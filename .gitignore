@@ -1,0 +1,9 @@
+# Working backups from the build sessions - 79 files, ~173 MB, none of it source
+*.bak
+*.bak[0-9]
+*.bak[0-9][0-9]
+*.v040
+
+# Local scratch
+*.new
+*.tmp

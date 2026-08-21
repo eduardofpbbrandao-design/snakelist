@@ -1,0 +1,506 @@
+<title>SnakeList Logo Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Spectral:ital,wght@0,200;0,400;0,600;0,800;1,400&family=Alegreya:ital,wght@0,400..900;1,400..900&family=Vollkorn:ital,wght@0,400..900;1,400..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Merriweather:ital,wght@0,300..900;1,300..900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Petrona:ital,wght@0,100..900;1,100..900&family=Gloock&family=Prata&family=Marcellus&family=Philosopher:ital,wght@0,400;0,700;1,400&family=DM+Serif+Display:ital,wght@0,400;1,400&family=Instrument+Serif:ital,wght@0,400;1,400&family=Young+Serif&family=Yeseva+One&family=Rozha+One&family=Abril+Fatface&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Outfit:wght@100..900&family=Space+Grotesk:wght@300..700&family=Manrope:wght@200..800&family=Sora:wght@100..800&family=Archivo:wght@100..900&family=Figtree:ital,wght@0,300..900;1,300..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Epilogue:ital,wght@0,100..900;1,100..900&family=Chivo:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&family=Work+Sans:ital,wght@0,100..900;1,100..900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Oswald:wght@200..700&family=Teko:wght@300..700&family=Archivo+Black&family=Anton&family=Bebas+Neue&family=Staatliches&family=Passion+One:wght@400;700;900&family=Julius+Sans+One&family=Poiret+One&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&family=Zilla+Slab:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Bitter:ital,wght@0,100..900;1,100..900&family=Bevan:ital,wght@0,400;1,400&family=Alfa+Slab+One&family=Ultra&family=Chonburi&family=Rye&family=Sancreek&family=Bowlby+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Fredoka:wght@300..700&family=Baloo+2:wght@400..800&family=Titan+One&family=Luckiest+Guy&family=Bungee&family=Bungee+Shade&family=Fugaz+One&family=Monoton&family=Audiowide&family=Orbitron:wght@400..900&family=Michroma&family=Cinzel:wght@400..900&family=Cinzel+Decorative:wght@400;700;900&family=Faster+One&family=Vast+Shadow&family=Chicle&family=Trade+Winds&family=Frijole&family=Emblema+One&family=Trochut:ital,wght@0,400;0,700;1,400&family=Megrim&family=Codystar:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lobster&family=Pacifico&family=Satisfy&family=Great+Vibes&family=Dancing+Script:wght@400..700&family=Parisienne&family=Sacramento&family=Yellowtail&family=Kaushan+Script&family=Caveat:wght@400..700&family=Shadows+Into+Light&family=Permanent+Marker&family=Rock+Salt&family=Amatic+SC:wght@400;700&family=Berkshire+Swash&family=Sail&family=Grand+Hotel&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&family=Metal+Mania&family=Pirata+One&family=UnifrakturMaguntia&family=Grenze+Gotisch:wght@100..900&family=Special+Elite&family=Cabin+Sketch:wght@400;700&family=Jolly+Lodger&family=Nova+Cut&family=Bigelow+Rules&family=Snowburst+One&family=Ewert&family=Smokum&family=Silkscreen:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:ital,wght@0,100;0,300;0,400;0,600;0,700;1,400&family=Major+Mono+Display&family=Nova+Mono&display=swap" rel="stylesheet">
+<style>
+/* Deliberately low-chroma chrome: this page exists to judge colour, so the
+   surroundings stay neutral and never tint the swatches being edited. */
+:root{
+  --page:#eceded; --panel:#fafbfa; --sunk:#e3e5e3;
+  --line:#d2d6d2; --ink:#1b1f1c; --muted:#6d746e; --accent:#3f7d43; --focus:#3f7d43;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --page:#161917; --panel:#1e2220; --sunk:#141715; --line:#333833;
+  --ink:#e9ece9; --muted:#98a099; --accent:#7fc266; --focus:#7fc266; } }
+:root[data-theme="dark"]{
+  --page:#161917; --panel:#1e2220; --sunk:#141715; --line:#333833;
+  --ink:#e9ece9; --muted:#98a099; --accent:#7fc266; --focus:#7fc266; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+  font-family:Outfit,system-ui,sans-serif;font-size:14.5px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 16px 64px}
+h1{font-size:20px;font-weight:600;margin:0 0 3px;letter-spacing:-0.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 18px;font-size:13.5px;max-width:62ch}
+.stage{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px}
+#canvas{display:flex;align-items:center;justify-content:center;min-height:212px;padding:30px 20px;overflow-x:auto}
+.grid{columns:258px 4;column-gap:14px}
+.card{break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 15px}
+.card h2{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:0.15em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:500}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.row:last-child{margin-bottom:0}
+.row label{font-size:13px;color:var(--muted);flex:1}
+.val{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;color:var(--muted);
+  min-width:46px;text-align:right;font-variant-numeric:tabular-nums}
+select{font:inherit;font-size:13px;padding:5px 8px;border-radius:7px;border:1px solid var(--line);
+  background:var(--sunk);color:var(--ink);max-width:152px}
+input[type=range]{width:118px;accent-color:var(--accent)}
+input[type=color]{width:36px;height:25px;padding:0;border:1px solid var(--line);border-radius:6px;background:none;cursor:pointer}
+input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 12px}
+button{font:inherit;font-size:13px;font-weight:500;padding:8px 15px;border-radius:999px;
+  border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+#recipe{width:100%;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;line-height:1.55;
+  padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);
+  min-height:84px;resize:vertical}
+.hint{color:var(--muted);font-size:12.5px;margin:8px 0 0;max-width:62ch}
+.wm{display:flex;align-items:baseline;white-space:nowrap;line-height:1}
+.words{display:flex;align-items:baseline}
+.snake{width:auto;flex-shrink:0;overflow:visible}
+.tick{width:auto;flex-shrink:0}
+.t2{font-style:normal}
+.wm.ital .t2{font-style:italic}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<style>
+#recipeBox{margin:0 0 14px}
+#recipeBox summary{cursor:pointer;font-size:12.5px;color:var(--muted);padding:4px 0;user-select:none}
+#recipeBox summary:hover{color:var(--ink)}
+#recipeBox[open] summary{margin-bottom:8px}
+#canvas{min-height:170px;padding:22px 20px}
+.wrap{padding:16px 16px 56px}
+h1{font-size:18px}
+.sub{margin:0 0 12px}
+.btns{margin:12px 0 10px}
+</style>
+<style>
+/* rows carry up to five controls (label, swatch, hex, slider, readout); let them
+   flex and wrap instead of spilling into the next column */
+.grid{columns:272px 4}
+.row{flex-wrap:wrap}
+.row input[type=range]{flex:1 1 84px;min-width:64px;width:auto}
+.hex{min-width:52px;flex:0 0 auto}
+.val{min-width:42px;flex:0 0 auto}
+.row label{min-width:70px}
+</style>
+<style>
+.fontbtn{max-width:190px;text-align:left;border-radius:8px;padding:6px 10px;background:var(--sunk);
+  font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#fontPanel{margin:0 0 10px;border:1px solid var(--line);border-radius:10px;background:var(--sunk);overflow:hidden}
+#fontPanel[hidden]{display:none}
+#fontSearch{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);
+  font:inherit;font-size:13px;padding:9px 11px;outline:none}
+#fontList{max-height:290px;overflow-y:auto;padding:4px}
+.fgroup{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:9.5px;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--muted);padding:9px 8px 4px}
+.frow{display:block;width:100%;text-align:left;border:0;background:none;color:var(--ink);
+  padding:5px 9px;border-radius:7px;cursor:pointer;font-size:19px;line-height:1.32;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.frow:hover{background:var(--panel)}
+.frow[aria-selected="true"]{background:var(--accent);color:#fff}
+</style>
+<style>
+/* A dark colour on a dark panel used to read as an empty box. Swatches now sit on a
+   light chip with a ring, so every value is visible, and each shows its hex. */
+input[type=color]{width:34px;height:24px;padding:2px;border:1px solid var(--line);border-radius:6px;
+  background:#fff;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,0.18) inset}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+input[type=color]::-webkit-color-swatch{border:0;border-radius:4px}
+.hex{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;color:var(--muted);
+  min-width:56px;text-align:right;text-transform:uppercase;letter-spacing:0.03em}
+</style>
+<style>
+.tickwrap{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;box-sizing:content-box}
+</style>
+<div class="wrap">
+<h1>SnakeList Logo Lab</h1>
+<p class="sub">Change anything below. When you like one, press <b>Copy settings</b> and paste it back to me — I'll make it the real logo.</p>
+
+<div class="stage"><div id="canvas"><div class="wm" id="wm">
+<svg class="snake" id="snakeA" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><g transform="translate(19.0 125.0) rotate(-131.2)" fill="var(--snakeFill)" stroke="var(--snakeLine)" stroke-width="1.1" stroke-linejoin="round"><g transform="rotate(0.0) translate(-1.5 0)"><path d="M0 -9.2 C3.3 -10.7, 6.1 -14.3, 9.4 -12.3 L9.4 12.3 C6.1 14.3, 3.3 10.7, 0 9.2 Z"></path></g><g transform="rotate(3.0) translate(7.1 0)"><path d="M0 -12.3 C3.4 -14.3, 6.4 -15.4, 9.8 -13.3 L9.8 13.3 C6.4 15.4, 3.4 14.3, 0 12.3 Z"></path></g><g transform="rotate(6.0) translate(16.2 0)"><path d="M0 -13.3 C3.4 -15.4, 6.2 -14.4, 9.6 -12.4 L9.6 12.4 C6.2 14.4, 3.4 15.4, 0 13.3 Z"></path></g><g transform="rotate(9.0) translate(25.0 0)"><path d="M0 -12.4 C3.1 -14.4, 5.9 -12.6, 9.0 -10.9 L9.0 10.9 C5.9 12.6, 3.1 14.4, 0 12.4 Z"></path></g><g transform="rotate(12.0) translate(33.3 0)"><path d="M0 -10.9 C2.8 -12.6, 5.3 -10.2, 8.1 -8.8 L8.1 8.8 C5.3 10.2, 2.8 12.6, 0 10.9 Z"></path></g><g transform="rotate(15.0) translate(40.7 0)"><path d="M0 -8.8 C2.4 -10.2, 4.5 -7.3, 7.0 -6.3 L7.0 6.3 C4.5 7.3, 2.4 10.2, 0 8.8 Z"></path></g></g><path class="snake-body" fill="var(--snakeFill)" d="M94.6 23.0L92.5 21.6L90.4 20.1L88.3 18.7L86.1 17.2L83.9 15.8L81.7 14.4L79.4 13.0L77.0 11.6L74.6 10.3L72.1 9.0L69.5 7.7L66.9 6.5L64.1 5.3L61.1 4.3L58.0 3.3L54.7 2.6L51.2 2.1L47.5 2.0L43.5 2.1L39.4 2.7L35.2 3.8L31.0 5.5L27.1 7.7L23.5 10.4L20.4 13.4L17.7 16.7L15.6 19.9L13.7 23.5L12.2 27.3L11.0 31.4L10.3 35.7L10.2 40.0L10.5 44.3L11.4 48.5L12.7 52.4L14.3 56.1L16.2 59.5L18.4 62.6L20.7 65.5L23.2 68.1L25.8 70.5L28.5 72.6L31.2 74.5L34.0 76.3L36.8 77.9L39.6 79.2L41.9 80.3L44.0 81.3L46.1 82.3L48.3 83.3L50.3 84.2L52.4 85.2L54.4 86.2L56.4 87.2L58.3 88.2L60.2 89.2L62.1 90.2L63.9 91.3L65.6 92.4L67.2 93.5L68.8 94.6L70.3 95.8L71.7 97.0L73.1 98.2L74.3 99.4L75.4 100.6L76.1 101.5L76.8 102.4L77.3 103.5L77.8 104.6L78.2 105.8L78.4 107.1L78.6 108.4L78.6 109.7L78.5 111.1L78.3 112.4L78.0 113.8L77.5 115.1L76.9 116.4L76.2 117.7L75.3 118.9L74.3 120.1L73.2 121.3L72.0 122.4L70.7 123.4L69.2 124.3L67.7 125.2L66.0 125.9L64.1 126.7L62.2 127.4L60.2 127.9L58.2 128.4L56.2 128.8L54.2 129.2L52.1 129.4L50.1 129.6L48.0 129.6L45.9 129.6L43.9 129.4L41.8 129.2L39.8 128.8L37.8 128.4L35.8 127.9L33.9 127.2L32.0 126.4L30.2 125.6L28.5 124.6L26.8 123.5L25.2 122.3L23.7 120.9L14.3 129.1L16.1 131.3L18.1 133.5L20.3 135.5L22.6 137.3L25.0 139.0L27.5 140.5L30.1 141.8L32.7 143.0L35.4 144.1L38.1 145.0L40.9 145.7L43.7 146.3L46.5 146.8L49.4 147.2L52.3 147.4L55.1 147.5L58.0 147.5L60.9 147.3L63.8 147.0L66.6 146.6L69.5 146.0L72.3 145.4L75.3 144.5L78.2 143.4L81.1 142.1L84.0 140.5L86.8 138.7L89.4 136.7L92.0 134.4L94.3 131.9L96.5 129.2L98.4 126.3L100.1 123.2L101.4 120.0L102.5 116.6L103.3 113.1L103.8 109.5L104.0 105.9L103.8 102.3L103.3 98.6L102.4 95.0L101.1 91.5L99.5 88.0L97.6 84.8L95.7 82.1L93.7 79.5L91.7 77.2L89.5 74.9L87.4 72.8L85.1 70.8L82.9 69.0L80.6 67.2L78.3 65.5L76.0 63.9L73.7 62.3L71.4 60.9L69.0 59.5L66.7 58.1L64.4 56.8L62.1 55.5L59.8 54.3L57.5 53.2L55.2 52.1L53.0 51.0L51.3 50.2L49.9 49.4L48.5 48.6L47.2 47.7L46.0 46.7L45.0 45.8L44.1 44.8L43.3 43.8L42.7 42.9L42.2 42.1L41.8 41.2L41.6 40.5L41.4 39.9L41.4 39.2L41.4 38.7L41.5 38.1L41.7 37.4L42.0 36.7L42.4 35.9L43.0 35.0L43.4 34.5L43.8 34.1L44.2 33.8L44.6 33.6L44.9 33.4L45.5 33.3L46.2 33.2L47.2 33.2L48.4 33.2L49.8 33.4L51.3 33.6L53.0 33.8L54.8 34.2L56.6 34.6L58.5 35.2L60.5 35.8L62.5 36.5L64.5 37.3L66.6 38.1L68.7 38.9L70.8 39.9L72.9 40.8L75.0 41.8L77.1 42.8L79.3 43.9L81.4 45.0Z"></path><g fill="var(--snakePat)"><g transform="translate(56.3 18.9) rotate(-165.4)"><path d="M0 -8.9 L12.3 0 L0 8.9 L-12.3 0 Z"></path></g><g transform="translate(36.1 20.4) rotate(148.4)"><path d="M0 -9.0 L12.5 0 L0 9.0 L-12.5 0 Z"></path></g><g transform="translate(25.8 37.8) rotate(93.9)"><path d="M0 -9.0 L12.5 0 L0 9.0 L-12.5 0 Z"></path></g><g transform="translate(33.6 56.4) rotate(45.4)"><path d="M0 -9.0 L12.5 0 L0 9.0 L-12.5 0 Z"></path></g><g transform="translate(51.2 67.4) rotate(25.7)"><path d="M0 -9.0 L12.5 0 L0 9.0 L-12.5 0 Z"></path></g><g transform="translate(69.5 77.4) rotate(32.8)"><path d="M0 -8.6 L11.9 0 L0 8.6 L-11.9 0 Z"></path></g><g transform="translate(85.2 91.0) rotate(51.4)"><path d="M0 -8.0 L11.0 0 L0 8.0 L-11.0 0 Z"></path></g><g transform="translate(91.1 110.4) rotate(95.7)"><path d="M0 -7.3 L10.0 0 L0 7.3 L-10.0 0 Z"></path></g><g transform="translate(81.8 128.5) rotate(138.0)"><path d="M0 -6.5 L9.0 0 L0 6.5 L-9.0 0 Z"></path></g><g transform="translate(63.1 137.2) rotate(168.3)"><path d="M0 -5.7 L7.8 0 L0 5.7 L-7.8 0 Z"></path></g><g transform="translate(42.4 137.6) rotate(-169.7)"><path d="M0 -4.8 L6.6 0 L0 4.8 L-6.6 0 Z"></path></g></g><g transform="translate(88.0 34.0) rotate(6)"><path d="M-15 -14.6 C-6 -21.0, 10 -14.6, 20 -7.2 C23.4 -3.6, 23.4 3.6, 20 7.2 C10 14.6, -6 21.0, -15 14.6 C-25 10.5, -25 -10.5, -15 -14.6 Z" fill="var(--snakeFill)"></path><circle cx="8.5" cy="-6.6" r="3.4" fill="var(--snakeEye)"></circle><path d="M21.5 2.5 L27.5 4.6" fill="none" stroke="var(--snakeFill)" stroke-width="2.3" stroke-linecap="round"></path><path d="M27.5 4.6 L31.5 3.2" fill="none" stroke="var(--snakeFill)" stroke-width="1.9" stroke-linecap="round"></path><path d="M27.5 4.6 L31.5 7.3" fill="none" stroke="var(--snakeFill)" stroke-width="1.9" stroke-linecap="round"></path></g></svg><svg class="snake" id="snakeB" viewBox="3.2 -8.9 84.8 114" aria-hidden="true"><path d="M8.1 79.5L8.2 80.6L8.4 81.9L8.6 83.2L8.9 84.5L9.2 85.8L9.6 87.1L10.1 88.3L10.7 89.5L11.4 90.7L12.1 91.7L12.9 92.7L13.9 93.6L14.8 94.4L15.8 95.2L16.8 96L17.7 96.7L18.7 97.4L19.7 98.1L20.7 98.8L21.7 99.5L22.8 100.1L23.8 100.7L24.9 101.2L26 101.7L27 102.2L28.1 102.6L29.3 102.9L30.4 103.3L31.5 103.5L32.7 103.7L33.8 103.9L34.9 104.1L36.1 104.3L37.2 104.4L38.3 104.6L39.5 104.7L40.6 104.8L41.8 104.9L42.9 105L44.1 105L45.2 105.1L46.4 105.1L47.5 105.1L48.7 105L49.9 105L51 104.9L52.2 104.7L53.4 104.6L54.6 104.4L55.7 104.2L56.9 103.9L58.1 103.6L59.3 103.3L60.4 102.9L61.6 102.5L62.8 102L63.9 101.5L65.1 101L66.2 100.5L67.4 99.9L68.5 99.2L69.6 98.5L70.8 97.8L71.8 97L72.9 96.1L74 95.2L75 94.2L75.9 93.2L76.9 92.1L77.8 90.9L78.6 89.7L79.3 88.4L80 87.1L80.7 85.8L81.2 84.4L81.7 83L82 81.5L82.3 80.1L82.6 78.6L82.7 77.2L82.8 75.8L82.8 74.3L82.7 72.9L82.6 71.4L82.4 70L82 68.5L81.6 67L81.1 65.6L80.6 64.2L79.9 62.8L79.1 61.5L78.3 60.2L77.5 59L76.5 57.8L75.6 56.8L74.6 55.8L73.6 54.8L72.5 54L71.5 53.1L70.4 52.4L69.3 51.7L68.3 51L67.2 50.4L66.1 49.8L65.1 49.2L64 48.7L62.9 48.2L61.8 47.7L60.8 47.3L59.7 46.8L58.7 46.4L57.6 46.1L56.6 45.7L55.5 45.3L54.5 45L53.4 44.7L52.4 44.4L51.3 44.1L50.3 43.8L49.3 43.5L48.2 43.2L47.2 43L46.2 42.7L45.2 42.5L44.2 42.2L43.3 42L42.4 41.8L41.5 41.6L40.6 41.3L39.7 41.1L38.8 40.8L38 40.6L37.1 40.3L36.2 40L35.4 39.7L34.5 39.5L33.7 39.2L32.9 38.9L32.1 38.5L31.3 38.2L30.6 37.9L29.8 37.5L29.1 37.2L28.4 36.8L27.7 36.5L27 36.1L26.4 35.7L25.8 35.3L25.3 34.9L24.7 34.5L24.2 34.1L23.8 33.7L23.3 33.3L23 32.8L22.6 32.4L22.3 32L22 31.6L21.8 31.2L21.6 30.8L21.4 30.3L21.2 29.9L21.1 29.5L21 29L20.9 28.5L20.8 28L20.8 27.4L20.8 26.8L20.8 26.2L20.9 25.7L20.9 25.1L21 24.5L21.2 24L21.3 23.4L21.5 22.9L21.7 22.3L21.9 21.8L22.2 21.3L22.5 20.8L22.8 20.3L23.1 19.8L23.5 19.4L23.9 18.9L24.3 18.4L24.7 18L25.2 17.6L25.7 17.1L26.2 16.7L26.8 16.3L27.3 16L27.9 15.6L28.5 15.3L29.2 14.9L29.8 14.6L30.5 14.3L31.2 14L31.9 13.8L32.6 13.5L33.3 13.3L34 13.1L34.8 12.9L35.6 12.7L36.3 12.5L37.1 12.4L37.9 12.2L38.7 12.1L39.5 12L40.3 12L41.1 11.9L42 11.8L42.8 11.8L43.6 11.8L44.4 11.8L45.2 11.8L45.9 11.9L46.7 11.9L47.5 12L48.3 12.1L49.2 12.2L50 12.3L50.9 12.4L51.7 12.6L52.6 12.7L53.5 12.9L54.4 13L55.4 13.2L56.3 13.4L57.3 13.5L58.3 13.7L59.4 13.9L60.5 14.1L61.6 14.2L62.8 14.4L64 14.5L65.3 14.7L66.7 14.7L68.3 14.7L69.9 14.6L71.7 14.3L73.6 13.8L75 13.2L69 -1.2L68.6 -1L68.5 -1L68.3 -1L68 -1L67.5 -1.1L66.9 -1.2L66.3 -1.3L65.5 -1.5L64.8 -1.7L63.9 -1.9L63.1 -2.2L62.2 -2.5L61.2 -2.7L60.3 -3L59.3 -3.3L58.3 -3.6L57.3 -3.9L56.2 -4.2L55.2 -4.5L54.1 -4.7L53 -4.9L51.8 -5.1L50.7 -5.3L49.5 -5.5L48.3 -5.6L47.1 -5.7L45.9 -5.8L44.7 -5.8L43.5 -5.8L42.3 -5.8L41.1 -5.7L40 -5.7L38.8 -5.6L37.6 -5.5L36.4 -5.3L35.3 -5.2L34.1 -5L32.9 -4.7L31.7 -4.5L30.5 -4.2L29.3 -3.9L28.2 -3.6L27 -3.2L25.8 -2.8L24.7 -2.3L23.5 -1.8L22.3 -1.3L21.2 -0.8L20.1 -0.2L18.9 0.5L17.8 1.2L16.7 1.9L15.7 2.7L14.6 3.5L13.6 4.4L12.6 5.3L11.6 6.2L10.7 7.3L9.8 8.3L8.9 9.4L8.1 10.6L7.4 11.8L6.7 13L6 14.3L5.4 15.6L4.9 16.9L4.5 18.3L4.1 19.7L3.8 21.1L3.5 22.5L3.4 23.9L3.2 25.3L3.2 26.7L3.2 28.1L3.3 29.5L3.5 31L3.7 32.5L4.1 33.9L4.5 35.4L5 36.8L5.6 38.2L6.3 39.6L7.1 40.9L7.9 42.2L8.8 43.4L9.7 44.5L10.7 45.5L11.7 46.5L12.7 47.4L13.8 48.3L14.8 49.1L15.9 49.8L17 50.5L18 51.2L19.1 51.8L20.2 52.4L21.3 53L22.3 53.5L23.4 54L24.5 54.4L25.5 54.9L26.6 55.3L27.6 55.7L28.7 56.1L29.7 56.4L30.8 56.8L31.8 57.1L32.9 57.4L33.9 57.7L35 58L36 58.3L37 58.6L38.1 58.9L39.1 59.1L40.1 59.4L41.1 59.6L42 59.8L43 60L43.9 60.3L44.8 60.5L45.7 60.7L46.5 61L47.4 61.2L48.3 61.5L49.2 61.8L50 62.1L50.9 62.3L51.7 62.6L52.5 62.9L53.3 63.2L54.1 63.5L54.9 63.9L55.7 64.2L56.4 64.6L57.1 64.9L57.8 65.3L58.5 65.6L59.1 66L59.8 66.4L60.3 66.8L60.9 67.2L61.4 67.6L61.9 68L62.4 68.5L62.8 68.9L63.2 69.3L63.5 69.7L63.8 70.1L64.1 70.5L64.3 70.9L64.5 71.4L64.7 71.8L64.8 72.2L64.9 72.7L65 73.2L65.1 73.7L65.2 74.2L65.2 74.7L65.2 75.3L65.2 75.9L65.1 76.4L65 76.9L64.9 77.5L64.8 77.9L64.6 78.4L64.4 78.9L64.2 79.4L64 79.8L63.7 80.3L63.4 80.7L63.1 81.1L62.8 81.6L62.4 82L62 82.4L61.5 82.8L61.1 83.3L60.6 83.6L60 84L59.5 84.4L58.9 84.8L58.3 85.1L57.6 85.4L57 85.8L56.3 86.1L55.6 86.3L54.9 86.6L54.2 86.8L53.4 87.1L52.7 87.3L51.9 87.5L51.1 87.7L50.3 87.9L49.5 88L48.7 88.2L47.9 88.4L47.1 88.5L46.3 88.6L45.5 88.8L44.6 88.9L43.8 88.9L42.9 89L42.1 89.1L41.2 89.1L40.4 89.1L39.5 89.1L38.7 89.1L37.8 89L37 89L36.1 88.9L35.3 88.7L34.5 88.6L33.7 88.4L32.8 88.3L32 88.2L31.2 88L30.4 87.9L29.6 87.8L28.7 87.6L27.9 87.5L27.1 87.3L26.3 87.1L25.5 86.9L24.8 86.7L24 86.4L23.3 86.1L22.7 85.7L22 85.3L21.4 84.8L20.9 84.4L20.3 83.9L19.7 83.5L19.1 83.1L18.6 82.7L18 82.2L17.5 81.8L17 81.2L16.6 80.6L16.3 80L16 79.3L15.9 78.5A3.9 3.9 0 0 0 8.1 79.5Z" fill="var(--snakeFill)"></path><g fill="var(--snakePat)"><g transform="translate(74 74.5) rotate(-91.3)"><path d="M0 -6.5L9.5 0L0 6.5L-9.5 0Z"></path></g><g transform="translate(45.1 51.5) rotate(-166)"><path d="M0 -6.5L9.5 0L0 6.5L-9.5 0Z"></path></g><g transform="translate(12.4 30.7) rotate(-101.4)"><path d="M0 -6.5L9.5 0L0 6.5L-9.5 0Z"></path></g><g transform="translate(36.6 3.5) rotate(-8.6)"><path d="M0 -6.5L9.5 0L0 6.5L-9.5 0Z"></path></g></g><g transform="translate(72 6) rotate(-25.3)"><path d="M-18 -6.6 C-8 -10.4, 4 -9.2, 10.0 -4.8 C12.8 -2.2, 12.8 2.2, 10.0 4.8 C4 9.2, -8 10.4, -18 6.6 Z" fill="var(--snakeFill)"></path><circle cx="4.6" cy="-3.2" r="2.9" fill="var(--snakeEye)"></circle></g></svg><svg class="snake" id="snakeC" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><defs><clipPath id="py-clip"><path d="M94.6 23L92.5 21.6L90.4 20.1L88.3 18.7L86.1 17.2L83.9 15.8L81.7 14.4L79.4 13L77 11.6L74.6 10.3L72.1 9L69.5 7.7L66.9 6.5L64.1 5.3L61.1 4.3L58 3.3L54.7 2.6L51.2 2.1L47.5 2L43.5 2.1L39.4 2.7L35.2 3.8L31 5.5L27.1 7.7L23.5 10.4L20.4 13.4L17.7 16.7L15.6 19.9L13.7 23.5L12.2 27.3L11 31.4L10.3 35.7L10.2 40L10.5 44.3L11.4 48.5L12.7 52.4L14.3 56.1L16.2 59.5L18.4 62.6L20.7 65.5L23.2 68.1L25.8 70.5L28.5 72.6L31.2 74.5L34 76.3L36.8 77.9L39.6 79.2L41.9 80.3L44 81.3L46.1 82.3L48.3 83.3L50.3 84.2L52.4 85.2L54.4 86.2L56.4 87.2L58.3 88.2L60.2 89.2L62.1 90.2L63.9 91.3L65.6 92.4L67.2 93.5L68.8 94.6L70.3 95.8L71.7 97L73.1 98.2L74.3 99.4L75.4 100.6L76.1 101.5L76.8 102.4L77.3 103.5L77.8 104.6L78.2 105.8L78.4 107.1L78.6 108.4L78.6 109.7L78.5 111.1L78.3 112.4L78 113.8L77.5 115.1L76.9 116.4L76.2 117.7L75.3 118.9L74.3 120.1L73.2 121.3L72 122.4L70.7 123.4L69.2 124.3L67.7 125.2L66 125.9L64.1 126.7L62.2 127.4L60.2 127.9L58.2 128.4L56.2 128.8L54.2 129.2L52.1 129.4L50.1 129.6L48 129.6L45.9 129.6L43.9 129.4L41.8 129.2L39.8 128.8L37.8 128.4L35.8 127.9L33.9 127.2L32 126.4L30.2 125.6L28.5 124.6L26.8 123.5L25.2 122.3L23.7 120.9L23.26 120.43L23.02 120.18L22.79 119.94L22.55 119.7L22.32 119.45L22.08 119.21L21.85 118.96L21.61 118.72L21.38 118.48L21.14 118.24L20.9 117.99L20.67 117.75L20.43 117.51L20.19 117.28L19.94 117.04L19.7 116.8L19.45 116.57L19.21 116.33L18.96 116.11L18.7 115.88L18.45 115.66L18.19 115.44L17.93 115.22L17.67 115L17.4 114.78L17.14 114.57L16.88 114.36L16.61 114.14L16.35 113.93L16.08 113.72L15.82 113.5L15.55 113.29L15.29 113.07L15.03 112.86L14.77 112.64L14.51 112.42L14.25 112.2L13.98 111.99L13.71 111.78L13.43 111.58L13.15 111.39L12.87 111.2L12.58 111.01L12.3 110.82L12.01 110.64L11.72 110.46L11.43 110.28L11.14 110.09L10.85 109.91L10.57 109.72L10.29 109.53L10.01 109.34L9.73 109.14L9.46 108.93L9.19 108.73L8.91 108.54L8.62 108.36L8.32 108.19L8.02 108.03L7.71 107.87L7.41 107.71L7.1 107.56L6.79 107.41L6.48 107.26L6.17 107.11L5.87 106.95L5.57 106.78L5.28 106.61L5 106.43L4.72 106.24L4.43 106.06L4.13 105.9L3.82 105.75L3.51 105.61L3.05 105.39L2.53 105.18L2.13 105.06L1.77 104.96L1.42 104.86L1.06 104.76L0.71 104.66L0.37 104.54L0.03 104.41L-0.31 104.27L-0.64 104.14L-0.99 104.03L-1.35 103.95L-1.72 103.88L-2.09 103.83L-2.46 103.79L-2.83 103.76L-3.2 103.72L-3.57 103.68L-3.93 103.62L-4.29 103.55L-4.64 103.45L-4.99 103.37L-5.35 103.33L-5.72 103.32L-6.1 103.34L-6.48 103.37L-6.85 103.4L-7.22 103.43L-7.59 103.43L-7.94 103.41L-8.29 103.36L-8.65 103.35L-9.02 103.41L-9.39 103.49L-9.76 103.58L-10.12 103.66L-10.47 103.7L-10.82 103.7L-11.17 103.75L-11.53 103.9L-11.88 104.05L-12.23 104.17L-12.57 104.2L-12.91 104.39L-13.25 104.52A0.85 0.85 0 0 0 -13.27 106.22L-12.95 106.35L-12.65 106.55L-12.34 106.61L-12.04 106.76L-11.75 106.96L-11.47 107.15L-11.17 107.27L-10.88 107.33L-10.59 107.45L-10.31 107.61L-10.04 107.8L-9.77 107.98L-9.5 108.14L-9.23 108.26L-8.94 108.33L-8.67 108.44L-8.4 108.58L-8.14 108.76L-7.89 108.94L-7.64 109.14L-7.39 109.32L-7.14 109.49L-6.89 109.64L-6.62 109.75L-6.35 109.85L-6.1 109.98L-5.85 110.14L-5.61 110.31L-5.37 110.5L-5.14 110.69L-4.91 110.89L-4.68 111.08L-4.45 111.27L-4.22 111.44L-3.98 111.59L-3.72 111.73L-3.47 111.86L-3.23 112.01L-2.99 112.17L-2.76 112.36L-2.54 112.55L-2.33 112.75L-2.11 112.96L-1.94 113.14L-1.91 113.25L-1.83 113.4L-1.61 113.63L-1.39 113.85L-1.16 114.06L-0.91 114.25L-0.67 114.43L-0.42 114.62L-0.19 114.83L0.04 115.04L0.26 115.26L0.48 115.48L0.69 115.71L0.9 115.95L1.11 116.18L1.32 116.41L1.53 116.64L1.75 116.87L1.96 117.09L2.19 117.3L2.42 117.51L2.66 117.7L2.9 117.89L3.13 118.09L3.36 118.3L3.58 118.51L3.8 118.72L4.02 118.94L4.23 119.17L4.45 119.39L4.66 119.62L4.87 119.84L5.08 120.07L5.29 120.3L5.5 120.52L5.72 120.74L5.94 120.96L6.16 121.17L6.38 121.38L6.61 121.58L6.84 121.78L7.07 121.99L7.29 122.2L7.52 122.41L7.74 122.62L7.96 122.84L8.17 123.06L8.39 123.27L8.6 123.49L8.82 123.71L9.03 123.94L9.24 124.16L9.46 124.38L9.67 124.6L9.89 124.82L10.1 125.04L10.32 125.25L10.54 125.47L10.76 125.68L10.98 125.9L11.2 126.11L11.43 126.32L11.65 126.53L11.87 126.74L12.09 126.95L12.32 127.17L12.54 127.38L12.76 127.59L12.98 127.81L13.2 128.02L13.42 128.24L13.64 128.45L13.86 128.67L14.08 128.89L14.3 129.11L14.3 129.1L16.1 131.3L18.1 133.5L20.3 135.5L22.6 137.3L25 139L27.5 140.5L30.1 141.8L32.7 143L35.4 144.1L38.1 145L40.9 145.7L43.7 146.3L46.5 146.8L49.4 147.2L52.3 147.4L55.1 147.5L58 147.5L60.9 147.3L63.8 147L66.6 146.6L69.5 146L72.3 145.4L75.3 144.5L78.2 143.4L81.1 142.1L84 140.5L86.8 138.7L89.4 136.7L92 134.4L94.3 131.9L96.5 129.2L98.4 126.3L100.1 123.2L101.4 120L102.5 116.6L103.3 113.1L103.8 109.5L104 105.9L103.8 102.3L103.3 98.6L102.4 95L101.1 91.5L99.5 88L97.6 84.8L95.7 82.1L93.7 79.5L91.7 77.2L89.5 74.9L87.4 72.8L85.1 70.8L82.9 69L80.6 67.2L78.3 65.5L76 63.9L73.7 62.3L71.4 60.9L69 59.5L66.7 58.1L64.4 56.8L62.1 55.5L59.8 54.3L57.5 53.2L55.2 52.1L53 51L51.3 50.2L49.9 49.4L48.5 48.6L47.2 47.7L46 46.7L45 45.8L44.1 44.8L43.3 43.8L42.7 42.9L42.2 42.1L41.8 41.2L41.6 40.5L41.4 39.9L41.4 39.2L41.4 38.7L41.5 38.1L41.7 37.4L42 36.7L42.4 35.9L43 35L43.4 34.5L43.8 34.1L44.2 33.8L44.6 33.6L44.9 33.4L45.5 33.3L46.2 33.2L47.2 33.2L48.4 33.2L49.8 33.4L51.3 33.6L53 33.8L54.8 34.2L56.6 34.6L58.5 35.2L60.5 35.8L62.5 36.5L64.5 37.3L66.6 38.1L68.7 38.9L70.8 39.9L72.9 40.8L75 41.8L77.1 42.8L79.3 43.9L81.4 45Z"></path></clipPath></defs><path class="snake-body" fill="var(--snakeFill)" d="M94.6 23L92.5 21.6L90.4 20.1L88.3 18.7L86.1 17.2L83.9 15.8L81.7 14.4L79.4 13L77 11.6L74.6 10.3L72.1 9L69.5 7.7L66.9 6.5L64.1 5.3L61.1 4.3L58 3.3L54.7 2.6L51.2 2.1L47.5 2L43.5 2.1L39.4 2.7L35.2 3.8L31 5.5L27.1 7.7L23.5 10.4L20.4 13.4L17.7 16.7L15.6 19.9L13.7 23.5L12.2 27.3L11 31.4L10.3 35.7L10.2 40L10.5 44.3L11.4 48.5L12.7 52.4L14.3 56.1L16.2 59.5L18.4 62.6L20.7 65.5L23.2 68.1L25.8 70.5L28.5 72.6L31.2 74.5L34 76.3L36.8 77.9L39.6 79.2L41.9 80.3L44 81.3L46.1 82.3L48.3 83.3L50.3 84.2L52.4 85.2L54.4 86.2L56.4 87.2L58.3 88.2L60.2 89.2L62.1 90.2L63.9 91.3L65.6 92.4L67.2 93.5L68.8 94.6L70.3 95.8L71.7 97L73.1 98.2L74.3 99.4L75.4 100.6L76.1 101.5L76.8 102.4L77.3 103.5L77.8 104.6L78.2 105.8L78.4 107.1L78.6 108.4L78.6 109.7L78.5 111.1L78.3 112.4L78 113.8L77.5 115.1L76.9 116.4L76.2 117.7L75.3 118.9L74.3 120.1L73.2 121.3L72 122.4L70.7 123.4L69.2 124.3L67.7 125.2L66 125.9L64.1 126.7L62.2 127.4L60.2 127.9L58.2 128.4L56.2 128.8L54.2 129.2L52.1 129.4L50.1 129.6L48 129.6L45.9 129.6L43.9 129.4L41.8 129.2L39.8 128.8L37.8 128.4L35.8 127.9L33.9 127.2L32 126.4L30.2 125.6L28.5 124.6L26.8 123.5L25.2 122.3L23.7 120.9L23.26 120.43L23.02 120.18L22.79 119.94L22.55 119.7L22.32 119.45L22.08 119.21L21.85 118.96L21.61 118.72L21.38 118.48L21.14 118.24L20.9 117.99L20.67 117.75L20.43 117.51L20.19 117.28L19.94 117.04L19.7 116.8L19.45 116.57L19.21 116.33L18.96 116.11L18.7 115.88L18.45 115.66L18.19 115.44L17.93 115.22L17.67 115L17.4 114.78L17.14 114.57L16.88 114.36L16.61 114.14L16.35 113.93L16.08 113.72L15.82 113.5L15.55 113.29L15.29 113.07L15.03 112.86L14.77 112.64L14.51 112.42L14.25 112.2L13.98 111.99L13.71 111.78L13.43 111.58L13.15 111.39L12.87 111.2L12.58 111.01L12.3 110.82L12.01 110.64L11.72 110.46L11.43 110.28L11.14 110.09L10.85 109.91L10.57 109.72L10.29 109.53L10.01 109.34L9.73 109.14L9.46 108.93L9.19 108.73L8.91 108.54L8.62 108.36L8.32 108.19L8.02 108.03L7.71 107.87L7.41 107.71L7.1 107.56L6.79 107.41L6.48 107.26L6.17 107.11L5.87 106.95L5.57 106.78L5.28 106.61L5 106.43L4.72 106.24L4.43 106.06L4.13 105.9L3.82 105.75L3.51 105.61L3.05 105.39L2.53 105.18L2.13 105.06L1.77 104.96L1.42 104.86L1.06 104.76L0.71 104.66L0.37 104.54L0.03 104.41L-0.31 104.27L-0.64 104.14L-0.99 104.03L-1.35 103.95L-1.72 103.88L-2.09 103.83L-2.46 103.79L-2.83 103.76L-3.2 103.72L-3.57 103.68L-3.93 103.62L-4.29 103.55L-4.64 103.45L-4.99 103.37L-5.35 103.33L-5.72 103.32L-6.1 103.34L-6.48 103.37L-6.85 103.4L-7.22 103.43L-7.59 103.43L-7.94 103.41L-8.29 103.36L-8.65 103.35L-9.02 103.41L-9.39 103.49L-9.76 103.58L-10.12 103.66L-10.47 103.7L-10.82 103.7L-11.17 103.75L-11.53 103.9L-11.88 104.05L-12.23 104.17L-12.57 104.2L-12.91 104.39L-13.25 104.52A0.85 0.85 0 0 0 -13.27 106.22L-12.95 106.35L-12.65 106.55L-12.34 106.61L-12.04 106.76L-11.75 106.96L-11.47 107.15L-11.17 107.27L-10.88 107.33L-10.59 107.45L-10.31 107.61L-10.04 107.8L-9.77 107.98L-9.5 108.14L-9.23 108.26L-8.94 108.33L-8.67 108.44L-8.4 108.58L-8.14 108.76L-7.89 108.94L-7.64 109.14L-7.39 109.32L-7.14 109.49L-6.89 109.64L-6.62 109.75L-6.35 109.85L-6.1 109.98L-5.85 110.14L-5.61 110.31L-5.37 110.5L-5.14 110.69L-4.91 110.89L-4.68 111.08L-4.45 111.27L-4.22 111.44L-3.98 111.59L-3.72 111.73L-3.47 111.86L-3.23 112.01L-2.99 112.17L-2.76 112.36L-2.54 112.55L-2.33 112.75L-2.11 112.96L-1.94 113.14L-1.91 113.25L-1.83 113.4L-1.61 113.63L-1.39 113.85L-1.16 114.06L-0.91 114.25L-0.67 114.43L-0.42 114.62L-0.19 114.83L0.04 115.04L0.26 115.26L0.48 115.48L0.69 115.71L0.9 115.95L1.11 116.18L1.32 116.41L1.53 116.64L1.75 116.87L1.96 117.09L2.19 117.3L2.42 117.51L2.66 117.7L2.9 117.89L3.13 118.09L3.36 118.3L3.58 118.51L3.8 118.72L4.02 118.94L4.23 119.17L4.45 119.39L4.66 119.62L4.87 119.84L5.08 120.07L5.29 120.3L5.5 120.52L5.72 120.74L5.94 120.96L6.16 121.17L6.38 121.38L6.61 121.58L6.84 121.78L7.07 121.99L7.29 122.2L7.52 122.41L7.74 122.62L7.96 122.84L8.17 123.06L8.39 123.27L8.6 123.49L8.82 123.71L9.03 123.94L9.24 124.16L9.46 124.38L9.67 124.6L9.89 124.82L10.1 125.04L10.32 125.25L10.54 125.47L10.76 125.68L10.98 125.9L11.2 126.11L11.43 126.32L11.65 126.53L11.87 126.74L12.09 126.95L12.32 127.17L12.54 127.38L12.76 127.59L12.98 127.81L13.2 128.02L13.42 128.24L13.64 128.45L13.86 128.67L14.08 128.89L14.3 129.11L14.3 129.1L16.1 131.3L18.1 133.5L20.3 135.5L22.6 137.3L25 139L27.5 140.5L30.1 141.8L32.7 143L35.4 144.1L38.1 145L40.9 145.7L43.7 146.3L46.5 146.8L49.4 147.2L52.3 147.4L55.1 147.5L58 147.5L60.9 147.3L63.8 147L66.6 146.6L69.5 146L72.3 145.4L75.3 144.5L78.2 143.4L81.1 142.1L84 140.5L86.8 138.7L89.4 136.7L92 134.4L94.3 131.9L96.5 129.2L98.4 126.3L100.1 123.2L101.4 120L102.5 116.6L103.3 113.1L103.8 109.5L104 105.9L103.8 102.3L103.3 98.6L102.4 95L101.1 91.5L99.5 88L97.6 84.8L95.7 82.1L93.7 79.5L91.7 77.2L89.5 74.9L87.4 72.8L85.1 70.8L82.9 69L80.6 67.2L78.3 65.5L76 63.9L73.7 62.3L71.4 60.9L69 59.5L66.7 58.1L64.4 56.8L62.1 55.5L59.8 54.3L57.5 53.2L55.2 52.1L53 51L51.3 50.2L49.9 49.4L48.5 48.6L47.2 47.7L46 46.7L45 45.8L44.1 44.8L43.3 43.8L42.7 42.9L42.2 42.1L41.8 41.2L41.6 40.5L41.4 39.9L41.4 39.2L41.4 38.7L41.5 38.1L41.7 37.4L42 36.7L42.4 35.9L43 35L43.4 34.5L43.8 34.1L44.2 33.8L44.6 33.6L44.9 33.4L45.5 33.3L46.2 33.2L47.2 33.2L48.4 33.2L49.8 33.4L51.3 33.6L53 33.8L54.8 34.2L56.6 34.6L58.5 35.2L60.5 35.8L62.5 36.5L64.5 37.3L66.6 38.1L68.7 38.9L70.8 39.9L72.9 40.8L75 41.8L77.1 42.8L79.3 43.9L81.4 45Z"></path><g clip-path="url(#py-clip)"><g fill="var(--snakePat)"><g transform="translate(56.3 18.9) rotate(-165.4)"><path d="M0 -10.32 C7.02 -10.32, 11.32 -5.68, 11.32 0 C11.32 5.68, 7.02 10.32, 0 10.32 C-7.02 10.32, -11.32 5.68, -11.32 0 C-11.32 -5.68, -7.02 -10.32, 0 -10.32 Z"></path></g><g transform="translate(36.1 20.4) rotate(148.4)"><path d="M0 -8.10 C8.14 -8.10, 13.12 -4.46, 13.12 0 C13.12 4.46, 8.14 8.10, 0 8.10 C-8.14 8.10, -13.12 4.46, -13.12 0 C-13.12 -4.46, -8.14 -8.10, 0 -8.10 Z"></path></g><g transform="translate(25.8 37.8) rotate(93.9)"><path d="M0 -10.80 C6.97 -10.80, 11.25 -5.94, 11.25 0 C11.25 5.94, 6.97 10.80, 0 10.80 C-6.97 10.80, -11.25 5.94, -11.25 0 C-11.25 -5.94, -6.97 -10.80, 0 -10.80 Z"></path></g><g transform="translate(33.6 56.4) rotate(45.4)"><path d="M0 -8.64 C7.91 -8.64, 12.75 -4.75, 12.75 0 C12.75 4.75, 7.91 8.64, 0 8.64 C-7.91 8.64, -12.75 4.75, -12.75 0 C-12.75 -4.75, -7.91 -8.64, 0 -8.64 Z"></path></g><g transform="translate(51.2 67.4) rotate(25.7)"><path d="M0 -9.90 C7.36 -9.90, 11.88 -5.45, 11.88 0 C11.88 5.45, 7.36 9.90, 0 9.90 C-7.36 9.90, -11.88 5.45, -11.88 0 C-11.88 -5.45, -7.36 -9.90, 0 -9.90 Z"></path></g><g transform="translate(69.5 77.4) rotate(32.8)"><path d="M0 -8.60 C7.38 -8.60, 11.90 -4.73, 11.90 0 C11.90 4.73, 7.38 8.60, 0 8.60 C-7.38 8.60, -11.90 4.73, -11.90 0 C-11.90 -4.73, -7.38 -8.60, 0 -8.60 Z"></path></g><g transform="translate(85.2 91.0) rotate(51.4)"><path d="M0 -9.12 C6.34 -9.12, 10.23 -5.02, 10.23 0 C10.23 5.02, 6.34 9.12, 0 9.12 C-6.34 9.12, -10.23 5.02, -10.23 0 C-10.23 -5.02, -6.34 -9.12, 0 -9.12 Z"></path></g><g transform="translate(91.1 110.4) rotate(95.7)"><path d="M0 -6.72 C6.45 -6.72, 10.40 -3.69, 10.40 0 C10.40 3.69, 6.45 6.72, 0 6.72 C-6.45 6.72, -10.40 3.69, -10.40 0 C-10.40 -3.69, -6.45 -6.72, 0 -6.72 Z"></path></g><g transform="translate(81.8 128.5) rotate(138.0)"><path d="M0 -6.89 C5.41 -6.89, 8.73 -3.79, 8.73 0 C8.73 3.79, 5.41 6.89, 0 6.89 C-5.41 6.89, -8.73 3.79, -8.73 0 C-8.73 -3.79, -5.41 -6.89, 0 -6.89 Z"></path></g><g transform="translate(63.1 137.2) rotate(168.3)"><path d="M0 -5.36 C4.98 -5.36, 8.03 -2.95, 8.03 0 C8.03 2.95, 4.98 5.36, 0 5.36 C-4.98 5.36, -8.03 2.95, -8.03 0 C-8.03 -2.95, -4.98 -5.36, 0 -5.36 Z"></path></g><g transform="translate(42.4 137.6) rotate(-169.7)"><path d="M0 -5.38 C3.85 -5.38, 6.20 -2.96, 6.20 0 C6.20 2.96, 3.85 5.38, 0 5.38 C-3.85 5.38, -6.20 2.96, -6.20 0 C-6.20 -2.96, -3.85 -5.38, 0 -5.38 Z"></path></g></g></g><g transform="translate(88.0 34.0) rotate(6)"><path d="M-30 -8.0 C-24 -14.2, -14 -16.6, -4 -16.5 C4.5 -16.3, 12.6 -12.6, 18.2 -8.6 C21.4 -6.4, 23.6 -4.5, 24.6 -3.0 C25.6 -1.5, 25.6 1.5, 24.6 3.0 C23.6 4.5, 21.4 6.4, 18.2 8.6 C12.6 12.6, 4.5 16.3, -4 16.5 C-14 16.6, -24 14.2, -30 8.0 C-33.5 5.4, -33.5 -5.4, -30 -8.0 Z" fill="var(--snakeFill)"></path><circle cx="9.0" cy="-7.0" r="2.8" fill="var(--snakeEye)"></circle><path d="M24.6 2.2 L30.8 3.6" fill="none" stroke="var(--snakeFill)" stroke-width="2.2" stroke-linecap="round"></path><path d="M30.8 3.6 L34.8 2.2" fill="none" stroke="var(--snakeFill)" stroke-width="1.8" stroke-linecap="round"></path><path d="M30.8 3.6 L34.8 6.2" fill="none" stroke="var(--snakeFill)" stroke-width="1.8" stroke-linecap="round"></path></g></svg><span class="words" id="words"><span class="t0">S</span><span class="t1">nake</span><span class="t2">List</span></span><span class="tickwrap" id="tickWrap"><svg class="tick" id="tickA" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--tickFill)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--tickPat)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--tickFill)" stroke="var(--tickPat)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg><svg class="tick" id="tickB" viewBox="-1 -6 42 37" aria-hidden="true"><path d="M4 17 L13 26 L28 8" fill="none" stroke="var(--tickFill)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"></path><g fill="var(--ratFill)" stroke="var(--ratEdge)" stroke-width="1.1" stroke-linejoin="round"><g transform="translate(28.6 7.3) rotate(-50)"><path d="M0 -5.0 C1.1 -5.6, 4.1 -5.0, 5.2 -4.4 L5.2 4.4 C4.1 5.0, 1.1 5.6, 0 5.0 Z"></path></g><g transform="translate(32.0 3.3) rotate(-44)"><path d="M0 -4.4 C1.0 -5.0, 3.8 -4.2, 4.8 -3.6 L4.8 3.6 C3.8 4.2, 1.0 5.0, 0 4.4 Z"></path></g><g transform="translate(35.2 0.2) rotate(-38)"><path d="M0 -3.6 C0.9 -4.1, 3.0 -3.0, 3.8 -2.4 A2.4 2.4 0 0 1 3.8 2.4 C3.0 3.0, 0.9 4.1, 0 3.6 Z"></path></g></g></svg></span></div></div></div>
+<div class="btns">
+  <button class="primary" id="copy">Copy settings</button>
+  <button data-preset="current">Preset: current v0.41</button>
+  <button data-preset="brief">Preset: brand brief</button>
+  <button data-preset="mono">Preset: one colour</button>
+  <button id="rand">Surprise me</button>
+</div>
+<details id="recipeBox"><summary>Settings code &mdash; open to copy or read</summary>
+<textarea id="recipe" readonly spellcheck="false"></textarea>
+<p class="hint">Paste that block back and say &ldquo;use this&rdquo; &mdash; the app logo gets rebuilt from it exactly.</p></details>
+<div class="grid">
+  <div class="card"><h2>Type</h2>
+    <div class="row"><label>Font</label><button type="button" id="fontBtn" class="fontbtn">Fraunces</button></div>
+    <div id="fontPanel" hidden><input type="text" id="fontSearch" placeholder="Search 118 fonts..." autocomplete="off"><div id="fontList"></div></div>
+    <div class="row"><label for="c_weight">Weight Snake</label><select id="c_weight">
+      <option>100</option><option>200</option><option>300</option><option>400</option><option>500</option>
+      <option>600</option><option selected>700</option><option>800</option><option>900</option></select></div>
+    <div class="row"><label for="c_weight2">Weight List</label><select id="c_weight2">
+      <option>100</option><option>200</option><option>300</option><option>400</option><option>500</option>
+      <option>600</option><option selected>700</option><option>800</option><option>900</option></select></div>
+    <div class="row"><label for="c_ital">Italic</label><select id="c_ital">
+      <option value="none">None</option><option value="list">List only</option>
+      <option value="snake">Snake only</option><option value="both">Both</option></select></div>
+    <div class="row"><label for="c_case">Letter case</label><select id="c_case">
+      <option value="none">SnakeList</option><option value="uppercase">SNAKELIST</option>
+      <option value="lowercase">snakelist</option></select></div>
+    <div class="row"><label for="c_size">Size</label><input type="range" id="c_size" min="30" max="180" step="1"><span class="val" id="v_size"></span></div>
+    <div class="row"><label for="c_track">Letter spacing</label><input type="range" id="c_track" min="-80" max="120" step="1"><span class="val" id="v_track"></span></div>
+    <div class="row"><label for="c_wgap">Gap between words</label><input type="range" id="c_wgap" min="-60" max="200" step="1"><span class="val" id="v_wgap"></span></div>
+    <div class="row"><label for="c_stroke">Outline width</label><input type="range" id="c_stroke" min="0" max="40" step="1"><span class="val" id="v_stroke"></span></div>
+    <div class="row"><label for="c_strokec">Outline colour</label><input type="color" id="c_strokec"></div>
+  </div>
+  <div class="card"><h2>Word colour</h2>
+    <div class="row"><label for="c_mode">Fill</label><select id="c_mode">
+      <option value="gradient">Gradient</option><option value="solid">Solid</option></select></div>
+    <div class="row" data-when="solid"><label for="c_col1">Snake</label><input type="color" id="c_col1"></div>
+    <div class="row" data-when="solid"><label for="c_col2">List</label><input type="color" id="c_col2"></div>
+    <div class="row" data-when="gradient"><label for="c_gtype">Type</label><select id="c_gtype">
+      <option value="linear">Linear</option><option value="radial">Radial</option></select></div>
+    <div class="row" data-when="gradient"><label for="c_g1">Stop 1</label><input type="color" id="c_g1"><input type="range" id="c_p1" min="0" max="100" step="1"><span class="val" id="v_p1"></span></div>
+    <div class="row" data-when="gradient"><label for="c_g2">Stop 2</label><input type="color" id="c_g2"><input type="range" id="c_p2" min="0" max="100" step="1"><span class="val" id="v_p2"></span></div>
+    <div class="row" data-when="gradient"><label for="c_g3">Stop 3</label><input type="color" id="c_g3"><input type="range" id="c_p3" min="0" max="100" step="1"><span class="val" id="v_p3"></span></div>
+    <div class="row" data-when="gradient"><label for="c_g4">Stop 4</label><input type="color" id="c_g4"><input type="range" id="c_p4" min="0" max="100" step="1"><span class="val" id="v_p4"></span></div>
+    <div class="row" data-when="gradient"><label for="c_gang">Angle</label><input type="range" id="c_gang" min="0" max="360" step="1"><span class="val" id="v_gang"></span></div>
+    <div class="row" data-when="gradient"><label for="c_gspan">Snake takes gradient</label><input type="checkbox" id="c_gspan"></div>
+  </div>
+  <div class="card"><h2>Shadow</h2>
+    <div class="row"><label for="c_shadow">Preset</label><select id="c_shadow">
+      <option value="none">None</option><option value="soft">Soft</option>
+      <option value="strong">Strong</option><option value="custom">Custom</option></select></div>
+    <div class="row" data-sh="custom"><label for="c_shy">Drop</label><input type="range" id="c_shy" min="-20" max="40" step="1"><span class="val" id="v_shy"></span></div>
+    <div class="row" data-sh="custom"><label for="c_shb">Blur</label><input type="range" id="c_shb" min="0" max="60" step="1"><span class="val" id="v_shb"></span></div>
+    <div class="row" data-sh="custom"><label for="c_sho">Opacity</label><input type="range" id="c_sho" min="0" max="100" step="1"><span class="val" id="v_sho"></span></div>
+    <div class="row" data-sh="custom"><label for="c_shc">Colour</label><input type="color" id="c_shc"></div>
+  </div>
+  <div class="card"><h2>Snake S</h2>
+    <div class="row"><label for="c_snake">Style</label><select id="c_snake">
+      <option value="A">Rattlesnake (current)</option><option value="B">Clean S</option>
+      <option value="C">Python</option>
+      <option value="none">None &mdash; plain letter S</option></select></div>
+    <div class="row"><label for="c_sfill">Body</label><input type="color" id="c_sfill"></div>
+    <div class="row"><label for="c_spat">Pattern</label><input type="color" id="c_spat"></div>
+    <div class="row"><label for="c_spato">Pattern strength</label><input type="range" id="c_spato" min="0" max="100" step="1"><span class="val" id="v_spato"></span></div>
+    <div class="row"><label for="c_seye">Eye</label><input type="color" id="c_seye"></div>
+    <div class="row"><label for="c_seyesz">Eye size</label><input type="range" id="c_seyesz" min="30" max="240" step="2"><span class="val" id="v_seyesz"></span></div>
+    <div class="row"><label for="c_ssize">Height</label><input type="range" id="c_ssize" min="40" max="120" step="1"><span class="val" id="v_ssize"></span></div>
+    <div class="row"><label for="c_sgap">Gap after</label><input type="range" id="c_sgap" min="-80" max="160" step="1"><span class="val" id="v_sgap"></span></div>
+    <div class="row"><label for="c_sdy">Nudge</label><input type="range" id="c_sdy" min="-40" max="40" step="1"><span class="val" id="v_sdy"></span></div>
+    <div class="row"><label for="c_srot">Rotate</label><input type="range" id="c_srot" min="-30" max="30" step="1"><span class="val" id="v_srot"></span></div>
+    <div class="row"><label for="c_sflip">Mirror</label><input type="checkbox" id="c_sflip"></div>
+  </div>
+  <div class="card"><h2>Checkmark</h2>
+    <div class="row"><label for="c_tick">Style</label><select id="c_tick">
+      <option value="A">Rattle tail (current)</option><option value="B">Check plus amber rattle</option>
+      <option value="none">None</option></select></div>
+    <div class="row"><label for="c_tpos">Position</label><select id="c_tpos">
+      <option value="after">After the word</option><option value="before">Before the S</option></select></div>
+    <div class="row"><label for="c_tfill">Check</label><input type="color" id="c_tfill"></div>
+    <div class="row"><label for="c_tpat">Markings / rattle</label><input type="color" id="c_tpat"></div>
+    <div class="row"><label for="c_tbox">Box around it</label><select id="c_tbox">
+      <option value="none">None</option><option value="rounded">Rounded square</option>
+      <option value="square">Square</option><option value="circle">Circle</option></select></div>
+    <div class="row" data-box="1"><label for="c_tboxc">Box colour</label><input type="color" id="c_tboxc"></div>
+    <div class="row" data-box="1"><label for="c_tboxw">Box thickness</label><input type="range" id="c_tboxw" min="1" max="14" step="1"><span class="val" id="v_tboxw"></span></div>
+    <div class="row" data-box="1"><label for="c_tboxp">Box padding</label><input type="range" id="c_tboxp" min="0" max="60" step="1"><span class="val" id="v_tboxp"></span></div>
+    <div class="row"><label for="c_tsize">Height</label><input type="range" id="c_tsize" min="25" max="120" step="1"><span class="val" id="v_tsize"></span></div>
+    <div class="row"><label for="c_tgap">Gap</label><input type="range" id="c_tgap" min="-60" max="200" step="1"><span class="val" id="v_tgap"></span></div>
+    <div class="row"><label for="c_tdy">Nudge</label><input type="range" id="c_tdy" min="-50" max="50" step="1"><span class="val" id="v_tdy"></span></div>
+    <div class="row"><label for="c_trot">Rotate</label><input type="range" id="c_trot" min="-45" max="45" step="1"><span class="val" id="v_trot"></span></div>
+  </div>
+  <div class="card"><h2>Backdrop</h2>
+    <div class="row"><label for="c_bg">Swatch</label><select id="c_bg">
+      <option value="#f2f1e6">App cream</option><option value="#ffffff">White</option>
+      <option value="#F5F1E6">Warm cream</option><option value="#152019">Charcoal</option>
+      <option value="#1F5A3A">Forest</option><option value="#08180f">Opening dark</option>
+      <option value="custom">Custom</option></select></div>
+    <div class="row"><label for="c_bgc">Custom colour</label><input type="color" id="c_bgc"></div>
+    <div class="row"><label for="c_pad">Preview height</label><input type="range" id="c_pad" min="120" max="420" step="4"><span class="val" id="v_pad"></span></div>
+    <p class="hint" style="margin-top:6px">The header sits on cream; the opening sits on the dark one. Check your pick against both.</p>
+  </div>
+</div>
+</div>
+<script>
+var FONTS=[
+["Serif & editorial",[["Fraunces"],["Playfair Display"],["Bodoni Moda"],["Cormorant Garamond"],["EB Garamond"],["Spectral"],["Alegreya"],["Vollkorn"],["Lora"],["Merriweather"],["Libre Baskerville"],["Petrona"],["Gloock"],["Prata"],["Marcellus"],["Philosopher"],["DM Serif Display"],["Instrument Serif"],["Young Serif"],["Yeseva One"],["Rozha One"],["Abril Fatface"]]],
+["Sans & modern",[["Bricolage Grotesque"],["Outfit"],["Space Grotesk"],["Manrope"],["Sora"],["Archivo"],["Figtree"],["Plus Jakarta Sans"],["Epilogue"],["Chivo"],["Rubik"],["Work Sans"],["Nunito"],["Poppins"],["Oswald"],["Teko"],["Archivo Black"],["Anton"],["Bebas Neue"],["Staatliches"],["Passion One"],["Julius Sans One"],["Poiret One"],["Syncopate"]]],
+["Slab & sturdy",[["Roboto Slab"],["Zilla Slab"],["Bitter"],["Bevan"],["Alfa Slab One"],["Ultra"],["Chonburi"],["Rye"],["Sancreek"],["Bowlby One"]]],
+["Display & poster",[["Righteous"],["Fredoka"],["Baloo 2"],["Titan One"],["Luckiest Guy"],["Bungee"],["Bungee Shade"],["Fugaz One"],["Monoton"],["Audiowide"],["Orbitron"],["Michroma"],["Cinzel"],["Cinzel Decorative"],["Faster One"],["Vast Shadow"],["Chicle"],["Trade Winds"],["Frijole"],["Emblema One"],["Trochut"],["Megrim"],["Codystar"]]],
+["Script & handwritten",[["Lobster"],["Pacifico"],["Satisfy"],["Great Vibes"],["Dancing Script"],["Parisienne"],["Sacramento"],["Yellowtail"],["Kaushan Script"],["Caveat"],["Shadows Into Light"],["Permanent Marker"],["Rock Salt"],["Amatic SC"],["Berkshire Swash"],["Sail"],["Grand Hotel"]]],
+["Wild & weird",[["Creepster"],["Nosifer"],["Metal Mania"],["Pirata One"],["UnifrakturMaguntia"],["Grenze Gotisch"],["Special Elite"],["Cabin Sketch"],["Jolly Lodger"],["Nova Cut"],["Bigelow Rules"],["Snowburst One"],["Ewert"],["Smokum"],["Silkscreen"],["Press Start 2P"]]],
+["Mono & technical",[["Fira Code"],["JetBrains Mono"],["Space Mono"],["IBM Plex Mono"],["Major Mono Display"],["Nova Mono"]]]];
+/* Rows are real DOM elements, so each one renders in its own webfont —
+   a native <select> popup is drawn by the OS and ignores font-family. */
+(function(){
+  var list=document.getElementById('fontList');
+  FONTS.forEach(function(g){
+    var h=document.createElement('div'); h.className='fgroup'; h.textContent=g[0]; list.appendChild(h);
+    g[1].forEach(function(f){
+      var b=document.createElement('button'); b.type='button'; b.className='frow';
+      b.textContent=f[0]; b.dataset.font=f[0];
+      b.style.fontFamily='"'+f[0]+'", serif';
+      list.appendChild(b); }); });
+  var btn=document.getElementById('fontBtn'), panel=document.getElementById('fontPanel'),
+      search=document.getElementById('fontSearch');
+  btn.addEventListener('click',function(){
+    panel.hidden=!panel.hidden;
+    if(!panel.hidden){ search.value=''; filter(''); search.focus(); } });
+  function filter(q){
+    q=q.toLowerCase();
+    var vis={};
+    [].forEach.call(list.querySelectorAll('.frow'),function(r){
+      var ok=r.dataset.font.toLowerCase().indexOf(q)>=0;
+      r.style.display=ok?'':'none'; if(ok) vis[r.previousGroup]=1; });
+    [].forEach.call(list.querySelectorAll('.fgroup'),function(h){
+      var n=h.nextElementSibling, any=false;
+      while(n && !n.classList.contains('fgroup')){ if(n.style.display!=='none'){any=true;break;} n=n.nextElementSibling; }
+      h.style.display=any?'':'none'; });
+  }
+  search.addEventListener('input',function(){ filter(search.value); });
+  list.addEventListener('click',function(e){
+    var r=e.target.closest('.frow'); if(!r) return;
+    window.__setFont(r.dataset.font); panel.hidden=true; });
+})();
+(function(){
+var $=function(i){return document.getElementById(i)};
+var KEYS=['font','weight','weight2','ital','case','size','track','wgap','stroke','strokec',
+ 'mode','col1','col2','gtype','g1','p1','g2','p2','g3','p3','g4','p4','gang','gspan',
+ 'shadow','shy','shb','sho','shc',
+ 'snake','sfill','spat','spato','seye','seyesz','ssize','sgap','sdy','srot','sflip',
+ 'tick','tpos','tfill','tpat','tsize','tgap','tdy','trot','tbox','tboxc','tboxw','tboxp','bg','bgc','pad'];
+var P={
+ current:{font:'Fraunces',weight:'700',weight2:'500',ital:'list',case:'none',size:73,track:10,wgap:0,
+  stroke:0,strokec:'#152019',mode:'gradient',col1:'#1F5A3A',col2:'#152019',gtype:'linear',
+  g1:'#96dd78',p1:0,g2:'#6fc255',p2:28,g3:'#57ab45',p3:62,g4:'#38802a',p4:100,gang:100,gspan:false,
+  shadow:'strong',shy:7,shb:20,sho:45,shc:'#000000',
+  snake:'A',sfill:'#8fd46c',spat:'#1e3a24',spato:36,seye:'#0b2114',seyesz:100,ssize:70,sgap:-15,sdy:0,srot:0,sflip:false,
+  tick:'A',tpos:'after',tfill:'#5fb246',tpat:'#1e3a24',tsize:70,tgap:20,tdy:0,trot:0,tbox:'none',tboxc:'#5fb246',tboxw:4,tboxp:14,
+  bg:'#f2f1e6',bgc:'#f2f1e6',pad:212},
+ brief:{font:'Bricolage Grotesque',weight:'600',weight2:'600',ital:'none',case:'none',size:73,track:-15,wgap:0,
+  stroke:0,strokec:'#152019',mode:'solid',col1:'#1F5A3A',col2:'#152019',gtype:'linear',
+  g1:'#A7D68B',p1:0,g2:'#55A844',p2:40,g3:'#2f7a4a',p3:72,g4:'#1F5A3A',p4:100,gang:100,gspan:false,
+  shadow:'none',shy:7,shb:20,sho:45,shc:'#000000',
+  snake:'B',sfill:'#55A844',spat:'#A7D68B',spato:100,seye:'#152019',seyesz:100,ssize:69,sgap:30,sdy:0,srot:0,sflip:false,
+  tick:'B',tpos:'after',tfill:'#1F5A3A',tpat:'#D4A23A',tsize:60,tgap:30,tdy:0,trot:0,tbox:'none',tboxc:'#1F5A3A',tboxw:4,tboxp:14,
+  bg:'#f2f1e6',bgc:'#f2f1e6',pad:212},
+ mono:{font:'Bricolage Grotesque',weight:'600',weight2:'600',ital:'none',case:'none',size:73,track:-15,wgap:0,
+  stroke:0,strokec:'#152019',mode:'solid',col1:'#1F5A3A',col2:'#1F5A3A',gtype:'linear',
+  g1:'#1F5A3A',p1:0,g2:'#1F5A3A',p2:40,g3:'#1F5A3A',p3:72,g4:'#1F5A3A',p4:100,gang:100,gspan:false,
+  shadow:'none',shy:7,shb:20,sho:45,shc:'#000000',
+  snake:'B',sfill:'#1F5A3A',spat:'#1F5A3A',spato:0,seye:'#F5F1E6',seyesz:100,ssize:69,sgap:30,sdy:0,srot:0,sflip:false,
+  tick:'B',tpos:'after',tfill:'#1F5A3A',tpat:'#1F5A3A',tsize:60,tgap:30,tdy:0,trot:0,tbox:'none',tboxc:'#1F5A3A',tboxw:4,tboxp:14,
+  bg:'#f2f1e6',bgc:'#f2f1e6',pad:212}
+};
+var S=JSON.parse(JSON.stringify(P.current));
+function rgba(h,a){var r=parseInt(h.substr(1,2),16),g=parseInt(h.substr(3,2),16),b=parseInt(h.substr(5,2),16);
+  return 'rgba('+r+','+g+','+b+','+a+')';}
+function em(v){return (v/1000).toFixed(3)+'em';}
+function push(){KEYS.forEach(function(k){var e=$('c_'+k);if(!e)return;
+  if(e.type==='checkbox')e.checked=!!S[k];else e.value=S[k];});apply();}
+function pull(){KEYS.forEach(function(k){var e=$('c_'+k);if(!e)return;
+  if(e.type==='checkbox')S[k]=e.checked;else if(e.type==='range')S[k]=+e.value;else S[k]=e.value;});apply();}
+function apply(){
+  var wm=$('wm'),w=$('words'),cv=$('canvas');
+  var t0=w.querySelector('.t0'),t1=w.querySelector('.t1'),t2=w.querySelector('.t2');
+  cv.style.background = S.bg==='custom' ? S.bgc : S.bg;
+  cv.style.minHeight = S.pad+'px';
+  wm.style.fontFamily='"'+S.font+'", serif';
+  wm.style.fontSize=S.size+'px';
+  wm.style.letterSpacing=em(S.track);
+  wm.style.textTransform = S.case==='none' ? 'none' : S.case;
+  t0.style.display = S.snake==='none' ? '' : 'none';
+  [t0,t1].forEach(function(e){e.style.fontWeight=S.weight;
+    e.style.fontStyle=(S.ital==='snake'||S.ital==='both')?'italic':'normal';});
+  t2.style.fontWeight=S.weight2;
+  t2.style.fontStyle=(S.ital==='list'||S.ital==='both')?'italic':'normal';
+  t2.style.marginLeft=em(S.wgap);
+  var st = S.stroke>0 ? (S.stroke/100)+'px '+S.strokec : '';
+  [t0,t1,t2].forEach(function(e){e.style.webkitTextStroke=st;});
+  var stops=S.g1+' '+S.p1+'%, '+S.g2+' '+S.p2+'%, '+S.g3+' '+S.p3+'%, '+S.g4+' '+S.p4+'%';
+  var grad = S.gtype==='radial' ? 'radial-gradient(circle at 30% 40%, '+stops+')'
+                                : 'linear-gradient('+S.gang+'deg, '+stops+')';
+  if(S.mode==='gradient'){
+    w.style.backgroundImage=grad; w.style.webkitBackgroundClip='text'; w.style.backgroundClip='text';
+    w.style.webkitTextFillColor='transparent';
+    t0.style.color=''; t1.style.color=''; t2.style.color='';
+  } else {
+    w.style.backgroundImage='none'; w.style.webkitBackgroundClip='border-box'; w.style.backgroundClip='border-box';
+    w.style.webkitTextFillColor='initial';
+    t0.style.color=S.col1; t1.style.color=S.col1; t2.style.color=S.col2;
+  }
+  var sh;
+  if(S.shadow==='none'){ sh='none'; }
+  else if(S.shadow==='soft'){ sh='drop-shadow(0 1px 1px rgba(0,0,0,0.22)) drop-shadow(0 3px 8px rgba(0,0,0,0.16))'; }
+  else if(S.shadow==='strong'){ sh='drop-shadow(0 2px 3px rgba(0,0,0,0.55)) drop-shadow(0 7px 20px rgba(0,0,0,0.45))'; }
+  else { sh='drop-shadow(0 '+S.shy+'px '+S.shb+'px '+rgba(S.shc,(S.sho/100).toFixed(2))+')'; }
+  w.style.filter=sh;
+  var A=$('snakeA'),Bx=$('snakeB'),Cx=$('snakeC'),tA=$('tickA'),tB=$('tickB'),TW=$('tickWrap');
+  A.style.display=S.snake==='A'?'':'none'; Bx.style.display=S.snake==='B'?'':'none'; Cx.style.display=S.snake==='C'?'':'none'; Cx.style.display=S.snake==='C'?'':'none';
+  tA.style.display=S.tick==='A'?'':'none'; tB.style.display=S.tick==='B'?'':'none';
+  [A,Bx,Cx].forEach(function(e){
+    e.style.height=(S.ssize/100)+'em'; e.style.marginRight=em(S.sgap);
+    e.style.transform='translateY('+(-S.sdy/100)+'em) rotate('+S.srot+'deg)'+(S.sflip?' scaleX(-1)':'');
+    e.style.setProperty('--snakeFill', (S.gspan && S.mode==='gradient') ? S.g1 : S.sfill);
+    e.style.setProperty('--snakePat', rgba(S.spat,(S.spato/100).toFixed(2)));
+    e.style.setProperty('--snakeLine', rgba(S.spat,(S.spato/100).toFixed(2)));
+    e.style.setProperty('--snakeEye', S.seye);});
+  [tA,tB].forEach(function(e){
+    e.style.height=(S.tsize/100)+'em';
+    e.style.transform='rotate('+S.trot+'deg)';
+    e.style.setProperty('--tickFill',S.tfill); e.style.setProperty('--tickPat',S.tpat);
+    e.style.setProperty('--ratFill',S.tpat); e.style.setProperty('--ratEdge','rgba(0,0,0,0.42)');});
+  var showTick = S.tick!=='none';
+  TW.style.display = showTick ? '' : 'none';
+  if(showTick){
+    if(S.tpos==='before'){ wm.insertBefore(TW,wm.firstChild); TW.style.marginRight=em(S.tgap); TW.style.marginLeft='0'; }
+    else { wm.appendChild(TW); TW.style.marginLeft=em(S.tgap); TW.style.marginRight='0'; }
+  }
+  var bx=S.tbox;
+  if(bx==='none'){ TW.style.border='0'; TW.style.padding='0'; TW.style.borderRadius='0'; }
+  else {
+    TW.style.border=(S.tboxw/100)+'em solid '+S.tboxc;
+    TW.style.padding=(S.tboxp/100)+'em';
+    TW.style.borderRadius = bx==='circle' ? '50%' : (bx==='rounded' ? (S.tboxp/100+0.12)+'em' : '0');
+  }
+  var lift = (bx==='none') ? 0 : (S.tboxp/100 + S.tboxw/100);
+  TW.style.transform = 'translateY(' + (-S.tdy/100 - lift) + 'em)';
+  document.querySelectorAll('[data-box]').forEach(function(r){ r.style.display = bx==='none' ? 'none' : ''; });
+  document.querySelectorAll('[data-when]').forEach(function(r){r.style.display=(r.getAttribute('data-when')===S.mode)?'':'none';});
+  document.querySelectorAll('[data-sh]').forEach(function(r){r.style.display=(S.shadow==='custom')?'':'none';});
+  $('v_size').textContent=S.size+'px'; $('v_track').textContent=em(S.track); $('v_wgap').textContent=em(S.wgap);
+  $('v_stroke').textContent=(S.stroke/100).toFixed(2)+'px'; $('v_gang').textContent=S.gang+'deg';
+  ['p1','p2','p3','p4'].forEach(function(k){$('v_'+k).textContent=S[k]+'%';});
+  $('v_shy').textContent=S.shy+'px'; $('v_shb').textContent=S.shb+'px'; $('v_sho').textContent=S.sho+'%';
+  $('v_spato').textContent=S.spato+'%';
+  $('v_ssize').textContent=(S.ssize/100).toFixed(2)+'em'; $('v_sgap').textContent=em(S.sgap);
+  $('v_sdy').textContent=(S.sdy/100).toFixed(2)+'em'; $('v_srot').textContent=S.srot+'deg';
+  $('v_tsize').textContent=(S.tsize/100).toFixed(2)+'em'; $('v_tgap').textContent=em(S.tgap);
+  $('v_tdy').textContent=(S.tdy/100).toFixed(2)+'em'; $('v_trot').textContent=S.trot+'deg'; $('v_tboxw').textContent=(S.tboxw/100).toFixed(2)+'em'; $('v_tboxp').textContent=(S.tboxp/100).toFixed(2)+'em';
+  $('v_pad').textContent=S.pad+'px';
+  $('recipe').value='SNAKELIST LOGO SETTINGS\n'+KEYS.map(function(k){return k+'='+S[k];}).join('\n');
+}
+KEYS.forEach(function(k){var e=$('c_'+k); if(e) e.addEventListener('input',pull);});
+document.querySelectorAll('[data-preset]').forEach(function(b){b.addEventListener('click',function(){
+  S=JSON.parse(JSON.stringify(P[b.getAttribute('data-preset')])); push();});});
+$('rand').addEventListener('click',function(){
+  var rc=function(){var s=Math.floor(Math.random()*16777215).toString(16); while(s.length<6){s='0'+s;} return '#'+s;};
+  var fo=[].map.call($('c_font').options,function(o){return o.value;});
+  S.font=fo[Math.floor(Math.random()*fo.length)];
+  S.g1=rc();S.g2=rc();S.g3=rc();S.g4=rc();S.gang=Math.floor(Math.random()*360);
+  S.sfill=rc();S.spat=rc();S.tfill=rc();S.tpat=rc();
+  S.snake=Math.random()<0.5?'A':'B'; S.tick=Math.random()<0.5?'A':'B';
+  S.mode=Math.random()<0.7?'gradient':'solid'; push();});
+$('copy').addEventListener('click',function(){ var d=document.getElementById('recipeBox'); if(d) d.open=true;var t=$('recipe'); t.select(); t.setSelectionRange(0,99999);
+  try{document.execCommand('copy'); $('copy').textContent='Copied';
+    setTimeout(function(){$('copy').textContent='Copy settings';},1400);}catch(e){}});
+push();
+
+
+window.__setFont=function(name){ S.font=name; push(); };
+(function(){
+  var orig=apply;
+  apply=function(){ orig();
+    var b=document.getElementById('fontBtn'); if(b){ b.textContent=S.font; b.style.fontFamily='"'+S.font+'", serif'; }
+    [].forEach.call(document.querySelectorAll('.frow'),function(r){
+      r.setAttribute('aria-selected', r.dataset.font===S.font ? 'true':'false'); });
+  };
+  apply();
+})();
+/* Persistence: the live settings auto-save on every change and restore on load,
+   and any number of named looks can be kept in slots. Nothing is lost on reload. */
+(function(){
+  var LIVE='snakelist.logolab.live', SLOTS='snakelist.logolab.slots';
+  function read(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+  function write(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+  var bar=document.createElement('div'); bar.className='btns'; bar.id='savebar';
+  bar.innerHTML='<button type="button" id="saveAs">Save this look</button>'+
+    '<button type="button" id="clearLive">Reset to preset</button>'+
+    '<span id="saveMsg" class="hint" style="margin:0;align-self:center"></span>';
+  var slotWrap=document.createElement('div'); slotWrap.id='slots'; slotWrap.className='btns';
+  var rec=document.getElementById('recipe');
+  rec.parentNode.insertBefore(bar, rec.nextSibling);
+  bar.parentNode.insertBefore(slotWrap, bar.nextSibling);
+  function msg(t){ var m=document.getElementById('saveMsg'); m.textContent=t;
+    setTimeout(function(){ m.textContent=''; },1800); }
+  function drawSlots(){
+    var s=read(SLOTS,{}); slotWrap.innerHTML='';
+    var names=Object.keys(s);
+    if(!names.length){ slotWrap.innerHTML='<span class="hint" style="margin:0">No saved looks yet.</span>'; return; }
+    names.forEach(function(n){
+      var b=document.createElement('button'); b.type='button'; b.textContent=n;
+      b.title='Load '+n;
+      b.addEventListener('click',function(){ S=JSON.parse(JSON.stringify(s[n])); push(); msg('Loaded '+n); });
+      var x=document.createElement('button'); x.type='button'; x.textContent='x';
+      x.title='Delete '+n; x.style.marginLeft='-4px'; x.style.padding='8px 10px';
+      x.addEventListener('click',function(){ var t=read(SLOTS,{}); delete t[n]; write(SLOTS,t); drawSlots(); msg('Deleted '+n); });
+      slotWrap.appendChild(b); slotWrap.appendChild(x); });
+  }
+  document.getElementById('saveAs').addEventListener('click',function(){
+    var n=prompt('Name this look:', 'Look '+(Object.keys(read(SLOTS,{})).length+1));
+    if(!n) return; var t=read(SLOTS,{}); t[n]=JSON.parse(JSON.stringify(S)); write(SLOTS,t); drawSlots(); msg('Saved '+n); });
+  document.getElementById('clearLive').addEventListener('click',function(){
+    try{ localStorage.removeItem(LIVE); }catch(e){}
+    S=JSON.parse(JSON.stringify(P.current)); push(); msg('Reset'); });
+  // auto-save live state after every apply
+  var prev=apply;
+  apply=function(){ prev(); write(LIVE,S); };
+  // restore whatever was last on screen
+  var saved=read(LIVE,null);
+  if(saved && typeof saved==='object'){ KEYS.forEach(function(k){ if(k in saved) S[k]=saved[k]; }); push(); }
+  drawSlots();
+})();
+/* Show the hex beside every colour control, so a dark pick is still readable. */
+(function(){
+  var inputs=[].slice.call(document.querySelectorAll('input[type=color]'));
+  inputs.forEach(function(inp){
+    var tag=document.createElement('span'); tag.className='hex'; tag.id='hex_'+inp.id;
+    inp.parentNode.insertBefore(tag, inp.nextSibling);
+    var sync=function(){ tag.textContent=inp.value; };
+    inp.addEventListener('input',sync); sync();
+  });
+  var prev=apply;
+  apply=function(){ prev();
+    inputs.forEach(function(inp){ var t=document.getElementById('hex_'+inp.id); if(t) t.textContent=inp.value; });
+  };
+  apply();
+})();
+/* Choosing a body colour is an unambiguous intent, so it wins: the gradient takeover
+   switches itself off rather than silently discarding the pick. */
+(function(){
+  var body=document.getElementById('c_sfill');
+  var row=body.closest('.row');
+  var note=document.createElement('span');
+  note.className='hint';
+  note.style.cssText='margin:0;font-size:11px;display:none;flex-basis:100%;text-align:right';
+  note.textContent='the gradient is painting the snake — pick a body colour to take it back';
+  row.parentNode.insertBefore(note, row.nextSibling);
+  // the generic handler runs first, so untick the box and re-read everything
+  body.addEventListener('input', function(){
+    if(document.getElementById('c_gspan').checked){
+      document.getElementById('c_gspan').checked=false; pull();
+    }
+  });
+  var prev=apply;
+  apply=function(){ prev();
+    var over = S.gspan && S.mode==='gradient';
+    body.disabled=false;                       // never locked out
+    note.style.display = over ? '' : 'none';
+    var h=document.getElementById('hex_c_sfill');
+    if(h) h.textContent = over ? S.g1.toUpperCase()+' (gradient)' : body.value;
+  };
+  apply();
+})();
+/* Eye size: each snake is drawn with its own eye radius, so scale from that baseline
+   rather than forcing one absolute value across three different heads. */
+(function(){
+  var eyes=[].slice.call(document.querySelectorAll('#snakeA circle, #snakeB circle, #snakeC circle'));
+  eyes.forEach(function(c){ c.dataset.baseR = c.getAttribute('r'); });
+  var prev=apply;
+  apply=function(){ prev();
+    var k=(S.seyesz||100)/100;
+    eyes.forEach(function(c){ c.setAttribute('r', (parseFloat(c.dataset.baseR)*k).toFixed(2)); });
+    var v=document.getElementById('v_seyesz'); if(v) v.textContent=(S.seyesz||100)+'%';
+  };
+  apply();
+})();
+})();
+</script>
