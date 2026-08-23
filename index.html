@@ -8,16 +8,50 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  html, body { margin: 0; padding: 0; min-height: 100%; background: #0e2f1e; }
+  html, body { margin: 0; padding: 0; min-height: 100%; background: var(--page-under); }
 
   .sl-root {
-    --bg: #1F5A3A;
-    --bg-grad: linear-gradient(180deg, #256846 0%, #1F5A3A 34%, #17472d 70%, #0e2f1e 100%);
-    --chip-lift: #8fd46c;
+    --bg: #f2f1e6;
+    --bg-grad: linear-gradient(180deg, #f2f1e6 0%, #e9f0e1 46%, #dce9d1 100%);
+    --page-under: #dce9d1;
+    --chip-lift: #7fc266;
+    --mark-shadow: drop-shadow(0 1px 1px rgba(0,0,0,0.22)) drop-shadow(0 3px 8px rgba(0,0,0,0.16));
+    --menu-shadow: 0 12px 28px rgba(36,50,31,0.16);
+    --done-wash: rgba(63,125,67,0.08);
+    --ver-bg: rgba(63,125,67,0.12);
     /* one gradient, used by the opening wordmark and the app header alike */
     --mark-grad: radial-gradient(circle at 30% 40%, #96dd78 0%, #6fc255 0%, #57ab45 32%, #38802a 100%);
     --sl-snake: #58b351; --sl-pat: rgba(26,65,43,0.51); --sl-eye: #1b412b;
     --sl-check: #5fb246; --sl-tpat: #1e3a24;
+    --surface: #ffffff;
+    --surface-hover: #eceadb;
+    --border: #dad8c5;
+    --text: #24321f;
+    --text-muted: #667261;
+    --gold: #3f7d43;
+    --gold-soft: #8fbf8f;
+    --moss: #4c7a4f;
+    --rust: #a24b34;
+    --rust-soft: #f3ded4;
+    --on-accent: #fbf9f0;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-grad);
+    background-attachment: fixed;
+    color: var(--text);
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  [data-sl-theme="dark"] {
+    --bg: #1F5A3A;
+    --bg-grad: linear-gradient(180deg, #256846 0%, #1F5A3A 34%, #17472d 70%, #0e2f1e 100%);
+    --page-under: #0e2f1e;
+    --chip-lift: #8fd46c;
+    --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.45)) drop-shadow(0 4px 12px rgba(0,0,0,0.30));
+    --menu-shadow: 0 14px 30px rgba(0,0,0,0.42);
+    --done-wash: rgba(155,224,124,0.16);
+    --ver-bg: rgba(155,224,124,0.16);
     --surface: #24684a;
     --surface-hover: #2c7a57;
     --border: #37855f;
@@ -29,15 +63,26 @@
     --rust: #eda183;
     --rust-soft: #5d2c20;
     --on-accent: #0e2f1e;
-    font-family: 'Inter', sans-serif;
-    background: var(--bg-grad);
-    background-attachment: fixed;
-    color: var(--text);
-    min-height: 100vh;
-    position: relative;
-    overflow: hidden;
-    box-sizing: border-box;
   }
+  .theme-btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500;
+    padding: 7px 12px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); cursor: pointer;
+  }
+  .theme-btn:hover { border-color: var(--gold-soft); }
+  .theme-btn { padding: 7px; width: 34px; height: 34px; }
+  .theme-btn svg { width: 16px; height: 16px; }
+  .ico-sun { display: none; }
+  [data-sl-theme="dark"] .ico-moon { display: none; }
+  [data-sl-theme="dark"] .ico-sun { display: block; }
+  .hdr-actions { display: flex; align-items: center; gap: 8px; }
+
+  .theme-btn svg { width: 14px; height: 14px; }
+  .theme-btn .lbl-dark { display: none; }
+  [data-sl-theme="dark"] .theme-btn .lbl-dark { display: inline; }
+  [data-sl-theme="dark"] .theme-btn .lbl-light { display: none; }
+
   .sl-root * { box-sizing: border-box; }
   .sl-body { padding: 28px 20px 60px; }
 
@@ -80,13 +125,14 @@
   }
 
   .intro-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .intro-line { display: flex; align-items: baseline; gap: 0; font-size: min(71px, 17vw); white-space: nowrap; }
+  .intro-line { display: flex; align-items: baseline; gap: 0; font-size: min(84px, 18vw); white-space: nowrap; }
 
   /* box trimmed to the tick itself, so 0.70em really is cap height */
   /* the tick continues the wordmark: same colour the gradient reaches on the final letter */
-  .intro-box { flex-shrink: 0; width: auto; height: 0.80em; margin-left: 0.137em; opacity: 0; will-change: opacity, transform; --snake-mark: rgba(9,28,17,0.20); --snake-mark-line: rgba(9,28,17,0.20); animation: box-in 0.38s 0.95s cubic-bezier(.2,1.4,.4,1) both; }
-  @keyframes box-in { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
-  .box-tick {
+  .intro-box { flex-shrink: 0; width: auto; height: 0.70em; margin-left: 0.071em; opacity: 0; will-change: opacity, transform; --snake-mark: rgba(9,28,17,0.20); --snake-mark-line: rgba(9,28,17,0.20); animation: box-in 0.38s 0.95s cubic-bezier(.2,1.4,.4,1) both; }
+  @keyframes box-in { from { opacity: 0; transform: translateY(0.02em) scale(0.5); } to { opacity: 1; transform: translateY(0.02em) scale(1); } }
+  .box-tick { stroke-dashoffset: 0; }
+  .intro-box .box-tick {
     stroke-dasharray: 46; stroke-dashoffset: 46;
     animation: tick-draw 0.34s 1.28s cubic-bezier(.6,0,.3,1) forwards;
   }
@@ -99,13 +145,13 @@
   .intro-title {
     font-family: 'EB Garamond', serif; font-weight: 600; font-size: 1em;
     color: #58b351; opacity: 0; letter-spacing: 0.010em;
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.45)) drop-shadow(0 4px 12px rgba(0,0,0,0.30));
+    filter: var(--mark-shadow);
     animation: fade-up 0.55s 0.35s ease forwards;
   }
   .intro-title em { font-style: normal; font-weight: 500; }
   /* the S is drawn rather than typed, so it can be a snake; sized to cap height
      and sitting on the baseline so it reads as a letter, not an illustration. */
-  .snake-s { height: 0.85em; width: auto; vertical-align: baseline; margin-right: -0.003em; overflow: visible; }
+  .snake-s { height: 0.71em; width: auto; vertical-align: baseline; margin-right: -0.003em; overflow: visible; }
   /* the moment it is ticked, the wordmark settles the way a checked-off line does */
   /* The opening wordmark is painted with a gradient clipped to the glyphs. `color`
      is left real because the snake-S fills from currentColor — only the text is
@@ -136,7 +182,7 @@
   }
 
   .sl-header { max-width: 900px; margin: 0 auto 22px; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
-  .auth-bar { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; padding-top: 4px; }
+  .auth-bar { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-top: 4px; }
   .auth-row { display: flex; align-items: center; gap: 9px; }
   .auth-btn { display: flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease; }
   .auth-btn:hover:not(:disabled) { border-color: var(--gold-soft); }
@@ -148,11 +194,11 @@
   .signin-card { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 14px; }
   .signin-back { align-self: flex-start; background: none; border: none; padding: 0 0 6px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text-muted); cursor: pointer; }
   .signin-back:hover { color: var(--text); }
-  .signin-title { font-family: 'Fraunces', serif; font-weight: 700; font-size: 34px; letter-spacing: -0.01em; margin: 0; line-height: 1; }
-  .signin-title em { font-style: italic; font-weight: 500; color: var(--gold); }
+  .signin-title { display: flex; align-items: baseline; font-size: 38px; margin: 0; line-height: 1; white-space: nowrap; }
   .signin-sub { margin: 0; color: var(--text-muted); font-size: 14px; }
   .signin-form { display: flex; flex-direction: column; gap: 11px; margin-top: 4px; }
   .field { display: flex; flex-direction: column; gap: 5px; }
+  .field[hidden] { display: none; }
   .field span { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
   .field input { font-family: 'Inter', sans-serif; font-size: 14.5px; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); outline: none; transition: border-color 0.15s ease; }
   .field input:focus { border-color: var(--gold-soft); }
@@ -162,19 +208,14 @@
   .signin-links { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
   .signin-link { background: none; border: none; padding: 0; font-family: 'Inter', sans-serif; font-size: 12.5px; color: var(--moss); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   .signin-link:hover { color: var(--gold); }
-  .signin-divider { display: flex; align-items: center; gap: 12px; margin: 4px 0; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
-  .signin-divider::before, .signin-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
-  .auth-provider { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500; padding: 11px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease; }
-  .auth-provider:hover:not(:disabled) { border-color: var(--gold-soft); background: var(--surface-hover); }
-  .auth-provider:disabled { opacity: 0.55; cursor: default; }
   .signin-msg { margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; line-height: 1.6; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rust); }
   .signin-msg[hidden] { display: none; }
   .signin-msg.ok { color: var(--moss); }
   .signin-msg.info { color: var(--text-muted); }
   .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--moss); margin: 0 0 6px; }
   /* SNAKELIST VERSION - bump on every change-set */
-  .sl-ver { margin-left: 10px; padding: 2px 7px; border-radius: 999px; background: rgba(155,224,124,0.16); color: var(--gold); letter-spacing: 0.06em; }
-  .sl-title { display: flex; align-items: baseline; gap: 0; font-size: clamp(36px, 5.8vw, 56px); white-space: nowrap; margin: 0; line-height: 1; }
+  .sl-ver { margin-left: 10px; padding: 2px 7px; border-radius: 999px; background: var(--ver-bg); color: var(--gold); letter-spacing: 0.06em; }
+  .sl-title { display: flex; align-items: baseline; gap: 0; font-size: clamp(42px, 6.9vw, 66px); white-space: nowrap; margin: 0; line-height: 1; }
   /* same settled letter-spacing as the opening wordmark */
   .sl-titletext { font-family: 'EB Garamond', serif; font-weight: 600; font-size: 1em; letter-spacing: 0.010em; }
   .sl-titletext em { font-style: normal; font-weight: 500; }
@@ -187,17 +228,17 @@
   @supports ((-webkit-background-clip: text) or (background-clip: text)) {
     .sl-titletext {
       background-image: var(--mark-grad);
-      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.45)) drop-shadow(0 4px 12px rgba(0,0,0,0.30));
+      filter: var(--mark-shadow);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
     }
   }
   .sl-titletext { color: #9fe08a; }
-  .sl-titletext .snake-s { height: 0.85em; }
+  .sl-titletext .snake-s { height: 0.71em; }
   /* the opening tick sits on dark photographs; this one sits on pale paper,
      so it gets a lighter gradient and lighter markings to READ the same. */
-  .sl-tick { flex-shrink: 0; height: 0.80em; width: auto; margin-left: 0.137em; }
+  .sl-tick { flex-shrink: 0; height: 0.70em; width: auto; margin-left: 0.071em; transform: translateY(0.02em); }
 
   .sl-sub { color: var(--text-muted); font-size: 14.5px; margin: 10px 0 0; max-width: 46ch; }
 
@@ -243,7 +284,7 @@
     position: absolute; z-index: 5; top: calc(100% + 5px); left: 0; right: 0;
     max-height: 230px; overflow-y: auto; background: var(--surface);
     border: 1px solid var(--border); border-radius: 12px; padding: 5px;
-    box-shadow: 0 14px 30px rgba(0,0,0,0.42);
+    box-shadow: var(--menu-shadow);
   }
   .country-menu[hidden] { display: none; }
   .country-opt {
@@ -270,7 +311,7 @@
     content-visibility: auto;
     contain-intrinsic-size: auto 150px;
   }
-  .card.done { border-color: var(--gold-soft); background: linear-gradient(180deg, rgba(155,224,124,0.16), transparent 62%), var(--surface); }
+  .card.done { border-color: var(--gold-soft); background: linear-gradient(180deg, var(--done-wash), transparent 62%), var(--surface); }
   .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
   .card-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 17px; line-height: 1.25; }
   .card.done .card-name { color: var(--gold); }
@@ -284,9 +325,9 @@
   .tag { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.02em; padding: 3px 7px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
   .tag.venom { color: var(--rust); border-color: var(--rust-soft); }
 
-  .card-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 2px; }
+  .card-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; }
   .seen-date { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--text-muted); }
-  .seen-btn { display: flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; transition: all 0.15s ease; margin-left: auto; }
+  .seen-btn { display: flex; align-items: center; gap: 6px; justify-content: center; min-width: 106px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; transition: all 0.15s ease; margin-left: auto; }
   .seen-btn:hover { border-color: var(--gold-soft); }
   .seen-btn.done { background: var(--gold); border-color: var(--gold); color: var(--on-accent); }
 
@@ -343,7 +384,7 @@
   <div class="signin-page" id="signin-page" hidden>
     <div class="signin-card">
       <button class="signin-back" id="signin-back" type="button">&larr; Back to the list</button>
-      <h2 class="signin-title">Snake<em>List</em></h2>
+      <h2 class="signin-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h2>
       <p class="signin-sub" id="signin-sub">Sign in to keep your sightings across devices.</p>
 
       <form class="signin-form" id="signin-form" novalidate>
@@ -363,22 +404,18 @@
         <button class="signin-link" id="signin-toggle" type="button">New here? Create an account</button>
         <button class="signin-link" id="signin-forgot" type="button">Forgot password?</button>
       </div>
-
-      <div class="signin-divider"><span>or</span></div>
-
-      <button class="auth-provider" id="signin-google" type="button"></button>
     </div>
   </div>
 
   <div class="sl-body">
     <header class="sl-header">
       <div>
-        <p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v0.43</span></p>
+        <p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v0.74</span></p>
         <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
         <p class="sl-sub">Your life list of serpents. Search the field guide and mark what you've seen.</p>
       </div>
       <div class="auth-bar">
-        <div class="auth-row" id="auth-row"></div>
+        <div class="auth-row" id="auth-row"></div><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button>
       </div>
     </header>
 
@@ -4755,13 +4792,6 @@ const save = () => {
 // Bridge for the optional Firebase layer (see the module script at the end of this file).
 // The app works fully without it; when signed in, SL.onLocalChange pushes to Firestore
 // and SL.applyRemote pulls other devices' changes in.
-const GOOGLE_G =
-  '<svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">' +
-    '<path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.71-1.57 2.68-3.89 2.68-6.62Z"></path>' +
-    '<path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"></path>' +
-    '<path fill="#FBBC05" d="M3.97 10.72a5.41 5.41 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33Z"></path>' +
-    '<path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z"></path>' +
-  '</svg>';
 
 const SL = {
   onLocalChange: null,
@@ -4796,7 +4826,6 @@ const msgEl = document.getElementById("signin-msg");
 const emailEl = document.getElementById("signin-email");
 const passwordEl = document.getElementById("signin-password");
 const submitEl = document.getElementById("signin-submit");
-const googleEl = document.getElementById("signin-google");
 
 const FRIENDLY = {
   "auth/invalid-credential": "Email or password is incorrect",
@@ -4833,10 +4862,8 @@ function renderSignInPage() {
     signInMode === "create" ? "Already have an account? Sign in" : "New here? Create an account";
   document.getElementById("signin-forgot").hidden = signInMode === "create";
   passwordEl.setAttribute("autocomplete", signInMode === "create" ? "new-password" : "current-password");
-  googleEl.innerHTML = GOOGLE_G + (signInMode === "create" ? " Continue with Google" : " Sign in with Google");
-  submitEl.disabled = !ready;
-  googleEl.disabled = !ready;
-  if (!ready) showMessage("Sync isn't set up yet — see SETUP.md", "info");
+  submitEl.disabled = false;
+  if (!ready) showMessage("Accounts need a Firebase key for this app. Until then your sightings save in this browser.", "info");
 }
 
 function openSignIn() {
@@ -4909,11 +4936,6 @@ document.getElementById("signin-form").addEventListener("submit", (e) => {
     .finally(() => { submitEl.disabled = auth.status === "unconfigured"; });
 });
 
-googleEl.addEventListener("click", () => {
-  if (!auth.signIn) return;
-  showMessage("Opening Google…", "info");
-  auth.signIn().catch((err) => showMessage(authErrorText(err.code), "error"));
-});
 
 window.addEventListener("hashchange", () => {
   if (location.hash === "#signin") { if (auth.status !== "signedIn") openSignIn(); }
@@ -5220,7 +5242,7 @@ SL.setAuth({ status: "unconfigured" });
     try {
       const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js");
       const {
-        getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+        getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged,
         signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail,
       } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js");
       const { getFirestore, doc, onSnapshot, setDoc, serverTimestamp } =
@@ -5232,7 +5254,18 @@ SL.setAuth({ status: "unconfigured" });
 
       // these reject with the Firebase error; the sign-in page turns codes into readable text
       const providers = {
-        signIn: () => signInWithPopup(auth, new GoogleAuthProvider()),
+        signIn: () =>
+          signInWithPopup(auth, new GoogleAuthProvider()).catch((err) => {
+            // phones often block the popup; the redirect flow is the reliable path there
+            const fallback = [
+              "auth/popup-blocked",
+              "auth/popup-closed-by-user",
+              "auth/operation-not-supported-in-this-environment",
+              "auth/cancelled-popup-request",
+            ];
+            if (fallback.includes(err.code)) return signInWithRedirect(auth, new GoogleAuthProvider());
+            throw err;
+          }),
         signInEmail: (email, password) => signInWithEmailAndPassword(auth, email, password),
         createAccount: (email, password) => createUserWithEmailAndPassword(auth, email, password),
         resetPassword: (email) => sendPasswordResetEmail(auth, email),
@@ -5303,5 +5336,33 @@ SL.setAuth({ status: "unconfigured" });
     }
   }
 </script>
+<script>
+(function(){
+  var KEY = "snakelist.theme";
+  // stamp both the document root and the app root: the app's palette lives on .sl-root,
+  // while html carries the colour behind the app when the page overscrolls
+  var targets = [document.documentElement, document.querySelector(".sl-root")].filter(Boolean);
+  function read(){ try { return localStorage.getItem(KEY); } catch(e){ return null; } }
+  function paint(mode){
+    targets.forEach(function(el){
+      if (mode === "dark") el.setAttribute("data-sl-theme", "dark");
+      else el.removeAttribute("data-sl-theme");
+    });
+    var btn = document.getElementById("theme-btn");
+    if (btn) btn.setAttribute("aria-pressed", mode === "dark" ? "true" : "false");
+  }
+  var saved = read();
+  paint(saved || (window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+  var btn = document.getElementById("theme-btn");
+  if (btn) btn.addEventListener("click", function(){
+    var now = document.documentElement.getAttribute("data-sl-theme") === "dark" ? "light" : "dark";
+    paint(now);
+    try { localStorage.setItem(KEY, now); } catch(e){}
+  });
+})();
+
+</script>
+
 </body>
 </html>
