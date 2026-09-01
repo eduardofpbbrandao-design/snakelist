@@ -175,7 +175,8 @@
     pointer-events: none; z-index: 5; border-radius: inherit; background: var(--done-wash);
     animation: seen-flash-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
   }
-  .seen-flash svg { color: var(--gold); filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35)); }
+  .seen-flash svg { color: var(--gold); filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35)); overflow: visible; }
+  .seen-flash-tick { stroke-dasharray: 46; stroke-dashoffset: 46; animation: tick-draw 0.22s 0.08s cubic-bezier(.6,0,.3,1) forwards; }
   @keyframes seen-flash-pop {
     0% { opacity: 0; transform: scale(0.4); }
     40% { opacity: 1; transform: scale(1.15); }
@@ -502,7 +503,7 @@
   .heat-panel[hidden] { display: none; }
   .heat-search { margin-bottom: 10px; }
   .heat-caption { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text-muted);
-    margin: 0 0 12px; }
+    display: inline-block; vertical-align: middle; margin: 0 10px 12px 0; }
 
   .globe-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
   .globe-row .globe-stage { flex: 1 1 60%; min-width: 0; margin-bottom: 0; }
@@ -544,7 +545,9 @@
     cursor: pointer; }
   .globe-zoom button:hover { background: rgba(255,255,255,0.92); color: #10375f; }
   .globe-hint { position: absolute; left: 12px; bottom: 10px; margin: 0; pointer-events: none;
-    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(255,255,255,0.55); }
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #fff;
+    padding: 4px 9px; border-radius: 999px; background: rgba(0,0,0,0.55);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
   .globe-busy { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
     font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.55); }
 
@@ -553,13 +556,15 @@
 
   .country-panel { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px 16px; margin-top: 14px; }
   .country-panel[hidden] { display: none; }
+  @keyframes cp-pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .cp-pop { animation: cp-pop 0.22s ease-out; }
   .cp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .cp-head h3 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 17px; margin: 0; }
   .cp-title-place { color: var(--map-on); }
   .cp-close { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text);
     cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; padding: 5px 10px; }
   .cp-close:hover { border-color: var(--gold-soft); }
-  .cp-sub { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text-muted); margin: 4px 0 12px; }
+  .cp-sub { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--gold-soft); margin: 4px 0 12px; }
   .cp-list { max-height: 340px; overflow-y: auto; display: grid; gap: 2px;
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
   .cp-row { padding: 5px 8px; border-radius: 7px; }
@@ -569,7 +574,10 @@
      naming a species instead (inside one clicked country) keeps the normal text color */
   .cp-row-country b { color: var(--map-on); }
   .cp-row i { font-family: 'JetBrains Mono', monospace; font-style: italic; font-size: 10.5px; color: var(--text-muted); }
-  .cp-row.intro b::after { content: " · invasive here"; color: var(--rust); font-weight: 600; }
+  .cp-row.cp-intro b::after { content: " · invasive here"; color: var(--rust); font-weight: 600; }
+  .cp-states { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .cp-state-pill { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; padding: 1px 7px;
+    border-radius: 999px; border: 1px dashed var(--gold-soft); color: var(--gold-soft); }
 
   body.tab-map #grid, body.tab-ach #grid, body.tab-quiz #grid { display: none; }
 
@@ -611,6 +619,7 @@
   .ach-toast-calendar { animation-name: ach-toast-flip, ach-toast-out; transform-origin: top center; }
   .ach-toast-camera { animation-name: ach-toast-fade, ach-toast-out; }
   .ach-toast-star { animation-name: ach-toast-spin, ach-toast-out; }
+  .ach-toast-quiz { animation-name: ach-toast-wobble, ach-toast-out; }
   .ach-toast-flash { position: absolute; inset: 0; background: #fff; pointer-events: none;
     animation: ach-toast-flash-pop 0.5s ease-out; }
   @keyframes ach-toast-pop {
@@ -632,6 +641,13 @@
     70% { opacity: 1; transform: scale(1.1) rotate(8deg); }
     100% { opacity: 1; transform: scale(1) rotate(0deg); }
   }
+  @keyframes ach-toast-wobble {
+    0% { opacity: 0; transform: translateX(24px) rotate(0deg); }
+    30% { opacity: 1; transform: translateX(0) rotate(-6deg); }
+    50% { transform: rotate(5deg); }
+    70% { transform: rotate(-3deg); }
+    100% { transform: rotate(0deg); }
+  }
   @keyframes ach-toast-out { to { opacity: 0; transform: translateX(24px) scale(0.9); } }
   @media (prefers-reduced-motion: reduce) {
     .ach-toast, .ach-toast-flash { animation: none; }
@@ -642,9 +658,13 @@
   body.map-full { overflow: hidden; }
   .globe-stage.full .country-panel { position: absolute; left: 14px; bottom: 14px; margin: 0;
     width: min(430px, 44vw); max-height: 56vh; overflow: auto; z-index: 4;
-    background: rgba(8,16,28,0.92); border-color: rgba(255,255,255,0.16); }
+    background: rgba(8,16,28,0.92); border-color: rgba(255,255,255,0.16);
+    backdrop-filter: blur(8px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  @media (max-width: 640px) {
+    .globe-stage.full .country-panel { left: 10px; right: 10px; bottom: 10px; width: auto; max-height: 42vh; }
+  }
   .globe-stage.full .cp-head h3, .globe-stage.full .cp-row b { color: #f2f6fa; }
-  .globe-stage.full .cp-sub, .globe-stage.full .cp-row i { color: rgba(255,255,255,0.6); }
+  .globe-stage.full .cp-row i { color: rgba(255,255,255,0.6); }
   .globe-stage.full .cp-row:nth-child(odd) { background: rgba(255,255,255,0.06); }
   .globe-stage.full .cp-close { color: #f2f6fa; border-color: rgba(255,255,255,0.25); }
   .globe-stage.full .heat-search { position: absolute; top: 12px; left: 50%;
@@ -654,14 +674,17 @@
   .globe-stage.full .heat-search input { color: #f2f6fa; }
   .globe-stage.full .heat-search input::placeholder { color: rgba(255,255,255,0.55); }
   .globe-stage.full .heat-search svg { color: rgba(255,255,255,0.6); }
-  .all-countries { display: inline-flex; align-items: center; font-family: 'Inter', sans-serif;
-    font-size: 12.5px; font-weight: 500; padding: 7px 13px; margin: 0 0 12px; border-radius: 9px;
-    border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
-  .all-countries:hover { border-color: var(--gold-soft); color: var(--gold); }
+  .all-countries { display: inline-flex; align-items: center; vertical-align: middle; font-family: 'Inter', sans-serif;
+    font-size: 12.5px; font-weight: 500; padding: 7px 13px; margin: 0 8px 12px 0; border-radius: 9px;
+    border: 1px solid var(--gold-soft); background: var(--surface); color: var(--gold-soft); cursor: pointer; }
+  .all-countries:hover { border-color: var(--gold); color: var(--gold); }
   .all-countries[hidden] { display: none; }
   .globe-stage.full .all-countries { position: absolute; top: 58px; left: 50%;
     transform: translateX(-50%); z-index: 5; margin: 0;
-    background: rgba(10,20,32,0.82); border-color: rgba(255,255,255,0.22); color: #f2f6fa; }
+    background: rgba(10,20,32,0.82); border-color: var(--gold-soft); color: var(--gold-soft); }
+  .globe-stage.full .see-species { position: absolute; top: 100px; left: 50%;
+    transform: translateX(-50%); z-index: 5; margin: 0;
+    background: rgba(10,20,32,0.82); border-color: var(--gold-soft); color: var(--gold-soft); }
 
   .quiz-panel { max-width: 640px; margin: 0 auto; }
   .quiz-panel[hidden] { display: none; }
@@ -705,10 +728,13 @@
   .quiz-result.right { background: var(--done-wash); color: var(--text); }
   .quiz-result.wrong { background: var(--rust-soft); color: var(--text); }
   .quiz-result b { display: block; font-family: 'Fraunces', serif; font-size: 15px; margin-bottom: 4px; }
-  .quiz-next { margin-top: 10px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+  .quiz-result-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .quiz-next, .quiz-see-map { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
     padding: 8px 16px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface);
     color: var(--text); cursor: pointer; }
-  .quiz-next:hover { border-color: var(--gold-soft); }
+  .quiz-next:hover, .quiz-see-map:hover { border-color: var(--gold-soft); }
+  .quiz-city-fact { margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+  .quiz-city-fact:empty { display: none; }
 
 
   .map-count { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text-muted); margin: 10px 0 8px; }
@@ -828,7 +854,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v1.48</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v1.55</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen &mdash; on every device you open this on.</p>
     </header>
@@ -5196,6 +5222,7 @@
       </div>
       <p class="heat-caption" id="heat-caption"></p>
       <button class="all-countries" id="all-countries" type="button" hidden></button>
+      <button class="all-countries see-species" id="see-species" type="button" hidden>See species</button>
       <div class="globe-row" id="globe-row">
         <div class="globe-stage" id="globe-stage">
           <canvas id="globe" width="900" height="620" aria-label="Map of where snake species live"></canvas>
@@ -5205,7 +5232,7 @@
             <button type="button" id="globe-reset" aria-label="Reset the view">&#8635;</button>
             <button type="button" id="globe-full" aria-label="Full screen">&#9910;</button>
           </div>
-          <p class="globe-hint">Drag to pan, scroll to zoom, click a country</p>
+          <p class="globe-hint">Drag to explore &middot; scroll to zoom &middot; click any country</p>
         </div>
         <div class="country-panel" id="country-panel" hidden>
           <div class="cp-head"><h3 id="cp-title"></h3><button class="cp-close" id="cp-close" type="button">Close</button></div>
@@ -5230,12 +5257,13 @@
             <b>Hard</b><span>Countries, exact &middot; 12s</span>
           </button>
         </div>
-        <p class="quiz-note">City-level questions aren&rsquo;t available yet &mdash; every level asks about countries.</p>
+        <p class="quiz-note">Questions ask for countries, or real US states for species with sourced state data. After you answer, we also show which city has the most documented sightings, live from iNaturalist.</p>
       </div>
       <div class="quiz-play" id="quiz-play" hidden>
         <div class="quiz-head">
           <span class="quiz-level-tag" id="quiz-level-tag"></span>
           <span class="quiz-score" id="quiz-score"></span>
+          <button class="quiz-quit" id="quiz-redo" type="button">Redo quiz</button>
           <button class="quiz-quit" id="quiz-quit" type="button">Change difficulty</button>
         </div>
         <div class="quiz-timer-track"><div class="quiz-timer-fill" id="quiz-timer-fill"></div></div>
@@ -8445,6 +8473,7 @@
     calendar: SVG('<rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path>', 16),
     star: SVG('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>', 16),
     check: SVG('<path d="M20 6 9 17l-5-5"></path>', 16),
+    quiz: SVG('<circle cx="12" cy="12" r="9"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path>', 16),
   };
 
   let tab = "guide";
@@ -8519,7 +8548,11 @@
     } else {
       const flash = document.createElement("div");
       flash.className = "seen-flash";
-      flash.innerHTML = '<svg viewBox="0 0 24 24" width="56" height="56"><use href="#i-check"></use></svg>';
+      // the exact same tick path and "drawing" stroke used by the SnakeList wordmark's own
+      // checkmark, so marking a species seen echoes the logo instead of a generic icon
+      flash.innerHTML = '<svg viewBox="5.6 0.3 36.9 36.0" width="64" height="64">' +
+        '<path class="seen-flash-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" ' +
+        'fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"></path></svg>';
       flash.addEventListener("animationend", () => flash.remove());
       card.appendChild(flash);
       setTimeout(() => flash.remove(), 600); // backup in case prefers-reduced-motion skips the animation entirely
@@ -8664,6 +8697,9 @@
   // Badges are read straight off the list: nothing is stored, so they cannot fall out of
   // step with what has actually been ticked.
   const BADGE_TIERS = [1, 3, 5, 10, 20, 30, 50, 100, 500, 1000, 4000, TOTAL];
+  // Full record gets its own tier ladder (explicitly requested: x3/x5/x10/x20/x50/x100/x400/x500/x1000/x4277)
+  // instead of reusing BADGE_TIERS, so the other categories keep their existing tiers untouched.
+  const FULL_RECORD_TIERS = [1, 3, 5, 10, 20, 50, 100, 400, 500, 1000, TOTAL];
   const BADGE_CATEGORIES = [
     { statKey: "seen", label: "Mark seen", verb: "Mark", icon: "check" },
     { statKey: "dated", label: "Log the date", verb: "Write the date for", icon: "calendar" },
@@ -8685,12 +8721,34 @@
       });
     });
   });
+  FULL_RECORD_TIERS.forEach((n) => {
+    BADGES.push({
+      name: "Full record" + (n === 1 ? "" : " ×" + n.toLocaleString()),
+      note: n === 1
+        ? "Mark a species seen, then add both a photo and a date for that same species."
+        : n === TOTAL
+          ? "Do that (seen, dated, and photographed) for all " + TOTAL.toLocaleString() + " species."
+          : "Do that (seen, dated, and photographed) for " + n.toLocaleString() + " species.",
+      goal: n,
+      statKey: "fullyLogged",
+      icon: "star",
+    });
+  });
+  BADGE_TIERS.forEach((n) => {
+    BADGES.push({
+      name: "Quiz whiz" + (n === 1 ? "" : " ×" + n.toLocaleString()),
+      note: n === 1 ? "Answer a quiz question correctly." : "Answer " + n.toLocaleString() + " quiz questions correctly.",
+      goal: n,
+      statKey: "quizCorrect",
+      icon: "quiz",
+    });
+  });
   BADGES.push({
-    name: "Full record",
-    note: "Mark a species seen, then add both a photo and a date for that same species.",
+    name: "Lose a question",
+    note: "Get a quiz question wrong (or run out of time). Everyone misses one eventually.",
     goal: 1,
-    statKey: "fullyLogged",
-    icon: "star",
+    statKey: "quizWrong",
+    icon: "quiz",
   });
 
   function computeStats() {
@@ -8704,7 +8762,17 @@
       if (hasPhoto) s.photographed++;
       if (hasDate && hasPhoto) s.fullyLogged++;
     });
+    try {
+      s.quizCorrect = +localStorage.getItem("sl-quiz-correct") || 0;
+      s.quizWrong = +localStorage.getItem("sl-quiz-wrong") || 0;
+    } catch (err) { s.quizCorrect = 0; s.quizWrong = 0; }
     return s;
+  }
+  function bumpQuizStat(key) {
+    try {
+      var k = "sl-quiz-" + key;
+      localStorage.setItem(k, (+localStorage.getItem(k) || 0) + 1);
+    } catch (err) {}
   }
 
   // tracks which badges were already won, so a fresh unlock can be toasted exactly once -
@@ -9457,23 +9525,39 @@
     document.getElementById("quiz-level-tag").textContent = level;
     nextQuizQuestion();
   }
+  const QUIZ_WRONG_MESSAGES = [
+    "Not quite.", "Oops, not quite.", "Close, but no.", "Nope — nice try though.",
+    "Even I wouldn't have guessed that one.", "That's not it.", "Not this time.",
+  ];
+  const QUIZ_EXAMPLES = ["Mexico", "Brazil", "India", "Indonesia"];
   function nextQuizQuestion() {
     stopQuizTimer();
     quizAnswered = false;
-    const card = QUIZ_POOL[Math.floor(Math.random() * QUIZ_POOL.length)];
+    const statePool = quizLevel === "hard" ? QUIZ_POOL.filter((c) => c.getAttribute("data-states")) : [];
+    // hard mode asks for real US states when it can - the one place we have verified,
+    // sourced sub-country data - and falls back to countries for species without it
+    const useStates = statePool.length && Math.random() < 0.6;
+    const pool = useStates ? statePool : QUIZ_POOL;
+    const card = pool[Math.floor(Math.random() * pool.length)];
     const countries = card.dataset.countries.split("|").filter(Boolean);
+    const states = (card.getAttribute("data-states") || "").split("|").filter(Boolean);
+    const answerKind = useStates ? "state" : "country";
+    const rawAnswers = useStates ? states.map((code) => (window.STATE_NAME && window.STATE_NAME[code]) || code) : countries;
     // easy always asks for just one; medium/hard ask for two when the species actually
     // has two or more, so "harder" mostly means less time plus more often needing both
-    const need = quizLevel === "easy" ? 1 : Math.min(2, countries.length);
-    quizCurrent = { name: card.querySelector(".card-name").textContent, sci: card.querySelector(".card-sci").textContent, countries, need, card };
+    const need = quizLevel === "easy" ? 1 : Math.min(2, rawAnswers.length);
+    quizCurrent = { name: card.querySelector(".card-name").textContent, sci: card.querySelector(".card-sci").textContent,
+      countries, states, answers: rawAnswers, answerKind, need, card };
     document.getElementById("quiz-question").textContent =
-      need === 1 ? "Which country is the " + quizCurrent.name + " found in?"
-                 : "Name " + need + " countries where the " + quizCurrent.name + " is found.";
+      need === 1 ? "Which " + answerKind + " is the " + quizCurrent.name + " found in?"
+                 : "Name " + need + " " + answerKind + "s where the " + quizCurrent.name + " is found.";
     document.getElementById("quiz-sci").textContent = quizCurrent.sci;
-    document.getElementById("quiz-answers").innerHTML = Array.from({ length: need }, (_, i) =>
-      '<label class="quiz-answer-field"><span>Country' + (need > 1 ? " " + (i + 1) : "") + '</span>' +
-      '<input type="text" class="quiz-answer-input" autocomplete="off" placeholder="e.g. Mexico"></label>'
-    ).join("");
+    document.getElementById("quiz-answers").innerHTML = Array.from({ length: need }, (_, i) => {
+      const label = answerKind === "state" ? "State" : "Country";
+      const example = useStates ? ["Arizona", "Texas"][i] || "Arizona" : QUIZ_EXAMPLES[i] || QUIZ_EXAMPLES[0];
+      return '<label class="quiz-answer-field"><span>' + label + (need > 1 ? " " + (i + 1) : "") + "</span>" +
+        '<input type="text" class="quiz-answer-input" autocomplete="off" placeholder="e.g. ' + example + '"></label>';
+    }).join("");
     document.getElementById("quiz-result").hidden = true;
     document.getElementById("quiz-submit").hidden = false;
     document.getElementById("quiz-submit").disabled = false;
@@ -9481,16 +9565,26 @@
     const firstInput = document.querySelector(".quiz-answer-input");
     if (firstInput) firstInput.focus();
     quizTimeLeft = QUIZ_TIME[quizLevel];
-    updateQuizTimerBar();
+    updateQuizTimerBar(true);
     quizTimerId = setInterval(() => {
       quizTimeLeft--;
-      updateQuizTimerBar();
+      updateQuizTimerBar(false);
       if (quizTimeLeft <= 0) submitQuizAnswer(true);
     }, 1000);
   }
-  function updateQuizTimerBar() {
+  function updateQuizTimerBar(reset) {
     const fill = document.getElementById("quiz-timer-fill");
     const pct = Math.max(0, (quizTimeLeft / QUIZ_TIME[quizLevel]) * 100);
+    if (reset) {
+      // a fresh question means the bar should already BE full, not visibly animate up to
+      // full from wherever the last question left it - so the transition is skipped once
+      fill.style.transition = "none";
+      fill.style.width = pct + "%";
+      fill.classList.remove("low");
+      void fill.offsetWidth; // force layout so the "none" transition actually takes hold
+      fill.style.transition = "";
+      return;
+    }
     fill.style.width = pct + "%";
     fill.classList.toggle("low", quizTimeLeft <= Math.ceil(QUIZ_TIME[quizLevel] * 0.25));
   }
@@ -9500,31 +9594,61 @@
     stopQuizTimer();
     const inputs = [].slice.call(document.querySelectorAll(".quiz-answer-input"));
     const given = inputs.map((i) => i.value.trim().toLowerCase()).filter(Boolean);
-    const validLower = quizCurrent.countries.map((c) => c.toLowerCase());
+    const validLower = quizCurrent.answers.map((c) => c.toLowerCase());
     const matched = new Set();
     given.forEach((g) => { if (validLower.includes(g)) matched.add(g); });
     const correct = !timedOut && matched.size >= quizCurrent.need;
     quizScore.total++;
     if (correct) quizScore.right++;
+    bumpQuizStat(correct ? "correct" : "wrong");
+    checkNewBadges(computeStats());
     document.getElementById("quiz-score").textContent = quizScore.right + " / " + quizScore.total + " correct";
     const result = document.getElementById("quiz-result");
     result.hidden = false;
     result.className = "quiz-result " + (correct ? "right" : "wrong");
-    result.innerHTML = "<b>" + (timedOut ? "Time's up!" : correct ? "Correct!" : "Not quite.") + "</b>" +
-      'Lives in: <span class="quiz-lives-in">' + quizCurrent.countries.join(", ") + "</span> (see it colored in on the map)" +
-      '<div><button class="quiz-next" id="quiz-next" type="button">Next question</button></div>';
+    const headline = timedOut ? "Time's up!" : correct ? "Correct!"
+      : QUIZ_WRONG_MESSAGES[Math.floor(Math.random() * QUIZ_WRONG_MESSAGES.length)];
+    result.innerHTML = "<b>" + headline + "</b>" +
+      "Lives in: " + '<span class="quiz-lives-in">' + quizCurrent.answers.join(", ") + "</span>" +
+      '<div id="quiz-city-fact" class="quiz-city-fact"></div>' +
+      '<div class="quiz-result-actions"><button class="quiz-see-map" id="quiz-see-map" type="button">See countries</button>' +
+      '<button class="quiz-next" id="quiz-next" type="button">Next question</button></div>';
     document.getElementById("quiz-submit").hidden = true;
     document.getElementById("quiz-next").addEventListener("click", nextQuizQuestion);
-    // reveal the real answer on the same "where this snake lives" map used elsewhere in
-    // the app, colored in exactly like the original request asked for
-    if (window.showMapSheet && quizCurrent.card) window.showMapSheet(quizCurrent.card);
+    // shows the real answer on the same "where this snake lives" map used elsewhere in the
+    // app - only when asked now, instead of popping open on its own every time
+    document.getElementById("quiz-see-map").addEventListener("click", () => {
+      if (window.showMapSheet && quizCurrent.card) window.showMapSheet(quizCurrent.card);
+    });
+    // a live bonus fact - which city has the most documented sightings - for species with
+    // real state data, using the same iNaturalist lookup as the checklist search
+    if (quizCurrent.states.length && window.STATE_CITIES) {
+      var sci = quizCurrent.sci, fact = document.getElementById("quiz-city-fact");
+      var cities = [];
+      quizCurrent.states.forEach((code) => { (window.STATE_CITIES[code] || []).forEach((c) => cities.push(c)); });
+      fact.textContent = "Checking which city has the most sightings…";
+      Promise.all(cities.map((c) =>
+        fetch("https://api.inaturalist.org/v1/observations?taxon_name=" + encodeURIComponent(sci) +
+          "&lat=" + c[1] + "&lng=" + c[2] + "&radius=25&per_page=0")
+          .then((r) => r.json()).then((d) => ({ city: c[0], count: d.total_results || 0 }))
+          .catch(() => ({ city: c[0], count: 0 }))
+      )).then((results) => {
+        if (document.getElementById("quiz-city-fact") !== fact) return; // question already moved on
+        const top = results.sort((a, b) => b.count - a.count)[0];
+        fact.textContent = top && top.count
+          ? "Most documented sightings: " + top.city + " (" + top.count.toLocaleString() + ", live from iNaturalist)"
+          : "";
+      });
+    }
   }
+  function redoQuiz() { startQuiz(quizLevel); }
 
   document.getElementById("tab-quiz").addEventListener("click", () => { tab = "quiz"; refresh(); });
   document.querySelectorAll(".quiz-level-btn").forEach((btn) => {
     btn.addEventListener("click", () => startQuiz(btn.dataset.level));
   });
   document.getElementById("quiz-quit").addEventListener("click", showQuizLevels);
+  document.getElementById("quiz-redo").addEventListener("click", redoQuiz);
   document.getElementById("quiz-submit").addEventListener("click", () => submitQuizAnswer(false));
   document.getElementById("quiz-answers").addEventListener("keydown", (e) => {
     if (e.key === "Enter") { e.preventDefault(); submitQuizAnswer(false); }
@@ -9631,6 +9755,7 @@
   // real, sourced state-level range - only for the subset of US species it's been
   // researched for; everyone else still shows the plain country the data actually has
   var STATE_NAME = {AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming"};
+  window.STATE_NAME = STATE_NAME; // the quiz (a separate script block) needs this too
 
   function show(card) {
     var names = (card.getAttribute("data-countries") || "").split("|").filter(Boolean);
@@ -10092,12 +10217,10 @@
     }
     if (selected) {
       shapePath(to, function (r) { return r.code === selected; }, stride);
-      // filled solid (not just outlined) so a clicked country reads the same forest green
-      // as a highlighted one in the "See countries" modal, just stronger
-      ctx.globalAlpha = 0.75;
+      // fully opaque, so this is the exact same solid color as the "See countries" modal's
+      // fill - any transparency here would blend with the land underneath and look different
       ctx.fillStyle = onColor;
       ctx.fill();
-      ctx.globalAlpha = 1;
       ctx.strokeStyle = "rgba(255,255,255,0.95)";
       ctx.lineWidth = 1.6;
       ctx.lineJoin = "round";
@@ -10190,6 +10313,16 @@
     return null;
   }
 
+  // every place that reveals the country panel replays this same little pop-in, so the
+  // panel reads as one deliberate piece of UI instead of just snapping into existence
+  function popPanel() {
+    var panel = document.getElementById("country-panel");
+    panel.hidden = false;
+    panel.classList.remove("cp-pop");
+    void panel.offsetWidth;
+    panel.classList.add("cp-pop");
+  }
+
   function fillPanel(code) {
     var list = ((BYCODE && BYCODE[code]) || []).slice();
     var extra = [];
@@ -10212,12 +10345,21 @@
       (extra.length ? " (" + extra.length + " introduced)" : "");
     var rows = list.map(function (sp) { return [sp, false]; }).concat(extra.map(function (sp) { return [sp, true]; }));
     rows.sort(function (a, b) { return a[0].name.localeCompare(b[0].name); });
+    // for the US, sourced state-level range beats the blanket country - the same states
+    // shown in the "See countries" sheet, surfaced here too instead of just living in the data
     document.getElementById("cp-list").innerHTML = rows.length
       ? rows.map(function (r) {
-          return '<div class="cp-row' + (r[1] ? " intro" : "") + '"><b>' + r[0].name + "</b><i>" + r[0].sci + "</i></div>";
+          var sp = r[0];
+          var statesHtml = (code === "us" && sp.states && sp.states.length)
+            ? '<div class="cp-states">' + sp.states.map(function (sc) {
+                return '<span class="cp-state-pill">' + ((window.STATE_NAME && window.STATE_NAME[sc]) || sc) + "</span>";
+              }).join("") + "</div>"
+            : "";
+          return '<div class="cp-row' + (r[1] ? " cp-intro" : "") + '"><b>' + sp.name + "</b><i>" + sp.sci + "</i>" + statesHtml + "</div>";
         }).join("")
       : '<div class="cp-row"><b>No species recorded here.</b></div>';
-    document.getElementById("country-panel").hidden = false;
+    popPanel();
+    document.getElementById("see-species").hidden = false;
   }
 
   // A marker is a place, not a country, so it gets its own answer: these species live here
@@ -10226,22 +10368,23 @@
     var cpTitle = document.getElementById("cp-title");
     cpTitle.textContent = pin.area;
     cpTitle.classList.add("cp-title-place");
+    document.getElementById("see-species").hidden = true;
     if (pin.cityDot) {
       document.getElementById("cp-sub").textContent =
         pin.count.toLocaleString() + (pin.count === 1 ? " documented sighting" : " documented sightings") +
         " of " + pin.speciesName + " within 25 miles";
       document.getElementById("cp-list").innerHTML =
         '<div class="cp-row"><b>Live count from iNaturalist</b><i>Citizen-science observations, not a verified population count. Darker dots on the map mean more documented sightings.</i></div>';
-      document.getElementById("country-panel").hidden = false;
+      popPanel();
       return;
     }
     document.getElementById("cp-sub").textContent = pin.species.length === 1
       ? pin.species[0].name + " is an invasive species here — this is outside its native range."
       : pin.species.length + " invasive species live here, none of them native.";
     document.getElementById("cp-list").innerHTML = pin.species.map(function (sp) {
-      return '<div class="cp-row intro"><b>' + sp.name + "</b><i>" + sp.sci + "</i></div>";
+      return '<div class="cp-row cp-intro"><b>' + sp.name + "</b><i>" + sp.sci + "</i></div>";
     }).join("");
-    document.getElementById("country-panel").hidden = false;
+    popPanel();
   }
 
   function listCountries() {
@@ -10255,12 +10398,12 @@
     document.getElementById("cp-list").innerHTML = names.map(function (n) {
       return '<div class="cp-row cp-row-country"><b>' + n + "</b><i>" + tally[n] + " species</i></div>";
     }).join("");
-    var panel = document.getElementById("country-panel");
-    panel.hidden = false;
+    popPanel();
     // the button did its job - once the list is up, showing it again would just re-run
     // the same thing, so it steps aside instead of sitting there doing nothing useful
     document.getElementById("all-countries").hidden = true;
-    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("see-species").hidden = true;
+    document.getElementById("country-panel").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   // ---- interaction --------------------------------------------------------------------------
@@ -10293,7 +10436,8 @@
         fillArea(pin);
       } else {
         selected = at(mx, my);
-        if (selected) fillPanel(selected); else document.getElementById("country-panel").hidden = true;
+        if (selected) fillPanel(selected);
+        else { document.getElementById("country-panel").hidden = true; document.getElementById("see-species").hidden = true; }
       }
     }
     drag = null;
@@ -10317,11 +10461,17 @@
   document.getElementById("globe-reset").addEventListener("click", function () {
     lon0 = 10; lat0 = 18; fz = 1; fx = 0; fy = 0; selected = null;
     document.getElementById("country-panel").hidden = true;
+    document.getElementById("see-species").hidden = true;
     invalidate();
   });
   document.getElementById("all-countries").addEventListener("click", listCountries);
+  document.getElementById("see-species").addEventListener("click", function () {
+    document.getElementById("country-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
   document.getElementById("cp-close").addEventListener("click", function () {
-    selected = null; document.getElementById("country-panel").hidden = true; invalidate();
+    selected = null; document.getElementById("country-panel").hidden = true;
+    document.getElementById("see-species").hidden = true;
+    invalidate();
   });
 
   // Full screen uses a class rather than the Fullscreen API, which an embedded page is often
@@ -10331,6 +10481,7 @@
   var searchBox = document.querySelector(".heat-search");
   var searchHome = searchBox ? searchBox.parentNode : null;
   var allBtn = document.getElementById("all-countries");
+  var seeSpeciesBtn = document.getElementById("see-species");
   function setFull(on) {
     full = on;
     stage.classList.toggle("full", on);
@@ -10342,11 +10493,13 @@
       stage.appendChild(panel);
       if (searchBox) stage.appendChild(searchBox);
       stage.appendChild(allBtn);
+      stage.appendChild(seeSpeciesBtn);
     } else {
       panelHome.appendChild(panel);
       if (searchBox && searchHome) searchHome.insertBefore(searchBox, searchHome.firstChild);
       var cap = document.getElementById("heat-caption");
       cap.parentNode.insertBefore(allBtn, cap.nextSibling);
+      cap.parentNode.insertBefore(seeSpeciesBtn, allBtn.nextSibling);
     }
     dirty = true;
     invalidate();
