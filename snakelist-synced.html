@@ -540,9 +540,16 @@
     --earth-ice: #dfe9ee;
     --earth-line: #2c4527;
     --earth-hi: #e0a53c;
-    --earth-void: #070d16;
+    --earth-void: #0a1911;
     position: relative; border: 1px solid var(--border); border-radius: 14px;
     overflow: hidden; background: var(--earth-void); margin-bottom: 14px;
+  }
+  /* the space around the map itself (visible briefly while it loads, or at unusual aspect
+     ratios) was flat black regardless of theme - now a dark green distinct from the map's
+     own land/sea colors, darker in light mode and a shade lighter in dark mode */
+  [data-sl-theme="dark"] .globe-stage { --earth-void: #16412a; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-sl-theme="light"]) .globe-stage { --earth-void: #16412a; }
   }
   .globe-stage canvas[hidden] { display: none; }
   .globe-stage canvas { display: block; width: 100%; height: auto; touch-action: none; cursor: grab; }
@@ -879,7 +886,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v1.74</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v1.75</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen &mdash; on every device you open this on.</p>
     </header>
@@ -942,7 +949,7 @@
           <span class="chip" id="chip-popular" role="button" tabindex="0">Popular</span>
           <span class="chip" id="chip-uncommon" role="button" tabindex="0">Uncommon</span>
           <span class="chip" id="chip-exotic" role="button" tabindex="0">Exotic</span>
-          <span class="chip" id="chip-native" role="button" tabindex="0">Native</span>
+          <span class="chip" id="chip-native" role="button" tabindex="0">North American</span>
           <span class="chip venom" id="chip-venom" role="button" tabindex="0">Venomous</span>
           <span class="chip safe" id="chip-nonvenom" role="button" tabindex="0">Non-venomous</span>
           <span class="chip" id="chip-constrictor" role="button" tabindex="0">Constrictor</span>
@@ -8998,7 +9005,7 @@
     document.getElementById("chip-popular").innerHTML = 'Popular <b class="chip-n">' + countWith({ popular: true }).toLocaleString() + '</b>';
     document.getElementById("chip-uncommon").innerHTML = 'Uncommon <b class="chip-n">' + countWith({ uncommon: true, popular: false }).toLocaleString() + '</b>';
     document.getElementById("chip-exotic").innerHTML = 'Exotic <b class="chip-n">' + countWith({ exotic: true }).toLocaleString() + '</b>';
-    document.getElementById("chip-native").innerHTML = 'Native <b class="chip-n">' + countWith({ native: true, exotic: false }).toLocaleString() + '</b>';
+    document.getElementById("chip-native").innerHTML = 'North American <b class="chip-n">' + countWith({ native: true, exotic: false }).toLocaleString() + '</b>';
     document.getElementById("chip-venom").innerHTML = 'Venomous <b class="chip-n">' + countWith({ venom: true, safe: false }).toLocaleString() + '</b>';
     document.getElementById("chip-nonvenom").innerHTML = 'Non-venomous <b class="chip-n">' + countWith({ safe: true, venom: false }).toLocaleString() + '</b>';
     document.getElementById("chip-constrictor").innerHTML = 'Constrictor <b class="chip-n">' + countWith({ constrictor: true, nonConstrictor: false }).toLocaleString() + '</b>';
@@ -9469,6 +9476,7 @@
   Object.keys(STATE_CITIES).forEach((code) => {
     STATE_CITIES[code].forEach((c) => { CITY_INDEX[c[0].toLowerCase()] = { name: c[0], lat: c[1], lng: c[2], state: code }; });
   });
+  window.CITY_INDEX = CITY_INDEX; // the Map tab's own script block (a separate closure) needs this too
   let citySearchToken = 0;
   function updateCitySearch(rawQuery) {
     const city = CITY_INDEX[rawQuery.trim().toLowerCase()];
@@ -9849,7 +9857,8 @@
   var LON0 = 10, KX = 7.6428, X0 = 1377.26 - LON0 * KX, Y0 = 698.79, KY = 697.77;
   var RAD = Math.PI / 180, TAU = 6.283185307;
   var TW = 2048, TH = 1024;                          // working texture, 2:1
-  var MAXZOOM = 4;                                   // past this the imagery has no more to give
+  var MAXZOOM = 10;                                  // country color/borders stay sharp (vector); only
+                                                      // the flat land/sea texture itself softens past here
 
   function tbl(T, lat) {
     var a = Math.abs(lat) / 5, i = Math.floor(a);
@@ -10119,8 +10128,14 @@
   function paint() {
     if (!INDEX) buildIndex();
     var q = hsearch.value.trim().toLowerCase();
+    // an exact city name (same lookup the checklist's own search already uses) jumps
+    // straight to species with sourced range data for that city's state, instead of
+    // running the ordinary species/family/country text search
+    var cityMatch = q && window.CITY_INDEX ? window.CITY_INDEX[q] : null;
     tally = {};
-    matched = q ? INDEX.filter(function (sp) { return sp.text.indexOf(q) >= 0; }) : INDEX;
+    matched = cityMatch
+      ? INDEX.filter(function (sp) { return sp.states.indexOf(cityMatch.state) >= 0; })
+      : q ? INDEX.filter(function (sp) { return sp.text.indexOf(q) >= 0; }) : INDEX;
     matched.forEach(function (sp) {
       sp.countries.forEach(function (n) { tally[n] = (tally[n] || 0) + 1; });
     });
@@ -10134,18 +10149,34 @@
     }
 
     var names = Object.keys(tally);
-    var subject = q ? matched.length.toLocaleString() + " species matching “" + q + "”"
-                    : "all " + matched.length.toLocaleString() + " species";
-    document.getElementById("heat-caption").textContent = matched.length
-      ? subject.charAt(0).toUpperCase() + subject.slice(1) + " · found across " + names.length + " countries"
-      : "Nothing matches that search.";
+    var stateName = cityMatch && ((window.STATE_NAME && window.STATE_NAME[cityMatch.state]) || cityMatch.state);
+    var subject = cityMatch
+      ? matched.length.toLocaleString() + " species with " + stateName + " range data (near " + cityMatch.name + ")"
+      : q ? matched.length.toLocaleString() + " species matching “" + q + "”"
+          : "all " + matched.length.toLocaleString() + " species";
+    document.getElementById("heat-caption").textContent = !matched.length
+      ? "Nothing matches that search."
+      : cityMatch
+        ? subject.charAt(0).toUpperCase() + subject.slice(1)
+        : subject.charAt(0).toUpperCase() + subject.slice(1) + " · found across " + names.length + " countries";
 
     var all = document.getElementById("all-countries");
     all.hidden = !q || !names.length;
     all.textContent = "See all " + names.length + (names.length === 1 ? " country" : " countries");
 
     PINS = [];
-    if (q) {
+    if (cityMatch) {
+      var cphi = cityMatch.lat * RAD, clam = cityMatch.lng * RAD, ccp = Math.cos(cphi);
+      // reuses the exact same rich "cityDot" pin the single-species search already builds
+      // (live per-species sighting counts within 25 miles), just placed directly from a
+      // typed city name instead of requiring the search to narrow to one species first
+      PINS.push({
+        area: cityMatch.name, lon: cityMatch.lng, lat: cityMatch.lat, species: [],
+        v: [ccp * Math.cos(clam), ccp * Math.sin(clam), Math.sin(cphi)],
+        cityDot: true, state: cityMatch.state,
+      });
+    }
+    if (q && !cityMatch) {
       var placed = {};
       matched.forEach(function (sp) {
         (INTRODUCED[sp.id] || []).forEach(function (p) {
@@ -10165,7 +10196,7 @@
     // cities as dots too, darker green where iNaturalist shows more documented sightings
     // and lighter where it shows fewer, so e.g. Tucson vs Phoenix reads as a real color gap
     cityDotToken++;
-    if (q && matched.length === 1 && matched[0].states.length && window.STATE_CITIES) {
+    if (q && !cityMatch && matched.length === 1 && matched[0].states.length && window.STATE_CITIES) {
       (function (sp, myToken) {
         var cities = [];
         sp.states.forEach(function (code) {
@@ -10195,7 +10226,13 @@
       })(matched[0], cityDotToken);
     }
 
-    if (q) faceResults();
+    if (q && !cityMatch) faceResults();
+    // jump straight there and zoom in close, rather than leaving the user to find a single
+    // small pin on the world map themselves after typing an exact city name
+    if (cityMatch) {
+      lon0 = cityMatch.lng; lat0 = cityMatch.lat; fz = Math.max(fz, 7); fx = 0; fy = 0;
+      fillArea(PINS[0]);
+    }
     if (selected) fillPanel(selected);
     invalidate();
   }
@@ -10248,8 +10285,11 @@
   function flatBox() {
     // read the canvas, so a click before the first flat frame still maps correctly
     var w = cv.clientWidth || sizeW, h = cv.clientHeight || sizeH;
-    var dw = w, dh = w / 2;                          // the map is 2:1 and stays 2:1
-    if (dh > h) { dh = h; dw = h * 2; }
+    var dw, dh;                                      // the map is 2:1 and stays 2:1
+    // covers the container instead of just fitting inside it - a container taller than
+    // 2:1 (fullscreen almost always is) used to only fit-by-width and leave the leftover
+    // height as plain black bars top and bottom instead of filling it
+    if (h > w / 2) { dh = h; dw = h * 2; } else { dw = w; dh = w / 2; }
     dw *= fz; dh *= fz;
     var ox = (w - dw) / 2 + fx * dw, oy = (h - dh) / 2 + fy * dh;
     var lox = Math.min(0, w - dw), hox = Math.max(0, w - dw);
