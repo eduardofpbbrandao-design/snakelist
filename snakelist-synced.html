@@ -834,12 +834,27 @@
   .note-actions #note-clear { color: var(--text-muted); }
   .note-actions .primary { background: var(--gold); border-color: var(--gold); color: var(--on-accent); margin-left: auto; }
 
-  .welcome-card { width: min(460px, 100%); }
-  .welcome-row { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 14px; }
-  .welcome-row .ic { flex: 0 0 auto; margin-top: 2px; color: var(--gold); }
-  .welcome-row div { display: flex; flex-direction: column; gap: 2px; }
-  .welcome-row b { font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; color: var(--text); }
-  .welcome-row span { font-family: 'Inter', sans-serif; font-size: 12.5px; color: var(--text-muted); line-height: 1.35; }
+  .tour-layer { position: fixed; inset: 0; z-index: 80; pointer-events: none; }
+  .tour-callout { position: fixed; pointer-events: auto; width: min(270px, calc(100vw - 32px));
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px 16px 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.28); }
+  .tour-step { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--text-muted); margin: 0 0 4px; }
+  .tour-callout h3 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 15.5px; margin: 0 0 6px; }
+  .tour-callout p#tour-text { font-family: 'Inter', sans-serif; font-size: 12.5px; color: var(--text-muted);
+    line-height: 1.4; margin: 0 0 13px; }
+  .tour-actions { display: flex; align-items: center; gap: 8px; }
+  .tour-actions button { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; padding: 7px 12px;
+    border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; }
+  .tour-actions .primary { background: var(--gold); border-color: var(--gold); color: var(--on-accent); margin-left: auto; }
+  .tour-arrow { position: absolute; width: 14px; height: 14px; background: var(--surface);
+    border: 1px solid var(--border); transform: rotate(45deg); }
+  .tour-arrow.pos-left { left: -8px; top: 22px; border-right: none; border-bottom: none; }
+  .tour-arrow.pos-right { right: -8px; top: 22px; border-left: none; border-top: none; }
+  .tour-arrow.pos-top { top: -8px; left: 22px; border-right: none; border-bottom: none; }
+  .tour-arrow.pos-bottom { bottom: -8px; left: 22px; border-left: none; border-top: none; }
+  .tour-highlight { position: relative; z-index: 81; box-shadow: 0 0 0 4px var(--gold), 0 0 0 999px rgba(0,0,0,0.45);
+    border-radius: 10px; }
 
   .empty-state { max-width: 900px; margin: 40px auto; text-align: center; color: var(--text-muted); font-family: 'Fraunces', serif; font-style: italic; font-size: 16px; }
   .empty-state[hidden] { display: none; }
@@ -902,7 +917,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.03</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.04</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen &mdash; on every device you open this on.</p>
     </header>
@@ -5366,32 +5381,15 @@
       </div>
     </div>
   </div>
-  <div class="note-sheet" id="welcome-sheet" role="dialog" aria-modal="true" aria-label="Welcome to SnakeList">
-    <div class="note-card welcome-card">
-      <h2>Welcome to SnakeList</h2>
-      <p class="note-sub">Your life list of serpents, synced across every device you open this on. Here's what each tab does:</p>
-      <div class="welcome-row">
-        <svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg>
-        <div><b>Species Checklist</b><span>Browse every species, search by name/family/country, and mark the ones you've seen.</span></div>
-      </div>
-      <div class="welcome-row">
-        <svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-        <div><b>My Sightings</b><span>Just the species you've already marked seen.</span></div>
-      </div>
-      <div class="welcome-row">
-        <svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"></path><path d="M7 6H4.5A2.5 2.5 0 0 0 7 10.5M17 6h2.5A2.5 2.5 0 0 1 17 10.5"></path><path d="M12 14v3M9 20h6M10 17h4"></path></svg>
-        <div><b>Achievements</b><span>Milestones you unlock as you log sightings, photos, and dates.</span></div>
-      </div>
-      <div class="welcome-row">
-        <svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3c2.5 2.7 3.8 5.8 3.8 9S14.5 18.3 12 21c-2.5-2.7-3.8-5.8-3.8-9S9.5 5.7 12 3z"></path></svg>
-        <div><b>Map</b><span>See where each species lives. Click a country, or search any country or city.</span></div>
-      </div>
-      <div class="welcome-row">
-        <svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg>
-        <div><b>Quiz</b><span>Test what you've learned.</span></div>
-      </div>
-      <div class="note-actions">
-        <button type="button" id="welcome-dismiss" class="primary" style="margin-left:auto">Got it</button>
+  <div class="tour-layer" id="tour-layer" hidden>
+    <div class="tour-callout" id="tour-callout" role="dialog" aria-label="Tour">
+      <div class="tour-arrow" id="tour-arrow"></div>
+      <p class="tour-step" id="tour-step-num"></p>
+      <h3 id="tour-title"></h3>
+      <p id="tour-text"></p>
+      <div class="tour-actions">
+        <button type="button" id="tour-skip">Skip tutorial</button>
+        <button type="button" id="tour-next" class="primary">Next</button>
       </div>
     </div>
   </div>
@@ -8714,26 +8712,87 @@
   noteSheet.addEventListener("click", (e) => { if (e.target === noteSheet) closeNote(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && noteBtn) closeNote(); });
 
-  // a one-time explainer of what the tabs do, shown right after the opening animation on a
-  // device's first-ever visit - gated by localStorage so returning devices never see it again
+  // A one-time spotlight tour of the tabs, shown right after the opening animation on a
+  // device's first-ever visit - gated by localStorage so returning devices never see it again.
+  // Each step highlights the real tab button and points a callout at it, rather than listing
+  // everything in one static box, so "what this does" always has something concrete to point at.
   (() => {
-    const WELCOME_KEY = "sl-welcome-seen";
-    const sheet = document.getElementById("welcome-sheet");
-    if (!sheet) return;
-    function dismiss() {
-      sheet.classList.remove("open");
-      try { localStorage.setItem(WELCOME_KEY, "1"); } catch (err) {}
+    const TOUR_KEY = "sl-tour-seen";
+    const steps = [
+      { sel: "#tab-guide", title: "Species Checklist", text: "Browse every species, search by name, family, or country, and mark the ones you've seen." },
+      { sel: "#tab-sightings", title: "My Sightings", text: "Just the species you've already marked seen." },
+      { sel: "#tab-ach", title: "Achievements", text: "Milestones you unlock as you log sightings, photos, and dates." },
+      { sel: "#tab-map", title: "Map", text: "See where each species lives. Click a country, or search any country or city." },
+      { sel: "#tab-quiz", title: "Quiz", text: "Test what you've learned." },
+    ];
+    const layer = document.getElementById("tour-layer");
+    const callout = document.getElementById("tour-callout");
+    const arrow = document.getElementById("tour-arrow");
+    if (!layer) return;
+    let i = 0, highlighted = null;
+
+    function clearHighlight() {
+      if (highlighted) highlighted.classList.remove("tour-highlight");
+      highlighted = null;
     }
-    function maybeShow() {
+
+    function place() {
+      const step = steps[i];
+      const target = document.querySelector(step.sel);
+      if (!target) { advance(); return; } // a step whose target isn't in the DOM just gets skipped
+      clearHighlight();
+      target.classList.add("tour-highlight");
+      highlighted = target;
+      document.getElementById("tour-step-num").textContent = "Step " + (i + 1) + " of " + steps.length;
+      document.getElementById("tour-title").textContent = step.title;
+      document.getElementById("tour-text").textContent = step.text;
+      document.getElementById("tour-next").textContent = i === steps.length - 1 ? "Done" : "Next";
+
+      layer.hidden = false;
+      const r = target.getBoundingClientRect();
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const cw = callout.offsetWidth, ch = callout.offsetHeight;
+      // prefer placing to the right of the element; fall back to the left, then below
+      let left, top, dir;
+      if (r.right + 12 + cw < vw - 8) { left = r.right + 12; top = r.top; dir = "left"; }
+      else if (r.left - 12 - cw > 8) { left = r.left - 12 - cw; top = r.top; dir = "right"; }
+      else { left = Math.max(8, Math.min(vw - cw - 8, r.left)); top = r.bottom + 12; dir = "top"; }
+      top = Math.max(8, Math.min(vh - ch - 8, top));
+      callout.style.left = left + "px";
+      callout.style.top = top + "px";
+      arrow.className = "tour-arrow pos-" + dir;
+      if (dir === "left" || dir === "right") {
+        // keeps the arrow pointed at the target's own middle even when the box had to slide
+        // down to stay on screen, instead of always sitting at a fixed spot on the box
+        arrow.style.top = Math.max(14, Math.min(ch - 28, (r.top + r.height / 2) - top - 7)) + "px";
+      }
+    }
+
+    function advance() {
+      i++;
+      if (i >= steps.length) { finish(); return; }
+      place();
+    }
+
+    function finish() {
+      clearHighlight();
+      layer.hidden = true;
+      try { localStorage.setItem(TOUR_KEY, "1"); } catch (err) {}
+    }
+
+    function start() {
       let seen = false;
-      try { seen = !!localStorage.getItem(WELCOME_KEY); } catch (err) {}
-      if (!seen) sheet.classList.add("open");
+      try { seen = !!localStorage.getItem(TOUR_KEY); } catch (err) {}
+      if (seen) return;
+      i = 0;
+      place();
     }
-    if (window.__introDone) maybeShow();
-    else document.addEventListener("sl-intro-done", maybeShow, { once: true });
-    document.getElementById("welcome-dismiss").addEventListener("click", dismiss);
-    sheet.addEventListener("click", (e) => { if (e.target === sheet) dismiss(); });
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && sheet.classList.contains("open")) dismiss(); });
+
+    if (window.__introDone) start();
+    else document.addEventListener("sl-intro-done", start, { once: true });
+    document.getElementById("tour-skip").addEventListener("click", finish);
+    document.getElementById("tour-next").addEventListener("click", advance);
+    window.addEventListener("resize", () => { if (!layer.hidden) place(); });
   })();
 
   document.getElementById("note-clear").addEventListener("click", () => {
