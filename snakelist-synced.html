@@ -834,8 +834,12 @@
   .note-actions #note-clear { color: var(--text-muted); }
   .note-actions .primary { background: var(--gold); border-color: var(--gold); color: var(--on-accent); margin-left: auto; }
 
-  .tour-layer { position: fixed; inset: 0; z-index: 80; pointer-events: none; }
-  .tour-callout { position: fixed; pointer-events: auto; width: min(270px, calc(100vw - 32px));
+  /* positioned in document coordinates (left/top include scrollX/scrollY), not viewport-fixed -
+     a fixed-position dim layer only ever covers one screenful, so on a page taller than the
+     viewport (this one almost always is) everything below the fold stayed undimmed. Sized to
+     the full document height in JS so it always reaches the actual bottom of the page. */
+  .tour-layer { position: absolute; left: 0; top: 0; width: 100%; z-index: 80; pointer-events: none; }
+  .tour-callout { position: absolute; z-index: 82; pointer-events: auto; width: min(270px, calc(100vw - 32px));
     background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
     padding: 14px 16px 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.28); }
   .tour-step { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.04em;
@@ -847,18 +851,27 @@
   .tour-actions button { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; padding: 7px 12px;
     border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; }
   .tour-actions .primary { background: var(--gold); border-color: var(--gold); color: var(--on-accent); margin-left: auto; }
-  .tour-arrow { position: absolute; width: 14px; height: 14px; background: var(--surface);
-    border: 1px solid var(--border); transform: rotate(45deg); }
-  .tour-arrow.pos-left { left: -8px; top: 22px; border-right: none; border-bottom: none; }
-  .tour-arrow.pos-right { right: -8px; top: 22px; border-left: none; border-top: none; }
-  .tour-arrow.pos-top { top: -8px; left: 22px; border-right: none; border-bottom: none; }
-  .tour-arrow.pos-bottom { bottom: -8px; left: 22px; border-left: none; border-top: none; }
-  /* a separate fixed-position box drawn over the target, positioned via JS to match its
-     rect - not a style applied to the target itself, which would get its "dim everywhere
-     outside this box" shadow silently clipped by any scrolling ancestor (the tab row
-     scrolls horizontally on narrow screens) instead of covering the full page */
-  .tour-spotlight { position: fixed; z-index: 81; pointer-events: none; border-radius: 10px;
-    box-shadow: 0 0 0 4px var(--gold), 0 0 0 999px rgba(0,0,0,0.45); transition: left 0.2s, top 0.2s, width 0.2s, height 0.2s; }
+  /* a plain CSS triangle (border trick), not a rotated square - sized to sit entirely inside
+     the gap between the spotlight ring and the callout without touching either one */
+  .tour-arrow { position: absolute; width: 0; height: 0; border: 8px solid transparent; }
+  .tour-arrow.pos-left { left: -8px; top: 22px; border-right-color: var(--surface); }
+  .tour-arrow.pos-right { right: -8px; top: 22px; border-left-color: var(--surface); }
+  .tour-arrow.pos-top { top: -8px; left: 22px; border-bottom-color: var(--surface); }
+  .tour-arrow.pos-bottom { bottom: -8px; left: 22px; border-top-color: var(--surface); }
+  /* four rectangles tiling the page around the target (above/below/left/right of it) rather
+     than one huge box-shadow spread trying to dim "everywhere" from a small rect - a spread
+     radius is a fixed pixel distance, so on a page taller than that radius (nearly always,
+     once there are more than a screenful of cards below the target) the dimming simply ran
+     out before reaching the real bottom of the page. Four plain rectangles always tile the
+     exact remaining area exactly, regardless of how long the page is. */
+  .tour-dim { position: absolute; z-index: 81; pointer-events: none; background: rgba(0,0,0,0.45);
+    transition: left 0.2s, top 0.2s, width 0.2s, height 0.2s; }
+  /* just the ring around the target - the dimming itself is the four rectangles above, so
+     this never needs a shadow large enough to reach the edges of the page, and (being a
+     separate element, not a style on the target) is never clipped by a scrolling ancestor
+     like the tab row (overflow-x: auto, for narrow screens) */
+  .tour-spotlight { position: absolute; z-index: 81; pointer-events: none; border-radius: 10px;
+    box-shadow: 0 0 0 4px var(--gold); transition: left 0.2s, top 0.2s, width 0.2s, height 0.2s; }
 
   .empty-state { max-width: 900px; margin: 40px auto; text-align: center; color: var(--text-muted); font-family: 'Fraunces', serif; font-style: italic; font-size: 16px; }
   .empty-state[hidden] { display: none; }
@@ -921,7 +934,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.07</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.08</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen &mdash; on every device you open this on.</p>
     </header>
@@ -5386,6 +5399,10 @@
     </div>
   </div>
   <div class="tour-layer" id="tour-layer" hidden>
+    <div class="tour-dim" id="tour-dim-top"></div>
+    <div class="tour-dim" id="tour-dim-bottom"></div>
+    <div class="tour-dim" id="tour-dim-left"></div>
+    <div class="tour-dim" id="tour-dim-right"></div>
     <div class="tour-spotlight" id="tour-spotlight"></div>
     <div class="tour-callout" id="tour-callout" role="dialog" aria-label="Tour">
       <div class="tour-arrow" id="tour-arrow"></div>
@@ -8734,8 +8751,21 @@
     const callout = document.getElementById("tour-callout");
     const arrow = document.getElementById("tour-arrow");
     const spotlight = document.getElementById("tour-spotlight");
+    const dimTop = document.getElementById("tour-dim-top");
+    const dimBottom = document.getElementById("tour-dim-bottom");
+    const dimLeft = document.getElementById("tour-dim-left");
+    const dimRight = document.getElementById("tour-dim-right");
     if (!layer) return;
     let i = 0;
+    const GAP = 20; // clear space between the spotlight ring and the callout - the arrow
+                     // lives entirely inside this gap so it never touches either one
+
+    function sizeLayer() {
+      // the layer is positioned in document coordinates (see .tour-layer), not fixed to the
+      // viewport, specifically so a page taller than one screen still gets dimmed all the
+      // way to its real bottom instead of only the first screenful
+      layer.style.height = Math.max(document.documentElement.scrollHeight, document.documentElement.clientHeight) + "px";
+    }
 
     function place() {
       const step = steps[i];
@@ -8750,19 +8780,37 @@
       document.getElementById("tour-next").textContent = i === steps.length - 1 ? "Done" : "Next";
 
       layer.hidden = false;
-      const r = target.getBoundingClientRect();
-      spotlight.style.left = (r.left - 4) + "px";
-      spotlight.style.top = (r.top - 4) + "px";
-      spotlight.style.width = (r.width + 8) + "px";
-      spotlight.style.height = (r.height + 8) + "px";
+      sizeLayer();
+      const vr = target.getBoundingClientRect();       // viewport coordinates, for fit checks
+      const sx = window.scrollX, sy = window.scrollY;
+      const r = { left: vr.left + sx, right: vr.right + sx, top: vr.top + sy, bottom: vr.bottom + sy, width: vr.width, height: vr.height };
+      const pad = 4;
+      spotlight.style.left = (r.left - pad) + "px";
+      spotlight.style.top = (r.top - pad) + "px";
+      spotlight.style.width = (r.width + pad * 2) + "px";
+      spotlight.style.height = (r.height + pad * 2) + "px";
+      // four rectangles tiling everything around the padded target box: full-width bands
+      // above and below it, and two bands exactly as tall as it is to its left and right -
+      // together they cover the whole page with no gap and no reliance on how long it is
+      const pageW = document.documentElement.clientWidth;
+      const pageH = parseFloat(layer.style.height);
+      dimTop.style.left = "0px"; dimTop.style.top = "0px";
+      dimTop.style.width = pageW + "px"; dimTop.style.height = Math.max(0, r.top - pad) + "px";
+      dimBottom.style.left = "0px"; dimBottom.style.top = (r.bottom + pad) + "px";
+      dimBottom.style.width = pageW + "px"; dimBottom.style.height = Math.max(0, pageH - (r.bottom + pad)) + "px";
+      dimLeft.style.left = "0px"; dimLeft.style.top = (r.top - pad) + "px";
+      dimLeft.style.width = Math.max(0, r.left - pad) + "px"; dimLeft.style.height = (r.height + pad * 2) + "px";
+      dimRight.style.left = (r.right + pad) + "px"; dimRight.style.top = (r.top - pad) + "px";
+      dimRight.style.width = Math.max(0, pageW - (r.right + pad)) + "px"; dimRight.style.height = (r.height + pad * 2) + "px";
       const vw = window.innerWidth, vh = window.innerHeight;
       const cw = callout.offsetWidth, ch = callout.offsetHeight;
-      // prefer placing to the right of the element; fall back to the left, then below
+      // prefer placing to the right of the element (in viewport terms); fall back to the
+      // left, then below - fit checks stay in viewport space since that's what's on screen
       let left, top, dir;
-      if (r.right + 12 + cw < vw - 8) { left = r.right + 12; top = r.top; dir = "left"; }
-      else if (r.left - 12 - cw > 8) { left = r.left - 12 - cw; top = r.top; dir = "right"; }
-      else { left = Math.max(8, Math.min(vw - cw - 8, r.left)); top = r.bottom + 12; dir = "top"; }
-      top = Math.max(8, Math.min(vh - ch - 8, top));
+      if (vr.right + GAP + cw < vw - 8) { left = r.right + GAP; top = r.top; dir = "left"; }
+      else if (vr.left - GAP - cw > 8) { left = r.left - GAP - cw; top = r.top; dir = "right"; }
+      else { left = Math.max(sx + 8, Math.min(sx + vw - cw - 8, r.left)); top = r.bottom + GAP; dir = "top"; }
+      top = Math.max(sy + 8, Math.min(sy + vh - ch - 8, top));
       callout.style.left = left + "px";
       callout.style.top = top + "px";
       arrow.className = "tour-arrow pos-" + dir;
