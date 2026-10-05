@@ -427,6 +427,16 @@
      as chips and the rest stay behind a search field. */
   .country-picker { display: flex; flex-direction: column; gap: 7px; }
   .country-empty { font-size: 12.5px; color: var(--text-muted); font-style: italic; }
+  /* the small "See all families" toggle under the Type row, and the family chips it opens */
+  .see-all-btn { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; padding: 3px 2px;
+    background: none; border: none; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+    color: var(--moss); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .see-all-btn:hover { color: var(--gold); }
+  .see-all-btn::after { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform 0.15s ease; }
+  .see-all-btn[aria-expanded="true"]::after { transform: translateY(1px) rotate(-135deg); }
+  .family-row { margin-top: 8px; }
+  .family-row[hidden] { display: none; }
   .place-note { margin: 0; font-size: 11.5px; color: var(--text-muted); max-width: 52ch; }
   .chip.country-chip b { font-weight: 400; opacity: 0.75; margin-left: 4px; }
   .country-field { position: relative; max-width: 280px; }
@@ -1005,7 +1015,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.19</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.20</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen &mdash; on every device you open this on.</p>
     </header>
@@ -1044,6 +1054,8 @@
       <div class="filter-group">
         <p class="filter-label">Type &mdash; pick one</p>
         <div class="chip-row" id="type-chips"></div>
+        <button class="see-all-btn" id="family-toggle" type="button" aria-expanded="false" aria-controls="family-chips">See all families</button>
+        <div class="chip-row family-row" id="family-chips" hidden></div>
       </div>
 
       <div class="filter-group">
@@ -8691,6 +8703,7 @@
   let typeFilter = "All";
   let continentFilters = [];
   let countryFilters = [];
+  let familyFilters = []; // scientific families, e.g. "Typhlopidae" - from each card's family tag
   let placeFilters = [];  // "US:TX", "MX:Sonora" - the same keys data-states/data-provinces use
   let cityFilters = [];   // { key, name, area } - area is a place key above, or "C:<country>"
   const PAGE = 60; // fewer cards rendered into the DOM at once - 300 was a lot to paint/manage
@@ -8714,6 +8727,16 @@
     Other: ["Other", "Sea Snake", "Watersnake"],
   };
   const TYPES = Object.keys(MAIN_TYPE_GROUPS);
+  // a card's family is its tag after the pinned continent and the type (e.g. "Typhlopidae")
+  function familyOf(card) {
+    if (card._family === undefined) {
+      const tags = [].slice.call(card.querySelectorAll(".card-tags .tag:not(.venom)"))
+        .filter((t) => !t.querySelector('use[href="#i-pin"]'));
+      card._family = tags[1] ? tags[1].textContent.trim() : "";
+    }
+    return card._family;
+  }
+  const FAMILIES = [...new Set(cards.map(familyOf))].filter(Boolean).sort();
   const expandTypeGroup = (t) => MAIN_TYPE_GROUPS[t] || [t];
 
   // one-time reverse migration: a later version briefly renamed "type" values to real
@@ -9196,6 +9219,7 @@
   function passes(card, st) {
     if (st.tab === "sightings") return card.classList.contains("done");
     if (st.type !== "All" && !expandTypeGroup(st.type).includes(card.dataset.type)) return false;
+    if (st.families.length && !st.families.includes(familyOf(card))) return false;
     if (st.continents.length && !card._continents.some((k) => st.continents.includes(k))) return false;
     if (st.countries.length && !card._countries.some((n) => st.countries.includes(n))) return false;
     if (st.places.length && !st.places.some((k) => placesOf(card).has(k))) return false;
@@ -9217,7 +9241,7 @@
 
   const filterState = () => ({
     tab: tab, type: typeFilter, continents: continentFilters, countries: countryFilters,
-    places: placeFilters, cities: cityFilters,
+    places: placeFilters, cities: cityFilters, families: familyFilters,
     popular: popularOnly, uncommon: uncommonOnly, exotic: exoticOnly, venom: venomousOnly, safe: nonVenomousOnly, q: query,
     constrictor: constrictorOnly, nonConstrictor: nonConstrictorOnly,
   });
@@ -9245,7 +9269,7 @@
     // themselves: toggling an attribute on up to thousands of cards on every keystroke,
     // tab switch or filter click was DOM churn happening *inside* the synced subtree,
     // which got diffed, persisted and pushed to every other device on each change.
-    const sig = [tab, query, typeFilter, continentFilters.join("|"), countryFilters.join("|"), placeFilters.join("|"), cityFilters.map((c) => c.key).join("|"), popularOnly, uncommonOnly, exoticOnly, venomousOnly, nonVenomousOnly, constrictorOnly, nonConstrictorOnly].join("~");
+    const sig = [tab, query, typeFilter, continentFilters.join("|"), countryFilters.join("|"), familyFilters.join("|"), placeFilters.join("|"), cityFilters.map((c) => c.key).join("|"), popularOnly, uncommonOnly, exoticOnly, venomousOnly, nonVenomousOnly, constrictorOnly, nonConstrictorOnly].join("~");
     if (sig !== lastSig) { lastSig = sig; renderLimit = PAGE; }
 
     let shown = 0, drawn = 0;
@@ -9332,6 +9356,12 @@
           .map((n) => '<span class="chip active country-chip" role="button" tabindex="0" data-country="' + n + '">' + n + " <b>&times;</b></span>")
           .join("")
       : '<span class="country-empty">Any country</span>';
+    document.getElementById("family-chips").innerHTML = FAMILIES.map((f) =>
+      '<span class="chip' + (familyFilters.includes(f) ? " active" : "") + '" role="button" tabindex="0" data-family="' + f + '">' +
+      f + ' <b class="chip-n">' + countWith({ families: [f] }).toLocaleString() + "</b></span>").join("");
+    const famOpen = !document.getElementById("family-chips").hidden;
+    document.getElementById("family-toggle").textContent = (famOpen ? "Hide families" : "See all families") +
+      (familyFilters.length && !famOpen ? " (" + familyFilters.length + " picked)" : "");
     document.getElementById("place-chips").innerHTML = placeFilters.length
       ? placeFilters
           .map((k) => '<span class="chip active country-chip" role="button" tabindex="0" data-place="' + k + '">' + placeName(k) + " <b>&times;</b></span>")
@@ -9642,7 +9672,7 @@
 
   const chipActivate = (container, handler) => {
     const act = (e) => {
-      const el = e.target.closest("[data-type], [data-continent]");
+      const el = e.target.closest("[data-type], [data-continent], [data-family]");
       if (!el) return;
       if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return;
       e.preventDefault();
@@ -9656,6 +9686,16 @@
   chipActivate(document.getElementById("type-chips"), (el) => {
     const t = el.dataset.type;
     typeFilter = typeFilter === t ? "All" : t;
+  });
+  chipActivate(document.getElementById("family-chips"), (el) => {
+    const f = el.dataset.family;
+    familyFilters = familyFilters.includes(f) ? familyFilters.filter((x) => x !== f) : familyFilters.concat(f);
+  });
+  document.getElementById("family-toggle").addEventListener("click", (e) => {
+    const row = document.getElementById("family-chips");
+    row.hidden = !row.hidden;
+    e.currentTarget.setAttribute("aria-expanded", String(!row.hidden));
+    refresh();
   });
   chipActivate(document.getElementById("continent-chips"), (el) => {
     const c = el.dataset.continent;
