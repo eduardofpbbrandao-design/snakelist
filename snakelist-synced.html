@@ -815,6 +815,17 @@
   .quiz-map svg .quiz-marker { pointer-events: none; }
   .map-wrap.quiz-map.answered svg { cursor: default; }
   .quiz-map-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; }
+  .quiz-map-search { position: relative; margin-bottom: 8px; }
+  .quiz-map-search input { width: 100%; box-sizing: border-box; font-family: 'Inter', sans-serif; font-size: 14px; padding: 9px 13px;
+    border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); outline: none; }
+  .quiz-map-search input:focus { border-color: var(--gold-soft); }
+  .quiz-map-search .country-menu { z-index: 6; }
+  .quiz-map-picks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .quiz-map-picks .pick { font-family: 'Inter', sans-serif; font-size: 12.5px; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--gold); background: var(--surface); color: var(--text); }
+  .quiz-map-picks .pick b { font-weight: 400; opacity: 0.7; margin-left: 4px; }
+  .quiz-map-picks .pick.right { background: var(--map-on); border-color: var(--map-on); color: var(--on-accent); cursor: default; }
+  .quiz-map-picks .pick.wrong { background: var(--rust-soft); border-color: var(--rust); color: var(--rust); cursor: default; }
   .quiz-map-pick { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text-muted); }
   .quiz-map-pick b { color: var(--text); font-weight: 600; }
   .quiz-left { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text-muted); text-align: center; margin: -8px 0 16px; }
@@ -1076,7 +1087,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.37</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.38</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen &mdash; on every device you open this on.</p>
     </header>
@@ -5514,11 +5525,16 @@
         </div>
         <div class="quiz-result" id="quiz-result" hidden></div>
         <div class="quiz-map-box" id="quiz-map-box">
-          <p class="quiz-map-hint" id="quiz-map-hint">Or tap the map where you think it lives, then submit your marker.</p>
+          <p class="quiz-map-hint" id="quiz-map-hint">Or mark where it lives: tap the map, or search a country, state or city. Add as many as you like.</p>
+          <div class="quiz-map-search">
+            <input type="text" id="quiz-map-q" placeholder="Search a country, state or city&hellip;" autocomplete="off" />
+            <div class="country-menu" id="quiz-map-menu" hidden></div>
+          </div>
           <div class="map-wrap quiz-map" id="quiz-map"></div>
+          <div class="quiz-map-picks" id="quiz-map-picks"></div>
           <div class="quiz-map-actions">
-            <span class="quiz-map-pick" id="quiz-map-pick">No marker yet</span>
-            <button class="quiz-submit" id="quiz-map-submit" type="button" disabled>Submit marker</button>
+            <span class="quiz-map-pick" id="quiz-map-pick">No markers yet</span>
+            <button class="quiz-submit" id="quiz-map-submit" type="button" disabled>Submit markers</button>
           </div>
         </div>
       </div>
@@ -10360,8 +10376,8 @@
       '<button class="quiz-next" id="quiz-next" type="button">Next question</button></div>';
     document.getElementById("quiz-submit").hidden = true;
     revealQuizMap();
-    if (viaMap) document.getElementById("quiz-map-pick").innerHTML = "Your marker: <b>" + viaMap.label + "</b>" +
-      (viaMap.correct ? " &mdash; right!" : " &mdash; the green countries are where it lives");
+    if (viaMap) document.getElementById("quiz-map-pick").innerHTML = "<b>" + viaMap.label + "</b>" +
+      (viaMap.correct ? " &mdash; nailed it" : " &mdash; the green countries are where it lives");
     document.getElementById("quiz-next").addEventListener("click", nextQuizQuestion);
     // shows the real answer on the same "where this snake lives" map used elsewhere in the
     // app - only when asked now, instead of popping open on its own every time
@@ -10418,34 +10434,125 @@
     const t = el && (el.querySelector("title") || (el.parentNode && el.parentNode.querySelector && el.parentNode.querySelector("title")));
     return t ? t.textContent.trim() : code.toUpperCase();
   }
-  function placeQuizMarker(x, y, code) {
-    quizMapSvg.querySelectorAll(".quiz-guess").forEach((el) => el.classList.remove("quiz-guess"));
-    quizMapSvg.querySelectorAll('[data-code="' + code + '"]').forEach((el) => el.classList.add("quiz-guess"));
-    let m = quizMapSvg.querySelector(".quiz-marker");
-    if (!m) {
-      m = document.createElementNS(QUIZ_SVG_NS, "g");
-      m.setAttribute("class", "quiz-marker");
-      // a map pin: point at the spot tapped, drawn at a size that stays readable when the
-      // 2754-unit-wide map is shrunk to the page
-      m.innerHTML = '<path d="M0 0 C -9 -14 -22 -24 -22 -38 A 22 22 0 1 1 22 -38 C 22 -24 9 -14 0 0 Z" style="fill:#c0392b;stroke:#fff;stroke-width:4px;vector-effect:none"/>' +
-        '<circle cx="0" cy="-38" r="8" style="fill:#fff;stroke:none"/>';
-      quizMapSvg.appendChild(m);
-    }
-    m.setAttribute("transform", "translate(" + x + " " + y + ")");
-    quizGuess = code;
-    document.getElementById("quiz-map-pick").innerHTML = "Your marker: <b>" + countryNameOf(code) + "</b>";
-    document.getElementById("quiz-map-submit").disabled = false;
+  // every pick: { key, kind: country|state|city, label, code (its country), area (state key), x, y }
+  let quizPicks = [];
+  const PROV_PREFIX = { "United States": "US", Mexico: "MX", Brazil: "BR", India: "IN", Colombia: "CO", Indonesia: "ID" };
+  function shapeCenter(code) {
+    let best = null, area = 0;
+    quizMapSvg.querySelectorAll('[data-code="' + code + '"] path, path[data-code="' + code + '"]').forEach((el) => {
+      const b = el.getBBox(), a = b.width * b.height;
+      if (a > area) { area = a; best = b; }
+    });
+    return best ? [best.x + best.width / 2, best.y + best.height / 2] : null;
   }
+  function drawQuizPicks() {
+    quizMapSvg.querySelectorAll(".quiz-marker").forEach((m) => m.remove());
+    quizMapSvg.querySelectorAll(".quiz-guess").forEach((el) => el.classList.remove("quiz-guess"));
+    quizPicks.forEach((pk) => {
+      if (pk.kind === "country") quizMapSvg.querySelectorAll('[data-code="' + pk.code + '"]').forEach((el) => el.classList.add("quiz-guess"));
+      const m = document.createElementNS(QUIZ_SVG_NS, "g");
+      m.setAttribute("class", "quiz-marker");
+      const col = pk.result === true ? "#f5a300" : "#c0392b"; // amber reads on the green range fill
+      m.innerHTML = '<path d="M0 0 C -9 -14 -22 -24 -22 -38 A 22 22 0 1 1 22 -38 C 22 -24 9 -14 0 0 Z" style="fill:' + col + ';stroke:#fff;stroke-width:4px;vector-effect:none"/>' +
+        '<circle cx="0" cy="-38" r="8" style="fill:#fff;stroke:none"/>';
+      m.setAttribute("transform", "translate(" + pk.x + " " + pk.y + ")");
+      quizMapSvg.appendChild(m);
+    });
+    document.getElementById("quiz-map-picks").innerHTML = quizPicks.map((pk, i) =>
+      '<span class="pick' + (pk.result === true ? " right" : pk.result === false ? " wrong" : "") + '" data-i="' + i + '">' +
+      (pk.result === true ? "&#10003; " : pk.result === false ? "&#10007; " : "") + pk.label +
+      (pk.result == null ? " <b>&times;</b>" : "") + "</span>").join("");
+    document.getElementById("quiz-map-pick").textContent = quizAnswered ? "" :
+      quizPicks.length ? quizPicks.length + (quizPicks.length === 1 ? " marker placed" : " markers placed") : "No markers yet";
+    document.getElementById("quiz-map-submit").disabled = !quizPicks.length;
+  }
+  function addQuizPick(pk) {
+    if (quizAnswered || !pk || pk.x == null) return;
+    if (quizPicks.some((q) => q.key === pk.key)) return;
+    quizPicks.push(pk);
+    drawQuizPicks();
+  }
+  // a tap on the map: that country (tapping a country already picked takes it back off)
+  function placeQuizMarker(x, y, code) {
+    const i = quizPicks.findIndex((q) => q.kind === "country" && q.code === code);
+    if (i >= 0) { quizPicks.splice(i, 1); drawQuizPicks(); return; }
+    addQuizPick({ key: "c:" + code, kind: "country", label: countryNameOf(code), code, x, y });
+  }
+  document.getElementById("quiz-map-picks").addEventListener("click", (e) => {
+    const el = e.target.closest(".pick");
+    if (!el || quizAnswered) return;
+    quizPicks.splice(+el.dataset.i, 1);
+    drawQuizPicks();
+  });
+  // the search bar: countries, states/provinces and cities, the same names used everywhere else
+  let QUIZ_PLACES = null;
+  function quizPlaceList() {
+    if (QUIZ_PLACES) return QUIZ_PLACES;
+    const iso = window.SL_WORLD.iso, out = [];
+    Object.keys(iso).forEach((n) => out.push({ kind: "country", label: n, sub: "Country", code: iso[n] }));
+    Object.keys(window.STATE_NAME || {}).forEach((c) => out.push({ kind: "state", label: window.STATE_NAME[c], sub: "State, United States", code: "us", area: "US:" + c }));
+    const seen = new Set();
+    cards.forEach((card) => (card.getAttribute("data-provinces") || "").split("|").filter(Boolean).forEach((p) => {
+      if (seen.has(p)) return; seen.add(p);
+      const cc = p.slice(0, 2), country = Object.keys(PROV_PREFIX).find((k) => PROV_PREFIX[k] === cc);
+      out.push({ kind: "state", label: p.slice(3), sub: (cc === "ID" ? "Island, " : "State, ") + country, code: iso[country], area: p });
+    }));
+    (window.SL_CITIES || []).forEach((r) => out.push({ kind: "city", label: r[0], sub: (r[4] ? (r[4].slice(0, 2) === "US" ? window.STATE_NAME[r[4].slice(3)] : r[4].slice(3)) + ", " : "") + r[1],
+      code: iso[r[1]], area: r[4] || null, lon: r[3], lat: r[2], country: r[1] }));
+    QUIZ_PLACES = out;
+    return out;
+  }
+  const quizMapQ = document.getElementById("quiz-map-q"), quizMapMenu = document.getElementById("quiz-map-menu");
+  function quizMapMatches() {
+    const q = foldQ(quizMapQ.value.trim());
+    if (!q) return [];
+    const all = quizPlaceList();
+    const starts = all.filter((o) => foldQ(o.label).startsWith(q)), within = all.filter((o) => !foldQ(o.label).startsWith(q) && foldQ(o.label).includes(q));
+    const rank = { country: 0, state: 1, city: 2 };
+    starts.sort((a, b) => rank[a.kind] - rank[b.kind] || a.label.length - b.label.length);
+    return starts.concat(within).slice(0, 12);
+  }
+  function openQuizMapMenu() {
+    const m = quizMapMatches();
+    quizMapMenu.innerHTML = m.length
+      ? m.map((o, i) => '<button type="button" class="country-opt" data-i="' + i + '">' + o.label + ' <i class="opt-sub">' + o.sub + "</i></button>").join("")
+      : '<p class="country-none">No place matches that.</p>';
+    quizMapMenu._m = m;
+    quizMapMenu.hidden = !quizMapQ.value.trim();
+  }
+  function pickFromSearch(o) {
+    const W = window.SL_WORLD;
+    let pt = null;
+    if (o.kind === "country") pt = shapeCenter(o.code);
+    else if (o.kind === "state") pt = W.placePoint(o.area) || shapeCenter(o.code);
+    else pt = W.project(o.lon, o.lat);
+    if (!pt) return;
+    addQuizPick({ key: o.kind + ":" + o.label + ":" + (o.area || o.code), kind: o.kind, label: o.label, code: o.code, area: o.area, x: pt[0], y: pt[1] });
+    quizMapQ.value = ""; quizMapMenu.hidden = true;
+  }
+  quizMapQ.addEventListener("input", openQuizMapMenu);
+  quizMapQ.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); const f = quizMapMatches()[0]; if (f) pickFromSearch(f); }
+    if (e.key === "Escape") quizMapMenu.hidden = true;
+  });
+  quizMapQ.addEventListener("blur", () => setTimeout(() => { quizMapMenu.hidden = true; }, 150));
+  quizMapMenu.addEventListener("mousedown", (e) => {
+    const b = e.target.closest("[data-i]");
+    if (!b) return;
+    e.preventDefault();
+    pickFromSearch(quizMapMenu._m[+b.dataset.i]);
+  });
   function resetQuizMap() {
     ensureQuizMap();
-    quizGuess = null;
+    quizPicks = [];
     document.getElementById("quiz-map").classList.remove("answered");
     if (quizMapSvg) {
       quizMapSvg.querySelectorAll(".on, .quiz-guess").forEach((el) => el.classList.remove("on", "quiz-guess"));
-      const m = quizMapSvg.querySelector(".quiz-marker");
-      if (m) m.remove();
+      quizMapSvg.querySelectorAll(".quiz-marker").forEach((m) => m.remove());
     }
-    document.getElementById("quiz-map-pick").textContent = "No marker yet";
+    quizMapQ.value = ""; quizMapMenu.hidden = true; quizMapQ.disabled = false;
+    document.getElementById("quiz-map-picks").innerHTML = "";
+    document.getElementById("quiz-map-pick").textContent = "No markers yet";
     document.getElementById("quiz-map-submit").disabled = true;
     document.getElementById("quiz-map-submit").hidden = false;
   }
@@ -10453,22 +10560,40 @@
   function revealQuizMap() {
     if (!quizMapSvg || !quizCurrent) return;
     document.getElementById("quiz-map").classList.add("answered");
+    quizMapQ.disabled = true;
     const iso = window.SL_WORLD.iso;
     quizCurrent.countries.forEach((n) => {
       const code = iso[n];
       if (code) quizMapSvg.querySelectorAll('[data-code="' + code + '"]').forEach((el) => el.classList.add("on"));
     });
     document.getElementById("quiz-map-submit").hidden = true;
+    if (quizPicks.length) drawQuizPicks();
+  }
+  // is one pick a place this snake lives? Down to the state where its range has states.
+  function pickIsRight(pk) {
+    const card = quizCurrent.card;
+    const codes = quizCodes();
+    const places = new Set(((card.getAttribute("data-states") || "").split("|").filter(Boolean).map((c) => "US:" + c))
+      .concat((card.getAttribute("data-provinces") || "").split("|").filter(Boolean)));
+    const placeCountries = new Set([...places].map((k) => k.slice(0, 2)));
+    if (quizCurrent.answerKind === "state" && pk.kind === "country") return false; // a state question wants a state
+    if (pk.kind === "country") return codes.includes(pk.code);
+    const area = pk.area;
+    if (area && placeCountries.has(area.slice(0, 2))) return places.has(area);
+    return codes.includes(pk.code);
   }
   function quizCodes() {
     const iso = (window.SL_WORLD && window.SL_WORLD.iso) || {};
     return quizCurrent.countries.map((n) => iso[n]).filter(Boolean);
   }
   document.getElementById("quiz-map-submit").addEventListener("click", () => {
-    if (!quizGuess || quizAnswered) return;
-    // a state question still has a country answer on a map with no state borders: the US
-    const right = quizCurrent.answerKind === "state" ? quizGuess === "us" : quizCodes().includes(quizGuess);
-    submitQuizAnswer(false, { correct: right, label: countryNameOf(quizGuess) });
+    if (!quizPicks.length || quizAnswered) return;
+    quizPicks.forEach((pk) => { pk.result = pickIsRight(pk); });
+    // right if every marker is a place it lives, covering as many places as the question asks
+    const rightPlaces = new Set(quizPicks.filter((pk) => pk.result).map((pk) => quizCurrent.answerKind === "state" ? pk.area : pk.code));
+    const right = quizPicks.every((pk) => pk.result) && rightPlaces.size >= quizCurrent.need;
+    const n = quizPicks.filter((pk) => pk.result).length;
+    submitQuizAnswer(false, { correct: right, label: n + " of " + quizPicks.length + " markers right" });
   });
   // walks away from the quiz entirely, timer and all, with the score so far kept on screen
   function leaveQuiz() {
@@ -10732,6 +10857,18 @@
     }
     return out;
   }
+  // for the quiz map: where a state/province sits on this same world map
+  window.SL_WORLD.project = projectSheet;
+  window.SL_WORLD.placePoint = function (key) {
+    var cc = key.slice(0, 2), nm = key.slice(3);
+    var shapes = cc === "US" ? US_STATES : (getCountryProvinces()[PROV_CODE[cc]] || []);
+    var st = shapes.find(function (x) { return (cc === "US" ? x.code : x.name) === nm; });
+    if (!st) return null;
+    var best = null; // the middle of its biggest ring
+    st.rings.forEach(function (r) { if (!best || r.length > best.length) best = r; });
+    var lon = 0, lat = 0; best.forEach(function (pt) { lon += pt[0]; lat += pt[1]; });
+    return projectSheet(lon / best.length, lat / best.length);
+  };
   document.getElementById("sheet-states").addEventListener("click", function () {
     sheetMode(this.getAttribute("aria-pressed") === "true" ? null : "states");
   });
