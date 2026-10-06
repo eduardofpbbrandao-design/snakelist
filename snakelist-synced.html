@@ -806,6 +806,17 @@
   .quiz-head { flex-wrap: wrap; }
   .quiz-leave { color: var(--rust); border-color: var(--rust); }
   .quiz-leave:hover { color: var(--rust); border-color: var(--rust); background: var(--surface-hover); }
+  /* "tap where it lives": the same world map as the See countries sheet, but clickable */
+  .quiz-map-box { margin-top: 22px; }
+  .quiz-map-hint { margin: 0 0 8px; font-size: 13px; color: var(--text-muted); }
+  .map-wrap.quiz-map svg { pointer-events: auto; cursor: crosshair; }
+  .map-wrap.quiz-map:not(.answered) svg .landxx:hover path, .map-wrap.quiz-map:not(.answered) svg path.landxx:hover { fill: var(--gold-soft); }
+  .map-wrap.quiz-map svg .quiz-guess path, .map-wrap.quiz-map svg path.quiz-guess, .map-wrap.quiz-map svg .quiz-guess circle { fill: var(--gold-soft); stroke: var(--gold); }
+  .quiz-map svg .quiz-marker { pointer-events: none; }
+  .map-wrap.quiz-map.answered svg { cursor: default; }
+  .quiz-map-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; }
+  .quiz-map-pick { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text-muted); }
+  .quiz-map-pick b { color: var(--text); font-weight: 600; }
   .quiz-left { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text-muted); text-align: center; margin: -8px 0 16px; }
   .quiz-left[hidden] { display: none; }
   .quiz-timer-track { height: 6px; border-radius: 999px; background: var(--surface-hover); overflow: hidden; margin-bottom: 16px; }
@@ -1045,7 +1056,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.34</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.35</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen &mdash; on every device you open this on.</p>
     </header>
@@ -5482,6 +5493,14 @@
           <button class="quiz-submit" id="quiz-submit" type="button">Submit</button>
         </div>
         <div class="quiz-result" id="quiz-result" hidden></div>
+        <div class="quiz-map-box" id="quiz-map-box">
+          <p class="quiz-map-hint" id="quiz-map-hint">Or tap the map where you think it lives, then submit your marker.</p>
+          <div class="map-wrap quiz-map" id="quiz-map"></div>
+          <div class="quiz-map-actions">
+            <span class="quiz-map-pick" id="quiz-map-pick">No marker yet</span>
+            <button class="quiz-submit" id="quiz-map-submit" type="button" disabled>Submit marker</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -10196,6 +10215,7 @@
         '<input type="text" class="quiz-answer-input" autocomplete="off" placeholder="e.g. ' + example + '"></label>';
     }).join("");
     document.getElementById("quiz-result").hidden = true;
+    resetQuizMap();
     document.getElementById("quiz-submit").hidden = false;
     document.getElementById("quiz-submit").disabled = false;
     document.getElementById("quiz-submit").textContent = "Submit";
@@ -10225,7 +10245,7 @@
     fill.style.width = pct + "%";
     fill.classList.toggle("low", quizTimeLeft <= Math.ceil(QUIZ_TIME[quizLevel] * 0.25));
   }
-  function submitQuizAnswer(timedOut) {
+  function submitQuizAnswer(timedOut, viaMap) {
     if (quizAnswered) return; // the timer and a manual submit can otherwise both fire for one question
     quizAnswered = true;
     stopQuizTimer();
@@ -10233,8 +10253,31 @@
     const given = inputs.map((i) => i.value.trim().toLowerCase()).filter(Boolean);
     const validLower = quizCurrent.answers.map((c) => c.toLowerCase());
     const matched = new Set();
-    given.forEach((g) => { if (validLower.includes(g)) matched.add(g); });
-    const correct = !timedOut && matched.size >= quizCurrent.need;
+    // a country question also takes a state/province from this snake's own range as the
+    // country it's in ("Florida" for the Cottonmouth counts as the United States), and the
+    // everyday names for a few countries ("USA", "America", "UK")
+    const placeCountry = {};
+    if (quizCurrent.answerKind === "country") {
+      const card = quizCurrent.card;
+      (card.getAttribute("data-states") || "").split("|").filter(Boolean).forEach((code) => {
+        const n = (window.STATE_NAME && window.STATE_NAME[code]) || code;
+        placeCountry[n.toLowerCase()] = "united states";
+      });
+      const PROV_COUNTRY = { MX: "mexico", BR: "brazil", IN: "india", CO: "colombia", ID: "indonesia" };
+      (card.getAttribute("data-provinces") || "").split("|").filter(Boolean).forEach((p) => {
+        const cc = PROV_COUNTRY[p.slice(0, 2)];
+        if (cc) placeCountry[p.slice(3).toLowerCase()] = cc;
+      });
+      Object.assign(placeCountry, { "usa": "united states", "us": "united states", "u.s.": "united states", "u.s.a.": "united states",
+        "america": "united states", "united states of america": "united states", "the united states": "united states",
+        "uk": "united kingdom", "britain": "united kingdom", "great britain": "united kingdom", "england": "united kingdom" });
+    }
+    const fold = (x) => x.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    given.forEach((g) => {
+      const c = validLower.includes(g) ? g : placeCountry[g] || placeCountry[fold(g)];
+      if (c && validLower.includes(c)) matched.add(c); // two states of one country still count as one country
+    });
+    const correct = viaMap ? viaMap.correct : (!timedOut && matched.size >= quizCurrent.need);
     quizScore.total++;
     if (correct) quizScore.right++;
     bumpQuizStat(correct ? "correct" : "wrong");
@@ -10250,6 +10293,9 @@
       '<div class="quiz-result-actions"><button class="quiz-see-map" id="quiz-see-map" type="button">See countries</button>' +
       '<button class="quiz-next" id="quiz-next" type="button">Next question</button></div>';
     document.getElementById("quiz-submit").hidden = true;
+    revealQuizMap();
+    if (viaMap) document.getElementById("quiz-map-pick").innerHTML = "Your marker: <b>" + viaMap.label + "</b>" +
+      (viaMap.correct ? " &mdash; right!" : " &mdash; the green countries are where it lives");
     document.getElementById("quiz-next").addEventListener("click", nextQuizQuestion);
     // shows the real answer on the same "where this snake lives" map used elsewhere in the
     // app - only when asked now, instead of popping open on its own every time
@@ -10258,6 +10304,106 @@
     });
   }
   function redoQuiz() { startQuiz(quizLevel); }
+
+  // ---- the quiz map: drop a marker where you think this snake lives -------------------
+  let quizMapSvg = null, quizGuess = null;
+  const QUIZ_SVG_NS = "http://www.w3.org/2000/svg";
+  // which country a clicked map shape belongs to - same rules the Map tab uses to read the SVG
+  function codeOfShape(el) {
+    for (let n = el; n && n.tagName && n.tagName.toLowerCase() !== "svg"; n = n.parentNode) {
+      if (n.dataset && n.dataset.code) return n.dataset.code;
+      const cls = (n.getAttribute("class") || "").split(" ");
+      if (cls.includes("xk")) return "xk";
+      const c = cls.find((x) => x.length === 2 && x !== "eu");
+      if (c && /landxx|circlexx|antxx/.test(n.getAttribute("class") || "")) return c;
+    }
+    return null;
+  }
+  function ensureQuizMap() {
+    if (quizMapSvg || !window.SL_WORLD) return quizMapSvg;
+    quizMapSvg = window.SL_WORLD.svg.cloneNode(true);
+    // the copy keeps its country codes as data-code instead of ids, so it never clashes with
+    // the original map's ids elsewhere in the page
+    quizMapSvg.querySelectorAll("[id]").forEach((el) => {
+      if (el.id.length === 2) el.dataset.code = el.id;
+      if (el.id === "ocean") el.classList.add("oceanxx");
+      el.removeAttribute("id");
+    });
+    quizMapSvg.querySelectorAll(".on").forEach((el) => el.classList.remove("on"));
+    document.getElementById("quiz-map").appendChild(quizMapSvg);
+    quizMapSvg.addEventListener("click", (e) => {
+      if (quizAnswered) return;
+      const code = codeOfShape(e.target);
+      if (!code) return; // the sea - nothing to mark
+      const pt = quizMapSvg.createSVGPoint();
+      pt.x = e.clientX; pt.y = e.clientY;
+      const p = pt.matrixTransform(quizMapSvg.getScreenCTM().inverse());
+      placeQuizMarker(p.x, p.y, code);
+    });
+    return quizMapSvg;
+  }
+  function countryNameOf(code) {
+    const iso = (window.SL_WORLD && window.SL_WORLD.iso) || {};
+    const named = Object.keys(iso).find((n) => iso[n] === code);
+    if (named) return named;
+    // places with no snakes on record (Greenland, ...) aren't in that table - the map's own
+    // <title> for the shape still names them
+    const el = quizMapSvg && quizMapSvg.querySelector('[data-code="' + code + '"]');
+    const t = el && (el.querySelector("title") || (el.parentNode && el.parentNode.querySelector && el.parentNode.querySelector("title")));
+    return t ? t.textContent.trim() : code.toUpperCase();
+  }
+  function placeQuizMarker(x, y, code) {
+    quizMapSvg.querySelectorAll(".quiz-guess").forEach((el) => el.classList.remove("quiz-guess"));
+    quizMapSvg.querySelectorAll('[data-code="' + code + '"]').forEach((el) => el.classList.add("quiz-guess"));
+    let m = quizMapSvg.querySelector(".quiz-marker");
+    if (!m) {
+      m = document.createElementNS(QUIZ_SVG_NS, "g");
+      m.setAttribute("class", "quiz-marker");
+      // a map pin: point at the spot tapped, drawn at a size that stays readable when the
+      // 2754-unit-wide map is shrunk to the page
+      m.innerHTML = '<path d="M0 0 C -9 -14 -22 -24 -22 -38 A 22 22 0 1 1 22 -38 C 22 -24 9 -14 0 0 Z" style="fill:#c0392b;stroke:#fff;stroke-width:4px;vector-effect:none"/>' +
+        '<circle cx="0" cy="-38" r="8" style="fill:#fff;stroke:none"/>';
+      quizMapSvg.appendChild(m);
+    }
+    m.setAttribute("transform", "translate(" + x + " " + y + ")");
+    quizGuess = code;
+    document.getElementById("quiz-map-pick").innerHTML = "Your marker: <b>" + countryNameOf(code) + "</b>";
+    document.getElementById("quiz-map-submit").disabled = false;
+  }
+  function resetQuizMap() {
+    ensureQuizMap();
+    quizGuess = null;
+    document.getElementById("quiz-map").classList.remove("answered");
+    if (quizMapSvg) {
+      quizMapSvg.querySelectorAll(".on, .quiz-guess").forEach((el) => el.classList.remove("on", "quiz-guess"));
+      const m = quizMapSvg.querySelector(".quiz-marker");
+      if (m) m.remove();
+    }
+    document.getElementById("quiz-map-pick").textContent = "No marker yet";
+    document.getElementById("quiz-map-submit").disabled = true;
+    document.getElementById("quiz-map-submit").hidden = false;
+  }
+  // once answered (any way), the map shows where the snake really lives
+  function revealQuizMap() {
+    if (!quizMapSvg || !quizCurrent) return;
+    document.getElementById("quiz-map").classList.add("answered");
+    const iso = window.SL_WORLD.iso;
+    quizCurrent.countries.forEach((n) => {
+      const code = iso[n];
+      if (code) quizMapSvg.querySelectorAll('[data-code="' + code + '"]').forEach((el) => el.classList.add("on"));
+    });
+    document.getElementById("quiz-map-submit").hidden = true;
+  }
+  function quizCodes() {
+    const iso = (window.SL_WORLD && window.SL_WORLD.iso) || {};
+    return quizCurrent.countries.map((n) => iso[n]).filter(Boolean);
+  }
+  document.getElementById("quiz-map-submit").addEventListener("click", () => {
+    if (!quizGuess || quizAnswered) return;
+    // a state question still has a country answer on a map with no state borders: the US
+    const right = quizCurrent.answerKind === "state" ? quizGuess === "us" : quizCodes().includes(quizGuess);
+    submitQuizAnswer(false, { correct: right, label: countryNameOf(quizGuess) });
+  });
   // walks away from the quiz entirely, timer and all, with the score so far kept on screen
   function leaveQuiz() {
     const level = quizLevel, score = quizScore;
@@ -10384,6 +10530,7 @@
   // researched for; everyone else still shows the plain country the data actually has
   var STATE_NAME = {AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming"};
   window.STATE_NAME = STATE_NAME; // the quiz (a separate script block) needs this too
+  window.SL_WORLD = { svg: svg, iso: ISO }; // and the quiz's own "tap where it lives" map
 
   function show(card) {
     var names = (card.getAttribute("data-countries") || "").split("|").filter(Boolean);
