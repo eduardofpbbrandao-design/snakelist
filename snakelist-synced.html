@@ -557,6 +557,7 @@
     border: 1px dashed var(--gold); background: var(--done-wash); color: var(--text); }
   .send-photo-btn:hover { border-style: solid; }
   .card.done .send-photo-btn { display: block; }
+  .send-photo-btn a { color: var(--gold); text-decoration: underline; }
   /* ---- chip photo/label/count editor ---- */
   .pic-sheet { position: fixed; inset: 0; z-index: 70; display: none; align-items: center; justify-content: center;
     padding: 20px; background: rgba(6,20,12,0.72); }
@@ -9118,16 +9119,28 @@
       navigator.share({ files: [file], title: subject, text: body.replace("(The photo is attached.)", "Send to: " + PHOTO_INBOX) }).catch(() => {});
       return;
     }
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(file); a.download = fileName;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-    window.location.href = "mailto:" + PHOTO_INBOX + "?subject=" + encodeURIComponent(subject) +
-      "&body=" + encodeURIComponent(body.replace("(The photo is attached.)", "(Attach the photo that just downloaded: " + fileName + ")"));
+    const mail = "mailto:" + PHOTO_INBOX + "?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body.replace("(The photo is attached.)", "(Attach the photo you just saved: " + fileName + ")"));
+    const btn = card.querySelector(".send-photo-btn");
+    // the artifact viewer hands files over only through its downloads capability (the viewer
+    // confirms the save); then the pre-filled email, with the address shown as a link in case
+    // the viewer won't open email links itself
+    const done = () => {
+      btn.innerHTML = 'Photo saved &mdash; now <a href="' + mail + '" target="_blank" rel="noopener">email it to ' + PHOTO_INBOX + "</a>";
+      try { window.open(mail, "_blank"); } catch (err) {}
+    };
+    const dl = window.claude && window.claude.use ? window.claude.use("downloads") : Promise.resolve(null);
+    dl.then((downloads) => {
+      if (!downloads) { done(); return; }
+      return downloads.save({ filename: fileName, data: new Blob([bytes], { type: "image/jpeg" }) }).then(done, (err) => {
+        if (err && err.code === "declined") return;
+        done();
+      });
+    });
   }
   grid.addEventListener("click", (e) => {
     const b = e.target.closest(".send-photo-btn");
-    if (b) { e.preventDefault(); sendSightingPhoto(b.closest(".card")); }
+    if (b && !e.target.closest("a")) { e.preventDefault(); sendSightingPhoto(b.closest(".card")); }
   });
   // restore whatever photos were already saved on a previous visit
   cards.forEach((card) => {
