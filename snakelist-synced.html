@@ -896,6 +896,10 @@
   .map-wrap svg .sheet-state.out { fill: var(--map-off); }
   .map-wrap svg .sheet-state.inv, .map-wrap svg .invasive path, .map-wrap svg path.invasive, .map-wrap svg .invasive circle {
     fill: #e08a2c; stroke: rgba(255,255,255,0.85); stroke-width: 0.8px; }
+  .map-list span[data-zoom] { cursor: pointer; transition: background .15s, border-color .15s; }
+  .map-list span[data-zoom]:hover { border-color: var(--map-on); }
+  .map-list span.zoomed { background: var(--map-on); border-color: var(--map-on); color: #fff; }
+  .map-wrap svg path.xk { stroke-width: 0.35px; }
   .map-list span.inv { background: #e08a2c; border-color: #e08a2c; color: #fff; }
   .map-wrap svg .sheet-city { fill: #c0392b; stroke: #fff; stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
   .sheet-btns { display: flex; gap: 8px; margin-top: 12px; }
@@ -1096,7 +1100,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.42</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.43</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen &mdash; on every device you open this on.</p>
     </header>
@@ -10879,7 +10883,7 @@
   }
   function countryList(card) {
     var names = (card.getAttribute("data-countries") || "").split("|").filter(Boolean);
-    return names.map(function (n) { return "<span>" + n + "</span>"; }).join("") +
+    return names.map(function (n) { return '<span data-zoom="c:' + (ISO[n] || "") + '">' + n + "</span>"; }).join("") +
       (INVASIVE[card.dataset.id] || []).map(function (pl) {
         return '<span class="inv">' + pl.name + (pl.note && pl.note !== pl.name ? " (" + pl.note + ")" : "") + " &middot; invasive</span>";
       }).join("");
@@ -10887,6 +10891,7 @@
   function sheetMode(mode) {
     var card = sheetCard;
     clearOverlay();
+    if (zoomedTo) sheetZoom(null);
     var places = sheetPlaces(card);
     var bS = document.getElementById("sheet-states"), bC = document.getElementById("sheet-cities");
     bS.hidden = !places.length;
@@ -10927,7 +10932,13 @@
           sheetOverlay.appendChild(path);
         });
       });
-      list.innerHTML = places.filter(function (k) { return k !== "US:"; }).map(function (k) { return '<span class="state-pill">' + placeLabel(k) + "</span>"; }).join("") +
+      // countries without state-level data still belong in the list - before, a species in
+      // Brazil (2 states) and 6 other countries listed only the 2 Brazilian states
+      var withStates = {};
+      Object.keys(ccs).forEach(function (cc) { withStates[PROV_CODE[cc]] = true; });
+      var others = (card.getAttribute("data-countries") || "").split("|").filter(function (n) { return n && !withStates[ISO[n]]; });
+      list.innerHTML = places.filter(function (k) { return k !== "US:"; }).map(function (k) { return '<span class="state-pill" data-zoom="s:' + k + '">' + placeLabel(k) + "</span>"; }).join("") +
+        others.map(function (n) { return '<span data-zoom="c:' + (ISO[n] || "") + '">' + n + "</span>"; }).join("") +
         (INVASIVE[card.dataset.id] || []).map(function (pl) {
           return (pl.states || []).map(function (c) { return '<span class="inv">' + (STATE_NAME[c] || c) + " &middot; invasive</span>"; }).join("");
         }).join("");
@@ -10940,9 +10951,51 @@
         var t = document.createElementNS(SVGNS, "title"); t.textContent = c.name; dot.appendChild(t);
         sheetOverlay.appendChild(dot);
       });
-      list.innerHTML = cities.map(function (c) { return "<span>" + c.name + " <i>" + c.where + "</i></span>"; }).join("");
+      list.innerHTML = cities.map(function (c) { return '<span data-zoom="p:' + c.lon + "," + c.lat + '">' + c.name + " <i>" + c.where + "</i></span>"; }).join("");
     }
   }
+  // ---- tap a pill: the sheet's map centres and zooms on that country / state / city --------
+  var homeViewBox = null, zoomedTo = null;
+  function sheetZoom(key) {
+    if (!homeViewBox) homeViewBox = svg.getAttribute("viewBox");
+    var hv = homeViewBox.split(/[ ,]+/).map(Number);
+    document.querySelectorAll("#map-list [data-zoom]").forEach(function (el) { el.classList.toggle("zoomed", el.getAttribute("data-zoom") === key && zoomedTo !== key); });
+    if (!key || zoomedTo === key) { zoomedTo = null; svg.setAttribute("viewBox", homeViewBox); return; }
+    var box = null;
+    if (key.slice(0, 2) === "c:") {
+      var g = svg.getElementById(key.slice(2));
+      if (g) { try { var b = g.getBBox(); box = [b.x, b.y, b.x + b.width, b.y + b.height]; } catch (err) {} }
+    } else if (key.slice(0, 2) === "s:") {
+      var k = key.slice(2), cc = k.slice(0, 2), nm = k.slice(3);
+      var shapes = cc === "US" ? US_STATES : (getCountryProvinces()[PROV_CODE[cc]] || []);
+      var st = shapes.find(function (x) { return (cc === "US" ? x.code : x.name) === nm || (x.also || []).indexOf(nm) >= 0; });
+      if (st) {
+        box = [Infinity, Infinity, -Infinity, -Infinity];
+        st.rings.forEach(function (ring) { ring.forEach(function (pt) {
+          var q = projectSheet(pt[0], pt[1]);
+          box[0] = Math.min(box[0], q[0]); box[1] = Math.min(box[1], q[1]); box[2] = Math.max(box[2], q[0]); box[3] = Math.max(box[3], q[1]);
+        }); });
+      }
+    } else if (key.slice(0, 2) === "p:") {
+      var ll = key.slice(2).split(",").map(Number), c = projectSheet(ll[0], ll[1]);
+      box = [c[0] - 30, c[1] - 15, c[0] + 30, c[1] + 15];
+    }
+    if (!box || !isFinite(box[0])) return;
+    // keep the map's own shape, with some land around the place so it's clear where it is
+    var w = Math.max(box[2] - box[0], 40) * 1.8, h = Math.max(box[3] - box[1], 20) * 1.8;
+    var ar = hv[2] / hv[3];
+    if (w / h > ar) h = w / ar; else w = h * ar;
+    w = Math.min(w, hv[2]); h = Math.min(h, hv[3]);
+    var cx = (box[0] + box[2]) / 2, cy = (box[1] + box[3]) / 2;
+    var x = Math.max(hv[0], Math.min(hv[0] + hv[2] - w, cx - w / 2));
+    var y = Math.max(hv[1], Math.min(hv[1] + hv[3] - h, cy - h / 2));
+    svg.setAttribute("viewBox", x.toFixed(1) + " " + y.toFixed(1) + " " + w.toFixed(1) + " " + h.toFixed(1));
+    zoomedTo = key;
+  }
+  document.getElementById("map-list").addEventListener("click", function (e) {
+    var el = e.target.closest("[data-zoom]");
+    if (el) sheetZoom(el.getAttribute("data-zoom"));
+  });
   // the biggest cities inside this species' range: in one of its states/provinces where it
   // has those, otherwise anywhere in one of its countries
   function sheetCities(card, places) {
@@ -11476,6 +11529,22 @@
     var countryMatch = !cityMatch && !continentMatch && q
       ? (worldCityMatch ? (cityReveal ? worldCityMatch.country : null) : Object.keys(ISO).filter(function (n) { return n.toLowerCase() === q; })[0])
       : null;
+    // a country's own name (or a common alias of it) is a question about that country, not a
+    // text search: before, "vatican city" matched the one species whose range lists it and lit
+    // up all 7 countries that species lives in, and "brazil" lit up every country of every
+    // species mentioning Brazil. Now it selects that country exactly like clicking it does.
+    var nameCode = q ? countryByName(foldedQ) : null;
+    if (nameCode && !cityMatch && !continentMatch) {
+      showSearchedCountry(nameCode);
+      return;
+    }
+    if (searchSelected && selected === searchSelected) {
+      selected = null;
+      document.getElementById("country-panel").hidden = true;
+      document.getElementById("see-provinces").hidden = true;
+      statesMode = false; pickedProvince = null; updateLegend();
+    }
+    searchSelected = null;
     lastCityMatch = cityMatch; lastContinentMatch = continentMatch; lastCountryMatch = countryMatch;
     tally = {};
     matched = cityMatch
@@ -11578,6 +11647,81 @@
       fillArea(PINS[0]);
     }
     if (selected) fillPanel(selected);
+    invalidate();
+  }
+
+  var COUNTRY_ALIAS = {
+    "usa": "us", "us": "us", "america": "us", "united states of america": "us", "the united states": "us",
+    "uk": "gb", "britain": "gb", "great britain": "gb", "england": "gb", "scotland": "gb", "wales": "gb",
+    "vatican": "va", "the vatican": "va", "holy see": "va", "vatican city state": "va",
+    "uae": "ae", "drc": "cd", "dr congo": "cd", "congo": "cg", "ivory coast": "ci", "cote d'ivoire": "ci",
+    "burma": "mm", "holland": "nl", "the netherlands": "nl", "czech republic": "cz", "korea": "kr",
+    "east timor": "tl", "swaziland": "sz", "macedonia": "mk", "the philippines": "ph", "the bahamas": "bs",
+    "the gambia": "gm", "russian federation": "ru", "persia": "ir", "ceylon": "lk", "turkiye": "tr"
+  };
+  var countryNameIndex = null;
+  function foldName(t) {
+    return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, "").trim();
+  }
+  function countryByName(fq) {
+    if (!countryNameIndex) {
+      countryNameIndex = {};
+      Object.keys(ISO).forEach(function (n) { countryNameIndex[foldName(n)] = ISO[n]; });
+      Object.keys(TITLE || {}).forEach(function (c) {
+        var t = foldName(TITLE[c]);
+        if (t && !countryNameIndex[t] && c.length === 2) countryNameIndex[t] = c;
+      });
+      Object.keys(COUNTRY_ALIAS).forEach(function (a) { countryNameIndex[foldName(a)] = COUNTRY_ALIAS[a]; });
+    }
+    return countryNameIndex[fq] || null;
+  }
+  // the outline's own bounding box - its biggest landmass plus everything near it, so far-off
+  // islands and overseas bits (Alaska's Aleutians across the date line, France's Reunion)
+  // don't drag the camera out to a whole-world view
+  function countryBox(code) {
+    var rows = POLY.filter(function (r) { return r.code === code && !r.dot; });
+    if (!rows.length) {
+      var dots = POLY.filter(function (r) { return r.code === code && r.dot; });
+      if (!dots.length) return null;
+      return [dots[0].lon0 - 1.5, dots[0].lon0 + 1.5, dots[0].lat0 - 1, dots[0].lat0 + 1];
+    }
+    var big = rows.reduce(function (a, b) { return (b.e - b.w) * (b.no - b.s) > (a.e - a.w) * (a.no - a.s) ? b : a; });
+    var w = big.w, e = big.e, s = big.s, n = big.no;
+    var cx = (big.w + big.e) / 2, cy = (big.s + big.no) / 2;
+    var reach = Math.max(12, (big.e - big.w), (big.no - big.s));
+    rows.forEach(function (r) {
+      if (r.e - r.w > 180) return;
+      if (Math.abs((r.w + r.e) / 2 - cx) > reach || Math.abs((r.s + r.no) / 2 - cy) > reach) return;
+      w = Math.min(w, r.w); e = Math.max(e, r.e); s = Math.min(s, r.s); n = Math.max(n, r.no);
+    });
+    // tiny countries (Vatican City, Monaco, ...) still get some land around them in view
+    var minSpan = 1.2;
+    if (e - w < minSpan) { var m = (w + e) / 2; w = m - minSpan / 2; e = m + minSpan / 2; }
+    if (n - s < minSpan / 2) { var mm = (s + n) / 2; s = mm - minSpan / 4; n = mm + minSpan / 4; }
+    return [w, e, s, n];
+  }
+  var searchSelected = null;
+  function showSearchedCountry(code) {
+    var name = NAME[code] || TITLE[code] || code.toUpperCase();
+    var list = (BYCODE && BYCODE[code]) || [];
+    tally = {}; tally[name] = list.length;
+    matched = list;
+    HI = null;
+    PINS = [];
+    pendingWorldCity = null; pendingCitySpecies = null;
+    lastCityMatch = null; lastContinentMatch = null; lastCountryMatch = name;
+    document.getElementById("all-countries").hidden = true;
+    document.getElementById("see-cities").hidden = true;
+    var fresh = selected !== code;
+    selected = code;
+    searchSelected = code;
+    fillPanel(code);
+    var n = document.getElementById("cp-sub").textContent;
+    document.getElementById("heat-caption").textContent = name + " · " + n;
+    if (fresh) {
+      var bx = countryBox(code);
+      if (bx) flyToLonLatBox(bx[0], bx[1], bx[2], bx[3], true);
+    }
     invalidate();
   }
 
@@ -11744,7 +11888,10 @@
       ctx.fillStyle = onColor;
       ctx.fill();
       ctx.globalAlpha = 1;
-      shapePath(to, wantHI, stride, true);
+      // tiny countries (Kosovo, Luxembourg, ...) skip the light line: at world zoom it's
+      // thicker than the country is wide, so Kosovo read as a white blob instead of green
+      var bigEnough = function (r) { return !r.dot && (r.e - r.w) / 360 * vb[2] > 14 && (r.no - r.s) / 180 * vb[3] > 10; };
+      shapePath(to, function (r) { return wantHI(r) && bigEnough(r); }, stride, true);
       // a light line between highlighted countries, so a range across several neighbours
       // still shows each country instead of one merged green shape
       ctx.strokeStyle = "rgba(255,255,255,0.85)";
@@ -11768,7 +11915,7 @@
       // fill - any transparency here would blend with the land underneath and look different
       ctx.fillStyle = onColor;
       ctx.fill();
-      shapePath(to, wantSel, stride, true);
+      shapePath(to, function (r) { return wantSel(r) && (r.e - r.w) / 360 * vb[2] > 8; }, stride, true);
       ctx.strokeStyle = "rgba(255,255,255,0.95)";
       ctx.lineWidth = 1.6;
       ctx.lineJoin = "round";
@@ -12325,7 +12472,6 @@
     document.getElementById("all-countries").hidden = true;
     document.getElementById("see-species").hidden = true;
     document.getElementById("see-provinces").hidden = true;
-    document.getElementById("country-panel").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   // ---- interaction --------------------------------------------------------------------------
@@ -12429,8 +12575,12 @@
       if (statesMode) flyToCountryProvinces(statesMode, true);
       updateLegend();
       invalidate();
+    } else {
+      // no state outlines to draw - the map still centres on the country itself
+      var bx = countryBox(lastCountryCode);
+      if (bx) flyToLonLatBox(bx[0], bx[1], bx[2], bx[3], true);
     }
-    document.getElementById("country-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+    // the page stays where it is - the map itself moves to the states instead
   });
   // a handful of species carry 40+ states (2 cities each) - firing all of those fetches to
   // iNaturalist at once via a single Promise.all was up to ~90 simultaneous requests, real
