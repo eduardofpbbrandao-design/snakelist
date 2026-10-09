@@ -5,7 +5,7 @@ real website needs its own doctype, charset, mobile viewport and the tags search
 link previews read. Run after every change:  python3 build-site.py
 """
 import re
-SITE = "https://eduardofpbbrandao-design.github.io/snakelist/"   # change when the domain is live
+SITE = "https://snakelist.com/"
 app = open("snakelist-synced.html", encoding="utf-8").read()
 title = "SnakeList - the snake life list, map and quiz"
 desc = ("Track every snake species you've seen. A checklist of 4,000+ snakes with photos, "
