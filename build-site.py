@@ -27,6 +27,14 @@ head = f"""<!doctype html>
 <meta property="og:image" content="{SITE}snakelist-logo.png">
 <meta name="twitter:card" content="summary_large_image">
 <style>html,body{{margin:0;padding:0}}</style>
+<!-- Google tag (gtag.js) - visitor statistics for snakelist.com -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PY2LJV389K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-PY2LJV389K');
+</script>
 """
 app = re.sub(r"^<title>[^<]*</title>", f"<title>{title}</title>", app, count=1)
 open("index.html", "w", encoding="utf-8").write(head + app + "\n</body>\n</html>\n")
