@@ -647,6 +647,26 @@
   .ff-txt { font-size: 13px; line-height: 1.35; }
   .ff-txt small { display: block; margin-top: 3px; font-size: 11.5px; color: var(--text-muted); }
   .ff-new { font-style: normal; font-size: 10.5px; font-weight: 700; padding: 1px 6px; margin-right: 5px; border-radius: 999px; background: #f2b33d; color: #3a2a05; }
+  .ff-news { margin: 0 0 10px; padding: 9px 12px; border-radius: 10px; background: rgba(242,179,61,0.18); font-size: 13.5px; font-weight: 600; }
+  .fp { display: grid; grid-template-columns: minmax(220px, 38%) 1fr; gap: 16px; padding: 14px; margin-bottom: 14px; border-radius: 14px;
+    border: 1px solid var(--border); background: var(--surface); }
+  .fp-img { width: 100%; aspect-ratio: 3 / 2; border-radius: 10px; background-color: var(--surface-hover); background-repeat: no-repeat; align-self: start; }
+  .fp-none { display: grid; place-items: center; font-size: 12.5px; font-style: italic; color: var(--text-muted); }
+  .fp-body h3 { font-family: 'Fraunces', serif; font-size: 21px; margin: 0; }
+  .fp-sci { margin: 2px 0 8px; font-family: 'JetBrains Mono', monospace; font-style: italic; font-size: 12px; color: var(--text-muted); }
+  .fp-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .fp-chips span { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border); }
+  .fp-chips .fp-v { color: var(--rust); border-color: var(--rust); } .fp-chips .fp-h { color: var(--map-on); border-color: var(--map-on); }
+  .fp-facts { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.5; }
+  .fp-facts li { margin-bottom: 5px; }
+  .fp-wait { color: var(--text-muted); font-style: italic; list-style: none; margin-left: -18px; font-size: 13px; }
+  .fp-more { display: inline-block; margin: 2px 0 6px; font-size: 12.5px; color: var(--map-on); }
+  .fp-sight h4 { margin: 10px 0 6px; font-size: 13px; }
+  .fp-obs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+  .fp-o { display: flex; gap: 7px; align-items: center; padding: 5px; border-radius: 8px; background: var(--surface-hover); color: var(--text); text-decoration: none; font-size: 12px; line-height: 1.3; }
+  .fp-o img { width: 44px; height: 44px; flex: 0 0 44px; border-radius: 6px; object-fit: cover; }
+  .fp-o small { display: block; color: var(--text-muted); font-size: 11px; }
+  @media (max-width: 640px) { .fp { grid-template-columns: 1fr; } }
   .ff-facts { margin-top: 16px; }
   .ff-facts h3 { margin-bottom: 8px; }
   .ff-fact { padding: 9px 12px; margin-bottom: 6px; border-radius: 10px; background: var(--surface-hover); font-size: 13px; line-height: 1.45; }
@@ -1210,7 +1230,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.59</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.60</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
     </header>
@@ -13399,26 +13419,59 @@
     return getJSON("https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(sci.replace(/ /g, "_")))
       .then(function (d) { return (wikiCache[sci] = d && d.type !== "disambiguation" ? d : null); }, function () { return (wikiCache[sci] = null); });
   }
-  // a handful of facts per snake: SnakeList's own data first, then sentences from Wikipedia
-  function ownFacts(s) {
-    var f = [];
-    f.push(s.name + (s.venom ? " is venomous - admire it from a distance." : " is not venomous."));
-    if (s.countries.length) f.push(s.countries.length === 1 ? "It lives in only one country: " + s.countries[0] + "."
-      : "It's found in " + s.countries.length + " countries, including " + s.countries.slice(0, 3).join(", ") + ".");
-    if (s.family) f.push("It belongs to the family " + s.family + ".");
-    var inv = window.SL_INVASIVE && window.SL_INVASIVE[s.id];
-    if (inv) f.push("It's invasive in " + inv.map(function (p) { return p.note || p.name; }).join(", ") + ", far from its native range.");
-    return f;
-  }
-  function wikiFacts(w) {
-    if (!w || !w.extract) return [];
-    return w.extract.replace(/\s+/g, " ").split(/(?<=[.!?])\s+(?=[A-Z])/).filter(function (x) { return x.length > 40 && x.length < 260; }).slice(0, 4);
+  // ---- real facts: the snake's whole Wikipedia article, not just its one-line summary ----
+  // Sections that say something about the animal itself are read; sentences with sizes,
+  // numbers, records and behaviour are ranked first. Etymology, taxonomy and reference lists
+  // are skipped - "it belongs to the family X" is not a fact anyone wants.
+  var artCache = store("sl-wiki-facts") || {};
+  var GOOD = /descr|appear|morph|size|behav|ecolog|diet|feed|prey|hunt|venom|toxi|bite|reprod|breed|life|habit|distrib|range|conserv|threat|captiv|relation with humans|predat|defen/i;
+  var SKIP = /etymol|taxonom|systemat|classif|subspec|synonym|refer|further|extern|see also|note|bibliog|gallery|phylog/i;
+  function articleFacts(sci) {
+    if (artCache[sci]) return Promise.resolve(artCache[sci]);
+    var url = "https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=extracts|pageimages&explaintext=1&piprop=thumbnail&pithumbsize=800&titles=" + encodeURIComponent(sci);
+    return getJSON(url).then(function (d) {
+      var pages = (d.query && d.query.pages) || {}, pg = pages[Object.keys(pages)[0]] || {};
+      if (!pg.extract) return (artCache[sci] = { facts: [], img: null });
+      var parts = pg.extract.split(/\n(={2,})\s*([^=\n]+?)\s*\1\n/), sections = [{ title: "intro", text: parts[0] }];
+      for (var i = 1; i + 2 < parts.length + 1; i += 3) sections.push({ title: parts[i + 1] || "", text: parts[i + 2] || "" });
+      var picked = [];
+      sections.forEach(function (sec, k) {
+        if (k > 0 && (SKIP.test(sec.title) || !GOOD.test(sec.title))) return;
+        sec.text.replace(/\s+/g, " ").split(/(?<=[.!?])\s+(?=[A-Z"(])/).forEach(function (t, j) {
+          t = t.trim();
+          if (t.length < 45 || t.length > 280) return;
+          if (/^(it|the species|this species)? ?(is|was) (a|an) (species|genus)\b/i.test(t) && k > 0) return;
+          if (/family [A-Z][a-z]+idae|subfamily|genus|described by|named after|synonym|classified|taxonom/i.test(t)) return;
+          var score = (k === 0 && j === 0 ? 3 : 0) + (/\d/.test(t) ? 2 : 0) + (/\b(cm|mm|m|metres?|meters?|inches|feet|ft|kg|g)\b/.test(t) ? 2 : 0) +
+            (/\b(most|largest|longest|only|fastest|deadliest|unique|known|record|unlike|rare|rarely|often|can)\b/i.test(t) ? 1 : 0) +
+            (/venom|bite|prey|feeds?|eats?|hunts?|lays?|eggs?|live-?bear|nocturnal|diurnal|burrow|arboreal|aquatic|swim|climb/i.test(t) ? 2 : 0);
+          picked.push({ t: t, score: score, order: picked.length });
+        });
+      });
+      var seen = {};
+      var facts = picked.sort(function (a, b) { return b.score - a.score || a.order - b.order; })
+        .filter(function (f) { var key = f.t.slice(0, 40); if (seen[key]) return false; seen[key] = 1; return true; })
+        .slice(0, 7).sort(function (a, b) { return a.order - b.order; }).map(function (f) { return f.t.replace(/\[\d+\]/g, ""); });
+      var res = { facts: facts, img: pg.thumbnail ? pg.thumbnail.source : null, title: pg.title };
+      artCache[sci] = res;
+      try { store("sl-wiki-facts", artCache); } catch (e) {}
+      return res;
+    }, function () { return { facts: [], img: null }; });
   }
   function factFor(s) {
-    return wiki(s.sci).then(function (w) {
-      var all = wikiFacts(w).concat(ownFacts(s));
-      return all[Math.floor(Math.random() * all.length)];
-    });
+    return articleFacts(s.sci).then(function (a) { return a.facts.length ? a.facts[Math.floor(Math.random() * a.facts.length)] : null; });
+  }
+  // a photo to show for a followed snake: the card's own photo, else one found online
+  function photoHTML(s, sightingPhoto) {
+    var D2 = window.SL_PHOTOS, it = D2 && D2.items[s.id], X2 = window.SL_EXTRA_PHOTOS || {};
+    if (it) {
+      var C = D2.cols, R = D2.rows;
+      return '<div class="fp-img" style="background-image:url(' + D2.path.replace("%d", it[0]) + ');background-size:' + (C * 100) + '% ' + (R * 100) +
+        '%;background-position:' + ((it[1] % C) / (C - 1) * 100) + '% ' + (Math.floor(it[1] / C) / (R - 1) * 100) + '%"></div>';
+    }
+    var url = (X2[s.id] && X2[s.id].url) || sightingPhoto;
+    return url ? '<div class="fp-img" style="background-image:url(&quot;' + esc(url) + '&quot;);background-size:cover;background-position:center"></div>'
+      : '<div class="fp-img fp-none">No photo of this snake yet</div>';
   }
   // a few requests at a time - polite to iNaturalist's free API
   function eachLimit(list, n, fn) {
@@ -13431,43 +13484,53 @@
     var d = (Date.now() - new Date(iso).getTime()) / 864e5;
     return d < 1 ? "today" : d < 2 ? "yesterday" : d < 31 ? Math.floor(d) + " days ago" : new Date(iso).toLocaleDateString();
   }
-  // ---- the Following tab: activity feed + facts, above the list of followed snakes ----
+  // ---- the Following tab: one profile per snake you follow - its photo, real facts from its
+  // Wikipedia article, and its newest sightings - with what's new since your last visit ----
   var renderToken = 0;
   window.SL_renderFeed = function () {
     var list = followed(), my = ++renderToken;
-    if (!list.length) { feed.innerHTML = '<div class="ff-empty"><b>Follow snakes to get their news here.</b> Tap the bell next to any snake\'s name: you\'ll see its newest sightings and photos from iNaturalist, and fun facts.</div>'; return; }
-    feed.innerHTML = '<div class="ff-head"><h3>Activity</h3><span class="ff-sub">Newest sightings and photos of the snakes you follow, from iNaturalist</span></div><div class="ff-list"><p class="ff-loading">Checking for news&hellip;</p></div><div class="ff-facts"></div>';
-    var shown = list.slice(0, 30);
+    if (!list.length) { feed.innerHTML = '<div class="ff-empty"><b>Follow snakes to see them here.</b> Tap the bell next to any snake\'s name to get its photo, facts and newest sightings in this tab.</div>'; return; }
+    var shown = list.slice(0, 24);
+    feed.innerHTML = '<p class="ff-news" hidden></p>' + shown.map(function (s, i) {
+      return '<article class="fp" data-i="' + i + '">' + photoHTML(s) +
+        '<div class="fp-body"><h3>' + esc(s.name) + '</h3><p class="fp-sci">' + esc(s.sci !== s.name ? s.sci : "") + '</p>' +
+        '<div class="fp-chips"><span class="' + (s.venom ? "fp-v" : "fp-h") + '">' + (s.venom ? "Venomous" : "Harmless to people") + '</span>' +
+        (s.countries.length ? '<span>' + (s.countries.length === 1 ? esc(s.countries[0]) : s.countries.length + " countries") + '</span>' : "") + '</div>' +
+        '<ul class="fp-facts"><li class="fp-wait">Loading facts&hellip;</li></ul>' +
+        '<div class="fp-sight"><h4>Latest sightings</h4><div class="fp-obs"><span class="fp-wait">Checking iNaturalist&hellip;</span></div></div></div></article>';
+    }).join("");
+    var cards = feed.querySelectorAll(".fp");
+    var newTotal = 0;
     eachLimit(shown, 3, function (s) {
-      return taxonOf(s.sci).then(function (t) { return t ? sightings(t, 3).then(function (r) { return { s: s, t: t, obs: r }; }) : { s: s, t: null, obs: [] }; });
-    }).then(function (res) {
+      var i = shown.indexOf(s), el = cards[i];
+      var facts = articleFacts(s.sci).then(function (a) {
+        if (my !== renderToken) return;
+        var ul = el.querySelector(".fp-facts");
+        ul.innerHTML = a.facts.length ? a.facts.map(function (f) { return "<li>" + esc(f) + "</li>"; }).join("")
+          : '<li class="fp-wait">Very little has been written about this snake yet - it\'s one of the least-known species on the list.</li>';
+        if (a.title) ul.insertAdjacentHTML("afterend", '<a class="fp-more" href="https://en.wikipedia.org/wiki/' + encodeURIComponent(a.title.replace(/ /g, "_")) + '" target="_blank" rel="noopener">Read more on Wikipedia</a>');
+        if (!el.querySelector(".fp-img").style.backgroundImage && a.img) el.querySelector(".fp-img").outerHTML = photoHTML(s, a.img);
+      });
+      var obs = taxonOf(s.sci).then(function (t) { return t ? sightings(t, 4) : []; }).then(function (r) {
+        if (my !== renderToken) return;
+        var m = meta[s.id] || {}, box = el.querySelector(".fp-obs");
+        if (el.querySelector(".fp-none") && r[0] && r[0].photo) el.querySelector(".fp-img").outerHTML = photoHTML(s, r[0].photo);
+        var fresh = r.filter(function (o) { return m.last && o.created > m.last; }).length;
+        newTotal += fresh;
+        box.innerHTML = r.length ? r.map(function (o) {
+          return '<a href="' + esc(o.url) + '" target="_blank" rel="noopener" class="fp-o">' + (o.photo ? '<img src="' + esc(o.photo) + '" alt="" loading="lazy">' : "") +
+            '<span>' + (m.last && o.created > m.last ? '<em class="ff-new">New</em>' : "") + esc(o.place) + '<small>' + esc(o.seen || "") + " · reported " + ago(o.created) + "</small></span></a>";
+        }).join("") : '<span class="fp-wait">No sightings with photos reported yet.</span>';
+      }, function () {
+        el.querySelector(".fp-obs").innerHTML = '<span class="fp-wait">Live sightings show on <a href="https://snakelist.com" target="_blank" rel="noopener">snakelist.com</a> when you\'re online.</span>';
+      });
+      return Promise.all([facts, obs]);
+    }).then(function () {
       if (my !== renderToken) return;
-      var items = [];
-      res.forEach(function (r) { if (r) r.obs.forEach(function (o) { items.push({ s: r.s, o: o }); }); });
-      items.sort(function (a, b) { return a.o.created < b.o.created ? 1 : -1; });
-      var box = feed.querySelector(".ff-list");
-      if (!res.some(Boolean) || res.every(function (r) { return !r; })) throw new Error("offline");
-      box.innerHTML = items.length ? items.slice(0, 24).map(function (it) {
-        var m = meta[it.s.id], isNew = m && m.last && it.o.created > m.last;
-        return '<a class="ff-item" href="' + esc(it.o.url) + '" target="_blank" rel="noopener">' +
-          (it.o.photo ? '<img src="' + esc(it.o.photo) + '" alt="" loading="lazy">' : '<span class="ff-noimg"></span>') +
-          '<span class="ff-txt">' + (isNew ? '<em class="ff-new">New</em>' : "") + '<b>' + esc(it.s.name) + '</b> spotted in ' + esc(it.o.place) +
-          '<small>' + esc(it.o.seen || "") + (it.o.user ? " · by " + esc(it.o.user) : "") + " · reported " + ago(it.o.created) +
-          (it.o.grade === "research" ? " · confirmed" : " · awaiting ID") + '</small></span></a>';
-      }).join("") : '<p class="ff-loading">No sightings with photos reported for these snakes yet.</p>';
+      if (newTotal) { var n = feed.querySelector(".ff-news"); n.hidden = false; n.textContent = newTotal + " new sighting" + (newTotal === 1 ? "" : "s") + " since your last visit - marked New below."; }
       var now = new Date().toISOString();
       shown.forEach(function (s) { meta[s.id] = meta[s.id] || {}; meta[s.id].last = now; });
       saveMeta();
-    }).catch(function () {
-      if (my !== renderToken) return;
-      feed.querySelector(".ff-list").innerHTML = '<p class="ff-loading">Live sightings appear when you open SnakeList at <a href="https://snakelist.com" target="_blank" rel="noopener">snakelist.com</a> with an internet connection.</p>';
-    });
-    eachLimit(shown.slice(0, 12), 3, function (s) { return factFor(s).then(function (f) { return { s: s, f: f }; }); }).then(function (fs) {
-      if (my !== renderToken) return;
-      var el = feed.querySelector(".ff-facts");
-      el.innerHTML = '<h3>Fun facts</h3>' + fs.filter(Boolean).map(function (x) {
-        return '<div class="ff-fact"><b>' + esc(x.s.name) + '</b><span>' + esc(x.f) + '</span></div>';
-      }).join("");
     });
   };
   // ---- when the app opens: what's new with the snakes you follow ----
@@ -13505,7 +13568,7 @@
       } else throw 0;
     }).catch(function () {
       var s = list[Math.floor(Math.random() * list.length)];
-      factFor(s).then(function (f) { if (f) showToast("<b>Did you know?</b> " + esc(f), true); });
+      factFor(s).then(function (f) { if (f) showToast("<b>Did you know?</b> " + esc(f), true); }, function () {});
     });
   }
   (function waitIntro() { if (window.__introDone) setTimeout(startupNews, 1800); else setTimeout(waitIntro, 500); })();
