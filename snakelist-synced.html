@@ -663,6 +663,7 @@
   .fp-wait { color: var(--text-muted); font-style: italic; font-size: 13px; }
   li.fp-wait { list-style: none; margin-left: -18px; }
   .fp-obs .fp-wait { grid-column: 1 / -1; }
+  .fp-retry { justify-self: start; font: inherit; font-size: 12.5px; padding: 5px 12px; border-radius: 8px; border: 1px solid var(--map-on); background: transparent; color: var(--map-on); cursor: pointer; }
   .fp-body { min-width: 0; }
   .fp-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   .fp-actions button { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 9px; cursor: pointer; }
@@ -1245,7 +1246,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.62</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.63</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
     </header>
@@ -10535,23 +10536,14 @@
     document.getElementById("quiz-level-tag").textContent = level;
     nextQuizQuestion();
   }
-  // wrong answers get roasted - funny and demotivating, never actually mean
+  // wrong answers get roasted - short and dry, never actually mean
   const QUIZ_WRONG_MESSAGES = [
-    "The snake has left you on read.", "Bold guess. Wrong, but bold.",
-    "That's not where it lives. That's not even where it goes on vacation.",
-    "Main character energy, zero accuracy.", "You and geography are officially on a break.",
-    "The snake would need a passport to get to where you guessed.", "Not you confidently pointing at the wrong continent.",
-    "Somewhere, a herpetologist just felt a sharp pain.", "Google Maps is crying right now.",
-    "The snake is filing a restraining order against that guess.", "Close. If you squint. From space.",
-    "You guessed like the snake owes you money.", "Plot twist: that was wrong.",
-    "The snake has never heard of that place, and neither has its family.",
-    "Your answer and the right answer have never met.", "That guess was so lost it needs a search party.",
+    "Nope.", "Not even close.", "Wrong continent.", "That's a no.", "Respectfully, no.", "Hmm. No.",
+    "You just guessed, didn't you.", "Swing and a miss.", "Incorrect. Painfully.", "Bold choice. Wrong one.",
+    "Close? No.", "That's where it doesn't live.", "Try again. Or don't.", "Wrong, and confidently.",
+    "Not quite. Not even nearly.", "The map is right there.",
   ];
-  const QUIZ_TIMEOUT_MESSAGES = [
-    "Time's up. The snake got bored and slithered off.", "You froze harder than a snake in winter.",
-    "The timer ran out. Your brain buffered.", "Still loading... and the snake has moved on with its life.",
-    "That pause was longer than a snake's lunch break. And they eat once a month.",
-  ];
+  const QUIZ_TIMEOUT_MESSAGES = ["Time's up.", "Too slow.", "The clock won.", "Out of time.", "Took too long."];
   const QUIZ_EXAMPLES = ["Mexico", "Brazil", "India", "Indonesia"];
   function nextQuizQuestion() {
     stopQuizTimer();
@@ -12502,6 +12494,14 @@
   // instant jump-cut from the world view to a zoomed-in country reads as the map glitching
   // rather than responding to the click.
   var flyToken = 0;
+  // for the Map Layers / heatmap maps: hand over (and take back) the exact area in view, so
+  // switching map style never resets where you are
+  window.SL_MAP_VIEW = function () {
+    var vb = flatBox(), W = sizeW || cv.clientWidth, H = sizeH || cv.clientHeight;
+    var lon = function (x) { return (x - vb[0]) / vb[2] * 360 - 180; }, lat = function (y) { return 90 - (y - vb[1]) / vb[3] * 180; };
+    return { w: Math.max(-180, lon(0)), e: Math.min(180, lon(W)), n: Math.min(85, lat(0)), s: Math.max(-85, lat(H)) };
+  };
+  window.SL_MAP_FIT = function (w, e, s, n) { flyToLonLatBox(w, e, s, n, false); clampPan(); invalidate(); };
   function flyToLonLatBox(w, e, s, n, animate) {
     var cw = cv.clientWidth || sizeW, ch = cv.clientHeight || sizeH;
     if (!cw || !ch) return;
@@ -13458,8 +13458,23 @@
       family: (card.querySelectorAll(".card-tags .tag")[2] || {}).textContent || "" };
   }
   function followed() { return [].slice.call(grid.querySelectorAll(".card.follow")).map(info); }
-  function getJSON(url) {
-    return fetch(url, { headers: { Accept: "application/json" } }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  // one quiet retry: a free public API sometimes drops a request when it's busy (HTTP 429)
+  function getJSON(url, tries) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) { var e = new Error("HTTP " + r.status); e.status = r.status; throw e; }
+      return r.json();
+    }).catch(function (e) {
+      if ((tries || 0) >= 2) throw e;
+      return new Promise(function (res) { setTimeout(res, 1200 * ((tries || 0) + 1)); }).then(function () { return getJSON(url, (tries || 0) + 1); });
+    });
+  }
+  window.SL_getJSON = getJSON;
+  // why live data didn't load, in plain words
+  function whyOffline(e) {
+    if (window.claude && window.claude.use) return "Live sightings only load on snakelist.com - this claude.ai version of the app blocks outside websites.";
+    if (typeof navigator !== "undefined" && navigator.onLine === false) return "You're offline - sightings will load when you're back online.";
+    if (e && e.status === 429) return "iNaturalist is busy right now - tap Retry in a moment.";
+    return "iNaturalist didn't answer" + (e && e.message ? " (" + e.message + ")" : "") + " - tap Retry.";
   }
   function taxonOf(sci) {
     if (taxa[sci] !== undefined) return Promise.resolve(taxa[sci]);
@@ -13471,6 +13486,7 @@
       taxa[sci] = v; store("sl-taxa-cache", taxa); return v;
     });
   }
+  window.SL_taxonOf = function (sci) { return taxonOf(sci); };
   function sightings(t, n) {
     return getJSON(INAT + "observations?photos=true&order=desc&order_by=created_at&quality_grade=research,needs_id&per_page=" + n + "&taxon_id=" + t.id)
       .then(function (d) { return (d.results || []).map(function (o) {
@@ -13576,6 +13592,7 @@
     feed.onclick = function (e) {
       var art = e.target.closest(".fp"); if (!art) return;
       var s = shown[+art.getAttribute("data-i")]; if (!s) return;
+      if (e.target.closest(".fp-retry")) { window.SL_renderFeed(); return; }
       if (e.target.closest(".fp-unfollow")) {
         var b = s.card.querySelector(".follow-btn");
         if (b) b.click(); // same as tapping its bell - the profile disappears
@@ -13614,8 +13631,9 @@
           return '<a href="' + esc(o.url) + '" target="_blank" rel="noopener" class="fp-o">' + (o.photo ? '<img src="' + esc(o.photo) + '" alt="" loading="lazy">' : "") +
             '<span>' + (m.last && o.created > m.last ? '<em class="ff-new">New</em>' : "") + esc(o.place) + '<small>' + esc(o.seen || "") + " · reported " + ago(o.created) + "</small></span></a>";
         }).join("") : '<span class="fp-wait">No sightings with photos reported yet.</span>';
-      }, function () {
-        el.querySelector(".fp-obs").innerHTML = '<span class="fp-wait">Couldn\'t reach iNaturalist right now - sightings will show next time you open this tab.</span>';
+      }, function (err) {
+        el.querySelector(".fp-obs").innerHTML = '<span class="fp-wait">' + esc(whyOffline(err)) + '</span>' +
+          (window.claude && window.claude.use ? "" : '<button type="button" class="fp-retry">Retry</button>');
       });
       return Promise.all([facts, obs]);
     }).then(function () {
@@ -13697,5 +13715,445 @@
     });
   }, { rootMargin: "300px" });
   grid.querySelectorAll(".card").forEach(function (c) { if (!D.items[c.dataset.id]) io.observe(c); });
+})();
+</script>
+<style>
+  /* ---- Map layers + species heatmap ---- */
+  .globe-stage .lmap { position: absolute; inset: 0; z-index: 1; background: #dfe6ea; }
+  .globe-stage .lmap[hidden] { display: none; }
+  .globe-stage .globe-zoom { top: 54px; }
+  .globe-stage.real-map #globe-in, .globe-stage.real-map #globe-out, .globe-stage.real-map #globe-reset,
+  .globe-stage.real-map .globe-hint, .globe-stage.real-map .map-legend { display: none; }
+  .globe-stage.real-map .globe-zoom { z-index: 3; }
+  @media (max-width: 640px) { .globe-stage.real-map { min-height: 460px; } }
+  .hm-toggle, .layers-btn { position: absolute; z-index: 4; display: inline-flex; align-items: center; gap: 7px;
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.22); background: rgba(10,20,32,0.78); color: #f2f6fa;
+    backdrop-filter: blur(6px); box-shadow: 0 2px 10px rgba(0,0,0,0.22); transition: background .18s, color .18s, transform .12s; }
+  .hm-toggle { top: 10px; left: 10px; padding: 7px 12px 7px 10px; border-radius: 999px; }
+  .hm-toggle:hover, .layers-btn:hover { background: rgba(10,20,32,0.92); }
+  .hm-toggle:active, .layers-btn:active { transform: scale(0.96); }
+  .hm-toggle.on { background: linear-gradient(90deg, #2fb35a, #f6d32d 55%, #e3261f); color: #1b1407; border-color: rgba(255,255,255,0.5); text-shadow: 0 1px 0 rgba(255,255,255,0.35); }
+  .layers-wrap { position: absolute; top: 10px; right: 10px; z-index: 5; }
+  .layers-btn { position: static; width: 36px; height: 36px; justify-content: center; border-radius: 10px; padding: 0; }
+  .layers-pop { position: absolute; top: 42px; right: 0; width: 190px; padding: 8px; border-radius: 12px;
+    background: var(--surface, #fff); color: var(--text, #222); border: 1px solid var(--border, rgba(0,0,0,.12));
+    box-shadow: 0 10px 30px rgba(0,0,0,0.28); animation: hmIn .16s ease-out; }
+  .layers-pop[hidden] { display: none; }
+  .layers-pop p { margin: 2px 6px 6px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; opacity: .6; }
+  .layers-pop button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px; border: 2px solid transparent;
+    border-radius: 9px; background: none; color: inherit; font-family: 'Inter', sans-serif; font-size: 13px; cursor: pointer; text-align: left; }
+  .layers-pop button:hover { background: rgba(127,127,127,0.12); }
+  .layers-pop button.on { border-color: var(--gold, #c8912e); font-weight: 600; }
+  .lp-sw { width: 34px; height: 26px; border-radius: 6px; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15); }
+  .lp-classic { background: linear-gradient(135deg, #10375f 0 40%, #4e7040 40% 75%, #10375f 75%); }
+  .lp-standard { background: #f2efe9 linear-gradient(115deg, transparent 44%, #f7c66b 44% 52%, transparent 52%),
+    linear-gradient(25deg, transparent 60%, #fff 60% 66%, transparent 66%), linear-gradient(0deg, #aad3df 0 30%, transparent 30%); }
+  .lp-satellite { background: radial-gradient(circle at 30% 40%, #5a7a3a, transparent 45%), radial-gradient(circle at 75% 70%, #8a7550, transparent 40%), #1e3b4f; }
+  .lp-terrain { background: repeating-radial-gradient(circle at 60% 55%, #d9c9a0 0 3px, #b9c98f 3px 5px, #e9e3c8 5px 8px); }
+  .hm-panel { position: absolute; top: 50px; left: 10px; z-index: 4; width: 262px; max-width: calc(100% - 70px);
+    padding: 12px 12px 10px; border-radius: 14px; background: rgba(10,20,32,0.84); color: #f2f6fa;
+    border: 1px solid rgba(255,255,255,0.16); backdrop-filter: blur(8px); box-shadow: 0 8px 26px rgba(0,0,0,0.3);
+    font-family: 'Inter', sans-serif; font-size: 12.5px; animation: hmIn .18s ease-out; }
+  .hm-panel[hidden] { display: none; }
+  @keyframes hmIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  .hm-head { display: flex; align-items: center; justify-content: space-between; margin: -2px 0 9px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
+  .hm-pick { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .hm-panel.collapsed > :not(.hm-head):not(.hm-legend):not(.hm-status) { display: none; }
+  .hm-panel.collapsed .hm-key { display: none; }
+  .hm-panel.collapsed .hm-head { margin-bottom: 7px; }
+  .hm-row { margin-bottom: 8px; }
+  .hm-row input, .hm-row select { width: 100%; box-sizing: border-box; padding: 7px 9px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.08); color: inherit; font: inherit; }
+  .hm-row select option { color: #111; }
+  .hm-row select:disabled { opacity: .45; }
+  .hm-row input::placeholder { color: rgba(255,255,255,0.55); }
+  .hm-seg { display: flex; padding: 2px; border-radius: 9px; background: rgba(255,255,255,0.08); gap: 2px; }
+  .hm-seg button { flex: 1; padding: 6px 4px; border: none; border-radius: 7px; background: none; color: rgba(255,255,255,0.75);
+    font: inherit; font-size: 11.5px; cursor: pointer; transition: background .15s, color .15s; white-space: nowrap; }
+  .hm-seg button:hover { color: #fff; }
+  .hm-seg button.on { background: #f2f6fa; color: #10233a; font-weight: 600; }
+  .hm-bar { height: 10px; border-radius: 999px; background: linear-gradient(90deg, #2fb35a, #a6d63a 35%, #f6d32d 55%, #f58a1f 75%, #e3261f); opacity: .85; }
+  .hm-ends { display: flex; justify-content: space-between; margin-top: 3px; font-size: 10.5px; opacity: .8; }
+  .hm-key { display: flex; align-items: center; gap: 7px; margin-top: 6px; font-size: 11px; opacity: .9; }
+  .hm-hatch, .hm-blank { width: 18px; height: 12px; border-radius: 3px; flex: none; border: 1px solid rgba(255,255,255,0.35); }
+  .hm-hatch { background: repeating-linear-gradient(-45deg, rgba(160,160,160,.75) 0 1.5px, transparent 1.5px 5px); }
+  .hm-blank { background: transparent; }
+  .hm-status { margin: 8px 0 0; font-size: 11px; opacity: .8; min-height: 0; }
+  .hm-status:empty { display: none; }
+  .hm-status.bad { color: #ffb4a8; opacity: 1; }
+  .hm-collapse { width: 24px; height: 22px; border-radius: 6px; border: none; padding: 0;
+    background: rgba(255,255,255,0.12); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .hm-collapse::after { content: ""; width: 7px; height: 7px; border: solid currentColor; border-width: 0 2px 2px 0;
+    transform: translateY(2px) rotate(-135deg); transition: transform .18s; }
+  .hm-panel.collapsed .hm-collapse::after { transform: translateY(-2px) rotate(45deg); }
+  .hm-panel.collapsed { width: 190px; }
+  .hm-spp { pointer-events: none; }
+  .globe-stage .lmap canvas { width: auto; height: auto; cursor: inherit; touch-action: auto; }
+  .globe-stage .leaflet-container { font-family: 'Inter', sans-serif; }
+  .globe-stage .leaflet-control-attribution { font-size: 9.5px; }
+  @media (max-width: 640px) {
+    .hm-panel { top: auto; bottom: 26px; left: 8px; right: 8px; width: auto; max-width: none; padding: 10px; }
+    .hm-panel.collapsed { width: auto; right: 64px; }
+    .hm-panel .hm-row { margin-bottom: 6px; }
+    .hm-pick { grid-template-columns: 1.4fr 1fr; gap: 6px; }
+    .hm-key { display: inline-flex; margin-right: 10px; }
+    .globe-stage.real-map .leaflet-bottom.leaflet-right { bottom: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .hm-panel, .layers-pop { animation: none; } }
+</style>
+<script>
+// ---- Map Layers + Species heatmap -------------------------------------------------------
+// The SnakeList map stays as it is (country clicks, states, cities). "Layers" swaps in a real
+// map underneath - Standard (roads, cities, names), Satellite or Terrain - and the Species
+// heatmap paints real iNaturalist sightings over whichever of those is showing: green where
+// few were recorded, red where many, blended smoothly, transparent enough to read the map.
+(function () {
+  var stage = document.getElementById("globe-stage");
+  if (!stage) return;
+  var KEY = "sl-map-layers";
+  function load() { try { return JSON.parse(localStorage.getItem(KEY) || "null") || {}; } catch (e) { return {}; } }
+  var st = Object.assign({ style: "classic", heat: false, q: "", cat: "all", time: "all", measure: "obs" }, load());
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+  var INAT = "https://api.inaturalist.org/v1/";
+  var SNAKES = 85553;
+  var CATS = { all: { label: "All snakes", id: SNAKES }, Boa: { label: "Boas", id: 32080 }, Colubrid: { label: "Colubrids", id: 26504 },
+    Elapid: { label: "Elapids (cobras, mambas...)", id: 30403 }, Python: { label: "Pythons", id: 67532 }, Viper: { label: "Vipers", id: 30667 },
+    Other: { label: "Other snakes", id: SNAKES, without: [32080, 26504, 30403, 67532, 30667] } };
+  var STYLES = {
+    standard: { name: "Standard", url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", opt: { subdomains: "abcd", maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' } },
+    satellite: { name: "Satellite", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", opt: { maxZoom: 19,
+      attribution: "Imagery &copy; Esri, Maxar, Earthstar Geographics, and the GIS User Community" },
+      labels: "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}" },
+    terrain: { name: "Terrain", url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", opt: { subdomains: "abc", maxZoom: 17,
+      attribution: 'Map &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA), &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, SRTM' } }
+  };
+  // ---- the controls ----
+  stage.insertAdjacentHTML("beforeend",
+    '<div class="lmap" id="lmap" hidden></div>' +
+    '<button type="button" class="hm-toggle" id="hm-toggle" aria-pressed="false"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><circle cx="12" cy="12" r="7" opacity=".6"></circle><circle cx="12" cy="12" r="10.5" opacity=".3"></circle></svg> Species heatmap</button>' +
+    '<div class="layers-wrap"><button type="button" class="layers-btn" id="layers-btn" aria-haspopup="true" aria-expanded="false" title="Map layers">' +
+    '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5Z"></path><path d="m2 13 10 5 10-5"></path><path d="m2 17.5 10 5 10-5" opacity=".55"></path></svg></button>' +
+    '<div class="layers-pop" id="layers-pop" hidden><p>Map style</p>' +
+    ['classic', 'standard', 'satellite', 'terrain'].map(function (k) {
+      return '<button type="button" data-style="' + k + '"><span class="lp-sw lp-' + k + '"></span>' + (k === "classic" ? "SnakeList map" : STYLES[k].name) + "</button>";
+    }).join("") + '</div></div>' +
+    '<div class="hm-panel" id="hm-panel" hidden>' +
+    '<div class="hm-head"><span>Heatmap filters</span><button type="button" class="hm-collapse" id="hm-collapse" aria-label="Hide filters" aria-expanded="true"></button></div>' +
+    '<div class="hm-row hm-pick"><input type="text" id="hm-q" list="hm-names" placeholder="Search a snake species&hellip;" autocomplete="off"><datalist id="hm-names"></datalist><select id="hm-cat">' + Object.keys(CATS).map(function (k) { return '<option value="' + k + '">' + CATS[k].label + "</option>"; }).join("") + '</select></div>' +
+    '<div class="hm-row hm-seg" id="hm-time">' + [["day", "Today"], ["month", "This month"], ["year", "This year"], ["all", "All time"]].map(function (t) { return '<button type="button" data-v="' + t[0] + '">' + t[1] + "</button>"; }).join("") + '</div>' +
+    '<div class="hm-row hm-seg" id="hm-measure"><button type="button" data-v="obs">Sightings</button><button type="button" data-v="spp">Different species</button></div>' +
+    '<div class="hm-legend"><div class="hm-bar"></div><div class="hm-ends"><span>Fewer</span><span id="hm-unit">sightings</span><span>More</span></div>' +
+    '<div class="hm-key"><span class="hm-hatch"></span>Too few records to tell</div><div class="hm-key"><span class="hm-blank"></span>No records yet - not the same as no snakes</div></div>' +
+    '<p class="hm-status" id="hm-status"></p></div>');
+  var lmapEl = document.getElementById("lmap"), btnHeat = document.getElementById("hm-toggle"), panel = document.getElementById("hm-panel");
+  var pop = document.getElementById("layers-pop"), btnLayers = document.getElementById("layers-btn"), status = document.getElementById("hm-status");
+  var qIn = document.getElementById("hm-q"), catSel = document.getElementById("hm-cat");
+  // species names to pick from, straight from the checklist
+  var names = [], bySearch = {};
+  [].slice.call(document.querySelectorAll("#grid .card")).forEach(function (c) {
+    var nm = c.querySelector(".card-name").textContent.trim(), sci = c.querySelector(".card-sci").textContent.trim();
+    var isSci = c.querySelector(".card-name").classList.contains("is-sci");
+    var real = isSci ? nm : sci;
+    var label = isSci ? nm : nm + " (" + sci + ")";
+    names.push(label); bySearch[label.toLowerCase()] = real; bySearch[nm.toLowerCase()] = real; bySearch[real.toLowerCase()] = real;
+  });
+  document.getElementById("hm-names").innerHTML = names.slice(0, 5000).map(function (n) { return '<option value="' + n.replace(/"/g, "&quot;") + '">'; }).join("");
+  // ---- Leaflet, loaded only once someone asks for a real map ----
+  var L, map, base, labels, heat, sppLayer, leafletP;
+  function needLeaflet() {
+    if (leafletP) return leafletP;
+    leafletP = new Promise(function (res, rej) {
+      var css = document.createElement("link"); css.rel = "stylesheet"; css.href = "vendor/leaflet/leaflet.css"; document.head.appendChild(css);
+      var sc = document.createElement("script"); sc.src = "vendor/leaflet/leaflet.js";
+      sc.onload = function () { res(window.L); };
+      sc.onerror = function () { // e.g. opened as a single file: use the public copy
+        css.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+        var s2 = document.createElement("script"); s2.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
+        s2.onload = function () { res(window.L); }; s2.onerror = rej; document.head.appendChild(s2);
+      };
+      document.head.appendChild(sc);
+    });
+    return leafletP;
+  }
+  function viewFromClassic() {
+    var v = window.SL_MAP_VIEW ? window.SL_MAP_VIEW() : { w: -170, e: 170, s: -60, n: 75 };
+    return [[v.s, v.w], [v.n, v.e]];
+  }
+  function ensureMap() {
+    return needLeaflet().then(function (LL) {
+      L = LL;
+      if (map) return map;
+      lmapEl.hidden = false;
+      map = L.map(lmapEl, { worldCopyJump: true, zoomControl: false, minZoom: 1, maxBoundsViscosity: 0.8, attributionControl: true });
+      L.control.zoom({ position: "bottomright" }).addTo(map);
+      map.fitBounds(viewFromClassic());
+      map.on("moveend", function () { if (st.heat && st.measure === "spp") drawSpecies(); });
+      map.on("zoomstart", function () { if (sppCanvas) sppCanvas.style.opacity = "0"; });
+      new ResizeObserver(function () { map.invalidateSize(); }).observe(stage);
+      return map;
+    });
+  }
+  function setStyle(style) {
+    var prev = st.style;
+    st.style = style; save();
+    [].slice.call(pop.querySelectorAll("button")).forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-style") === style); });
+    stage.classList.toggle("real-map", style !== "classic");
+    if (style === "classic") {
+      if (map && prev !== "classic") {
+        var b = map.getBounds();
+        window.SL_MAP_FIT && window.SL_MAP_FIT(b.getWest(), b.getEast(), b.getSouth(), b.getNorth());
+      }
+      lmapEl.hidden = true;
+      return Promise.resolve();
+    }
+    var fromClassic = prev === "classic" || !map;
+    return ensureMap().then(function () {
+      lmapEl.hidden = false; map.invalidateSize();
+      if (fromClassic) map.fitBounds(viewFromClassic());
+      if (base) map.removeLayer(base);
+      if (labels) { map.removeLayer(labels); labels = null; }
+      var S = STYLES[style];
+      base = L.tileLayer(S.url, S.opt).addTo(map);
+      base.bringToBack();
+      if (S.labels) labels = L.tileLayer(S.labels, { maxZoom: 19, pane: "overlayPane", opacity: 0.85 }).addTo(map);
+      base.on("tileerror", function () {
+        if (window.claude && window.claude.use) setStatus("Real maps only load on snakelist.com - this claude.ai version blocks outside websites.", true);
+      });
+    });
+  }
+  // ---- what to show ----
+  function today() { var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function timeParam() {
+    var d = new Date(), y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, "0");
+    return st.time === "day" ? "&d1=" + today() + "&d2=" + today() : st.time === "month" ? "&d1=" + y + "-" + m + "-01" : st.time === "year" ? "&d1=" + y + "-01-01" : "";
+  }
+  var speciesTaxon = null; // resolved iNaturalist id of the searched species
+  function taxonParam() {
+    if (speciesTaxon) return "&taxon_id=" + speciesTaxon;
+    var c = CATS[st.cat] || CATS.all;
+    return "&taxon_id=" + c.id + (c.without ? "&without_taxon_id=" + c.without.join(",") : "");
+  }
+  function filterKey() { return taxonParam() + timeParam() + "|" + st.measure; }
+  function setStatus(t, bad) { status.textContent = t || ""; status.classList.toggle("bad", !!bad); }
+  // ---- the colours: green (few) -> yellow -> orange -> red (many), as a 256-step lookup ----
+  var PAL = (function () {
+    var c = document.createElement("canvas"); c.width = 256; c.height = 1;
+    var g = c.getContext("2d"), gr = g.createLinearGradient(0, 0, 256, 0);
+    gr.addColorStop(0, "#2fb35a"); gr.addColorStop(0.35, "#a6d63a"); gr.addColorStop(0.55, "#f6d32d"); gr.addColorStop(0.75, "#f58a1f"); gr.addColorStop(1, "#e3261f");
+    g.fillStyle = gr; g.fillRect(0, 0, 256, 1);
+    return g.getImageData(0, 0, 256, 1).data;
+  })();
+  // soft blobs are added into an intensity canvas, then every pixel is coloured from the palette
+  function colorize(ctx, w, h, maxA) {
+    var img = ctx.getImageData(0, 0, w, h), d = img.data;
+    for (var i = 0; i < d.length; i += 4) {
+      var a = d[i + 3];
+      if (!a) continue;
+      var k = Math.min(255, a) * 4;
+      d[i] = PAL[k]; d[i + 1] = PAL[k + 1]; d[i + 2] = PAL[k + 2];
+      d[i + 3] = Math.round(Math.min(maxA, 40 + a * 0.7)); // see-through, like a highlighter
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  function blob(ctx, x, y, r, t) {
+    var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, "rgba(0,0,0," + t + ")"); g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  }
+  function hatch(ctx, x, y, w, h) {
+    ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+    ctx.strokeStyle = "rgba(120,120,120,0.55)"; ctx.lineWidth = 1;
+    for (var k = -h; k < w; k += 5) { ctx.beginPath(); ctx.moveTo(x + k, y + h); ctx.lineTo(x + k + h, y); ctx.stroke(); }
+    ctx.restore();
+  }
+  // ---- Sightings: iNaturalist's grid tiles (counts per map cell), drawn as a smooth heat surface ----
+  var gridCache = {}, maxSeen = {}, redrawT = null;
+  function decodeUTF(g) { // UTFGrid: one character per 4x4 px, pointing at a key with that cell's data
+    var cells = {}, rows = g.grid || [], res = 256 / (rows.length || 64);
+    for (var y = 0; y < rows.length; y++) {
+      var row = rows[y];
+      for (var x = 0; x < row.length; x++) {
+        var code = row.charCodeAt(x); if (code >= 93) code--; if (code >= 35) code--; code -= 32;
+        var key = g.keys[code]; if (!key) continue;
+        var c = cells[key] || (cells[key] = { x0: x, y0: y, x1: x, y1: y, n: ((g.data || {})[key] || {}).cellCount || 1 });
+        if (x < c.x0) c.x0 = x; if (x > c.x1) c.x1 = x; if (y < c.y0) c.y0 = y; if (y > c.y1) c.y1 = y;
+      }
+    }
+    return Object.keys(cells).map(function (k) { var c = cells[k]; return { x: c.x0 * res, y: c.y0 * res, w: (c.x1 - c.x0 + 1) * res, h: (c.y1 - c.y0 + 1) * res, n: c.n }; });
+  }
+  function makeHeat() {
+    var Layer = L.GridLayer.extend({
+      createTile: function (coords, done) {
+        var tile = document.createElement("canvas"); tile.width = tile.height = 256;
+        var z = coords.z, url = INAT + "grid/" + z + "/" + coords.x + "/" + coords.y + ".grid.json?verifiable=true" + taxonParam() + timeParam();
+        var key = url;
+        var draw = function (cells) {
+          var ctx = tile.getContext("2d"), ref = Math.max(maxSeen[z] || 1, 5);
+          ctx.clearRect(0, 0, 256, 256);
+          cells.forEach(function (c) {
+            if (c.n < 3) return;
+            var t = Math.min(1, Math.log(1 + c.n) / Math.log(1 + ref));
+            var r = Math.max(10, Math.max(c.w, c.h) * 0.95);
+            blob(ctx, c.x + c.w / 2, c.y + c.h / 2, r, 0.25 + 0.75 * t);
+          });
+          colorize(ctx, 256, 256, 175);
+          cells.forEach(function (c) { if (c.n < 3) hatch(ctx, c.x, c.y, Math.max(c.w, 6), Math.max(c.h, 6)); });
+        };
+        var p = gridCache[key] ? Promise.resolve(gridCache[key]) :
+          (window.SL_getJSON ? window.SL_getJSON(url) : fetch(url).then(function (r) { return r.json(); })).then(function (g) { return (gridCache[key] = decodeUTF(g)); });
+        p.then(function (cells) {
+          var mx = 0; cells.forEach(function (c) { if (c.n > mx) mx = c.n; });
+          if (mx > (maxSeen[z] || 0) * 1.3) { maxSeen[z] = mx; clearTimeout(redrawT); redrawT = setTimeout(function () { heat && heat.redraw(); }, 400); }
+          draw(cells); done(null, tile); loaded++;
+          if (loaded === 1) setStatus("");
+        }, function (e) { failed(e); done(null, tile); });
+        return tile;
+      }
+    });
+    return new Layer({ opacity: 1, updateWhenZooming: false, keepBuffer: 2, zIndex: 400 });
+  }
+  var loaded = 0;
+  function failed(e) {
+    if (window.claude && window.claude.use) setStatus("The heatmap only loads on snakelist.com - this claude.ai version blocks outside websites.", true);
+    else setStatus("iNaturalist didn't answer" + (e && e.message ? " (" + e.message + ")" : "") + ". Try again in a moment.", true);
+  }
+  // ---- Different species: how many distinct snakes were recorded in each part of the view ----
+  var sppCanvas = null, sppCache = {}, sppToken = 0;
+  function drawSpecies() {
+    if (!map) return;
+    var my = ++sppToken;
+    if (!sppCanvas) { sppCanvas = L.DomUtil.create("canvas", "hm-spp"); map.getPanes().overlayPane.appendChild(sppCanvas); }
+    var size = map.getSize(), b = map.getBounds();
+    var cols = size.x > size.y ? 6 : 4, rows = size.x > size.y ? 4 : 6;
+    var W = b.getWest(), E = b.getEast(), S = Math.max(-85, b.getSouth()), N = Math.min(85, b.getNorth());
+    var cells = [];
+    for (var i = 0; i < cols; i++) for (var j = 0; j < rows; j++) {
+      var w = W + (E - W) * i / cols, e = W + (E - W) * (i + 1) / cols, n = N - (N - S) * j / rows, s = N - (N - S) * (j + 1) / rows;
+      cells.push({ w: w, e: e, s: s, n: n });
+    }
+    setStatus("Counting species across the view…");
+    var fk = filterKey(), k = 0, out = [];
+    function next() {
+      if (k >= cells.length || my !== sppToken) return Promise.resolve();
+      var c = cells[k++], key = fk + "|" + [c.w, c.e, c.s, c.n].map(function (v) { return v.toFixed(2); }).join(",");
+      var url = INAT + "observations/species_counts?per_page=0&verifiable=true" + taxonParam() + timeParam() +
+        "&swlat=" + c.s.toFixed(4) + "&swlng=" + c.w.toFixed(4) + "&nelat=" + c.n.toFixed(4) + "&nelng=" + c.e.toFixed(4);
+      var p = sppCache[key] != null ? Promise.resolve(sppCache[key]) : window.SL_getJSON(url).then(function (d) { return (sppCache[key] = d.total_results || 0); });
+      return p.then(function (v) { c.v = v; out.push(c); }, function (e) { c.err = e; }).then(next);
+    }
+    Promise.all([next(), next(), next()]).then(function () {
+      if (my !== sppToken) return;
+      if (!out.length) { failed(cells[0] && cells[0].err); return; }
+      var tl = map.containerPointToLayerPoint([0, 0]);
+      L.DomUtil.setPosition(sppCanvas, tl);
+      sppCanvas.width = size.x; sppCanvas.height = size.y;
+      sppCanvas.style.opacity = "1"; sppCanvas.style.width = size.x + "px"; sppCanvas.style.height = size.y + "px";
+      var ctx = sppCanvas.getContext("2d"), mx = Math.max.apply(null, out.map(function (c) { return c.v; })) || 1;
+      out.forEach(function (c) {
+        if (c.v < 2) return;
+        var p1 = map.latLngToContainerPoint([c.n, c.w]), p2 = map.latLngToContainerPoint([c.s, c.e]);
+        var cx = (p1.x + p2.x) / 2, cy = (p1.y + p2.y) / 2, r = Math.max(p2.x - p1.x, p2.y - p1.y) * 0.85;
+        blob(ctx, cx, cy, r, 0.3 + 0.7 * Math.sqrt(c.v / mx));
+      });
+      colorize(ctx, size.x, size.y, 165);
+      out.forEach(function (c) {
+        if (c.v !== 1) return;
+        var p1 = map.latLngToContainerPoint([c.n, c.w]), p2 = map.latLngToContainerPoint([c.s, c.e]);
+        hatch(ctx, p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+      });
+      setStatus(speciesTaxon ? "Species mode counts different snakes - pick a category to compare areas." : "Up to " + mx + " different snakes recorded in one part of the view.");
+    });
+  }
+  function clearHeat() {
+    if (heat && map) { map.removeLayer(heat); heat = null; }
+    if (sppCanvas) { sppCanvas.remove(); sppCanvas = null; }
+    sppToken++;
+  }
+  function applyHeat() {
+    clearHeat();
+    if (!st.heat) return;
+    var go = function () {
+      gridCache = {}; maxSeen = {}; loaded = 0;
+      setStatus("Loading sightings from iNaturalist…");
+      if (st.measure === "spp") drawSpecies();
+      else { heat = makeHeat().addTo(map); }
+    };
+    if (st.q && !speciesTaxon) {
+      var sci = bySearch[st.q.toLowerCase()] || st.q;
+      setStatus("Finding " + sci + "…");
+      (window.SL_taxonOf ? window.SL_taxonOf(sci) : Promise.reject()).then(function (t) {
+        if (!t) { setStatus("Couldn't find \"" + st.q + "\" on iNaturalist.", true); return; }
+        speciesTaxon = t.id; go();
+      }, failed);
+    } else go();
+  }
+  // ---- wiring ----
+  function syncUI() {
+    btnHeat.classList.toggle("on", st.heat); btnHeat.setAttribute("aria-pressed", String(st.heat));
+    panel.hidden = !st.heat;
+    qIn.value = st.q; catSel.value = st.cat; catSel.disabled = !!st.q;
+    [["hm-time", st.time], ["hm-measure", st.measure]].forEach(function (g) {
+      [].slice.call(document.getElementById(g[0]).children).forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-v") === g[1]); });
+    });
+    document.getElementById("hm-unit").textContent = st.measure === "spp" ? "different species" : "sightings";
+    [].slice.call(pop.querySelectorAll("button")).forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-style") === st.style); });
+  }
+  btnLayers.addEventListener("click", function (e) { e.stopPropagation(); pop.hidden = !pop.hidden; btnLayers.setAttribute("aria-expanded", String(!pop.hidden)); });
+  document.addEventListener("click", function (e) { if (!e.target.closest(".layers-wrap")) pop.hidden = true; });
+  pop.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-style]"); if (!b) return;
+    pop.hidden = true;
+    var sty = b.getAttribute("data-style");
+    if (sty === "classic" && st.heat) { st.heat = false; save(); clearHeat(); syncUI(); }
+    setStyle(sty).then(function () { if (st.heat) applyHeat(); });
+  });
+  btnHeat.addEventListener("click", function () {
+    st.heat = !st.heat; save(); syncUI();
+    if (!st.heat) { clearHeat(); return; }
+    // the heatmap goes on a real map; from the SnakeList map it switches to Standard
+    var p = st.style === "classic" ? setStyle(st.lastReal || "standard") : setStyle(st.style);
+    p.then(applyHeat, function () { setStatus("Couldn't load the map.", true); });
+  });
+  var qT = null;
+  qIn.addEventListener("input", function () {
+    clearTimeout(qT);
+    qT = setTimeout(function () {
+      var v = qIn.value.trim(), real = bySearch[v.toLowerCase()];
+      if (v && !real) return; // wait until it matches a species in the list
+      st.q = real ? v : ""; speciesTaxon = null; save(); syncUI(); applyHeat();
+    }, 350);
+  });
+  qIn.addEventListener("search", function () { if (!qIn.value) { st.q = ""; speciesTaxon = null; save(); syncUI(); applyHeat(); } });
+  catSel.addEventListener("change", function () { st.cat = catSel.value; save(); applyHeat(); });
+  ["hm-time", "hm-measure"].forEach(function (id) {
+    document.getElementById(id).addEventListener("click", function (e) {
+      var b = e.target.closest("[data-v]"); if (!b) return;
+      st[id === "hm-time" ? "time" : "measure"] = b.getAttribute("data-v"); save(); syncUI(); applyHeat();
+    });
+  });
+  document.getElementById("hm-collapse").addEventListener("click", function () {
+    var c = panel.classList.toggle("collapsed"); this.setAttribute("aria-expanded", String(!c)); this.setAttribute("aria-label", c ? "Show filters" : "Hide filters");
+  });
+  // on a phone the filters fold away after a choice so the map stays visible
+  panel.addEventListener("change", foldOnPhone); ["hm-time", "hm-measure"].forEach(function (id) { document.getElementById(id).addEventListener("click", foldOnPhone); });
+  function foldOnPhone(e) { if (window.innerWidth <= 640 && e.target.closest && e.target.closest("button,select,input")) setTimeout(function () { panel.classList.add("collapsed"); }, 500); }
+  // a clear button inside the search box
+  qIn.setAttribute("type", "search");
+  syncUI();
+  // remember the last real style, and bring back what was on last time
+  var _set = setStyle;
+  setStyle = function (sty) { if (sty !== "classic") st.lastReal = sty; return _set(sty); };
+  function restore() {
+    if (st.style !== "classic") setStyle(st.style).then(function () { if (st.heat) applyHeat(); });
+    else if (st.heat) { st.heat = false; save(); syncUI(); }
+  }
+  // wait until the Map tab is actually opened (the stage has a size) before building a real map
+  var started = false;
+  new MutationObserver(function () {
+    if (!started && document.body.classList.contains("tab-map")) { started = true; setTimeout(restore, 300); }
+  }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
 })();
 </script>
