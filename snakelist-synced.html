@@ -689,6 +689,7 @@
     font-size: 13.5px; color: var(--text); transform: translate(-50%, 140%); opacity: 0; transition: transform .35s cubic-bezier(.2,.9,.3,1), opacity .25s; }
   .ff-toast.show { transform: translate(-50%, 0); opacity: 1; }
   .ff-tmsg { flex: 1; line-height: 1.4; }
+  .ff-bell { flex: 0 0 auto; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: #c98a12; background: rgba(242,179,61,0.16); border: 1px solid rgba(242,179,61,0.5); }
   .ff-go { flex: 0 0 auto; font: inherit; font-size: 12.5px; font-weight: 600; padding: 6px 11px; border-radius: 999px; border: 0; background: var(--map-on); color: #fff; cursor: pointer; }
   .ff-x { flex: 0 0 auto; border: 0; background: none; color: var(--text-muted); font-size: 18px; cursor: pointer; }
 
@@ -1041,7 +1042,10 @@
   .map-list span.zoomed, .map-list span.state-pill.zoomed { background: var(--gold); border-color: var(--gold); color: var(--on-accent); box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--gold); }
   .map-wrap svg path.xk { stroke-width: 0.35px; }
   .map-list span.inv { background: #e08a2c; border-color: #e08a2c; color: #fff; }
-  .map-wrap svg .sheet-city { fill: #c0392b; stroke: #fff; stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
+  .map-wrap svg .sheet-city { fill: #4f8a4a; stroke: #fff; stroke-width: 1.4px; vector-effect: non-scaling-stroke; transition: fill .4s; }
+  .map-wrap svg.cities-view .on path, .map-wrap svg.cities-view path.on, .map-wrap svg.cities-view .on circle { fill: var(--map-off); stroke: var(--map-line); }
+  .city-sw { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; border: 1px solid rgba(255,255,255,0.7); }
+  .city-note { flex-basis: 100%; margin: 6px 0 0; font-size: 11.5px; color: var(--text-muted); }
   .sheet-btns { display: flex; gap: 8px; margin-top: 12px; }
   .sheet-btn { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; padding: 6px 13px; border-radius: 999px;
     border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
@@ -1241,7 +1245,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.61</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.62</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
     </header>
@@ -11167,7 +11171,8 @@
   function sheetMode(mode) {
     var card = sheetCard;
     clearOverlay();
-    if (zoomedTo) sheetZoom(null);
+    svg.classList.remove("cities-view");
+    if (zoomedTo) { zoomedTo = null; if (homeViewBox) svg.setAttribute("viewBox", homeViewBox); }
     var places = sheetPlaces(card);
     var bS = document.getElementById("sheet-states"), bC = document.getElementById("sheet-cities");
     bS.hidden = !places.length;
@@ -11239,16 +11244,70 @@
           return (pl.states || []).map(function (c) { return '<span class="inv">' + (STATE_NAME[c] || c) + " &middot; invasive</span>"; }).join("");
         }).join("");
     } else {
-      cities.forEach(function (c) {
+      var dots = cities.map(function (c) {
         var q = projectSheet(c.lon, c.lat);
         var dot = document.createElementNS(SVGNS, "circle");
-        dot.setAttribute("cx", q[0]); dot.setAttribute("cy", q[1]); dot.setAttribute("r", 6);
+        dot.setAttribute("cx", q[0]); dot.setAttribute("cy", q[1]); dot.setAttribute("r", 7);
         dot.setAttribute("class", "sheet-city");
         var t = document.createElementNS(SVGNS, "title"); t.textContent = c.name; dot.appendChild(t);
         sheetOverlay.appendChild(dot);
+        return dot;
       });
-      list.innerHTML = cities.map(function (c) { return '<span data-zoom="p:' + c.lon + "," + c.lat + '">' + c.name + " <i>" + c.where + "</i></span>"; }).join("");
+      var pill = function (c) {
+        return '<span data-zoom="p:' + c.lon + "," + c.lat + '">' + (c.col ? '<b class="city-sw" style="background:' + c.col + '"></b>' : "") +
+          c.name + " <i>" + c.where + (c.n != null ? " &middot; " + c.n.toLocaleString() + (c.n === 1 ? " sighting" : " sightings") : "") + "</i></span>";
+      };
+      list.innerHTML = cities.map(pill).join("") + '<p class="city-note">Checking iNaturalist for sightings near each city&hellip;</p>';
+      // the country fill steps back to plain land so the city shades read, and the map zooms in on them
+      svg.classList.add("cities-view");
+      if (cities.length) {
+        if (!homeViewBox) homeViewBox = svg.getAttribute("viewBox");
+        var hv = homeViewBox.split(/[ ,]+/).map(Number), bx = [Infinity, Infinity, -Infinity, -Infinity];
+        cities.forEach(function (c) { var q = projectSheet(c.lon, c.lat); bx[0] = Math.min(bx[0], q[0]); bx[1] = Math.min(bx[1], q[1]); bx[2] = Math.max(bx[2], q[0]); bx[3] = Math.max(bx[3], q[1]); });
+        var w = Math.max((bx[2] - bx[0]) * 1.35, 300), h = Math.max((bx[3] - bx[1]) * 1.35, 150), ar = hv[2] / hv[3];
+        if (w / h > ar) h = w / ar; else w = h * ar;
+        w = Math.min(w, hv[2]); h = Math.min(h, hv[3]);
+        var cx = (bx[0] + bx[2]) / 2, cy = (bx[1] + bx[3]) / 2;
+        svg.setAttribute("viewBox", Math.max(hv[0], Math.min(hv[0] + hv[2] - w, cx - w / 2)).toFixed(1) + " " + Math.max(hv[1], Math.min(hv[1] + hv[3] - h, cy - h / 2)).toFixed(1) + " " + w.toFixed(1) + " " + h.toFixed(1));
+        zoomedTo = "cities";
+        var rr = Math.max(2.2, 8 * w / hv[2]);  // the same size on screen however far it zoomed in
+        dots.forEach(function (d) { d.setAttribute("r", rr.toFixed(2)); });
+      }
+      // how often this snake has been seen around each city (iNaturalist, within 25 km): the
+      // city where it's seen most is dark forest green, the one where it's seen least is light
+      var sci = (card.querySelector(".card-name.is-sci") || card.querySelector(".card-sci")).textContent.trim();
+      var token = ++sheetCityToken;
+      var i = 0, done = 0;
+      function one() {
+        if (i >= cities.length) return Promise.resolve();
+        var c = cities[i++];
+        var key = sci + "|" + c.name;
+        var p = CITY_SIGHT[key] != null ? Promise.resolve(CITY_SIGHT[key]) :
+          fetch("https://api.inaturalist.org/v1/observations?per_page=0&verifiable=true&radius=25&lat=" + c.lat + "&lng=" + c.lon + "&taxon_name=" + encodeURIComponent(sci))
+            .then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) { return (CITY_SIGHT[key] = d.total_results || 0); });
+        return p.then(function (n) { c.n = n; done++; }, function () {}).then(one);
+      }
+      Promise.all([one(), one(), one(), one()]).then(function () {
+        if (token !== sheetCityToken || !sheetOverlay) return;
+        if (!done) { list.querySelector(".city-note").textContent = "Sighting counts need an internet connection (they come from iNaturalist)."; return; }
+        var max = Math.max.apply(null, cities.map(function (c) { return c.n || 0; })) || 1;
+        cities.forEach(function (c, k) {
+          // square-root scale, so one city with thousands of sightings doesn't wash all the rest out
+          var t = c.n ? Math.sqrt(c.n / max) : 0;
+          c.col = cityShade(t);
+          dots[k].style.fill = c.col;
+        });
+        var order = cities.slice().sort(function (a, b) { return (b.n || 0) - (a.n || 0); });
+        list.innerHTML = order.map(pill).join("") +
+          '<p class="city-note"><b class="city-sw" style="background:' + cityShade(1) + '"></b>most sightings &nbsp; <b class="city-sw" style="background:' + cityShade(0) + '"></b>fewest &middot; iNaturalist sightings within 25 km of each city</p>';
+      });
     }
+  }
+  var sheetCityToken = 0, CITY_SIGHT = {};
+  // light leaf green (fewest sightings) to dark forest green (most)
+  function cityShade(t) {
+    var lo = [205, 236, 186], hi = [16, 58, 28];
+    return "rgb(" + lo.map(function (v, i) { return Math.round(v + (hi[i] - v) * t); }).join(",") + ")";
   }
   // ---- tap a pill: the sheet's map centres and zooms on that country / state / city --------
   var homeViewBox = null, zoomedTo = null;
@@ -11303,7 +11362,7 @@
     places.forEach(function (k) { placeSet[k] = true; placeCountries[k.slice(0, 2)] = true; });
     var CC = { "United States": "US", Mexico: "MX", Brazil: "BR", India: "IN", Colombia: "CO", Indonesia: "ID" };
     var out = [];
-    for (var i = 0; i < rows.length && out.length < 24; i++) {
+    for (var i = 0; i < rows.length && out.length < 40; i++) {
       var r = rows[i];
       if (countries.indexOf(r[1]) < 0) continue;
       var cc = CC[r[1]];
@@ -13572,7 +13631,7 @@
   toast.className = "ff-toast"; toast.setAttribute("role", "status");
   document.body.appendChild(toast);
   function showToast(html, withBtn) {
-    toast.innerHTML = '<span class="ff-bell">🔔</span><span class="ff-tmsg">' + html + '</span>' +
+    toast.innerHTML = '<span class="ff-bell"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" fill="currentColor"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg></span><span class="ff-tmsg">' + html + '</span>' +
       (withBtn ? '<button type="button" class="ff-go">See activity</button>' : "") + '<button type="button" class="ff-x" aria-label="Close">&times;</button>';
     toast.classList.add("show");
     clearTimeout(toast._t); toast._t = setTimeout(function () { toast.classList.remove("show"); }, 12000);
