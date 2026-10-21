@@ -32,6 +32,9 @@ head = f"""<!doctype html>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){{dataLayer.push(arguments);}}
+  // cookies only once the visitor accepts them in SnakeList's cookie banner
+  var slOk = false; try {{ slOk = localStorage.getItem('sl-consent') === 'yes'; }} catch (e) {{}}
+  gtag('consent', 'default', {{ analytics_storage: slOk ? 'granted' : 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' }});
   gtag('js', new Date());
   gtag('config', 'G-PY2LJV389K');
 </script>
