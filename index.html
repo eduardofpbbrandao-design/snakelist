@@ -734,6 +734,12 @@
   .fp-countries { border: 1px solid var(--map-on); background: var(--map-on); color: #fff; }
   .fp-unfollow { border: 1px solid var(--border); background: transparent; color: var(--text); }
   .fp-unfollow:hover { border-color: var(--rust); color: var(--rust); }
+  .fp-fav { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--gold); background: transparent; color: var(--text); }
+  .fp-fav svg { width: 14px; height: 14px; }
+  .fp-fav.on { background: linear-gradient(135deg, #e0a526 0%, #f3cf6a 140%); border-color: #c98f14; color: #3a2600; }
+  .fp-fav.on svg { fill: currentColor; }
+  .fp.fav { box-shadow: 0 0 0 2px #e0a526; }
+  .fp-favtag { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: #e0a526; color: #3a2600; }
   .fp-chips button.fp-place { font: inherit; font-size: 11.5px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; }
   .fp-chips button.fp-place:hover { border-color: var(--map-on); color: var(--map-on); }
   .fp-more { display: inline-block; margin: 2px 0 6px; font-size: 12.5px; color: var(--map-on); }
@@ -1312,7 +1318,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.85</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v2.87</span></p><div class="hdr-actions"><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
     </header>
@@ -11593,6 +11599,10 @@
       family: (card.querySelectorAll(".card-tags .tag")[2] || {}).textContent || "" };
   }
   function followed() { return [].slice.call(grid.querySelectorAll(".card.follow")).map(info); }
+  // favourites among the snakes you follow - shown first in Following, and a strong hint for "Picked for you"
+  function isFav(id) { return !!(meta[id] && meta[id].fav); }
+  window.SL_FAVS = function () { return Object.keys(meta).filter(isFav); };
+  var STAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 2.8 2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3-4.6-4.4 6.3-.9Z"></path></svg>';
   // one quiet retry: a free public API sometimes drops a request when it's busy (HTTP 429)
   function getJSON(url, tries) {
     return fetch(url).then(function (r) {
@@ -11712,22 +11722,33 @@
   window.SL_renderFeed = function () {
     var list = followed(), my = ++renderToken;
     if (!list.length) { feed.innerHTML = '<div class="ff-empty"><b>Follow snakes to see them here.</b> Tap the bell next to any snake\'s name to get its photo, facts and newest sightings in this tab.</div>'; return; }
+    list.sort(function (a, b) { return isFav(b.id) - isFav(a.id); }); // favourites first
     var shown = list.slice(0, 24);
     feed.innerHTML = '<p class="ff-news" hidden></p>' + shown.map(function (s, i) {
-      return '<article class="fp" data-i="' + i + '">' + photoHTML(s) +
+      var fav = isFav(s.id);
+      return '<article class="fp' + (fav ? " fav" : "") + '" data-i="' + i + '">' + photoHTML(s) +
         '<div class="fp-body"><h3>' + esc(s.name) + '</h3><p class="fp-sci">' + esc(s.sci !== s.name ? s.sci : "") + '</p>' +
-        '<div class="fp-chips"><span class="' + (s.venom ? "fp-v" : "fp-h") + '">' + (s.venom ? "Venomous" : "Harmless to people") + '</span>' +
+        '<div class="fp-chips">' + (fav ? '<span class="fp-favtag">Favourite</span>' : "") + '<span class="' + (s.venom ? "fp-v" : "fp-h") + '">' + (s.venom ? "Venomous" : "Harmless to people") + '</span>' +
         (s.countries.length ? '<button type="button" class="fp-place" title="' + (s.countries.length === 1 ? "See it on the map" : "See where it lives") + '">' +
           (s.countries.length === 1 ? esc(s.countries[0]) : s.countries.length + " countries") + '</button>' : "") + '</div>' +
         '<ul class="fp-facts"><li class="fp-wait">Loading facts&hellip;</li></ul>' +
         '<div class="fp-sight"><h4>Latest sightings</h4><div class="fp-obs"><span class="fp-wait">Checking iNaturalist&hellip;</span></div></div>' +
-        '<div class="fp-actions"><button type="button" class="fp-countries">See countries</button><button type="button" class="fp-unfollow">Unfollow</button></div></div></article>';
+        '<div class="fp-actions"><button type="button" class="fp-fav' + (fav ? " on" : "") + '">' + STAR + (fav ? "Favourite" : "Mark as favourite") + '</button>' +
+        '<button type="button" class="fp-countries">See countries</button><button type="button" class="fp-unfollow">Unfollow</button></div></div></article>';
     }).join("");
     var cards = feed.querySelectorAll(".fp");
     feed.onclick = function (e) {
       var art = e.target.closest(".fp"); if (!art) return;
       var s = shown[+art.getAttribute("data-i")]; if (!s) return;
       if (e.target.closest(".fp-retry")) { window.SL_renderFeed(); return; }
+      if (e.target.closest(".fp-fav")) {
+        meta[s.id] = meta[s.id] || {}; meta[s.id].fav = !meta[s.id].fav; saveMeta();
+        // updated in place (no reloading its facts and sightings); it moves to the top next visit
+        var on = meta[s.id].fav, fb = e.target.closest(".fp-fav"), chips = art.querySelector(".fp-chips"), tag = chips.querySelector(".fp-favtag");
+        art.classList.toggle("fav", on); fb.classList.toggle("on", on); fb.innerHTML = STAR + (on ? "Favourite" : "Mark as favourite");
+        if (on && !tag) chips.insertAdjacentHTML("afterbegin", '<span class="fp-favtag">Favourite</span>'); else if (!on && tag) tag.remove();
+        return;
+      }
       if (e.target.closest(".fp-unfollow")) {
         var b = s.card.querySelector(".follow-btn");
         if (b) b.click(); // same as tapping its bell - the profile disappears
@@ -13059,6 +13080,8 @@
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v2.87", items: ["“Mark as favourite” on the snakes you follow - favourites come first in Following and shape “Picked for you” the most"] },
+    { v: "v2.86", items: ["“Picked for you” now learns from the snakes you follow, want to see and have seen - their type, family, where they live, venomous or not", "...and from the snakes you open and look at the most"] },
     { v: "v2.85", items: ["Map: no more double “See states” button", "Clicking a country in a search (like a continent) keeps “See all countries” so you can go back to the others"] },
     { v: "v2.84", items: ["Habitats: one “Show all” button shows every habitat straight away"] },
     { v: "v2.83", items: ["A new button next to Report shows every SnakeList update ever", "The report box is back to how it was, now with an Other option"] },
@@ -13138,6 +13161,7 @@
   // ---- what this person looks at (only with consent), and the snakes that match it ----
   var P; try { P = JSON.parse(get("sl-interests") || "null"); } catch (e) { P = null; }
   P = P || { type: {}, fam: {}, cont: {}, ctry: {}, venom: 0, safe: 0, q: {}, n: 0 };
+  P.visit = P.visit || {}; // how often you open each snake - tap its card, its photo, its buttons
   var saveT = null;
   function bump(map, key, w) { if (!key) return; map[key] = (map[key] || 0) + (w || 1); }
   function note() { P.n++; clearTimeout(saveT); saveT = setTimeout(function () { if (allowed()) set("sl-interests", JSON.stringify(P)); }, 400); }
@@ -13147,6 +13171,7 @@
   }
   function likeCard(card, w) {
     if (!allowed() || !card) return;
+    bump(P.visit, card.dataset.id, w);
     bump(P.type, card.dataset.type, w); bump(P.fam, famOf(card), w);
     (card.dataset.continents || "").split("|").forEach(function (c) { bump(P.cont, c, w * 0.5); });
     if (card.dataset.venomous === "1") P.venom += w * 0.5; else P.safe += w * 0.2;
@@ -13157,7 +13182,7 @@
     var t = e.target;
     var card = t.closest && t.closest("#grid .card");
     if (card && t.closest(".seen-btn, .wish-btn, .follow-btn, .map-btn, .photo-btn, .note-btn")) likeCard(card, t.closest(".wish-btn, .follow-btn") ? 3 : 2);
-    else if (card) likeCard(card, 1);
+    else if (card) likeCard(card, t === card ? 2 : 1); // a tap on its photo counts more
     var chip = t.closest && t.closest("[data-type], [data-family], [data-continent]");
     if (chip && chip.closest(".filters, #guide-controls, .filter-group")) {
       bump(P.type, chip.dataset.type, 2); bump(P.fam, chip.dataset.family, 2); bump(P.cont, chip.dataset.continent, 2); note();
@@ -13173,17 +13198,55 @@
     sqT = setTimeout(function () { var v = sq.value.trim().toLowerCase(); if (v.length >= 3 && allowed()) { bump(P.q, v, 1); note(); } }, 1200);
   });
   function top(map) { var t = 0; for (var k in map) t += map[k]; return t || 1; }
+  // what your own lists say you like: the snakes you follow, want to see and have seen -
+  // their types, families, where they live, venomous or not, invasive or not. Your lists are
+  // already on this device, so this needs no cookies.
+  function listTaste() {
+    var L = { type: {}, fam: {}, cont: {}, ctry: {}, area: {}, venom: 0, safe: 0, inv: 0, n: 0 };
+    // ...and the snakes you open the most (with cookies allowed), each counted by how often
+    var vis = allowed() ? Object.keys(P.visit).sort(function (a, b) { return P.visit[b] - P.visit[a]; }).slice(0, 15) : [];
+    var vmax = vis.length ? P.visit[vis[0]] : 1, vw = {}, favs = {};
+    (window.SL_FAVS ? window.SL_FAVS() : []).forEach(function (id) { favs[id] = 1; });
+    vis.forEach(function (id) { vw[id] = 0.5 + 2.5 * P.visit[id] / vmax; });
+    var sel = "#grid .card.follow, #grid .card.wish, #grid .card.done" + vis.map(function (id) { return ', #grid .card[data-id="' + id + '"]'; }).join("");
+    [].slice.call(document.querySelectorAll(sel)).forEach(function (c) {
+      var w = favs[c.dataset.id] ? 5 : c.classList.contains("follow") || c.classList.contains("wish") ? 3 : c.classList.contains("done") ? 2 : vw[c.dataset.id] || 1;
+      L.n++;
+      bump(L.type, c.dataset.type, w); bump(L.fam, famOf(c), w);
+      (c.dataset.continents || "").split("|").forEach(function (k) { bump(L.cont, k, w); });
+      (c.dataset.countries || "").split("|").forEach(function (k) { bump(L.ctry, k, w); });
+      (c.dataset.states || "").split("|").concat((c.dataset.provinces || "").split("|")).forEach(function (k) { bump(L.area, k, w); });
+      if (c.dataset.venomous === "1") L.venom += w; else L.safe += w;
+      if (c.dataset.invasive) L.inv += w;
+    });
+    return L;
+  }
   function pick() {
-    if (!allowed() || P.n < 3 || !window.SL_SET_PRIORITY) return;
+    if (!window.SL_SET_PRIORITY) return;
+    var useP = allowed() && P.n >= 3, L = listTaste();
+    if (!useP && !L.n) return;
     var tT = top(P.type), tF = top(P.fam), tC = top(P.cont), tK = top(P.ctry), tQ = top(P.q), vv = P.venom + P.safe || 1;
-    var qs = Object.keys(P.q).sort(function (a, b) { return P.q[b] - P.q[a]; }).slice(0, 6);
+    var lT = top(L.type), lF = top(L.fam), lC = top(L.cont), lK = top(L.ctry), lA = top(L.area), lv = L.venom + L.safe || 1, lw = L.n ? 1 : 0;
+    var qs = useP ? Object.keys(P.q).sort(function (a, b) { return P.q[b] - P.q[a]; }).slice(0, 6) : [];
     var scored = [];
     [].slice.call(document.querySelectorAll("#grid .card")).forEach(function (c) {
-      if (c.classList.contains("done")) return;
-      var sc = 2 * (P.type[c.dataset.type] || 0) / tT + 3 * (P.fam[famOf(c)] || 0) / tF;
-      (c.dataset.continents || "").split("|").forEach(function (k) { sc += (P.cont[k] || 0) / tC; });
-      (c.dataset.countries || "").split("|").forEach(function (k) { sc += 2 * (P.ctry[k] || 0) / tK; });
-      sc += (c.dataset.venomous === "1" ? P.venom : P.safe) / vv * 0.8;
+      // already on one of your lists - you know about it, so it's not a new suggestion
+      if (c.classList.contains("done") || c.classList.contains("wish") || c.classList.contains("follow")) return;
+      var sc = 0, fam = famOf(c), conts = (c.dataset.continents || "").split("|"), ctrs = (c.dataset.countries || "").split("|");
+      if (useP) {
+        sc += 2 * (P.type[c.dataset.type] || 0) / tT + 3 * (P.fam[fam] || 0) / tF;
+        conts.forEach(function (k) { sc += (P.cont[k] || 0) / tC; });
+        ctrs.forEach(function (k) { sc += 2 * (P.ctry[k] || 0) / tK; });
+        sc += (c.dataset.venomous === "1" ? P.venom : P.safe) / vv * 0.8;
+      }
+      if (lw) {
+        sc += 2 * (L.type[c.dataset.type] || 0) / lT + 3 * (L.fam[fam] || 0) / lF;
+        var bc = 0; conts.forEach(function (k) { bc = Math.max(bc, (L.cont[k] || 0) / lC); }); sc += bc;
+        var bk = 0; ctrs.forEach(function (k) { bk = Math.max(bk, (L.ctry[k] || 0) / lK); }); sc += 2 * bk;
+        var ba = 0; (c.dataset.states || "").split("|").concat((c.dataset.provinces || "").split("|")).forEach(function (k) { if (k) ba = Math.max(ba, (L.area[k] || 0) / lA); }); sc += 2 * ba;
+        sc += (c.dataset.venomous === "1" ? L.venom : L.safe) / lv;
+        if (c.dataset.invasive && L.inv) sc += L.inv / (L.n * 3);
+      }
       if (qs.length) {
         var txt = (c.querySelector(".card-name").textContent + " " + c.querySelector(".card-sci").textContent).toLowerCase();
         qs.forEach(function (q) { if (txt.indexOf(q) >= 0) sc += 4 * P.q[q] / tQ; });
