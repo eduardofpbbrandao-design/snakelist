@@ -582,6 +582,7 @@
   .photo-lightbox .pl-frame { position: relative; overflow: hidden; border-radius: 12px; touch-action: none; cursor: zoom-in; }
   .photo-lightbox .pl-frame.zoomed { cursor: grab; }
   .photo-lightbox .pl-frame .pl-img { border-radius: 0; transform-origin: 50% 50%; will-change: transform; }
+  .photo-lightbox .pl-img.pl-hq { background-color: #0b130e; background-repeat: no-repeat; }
   .pl-zoom { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 6px; }
   .pl-zoom button { width: 34px; height: 34px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.25); background: rgba(10,20,14,0.7);
     color: #fff; font-size: 17px; line-height: 1; cursor: pointer; backdrop-filter: blur(4px); }
@@ -11433,6 +11434,7 @@
     Z.x = Math.max(-mx, Math.min(mx, Z.x)); Z.y = Math.max(-my, Math.min(my, Z.y));
     zimg.style.transition = anim ? "transform .2s ease-out" : "none";
     zimg.style.transform = "translate(" + Z.x + "px," + Z.y + "px) scale(" + Z.k + ")";
+    if (typeof maybeOriginal === "function") maybeOriginal();
     frame.classList.toggle("zoomed", Z.k > 1.01);
   }
   function zTo(k, cx, cy, anim) { // zoom keeping the point (cx, cy) - frame-relative - under the finger
@@ -11506,6 +11508,30 @@
     var sm = document.createElement("small"); sm.textContent = xp ? "Photo: " + it[2] + (/wikipedia|inaturalist/i.test(it[2]) ? "" : " · via iNaturalist") : "Photo © " + it[2] + " · via iNaturalist"; cap.appendChild(sm);
     box.classList.add("open");
     Z.k = 1; Z.x = 0; Z.y = 0; zApply(false);
+    // the full photo, not just the card's crop: iNaturalist's open-data copy, swapped in once it loads
+    // (the claude.ai copy can't reach outside sites, so it keeps the built-in picture)
+    HQ = null;
+    if (!xp && it[4] && !(window.claude && window.claude.use)) {
+      var key = id, base = "https://inaturalist-open-data.s3.amazonaws.com/photos/" + it[4].replace(".", "/large.");
+      HQ = { id: key, url: base, orig: base.replace("/large.", "/original."), up: false };
+      var big = new Image();
+      big.onload = function () {
+        if (!HQ || HQ.id !== key || !box.classList.contains("open")) return;
+        img.style.backgroundImage = 'url("' + base + '")'; img.style.backgroundSize = "contain"; img.style.backgroundPosition = "center";
+        img.classList.add("pl-hq");
+      };
+      big.src = base;
+    }
+    img.classList.remove("pl-hq");
+  }
+  var HQ = null;
+  // zoomed right in: the original, full-resolution photo
+  function maybeOriginal() {
+    if (!HQ || HQ.up || Z.k < 1.6) return;
+    HQ.up = true;
+    var o = new Image(), key = HQ.id, url = HQ.orig;
+    o.onload = function () { if (HQ && HQ.id === key) zimg.style.backgroundImage = 'url("' + url + '")'; };
+    o.src = url;
   }
   window.SL_openPhoto = openPhoto;
   document.addEventListener("click", function (e) {
