@@ -18,7 +18,7 @@ head = f"""<!doctype html>
 <meta name="description" content="{desc}">
 <meta name="theme-color" content="#1F5A3A">
 <link rel="canonical" href="{SITE}">
-<link rel="icon" type="image/png" href="brand/snakelist-icon.png">
+<link rel="icon" type="image/png" href="app/favicon-48.png">
 <link rel="apple-touch-icon" href="app/apple-touch-icon.png">
 <link rel="manifest" href="app/manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -64,7 +64,7 @@ open("app/manifest.webmanifest", "w").write(json.dumps({
 # the offline helper: pages always from the network first (so updates show at once), with the
 # last copy kept for when there's no connection; photos, map data and icons are kept after
 # their first load and refreshed in the background
-open("sw.js", "w").write("""const CACHE = 'snakelist-v1';
+open("sw.js", "w").write("""const CACHE = 'snakelist-v2';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => c.add('./'))); });
 self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', (e) => {
