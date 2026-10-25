@@ -1,0 +1,29 @@
+{
+ "name": "SnakeList",
+ "short_name": "SnakeList",
+ "description": "Track every snake species you've seen. A checklist of 4,000+ snakes with photos, range maps down to states and provinces, a wishlist and a where-does-it-live quiz.",
+ "start_url": "./../",
+ "scope": "./../",
+ "display": "standalone",
+ "orientation": "any",
+ "background_color": "#1F5A3A",
+ "theme_color": "#1F5A3A",
+ "icons": [
+  {
+   "src": "icon-192-s.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512-s.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-maskable-512-s.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}

@@ -20,7 +20,7 @@ head = f"""<!doctype html>
 <link rel="canonical" href="{SITE}">
 <link rel="icon" type="image/png" href="app/favicon-48-s.png">
 <link rel="apple-touch-icon" href="app/apple-touch-icon-s.png">
-<link rel="manifest" href="app/manifest.webmanifest">
+<link rel="manifest" href="app/snakelist.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="SnakeList">
@@ -54,17 +54,20 @@ open("index.html", "w", encoding="utf-8").write(head + app + "\n</body>\n</html>
 open("robots.txt", "w").write(f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.xml\n")
 open("sitemap.xml", "w").write(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>{SITE}</loc></url>\n</urlset>\n')
 import json
-open("app/manifest.webmanifest", "w").write(json.dumps({
+MANIFEST = json.dumps({
     "name": "SnakeList", "short_name": "SnakeList", "description": desc,
     "start_url": "./../", "scope": "./../", "display": "standalone", "orientation": "any",
     "background_color": "#1F5A3A", "theme_color": "#1F5A3A",
     "icons": [{"src": "icon-192-s.png", "sizes": "192x192", "type": "image/png"},
               {"src": "icon-512-s.png", "sizes": "512x512", "type": "image/png"},
-              {"src": "icon-maskable-512-s.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}]}, indent=1))
+              {"src": "icon-maskable-512-s.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}]}, indent=1)
+# the older name too, for phones that saved the page before the rename
+for f in ("app/snakelist.webmanifest", "app/manifest.webmanifest"):
+    open(f, "w").write(MANIFEST)
 # the offline helper: pages always from the network first (so updates show at once), with the
 # last copy kept for when there's no connection; photos, map data and icons are kept after
 # their first load and refreshed in the background
-open("sw.js", "w").write("""const CACHE = 'snakelist-v4';
+open("sw.js", "w").write("""const CACHE = 'snakelist-v5';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => c.add('./'))); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
