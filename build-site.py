@@ -18,7 +18,9 @@ head = f"""<!doctype html>
 <meta name="description" content="{desc}">
 <meta name="theme-color" content="#1F5A3A">
 <link rel="canonical" href="{SITE}">
-<link rel="icon" type="image/png" href="app/favicon-48-s.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="96x96" href="app/favicon-96-s.png">
+<link rel="icon" type="image/png" sizes="48x48" href="app/favicon-48-s.png">
 <link rel="apple-touch-icon" href="app/apple-touch-icon-s.png">
 <link rel="manifest" href="app/snakelist.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
