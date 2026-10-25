@@ -64,7 +64,7 @@ open("app/manifest.webmanifest", "w").write(json.dumps({
 # the offline helper: pages always from the network first (so updates show at once), with the
 # last copy kept for when there's no connection; photos, map data and icons are kept after
 # their first load and refreshed in the background
-open("sw.js", "w").write("""const CACHE = 'snakelist-v2';
+open("sw.js", "w").write("""const CACHE = 'snakelist-v3';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => c.add('./'))); });
 self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', (e) => {

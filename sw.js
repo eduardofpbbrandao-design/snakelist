@@ -1,4 +1,4 @@
-const CACHE = 'snakelist-v2';
+const CACHE = 'snakelist-v3';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => c.add('./'))); });
 self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', (e) => {
