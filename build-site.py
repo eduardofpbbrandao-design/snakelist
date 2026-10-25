@@ -18,8 +18,8 @@ head = f"""<!doctype html>
 <meta name="description" content="{desc}">
 <meta name="theme-color" content="#1F5A3A">
 <link rel="canonical" href="{SITE}">
-<link rel="icon" type="image/png" href="app/favicon-48.png">
-<link rel="apple-touch-icon" href="app/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="app/favicon-48-s.png">
+<link rel="apple-touch-icon" href="app/apple-touch-icon-s.png">
 <link rel="manifest" href="app/manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -58,15 +58,15 @@ open("app/manifest.webmanifest", "w").write(json.dumps({
     "name": "SnakeList", "short_name": "SnakeList", "description": desc,
     "start_url": "./../", "scope": "./../", "display": "standalone", "orientation": "any",
     "background_color": "#1F5A3A", "theme_color": "#1F5A3A",
-    "icons": [{"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
-              {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
-              {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}]}, indent=1))
+    "icons": [{"src": "icon-192-s.png", "sizes": "192x192", "type": "image/png"},
+              {"src": "icon-512-s.png", "sizes": "512x512", "type": "image/png"},
+              {"src": "icon-maskable-512-s.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}]}, indent=1))
 # the offline helper: pages always from the network first (so updates show at once), with the
 # last copy kept for when there's no connection; photos, map data and icons are kept after
 # their first load and refreshed in the background
-open("sw.js", "w").write("""const CACHE = 'snakelist-v3';
+open("sw.js", "w").write("""const CACHE = 'snakelist-v4';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => c.add('./'))); });
-self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== location.origin) return;
@@ -75,7 +75,11 @@ self.addEventListener('fetch', (e) => {
       .catch(() => caches.match('./')));
     return;
   }
-  if (/\\/(species-photos|data|vendor|brand|app)\\//.test(url.pathname)) {
+  if (/\\/(app|brand)\\//.test(url.pathname)) {
+    e.respondWith(fetch(req).then((r) => { if (r.ok) { const copy = r.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); } return r; }).catch(() => caches.match(req)));
+    return;
+  }
+  if (/\\/(species-photos|data|vendor)\\//.test(url.pathname)) {
     e.respondWith(caches.open(CACHE).then((c) => c.match(req).then((hit) => {
       const net = fetch(req).then((r) => { if (r.ok) c.put(req, r.clone()); return r; }).catch(() => hit);
       return hit || net;

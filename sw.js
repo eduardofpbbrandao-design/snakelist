@@ -1,6 +1,6 @@
-const CACHE = 'snakelist-v3';
+const CACHE = 'snakelist-v4';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => c.add('./'))); });
-self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== location.origin) return;
@@ -9,7 +9,11 @@ self.addEventListener('fetch', (e) => {
       .catch(() => caches.match('./')));
     return;
   }
-  if (/\/(species-photos|data|vendor|brand|app)\//.test(url.pathname)) {
+  if (/\/(app|brand)\//.test(url.pathname)) {
+    e.respondWith(fetch(req).then((r) => { if (r.ok) { const copy = r.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); } return r; }).catch(() => caches.match(req)));
+    return;
+  }
+  if (/\/(species-photos|data|vendor)\//.test(url.pathname)) {
     e.respondWith(caches.open(CACHE).then((c) => c.match(req).then((hit) => {
       const net = fetch(req).then((r) => { if (r.ok) c.put(req, r.clone()); return r; }).catch(() => hit);
       return hit || net;
