@@ -58,7 +58,7 @@ open("sitemap.xml", "w").write(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset
 import json
 MANIFEST = json.dumps({
     "name": "SnakeList", "short_name": "SnakeList", "description": desc,
-    "start_url": "./../", "scope": "./../", "display": "standalone", "orientation": "any",
+    "start_url": "./../", "scope": "./../", "display": "standalone", "display_override": ["window-controls-overlay", "standalone"], "orientation": "any",
     "background_color": "#1F5A3A", "theme_color": "#1F5A3A",
     "icons": [{"src": "icon-192-s.png", "sizes": "192x192", "type": "image/png"},
               {"src": "icon-512-s.png", "sizes": "512x512", "type": "image/png"},
