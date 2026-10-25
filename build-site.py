@@ -19,7 +19,12 @@ head = f"""<!doctype html>
 <meta name="theme-color" content="#1F5A3A">
 <link rel="canonical" href="{SITE}">
 <link rel="icon" type="image/png" href="brand/snakelist-icon.png">
-<link rel="apple-touch-icon" href="brand/snakelist-icon.png">
+<link rel="apple-touch-icon" href="app/apple-touch-icon.png">
+<link rel="manifest" href="app/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SnakeList">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
@@ -27,6 +32,11 @@ head = f"""<!doctype html>
 <meta property="og:image" content="{SITE}snakelist-logo.png">
 <meta name="twitter:card" content="summary_large_image">
 <style>html,body{{margin:0;padding:0}}</style>
+<script>
+  // installable app: the offline helper, and the browser's install prompt kept for the Install button
+  window.addEventListener('beforeinstallprompt', function (e) {{ e.preventDefault(); window.SL_INSTALL_EVT = e; }});
+  if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEventListener('load', function () {{ navigator.serviceWorker.register('sw.js').catch(function () {{}}); }});
+</script>
 <!-- Google tag (gtag.js) - visitor statistics for snakelist.com -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PY2LJV389K"></script>
 <script>
@@ -43,4 +53,34 @@ app = re.sub(r"^<title>[^<]*</title>", f"<title>{title}</title>", app, count=1)
 open("index.html", "w", encoding="utf-8").write(head + app + "\n</body>\n</html>\n")
 open("robots.txt", "w").write(f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.xml\n")
 open("sitemap.xml", "w").write(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>{SITE}</loc></url>\n</urlset>\n')
+import json
+open("app/manifest.webmanifest", "w").write(json.dumps({
+    "name": "SnakeList", "short_name": "SnakeList", "description": desc,
+    "start_url": "./../", "scope": "./../", "display": "standalone", "orientation": "any",
+    "background_color": "#1F5A3A", "theme_color": "#1F5A3A",
+    "icons": [{"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+              {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+              {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}]}, indent=1))
+# the offline helper: pages always from the network first (so updates show at once), with the
+# last copy kept for when there's no connection; photos, map data and icons are kept after
+# their first load and refreshed in the background
+open("sw.js", "w").write("""const CACHE = 'snakelist-v1';
+self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => c.add('./'))); });
+self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', (e) => {
+  const req = e.request, url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== location.origin) return;
+  if (req.mode === 'navigate') {
+    e.respondWith(fetch(req).then((r) => { const copy = r.clone(); caches.open(CACHE).then((c) => c.put('./', copy)); return r; })
+      .catch(() => caches.match('./')));
+    return;
+  }
+  if (/\\/(species-photos|data|vendor|brand|app)\\//.test(url.pathname)) {
+    e.respondWith(caches.open(CACHE).then((c) => c.match(req).then((hit) => {
+      const net = fetch(req).then((r) => { if (r.ok) c.put(req, r.clone()); return r; }).catch(() => hit);
+      return hit || net;
+    })));
+  }
+});
+""")
 print("built index.html")
