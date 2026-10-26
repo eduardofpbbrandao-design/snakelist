@@ -31,5 +31,35 @@
    "type": "image/png",
    "purpose": "maskable"
   }
+ ],
+ "screenshots": [
+  {
+   "src": "screenshots/1-homepage.jpg",
+   "sizes": "2048x960",
+   "type": "image/jpeg",
+   "form_factor": "wide",
+   "label": "SnakeList homepage: the snake life list with every snake species in the world"
+  },
+  {
+   "src": "screenshots/2-snake-species.jpg",
+   "sizes": "2048x960",
+   "type": "image/jpeg",
+   "form_factor": "wide",
+   "label": "Snake species cards with photos, range, venom and size"
+  },
+  {
+   "src": "screenshots/3-world-map.jpg",
+   "sizes": "2048x960",
+   "type": "image/jpeg",
+   "form_factor": "wide",
+   "label": "World map showing where each snake species lives, down to states and provinces"
+  },
+  {
+   "src": "screenshots/4-snake-identifier.jpg",
+   "sizes": "2048x960",
+   "type": "image/jpeg",
+   "form_factor": "wide",
+   "label": "Snake identifier: take a photo and the camera suggests which snake it is"
+  }
  ]
 }

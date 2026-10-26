@@ -70,7 +70,13 @@ MANIFEST = json.dumps({
     "background_color": "#1F5A3A", "theme_color": "#1F5A3A",
     "icons": [{"src": "icon-192-s.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
               {"src": "icon-512-s.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
-              {"src": "icon-maskable-512-s.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}]}, indent=1)
+              {"src": "icon-maskable-512-s.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}],
+    # real screenshots for the install sheet (wide = desktop / landscape), in this order
+    "screenshots": [{"src": "screenshots/" + f, "sizes": "2048x960", "type": "image/jpeg", "form_factor": "wide", "label": l} for f, l in (
+        ("1-homepage.jpg", "SnakeList homepage: the snake life list with every snake species in the world"),
+        ("2-snake-species.jpg", "Snake species cards with photos, range, venom and size"),
+        ("3-world-map.jpg", "World map showing where each snake species lives, down to states and provinces"),
+        ("4-snake-identifier.jpg", "Snake identifier: take a photo and the camera suggests which snake it is"))]}, indent=1)
 # the older name too, for phones that saved the page before the rename
 for f in ("app/snakelist.webmanifest", "app/manifest.webmanifest"):
     open(f, "w").write(MANIFEST)
