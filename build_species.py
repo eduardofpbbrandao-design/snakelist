@@ -215,6 +215,7 @@ PAGE = """<!doctype html>
 <meta name="description" content="{desc}">
 <link rel="canonical" href="{url}">
 <meta name="author" content="{author}">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
 <meta property="og:type" content="article"><meta property="og:site_name" content="SnakeList by {author}">
 <meta property="og:title" content="{title}"><meta property="og:description" content="{desc}">
 <meta property="og:url" content="{url}"><meta property="og:image" content="{img}">
@@ -249,7 +250,7 @@ INDEX = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>All {n} snake species A-Z | SnakeList</title>
 <meta name="description" content="Every one of the {n} snake species in SnakeList, by family - each with its photo, range map, habitats and facts.">
-<link rel="canonical" href="{url}"><meta name="author" content="{author}">
+<link rel="canonical" href="{url}"><meta name="author" content="{author}"><meta name="robots" content="index,follow">
 <link rel="icon" href="../favicon.ico" sizes="any"><link rel="stylesheet" href="sp.css">
 </head><body>
 <header class="sp-top"><a class="sp-logo" href="../">SnakeList</a><nav><a href="../">Open the app</a></nav></header>
