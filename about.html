@@ -23,6 +23,8 @@ p, li { color:var(--text); } .muted { color:var(--muted); } a { color:var(--acce
 .box { border:2px dashed var(--border); border-radius:14px; padding:12px 16px; color:var(--muted); font-style:italic; background:var(--bg); }
 .facts { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-top:8px; }
 .facts div { border:1px solid var(--border); border-radius:12px; padding:10px 14px; } .facts b { display:block; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-style:normal; }
+.me-photo { margin:18px auto 6px; max-width:320px; } .me-photo img { display:block; width:100%; height:auto; border-radius:16px; border:1px solid var(--border); }
+.me-photo figcaption { margin-top:8px; font-size:14px; color:var(--muted); text-align:center; }
 </style></head><body><main><p><a href="./">&larr; Back to SnakeList</a></p><div class="card">
 <div class="hero">
   <div class="photo has" id="photo" style="background-image:url(app/icon-512-s.png);background-color:#1f5a2e"></div>
@@ -32,6 +34,8 @@ p, li { color:var(--text); } .muted { color:var(--muted); } a { color:var(--acce
 <h2>About me</h2>
 <p>Hi, I'm Eduardo Brandao, a new herpetologist who loves snakes. It all started when my dad and I began reading books about snakes together, and then helping out with them in Florida.</p>
 <p>Snakes are my favourite animal. I love their patterns (even if not every snake has an elegant one), the feeling of looking at something truly alive, and the beauty of nature that I've always loved.</p>
+<figure class="me-photo"><img src="about/eduardo-herping.jpg" width="659" height="1428" alt="Eduardo crouching on a road at night with a camera and two lights, photographing a snake" loading="lazy">
+<figcaption>Out herping at night - lighting up a snake on the road to photograph it.</figcaption></figure>
 
 <h2>Why I made SnakeList</h2>
 <p>I first had the idea in Orlando. I wanted an app to tick off every snake I'd ever seen, instead of keeping a checklist in Google Keep. When I found out no app like that existed (iNaturalist can work as a list if you add photos, but I wanted a real checklist), I decided to make my own.</p>
