@@ -240,7 +240,7 @@ PAGE = """<!doctype html>
 <section><h2>Habitats</h2><ul class="sp-pills">{habitats}</ul></section>
 <section><h2>Related snakes</h2><ul class="sp-rel">{related}</ul></section>
 </article></main>
-<footer class="sp-foot">SnakeList &middot; made by <b>{author}</b> &middot; <a href="../privacy.html">Privacy</a> &middot; <a href="../terms.html">Terms</a></footer>
+<footer class="sp-foot">SnakeList &middot; made by <a href="../about.html"><b>{author}</b></a> &middot; <a href="../about.html">About me</a> &middot; <a href="../privacy.html">Privacy</a> &middot; <a href="../terms.html">Terms</a></footer>
 <script src="sp.js" defer></script>
 </body></html>
 """
