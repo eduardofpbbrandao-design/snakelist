@@ -1,7 +1,7 @@
 {
  "name": "SnakeList",
  "short_name": "SnakeList",
- "description": "Track every snake species you've seen. A checklist of 4,000+ snakes with photos, range maps down to states and provinces, a wishlist and a where-does-it-live quiz.",
+ "description": "Track every snake species you've seen. A checklist of 4,000+ snakes with photos, range maps down to states and provinces, a wishlist and a where-does-it-live quiz. Made by Eduardo Brandao.",
  "start_url": "./../",
  "scope": "./../",
  "display": "standalone",

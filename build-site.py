@@ -17,6 +17,10 @@ head = f"""<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="{desc}">
 <meta name="theme-color" content="#1F5A3A">
+<meta name="author" content="Eduardo Brandao">
+<meta name="copyright" content="SnakeList by Eduardo Brandao">
+<meta property="og:site_name" content="SnakeList by Eduardo Brandao">
+<script type="application/ld+json">{{"@context":"https://schema.org","@type":"WebApplication","name":"SnakeList","url":"{SITE}","applicationCategory":"EducationalApplication","operatingSystem":"Any","description":"{desc}","author":{{"@type":"Person","name":"Eduardo Brandao"}},"creator":{{"@type":"Person","name":"Eduardo Brandao"}},"publisher":{{"@type":"Person","name":"Eduardo Brandao"}},"offers":{{"@type":"Offer","price":"0","priceCurrency":"USD"}}}}</script>
 <link rel="canonical" href="{SITE}">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="96x96" href="app/favicon-96-s.png">
@@ -57,7 +61,7 @@ open("robots.txt", "w").write(f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.
 open("sitemap.xml", "w").write(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>{SITE}</loc></url>\n  <url><loc>{SITE}privacy.html</loc></url>\n  <url><loc>{SITE}terms.html</loc></url>\n</urlset>\n')
 import json
 MANIFEST = json.dumps({
-    "name": "SnakeList", "short_name": "SnakeList", "description": desc,
+    "name": "SnakeList", "short_name": "SnakeList", "description": desc + " Made by Eduardo Brandao.",
     "start_url": "./../", "scope": "./../", "display": "standalone", "display_override": ["window-controls-overlay", "standalone"], "orientation": "any",
     "background_color": "#1F5A3A", "theme_color": "#1F5A3A",
     "icons": [{"src": "icon-192-s.png", "sizes": "192x192", "type": "image/png"},
