@@ -935,7 +935,7 @@
     border-radius: 999px; border: 1px solid var(--gold); background: var(--gold); color: var(--on-accent); }
   .cp-city-fact { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--text-muted); margin-top: 4px; min-height: 1em; }
 
-  body.tab-map #grid, body.tab-ach #grid, body.tab-quiz #grid { display: none; }
+  body.tab-map #grid, body.tab-ach #grid, body.tab-quiz #grid, body.tab-cam #grid { display: none; }
 
   .ach-panel { max-width: 900px; margin: 0 auto; }
   .ach-panel[hidden] { display: none; }
@@ -1355,7 +1355,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v3.28</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v3.29</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
     </header>
@@ -1369,6 +1369,7 @@
       <button class="tab-btn" id="tab-ach" type="button"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"></path><path d="M7 6H4.5A2.5 2.5 0 0 0 7 10.5M17 6h2.5A2.5 2.5 0 0 1 17 10.5"></path><path d="M12 14v3M9 20h6M10 17h4"></path></svg> Achievements</button>
       <button class="tab-btn" id="tab-map" type="button"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3c2.5 2.7 3.8 5.8 3.8 9S14.5 18.3 12 21c-2.5-2.7-3.8-5.8-3.8-9S9.5 5.7 12 3z"></path></svg> Map</button>
       <button class="tab-btn" id="tab-quiz" type="button"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg> Quiz</button>
+      <button class="tab-btn" id="tab-cam" type="button"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"></path><circle cx="12" cy="13" r="4"></circle></svg> Camera</button>
     </div>
 
     <div id="guide-controls">
@@ -5835,6 +5836,34 @@
       </div>
     </div>
 
+    <div class="cam-panel" id="cam-panel" hidden>
+      <div class="cam-card">
+        <h2 class="cam-h">What snake is this?</h2>
+        <p class="cam-sub">Take a photo and SnakeList guesses the species, from the snakes that live where you are. It all happens on your device &mdash; the photo isn&rsquo;t uploaded anywhere.</p>
+        <div class="cam-step" id="cam-loc">
+          <div class="cam-num">1</div>
+          <div class="cam-body"><b>Allow your location</b><span id="cam-loc-txt">Needed so SnakeList only suggests snakes that live near you.</span></div>
+          <button type="button" class="cam-btn" id="cam-loc-btn">Allow location</button>
+        </div>
+        <div class="cam-step" id="cam-shot">
+          <div class="cam-num">2</div>
+          <div class="cam-body"><b>Photo of the snake</b><span>From a safe distance &mdash; zoom in, never go closer.</span></div>
+          <div class="cam-btns">
+            <button type="button" class="cam-btn" id="cam-take" disabled>Take a photo</button>
+            <button type="button" class="cam-btn ghost" id="cam-pick" disabled>Choose a photo</button>
+          </div>
+        </div>
+        <input type="file" id="cam-file-take" accept="image/*" capture="environment" hidden>
+        <input type="file" id="cam-file-pick" accept="image/*" hidden>
+        <div class="cam-work" id="cam-work" hidden>
+          <img id="cam-preview" alt="Your photo">
+          <div class="cam-status" id="cam-status"></div>
+        </div>
+        <div class="cam-results" id="cam-results"></div>
+        <p class="cam-safe">Never touch or approach a snake, even one SnakeList calls harmless &mdash; guesses can be wrong. If someone is bitten, call your local emergency number straight away.</p>
+      </div>
+    </div>
+
     <div class="quiz-panel" id="quiz-panel" hidden>
       <div class="quiz-levels" id="quiz-levels">
         <p class="quiz-intro">Where do these snakes live? Pick a difficulty to start.</p>
@@ -7593,6 +7622,9 @@
     document.getElementById("tab-map").classList.toggle("active", tab === "map");
     document.getElementById("tab-ach").classList.toggle("active", tab === "ach");
     document.getElementById("tab-quiz").classList.toggle("active", tab === "quiz");
+    document.getElementById("tab-cam").classList.toggle("active", tab === "cam");
+    document.body.classList.toggle("tab-cam", tab === "cam");
+    document.getElementById("cam-panel").hidden = tab !== "cam";
     const onAch = tab === "ach";
     document.body.classList.toggle("tab-ach", onAch);
     document.getElementById("ach-panel").hidden = !onAch;
@@ -7610,16 +7642,17 @@
     document.body.classList.toggle("tab-quiz", onQuiz);
     document.getElementById("quiz-panel").hidden = !onQuiz;
     if (onQuiz) { moreBtn.hidden = true; initQuizTab(); } else { stopQuizTimer(); }
+    if (tab === "cam") moreBtn.hidden = true;
 
     document.getElementById("result-count").textContent =
-      tab === "map" || tab === "ach" || tab === "quiz" ? ""
+      tab === "map" || tab === "ach" || tab === "quiz" || tab === "cam" ? ""
         : tab === "guide" ? shown.toLocaleString() + " species" + (drawn < shown ? " · showing " + drawn.toLocaleString() : "")
         : tab === "wish" ? shown + " snake" + (shown === 1 ? "" : "s") + " you want to see"
         : tab === "follow" ? "Your following list · " + shown + " snake" + (shown === 1 ? "" : "s")
         : shown + " snake" + (shown === 1 ? "" : "s") + " logged";
 
     const empty = document.getElementById("empty");
-    empty.hidden = shown > 0 || tab === "map" || tab === "ach" || tab === "quiz";
+    empty.hidden = shown > 0 || tab === "map" || tab === "ach" || tab === "quiz" || tab === "cam";
     empty.textContent = tab === "guide"
       ? "No snakes found."
       : tab === "follow" ? "You're not following any snakes yet - tap the bell next to a snake's name to follow it."
@@ -9048,6 +9081,14 @@
   }
 
   document.getElementById("tab-quiz").addEventListener("click", () => { tab = "quiz"; refresh(); });
+  document.getElementById("tab-cam").addEventListener("click", () => { tab = "cam"; refresh(); });
+  // the Camera tab's "See in checklist": the checklist, searched for that one snake
+  window.SL_showInChecklist = function (name) {
+    tab = "guide";
+    const sb = document.getElementById("search"); if (sb) { sb.value = name; sb.dispatchEvent(new Event("input")); }
+    refresh();
+    setTimeout(() => { const g = document.getElementById("grid"); if (g) window.scrollTo({ top: g.getBoundingClientRect().top + scrollY - 90, behavior: "smooth" }); }, 120);
+  };
   document.querySelectorAll(".quiz-level-btn").forEach((btn) => {
     btn.addEventListener("click", () => startQuiz(btn.dataset.level));
   });
@@ -9572,6 +9613,7 @@
     "lycodon-capucinus":  [{ area: "Christmas Island", lon: 105.63, lat: -10.49 }]
   };
 
+  window.SL_INTRODUCED = INTRODUCED;
   // US state boundaries (10m TopoJSON from the public-domain "us-atlas" package, decoded
   // to simple lon/lat rings and decimated to ~0.12 degrees - plenty for a map a few hundred
   // px wide, at under a quarter of the raw size). Used to actually draw states on the map
@@ -10841,6 +10883,7 @@
   window.SL_MAP_REDRAW = function () { invalidate(); };
   window.SL_MAP_SEARCH = function () { return { q: hsearch ? hsearch.value.trim() : "", species: matched || [] }; };
   window.SL_MAP_PICKLL = function (lon, lat) { return POLY ? pick(lon, lat) : null; };
+  window.SL_MAP_PROVINCE_AT = function (cc, lon, lat) { var st = provinceAt(cc, lon, lat); return st ? (cc === "us" ? st.code : st.name) : null; };
   window.SL_MAP_GEO = function () { return { poly: POLY, iso: ISO, name: NAME, title: TITLE }; };
   window.SL_MAP_PICK = function (x, y) { return at(x, y); };
   function flyToLonLatBox(w, e, s, n, animate) {
@@ -13480,6 +13523,7 @@
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v3.29", d: "2026-10-26", items: ["New Camera section: take a photo of a snake and SnakeList guesses the species from the snakes that live where you are (allow your location)"] },
     { v: "v3.28", d: "2026-10-26", items: ["Creator: On is easy to read in dark mode"] },
     { v: "v3.27", d: "2026-10-26", items: ["Creator: On / Off button on the creator\u2019s account to switch the gold look", "In the installed app the creator\u2019s top strip is gold too", "A restart button in the installed app"] },
     { v: "v3.26", d: "2026-10-26", items: ["Press Enter in the checklist search to jump down to the snakes it found"] },
@@ -13903,6 +13947,183 @@
 })();
 </script>
 <style>
+  /* ---- Camera: identify a snake from a photo, near where you are ---- */
+  .cam-panel { max-width: 760px; margin: 6px auto 30px; }
+  .cam-panel[hidden] { display: none; }
+  .cam-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: clamp(18px, 3vw, 30px); }
+  .cam-h { font-family: 'Fraunces', serif; font-size: clamp(24px, 3vw, 32px); margin: 0 0 6px; }
+  .cam-sub { margin: 0 0 18px; color: var(--text-muted); font-size: 15px; line-height: 1.5; }
+  .cam-step { display: flex; align-items: center; gap: 14px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; margin-bottom: 10px; flex-wrap: wrap; }
+  .cam-step.done { border-color: var(--moss); }
+  .cam-step.off { opacity: 0.55; }
+  .cam-num { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 700 14px 'Inter', sans-serif; background: var(--moss); color: #fff; flex: none; }
+  .cam-step.done .cam-num { background: #3f8a3a; }
+  .cam-body { flex: 1 1 220px; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+  .cam-body span { color: var(--text-muted); font-size: 13px; }
+  .cam-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .cam-btn { font: 600 14px 'Inter', sans-serif; padding: 10px 16px; border-radius: 12px; border: 1px solid #3f8a3a; background: #3f8a3a; color: #fff; cursor: pointer; }
+  .cam-btn.ghost { background: transparent; color: var(--moss); }
+  .cam-btn:disabled { opacity: 0.45; cursor: default; }
+  .cam-work { display: flex; gap: 14px; align-items: center; margin: 14px 0 6px; flex-wrap: wrap; }
+  .cam-work[hidden] { display: none; }
+  .cam-work img { width: 150px; height: 110px; object-fit: cover; border-radius: 12px; border: 1px solid var(--border); }
+  .cam-status { flex: 1 1 200px; font-size: 14px; color: var(--text-muted); }
+  .cam-bar { height: 6px; border-radius: 4px; background: var(--border); overflow: hidden; margin-top: 8px; }
+  .cam-bar i { display: block; height: 100%; width: 0; background: #3f8a3a; transition: width .2s; }
+  .cam-results { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .cam-res { display: flex; gap: 12px; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 14px; }
+  .cam-res.top { border-color: #3f8a3a; box-shadow: 0 0 0 1px #3f8a3a inset; }
+  .cam-thumb { width: 96px; height: 64px; border-radius: 9px; background-color: var(--border); background-repeat: no-repeat; flex: none; }
+  .cam-info { flex: 1; min-width: 0; }
+  .cam-info b { display: block; font-size: 15px; }
+  .cam-info i { color: var(--text-muted); font-size: 12.5px; }
+  .cam-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; font-size: 11.5px; }
+  .cam-meta span { padding: 2px 8px; border-radius: 999px; background: rgba(63,138,58,0.14); }
+  .cam-meta .v { background: rgba(176,58,46,0.16); color: #c0392b; }
+  .cam-pct { font: 700 15px 'JetBrains Mono', monospace; color: #3f8a3a; min-width: 48px; text-align: right; }
+  .cam-res .cam-btn { padding: 7px 11px; font-size: 12.5px; }
+  .cam-note { font-size: 13.5px; color: var(--text-muted); margin: 6px 0 0; }
+  .cam-safe { margin: 18px 0 0; font-size: 12.5px; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 12px; }
+  @media (max-width: 560px) { .cam-res { flex-wrap: wrap; } .cam-thumb { width: 84px; height: 56px; } .cam-res .cam-btn { margin-left: auto; } }
+</style>
+<script>
+// ---- Camera: guesses the species in a photo with a small recogniser that runs on the device
+// (EfficientNetV2 + a head trained on ~90,000 iNaturalist research-grade snake photos), then
+// keeps only the snakes recorded in the country - and state, when known - where you are ----
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  if (!$("cam-panel")) return;
+  var here = null, model = null, classes = null, loading = null;
+  var locStep = $("cam-loc"), shotStep = $("cam-shot");
+  shotStep.classList.add("off");
+  function setLoc(t, ok) { $("cam-loc-txt").textContent = t; locStep.classList.toggle("done", !!ok); }
+  function whereNow(lat, lon, tries) {
+    var cc = window.SL_MAP_PICKLL ? window.SL_MAP_PICKLL(lon, lat) : null;
+    if (!cc && (tries || 0) < 20) { setTimeout(function () { whereNow(lat, lon, (tries || 0) + 1); }, 500); return; }
+    var geo = window.SL_MAP_GEO ? window.SL_MAP_GEO() : null;
+    var country = cc && geo ? (geo.name[cc] || geo.title[cc] || "") : "";
+    var prov = cc && window.SL_MAP_PROVINCE_AT ? window.SL_MAP_PROVINCE_AT(cc, lon, lat) : null;
+    here = { lat: lat, lon: lon, cc: cc, country: country, prov: prov };
+    var pname = prov && cc === "us" && window.STATE_NAME ? window.STATE_NAME[prov] : prov;
+    setLoc(country ? "Near " + (pname ? pname + ", " : "") + country + " - only snakes found here are suggested." : "Got your location (at sea?) - snakes from anywhere will be suggested.", true);
+    $("cam-loc-btn").hidden = true;
+    shotStep.classList.remove("off"); $("cam-take").disabled = false; $("cam-pick").disabled = false;
+    loadModel(); // start the download while they line up the photo
+  }
+  $("cam-loc-btn").addEventListener("click", function () {
+    if (!navigator.geolocation) { setLoc("This browser can't share a location, so the camera can't be used here."); return; }
+    setLoc("Asking for your location…");
+    navigator.geolocation.getCurrentPosition(function (p) { whereNow(p.coords.latitude, p.coords.longitude); }, function (e) {
+      setLoc(e && e.code === 1 ? "Location is blocked - allow it for this site in your browser or phone settings, then try again." : "Couldn't find your location - check GPS is on and try again.");
+    }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 60000 });
+  });
+  $("cam-take").addEventListener("click", function () { $("cam-file-take").click(); });
+  $("cam-pick").addEventListener("click", function () { $("cam-file-pick").click(); });
+  function loadScript(src) { return new Promise(function (res, rej) { var sc = document.createElement("script"); sc.src = src; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); }); }
+  function status(t, pct) {
+    $("cam-status").innerHTML = t + (pct != null ? '<div class="cam-bar"><i style="width:' + Math.round(pct * 100) + '%"></i></div>' : "");
+  }
+  function loadModel() {
+    if (loading) return loading;
+    // the world map has an element with id "tf" (French Southern Territories), which the browser
+    // also exposes as window.tf - cleared first so the TensorFlow.js library gets that name
+    var ready = window.tf && window.tf.loadGraphModel;
+    if (!ready) window.tf = undefined;
+    loading = (ready ? Promise.resolve() : loadScript("vendor/tfjs/tf.min.js")).then(function () {
+      return Promise.all([
+        tf.loadGraphModel("data/camid/model.json", { onProgress: function (f) { if (!model && $("cam-work").hidden === false) status("Getting the snake recogniser ready (first time only)…", f); } }),
+        fetch("data/camid/classes.json").then(function (r) { return r.json(); })
+      ]);
+    }).then(function (r) { model = r[0]; classes = r[1]; return model; });
+    loading.catch(function () { loading = null; });
+    return loading;
+  }
+  function onFile(inp) {
+    var f = inp.files && inp.files[0]; inp.value = "";
+    if (!f) return;
+    var url = URL.createObjectURL(f), img = $("cam-preview");
+    $("cam-work").hidden = false; $("cam-results").innerHTML = "";
+    img.onload = function () { identify(img); };
+    img.src = url;
+    status("Looking at your photo…");
+  }
+  $("cam-file-take").addEventListener("change", function () { onFile(this); });
+  $("cam-file-pick").addEventListener("change", function () { onFile(this); });
+  function tensorFrom(img, crop) {
+    var c = document.createElement("canvas"); c.width = c.height = 260;
+    var g = c.getContext("2d"), w = img.naturalWidth, h = img.naturalHeight, k = crop || 1;
+    g.drawImage(img, w * (1 - k) / 2, h * (1 - k) / 2, w * k, h * k, 0, 0, 260, 260);
+    return tf.browser.fromPixels(c).toFloat();
+  }
+  function identify(img) {
+    status("Getting the snake recogniser ready (first time only)…", 0);
+    loadModel().then(function () {
+      status("Working out which snake it is…");
+      return new Promise(function (r) { setTimeout(r, 30); });
+    }).then(function () {
+      var probs = tf.tidy(function () {
+        var x = tf.stack([tensorFrom(img, 1), tensorFrom(img, 0.8)]);
+        return model.predict(x).mean(0);
+      });
+      return probs.data().then(function (d) { probs.dispose(); return d; });
+    }).then(show, function (e) {
+      if (window.console) console.warn("SnakeList camera:", e);
+      status("Sorry - the recogniser couldn't load" + (navigator.onLine === false ? " (you're offline)" : "") + ". Try again in a moment.");
+    });
+  }
+  var byId = null;
+  function cardInfo(id) {
+    if (!byId) { byId = {}; [].slice.call(document.querySelectorAll("#grid .card")).forEach(function (c) { byId[c.dataset.id] = c; }); }
+    var c = byId[id]; if (!c) return null;
+    var cs = (c.getAttribute("data-countries") || "").split("|").filter(Boolean);
+    var pv = (c.getAttribute("data-provinces") || "").split("|").filter(Boolean).concat((c.getAttribute("data-states") || "").split("|").filter(Boolean).map(function (x) { return "US:" + x; }));
+    return { id: id, card: c, name: c.querySelector(".card-name").textContent.trim(), sci: (c.querySelector(".card-sci") || {}).textContent || "",
+      countries: cs, provs: pv, venom: c.getAttribute("data-venomous") === "1", type: c.dataset.type };
+  }
+  function thumb(id) {
+    var P = window.SL_PHOTOS, it = P && P.items[id];
+    if (!it) return "";
+    var col = it[1] % P.cols, row = Math.floor(it[1] / P.cols);
+    return "background-image:url('" + P.path.replace("%d", it[0]) + "');background-size:" + P.cols * 100 + "% " + P.rows * 100 + "%;background-position:" +
+      (P.cols > 1 ? col / (P.cols - 1) * 100 : 0) + "% " + (P.rows > 1 ? row / (P.rows - 1) * 100 : 0) + "%";
+  }
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function show(d) {
+    var key = here && here.cc ? here.cc.toUpperCase() + ":" + here.prov : null, list = [], anyHere = false;
+    for (var i = 0; i < d.length; i++) {
+      var info = cardInfo(classes[i]); if (!info) continue;
+      var inCountry = here && here.country ? info.countries.indexOf(here.country) >= 0 : true;
+      // invasive populations count as living there too (Burmese pythons in Florida)
+      var intro = here && (window.SL_INTRODUCED || {})[info.id];
+      var introHere = !!(intro && intro.some(function (a) { return Math.abs(a.lat - here.lat) < 4 && Math.abs(a.lon - here.lon) < 5; }));
+      if (introHere) inCountry = true;
+      if (inCountry && here && here.country) anyHere = true;
+      var w = inCountry ? 1 : 0;
+      if (w && here && here.prov && !introHere) {
+        var hasProv = info.provs.some(function (k) { return k.slice(0, 2) === here.cc.toUpperCase(); });
+        if (hasProv) w *= info.provs.indexOf(key) >= 0 ? 2 : 0.35;
+      }
+      list.push({ info: info, p: d[i], s: d[i] * w });
+    }
+    if (!anyHere) list.forEach(function (x) { x.s = x.p; });
+    list.sort(function (a, b) { return b.s - a.s; });
+    var tot = list.reduce(function (t, x) { return t + x.s; }, 0) || 1, top = list.slice(0, 5);
+    var best = top[0] ? top[0].s / tot : 0;
+    status(best >= 0.5 ? "Best guess: <b>" + esc(top[0].info.name) + "</b>." : best >= 0.2 ? "Probably <b>" + esc(top[0].info.name) + "</b> - but check the others below." : "Not sure - compare these with your snake:");
+    $("cam-results").innerHTML = top.map(function (x, k) {
+      var i = x.info, pct = Math.round(x.s / tot * 100);
+      return '<div class="cam-res' + (k === 0 ? " top" : "") + '"><div class="cam-thumb" style="' + thumb(i.id) + '"></div><div class="cam-info"><b>' + esc(i.name) + "</b><i>" + esc(i.sci) + "</i>" +
+        '<div class="cam-meta">' + (i.venom ? '<span class="v">Venomous</span>' : "<span>Not venomous</span>") + "<span>" + esc(i.type || "") + "</span></div></div>" +
+        '<div class="cam-pct">' + (pct < 1 ? "<1" : pct) + '%</div><button type="button" class="cam-btn ghost" data-see="' + esc(i.name) + '">See in checklist</button></div>';
+    }).join("") + (anyHere || !here ? "" : '<p class="cam-note">No snakes are on record where you are, so these are from anywhere in the world.</p>') +
+      '<p class="cam-note">Guesses come from what the snake looks like and where you are. Use them as a starting point, not a final answer.</p>';
+  }
+  $("cam-results").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-see]"); if (b && window.SL_showInChecklist) window.SL_showInChecklist(b.getAttribute("data-see"));
+  });
+})();
+</script>
+<style>
   #fav-layer { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 5; }
   .fav-btn { position: absolute; display: inline-flex; align-items: center; gap: 5px; font: 600 11.5px 'Inter', sans-serif; padding: 5px 10px; border-radius: 999px; cursor: pointer;
     border: 1px solid rgba(255,255,255,0.55); background: rgba(10,22,14,0.62); color: #fff; white-space: nowrap; }
@@ -13922,7 +14143,7 @@
   .sl-badge.eat { background: linear-gradient(135deg, #a8452c, #7d2f1c); }
   .sl-badge.com { background: linear-gradient(135deg, #3f8a3a, #2b6a2a); }
   .sl-badge.rare { background: linear-gradient(135deg, #7a4fa0, #573578); }
-  body.tab-map #fav-layer, body.tab-quiz #fav-layer, body.tab-ach #fav-layer { display: none; }
+  body.tab-map #fav-layer, body.tab-quiz #fav-layer, body.tab-ach #fav-layer, body.tab-cam #fav-layer { display: none; }
   .creator-bar { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 7px 14px; font: 600 12.5px 'Inter', sans-serif; letter-spacing: .02em;
     background: linear-gradient(90deg, #e0a526, #f3cf6a); color: #3a2600; }
   .creator-bar[hidden] { display: none; }
