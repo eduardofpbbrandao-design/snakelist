@@ -45,4 +45,45 @@ p, li { color:var(--text); } .muted { color:var(--muted); } a { color:var(--acce
 <p>Got an idea, or found something wrong? Use the <b>Report</b> button at the top of <a href="./">SnakeList</a> - I read every one.</p>
 
 <p class="muted" style="margin-top:30px">SnakeList is free, made by Eduardo Brandao. Snake photos come from iNaturalist photographers, credited on each species.</p>
-</div></main></body></html>
+</div></main>
+<div class="ed-bar" id="ed-bar" hidden><button type="button" id="ed-go">Edit this page</button></div>
+<style>
+.ed-bar { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 8px; z-index: 5; white-space: nowrap; }
+body { padding-bottom: 80px; }
+.ed-bar[hidden] { display: none; }
+.ed-bar button { font: 600 15px Inter, system-ui, sans-serif; padding: 12px 20px; border-radius: 999px; border: 0; cursor: pointer; background: linear-gradient(90deg,#c98d14,#d9a93a); color: #2a1a00; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+.ed-bar button.sec { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+.ed-box { width: 100%; min-height: 110px; box-sizing: border-box; border: 2px solid var(--gold); border-radius: 12px; padding: 10px 12px; font: 16px/1.5 Inter, system-ui, sans-serif; background: var(--bg); color: var(--text); }
+.ed-note { font-size: 13px; color: var(--muted); margin: 4px 0 0; }
+</style>
+<script>
+// the creator writes the page himself: each section becomes a box, then one tap copies it all to send
+(function () {
+  var u = null; try { u = JSON.parse(localStorage.getItem("sl-google") || "null"); } catch (e) {}
+  if (!u || String(u.email || "").toLowerCase() !== "eduardo.fpb.brandao@gmail.com") return;
+  var bar = document.getElementById("ed-bar"); bar.hidden = false;
+  var KEY = "sl-about-draft", draft = {}; try { draft = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+  var SECTIONS = [["about", "About me", "A few sentences about you"], ["why", "Why I made SnakeList", "Why you started SnakeList and what you want it to be"],
+    ["fav", "My favourite snake", "Your favourite snake and why (or leave empty)"], ["seen", "Snakes I've seen", "How many, or which ones (or leave empty)"],
+    ["want", "Snake I most want to see", "(or leave empty)"], ["contact", "Get in touch", "How people can reach you (or leave empty)"], ["more", "Anything else", "Anything else you want on the page"]];
+  document.getElementById("ed-go").addEventListener("click", function () {
+    var card = document.querySelector(".card");
+    card.innerHTML = '<h1 style="font-size:28px">Write your About me</h1><p class="ed-note">Write it however you like - spelling and wording don\u2019t matter. When you\u2019re done, tap <b>Copy my text</b> and paste it to Claude to polish.</p>' +
+      SECTIONS.map(function (x) { return '<h2>' + x[1] + '</h2><textarea class="ed-box" data-k="' + x[0] + '" placeholder="' + x[2] + '"></textarea>'; }).join("");
+    [].slice.call(card.querySelectorAll(".ed-box")).forEach(function (t) {
+      t.value = draft[t.dataset.k] || "";
+      t.addEventListener("input", function () { draft[t.dataset.k] = t.value; try { localStorage.setItem(KEY, JSON.stringify(draft)); } catch (e) {} });
+    });
+    bar.innerHTML = '<button type="button" id="ed-copy">Copy my text</button><button type="button" class="sec" id="ed-done">Back</button>';
+    document.getElementById("ed-done").onclick = function () { location.reload(); };
+    document.getElementById("ed-copy").onclick = function () {
+      var txt = "Please polish my About me page:\n\n" + SECTIONS.map(function (x) { return x[1] + ": " + (draft[x[0]] || "").trim(); }).filter(function (l) { return !/:\s*$/.test(l); }).join("\n\n");
+      var b = this, ok = function () { b.textContent = "Copied! Paste it to Claude"; };
+      if (navigator.clipboard) navigator.clipboard.writeText(txt).then(ok, function () { prompt("Copy this:", txt); });
+      else prompt("Copy this:", txt);
+    };
+    window.scrollTo(0, 0);
+  });
+})();
+</script>
+</body></html>
