@@ -37,7 +37,7 @@ head = f"""<!doctype html>
 <script>
   // installable app: the offline helper, and the browser's install prompt kept for the Install button
   window.addEventListener('beforeinstallprompt', function (e) {{ e.preventDefault(); window.SL_INSTALL_EVT = e; }});
-  if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEventListener('load', function () {{ navigator.serviceWorker.register('sw.js').catch(function () {{}}); }});
+  if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEventListener('load', function () {{ var had = !!navigator.serviceWorker.controller; navigator.serviceWorker.addEventListener('controllerchange', function () {{ if (had && !window.SL_SW_RELOADED) {{ window.SL_SW_RELOADED = 1; location.reload(); }} }}); navigator.serviceWorker.register('sw.js', {{ updateViaCache: 'none' }}).then(function (r) {{ r.update(); }}).catch(function () {{}}); }});
 </script>
 <!-- Google tag (gtag.js) - visitor statistics for snakelist.com -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PY2LJV389K"></script>
@@ -69,19 +69,19 @@ for f in ("app/snakelist.webmanifest", "app/manifest.webmanifest"):
 # the offline helper: pages always from the network first (so updates show at once), with the
 # last copy kept for when there's no connection; photos, map data and icons are kept after
 # their first load and refreshed in the background
-open("sw.js", "w").write("""const CACHE = 'snakelist-v5';
+open("sw.js", "w").write("""const CACHE = 'snakelist-v6';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => c.add('./'))); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== location.origin) return;
   if (req.mode === 'navigate') {
-    e.respondWith(fetch(req).then((r) => { const copy = r.clone(); caches.open(CACHE).then((c) => c.put('./', copy)); return r; })
+    e.respondWith(fetch(req, { cache: 'no-cache' }).then((r) => { const copy = r.clone(); caches.open(CACHE).then((c) => c.put('./', copy)); return r; })
       .catch(() => caches.match('./')));
     return;
   }
   if (/\\/(app|brand)\\//.test(url.pathname)) {
-    e.respondWith(fetch(req).then((r) => { if (r.ok) { const copy = r.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); } return r; }).catch(() => caches.match(req)));
+    e.respondWith(fetch(req, { cache: 'no-cache' }).then((r) => { if (r.ok) { const copy = r.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); } return r; }).catch(() => caches.match(req)));
     return;
   }
   if (/\\/(species-photos|data|vendor)\\//.test(url.pathname)) {
