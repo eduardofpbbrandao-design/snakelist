@@ -58,7 +58,10 @@ head = f"""<!doctype html>
 app = re.sub(r"^<title>[^<]*</title>", f"<title>{title}</title>", app, count=1)
 open("index.html", "w", encoding="utf-8").write(head + app + "\n</body>\n</html>\n")
 open("robots.txt", "w").write(f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.xml\n")
-open("sitemap.xml", "w").write(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>{SITE}</loc></url>\n  <url><loc>{SITE}privacy.html</loc></url>\n  <url><loc>{SITE}terms.html</loc></url>\n</urlset>\n')
+import build_species
+SPECIES_URLS = build_species.build(app)
+open("sitemap.xml", "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+    "".join("  <url><loc>%s</loc></url>\n" % u for u in [SITE, SITE + "privacy.html", SITE + "terms.html"] + SPECIES_URLS) + "</urlset>\n")
 import json
 MANIFEST = json.dumps({
     "name": "SnakeList", "short_name": "SnakeList", "description": desc + " Made by Eduardo Brandao.",
