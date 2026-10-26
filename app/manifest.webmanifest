@@ -10,7 +10,7 @@
   "window-controls-overlay",
   "standalone"
  ],
- "orientation": "any",
+ "orientation": "landscape",
  "background_color": "#1F5A3A",
  "theme_color": "#1F5A3A",
  "icons": [
