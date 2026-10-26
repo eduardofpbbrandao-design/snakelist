@@ -60,7 +60,8 @@ body { padding-bottom: 80px; }
 // the creator writes the page himself: each section becomes a box, then one tap copies it all to send
 (function () {
   var u = null; try { u = JSON.parse(localStorage.getItem("sl-google") || "null"); } catch (e) {}
-  if (!u || String(u.email || "").toLowerCase() !== "eduardo.fpb.brandao@gmail.com") return;
+  var wantEdit = /[?&]edit\b/.test(location.search);
+  if (!wantEdit && (!u || String(u.email || "").toLowerCase() !== "eduardo.fpb.brandao@gmail.com")) return;
   var bar = document.getElementById("ed-bar"); bar.hidden = false;
   var KEY = "sl-about-draft", draft = {}; try { draft = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
   var SECTIONS = [["about", "About me", "A few sentences about you"], ["why", "Why I made SnakeList", "Why you started SnakeList and what you want it to be"],
@@ -84,6 +85,7 @@ body { padding-bottom: 80px; }
     };
     window.scrollTo(0, 0);
   });
+  if (wantEdit) document.getElementById("ed-go").click(); // snakelist.com/about.html?edit opens straight to the boxes
 })();
 </script>
 </body></html>
