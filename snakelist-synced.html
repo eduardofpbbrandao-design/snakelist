@@ -9320,9 +9320,9 @@
   // Anything not listed reads "regions"; Indonesia's shapes are its islands (see "also" below).
   var SUBDIV = {};
   ("states:us mx br in au ng my ve de at sd ss pw fm|provinces:ca ar cn za es be nl af ao bi cd kp kr kh la lk mz pk pg sb th tr vn zm zw ke cr cu do ec pa ir ga gq mn tm dz bg td bf rw sl sa am vu nc|" +
-   "regions:fr it cl pe kz kg tj uz ph ru ua by cm ci sn ml mr tg gh gn gw dj so et er ug tz mg sz na ne ma ge az ba si sk cz fi dk is nz gr mm gy tt kn|" +
+   "regions:fr it cl pe kz kg tj uz ph ru ua by cm ci sn ml mr tg gh gn gw dj so et er ug tz mg sz na ne ma ge az ba si sk cz fi dk is nz gr mm gy tt|" +
    "departments:co bo py uy gt hn ni sv bj ht cg|prefectures:jp cf|counties:ro al hr hu ee se no ie lt lr|districts:pt bt bn bz sr bs mw ls bw ly il cy md rs mu sc ai sg lc|" +
-   "governorates:eg tn sy jo lb iq ye om kw bh|emirates:ae|cantons:ch|parishes:jm bb ag dm gd vc ms|municipalities:me mk xk lv qa tl cv gl|" +
+   "governorates:eg tn sy jo lb iq ye om kw bh|emirates:ae|cantons:ch|parishes:jm bb ag dm gd vc ms kn|municipalities:me mk xk lv qa tl cv gl|" +
    "divisions:bd fj gm|zones:np|atolls:mv|islands:id km st tc vi mp pf|nations:gb|voivodeships:pl|territories:ps").split("|").forEach(function (grp) {
     var p = grp.split(":");
     p[1].split(" ").forEach(function (cc) { SUBDIV[cc] = p[0]; });
@@ -9454,7 +9454,8 @@
     bC.setAttribute("aria-pressed", String(mode === "cities"));
     var cities = sheetCities(card, places);
     bC.hidden = !cities.length;
-    bS.textContent = mode === "states" ? "Hide states" : "See states";
+    var word = subdivWord(places.map(function (k) { return k.slice(0, 2); })); // "provinces", "states & provinces"...
+    bS.textContent = (mode === "states" ? "Hide " : "See ") + word;
     bC.textContent = mode === "cities" ? "Hide cities" : "See cities";
     var list = document.getElementById("map-list");
     if (!mode) {
