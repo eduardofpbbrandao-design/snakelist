@@ -10341,7 +10341,7 @@
     pendingWorldCity = (worldCityMatch && !cityReveal) ? { key: foldedQ, data: worldCityMatch } : null;
     document.getElementById("see-species").hidden = !worldCityMatch;
 
-    PINS = [];
+    PINS = []; labelPin = null; citiesProv = null;
     if (worldCityMatch) {
       lon0 = worldCityMatch.lon; lat0 = worldCityMatch.lat; fz = Math.max(fz, 5); fx = 0; fy = 0;
       var wphi = worldCityMatch.lat * RAD, wlam = worldCityMatch.lon * RAD, wcp = Math.cos(wphi);
