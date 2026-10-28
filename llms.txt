@@ -1,0 +1,20 @@
+# SnakeList
+
+> SnakeList (https://snakelist.com/) is a free snake life list, map and quiz made by Eduardo Brandao. It covers 4,254 snake species with photos, range maps down to states and provinces, habitats, venom and constrictor classification, and a checklist people can tick off.
+
+The app itself is one large interactive page. Every species also has its own small static page with its facts, range and links - those are the best pages to read.
+
+## Species
+- [All snake species A-Z](https://snakelist.com/species/): every species, by family, with links to each species page
+- [Sitemap](https://snakelist.com/sitemap.xml): every public page, including all species, country, family and genus pages
+- Species pages look like https://snakelist.com/species/coastal-taipan-oxyuranus-scutellatus (common name, then scientific name)
+
+## Browse
+- Snakes by country: https://snakelist.com/species/country/<country> - e.g. [Snakes of Australia](https://snakelist.com/species/country/australia)
+- Snakes by family: https://snakelist.com/species/family/<family> - e.g. [Elapidae](https://snakelist.com/species/family/elapidae)
+- Snakes by genus: https://snakelist.com/species/genus/<genus> - e.g. [Oxyuranus](https://snakelist.com/species/genus/oxyuranus)
+
+## About
+- [About the creator](https://snakelist.com/about.html)
+- [Privacy](https://snakelist.com/privacy.html) - lists are kept on the visitor's own device or their own Google Drive; there is no user database
+- Photos come from iNaturalist photographers under Creative Commons licences, credited on each species page

@@ -56,8 +56,48 @@ head = f"""<!doctype html>
 </script>
 """
 app = re.sub(r"^<title>[^<]*</title>", f"<title>{title}</title>", app, count=1)
-open("index.html", "w", encoding="utf-8").write(head + app + "\n</body>\n</html>\n")
-open("robots.txt", "w").write(f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.xml\n")
+# for search engines and AI browsers that only read the first megabytes of a page: the pictures
+# built into the app's styles become small separate files (same look, the page's text comes much
+# sooner), and the page gets its explicit </head><body> where the browser would start the body anyway
+import hashlib, base64, os
+os.makedirs("data/ui", exist_ok=True)
+def _pic(m):
+    q, mime, b64 = m.group(1), m.group(2), m.group(3)
+    raw = base64.b64decode(b64)
+    ext = {"jpeg": "jpg", "svg+xml": "svg"}.get(mime, mime)
+    name = "data/ui/%s.%s" % (hashlib.sha1(raw).hexdigest()[:14], ext)
+    if not os.path.exists(name): open(name, "wb").write(raw)
+    return "url(%s%s%s)" % (q, name, q)
+site_app = re.sub(r"url\((['\"]?)data:image/([a-z+]+);base64,([A-Za-z0-9+/=]+)\1\)", _pic, app)
+body_at = re.search(r"<(?!/?(?:title|style|script|link|meta|!--)\b)[a-zA-Z]", site_app).start()
+site_app = site_app[:body_at] + "</head>\n<body>\n" + site_app[body_at:]
+open("index.html", "w", encoding="utf-8").write(head + site_app + "\n</body>\n</html>\n")
+# every crawler is welcome on the public pages; the AI ones named too, so it's never in doubt
+open("robots.txt", "w").write("User-agent: *\nAllow: /\n\n" + "".join("User-agent: %s\nAllow: /\n\n" % b for b in (
+    "Googlebot", "Bingbot", "GPTBot", "ChatGPT-User", "OAI-SearchBot", "ClaudeBot", "Claude-User", "Claude-SearchBot", "PerplexityBot", "Perplexity-User", "Applebot")) +
+    f"Sitemap: {SITE}sitemap.xml\n")
+# a plain-text guide for AI tools (llmstxt.org): what SnakeList is and where everything is
+open("llms.txt", "w", encoding="utf-8").write(f"""# SnakeList
+
+> SnakeList ({SITE}) is a free snake life list, map and quiz made by Eduardo Brandao. It covers 4,254 snake species with photos, range maps down to states and provinces, habitats, venom and constrictor classification, and a checklist people can tick off.
+
+The app itself is one large interactive page. Every species also has its own small static page with its facts, range and links - those are the best pages to read.
+
+## Species
+- [All snake species A-Z]({SITE}species/): every species, by family, with links to each species page
+- [Sitemap]({SITE}sitemap.xml): every public page, including all species, country, family and genus pages
+- Species pages look like {SITE}species/coastal-taipan-oxyuranus-scutellatus (common name, then scientific name)
+
+## Browse
+- Snakes by country: {SITE}species/country/<country> - e.g. [Snakes of Australia]({SITE}species/country/australia)
+- Snakes by family: {SITE}species/family/<family> - e.g. [Elapidae]({SITE}species/family/elapidae)
+- Snakes by genus: {SITE}species/genus/<genus> - e.g. [Oxyuranus]({SITE}species/genus/oxyuranus)
+
+## About
+- [About the creator]({SITE}about.html)
+- [Privacy]({SITE}privacy.html) - lists are kept on the visitor's own device or their own Google Drive; there is no user database
+- Photos come from iNaturalist photographers under Creative Commons licences, credited on each species page
+""")
 import build_species, datetime
 TODAY = datetime.date.today().isoformat()
 SPECIES_URLS = build_species.build(app)
