@@ -328,7 +328,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if len(rel) < 6: rel += [x for x in by_family.get(c["family"], []) if x is not c and x not in rel][:12 - len(rel)]
         facts = []
         facts.append(("Venom", "Venomous" if c["venom"] else "Not venomous"))
-        facts.append(("Constrictor", "Yes - squeezes its prey" if constrictor else "No"))
+        facts.append(("Constrictor", "Constrictor" if constrictor else "Not a constrictor"))
         facts.append(("Type", c["type"] or "Snake"))
         if c["family"]: facts.append(("Family", c["family"]))
         if c["genus"]: facts.append(("Genus", c["genus"]))
