@@ -43,7 +43,7 @@ def build(app):
             "countries": [x for x in a.get("countries", "").split("|") if x],
             "provinces": [x for x in H.unescape(a.get("provinces", "")).split("|") if x],
             "states": [x for x in a.get("states", "").split("|") if x],
-            "venom": a.get("venomous") == "1", "invasive": H.unescape(a.get("invasive", "")),
+            "venom": a.get("venomous") == "1", "popular": a.get("popular") == "1", "invasive": H.unescape(a.get("invasive", "")),
         }
         if c["is_sci"]: c["sci"] = c["name"]
         c["genus"] = c["sci"].split(" ")[0] if c["sci"] else ""
@@ -312,10 +312,13 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             view = "%.0f %.0f %.0f %.0f" % ((w + 180) * 4, (90 - nn) * 4, (e - w) * 4, (nn - s) * 4)
         # what the app's filter chips say about it, each a link to that filter
         tags = []
+        tags.append(("Popular", "f=chip-popular") if c["popular"] else ("Uncommon", "f=chip-uncommon"))
+        if "North America" not in c["continents"]: tags.append(("Exotic", "f=chip-exotic"))
         if rt.startswith("Common"): tags.append(("Common", "f=chip-common"))
         if rt.startswith("Rare"): tags.append(("Rare", "f=chip-rare"))
         tags.append(("Venomous", "f=chip-venom") if c["venom"] else ("Non-venomous", "f=chip-nonvenom"))
-        if c["type"] in ("Boa", "Python"): tags.append(("Constrictor", "f=chip-constrictor"))  # the app's own rule
+        constrictor = c["type"] in ("Boa", "Python")  # the app's own rule
+        tags.append(("Constrictor", "f=chip-constrictor") if constrictor else ("Non-constrictor", "f=chip-nonconstrictor"))
         if c["invasive"]: tags.append(("Invasive", "f=chip-invasive"))
         if c["eater"]: tags.append(("Snake eater", "f=chip-snakeeater"))
         if c["extinct"] or c["fossil"]: tags.append(("Fossil" if c["fossil"] else c["extinct"].split(" - ")[0].split(" since")[0], "f=chip-extinct"))
@@ -325,6 +328,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if len(rel) < 6: rel += [x for x in by_family.get(c["family"], []) if x is not c and x not in rel][:12 - len(rel)]
         facts = []
         facts.append(("Venom", "Venomous" if c["venom"] else "Not venomous"))
+        facts.append(("Constrictor", "Yes - squeezes its prey" if constrictor else "No"))
         facts.append(("Type", c["type"] or "Snake"))
         if c["family"]: facts.append(("Family", c["family"]))
         if c["genus"]: facts.append(("Genus", c["genus"]))
