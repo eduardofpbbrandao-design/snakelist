@@ -2,11 +2,30 @@
 world map they colour in (species/world.svg) and their style/script - all generated from the app
 file, so the pages always match the checklist. Called by build-site.py.
 """
-import json, re, html as H, os, base64
+import json, re, html as H, os, base64, unicodedata
 
 SITE = "https://snakelist.com/"
 OUT = "species"
 AUTHOR = "Eduardo Brandao"
+
+
+def slugify(t):
+    """the same as the app's SL_SLUG: plain letters and digits joined by dashes"""
+    t = unicodedata.normalize("NFD", t.lower())
+    t = "".join(ch for ch in t if not unicodedata.combining(ch))
+    return re.sub(r"[^a-z0-9]+", "-", t).strip("-")
+
+
+def page_name(c):
+    """species/<common-name>-<scientific-name>, or just the scientific name when there is no common one"""
+    n = slugify(c["name"]) if not c["is_sci"] else ""
+    return (n + "-" + c["id"]) if n and n != c["id"] else c["id"]
+
+
+REDIRECT = """<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{name}</title><meta name="robots" content="noindex">
+<link rel="canonical" href="{url}"><meta http-equiv="refresh" content="0; url={page}">
+<script>location.replace("{page}" + location.search + location.hash)</script></head><body><a href="{page}">{name}</a></body></html>
+"""
 
 
 def build(app):
@@ -269,7 +288,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         about = lead + " " + " ".join(extra)
         title = ("%s - %s" % (nm, sci) if not c["is_sci"] else sci) + ": range map, photos & facts | SnakeList"
         desc = (lead + (" " + extra[0] if extra else ""))[:300]
-        url = SITE + "species/" + c["id"]
+        url = SITE + "species/" + page_name(c)
         img = img_of(c, "large") or (SITE + "snakelist-logo.png")
         # where it lives, country by country, with its states/provinces
         provs = {}
@@ -368,18 +387,20 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             legend=('<p class="sp-legend"><span><i class="on"></i>Native range</span>%s</p>' % (
                 '<span><i class="in"></i>Introduced / invasive</span>' if icodes or ishapes or any(d[2] == "in" for d in dots) else "")) if codes or icodes or ishapes or dots else "", view=esc(view or "0 0 1440 720"), sci_attr=esc(sci), id=c["id"],
             nplaces=len(c["countries"]),
-            related="".join('<li><a href="%s">%s</a> <i>%s</i></li>' % (x["id"], esc(x["name"]), esc(x["sci"] if not x["is_sci"] else "")) for x in rel),
+            related="".join('<li><a href="%s">%s</a> <i>%s</i></li>' % (page_name(x), esc(x["name"]), esc(x["sci"] if not x["is_sci"] else "")) for x in rel),
             author=AUTHOR, venom_cls="v" if c["venom"] else "nv", mapnote="" if codes or icodes or ishapes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
-        open("%s/%s.html" % (OUT, c["id"]), "w", encoding="utf-8").write(page)
+        open("%s/%s.html" % (OUT, page_name(c)), "w", encoding="utf-8").write(page)
+        if page_name(c) != c["id"]:  # the old address (and the app's ?sp ids) still lead here
+            open("%s/%s.html" % (OUT, c["id"]), "w", encoding="utf-8").write(REDIRECT.format(name=esc(c["name"]), url=url, page=page_name(c)))
         links.append(c)
     # the A-Z of every species, by family - one crawlable page linking them all
     fams = sorted(by_family.items(), key=lambda kv: (kv[0] == "", kv[0]))
     body = "".join('<section><h2>%s <small>%d</small></h2><ul class="sp-az">%s</ul></section>' % (
         esc(f or "Other snakes"), len(L), "".join('<li><a href="%s">%s</a>%s</li>' % (
-            x["id"], esc(x["name"]), (" <i>%s</i>" % esc(x["sci"])) if not x["is_sci"] else "") for x in sorted(L, key=lambda x: x["name"].lower())))
+            page_name(x), esc(x["name"]), (" <i>%s</i>" % esc(x["sci"])) if not x["is_sci"] else "") for x in sorted(L, key=lambda x: x["name"].lower())))
         for f, L in fams)
     open(OUT + "/index.html", "w", encoding="utf-8").write(INDEX.format(n=len(cards), body=body, author=AUTHOR, url=SITE + "species/"))
-    return [SITE + "species/"] + [SITE + "species/" + c["id"] for c in links]
+    return [SITE + "species/"] + [SITE + "species/" + page_name(c) for c in links]
 
 
 PAGE = """<!doctype html>
