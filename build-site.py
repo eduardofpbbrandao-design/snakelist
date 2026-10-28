@@ -61,8 +61,25 @@ open("robots.txt", "w").write(f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.
 import build_species, datetime
 TODAY = datetime.date.today().isoformat()
 SPECIES_URLS = build_species.build(app)
+import json
+# lastmod only moves when a page really changed, so search engines can trust it
+import hashlib
+DATES_FILE = "data/sitemap-dates.json"
+try: DATES = json.load(open(DATES_FILE))
+except Exception: DATES = {}
+def lastmod(u):
+    rel = u[len(SITE):] or "index.html"
+    if rel.endswith("/"): rel += "index.html"
+    elif not rel.endswith(".html"): rel += ".html"
+    try: h = hashlib.sha1(open(rel, "rb").read()).hexdigest()[:16]
+    except OSError: return TODAY
+    old = DATES.get(u)
+    if not old or old[0] != h: DATES[u] = [h, TODAY]
+    return DATES[u][1]
+ALL_URLS = [SITE, SITE + "about.html", SITE + "privacy.html", SITE + "terms.html"] + SPECIES_URLS
 open("sitemap.xml", "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    "".join("  <url><loc>%s</loc><lastmod>%s</lastmod></url>\n" % (u, TODAY) for u in [SITE, SITE + "about.html", SITE + "privacy.html", SITE + "terms.html"] + SPECIES_URLS) + "</urlset>\n")
+    "".join("  <url><loc>%s</loc><lastmod>%s</lastmod></url>\n" % (u, lastmod(u)) for u in ALL_URLS) + "</urlset>\n")
+json.dump(DATES, open(DATES_FILE, "w"), separators=(",", ":"))
 import json
 MANIFEST = json.dumps({
     "name": "SnakeList", "short_name": "SnakeList", "description": desc + " Made by Eduardo Brandao.",
