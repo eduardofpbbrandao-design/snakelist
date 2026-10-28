@@ -12570,6 +12570,25 @@
   paint();
 })();
 </script>
+<style>.sl-header .sl-title { cursor: pointer; }</style>
+<script>
+// the SnakeList logo goes home: the Species Checklist, from the top, with any panel closed
+(function () {
+  var logo = document.querySelector(".sl-header .sl-title"); if (!logo) return;
+  logo.setAttribute("role", "link"); logo.setAttribute("tabindex", "0"); logo.title = "Home";
+  function home(e) {
+    if (e.type === "keydown" && e.key !== "Enter") return;
+    var pg = document.getElementById("signin-page"), back = document.getElementById("signin-back");
+    if (pg && !pg.hidden && back) back.click();
+    [].slice.call(document.querySelectorAll(".open[role=dialog], .note-sheet.open, .map-sheet.open")).forEach(function (d) {
+      var c = d.querySelector("[id$=-close], [id$=-cancel], .map-close"); if (c) c.click(); else d.classList.remove("open");
+    });
+    var tg = document.getElementById("tab-guide"); if (tg) tg.click();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  logo.addEventListener("click", home); logo.addEventListener("keydown", home);
+})();
+</script>
 <script>
 // the checklist's Refresh button: different snakes, the kept-at-top ones stay put
 (function () {
@@ -14229,7 +14248,7 @@
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
-    { v: "v3.73", d: "2026-10-28", items: ["Filters fold into six sections - Snake family, Location, Habitats, Characteristics, Other filters and My lists - so the snakes come first", "Active filters show at the top: tap one to remove it, or Reset all filters", "Constrictor and Non-constrictor only count snakes where it is documented"] },
+    { v: "v3.73", d: "2026-10-28", items: ["Tap the SnakeList logo to go home - back to the checklist, from the top", "Filters fold into six sections - Snake family, Location, Habitats, Characteristics, Other filters and My lists - so the snakes come first", "Active filters show at the top: tap one to remove it, or Reset all filters", "Constrictor and Non-constrictor only count snakes where it is documented"] },
     { v: "v3.72", d: "2026-10-28", items: ["New pages for every country, family and genus - like Snakes of Australia - so you (and Google) can find every species", "Species pages: a safety note, and habitats marked as estimates"] },
     { v: "v3.71", d: "2026-10-28", items: ["Species pages say Non-constrictor for snakes that aren't constrictors"] },
     { v: "v3.70", d: "2026-10-28", items: ["Species page addresses show the common name and the scientific name, like species/california-kingsnake-lampropeltis-californiae"] },
