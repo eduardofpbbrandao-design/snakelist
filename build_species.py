@@ -65,16 +65,18 @@ def build(app):
     for m in re.finditer(r'"([a-z0-9-]+)":\s*\[(\{[^\]]*?(?:\[[^\]]*\][^\]]*?)*)\]', app.split("var INVASIVE = {", 1)[1].split("};", 1)[0]):
         for o in re.findall(r"\{([^{}]*)\}", m.group(2)):
             g = lambda k: (re.search(k + r':\s*"([^"]*)"', o) or [None, ""])[1]
-            invasive.setdefault(m.group(1), []).append({"name": g("name"), "code": g("code"), "note": g("note")})
+            st = re.search(r"states:\s*\[([^\]]*)\]", o)  # US state codes, or province names elsewhere
+            invasive.setdefault(m.group(1), []).append({"name": g("name"), "code": g("code"), "note": g("note"),
+                                                        "states": re.findall(r'"([^"]*)"', st.group(1)) if st else []})
     intro_ll = {}
     for m in re.finditer(r'area: "([^"]*)", lon: (-?[\d.]+), lat: (-?[\d.]+)', app.split("var INTRODUCED = {", 1)[1].split("};", 1)[0]):
         intro_ll[m.group(1)] = (float(m.group(2)), float(m.group(3)))
 
-    paths, boxes = world_map(OUT + "/world.svg")
+    paths, boxes, region = world_map(OUT + "/world.svg")
 
     open(OUT + "/sp.css", "w").write(CSS)
     open(OUT + "/sp.js", "w").write(JS)
-    return pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll, paths, boxes)
+    return pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll, paths, boxes, region)
 
 
 def world_map(out):
@@ -183,10 +185,41 @@ def world_map(out):
         svg.append('<path id="c-%s"%s d="%s"/>' % (code, ' pointer-events="none"' if code in overlay else "", "".join(ps)))
     svg.append("</svg>")
     open(out, "w").write("".join(svg))
-    return set(paths), boxes
+
+    def region(cc, names):
+        """The outline of some states/provinces of one country - only the few introduced areas
+        need these, so they go inline in their species' pages, not in world.svg. US states come
+        from SL_GEO.us (by code or name), elsewhere from the app's admin-1 data SL_GEO.wp/cp.
+        Returns (path data, (w, e, s, n) in degrees) or None."""
+        want = {n.lower() for n in names}; rings = []
+        if cc == "us":
+            for st in G["us"]:
+                if st["code"].lower() in want or st["name"].lower() in want: rings += st["rings"]
+        else:
+            src = G["wp"].get(cc) or G["cp"].get(cc)
+            if src and isinstance(src, list) and len(src) == 2:
+                k = src[0]
+                for nm, rr in src[1]:
+                    if re.sub(r" \(\d+\)$", "", nm).lower() in want:
+                        for flat in rr:
+                            x = y = 0; ring = []
+                            for i in range(0, len(flat) - 1, 2):
+                                x += flat[i]; y += flat[i + 1]; ring.append([x / k, y / k])
+                            rings.append(ring)
+        ds, lons, lats = [], [], []
+        for ring in rings:
+            if len(ring) < 3: continue
+            d = path_d(simplify(ring_xy([p[0] for p in ring], [p[1] for p in ring])))
+            if d: ds.append(d)
+            # the fit uses only pieces of some size (not every key off Florida)
+            xs = [p[0] for p in ring]; ys = [p[1] for p in ring]
+            if (max(xs) - min(xs)) * (max(ys) - min(ys)) > 0.05 or not lons: lons += xs; lats += ys
+        return ("".join(ds), (min(lons), max(lons), min(lats), max(lats))) if ds else None
+
+    return set(paths), boxes, region
 
 
-def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll, paths, boxes):
+def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll, paths, boxes, region):
     from urllib.parse import quote
 
     def esc(t): return H.escape(str(t), quote=True)
@@ -253,11 +286,14 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         codes = [iso[n] for n in c["countries"] if n in iso]
         # introduced / invasive places: their own colour on the map (unless also native there)
         inv = invasive.get(c["id"]) or [{"name": a, "code": "", "note": ""} for a in c["intro"]]
-        icodes, dots = [], []
+        icodes, dots, ishapes, iboxes = [], [], [], []
         for x in inv:
             cc = x["code"] or iso.get(x["name"], "")
             rows.append("<li><b>Introduced:</b> %s%s</li>" % (place(x["name"]), (" (%s)" % esc(x["note"])) if x["note"] else ""))
-            if cc in paths:
+            rg = region(cc, x.get("states") or []) if cc and x.get("states") else None
+            if rg:  # only the states/provinces it was brought to, not the whole country
+                ishapes.append(rg[0]); iboxes.append((0,) + rg[1])
+            elif cc in paths:
                 if cc not in codes and cc not in icodes: icodes.append(cc)
             else:  # too small for a shape (Christmas Island): a dot where it is
                 ll = intro_ll.get(x["name"]) or next((v for k, v in intro_ll.items() if k.startswith(x["name"])), None)
@@ -266,7 +302,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         for cc, cls in [(cc, "on") for cc in codes] + [(cc, "in") for cc in icodes]:
             b = boxes.get(cc)
             if b and max(b[2] - b[1], b[4] - b[3]) < 1.2: dots.append(((b[1] + b[2]) / 2, (b[3] + b[4]) / 2, cls, max(b[2] - b[1], b[4] - b[3]) * 4))
-        bx = [boxes[cc] for cc in codes + icodes if cc in boxes] + [(0, d[0], d[0], d[1], d[1]) for d in dots]
+        bx = [boxes[cc] for cc in codes + icodes if cc in boxes] + iboxes + [(0, d[0], d[0], d[1], d[1]) for d in dots]
         view = None
         if bx:
             w, e = min(b[1] for b in bx), max(b[2] for b in bx); s, nn = min(b[3] for b in bx), max(b[4] for b in bx)
@@ -323,12 +359,13 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             where="".join(rows) or "<li>No range recorded yet.</li>",
             tags="".join('<li><a href="../?%s">%s</a></li>' % (esc(q), esc(t)) for t, q in tags),
             codes=esc(" ".join(codes)), intro=esc(" ".join(icodes)),
+            ishapes="".join('<path class="in" d="%s"/>' % d for d in ishapes),
             dots=esc(" ".join("%.1f,%.1f,%s,%.2g" % ((lo + 180) * 4, (90 - la) * 4, k, sz) for lo, la, k, sz in dots)),
             legend=('<p class="sp-legend"><span><i class="on"></i>Native range</span>%s</p>' % (
-                '<span><i class="in"></i>Introduced / invasive</span>' if icodes or any(d[2] == "in" for d in dots) else "")) if codes or icodes or dots else "", view=esc(view or "0 0 1440 720"), sci_attr=esc(sci), id=c["id"],
+                '<span><i class="in"></i>Introduced / invasive</span>' if icodes or ishapes or any(d[2] == "in" for d in dots) else "")) if codes or icodes or ishapes or dots else "", view=esc(view or "0 0 1440 720"), sci_attr=esc(sci), id=c["id"],
             nplaces=len(c["countries"]),
             related="".join('<li><a href="%s">%s</a> <i>%s</i></li>' % (x["id"], esc(x["name"]), esc(x["sci"] if not x["is_sci"] else "")) for x in rel),
-            author=AUTHOR, venom_cls="v" if c["venom"] else "nv", mapnote="" if codes or icodes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
+            author=AUTHOR, venom_cls="v" if c["venom"] else "nv", mapnote="" if codes or icodes or ishapes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
         open("%s/%s.html" % (OUT, c["id"]), "w", encoding="utf-8").write(page)
         links.append(c)
     # the A-Z of every species, by family - one crawlable page linking them all
@@ -369,7 +406,7 @@ PAGE = """<!doctype html>
 <p class="sp-cta"><a class="sp-btn" href="../?sp={id}">Open in SnakeList</a></p></div></div>
 <section><h2>About</h2><p>{about}</p><div id="sp-wiki"></div></section>
 <section><h2>Where it lives</h2>
-<div class="sp-map" data-codes="{codes}" data-intro="{intro}" data-dots="{dots}" data-view="{view}" aria-label="Map of the {nplaces} countries where {h1} lives"></div>{legend}{mapnote}
+<div class="sp-map" data-codes="{codes}" data-intro="{intro}" data-dots="{dots}" data-view="{view}" aria-label="Map of the {nplaces} countries where {h1} lives"></div><template class="sp-ishapes">{ishapes}</template>{legend}{mapnote}
 <ul class="sp-where">{where}</ul></section>
 <section><h2>Habitats</h2><ul class="sp-pills">{habitats}</ul></section>
 <section><h2>Related snakes</h2><ul class="sp-rel">{related}</ul></section>
@@ -434,6 +471,7 @@ var m=document.querySelector('.sp-map');
 if(m){fetch('world.svg').then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){m.innerHTML=t;var s=m.querySelector('svg'),NS='http://www.w3.org/2000/svg';
 s.removeAttribute('width');s.removeAttribute('height');s.setAttribute('preserveAspectRatio','xMidYMid meet');s.setAttribute('aria-hidden','true');
 [['intro','in'],['codes','on']].forEach(function(a){(m.dataset[a[0]]||'').split(' ').forEach(function(c){var p=c&&s.getElementById('c-'+c);if(p){p.setAttribute('class',a[1]);s.appendChild(p)}})});
+var tp=document.querySelector('template.sp-ishapes');if(tp&&tp.innerHTML.trim()){var g=new DOMParser().parseFromString('<svg xmlns="'+NS+'">'+tp.innerHTML+'</svg>','image/svg+xml').documentElement;[].slice.call(g.childNodes).forEach(function(n){s.appendChild(document.importNode(n,true))})}
 var dots=[];(m.dataset.dots||'').split(' ').forEach(function(d){var q=d.split(',');if(q.length<3)return;var c=document.createElementNS(NS,'circle');c.setAttribute('cx',q[0]);c.setAttribute('cy',q[1]);c.setAttribute('class',q[2]);c._s=+q[3]||0;s.appendChild(c);dots.push(c)});
 var W=1440,HH=720,f=(m.dataset.view||'0 0 1440 720').split(' ').map(Number),v={x:0,y:0,w:W,h:HH},minW=Math.max(30,f[2]/12),maxW=W,A=.5;
 var z=document.createElement('div');z.className='sp-zoom';z.innerHTML='<button type="button" aria-label="Zoom in">+</button><button type="button" aria-label="Zoom out">−</button>';m.appendChild(z);
