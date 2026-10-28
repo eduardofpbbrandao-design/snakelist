@@ -9315,6 +9315,28 @@
     return c + (c === 1 ? " country" : " countries") + (t ? " (+" + t + (t === 1 ? " territory)" : " territories)") : "");
   }
   window.SL_countPlaces = countPlaces; window.SL_NON_SOVEREIGN = NON_SOVEREIGN;
+  // what each country calls the parts it is divided into, so "See states" says what it really
+  // shows - the shapes (Natural Earth admin-1) carry no type of their own, so this is by country.
+  // Anything not listed reads "regions"; Indonesia's shapes are its islands (see "also" below).
+  var SUBDIV = {};
+  ("states:us mx br in au ng my ve de at sd ss pw fm|provinces:ca ar cn za es be nl af ao bi cd kp kr kh la lk mz pk pg sb th tr vn zm zw ke cr cu do ec pa ir ga gq mn tm dz bg td bf rw sl sa am vu nc|" +
+   "regions:fr it cl pe kz kg tj uz ph ru ua by cm ci sn ml mr tg gh gn gw dj so et er ug tz mg sz na ne ma ge az ba si sk cz fi dk is nz gr mm gy tt kn|" +
+   "departments:co bo py uy gt hn ni sv bj ht cg|prefectures:jp cf|counties:ro al hr hu ee se no ie lt lr|districts:pt bt bn bz sr bs mw ls bw ly il cy md rs mu sc ai sg lc|" +
+   "governorates:eg tn sy jo lb iq ye om kw bh|emirates:ae|cantons:ch|parishes:jm bb ag dm gd vc ms|municipalities:me mk xk lv qa tl cv gl|" +
+   "divisions:bd fj gm|zones:np|atolls:mv|islands:id km st tc vi mp pf|nations:gb|voivodeships:pl|territories:ps").split("|").forEach(function (grp) {
+    var p = grp.split(":");
+    p[1].split(" ").forEach(function (cc) { SUBDIV[cc] = p[0]; });
+  });
+  // "provinces" / "province" for one country (lowercase code); several countries share one
+  // word if they all use it, two words are joined ("states & provinces"), more read "regions"
+  function subdivWord(codes, one) {
+    var ws = [];
+    [].concat(codes).forEach(function (cc) { var w = SUBDIV[String(cc).toLowerCase()] || "regions"; if (ws.indexOf(w) < 0) ws.push(w); });
+    var w = !ws.length || ws.length > 2 ? "regions" : ws.join(" & ");
+    return one ? w.split(" & ").map(function (x) { return x.replace(/ies$/, "y").replace(/(sh|ch)es$/, "$1").replace(/s$/, ""); }).join(" or ") : w;
+  }
+  function capWord(w) { return w.charAt(0).toUpperCase() + w.slice(1); }
+  window.SL_SUBDIV_WORD = subdivWord;
   var sheet = document.getElementById("map-sheet");
   var wrap  = document.getElementById("map-wrap");
   if (!sheet || !wrap) return;

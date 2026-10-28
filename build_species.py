@@ -59,35 +59,135 @@ def build(app):
     for c in cards:
         by_genus.setdefault(c["genus"], []).append(c); by_family.setdefault(c["family"], []).append(c)
 
-    # ---- the world map: one path per country, equirectangular (x = lon, y = -lat) ----
-    src = open("data/geo.js", encoding="utf-8").read().split("window.SL_GEO=", 1)[1]
-    js = re.sub(r'([{,])(prebuilt|wp|cp|us):', r'\1"\2":', src.rstrip().rstrip(';'), count=4)
-    P = json.loads(js)["prebuilt"]; SC = P["scale"]
-    paths, boxes = {}, {}
-    for r in P["poly"]:
-        code = r[0]
-        if not isinstance(r[7], list) or len(r[7]) < 3: continue
-        xs, ys, x, y = [], [], 0, 0
-        for dx, dy in zip(r[7], r[8]):
-            x += dx; y += dy; xs.append(x / SC); ys.append(y / SC)
-        area = (max(xs) - min(xs)) * (max(ys) - min(ys))
-        if area < 0.02 and code in paths: continue          # specks next to a bigger shape of the same country
-        q, last = [], None
-        for lon, lat in zip(xs, ys):
-            pt = (round((lon + 180) * 4), round((90 - lat) * 4))
-            if pt != last: q.append(pt); last = pt
-        if len(q) < 3: continue
-        d = "M%d %d" % q[0] + "".join("l%d %d" % (b[0] - a[0], b[1] - a[1]) for a, b in zip(q, q[1:]))
-        paths.setdefault(code, []).append(d + "z")
-        if area > boxes.get(code, (0,))[0]: boxes[code] = (area, min(xs), max(xs), min(ys), max(ys))
-    svg = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 720">']
-    for code, ps in paths.items():
-        svg.append('<path id="c-%s" d="%s"/>' % (code, "".join(ps)))
-    svg.append("</svg>")
-    open(OUT + "/world.svg", "w").write("".join(svg))
+    # introduced / invasive populations: the app's INVASIVE table (with the world map's code for
+    # each place), plus the INTRODUCED points (lon/lat) for places too small to have a shape
+    invasive = {}
+    for m in re.finditer(r'"([a-z0-9-]+)":\s*\[(\{[^\]]*?(?:\[[^\]]*\][^\]]*?)*)\]', app.split("var INVASIVE = {", 1)[1].split("};", 1)[0]):
+        for o in re.findall(r"\{([^{}]*)\}", m.group(2)):
+            g = lambda k: (re.search(k + r':\s*"([^"]*)"', o) or [None, ""])[1]
+            invasive.setdefault(m.group(1), []).append({"name": g("name"), "code": g("code"), "note": g("note")})
+    intro_ll = {}
+    for m in re.finditer(r'area: "([^"]*)", lon: (-?[\d.]+), lat: (-?[\d.]+)', app.split("var INTRODUCED = {", 1)[1].split("};", 1)[0]):
+        intro_ll[m.group(1)] = (float(m.group(2)), float(m.group(3)))
+
+    paths, boxes = world_map(OUT + "/world.svg")
 
     open(OUT + "/sp.css", "w").write(CSS)
     open(OUT + "/sp.js", "w").write(JS)
+    return pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll, paths, boxes)
+
+
+def world_map(out):
+    """species/world.svg: one path per country (id c-<iso code>) from the app's Natural Earth
+    1:10m outlines, equirectangular x = (lon+180)*4, y = (90-lat)*4 in a 1440x720 box (the app's
+    camera place-picker loads the same file, so keep the ids and projection). The full-detail
+    rings are simplified (Douglas-Peucker, 0.1 map units = 0.025 degrees, well under a pixel at
+    12x zoom) and written as relative moves in tenths of a unit. Returns the path codes and, per
+    country, the box of its largest piece (for fitting a species' range)."""
+    src = open("data/geo.js", encoding="utf-8").read().split("window.SL_GEO=", 1)[1]
+    js = re.sub(r'([{,])(prebuilt|wp|cp|us):', r'\1"\2":', src.rstrip().rstrip(';'), count=4)
+    G = json.loads(js); P = G["prebuilt"]; SC = P["scale"]
+    TOL = 0.1
+
+    def ring_xy(lons, lats):
+        return [((lo + 180) * 4, (90 - la) * 4) for lo, la in zip(lons, lats)]
+
+    def simplify(pts):
+        """Douglas-Peucker on a closed ring (split in two halves so the ends stay put)."""
+        def dp(p):
+            n = len(p)
+            if n < 3: return p
+            keep = [False] * n; keep[0] = keep[-1] = True; st = [(0, n - 1)]; t2 = TOL * TOL
+            while st:
+                a, b = st.pop(); ax, ay = p[a]; bx, by = p[b]; dx, dy = bx - ax, by - ay; L = dx * dx + dy * dy
+                best, bi = -1, -1
+                for i in range(a + 1, b):
+                    px, py = p[i]
+                    if L == 0: d = (px - ax) ** 2 + (py - ay) ** 2
+                    else:
+                        t = max(0, min(1, ((px - ax) * dx + (py - ay) * dy) / L))
+                        d = (px - ax - t * dx) ** 2 + (py - ay - t * dy) ** 2
+                    if d > best: best, bi = d, i
+                if best > t2: keep[bi] = True; st.append((a, bi)); st.append((bi, b))
+            return [q for q, k in zip(p, keep) if k]
+        m = len(pts) // 2
+        return dp(pts[:m + 1])[:-1] + dp(pts[m:])
+
+    def num(n):  # n in tenths of a unit -> shortest SVG number
+        s = "-" if n < 0 else ""; n = abs(n)
+        return s + (str(n // 10) if n % 10 == 0 else (str(n // 10) if n >= 10 else "") + "." + str(n % 10))
+
+    def path_d(pts):
+        q = []
+        for x, y in pts:
+            p = (round(x * 10), round(y * 10))
+            if not q or p != q[-1]: q.append(p)
+        if len(q) > 1 and q[-1] == q[0]: q.pop()
+        if len(q) < 3: return ""
+        toks = [num(q[0][0]), num(q[0][1])]
+        out = "M" + join(toks) + "l"
+        rel = []
+        for a, b in zip(q, q[1:]): rel += [num(b[0] - a[0]), num(b[1] - a[1])]
+        return out + join(rel) + "z"
+
+    def join(toks):
+        s, prev = "", ""
+        for t in toks:
+            if prev and not (t[0] == "-" or (t[0] == "." and "." in prev)): s += " "
+            s += t; prev = t
+        return s
+
+    paths, boxes = {}, {}
+    def add(code, pts, track=True):
+        xs = [p[0] for p in pts]; ys = [p[1] for p in pts]
+        bw, bh = max(xs) - min(xs), max(ys) - min(ys)
+        # sub-pixel specks (even at full zoom) next to a bigger piece of the same country
+        if bw < 0.3 and bh < 0.3 and code in paths: return
+        d = path_d(simplify(pts)) or (path_d(pts) if code not in paths else "")
+        if not d and code not in paths:  # smaller than the grid: a tiny diamond where it is
+            cx, cy = round(sum(xs) / len(xs), 1), round(sum(ys) / len(ys), 1)
+            d = path_d([(cx, cy - .1), (cx + .1, cy), (cx, cy + .1), (cx - .1, cy)])
+        if not d: return
+        paths.setdefault(code, []).append(d)
+        if track:
+            area = bw * bh / 16  # in square degrees
+            if area > boxes.get(code, (-1,))[0]:
+                boxes[code] = (area, min(xs) / 4 - 180, max(xs) / 4 - 180, 90 - max(ys) / 4, 90 - min(ys) / 4)
+
+    kuril = []
+    for r in P["poly"]:
+        if r[1] or not isinstance(r[2], list) or len(r[2]) < 3: continue
+        lons, lats, x, y = [], [], 0, 0
+        for dx, dy in zip(r[2], r[3]):
+            x += dx; y += dy; lons.append(x / SC); lats.append(y / SC)
+        pts = ring_xy(lons, lats)
+        add(r[0], pts)
+        # the Southern Kuril Islands (a "country" in the app's list) are Russian islands here
+        if r[0] == "ru" and 145.3 <= min(lons) and max(lons) <= 149.2 and 43.2 <= min(lats) and max(lats) <= 45.7: kuril.append(pts)
+    # Crimea is drawn inside Russia's outline in this Natural Earth edition: its own shape comes
+    # from the province outlines (Crimea + Sevastopol), drawn on top, so it can be coloured alone
+    wsc, crimea = G["wp"]["ru"][0], []
+    for nm, rings in G["wp"]["ru"][1]:
+        if nm in ("Autonomous Republic of Crimea", "Sevastopol"):
+            for rg in rings:
+                x, y, lons, lats = rg[0], rg[1], [rg[0] / wsc], [rg[1] / wsc]
+                for i in range(2, len(rg) - 1, 2):
+                    x += rg[i]; y += rg[i + 1]; lons.append(x / wsc); lats.append(y / wsc)
+                crimea.append(ring_xy(lons, lats))
+    for code, rings in (("xq", crimea), ("xr", kuril)):
+        for pts in rings: add(code, pts)
+    overlay = {"xq", "xr"}
+    svg = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 720">']
+    for code, ps in sorted(paths.items(), key=lambda kv: kv[0] in overlay):
+        # the overlays sit on top of Russia; taps on the app's picker go through to Russia itself
+        svg.append('<path id="c-%s"%s d="%s"/>' % (code, ' pointer-events="none"' if code in overlay else "", "".join(ps)))
+    svg.append("</svg>")
+    open(out, "w").write("".join(svg))
+    return set(paths), boxes
+
+
+def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll, paths, boxes):
+    from urllib.parse import quote
 
     def esc(t): return H.escape(str(t), quote=True)
     def plist(L, n=6):
@@ -143,13 +243,30 @@ def build(app):
         for pkey in c["provinces"]:
             cc, _, pn = pkey.partition(":"); provs.setdefault(cc.lower(), []).append(pn)
         if c["states"]: provs.setdefault("us", []).extend(c["states"])
+        def place(n):  # a country name, linking to the app's map on that country
+            return '<a href="../?map=%s">%s</a>' % (esc(quote(n)), esc(n)) if n in iso else esc(n)
         rows = []
         for n in c["countries"]:
             cc = iso.get(n, "")
             sub = provs.get(cc, [])
-            rows.append("<li><b>%s</b>%s</li>" % (esc(n), (": " + esc(", ".join(sorted(sub)))) if sub else ""))
+            rows.append("<li><b>%s</b>%s</li>" % (place(n), (": " + esc(", ".join(sorted(sub)))) if sub else ""))
         codes = [iso[n] for n in c["countries"] if n in iso]
-        bx = [boxes[cc] for cc in codes if cc in boxes]
+        # introduced / invasive places: their own colour on the map (unless also native there)
+        inv = invasive.get(c["id"]) or [{"name": a, "code": "", "note": ""} for a in c["intro"]]
+        icodes, dots = [], []
+        for x in inv:
+            cc = x["code"] or iso.get(x["name"], "")
+            rows.append("<li><b>Introduced:</b> %s%s</li>" % (place(x["name"]), (" (%s)" % esc(x["note"])) if x["note"] else ""))
+            if cc in paths:
+                if cc not in codes and cc not in icodes: icodes.append(cc)
+            else:  # too small for a shape (Christmas Island): a dot where it is
+                ll = intro_ll.get(x["name"]) or next((v for k, v in intro_ll.items() if k.startswith(x["name"])), None)
+                if ll: dots.append((ll[0], ll[1], "in"))
+        # tiny countries (Gibraltar, Monaco...) get a dot too, or they'd be invisible zoomed out
+        for cc, cls in [(cc, "on") for cc in codes] + [(cc, "in") for cc in icodes]:
+            b = boxes.get(cc)
+            if b and max(b[2] - b[1], b[4] - b[3]) < 1.2: dots.append(((b[1] + b[2]) / 2, (b[3] + b[4]) / 2, cls))
+        bx = [boxes[cc] for cc in codes + icodes if cc in boxes] + [(0, d[0], d[0], d[1], d[1]) for d in dots]
         view = None
         if bx:
             w, e = min(b[1] for b in bx), max(b[2] for b in bx); s, nn = min(b[3] for b in bx), max(b[4] for b in bx)
@@ -157,6 +274,17 @@ def build(app):
             w, e, s, nn = max(-180, w - padx), min(180, e + padx), max(-60, s - pady), min(85, nn + pady)
             if (e - w) < (nn - s) * 1.6: mid = (w + e) / 2; half = (nn - s) * 0.8; w, e = max(-180, mid - half), min(180, mid + half)
             view = "%.0f %.0f %.0f %.0f" % ((w + 180) * 4, (90 - nn) * 4, (e - w) * 4, (nn - s) * 4)
+        # what the app's filter chips say about it, each a link to that filter
+        tags = []
+        if rt.startswith("Common"): tags.append(("Common", "f=chip-common"))
+        if rt.startswith("Rare"): tags.append(("Rare", "f=chip-rare"))
+        tags.append(("Venomous", "f=chip-venom") if c["venom"] else ("Non-venomous", "f=chip-nonvenom"))
+        if c["type"] in ("Boa", "Python"): tags.append(("Constrictor", "f=chip-constrictor"))  # the app's own rule
+        if c["invasive"]: tags.append(("Invasive", "f=chip-invasive"))
+        if c["eater"]: tags.append(("Snake eater", "f=chip-snakeeater"))
+        if c["extinct"] or c["fossil"]: tags.append(("Fossil" if c["fossil"] else c["extinct"].split(" - ")[0].split(" since")[0], "f=chip-extinct"))
+        if c["type"] and c["type"] != "Other": tags.append((c["type"], "type=" + quote(c["type"])))
+        if c["family"]: tags.append((c["family"], "fam=" + quote(c["family"])))
         rel = [x for x in by_genus.get(c["genus"], []) if x is not c][:12]
         if len(rel) < 6: rel += [x for x in by_family.get(c["family"], []) if x is not c and x not in rel][:12 - len(rel)]
         facts = []
@@ -191,12 +319,16 @@ def build(app):
             title=esc(title), desc=esc(desc), url=url, img=esc(img), ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"),
             h1=esc(nm), sub=esc(sci) if not c["is_sci"] else "", photo=ph, about=esc(about),
             facts="".join("<div><dt>%s</dt><dd>%s</dd></div>" % (esc(k), esc(v)) for k, v in facts),
-            habitats="".join("<li>%s</li>" % esc(h) for h in c["habitats"][:24]) or "<li>Not worked out yet</li>",
-            where=("".join(rows) or "<li>No range recorded yet.</li>") + ("".join("<li><b>Introduced:</b> %s</li>" % esc(x) for x in c["intro"])),
-            codes=esc(" ".join(codes)), view=esc(view or "0 0 1440 720"), sci_attr=esc(sci), id=c["id"],
+            habitats="".join('<li><a href="../?hab=%s">%s</a></li>' % (esc(quote(h)), esc(h)) for h in c["habitats"][:24]) or "<li>Not worked out yet</li>",
+            where="".join(rows) or "<li>No range recorded yet.</li>",
+            tags="".join('<li><a href="../?%s">%s</a></li>' % (esc(q), esc(t)) for t, q in tags),
+            codes=esc(" ".join(codes)), intro=esc(" ".join(icodes)),
+            dots=esc(" ".join("%.1f,%.1f,%s" % ((lo + 180) * 4, (90 - la) * 4, k) for lo, la, k in dots)),
+            legend=('<p class="sp-legend"><span><i class="on"></i>Native range</span>%s</p>' % (
+                '<span><i class="in"></i>Introduced / invasive</span>' if icodes or any(d[2] == "in" for d in dots) else "")) if codes or icodes or dots else "", view=esc(view or "0 0 1440 720"), sci_attr=esc(sci), id=c["id"],
             nplaces=len(c["countries"]),
             related="".join('<li><a href="%s">%s</a> <i>%s</i></li>' % (x["id"], esc(x["name"]), esc(x["sci"] if not x["is_sci"] else "")) for x in rel),
-            author=AUTHOR, venom_cls="v" if c["venom"] else "nv", mapnote="" if codes else '<p class="sp-muted">No range data for this snake yet.</p>')
+            author=AUTHOR, venom_cls="v" if c["venom"] else "nv", mapnote="" if codes or icodes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
         open("%s/%s.html" % (OUT, c["id"]), "w", encoding="utf-8").write(page)
         links.append(c)
     # the A-Z of every species, by family - one crawlable page linking them all
@@ -231,12 +363,13 @@ PAGE = """<!doctype html>
 <article>
 <div class="sp-head">{photo}
 <div class="sp-title"><h1>{h1}</h1><p class="sp-sci">{sub}</p>
+<ul class="sp-tags" aria-label="In SnakeList">{tags}</ul>
 <p class="sp-badge {venom_cls}"></p>
 <dl class="sp-facts">{facts}</dl>
 <p class="sp-cta"><a class="sp-btn" href="../?sp={id}">Open in SnakeList</a></p></div></div>
 <section><h2>About</h2><p>{about}</p><div id="sp-wiki"></div></section>
 <section><h2>Where it lives</h2>
-<div class="sp-map" data-codes="{codes}" data-view="{view}" aria-label="Map of the {nplaces} countries where {h1} lives"></div>{mapnote}
+<div class="sp-map" data-codes="{codes}" data-intro="{intro}" data-dots="{dots}" data-view="{view}" aria-label="Map of the {nplaces} countries where {h1} lives"></div>{legend}{mapnote}
 <ul class="sp-where">{where}</ul></section>
 <section><h2>Habitats</h2><ul class="sp-pills">{habitats}</ul></section>
 <section><h2>Related snakes</h2><ul class="sp-rel">{related}</ul></section>
@@ -259,8 +392,8 @@ INDEX = """<!doctype html>
 </body></html>
 """
 
-CSS = """:root{--bg:#f1f6ee;--card:#fbfdf9;--text:#183020;--muted:#55705b;--line:#d5e4cf;--g:#3f8a3a;--land:#d7dccb;--on:#3f8a3a;--sea:#e3ecef}
-@media (prefers-color-scheme:dark){:root{--bg:#10261a;--card:#173323;--text:#e6f2e4;--muted:#a3c3a8;--line:#2b4d37;--g:#7fc76a;--land:#2d4b39;--on:#7fc76a;--sea:#0d1f15}}
+CSS = """:root{--bg:#f1f6ee;--card:#fbfdf9;--text:#183020;--muted:#55705b;--line:#d5e4cf;--g:#3f8a3a;--land:#d7dccb;--on:#3f8a3a;--in:#e07a1f;--sea:#e3ecef;--tag:#e3f0dc;--tagline:#a9cf9c}
+@media (prefers-color-scheme:dark){:root{--bg:#10261a;--card:#173323;--text:#e6f2e4;--muted:#a3c3a8;--line:#2b4d37;--g:#7fc76a;--land:#2d4b39;--on:#7fc76a;--in:#f0a04b;--sea:#0d1f15;--tag:#1f4630;--tagline:#3d7a52}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
 a{color:var(--g)}.sp-top{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:980px;margin:0 auto;padding:14px 16px}
 .sp-logo{font:700 26px Georgia,'Times New Roman',serif;color:var(--g);text-decoration:none}.sp-top nav{display:flex;gap:16px;font-size:14px}
@@ -274,10 +407,22 @@ h1{font:700 clamp(30px,5vw,44px)/1.1 Georgia,serif;margin:0}.sp-sci{font-style:i
 .sp-facts div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px}.sp-facts dt{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.sp-facts dd{margin:0;font-weight:600}
 .sp-btn{display:inline-block;background:var(--g);color:#fff;text-decoration:none;font-weight:600;padding:11px 18px;border-radius:12px}
 section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 20px;margin-top:18px}h2{font:700 22px Georgia,serif;margin:0 0 8px}h2 small{font:500 13px Inter,sans-serif;color:var(--muted)}
-.sp-map{border-radius:12px;overflow:hidden;background:var(--sea);aspect-ratio:2/1;max-height:460px}.sp-map svg{width:100%;height:100%;display:block}
-.sp-map path{fill:var(--land);stroke:var(--sea);stroke-width:.6;vector-effect:non-scaling-stroke}.sp-map path.on{fill:var(--on)}
+.sp-map{position:relative;border-radius:12px;overflow:hidden;background:var(--sea);aspect-ratio:2/1;max-height:460px;width:100%}
+.sp-map svg{width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.sp-map svg.drag{cursor:grabbing}
+.sp-map path{fill:var(--land);stroke:var(--sea);stroke-width:.6;vector-effect:non-scaling-stroke;stroke-linejoin:round}.sp-map path.on{fill:var(--on)}.sp-map path.in{fill:var(--in)}
+.sp-map circle{stroke:var(--card);stroke-width:1.2;vector-effect:non-scaling-stroke}.sp-map circle.on{fill:var(--on)}.sp-map circle.in{fill:var(--in)}
+.sp-zoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px}
+.sp-zoom button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--g);font:600 20px/1 Inter,system-ui,sans-serif;cursor:pointer;padding:0;touch-action:manipulation}
+.sp-zoom button:disabled{opacity:.45;cursor:default}
+.sp-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 0 0;font-size:13px;color:var(--muted)}.sp-legend span{display:inline-flex;align-items:center;gap:6px}
+.sp-legend i{width:14px;height:14px;border-radius:4px;display:inline-block}.sp-legend i.on{background:var(--on)}.sp-legend i.in{background:var(--in)}
+.sp-tags{list-style:none;padding:0;margin:4px 0 10px;display:flex;flex-wrap:wrap;gap:6px}
+.sp-tags a{display:inline-block;background:var(--tag);border:1px solid var(--tagline);color:var(--g);text-decoration:none;font-size:13px;font-weight:600;padding:3px 12px;border-radius:999px}
+.sp-tags a:hover,.sp-pills a:hover{background:var(--g);border-color:var(--g);color:#fff}
+.sp-where a{color:inherit;text-decoration:underline;text-decoration-color:var(--tagline);text-underline-offset:2px}.sp-where a:hover{color:var(--g)}
 .sp-where{columns:2 260px;padding-left:18px;font-size:14px}.sp-where li{break-inside:avoid;margin-bottom:4px}
-.sp-pills{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px}.sp-pills li{border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:13.5px}
+.sp-pills{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px}.sp-pills li{border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:13.5px}.sp-pills li:has(a){border:0;padding:0}
+.sp-pills a{display:inline-block;border:1px solid var(--tagline);background:var(--tag);color:var(--g);text-decoration:none;border-radius:999px;padding:3px 11px;font-size:13.5px}
 .sp-rel,.sp-az{columns:3 220px;padding-left:18px}.sp-rel i,.sp-az i{color:var(--muted);font-size:13px}.sp-muted{color:var(--muted)}
 .sp-lb{position:fixed;inset:0;z-index:50;background:rgba(5,15,9,.92);display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
 .sp-lb img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;cursor:default}.sp-lb-x{position:fixed;top:12px;right:14px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:26px;cursor:pointer}
@@ -286,9 +431,33 @@ section{background:var(--card);border:1px solid var(--line);border-radius:18px;p
 
 JS = """(function(){
 var m=document.querySelector('.sp-map');
-if(m){fetch('world.svg').then(function(r){return r.text()}).then(function(t){m.innerHTML=t;var s=m.querySelector('svg');
-s.setAttribute('viewBox',m.dataset.view||'0 0 1440 720');s.setAttribute('preserveAspectRatio','xMidYMid meet');
-(m.dataset.codes||'').split(' ').forEach(function(c){var p=c&&s.getElementById('c-'+c);if(p){p.classList.add('on');s.appendChild(p)}})}).catch(function(){})}
+if(m){fetch('world.svg').then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){m.innerHTML=t;var s=m.querySelector('svg'),NS='http://www.w3.org/2000/svg';
+s.removeAttribute('width');s.removeAttribute('height');s.setAttribute('preserveAspectRatio','xMidYMid meet');s.setAttribute('aria-hidden','true');
+[['intro','in'],['codes','on']].forEach(function(a){(m.dataset[a[0]]||'').split(' ').forEach(function(c){var p=c&&s.getElementById('c-'+c);if(p){p.setAttribute('class',a[1]);s.appendChild(p)}})});
+var dots=[];(m.dataset.dots||'').split(' ').forEach(function(d){var q=d.split(',');if(q.length<3)return;var c=document.createElementNS(NS,'circle');c.setAttribute('cx',q[0]);c.setAttribute('cy',q[1]);c.setAttribute('class',q[2]);s.appendChild(c);dots.push(c)});
+var W=1440,HH=720,f=(m.dataset.view||'0 0 1440 720').split(' ').map(Number),v={x:0,y:0,w:W,h:HH},minW=Math.max(30,f[2]/12),maxW=W,A=.5;
+var z=document.createElement('div');z.className='sp-zoom';z.innerHTML='<button type="button" aria-label="Zoom in">+</button><button type="button" aria-label="Zoom out">−</button>';m.appendChild(z);
+var bi=z.children[0],bo=z.children[1];
+function asp(){var w=m.clientWidth,h=m.clientHeight;A=w&&h?h/w:.5}
+function draw(){asp();v.w=Math.min(maxW,Math.max(minW,v.w));v.h=v.w*A;
+if(v.h>HH&&v.w>=maxW){v.x=0;v.y=(HH-v.h)/2}else{v.x=Math.min(W-v.w,Math.max(0,v.x));v.y=v.h>=HH?(HH-v.h)/2:Math.min(HH-v.h,Math.max(0,v.y))}
+s.setAttribute('viewBox',v.x+' '+v.y+' '+v.w+' '+v.h);var k=v.w/Math.max(1,m.clientWidth);dots.forEach(function(c){c.setAttribute('r',(4*k).toFixed(3))});
+bi.disabled=v.w<=minW+.01;bo.disabled=v.w>=maxW-.01}
+function fit(){asp();var w=f[2],h=f[3],cx=f[0]+w/2,cy=f[1]+h/2;if(h>w*A)w=h/A;w=Math.min(maxW,Math.max(minW,w));v.w=w;v.h=w*A;v.x=cx-w/2;v.y=cy-v.h/2;draw()}
+function pt(cx,cy){var r=s.getBoundingClientRect();return[v.x+(cx-r.left)/r.width*v.w,v.y+(cy-r.top)/r.height*v.h]}
+function zoom(k,cx,cy){var r=s.getBoundingClientRect(),p=cx==null?[v.x+v.w/2,v.y+v.h/2]:pt(cx,cy),fx=(p[0]-v.x)/v.w,fy=(p[1]-v.y)/v.h,nw=Math.min(maxW,Math.max(minW,v.w/k));
+v.w=nw;v.h=nw*A;v.x=p[0]-fx*nw;v.y=p[1]-fy*v.h;draw()}
+bi.addEventListener('click',function(){zoom(1.6)});bo.addEventListener('click',function(){zoom(1/1.6)});
+s.addEventListener('wheel',function(e){e.preventDefault();var d=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?400:1);zoom(Math.exp(-Math.max(-300,Math.min(300,d))*(e.ctrlKey?.01:.002)),e.clientX,e.clientY)},{passive:false});
+var P={},last=null;
+function mid(){var k=Object.keys(P),a=P[k[0]],b=P[k[1]]||a;return{x:(a[0]+b[0])/2,y:(a[1]+b[1])/2,d:Math.hypot(a[0]-b[0],a[1]-b[1])}}
+s.addEventListener('pointerdown',function(e){if(e.button>0)return;try{s.setPointerCapture(e.pointerId)}catch(x){}P[e.pointerId]=[e.clientX,e.clientY];last=mid();s.classList.add('drag')});
+s.addEventListener('pointermove',function(e){if(!P[e.pointerId])return;e.preventDefault();P[e.pointerId]=[e.clientX,e.clientY];var n=mid(),r=s.getBoundingClientRect();
+if(last){if(Object.keys(P).length>1&&last.d>0&&n.d>0)zoom(n.d/last.d,n.x,n.y);v.x-=(n.x-last.x)/r.width*v.w;v.y-=(n.y-last.y)/r.height*v.h;draw()}last=n});
+function up(e){delete P[e.pointerId];last=Object.keys(P).length?mid():null;if(!last)s.classList.remove('drag')}
+s.addEventListener('pointerup',up);s.addEventListener('pointercancel',up);s.addEventListener('lostpointercapture',up);
+['gesturestart','gesturechange'].forEach(function(n){s.addEventListener(n,function(e){e.preventDefault()})});
+var rw=m.clientWidth;window.addEventListener('resize',function(){if(m.clientWidth!==rw){rw=m.clientWidth;draw()}});fit()}).catch(function(){})}
 var im=document.querySelector('.sp-photo img');
 if(im){im.style.cursor='zoom-in';im.addEventListener('click',function(){var o=document.createElement('div');o.className='sp-lb';o.setAttribute('role','dialog');
 var big=new Image();big.alt=im.alt;big.src=im.src.replace('/medium.','/original.');big.onerror=function(){big.onerror=null;big.src=im.src.replace('/medium.','/large.')};
