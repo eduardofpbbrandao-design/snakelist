@@ -28,7 +28,11 @@ REDIRECT = """<!doctype html><html lang="en"><head><meta charset="utf-8"><title>
 """
 
 
+APP = [""]
+
+
 def build(app):
+    APP[0] = app
     os.makedirs(OUT, exist_ok=True)
     jget = lambda i: json.loads(re.search(r'<script type="application/json" id="%s">(.*?)</script>' % i, app, re.S).group(1))
     photos = jget("photo-index")
@@ -267,6 +271,11 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if n <= 2: return "Rare - " + ("recorded in only %d place%s on iNaturalist" % (n, "s" if n > 1 else "") if n else "no confirmed iNaturalist sightings")
         return "Recorded in %d places on iNaturalist" % n
 
+    CONS = json.loads(re.search(r'<script type="application/json" id="constrictor-data">(.*?)</script>', APP[0], re.S).group(1))
+    def constriction(c):
+        if c["genus"] in CONS["constrictor"]["genera"] or c["family"] in CONS["constrictor"]["families"] or c["type"] in ("Boa", "Python"): return "yes"
+        if c["genus"] in CONS["nonconstrictor"]["genera"] or c["family"] in CONS["nonconstrictor"]["families"]: return "no"
+        return "unknown"
     links = []
     for c in cards:
         nm, sci = c["name"], c["sci"]
@@ -336,8 +345,9 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if rt.startswith("Common"): tags.append(("Common", "f=chip-common"))
         if rt.startswith("Rare"): tags.append(("Rare", "f=chip-rare"))
         tags.append(("Venomous", "f=chip-venom") if c["venom"] else ("Non-venomous", "f=chip-nonvenom"))
-        constrictor = c["type"] in ("Boa", "Python")  # the app's own rule
-        tags.append(("Constrictor", "f=chip-constrictor") if constrictor else ("Non-constrictor", "f=chip-nonconstrictor"))
+        cons = constriction(c)  # documented for its family or genus, same list as the app (#constrictor-data)
+        if cons == "yes": tags.append(("Constrictor", "f=chip-constrictor"))
+        elif cons == "no": tags.append(("Non-constrictor", "f=chip-nonconstrictor"))
         if c["invasive"]: tags.append(("Invasive", "f=chip-invasive"))
         if c["eater"]: tags.append(("Snake eater", "f=chip-snakeeater"))
         if c["extinct"] or c["fossil"]: tags.append(("Fossil" if c["fossil"] else c["extinct"].split(" - ")[0].split(" since")[0], "f=chip-extinct"))
@@ -347,7 +357,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if len(rel) < 6: rel += [x for x in by_family.get(c["family"], []) if x is not c and x not in rel][:12 - len(rel)]
         facts = []
         facts.append(("Venom", "Venomous" if c["venom"] else "Not venomous"))
-        facts.append(("Constrictor", "Constrictor" if constrictor else "Non-constrictor"))
+        facts.append(("Constrictor", {"yes": "Constrictor", "no": "Non-constrictor"}.get(cons, "Not documented")))
         facts.append(("Type", c["type"] or "Snake"))
         if c["family"]: facts.append(("Family", c["family"]))
         if c["genus"]: facts.append(("Genus", c["genus"]))
