@@ -9711,6 +9711,8 @@
   var TW = 2048, TH = 1024;                          // working texture, 2:1
   var MAXZOOM = 10;                                  // country color/borders stay sharp (vector); only
                                                       // the flat land/sea texture itself softens past here
+  var CLOSEZOOM = 240;                               // with states or city dots on the map: close enough
+                                                      // to tap a city-sized state or one dot of a cluster
 
   function tbl(T, lat) {
     var a = Math.abs(lat) / 5, i = Math.floor(a);
@@ -9787,6 +9789,10 @@
   document.getElementById("legend-dot-high").style.background = cityDotColor(1);
   document.getElementById("legend-dot-off").style.background =
     getComputedStyle(document.documentElement).getPropertyValue("--map-off").trim() || "#c9ccbb";
+  // the country's own "See provinces" / "Hide prefectures" wording (see SUBDIV)
+  function setProvBtn(on, cc) {
+    document.getElementById("see-provinces").textContent = (on ? "Hide " : "See ") + subdivWord(cc || statesMode || lastCountryCode || "us");
+  }
   function updateLegend() {
     var citiesShown = document.getElementById("see-cities").textContent === "Hide cities";
     document.getElementById("legend-dot-low").parentNode.lastChild.textContent = "Fewer sightings";
@@ -9794,7 +9800,7 @@
     document.getElementById("map-legend").hidden = !(statesMode || citiesShown);
     var hint = document.querySelector(".globe-hint");
     if (hint) hint.innerHTML = "Drag to explore &middot; scroll to zoom &middot; " +
-      (statesMode ? "click any state to see its species" : "click any country");
+      (statesMode ? "click any " + subdivWord(statesMode, true) + " to see its species" : "click any country");
   }
   var lon0 = 10, lat0 = 18, selected = null, ready = false;
   // real admin-1 boundaries for the handful of non-US countries this checklist has actual
@@ -10382,6 +10388,9 @@
     // a species search also gets "See states" / "See cities" next to "See all N countries"
     var anyStates = matched.some(function (sp) { return (sp.states && sp.states.length) || (sp.provinces && sp.provinces.length); });
     document.getElementById("see-search-states").hidden = !q || !names.length || !!cityMatch || !anyStates;
+    var stateCcs = {};
+    matched.forEach(function (sp) { if (sp.states && sp.states.length) stateCcs.us = 1; (sp.provinces || []).forEach(function (k) { stateCcs[k.slice(0, 2)] = 1; }); });
+    document.getElementById("see-search-states").textContent = "See " + subdivWord(Object.keys(stateCcs));
     document.getElementById("see-search-cities").hidden = !q || !names.length || !!cityMatch || !!pendingCitySpecies;
     searchBtns = { all: !all.hidden, states: !document.getElementById("see-search-states").hidden };
 
@@ -10440,8 +10449,9 @@
       if (Math.abs((r.w + r.e) / 2 - cx) > reach || Math.abs((r.s + r.no) / 2 - cy) > reach) return;
       w = Math.min(w, r.w); e = Math.max(e, r.e); s = Math.min(s, r.s); n = Math.max(n, r.no);
     });
-    // tiny countries (Vatican City, Monaco, ...) still get some land around them in view
-    var minSpan = 1.2;
+    // tiny countries (Vatican City, Monaco, ...) still get some land around them in view -
+    // a few times their own size, so the camera can come close enough to show the real shape
+    var minSpan = Math.min(1.2, Math.max(0.02, 8 * Math.max(e - w, n - s)));
     if (e - w < minSpan) { var m = (w + e) / 2; w = m - minSpan / 2; e = m + minSpan / 2; }
     if (n - s < minSpan / 2) { var mm = (s + n) / 2; s = mm - minSpan / 4; n = mm + minSpan / 4; }
     return [w, e, s, n];
@@ -10461,7 +10471,7 @@
     var list = code === "us" ? US_STATES : (getCountryProvinces()[code] || []);
     if (!list.length) return;
     statesMode = code;
-    document.getElementById("see-provinces").textContent = "Hide states";
+    setProvBtn(true, code);
     updateLegend();
   }
   window.SL_MAP_HEATSTATES = function () { if (searchSelected && selected === searchSelected) { heatStates(searchSelected); invalidate(); } };
@@ -10641,7 +10651,9 @@
     where: "Andaman Islands, India",
     note: "Home to the uncontacted Sentinelese - visiting is illegal, so no one has ever surveyed its snakes." }];
   var shownPlace = null;
-  // a picked country too small to see (Vatican City, Monaco, San Marino...): a ring and its name
+  // a picked country small on screen (Isle of Man, Vatican City, Monaco...): its own shape is
+  // already filled in by borders(), so it just gets its name beside it - no ring around it.
+  // Only when even the shape is under a couple of pixels does a small solid dot stand in for it.
   function drawTinySelected(to) {
     if (!selected) return;
     var rows = POLY.filter(function (r) { return r.code === selected; });
@@ -10649,16 +10661,18 @@
     var w = 999, e = -999, s = 999, n = -999;
     rows.forEach(function (r) { if (r.dot) { w = Math.min(w, r.lon0); e = Math.max(e, r.lon0); s = Math.min(s, r.lat0); n = Math.max(n, r.lat0); } else { w = Math.min(w, r.w); e = Math.max(e, r.e); s = Math.min(s, r.s); n = Math.max(n, r.no); } });
     var a = to(w, n), b = to(e, s);
-    if (!a || !b || Math.abs(b[0] - a[0]) > 14 || Math.abs(b[1] - a[1]) > 14) return; // big enough to see by itself
+    if (!a || !b) return;
+    var pw = Math.abs(b[0] - a[0]), ph = Math.abs(b[1] - a[1]);
+    if (pw > 60 || ph > 60) return; // big enough to read by itself
     var pt = to((w + e) / 2, (s + n) / 2); if (!pt) return;
     var css = getComputedStyle(document.documentElement);
     var ink = css.getPropertyValue("--text").trim() || "#24321f", halo = css.getPropertyValue("--map-sea").trim() || "#dbe4ea";
     ctx.save();
-    ctx.beginPath(); ctx.arc(pt[0], pt[1], 9, 0, TAU); ctx.lineWidth = 3; ctx.strokeStyle = mapOnColor(); ctx.stroke();
-    ctx.beginPath(); ctx.arc(pt[0], pt[1], 3, 0, TAU); ctx.fillStyle = mapOnColor(); ctx.fill();
+    if (pw < 2.5 && ph < 2.5) { ctx.beginPath(); ctx.arc(pt[0], pt[1], 2.5, 0, TAU); ctx.fillStyle = mapOnColor(); ctx.fill(); }
     var label = NAME[selected] || TITLE[selected] || "";
+    var lx = Math.max(pt[0] + pw / 2, pt[0] + 2.5) + 6;
     ctx.font = "700 12px Inter, sans-serif"; ctx.textBaseline = "middle"; ctx.lineJoin = "round"; ctx.lineWidth = 4; ctx.strokeStyle = halo;
-    ctx.strokeText(label, pt[0] + 14, pt[1]); ctx.fillStyle = ink; ctx.fillText(label, pt[0] + 14, pt[1]);
+    ctx.strokeText(label, lx, pt[1]); ctx.fillStyle = ink; ctx.fillText(label, lx, pt[1]);
     ctx.restore();
   }
   function drawPlaceLabels(to) {
@@ -11013,6 +11027,40 @@
   window.SL_MAP_GEO = function () { return { poly: POLY, iso: ISO, name: NAME, title: TITLE }; };
   window.SL_MAP_GEO_WARM = function () { if (!POLY) start(); }; // country outlines, so a tapped spot can be named
   window.SL_MAP_PICK = function (x, y) { return at(x, y); };
+  // how far in the map may go right now: the usual limit, much closer while states/provinces or
+  // city dots are shown, and for a picked country that small (Vatican City, Monaco) as close as
+  // it takes for its real shape to be some 48px across
+  var tinyZoomCache = {};
+  function tinyZoom(code) {
+    if (code in tinyZoomCache) return tinyZoomCache[code];
+    var big = 0;
+    POLY.forEach(function (r) { if (r.code === code && !r.dot) big = Math.max(big, r.e - r.w, r.no - r.s); });
+    var cw = cv.clientWidth || sizeW || 900;
+    return (tinyZoomCache[code] = big ? Math.min(6000, 48 * 360 / (cw * big)) : MAXZOOM);
+  }
+  function zoomCap() {
+    var cap = MAXZOOM;
+    if (statesMode || PINS.some(function (p) { return p.cityPick || p.cityDot; })) cap = CLOSEZOOM;
+    if (selected && POLY) cap = Math.max(cap, tinyZoom(selected));
+    return cap;
+  }
+  // zoom by k keeping the spot under (sx, sy) where it is - so wheel and pinch go to what's
+  // under the pointer, not the middle of the map. Already past the cap (it just changed, say
+  // states were hidden) it never jumps back out while zooming in.
+  function zoomAt(k, sx, sy) {
+    var w = cv.clientWidth || sizeW, h = cv.clientHeight || sizeH;
+    var cap = zoomCap(), nz = fz * k;
+    nz = k > 1 ? Math.min(Math.max(cap, fz), nz) : nz;
+    nz = Math.max(1, nz);
+    if (sx == null) { sx = w / 2; sy = h / 2; }
+    var b = flatBox(), u = (sx - b[0]) / b[2], v = (sy - b[1]) / b[3];
+    var bs = baseSize(w, h), dw = bs[0] * nz, dh = bs[1] * nz;
+    fz = nz;
+    fx = (sx - u * dw - (w - dw) / 2) / dw;
+    fy = (sy - v * dh - (h - dh) / 2) / dh;
+    clampPan();
+    invalidate();
+  }
   function flyToLonLatBox(w, e, s, n, animate) {
     var cw = cv.clientWidth || sizeW, ch = cv.clientHeight || sizeH;
     if (!cw || !ch) return;
@@ -11020,7 +11068,7 @@
     var lonSpan = (e - w) / 360, latSpan = (n - s) / 180;
     var pad = 0.82; // leaves a visible margin around the fitted region
     var fzX = cw / (baseDw * lonSpan), fzY = ch / (baseDh * latSpan);
-    var targetFz = Math.max(1, Math.min(MAXZOOM, Math.min(fzX, fzY) * pad));
+    var targetFz = Math.max(1, Math.min(zoomCap(), Math.min(fzX, fzY) * pad));
     var midLon = (w + e) / 2, midLat = (s + n) / 2;
     var targetFx = 0.5 - (midLon + 180) / 360;
     var targetFy = 0.5 - (90 - midLat) / 180;
@@ -11088,10 +11136,12 @@
       ctx.restore();
       ctx.beginPath(); ctx.arc(s[0], s[1], 3.6, 0, TAU);
       ctx.fillStyle = PINS[i].color || mapOnColor(); ctx.fill(); // city dots carry their own gradient shade
-      if (fz > 1.6) {
+      // city dots are just dots - only the one last tapped carries its name (see labelPin)
+      var isCity = PINS[i].cityPick || PINS[i].cityDot;
+      if (isCity ? PINS[i] === labelPin : fz > 1.6) {
         ctx.font = "600 12px Inter, sans-serif";
         var lw = ctx.measureText(PINS[i].area).width, box = [s[0] + 8, s[1] - 9, s[0] + 12 + lw, s[1] + 8];
-        if (placed.some(function (q) { return box[0] < q[2] && box[2] > q[0] && box[1] < q[3] && box[3] > q[1]; })) continue;
+        if (!isCity && placed.some(function (q) { return box[0] < q[2] && box[2] > q[0] && box[1] < q[3] && box[3] > q[1]; })) continue;
         placed.push(box);
         ctx.textAlign = "left";
         ctx.lineJoin = "round";
@@ -11149,12 +11199,28 @@
     return pick(lon, lat);
   }
 
+  // the nearest marker within reach of the tap, so the right one of two close city dots wins
   function pinAt(mx, my) {
+    var best = null, bestD = 14;
     for (var i = 0; i < PINS.length; i++) {
       var s = PINS[i].screen;
-      if (s && Math.abs(s[0] - mx) < 16 && Math.abs(s[1] - my) < 16) return PINS[i];
+      var d = s ? Math.hypot(s[0] - mx, s[1] - my) : 99;
+      if (d < bestD) { best = PINS[i]; bestD = d; }
     }
-    return null;
+    return best;
+  }
+  // "See cities": the one dot whose name is showing, and the state/province the dots were kept
+  // to (null: the whole country or search)
+  var labelPin = null, citiesProv = null;
+  // takes every city dot off the map, with its name and legend - the open sea or another
+  // country clicked, the panel closed, or the map reset
+  function clearCities() {
+    cityDotToken++; cityShadeToken++; // cancels any sighting lookups still in flight
+    PINS = PINS.filter(function (p) { return !p.cityPick && !p.cityDot; });
+    labelPin = null; citiesProv = null; lastCityList = [];
+    document.getElementById("see-cities").textContent = "See cities";
+    updateLegend();
+    invalidate();
   }
 
   // every place that reveals the country panel replays this same little pop-in, so the
@@ -11275,7 +11341,7 @@
     document.getElementById("see-search-cities").hidden = false;
     document.getElementById("see-search-states").hidden = true; // the country's own "See states" covers it
     if (searchBtns.all) document.getElementById("all-countries").hidden = false;
-    document.getElementById("see-provinces").textContent = "See states";
+    setProvBtn(false, code);
     document.getElementById("see-provinces").hidden = !rows.some(function (r) {
       var sp = r[0];
       return (code === "us" && sp.states && sp.states.length) ||
@@ -11308,7 +11374,7 @@
     if (!st) { st = cc === "us" ? { code: key, name: key, rings: [] } : { name: key, rings: [] }; fillProvince(cc, st); return; }
     statesMode = cc;
     pickedProvince = st;
-    document.getElementById("see-provinces").textContent = "Hide states";
+    setProvBtn(true, cc);
     updateLegend();
     var w = 999, e = -999, s = 999, n = -999;
     st.rings.forEach(function (ring) { ring.forEach(function (p) {
@@ -11374,10 +11440,10 @@
     });
     var names = Object.keys(counts).sort();
     document.getElementById("cp-title").classList.add("cp-title-place");
-    document.getElementById("cp-title").textContent = (NAME[lastCountryCode] || lastCountryCode.toUpperCase()) + ": states/provinces";
+    document.getElementById("cp-title").textContent = (NAME[lastCountryCode] || lastCountryCode.toUpperCase()) + ": " + subdivWord(lastCountryCode);
     document.getElementById("cp-sub").textContent = names.length
       ? names.length + " with sourced species data"
-      : "No sourced state/province data for this country yet.";
+      : "No sourced " + subdivWord(lastCountryCode, true) + " data for this country yet.";
     document.getElementById("cp-list").innerHTML = names.map(function (n) {
       return '<div class="cp-row cp-row-country cp-state-pick" data-prov="' + attrEsc(provKeyOf[n] || n) + '"><b>' + n + "</b><i>" + counts[n] + " species</i></div>";
     }).join("");
@@ -11489,14 +11555,37 @@
 
   // ---- interaction --------------------------------------------------------------------------
   var drag = null, moved = 0;
+  // two fingers down: pinch zoom around the point between them (never read as a tap)
+  var fingers = {}, pinch = null;
+  function pinchSpan() {
+    var ids = Object.keys(fingers); if (ids.length < 2) return null;
+    var a = fingers[ids[0]], b = fingers[ids[1]], r = cv.getBoundingClientRect();
+    return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, x: (a.x + b.x) / 2 - r.left, y: (a.y + b.y) / 2 - r.top };
+  }
+  function liftFinger(e) {
+    delete fingers[e.pointerId];
+    if (pinch && Object.keys(fingers).length < 2) { pinch = null; drag = null; dragging = false; cv.classList.remove("dragging"); invalidate(); return true; }
+    return !!pinch;
+  }
+  cv.addEventListener("pointercancel", liftFinger);
   cv.addEventListener("pointerdown", function (e) {
     flyToken++; // a manual drag wins over any fly-to animation still in flight
+    fingers[e.pointerId] = { x: e.clientX, y: e.clientY };
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    if (Object.keys(fingers).length >= 2) { pinch = pinchSpan(); drag = null; moved = 99; return; }
     drag = { x: e.clientX, y: e.clientY, lon: lon0, lat: lat0, fx: fx, fy: fy };
     moved = 0;
     cv.classList.add("dragging");
-    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
   });
   cv.addEventListener("pointermove", function (e) {
+    if (fingers[e.pointerId]) fingers[e.pointerId] = { x: e.clientX, y: e.clientY };
+    if (pinch) {
+      var now = pinchSpan(); if (!now) return;
+      dragging = true;
+      zoomAt(now.d / pinch.d, now.x, now.y);
+      pinch = now;
+      return;
+    }
     if (!drag) return;
     var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     moved = Math.max(moved, Math.abs(dx) + Math.abs(dy));
@@ -11508,6 +11597,7 @@
     invalidate();                                  // at most one redraw per frame
   });
   cv.addEventListener("pointerup", function (e) {
+    if (liftFinger(e)) return; // the end of a pinch, not a tap
     cv.classList.remove("dragging");
     var wasDrag = dragging;
     dragging = false;
@@ -11520,14 +11610,28 @@
       var picked = statesMode && !pin
         ? provinceAt(statesMode, (mx - bx[0]) / bx[2] * 360 - 180, 90 - (my - bx[1]) / bx[3] * 180)
         : null;
-      if (picked) {
-        // with "See states" on, a click on a state is a question about that state
-        pickedProvince = picked;
-        fillProvince(statesMode, picked);
+      var cityOn = PINS.some(function (p) { return p.cityPick || p.cityDot; });
+      if (pin && (pin.cityPick || pin.cityDot)) {
+        // a city dot: its name shows beside it (one at a time) and the panel says what lives there
+        labelPin = pin;
+        fillArea(pin);
+      } else if (picked) {
+        // with "See states" on, a click on a state is a question about that state. A miss between
+        // the dots of the state they're kept to only puts the name away; another state clears them
+        labelPin = null;
+        if (!(cityOn && citiesProv === picked)) {
+          if (cityOn && citiesProv) clearCities();
+          pickedProvince = picked;
+          fillProvince(statesMode, picked);
+        }
       } else if (pin) {
         selected = null;
         fillArea(pin);
+      } else if (cityOn && (function (c) { return c && PINS.some(function (p) { return (p.cityPick || p.cityDot) && p.cc === c; }); })(at(mx, my))) {
+        labelPin = null; // a miss between the dots, inside the cities' own country: just hides the name
       } else {
+        // the open sea or another country: the cities go, and that country shows as usual
+        if (cityOn) clearCities();
         statesMode = false;
         pickedProvince = null;
         updateLegend();
@@ -11547,25 +11651,26 @@
   });
   cv.addEventListener("wheel", function (e) {
     e.preventDefault();
-    var k = e.deltaY < 0 ? 1.16 : 1 / 1.16;
-    fz = Math.max(1, Math.min(MAXZOOM, fz * k));
-    invalidate();
+    flyToken++;
+    var r = cv.getBoundingClientRect();
+    zoomAt(e.deltaY < 0 ? 1.16 : 1 / 1.16, e.clientX - r.left, e.clientY - r.top);
   }, { passive: false });
 
   document.getElementById("globe-in").addEventListener("click", function () {
-    fz = Math.min(MAXZOOM, fz * 1.3);
-    invalidate();
+    flyToken++;
+    zoomAt(1.3);
   });
   document.getElementById("globe-out").addEventListener("click", function () {
-    fz = Math.max(1, fz / 1.3);
-    invalidate();
+    flyToken++;
+    zoomAt(1 / 1.3);
   });
   document.getElementById("globe-reset").addEventListener("click", function () {
     lon0 = 10; lat0 = 18; fz = 1; fx = 0; fy = 0; selected = null; statesMode = false; pickedProvince = null;
     document.getElementById("country-panel").hidden = true;
     document.getElementById("see-species").hidden = true;
     document.getElementById("see-provinces").hidden = true;
-    document.getElementById("see-provinces").textContent = "See states";
+    setProvBtn(false);
+    clearCities();
     document.getElementById("see-search-cities").hidden = true;
     updateLegend();
     invalidate();
@@ -11588,7 +11693,7 @@
     if (lastCountryCode === "us" || getCountryProvinces()[lastCountryCode]) {
       statesMode = statesMode ? false : lastCountryCode;
       pickedProvince = null;
-      btn.textContent = statesMode ? "Hide states" : "See states";
+      setProvBtn(!!statesMode, lastCountryCode);
       if (statesMode) flyToCountryProvinces(statesMode, true);
       updateLegend();
       invalidate();
@@ -11637,7 +11742,7 @@
         PINS.push({
           area: r.name, lon: r.lon, lat: r.lat, species: [],
           v: [cp * Math.cos(lam), cp * Math.sin(lam), Math.sin(phi)],
-          color: cityDotColor(t), cityDot: true, count: r.count, speciesName: sp.name, state: r.state,
+          color: cityDotColor(t), cityDot: true, count: r.count, speciesName: sp.name, state: r.state, cc: "us",
         });
       });
       document.getElementById("heat-caption").textContent += " — city dots below: darker = more documented sightings, click one to see every species with sightings there";
@@ -11650,6 +11755,7 @@
     if (showing) {
       cityDotToken++; // cancels any fetch for these cities still in flight
       PINS = PINS.filter(function (p) { return !(p.cityDot && pendingCitySpecies && p.speciesName === pendingCitySpecies.name); });
+      labelPin = null;
       btn.textContent = "See cities";
       updateLegend();
       invalidate();
@@ -11676,8 +11782,9 @@
     var keys = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || provLabel(a).localeCompare(provLabel(b)); });
     var cpTitle = document.getElementById("cp-title");
     cpTitle.classList.add("cp-title-place");
-    cpTitle.textContent = cont ? "States & provinces in " + cont : "States & provinces";
-    document.getElementById("cp-sub").textContent = keys.length + " states/provinces with " +
+    var sw = subdivWord(keys.map(function (k) { return k.slice(0, 2); }));
+    cpTitle.textContent = capWord(sw) + (cont ? " in " + cont : "");
+    document.getElementById("cp-sub").textContent = keys.length + " " + (keys.length === 1 ? subdivWord(keys.map(function (k) { return k.slice(0, 2); }), true) : sw) + " with " +
       (matched.length === 1 ? matched[0].name : matched.length + " matching species") + " · tap one to see it";
     document.getElementById("cp-list").innerHTML = keys.map(function (k) {
       var cc = k.slice(0, 2).toLowerCase(), country = NAME[cc] || TITLE[cc] || k.slice(0, 2);
@@ -11713,22 +11820,29 @@
     stopCityFactObserver();
     var panelCountry = selected ? (NAME[selected] || TITLE[selected]) : null;
     var pool = panelCountry ? lastCountryRows.map(function (r) { return r[0]; }) : (matched || []);
+    // a state/province picked on the map: only the cities inside it (by the city's own area, or
+    // the point-in-shape test cityArea() falls back on)
+    var prov = panelCountry && statesMode === selected && pickedProvince ? pickedProvince : null;
+    var provKey = prov ? selected.toUpperCase() + ":" + (selected === "us" ? prov.code : prov.name) : null;
+    var provPlace = prov ? (selected === "us" && window.STATE_NAME && window.STATE_NAME[prov.code]) || prov.name : null;
     var cont = !panelCountry && lastContinentMatch, cset = !panelCountry && lastContinentSet; // a continent search: only that continent's cities
     var out = [];
     (window.SL_CITIES || []).forEach(function (r) {
       if (out.length >= 60 || (panelCountry && r[1] !== panelCountry)) return;
+      if (provKey && cityArea(r) !== provKey && (prov.also || []).every(function (a) { return cityArea(r) !== selected.toUpperCase() + ":" + a; })) return;
       if (cset && !onContinents(r[1], cset)) return;
       var here = pool.filter(function (sp) { return livesNear(sp, r); });
       if (here.length) out.push({ r: r, species: here });
     });
     PINS = PINS.filter(function (p) { return !p.cityPick; });
+    labelPin = null; citiesProv = prov;
     // darker green = more species live around that city (from the checklist's own ranges)
     var spMax = Math.max.apply(null, out.map(function (c) { return c.species.length; }).concat(1));
     var spMin = Math.min.apply(null, out.map(function (c) { return c.species.length; }).concat(spMax));
     out.forEach(function (c) {
       var phi = c.r[2] * RAD, lam = c.r[3] * RAD, cp = Math.cos(phi);
       var t = spMax > spMin ? (c.species.length - spMin) / (spMax - spMin) : 0.5;
-      PINS.push({ area: c.r[0], lon: c.r[3], lat: c.r[2], species: c.species, cityPick: true, where: cityArea(c.r) ? provLabel(cityArea(c.r)) + ", " + c.r[1] : c.r[1],
+      PINS.push({ area: c.r[0], lon: c.r[3], lat: c.r[2], species: c.species, cityPick: true, cc: ISO[c.r[1]], where: cityArea(c.r) ? provLabel(cityArea(c.r)) + ", " + c.r[1] : c.r[1],
         color: cityDotColor(t), v: [cp * Math.cos(lam), cp * Math.sin(lam), Math.sin(phi)] });
     });
     cityPickLegend(spMax > spMin ? "species" : null);
@@ -11736,10 +11850,10 @@
     if (pool.length === 1 && out.length) shadeCitiesBySightings(out, pool[0]);
     var cpTitle = document.getElementById("cp-title");
     cpTitle.classList.add("cp-title-place");
-    cpTitle.textContent = panelCountry ? "Big cities in " + panelCountry : cont ? "Big cities in " + cont : "Big cities in its range";
+    cpTitle.textContent = provPlace ? "Big cities in " + provPlace : panelCountry ? "Big cities in " + panelCountry : cont ? "Big cities in " + cont : "Big cities in its range";
     document.getElementById("cp-sub").textContent = out.length
       ? out.length + " cities with these species nearby · tap one to see it"
-      : "No big cities on record inside this range.";
+      : provPlace ? "No big cities on record in " + provPlace + "." : "No big cities on record inside this range.";
     document.getElementById("cp-list").innerHTML = out.map(function (c, i) {
       return '<div class="cp-row cp-row-country cp-state-pick" data-city="' + i + '"><b>' + c.r[0] + "</b><i>" +
         (cityArea(c.r) ? provLabel(cityArea(c.r)) + ", " : "") + c.r[1] + " · " + c.species.length + " species</i></div>";
@@ -11796,7 +11910,8 @@
   }
   document.getElementById("cp-close").addEventListener("click", function () {
     selected = null; statesMode = false;
-    document.getElementById("see-provinces").textContent = "See states";
+    clearCities();
+    setProvBtn(false);
     document.getElementById("country-panel").hidden = true;
     document.getElementById("see-species").hidden = true;
     document.getElementById("see-provinces").hidden = true;
