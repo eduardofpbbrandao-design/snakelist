@@ -1427,7 +1427,7 @@
       </div>
 
       <div class="filter-group">
-        <div class="ml-head"><p class="filter-label">My lists</p><span class="ml-tools"><button type="button" class="ml-picks" id="ml-picks" aria-pressed="true" title="Put snakes you're likely to love at the top of the checklist">Picked for you: On</button><button type="button" class="ml-edit" id="ml-edit" title="Choose which snakes stay at the top of your checklist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>Edit</button></span></div>
+        <div class="ml-head"><p class="filter-label">My lists</p><span class="ml-tools"><button type="button" class="ml-picks" id="ml-picks" aria-pressed="true" title="Put snakes you're likely to love at the top of the checklist">Picked for you: On</button><button type="button" class="ml-edit" id="ml-edit" title="Choose which snakes stay at the top of your checklist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>Edit</button><button type="button" class="ml-edit" id="ml-reshuffle" title="Show different snakes - the ones you keep at the top stay there"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v6h-6"></path></svg>Refresh</button></span></div>
         <div class="chip-row">
           <span class="chip" id="chip-mine-follow" role="button" tabindex="0">Following</span>
           <span class="chip" id="chip-mine-wish" role="button" tabindex="0">Want to see</span>
@@ -6773,10 +6773,21 @@
   // "Keep this layout" (in Edit) saves the shuffle's seed so the same order comes back next time
   let LAYOUT_SEED = null;
   try { LAYOUT_SEED = localStorage.getItem("sl-layout-seed"); } catch (err) {}
-  const seed = LAYOUT_SEED ? +LAYOUT_SEED : Math.floor(Math.random() * 2147483646) + 1;
+  let seed = LAYOUT_SEED ? +LAYOUT_SEED : Math.floor(Math.random() * 2147483646) + 1;
   let rs = seed;
   const rnd = () => (rs = (rs * 16807) % 2147483647) / 2147483647;
-  const shuffled = cards.map((c) => [rnd(), c]).sort((a, b) => a[0] - b[0]).map((x) => x[1]);
+  let shuffled = cards.map((c) => [rnd(), c]).sort((a, b) => a[0] - b[0]).map((x) => x[1]);
+  // Refresh: a new random order for everything you haven't kept at the top
+  window.SL_RESHUFFLE = () => {
+    seed = Math.floor(Math.random() * 2147483646) + 1; rs = seed;
+    shuffled = cards.map((c) => [rnd(), c]).sort((a, b) => a[0] - b[0]).map((x) => x[1]);
+    if (PRIORITY.length) { // "Picked for you" ones come in a new order too
+      let r2 = seed; const pr = () => (r2 = (r2 * 48271) % 2147483647) / 2147483647;
+      PRIORITY = PRIORITY.map((id) => [pr(), id]).sort((a, b) => a[0] - b[0]).map((x) => x[1]);
+    }
+    if (LAYOUT_SEED) window.SL_KEEP_LAYOUT(true);
+    refresh();
+  };
   window.SL_LAYOUT_KEPT = () => !!LAYOUT_SEED;
   window.SL_KEEP_LAYOUT = (on) => {
     LAYOUT_SEED = on ? String(seed) : null;
@@ -8191,6 +8202,7 @@
   // the same, from the Camera's results: Venomous / Not venomous / the snake's type
   window.SL_applyFilter = (kind, value) => {
     let chipId = null;
+    if (kind === "family") { familyFilters = [value]; typeFilter = "All"; }
     if (kind === "venom") { venomousOnly = true; nonVenomousOnly = false; chipId = "chip-venom"; }
     else if (kind === "safe") { nonVenomousOnly = true; venomousOnly = false; chipId = "chip-nonvenom"; }
     else if (kind === "type") { typeFilter = TYPES.find((k) => MAIN_TYPE_GROUPS[k].includes(value)) || "All"; familyFilters = []; }
@@ -12120,6 +12132,57 @@
   setTimeout(go, 1200);
 })();
 </script>
+<script>
+// the checklist's Refresh button: different snakes, the kept-at-top ones stay put
+(function () {
+  var b = document.getElementById("ml-reshuffle"); if (!b) return;
+  b.addEventListener("click", function () {
+    if (!window.SL_RESHUFFLE) return;
+    window.SL_RESHUFFLE();
+    var t = document.getElementById("tab-guide"); if (t && !document.body.classList.contains("tab-guide")) t.click();
+    var g = document.getElementById("grid"); if (g) window.scrollTo({ top: Math.max(0, g.getBoundingClientRect().top + scrollY - 120), behavior: "smooth" });
+    b.classList.remove("spin"); void b.offsetWidth; b.classList.add("spin");
+  });
+})();
+// links from a species page into the app:
+//   ?map=<country>  the map, on that country      ?f=<chip id>  that filter (chip-common, chip-rare...)
+//   ?hab=<habitat>  that habitat                  ?type=<type> / ?fam=<family>  that kind of snake
+(function () {
+  var q = null; try { q = new URLSearchParams(location.search); } catch (e) {} if (!q) return;
+  var map = q.get("map"), f = q.get("f"), hab = q.get("hab"), type = q.get("type"), fam = q.get("fam");
+  if (!map && !f && !hab && !type && !fam) return;
+  function ready(tries) {
+    if (!window.__introDone && document.getElementById("intro") && tries < 40) { setTimeout(function () { ready(tries + 1); }, 300); return; }
+    if (map) {
+      document.getElementById("tab-map").click();
+      setTimeout(function () { var hs = document.getElementById("heat-search"); if (hs) { hs.value = map; hs.dispatchEvent(new Event("input")); hs.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true })); } }, 400);
+      return;
+    }
+    var chip = null;
+    if (f) chip = document.getElementById(f);
+    if (hab) {
+      var want = hab.toLowerCase().trim();
+      [].slice.call(document.querySelectorAll("#habitat-chips [data-habitat]")).some(function (c) {
+        var n = (c.firstChild && c.firstChild.textContent || c.textContent).replace(/\s+\d[\d,.]*\s*$/, "").trim().toLowerCase();
+        if (n === want) { chip = c; return true; } return false;
+      });
+    }
+    var tg = document.getElementById("tab-guide"); if (tg) tg.click();
+    if (chip) { if (!chip.classList.contains("active")) chip.click(); }
+    else if (type && window.SL_applyFilter) window.SL_applyFilter("type", type);
+    else if (fam && window.SL_applyFilter) window.SL_applyFilter("family", fam);
+    setTimeout(function () {
+      var on = chip || document.querySelector("#type-chips .chip.active, #family-chips .chip.active");
+      if (on) { on.scrollIntoView({ behavior: "smooth", block: "center" }); on.classList.remove("chip-pulse"); void on.offsetWidth; on.classList.add("chip-pulse"); }
+    }, 300);
+  }
+  setTimeout(function () { ready(0); }, 1200);
+})();
+</script>
+<style>
+  #ml-reshuffle.spin svg { animation: mlSpin .6s ease; }
+  @keyframes mlSpin { to { transform: rotate(360deg); } }
+</style>
 <script>
 // ---- Follow: news, sightings and fun facts for the snakes you follow --------------------
 // Live data comes straight from iNaturalist's and Wikipedia's public APIs, in the visitor's
