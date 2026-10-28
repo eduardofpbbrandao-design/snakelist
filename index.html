@@ -526,6 +526,13 @@
     border-color: var(--gold); color: var(--on-accent); font-weight: 600;
     box-shadow: 0 2px 8px rgba(36,50,31,0.18);
   }
+  /* a tap or click never leaves a light flash or a focus ring on a button (iPad Safari drew both
+     round the map's pill buttons) - the ring is only for keyboard focus, in the app's own green */
+  html { -webkit-tap-highlight-color: transparent; }
+  * { -webkit-tap-highlight-color: transparent; }
+  button:focus:not(:focus-visible), [role="button"]:focus:not(:focus-visible), a:focus:not(:focus-visible),
+  select:focus:not(:focus-visible), summary:focus:not(:focus-visible), .chip:focus:not(:focus-visible) { outline: none; }
+  button:focus-visible, [role="button"]:focus-visible, summary:focus-visible { outline: 2px solid var(--chip-lift, #7fc266); outline-offset: 2px; }
   /* no browser/host focus ring after a tap - a thin green one for keyboard users instead */
   .see-all-btn:focus { outline: none; }
   .see-all-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--chip-lift); }
@@ -1145,6 +1152,13 @@
      read as separate countries instead of merging into one green blob */
   .map-wrap svg .on path, .map-wrap svg path.on, .map-wrap svg .on circle {
     fill: var(--map-on); stroke: rgba(255,255,255,0.85); stroke-width: 0.8px; }
+  /* the source map marks its smallest places (Vatican City, Monaco, the Isle of Man...) with a
+     circle drawn beside them - no rings: the place's own shape shows instead, and when it's lit
+     a stroke in its own colour keeps that tiny shape findable right where it really is */
+  .map-wrap svg .circlexx { display: none; }
+  .map-wrap svg g:has(> .circlexx).on > path { stroke: var(--map-on); stroke-width: 2.4px; }
+  .map-wrap svg g:has(> .circlexx).invasive > path { stroke: #e08a2c; stroke-width: 2.4px; }
+  .map-wrap.quiz-map svg g:has(> .circlexx).quiz-guess > path { stroke: var(--map-on); stroke-width: 2.4px; }
   .map-wrap svg .sheet-state { stroke: rgba(255,255,255,0.9); stroke-width: 0.7px; vector-effect: non-scaling-stroke; }
   .map-wrap svg .sheet-state.in { fill: var(--map-on); }
   .map-wrap svg .sheet-state.out { fill: var(--map-off); }
@@ -1361,7 +1375,7 @@
 
   <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v3.57</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v3.66</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
     </header>
@@ -6938,6 +6952,10 @@
   cards.forEach((c, k) => { c._idx = k; });
   let habitatFilters = [];
   const inHabitat = (card, n) => { const u = HAB_BITS[n]; return !!u && card._idx < HAB.n && !!(u[card._idx >> 3] & (1 << (card._idx & 7))); }; // only snakes established in the wild outside their native range // "My lists": snakes you follow / want to see / have seen
+  // the Map's "Habitats" picker (a separate script) reads these: every habitat by section, and
+  // the ids of the snakes in habitat n (n counts through the sections in order, as HAB_BITS does)
+  window.SL_HABITATS = { sections: HAB.sections.map((sec) => [sec[0], sec[1].map((h) => h[0])]),
+    ids: (n) => cards.filter((c) => inHabitat(c, n)).map((c) => c.dataset.id) };
   let nonConstrictorOnly = false;
 
   const uniq = (attr) => [...new Set(cards.map((c) => c.dataset[attr]))].sort();
@@ -9359,6 +9377,28 @@
     return c + (c === 1 ? " country" : " countries") + (t ? " (+" + t + (t === 1 ? " territory)" : " territories)") : "");
   }
   window.SL_countPlaces = countPlaces; window.SL_NON_SOVEREIGN = NON_SOVEREIGN;
+  // what each country calls the parts it is divided into, so "See states" says what it really
+  // shows - the shapes (Natural Earth admin-1) carry no type of their own, so this is by country.
+  // Anything not listed reads "regions"; Indonesia's shapes are its islands (see "also" below).
+  var SUBDIV = {};
+  ("states:us mx br in au ng my ve de at sd ss pw fm|provinces:ca ar cn za es be nl af ao bi cd kp kr kh la lk mz pk pg sb th tr vn zm zw ke cr cu do ec pa ir ga gq mn tm dz bg td bf rw sl sa am vu nc|" +
+   "regions:fr it cl pe kz kg tj uz ph ru ua by cm ci sn ml mr tg gh gn gw dj so et er ug tz mg sz na ne ma ge az ba si sk cz fi dk is nz gr mm gy tt|" +
+   "departments:co bo py uy gt hn ni sv bj ht cg|prefectures:jp cf|counties:ro al hr hu ee se no ie lt lr|districts:pt bt bn bz sr bs mw ls bw ly il cy md rs mu sc ai sg lc|" +
+   "governorates:eg tn sy jo lb iq ye om kw bh|emirates:ae|cantons:ch|parishes:jm bb ag dm gd vc ms kn|municipalities:me mk xk lv qa tl cv gl|" +
+   "divisions:bd fj gm|zones:np|atolls:mv|islands:id km st tc vi mp pf|nations:gb|voivodeships:pl|territories:ps").split("|").forEach(function (grp) {
+    var p = grp.split(":");
+    p[1].split(" ").forEach(function (cc) { SUBDIV[cc] = p[0]; });
+  });
+  // "provinces" / "province" for one country (lowercase code); several countries share one
+  // word if they all use it, two words are joined ("states & provinces"), more read "regions"
+  function subdivWord(codes, one) {
+    var ws = [];
+    [].concat(codes).forEach(function (cc) { var w = SUBDIV[String(cc).toLowerCase()] || "regions"; if (ws.indexOf(w) < 0) ws.push(w); });
+    var w = !ws.length || ws.length > 2 ? "regions" : ws.join(" & ");
+    return one ? w.split(" & ").map(function (x) { return x.replace(/ies$/, "y").replace(/(sh|ch)es$/, "$1").replace(/s$/, ""); }).join(" or ") : w;
+  }
+  function capWord(w) { return w.charAt(0).toUpperCase() + w.slice(1); }
+  window.SL_SUBDIV_WORD = subdivWord;
   var sheet = document.getElementById("map-sheet");
   var wrap  = document.getElementById("map-wrap");
   if (!sheet || !wrap) return;
@@ -9476,7 +9516,8 @@
     bC.setAttribute("aria-pressed", String(mode === "cities"));
     var cities = sheetCities(card, places);
     bC.hidden = !cities.length;
-    bS.textContent = mode === "states" ? "Hide states" : "See states";
+    var word = subdivWord(places.map(function (k) { return k.slice(0, 2); })); // "provinces", "states & provinces"...
+    bS.textContent = (mode === "states" ? "Hide " : "See ") + word;
     bC.textContent = mode === "cities" ? "Hide cities" : "See cities";
     var list = document.getElementById("map-list");
     if (!mode) {
@@ -9732,6 +9773,8 @@
   var TW = 2048, TH = 1024;                          // working texture, 2:1
   var MAXZOOM = 10;                                  // country color/borders stay sharp (vector); only
                                                       // the flat land/sea texture itself softens past here
+  var CLOSEZOOM = 240;                               // with states or city dots on the map: close enough
+                                                      // to tap a city-sized state or one dot of a cluster
 
   function tbl(T, lat) {
     var a = Math.abs(lat) / 5, i = Math.floor(a);
@@ -9808,6 +9851,10 @@
   document.getElementById("legend-dot-high").style.background = cityDotColor(1);
   document.getElementById("legend-dot-off").style.background =
     getComputedStyle(document.documentElement).getPropertyValue("--map-off").trim() || "#c9ccbb";
+  // the country's own "See provinces" / "Hide prefectures" wording (see SUBDIV)
+  function setProvBtn(on, cc) {
+    document.getElementById("see-provinces").textContent = (on ? "Hide " : "See ") + subdivWord(cc || statesMode || lastCountryCode || "us");
+  }
   function updateLegend() {
     var citiesShown = document.getElementById("see-cities").textContent === "Hide cities";
     document.getElementById("legend-dot-low").parentNode.lastChild.textContent = "Fewer sightings";
@@ -9815,7 +9862,7 @@
     document.getElementById("map-legend").hidden = !(statesMode || citiesShown);
     var hint = document.querySelector(".globe-hint");
     if (hint) hint.innerHTML = "Drag to explore &middot; scroll to zoom &middot; " +
-      (statesMode ? "click any state to see its species" : "click any country");
+      (statesMode ? "click any " + subdivWord(statesMode, true) + " to see its species" : "click any country");
   }
   var lon0 = 10, lat0 = 18, selected = null, ready = false;
   // real admin-1 boundaries for the handful of non-US countries this checklist has actual
@@ -10219,7 +10266,7 @@
 
   // ---- recount and redraw -----------------------------------------------------------------
   function paint() {
-    if (hsearch && typeof commitSearch === "function" && undoStack) commitSearch(); // remembered for Undo
+    shownQ = hsearch ? hsearch.value : ""; // what Undo puts back (see snap() below)
     if (!INDEX) buildIndex();
     var q = hsearch.value.trim().toLowerCase().replace(/-/g, "");
     // an exact city name (same lookup the checklist's own search already uses) jumps
@@ -10266,6 +10313,7 @@
     })[0] : null;
     shownPlace = placeHit;
     if (placeHit) {
+      panelKind = "place";
       setScope(null);
       HI = null; PINS = []; tally = {}; matched = [];
       selected = null; searchSelected = null; statesMode = false; pickedProvince = null;
@@ -10356,7 +10404,7 @@
     pendingWorldCity = (worldCityMatch && !cityReveal) ? { key: foldedQ, data: worldCityMatch } : null;
     document.getElementById("see-species").hidden = !worldCityMatch;
 
-    PINS = [];
+    PINS = []; labelPin = null; citiesProv = null;
     if (worldCityMatch) {
       lon0 = worldCityMatch.lon; lat0 = worldCityMatch.lat; fz = Math.max(fz, 5); fx = 0; fy = 0;
       var wphi = worldCityMatch.lat * RAD, wlam = worldCityMatch.lon * RAD, wcp = Math.cos(wphi);
@@ -10403,6 +10451,9 @@
     // a species search also gets "See states" / "See cities" next to "See all N countries"
     var anyStates = matched.some(function (sp) { return (sp.states && sp.states.length) || (sp.provinces && sp.provinces.length); });
     document.getElementById("see-search-states").hidden = !q || !names.length || !!cityMatch || !anyStates;
+    var stateCcs = {};
+    matched.forEach(function (sp) { if (sp.states && sp.states.length) stateCcs.us = 1; (sp.provinces || []).forEach(function (k) { stateCcs[k.slice(0, 2)] = 1; }); });
+    document.getElementById("see-search-states").textContent = "See " + subdivWord(Object.keys(stateCcs));
     document.getElementById("see-search-cities").hidden = !q || !names.length || !!cityMatch || !!pendingCitySpecies;
     searchBtns = { all: !all.hidden, states: !document.getElementById("see-search-states").hidden };
 
@@ -10461,8 +10512,9 @@
       if (Math.abs((r.w + r.e) / 2 - cx) > reach || Math.abs((r.s + r.no) / 2 - cy) > reach) return;
       w = Math.min(w, r.w); e = Math.max(e, r.e); s = Math.min(s, r.s); n = Math.max(n, r.no);
     });
-    // tiny countries (Vatican City, Monaco, ...) still get some land around them in view
-    var minSpan = 1.2;
+    // tiny countries (Vatican City, Monaco, ...) still get some land around them in view -
+    // a few times their own size, so the camera can come close enough to show the real shape
+    var minSpan = Math.min(1.2, Math.max(0.02, 8 * Math.max(e - w, n - s)));
     if (e - w < minSpan) { var m = (w + e) / 2; w = m - minSpan / 2; e = m + minSpan / 2; }
     if (n - s < minSpan / 2) { var mm = (s + n) / 2; s = mm - minSpan / 4; n = mm + minSpan / 4; }
     return [w, e, s, n];
@@ -10482,7 +10534,7 @@
     var list = code === "us" ? US_STATES : (getCountryProvinces()[code] || []);
     if (!list.length) return;
     statesMode = code;
-    document.getElementById("see-provinces").textContent = "Hide states";
+    setProvBtn(true, code);
     updateLegend();
   }
   window.SL_MAP_HEATSTATES = function () { if (searchSelected && selected === searchSelected) { heatStates(searchSelected); invalidate(); } };
@@ -10662,7 +10714,9 @@
     where: "Andaman Islands, India",
     note: "Home to the uncontacted Sentinelese - visiting is illegal, so no one has ever surveyed its snakes." }];
   var shownPlace = null;
-  // a picked country too small to see (Vatican City, Monaco, San Marino...): a ring and its name
+  // a picked country small on screen (Isle of Man, Vatican City, Monaco...): its own shape is
+  // already filled in by borders(), so it just gets its name beside it - no ring around it.
+  // Only when even the shape is under a couple of pixels does a small solid dot stand in for it.
   function drawTinySelected(to) {
     if (!selected) return;
     var rows = POLY.filter(function (r) { return r.code === selected; });
@@ -10670,16 +10724,18 @@
     var w = 999, e = -999, s = 999, n = -999;
     rows.forEach(function (r) { if (r.dot) { w = Math.min(w, r.lon0); e = Math.max(e, r.lon0); s = Math.min(s, r.lat0); n = Math.max(n, r.lat0); } else { w = Math.min(w, r.w); e = Math.max(e, r.e); s = Math.min(s, r.s); n = Math.max(n, r.no); } });
     var a = to(w, n), b = to(e, s);
-    if (!a || !b || Math.abs(b[0] - a[0]) > 14 || Math.abs(b[1] - a[1]) > 14) return; // big enough to see by itself
+    if (!a || !b) return;
+    var pw = Math.abs(b[0] - a[0]), ph = Math.abs(b[1] - a[1]);
+    if (pw > 60 || ph > 60) return; // big enough to read by itself
     var pt = to((w + e) / 2, (s + n) / 2); if (!pt) return;
     var css = getComputedStyle(document.documentElement);
     var ink = css.getPropertyValue("--text").trim() || "#24321f", halo = css.getPropertyValue("--map-sea").trim() || "#dbe4ea";
     ctx.save();
-    ctx.beginPath(); ctx.arc(pt[0], pt[1], 9, 0, TAU); ctx.lineWidth = 3; ctx.strokeStyle = mapOnColor(); ctx.stroke();
-    ctx.beginPath(); ctx.arc(pt[0], pt[1], 3, 0, TAU); ctx.fillStyle = mapOnColor(); ctx.fill();
+    if (pw < 2.5 && ph < 2.5) { ctx.beginPath(); ctx.arc(pt[0], pt[1], 2.5, 0, TAU); ctx.fillStyle = mapOnColor(); ctx.fill(); }
     var label = NAME[selected] || TITLE[selected] || "";
+    var lx = Math.max(pt[0] + pw / 2, pt[0] + 2.5) + 6;
     ctx.font = "700 12px Inter, sans-serif"; ctx.textBaseline = "middle"; ctx.lineJoin = "round"; ctx.lineWidth = 4; ctx.strokeStyle = halo;
-    ctx.strokeText(label, pt[0] + 14, pt[1]); ctx.fillStyle = ink; ctx.fillText(label, pt[0] + 14, pt[1]);
+    ctx.strokeText(label, lx, pt[1]); ctx.fillStyle = ink; ctx.fillText(label, lx, pt[1]);
     ctx.restore();
   }
   function drawPlaceLabels(to) {
@@ -10939,16 +10995,20 @@
   }
   // keyed per shape and cached until the listed species change - this runs every frame
   // while the map is dragged, and recounting 50 islands x 700 species each frame would stutter
-  var _tallyFor = null, _tallyRows = null, _tally = null;
+  // With the heatmap showing one habitat (SL_HEAT_KEEP, from the Map Layers script), only that
+  // habitat's snakes count, so each state is shaded by how many of them live there.
+  var _tallyFor = null, _tallyRows = null, _tally = null, _tallyKeep = "";
   function provinceTally(cc) {
-    if (_tallyFor === cc && _tallyRows === lastCountryRows) return _tally;
+    var keep = window.SL_HEAT_IS_ON && window.SL_HEAT_IS_ON() && window.SL_HEAT_KEEP, kk = keep ? keep.key : "";
+    if (_tallyFor === cc && _tallyRows === lastCountryRows && _tallyKeep === kk) return _tally;
     var list = cc === "us" ? US_STATES : (getCountryProvinces()[cc] || []);
-    _tally = list.map(function (s) { return speciesInProvince(cc, s).length; });
-    _tallyFor = cc; _tallyRows = lastCountryRows;
+    _tally = list.map(function (s) { return speciesInProvince(cc, s).filter(function (r) { return !keep || keep(r[0].id); }).length; });
+    _tallyFor = cc; _tallyRows = lastCountryRows; _tallyKeep = kk;
     return _tally;
   }
 
   var pickedProvince = null; // the state/province last clicked while "See states" is on
+  var panelKind = null, shownQ = ""; // what the side panel shows, and the search the map shows - for Undo
   function drawCountryProvinces(to, cc) {
     var list = cc === "us" ? US_STATES : (getCountryProvinces()[cc] || []);
     var tally = provinceTally(cc);
@@ -11034,6 +11094,42 @@
   window.SL_MAP_GEO = function () { return { poly: POLY, iso: ISO, name: NAME, title: TITLE }; };
   window.SL_MAP_GEO_WARM = function () { if (!POLY) start(); }; // country outlines, so a tapped spot can be named
   window.SL_MAP_PICK = function (x, y) { return at(x, y); };
+  // how far in the map may go right now: the usual limit, much closer while states/provinces or
+  // city dots are shown, and for a picked country that small (Vatican City, Monaco) as close as
+  // it takes for its real shape to be some 48px across
+  var tinyZoomCache = {};
+  function tinyZoom(code) {
+    if (code in tinyZoomCache) return tinyZoomCache[code];
+    var big = 0, any = false;
+    POLY.forEach(function (r) { if (r.code === code && !r.dot) { any = true; big = Math.max(big, r.e - r.w, r.no - r.s); } });
+    var cw = cv.clientWidth || sizeW || 900;
+    // Vatican City's outline is a single point at this data's resolution (no shape to show):
+    // close enough to see the streets-of-Rome scale it sits at, with its marker and name
+    return (tinyZoomCache[code] = big ? Math.min(6000, 48 * 360 / (cw * big)) : any ? 60 : MAXZOOM);
+  }
+  function zoomCap() {
+    var cap = MAXZOOM;
+    if (statesMode || PINS.some(function (p) { return p.cityPick || p.cityDot; })) cap = CLOSEZOOM;
+    if (selected && POLY) cap = Math.max(cap, tinyZoom(selected));
+    return cap;
+  }
+  // zoom by k keeping the spot under (sx, sy) where it is - so wheel and pinch go to what's
+  // under the pointer, not the middle of the map. Already past the cap (it just changed, say
+  // states were hidden) it never jumps back out while zooming in.
+  function zoomAt(k, sx, sy) {
+    var w = cv.clientWidth || sizeW, h = cv.clientHeight || sizeH;
+    var cap = zoomCap(), nz = fz * k;
+    nz = k > 1 ? Math.min(Math.max(cap, fz), nz) : nz;
+    nz = Math.max(1, nz);
+    if (sx == null) { sx = w / 2; sy = h / 2; }
+    var b = flatBox(), u = (sx - b[0]) / b[2], v = (sy - b[1]) / b[3];
+    var bs = baseSize(w, h), dw = bs[0] * nz, dh = bs[1] * nz;
+    fz = nz;
+    fx = (sx - u * dw - (w - dw) / 2) / dw;
+    fy = (sy - v * dh - (h - dh) / 2) / dh;
+    clampPan();
+    invalidate();
+  }
   function flyToLonLatBox(w, e, s, n, animate) {
     var cw = cv.clientWidth || sizeW, ch = cv.clientHeight || sizeH;
     if (!cw || !ch) return;
@@ -11041,7 +11137,7 @@
     var lonSpan = (e - w) / 360, latSpan = (n - s) / 180;
     var pad = 0.82; // leaves a visible margin around the fitted region
     var fzX = cw / (baseDw * lonSpan), fzY = ch / (baseDh * latSpan);
-    var targetFz = Math.max(1, Math.min(MAXZOOM, Math.min(fzX, fzY) * pad));
+    var targetFz = Math.max(1, Math.min(zoomCap(), Math.min(fzX, fzY) * pad));
     var midLon = (w + e) / 2, midLat = (s + n) / 2;
     var targetFx = 0.5 - (midLon + 180) / 360;
     var targetFy = 0.5 - (90 - midLat) / 180;
@@ -11100,19 +11196,25 @@
       var s = toScreen(PINS[i]);
       PINS[i].screen = s;                            // remembered so a click can find it
       if (!s) continue;
+      // city dots are just dots - one solid disc in its own shade, no white rim, and only the
+      // one last tapped carries its name (see labelPin)
+      var isCity = PINS[i].cityPick || PINS[i].cityDot;
       ctx.save();
       ctx.shadowColor = "rgba(0,0,0,0.55)";
-      ctx.shadowBlur = 7;
+      ctx.shadowBlur = isCity ? 3 : 7;
       ctx.shadowOffsetY = 1;
-      ctx.beginPath(); ctx.arc(s[0], s[1], 5.4, 0, TAU);
-      ctx.fillStyle = "rgba(255,255,255,0.96)"; ctx.fill();
+      ctx.beginPath(); ctx.arc(s[0], s[1], isCity ? (PINS[i] === labelPin ? 5.6 : 4.4) : 5.4, 0, TAU);
+      ctx.fillStyle = isCity ? PINS[i].color || mapOnColor() : "rgba(255,255,255,0.96)"; ctx.fill();
       ctx.restore();
-      ctx.beginPath(); ctx.arc(s[0], s[1], 3.6, 0, TAU);
-      ctx.fillStyle = PINS[i].color || mapOnColor(); ctx.fill(); // city dots carry their own gradient shade
-      if (fz > 1.6) {
+      if (isCity) { ctx.lineWidth = 1; ctx.strokeStyle = "rgba(14,40,18,0.75)"; ctx.stroke(); } // a fine dark edge, so it reads on a green state too
+      if (!isCity) {
+        ctx.beginPath(); ctx.arc(s[0], s[1], 3.6, 0, TAU);
+        ctx.fillStyle = PINS[i].color || mapOnColor(); ctx.fill();
+      }
+      if (isCity ? PINS[i] === labelPin : fz > 1.6) {
         ctx.font = "600 12px Inter, sans-serif";
         var lw = ctx.measureText(PINS[i].area).width, box = [s[0] + 8, s[1] - 9, s[0] + 12 + lw, s[1] + 8];
-        if (placed.some(function (q) { return box[0] < q[2] && box[2] > q[0] && box[1] < q[3] && box[3] > q[1]; })) continue;
+        if (!isCity && placed.some(function (q) { return box[0] < q[2] && box[2] > q[0] && box[1] < q[3] && box[3] > q[1]; })) continue;
         placed.push(box);
         ctx.textAlign = "left";
         ctx.lineJoin = "round";
@@ -11170,12 +11272,28 @@
     return pick(lon, lat);
   }
 
+  // the nearest marker within reach of the tap, so the right one of two close city dots wins
   function pinAt(mx, my) {
+    var best = null, bestD = 14;
     for (var i = 0; i < PINS.length; i++) {
       var s = PINS[i].screen;
-      if (s && Math.abs(s[0] - mx) < 16 && Math.abs(s[1] - my) < 16) return PINS[i];
+      var d = s ? Math.hypot(s[0] - mx, s[1] - my) : 99;
+      if (d < bestD) { best = PINS[i]; bestD = d; }
     }
-    return null;
+    return best;
+  }
+  // "See cities": the one dot whose name is showing, and the state/province the dots were kept
+  // to (null: the whole country or search)
+  var labelPin = null, citiesProv = null;
+  // takes every city dot off the map, with its name and legend - the open sea or another
+  // country clicked, the panel closed, or the map reset
+  function clearCities() {
+    cityDotToken++; cityShadeToken++; // cancels any sighting lookups still in flight
+    PINS = PINS.filter(function (p) { return !p.cityPick && !p.cityDot; });
+    labelPin = null; citiesProv = null; lastCityList = [];
+    document.getElementById("see-cities").textContent = "See cities";
+    updateLegend();
+    invalidate();
   }
 
   // every place that reveals the country panel replays this same little pop-in, so the
@@ -11239,6 +11357,7 @@
   // places that genuinely have no snakes (Antarctica, the far north, remote cold islands)
   var NO_SNAKES = { aq: 1, is: 1, gl: 1, fo: 1, xv: 1, fk: 1, gs: 1, tf: 1, pm: 1, sh: 1, pn: 1, bm: 1, cv: 1, gg: 1, im: 1 };
   function fillPanel(code) {
+    panelKind = "country";
     var list = ((BYCODE && BYCODE[code]) || []).slice();
     var extra = [];
     Object.keys(INTRODUCED).forEach(function (id) {
@@ -11296,7 +11415,7 @@
     document.getElementById("see-search-cities").hidden = false;
     document.getElementById("see-search-states").hidden = true; // the country's own "See states" covers it
     if (searchBtns.all) document.getElementById("all-countries").hidden = false;
-    document.getElementById("see-provinces").textContent = "See states";
+    setProvBtn(false, code);
     document.getElementById("see-provinces").hidden = !rows.some(function (r) {
       var sp = r[0];
       return (code === "us" && sp.states && sp.states.length) ||
@@ -11329,7 +11448,7 @@
     if (!st) { st = cc === "us" ? { code: key, name: key, rings: [] } : { name: key, rings: [] }; fillProvince(cc, st); return; }
     statesMode = cc;
     pickedProvince = st;
-    document.getElementById("see-provinces").textContent = "Hide states";
+    setProvBtn(true, cc);
     updateLegend();
     var w = 999, e = -999, s = 999, n = -999;
     st.rings.forEach(function (ring) { ring.forEach(function (p) {
@@ -11376,6 +11495,7 @@
   });
   function showProvinces() {
     if (!lastCountryCode) return;
+    panelKind = "provlist";
     var codeUp = lastCountryCode.toUpperCase();
     var counts = {};
     lastCountryRows.forEach(function (r) {
@@ -11395,10 +11515,10 @@
     });
     var names = Object.keys(counts).sort();
     document.getElementById("cp-title").classList.add("cp-title-place");
-    document.getElementById("cp-title").textContent = (NAME[lastCountryCode] || lastCountryCode.toUpperCase()) + ": states/provinces";
+    document.getElementById("cp-title").textContent = (NAME[lastCountryCode] || lastCountryCode.toUpperCase()) + ": " + subdivWord(lastCountryCode);
     document.getElementById("cp-sub").textContent = names.length
       ? names.length + " with sourced species data"
-      : "No sourced state/province data for this country yet.";
+      : "No sourced " + subdivWord(lastCountryCode, true) + " data for this country yet.";
     document.getElementById("cp-list").innerHTML = names.map(function (n) {
       return '<div class="cp-row cp-row-country cp-state-pick" data-prov="' + attrEsc(provKeyOf[n] || n) + '"><b>' + n + "</b><i>" + counts[n] + " species</i></div>";
     }).join("");
@@ -11407,6 +11527,7 @@
 
   // one clicked state/province: how many of the country's listed species live there, and which
   function fillProvince(cc, s) {
+    panelKind = "prov";
     stopCityFactObserver();
     var rows = speciesInProvince(cc, s).slice().sort(function (a, b) { return a[0].name.localeCompare(b[0].name); });
     var place = (cc === "us" && window.STATE_NAME && window.STATE_NAME[s.code]) || s.name;
@@ -11426,6 +11547,7 @@
   // A marker is a place, not a country, so it gets its own answer: these species live here
   // but did not evolve here.
   function fillArea(pin) {
+    panelKind = "area:" + pin.area;
     stopCityFactObserver();
     var cpTitle = document.getElementById("cp-title");
     cpTitle.textContent = pin.area;
@@ -11483,6 +11605,7 @@
   }
 
   function listCountries() {
+    panelKind = "countries";
     stopCityFactObserver();
     var names = Object.keys(tally).sort();
     var q = hsearch.value.trim();
@@ -11510,14 +11633,37 @@
 
   // ---- interaction --------------------------------------------------------------------------
   var drag = null, moved = 0;
+  // two fingers down: pinch zoom around the point between them (never read as a tap)
+  var fingers = {}, pinch = null;
+  function pinchSpan() {
+    var ids = Object.keys(fingers); if (ids.length < 2) return null;
+    var a = fingers[ids[0]], b = fingers[ids[1]], r = cv.getBoundingClientRect();
+    return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, x: (a.x + b.x) / 2 - r.left, y: (a.y + b.y) / 2 - r.top };
+  }
+  function liftFinger(e) {
+    delete fingers[e.pointerId];
+    if (pinch && Object.keys(fingers).length < 2) { pinch = null; drag = null; dragging = false; cv.classList.remove("dragging"); invalidate(); return true; }
+    return !!pinch;
+  }
+  cv.addEventListener("pointercancel", liftFinger);
   cv.addEventListener("pointerdown", function (e) {
     flyToken++; // a manual drag wins over any fly-to animation still in flight
+    fingers[e.pointerId] = { x: e.clientX, y: e.clientY };
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    if (Object.keys(fingers).length >= 2) { pinch = pinchSpan(); drag = null; moved = 99; return; }
     drag = { x: e.clientX, y: e.clientY, lon: lon0, lat: lat0, fx: fx, fy: fy };
     moved = 0;
     cv.classList.add("dragging");
-    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
   });
   cv.addEventListener("pointermove", function (e) {
+    if (fingers[e.pointerId]) fingers[e.pointerId] = { x: e.clientX, y: e.clientY };
+    if (pinch) {
+      var now = pinchSpan(); if (!now) return;
+      dragging = true;
+      zoomAt(now.d / pinch.d, now.x, now.y);
+      pinch = now;
+      return;
+    }
     if (!drag) return;
     var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     moved = Math.max(moved, Math.abs(dx) + Math.abs(dy));
@@ -11529,6 +11675,7 @@
     invalidate();                                  // at most one redraw per frame
   });
   cv.addEventListener("pointerup", function (e) {
+    if (liftFinger(e)) return; // the end of a pinch, not a tap
     cv.classList.remove("dragging");
     var wasDrag = dragging;
     dragging = false;
@@ -11541,14 +11688,28 @@
       var picked = statesMode && !pin
         ? provinceAt(statesMode, (mx - bx[0]) / bx[2] * 360 - 180, 90 - (my - bx[1]) / bx[3] * 180)
         : null;
-      if (picked) {
-        // with "See states" on, a click on a state is a question about that state
-        pickedProvince = picked;
-        fillProvince(statesMode, picked);
+      var cityOn = PINS.some(function (p) { return p.cityPick || p.cityDot; });
+      if (pin && (pin.cityPick || pin.cityDot)) {
+        // a city dot: its name shows beside it (one at a time) and the panel says what lives there
+        labelPin = pin;
+        fillArea(pin);
+      } else if (picked) {
+        // with "See states" on, a click on a state is a question about that state. A miss between
+        // the dots of the state they're kept to only puts the name away; another state clears them
+        labelPin = null;
+        if (!(cityOn && citiesProv === picked)) {
+          if (cityOn && citiesProv) clearCities();
+          pickedProvince = picked;
+          fillProvince(statesMode, picked);
+        }
       } else if (pin) {
         selected = null;
         fillArea(pin);
+      } else if (cityOn && (function (c) { return c && PINS.some(function (p) { return (p.cityPick || p.cityDot) && p.cc === c; }); })(at(mx, my))) {
+        labelPin = null; // a miss between the dots, inside the cities' own country: just hides the name
       } else {
+        // the open sea or another country: the cities go, and that country shows as usual
+        if (cityOn) clearCities();
         statesMode = false;
         pickedProvince = null;
         updateLegend();
@@ -11568,25 +11729,26 @@
   });
   cv.addEventListener("wheel", function (e) {
     e.preventDefault();
-    var k = e.deltaY < 0 ? 1.16 : 1 / 1.16;
-    fz = Math.max(1, Math.min(MAXZOOM, fz * k));
-    invalidate();
+    flyToken++;
+    var r = cv.getBoundingClientRect();
+    zoomAt(e.deltaY < 0 ? 1.16 : 1 / 1.16, e.clientX - r.left, e.clientY - r.top);
   }, { passive: false });
 
   document.getElementById("globe-in").addEventListener("click", function () {
-    fz = Math.min(MAXZOOM, fz * 1.3);
-    invalidate();
+    flyToken++;
+    zoomAt(1.3);
   });
   document.getElementById("globe-out").addEventListener("click", function () {
-    fz = Math.max(1, fz / 1.3);
-    invalidate();
+    flyToken++;
+    zoomAt(1 / 1.3);
   });
   document.getElementById("globe-reset").addEventListener("click", function () {
     lon0 = 10; lat0 = 18; fz = 1; fx = 0; fy = 0; selected = null; statesMode = false; pickedProvince = null;
     document.getElementById("country-panel").hidden = true;
     document.getElementById("see-species").hidden = true;
     document.getElementById("see-provinces").hidden = true;
-    document.getElementById("see-provinces").textContent = "See states";
+    setProvBtn(false);
+    clearCities();
     document.getElementById("see-search-cities").hidden = true;
     updateLegend();
     invalidate();
@@ -11609,7 +11771,7 @@
     if (lastCountryCode === "us" || getCountryProvinces()[lastCountryCode]) {
       statesMode = statesMode ? false : lastCountryCode;
       pickedProvince = null;
-      btn.textContent = statesMode ? "Hide states" : "See states";
+      setProvBtn(!!statesMode, lastCountryCode);
       if (statesMode) flyToCountryProvinces(statesMode, true);
       updateLegend();
       invalidate();
@@ -11658,7 +11820,7 @@
         PINS.push({
           area: r.name, lon: r.lon, lat: r.lat, species: [],
           v: [cp * Math.cos(lam), cp * Math.sin(lam), Math.sin(phi)],
-          color: cityDotColor(t), cityDot: true, count: r.count, speciesName: sp.name, state: r.state,
+          color: cityDotColor(t), cityDot: true, count: r.count, speciesName: sp.name, state: r.state, cc: "us",
         });
       });
       document.getElementById("heat-caption").textContent += " — city dots below: darker = more documented sightings, click one to see every species with sightings there";
@@ -11671,6 +11833,7 @@
     if (showing) {
       cityDotToken++; // cancels any fetch for these cities still in flight
       PINS = PINS.filter(function (p) { return !(p.cityDot && pendingCitySpecies && p.speciesName === pendingCitySpecies.name); });
+      labelPin = null;
       btn.textContent = "See cities";
       updateLegend();
       invalidate();
@@ -11689,6 +11852,7 @@
     return (sp.states || []).map(function (c) { return "US:" + c; }).concat(sp.provinces || []);
   }
   document.getElementById("see-search-states").addEventListener("click", function () {
+    panelKind = "searchstates";
     stopCityFactObserver();
     var counts = {}, cont = lastContinentMatch, cset = lastContinentSet;
     (matched || []).forEach(function (sp) { placeKeysOf(sp).forEach(function (k) {
@@ -11697,8 +11861,9 @@
     var keys = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || provLabel(a).localeCompare(provLabel(b)); });
     var cpTitle = document.getElementById("cp-title");
     cpTitle.classList.add("cp-title-place");
-    cpTitle.textContent = cont ? "States & provinces in " + cont : "States & provinces";
-    document.getElementById("cp-sub").textContent = keys.length + " states/provinces with " +
+    var sw = subdivWord(keys.map(function (k) { return k.slice(0, 2); }));
+    cpTitle.textContent = capWord(sw) + (cont ? " in " + cont : "");
+    document.getElementById("cp-sub").textContent = keys.length + " " + (keys.length === 1 ? subdivWord(keys.map(function (k) { return k.slice(0, 2); }), true) : sw) + " with " +
       (matched.length === 1 ? matched[0].name : matched.length + " matching species") + " · tap one to see it";
     document.getElementById("cp-list").innerHTML = keys.map(function (k) {
       var cc = k.slice(0, 2).toLowerCase(), country = NAME[cc] || TITLE[cc] || k.slice(0, 2);
@@ -11731,25 +11896,33 @@
     return !keys.length || keys.indexOf(area) >= 0;
   }
   document.getElementById("see-search-cities").addEventListener("click", function () {
+    panelKind = "cities";
     stopCityFactObserver();
     var panelCountry = selected ? (NAME[selected] || TITLE[selected]) : null;
     var pool = panelCountry ? lastCountryRows.map(function (r) { return r[0]; }) : (matched || []);
+    // a state/province picked on the map: only the cities inside it (by the city's own area, or
+    // the point-in-shape test cityArea() falls back on)
+    var prov = panelCountry && statesMode === selected && pickedProvince ? pickedProvince : null;
+    var provKey = prov ? selected.toUpperCase() + ":" + (selected === "us" ? prov.code : prov.name) : null;
+    var provPlace = prov ? (selected === "us" && window.STATE_NAME && window.STATE_NAME[prov.code]) || prov.name : null;
     var cont = !panelCountry && lastContinentMatch, cset = !panelCountry && lastContinentSet; // a continent search: only that continent's cities
     var out = [];
     (window.SL_CITIES || []).forEach(function (r) {
       if (out.length >= 60 || (panelCountry && r[1] !== panelCountry)) return;
+      if (provKey && cityArea(r) !== provKey && (prov.also || []).every(function (a) { return cityArea(r) !== selected.toUpperCase() + ":" + a; })) return;
       if (cset && !onContinents(r[1], cset)) return;
       var here = pool.filter(function (sp) { return livesNear(sp, r); });
       if (here.length) out.push({ r: r, species: here });
     });
     PINS = PINS.filter(function (p) { return !p.cityPick; });
+    labelPin = null; citiesProv = prov;
     // darker green = more species live around that city (from the checklist's own ranges)
     var spMax = Math.max.apply(null, out.map(function (c) { return c.species.length; }).concat(1));
     var spMin = Math.min.apply(null, out.map(function (c) { return c.species.length; }).concat(spMax));
     out.forEach(function (c) {
       var phi = c.r[2] * RAD, lam = c.r[3] * RAD, cp = Math.cos(phi);
-      var t = spMax > spMin ? (c.species.length - spMin) / (spMax - spMin) : 0.5;
-      PINS.push({ area: c.r[0], lon: c.r[3], lat: c.r[2], species: c.species, cityPick: true, where: cityArea(c.r) ? provLabel(cityArea(c.r)) + ", " + c.r[1] : c.r[1],
+      var t = spMax > spMin ? (c.species.length - spMin) / (spMax - spMin) : 0.1; // all alike: one light shade
+      PINS.push({ area: c.r[0], lon: c.r[3], lat: c.r[2], species: c.species, cityPick: true, cc: ISO[c.r[1]], where: cityArea(c.r) ? provLabel(cityArea(c.r)) + ", " + c.r[1] : c.r[1],
         color: cityDotColor(t), v: [cp * Math.cos(lam), cp * Math.sin(lam), Math.sin(phi)] });
     });
     cityPickLegend(spMax > spMin ? "species" : null);
@@ -11757,10 +11930,10 @@
     if (pool.length === 1 && out.length) shadeCitiesBySightings(out, pool[0]);
     var cpTitle = document.getElementById("cp-title");
     cpTitle.classList.add("cp-title-place");
-    cpTitle.textContent = panelCountry ? "Big cities in " + panelCountry : cont ? "Big cities in " + cont : "Big cities in its range";
+    cpTitle.textContent = provPlace ? "Big cities in " + provPlace : panelCountry ? "Big cities in " + panelCountry : cont ? "Big cities in " + cont : "Big cities in its range";
     document.getElementById("cp-sub").textContent = out.length
       ? out.length + " cities with these species nearby · tap one to see it"
-      : "No big cities on record inside this range.";
+      : provPlace ? "No big cities on record in " + provPlace + "." : "No big cities on record inside this range.";
     document.getElementById("cp-list").innerHTML = out.map(function (c, i) {
       return '<div class="cp-row cp-row-country cp-state-pick" data-city="' + i + '"><b>' + c.r[0] + "</b><i>" +
         (cityArea(c.r) ? provLabel(cityArea(c.r)) + ", " : "") + c.r[1] + " · " + c.species.length + " species</i></div>";
@@ -11817,7 +11990,8 @@
   }
   document.getElementById("cp-close").addEventListener("click", function () {
     selected = null; statesMode = false;
-    document.getElementById("see-provinces").textContent = "See states";
+    clearCities();
+    setProvBtn(false);
     document.getElementById("country-panel").hidden = true;
     document.getElementById("see-species").hidden = true;
     document.getElementById("see-provinces").hidden = true;
@@ -11911,26 +12085,102 @@
     paint();
   });
   var typing = null;
-  // Undo: back to the map as it was before the last search (all the way back to the plain map)
-  var undoStack = [], committedQ = "", undoing = false, undoBtn = document.getElementById("map-undo");
-  function syncUndo() { if (undoBtn) undoBtn.hidden = !(hsearch && hsearch.value.trim()) && !undoStack.length; }
-  function commitSearch() {
-    var q = hsearch.value.trim();
-    if (q !== committedQ) { if (!undoing) undoStack.push(committedQ); committedQ = q; }
-    undoing = false; syncUndo();
+  // Undo: one step back, to exactly the map as it was - the search, the picked country or state,
+  // its states or cities, what the panel listed, and the same zoom and spot. A snapshot of that is
+  // taken just before anything changes it (a search, a tap on the map, a button, a row in the
+  // panel); Undo puts the last one back. A tap that changed nothing leaves no step behind.
+  var undoStack = [], undoing = false, undoBtn = document.getElementById("map-undo");
+  function syncUndo() { if (undoBtn) undoBtn.hidden = !undoStack.length; }
+  function provKeyOfShape(cc, st) { return st ? (cc === "us" ? st.code : st.name) : null; }
+  function snap() {
+    var panelOn = !document.getElementById("country-panel").hidden;
+    var cityPin = PINS.some(function (p) { return p.cityPick; });
+    return {
+      q: shownQ, sel: selected, st: statesMode, pk: statesMode ? provKeyOfShape(statesMode, pickedProvince) : null,
+      cities: cityPin, cprov: citiesProv ? provKeyOfShape(selected, citiesProv) : null, label: labelPin ? labelPin.area : null,
+      spCities: document.getElementById("see-cities").textContent === "Hide cities",
+      panel: panelOn ? panelKind : null, view: [fz, fx, fy]
+    };
+  }
+  function sameStep(a, b) {
+    return ["q", "sel", "st", "pk", "cities", "cprov", "label", "spCities", "panel"].every(function (k) { return a[k] === b[k]; });
+  }
+  var undoCheck = null;
+  function beforeChange() {
+    if (undoing || !ready) return;
+    var s = snap();
+    undoStack.push(s);
+    if (undoStack.length > 60) undoStack.shift();
+    syncUndo();
+    // once the change has run: nothing different (a tap on the same country) - no step
+    clearTimeout(undoCheck);
+    undoCheck = setTimeout(function () {
+      if (undoStack[undoStack.length - 1] === s && sameStep(s, snap())) { undoStack.pop(); syncUndo(); }
+    }, 0);
+  }
+  function hidePanel() {
+    document.getElementById("country-panel").hidden = true;
+    ["see-species", "see-provinces"].forEach(function (id) { document.getElementById(id).hidden = true; });
+    document.getElementById("see-search-cities").hidden = !hsearch.value.trim();
+    document.getElementById("see-search-states").hidden = !searchBtns.states || !hsearch.value.trim();
+  }
+  function restore(s) {
+    undoing = true;
+    clearCities();
+    hsearch.value = s.q;
+    paint();
+    if (s.sel) {
+      if (selected !== s.sel || panelKind !== "country") { selected = s.sel; fillPanel(s.sel); }
+    } else selected = null;
+    statesMode = false; pickedProvince = null;
+    if (s.st) {
+      lastCountryCode = s.st;
+      statesMode = s.st;
+      setProvBtn(true, s.st);
+      if (s.pk) {
+        var list = s.st === "us" ? US_STATES : (getCountryProvinces()[s.st] || []);
+        pickedProvince = list.find(function (x) { return provKeyOfShape(s.st, x) === s.pk; }) || null;
+      }
+    }
+    var kind = s.panel || "";
+    if (kind === "provlist") showProvinces();
+    else if (kind === "countries") listCountries();
+    else if (kind === "searchstates") document.getElementById("see-search-states").click();
+    else if (kind === "prov" && pickedProvince) fillProvince(statesMode, pickedProvince);
+    if (s.cities) {
+      if (!s.cprov) { var keepPk = pickedProvince; pickedProvince = null; document.getElementById("see-search-cities").click(); pickedProvince = keepPk; }
+      else document.getElementById("see-search-cities").click();
+      if (s.panel && s.panel !== "cities") panelKind = s.panel;
+    }
+    if (s.spCities && pendingCitySpecies) document.getElementById("see-cities").click();
+    if (s.label) labelPin = PINS.filter(function (p) { return (p.cityPick || p.cityDot) && p.area === s.label; })[0] || null;
+    if (kind.slice(0, 5) === "area:") {
+      var pin = PINS.filter(function (p) { return p.area === kind.slice(5); })[0];
+      if (pin) fillArea(pin);
+    }
+    if (!s.panel) hidePanel();
+    updateLegend();
+    flyToken++; // the exact view it had, not a fresh fly-to from the steps above
+    fz = s.view[0]; fx = s.view[1]; fy = s.view[2];
+    clampPan();
+    invalidate();
+    undoing = false;
   }
   if (undoBtn) undoBtn.addEventListener("click", function () {
-    var prev = undoStack.length ? undoStack.pop() : "";
-    undoing = true;
-    hsearch.value = prev;
-    if (ready) paint();
-    commitSearch();
-    if (!prev) document.getElementById("globe-reset").click(); // nothing before: the plain world map
+    clearTimeout(undoCheck);
+    var prev = undoStack.pop();
+    if (prev && ready) restore(prev);
     syncUndo();
+  });
+  // every way the map changes takes its snapshot first (capture phase, so before the change runs)
+  cv.addEventListener("pointerup", function () { if (drag && moved < 5 && !pinch) beforeChange(); }, true);
+  ["globe-btns", "cp-list", "cp-close", "globe-reset"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener("click", function (e) { if (!e.target.closest("#map-undo")) beforeChange(); }, true);
   });
   if (hsearch) hsearch.addEventListener("input", function () {
     clearTimeout(typing);
-    typing = setTimeout(function () { if (ready) { paint(); commitSearch(); } }, 180);
+    typing = setTimeout(function () { if (ready && hsearch.value !== shownQ) { beforeChange(); paint(); } }, 180);
   });
 })();
 
@@ -12190,7 +12440,7 @@
 })();
 // links from a species page into the app:
 //   ?map=<country>  the map, on that country      ?f=<chip id>  that filter (chip-common, chip-rare...)
-//   ?hab=<habitat>  that habitat                  ?type=<type> / ?fam=<family>  that kind of snake
+//   ?hab=<habitat>  the map, by that habitat       ?type=<type> / ?fam=<family>  that kind of snake
 (function () {
   var q = null; try { q = new URLSearchParams(location.search); } catch (e) {} if (!q) return;
   var map = q.get("map"), f = q.get("f"), hab = q.get("hab"), type = q.get("type"), fam = q.get("fam");
@@ -12202,15 +12452,14 @@
       setTimeout(function () { var hs = document.getElementById("heat-search"); if (hs) { hs.value = map; hs.dispatchEvent(new Event("input")); hs.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true })); } }, 400);
       return;
     }
+    // a habitat opens the Map tab, coloured by where that habitat's snakes live
+    if (hab && window.SL_MAP_HABITAT) {
+      document.getElementById("tab-map").click();
+      setTimeout(function () { window.SL_MAP_HABITAT(hab); }, 400);
+      return;
+    }
     var chip = null;
     if (f) chip = document.getElementById(f);
-    if (hab) {
-      var want = hab.toLowerCase().trim();
-      [].slice.call(document.querySelectorAll("#habitat-chips [data-habitat]")).some(function (c) {
-        var n = (c.firstChild && c.firstChild.textContent || c.textContent).replace(/\s+\d[\d,.]*\s*$/, "").trim().toLowerCase();
-        if (n === want) { chip = c; return true; } return false;
-      });
-    }
     var tg = document.getElementById("tab-guide"); if (tg) tg.click();
     if (chip) { if (!chip.classList.contains("active")) chip.click(); }
     else if (type && window.SL_applyFilter) window.SL_applyFilter("type", type);
@@ -12555,6 +12804,14 @@
   .hm-toggle:active, .layers-btn:active { transform: scale(0.96); }
   /* switched on, both look like the Venomous filter chip */
   .hm-toggle.on { background: linear-gradient(135deg, var(--rust) 0%, var(--chip-lift, var(--rust)) 155%); border-color: var(--rust); color: #fff; }
+  /* Habitats, switched on: the heatmap panel's own green */
+  .map-tools .hm-toggle.hab-toggle.on, .map-tools .hm-toggle.hab-toggle.on:hover { background: linear-gradient(135deg, #2f7a45 0%, #1f5431 100%); border-color: #2f7a45; color: #fff; filter: none; }
+  /* touch screens keep :hover after a tap - so a tapped map button stayed lit up (the zoom
+     buttons went white) until something else was touched. There, hover changes nothing. */
+  @media (hover: none) {
+    .hm-toggle:hover, .layers-btn:hover { background: rgba(10,20,32,0.78); }
+    .globe-stage .globe-zoom button:hover { background: rgba(10,20,32,0.72); color: rgba(255,255,255,0.85); }
+  }
   .hm-toggle.on:hover { filter: brightness(1.08); background: linear-gradient(135deg, var(--rust) 0%, var(--chip-lift, var(--rust)) 155%); }
   .sg-note { position: absolute; top: 52px; right: 56px; z-index: 4; max-width: 300px; margin: 0; padding: 8px 11px; border-radius: 10px;
     background: rgba(10,20,32,0.86); color: #f2f6fa; font: 12px/1.4 'Inter', sans-serif; box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
@@ -12689,6 +12946,7 @@
   function load() { try { return JSON.parse(localStorage.getItem(KEY) || "null") || {}; } catch (e) { return {}; } }
   var st = Object.assign({ style: "classic", heat: false, q: "", cat: "all", time: "all", measure: "live" }, load());
   if (st.measure !== "obs") st.measure = "live"; // "live" = where the species live (the checklist's own ranges)
+  st.hab = ""; // a habitat picked on the map (see HABS below) - starts off each visit, like Sightings
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
   var INAT = "https://api.inaturalist.org/v1/";
   var SNAKES = 85553;
@@ -12706,7 +12964,8 @@
   stage.insertAdjacentHTML("beforeend",
     '<div class="lmap" id="lmap" hidden></div>' +
     '<div class="map-tools"><button type="button" class="hm-toggle" id="hm-toggle" aria-pressed="false"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><circle cx="12" cy="12" r="7" opacity=".6"></circle><circle cx="12" cy="12" r="10.5" opacity=".3"></circle></svg> <span><span class="lbl-l">Species </span>Heatmap</span></button>' +
-    '<button type="button" class="hm-toggle sg-toggle" id="sg-toggle" aria-pressed="false"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg> <span><span class="lbl-l">Snake </span>Sightings<span class="sg-what" id="sg-what"></span></span></button></div>' +
+    '<button type="button" class="hm-toggle sg-toggle" id="sg-toggle" aria-pressed="false"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg> <span><span class="lbl-l">Snake </span>Sightings<span class="sg-what" id="sg-what"></span></span></button>' +
+    '<button type="button" class="hm-toggle hab-toggle" id="hab-toggle" aria-pressed="false" title="Show where the snakes of one habitat live"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V11"></path><path d="M12 11c0-4 3-7 8-7 0 5-3 8-8 7Z"></path><path d="M12 14c0-3.5-2.6-6-7-6 0 4.4 2.6 6.9 7 6Z"></path></svg> <span>Habitats<span class="sg-what" id="hab-what"></span></span></button></div>' +
     '<p class="sg-note" id="sg-note" hidden></p>' +
     '<p class="sg-key" id="sg-key" hidden><span></span>Red dots = snake sightings on iNaturalist &middot; tap one</p>' +
     '<div class="sg-pop" id="sg-pop" hidden role="dialog" aria-label="Snake sighting"></div>' +
@@ -12719,6 +12978,7 @@
     '<div class="hm-panel" id="hm-panel" hidden>' +
     '<div class="hm-head"><span>Species heatmap</span><button type="button" class="hm-collapse" id="hm-collapse" aria-label="Hide filters" aria-expanded="true"></button></div>' +
     '<div class="hm-row hm-pick"><input type="text" id="hm-q" list="hm-names" placeholder="Search a snake species&hellip;" autocomplete="off"><datalist id="hm-names"></datalist><select id="hm-cat">' + Object.keys(CATS).map(function (k) { return '<option value="' + k + '">' + CATS[k].label + "</option>"; }).join("") + '</select></div>' +
+    '<div class="hm-row"><select id="hm-hab" aria-label="Habitat"></select></div>' +
     '<div class="hm-row hm-seg" id="hm-measure"><button type="button" data-v="live">Where they live</button><button type="button" data-v="obs">Live sightings</button></div>' +
     '<div class="hm-row hm-seg" id="hm-time">' + [["day", "Today"], ["month", "This month"], ["year", "This year"], ["all", "All time"]].map(function (t) { return '<button type="button" data-v="' + t[0] + '">' + t[1] + "</button>"; }).join("") + '</div>' +
     '<div class="hm-legend" id="hm-legend"></div>' +
@@ -12726,6 +12986,33 @@
   var lmapEl = document.getElementById("lmap"), btnHeat = document.getElementById("hm-toggle"), panel = document.getElementById("hm-panel");
   var pop = document.getElementById("layers-pop"), btnLayers = document.getElementById("layers-btn"), status = document.getElementById("hm-status");
   var qIn = document.getElementById("hm-q"), catSel = document.getElementById("hm-cat");
+  // ---- Habitats: the checklist's own habitats (Tropical Rainforest, Desert...), each country
+  // and state/province shaded by how many of that habitat's snakes are recorded there ----
+  var HABS = window.SL_HABITATS || { sections: [], ids: function () { return []; } }, HAB_IDX = {}, habSel = document.getElementById("hm-hab");
+  var habBtn = document.getElementById("hab-toggle");
+  (function () {
+    var n = 0, html = '<option value="">Any habitat</option>';
+    HABS.sections.forEach(function (sec) {
+      html += '<optgroup label="' + sec[0].replace(/"/g, "&quot;") + '">' + sec[1].map(function (h) {
+        HAB_IDX[h.toLowerCase()] = { n: n++, name: h };
+        return '<option value="' + h.replace(/"/g, "&quot;") + '">' + h + "</option>";
+      }).join("") + "</optgroup>";
+    });
+    habSel.innerHTML = html;
+  })();
+  var habCache = {};
+  function habSet() { // id -> 1 for the picked habitat's snakes, or null
+    var h = st.hab && HAB_IDX[st.hab.toLowerCase()];
+    if (!h) return null;
+    if (!habCache[h.n]) { var o = {}; HABS.ids(h.n).forEach(function (id) { o[id] = 1; }); habCache[h.n] = o; }
+    return habCache[h.n];
+  }
+  // the map's states/provinces (drawn by the Map script) follow the habitat too
+  function syncHabKeep() {
+    var hs = habSet();
+    window.SL_HEAT_KEEP = hs ? function (id) { return !!hs[id]; } : null;
+    if (window.SL_HEAT_KEEP) window.SL_HEAT_KEEP.key = st.hab;
+  }
   // species names to pick from, straight from the checklist
   var names = [], bySearch = {};
   [].slice.call(document.querySelectorAll("#grid .card")).forEach(function (c) {
@@ -12990,7 +13277,7 @@
   function merc2lat(Y) { return Math.atan(Math.sinh(Math.PI * (1 - 2 * Y))) * 180 / Math.PI; }
   var RC = { key: "", R: null };
   function rangeReady() {
-    var k = st.q + "|" + st.cat + "|" + ((window.SL_MAP_SCOPE || {}).key || "");
+    var k = st.q + "|" + st.cat + "|" + st.hab + "|" + ((window.SL_MAP_SCOPE || {}).key || "");
     if (RC.key !== k || !RC.R) { var R = rangeCounts(); if (R) { RC.R = R; RC.key = k; lastRange = R; rangeStatus(R); } }
     return RC.R;
   }
@@ -13169,8 +13456,10 @@
     // what's typed in the map's own search narrows the heatmap too: its species, its countries
     var SC = window.SL_MAP_SCOPE || null;
     CARDS.forEach(function (c) { c.countries.forEach(function (n) { var cc = geo.iso[n]; if (cc) hasData[cc] = 1; }); });
+    var hs = habSet();
     CARDS.forEach(function (c) {
       if (SC && SC.ids && !SC.ids[c.id]) return;
+      if (hs && !hs[c.id]) return; // a habitat picked: only its snakes
       if (wantSci ? c.sci.toLowerCase() !== wantSci : st.cat === "Other" ? !!FAM[Object.keys(FAM).filter(function (k) { return FAM[k] === c.fam; })[0]] : (st.cat !== "all" && c.fam !== FAM[st.cat])) return;
       nsp++;
       c.countries.forEach(function (n) { names[n] = 1; var cc = geo.iso[n]; if (cc) { counts[cc] = (counts[cc] || 0) + 1; if (counts[cc] > mx) mx = counts[cc]; } });
@@ -13220,6 +13509,7 @@
     if (!R.nsp) { setStatus("None of the checklist's snakes match this filter."); return; }
     var places = window.SL_countPlaces ? window.SL_countPlaces(R.names) : nc + " countries";
     if (R.single) setStatus(nc ? displayName() + " lives in " + places + ". Tap a country for its details." + note : "No range on record for this species yet." + note);
+    else if (st.hab) setStatus(st.hab + ": where its " + R.nsp.toLocaleString() + (R.nsp === 1 ? " snake lives" : " snakes live") + " - " + places + "." + note);
     else setStatus(R.nsp.toLocaleString() + " species across " + places + "." + note);
   }
   // the two "nothing here" colours: snakes live there but none of these (warm sand - plain,
@@ -13252,7 +13542,7 @@
     var keys = '<div class="hm-key"><span class="hm-sw hm-none"></span>' + (st.q ? "Doesn't live here" : "None of these snakes live here") + '</div>' +
       '<div class="hm-key"><span class="hm-sw hm-nodata"></span>No data - no snakes on record</div>';
     if (st.q) return '<div class="hm-bar"></div><div class="hm-ends"><span>In a few parts</span><span>All over the country</span></div>' + keys;
-    return '<div class="hm-bar"></div><div class="hm-ends"><span>Fewer</span><span>species living there</span><span>More</span></div>' + keys;
+    return '<div class="hm-bar"></div><div class="hm-ends"><span>Fewer</span><span>' + (st.hab ? "of its snakes" : "species living there") + '</span><span>More</span></div>' + keys;
   }
   // after a species search, the map moves to show its whole range
   function fitRange() {
@@ -13457,6 +13747,11 @@
     panel.hidden = !st.heat;
     if (document.activeElement !== qIn) qIn.value = st.q;
     catSel.value = st.cat; catSel.disabled = !!st.q;
+    habSel.value = st.hab;
+    var habOn = !!(st.heat && st.hab);
+    habBtn.classList.toggle("on", habOn); habBtn.setAttribute("aria-pressed", String(habOn));
+    document.getElementById("hab-what").textContent = habOn ? ": " + st.hab : "";
+    syncHabKeep();
     [["hm-time", st.time], ["hm-measure", st.measure]].forEach(function (g) {
       [].slice.call(document.getElementById(g[0]).children).forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-v") === g[1]); });
     });
@@ -13492,6 +13787,25 @@
   });
   qIn.addEventListener("search", function () { if (!qIn.value) { st.q = ""; speciesTaxon = null; save(); syncUI(); applyHeat(); } });
   catSel.addEventListener("change", function () { st.cat = catSel.value; save(); applyHeat(); });
+  // a habitat is about where its snakes live, so it always shows the range map, not sightings
+  function showHabitat(name) {
+    var h = name && HAB_IDX[String(name).toLowerCase().trim()];
+    st.hab = h ? h.name : "";
+    if (st.hab) { st.heat = true; st.measure = "live"; }
+    save(); syncUI(); applyHeat();
+    return !!h;
+  }
+  habSel.addEventListener("change", function () { showHabitat(habSel.value); });
+  // the "Habitats" map button: the heatmap's panel opens on its habitat list
+  habBtn.addEventListener("click", function () {
+    if (!st.heat) { st.heat = true; st.measure = "live"; save(); syncUI(); applyHeat(); }
+    panel.classList.remove("collapsed");
+    document.getElementById("hm-collapse").setAttribute("aria-expanded", "true");
+    habSel.focus();
+    try { if (habSel.showPicker) habSel.showPicker(); } catch (err) {}
+  });
+  // ?hab=<habitat> links (and anything else that wants one habitat shown on the map)
+  window.SL_MAP_HABITAT = showHabitat;
   ["hm-time", "hm-measure"].forEach(function (id) {
     document.getElementById(id).addEventListener("click", function (e) {
       var b = e.target.closest("[data-v]"); if (!b) return;
@@ -13766,6 +14080,15 @@
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v3.66", d: "2026-10-28", items: ["Species pages: a sharp map you can zoom and drag, every country shown, introduced places (like Florida for the Burmese python) in orange", "Species pages: tap a country, habitat or tag (Common, Rare, Venomous, type, family...) to open it in the app"] },
+    { v: "v3.65", d: "2026-10-28", items: ["Buttons no longer keep a light ring or highlight after you tap them"] },
+    { v: "v3.64", d: "2026-10-28", items: ["Map: Undo goes back exactly one step - the same search, country, states or cities, and the same view"] },
+    { v: "v3.63", d: "2026-10-28", items: ["Map: a Habitats button - pick a habitat and the map shows where its snakes live, country by country and state by state"] },
+    { v: "v3.62", d: "2026-10-28", items: ["Map: See cities shows plain dots - tap one for its name; tapping the sea or another country clears them, and a picked state shows only its own cities"] },
+    { v: "v3.61", d: "2026-10-28", items: ["Map: zoom in much closer on states and provinces, by scrolling or pinching, so even the tiny ones can be tapped"] },
+    { v: "v3.60", d: "2026-10-28", items: ["Map: small places like the Isle of Man and Monaco show their real shape with their name - no more rings around them"] },
+    { v: "v3.59", d: "2026-10-28", items: ["Map: “See states” says what a country really has - See provinces, See regions, See prefectures, See counties, See islands..."] },
+    { v: "v3.58", d: "2026-10-28", items: ["A Refresh button in My lists shows different snakes - the ones you keep at the top stay there", "Species pages link straight into the app's map and filters"] },
     { v: "v3.57", d: "2026-10-27", items: ["Sync works on iPad and iPhone (Safari)", "Sync tells you when it worked - or what went wrong"] },
     { v: "v3.56", d: "2026-10-27", items: ["Sync: no more Sync button - it keeps going by itself"] },
     { v: "v3.55", d: "2026-10-27", items: ["Signed in with Google: your lists, notes, favourites, quiz score and photos now sync to all your devices by themselves", "Removing a snake on one device removes it everywhere", "75 more dead-snake photos swapped for live ones"] },
