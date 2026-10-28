@@ -1101,6 +1101,13 @@
      read as separate countries instead of merging into one green blob */
   .map-wrap svg .on path, .map-wrap svg path.on, .map-wrap svg .on circle {
     fill: var(--map-on); stroke: rgba(255,255,255,0.85); stroke-width: 0.8px; }
+  /* the source map marks its smallest places (Vatican City, Monaco, the Isle of Man...) with a
+     circle drawn beside them - no rings: the place's own shape shows instead, and when it's lit
+     a stroke in its own colour keeps that tiny shape findable right where it really is */
+  .map-wrap svg .circlexx { display: none; }
+  .map-wrap svg g:has(> .circlexx).on > path { stroke: var(--map-on); stroke-width: 2.4px; }
+  .map-wrap svg g:has(> .circlexx).invasive > path { stroke: #e08a2c; stroke-width: 2.4px; }
+  .map-wrap.quiz-map svg g:has(> .circlexx).quiz-guess > path { stroke: var(--map-on); stroke-width: 2.4px; }
   .map-wrap svg .sheet-state { stroke: rgba(255,255,255,0.9); stroke-width: 0.7px; vector-effect: non-scaling-stroke; }
   .map-wrap svg .sheet-state.in { fill: var(--map-on); }
   .map-wrap svg .sheet-state.out { fill: var(--map-off); }
@@ -11033,10 +11040,12 @@
   var tinyZoomCache = {};
   function tinyZoom(code) {
     if (code in tinyZoomCache) return tinyZoomCache[code];
-    var big = 0;
-    POLY.forEach(function (r) { if (r.code === code && !r.dot) big = Math.max(big, r.e - r.w, r.no - r.s); });
+    var big = 0, any = false;
+    POLY.forEach(function (r) { if (r.code === code && !r.dot) { any = true; big = Math.max(big, r.e - r.w, r.no - r.s); } });
     var cw = cv.clientWidth || sizeW || 900;
-    return (tinyZoomCache[code] = big ? Math.min(6000, 48 * 360 / (cw * big)) : MAXZOOM);
+    // Vatican City's outline is a single point at this data's resolution (no shape to show):
+    // close enough to see the streets-of-Rome scale it sits at, with its marker and name
+    return (tinyZoomCache[code] = big ? Math.min(6000, 48 * 360 / (cw * big)) : any ? 60 : MAXZOOM);
   }
   function zoomCap() {
     var cap = MAXZOOM;
