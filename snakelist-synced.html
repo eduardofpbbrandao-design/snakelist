@@ -11670,6 +11670,139 @@
     }
     if (lastCountryCode) showProvinceByKey(lastCountryCode, pill.getAttribute("data-prov"));
   });
+
+  // ---- species info: tapping a species' name in the map's list opens its details over the
+  // map (inside the stage, so full screen too). It's only an overlay - the map, its search,
+  // filters and the list underneath are never touched, so closing it (x, Esc, or a tap
+  // outside it on the map) leaves everything exactly as it was. Seen / Want to see press the
+  // species card's own buttons in the checklist, the same way the quick preview does.
+  var spWrap = document.createElement("div");
+  spWrap.className = "sp-info-wrap"; spWrap.hidden = true;
+  spWrap.innerHTML = '<div class="sp-info" role="dialog" aria-modal="true" aria-labelledby="sp-info-name" tabindex="-1">' +
+    '<button type="button" class="sp-info-x" aria-label="Close">&times;</button><div class="sp-info-body"></div></div>';
+  stage.appendChild(spWrap);
+  var spCard = spWrap.querySelector(".sp-info"), spBody = spWrap.querySelector(".sp-info-body"), spCur = null, spBack = null;
+  function spEsc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function spCardEl(id) { var g = document.getElementById("grid"); return g && g.querySelector('.card[data-id="' + id + '"]'); }
+  // the species page's address, the same as a card's own click (species/<common-name>-<id>)
+  function spPageUrl(card) {
+    var id = card.dataset.id, nmEl = card.querySelector(".card-name");
+    var slug = function (t) { return String(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); };
+    var nm = nmEl && !nmEl.classList.contains("is-sci") ? slug(nmEl.textContent) : "";
+    if (nm && nm !== id) id = nm + "-" + id;
+    if (window.claude && window.claude.use) return "https://snakelist.com/species/" + id;
+    return "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html");
+  }
+  // the photo: the same sprite tile the card shows (or the photo found online for it)
+  function spPhoto(id) {
+    var P = window.SL_PHOTOS, it = P && P.items[id];
+    if (it) {
+      var col = it[1] % P.cols, row = Math.floor(it[1] / P.cols);
+      return { css: "background-image:url('" + P.path.replace("%d", it[0]) + "');background-size:" + P.cols * 100 + "% " + P.rows * 100 + "%;background-position:" +
+        (P.cols > 1 ? col / (P.cols - 1) * 100 : 0) + "% " + (P.rows > 1 ? row / (P.rows - 1) * 100 : 0) + "%", by: it[2] ? "Photo © " + it[2] + " · via iNaturalist" : "" };
+    }
+    var X = window.SL_EXTRA_PHOTOS && window.SL_EXTRA_PHOTOS[id];
+    if (X && X.url) return { css: 'background-image:url("' + String(X.url).replace(/"/g, "%22") + '");background-size:cover;background-position:center 40%', by: X.by || X.credit ? "Photo: " + (X.by || X.credit) : "" };
+    return null;
+  }
+  // which habitats each snake is in, worked out once from the checklist's habitat lists
+  var spHabOf = null;
+  function spHabitats(id) {
+    if (!spHabOf) {
+      spHabOf = {};
+      var H = window.SL_HABITATS, n = 0;
+      if (H && H.sections) H.sections.forEach(function (sec) { sec[1].forEach(function (h) { H.ids(n++).forEach(function (sid) { (spHabOf[sid] = spHabOf[sid] || []).push(h); }); }); });
+    }
+    return spHabOf[id] || [];
+  }
+  function spFamily(card) { var f = ""; [].slice.call(card.querySelectorAll(".card-tags .tag")).forEach(function (t) { if (/idae$/.test(t.textContent.trim())) f = t.textContent.trim(); }); return f; }
+  function spRender() {
+    var c = spCur; if (!c) return;
+    var id = c.dataset.id, nmEl = c.querySelector(".card-name"), isSci = nmEl.classList.contains("is-sci");
+    var name = nmEl.textContent.trim(), sci = ((c.querySelector(".card-sci") || {}).textContent || "").trim();
+    var ph = spPhoto(id), fam = spFamily(c);
+    var cons = window.SL_CONSTRICTION ? window.SL_CONSTRICTION(id) : "unknown", harm = window.SL_HARM ? window.SL_HARM(id) : null;
+    var ext = window.SL_FACTS && window.SL_FACTS.EXTINCT && window.SL_FACTS.EXTINCT[id];
+    var ctry = (c.dataset.countries || "").split("|").filter(Boolean), habs = spHabitats(id);
+    var done = c.classList.contains("done"), wish = c.classList.contains("wish");
+    spBody.innerHTML =
+      (ph ? '<button type="button" class="sp-info-photo" data-sp="photo" aria-label="See the photo bigger" style="' + spEsc(ph.css) + '"></button>' +
+          (ph.by ? '<p class="sp-info-credit">' + spEsc(ph.by) + "</p>" : "")
+        : '<div class="sp-info-photo none">No photo yet</div>') +
+      '<div class="sp-info-main">' +
+      '<h3 id="sp-info-name"' + (isSci ? ' class="is-sci"' : "") + ">" + spEsc(name) + "</h3>" +
+      '<p class="sp-info-sci">' + (isSci ? "No common name" : spEsc(sci)) + "</p>" +
+      '<dl class="sp-info-facts"><dt>Type</dt><dd>' + spEsc(c.dataset.type || "Not documented") + "</dd>" +
+      "<dt>Family</dt><dd>" + spEsc(fam || "Not documented") + "</dd>" +
+      "<dt>Venom</dt><dd>" + (c.dataset.venomous === "1" ? "Venomous" : "Non-venomous") + "</dd>" +
+      "<dt>Constrictor</dt><dd>" + (cons === "yes" ? "Yes" : cons === "no" ? "No" : "Not documented") + "</dd>" +
+      (harm ? "<dt>Harm</dt><dd>" + (harm === "harmful" ? "Harmful" : harm === "harmless" ? "Harmless" : "Not documented") + "</dd>" : "") +
+      (ext ? "<dt>Status</dt><dd>" + spEsc(ext) + "</dd>" : "") + "</dl>" +
+      '<p class="sp-info-h">Habitats' + (habs.length ? " (" + habs.length + ")" : "") + "</p>" +
+      (habs.length ? '<div class="sp-info-habs">' + habs.map(function (h) { return "<span>" + spEsc(h) + "</span>"; }).join("") + "</div>" : '<p class="sp-info-txt">Not documented</p>') +
+      '<p class="sp-info-h">' + (ctry.length === 1 ? "Country" : "Countries" + (ctry.length ? " (" + ctry.length + ")" : "")) + "</p>" +
+      '<p class="sp-info-txt">' + (ctry.length ? spEsc(ctry.join(", ")) : "Not recorded") + "</p>" +
+      '<div class="sp-info-acts">' +
+        '<button type="button" data-sp="seen"' + (ext ? " hidden" : "") + (done ? ' class="on"' : "") + ' aria-pressed="' + done + '">' + (done ? "&#10003; Seen" : "Mark Seen") + "</button>" +
+        '<button type="button" data-sp="wish"' + (ext || done ? " hidden" : "") + (wish ? ' class="on"' : "") + ' aria-pressed="' + wish + '">' + (wish ? "&#9733; Want to see" : "&#9734; Want to see") + "</button>" +
+        '<a class="sp-info-page" href="' + spEsc(spPageUrl(c)) + '"' + (window.claude && window.claude.use ? ' target="_blank" rel="noopener"' : "") + ">View full species page</a>" +
+      "</div></div>";
+  }
+  function spOpen(id) {
+    var c = spCardEl(id); if (!c) return false;
+    spCur = c; spBack = document.activeElement; spRender();
+    spWrap.hidden = false; spBody.scrollTop = 0; spCard.scrollTop = 0;
+    var tipEl = stage.querySelector(".hm-tip"); if (tipEl) tipEl.hidden = true;
+    // the list can sit under the map on a narrow screen: bring the map into view (the page
+    // scrolls, the map itself doesn't move)
+    var r = stage.getBoundingClientRect();
+    if (!full && (r.bottom < 60 || r.top > window.innerHeight - 60)) stage.scrollIntoView({ block: "nearest" });
+    var x = spWrap.querySelector(".sp-info-x"); if (x) x.focus({ preventScroll: true });
+    return true;
+  }
+  function spClose() {
+    if (spWrap.hidden) return;
+    spWrap.hidden = true; spCur = null;
+    if (spBack && spBack.focus && document.contains(spBack)) spBack.focus({ preventScroll: true });
+  }
+  window.SL_MAP_SPECIES_INFO = spOpen;
+  spWrap.addEventListener("click", function (e) {
+    if (e.target === spWrap || e.target.closest(".sp-info-x")) { spClose(); return; } // a tap outside the panel, on the map
+    var b = e.target.closest("[data-sp]"); if (!b || !spCur) return;
+    var k = b.getAttribute("data-sp"), c = spCur;
+    if (k === "photo") { var nm = c.querySelector(".card-name"), sc = c.querySelector(".card-sci"); if (window.SL_openPhoto) window.SL_openPhoto(c.dataset.id, nm.textContent.trim(), nm.classList.contains("is-sci") ? "" : (sc ? sc.textContent.trim() : "")); return; }
+    var btn = c.querySelector(k === "seen" ? ".seen-btn" : ".wish-btn");
+    if (btn) { btn.click(); setTimeout(function () { if (spCur === c) { spRender(); var nb = spBody.querySelector('[data-sp="' + k + '"]'); if (nb && !nb.hidden) nb.focus({ preventScroll: true }); } }, 60); }
+  });
+  // nothing under the panel reacts while it's open: no map zoom, drag or hover label
+  ["wheel", "pointerdown", "pointermove", "touchstart", "dblclick"].forEach(function (t) {
+    spWrap.addEventListener(t, function (e) { e.stopPropagation(); }, { passive: true });
+  });
+  // Esc closes it first (before full screen's own Esc), unless the bigger photo is open on top
+  window.addEventListener("keydown", function (e) {
+    if (spWrap.hidden) return;
+    if (e.key === "Escape") {
+      if (document.querySelector(".photo-lightbox.open")) return;
+      e.preventDefault(); e.stopImmediatePropagation(); spClose(); return;
+    }
+    if (e.key === "Tab") { // the keyboard stays inside the panel while it's open
+      var f = [].slice.call(spCard.querySelectorAll("button:not([hidden]), a[href]")).filter(function (x) { return x.offsetParent !== null; });
+      if (!f.length) return;
+      if (e.shiftKey && (document.activeElement === f[0] || document.activeElement === spCard)) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    }
+  }, true);
+  // a species row's name (not its "See photo", state pills or city line) opens it
+  document.getElementById("cp-list").addEventListener("click", function (e) {
+    if (e.target.closest(".cp-photo, .cp-states, .cp-city-fact")) return;
+    var row = e.target.closest(".cp-row");
+    if (!row || row.hasAttribute("data-city") || row.hasAttribute("data-country") || row.hasAttribute("data-prov")) return;
+    if (!e.target.closest("b, i")) return;
+    var nmEl = row.querySelector("b"), sciEl = row.querySelector("i");
+    var nm = nmEl ? nmEl.textContent.trim() : "", sci = sciEl ? sciEl.textContent.trim() : "";
+    var sp = INDEX && (INDEX.find(function (x) { return x.name === nm && x.sci === sci; }) || INDEX.find(function (x) { return x.sci === sci; }));
+    if (sp) spOpen(sp.id);
+  });
   function showProvinces() {
     if (!lastCountryCode) return;
     panelKind = "provlist";
@@ -12250,7 +12383,8 @@
     invalidate();
   }
   document.getElementById("globe-full").addEventListener("click", function () { setFull(!full); });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && full) setFull(false); });
+  // (Esc on the bigger photo only closes the photo, not full screen too)
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && full && !document.querySelector(".photo-lightbox.open")) setFull(false); });
   window.addEventListener("resize", function () { dirty = true; invalidate(); });
 
   // ---- build, off the critical path ------------------------------------------------------------
@@ -13335,7 +13469,54 @@
     .hm-key { display: inline-flex; margin-right: 10px; }
     .globe-stage.real-map .leaflet-bottom.leaflet-right { bottom: 0; }
   }
-  @media (prefers-reduced-motion: reduce) { .hm-panel, .layers-pop { animation: none; } }
+  /* species info, opened from a species' name in the map's list: the heatmap panel's own green,
+     over the map, with a light green-tinted veil behind it that closes it when tapped */
+  .sp-info-wrap { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center;
+    padding: 10px; box-sizing: border-box; background: rgba(6,28,15,0.4); }
+  .sp-info-wrap[hidden] { display: none; }
+  .sp-info { position: relative; width: min(600px, 100%); max-height: 100%; overflow-y: auto; overscroll-behavior: contain; box-sizing: border-box;
+    border-radius: 14px; background: linear-gradient(160deg, rgba(31,84,49,0.97), rgba(14,48,28,0.97)); color: #f0f8ec;
+    border: 1px solid rgba(160,222,140,0.28); box-shadow: 0 12px 34px rgba(0,0,0,0.4); font-family: 'Inter', sans-serif; font-size: 12.5px;
+    scrollbar-width: thin; scrollbar-color: rgba(169,224,142,0.45) transparent; animation: hmIn .18s ease-out; outline: none; }
+  .sp-info-body { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); grid-template-areas: "ph mn" "cr mn" "sp mn";
+    grid-template-rows: auto auto 1fr; column-gap: 14px; padding: 14px; }
+  .sp-info-photo { grid-area: ph; display: block; width: 100%; aspect-ratio: 3 / 2; border: none; padding: 0; border-radius: 10px; cursor: zoom-in;
+    background-color: #163d24; background-repeat: no-repeat; box-shadow: inset 0 0 0 1px rgba(169,224,142,0.25); }
+  .sp-info-photo.none { display: flex; align-items: center; justify-content: center; cursor: default; color: rgba(240,248,236,0.6); font-size: 12px; }
+  .sp-info-credit { grid-area: cr; margin: 5px 2px 0; font-size: 10.5px; line-height: 1.35; opacity: .75; }
+  .sp-info-main { grid-area: mn; min-width: 0; }
+  .sp-info h3 { margin: 0 34px 2px 0; font-size: 17px; font-weight: 600; line-height: 1.25; color: #fff; }
+  .sp-info h3.is-sci { font-style: italic; }
+  .sp-info-sci { margin: 0 0 9px; font-family: 'JetBrains Mono', monospace; font-style: italic; font-size: 11px; color: #a9e08e; }
+  .sp-info-facts { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 0 0 9px; padding: 8px 9px; border-radius: 10px; background: rgba(0,0,0,0.18); }
+  .sp-info-facts dt { font: 600 10px 'JetBrains Mono', monospace; letter-spacing: .06em; text-transform: uppercase; opacity: .7; padding-top: 2px; }
+  .sp-info-facts dd { margin: 0; }
+  .sp-info-h { margin: 8px 0 4px; font: 600 10px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #a9e08e; }
+  .sp-info-txt { margin: 0; line-height: 1.45; max-height: 84px; overflow-y: auto; scrollbar-width: thin; }
+  .sp-info-habs { display: flex; flex-wrap: wrap; gap: 4px; max-height: 86px; overflow-y: auto; scrollbar-width: thin; }
+  .sp-info-habs span { padding: 2px 8px; border-radius: 999px; font-size: 11.5px; background: rgba(169,224,142,0.16); border: 1px solid rgba(169,224,142,0.3); }
+  .sp-info-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; }
+  .sp-info-acts button { padding: 7px 11px; border-radius: 8px; border: 1px solid rgba(169,224,142,0.4); background: rgba(0,0,0,0.22); color: #f0f8ec;
+    font: 600 12px 'Inter', sans-serif; cursor: pointer; }
+  .sp-info-acts button:hover { background: rgba(169,224,142,0.18); }
+  .sp-info-acts button.on { background: #a9e08e; border-color: #a9e08e; color: #0d2a17; }
+  .sp-info-acts button[hidden] { display: none; }
+  .sp-info-page { margin-left: auto; color: #a9e08e; font-weight: 600; font-size: 12.5px; text-decoration: underline; text-underline-offset: 2px; }
+  .sp-info-x { position: absolute; top: 9px; right: 9px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(0,0,0,0.4); color: #fff; font-size: 18px; line-height: 1; }
+  .sp-info-x:hover { background: rgba(0,0,0,0.6); }
+  .sp-info button:focus-visible, .sp-info a:focus-visible { outline: 2px solid #a9e08e; outline-offset: 2px; }
+  .cp-row b, .cp-row i { cursor: pointer; }
+  .cp-row-country b, .cp-row-country i, .cp-row:not(:has(i)) b { cursor: inherit; }
+  @media (max-width: 520px) {
+    .sp-info-body { grid-template-columns: 1fr; grid-template-areas: "ph" "cr" "mn"; grid-template-rows: auto; }
+    .sp-info-main { margin-top: 10px; }
+  }
+  /* a phone held upright: the map is too short to hold it, so it covers the screen instead */
+  @media (max-width: 640px) { .globe-stage:not(.full) .sp-info-wrap { position: fixed; z-index: 400; padding: 12px; } }
+  /* the bigger photo opens above the full-screen map (it sat under it before) */
+  body.map-full .photo-lightbox { z-index: 400; }
+  @media (prefers-reduced-motion: reduce) { .hm-panel, .layers-pop, .sp-info { animation: none; } }
 </style>
 <script>
 // ---- Map Layers + Species heatmap -------------------------------------------------------
