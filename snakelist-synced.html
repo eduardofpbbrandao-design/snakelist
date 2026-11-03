@@ -10474,7 +10474,7 @@
       lon0 = worldCityMatch.lon; lat0 = worldCityMatch.lat; fz = Math.max(fz, 5); fx = 0; fy = 0;
       var wphi = worldCityMatch.lat * RAD, wlam = worldCityMatch.lon * RAD, wcp = Math.cos(wphi);
       PINS.push({
-        area: worldCityMatch.name, lon: worldCityMatch.lon, lat: worldCityMatch.lat, species: [],
+        area: worldCityMatch.name, lon: worldCityMatch.lon, lat: worldCityMatch.lat, species: [], fromSearch: true,
         v: [wcp * Math.cos(wlam), wcp * Math.sin(wlam), Math.sin(wphi)],
       });
     }
@@ -10486,7 +10486,7 @@
       PINS.push({
         area: cityMatch.name, lon: cityMatch.lng, lat: cityMatch.lat, species: [],
         v: [ccp * Math.cos(clam), ccp * Math.sin(clam), Math.sin(cphi)],
-        cityDot: true, state: cityMatch.state,
+        cityDot: true, state: cityMatch.state, fromSearch: true,
       });
     }
     if (q && !cityMatch && !continentMatch) {
@@ -10496,7 +10496,7 @@
           var pin = placed[p.area];
           if (!pin) {                                // one marker per place, however many species
             var phi = p.lat * RAD, lam = p.lon * RAD, cp = Math.cos(phi);
-            pin = placed[p.area] = { area: p.area, lon: p.lon, lat: p.lat, species: [],
+            pin = placed[p.area] = { area: p.area, lon: p.lon, lat: p.lat, species: [], fromSearch: true,
                                      v: [cp * Math.cos(lam), cp * Math.sin(lam), Math.sin(phi)] };
             PINS.push(pin);
           }
@@ -10805,9 +10805,20 @@
     ctx.strokeText(label, lx, pt[1]); ctx.fillStyle = ink; ctx.fillText(label, lx, pt[1]);
     ctx.restore();
   }
+  // while a country other than what was searched is clicked/selected, the search's own marks
+  // (a named spot's dot and name, its city or place pins, its highlighted countries) step
+  // aside, so only the selected country reads as picked. Deselect it (the sea, Close, Undo)
+  // and they're back - nothing about the search itself is cleared. A country that is part of
+  // the search (one of its highlighted countries, or where its pin is) keeps them showing.
+  function searchMuted() { return !!(selected && selected !== searchSelected && !(HI && HI[selected])); }
+  function markMuted(o) {
+    if (!searchMuted()) return false;
+    if (o.pcc === undefined) o.pcc = POLY ? pick(o.lon, o.lat) || "" : "";
+    return o.pcc !== selected;
+  }
   function drawPlaceLabels(to) {
     drawTinySelected(to);
-    if (!shownPlace) return;
+    if (!shownPlace || markMuted(shownPlace)) return;
     var css = getComputedStyle(document.documentElement);
     var ink = css.getPropertyValue("--text").trim() || "#24321f";
     var halo = css.getPropertyValue("--map-sea").trim() || "#dbe4ea";
@@ -10860,7 +10871,7 @@
     ctx.lineWidth = 0.85;
     ctx.lineJoin = "round";
     STROKE();
-    if (HI) {
+    if (HI && !searchMuted()) {
       // Kosovo has no species of its own recorded (every source lists it under Serbia),
       // so it never ends up in HI on its own - without this it stays the plain unhighlighted
       // land color while Serbia around it lights up, reading as a mistake rather than a gap.
@@ -11289,6 +11300,7 @@
     var b = flatBox(), placed = [];               // names already written, so none land on top of another
     var toScreen = function (p) { return [b[0] + (p.lon + 180) / 360 * b[2], b[1] + (90 - p.lat) / 180 * b[3]]; };
     for (var i = 0; i < PINS.length; i++) {
+      if (PINS[i].fromSearch && markMuted(PINS[i])) { PINS[i].screen = null; continue; } // see searchMuted
       var s = toScreen(PINS[i]);
       PINS[i].screen = s;                            // remembered so a click can find it
       if (!s) continue;
