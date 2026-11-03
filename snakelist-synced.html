@@ -13360,6 +13360,88 @@
     satImg.onload = function () { window.SL_MAP_SAT = st.style === "satellite" ? satImg : null; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); };
     satImg.src = "vendor/earth/blue-marble.jpg";
   }
+  // ---- Satellite, zoomed in: the bundled Blue Marble photo is 4096 x 2048 (about 10 km a
+  // pixel), so close up - Andorra, a valley in the Pyrenees - it went to mush. Past that point
+  // Esri's World Imagery tiles (the provider named in STYLES above) are laid over it, at the
+  // zoom level that gives one tile pixel per screen pixel at this view and screen density.
+  // The tiles are Web Mercator and this map is plain lon/lat, so each tile is drawn in thin
+  // horizontal strips, each put where its latitudes belong. Until a tile arrives its nearest
+  // loaded parent stands in, and where tiles can't load at all the Blue Marble stays as it was.
+  var SAT_URL = STYLES.satellite.url, SAT_MAX = STYLES.satellite.opt.maxZoom, SAT_ATTR = "Imagery © Esri, Maxar, Earthstar Geographics";
+  var TILES = {}, tileCount = 0, tileUse = 0, tileFails = 0, tileFailAt = 0;
+  function mercY(lat) { var s = Math.sin(lat * Math.PI / 180); return 0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI); }
+  function satTile(z, x, y, fetchIt) {
+    var k = z + "/" + x + "/" + y, t = TILES[k];
+    if (t) { t.use = ++tileUse; return t; }
+    if (!fetchIt) return null;
+    // tiles keep failing (offline, or a copy that can't reach outside sites): rest a minute
+    if (tileFails >= 16) { if (Date.now() - tileFailAt < 60000) return null; tileFails = 0; }
+    t = TILES[k] = { img: new Image(), ok: false, use: ++tileUse };
+    tileCount++;
+    t.img.crossOrigin = "anonymous"; // drawn on the map's canvas, which must stay readable
+    t.img.decoding = "async";
+    t.img.onload = function () { t.ok = true; tileFails = 0; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); };
+    t.img.onerror = function () { t.bad = true; tileFails++; tileFailAt = Date.now(); };
+    t.img.src = SAT_URL.replace("{z}", z).replace("{y}", y).replace("{x}", x);
+    if (tileCount > 450) { // keep the most recently used few hundred
+      var keys = Object.keys(TILES).sort(function (a, b2) { return TILES[a].use - TILES[b2].use; });
+      keys.slice(0, tileCount - 320).forEach(function (kk) { var o = TILES[kk]; if (!o.ok && !o.bad) o.img.src = ""; delete TILES[kk]; });
+      tileCount = Object.keys(TILES).length;
+    }
+    return t;
+  }
+  // one tile (z,x,y) on screen, from img holding it at zoom za (itself, or a parent)
+  function drawSatTile(ctx, b, img, z, x, y, za, gap) {
+    var n = 1 << z, s = 1 << (z - za), xa = x >> (z - za), ya = y >> (z - za);
+    var sw = 256 / s, sx = (x - xa * s) * sw, sy0 = (y - ya * s) * sw;
+    var dx0 = b[0] + x / n * b[2], dw = b[2] / n;
+    var latT = merc2lat(y / n), latB = merc2lat((y + 1) / n);
+    var hpx = (latT - latB) / 180 * b[3], k = Math.max(1, Math.min(16, Math.ceil(hpx / 40)));
+    for (var i = 0; i < k; i++) {
+      var la0 = merc2lat((y + i / k) / n), la1 = merc2lat((y + (i + 1) / k) / n);
+      var dy0 = b[1] + (90 - la0) / 180 * b[3], dy1 = b[1] + (90 - la1) / 180 * b[3];
+      ctx.drawImage(img, sx, sy0 + i / k * sw, sw, sw / k, dx0, dy0, dw + gap, dy1 - dy0 + gap);
+    }
+  }
+  window.SL_MAP_SAT_TILES = function (ctx, b, w, h) {
+    var bm = window.SL_MAP_SAT;
+    if (!bm || (window.claude && window.claude.use)) return; // claude.ai's copy blocks outside sites
+    var dpr = ctx.getTransform ? ctx.getTransform().a : Math.min(2, window.devicePixelRatio || 1);
+    var need = b[2] * dpr; // device pixels across the whole world at this zoom
+    if (need <= bm.naturalWidth * 1.1) { window.SL_SAT_TILE_Z = 0; return; } // the photo is sharp enough
+    var z = Math.min(SAT_MAX, Math.max(1, Math.ceil(Math.log(need / 256) / Math.LN2 - 0.15))), n = 1 << z;
+    var zFloor = Math.ceil(Math.log(bm.naturalWidth / 256) / Math.LN2) + 1; // parents coarser than the photo don't help
+    var lonA = Math.max(-180, -b[0] / b[2] * 360 - 180), lonB = Math.min(180, (w - b[0]) / b[2] * 360 - 180);
+    var latA = Math.min(85.05, 90 + b[1] / b[3] * 180), latB = Math.max(-85.05, 90 - (h - b[1]) / b[3] * 180);
+    if (lonA >= lonB || latA <= latB) return;
+    var x0 = Math.max(0, Math.floor((lonA + 180) / 360 * n)), x1 = Math.min(n - 1, Math.floor((lonB + 180) / 360 * n));
+    var y0 = Math.max(0, Math.floor(mercY(latA) * n)), y1 = Math.min(n - 1, Math.floor(mercY(latB) * n));
+    if ((x1 - x0 + 1) * (y1 - y0 + 1) > 400) return;
+    window.SL_SAT_TILE_Z = z; // (for checking: the zoom level in use)
+    var gap = 0.6 / dpr, drawn = 0;
+    ctx.save();
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+    // middle tiles first, so the part being looked at arrives first
+    var cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, list = [];
+    for (var ty = y0; ty <= y1; ty++) for (var tx = x0; tx <= x1; tx++) list.push([tx, ty]);
+    list.sort(function (p, q) { return Math.abs(p[0] - cx) + Math.abs(p[1] - cy) - Math.abs(q[0] - cx) - Math.abs(q[1] - cy); });
+    list.forEach(function (p) {
+      var t = satTile(z, p[0], p[1], true);
+      if (t && t.ok) { drawSatTile(ctx, b, t.img, z, p[0], p[1], z, gap); drawn++; return; }
+      for (var za = z - 1; za >= zFloor; za--) { // a parent tile, scaled up, until this one arrives
+        var d = z - za, pt = satTile(za, p[0] >> d, p[1] >> d, false);
+        if (pt && pt.ok) { drawSatTile(ctx, b, pt.img, z, p[0], p[1], za, gap); drawn++; return; }
+      }
+    });
+    ctx.restore();
+    if (drawn) { // the imagery's credit, small, in the corner like the real-map layers had it
+      ctx.save();
+      ctx.font = "9.5px Inter, sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+      ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.shadowColor = "rgba(0,0,0,0.7)"; ctx.shadowBlur = 2;
+      ctx.fillText(SAT_ATTR, w - 6, h - 4);
+      ctx.restore();
+    }
+  };
   function setStyle(style) {
     var prev = st.style;
     st.style = style; save();
