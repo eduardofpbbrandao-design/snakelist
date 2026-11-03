@@ -29,10 +29,16 @@ REDIRECT = """<!doctype html><html lang="en"><head><meta charset="utf-8"><title>
 
 
 APP = [""]
+CITIES = {}
 
 
 def build(app):
     APP[0] = app
+    # the app's big-city list; only cities that name their state can be placed in a snake's range
+    CITIES.clear()
+    for ct in json.loads(re.search(r"window\.SL_CITIES = (\[.*?\]);\n", app, re.S).group(1)):
+        if len(ct) > 4 and ":" in ct[4]:
+            cc, _, st = ct[4].partition(":"); CITIES.setdefault(cc.lower(), []).append((ct[0], ct[1], st, ct[2], ct[3]))
     os.makedirs(OUT, exist_ok=True)
     jget = lambda i: json.loads(re.search(r'<script type="application/json" id="%s">(.*?)</script>' % i, app, re.S).group(1))
     photos = jget("photo-index")
@@ -412,6 +418,12 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             cc = x["code"] or iso.get(x["name"], "")
             if x.get("states") and cc not in provs:
                 st_rows.append("<li><b>%s (invasive):</b> %s</li>" % (esc(x["name"]), esc(", ".join(region.us_names.get(n, n) if cc == "us" else n for n in x["states"]))))
+        cities = []
+        for cc, names in provs.items():
+            want = set(names)
+            for ct in CITIES.get(cc, []):
+                if ct[2] in want: cities.append(ct)
+        cities.sort(key=lambda t: t[0])
         sview = view
         if st_data:
             sview = view_of([boxes[cc] for cc in codes + icodes if cc in boxes and cc not in st_whole] + st_boxes + iboxes + [(0, d[0], d[0], d[1], d[1]) for d in dots]) or view
@@ -472,7 +484,11 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             hab_all=see_all("habitats", len(c["habitats"])),
             where="".join(rows) or "<li>No range recorded yet.</li>", where_all=see_all("countries", len(c["countries"])),
             st=esc(json.dumps(st_data, ensure_ascii=False, separators=(",", ":"))) if st_data else "", sview=esc(sview or "0 0 1440 720"),
-            stbtn='<button type="button" class="sp-all sp-stbtn" aria-pressed="false">See states</button>' if st_rows else "",
+            stbtn=('<button type="button" class="sp-all sp-stbtn" aria-pressed="false">See precise area</button>' if st_rows else "") +
+                  ('<button type="button" class="sp-all sp-ctbtn" aria-pressed="false">See cities</button>' if cities else ""),
+            cities_json=esc(json.dumps([[round(t[3], 2), round(t[4], 2), t[0]] for t in cities], ensure_ascii=False)),
+            cities_list=('<div class="sp-cities"><h3>Cities in its range</h3><p class="sp-note">Big cities inside the states and provinces where it is recorded - not individual sightings.</p><ul class="sp-where">%s</ul></div>' % "".join(
+                "<li>%s <small>%s</small></li>" % (esc(t[0]), esc(t[1])) for t in cities)) if cities else "",
             states=('<div class="sp-states"><h3>States, provinces and islands</h3><ul class="sp-where">%s</ul></div>' % "".join(st_rows)) if st_rows else "",
             tags="".join('<li><a href="../?%s">%s</a></li>' % (esc(q), esc(t)) for t, q in tags),
             codes=esc(" ".join(codes)), intro=esc(" ".join(icodes)),
@@ -588,7 +604,7 @@ PAGE = """<!doctype html>
 <p class="sp-cta"><a class="sp-btn" href="../?sp={id}">Open in SnakeList</a></p>
 <section><h2>About</h2><p>{about}</p><div id="sp-wiki"></div></section>
 <section><h2>Where it lives</h2>
-<div class="sp-map" data-codes="{codes}" data-intro="{intro}" data-dots="{dots}" data-view="{view}" data-st="{st}" data-sview="{sview}" aria-label="Map of the {nplaces} countries where {h1} lives"></div><template class="sp-ishapes">{ishapes}</template><div class="sp-mapbar">{legend}{stbtn}</div>{mapnote}{states}
+<div class="sp-map" data-codes="{codes}" data-intro="{intro}" data-dots="{dots}" data-view="{view}" data-st="{st}" data-sview="{sview}" data-cities="{cities_json}" aria-label="Map of the {nplaces} countries where {h1} lives"></div><template class="sp-ishapes">{ishapes}</template><div class="sp-mapbar">{legend}{stbtn}</div>{mapnote}{states}{cities_list}
 <ul class="sp-where sp-clip">{where}</ul>{where_all}</section>
 <section><h2>Habitats</h2><p class="sp-note">Estimated from where this snake is recorded and what kind of snake it is - not a confirmed habitat survey.</p><ul class="sp-pills sp-clip">{habitats}</ul>{hab_all}</section>
 <section><h2>Related snakes</h2><ul class="sp-rel sp-clip">{related}</ul>{rel_all}</section>
@@ -634,8 +650,9 @@ CSS = """.sp-note{font-size:13px;color:var(--muted);margin:-4px 0 10px}.sp-more{
 .sp-safe{margin:24px 0 0;padding:18px 22px;border-radius:16px;border:2px solid var(--tagline);background:var(--tag);font-size:16.5px;line-height:1.55}
 .sp-all{font:500 12px Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:4px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;margin:8px 0 0;display:none}
 .js .sp-all{display:inline-block}.js .sp-clip:not(.sp-open)>.sp-x{display:none}
-.sp-mapbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px}.sp-mapbar .sp-legend,.sp-mapbar .sp-all{margin-top:8px}
-.sp-states{margin-top:12px}.js .sp-states:not(.sp-open){display:none}.sp-states h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-states .sp-where{margin:0;columns:1}
+.sp-mapbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}.sp-mapbar .sp-legend{margin-right:auto}.sp-mapbar .sp-legend,.sp-mapbar .sp-all{margin-top:8px}
+.sp-states{margin-top:12px}.sp-cities{margin-top:12px}.js .sp-cities:not(.sp-open){display:none}.sp-cities h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-cities .sp-where{margin:0}.sp-cities small{color:var(--muted)}
+.sp-map circle.ct{fill:#e0a526;stroke:#fff;stroke-width:1.2px;vector-effect:non-scaling-stroke}.sp-states h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-states .sp-where{margin:0;columns:1}
 .sp-az .v{font-size:11px;font-weight:700;color:#b5452a;margin-left:4px}@media (prefers-color-scheme:dark){.sp-az .v{color:#f0a04b}}
 .sp-hubs{columns:3 200px;column-gap:24px;padding:0;list-style:none}.sp-hubs li{break-inside:avoid;margin:2px 0}
 :root{--bg:#f1f6ee;--card:#fbfdf9;--text:#183020;--muted:#55705b;--line:#d5e4cf;--g:#3f8a3a;--land:#d7dccb;--on:#3f8a3a;--in:#e07a1f;--sea:#e3ecef;--tag:#e3f0dc;--tagline:#a9cf9c}
@@ -696,7 +713,11 @@ busy=1;Promise.all(st.map(function(x){return fetch('prov/'+x[0]+'.json').then(fu
 sg=document.createElementNS(NS,'g');st.forEach(function(x,i){var n=0;x[2].forEach(function(nm){var d=J[i][nm];if(!d)return;var p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('class',x[1]);sg.appendChild(p);n++});
 var c=n&&s.getElementById('c-'+x[0]);if(c&&c.getAttribute('class')){off.push([c,c.getAttribute('class')]);c.removeAttribute('class')}});
 s.insertBefore(sg,mk.nextSibling);f=V(m.dataset.sview);fit();done(1)})});
-function done(o){sb.textContent=o?'Hide states':'See states';sb.setAttribute('aria-pressed',o?'true':'false');if(sl)sl.classList.toggle('sp-open',!!o)}
+function done(o){sb.textContent=o?'Hide precise area':'See precise area';sb.setAttribute('aria-pressed',o?'true':'false')}
+var cb=document.querySelector('.sp-ctbtn'),cl=document.querySelector('.sp-cities'),cg=null,cs=[];try{cs=JSON.parse(m.dataset.cities||'[]')}catch(e){}
+if(cb)cb.addEventListener('click',function(){var on=!cg;
+if(!on){cg.remove();cg=null}else{cg=document.createElementNS(NS,'g');var k=v.w/Math.max(1,m.clientWidth);cs.forEach(function(c){var d=document.createElementNS(NS,'circle');d.setAttribute('cx',((c[1]+180)*4).toFixed(1));d.setAttribute('cy',((90-c[0])*4).toFixed(1));d.setAttribute('r',(4.5*k).toFixed(2));d.setAttribute('class','ct');var t=document.createElementNS(NS,'title');t.textContent=c[2];d.appendChild(t);cg.appendChild(d)});s.appendChild(cg)}
+cb.textContent=on?'Hide cities':'See cities';cb.setAttribute('aria-pressed',on?'true':'false');if(cl)cl.classList.toggle('sp-open',on)});
 }).catch(function(){})}
 [].forEach.call(document.querySelectorAll('.sp-all[data-all]'),function(b){b.addEventListener('click',function(){var l=b.previousElementSibling,o=!l.classList.contains('sp-open');l.classList.toggle('sp-open',o);b.textContent=o?'Show less':b.dataset.all;b.setAttribute('aria-expanded',o?'true':'false')})});
 var im=document.querySelector('.sp-photo img');

@@ -19,7 +19,11 @@ busy=1;Promise.all(st.map(function(x){return fetch('prov/'+x[0]+'.json').then(fu
 sg=document.createElementNS(NS,'g');st.forEach(function(x,i){var n=0;x[2].forEach(function(nm){var d=J[i][nm];if(!d)return;var p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('class',x[1]);sg.appendChild(p);n++});
 var c=n&&s.getElementById('c-'+x[0]);if(c&&c.getAttribute('class')){off.push([c,c.getAttribute('class')]);c.removeAttribute('class')}});
 s.insertBefore(sg,mk.nextSibling);f=V(m.dataset.sview);fit();done(1)})});
-function done(o){sb.textContent=o?'Hide states':'See states';sb.setAttribute('aria-pressed',o?'true':'false');if(sl)sl.classList.toggle('sp-open',!!o)}
+function done(o){sb.textContent=o?'Hide precise area':'See precise area';sb.setAttribute('aria-pressed',o?'true':'false')}
+var cb=document.querySelector('.sp-ctbtn'),cl=document.querySelector('.sp-cities'),cg=null,cs=[];try{cs=JSON.parse(m.dataset.cities||'[]')}catch(e){}
+if(cb)cb.addEventListener('click',function(){var on=!cg;
+if(!on){cg.remove();cg=null}else{cg=document.createElementNS(NS,'g');var k=v.w/Math.max(1,m.clientWidth);cs.forEach(function(c){var d=document.createElementNS(NS,'circle');d.setAttribute('cx',((c[1]+180)*4).toFixed(1));d.setAttribute('cy',((90-c[0])*4).toFixed(1));d.setAttribute('r',(4.5*k).toFixed(2));d.setAttribute('class','ct');var t=document.createElementNS(NS,'title');t.textContent=c[2];d.appendChild(t);cg.appendChild(d)});s.appendChild(cg)}
+cb.textContent=on?'Hide cities':'See cities';cb.setAttribute('aria-pressed',on?'true':'false');if(cl)cl.classList.toggle('sp-open',on)});
 }).catch(function(){})}
 [].forEach.call(document.querySelectorAll('.sp-all[data-all]'),function(b){b.addEventListener('click',function(){var l=b.previousElementSibling,o=!l.classList.contains('sp-open');l.classList.toggle('sp-open',o);b.textContent=o?'Show less':b.dataset.all;b.setAttribute('aria-expanded',o?'true':'false')})});
 var im=document.querySelector('.sp-photo img');
