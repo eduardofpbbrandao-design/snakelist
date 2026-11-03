@@ -10753,6 +10753,8 @@
     if (window.SL_MAP_SAT) {
       ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
       ctx.drawImage(window.SL_MAP_SAT, b[0], b[1], b[2], b[3]);
+      // zoomed in past what the bundled photo holds: real imagery tiles go over it (Map Layers script)
+      if (window.SL_MAP_SAT_TILES) window.SL_MAP_SAT_TILES(ctx, b, w, h);
     } else if (POLY && POLY.length && POLY[0].L) {
       var cs = getComputedStyle(document.documentElement);
       ctx.fillStyle = cs.getPropertyValue("--map-sea").trim() || "#dbe4ea"; ctx.fillRect(b[0], b[1], b[2], b[3]);
@@ -11105,7 +11107,7 @@
       // no sourced species for this state yet - reads as plain unhighlighted land rather than
       // stretching the gradient down to a misleadingly "some, but very few" light green
       var heatOn = window.SL_HEAT_IS_ON && window.SL_HEAT_IS_ON();
-      ctx.fillStyle = n > 0 ? (heatOn ? window.SL_HEAT_COLOR(0.06 + 0.94 * Math.log(1 + n) / Math.log(1 + Math.max(1, maxN))) : cityDotColor(maxN ? n / maxN : 0)) : offColor;
+      ctx.fillStyle = n > 0 ? (heatOn ? window.SL_HEAT_COLOR(0.06 + 0.94 * Math.log(1 + n) / Math.log(1 + Math.max(1, maxN))) : cityDotColor(maxN ? n / maxN : 0)) : (heatOn && window.SL_HEAT_EMPTY && window.SL_HEAT_EMPTY()) || offColor;
       ctx.fill();
       // with a state tapped, every other state steps back under a wash of the map's own sea
       // colour (pale in day mode, deep green at night) so the tapped one is easy to find -
@@ -13146,14 +13148,15 @@
   .hm-legend .hm-key:first-child { margin-top: 0; }
   .hm-sw { width: 18px; height: 12px; border-radius: 3px; flex: none; opacity: .85; border: 1px solid rgba(255,255,255,0.35); }
   .hm-none { background: #ddd0a8; }
-  .hm-nodata { background: #3b4f6b repeating-linear-gradient(-45deg, #5b7194 0 1.4px, transparent 1.4px 5px); }
+  .hm-nodata { background: #9aa3a0; }
+  [data-sl-theme="dark"] .hm-nodata { background: #4a524f; }
   .hm-tip { position: absolute; z-index: 5; pointer-events: none; padding: 5px 9px; border-radius: 8px; white-space: nowrap;
     background: rgba(14,48,28,0.92); color: #f0f8ec; font: 12px 'Inter', sans-serif; box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
   .hm-tip[hidden] { display: none; }
   .sg-what { font-weight: 500; opacity: .9; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: bottom; }
   @media (max-width: 640px) { .sg-what { max-width: 90px; } }
   .hm-tip b { font-weight: 600; margin-right: 3px; }
-  .hm-bar { height: 10px; border-radius: 999px; background: linear-gradient(90deg, #2fb35a, #a6d63a 35%, #f6d32d 55%, #f58a1f 75%, #e3261f); opacity: .85; }
+  .hm-bar { height: 10px; border-radius: 999px; background: linear-gradient(90deg, #8fc47f, #3f8a3a 50%, #1f5a24); border: 1px solid rgba(255,255,255,0.3); box-sizing: border-box; }
   .hm-ends { display: flex; justify-content: space-between; margin-top: 3px; font-size: 10.5px; opacity: .8; }
   .hm-key { display: flex; align-items: center; gap: 7px; margin-top: 6px; font-size: 11px; opacity: .9; }
   .hm-hatch, .hm-blank { width: 18px; height: 12px; border-radius: 3px; flex: none; border: 1px solid rgba(255,255,255,0.35); }
@@ -13410,11 +13413,12 @@
   // of the habitat's snakes live in a country - light for a few, the map's own green, then deep
   var HAB_GREEN = ["#8fc47f", "#3f8a3a", "#1f5a24"];
   function habShade(t) { return HAB_GREEN[t < 0.34 ? 0 : t < 0.67 ? 1 : 2]; }
-  // ---- the colours: green (few) -> yellow -> orange -> red (many), as a 256-step lookup ----
+  // ---- the colours: light green (few) -> deep green (many), as a 256-step lookup ----
   var PAL = (function () {
     var c = document.createElement("canvas"); c.width = 256; c.height = 1;
     var g = c.getContext("2d"), gr = g.createLinearGradient(0, 0, 256, 0);
-    gr.addColorStop(0, "#2fb35a"); gr.addColorStop(0.35, "#a6d63a"); gr.addColorStop(0.55, "#f6d32d"); gr.addColorStop(0.75, "#f58a1f"); gr.addColorStop(1, "#e3261f");
+    // the Habitats panel's own three greens, as a smooth ramp: light green for few, deep green for many
+    gr.addColorStop(0, HAB_GREEN[0]); gr.addColorStop(0.5, HAB_GREEN[1]); gr.addColorStop(1, HAB_GREEN[2]);
     g.fillStyle = gr; g.fillRect(0, 0, 256, 1);
     return g.getImageData(0, 0, 256, 1).data;
   })();
@@ -13593,7 +13597,7 @@
         STY = { none: NONE_COL };
         for (var q = 0; q < 32; q++) { var k = Math.round(q / 31 * 255) * 4; STY["q" + q] = "rgb(" + PAL[k] + "," + PAL[k + 1] + "," + PAL[k + 2] + ")"; }
       }
-      STY.nodata = ctx.createPattern(NODATA_TILE, "repeat");
+      STY.nodata = heatGrey();
       fillBy(function (code) { return rangeKey(R, code); }, STY, window.SL_MAP_SAT ? 0.62 : 1);
       window.SL_HEAT_LINE = "rgba(20,28,24,0.38)";
       return;
@@ -13768,13 +13772,13 @@
     return { geo: geo, counts: counts, mx: mx, nsp: nsp, single: !!wantSci, cover: cover, hasData: hasData, names: Object.keys(names), scope: SC && SC.codes };
   }
   var lastRange = null;
-  // every country painted: green -> red by how many of the chosen snakes live there, and grey
+  // every country painted: light -> deep green by how many of the chosen snakes live there, and grey
   // where none of them do - so a single species still shows the whole world, its range lit up
   function offlineHeat(g, cv, px, finish) {
     var R = rangeCounts();
     if (!R) { failed(); return; }
     lastRange = R;
-    var noData = g.createPattern(NODATA_TILE, "repeat");
+    var noData = heatGrey();
     g.globalAlpha = 0.8;
     R.geo.poly.forEach(function (r) {
       var key = rangeKey(R, r.code);
@@ -13808,15 +13812,12 @@
     else setStatus(R.nsp.toLocaleString() + " species across " + places + "." + note);
   }
   // the two "nothing here" colours: snakes live there but none of these (warm sand - plain,
-  // empty land), or the checklist has no snake records for the place at all (deep slate blue
-  // with fine lines - "unknown")
+  // empty land), or the place has no snakes on record at all (a plain neutral grey, lighter
+  // in the day theme, darker at night)
   var NONE_COL = "#ddd0a8";
-  var NODATA_TILE = (function () {
-    var c = document.createElement("canvas"); c.width = c.height = 8;
-    var g = c.getContext("2d"); g.fillStyle = "#3b4f6b"; g.fillRect(0, 0, 8, 8);
-    g.strokeStyle = "#5b7194"; g.lineWidth = 1.4; g.beginPath(); g.moveTo(-2, 10); g.lineTo(10, -2); g.moveTo(6, 10); g.lineTo(10, 6); g.moveTo(-2, 2); g.lineTo(2, -2); g.stroke();
-    return c;
-  })();
+  function heatGrey() { return document.querySelector('[data-sl-theme="dark"]') ? "#4a524f" : "#9aa3a0"; }
+  // the map's states/provinces with none of the heatmap's snakes take the same grey
+  window.SL_HEAT_EMPTY = function () { return habOn ? null : heatGrey(); };
   function displayName() { return st.q.replace(/\s*\(.*\)$/, ""); }
   // the same picture on the Satellite map, redrawn whenever it stops moving
   function drawRangeLeaflet() {
@@ -13835,7 +13836,7 @@
     if (st.measure === "obs" && liveOK) return '<div class="hm-bar"></div><div class="hm-ends"><span>Fewer</span><span>sightings</span><span>More</span></div>' +
       '<div class="hm-key"><span class="hm-hatch"></span>Too few records to tell</div><div class="hm-key"><span class="hm-blank"></span>No records yet - not the same as no snakes</div>';
     var keys = '<div class="hm-key"><span class="hm-sw hm-none"></span>' + (st.q ? "Doesn't live here" : "None of these snakes live here") + '</div>' +
-      '<div class="hm-key"><span class="hm-sw hm-nodata"></span>No data - no snakes on record</div>';
+      '<div class="hm-key"><span class="hm-sw hm-nodata"></span>No snakes on record</div>';
     if (st.q) return '<div class="hm-bar"></div><div class="hm-ends"><span>In a few parts</span><span>All over the country</span></div>' + keys;
     return '<div class="hm-bar"></div><div class="hm-ends"><span>Fewer</span><span>species living there</span><span>More</span></div>' + keys;
   }
@@ -15912,8 +15913,6 @@ window.SL_welcome = function (u, back) {
   #habitat-chips .hab-subs:not(.on), #habitat-chips .hab-subs:not(.open) .chip-row { display: none; }
   #family-chips[hidden] { display: none; }
   /* 5. compact filters: three columns on wide screens; the less-used ones under "Advanced filters" */
-  @media (min-width: 1100px) { .fsecs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  .fsecs:not(.adv-open) .fsec[data-sec="other"], .fsecs:not(.adv-open) .adv-extra { display: none; }
   .fsecs.adv-open .adv-more { display: none; }
   .fsec-adv { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 42px; padding: 8px 16px; border-radius: 14px; cursor: pointer; text-align: left;
     border: 1px dashed var(--gold-soft); background: transparent; color: var(--text); font: 600 15px 'Inter', sans-serif; box-sizing: border-box; }
@@ -15939,6 +15938,12 @@ window.SL_welcome = function (u, back) {
   [data-sl-theme="dark"] .sl-sort { border-color: #7fc76a; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237fc76a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
   .sl-sort:hover { background-color: var(--surface-hover); }
   .sl-sort option { background: var(--surface); color: var(--text); }
+  .sl-sort-menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 60; margin: 0; padding: 6px; list-style: none; min-width: 230px; border-radius: 14px;
+    background: linear-gradient(160deg, #1f5a2e, #17462a); border: 1px solid rgba(169,224,142,0.3); box-shadow: 0 12px 30px rgba(0,0,0,0.3); outline: none; }
+  .sl-sort-menu[hidden] { display: none; }
+  .sl-sort-menu li { padding: 8px 12px; border-radius: 9px; font: 500 13.5px 'Inter', sans-serif; color: #f0f8ec; cursor: pointer; white-space: nowrap; }
+  .sl-sort-menu li.hi { background: rgba(63,138,58,0.55); }
+  .sl-sort-menu li[aria-selected="true"] { background: #3f8a3a; color: #fff; font-weight: 600; }
   body.tab-follow .sl-sort-wrap, body.tab-map .sl-sort-wrap, body.tab-quiz .sl-sort-wrap, body.tab-ach .sl-sort-wrap, body.tab-cam .sl-sort-wrap { display: none; }
   body.sl-sorted #grid .card::after { content: none !important; display: none !important; }
   /* 7. quick preview of a species */
@@ -16011,7 +16016,7 @@ window.SL_welcome = function (u, back) {
   .sl-nudge img { width: 44px; height: 44px; border-radius: 11px; flex: none; }
   .sl-nudge .nd-t { flex: 1; min-width: 0; font-size: 13px; line-height: 1.35; }
   .sl-nudge .nd-t b { display: block; font-family: 'Fraunces', serif; font-size: 16px; }
-  .sl-nudge .nd-go { flex: none; font: 600 13px 'Inter', sans-serif; padding: 8px 14px; border-radius: 999px; border: 0; background: #a9e08e; color: #0d2a17; cursor: pointer; }
+  .sl-nudge .nd-go { flex: none; font: 600 13px 'Inter', sans-serif; padding: 8px 14px; border-radius: 999px; border: 0; background: #3f8a3a; color: #fff; cursor: pointer; }
   .sl-nudge .nd-go:hover { filter: brightness(1.05); }
   .sl-nudge .nd-x { position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border-radius: 50%; border: 0; background: transparent; color: inherit; font-size: 19px; line-height: 1; cursor: pointer; opacity: .8; }
   .sl-nudge .nd-x:hover { opacity: 1; background: rgba(255,255,255,0.1); }
@@ -16043,10 +16048,31 @@ window.SL_welcome = function (u, back) {
     document.body.classList.toggle("sl-sorted", window.SL_SORT() !== "default");
     if (window.SL_SORT() !== "default") window.SL_SET_SORT(window.SL_SORT());
     sel.addEventListener("change", function () { window.SL_SET_SORT(sel.value); });
+    // the system's own list (blue highlight, white panel) swapped for one in SnakeList's green
+    sel.hidden = true;
+    var sbtn = document.createElement("button"); sbtn.type = "button"; sbtn.className = "sl-sort"; sbtn.setAttribute("aria-haspopup", "listbox"); sbtn.setAttribute("aria-expanded", "false");
+    var smenu = document.createElement("ul"); smenu.className = "sl-sort-menu"; smenu.setAttribute("role", "listbox"); smenu.hidden = true; smenu.tabIndex = -1;
+    smenu.innerHTML = OPTS.map(function (o) { return '<li role="option" data-v="' + o[0] + '">' + o[1] + "</li>"; }).join("");
+    wrap.appendChild(sbtn); wrap.appendChild(smenu); wrap.style.position = "relative";
+    function sLabel() { var o = OPTS.filter(function (x) { return x[0] === sel.value; })[0] || OPTS[0]; sbtn.textContent = o[1];
+      [].slice.call(smenu.children).forEach(function (li) { li.setAttribute("aria-selected", String(li.dataset.v === sel.value)); }); }
+    function sOpen(on) { smenu.hidden = !on; sbtn.setAttribute("aria-expanded", String(on)); if (on) { var c = smenu.querySelector('[aria-selected="true"]') || smenu.firstChild; [].slice.call(smenu.children).forEach(function (li) { li.classList.toggle("hi", li === c); }); smenu.focus(); } }
+    function sPick(v) { sel.value = v; sel.dispatchEvent(new Event("change")); sLabel(); sOpen(false); sbtn.focus(); }
+    sbtn.addEventListener("click", function (e) { e.preventDefault(); sOpen(smenu.hidden); });
+    smenu.addEventListener("click", function (e) { var li = e.target.closest("li"); if (li) sPick(li.dataset.v); });
+    smenu.addEventListener("mousemove", function (e) { var li = e.target.closest("li"); if (li) [].slice.call(smenu.children).forEach(function (x) { x.classList.toggle("hi", x === li); }); });
+    smenu.addEventListener("keydown", function (e) {
+      var items = [].slice.call(smenu.children), i = items.findIndex(function (x) { return x.classList.contains("hi"); });
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); i = (i + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length; items.forEach(function (x, j) { x.classList.toggle("hi", j === i); }); }
+      else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (items[i]) sPick(items[i].dataset.v); }
+      else if (e.key === "Escape" || e.key === "Tab") { sOpen(false); sbtn.focus(); }
+    });
+    document.addEventListener("click", function (e) { if (!smenu.hidden && !wrap.contains(e.target)) sOpen(false); });
+    sLabel();
   }
 
-  // ---- Advanced filters: Other filters and the rarer Characteristics live behind one toggle ----
-  if (fsecs) {
+  // ---- Advanced filters: switched off - all six sections show, as before ----
+  if (false) {
     var other = fsecs.querySelector('.fsec[data-sec="other"]'), traits = fsecs.querySelector('.fsec[data-sec="traits"]');
     var adv = document.createElement("button"); adv.type = "button"; adv.className = "fsec-adv"; adv.id = "fsec-adv"; adv.setAttribute("aria-expanded", "false");
     adv.innerHTML = '<span class="fa-t">Advanced filters</span><span class="fa-s">Popular, Common, Rare, Harmful, Constrictor and more</span><span class="fa-n" hidden></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
@@ -16172,7 +16198,7 @@ window.SL_welcome = function (u, back) {
   // runs before the card's own "open the species page" handler; buttons, tags and the photo keep theirs
   document.addEventListener("click", function (e) {
     if (!grid || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
-    if (document.body.classList.contains("sl-editing") || lsGet("sl-preview-off") === "1") return;
+    return; // the quick preview is switched off - a card opens its species page, as before
     var card = e.target.closest && e.target.closest("#grid .card");
     if (!card || e.target.closest("button, a, input, textarea, select, label, .tag, [role=button], .photo-btn, .wish-row, .card-bottom, .follow-btn")) return;
     var r = card.getBoundingClientRect(), P = window.SL_PHOTOS;
