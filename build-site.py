@@ -41,7 +41,7 @@ head = f"""<!doctype html>
 <script>
   // installable app: the offline helper, and the browser's install prompt kept for the Install button
   window.addEventListener('beforeinstallprompt', function (e) {{ e.preventDefault(); window.SL_INSTALL_EVT = e; }});
-  if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEventListener('load', function () {{ var had = !!navigator.serviceWorker.controller; navigator.serviceWorker.addEventListener('controllerchange', function () {{ if (had && !window.SL_SW_RELOADED) {{ window.SL_SW_RELOADED = 1; location.reload(); }} }}); navigator.serviceWorker.register('sw.js', {{ updateViaCache: 'none' }}).then(function (r) {{ r.update(); }}).catch(function () {{}}); }});
+  if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEventListener('load', function () {{ var had = !!navigator.serviceWorker.controller; navigator.serviceWorker.addEventListener('controllerchange', function () {{ if (had && !window.SL_SW_RELOADED && !window.SL_TOUCHED) {{ window.SL_SW_RELOADED = 1; location.reload(); }} }}); navigator.serviceWorker.register('sw.js', {{ updateViaCache: 'none' }}).then(function (r) {{ r.update(); }}).catch(function () {{}}); }});
 </script>
 <!-- Google tag (gtag.js) - visitor statistics for snakelist.com -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PY2LJV389K"></script>
