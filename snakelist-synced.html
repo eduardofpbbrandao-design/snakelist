@@ -13982,7 +13982,8 @@
     var ofTxt = function (k, tot) { return why ? " &middot; " + (k ? k.toLocaleString() : "none") + " of " + tot.toLocaleString() + " species &middot; " + esc(why) : " " + k.toLocaleString() + " species"; };
     var stAt = !lastRange.single && window.SL_MAP_STATE_AT && window.SL_MAP_STATE_AT(x, y);
     if (stAt && stAt.cc === cc) // "See states" is on: the state under the pointer, as its colour counts it
-      tip.innerHTML = "<b>" + esc(stAt.name) + "</b>" + esc(", " + name) + (stAt.all ? ofTxt(habSet() ? stAt.n : stAt.all, stAt.all) : " &middot; no species recorded here");
+      tip.innerHTML = "<b>" + esc(stAt.name) + "</b>" + esc(", " + name) + (!stAt.all ? " &middot; no species recorded here" : habSet() ? ofTxt(stAt.n, stAt.all)
+        : " &middot; " + stAt.all.toLocaleString() + " species" + (window.SL_MAP_SCOPE && window.SL_MAP_SCOPE.ids ? " of your search" : ""));
     else tip.innerHTML = "<b>" + esc(name) + "</b>" + (!lastRange.hasData[cc] ? " no snakes on record" :
       lastRange.single ? " " + (n ? "lives here" + pct : "doesn't live here") : ofTxt(n, all));
     tip.hidden = false;
