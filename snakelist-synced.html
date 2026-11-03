@@ -13103,6 +13103,8 @@
   .hm-row input, .hm-row select { width: 100%; box-sizing: border-box; padding: 7px 9px; border-radius: 8px;
     border: 1px solid rgba(169,224,142,0.3); background: rgba(0,0,0,0.2); color: inherit; font: inherit; }
   .hm-row select option { color: #f0f8ec; background: #163d24; }
+  /* the Map tab is as wide as the rest of the page: 1280px on wide screens, 900px below 960px */
+  @media (min-width: 960px) { .heat-panel { max-width: 1280px; } }
   /* the Habitats panel: a green list of habitats, grouped by section */
   .hab-list { max-height: 176px; overflow-y: auto; margin: 0 -4px 8px; padding: 0 4px 2px; overscroll-behavior: contain;
     scrollbar-width: thin; scrollbar-color: rgba(169,224,142,0.45) transparent; }
@@ -13833,7 +13835,7 @@
   }
   function habLegendHTML() {
     return '<div class="hab-bar">' + HAB_GREEN.map(function (c) { return '<span style="background:' + c + '"></span>'; }).join("") + '</div>' +
-      '<div class="hm-ends"><span>A few</span><span>of its snakes live there</span><span>Many</span></div>';
+      '<div class="hm-ends"><span>Few</span><span>of its snakes</span><span>Many</span></div>';
   }
   // after a species search, the map moves to show its whole range
   function fitRange() {
