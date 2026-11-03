@@ -239,6 +239,49 @@ def world_map(out):
             if (max(xs) - min(xs)) * (max(ys) - min(ys)) > 0.05 or not lons: lons += xs; lats += ys
         return ("".join(ds), (min(lons), max(lons), min(lats), max(lats))) if ds else None
 
+    prov_cache = {}
+    def provinces(cc):
+        """Every state/province (or, for Indonesia, island) of one country, for the "See states"
+        button: {name: {"d": path data, "also": group names it also answers to (ID:Nusa Tenggara),
+        "box": (w, e, s, n) of its sizeable pieces}}. US states are keyed by code, like the cards'
+        data-states; elsewhere by the names the cards' data-provinces use (the app's SL_GEO.cp
+        first, then the Natural Earth admin-1 shapes in SL_GEO.wp), simplified like world.svg."""
+        if cc in prov_cache: return prov_cache[cc]
+        items = []
+        if cc == "us":
+            items = [(st["code"], st["rings"], []) for st in G["us"]]
+        elif isinstance(G["cp"].get(cc), list):
+            items = [(st["name"], st["rings"], st.get("also") or []) for st in G["cp"][cc]]
+        elif isinstance(G["wp"].get(cc), list) and len(G["wp"][cc]) == 2:
+            k = G["wp"][cc][0]
+            for nm, rr in G["wp"][cc][1]:
+                rings = []
+                for flat in rr:
+                    x = y = 0; ring = []
+                    for i in range(0, len(flat) - 1, 2):
+                        x += flat[i]; y += flat[i + 1]; ring.append([x / k, y / k])
+                    rings.append(ring)
+                items.append((nm, rings, []))  # "Toamasina (3)": its own shape, named so in data-provinces too
+        out = {}
+        for nm, rings, also in items:
+            e = out.setdefault(nm, {"d": "", "also": set(), "box": None, "ll": []})
+            e["also"].update(also)
+            for ring in rings:
+                if len(ring) < 3: continue
+                pts = ring_xy([p[0] for p in ring], [p[1] for p in ring])
+                d = path_d(simplify(pts)) or path_d(pts)
+                if d: e["d"] += d
+                xs = [p[0] for p in ring]; ys = [p[1] for p in ring]
+                if (max(xs) - min(xs)) * (max(ys) - min(ys)) > 0.05 or not e["ll"]: e["ll"].append((min(xs), max(xs), min(ys), max(ys)))
+        for nm in list(out):
+            e = out[nm]
+            if not e["d"]: del out[nm]; continue
+            L = e.pop("ll"); e["box"] = (min(b[0] for b in L), max(b[1] for b in L), min(b[2] for b in L), max(b[3] for b in L))
+        prov_cache[cc] = out
+        return out
+    region.provinces = provinces
+    region.us_names = {st["code"]: st["name"] for st in G["us"]}
+
     return set(paths), boxes, region
 
 
@@ -271,6 +314,26 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if n <= 2: return "Rare - " + ("recorded in only %d place%s on iNaturalist" % (n, "s" if n > 1 else "") if n else "no confirmed iNaturalist sightings")
         return "Recorded in %d places on iNaturalist" % n
 
+    def view_of(bx):
+        """the map's starting view (an SVG viewBox) around some (_, w, e, s, n) boxes in degrees"""
+        if not bx: return None
+        w, e = min(b[1] for b in bx), max(b[2] for b in bx); s, nn = min(b[3] for b in bx), max(b[4] for b in bx)
+        padx, pady = max(8, (e - w) * 0.25), max(6, (nn - s) * 0.25)
+        w, e, s, nn = max(-180, w - padx), min(180, e + padx), max(-60, s - pady), min(85, nn + pady)
+        if (e - w) < (nn - s) * 1.6: mid = (w + e) / 2; half = (nn - s) * 0.8; w, e = max(-180, mid - half), min(180, mid + half)
+        return "%.0f %.0f %.0f %.0f" % ((w + 180) * 4, (90 - nn) * 4, (e - w) * 4, (nn - s) * 4)
+    CLIP = 10  # long lists show this many, then a "See all" button (the rest stay in the HTML)
+    def clipped(n): return n > CLIP + 2  # never hide just one or two
+    def xcls(i, n): return ' class="sp-x"' if i >= CLIP and clipped(n) else ""
+    def see_all(what, n):
+        return ('<button type="button" class="sp-all" aria-expanded="false" data-all="See all %s (%d)">See all %s (%d)</button>' % (what, n, what, n)) if clipped(n) else ""
+    code_name = {v: k for k, v in iso.items()}
+    prov_used = set()
+    HARM = json.loads(re.search(r'<script type="application/json" id="harm-data">(.*?)</script>', APP[0], re.S).group(1))["harmful"]
+    def harm(c):
+        """the app's #harm-data: dangerous to people, harmless, or not documented (mild rear-fanged venom)"""
+        if (c["venom"] and c["family"] in HARM["venomousFamilies"]) or c["genus"] in HARM["genera"] or c["id"] in HARM["species"]: return "harmful"
+        return "harmless" if not c["venom"] else ""
     CONS = json.loads(re.search(r'<script type="application/json" id="constrictor-data">(.*?)</script>', APP[0], re.S).group(1))
     def constriction(c):
         if c["genus"] in CONS["constrictor"]["genera"] or c["family"] in CONS["constrictor"]["families"] or c["type"] in ("Boa", "Python"): return "yes"
@@ -290,7 +353,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         extra = []
         if c["extinct"]: extra.append(c["extinct"].replace(" - ", ": ", 1) + ".")
         if c["eater"]: extra.append("It is known to eat other snakes.")
-        if c["invasive"] or c["intro"]: extra.append("It has also been introduced outside its native range (%s), where it is invasive." % (c["invasive"] or ", ".join(c["intro"])))
+        if c["invasive"] or c["intro"]: extra.append("It is also invasive outside its native range (%s)." % (c["invasive"] or ", ".join(c["intro"])))
         if c["habitats"]: extra.append("It lives in habitats such as %s." % plist([h.lower() for h in c["habitats"]], 4))
         rt = rarity_txt(c)
         if rt: extra.append(rt.split(" - ")[0] + ": " + rt.split(" - ", 1)[1] + "." if " - " in rt else rt + ".")
@@ -307,17 +370,15 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         def place(n):  # a country name, linking to the app's map on that country
             return '<a href="../?map=%s">%s</a>' % (esc(quote(n)), esc(n)) if n in iso else esc(n)
         rows = []
-        for n in c["countries"]:
-            cc = iso.get(n, "")
-            sub = provs.get(cc, [])
-            rows.append("<li><b>%s</b></li>" % place(n))  # countries only - the states are on the map
+        for i, n in enumerate(c["countries"]):  # countries only - the states are on the map
+            rows.append("<li%s><b>%s</b></li>" % (xcls(i, len(c["countries"])), place(n)))
         codes = [iso[n] for n in c["countries"] if n in iso]
         # introduced / invasive places: their own colour on the map (unless also native there)
         inv = invasive.get(c["id"]) or [{"name": a, "code": "", "note": ""} for a in c["intro"]]
         icodes, dots, ishapes, iboxes = [], [], [], []
         for x in inv:
             cc = x["code"] or iso.get(x["name"], "")
-            rows.append("<li><b>Introduced:</b> %s</li>" % place(x["name"]))
+            rows.append("<li><b>Invasive:</b> %s</li>" % place(x["name"]))
             rg = region(cc, x.get("states") or []) if cc and x.get("states") else None
             if rg:  # only the states/provinces it was brought to, not the whole country
                 ishapes.append(rg[0]); iboxes.append((0,) + rg[1])
@@ -331,13 +392,29 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             b = boxes.get(cc)
             if b and max(b[2] - b[1], b[4] - b[3]) < 1.2: dots.append(((b[1] + b[2]) / 2, (b[3] + b[4]) / 2, cls, max(b[2] - b[1], b[4] - b[3]) * 4))
         bx = [boxes[cc] for cc in codes + icodes if cc in boxes] + iboxes + [(0, d[0], d[0], d[1], d[1]) for d in dots]
-        view = None
-        if bx:
-            w, e = min(b[1] for b in bx), max(b[2] for b in bx); s, nn = min(b[3] for b in bx), max(b[4] for b in bx)
-            padx, pady = max(8, (e - w) * 0.25), max(6, (nn - s) * 0.25)
-            w, e, s, nn = max(-180, w - padx), min(180, e + padx), max(-60, s - pady), min(85, nn + pady)
-            if (e - w) < (nn - s) * 1.6: mid = (w + e) / 2; half = (nn - s) * 0.8; w, e = max(-180, mid - half), min(180, mid + half)
-            view = "%.0f %.0f %.0f %.0f" % ((w + 180) * 4, (90 - nn) * 4, (e - w) * 4, (nn - s) * 4)
+        view = view_of(bx)
+        # "See states": its native states/provinces/islands, drawn from species/prov/<cc>.json when
+        # the button is pressed (green; orange where the country is only an invasive one for it),
+        # and listed by country under the map
+        st_data, st_rows, st_boxes, st_whole = [], [], [], set()
+        st_ccs = [iso[n] for n in c["countries"] if n in iso and provs.get(iso[n])] + [cc for cc in provs if cc not in codes]
+        for cc in dict.fromkeys(st_ccs):
+            names = list(dict.fromkeys(provs[cc])); shapes = region.provinces(cc)
+            want = set(names); hit = [nm for nm, e in shapes.items() if nm in want or e["also"] & want]
+            cls = "in" if cc in icodes and cc not in codes else "on"
+            if hit:
+                st_data.append([cc, cls, sorted(hit)]); prov_used.add(cc); st_whole.add(cc)
+                st_boxes += [(0,) + shapes[nm]["box"] for nm in hit]
+            cname = next((n for n in c["countries"] if iso.get(n) == cc), None) or code_name.get(cc, cc.upper())
+            shown = sorted({region.us_names.get(n, n) if cc == "us" else re.sub(r" \(\d+\)$", "", n) for n in names}, key=lambda t: slugify(t))
+            st_rows.append("<li><b>%s%s:</b> %s</li>" % (esc(cname), " (islands)" if cc == "id" else " (invasive)" if cls == "in" else "", esc(", ".join(shown))))
+        for x in inv:  # the states it was brought to (already drawn in orange, see ishapes)
+            cc = x["code"] or iso.get(x["name"], "")
+            if x.get("states") and cc not in provs:
+                st_rows.append("<li><b>%s (invasive):</b> %s</li>" % (esc(x["name"]), esc(", ".join(region.us_names.get(n, n) if cc == "us" else n for n in x["states"]))))
+        sview = view
+        if st_data:
+            sview = view_of([boxes[cc] for cc in codes + icodes if cc in boxes and cc not in st_whole] + st_boxes + iboxes + [(0, d[0], d[0], d[1], d[1]) for d in dots]) or view
         # what the app's filter chips say about it, each a link to that filter
         tags = []
         tags.append(("Popular", "f=chip-popular") if c["popular"] else ("Uncommon", "f=chip-uncommon"))
@@ -345,6 +422,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if rt.startswith("Common"): tags.append(("Common", "f=chip-common"))
         if rt.startswith("Rare"): tags.append(("Rare", "f=chip-rare"))
         tags.append(("Venomous", "f=chip-venom") if c["venom"] else ("Non-venomous", "f=chip-nonvenom"))
+        hm = harm(c)
+        if hm: tags.append((hm.capitalize(), "f=chip-" + hm))
         cons = constriction(c)  # documented for its family or genus, same list as the app (#constrictor-data)
         if cons == "yes": tags.append(("Constrictor", "f=chip-constrictor"))
         elif cons == "no": tags.append(("Non-constrictor", "f=chip-nonconstrictor"))
@@ -353,10 +432,11 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if c["extinct"] or c["fossil"]: tags.append(("Fossil" if c["fossil"] else c["extinct"].split(" - ")[0].split(" since")[0], "f=chip-extinct"))
         if c["type"] and c["type"] != "Other": tags.append((c["type"], "type=" + quote(c["type"])))
         if c["family"]: tags.append((c["family"], "fam=" + quote(c["family"])))
-        rel = [x for x in by_genus.get(c["genus"], []) if x is not c][:12]
+        rel = [x for x in by_genus.get(c["genus"], []) if x is not c][:40]
         if len(rel) < 6: rel += [x for x in by_family.get(c["family"], []) if x is not c and x not in rel][:12 - len(rel)]
         facts = []
         facts.append(("Venom", "Venomous" if c["venom"] else "Not venomous"))
+        facts.append(("To people", hm.capitalize() if hm else "Not documented"))
         facts.append(("Constrictor", {"yes": "Constrictor", "no": "Non-constrictor"}.get(cons, "Not documented")))
         facts.append(("Type", c["type"] or "Snake"))
         if c["family"]: facts.append(("Family", c["family"]))
@@ -388,21 +468,31 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             title=esc(title), desc=esc(desc), url=url, img=esc(img), ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"),
             h1=esc(nm), sub=esc(sci) if not c["is_sci"] else "", photo=ph, about=esc(about),
             facts="".join("<div><dt>%s</dt><dd>%s</dd></div>" % (esc(k), ('<a href="%s/%s">%s</a>' % (k.lower(), slugify(v), esc(v))) if k in ("Family", "Genus") and v else esc(v)) for k, v in facts),
-            habitats="".join('<li><a href="../?hab=%s">%s</a></li>' % (esc(quote(h)), esc(h)) for h in c["habitats"][:24]) or "<li>Not worked out yet</li>",
-            where="".join(rows) or "<li>No range recorded yet.</li>",
+            habitats="".join('<li%s><a href="../?hab=%s">%s</a></li>' % (xcls(i, len(c["habitats"])), esc(quote(h)), esc(h)) for i, h in enumerate(c["habitats"])) or "<li>Not worked out yet</li>",
+            hab_all=see_all("habitats", len(c["habitats"])),
+            where="".join(rows) or "<li>No range recorded yet.</li>", where_all=see_all("countries", len(c["countries"])),
+            st=esc(json.dumps(st_data, ensure_ascii=False, separators=(",", ":"))) if st_data else "", sview=esc(sview or "0 0 1440 720"),
+            stbtn='<button type="button" class="sp-all sp-stbtn" aria-pressed="false">See states</button>' if st_rows else "",
+            states=('<div class="sp-states"><h3>States, provinces and islands</h3><ul class="sp-where">%s</ul></div>' % "".join(st_rows)) if st_rows else "",
             tags="".join('<li><a href="../?%s">%s</a></li>' % (esc(q), esc(t)) for t, q in tags),
             codes=esc(" ".join(codes)), intro=esc(" ".join(icodes)),
             ishapes="".join('<path class="in" d="%s"/>' % d for d in ishapes),
             dots=esc(" ".join("%.1f,%.1f,%s,%.2g" % ((lo + 180) * 4, (90 - la) * 4, k, sz) for lo, la, k, sz in dots)),
             legend=('<p class="sp-legend"><span><i class="on"></i>Native range</span>%s</p>' % (
-                '<span><i class="in"></i>Introduced / invasive</span>' if icodes or ishapes or any(d[2] == "in" for d in dots) else "")) if codes or icodes or ishapes or dots else "", view=esc(view or "0 0 1440 720"), sci_attr=esc(sci), id=c["id"],
+                '<span><i class="in"></i>Invasive</span>' if icodes or ishapes or any(d[2] == "in" for d in dots) else "")) if codes or icodes or ishapes or dots else "", view=esc(view or "0 0 1440 720"), sci_attr=esc(sci), id=c["id"],
             nplaces=len(c["countries"]),
-            related="".join('<li><a href="%s">%s</a> <i>%s</i></li>' % (page_name(x), esc(x["name"]), esc(x["sci"] if not x["is_sci"] else "")) for x in rel),
+            related="".join('<li%s><a href="%s">%s</a> <i>%s</i></li>' % (xcls(i, len(rel)), page_name(x), esc(x["name"]), esc(x["sci"] if not x["is_sci"] else "")) for i, x in enumerate(rel)),
+            rel_all=see_all("related snakes", len(rel)),
             author=AUTHOR, venom_cls="v" if c["venom"] else "nv", mapnote="" if codes or icodes or ishapes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
         open("%s/%s.html" % (OUT, page_name(c)), "w", encoding="utf-8").write(page)
         if page_name(c) != c["id"]:  # the old address (and the app's ?sp ids) still lead here
             open("%s/%s.html" % (OUT, c["id"]), "w", encoding="utf-8").write(REDIRECT.format(name=esc(c["name"]), url=url, page=page_name(c)))
         links.append(c)
+    # the "See states" shapes: one small file per country, fetched only when the button is pressed
+    os.makedirs(OUT + "/prov", exist_ok=True)
+    for cc in sorted(prov_used):
+        with open("%s/prov/%s.json" % (OUT, cc), "w", encoding="utf-8") as fh:
+            json.dump({nm: e["d"] for nm, e in region.provinces(cc).items()}, fh, ensure_ascii=False, separators=(",", ":"))
     # the A-Z of every species, by family - one crawlable page linking them all
     fams = sorted(by_family.items(), key=lambda kv: (kv[0] == "", kv[0]))
     cnt = {}
@@ -482,7 +572,7 @@ PAGE = """<!doctype html>
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#1F5A3A">
 <link rel="icon" href="../favicon.ico" sizes="any"><link rel="manifest" href="../app/snakelist.webmanifest">
-<link rel="stylesheet" href="sp.css">
+<link rel="stylesheet" href="sp.css"><script>document.documentElement.className+=" js"</script>
 <script type="application/ld+json">{ld}</script>
 </head><body>
 <header class="sp-top"><a class="sp-logo" href="../">SnakeList</a><nav><a href="./">All species</a><a href="../">Open the app</a></nav></header>
@@ -498,10 +588,10 @@ PAGE = """<!doctype html>
 <p class="sp-cta"><a class="sp-btn" href="../?sp={id}">Open in SnakeList</a></p>
 <section><h2>About</h2><p>{about}</p><div id="sp-wiki"></div></section>
 <section><h2>Where it lives</h2>
-<div class="sp-map" data-codes="{codes}" data-intro="{intro}" data-dots="{dots}" data-view="{view}" aria-label="Map of the {nplaces} countries where {h1} lives"></div><template class="sp-ishapes">{ishapes}</template>{legend}{mapnote}
-<ul class="sp-where">{where}</ul></section>
-<section><h2>Habitats</h2><p class="sp-note">Estimated from where this snake is recorded and what kind of snake it is - not a confirmed habitat survey.</p><ul class="sp-pills">{habitats}</ul></section>
-<section><h2>Related snakes</h2><ul class="sp-rel">{related}</ul></section>
+<div class="sp-map" data-codes="{codes}" data-intro="{intro}" data-dots="{dots}" data-view="{view}" data-st="{st}" data-sview="{sview}" aria-label="Map of the {nplaces} countries where {h1} lives"></div><template class="sp-ishapes">{ishapes}</template><div class="sp-mapbar">{legend}{stbtn}</div>{mapnote}{states}
+<ul class="sp-where sp-clip">{where}</ul>{where_all}</section>
+<section><h2>Habitats</h2><p class="sp-note">Estimated from where this snake is recorded and what kind of snake it is - not a confirmed habitat survey.</p><ul class="sp-pills sp-clip">{habitats}</ul>{hab_all}</section>
+<section><h2>Related snakes</h2><ul class="sp-rel sp-clip">{related}</ul>{rel_all}</section>
 <p class="sp-safe"><b>Stay safe:</b> a photo or a web page can never tell you for certain that a snake is harmless. Keep your distance, never handle a wild snake, and get medical help straight away after any bite.</p>
 </article></main>
 <footer class="sp-foot">SnakeList &middot; made by <a href="../about.html"><b>{author}</b></a> &middot; <a href="../about.html">About me</a> &middot; <a href="../privacy.html">Privacy</a> &middot; <a href="../terms.html">Terms</a></footer>
@@ -541,7 +631,11 @@ INDEX = """<!doctype html>
 """
 
 CSS = """.sp-note{font-size:13px;color:var(--muted);margin:-4px 0 10px}.sp-more{font-size:14px;margin:10px 0 0}.sp-lead{font-size:18px;margin:10px 0 14px}
-.sp-safe{margin:22px 0 0;padding:12px 16px;border-radius:14px;border:1px solid var(--tagline);background:var(--tag);font-size:14px}
+.sp-safe{margin:24px 0 0;padding:18px 22px;border-radius:16px;border:2px solid var(--tagline);background:var(--tag);font-size:16.5px;line-height:1.55}
+.sp-all{font:500 12px Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:4px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;margin:8px 0 0;display:none}
+.js .sp-all{display:inline-block}.js .sp-clip:not(.sp-open)>.sp-x{display:none}
+.sp-mapbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px}.sp-mapbar .sp-legend,.sp-mapbar .sp-all{margin-top:8px}
+.sp-states{margin-top:12px}.js .sp-states:not(.sp-open){display:none}.sp-states h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-states .sp-where{margin:0;columns:1}
 .sp-az .v{font-size:11px;font-weight:700;color:#b5452a;margin-left:4px}@media (prefers-color-scheme:dark){.sp-az .v{color:#f0a04b}}
 .sp-hubs{columns:3 200px;column-gap:24px;padding:0;list-style:none}.sp-hubs li{break-inside:avoid;margin:2px 0}
 :root{--bg:#f1f6ee;--card:#fbfdf9;--text:#183020;--muted:#55705b;--line:#d5e4cf;--g:#3f8a3a;--land:#d7dccb;--on:#3f8a3a;--in:#e07a1f;--sea:#e3ecef;--tag:#e3f0dc;--tagline:#a9cf9c}
@@ -560,7 +654,7 @@ h1{font:700 clamp(30px,5vw,44px)/1.1 Georgia,serif;margin:0}.sp-sci{font-style:i
 .sp-btn{display:inline-block;background:var(--g);color:#fff;text-decoration:none;font-weight:600;padding:11px 18px;border-radius:12px}
 section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 20px;margin-top:18px}h2{font:700 22px Georgia,serif;margin:0 0 8px}h2 small{font:500 13px Inter,sans-serif;color:var(--muted)}
 .sp-map{position:relative;border-radius:12px;overflow:hidden;background:var(--sea);aspect-ratio:2/1;max-height:460px;width:100%}
-.sp-map svg{width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.sp-map svg.drag{cursor:grabbing}
+.sp-map svg{width:100%;height:100%;display:block;user-select:none;-webkit-user-select:none}
 .sp-map path{fill:var(--land);stroke:var(--sea);stroke-width:.6;vector-effect:non-scaling-stroke;stroke-linejoin:round}.sp-map path.on{fill:var(--on)}.sp-map path.in{fill:var(--in)}
 .sp-map circle{stroke:var(--card);stroke-width:1.2;vector-effect:non-scaling-stroke}.sp-map circle.on{fill:var(--on)}.sp-map circle.in{fill:var(--in)}
 .sp-zoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px}
@@ -585,16 +679,26 @@ JS = """(function(){
 var m=document.querySelector('.sp-map');
 if(m){fetch('world.svg').then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){m.innerHTML=t;var s=m.querySelector('svg'),NS='http://www.w3.org/2000/svg';
 s.removeAttribute('width');s.removeAttribute('height');s.setAttribute('preserveAspectRatio','xMidYMid meet');s.setAttribute('aria-hidden','true');
-[['intro','in'],['codes','on']].forEach(function(a){(m.dataset[a[0]]||'').split(' ').forEach(function(c){var p=c&&s.getElementById('c-'+c);if(p){p.setAttribute('class',a[1]);s.appendChild(p)}})});
+[['intro','in'],['codes','on']].forEach(function(a){(m.dataset[a[0]]||'').split(' ').forEach(function(c){var p=c&&s.getElementById('c-'+c);if(p){p.setAttribute('class',a[1]);s.appendChild(p)}})});var mk=document.createComment('states');s.appendChild(mk);
 var tp=document.querySelector('template.sp-ishapes');if(tp&&tp.innerHTML.trim()){var g=new DOMParser().parseFromString('<svg xmlns="'+NS+'">'+tp.innerHTML+'</svg>','image/svg+xml').documentElement;[].slice.call(g.childNodes).forEach(function(n){s.appendChild(document.importNode(n,true))})}
 var dots=[];(m.dataset.dots||'').split(' ').forEach(function(d){var q=d.split(',');if(q.length<3)return;var c=document.createElementNS(NS,'circle');c.setAttribute('cx',q[0]);c.setAttribute('cy',q[1]);c.setAttribute('class',q[2]);c._s=+q[3]||0;s.appendChild(c);dots.push(c)});
-var W=1440,HH=720,f=(m.dataset.view||'0 0 1440 720').split(' ').map(Number),v={x:0,y:0,w:W,h:HH},minW=Math.max(80,f[2]),maxW=W,A=.5;
+var W=1440,HH=720,V=function(a){return(a||'0 0 1440 720').split(' ').map(Number)},f=V(m.dataset.view),v={x:0,y:0,w:W,h:HH},minW=Math.max(80,f[2]),maxW=W,A=.5;
 function asp(){var w=m.clientWidth,h=m.clientHeight;A=w&&h?h/w:.5}
 function draw(){asp();v.w=Math.min(maxW,Math.max(minW,v.w));v.h=v.w*A;
 if(v.h>HH&&v.w>=maxW){v.x=0;v.y=(HH-v.h)/2}else{v.x=Math.min(W-v.w,Math.max(0,v.x));v.y=v.h>=HH?(HH-v.h)/2:Math.min(HH-v.h,Math.max(0,v.y))}
 s.setAttribute('viewBox',v.x+' '+v.y+' '+v.w+' '+v.h);var k=v.w/Math.max(1,m.clientWidth);dots.forEach(function(c){c.setAttribute('r',(4*k).toFixed(3));c.style.display=c._s/k>12?'none':''})}
 function fit(){asp();var w=f[2],h=f[3],cx=f[0]+w/2,cy=f[1]+h/2;if(h>w*A)w=h/A;w=Math.min(maxW,Math.max(minW,w));v.w=w;v.h=w*A;v.x=cx-w/2;v.y=cy-v.h/2;draw()}
-var rw=m.clientWidth;window.addEventListener('resize',function(){if(m.clientWidth!==rw){rw=m.clientWidth;fit()}});fit()}).catch(function(){})}
+var rw=m.clientWidth;window.addEventListener('resize',function(){if(m.clientWidth!==rw){rw=m.clientWidth;fit()}});fit();
+var sb=document.querySelector('.sp-stbtn'),sl=document.querySelector('.sp-states'),sg=null,off=[],busy=0,st=[];try{st=JSON.parse(m.dataset.st||'[]')}catch(e){}
+if(sb)sb.addEventListener('click',function(){if(busy)return;var on=!sg;
+if(!on){sg.remove();sg=null;off.forEach(function(p){p[0].setAttribute('class',p[1])});off=[];f=V(m.dataset.view);fit();done(0);return}
+busy=1;Promise.all(st.map(function(x){return fetch('prov/'+x[0]+'.json').then(function(r){return r.ok?r.json():{}}).catch(function(){return{}})})).then(function(J){busy=0;
+sg=document.createElementNS(NS,'g');st.forEach(function(x,i){var n=0;x[2].forEach(function(nm){var d=J[i][nm];if(!d)return;var p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('class',x[1]);sg.appendChild(p);n++});
+var c=n&&s.getElementById('c-'+x[0]);if(c&&c.getAttribute('class')){off.push([c,c.getAttribute('class')]);c.removeAttribute('class')}});
+s.insertBefore(sg,mk.nextSibling);f=V(m.dataset.sview);fit();done(1)})});
+function done(o){sb.textContent=o?'Hide states':'See states';sb.setAttribute('aria-pressed',o?'true':'false');if(sl)sl.classList.toggle('sp-open',!!o)}
+}).catch(function(){})}
+[].forEach.call(document.querySelectorAll('.sp-all[data-all]'),function(b){b.addEventListener('click',function(){var l=b.previousElementSibling,o=!l.classList.contains('sp-open');l.classList.toggle('sp-open',o);b.textContent=o?'Show less':b.dataset.all;b.setAttribute('aria-expanded',o?'true':'false')})});
 var im=document.querySelector('.sp-photo img');
 if(im){im.style.cursor='zoom-in';im.addEventListener('click',function(){var o=document.createElement('div');o.className='sp-lb';o.setAttribute('role','dialog');
 var big=new Image();big.alt=im.alt;big.src=im.src.replace('/medium.','/original.');big.onerror=function(){big.onerror=null;big.src=im.src.replace('/medium.','/large.')};
