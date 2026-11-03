@@ -24,7 +24,7 @@
     --border: #c8d6bc;
     --text: #24321f;
     --text-muted: #667261;
-    --gold: #3f7d43;
+    --gold: #3f7d43; --gold-fill: #3f7d43; --on-fill: var(--on-accent);
     --gold-soft: #8fbf8f;
     --moss: #4c7a4f;
     /* the Non-venomous chip keeps these in both themes */
@@ -68,6 +68,7 @@
     --rust: #eda183;
     --rust-soft: #5d2c20;
     --on-accent: #0e2f1e;
+    --gold-fill: #3f8a3a; --on-fill: #fff;
     --map-sea: #0c2519; --map-off: #2b6a4b; --map-line: #3f8b64; --map-on: #9be07c;
   }
   .auth-btn { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
@@ -286,7 +287,7 @@
   .field span { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
   .field input { font-family: 'Inter', sans-serif; font-size: 14.5px; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); outline: none; transition: border-color 0.15s ease; }
   .field input:focus { border-color: var(--gold-soft); }
-  .signin-primary { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; padding: 12px; border-radius: 10px; border: 1px solid var(--gold); background: var(--gold); color: var(--on-accent); cursor: pointer; transition: opacity 0.15s ease; }
+  .signin-primary { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; padding: 12px; border-radius: 10px; border: 1px solid var(--gold); background: var(--gold-fill); color: var(--on-fill); cursor: pointer; transition: opacity 0.15s ease; }
   .signin-primary:hover:not(:disabled) { opacity: 0.9; }
   .signin-primary:disabled { opacity: 0.5; cursor: default; }
   .signin-links { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: nowrap; }
@@ -378,7 +379,7 @@
   .chip:hover { border-color: var(--gold-soft); }
   /* A selected chip keeps its own colour but lifts toward light green across the
      diagonal. The stop runs past 100% so the pale end stays off the text. */
-  .chip.active { background: linear-gradient(135deg, var(--gold) 0%, var(--chip-lift) 145%); color: var(--on-accent); border-color: var(--gold); font-weight: 600; }
+  .chip.active { background: linear-gradient(135deg, var(--gold-fill) 0%, var(--chip-lift) 145%); color: var(--on-accent); border-color: var(--gold); font-weight: 600; }
   .chip.active.venom { background: linear-gradient(135deg, var(--rust) 0%, var(--chip-lift) 155%); border-color: var(--rust); color: #fff; }
   .chip.active.safe { background: linear-gradient(135deg, var(--safe-bg) 0%, var(--safe-lift) 140%);
     border-color: var(--safe-bg); color: var(--safe-ink); }
@@ -478,7 +479,7 @@
   .see-all-btn:hover { border-color: var(--gold-soft); color: var(--text); }
   /* open: the same green fill a picked chip gets, so it reads as "on" */
   .see-all-btn[aria-expanded="true"] {
-    background: linear-gradient(135deg, var(--gold) 0%, var(--chip-lift) 145%);
+    background: linear-gradient(135deg, var(--gold-fill) 0%, var(--chip-lift) 145%);
     border-color: var(--gold); color: var(--on-accent); font-weight: 600;
     box-shadow: 0 2px 8px rgba(36,50,31,0.18);
   }
@@ -686,7 +687,7 @@
   .pic-btn { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; padding: 8px 14px;
     border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
   .pic-btn:hover { border-color: var(--gold-soft); }
-  .pic-save { background: var(--gold); border-color: var(--gold); color: var(--on-accent); }
+  .pic-save { background: var(--gold-fill); border-color: var(--gold-fill); color: var(--on-fill); }
 
   /* ---- country map ---- */
   .map-sheet { position: fixed; inset: 0; z-index: 60; display: none; align-items: center; justify-content: center;
@@ -901,7 +902,7 @@
   .cp-row.cp-intro b::after { content: " · invasive here"; color: var(--rust); font-weight: 600; }
   .cp-states { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
   .cp-state-pill { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; padding: 1px 7px;
-    border-radius: 999px; border: 1px solid var(--gold); background: var(--gold); color: var(--on-accent); }
+    border-radius: 999px; border: 1px solid var(--gold); background: var(--gold-fill); color: var(--on-fill); }
   .cp-city-fact { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--text-muted); margin-top: 4px; min-height: 1em; }
 
   body.tab-map #grid, body.tab-ach #grid, body.tab-quiz #grid, body.tab-cam #grid { display: none; }
@@ -921,8 +922,8 @@
     font-variant-numeric: tabular-nums; white-space: nowrap; }
   .ach-note { font-family: 'Inter', sans-serif; font-size: 12px; line-height: 1.45; color: var(--text-muted); margin: 5px 0 9px; }
   .ach-bar { height: 5px; border-radius: 999px; background: var(--surface-hover); overflow: hidden; }
-  .ach-fill { height: 100%; border-radius: 999px; background: var(--gold); }
-  .ach.won .ach-fill { background: var(--gold); }
+  .ach-fill { height: 100%; border-radius: 999px; background: var(--gold-fill); }
+  .ach.won .ach-fill { background: var(--gold-fill); }
 
   /* the "achievement unlocked" toasts that pop up the instant a badge is earned, wherever
      you happen to be in the app - not just when looking at the Achievements tab */
@@ -933,8 +934,8 @@
     position: relative; overflow: hidden;
     animation-duration: 0.45s, 0.35s; animation-timing-function: cubic-bezier(0.2,0.9,0.3,1), ease-in;
     animation-delay: 0s, 3.5s; animation-fill-mode: backwards, forwards; }
-  .ach-toast-icon { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--gold);
-    color: var(--on-accent); display: flex; align-items: center; justify-content: center; }
+  .ach-toast-icon { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--gold-fill);
+    color: var(--on-fill); display: flex; align-items: center; justify-content: center; }
   .ach-toast b { display: block; font-family: 'Fraunces', serif; font-size: 12.5px; color: var(--text); }
   .ach-toast span span { display: block; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--text-muted); }
   /* one entrance per badge category, so "an animation about the achievement" means something -
@@ -991,7 +992,7 @@
   .globe-btns { display: inline-flex; flex-wrap: wrap; gap: 8px; vertical-align: middle; margin-bottom: 12px; }
   .all-countries { display: inline-flex; align-items: center; font-family: 'Inter', sans-serif;
     font-size: 12.5px; font-weight: 500; padding: 7px 13px; border-radius: 9px;
-    border: 1px solid var(--gold); background: var(--gold); color: var(--on-accent); cursor: pointer; }
+    border: 1px solid var(--gold); background: var(--gold-fill); color: var(--on-fill); cursor: pointer; }
   .all-countries:hover { opacity: 0.85; }
   .all-countries[hidden] { display: none; }
   .all-countries.map-undo { background: transparent; color: var(--text); border: 1px solid var(--map-on); }
@@ -1063,7 +1064,7 @@
   .quiz-suggest { display: flex; flex-wrap: wrap; gap: 6px; }
   .quiz-suggest[hidden] { display: none; }
   .quiz-suggest-opt { font-family: 'Inter', sans-serif; font-size: 13px; padding: 5px 12px; border-radius: 999px;
-    border: 1px solid var(--gold); background: linear-gradient(135deg, var(--gold) 0%, var(--chip-lift) 145%);
+    border: 1px solid var(--gold); background: linear-gradient(135deg, var(--gold-fill) 0%, var(--chip-lift) 145%);
     color: var(--on-accent); font-weight: 600; cursor: pointer; }
   .quiz-suggest-opt:first-child { box-shadow: 0 2px 8px rgba(36,50,31,0.2); }
   .quiz-suggest-opt + .quiz-suggest-opt { background: var(--surface); color: var(--text); border-color: var(--border); font-weight: 500; }
@@ -1074,7 +1075,7 @@
   .quiz-answer-field input:focus { border-color: var(--gold); }
   .quiz-actions { display: flex; gap: 10px; }
   .quiz-submit { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; padding: 11px 20px;
-    border-radius: 10px; border: 1px solid var(--gold); background: var(--gold); color: var(--on-accent); cursor: pointer; }
+    border-radius: 10px; border: 1px solid var(--gold); background: var(--gold-fill); color: var(--on-fill); cursor: pointer; }
   .quiz-submit:disabled { opacity: 0.5; cursor: default; }
   .quiz-result { margin-top: 16px; padding: 12px 14px; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 13.5px; }
   .quiz-lives-in { color: var(--map-on); font-weight: 600; }
@@ -1125,7 +1126,7 @@
   .map-credit[hidden] { display: none; }
   .map-list span[data-zoom] { cursor: pointer; transition: background .15s, border-color .15s; }
   .map-list span[data-zoom]:hover { border-color: var(--map-on); }
-  .map-list span.zoomed, .map-list span.state-pill.zoomed { background: var(--gold); border-color: var(--gold); color: var(--on-accent); box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--gold); }
+  .map-list span.zoomed, .map-list span.state-pill.zoomed { background: var(--gold-fill); border-color: var(--gold-fill); color: var(--on-fill); box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--gold); }
   .map-wrap svg path.xk { stroke-width: 0.35px; }
   .map-list span.inv { background: #e08a2c; border-color: #e08a2c; color: #fff; }
   .map-wrap svg .sheet-city { fill: #4f8a4a; stroke: #fff; stroke-width: 1.4px; vector-effect: non-scaling-stroke; transition: fill .4s; }
@@ -1136,22 +1137,22 @@
   .sheet-btn { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; padding: 6px 13px; border-radius: 999px;
     border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
   .sheet-btn:hover { border-color: var(--gold-soft); }
-  .sheet-btn[aria-pressed="true"] { background: linear-gradient(135deg, var(--gold) 0%, var(--chip-lift) 145%);
+  .sheet-btn[aria-pressed="true"] { background: linear-gradient(135deg, var(--gold-fill) 0%, var(--chip-lift) 145%);
     border-color: var(--gold); color: var(--on-accent); font-weight: 600; }
   .sheet-btn[hidden] { display: none; }
   .map-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
   .map-list span { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; padding: 3px 8px;
-    border-radius: 999px; border: 1px solid var(--gold); background: var(--gold); color: var(--on-accent); }
+    border-radius: 999px; border: 1px solid var(--gold); background: var(--gold-fill); color: var(--on-fill); }
 
   /* Mark Seen sits left of See countries now (order flipped from source order via flex
      order, not by touching the identical markup baked into every one of the 4,277 cards) */
   .map-btn { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; padding: 7px 12px;
-    border-radius: 8px; border: 1px solid var(--gold); background: var(--gold); color: var(--on-accent);
+    border-radius: 8px; border: 1px solid var(--gold); background: var(--gold-fill); color: var(--on-fill);
     cursor: pointer; margin-left: 8px; white-space: nowrap; transition: all 0.15s ease; order: 4; }
   .map-btn:hover { opacity: 0.85; }
   .seen-btn { display: flex; align-items: center; gap: 6px; justify-content: center; min-width: 106px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; transition: all 0.15s ease; margin-left: auto; order: 3; }
   .seen-btn:hover { border-color: var(--gold-soft); }
-  .card.done .seen-btn { background: var(--gold); border-color: var(--gold); color: var(--on-accent); }
+  .card.done .seen-btn { background: var(--gold-fill); border-color: var(--gold-fill); color: var(--on-fill); }
   .lbl-mark, .lbl-seen { display: flex; align-items: center; gap: 6px; }
   .lbl-seen { display: none; }
   /* the shared .ic use scale is tuned for the 10px tag icons; the Seen check is a 13px icon
@@ -1184,7 +1185,7 @@
     border-radius: 9px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; }
   .note-actions button:hover { border-color: var(--gold-soft); }
   .note-actions #note-clear { color: var(--text-muted); }
-  .note-actions .primary { background: var(--gold); border-color: var(--gold); color: var(--on-accent); margin-left: auto; }
+  .note-actions .primary { background: var(--gold-fill); border-color: var(--gold-fill); color: var(--on-fill); margin-left: auto; }
 
   /* positioned in document coordinates (left/top include scrollX/scrollY), not viewport-fixed -
      a fixed-position dim layer only ever covers one screenful, so on a page taller than the
@@ -1202,7 +1203,7 @@
   .tour-actions { display: flex; align-items: center; gap: 8px; }
   .tour-actions button { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; padding: 7px 12px;
     border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; }
-  .tour-actions .primary { background: var(--gold); border-color: var(--gold); color: var(--on-accent); margin-left: auto; }
+  .tour-actions .primary { background: var(--gold-fill); border-color: var(--gold-fill); color: var(--on-fill); margin-left: auto; }
   /* a plain CSS triangle (border trick), not a rotated square - sized to sit entirely inside
      the gap between the spotlight ring and the callout without touching either one */
   .tour-arrow { position: absolute; width: 0; height: 0; border: 8px solid transparent; }
@@ -1341,7 +1342,7 @@
 </style>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v3.78</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v3.79</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All 4,254 snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -10471,7 +10472,7 @@
 
     PINS = []; labelPin = null; citiesProv = null;
     if (worldCityMatch) {
-      lon0 = worldCityMatch.lon; lat0 = worldCityMatch.lat; fz = Math.max(fz, 5); fx = 0; fy = 0;
+      lon0 = worldCityMatch.lon; lat0 = worldCityMatch.lat; fz = Math.max(fz, 5); fx = -(lon0 / 360); fy = lat0 / 180;
       var wphi = worldCityMatch.lat * RAD, wlam = worldCityMatch.lon * RAD, wcp = Math.cos(wphi);
       PINS.push({
         area: worldCityMatch.name, lon: worldCityMatch.lon, lat: worldCityMatch.lat, species: [], fromSearch: true,
@@ -10526,7 +10527,7 @@
     // jump straight there and zoom in close, rather than leaving the user to find a single
     // small pin on the world map themselves after typing an exact city name
     if (cityMatch) {
-      lon0 = cityMatch.lng; lat0 = cityMatch.lat; fz = Math.max(fz, 7); fx = 0; fy = 0;
+      lon0 = cityMatch.lng; lat0 = cityMatch.lat; fz = Math.max(fz, 7); fx = -(lon0 / 360); fy = lat0 / 180; // centred on the city (0,0 was the Gulf of Guinea)
       fillArea(PINS[0]);
     }
     if (selected) fillPanel(selected);
@@ -10671,7 +10672,7 @@
     var d = Math.hypot(x, y, z) || 1;
     lat0 = Math.asin(z / d) / RAD;
     lon0 = Math.atan2(y / d, x / d) / RAD;
-    fx = -(lon0 / 360); fy = -(lat0 / 180);
+    fx = -(lon0 / 360); fy = lat0 / 180; // (+lat: the map's y runs north to south)
   }
 
   // ---- drawing --------------------------------------------------------------------------------
@@ -10785,7 +10786,7 @@
   // already filled in by borders(), so it just gets its name beside it - no ring around it.
   // Only when even the shape is under a couple of pixels does a small solid dot stand in for it.
   function drawTinySelected(to) {
-    if (!selected) return;
+    if (!selected || (statesMode && pickedProvince)) return; // a tapped state's own name shows instead
     var rows = POLY.filter(function (r) { return r.code === selected; });
     if (!rows.length) return;
     var w = 999, e = -999, s = 999, n = -999;
@@ -10793,17 +10794,62 @@
     var a = to(w, n), b = to(e, s);
     if (!a || !b) return;
     var pw = Math.abs(b[0] - a[0]), ph = Math.abs(b[1] - a[1]);
-    if (pw > 60 || ph > 60) return; // big enough to read by itself
-    var pt = to((w + e) / 2, (s + n) / 2); if (!pt) return;
+    var label = NAME[selected] || TITLE[selected] || "";
+    if (!label) return;
     var css = getComputedStyle(document.documentElement);
     var ink = css.getPropertyValue("--text").trim() || "#24321f", halo = css.getPropertyValue("--map-sea").trim() || "#dbe4ea";
     ctx.save();
-    if (pw < 2.5 && ph < 2.5) { ctx.beginPath(); ctx.arc(pt[0], pt[1], 2.5, 0, TAU); ctx.fillStyle = mapOnColor(); ctx.fill(); }
-    var label = NAME[selected] || TITLE[selected] || "";
-    var lx = Math.max(pt[0] + pw / 2, pt[0] + 2.5) + 6;
     ctx.font = "700 12px Inter, sans-serif"; ctx.textBaseline = "middle"; ctx.lineJoin = "round"; ctx.lineWidth = 4; ctx.strokeStyle = halo;
-    ctx.strokeText(label, lx, pt[1]); ctx.fillStyle = ink; ctx.fillText(label, lx, pt[1]);
+    var tw = ctx.measureText(label).width, lx, ly;
+    if (pw <= 60 && ph <= 60) {
+      // small on screen: the name just beside it (a dot stands in when even the shape is under a few px)
+      var pt = to((w + e) / 2, (s + n) / 2); if (!pt) { ctx.restore(); return; }
+      if (pw < 2.5 && ph < 2.5) { ctx.beginPath(); ctx.arc(pt[0], pt[1], 2.5, 0, TAU); ctx.fillStyle = mapOnColor(); ctx.fill(); }
+      lx = Math.max(pt[0] + pw / 2, pt[0] + 2.5) + 6; ly = pt[1];
+    } else {
+      // bigger: the name centred on its main landmass (the US on the lower 48, not halfway to
+      // Alaska), kept to the part of it that's on screen
+      var big = rows.filter(function (r) { return !r.dot; }).reduce(function (m, r) { return !m || (r.e - r.w) * (r.no - r.s) > (m.e - m.w) * (m.no - m.s) ? r : m; }, null) || rows[0];
+      var p1 = to(big.dot ? big.lon0 : big.w, big.dot ? big.lat0 : big.no), p2 = to(big.dot ? big.lon0 : big.e, big.dot ? big.lat0 : big.s);
+      var x0 = Math.max(0, Math.min(p1[0], p2[0])), x1 = Math.min(sizeW, Math.max(p1[0], p2[0]));
+      var y0 = Math.max(0, Math.min(p1[1], p2[1])), y1 = Math.min(sizeH, Math.max(p1[1], p2[1]));
+      if (x0 >= x1 || y0 >= y1) { x0 = Math.max(0, Math.min(a[0], b[0])); x1 = Math.min(sizeW, Math.max(a[0], b[0])); y0 = Math.max(0, Math.min(a[1], b[1])); y1 = Math.min(sizeH, Math.max(a[1], b[1])); }
+      lx = (x0 + x1) / 2 - tw / 2; ly = (y0 + y1) / 2;
+      // the middle of a country's box can be sea (Croatia, Chile's neighbours) - nudge to land of its own
+      if (pick((lx + tw / 2 - flatBox()[0]) / flatBox()[2] * 360 - 180, 90 - (ly - flatBox()[1]) / flatBox()[3] * 180) !== selected) {
+        var vb2 = flatBox(), best = null;
+        for (var gy = 1; gy < 8 && !best; gy++) for (var gx = 1; gx < 8; gx++) {
+          var qx = x0 + (x1 - x0) * gx / 8, qy = y0 + (y1 - y0) * ((gy % 2 ? 4 + (gy >> 1) : 4 - (gy >> 1))) / 8;
+          if (pick((qx - vb2[0]) / vb2[2] * 360 - 180, 90 - (qy - vb2[1]) / vb2[3] * 180) === selected) { best = [qx, qy]; break; }
+        }
+        if (best) { lx = best[0] - tw / 2; ly = best[1]; }
+      }
+    }
+    // never under the map's own panels and buttons
+    var spot = clearOfPanels(lx, ly, tw);
+    ctx.strokeText(label, spot[0], spot[1]); ctx.fillStyle = ink; ctx.fillText(label, spot[0], spot[1]);
     ctx.restore();
+  }
+  // a label at (x, y) (left edge, middle) and tw wide: moved down/up, then sideways, until it is
+  // clear of the panels, buttons and search sitting on top of the map
+  function clearOfPanels(x, y, tw) {
+    var sr = stage.getBoundingClientRect(), boxes = [];
+    [].slice.call(stage.querySelectorAll(".hm-panel, .map-tools, .layers-wrap, .globe-zoom, .country-panel, .heat-search, .globe-btns, .sg-pop, .sp-info-wrap")).forEach(function (el) {
+      if (el.hidden || el.classList.contains("docked") || el.offsetParent === null) return;
+      var r = el.getBoundingClientRect(); if (!r.width || !r.height) return;
+      boxes.push([r.left - sr.left - 4, r.top - sr.top - 4, r.right - sr.left + 4, r.bottom - sr.top + 4]);
+    });
+    var hit = function (px, py) { return boxes.some(function (q) { return px < q[2] && px + tw > q[0] && py - 9 < q[3] && py + 9 > q[1]; }); };
+    x = Math.max(4, Math.min(sizeW - tw - 4, x)); y = Math.max(12, Math.min(sizeH - 12, y));
+    if (!hit(x, y)) return [x, y];
+    for (var d = 18; d < 240; d += 18) {
+      var tries = [[x, y + d], [x, y - d], [x + d, y], [x - d, y]];
+      for (var i = 0; i < tries.length; i++) {
+        var t = tries[i];
+        if (t[0] >= 4 && t[0] + tw <= sizeW - 4 && t[1] >= 12 && t[1] <= sizeH - 12 && !hit(t[0], t[1])) return t;
+      }
+    }
+    return [x, y];
   }
   // while a country other than what was searched is clicked/selected, the search's own marks
   // (a named spot's dot and name, its city or place pins, its highlighted countries) step
@@ -10816,8 +10862,31 @@
     if (o.pcc === undefined) o.pcc = POLY ? pick(o.lon, o.lat) || "" : "";
     return o.pcc !== selected;
   }
+  // the state/province tapped in "See states" carries its name too, the same way
+  function drawPickedProvince(to) {
+    if (!statesMode || !pickedProvince || !pickedProvince.rings || !pickedProvince.rings.length) return;
+    var big = null, bs = -1;
+    pickedProvince.rings.forEach(function (ring) {
+      var w = 999, e = -999, s = 999, n = -999;
+      ring.forEach(function (p) { if (statesMode === "us" && p[0] > 0) return; w = Math.min(w, p[0]); e = Math.max(e, p[0]); s = Math.min(s, p[1]); n = Math.max(n, p[1]); });
+      if (w < 999 && (e - w) * (n - s) > bs) { bs = (e - w) * (n - s); big = [w, e, s, n]; }
+    });
+    if (!big) return;
+    var label = statesMode === "us" ? ((window.STATE_NAME && window.STATE_NAME[pickedProvince.code]) || pickedProvince.code) : pickedProvince.name;
+    var a = to(big[0], big[3]), b = to(big[1], big[2]);
+    var css = getComputedStyle(document.documentElement);
+    ctx.save();
+    ctx.font = "700 12px Inter, sans-serif"; ctx.textBaseline = "middle"; ctx.lineJoin = "round"; ctx.lineWidth = 4;
+    ctx.strokeStyle = css.getPropertyValue("--map-sea").trim() || "#dbe4ea";
+    var tw = ctx.measureText(label).width, pw = Math.abs(b[0] - a[0]);
+    var x = pw > tw + 8 ? (Math.max(0, a[0]) + Math.min(sizeW, b[0])) / 2 - tw / 2 : b[0] + 6, y = (Math.max(0, a[1]) + Math.min(sizeH, b[1])) / 2;
+    var spot = clearOfPanels(x, y, tw);
+    ctx.strokeText(label, spot[0], spot[1]); ctx.fillStyle = css.getPropertyValue("--text").trim() || "#24321f"; ctx.fillText(label, spot[0], spot[1]);
+    ctx.restore();
+  }
   function drawPlaceLabels(to) {
     drawTinySelected(to);
+    drawPickedProvince(to);
     if (!shownPlace || markMuted(shownPlace)) return;
     var css = getComputedStyle(document.documentElement);
     var ink = css.getPropertyValue("--text").trim() || "#24321f";
@@ -13076,7 +13145,7 @@
   .sg-note { position: absolute; top: 52px; right: 56px; z-index: 4; max-width: 300px; margin: 0; padding: 8px 11px; border-radius: 10px;
     background: rgba(10,20,32,0.86); color: #f2f6fa; font: 12px/1.4 'Inter', sans-serif; box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
   .sg-note[hidden] { display: none; }
-  .sg-note a { color: #a9e08e; font-weight: 600; }
+  .sg-note a { color: #7fc76a; font-weight: 600; }
   .sg-key { position: absolute; left: 10px; bottom: 10px; z-index: 4; margin: 0; display: flex; align-items: center; gap: 7px; padding: 5px 10px; border-radius: 999px;
     background: rgba(10,20,32,0.78); color: #f2f6fa; font: 11.5px 'Inter', sans-serif; pointer-events: none; }
   .sg-key[hidden] { display: none; }
@@ -13134,12 +13203,12 @@
   /* the Habitats panel: a green list of habitats, grouped by section */
   .hab-list { max-height: 176px; overflow-y: auto; margin: 0 -4px 8px; padding: 0 4px 2px; overscroll-behavior: contain;
     scrollbar-width: thin; scrollbar-color: rgba(169,224,142,0.45) transparent; }
-  .hab-list .gm-h { margin: 8px 6px 3px; font: 600 10px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #a9e08e; }
+  .hab-list .gm-h { margin: 8px 6px 3px; font: 600 10px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #7fc76a; }
   .hab-list .gm-h:first-child { margin-top: 2px; }
   .hab-opt { display: block; width: 100%; padding: 6px 9px; border: none; border-radius: 7px; background: none; color: #f0f8ec;
     font: inherit; font-size: 12.5px; text-align: left; cursor: pointer; }
   .hab-opt:hover, .hab-opt:focus-visible { background: rgba(169,224,142,0.18); outline: none; }
-  .hab-opt.on { background: #a9e08e; color: #0d2a17; font-weight: 600; }
+  .hab-opt.on { background: #3f8a3a; color: #fff; font-weight: 600; }
   .hab-none { margin: 6px; font-size: 12px; opacity: .75; }
   /* the map's suggestion lists (its search box, the heatmap's species box and category picker)
      stay the heatmap panel's deep green in the light theme too - not a near-white sheet */
@@ -13148,7 +13217,7 @@
   #heat-panel .gmenu .country-opt, #hm-panel .gmenu .country-opt { color: #f0f8ec; }
   #heat-panel .gmenu .country-opt:hover, #heat-panel .gmenu .country-opt.cursor, #hm-panel .gmenu .country-opt:hover, #hm-panel .gmenu .country-opt.cursor { background: rgba(169,224,142,0.2); }
   #heat-panel .gmenu .country-opt span, #hm-panel .gmenu .country-opt span, #heat-panel .gmenu .country-none, #hm-panel .gmenu .country-none { color: rgba(240,248,236,0.7); }
-  #heat-panel .gmenu .gm-h, #hm-panel .gmenu .gm-h { color: #a9e08e; }
+  #heat-panel .gmenu .gm-h, #hm-panel .gmenu .gm-h { color: #7fc76a; }
   .hab-bar { display: flex; height: 10px; border-radius: 999px; overflow: hidden; }
   .hab-bar span { flex: 1; }
   .globe-stage.full .hab-list { max-height: max(90px, min(46vh, calc(100vh - 300px), 420px)); }
@@ -13165,9 +13234,9 @@
   .hm-seg button { flex: 1; padding: 6px 4px; border: none; border-radius: 7px; background: none; color: rgba(255,255,255,0.75);
     font: inherit; font-size: 11.5px; cursor: pointer; transition: background .15s, color .15s; white-space: nowrap; }
   .hm-seg button:hover { color: #fff; }
-  .hm-seg button.on { background: #a9e08e; color: #0d2a17; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+  .hm-seg button.on { background: #3f8a3a; color: #fff; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
   .hm-row[hidden] { display: none; }
-  .hm-row input:focus, .hm-row select:focus { outline: none; border-color: #a9e08e; box-shadow: 0 0 0 2px rgba(169,224,142,0.3); }
+  .hm-row input:focus, .hm-row select:focus { outline: none; border-color: #3f8a3a; box-shadow: 0 0 0 2px rgba(169,224,142,0.3); }
   .hm-legend { padding: 8px 9px; border-radius: 10px; background: rgba(0,0,0,0.18); }
   .hm-legend .hm-key:first-child { margin-top: 0; }
   .hm-sw { width: 18px; height: 12px; border-radius: 3px; flex: none; opacity: .85; border: 1px solid rgba(255,255,255,0.35); }
@@ -14297,7 +14366,7 @@
   .gmenu { position: absolute; z-index: 30; top: calc(100% + 5px); left: 0; right: 0; max-height: 300px; overflow-y: auto;
     border-radius: 12px; padding: 5px; font-family: 'Inter', sans-serif; text-align: left; }
   .gmenu[hidden] { display: none; }
-  .gmenu .gm-h { margin: 6px 10px 3px; font: 600 10px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #a9e08e; }
+  .gmenu .gm-h { margin: 6px 10px 3px; font: 600 10px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #7fc76a; }
   .gmenu .country-opt b { font-weight: 600; }
   .gmenu .country-opt { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; text-align: left;
     font-family: 'Inter', sans-serif; font-size: 13px; padding: 7px 10px; border: none; border-radius: 8px; background: none; cursor: pointer; }
@@ -14485,14 +14554,14 @@
     border: 1px solid rgba(160,222,140,0.3); border-radius: 18px; padding: 22px 22px 18px; box-sizing: border-box; box-shadow: 0 18px 50px rgba(0,0,0,0.45);
     font-family: 'Inter', sans-serif; animation: wnUp .25s ease-out; }
   @keyframes wnUp { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
-  .wn-ver { display: inline-block; font: 600 11px 'JetBrains Mono', monospace; letter-spacing: .08em; padding: 3px 9px; border-radius: 999px; background: #a9e08e; color: #0d2a17; }
+  .wn-ver { display: inline-block; font: 600 11px 'JetBrains Mono', monospace; letter-spacing: .08em; padding: 3px 9px; border-radius: 999px; background: #3f8a3a; color: #fff; }
   .wn-card h2 { font-family: 'Fraunces', serif; font-size: 22px; margin: 10px 0 4px; }
   .wn-card .wn-sub { margin: 0 0 14px; font-size: 13px; color: rgba(240,248,236,0.75); }
-  .wn-card h3 { margin: 14px 0 6px; font: 600 10.5px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #a9e08e; }
+  .wn-card h3 { margin: 14px 0 6px; font: 600 10.5px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #7fc76a; }
   .wn-card ul { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.5; }
   .wn-card li { margin-bottom: 4px; }
   .wn-date { font-weight: 400; letter-spacing: .04em; color: rgba(240,248,236,0.6); margin-left: 6px; }
-  .wn-ok { margin-top: 16px; width: 100%; padding: 11px; border-radius: 11px; border: none; background: #a9e08e; color: #0d2a17; font: 600 14px 'Inter', sans-serif; cursor: pointer; }
+  .wn-ok { margin-top: 16px; width: 100%; padding: 11px; border-radius: 11px; border: none; background: #3f8a3a; color: #fff; font: 600 14px 'Inter', sans-serif; cursor: pointer; }
   .wn-ok:hover { filter: brightness(1.06); }
   .wn-mute { margin-top: 8px; width: 100%; padding: 10px; border-radius: 11px; border: 1px solid rgba(169,224,142,0.55); background: transparent; color: #d8efcd; font: 500 13.5px 'Inter', sans-serif; cursor: pointer; }
   .wn-mute:hover { background: rgba(169,224,142,0.12); }
@@ -14505,7 +14574,7 @@
   .ck-bar b { font-weight: 600; }
   .ck-btns { display: flex; gap: 8px; flex: none; }
   .ck-btns button { padding: 9px 14px; border-radius: 10px; font: 600 13px 'Inter', sans-serif; cursor: pointer; border: 1px solid rgba(169,224,142,0.45); }
-  .ck-yes { background: #a9e08e; color: #0d2a17; border-color: #a9e08e !important; }
+  .ck-yes { background: #3f8a3a; color: #fff; border-color: #3f8a3a !important; }
   .ck-no { background: transparent; color: #f0f8ec; }
   @media (max-width: 600px) { .ck-bar { flex-direction: column; align-items: stretch; left: 10px; right: 10px; bottom: 10px; } .ck-btns button { flex: 1; } }
 </style>
@@ -14532,6 +14601,7 @@
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v3.79", d: "2026-11-03", items: ["Buttons, badges and the updates window use SnakeList's own green", "Filters are back to the six sections, without Advanced filters", "Tapping a snake opens its species page straight away again", "The Sort by menu is SnakeList green"] },
     { v: "v3.78", d: "2026-11-03", items: ["Map: Habitats has its own panel and colours where a habitat's snakes live in SnakeList green", "Map: American Samoa and other small islands are coloured in", "Map: switching to Heatmap, Sightings or Habitats clears the states or cities you had open", "Map: no more white dropdowns, and the map is as wide as the page", "Species pages: See states (with islands), See all for long lists, Invasive instead of Introduced, Harmful or Harmless, a bigger safety note", "Bigger screens get a wider checklist - four snakes to a row - with bigger photos and easier-to-read names", "Sort the checklist: by name, scientific name, venomous first, most recorded or family", "Tap a snake for a quick look - photo, facts and countries - then open its full page", "New filters in Other filters: Harmful and Harmless", "Less-used filters fold under Advanced filters; tabs that don't fit go into a More menu; a Back to top button"] },
     { v: "v3.77", d: "2026-10-28", items: ["Species pages: the map just shows where the snake lives, centred on it - no zooming or dragging", "Species pages list countries only, without states or a More snakes line"] },
     { v: "v3.76", d: "2026-10-28", items: ["A picked family or habitat button has one border again, not two"] },
@@ -14851,12 +14921,12 @@
   .g-me { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); }
   .g-me[hidden] { display: none; }
   .g-me img, .g-me .g-init { width: 40px; height: 40px; border-radius: 50%; flex: none; object-fit: cover; }
-  .g-me .g-init { display: flex; align-items: center; justify-content: center; background: var(--gold); color: var(--on-accent); font-weight: 700; }
+  .g-me .g-init { display: flex; align-items: center; justify-content: center; background: var(--gold-fill); color: var(--on-fill); font-weight: 700; }
   .g-me div { flex: 1; min-width: 0; }
   .g-me b { display: block; font-size: 14px; }
   .g-me small { color: var(--text-muted); font-size: 12px; }
   .g-out { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; color: var(--text); cursor: pointer; font: 500 12.5px 'Inter', sans-serif; }
-  .auth-btn .g-dot { width: 20px; height: 20px; border-radius: 50%; background: var(--gold); color: var(--on-accent); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; overflow: hidden; }
+  .auth-btn .g-dot { width: 20px; height: 20px; border-radius: 50%; background: var(--gold-fill); color: var(--on-fill); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; overflow: hidden; }
   .auth-btn .g-dot img { width: 100%; height: 100%; object-fit: cover; }
 </style>
 <script>
@@ -15734,10 +15804,10 @@ window.SL_welcome = function (u, back) {
   .ml-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 7px; }
   .ml-head .filter-label { margin: 0; }
   .ml-tools { display: inline-flex; gap: 6px; align-items: center; }
-  .ml-picks { font: 600 11px 'Inter', sans-serif; padding: 3px 10px; line-height: 1.4; border-radius: 999px; cursor: pointer; border: 1px solid var(--gold); background: var(--gold); color: var(--on-accent); }
+  .ml-picks { font: 600 11px 'Inter', sans-serif; padding: 3px 10px; line-height: 1.4; border-radius: 999px; cursor: pointer; border: 1px solid var(--gold); background: var(--gold-fill); color: var(--on-fill); }
   .ml-picks[aria-pressed="false"] { background: transparent; color: var(--text-muted); border-color: var(--border); }
   .ml-edit { display: inline-flex; align-items: center; gap: 5px; font: 600 11px 'Inter', sans-serif; padding: 3px 10px; line-height: 1.4; border-radius: 999px; cursor: pointer;
-    border: 1px solid var(--map-on); background: var(--map-on); color: #fff; }
+    border: 1px solid #3f8a3a; background: #3f8a3a; color: #fff; }
   .ml-edit:hover { filter: brightness(1.08); }
   .ml-edit svg { width: 11px; height: 11px; }
   .ed-sheet { position: fixed; inset: 0; z-index: 90; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(6,20,12,0.72); }
@@ -15749,17 +15819,17 @@ window.SL_welcome = function (u, back) {
   .ed-search { width: 100%; box-sizing: border-box; font: 14px 'Inter', sans-serif; padding: 10px 13px; border-radius: 11px; border: 1px solid rgba(169,224,142,0.4);
     background: rgba(255,255,255,0.08); color: #fff; outline: none; }
   .ed-search::placeholder { color: rgba(240,248,236,0.55); }
-  .ed-search:focus { border-color: #a9e08e; }
+  .ed-search:focus { border-color: #3f8a3a; }
   .ed-list { margin-top: 10px; overflow-y: auto; flex: 1; min-height: 120px; display: flex; flex-direction: column; gap: 5px; }
-  .ed-h { margin: 8px 0 2px; font: 600 10.5px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #a9e08e; }
+  .ed-h { margin: 8px 0 2px; font: 600 10.5px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #7fc76a; }
   .ed-row { display: flex; align-items: center; gap: 10px; padding: 8px 11px; border-radius: 10px; background: rgba(255,255,255,0.06); cursor: pointer; font-size: 13.5px; }
   .ed-row:hover { background: rgba(255,255,255,0.11); }
-  .ed-row input { width: 17px; height: 17px; accent-color: #a9e08e; flex: none; }
+  .ed-row input { width: 17px; height: 17px; accent-color: #3f8a3a; flex: none; }
   .ed-row i { color: rgba(240,248,236,0.6); font-size: 12px; margin-left: auto; text-align: right; }
   .ed-empty { font-size: 13px; color: rgba(240,248,236,0.65); padding: 6px 2px; }
   .ed-btns { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
   .ed-btns button { font: 600 14px 'Inter', sans-serif; padding: 11px 16px; border-radius: 11px; cursor: pointer; }
-  .ed-stay { flex: 1; border: none; background: #a9e08e; color: #0d2a17; }
+  .ed-stay { flex: 1; border: none; background: #3f8a3a; color: #fff; }
   .ed-clear, .ed-cancel { border: 1px solid rgba(169,224,142,0.4); background: transparent; color: #f0f8ec; }
   .ed-bar { position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; z-index: 96; width: min(760px, calc(100% - 24px)); box-sizing: border-box;
     display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; border-radius: 16px; color: #f0f8ec;
@@ -15769,10 +15839,10 @@ window.SL_welcome = function (u, back) {
   .ed-bar p b { display: block; color: #fff; font-size: 14px; }
   .ed-bar-btns { display: flex; gap: 6px; flex-wrap: wrap; }
   .ed-bar-btns button { font: 600 12.5px 'Inter', sans-serif; padding: 8px 12px; border-radius: 10px; cursor: pointer; border: 1px solid rgba(169,224,142,0.4); background: transparent; color: #f0f8ec; }
-  .ed-bar-btns button.on { background: rgba(169,224,142,0.2); border-color: #a9e08e; }
-  .ed-bar-btns .edb-done { background: #a9e08e; color: #0d2a17; border-color: #a9e08e; }
+  .ed-bar-btns button.on { background: rgba(169,224,142,0.2); border-color: #3f8a3a; }
+  .ed-bar-btns .edb-done { background: #3f8a3a; color: #fff; border-color: #3f8a3a; }
   .pin-btn { position: absolute; white-space: nowrap; font: 700 11.5px 'Inter', sans-serif; padding: 6px 11px; border-radius: 999px; cursor: pointer; border: 2px solid #a9e08e; background: #1f5431; color: #fff; box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
-  .pin-btn.on { background: #a9e08e; color: #0d2a17; }
+  .pin-btn.on { background: #3f8a3a; color: #fff; }
   body.sl-editing #grid .card { outline: 2px dashed rgba(63,138,58,0.45); outline-offset: 2px; }
 </style>
 <div class="ed-bar" id="ed-bar" hidden>
@@ -15871,7 +15941,7 @@ window.SL_welcome = function (u, back) {
 </script>
 <style>
   .install-btn { display: none; align-items: center; gap: 6px; white-space: nowrap; line-height: 1; font: 600 13px 'Inter', sans-serif; padding: 8px 13px; border-radius: 999px; cursor: pointer;
-    border: 1px solid var(--map-on); background: var(--map-on); color: #fff; }
+    border: 1px solid #3f8a3a; background: #3f8a3a; color: #fff; }
   .install-btn svg { width: 15px; height: 15px; flex: none; }
   .auth-btn { white-space: nowrap; }
   /* phones: one short line, the same height as the round buttons next to it */
@@ -15890,7 +15960,7 @@ window.SL_welcome = function (u, back) {
   .ins-card p { margin: 0 0 12px; font-size: 14px; line-height: 1.5; color: rgba(240,248,236,0.85); }
   .ins-card ol { margin: 0 0 14px; padding-left: 20px; font-size: 14px; line-height: 1.7; }
   .ins-card b { color: #fff; }
-  .ins-ok { width: 100%; padding: 11px; border-radius: 11px; border: none; background: #a9e08e; color: #0d2a17; font: 600 14px 'Inter', sans-serif; cursor: pointer; }
+  .ins-ok { width: 100%; padding: 11px; border-radius: 11px; border: none; background: #3f8a3a; color: #fff; font: 600 14px 'Inter', sans-serif; cursor: pointer; }
 </style>
 <div class="ins-sheet" id="ins-sheet" role="dialog" aria-modal="true" aria-label="Install the SnakeList app">
   <div class="ins-card">
@@ -16070,6 +16140,12 @@ window.SL_welcome = function (u, back) {
   .sl-sort-menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 60; margin: 0; padding: 6px; list-style: none; min-width: 230px; border-radius: 14px;
     background: linear-gradient(160deg, #1f5a2e, #17462a); border: 1px solid rgba(169,224,142,0.3); box-shadow: 0 12px 30px rgba(0,0,0,0.3); outline: none; }
   .sl-sort-menu[hidden] { display: none; }
+  /* one border only, even when focused; presses like every other pill button */
+  button.sl-sort, button.sl-sort:focus, button.sl-sort:focus-visible { outline: none !important; box-shadow: none !important; }
+  button.sl-sort:focus-visible { border-color: var(--text) !important; }
+  button.sl-sort[aria-expanded="true"] { background-color: var(--surface-hover); }
+  button.sl-sort:active { transform: scale(0.97); }
+  button.sl-sort { transition: transform .1s ease, background-color .15s ease; }
   .sl-sort-menu li { padding: 8px 12px; border-radius: 9px; font: 500 13.5px 'Inter', sans-serif; color: #f0f8ec; cursor: pointer; white-space: nowrap; }
   .sl-sort-menu li.hi { background: rgba(63,138,58,0.55); }
   .sl-sort-menu li[aria-selected="true"] { background: #3f8a3a; color: #fff; font-weight: 600; }
@@ -16094,19 +16170,19 @@ window.SL_welcome = function (u, back) {
   .qp-panel h2 { font-family: 'Fraunces', serif; font-size: 22px; line-height: 1.2; margin: 4px 40px 2px 0; }
   .qp-sci { margin: 0 0 12px; font: italic 13px 'JetBrains Mono', monospace; color: rgba(240,248,236,0.82); }
   .qp-facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 14px; font-size: 13.5px; }
-  .qp-facts dt { font: 600 10.5px 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #a9e08e; padding-top: 2px; }
+  .qp-facts dt { font: 600 10.5px 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #7fc76a; padding-top: 2px; }
   .qp-facts dd { margin: 0; }
-  .qp-h { margin: 0 0 4px; font: 600 10.5px 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #a9e08e; }
+  .qp-h { margin: 0 0 4px; font: 600 10.5px 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #7fc76a; }
   .qp-countries { margin: 0 0 14px; font-size: 13.5px; line-height: 1.5; }
   .qp-acts { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 12px; }
   .qp-acts button { font: 600 12.5px 'Inter', sans-serif; padding: 8px 13px; border-radius: 999px; cursor: pointer; border: 1px solid rgba(169,224,142,0.45); background: transparent; color: #f0f8ec; }
   .qp-acts button:hover { background: rgba(169,224,142,0.14); }
-  .qp-acts button.on { background: #a9e08e; border-color: #a9e08e; color: #0d2a17; }
+  .qp-acts button.on { background: #3f8a3a; border-color: #3f8a3a; color: #fff; }
   .qp-acts button[hidden] { display: none; }
-  .qp-open { display: block; text-align: center; padding: 11px; border-radius: 11px; background: #a9e08e; color: #0d2a17; font: 600 14px 'Inter', sans-serif; text-decoration: none; }
+  .qp-open { display: block; text-align: center; padding: 11px; border-radius: 11px; background: #3f8a3a; color: #fff; font: 600 14px 'Inter', sans-serif; text-decoration: none; }
   .qp-open:hover { filter: brightness(1.05); }
   .qp-pref { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 12.5px; color: rgba(240,248,236,0.75); cursor: pointer; }
-  .qp-pref input { accent-color: #a9e08e; }
+  .qp-pref input { accent-color: #3f8a3a; }
   html:not([data-sl-theme="dark"]) .qp-panel { background: linear-gradient(160deg, #f6fbf1, #e1eed5); color: #1c3a22; border-color: rgba(47,107,51,0.25); }
   html:not([data-sl-theme="dark"]) .qp-sheet { background: rgba(30,60,35,0.35); }
   html:not([data-sl-theme="dark"]) .qp-sci, html:not([data-sl-theme="dark"]) .qp-credit, html:not([data-sl-theme="dark"]) .qp-pref { color: #4a6350; }
