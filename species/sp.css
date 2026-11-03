@@ -22,7 +22,7 @@ h1{font:700 clamp(30px,5vw,44px)/1.1 Georgia,serif;margin:0}.sp-sci{font-style:i
 .sp-btn{display:inline-block;background:var(--g);color:#fff;text-decoration:none;font-weight:600;padding:11px 18px;border-radius:12px}
 section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 20px;margin-top:18px}h2{font:700 22px Georgia,serif;margin:0 0 8px}h2 small{font:500 13px Inter,sans-serif;color:var(--muted)}
 .sp-map{position:relative;border-radius:12px;overflow:hidden;background:var(--sea);aspect-ratio:2/1;max-height:460px;width:100%}
-.sp-map svg{width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.sp-map svg.drag{cursor:grabbing}
+.sp-map svg{width:100%;height:100%;display:block;user-select:none;-webkit-user-select:none}
 .sp-map path{fill:var(--land);stroke:var(--sea);stroke-width:.6;vector-effect:non-scaling-stroke;stroke-linejoin:round}.sp-map path.on{fill:var(--on)}.sp-map path.in{fill:var(--in)}
 .sp-map circle{stroke:var(--card);stroke-width:1.2;vector-effect:non-scaling-stroke}.sp-map circle.on{fill:var(--on)}.sp-map circle.in{fill:var(--in)}
 .sp-zoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px}

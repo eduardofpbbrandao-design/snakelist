@@ -13125,7 +13125,13 @@
   #heat-panel .gmenu .gm-h, #hm-panel .gmenu .gm-h { color: #a9e08e; }
   .hab-bar { display: flex; height: 10px; border-radius: 999px; overflow: hidden; }
   .hab-bar span { flex: 1; }
-  .globe-stage.full .hab-list { max-height: min(46vh, 420px); }
+  .globe-stage.full .hab-list { max-height: max(90px, min(46vh, calc(100vh - 300px), 420px)); }
+  /* a phone on its side, full screen: the search sits beside the three map buttons - keep it
+     clear of them (the Habitats button drops the habitat's name there) */
+  @media (max-height: 520px) and (min-width: 600px) {
+    .globe-stage.full .heat-search { width: min(380px, calc(100vw - 530px)) !important; }
+    .globe-stage.full #hab-what { display: none; }
+  }
   @media (max-width: 640px) { .hab-list { max-height: 180px; } #hab-what { display: none; } }
   .hm-row select:disabled { opacity: .45; }
   .hm-row input::placeholder { color: rgba(255,255,255,0.55); }
@@ -14396,7 +14402,7 @@
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
-    { v: "v3.78", d: "2026-11-03", items: ["Bigger screens get a wider checklist - four snakes to a row - with bigger photos and easier-to-read names", "Sort the checklist: by name, scientific name, venomous first, most recorded or family", "Tap a snake for a quick look - photo, facts and countries - then open its full page", "New filters in Other filters: Harmful and Harmless", "Less-used filters fold under Advanced filters; tabs that don't fit go into a More menu; a Back to top button"] },
+    { v: "v3.78", d: "2026-11-03", items: ["Map: Habitats has its own panel and colours where a habitat's snakes live in SnakeList green", "Map: American Samoa and other small islands are coloured in", "Map: switching to Heatmap, Sightings or Habitats clears the states or cities you had open", "Map: no more white dropdowns, and the map is as wide as the page", "Species pages: See states (with islands), See all for long lists, Invasive instead of Introduced, Harmful or Harmless, a bigger safety note", "Bigger screens get a wider checklist - four snakes to a row - with bigger photos and easier-to-read names", "Sort the checklist: by name, scientific name, venomous first, most recorded or family", "Tap a snake for a quick look - photo, facts and countries - then open its full page", "New filters in Other filters: Harmful and Harmless", "Less-used filters fold under Advanced filters; tabs that don't fit go into a More menu; a Back to top button"] },
     { v: "v3.77", d: "2026-10-28", items: ["Species pages: the map just shows where the snake lives, centred on it - no zooming or dragging", "Species pages list countries only, without states or a More snakes line"] },
     { v: "v3.76", d: "2026-10-28", items: ["A picked family or habitat button has one border again, not two"] },
     { v: "v3.75", d: "2026-10-28", items: ["Snake family: no more stray Boa / Colubrid / Python buttons among the families - every family has its photo", "An open filter section uses the full width, so there are no empty gaps", "Tags on the cards stay in place when a filter section opens", "The page loads lighter and is easier for search engines and AI browsers to read"] },
