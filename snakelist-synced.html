@@ -566,7 +566,7 @@
      per-card rules are written at startup from #photo-index (see the photo script). */
   .card::before { content: "No photos found for " attr(data-name); display: flex; align-items: center;
     justify-content: center; text-align: center; box-sizing: border-box; padding: 0 22px;
-    margin: -14px -14px 0; aspect-ratio: 2.5; border-radius: 11px 11px 0 0;
+    margin: -14px -14px 0; aspect-ratio: 2.2; border-radius: 11px 11px 0 0;
     background-color: var(--surface-hover, var(--map-sea)); background-repeat: no-repeat; background-size: 500% auto;
     font-family: 'Inter', sans-serif; font-size: 12.5px; font-style: italic; line-height: 1.4; color: var(--text-muted);
     border-bottom: 1px solid var(--border); }
@@ -1460,7 +1460,10 @@
           <span class="chip" id="chip-rare" role="button" tabindex="0" title="Hardly ever seen - few or no records on iNaturalist">Rare</span>
           <span class="chip" id="chip-nophoto" role="button" tabindex="0" title="Species nobody has a photo of on SnakeList yet">No photos</span>
           <span class="chip" id="chip-extinct" role="button" tabindex="0" title="Snakes that have died out">Extinct</span>
-        </div></div>
+          <span class="chip" id="chip-harmful" role="button" tabindex="0" title="Snakes documented as dangerous to people">Harmful</span>
+          <span class="chip" id="chip-harmless" role="button" tabindex="0" title="Non-venomous snakes that aren't giant constrictors">Harmless</span>
+        </div>
+        <p class="place-note" id="harm-note"></p></div>
         </div>
       </details>
       <details class="fsec" data-sec="mine"><summary><span class="fsec-t">My lists</span><span class="fsec-n" hidden></span><svg class="fsec-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
@@ -6837,12 +6840,43 @@
     LAYOUT_SEED = on ? String(seed) : null;
     try { if (on) localStorage.setItem("sl-layout-seed", LAYOUT_SEED); else localStorage.removeItem("sl-layout-seed"); } catch (err) {}
   };
+  // the sort menu above the results: "default" is the shuffle with Picked for you first; any other
+  // sort keeps the kept-at-top (PINNED) snakes first and orders the rest by that key
+  let SORT = "default";
+  try { SORT = localStorage.getItem("sl-sort") || "default"; } catch (err) {}
+  const sciOf = (c) => { const nm = c.querySelector(".card-name"); return ((nm && nm.classList.contains("is-sci") ? nm : c.querySelector(".card-sci")) || {}).textContent || ""; };
+  const byName = (a, b) => (a.dataset.name || "").localeCompare(b.dataset.name || "");
+  const SORTERS = {
+    "name-az": byName,
+    "name-za": (a, b) => byName(b, a),
+    "sci-az": (a, b) => (a._sci || (a._sci = sciOf(a).trim())).localeCompare(b._sci || (b._sci = sciOf(b).trim())) || byName(a, b),
+    "venom-first": (a, b) => (b.dataset.venomous === "1") - (a.dataset.venomous === "1") || byName(a, b),
+    "safe-first": (a, b) => (a.dataset.venomous === "1") - (b.dataset.venomous === "1") || byName(a, b),
+    "recorded": (a, b) => spotsOf(b) - spotsOf(a) || byName(a, b),
+    "family": (a, b) => (familyOf(a) || "~").localeCompare(familyOf(b) || "~") || byName(a, b),
+  };
+  let sortCache = { key: null, src: null, list: null };
   const orderedCards = () => {
+    if (SORT !== "default" && SORTERS[SORT]) {
+      if (sortCache.key !== SORT || sortCache.src !== shuffled) sortCache = { key: SORT, src: shuffled, list: shuffled.slice().sort(SORTERS[SORT]) };
+      if (!PINNED.length) return sortCache.list;
+      const pset = new Set(PINNED), pById = {};
+      cards.forEach((c) => { if (pset.has(c.dataset.id)) pById[c.dataset.id] = c; });
+      return PINNED.map((id) => pById[id]).filter(Boolean).concat(sortCache.list.filter((c) => !pset.has(c.dataset.id)));
+    }
     const first = PINNED.concat(PRIORITY.filter((id) => !PINNED.includes(id)));
     if (!first.length) return shuffled;
     const set = new Set(first), byId = {};
     cards.forEach((c) => { if (set.has(c.dataset.id)) byId[c.dataset.id] = c; });
     return first.map((id) => byId[id]).filter(Boolean).concat(shuffled.filter((c) => !set.has(c.dataset.id)));
+  };
+  window.SL_SORT = () => SORT;
+  window.SL_SET_SORT = (k) => {
+    SORT = SORTERS[k] ? k : "default";
+    try { if (SORT === "default") localStorage.removeItem("sl-sort"); else localStorage.setItem("sl-sort", SORT); } catch (err) {}
+    document.body.classList.toggle("sl-sorted", SORT !== "default");
+    lastSig = null; // back to the first page of results
+    refresh(true);
   };
   window.SL_PINNED = () => PINNED.slice();
   window.SL_SET_PINNED = (ids) => {
@@ -6894,6 +6928,23 @@
     "Sinomicrurus", "Hemibungarus", "Bungarus", "Mehelya", "Gonionotophis", "Polemon", "Coronella", "Malpolon", "Pseudechis", "Elapomorphus"]);
   const genusOf = (card) => card._genus || (card._genus = ((card.querySelector(".card-sci") || {}).textContent || "").trim().split(/\s+/)[0]);
   const eatsSnakes = (card) => SNAKE_EATERS.has(genusOf(card)) || /snake[- ]?eater/i.test(card.dataset.name || "");
+  // Harmful / Harmless, from #harm-data: harmful = venomous elapids/vipers (by family), the listed
+  // dangerous genera and the giant constrictors (by species); harmless = non-venomous and not
+  // harmful; everything else (mildly venomous rear-fanged snakes) is "not documented"
+  let harmfulOnly = false, harmlessOnly = false;
+  const HARM = (() => { try { return JSON.parse(document.getElementById("harm-data").textContent); } catch (err) { return null; } })();
+  const harmOf = (card) => {
+    if (card._harm) return card._harm;
+    let v = "unknown";
+    if (HARM && HARM.harmful) {
+      const h = HARM.harmful;
+      if ((card.dataset.venomous === "1" && (h.venomousFamilies || []).includes(familyOf(card))) || (h.genera || []).includes(genusOf(card)) || (h.species || []).includes(card.dataset.id)) v = "harmful";
+      else if (card.dataset.venomous === "0") v = "harmless";
+    }
+    return (card._harm = v);
+  };
+  window.SL_HARM = (id) => { const c = cards.find((x) => x.dataset.id === id); return c ? harmOf(c) : "unknown"; };
+  (() => { const n = document.getElementById("harm-note"); if (n && HARM && HARM.note) n.textContent = HARM.note; })();
   // small labels on each card's photo for the newer facts; tapping one turns on that filter in More
   window.SL_BADGES = (card) => {
     const out = [], id = card.dataset.id;
@@ -7671,6 +7722,8 @@
     if (st.snakeEater && !eatsSnakes(card)) return false;
     if (st.noPhoto && hasPhoto(card)) return false;
     if (st.extinct && !EXTINCT[card.dataset.id]) return false;
+    if (st.harmful && harmOf(card) !== "harmful") return false;
+    if (st.harmless && harmOf(card) !== "harmless") return false;
     if (st.habitats && st.habitats.length && !st.habitats.some((n) => inHabitat(card, n))) return false;
     // My lists: any of the picked lists (a snake on two of them shows once)
     if (st.mFollow || st.mWish || st.mSeen) {
@@ -7690,6 +7743,7 @@
     popular: popularOnly, uncommon: uncommonOnly, exotic: exoticOnly, venom: venomousOnly, safe: nonVenomousOnly, q: query,
     constrictor: constrictorOnly, nonConstrictor: nonConstrictorOnly,
     mFollow: mineFollow, mWish: mineWish, mSeen: mineSeen, invasive: invasiveOnly, common: commonOnly, rare: rareOnly, snakeEater: snakeEaterOnly, noPhoto: noPhotoOnly, extinct: extinctOnly, habitats: habitatFilters,
+    harmful: harmfulOnly, harmless: harmlessOnly,
   });
 
   // A chip's number is how many species that chip stands for in the whole checklist - the
@@ -7732,7 +7786,7 @@
     // themselves: toggling an attribute on up to thousands of cards on every keystroke,
     // tab switch or filter click was DOM churn happening *inside* the synced subtree,
     // which got diffed, persisted and pushed to every other device on each change.
-    const sig = [tab, query, typeFilter, continentFilters.join("|"), countryFilters.join("|"), familyFilters.join("|"), placeFilters.join("|"), cityFilters.map((c) => c.key).join("|"), popularOnly, uncommonOnly, exoticOnly, venomousOnly, nonVenomousOnly, constrictorOnly, nonConstrictorOnly, invasiveOnly, commonOnly, rareOnly, snakeEaterOnly, noPhotoOnly, extinctOnly, habitatFilters.join("|"), mineFollow, mineWish, mineSeen, followCount(), wishCount(), cards.filter((c) => c.classList.contains("done")).length].join("~");
+    const sig = [tab, query, typeFilter, continentFilters.join("|"), countryFilters.join("|"), familyFilters.join("|"), placeFilters.join("|"), cityFilters.map((c) => c.key).join("|"), popularOnly, uncommonOnly, exoticOnly, venomousOnly, nonVenomousOnly, constrictorOnly, nonConstrictorOnly, invasiveOnly, commonOnly, rareOnly, snakeEaterOnly, noPhotoOnly, extinctOnly, harmfulOnly, harmlessOnly, habitatFilters.join("|"), mineFollow, mineWish, mineSeen, followCount(), wishCount(), cards.filter((c) => c.classList.contains("done")).length].join("~");
     if (sig !== lastSig) { lastSig = sig; renderLimit = PAGE; }
 
     let shown = 0, drawn = 0;
@@ -7888,7 +7942,8 @@
     document.getElementById("chip-common").classList.toggle("active", commonOnly);
     document.getElementById("chip-rare").innerHTML = 'Rare <b class="chip-n">' + countTotal({ rare: true }).toLocaleString() + '</b>';
     document.getElementById("chip-rare").classList.toggle("active", rareOnly);
-    [["chip-snakeeater", "Snake eater", { snakeEater: true }, snakeEaterOnly], ["chip-nophoto", "No photos", { noPhoto: true }, noPhotoOnly], ["chip-extinct", "Extinct", { extinct: true }, extinctOnly]].forEach((x) => {
+    [["chip-snakeeater", "Snake eater", { snakeEater: true }, snakeEaterOnly], ["chip-nophoto", "No photos", { noPhoto: true }, noPhotoOnly], ["chip-extinct", "Extinct", { extinct: true }, extinctOnly],
+      ["chip-harmful", "Harmful", { harmful: true }, harmfulOnly], ["chip-harmless", "Harmless", { harmless: true }, harmlessOnly]].forEach((x) => {
       const el = document.getElementById(x[0]);
       el.innerHTML = x[1] + ' <b class="chip-n">' + countTotal(x[2]).toLocaleString() + "</b>";
       el.classList.toggle("active", x[3]);
@@ -8332,6 +8387,8 @@
   toggleChip("chip-snakeeater", () => snakeEaterOnly, (v) => { snakeEaterOnly = v; });
   toggleChip("chip-nophoto", () => noPhotoOnly, (v) => { noPhotoOnly = v; });
   toggleChip("chip-extinct", () => extinctOnly, (v) => { extinctOnly = v; });
+  toggleChip("chip-harmful", () => harmfulOnly, (v) => { harmfulOnly = v; if (v) harmlessOnly = false; });
+  toggleChip("chip-harmless", () => harmlessOnly, (v) => { harmlessOnly = v; if (v) harmfulOnly = false; });
   // the Habitats: one button per section (Rainforests, Mountains & rocks, South America...), a few at
   // first with "Show more" / "Show all" for the rest. Pick one at a time, like the Type buttons; a
   // picked section offers "Show all" beneath to narrow it down to one of its habitats.
@@ -9999,8 +10056,13 @@
           return { n: m, lon: lo2, lat: la2 };
         };
         var full = { n: n, lon: lon, lat: lat };
+        // a small island simplified down to 3-4 points becomes a hairline sliver (American
+        // Samoa's Tutuila, Guam's neighbours, atolls...): its outline still drew but there was
+        // almost nothing left to fill. Rings that small are cheap, so keep them whole instead.
+        var ar = function (o) { var a = 0; for (var k = 0, m = o.n; k < m; k++) { var j = (k + 1) % m; a += o.lon[k] * o.lat[j] - o.lon[j] * o.lat[k]; } return Math.abs(a); };
+        var keep = function (o) { return !o || (n <= 80 && o.n < n && (o.n < 6 || ar(o) < 0.75 * ar(full))) ? full : o; };
         return { code: q[0], n: n, dot: false, lon: lon, lat: lat, w: w, e: e, s: s, no: no, c: q[4],
-          L: [lv(q[5], q[6]) || full, lv(q[7], q[8]) || full, full] };
+          L: [keep(lv(q[5], q[6])), keep(lv(q[7], q[8])), full] };
       });
       CENTRE = data.centre;
       TITLE = data.title;
@@ -12252,12 +12314,15 @@
   var C = D.cols, R = D.rows;
   // each sprite tile is a whole photo (D.w x D.h); the band on the card is 2.5:1, so it shows
   // the photo's middle strip at the card's full width - same tile the bigger view shows whole
-  var tileH = D.h / D.w, band = 1 / 2.5, denom = R * tileH - band;
+  // the band is SL_PHOTO_AR:1 (2.2 since v3.78, 2.5 before); each photo's stored offset (it[3]) was
+  // picked for a 2.5:1 band, so a taller band is centred on that same strip
+  var AR = window.SL_PHOTO_AR || (window.SL_PHOTO_AR = 2.2), OLD_BAND = 1 / 2.5;
+  var tileH = D.h / D.w, band = 1 / AR, denom = R * tileH - band;
   var css = [];
   Object.keys(D.items).forEach(function (id) {
     var it = D.items[id], col = it[1] % C, row = Math.floor(it[1] / C);
     // it[3]: where the band sits inside the tile (picked so it lands on the snake's head/body)
-    var by = it[3] != null ? it[3] : (1 - band / tileH) / 2;
+    var by = it[3] != null ? Math.max(0, Math.min(1 - band / tileH, it[3] + (OLD_BAND - band) / 2 / tileH)) : (1 - band / tileH) / 2;
     var py = (row * tileH + by * tileH) / denom * 100;
     css.push('.card[data-id="' + id + '"]::before{content:"";cursor:zoom-in;background-image:url(' +
       D.path.replace("%d", it[0]) + ");background-position:" + (col / (C - 1) * 100) + "% " + py.toFixed(3) + "%}");
@@ -12387,7 +12452,7 @@
     if (!card.classList || !card.classList.contains("card")) return; // the photo band is the card's own ::before
     if (!D.items[card.dataset.id] && !(window.SL_EXTRA_PHOTOS && window.SL_EXTRA_PHOTOS[card.dataset.id])) return;
     var r = card.getBoundingClientRect();
-    if (e.clientY - r.top > r.width / 2.5) return;
+    if (e.clientY - r.top > r.width / (window.SL_PHOTO_AR || 2.5)) return;
     var nm = card.querySelector(".card-name"), sci = card.querySelector(".card-sci");
     openPhoto(card.dataset.id, nm ? nm.textContent : "", nm && nm.classList.contains("is-sci") ? "" : (sci ? sci.textContent : ""));
   });
@@ -12399,7 +12464,7 @@
     var card = e.target.closest && e.target.closest(".card");
     if (!card || e.target.closest("button, a, input, textarea, select, label, .tag, [role=button], .photo-btn, .wish-row, .card-bottom, .follow-btn")) return;
     var r = card.getBoundingClientRect();
-    if (e.target === card && (D.items[card.dataset.id] || (window.SL_EXTRA_PHOTOS && window.SL_EXTRA_PHOTOS[card.dataset.id])) && e.clientY - r.top <= r.width / 2.5) return;
+    if (e.target === card && (D.items[card.dataset.id] || (window.SL_EXTRA_PHOTOS && window.SL_EXTRA_PHOTOS[card.dataset.id])) && e.clientY - r.top <= r.width / (window.SL_PHOTO_AR || 2.5)) return;
     var id = card.dataset.id, nmEl = card.querySelector(".card-name");
     // the page's address carries the common name too (species/california-kingsnake-lampropeltis-californiae), same as build_species.page_name
     var slug = function (t) { return String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); };
@@ -14604,7 +14669,16 @@
     if (e.target.closest("#g-sync")) signIn(true);
   });
   // ---- what follows your account: the lists, notes, favourites, quiz score and your photos ----
-  var KV = ["sl-favs", "sl-pinned", "sl-follow-meta", "sl-quiz-correct", "sl-quiz-wrong"], SETKV = { "sl-favs": 1 }, MAXKV = { "sl-quiz-correct": 1, "sl-quiz-wrong": 1 };
+  var KV = ["sl-favs", "sl-pinned", "sl-follow-meta", "sl-quiz-correct", "sl-quiz-wrong", "sl-app-installs"], SETKV = { "sl-favs": 1 }, MAXKV = { "sl-quiz-correct": 1, "sl-quiz-wrong": 1 };
+  // "sl-app-installs" ({ "<account>:<device>": last seen ISO }, the installed app's heartbeat):
+  // both sides' devices are kept, each with its latest time; anything not seen for 90 days drops out
+  var STAMPKV = { "sl-app-installs": 1 };
+  function mergeStamps(l, r) {
+    var a = {}, b = {}, o = {}, old = Date.now() - 90 * 864e5;
+    try { a = JSON.parse(l || "{}") || {}; } catch (e) {} try { b = JSON.parse(r || "{}") || {}; } catch (e) {}
+    Object.keys(Object.assign({}, a, b)).forEach(function (d) { var t = [a[d], b[d]].filter(function (x) { return typeof x === "string" && Date.parse(x) > old; }).sort().pop(); if (t) o[d] = t; });
+    return Object.keys(o).length ? JSON.stringify(o) : null;
+  }
   var PH = "sl-sighting-photos:", BASE = "sl-sync-base", PIDX = "sl-sync-photos", TOK = "sl-gtoken";
   function readList() {
     var out = { done: [], wish: [], follow: [], notes: {}, kv: {} };
@@ -14639,6 +14713,7 @@
     KV.forEach(function (k) {
       var v;
       if (MAXKV[k]) v = String(Math.max(+lk[k] || 0, +rk[k] || 0));
+      else if (STAMPKV[k]) v = mergeStamps(lk[k], rk[k]);
       else if (SETKV[k]) v = JSON.stringify(mergeSet(parseArr(lk[k]), rk[k] != null ? parseArr(rk[k]) : null, hb && bk[k] != null ? parseArr(bk[k]) : (hb ? [] : null)));
       else v = pickVal(lk[k], rk[k], bk[k], hb);
       if (v != null && v !== "0" && v !== "[]") M.kv[k] = v; else if (v === "0" || v === "[]") { if (lk[k] != null || rk[k] != null) M.kv[k] = v; }
@@ -14661,7 +14736,7 @@
     KV.forEach(function (k) {
       var cur = null; try { cur = localStorage.getItem(k); } catch (e) {}
       var want = M.kv[k] != null ? M.kv[k] : null;
-      if (cur !== want) { reload = true; try { if (want == null) localStorage.removeItem(k); else localStorage.setItem(k, want); } catch (e) {} }
+      if (cur !== want) { if (!STAMPKV[k]) reload = true; try { if (want == null) localStorage.removeItem(k); else localStorage.setItem(k, want); } catch (e) {} }
     });
     applying = false;
     return reload;
@@ -15337,7 +15412,7 @@ window.SL_welcome = function (u, back) {
       // the newer facts, along the bottom of the photo
       var bs = window.SL_BADGES ? window.SL_BADGES(c) : [];
       var onPhoto = bs.filter(function (b) { return b.t === "Fossil"; }), asTags = bs.filter(function (b) { return b.t !== "Fossil"; });
-      if (onPhoto.length) html += '<div class="sl-badges" style="left:' + (x0 + 9) + "px;top:" + (y0 + r.width / 2.5 - 31) + 'px">' + onPhoto.map(function (b) {
+      if (onPhoto.length) html += '<div class="sl-badges" style="left:' + (x0 + 9) + "px;top:" + (y0 + r.width / (window.SL_PHOTO_AR || 2.5) - 31) + 'px">' + onPhoto.map(function (b) {
         return '<button type="button" class="sl-badge ' + b.k + '" data-chip="' + b.chip + '" title="' + b.title.replace(/"/g, "&quot;") + '">' + b.t + "</button>";
       }).join("") + "</div>";
       // the others sit in the card's own tag row, right after its last tag (placed after a measure, below)
