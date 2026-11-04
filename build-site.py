@@ -70,7 +70,17 @@ def _pic(m):
     return "url(%s%s%s)" % (q, name, q)
 site_app = re.sub(r"url\((['\"]?)data:image/([a-z+]+);base64,([A-Za-z0-9+/=]+)\1\)", _pic, app)
 body_at = re.search(r"<(?!/?(?:title|style|script|link|meta|!--)\b)[a-zA-Z]", site_app).start()
-site_app = site_app[:body_at] + "</head>\n<body>\n" + site_app[body_at:]
+# every stylesheet goes up into the head, in the same order: the page is megabytes long, and a
+# style block near its end used to arrive seconds after the parts it styles - the Install
+# button and the tab bar showed unstyled (an old-looking grey button) while SnakeList opened
+_late = [m for m in re.finditer(r"<style>.*?</style>", site_app[body_at:], re.S)]
+if _late:
+    _css = "\n".join(m.group(0) for m in _late)
+    _rest = site_app[body_at:]
+    for m in reversed(_late): _rest = _rest[:m.start()] + _rest[m.end():]
+    site_app = site_app[:body_at] + _css + "\n</head>\n<body>\n" + _rest
+else:
+    site_app = site_app[:body_at] + "</head>\n<body>\n" + site_app[body_at:]
 open("index.html", "w", encoding="utf-8").write(head + site_app + "\n</body>\n</html>\n")
 # every crawler is welcome on the public pages; the AI ones named too, so it's never in doubt
 open("robots.txt", "w").write("User-agent: *\nAllow: /\n\n" + "".join("User-agent: %s\nAllow: /\n\n" % b for b in (
