@@ -95,8 +95,10 @@ def build(app):
         for o in re.findall(r"\{([^{}]*)\}", m.group(2)):
             g = lambda k: (re.search(k + r':\s*"([^"]*)"', o) or [None, ""])[1]
             st = re.search(r"states:\s*\[([^\]]*)\]", o)  # US state codes, or province names elsewhere
+            ar = re.search(r"areas:\s*\[([^\]]*)\]", o)  # the provinces/islands it was brought to (shown by "See precise area")
             invasive.setdefault(m.group(1), []).append({"name": g("name"), "code": g("code"), "note": g("note"),
-                                                        "states": re.findall(r'"([^"]*)"', st.group(1)) if st else []})
+                                                        "states": re.findall(r'"([^"]*)"', st.group(1)) if st else [],
+                                                        "areas": re.findall(r'"([^"]*)"', ar.group(1)) if ar else []})
     intro_ll = {}
     for m in re.finditer(r'area: "([^"]*)", lon: (-?[\d.]+), lat: (-?[\d.]+)', app.split("var INTRODUCED = {", 1)[1].split("};", 1)[0]):
         intro_ll[m.group(1)] = (float(m.group(2)), float(m.group(3)))
@@ -345,6 +347,23 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if c["genus"] in CONS["constrictor"]["genera"] or c["family"] in CONS["constrictor"]["families"] or c["type"] in ("Boa", "Python"): return "yes"
         if c["genus"] in CONS["nonconstrictor"]["genera"] or c["family"] in CONS["nonconstrictor"]["families"]: return "no"
         return "unknown"
+    # how many species live in each state/province (by the cards' own names), for "See precise area"
+    def st_row(cc, cname, names, what):
+        items = []
+        for n in sorted(dict.fromkeys(names), key=lambda t: slugify(region.us_names.get(t, t) if cc == "us" else t)):
+            shown = region.us_names.get(n, n) if cc == "us" else re.sub(r" \(\d+\)$", "", n)
+            k = prov_count(cc, [n])
+            items.append('<a href="../?map=%s">%s</a>%s' % (esc(quote(shown)), esc(shown), (' <small class="sp-n">%d species</small>' % k) if k else ""))
+        return "<li><b>%s%s:</b> %s</li>" % (esc(cname), what, ", ".join(items))
+    PROV_N = {}
+    for c in cards:
+        for pkey in c["provinces"]:
+            cc, _, pn = pkey.partition(":"); PROV_N.setdefault(cc.lower(), {}).setdefault(pn, set()).add(c["id"])
+        for stc in c["states"] or []: PROV_N.setdefault("us", {}).setdefault(stc, set()).add(c["id"])
+    def prov_count(cc, names):
+        ids = set()
+        for n in names: ids |= PROV_N.get(cc, {}).get(n, set())
+        return len(ids)
     links = []
     for c in cards:
         nm, sci = c["name"], c["sci"]
@@ -409,11 +428,22 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             want = set(names); hit = [nm for nm, e in shapes.items() if nm in want or e["also"] & want]
             cls = "in" if cc in icodes and cc not in codes else "on"
             if hit:
-                st_data.append([cc, cls, sorted(hit)]); prov_used.add(cc); st_whole.add(cc)
+                hit = sorted(hit)
+                st_data.append([cc, cls, hit, [prov_count(cc, {nm} | shapes[nm]["also"]) for nm in hit]] + ([[region.us_names.get(nm, nm) for nm in hit]] if cc == "us" else [])); prov_used.add(cc); st_whole.add(cc)
                 st_boxes += [(0,) + shapes[nm]["box"] for nm in hit]
             cname = next((n for n in c["countries"] if iso.get(n) == cc), None) or code_name.get(cc, cc.upper())
-            shown = sorted({region.us_names.get(n, n) if cc == "us" else re.sub(r" \(\d+\)$", "", n) for n in names}, key=lambda t: slugify(t))
-            st_rows.append("<li><b>%s%s:</b> %s</li>" % (esc(cname), " (islands)" if cc == "id" else " (invasive)" if cls == "in" else "", esc(", ".join(shown))))
+            st_rows.append(st_row(cc, cname, names, " (islands)" if cc == "id" else " (invasive)" if cls == "in" else ""))
+        # invasive provinces/islands outside the US (the Canary Islands, the Balearics): orange, only
+        # with "See precise area" on - the whole country stays orange otherwise
+        for x in inv:
+            cc = x["code"] or iso.get(x["name"], "")
+            if not (cc and x.get("areas")) or cc == "us": continue
+            shapes = region.provinces(cc); want = set(x["areas"])
+            hit = sorted(nm for nm, e in shapes.items() if nm in want or e["also"] & want)
+            if not hit: continue
+            st_data.append([cc, "in", hit, [prov_count(cc, {nm} | shapes[nm]["also"]) for nm in hit]]); prov_used.add(cc); st_whole.add(cc)
+            st_boxes += [(0,) + shapes[nm]["box"] for nm in hit]
+            st_rows.append(st_row(cc, x["name"], x["areas"], " (invasive)"))
         for x in inv:  # the states it was brought to (already drawn in orange, see ishapes)
             cc = x["code"] or iso.get(x["name"], "")
             if x.get("states") and cc not in provs:
@@ -651,7 +681,7 @@ CSS = """.sp-note{font-size:13px;color:var(--muted);margin:-4px 0 10px}.sp-more{
 .sp-all{font:500 12px Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:4px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;margin:8px 0 0;display:none}
 .js .sp-all{display:inline-block}.js .sp-clip:not(.sp-open)>.sp-x{display:none}
 .sp-mapbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}.sp-mapbar .sp-legend{margin-right:auto}.sp-mapbar .sp-legend,.sp-mapbar .sp-all{margin-top:8px}
-.sp-states{margin-top:12px}.sp-cities{margin-top:12px}.js .sp-cities:not(.sp-open){display:none}.sp-cities h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-cities .sp-where{margin:0}.sp-cities small{color:var(--muted)}
+.sp-states{margin-top:12px}.sp-n{color:var(--muted);font-size:.85em}.sp-shade{display:inline-flex;align-items:center;gap:6px}.sp-ramp{display:inline-block;width:46px!important;height:12px;border-radius:4px;background:linear-gradient(90deg,#b8e2aa,#1f5c28)}.sp-cities{margin-top:12px}.js .sp-cities:not(.sp-open){display:none}.sp-cities h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-cities .sp-where{margin:0}.sp-cities small{color:var(--muted)}
 .sp-map circle.ct{fill:#e0a526;stroke:#fff;stroke-width:1.2px;vector-effect:non-scaling-stroke}.sp-states h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-states .sp-where{margin:0;columns:1}
 .sp-az .v{font-size:11px;font-weight:700;color:#b5452a;margin-left:4px}@media (prefers-color-scheme:dark){.sp-az .v{color:#f0a04b}}
 .sp-hubs{columns:3 200px;column-gap:24px;padding:0;list-style:none}.sp-hubs li{break-inside:avoid;margin:2px 0}
@@ -708,11 +738,15 @@ function fit(){asp();var w=f[2],h=f[3],cx=f[0]+w/2,cy=f[1]+h/2;if(h>w*A)w=h/A;w=
 var rw=m.clientWidth;window.addEventListener('resize',function(){if(m.clientWidth!==rw){rw=m.clientWidth;fit()}});fit();
 var sb=document.querySelector('.sp-stbtn'),sl=document.querySelector('.sp-states'),sg=null,off=[],busy=0,st=[];try{st=JSON.parse(m.dataset.st||'[]')}catch(e){}
 if(sb)sb.addEventListener('click',function(){if(busy)return;var on=!sg;
-if(!on){sg.remove();sg=null;off.forEach(function(p){p[0].setAttribute('class',p[1])});off=[];f=V(m.dataset.view);fit();done(0);return}
+if(!on){sg.remove();sg=null;var sh=document.querySelector('.sp-shade');if(sh)sh.remove();off.forEach(function(p){p[0].setAttribute('class',p[1])});off=[];f=V(m.dataset.view);fit();done(0);return}
 busy=1;Promise.all(st.map(function(x){return fetch('prov/'+x[0]+'.json').then(function(r){return r.ok?r.json():{}}).catch(function(){return{}})})).then(function(J){busy=0;
-sg=document.createElementNS(NS,'g');st.forEach(function(x,i){var n=0;x[2].forEach(function(nm){var d=J[i][nm];if(!d)return;var p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('class',x[1]);sg.appendChild(p);n++});
+sg=document.createElementNS(NS,'g');var mx=1,mn=1e9;st.forEach(function(x){if(x[1]==='on')(x[3]||[]).forEach(function(k){if(k>mx)mx=k;if(k<mn)mn=k})});if(mn>mx)mn=mx;
+st.forEach(function(x,i){var n=0;x[2].forEach(function(nm,j){var d=J[i][nm];if(!d)return;var p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('class',x[1]);
+var k=(x[3]||[])[j]||0;if(x[1]==='on'&&mx>mn){var t=Math.sqrt((k-mn)/(mx-mn)),a=[184,226,170],b=[31,92,40];p.style.fill='rgb('+a.map(function(v,q){return Math.round(v+(b[q]-v)*t)}).join(',')+')'}
+var tt=document.createElementNS(NS,'title');tt.textContent=((x[4]||[])[j]||nm).replace(/ \\(\\d+\\)$/,'')+(k?': '+k+' snake species live here':'');p.appendChild(tt);sg.appendChild(p);n++});
 var c=n&&s.getElementById('c-'+x[0]);if(c&&c.getAttribute('class')){off.push([c,c.getAttribute('class')]);c.removeAttribute('class')}});
-s.insertBefore(sg,mk.nextSibling);f=V(m.dataset.sview);fit();done(1)})});
+s.insertBefore(sg,mk.nextSibling);f=V(m.dataset.sview);fit();done(1);
+var lg=document.querySelector('.sp-legend');if(lg&&mx>mn&&!document.querySelector('.sp-shade')){var e=document.createElement('span');e.className='sp-shade';e.innerHTML='<i class="sp-ramp"></i>Lighter: fewer snake species live there · darker: more';lg.appendChild(e)}})});
 function done(o){sb.textContent=o?'Hide precise area':'See precise area';sb.setAttribute('aria-pressed',o?'true':'false')}
 var cb=document.querySelector('.sp-ctbtn'),cl=document.querySelector('.sp-cities'),cg=null,cs=[];try{cs=JSON.parse(m.dataset.cities||'[]')}catch(e){}
 if(cb)cb.addEventListener('click',function(){var on=!cg;
