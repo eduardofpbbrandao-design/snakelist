@@ -448,6 +448,15 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             cc = x["code"] or iso.get(x["name"], "")
             if x.get("states") and cc not in provs:
                 st_rows.append("<li><b>%s (invasive):</b> %s</li>" % (esc(x["name"]), esc(", ".join(region.us_names.get(n, n) if cc == "us" else n for n in x["states"]))))
+        ns = []
+        for cc in codes:
+            if cc in st_whole or cc in provs or cc not in boxes: continue
+            P = region.provinces(cc)
+            if not P: continue
+            B = [e["box"] for e in P.values()]  # every state's own box, so islands far off count too
+            w, e_, s_, n_ = min(x[0] for x in B), max(x[1] for x in B), min(x[2] for x in B), max(x[3] for x in B)
+            if e_ - w > 180: w, e_, s_, n_ = boxes[cc][1:]  # across the date line: the main piece only
+            ns.append([cc, round(w, 2), round(e_, 2), round(s_, 2), round(n_, 2), next((n for n in c["countries"] if iso.get(n) == cc), cc.upper())]); prov_used.add(cc)
         cities = []
         for cc, names in provs.items():
             want = set(names)
@@ -514,12 +523,13 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             hab_all=see_all("habitats", len(c["habitats"])),
             where="".join(rows) or "<li>No range recorded yet.</li>", where_all=see_all("countries", len(c["countries"])),
             st=esc(json.dumps(st_data, ensure_ascii=False, separators=(",", ":"))) if st_data else "", sview=esc(sview or "0 0 1440 720"),
-            stbtn=('<button type="button" class="sp-all sp-stbtn" aria-pressed="false">See precise area</button>' if st_rows else "") +
+            ns=esc(json.dumps(ns, separators=(",", ":"))) if ns else "",
+            stbtn=('<button type="button" class="sp-all sp-stbtn" aria-pressed="false">See precise area</button>' if st_rows or ns else "") +
                   ('<button type="button" class="sp-all sp-ctbtn" aria-pressed="false">See cities</button>' if cities else ""),
             cities_json=esc(json.dumps([[round(t[3], 2), round(t[4], 2), t[0]] for t in cities], ensure_ascii=False)),
             cities_list=('<div class="sp-cities"><h3>Cities in its range</h3><p class="sp-note">Big cities inside the states and provinces where it is recorded - not individual sightings.</p><ul class="sp-where">%s</ul></div>' % "".join(
                 "<li>%s <small>%s</small></li>" % (esc(t[0]), esc(t[1])) for t in cities)) if cities else "",
-            states=('<div class="sp-states"><h3>States, provinces and islands</h3><ul class="sp-where">%s</ul></div>' % "".join(st_rows)) if st_rows else "",
+            states=('<div class="sp-states"><h3>States, provinces and islands</h3><ul class="sp-where">%s</ul></div>' % "".join(st_rows)) if st_rows or ns else "",
             tags="".join('<li><a href="../?%s">%s</a></li>' % (esc(q), esc(t)) for t, q in tags),
             codes=esc(" ".join(codes)), intro=esc(" ".join(icodes)),
             ishapes="".join('<path class="in" d="%s"/>' % d for d in ishapes),
@@ -634,7 +644,7 @@ PAGE = """<!doctype html>
 <p class="sp-cta"><a class="sp-btn" href="../?sp={id}">Open in SnakeList</a></p>
 <section><h2>About</h2><p>{about}</p><div id="sp-wiki"></div></section>
 <section><h2>Where it lives</h2>
-<div class="sp-map" data-codes="{codes}" data-intro="{intro}" data-dots="{dots}" data-view="{view}" data-st="{st}" data-sview="{sview}" data-cities="{cities_json}" aria-label="Map of the {nplaces} countries where {h1} lives"></div><template class="sp-ishapes">{ishapes}</template><div class="sp-mapbar">{legend}{stbtn}</div>{mapnote}{states}{cities_list}
+<div class="sp-map" data-codes="{codes}" data-intro="{intro}" data-dots="{dots}" data-view="{view}" data-st="{st}" data-ns="{ns}" data-sview="{sview}" data-cities="{cities_json}" aria-label="Map of the {nplaces} countries where {h1} lives"></div><template class="sp-ishapes">{ishapes}</template><div class="sp-mapbar">{legend}{stbtn}</div>{mapnote}{states}{cities_list}
 <ul class="sp-where sp-clip">{where}</ul>{where_all}</section>
 <section><h2>Habitats</h2><p class="sp-note">Estimated from where this snake is recorded and what kind of snake it is - not a confirmed habitat survey.</p><ul class="sp-pills sp-clip">{habitats}</ul>{hab_all}</section>
 <section><h2>Related snakes</h2><ul class="sp-rel sp-clip">{related}</ul>{rel_all}</section>
@@ -738,7 +748,7 @@ function fit(){asp();var w=f[2],h=f[3],cx=f[0]+w/2,cy=f[1]+h/2;if(h>w*A)w=h/A;w=
 var rw=m.clientWidth;window.addEventListener('resize',function(){if(m.clientWidth!==rw){rw=m.clientWidth;fit()}});fit();
 var sb=document.querySelector('.sp-stbtn'),sl=document.querySelector('.sp-states'),sg=null,off=[],busy=0,st=[];try{st=JSON.parse(m.dataset.st||'[]')}catch(e){}
 if(sb)sb.addEventListener('click',function(){if(busy)return;var on=!sg;
-if(!on){sg.remove();sg=null;var sh=document.querySelector('.sp-shade');if(sh)sh.remove();off.forEach(function(p){p[0].setAttribute('class',p[1])});off=[];f=V(m.dataset.view);fit();done(0);return}
+if(!on){sg.remove();sg=null;[].forEach.call(document.querySelectorAll('.sp-inat'),function(e){e.remove()});var sh=document.querySelector('.sp-shade');if(sh)sh.remove();off.forEach(function(p){p[0].setAttribute('class',p[1])});off=[];f=V(m.dataset.view);fit();done(0);return}
 busy=1;Promise.all(st.map(function(x){return fetch('prov/'+x[0]+'.json').then(function(r){return r.ok?r.json():{}}).catch(function(){return{}})})).then(function(J){busy=0;
 sg=document.createElementNS(NS,'g');var mx=1,mn=1e9;st.forEach(function(x){if(x[1]==='on')(x[3]||[]).forEach(function(k){if(k>mx)mx=k;if(k<mn)mn=k})});if(mn>mx)mn=mx;
 st.forEach(function(x,i){var n=0;x[2].forEach(function(nm,j){var d=J[i][nm];if(!d)return;var p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('class',x[1]);
@@ -746,7 +756,23 @@ var k=(x[3]||[])[j]||0;if(x[1]==='on'&&mx>mn){var t=Math.sqrt((k-mn)/(mx-mn)),a=
 var tt=document.createElementNS(NS,'title');tt.textContent=((x[4]||[])[j]||nm).replace(/ \\(\\d+\\)$/,'')+(k?': '+k+' snake species live here':'');p.appendChild(tt);sg.appendChild(p);n++});
 var c=n&&s.getElementById('c-'+x[0]);if(c&&c.getAttribute('class')){off.push([c,c.getAttribute('class')]);c.removeAttribute('class')}});
 s.insertBefore(sg,mk.nextSibling);f=V(m.dataset.sview);fit();done(1);
-var lg=document.querySelector('.sp-legend');if(lg&&mx>mn&&!document.querySelector('.sp-shade')){var e=document.createElement('span');e.className='sp-shade';e.innerHTML='<i class="sp-ramp"></i>Lighter: fewer snake species live there · darker: more';lg.appendChild(e)}})});
+inat();var lg=document.querySelector('.sp-legend');if(lg&&mx>mn&&!document.querySelector('.sp-shade')){var e=document.createElement('span');e.className='sp-shade';e.innerHTML='<i class="sp-ramp"></i>Lighter: fewer snake species live there · darker: more';lg.appendChild(e)}})});
+// countries with no state data on record: their states come from where it has actually been
+// seen - iNaturalist's verified wild sightings, each one placed in the state it falls in
+var ns=[];try{ns=JSON.parse(m.dataset.ns||'[]')}catch(e){}
+function inat(){if(!ns.length||!sg)return;var sci=(document.querySelector('.sp-main')||{dataset:{}}).dataset.sci,my=sg,q=ns.slice(0,40),i=0,live=0,got=[];
+var ul=sl&&sl.querySelector('.sp-where'),note=document.createElement('p');note.className='sp-note sp-inat';note.textContent='Looking up where it has been seen on iNaturalist...';if(sl)sl.appendChild(note);
+function fin(){if(live||i<q.length)return;if(!got.length)note.textContent='No iNaturalist sightings to place in the other countries yet - they stay shaded whole.';else note.textContent='States and provinces marked from verified wild sightings on iNaturalist.'}
+function one(){if(sg!==my)return;if(i>=q.length){fin();return}var x=q[i++];live++;
+Promise.all([fetch('prov/'+x[0]+'.json').then(function(r){return r.ok?r.json():{}}),fetch('https://api.inaturalist.org/v1/observations?taxon_name='+encodeURIComponent(sci)+'&verifiable=true&captive=false&per_page=200&swlng='+x[1]+'&nelng='+x[2]+'&swlat='+x[3]+'&nelat='+x[4]).then(function(r){return r.ok?r.json():{}})]).then(function(R){live--;if(sg!==my)return;
+var P=R[0]||{},pts=((R[1]||{}).results||[]).map(function(o){return o.geojson&&o.geojson.coordinates}).filter(Boolean),g=document.createElementNS(NS,'g'),names=[];
+if(pts.length){sg.appendChild(g);Object.keys(P).forEach(function(nm){var p=document.createElementNS(NS,'path');p.setAttribute('d',P[nm]);p.setAttribute('class','on');g.appendChild(p);var k=0;
+pts.forEach(function(c){var pt=s.createSVGPoint();pt.x=(c[0]+180)*4;pt.y=(90-c[1])*4;if(p.isPointInFill(pt))k++});
+if(!k){p.remove();return}var nm2=nm.replace(/ \(\d+\)$/,''),t=document.createElementNS(NS,'title');t.textContent=nm2+': seen '+k+(k===1?' time':' times')+' on iNaturalist';p.appendChild(t);names.push(nm2)});
+if(names.length){var c=s.getElementById('c-'+x[0]);if(c&&c.getAttribute('class')){off.push([c,c.getAttribute('class')]);c.removeAttribute('class')}got.push(x[5]);
+if(ul){var li=document.createElement('li');li.className='sp-inat';li.innerHTML='<b></b> <span></span> <small class="sp-n">from iNaturalist sightings</small>';li.firstChild.textContent=x[5]+':';li.children[1].textContent=names.sort().join(', ');ul.appendChild(li)}}else g.remove()}
+one();fin()},function(){live--;one();fin()})}
+one();one();one()}
 function done(o){sb.textContent=o?'Hide precise area':'See precise area';sb.setAttribute('aria-pressed',o?'true':'false')}
 var cb=document.querySelector('.sp-ctbtn'),cl=document.querySelector('.sp-cities'),cg=null,cs=[];try{cs=JSON.parse(m.dataset.cities||'[]')}catch(e){}
 if(cb)cb.addEventListener('click',function(){var on=!cg;
