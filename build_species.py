@@ -46,6 +46,9 @@ def build(app):
     hab = jget("habitat-data")
     iso = json.loads(re.search(r"var ISO = (\{.*?\});", app).group(1))
     extinct = dict(re.findall(r'"([a-z0-9-]+)": "((?:Extinct|Possibly extinct)[^"]*)"', app.split("const EXTINCT = ", 1)[1].split("};", 1)[0]))
+    fossil_age = json.loads(app.split("const FOSSIL_AGE = ", 1)[1].split(";\n", 1)[0])
+    def ago(m):
+        return "about %s million years ago" % (round(m) if m >= 10 else (round(m * 10) / 10 if m % 1 else int(m))) if m >= 1 else "about {:,} years ago".format(round(m * 1000))
     fossils = set(re.findall(r'"([a-z0-9-]+)"', app.split("// prehistoric snakes known only from fossil bones", 1)[1].split("]", 1)[0]))
     eaters = set(re.findall(r'"([A-Z][a-z]+)"', app.split("const SNAKE_EATERS = new Set([", 1)[1].split("]", 1)[0]))
     intro = {}
@@ -80,6 +83,8 @@ def build(app):
         c["spots"] = rarity.get(c["id"], 0)
         c["extinct"] = extinct.get(c["id"], "")
         c["fossil"] = c["id"] in fossils
+        fa = fossil_age.get(c["id"])
+        c["died"] = (fa[0], ago(fa[1])) if c["fossil"] and fa else None  # (epoch, "about 6 million years ago")
         c["eater"] = c["genus"] in eaters or bool(re.search(r"snake[- ]?eater", a.get("name", ""), re.I))
         c["intro"] = intro.get(c["id"], [])
         c["photo"] = photos["items"].get(c["id"])
@@ -371,7 +376,9 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         where = plist(c["countries"], 5) if c["countries"] else ""
         venom = "venomous" if c["venom"] else "non-venomous"
         if c["fossil"]:
-            lead = "%s is a prehistoric snake known only from fossils%s." % (label, " of the family %s" % c["family"] if c["family"] else "")
+            fa = c["died"]
+            lead = "%s is a prehistoric snake known only from fossils%s.%s" % (label, " of the family %s" % c["family"] if c["family"] else "",
+                (" It died out in the %s, %s." % fa) if fa else "")
         elif c["extinct"]:  # died out: everything about it in the past tense
             lead = "%s was a %s %s%s%s." % (label, venom, kind(c), " of the family %s" % c["family"] if c["family"] else "",
                                             (" that lived in " + where) if where else "")
@@ -500,7 +507,10 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if c["countries"]: facts.append(("Countries", "%d" % len(c["countries"])))
         if rt: facts.append(("How common", rt.split(" - ")[0]))
         if c["extinct"]: facts.append(("Status", c["extinct"].split(" - ")[0]))
-        if c["fossil"]: facts.append(("Status", "Known only from fossils"))
+        if c["fossil"]:
+            facts.append(("Status", "Known only from fossils"))
+            fa = c["died"]
+            if fa: facts.append(("Died out", "%s, %s" % (fa[0][0].upper() + fa[0][1:], fa[1])))
         if c["eater"]: facts.append(("Diet", "Eats other snakes"))
         if c["invasive"] or c["intro"]: facts.append(("Invasive in", c["invasive"] or ", ".join(c["intro"])))
         photo = img_of(c)
