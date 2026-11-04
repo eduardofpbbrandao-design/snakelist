@@ -372,14 +372,18 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         venom = "venomous" if c["venom"] else "non-venomous"
         if c["fossil"]:
             lead = "%s is a prehistoric snake known only from fossils%s." % (label, " of the family %s" % c["family"] if c["family"] else "")
+        elif c["extinct"]:  # died out: everything about it in the past tense
+            lead = "%s was a %s %s%s%s." % (label, venom, kind(c), " of the family %s" % c["family"] if c["family"] else "",
+                                            (" that lived in " + where) if where else "")
         else:
             lead = "%s is a %s %s%s%s." % (label, venom, kind(c), " of the family %s" % c["family"] if c["family"] else "",
                                            (", found in " + where) if where else "")
+        gone = bool(c["extinct"] or c["fossil"])
         extra = []
         if c["extinct"]: extra.append(c["extinct"].replace(" - ", ": ", 1) + ".")
-        if c["eater"]: extra.append("It is known to eat other snakes.")
+        if c["eater"]: extra.append("It was known to eat other snakes." if gone else "It is known to eat other snakes.")
         if c["invasive"] or c["intro"]: extra.append("It is also invasive outside its native range (%s)." % (c["invasive"] or ", ".join(c["intro"])))
-        if c["habitats"]: extra.append("It lives in habitats such as %s." % plist([h.lower() for h in c["habitats"]], 4))
+        if c["habitats"] and not c["fossil"]: extra.append(("It lived in habitats such as %s." if gone else "It lives in habitats such as %s.") % plist([h.lower() for h in c["habitats"]], 4))
         rt = rarity_txt(c)
         if rt: extra.append(rt.split(" - ")[0] + ": " + rt.split(" - ", 1)[1] + "." if " - " in rt else rt + ".")
         about = lead + " " + " ".join(extra)
@@ -519,8 +523,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             title=esc(title), desc=esc(desc), url=url, img=esc(img), ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"),
             h1=esc(nm), sub=esc(sci) if not c["is_sci"] else "", photo=ph, about=esc(about),
             facts="".join("<div><dt>%s</dt><dd>%s</dd></div>" % (esc(k), ('<a href="%s/%s">%s</a>' % (k.lower(), slugify(v), esc(v))) if k in ("Family", "Genus") and v else esc(v)) for k, v in facts),
-            habitats="".join('<li%s><a href="../?hab=%s">%s</a></li>' % (xcls(i, len(c["habitats"])), esc(quote(h)), esc(h)) for i, h in enumerate(c["habitats"])) or "<li>Not worked out yet</li>",
-            hab_all=see_all("habitats", len(c["habitats"])),
+            habitats='<li>Unknown for a snake known only from fossils</li>' if c["fossil"] else "".join('<li%s><a href="../?hab=%s">%s</a></li>' % (xcls(i, len(c["habitats"])), esc(quote(h)), esc(h)) for i, h in enumerate(c["habitats"])) or "<li>Not worked out yet</li>",
+            hab_all="" if c["fossil"] else see_all("habitats", len(c["habitats"])),
             where="".join(rows) or "<li>No range recorded yet.</li>", where_all=see_all("countries", len(c["countries"])),
             st=esc(json.dumps(st_data, ensure_ascii=False, separators=(",", ":"))) if st_data else "", sview=esc(sview or "0 0 1440 720"),
             ns=esc(json.dumps(ns, separators=(",", ":"))) if ns else "",
@@ -536,7 +540,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             dots=esc(" ".join("%.1f,%.1f,%s,%.2g" % ((lo + 180) * 4, (90 - la) * 4, k, sz) for lo, la, k, sz in dots)),
             legend=('<p class="sp-legend"><span><i class="on"></i>Native range</span>%s</p>' % (
                 '<span><i class="in"></i>Invasive</span>' if icodes or ishapes or any(d[2] == "in" for d in dots) else "")) if codes or icodes or ishapes or dots else "", view=esc(view or "0 0 1440 720"), sci_attr=esc(sci), id=c["id"],
-            nplaces=len(c["countries"]),
+            nplaces=len(c["countries"]), lives="lived" if gone else "lives", safe_hidden=" hidden" if gone else "",
             related="".join('<li%s><a href="%s">%s</a> <i>%s</i></li>' % (xcls(i, len(rel)), page_name(x), esc(x["name"]), esc(x["sci"] if not x["is_sci"] else "")) for i, x in enumerate(rel)),
             rel_all=see_all("related snakes", len(rel)),
             author=AUTHOR, venom_cls="v" if c["venom"] else "nv", mapnote="" if codes or icodes or ishapes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
@@ -643,12 +647,12 @@ PAGE = """<!doctype html>
 <dl class="sp-facts">{facts}</dl>
 <p class="sp-cta"><a class="sp-btn" href="../?sp={id}">Open in SnakeList</a></p>
 <section><h2>About</h2><p>{about}</p><div id="sp-wiki"></div></section>
-<section><h2>Where it lives</h2>
-<div class="sp-map" data-codes="{codes}" data-intro="{intro}" data-dots="{dots}" data-view="{view}" data-st="{st}" data-ns="{ns}" data-sview="{sview}" data-cities="{cities_json}" aria-label="Map of the {nplaces} countries where {h1} lives"></div><template class="sp-ishapes">{ishapes}</template><div class="sp-mapbar">{legend}{stbtn}</div>{mapnote}{states}{cities_list}
+<section><h2>Where it {lives}</h2>
+<div class="sp-map" data-codes="{codes}" data-intro="{intro}" data-dots="{dots}" data-view="{view}" data-st="{st}" data-ns="{ns}" data-sview="{sview}" data-cities="{cities_json}" aria-label="Map of the {nplaces} countries where {h1} {lives}"></div><template class="sp-ishapes">{ishapes}</template><div class="sp-mapbar">{legend}{stbtn}</div>{mapnote}{states}{cities_list}
 <ul class="sp-where sp-clip">{where}</ul>{where_all}</section>
 <section><h2>Habitats</h2><p class="sp-note">Estimated from where this snake is recorded and what kind of snake it is - not a confirmed habitat survey.</p><ul class="sp-pills sp-clip">{habitats}</ul>{hab_all}</section>
 <section><h2>Related snakes</h2><ul class="sp-rel sp-clip">{related}</ul>{rel_all}</section>
-<p class="sp-safe"><b>Stay safe:</b> a photo or a web page can never tell you for certain that a snake is harmless. Keep your distance, never handle a wild snake, and get medical help straight away after any bite.</p>
+<p class="sp-safe"{safe_hidden}><b>Stay safe:</b> a photo or a web page can never tell you for certain that a snake is harmless. Keep your distance, never handle a wild snake, and get medical help straight away after any bite.</p>
 </article></main>
 <footer class="sp-foot">SnakeList &middot; made by <a href="../about.html"><b>{author}</b></a> &middot; <a href="../about.html">About me</a> &middot; <a href="../privacy.html">Privacy</a> &middot; <a href="../terms.html">Terms</a></footer>
 <script src="sp.js" defer></script>
