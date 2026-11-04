@@ -11,6 +11,12 @@
   "standalone"
  ],
  "orientation": "landscape",
+ "related_applications": [
+  {
+   "platform": "webapp",
+   "url": "https://snakelist.com/app/snakelist.webmanifest"
+  }
+ ],
  "background_color": "#1F5A3A",
  "theme_color": "#1F5A3A",
  "icons": [
