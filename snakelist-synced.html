@@ -894,7 +894,13 @@
   .cp-row:has(.cp-photo) b { padding-right: 84px; }
   .cp-state-pill[data-prov], .cp-state-pick { cursor: pointer; }
   .cp-state-pill[data-prov]:hover { filter: brightness(1.12); text-decoration: underline; }
-  .cp-state-pick:hover { outline: 1px solid var(--map-on); }
+  /* an inset ring, not an outline: the list scrolls, so an outline was clipped at its sides and only showed top and bottom */
+  .cp-state-pick:hover { outline: none; box-shadow: inset 0 0 0 1.5px var(--map-on); }
+  .cp-titlewrap { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-width: 0; }
+  .cp-top { font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--map-on); background: transparent; color: var(--map-on); white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .cp-top:hover { background: var(--map-on); color: var(--surface, #fff); }
+  .cp-top[hidden] { display: none; }
   .cp-row b { display: block; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; color: var(--text); }
   /* only when this row names a country (the "where these snakes live" overview) - a row
      naming a species instead (inside one clicked country) keeps the normal text color */
@@ -5846,6 +5852,7 @@
         <button class="all-countries see-cities" id="see-cities" type="button" hidden>See cities</button>
         <button class="all-countries" id="see-search-states" type="button" hidden>See states</button>
         <button class="all-countries" id="see-search-cities" type="button" hidden>See cities</button>
+        <button class="all-countries see-islands" id="see-islands" type="button" hidden>See islands</button>
       </div>
       <div class="globe-row" id="globe-row">
         <div class="globe-stage" id="globe-stage">
@@ -5864,7 +5871,7 @@
           </div>
         </div>
         <div class="country-panel" id="country-panel" hidden>
-          <div class="cp-head"><h3 id="cp-title"></h3><button class="cp-close" id="cp-close" type="button">Close</button></div>
+          <div class="cp-head"><div class="cp-titlewrap"><h3 id="cp-title"></h3><button class="cp-top" id="cp-top" type="button" hidden></button></div><button class="cp-close" id="cp-close" type="button">Close</button></div>
           <p class="cp-sub" id="cp-sub"></p>
           <div class="cp-list" id="cp-list"></div>
         </div>
@@ -11921,7 +11928,15 @@ window.SL_GEO_READY = new Promise(function (res) {
       else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
     }
   }, true);
-  // a species row's name (not its "See photo", state pills or city line) opens it
+  // a species row's name (not its "See photo", state pills or city line) goes to that snake's
+  // own species page - the same address the info panel's "View full species page" link uses
+  function spGoPage(id) {
+    var c = spCardEl(id); if (!c) return spOpen(id);
+    var url = spPageUrl(c);
+    if (window.claude && window.claude.use) window.open(url, "_blank", "noopener");
+    else location.href = url;
+    return true;
+  }
   document.getElementById("cp-list").addEventListener("click", function (e) {
     if (e.target.closest(".cp-photo, .cp-states, .cp-city-fact")) return;
     var row = e.target.closest(".cp-row");
@@ -11930,7 +11945,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     var nmEl = row.querySelector("b"), sciEl = row.querySelector("i");
     var nm = nmEl ? nmEl.textContent.trim() : "", sci = sciEl ? sciEl.textContent.trim() : "";
     var sp = INDEX && (INDEX.find(function (x) { return x.name === nm && x.sci === sci; }) || INDEX.find(function (x) { return x.sci === sci; }));
-    if (sp) spOpen(sp.id);
+    if (sp) spGoPage(sp.id);
   });
   function showProvinces() {
     if (!lastCountryCode) return;
