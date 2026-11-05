@@ -152,7 +152,10 @@
     overflow: hidden; background: #08180f;
     clip-path: circle(150% at 50% 50%);
   }
-  .intro-wipe { clip-path: circle(0% at 50% 50%); transition: clip-path 0.5s cubic-bezier(.76,0,.24,1); }
+  /* held on its first frame while the (very long) page is still arriving, so it plays in one
+     go instead of starting, freezing and starting again; it ends with a fade (smooth on the GPU) */
+  .intro.intro-hold, .intro.intro-hold * { animation-play-state: paused !important; }
+  .intro-wipe { opacity: 0; transform: scale(1.03); transition: opacity 0.45s ease, transform 0.45s ease; pointer-events: none; }
   .intro-gone { display: none; }
 
   .photo-wall {
@@ -1439,7 +1442,8 @@
   .layers-pop button:hover { background: rgba(127,127,127,0.12); }
   .layers-pop button.on { border-color: var(--gold, #c8912e); font-weight: 600; }
   .lp-sw { width: 34px; height: 26px; border-radius: 6px; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15); }
-  .lp-classic { background: linear-gradient(135deg, #10375f 0 40%, #4e7040 40% 75%, #10375f 75%); }
+  .lp-classic { background: var(--map-sea, #dbe4ea) linear-gradient(135deg, transparent 0 38%, var(--map-off, #c9ccbb) 38% 72%, transparent 72%); }
+  .lp-classic.lp-real { background-color: var(--map-sea, #dbe4ea); background-size: 300% auto; background-position: 38% 30%; background-repeat: no-repeat; }
   .lp-standard { background: #f2efe9 linear-gradient(115deg, transparent 44%, #f7c66b 44% 52%, transparent 52%),
     linear-gradient(25deg, transparent 60%, #fff 60% 66%, transparent 66%), linear-gradient(0deg, #aad3df 0 30%, transparent 30%); }
   .lp-satellite { background: #1e3b4f url("vendor/earth/blue-marble.jpg") 38% 30% / 300% auto no-repeat; }
@@ -2175,13 +2179,13 @@
 </style>
 <style>
   /* ---- Language: the whole app in any language (Google Translate), picked from the header ---- */
-  .lang-menu { position: fixed; z-index: 120; width: 270px; max-width: calc(100vw - 24px); padding: 8px; border-radius: 14px; background: linear-gradient(160deg, #256846, #22623f);
+  .lang-menu { position: fixed; z-index: 120; width: 300px; max-width: calc(100vw - 24px); padding: 8px; border-radius: 14px; background: linear-gradient(160deg, #256846, #22623f);
     border: 1px solid #37855f; box-shadow: 0 14px 34px rgba(0,0,0,0.3); color: #eef6ee; font: 14px 'Inter', sans-serif; }
   .lang-menu[hidden] { display: none; }
   .lang-menu input { width: 100%; box-sizing: border-box; height: 36px; padding: 0 11px; margin-bottom: 6px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.08); color: #fff; font: 14px 'Inter', sans-serif; outline: none; }
   .lang-menu input::placeholder { color: rgba(238,246,238,0.6); }
   .lang-menu input:focus { border-color: #58b351; }
-  .lang-menu ul { list-style: none; margin: 0; padding: 0; max-height: min(340px, 60vh); overflow-y: auto; scrollbar-width: thin; }
+  .lang-menu ul { list-style: none; margin: 0; padding: 0; max-height: min(460px, 62vh); overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
   .lang-menu li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
   .lang-menu li small { color: rgba(238,246,238,0.6); font-size: 12px; }
   .lang-menu li:hover, .lang-menu li.hi { background: #2c7a57; }
@@ -2250,7 +2254,7 @@
       if (window.matchMedia) matchMedia("(orientation: portrait)").addEventListener("change", check);
     })();
   </script>
-  <div class="intro" id="intro" aria-hidden="true">
+  <div class="intro intro-hold" id="intro" aria-hidden="true">
     <div class="photo-wall" aria-hidden="true">
       <div class="ph ph-1" style="background-image:url(data/ui/1310f8ba59b7c4.jpg)"></div>
       <div class="ph ph-2" style="background-image:url(data/ui/d72b01d04aafa7.jpg)"></div>
@@ -2293,7 +2297,28 @@
       if (/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search)) {
         intro.classList.add("intro-gone"); done = true; window.__introDone = true;
         document.addEventListener("DOMContentLoaded", function () { document.dispatchEvent(new Event("sl-intro-done")); });
-      } else setTimeout(window.__dismissIntro, 1450);
+      } else {
+        // play once the page has arrived and its photos are decoded (never wait more than ~6 s)
+        var go = false, release = function () {
+          if (go) return; go = true;
+          requestAnimationFrame(function () { requestAnimationFrame(function () {
+            intro.classList.remove("intro-hold");
+            setTimeout(window.__dismissIntro, 1450);
+          }); });
+        };
+        var whenReady = function () {
+          var pics = [].slice.call(intro.querySelectorAll(".ph")).map(function (el) {
+            var m = /url\((['"]?)(.*?)\1\)/.exec(el.style.backgroundImage || getComputedStyle(el).backgroundImage || "");
+            if (!m) return Promise.resolve();
+            var im = new Image(); im.src = m[2];
+            return im.decode ? im.decode().catch(function () {}) : Promise.resolve();
+          });
+          Promise.all(pics).then(release, release);
+          setTimeout(release, 1500);
+        };
+        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", whenReady); else whenReady();
+        setTimeout(release, 20000); // a very slow device: never hold the opening forever
+      }
     })();
   </script>
 
@@ -11817,6 +11842,11 @@ window.SL_GEO_READY = new Promise(function (res) {
       ctx.drawImage(window.SL_MAP_SAT, b[0], b[1], b[2], b[3]);
       // zoomed in past what the bundled photo holds: real imagery tiles go over it (Map Layers script)
       if (window.SL_MAP_SAT_TILES) window.SL_MAP_SAT_TILES(ctx, b, w, h);
+      // the photo follows day and night like the rest of the app: a touch lighter by day,
+      // dimmed under a deep green wash at night (the theme button redraws the map)
+      var night = document.documentElement.getAttribute("data-sl-theme") === "dark";
+      ctx.fillStyle = night ? "rgba(6,24,15,0.34)" : "rgba(255,255,255,0.08)";
+      ctx.fillRect(b[0], b[1], b[2], b[3]);
     } else if (POLY && POLY.length && POLY[0].L) {
       var cs = getComputedStyle(document.documentElement);
       ctx.fillStyle = cs.getPropertyValue("--map-sea").trim() || "#dbe4ea"; ctx.fillRect(b[0], b[1], b[2], b[3]);
@@ -12545,7 +12575,28 @@ window.SL_GEO_READY = new Promise(function (res) {
     var lon = function (x) { return (x - vb[0]) / vb[2] * 360 - 180; }, lat = function (y) { return 90 - (y - vb[1]) / vb[3] * 180; };
     return { w: Math.max(-180, lon(0)), e: Math.min(180, lon(W)), n: Math.min(85, lat(0)), s: Math.max(-85, lat(H)) };
   };
-  window.SL_MAP_FIT = function (w, e, s, n) { flyToLonLatBox(w, e, s, n, false); clampPan(); invalidate(); };
+  window.SL_MAP_FIT = function (w, e, s, n, animate) { flyToLonLatBox(w, e, s, n, !!animate); if (!animate) clampPan(); invalidate(); };
+  // a small picture of the SnakeList map itself (whole world, in the current day/night colours),
+  // for the Map style menu - drawn from the same outlines as the map, at the coarsest detail
+  var thumbCache = { key: "", url: null };
+  window.SL_MAP_THUMB = function (W, H) {
+    if (!ready || !POLY || !POLY.length || !POLY[0].L || !window.Path2D || !window.DOMMatrix) return null;
+    var cs = getComputedStyle(document.documentElement);
+    var sea = cs.getPropertyValue("--map-sea").trim() || "#dbe4ea", land = cs.getPropertyValue("--map-off").trim() || "#c9ccbb";
+    var line = cs.getPropertyValue("--map-line").trim() || "#a9ac99", key = [W, H, sea, land, line].join("|");
+    if (thumbCache.key === key) return thumbCache.url;
+    var c = mkCanvas(W, H), g = c.getContext("2d"), M = new DOMMatrix([W / 360, 0, 0, H / 180, 0, 0]);
+    var fillP = new Path2D(), lineP = new Path2D(), idx = p2Index();
+    for (var k in idx) { fillP.addPath(codePath(idx[k], 0, false), M); lineP.addPath(codePath(idx[k], 0, true), M); }
+    g.fillStyle = sea; g.fillRect(0, 0, W, H);
+    g.fillStyle = land; g.fill(fillP);
+    g.strokeStyle = line; g.lineWidth = 0.6; g.lineJoin = "round"; g.stroke(lineP);
+    var url = null;
+    try { url = c.toDataURL("image/png"); } catch (err) {}
+    c.width = c.height = 0; // the picture is kept as its small data URL, not as a canvas
+    thumbCache = { key: key, url: url };
+    return url;
+  };
   window.SL_MAP_REDRAW = function () { invalidate(); };
   window.SL_MAP_SEARCH = function () { return { q: hsearch ? hsearch.value.trim() : "", species: matched || [] }; };
   window.SL_MAP_PICKLL = function (lon, lat) { return POLY ? pick(lon, lat) : null; };
@@ -12580,7 +12631,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   function zoomCap() {
     var cap = MAXZOOM;
-    if (statesMode || islandsOn || multiOn() || PINS.some(function (p) { return p.cityPick || p.cityDot; })) cap = CLOSEZOOM;
+    // (and on Satellite: real imagery tiles hold detail much further in than the plain map)
+    if (statesMode || islandsOn || multiOn() || window.SL_MAP_SAT || PINS.some(function (p) { return p.cityPick || p.cityDot; })) cap = CLOSEZOOM;
     if (selected && POLY) cap = Math.max(cap, tinyZoom(selected));
     return cap;
   }
@@ -14851,7 +14903,12 @@ window.SL_GEO_READY = new Promise(function (res) {
   // horizontal strips, each put where its latitudes belong. Until a tile arrives its nearest
   // loaded parent stands in, and where tiles can't load at all the Blue Marble stays as it was.
   var SAT_URL = STYLES.satellite.url, SAT_MAX = STYLES.satellite.opt.maxZoom, SAT_ATTR = "Imagery © Esri, Maxar, Earthstar Geographics";
-  var TILES = {}, tileCount = 0, tileUse = 0, tileFails = 0, tileFailAt = 0;
+  // Memory: a decoded 256px tile holds 256 KB, so the cache is capped at TILE_CAP tiles (about
+  // 40 MB) and trimmed back to the most recently used TILE_KEEP - a phone or tablet never ends
+  // up holding hundreds of them. At most TILE_FLIGHT downloads run at once; the rest are asked
+  // for as those arrive (each one redraws the map), middle of the view first.
+  var TILES = {}, tileCount = 0, tileUse = 0, tileFails = 0, tileFailAt = 0, tileFlight = 0;
+  var TILE_CAP = 160, TILE_KEEP = 110, TILE_FLIGHT = 10, TILE_VIEW = 100;
   function mercY(lat) { var s = Math.sin(lat * Math.PI / 180); return 0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI); }
   function satTile(z, x, y, fetchIt) {
     var k = z + "/" + x + "/" + y, t = TILES[k];
@@ -14859,17 +14916,25 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (!fetchIt) return null;
     // tiles keep failing (offline, or a copy that can't reach outside sites): rest a minute
     if (tileFails >= 16) { if (Date.now() - tileFailAt < 60000) return null; tileFails = 0; }
+    if (tileFlight >= TILE_FLIGHT) return null; // asked for again on a later redraw
     t = TILES[k] = { img: new Image(), ok: false, use: ++tileUse };
-    tileCount++;
+    tileCount++; tileFlight++;
     t.img.crossOrigin = "anonymous"; // drawn on the map's canvas, which must stay readable
     t.img.decoding = "async";
-    t.img.onload = function () { t.ok = true; tileFails = 0; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); };
-    t.img.onerror = function () { t.bad = true; tileFails++; tileFailAt = Date.now(); };
+    t.img.onload = function () { tileFlight--; t.ok = true; tileFails = 0; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); };
+    t.img.onerror = function () { tileFlight--; t.bad = true; tileFails++; tileFailAt = Date.now(); };
     t.img.src = SAT_URL.replace("{z}", z).replace("{y}", y).replace("{x}", x);
-    if (tileCount > 450) { // keep the most recently used few hundred
+    if (tileCount > TILE_CAP) { // keep only the most recently used ones
       var keys = Object.keys(TILES).sort(function (a, b2) { return TILES[a].use - TILES[b2].use; });
-      keys.slice(0, tileCount - 320).forEach(function (kk) { var o = TILES[kk]; if (!o.ok && !o.bad) o.img.src = ""; delete TILES[kk]; });
+      keys.slice(0, tileCount - TILE_KEEP).forEach(function (kk) {
+        var o = TILES[kk];
+        if (!o.ok && !o.bad) tileFlight--; // cancelled before it arrived
+        o.img.onload = o.img.onerror = null;
+        o.img.src = ""; // lets the browser drop the decoded picture straight away
+        delete TILES[kk];
+      });
       tileCount = Object.keys(TILES).length;
+      if (tileFlight < 0) tileFlight = 0;
     }
     return t;
   }
@@ -14892,14 +14957,20 @@ window.SL_GEO_READY = new Promise(function (res) {
     var dpr = ctx.getTransform ? ctx.getTransform().a : Math.min(2, window.devicePixelRatio || 1);
     var need = b[2] * dpr; // device pixels across the whole world at this zoom
     if (need <= bm.naturalWidth * 1.1) { window.SL_SAT_TILE_Z = 0; return; } // the photo is sharp enough
-    var z = Math.min(SAT_MAX, Math.max(1, Math.ceil(Math.log(need / 256) / Math.LN2 - 0.15))), n = 1 << z;
+    // one tile pixel (or a little more) per device pixel: sharp on a high-density screen too
+    var z = Math.min(SAT_MAX, Math.max(1, Math.ceil(Math.log(need / 256) / Math.LN2 - 0.1))), n = 1 << z;
     var zFloor = Math.ceil(Math.log(bm.naturalWidth / 256) / Math.LN2) + 1; // parents coarser than the photo don't help
     var lonA = Math.max(-180, -b[0] / b[2] * 360 - 180), lonB = Math.min(180, (w - b[0]) / b[2] * 360 - 180);
     var latA = Math.min(85.05, 90 + b[1] / b[3] * 180), latB = Math.max(-85.05, 90 - (h - b[1]) / b[3] * 180);
     if (lonA >= lonB || latA <= latB) return;
-    var x0 = Math.max(0, Math.floor((lonA + 180) / 360 * n)), x1 = Math.min(n - 1, Math.floor((lonB + 180) / 360 * n));
-    var y0 = Math.max(0, Math.floor(mercY(latA) * n)), y1 = Math.min(n - 1, Math.floor(mercY(latB) * n));
-    if ((x1 - x0 + 1) * (y1 - y0 + 1) > 400) return;
+    var x0, x1, y0, y1;
+    for (;;) { // a very big screen: one level coarser rather than more tiles than the cache holds
+      x0 = Math.max(0, Math.floor((lonA + 180) / 360 * n)); x1 = Math.min(n - 1, Math.floor((lonB + 180) / 360 * n));
+      y0 = Math.max(0, Math.floor(mercY(latA) * n)); y1 = Math.min(n - 1, Math.floor(mercY(latB) * n));
+      if ((x1 - x0 + 1) * (y1 - y0 + 1) <= TILE_VIEW || z <= zFloor) break;
+      z--; n = 1 << z;
+    }
+    if (z < zFloor) { window.SL_SAT_TILE_Z = 0; return; }
     window.SL_SAT_TILE_Z = z; // (for checking: the zoom level in use)
     var gap = 0.6 / dpr, drawn = 0;
     ctx.save();
@@ -14908,6 +14979,17 @@ window.SL_GEO_READY = new Promise(function (res) {
     var cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, list = [];
     for (var ty = y0; ty <= y1; ty++) for (var tx = x0; tx <= x1; tx++) list.push([tx, ty]);
     list.sort(function (p, q) { return Math.abs(p[0] - cx) + Math.abs(p[1] - cy) - Math.abs(q[0] - cx) - Math.abs(q[1] - cy); });
+    // progressive: a few coarse tiles three levels up cover the whole view almost at once, so
+    // a fast zoom shows real imagery straight away and sharpens as the close-up tiles arrive
+    var zc = Math.max(zFloor, z - 3);
+    if (zc < z) {
+      var asked = {};
+      list.forEach(function (p) {
+        var d = z - zc, kx = p[0] >> d, ky = p[1] >> d, kk = kx + "/" + ky;
+        if (asked[kk]) return; asked[kk] = 1;
+        satTile(zc, kx, ky, true);
+      });
+    }
     list.forEach(function (p) {
       var t = satTile(z, p[0], p[1], true);
       if (t && t.ok) { drawSatTile(ctx, b, t.img, z, p[0], p[1], z, gap); drawn++; return; }
@@ -15415,6 +15497,28 @@ window.SL_GEO_READY = new Promise(function (res) {
     return '<div class="hab-bar">' + HAB_GREEN.map(function (c) { return '<span style="background:' + c + '"></span>'; }).join("") + '</div>' +
       '<div class="hm-ends"><span>Few</span><span>of its snakes</span><span>Many</span></div>';
   }
+  // a habitat picked: the map moves to where its snakes live - the countries holding most of
+  // them (each by its main landmass, so overseas islands don't stretch the view to the world)
+  function fitHabitat() {
+    var R = habOn && st.hab ? rangeReady() : null;
+    if (!R || !R.nsp) return;
+    var best = {};
+    R.geo.poly.forEach(function (r) {
+      if (r.dot || !R.counts[r.code] || r.e - r.w > 180) return;
+      var a = (r.e - r.w) * (r.no - r.s);
+      if (!best[r.code] || a > best[r.code].a) best[r.code] = { a: a, r: r };
+    });
+    var codes = Object.keys(best); if (!codes.length) return;
+    var core = codes.filter(function (c) { return R.counts[c] >= R.mx * 0.3; });
+    if (!core.length) core = codes;
+    var w = 999, e = -999, so = 999, n = -999;
+    core.forEach(function (c) { var r = best[c].r; w = Math.min(w, r.w); e = Math.max(e, r.e); so = Math.min(so, r.s); n = Math.max(n, r.no); });
+    if (e - w > 200) { w = -180; e = 180; } // all round the world: the band of latitudes it lives in
+    var pw = Math.max(4, (e - w) * 0.08), ph = Math.max(3, (n - so) * 0.08);
+    w = Math.max(-180, w - pw); e = Math.min(180, e + pw); so = Math.max(-85, so - ph); n = Math.min(85, n + ph);
+    if (onCanvas()) window.SL_MAP_FIT && window.SL_MAP_FIT(w, e, so, n, true);
+    else if (map) map.flyToBounds([[so, w], [n, e]], { duration: 0.8 });
+  }
   // after a species search, the map moves to show its whole range
   function fitRange() {
     var R = rangeCounts(); if (!R || !R.single) return;
@@ -15658,7 +15762,13 @@ window.SL_GEO_READY = new Promise(function (res) {
     document.getElementById("hm-time").hidden = st.measure !== "obs";
     [].slice.call(pop.querySelectorAll("button")).forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-style") === st.style); });
   }
-  btnLayers.addEventListener("click", function (e) { e.stopPropagation(); pop.hidden = !pop.hidden; btnLayers.setAttribute("aria-expanded", String(!pop.hidden)); });
+  // the "SnakeList map" choice shows a little picture of the map itself, in today's colours
+  function layerThumb() {
+    var sw = pop.querySelector(".lp-classic"), url = window.SL_MAP_THUMB && window.SL_MAP_THUMB(204, 102);
+    if (sw && url) { sw.style.backgroundImage = 'url("' + url + '")'; sw.classList.add("lp-real"); }
+  }
+  new MutationObserver(function () { if (!pop.hidden) layerThumb(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-sl-theme"] });
+  btnLayers.addEventListener("click", function (e) { e.stopPropagation(); pop.hidden = !pop.hidden; btnLayers.setAttribute("aria-expanded", String(!pop.hidden)); if (!pop.hidden) layerThumb(); });
   document.addEventListener("click", function (e) { if (!e.target.closest(".layers-wrap")) pop.hidden = true; });
   pop.addEventListener("click", function (e) {
     var b = e.target.closest("[data-style]"); if (!b) return;
@@ -15713,7 +15823,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   habQ.addEventListener("input", habRender);
   habList.addEventListener("click", function (e) {
     var b = e.target.closest("[data-h]"); if (!b) return;
-    showHabitat(b.getAttribute("data-h"));
+    if (showHabitat(b.getAttribute("data-h"))) fitHabitat();
     if (window.innerWidth <= 640) setTimeout(function () { habPanel.classList.add("collapsed"); }, 500);
   });
   document.getElementById("hab-collapse").addEventListener("click", function () {
@@ -17734,7 +17844,7 @@ window.SL_welcome = function (u, back) {
 <script>
 (function () {
   var btn = document.getElementById("lang-btn"); if (!btn) return;
-  var LANGS = [["en", "English (original)", "English"], ["af", "Afrikaans", "Afrikaans"], ["sq", "Shqip", "Albanian"], ["ar", "العربية", "Arabic"], ["hy", "Հայերեն", "Armenian"], ["az", "Azərbaycanca", "Azerbaijani"], ["eu", "Euskara", "Basque"], ["be", "Беларуская", "Belarusian"], ["bn", "বাংলা", "Bengali"], ["bs", "Bosanski", "Bosnian"], ["bg", "Български", "Bulgarian"], ["ca", "Català", "Catalan"], ["zh-CN", "中文 (简体)", "Chinese Simplified"], ["zh-TW", "中文 (繁體)", "Chinese Traditional"], ["hr", "Hrvatski", "Croatian"], ["cs", "Čeština", "Czech"], ["da", "Dansk", "Danish"], ["nl", "Nederlands", "Dutch"], ["eo", "Esperanto", "Esperanto"], ["et", "Eesti", "Estonian"], ["tl", "Filipino", "Filipino Tagalog"], ["fi", "Suomi", "Finnish"], ["fr", "Français", "French"], ["gl", "Galego", "Galician"], ["ka", "ქართული", "Georgian"], ["de", "Deutsch", "German"], ["el", "Ελληνικά", "Greek"], ["gu", "ગુજરાતી", "Gujarati"], ["ht", "Kreyòl ayisyen", "Haitian Creole"], ["ha", "Hausa", "Hausa"], ["iw", "עברית", "Hebrew"], ["hi", "हिन्दी", "Hindi"], ["hu", "Magyar", "Hungarian"], ["is", "Íslenska", "Icelandic"], ["ig", "Igbo", "Igbo"], ["id", "Bahasa Indonesia", "Indonesian"], ["ga", "Gaeilge", "Irish"], ["it", "Italiano", "Italian"], ["ja", "日本語", "Japanese"], ["jw", "Basa Jawa", "Javanese"], ["kn", "ಕನ್ನಡ", "Kannada"], ["kk", "Қазақ", "Kazakh"], ["km", "ខ្មែរ", "Khmer"], ["ko", "한국어", "Korean"], ["lo", "ລາວ", "Lao"], ["la", "Latina", "Latin"], ["lv", "Latviešu", "Latvian"], ["lt", "Lietuvių", "Lithuanian"], ["mk", "Македонски", "Macedonian"], ["mg", "Malagasy", "Malagasy"], ["ms", "Bahasa Melayu", "Malay"], ["ml", "മലയാളം", "Malayalam"], ["mt", "Malti", "Maltese"], ["mi", "Māori", "Maori"], ["mr", "मराठी", "Marathi"], ["mn", "Монгол", "Mongolian"], ["my", "မြန်မာ", "Burmese Myanmar"], ["ne", "नेपाली", "Nepali"], ["no", "Norsk", "Norwegian"], ["fa", "فارسی", "Persian Farsi"], ["pl", "Polski", "Polish"], ["pt", "Português", "Portuguese"], ["pa", "ਪੰਜਾਬੀ", "Punjabi"], ["ro", "Română", "Romanian"], ["ru", "Русский", "Russian"], ["sr", "Српски", "Serbian"], ["si", "සිංහල", "Sinhala"], ["sk", "Slovenčina", "Slovak"], ["sl", "Slovenščina", "Slovenian"], ["so", "Soomaali", "Somali"], ["es", "Español", "Spanish"], ["sw", "Kiswahili", "Swahili"], ["sv", "Svenska", "Swedish"], ["ta", "தமிழ்", "Tamil"], ["te", "తెలుగు", "Telugu"], ["th", "ไทย", "Thai"], ["tr", "Türkçe", "Turkish"], ["uk", "Українська", "Ukrainian"], ["ur", "اردو", "Urdu"], ["uz", "Oʻzbek", "Uzbek"], ["vi", "Tiếng Việt", "Vietnamese"], ["cy", "Cymraeg", "Welsh"], ["xh", "isiXhosa", "Xhosa"], ["yo", "Yorùbá", "Yoruba"], ["zu", "isiZulu", "Zulu"]];
+  var LANGS = [["en", "English (original)", "English"], ["ace", "Bahsa Acèh", "Acehnese"], ["ach", "Acholi", "Acholi"], ["af", "Afrikaans", "Afrikaans"], ["ak", "Akan", "Akan (Twi)"], ["sq", "Shqip", "Albanian"], ["alz", "Alur", "Alur"], ["am", "አማርኛ", "Amharic"], ["ar", "العربية", "Arabic"], ["hy", "Հայերեն", "Armenian"], ["as", "অসমীয়া", "Assamese"], ["awa", "अवधी", "Awadhi"], ["ay", "Aymar aru", "Aymara"], ["az", "Azərbaycanca", "Azerbaijani"], ["ban", "Basa Bali", "Balinese"], ["bm", "Bamanankan", "Bambara"], ["ba", "Башҡортса", "Bashkir"], ["eu", "Euskara", "Basque"], ["btx", "Batak Karo", "Batak Karo"], ["bts", "Batak Simalungun", "Batak Simalungun"], ["bbc", "Batak Toba", "Batak Toba"], ["be", "Беларуская", "Belarusian"], ["bem", "Ichibemba", "Bemba"], ["bn", "বাংলা", "Bengali"], ["bew", "Betawi", "Betawi"], ["bho", "भोजपुरी", "Bhojpuri"], ["bik", "Bikol", "Bikol"], ["bs", "Bosanski", "Bosnian"], ["br", "Brezhoneg", "Breton"], ["bg", "Български", "Bulgarian"], ["bua", "Буряад", "Buryat"], ["yue", "粵語", "Cantonese"], ["ca", "Català", "Catalan"], ["ceb", "Cebuano", "Cebuano"], ["ny", "Chichewa", "Chichewa"], ["zh-CN", "中文 (简体)", "Chinese (Simplified)"], ["zh-TW", "中文 (繁體)", "Chinese (Traditional)"], ["cv", "Чӑвашла", "Chuvash"], ["co", "Corsu", "Corsican"], ["crh", "Qırımtatarca", "Crimean Tatar"], ["hr", "Hrvatski", "Croatian"], ["cs", "Čeština", "Czech"], ["da", "Dansk", "Danish"], ["dv", "ދިވެހި", "Dhivehi"], ["din", "Thuɔŋjäŋ", "Dinka"], ["doi", "डोगरी", "Dogri"], ["dov", "Dombe", "Dombe"], ["nl", "Nederlands", "Dutch"], ["dz", "རྫོང་ཁ", "Dzongkha"], ["eo", "Esperanto", "Esperanto"], ["et", "Eesti", "Estonian"], ["ee", "Eʋegbe", "Ewe"], ["fj", "Na Vosa Vakaviti", "Fijian"], ["tl", "Filipino", "Filipino (Tagalog)"], ["fi", "Suomi", "Finnish"], ["fr", "Français", "French"], ["fr-CA", "Français (Canada)", "French (Canada)"], ["fy", "Frysk", "Frisian"], ["ff", "Fulfulde", "Fulani"], ["gaa", "Ga", "Ga"], ["gl", "Galego", "Galician"], ["lg", "Luganda", "Ganda (Luganda)"], ["ka", "ქართული", "Georgian"], ["de", "Deutsch", "German"], ["el", "Ελληνικά", "Greek"], ["gn", "Avañe'ẽ", "Guarani"], ["gu", "ગુજરાતી", "Gujarati"], ["ht", "Kreyòl ayisyen", "Haitian Creole"], ["cnh", "Hakha Chin", "Hakha Chin"], ["ha", "Hausa", "Hausa"], ["haw", "ʻŌlelo Hawaiʻi", "Hawaiian"], ["iw", "עברית", "Hebrew"], ["hil", "Hiligaynon", "Hiligaynon"], ["hi", "हिन्दी", "Hindi"], ["hmn", "Hmoob", "Hmong"], ["hu", "Magyar", "Hungarian"], ["hrx", "Hunsrik", "Hunsrik"], ["is", "Íslenska", "Icelandic"], ["ig", "Igbo", "Igbo"], ["ilo", "Ilokano", "Ilocano"], ["id", "Bahasa Indonesia", "Indonesian"], ["ga", "Gaeilge", "Irish"], ["it", "Italiano", "Italian"], ["ja", "日本語", "Japanese"], ["jw", "Basa Jawa", "Javanese"], ["kn", "ಕನ್ನಡ", "Kannada"], ["pam", "Kapampangan", "Kapampangan"], ["kk", "Қазақ", "Kazakh"], ["km", "ខ្មែរ", "Khmer"], ["cgg", "Rukiga", "Kiga"], ["rw", "Kinyarwanda", "Kinyarwanda"], ["ktu", "Kituba", "Kituba"], ["gom", "कोंकणी", "Konkani"], ["ko", "한국어", "Korean"], ["kri", "Krio", "Krio"], ["ku", "Kurdî", "Kurdish (Kurmanji)"], ["ckb", "کوردی", "Kurdish (Sorani)"], ["ky", "Кыргызча", "Kyrgyz"], ["lo", "ລາວ", "Lao"], ["ltg", "Latgaļu", "Latgalian"], ["la", "Latina", "Latin"], ["lv", "Latviešu", "Latvian"], ["lij", "Ligure", "Ligurian"], ["li", "Limburgs", "Limburgish"], ["ln", "Lingála", "Lingala"], ["lt", "Lietuvių", "Lithuanian"], ["lmo", "Lombard", "Lombard"], ["luo", "Dholuo", "Luo"], ["lb", "Lëtzebuergesch", "Luxembourgish"], ["mk", "Македонски", "Macedonian"], ["mai", "मैथिली", "Maithili"], ["mak", "Makassar", "Makassar"], ["mg", "Malagasy", "Malagasy"], ["ms", "Bahasa Melayu", "Malay"], ["ms-Arab", "بهاس ملايو", "Malay (Jawi)"], ["ml", "മലയാളം", "Malayalam"], ["mt", "Malti", "Maltese"], ["mi", "Māori", "Maori"], ["mr", "मराठी", "Marathi"], ["chm", "Марий", "Meadow Mari"], ["mni-Mtei", "ꯃꯩꯇꯩꯂꯣꯟ", "Meiteilon (Manipuri)"], ["min", "Minang", "Minang"], ["lus", "Mizo", "Mizo"], ["mn", "Монгол", "Mongolian"], ["my", "မြန်မာ", "Myanmar (Burmese)"], ["nr", "isiNdebele", "Ndebele (South)"], ["new", "नेपाल भाषा", "Nepalbhasa (Newari)"], ["ne", "नेपाली", "Nepali"], ["nso", "Sesotho sa Leboa", "Northern Sotho (Sepedi)"], ["no", "Norsk", "Norwegian"], ["nus", "Thok Naath", "Nuer"], ["oc", "Occitan", "Occitan"], ["or", "ଓଡ଼ିଆ", "Odia (Oriya)"], ["om", "Afaan Oromoo", "Oromo"], ["pag", "Pangasinan", "Pangasinan"], ["pap", "Papiamento", "Papiamento"], ["ps", "پښتو", "Pashto"], ["fa", "فارسی", "Persian"], ["pl", "Polski", "Polish"], ["pt", "Português (Brasil)", "Portuguese (Brazil)"], ["pt-PT", "Português (Portugal)", "Portuguese (Portugal)"], ["pa", "ਪੰਜਾਬੀ", "Punjabi (Gurmukhi)"], ["pa-Arab", "پنجابی", "Punjabi (Shahmukhi)"], ["qu", "Runa Simi", "Quechua"], ["rom", "Romani", "Romani"], ["ro", "Română", "Romanian"], ["rn", "Ikirundi", "Rundi"], ["ru", "Русский", "Russian"], ["sm", "Gagana Samoa", "Samoan"], ["sg", "Sängö", "Sango"], ["sa", "संस्कृतम्", "Sanskrit"], ["gd", "Gàidhlig", "Scots Gaelic"], ["sr", "Српски", "Serbian"], ["st", "Sesotho", "Sesotho"], ["crs", "Seselwa", "Seychellois Creole"], ["shn", "Shan", "Shan"], ["sn", "chiShona", "Shona"], ["scn", "Sicilianu", "Sicilian"], ["szl", "Ślōnski", "Silesian"], ["sd", "سنڌي", "Sindhi"], ["si", "සිංහල", "Sinhala"], ["sk", "Slovenčina", "Slovak"], ["sl", "Slovenščina", "Slovenian"], ["so", "Soomaali", "Somali"], ["es", "Español", "Spanish"], ["su", "Basa Sunda", "Sundanese"], ["sw", "Kiswahili", "Swahili"], ["ss", "SiSwati", "Swati"], ["sv", "Svenska", "Swedish"], ["tg", "Тоҷикӣ", "Tajik"], ["ta", "தமிழ்", "Tamil"], ["tt", "Татарча", "Tatar"], ["te", "తెలుగు", "Telugu"], ["tet", "Tetun", "Tetum"], ["th", "ไทย", "Thai"], ["ti", "ትግርኛ", "Tigrinya"], ["ts", "Xitsonga", "Tsonga"], ["tn", "Setswana", "Tswana"], ["tr", "Türkçe", "Turkish"], ["tk", "Türkmençe", "Turkmen"], ["uk", "Українська", "Ukrainian"], ["ur", "اردو", "Urdu"], ["ug", "ئۇيغۇرچە", "Uyghur"], ["uz", "Oʻzbek", "Uzbek"], ["vi", "Tiếng Việt", "Vietnamese"], ["cy", "Cymraeg", "Welsh"], ["xh", "isiXhosa", "Xhosa"], ["yi", "ייִדיש", "Yiddish"], ["yo", "Yorùbá", "Yoruba"], ["yua", "Maaya T'aan", "Yucatec Maya"], ["zu", "isiZulu", "Zulu"]];
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) {} }
   var cur = lsGet("sl-lang") || "en";
@@ -17777,7 +17887,7 @@ window.SL_welcome = function (u, back) {
   function paintBtn() { btn.classList.toggle("on", cur !== "en"); var n = LANGS.find(function (l) { return l[0] === cur; }); btn.title = "Language: " + (n ? n[1] : "English"); }
   // the menu
   var menu = document.createElement("div"); menu.className = "lang-menu notranslate"; menu.setAttribute("translate", "no"); menu.hidden = true;
-  menu.innerHTML = '<input type="text" placeholder="Find a language…" aria-label="Find a language" autocomplete="off"><ul role="listbox" aria-label="Languages"></ul><p class="lang-note">Translated by Google - names of snakes may read oddly.</p>';
+  menu.innerHTML = '<input type="text" placeholder="Find a language…" aria-label="Find a language" autocomplete="off"><ul role="listbox" aria-label="Languages"></ul><p class="lang-note">' + (LANGS.length - 1) + ' languages - scroll or type to find yours. Translated by Google.</p>';
   document.body.appendChild(menu);
   var q = menu.querySelector("input"), ul = menu.querySelector("ul"), shown = [], hi = 0;
   function fold(t) { return String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
