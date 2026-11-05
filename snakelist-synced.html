@@ -10227,8 +10227,38 @@ window.SL_GEO_READY = new Promise(function (res) {
       CENTRE = data.centre;
       TITLE = data.title;
       window.SL_GEO.prebuilt = null; // nothing needs the raw copy any more
+      addIslands();
       return true;
     } catch (err) { return false; }
+  }
+  // the ~9,700 islands of 1 km2 and more that the 1:10m outlines leave out (data/islands.js,
+  // loaded with the map): small rings added to their country's outline. Each is drawn only at
+  // the zoom where it can be a pixel or more across - under that its detail level holds an
+  // empty ring - so the world view costs nothing extra. Never simplified further.
+  function addIslands() {
+    var X = window.SL_ISLANDS;
+    if (!X || !X.c) return;
+    window.SL_ISLANDS = null; // read once; the rings below are all that's kept
+    try {
+      var SC = X.scale || 500, NONE = { n: 0, lon: new Float32Array(0), lat: new Float32Array(0) };
+      Object.keys(X.c).forEach(function (code) {
+        var f = X.c[code], i = 0, x = 0, y = 0;
+        while (i < f.length) {
+          var head = f[i++], n = Math.floor(head / 3), cls = head % 3;
+          var lon = new Float32Array(n), lat = new Float32Array(n), w = 999, e = -999, s = 999, no = -999;
+          for (var k = 0; k < n; k++) {
+            x += f[i++]; y += f[i++];
+            var lo = x / SC, la = y / SC;
+            lon[k] = lo; lat[k] = la;
+            if (lo < w) w = lo; if (lo > e) e = lo; if (la < s) s = la; if (la > no) no = la;
+          }
+          if (n < 3) continue;
+          var full = { n: n, lon: lon, lat: lat };
+          POLY.push({ code: code, n: n, dot: false, lon: lon, lat: lat, w: w, e: e, s: s, no: no, c: [0, 0, 0], isle: true,
+            L: [cls === 2 ? full : NONE, cls >= 1 ? full : NONE, full] });
+        }
+      });
+    } catch (err) {}
   }
   function buildGeometry(done) {
     if (loadPrebuiltGeometry() || loadCachedGeometry()) { done(); return; }
@@ -12962,12 +12992,20 @@ window.SL_GEO_READY = new Promise(function (res) {
       }, 6000);
     } else if (!on && busy) { busy.remove(); busy = null; }
   }
-  var geoWaited = false;
+  var geoWaited = false, islesAsked = false;
   function start() {
     if (ready || building) return;
     building = true;
     // the outlines file still on its way: wait for it (failing that, the map builds from the page's own drawing)
     if (!window.SL_GEO && window.SL_GEO_READY && !geoWaited) { note(true); window.SL_GEO_READY.then(function () { geoWaited = true; building = false; start(); }); return; }
+    // the small islands (data/islands.js, ~400 KB) - fetched only now that the map is wanted
+    if (window.SL_GEO && !islesAsked) {
+      islesAsked = true; note(true);
+      var isc = document.createElement("script"), go = function () { building = false; start(); };
+      isc.src = "data/islands.js"; isc.async = true; isc.onload = go; isc.onerror = go;
+      document.head.appendChild(isc);
+      return;
+    }
     buildGeometry(function () {
       buildTexture(function () {
         ready = true; building = false; dirty = true; window.SL_MAP_GEO_DONE = true;
