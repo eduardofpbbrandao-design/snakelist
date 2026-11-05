@@ -938,7 +938,13 @@
   .cp-row:has(.cp-photo) b { padding-right: 84px; }
   .cp-state-pill[data-prov], .cp-state-pick { cursor: pointer; }
   .cp-state-pill[data-prov]:hover { filter: brightness(1.12); text-decoration: underline; }
-  .cp-state-pick:hover { outline: 1px solid var(--map-on); }
+  /* an inset ring, not an outline: the list scrolls, so an outline was clipped at its sides and only showed top and bottom */
+  .cp-state-pick:hover { outline: none; box-shadow: inset 0 0 0 1.5px var(--map-on); }
+  .cp-titlewrap { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-width: 0; }
+  .cp-top { font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--map-on); background: transparent; color: var(--map-on); white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .cp-top:hover { background: var(--map-on); color: var(--surface, #fff); }
+  .cp-top[hidden] { display: none; }
   .cp-row b { display: block; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 500; color: var(--text); }
   /* only when this row names a country (the "where these snakes live" overview) - a row
      naming a species instead (inside one clicked country) keeps the normal text color */
@@ -1934,7 +1940,20 @@
   .signin-title { font-size: 40px; justify-content: center; margin: 0 0 28px; }
   .signin-head { margin: 0 0 12px; font: 600 clamp(30px, 4.4vw, 40px)/1.15 'Fraunces', Georgia, serif; letter-spacing: -0.01em; color: var(--text); max-width: 400px; }
   .signin-sub { margin: 0 0 30px; font-size: 16px; line-height: 1.5; max-width: 360px; color: var(--text-muted); }
-  #signin-page .g-wrap { width: 100%; align-items: stretch; gap: 14px !important; }
+  #signin-page .g-wrap { width: 100%; box-sizing: border-box; align-items: stretch; gap: 14px !important; padding: 26px 24px 22px; border-radius: 18px;
+    border: 1px solid var(--border); background: var(--surface); box-shadow: 0 6px 24px rgba(10,30,15,0.08); }
+  [data-sl-theme="dark"] #signin-page .g-wrap { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.16); box-shadow: none; }
+  #signin-page .g-legal { margin-top: 6px !important; }
+  .g-accts[hidden] { display: none; }
+  .g-accts { display: flex; flex-direction: column; gap: 8px; }
+  .g-accts-h { margin: 4px 0 0; font: 600 12.5px 'Inter', sans-serif; color: var(--text-muted); text-align: left; }
+  .g-acct { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; text-align: left; font: 14px 'Inter', sans-serif; }
+  .g-acct:hover { border-color: #58b351; background: rgba(88,179,81,0.08); }
+  .g-acct img, .g-acct .g-init { width: 34px; height: 34px; border-radius: 50%; flex: none; object-fit: cover; }
+  .g-acct .g-init { display: flex; align-items: center; justify-content: center; background: #58b351; color: #fff; font-weight: 700; }
+  .g-acct span { display: flex; flex-direction: column; min-width: 0; } .g-acct small { color: var(--text-muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
+  .g-add { width: 100%; height: 44px; border-radius: 12px; border: 1px dashed #58b351; background: transparent; color: var(--text); font: 600 14px 'Inter', sans-serif; cursor: pointer; }
+  .g-add:hover { background: rgba(88,179,81,0.1); }
   #signin-page .g-btn { height: 52px; padding: 0 18px; font: 600 16px 'Inter', sans-serif; border-radius: 12px; gap: 12px; border: 1px solid var(--border);
     background: #fff; color: #1f1f1f; box-shadow: 0 1px 2px rgba(0,0,0,0.06); transition: background-color .15s ease, box-shadow .15s ease; }
   #signin-page .g-btn:hover { background: #f6f8f5; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
@@ -1977,11 +1996,8 @@
   /* big screens: the whole sign-in grows with the screen (same look, just larger), so it fills
      the page instead of sitting small in the middle */
   @media (min-width: 1100px) { .signin-card { max-width: 560px; } #signin-page .signin-head { max-width: 560px; } #signin-page .signin-sub { max-width: 520px; } }
-  @media (min-width: 1100px) and (min-height: 700px) { .signin-card { zoom: 1.15; } }
-  @media (min-width: 1400px) and (min-height: 800px) { .signin-card { zoom: 1.35; } }
-  @media (min-width: 1700px) and (min-height: 900px) { .signin-card { zoom: 1.55; } }
-  @media (min-width: 2100px) and (min-height: 1100px) { .signin-card { zoom: 1.85; } }
-  @media (min-width: 2600px) and (min-height: 1350px) { .signin-card { zoom: 2.2; } }
+  @media (min-width: 1500px) and (min-height: 850px) { .signin-card { zoom: 1.1; } }
+  @media (min-width: 2000px) and (min-height: 1100px) { .signin-card { zoom: 1.2; } }
 </style>
 <style>
   /* eight tabs now (Camera joined) - on wider screens they share the row instead of scrolling */
@@ -6716,6 +6732,7 @@
   var timer = null;
   function save() {
     timer = null;
+    if (window.SL_SWITCHING) return; // switching account: this list has just been put away
     var out = { done: [], wish: [], follow: [], notes: {} };
     grid.querySelectorAll(".card.follow").forEach(function (c) { out.follow.push(c.dataset.id); });
     grid.querySelectorAll(".card.done, .card.wish").forEach(function (c) {
@@ -6761,6 +6778,7 @@
         <button class="all-countries see-cities" id="see-cities" type="button" hidden>See cities</button>
         <button class="all-countries" id="see-search-states" type="button" hidden>See states</button>
         <button class="all-countries" id="see-search-cities" type="button" hidden>See cities</button>
+        <button class="all-countries see-islands" id="see-islands" type="button" hidden>See islands</button>
       </div>
       <div class="globe-row" id="globe-row">
         <div class="globe-stage" id="globe-stage">
@@ -6779,7 +6797,7 @@
           </div>
         </div>
         <div class="country-panel" id="country-panel" hidden>
-          <div class="cp-head"><h3 id="cp-title"></h3><button class="cp-close" id="cp-close" type="button">Close</button></div>
+          <div class="cp-head"><div class="cp-titlewrap"><h3 id="cp-title"></h3><button class="cp-top" id="cp-top" type="button" hidden></button></div><button class="cp-close" id="cp-close" type="button">Close</button></div>
           <p class="cp-sub" id="cp-sub"></p>
           <div class="cp-list" id="cp-list"></div>
         </div>
@@ -10962,7 +10980,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     var citiesShown = document.getElementById("see-cities").textContent === "Hide cities";
     document.getElementById("legend-dot-low").parentNode.lastChild.textContent = "Fewer sightings";
     document.getElementById("legend-dot-high").parentNode.lastChild.textContent = "More sightings";
-    document.getElementById("map-legend").hidden = !(statesMode || citiesShown);
+    document.getElementById("map-legend").hidden = !(statesMode || citiesShown || (typeof multiOn === "function" && multiOn()));
     var hint = document.querySelector(".globe-hint");
     if (hint) hint.innerHTML = "Drag to explore &middot; scroll to zoom &middot; " +
       (statesMode ? "click any " + subdivWord(statesMode, true) + " to see its species" : "click any country");
@@ -11743,6 +11761,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (dirty) { if (!resize()) return; dirty = false; }
     renderFlat();
     drawPins();
+    syncPanelBtns();
     if (window.SL_OVERLAY_DRAW) window.SL_OVERLAY_DRAW(ctx, flatBox(), sizeW, sizeH);
   }
 
@@ -11812,6 +11831,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     // the Species heatmap paints onto this map too, under the borders and labels
     if (window.SL_HEAT_DRAW) window.SL_HEAT_DRAW(ctx, b, w, h, heatFill);
     borders(toFlat);
+    drawMultiStates();
+    drawIslands(toFlat);
     if (statesMode) drawCountryProvinces(toFlat, statesMode);
     drawPlaceLabels(toFlat);
     ctx.restore();
@@ -12121,13 +12142,17 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (o.p[key]) return o.p[key];
     var P = new Path2D();
     o.rings.forEach(function (r) {
-      var L = r.L[lvl], open = false, broke = false;
-      for (var i = 0; i < L.n; i++) {
+      var L = r.L[lvl], open = false, broke = false, n = L.n;
+      // a coast cut at the date line (Chukotka, Fiji, Antarctica) runs along it as an edge of
+      // the shape - filled, that's right, but stroked it drew a straight line down the map's edge
+      var seam = function (k) { return Math.abs(L.lon[k]) >= 179.99 && Math.abs(L.lon[(k + n - 1) % n]) >= 179.99; };
+      for (var i = 0; i < n; i++) {
         if (forStroke && L.lat[i] < POLE_LAT) { open = false; broke = true; continue; }
         var x = L.lon[i] + 180, y = 90 - L.lat[i];
+        if (forStroke && open && seam(i)) { P.moveTo(x, y); broke = true; continue; }
         if (!open) { P.moveTo(x, y); open = true; } else P.lineTo(x, y);
       }
-      if (open && !broke) P.closePath();
+      if (open && !broke && !(forStroke && n && seam(0))) P.closePath();
     });
     return (o.p[key] = P);
   }
@@ -12215,52 +12240,280 @@ window.SL_GEO_READY = new Promise(function (res) {
 
   var pickedProvince = null; // the state/province last clicked while "See states" is on
   var panelKind = null, shownQ = ""; // what the side panel shows, and the search the map shows - for Undo
+  // ---- states/provinces as ready-made shapes ------------------------------------------------
+  // Each country's states are traced once into Path2D shapes in plain lon/lat units (x = lon+180,
+  // y = 90-lat) at three levels of detail, then painted at any zoom with a single transform -
+  // the same way the country outlines are (see codePath). Only the countries actually drawn get
+  // built, and only the states on screen are painted.
+  var PROV_P2 = {}, PROV_TOL = [0.08, 0.02, 0];
+  function provPaths(cc) {
+    var list = cc === "us" ? US_STATES : (getCountryProvinces()[cc] || []);
+    var o = PROV_P2[cc];
+    if (o && o.list === list) return o;
+    if (!list.length || !window.Path2D || !window.DOMMatrix || !Path2D.prototype.addPath) return null;
+    o = { list: list, items: [], w: 999, e: -999, s: 999, n: -999 };
+    list.forEach(function (st) {
+      var it = { st: st, p: [], w: 999, e: -999, s: 999, n: -999, seam: false };
+      (st.rings || []).forEach(function (ring) {
+        for (var i = 0; i < ring.length; i++) {
+          var lo = ring[i][0], la = ring[i][1];
+          if (lo < it.w) it.w = lo; if (lo > it.e) it.e = lo; if (la < it.s) it.s = la; if (la > it.n) it.n = la;
+          if (la < POLE_LAT || Math.abs(lo) >= 179.99) it.seam = true;
+        }
+      });
+      o.items.push(it);
+      if (it.w < o.w) o.w = it.w; if (it.e > o.e) o.e = it.e; if (it.s < o.s) o.s = it.s; if (it.n > o.n) o.n = it.n;
+    });
+    return (PROV_P2[cc] = o);
+  }
+  // one state's shape at a detail level. forStroke: the edges along the date line and the South
+  // Pole are where the source map was cut, not real borders - the line breaks there instead of
+  // drawing a stray straight line along the edge of the map
+  function provLv(it, lvl, forStroke) {
+    var key = lvl * 2 + (forStroke ? 1 : 0);
+    if (it.p[key]) return it.p[key];
+    if (forStroke && !it.seam) return (it.p[key] = provLv(it, lvl, false));
+    var tol = PROV_TOL[lvl], P = new Path2D();
+    it.st.rings.forEach(function (ring) {
+      var n = ring.length, open = false, broke = false, lx = 0, ly = 0, cut = function (k) {
+        var a = ring[k], b = ring[(k + n - 1) % n];
+        return a[1] < POLE_LAT || (Math.abs(a[0]) >= 179.99 && Math.abs(b[0]) >= 179.99);
+      };
+      if (!n) return;
+      if (tol) { // a ring smaller than the detail level is under a pixel: skipped
+        var w = 999, e = -999, s = 999, no = -999;
+        for (var j = 0; j < n; j++) { var q = ring[j]; if (q[0] < w) w = q[0]; if (q[0] > e) e = q[0]; if (q[1] < s) s = q[1]; if (q[1] > no) no = q[1]; }
+        if (e - w < tol && no - s < tol) return;
+      }
+      for (var i = 0; i < n; i++) {
+        var lo = ring[i][0], la = ring[i][1];
+        if (forStroke && cut(i)) { broke = true; if (la < POLE_LAT) { open = false; continue; } P.moveTo(lo + 180, 90 - la); open = true; lx = lo; ly = la; continue; }
+        if (open && tol && i < n - 1 && Math.abs(lo - lx) < tol && Math.abs(la - ly) < tol) continue;
+        if (!open) { P.moveTo(lo + 180, 90 - la); open = true; } else P.lineTo(lo + 180, 90 - la);
+        lx = lo; ly = la;
+      }
+      if (open && !(forStroke && (broke || cut(0)))) P.closePath();
+    });
+    return (it.p[key] = P);
+  }
+  function viewMatrix() { var bx = flatBox(); return new DOMMatrix([bx[2] / 360, 0, 0, bx[3] / 180, bx[0], bx[1]]); }
+  function viewLL() {
+    var vb = flatBox();
+    return { w: -vb[0] / vb[2] * 360 - 180, e: (sizeW - vb[0]) / vb[2] * 360 - 180, n: 90 + vb[1] / vb[3] * 180, s: 90 - (sizeH - vb[1]) / vb[3] * 180 };
+  }
+  function boxInView(o, v) { return o.e >= v.w && o.w <= v.e && o.n >= v.s && o.s <= v.n; }
+  function onScreen(path, M) { var P = new Path2D(); P.addPath(path, M); return P; }
+  // a country's states are drawn inside its own coastline: the state shapes are a coarser
+  // tracing than the country outline, so close up they used to stick out over the sea (and
+  // stop short of the real coast elsewhere) - clipped, their edges always meet the coast the
+  // map shows. A few countries' states also cover places drawn as their own (Puerto Rico...).
+  var CLIP_ALSO = { am: ["az"], az: ["am"], fr: ["gf"], kg: ["tj", "uz"], ls: ["za"], ma: ["es"], mz: ["mw"], om: ["ae"], sm: ["it"], uz: ["tj"], "in": ["bd", "mm"], us: ["as", "gu", "mp", "pr", "vi"] };
+  function countryClip(cc, M, forStroke) {
+    if (!POLY || !POLY.length || !POLY[0].L) return null;
+    var idx = p2Index(), lvl = detailLevel(), out = null;
+    [cc].concat(CLIP_ALSO[cc] || []).forEach(function (c) {
+      if (!idx[c]) return;
+      if (!out) out = new Path2D();
+      out.addPath(codePath(idx[c], lvl, forStroke), M);
+    });
+    return out;
+  }
+  // which of a country's states (as listed by provPaths) hold any of the given species, as counts
+  function stateCounts(cc, rows) {
+    var o = provPaths(cc), list = o ? o.list : (cc === "us" ? US_STATES : (getCountryProvinces()[cc] || [])), CCU = cc.toUpperCase();
+    var byKey = {};
+    rows.forEach(function (sp) {
+      if (cc === "us") (sp.states || []).forEach(function (c) { byKey[c] = (byKey[c] || 0) + 1; });
+      else (sp.provinces || []).forEach(function (k) { if (k.slice(0, 3) === CCU + ":") { var nm = k.slice(3); byKey[nm] = (byKey[nm] || 0) + 1; } });
+    });
+    return list.map(function (st) {
+      if (cc === "us") return byKey[st.code] || 0;
+      if (!st.also || !st.also.length) return byKey[st.name] || 0;
+      var keys = [st.name].concat(st.also).map(function (k) { return CCU + ":" + k; });
+      return rows.filter(function (sp) { return (sp.provinces || []).some(function (k) { return keys.indexOf(k) >= 0; }); }).length;
+    });
+  }
+
+  // ---- "See states" for a search: every lit-up country's states at once --------------------
+  // the search "See states" was turned on for (null: off). A new search turns it off by itself.
+  var searchStatesQ = null;
+  function multiOn() {
+    return !!(HI && !searchMuted() && ((searchStatesQ !== null && searchStatesQ === shownQ) || (statesMode && HI[statesMode])));
+  }
+  var MS = { matched: null, q: null, per: {}, max: 1, top: null };
+  // per lit country: how many of the searched species are recorded in each of its states
+  function multiCounts() {
+    if (MS.matched === matched && MS.q === shownQ && MS.hi === HI) return MS;
+    MS = { matched: matched, q: shownQ, hi: HI, per: {}, max: 1, top: null };
+    var byCC = {};
+    (matched || []).forEach(function (sp) {
+      if (sp.states && sp.states.length) (byCC.us = byCC.us || []).push(sp);
+      var seen = {};
+      (sp.provinces || []).forEach(function (k) { var c = k.slice(0, 2).toLowerCase(); if (!seen[c]) { seen[c] = 1; (byCC[c] = byCC[c] || []).push(sp); } });
+    });
+    Object.keys(HI || {}).forEach(function (cc) {
+      var o = provPaths(cc); if (!o) return;
+      var per = byCC[cc] ? stateCounts(cc, byCC[cc]) : o.list.map(function () { return 0; });
+      MS.per[cc] = per;
+      per.forEach(function (n, i) {
+        if (n > MS.max) MS.max = n;
+        if (n && (!MS.top || n > MS.top.n)) { var st = o.list[i]; MS.top = { cc: cc, key: cc === "us" ? st.code : st.name, n: n, multi: true }; }
+      });
+    });
+    return MS;
+  }
+  function drawMultiStates() {
+    if (!multiOn()) return;
+    var ms = multiCounts(), M = viewMatrix(), v = viewLL(), lvl = detailLevel();
+    Object.keys(ms.per).forEach(function (cc) {
+      if (cc === statesMode) return; // drawn in full by drawCountryProvinces
+      var o = provPaths(cc); if (!o || !boxInView(o, v)) return;
+      var per = ms.per[cc], lines = new Path2D(), any = false;
+      ctx.save();
+      var clip = countryClip(cc, M);
+      if (clip) ctx.clip(clip);
+      o.items.forEach(function (it, i) {
+        if (!boxInView(it, v)) return;
+        var n = per[i];
+        if (n > 0) { ctx.fillStyle = cityDotColor(n / ms.max); ctx.fill(onScreen(provLv(it, lvl, false), M)); }
+        lines.addPath(provLv(it, lvl, true), M); any = true;
+      });
+      if (any) { ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 0.8; ctx.lineJoin = "round"; ctx.stroke(lines); }
+      ctx.restore();
+    });
+  }
+
+  // ---- See islands -----------------------------------------------------------------------------
+  // Island countries and territories (every piece of them an island of its own) and the states,
+  // provinces and regions that are islands (Sicily, Tasmania, Hokkaido, Indonesia's islands...),
+  // worked out once from the map's own outlines: a state is an island when every landmass it
+  // covers has no land border with another country and no other state on it.
+  var ISLAND_LIST = {"c":["ag","ai","as","aw","bb","bh","bl","bm","bn","bs","ck","cu","cv","cw","cy","dm","do","fj","fk","fm","fo","gb","gd","gg","gl","gs","gu","ht","id","ie","im","io","is","je","jm","jp","ki","km","kn","ky","lc","lk","mf","mg","mh","mp","ms","mt","mu","mv","nc","nr","nu","nz","pf","pg","ph","pm","pn","pr","pw","sb","sc","sg","sh","st","sx","tc","tf","tk","tl","to","tt","tv","tw","vc","vg","vi","vu","wf","ws"],"s":{"ag":["Barbuda","Redonda"],"au":["Tasmania","Macquarie Island","Ashmore and Cartier Islands"],"bh":["Muharraq"],"bs":["Berry Islands","Bimini","Black Point","Cat Island","Exuma","Inagua","Long Island","New Providence","San Salvador Island","Mayaguana","Acklins","Crooked Island","Rum Cay","Moore's Island","Ragged Island","Harbour Island","Spanish Wells"],"ca":["Prince Edward Island"],"cn":["Hainan"],"cu":["Isla de la Juventud"],"cv":["Brava","Maio","Boa Vista","Sal","São Vicente"],"ec":["Galápagos"],"ee":["Hiiu","Saare"],"es":["Balearic Islands","Santa Cruz de Tenerife","Las Palmas"],"fj":["Eastern","Northern","Rotuma"],"fr":["Corse","Martinique","Guadeloupe","Réunion","Mayotte"],"gd":["Carriacou and Petite Martinique"],"gq":["Annobón"],"gr":["Crete","Ionian Islands","North Aegean","South Aegean"],"hn":["Bay Islands"],"it":["Sardegna","Sicily"],"jp":["Hokkaidō","Okinawa Prefecture"],"km":["Andjazîdja","Anjouan","Mohéli"],"kr":["Jeju"],"mp":["Rota","Tinian","Saipan","Northern Mariana Islands"],"mu":["Agaléga","Rodrigues"],"mv":["Alif Alif Atoll","Alif Dhaal Atoll","Baa Atoll","Addu Atoll","Gnaviyani Atoll","Gaafu Dhaalu Atoll","Gaafu Alif Atoll","Kaafu Atoll","Lhaviyani Atoll","Raa Atoll","Shaviyani Atoll","Laamu Atoll","Thaa Atoll","Dhaalu Atoll","Meemu Atoll","Faafu Atoll","Vaavu Atoll","Malé","Noonu Atoll","Haa Dhaalu Atoll","Haa Alif Atoll"],"my":["Labuan"],"nc":["Loyalty Islands"],"nl":["Saba","Sint Eustatius","Bonaire"],"no":["Svalbard","Bouvet Island"],"nz":["Auckland Islands","Campbell Islands","Antipodes Islands","Chatham Islands","Kermadec Islands","Snares Islands","Three Kings Islands"],"pf":["Tuamotu Archipelago","Windward Islands","Leeward Islands","Austral Islands","Marquesas Islands"],"pg":["Manus","New Ireland","of Bougainville"],"ph":["Eastern Visayas (Region VIII)","MIMAROPA (Region IV-B)"],"pt":["Madeira","Azores"],"pw":["Koror","Peleliu","Hatohobei","Sonsorol","Angaur","Kayangel"],"ru":["Sakhalin"],"sb":["Central","Choiseul","Guadalcanal","Malaita","Rennell and Bellona","Western","Makira-Ulawa","Temotu","Isabel"],"sc":["La Digue","Coralline Seychelles","Baie Sainte Anne"],"se":["Gotland"],"st":["Príncipe","São Tomé"],"tc":["North Caicos","Providenciales and West Caicos","South Caicos and East Caicos","Middle Caicos","Grand Turk","Salt Cay"],"th":["Phuket"],"vc":["Grenadines"],"ve":["Nueva Esparta","Federal Dependencies"],"vi":["Saint Croix","Saint John","Saint Thomas"],"in":["Andaman and Nicobar Islands"],"co":["San Andrés, Providencia y Santa Catalina"],"id":["Sumatra","Java","Kalimantan (Borneo)","Sulawesi","Papua","Bali","Lombok","Sumbawa","Komodo","Flores","Sumba","Sawu","Roti","Semau","Timor","Solor","Adonara","Lembata","Pantar","Alor","Wetar","Damar","Babar","Tanimbar Islands","Kai Islands","Aru Islands","Seram","Ambon","Buru","Sula Islands","Bacan","Halmahera","Ternate","Tidore","Morotai","Raja Ampat Islands","Yapen Island","Sangihe Islands","Talaud Islands","Weh Island","Simeulue","Nias","Mentawai Islands","Enggano","Bangka","Belitung","Riau Archipelago","Lingga Archipelago","Natuna Islands","Karimata Archipelago"],"us":["HI"]}};
+  var islandsOn = false, ISL = null;
+  function islandEntries() {
+    if (ISL) return ISL;
+    if (!INDEX) buildIndex();
+    var out = [], cset = {}, sset = {};
+    ISLAND_LIST.c.forEach(function (cc) {
+      var name = NAME[cc] || TITLE[cc];
+      if (!name || !(p2Index()[cc] || POLY.some(function (r) { return r.code === cc; }))) return;
+      cset[cc] = 1;
+      out.push({ cc: cc, name: name, n: ((BYCODE && BYCODE[cc]) || []).length, where: "Island country or territory" });
+    });
+    Object.keys(ISLAND_LIST.s).forEach(function (cc) {
+      var list = cc === "us" ? US_STATES : (getCountryProvinces()[cc] || []);
+      if (!list.length) return;
+      var rows = (BYCODE && BYCODE[cc]) || [], counts = stateCounts(cc, rows), want = {};
+      ISLAND_LIST.s[cc].forEach(function (k) { want[k] = 1; });
+      list.forEach(function (st, i) {
+        var key = cc === "us" ? st.code : st.name;
+        if (!want[key]) return;
+        (sset[cc] = sset[cc] || {})[i] = 1;
+        var label = cc === "us" ? ((window.STATE_NAME && window.STATE_NAME[key]) || key) : key.replace(/^of /, "");
+        out.push({ cc: cc, key: key, name: label, n: counts[i], where: NAME[cc] || TITLE[cc] || cc.toUpperCase(), sub: true });
+      });
+    });
+    out.sort(function (a, b) { return b.n - a.n || a.name.localeCompare(b.name); });
+    return (ISL = { list: out, cset: cset, sset: sset });
+  }
+  function showIslands() {
+    var I = islandEntries();
+    panelKind = "islands";
+    stopCityFactObserver();
+    var cpTitle = document.getElementById("cp-title");
+    cpTitle.classList.add("cp-title-place");
+    cpTitle.textContent = "Islands";
+    document.getElementById("cp-sub").textContent = I.list.length + " islands and island groups · tap one to see its snakes";
+    document.getElementById("cp-list").innerHTML = I.list.map(function (e, i) {
+      return '<div class="cp-row cp-row-country cp-state-pick" data-island="' + i + '"><b>' + spEsc(e.name) + "</b><i>" + spEsc(e.where) + " · " +
+        (e.n ? e.n + (e.n === 1 ? " species" : " species") : "no species on record") + "</i></div>";
+    }).join("");
+    popPanel();
+  }
+  function setIslands(on) {
+    islandsOn = !!on;
+    var b = document.getElementById("see-islands");
+    if (b) { b.textContent = islandsOn ? "Hide islands" : "See islands"; b.setAttribute("aria-pressed", String(islandsOn)); }
+  }
+  function drawIslands(to) {
+    if (!islandsOn || !ISL) return;
+    var on = mapOnColor(), v = viewLL(), cs = ISL.cset;
+    var want = function (r) { return cs[r.code] && boxInView({ w: r.w, e: r.e, s: r.s, n: r.no }, v); };
+    shapePath(to, want, 1);
+    ctx.save();
+    ctx.globalAlpha = 0.5; ctx.fillStyle = on; FILL();
+    ctx.globalAlpha = 1; fillDots(to, function (r) { return !!cs[r.code]; }, 2.2);
+    ctx.restore();
+    if (!window.Path2D || !window.DOMMatrix) return;
+    var M = viewMatrix(), lvl = detailLevel(), fills = new Path2D(), any = false;
+    Object.keys(ISL.sset).forEach(function (cc) {
+      var o = provPaths(cc); if (!o || !boxInView(o, v)) return;
+      Object.keys(ISL.sset[cc]).forEach(function (i) {
+        var it = o.items[+i]; if (!it || !boxInView(it, v)) return;
+        fills.addPath(provLv(it, lvl, false), M); any = true;
+      });
+    });
+    if (!any) return;
+    ctx.save();
+    ctx.globalAlpha = 0.6; ctx.fillStyle = on; ctx.fill(fills);
+    ctx.globalAlpha = 1; ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.lineWidth = 0.8; ctx.lineJoin = "round"; ctx.stroke(fills);
+    ctx.restore();
+  }
+
   function drawCountryProvinces(to, cc) {
     var list = cc === "us" ? US_STATES : (getCountryProvinces()[cc] || []);
     var tally = provinceTally(cc);
     var maxN = 0;
     tally.forEach(function (n) { if (n > maxN) maxN = n; });
-    var offColor = getComputedStyle(document.documentElement).getPropertyValue("--map-off").trim() || "#c9ccbb";
-    var seaColor = getComputedStyle(document.documentElement).getPropertyValue("--map-sea").trim() || "#dbe4ea";
+    var css = getComputedStyle(document.documentElement);
+    var offColor = css.getPropertyValue("--map-off").trim() || "#c9ccbb";
+    var seaColor = css.getPropertyValue("--map-sea").trim() || "#dbe4ea";
+    var heatOn = window.SL_HEAT_IS_ON && window.SL_HEAT_IS_ON();
+    var pp = provPaths(cc), M = pp ? viewMatrix() : null, v = viewLL(), lvl = detailLevel();
+    var fade = pickedProvince && list.indexOf(pickedProvince) >= 0;
+    ctx.save();
+    var clip = pp ? countryClip(cc, M) : null;
+    if (clip) ctx.clip(clip);
+    ctx.lineJoin = "round";
     list.forEach(function (s, i) {
-      var n = tally[i];
-      ctx.beginPath();
-      traceStateRings(to, s);
+      var n = tally[i], it = pp && pp.items[i], path = null;
+      if (it) { if (!boxInView(it, v)) return; path = onScreen(provLv(it, lvl, false), M); }
+      else { ctx.beginPath(); traceStateRings(to, s); }
       // no sourced species for this state yet - reads as plain unhighlighted land rather than
       // stretching the gradient down to a misleadingly "some, but very few" light green
-      var heatOn = window.SL_HEAT_IS_ON && window.SL_HEAT_IS_ON();
       ctx.fillStyle = n > 0 ? (heatOn ? window.SL_HEAT_COLOR(0.06 + 0.94 * Math.log(1 + n) / Math.log(1 + Math.max(1, maxN))) : cityDotColor(maxN ? n / maxN : 0)) : (heatOn && window.SL_HEAT_EMPTY && window.SL_HEAT_EMPTY()) || offColor;
-      ctx.fill();
+      if (path) ctx.fill(path); else ctx.fill();
       // with a state tapped, every other state steps back under a wash of the map's own sea
       // colour (pale in day mode, deep green at night) so the tapped one is easy to find -
       // plain transparency would let the selected country's solid green show through instead
-      if (pickedProvince && s !== pickedProvince && list.indexOf(pickedProvince) >= 0) {
+      if (fade && s !== pickedProvince) {
         ctx.globalAlpha = 0.6;
         ctx.fillStyle = seaColor;
-        ctx.fill();
+        if (path) ctx.fill(path); else ctx.fill();
         ctx.globalAlpha = 1;
       }
       ctx.strokeStyle = "rgba(255,255,255,0.9)";
       ctx.lineWidth = 1;
-      ctx.lineJoin = "round";
-      ctx.stroke();
+      if (it) ctx.stroke(onScreen(provLv(it, lvl, true), M)); else ctx.stroke();
     });
     // the clicked state gets a thin line in the bright green the Seen styling lifts to -
     // light enough to read on dark-green states too. Drawn last so no neighbour paints over it.
-    if (pickedProvince && list.indexOf(pickedProvince) >= 0) {
-      var lift = getComputedStyle(document.documentElement).getPropertyValue("--chip-lift").trim() || "#7fc266";
-      ctx.beginPath();
-      traceStateRings(to, pickedProvince);
+    if (fade) {
+      var lift = css.getPropertyValue("--chip-lift").trim() || "#7fc266";
+      var pit = pp && pp.items[list.indexOf(pickedProvince)], pk = pit ? onScreen(provLv(pit, lvl, false), M) : null;
+      if (!pk) { ctx.beginPath(); traceStateRings(to, pickedProvince); }
       // a bright green wash over its own colour, then the thin line on top
       ctx.globalAlpha = 0.3;
       ctx.fillStyle = lift;
-      ctx.fill();
+      if (pk) ctx.fill(pk); else ctx.fill();
       ctx.globalAlpha = 1;
-      ctx.lineJoin = "round";
       ctx.strokeStyle = lift;
       ctx.lineWidth = 2;
-      ctx.stroke();
+      if (pk) ctx.stroke(onScreen(provLv(pit, lvl, true), M)); else ctx.stroke();
     }
+    ctx.restore();
+    // the coast once more, on top: clipped to it, the states end in a clean, even edge
+    if (clip) { ctx.strokeStyle = "rgba(255,255,255,0.9)"; ctx.lineWidth = 1; ctx.lineJoin = "round"; ctx.stroke(countryClip(cc, M, true)); }
   }
 
   // which of the shown states/provinces holds this lon/lat (even-odd, so holes such as
@@ -12327,7 +12580,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   function zoomCap() {
     var cap = MAXZOOM;
-    if (statesMode || PINS.some(function (p) { return p.cityPick || p.cityDot; })) cap = CLOSEZOOM;
+    if (statesMode || islandsOn || multiOn() || PINS.some(function (p) { return p.cityPick || p.cityDot; })) cap = CLOSEZOOM;
     if (selected && POLY) cap = Math.max(cap, tinyZoom(selected));
     return cap;
   }
@@ -12702,6 +12955,26 @@ window.SL_GEO_READY = new Promise(function (res) {
     }
     var city = e.target.closest("[data-city]");
     if (city) { var c = lastCityList[+city.getAttribute("data-city")]; if (c) showCityPick(c); return; }
+    // an island from "See islands": a whole island country goes to that country, an island
+    // state/province to that state - flown to, outlined, with the snakes that live on it
+    var irow = e.target.closest("[data-island]");
+    if (irow) {
+      var ie = ISL && ISL.list[+irow.getAttribute("data-island")];
+      if (!ie) return;
+      if (ie.sub) {
+        lastCountryCode = ie.cc;
+        lastCountryRows = ((BYCODE && BYCODE[ie.cc]) || []).map(function (sp) { return [sp, false]; });
+        showProvinceByKey(ie.cc, ie.key);
+      } else {
+        statesMode = false; pickedProvince = null; updateLegend();
+        selected = ie.cc;
+        fillPanel(ie.cc);
+        var ib = countryBox(ie.cc);
+        if (ib) flyToLonLatBox(ib[0], ib[1], ib[2], ib[3], true);
+      }
+      invalidate();
+      return;
+    }
     var pill = e.target.closest("[data-prov]");
     if (!pill) return;
     var pcc = pill.getAttribute("data-cc");
@@ -12836,7 +13109,15 @@ window.SL_GEO_READY = new Promise(function (res) {
       else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
     }
   }, true);
-  // a species row's name (not its "See photo", state pills or city line) opens it
+  // a species row's name (not its "See photo", state pills or city line) goes to that snake's
+  // own species page - the same address the info panel's "View full species page" link uses
+  function spGoPage(id) {
+    var c = spCardEl(id); if (!c) return spOpen(id);
+    var url = spPageUrl(c);
+    if (window.claude && window.claude.use) window.open(url, "_blank", "noopener");
+    else location.href = url;
+    return true;
+  }
   document.getElementById("cp-list").addEventListener("click", function (e) {
     if (e.target.closest(".cp-photo, .cp-states, .cp-city-fact")) return;
     var row = e.target.closest(".cp-row");
@@ -12845,7 +13126,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     var nmEl = row.querySelector("b"), sciEl = row.querySelector("i");
     var nm = nmEl ? nmEl.textContent.trim() : "", sci = sciEl ? sciEl.textContent.trim() : "";
     var sp = INDEX && (INDEX.find(function (x) { return x.name === nm && x.sci === sci; }) || INDEX.find(function (x) { return x.sci === sci; }));
-    if (sp) spOpen(sp.id);
+    if (sp) spGoPage(sp.id);
   });
   function showProvinces() {
     if (!lastCountryCode) return;
@@ -13042,6 +13323,12 @@ window.SL_GEO_READY = new Promise(function (res) {
       var picked = statesMode && !pin
         ? provinceAt(statesMode, (mx - bx[0]) / bx[2] * 360 - 180, 90 - (my - bx[1]) / bx[3] * 180)
         : null;
+      // "See states" on for a search: a state in any of its lit-up countries can be tapped too
+      var multiPick = null;
+      if (!pin && !picked && multiOn()) {
+        var tlon = (mx - bx[0]) / bx[2] * 360 - 180, tlat = 90 - (my - bx[1]) / bx[3] * 180, tcc = pick(tlon, tlat);
+        if (tcc && tcc !== statesMode && multiCounts().per[tcc]) { var tst = provinceAt(tcc, tlon, tlat); if (tst) multiPick = [tcc, tst]; }
+      }
       var cityOn = PINS.some(function (p) { return p.cityPick || p.cityDot; });
       if (pin && (pin.cityPick || pin.cityDot)) {
         // a city dot: its name shows beside it (one at a time) and the panel says what lives there
@@ -13056,6 +13343,16 @@ window.SL_GEO_READY = new Promise(function (res) {
           pickedProvince = picked;
           fillProvince(statesMode, picked);
         }
+      } else if (multiPick) {
+        // the same as tapping that state in the search's own list of states
+        labelPin = null;
+        if (cityOn) clearCities();
+        lastCountryCode = multiPick[0];
+        lastCountryRows = (matched || []).map(function (sp) { return [sp, false]; });
+        statesMode = multiPick[0]; pickedProvince = multiPick[1];
+        setProvBtn(true, statesMode);
+        updateLegend();
+        fillProvince(statesMode, pickedProvince);
       } else if (pin) {
         selected = null;
         fillArea(pin);
@@ -13112,7 +13409,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     zoomAt(1 / 1.3);
   });
   document.getElementById("globe-reset").addEventListener("click", function () {
-    lon0 = 10; lat0 = 18; fz = 1; fx = 0; fy = 0; selected = null; statesMode = false; pickedProvince = null;
+    lon0 = 10; lat0 = 18; fz = 1; fx = 0; fy = 0; selected = null; statesMode = false; pickedProvince = null; searchStatesQ = null; setIslands(false);
     document.getElementById("country-panel").hidden = true;
     document.getElementById("see-species").hidden = true;
     document.getElementById("see-provinces").hidden = true;
@@ -13129,6 +13426,8 @@ window.SL_GEO_READY = new Promise(function (res) {
       paint();
       return;
     }
+    // with the country's states on, this button reads "List states" and lists them
+    if (statesMode && statesMode === lastCountryCode) showProvinces();
     document.getElementById("country-panel").scrollIntoView({ behavior: "smooth", block: "start" });
   });
   document.getElementById("see-provinces").addEventListener("click", function () {
@@ -13150,6 +13449,60 @@ window.SL_GEO_READY = new Promise(function (res) {
       if (bx) flyToLonLatBox(bx[0], bx[1], bx[2], bx[3], true);
     }
     // the page stays where it is - the map itself moves to the states instead
+  });
+  // the panel's buttons that depend on what the map shows, kept in step after every frame (only
+  // touching the page when something actually changed): "See species" reads "List states" while
+  // a country's states are on (that's what it shows), the search's "See states" reads "Hide
+  // states" while they're drawn, and next to the panel's title, the state with the most species
+  var TOPP = null, _btnKey = "";
+  function topProvince() {
+    if (document.getElementById("country-panel").hidden || panelKind === "islands" || panelKind === "countries" || panelKind === "cities") return null;
+    if (searchStatesQ !== null && searchStatesQ === shownQ && multiOn()) return multiCounts().top;
+    if (statesMode) {
+      var list = statesMode === "us" ? US_STATES : (getCountryProvinces()[statesMode] || []), t = provinceTally(statesMode), bi = -1;
+      t.forEach(function (n, i) { if (n > 0 && (bi < 0 || n > t[bi])) bi = i; });
+      if (bi >= 0) return { cc: statesMode, key: statesMode === "us" ? list[bi].code : list[bi].name, n: t[bi] };
+    }
+    return null;
+  }
+  function syncPanelBtns() {
+    var multi = multiOn() && searchStatesQ === shownQ;
+    TOPP = topProvince();
+    var sb = document.getElementById("see-species"), qb = document.getElementById("see-search-states");
+    var spT = !pendingWorldCity && statesMode && statesMode === lastCountryCode ? "List " + subdivWord(statesMode) : "See species";
+    if (sb.textContent !== spT) sb.textContent = spT;
+    var qT = (multi ? "Hide " : "See ") + qb.textContent.replace(/^(See|Hide) /, "");
+    if (qb.textContent !== qT) qb.textContent = qT;
+    var key = TOPP ? TOPP.cc + "|" + TOPP.key + "|" + TOPP.n : "";
+    if (key === _btnKey) return;
+    _btnKey = key;
+    var top = document.getElementById("cp-top");
+    top.hidden = !TOPP;
+    if (TOPP) {
+      var nm = TOPP.cc === "us" ? ((window.STATE_NAME && window.STATE_NAME[TOPP.key]) || TOPP.key) : TOPP.key;
+      top.textContent = "Most species: " + nm + " (" + TOPP.n + ")";
+      top.title = "Go to " + nm + ", the " + subdivWord(TOPP.cc, true) + " with the most species";
+    }
+  }
+  document.getElementById("cp-top").addEventListener("click", function () {
+    var t = TOPP; if (!t) return;
+    beforeChange();
+    if (t.multi) {
+      lastCountryCode = t.cc;
+      lastCountryRows = (matched || []).map(function (sp) { return [sp, false]; });
+    }
+    showProvinceByKey(t.cc, t.key);
+    invalidate();
+  });
+  document.getElementById("see-islands").addEventListener("click", function () {
+    if (islandsOn) {
+      setIslands(false);
+      if (panelKind === "islands") hidePanel();
+    } else {
+      setIslands(true);
+      showIslands();
+    }
+    invalidate();
   });
   // a handful of species carry 40+ states (2 cities each) - firing all of those fetches to
   // iNaturalist at once via a single Promise.all was up to ~90 simultaneous requests, real
@@ -13221,6 +13574,17 @@ window.SL_GEO_READY = new Promise(function (res) {
     return (sp.states || []).map(function (c) { return "US:" + c; }).concat(sp.provinces || []);
   }
   document.getElementById("see-search-states").addEventListener("click", function () {
+    // a second tap hides them again (the button reads "Hide states" while they're on)
+    if (searchStatesQ !== null && searchStatesQ === shownQ) {
+      searchStatesQ = null;
+      if (statesMode && HI && HI[statesMode] && statesMode !== selected) { statesMode = false; pickedProvince = null; setProvBtn(false); }
+      if (panelKind === "searchstates" || panelKind === "prov") { document.getElementById("country-panel").hidden = true; ["see-species", "see-provinces"].forEach(function (id) { document.getElementById(id).hidden = true; }); }
+      updateLegend();
+      invalidate();
+      return;
+    }
+    // every country the search lights up shows its states on the map, not just one
+    searchStatesQ = shownQ;
     panelKind = "searchstates";
     stopCityFactObserver();
     var counts = {}, cont = lastContinentMatch, cset = lastContinentSet;
@@ -13240,6 +13604,8 @@ window.SL_GEO_READY = new Promise(function (res) {
         provLabel(k) + "</b><i>" + country + " · " + counts[k] + " species</i></div>";
     }).join("");
     popPanel();
+    updateLegend();
+    invalidate();
   });
   // a city counts a species when the species lives in its country - and, where the species has
   // state/province data for that country, in the city's own state too
@@ -13412,7 +13778,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (pin) fillArea(pin);
   }
   document.getElementById("cp-close").addEventListener("click", function () {
-    selected = null; statesMode = false;
+    selected = null; statesMode = false; searchStatesQ = null;
     clearCities();
     setProvBtn(false);
     document.getElementById("country-panel").hidden = true;
@@ -13480,6 +13846,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       buildTexture(function () {
         ready = true; building = false; dirty = true; window.SL_MAP_GEO_DONE = true;
         note(false);
+        document.getElementById("see-islands").hidden = false;
         paint();
       });
     });
@@ -13524,7 +13891,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     beforeChange();
     var fromSearch = !!(searchSelected || shownPlace);
     clearCities();
-    selected = null; searchSelected = null; statesMode = false; pickedProvince = null;
+    selected = null; searchSelected = null; statesMode = false; pickedProvince = null; searchStatesQ = null;
     setProvBtn(false);
     if (fromSearch) hsearch.value = "";
     paint();
@@ -13547,11 +13914,12 @@ window.SL_GEO_READY = new Promise(function (res) {
       q: shownQ, sel: selected, st: statesMode, pk: statesMode ? provKeyOfShape(statesMode, pickedProvince) : null,
       cities: cityPin, cprov: citiesProv ? provKeyOfShape(selected, citiesProv) : null, label: labelPin ? labelPin.area : null,
       spCities: document.getElementById("see-cities").textContent === "Hide cities",
+      ss: searchStatesQ !== null && searchStatesQ === shownQ, isl: islandsOn,
       panel: panelOn ? panelKind : null, view: [fz, fx, fy]
     };
   }
   function sameStep(a, b) {
-    return ["q", "sel", "st", "pk", "cities", "cprov", "label", "spCities", "panel"].every(function (k) { return a[k] === b[k]; });
+    return ["q", "sel", "st", "pk", "cities", "cprov", "label", "spCities", "ss", "isl", "panel"].every(function (k) { return a[k] === b[k]; });
   }
   var undoCheck = null;
   function beforeChange() {
@@ -13576,7 +13944,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     undoing = true;
     clearCities();
     hsearch.value = s.q;
+    searchStatesQ = null;
     paint();
+    setIslands(s.isl);
     if (s.sel) {
       if (selected !== s.sel || panelKind !== "country") { selected = s.sel; fillPanel(s.sel); }
     } else selected = null;
@@ -13594,6 +13964,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (kind === "provlist") showProvinces();
     else if (kind === "countries") listCountries();
     else if (kind === "searchstates") document.getElementById("see-search-states").click();
+    else if (kind === "islands") showIslands();
     else if (kind === "prov" && pickedProvince) fillProvince(statesMode, pickedProvince);
     if (s.cities) {
       if (!s.cprov) { var keepPk = pickedProvince; pickedProvince = null; document.getElementById("see-search-cities").click(); pickedProvince = keepPk; }
@@ -13607,6 +13978,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       if (pin) fillArea(pin);
     }
     if (!s.panel) hidePanel();
+    searchStatesQ = s.ss ? shownQ : null;
     updateLegend();
     flyToken++; // the exact view it had, not a fresh fly-to from the steps above
     fz = s.view[0]; fx = s.view[1]; fy = s.view[2];
@@ -15994,7 +16366,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   form.addEventListener("submit", function (e) {
     e.preventDefault(); e.stopImmediatePropagation();
     if (window.claude && window.claude.use) { formSay("Email accounts work on snakelist.com - this copy keeps your list on this device.", "info"); return; }
-    if (!FIREBASE_CONFIG) { formSay("Email accounts are being switched on - use Continue with Google for now. Your list is saved on this device.", "info"); return; }
+    if (!FIREBASE_CONFIG) { localAccount(); return; }
     var mode = window.SL_SIGNIN_MODE || "signin";
     var email = document.getElementById("signin-email").value.trim(), pw = document.getElementById("signin-password").value;
     var name = (document.getElementById("signin-name") || {}).value || "";
@@ -16022,18 +16394,120 @@ window.SL_GEO_READY = new Promise(function (res) {
     }).then(function () { sub.disabled = false; document.getElementById("signin-password").value = ""; },
       function (err) { sub.disabled = false; formSay(err && err.code ? fbError(err) : "Couldn't load the sign-in - check your connection and try again."); });
   }, true);
+  // until SnakeList accounts sync online (Firebase), an email account lives on this device:
+  // name, email and a salted SHA-256 of the password (never the password itself)
+  function pwHash(pw, salt) {
+    var data = new TextEncoder().encode(salt + ":" + pw);
+    return crypto.subtle.digest("SHA-256", data).then(function (b) { return Array.from(new Uint8Array(b)).map(function (x) { return x.toString(16).padStart(2, "0"); }).join(""); });
+  }
+  function localAccount() {
+    var mode = window.SL_SIGNIN_MODE || "signin";
+    var email = document.getElementById("signin-email").value.trim(), pw = document.getElementById("signin-password").value;
+    var name = ((document.getElementById("signin-name") || {}).value || "").trim();
+    var low = email.toLowerCase(), list = accounts(), found = list.find(function (a) { return a.kind === "local" && String(a.email).toLowerCase() === low; });
+    if (!email || email.indexOf("@") < 1) { formSay("Type your email."); return; }
+    if (mode === "reset") { formSay(found ? "This account is saved on this device - you can open it from Switch account without a password." : "There's no SnakeList account with that email on this device.", found ? "info" : ""); return; }
+    if (!pw) { formSay("Type your password."); return; }
+    if (!(window.crypto && crypto.subtle)) { formSay("This browser can't keep a password safely - use Continue with Google."); return; }
+    if (mode === "create") {
+      if (found) { formSay("There's already an account with that email - sign in instead."); return; }
+      if (pw.length < 6) { formSay("Pick a password with at least 6 characters."); return; }
+      var salt = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      pwHash(pw, salt).then(function (h) {
+        user = { name: name || email.split("@")[0], email: email, kind: "local" };
+        put("sl-google", user); markAlive();
+        var a = accounts(), id = curAcct(), e = a.find(function (x) { return x.id === id; });
+        var info = { id: id, name: user.name, email: email, picture: "", kind: "local", salt: salt, hash: h };
+        if (e) Object.assign(e, info); else a.push(info);
+        put("sl-accounts", a);
+        document.getElementById("signin-password").value = ""; formSay("");
+        paintUser(); if (window.SL_welcome) window.SL_welcome(user, false); backHome();
+      });
+      return;
+    }
+    if (!found) { formSay("There's no SnakeList account with that email on this device - create one, or use Continue with Google."); return; }
+    pwHash(pw, found.salt).then(function (h) {
+      if (h !== found.hash) { formSay("That password isn't right - try again."); return; }
+      document.getElementById("signin-password").value = "";
+      if (found.id === curAcct()) { user = { name: found.name, email: found.email, kind: "local" }; put("sl-google", user); paintUser(); backHome(); }
+      else switchTo(found.id);
+    });
+  }
   // signed in with an email account on an earlier visit: reconnect quietly
   if (user && user.kind === "email" && FIREBASE_CONFIG && !(window.claude && window.claude.use)) loadFB().catch(function () {});
   function esc(t) { return String(t || "").replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  // ---- several SnakeList accounts on one device: each keeps its own list, notes, favourites,
+  // quiz score, badges and photos. The account in use lives in localStorage as always; the
+  // others are put away in IndexedDB and swapped back in (then a reload) when you switch.
+  var ACCT_KEYS = ["sl-web-state", "sl-favs", "sl-follow-meta", "sl-pinned", "sl-quiz-correct", "sl-quiz-wrong", "sl-badges", "sl-interests",
+    "sl-google", "sl-gtoken", "sl-sync-base", "sl-sync-photos", "sl-last-sync"], ACCT_PRE = ["sl-sighting-photos:", "sl-sighting-photo:", "sl-quiz-"];
+  function isAcctKey(k) { return ACCT_KEYS.indexOf(k) >= 0 || ACCT_PRE.some(function (p) { return k.indexOf(p) === 0; }); }
+  function idbStore(mode, fn) {
+    return new Promise(function (res, rej) {
+      var rq = indexedDB.open("snakelist-accounts", 1);
+      rq.onupgradeneeded = function () { rq.result.createObjectStore("stash"); };
+      rq.onerror = function () { rej(rq.error); };
+      rq.onsuccess = function () { var db = rq.result, tx = db.transaction("stash", mode), r = fn(tx.objectStore("stash"));
+        tx.oncomplete = function () { res(r && r.result); db.close(); }; tx.onerror = function () { rej(tx.error); }; };
+    });
+  }
+  function accounts() { return get("sl-accounts") || []; }
+  function curAcct() { var id = get("sl-acct-cur"); if (!id) { id = "a" + Date.now().toString(36); put("sl-acct-cur", id); } return id; }
+  function noteAccount() { // the account in use, as the account list shows it
+    if (!user) return;
+    var a = accounts(), id = curAcct(), e = a.find(function (x) { return x.id === id; });
+    var info = { id: id, name: user.name || "", email: user.email || "", picture: user.picture || "", kind: user.kind || "google" };
+    if (e) Object.assign(e, info); else a.push(info);
+    put("sl-accounts", a);
+  }
+  // put this account's things away and bring another's back (or none: a fresh start to add an account)
+  function switchTo(targetId) {
+    if (window.claude && window.claude.use) return;
+    window.SL_SWITCHING = true;
+    var snap = {}, keys = [];
+    for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && isAcctKey(k)) keys.push(k); }
+    keys.forEach(function (k) { snap[k] = localStorage.getItem(k); });
+    var cur = curAcct();
+    return idbStore("readwrite", function (st) { return st.put(snap, cur); })
+      .then(function () { return targetId ? idbStore("readonly", function (st) { return st.get(targetId); }) : null; })
+      .then(function (t) {
+        keys.forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
+        if (t) Object.keys(t).forEach(function (k) { try { localStorage.setItem(k, t[k]); } catch (e) {} });
+        put("sl-acct-cur", targetId || "a" + Date.now().toString(36));
+        try { sessionStorage.removeItem("sl-sync-reloaded"); if (!targetId) sessionStorage.setItem("sl-open-signin", "1"); } catch (e) {}
+        if (targetId) return idbStore("readwrite", function (st) { return st.delete(targetId); });
+      })
+      .then(function () { location.reload(); }, function () { window.SL_SWITCHING = false; say("Couldn't switch account on this device - please try again."); });
+  }
+  function otherAccounts() { var id = curAcct(); return accounts().filter(function (a) { return a.id !== id; }); }
+  function acctRows() {
+    var o = otherAccounts();
+    return (o.length ? '<p class="g-accts-h">Switch account</p>' + o.map(function (a) {
+      return '<button type="button" class="g-acct" data-acct="' + esc(a.id) + '">' + (a.picture ? '<img src="' + esc(a.picture) + '" alt="" referrerpolicy="no-referrer">' : '<span class="g-init">' + esc((a.name || "?")[0]) + "</span>") +
+        "<span><b>" + esc(a.name) + "</b><small>" + esc(a.email) + "</small></span></button>";
+    }).join("") : "") + (user ? '<button type="button" class="g-add" id="g-add">+ Add another account</button>' : "");
+  }
+  var acctBox = document.createElement("div"); acctBox.className = "g-accts"; wrap.insertBefore(acctBox, me.nextSibling);
+  acctBox.addEventListener("click", function (e) {
+    var a = e.target.closest("[data-acct]"); if (a) { switchTo(a.getAttribute("data-acct")); return; }
+    if (e.target.closest("#g-add")) switchTo(null);
+  });
+  // a fresh start for a new account opens straight onto the sign-in page
+  try { if (sessionStorage.getItem("sl-open-signin")) { sessionStorage.removeItem("sl-open-signin"); setTimeout(function () { var o = document.querySelector('[data-auth="open"]'); if (o) o.click(); }, 300); } } catch (e) {}
   function paintUser() {
+    noteAccount();
+    var subEl = document.getElementById("signin-sub");
+    if (subEl) { if (user) subEl.textContent = "You're signed in."; else if (subEl.textContent === "You're signed in.") subEl.textContent = "Sign in to keep your sightings safe and in sync."; }
+    acctBox.innerHTML = window.claude && window.claude.use ? "" : acctRows();
+    acctBox.hidden = !acctBox.innerHTML;
     var hb = document.querySelector('.auth-btn[data-auth="open"]');
     var cb = document.getElementById("creator-bar");
-    var isCreator = !!(user && String(user.email || "").toLowerCase() === "eduardo.fpb.brandao@gmail.com" && (user.kind !== "email" || user.verified));
+    var isCreator = !!(user && String(user.email || "").toLowerCase() === "eduardo.fpb.brandao@gmail.com" && user.kind !== "local" && (user.kind !== "email" || user.verified));
     if (window.SL_setCreator) window.SL_setCreator(isCreator); else if (cb) cb.hidden = !isCreator;
     if (user) {
       me.hidden = false; btn.hidden = true; remember.hidden = true; form.hidden = true; orLine.hidden = true; if (links) links.hidden = true;
       me.innerHTML = (user.picture ? '<img src="' + esc(user.picture) + '" alt="" referrerpolicy="no-referrer">' : '<span class="g-init">' + esc((user.name || "?")[0]) + "</span>") +
-        "<div><b>" + esc(user.name) + "</b><small>" + esc(user.email) + " · " + (token || fbUser ? "your list syncs by itself" : user.kind === "email" ? "connecting…" : "syncs again on your next tap") + "</small></div>" +
+        "<div><b>" + esc(user.name) + "</b><small>" + esc(user.email) + " · " + (user.kind === "local" ? "saved on this device" : token || fbUser ? "your list syncs by itself" : user.kind === "email" ? "connecting…" : "syncs again on your next tap") + "</small></div>" +
         '<button type="button" class="g-out" id="g-out">Sign out</button>';
       if (hb) hb.innerHTML = '<span class="g-dot">' + (user.picture ? '<img src="' + esc(user.picture) + '" alt="" referrerpolicy="no-referrer">' : esc((user.name || "?")[0])) + "</span>" + esc((user.name || "").split(" ")[0]);
     } else {
@@ -16045,6 +16519,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (e.target.closest("#g-out")) {
       if (token && window.google && google.accounts && google.accounts.oauth2) google.accounts.oauth2.revoke(token, function () {});
       if (fbUser && window.firebase) { fbUser = null; firebase.auth().signOut().catch(function () {}); }
+      var gone = curAcct(); put("sl-accounts", accounts().filter(function (a) { return a.id !== gone || a.kind === "local"; }));
       user = null; token = null; put("sl-google", null); put("sl-gtoken", null); put("sl-sync-base", null); put("sl-sync-photos", null); paintUser(); say("Signed out. Your list stays on this device.");
     }
     if (e.target.closest("#g-sync")) signIn(true);
