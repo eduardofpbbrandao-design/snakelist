@@ -104,6 +104,7 @@ The app itself is one large interactive page. Every species also has its own sma
 - Snakes by genus: {SITE}species/genus/<genus> - e.g. [Oxyuranus]({SITE}species/genus/oxyuranus)
 
 ## About
+- [About SnakeList]({SITE}about-snakelist.html) - what it is, why and when it was made, and who made it
 - [About the creator]({SITE}about.html)
 - [Privacy]({SITE}privacy.html) - lists are kept on the visitor's own device or their own Google Drive; there is no user database
 - Photos come from iNaturalist photographers under Creative Commons licences, credited on each species page
@@ -126,7 +127,7 @@ def lastmod(u):
     old = DATES.get(u)
     if not old or old[0] != h: DATES[u] = [h, TODAY]
     return DATES[u][1]
-ALL_URLS = [SITE, SITE + "about.html", SITE + "privacy.html", SITE + "terms.html"] + SPECIES_URLS
+ALL_URLS = [SITE, SITE + "about-snakelist.html", SITE + "about.html", SITE + "privacy.html", SITE + "terms.html"] + SPECIES_URLS
 open("sitemap.xml", "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     "".join("  <url><loc>%s</loc><lastmod>%s</lastmod></url>\n" % (u, lastmod(u)) for u in ALL_URLS) + "</urlset>\n")
 json.dump(DATES, open(DATES_FILE, "w"), separators=(",", ":"))

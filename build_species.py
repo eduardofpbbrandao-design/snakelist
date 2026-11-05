@@ -664,7 +664,7 @@ PAGE = """<!doctype html>
 <section><h2>Related snakes</h2><ul class="sp-rel sp-clip">{related}</ul>{rel_all}</section>
 <p class="sp-safe"{safe_hidden}><b>Stay safe:</b> a photo or a web page can never tell you for certain that a snake is harmless. Keep your distance, never handle a wild snake, and get medical help straight away after any bite.</p>
 </article></main>
-<footer class="sp-foot">SnakeList &middot; made by <a href="../about.html"><b>{author}</b></a> &middot; <a href="../about.html">About me</a> &middot; <a href="../privacy.html">Privacy</a> &middot; <a href="../terms.html">Terms</a></footer>
+<footer class="sp-foot"><a href="../about-snakelist.html">SnakeList</a> &middot; made by <a href="../about.html"><b>{author}</b></a> &middot; <a href="../about.html">About me</a> &middot; <a href="../privacy.html">Privacy</a> &middot; <a href="../terms.html">Terms</a></footer>
 <script src="sp.js" defer></script>
 </body></html>
 """
@@ -683,7 +683,7 @@ HUB = """<!doctype html>
 <main class="sp-main"><nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../../">SnakeList</a> &rsaquo; <a href="../">All species</a> &rsaquo; <span>{h1}</span></nav>
 <h1>{h1}</h1><p class="sp-lead">{lead}</p><p class="sp-cta"><a class="sp-btn" href="{app}">{app_label}</a></p>
 <ul class="sp-az">{items}</ul></main>
-<footer class="sp-foot">SnakeList &middot; made by <a href="../../about.html"><b>{author}</b></a></footer>
+<footer class="sp-foot"><a href="../../about-snakelist.html">SnakeList</a> &middot; made by <a href="../../about.html"><b>{author}</b></a></footer>
 </body></html>
 """
 
@@ -696,7 +696,7 @@ INDEX = """<!doctype html>
 </head><body>
 <header class="sp-top"><a class="sp-logo" href="../">SnakeList</a><nav><a href="../">Open the app</a></nav></header>
 <main class="sp-main"><h1>All {n} snake species</h1><p class="sp-muted">By family, A-Z. Tap one for its photo, map and facts.</p>{body}</main>
-<footer class="sp-foot">SnakeList &middot; made by <b>{author}</b></footer>
+<footer class="sp-foot"><a href="../about-snakelist.html">SnakeList</a> &middot; made by <b>{author}</b></footer>
 </body></html>
 """
 
