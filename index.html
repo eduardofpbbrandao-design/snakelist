@@ -1077,6 +1077,10 @@
   .map-wrap.quiz-map:not(.answered) svg .landxx:hover path, .map-wrap.quiz-map:not(.answered) svg path.landxx:hover { fill: color-mix(in srgb, var(--map-on) 55%, var(--map-off)); }
   .map-wrap.quiz-map svg .quiz-guess path, .map-wrap.quiz-map svg path.quiz-guess, .map-wrap.quiz-map svg .quiz-guess circle { fill: var(--map-on); stroke: rgba(255,255,255,0.95); stroke-width: 1.2px; } /* same as a picked country on the Map tab */
   .quiz-map svg .quiz-marker { pointer-events: none; }
+  /* a state question: that country's states drawn over it - tap one to pick it */
+  .quiz-map svg .quiz-prov { fill: var(--map-off); stroke: rgba(255,255,255,0.9); stroke-width: 0.8px; vector-effect: non-scaling-stroke; cursor: pointer; transition: fill .12s ease; }
+  .quiz-map svg .quiz-prov:hover { fill: color-mix(in srgb, var(--map-on) 45%, var(--map-off)); }
+  .quiz-map svg .quiz-prov.right { fill: var(--map-on); }
   .map-wrap.quiz-map.answered svg { cursor: default; }
   .quiz-map-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; }
   .quiz-map-search { position: relative; margin-bottom: 8px; }
@@ -2249,7 +2253,7 @@
   
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.00</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.01</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All 4,254 snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -9816,7 +9820,7 @@
     quizAnswered = false;
     if (Math.random() < 0.33) { factQuizQuestion(quizPoolFor(quizLevel)); return; }
     const tierPool = quizPoolFor(quizLevel);
-    const statePool = quizLevel === "hard" ? tierPool.filter((c) => c.getAttribute("data-states")) : [];
+    const statePool = quizLevel === "hard" ? tierPool.filter((c) => c.getAttribute("data-states") || c.getAttribute("data-provinces")) : [];
     // hard mode asks for real US states when it can - the one place we have verified,
     // sourced sub-country data - and falls back to countries for species without it
     const useStates = statePool.length && Math.random() < 0.6;
@@ -9828,8 +9832,13 @@
     if (quizRecent.length > Math.min(15, Math.floor(pool.length / 2))) quizRecent.shift();
     const countries = card.dataset.countries.split("|").filter(Boolean);
     const states = (card.getAttribute("data-states") || "").split("|").filter(Boolean);
+    const provs = (card.getAttribute("data-provinces") || "").split("|").filter(Boolean);
     const answerKind = useStates ? "state" : "country";
-    const rawAnswers = useStates ? states.map((code) => (window.STATE_NAME && window.STATE_NAME[code]) || code) : countries;
+    const rawAnswers = useStates ? states.map((code) => (window.STATE_NAME && window.STATE_NAME[code]) || code)
+      .concat(provs.map((p) => p.slice(3).replace(/ \(\d+\)$/, ""))).filter((v, i, a) => a.indexOf(v) === i) : countries;
+    // which countries' states to show on the map: the ones its state records are in
+    const stateCCs = useStates ? [...new Set((states.length ? ["US"] : []).concat(provs.map((p) => p.slice(0, 2))))] : [];
+    const word = useStates ? (window.SL_SUBDIV_WORD ? window.SL_SUBDIV_WORD(stateCCs.map((c) => c.toLowerCase()), true) : "state") : "country";
     // easy always asks for just one; medium/hard ask for two when the species actually
     // has two or more, so "harder" mostly means less time plus more often needing both
     const need = quizLevel === "easy" ? 1 : Math.min(2, rawAnswers.length);
@@ -9839,14 +9848,14 @@
     else inv.forEach((pl) => (pl.states || []).forEach((c) => { const n = window.STATE_NAME[c]; if (n && !rawAnswers.includes(n)) rawAnswers.push(n); }));
     const allCountries = countries.concat(inv.map((pl) => pl.name).filter((n) => !countries.includes(n)));
     quizCurrent = { name: card.querySelector(".card-name").textContent, sci: card.querySelector(".card-sci").textContent,
-      countries: allCountries, states, answers: rawAnswers, answerKind, need, card };
+      countries: allCountries, states, answers: rawAnswers, answerKind, need, card, stateCCs, word };
     document.getElementById("quiz-question").textContent =
-      need === 1 ? "Which " + answerKind + " is the " + quizCurrent.name + " found in?"
-                 : "Name " + need + " " + (answerKind === "country" ? "countries" : answerKind + "s") + " where the " + quizCurrent.name + " is found.";
+      need === 1 ? "Which " + word + " is the " + quizCurrent.name + " found in?"
+                 : "Name " + need + " " + (answerKind === "country" ? "countries" : (window.SL_SUBDIV_WORD ? window.SL_SUBDIV_WORD(stateCCs.map((c) => c.toLowerCase())) : "states")) + " where the " + quizCurrent.name + " is found.";
     document.getElementById("quiz-sci").textContent = quizCurrent.sci;
     document.getElementById("quiz-answers").innerHTML = Array.from({ length: need }, (_, i) => {
-      const label = answerKind === "state" ? "State" : "Country";
-      const example = useStates ? ["Arizona", "Texas"][i] || "Arizona" : QUIZ_EXAMPLES[i] || QUIZ_EXAMPLES[0];
+      const label = answerKind === "state" ? word.charAt(0).toUpperCase() + word.slice(1) : "Country";
+      const example = useStates ? (stateCCs.includes("US") ? ["Arizona", "Texas"][i] || "Arizona" : ({ MX: "Sonora", BR: "Bahia", IN: "Kerala", AU: "Queensland", CN: "Yunnan" })[stateCCs[0]] || "the state's name") : QUIZ_EXAMPLES[i] || QUIZ_EXAMPLES[0];
       return '<label class="quiz-answer-field"><span>' + label + (need > 1 ? " " + (i + 1) : "") + "</span>" +
         '<div class="quiz-suggest" hidden></div>' +
         '<input type="text" class="quiz-answer-input" autocomplete="off" placeholder="e.g. ' + example + '"></label>';
@@ -9870,9 +9879,13 @@
   // As you type, the best matches show above the box ("arg" -> Argentina); tap one to fill it in.
   // A country question also suggests US states/provinces, since those count as their country.
   const foldQ = (x) => x.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  let PROV_NAMES = null;
   function quizSuggestPool(kind) {
     const states = Object.values(window.STATE_NAME || {});
-    if (kind === "state") return states;
+    if (kind === "state") {
+      if (!PROV_NAMES) { const s = new Set(); cards.forEach((c) => (c.getAttribute("data-provinces") || "").split("|").forEach((p) => { if (p) s.add(p.slice(3).replace(/ \(\d+\)$/, "")); })); PROV_NAMES = [...s]; }
+      return states.concat(PROV_NAMES);
+    }
     return COUNTRIES.concat(states, ["USA", "UK"]);
   }
   function wireQuizSuggestions(kind) {
@@ -10166,9 +10179,45 @@
     e.preventDefault();
     pickFromSearch(quizMapMenu._m[+b.dataset.i]);
   });
+  const QSVG = "http://www.w3.org/2000/svg";
+  function drawQuizStates() {
+    if (!quizMapSvg) return;
+    const old = quizMapSvg.querySelector(".quiz-provs"); if (old) old.remove();
+    quizMapSvg.setAttribute("viewBox", "0 0 2754 1398");
+    if (!quizCurrent || quizCurrent.answerKind !== "state" || !window.SL_WORLD.provShapes) return;
+    const g = document.createElementNS(QSVG, "g"); g.setAttribute("class", "quiz-provs");
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    quizCurrent.stateCCs.forEach((cc) => {
+      window.SL_WORLD.provShapes(cc).forEach((st) => {
+        const p = document.createElementNS(QSVG, "path");
+        p.setAttribute("d", st.d); p.setAttribute("class", "quiz-prov");
+        p.dataset.key = st.key; p.dataset.also = st.also.join("|"); p.dataset.label = st.label; p.dataset.cc = cc.toLowerCase();
+        const t = document.createElementNS(QSVG, "title"); t.textContent = st.label; p.appendChild(t);
+        g.appendChild(p);
+      });
+    });
+    if (!g.childNodes.length) return;
+    quizMapSvg.appendChild(g);
+    [].forEach.call(g.childNodes, (p) => { const b = p.getBBox(); if (b.width * b.height > 0.5) { x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.width); y1 = Math.max(y1, b.y + b.height); } });
+    if (x1 > x0) { // zoomed to those countries, a little room around them
+      const w = Math.max((x1 - x0) * 1.2, 160), h = Math.max((y1 - y0) * 1.2, 80), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+      const W = Math.max(w, h * 2754 / 1398), H = W * 1398 / 2754;
+      quizMapSvg.setAttribute("viewBox", (cx - W / 2).toFixed(1) + " " + (cy - H / 2).toFixed(1) + " " + W.toFixed(1) + " " + H.toFixed(1));
+    }
+    g.addEventListener("click", (e) => {
+      const p = e.target.closest(".quiz-prov"); if (!p || quizAnswered) return;
+      e.stopPropagation();
+      const i = quizPicks.findIndex((q) => q.area === p.dataset.key);
+      if (i >= 0) { quizPicks.splice(i, 1); drawQuizPicks(); return; }
+      const pt = quizMapSvg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+      const q = pt.matrixTransform(quizMapSvg.getScreenCTM().inverse());
+      addQuizPick({ key: "state:" + p.dataset.key, kind: "state", label: p.dataset.label, code: p.dataset.cc, area: p.dataset.key, x: q.x, y: q.y });
+    });
+  }
   function resetQuizMap() {
     ensureQuizMap();
     quizPicks = [];
+    drawQuizStates();
     document.getElementById("quiz-map").classList.remove("answered");
     if (quizMapSvg) {
       quizMapSvg.querySelectorAll(".on, .quiz-guess").forEach((el) => el.classList.remove("on", "quiz-guess"));
@@ -10190,6 +10239,11 @@
       const code = iso[n];
       if (code) quizMapSvg.querySelectorAll('[data-code="' + code + '"]').forEach((el) => el.classList.add("on"));
     });
+    const places = new Set(((quizCurrent.card.getAttribute("data-states") || "").split("|").filter(Boolean).map((c) => "US:" + c))
+      .concat((quizCurrent.card.getAttribute("data-provinces") || "").split("|").filter(Boolean)));
+    quizMapSvg.querySelectorAll(".quiz-prov").forEach((p) => {
+      if (places.has(p.dataset.key) || p.dataset.also.split("|").some((a) => places.has(a))) p.classList.add("right");
+    });
     document.getElementById("quiz-map-submit").hidden = true;
     if (quizPicks.length) drawQuizPicks();
   }
@@ -10203,7 +10257,11 @@
     if (quizCurrent.answerKind === "state" && pk.kind === "country") return false; // a state question wants a state
     if (pk.kind === "country") return codes.includes(pk.code);
     const area = pk.area;
-    if (area && placeCountries.has(area.slice(0, 2))) return places.has(area);
+    if (area && placeCountries.has(area.slice(0, 2))) {
+      if (places.has(area)) return true;
+      const el = quizMapSvg && [].find.call(quizMapSvg.querySelectorAll(".quiz-prov"), (p) => p.dataset.key === area);
+      return !!(el && el.dataset.also.split("|").some((a) => places.has(a)));
+    }
     return codes.includes(pk.code);
   }
   function quizCodes() {
@@ -10710,7 +10768,16 @@ window.SL_GEO_READY = new Promise(function (res) {
     }
     return out;
   }
-  // for the quiz map: where a state/province sits on this same world map
+  // for the quiz map: every state/province of one country, as paths on this same world map
+  window.SL_WORLD.provShapes = function (cc) {
+    cc = String(cc).toUpperCase();
+    var shapes = cc === "US" ? US_STATES : (getCountryProvinces()[cc.toLowerCase()] || []);
+    return shapes.map(function (st) {
+      var nm = cc === "US" ? st.code : st.name;
+      return { key: cc + ":" + nm, also: (st.also || []).map(function (a) { return cc + ":" + a; }), label: cc === "US" ? (STATE_NAME[st.code] || st.code) : String(st.name).replace(/ \(\d+\)$/, ""),
+        d: st.rings.map(function (ring) { return "M" + ring.map(function (pt) { var q = projectSheet(pt[0], pt[1]); return q[0].toFixed(1) + " " + q[1].toFixed(1); }).join("L") + "Z"; }).join("") };
+    });
+  };
   window.SL_WORLD.project = projectSheet;
   window.SL_WORLD.placePoint = function (key) {
     var cc = key.slice(0, 2), nm = key.slice(3);
@@ -15473,6 +15540,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v4.01", d: "2026-11-05", items: ["Quiz: \"which state\" questions now work for snakes all over the world, and the map zooms to that country with its states drawn in - tap one to pick it"] },
     { v: "v4.00", d: "2026-11-05", items: ["SnakeList accounts: sign in with your email and a password (or create an account, or reset a forgotten password) - your list syncs across your devices, just like with Google"] },
     { v: "v3.99", d: "2026-11-05", items: ["Sign in: Remember me is a normal checkbox - green with a white tick when it's on"] },
     { v: "v3.98", d: "2026-11-05", items: ["A calmer sign-in page: no box, a big heading, one wide Continue with Google button, Remember me, and the small print underneath"] },
