@@ -10444,7 +10444,7 @@
 // the map's outlines (data/geo.js, several MB): downloaded in the background, never holding up
 // SnakeList opening - the map, "See states" and the state lists pick it up when it's there
 window.SL_GEO_READY = new Promise(function (res) {
-  var sc = document.createElement("script"); sc.src = "data/geo.js"; sc.async = true;
+  var sc = document.createElement("script"); sc.src = "data/geo.js?v=5e21fb8fa6"; sc.async = true;
   sc.onload = function () { res(window.SL_GEO || null); document.dispatchEvent(new Event("sl-geo")); };
   sc.onerror = function () { res(null); };
   document.head.appendChild(sc);
@@ -15394,7 +15394,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (plP) return plP;
     plP = new Promise(function (res) {
       if (window.SL_PLACES_RAW) { res(); return; }
-      var sc = document.createElement("script"); sc.src = "data/places.js"; sc.onload = res; sc.onerror = res; document.head.appendChild(sc);
+      var sc = document.createElement("script"); sc.src = "data/places.js?v=28fa1d89bc"; sc.onload = res; sc.onerror = res; document.head.appendChild(sc);
     }).then(function () {
       var raw = window.SL_PLACES_RAW || ""; window.SL_PLACES_RAW = null;
       if (!raw) return;
