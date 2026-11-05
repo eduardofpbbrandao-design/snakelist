@@ -69,6 +69,12 @@ def _pic(m):
     if not os.path.exists(name): open(name, "wb").write(raw)
     return "url(%s%s%s)" % (q, name, q)
 site_app = re.sub(r"url\((['\"]?)data:image/([a-z+]+);base64,([A-Za-z0-9+/=]+)\1\)", _pic, app)
+# the big data files get a version tag from their contents, so a device that saved an older copy
+# (the offline helper keeps data/ files) fetches the new one the moment it changes
+for _f in ("data/geo.js", "data/places.js"):
+    if os.path.exists(_f):
+        _v = hashlib.sha1(open(_f, "rb").read()).hexdigest()[:10]
+        site_app = site_app.replace('sc.src = "%s"' % _f, 'sc.src = "%s?v=%s"' % (_f, _v))
 body_at = re.search(r"<(?!/?(?:title|style|script|link|meta|!--)\b)[a-zA-Z]", site_app).start()
 # every stylesheet goes up into the head, in the same order: the page is megabytes long, and a
 # style block near its end used to arrive seconds after the parts it styles - the Install
@@ -171,7 +177,14 @@ self.addEventListener('fetch', (e) => {
   }
   if (/\\/(species-photos|data|vendor)\\//.test(url.pathname)) {
     e.respondWith(caches.open(CACHE).then((c) => c.match(req).then((hit) => {
-      const net = fetch(req).then((r) => { if (r.ok) c.put(req, r.clone()); return r; }).catch(() => hit);
+      const net = fetch(req).then((r) => {
+        if (r.ok) {
+          c.put(req, r.clone());
+          // a new version of a data file: drop the older copies of the same file
+          if (url.search) c.keys().then((ks) => ks.forEach((k) => { const u = new URL(k.url); if (u.pathname === url.pathname && u.search !== url.search) c.delete(k); }));
+        }
+        return r;
+      }).catch(() => hit);
       return hit || net;
     })));
   }

@@ -15,7 +15,14 @@ self.addEventListener('fetch', (e) => {
   }
   if (/\/(species-photos|data|vendor)\//.test(url.pathname)) {
     e.respondWith(caches.open(CACHE).then((c) => c.match(req).then((hit) => {
-      const net = fetch(req).then((r) => { if (r.ok) c.put(req, r.clone()); return r; }).catch(() => hit);
+      const net = fetch(req).then((r) => {
+        if (r.ok) {
+          c.put(req, r.clone());
+          // a new version of a data file: drop the older copies of the same file
+          if (url.search) c.keys().then((ks) => ks.forEach((k) => { const u = new URL(k.url); if (u.pathname === url.pathname && u.search !== url.search) c.delete(k); }));
+        }
+        return r;
+      }).catch(() => hit);
       return hit || net;
     })));
   }
