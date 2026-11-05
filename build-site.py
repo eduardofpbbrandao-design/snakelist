@@ -71,7 +71,7 @@ def _pic(m):
 site_app = re.sub(r"url\((['\"]?)data:image/([a-z+]+);base64,([A-Za-z0-9+/=]+)\1\)", _pic, app)
 # the big data files get a version tag from their contents, so a device that saved an older copy
 # (the offline helper keeps data/ files) fetches the new one the moment it changes
-for _f in ("data/geo.js", "data/places.js"):
+for _f in ("data/geo.js", "data/places.js", "data/islands.js"):
     if os.path.exists(_f):
         _v = hashlib.sha1(open(_f, "rb").read()).hexdigest()[:10]
         site_app = site_app.replace('sc.src = "%s"' % _f, 'sc.src = "%s?v=%s"' % (_f, _v))
