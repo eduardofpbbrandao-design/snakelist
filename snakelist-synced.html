@@ -11197,7 +11197,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     var lonA = (0 - vb[0]) / vb[2] * 360 - 180, lonB = (sizeW - vb[0]) / vb[2] * 360 - 180;
     var latA = 90 - (0 - vb[1]) / vb[3] * 180, latB = 90 - (sizeH - vb[1]) / vb[3] * 180;
     var to = function (lon, lat) { return [vb[0] + (lon + 180) / 360 * vb[2], vb[1] + (90 - lat) / 180 * vb[3]]; };
-    var groups = {};
+    var groups = {}, memo = {}, key0 = keyOf;
+    keyOf = function (c) { return c in memo ? memo[c] : (memo[c] = key0(c)); }; // once per country, not per ring
     POLY.forEach(function (r) { var k = keyOf(r.code); if (k) groups[k] = 1; });
     ctx.save();
     ctx.globalAlpha = alpha;
