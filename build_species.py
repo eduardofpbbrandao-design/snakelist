@@ -305,9 +305,14 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     def plist(L, n=6):
         L = list(L)
         return ", ".join(L) if len(L) <= n else ", ".join(L[:n]) + " and %d more" % (len(L) - n)
+    # photos that came with the photographer's name printed on them: SnakeList keeps a cleaned
+    # copy (the name cropped off; the credit is shown under the photo), used instead of the original
+    CLEANED = set(['0-9', '102-12', '104-7', '108-7', '109-3', '16-19', '16-2', '21-20', '22-14', '24-12', '28-13', '29-19', '3-2', '33-4', '35-23', '40-12', '40-7', '43-24', '43-8', '49-22', '50-10', '50-14', '50-6', '61-10', '61-18', '61-2', '69-4', '7-9', '72-1', '80-16', '88-10', '9-5', '93-9', '97-2', '97-7', '98-5'])
     def img_of(c, size="medium"):
         p = c["photo"]
         if not p or len(p) < 5 or "Illustration" in p[2]: return None
+        if "%d-%d" % (p[0], p[1]) in CLEANED:
+            return SITE + "species-photos/t/%d-%d.webp" % (p[0], p[1])
         pid, ext = p[4].split(".")
         return "https://inaturalist-open-data.s3.amazonaws.com/photos/%s/%s.%s" % (pid, size, ext)
     def sprite(c):
