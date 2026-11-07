@@ -10,7 +10,7 @@
   "window-controls-overlay",
   "standalone"
  ],
- "orientation": "landscape",
+ "orientation": "any",
  "related_applications": [
   {
    "platform": "webapp",

@@ -141,7 +141,7 @@ import json
 MANIFEST = json.dumps({
     "name": "SnakeList", "short_name": "SnakeList", "description": desc + " Made by Eduardo Brandao.",
     "id": "/",  # same as the old default (the start URL) so installed apps keep their identity
-    "start_url": "./../", "scope": "./../", "display": "standalone", "display_override": ["window-controls-overlay", "standalone"], "orientation": "landscape",
+    "start_url": "./../", "scope": "./../", "display": "standalone", "display_override": ["window-controls-overlay", "standalone"], "orientation": "any",
     # lets the website ask the browser "is the SnakeList app installed on this device?"
     "related_applications": [{"platform": "webapp", "url": "https://snakelist.com/app/snakelist.webmanifest"}],
     "background_color": "#1F5A3A", "theme_color": "#1F5A3A",
