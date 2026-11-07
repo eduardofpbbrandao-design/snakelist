@@ -573,7 +573,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     cnt = {}
     for c in cards:
         for n in c["countries"]: cnt[n] = cnt.get(n, 0) + 1
-    hub_lists = ('<section><h2>Snakes by country</h2><ul class="sp-hubs">%s</ul></section>' % "".join(
+    hub_lists = ('<section id="by-country"><h2>Snakes by country</h2><ul class="sp-hubs">%s</ul></section>' % "".join(
         '<li><a href="country/%s">%s</a> <small>%d</small></li>' % (slugify(n), esc(n), k) for n, k in sorted(cnt.items()) if slugify(n)) +
         '<section id="by-family"><h2>Snake families</h2><ul class="sp-hubs">%s</ul></section>' % "".join(
         '<li><a href="family/%s">%s</a> <small>%d</small></li>' % (slugify(f), esc(f), len(L)) for f, L in fams if f))
@@ -583,10 +583,10 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         for f, L in fams)
     body = hub_lists + body
     open(OUT + "/index.html", "w", encoding="utf-8").write(INDEX.format(n=len(cards), body=body, author=AUTHOR, url=SITE + "species/"))
-    return [SITE + "species/"] + [SITE + "species/" + page_name(c) for c in links] + hubs(cards, esc, img_of)
+    return [SITE + "species/"] + [SITE + "species/" + page_name(c) for c in links] + hubs(cards, esc, img_of, invasive)
 
 
-def hubs(cards, esc, img_of):
+def hubs(cards, esc, img_of, invasive=None):
     """crawlable landing pages - snakes of each country, each family, each genus - linking to the species pages"""
     groups = {"country": {}, "family": {}, "genus": {}}
     for c in cards:
@@ -596,6 +596,27 @@ def hubs(cards, esc, img_of):
     urls = []
     for kind, G in groups.items():
         os.makedirs(OUT + "/" + kind, exist_ok=True)
+        if kind == "country":  # the redesigned country pages (country_page below) and the country picker's list
+            open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS)
+            open(OUT + "/country.js", "w", encoding="utf-8").write(COUNTRY_JS)
+            with open(OUT + "/countries.json", "w", encoding="utf-8") as fh:
+                json.dump({n: slugify(n) for n in sorted(G) if slugify(n)}, fh, ensure_ascii=False, separators=(",", ":"))
+            for name, L in G.items():
+                slug = slugify(name)
+                if not slug: continue
+                open("%s/country/%s.html" % (OUT, slug), "w", encoding="utf-8").write(
+                    country_page(name, L, {"_cards": cards}, invasive or {}, esc, slug))
+                urls.append(SITE + "species/country/%s" % slug)
+            # a country page from an earlier build whose country no longer has a species: still a
+            # working page (it may be linked or bookmarked), now saying plainly that none are listed
+            done = {slugify(n) for n in G}
+            for f in os.listdir(OUT + "/country"):
+                if not f.endswith(".html") or f[:-5] in done: continue
+                old = open("%s/country/%s" % (OUT, f), encoding="utf-8").read()
+                m = re.search(r"<title>Snakes of ([^:<|]+?)(?::| \|)", old)
+                if m: open("%s/country/%s" % (OUT, f), "w", encoding="utf-8").write(
+                    country_page(H.unescape(m.group(1).strip()), [], {"_cards": cards}, invasive or {}, esc, f[:-5]))
+            continue
         for name, L in G.items():
             L = sorted(L, key=lambda x: (not x["popular"], x["name"].lower()))
             slug = slugify(name)
@@ -808,8 +829,8 @@ var big=new Image();big.alt=im.alt;big.src=im.src.replace('/medium.','/original.
 var x=document.createElement('button');x.type='button';x.className='sp-lb-x';x.textContent='\u00d7';x.setAttribute('aria-label','Close');
 o.appendChild(big);o.appendChild(x);document.body.appendChild(o);function close(){o.remove();document.removeEventListener('keydown',k)}function k(e){if(e.key==='Escape')close()}
 o.addEventListener('click',function(e){if(e.target!==big)close()});document.addEventListener('keydown',k)})}
-// no photo built in: find one now - iNaturalist's photo of the species, else its best
-// community-verified sighting, else its Wikipedia picture (never a map, range map or drawing)
+// no photo built in: find one now - its best sighting marked Alive (never a dead snake), else
+// iNaturalist's photo of the species, else its Wikipedia picture (never a map, range map or drawing)
 var nf=document.querySelector('.sp-nophoto'),sm=document.querySelector('.sp-main[data-sci]');
 if(nf&&sm){var sci=sm.dataset.sci,API='https://api.inaturalist.org/v1/';
 function bad(u){var f='';try{f=decodeURIComponent(String(u).split('?')[0].split('/').pop())}catch(e){f=String(u)}return !u||/map|range|distrib|locat|verbreit|carte|mapa|karte|areal|zone|world|globe/i.test(f)||(/wiki(pedia|media)/.test(u)&&/\.(svg|png|gif)\b/i.test(f))}
@@ -819,15 +840,247 @@ var i=new Image();i.src=url;i.alt='Photo of '+sci;i.width=500;i.height=333;var c
 f.appendChild(i);f.appendChild(c);nf.replaceWith(f);return true}
 J(API+'taxa?per_page=10&is_active=true&q='+encodeURIComponent(sci)).then(function(d){
 var t=d&&(d.results||[]).filter(function(x){return (x.name||'').toLowerCase()===sci.toLowerCase()})[0];
-if(t&&t.default_photo&&show((t.default_photo.medium_url||t.default_photo.url),(t.default_photo.attribution||'iNaturalist').replace(/^\(c\)\s*/i,''),'iNaturalist'))return true;
-return (t?J(API+'observations?photos=true&quality_grade=research&order_by=votes&per_page=3&taxon_id='+t.id):Promise.resolve(null)).then(function(o){
+return (t?J(API+'observations?photos=true&quality_grade=research&term_id=17&term_value_id=18&order_by=votes&per_page=3&taxon_id='+t.id):Promise.resolve(null)).then(function(o){
 var r=o&&(o.results||[]).filter(function(x){return x.photos&&x.photos[0]})[0];
 if(r&&show(r.photos[0].url.replace('/square.','/medium.'),(r.photos[0].attribution||'iNaturalist').replace(/^\(c\)\s*/i,''),'iNaturalist'))return true;
+if(t&&t.default_photo&&show((t.default_photo.medium_url||t.default_photo.url),(t.default_photo.attribution||'iNaturalist').replace(/^\(c\)\s*/i,''),'iNaturalist'))return true;
 return J('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(sci.replace(/ /g,'_'))).then(function(w){
 var img=w&&(w.originalimage||w.thumbnail);if(img&&!bad(img.source)&&w.thumbnail)show(w.thumbnail.source,'Wikipedia','Wikipedia')})})}).catch(function(){})}
 var main=document.querySelector('.sp-main[data-sci]'),w=document.getElementById('sp-wiki');
 if(main&&w){fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(main.dataset.sci.replace(/ /g,'_'))).then(function(r){return r.ok?r.json():null}).then(function(d){
 if(!d||!d.extract||d.type==='disambiguation')return;var p=document.createElement('p');p.textContent=d.extract;w.appendChild(p);
 var s=document.createElement('p');s.className='src';s.innerHTML='From <a href="'+d.content_urls.desktop.page+'" rel="noopener" target="_blank">Wikipedia</a> (CC BY-SA)';w.appendChild(s)}).catch(function(){})}
+})();
+"""
+
+
+# ---- country pages: "Snakes of <country>" ----------------------------------------------------
+# one reusable template for every country: a header with its real numbers, photo cards for each
+# species (each card's own built-in photo tile, never another species'), and - for lists long
+# enough to need them - search, venom/family filters and sorting, all over that country's own
+# species only. Everything is in the HTML (crawlable); country.js only filters, sorts and pages.
+def country_page(name, L, all_countries, invasive, esc, slug):
+    url = SITE + "species/country/%s" % slug
+    intro_here = []  # species SnakeList records as introduced (invasive) here, not native
+    for c in all_countries["_cards"]:
+        if name in c["countries"]: continue
+        if any(e.get("name") == name for e in invasive.get(c["id"], [])): intro_here.append(c)
+    def key(c): return ((1 if c["is_sci"] else 0), (c["sci"] if c["is_sci"] else c["name"]).lower(), c["sci"].lower())
+    L = sorted(L, key=key); intro_here = sorted(intro_here, key=key)
+    n = len(L); nv = sum(1 for x in L if x["venom"]); fams = {}
+    for x in L: fams[x["family"] or ""] = fams.get(x["family"] or "", 0) + 1
+    nfam = len([f for f in fams if f])
+    only = [x for x in L if x["countries"] == [name]]
+    gone = [x for x in L if x["extinct"] or x["fossil"]]
+    def plural(k, one, many=None): return "%d %s" % (k, one if k == 1 else (many or one + "s"))
+    if n:
+        lead = "%s %s recorded in %s in SnakeList: %d venomous and %d non-venomous%s." % (
+            plural(n, "snake species", "snake species"), "is" if n == 1 else "are", name, nv, n - nv,
+            ", from %s" % plural(nfam, "family", "families") if nfam else "")
+    else:
+        lead = "No snake species are currently listed for %s in SnakeList." % name
+    title = "Snakes of %s: %s with photos, venom status & map | SnakeList" % (name, plural(n, "species", "species")) if n else "Snakes of %s | SnakeList" % name
+    desc = lead + (" Photos, scientific names and families for each, plus a map." if n else "")
+
+    def card(x, intro=False):
+        p = x["photo"]
+        has = bool(p and len(p) >= 5 and "Illustration" not in p[2])
+        nm = x["sci"] if x["is_sci"] else x["name"]
+        alt = "Photo of %s" % (nm if x["is_sci"] else "%s (%s)" % (x["name"], x["sci"]))
+        img = ('<img src="../../species-photos/t/%d-%d.webp" alt="%s" width="540" height="360" loading="lazy" decoding="async">' % (p[0], p[1], esc(alt))
+               if has else '<span class="cy-noimg">%s</span>' % ("Known from fossils" if x["fossil"] else "No photo yet"))
+        badges = '<span class="cy-b %s">%s</span>' % (("v", "Venomous") if x["venom"] else ("nv", "Non-venomous"))
+        if x["fossil"]: badges += '<span class="cy-b x">Fossil</span>'
+        elif x["extinct"]: badges += '<span class="cy-b x">Extinct</span>'
+        if intro: badges += '<span class="cy-b i">Introduced</span>'
+        title_html = ('<strong class="cy-name"><i>%s</i></strong>' % esc(nm)) if x["is_sci"] else (
+            '<strong class="cy-name">%s</strong><i class="cy-sci">%s</i>' % (esc(x["name"]), esc(x["sci"])))
+        return ('<li class="cy-card" data-n="%s" data-s="%s" data-f="%s" data-v="%d"%s><a href="../%s">'
+                '<span class="cy-img">%s</span><span class="cy-body">%s<span class="cy-meta">%s%s</span></span></a></li>') % (
+            esc(("~" + nm) if x["is_sci"] else nm.lower()), esc(x["sci"].lower()), esc(x["family"] or ""), 1 if x["venom"] else 0,
+            ' data-i="1"' if intro else "", page_name(x), img, title_html, badges,
+            '<span class="cy-fam">%s</span>' % esc(x["family"]) if x["family"] else "")
+
+    stats = ""
+    if n:
+        stats = '<ul class="cy-stats" aria-label="At a glance">%s</ul>' % "".join('<li><b>%s</b><span>%s</span></li>' % (v, k) for v, k in [
+            (n, "species" if n != 1 else "species"), (nv, "venomous"), (n - nv, "non-venomous"), (nfam, "families" if nfam != 1 else "family")])
+    big = n > 6
+    controls = ""
+    if big:
+        fam_opts = "".join('<option value="%s">%s (%d)</option>' % (esc(f), esc(f), k) for f, k in sorted(fams.items()) if f)
+        if "" in fams: fam_opts += '<option value="-">Family not recorded (%d)</option>' % fams[""]
+        controls = ('<div class="cy-tools" role="search">'
+                    '<label class="cy-q"><span class="cy-sr">Search snakes in %s</span><input id="cy-q" type="search" placeholder="Search snakes in %s..." autocomplete="off"></label>'
+                    '<label><span class="cy-lab">Venom</span><select id="cy-v"><option value="">All species</option><option value="1">Venomous (%d)</option><option value="0">Non-venomous (%d)</option></select></label>'
+                    '%s'
+                    '<label><span class="cy-lab">Sort</span><select id="cy-s"><option value="n">Common name A-Z</option><option value="nr">Common name Z-A</option><option value="s">Scientific name A-Z</option><option value="f">Family</option></select></label>'
+                    '<button type="button" id="cy-reset" class="cy-reset" hidden>Reset</button></div>') % (
+            esc(name), esc(name), nv, n - nv,
+            ('<label><span class="cy-lab">Family</span><select id="cy-f"><option value="">All families</option>%s</select></label>' % fam_opts) if nfam > 1 else "")
+    count = '<p class="cy-count" id="cy-count" aria-live="polite">Showing %s</p>' % plural(n, "species", "species") if n else ""
+    grid = ('<ul class="cy-grid" id="cy-grid">%s</ul><p class="cy-empty" id="cy-empty" hidden>No snakes in %s match. <button type="button" class="cy-link" id="cy-clear">Clear the search and filters</button></p>'
+            '<p class="cy-more-wrap"><button type="button" class="cy-more" id="cy-more" hidden>Show more</button></p>' % ("".join(card(x) for x in L), esc(name))) if n else (
+            '<div class="cy-none"><p><b>No snake species are currently listed for %s in SnakeList.</b></p><p>That only means none are in SnakeList yet - not that no snakes live there.</p>'
+            '<p><a href="../#by-country">All countries</a> &middot; <a href="../">All species</a></p></div>' % esc(name))
+    intro_sec = ""
+    if intro_here:
+        intro_sec = ('<section class="cy-sec" aria-labelledby="cy-intro-h"><h2 id="cy-intro-h">Introduced to %s</h2><p class="cy-note">Not native here: SnakeList records %s brought to %s by people.</p>'
+                     '<ul class="cy-grid cy-grid-intro">%s</ul></section>') % (esc(name), "this snake as" if len(intro_here) == 1 else "these snakes as", esc(name), "".join(card(x, True) for x in intro_here))
+    # the overview: only facts that come straight from the data
+    facts = []
+    if n >= 2:
+        top = sorted([(k, f) for f, k in fams.items() if f], key=lambda t: (-t[0], t[1]))
+        if top:
+            facts.append("<li><b>Families:</b> %s.</li>" % ", ".join('<a href="../family/%s">%s</a> %d' % (slugify(f), esc(f), k) for k, f in top))
+        if only:
+            facts.append("<li><b>%s</b> %s recorded in no other country in SnakeList: %s.</li>" % (
+                len(only), "is" if len(only) == 1 else "are", ", ".join('<a href="../%s">%s</a>' % (page_name(x), esc(x["sci"] if x["is_sci"] else x["name"])) for x in only[:12]) + (" and %d more" % (len(only) - 12) if len(only) > 12 else "")))
+        if gone:
+            facts.append("<li><b>%s</b> %s extinct or known only from fossils.</li>" % (len(gone), "is" if len(gone) == 1 else "are"))
+    if len(facts) == 1 and nfam < 3: facts = []  # just the family split the header already gives
+    overview = ('<section class="cy-sec" aria-labelledby="cy-ov-h"><h2 id="cy-ov-h">%s&rsquo;s snakes in numbers</h2><ul class="cy-facts">%s</ul></section>' % (esc(name), "".join(facts))) if facts else ""
+    ld = json.dumps([{"@context": "https://schema.org", "@type": "CollectionPage", "name": "Snakes of " + name, "url": url, "description": lead,
+                      "mainEntity": {"@type": "ItemList", "numberOfItems": n, "itemListElement": [
+                          {"@type": "ListItem", "position": i + 1, "url": SITE + "species/" + page_name(x), "name": x["sci"] if x["is_sci"] else x["name"]} for i, x in enumerate(L[:100])]}},
+                     {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+                         {"@type": "ListItem", "position": 1, "name": "SnakeList", "item": SITE},
+                         {"@type": "ListItem", "position": 2, "name": "Countries", "item": SITE + "species/#by-country"},
+                         {"@type": "ListItem", "position": 3, "name": name, "item": url}]}], ensure_ascii=False).replace("</", "<\\/")
+    first = next((x for x in L if x["photo"] and len(x["photo"]) >= 5 and "Illustration" not in x["photo"][2]), None)
+    img = SITE + "species-photos/t/%d-%d.webp" % (first["photo"][0], first["photo"][1]) if first else SITE + "snakelist-logo.png"
+    return COUNTRY.format(title=esc(title), desc=esc(desc), url=url, img=img, ld=ld, name=esc(name), lead=esc(lead), stats=stats,
+                          map=esc(quote_param(name)), controls=controls, count=count, grid=grid, intro=intro_sec, overview=overview,
+                          author=AUTHOR, big=" cy-big" if big else "", total=n,
+                          robots="index,follow,max-image-preview:large" if n else "noindex,follow")
+
+
+def quote_param(s):
+    from urllib.parse import quote
+    return quote(s)
+
+
+COUNTRY = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title}</title>
+<meta name="description" content="{desc}">
+<link rel="canonical" href="{url}"><meta name="author" content="{author}"><meta name="robots" content="{robots}">
+<meta property="og:type" content="website"><meta property="og:site_name" content="SnakeList"><meta property="og:title" content="{title}"><meta property="og:description" content="{desc}">
+<meta property="og:url" content="{url}"><meta property="og:image" content="{img}"><meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#1F5A3A">
+<link rel="icon" href="../../favicon.ico" sizes="any"><link rel="stylesheet" href="../sp.css"><link rel="stylesheet" href="../country.css">
+<script type="application/ld+json">{ld}</script>
+</head><body class="cy-page">
+<header class="sp-top cy-top"><a class="sp-logo" href="../../">SnakeList</a><nav aria-label="Site"><a href="../">All species</a><a href="../#by-country">Countries</a><a href="../../">Open the app</a></nav></header>
+<main class="cy-main" id="main">
+<nav class="cy-crumbs" aria-label="Breadcrumb"><ol><li><a href="../../">SnakeList</a></li><li><a href="../#by-country">Countries</a></li><li aria-current="page">{name}</li></ol>
+<form class="cy-jump" id="cy-jump" role="search" action="../#by-country"><label for="cy-jq" class="cy-sr">Go to another country</label><input id="cy-jq" list="cy-clist" placeholder="Another country..." autocomplete="off"><datalist id="cy-clist"></datalist><button type="submit">Go</button></form></nav>
+<header class="cy-head">
+<div class="cy-htext"><h1>Snakes of {name}</h1><p class="cy-lead">{lead}</p></div>
+{stats}
+<p class="cy-cta"><a class="cy-btn" href="../../?map={map}">View snakes on map</a></p>
+</header>
+<section class="cy-list{big}" aria-labelledby="cy-list-h" data-total="{total}"><h2 id="cy-list-h" class="cy-sr">Species</h2>
+{controls}{count}{grid}
+</section>
+{intro}{overview}
+</main>
+<footer class="cy-foot"><p><a class="cy-flogo" href="../../about-snakelist.html">SnakeList</a> &middot; made by <a href="../../about.html"><b>{author}</b></a></p>
+<p class="cy-flinks"><a href="../../">Open the app</a><a href="../">All species</a><a href="../#by-country">All countries</a><a href="../../privacy.html">Privacy</a><a href="../../terms.html">Terms</a></p>
+<p class="cy-fnote">Photos: iNaturalist observers (CC licences) - credited on each species page.</p></footer>
+<script src="../country.js" defer></script>
+</body></html>
+"""
+
+COUNTRY_CSS = """.cy-page{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.cy-main{flex:1 0 auto;width:100%;max-width:1120px;margin:0 auto;padding:0 16px 40px}
+.cy-top{max-width:1120px}.cy-top nav{flex-wrap:wrap;justify-content:flex-end;gap:6px 16px}
+.cy-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cy-page a:focus-visible,.cy-page button:focus-visible,.cy-page input:focus-visible,.cy-page select:focus-visible{outline:3px solid var(--g);outline-offset:2px}
+.cy-crumbs{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin:2px 0 14px;font-size:13.5px;color:var(--muted)}
+.cy-crumbs ol{list-style:none;display:flex;flex-wrap:wrap;margin:0;padding:0}.cy-crumbs li+li:before{content:"/";margin:0 8px;color:var(--tagline)}
+.cy-crumbs a{color:var(--muted)}.cy-crumbs a:hover{color:var(--g)}.cy-crumbs [aria-current]{color:var(--text);font-weight:600}
+.cy-jump{display:flex;gap:6px}.cy-jump input{width:190px;max-width:52vw;font:inherit;font-size:14px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text)}
+.cy-jump button,.cy-reset{font:600 13px Inter,system-ui,sans-serif;padding:6px 12px;border-radius:10px;border:1px solid var(--tagline);background:var(--tag);color:var(--text);cursor:pointer}
+.cy-head{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;display:grid;grid-template-columns:1fr auto;gap:14px 24px;align-items:center;box-shadow:0 1px 2px rgba(20,60,30,.06)}
+.cy-head h1{font:700 clamp(28px,4.4vw,40px)/1.12 Georgia,serif;margin:0;overflow-wrap:anywhere}
+.cy-lead{margin:8px 0 0;color:var(--muted);font-size:16px;max-width:62ch}
+.cy-stats{grid-column:1;list-style:none;margin:2px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.cy-stats li{display:flex;align-items:baseline;gap:6px;background:var(--tag);border:1px solid var(--tagline);border-radius:12px;padding:5px 12px;font-size:13.5px;color:var(--muted)}
+.cy-stats b{font-size:18px;color:var(--text)}
+.cy-cta{grid-column:2;grid-row:1/span 2;margin:0}
+.cy-btn{display:inline-flex;align-items:center;min-height:44px;background:var(--g);color:#fff;text-decoration:none;font-weight:600;padding:10px 18px;border-radius:12px;white-space:nowrap}
+.cy-btn:hover{filter:brightness(.95)}
+.cy-list{margin-top:22px;background:none;border:0;padding:0;border-radius:0}
+.cy-tools{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.cy-tools label{display:flex;flex-direction:column;gap:3px;min-width:0}.cy-lab{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.cy-q{flex:1 1 240px}.cy-tools input,.cy-tools select{font:inherit;font-size:15px;min-height:40px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);max-width:100%}
+.cy-tools input{width:100%}.cy-reset{min-height:40px}
+.cy-count{margin:12px 2px 10px;font-size:14px;color:var(--muted)}
+.cy-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.cy-list:not(.cy-big) .cy-grid,.cy-grid-intro{grid-template-columns:repeat(auto-fill,minmax(230px,256px))}
+.cy-card a{display:flex;flex-direction:column;height:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;color:inherit;text-decoration:none;transition:border-color .15s,box-shadow .15s}
+.cy-card a:hover{border-color:var(--tagline);box-shadow:0 3px 10px rgba(20,60,30,.10)}
+.cy-img{display:block;aspect-ratio:3/2;background:var(--line);overflow:hidden}.cy-img img{width:100%;height:100%;object-fit:cover;display:block}
+.cy-noimg{display:grid;place-items:center;height:100%;color:var(--muted);font-size:13px}
+.cy-body{display:flex;flex-direction:column;gap:2px;padding:10px 12px 12px;flex:1}
+.cy-name{font:700 16.5px/1.25 Georgia,serif;overflow-wrap:anywhere}.cy-sci{color:var(--muted);font-size:13.5px;overflow-wrap:anywhere}
+.cy-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:auto;padding-top:8px}
+.cy-b{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--line);line-height:1.4}
+.cy-b.v{background:#fbe9e3;border-color:#e8b9a8;color:#8a2f17}.cy-b.nv{background:var(--tag);border-color:var(--tagline);color:var(--text)}
+.cy-b.x{color:var(--muted)}.cy-b.i{background:#fdf1df;border-color:#ecc995;color:#7a4a0c}
+.cy-fam{font-size:12.5px;color:var(--muted)}
+.cy-empty,.cy-none{background:var(--card);border:1px dashed var(--tagline);border-radius:14px;padding:18px 20px;margin:4px 0 0}
+.cy-none p{margin:4px 0}.cy-link{font:inherit;background:none;border:0;color:var(--g);text-decoration:underline;cursor:pointer;padding:0}
+.cy-more-wrap{text-align:center;margin:16px 0 0}.cy-more{font:600 14px Inter,system-ui,sans-serif;min-height:42px;padding:8px 22px;border-radius:12px;border:1px solid var(--tagline);background:var(--card);color:var(--text);cursor:pointer}
+.cy-sec{margin-top:26px}.cy-sec h2{font:700 21px Georgia,serif;margin:0 0 6px}.cy-note{margin:0 0 12px;color:var(--muted);font-size:14px}
+.cy-facts{margin:0;padding-left:18px}.cy-facts li{margin:4px 0}
+.cy-foot{border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:13px;padding:18px 16px 26px}
+.cy-foot p{margin:4px 0}.cy-flogo{font:700 17px Georgia,serif;color:var(--g);text-decoration:none}
+.cy-flinks{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px}.cy-foot a{color:var(--muted)}.cy-foot .cy-flogo{color:var(--g)}.cy-fnote{font-size:12px}
+@media (prefers-color-scheme:dark){.cy-b.v{background:#5a2a1c;border-color:#a5553a;color:#ffd9cc}.cy-b.i{background:#5a4318;border-color:#a8833d;color:#ffe3b0}
+.cy-head,.cy-card a:hover{box-shadow:none}.cy-tools input,.cy-tools select{background:var(--bg)}}
+@media (max-width:760px){.cy-head{grid-template-columns:1fr;padding:18px}.cy-cta{grid-column:1;grid-row:auto}.cy-btn{width:100%;justify-content:center}}
+@media (max-width:560px){.cy-main{padding:0 12px 32px}.cy-crumbs{flex-direction:column;align-items:stretch}.cy-jump input{flex:1;width:auto;max-width:none}
+.cy-tools{padding:10px}.cy-tools label:not(.cy-q){flex:1 1 calc(50% - 6px)}.cy-tools select{width:100%}
+.cy-grid,.cy-list:not(.cy-big) .cy-grid,.cy-grid-intro{grid-template-columns:1fr;gap:10px}
+.cy-card a{flex-direction:row;min-height:96px}.cy-img{flex:0 0 112px;width:112px;aspect-ratio:auto;align-self:stretch}.cy-body{padding:9px 12px}
+.cy-name{font-size:15.5px}.cy-stats b{font-size:16px}}
+@media (prefers-reduced-motion:reduce){.cy-card a{transition:none}}
+"""
+
+COUNTRY_JS = r"""(function(){
+var grid=document.getElementById('cy-grid'),PAGE=60,shown=PAGE;
+// the country picker: every country page, typed to search
+var jump=document.getElementById('cy-jump'),jq=document.getElementById('cy-jq'),dl=document.getElementById('cy-clist'),C=null;
+function loadC(){if(C)return;C={};fetch('../countries.json').then(function(r){return r.ok?r.json():{}}).then(function(o){C=o;dl.innerHTML=Object.keys(o).map(function(n){return '<option value="'+n.replace(/"/g,'&quot;')+'">'}).join('')}).catch(function(){})}
+if(jq){jq.addEventListener('focus',loadC);jq.addEventListener('change',function(){go(false)})}
+function go(sub){var v=(jq.value||'').trim().toLowerCase(),hit=null;for(var k in C)if(k.toLowerCase()===v){hit=k;break}
+if(!hit&&sub){for(var k2 in C)if(k2.toLowerCase().indexOf(v)===0){hit=k2;break}}if(hit){location.href=C[hit];return true}return false}
+if(jump)jump.addEventListener('submit',function(e){e.preventDefault();loadC();if(!go(true)&&C&&Object.keys(C).length)jq.setCustomValidity('No country called that in SnakeList'),jq.reportValidity(),setTimeout(function(){jq.setCustomValidity('')},1500)});
+if(!grid)return;
+var items=[].slice.call(grid.children),total=items.length,count=document.getElementById('cy-count'),empty=document.getElementById('cy-empty'),more=document.getElementById('cy-more');
+var q=document.getElementById('cy-q'),fv=document.getElementById('cy-v'),ff=document.getElementById('cy-f'),fs=document.getElementById('cy-s'),reset=document.getElementById('cy-reset');
+items.forEach(function(li,i){li._t=(li.textContent+' '+li.dataset.f).toLowerCase();li._i=i});
+function cmp(a,b){var s=fs?fs.value:'n',x,y;
+if(s==='s'){x=a.dataset.s;y=b.dataset.s}else if(s==='f'){x=(a.dataset.f||'~')+' '+a.dataset.n;y=(b.dataset.f||'~')+' '+b.dataset.n}else{x=a.dataset.n;y=b.dataset.n}
+var r=x<y?-1:x>y?1:(a.dataset.s<b.dataset.s?-1:a.dataset.s>b.dataset.s?1:0);if(s==='nr'){r=-r;if(a.dataset.n.charAt(0)==='~'!==(b.dataset.n.charAt(0)==='~'))r=-r}return r}
+function apply(keep){
+var t=q?q.value.trim().toLowerCase():'',v=fv?fv.value:'',f=ff?ff.value:'';
+var hit=items.filter(function(li){return (!t||li._t.indexOf(t)>=0)&&(!v||li.dataset.v===v)&&(!f||(f==='-'?!li.dataset.f:li.dataset.f===f))});
+hit.sort(cmp);if(!keep)shown=PAGE;
+var frag=document.createDocumentFragment();hit.forEach(function(li){frag.appendChild(li)});
+items.forEach(function(li){li.hidden=true});grid.appendChild(frag);
+hit.forEach(function(li,i){li.hidden=i>=shown});
+var vis=Math.min(hit.length,shown);
+if(count)count.textContent=hit.length===total?(vis===total?'Showing '+total+' species':'Showing '+vis+' of '+total+' species'):
+(vis<hit.length?'Showing '+vis+' of '+hit.length+' matching species ('+total+' in all)':'Showing '+hit.length+' of '+total+' species');
+empty.hidden=hit.length>0;more.hidden=hit.length<=shown;if(!more.hidden)more.textContent='Show more ('+(hit.length-shown)+' left)';
+if(reset)reset.hidden=!(t||v||f||(fs&&fs.value!=='n'))}
+[q,fv,ff,fs].forEach(function(el){if(el)el.addEventListener(el===q?'input':'change',function(){apply()})});
+function clear(){if(q)q.value='';if(fv)fv.value='';if(ff)ff.value='';if(fs)fs.value='n';apply();(q||grid).focus&&q&&q.focus()}
+if(reset)reset.addEventListener('click',clear);var cl=document.getElementById('cy-clear');if(cl)cl.addEventListener('click',clear);
+more.addEventListener('click',function(){var first=shown;shown+=PAGE;apply(true);var li=grid.children[first];if(li){var a=li.querySelector('a');if(a)a.focus({preventScroll:true})}});
+apply(true);
 })();
 """
