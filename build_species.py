@@ -808,6 +808,23 @@ var big=new Image();big.alt=im.alt;big.src=im.src.replace('/medium.','/original.
 var x=document.createElement('button');x.type='button';x.className='sp-lb-x';x.textContent='\u00d7';x.setAttribute('aria-label','Close');
 o.appendChild(big);o.appendChild(x);document.body.appendChild(o);function close(){o.remove();document.removeEventListener('keydown',k)}function k(e){if(e.key==='Escape')close()}
 o.addEventListener('click',function(e){if(e.target!==big)close()});document.addEventListener('keydown',k)})}
+// no photo built in: find one now - iNaturalist's photo of the species, else its best
+// community-verified sighting, else its Wikipedia picture (never a map, range map or drawing)
+var nf=document.querySelector('.sp-nophoto'),sm=document.querySelector('.sp-main[data-sci]');
+if(nf&&sm){var sci=sm.dataset.sci,API='https://api.inaturalist.org/v1/';
+function bad(u){var f='';try{f=decodeURIComponent(String(u).split('?')[0].split('/').pop())}catch(e){f=String(u)}return !u||/map|range|distrib|locat|verbreit|carte|mapa|karte|areal|zone|world|globe/i.test(f)||(/wiki(pedia|media)/.test(u)&&/\.(svg|png|gif)\b/i.test(f))}
+function J(u){return fetch(u).then(function(r){return r.ok?r.json():null})}
+function show(url,credit,via){if(!url||bad(url))return false;var f=document.createElement('figure');f.className='sp-photo';
+var i=new Image();i.src=url;i.alt='Photo of '+sci;i.width=500;i.height=333;var c=document.createElement('figcaption');c.textContent='Photo: '+credit+', via '+via;
+f.appendChild(i);f.appendChild(c);nf.replaceWith(f);return true}
+J(API+'taxa?per_page=10&is_active=true&q='+encodeURIComponent(sci)).then(function(d){
+var t=d&&(d.results||[]).filter(function(x){return (x.name||'').toLowerCase()===sci.toLowerCase()})[0];
+if(t&&t.default_photo&&show((t.default_photo.medium_url||t.default_photo.url),(t.default_photo.attribution||'iNaturalist').replace(/^\(c\)\s*/i,''),'iNaturalist'))return true;
+return (t?J(API+'observations?photos=true&quality_grade=research&order_by=votes&per_page=3&taxon_id='+t.id):Promise.resolve(null)).then(function(o){
+var r=o&&(o.results||[]).filter(function(x){return x.photos&&x.photos[0]})[0];
+if(r&&show(r.photos[0].url.replace('/square.','/medium.'),(r.photos[0].attribution||'iNaturalist').replace(/^\(c\)\s*/i,''),'iNaturalist'))return true;
+return J('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(sci.replace(/ /g,'_'))).then(function(w){
+var img=w&&(w.originalimage||w.thumbnail);if(img&&!bad(img.source)&&w.thumbnail)show(w.thumbnail.source,'Wikipedia','Wikipedia')})})}).catch(function(){})}
 var main=document.querySelector('.sp-main[data-sci]'),w=document.getElementById('sp-wiki');
 if(main&&w){fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(main.dataset.sci.replace(/ /g,'_'))).then(function(r){return r.ok?r.json():null}).then(function(d){
 if(!d||!d.extract||d.type==='disambiguation')return;var p=document.createElement('p');p.textContent=d.extract;w.appendChild(p);
