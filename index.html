@@ -1603,6 +1603,10 @@
   .sp-info-x:hover { background: rgba(0,0,0,0.6); }
   .sp-info button:focus-visible, .sp-info a:focus-visible { outline: 2px solid #58b351; outline-offset: 2px; }
   .cp-row b, .cp-row i { cursor: pointer; }
+  .cp-row.cp-sp { cursor: pointer; }
+  .map-tip { position: absolute; left: 0; top: 0; z-index: 6; pointer-events: none; padding: 4px 8px; border-radius: 6px; font: 600 12px/1.3 Inter, sans-serif;
+    color: #fff; background: rgba(14, 40, 24, 0.88); box-shadow: 0 2px 8px rgba(0,0,0,0.25); white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
+  .map-tip[hidden] { display: none; }
   .cp-row-country b, .cp-row-country i, .cp-row:not(:has(i)) b { cursor: inherit; }
   @media (max-width: 520px) {
     .sp-info-body { grid-template-columns: 1fr; grid-template-areas: "ph" "cr" "mn"; grid-template-rows: auto; }
@@ -2340,7 +2344,7 @@
   
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.16</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.24</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All 4,254 snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -10505,7 +10509,7 @@
 // the map's outlines (data/geo.js, several MB): downloaded in the background, never holding up
 // SnakeList opening - the map, "See states" and the state lists pick it up when it's there
 window.SL_GEO_READY = new Promise(function (res) {
-  var sc = document.createElement("script"); sc.src = "data/geo.js?v=ac093a2a66"; sc.async = true;
+  var sc = document.createElement("script"); sc.src = "data/geo.js?v=7b343377c1"; sc.async = true;
   sc.onload = function () { res(window.SL_GEO || null); document.dispatchEvent(new Event("sl-geo")); };
   sc.onerror = function () { res(null); };
   document.head.appendChild(sc);
@@ -10534,7 +10538,8 @@ window.SL_GEO_READY = new Promise(function (res) {
    "departments:co bo py uy gt hn ni sv bj ht cg|prefectures:jp cf gn|counties:ro al hr hu ee se no ie lt lr|districts:pt lk bt bn bz sr bs mw ls bw ly il cy md rs mu sc ai sg lc|" +
    "governorates:eg tn sy jo lb iq ye om kw bh ps|emirates:ae|cantons:ch|parishes:jm bb ag dm gd vc ms kn|municipalities:me mk xk lv qa tl cv gl|" +
    "divisions:bd fj gm|zones:np|atolls:mv|islands:id km st tc vi mp pf|nations:gb|voivodeships:pl|castelli:sm|" +
-   "states & territories:au my|states & union territories:in|provinces & territories:ca pk|states & regions:mm|cantons & regions:ba").split("|").forEach(function (grp) {
+   "municipalities:li|parishes:ad bm|counties & cities:tw|communes:pm|districts:tf ws nr as|island chains:mh|local councils:mt|divisions:to|kingdoms:wf|island groups:ki|cantons:lu|villages:nu|" +
+   "islands:sh ck tv|states & territories:au my|states & union territories:in|provinces & territories:ca pk|states & regions:mm|cantons & regions:ba").split("|").forEach(function (grp) {
     var p = grp.split(":");
     p[1].split(" ").forEach(function (cc) { SUBDIV[cc] = p[0]; });
   });
@@ -11173,6 +11178,9 @@ window.SL_GEO_READY = new Promise(function (res) {
       });
       CENTRE = data.centre;
       TITLE = data.title;
+      // which outlines are islands - every piece of land that is not part of a continent
+      // (Afro-Eurasia, the Americas, Australia), worked out once from the outlines themselves
+      (window.SL_GEO.isle || []).forEach(function (i) { if (POLY[i]) POLY[i].isl = true; });
       window.SL_GEO.prebuilt = null; // nothing needs the raw copy any more
       addIslands();
       return true;
@@ -11541,6 +11549,16 @@ window.SL_GEO_READY = new Promise(function (res) {
     var cleanQ = foldedQ.replace(/[^a-z0-9\s']/g, "").replace(/\s+/g, " ").trim();
     var provHit = !nameCode && !cityMatch && !continentMatch && cleanQ.length >= 3 ? provinceByName(cleanQ) : null;
     if (provHit) { showSearchedProvince(provHit[0], provHit[1]); return; }
+    // Palestine's two parts: the Gaza Strip (the strip of land by the sea, 5 governorates) and the
+    // West Bank (11) - each shown with its own governorates, inside Palestine
+    var psPart = /^(the )?gaza( strip)?$/.test(cleanQ) ? ["Gaza Strip", 34.15, 34.6, 31.2, 31.62] : /^(the )?west bank$/.test(cleanQ) ? ["West Bank", 34.85, 35.6, 31.3, 32.6] : null;
+    if (psPart && NAME.ps) {
+      showSearchedCountry("ps");
+      if (statesMode !== "ps") document.getElementById("see-provinces").click();
+      flyToLonLatBox(psPart[1], psPart[2], psPart[3], psPart[4], true);
+      document.getElementById("heat-caption").textContent = psPart[0] + ", Palestine · " + (psPart[0] === "Gaza Strip" ? "its 5 governorates" : "its 11 governorates");
+      return;
+    }
     if (nameCode && !cityMatch && !continentMatch) {
       showSearchedCountry(nameCode);
       return;
@@ -11842,6 +11860,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     renderFlat();
     drawPins();
     syncPanelBtns();
+    if (typeof tipEv !== "undefined" && tipEv && !tipRaf) tipRaf = requestAnimationFrame(tipAt); // the map moved under a still pointer
     if (window.SL_OVERLAY_DRAW) window.SL_OVERLAY_DRAW(ctx, flatBox(), sizeW, sizeH);
   }
 
@@ -11932,6 +11951,47 @@ window.SL_GEO_READY = new Promise(function (res) {
   var shownPlace = null;
   // every name on the map is the same size, and grows as you zoom in (12 px at the world view,
   // up to 22 px when zoomed right in); the halo round it grows with it
+  // ---- names on the map never sit on top of each other ----------------------------------
+  // Every name drawn in a frame books its box here (LBL); the next one tries its own spots in
+  // order (beside its place, the other side, above, below) and takes the first that is free -
+  // of other names, of the map's dots and of the panels over the map. The most wanted names
+  // book first: the city you tapped, then the state you picked, then the country; a name with
+  // no free spot left is not drawn (its place still has its name in the panel and on hover).
+  var LBL = [];
+  function lblFree(b) { for (var i = 0; i < LBL.length; i++) { var q = LBL[i]; if (b[0] < q[2] && b[2] > q[0] && b[1] < q[3] && b[3] > q[1]) return false; } return true; }
+  function lblBox(x, y, tw) { var hh = labelPx() * 0.62; return [x - 2, y - hh, x + tw + 2, y + hh]; }
+  // tries spots [[x, y], ...] (left edge, middle) for a name tw wide: the first that is on
+  // screen, clear of the panels and of every name already placed; null when none is
+  function lblSpot(spots, tw) {
+    for (var i = 0; i < spots.length; i++) {
+      var x = spots[i][0], y = spots[i][1];
+      if (x < 4 || x + tw > sizeW - 4 || y < 12 || y > sizeH - 12) continue;
+      var c = clearOfPanels(x, y, tw);
+      if (Math.abs(c[0] - x) > 1 || Math.abs(c[1] - y) > 1) continue; // under a panel
+      if (lblFree(lblBox(x, y, tw))) return [x, y];
+    }
+    return null;
+  }
+  function lblTake(x, y, tw) { LBL.push(lblBox(x, y, tw)); }
+  // the dots on the map (searched places, cities) and the tapped city's own name are booked
+  // before any other name is placed, so names never cover a marker
+  function lblReservePins() {
+    LBL = [];
+    var b = flatBox();
+    for (var i = 0; i < PINS.length; i++) {
+      var P = PINS[i];
+      if (P.fromSearch && markMuted(P)) continue;
+      var x = b[0] + (P.lon + 180) / 360 * b[2], y = b[1] + (90 - P.lat) / 180 * b[3];
+      if (x < -20 || x > sizeW + 20 || y < -20 || y > sizeH + 20) continue;
+      LBL.push([x - 7, y - 7, x + 7, y + 7]);
+      if (P === labelPin && P.area) { ctx.save(); ctx.font = labelFont(600); var lw = ctx.measureText(P.area).width; ctx.restore(); LBL.push([x + 8, y - labelPx() * 0.75, x + 12 + lw, y + labelPx() * 0.7]); }
+    }
+  }
+  // how a country's name is written on the map: with its own accents and current name (the
+  // data keeps its plain key - "Sao Tome and Principe" - for matching; only the text shown changes)
+  var DISPLAY_NAME = { "Sao Tome and Principe": "São Tomé and Príncipe", "Ivory Coast": "Côte d'Ivoire", "Turkey": "Türkiye",
+    "Cape Verde": "Cabo Verde", "Reunion": "Réunion", "Curacao": "Curaçao" };
+  window.SL_DISPLAY_NAME = function (n) { return DISPLAY_NAME[n] || n; };
   function labelPx() { return Math.round(Math.max(12, Math.min(22, 12 + 3 * Math.log2(Math.max(1, fz))))); }
   function labelFont(w) { return (w || 700) + " " + labelPx() + "px Inter, sans-serif"; }
   function haloW() { return Math.max(3.5, labelPx() / 3.2); }
@@ -11957,8 +12017,10 @@ window.SL_GEO_READY = new Promise(function (res) {
     var pw = Math.abs(b[0] - a[0]), ph = Math.abs(b[1] - a[1]);
     var label = NAME[selected] || TITLE[selected] || "";
     if (!label) return;
+    label = DISPLAY_NAME[label] || label;
     var css = getComputedStyle(document.documentElement);
     var ink = css.getPropertyValue("--text").trim() || "#24321f", halo = css.getPropertyValue("--map-sea").trim() || "#dbe4ea";
+    var spots = null;
     ctx.save();
     ctx.font = labelFont(); ctx.textBaseline = "middle"; ctx.lineJoin = "round"; ctx.lineWidth = haloW(); ctx.strokeStyle = halo;
     var tw = ctx.measureText(label).width, lx, ly;
@@ -11967,6 +12029,10 @@ window.SL_GEO_READY = new Promise(function (res) {
       var pt = to((w + e) / 2, (s + n) / 2); if (!pt) { ctx.restore(); return; }
       if (pw < 2.5 && ph < 2.5) { ctx.beginPath(); ctx.arc(pt[0], pt[1], 2.5, 0, TAU); ctx.fillStyle = mapOnColor(); ctx.fill(); }
       lx = Math.max(pt[0] + pw / 2, pt[0] + 2.5) + 6; ly = pt[1];
+      // beside it on the right, else the left, above or below - wherever no other name is
+      var lh0 = labelPx(), hx = Math.max(pw / 2, 2.5), hy = Math.max(ph / 2, 2.5);
+      spots = [[lx, ly], [pt[0] - hx - 6 - tw, ly], [pt[0] - tw / 2, pt[1] - hy - lh0 * 0.8], [pt[0] - tw / 2, pt[1] + hy + lh0 * 0.8],
+        [lx, ly - lh0 * 1.1], [lx, ly + lh0 * 1.1], [pt[0] - hx - 6 - tw, ly - lh0 * 1.1], [pt[0] - hx - 6 - tw, ly + lh0 * 1.1]];
     } else {
       // bigger: the name sits at one fixed spot - the middle of its main landmass (the US on the
       // lower 48, not halfway to Alaska) - and stays there as you zoom and pan; it does not
@@ -11996,11 +12062,28 @@ window.SL_GEO_READY = new Promise(function (res) {
       var ap = to(at[0], at[1]);
       if (!ap || ap[0] < -tw || ap[0] > sizeW + tw || ap[1] < -20 || ap[1] > sizeH + 20) { ctx.restore(); return; }
       lx = ap[0] - tw / 2; ly = ap[1];
+      var lh1 = labelPx();
+      spots = [[lx, ly], [lx, ly - lh1 * 1.3], [lx, ly + lh1 * 1.3], [lx - tw * 0.4, ly], [lx + tw * 0.4, ly]];
+      // a name wider than the land it names (São Tomé and Príncipe, Gambia, Brunei...) is not
+      // squeezed across it: it goes beside its main landmass, where it covers nothing
+      if (!big.dot) {
+        var ba = to(big.w, big.no), bb = to(big.e, big.s);
+        if (ba && bb && tw > Math.abs(bb[0] - ba[0]) * 0.85) {
+          var bl = Math.min(ba[0], bb[0]), br = Math.max(ba[0], bb[0]), bt = Math.min(ba[1], bb[1]), bbm = Math.max(ba[1], bb[1]), bcy = (bt + bbm) / 2, bcx = (bl + br) / 2;
+          spots = [[br + 8, bcy], [bl - 8 - tw, bcy], [bcx - tw / 2, bt - lh1 * 0.8], [bcx - tw / 2, bbm + lh1 * 0.8]].concat(spots);
+        }
+      }
     }
-    // never under the map's own panels and buttons (only nudged when it's fully on screen -
-    // a name half off the edge stays where its country is, it isn't pulled along)
+    // never under the map's own panels and buttons, and never on another name: the first
+    // free spot. A big country's name that is half off the edge stays where its country is.
     var onScreen = lx >= 4 && lx + tw <= sizeW - 4 && ly >= 12 && ly <= sizeH - 12;
-    var spot = onScreen ? clearOfPanels(lx, ly, tw) : [lx, ly];
+    var spot = lblSpot(spots, tw);
+    if (!spot) {
+      if (onScreen) { var cp0 = clearOfPanels(lx, ly, tw); if (!lblFree(lblBox(cp0[0], cp0[1], tw))) { ctx.restore(); return; } spot = cp0; }
+      else if (pw > 60 || ph > 60) spot = [lx, ly];
+      else { ctx.restore(); return; }
+    }
+    lblTake(spot[0], spot[1], tw);
     ctx.strokeText(label, spot[0], spot[1]); ctx.fillStyle = ink; ctx.fillText(label, spot[0], spot[1]);
     ctx.restore();
   }
@@ -12064,13 +12147,19 @@ window.SL_GEO_READY = new Promise(function (res) {
       if (cp) { x = cp[0] - tw / 2; y = cp[1]; }
     }
     if (x + tw < 0 || x > sizeW || y < -20 || y > sizeH + 20) { ctx.restore(); return; } // its middle is off screen: no name
-    var spot = x >= 4 && x + tw <= sizeW - 4 && y >= 12 && y <= sizeH - 12 ? clearOfPanels(x, y, tw) : [x, y];
+    var lhp = labelPx(), small = !(pw > tw + 8);
+    var spots = small ? [[x, y], [a[0] - 6 - tw, y], [(a[0] + b[0]) / 2 - tw / 2, Math.min(a[1], b[1]) - lhp * 0.8], [(a[0] + b[0]) / 2 - tw / 2, Math.max(a[1], b[1]) + lhp * 0.8]]
+      : [[x, y], [x, y - lhp * 1.3], [x, y + lhp * 1.3]];
+    var spot = lblSpot(spots, tw);
+    if (!spot) spot = x >= 4 && x + tw <= sizeW - 4 && y >= 12 && y <= sizeH - 12 ? clearOfPanels(x, y, tw) : [x, y];
+    lblTake(spot[0], spot[1], tw);
     ctx.strokeText(label, spot[0], spot[1]); ctx.fillStyle = css.getPropertyValue("--text").trim() || "#24321f"; ctx.fillText(label, spot[0], spot[1]);
     ctx.restore();
   }
   function drawPlaceLabels(to) {
-    drawTinySelected(to);
+    lblReservePins();
     drawPickedProvince(to);
+    drawTinySelected(to);
     if (!shownPlace || markMuted(shownPlace)) return;
     var css = getComputedStyle(document.documentElement);
     var ink = css.getPropertyValue("--text").trim() || "#24321f";
@@ -12129,7 +12218,9 @@ window.SL_GEO_READY = new Promise(function (res) {
       // so it never ends up in HI on its own - without this it stays the plain unhighlighted
       // land color while Serbia around it lights up, reading as a mistake rather than a gap.
       var wantHI = function (r) { return r.code && (HI[r.code] || (r.code === "xk" && HI.rs) || (ENCLAVE[r.code] && HI[ENCLAVE[r.code]])); };
-      shapePath(to, wantHI, stride);
+      // "See islands" for one country: its islands are what's coloured, not its mainland
+      var wantHIfill = islandsOn && islScope ? function (r) { return wantHI(r) && r.code !== islScope; } : wantHI;
+      shapePath(to, wantHIfill, stride);
       ctx.globalAlpha = 0.45;
       ctx.fillStyle = onColor;
       FILL();
@@ -12159,8 +12250,9 @@ window.SL_GEO_READY = new Promise(function (res) {
       shapePath(to, wantSel, stride);
       // fully opaque, so this is the exact same solid color as the "See countries" modal's
       // fill - any transparency here would blend with the land underneath and look different
+      // (with "See islands" on for this country only its islands are coloured - its outline stays)
       ctx.fillStyle = onColor;
-      FILL();
+      if (!(islandsOn && islScope === selected)) FILL();
       shapePath(to, function (r) { return wantSel(r) && (r.e - r.w) / 360 * vb[2] > 8; }, stride, true);
       ctx.strokeStyle = "rgba(255,255,255,0.95)";
       ctx.lineWidth = 1.6;
@@ -12679,7 +12771,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // the small islands (1 km2 and more) the map gave to a country
   function smallIslesOf(cc) {
     var n = 0;
-    for (var i = 0; i < POLY.length; i++) if (POLY[i].isle && POLY[i].code === cc) n++;
+    for (var i = 0; i < POLY.length; i++) { var r = POLY[i]; if ((!cc || r.code === cc) && (r.isle || r.isl || r.dot)) n++; }
     return n;
   }
   function showIslands() {
@@ -12691,11 +12783,10 @@ window.SL_GEO_READY = new Promise(function (res) {
     var cpTitle = document.getElementById("cp-title");
     cpTitle.classList.add("cp-title-place");
     cpTitle.textContent = cc ? "Islands of " + cname : "Islands";
-    var small = cc ? smallIslesOf(cc) : 0;
+    var small = smallIslesOf(cc), smallTxt = small.toLocaleString() + " island" + (small === 1 ? "" : "s") + " coloured on the map";
     document.getElementById("cp-sub").textContent = cc
-      ? (islShown.length ? islShown.length + (islShown.length === 1 ? " island or island group" : " islands and island groups") + " · tap one to see its snakes" : "No big named islands")
-        + (small ? " · " + small + " small island" + (small === 1 ? "" : "s") + " coloured on the map" : "")
-      : I.list.length + " islands and island groups · tap one to see its snakes";
+      ? (small ? smallTxt : "No islands") + (islShown.length ? " · " + islShown.length + " named · tap one to see its snakes" : "")
+      : "All " + smallTxt + " · " + I.list.length + " named islands and island groups below · tap one to see its snakes";
     document.getElementById("cp-list").innerHTML = islShown.map(function (e, i) {
       return '<div class="cp-row cp-row-country cp-state-pick" data-island="' + i + '"><b>' + spEsc(e.name) + "</b><i>" + spEsc(e.where) + " · " +
         (e.n ? e.n + (e.n === 1 ? " species" : " species") : "no species on record") + "</i></div>";
@@ -12709,16 +12800,45 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   function drawIslands(to) {
     if (!islandsOn || !ISL) return;
-    var on = mapOnColor(), v = viewLL(), cs = ISL.cset, sc = islScope;
-    if (sc) { cs = {}; if (ISL.cset[sc]) cs[sc] = 1; }
-    var want = function (r) { return (cs[r.code] || (sc && r.isle && r.code === sc)) && boxInView({ w: r.w, e: r.e, s: r.s, n: r.no }, v); };
-    shapePath(to, want, 1);
+    // every island in the world (or, with a country picked, just that country's islands - not
+    // its mainland): each outline that is not part of a continent, plus the tiny ones drawn
+    // as dots and the ~9,700 small islands (data/islands.js)
+    var on = mapOnColor(), v = viewLL(), sc = islScope, lvl = detailLevel(), close = needClip();
+    var bx = flatBox(), M = viewMatrix(), fill = window.Path2D ? new Path2D() : null, anyR = false;
+    if (fill) {
+      for (var k = 0; k < POLY.length; k++) {
+        var r = POLY[k];
+        if (r.dot || !(r.isl || r.isle) || (sc && r.code !== sc) || !(r.e >= v.w && r.w <= v.e && r.no >= v.s && r.s <= v.n)) continue;
+        var o = (r.L && r.L[lvl]) || r;
+        if (!o || o.n < 3) continue;
+        if (close) {
+          // close up: straight to screen pixels (huge flat coordinates lose precision)
+          var p0 = to(o.lon[0], o.lat[0]); if (!p0) continue;
+          fill.moveTo(p0[0], p0[1]);
+          for (var q = 1; q < o.n; q++) { var pq = to(o.lon[q], o.lat[q]); if (pq) fill.lineTo(pq[0], pq[1]); }
+          fill.closePath();
+        } else {
+          var P = r._ip && r._ip[lvl];
+          if (!P) {
+            P = new Path2D(); P.moveTo(o.lon[0] + 180, 90 - o.lat[0]);
+            for (var q2 = 1; q2 < o.n; q2++) P.lineTo(o.lon[q2] + 180, 90 - o.lat[q2]);
+            P.closePath(); (r._ip = r._ip || [])[lvl] = P;
+          }
+          fill.addPath(P, M);
+        }
+        anyR = true;
+      }
+    }
     ctx.save();
-    ctx.globalAlpha = 0.5; ctx.fillStyle = on; FILL();
-    ctx.globalAlpha = 1; fillDots(to, function (r) { return !!cs[r.code]; }, 2.2);
+    if (anyR) {
+      ctx.globalAlpha = 0.55; ctx.fillStyle = on; ctx.fill(fill);
+      ctx.globalAlpha = 0.9; ctx.strokeStyle = "rgba(255,255,255,0.75)"; ctx.lineWidth = 0.7; ctx.lineJoin = "round"; ctx.stroke(fill);
+    }
+    ctx.globalAlpha = 1; fillDots(to, function (r) { return r.dot && (!sc || r.code === sc); }, 2.2);
     ctx.restore();
+    // island states and provinces (Sicily, Tasmania, Hokkaido, Indonesia's islands...) outlined too
     if (!window.Path2D || !window.DOMMatrix) return;
-    var M = viewMatrix(), lvl = detailLevel(), fills = new Path2D(), any = false;
+    var fills = new Path2D(), any = false;
     Object.keys(ISL.sset).forEach(function (cc) {
       if (sc && cc !== sc) return;
       var o = provPaths(cc); if (!o || !boxInView(o, v)) return;
@@ -12730,10 +12850,10 @@ window.SL_GEO_READY = new Promise(function (res) {
     });
     if (!any) return;
     ctx.save();
-    ctx.globalAlpha = 0.6; ctx.fillStyle = on; ctx.fill(fills);
     ctx.globalAlpha = 1; ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.lineWidth = 0.8; ctx.lineJoin = "round"; ctx.stroke(fills);
     ctx.restore();
   }
+
 
   function drawCountryProvinces(to, cc) {
     var list = cc === "us" ? US_STATES : (getCountryProvinces()[cc] || []);
@@ -12795,17 +12915,23 @@ window.SL_GEO_READY = new Promise(function (res) {
   // Brasilia's district inside Goias go to the right state)
   function provinceAt(cc, lon, lat) {
     var list = cc === "us" ? US_STATES : (getCountryProvinces()[cc] || []);
+    // a state inside another (Mexico City inside the State of Mexico, Berlin in Brandenburg...)
+    // wins over the one around it: of every state the point is in, the smallest ring is picked
+    var best = null, bestA = Infinity;
     for (var i = 0; i < list.length; i++) {
-      var inside = false;
+      var inside = false, area = Infinity;
       list[i].rings.forEach(function (ring) {
+        var hit = false, w = 999, e = -999, s = 999, n = -999;
         for (var a = 0, b = ring.length - 1; a < ring.length; b = a++) {
           var xa = ring[a][0], ya = ring[a][1], xb = ring[b][0], yb = ring[b][1];
-          if ((ya > lat) !== (yb > lat) && lon < (xb - xa) * (lat - ya) / (yb - ya) + xa) inside = !inside;
+          if (xa < w) w = xa; if (xa > e) e = xa; if (ya < s) s = ya; if (ya > n) n = ya;
+          if ((ya > lat) !== (yb > lat) && lon < (xb - xa) * (lat - ya) / (yb - ya) + xa) { inside = !inside; hit = !hit; }
         }
+        if (hit) area = Math.min(area, (e - w) * (n - s));
       });
-      if (inside) return list[i];
+      if (inside && area < bestA) { best = list[i]; bestA = area; }
     }
-    return null;
+    return best;
   }
 
   // pans/zooms so the given lon/lat box fills the view (with a little padding), using the
@@ -12983,15 +13109,21 @@ window.SL_GEO_READY = new Promise(function (res) {
       if (isCity ? PINS[i] === labelPin : fz > 1.6) {
         ctx.font = labelFont(600);
         var lh = labelPx(), lw = ctx.measureText(PINS[i].area).width, box = [s[0] + 8, s[1] - lh * 0.75, s[0] + 12 + lw, s[1] + lh * 0.7];
-        if (!isCity && placed.some(function (q) { return box[0] < q[2] && box[2] > q[0] && box[1] < q[3] && box[3] > q[1]; })) continue;
-        placed.push(box);
+        var tx = s[0] + 10;
+        if (!isCity) {
+          // a searched place's name: on the right of its dot, else the left - never on another
+          // name; with no room on either side it is left off (its dot stays)
+          var clash = function (bx) { return placed.some(function (q) { return bx[0] < q[2] && bx[2] > q[0] && bx[1] < q[3] && bx[3] > q[1]; }) || !lblFree(bx); };
+          if (clash(box)) { var lb = [s[0] - 12 - lw, box[1], s[0] - 8, box[3]]; if (clash(lb)) continue; box = lb; tx = s[0] - 10 - lw; }
+        }
+        placed.push(box); if (!isCity) LBL.push(box);
         ctx.textAlign = "left";
         ctx.lineJoin = "round";
         ctx.lineWidth = haloW();                     // a dark rim so the name reads over anything
         ctx.strokeStyle = "rgba(0,0,0,0.62)";
-        ctx.strokeText(PINS[i].area, s[0] + 10, s[1] + 4);
+        ctx.strokeText(PINS[i].area, tx, s[1] + 4);
         ctx.fillStyle = "#ffffff";
-        ctx.fillText(PINS[i].area, s[0] + 10, s[1] + 4);
+        ctx.fillText(PINS[i].area, tx, s[1] + 4);
       }
     }
   }
@@ -13020,7 +13152,16 @@ window.SL_GEO_READY = new Promise(function (res) {
     // walked backwards so a nested disputed region (Kosovo, traced inside Serbia's own
     // outline) wins the hit test over the larger country it's nested inside, since it's
     // added to POLY after that country
-    for (var i = POLY.length - 1; i >= 0; i--) if (inRing(POLY[i], lon, lat)) return POLY[i].code;
+    // and an enclave (San Marino and the Vatican in Italy, Lesotho in South Africa...) wins over
+    // the country around it: of every outline the point is in, the smallest one is the answer
+    var best = null, bestA = Infinity;
+    for (var i = POLY.length - 1; i >= 0; i--) {
+      var r = POLY[i];
+      if (!inRing(r, lon, lat)) continue;
+      var a = (r.e - r.w) * (r.no - r.s);
+      if (a < bestA) { best = r.code; bestA = a; }
+    }
+    if (best) return best;
     // Antarctica's coastline is jagged enough that buildGeometry breaks it into ~100
     // small disconnected fragments with real gaps between them, so an ordinary click
     // anywhere in that region easily lands in a gap and finds nothing. Nothing else is
@@ -13140,7 +13281,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       });
     });
     var cpTitle = document.getElementById("cp-title");
-    cpTitle.textContent = NAME[code] || TITLE[code] || code.toUpperCase();
+    cpTitle.textContent = window.SL_DISPLAY_NAME(NAME[code] || TITLE[code] || code.toUpperCase());
     cpTitle.classList.add("cp-title-place");
     var total = list.length + extra.length;
     document.getElementById("cp-sub").textContent = !total && NO_SNAKES[code]
@@ -13172,7 +13313,7 @@ window.SL_GEO_READY = new Promise(function (res) {
           var cityFactHtml = hasUsStates
             ? '<div class="cp-city-fact" data-sp-id="' + sp.id + '">' + (CITY_FACT_CACHE[sp.id] || "") + "</div>"
             : "";
-          return '<div class="cp-row' + (r[1] ? " cp-intro" : "") + '">' + photoBtn(sp) + "<b>" + sp.name + "</b><i>" + sp.sci + "</i>" + statesHtml + cityFactHtml + "</div>";
+          return '<div class="cp-row cp-sp' + (r[1] ? " cp-intro" : "") + '" data-sp="' + attrEsc(sp.id) + '">' + photoBtn(sp) + "<b>" + sp.name + "</b><i>" + sp.sci + "</i>" + statesHtml + cityFactHtml + "</div>";
         }).join("")
       : NO_SNAKES[code]
         ? '<div class="cp-row"><b>No snakes live here.</b><i>Too cold, or too remote for snakes ever to have reached.</i></div>'
@@ -13185,11 +13326,13 @@ window.SL_GEO_READY = new Promise(function (res) {
     document.getElementById("see-search-states").hidden = true; // the country's own "See states" covers it
     if (searchBtns.all) document.getElementById("all-countries").hidden = false;
     setProvBtn(false, code);
-    document.getElementById("see-provinces").hidden = !rows.some(function (r) {
+    // every country with state/province shapes offers them - also where no snake has state
+    // records yet (they then show as "no species data")
+    document.getElementById("see-provinces").hidden = !(code === "us" || ((getCountryProvinces()[code] || []).length > 1) || rows.some(function (r) {
       var sp = r[0];
       return (code === "us" && sp.states && sp.states.length) ||
         (sp.provinces || []).some(function (p) { return p.split(":")[0] === codeUp; });
-    });
+    }));
     // selecting a different country always leaves states mode behind - "See states" is an
     // explicit, click-to-reveal action, not automatic. "See cities" is untouched here on
     // purpose: it's a property of the current species *search*, not of which country is
@@ -13418,7 +13561,9 @@ window.SL_GEO_READY = new Promise(function (res) {
   document.getElementById("cp-list").addEventListener("click", function (e) {
     if (e.target.closest(".cp-photo, .cp-states, .cp-city-fact")) return;
     var row = e.target.closest(".cp-row");
-    if (!row || row.hasAttribute("data-city") || row.hasAttribute("data-country") || row.hasAttribute("data-prov")) return;
+    if (!row || row.hasAttribute("data-city") || row.hasAttribute("data-country") || row.hasAttribute("data-prov") || row.hasAttribute("data-island")) return;
+    // a species row: anywhere on it (not its buttons) opens that snake's own page
+    if (row.dataset.sp) { spGoPage(row.dataset.sp); return; }
     if (!e.target.closest("b, i")) return;
     var nmEl = row.querySelector("b"), sciEl = row.querySelector("i");
     var nm = nmEl ? nmEl.textContent.trim() : "", sci = sciEl ? sciEl.textContent.trim() : "";
@@ -13447,7 +13592,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     });
     var names = Object.keys(counts).sort();
     document.getElementById("cp-title").classList.add("cp-title-place");
-    document.getElementById("cp-title").textContent = (NAME[lastCountryCode] || lastCountryCode.toUpperCase()) + ": " + subdivWord(lastCountryCode);
+    document.getElementById("cp-title").textContent = window.SL_DISPLAY_NAME(NAME[lastCountryCode] || lastCountryCode.toUpperCase()) + ": " + subdivWord(lastCountryCode);
     document.getElementById("cp-sub").textContent = names.length
       ? names.length + " with sourced species data"
       : "No sourced " + subdivWord(lastCountryCode, true) + " data for this country yet.";
@@ -13470,7 +13615,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       ? rows.length + (rows.length === 1 ? " species lives here" : " species live here")
       : "No sourced species data for here yet.";
     document.getElementById("cp-list").innerHTML = rows.map(function (r) {
-      return '<div class="cp-row' + (r[1] ? " cp-intro" : "") + '">' + photoBtn(r[0]) + "<b>" + r[0].name + "</b><i>" + r[0].sci + "</i></div>";
+      return '<div class="cp-row cp-sp' + (r[1] ? " cp-intro" : "") + '" data-sp="' + attrEsc(r[0].id) + '">' + photoBtn(r[0]) + "<b>" + r[0].name + "</b><i>" + r[0].sci + "</i></div>";
     }).join("");
     popPanel();
     invalidate();
@@ -13488,7 +13633,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       document.getElementById("cp-sub").textContent = pin.where + " · " + pin.species.length +
         (pin.species.length === 1 ? " species lives around here" : " species live around here");
       document.getElementById("cp-list").innerHTML = pin.species.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (sp) {
-        return '<div class="cp-row">' + photoBtn(sp) + "<b>" + sp.name + "</b><i>" + sp.sci + "</i></div>";
+        return '<div class="cp-row cp-sp" data-sp="' + attrEsc(sp.id) + '">' + photoBtn(sp) + "<b>" + sp.name + "</b><i>" + sp.sci + "</i></div>";
       }).join("");
       popPanel();
       return;
@@ -13520,7 +13665,7 @@ window.SL_GEO_READY = new Promise(function (res) {
           : "No documented sightings within 25 miles yet.";
         document.getElementById("cp-list").innerHTML = found.length
           ? found.map(function (r) {
-              return '<div class="cp-row">' + photoBtn(r.sp) + "<b>" + r.sp.name + "</b><i>" + r.sp.sci + "</i>" +
+              return '<div class="cp-row cp-sp" data-sp="' + attrEsc(r.sp.id) + '">' + photoBtn(r.sp) + "<b>" + r.sp.name + "</b><i>" + r.sp.sci + "</i>" +
                 '<div class="cp-city-fact">' + r.count.toLocaleString() + (r.count === 1 ? " sighting" : " sightings") + "</div></div>";
             }).join("")
           : '<div class="cp-row"><b>Live count from iNaturalist</b><i>Citizen-science observations, not a verified population count.</i></div>';
@@ -13531,7 +13676,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       ? pin.species[0].name + " is an invasive species here — this is outside its native range."
       : pin.species.length + " invasive species live here, none of them native.";
     document.getElementById("cp-list").innerHTML = pin.species.map(function (sp) {
-      return '<div class="cp-row cp-intro">' + photoBtn(sp) + "<b>" + sp.name + "</b><i>" + sp.sci + "</i></div>";
+      return '<div class="cp-row cp-sp cp-intro" data-sp="' + attrEsc(sp.id) + '">' + photoBtn(sp) + "<b>" + sp.name + "</b><i>" + sp.sci + "</i></div>";
     }).join("");
     popPanel();
   }
@@ -13587,6 +13732,36 @@ window.SL_GEO_READY = new Promise(function (res) {
     moved = 0;
     cv.classList.add("dragging");
   });
+  // with a mouse, the name of whatever country (or state, with See states on) is under the
+  // pointer shows in a small tip beside it - so a place whose name has no room on the map
+  // can still be named. Touch screens get the name by tapping, as before.
+  var mapTip = document.createElement("div"); mapTip.className = "map-tip"; mapTip.hidden = true; mapTip.setAttribute("aria-hidden", "true");
+  stage.appendChild(mapTip);
+  var tipRaf = 0, tipEv = null;
+  function tipAt() {
+    tipRaf = 0; var e = tipEv; if (!e || drag || pinch) { mapTip.hidden = true; return; }
+    var r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    var code = POLY ? at(x, y) : null, txt = "";
+    if (code) {
+      txt = window.SL_DISPLAY_NAME(NAME[code] || TITLE[code] || "");
+      if (statesMode && code === statesMode) {
+        var bx = flatBox(), st = provinceAt(code, (x - bx[0]) / bx[2] * 360 - 180, 90 - (y - bx[1]) / bx[3] * 180);
+        if (st) txt = (code === "us" ? ((window.STATE_NAME && window.STATE_NAME[st.code]) || st.code) : st.name) + ", " + txt;
+      }
+    }
+    if (!txt) { mapTip.hidden = true; return; }
+    mapTip.textContent = txt; mapTip.hidden = false;
+    var sr = stage.getBoundingClientRect(), tw = mapTip.offsetWidth, th = mapTip.offsetHeight;
+    var lx = e.clientX - sr.left + 14, ly = e.clientY - sr.top + 16;
+    if (lx + tw > sr.width - 6) lx = e.clientX - sr.left - tw - 10;
+    if (ly + th > sr.height - 6) ly = e.clientY - sr.top - th - 10;
+    mapTip.style.transform = "translate(" + Math.round(lx) + "px," + Math.round(ly) + "px)";
+  }
+  cv.addEventListener("pointermove", function (e) {
+    if (e.pointerType === "mouse") { tipEv = e; if (!tipRaf) tipRaf = requestAnimationFrame(tipAt); }
+  });
+  cv.addEventListener("pointerleave", function () { tipEv = null; mapTip.hidden = true; });
+  cv.addEventListener("pointerdown", function () { mapTip.hidden = true; });
   cv.addEventListener("pointermove", function (e) {
     if (fingers[e.pointerId]) fingers[e.pointerId] = { x: e.clientX, y: e.clientY };
     if (pinch) {
@@ -16374,6 +16549,14 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v4.24", d: "2026-11-07", items: ["Map: names never sit on top of each other (São Tomé and Príncipe's name goes beside the island instead of over it), and hover any country or state to see its name"] },
+    { v: "v4.23", d: "2026-11-07", items: ["Translator: all 249 languages Google Translate has"] },
+    { v: "v4.22", d: "2026-11-07", items: ["Map: search Gaza Strip or West Bank to see that part of Palestine and its governorates"] },
+    { v: "v4.21", d: "2026-11-07", items: ["See islands: every island in the world is coloured (13,430); with a country picked, only its islands - not its mainland"] },
+    { v: "v4.20", d: "2026-11-07", items: ["Map: Mexico's states redrawn correctly, and states inside other states (Mexico City, Berlin...) and countries inside others (San Marino, Vatican City, Lesotho) can be clicked"] },
+    { v: "v4.19", d: "2026-11-07", items: ["Map: 20 more countries show their states, parishes or districts (Taiwan, Malta, Andorra, Samoa, Luxembourg...), and See states shows for every country that has them"] },
+    { v: "v4.18", d: "2026-11-07", items: ["Map: clicking a snake anywhere in a map list opens its species page"] },
+    { v: "v4.17", d: "2026-11-07", items: ["Map: state borders now meet the coast and each other exactly - no doubled or overlapping lines when you zoom right in (Egypt and everywhere else)"] },
     { v: "v4.16", d: "2026-11-07", items: ["Country pages (Snakes of San Marino, Brazil...) redesigned: photo cards, real counts, search, venom and family filters, sorting, a country picker and a View snakes on map button"] },
     { v: "v4.15", d: "2026-11-07", items: ["Map: Palestine shows its 16 governorates (5 in Gaza, 11 in the West Bank) - it used to say Gaza Strip with 2 territories", "Map: the right word for each country's parts - districts in Sri Lanka, castelli in San Marino, states & union territories in India and more"] },
     { v: "v4.14", d: "2026-11-07", items: ["Map: See islands with a country picked shows just that country's islands; with nothing picked, the whole world's"] },
@@ -18174,7 +18357,7 @@ window.SL_welcome = function (u, back) {
 <script>
 (function () {
   var btn = document.getElementById("lang-btn"); if (!btn) return;
-  var LANGS = [["en", "English (original)", "English"], ["ace", "Bahsa Acèh", "Acehnese"], ["ach", "Acholi", "Acholi"], ["af", "Afrikaans", "Afrikaans"], ["ak", "Akan", "Akan (Twi)"], ["sq", "Shqip", "Albanian"], ["alz", "Alur", "Alur"], ["am", "አማርኛ", "Amharic"], ["ar", "العربية", "Arabic"], ["hy", "Հայերեն", "Armenian"], ["as", "অসমীয়া", "Assamese"], ["awa", "अवधी", "Awadhi"], ["ay", "Aymar aru", "Aymara"], ["az", "Azərbaycanca", "Azerbaijani"], ["ban", "Basa Bali", "Balinese"], ["bm", "Bamanankan", "Bambara"], ["ba", "Башҡортса", "Bashkir"], ["eu", "Euskara", "Basque"], ["btx", "Batak Karo", "Batak Karo"], ["bts", "Batak Simalungun", "Batak Simalungun"], ["bbc", "Batak Toba", "Batak Toba"], ["be", "Беларуская", "Belarusian"], ["bem", "Ichibemba", "Bemba"], ["bn", "বাংলা", "Bengali"], ["bew", "Betawi", "Betawi"], ["bho", "भोजपुरी", "Bhojpuri"], ["bik", "Bikol", "Bikol"], ["bs", "Bosanski", "Bosnian"], ["br", "Brezhoneg", "Breton"], ["bg", "Български", "Bulgarian"], ["bua", "Буряад", "Buryat"], ["yue", "粵語", "Cantonese"], ["ca", "Català", "Catalan"], ["ceb", "Cebuano", "Cebuano"], ["ny", "Chichewa", "Chichewa"], ["zh-CN", "中文 (简体)", "Chinese (Simplified)"], ["zh-TW", "中文 (繁體)", "Chinese (Traditional)"], ["cv", "Чӑвашла", "Chuvash"], ["co", "Corsu", "Corsican"], ["crh", "Qırımtatarca", "Crimean Tatar"], ["hr", "Hrvatski", "Croatian"], ["cs", "Čeština", "Czech"], ["da", "Dansk", "Danish"], ["dv", "ދިވެހި", "Dhivehi"], ["din", "Thuɔŋjäŋ", "Dinka"], ["doi", "डोगरी", "Dogri"], ["dov", "Dombe", "Dombe"], ["nl", "Nederlands", "Dutch"], ["dz", "རྫོང་ཁ", "Dzongkha"], ["eo", "Esperanto", "Esperanto"], ["et", "Eesti", "Estonian"], ["ee", "Eʋegbe", "Ewe"], ["fj", "Na Vosa Vakaviti", "Fijian"], ["tl", "Filipino", "Filipino (Tagalog)"], ["fi", "Suomi", "Finnish"], ["fr", "Français", "French"], ["fr-CA", "Français (Canada)", "French (Canada)"], ["fy", "Frysk", "Frisian"], ["ff", "Fulfulde", "Fulani"], ["gaa", "Ga", "Ga"], ["gl", "Galego", "Galician"], ["lg", "Luganda", "Ganda (Luganda)"], ["ka", "ქართული", "Georgian"], ["de", "Deutsch", "German"], ["el", "Ελληνικά", "Greek"], ["gn", "Avañe'ẽ", "Guarani"], ["gu", "ગુજરાતી", "Gujarati"], ["ht", "Kreyòl ayisyen", "Haitian Creole"], ["cnh", "Hakha Chin", "Hakha Chin"], ["ha", "Hausa", "Hausa"], ["haw", "ʻŌlelo Hawaiʻi", "Hawaiian"], ["iw", "עברית", "Hebrew"], ["hil", "Hiligaynon", "Hiligaynon"], ["hi", "हिन्दी", "Hindi"], ["hmn", "Hmoob", "Hmong"], ["hu", "Magyar", "Hungarian"], ["hrx", "Hunsrik", "Hunsrik"], ["is", "Íslenska", "Icelandic"], ["ig", "Igbo", "Igbo"], ["ilo", "Ilokano", "Ilocano"], ["id", "Bahasa Indonesia", "Indonesian"], ["ga", "Gaeilge", "Irish"], ["it", "Italiano", "Italian"], ["ja", "日本語", "Japanese"], ["jw", "Basa Jawa", "Javanese"], ["kn", "ಕನ್ನಡ", "Kannada"], ["pam", "Kapampangan", "Kapampangan"], ["kk", "Қазақ", "Kazakh"], ["km", "ខ្មែរ", "Khmer"], ["cgg", "Rukiga", "Kiga"], ["rw", "Kinyarwanda", "Kinyarwanda"], ["ktu", "Kituba", "Kituba"], ["gom", "कोंकणी", "Konkani"], ["ko", "한국어", "Korean"], ["kri", "Krio", "Krio"], ["ku", "Kurdî", "Kurdish (Kurmanji)"], ["ckb", "کوردی", "Kurdish (Sorani)"], ["ky", "Кыргызча", "Kyrgyz"], ["lo", "ລາວ", "Lao"], ["ltg", "Latgaļu", "Latgalian"], ["la", "Latina", "Latin"], ["lv", "Latviešu", "Latvian"], ["lij", "Ligure", "Ligurian"], ["li", "Limburgs", "Limburgish"], ["ln", "Lingála", "Lingala"], ["lt", "Lietuvių", "Lithuanian"], ["lmo", "Lombard", "Lombard"], ["luo", "Dholuo", "Luo"], ["lb", "Lëtzebuergesch", "Luxembourgish"], ["mk", "Македонски", "Macedonian"], ["mai", "मैथिली", "Maithili"], ["mak", "Makassar", "Makassar"], ["mg", "Malagasy", "Malagasy"], ["ms", "Bahasa Melayu", "Malay"], ["ms-Arab", "بهاس ملايو", "Malay (Jawi)"], ["ml", "മലയാളം", "Malayalam"], ["mt", "Malti", "Maltese"], ["mi", "Māori", "Maori"], ["mr", "मराठी", "Marathi"], ["chm", "Марий", "Meadow Mari"], ["mni-Mtei", "ꯃꯩꯇꯩꯂꯣꯟ", "Meiteilon (Manipuri)"], ["min", "Minang", "Minang"], ["lus", "Mizo", "Mizo"], ["mn", "Монгол", "Mongolian"], ["my", "မြန်မာ", "Myanmar (Burmese)"], ["nr", "isiNdebele", "Ndebele (South)"], ["new", "नेपाल भाषा", "Nepalbhasa (Newari)"], ["ne", "नेपाली", "Nepali"], ["nso", "Sesotho sa Leboa", "Northern Sotho (Sepedi)"], ["no", "Norsk", "Norwegian"], ["nus", "Thok Naath", "Nuer"], ["oc", "Occitan", "Occitan"], ["or", "ଓଡ଼ିଆ", "Odia (Oriya)"], ["om", "Afaan Oromoo", "Oromo"], ["pag", "Pangasinan", "Pangasinan"], ["pap", "Papiamento", "Papiamento"], ["ps", "پښتو", "Pashto"], ["fa", "فارسی", "Persian"], ["pl", "Polski", "Polish"], ["pt", "Português (Brasil)", "Portuguese (Brazil)"], ["pt-PT", "Português (Portugal)", "Portuguese (Portugal)"], ["pa", "ਪੰਜਾਬੀ", "Punjabi (Gurmukhi)"], ["pa-Arab", "پنجابی", "Punjabi (Shahmukhi)"], ["qu", "Runa Simi", "Quechua"], ["rom", "Romani", "Romani"], ["ro", "Română", "Romanian"], ["rn", "Ikirundi", "Rundi"], ["ru", "Русский", "Russian"], ["sm", "Gagana Samoa", "Samoan"], ["sg", "Sängö", "Sango"], ["sa", "संस्कृतम्", "Sanskrit"], ["gd", "Gàidhlig", "Scots Gaelic"], ["sr", "Српски", "Serbian"], ["st", "Sesotho", "Sesotho"], ["crs", "Seselwa", "Seychellois Creole"], ["shn", "Shan", "Shan"], ["sn", "chiShona", "Shona"], ["scn", "Sicilianu", "Sicilian"], ["szl", "Ślōnski", "Silesian"], ["sd", "سنڌي", "Sindhi"], ["si", "සිංහල", "Sinhala"], ["sk", "Slovenčina", "Slovak"], ["sl", "Slovenščina", "Slovenian"], ["so", "Soomaali", "Somali"], ["es", "Español", "Spanish"], ["su", "Basa Sunda", "Sundanese"], ["sw", "Kiswahili", "Swahili"], ["ss", "SiSwati", "Swati"], ["sv", "Svenska", "Swedish"], ["tg", "Тоҷикӣ", "Tajik"], ["ta", "தமிழ்", "Tamil"], ["tt", "Татарча", "Tatar"], ["te", "తెలుగు", "Telugu"], ["tet", "Tetun", "Tetum"], ["th", "ไทย", "Thai"], ["ti", "ትግርኛ", "Tigrinya"], ["ts", "Xitsonga", "Tsonga"], ["tn", "Setswana", "Tswana"], ["tr", "Türkçe", "Turkish"], ["tk", "Türkmençe", "Turkmen"], ["uk", "Українська", "Ukrainian"], ["ur", "اردو", "Urdu"], ["ug", "ئۇيغۇرچە", "Uyghur"], ["uz", "Oʻzbek", "Uzbek"], ["vi", "Tiếng Việt", "Vietnamese"], ["cy", "Cymraeg", "Welsh"], ["xh", "isiXhosa", "Xhosa"], ["yi", "ייִדיש", "Yiddish"], ["yo", "Yorùbá", "Yoruba"], ["yua", "Maaya T'aan", "Yucatec Maya"], ["zu", "isiZulu", "Zulu"]];
+  var LANGS = [["en", "English (original)", "English"], ["ab", "Аԥсуа", "Abkhaz"], ["ace", "Bahsa Acèh", "Acehnese"], ["ach", "Acholi", "Acholi"], ["aa", "Qafaraf", "Afar"], ["af", "Afrikaans", "Afrikaans"], ["sq", "Shqip", "Albanian"], ["alz", "Alur", "Alur"], ["am", "አማርኛ", "Amharic"], ["ar", "العربية", "Arabic"], ["hy", "Հայերեն", "Armenian"], ["as", "অসমীয়া", "Assamese"], ["av", "Авар мацӀ", "Avar"], ["awa", "अवधी", "Awadhi"], ["ay", "Aymar aru", "Aymara"], ["az", "Azərbaycanca", "Azerbaijani"], ["ban", "Basa Bali", "Balinese"], ["bal", "بلوچی", "Baluchi"], ["bm", "Bamanankan", "Bambara"], ["bci", "Wawle", "Baoulé"], ["ba", "Башҡортса", "Bashkir"], ["eu", "Euskara", "Basque"], ["btx", "Batak Karo", "Batak Karo"], ["bts", "Batak Simalungun", "Batak Simalungun"], ["bbc", "Batak Toba", "Batak Toba"], ["be", "Беларуская", "Belarusian"], ["bem", "Ichibemba", "Bemba"], ["bn", "বাংলা", "Bengali"], ["bew", "Betawi", "Betawi"], ["bho", "भोजपुरी", "Bhojpuri"], ["bik", "Bikol", "Bikol"], ["bs", "Bosanski", "Bosnian"], ["br", "Brezhoneg", "Breton"], ["bg", "Български", "Bulgarian"], ["bua", "Буряад", "Buryat"], ["yue", "粵語", "Cantonese"], ["ca", "Català", "Catalan"], ["ceb", "Cebuano", "Cebuano"], ["ch", "Chamoru", "Chamorro"], ["ce", "Нохчийн", "Chechen"], ["ny", "Chichewa", "Chichewa"], ["zh-CN", "中文 (简体)", "Chinese (Simplified)"], ["zh-TW", "中文 (繁體)", "Chinese (Traditional)"], ["chk", "Chuukese", "Chuukese"], ["cv", "Чӑвашла", "Chuvash"], ["co", "Corsu", "Corsican"], ["crh", "Къырымтатарджа", "Crimean Tatar (Cyrillic)"], ["crh-Latn", "Qırımtatarca", "Crimean Tatar (Latin)"], ["hr", "Hrvatski", "Croatian"], ["cs", "Čeština", "Czech"], ["da", "Dansk", "Danish"], ["fa-AF", "دری", "Dari"], ["dv", "ދިވެހި", "Dhivehi"], ["din", "Thuɔŋjäŋ", "Dinka"], ["doi", "डोगरी", "Dogri"], ["dov", "Dombe", "Dombe"], ["nl", "Nederlands", "Dutch"], ["dyu", "Julakan", "Dyula"], ["dz", "རྫོང་ཁ", "Dzongkha"], ["eo", "Esperanto", "Esperanto"], ["et", "Eesti", "Estonian"], ["ee", "Eʋegbe", "Ewe"], ["fo", "Føroyskt", "Faroese"], ["fj", "Na Vosa Vakaviti", "Fijian"], ["tl", "Filipino", "Filipino"], ["fi", "Suomi", "Finnish"], ["fon", "Fɔ̀ngbè", "Fon"], ["fr", "Français", "French"], ["fr-CA", "Français (Canada)", "French (Canada)"], ["fy", "Frysk", "Frisian"], ["fur", "Furlan", "Friulian"], ["ff", "Fulfulde", "Fulani"], ["gaa", "Ga", "Ga"], ["gl", "Galego", "Galician"], ["ka", "ქართული", "Georgian"], ["de", "Deutsch", "German"], ["el", "Ελληνικά", "Greek"], ["gn", "Avañe'ẽ", "Guarani"], ["gu", "ગુજરાતી", "Gujarati"], ["ht", "Kreyòl ayisyen", "Haitian Creole"], ["cnh", "Hakha Chin", "Hakha Chin"], ["ha", "Hausa", "Hausa"], ["haw", "ʻŌlelo Hawaiʻi", "Hawaiian"], ["iw", "עברית", "Hebrew"], ["hil", "Hiligaynon", "Hiligaynon"], ["hi", "हिन्दी", "Hindi"], ["hmn", "Hmoob", "Hmong"], ["hu", "Magyar", "Hungarian"], ["hrx", "Hunsrik", "Hunsrik"], ["iba", "Jaku Iban", "Iban"], ["is", "Íslenska", "Icelandic"], ["ig", "Igbo", "Igbo"], ["ilo", "Ilokano", "Ilocano"], ["id", "Bahasa Indonesia", "Indonesian"], ["iu-Latn", "Inuktitut", "Inuktut (Latin)"], ["iu", "ᐃᓄᒃᑎᑐᑦ", "Inuktut (Syllabics)"], ["ga", "Gaeilge", "Irish"], ["it", "Italiano", "Italian"], ["jam", "Patwa", "Jamaican Patois"], ["ja", "日本語", "Japanese"], ["jw", "Basa Jawa", "Javanese"], ["kac", "Jinghpaw", "Jingpo"], ["kl", "Kalaallisut", "Kalaallisut"], ["kn", "ಕನ್ನಡ", "Kannada"], ["kr", "Kanuri", "Kanuri"], ["pam", "Kapampangan", "Kapampangan"], ["kk", "Қазақ", "Kazakh"], ["kha", "Ka Ktien Khasi", "Khasi"], ["km", "ខ្មែរ", "Khmer"], ["cgg", "Rukiga", "Kiga"], ["kg", "Kikongo", "Kikongo"], ["rw", "Kinyarwanda", "Kinyarwanda"], ["ktu", "Kituba", "Kituba"], ["trp", "Kokborok", "Kokborok"], ["kv", "Коми", "Komi"], ["gom", "कोंकणी", "Konkani"], ["ko", "한국어", "Korean"], ["kri", "Krio", "Krio"], ["ku", "Kurdî", "Kurdish (Kurmanji)"], ["ckb", "کوردی", "Kurdish (Sorani)"], ["ky", "Кыргызча", "Kyrgyz"], ["lo", "ລາວ", "Lao"], ["ltg", "Latgaļu", "Latgalian"], ["la", "Latina", "Latin"], ["lv", "Latviešu", "Latvian"], ["lij", "Ligure", "Ligurian"], ["li", "Limburgs", "Limburgish"], ["ln", "Lingála", "Lingala"], ["lt", "Lietuvių", "Lithuanian"], ["lmo", "Lombard", "Lombard"], ["lg", "Luganda", "Luganda"], ["luo", "Dholuo", "Luo"], ["lb", "Lëtzebuergesch", "Luxembourgish"], ["mk", "Македонски", "Macedonian"], ["mad", "Basa Madhura", "Madurese"], ["mai", "मैथिली", "Maithili"], ["mak", "Makassar", "Makassar"], ["mg", "Malagasy", "Malagasy"], ["ms", "Bahasa Melayu", "Malay"], ["ms-Arab", "بهاس ملايو", "Malay (Jawi)"], ["ml", "മലയാളം", "Malayalam"], ["mt", "Malti", "Maltese"], ["mam", "Qyol Mam", "Mam"], ["gv", "Gaelg", "Manx"], ["mi", "Māori", "Maori"], ["mr", "मराठी", "Marathi"], ["mh", "Kajin M̧ajeļ", "Marshallese"], ["mwr", "मारवाड़ी", "Marwadi"], ["mfe", "Kreol Morisien", "Mauritian Creole"], ["chm", "Марий", "Meadow Mari"], ["mni-Mtei", "ꯃꯩꯇꯩꯂꯣꯟ", "Meiteilon (Manipuri)"], ["min", "Minang", "Minang"], ["lus", "Mizo", "Mizo"], ["mn", "Монгол", "Mongolian"], ["my", "မြန်မာ", "Myanmar (Burmese)"], ["nhe", "Nāhuatlahtōlli", "Nahuatl (Eastern Huasteca)"], ["ndc-ZW", "Cindau", "Ndau"], ["nr", "isiNdebele", "Ndebele (South)"], ["new", "नेपाल भाषा", "Nepalbhasa (Newari)"], ["ne", "नेपाली", "Nepali"], ["bm-Nkoo", "ߒߞߏ", "NKo"], ["no", "Norsk", "Norwegian"], ["nus", "Thok Naath", "Nuer"], ["oc", "Occitan", "Occitan"], ["or", "ଓଡ଼ିଆ", "Odia (Oriya)"], ["om", "Afaan Oromoo", "Oromo"], ["os", "Ирон", "Ossetian"], ["pag", "Pangasinan", "Pangasinan"], ["pap", "Papiamento", "Papiamento"], ["ps", "پښتو", "Pashto"], ["fa", "فارسی", "Persian"], ["pl", "Polski", "Polish"], ["pt", "Português (Brasil)", "Portuguese (Brazil)"], ["pt-PT", "Português (Portugal)", "Portuguese (Portugal)"], ["pa", "ਪੰਜਾਬੀ", "Punjabi (Gurmukhi)"], ["pa-Arab", "پنجابی", "Punjabi (Shahmukhi)"], ["qu", "Runa Simi", "Quechua"], ["kek", "Qʼeqchiʼ", "Qʼeqchiʼ"], ["rom", "Romani", "Romani"], ["ro", "Română", "Romanian"], ["rn", "Ikirundi", "Rundi"], ["ru", "Русский", "Russian"], ["se", "Davvisámegiella", "Sami (North)"], ["sm", "Gagana Samoa", "Samoan"], ["sg", "Sängö", "Sango"], ["sa", "संस्कृतम्", "Sanskrit"], ["sat-Latn", "Santali", "Santali (Latin)"], ["sat", "ᱥᱟᱱᱛᱟᱲᱤ", "Santali (Ol Chiki)"], ["gd", "Gàidhlig", "Scots Gaelic"], ["nso", "Sesotho sa Leboa", "Sepedi"], ["sr", "Српски", "Serbian"], ["st", "Sesotho", "Sesotho"], ["crs", "Seselwa", "Seychellois Creole"], ["shn", "Shan", "Shan"], ["sn", "chiShona", "Shona"], ["scn", "Sicilianu", "Sicilian"], ["szl", "Ślōnski", "Silesian"], ["sd", "سنڌي", "Sindhi"], ["si", "සිංහල", "Sinhala"], ["sk", "Slovenčina", "Slovak"], ["sl", "Slovenščina", "Slovenian"], ["so", "Soomaali", "Somali"], ["es", "Español", "Spanish"], ["su", "Basa Sunda", "Sundanese"], ["sus", "Sosoxui", "Susu"], ["sw", "Kiswahili", "Swahili"], ["ss", "SiSwati", "Swati"], ["sv", "Svenska", "Swedish"], ["ty", "Reo Tahiti", "Tahitian"], ["tg", "Тоҷикӣ", "Tajik"], ["ber-Latn", "Tamaziɣt", "Tamazight"], ["ber", "ⵜⴰⵎⴰⵣⵉⵖⵜ", "Tamazight (Tifinagh)"], ["ta", "தமிழ்", "Tamil"], ["tt", "Татарча", "Tatar"], ["te", "తెలుగు", "Telugu"], ["tet", "Tetun", "Tetum"], ["th", "ไทย", "Thai"], ["bo", "བོད་སྐད", "Tibetan"], ["ti", "ትግርኛ", "Tigrinya"], ["tiv", "Tiv", "Tiv"], ["tpi", "Tok Pisin", "Tok Pisin"], ["to", "Lea faka-Tonga", "Tongan"], ["lua", "Tshiluba", "Tshiluba"], ["ts", "Xitsonga", "Tsonga"], ["tn", "Setswana", "Tswana"], ["tcy", "ತುಳು", "Tulu"], ["tum", "Chitumbuka", "Tumbuka"], ["tr", "Türkçe", "Turkish"], ["tk", "Türkmençe", "Turkmen"], ["tyv", "Тыва дыл", "Tuvan"], ["ak", "Akan", "Twi"], ["udm", "Удмурт", "Udmurt"], ["uk", "Українська", "Ukrainian"], ["ur", "اردو", "Urdu"], ["ug", "ئۇيغۇرچە", "Uyghur"], ["uz", "Oʻzbek", "Uzbek"], ["ve", "Tshivenḓa", "Venda"], ["vec", "Vèneto", "Venetian"], ["vi", "Tiếng Việt", "Vietnamese"], ["war", "Winaray", "Waray"], ["cy", "Cymraeg", "Welsh"], ["wo", "Wolof", "Wolof"], ["xh", "isiXhosa", "Xhosa"], ["sah", "Саха тыла", "Yakut"], ["yi", "ייִדיש", "Yiddish"], ["yo", "Yorùbá", "Yoruba"], ["yua", "Maaya T'aan", "Yucatec Maya"], ["zap", "Diidxazá", "Zapotec"], ["zu", "isiZulu", "Zulu"]];
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) {} }
   var cur = lsGet("sl-lang") || "en";
