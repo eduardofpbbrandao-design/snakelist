@@ -1,3 +1,4 @@
+.sl-nophoto{display:flex;align-items:center;justify-content:center;width:100%;min-height:120px;height:100%;background:var(--tag,#e3f0dc);color:var(--muted,#55705b);font-size:13px;border-radius:inherit}
 .cy-page{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 .cy-main{flex:1 0 auto;width:100%;max-width:1120px;margin:0 auto;padding:0 16px 40px}
 .cy-top{max-width:1120px}.cy-top nav{flex-wrap:wrap;justify-content:flex-end;gap:6px 16px}

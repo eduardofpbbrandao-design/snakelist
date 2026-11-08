@@ -28,6 +28,56 @@ REDIRECT = """<!doctype html><html lang="en"><head><meta charset="utf-8"><title>
 """
 
 
+# the header and footer every SnakeList page shares (the static pages use the same markup):
+# the app icon and the SnakeList wordmark going home, then the app, the species directory,
+# the install guide and the About page. rel = the way back to the site root ("../", "../../")
+def site_header(rel, here=""):
+    def a(href, label, key):
+        return '<a href="%s"%s>%s</a>' % (href, ' aria-current="page"' if key == here else "", label)
+    return ('<header class="sl-top"><a class="sl-brand" href="%s"><img src="%sapp/icon-192-s.png" width="32" height="32" alt="">SnakeList</a>'
+            '<nav aria-label="Site">%s%s%s%s</nav></header>') % (rel, rel, a(rel, "Open the app", "app"), a(rel + "species/", "Species", "species"),
+                                                                 a(rel + "install.html", "Install", "install"), a(rel + "about-snakelist.html", "About", "about"))
+def site_footer(rel, note=""):
+    return ('<footer class="sl-foot"><p><a class="sl-flogo" href="%s">SnakeList</a> &middot; made by <a href="%sabout.html">Eduardo Brandao</a></p>'
+            '<p class="sl-flinks"><a href="%s">Open the app</a><a href="%sspecies/">All species</a><a href="%sinstall.html">Install app</a>'
+            '<a href="%sabout-snakelist.html">About SnakeList</a><a href="%sabout.html">About me</a><a href="%sprivacy.html">Privacy</a><a href="%sterms.html">Terms</a></p>%s</footer>') % (
+        rel, rel, rel, rel, rel, rel, rel, rel, rel, ('<p class="sl-fnote">%s</p>' % note) if note else "")
+def an(word):
+    """'a' or 'an' before a word (an Inland Taipan, a Boa, an elapid)"""
+    w = (word or "").strip().lower()
+    return "an" if w[:1] in "aeiou" and not w.startswith(("uni", "use", "eu", "one")) else "a"
+def nplural(k, one, many=None):
+    return "{:,} {}".format(k, one if k == 1 else (many or one + "s"))
+# ---- habitats ----
+# SnakeList's habitat data (#habitat-data in the app) was generated earlier from WHERE each snake is
+# recorded (every habitat of its countries, states and provinces) plus WHAT KIND of snake it is -
+# never from a study of the species. So it gives a sea snake rainforests and deserts, and the
+# Inland Taipan the Queensland rainforests, because those habitats exist in its countries.
+# Here those estimates are (1) cut back where they contradict the kind of snake (a sea snake is
+# kept to the sea and coasts; a land snake never gets the open ocean or coral reefs) and (2) shown
+# as what they are: habitat types found where the snake is recorded, not habitats proven for it.
+HAB_SEC = {}
+MARINE = re.compile(r"ocean|pelagic|coral|reef|sea\b|seagrass|coastal waters|open water", re.I)
+COASTAL = re.compile(r"mangrove|estuar|lagoon|shore|beach|coast|brackish|tidal|salt marsh|island", re.I)
+def habitat_estimate(hs, typ):
+    if typ == "Sea Snake":
+        return [h for h in hs if HAB_SEC.get(h) == "Coasts & sea" or MARINE.search(h) or COASTAL.search(h)]
+    return [h for h in hs if not MARINE.search(h)]
+# the broad kinds of habitat, in order (the place-named sections - Borneo, Madagascar... - are
+# the same habitats again under a regional name, so they count toward their kind instead)
+HAB_KIND_ORDER = ["Rainforests", "Forests & woodlands", "Savannas & grasslands", "Shrublands & heath", "Deserts & dunes", "Mountains & rocks",
+                  "Underground & forest floor", "Wetlands & swamps", "Rivers & lakes", "Coasts & sea", "Around people"]
+def hab_kind(h):
+    sec = HAB_SEC.get(h, "")
+    if sec in HAB_KIND_ORDER: return sec
+    t = h.lower()
+    for k, rx in (("Coasts & sea", "mangrove|coast|reef|sea|estuar|lagoon|island"), ("Rivers & lakes", "river|lake|stream|flooded|várzea|igapó|delta"),
+                  ("Wetlands & swamps", "swamp|marsh|wetland|peat|everglades|pantanal|sundarbans"), ("Deserts & dunes", "desert|dune|sahara|kalahari|namib|outback|arabian|gobi"),
+                  ("Savannas & grasslands", "savanna|grassland|steppe|prairie|plains|llanos|cerrado|pampas|spinifex|veld"), ("Shrublands & heath", "scrub|shrub|heath|fynbos|chaparral|matorral|mallee|caatinga|maquis"),
+                  ("Mountains & rocks", "montane|mountain|alpine|highland|rock|limestone|karst|andes|himalaya|plateau"), ("Rainforests", "rainforest|cloud forest|moist forest|wet tropics|humid forest"),
+                  ("Forests & woodlands", "forest|woodland|mulga|brigalow|miombo|mopane|taiga|pine|oak")):
+        if re.search(rx, t): return k
+    return "Forests & woodlands"
 APP = [""]
 CITIES = {}
 
@@ -56,9 +106,10 @@ def build(app):
         intro[m.group(1)] = re.findall(r'area: "([^"]*)"', m.group(2))
     # habitats: one bit per card, in card order
     hab_names, hab_bits = [], []
+    HAB_SEC.clear()
     for sec in hab["sections"]:
         for h in sec[1]:
-            hab_names.append(h[0]); hab_bits.append(base64.b64decode(h[1]))
+            hab_names.append(h[0]); hab_bits.append(base64.b64decode(h[1])); HAB_SEC[h[0]] = sec[0]
 
     cards = []
     for k, m in enumerate(re.finditer(r'<div class="card" (data-id="[^"]*"[^>]*)>(.*?)<div class="card-bottom">', app, re.S)):
@@ -79,7 +130,8 @@ def build(app):
         }
         if c["is_sci"]: c["sci"] = c["name"]
         c["genus"] = c["sci"].split(" ")[0] if c["sci"] else ""
-        c["habitats"] = [hab_names[n] for n, b in enumerate(hab_bits) if k < hab["n"] and b[k >> 3] & (1 << (k & 7))]
+        c["habitats_raw"] = [hab_names[n] for n, b in enumerate(hab_bits) if k < hab["n"] and b[k >> 3] & (1 << (k & 7))]
+        c["habitats"] = habitat_estimate(c["habitats_raw"], a.get("type", ""))
         c["spots"] = rarity.get(c["id"], 0)
         c["extinct"] = extinct.get(c["id"], "")
         c["fossil"] = c["id"] in fossils
@@ -363,7 +415,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         for n in sorted(dict.fromkeys(names), key=lambda t: slugify(region.us_names.get(t, t) if cc == "us" else t)):
             shown = region.us_names.get(n, n) if cc == "us" else re.sub(r" \(\d+\)$", "", n)
             k = prov_count(cc, [n])
-            items.append('<a href="../?map=%s">%s</a>%s' % (esc(quote(shown)), esc(shown), (' <small class="sp-n">%d species</small>' % k) if k else ""))
+            items.append('<a href="../?map=%s">%s</a>%s' % (esc(quote(shown)), esc(shown), (' <small class="sp-n" title="All snake species SnakeList records in %s - not records of this snake">(%s in all)</small>' % (esc(shown), nplural(k, "species", "species"))) if k else ""))
         return "<li><b>%s%s:</b> %s</li>" % (esc(cname), what, ", ".join(items))
     PROV_N = {}
     for c in cards:
@@ -374,6 +426,32 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         ids = set()
         for n in names: ids |= PROV_N.get(cc, {}).get(n, set())
         return len(ids)
+    def hab_html(c, gone):
+        if c["fossil"]: return '<p class="sp-muted">Unknown - this snake is known only from fossils.</p>'
+        hs = c["habitats"]
+        if not hs: return '<p class="sp-muted">Habitat information unavailable.</p>'
+        kinds = {}
+        for h in hs: kinds.setdefault(hab_kind(h), []).append(h)
+        order = [k for k in HAB_KIND_ORDER if k in kinds]
+        note = ('<p class="sp-note">Habitat types found in the countries, states and provinces where it %s recorded, narrowed by what kind of snake it is. '
+                'They have not been checked for this species, so some may not apply.</p>') % ("was" if gone else "is")
+        pills = '<ul class="sp-pills" aria-label="Kinds of habitat in its range">%s</ul>' % "".join(
+            '<li><a href="../?hab=%s">%s</a></li>' % (esc(quote(kinds[k][0])), esc(k)) for k in order)
+        full = ('<details class="sp-habd"><summary>The %s habitat types in the estimate</summary><ul class="sp-pills">%s</ul></details>') % (
+            "{:,}".format(len(hs)), "".join('<li><a href="../?hab=%s">%s</a></li>' % (esc(quote(h)), esc(h)) for h in hs))
+        return note + pills + full
+    def rel_html(c, rg, rf):
+        out = ""
+        if rg:
+            out += '<h3 class="sp-relh">Same genus: <a href="genus/%s"><i>%s</i></a> <small>%s</small></h3><ul class="sp-rel sp-clip">%s</ul>%s' % (
+                slugify(c["genus"]), esc(c["genus"]), "closest relatives" if len(rg) > 1 else "its closest relative",
+                "".join('<li%s><a href="%s">%s</a> <i>%s</i></li>' % (xcls(i, len(rg)), page_name(x), esc(x["name"]), esc(x["sci"] if not x["is_sci"] else "")) for i, x in enumerate(rg)),
+                see_all("of the genus", len(rg)))
+        if rf:
+            out += '<h3 class="sp-relh">Same family: <a href="family/%s">%s</a> <small>other genera</small></h3><ul class="sp-rel">%s</ul>' % (
+                slugify(c["family"]), esc(c["family"]),
+                "".join('<li><a href="%s">%s</a> <i>%s</i></li>' % (page_name(x), esc(x["name"]), esc(x["sci"] if not x["is_sci"] else "")) for x in rf))
+        return out or '<p class="sp-muted">No other species of its genus or family in SnakeList.</p>'
     links = []
     for c in cards:
         nm, sci = c["name"], c["sci"]
@@ -385,17 +463,16 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             lead = "%s is a prehistoric snake known only from fossils%s.%s" % (label, " of the family %s" % c["family"] if c["family"] else "",
                 (" It died out in the %s, %s." % fa) if fa else "")
         elif c["extinct"]:  # died out: everything about it in the past tense
-            lead = "%s was a %s %s%s%s." % (label, venom, kind(c), " of the family %s" % c["family"] if c["family"] else "",
+            lead = "%s was %s %s %s%s%s." % (label, an(venom), venom, kind(c), " of the family %s" % c["family"] if c["family"] else "",
                                             (" that lived in " + where) if where else "")
         else:
-            lead = "%s is a %s %s%s%s." % (label, venom, kind(c), " of the family %s" % c["family"] if c["family"] else "",
+            lead = "%s is %s %s %s%s%s." % (label, an(venom), venom, kind(c), " of the family %s" % c["family"] if c["family"] else "",
                                            (", found in " + where) if where else "")
         gone = bool(c["extinct"] or c["fossil"])
         extra = []
         if c["extinct"]: extra.append(c["extinct"].replace(" - ", ": ", 1) + ".")
         if c["eater"]: extra.append("It was known to eat other snakes." if gone else "It is known to eat other snakes.")
-        if c["invasive"] or c["intro"]: extra.append("It is also invasive outside its native range (%s)." % (c["invasive"] or ", ".join(c["intro"])))
-        if c["habitats"] and not c["fossil"]: extra.append(("It lived in habitats such as %s." if gone else "It lives in habitats such as %s.") % plist([h.lower() for h in c["habitats"]], 4))
+        if c["invasive"] or c["intro"]: extra.append("It has also been introduced by people outside its native range (%s)." % (c["invasive"] or ", ".join(c["intro"])))
         rt = rarity_txt(c)
         if rt: extra.append(rt.split(" - ")[0] + ": " + rt.split(" - ", 1)[1] + "." if " - " in rt else rt + ".")
         about = lead + " " + " ".join(extra)
@@ -484,23 +561,29 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             sview = view_of([boxes[cc] for cc in codes + icodes if cc in boxes and cc not in st_whole] + st_boxes + iboxes + [(0, d[0], d[0], d[1], d[1]) for d in dots]) or view
         # what the app's filter chips say about it, each a link to that filter
         tags = []
-        tags.append(("Popular", "f=chip-popular") if c["popular"] else ("Uncommon", "f=chip-uncommon"))
-        if "North America" not in c["continents"]: tags.append(("Exotic", "f=chip-exotic"))
-        if rt.startswith("Common"): tags.append(("Common", "f=chip-common"))
-        if rt.startswith("Rare"): tags.append(("Rare", "f=chip-rare"))
+        # each label says what it measures: how well known it is (SnakeList's Popular / Uncommon),
+        # how often it's recorded on iNaturalist (Common / Rare) - two different things - and where
+        # it's exotic (SnakeList's "Exotic" means not native to North America)
+        tags.append(("Popular (well known)", "f=chip-popular") if c["popular"] else ("Less well known", "f=chip-uncommon"))
+        if "North America" not in c["continents"] and c["continents"]: tags.append(("Exotic to North America", "f=chip-exotic"))
+        if rt.startswith("Common"): tags.append(("Often recorded on iNaturalist", "f=chip-common"))
+        if rt.startswith("Rare"): tags.append(("Rarely recorded on iNaturalist", "f=chip-rare"))
         tags.append(("Venomous", "f=chip-venom") if c["venom"] else ("Non-venomous", "f=chip-nonvenom"))
         hm = harm(c)
         if hm: tags.append((hm.capitalize(), "f=chip-" + hm))
         cons = constriction(c)  # documented for its family or genus, same list as the app (#constrictor-data)
         if cons == "yes": tags.append(("Constrictor", "f=chip-constrictor"))
         elif cons == "no": tags.append(("Non-constrictor", "f=chip-nonconstrictor"))
-        if c["invasive"]: tags.append(("Invasive", "f=chip-invasive"))
+        if c["invasive"]: tags.append(("Invasive in " + plist([x.strip() for x in c["invasive"].split(",")], 2), "f=chip-invasive"))
         if c["eater"]: tags.append(("Snake eater", "f=chip-snakeeater"))
         if c["extinct"] or c["fossil"]: tags.append(("Fossil" if c["fossil"] else c["extinct"].split(" - ")[0].split(" since")[0], "f=chip-extinct"))
         if c["type"] and c["type"] != "Other": tags.append((c["type"], "type=" + quote(c["type"])))
         if c["family"]: tags.append((c["family"], "fam=" + quote(c["family"])))
-        rel = [x for x in by_genus.get(c["genus"], []) if x is not c][:40]
-        if len(rel) < 6: rel += [x for x in by_family.get(c["family"], []) if x is not c and x not in rel][:12 - len(rel)]
+        # related: its own genus first (its closest relatives), then - when the genus is small - a
+        # few more of its family, each group labelled with how it's related
+        def relkey(x): return (not x["popular"], x["name"].lower())
+        rel_g = sorted([x for x in by_genus.get(c["genus"], []) if x is not c], key=relkey)
+        rel_f = sorted([x for x in by_family.get(c["family"], []) if x is not c and x["genus"] != c["genus"]], key=relkey)[:max(0, 8 - len(rel_g))] if c["family"] else []
         facts = []
         facts.append(("Venom", "Venomous" if c["venom"] else "Not venomous"))
         facts.append(("To people", hm.capitalize() if hm else "Not documented"))
@@ -510,7 +593,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if c["genus"]: facts.append(("Genus", c["genus"]))
         if c["continents"]: facts.append(("Continents", ", ".join(c["continents"])))
         if c["countries"]: facts.append(("Countries", "%d" % len(c["countries"])))
-        if rt: facts.append(("How common", rt.split(" - ")[0]))
+        if rt: facts.append(("iNaturalist records", {"Common": "Often recorded", "Rare": "Rarely recorded"}.get(rt.split(" - ")[0], "%s places" % "{:,}".format(c["spots"]))))
         if c["extinct"]: facts.append(("Status", c["extinct"].split(" - ")[0]))
         if c["fossil"]:
             facts.append(("Status", "Known only from fossils"))
@@ -521,7 +604,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         photo = img_of(c)
         if photo:
             ph = '<figure class="sp-photo"><img src="%s" alt="%s" width="500" height="333" fetchpriority="high"><figcaption>Photo: %s, via iNaturalist</figcaption></figure>' % (
-                esc(photo), esc("Photo of a " + (nm if not c["is_sci"] else sci) + " (" + sci + ")"), esc(c["photo"][2]))
+                esc(photo), esc("Photo of %s" % ((nm + " (" + sci + ")") if not c["is_sci"] else sci)), esc(c["photo"][2]))
         elif c["photo"]:
             ph = '<figure class="sp-photo"><div class="sp-sprite" role="img" aria-label="%s" style="%s"></div><figcaption>%s</figcaption></figure>' % (esc("Illustration of " + label), sprite(c), esc(c["photo"][2]))
         else:
@@ -538,8 +621,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             title=esc(title), desc=esc(desc), url=url, img=esc(img), ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"),
             h1=esc(nm), sub=esc(sci) if not c["is_sci"] else "", photo=ph, about=esc(about),
             facts="".join("<div><dt>%s</dt><dd>%s</dd></div>" % (esc(k), ('<a href="%s/%s">%s</a>' % (k.lower(), slugify(v), esc(v))) if k in ("Family", "Genus") and v else esc(v)) for k, v in facts),
-            habitats='<li>Unknown for a snake known only from fossils</li>' if c["fossil"] else "".join('<li%s><a href="../?hab=%s">%s</a></li>' % (xcls(i, len(c["habitats"])), esc(quote(h)), esc(h)) for i, h in enumerate(c["habitats"])) or "<li>Not worked out yet</li>",
-            hab_all="" if c["fossil"] else see_all("habitats", len(c["habitats"])),
+            habitats=hab_html(c, gone),
             where="".join(rows) or "<li>No range recorded yet.</li>", where_all=see_all("countries", len(c["countries"])),
             st=esc(json.dumps(st_data, ensure_ascii=False, separators=(",", ":"))) if st_data else "", sview=esc(sview or "0 0 1440 720"),
             ns=esc(json.dumps(ns, separators=(",", ":"))) if ns else "",
@@ -548,16 +630,17 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             cities_json=esc(json.dumps([[round(t[3], 2), round(t[4], 2), t[0]] for t in cities], ensure_ascii=False)),
             cities_list=('<div class="sp-cities"><h3>Cities in its range</h3><p class="sp-note">Big cities inside the states and provinces where it is recorded - not individual sightings.</p><ul class="sp-where">%s</ul></div>' % "".join(
                 "<li>%s <small>%s</small></li>" % (esc(t[0]), esc(t[1])) for t in cities)) if cities else "",
-            states=('<div class="sp-states"><h3>States, provinces and islands</h3><ul class="sp-where">%s</ul></div>' % "".join(st_rows)) if st_rows or ns else "",
+            states=('<div class="sp-states"><h3>States, provinces and islands</h3><p class="sp-note">Where this snake is recorded. The number after each place is how many snake species SnakeList records there <b>in all</b> - not how many records there are of this snake.</p><ul class="sp-where">%s</ul></div>' % "".join(st_rows)) if st_rows or ns else "",
             tags="".join('<li><a href="../?%s">%s</a></li>' % (esc(q), esc(t)) for t, q in tags),
             codes=esc(" ".join(codes)), intro=esc(" ".join(icodes)),
             ishapes="".join('<path class="in" d="%s"/>' % d for d in ishapes),
             dots=esc(" ".join("%.1f,%.1f,%s,%.2g" % ((lo + 180) * 4, (90 - la) * 4, k, sz) for lo, la, k, sz in dots)),
             legend=('<p class="sp-legend"><span><i class="on"></i>Native range</span>%s</p>' % (
                 '<span><i class="in"></i>Invasive</span>' if icodes or ishapes or any(d[2] == "in" for d in dots) else "")) if codes or icodes or ishapes or dots else "", view=esc(view or "0 0 1440 720"), sci_attr=esc(sci), id=c["id"],
-            nplaces=len(c["countries"]), lives="lived" if gone else "lives", safe_hidden=" hidden" if gone else "",
-            related="".join('<li%s><a href="%s">%s</a> <i>%s</i></li>' % (xcls(i, len(rel)), page_name(x), esc(x["name"]), esc(x["sci"] if not x["is_sci"] else "")) for i, x in enumerate(rel)),
-            rel_all=see_all("related snakes", len(rel)),
+            nplaces_txt=nplural(len(c["countries"]), "country", "countries") if c["countries"] else "the places", lives="lived" if gone else "lives", safe_hidden=" hidden" if gone else "",
+            related=rel_html(c, rel_g, rel_f),
+            site_head=site_header("../", "species"), site_foot=site_footer("../"),
+            crumb_tax=((' &rsaquo; <a href="family/%s">%s</a>' % (slugify(c["family"]), esc(c["family"]))) if c["family"] else "") + ((' &rsaquo; <a href="genus/%s"><i>%s</i></a>' % (slugify(c["genus"]), esc(c["genus"]))) if c["genus"] and not c["fossil"] else ""),
             author=AUTHOR, venom_cls="v" if c["venom"] else "nv", mapnote="" if codes or icodes or ishapes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
         open("%s/%s.html" % (OUT, page_name(c)), "w", encoding="utf-8").write(page)
         if page_name(c) != c["id"]:  # the old address (and the app's ?sp ids) still lead here
@@ -573,16 +656,30 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     cnt = {}
     for c in cards:
         for n in c["countries"]: cnt[n] = cnt.get(n, 0) + 1
+    countries = [(n, k) for n, k in sorted(cnt.items()) if slugify(n)]
+    fid = lambda f: "f-" + (slugify(f) or "other")
+    tools = ('<div class="sx-tools">'
+             '<form class="sx-box" role="search" onsubmit="return false"><label for="sx-q">Find a snake</label>'
+             '<input id="sx-q" type="search" placeholder="Common or scientific name..." autocomplete="off"><p id="sx-n" class="sp-note" aria-live="polite"></p></form>'
+             '<form class="sx-box" id="sx-cf" role="search" action="#by-country"><label for="sx-c">Snakes of a country</label><span class="sx-row">'
+             '<input id="sx-c" list="sx-cl" placeholder="Type a country..." autocomplete="off"><button type="submit">Go</button></span>'
+             '<datalist id="sx-cl">%s</datalist></form></div>') % "".join('<option value="%s">' % esc(n) for n, k in countries)
+    jump = ('<nav class="sx-jump" aria-label="Jump to"><a href="#by-country">By country</a><a href="#by-family">Families</a><a href="#az">A-Z by family</a></nav>'
+            '<nav class="sx-chips" aria-label="Families">%s</nav>') % "".join(
+        '<a href="#%s">%s <small>%s</small></a>' % (fid(f), esc(f or "Other"), "{:,}".format(len(L))) for f, L in fams)
     hub_lists = ('<section id="by-country"><h2>Snakes by country</h2><ul class="sp-hubs">%s</ul></section>' % "".join(
-        '<li><a href="country/%s">%s</a> <small>%d</small></li>' % (slugify(n), esc(n), k) for n, k in sorted(cnt.items()) if slugify(n)) +
+        '<li><a href="country/%s">%s</a> <small>%s</small></li>' % (slugify(n), esc(n), "{:,}".format(k)) for n, k in countries) +
         '<section id="by-family"><h2>Snake families</h2><ul class="sp-hubs">%s</ul></section>' % "".join(
-        '<li><a href="family/%s">%s</a> <small>%d</small></li>' % (slugify(f), esc(f), len(L)) for f, L in fams if f))
-    body = "".join('<section><h2>%s <small>%d</small></h2><ul class="sp-az">%s</ul></section>' % (
-        esc(f or "Other snakes"), len(L), "".join('<li><a href="%s">%s</a>%s</li>' % (
+        '<li><a href="family/%s">%s</a> <small>%s</small></li>' % (slugify(f), esc(f), "{:,}".format(len(L))) for f, L in fams if f))
+    body = '<div id="az">' + "".join('<section class="sx-fam" id="%s"><h2>%s <small>%s</small></h2><ul class="sp-az">%s</ul></section>' % (
+        fid(f), ('<a href="family/%s">%s</a>' % (slugify(f), esc(f))) if f else "Other snakes", "{:,}".format(len(L)), "".join('<li><a href="%s">%s</a>%s</li>' % (
             page_name(x), esc(x["name"]), (" <i>%s</i>" % esc(x["sci"])) if not x["is_sci"] else "") for x in sorted(L, key=lambda x: x["name"].lower())))
-        for f, L in fams)
-    body = hub_lists + body
-    open(OUT + "/index.html", "w", encoding="utf-8").write(INDEX.format(n=len(cards), body=body, author=AUTHOR, url=SITE + "species/"))
+        for f, L in fams) + '</div><p id="sx-none" class="sp-muted" hidden>No snake matches that name. Try part of the name, or the scientific name.</p>'
+    body = tools + jump + hub_lists + body
+    cslugs = json.dumps({n: slugify(n) for n, k in countries}, ensure_ascii=False).replace("</", "<\\/")
+    open(OUT + "/index.html", "w", encoding="utf-8").write(INDEX.format(n="{:,}".format(len(cards)), body=body, author=AUTHOR, url=SITE + "species/",
+        nfam=len([f for f, L in fams if f]), ncountry="{:,}".format(len(countries)), cslugs=cslugs,
+        site_head=site_header("../", "species"), site_foot=site_footer("../", "Photos: iNaturalist observers (CC licences) - credited on each species page.")))
     return [SITE + "species/"] + [SITE + "species/" + page_name(c) for c in links] + hubs(cards, esc, img_of, invasive)
 
 
@@ -617,40 +714,13 @@ def hubs(cards, esc, img_of, invasive=None):
                 if m: open("%s/country/%s" % (OUT, f), "w", encoding="utf-8").write(
                     country_page(H.unescape(m.group(1).strip()), [], {"_cards": cards}, invasive or {}, esc, f[:-5]))
             continue
+        open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS)
+        open(OUT + "/country.js", "w", encoding="utf-8").write(COUNTRY_JS)
         for name, L in G.items():
-            L = sorted(L, key=lambda x: (not x["popular"], x["name"].lower()))
             slug = slugify(name)
             if not slug: continue
-            nv = sum(1 for x in L if x["venom"]); nfam = len({x["family"] for x in L if x["family"]})
-            if kind == "country":
-                h1 = "Snakes of %s" % name
-                title = "Snakes of %s: all %d species, with photos and maps | SnakeList" % (name, len(L))
-                lead = "%d snake species are recorded in %s - %d venomous and %d non-venomous%s." % (len(L), name, nv, len(L) - nv, ", from %d families" % nfam if nfam > 1 else "")
-            elif kind == "family":
-                h1 = name
-                title = "%s: all %d snake species | SnakeList" % (name, len(L))
-                lead = "The family %s has %d species in SnakeList - %d venomous and %d non-venomous, in %d genera." % (name, len(L), nv, len(L) - nv, len({x["genus"] for x in L}))
-            else:
-                h1 = name
-                title = "%s snakes: all %d species | SnakeList" % (name, len(L))
-                fam = next((x["family"] for x in L if x["family"]), "")
-                lead = "The genus %s%s has %d species in SnakeList - %d venomous and %d non-venomous." % (name, " (family %s)" % fam if fam else "", len(L), nv, len(L) - nv)
-            url = SITE + "species/%s/%s" % (kind, slug)
-            img = next((img_of(x, "large") for x in L if img_of(x)), SITE + "snakelist-logo.png")
-            items = "".join('<li><a href="../%s">%s</a>%s%s</li>' % (page_name(x), esc(x["name"]), (" <i>%s</i>" % esc(x["sci"])) if not x["is_sci"] else "",
-                                                                   ' <span class="v">venomous</span>' if x["venom"] else "") for x in L)
-            ld = json.dumps([{"@context": "https://schema.org", "@type": "CollectionPage", "name": h1, "url": url, "description": lead,
-                              "mainEntity": {"@type": "ItemList", "numberOfItems": len(L), "itemListElement": [
-                                  {"@type": "ListItem", "position": i + 1, "url": SITE + "species/" + page_name(x), "name": x["name"]} for i, x in enumerate(L[:100])]}},
-                             {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
-                                 {"@type": "ListItem", "position": 1, "name": "SnakeList", "item": SITE},
-                                 {"@type": "ListItem", "position": 2, "name": "All species", "item": SITE + "species/"},
-                                 {"@type": "ListItem", "position": 3, "name": h1, "item": url}]}], ensure_ascii=False).replace("</", "<\\/")
-            app = "../../?map=%s" % esc(name) if kind == "country" else "../../?fam=%s" % esc(name) if kind == "family" else "../../?q=%s" % esc(name)
-            open("%s/%s/%s.html" % (OUT, kind, slug), "w", encoding="utf-8").write(HUB.format(
-                title=esc(title), desc=esc(lead), url=url, img=img, ld=ld, h1=esc(h1), lead=esc(lead), items=items, author=AUTHOR, app=app,
-                app_label="See it on the map" if kind == "country" else "Open in SnakeList"))
-            urls.append(url)
+            open("%s/%s/%s.html" % (OUT, kind, slug), "w", encoding="utf-8").write(country_page(name, L, {"_cards": cards}, invasive or {}, esc, slug, kind))
+            urls.append(SITE + "species/%s/%s" % (kind, slug))
     # the lists of every country and family, so each hub is one link from the A-Z page
     return urls
 
@@ -671,9 +741,9 @@ PAGE = """<!doctype html>
 <link rel="stylesheet" href="sp.css"><script>document.documentElement.className+=" js"</script>
 <script type="application/ld+json">{ld}</script>
 </head><body>
-<header class="sp-top"><a class="sp-logo" href="../">SnakeList</a><nav><a href="./">All species</a><a href="../install.html">Install app</a><a href="../">Open the app</a></nav></header>
+{site_head}
 <main class="sp-main" data-id="{id}" data-sci="{sci_attr}">
-<nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../">SnakeList</a> &rsaquo; <a href="./">All species</a> &rsaquo; <span>{h1}</span></nav>
+<nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../">SnakeList</a> &rsaquo; <a href="./">All species</a>{crumb_tax} &rsaquo; <span aria-current="page">{h1}</span></nav>
 <article>
 <div class="sp-head">{photo}
 <div class="sp-title"><h1>{h1}</h1><p class="sp-sci">{sub}</p>
@@ -684,49 +754,44 @@ PAGE = """<!doctype html>
 <p class="sp-cta"><a class="sp-btn" href="../?sp={id}">Open in SnakeList</a></p>
 <section><h2>About</h2><p>{about}</p><div id="sp-wiki"></div></section>
 <section><h2>Where it {lives}</h2>
-<div class="sp-map" data-codes="{codes}" data-intro="{intro}" data-dots="{dots}" data-view="{view}" data-st="{st}" data-ns="{ns}" data-sview="{sview}" data-cities="{cities_json}" aria-label="Map of the {nplaces} countries where {h1} {lives}"></div><template class="sp-ishapes">{ishapes}</template><div class="sp-mapbar">{legend}{stbtn}</div>{mapnote}{states}{cities_list}
+<div class="sp-map" data-codes="{codes}" data-intro="{intro}" data-dots="{dots}" data-view="{view}" data-st="{st}" data-ns="{ns}" data-sview="{sview}" data-cities="{cities_json}" aria-label="Map of {nplaces_txt} where {h1} {lives}"></div><template class="sp-ishapes">{ishapes}</template><div class="sp-mapbar">{legend}{stbtn}</div>{mapnote}{states}{cities_list}
 <ul class="sp-where sp-clip">{where}</ul>{where_all}</section>
-<section><h2>Habitats</h2><p class="sp-note">Estimated from where this snake is recorded and what kind of snake it is - not a confirmed habitat survey.</p><ul class="sp-pills sp-clip">{habitats}</ul>{hab_all}</section>
-<section><h2>Related snakes</h2><ul class="sp-rel sp-clip">{related}</ul>{rel_all}</section>
+<section><h2>Habitats <small>estimated</small></h2>{habitats}</section>
+<section><h2>Related snakes</h2>{related}</section>
 <p class="sp-safe"{safe_hidden}><b>Stay safe:</b> a photo or a web page can never tell you for certain that a snake is harmless. Keep your distance, never handle a wild snake, and get medical help straight away after any bite.</p>
 </article></main>
-<footer class="sp-foot"><a href="../about-snakelist.html">SnakeList</a> &middot; made by <a href="../about.html"><b>{author}</b></a> &middot; <a href="../about.html">About me</a> &middot; <a href="../privacy.html">Privacy</a> &middot; <a href="../terms.html">Terms</a></footer>
+{site_foot}
 <script src="sp.js" defer></script>
-</body></html>
-"""
-
-HUB = """<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{title}</title>
-<meta name="description" content="{desc}">
-<link rel="canonical" href="{url}"><meta name="author" content="{author}"><meta name="robots" content="index,follow,max-image-preview:large">
-<meta property="og:type" content="website"><meta property="og:title" content="{title}"><meta property="og:description" content="{desc}">
-<meta property="og:url" content="{url}"><meta property="og:image" content="{img}"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="../../favicon.ico" sizes="any"><link rel="stylesheet" href="../sp.css">
-<script type="application/ld+json">{ld}</script>
-</head><body>
-<header class="sp-top"><a class="sp-logo" href="../../">SnakeList</a><nav><a href="../">All species</a><a href="../../install.html">Install app</a><a href="../../">Open the app</a></nav></header>
-<main class="sp-main"><nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../../">SnakeList</a> &rsaquo; <a href="../">All species</a> &rsaquo; <span>{h1}</span></nav>
-<h1>{h1}</h1><p class="sp-lead">{lead}</p><p class="sp-cta"><a class="sp-btn" href="{app}">{app_label}</a></p>
-<ul class="sp-az">{items}</ul></main>
-<footer class="sp-foot"><a href="../../about-snakelist.html">SnakeList</a> &middot; made by <a href="../../about.html"><b>{author}</b></a></footer>
 </body></html>
 """
 
 INDEX = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>All {n} snake species A-Z | SnakeList</title>
-<meta name="description" content="Every one of the {n} snake species in SnakeList, by family - each with its photo, range map, habitats and facts.">
+<title>All {n} snake species A-Z, by family and country | SnakeList</title>
+<meta name="description" content="Every one of the {n} snake species in SnakeList, by family and by country - each with its photo, range map and facts.">
 <link rel="canonical" href="{url}"><meta name="author" content="{author}"><meta name="robots" content="index,follow">
+<meta property="og:title" content="All {n} snake species | SnakeList"><meta property="og:url" content="{url}"><meta property="og:type" content="website">
 <link rel="icon" href="../favicon.ico" sizes="any"><link rel="stylesheet" href="sp.css">
 </head><body>
-<header class="sp-top"><a class="sp-logo" href="../">SnakeList</a><nav><a href="../install.html">Install app</a><a href="../">Open the app</a></nav></header>
-<main class="sp-main"><h1>All {n} snake species</h1><p class="sp-muted">By family, A-Z. Tap one for its photo, map and facts.</p>{body}</main>
-<footer class="sp-foot"><a href="../about-snakelist.html">SnakeList</a> &middot; made by <b>{author}</b></footer>
+{site_head}
+<main class="sp-main"><nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../">SnakeList</a> &rsaquo; <span aria-current="page">All species</span></nav>
+<h1>All {n} snake species</h1><p class="sp-muted">{n} species in {nfam} families, recorded in {ncountry} countries. Search by name, open a country, or browse by family A-Z.</p>{body}</main>
+{site_foot}
+<script>(function(){{var C={cslugs};
+var q=document.getElementById('sx-q'),n=document.getElementById('sx-n'),none=document.getElementById('sx-none'),secs=[].slice.call(document.querySelectorAll('.sx-fam')),t0;
+secs.forEach(function(s){{s._li=[].slice.call(s.querySelectorAll('li')).map(function(li){{return [li,li.textContent.toLowerCase()]}})}});
+function run(){{var t=q.value.trim().toLowerCase(),hit=0;secs.forEach(function(s){{var k=0;s._li.forEach(function(e){{var m=!t||e[1].indexOf(t)>=0;e[0].hidden=!m;if(m)k++}});s.hidden=!k;hit+=k}});
+document.body.classList.toggle('sx-searching',!!t);none.hidden=hit>0;n.textContent=t?(hit===1?'1 match':hit.toLocaleString('en')+' matches'):''}}
+q.addEventListener('input',function(){{clearTimeout(t0);t0=setTimeout(run,120)}});
+document.getElementById('sx-cf').addEventListener('submit',function(e){{var v=document.getElementById('sx-c').value.trim().toLowerCase();
+for(var k in C)if(k.toLowerCase()===v){{e.preventDefault();location.href='country/'+C[k];return}}
+for(var k in C)if(k.toLowerCase().indexOf(v)===0&&v){{e.preventDefault();location.href='country/'+C[k];return}}}});
+}})();</script>
 </body></html>
 """
 
-CSS = """.sp-note{font-size:13px;color:var(--muted);margin:-4px 0 10px}.sp-more{font-size:14px;margin:10px 0 0}.sp-lead{font-size:18px;margin:10px 0 14px}
+CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:center;width:100%;min-height:120px;height:100%;background:var(--tag,#e3f0dc);color:var(--muted,#55705b);font-size:13px;border-radius:inherit}
+.sp-note{font-size:13px;color:var(--muted);margin:-4px 0 10px}.sp-more{font-size:14px;margin:10px 0 0}.sp-lead{font-size:18px;margin:10px 0 14px}
 .sp-safe{margin:24px 0 0;padding:18px 22px;border-radius:16px;border:2px solid var(--tagline);background:var(--tag);font-size:16.5px;line-height:1.55}
 .sp-all{font:500 12px Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:4px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;margin:8px 0 0;display:none}
 .js .sp-all{display:inline-block}.js .sp-clip:not(.sp-open)>.sp-x{display:none}
@@ -734,6 +799,12 @@ CSS = """.sp-note{font-size:13px;color:var(--muted);margin:-4px 0 10px}.sp-more{
 .sp-states{margin-top:12px}.sp-n{color:var(--muted);font-size:.85em}.sp-shade{display:inline-flex;align-items:center;gap:6px}.sp-ramp{display:inline-block;width:46px!important;height:12px;border-radius:4px;background:linear-gradient(90deg,#b8e2aa,#1f5c28)}.sp-cities{margin-top:12px}.js .sp-cities:not(.sp-open){display:none}.sp-cities h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-cities .sp-where{margin:0}.sp-cities small{color:var(--muted)}
 .sp-map circle.ct{fill:#e0a526;stroke:#fff;stroke-width:1.2px;vector-effect:non-scaling-stroke}.sp-states h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-states .sp-where{margin:0;columns:1}
 .sp-az .v{font-size:11px;font-weight:700;color:#b5452a;margin-left:4px}@media (prefers-color-scheme:dark){.sp-az .v{color:#f0a04b}}
+.sx-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0}.sx-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.sx-box label{display:block;font-weight:600;font-size:14px;margin:0 0 6px}.sx-box input{width:100%;min-width:0;font:inherit;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+.sx-row{display:flex;gap:8px}.sx-box button{font:600 14px Inter,system-ui,sans-serif;padding:8px 14px;border-radius:10px;border:0;background:var(--g);color:#fff;cursor:pointer}.sx-box .sp-note{margin:6px 0 0;min-height:1em}
+.sx-jump{display:flex;flex-wrap:wrap;gap:6px 16px;font-weight:600;margin:6px 0}.sx-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 18px}
+.sx-chips a{display:inline-block;padding:4px 11px;border-radius:999px;border:1px solid var(--tagline);background:var(--tag);color:var(--text);text-decoration:none;font-size:13px}.sx-chips small{color:var(--muted)}
+.sx-searching #by-country,.sx-searching #by-family,.sx-searching .sx-chips{display:none}.sx-fam{scroll-margin-top:12px}.sx-fam h2 a{color:inherit}
 .sp-hubs{columns:3 200px;column-gap:24px;padding:0;list-style:none}.sp-hubs li{break-inside:avoid;margin:2px 0}
 :root{--bg:#f1f6ee;--card:#fbfdf9;--text:#183020;--muted:#55705b;--line:#d5e4cf;--g:#58b351;--land:#d7dccb;--on:#58b351;--in:#e07a1f;--sea:#e3ecef;--tag:#e3f0dc;--tagline:#a9cf9c}
 @media (prefers-color-scheme:dark){:root{--bg:#22623f;--card:#256846;--text:#eef6ee;--muted:#b5d4bf;--line:#37855f;--g:#58b351;--land:#3a7c5a;--on:#58b351;--in:#f0a04b;--sea:#1b5034;--tag:#2c7a57;--tagline:#4a9a6c}}
@@ -770,9 +841,23 @@ section{background:var(--card);border:1px solid var(--line);border-radius:18px;p
 .sp-lb{position:fixed;inset:0;z-index:50;background:rgba(5,15,9,.92);display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
 .sp-lb img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;cursor:default}.sp-lb-x{position:fixed;top:12px;right:14px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:26px;cursor:pointer}
 #sp-wiki p{margin:10px 0 0}#sp-wiki .src{font-size:12px;color:var(--muted)}.sp-foot{text-align:center;color:var(--muted);font-size:13px;padding:20px 16px 34px;border-top:1px solid var(--line)}
+.sl-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;max-width:1120px;margin:0 auto;padding:14px 16px}
+.sl-brand{display:inline-flex;align-items:center;gap:9px;font:700 24px/1 Fraunces,Georgia,'Times New Roman',serif;color:#58b351;text-decoration:none}
+.sl-brand img{width:32px;height:32px;border-radius:8px;display:block}
+.sl-top nav{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14.5px}.sl-top nav a{color:var(--muted);text-decoration:none;padding:6px 0}
+.sl-top nav a:hover,.sl-top nav a[aria-current]{color:var(--g)}.sl-top nav a[aria-current]{font-weight:600}
+.sl-foot{margin-top:30px;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:13.5px;padding:20px 16px 30px}
+.sl-foot p{margin:4px 0}.sl-flogo{font:700 18px Fraunces,Georgia,serif;color:#58b351!important;text-decoration:none}
+.sl-flinks{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px}.sl-foot a{color:var(--muted)}.sl-fnote{font-size:12px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--g);outline-offset:2px;border-radius:4px}
+.sp-relh{font:700 16px Georgia,serif;margin:10px 0 4px}.sp-relh small{font:500 12.5px Inter,sans-serif;color:var(--muted)}
+.sp-habd{margin-top:10px}.sp-habd summary{cursor:pointer;color:var(--g);font-size:14px}.sp-habd .sp-pills{margin-top:8px}
+@media (max-width:560px){.sl-top{padding:12px}.sl-top nav{gap:2px 14px;font-size:14px}.sl-brand{font-size:21px}}
 """
 
-JS = """(function(){
+JS = """(function(){function nf(t){if(!t||t.tagName!=='IMG'||t.dataset.nf)return;t.dataset.nf=1;var d=document.createElement('span');d.className='sl-nophoto';d.setAttribute('role','img');d.setAttribute('aria-label',t.alt||'Photo unavailable');d.textContent='Photo unavailable';if(t.width&&t.height)d.style.aspectRatio=t.width+'/'+t.height;t.replaceWith(d)}
+window.addEventListener('error',function(e){nf(e.target)},true);[].forEach.call(document.images,function(i){if(i.complete&&!i.naturalWidth&&i.getAttribute('src'))nf(i)})})();
+(function(){
 var m=document.querySelector('.sp-map');
 if(m){fetch('world.svg').then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){m.innerHTML=t;var s=m.querySelector('svg'),NS='http://www.w3.org/2000/svg';
 s.removeAttribute('width');s.removeAttribute('height');s.setAttribute('preserveAspectRatio','xMidYMid meet');s.setAttribute('aria-hidden','true');
@@ -859,28 +944,52 @@ var s=document.createElement('p');s.className='src';s.innerHTML='From <a href="'
 # species (each card's own built-in photo tile, never another species'), and - for lists long
 # enough to need them - search, venom/family filters and sorting, all over that country's own
 # species only. Everything is in the HTML (crawlable); country.js only filters, sorts and pages.
-def country_page(name, L, all_countries, invasive, esc, slug):
-    url = SITE + "species/country/%s" % slug
+def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
+    """one template for the country, family and genus pages (kind): photo cards, search, filters
+    and sorting over that group's own species only"""
+    url = SITE + "species/%s/%s" % (kind, slug)
     intro_here = []  # species SnakeList records as introduced (invasive) here, not native
-    for c in all_countries["_cards"]:
-        if name in c["countries"]: continue
-        if any(e.get("name") == name for e in invasive.get(c["id"], [])): intro_here.append(c)
+    if kind == "country":
+        for c in all_countries["_cards"]:
+            if name in c["countries"]: continue
+            if any(e.get("name") == name for e in invasive.get(c["id"], [])): intro_here.append(c)
+    # the second filter: a family page filters by genus, the others by family
+    grp = (lambda x: x["genus"]) if kind == "family" else (lambda x: x["family"])
     def key(c): return ((1 if c["is_sci"] else 0), (c["sci"] if c["is_sci"] else c["name"]).lower(), c["sci"].lower())
     L = sorted(L, key=key); intro_here = sorted(intro_here, key=key)
     n = len(L); nv = sum(1 for x in L if x["venom"]); fams = {}
-    for x in L: fams[x["family"] or ""] = fams.get(x["family"] or "", 0) + 1
+    for x in L: fams[grp(x) or ""] = fams.get(grp(x) or "", 0) + 1
     nfam = len([f for f in fams if f])
+    fam_word = ("genus", "genera") if kind == "family" else ("family", "families")
+    family = next((x["family"] for x in L if x["family"]), "")
+    ncountry = len({k for x in L for k in x["countries"]})
     only = [x for x in L if x["countries"] == [name]]
     gone = [x for x in L if x["extinct"] or x["fossil"]]
-    def plural(k, one, many=None): return "%d %s" % (k, one if k == 1 else (many or one + "s"))
-    if n:
+    def plural(k, one, many=None): return "{:,} {}".format(k, one if k == 1 else (many or one + "s"))
+    def vsplit():
+        if nv == n: return "all venomous" if n > 1 else "venomous"
+        if nv == 0: return "none venomous" if n > 1 else "non-venomous"
+        return "%s venomous and %s non-venomous" % ("{:,}".format(nv), "{:,}".format(n - nv))
+    if kind == "family":
+        h1 = name
+        lead = "The family %s has %s in SnakeList (%s), in %s." % (name, plural(n, "species", "species"), vsplit(), plural(nfam, "genus", "genera"))
+        title = "%s: all %s, with photos | SnakeList" % (name, plural(n, "snake species", "snake species"))
+    elif kind == "genus":
+        h1 = name
+        lead = "The genus %s%s has %s in SnakeList (%s), recorded in %s." % (
+            name, " (family %s)" % family if family else "", plural(n, "species", "species"), vsplit(), plural(ncountry, "country", "countries"))
+        title = "%s snakes: all %s, with photos | SnakeList" % (name, plural(n, "species", "species"))
+    elif n:
+        h1 = "Snakes of %s" % name
         lead = "%s %s recorded in %s in SnakeList: %d venomous and %d non-venomous%s." % (
             plural(n, "snake species", "snake species"), "is" if n == 1 else "are", name, nv, n - nv,
             ", from %s" % plural(nfam, "family", "families") if nfam else "")
+        title = "Snakes of %s: %s with photos, venom status & map | SnakeList" % (name, plural(n, "species", "species"))
     else:
+        h1 = "Snakes of %s" % name
         lead = "No snake species are currently listed for %s in SnakeList." % name
-    title = "Snakes of %s: %s with photos, venom status & map | SnakeList" % (name, plural(n, "species", "species")) if n else "Snakes of %s | SnakeList" % name
-    desc = lead + (" Photos, scientific names and families for each, plus a map." if n else "")
+        title = "Snakes of %s | SnakeList" % name
+    desc = lead + (" Photos, scientific names and families for each%s." % (", plus a map" if kind == "country" else "") if n else "")
 
     def card(x, intro=False):
         p = x["photo"]
@@ -897,27 +1006,29 @@ def country_page(name, L, all_countries, invasive, esc, slug):
             '<strong class="cy-name">%s</strong><i class="cy-sci">%s</i>' % (esc(x["name"]), esc(x["sci"])))
         return ('<li class="cy-card" data-n="%s" data-s="%s" data-f="%s" data-v="%d"%s><a href="../%s">'
                 '<span class="cy-img">%s</span><span class="cy-body">%s<span class="cy-meta">%s%s</span></span></a></li>') % (
-            esc(("~" + nm) if x["is_sci"] else nm.lower()), esc(x["sci"].lower()), esc(x["family"] or ""), 1 if x["venom"] else 0,
+            esc(("~" + nm) if x["is_sci"] else nm.lower()), esc(x["sci"].lower()), esc(grp(x) or ""), 1 if x["venom"] else 0,
             ' data-i="1"' if intro else "", page_name(x), img, title_html, badges,
-            '<span class="cy-fam">%s</span>' % esc(x["family"]) if x["family"] else "")
+            ('<span class="cy-fam">%s</span>' % esc(grp(x))) if grp(x) and kind != "genus" else "")
 
     stats = ""
     if n:
         stats = '<ul class="cy-stats" aria-label="At a glance">%s</ul>' % "".join('<li><b>%s</b><span>%s</span></li>' % (v, k) for v, k in [
-            (n, "species" if n != 1 else "species"), (nv, "venomous"), (n - nv, "non-venomous"), (nfam, "families" if nfam != 1 else "family")])
+            ("{:,}".format(n), "species"), ("{:,}".format(nv), "venomous"), ("{:,}".format(n - nv), "non-venomous"),
+            (("{:,}".format(ncountry), "countries" if ncountry != 1 else "country") if kind == "genus" else ("{:,}".format(nfam), fam_word[1] if nfam != 1 else fam_word[0]))] if not (v == "0" and k in ("venomous", "non-venomous")))
     big = n > 6
     controls = ""
     if big:
         fam_opts = "".join('<option value="%s">%s (%d)</option>' % (esc(f), esc(f), k) for f, k in sorted(fams.items()) if f)
-        if "" in fams: fam_opts += '<option value="-">Family not recorded (%d)</option>' % fams[""]
+        if "" in fams: fam_opts += '<option value="-">%s not recorded (%d)</option>' % (fam_word[0].capitalize(), fams[""])
         controls = ('<div class="cy-tools" role="search">'
                     '<label class="cy-q"><span class="cy-sr">Search snakes in %s</span><input id="cy-q" type="search" placeholder="Search snakes in %s..." autocomplete="off"></label>'
-                    '<label><span class="cy-lab">Venom</span><select id="cy-v"><option value="">All species</option><option value="1">Venomous (%d)</option><option value="0">Non-venomous (%d)</option></select></label>'
-                    '%s'
-                    '<label><span class="cy-lab">Sort</span><select id="cy-s"><option value="n">Common name A-Z</option><option value="nr">Common name Z-A</option><option value="s">Scientific name A-Z</option><option value="f">Family</option></select></label>'
+                    '%s%s'
+                    '<label><span class="cy-lab">Sort</span><select id="cy-s"><option value="n">Common name A-Z</option><option value="nr">Common name Z-A</option><option value="s">Scientific name A-Z</option>%s</select></label>'
                     '<button type="button" id="cy-reset" class="cy-reset" hidden>Reset</button></div>') % (
-            esc(name), esc(name), nv, n - nv,
-            ('<label><span class="cy-lab">Family</span><select id="cy-f"><option value="">All families</option>%s</select></label>' % fam_opts) if nfam > 1 else "")
+            esc(name), esc(name),
+            ('<label><span class="cy-lab">Venom</span><select id="cy-v"><option value="">All species</option><option value="1">Venomous (%s)</option><option value="0">Non-venomous (%s)</option></select></label>' % ("{:,}".format(nv), "{:,}".format(n - nv))) if 0 < nv < n else "",
+            ('<label><span class="cy-lab">%s</span><select id="cy-f"><option value="">All %s</option>%s</select></label>' % (fam_word[0].capitalize(), fam_word[1], fam_opts)) if nfam > 1 else "",
+            "" if kind == "genus" else '<option value="f">%s</option>' % ("Genus" if kind == "family" else "Family"))
     count = '<p class="cy-count" id="cy-count" aria-live="polite">Showing %s</p>' % plural(n, "species", "species") if n else ""
     grid = ('<ul class="cy-grid" id="cy-grid">%s</ul><p class="cy-empty" id="cy-empty" hidden>No snakes in %s match. <button type="button" class="cy-link" id="cy-clear">Clear the search and filters</button></p>'
             '<p class="cy-more-wrap"><button type="button" class="cy-more" id="cy-more" hidden>Show more</button></p>' % ("".join(card(x) for x in L), esc(name))) if n else (
@@ -929,7 +1040,16 @@ def country_page(name, L, all_countries, invasive, esc, slug):
                      '<ul class="cy-grid cy-grid-intro">%s</ul></section>') % (esc(name), "this snake as" if len(intro_here) == 1 else "these snakes as", esc(name), "".join(card(x, True) for x in intro_here))
     # the overview: only facts that come straight from the data
     facts = []
-    if n >= 2:
+    if kind == "family" and n >= 2:
+        top = sorted([(k, f) for f, k in fams.items() if f], key=lambda t: (-t[0], t[1]))
+        facts.append("<li><b>Genera:</b> %s.</li>" % ", ".join('<a href="../genus/%s"><i>%s</i></a> %d' % (slugify(f), esc(f), k) for k, f in top))
+    elif kind == "genus" and n:
+        if family: facts.append('<li><b>Family:</b> <a href="../family/%s">%s</a>.</li>' % (slugify(family), esc(family)))
+        cc = {}
+        for x in L:
+            for k in x["countries"]: cc[k] = cc.get(k, 0) + 1
+        if cc: facts.append("<li><b>Recorded in:</b> %s.</li>" % ", ".join('<a href="../country/%s">%s</a>' % (slugify(k), esc(k)) for k in sorted(cc)[:40]) + (" and %d more" % (len(cc) - 40) if len(cc) > 40 else ""))
+    if kind == "country" and n >= 2:
         top = sorted([(k, f) for f, k in fams.items() if f], key=lambda t: (-t[0], t[1]))
         if top:
             facts.append("<li><b>Families:</b> %s.</li>" % ", ".join('<a href="../family/%s">%s</a> %d' % (slugify(f), esc(f), k) for k, f in top))
@@ -938,20 +1058,31 @@ def country_page(name, L, all_countries, invasive, esc, slug):
                 len(only), "is" if len(only) == 1 else "are", ", ".join('<a href="../%s">%s</a>' % (page_name(x), esc(x["sci"] if x["is_sci"] else x["name"])) for x in only[:12]) + (" and %d more" % (len(only) - 12) if len(only) > 12 else "")))
         if gone:
             facts.append("<li><b>%s</b> %s extinct or known only from fossils.</li>" % (len(gone), "is" if len(gone) == 1 else "are"))
-    if len(facts) == 1 and nfam < 3: facts = []  # just the family split the header already gives
-    overview = ('<section class="cy-sec" aria-labelledby="cy-ov-h"><h2 id="cy-ov-h">%s&rsquo;s snakes in numbers</h2><ul class="cy-facts">%s</ul></section>' % (esc(name), "".join(facts))) if facts else ""
-    ld = json.dumps([{"@context": "https://schema.org", "@type": "CollectionPage", "name": "Snakes of " + name, "url": url, "description": lead,
+    if kind == "country" and len(facts) == 1 and nfam < 3: facts = []  # just the family split the header already gives
+    ov_h = ("%s&rsquo;s snakes in numbers" % esc(name)) if kind == "country" else ("About the %s %s" % ("family" if kind == "family" else "genus", esc(name)))
+    overview = ('<section class="cy-sec" aria-labelledby="cy-ov-h"><h2 id="cy-ov-h">%s</h2><ul class="cy-facts">%s</ul></section>' % (ov_h, "".join(facts))) if facts else ""
+    if kind == "country": crumbs = [("Countries", SITE + "species/#by-country", "../#by-country")]
+    elif kind == "family": crumbs = [("Families", SITE + "species/#by-family", "../#by-family")]
+    else: crumbs = [("Families", SITE + "species/#by-family", "../#by-family")] + ([(family, SITE + "species/family/" + slugify(family), "../family/" + slugify(family))] if family else [])
+    ld = json.dumps([{"@context": "https://schema.org", "@type": "CollectionPage", "name": h1, "url": url, "description": lead,
                       "mainEntity": {"@type": "ItemList", "numberOfItems": n, "itemListElement": [
                           {"@type": "ListItem", "position": i + 1, "url": SITE + "species/" + page_name(x), "name": x["sci"] if x["is_sci"] else x["name"]} for i, x in enumerate(L[:100])]}},
                      {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
                          {"@type": "ListItem", "position": 1, "name": "SnakeList", "item": SITE},
-                         {"@type": "ListItem", "position": 2, "name": "Countries", "item": SITE + "species/#by-country"},
-                         {"@type": "ListItem", "position": 3, "name": name, "item": url}]}], ensure_ascii=False).replace("</", "<\\/")
+                         ] + [{"@type": "ListItem", "position": i + 2, "name": c0[0], "item": c0[1]} for i, c0 in enumerate(crumbs)] + [
+                         {"@type": "ListItem", "position": len(crumbs) + 2, "name": h1, "item": url}]}], ensure_ascii=False).replace("</", "<\\/")
     first = next((x for x in L if x["photo"] and len(x["photo"]) >= 5 and "Illustration" not in x["photo"][2]), None)
     img = SITE + "species-photos/t/%d-%d.webp" % (first["photo"][0], first["photo"][1]) if first else SITE + "snakelist-logo.png"
+    cta = ("../../?map=%s" % quote_param(name), "View snakes on map") if kind == "country" else (
+        ("../../?fam=%s" % quote_param(name), "Open the family in SnakeList") if kind == "family" else ("../../?q=%s" % quote_param(name), "Open the genus in SnakeList"))
+    crumbs_html = "".join('<li><a href="%s">%s</a></li>' % (c0[2], esc(c0[0])) for c0 in crumbs)
+    jump = ('<form class="cy-jump" id="cy-jump" role="search" action="../#by-country"><label for="cy-jq" class="cy-sr">Go to another country</label><input id="cy-jq" list="cy-clist" placeholder="Another country..." autocomplete="off"><datalist id="cy-clist"></datalist><button type="submit">Go</button></form>'
+            if kind == "country" else "")
     return COUNTRY.format(title=esc(title), desc=esc(desc), url=url, img=img, ld=ld, name=esc(name), lead=esc(lead), stats=stats,
-                          map=esc(quote_param(name)), controls=controls, count=count, grid=grid, intro=intro_sec, overview=overview,
+                          h1=("<i>%s</i>" % esc(h1)) if kind == "genus" else esc(h1), crumbs=crumbs_html, jump=jump,
+                          cta_href=esc(cta[0]), cta_label=cta[1], controls=controls, count=count, grid=grid, intro=intro_sec, overview=overview,
                           author=AUTHOR, big=" cy-big" if big else "", total=n,
+                          site_head=site_header("../../", "species"), site_foot=site_footer("../../", "Photos: iNaturalist observers (CC licences) - credited on each species page."),
                           robots="index,follow,max-image-preview:large" if n else "noindex,follow")
 
 
@@ -971,28 +1102,27 @@ COUNTRY = """<!doctype html>
 <link rel="icon" href="../../favicon.ico" sizes="any"><link rel="stylesheet" href="../sp.css"><link rel="stylesheet" href="../country.css">
 <script type="application/ld+json">{ld}</script>
 </head><body class="cy-page">
-<header class="sp-top cy-top"><a class="sp-logo" href="../../">SnakeList</a><nav aria-label="Site"><a href="../">All species</a><a href="../#by-country">Countries</a><a href="../../install.html">Install app</a><a href="../../">Open the app</a></nav></header>
+{site_head}
 <main class="cy-main" id="main">
-<nav class="cy-crumbs" aria-label="Breadcrumb"><ol><li><a href="../../">SnakeList</a></li><li><a href="../#by-country">Countries</a></li><li aria-current="page">{name}</li></ol>
-<form class="cy-jump" id="cy-jump" role="search" action="../#by-country"><label for="cy-jq" class="cy-sr">Go to another country</label><input id="cy-jq" list="cy-clist" placeholder="Another country..." autocomplete="off"><datalist id="cy-clist"></datalist><button type="submit">Go</button></form></nav>
+<nav class="cy-crumbs" aria-label="Breadcrumb"><ol><li><a href="../../">SnakeList</a></li><li><a href="../">Species</a></li>{crumbs}<li aria-current="page">{h1}</li></ol>
+{jump}</nav>
 <header class="cy-head">
-<div class="cy-htext"><h1>Snakes of {name}</h1><p class="cy-lead">{lead}</p></div>
+<div class="cy-htext"><h1>{h1}</h1><p class="cy-lead">{lead}</p></div>
 {stats}
-<p class="cy-cta"><a class="cy-btn" href="../../?map={map}">View snakes on map</a></p>
+<p class="cy-cta"><a class="cy-btn" href="{cta_href}">{cta_label}</a></p>
 </header>
 <section class="cy-list{big}" aria-labelledby="cy-list-h" data-total="{total}"><h2 id="cy-list-h" class="cy-sr">Species</h2>
 {controls}{count}{grid}
 </section>
 {intro}{overview}
 </main>
-<footer class="cy-foot"><p><a class="cy-flogo" href="../../about-snakelist.html">SnakeList</a> &middot; made by <a href="../../about.html"><b>{author}</b></a></p>
-<p class="cy-flinks"><a href="../../">Open the app</a><a href="../../install.html">Install app</a><a href="../">All species</a><a href="../#by-country">All countries</a><a href="../../privacy.html">Privacy</a><a href="../../terms.html">Terms</a></p>
-<p class="cy-fnote">Photos: iNaturalist observers (CC licences) - credited on each species page.</p></footer>
+{site_foot}
 <script src="../country.js" defer></script>
 </body></html>
 """
 
-COUNTRY_CSS = """.cy-page{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+COUNTRY_CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:center;width:100%;min-height:120px;height:100%;background:var(--tag,#e3f0dc);color:var(--muted,#55705b);font-size:13px;border-radius:inherit}
+.cy-page{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 .cy-main{flex:1 0 auto;width:100%;max-width:1120px;margin:0 auto;padding:0 16px 40px}
 .cy-top{max-width:1120px}.cy-top nav{flex-wrap:wrap;justify-content:flex-end;gap:6px 16px}
 .cy-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -1049,7 +1179,9 @@ COUNTRY_CSS = """.cy-page{min-height:100vh;min-height:100dvh;display:flex;flex-d
 @media (prefers-reduced-motion:reduce){.cy-card a{transition:none}}
 """
 
-COUNTRY_JS = r"""(function(){
+COUNTRY_JS = r"""(function(){function nf(t){if(!t||t.tagName!=='IMG'||t.dataset.nf)return;t.dataset.nf=1;var d=document.createElement('span');d.className='sl-nophoto';d.setAttribute('role','img');d.setAttribute('aria-label',t.alt||'Photo unavailable');d.textContent='Photo unavailable';if(t.width&&t.height)d.style.aspectRatio=t.width+'/'+t.height;t.replaceWith(d)}
+window.addEventListener('error',function(e){nf(e.target)},true);[].forEach.call(document.images,function(i){if(i.complete&&!i.naturalWidth&&i.getAttribute('src'))nf(i)})})();
+(function(){
 var grid=document.getElementById('cy-grid'),PAGE=60,shown=PAGE;
 // the country picker: every country page, typed to search
 var jump=document.getElementById('cy-jump'),jq=document.getElementById('cy-jq'),dl=document.getElementById('cy-clist'),C=null;
