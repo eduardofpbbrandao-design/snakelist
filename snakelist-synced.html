@@ -1239,6 +1239,27 @@
   .note-actions button:hover { border-color: var(--gold-soft); }
   .note-actions #note-clear { color: var(--text-muted); }
   .note-actions .primary { background: var(--gold-fill); border-color: var(--gold-fill); color: var(--on-fill); margin-left: auto; }
+  .note-actions .primary:disabled { opacity: .6; cursor: default; }
+  .note-btn[data-n]::after { content: " · " attr(data-n) " encounters"; color: var(--text-muted); }
+  .note-card { max-height: calc(100vh - 40px); overflow-y: auto; }
+  .note-encs { display: flex; flex-wrap: wrap; gap: 6px; margin: -6px 0 14px; }
+  .note-enc, .note-enc-add { font-family: 'Inter', sans-serif; font-size: 12px; padding: 5px 10px; border-radius: 99px; cursor: pointer;
+    border: 1px solid var(--border); background: transparent; color: var(--text); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .note-enc.on { background: var(--gold-fill); border-color: var(--gold-fill); color: var(--on-fill); }
+  .note-enc-add { border-style: dashed; color: var(--text-muted); }
+  .note-date-row { display: flex; gap: 8px; }
+  .note-date-row select { font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text); background: var(--bg);
+    border: 1px solid var(--border); border-radius: 9px; padding: 9px 8px; flex: 0 0 auto; }
+  .note-date-row input { flex: 1 1 auto; min-width: 0; }
+  .note-date-row input[hidden] { display: none; }
+  .note-hint { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text-muted); margin: 5px 0 0; }
+  .note-approx { display: flex; align-items: center; gap: 7px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text); margin: -4px 0 10px; cursor: pointer; }
+  .note-err { font-family: 'Inter', sans-serif; font-size: 13px; color: #c0392b; margin: 8px 0 0; }
+  .sl-undo { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 9150; display: flex; align-items: center; gap: 14px;
+    max-width: min(560px, calc(100vw - 32px)); padding: 11px 12px 11px 18px; border-radius: 14px; background: #256846; color: #fff;
+    font: 500 14px/1.35 'Inter', sans-serif; box-shadow: 0 8px 28px rgba(0,0,0,.28); }
+  .sl-undo[hidden] { display: none; }
+  .sl-undo button { flex: 0 0 auto; font: 600 14px 'Inter', sans-serif; color: #256846; background: #fff; border: 0; border-radius: 9px; padding: 7px 14px; cursor: pointer; }
 
   /* positioned in document coordinates (left/top include scrollX/scrollY), not viewport-fixed -
      a fixed-position dim layer only ever covers one screenful, so on a page taller than the
@@ -1450,7 +1471,7 @@
 </style>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.39</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.40</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All 4,254 snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -5877,7 +5898,7 @@
     Object.keys(st.notes || {}).forEach(function (id) {
       var b = byId[id] && byId[id].querySelector(".note-btn"), n = st.notes[id];
       if (!b) return;
-      ["iso", "when", "where"].forEach(function (k) { if (n[k]) b.setAttribute("data-" + k, n[k]); });
+      ["iso", "when", "where", "more", "n"].forEach(function (k) { if (n[k]) b.setAttribute("data-" + k, n[k]); });
     });
   }
   var timer = null;
@@ -5891,7 +5912,9 @@
       if (c.classList.contains("wish")) out.wish.push(c.dataset.id);
     });
     grid.querySelectorAll(".note-btn[data-iso], .note-btn[data-where]").forEach(function (b) {
-      out.notes[b.closest(".card").dataset.id] = { iso: b.getAttribute("data-iso"), when: b.getAttribute("data-when"), where: b.getAttribute("data-where") };
+      var n = { iso: b.getAttribute("data-iso"), when: b.getAttribute("data-when"), where: b.getAttribute("data-where") };
+      if (b.hasAttribute("data-more")) { n.more = b.getAttribute("data-more"); n.n = b.getAttribute("data-n"); }
+      out.notes[b.closest(".card").dataset.id] = n;
     });
     try { localStorage.setItem(KEY, JSON.stringify(out)); } catch (err) {}
   }
@@ -5903,7 +5926,7 @@
         return;
       }
     }
-  }).observe(grid, { subtree: true, attributes: true, attributeFilter: ["class", "data-iso", "data-when", "data-where"] });
+  }).observe(grid, { subtree: true, attributes: true, attributeFilter: ["class", "data-iso", "data-when", "data-where", "data-more"] });
   window.addEventListener("pagehide", function () { if (timer) { clearTimeout(timer); save(); } });
 })();
 </script>
@@ -6088,11 +6111,17 @@
     <div class="note-card">
       <h2 id="note-title"></h2>
       <p class="note-sub" id="note-sub"></p>
-      <label class="note-field"><span>Date seen</span><input type="date" id="note-date"></label>
+      <div class="note-encs" id="note-encs" hidden></div>
+      <div class="note-field"><span id="note-date-lbl">Date seen</span>
+        <div class="note-date-row"><select id="note-prec" aria-label="How exact is the date"><option value="day">Exact day</option><option value="month">Month only</option><option value="year">Year only</option><option value="none">Don't know</option></select>
+        <input type="date" id="note-date" aria-labelledby="note-date-lbl"><input type="month" id="note-month" placeholder="2024-05" aria-labelledby="note-date-lbl" hidden><input type="number" id="note-year" inputmode="numeric" min="1900" max="2100" placeholder="2024" aria-labelledby="note-date-lbl" hidden></div>
+        <p class="note-hint">Not sure of the exact day? Pick "Month only", "Year only" or "Don't know".</p></div>
       <label class="note-field"><span>Where</span><input type="text" id="note-where" placeholder="Tortuguero, Costa Rica" autocomplete="off"></label>
+      <label class="note-approx"><input type="checkbox" id="note-approx"> The place is only roughly right</label>
       <div class="note-locs"><button type="button" id="note-gps">Use my location</button><button type="button" id="note-map">Pick on the map</button></div>
       <div class="note-pick" id="note-pick" hidden></div>
       <p class="note-loc-msg" id="note-loc-msg" hidden></p>
+      <p class="note-err" id="note-err" role="alert" hidden></p>
       <div class="note-actions">
         <button type="button" id="note-clear">Clear</button>
         <button type="button" id="note-cancel">Cancel</button>
@@ -7215,10 +7244,20 @@
     card.classList.toggle("done", done);
     // The date is never assumed - it is typed in through the note button below.
     if (!done) {
-      const note = card.querySelector(".note-btn");
-      ["data-iso", "data-when", "data-where"].forEach((a) => note.removeAttribute(a));
-      setPhotos(card.dataset.id, []);
+      const note = card.querySelector(".note-btn"), id = card.dataset.id;
+      const keptNote = snapNote(note), keptPhotos = getPhotos(id), nEnc = readEnc(note).length;
+      NOTE_ATTRS.forEach((a) => note.removeAttribute(a));
+      setPhotos(id, []);
       applySightingPhoto(card.querySelector(".photo-btn"), null);
+      const lost = [];
+      if (nEnc) lost.push(nEnc === 1 ? "its date and place" : "its " + nEnc + " encounters");
+      if (keptPhotos.length) lost.push(keptPhotos.length === 1 ? "1 photo" : keptPhotos.length + " photos");
+      offerUndo(card.querySelector(".card-name").textContent + " is no longer marked seen" + (lost.length ? " (" + lost.join(" and ") + " removed)" : "") + ".", () => {
+        if (card.classList.contains("done")) return;
+        card.classList.add("done"); putNote(note, keptNote);
+        try { setPhotos(id, keptPhotos); } catch (err) {}
+        showPhotos(card); checkNewBadges(computeStats()); refresh(true);
+      });
     } else {
       const flash = document.createElement("div");
       flash.className = "seen-flash";
@@ -7270,21 +7309,148 @@
   const noteWhere = document.getElementById("note-where");
   let noteBtn = null;
 
-  function closeNote() { noteSheet.classList.remove("open"); noteBtn = null; const np = document.getElementById("note-pick"), nm = document.getElementById("note-loc-msg"); if (np) np.hidden = true; if (nm) nm.hidden = true; }
+  // the second tap of a quick double tap on Save/Cancel would land on whatever is under the
+  // sheet once it has closed (often a snake's name, which opens its page) - swallow it
+  let noteShield = 0;
+  document.addEventListener("click", (e) => { if (Date.now() < noteShield) { e.preventDefault(); e.stopPropagation(); } }, true);
+  function closeNote() { if (noteSheet.classList.contains("open")) noteShield = Date.now() + 450; noteSheet.classList.remove("open"); noteBtn = null; const np = document.getElementById("note-pick"), nm = document.getElementById("note-loc-msg"); if (np) np.hidden = true; if (nm) nm.hidden = true; }
 
-  grid.addEventListener("click", (e) => {
-    const b = e.target.closest(".note-btn");
-    if (!b) return;
+  // ---- encounters: a snake can be seen more than once ---------------------------------------
+  // The card's note button keeps the newest encounter in data-iso/data-when/data-where (so
+  // everything that already reads those keeps working) and any older ones as JSON in
+  // data-more, with data-n = how many there are. data-iso can be "2024-05-12", "2024-05"
+  // (month only) or "2024" (year only); a place that is only roughly right starts with "≈ ".
+  const NOTE_ATTRS = ["data-iso", "data-when", "data-where", "data-more", "data-n"];
+  function readEnc(b) {
+    const out = [];
+    if (b.hasAttribute("data-iso") || b.hasAttribute("data-where")) out.push({ iso: b.getAttribute("data-iso") || "", where: b.getAttribute("data-where") || "" });
+    try { (JSON.parse(b.getAttribute("data-more") || "[]") || []).forEach((x) => { if (x && (x.iso || x.where)) out.push({ iso: x.iso || "", where: x.where || "" }); }); } catch (err) {}
+    return out;
+  }
+  function whenLabel(iso) {
+    if (!iso) return "";
+    const p = iso.split("-").map(Number);
+    if (p.length === 1) return String(p[0]);
+    if (p.length === 2) return new Date(p[0], p[1] - 1, 1).toLocaleDateString(undefined, { month: "short", year: "numeric" });
+    return dateFmt(new Date(p[0], p[1] - 1, p[2])); // built from the parts so the day never slips across UTC
+  }
+  window.SL_whenLabel = whenLabel;
+  function sortEnc(list) { return list.filter((x) => x.iso || x.where).sort((x, y) => (y.iso || "").localeCompare(x.iso || "")); } // newest first, unknown dates last
+  function writeEnc(b, list) {
+    list = sortEnc(list);
+    NOTE_ATTRS.forEach((x) => b.removeAttribute(x));
+    if (!list.length) return;
+    const f = list[0];
+    if (f.iso) { b.setAttribute("data-iso", f.iso); b.setAttribute("data-when", whenLabel(f.iso)); }
+    if (f.where) b.setAttribute("data-where", f.where);
+    if (list.length > 1) { b.setAttribute("data-more", JSON.stringify(list.slice(1))); b.setAttribute("data-n", String(list.length)); }
+  }
+  function snapNote(b) { const o = {}; NOTE_ATTRS.forEach((x) => { if (b.hasAttribute(x)) o[x] = b.getAttribute(x); }); return o; }
+  function putNote(b, o) { NOTE_ATTRS.forEach((x) => { if (o[x] != null) b.setAttribute(x, o[x]); else b.removeAttribute(x); }); }
+  window.SL_readEnc = readEnc; window.SL_writeEnc = writeEnc;
+
+  // a short "Undo" bar, for anything that throws away what you logged
+  const undoEl = document.createElement("div");
+  undoEl.className = "sl-undo"; undoEl.setAttribute("role", "status"); undoEl.hidden = true;
+  undoEl.innerHTML = '<span></span><button type="button">Undo</button>';
+  document.body.appendChild(undoEl);
+  let undoFn = null, undoT = null;
+  function offerUndo(text, fn) {
+    undoFn = fn; undoEl.firstChild.textContent = text; undoEl.hidden = false;
+    clearTimeout(undoT); undoT = setTimeout(() => { undoEl.hidden = true; undoFn = null; }, 10000);
+  }
+  undoEl.querySelector("button").addEventListener("click", () => { const f = undoFn; undoFn = null; undoEl.hidden = true; clearTimeout(undoT); if (f) f(); });
+  window.SL_offerUndo = offerUndo;
+
+  const noteEncs = document.getElementById("note-encs"), notePrec = document.getElementById("note-prec");
+  const noteMonth = document.getElementById("note-month"), noteYear = document.getElementById("note-year");
+  const noteApprox = document.getElementById("note-approx"), noteErr = document.getElementById("note-err");
+  const noteSave = document.getElementById("note-save"), noteClearBtn = document.getElementById("note-clear");
+  let encList = [], encIdx = 0, encStart = "", noteWarned = false;
+  const encText = (x) => (whenLabel(x.iso) || "Date unknown") + (x.where ? " · " + x.where : "");
+  function showPrec() { const v = notePrec.value; noteDate.hidden = v !== "day"; noteMonth.hidden = v !== "month"; noteYear.hidden = v !== "year"; }
+  function fillFields(x) {
+    const iso = (x && x.iso) || "", p = iso ? iso.split("-") : [];
+    notePrec.value = !iso ? (x && x.where ? "none" : "day") : p.length === 3 ? "day" : p.length === 2 ? "month" : "year";
+    noteDate.value = p.length === 3 ? iso : ""; noteMonth.value = p.length >= 2 ? p[0] + "-" + p[1] : ""; noteYear.value = p[0] || "";
+    const w = (x && x.where) || "";
+    noteApprox.checked = w.indexOf("≈ ") === 0; noteWhere.value = w.replace(/^≈ /, "");
+    showPrec(); noteErr.hidden = true; noteWarned = false;
+  }
+  // what the fields say now -> {iso, where}, or an error message
+  function readFields() {
+    const v = notePrec.value, now = new Date(), y0 = now.getFullYear();
+    let iso = "";
+    if (v === "day" && noteDate.value) {
+      iso = noteDate.value;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return { err: "That date doesn't look right." };
+      const p = iso.split("-").map(Number);
+      if (new Date(p[0], p[1] - 1, p[2]) > now) return { err: "That date is in the future." };
+    } else if (v === "month" && noteMonth.value) {
+      iso = noteMonth.value.trim();
+      if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(iso)) return { err: "Write the month like 2024-05." };
+      const p = iso.split("-").map(Number);
+      if (p[0] > y0 || (p[0] === y0 && p[1] > now.getMonth() + 1)) return { err: "That month is in the future." };
+    } else if (v === "year" && noteYear.value) {
+      const y = +noteYear.value;
+      if (!(y >= 1900 && y <= y0)) return { err: "Pick a year between 1900 and " + y0 + "." };
+      iso = String(y);
+    }
+    if (iso && +iso.slice(0, 4) < 1900) return { err: "Pick a year from 1900 on." };
+    const w = noteWhere.value.trim().replace(/^≈\s*/, "");
+    return { iso: iso, where: w ? (noteApprox.checked ? "≈ " + w : w) : "" };
+  }
+  function stashFields() { // keep what you typed when you switch to another encounter
+    const r = readFields(); if (r.err) return r;
+    if (encIdx < encList.length) encList[encIdx] = r; else if (r.iso || r.where) encList.push(r);
+    return r;
+  }
+  function paintEncs() {
+    let h = "";
+    encList.forEach((x, i) => { h += '<button type="button" class="note-enc' + (i === encIdx ? " on" : "") + '" data-i="' + i + '" aria-pressed="' + (i === encIdx) + '"></button>'; });
+    if (encList.length) h += encIdx >= encList.length ? '<button type="button" class="note-enc on" aria-pressed="true" data-i="' + encList.length + '">New encounter</button>'
+      : '<button type="button" class="note-enc-add" data-i="' + encList.length + '">+ Add another encounter</button>';
+    noteEncs.innerHTML = h; noteEncs.hidden = !encList.length;
+    noteEncs.querySelectorAll(".note-enc[data-i]").forEach((el) => { const x = encList[+el.dataset.i]; if (x) el.textContent = encText(x); });
+    noteClearBtn.textContent = encIdx < encList.length ? (encList.length > 1 ? "Delete this encounter" : "Clear") : "Clear";
+    const t = encList.length > 1 || encIdx >= encList.length && encList.length ? "Encounter " + (encIdx + 1) + " of " + Math.max(encList.length, encIdx + 1) : "";
+    noteSheet.setAttribute("aria-label", t ? "Log a sighting - " + t : "Log a sighting");
+  }
+  function openNote(b, addNew) {
     noteBtn = b;
     const card = b.closest(".card");
     document.getElementById("note-title").textContent = card.querySelector(".card-name").textContent;
     document.getElementById("note-sub").textContent = card.querySelector(".card-sci").textContent;
-    noteDate.value = b.getAttribute("data-iso") || "";
-    noteWhere.value = b.getAttribute("data-where") || "";
+    encList = readEnc(b); encStart = JSON.stringify(encList);
+    encIdx = addNew ? encList.length : 0;
+    fillFields(encList[encIdx]); paintEncs();
+    noteSave.disabled = false;
     noteSheet.classList.add("open"); // no auto-focus: the keyboard only opens when you tap "Where" yourself
+  }
+  window.SL_openNote = openNote;
+  grid.addEventListener("click", (e) => { const b = e.target.closest(".note-btn"); if (b) openNote(b); });
+  noteEncs.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-i]"); if (!t) return;
+    const r = stashFields(); if (r.err) { noteErr.textContent = r.err; noteErr.hidden = false; return; }
+    encIdx = Math.min(+t.dataset.i, encList.length); fillFields(encList[encIdx]); paintEncs();
   });
-
-  document.getElementById("note-cancel").addEventListener("click", closeNote);
+  notePrec.addEventListener("change", () => { // carry the date over to the new precision
+    const iso = noteDate.value || (noteMonth.value ? noteMonth.value + "-01" : "") || (noteYear.value ? noteYear.value + "-01-01" : "");
+    if (iso) { if (!noteMonth.value && iso.length >= 7) noteMonth.value = iso.slice(0, 7); if (!noteYear.value) noteYear.value = iso.slice(0, 4); }
+    showPrec();
+  });
+  function noteDirty() {
+    if (!noteBtn) return false;
+    const r = readFields(); if (r.err) return true;
+    const w = encList.slice(); if (encIdx < w.length) w[encIdx] = r; else if (r.iso || r.where) w.push(r);
+    return JSON.stringify(sortEnc(w)) !== JSON.stringify(sortEnc(JSON.parse(encStart)));
+  }
+  // closing with changes you haven't saved asks once, instead of silently losing them
+  function tryClose() {
+    if (noteDirty() && !noteWarned) { noteWarned = true; noteErr.textContent = "You haven't saved this. Press Save to keep it, or close again to throw it away."; noteErr.hidden = false; return; }
+    closeNote();
+  }
+  document.getElementById("note-cancel").addEventListener("click", tryClose);
   // the place, from your live location or a tap on the map
   const noteMsg = document.getElementById("note-loc-msg"), notePick = document.getElementById("note-pick");
   let notePicker = null;
@@ -7309,8 +7475,8 @@
     if (window.SL_MAP_GEO_WARM) window.SL_MAP_GEO_WARM();
     if (!notePicker && window.SL_buildPicker) notePicker = window.SL_buildPicker(notePick, notePlace, null).catch(() => { notePicker = null; notePick.hidden = true; noteSay("Couldn't load the map."); });
   });
-  noteSheet.addEventListener("click", (e) => { if (e.target === noteSheet) closeNote(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && noteBtn) closeNote(); });
+  noteSheet.addEventListener("click", (e) => { if (e.target === noteSheet) tryClose(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && noteBtn) tryClose(); });
 
   // A one-time spotlight tour of the tabs, shown right after the opening animation on a
   // device's first-ever visit - gated by localStorage so returning devices never see it again.
@@ -7429,29 +7595,25 @@
     if (replayBtn) replayBtn.addEventListener("click", () => { i = 0; place(); });
   })();
 
-  document.getElementById("note-clear").addEventListener("click", () => {
+  noteClearBtn.addEventListener("click", () => {
     if (!noteBtn) return;
-    ["data-iso", "data-when", "data-where"].forEach((a) => noteBtn.removeAttribute(a));
+    if (encIdx >= encList.length) { fillFields(null); return; } // a new, unsaved encounter: just empty the boxes
+    const b = noteBtn, before = snapNote(b), name = b.closest(".card").querySelector(".card-name").textContent;
+    const gone = encList[encIdx];
+    encList.splice(encIdx, 1); writeEnc(b, encList);
     closeNote();
     checkNewBadges(computeStats());
     refresh();
+    offerUndo((encList.length ? "Deleted an encounter (" + encText(gone) + ") of " : "Cleared the date and place of ") + name + ".", () => { putNote(b, before); checkNewBadges(computeStats()); refresh(); });
   });
 
-  document.getElementById("note-save").addEventListener("click", () => {
-    if (!noteBtn) return;
-    const iso = noteDate.value;
-    const where = noteWhere.value.trim();
-    if (iso) {
-      const p = iso.split("-").map(Number);
-      noteBtn.setAttribute("data-iso", iso);
-      // built from the parts so the day never slips back across the UTC boundary
-      noteBtn.setAttribute("data-when", dateFmt(new Date(p[0], p[1] - 1, p[2])));
-    } else {
-      noteBtn.removeAttribute("data-iso");
-      noteBtn.removeAttribute("data-when");
-    }
-    if (where) noteBtn.setAttribute("data-where", where);
-    else noteBtn.removeAttribute("data-where");
+  noteSave.addEventListener("click", () => {
+    if (!noteBtn || noteSave.disabled) return; // a fast double tap saves once
+    const r = readFields();
+    if (r.err) { noteErr.textContent = r.err; noteErr.hidden = false; return; }
+    noteSave.disabled = true;
+    if (encIdx < encList.length) encList[encIdx] = r; else encList.push(r);
+    writeEnc(noteBtn, encList);
     closeNote();
     checkNewBadges(computeStats());
     refresh();
@@ -7593,8 +7755,10 @@
     const card = cards.find((c) => c.dataset.id === id); if (!card) return false;
     if (!card.classList.contains("done")) card.querySelector(".seen-btn").click();
     const note = card.querySelector(".note-btn"), d = new Date(), iso = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-    note.setAttribute("data-iso", iso); note.setAttribute("data-when", dateFmt(d));
-    if (where) note.setAttribute("data-where", where);
+    // a photo taken today is a new encounter - earlier ones are kept, not overwritten
+    const L0 = readEnc(note), same = L0.find((x) => x.iso === iso && (!where || !x.where || x.where === where));
+    if (same) { if (where && !same.where) same.where = where; } else L0.push({ iso: iso, where: where || "" });
+    writeEnc(note, L0);
     if (dataUrl) {
       const L = getPhotos(id);
       if (L.length >= MAX_PHOTOS) L.pop();
@@ -16795,6 +16959,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v4.40", d: "2026-11-08", items: ["Log the same snake more than once: each encounter keeps its own date and place, newest shown on the card", "Not sure of the date? Pick month only, year only or don't know; tick when the place is only roughly right", "Unmarking a snake or deleting an encounter can be undone; closing with unsaved changes asks first", "New Your data box (on the Sign in page): download a backup, or restore one - checked and previewed first, add or replace, with Undo", "Signing in on a second device keeps both devices' encounters instead of one replacing the other"] },
     { v: "v4.39", d: "2026-11-08", items: ["Species pages, family and genus pages and the species directory share the new header and footer; family and genus pages get photo cards, search, venom filter and sort", "Habitats: removed 1,000 impossible habitats (no rainforests for sea snakes, no reefs for land snakes); species pages now say the list is an estimate", "Portugal and Spain: the Grass Snake there is Natrix astreptophora (and Natrix helvetica in the UK), and the False Smooth Snake there is Macroprotodon brevis", "Species chips no longer contradict each other: Popular / Less well known, Often / Rarely recorded on iNaturalist"] },
     { v: "v4.38", d: "2026-11-08", items: ["About SnakeList, About me, Privacy, Terms and Install share one header and footer with the real SnakeList logo; About and Privacy now say exactly what SnakeList does (photos for most species, camera suggestions, what goes to Google Analytics, iNaturalist and others)"] },
     { v: "v4.37", d: "2026-11-08", items: ["Map: a picked district shows as 'Lisbon district, Portugal · 7 matching species', and a city's list separates snakes recorded in its district from ones only recorded for the country", "Map: each layer says which snakes it shows; Habitats says it maps where those snakes live (not the habitat's outline) and Sightings follow the habitat picked", "Map filters: numbers follow your other filters; conservation status keeps SnakeList's fossil list apart from the Red List; Done says how many species match", "Sightings group into clusters where they crowd - tap one to zoom in", "Photo viewer: a Close button, and the keyboard works inside it", "Full screen: the selected place's list sits over the map instead of below it"] },
@@ -17177,6 +17342,18 @@ window.SL_GEO_READY = new Promise(function (res) {
   .g-msg:empty { display: none; }
   .g-me { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); }
   .g-me[hidden] { display: none; }
+  .sl-data { margin-top: 22px; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); text-align: left; }
+  .sl-data h2 { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; margin: 0 0 6px; }
+  .sl-data p { font-size: 13.5px; line-height: 1.45; color: var(--text); margin: 0 0 10px; }
+  .sl-data .sl-data-status { color: var(--text-muted); }
+  .sl-data-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sl-data-btns button { font: 500 13px 'Inter', sans-serif; padding: 8px 14px; border-radius: 9px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; }
+  .sl-data-btns button:hover { border-color: var(--gold-soft); }
+  .sl-data-btns button.primary { background: var(--gold-fill); border-color: var(--gold-fill); color: var(--on-fill); }
+  .sl-data-btns button:disabled { opacity: .6; cursor: default; }
+  .bk-preview { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .bk-preview .bk-err { color: #c0392b; }
+  .bk-preview .bk-small { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
   .g-me img, .g-me .g-init { width: 40px; height: 40px; border-radius: 50%; flex: none; object-fit: cover; }
   .g-me .g-init { display: flex; align-items: center; justify-content: center; background: var(--gold-fill); color: var(--on-fill); font-weight: 700; }
   .g-me div { flex: 1; min-width: 0; }
@@ -17413,7 +17590,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (user) {
       me.hidden = false; btn.hidden = true; remember.hidden = true; form.hidden = true; orLine.hidden = true; if (links) links.hidden = true;
       me.innerHTML = (user.picture ? '<img src="' + esc(user.picture) + '" alt="" referrerpolicy="no-referrer">' : '<span class="g-init">' + esc((user.name || "?")[0]) + "</span>") +
-        "<div><b>" + esc(user.name) + "</b><small>" + esc(user.email) + " · " + (user.kind === "local" ? "saved on this device" : token || fbUser ? "your list syncs by itself" : user.kind === "email" ? "connecting…" : "syncs again on your next tap") + "</small></div>" +
+        "<div><b>" + esc(user.name) + "</b><small>" + esc(user.email) + " · " + (user.kind === "local" ? "saved on this device" : token || fbUser ? (syncing ? "syncing…" : get("sl-last-sync") ? "synced " + ago(get("sl-last-sync")) : "your list syncs by itself") : user.kind === "email" ? "connecting…" : "syncs again on your next tap") + "</small></div>" +
         '<button type="button" class="g-out" id="g-out">Sign out</button>';
       if (hb) hb.innerHTML = '<span class="g-dot">' + (user.picture ? '<img src="' + esc(user.picture) + '" alt="" referrerpolicy="no-referrer">' : esc((user.name || "?")[0])) + "</span>" + esc((user.name || "").split(" ")[0]);
     } else {
@@ -17450,7 +17627,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       if (c.classList.contains("follow")) out.follow.push(c.dataset.id);
     });
     grid.querySelectorAll(".note-btn[data-iso], .note-btn[data-where]").forEach(function (b) {
-      var n = {}; ["iso", "when", "where"].forEach(function (k) { var v = b.getAttribute("data-" + k); if (v) n[k] = v; });
+      var n = {}; ["iso", "when", "where", "more", "n"].forEach(function (k) { var v = b.getAttribute("data-" + k); if (v) n[k] = v; });
       out.notes[b.closest(".card").dataset.id] = n;
     });
     KV.forEach(function (k) { var v = null; try { v = localStorage.getItem(k); } catch (e) {} if (v != null) out.kv[k] = v; });
@@ -17464,13 +17641,37 @@ window.SL_GEO_READY = new Promise(function (res) {
     Object.keys(Object.assign({}, L, R)).forEach(function (x) { if (!B || (L[x] && R[x]) || (L[x] && !B[x]) || (R[x] && !B[x])) out.push(x); });
     return out;
   }
+  function encOf(n) {
+    var a = []; if (!n) return a;
+    if (n.iso || n.where) a.push({ iso: n.iso || "", where: n.where || "" });
+    try { (JSON.parse(n.more || "[]") || []).forEach(function (e) { if (e && (e.iso || e.where)) a.push({ iso: e.iso || "", where: e.where || "" }); }); } catch (e) {}
+    return a;
+  }
+  function joinNotes(l, r) {
+    var seen = {}, all = [];
+    encOf(l).concat(encOf(r)).forEach(function (e) { var k = e.iso + "|" + e.where; if (!seen[k]) { seen[k] = 1; all.push(e); } });
+    all.sort(function (x, y) { return (y.iso || "").localeCompare(x.iso || ""); });
+    if (!all.length) return null;
+    var f = all[0], o = {};
+    if (f.iso) { o.iso = f.iso; o.when = window.SL_whenLabel ? window.SL_whenLabel(f.iso) : f.iso; }
+    if (f.where) o.where = f.where;
+    if (all.length > 1) { o.more = JSON.stringify(all.slice(1)); o.n = String(all.length); }
+    return o;
+  }
+  window.SL_joinNotes = joinNotes;
   function pickVal(l, r, b, hasBase) { var lc = hasBase ? JSON.stringify(l) !== JSON.stringify(b) : l != null; return lc ? l : (r != null ? r : (hasBase ? r : l)); }
   function parseArr(v) { try { var a = JSON.parse(v || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
   function merge(L, R, B) {
     var hb = !!B; B = B || { notes: {}, kv: {} }; R = R || {};
     var M = { done: mergeSet(L.done, R.done, hb && B.done), wish: mergeSet(L.wish, R.wish, hb && B.wish), follow: mergeSet(L.follow, R.follow, hb && B.follow), notes: {}, kv: {} };
     var ln = L.notes || {}, rn = R.notes || {}, bn = B.notes || {};
-    Object.keys(Object.assign({}, ln, rn, bn)).forEach(function (id) { var v = pickVal(ln[id], rn[id], bn[id], hb); if (v) M.notes[id] = v; });
+    Object.keys(Object.assign({}, ln, rn, bn)).forEach(function (id) {
+      // both sides logged something different for the same snake (e.g. the first sign-in on a
+      // second device): keep every encounter from both instead of one silently replacing the other
+      var l = ln[id], r = rn[id], b = bn[id], ls = JSON.stringify(l), rs = JSON.stringify(r), bs = JSON.stringify(b);
+      var both = l && r && ls !== rs && (hb ? ls !== bs && rs !== bs : true);
+      var v = both ? joinNotes(l, r) : pickVal(l, r, b, hb); if (v) M.notes[id] = v;
+    });
     var lk = L.kv || {}, rk = R.kv || {}, bk = B.kv || {};
     KV.forEach(function (k) {
       var v;
@@ -17492,7 +17693,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       var id = c.dataset.id;
       ["done", "wish", "follow"].forEach(function (k) { if (!!on[k][id] !== c.classList.contains(k)) c.classList.toggle(k, !!on[k][id]); });
       var b = c.querySelector(".note-btn"), n = (M.notes || {})[id];
-      if (b) ["iso", "when", "where"].forEach(function (k) { var v = n && n[k]; if ((b.getAttribute("data-" + k) || null) !== (v || null)) { if (v) b.setAttribute("data-" + k, v); else b.removeAttribute("data-" + k); } });
+      if (b) ["iso", "when", "where", "more", "n"].forEach(function (k) { var v = n && n[k]; if ((b.getAttribute("data-" + k) || null) !== (v || null)) { if (v) b.setAttribute("data-" + k, v); else b.removeAttribute("data-" + k); } });
     });
     var reload = false;
     KV.forEach(function (k) {
@@ -17557,7 +17758,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       var same = remote && JSON.stringify(Object.assign({}, remote, { at: 0 })) === JSON.stringify(Object.assign({ at: 0 }, M));
       return (same ? Promise.resolve() : ref.set({ list: JSON.stringify(M), at: new Date().toISOString() })).then(function () { put(BASE, M); });
     }).then(function () {
-      if (first) shout("Synced with your SnakeList account."); else say(""); put("sl-last-sync", Date.now()); paintUser();
+      if (first) shout("Synced with your SnakeList account."); else say(""); put("sl-last-sync", Date.now()); paintUser(); if (window.SL_paintData) window.SL_paintData();
       if (reload && first && !window.SL_TOUCHED) { try { if (!sessionStorage.getItem("sl-sync-reloaded")) { sessionStorage.setItem("sl-sync-reloaded", "1"); location.reload(); } } catch (e) {} }
       first = false;
     }, function (e) {
@@ -17580,7 +17781,7 @@ window.SL_GEO_READY = new Promise(function (res) {
         return (same ? Promise.resolve() : putFile(listFile && listFile.id, FILE, body)).then(function () { put(BASE, M); return syncPhotos(files); });
       });
     }).then(function () {
-      if (first) shout("Synced with your Google account."); else say(""); put("sl-last-sync", Date.now()); paintUser();
+      if (first) shout("Synced with your Google account."); else say(""); put("sl-last-sync", Date.now()); paintUser(); if (window.SL_paintData) window.SL_paintData();
       // favourites / pins / quiz come back properly after one quiet reload, the first time only
       if (reload && first && !window.SL_TOUCHED) { try { if (!sessionStorage.getItem("sl-sync-reloaded")) { sessionStorage.setItem("sl-sync-reloaded", "1"); location.reload(); } } catch (e) {} }
       first = false;
@@ -17590,11 +17791,136 @@ window.SL_GEO_READY = new Promise(function (res) {
       else if (first) shout("Couldn't reach Google Drive just now - your list is safe here and will sync later.");
     }).then(function () { syncing = false; if (again) { again = false; schedule(); } });
   }
+  // ---- your data: a backup file you can keep, and restoring one (checked and previewed first) ----
+  var dataBox = document.createElement("section");
+  dataBox.className = "sl-data"; dataBox.id = "sl-data";
+  dataBox.innerHTML = '<h2>Your data</h2><p class="sl-data-status" id="sl-data-status"></p>' +
+    '<div class="sl-data-btns"><button type="button" id="bk-export">Download a backup</button><button type="button" id="bk-import">Restore from a backup</button>' +
+    '<input type="file" id="bk-file" accept=".json,application/json" hidden></div><div class="bk-preview" id="bk-preview" hidden></div>';
+  card.appendChild(dataBox);
+  var bkPrev = document.getElementById("bk-preview"), bkFile = document.getElementById("bk-file"), bkPending = null;
+  function ago(t) {
+    var s = Math.round((Date.now() - t) / 1000);
+    if (s < 60) return "just now"; if (s < 3600) return Math.round(s / 60) + " min ago"; if (s < 86400) return Math.round(s / 3600) + " h ago";
+    return new Date(t).toLocaleDateString();
+  }
+  function photoCount(P) { var n = 0; Object.keys(P).forEach(function (id) { try { n += (typeof P[id] === "string" ? JSON.parse(P[id]) : P[id]).length; } catch (e) {} }); return n; }
+  function summary(L, P) {
+    var dated = 0; Object.keys(L.notes || {}).forEach(function (id) { if (L.notes[id].iso || L.notes[id].where) dated++; });
+    var bits = [L.done.length + " seen", L.wish.length + " want to see", L.follow.length + " followed", dated + " with a date or place"];
+    var pc = photoCount(P || {}); if (pc) bits.push(pc + " photo" + (pc === 1 ? "" : "s"));
+    return bits.join(" · ");
+  }
+  function paintData() {
+    var st = document.getElementById("sl-data-status"); if (!st) return;
+    var last = get("sl-last-sync"), on = !!(token || fbUser);
+    st.textContent = "Your list: " + summary(readList(), localPhotos()) + ". Everything you log is saved in this browser straight away" +
+      (on ? (syncing ? " and is syncing to your account now." : last ? " and was last synced to your account " + ago(last) + "." : " and syncs to your account.")
+        : user ? "; it syncs again when you're connected." : ". Sign in to keep a copy in your account, or download a backup.");
+  }
+  window.SL_paintData = paintData;
+  function backupObj() {
+    var L = readList(), ph = localPhotos(), P = {};
+    Object.keys(ph).forEach(function (id) { try { var a = JSON.parse(ph[id]); if (Array.isArray(a) && a.length) P[id] = a; } catch (e) {} });
+    var v = document.querySelector(".sl-ver");
+    return { app: "SnakeList", kind: "backup", format: 1, exported: new Date().toISOString(), appVersion: v ? v.textContent.trim() : "", list: L, photos: P };
+  }
+  document.getElementById("bk-export").addEventListener("click", function () {
+    var o = backupObj(), body = JSON.stringify(o), d = new Date();
+    var name = "snakelist-backup-" + d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0") + ".json";
+    var url = URL.createObjectURL(new Blob([body], { type: "application/json" })), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    say("Backup downloaded: " + name + " (" + summary(o.list, o.photos) + ").");
+  });
+  document.getElementById("bk-import").addEventListener("click", function () { bkFile.value = ""; bkFile.click(); });
+  // only what SnakeList itself writes gets in: known snakes, real dates, image photos
+  function checkBackup(o) {
+    if (!o || typeof o !== "object" || o.app !== "SnakeList" || !o.list || typeof o.list !== "object") throw new Error("This file isn't a SnakeList backup.");
+    var ids = {}, bad = 0;
+    grid.querySelectorAll(".card").forEach(function (c) { ids[c.dataset.id] = 1; });
+    function set(a) { if (!Array.isArray(a)) return []; var seen = {}; return a.filter(function (x) { if (typeof x === "string" && ids[x] && !seen[x]) { seen[x] = 1; return true; } bad++; return false; }); }
+    var L = { done: set(o.list.done), wish: set(o.list.wish), follow: set(o.list.follow), notes: {}, kv: {} };
+    var n = o.list.notes && typeof o.list.notes === "object" ? o.list.notes : {};
+    Object.keys(n).forEach(function (id) {
+      var v = n[id], c = {};
+      if (!ids[id] || !v || typeof v !== "object") { bad++; return; }
+      ["iso", "when", "where", "more", "n"].forEach(function (k) { if (typeof v[k] === "string" && v[k].length < 20000) c[k] = v[k]; });
+      if (c.iso && !/^\d{4}(-\d{2}(-\d{2})?)?$/.test(c.iso)) { delete c.iso; delete c.when; bad++; }
+      if (c.more) { try { if (!Array.isArray(JSON.parse(c.more))) throw 0; } catch (e) { delete c.more; delete c.n; bad++; } }
+      if (c.iso || c.where) L.notes[id] = c;
+    });
+    var kv = o.list.kv && typeof o.list.kv === "object" ? o.list.kv : {};
+    KV.forEach(function (k) { if (typeof kv[k] === "string" && kv[k].length < 200000) L.kv[k] = kv[k]; });
+    var P = {}, ph = o.photos && typeof o.photos === "object" ? o.photos : {};
+    Object.keys(ph).forEach(function (id) {
+      var a = ph[id]; if (!ids[id] || !Array.isArray(a)) { bad++; return; }
+      a = a.filter(function (s) { return typeof s === "string" && /^data:image\/(jpeg|png|webp|gif);base64,/.test(s); }).slice(0, 5);
+      if (a.length) P[id] = a;
+    });
+    if (!L.done.length && !L.wish.length && !L.follow.length && !Object.keys(L.notes).length && !Object.keys(P).length) throw new Error("This backup has nothing in it to restore.");
+    return { L: L, P: P, bad: bad, when: typeof o.exported === "string" ? o.exported : "" };
+  }
+  bkFile.addEventListener("change", function () {
+    var f = bkFile.files && bkFile.files[0]; if (!f) return;
+    bkPrev.hidden = false; bkPending = null;
+    if (f.size > 60 * 1024 * 1024) { bkPrev.innerHTML = '<p class="bk-err">That file is too big to be a SnakeList backup.</p>'; return; }
+    bkPrev.innerHTML = "<p>Reading " + esc(f.name) + "…</p>";
+    var r = new FileReader();
+    r.onerror = function () { bkPrev.innerHTML = '<p class="bk-err">Couldn’t read that file.</p>'; };
+    r.onload = function () {
+      var B;
+      try { B = checkBackup(JSON.parse(r.result)); }
+      catch (e) { bkPrev.innerHTML = '<p class="bk-err">' + esc(e instanceof SyntaxError ? "That file isn't a SnakeList backup (it isn't valid JSON)." : e.message) + " Nothing was changed.</p>"; return; }
+      bkPending = B;
+      var cur = readList(), newSeen = B.L.done.filter(function (id) { return cur.done.indexOf(id) < 0; }).length;
+      var when = B.when && !isNaN(Date.parse(B.when)) ? new Date(B.when).toLocaleString() : "an unknown date";
+      bkPrev.innerHTML = "<p><b>Backup from " + esc(when) + "</b><br>" + esc(summary(B.L, B.P)) + "</p>" +
+        "<p>Your list now: " + esc(summary(cur, localPhotos())) + ".<br>" + newSeen + " of the backup's seen snakes aren't on this list yet." +
+        (B.bad ? "<br>" + B.bad + " item" + (B.bad === 1 ? "" : "s") + " in the file weren't recognised and will be skipped." : "") + "</p>" +
+        '<div class="sl-data-btns"><button type="button" class="primary" id="bk-merge">Add to my list</button><button type="button" id="bk-replace">Replace my list</button><button type="button" id="bk-cancel">Cancel</button></div>' +
+        '<p class="bk-small">"Add to my list" keeps everything you have and adds what the backup has (both sets of encounters are kept). "Replace my list" makes your list exactly the backup’s - you can undo it right after.</p>';
+    };
+    r.readAsText(f);
+  });
+  bkPrev.addEventListener("click", function (e) {
+    if (e.target.closest("#bk-cancel")) { bkPrev.hidden = true; bkPending = null; return; }
+    var mode = e.target.closest("#bk-merge") ? "merge" : e.target.closest("#bk-replace") ? "replace" : null;
+    if (!mode || !bkPending) return;
+    var B = bkPending; bkPending = null;
+    bkPrev.querySelectorAll("button").forEach(function (b) { b.disabled = true; });
+    var before = readList(), beforePh = {}, touched = Object.keys(B.P);
+    touched.forEach(function (id) { beforePh[id] = localStorage.getItem(PH + id); });
+    var M = mode === "merge" ? merge(before, B.L, null) : B.L;
+    var reload = applyList(M), full = false;
+    touched.forEach(function (id) {
+      var mine = []; try { mine = JSON.parse(localStorage.getItem(PH + id) || "[]") || []; } catch (er) {}
+      var want = mode === "merge" ? mine.concat(B.P[id].filter(function (s) { return mine.indexOf(s) < 0; })).slice(0, 5) : B.P[id];
+      try { localStorage.setItem(PH + id, JSON.stringify(want)); } catch (er) { full = true; }
+      if (window.SL_showPhotosFor) window.SL_showPhotosFor(id);
+    });
+    schedule();
+    bkPrev.hidden = true; paintData();
+    var done = (mode === "merge" ? "Backup added to your list" : "Your list was replaced by the backup") + (full ? " - some photos didn't fit in this browser's storage" : "") + ".";
+    if (reload) { // favourites / pins / quiz score only show after a reload
+      try { sessionStorage.setItem("sl-bk-done", done); } catch (er) {}
+      setTimeout(function () { location.reload(); }, 700); return;
+    }
+    say(done); if (!window.SL_offerUndo) shout(done);
+    if (window.SL_offerUndo) window.SL_offerUndo(done, function () {
+      applyList(before);
+      touched.forEach(function (id) { try { if (beforePh[id] == null) localStorage.removeItem(PH + id); else localStorage.setItem(PH + id, beforePh[id]); } catch (er) {} if (window.SL_showPhotosFor) window.SL_showPhotosFor(id); });
+      schedule(); paintData(); shout("Restore undone - your list is back as it was.");
+    });
+  });
+  (function () { var t = null; try { t = sessionStorage.getItem("sl-bk-done"); sessionStorage.removeItem("sl-bk-done"); } catch (e) {} if (t) setTimeout(function () { shout(t); }, 1200); })();
+  new MutationObserver(function () { if (!document.getElementById("signin-page").hidden) paintData(); })
+    .observe(document.getElementById("signin-page"), { attributes: true, attributeFilter: ["hidden"] });
+  paintData();
   // every change is synced a few seconds later; other devices' changes arrive while you use it
   var pushT = null;
   function schedule() { if (!token && !fbUser) return; clearTimeout(pushT); pushT = setTimeout(syncNow, 3000); }
   new MutationObserver(function () { if (!applying) schedule(); })
-    .observe(grid, { subtree: true, attributes: true, attributeFilter: ["class", "data-iso", "data-when", "data-where"] });
+    .observe(grid, { subtree: true, attributes: true, attributeFilter: ["class", "data-iso", "data-when", "data-where", "data-more"] });
   (function () { // the favourites, pins, quiz score and photos live in this browser's storage
     var S = window.Storage && Storage.prototype; if (!S) return;
     var set = S.setItem, rem = S.removeItem;
