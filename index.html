@@ -634,6 +634,29 @@
   .photo-lightbox { position: fixed; inset: 0; z-index: 80; display: none; align-items: center; justify-content: center;
     padding: 16px; background: rgba(4, 14, 8, 0.86); cursor: zoom-out; }
   .photo-lightbox.open { display: flex; }
+  .photo-lightbox .pl-compare { display: block; margin: 8px 0 4px; font: 600 13px 'Inter', sans-serif; padding: 7px 14px; border-radius: 99px; border: 1px solid #9be07c; background: transparent; color: #fff; cursor: pointer; }
+  .cmp-sheet { position: fixed; inset: 0; z-index: 85; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(6,20,12,0.72); }
+  .cmp-sheet.open { display: flex; }
+  .cmp-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: min(980px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: 18px 20px; color: var(--text); }
+  .cmp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cmp-head h2 { font-family: 'Fraunces', serif; font-size: 20px; margin: 0; }
+  .cmp-x { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); background: transparent; color: var(--text); font-size: 22px; cursor: pointer; }
+  .cmp-cols { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 1fr); gap: 12px; overflow-x: auto; }
+  .cmp-col { border: 1px solid var(--border); border-radius: 12px; padding: 10px; min-width: 0; }
+  .cmp-col.main { border-color: var(--gold); }
+  .cmp-col.main::before { content: "This snake"; display: block; font: 600 11px 'Inter', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin: 6px 0 12px; }
+  .cmp-pick { width: 100%; margin-bottom: 8px; font: 13px 'Inter', sans-serif; padding: 6px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+  .cmp-ph { aspect-ratio: 3 / 2; border-radius: 8px; background-color: var(--surface-hover); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-muted); }
+  .cmp-col h3 { font-family: 'Fraunces', serif; font-size: 16px; margin: 10px 0 0; }
+  .cmp-sci { font-style: italic; font-size: 12.5px; color: var(--text-muted); margin: 0 0 8px; }
+  .cmp-col dl { margin: 0; font-size: 13px; }
+  .cmp-col dt { font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-top: 8px; }
+  .cmp-col dd { margin: 2px 0 0; }
+  .cmp-ven { color: #c0392b; font-weight: 600; }
+  .cmp-same { font-size: 12px; color: var(--text-muted); }
+  .cmp-diff { font-size: 11px; font-weight: 700; color: #c0392b; }
+  .cmp-link { display: inline-block; margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--gold); }
+  .cmp-note { font-size: 12.5px; color: var(--text-muted); margin: 14px 0 0; }
   .photo-lightbox .pl-close { position: absolute; top: max(12px, env(safe-area-inset-top)); right: 12px; z-index: 3; width: 44px; height: 44px; border-radius: 50%;
     border: 1px solid rgba(255,255,255,0.35); background: rgba(10,20,14,0.82); color: #fff; font: 400 28px/1 'Inter', sans-serif; cursor: pointer; }
   .photo-lightbox .pl-close:hover { background: rgba(10,20,14,0.95); }
@@ -15670,6 +15693,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     cap.innerHTML = "";
     var b = document.createElement("b"); b.textContent = name || ""; cap.appendChild(b);
     var i = document.createElement("i"); i.textContent = sci && sci !== name ? sci : ""; cap.appendChild(i);
+    if (window.SL_compare) { var cb0 = document.createElement("button"); cb0.type = "button"; cb0.className = "pl-compare"; cb0.textContent = "Compare with similar snakes";
+      cb0.addEventListener("click", function (ev) { ev.stopPropagation(); close(); window.SL_compare(id); }); cap.appendChild(cb0); }
     var sm = document.createElement("small"); sm.textContent = xp ? "Photo: " + it[2] + (/wikipedia|inaturalist/i.test(it[2]) ? "" : " · via iNaturalist") : "Photo © " + it[2] + " · via iNaturalist"; cap.appendChild(sm);
     box.setAttribute("aria-label", "Photo of " + (name || sci || "this snake"));
     plOpener = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
@@ -19746,6 +19771,93 @@ window.SL_welcome = function (u, back) {
   paintBtn();
   // picked on an earlier visit: SnakeList opens in that language again
   if (cur !== "en" && !(window.claude && window.claude.use)) { keep(); setCookie("/en/" + cur); loadGT().then(function () { apply(cur); }, function () {}); }
+})();
+</script>
+<script>
+// ---- compare similar snakes: side by side, using only what SnakeList itself knows for sure
+// (family, type, venom, where it lives, how often it's recorded, extinct or not) - no guessed
+// field marks. "Similar" = same genus first, then same family, preferring snakes that share a country.
+(function () {
+  var grid = document.getElementById("grid"); if (!grid) return;
+  var RAR = {}; try { RAR = JSON.parse(document.getElementById("rarity-data").textContent); } catch (e) {}
+  var byId = {}, cards = [].slice.call(grid.querySelectorAll(".card"));
+  cards.forEach(function (c) { byId[c.dataset.id] = c; });
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (ch) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]; }); }
+  function info(id) {
+    var c = byId[id]; if (!c) return null;
+    var d = c.dataset, sci = (c.querySelector(".card-sci") || {}).textContent || "";
+    var X = window.SL_FACTS && window.SL_FACTS.EXTINCT || {};
+    return { id: id, name: d.name || sci, sci: sci.trim(), genus: sci.trim().split(" ")[0], family: d.family || "", type: d.type || "",
+      venom: d.venomous === "1", countries: (d.countries || "").split("|").filter(Boolean), continents: (d.continents || "").split("|").filter(Boolean),
+      spots: RAR[id] || 0, extinct: X[id] || "", invasive: d.invasive || "" };
+  }
+  function similar(id) {
+    var a = info(id); if (!a) return [];
+    var cs = {}; a.countries.forEach(function (k) { cs[k] = 1; });
+    var out = [];
+    cards.forEach(function (c) {
+      if (c.dataset.id === id) return;
+      var b = info(c.dataset.id); if (!b) return;
+      if (b.extinct && !a.extinct) return; // compare living snakes with living snakes
+      var s = 0;
+      if (b.genus === a.genus) s += 6; else if (b.family === a.family) s += 2; else return;
+      var sh = 0; b.countries.forEach(function (k) { if (cs[k]) sh++; });
+      s += Math.min(sh, 6) * 0.6 + (b.type === a.type ? 0.5 : 0) + (b.venom === a.venom ? 0.3 : 0) + Math.min(b.spots, 200) / 1000;
+      out.push([s, b.id]);
+    });
+    out.sort(function (x, y) { return y[0] - x[0]; });
+    return out.slice(0, 24).map(function (x) { return x[1]; });
+  }
+  function thumb(id) {
+    var D = window.SL_PHOTOS, it = D && D.items[id], xp = !it && window.SL_EXTRA_PHOTOS && window.SL_EXTRA_PHOTOS[id];
+    if (xp) return 'background-image:url("' + String(xp.url).replace(/"/g, "%22") + '");background-size:cover;background-position:center';
+    if (!it) return "";
+    var C = D.cols, R = D.rows;
+    return "background-image:url(" + D.path.replace("%d", it[0]) + ");background-size:" + C * 100 + "% " + R * 100 + "%;background-position:" +
+      ((it[1] % C) / (C - 1) * 100) + "% " + (Math.floor(it[1] / C) / (R - 1) * 100) + "%";
+  }
+  function pageUrl(id) { return "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html"); }
+  var sheet = document.createElement("div");
+  sheet.className = "cmp-sheet"; sheet.setAttribute("role", "dialog"); sheet.setAttribute("aria-modal", "true"); sheet.setAttribute("aria-label", "Compare snakes");
+  document.body.appendChild(sheet);
+  var cur = [], pool = [], opener = null;
+  function recorded(n) { return n ? (n >= 75 ? "Often (" : n <= 2 ? "Rarely (" : "Sometimes (") + n.toLocaleString() + (n === 1 ? " place)" : " places)") : "Not recorded yet"; }
+  function render() {
+    var A = cur.map(info), first = A[0], fc = {}; first.countries.forEach(function (k) { fc[k] = 1; });
+    var col = function (b, i) {
+      var shared = b.countries.filter(function (k) { return fc[k]; });
+      var where = !b.countries.length ? "Not recorded" : b.countries.length <= 4 ? b.countries.join(", ") : b.countries.slice(0, 3).join(", ") + " and " + (b.countries.length - 3) + " more";
+      var sel = i === 0 ? "" : '<select class="cmp-pick" data-i="' + i + '" aria-label="Compare with another snake">' + pool.map(function (id) {
+        var x = info(id); return '<option value="' + id + '"' + (id === b.id ? " selected" : "") + ">" + esc(x.name) + "</option>"; }).join("") + "</select>";
+      return '<div class="cmp-col' + (i === 0 ? " main" : "") + '">' + sel +
+        '<div class="cmp-ph" style=\'' + thumb(b.id) + '\'>' + (thumb(b.id) ? "" : "<span>No photo yet</span>") + "</div>" +
+        '<h3>' + esc(b.name) + '</h3><p class="cmp-sci">' + esc(b.sci) + "</p>" +
+        "<dl>" +
+        "<dt>Family</dt><dd>" + esc(b.family || "-") + (i && b.genus === first.genus ? ' <span class="cmp-same">same genus</span>' : i && b.family === first.family ? ' <span class="cmp-same">same family</span>' : "") + "</dd>" +
+        "<dt>Kind</dt><dd>" + esc(b.type || "-") + "</dd>" +
+        "<dt>Venomous</dt><dd class=\"" + (b.venom ? "cmp-ven" : "") + "\">" + (b.venom ? "Yes - dangerous" : "No") + (i && b.venom !== first.venom ? ' <span class="cmp-diff">different!</span>' : "") + "</dd>" +
+        "<dt>Lives in</dt><dd>" + esc(where) + (i ? '<br><span class="cmp-same">' + (shared.length ? "Shares " + shared.length + " countr" + (shared.length === 1 ? "y" : "ies") + (shared.length <= 3 ? ": " + esc(shared.join(", ")) : "") : "No countries in common") + "</span>" : "") + "</dd>" +
+        "<dt>iNaturalist records</dt><dd>" + recorded(b.spots) + "</dd>" +
+        (b.extinct ? "<dt>Status</dt><dd>" + esc(b.extinct) + "</dd>" : "") +
+        '</dl><a class="cmp-link" href="' + pageUrl(b.id) + '">Open its page</a></div>';
+    };
+    sheet.innerHTML = '<div class="cmp-card"><div class="cmp-head"><h2>Compare snakes</h2><button type="button" class="cmp-x" aria-label="Close">&times;</button></div>' +
+      (A.length < 2 ? "<p>SnakeList has no close relatives of this snake to compare it with.</p>" :
+        '<div class="cmp-cols">' + A.map(col).join("") + "</div>") +
+      '<p class="cmp-note">Only facts SnakeList has for every snake. To tell similar snakes apart in the wild, compare the photos and check a local field guide or iNaturalist - and never handle a snake you are not sure about.</p></div>';
+  }
+  function open(id) {
+    if (!byId[id]) return;
+    pool = similar(id); cur = [id].concat(pool.slice(0, window.innerWidth < 640 ? 1 : 2));
+    opener = document.activeElement; render(); sheet.classList.add("open");
+    var x = sheet.querySelector(".cmp-x"); if (x) x.focus({ preventScroll: true });
+  }
+  function close() { sheet.classList.remove("open"); if (opener && opener.focus) try { opener.focus({ preventScroll: true }); } catch (e) {} }
+  sheet.addEventListener("click", function (e) { if (e.target === sheet || e.target.closest(".cmp-x")) close(); });
+  sheet.addEventListener("change", function (e) { var s = e.target.closest(".cmp-pick"); if (!s) return; cur[+s.dataset.i] = s.value; render(); var n = sheet.querySelector('.cmp-pick[data-i="' + s.dataset.i + '"]'); if (n) n.focus(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && sheet.classList.contains("open")) close(); });
+  window.SL_compare = open;
+  window.SL_similar = similar;
 })();
 </script>
 
