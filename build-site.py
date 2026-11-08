@@ -111,6 +111,7 @@ The app itself is one large interactive page. Every species also has its own sma
 
 ## About
 - [About SnakeList]({SITE}about-snakelist.html) - what it is, why and when it was made, and who made it
+- [Install SnakeList]({SITE}install.html) - how to install SnakeList on Android, iPhone, iPad, Windows and Mac
 - [About the creator]({SITE}about.html)
 - [Privacy]({SITE}privacy.html) - lists are kept on the visitor's own device or their own Google Drive; there is no user database
 - Photos come from iNaturalist photographers under Creative Commons licences, credited on each species page
@@ -133,7 +134,7 @@ def lastmod(u):
     old = DATES.get(u)
     if not old or old[0] != h: DATES[u] = [h, TODAY]
     return DATES[u][1]
-ALL_URLS = [SITE, SITE + "about-snakelist.html", SITE + "about.html", SITE + "privacy.html", SITE + "terms.html"] + SPECIES_URLS
+ALL_URLS = [SITE, SITE + "install.html", SITE + "about-snakelist.html", SITE + "about.html", SITE + "privacy.html", SITE + "terms.html"] + SPECIES_URLS
 open("sitemap.xml", "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     "".join("  <url><loc>%s</loc><lastmod>%s</lastmod></url>\n" % (u, lastmod(u)) for u in ALL_URLS) + "</urlset>\n")
 json.dump(DATES, open(DATES_FILE, "w"), separators=(",", ":"))
@@ -160,15 +161,19 @@ for f in ("app/snakelist.webmanifest", "app/manifest.webmanifest"):
 # the offline helper: pages always from the network first (so updates show at once), with the
 # last copy kept for when there's no connection; photos, map data and icons are kept after
 # their first load and refreshed in the background
-open("sw.js", "w").write("""const CACHE = 'snakelist-v6';
+open("sw.js", "w").write("""const CACHE = 'snakelist-v7';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => c.add('./'))); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== location.origin) return;
   if (req.mode === 'navigate') {
-    e.respondWith(fetch(req, { cache: 'no-cache' }).then((r) => { const copy = r.clone(); caches.open(CACHE).then((c) => c.put('./', copy)); return r; })
-      .catch(() => caches.match('./')));
+    // each page keeps its own last copy (the app itself under './'), so being offline on a species
+    // page or the install page can never put that page in place of the app
+    const home = url.pathname === '/' || url.pathname === '/index.html';
+    const key = home ? './' : url.origin + url.pathname;
+    e.respondWith(fetch(req, { cache: 'no-cache' }).then((r) => { if (r.ok) { const copy = r.clone(); caches.open(CACHE).then((c) => c.put(key, copy)); } return r; })
+      .catch(() => caches.match(key).then((hit) => hit || caches.match('./'))));
     return;
   }
   if (/\\/(app|brand)\\//.test(url.pathname)) {

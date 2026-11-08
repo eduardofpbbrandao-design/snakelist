@@ -123,7 +123,7 @@ def world_map(out):
     12x zoom) and written as relative moves in tenths of a unit. Returns the path codes and, per
     country, the box of its largest piece (for fitting a species' range)."""
     src = open("data/geo.js", encoding="utf-8").read().split("window.SL_GEO=", 1)[1]
-    js = re.sub(r'([{,])(prebuilt|wp|cp|us):', r'\1"\2":', src.rstrip().rstrip(';'), count=4)
+    js = re.sub(r'([{,])(prebuilt|wp|cp|us|isle):', r'\1"\2":', src.rstrip().rstrip(';'), count=5)
     G = json.loads(js); P = G["prebuilt"]; SC = P["scale"]
     TOL = 0.1
 
@@ -671,7 +671,7 @@ PAGE = """<!doctype html>
 <link rel="stylesheet" href="sp.css"><script>document.documentElement.className+=" js"</script>
 <script type="application/ld+json">{ld}</script>
 </head><body>
-<header class="sp-top"><a class="sp-logo" href="../">SnakeList</a><nav><a href="./">All species</a><a href="../">Open the app</a></nav></header>
+<header class="sp-top"><a class="sp-logo" href="../">SnakeList</a><nav><a href="./">All species</a><a href="../install.html">Install app</a><a href="../">Open the app</a></nav></header>
 <main class="sp-main" data-id="{id}" data-sci="{sci_attr}">
 <nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../">SnakeList</a> &rsaquo; <a href="./">All species</a> &rsaquo; <span>{h1}</span></nav>
 <article>
@@ -705,7 +705,7 @@ HUB = """<!doctype html>
 <link rel="icon" href="../../favicon.ico" sizes="any"><link rel="stylesheet" href="../sp.css">
 <script type="application/ld+json">{ld}</script>
 </head><body>
-<header class="sp-top"><a class="sp-logo" href="../../">SnakeList</a><nav><a href="../">All species</a><a href="../../">Open the app</a></nav></header>
+<header class="sp-top"><a class="sp-logo" href="../../">SnakeList</a><nav><a href="../">All species</a><a href="../../install.html">Install app</a><a href="../../">Open the app</a></nav></header>
 <main class="sp-main"><nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../../">SnakeList</a> &rsaquo; <a href="../">All species</a> &rsaquo; <span>{h1}</span></nav>
 <h1>{h1}</h1><p class="sp-lead">{lead}</p><p class="sp-cta"><a class="sp-btn" href="{app}">{app_label}</a></p>
 <ul class="sp-az">{items}</ul></main>
@@ -720,7 +720,7 @@ INDEX = """<!doctype html>
 <link rel="canonical" href="{url}"><meta name="author" content="{author}"><meta name="robots" content="index,follow">
 <link rel="icon" href="../favicon.ico" sizes="any"><link rel="stylesheet" href="sp.css">
 </head><body>
-<header class="sp-top"><a class="sp-logo" href="../">SnakeList</a><nav><a href="../">Open the app</a></nav></header>
+<header class="sp-top"><a class="sp-logo" href="../">SnakeList</a><nav><a href="../install.html">Install app</a><a href="../">Open the app</a></nav></header>
 <main class="sp-main"><h1>All {n} snake species</h1><p class="sp-muted">By family, A-Z. Tap one for its photo, map and facts.</p>{body}</main>
 <footer class="sp-foot"><a href="../about-snakelist.html">SnakeList</a> &middot; made by <b>{author}</b></footer>
 </body></html>
@@ -971,7 +971,7 @@ COUNTRY = """<!doctype html>
 <link rel="icon" href="../../favicon.ico" sizes="any"><link rel="stylesheet" href="../sp.css"><link rel="stylesheet" href="../country.css">
 <script type="application/ld+json">{ld}</script>
 </head><body class="cy-page">
-<header class="sp-top cy-top"><a class="sp-logo" href="../../">SnakeList</a><nav aria-label="Site"><a href="../">All species</a><a href="../#by-country">Countries</a><a href="../../">Open the app</a></nav></header>
+<header class="sp-top cy-top"><a class="sp-logo" href="../../">SnakeList</a><nav aria-label="Site"><a href="../">All species</a><a href="../#by-country">Countries</a><a href="../../install.html">Install app</a><a href="../../">Open the app</a></nav></header>
 <main class="cy-main" id="main">
 <nav class="cy-crumbs" aria-label="Breadcrumb"><ol><li><a href="../../">SnakeList</a></li><li><a href="../#by-country">Countries</a></li><li aria-current="page">{name}</li></ol>
 <form class="cy-jump" id="cy-jump" role="search" action="../#by-country"><label for="cy-jq" class="cy-sr">Go to another country</label><input id="cy-jq" list="cy-clist" placeholder="Another country..." autocomplete="off"><datalist id="cy-clist"></datalist><button type="submit">Go</button></form></nav>
@@ -986,7 +986,7 @@ COUNTRY = """<!doctype html>
 {intro}{overview}
 </main>
 <footer class="cy-foot"><p><a class="cy-flogo" href="../../about-snakelist.html">SnakeList</a> &middot; made by <a href="../../about.html"><b>{author}</b></a></p>
-<p class="cy-flinks"><a href="../../">Open the app</a><a href="../">All species</a><a href="../#by-country">All countries</a><a href="../../privacy.html">Privacy</a><a href="../../terms.html">Terms</a></p>
+<p class="cy-flinks"><a href="../../">Open the app</a><a href="../../install.html">Install app</a><a href="../">All species</a><a href="../#by-country">All countries</a><a href="../../privacy.html">Privacy</a><a href="../../terms.html">Terms</a></p>
 <p class="cy-fnote">Photos: iNaturalist observers (CC licences) - credited on each species page.</p></footer>
 <script src="../country.js" defer></script>
 </body></html>

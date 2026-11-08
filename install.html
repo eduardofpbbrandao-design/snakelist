@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Install SnakeList - the snake app on your phone, tablet or computer</title>
+<meta name="description" content="Install SnakeList on Android, iPhone, iPad, Windows or Mac in a few taps - free, no app store needed. Step-by-step guides for every device, plus answers to common questions.">
+<link rel="canonical" href="https://snakelist.com/install.html">
+<meta name="author" content="Eduardo Brandao">
+<meta name="theme-color" content="#1F5A3A">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SnakeList by Eduardo Brandao">
+<meta property="og:title" content="Install SnakeList">
+<meta property="og:description" content="Explore the world of snakes, right from your home screen.">
+<meta property="og:url" content="https://snakelist.com/install.html">
+<meta property="og:image" content="https://snakelist.com/snakelist-logo.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="96x96" href="app/favicon-96-s.png">
+<link rel="apple-touch-icon" href="app/apple-touch-icon-s.png">
+<!-- the same app as the home page: same manifest and offline helper, so the browser can offer
+     to install SnakeList from this page too (it opens the full app at snakelist.com) -->
+<link rel="manifest" href="app/snakelist.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SnakeList">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Install SnakeList","url":"https://snakelist.com/install.html","description":"How to install SnakeList on Android, iPhone, iPad, Windows and Mac.","isPartOf":{"@type":"WebSite","name":"SnakeList","url":"https://snakelist.com/"},"about":{"@type":"WebApplication","name":"SnakeList","url":"https://snakelist.com/","applicationCategory":"EducationalApplication","operatingSystem":"Android, iOS, iPadOS, Windows, macOS","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Eduardo Brandao"}},"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"SnakeList","item":"https://snakelist.com/"},{"@type":"ListItem","position":2,"name":"Install SnakeList","item":"https://snakelist.com/install.html"}]}}</script>
+<script>
+  // the browser's install offer, kept for the Install button (only browsers that have one fire this)
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.SL_INSTALL_EVT = e; if (window.SL_INS_READY) window.SL_INS_READY(); });
+  if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(function () {}); });
+  // the theme the app uses (light/dark), before the page draws
+  try { var t = localStorage.getItem('sl-theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+<style>
+:root {
+  --bg: #f1f7ee; --bg2: #e6f1e1; --card: #ffffff; --text: #17301f; --muted: #4f6b57; --line: #d3e6cc;
+  --accent: #58b351; --accent-ink: #2f7a37; --deep: #1f5a3a; --deep2: #256846; --chip: #eef7ea; --shadow: 0 10px 30px rgba(23,48,31,0.08);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12281a; --bg2: #173322; --card: #1b3a27; --text: #e7f3e4; --muted: #a8c8ae; --line: #2c5338; --accent: #58b351; --accent-ink: #9be07c; --chip: #21452f; --shadow: 0 10px 30px rgba(0,0,0,0.3);
+} }
+:root[data-theme="dark"] { --bg: #12281a; --bg2: #173322; --card: #1b3a27; --text: #e7f3e4; --muted: #a8c8ae; --line: #2c5338; --accent: #58b351; --accent-ink: #9be07c; --chip: #21452f; --shadow: 0 10px 30px rgba(0,0,0,0.3); }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow-x: hidden; }
+a { color: var(--accent-ink); }
+img { max-width: 100%; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+.serif { font-family: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 8px; }
+
+/* top bar */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 0; flex-wrap: wrap; }
+.top .logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--accent); font: 700 22px/1 "Fraunces", Georgia, serif; }
+.top .logo img { width: 34px; height: 34px; border-radius: 9px; }
+.top nav { display: flex; gap: 6px 16px; flex-wrap: wrap; font-size: 14.5px; }
+.top nav a { text-decoration: none; color: var(--muted); padding: 6px 2px; }
+.top nav a:hover, .top nav a[aria-current] { color: var(--accent-ink); }
+.top nav a[aria-current] { font-weight: 600; }
+
+/* hero */
+.hero { position: relative; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; padding: 30px 0 48px; }
+.hero h1 { font-size: clamp(36px, 6vw, 60px); line-height: 1.05; margin: 0 0 14px; letter-spacing: -0.01em; }
+.hero .tag { font-size: clamp(19px, 2.4vw, 23px); line-height: 1.4; margin: 0 0 14px; color: var(--accent-ink); font-weight: 600; }
+.hero .lede { margin: 0 0 26px; color: var(--muted); font-size: 17px; max-width: 560px; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 26px; border-radius: 14px; border: 1px solid transparent;
+  font: 600 17px/1 Inter, system-ui, sans-serif; text-decoration: none; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease, background .15s ease; }
+.btn svg { width: 20px; height: 20px; flex: none; }
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 8px 22px rgba(88,179,81,0.35); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 26px rgba(88,179,81,0.42); }
+.btn-ghost { background: transparent; color: var(--text); border-color: var(--line); }
+.btn-ghost:hover { border-color: var(--accent); }
+.hero-note { margin: 14px 0 0; font-size: 14px; color: var(--muted); min-height: 1.4em; }
+.hero-art { position: relative; display: grid; place-items: center; min-height: 340px; }
+.hero-art .glow { position: absolute; inset: 8% 6%; border-radius: 40% 60% 55% 45%; background: radial-gradient(closest-side, rgba(88,179,81,0.28), transparent); filter: blur(4px); }
+.hero-card { position: relative; width: min(330px, 100%); padding: 26px 24px 22px; border-radius: 28px; text-align: center; color: #eef8ea;
+  background: linear-gradient(160deg, var(--deep2), var(--deep)); box-shadow: 0 24px 60px rgba(23,48,31,0.35); border: 1px solid rgba(155,224,124,0.25); }
+.hero-card .app-icon { width: 96px; height: 96px; border-radius: 24px; display: block; margin: 0 auto 14px; box-shadow: 0 10px 24px rgba(0,0,0,0.3); }
+.hero-card .wm { width: 210px; max-width: 80%; height: auto; display: block; margin: 0 auto 6px; }
+.hero-card p { margin: 0; font-size: 14px; color: rgba(238,248,234,0.82); }
+.hero-card .facts { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.hero-card .facts span { font-size: 12.5px; padding: 5px 10px; border-radius: 999px; background: rgba(0,0,0,0.18); border: 1px solid rgba(155,224,124,0.25); }
+
+/* sections */
+section { padding: 40px 0; }
+.sec-h { text-align: center; max-width: 680px; margin: 0 auto 26px; }
+.sec-h h2 { font-size: clamp(26px, 3.6vw, 36px); line-height: 1.15; margin: 0 0 8px; }
+.sec-h p { margin: 0; color: var(--muted); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); }
+
+/* status */
+.status { display: flex; gap: 16px; align-items: center; padding: 18px 20px; margin: 0 auto; max-width: 860px; }
+.status .dot { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--chip); color: var(--accent-ink); }
+.status .dot svg { width: 24px; height: 24px; }
+.status h3 { margin: 0 0 2px; font-size: 18px; }
+.status p { margin: 0; color: var(--muted); font-size: 15px; }
+.status .grow { flex: 1; min-width: 0; }
+.status.ok .dot { background: var(--accent); color: #fff; }
+
+/* device tabs */
+.tabs { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 0 auto 22px; padding: 6px; max-width: max-content; border-radius: 18px; background: var(--bg2); border: 1px solid var(--line); }
+.tab { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 13px; border: 1px solid transparent; background: transparent; color: var(--muted);
+  font: 600 15px/1 Inter, system-ui, sans-serif; cursor: pointer; transition: background .2s, color .2s, box-shadow .2s; }
+.tab svg { width: 20px; height: 20px; flex: none; }
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { background: var(--card); color: var(--accent-ink); border-color: var(--line); box-shadow: 0 4px 14px rgba(23,48,31,0.10); }
+.tab .you { font: 600 10.5px/1 Inter, system-ui, sans-serif; padding: 3px 6px; border-radius: 999px; background: var(--accent); color: #fff; }
+
+.guide { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 0; overflow: hidden; }
+.panel[hidden] { display: none; }
+.panel { animation: fadeIn .28s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.steps-col { padding: 28px 30px; }
+.steps-col h3 { margin: 0 0 4px; font-size: 22px; }
+.steps-col .sub { margin: 0 0 18px; color: var(--muted); font-size: 15px; }
+ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+ol.steps li { position: relative; padding: 0 0 18px 50px; counter-increment: s; }
+ol.steps li::before { content: counter(s); position: absolute; left: 0; top: -2px; width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center;
+  background: var(--chip); color: var(--accent-ink); font-weight: 700; font-size: 15px; border: 1px solid var(--line); }
+ol.steps li:not(:last-child)::after { content: ""; position: absolute; left: 16.5px; top: 36px; bottom: 4px; width: 1px; background: var(--line); }
+ol.steps b { color: var(--text); }
+.k { display: inline-flex; align-items: center; gap: 5px; padding: 1px 8px; border-radius: 8px; background: var(--chip); border: 1px solid var(--line); font-weight: 600; font-size: 0.93em; white-space: nowrap; color: var(--text); }
+.k svg { width: 15px; height: 15px; }
+.tip { margin: 6px 0 0; padding: 12px 14px; border-radius: 14px; background: var(--bg2); border: 1px solid var(--line); font-size: 14.5px; color: var(--muted); }
+.tip b { color: var(--text); }
+.art-col { position: relative; display: grid; place-items: center; padding: 28px; background: linear-gradient(160deg, var(--deep2), var(--deep)); min-height: 420px; }
+.art-col { grid-template-rows: 1fr auto; }
+.art-col .cap { margin: 14px 0 0; text-align: center; font-size: 12px; color: rgba(238,248,234,0.65); }
+
+/* the drawings: simplified pictures of a phone or a computer window - not screenshots */
+.phone { width: 220px; height: 420px; border-radius: 34px; background: #0c1a12; padding: 10px; box-shadow: 0 20px 50px rgba(0,0,0,0.45); position: relative; }
+.phone .scr { width: 100%; height: 100%; border-radius: 26px; background: linear-gradient(180deg, #e8f2e4, #d4e8cd); overflow: hidden; position: relative; font: 12px/1.3 Inter, system-ui, sans-serif; color: #17301f; }
+.phone .bar { display: flex; align-items: center; gap: 6px; margin: 26px 10px 8px; padding: 7px 9px; border-radius: 12px; background: #fff; font-size: 11px; color: #4f6b57; }
+.phone .bar .url { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.phone .bar svg { width: 15px; height: 15px; flex: none; }
+.mini { margin: 8px 10px; padding: 10px; border-radius: 12px; background: #fff; }
+.mini .t { height: 8px; border-radius: 4px; background: #cfe3c9; margin: 6px 0; }
+.mini .t.s { width: 60%; }
+.mini .wmk { color: #58b351; font: 700 15px "Fraunces", Georgia, serif; }
+.sheet { position: absolute; left: 8px; right: 8px; bottom: 8px; padding: 10px; border-radius: 16px; background: #fff; box-shadow: 0 -6px 18px rgba(0,0,0,0.15); }
+.sheet .row { display: flex; align-items: center; gap: 9px; padding: 8px; border-radius: 9px; font-size: 12px; }
+.sheet .row svg { width: 16px; height: 16px; flex: none; color: #4f6b57; }
+.hl { position: relative; background: #e6f4e1; color: #1f5a3a; font-weight: 700; outline: 2px solid #58b351; }
+.hl::after { content: ""; position: absolute; right: 8px; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: #58b351; box-shadow: 0 0 0 0 rgba(88,179,81,0.6); animation: pulse 1.8s ease-out infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(88,179,81,0.6); } 100% { box-shadow: 0 0 0 12px rgba(88,179,81,0); } }
+.hlb { outline: 2px solid #58b351; border-radius: 6px; background: #e6f4e1; color: #1f5a3a; }
+.win { width: min(380px, 100%); border-radius: 14px; background: #e8f2e4; box-shadow: 0 20px 50px rgba(0,0,0,0.45); overflow: hidden; font: 12px/1.3 Inter, system-ui, sans-serif; color: #17301f; }
+.win .chrome { display: flex; align-items: center; gap: 8px; padding: 9px 10px; background: #fff; border-bottom: 1px solid #d3e6cc; }
+.win .lights { display: flex; gap: 5px; } .win .lights i { width: 9px; height: 9px; border-radius: 50%; background: #d3e6cc; display: block; }
+.win .addr { flex: 1; display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 8px; background: #f1f7ee; color: #4f6b57; min-width: 0; }
+.win .addr span { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.win .addr svg, .win .chrome > svg { width: 15px; height: 15px; flex: none; }
+.win .body { padding: 12px; min-height: 170px; position: relative; }
+.pop { position: absolute; right: 12px; top: 8px; width: 200px; padding: 12px; border-radius: 12px; background: #fff; box-shadow: 0 10px 26px rgba(0,0,0,0.2); }
+.pop .ph { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; font-weight: 700; }
+.pop .ph img { width: 26px; height: 26px; border-radius: 7px; }
+.pop .bt { display: flex; gap: 6px; justify-content: flex-end; }
+.pop .bt span { padding: 5px 10px; border-radius: 7px; font-weight: 600; }
+.pop .bt .go { background: #58b351; color: #fff; }
+.menubar { display: flex; gap: 14px; padding: 6px 10px; background: #fff; border-bottom: 1px solid #d3e6cc; font-weight: 600; }
+.menu { position: absolute; left: 34px; top: 0; width: 170px; padding: 6px; border-radius: 10px; background: #fff; box-shadow: 0 10px 26px rgba(0,0,0,0.2); }
+.menu div { padding: 6px 8px; border-radius: 6px; }
+
+/* Google Play */
+.play { display: grid; grid-template-columns: auto 1fr auto; gap: 22px; align-items: center; padding: 26px 28px; }
+.play .gp { width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; background: var(--chip); border: 1px solid var(--line); }
+.play .gp svg { width: 34px; height: 34px; }
+.play h3 { margin: 0 0 4px; font-size: 21px; }
+.play p { margin: 0; color: var(--muted); font-size: 15px; }
+.gp-btn { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 18px; border-radius: 12px; background: #111; color: #fff; text-decoration: none; border: 1px solid #333; }
+.gp-btn svg { width: 22px; height: 22px; }
+.gp-btn small { display: block; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; opacity: .8; }
+.gp-btn b { display: block; font-size: 16px; line-height: 1.1; }
+.gp-btn[aria-disabled="true"] { opacity: .55; cursor: not-allowed; }
+.soon { display: inline-block; margin-left: 8px; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--chip); color: var(--accent-ink); border: 1px solid var(--line); vertical-align: middle; }
+
+/* why install */
+.why { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.why .card { padding: 22px; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.why .card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.why .ic { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; margin-bottom: 14px; background: var(--chip); color: var(--accent-ink); }
+.why .ic svg { width: 24px; height: 24px; }
+.why h3 { margin: 0 0 6px; font-size: 18px; }
+.why p { margin: 0; color: var(--muted); font-size: 15px; }
+
+/* FAQ */
+.faq { max-width: 820px; margin: 0 auto; display: grid; gap: 10px; }
+.faq details { background: var(--card); border: 1px solid var(--line); border-radius: 16px; }
+.faq summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 20px; font-weight: 600; font-size: 16.5px; border-radius: 16px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: ""; flex: none; width: 9px; height: 9px; border-right: 2px solid var(--accent-ink); border-bottom: 2px solid var(--accent-ink); transform: rotate(45deg); transition: transform .2s; margin-top: -4px; }
+.faq details[open] summary::after { transform: rotate(-135deg); margin-top: 4px; }
+.faq .a { padding: 0 20px 18px; color: var(--muted); font-size: 15.5px; }
+.faq .a p { margin: 0 0 8px; }
+.faq .a ul { margin: 0; padding-left: 20px; }
+
+footer.foot { padding: 34px 0 44px; text-align: center; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); margin-top: 30px; }
+footer.foot a { color: var(--muted); margin: 0 6px; }
+footer.foot .brand { color: var(--accent); font: 700 18px "Fraunces", Georgia, serif; text-decoration: none; }
+
+/* tablets and phones */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: 26px; padding-top: 10px; text-align: center; }
+  .hero .lede { margin-left: auto; margin-right: auto; }
+  .cta-row { justify-content: center; }
+  .hero-art { min-height: 0; }
+  .guide { grid-template-columns: 1fr; }
+  .art-col { min-height: 0; padding: 26px 20px 36px; }
+}
+@media (max-width: 640px) {
+  .wrap { padding: 0 16px; }
+  section { padding: 30px 0; }
+  .tabs { max-width: 100%; display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .tab { justify-content: center; padding: 0 10px; font-size: 14.5px; position: relative; }
+  .tab .you { position: absolute; top: -7px; right: 6px; font-size: 9.5px; padding: 3px 5px; }
+  .hero-card { padding: 20px 18px; }
+  .hero-card .app-icon { width: 72px; height: 72px; border-radius: 18px; }
+  .steps-col { padding: 22px 18px; }
+  .play { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+  .status { flex-wrap: wrap; }
+  .status .btn { width: 100%; }
+  .btn { width: 100%; }
+  .cta-row .btn { width: 100%; }
+  .phone { width: 196px; height: 372px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="./" aria-label="SnakeList home"><img src="app/icon-192-s.png" alt="" width="34" height="34">SnakeList</a>
+    <nav aria-label="Site">
+      <a href="./">Open the app</a>
+      <a href="species/">All species</a>
+      <a href="about-snakelist.html">About</a>
+      <a href="install.html" aria-current="page">Install app</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <div class="hero">
+      <div>
+        <h1 class="serif">Install SnakeList</h1>
+        <p class="tag">Explore the world of snakes, right from your home screen.</p>
+        <p class="lede">Get quick access to SnakeList on your phone, tablet, or computer. Explore snake species, discover their habitats, and use interactive maps in an app-like experience.</p>
+        <div class="cta-row">
+          <button type="button" class="btn btn-primary" id="hero-install">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+            <span>Install SnakeList</span>
+          </button>
+          <a class="btn btn-ghost" href="./">Open in the browser</a>
+        </div>
+        <p class="hero-note" id="hero-note" aria-live="polite"></p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="glow"></div>
+        <div class="hero-card">
+          <img class="app-icon" src="app/icon-192-s.png" alt="" width="96" height="96">
+          <img class="wm" src="snakelist-logo.png" alt="">
+          <p>The snake life list, map and quiz</p>
+          <div class="facts"><span>Free</span><span>4,254 species</span><span>No app store needed</span></div>
+        </div>
+      </div>
+    </div>
+
+    <section aria-labelledby="st-h" style="padding-top:0">
+      <div class="card status" id="status">
+        <div class="dot" id="st-ico" aria-hidden="true"></div>
+        <div class="grow"><h3 id="st-h">Checking this device…</h3><p id="st-p"></p></div>
+        <button type="button" class="btn btn-primary" id="st-btn" hidden>Install now</button>
+        <a class="btn btn-primary" id="st-open" href="./" hidden>Open SnakeList</a>
+      </div>
+    </section>
+
+    <section id="guide" aria-labelledby="g-h">
+      <div class="sec-h"><h2 class="serif" id="g-h">Install it on your device</h2><p>Pick your device - we've chosen the one you're on. It takes less than a minute.</p></div>
+      <div class="tabs" role="tablist" aria-label="Choose your device">
+        <button type="button" class="tab" role="tab" id="t-android" aria-controls="p-android" aria-selected="false" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 9.48l1.84-3.18a.38.38 0 0 0-.66-.38l-1.86 3.22a11.4 11.4 0 0 0-9.84 0L5.22 5.92a.38.38 0 0 0-.66.38L6.4 9.48A10.8 10.8 0 0 0 1 18h22a10.8 10.8 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/></svg>Android</button>
+        <button type="button" class="tab" role="tab" id="t-ios" aria-controls="p-ios" aria-selected="false" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.62 1.11 8.79.73 1.06 1.6 2.25 2.75 2.2 1.1-.04 1.52-.71 2.85-.71 1.33 0 1.71.71 2.88.69 1.19-.02 1.94-1.08 2.66-2.14.84-1.23 1.19-2.42 1.21-2.48-.03-.01-2.31-.89-2.33-3.52zM14.2 6.13c.61-.74 1.02-1.76.91-2.78-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.69-.93 2.69.98.08 1.98-.5 2.59-1.23z"/></svg>iPhone &amp; iPad</button>
+        <button type="button" class="tab" role="tab" id="t-windows" aria-controls="p-windows" aria-selected="false" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.1 10.4 4v7.1H3zm8.4-1.2L21 2.5v8.6h-9.6zM3 12.9h7.4V20L3 18.9zm8.4 0H21v8.6l-9.6-1.4z"/></svg>Windows</button>
+        <button type="button" class="tab" role="tab" id="t-mac" aria-controls="p-mac" aria-selected="false" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>Mac</button>
+      </div>
+
+      <!-- Android -->
+      <div class="panel card guide" role="tabpanel" id="p-android" aria-labelledby="t-android" hidden>
+        <div class="steps-col">
+          <h3>Android</h3>
+          <p class="sub">Chrome, Edge and Samsung Internet can all install SnakeList.</p>
+          <ol class="steps">
+            <li>Open <b>snakelist.com</b> in <b>Chrome</b> (or Edge or Samsung Internet).</li>
+            <li>If an <span class="k">Install</span> bar or button appears, tap it. If not, tap the browser menu <span class="k" aria-label="three dots"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></span>.</li>
+            <li>Choose <span class="k">Install app</span> or <span class="k">Add to Home screen</span> - the name depends on the browser. In Samsung Internet it's <span class="k">Add page to</span> then <span class="k">Home screen</span>.</li>
+            <li>Confirm with <span class="k">Install</span> (or <span class="k">Add</span>).</li>
+            <li>Open <b>SnakeList</b> from your home screen or app drawer.</li>
+          </ol>
+          <p class="tip"><b>Tip:</b> on this page, the <b>Install SnakeList</b> button at the top opens the install window directly when your browser allows it.</p>
+        </div>
+        <div class="art-col" aria-hidden="true">
+          <div class="phone"><div class="scr">
+            <div class="bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span class="url">snakelist.com</span><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></div>
+            <div class="mini"><div class="wmk">SnakeList</div><div class="t"></div><div class="t s"></div></div>
+            <div class="sheet">
+              <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New tab</div>
+              <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Bookmarks</div>
+              <div class="row hl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 8v6M9 11l3 3 3-3"/></svg>Install app</div>
+              <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4"/></svg>Settings</div>
+            </div>
+          </div></div>
+          <p class="cap">Illustration of the Chrome menu - your screen may look a little different</p>
+        </div>
+      </div>
+
+      <!-- iPhone & iPad -->
+      <div class="panel card guide" role="tabpanel" id="p-ios" aria-labelledby="t-ios" hidden>
+        <div class="steps-col">
+          <h3>iPhone &amp; iPad</h3>
+          <p class="sub">Apple doesn't show an install button on websites - it takes a few taps in the Share menu instead.</p>
+          <ol class="steps">
+            <li>Open <b>snakelist.com</b> in <b>Safari</b>. (On iOS and iPadOS 16.4 or newer, Chrome and Edge work too.)</li>
+            <li>Tap the <span class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></svg>Share</span> button - at the bottom of the screen on iPhone, at the top on iPad. In Chrome it's at the top right.</li>
+            <li>Scroll down and tap <span class="k">Add to Home Screen</span>.</li>
+            <li>Check the name says <b>SnakeList</b>, then tap <span class="k">Add</span>.</li>
+            <li>Open <b>SnakeList</b> from your Home Screen.</li>
+          </ol>
+          <p class="tip"><b>Good to know:</b> on iPhone and iPad the Home Screen app keeps its own storage, separate from Safari - snakes you ticked off in Safari won't appear in it by themselves.</p>
+        </div>
+        <div class="art-col" aria-hidden="true">
+          <div class="phone"><div class="scr">
+            <div class="mini" style="margin-top:30px"><div class="wmk">SnakeList</div><div class="t"></div><div class="t s"></div></div>
+            <div class="sheet">
+              <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</div>
+              <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/></svg>Add Bookmark</div>
+              <div class="row hl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>Add to Home Screen</div>
+              <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></svg>Share…</div>
+            </div>
+          </div></div>
+          <p class="cap">Illustration of the Share menu - your screen may look a little different</p>
+        </div>
+      </div>
+
+      <!-- Windows -->
+      <div class="panel card guide" role="tabpanel" id="p-windows" aria-labelledby="t-windows" hidden>
+        <div class="steps-col">
+          <h3>Windows</h3>
+          <p class="sub">Use Microsoft Edge or Google Chrome. (Firefox can't install websites as apps.)</p>
+          <ol class="steps">
+            <li>Open <b>snakelist.com</b> in <b>Microsoft Edge</b> or <b>Google Chrome</b>.</li>
+            <li>Look for the install icon <span class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M12 8v6M9 11l3 3 3-3"/></svg></span> at the right end of the address bar, and click it.</li>
+            <li>No icon? Open the browser menu <span class="k">⋯</span> or <span class="k">⋮</span>: in Edge choose <span class="k">Apps</span> → <span class="k">Install this site as an app</span>; in Chrome choose <span class="k">Cast, save and share</span> → <span class="k">Install page as app</span>.</li>
+            <li>Click <span class="k">Install</span> to confirm.</li>
+            <li>Open <b>SnakeList</b> from the Start menu, the taskbar or your desktop.</li>
+          </ol>
+          <p class="tip"><b>Tip:</b> the <b>Install SnakeList</b> button at the top of this page opens the same install window, when your browser allows it.</p>
+        </div>
+        <div class="art-col" aria-hidden="true">
+          <div class="win">
+            <div class="chrome"><div class="lights"><i></i><i></i><i></i></div><div class="addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>snakelist.com</span><svg class="hlb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M12 8v6M9 11l3 3 3-3"/></svg></div></div>
+            <div class="body">
+              <div class="mini" style="margin:0;width:55%"><div class="wmk">SnakeList</div><div class="t"></div><div class="t s"></div></div>
+              <div class="pop"><div class="ph"><img src="app/icon-192-s.png" alt="">Install SnakeList?</div><div class="bt"><span>Cancel</span><span class="go">Install</span></div></div>
+            </div>
+          </div>
+          <p class="cap">Illustration of a browser window - your screen may look a little different</p>
+        </div>
+      </div>
+
+      <!-- Mac -->
+      <div class="panel card guide" role="tabpanel" id="p-mac" aria-labelledby="t-mac" hidden>
+        <div class="steps-col">
+          <h3>Mac</h3>
+          <p class="sub">Safari on macOS Sonoma (14) or newer, or Chrome or Edge on any recent macOS.</p>
+          <ol class="steps">
+            <li>Open <b>snakelist.com</b> in <b>Safari</b>, <b>Chrome</b> or <b>Edge</b>.</li>
+            <li>In <b>Safari</b>: choose <span class="k">File</span> → <span class="k">Add to Dock…</span> (or the <span class="k">Share</span> button → <span class="k">Add to Dock</span>). In <b>Chrome</b> or <b>Edge</b>: click the install icon in the address bar, or use the browser menu as on Windows.</li>
+            <li>Confirm with <span class="k">Add</span> (Safari) or <span class="k">Install</span> (Chrome and Edge).</li>
+            <li>Open <b>SnakeList</b> from your Dock or the Applications folder (Launchpad).</li>
+          </ol>
+          <p class="tip"><b>Older Mac?</b> Safari before macOS Sonoma has no Add to Dock - use Chrome or Edge, or keep SnakeList as a bookmark.</p>
+        </div>
+        <div class="art-col" aria-hidden="true">
+          <div class="win">
+            <div class="menubar"><span></span><span>Safari</span><span class="hlb" style="padding:0 4px">File</span><span>Edit</span><span>View</span></div>
+            <div class="body">
+              <div class="mini" style="margin:0;width:55%;margin-left:auto"><div class="wmk">SnakeList</div><div class="t"></div><div class="t s"></div></div>
+              <div class="menu"><div>New Window</div><div>New Tab</div><div class="hl" style="padding-right:24px">Add to Dock…</div><div>Share</div></div>
+            </div>
+          </div>
+          <p class="cap">Illustration of Safari's File menu - your screen may look a little different</p>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="gp-h">
+      <div class="card play">
+        <div class="gp" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#34a853" d="M3.6 2.3 13.5 12l-9.9 9.7c-.3-.2-.5-.6-.5-1V3.3c0-.4.2-.8.5-1z"/><path fill="#fbbc04" d="m17 8.5-3.5 3.5L17 15.5l3.9-2.2c1.1-.6 1.1-2.1 0-2.7z"/><path fill="#4285f4" d="M13.5 12 3.6 21.7c.4.3 1 .3 1.5 0L17 15.5z"/><path fill="#ea4335" d="M5.1 2.3c-.5-.3-1.1-.3-1.5 0L13.5 12 17 8.5z"/></svg></div>
+        <div>
+          <h3 id="gp-h">SnakeList for Android <span class="soon" id="gp-soon">Coming soon</span></h3>
+          <p id="gp-text">A Google Play version of SnakeList is on its way. Until it's published, install SnakeList from your browser using the Android steps above - it's the same SnakeList.</p>
+        </div>
+        <a class="gp-btn" id="gp-btn" role="link" aria-disabled="true" tabindex="0">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#34a853" d="M3.6 2.3 13.5 12l-9.9 9.7c-.3-.2-.5-.6-.5-1V3.3c0-.4.2-.8.5-1z"/><path fill="#fbbc04" d="m17 8.5-3.5 3.5L17 15.5l3.9-2.2c1.1-.6 1.1-2.1 0-2.7z"/><path fill="#4285f4" d="M13.5 12 3.6 21.7c.4.3 1 .3 1.5 0L17 15.5z"/><path fill="#ea4335" d="M5.1 2.3c-.5-.3-1.1-.3-1.5 0L13.5 12 17 8.5z"/></svg>
+          <span><small>Get it on</small><b>Google Play</b></span>
+        </a>
+      </div>
+    </section>
+
+    <section aria-labelledby="w-h">
+      <div class="sec-h"><h2 class="serif" id="w-h">Why install SnakeList?</h2><p>The same SnakeList as the website - just one tap away.</p></div>
+      <div class="why">
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div><h3>Quick Access</h3><p>Open SnakeList directly from your home screen, Dock, Start menu or taskbar.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg></div><h3>App-Like Experience</h3><p>On supported devices SnakeList opens in its own window, without the browser's address bar and tabs.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3z"/><path d="M9 3v15M15 6v15"/></svg></div><h3>Interactive Snake Maps</h3><p>Explore where every snake lives - down to states and provinces - with the heatmap, sightings and habitats.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div><h3>Discover Species</h3><p>Browse all 4,254 snake species, with photos, venom, habitats and where each one lives.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div><h3>No Complicated Setup</h3><p>No app store and no account needed - install in a few steps from your browser.</p></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="f-h">
+      <div class="sec-h"><h2 class="serif" id="f-h">Questions</h2></div>
+      <div class="faq">
+        <details><summary>Is SnakeList free to install?</summary><div class="a"><p>Yes. SnakeList is completely free - to use and to install. There are no purchases inside it.</p></div></details>
+        <details><summary>Is SnakeList available on Android?</summary><div class="a"><p>Yes - install it from Chrome, Edge or Samsung Internet using the Android steps above. A Google Play version is coming; this page will link to it once it's published.</p></div></details>
+        <details><summary>Can I install SnakeList on an iPhone?</summary><div class="a"><p>Yes, and on iPad too: open snakelist.com in Safari, tap <b>Share</b>, then <b>Add to Home Screen</b>. On iOS and iPadOS 16.4 or newer you can also do it from Chrome or Edge. SnakeList isn't on the App Store.</p></div></details>
+        <details><summary>Can I install SnakeList on Windows or Mac?</summary><div class="a"><p>Yes. On Windows, use Microsoft Edge or Google Chrome. On a Mac, use Safari (macOS Sonoma or newer: <b>File → Add to Dock</b>) or Chrome or Edge. Firefox doesn't install websites as apps.</p></div></details>
+        <details><summary>Do I need to create an account?</summary><div class="a"><p>No. Your lists - the snakes you've seen, want to see and follow - are saved on your device. Signing in is optional.</p></div></details>
+        <details><summary>Does SnakeList work without internet?</summary><div class="a"><p>Partly. Once you've opened SnakeList with a connection, it can open again without one and show the checklist; photos and map data you've already looked at are kept on your device.</p><p>Some things always need internet: snake sightings and conservation status (live from iNaturalist), photos you haven't opened before, the translator and signing in.</p></div></details>
+        <details><summary>How do I uninstall SnakeList?</summary><div class="a"><ul>
+          <li><b>Android:</b> press and hold the SnakeList icon, then tap <b>Uninstall</b> (or <b>Remove</b>).</li>
+          <li><b>iPhone &amp; iPad:</b> press and hold the icon, tap <b>Remove App</b>, then <b>Delete</b>.</li>
+          <li><b>Windows:</b> open SnakeList, click the <b>⋯</b> menu in its title bar and choose <b>Uninstall</b> - or right-click it in the Start menu and choose <b>Uninstall</b>.</li>
+          <li><b>Mac:</b> Safari apps: drag SnakeList from Applications to the Bin. Chrome or Edge apps: open SnakeList and choose <b>Uninstall</b> from its menu.</li>
+        </ul></div></details>
+        <details><summary>Is the installed version different from the website?</summary><div class="a"><p>It's the same SnakeList, with the same features. It just opens in its own window, without the browser's address bar.</p><p>On Android and on computers it shares your lists with SnakeList in that browser. On iPhone and iPad the Home Screen app keeps its own storage, separate from Safari.</p></div></details>
+        <details><summary>Will SnakeList update automatically?</summary><div class="a"><p>Yes. Whenever you open it with an internet connection it loads the newest version - there's nothing to update by hand.</p></div></details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <a class="brand" href="./">SnakeList</a>
+    <p>Made by <a href="about.html">Eduardo Brandao</a></p>
+    <p><a href="./">Open the app</a> &middot; <a href="species/">All species</a> &middot; <a href="about-snakelist.html">About SnakeList</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></p>
+  </footer>
+</div>
+
+<script>
+// ---- Install SnakeList: device detection, tabs, the install button and the status card ----
+(function () {
+  // where to point the Google Play button once the listing is published - empty until then
+  var PLAY_URL = "";
+
+  var ua = navigator.userAgent || "", plat = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+  var isIPad = /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  var device = /Android/i.test(ua) ? "android" : (/iPhone|iPod/.test(ua) || isIPad) ? "ios" : /Win/i.test(plat) || /Windows/.test(ua) ? "windows" : /Mac/i.test(plat) || /Macintosh/.test(ua) ? "mac" : null;
+  var isSafari = /Safari/.test(ua) && !/Chrome|Chromium|CriOS|Edg|EdgiOS|FxiOS|OPR|SamsungBrowser/.test(ua);
+  var isFirefox = /Firefox|FxiOS/.test(ua);
+
+  // ---- tabs (arrow keys move between them, as tabs should) ----
+  var tabs = [].slice.call(document.querySelectorAll('[role="tab"]'));
+  function pick(id, focus) {
+    tabs.forEach(function (t) {
+      var on = t.id === "t-" + id;
+      t.setAttribute("aria-selected", on ? "true" : "false"); t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+      if (on && focus) t.focus();
+    });
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { pick(t.id.slice(2)); });
+    t.addEventListener("keydown", function (e) {
+      var k = e.key, j = k === "ArrowRight" ? i + 1 : k === "ArrowLeft" ? i - 1 : k === "Home" ? 0 : k === "End" ? tabs.length - 1 : null;
+      if (j === null) return; e.preventDefault(); j = (j + tabs.length) % tabs.length; pick(tabs[j].id.slice(2), true);
+    });
+  });
+  pick(device || "android");
+  if (device) { var mine = document.getElementById("t-" + device), you = document.createElement("span"); you.className = "you"; you.textContent = "Your device"; mine.appendChild(you); }
+
+  // ---- what this browser can tell us ----
+  var standalone = ["standalone", "window-controls-overlay", "minimal-ui", "fullscreen"].some(function (m) { return window.matchMedia && matchMedia("(display-mode: " + m + ")").matches; }) || navigator.standalone === true;
+  var related = false, installedNow = false;
+  var heroBtn = document.getElementById("hero-install"), note = document.getElementById("hero-note");
+  var stH = document.getElementById("st-h"), stP = document.getElementById("st-p"), stIco = document.getElementById("st-ico"), stBtn = document.getElementById("st-btn"), stOpen = document.getElementById("st-open"), card = document.getElementById("status");
+  var ICON_OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+  var ICON_DL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>';
+  var ICON_INFO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>';
+  var NAMES = { android: "Android", ios: "iPhone & iPad", windows: "Windows", mac: "Mac" };
+
+  function paint() {
+    stBtn.hidden = true; stOpen.hidden = true; card.classList.remove("ok");
+    if (standalone) {
+      card.classList.add("ok"); stIco.innerHTML = ICON_OK;
+      stH.textContent = "SnakeList is already installed!";
+      stP.textContent = "You're using SnakeList in its app experience.";
+      stOpen.hidden = false;
+      heroBtn.hidden = true; note.textContent = "";
+      return;
+    }
+    if (installedNow || related) {
+      card.classList.add("ok"); stIco.innerHTML = ICON_OK;
+      stH.textContent = installedNow ? "SnakeList is installed!" : "SnakeList is installed on this device";
+      stP.textContent = installedNow ? "Find it on your home screen or in your apps." : "Your browser says SnakeList is already installed here - open it from your home screen or apps.";
+      stOpen.hidden = false; stOpen.textContent = "Open SnakeList";
+      return;
+    }
+    if (window.SL_INSTALL_EVT) {
+      stIco.innerHTML = ICON_DL;
+      stH.textContent = "Ready to install";
+      stP.textContent = "Your browser can install SnakeList right now - it takes a few seconds.";
+      stBtn.hidden = false;
+      return;
+    }
+    stIco.innerHTML = ICON_INFO;
+    if (device === "ios") {
+      stH.textContent = isSafari || /CriOS|EdgiOS/.test(ua) ? "Install from the Share menu" : "Open snakelist.com in Safari to install";
+      stP.textContent = "iPhone and iPad install websites from the Share menu - follow the steps below.";
+    } else if (isFirefox) {
+      stH.textContent = "This browser can't install SnakeList";
+      stP.textContent = "Firefox doesn't install websites as apps. Open snakelist.com in " + (device === "android" ? "Chrome or Samsung Internet" : device === "mac" ? "Safari, Chrome or Edge" : "Edge or Chrome") + " and follow the steps below.";
+    } else if (device === "mac" && isSafari) {
+      stH.textContent = "Install from Safari's File menu";
+      stP.textContent = "On macOS Sonoma or newer, choose File → Add to Dock. The steps are below.";
+    } else {
+      stH.textContent = "Install with your browser's menu";
+      stP.textContent = "Your browser hasn't offered an install button on this page - the steps below show where to find it" + (device ? " on " + NAMES[device] : "") + ".";
+    }
+  }
+  window.SL_INS_READY = paint;
+
+  // the install itself: the browser's own window when it has one, otherwise the right steps
+  function install() {
+    var ev = window.SL_INSTALL_EVT;
+    if (ev) {
+      ev.prompt();
+      (ev.userChoice || Promise.resolve({})).then(function (c) {
+        window.SL_INSTALL_EVT = null; // each offer can be used once - never asked again by itself
+        if (c && c.outcome === "accepted") { installedNow = true; note.textContent = "Installing SnakeList…"; }
+        else note.textContent = "No problem - you can install SnakeList any time from this page.";
+        paint();
+      });
+      return;
+    }
+    var g = document.getElementById("guide");
+    g.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    note.textContent = "Follow the steps below for " + (device ? NAMES[device] : "your device") + ".";
+    var sel = document.querySelector('[role="tab"][aria-selected="true"]'); if (sel) setTimeout(function () { sel.focus({ preventScroll: true }); }, 400);
+  }
+  heroBtn.addEventListener("click", install);
+  stBtn.addEventListener("click", install);
+  window.addEventListener("appinstalled", function () { installedNow = true; window.SL_INSTALL_EVT = null; note.textContent = "SnakeList is installed - find it with your other apps."; paint(); });
+  if (navigator.getInstalledRelatedApps) navigator.getInstalledRelatedApps().then(function (l) { related = !!(l && l.length); paint(); }, function () {});
+  paint();
+
+  // ---- Google Play: a real link only once the listing exists ----
+  var gp = document.getElementById("gp-btn");
+  if (PLAY_URL) {
+    gp.href = PLAY_URL; gp.removeAttribute("aria-disabled"); gp.removeAttribute("role"); gp.target = "_blank"; gp.rel = "noopener";
+    document.getElementById("gp-soon").hidden = true;
+    document.getElementById("gp-text").textContent = "Get SnakeList from Google Play - the same SnakeList, from the Play Store.";
+  } else {
+    gp.addEventListener("click", function (e) { e.preventDefault(); });
+    gp.title = "Coming soon - not on Google Play yet";
+  }
+})();
+</script>
+</body>
+</html>
