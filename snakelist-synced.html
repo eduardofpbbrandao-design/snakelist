@@ -590,6 +590,10 @@
   .photo-lightbox { position: fixed; inset: 0; z-index: 80; display: none; align-items: center; justify-content: center;
     padding: 16px; background: rgba(4, 14, 8, 0.86); cursor: zoom-out; }
   .photo-lightbox.open { display: flex; }
+  .photo-lightbox .pl-close { position: absolute; top: max(12px, env(safe-area-inset-top)); right: 12px; z-index: 3; width: 44px; height: 44px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.35); background: rgba(10,20,14,0.82); color: #fff; font: 400 28px/1 'Inter', sans-serif; cursor: pointer; }
+  .photo-lightbox .pl-close:hover { background: rgba(10,20,14,0.95); }
+  .photo-lightbox .pl-close:focus-visible, .photo-lightbox button:focus-visible { outline: 3px solid #9be07c; outline-offset: 2px; }
   .photo-lightbox figure { margin: 0; width: min(1080px, 100%, calc((100vh - 120px) * 1.5)); }
   .photo-lightbox .pl-img { width: 100%; aspect-ratio: 3 / 2; border-radius: 12px; background-size: 500% 500%;
     background-repeat: no-repeat; background-color: #0b1a10; box-shadow: 0 18px 50px rgba(0,0,0,0.5); }
@@ -891,6 +895,20 @@
 
 
   .country-panel { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px 16px; margin-top: 14px; background: var(--surface); }
+  /* full screen: the map fills the screen with no page scrolling, and the selected place's panel
+     sits over the map's bottom-left corner (a bottom sheet on phones) instead of below it, out of view */
+  .globe-stage.full { overflow: hidden; }
+  .globe-stage.full .country-panel { position: absolute; left: 12px; bottom: 12px; z-index: 6; margin: 0; width: min(420px, calc(100% - 24px));
+    max-height: min(46%, 460px); overflow: auto; overscroll-behavior: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  .globe-stage.full:has(.country-panel:not([hidden])) .globe-hint { display: none; }
+  @media (max-width: 640px) {
+    .globe-stage.full .country-panel { left: 0; right: 0; bottom: 0; width: auto; max-height: 48%; border-radius: 16px 16px 0 0; }
+    .globe-stage.full:has(.country-panel:not([hidden])) .map-legend { bottom: calc(48% + 8px); }
+  }
+  /* the controls over the map stay readable on any background (satellite photos included) */
+  .globe-stage.full .all-countries.map-undo { background: var(--surface, #fff); color: var(--text); border-color: var(--map-on, #58b351); }
+  .globe-stage .all-countries:focus-visible, .map-tools .hm-toggle:focus-visible, .layers-btn:focus-visible, .globe-zoom button:focus-visible { outline: 3px solid #9be07c; outline-offset: 2px; }
+  #heat-caption { color: var(--text); }
   .country-panel[hidden] { display: none; }
   @keyframes cp-pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   .cp-pop { animation: cp-pop 0.22s ease-out; }
@@ -1432,7 +1450,7 @@
 </style>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.36</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.38</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All 4,254 snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -10935,7 +10953,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     setScope([code], null, "country:" + code);
     heatStates(code);
     var n = document.getElementById("cp-sub").textContent;
-    document.getElementById("heat-caption").textContent = name + " · " + n;
+    document.getElementById("heat-caption").textContent = document.getElementById("cp-title").textContent + " · " + n;
     if (fresh) {
       var bx = countryBox(code);
       if (bx) flyToLonLatBox(bx[0], bx[1], bx[2], bx[3], true);
@@ -12236,6 +12254,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     return url;
   };
   window.SL_MAP_REDRAW = function () { invalidate(); };
+  // zoom in round a point on the map (screen x/y) - a cluster of sightings opens up this way
+  window.SL_MAP_ZOOM_AT = function (k, x, y) { zoomAt(k, x, y); };
   // fly the map to a lon/lat box (used by the map tests and other scripts)
   window.SL_FLY_BOX = function (w, e, s2, n) { flyToLonLatBox(w, e, s2, n, false); invalidate(); };
   window.SL_MAP_SEARCH = function () { return { q: hsearch ? hsearch.value.trim() : "", species: matched || [], filtered: !!MFSET }; };
@@ -12549,12 +12569,17 @@ window.SL_GEO_READY = new Promise(function (res) {
         }
       });
     });
+    if (MFSET) extra = extra.filter(function (sp) { return MFSET[sp.id]; });
     var cpTitle = document.getElementById("cp-title");
-    cpTitle.textContent = window.SL_DISPLAY_NAME(NAME[code] || TITLE[code] || code.toUpperCase());
+    // the title and count say what they really cover: with the map's filters narrowing it to a
+    // district ("Lisbon district, Portugal") and/or other filters, it's the matching species,
+    // not the country's whole list
+    cpTitle.textContent = mfScopeTitle(code);
     cpTitle.classList.add("cp-title-place");
     var total = list.length + extra.length;
     document.getElementById("cp-sub").textContent = !total && NO_SNAKES[code]
       ? "Snake-free"
+      : MFSET ? total + (total === 1 ? " matching species" : " matching species") + " · your filters"
       : total + (total === 1 ? " species lives here" : " species live here");
     var rows = list.map(function (sp) { return [sp, false]; }).concat(extra.map(function (sp) { return [sp, true]; }));
     rows.sort(function (a, b) { return a[0].name.localeCompare(b[0].name); });
@@ -12820,6 +12845,27 @@ window.SL_GEO_READY = new Promise(function (res) {
   }, true);
   // a species row's name (not its "See photo", state pills or city line) goes to that snake's
   // own species page - the same address the info panel's "View full species page" link uses
+  // the map's lists are reachable with the keyboard: a snake's row is a link to its page, a
+  // country / state / city / island row is a button; Enter (or Space on buttons) works them
+  (function () {
+    var L = document.getElementById("cp-list"); if (!L) return;
+    function mark() {
+      [].slice.call(L.querySelectorAll(".cp-row")).forEach(function (r) {
+        if (r.hasAttribute("tabindex")) return;
+        if (r.dataset.sp) { r.setAttribute("role", "link"); r.tabIndex = 0; var b = r.querySelector("b"); if (b) r.setAttribute("aria-label", b.textContent + " - open its species page"); }
+        else if (r.hasAttribute("data-prov") || r.hasAttribute("data-country") || r.hasAttribute("data-island") || r.hasAttribute("data-city")) { r.setAttribute("role", "button"); r.tabIndex = 0; }
+      });
+    }
+    new MutationObserver(mark).observe(L, { childList: true });
+    L.addEventListener("keydown", function (e) {
+      var r = e.target.closest && e.target.closest(".cp-row[tabindex]");
+      if (!r || e.target !== r) return;
+      if (e.key === "Enter" || (e.key === " " && r.getAttribute("role") === "button")) {
+        e.preventDefault();
+        var t = r.querySelector("b") || r; t.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      }
+    });
+  })();
   function spGoPage(id) {
     var c = spCardEl(id); if (!c) return spOpen(id);
     var url = spPageUrl(c);
@@ -12899,11 +12945,20 @@ window.SL_GEO_READY = new Promise(function (res) {
     cpTitle.textContent = pin.area;
     cpTitle.classList.add("cp-title-place");
     if (pin.cityPick) {
-      document.getElementById("cp-sub").textContent = pin.where + " · " + pin.species.length +
-        (pin.species.length === 1 ? " species lives around here" : " species live around here");
-      document.getElementById("cp-list").innerHTML = pin.species.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (sp) {
-        return '<div class="cp-row cp-sp" data-sp="' + attrEsc(sp.id) + '">' + photoBtn(sp) + "<b>" + sp.name + "</b><i>" + sp.sci + "</i></div>";
-      }).join("");
+      // two kinds of record, kept apart: snakes recorded in the city's own state/district, and
+      // snakes recorded only for the whole country (where in it isn't known) - from the
+      // checklist's range data, not a distance from the city and not sightings
+      var loose = {}; (pin.loose || []).forEach(function (id) { loose[id] = 1; });
+      var inArea = pin.species.filter(function (sp) { return !loose[sp.id]; }), inCountry = pin.species.filter(function (sp) { return loose[sp.id]; });
+      var areaName = pin.where && pin.where.indexOf(",") > 0 ? pin.where.split(",")[0] : null;
+      var row = function (sp) { return '<div class="cp-row cp-sp" data-sp="' + attrEsc(sp.id) + '">' + photoBtn(sp) + "<b>" + sp.name + "</b><i>" + sp.sci + "</i></div>"; };
+      var byName = function (a, b) { return a.name.localeCompare(b.name); };
+      document.getElementById("cp-sub").textContent = pin.where + " · " + inArea.length + (areaName ? " recorded in " + areaName : " recorded here") +
+        (inCountry.length ? " · " + inCountry.length + " more recorded in " + (pin.country || "the country") + " without a known district" : "");
+      document.getElementById("cp-list").innerHTML =
+        (inArea.length ? '<p class="cp-group">Recorded in ' + (areaName ? spEsc(areaName) : "this area") + "</p>" + inArea.sort(byName).map(row).join("") : "") +
+        (inCountry.length ? '<p class="cp-group">Recorded in ' + spEsc(pin.country || "the country") + ', district not known</p><p class="cp-note">These snakes have no state, province or district records in SnakeList, so they may or may not live near ' + spEsc(pin.area) + ".</p>" + inCountry.sort(byName).map(row).join("") : "") +
+        '<p class="cp-note">From SnakeList\'s range records (where species are documented), not from sightings or a distance round the city. Not listed is not the same as absent.</p>';
       popPanel();
       return;
     }
@@ -13054,8 +13109,12 @@ window.SL_GEO_READY = new Promise(function (res) {
   // lives) and its sightings (where someone photographed one) stay two different things.
   var MF = { families: [], venom: false, safe: false, countries: [], places: [], habitats: [], iucn: [], extra: null };
   var MFSET = null, MFSCI = null;           // ids / scientific names that pass, or null when no filter is on
-  var IUCN = null, IUCN_STATE = "idle";      // id -> IUCN code, loaded from iNaturalist on first use
-  var IUCN_CODES = [["LC", "Least Concern"], ["NT", "Near Threatened"], ["VU", "Vulnerable"], ["EN", "Endangered"], ["CR", "Critically Endangered"], ["EW", "Extinct in the Wild"], ["EX", "Extinct"], ["NONE", "No status found"]];
+  var IUCN = null, IUCN_STATE = "idle", IUCN_T = 0;      // id -> IUCN code, loaded from iNaturalist on first use
+  // IUCN Red List categories as iNaturalist lists them (global assessments). Data Deficient and
+  // Not Evaluated can't be asked for there, so they fall in "No status found" - which says so.
+  // SnakeList's own list of fossil and recently extinct snakes is a separate choice, never
+  // mixed into the Red List's "Extinct".
+  var IUCN_CODES = [["LC", "Least Concern"], ["NT", "Near Threatened"], ["VU", "Vulnerable"], ["EN", "Endangered"], ["CR", "Critically Endangered"], ["EW", "Extinct in the Wild"], ["EX", "Extinct (Red List)"], ["SLX", "Fossil or extinct (SnakeList's own list)"], ["NONE", "No status found"]];
   var EXTRA_LABEL = { popular: "Popular", uncommon: "Uncommon", exotic: "Exotic", constrictor: "Constrictor", nonConstrictor: "Non-constrictor",
     invasive: "Invasive", common: "Common", rare: "Rare", snakeEater: "Snake eater", noPhoto: "No photo yet", extinct: "Extinct",
     harmful: "Harmful to people", harmless: "Harmless to people", mFollow: "Following", mWish: "Want to see", mSeen: "My sightings" };
@@ -13075,7 +13134,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   function iucnOf(id) {
     if (IUCN && IUCN[id]) return IUCN[id];
-    if (window.SL_CK && window.SL_CK.extinct(id)) return "EX";
+    if (window.SL_CK && window.SL_CK.extinct(id)) return "SLX";
     return "NONE";
   }
   function mfCompute() {
@@ -13096,6 +13155,32 @@ window.SL_GEO_READY = new Promise(function (res) {
     });
   }
   window.SL_MAPF_SCI = function () { return MFSCI; };
+  // the snakes that pass every map filter except one kind (so that kind's options can say how
+  // many they would match next to the others) - null when no other filter is on
+  function mfPassExcept(kind) {
+    var M2 = { families: kind === "fam" ? [] : MF.families, venom: kind === "ven" ? false : MF.venom, safe: kind === "ven" ? false : MF.safe,
+      countries: MF.countries, places: kind === "plc" ? [] : MF.places, habitats: kind === "hab" ? [] : MF.habitats, iucn: kind === "iucn" ? [] : MF.iucn };
+    var on = M2.families.length || M2.venom || M2.safe || M2.countries.length || M2.places.length || M2.habitats.length || M2.iucn.length || mfExtraChips().length;
+    if (!on || !window.SL_CK) return null;
+    var st = Object.assign({}, MF.extra || {}, { families: M2.families, countries: M2.countries, places: M2.places, habitats: M2.habitats,
+      venom: M2.venom && !M2.safe, safe: M2.safe && !M2.venom });
+    var want = {}; M2.iucn.forEach(function (c) { want[c] = 1; });
+    var useI = M2.iucn.length && IUCN_STATE === "ready", out = {};
+    INDEX.forEach(function (sp) { if (window.SL_CK.pass(sp.id, st) && (!useI || want[iucnOf(sp.id)])) out[sp.id] = 1; });
+    return out;
+  }
+  // a country's name as the filters narrow it: "Lisbon district, Portugal", "Lisbon and Porto
+  // districts, Portugal" - the plain name when no district of it is picked
+  function mfScopeTitle(code) {
+    var nm = window.SL_DISPLAY_NAME(NAME[code] || TITLE[code] || code.toUpperCase());
+    if (!MFSET) return nm;
+    var cc = code.toUpperCase(), ks = MF.places.filter(function (k) { return k.slice(0, 2) === cc; });
+    if (!ks.length) return nm;
+    var names = ks.map(function (k) { return window.SL_CK ? window.SL_CK.placeName(k) : k.slice(3); });
+    var word = ks.length === 1 ? subdivWord(code, true, true) : subdivWord(code, false, true);
+    var list = names.length === 1 ? names[0] : names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
+    return list + " " + word + ", " + nm;
+  }
   function mfApply() {
     mfCompute();
     mfPaintUI();
@@ -13108,7 +13193,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (IUCN_STATE === "ready" || IUCN_STATE === "loading") return;
     try {
       var c = JSON.parse(localStorage.getItem("sl-iucn") || "null");
-      if (c && c.t && Date.now() - c.t < 7 * 864e5 && c.m) { IUCN = c.m; IUCN_STATE = "ready"; mfPaintUI(); return; }
+      if (c && c.t && Date.now() - c.t < 7 * 864e5 && c.m) { IUCN = c.m; IUCN_STATE = "ready"; IUCN_T = c.t; mfPaintUI(); return; }
     } catch (e) {}
     if (window.claude && window.claude.use) { IUCN_STATE = "off"; mfPaintUI(); return; }
     IUCN_STATE = "loading"; mfPaintUI();
@@ -13127,8 +13212,8 @@ window.SL_GEO_READY = new Promise(function (res) {
         });
     }
     codes.reduce(function (pr, code) { return pr.then(function () { return page(code, 1); }); }, Promise.resolve()).then(function () {
-      IUCN = m; IUCN_STATE = "ready";
-      try { localStorage.setItem("sl-iucn", JSON.stringify({ t: Date.now(), m: m })); } catch (e) {}
+      IUCN = m; IUCN_STATE = "ready"; IUCN_T = Date.now();
+      try { localStorage.setItem("sl-iucn", JSON.stringify({ t: IUCN_T, m: m })); } catch (e) {}
       mfApply();
     }, function () { IUCN_STATE = "failed"; mfPaintUI(); });
   }
@@ -13149,13 +13234,13 @@ window.SL_GEO_READY = new Promise(function (res) {
   mfPanel.className = "hm-panel mf-panel"; mfPanel.id = "mf-panel"; mfPanel.hidden = true;
   mfPanel.setAttribute("role", "dialog"); mfPanel.setAttribute("aria-label", "Map filters");
   mfPanel.innerHTML = '<div class="mf-head"><b>Filters</b><span class="mf-res" aria-live="polite"></span><button type="button" class="mf-x" aria-label="Close filters">&times;</button></div>' +
-    '<div class="mf-body">' +
+    '<p class="mf-cnote"></p><div class="mf-body">' +
     '<details class="mf-sec" data-s="fam"><summary>Snake family<i></i></summary><input type="text" class="mf-find" placeholder="Find a family&hellip;" aria-label="Find a family"><div class="mf-opts" data-k="fam"></div></details>' +
     '<details class="mf-sec" data-s="ven"><summary>Venom<i></i></summary><div class="mf-opts" data-k="ven"></div><p class="mf-note">The same venom data as the checklist.</p></details>' +
     '<details class="mf-sec" data-s="geo"><summary>Country &amp; region<i></i></summary><div class="mf-geo"><input type="text" class="mf-find mf-cfind" placeholder="Find a country&hellip;" aria-label="Find a country" autocomplete="off"><div class="mf-sugg" hidden></div></div><div class="mf-picked"></div></details>' +
     '<details class="mf-sec" data-s="hab"><summary>Habitat<i></i></summary><input type="text" class="mf-find" placeholder="Find a habitat&hellip;" aria-label="Find a habitat"><div class="mf-opts" data-k="hab"></div></details>' +
     '<details class="mf-sec" data-s="iucn"><summary>Conservation status<i></i></summary><div class="mf-opts" data-k="iucn"></div><p class="mf-note mf-inote"></p></details>' +
-    '</div><div class="mf-foot"><button type="button" class="mf-clear">Clear all</button><button type="button" class="mf-done">Show results</button></div>';
+    '</div><div class="mf-foot"><button type="button" class="mf-clear">Clear all</button><button type="button" class="mf-done">Done</button></div>';
   stage.appendChild(mfPanel);
   var mfChips = document.createElement("div");
   mfChips.className = "mf-chips"; mfChips.id = "mf-chips"; mfChips.hidden = true; mfChips.setAttribute("aria-label", "Active map filters");
@@ -13200,37 +13285,45 @@ window.SL_GEO_READY = new Promise(function (res) {
       (chips.length > MAXC ? '<button type="button" class="mf-more">' + (mfMore ? "Show less" : "+" + (chips.length - MAXC) + " more") + "</button>" : "") +
       (chips.length ? '<button type="button" class="mf-clearall">Clear all</button>' : "");
     // how many snakes pass, and an honest word when none do
-    var res = mfPanel.querySelector(".mf-res");
-    if (MFSET) { var k = Object.keys(MFSET).length; res.textContent = k ? k.toLocaleString() + " species match" : "No species match"; }
-    else res.textContent = "";
+    var res = mfPanel.querySelector(".mf-res"), done = mfPanel.querySelector(".mf-done");
+    if (MFSET) { var k = Object.keys(MFSET).length; res.textContent = k ? k.toLocaleString() + " species match" : "No species match"; done.textContent = k ? "View " + k.toLocaleString() + " matching species" : "Done"; }
+    else { res.textContent = ""; done.textContent = "Done"; }
+    var cn = mfPanel.querySelector(".mf-cnote"); if (cn) cn.textContent = MFSET ? "Numbers: how many species each choice gives with your other filters. Filters apply as you pick them." : "Numbers: species in the whole checklist. Filters apply as you pick them.";
     if (mfPanel.hidden) return;
     mfLists();
     var fq = (mfPanel.querySelector('[data-s="fam"] .mf-find').value || "").trim().toLowerCase();
     var famBox = mfPanel.querySelector('.mf-opts[data-k="fam"]');
     var fl = FAM.filter(function (f) { return !fq || f[0].toLowerCase().indexOf(fq) >= 0; });
-    famBox.innerHTML = fl.length ? fl.map(function (f) { return opt("fam", f[0], f[0], MF.families.indexOf(f[0]) >= 0, f[1]); }).join("") : '<p class="mf-empty">No family matches that.</p>';
+    // the numbers: how many snakes each option would show next to your other filters (or in
+    // the whole checklist when nothing else is picked) - the panel says which
+    var exF = mfPassExcept("fam"), famN = null;
+    if (exF) { famN = {}; Object.keys(exF).forEach(function (id) { var f0 = window.SL_CK.family(id); famN[f0] = (famN[f0] || 0) + 1; }); }
+    famBox.innerHTML = fl.length ? fl.map(function (f) { return opt("fam", f[0], f[0], MF.families.indexOf(f[0]) >= 0, famN ? famN[f[0]] || 0 : f[1]); }).join("") : '<p class="mf-empty">No family matches that.</p>';
     mfPanel.querySelector('.mf-opts[data-k="ven"]').innerHTML = opt("ven", "venom", "Venomous", MF.venom) + opt("ven", "safe", "Non-venomous", MF.safe);
     var hq = (mfPanel.querySelector('[data-s="hab"] .mf-find').value || "").trim().toLowerCase(), lastSec = "";
     var hl = HABL.filter(function (h) { return !hq || h[1].toLowerCase().indexOf(hq) >= 0; });
+    var exH = mfPassExcept("hab");
     mfPanel.querySelector('.mf-opts[data-k="hab"]').innerHTML = hl.length ? hl.map(function (h) {
       var head = h[2] !== lastSec ? '<p class="mf-sub">' + esc(h[2]) + "</p>" : ""; lastSec = h[2];
-      return head + opt("hab", h[0], h[1], MF.habitats.indexOf(h[0]) >= 0, h[3]);
+      var hn = h[3]; if (exH) { hn = 0; window.SL_HABITATS.ids(h[0]).forEach(function (id) { if (exH[id]) hn++; }); }
+      return head + opt("hab", h[0], h[1], MF.habitats.indexOf(h[0]) >= 0, hn);
     }).join("") : '<p class="mf-empty">No habitat matches that.</p>';
     var ib = mfPanel.querySelector('.mf-opts[data-k="iucn"]'), note = mfPanel.querySelector(".mf-inote");
     if (IUCN_STATE === "ready") {
-      var cnt = {}; INDEX.forEach(function (sp) { var c = iucnOf(sp.id); cnt[c] = (cnt[c] || 0) + 1; });
+      var exI = mfPassExcept("iucn"), cnt = {};
+      INDEX.forEach(function (sp) { if (exI && !exI[sp.id]) return; var c = iucnOf(sp.id); cnt[c] = (cnt[c] || 0) + 1; });
       ib.innerHTML = IUCN_CODES.map(function (c) { return opt("iucn", c[0], c[1], MF.iucn.indexOf(c[0]) >= 0, cnt[c[0]] || 0); }).join("");
-      note.textContent = "IUCN Red List status, as listed on iNaturalist. “No status found” means none was found for that snake - not that it is safe.";
+      note.textContent = "Global IUCN Red List status, as iNaturalist lists it (loaded " + new Date(IUCN_T || Date.now()).toLocaleDateString() + "). “No status found” covers snakes not assessed, Data Deficient or not listed there - not that they are safe. Fossil and recently extinct snakes are SnakeList's own list.";
     } else {
-      ib.innerHTML = "";
+      ib.innerHTML = IUCN_STATE === "failed" ? '<button type="button" class="mf-retry">Retry</button>' : "";
       note.textContent = IUCN_STATE === "loading" ? "Loading conservation status from iNaturalist…"
-        : IUCN_STATE === "failed" ? "Couldn't reach iNaturalist for conservation status - close and open this again to retry."
+        : IUCN_STATE === "failed" ? "Couldn't reach iNaturalist for conservation status. Use Retry below."
         : IUCN_STATE === "off" ? "Conservation status comes live from iNaturalist - open snakelist.com to use it." : "Open to load conservation status from iNaturalist.";
     }
     // countries picked, each with its own regions and a button to fly there
     var picked = mfPanel.querySelector(".mf-picked");
     picked.innerHTML = MF.countries.map(function (name) {
-      var code = ISO[name], keys = mfRegionKeys(code);
+      var code = ISO[name], keys = mfRegionKeys(code, mfPassExcept("plc"));
       return '<div class="mf-cty"><div class="mf-cty-h"><b>' + esc(window.SL_DISPLAY_NAME ? window.SL_DISPLAY_NAME(name) : name) + '</b>' +
         '<button type="button" class="mf-zoom" data-c="' + esc(code || "") + '">Zoom to</button><button type="button" class="mf-rm" data-v="' + esc(name) + '" aria-label="Remove ' + esc(name) + '">&times;</button></div>' +
         (keys.length ? '<div class="mf-opts mf-reg">' + keys.map(function (k) { return opt("plc", k[0], k[1], MF.places.indexOf(k[0]) >= 0, k[2]); }).join("") + "</div>"
@@ -13243,10 +13336,11 @@ window.SL_GEO_READY = new Promise(function (res) {
     deoverlap();
   }
   // a country's regions that snakes are recorded in (keys "MX:Hidalgo" / "US:TX"), with counts
-  function mfRegionKeys(code) {
+  function mfRegionKeys(code, only) {
     if (!code) return [];
     var cc = code.toUpperCase(), cnt = {};
     INDEX.forEach(function (sp) {
+      if (only && !only[sp.id]) return;
       if (cc === "US") (sp.states || []).forEach(function (s2) { cnt["US:" + s2] = (cnt["US:" + s2] || 0) + 1; });
       (sp.provinces || []).forEach(function (k) { if (k.slice(0, 3) === cc + ":") cnt[k] = (cnt[k] || 0) + 1; });
     });
@@ -13284,6 +13378,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     var sg = e.target.closest(".mf-sugg button");
     if (sg) { if (MF.countries.indexOf(sg.dataset.v) < 0) MF.countries.push(sg.dataset.v); cfind.value = ""; sugg.hidden = true; mfApply(); return; }
     if (e.target.closest(".mf-clear")) { mfClear(); }
+    if (e.target.closest(".mf-retry")) { IUCN_STATE = "idle"; iucnLoad(); }
   });
   // the country finder: type to search, arrows/Enter to pick
   var cfind = mfPanel.querySelector(".mf-cfind"), sugg = mfPanel.querySelector(".mf-sugg");
@@ -13786,12 +13881,21 @@ window.SL_GEO_READY = new Promise(function (res) {
       if (idx && !idx[fold(c[0])] && fold(c[0]) !== fold(c[1])) idx[fold(c[0])] = { name: c[0], country: c[1], lat: c[2], lon: c[3] };
     });
   })();
+  // a snake counts for a city when it's recorded in the city's own state/district - or when it
+  // is recorded in the country with no state/district records at all (it could be anywhere
+  // there, so it's listed apart as "district not known", never as recorded in that district)
   function livesNear(sp, r) {
     if (sp.countries.indexOf(r[1]) < 0) return false;
     var area = cityArea(r);
     if (!area) return true;
     var cc = area.slice(0, 2), keys = placeKeysOf(sp).filter(function (k) { return k.slice(0, 2) === cc; });
     return !keys.length || keys.indexOf(area) >= 0;
+  }
+  function nearIsCountryOnly(sp, r) {
+    var area = cityArea(r);
+    if (!area) return true;
+    var cc = area.slice(0, 2);
+    return !placeKeysOf(sp).some(function (k) { return k.slice(0, 2) === cc; });
   }
   document.getElementById("see-search-cities").addEventListener("click", function () {
     panelKind = "cities";
@@ -13811,7 +13915,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       if (cset && !onContinents(r[1], cset)) return;
       var here = pool.filter(function (sp) { return livesNear(sp, r); });
       // a country's capital from CAPITALS (it has no other city listed) shows even with no snakes around it
-      if (here.length || (panelCountry && CAP_OF[r[1]] === r[0])) out.push({ r: r, species: here });
+      if (here.length || (panelCountry && CAP_OF[r[1]] === r[0])) out.push({ r: r, species: here, loose: here.filter(function (sp) { return nearIsCountryOnly(sp, r); }).map(function (sp) { return sp.id; }) });
     });
     PINS = PINS.filter(function (p) { return !p.cityPick; });
     labelPin = null; citiesProv = prov;
@@ -13821,7 +13925,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     out.forEach(function (c) {
       var phi = c.r[2] * RAD, lam = c.r[3] * RAD, cp = Math.cos(phi);
       var t = spMax > spMin ? (c.species.length - spMin) / (spMax - spMin) : 0.1; // all alike: one light shade
-      PINS.push({ area: c.r[0], lon: c.r[3], lat: c.r[2], species: c.species, cityPick: true, cc: ISO[c.r[1]], country: c.r[1], where: cityArea(c.r) ? provLabel(cityArea(c.r)) + ", " + c.r[1] : c.r[1],
+      PINS.push({ area: c.r[0], lon: c.r[3], lat: c.r[2], species: c.species, loose: c.loose || [], cityPick: true, cc: ISO[c.r[1]], country: c.r[1], where: cityArea(c.r) ? provLabel(cityArea(c.r)) + ", " + c.r[1] : c.r[1],
         color: cityDotColor(t), v: [cp * Math.cos(lam), cp * Math.sin(lam), Math.sin(phi)] });
     });
     // the capital carries its name from the start - until another city is tapped, or anything
@@ -14218,8 +14322,10 @@ window.SL_GEO_READY = new Promise(function (res) {
   var box = document.createElement("div");
   box.className = "photo-lightbox";
   box.setAttribute("role", "dialog");
+  box.setAttribute("aria-modal", "true");
   box.setAttribute("aria-label", "Species photo");
-  box.innerHTML = '<figure><div class="pl-frame"><div class="pl-img"></div>' +
+  // a Close button that is always on screen (top right, outside the photo, so zooming never moves it)
+  box.innerHTML = '<button type="button" class="pl-close" aria-label="Close photo">&times;</button><figure><div class="pl-frame"><div class="pl-img"></div>' +
     '<div class="pl-zoom"><button type="button" data-z="in" aria-label="Zoom in">+</button><button type="button" data-z="out" aria-label="Zoom out">&minus;</button><button type="button" data-z="reset" aria-label="Fit photo">&#8635;</button></div></div>' +
     '<figcaption></figcaption><p class="pl-hint">Pinch, scroll or double-tap to zoom &middot; drag to look around</p></figure>';
   document.body.appendChild(box);
@@ -14282,10 +14388,27 @@ window.SL_GEO_READY = new Promise(function (res) {
     var w = frame.clientWidth, h = frame.clientHeight, z = b.getAttribute("data-z");
     if (z === "reset") zReset(); else zTo(Z.k * (z === "in" ? 1.6 : 1 / 1.6), w / 2, h / 2, true);
   });
-  function close() { box.classList.remove("open"); }
+  var plOpener = null;
+  function close() {
+    if (!box.classList.contains("open")) return;
+    box.classList.remove("open");
+    // back to whatever opened it (the photo's card, the map's See photo button...)
+    if (plOpener && document.contains(plOpener) && plOpener.focus) { try { plOpener.focus({ preventScroll: true }); } catch (e) {} }
+    plOpener = null;
+  }
   // tapping the dark area closes it; taps and drags on the photo itself are for zooming
-  box.addEventListener("click", function (e) { if (e.target.closest(".pl-frame")) return; close(); });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+  box.addEventListener("click", function (e) { if (e.target.closest(".pl-close")) { close(); return; } if (e.target.closest(".pl-frame")) return; close(); });
+  document.addEventListener("keydown", function (e) {
+    if (!box.classList.contains("open")) return;
+    if (e.key === "Escape") { close(); return; }
+    if (e.key === "Tab") { // the keyboard stays inside the photo while it's open
+      var f = [].slice.call(box.querySelectorAll("button")).filter(function (x) { return x.offsetParent !== null; });
+      if (!f.length) return;
+      var i = f.indexOf(document.activeElement);
+      if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && (i === f.length - 1 || i < 0)) { e.preventDefault(); f[0].focus(); }
+    }
+  });
   function openPhoto(id, name, sci) {
     var it = D.items[id];
     var img = box.querySelector(".pl-img");
@@ -14303,7 +14426,10 @@ window.SL_GEO_READY = new Promise(function (res) {
     var b = document.createElement("b"); b.textContent = name || ""; cap.appendChild(b);
     var i = document.createElement("i"); i.textContent = sci && sci !== name ? sci : ""; cap.appendChild(i);
     var sm = document.createElement("small"); sm.textContent = xp ? "Photo: " + it[2] + (/wikipedia|inaturalist/i.test(it[2]) ? "" : " · via iNaturalist") : "Photo © " + it[2] + " · via iNaturalist"; cap.appendChild(sm);
+    box.setAttribute("aria-label", "Photo of " + (name || sci || "this snake"));
+    plOpener = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
     box.classList.add("open");
+    setTimeout(function () { var cb = box.querySelector(".pl-close"); if (cb) cb.focus({ preventScroll: true }); }, 30);
     Z.k = 1; Z.x = 0; Z.y = 0; zApply(false);
     // the full photo, not just the card's crop: iNaturalist's open-data copy, swapped in once it loads
     // (the claude.ai copy can't reach outside sites, so it keeps the built-in picture)
@@ -14514,6 +14640,13 @@ window.SL_GEO_READY = new Promise(function (res) {
 (function () {
   var q = null; try { q = new URLSearchParams(location.search); } catch (e) {} if (!q) return;
   var map = q.get("map"), f = q.get("f"), hab = q.get("hab"), type = q.get("type"), fam = q.get("fam"), qs = q.get("q");
+  // ?tab=map / quiz / cam / ach / guide: opens SnakeList on that tab (the About page's feature cards)
+  var tabQ = q.get("tab");
+  if (tabQ && /^(map|quiz|cam|ach|guide|sightings|wish|follow)$/.test(tabQ) && !map && !f && !hab && !type && !fam && !qs) {
+    (function go(n) { if (!window.__introDone && document.getElementById("intro") && n < 40) { setTimeout(function () { go(n + 1); }, 300); return; }
+      var t = document.getElementById("tab-" + tabQ); if (t) t.click(); })(0);
+    return;
+  }
   if (!map && !f && !hab && !type && !fam && !qs) return;
   function ready(tries) {
     if (!window.__introDone && document.getElementById("intro") && tries < 40) { setTimeout(function () { ready(tries + 1); }, 300); return; }
@@ -15025,7 +15158,9 @@ window.SL_GEO_READY = new Promise(function (res) {
   .mf-panel[hidden] { display: none; }
   .mf-head { display: flex; align-items: center; gap: 8px; margin: 0 2px 6px; }
   .mf-head b { font: 600 13px 'Inter', sans-serif; }
-  .mf-res { flex: 1; font-size: 11.5px; opacity: .8; }
+  .mf-res { flex: 1; font-size: 11.5px; opacity: .9; }
+  .mf-cnote { margin: -2px 2px 6px; font-size: 11.5px; line-height: 1.4; opacity: .85; }
+  .mf-retry { min-height: 32px; padding: 5px 14px; border-radius: 8px; border: 1px solid rgba(160,222,140,0.5); background: none; color: inherit; font: 600 12px 'Inter', sans-serif; cursor: pointer; margin: 0 4px 6px; }
   .mf-x { width: 28px; height: 28px; border: none; border-radius: 8px; background: rgba(0,0,0,0.18); color: inherit; font-size: 18px; line-height: 1; cursor: pointer; }
   .mf-body { overflow-y: auto; overscroll-behavior: contain; margin: 0 -4px; padding: 0 4px; scrollbar-width: thin; scrollbar-color: rgba(88,179,81,0.45) transparent; }
   .mf-sec { border-top: 1px solid rgba(160,222,140,0.18); }
@@ -15208,6 +15343,9 @@ window.SL_GEO_READY = new Promise(function (res) {
   .sp-info button:focus-visible, .sp-info a:focus-visible { outline: 2px solid #58b351; outline-offset: 2px; }
   .cp-row b, .cp-row i { cursor: pointer; }
   .cp-row.cp-sp { cursor: pointer; }
+  .cp-row[tabindex]:focus-visible { outline: 3px solid #58b351; outline-offset: -2px; border-radius: 8px; }
+  .cp-group { margin: 12px 4px 4px; font: 600 11px 'JetBrains Mono', monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--text); opacity: .85; }
+  .cp-note { margin: 2px 4px 8px; font-size: 12px; line-height: 1.45; color: var(--text); opacity: .78; }
   .map-tip { position: absolute; left: 0; top: 0; z-index: 6; pointer-events: none; padding: 4px 8px; border-radius: 6px; font: 600 12px/1.3 Inter, sans-serif;
     color: #fff; background: rgba(14, 40, 24, 0.88); box-shadow: 0 2px 8px rgba(0,0,0,0.25); white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
   .map-tip b { display: block; font-weight: 600; }
@@ -15268,7 +15406,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     }).join("") + '</div></div>' +
     '<div class="hm-panel" id="hm-panel" hidden>' +
     '<div class="hm-head"><span>Species heatmap</span><button type="button" class="hm-collapse" id="hm-collapse" aria-label="Hide filters" aria-expanded="true"></button></div>' +
-    '<div class="hm-row hm-pick"><input type="text" id="hm-q" placeholder="Search a snake species&hellip;" autocomplete="off"><select id="hm-cat" hidden aria-hidden="true" tabindex="-1">' + Object.keys(CATS).map(function (k) { return '<option value="' + k + '">' + CATS[k].label + "</option>"; }).join("") + '</select></div>' +
+    '<div class="hm-row hm-pick"><input type="text" id="hm-q" placeholder="Search a snake species&hellip;" aria-label="Heatmap: search a snake species to map" autocomplete="off"><select id="hm-cat" hidden aria-hidden="true" tabindex="-1">' + Object.keys(CATS).map(function (k) { return '<option value="' + k + '">' + CATS[k].label + "</option>"; }).join("") + '</select></div>' +
     '<div class="hm-row hm-seg" id="hm-measure"><button type="button" data-v="live">Where they live</button><button type="button" data-v="obs">Live sightings</button></div>' +
     '<div class="hm-row hm-seg" id="hm-time">' + [["day", "Today"], ["month", "This month"], ["year", "This year"], ["all", "All time"]].map(function (t) { return '<button type="button" data-v="' + t[0] + '">' + t[1] + "</button>"; }).join("") + '</div>' +
     '<div class="hm-legend" id="hm-legend"></div>' +
@@ -15308,7 +15446,11 @@ window.SL_GEO_READY = new Promise(function (res) {
     });
     habList.innerHTML = html || '<p class="hab-none">No habitat matches that.</p>';
   }
-  var habCache = {};
+  var habCache = {}, SCI2ID = null;
+  function sciToId(sci) {
+    if (!SCI2ID) { SCI2ID = {}; [].slice.call(document.querySelectorAll("#grid .card")).forEach(function (c) { var e = c.querySelector(".card-sci"); if (e) SCI2ID[e.textContent.trim().toLowerCase()] = c.dataset.id; }); }
+    return SCI2ID[sci] || "";
+  }
   function habSet() { // id -> 1 for the picked habitat's snakes, or null
     var h = habOn && st.hab && HAB_IDX[st.hab.toLowerCase()];
     if (!h) return null;
@@ -15951,8 +16093,12 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (!R.nsp) { setStatus("None of the checklist's snakes match this filter."); return; }
     var places = window.SL_countPlaces ? window.SL_countPlaces(R.names) : nc + " countries";
     if (R.single) setStatus(nc ? displayName() + (R.gone ? " lived in " : " lives in ") + places + ". Tap a country for its details." + note : "No range on record for this species yet." + note);
-    else if (habOn && st.hab) setStatus(st.hab + ": where its " + R.nsp.toLocaleString() + (R.nsp === 1 ? " snake lives" : " snakes live") + " - " + places + "." + note);
-    else setStatus(R.nsp.toLocaleString() + " species across " + places + "." + note);
+    // each layer says which snakes it uses and that its choice is its own (the search and the
+    // Filters above stay as they are) - and a habitat map shows where the habitat's snakes live,
+    // not the habitat's own outline
+    else if (habOn && st.hab) setStatus("Habitats layer · " + st.hab + ": the whole ranges of the " + R.nsp.toLocaleString() + (R.nsp === 1 ? " snake" : " snakes") +
+      " associated with it, across " + places + " - not the outline of the " + st.hab.toLowerCase() + " itself. Habitats are estimated from where each snake is recorded and what kind of snake it is, not from field surveys. This choice only changes this layer." + note);
+    else setStatus("Heatmap layer · " + (st.q ? displayName() : st.cat !== "all" && CATS[st.cat] ? CATS[st.cat].label : "all snakes") + ": " + R.nsp.toLocaleString() + " species across " + places + ". This choice only changes the heatmap - the search and Filters above stay as they are." + note);
   }
   // the two "nothing here" colours: snakes live there but none of these (a light grey), or the place has no snakes on record at all (a plain neutral grey, lighter
   // in the day theme, darker at night)
@@ -16113,6 +16259,8 @@ window.SL_GEO_READY = new Promise(function (res) {
       label = ms.species.length === 1 ? ms.species[0].name : ms.species.length + " species";
       sci = ms.species.map(function (sp) { return sp.sci; });
     }
+    // the Habitats layer on with a habitat picked: the dots are that habitat's snakes only
+    if (!sci.length && habOn && st.hab && habSet()) return Promise.resolve({ key: "hab:" + st.hab, label: st.hab + " snakes", param: "&taxon_id=" + SNAKES });
     if (!sci.length) {
       var fs = window.SL_MAPF_SCI && window.SL_MAPF_SCI();
       return Promise.resolve({ key: fs ? "f" + Object.keys(fs).length + ":" + Object.keys(fs).slice(0, 5).join(",") : "all", label: fs ? "your filters" : "", param: "&taxon_id=" + SNAKES });
@@ -16136,7 +16284,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     sgFilter().then(function (F) {
       if (my !== SG.token || !SG.on) return;
       if (F.key !== SG.fkey) { SG.fkey = F.key; SG.list = []; SG.ids = {}; sgRender(); force = true; }
-      sgWhat.textContent = F.label ? " · " + F.label : "";
+      sgWhat.textContent = " · " + (F.label || "all snakes"); // always says which snakes the dots are
       if (!F.param) { sgNoteSet("No iNaturalist sightings found for " + F.label + "."); return; }
       var v = sgView(), key = [v.w, v.e, v.s, v.n].map(function (x) { return x.toFixed(1); }).join(",") + F.key + (st.heat ? timeParam() : "");
       if (!force && key === SG.want) return;
@@ -16156,8 +16304,9 @@ window.SL_GEO_READY = new Promise(function (res) {
         var c = o.geojson && o.geojson.coordinates; if (!c) return;
         var t = o.taxon || {}, ph = (o.photos && o.photos[0] && o.photos[0].url) || (t.default_photo && t.default_photo.medium_url) || "";
         // the map's filters on: only sightings of snakes that pass them (a subspecies counts as its species)
-        var FS = window.SL_MAPF_SCI && window.SL_MAPF_SCI();
-        if (FS && !FS[String(t.name || "").toLowerCase().split(" ").slice(0, 2).join(" ")]) return;
+        var FS = window.SL_MAPF_SCI && window.SL_MAPF_SCI(), sp2 = String(t.name || "").toLowerCase().split(" ").slice(0, 2).join(" ");
+        if (FS && !FS[sp2]) return;
+        if (SG.fkey && SG.fkey.indexOf("hab:") === 0) { var hs2 = habSet(); if (hs2 && !hs2[sciToId(sp2)]) return; }
         SG.ids[o.id] = 1;
         SG.list.push({ id: o.id, lon: c[0], lat: c[1], sci: t.name || "Unknown snake", common: t.preferred_common_name || "",
           photo: ph.replace("/square.", "/medium."), place: o.place_guess || "", date: o.observed_on || "", by: (o.user && o.user.login) || "",
@@ -16165,7 +16314,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       });
       if (SG.list.length > 2500) { SG.list.splice(0, SG.list.length - 2500); SG.ids = {}; SG.list.forEach(function (m) { SG.ids[m.id] = 1; }); }
       var FSn = window.SL_MAPF_SCI && window.SL_MAPF_SCI();
-      sgNoteSet(SG.list.length ? "" : FSn ? "No sightings match these filters in this part of the map. Try removing one or more filters, or move the map."
+      sgNoteSet(SG.list.length ? ((d.total_results || 0) > SG.list.length && page >= 3 ? "Showing the latest " + SG.list.length.toLocaleString() + " of " + (d.total_results || 0).toLocaleString() + " sightings here - zoom in to see more." : "") : FSn ? "No sightings match these filters in this part of the map. Try removing one or more filters, or move the map."
         : "No sightings in this part of the map yet" + (SG.fkey !== "all" ? " for " + sgWhat.textContent.replace(" · ", "") : "") + ".");
       sgRender();
       // more where that came from: the next page, a moment later (polite to iNaturalist)
@@ -16194,21 +16343,50 @@ window.SL_GEO_READY = new Promise(function (res) {
     var lonOf = function (x) { return (x - b[0]) / b[2] * 360 - 180; };
     var want = Math.round(b[0]) + "," + Math.round(b[1]) + "," + Math.round(b[2]);
     if (want !== SG.lastBox) { SG.lastBox = want; clearTimeout(SG.t); SG.t = setTimeout(function () { sgLoad(false); }, 450); }
+    // crowded places: sightings closer than ~22 px on screen are drawn as one round cluster with
+    // its count (tap it to zoom in and split it); a single sighting stays its own red dot
     ctx.save();
+    var CELL = 22, cells = {}, groups = [];
     SG.list.forEach(function (m) {
       var x = b[0] + (m.lon + 180) / 360 * b[2], y = b[1] + (90 - m.lat) / 180 * b[3];
-      m.sx = x; m.sy = y;
-      if (x < -10 || y < -10 || x > w + 10 || y > h + 10) return;
-      ctx.beginPath(); ctx.arc(x, y, 5.5, 0, Math.PI * 2);
-      ctx.fillStyle = m === SG.openM ? "#ffd23f" : "#e3261f"; ctx.fill();
-      ctx.lineWidth = 1.8; ctx.strokeStyle = "#fff"; ctx.stroke();
+      m.sx = x; m.sy = y; m.cl = null;
+      if (x < -10 || y < -10 || x > w + 10 || y > h + 10) { m.sx = null; return; }
+      var key = Math.floor(x / CELL) + ":" + Math.floor(y / CELL), g = cells[key];
+      if (!g) { g = cells[key] = { list: [], x: 0, y: 0 }; groups.push(g); }
+      g.list.push(m); g.x += x; g.y += y;
+    });
+    SG.clusters = [];
+    groups.forEach(function (g) {
+      if (g.list.length === 1) {
+        var m = g.list[0];
+        ctx.beginPath(); ctx.arc(m.sx, m.sy, 5.5, 0, Math.PI * 2);
+        ctx.fillStyle = m === SG.openM ? "#ffd23f" : "#e3261f"; ctx.fill();
+        ctx.lineWidth = 1.8; ctx.strokeStyle = "#fff"; ctx.stroke();
+        return;
+      }
+      var cx = g.x / g.list.length, cy = g.y / g.list.length, n = g.list.length, r = Math.min(17, 8 + Math.log(n) * 2.6);
+      g.list.forEach(function (m) { m.cl = g; });
+      g.cx = cx; g.cy = cy; g.r = r; SG.clusters.push(g);
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(227,38,31,0.92)"; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = "#fff"; ctx.stroke();
+      ctx.fillStyle = "#fff"; ctx.font = "700 11px Inter, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(n > 999 ? Math.round(n / 1000) + "k" : String(n), cx, cy + 0.5);
     });
     ctx.restore();
   };
   window.SL_MAP_TAP = function (x, y) {
     if (!SG.on || !onCanvas()) return false;
-    var best = null, bd = 13 * 13;
-    SG.list.forEach(function (m) { if (m.sx == null) return; var d = (m.sx - x) * (m.sx - x) + (m.sy - y) * (m.sy - y); if (d < bd) { bd = d; best = m; } });
+    // a cluster: zoom in round it (when it can't split any more - the same spot - its newest sighting opens)
+    var cl = null;
+    (SG.clusters || []).forEach(function (g) { var d = Math.hypot(g.cx - x, g.cy - y); if (d <= g.r + 4 && (!cl || d < Math.hypot(cl.cx - x, cl.cy - y))) cl = g; });
+    if (cl) {
+      var same = cl.list.every(function (m) { return Math.abs(m.lat - cl.list[0].lat) < 1e-4 && Math.abs(m.lon - cl.list[0].lon) < 1e-4; });
+      if (same) { sgOpen(cl.list[0], cl.cx, cl.cy); return true; }
+      if (window.SL_MAP_ZOOM_AT) window.SL_MAP_ZOOM_AT(2.5, cl.cx, cl.cy);
+      return true;
+    }
+    var best = null, bd = 14 * 14;
+    SG.list.forEach(function (m) { if (m.sx == null || m.cl) return; var d = (m.sx - x) * (m.sx - x) + (m.sy - y) * (m.sy - y); if (d < bd) { bd = d; best = m; } });
     if (!best) { if (!sgPop.hidden) { sgClose(); return true; } return false; }
     sgOpen(best, best.sx, best.sy);
     return true;
@@ -16261,11 +16439,11 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (habOn) habRender();
     syncHabKeep();
     [["hm-time", st.time], ["hm-measure", st.measure]].forEach(function (g) {
-      [].slice.call(document.getElementById(g[0]).children).forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-v") === g[1]); });
+      [].slice.call(document.getElementById(g[0]).children).forEach(function (b) { var on = b.getAttribute("data-v") === g[1]; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
     });
     document.getElementById("hm-legend").innerHTML = legendHTML();
     document.getElementById("hm-time").hidden = st.measure !== "obs";
-    [].slice.call(pop.querySelectorAll("button")).forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-style") === st.style); });
+    [].slice.call(pop.querySelectorAll("button")).forEach(function (b) { var on = b.getAttribute("data-style") === st.style; b.classList.toggle("on", on); b.setAttribute("role", "menuitemradio"); b.setAttribute("aria-checked", String(on)); });
   }
   // the "SnakeList map" choice shows a little picture of the map itself, in today's colours
   function layerThumb() {
@@ -16275,6 +16453,10 @@ window.SL_GEO_READY = new Promise(function (res) {
   new MutationObserver(function () { if (!pop.hidden) layerThumb(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-sl-theme"] });
   btnLayers.addEventListener("click", function (e) { e.stopPropagation(); pop.hidden = !pop.hidden; btnLayers.setAttribute("aria-expanded", String(!pop.hidden)); if (!pop.hidden) layerThumb(); });
   document.addEventListener("click", function (e) { if (!e.target.closest(".layers-wrap")) pop.hidden = true; });
+  // the Map layers button always tells assistive tech the truth about its menu - however the
+  // menu was closed (a style picked, a tap elsewhere, Escape)
+  if (window.MutationObserver) new MutationObserver(function () { btnLayers.setAttribute("aria-expanded", String(!pop.hidden)); }).observe(pop, { attributes: true, attributeFilter: ["hidden"] });
+  pop.setAttribute("role", "menu");
   pop.addEventListener("click", function (e) {
     var b = e.target.closest("[data-style]"); if (!b) return;
     pop.hidden = true;
@@ -16317,6 +16499,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     st.hab = h ? h.name : "";
     if (h) habQ.value = "";
     save(); syncUI(); applyHeat();
+    if (SG.on) sgLoad(true); // the sightings follow the habitat picked (or go back to all snakes)
     var on = habList.querySelector(".hab-opt.on"); if (on) on.scrollIntoView({ block: "nearest" });
     return !!h;
   }
@@ -16601,7 +16784,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   </div>
 </div>
 <div class="ck-bar" id="ck-bar" hidden role="dialog" aria-label="Cookies">
-  <p><b>Cookies?</b> SnakeList keeps your list on this device, and with your OK also remembers what you search and look at, to put snakes you're likely to love at the top of the checklist and to count visits.</p>
+  <p><b>Cookies?</b> SnakeList keeps your list on this device. With your OK, it also remembers on this device what you look at, to put snakes you're likely to love first, and lets Google Analytics use cookies to count visits. Without it, analytics cookies stay off. <a href="privacy.html">Privacy</a></p>
   <div class="ck-btns"><button type="button" class="ck-no" id="ck-no">Only essentials</button><button type="button" class="ck-yes" id="ck-yes">Accept cookies</button></div>
 </div>
 <script>
@@ -16612,6 +16795,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v4.38", d: "2026-11-08", items: ["About SnakeList, About me, Privacy, Terms and Install share one header and footer with the real SnakeList logo; About and Privacy now say exactly what SnakeList does (photos for most species, camera suggestions, what goes to Google Analytics, iNaturalist and others)"] },
+    { v: "v4.37", d: "2026-11-08", items: ["Map: a picked district shows as 'Lisbon district, Portugal · 7 matching species', and a city's list separates snakes recorded in its district from ones only recorded for the country", "Map: each layer says which snakes it shows; Habitats says it maps where those snakes live (not the habitat's outline) and Sightings follow the habitat picked", "Map filters: numbers follow your other filters; conservation status keeps SnakeList's fossil list apart from the Red List; Done says how many species match", "Sightings group into clusters where they crowd - tap one to zoom in", "Photo viewer: a Close button, and the keyboard works inside it", "Full screen: the selected place's list sits over the map instead of below it"] },
     { v: "v4.36", d: "2026-11-08", items: ["Map: the Filters button looks like the other map buttons, and turns the same green as Habitats while it's open"] },
     { v: "v4.35", d: "2026-11-08", items: ["Map: states and regions with no species recorded are solid grey, and the key says Fewer / More recorded species with the real numbers - and No species recorded"] },
     { v: "v4.34", d: "2026-11-08", items: ["See islands: picks up where you are - with a country it flies to that country's islands (out far enough to see them all), with an island like Sicily or Sumatra it shows that island and the small islands round it"] },

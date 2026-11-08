@@ -1,67 +1,131 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>About SnakeList - the snake life list for every snake in the world</title>
 <meta name="description" content="What SnakeList is, why and when it was made, and who made it: a free checklist, map, quiz and snake identifier for all 4,254 snake species in the world, by Eduardo Brandao.">
 <link rel="canonical" href="https://snakelist.com/about-snakelist.html"><meta name="author" content="Eduardo Brandao">
 <meta property="og:type" content="website"><meta property="og:title" content="About SnakeList">
 <meta property="og:url" content="https://snakelist.com/about-snakelist.html"><meta property="og:image" content="https://snakelist.com/snakelist-logo.png">
-<link rel="icon" href="favicon.ico">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"AboutPage","url":"https://snakelist.com/about-snakelist.html","about":{"@type":"WebApplication","name":"SnakeList","url":"https://snakelist.com/","applicationCategory":"EducationalApplication","isAccessibleForFree":true,"author":{"@type":"Person","name":"Eduardo Brandao","url":"https://snakelist.com/about.html"}}}</script>
+<meta name="theme-color" content="#1F5A3A">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="app/apple-touch-icon-s.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem('sl-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <style>
-:root { --bg:#f3f8f1; --card:#ffffff; --text:#183020; --muted:#4d6a55; --accent:#58b351; --border:#cfe3c9; --gold:#e0a526; }
-@media (prefers-color-scheme: dark) { :root { --bg:#16301f; --card:#1e3d29; --text:#e6f2e4; --muted:#a9c9ad; --accent:#58b351; --border:#2f5a3c; } }
-body { margin:0; background:var(--bg); color:var(--text); font:17px/1.65 Inter, system-ui, sans-serif; }
-main { max-width:1120px; margin:0 auto; padding:40px 18px 60px; }
-.card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:clamp(22px,4vw,44px); }
-.hero { display:flex; gap:22px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
-.photo { width:132px; height:132px; border-radius:50%; flex:none; display:grid; place-items:center; text-align:center; font-size:13px; color:var(--muted);
-  border:2px dashed var(--border); background:var(--bg); background-size:cover; background-position:center; }
-.photo.has { border:3px solid var(--gold); }
-h1 { font-size:clamp(30px,5vw,42px); margin:0; line-height:1.15; } .role { margin:4px 0 0; color:var(--gold); font-weight:700; letter-spacing:.02em; }
-h2 { font-size:20px; margin:30px 0 6px; }
-p, li { color:var(--text); } .muted { color:var(--muted); } a { color:var(--accent); }
-.box { border:2px dashed var(--border); border-radius:14px; padding:12px 16px; color:var(--muted); font-style:italic; background:var(--bg); }
-.facts { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-top:8px; }
-.facts div { border:1px solid var(--border); border-radius:12px; padding:10px 14px; } .facts b { display:block; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-style:normal; }
-.me-photo { margin:18px auto 6px; max-width:320px; } .me-photo img { display:block; width:100%; height:auto; border-radius:16px; border:1px solid var(--border); }
-.me-photo figcaption { margin-top:8px; font-size:14px; color:var(--muted); text-align:center; }
-</style>
-<style>
-.hero img { width: min(420px, 80%); height: auto; display: block; margin: 0 auto 6px; }
-.lead { font-size: 19px; text-align: center; color: var(--muted); margin: 6px auto 4px; max-width: 620px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 10px; }
-.grid div { border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px; }
-.grid b { display: block; margin-bottom: 2px; }
-.btn { display: inline-block; margin-top: 8px; padding: 12px 22px; border-radius: 12px; background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; }
-.timeline { list-style: none; padding: 0; margin: 8px 0 0; border-left: 2px solid var(--border); }
+:root { --bg:#f1f7ee; --bg2:#e6f1e1; --card:#ffffff; --text:#17301f; --muted:#4a6552; --line:#d3e6cc; --accent:#58b351; --link:#2f7a37; --chip:#eef7ea; --gold:#a8700f;
+  --shadow:0 10px 30px rgba(23,48,31,0.08);
+  --sl-snake:#58b351; --sl-pat:rgba(26,65,43,0.51); --sl-eye:#1b412b; --sl-check:#5fb246; --sl-tpat:#1e3a24;
+  --mark-grad: radial-gradient(circle at 30% 40%, #96dd78 0%, #6fc255 0%, #57ab45 32%, #38802a 100%);
+  --mark-shadow: drop-shadow(0 1px 1px rgba(0,0,0,0.22)) drop-shadow(0 3px 8px rgba(0,0,0,0.16)); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#12281a; --bg2:#173322; --card:#1b3a27; --text:#e7f3e4; --muted:#acc9b1; --line:#2c5338; --link:#9be07c; --chip:#21452f; --gold:#e8b44a; --shadow:0 10px 30px rgba(0,0,0,0.3);
+  --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.45)) drop-shadow(0 4px 12px rgba(0,0,0,0.30)); } }
+:root[data-theme="dark"] { --bg:#12281a; --bg2:#173322; --card:#1b3a27; --text:#e7f3e4; --muted:#acc9b1; --line:#2c5338; --link:#9be07c; --chip:#21452f; --gold:#e8b44a; --shadow:0 10px 30px rgba(0,0,0,0.3);
+  --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.45)) drop-shadow(0 4px 12px rgba(0,0,0,0.30)); }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.65 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow-x: hidden;
+  min-height: 100vh; display: flex; flex-direction: column; }
+a { color: var(--link); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 10; padding: 8px 14px; border-radius: 8px; background: var(--card); color: var(--text); }
+.skip:focus { left: 12px; }
+/* shared SnakeList header and footer (the same on every page) */
+.site-top { border-bottom: 1px solid var(--line); background: var(--bg); }
+.site-wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+.site-top .site-wrap { display: flex; align-items: center; justify-content: space-between; gap: 8px 18px; flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
+.site-logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: #58b351; font: 700 22px/1 "Fraunces", Georgia, serif; }
+.site-logo img { width: 32px; height: 32px; border-radius: 8px; display: block; }
+.site-top nav { display: flex; flex-wrap: wrap; gap: 2px 4px; font-size: 15px; }
+.site-top nav a { color: var(--muted); text-decoration: none; padding: 7px 9px; border-radius: 8px; }
+.site-top nav a:hover { color: var(--text); background: var(--chip); }
+.site-top nav a[aria-current="page"] { color: var(--link); font-weight: 600; }
+.crumbs { font-size: 14px; color: var(--muted); margin: 18px 0 0; }
+.crumbs a { color: var(--muted); }
+.crumbs span[aria-hidden] { margin: 0 6px; }
+main { flex: 1; width: 100%; }
+.site-foot { margin-top: 40px; padding: 26px 20px 34px; border-top: 1px solid var(--line); text-align: center; color: var(--muted); font-size: 14.5px; }
+.site-foot p { margin: 4px 0; }
+.site-foot a { color: var(--muted); }
+.site-foot .brand { color: #58b351; font: 700 18px "Fraunces", Georgia, serif; text-decoration: none; }
+.site-foot .links a { display: inline-block; padding: 4px 4px; }
+/* the app's own wordmark */
+.mark-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.logo-mark { display: inline-block; text-decoration: none; border-radius: 12px; }
+.sl-title { display: inline-flex; align-items: baseline; white-space: nowrap; line-height: 1; font-size: clamp(40px, 9vw, 64px); }
+.sl-titletext { font-family: 'EB Garamond', Georgia, serif; font-weight: 600; letter-spacing: 0.010em; color: #9fe08a; }
+.sl-titletext em { font-style: normal; font-weight: 500; }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .sl-titletext { background-image: var(--mark-grad); filter: var(--mark-shadow); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; } }
+.sl-titletext .snake-s { height: 0.71em; }
+.sl-tick { flex-shrink: 0; height: 0.70em; width: auto; margin-left: 0.071em; transform: translateY(0.02em); }
+/* page body */
+.page { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); padding: clamp(22px, 4vw, 44px); margin-top: 18px; }
+h1 { font-family: "Fraunces", Georgia, serif; font-size: clamp(32px, 5vw, 46px); line-height: 1.12; margin: 0 0 6px; }
+h2 { font-family: "Fraunces", Georgia, serif; font-size: clamp(21px, 2.6vw, 25px); line-height: 1.25; margin: 34px 0 8px; }
+p, li { color: var(--text); overflow-wrap: break-word; }
+.card a { overflow-wrap: anywhere; }
+.muted { color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border-radius: 13px; background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; }
+.btn:hover { filter: brightness(1.06); }
+@media (max-width: 640px) { body { font-size: 16.5px; } .site-wrap, .page { padding-left: 16px; padding-right: 16px; } .site-top nav { font-size: 14.5px; } .site-top nav a { padding: 6px 7px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+.about-hero { text-align: center; padding-top: 6px; }
+.about-hero .logo-mark { margin: 6px auto 14px; }
+.about-hero h1 { margin-top: 4px; }
+.lead { font-size: clamp(17px, 2vw, 19px); color: var(--muted); margin: 6px auto 0; max-width: 640px; }
+.features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 16px; }
+@media (max-width: 960px) { .features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .features { grid-template-columns: 1fr; } }
+.feature { display: flex; flex-direction: column; gap: 6px; padding: 18px 18px 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--card);
+  color: var(--text); text-decoration: none; transition: border-color .15s, transform .15s; }
+.feature:hover { border-color: var(--accent); transform: translateY(-1px); }
+.feature b { font-size: 17.5px; }
+.feature span { color: var(--muted); font-size: 15.5px; line-height: 1.55; }
+.feature i { margin-top: auto; padding-top: 6px; font-style: normal; font-weight: 600; font-size: 14.5px; color: var(--link); }
+.center { text-align: center; }
+.timeline { list-style: none; padding: 0; margin: 8px 0 0; border-left: 2px solid var(--line); }
 .timeline li { position: relative; padding: 0 0 12px 18px; }
-.timeline li::before { content: ""; position: absolute; left: -7px; top: 8px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+.timeline li::before { content: ""; position: absolute; left: -7px; top: 9px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
 </style>
-</head><body><main><p><a href="./">&larr; Back to SnakeList</a></p><div class="card">
-<div class="hero"><img src="snakelist-logo.png" alt="SnakeList" width="1166" height="280"></div>
-<p class="lead">A free life list for every snake species in the world - tick off the snakes you've seen, find out where each one lives, and test yourself.</p>
+</head>
+<body>
+<svg class="mark-defs" aria-hidden="true"><defs><linearGradient id="sgrad" x1="0" y1="0" x2="1" y2="0.3"><stop offset="0" stop-color="#96dd78"></stop><stop offset="1" stop-color="#81ce65"></stop></linearGradient><linearGradient id="tickgrad" x1="0" y1="0" x2="1" y2="0.3"><stop offset="0" stop-color="#5fb246"></stop><stop offset="1" stop-color="#3b8429"></stop></linearGradient><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath><g id="mark-snake"><defs><clipPath id="py-clip"><path d="M94.6 23L92.5 21.6L90.4 20.1L88.3 18.7L86.1 17.2L83.9 15.8L81.7 14.4L79.4 13L77 11.6L74.6 10.3L72.1 9L69.5 7.7L66.9 6.5L64.1 5.3L61.1 4.3L58 3.3L54.7 2.6L51.2 2.1L47.5 2L43.5 2.1L39.4 2.7L35.2 3.8L31 5.5L27.1 7.7L23.5 10.4L20.4 13.4L17.7 16.7L15.6 19.9L13.7 23.5L12.2 27.3L11 31.4L10.3 35.7L10.2 40L10.5 44.3L11.4 48.5L12.7 52.4L14.3 56.1L16.2 59.5L18.4 62.6L20.7 65.5L23.2 68.1L25.8 70.5L28.5 72.6L31.2 74.5L34 76.3L36.8 77.9L39.6 79.2L41.9 80.3L44 81.3L46.1 82.3L48.3 83.3L50.3 84.2L52.4 85.2L54.4 86.2L56.4 87.2L58.3 88.2L60.2 89.2L62.1 90.2L63.9 91.3L65.6 92.4L67.2 93.5L68.8 94.6L70.3 95.8L71.7 97L73.1 98.2L74.3 99.4L75.4 100.6L76.1 101.5L76.8 102.4L77.3 103.5L77.8 104.6L78.2 105.8L78.4 107.1L78.6 108.4L78.6 109.7L78.5 111.1L78.3 112.4L78 113.8L77.5 115.1L76.9 116.4L76.2 117.7L75.3 118.9L74.3 120.1L73.2 121.3L72 122.4L70.7 123.4L69.2 124.3L67.7 125.2L66 125.9L64.1 126.7L62.2 127.4L60.2 127.9L58.2 128.4L56.2 128.8L54.2 129.2L52.1 129.4L50.1 129.6L48 129.6L45.9 129.6L43.9 129.4L41.8 129.2L39.8 128.8L37.8 128.4L35.8 127.9L33.9 127.2L32 126.4L30.2 125.6L28.5 124.6L26.8 123.5L25.2 122.3L23.7 120.9L23.26 120.43L23.02 120.18L22.79 119.94L22.55 119.7L22.32 119.45L22.08 119.21L21.85 118.96L21.61 118.72L21.38 118.48L21.14 118.24L20.9 117.99L20.67 117.75L20.43 117.51L20.19 117.28L19.94 117.04L19.7 116.8L19.45 116.57L19.21 116.33L18.96 116.11L18.7 115.88L18.45 115.66L18.19 115.44L17.93 115.22L17.67 115L17.4 114.78L17.14 114.57L16.88 114.36L16.61 114.14L16.35 113.93L16.08 113.72L15.82 113.5L15.55 113.29L15.29 113.07L15.03 112.86L14.77 112.64L14.51 112.42L14.25 112.2L13.98 111.99L13.71 111.78L13.43 111.58L13.15 111.39L12.87 111.2L12.58 111.01L12.3 110.82L12.01 110.64L11.72 110.46L11.43 110.28L11.14 110.09L10.85 109.91L10.57 109.72L10.29 109.53L10.01 109.34L9.73 109.14L9.46 108.93L9.19 108.73L8.91 108.54L8.62 108.36L8.32 108.19L8.02 108.03L7.71 107.87L7.41 107.71L7.1 107.56L6.79 107.41L6.48 107.26L6.17 107.11L5.87 106.95L5.57 106.78L5.28 106.61L5 106.43L4.72 106.24L4.43 106.06L4.13 105.9L3.82 105.75L3.51 105.61L3.05 105.39L2.53 105.18L2.13 105.06L1.77 104.96L1.42 104.86L1.06 104.76L0.71 104.66L0.37 104.54L0.03 104.41L-0.31 104.27L-0.64 104.14L-0.99 104.03L-1.35 103.95L-1.72 103.88L-2.09 103.83L-2.46 103.79L-2.83 103.76L-3.2 103.72L-3.57 103.68L-3.93 103.62L-4.29 103.55L-4.64 103.45L-4.99 103.37L-5.35 103.33L-5.72 103.32L-6.1 103.34L-6.48 103.37L-6.85 103.4L-7.22 103.43L-7.59 103.43L-7.94 103.41L-8.29 103.36L-8.65 103.35L-9.02 103.41L-9.39 103.49L-9.76 103.58L-10.12 103.66L-10.47 103.7L-10.82 103.7L-11.17 103.75L-11.53 103.9L-11.88 104.05L-12.23 104.17L-12.57 104.2L-12.91 104.39L-13.25 104.52A0.85 0.85 0 0 0 -13.27 106.22L-12.95 106.35L-12.65 106.55L-12.34 106.61L-12.04 106.76L-11.75 106.96L-11.47 107.15L-11.17 107.27L-10.88 107.33L-10.59 107.45L-10.31 107.61L-10.04 107.8L-9.77 107.98L-9.5 108.14L-9.23 108.26L-8.94 108.33L-8.67 108.44L-8.4 108.58L-8.14 108.76L-7.89 108.94L-7.64 109.14L-7.39 109.32L-7.14 109.49L-6.89 109.64L-6.62 109.75L-6.35 109.85L-6.1 109.98L-5.85 110.14L-5.61 110.31L-5.37 110.5L-5.14 110.69L-4.91 110.89L-4.68 111.08L-4.45 111.27L-4.22 111.44L-3.98 111.59L-3.72 111.73L-3.47 111.86L-3.23 112.01L-2.99 112.17L-2.76 112.36L-2.54 112.55L-2.33 112.75L-2.11 112.96L-1.94 113.14L-1.91 113.25L-1.83 113.4L-1.61 113.63L-1.39 113.85L-1.16 114.06L-0.91 114.25L-0.67 114.43L-0.42 114.62L-0.19 114.83L0.04 115.04L0.26 115.26L0.48 115.48L0.69 115.71L0.9 115.95L1.11 116.18L1.32 116.41L1.53 116.64L1.75 116.87L1.96 117.09L2.19 117.3L2.42 117.51L2.66 117.7L2.9 117.89L3.13 118.09L3.36 118.3L3.58 118.51L3.8 118.72L4.02 118.94L4.23 119.17L4.45 119.39L4.66 119.62L4.87 119.84L5.08 120.07L5.29 120.3L5.5 120.52L5.72 120.74L5.94 120.96L6.16 121.17L6.38 121.38L6.61 121.58L6.84 121.78L7.07 121.99L7.29 122.2L7.52 122.41L7.74 122.62L7.96 122.84L8.17 123.06L8.39 123.27L8.6 123.49L8.82 123.71L9.03 123.94L9.24 124.16L9.46 124.38L9.67 124.6L9.89 124.82L10.1 125.04L10.32 125.25L10.54 125.47L10.76 125.68L10.98 125.9L11.2 126.11L11.43 126.32L11.65 126.53L11.87 126.74L12.09 126.95L12.32 127.17L12.54 127.38L12.76 127.59L12.98 127.81L13.2 128.02L13.42 128.24L13.64 128.45L13.86 128.67L14.08 128.89L14.3 129.11L14.3 129.1L16.1 131.3L18.1 133.5L20.3 135.5L22.6 137.3L25 139L27.5 140.5L30.1 141.8L32.7 143L35.4 144.1L38.1 145L40.9 145.7L43.7 146.3L46.5 146.8L49.4 147.2L52.3 147.4L55.1 147.5L58 147.5L60.9 147.3L63.8 147L66.6 146.6L69.5 146L72.3 145.4L75.3 144.5L78.2 143.4L81.1 142.1L84 140.5L86.8 138.7L89.4 136.7L92 134.4L94.3 131.9L96.5 129.2L98.4 126.3L100.1 123.2L101.4 120L102.5 116.6L103.3 113.1L103.8 109.5L104 105.9L103.8 102.3L103.3 98.6L102.4 95L101.1 91.5L99.5 88L97.6 84.8L95.7 82.1L93.7 79.5L91.7 77.2L89.5 74.9L87.4 72.8L85.1 70.8L82.9 69L80.6 67.2L78.3 65.5L76 63.9L73.7 62.3L71.4 60.9L69 59.5L66.7 58.1L64.4 56.8L62.1 55.5L59.8 54.3L57.5 53.2L55.2 52.1L53 51L51.3 50.2L49.9 49.4L48.5 48.6L47.2 47.7L46 46.7L45 45.8L44.1 44.8L43.3 43.8L42.7 42.9L42.2 42.1L41.8 41.2L41.6 40.5L41.4 39.9L41.4 39.2L41.4 38.7L41.5 38.1L41.7 37.4L42 36.7L42.4 35.9L43 35L43.4 34.5L43.8 34.1L44.2 33.8L44.6 33.6L44.9 33.4L45.5 33.3L46.2 33.2L47.2 33.2L48.4 33.2L49.8 33.4L51.3 33.6L53 33.8L54.8 34.2L56.6 34.6L58.5 35.2L60.5 35.8L62.5 36.5L64.5 37.3L66.6 38.1L68.7 38.9L70.8 39.9L72.9 40.8L75 41.8L77.1 42.8L79.3 43.9L81.4 45Z"></path></clipPath></defs><path class="snake-body" fill="var(--sl-snake, #58b351)" d="M94.6 23L92.5 21.6L90.4 20.1L88.3 18.7L86.1 17.2L83.9 15.8L81.7 14.4L79.4 13L77 11.6L74.6 10.3L72.1 9L69.5 7.7L66.9 6.5L64.1 5.3L61.1 4.3L58 3.3L54.7 2.6L51.2 2.1L47.5 2L43.5 2.1L39.4 2.7L35.2 3.8L31 5.5L27.1 7.7L23.5 10.4L20.4 13.4L17.7 16.7L15.6 19.9L13.7 23.5L12.2 27.3L11 31.4L10.3 35.7L10.2 40L10.5 44.3L11.4 48.5L12.7 52.4L14.3 56.1L16.2 59.5L18.4 62.6L20.7 65.5L23.2 68.1L25.8 70.5L28.5 72.6L31.2 74.5L34 76.3L36.8 77.9L39.6 79.2L41.9 80.3L44 81.3L46.1 82.3L48.3 83.3L50.3 84.2L52.4 85.2L54.4 86.2L56.4 87.2L58.3 88.2L60.2 89.2L62.1 90.2L63.9 91.3L65.6 92.4L67.2 93.5L68.8 94.6L70.3 95.8L71.7 97L73.1 98.2L74.3 99.4L75.4 100.6L76.1 101.5L76.8 102.4L77.3 103.5L77.8 104.6L78.2 105.8L78.4 107.1L78.6 108.4L78.6 109.7L78.5 111.1L78.3 112.4L78 113.8L77.5 115.1L76.9 116.4L76.2 117.7L75.3 118.9L74.3 120.1L73.2 121.3L72 122.4L70.7 123.4L69.2 124.3L67.7 125.2L66 125.9L64.1 126.7L62.2 127.4L60.2 127.9L58.2 128.4L56.2 128.8L54.2 129.2L52.1 129.4L50.1 129.6L48 129.6L45.9 129.6L43.9 129.4L41.8 129.2L39.8 128.8L37.8 128.4L35.8 127.9L33.9 127.2L32 126.4L30.2 125.6L28.5 124.6L26.8 123.5L25.2 122.3L23.7 120.9L23.26 120.43L23.02 120.18L22.79 119.94L22.55 119.7L22.32 119.45L22.08 119.21L21.85 118.96L21.61 118.72L21.38 118.48L21.14 118.24L20.9 117.99L20.67 117.75L20.43 117.51L20.19 117.28L19.94 117.04L19.7 116.8L19.45 116.57L19.21 116.33L18.96 116.11L18.7 115.88L18.45 115.66L18.19 115.44L17.93 115.22L17.67 115L17.4 114.78L17.14 114.57L16.88 114.36L16.61 114.14L16.35 113.93L16.08 113.72L15.82 113.5L15.55 113.29L15.29 113.07L15.03 112.86L14.77 112.64L14.51 112.42L14.25 112.2L13.98 111.99L13.71 111.78L13.43 111.58L13.15 111.39L12.87 111.2L12.58 111.01L12.3 110.82L12.01 110.64L11.72 110.46L11.43 110.28L11.14 110.09L10.85 109.91L10.57 109.72L10.29 109.53L10.01 109.34L9.73 109.14L9.46 108.93L9.19 108.73L8.91 108.54L8.62 108.36L8.32 108.19L8.02 108.03L7.71 107.87L7.41 107.71L7.1 107.56L6.79 107.41L6.48 107.26L6.17 107.11L5.87 106.95L5.57 106.78L5.28 106.61L5 106.43L4.72 106.24L4.43 106.06L4.13 105.9L3.82 105.75L3.51 105.61L3.05 105.39L2.53 105.18L2.13 105.06L1.77 104.96L1.42 104.86L1.06 104.76L0.71 104.66L0.37 104.54L0.03 104.41L-0.31 104.27L-0.64 104.14L-0.99 104.03L-1.35 103.95L-1.72 103.88L-2.09 103.83L-2.46 103.79L-2.83 103.76L-3.2 103.72L-3.57 103.68L-3.93 103.62L-4.29 103.55L-4.64 103.45L-4.99 103.37L-5.35 103.33L-5.72 103.32L-6.1 103.34L-6.48 103.37L-6.85 103.4L-7.22 103.43L-7.59 103.43L-7.94 103.41L-8.29 103.36L-8.65 103.35L-9.02 103.41L-9.39 103.49L-9.76 103.58L-10.12 103.66L-10.47 103.7L-10.82 103.7L-11.17 103.75L-11.53 103.9L-11.88 104.05L-12.23 104.17L-12.57 104.2L-12.91 104.39L-13.25 104.52A0.85 0.85 0 0 0 -13.27 106.22L-12.95 106.35L-12.65 106.55L-12.34 106.61L-12.04 106.76L-11.75 106.96L-11.47 107.15L-11.17 107.27L-10.88 107.33L-10.59 107.45L-10.31 107.61L-10.04 107.8L-9.77 107.98L-9.5 108.14L-9.23 108.26L-8.94 108.33L-8.67 108.44L-8.4 108.58L-8.14 108.76L-7.89 108.94L-7.64 109.14L-7.39 109.32L-7.14 109.49L-6.89 109.64L-6.62 109.75L-6.35 109.85L-6.1 109.98L-5.85 110.14L-5.61 110.31L-5.37 110.5L-5.14 110.69L-4.91 110.89L-4.68 111.08L-4.45 111.27L-4.22 111.44L-3.98 111.59L-3.72 111.73L-3.47 111.86L-3.23 112.01L-2.99 112.17L-2.76 112.36L-2.54 112.55L-2.33 112.75L-2.11 112.96L-1.94 113.14L-1.91 113.25L-1.83 113.4L-1.61 113.63L-1.39 113.85L-1.16 114.06L-0.91 114.25L-0.67 114.43L-0.42 114.62L-0.19 114.83L0.04 115.04L0.26 115.26L0.48 115.48L0.69 115.71L0.9 115.95L1.11 116.18L1.32 116.41L1.53 116.64L1.75 116.87L1.96 117.09L2.19 117.3L2.42 117.51L2.66 117.7L2.9 117.89L3.13 118.09L3.36 118.3L3.58 118.51L3.8 118.72L4.02 118.94L4.23 119.17L4.45 119.39L4.66 119.62L4.87 119.84L5.08 120.07L5.29 120.3L5.5 120.52L5.72 120.74L5.94 120.96L6.16 121.17L6.38 121.38L6.61 121.58L6.84 121.78L7.07 121.99L7.29 122.2L7.52 122.41L7.74 122.62L7.96 122.84L8.17 123.06L8.39 123.27L8.6 123.49L8.82 123.71L9.03 123.94L9.24 124.16L9.46 124.38L9.67 124.6L9.89 124.82L10.1 125.04L10.32 125.25L10.54 125.47L10.76 125.68L10.98 125.9L11.2 126.11L11.43 126.32L11.65 126.53L11.87 126.74L12.09 126.95L12.32 127.17L12.54 127.38L12.76 127.59L12.98 127.81L13.2 128.02L13.42 128.24L13.64 128.45L13.86 128.67L14.08 128.89L14.3 129.11L14.3 129.1L16.1 131.3L18.1 133.5L20.3 135.5L22.6 137.3L25 139L27.5 140.5L30.1 141.8L32.7 143L35.4 144.1L38.1 145L40.9 145.7L43.7 146.3L46.5 146.8L49.4 147.2L52.3 147.4L55.1 147.5L58 147.5L60.9 147.3L63.8 147L66.6 146.6L69.5 146L72.3 145.4L75.3 144.5L78.2 143.4L81.1 142.1L84 140.5L86.8 138.7L89.4 136.7L92 134.4L94.3 131.9L96.5 129.2L98.4 126.3L100.1 123.2L101.4 120L102.5 116.6L103.3 113.1L103.8 109.5L104 105.9L103.8 102.3L103.3 98.6L102.4 95L101.1 91.5L99.5 88L97.6 84.8L95.7 82.1L93.7 79.5L91.7 77.2L89.5 74.9L87.4 72.8L85.1 70.8L82.9 69L80.6 67.2L78.3 65.5L76 63.9L73.7 62.3L71.4 60.9L69 59.5L66.7 58.1L64.4 56.8L62.1 55.5L59.8 54.3L57.5 53.2L55.2 52.1L53 51L51.3 50.2L49.9 49.4L48.5 48.6L47.2 47.7L46 46.7L45 45.8L44.1 44.8L43.3 43.8L42.7 42.9L42.2 42.1L41.8 41.2L41.6 40.5L41.4 39.9L41.4 39.2L41.4 38.7L41.5 38.1L41.7 37.4L42 36.7L42.4 35.9L43 35L43.4 34.5L43.8 34.1L44.2 33.8L44.6 33.6L44.9 33.4L45.5 33.3L46.2 33.2L47.2 33.2L48.4 33.2L49.8 33.4L51.3 33.6L53 33.8L54.8 34.2L56.6 34.6L58.5 35.2L60.5 35.8L62.5 36.5L64.5 37.3L66.6 38.1L68.7 38.9L70.8 39.9L72.9 40.8L75 41.8L77.1 42.8L79.3 43.9L81.4 45Z"></path><g clip-path="url(#py-clip)"><g fill="var(--sl-pat, rgba(26,65,43,0.51))"><g transform="translate(56.3 18.9) rotate(-165.4)"><path d="M0 -10.32 C7.02 -10.32, 11.32 -5.68, 11.32 0 C11.32 5.68, 7.02 10.32, 0 10.32 C-7.02 10.32, -11.32 5.68, -11.32 0 C-11.32 -5.68, -7.02 -10.32, 0 -10.32 Z"></path></g><g transform="translate(36.1 20.4) rotate(148.4)"><path d="M0 -8.10 C8.14 -8.10, 13.12 -4.46, 13.12 0 C13.12 4.46, 8.14 8.10, 0 8.10 C-8.14 8.10, -13.12 4.46, -13.12 0 C-13.12 -4.46, -8.14 -8.10, 0 -8.10 Z"></path></g><g transform="translate(25.8 37.8) rotate(93.9)"><path d="M0 -10.80 C6.97 -10.80, 11.25 -5.94, 11.25 0 C11.25 5.94, 6.97 10.80, 0 10.80 C-6.97 10.80, -11.25 5.94, -11.25 0 C-11.25 -5.94, -6.97 -10.80, 0 -10.80 Z"></path></g><g transform="translate(33.6 56.4) rotate(45.4)"><path d="M0 -8.64 C7.91 -8.64, 12.75 -4.75, 12.75 0 C12.75 4.75, 7.91 8.64, 0 8.64 C-7.91 8.64, -12.75 4.75, -12.75 0 C-12.75 -4.75, -7.91 -8.64, 0 -8.64 Z"></path></g><g transform="translate(51.2 67.4) rotate(25.7)"><path d="M0 -9.90 C7.36 -9.90, 11.88 -5.45, 11.88 0 C11.88 5.45, 7.36 9.90, 0 9.90 C-7.36 9.90, -11.88 5.45, -11.88 0 C-11.88 -5.45, -7.36 -9.90, 0 -9.90 Z"></path></g><g transform="translate(69.5 77.4) rotate(32.8)"><path d="M0 -8.60 C7.38 -8.60, 11.90 -4.73, 11.90 0 C11.90 4.73, 7.38 8.60, 0 8.60 C-7.38 8.60, -11.90 4.73, -11.90 0 C-11.90 -4.73, -7.38 -8.60, 0 -8.60 Z"></path></g><g transform="translate(85.2 91.0) rotate(51.4)"><path d="M0 -9.12 C6.34 -9.12, 10.23 -5.02, 10.23 0 C10.23 5.02, 6.34 9.12, 0 9.12 C-6.34 9.12, -10.23 5.02, -10.23 0 C-10.23 -5.02, -6.34 -9.12, 0 -9.12 Z"></path></g><g transform="translate(91.1 110.4) rotate(95.7)"><path d="M0 -6.72 C6.45 -6.72, 10.40 -3.69, 10.40 0 C10.40 3.69, 6.45 6.72, 0 6.72 C-6.45 6.72, -10.40 3.69, -10.40 0 C-10.40 -3.69, -6.45 -6.72, 0 -6.72 Z"></path></g><g transform="translate(81.8 128.5) rotate(138.0)"><path d="M0 -6.89 C5.41 -6.89, 8.73 -3.79, 8.73 0 C8.73 3.79, 5.41 6.89, 0 6.89 C-5.41 6.89, -8.73 3.79, -8.73 0 C-8.73 -3.79, -5.41 -6.89, 0 -6.89 Z"></path></g><g transform="translate(63.1 137.2) rotate(168.3)"><path d="M0 -5.36 C4.98 -5.36, 8.03 -2.95, 8.03 0 C8.03 2.95, 4.98 5.36, 0 5.36 C-4.98 5.36, -8.03 2.95, -8.03 0 C-8.03 -2.95, -4.98 -5.36, 0 -5.36 Z"></path></g><g transform="translate(42.4 137.6) rotate(-169.7)"><path d="M0 -5.38 C3.85 -5.38, 6.20 -2.96, 6.20 0 C6.20 2.96, 3.85 5.38, 0 5.38 C-3.85 5.38, -6.20 2.96, -6.20 0 C-6.20 -2.96, -3.85 -5.38, 0 -5.38 Z"></path></g></g></g><g transform="translate(88.0 34.0) rotate(6)"><path d="M-30 -8.0 C-24 -14.2, -14 -16.6, -4 -16.5 C4.5 -16.3, 12.6 -12.6, 18.2 -8.6 C21.4 -6.4, 23.6 -4.5, 24.6 -3.0 C25.6 -1.5, 25.6 1.5, 24.6 3.0 C23.6 4.5, 21.4 6.4, 18.2 8.6 C12.6 12.6, 4.5 16.3, -4 16.5 C-14 16.6, -24 14.2, -30 8.0 C-33.5 5.4, -33.5 -5.4, -30 -8.0 Z" fill="var(--sl-snake, #58b351)"></path><circle cx="9.0" cy="-7.0" r="4.26" fill="var(--sl-eye, #1b412b)"></circle><path d="M24.6 2.2 L30.8 3.6" fill="none" stroke="var(--sl-snake, #58b351)" stroke-width="2.2" stroke-linecap="round"></path><path d="M30.8 3.6 L34.8 2.2" fill="none" stroke="var(--sl-snake, #58b351)" stroke-width="1.8" stroke-linecap="round"></path><path d="M30.8 3.6 L34.8 6.2" fill="none" stroke="var(--sl-snake, #58b351)" stroke-width="1.8" stroke-linecap="round"></path></g></g></defs></svg>
+<a class="skip" href="#main">Skip to content</a><header class="site-top"><div class="site-wrap"><a class="site-logo" href="./" aria-label="SnakeList - go to the app"><img src="app/icon-192-s.png" alt="" width="32" height="32"><span>SnakeList</span></a><nav aria-label="Site"><a href="./">Open the app</a><a href="species/">Species</a><a href="install.html">Install</a><a href="about-snakelist.html" aria-current="page">About</a></nav></div></header>
+<main id="main"><div class="page">
+<div class="card">
+<div class="about-hero">
+<a class="logo-mark" href="./" aria-label="SnakeList - go to the app"><span class="sl-title" aria-hidden="true"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></span></a>
+<h1>About SnakeList</h1>
+<p class="lead">A free life list for every snake species in the world &ndash; tick off the snakes you've seen, find out where each one lives, and test yourself.</p>
+</div>
 
 <h2>What SnakeList is</h2>
-<p>SnakeList is a checklist of all <b>4,254 snake species</b> in the world, from the tiniest blind snakes to the biggest pythons. You can mark the snakes you've seen (with the date, the place and your own photos), keep a list of the ones you want to see, and follow your favourites. It works on a computer, a tablet or a phone, and you can install it like an app.</p>
-<div class="grid">
-<div><b>The checklist</b>Every species with a photo, its family, where it lives, whether it's venomous, and filters to find any snake.</div>
-<div><b>The map</b>Where each snake lives, down to states, provinces and islands, a heatmap of how many species live in each place, live sightings and habitats.</div>
-<div><b>Species pages</b>A page for every snake, with its photo, facts, range map, the states and cities where it's found, and related snakes.</div>
-<div><b>The quiz</b>Easy, medium and hard rounds: where does this snake live, which state, and snake facts.</div>
-<div><b>The camera</b>Take a photo of a snake and SnakeList suggests which species it might be, from the snakes that live where you are - on your own device.</div>
-<div><b>Achievements</b>Badges for the snakes you see and the quizzes you finish.</div>
+<p>SnakeList is a checklist of all <b>4,254 snake species</b> in the world, from the tiniest blind snakes to the biggest pythons. You can mark the snakes you've seen (with the date, the place and your own photos), keep a list of the ones you want to see, and follow your favourites. It works on a computer, a tablet or a phone, and you can <a href="install.html">install it like an app</a>.</p>
+<div class="features">
+<a class="feature" href="./"><b>The checklist</b><span>Every species with its family, where it lives and whether it's venomous, with a photo for most of them (about 3,100 of the 4,254 so far), and filters to find any snake.</span><i>Open the checklist &rarr;</i></a>
+<a class="feature" href="./?tab=map"><b>The map</b><span>Where each snake lives, down to states, provinces and islands, a heatmap of how many species live in each place, live sightings and habitats.</span><i>Open the map &rarr;</i></a>
+<a class="feature" href="species/"><b>Species pages</b><span>A page for every snake, with a photo where one is available, facts, a range map, the states and cities where it's recorded, and related snakes.</span><i>Browse all species &rarr;</i></a>
+<a class="feature" href="./?tab=quiz"><b>The quiz</b><span>Easy, medium and hard rounds: where does this snake live, which state, and snake facts.</span><i>Take the quiz &rarr;</i></a>
+<a class="feature" href="./?tab=cam"><b>The camera</b><span>Take a photo of a snake and SnakeList suggests which species it might be, from the snakes recorded near you. The suggestions are a guide, not a definite identification.</span><i>Try the camera &rarr;</i></a>
+<a class="feature" href="./?tab=ach"><b>Achievements</b><span>Badges for the snakes you see and the quizzes you finish.</span><i>See achievements &rarr;</i></a>
 </div>
-<p style="text-align:center"><a class="btn" href="./">Open SnakeList</a></p>
+<p class="center" style="margin-top:22px"><a class="btn" href="./">Open SnakeList</a></p>
 
 <h2>Why it was made</h2>
-<p>SnakeList was made by <a href="about.html">Eduardo Brandao</a>, a new herpetologist who loves snakes. He wanted one place to tick off every snake he had ever seen, instead of keeping a checklist in Google Keep. When he found out that no app like that existed - iNaturalist can work as a list if you add photos, but he wanted a real checklist - he decided to make his own.</p>
+<p>SnakeList was made by <a href="about.html">Eduardo Brandao</a>, a new herpetologist who loves snakes. He wanted one place to tick off every snake he had ever seen, instead of keeping a checklist in Google Keep. He couldn't find an app that worked the way he wanted &ndash; iNaturalist can work as a list if you upload photos, but he wanted a real checklist &ndash; so he decided to make his own.</p>
 <p>The name SnakeList is his own idea.</p>
 
 <h2>When</h2>
 <ul class="timeline">
-<li><b>The idea</b> - on a family trip to Florida, in Orlando, after going herping for the first time.</li>
-<li><b>21 August 2026</b> - the first SnakeList: a checklist of the world's snakes to tick off.</li>
-<li><b>Since then</b> - more than a hundred updates: photos for thousands of species, the map, the quiz, the camera, species pages, sign-in to keep your list on every device, and much more. Every change is listed in SnakeList itself (the clock button at the top).</li>
+<li><b>The idea</b> &ndash; on a family trip to Florida, in Orlando, after going herping for the first time.</li>
+<li><b>21 August 2026</b> &ndash; the first SnakeList: a checklist of the world's snakes to tick off.</li>
+<li><b>Since then</b> &ndash; more than a hundred updates: photos for thousands of species, the map, the quiz, the camera, species pages, sign-in to keep your list on every device, and much more. Every change is listed in SnakeList itself (the clock button at the top).</li>
 </ul>
 
 <h2>How it's made</h2>
@@ -73,13 +137,16 @@ p, li { color:var(--text); } .muted { color:var(--muted); } a { color:var(--acce
 <li>Small islands from <a href="https://www.soest.hawaii.edu/pwessel/gshhg/" target="_blank" rel="noopener">GSHHG</a> coastlines (LGPL licence)</li>
 <li>Fossil snake ages from the published fossil record</li>
 </ul>
-<p>Habitats are estimated from where each snake lives and what kind of snake it is, so they're a guide rather than a survey.</p>
+<p>Habitats are estimated from where each snake lives and what kind of snake it is, so they're a guide rather than a survey. Some species don't have a photo yet, and some ranges are incomplete &ndash; if you spot a mistake, please report it.</p>
 
 <h2>Free, and your list is yours</h2>
-<p>SnakeList is free. Your list is saved on your own device, and if you sign in, in your own account - see the <a href="privacy.html">privacy policy</a>.</p>
+<p>SnakeList is free. Your list is saved on your own device, and if you sign in with Google, in your own Google Drive &ndash; see the <a href="privacy.html">privacy policy</a>.</p>
 
 <h2>Get in touch</h2>
 <p>Have an idea, or spotted something wrong? Use the <b>Report</b> button at the top of <a href="./">SnakeList</a>.</p>
+</div>
+</div></main>
+<footer class="site-foot"><p><a class="brand" href="about-snakelist.html">SnakeList</a> &middot; made by <a href="about.html">Eduardo Brandao</a></p><p class="links"><a href="./">Open the app</a> &middot; <a href="species/">All species</a> &middot; <a href="install.html">Install app</a> &middot; <a href="about-snakelist.html">About SnakeList</a> &middot; <a href="about.html">About me</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></p></footer>
 
-<p class="muted" style="margin-top:30px">SnakeList &middot; made by <a href="about.html">Eduardo Brandao</a> &middot; <a href="about.html">About me</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></p>
-</div></main></body></html>
+</body>
+</html>

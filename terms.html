@@ -1,17 +1,91 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Terms of service - SnakeList</title><link rel="icon" href="favicon.ico"><meta name="robots" content="index,follow">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Terms of service - SnakeList</title>
+<meta name="description" content="The simple terms for using SnakeList, the free snake checklist, map and quiz.">
+<link rel="canonical" href="https://snakelist.com/terms.html"><meta name="author" content="Eduardo Brandao">
+<meta name="theme-color" content="#1F5A3A">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="app/apple-touch-icon-s.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem('sl-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <style>
-:root { --bg:#f3f8f1; --card:#ffffff; --text:#183020; --muted:#4d6a55; --accent:#58b351; --border:#cfe3c9; }
-@media (prefers-color-scheme: dark) { :root { --bg:#16301f; --card:#1e3d29; --text:#e6f2e4; --muted:#a9c9ad; --accent:#58b351; --border:#2f5a3c; } }
-body { margin:0; background:var(--bg); color:var(--text); font:17px/1.65 Inter, system-ui, sans-serif; }
-main { max-width:760px; margin:0 auto; padding:40px 18px 60px; }
-.card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:clamp(22px,4vw,44px); }
-h1 { font-size:clamp(30px,5vw,42px); margin:0 0 4px; } h2 { font-size:20px; margin:28px 0 6px; }
-p, li { color:var(--text); } .muted { color:var(--muted); } a { color:var(--accent); overflow-wrap:anywhere; }
-</style></head><body><main><p><a href="./">&larr; Back to SnakeList</a></p><div class="card">
-<h1>Terms of service</h1><p class="muted">Last updated 26 October 2026</p>
+:root { --bg:#f1f7ee; --bg2:#e6f1e1; --card:#ffffff; --text:#17301f; --muted:#4a6552; --line:#d3e6cc; --accent:#58b351; --link:#2f7a37; --chip:#eef7ea; --gold:#a8700f;
+  --shadow:0 10px 30px rgba(23,48,31,0.08);
+  --sl-snake:#58b351; --sl-pat:rgba(26,65,43,0.51); --sl-eye:#1b412b; --sl-check:#5fb246; --sl-tpat:#1e3a24;
+  --mark-grad: radial-gradient(circle at 30% 40%, #96dd78 0%, #6fc255 0%, #57ab45 32%, #38802a 100%);
+  --mark-shadow: drop-shadow(0 1px 1px rgba(0,0,0,0.22)) drop-shadow(0 3px 8px rgba(0,0,0,0.16)); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#12281a; --bg2:#173322; --card:#1b3a27; --text:#e7f3e4; --muted:#acc9b1; --line:#2c5338; --link:#9be07c; --chip:#21452f; --gold:#e8b44a; --shadow:0 10px 30px rgba(0,0,0,0.3);
+  --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.45)) drop-shadow(0 4px 12px rgba(0,0,0,0.30)); } }
+:root[data-theme="dark"] { --bg:#12281a; --bg2:#173322; --card:#1b3a27; --text:#e7f3e4; --muted:#acc9b1; --line:#2c5338; --link:#9be07c; --chip:#21452f; --gold:#e8b44a; --shadow:0 10px 30px rgba(0,0,0,0.3);
+  --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.45)) drop-shadow(0 4px 12px rgba(0,0,0,0.30)); }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.65 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow-x: hidden;
+  min-height: 100vh; display: flex; flex-direction: column; }
+a { color: var(--link); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 10; padding: 8px 14px; border-radius: 8px; background: var(--card); color: var(--text); }
+.skip:focus { left: 12px; }
+/* shared SnakeList header and footer (the same on every page) */
+.site-top { border-bottom: 1px solid var(--line); background: var(--bg); }
+.site-wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+.site-top .site-wrap { display: flex; align-items: center; justify-content: space-between; gap: 8px 18px; flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
+.site-logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: #58b351; font: 700 22px/1 "Fraunces", Georgia, serif; }
+.site-logo img { width: 32px; height: 32px; border-radius: 8px; display: block; }
+.site-top nav { display: flex; flex-wrap: wrap; gap: 2px 4px; font-size: 15px; }
+.site-top nav a { color: var(--muted); text-decoration: none; padding: 7px 9px; border-radius: 8px; }
+.site-top nav a:hover { color: var(--text); background: var(--chip); }
+.site-top nav a[aria-current="page"] { color: var(--link); font-weight: 600; }
+.crumbs { font-size: 14px; color: var(--muted); margin: 18px 0 0; }
+.crumbs a { color: var(--muted); }
+.crumbs span[aria-hidden] { margin: 0 6px; }
+main { flex: 1; width: 100%; }
+.site-foot { margin-top: 40px; padding: 26px 20px 34px; border-top: 1px solid var(--line); text-align: center; color: var(--muted); font-size: 14.5px; }
+.site-foot p { margin: 4px 0; }
+.site-foot a { color: var(--muted); }
+.site-foot .brand { color: #58b351; font: 700 18px "Fraunces", Georgia, serif; text-decoration: none; }
+.site-foot .links a { display: inline-block; padding: 4px 4px; }
+/* the app's own wordmark */
+.mark-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.logo-mark { display: inline-block; text-decoration: none; border-radius: 12px; }
+.sl-title { display: inline-flex; align-items: baseline; white-space: nowrap; line-height: 1; font-size: clamp(40px, 9vw, 64px); }
+.sl-titletext { font-family: 'EB Garamond', Georgia, serif; font-weight: 600; letter-spacing: 0.010em; color: #9fe08a; }
+.sl-titletext em { font-style: normal; font-weight: 500; }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .sl-titletext { background-image: var(--mark-grad); filter: var(--mark-shadow); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; } }
+.sl-titletext .snake-s { height: 0.71em; }
+.sl-tick { flex-shrink: 0; height: 0.70em; width: auto; margin-left: 0.071em; transform: translateY(0.02em); }
+/* page body */
+.page { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); padding: clamp(22px, 4vw, 44px); margin-top: 18px; }
+h1 { font-family: "Fraunces", Georgia, serif; font-size: clamp(32px, 5vw, 46px); line-height: 1.12; margin: 0 0 6px; }
+h2 { font-family: "Fraunces", Georgia, serif; font-size: clamp(21px, 2.6vw, 25px); line-height: 1.25; margin: 34px 0 8px; }
+p, li { color: var(--text); overflow-wrap: break-word; }
+.card a { overflow-wrap: anywhere; }
+.muted { color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border-radius: 13px; background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; }
+.btn:hover { filter: brightness(1.06); }
+@media (max-width: 640px) { body { font-size: 16.5px; } .site-wrap, .page { padding-left: 16px; padding-right: 16px; } .site-top nav { font-size: 14.5px; } .site-top nav a { padding: 6px 7px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
+.doc { max-width: 820px; margin: 0 auto; }
+.doc h2 { margin-top: 30px; }
+.doc ul { padding-left: 22px; }
+.doc li { margin: 4px 0; }
+.updated { color: var(--muted); margin: 0; }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 16px 0 0; padding: 12px 14px; border-radius: 14px; background: var(--bg2); border: 1px solid var(--line); font-size: 15px; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a><header class="site-top"><div class="site-wrap"><a class="site-logo" href="./" aria-label="SnakeList - go to the app"><img src="app/icon-192-s.png" alt="" width="32" height="32"><span>SnakeList</span></a><nav aria-label="Site"><a href="./">Open the app</a><a href="species/">Species</a><a href="install.html">Install</a><a href="about-snakelist.html">About</a></nav></div></header>
+<main id="main"><div class="page"><nav class="crumbs" aria-label="Breadcrumb"><a href="./">SnakeList</a><span aria-hidden="true">/</span><span aria-current="page">Terms of service</span></nav>
+<div class="card doc">
+<h1>Terms of service</h1>
+<p class="updated">Last updated 26 October 2026</p>
 <p>SnakeList is made and run by Eduardo Brandao. By using SnakeList (snakelist.com and the installed app) you agree to these simple terms.</p>
 <h2>Free to use</h2>
 <p>SnakeList is free for personal and educational use.</p>
@@ -25,5 +99,9 @@ p, li { color:var(--text); } .muted { color:var(--muted); } a { color:var(--acce
 <p>These terms may be updated; the date at the top shows the latest version.</p>
 <h2>Contact</h2>
 <p><a href="mailto:eduardo.fpb.brandao@gmail.com">eduardo.fpb.brandao@gmail.com</a></p>
+</div>
+</div></main>
+<footer class="site-foot"><p><a class="brand" href="about-snakelist.html">SnakeList</a> &middot; made by <a href="about.html">Eduardo Brandao</a></p><p class="links"><a href="./">Open the app</a> &middot; <a href="species/">All species</a> &middot; <a href="install.html">Install app</a> &middot; <a href="about-snakelist.html">About SnakeList</a> &middot; <a href="about.html">About me</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></p></footer>
 
-<p class="muted">&copy; 2026 Eduardo Brandao &middot; SnakeList</p></div></main></body></html>
+</body>
+</html>
