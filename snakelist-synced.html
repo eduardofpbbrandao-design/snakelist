@@ -1009,6 +1009,12 @@
   body.map-full { overflow: hidden; }
   .globe-stage.full .heat-search { position: absolute; top: 12px; left: 50%;
     transform: translateX(-50%); width: min(440px, 56vw); margin: 0; z-index: 5; }
+  /* a narrow screen, full screen: the search spans from the left edge to just before the
+     layers/zoom column on the right, never under it */
+  @media (max-width: 640px) {
+    .globe-stage.full .heat-search { left: 10px; right: 100px; width: auto; transform: none; }
+    .globe-stage.full .globe-btns { left: 10px; right: 56px; width: auto; transform: none; max-width: none; justify-content: flex-start; }
+  }
   .globe-stage.full .heat-search { background: rgba(10,20,32,0.82); border-color: rgba(255,255,255,0.22);
     backdrop-filter: blur(6px); }
   .globe-stage.full .heat-search input { color: #f2f6fa; }
@@ -1426,7 +1432,7 @@
 </style>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.29</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.30</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All 4,254 snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -10932,7 +10938,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     var h = full ? stage.clientHeight : Math.round(w / 2);
     // a phone held upright: half its width would be a thin strip - the map gets most of the
     // screen's height instead (v4.28), so it's big enough to use with a finger
-    if (!full && w < 700 && window.innerHeight > window.innerWidth) h = Math.max(h, Math.round(Math.min(window.innerHeight * 0.62, w * 1.5)));
+    if (!full && w < 700 && window.innerHeight > window.innerWidth) h = Math.max(h, Math.round(Math.min(window.innerHeight * 0.56, w * 1.25)));
     var dpr = Math.min(2, window.devicePixelRatio || 1);
     sizeW = w; sizeH = h;
     if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
@@ -10962,6 +10968,10 @@ window.SL_GEO_READY = new Promise(function (res) {
   function baseSize(w, h) {
     var dw = w, dh = w / 2;
     if (dh > h) { dh = h; dw = h * 2; }
+    // a map box taller than the world's 2:1 shape (a phone held upright): the world fills its
+    // height instead of floating as a thin strip in the middle of empty sea - it reaches past
+    // the sides, and you drag across to the rest. Shapes keep their true proportions.
+    else if (h > dh * 1.1) { dh = h; dw = h * 2; }
     return [dw, dh];
   }
   function clampPan() {
@@ -11194,7 +11204,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // clear of the panels, buttons and search sitting on top of the map
   function clearOfPanels(x, y, tw) {
     var sr = stage.getBoundingClientRect(), boxes = [];
-    [].slice.call(stage.querySelectorAll(".hm-panel, .map-tools, .layers-wrap, .globe-zoom, .country-panel, .heat-search, .globe-btns, .sg-pop, .sp-info-wrap")).forEach(function (el) {
+    [].slice.call(stage.querySelectorAll(".hm-panel, .map-tools, .layers-wrap, .globe-zoom, .country-panel, .heat-search, .globe-btns, .sg-pop, .sp-info-wrap, .globe-hint, .map-legend, .sg-note, .sg-key")).forEach(function (el) {
       if (el.hidden || el.classList.contains("docked") || el.offsetParent === null) return;
       var r = el.getBoundingClientRect(); if (!r.width || !r.height) return;
       boxes.push([r.left - sr.left - 4, r.top - sr.top - 4, r.right - sr.left + 4, r.bottom - sr.top + 4]);
@@ -11335,13 +11345,15 @@ window.SL_GEO_READY = new Promise(function (res) {
       // tiny countries (Kosovo, Luxembourg, ...) skip the light line: at world zoom it's
       // thicker than the country is wide, so Kosovo read as a white blob instead of green
       var bigEnough = function (r) { return !r.dot && (r.e - r.w) / 360 * vb[2] > 14 && (r.no - r.s) / 180 * vb[3] > 10; };
-      shapePath(to, function (r) { return wantHI(r) && bigEnough(r); }, stride, true);
       // a light line between highlighted countries, so a range across several neighbours
       // still shows each country instead of one merged green shape
-      ctx.strokeStyle = "rgba(255,255,255,0.85)";
-      ctx.lineWidth = 0.9;
-      ctx.lineJoin = "round";
-      STROKE();
+      if (!strokeBigRings(wantHI, 14, "rgba(255,255,255,0.85)", 0.9)) {
+        shapePath(to, function (r) { return wantHI(r) && bigEnough(r); }, stride, true);
+        ctx.strokeStyle = "rgba(255,255,255,0.85)";
+        ctx.lineWidth = 0.9;
+        ctx.lineJoin = "round";
+        STROKE();
+      }
       // POLY also holds single-point "dot" entries for islands too small to trace as a
       // polygon - shapePath skips those, so without this a country with lots of small
       // islands (Indonesia, the Philippines, ...) would highlight only its bigger
@@ -11360,11 +11372,13 @@ window.SL_GEO_READY = new Promise(function (res) {
       // (with "See islands" on for this country only its islands are coloured - its outline stays)
       ctx.fillStyle = onColor;
       if (!(islandsOn && islScope === selected)) FILL();
-      shapePath(to, function (r) { return wantSel(r) && (r.e - r.w) / 360 * vb[2] > 8; }, stride, true);
-      ctx.strokeStyle = "rgba(255,255,255,0.95)";
-      ctx.lineWidth = 1.6;
-      ctx.lineJoin = "round";
-      STROKE();
+      if (!strokeBigRings(wantSel, 14, "rgba(255,255,255,0.95)", 1.6)) {
+        shapePath(to, function (r) { return wantSel(r) && (r.e - r.w) / 360 * vb[2] > 8; }, stride, true);
+        ctx.strokeStyle = "rgba(255,255,255,0.95)";
+        ctx.lineWidth = 1.6;
+        ctx.lineJoin = "round";
+        STROKE();
+      }
       fillDots(to, wantSel, 2.6); // after the stroke, same reason as the HI block above
     }
   }
@@ -11908,6 +11922,52 @@ window.SL_GEO_READY = new Promise(function (res) {
     var b = document.getElementById("see-islands");
     if (b) { b.textContent = islandsOn ? "Hide islands" : "See islands"; b.setAttribute("aria-pressed", String(islandsOn)); }
   }
+  // one outline ring as a path at this zoom's detail: flat coordinates (cached) or, close up,
+  // straight to screen pixels
+  function ringPathInto(P, r, lvl, close, to, M) {
+    var o = (r.L && r.L[lvl]) || r;
+    if (!o || o.n < 3) return false;
+    if (close) {
+      var p0 = to(o.lon[0], o.lat[0]); if (!p0) return false;
+      P.moveTo(p0[0], p0[1]);
+      for (var q = 1; q < o.n; q++) { var pq = to(o.lon[q], o.lat[q]); if (pq) P.lineTo(pq[0], pq[1]); }
+      P.closePath(); return true;
+    }
+    var C = r._ip && r._ip[lvl];
+    if (!C) {
+      C = new Path2D(); C.moveTo(o.lon[0] + 180, 90 - o.lat[0]);
+      for (var q2 = 1; q2 < o.n; q2++) C.lineTo(o.lon[q2] + 180, 90 - o.lat[q2]);
+      C.closePath(); (r._ip = r._ip || [])[lvl] = C;
+    }
+    P.addPath(C, M); return true;
+  }
+  // the light edge round a picked or lit-up country, drawn only round the pieces of land big
+  // enough on screen to carry it - round a small island the edge was wider than the island,
+  // so the islands of a picked country showed as white specks instead of green land
+  function strokeBigRings(want, minPx, style, width) {
+    if (!window.Path2D || !POLY || !POLY.length || !POLY[0].L) return false;
+    var bx = flatBox(), kx = bx[2] / 360, ky = bx[3] / 180, v = viewLL(), lvl = detailLevel(), close = needClip(), M = viewMatrix();
+    var P = new Path2D(), any = false, seamCodes = {};
+    for (var k = 0; k < POLY.length; k++) {
+      var r = POLY[k];
+      if (r.dot || !want(r)) continue;
+      // a ring cut at the date line or the pole has edges that are not real borders: those
+      // countries (Russia, Fiji, Antarctica...) keep the outline that knows to skip them
+      if (r.e >= 179.9 || r.w <= -179.9 || r.s <= -85) { seamCodes[r.code] = 1; continue; }
+      if (!(r.e >= v.w && r.w <= v.e && r.no >= v.s && r.s <= v.n)) continue;
+      if ((r.e - r.w) * kx < minPx && (r.no - r.s) * ky < minPx) continue;
+      if (ringPathInto(P, r, lvl, close, toScreenLL, M)) any = true;
+    }
+    ctx.save(); ctx.strokeStyle = style; ctx.lineWidth = width; ctx.lineJoin = "round";
+    if (any) ctx.stroke(P);
+    if (Object.keys(seamCodes).length) {
+      shapePath(toScreenLL, function (o) { return seamCodes[o.code]; }, 1, true);
+      ctx.strokeStyle = style; ctx.lineWidth = width; STROKE();
+    }
+    ctx.restore();
+    return true;
+  }
+  function toScreenLL(lon, lat) { var b = flatBox(); return [b[0] + (lon + 180) / 360 * b[2], b[1] + (90 - lat) / 180 * b[3]]; }
   function drawIslands(to) {
     if (!islandsOn || !ISL) return;
     // every island in the world (or, with a country picked, just that country's islands - not
@@ -11941,8 +12001,11 @@ window.SL_GEO_READY = new Promise(function (res) {
     }
     ctx.save();
     if (anyR) {
-      ctx.globalAlpha = 0.55; ctx.fillStyle = on; ctx.fill(fill);
-      ctx.globalAlpha = 0.9; ctx.strokeStyle = "rgba(255,255,255,0.75)"; ctx.lineWidth = 0.7; ctx.lineJoin = "round"; ctx.stroke(fill);
+      // a solid land green with a fine darker edge - a white edge made small islands read as
+      // white specks on the pale light-mode sea
+      var nightI = document.documentElement.getAttribute("data-sl-theme") === "dark";
+      ctx.globalAlpha = 0.85; ctx.fillStyle = on; ctx.fill(fill);
+      ctx.globalAlpha = 1; ctx.strokeStyle = nightI ? "rgba(230,245,230,0.45)" : "rgba(20,70,35,0.7)"; ctx.lineWidth = 0.6; ctx.lineJoin = "round"; ctx.stroke(fill);
     }
     ctx.globalAlpha = 1; fillDots(to, function (r) { return r.dot && (!sc || r.code === sc); }, 2.2);
     ctx.restore();
@@ -11960,7 +12023,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     });
     if (!any) return;
     ctx.save();
-    ctx.globalAlpha = 1; ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.lineWidth = 0.8; ctx.lineJoin = "round"; ctx.stroke(fills);
+    ctx.globalAlpha = 1; ctx.strokeStyle = document.documentElement.getAttribute("data-sl-theme") === "dark" ? "rgba(230,245,230,0.6)" : "rgba(20,70,35,0.75)"; ctx.lineWidth = 0.8; ctx.lineJoin = "round"; ctx.stroke(fills);
     ctx.restore();
   }
 
@@ -12842,6 +12905,47 @@ window.SL_GEO_READY = new Promise(function (res) {
     moved = 0;
     cv.classList.add("dragging");
   });
+  // ---- the controls laid over the map never cover each other ------------------------------
+  // The search, its buttons (Undo, See species, See cities...), the map-mode buttons (Heatmap,
+  // Sightings, Habitats), their panels and notes each have a place set in the CSS. Whenever any
+  // of them changes size or shows/hides (a row wraps on a narrow phone, a mode adds a panel,
+  // full screen moves the search onto the map), each one, in this order, is checked against
+  // the ones already placed and the layers/zoom column, and moved down just below anything it
+  // would cover. Measured, not guessed, so it holds at every screen size and in every mode.
+  var DEO_ORDER = [".heat-search", ".globe-btns", ".map-tools", ".hm-panel:not(.docked)", ".hab-panel:not(.docked)", ".sg-note", ".sg-key"];
+  var deoRaf = 0;
+  function deoverlapNow() {
+    deoRaf = 0;
+    var sr = stage.getBoundingClientRect(); if (!sr.width) return;
+    var placed = [];
+    var vis = function (el) { return el && !el.hidden && el.offsetParent !== null && getComputedStyle(el).visibility !== "hidden"; };
+    [".layers-wrap", ".globe-zoom"].forEach(function (q) { var el = stage.querySelector(q); if (vis(el)) placed.push(el.getBoundingClientRect()); });
+    var seen = [];
+    DEO_ORDER.forEach(function (q) {
+      [].slice.call(stage.querySelectorAll(q)).forEach(function (el) {
+        if (seen.indexOf(el) >= 0) return; seen.push(el);
+        if (el.dataset.deoTop !== undefined) { el.style.top = el.dataset.deoTop; delete el.dataset.deoTop; }
+        if (!vis(el) || getComputedStyle(el).position !== "absolute") return;
+        var r = el.getBoundingClientRect(), moved = false;
+        for (var pass = 0; pass < 6; pass++) {
+          var hit = null;
+          for (var i = 0; i < placed.length; i++) { var o = placed[i]; if (r.left < o.right - 1 && r.right > o.left + 1 && r.top < o.bottom - 1 && r.bottom > o.top + 1) { hit = o; break; } }
+          if (!hit) break;
+          if (!moved) { el.dataset.deoTop = el.style.top; moved = true; }
+          el.style.top = Math.round(hit.bottom - sr.top + 8) + "px";
+          r = el.getBoundingClientRect();
+        }
+        placed.push(r);
+      });
+    });
+  }
+  function deoverlap() { if (!deoRaf) deoRaf = requestAnimationFrame(deoverlapNow); }
+  if (window.ResizeObserver) new ResizeObserver(deoverlap).observe(stage);
+  if (window.MutationObserver) new MutationObserver(function (ms) {
+    // only changes to the controls themselves, not to the canvas or the tip
+    if (ms.some(function (m) { var t = m.target; return t !== cv && !(t.closest && t.closest(".map-tip")) && !(m.attributeName === "style" && t.dataset && t.dataset.deoTop !== undefined); })) deoverlap();
+  }).observe(stage, { attributes: true, attributeFilter: ["hidden", "class"], childList: true, subtree: true });
+  window.addEventListener("resize", deoverlap);
   // with a mouse, the name of whatever country (or state, with See states on) is under the
   // pointer shows in a small tip beside it - so a place whose name has no room on the map
   // can still be named. Touch screens get the name by tapping, as before.
@@ -12860,12 +12964,26 @@ window.SL_GEO_READY = new Promise(function (res) {
       }
     }
     if (!txt) { mapTip.hidden = true; return; }
-    mapTip.textContent = txt; mapTip.hidden = false;
-    var sr = stage.getBoundingClientRect(), tw = mapTip.offsetWidth, th = mapTip.offsetHeight;
-    var lx = e.clientX - sr.left + 14, ly = e.clientY - sr.top + 16;
-    if (lx + tw > sr.width - 6) lx = e.clientX - sr.left - tw - 10;
-    if (ly + th > sr.height - 6) ly = e.clientY - sr.top - th - 10;
-    mapTip.style.transform = "translate(" + Math.round(lx) + "px," + Math.round(ly) + "px)";
+    // the number of snakes SnakeList records there (the country's, or the state's own)
+    var nSp = null;
+    if (code && !(statesMode && code === statesMode)) nSp = ((BYCODE && BYCODE[code]) || []).length;
+    mapTip.textContent = "";
+    var tb = document.createElement("b"); tb.textContent = txt; mapTip.appendChild(tb);
+    if (nSp !== null) { var ts = document.createElement("span"); ts.textContent = nSp ? nSp + (nSp === 1 ? " snake species recorded" : " snake species recorded") : "No snakes on record"; mapTip.appendChild(ts); }
+    mapTip.hidden = false;
+    var sr = stage.getBoundingClientRect(), cr = cv.getBoundingClientRect(), tw = mapTip.offsetWidth, th = mapTip.offsetHeight;
+    var mx = e.clientX - sr.left, my = e.clientY - sr.top, ox = cr.left - sr.left, oy = cr.top - sr.top;
+    // the first corner round the pointer where the tip covers no name on the map
+    var cands = [[mx + 14, my + 16], [mx + 14, my - th - 10], [mx - tw - 10, my + 16], [mx - tw - 10, my - th - 10], [mx + 14, my + 44], [mx + 14, my - th - 38]];
+    var pick = null;
+    for (var ci = 0; ci < cands.length && !pick; ci++) {
+      var c = cands[ci]; if (c[0] < 4 || c[1] < 4 || c[0] + tw > sr.width - 4 || c[1] + th > sr.height - 4) continue;
+      var bx0 = c[0] - ox, by0 = c[1] - oy, free = true;
+      for (var li = 0; li < LBL.length; li++) { var q = LBL[li]; if (bx0 < q[2] && bx0 + tw > q[0] && by0 < q[3] && by0 + th > q[1]) { free = false; break; } }
+      if (free) pick = c;
+    }
+    if (!pick) pick = [Math.min(Math.max(4, mx + 14), sr.width - tw - 4), Math.min(Math.max(4, my + 16), sr.height - th - 4)];
+    mapTip.style.transform = "translate(" + Math.round(pick[0]) + "px," + Math.round(pick[1]) + "px)";
   }
   cv.addEventListener("pointermove", function (e) {
     if (e.pointerType === "mouse") { tipEv = e; if (!tipRaf) tipRaf = requestAnimationFrame(tipAt); }
@@ -14614,6 +14732,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   .cp-row.cp-sp { cursor: pointer; }
   .map-tip { position: absolute; left: 0; top: 0; z-index: 6; pointer-events: none; padding: 4px 8px; border-radius: 6px; font: 600 12px/1.3 Inter, sans-serif;
     color: #fff; background: rgba(14, 40, 24, 0.88); box-shadow: 0 2px 8px rgba(0,0,0,0.25); white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
+  .map-tip b { display: block; font-weight: 600; }
+  .map-tip span { display: block; font-weight: 400; font-size: 11px; opacity: 0.85; }
   .map-tip[hidden] { display: none; }
   .cp-row-country b, .cp-row-country i, .cp-row:not(:has(i)) b { cursor: inherit; }
   @media (max-width: 520px) {
@@ -16005,6 +16125,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v4.30", d: "2026-11-08", items: ["Map: the buttons, search, panels and notes over the map never cover each other - in every mode, at every screen size, full screen or not", "Map: hovering a country shows its name and how many snakes it has, never on top of a name already on the map; names stay clear of the hint and colour key (Antarctica)", "Map: the islands of a picked country are green, not white specks, and See islands shows islands as solid land in light mode", "Map: on a phone held upright the world fills the map instead of floating in empty sea"] },
     { v: "v4.29", d: "2026-11-07", items: ["Map: shorter button names (List states, Hide states...) so the map's buttons never pile on top of each other on a phone, for India and every country with long names", "Map: the hint at the bottom never runs under the colour key"] },
     { v: "v4.28", d: "2026-11-07", items: ["SnakeList works with your phone held upright - no more Turn your phone sideways: the header, tabs, map, species pages and country pages all fit the screen, and the installed app turns both ways", "The map gets most of the screen's height on a phone held upright"] },
     { v: "v4.27", d: "2026-11-07", items: ["Map: wherever you click - a country, a state, an island - the button says See species and shows that place's snakes"] },
