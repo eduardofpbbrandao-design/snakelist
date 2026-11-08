@@ -1259,6 +1259,10 @@
     max-width: min(560px, calc(100vw - 32px)); padding: 11px 12px 11px 18px; border-radius: 14px; background: #256846; color: #fff;
     font: 500 14px/1.35 'Inter', sans-serif; box-shadow: 0 8px 28px rgba(0,0,0,.28); }
   .sl-undo[hidden] { display: none; }
+  .sl-top { position: fixed; right: 16px; bottom: 18px; z-index: 60; font: 600 13px 'Inter', sans-serif; padding: 9px 14px; border-radius: 99px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text); box-shadow: 0 4px 16px rgba(0,0,0,.18); cursor: pointer; }
+  .sl-top[hidden] { display: none; }
+  @media (max-width: 640px) { .sl-top { bottom: 76px; } }
   .sl-undo button { flex: 0 0 auto; font: 600 14px 'Inter', sans-serif; color: #256846; background: #fff; border: 0; border-radius: 9px; padding: 7px 14px; cursor: pointer; }
 
   /* positioned in document coordinates (left/top include scrollX/scrollY), not viewport-fixed -
@@ -1471,7 +1475,7 @@
 </style>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.40</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.41</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All 4,254 snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -5960,7 +5964,7 @@
           <div class="globe-zoom">
             <button type="button" id="globe-in" aria-label="Zoom in">+</button>
             <button type="button" id="globe-out" aria-label="Zoom out">&minus;</button>
-            <button type="button" id="globe-reset" aria-label="Reset the view">&#8635;</button>
+            <button type="button" id="globe-reset" aria-label="Reset the view" title="Reset view: show the whole world and clear what you picked">&#8635;</button>
             <button type="button" id="globe-full" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></button>
           </div>
           <p class="globe-hint">Drag to explore &middot; scroll to zoom &middot; click any country</p>
@@ -6966,13 +6970,16 @@
   // "Keep this layout" (in Edit) saves the shuffle's seed so the same order comes back next time
   let LAYOUT_SEED = null;
   try { LAYOUT_SEED = localStorage.getItem("sl-layout-seed"); } catch (err) {}
-  let seed = LAYOUT_SEED ? +LAYOUT_SEED : Math.floor(Math.random() * 2147483646) + 1;
+  // coming Back from a snake's page keeps the same order, so the list is as you left it
+  const backSeed = (() => { try { const n = performance.getEntriesByType("navigation")[0]; return n && n.type === "back_forward" ? +sessionStorage.getItem("sl-seed") || 0 : 0; } catch (err) { return 0; } })();
+  let seed = LAYOUT_SEED ? +LAYOUT_SEED : backSeed || Math.floor(Math.random() * 2147483646) + 1;
+  try { sessionStorage.setItem("sl-seed", seed); } catch (err) {}
   let rs = seed;
   const rnd = () => (rs = (rs * 16807) % 2147483647) / 2147483647;
   let shuffled = cards.map((c) => [rnd(), c]).sort((a, b) => a[0] - b[0]).map((x) => x[1]);
   // Refresh: a new random order for everything you haven't kept at the top
   window.SL_RESHUFFLE = () => {
-    seed = Math.floor(Math.random() * 2147483646) + 1; rs = seed;
+    seed = Math.floor(Math.random() * 2147483646) + 1; rs = seed; try { sessionStorage.setItem("sl-seed", seed); } catch (err) {}
     shuffled = cards.map((c) => [rnd(), c]).sort((a, b) => a[0] - b[0]).map((x) => x[1]);
     if (PRIORITY.length) { // "Picked for you" ones come in a new order too
       let r2 = seed; const pr = () => (r2 = (r2 * 48271) % 2147483647) / 2147483647;
@@ -7739,14 +7746,34 @@
       '</div><div class="ps-big" hidden></div><button type="button" class="ps-close" data-close="1">Done</button></div>';
     ps.classList.add("open");
   }
+  // one photo, big, with previous / next when there are more (arrow keys too; Escape goes back)
+  function showBig(L, i) {
+    const big = ps.querySelector(".ps-big"); if (!big || !L.length) return;
+    big.hidden = false; big.dataset.i = i;
+    big.innerHTML = '<img src="' + L[i] + '" alt="Your photo ' + (i + 1) + ' of ' + L.length + '">' +
+      (L.length > 1 ? '<button type="button" class="ps-nav prev" data-nav="-1" aria-label="Previous photo">&#8249;</button><button type="button" class="ps-nav next" data-nav="1" aria-label="Next photo">&#8250;</button><span class="ps-count">' + (i + 1) + " / " + L.length + "</span>" : "");
+  }
+  document.addEventListener("keydown", (e) => {
+    const big = ps.classList.contains("open") && ps.querySelector(".ps-big:not([hidden])"); if (!big || !psCard) return;
+    const L = getPhotos(psCard.dataset.id);
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); showBig(L, (+big.dataset.i + (e.key === "ArrowRight" ? 1 : -1) + L.length) % L.length); }
+    else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); big.hidden = true; }
+  }, true);
   ps.addEventListener("click", (e) => {
     if (e.target === ps || e.target.closest("[data-close]")) { ps.classList.remove("open"); psCard = null; return; }
     if (!psCard) return;
     const id = psCard.dataset.id, L = getPhotos(id), big = ps.querySelector(".ps-big");
     const del = e.target.closest("[data-del]"), cp = e.target.closest("[data-copy]"), v = e.target.closest("[data-view]");
-    if (del) { L.splice(+del.dataset.del, 1); setPhotos(id, L); showPhotos(psCard); checkNewBadges(computeStats()); refresh(); if (L.length) openPhotos(psCard); else { ps.classList.remove("open"); psCard = null; } return; }
+    if (del) {
+      const at = +del.dataset.del, gone = L.splice(at, 1)[0], card = psCard;
+      setPhotos(id, L); showPhotos(card); checkNewBadges(computeStats()); refresh(); if (L.length) openPhotos(card); else { ps.classList.remove("open"); psCard = null; }
+      offerUndo("Photo removed.", () => { const L2 = getPhotos(id); L2.splice(at, 0, gone); try { setPhotos(id, L2); } catch (err) {} showPhotos(card); checkNewBadges(computeStats()); refresh(); if (psCard === card) openPhotos(card); });
+      return;
+    }
     if (cp) { copyPhoto(L[+cp.dataset.copy], cp); return; }
-    if (v) { big.hidden = false; big.innerHTML = '<img src="' + L[+v.dataset.view] + '" alt="">'; return; }
+    const nav = e.target.closest("[data-nav]");
+    if (nav) { showBig(L, (+big.dataset.i + +nav.dataset.nav + L.length) % L.length); return; }
+    if (v) { showBig(L, +v.dataset.view); return; }
     if (e.target.closest(".ps-big")) { big.hidden = true; return; }
     if (e.target.closest("[data-add]")) { sightingPhotoTarget = psCard.querySelector(".photo-btn"); sightingPhotoInput.value = ""; sightingPhotoInput.click(); }
   });
@@ -8098,6 +8125,19 @@
   // the photo finder (further down) refreshes the list when a snake turns out to have a photo
   window.SL_REFRESH = function () { refresh(); };
   window.SL_NOPHOTO_ON = function () { return noPhotoOnly; };
+  const listMem = {}, listY = {}; let listTab = null;
+  const backNav = (() => { try { const n = performance.getEntriesByType("navigation")[0]; return !!n && n.type === "back_forward"; } catch (err) { return false; } })();
+  window.addEventListener("pagehide", () => { if (grid.offsetParent) try { sessionStorage.setItem("sl-list-pos", JSON.stringify({ sig: lastSig, limit: renderLimit, y: window.scrollY })); } catch (err) {} });
+  // where you are in each list, noted while it is on screen (hiding it for the map lets the
+  // browser jump to the top before anything else hears about the switch)
+  const topBtn = document.createElement("button");
+  topBtn.type = "button"; topBtn.className = "sl-top"; topBtn.hidden = true; topBtn.innerHTML = "&uarr; Top"; topBtn.setAttribute("aria-label", "Back to the top of the list");
+  topBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
+  document.body.appendChild(topBtn);
+  window.addEventListener("scroll", () => {
+    if (grid.offsetParent && listTab === tab) listY[tab] = window.scrollY;
+    topBtn.hidden = !(grid.offsetParent && window.scrollY > 1600);
+  }, { passive: true });
   function refresh(skipChips) {
     // Every card stays in the document (the sync region is the record of what's been
     // seen), but only a page of them is shown at a time — 4,500 laid-out cards is far
@@ -8107,7 +8147,17 @@
     // tab switch or filter click was DOM churn happening *inside* the synced subtree,
     // which got diffed, persisted and pushed to every other device on each change.
     const sig = [tab, query, typeFilter, continentFilters.join("|"), countryFilters.join("|"), familyFilters.join("|"), placeFilters.join("|"), cityFilters.map((c) => c.key).join("|"), popularOnly, uncommonOnly, exoticOnly, venomousOnly, nonVenomousOnly, constrictorOnly, nonConstrictorOnly, invasiveOnly, commonOnly, rareOnly, snakeEaterOnly, noPhotoOnly, extinctOnly, harmfulOnly, harmlessOnly, habitatFilters.join("|"), mineFollow, mineWish, mineSeen, followCount(), wishCount(), cards.filter((c) => c.classList.contains("done")).length].join("~");
-    if (sig !== lastSig) { lastSig = sig; renderLimit = PAGE; }
+    // switching tab and coming back keeps how far down the list you were (and how many
+    // "Show more" pages were open), as long as nothing about that list's filters changed
+    let restoreY = null;
+    if (sig !== lastSig) {
+      if (listTab) listMem[listTab] = { sig: lastSig, limit: renderLimit, y: listY[listTab] || 0 };
+      const m = listMem[tab], back = tab !== listTab && m && m.sig === sig;
+      lastSig = sig; renderLimit = back ? m.limit : PAGE; if (back) restoreY = m.y;
+      // coming Back from a snake's page: the list as you left it (a refresh still starts at the top)
+      if (listTab === null && backNav) { try { const s = JSON.parse(sessionStorage.getItem("sl-list-pos") || "null"); if (s && s.sig === sig) { renderLimit = s.limit; restoreY = s.y; } } catch (err) {} }
+      listTab = tab;
+    }
 
     let shown = 0, drawn = 0;
     // city lookup only makes sense when a search actually narrowed things to one species
@@ -8126,6 +8176,10 @@
         shownIds.map((id, i) => '#grid .card[data-id="' + id + '"]{order:' + i + "}").join("")
       : "";
     updateCityLookup(searchMatches.length === 1 ? searchMatches[0] : null);
+    if (restoreY != null) { // after the opening animation, which starts at the top
+      const y = restoreY, go = (n) => { if (!window.__introDone && document.getElementById("intro") && n < 30) { setTimeout(() => go(n + 1), 200); return; } requestAnimationFrame(() => window.scrollTo(0, y)); };
+      go(0);
+    }
 
     const moreBtn = document.getElementById("more-btn");
     moreBtn.hidden = drawn >= shown;
@@ -14798,6 +14852,38 @@ window.SL_GEO_READY = new Promise(function (res) {
     b.classList.remove("spin"); void b.offsetWidth; b.classList.add("spin");
   });
 })();
+// Want to see vs Following, said where you tap them: one is a wish list, the other a news feed
+(function () {
+  var W = "Want to see: add it to your wish list of snakes you hope to find. Mark it Seen once you do.";
+  var F = "Follow: get its news - new sightings and fun facts - in your Following tab. It doesn't change your lists.";
+  var tw = document.getElementById("tab-wish"), tf = document.getElementById("tab-follow");
+  if (tw) tw.title = "Want to see: your wish list of snakes you hope to find one day";
+  if (tf) tf.title = "Following: news, new sightings and facts about the snakes you follow";
+  document.querySelectorAll("#grid .wish-btn").forEach(function (b) { b.title = W; });
+  document.querySelectorAll("#grid .follow-btn").forEach(function (b) { b.title = F; });
+})();
+// Back / Forward move between the tabs you opened, and the address names the tab you're on,
+// so a copied link opens the same tab (only your own taps add history - links opening a tab don't)
+(function () {
+  if (!window.history || !history.pushState || !window.URL) return;
+  var fromPop = false;
+  function cur() {
+    try { var q = new URLSearchParams(location.search); return q.get("tab") || (q.get("map") || q.get("hab") ? "map" : "guide"); } catch (e) { return "guide"; }
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest('.tab-btn[id^="tab-"]');
+    if (!t || fromPop || !e.isTrusted) return;
+    var name = t.id.slice(4); if (name === cur()) return;
+    var u = new URL(location.href);
+    ["map", "f", "hab", "type", "fam", "q", "tab"].forEach(function (k) { u.searchParams.delete(k); });
+    if (name !== "guide") u.searchParams.set("tab", name);
+    try { history.pushState({ slTab: name }, "", u.pathname + u.search + u.hash); } catch (er) {}
+  }, true);
+  window.addEventListener("popstate", function () {
+    var t = document.getElementById("tab-" + cur()) || document.getElementById("tab-guide");
+    if (t && !t.classList.contains("active")) { fromPop = true; try { t.click(); } finally { fromPop = false; } }
+  });
+})();
 // links from a species page into the app:
 //   ?map=<country>  the map, on that country      ?f=<chip id>  that filter (chip-common, chip-rare...)
 //   ?hab=<habitat>  the map, by that habitat       ?type=<type> / ?fam=<family>  that kind of snake
@@ -15243,6 +15329,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   .hm-toggle.on:hover { filter: brightness(1.08); background: linear-gradient(135deg, var(--rust) 0%, var(--chip-lift, var(--rust)) 155%); }
   .sg-note { position: absolute; top: 52px; right: 56px; z-index: 4; max-width: 300px; margin: 0; padding: 8px 11px; border-radius: 10px;
+  .sg-retry { margin-left: 8px; font: 600 12px 'Inter', sans-serif; padding: 3px 10px; border-radius: 8px; border: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer; }
     background: rgba(10,20,32,0.86); color: #f2f6fa; font: 12px/1.4 'Inter', sans-serif; box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
   .sg-note[hidden] { display: none; }
   .sg-note a { color: #58b351; font-weight: 600; }
@@ -15458,7 +15545,6 @@ window.SL_GEO_READY = new Promise(function (res) {
     .layers-btn { width: 32px; height: 32px; }
     .globe-stage .globe-zoom { top: 8px; right: 8px; gap: 4px; }
     .globe-stage .globe-zoom button { width: 30px; height: 30px; }
-    .globe-stage:not(.full) #globe-reset { display: none; }
     .globe-stage.hm-on .globe-hint { display: none; }
     .hm-panel.collapsed { width: auto; right: 64px; }
     .hm-panel .hm-row { margin-bottom: 6px; }
@@ -16402,6 +16488,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var hs = document.getElementById("heat-search");
   if (hs) hs.addEventListener("input", function () { clearTimeout(sgSearchT); sgSearchT = setTimeout(function () { if (SG.on) sgLoad(true); }, 700); });
   var sgNoteT = null;
+  if (sgNote) sgNote.addEventListener("click", function (e) { if (e.target.closest(".sg-retry")) { sgNoteSet("Loading sightings from iNaturalist…"); sgLoad(true); } });
   function sgNoteSet(t, html) {
     if (html) sgNote.innerHTML = t; else sgNote.textContent = t || "";
     sgNote.hidden = !t;
@@ -16453,7 +16540,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       var v = sgView(), key = [v.w, v.e, v.s, v.n].map(function (x) { return x.toFixed(1); }).join(",") + F.key + (st.heat ? timeParam() : "");
       if (!force && key === SG.want) return;
       SG.want = key;
-      sgNoteSet("");
+      sgNoteSet(SG.list.length ? "" : "Loading sightings from iNaturalist…"); // the old dots stay until the new ones arrive
       // research-grade and needs-ID sightings, with or without a photo - up to 3 pages of 200
       var url = INAT + "observations?verifiable=true&per_page=200&order_by=observed_on&order=desc" + F.param + (st.heat ? timeParam() : "") +
         "&swlat=" + v.s.toFixed(3) + "&swlng=" + v.w.toFixed(3) + "&nelat=" + v.n.toFixed(3) + "&nelng=" + v.e.toFixed(3);
@@ -16485,7 +16572,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       if (page < 3 && (d.total_results || 0) > page * 200) setTimeout(function () { if (my === SG.ptok && SG.on) sgFetch(url, my, page + 1); }, 700);
     }, function (e) {
       if (my !== SG.ptok) return;
-      sgNoteSet(e && e.status === 429 ? "iNaturalist is busy right now - try again in a minute." : "Couldn't reach iNaturalist just now - move the map or tap the button again to retry.");
+      sgNoteSet((e && e.status === 429 ? "iNaturalist is busy right now - try again in a minute." : "Couldn't reach iNaturalist just now.") + ' <button type="button" class="sg-retry">Retry</button>', true);
       SG.want = "";
     });
   }
@@ -16959,6 +17046,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v4.41", d: "2026-11-08", items: ["Back and Forward move between the tabs you opened, and a copied link opens the same tab", "Coming Back from a snake's page puts the checklist exactly where you left it; switching tabs keeps your Show more pages; a Top button for long lists", "Your photos: previous / next (and arrow keys) in the big view, and Undo after removing one", "Map: Reset view is on phones too; sightings say when they are loading and offer Retry if iNaturalist can't be reached", "When a new version of SnakeList is ready while you're using it, a bar offers Refresh instead of reloading under you", "Want to see and Follow buttons explain what they do"] },
     { v: "v4.40", d: "2026-11-08", items: ["Log the same snake more than once: each encounter keeps its own date and place, newest shown on the card", "Not sure of the date? Pick month only, year only or don't know; tick when the place is only roughly right", "Unmarking a snake or deleting an encounter can be undone; closing with unsaved changes asks first", "New Your data box (on the Sign in page): download a backup, or restore one - checked and previewed first, add or replace, with Undo", "Signing in on a second device keeps both devices' encounters instead of one replacing the other"] },
     { v: "v4.39", d: "2026-11-08", items: ["Species pages, family and genus pages and the species directory share the new header and footer; family and genus pages get photo cards, search, venom filter and sort", "Habitats: removed 1,000 impossible habitats (no rainforests for sea snakes, no reefs for land snakes); species pages now say the list is an estimate", "Portugal and Spain: the Grass Snake there is Natrix astreptophora (and Natrix helvetica in the UK), and the False Smooth Snake there is Macroprotodon brevis", "Species chips no longer contradict each other: Popular / Less well known, Often / Rarely recorded on iNaturalist"] },
     { v: "v4.38", d: "2026-11-08", items: ["About SnakeList, About me, Privacy, Terms and Install share one header and footer with the real SnakeList logo; About and Privacy now say exactly what SnakeList does (photos for most species, camera suggestions, what goes to Google Analytics, iNaturalist and others)"] },
@@ -18059,6 +18147,9 @@ window.SL_GEO_READY = new Promise(function (res) {
   .ps-copy { margin-top: 6px; width: 100%; padding: 6px; border-radius: 9px; border: 1px solid #e0a526; background: transparent; color: inherit; font: 600 12.5px 'Inter', sans-serif; cursor: pointer; }
   .ps-add { aspect-ratio: 1; border-radius: 12px; border: 2px dashed var(--border); background: transparent; color: var(--text-muted); font: 600 14px 'Inter', sans-serif; cursor: pointer; }
   .ps-big { position: fixed; inset: 0; z-index: 2; background: rgba(5,15,9,0.92); display: flex; align-items: center; justify-content: center; padding: 16px; cursor: zoom-out; }
+  .ps-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 46px; height: 46px; border-radius: 50%; border: 0; background: rgba(255,255,255,.88); color: #1e3a24; font-size: 30px; line-height: 1; cursor: pointer; }
+  .ps-nav.prev { left: 12px; } .ps-nav.next { right: 12px; }
+  .ps-count { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); color: #fff; font: 500 13px 'Inter', sans-serif; background: rgba(0,0,0,.45); padding: 3px 10px; border-radius: 99px; }
   .ps-big[hidden] { display: none; } .ps-big img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; }
   .ps-close { margin-top: 14px; width: 100%; padding: 11px; border-radius: 11px; border: 0; background: #58b351; color: #fff; font: 600 14px 'Inter', sans-serif; cursor: pointer; }
   .cam-meta .cam-near { padding: 2px 9px; border-radius: 999px; background: rgba(224,165,38,0.18); color: #8a5a00; }
