@@ -1,0 +1,48 @@
+{
+  "id": "vipera-berus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "Small: up to about 55 cm", "src": ["livesci"]},
+    "reproduction": {"text": "Live young (about 3-20), born in late summer", "src": ["froglife"]},
+    "diet": {"text": "Small mammals, amphibians, birds, reptiles", "src": ["wt"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Adder, or Common European Viper, is a small, stocky viper with one of the largest ranges of any snake, from western Europe across to eastern Asia. It lives north of the Arctic Circle in Scandinavia, where no other snake is found. It is Britain's only native venomous snake, but its bite is rarely dangerous to people.", "src": ["wildlifeonline", "livesci", "polar"]}
+    ],
+    "identification": [
+      {"text": "A dark zigzag stripe runs down the middle of the back, and there is usually a V- or X-shaped mark on top of the head. Completely black adders are common in some areas.", "src": ["froglife"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "A small snake: one source gives a maximum length of about 55 cm (21.7 in).", "src": ["livesci"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "Most of western Europe and on across northern Eurasia into eastern Asia. In Sweden it has been studied about 150 km north of the Arctic Circle.", "src": ["wildlifeonline", "polar"]}
+    ],
+    "habitat": [
+      {"text": "Heathland, grassland and woodland.", "src": ["wt"]}
+    ],
+    "behaviour": [
+      {"text": "Hibernates through the winter.", "src": ["adw", "polar"]},
+      {"label": "Bites", "text": "Its bite is rarely fatal; serious effects are uncommon apart from rare allergic reactions.", "src": ["livesci"]}
+    ],
+    "diet": [
+      {"text": "Small mammals, amphibians, birds and reptiles.", "src": ["wt"]}
+    ],
+    "reproduction": [
+      {"text": "Gives birth to live young in late summer (August or September), usually about 3 to 20 at a time; in some populations birth comes just before hibernation.", "src": ["froglife", "adw"]}
+    ]
+  },
+  "funfacts": [
+    {"text": "The adder is the only snake known to live north of the Arctic Circle.", "src": ["livesci"]}
+  ],
+  "sources": {
+    "wildlifeonline": {"title": "European adder", "publisher": "Wildlife Online", "url": "https://www.wildlifeonline.me.uk/animals/species/european-adder"},
+    "livesci": {"title": "Facts about adders", "publisher": "Live Science", "url": "https://www.livescience.com/54227-adder-facts.html"},
+    "froglife": {"title": "Adder", "publisher": "Froglife", "url": "https://www.froglife.org/info-advice/amphibians-and-reptiles/adder/"},
+    "wt": {"title": "Adder", "publisher": "Woodland Trust", "url": "https://www.woodlandtrust.org.uk/trees-woods-and-wildlife/animals/reptiles-and-amphibians/adder/"},
+    "adw": {"title": "Vipera berus", "publisher": "Animal Diversity Web, University of Michigan", "url": "https://animaldiversity.org/accounts/Vipera_berus/"},
+    "polar": {"title": "Hibernation, habitat and seasonal activity in the adder, Vipera berus, north of the Arctic Circle in Sweden", "publisher": "Amphibia-Reptilia", "url": "https://openpolar.no/Record/crbrillap:10.1163%2F156853803322763918"}
+  }
+}

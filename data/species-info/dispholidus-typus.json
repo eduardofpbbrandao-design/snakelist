@@ -1,0 +1,42 @@
+{
+  "id": "dispholidus-typus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Smith, 1828)",
+  "facts": {
+    "reproduction": {"text": "Lays eggs", "src": ["doccheck"]},
+    "diet": {"text": "Lizards, birds and their eggs, frogs", "src": ["doccheck"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Boomslang is a slender, highly venomous tree snake of sub-Saharan Africa. Unlike most of its family, the colubrids, its bite can kill a person. Its venom acts slowly: symptoms may not appear until many hours after a bite.", "src": ["wiki"]}
+    ],
+    "identification": [
+      {"text": "A slim snake with very large eyes with round pupils, giving it sharp eyesight. Colour varies from plain brown to green; males are usually more colourful than females.", "src": ["wiki", "adw"]}
+    ],
+    "variation": [
+      {"label": "Sexes", "text": "Males tend to be brighter; female hatchlings are pale brown.", "src": ["adw", "wiki"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "Sub-Saharan Africa.", "src": ["wiki"]}
+    ],
+    "behaviour": [
+      {"text": "An active hunter in trees and bushes that relies on its excellent vision. Its fangs are at the back of the mouth (it is \"rear-fanged\").", "src": ["wiki"]}
+    ],
+    "diet": [
+      {"text": "Lizards, birds, bird eggs and frogs, which it swallows whole after biting.", "src": ["doccheck", "arv"]}
+    ],
+    "reproduction": [
+      {"text": "Lays eggs.", "src": ["doccheck"]}
+    ]
+  },
+  "funfacts": [
+    {"text": "In 1957 the famous American herpetologist Karl Patterson Schmidt died after being bitten by a young boomslang.", "src": ["doccheck", "wiki"]}
+  ],
+  "sources": {
+    "wiki": {"title": "Boomslang", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Boomslang"},
+    "adw": {"title": "Dispholidus typus", "publisher": "Animal Diversity Web, University of Michigan", "url": "https://animaldiversity.org/accounts/Dispholidus_typus/"},
+    "arv": {"title": "Boomslang", "publisher": "African Reptiles & Venom", "url": "https://africanreptiles-venom.co.za/boomslang/"},
+    "doccheck": {"title": "Boomslang", "publisher": "DocCheck Flexikon (German)", "url": "https://flexikon.doccheck.com/de/Boomslang"}
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "crotalus-cerastes",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "About 43-80 cm", "src": ["wiki", "azan"]},
+    "reproduction": {"text": "Live young, about 8-10", "src": ["nps"]},
+    "diet": {"text": "Lizards and small rodents", "src": ["nps", "wiki"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Sidewinder is a small rattlesnake of the sandy deserts of the south-western United States and north-western Mexico. It is named for its sideways way of moving, called sidewinding. It is also called the Horned Rattlesnake.", "src": ["wiki", "nps"]}
+    ],
+    "identification": [
+      {"text": "A small rattlesnake whose enlarged, pointed scales above each eye look like little horns.", "src": ["wiki"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "About 43 to 80 cm long, depending on the source.", "src": ["wiki", "azan"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "The Mojave and Sonoran deserts of the south-western United States and north-western Mexico. Three subspecies are recognised.", "src": ["wiki"]}
+    ],
+    "habitat": [
+      {"text": "Sandy flats with creosote bush and mesquite, and occasionally rocky slopes.", "src": ["nps"]}
+    ],
+    "behaviour": [
+      {"text": "Active mainly from March to October. It often buries itself in sand to wait for prey, and may twitch its tail as a lure - a habit adults lose as they switch from lizards to rodents.", "src": ["nps", "wiki"]}
+    ],
+    "diet": [
+      {"text": "Lizards, pocket mice, kangaroo rats and other small mammals; in many areas lizards make up most of the diet.", "src": ["nps", "wiki"]}
+    ],
+    "reproduction": [
+      {"text": "Gives birth to live young, on average eight to ten (other sources give 5 to 18).", "src": ["nps", "azan"]}
+    ]
+  },
+  "sources": {
+    "wiki": {"title": "Crotalus cerastes", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Crotalus_cerastes"},
+    "nps": {"title": "Mojave Desert Sidewinder", "publisher": "U.S. National Park Service, Death Valley", "url": "https://www.nps.gov/deva/learn/nature/sidewinder.htm"},
+    "azan": {"title": "Sidewinder", "publisher": "A-Z Animals", "url": "https://a-z-animals.com/animals/sidewinder/"}
+  }
+}

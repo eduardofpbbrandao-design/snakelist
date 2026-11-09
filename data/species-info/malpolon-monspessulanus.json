@@ -1,0 +1,35 @@
+{
+  "id": "malpolon-monspessulanus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "Up to about 2 m (some sources 2.5 m)", "src": ["wiki"]},
+    "activity": {"text": "By day", "src": ["wiki"]},
+    "diet": {"text": "Mainly lizards", "src": ["wiki", "moroccoherps"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Montpellier Snake is a large, fast, day-active snake of the western Mediterranean, very common in Spain and Portugal. It is mildly venomous with fangs at the back of the mouth, but only a few cases of people being envenomed are known.", "src": ["wiki"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Sources usually give a maximum of about 2 m; some give up to 2.55 m and 2 kg. Often described as Spain's longest snake.", "src": ["wiki", "snakeradar"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "Spain, Portugal and north-western Africa, also reaching the Mediterranean coast of southern France.", "src": ["wiki"]}
+    ],
+    "behaviour": [
+      {"text": "Active during the day. Like its relatives the sand snakes, it has been seen rubbing its body - both young and adults do this - a habit that may play a part in social life and breeding.", "src": ["wiki", "moroccoherps"]}
+    ],
+    "diet": [
+      {"text": "Mainly lizards; rodents, other snakes and small birds are also eaten.", "src": ["wiki", "moroccoherps"]}
+    ],
+    "taxonomy": [
+      {"text": "It belongs to the family Psammophiidae (sand snakes and allies).", "src": ["moroccoherps"]}
+    ]
+  },
+  "sources": {
+    "wiki": {"title": "Montpellier snake", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Montpellier_snake"},
+    "moroccoherps": {"title": "Malpolon monspessulanus", "publisher": "MoroccoHerps", "url": "https://www.moroccoherps.com/en/?p=3197"},
+    "snakeradar": {"title": "11 facts about the Montpellier snake", "publisher": "Snake Radar", "url": "https://snakeradar.com/?p=2077"}
+  }
+}

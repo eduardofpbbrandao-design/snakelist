@@ -1,0 +1,35 @@
+{
+  "id": "vipera-latastei",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "Usually under 60 cm; up to about 72 cm", "src": ["wiki", "uicnmed"]},
+    "iucn": {"code": "VU", "text": "Vulnerable", "long": "Listed as Vulnerable on the IUCN Red List according to Wikipedia; some other sources give Near Threatened, so check the current Red List entry.", "src": ["wiki"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "Lataste's Viper, also called the Snub-nosed Viper, is a small viper of the Iberian Peninsula and north-western Africa. Its populations are fragmented across Portugal and Spain.", "src": ["wiki", "uicnmed"]}
+    ],
+    "identification": [
+      {"text": "Its most remarkable feature is the upturned tip of the snout, forming a small \"nose horn\" - the origin of its other name, Snub-nosed Viper.", "src": ["wiki", "wildside"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Normally less than 60 cm; the maximum recorded total length is about 72 cm.", "src": ["wiki", "uicnmed"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "The Iberian Peninsula (Portugal and Spain) and north-western North Africa, including the Rif mountains of Morocco; it may now be extinct in Tunisia. The southern subspecies *V. l. gaditana* lives in the south of Portugal and Spain.", "src": ["wiki"]}
+    ],
+    "habitat": [
+      {"text": "Rocky and scrubby country, including stone walls and sometimes coastal dunes, where its colours blend in well.", "src": ["wiki", "wildside"]}
+    ]
+  },
+  "similar": [
+    {"id": "natrix-maura", "text": "a harmless water snake that copies viper patterns and behaviour; it lacks the upturned snout and is usually found in or near water.", "src": ["wiki-nm"]}
+  ],
+  "sources": {
+    "wiki": {"title": "Vipera latastei", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Vipera_latastei"},
+    "uicnmed": {"title": "Vipera latastei (Mediterranean reptile summary)", "publisher": "IUCN Centre for Mediterranean Cooperation", "url": "https://www.uicnmed.org/web2007/cd_rep_amp/materials/reptile_summery/vipera_latastei.pdf"},
+    "wildside": {"title": "Lataste's Viper (Vipera latastei)", "publisher": "Wildside Holidays", "url": "https://wildsideholidays.co.uk/latastes-viper-vipera-latastei-vibora-hocicuda/"},
+    "wiki-nm": {"title": "Natrix maura", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Natrix_maura"}
+  }
+}
