@@ -1267,6 +1267,7 @@
   .note-actions .primary { background: var(--gold-fill); border-color: var(--gold-fill); color: var(--on-fill); margin-left: auto; }
   .note-actions .primary:disabled { opacity: .6; cursor: default; }
   .cap-link { font: inherit; color: inherit; background: none; border: 0; padding: 0 2px; border-radius: 4px; cursor: pointer; font-weight: 700; box-shadow: inset 0 -2px 0 var(--map-on, #58b351); }
+  .cap-intro { color: var(--rust, #c8641e); }
   .cap-link:hover { background: var(--surface-hover, rgba(127,199,106,.2)); }
   .fuzzy-note { margin: 4px 0 12px; padding: 9px 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); font: 13.5px 'Inter', sans-serif; color: var(--text); }
   .note-btn[data-n]::after { content: " · " attr(data-n) " encounters"; color: var(--text-muted); }
@@ -10065,7 +10066,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     svg.querySelectorAll(".invasive").forEach(function (el) { el.classList.remove("invasive"); });
     var inv = INVASIVE[card.dataset.id] || [];
     inv.forEach(function (pl) {
-      if (pl.states) return; // only some states (Florida) - drawn as those states, not the whole country
+      if (pl.states || pl.areas) return; // only some states / islands (Florida, the Canaries) - drawn as those, not the whole country
       var g = svg.getElementById(pl.code);
       if (g && !g.classList.contains("on")) g.classList.add("invasive");
     });
@@ -10078,6 +10079,10 @@ window.SL_GEO_READY = new Promise(function (res) {
     setSheetBig(true); // opens wide - the map as big as the screen allows
     sheet.classList.add("open");
     fitSheetToRange();
+    // states / islands (Florida, the Canaries) need the detailed shapes: fetched if they aren't here yet
+    if (!window.SL_GEO && window.SL_LOAD_GEO) window.SL_LOAD_GEO().then(function () {
+      if (sheetCard === card && sheet.classList.contains("open")) { sheetMode(null); fitSheetToRange(); }
+    });
     return;
   }
   // ---- states / cities on the sheet's own map ------------------------------------------
@@ -10107,7 +10112,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     var names = (card.getAttribute("data-countries") || "").split("|").filter(Boolean);
     return names.map(function (n) { return '<span data-zoom="c:' + (ISO[n] || "") + '">' + n + "</span>"; }).join("") +
       (INVASIVE[card.dataset.id] || []).map(function (pl) {
-        var zk = pl.states && pl.states.length === 1 ? "s:US:" + pl.states[0] : pl.code ? "c:" + pl.code : "";
+        var zk = pl.states && pl.states.length === 1 ? "s:US:" + pl.states[0] : pl.areas && pl.areas.length ? "s:" + pl.code.toUpperCase() + ":" + pl.areas[0] : pl.code ? "c:" + pl.code : "";
         return '<span class="inv"' + (zk ? ' data-zoom="' + zk + '"' : "") + ">" + pl.name + (pl.note && pl.note !== pl.name ? " (" + pl.note + ")" : "") + " &middot; invasive</span>";
       }).join("");
   }
@@ -10129,10 +10134,23 @@ window.SL_GEO_READY = new Promise(function (res) {
     var list = document.getElementById("map-list");
     if (!mode) {
       list.innerHTML = countryList(card);
-      var invStates = [];
-      (INVASIVE[card.dataset.id] || []).forEach(function (pl) { (pl.states || []).forEach(function (c) { invStates.push(c); }); });
+      var invStates = [], invAreas = [];
+      (INVASIVE[card.dataset.id] || []).forEach(function (pl) { (pl.states || []).forEach(function (c) { invStates.push(c); }); (pl.areas || []).forEach(function (n) { invAreas.push([pl.code, n]); }); });
+      if (invAreas.length) { // island groups and regions (the Canaries, the Balearics): just those, in orange
+        sheetOverlay = sheetOverlay || document.createElementNS(SVGNS, "g");
+        sheetOverlay.setAttribute("class", "sheet-overlay");
+        svg.appendChild(sheetOverlay);
+        invAreas.forEach(function (ca) {
+          var pv = getCountryProvinces()[ca[0]] || [], st = pv.find(function (x) { return x.name === ca[1] || (x.also || []).indexOf(ca[1]) >= 0; });
+          if (!st) return;
+          var path = document.createElementNS(SVGNS, "path");
+          path.setAttribute("d", st.rings.map(function (ring) { return "M" + ring.map(function (pt) { var q = projectSheet(pt[0], pt[1]); return q[0].toFixed(1) + " " + q[1].toFixed(1); }).join("L") + "Z"; }).join(""));
+          path.setAttribute("class", "sheet-state inv");
+          sheetOverlay.appendChild(path);
+        });
+      }
       if (invStates.length) {
-        sheetOverlay = document.createElementNS(SVGNS, "g");
+        sheetOverlay = sheetOverlay || document.createElementNS(SVGNS, "g");
         sheetOverlay.setAttribute("class", "sheet-overlay");
         svg.appendChild(sheetOverlay);
         US_STATES.forEach(function (st) {
@@ -10473,6 +10491,41 @@ window.SL_GEO_READY = new Promise(function (res) {
   };
 
   window.SL_INTRODUCED = INTRODUCED;
+  // v4.50: every introduced population SnakeList knows (the same list the "where it lives" map
+  // uses), as a map pin at the place itself - a state (Florida), an island group (Canaries,
+  // Balearics) or a small country/territory (Guam) - so none is left out
+  function ringsCentre(rings) {
+    var best = null, ba = -1;
+    (rings || []).forEach(function (r) { var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; r.forEach(function (p) { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); }); var ar = (x1 - x0) * (y1 - y0); if (ar > ba) { ba = ar; best = [(x0 + x1) / 2, (y0 + y1) / 2]; } });
+    return best;
+  }
+  function introducedOf(id) {
+    var out = (INTRODUCED[id] || []).slice(), have = {};
+    out.forEach(function (p) { have[p.area] = 1; });
+    var inv = (window.SL_INVASIVE || {})[id] || [];
+    inv.forEach(function (pl) {
+      var parts = [];
+      if (pl.states && pl.states.length) {
+        pl.states.forEach(function (sc) { var st = US_STATES.find(function (s) { return s.code === sc; }); if (st) parts.push([STATE_NAME[sc] || sc, ringsCentre(st.rings)]); });
+      } else if (pl.areas && pl.areas.length) {
+        var pv = getCountryProvinces()[pl.code] || [], c0 = null, n = 0, sx = 0, sy = 0;
+        pl.areas.forEach(function (nm) { var s = pv.find(function (x) { return x.name === nm || (x.also || []).indexOf(nm) >= 0; }); var c = s && ringsCentre(s.rings); if (c) { sx += c[0]; sy += c[1]; n++; } });
+        if (n) parts.push([pl.note || pl.areas.join(", "), [sx / n, sy / n]]);
+      } else {
+        var bx = typeof countryBox === "function" ? countryBox(pl.code) : null;
+        if (bx) parts.push([pl.name, [(bx[0] + bx[1]) / 2, (bx[2] + bx[3]) / 2]]);
+      }
+      parts.forEach(function (pt) {
+        if (!pt[1]) return;
+        var area = pt[0] + (pl.name && pt[0] !== pl.name ? ", " + (pl.name === "United States" ? "USA" : pl.name) : "");
+        // the hand-placed pins above already cover a few: don't put two pins on one place
+        if (out.some(function (o) { return Math.abs(o.lon - pt[1][0]) < 3 && Math.abs(o.lat - pt[1][1]) < 3; })) return;
+        if (!have[area]) { have[area] = 1; out.push({ area: area, lon: pt[1][0], lat: pt[1][1] }); }
+      });
+    });
+    return out;
+  }
+  window.SL_introducedOf = introducedOf;
   // US state boundaries (10m TopoJSON from the public-domain "us-atlas" package, decoded
   // to simple lon/lat rings and decimated to ~0.12 degrees - plenty for a map a few hundred
   // px wide, at under a quarter of the raw size). Used to actually draw states on the map
@@ -10541,8 +10594,17 @@ window.SL_GEO_READY = new Promise(function (res) {
     var mx = 0;
     if (statesMode) provinceTally(statesMode).forEach(function (n) { if (n > mx) mx = n; });
     else if (typeof multiOn === "function" && multiOn()) mx = multiCounts().max;
-    document.getElementById("legend-dot-low").parentNode.lastChild.textContent = "Fewer recorded species" + (mx ? " (1)" : "");
-    document.getElementById("legend-dot-high").parentNode.lastChild.textContent = "More recorded species" + (mx ? " (" + mx + ")" : "");
+    // every shaded place has the same number (often just 1): a fewer/more scale would mislead -
+    // the key just says "recorded here" (v4.50)
+    var mn = Infinity;
+    if (statesMode) provinceTally(statesMode).forEach(function (n) { if (n > 0 && n < mn) mn = n; });
+    else if (typeof multiOn === "function" && multiOn()) mn = multiCounts().min || mx;
+    var flat = mx > 0 && mn === mx;
+    document.getElementById("legend-dot-low").parentNode.hidden = flat;
+    document.getElementById("legend-dot-low").parentNode.lastChild.textContent = "Fewer recorded species" + (mx ? " (" + (isFinite(mn) ? mn : 1) + ")" : "");
+    document.getElementById("legend-dot-high").parentNode.lastChild.textContent = flat
+      ? "Recorded here" + (mx > 1 ? " (" + mx + " species in each)" : "")
+      : "More recorded species" + (mx ? " (" + mx + ")" : "");
     document.getElementById("legend-dot-off").parentNode.lastChild.textContent = "No species recorded";
     document.getElementById("map-legend").hidden = !(statesMode || citiesShown || (typeof multiOn === "function" && multiOn()));
     var hint = document.querySelector(".globe-hint");
@@ -10564,6 +10626,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // every other page load skips parsing/holding this ~1MB of geometry in memory for nothing.
   var _countryProvincesCache = null;
   function getCountryProvinces() {
+    if (!window.SL_GEO) return {}; // not downloaded yet: nothing to keep (asked again once it's here)
     if (!_countryProvincesCache) {
       _countryProvincesCache = JSON.parse(JSON.stringify((window.SL_GEO && window.SL_GEO.cp) || {}));
       // every other country: Natural Earth admin-1 shapes (public domain) refit onto this map's
@@ -11142,6 +11205,17 @@ window.SL_GEO_READY = new Promise(function (res) {
           ? subject.charAt(0).toUpperCase() + subject.slice(1)
           : subject.charAt(0).toUpperCase() + subject.slice(1) + " · found across " + countPlaces(names));
     if (window.SL_CAPTION_PLACES && matched.length && !cityMatch && !worldCityMatch) window.SL_CAPTION_PLACES();
+    // native countries vs places it was brought to: said in so many words (v4.50)
+    if (q && mapSearchKind === "text" && matched.length && matched.length <= 30) {
+      var intro = [];
+      matched.forEach(function (sp) { introducedOf(sp.id).forEach(function (p) { if (intro.indexOf(p.area) < 0) intro.push(p.area); }); });
+      if (intro.length) {
+        var capEl = document.getElementById("heat-caption"), extra = document.createElement("span");
+        extra.className = "cap-intro";
+        extra.textContent = " · native range only - also introduced by people in " + intro.join("; ") + " (orange pin" + (intro.length > 1 ? "s" : "") + ")";
+        capEl.appendChild(extra);
+      }
+    }
 
     // nothing found: the last search's country panel goes too, instead of hanging around
     if (q && !matched.length && !worldCityMatch) {
@@ -11178,11 +11252,11 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (q && !cityMatch && !continentMatch) {
       var placed = {};
       matched.forEach(function (sp) {
-        (INTRODUCED[sp.id] || []).forEach(function (p) {
+        introducedOf(sp.id).forEach(function (p) {
           var pin = placed[p.area];
           if (!pin) {                                // one marker per place, however many species
             var phi = p.lat * RAD, lam = p.lon * RAD, cp = Math.cos(phi);
-            pin = placed[p.area] = { area: p.area, lon: p.lon, lat: p.lat, species: [], fromSearch: true,
+            pin = placed[p.area] = { area: p.area, lon: p.lon, lat: p.lat, species: [], fromSearch: true, color: "#e0782a", introduced: true,
                                      v: [cp * Math.cos(lam), cp * Math.sin(lam), Math.sin(phi)] };
             PINS.push(pin);
           }
@@ -12271,7 +12345,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // per lit country: how many of the searched species are recorded in each of its states
   function multiCounts() {
     if (MS.matched === matched && MS.q === shownQ && MS.hi === HI) return MS;
-    MS = { matched: matched, q: shownQ, hi: HI, per: {}, max: 1, top: null };
+    MS = { matched: matched, q: shownQ, hi: HI, per: {}, max: 1, min: 0, top: null };
     var byCC = {};
     (matched || []).forEach(function (sp) {
       if (sp.states && sp.states.length) (byCC.us = byCC.us || []).push(sp);
@@ -12284,6 +12358,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       MS.per[cc] = per;
       per.forEach(function (n, i) {
         if (n > MS.max) MS.max = n;
+        if (n && (!MS.min || n < MS.min)) MS.min = n;
         if (n && (!MS.top || n > MS.top.n)) { var st = o.list[i]; MS.top = { cc: cc, key: cc === "us" ? st.code : st.name, n: n, multi: true }; }
       });
     });
@@ -13381,8 +13456,8 @@ window.SL_GEO_READY = new Promise(function (res) {
       return;
     }
     document.getElementById("cp-sub").textContent = pin.species.length === 1
-      ? pin.species[0].name + " is an invasive species here — this is outside its native range."
-      : pin.species.length + " invasive species live here, none of them native.";
+      ? pin.species[0].name + " was brought here by people (introduced) - this is outside its native range, so it isn't counted in the native countries above."
+      : pin.species.length + " snakes were brought here by people (introduced) - none of them is native here.";
     document.getElementById("cp-list").innerHTML = pin.species.map(function (sp) {
       return '<div class="cp-row cp-sp cp-intro" data-sp="' + attrEsc(sp.id) + '">' + photoBtn(sp) + "<b>" + sp.name + "</b><i>" + sp.sci + "</i></div>";
     }).join("");
@@ -14058,11 +14133,15 @@ window.SL_GEO_READY = new Promise(function (res) {
     // only while a whole country (or a whole search) is showing - not inside one of its states,
     // a city, a place or a list of cities/islands
     if (document.getElementById("country-panel").hidden || ["country", "provlist", "searchstates"].indexOf(panelKind) < 0) return null;
-    if (searchStatesQ !== null && searchStatesQ === shownQ && multiOn()) return multiCounts().top;
+    if (searchStatesQ !== null && searchStatesQ === shownQ && multiOn()) {
+      var ms0 = multiCounts(), tp = ms0.top; if (!tp) return null;
+      var ties = 0; Object.keys(ms0.per).forEach(function (cc) { ms0.per[cc].forEach(function (n) { if (n === tp.n) ties++; }); });
+      return Object.assign({}, tp, { ties: ties - 1 });
+    }
     if (statesMode) {
       var list = statesMode === "us" ? US_STATES : (getCountryProvinces()[statesMode] || []), t = provinceTally(statesMode), bi = -1;
       t.forEach(function (n, i) { if (n > 0 && (bi < 0 || n > t[bi])) bi = i; });
-      if (bi >= 0) return { cc: statesMode, key: statesMode === "us" ? list[bi].code : list[bi].name, n: t[bi] };
+      if (bi >= 0) return { cc: statesMode, key: statesMode === "us" ? list[bi].code : list[bi].name, n: t[bi], ties: t.filter(function (n) { return n === t[bi]; }).length - 1 };
     }
     return null;
   }
@@ -14072,22 +14151,23 @@ window.SL_GEO_READY = new Promise(function (res) {
     var sb = document.getElementById("see-species"), qb = document.getElementById("see-search-states");
     // whatever was clicked (a country, a state, an island, a city...), the button says See species;
     // only with a country's states on and none of them picked does it list the states instead
-    var spT = !pendingWorldCity && statesMode && statesMode === lastCountryCode && !pickedProvince ? "List " + subdivWord(statesMode, false, true) : "See species";
+    var spT = "See species"; // always (v4.50) - in a country's states view it lists the states with their species
     if (sb.textContent !== spT) sb.textContent = spT;
     // and it is there whenever the panel holds a place's snakes
     var cpEl = document.getElementById("country-panel");
     if (sb.hidden && cpEl && !cpEl.hidden && document.querySelector("#cp-list .cp-sp")) sb.hidden = false;
     var qT = (multi ? "Hide " : "See ") + qb.textContent.replace(/^(See|Hide) /, "");
     if (qb.textContent !== qT) qb.textContent = qT;
-    var key = TOPP ? TOPP.cc + "|" + TOPP.key + "|" + TOPP.n : "";
+    var key = TOPP ? TOPP.cc + "|" + TOPP.key + "|" + TOPP.n + "|" + (TOPP.ties || 0) : "";
     if (key === _btnKey) return;
     _btnKey = key;
     var top = document.getElementById("cp-top");
     top.hidden = !TOPP;
     if (TOPP) {
       var nm = TOPP.cc === "us" ? ((window.STATE_NAME && window.STATE_NAME[TOPP.key]) || TOPP.key) : TOPP.key;
-      top.textContent = "Most species: " + nm + " (" + TOPP.n + ")";
-      top.title = "Go to " + nm + ", the " + subdivWord(TOPP.cc, true) + " with the most species";
+      // a tie is said as a tie: no single place is "the one with the most"
+      top.textContent = TOPP.ties > 0 ? "Most species (" + TOPP.n + "): " + nm + " and " + TOPP.ties + " more tied" : "Most species: " + nm + " (" + TOPP.n + ")";
+      top.title = TOPP.ties > 0 ? (TOPP.ties + 1) + " places are tied with " + TOPP.n + " species each - this goes to " + nm : "Go to " + nm + ", the " + subdivWord(TOPP.cc, true) + " with the most species";
     }
   }
   document.getElementById("cp-top").addEventListener("click", function () {
@@ -15589,8 +15669,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   .mf-toggle { position: relative; }
   /* the same dark button as Heatmap, Sightings and Habitats; open, the same green as Habitats when it's on */
   .map-tools .hm-toggle.mf-toggle.on, .map-tools .hm-toggle.mf-toggle.on:hover { background: linear-gradient(135deg, #2c7a57 0%, #256846 100%); border-color: #2f7a45; color: #fff; filter: none; }
-  .mf-toggle .mf-n { display: inline-grid; place-items: center; min-width: 17px; height: 17px; margin-left: 5px; padding: 0 4px; border-radius: 9px;
-    background: #fff; color: #1d5a39; font: 700 10.5px/1 'Inter', sans-serif; }
+  .mf-toggle .mf-n { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: 18px; height: 18px; margin-left: 5px; padding: 0 5px; border-radius: 9px;
+    background: #fff; color: #1d5a39; font: 700 11px/18px 'Inter', sans-serif; font-variant-numeric: tabular-nums; text-align: center; }
   .mf-toggle .mf-n[hidden] { display: none; }
   .mf-panel { width: 300px; max-height: min(70vh, calc(100% - 70px)); display: flex; flex-direction: column; padding: 10px 10px 8px; }
   .mf-panel[hidden] { display: none; }
@@ -15839,8 +15919,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5Z"></path><path d="m2 13 10 5 10-5"></path><path d="m2 17.5 10 5 10-5" opacity=".55"></path></svg></button>' +
     '<div class="layers-pop" id="layers-pop" hidden><p>Map style</p>' +
     ['classic', 'satellite'].map(function (k) {
-      return '<button type="button" data-style="' + k + '"><span class="lp-sw lp-' + k + '"></span>' + (k === "classic" ? "SnakeList map" : STYLES[k].name) + "</button>";
-    }).join("") + '</div></div>' +
+      return '<button type="button" data-style="' + k + '"><span class="lp-sw lp-' + k + '"></span>' + (k === "classic" ? 'SnakeList map <em class="lp-rec">Recommended</em>' : STYLES[k].name) + "</button>";
+    }).join("") + '<button type="button" data-style="heatonly"><span class="lp-sw lp-heatonly"></span>Heatmap <em class="lp-rec lp-sub">just the heatmap</em></button></div></div>' +
     '<div class="hm-panel" id="hm-panel" hidden>' +
     '<div class="hm-head"><span>Species heatmap</span><button type="button" class="hm-collapse" id="hm-collapse" aria-label="Hide filters" aria-expanded="true"></button></div>' +
     '<div class="hm-row hm-pick"><input type="text" id="hm-q" placeholder="Search a snake species&hellip;" aria-label="Heatmap: search a snake species to map" autocomplete="off"><select id="hm-cat" hidden aria-hidden="true" tabindex="-1">' + Object.keys(CATS).map(function (k) { return '<option value="' + k + '">' + CATS[k].label + "</option>"; }).join("") + '</select></div>' +
@@ -16896,7 +16976,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     });
     document.getElementById("hm-legend").innerHTML = legendHTML();
     document.getElementById("hm-time").hidden = st.measure !== "obs";
-    [].slice.call(pop.querySelectorAll("button")).forEach(function (b) { var on = b.getAttribute("data-style") === st.style; b.classList.toggle("on", on); b.setAttribute("role", "menuitemradio"); b.setAttribute("aria-checked", String(on)); });
+    [].slice.call(pop.querySelectorAll("button")).forEach(function (b) { var ho = document.getElementById("globe-stage").classList.contains("heat-only"); var on = b.getAttribute("data-style") === "heatonly" ? ho : (!ho && b.getAttribute("data-style") === st.style); b.classList.toggle("on", on); b.setAttribute("role", "menuitemradio"); b.setAttribute("aria-checked", String(on)); });
   }
   // the "SnakeList map" choice shows a little picture of the map itself, in today's colours
   function layerThumb() {
@@ -16914,10 +16994,18 @@ window.SL_GEO_READY = new Promise(function (res) {
     var b = e.target.closest("[data-style]"); if (!b) return;
     pop.hidden = true;
     var sty = b.getAttribute("data-style");
+    // "Heatmap": the SnakeList map with only the species heatmap on it (v4.50)
+    if (sty === "heatonly") {
+      var go = function () { if (!st.heat) btnHeat.click(); document.getElementById("globe-stage").classList.add("heat-only"); };
+      if (st.style !== "classic") setStyle("classic").then(go); else go();
+      return;
+    }
+    document.getElementById("globe-stage").classList.remove("heat-only");
     setStyle(sty).then(function () { if (heatOn()) applyHeat(); if (SG.on) { sgClose(); sgRender(); sgLoad(true); } });
   });
   btnHeat.addEventListener("click", function () {
     st.heat = !st.heat;
+    if (!st.heat) document.getElementById("globe-stage").classList.remove("heat-only");
     if (st.heat) { habOn = false; window.SL_MAP_CLEAN && window.SL_MAP_CLEAN(); } // one view at a time, from a clean map
     save(); syncUI();
     if (!st.heat) { clearHeat(); return; }
@@ -20077,3 +20165,13 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
   new MutationObserver(function () { if (!pg.hidden) { window.scrollTo(0, 0); pg.scrollTop = 0; } }).observe(pg, { attributes: true, attributeFilter: ["hidden"] });
 })();
 </script>
+<style>
+/* v4.50: count badges centred; Snake Sightings on = red like its dots (not the heatmap's colour) */
+.tab-n { display: inline-flex; align-items: center; justify-content: center; line-height: 1; font-variant-numeric: tabular-nums; text-align: center; }
+.hm-toggle.sg-toggle.on, .hm-toggle.sg-toggle.on:hover { background: #c62f24; border-color: #c62f24; color: #fff; filter: none; }
+.layers-pop .lp-rec { display: block; font-style: normal; font-size: 10.5px; font-weight: 600; color: var(--gold, #58b351); letter-spacing: .02em; }
+.layers-pop .lp-rec.lp-sub { color: var(--text-muted); font-weight: 500; }
+.lp-heatonly { background: radial-gradient(circle at 40% 45%, #e04e2a 0 18%, #f2a33a 30%, #f7e07a 45%, var(--map-sea, #dbe4ea) 62%); }
+/* Heatmap style: just the heatmap - the other layer buttons step aside */
+.globe-stage.heat-only #sg-toggle, .globe-stage.heat-only #hab-toggle, .globe-stage.heat-only #mf-toggle { display: none; }
+</style>
