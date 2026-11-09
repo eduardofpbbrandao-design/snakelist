@@ -1,0 +1,38 @@
+{
+  "id": "python-regius",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "Usually 0.9-1.5 m; up to about 1.8 m", "src": ["wiki", "worldatlas"]},
+    "reproduction": {"text": "Lays eggs", "src": ["wiki"]},
+    "iucn": {"code": "NT", "text": "Near Threatened (2021)", "long": "Reassessed in 2021 as Near Threatened on the IUCN Red List (previously Least Concern), because of a suspected decline of about 30% over three generations, mainly in West Africa.", "src": ["wiki"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Ball Python, or Royal Python, is the smallest of Africa's pythons: a calm, non-venomous constrictor from West and Central Africa. Its name comes from its habit of rolling into a tight ball, with its head tucked inside, when it feels threatened. It is one of the most traded pet reptiles in the world.", "src": ["wiki", "cites"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Adults are usually about 0.9 to 1.5 m long; the maximum is about 1.8 m (72 in).", "src": ["worldatlas", "wiki"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "West and Central Africa. A CITES study described its population density as high in Ghana, medium in Togo and low in Benin.", "src": ["wiki", "cites"]}
+    ],
+    "habitat": [
+      {"text": "Grasslands, savannas and sparsely wooded country.", "src": ["worldatlas"]}
+    ],
+    "behaviour": [
+      {"text": "When stressed it curls into a ball, protecting its head in the middle of its coils, instead of biting.", "src": ["wiki"]}
+    ],
+    "conservation": [
+      {"text": "The main threat is the capture of wild snakes for the international pet trade, which a CITES study described as continuing and possibly increasing.", "src": ["wiki", "cites"]}
+    ]
+  },
+  "funfacts": [
+    {"text": "It is named for the way it rolls up into a ball when scared.", "src": ["wiki"]}
+  ],
+  "sources": {
+    "wiki": {"title": "Ball python", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Ball_python"},
+    "worldatlas": {"title": "Ball python", "publisher": "WorldAtlas", "url": "https://animals.worldatlas.com/animals/ball-python.html"},
+    "cites": {"title": "Case study on the trade in Python regius (AC28 Inf. 4)", "publisher": "CITES Animals Committee", "url": "https://cites.org/sites/default/files/eng/com/ac/28/Inf/E-AC28-Inf-04.pdf"}
+  }
+}

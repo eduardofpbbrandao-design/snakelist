@@ -1,0 +1,37 @@
+{
+  "id": "naja-naja",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "Up to about 2 m; rarely 2.1-2.2 m", "src": ["roundglass", "wiki"]},
+    "diet": {"text": "Rodents, lizards and frogs", "src": ["wiki"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Indian Cobra, or Spectacled Cobra, is the classic cobra of the Indian subcontinent. It is one of the \"Big Four\" snakes that cause most of the serious snakebites in India and Sri Lanka, partly because it often lives close to people.", "src": ["wiki", "rentokil"]}
+    ],
+    "identification": [
+      {"text": "When alarmed it raises the front of its body and spreads a broad hood. On the back of the hood there is usually a mark of two rings joined by a curved line, like a pair of spectacles - though a few snakes lack it.", "src": ["wiki"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Can grow to around 2 m. Some specimens, particularly from Sri Lanka, reach 2.1 to 2.2 m, but that is uncommon.", "src": ["roundglass", "wiki"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "The Indian subcontinent, including India and Sri Lanka.", "src": ["wiki"]}
+    ],
+    "behaviour": [
+      {"text": "Spreading the hood is a defensive display meant to startle an attacker so that the cobra can escape.", "src": ["wiki"]}
+    ],
+    "diet": [
+      {"text": "Mainly rodents, lizards and frogs.", "src": ["wiki"]}
+    ]
+  },
+  "funfacts": [
+    {"text": "It gets the name Spectacled Cobra from the glasses-like pattern on the back of its hood.", "src": ["wiki"]}
+  ],
+  "sources": {
+    "wiki": {"title": "Indian cobra", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Indian_cobra"},
+    "roundglass": {"title": "Spectacled cobra", "publisher": "Roundglass Sustain", "url": "https://roundglasssustain.com/species/spectacled-cobra"},
+    "rentokil": {"title": "Most venomous snakes in India", "publisher": "Rentokil PCI", "url": "https://www.rentokil-pestcontrolindia.com/blog/pest-solutions/most-venomous-snakes-in-india"}
+  }
+}

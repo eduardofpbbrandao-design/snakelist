@@ -1,0 +1,37 @@
+{
+  "id": "micrurus-fulvius",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "Usually under 80 cm", "src": ["wiki"]},
+    "reproduction": {"text": "Lays eggs (about 3-12)", "src": ["ncw"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Eastern Coral Snake is a slender, brightly ringed elapid of the south-eastern United States. Its venom acts on the nervous system and is dangerous, but it is shy and secretive, and bites are very rare.", "src": ["wiki", "outdooral"]}
+    ],
+    "identification": [
+      {"text": "Ringed with red, yellow and black around the whole body. In this species the red rings touch the yellow ones; a well-known rhyme (\"red on yellow can kill a fellow\") is based on that. Still, never rely on a rhyme to decide whether a snake is safe.", "src": ["ncw", "wiki"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Usually less than 80 cm (31 in) in total length.", "src": ["wiki"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "The south-eastern United States, including Florida - one of its other names is Florida Coral Snake.", "src": ["wiki", "ncw"]}
+    ],
+    "habitat": [
+      {"text": "Woodlands, pine and scrub forests, marshes and areas near water.", "src": ["ncw"]}
+    ],
+    "behaviour": [
+      {"text": "Secretive and shy; it usually avoids people.", "src": ["outdooral", "ncw"]}
+    ],
+    "reproduction": [
+      {"text": "Lays about three to 12 eggs in June, which hatch in September.", "src": ["ncw"]}
+    ]
+  },
+  "sources": {
+    "wiki": {"title": "Micrurus fulvius", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Micrurus_fulvius"},
+    "ncw": {"title": "Eastern Coral Snake", "publisher": "North Carolina Wildlife Resources Commission", "url": "https://www.ncwildlife.gov/species/eastern-coral-snake"},
+    "outdooral": {"title": "Eastern Coral Snake", "publisher": "Outdoor Alabama (Alabama Department of Conservation)", "url": "https://outdooralabama.com/venomous-snakes/eastern-coral-snake"}
+  }
+}

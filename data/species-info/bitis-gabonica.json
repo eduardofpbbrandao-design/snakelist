@@ -1,0 +1,46 @@
+{
+  "id": "bitis-gabonica",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "Usually 1.25-1.55 m", "src": ["wiki"]},
+    "reproduction": {"text": "Live young, often 30-40", "src": ["toronto"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Gaboon Viper is a massive, beautifully camouflaged viper of African rainforests. It holds the record for the longest fangs of any snake and is often called the heaviest viper. It spends most of its time lying still on the forest floor, waiting for prey to come close.", "src": ["guinness", "wiki"]}
+    ],
+    "identification": [
+      {"text": "A very thick-bodied viper whose bold colour pattern gives it excellent camouflage among dead leaves on the forest floor. A pair of small horn-like scales sits between the raised nostrils.", "src": ["wiki"]}
+    ],
+    "size": [
+      {"label": "Typical adults", "text": "Adults usually measure 125 to 155 cm in total length.", "src": ["wiki"]},
+      {"label": "Records", "text": "A 1.8 m specimen weighed 11.3 kg with an empty stomach. A 205 cm snake from Sierra Leone is often quoted as the record, but snakes from that region are now treated as the West African Gaboon Viper. Heavier weights are unverified.", "src": ["wiki"]},
+      {"label": "Fangs", "text": "Its fangs are the longest of any snake: the record is about 5 cm.", "src": ["guinness"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "Sub-Saharan Africa, mainly in and around its rainforests. West African snakes, once a subspecies of this species, are now listed separately as [[bitis-rhinoceros]].", "src": ["wiki", "adw"]}
+    ],
+    "habitat": [
+      {"text": "Rainforest and the woodland around it, mostly at low altitudes, where it lies hidden in leaf litter.", "src": ["wiki"]}
+    ],
+    "behaviour": [
+      {"text": "An ambush hunter: its camouflage is so good that prey walks right past it, and then it lunges and bites.", "src": ["toronto", "wiki"]}
+    ],
+    "reproduction": [
+      {"text": "Gives birth to live young after a pregnancy of about seven months, often 30 to 40 babies at once.", "src": ["toronto"]}
+    ]
+  },
+  "similar": [
+    {"id": "bitis-rhinoceros", "text": "the West African Gaboon Viper, formerly a subspecies; it has much larger horns on the snout.", "src": ["wiki"]}
+  ],
+  "funfacts": [
+    {"text": "Its fangs, up to about 5 cm long, are the longest of any snake in the world.", "src": ["guinness"]}
+  ],
+  "sources": {
+    "wiki": {"title": "Gaboon viper", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Gaboon_viper"},
+    "guinness": {"title": "Snake with the longest fangs", "publisher": "Guinness World Records", "url": "https://www.guinnessworldrecords.com/world-records/snake-with-the-longest-fangs"},
+    "toronto": {"title": "Gaboon viper", "publisher": "Toronto Zoo", "url": "https://www.torontozoo.com/animals/Gaboon%20viper"},
+    "adw": {"title": "Bitis gabonica", "publisher": "Animal Diversity Web, University of Michigan", "url": "https://animaldiversity.org/accounts/Bitis_gabonica/"}
+  }
+}

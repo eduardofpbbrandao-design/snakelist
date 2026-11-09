@@ -1,0 +1,45 @@
+{
+  "id": "eunectes-murinus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {"text": "Popular sources give 6-9 m; such sizes are rare", "src": ["natgeo", "livesci"]},
+    "diet": {"text": "Large prey, including caimans", "src": ["livesci"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Green Anaconda is the heaviest snake in the world: a huge, non-venomous boa of the rivers and swamps of tropical South America. In 2024 scientists split it into two species, the Southern Green Anaconda (*Eunectes murinus*) and the Northern Green Anaconda (*E. akayima*), which look identical but differ in their DNA.", "src": ["guinness", "rivas"]}
+    ],
+    "size": [
+      {"label": "Sizes reported", "text": "National Geographic gives 6 to 9 m and up to about 227 kg, but the heaviest weights are estimates rather than careful measurements, and a researcher who measured over a thousand wild anacondas found very large ones to be rare.", "src": ["natgeo", "wiki", "livesci"]}
+    ],
+    "distribution": [
+      {"label": "Before the 2024 split", "text": "Tropical South America east of the Andes, in the Amazon and Orinoco basins.", "src": ["rivas"]},
+      {"label": "After the split", "text": "The Southern Green Anaconda (*E. murinus*) lives in Peru, Bolivia, Brazil and French Guiana; the Northern Green Anaconda (*E. akayima*) in Ecuador, Colombia, Venezuela, Trinidad, Guyana, Suriname and French Guiana. SnakeList's map still shows the green anaconda in the older, broad sense.", "src": ["rivas", "dm"]}
+    ],
+    "behaviour": [
+      {"text": "Usually solitary: adults keep to their own hunting areas except in the breeding season.", "src": ["nzoo"]}
+    ],
+    "diet": [
+      {"text": "A constrictor that can tackle very large animals, including caimans and even jaguars.", "src": ["livesci"]}
+    ],
+    "taxonomy": [
+      {"text": "A 2024 study found that northern and southern green anacondas differ genetically by about 5.5% and split roughly 10 million years ago, and named the northern one *Eunectes akayima*. Because the two cannot be told apart by appearance, some experts dispute the split.", "src": ["rivas", "wiki-ak"]}
+    ]
+  },
+  "funfacts": [
+    {"text": "Its genus name *Eunectes* means good swimmer.", "src": ["wiki-ana"]}
+  ],
+  "sources": {
+    "guinness": {"title": "Heaviest species of snake", "publisher": "Guinness World Records", "url": "https://www.guinnessworldrecords.com/world-records/70277-heaviest-species-of-snake"},
+    "rivas": {"title": "Description of the northern green anaconda (Eunectes akayima)", "authors": "Rivas et al.", "publisher": "Diversity", "year": 2024, "url": "https://repository.naturalis.nl/pub/800678/Rivas-2024-Description-of-the-northern-green-anaconda-A.pdf"},
+    "dm": {"title": "New species of Amazon anaconda discovered", "publisher": "Daily Maverick", "year": 2024, "url": "https://www.dailymaverick.co.za/article/2024-03-01-new-species-of-amazon-anaconda-worlds-largest-snake-discovered/"},
+    "natgeo": {"title": "Green anaconda", "publisher": "National Geographic", "url": "https://www.nationalgeographic.com/animals/reptiles/facts/green-anaconda"},
+    "livesci": {"title": "Anaconda: habits, hunting and diet", "publisher": "Live Science", "url": "https://www.livescience.com/53318-anaconda-facts.html"},
+    "nzoo": {"title": "Green anaconda", "publisher": "Smithsonian's National Zoo", "url": "https://nationalzoo.si.edu/node/6847"},
+    "wiki": {"title": "Green anaconda", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Green_anaconda"},
+    "wiki-ak": {"title": "Northern green anaconda", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Eunectes_akayima"},
+    "wiki-ana": {"title": "Anaconda", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Anaconda"}
+  }
+}
