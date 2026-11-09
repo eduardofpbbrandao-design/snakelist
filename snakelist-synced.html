@@ -16119,7 +16119,10 @@ window.SL_GEO_READY = new Promise(function (res) {
     t.img.crossOrigin = "anonymous"; // drawn on the map's canvas, which must stay readable
     t.img.decoding = "async";
     t.img.onload = function () { tileFlight--; t.ok = true; tileFails = 0; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); };
-    t.img.onerror = function () { tileFlight--; t.bad = true; tileFails++; tileFailAt = Date.now(); };
+    t.img.onerror = function () { tileFlight--; t.bad = true; tileFails++; tileFailAt = Date.now();
+      // the satellite pictures can't be reached (offline, or blocked): say so once, on the map
+      if (tileFails === 8 && typeof sgNoteSet === "function") sgNoteSet("Satellite pictures can't load right now (no connection?) - the SnakeList map underneath still works. Switch to SnakeList map in the map styles.");
+    };
     t.img.src = SAT_URL.replace("{z}", z).replace("{y}", y).replace("{x}", x);
     if (tileCount > TILE_CAP) { // keep only the most recently used ones
       var keys = Object.keys(TILES).sort(function (a, b2) { return TILES[a].use - TILES[b2].use; });
@@ -16859,7 +16862,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     }
     sgFilter().then(function (F) {
       if (my !== SG.token || !SG.on) return;
-      if (F.key !== SG.fkey) { SG.fkey = F.key; SG.list = []; SG.ids = {}; sgRender(); force = true; }
+      if (F.key !== SG.fkey) { SG.fkey = F.key; SG.list = []; SG.ids = {}; if (typeof sgClose === "function") sgClose(); sgRender(); force = true; } // a different snake: its old popup goes too
       SG.only = F.only || null;
       sgWhat.textContent = " · " + (F.label || "all snakes"); // always says which snakes the dots are
       if (!F.param) { // nothing to ask for: no dots at all (never the old ones, never every snake)
