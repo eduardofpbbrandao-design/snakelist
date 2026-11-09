@@ -7,6 +7,16 @@ link previews read. Run after every change:  python3 build-site.py
 import re
 SITE = "https://snakelist.com/"
 app = open("snakelist-synced.html", encoding="utf-8").read()
+# how many snakes SnakeList lists: the one source for every "N species" on the static pages
+N_SPECIES = len(re.findall(r'<div class="card" data-id=', app))
+N_TXT = "{:,}".format(N_SPECIES)
+def _fix_totals(path):
+    try: t = open(path, encoding="utf-8").read()
+    except OSError: return
+    t2 = re.sub(r"\b\d,\d{3}(?=(?:</[a-z]+>)? (?:snake )?species\b)", N_TXT, t)
+    t2 = re.sub(r'(<span data-sl-total>)[\d,]+(</span>)', r"\g<1>" + N_TXT + r"\2", t2)
+    if t2 != t: open(path, "w", encoding="utf-8").write(t2)
+for _p in ("about.html", "about-snakelist.html", "install.html", "privacy.html", "terms.html"): _fix_totals(_p)
 title = "SnakeList - the snake life list, map and quiz"
 desc = ("Track every snake species you've seen. A checklist of 4,000+ snakes with photos, "
         "range maps down to states and provinces, a wishlist and a where-does-it-live quiz.")
@@ -95,7 +105,7 @@ open("robots.txt", "w").write("User-agent: *\nAllow: /\n\n" + "".join("User-agen
 # a plain-text guide for AI tools (llmstxt.org): what SnakeList is and where everything is
 open("llms.txt", "w", encoding="utf-8").write(f"""# SnakeList
 
-> SnakeList ({SITE}) is a free snake life list, map and quiz made by Eduardo Brandao. It covers 4,254 snake species with photos, range maps down to states and provinces, habitats, venom and constrictor classification, and a checklist people can tick off.
+> SnakeList ({SITE}) is a free snake life list, map and quiz made by Eduardo Brandao. It covers {N_TXT} snake species with photos, range maps down to states and provinces, habitats, venom and constrictor classification, and a checklist people can tick off.
 
 The app itself is one large interactive page. Every species also has its own small static page with its facts, range and links - those are the best pages to read.
 
