@@ -1,0 +1,47 @@
+{
+  "id": "zamenis-longissimus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "Usually up to 1.6 m; large males just over 2 m", "src": ["wiki"]},
+    "diet": {"text": "Small mammals, birds and eggs", "src": ["wiki", "wlo"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Aesculapian Snake is one of Europe's largest snakes and an excellent climber. It is named after Asclepius (Aesculapius), the Greek and Roman god of medicine: the snake coiled around his staff, still used in medical logos today, is thought to be this species.", "src": ["wiki"]}
+    ],
+    "identification": [
+      {"text": "Adults are light brown to bronze with smooth scales that give a metallic sheen, sometimes with small white dots. The belly scales are angled sharply at the sides, which helps it climb.", "src": ["wiki", "wildside"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Usually not longer than about 1.6 m; males grow larger than females and may reach just over 2 m.", "src": ["wiki"]}
+    ],
+    "variation": [
+      {"label": "Young", "text": "Juveniles are light green or brownish-green with darker markings along the back and sides.", "src": ["wiki"]},
+      {"label": "Sexes", "text": "Adult males grow larger than females.", "src": ["wiki"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "From eastern France across central and southern Europe to the Balkans and the Black Sea region, and south into northern Italy. A closely related Italian form has been raised to a separate species, the Italian Aesculapian Snake (*Zamenis lineatus*).", "src": ["wiki", "wiki-lin"]},
+      {"label": "Introduced", "text": "Small introduced populations exist in Britain.", "src": ["nnss", "wlo"]}
+    ],
+    "habitat": [
+      {"text": "Warm, moderately humid, hilly or rocky forested places; it avoids open plains and intensively farmed land.", "src": ["wiki"]}
+    ],
+    "behaviour": [
+      {"text": "A good climber, often seen in bushes and trees, where it raids bird nests.", "src": ["wiki", "wlo"]}
+    ],
+    "diet": [
+      {"text": "Mainly small mammals - shrews, moles and rodents up to the size of rats - plus birds, their eggs and nestlings.", "src": ["wiki", "wlo"]}
+    ]
+  },
+  "funfacts": [
+    {"text": "The snake on the medical symbol, the Rod of Asclepius, is believed to be an Aesculapian Snake.", "src": ["wiki"]}
+  ],
+  "sources": {
+    "wiki": {"title": "Aesculapian snake", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Aesculapian_snake"},
+    "wiki-lin": {"title": "Italian Aesculapian snake", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Italian_Aesculapian_snake"},
+    "wlo": {"title": "Aesculapian snake", "publisher": "Wildlife Online", "url": "https://www.wildlifeonline.me.uk/animals/species/aesculapian-snake"},
+    "wildside": {"title": "Aesculapian Snake (Zamenis longissimus)", "publisher": "Wildside Holidays", "url": "https://wildsideholidays.co.uk/aesculapian-snake-elaphe-longissima-or-zamenis-longissimus-culebra-de-esculapio/"},
+    "nnss": {"title": "Aesculapian Snake - Zamenis longissimus", "publisher": "GB Non-native Species Secretariat", "url": "https://www.nonnativespecies.org/non-native-species/information-portal/view/3773"}
+  }
+}

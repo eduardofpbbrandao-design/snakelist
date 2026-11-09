@@ -1,0 +1,38 @@
+{
+  "id": "crotalus-horridus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "About 76-152 cm", "src": ["vazoo", "maine"]},
+    "iucn": {"code": "LC", "text": "Least Concern", "long": "Least Concern on the IUCN Red List (NatureServe: Apparently Secure); individual states may list it differently.", "src": ["vazoo", "wiki"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Timber Rattlesnake is a large pit viper found only in the eastern United States, from about New York south to northern Florida. In many areas its life revolves around traditional winter dens shared with other rattlesnakes.", "src": ["wiki", "vazoo", "vhs"]}
+    ],
+    "identification": [
+      {"text": "Yellowish, grey, brown or black above, with darker blotches or crossbands, and a rattle on the tail.", "src": ["maine"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Roughly 76 to 152 cm (2.5 to 5 ft); Maine gives about 91 to 132 cm.", "src": ["vazoo", "maine"]}
+    ],
+    "variation": [
+      {"label": "Regional", "text": "Snakes from cooler places - farther north or higher up - are often darker.", "src": ["maine"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "The eastern United States, from about New York to northern Florida.", "src": ["wiki", "vazoo"]}
+    ],
+    "habitat": [
+      {"label": "Virginia (regional)", "text": "In western Virginia it lives in upland hardwood and mixed oak-pine forest with rocky ledges or talus slopes.", "src": ["vhs"]}
+    ],
+    "behaviour": [
+      {"label": "Dens", "text": "In parts of Virginia, its life centres on communal dens used for generations (hibernacula) and on sites where females give birth (rookeries).", "src": ["vhs"]}
+    ]
+  },
+  "sources": {
+    "wiki": {"title": "Timber rattlesnake", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Timber_rattlesnake"},
+    "vazoo": {"title": "Timber Rattlesnake", "publisher": "Virginia Zoo", "url": "https://virginiazoo.org/animal/timber-rattlesnake/"},
+    "vhs": {"title": "Timber Rattlesnake", "publisher": "Virginia Herpetological Society", "url": "https://virginiaherpetologicalsociety.com/reptiles/snakes/timber-rattlesnake/index.php"},
+    "maine": {"title": "Timber rattlesnake", "publisher": "Maine Department of Inland Fisheries and Wildlife", "url": "https://www.maine.gov/ifw/fish-wildlife/wildlife/species-information/reptiles-amphibians/timber-rattlesnake.html"}
+  }
+}

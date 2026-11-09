@@ -1,0 +1,50 @@
+{
+  "id": "coronella-austriaca",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "About 60-75 cm", "src": ["azan"]},
+    "reproduction": {"text": "Live young (eggs hatch inside the mother)", "src": ["pmc"]},
+    "diet": {"text": "Mainly lizards", "src": ["azan", "pmc"]},
+    "iucn": {"code": "LC", "text": "Least Concern", "long": "Least Concern on the global IUCN Red List, but rated Endangered in Great Britain.", "src": ["nscot"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Smooth Snake is a fairly small colubrid snake found from Portugal to Iran. In Great Britain it is the rarest snake, living only on lowland heathland in the south of England, where it is a strictly protected species.", "src": ["nscot", "pmc", "ne"]}
+    ],
+    "identification": [
+      {"text": "A dark line runs from the eye along the side of the head, giving it a masked look.", "src": ["florafauna"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Both sexes average about 60 to 75 cm.", "src": ["azan"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "Widespread in the western Palearctic, from Portugal to Iran. In Britain most populations are in Dorset and Hampshire, with smaller ones in Surrey, West Sussex and Berkshire, plus some reintroduced populations.", "src": ["nscot", "ne"]}
+    ],
+    "habitat": [
+      {"label": "In Britain (regional)", "text": "Confined to lowland heathland; the area of heath is stable, but its quality for smooth snakes continues to decline.", "src": ["pmc", "jncc"]}
+    ],
+    "diet": [
+      {"text": "An ambush hunter. Small reptiles - especially lizards and slow worms - are the main prey in diet studies; small mammals are also taken.", "src": ["azan", "pmc"]}
+    ],
+    "reproduction": [
+      {"text": "Ovoviviparous: the eggs hatch inside the mother, and the young are born live.", "src": ["pmc"]}
+    ],
+    "conservation": [
+      {"text": "Protected in the UK as a European protected species. Heathland management, including conservation grazing, is studied to help it.", "src": ["ne", "bhs"]}
+    ]
+  },
+  "similar": [
+    {"id": "vipera-berus", "text": "the Adder; the Adder has a bold zigzag down its back, while the Smooth Snake has a dark stripe through the eye instead.", "src": ["florafauna", "froglife"]}
+  ],
+  "sources": {
+    "pmc": {"title": "Research article on the smooth snake in Britain", "publisher": "PubMed Central", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3183952"},
+    "nscot": {"title": "Genetic scorecard indicator: smooth snake", "publisher": "NatureScot", "url": "https://www.nature.scot/doc/genetic-scorecard-indicator-smooth-snake"},
+    "ne": {"title": "Smooth snake: European protected species", "publisher": "Natural England", "url": "https://www.lbp.org.uk/downloads/Publications/SpeciesInfo/NE_EU_smoothsnake.pdf"},
+    "jncc": {"title": "S1283 Smooth snake - UK Habitats Directive Article 17 report", "publisher": "JNCC", "year": 2019, "url": "https://hub.jncc.gov.uk/jncc-assets/Art17/S1283-UK-Habitats-Directive-Art17-2019.pdf"},
+    "bhs": {"title": "Habitat use by smooth snakes on lowland heath managed using conservation grazing", "publisher": "Herpetological Journal (British Herpetological Society)", "year": 2015, "url": "https://www.thebhs.org/publications/the-herpetological-journal/volume-25-number-4-october-2015/812-04-habitat-use-by-smooth-snakes-on-lowland-heath-managed-using-conservation-grazing"},
+    "azan": {"title": "Smooth snake", "publisher": "A-Z Animals", "url": "https://a-z-animals.com/animals/smooth-snake/"},
+    "florafauna": {"title": "The Smooth Snake (Coronella austriaca): a rare gem of UK fauna", "publisher": "FloraFauna UK", "url": "https://florafauna.uk/?p=920"},
+    "froglife": {"title": "Adder", "publisher": "Froglife", "url": "https://www.froglife.org/info-advice/amphibians-and-reptiles/adder/"}
+  }
+}
