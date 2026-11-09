@@ -1,0 +1,153 @@
+{
+  "id": "notechis-scutatus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Peters, 1861)",
+  "facts": {
+    "length": {
+      "text": "Mainland adults average about 1.2 m; island forms 1-2.4 m",
+      "src": [
+        "wiki",
+        "am"
+      ]
+    },
+    "reproduction": {
+      "text": "Gives birth to live young, often 20-30",
+      "src": [
+        "wiki",
+        "am"
+      ]
+    },
+    "diet": {
+      "text": "Mainland: mostly frogs; islands: mostly birds and mammals",
+      "src": [
+        "mq",
+        "wiki"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Tiger Snake is a large, highly venomous elapid of southern Australia, including Tasmania and many Bass Strait and other offshore islands. It is often found near water, where it hunts frogs, and island populations have evolved strikingly different sizes depending on the prey available.",
+        "src": [
+          "wiki",
+          "am",
+          "tas"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Colour is very variable: many animals have pale yellowish and dark crossbands like a tiger, but others are plain olive, brown or black. When threatened it flattens its neck and raises its head off the ground.",
+        "src": [
+          "wiki",
+          "tas"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Mainland",
+        "text": "Mainland tiger snakes average about 1.2 m and may reach about 2.1 m.",
+        "src": [
+          "wiki"
+        ]
+      },
+      {
+        "label": "Islands",
+        "text": "Regional: island populations differ greatly. The Australian Museum gives a range from about 1 m on Roxby Island (South Australia) to about 2.4 m on Chappell Island (Bass Strait); the Tasmanian government gives a Chappell Island maximum of about 2.1 m. The size of prey available is thought to shape adult size on some islands.",
+        "src": [
+          "am",
+          "tas"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern and eastern Australia - south-eastern Queensland, New South Wales, Victoria, South Australia and south-western Western Australia - plus Tasmania and many offshore islands. SnakeList's map shows the states where it is recorded.",
+        "src": [
+          "wiki",
+          "am"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Often near water - wetlands, creeks, swamps and coastal areas - but also grassland and forest.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainland snakes feed mainly on frogs, whereas many island populations eat mainly mammals and birds. Young snakes grow quickly on small frogs, lizards and insects.",
+        "src": [
+          "mq",
+          "wiki"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young. Litters usually hold 20-30 young; the Australian Museum gives a range of 10-64, and a Tasmanian government source reports litters of up to 126. Litter size tends to rise with the size of the mother, and snakes from small islands produce fewer, larger young.",
+        "src": [
+          "wiki",
+          "am",
+          "tas"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "Island and western populations were once divided among several subspecies or a second species, the Black Tiger Snake (*Notechis ater*). Most current authorities treat all tiger snakes as one variable species, though older names such as *N. ater serventyi* for the Chappell Island form still appear.",
+        "src": [
+          "wiki",
+          "am"
+        ]
+      }
+    ]
+  },
+  "synonyms": {
+    "names": [
+      "*Notechis ater* (Krefft, 1866)",
+      "*Notechis ater serventyi* (Chappell Island Tiger Snake)"
+    ],
+    "src": [
+      "wiki",
+      "am"
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "A tiger snake from Chappell Island in Bass Strait can be twice as long as one from Roxby Island in South Australia - island snakes have grown to suit the size of prey on each island.",
+      "src": [
+        "am"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "Tiger snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Tiger_snake"
+    },
+    "am": {
+      "title": "Tiger Snake",
+      "publisher": "Australian Museum",
+      "url": "https://australian.museum/learn/animals/reptiles/tiger-snake/"
+    },
+    "tas": {
+      "title": "Tiger Snake",
+      "publisher": "Tasmania Department of Natural Resources and Environment",
+      "url": "https://nre.tas.gov.au/wildlife-management/fauna-of-tasmania/reptiles-and-frogs/tasmanian-snakes/tiger-snake"
+    },
+    "mq": {
+      "title": "Ecological comparisons of island and mainland populations of Australian tiger snakes",
+      "publisher": "Macquarie University",
+      "url": "https://researchers.mq.edu.au/en/publications/ecological-comparisons-of-island-and-mainland-populations-of-aust/"
+    }
+  }
+}

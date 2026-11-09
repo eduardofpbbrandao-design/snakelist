@@ -1,0 +1,189 @@
+{
+  "id": "agkistrodon-piscivorus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Lacépède, 1789)",
+  "facts": {
+    "length": {
+      "text": "Usually about 60 cm-1.2 m; record about 1.9 m",
+      "src": [
+        "twra",
+        "adw"
+      ]
+    },
+    "reproduction": {
+      "text": "Gives birth to live young",
+      "src": [
+        "adw",
+        "twra"
+      ]
+    },
+    "diet": {
+      "text": "Mainly fish and frogs, but takes many other animals",
+      "src": [
+        "twra",
+        "adw"
+      ]
+    },
+    "iucn": {
+      "code": "LC",
+      "text": "Least Concern",
+      "long": "Listed as Least Concern on the IUCN Red List.",
+      "src": [
+        "adw"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Cottonmouth, also called the Water Moccasin, is a heavy-bodied pit viper of the south-eastern United States and the most aquatic venomous snake in North America. Its common name comes from the white lining of its mouth, which it shows when threatened.",
+        "src": [
+          "adw",
+          "wiki"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Thick-bodied with a broad head and a heat-sensing pit between eye and nostril. Young animals have bold dark crossbands and a bright yellowish tail tip; adults darken with age and many become almost uniformly dark olive, brown or black.",
+        "src": [
+          "wiki",
+          "twra"
+        ]
+      },
+      {
+        "text": "When disturbed it often holds its ground, coils and gapes widely to show the white inside of the mouth.",
+        "src": [
+          "wiki",
+          "twra"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Most adults are roughly 60 cm to 1.2 m (2-4 ft) long. The largest recorded specimen was about 188 cm (74 in).",
+        "src": [
+          "twra",
+          "adw"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The south-eastern United States, from south-eastern Virginia west to Missouri and Texas and south to the Florida Keys. Since 2015 the Florida peninsula population is often treated as a separate species, [[agkistrodon-conanti|the Florida Cottonmouth]].",
+        "src": [
+          "adw",
+          "plazi"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Almost any habitat with water: swamps, marshes, slow rivers and streams, lake and pond edges, ditches and bottomland forest. Studied home ranges were small, around one hectare, and usually included a stream or lake.",
+        "src": [
+          "adw",
+          "twra"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Swims with its body riding high on the surface, unlike most harmless water snakes. It is reluctant to flee and relies on its gaping threat display, but bites mostly happen when it is stepped on or handled.",
+        "src": [
+          "wiki",
+          "twra"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "A broad generalist. Fish and frogs are the main prey, but it also eats small mammals, birds, other snakes, lizards and turtles, and will take carrion.",
+        "src": [
+          "twra",
+          "adw",
+          "wiki"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Females carry developing young internally for about five months and give birth to live young, usually about 5-9 per litter and up to around 16. Only a small share of each litter is thought to survive to adulthood.",
+        "src": [
+          "adw"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "In 2015 Burbrink and Guiher used genetic data to treat Florida Cottonmouths as a separate species, *Agkistrodon conanti*, and merged the former northern subspecies into *A. piscivorus*. The two meet in a zone where they hybridise, and some herpetologists, notably David Hillis, argue they should still be subspecies.",
+        "src": [
+          "plazi",
+          "rdb-conanti"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "agkistrodon-conanti",
+      "text": "the Florida Cottonmouth of peninsular Florida and southern Georgia, separated mainly on genetic grounds; the two hybridise where they meet.",
+      "src": [
+        "plazi"
+      ]
+    },
+    {
+      "id": "nerodia-sipedon",
+      "text": "harmless water snakes are often mistaken for Cottonmouths; they have slimmer heads without facial pits and usually flee into the water.",
+      "src": [
+        "wiki"
+      ]
+    }
+  ],
+  "synonyms": {
+    "names": [
+      "*Agkistrodon piscivorus leucostoma* (Western Cottonmouth, now merged into this species)"
+    ],
+    "src": [
+      "plazi"
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Its name comes from the startling cotton-white lining of the mouth that it flashes as a warning.",
+      "src": [
+        "adw",
+        "wiki"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "Agkistrodon piscivorus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Agkistrodon_piscivorus"
+    },
+    "adw": {
+      "title": "Agkistrodon piscivorus (Cottonmouth)",
+      "publisher": "Animal Diversity Web, University of Michigan",
+      "url": "https://animaldiversity.org/accounts/Agkistrodon_piscivorus/"
+    },
+    "twra": {
+      "title": "Cottonmouth, Agkistrodon piscivorus",
+      "publisher": "Tennessee Wildlife Resources Agency",
+      "url": "https://www.tn.gov/twra/wildlife/reptiles/snakes/cottonmouth.html"
+    },
+    "plazi": {
+      "title": "Agkistrodon piscivorus (Lacepede, 1789) (taxonomic treatment)",
+      "publisher": "Plazi TreatmentBank",
+      "url": "https://treatment.plazi.org/GgServer/html/590E405CFFEB2F7CFCC7A615FE32B03E"
+    },
+    "rdb-conanti": {
+      "title": "Agkistrodon conanti",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Agkistrodon&species=conanti"
+    }
+  }
+}

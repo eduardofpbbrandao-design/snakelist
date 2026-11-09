@@ -1,0 +1,167 @@
+{
+  "id": "epicrates-cenchria",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "Adults commonly about 1.5-2 m; females larger",
+      "src": [
+        "adw",
+        "lincoln"
+      ]
+    },
+    "reproduction": {
+      "text": "Gives birth to live young",
+      "src": [
+        "adw",
+        "seaworld"
+      ]
+    },
+    "diet": {
+      "text": "Mostly rodents; also birds and lizards",
+      "src": [
+        "adw",
+        "lincoln"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Brazilian Rainbow Boa is a medium-sized, non-venomous boa of South America, named for the rainbow-coloured shimmer that plays across its scales in sunlight. It is a popular snake in zoos and the pet trade.",
+        "src": [
+          "adw",
+          "seaworld"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Orange to reddish-brown with a row of large dark rings along the back, each with a paler centre, and dark spots along the sides. The scales are smooth, and microscopic ridges on their surface split light into colours, producing the iridescent sheen.",
+        "src": [
+          "adw",
+          "seaworld"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Adults are commonly reported at about 1.5-2 m, with females usually larger than males. They become mature at around 1.5 m.",
+        "src": [
+          "adw",
+          "lincoln"
+        ]
+      },
+      {
+        "label": "Newborns",
+        "text": "About 38-50 cm long at birth.",
+        "src": [
+          "seaworld"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Much of tropical South America, especially the Amazon basin and the Guianas, south to Bolivia and east into Brazil's Atlantic coastal region. SnakeList's map shows the countries where it is recorded.",
+        "src": [
+          "adw",
+          "plazi"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Mainly humid tropical forest and woodland; it is also found in more open, savanna-like country in parts of its range.",
+        "src": [
+          "adw",
+          "lincoln"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "A constrictor that feeds mainly on warm-blooded prey. Rodents are the prey most often reported; birds and lizards are also eaten.",
+        "src": [
+          "adw",
+          "lincoln"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young, which develop inside the mother. Sources disagree widely on litter size, giving ranges anywhere from about 2 to 35 young.",
+        "src": [
+          "adw",
+          "seaworld",
+          "lincoln"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "Rainbow boas were long treated as one species, *Epicrates cenchria*, with nine subspecies. In 2008 Paulo Passos and Ronaldo Fernandes revised the group using scales, skeleton and reproductive organs and recognised five species: *E. cenchria*, [[epicrates-maurus|*E. maurus*]], [[epicrates-crassus|*E. crassus*]], [[epicrates-alvarezi|*E. alvarezi*]] and [[epicrates-assisi|*E. assisi*]]. The Brazilian Rainbow Boa is the true *E. cenchria*.",
+        "src": [
+          "hm",
+          "plazi"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "epicrates-maurus",
+      "text": "the Brown Rainbow Boa of northern South America, treated as a subspecies of *E. cenchria* until the 2008 revision.",
+      "src": [
+        "hm"
+      ]
+    },
+    {
+      "id": "epicrates-crassus",
+      "text": "another former subspecies, raised to a full species in the same 2008 revision.",
+      "src": [
+        "hm"
+      ]
+    }
+  ],
+  "funfacts": [
+    {
+      "text": "Its rainbow sheen is not made by pigment: tiny ridges on each scale bend the light, like the colours on a soap bubble.",
+      "src": [
+        "seaworld",
+        "adw"
+      ]
+    }
+  ],
+  "sources": {
+    "adw": {
+      "title": "Epicrates cenchria (Rainbow Boa)",
+      "publisher": "Animal Diversity Web, University of Michigan",
+      "url": "https://animaldiversity.org/accounts/Epicrates_cenchria/"
+    },
+    "seaworld": {
+      "title": "Brazilian Rainbow Boa",
+      "publisher": "SeaWorld Parks & Entertainment animal info",
+      "url": "https://seaworld.org/animals/facts/reptiles/brazilian-rainbow-boa"
+    },
+    "lincoln": {
+      "title": "Brazilian Rainbow Boa",
+      "publisher": "Lincoln Children's Zoo",
+      "url": "https://www.lincolnzoo.org/animals/reptiles-and-amphibians/brazilian-rainbow-boa.html"
+    },
+    "hm": {
+      "title": "Revision of the Epicrates cenchria Complex (Serpentes: Boidae)",
+      "authors": "Passos & Fernandes",
+      "publisher": "Herpetological Monographs 22",
+      "year": 2008,
+      "url": "https://bioone.org/journals/herpetological-monographs/volume-22/issue-1/06-003.1/Revision-of-the-Epicrates-cenchria-Complex-Serpentes-Boidae/10.1655/06-003.1.full"
+    },
+    "plazi": {
+      "title": "Epicrates cenchria (Linnaeus, 1758) (taxonomic treatment)",
+      "publisher": "Plazi TreatmentBank",
+      "url": "https://treatment.plazi.org/GgServer/html/03E938678E46D35C4DB2FB39FF6FF9ED"
+    }
+  }
+}

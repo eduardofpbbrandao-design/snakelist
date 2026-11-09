@@ -1,0 +1,177 @@
+{
+  "id": "heterodon-platirhinos",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "Latreille, 1801",
+  "facts": {
+    "length": {
+      "text": "Adults average about 71 cm; females larger",
+      "src": [
+        "wiki"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs in sandy soil",
+      "src": [
+        "wiki",
+        "cosewic"
+      ]
+    },
+    "diet": {
+      "text": "Specialist on toads",
+      "src": [
+        "flmnh",
+        "wiki"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Eastern Hognose Snake is a stout, harmless snake of eastern North America, named for its upturned, shovel-like snout. It is best known for its dramatic bluff: when threatened it spreads its neck like a cobra and hisses, and if that fails it rolls over and plays dead.",
+        "src": [
+          "wiki",
+          "ct"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A thick-bodied snake with a short, upturned and keeled scale at the tip of the snout. Colour is extremely variable - yellow, orange, red, brown, olive, grey or all black, plain or blotched - depending on the region and the individual.",
+        "src": [
+          "flmnh",
+          "ct"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Adults average about 71 cm (28 in) in total length, with females larger than males. Published ranges for total length run from about 30 to 116 cm.",
+        "src": [
+          "wiki"
+        ]
+      },
+      {
+        "label": "Hatchlings",
+        "text": "About 16.5-21 cm long.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Much of the eastern and central United States, from New England and southern Ontario south to Florida and west to the Great Plains and Texas. SnakeList's map shows the states and provinces where it is recorded.",
+        "src": [
+          "wiki",
+          "cosewic"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Open areas with sandy, loose soils. Loose soil is important for nesting and egg-laying, and for digging out prey.",
+        "src": [
+          "cosewic",
+          "wiki"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "When threatened it coils, flattens its head and neck into a cobra-like hood, inflates its body, hisses loudly and strikes - all bluff, as it rarely bites. If this fails it writhes, rolls onto its back and lies still as if dead; one individual was observed feigning death for 45 minutes before recovering and moving off.",
+        "src": [
+          "ct",
+          "wiki"
+        ]
+      },
+      {
+        "text": "It uses its upturned snout as a shovel, swinging its head from side to side to burrow and to dig toads out of the soil.",
+        "src": [
+          "ct",
+          "flmnh"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "A dietary specialist on toads, which it often eats in large numbers; it also takes frogs and other amphibians. Enlarged teeth at the back of the upper jaw help puncture toads that puff themselves up with air. The snake tolerates the toxins in toad skin, possibly helped by unusually large adrenal glands.",
+        "src": [
+          "flmnh",
+          "wiki"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Females lay eggs in nests dug up to about 20 cm deep in sandy soil. The eggs hatch after about 60 days.",
+        "src": [
+          "wiki",
+          "cosewic"
+        ]
+      }
+    ],
+    "conservation": [
+      {
+        "label": "Canada",
+        "text": "Regional: in Canada it lives only in parts of Ontario, where it is a species at risk and has been assessed by COSEWIC.",
+        "src": [
+          "cosewic"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "heterodon-simus",
+      "text": "the Southern Hognose Snake of the south-eastern coastal plain, with a more sharply upturned snout; the Eastern species is usually told apart by its belly and underside of the tail.",
+      "src": [
+        "flmnh"
+      ]
+    },
+    {
+      "id": "heterodon-nasicus",
+      "text": "the Western Hognose Snake of the Great Plains, a close relative with a similar upturned snout and the same bluffing habits.",
+      "src": [
+        "wiki-nas"
+      ]
+    }
+  ],
+  "funfacts": [
+    {
+      "text": "Its scientific genus name *Heterodon* means \"different tooth\", after the enlarged teeth at the back of its upper jaw that it uses to deflate puffed-up toads.",
+      "src": [
+        "flmnh"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "Eastern hognose snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Eastern_hognose_snake"
+    },
+    "flmnh": {
+      "title": "Eastern Hog-nosed Snake (Florida Snake ID Guide)",
+      "publisher": "Florida Museum of Natural History",
+      "url": "https://www.floridamuseum.ufl.edu/florida-snake-id/snake/eastern-hog-nosed-snake/"
+    },
+    "ct": {
+      "title": "Eastern Hog-nosed Snake",
+      "publisher": "Connecticut Department of Energy and Environmental Protection",
+      "url": "https://portal.ct.gov/DEEP/Wildlife/Fact-Sheets/Eastern-Hog-nosed-Snake"
+    },
+    "cosewic": {
+      "title": "COSEWIC assessment and update status report on the Eastern Hog-nosed Snake (Heterodon platirhinos)",
+      "publisher": "Government of Canada, Species at Risk Public Registry",
+      "url": "https://www.canada.ca/en/environment-climate-change/services/species-risk-public-registry/cosewic-assessments-status-reports/eastern-hog-nosed-snake/chapter-6.html"
+    },
+    "wiki-nas": {
+      "title": "Western hognose snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Western_hognose_snake"
+    }
+  }
+}

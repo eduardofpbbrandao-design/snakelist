@@ -1,0 +1,184 @@
+{
+  "id": "lachesis-muta",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Linnaeus, 1766)",
+  "facts": {
+    "length": {
+      "text": "Adults usually over 2 m; rarely above 3.6 m",
+      "src": [
+        "ku",
+        "uwi"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs - unusual for an American pit viper",
+      "src": [
+        "uwi",
+        "lazoo"
+      ]
+    },
+    "activity": {
+      "text": "Mostly at night",
+      "src": [
+        "wiki"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The South American Bushmaster is the longest pit viper in the Americas and is often called the longest viper in the world. It lives in the rainforests of the Amazon basin and in Brazil's Atlantic Forest, and it is unusual among New World pit vipers in laying eggs.",
+        "src": [
+          "wiki",
+          "ku",
+          "uwi"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A long, fairly slender pit viper with rough, strongly keeled scales. It is tan, yellowish or reddish-brown with a row of dark diamond-shaped blotches along the back, and the tail ends in a short spine of modified scales.",
+        "src": [
+          "wiki",
+          "uwi"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Most adults exceed 2 m, and lengths over 3.6 m are rare. Published maximums vary between sources, from about 3.4 to 3.6 m.",
+        "src": [
+          "ku",
+          "uwi",
+          "lazoo"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Tropical South America east of the Andes, mainly the Amazon basin and the Guianas, and Trinidad. A separate population lives in the Atlantic Forest of eastern Brazil.",
+        "src": [
+          "wiki",
+          "uwi"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Lowland tropical rainforest, where it spends much of its time on the forest floor.",
+        "src": [
+          "wiki",
+          "lazoo"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Mostly nocturnal and an ambush hunter that waits coiled for prey to pass.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Feeds mainly on rodents and other small mammals.",
+        "src": [
+          "wiki",
+          "lazoo"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Females lay eggs rather than giving birth, which sets bushmasters apart from almost all other pit vipers of the Americas. Clutch sizes reported range from about 5 to 18 eggs, and incubation lasts roughly two months.",
+        "src": [
+          "uwi",
+          "lazoo",
+          "wiki"
+        ]
+      },
+      {
+        "label": "Captivity",
+        "text": "Captive females have been seen coiling around and attending their clutch.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "The Atlantic Forest population has traditionally been the subspecies *L. m. rhombeata*. A 2024 study by Hamdan and colleagues treated it as a full species, *Lachesis rhombeata*, but not every source has adopted this yet.",
+        "src": [
+          "wiki-rh",
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "lachesis-stenophrys",
+      "text": "the Central American Bushmaster of Nicaragua, Costa Rica and Panama, formerly treated as part of this species.",
+      "src": [
+        "wiki"
+      ]
+    },
+    {
+      "id": "bothrops-atrox",
+      "text": "a much more frequently met pit viper of the same forests; it is smaller and gives birth to live young.",
+      "src": [
+        "wiki-ba"
+      ]
+    }
+  ],
+  "funfacts": [
+    {
+      "text": "Bushmasters are the only pit vipers in the Americas known for certain to lay eggs; nearly all their relatives give birth to live young.",
+      "src": [
+        "uwi",
+        "lazoo"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "Lachesis muta",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Lachesis_muta"
+    },
+    "wiki-rh": {
+      "title": "Lachesis muta rhombeata",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Lachesis_muta_rhombeata"
+    },
+    "uwi": {
+      "title": "Lachesis muta - Bushmaster or Mapepire Zanana (Online Guide to the Animals of Trinidad and Tobago)",
+      "publisher": "The University of the West Indies, St Augustine",
+      "url": "https://sta.uwi.edu/fst/lifesciences/sites/default/files/lifesciences/documents/ogatt/Lachesis_muta%20-%20Bushmaster%20or%20Mapepire%20Zanana.pdf"
+    },
+    "lazoo": {
+      "title": "South American Bushmaster",
+      "publisher": "Los Angeles Zoo",
+      "url": "https://lazoo.org/explore-your-zoo/our-animals/reptiles/south-american-bushmaster/"
+    },
+    "ku": {
+      "title": "Article on the bushmaster",
+      "publisher": "Reptiles & Amphibians (University of Kansas journals)",
+      "url": "https://journals.ku.edu/reptilesandamphibians/article/download/16007/14324/38258"
+    },
+    "rdb": {
+      "title": "Lachesis muta",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Lachesis&species=muta"
+    },
+    "wiki-ba": {
+      "title": "Bothrops atrox",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Bothrops_atrox"
+    }
+  }
+}

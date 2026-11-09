@@ -1,0 +1,203 @@
+{
+  "id": "morelia-viridis",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Schlegel, 1872)",
+  "facts": {
+    "length": {
+      "text": "Average about 1.5 m; largest recorded about 2.2 m",
+      "src": [
+        "adw",
+        "wiki"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs; wild breeding not documented",
+      "src": [
+        "wiki",
+        "adw"
+      ]
+    },
+    "activity": {
+      "text": "At night; rests coiled on branches by day",
+      "src": [
+        "adw"
+      ]
+    },
+    "diet": {
+      "text": "Mostly small mammals; also reptiles",
+      "src": [
+        "wiki"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Green Tree Python is a small, stout, tree-living python of New Guinea, nearby islands and the tip of Cape York in northern Australia. It is famous for its colour change: babies are bright yellow or red and turn green as they grow. It is the most arboreal of the pythons.",
+        "src": [
+          "adw",
+          "cites",
+          "wiki"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Adults are bright green, often with a scattering of white or yellow scales along the back. It rests in a characteristic way, with its coils looped over a horizontal branch and its head in the middle.",
+        "src": [
+          "wiki",
+          "adw"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Averages about 1.5 m in length; the largest recorded specimen was about 2.2 m. The Australian Reptile Park says it rarely exceeds 1.5-1.8 m.",
+        "src": [
+          "adw",
+          "arp"
+        ]
+      },
+      {
+        "label": "Weight",
+        "text": "Captive males weigh about 1.1-1.4 kg and females up to 1.6 kg; wild snakes are usually much lighter.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "variation": [
+      {
+        "label": "Colour change",
+        "text": "Hatchlings are lemon yellow or brick red. They change to green as they grow - the CITES document gives a length of about 65 cm, and other studies a little less. The change can happen almost overnight or take several months, and is not tied to shedding.",
+        "src": [
+          "cites",
+          "wiki"
+        ]
+      },
+      {
+        "label": "Yellow and red young",
+        "text": "Yellow juveniles occur throughout the range, while red ones are found only in parts of New Guinea. A study found no difference between yellow and red juveniles in survival, sex ratio, body shape or diet.",
+        "src": [
+          "wiki",
+          "ouci"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "New Guinea and nearby islands, including the Aru Islands, and the Cape York Peninsula of Queensland, Australia.",
+        "src": [
+          "wiki",
+          "adw"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Tropical rainforest. Adults live in the canopy, while young snakes hunt nearer the ground.",
+        "src": [
+          "wiki",
+          "adw"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Adults are active mainly at night and spend the day coiled over branches. The switch from juvenile to adult colour coincides with a change in feeding: from hunting near the ground to hunting in the canopy.",
+        "src": [
+          "adw",
+          "wiki"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly small mammals such as rodents, and sometimes reptiles such as geckos and skinks. Birds were once thought to be a major part of its diet, but field work has suggested they are not; some sources still list birds.",
+        "src": [
+          "wiki",
+          "arp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs, but breeding in the wild has never been documented.",
+        "src": [
+          "wiki",
+          "adw"
+        ]
+      },
+      {
+        "label": "Captivity",
+        "text": "In captivity females lay up to about 25 eggs (sources give ranges of 1-25 and 8-25), then coil around and protect them during incubation.",
+        "src": [
+          "wiki",
+          "arp"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "Long classified in its own genus as *Chondropython viridis*, it is now placed in *Morelia*. A study published in 2021 split the green pythons of northern New Guinea off as a separate species, [[morelia-azurea|*Morelia azurea*]], leaving *M. viridis* for southern New Guinea, the Aru Islands and Australia.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "morelia-azurea",
+      "text": "the northern green python of northern New Guinea, split from this species in 2021; the two look alike and are separated mainly by range and genetics.",
+      "src": [
+        "wiki"
+      ]
+    },
+    {
+      "id": "corallus-caninus",
+      "text": "the Emerald Tree Boa of South America looks and rests almost exactly like it - an example of convergent evolution - but is a boa that gives birth to live young.",
+      "src": [
+        "wiki"
+      ]
+    }
+  ],
+  "synonyms": {
+    "names": [
+      "*Chondropython viridis* (Schlegel, 1872)"
+    ],
+    "src": [
+      "wiki"
+    ]
+  },
+  "sources": {
+    "wiki": {
+      "title": "Green tree python",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Green_tree_python"
+    },
+    "adw": {
+      "title": "Morelia viridis (Green Tree Python)",
+      "publisher": "Animal Diversity Web, University of Michigan",
+      "url": "https://animaldiversity.org/accounts/Morelia_viridis/"
+    },
+    "arp": {
+      "title": "Green Tree Python",
+      "publisher": "Australian Reptile Park",
+      "url": "https://www.reptilepark.com.au/about/meet-our-animals/green-tree-python"
+    },
+    "cites": {
+      "title": "Information document AC28 Inf. 8 (green python trade and biology)",
+      "publisher": "CITES Animals Committee",
+      "url": "https://cites.org/sites/default/files/eng/com/ac/28/Inf/E-AC28-Inf-08.pdf"
+    },
+    "ouci": {
+      "title": "Geographic frequency and ecological correlates of juvenile colour polymorphism in green pythons",
+      "publisher": "Australian Journal of Zoology (record via OUCI)",
+      "url": "https://ouci.dntb.gov.ua/works/45LKze27"
+    }
+  }
+}

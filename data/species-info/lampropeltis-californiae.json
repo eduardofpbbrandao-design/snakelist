@@ -1,0 +1,196 @@
+{
+  "id": "lampropeltis-californiae",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Blainville, 1835)",
+  "facts": {
+    "length": {
+      "text": "Adults usually 76-122 cm; maximum about 2 m",
+      "src": [
+        "plazi"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wiki"
+      ]
+    },
+    "diet": {
+      "text": "Rodents, lizards, birds and eggs, and other snakes including rattlesnakes",
+      "src": [
+        "wiki",
+        "caherps"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The California Kingsnake is a medium-sized, non-venomous constrictor of the western United States and north-western Mexico. It is one of the most popular pet snakes, and escaped or released animals have founded an invasive population on Gran Canaria in the Canary Islands, where it is badly harming native reptiles.",
+        "src": [
+          "wiki",
+          "pubmed"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Most wild animals are banded, with alternating dark brown or black and white or cream rings. Some populations include striped animals with a pale stripe running along the back, and the pet trade has produced many other colour forms, including albinos.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Mean adult length is about 76-122 cm, with a maximum of about 200 cm.",
+        "src": [
+          "plazi"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "From south-western Oregon south through most of California to the tip of Baja California, and east into Nevada, southern Utah, western Arizona and Sonora.",
+        "src": [
+          "plazi",
+          "wiki"
+        ]
+      },
+      {
+        "label": "Introduced",
+        "text": "Gran Canaria, Canary Islands (Spain). Introduced through the pet trade, it was found in the wild in the late 1990s (1998 in several studies) and was considered naturalised by 2007.",
+        "src": [
+          "pubmed",
+          "lifelamp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Very adaptable: woodland, chaparral, grassland, desert, farmland and suburban areas, often near rocks or streams.",
+        "src": [
+          "wiki",
+          "caherps"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Kills prey by constriction. It eats rodents, lizards, birds and their eggs, and other snakes; it has been photographed eating rattlesnakes in the wild. A 2019 study of stomach contents from museum specimens examined its diet across its range.",
+        "src": [
+          "caherps",
+          "wiseman",
+          "wiki"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "wiki"
+        ]
+      },
+      {
+        "label": "Gran Canaria",
+        "text": "Regional: on Gran Canaria, studies have found fewer juveniles but adults that are longer and heavier than in the native range.",
+        "src": [
+          "sprep"
+        ]
+      }
+    ],
+    "conservation": [
+      {
+        "label": "As an invader",
+        "text": "On Gran Canaria, sites invaded by kingsnakes had far fewer native reptiles: more than 90% fewer Gran Canaria Giant Lizards, more than 80% fewer Gran Canaria Skinks and more than 50% fewer Boettger's Wall Geckos. EU-funded LIFE projects have worked to control it.",
+        "src": [
+          "pubmed",
+          "lifelamp"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "Long treated as the subspecies *Lampropeltis getula californiae*, it was raised to a full species in 2009, when Pyron and Burbrink split the Common Kingsnake into five species. Not all authorities follow this.",
+        "src": [
+          "plazi",
+          "wiki"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "lampropeltis-getula",
+      "text": "the Eastern (Common) Kingsnake, of which it was once a subspecies; the two live on opposite sides of the continent.",
+      "src": [
+        "plazi"
+      ]
+    }
+  ],
+  "synonyms": {
+    "names": [
+      "*Lampropeltis getula californiae* (Blainville, 1835)"
+    ],
+    "src": [
+      "plazi"
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "The first kingsnakes found on Gran Canaria included albinos - a sign that they came from captive-bred pets.",
+      "src": [
+        "rm"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "California kingsnake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/California_kingsnake"
+    },
+    "plazi": {
+      "title": "Lampropeltis californiae (Blainville 1835) (taxonomic treatment)",
+      "publisher": "Plazi TreatmentBank",
+      "url": "https://tb.plazi.org/GgServer/html/03F2AA3FFFE1401323E0F920A19FFCFC"
+    },
+    "caherps": {
+      "title": "California Kingsnake - Lampropeltis californiae",
+      "publisher": "CaliforniaHerps.com",
+      "url": "https://californiaherps.com/snakes/pages/l.californiae.html"
+    },
+    "wiseman": {
+      "title": "Feeding ecology of the California Kingsnake",
+      "authors": "Wiseman et al.",
+      "publisher": "Herpetological Conservation and Biology 14(1)",
+      "year": 2019,
+      "url": "https://www.herpconbio.org/Volume_14/Issue_1/Wiseman_etal_2019.pdf"
+    },
+    "pubmed": {
+      "title": "Invasive snake causes massive reduction of all endemic herpetofauna on Gran Canaria",
+      "publisher": "Proceedings of the Royal Society B (PubMed record)",
+      "year": 2021,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/34875190"
+    },
+    "sprep": {
+      "title": "Life-history comparisons between the native range and an invasive island population of a colubrid snake",
+      "publisher": "SPREP library (reprint)",
+      "url": "https://library.sprep.org/sites/default/files/2021-07/life-history-native-range-invasive.pdf"
+    },
+    "lifelamp": {
+      "title": "LIFE Lampropeltis - project summary",
+      "publisher": "LIFE+ Lampropeltis project",
+      "url": "https://www.lifelampropeltis.com/images/pdf/Summary_Project.pdf"
+    },
+    "rm": {
+      "title": "Invasive California kingsnake decimates native reptiles on Gran Canaria Island",
+      "publisher": "Reptiles Magazine",
+      "url": "https://reptilesmagazine.com/invasive-california-kingsnake-decimates-native-reptiles-on-gran-canaria-island/"
+    }
+  }
+}

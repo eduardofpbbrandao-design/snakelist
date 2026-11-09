@@ -1,0 +1,148 @@
+{
+  "id": "pantherophis-alleghaniensis",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Holbrook, 1836)",
+  "facts": {
+    "length": {
+      "text": "Usually about 1-1.8 m; record about 2.14 m",
+      "src": [
+        "wiki"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs in midsummer",
+      "src": [
+        "wiki"
+      ]
+    },
+    "diet": {
+      "text": "Mainly small mammals, birds and birds' eggs",
+      "src": [
+        "biofiles",
+        "wiki"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Eastern Rat Snake is a large, non-venomous constrictor of the eastern United States and an excellent climber. It is common around farms, woodlands and even suburbs, wherever rodents are plentiful and there are trees or buildings to climb.",
+        "src": [
+          "wiki",
+          "gtc"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Colour varies a great deal by region: in the north adults are mostly shiny black, while in the south-east they can be yellowish or greyish with four dark stripes along the body. Young rat snakes are pale grey with dark blotches and look quite different from adults.",
+        "src": [
+          "wiki",
+          "gtc"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually about 99-183 cm (3¼-6 ft) in total length; the record is 213.9 cm.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The eastern United States, east of the Appalachians and along the Atlantic coast to Florida. SnakeList's map shows the states where it is recorded.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Almost any place rich in rodents and with somewhere to climb: forests, woodland edges, fields, swamps and farm buildings.",
+        "src": [
+          "gtc",
+          "wiki"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Climbs very well, up tree trunks and into the canopy. It hunts actively, finding prey largely by scent, and kills by constriction. Rat snakes have even been seen waiting on branches at cave entrances to catch emerging bats.",
+        "src": [
+          "biofiles",
+          "gtc"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Adults feed mainly on small mammals, birds and birds' eggs; young snakes prefer frogs and lizards.",
+        "src": [
+          "biofiles"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Females lay about 5-27 eggs around midsummer. The hatchlings, about 25-30 cm long, usually appear in September.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "In 2001 Frank Burbrink split the old Rat Snake (*Elaphe* or *Pantherophis obsoletus*) into three species based mainly on mitochondrial DNA: *P. alleghaniensis* in the east, [[pantherophis-spiloides|*P. spiloides*]] in the centre and [[pantherophis-obsoletus|*P. obsoletus*]] in the west. The three overlap in every body feature measured, and later authors have argued both about the split itself and about which name belongs to which lineage - one view gives the eastern lineage the name *P. quadrivittatus*.",
+        "src": [
+          "wiki",
+          "wiki-spil"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "pantherophis-spiloides",
+      "text": "the Gray Rat Snake of the central and southern states, which keeps a blotched pattern as an adult.",
+      "src": [
+        "wiki-spil"
+      ]
+    }
+  ],
+  "synonyms": {
+    "names": [
+      "*Elaphe obsoleta* (part)",
+      "*Pantherophis obsoletus* (part, before 2001)"
+    ],
+    "src": [
+      "wiki"
+    ]
+  },
+  "sources": {
+    "wiki": {
+      "title": "Pantherophis alleghaniensis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Pantherophis_alleghaniensis"
+    },
+    "wiki-spil": {
+      "title": "Gray ratsnake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Gray_ratsnake"
+    },
+    "biofiles": {
+      "title": "Eastern Ratsnake (Pantherophis alleghaniensis)",
+      "publisher": "The BioFiles",
+      "url": "https://thebiofiles.com/info/3978"
+    },
+    "gtc": {
+      "title": "Ratsnakes (fact sheet)",
+      "publisher": "Gopher Tortoise Council",
+      "url": "https://gophertortoisecouncil.org/pdf/GTC%20Ratsnakes.pdf"
+    }
+  }
+}

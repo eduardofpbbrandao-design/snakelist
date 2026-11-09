@@ -1,0 +1,175 @@
+{
+  "id": "bungarus-caeruleus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Schneider, 1801)",
+  "facts": {
+    "length": {
+      "text": "Average about 0.9 m; up to about 1.75 m",
+      "src": [
+        "wiki"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wiki"
+      ]
+    },
+    "activity": {
+      "text": "At night",
+      "src": [
+        "wiki",
+        "mp"
+      ]
+    },
+    "diet": {
+      "text": "Mainly other snakes",
+      "src": [
+        "wiki",
+        "jh"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Common Krait is a shiny, banded elapid of South Asia and a member of India's \"Big Four\" medically important snakes. It hunts at night and often enters houses, and many of its bites happen to people sleeping on the floor.",
+        "src": [
+          "wiki",
+          "jh"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Glossy black, dark brown or bluish-grey above, often with a blue sheen, crossed by narrow white bands that are often paired. The bands tend to fade toward the front of the body, where they may be reduced to white spots along the spine.",
+        "src": [
+          "mp",
+          "wiki"
+        ]
+      },
+      {
+        "text": "A row of enlarged, six-sided (hexagonal) scales runs down the middle of the back - a key feature of kraits. The tail scales beneath are undivided, and the eye is entirely black. The belly is white.",
+        "src": [
+          "mp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Average length is about 0.9 m, and it can grow to about 1.75 m. Some local guides give larger figures that are not well supported.",
+        "src": [
+          "wiki",
+          "mp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The Indian subcontinent, from Sindh in Pakistan east to the plains of West Bengal and south through peninsular India to Sri Lanka; also recorded from Afghanistan, Nepal and Bangladesh. SnakeList's map shows the countries where it is recorded.",
+        "src": [
+          "wiki",
+          "mp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "A wide range of lowland habitats, including fields, scrub and villages. It shelters in termite mounds, rat holes, brick piles and similar hiding places, and regularly enters houses.",
+        "src": [
+          "wiki",
+          "jh"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Strictly nocturnal, active from late evening to early morning. By day it is usually docile and hides its head under its coils if disturbed; at night it is far more active.",
+        "src": [
+          "mp",
+          "wiki"
+        ]
+      },
+      {
+        "text": "Bites on people sleeping on the ground are common. A 2020 study suggested that the prey kraits hunt attracts them into houses, and found that they bite sleepers even under mosquito nets; whether such bites are defensive or not is still debated.",
+        "src": [
+          "jh",
+          "wiki"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Feeds mainly on other snakes, including venomous ones such as other kraits and vipers. It also takes rodents, lizards, frogs and birds, and both cannibalism and scavenging have been recorded.",
+        "src": [
+          "wiki",
+          "jh"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Females lay eggs.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "conservation": [
+      {
+        "label": "Snakebite",
+        "text": "Its venom is strongly neurotoxic, and bites can cause paralysis with little pain at first, so victims - especially those bitten in their sleep - may not seek help quickly enough.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "lycodon-aulicus",
+      "text": "a harmless, banded wolf snake that is often mistaken for a krait.",
+      "src": [
+        "wiki-lyc"
+      ]
+    },
+    {
+      "id": "bungarus-sindanus",
+      "text": "the Sind Krait of Pakistan and north-western India, a closely related banded krait.",
+      "src": [
+        "wiki-sind"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "Common krait",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Common_krait"
+    },
+    "mp": {
+      "title": "Bungarus caeruleus (Schneider, 1801)",
+      "publisher": "Madhya Pradesh State Biodiversity Board / Forest Department",
+      "url": "https://www.mpforest.gov.in/mpsbb/snakes/91.html"
+    },
+    "jh": {
+      "title": "Food Spectrum of Common Kraits (Bungarus caeruleus): An Implication for Snakebite Prevention and Snake Conservation",
+      "publisher": "Journal of Herpetology 54(1)",
+      "year": 2020,
+      "url": "https://bioone.org/journals/Journal-of-Herpetology/volume-54/issue-1/18-054/Food-Spectrum-of-Common-Kraits-Bungarus-caeruleus--An-Implication/10.1670/18-054.full"
+    },
+    "wiki-lyc": {
+      "title": "Lycodon aulicus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Lycodon_aulicus"
+    },
+    "wiki-sind": {
+      "title": "Bungarus sindanus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Bungarus_sindanus"
+    }
+  }
+}

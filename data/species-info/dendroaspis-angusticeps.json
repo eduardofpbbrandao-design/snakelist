@@ -1,0 +1,55 @@
+{
+  "id": "dendroaspis-angusticeps",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(A. Smith, 1849)",
+  "facts": {
+    "length": {"text": "Adults average about 1.8-2 m; rarely over 2.5 m", "src": ["wiki"]},
+    "reproduction": {"text": "Lays eggs", "src": ["wiki"]},
+    "activity": {"text": "By day, in trees", "src": ["wiki"]},
+    "diet": {"text": "Mainly birds, eggs and small mammals", "src": ["wiki"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Eastern Green Mamba is a slender, bright green, tree-living mamba of the coastal forests of East and south-eastern Africa. Despite its reputation, it is a shy snake that stays hidden in the trees and is rarely seen. Its venom is the least toxic of the three green mambas, but a serious bite can still kill quickly without treatment.", "src": ["wiki"]}
+    ],
+    "identification": [
+      {"text": "A long, thin snake with a narrow, coffin-shaped head and smooth scales. Adults are a uniform bright green above and paler yellowish-green below; hatchlings are more bluish-green.", "src": ["wiki"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Males average about 1.8 m and females about 2 m in total length, and individuals over 2.5 m are rare. Some popular sources quote much larger maximums of up to 3.7 m, which are not well documented.", "src": ["wiki", "rm"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "Near the coasts of East and southern Africa, from Kenya south through Tanzania (including Zanzibar), Mozambique, Malawi and eastern Zimbabwe to KwaZulu-Natal and the north of the Eastern Cape in South Africa.", "src": ["wiki"]}
+    ],
+    "habitat": [
+      {"text": "Coastal forest and bush, dune forest and some montane forest. It favours dense, shady vegetation and is seldom found in open country.", "src": ["wiki", "asi"]}
+    ],
+    "behaviour": [
+      {"text": "Almost entirely arboreal and active by day; at night it sleeps coiled among foliage. It usually avoids people and other large animals and bites only when threatened.", "src": ["wiki", "asi"]}
+    ],
+    "diet": [
+      {"text": "Feeds mainly on birds and their eggs and on small mammals, including bats. Tree-dwelling lizards may also be eaten, though this is less certain.", "src": ["wiki"]}
+    ],
+    "reproduction": [
+      {"text": "Females lay eggs, often in hollow trees or among leaf litter. Clutch sizes reported range from about 4 to 17, and incubation takes roughly 10-12 weeks. Sources disagree on the breeding season.", "src": ["wiki", "rm"]}
+    ],
+    "taxonomy": [
+      {"text": "Andrew Smith described it in 1849 as *Naja angusticeps*. For a long time the black mamba was treated as part of the same species, until Vivian FitzSimons compared dozens of specimens of each and showed that build, scales, colour and behaviour separate them.", "src": ["wiki"]}
+    ]
+  },
+  "similar": [
+    {"id": "dendroaspis-viridis", "text": "the Western Green Mamba of West Africa, which has scales edged in black; the ranges do not overlap.", "src": ["wiki-w"]},
+    {"id": "dispholidus-typus", "text": "green Boomslangs share its forests; the Boomslang has a short head with very large eyes.", "src": ["wiki-boom"]}
+  ],
+  "funfacts": [
+    {"text": "It was long confused with the black mamba - two very different-looking snakes - until a comparison of specimens in the 20th century separated them.", "src": ["wiki"]}
+  ],
+  "sources": {
+    "wiki": {"title": "Eastern green mamba", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Eastern_green_mamba"},
+    "wiki-w": {"title": "Western green mamba", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Western_green_mamba"},
+    "wiki-boom": {"title": "Boomslang", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Boomslang"},
+    "asi": {"title": "Eastern Green Mamba (Dendroaspis angusticeps)", "publisher": "African Snakebite Institute", "url": "https://www.africansnakebiteinstitute.com/?p=12641"},
+    "rm": {"title": "Green Mamba", "publisher": "Reptiles Magazine", "url": "https://reptilesmagazine.com/Snake-Species/Green-Mamba/"}
+  }
+}

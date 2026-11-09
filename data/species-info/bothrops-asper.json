@@ -1,0 +1,51 @@
+{
+  "id": "bothrops-asper",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Garman, 1883)",
+  "facts": {
+    "length": {"text": "Usually about 1.2-1.8 m; occasionally larger", "src": ["adw", "wiki"]},
+    "reproduction": {"text": "Gives birth to live young, often in large litters", "src": ["adw"]},
+    "activity": {"text": "Mostly at night", "src": ["wiki"]},
+    "diet": {"text": "Adults mainly mammals; young eat frogs, lizards and invertebrates", "src": ["peerj", "adw"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "*Bothrops asper*, known as the Terciopelo or Fer-de-lance, is a large lancehead pit viper of the lowlands from eastern Mexico through Central America to north-western South America. It is one of the most dangerous snakes in the Americas, because it is common, often lives close to farms and villages, and is responsible for a large share of snakebites in its range.", "src": ["wiki", "adw"]}
+    ],
+    "identification": [
+      {"text": "A large pit viper with a broad, flat, arrow-shaped head clearly wider than the neck. The body is olive, grey or brown with a row of dark triangles along each side, whose pale edges form X- or V-shapes along the back. The underside of the chin is often yellow.", "src": ["wiki"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Adults are commonly about 1.2-1.8 m long. Sources disagree on the maximum: some give about 2.5 m, others occasional reports up to 3 m.", "src": ["adw", "wiki"]},
+      {"label": "Males and females", "text": "Females grow much larger than males, can weigh over 4.5 kg, and have bigger heads and longer fangs.", "src": ["adw"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "The Atlantic lowlands of eastern Mexico and Central America, and on into Colombia, Ecuador and Venezuela, including the Pacific lowlands of western Colombia and Ecuador. SnakeList's map shows the countries where it is recorded.", "src": ["wiki"]}
+    ],
+    "habitat": [
+      {"text": "Mainly humid lowland forest, but it adapts well to disturbed land: plantations, pastures, riverbanks and the edges of towns. It has been recorded from sea level up to about 2,640 m.", "src": ["adw", "wiki"]}
+    ],
+    "behaviour": [
+      {"text": "An ambush predator that is mostly active at night. It can be nervous and quick to defend itself when disturbed.", "src": ["wiki", "adw"]}
+    ],
+    "diet": [
+      {"text": "Its diet changes as it grows. A study in Ecuador found that young snakes eat a wide variety of small prey, including frogs, lizards and centipedes, while adults specialise mainly on mammals such as rodents; birds are also taken.", "src": ["peerj", "adw"]}
+    ],
+    "reproduction": [
+      {"text": "Females give birth to live young after a pregnancy of roughly six to eight months. Litter size grows with the size of the mother and differs between regions: in Costa Rica, females on the Atlantic slope have been reported to produce much larger litters on average than those on the Pacific slope, and litters of more than 80 young are known.", "src": ["adw", "wiki"]}
+    ],
+    "conservation": [
+      {"label": "Snakebite", "text": "It causes a large proportion of the serious snakebites in Central America, largely because it thrives in farmland where people work by hand. Exact percentages vary between sources.", "src": ["adw", "wiki"]}
+    ]
+  },
+  "similar": [
+    {"id": "bothrops-atrox", "text": "its close relative in the Amazon basin and east of the Andes, very similar in shape and pattern; the two are mostly separated by range.", "src": ["wiki-atrox"]}
+  ],
+  "sources": {
+    "wiki": {"title": "Bothrops asper", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Bothrops_asper"},
+    "adw": {"title": "Bothrops asper", "publisher": "Animal Diversity Web, University of Michigan", "url": "https://animaldiversity.org/accounts/Bothrops_asper/"},
+    "peerj": {"title": "Ontogenetic dietary shift in Bothrops asper (Ecuador)", "publisher": "PeerJ", "year": 2023, "url": "https://peerj.com/articles/14817/"},
+    "wiki-atrox": {"title": "Bothrops atrox", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Bothrops_atrox"}
+  }
+}

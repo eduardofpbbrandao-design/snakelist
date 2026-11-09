@@ -1,0 +1,156 @@
+{
+  "id": "daboia-russelii",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Shaw & Nodder, 1797)",
+  "facts": {
+    "length": {
+      "text": "Mainland average about 1.2 m; maximum about 1.66 m",
+      "src": [
+        "wiki"
+      ]
+    },
+    "reproduction": {
+      "text": "Gives birth to live young, often 20-40",
+      "src": [
+        "wiki"
+      ]
+    },
+    "diet": {
+      "text": "Mainly rodents, especially rats and mice",
+      "src": [
+        "wiki",
+        "rajagiri"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "Russell's Viper is a large, heavy-bodied viper of South Asia and one of India's \"Big Four\" medically important snakes. It is common in open farmland, where it hunts rats and mice, and this brings it into frequent contact with people working in the fields.",
+        "src": [
+          "wiki",
+          "rajagiri"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A stout viper with a flat, triangular head and a pattern of three rows of large, dark-brown spots, each ringed in black and edged with white or yellow, running the length of the body.",
+        "src": [
+          "wiki",
+          "brit"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Mainland adults average about 120 cm and reach a maximum of about 166 cm; island populations stay smaller. Some sources give a maximum of about 160 cm.",
+        "src": [
+          "wiki",
+          "rajagiri"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The Indian subcontinent west of the Bay of Bengal: India, Pakistan, Nepal, Bhutan, Bangladesh and Sri Lanka. Populations east of the Bay of Bengal are now treated as a separate species, [[daboia-siamensis|the Eastern Russell's Viper]].",
+        "src": [
+          "wiki",
+          "rajagiri"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Mostly open, grassy or bushy country, including plains, coastal lowlands, hills and farmland. It generally avoids dense, damp forest.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Rodents are its main food, especially field and house rats and mice such as *Rattus* and *Bandicota*. That is why it is drawn to fields, villages and grain stores.",
+        "src": [
+          "rajagiri",
+          "wiki"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young. Litters of 20-40 are typical; sources disagree on the record, with maximums of 65 and 75 young both reported.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "conservation": [
+      {
+        "label": "Snakebite",
+        "text": "It is a member of India's \"Big Four\" (with the Indian Cobra, Common Krait and Saw-scaled Viper), the species responsible for most serious snakebites in the region.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "Russell's Viper was long treated as one species with several subspecies across South and South-east Asia. Analyses of body features and mitochondrial DNA led to the eastern populations being recognised as a separate species, *Daboia siamensis*.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "When threatened it coils and gives a very loud hiss, said to be louder than that of almost any other snake, before striking.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "daboia-siamensis",
+      "text": "the Eastern Russell's Viper of South-east Asia, China and Taiwan, formerly part of this species; the two are separated by the Bay of Bengal.",
+      "src": [
+        "wiki"
+      ]
+    }
+  ],
+  "funfacts": [
+    {
+      "text": "Its genus name *Daboia* is thought to come from a Hindi word meaning \"that lies hid\" or \"the lurker\".",
+      "src": [
+        "dte"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "Russell's viper",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Russell%27s_viper"
+    },
+    "brit": {
+      "title": "Russell's viper",
+      "publisher": "Encyclopaedia Britannica",
+      "url": "https://www.britannica.com/animal/Russells-viper"
+    },
+    "rajagiri": {
+      "title": "Russell's Viper Daboia russelii",
+      "publisher": "Rajagiri College of Social Sciences (campus fauna)",
+      "url": "https://www.rajagiricollege.edu.in/fauna-posts/russells-viper-daboia-russelii/"
+    },
+    "dte": {
+      "title": "Latin, local tongues and legends: study decodes the meanings of 1,047 Indian reptile names",
+      "publisher": "Down To Earth",
+      "url": "https://www.downtoearth.org.in/wildlife-biodiversity/latin-local-tongues-and-legends-study-decodes-the-meanings-of-1047-indian-reptile-names"
+    }
+  }
+}
