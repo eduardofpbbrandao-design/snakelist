@@ -162,8 +162,9 @@ def build(app):
 
     paths, boxes, region = world_map(OUT + "/world.svg")
 
-    open(OUT + "/sp.css", "w").write(CSS)
-    open(OUT + "/sp.js", "w").write(JS)
+    import build_regions
+    open(OUT + "/sp.css", "w").write(CSS + build_regions.REAL_CSS)
+    open(OUT + "/sp.js", "w").write(JS + build_regions.REAL_JS)
     return pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll, paths, boxes, region)
 
 
@@ -329,10 +330,11 @@ def world_map(out):
                 items.append((nm, rings, []))  # "Toamasina (3)": its own shape, named so in data-provinces too
         out = {}
         for nm, rings, also in items:
-            e = out.setdefault(nm, {"d": "", "also": set(), "box": None, "ll": []})
+            e = out.setdefault(nm, {"d": "", "also": set(), "box": None, "ll": [], "rings": []})
             e["also"].update(also)
             for ring in rings:
                 if len(ring) < 3: continue
+                e["rings"].append(ring)  # [lon, lat] points, for the region and city pages (build_regions.py)
                 pts = ring_xy([p[0] for p in ring], [p[1] for p in ring])
                 d = path_d(simplify(pts)) or path_d(pts)
                 if d: e["d"] += d
@@ -528,14 +530,17 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         items = []
         for n in sorted(dict.fromkeys(names), key=lambda t: slugify(region.us_names.get(t, t) if cc == "us" else t)):
             shown = region.us_names.get(n, n) if cc == "us" else re.sub(r" \(\d+\)$", "", n)
-            k = prov_count(cc, [n])
-            items.append('<a href="../?map=%s">%s</a>%s' % (esc(quote(shown)), esc(shown), (' <small class="sp-n" title="All snake species SnakeList records in %s - not records of this snake">(%s in all)</small>' % (esc(shown), nplural(k, "species", "species"))) if k else ""))
+            rk = build_regions.key_of(cc, n)  # its own page (species/region/...), else the app's map on it
+            k = len(build_regions.REG[rk]["ids"]) if rk else prov_count(cc, [n])
+            items.append('<a href="%s">%s</a>%s' % (("region/" + rk) if rk else "../?map=" + esc(quote(shown)), esc(shown), (' <small class="sp-n" title="All snake species SnakeList records in %s - not records of this snake">(%s in all)</small>' % (esc(shown), nplural(k, "species", "species"))) if k else ""))
         return "<li><b>%s%s:</b> %s</li>" % (esc(cname), what, ", ".join(items))
     PROV_N = {}
     for c in cards:
         for pkey in c["provinces"]:
             cc, _, pn = pkey.partition(":"); PROV_N.setdefault(cc.lower(), {}).setdefault(pn, set()).add(c["id"])
         for stc in c["states"] or []: PROV_N.setdefault("us", {}).setdefault(stc, set()).add(c["id"])
+    import build_regions
+    build_regions.index(cards, region, iso, APP[0])  # the state/province and city pages, so the species pages can link them
     def prov_count(cc, names):
         ids = set()
         for n in names: ids |= PROV_N.get(cc, {}).get(n, set())
@@ -762,6 +767,17 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             ov_body += '<div class="sp-fun"><h3>Did you know?</h3><ul>%s</ul></div>' % "".join(
                 "<li>%s%s</li>" % (R.rich(x["text"]), R.cite(x.get("src"))) for x in info["funfacts"])
         if not info: ov_body += '<div id="sp-wiki"></div>'
+        # who described it: the reviewed account's authority, with the person (and, without an
+        # account, the whole answer) looked up on Wikidata by wd.js; fossils add their geological age
+        am = build_regions.authority(INFO, c)
+        who = ""
+        if am:
+            who = '<p class="sp-who-s">First described by <b>%s</b> in <b>%d</b><span class="sp-ago" data-y="%d"></span>.%s</p>' % (
+                esc(am[1]), am[2], am[2], (" The brackets in its name&rsquo;s authority, %s, mean it was first described under a different genus." % esc(am[0])) if am[3] else "")
+        if c["fossil"] and c["died"]:
+            who += '<p><b>Geological age:</b> known from fossils; it died out in the %s, %s.</p>' % (esc(c["died"][0]), esc(c["died"][1]))
+        ov_body += '<div class="sp-who" id="sp-who" data-sci="%s" data-auth="%s"%s%s><h3>Who described it</h3>%s<div class="sp-who-p"></div></div>' % (
+            esc(sci), esc(am[0] if am else ""), (' data-y="%d"' % am[2]) if am else "", "" if who else " hidden", who if am else '<p class="sp-who-s"></p>' + who)
         ov_body += '<p class="sp-tagh">Find snakes like it in the SnakeList app:</p><ul class="sp-tags" aria-label="SnakeList filters">%s</ul>' % "".join(
             '<li><a href="../?%s">%s</a></li>' % (esc(q), esc(t)) for t, q in tags)
         secs = [("overview", "Overview", ov_body)]
@@ -870,6 +886,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             site_head=site_header("../", "species"), site_foot=site_footer("../"),
             crumb_tax=((' &rsaquo; <a href="family/%s">%s</a>' % (slugify(c["family"]), esc(c["family"]))) if c["family"] else "") + ((' &rsaquo; <a href="genus/%s"><i>%s</i></a>' % (slugify(c["genus"]), esc(c["genus"]))) if c["genus"] and not c["fossil"] else ""),
             author=AUTHOR, venom_cls="v" if c["venom"] else "nv",
+            realbtn="" if c["fossil"] else '<button type="button" class="sp-btn sp-btn2 sp-realbtn" aria-haspopup="dialog">See it in real life</button>',
+            lenattr=len_attr(info),
             mapnote=('<p class="sp-note sp-mapnote">Shaded countries are those where it %s recorded &ndash; it does not live everywhere inside them.</p>' % ("was" if gone else "is"))
                     if codes or icodes or ishapes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
         page = page.replace(GEN_MARK, fmt_date(dates.get(page_name(c), page)))
@@ -912,11 +930,25 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     open(OUT + "/index.html", "w", encoding="utf-8").write(INDEX.format(n="{:,}".format(len(cards)), body=body, author=AUTHOR, url=SITE + "species/",
         nfam=len([f for f, L in fams if f]), ncountry="{:,}".format(len(countries)), cslugs=cslugs,
         site_head=site_header("../", "species"), site_foot=site_footer("../", "Photos: iNaturalist observers (CC licences) - credited on each species page.")))
-    return [SITE + "species/"] + [SITE + "species/" + page_name(c) for c in links] + hubs(cards, esc, img_of, invasive)
+    reg_urls = build_regions.build(cards, by_id, INFO, invasive, iso, harm)
+    return [SITE + "species/"] + [SITE + "species/" + page_name(c) for c in links] + hubs(cards, esc, img_of, invasive) + reg_urls
+
+
+def len_attr(info):
+    """a species page's sourced adult length, for the size picture in "See it in real life":
+    data-lenlo/-hi in metres, the account's own words and its first source (none without an account)"""
+    import build_regions
+    lm = build_regions.length_m(info)
+    if not lm: return ""
+    f = info["facts"]["length"]; s = (info.get("sources") or {}).get((f.get("src") or [""])[0], {})
+    e = lambda t: H.escape(str(t), quote=True)
+    return ' data-lenlo="%g" data-lenhi="%g" data-lentxt="%s"%s' % (lm[0], lm[1], e(plain(f["text"])),
+                                                              (' data-lensrc="%s"' % e("%s|%s" % (s.get("publisher") or s.get("title", ""), s.get("url", "")))) if s else "")
 
 
 def hubs(cards, esc, img_of, invasive=None):
     """crawlable landing pages - snakes of each country, each family, each genus - linking to the species pages"""
+    import build_regions
     groups = {"country": {}, "family": {}, "genus": {}}
     for c in cards:
         for n in c["countries"]: groups["country"].setdefault(n, []).append(c)
@@ -926,8 +958,8 @@ def hubs(cards, esc, img_of, invasive=None):
     for kind, G in groups.items():
         os.makedirs(OUT + "/" + kind, exist_ok=True)
         if kind == "country":  # the redesigned country pages (country_page below) and the country picker's list
-            open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS)
-            open(OUT + "/country.js", "w", encoding="utf-8").write(COUNTRY_JS)
+            open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS + build_regions.REGION_CSS)
+            open(OUT + "/country.js", "w", encoding="utf-8").write(COUNTRY_JS + build_regions.PLIST_JS)
             with open(OUT + "/countries.json", "w", encoding="utf-8") as fh:
                 json.dump({n: slugify(n) for n in sorted(G) if slugify(n)}, fh, ensure_ascii=False, separators=(",", ":"))
             for name, L in G.items():
@@ -946,8 +978,8 @@ def hubs(cards, esc, img_of, invasive=None):
                 if m: open("%s/country/%s" % (OUT, f), "w", encoding="utf-8").write(
                     country_page(H.unescape(m.group(1).strip()), [], {"_cards": cards}, invasive or {}, esc, f[:-5]))
             continue
-        open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS)
-        open(OUT + "/country.js", "w", encoding="utf-8").write(COUNTRY_JS)
+        open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS + build_regions.REGION_CSS)
+        open(OUT + "/country.js", "w", encoding="utf-8").write(COUNTRY_JS + build_regions.PLIST_JS)
         for name, L in G.items():
             slug = slugify(name)
             if not slug: continue
@@ -974,14 +1006,14 @@ PAGE = """<!doctype html>
 <script type="application/ld+json">{ld}</script>
 </head><body>
 {site_head}
-<main class="sp-main" data-id="{id}" data-sci="{sci_attr}">
+<main class="sp-main" data-id="{id}" data-sci="{sci_attr}"{lenattr}>
 <nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../">SnakeList</a> &rsaquo; <a href="./">All species</a>{crumb_tax} &rsaquo; <span aria-current="page">{h1}</span></nav>
 <article>
 <header class="sp-head">{photo}
 <div class="sp-title"><h1>{h1}</h1><p class="sp-sci">{sub}</p>
 {intro}
 
-<div class="sp-actions"><a class="sp-btn" href="../?sp={id}">Mark Seen / Want to see</a>{maplink}</div>
+<div class="sp-actions"><a class="sp-btn" href="../?sp={id}">Mark Seen / Want to see</a>{realbtn}{maplink}</div>
 <p class="sp-actnote">Opens this snake in the SnakeList app, where you can tick it as Seen or add it to your Want to see list.</p>
 </div><dl class="sp-key">{keyfacts}</dl></header>
 <nav class="sp-toc" aria-label="On this page">{toc}</nav>
@@ -993,7 +1025,7 @@ PAGE = """<!doctype html>
 <p class="sp-safe"{safe_hidden}><b>Stay safe:</b> a photo or a web page can never tell you for certain that a snake is harmless. Keep your distance, never handle a wild snake, and get medical help straight away after any bite.</p>
 </article></main>
 {site_foot}
-<script src="sp.js" defer></script>
+<script src="sp.js" defer></script><script src="wd.js" defer></script>
 </body></html>
 """
 
@@ -1320,7 +1352,12 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
             facts.append("<li><b>%s</b> %s extinct or known only from fossils.</li>" % (len(gone), "is" if len(gone) == 1 else "are"))
     if kind == "country" and len(facts) == 1 and nfam < 3: facts = []  # just the family split the header already gives
     ov_h = ("%s&rsquo;s snakes in numbers" % esc(name)) if kind == "country" else ("About the %s %s" % ("family" if kind == "family" else "genus", esc(name)))
+    if kind == "country":  # its states/provinces and cities, each with its own page (build_regions.py)
+        import build_regions
+        facts_extra = build_regions.country_sections(name)
+    else: facts_extra = ""
     overview = ('<section class="cy-sec" aria-labelledby="cy-ov-h"><h2 id="cy-ov-h">%s</h2><ul class="cy-facts">%s</ul></section>' % (ov_h, "".join(facts))) if facts else ""
+    overview += facts_extra
     if kind == "country": crumbs = [("Countries", SITE + "species/#by-country", "../#by-country")]
     elif kind == "family": crumbs = [("Families", SITE + "species/#by-family", "../#by-family")]
     else: crumbs = [("Families", SITE + "species/#by-family", "../#by-family")] + ([(family, SITE + "species/family/" + slugify(family), "../family/" + slugify(family))] if family else [])
