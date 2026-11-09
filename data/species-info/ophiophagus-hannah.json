@@ -1,0 +1,255 @@
+{
+  "id": "ophiophagus-hannah",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Cantor, 1836)",
+  "facts": {
+    "length": {
+      "text": "Adults usually 3-4 m; record about 5.6 m",
+      "src": [
+        "adw",
+        "ypte"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs in a nest",
+      "src": [
+        "dte",
+        "adw"
+      ]
+    },
+    "diet": {
+      "text": "Mostly other snakes",
+      "src": [
+        "adw",
+        "natgeo"
+      ]
+    },
+    "iucn": {
+      "code": "VU",
+      "text": "Vulnerable",
+      "long": "Listed as Vulnerable on the IUCN Red List, with a decreasing population. That assessment was made before the 2024 split into four species, so it will need to be redone.",
+      "src": [
+        "natgeo",
+        "livesci"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The King Cobra is the world's longest venomous snake: a huge, alert elapid of the forests of South and Southeast Asia. Its scientific name *Ophiophagus* means snake-eater, and other snakes are indeed its main food. It is also the only snake known to build a nest for its eggs. In 2024 scientists split it into four species; SnakeList's page and map still cover the king cobra in the older, broad sense.",
+        "src": [
+          "adw",
+          "natgeo",
+          "ejt"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A very long snake with smooth scales and a hood it spreads when alarmed. Adult colour depends on the region: pale olive in Malaysia, bronze-brown in eastern India, glossy black with pale crossbars in the Western Ghats, often with pale bands that converge towards the head.",
+        "src": [
+          "wiki",
+          "whk"
+        ]
+      },
+      {
+        "label": "Young",
+        "text": "Hatchlings look very different: jet black with bright yellow or white crossbands, which fade as the snake grows.",
+        "src": [
+          "wiki",
+          "whk"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Typical adults",
+        "text": "Adults typically measure 3-4 m, and individuals rarely exceed about 4.25 m.",
+        "src": [
+          "adw",
+          "ypte"
+        ]
+      },
+      {
+        "label": "Largest record",
+        "text": "The longest reliably reported specimen, caught in Thailand, measured about 5.6 m (18 ft 4 in).",
+        "src": [
+          "ypte"
+        ]
+      }
+    ],
+    "variation": [
+      {
+        "label": "Regional",
+        "text": "Colour and banding differ from region to region. These differences, together with DNA, are part of why the king cobra is now divided into four species (see Taxonomy).",
+        "src": [
+          "livesci",
+          "ejt"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native (broad sense)",
+        "text": "From India and eastern Pakistan through Nepal, Bhutan, Bangladesh, Myanmar, Indochina and southern China to the Malay Peninsula, the Greater Sunda Islands and the Philippines.",
+        "src": [
+          "adw",
+          "ejt"
+        ]
+      },
+      {
+        "label": "After the 2024 split",
+        "text": "*O. hannah* in the strict sense is the Northern King Cobra of eastern Pakistan, northern and eastern India, the Andaman Islands, Indo-Burma and Indochina south to central Thailand. The Sunda King Cobra (*O. bungarus*) lives on the Malay Peninsula, the Greater Sunda Islands and parts of the southern Philippines; the Western Ghats King Cobra (*O. kaalinga*) in south-western India; and the Luzon King Cobra (*O. salvatana*) on Luzon in the Philippines.",
+        "src": [
+          "ejt",
+          "novataxa"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Mainly a forest snake: rainforest, bamboo thickets and mangrove swamps, often near streams and other water, from the lowlands up to about 2,000 m. It also turns up in plantations and farmland next to forest.",
+        "src": [
+          "ypte",
+          "nzoo"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Mostly seen hunting by day, though its activity varies with season and prey. When threatened it can raise about a third of its body off the ground and spread its hood.",
+        "src": [
+          "ypte",
+          "adw"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Almost entirely other snakes - including true cobras and, now and then, other king cobras - with monitor lizards taken occasionally.",
+        "src": [
+          "adw",
+          "natgeo",
+          "wiki"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs. The female gathers dead leaves into a mound using her body and tail, lays her eggs inside, and then stays nearby to guard the nest. Clutch sizes differ between reports, roughly 15 to over 20 eggs.",
+        "src": [
+          "dte",
+          "adw"
+        ]
+      }
+    ],
+    "conservation": [
+      {
+        "text": "It needs large areas of forest. A 2012 review reported local declines of more than 80 percent in parts of its range. After the 2024 split, the new species have not yet been assessed separately.",
+        "src": [
+          "dte",
+          "wiki"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "Long treated as a single species, the king cobra was shown by a 2021 DNA study to consist of four lineages. A 2024 revision in the European Journal of Taxonomy named them: *O. hannah* (Northern), *O. bungarus* (Sunda, an old name brought back), and two new species, *O. kaalinga* (Western Ghats) and *O. salvatana* (Luzon).",
+        "src": [
+          "livesci",
+          "ejt"
+        ]
+      },
+      {
+        "text": "Despite its name it is not a true cobra (genus *Naja*): it sits in its own genus and is more closely related to the mambas.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ]
+  },
+  "synonyms": {
+    "names": [
+      "*Hamadryas hannah* Cantor, 1836 (original name)",
+      "*Ophiophagus bungarus* (Schlegel, 1837) - now a separate species again",
+      "*Ophiophagus kaalinga* Das et al., 2024 - split off in 2024",
+      "*Ophiophagus salvatana* Das et al., 2024 - split off in 2024"
+    ],
+    "src": [
+      "ejt"
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "It is the only snake known to build a real nest: the mother rakes leaves into a pile for her eggs.",
+      "src": [
+        "dte",
+        "adw"
+      ]
+    },
+    {
+      "text": "Its scientific name *Ophiophagus* means snake-eater.",
+      "src": [
+        "wiki"
+      ]
+    }
+  ],
+  "sources": {
+    "adw": {
+      "title": "Ophiophagus hannah",
+      "publisher": "Animal Diversity Web, University of Michigan",
+      "url": "https://animaldiversity.org/accounts/Ophiophagus_hannah/"
+    },
+    "natgeo": {
+      "title": "King cobra",
+      "publisher": "National Geographic",
+      "url": "https://www.nationalgeographic.com/animals/reptiles/facts/king-cobra"
+    },
+    "ypte": {
+      "title": "King cobra factsheet",
+      "publisher": "Young People's Trust for the Environment",
+      "url": "https://ypte.org.uk/factsheets/cobra-king/overview"
+    },
+    "nzoo": {
+      "title": "King cobra",
+      "publisher": "Smithsonian's National Zoo",
+      "url": "https://nationalzoo.si.edu/node/6851"
+    },
+    "dte": {
+      "title": "Perfect stranger (king cobra research by P. Gowri Shankar)",
+      "publisher": "Down To Earth",
+      "url": "https://www.downtoearth.org.in/wildlife-biodiversity/perfect-stranger"
+    },
+    "livesci": {
+      "title": "Surprise! King cobra is actually a royal lineage of 4 species",
+      "publisher": "Live Science",
+      "year": 2021,
+      "url": "https://www.livescience.com/king-cobra-four-species"
+    },
+    "ejt": {
+      "title": "Taxonomic revision of the king cobra Ophiophagus hannah (Cantor, 1836) species complex, with the description of two new species",
+      "authors": "Das et al.",
+      "publisher": "European Journal of Taxonomy",
+      "year": 2024,
+      "url": "https://research.bangor.ac.uk/en/publications/taxonomic-revision-of-the-king-cobra-ophiophagus-hannah-cantor-18/"
+    },
+    "novataxa": {
+      "title": "Ophiophagus kaalinga & O. salvatana (common names summary)",
+      "publisher": "Novataxa",
+      "year": 2024,
+      "url": "https://novataxa.blogspot.com/2024/10/ophiophagus.html"
+    },
+    "wiki": {
+      "title": "King cobra",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/King_cobra"
+    },
+    "whk": {
+      "title": "King cobra (Ophiophagus hannah)",
+      "publisher": "Wild Creatures Hong Kong",
+      "url": "https://www.wildcreatureshongkong.org/single-post/2018/11/20/king-cobra-ophiophagus-hannah"
+    }
+  }
+}

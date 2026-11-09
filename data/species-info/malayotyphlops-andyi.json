@@ -1,0 +1,73 @@
+{
+  "id": "malayotyphlops-andyi",
+  "reviewed": "2026-11-09",
+  "status": "limited",
+  "authority": "Wynn, Diesmos & Brown, 2016",
+  "facts": {
+    "iucn": {
+      "code": "DD",
+      "text": "Data Deficient",
+      "long": "Listed as Data Deficient on the IUCN Red List: there is not enough information to judge whether it is threatened.",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "Andy's Blind Snake is a blind snake (family Typhlopidae) from northern Luzon in the Philippines. Scientists described it only in 2016, from specimens collected in the Sierra Madre mountains, and almost nothing has been published about how it lives - its size range, diet, breeding and behaviour are not documented.",
+        "src": [
+          "plazi",
+          "rdb"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "It looks very like its relative [[malayotyphlops-luzonensis|*Malayotyphlops luzonensis*]] in size and colour. The two are told apart by details of the head scales - for example, which small scales beside the nostril touch the scales of the upper lip - so a specimen has to be examined closely.",
+        "src": [
+          "plazi"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Known range",
+        "text": "Known only from Cagayan Province in northern Luzon, Philippines. The type specimen (the one the species is named from) came from a reforestation project area at Nassiping, Gattaran, in the Sierra Madre.",
+        "src": [
+          "plazi",
+          "rdb"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "Described in 2016 by Addison Wynn, Arvin Diesmos and Rafe Brown in the Journal of Herpetology, in a paper that also named a second new *Malayotyphlops* and redescribed two known species. Its holotype is catalogued as PNM 9779.",
+        "src": [
+          "jh",
+          "plazi"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "plazi": {
+      "title": "Malayotyphlops andyi Wynn, Diesmos, and Brown, 2016 (taxonomic treatment)",
+      "publisher": "Plazi TreatmentBank",
+      "url": "https://treatment.plazi.org/GgServer/html/03B38B5C847CFFCCFFDCFADBFEB4FEA9"
+    },
+    "jh": {
+      "title": "Two New Species of Malayotyphlops from the Northern Philippines",
+      "authors": "Wynn, Diesmos & Brown",
+      "publisher": "Journal of Herpetology 50(1): 157-168",
+      "year": 2016,
+      "url": "https://journal-of-herpetology.kglmeridian.com/view/journals/hpet/50/1/article-p157.xml"
+    },
+    "rdb": {
+      "title": "Malayotyphlops andyi",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Malayotyphlops&species=andyi"
+    }
+  }
+}

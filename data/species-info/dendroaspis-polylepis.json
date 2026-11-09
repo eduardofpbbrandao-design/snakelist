@@ -1,0 +1,197 @@
+{
+  "id": "dendroaspis-polylepis",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "Günther, 1864",
+  "facts": {
+    "length": {
+      "text": "Usually 2-2.5 m; rarely over 4 m",
+      "src": [
+        "sanbi"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "sanbi",
+        "adw"
+      ]
+    },
+    "activity": {
+      "text": "By day",
+      "src": [
+        "adw"
+      ]
+    },
+    "iucn": {
+      "code": "LC",
+      "text": "Least Concern",
+      "long": "Listed as Least Concern on the IUCN Red List: it is widespread and not considered at risk of extinction.",
+      "src": [
+        "wiki"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Black Mamba is Africa's longest venomous snake: a slender, fast-moving elapid of the savannas and dry woodlands of eastern and southern Africa. Despite its name it is not black on the outside - it gets the name from the inky-black lining of its mouth, which it shows when threatened. Its bite is very dangerous to people without antivenom.",
+        "src": [
+          "sanbi",
+          "stl",
+          "arv"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A long, thin snake with a narrow, coffin-shaped head and smooth scales. The back is olive, khaki, grey-brown or gunmetal grey - rarely truly black - and the belly is paler. The inside of the mouth is blue-black.",
+        "src": [
+          "sanbi",
+          "stl"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Typical adults",
+        "text": "Adults usually measure 2.0-2.5 m.",
+        "src": [
+          "sanbi"
+        ]
+      },
+      {
+        "label": "Largest records",
+        "text": "A maximum of about 4.3 m is accepted; claims of 4.5 m exist but are rare and less certain.",
+        "src": [
+          "sanbi",
+          "wiki"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Sub-Saharan Africa: from the Horn of Africa and East Africa south through south-eastern Africa, and west to Namibia and Angola. Records from West Africa are few and scattered.",
+        "src": [
+          "wiki",
+          "adw"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Mostly a ground-dwelling snake of open country: moist and dry savanna, woodland, rocky hills, riverine forest and coastal bush. It hides in holes in the ground, rock crevices, hollow trees, old termite mounds and under tree stumps, and often returns to the same shelter for a long time.",
+        "src": [
+          "adw",
+          "arv"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day. It spends much of its time basking near its retreat, and its shelters are sometimes shared with other snakes. It usually escapes when disturbed, but if cornered it rears up, leaning forward, spreads a narrow hood and opens its black mouth as a warning.",
+        "src": [
+          "adw",
+          "arv",
+          "mamba"
+        ]
+      },
+      {
+        "label": "Speed",
+        "text": "One of the fastest snakes, though sources disagree on the figure: about 7-10 km/h when travelling, with short bursts estimated at 15-20 km/h.",
+        "src": [
+          "arv"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly small mammals such as rodents and, in rocky areas, hyraxes (dassies); it also takes birds. It bites its prey and lets the venom work rather than constricting.",
+        "src": [
+          "kruger",
+          "adw"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs, which hatch after about two to three months. Clutch size differs between sources: 6-17 eggs in some accounts, 10-25 in others.",
+        "src": [
+          "sanbi",
+          "stl",
+          "adw"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "One of four mamba species in the genus *Dendroaspis*. The others are the three green-coloured mambas.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "dendroaspis-angusticeps",
+      "text": "a relative from the coastal forests of East and southern Africa; adults are bright green and live mainly in trees, while the Black Mamba is grey-brown and lives mainly on the ground.",
+      "src": [
+        "mamba",
+        "sanbi"
+      ]
+    }
+  ],
+  "funfacts": [
+    {
+      "text": "The Black Mamba is named after the colour inside its mouth, not the colour of its body.",
+      "src": [
+        "stl"
+      ]
+    },
+    {
+      "text": "It can come back to the same burrow or termite mound day after day.",
+      "src": [
+        "adw"
+      ]
+    }
+  ],
+  "sources": {
+    "sanbi": {
+      "title": "Black mamba (Animal of the week)",
+      "publisher": "South African National Biodiversity Institute (SANBI)",
+      "url": "https://www.sanbi.org/animal-of-the-week/black-mamba/"
+    },
+    "adw": {
+      "title": "Dendroaspis polylepis",
+      "publisher": "Animal Diversity Web, University of Michigan",
+      "url": "https://animaldiversity.org/accounts/Dendroaspis_polylepis/"
+    },
+    "stl": {
+      "title": "Black mamba",
+      "publisher": "Saint Louis Zoo",
+      "url": "https://www.stlzoo.org/animals/reptiles/snakes/black-mamba"
+    },
+    "arv": {
+      "title": "Black Mamba",
+      "publisher": "African Reptiles & Venom",
+      "url": "https://africanreptiles-venom.co.za/black-mamba/"
+    },
+    "kruger": {
+      "title": "Black Mamba",
+      "publisher": "Kruger National Park guide (krugerpark.co.za)",
+      "url": "https://www.krugerpark.co.za/africa_black_mamba.html"
+    },
+    "wiki": {
+      "title": "Black mamba",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Black_mamba"
+    },
+    "mamba": {
+      "title": "Mamba",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Mamba"
+    }
+  }
+}

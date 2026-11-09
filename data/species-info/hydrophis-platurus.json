@@ -1,0 +1,161 @@
+{
+  "id": "hydrophis-platurus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Linnaeus, 1766)",
+  "facts": {
+    "length": {
+      "text": "Up to about 80 cm",
+      "src": [
+        "ag"
+      ]
+    },
+    "reproduction": {
+      "text": "Gives birth to live young at sea",
+      "src": [
+        "wiki"
+      ]
+    },
+    "diet": {
+      "text": "Small fish",
+      "src": [
+        "wiki",
+        "dw"
+      ]
+    },
+    "iucn": {
+      "code": "LC",
+      "text": "Least Concern",
+      "long": "Listed as Least Concern on the IUCN Red List; no overall population estimate exists.",
+      "src": [
+        "azan",
+        "wiki"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Yellow-bellied Sea Snake spends its whole life in the open ocean and never needs to come ashore. It is one of the most widespread snakes on Earth, drifting across the tropical Indian and Pacific Oceans with the currents. It is venomous, but because it lives far out at sea, bites to people are rare.",
+        "src": [
+          "wiki",
+          "azan"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Unmistakable: black or dark brown on the back and bright yellow underneath, with a sharp line between the two colours. The tail is flattened from side to side like a paddle and is yellow with black spots or bars. The head is long and narrow.",
+        "src": [
+          "wiki",
+          "naturemapr"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Reaches up to about 80 cm.",
+        "src": [
+          "ag"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Tropical and warm waters of the Indian and Pacific Oceans, from the coasts of Africa across to the Pacific coast of the Americas, from southern California to northern Peru. It is the only sea snake to have reached Hawaii, and the only one found - rarely - in the Atlantic. Storms and warm currents sometimes carry it far beyond its usual range.",
+        "src": [
+          "wiki"
+        ]
+      },
+      {
+        "label": "About the map",
+        "text": "Because it lives at sea, the countries shaded on SnakeList's map are coasts where it has been recorded, not land where it lives.",
+        "src": []
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Completely pelagic (living in the open ocean). It is often found along slicks and drift lines - the lines where surface currents meet and floating debris collects - and it is the only air-breathing marine predator known to hunt at these surface features.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "It lets surface currents and storms carry it around the ocean. It is said to be able to swim backwards as well as forwards.",
+        "src": [
+          "wiki",
+          "azan"
+        ]
+      },
+      {
+        "label": "Drinking",
+        "text": "Like other sea snakes it needs fresh water: it drinks the layer of rainwater that forms on the sea surface after rain.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Small fish, including the young of larger species. It floats still near the surface and catches fish that gather beneath it for shelter.",
+        "src": [
+          "dw",
+          "azan"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young in the water instead of laying eggs; litters of about 3-8 babies are reported.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "It is the only sea snake ever recorded in Hawaii.",
+      "src": [
+        "wiki"
+      ]
+    },
+    {
+      "text": "It drinks rainwater floating on top of the salty sea.",
+      "src": [
+        "wiki"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "Yellow-bellied sea snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Yellow-bellied_sea_snake"
+    },
+    "ag": {
+      "title": "Yellow-bellied sea snake",
+      "publisher": "Australian Geographic",
+      "url": "https://www.australiangeographic.com.au/?p=241534"
+    },
+    "naturemapr": {
+      "title": "Hydrophis platurus (Yellow-bellied Sea Snake)",
+      "publisher": "NatureMapr",
+      "url": "https://naturemapr.org/species/9919"
+    },
+    "dw": {
+      "title": "Sea snakes guide",
+      "publisher": "BBC Discover Wildlife",
+      "url": "https://www.discoverwildlife.com/animal-facts/reptiles/sea-snakes-guide"
+    },
+    "azan": {
+      "title": "Yellow-Bellied Sea Snake",
+      "publisher": "A-Z Animals",
+      "url": "https://a-z-animals.com/animals/yellow-bellied-sea-snake/"
+    }
+  }
+}
