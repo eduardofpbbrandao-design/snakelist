@@ -1232,7 +1232,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
         return "%s venomous and %s non-venomous" % ("{:,}".format(nv), "{:,}".format(n - nv))
     if kind == "family":
         h1 = name
-        lead = "The family %s has %s in SnakeList (%s), in %s." % (name, plural(n, "species", "species"), vsplit(), plural(nfam, "genus", "genera"))
+        lead = "The family %s%s has %s in SnakeList (%s), in %s." % (name, (" (%s)" % FAMILY_INFO[name]["common"]) if FAMILY_INFO.get(name, {}).get("common") else "", plural(n, "species", "species"), vsplit(), plural(nfam, "genus", "genera"))
         title = "%s: all %s, with photos | SnakeList" % (name, plural(n, "snake species", "snake species"))
     elif kind == "genus":
         h1 = name
@@ -1242,7 +1242,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
     elif n:
         h1 = "Snakes of %s" % name
         lead = "%s %s recorded in %s in SnakeList: %d venomous and %d non-venomous%s." % (
-            plural(n, "snake species", "snake species"), "is" if n == 1 else "are", name, nv, n - nv,
+            plural(n, "snake species", "snake species"), "is" if n == 1 else "are", the_place(name), nv, n - nv,
             ", from %s" % plural(nfam, "family", "families") if nfam else "")
         title = "Snakes of %s: %s with photos, venom status & map | SnakeList" % (name, plural(n, "species", "species"))
     else:
@@ -1338,12 +1338,53 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
     crumbs_html = "".join('<li><a href="%s">%s</a></li>' % (c0[2], esc(c0[0])) for c0 in crumbs)
     jump = ('<form class="cy-jump" id="cy-jump" role="search" action="../#by-country"><label for="cy-jq" class="cy-sr">Go to another country</label><input id="cy-jq" list="cy-clist" placeholder="Another country..." autocomplete="off"><datalist id="cy-clist"></datalist><button type="submit">Go</button></form>'
             if kind == "country" else "")
-    return COUNTRY.format(title=esc(title), desc=esc(desc), url=url, img=img, ld=ld, name=esc(name), lead=esc(lead), stats=stats,
+    # the introduction: what this family is (its reviewed text), what the genus name means, or
+    # for a country, what its totals count
+    about = ""
+    if kind == "family" and FAMILY_INFO.get(name):
+        fi = FAMILY_INFO[name]; R = Refs(fi, {}, page_name, "../")
+        R.who = name
+        paras = "".join(R.para(p) for p in fi["text"])
+        about = ('<section class="cy-about" aria-labelledby="cy-ab-h"><h2 id="cy-ab-h" class="cy-sr">About the family</h2>%s'
+                 '<details><summary>Sources for this introduction</summary>%s<p class="sp-note">Information last reviewed %s.</p></details></section>') % (
+            paras, R.list_html(), fmt_date(fi["reviewed"]))
+    elif kind == "genus":
+        G = GENUS_INFO.get(name); bits = []
+        if G:
+            R = Refs({"sources": {"g": {"title": "Meaning of the name %s" % name, **G["source"]}}}, {}, page_name, "../"); R.who = name
+            bits.append('<p><b>What the name means:</b> <i>%s</i> &ndash; %s.%s</p>' % (esc(name), R.rich(G["meaning"]), R.cite(["g"])))
+            bits.append('<details><summary>Source</summary>%s<p class="sp-note">Information last reviewed %s.</p></details>' % (R.list_html(), fmt_date(G["reviewed"])))
+        fi = FAMILY_INFO.get(family)
+        if fi and fi.get("common"):
+            bits.insert(0, '<p>A genus of the family <a href="../family/%s">%s</a> (%s).</p>' % (slugify(family), esc(family), esc(fi["common"])))
+        if bits: about = '<section class="cy-about" aria-labelledby="cy-ab-h"><h2 id="cy-ab-h" class="cy-sr">About the genus</h2>%s</section>' % "".join(bits)
+    elif kind == "country" and n:
+        bits = ["These totals count the snakes SnakeList records as living in %s%s." % (esc(the_place(name)), (", including %s" % nplural(len(gone), "extinct or fossil species", "extinct or fossil species")) if gone else "")]
+        if intro_here: bits.append("The %s brought here by people (introduced, not native) %s listed separately below and %s not in the total." % (
+            nplural(len(intro_here), "species", "species"), "is" if len(intro_here) == 1 else "are", "is" if len(intro_here) == 1 else "are"))
+        TERR = {"United States": ["Puerto Rico", "Guam", "American Samoa", "US Virgin Islands", "Northern Mariana Islands"],
+                "France": ["French Guiana", "New Caledonia", "Martinique", "Guadeloupe", "Mayotte", "Réunion", "Saint Barthélemy", "Saint Martin"],
+                "United Kingdom": ["British Virgin Islands", "Cayman Islands", "Montserrat", "Anguilla", "Turks and Caicos Islands", "Jersey"],
+                "Netherlands": ["Aruba", "Curaçao", "Sint Maarten"]}
+        listed = {k for x in all_countries["_cards"] for k in x["countries"]}
+        terr = [t for t in TERR.get(name, []) if t in listed]
+        if terr: bits.append("Territories that SnakeList lists as places of their own (%s) have their own pages and are not counted here." % ", ".join(
+            '<a href="%s">%s</a>' % (slugify(t), esc(t)) for t in terr))
+        bits.append("A species counts if it is recorded anywhere in the country, so not every snake lives in every region.")
+        about = '<section class="cy-about cy-about-note" aria-label="What the totals count"><p>%s</p></section>' % " ".join(bits)
+    return COUNTRY.format(about=about, title=esc(title), desc=esc(desc), url=url, img=img, ld=ld, name=esc(name), lead=esc(lead), stats=stats,
                           h1=("<i>%s</i>" % esc(h1)) if kind == "genus" else esc(h1), crumbs=crumbs_html, jump=jump,
                           cta_href=esc(cta[0]), cta_label=cta[1], controls=controls, count=count, grid=grid, intro=intro_sec, overview=overview,
                           author=AUTHOR, big=" cy-big" if big else "", total=n,
                           site_head=site_header("../../", "species"), site_foot=site_footer("../../", "Photos: iNaturalist observers (CC licences) - credited on each species page."),
                           robots="index,follow,max-image-preview:large" if n else "noindex,follow")
+
+
+def the_place(name):
+    """'the United States', 'the Philippines' - but 'Portugal'"""
+    if re.match(r"(United |Republic |Democratic Republic |Central African |Dominican |Czech Republic)", name) or re.search(r"(Islands|lands|Philippines|Bahamas|Gambia|Maldives|Seychelles|Comoros|Emirates)$", name):
+        return "the " + name
+    return name
 
 
 def quote_param(s):
@@ -1370,7 +1411,7 @@ COUNTRY = """<!doctype html>
 <div class="cy-htext"><h1>{h1}</h1><p class="cy-lead">{lead}</p></div>
 {stats}
 <p class="cy-cta"><a class="cy-btn" href="{cta_href}">{cta_label}</a></p>
-</header>
+</header>{about}
 <section class="cy-list{big}" aria-labelledby="cy-list-h" data-total="{total}"><h2 id="cy-list-h" class="cy-sr">Species</h2>
 {controls}{count}{grid}
 </section>

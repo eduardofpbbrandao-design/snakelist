@@ -1,0 +1,782 @@
+{
+  "_about": "Introductions for SnakeList's family pages. Each text lists its own sources; reviewed = the day it was last checked against them. Species totals are never written here - the pages count them from the checklist.",
+  "Colubridae": {
+    "common": "colubrids",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "The largest snake family by far, and a very mixed one: rat snakes, racers, whip snakes, kingsnakes, water snakes, garter snakes, egg-eaters and many more. Colubrids live on every continent with snakes; only in Australia do the elapids outnumber them.",
+        "src": [
+          "wiki",
+          "brit"
+        ]
+      },
+      {
+        "text": "Most colubrids are harmless to people. Many have no venom at all, and others have mild venom delivered by grooved teeth at the back of the mouth (they are \"rear-fanged\"). A few, such as the Boomslang, the twig snakes and the Asian keelbacks (*Rhabdophis*), have caused serious or fatal bites.",
+        "src": [
+          "wiki",
+          "ency"
+        ]
+      },
+      {
+        "text": "Scientists still debate how to divide this family. Large groups such as the water snakes and garter snakes (natricines) and the many American dipsadines are treated by some as families of their own; SnakeList keeps most of them inside Colubridae.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Colubridae",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Colubridae"
+      },
+      "brit": {
+        "title": "Colubrid",
+        "publisher": "Britannica Kids",
+        "url": "https://kids.britannica.com/students/article/colubrid/310781"
+      },
+      "ency": {
+        "title": "Colubrids (Colubridae)",
+        "publisher": "Grzimek's Animal Life Encyclopedia, via Encyclopedia.com",
+        "url": "https://www.encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/colubrids-colubridae"
+      }
+    }
+  },
+  "Viperidae": {
+    "common": "vipers and pit vipers",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "All vipers are venomous. Their long, hollow fangs sit on hinges at the front of the mouth and fold back against the roof of the mouth when not in use. Most are stout snakes with a broad head.",
+        "src": [
+          "ency",
+          "livesci"
+        ]
+      },
+      {
+        "text": "Pit vipers (subfamily Crotalinae) - rattlesnakes, lanceheads, copperheads and their relatives - have a heat-sensing pit between the eye and the nostril on each side of the head, which lets them sense warm-blooded prey. The true vipers (Viperinae) of Africa, Europe and Asia have no pits.",
+        "src": [
+          "nwe-crot",
+          "nwe"
+        ]
+      },
+      {
+        "text": "Vipers live almost everywhere except Antarctica, Australia, New Zealand, Madagascar, the far north and remote islands such as Hawaii. Most give birth to live young, but a few species lay eggs.",
+        "src": [
+          "nwe"
+        ]
+      }
+    ],
+    "sources": {
+      "ency": {
+        "title": "Vipers and Pitvipers (Viperidae)",
+        "publisher": "Grzimek's Animal Life Encyclopedia, via Encyclopedia.com",
+        "url": "https://www.encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/vipers-and-pitvipers-viperidae"
+      },
+      "livesci": {
+        "title": "Facts about vipers",
+        "publisher": "Live Science",
+        "url": "https://www.livescience.com/54023-vipers.html"
+      },
+      "nwe": {
+        "title": "Viperidae",
+        "publisher": "New World Encyclopedia",
+        "url": "https://www.newworldencyclopedia.org/entry/Viperidae"
+      },
+      "nwe-crot": {
+        "title": "Crotalinae",
+        "publisher": "New World Encyclopedia",
+        "url": "https://www.newworldencyclopedia.org/entry/Crotalinae"
+      }
+    }
+  },
+  "Elapidae": {
+    "common": "cobras, mambas, coral snakes, sea snakes and relatives",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "All elapids are venomous. Their fangs are fixed at the front of the upper jaw and fairly short, unlike the folding fangs of vipers. The family includes cobras, mambas, kraits, coral snakes, death adders, taipans and the sea snakes.",
+        "src": [
+          "wiki",
+          "nwe"
+        ]
+      },
+      {
+        "text": "Elapids live in warm regions around the world, and Australia is their stronghold: with no vipers there, they have taken over most of the roles land snakes play elsewhere, and some lineages moved into the sea.",
+        "src": [
+          "unimelb"
+        ]
+      },
+      {
+        "text": "Most elapids lay eggs - including the coral snakes, mambas, kraits and almost all cobras - but the true sea snakes and many Australian species give birth to live young.",
+        "src": [
+          "ency",
+          "unimelb"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Elapidae",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Elapidae"
+      },
+      "nwe": {
+        "title": "Elapidae",
+        "publisher": "New World Encyclopedia",
+        "url": "https://www.newworldencyclopedia.org/entry/Elapidae"
+      },
+      "ency": {
+        "title": "Cobras, Kraits, Seasnakes, Death Adders, and Relatives (Elapidae)",
+        "publisher": "Grzimek's Animal Life Encyclopedia, via Encyclopedia.com",
+        "url": "https://www.encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/cobras-kraits-seasnakes-death-adders-and-relatives-elapidae"
+      },
+      "unimelb": {
+        "title": "Research thesis on the evolution of Australian elapids and sea snakes",
+        "publisher": "University of Melbourne (Minerva Access)",
+        "url": "https://minerva-access.unimelb.edu.au/server/api/core/bitstreams/04d5459b-ae83-5dc7-a5d0-d138bbb5df7c/content"
+      }
+    }
+  },
+  "Typhlopidae": {
+    "common": "blind snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "The largest and most widespread of the blind snake families, found mainly across the tropics. Blind snakes are small, smooth, cylindrical burrowers whose reduced eyes lie under the head scales.",
+        "src": [
+          "scol",
+          "ency"
+        ]
+      },
+      {
+        "text": "They spend almost all their lives underground and eat small invertebrates; the species that have been studied lay eggs. Many are known from only a handful of specimens.",
+        "src": [
+          "scol"
+        ]
+      }
+    ],
+    "sources": {
+      "scol": {
+        "title": "Scolecophidia",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Scolecophidia"
+      },
+      "ency": {
+        "title": "Blindsnakes (Typhlopidae)",
+        "publisher": "Grzimek's Animal Life Encyclopedia, via Encyclopedia.com",
+        "url": "https://www.encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/blindsnakes-typhlopidae"
+      }
+    }
+  },
+  "Leptotyphlopidae": {
+    "common": "thread snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Very thin, worm-like burrowing snakes with reduced eyes under the head scales. They live in North and South America, Africa and Asia, and feed on ants and termites.",
+        "src": [
+          "scol"
+        ]
+      },
+      {
+        "text": "Like other blind snakes, they are rarely seen because they live underground, and many species are poorly known.",
+        "src": [
+          "scol"
+        ]
+      }
+    ],
+    "sources": {
+      "scol": {
+        "title": "Scolecophidia",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Scolecophidia"
+      }
+    }
+  },
+  "Anomalepididae": {
+    "common": "early blind snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Small burrowing blind snakes found only in the tropics of the Americas, in southern Central America and central and northern South America. Very little is known about their diet or way of life.",
+        "src": [
+          "ency",
+          "scol"
+        ]
+      }
+    ],
+    "sources": {
+      "ency": {
+        "title": "Early Blindsnakes (Anomalepididae)",
+        "publisher": "Grzimek's Animal Life Encyclopedia, via Encyclopedia.com",
+        "url": "https://www.encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/early-blindsnakes-anomalepididae"
+      },
+      "scol": {
+        "title": "Scolecophidia",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Scolecophidia"
+      }
+    }
+  },
+  "Gerrhopilidae": {
+    "common": "Indo-Malayan blind snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "A family of blind snakes recognised from DNA studies. They live in India, Southeast Asia, Indonesia, the Philippines and New Guinea, and like other blind snakes they burrow and are rarely seen.",
+        "src": [
+          "scol",
+          "gondwana"
+        ]
+      }
+    ],
+    "sources": {
+      "scol": {
+        "title": "Scolecophidia",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Scolecophidia"
+      },
+      "gondwana": {
+        "title": "Blindsnake evolutionary tree reveals long history on Gondwana",
+        "publisher": "Paperity (open-access paper)",
+        "url": "https://paperity.org/p/38049980/blindsnake-evolutionary-tree-reveals-long-history-on-gondwana"
+      }
+    }
+  },
+  "Xenotyphlopidae": {
+    "common": "Malagasy blind snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "A tiny family of blind snakes found only in Madagascar. A DNA study that named it placed it, with the Gerrhopilidae, among the earliest blind snake lineages, which it suggests lived on the old landmass formed by India and Madagascar together.",
+        "src": [
+          "scol",
+          "gondwana"
+        ]
+      }
+    ],
+    "sources": {
+      "scol": {
+        "title": "Scolecophidia",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Scolecophidia"
+      },
+      "gondwana": {
+        "title": "Blindsnake evolutionary tree reveals long history on Gondwana",
+        "publisher": "Paperity (open-access paper)",
+        "url": "https://paperity.org/p/38049980/blindsnake-evolutionary-tree-reveals-long-history-on-gondwana"
+      }
+    }
+  },
+  "Boidae": {
+    "common": "boas",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Non-venomous snakes that kill their prey by constriction, from the giant anacondas to the small sand boas. Most boas live in tropical America and Madagascar; the Pacific boas live thousands of kilometres away from their American relatives.",
+        "src": [
+          "wiki",
+          "ency"
+        ]
+      },
+      {
+        "text": "Almost all boas give birth to live young; only a few lay eggs. Many have heat-sensing pits between the lip scales, and they have small claw-like spurs beside the vent - the last traces of hind legs - which are usually larger in males.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Boidae",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Boidae"
+      },
+      "ency": {
+        "title": "Boas (Boidae)",
+        "publisher": "Grzimek's Animal Life Encyclopedia, via Encyclopedia.com",
+        "url": "https://www.encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/boas-boidae"
+      }
+    }
+  },
+  "Pythonidae": {
+    "common": "pythons",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Non-venomous constrictors of the Old World tropics: sub-Saharan Africa, tropical and subtropical Asia, and Australia, which has the greatest variety. The family includes some of the longest snakes on Earth.",
+        "src": [
+          "wiki",
+          "ency"
+        ]
+      },
+      {
+        "text": "Unlike most boas, all pythons lay eggs, and the females usually stay with the clutch until it hatches.",
+        "src": [
+          "wiki",
+          "ency"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Pythonidae",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Pythonidae"
+      },
+      "ency": {
+        "title": "Pythons (Pythonidae)",
+        "publisher": "Grzimek's Animal Life Encyclopedia, via Encyclopedia.com",
+        "url": "https://www.encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/pythons-pythonidae"
+      }
+    }
+  },
+  "Lamprophiidae": {
+    "common": "lamprophiids",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "A mainly African family, also found in the Seychelles. Several groups that used to be part of it - the sand snakes, burrowing asps, shovel-snouted snakes, mole snakes and the Malagasy snakes - are now usually treated as separate families, and SnakeList lists them separately too.",
+        "src": [
+          "wiki",
+          "repfocus"
+        ]
+      },
+      {
+        "text": "Scientists still disagree on how many families this group should be split into, so you may see these snakes placed differently in other books.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Lamprophiidae",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Lamprophiidae"
+      },
+      "repfocus": {
+        "title": "Taxonomy: Lamprophiidae",
+        "publisher": "Repfocus",
+        "url": "https://www.repfocus.dk/Lamprophiidae.html"
+      }
+    }
+  },
+  "Pseudoxyrhophiidae": {
+    "common": "Malagasy snakes and allies",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "The Malagasy snakes and their allies, including the Malagasy hognose snakes and the brook snakes. It was formerly treated as a subfamily of the Lamprophiidae.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Lamprophiidae (former subfamilies)",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Lamprophiidae"
+      }
+    }
+  },
+  "Atractaspididae": {
+    "common": "burrowing asps, stiletto snakes and relatives",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Poorly studied, burrowing snakes found throughout Africa and in western Asia. The stiletto snakes (*Atractaspis*), which give the family its name, have exceptionally long, movable fangs. The family also includes the harlequin snakes.",
+        "src": [
+          "wiki",
+          "pmc"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Atractaspididae",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Atractaspididae"
+      },
+      "pmc": {
+        "title": "Review of atractaspidine snakes",
+        "publisher": "PubMed Central",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6469773"
+      }
+    }
+  },
+  "Psammophiidae": {
+    "common": "sand snakes and allies",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "The sand snakes and their allies. They were formerly treated as a subfamily of the Lamprophiidae.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Psammophiidae",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Psammophiidae"
+      }
+    }
+  },
+  "Prosymnidae": {
+    "common": "shovel-snouted snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "The shovel-snouted snakes of Africa (genus *Prosymna*), named for their broad, shovel-like snout. They were formerly placed in the Lamprophiidae.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Lamprophiidae (former subfamilies)",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Lamprophiidae"
+      }
+    }
+  },
+  "Pseudaspididae": {
+    "common": "mole snakes and allies",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "A small group including the Mole Snake and the Western Keeled Snake of southern Africa. It was formerly a subfamily of the Lamprophiidae. SnakeList also lists the Asian mock vipers (*Psammodynastes*) here, following classifications that group them together.",
+        "src": [
+          "wiki",
+          "repfocus"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Lamprophiidae (former subfamilies)",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Lamprophiidae"
+      },
+      "repfocus": {
+        "title": "Taxonomy: Lamprophiidae",
+        "publisher": "Repfocus",
+        "url": "https://www.repfocus.dk/Lamprophiidae.html"
+      }
+    }
+  },
+  "Uropeltidae": {
+    "common": "shield-tailed snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Burrowing snakes found only in southern India and Sri Lanka, named for the shield at the tip of the tail.",
+        "src": [
+          "wiki",
+          "brit"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Uropeltoidea",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Uropeltoidea"
+      },
+      "brit": {
+        "title": "Shieldtail snake",
+        "publisher": "Encyclopaedia Britannica",
+        "url": "https://www.britannica.com/print/article/461348"
+      }
+    }
+  },
+  "Cylindrophiidae": {
+    "common": "Asian pipe snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Secretive, partly burrowing, non-venomous snakes of south-eastern Asia. When disturbed, a pipe snake hides its head under its coils and raises its tail, whose bright colours can startle a predator.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Cylindrophis",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Cylindrophis"
+      }
+    }
+  },
+  "Aniliidae": {
+    "common": "false coral snake",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "A family with a single living species, the South American pipe snake or false coral snake of the Amazon basin. It hides by day in leaf litter or soil. Its bold red and black rings make people confuse it with venomous coral snakes, but it is non-venomous.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Uropeltoidea and related families",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Aniliidae"
+      }
+    }
+  },
+  "Anomochilidae": {
+    "common": "dwarf pipe snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "A family created for the genus *Anomochilus*: burrowing pipe snakes from West Malaysia, Sumatra and Borneo.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Anomochilus",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Anomochilus"
+      }
+    }
+  },
+  "Tropidophiidae": {
+    "common": "dwarf boas",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Small, boa-like snakes found mainly in Central America and the Caribbean.",
+        "src": [
+          "gmu",
+          "rmag"
+        ]
+      }
+    ],
+    "sources": {
+      "gmu": {
+        "title": "Snake families (course notes)",
+        "publisher": "George Mason University",
+        "url": "https://mason.gmu.edu/~alaemmer/herp/snakes.pdf"
+      },
+      "rmag": {
+        "title": "Tiny giant snakes",
+        "publisher": "Reptiles Magazine",
+        "url": "https://reptilesmagazine.com/tiny-giant-snakes/"
+      }
+    }
+  },
+  "Bolyeriidae": {
+    "common": "Round Island boas",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Two species from the islands of Mauritius in the western Indian Ocean, today confined to tiny Round Island.",
+        "src": [
+          "gmu",
+          "repfocus"
+        ]
+      }
+    ],
+    "sources": {
+      "gmu": {
+        "title": "Snake families (course notes)",
+        "publisher": "George Mason University",
+        "url": "https://mason.gmu.edu/~alaemmer/herp/snakes.pdf"
+      },
+      "repfocus": {
+        "title": "IUCN Red List assessments of snakes",
+        "publisher": "Repfocus",
+        "url": "https://repfocus.dk/IUCN/Serpentes.html"
+      }
+    }
+  },
+  "Xenopeltidae": {
+    "common": "sunbeam snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Snakes of Southeast Asia named for their smooth, iridescent scales that shine with rainbow colours in sunlight.",
+        "src": [
+          "gmu"
+        ]
+      }
+    ],
+    "sources": {
+      "gmu": {
+        "title": "Snake families (course notes)",
+        "publisher": "George Mason University",
+        "url": "https://mason.gmu.edu/~alaemmer/herp/snakes.pdf"
+      }
+    }
+  },
+  "Loxocemidae": {
+    "common": "Mexican burrowing python",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "A family with one species, the Mexican Burrowing Python, found on the western side of Mexico and Central America. Although it is called a python, it is placed in its own family.",
+        "src": [
+          "gmu"
+        ]
+      }
+    ],
+    "sources": {
+      "gmu": {
+        "title": "Snake families (course notes)",
+        "publisher": "George Mason University",
+        "url": "https://mason.gmu.edu/~alaemmer/herp/snakes.pdf"
+      }
+    }
+  },
+  "Xenophidiidae": {
+    "common": "spiny-jawed snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "A small, little-known family of spiny-jawed snakes. SnakeList's species are recorded from Malaysia; very little has been published about how they live.",
+        "src": [
+          "tmpl"
+        ]
+      }
+    ],
+    "sources": {
+      "tmpl": {
+        "title": "Snake families",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Template:Snake_families"
+      }
+    }
+  },
+  "Homalopsidae": {
+    "common": "mud snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Water snakes of South and Southeast Asia and Australasia. Most live in fresh water, but some tolerate salty water. The family was once part of Colubridae.",
+        "src": [
+          "repfocus",
+          "serpent",
+          "sgbio"
+        ]
+      }
+    ],
+    "sources": {
+      "repfocus": {
+        "title": "Snake biodiversity",
+        "publisher": "Repfocus",
+        "url": "https://repfocus.dk/Serpentes_biodiversity.html"
+      },
+      "serpent": {
+        "title": "Homalopsids and salt tolerance",
+        "publisher": "Serpent Research",
+        "url": "https://serpentresearch.com/2013/01/16/2013-01-homalopsids-salt-tolerance/"
+      },
+      "sgbio": {
+        "title": "Homalopsidae",
+        "publisher": "Biodiversity of Singapore",
+        "url": "https://singapore.biodiversity.online/taxon/A-Vert-Rept-Snak-Homalopsidae"
+      }
+    }
+  },
+  "Pareidae": {
+    "common": "snail-eating snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Slender snakes of South, Southeast and East Asia that specialise in eating snails and slugs. Many species are found in only one country.",
+        "src": [
+          "repfocus"
+        ]
+      }
+    ],
+    "sources": {
+      "repfocus": {
+        "title": "Taxonomy: Pareidae",
+        "publisher": "Repfocus",
+        "url": "https://www.repfocus.dk/Pareidae.html"
+      }
+    }
+  },
+  "Xenodermidae": {
+    "common": "odd-scaled snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Secretive, probably nocturnal snakes of the moist forests of East, South and Southeast Asia, with unusual, often bumpy scales. Their closest relatives may be the file snakes (Acrochordidae).",
+        "src": [
+          "wiki",
+          "repfocus"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Xenodermidae",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Xenodermidae"
+      },
+      "repfocus": {
+        "title": "Taxonomy: Xenodermidae",
+        "publisher": "Repfocus",
+        "url": "https://repfocus.dk/Xenodermidae.html"
+      }
+    }
+  },
+  "Acrochordidae": {
+    "common": "file snakes",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "Fully aquatic snakes of Southeast Asia, New Guinea and northern Australia that are rarely seen on land. Their loose, wrinkled skin and supple bodies help them seize and hold struggling fish. The Little File Snake gives birth to live young and can live in fresh or salty water.",
+        "src": [
+          "ency",
+          "adw"
+        ]
+      }
+    ],
+    "sources": {
+      "ency": {
+        "title": "File Snakes (Acrochordidae)",
+        "publisher": "Grzimek's Animal Life Encyclopedia, via Encyclopedia.com",
+        "url": "https://www.encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/file-snakes-acrochordidae"
+      },
+      "adw": {
+        "title": "Acrochordus granulatus",
+        "publisher": "Animal Diversity Web",
+        "url": "https://animaldiversity.org/accounts/Acrochordus_granulatus/"
+      }
+    }
+  },
+  "Dipsadidae": {
+    "common": "dipsadines",
+    "reviewed": "2026-11-09",
+    "text": [
+      {
+        "text": "A huge group of mostly American snakes that some scientists treat as a family and others as a subfamily of Colubridae. SnakeList keeps nearly all of them inside Colubridae, so only a couple of species are listed under this name.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "sources": {
+      "wiki": {
+        "title": "Colubridae (Dipsadinae)",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Colubridae"
+      }
+    }
+  }
+}
