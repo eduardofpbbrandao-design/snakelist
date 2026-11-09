@@ -593,6 +593,8 @@
   .photo-lightbox { position: fixed; inset: 0; z-index: 80; display: none; align-items: center; justify-content: center;
     padding: 16px; background: rgba(4, 14, 8, 0.86); cursor: zoom-out; }
   .photo-lightbox.open { display: flex; }
+  .photo-lightbox .pl-real { display: inline-block; text-decoration: none; text-align: center; }
+  .sp-info-real { margin-left: 0; margin-right: 12px; }
   .photo-lightbox .pl-compare { display: block; margin: 8px 0 4px; font: 600 13px 'Inter', sans-serif; padding: 7px 14px; border-radius: 99px; border: 1px solid #9be07c; background: transparent; color: #fff; cursor: pointer; }
   .cmp-sheet { position: fixed; inset: 0; z-index: 85; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(6,20,12,0.72); }
   .cmp-sheet.open { display: flex; }
@@ -1346,6 +1348,8 @@
   .note-actions .primary:disabled { opacity: .6; cursor: default; }
   .cap-link { font: inherit; color: inherit; background: none; border: 0; padding: 0 2px; border-radius: 4px; cursor: pointer; font-weight: 700; box-shadow: inset 0 -2px 0 var(--map-on, #58b351); }
   .cap-intro { color: var(--rust, #c8641e); }
+  .cp-more-cities { display: block; width: 100%; margin: 6px 0 2px; padding: 9px; border-radius: 10px; border: 1px dashed var(--map-on, #58b351); background: transparent; color: var(--text); font: 600 13px 'Inter', sans-serif; cursor: pointer; }
+  .cp-row.cp-most { border-left: 3px solid var(--map-on, #58b351); }
   .cap-link:hover { background: var(--surface-hover, rgba(127,199,106,.2)); }
   .fuzzy-note { margin: 4px 0 12px; padding: 9px 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); font: 13.5px 'Inter', sans-serif; color: var(--text); }
   .note-btn[data-n]::after { content: " · " attr(data-n) " encounters"; color: var(--text-muted); }
@@ -1601,7 +1605,7 @@
 </style>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.53</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.54</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All <span data-sl-total>4,205</span> snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -10081,7 +10085,11 @@ window.SL_GEO_READY = new Promise(function (res) {
   window.SL_LOAD_GEO = function () {
     if (started) return window.SL_GEO_READY; started = true;
     var sc = document.createElement("script"); sc.src = "data/geo.js"; sc.async = true;
-    sc.onload = function () { res(window.SL_GEO || null); document.dispatchEvent(new Event("sl-geo")); };
+    sc.onload = function () { res(window.SL_GEO || null); document.dispatchEvent(new Event("sl-geo"));
+      // and ~4,000 more towns for "See cities" (GeoNames) - small, and only once the map is wanted
+      var sc = document.createElement("script"); sc.src = "data/cities-more.js"; sc.async = true; var cm = sc;
+      cm.onload = function () { var L = window.SL_CITIES, M = window.SL_CITIES_MORE || []; if (L && M.length) { M.forEach(function (r) { L.push(r); }); window.SL_CITIES_MORE = null; } };
+      document.head.appendChild(cm); };
     sc.onerror = function () { started = false; res(null); };
     document.head.appendChild(sc);
     return window.SL_GEO_READY;
@@ -13438,6 +13446,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       '<div class="sp-info-acts">' +
         '<button type="button" data-sp="seen"' + (ext ? " hidden" : "") + (done ? ' class="on"' : "") + ' aria-pressed="' + done + '">' + (done ? "&#10003; Seen" : "Mark Seen") + "</button>" +
         '<button type="button" data-sp="wish"' + (ext || done ? " hidden" : "") + (wish ? ' class="on"' : "") + ' aria-pressed="' + wish + '">' + (wish ? "&#9733; Want to see" : "&#9734; Want to see") + "</button>" +
+        '<a class="sp-info-page sp-info-real" href="' + spEsc(spPageUrl(c)) + '#real"' + (window.claude && window.claude.use ? ' target="_blank" rel="noopener"' : "") + ">See it in real life</a>" +
         '<a class="sp-info-page" href="' + spEsc(spPageUrl(c)) + '"' + (window.claude && window.claude.use ? ' target="_blank" rel="noopener"' : "") + ">View full species page</a>" +
       "</div></div>";
   }
@@ -14567,7 +14576,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     var cc = area.slice(0, 2);
     return !placeKeysOf(sp).some(function (k) { return k.slice(0, 2) === cc; });
   }
+  var cityShown = 20, cityMore = false;
   document.getElementById("see-search-cities").addEventListener("click", function () {
+    if (!cityMore) cityShown = 20; cityMore = false;
     panelKind = "cities";
     stopCityFactObserver();
     var panelCountry = selected ? (NAME[selected] || TITLE[selected]) : null;
@@ -14580,13 +14591,18 @@ window.SL_GEO_READY = new Promise(function (res) {
     var cont = !panelCountry && lastContinentMatch, cset = !panelCountry && lastContinentSet; // a continent search: only that continent's cities
     var out = [];
     (window.SL_CITIES || []).forEach(function (r) {
-      if (out.length >= 60 || (panelCountry && r[1] !== panelCountry)) return;
+      if ((!panelCountry && out.length >= 60) || (panelCountry && r[1] !== panelCountry)) return;
       if (provKey && cityArea(r) !== provKey && (prov.also || []).every(function (a) { return cityArea(r) !== selected.toUpperCase() + ":" + a; })) return;
       if (cset && !onContinents(r[1], cset)) return;
       var here = pool.filter(function (sp) { return livesNear(sp, r); });
       // a country's capital from CAPITALS (it has no other city listed) shows even with no snakes around it
       if (here.length || (panelCountry && CAP_OF[r[1]] === r[0])) out.push({ r: r, species: here, loose: here.filter(function (sp) { return nearIsCountryOnly(sp, r); }).map(function (sp) { return sp.id; }) });
     });
+    // v4.54: every city of the country is looked at, the ones with the most snakes come first, and
+    // the list grows with "Show more cities" instead of stopping at a fixed number
+    out.sort(function (x, y) { return y.species.length - x.species.length || (CAP_OF[y.r[1]] === y.r[0]) - (CAP_OF[x.r[1]] === x.r[0]); });
+    var cityAll = out; out = out.slice(0, cityShown);
+    var cityTop = cityAll[0], cityTies = cityTop ? cityAll.filter(function (c) { return c.species.length === cityTop.species.length; }).length - 1 : 0;
     PINS = PINS.filter(function (p) { return !p.cityPick; });
     labelPin = null; citiesProv = prov;
     // darker green = more species live around that city (from the checklist's own ranges)
@@ -14616,10 +14632,12 @@ window.SL_GEO_READY = new Promise(function (res) {
     document.getElementById("cp-sub").textContent = out.length
       ? (out.length === 1 && CAP_OF[out[0].r[1]] === out[0].r[0] ? "Its capital · tap it to see it" : out.length + (out.length === 1 ? " city" : " cities") + " with these species nearby · tap one to see it")
       : provPlace ? "No big cities on record in " + provPlace + "." : "No big cities on record inside this range.";
-    document.getElementById("cp-list").innerHTML = out.map(function (c, i) {
+    document.getElementById("cp-list").innerHTML = (cityTop && cityTop.species.length && cityAll.length > 1
+      ? '<div class="cp-row cp-most cp-state-pick" data-city="0"><b>Most species: ' + cityTop.r[0] + " (" + cityTop.species.length + ")" + (cityTies > 0 ? " and " + cityTies + " more tied" : "") + "</b><i>" + (cityTies > 0 ? (cityTies + 1) + " cities have " + cityTop.species.length + " species each" : "The city with the most snakes recorded around it") + "</i></div>" : "") +
+      out.map(function (c, i) {
       return '<div class="cp-row cp-row-country cp-state-pick" data-city="' + i + '"><b>' + c.r[0] + "</b><i>" +
         (cityArea(c.r) ? provLabel(cityArea(c.r)) + ", " : "") + c.r[1] + " · " + c.species.length + " species</i></div>";
-    }).join("");
+    }).join("") + (cityAll.length > out.length ? '<button type="button" class="cp-more-cities">Show more cities (' + (cityAll.length - out.length) + " more)</button>" : "");
     lastCityList = out;
     popPanel();
     if (out.length) {
@@ -14630,6 +14648,13 @@ window.SL_GEO_READY = new Promise(function (res) {
     invalidate();
   });
   var lastCityList = [], cityShadeToken = 0;
+  document.getElementById("cp-list").addEventListener("click", function (e) {
+    if (!e.target.closest(".cp-more-cities")) return;
+    e.stopPropagation(); cityShown += 20; cityMore = true;
+    var y = document.getElementById("cp-list").scrollTop;
+    document.getElementById("see-search-cities").click();
+    document.getElementById("cp-list").scrollTop = y;
+  }, true);
   function cityPickLegend(kind) {
     var lo = document.getElementById("legend-dot-low").parentNode, hi = document.getElementById("legend-dot-high").parentNode;
     if (!kind) { updateLegend(); return; }
@@ -15095,6 +15120,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     cap.innerHTML = "";
     var b = document.createElement("b"); b.textContent = name || ""; cap.appendChild(b);
     var i = document.createElement("i"); i.textContent = sci && sci !== name ? sci : ""; cap.appendChild(i);
+    var rl = document.createElement("a"); rl.className = "pl-compare pl-real"; rl.textContent = "See it in real life";
+    rl.href = "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html") + "#real"; cap.appendChild(rl);
     if (window.SL_compare) { var cb0 = document.createElement("button"); cb0.type = "button"; cb0.className = "pl-compare"; cb0.textContent = "Compare with similar snakes";
       cb0.addEventListener("click", function (ev) { ev.stopPropagation(); close(); window.SL_compare(id); }); cap.appendChild(cb0); }
     var sm = document.createElement("small"); sm.textContent = xp ? "Photo: " + it[2] + (/wikipedia|inaturalist/i.test(it[2]) ? "" : " · via iNaturalist") : "Photo © " + it[2] + " · via iNaturalist"; cap.appendChild(sm);
@@ -17048,6 +17075,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     });
   }
   window.SL_SG_COUNT = function () { return SG.list.length; };
+  window.SL_SG_ON = function () { return !!SG.on && onCanvas(); };
   function sgRender() {
     if (!onCanvas() && map) {
       if (!SG.layer) SG.layer = L.layerGroup().addTo(map);
@@ -17063,6 +17091,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // drawn by the SnakeList map on top of everything else, each frame
   window.SL_OVERLAY_DRAW = function (ctx, b, w, h) {
     if (!SG.on || !onCanvas()) return;
+    if (window.SL_SG_HIDE) { SG.clusters = []; SG.list.forEach(function (m) { m.sx = null; }); return; } // only the trail cameras are ticked
     var lonOf = function (x) { return (x - b[0]) / b[2] * 360 - 180; };
     var want = Math.round(b[0]) + "," + Math.round(b[1]) + "," + Math.round(b[2]);
     if (want !== SG.lastBox) { SG.lastBox = want; clearTimeout(SG.t); SG.t = setTimeout(function () { sgLoad(false); }, 450); }
@@ -17087,13 +17116,14 @@ window.SL_GEO_READY = new Promise(function (res) {
         ctx.lineWidth = 1.8; ctx.strokeStyle = "#fff"; ctx.stroke();
         return;
       }
-      var cx = g.x / g.list.length, cy = g.y / g.list.length, n = g.list.length, r = Math.min(17, 8 + Math.log(n) * 2.6);
+      // several close together: one slightly bigger red dot with a second ring - no numbers
+      // (v4.54: the counts made the layer look busy and confusing); tap it to zoom in
+      var cx = g.x / g.list.length, cy = g.y / g.list.length, n = g.list.length, r = Math.min(10, 7 + Math.log(n) * 0.9);
       g.list.forEach(function (m) { m.cl = g; });
       g.cx = cx; g.cy = cy; g.r = r; SG.clusters.push(g);
+      ctx.beginPath(); ctx.arc(cx, cy, r + 3, 0, Math.PI * 2); ctx.fillStyle = "rgba(227,38,31,0.28)"; ctx.fill();
       ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(227,38,31,0.92)"; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = "#fff"; ctx.stroke();
-      ctx.fillStyle = "#fff"; ctx.font = "700 11px Inter, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText(n > 999 ? Math.round(n / 1000) + "k" : String(n), cx, cy + 0.5);
+      ctx.fillStyle = "#e3261f"; ctx.fill(); ctx.lineWidth = 1.8; ctx.strokeStyle = "#fff"; ctx.stroke();
     });
     ctx.restore();
   };
@@ -17172,7 +17202,37 @@ window.SL_GEO_READY = new Promise(function (res) {
   function layerThumb() {
     var sw = pop.querySelector(".lp-classic"), url = window.SL_MAP_THUMB && window.SL_MAP_THUMB(204, 102);
     if (sw && url) { sw.style.backgroundImage = 'url("' + url + '")'; sw.classList.add("lp-real"); }
+    heatThumb(url);
   }
+  // the "Heatmap" choice looks like the real heatmap (v4.54): a snapshot of the heatmap you last
+  // had on screen, or until then the map recoloured in the heatmap's own greens (the tropics,
+  // where most snakes live, darkest - like the real one)
+  var heatShot = null; try { heatShot = localStorage.getItem("sl-heat-thumb"); } catch (e) {}
+  function heatThumb(mapUrl) {
+    var hs = pop.querySelector(".lp-heatonly"); if (!hs) return;
+    if (heatShot) { hs.style.background = 'var(--map-sea, #dbe4ea) url("' + heatShot + '") center / cover no-repeat'; return; }
+    if (!mapUrl || hs._made === mapUrl) return; hs._made = mapUrl;
+    var im = new Image();
+    im.onload = function () {
+      var c = document.createElement("canvas"); c.width = im.width; c.height = im.height; var g = c.getContext("2d"); g.drawImage(im, 0, 0);
+      var d = g.getImageData(0, 0, c.width, c.height), px = d.data, s0 = [px[0], px[1], px[2]];
+      for (var y = 0; y < c.height; y++) { var lat = 90 - y / c.height * 180, t = Math.max(0, 1 - Math.abs(lat) / 62);
+        for (var x = 0; x < c.width; x++) { var i = (y * c.width + x) * 4;
+          if (Math.abs(px[i] - s0[0]) + Math.abs(px[i + 1] - s0[1]) + Math.abs(px[i + 2] - s0[2]) < 40) continue; // sea
+          px[i] = Math.round(0x8f + (0x1f - 0x8f) * t); px[i + 1] = Math.round(0xc4 + (0x5a - 0xc4) * t); px[i + 2] = Math.round(0x7f + (0x24 - 0x7f) * t); } }
+      g.putImageData(d, 0, 0);
+      hs.style.background = 'url("' + c.toDataURL("image/png") + '") 38% 30% / 300% auto no-repeat';
+    };
+    im.src = mapUrl;
+  }
+  // a real snapshot of the heatmap, taken a moment after it has been drawn
+  window.SL_HEAT_SNAP = function () {
+    try { var cv = document.querySelector("#globe-stage canvas"); if (!cv || !cv.width) return;
+      var t = document.createElement("canvas"); t.width = 204; t.height = 102; var sw0 = Math.min(cv.width, cv.height * 2), sh0 = sw0 / 2;
+      t.getContext("2d").drawImage(cv, (cv.width - sw0) / 2, (cv.height - sh0) / 2, sw0, sh0, 0, 0, 204, 102);
+      heatShot = t.toDataURL("image/jpeg", 0.8); localStorage.setItem("sl-heat-thumb", heatShot);
+    } catch (e) {}
+  };
   new MutationObserver(function () { if (!pop.hidden) layerThumb(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-sl-theme"] });
   btnLayers.addEventListener("click", function (e) { e.stopPropagation(); pop.hidden = !pop.hidden; btnLayers.setAttribute("aria-expanded", String(!pop.hidden)); if (!pop.hidden) layerThumb(); });
   document.addEventListener("click", function (e) { if (!e.target.closest(".layers-wrap")) pop.hidden = true; });
@@ -17201,6 +17261,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (!st.heat) { clearHeat(); return; }
     // the heatmap goes on whichever map is showing - it never swaps the map
     applyHeat();
+    setTimeout(function () { if (st.heat && window.SL_HEAT_SNAP) window.SL_HEAT_SNAP(); }, 2500);
   });
   var qT = null;
   qIn.addEventListener("input", function () {
@@ -17526,6 +17587,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v4.54", d: "2026-11-09", items: ["Trail cameras on the map: turn on Snake Sightings and tick Trail cameras in the key (bottom left) - blue dots are people's cameras, purple ones have a live stream; add your own camera (sign in first), choose whether your name shows, and add photos and video links of the snakes it caught. Places are rounded to about 1 km and new cameras appear for everyone once the SnakeList creator has checked them", "Snake Sightings look simpler: no more numbers on the dots, and the key says what every colour means", "See cities: every city of a country is checked (about 4,000 more towns added), the ones with the most snakes come first, Most species shows the top city (and ties), and Show more cities adds more", "The Heatmap preview in Map style looks like the real heatmap", "See it in real life buttons on the big photo and the map's species box"] },
     { v: "v4.53", d: "2026-11-09", items: ["Smoother opening: the photos no longer freeze while SnakeList gets ready (on a slow phone the longest freeze went from almost 2 seconds to under a tenth of a second)", "Smoother Mark Seen tick: it now runs on the graphics chip, and saving waits until it has finished", "New Achievements page: a progress ring with your badges won, what's next, badges grouped (sightings, dates, photos, full records, quiz) with medals, progress bars and your newest badge highlighted"] },
     { v: "v4.52", d: "2026-11-09", items: ["23 more snakes with full, sourced pages - 52 in all: rattlesnakes, Cottonmouth, Saw-scaled Viper, mambas, Bushmaster, Fer-de-lance, Russell's Viper, Eastern Brown Snake, Tiger Snake, Common Krait, kingsnakes, Milk Snake, rat snakes, Eastern Hognose, Rough Green Snake, Emerald Tree Boa, Green Tree Python, Rainbow Boa, Boa constrictor, Sand Boa", "Map: a sighting's popup closes when you switch to another snake; the map says when satellite pictures can't load"] },
     { v: "v4.51", d: "2026-11-09", items: ["Map borders: one colour for every line (countries, coasts, islands, states) in each theme, drawn once - no more green lines next to white ones or two lines along one coast", "Country names stay on their country (Greece, Morocco) or beside it over the sea - never on a neighbour (Portugal on Spain)", "Picking another country switches off the last one's islands and states, so nothing from it is left on the map", "Zoom in much closer when a small island is on screen", "Full-screen map: the species panel runs across the screen, with Make smaller / Make wider"] },
@@ -18014,6 +18076,12 @@ window.SL_GEO_READY = new Promise(function (res) {
     appId: "1:807677850538:web:e83ee8655b8b99e02bf1d3"
   };
   var FB_V = "10.12.5", fbP = null, fbUser = null, db = null;
+  // the trail-camera map layer (and anything else) reaches the SnakeList account service here
+  window.SL_FB = {
+    load: function () { return FIREBASE_CONFIG && !(window.claude && window.claude.use) ? loadFB().then(function () { return db; }) : Promise.reject(new Error("unavailable")); },
+    user: function () { return fbUser; },
+    isCreator: function () { return !!(fbUser && String(fbUser.email || "").toLowerCase() === "eduardo.fpb.brandao@gmail.com" && fbUser.emailVerified); }
+  };
   function loadFB() {
     if (fbP) return fbP;
     var one = function (n) { return new Promise(function (res, rej) { var sc = document.createElement("script"); sc.src = "https://www.gstatic.com/firebasejs/" + FB_V + "/firebase-" + n + "-compat.js"; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); }); };
@@ -20398,5 +20466,291 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
   b.addEventListener("click", function (e) { e.stopPropagation(); panel.classList.toggle("cp-small"); try { localStorage.setItem("sl-cp-small", panel.classList.contains("cp-small") ? "1" : "0"); } catch (er) {} paint(); });
   try { if (localStorage.getItem("sl-cp-small") === "1") panel.classList.add("cp-small"); } catch (er) {}
   close.parentNode.insertBefore(b, close); paint();
+})();
+</script>
+<style>
+/* ---- trail cameras (v4.54) ---- */
+.sg-key.sg-key2 { pointer-events: auto; z-index: 6; flex-direction: column; align-items: stretch; gap: 4px; border-radius: 12px; padding: 8px 10px; }
+.sg-key2 label { display: flex; align-items: center; gap: 7px; cursor: pointer; white-space: nowrap; }
+.sg-key2 label input { margin: 0; accent-color: #58b351; }
+.sg-key2 .k-dot { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid #fff; flex: none; }
+.sg-key2 .k-red { background: #e3261f; } .sg-key2 .k-cam { background: #2f7de1; } .sg-key2 .k-live { background: #9b4dde; }
+.sg-key2 .k-small { font-size: 11px; opacity: .85; padding-left: 25px; }
+.sg-key2 button { margin-top: 3px; font: 600 12px 'Inter', sans-serif; padding: 5px 9px; border-radius: 8px; border: 1px solid rgba(255,255,255,.5); background: rgba(255,255,255,.12); color: inherit; cursor: pointer; }
+.cam-pop { position: absolute; z-index: 30; width: min(300px, calc(100% - 20px)); max-height: 70%; overflow: auto; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.3); padding: 12px; font: 13px/1.4 'Inter', sans-serif; }
+.cam-pop[hidden] { display: none; }
+.cam-pop h4 { margin: 0 24px 2px 0; font: 600 15px 'Fraunces', serif; }
+.cam-pop .cam-x { position: absolute; right: 8px; top: 6px; border: 0; background: none; font-size: 20px; color: var(--text-muted); cursor: pointer; }
+.cam-pop .cam-meta { color: var(--text-muted); font-size: 12px; margin: 0 0 8px; }
+.cam-pop .cam-ph { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 8px; }
+.cam-pop .cam-ph figure { margin: 0; } .cam-pop .cam-ph img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 8px; display: block; }
+.cam-pop .cam-ph figcaption { font-size: 11px; color: var(--text-muted); }
+.cam-pop a { color: var(--gold); font-weight: 600; }
+.cam-pop .cam-live { display: inline-block; margin: 2px 0 8px; padding: 4px 10px; border-radius: 99px; background: #9b4dde; color: #fff !important; text-decoration: none; }
+.cam-pop .cam-pend { background: #fff3cd; color: #6b5200; border-radius: 8px; padding: 6px 8px; font-size: 12px; margin-bottom: 8px; }
+.cam-sheet { position: fixed; inset: 0; z-index: 96; display: none; align-items: center; justify-content: center; padding: 14px; background: rgba(6,20,12,.7); }
+.cam-sheet.open { display: flex; }
+.cam-card { width: min(560px, 100%); max-height: calc(100vh - 28px); overflow: auto; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; font: 14px/1.45 'Inter', sans-serif; }
+.cam-card h2 { margin: 0 0 4px; font: 600 20px 'Fraunces', serif; }
+.cam-card .cam-sub { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; }
+.cam-card label.f { display: block; margin: 0 0 12px; }
+.cam-card label.f > span { display: block; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; }
+.cam-card input[type=text], .cam-card input[type=url], .cam-card input[type=date] { width: 100%; box-sizing: border-box; font: 14px 'Inter', sans-serif; padding: 9px 11px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+.cam-card .chk { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 12px; cursor: pointer; }
+.cam-card .row { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 8px; }
+.cam-card button { font: 600 13px 'Inter', sans-serif; padding: 8px 14px; border-radius: 9px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; }
+.cam-card button.primary { background: var(--gold-fill); border-color: var(--gold-fill); color: var(--on-fill); }
+.cam-card button:disabled { opacity: .6; cursor: default; }
+.cam-card .cam-pick { height: 260px; border-radius: 10px; overflow: hidden; margin: 6px 0; }
+.cam-card .cam-pick[hidden] { display: none; }
+.cam-card .cam-msg { font-size: 13px; margin: 8px 0 0; } .cam-card .cam-msg.err { color: #c0392b; }
+.cam-card .cam-safe { font-size: 12.5px; background: var(--surface-hover, rgba(127,199,106,.15)); border-radius: 10px; padding: 8px 10px; margin: 0 0 14px; }
+.cam-card .cam-media { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 10px; }
+.cam-card .cam-media .m { display: grid; grid-template-columns: 64px 1fr auto; gap: 8px; align-items: center; }
+.cam-card .cam-media img { width: 64px; height: 48px; object-fit: cover; border-radius: 6px; }
+.cam-card .cam-media .m input { padding: 6px 8px; font-size: 13px; }
+.cam-card .cam-review .rv { border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; }
+</style>
+<script>
+// ---- trail cameras on the map (v4.54) -------------------------------------------------------
+// A filter inside Snake Sightings: people's trail cameras (blue; purple when they have a live
+// stream link) next to the iNaturalist sightings (red), with a key in the corner. Anyone signed in
+// with a SnakeList account can add their camera, choose whether their name shows, and add photos
+// and video links of snakes it caught. Places are rounded to about 1 km, and a camera only shows
+// for everyone once the SnakeList creator has approved it (a kids' app: nothing goes public unseen).
+(function () {
+  var stage = document.getElementById("globe-stage"); if (!stage) return;
+  var CAMS = [], loaded = 0, loading = null, showCams = true, showSight = true, open = null, MAXPH = 4;
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function safeUrl(u) { u = String(u || "").trim(); return /^https:\/\/[^\s"<>]+$/i.test(u) ? u : ""; }
+  // the storage: SnakeList's Firebase (window.SL_CAM_API can replace it, e.g. in tests)
+  var api = window.SL_CAM_API || {
+    list: function () {
+      return window.SL_FB.load().then(function (db) {
+        var u = window.SL_FB.user(), qs = [db.collection("cams").where("status", "==", "ok").limit(800).get()];
+        if (u) qs.push(db.collection("cams").where("uid", "==", u.uid).get());
+        if (window.SL_FB.isCreator()) qs.push(db.collection("cams").where("status", "==", "pending").get());
+        return Promise.all(qs.map(function (q) { return q.catch(function () { return { docs: [] }; }); })).then(function (rs) {
+          var by = {}; rs.forEach(function (r) { r.docs.forEach(function (d) { by[d.id] = Object.assign({ id: d.id }, d.data()); }); });
+          return Object.keys(by).map(function (k) { return by[k]; });
+        });
+      });
+    },
+    save: function (cam) {
+      return window.SL_FB.load().then(function (db) {
+        var u = window.SL_FB.user(); if (!u) throw new Error("signin");
+        var d = Object.assign({}, cam); delete d.id; d.uid = u.uid; d.status = "pending"; d.at = new Date().toISOString();
+        return cam.id ? db.collection("cams").doc(cam.id).set(d).then(function () { return cam.id; }) : db.collection("cams").add(d).then(function (r) { return r.id; });
+      });
+    },
+    setStatus: function (id, st) { return window.SL_FB.load().then(function (db) { return db.collection("cams").doc(id).update({ status: st }); }); },
+    remove: function (id) { return window.SL_FB.load().then(function (db) { return db.collection("cams").doc(id).delete(); }); },
+    me: function () { var u = window.SL_FB && window.SL_FB.user(); return u ? { uid: u.uid, name: u.displayName || String(u.email || "").split("@")[0] } : null; },
+    creator: function () { return !!(window.SL_FB && window.SL_FB.isCreator()); }
+  };
+  function sgOn() { return window.SL_SG_ON ? window.SL_SG_ON() : false; }
+  function load(force) {
+    if (loading || (!force && Date.now() - loaded < 120000)) return loading || Promise.resolve();
+    loading = api.list().then(function (L) { CAMS = (L || []).filter(function (c) { return isFinite(c.lat) && isFinite(c.lon); }); loaded = Date.now(); paintKey(); redraw(); },
+      function () { CAMS = []; loaded = Date.now(); paintKey("Trail cameras can't load right now."); }).then(function () { loading = null; });
+    return loading;
+  }
+  function redraw() { if (window.SL_MAP_REDRAW) window.SL_MAP_REDRAW(); }
+  // the key in the corner: what each colour is, and tick boxes to show either kind
+  var key = document.getElementById("sg-key");
+  function paintKey(note) {
+    if (!key) return;
+    key.classList.add("sg-key2");
+    var me = api.me(), mine = me ? CAMS.filter(function (c) { return c.uid === me.uid; }).length : 0, pend = api.creator() ? CAMS.filter(function (c) { return c.status === "pending"; }).length : 0;
+    key.innerHTML = '<label><input type="checkbox" data-k="s"' + (showSight ? " checked" : "") + '><span class="k-dot k-red"></span>Snake sightings (iNaturalist)</label>' +
+      '<label><input type="checkbox" data-k="c"' + (showCams ? " checked" : "") + '><span class="k-dot k-cam"></span>Trail cameras</label>' +
+      '<div class="k-small"><span class="k-dot k-live" style="display:inline-block;vertical-align:-1px;margin-right:5px"></span>a camera with a live stream</div>' +
+      (note ? '<div class="k-small">' + esc(note) + "</div>" : "") +
+      '<button type="button" data-k="add">+ Add my trail camera' + (mine ? " (" + mine + " added)" : "") + "</button>" +
+      (pend ? '<button type="button" data-k="review">Review ' + pend + " waiting camera" + (pend === 1 ? "" : "s") + "</button>" : "");
+  }
+  if (key) key.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-k]"); if (!t) return;
+    var k = t.getAttribute("data-k");
+    if (k === "s") { showSight = t.checked; window.SL_SG_HIDE = !showSight; redraw(); }
+    else if (k === "c") { showCams = t.checked; if (showCams) load(); redraw(); }
+    else if (k === "add") openSheet(null);
+    else if (k === "review") openReview();
+  });
+  // the layer turns on with Snake Sightings
+  var sgBtn = document.getElementById("sg-toggle");
+  if (sgBtn) new MutationObserver(function () { if (sgBtn.classList.contains("on") || sgBtn.getAttribute("aria-pressed") === "true") { paintKey(); if (showCams) load(); } else closePop(); })
+    .observe(sgBtn, { attributes: true, attributeFilter: ["class", "aria-pressed"] });
+  // drawn on top of the sightings
+  var prevDraw = window.SL_OVERLAY_DRAW;
+  window.SL_OVERLAY_DRAW = function (ctx, b, w, h) {
+    if (prevDraw) prevDraw(ctx, b, w, h);
+    if (!sgOn() || !showCams || !CAMS.length) return;
+    ctx.save();
+    CAMS.forEach(function (c) {
+      var x = b[0] + (c.lon + 180) / 360 * b[2], y = b[1] + (90 - c.lat) / 180 * b[3];
+      c.sx = x; c.sy = y;
+      if (x < -12 || y < -12 || x > w + 12 || y > h + 12) { c.sx = null; return; }
+      var live = !!safeUrl(c.live);
+      ctx.beginPath(); ctx.arc(x, y, 7, 0, Math.PI * 2);
+      ctx.fillStyle = c === open ? "#ffd23f" : live ? "#9b4dde" : "#2f7de1"; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = "#fff"; if (c.status === "pending") ctx.setLineDash([3, 2]); ctx.stroke(); ctx.setLineDash([]);
+      // a little camera body in the dot
+      ctx.fillStyle = "#fff"; ctx.fillRect(x - 3.5, y - 2, 7, 4.5); ctx.beginPath(); ctx.arc(x, y + 0.2, 1.4, 0, Math.PI * 2); ctx.fillStyle = live ? "#9b4dde" : "#2f7de1"; ctx.fill();
+    });
+    ctx.restore();
+  };
+  var prevTap = window.SL_MAP_TAP;
+  window.SL_MAP_TAP = function (x, y) {
+    if (sgOn() && showCams && CAMS.length) {
+      var best = null, bd = 13 * 13;
+      CAMS.forEach(function (c) { if (c.sx == null) return; var d = (c.sx - x) * (c.sx - x) + (c.sy - y) * (c.sy - y); if (d < bd) { bd = d; best = c; } });
+      if (best) { openPop(best); return true; }
+      if (!pop.hidden) { closePop(); return true; }
+    }
+    return prevTap ? prevTap(x, y) : false;
+  };
+  // a camera's card
+  var pop = document.createElement("div"); pop.className = "cam-pop"; pop.hidden = true; pop.setAttribute("role", "dialog"); pop.setAttribute("aria-label", "Trail camera");
+  stage.appendChild(pop);
+  function closePop() { pop.hidden = true; open = null; redraw(); }
+  function openPop(c) {
+    open = c; var me = api.me(), mine = me && c.uid === me.uid, live = safeUrl(c.live);
+    var ph = (c.media || []).filter(function (m) { return m && m.kind === "photo" && /^data:image\//.test(m.data || ""); });
+    var vids = (c.media || []).filter(function (m) { return m && m.kind === "video" && safeUrl(m.url); });
+    pop.innerHTML = '<button type="button" class="cam-x" aria-label="Close">&times;</button><h4>' + esc(c.title || "Trail camera") + "</h4>" +
+      '<p class="cam-meta">' + (c.showName && c.name ? "By " + esc(c.name) + " · " : "") + "place shown to about 1 km" + (c.at ? " · added " + esc(String(c.at).slice(0, 10)) : "") + "</p>" +
+      (c.status === "pending" ? '<div class="cam-pend">Waiting for the SnakeList creator to check it - only you' + (api.creator() ? " (and the creator)" : "") + " can see it for now.</div>" : "") +
+      (live ? '<a class="cam-live" href="' + esc(live) + '" target="_blank" rel="noopener nofollow">&#9679; Watch live</a>' : "") +
+      (ph.length ? '<div class="cam-ph">' + ph.map(function (m) { return "<figure><img src=\"" + m.data + "\" alt=\"" + esc(m.species || "Snake") + '"><figcaption>' + esc(m.species || "Snake") + (m.date ? " · " + esc(m.date) : "") + "</figcaption></figure>"; }).join("") + "</div>" : "<p>No snake photos yet.</p>") +
+      (vids.length ? "<p>" + vids.map(function (m) { return '<a href="' + esc(safeUrl(m.url)) + '" target="_blank" rel="noopener nofollow">&#9654; ' + esc(m.species || "Video") + "</a>"; }).join("<br>") + "</p>" : "") +
+      (mine || api.creator() ? '<p class="row"><button type="button" data-a="edit">Edit</button> <button type="button" data-a="del">Delete</button>' + (api.creator() && c.status === "pending" ? ' <button type="button" data-a="ok">Approve</button>' : "") + "</p>" : "");
+    var sr = stage.getBoundingClientRect();
+    pop.hidden = false;
+    var px = Math.max(10, Math.min(c.sx + 14, sr.width - pop.offsetWidth - 10)), py = Math.max(10, Math.min(c.sy - 20, sr.height - pop.offsetHeight - 10));
+    pop.style.left = px + "px"; pop.style.top = py + "px";
+    redraw();
+  }
+  pop.addEventListener("click", function (e) {
+    if (e.target.closest(".cam-x")) { closePop(); return; }
+    var a = e.target.closest("[data-a]"); if (!a || !open) return;
+    var c = open, k = a.getAttribute("data-a");
+    if (k === "edit") { closePop(); openSheet(c); }
+    else if (k === "del") { if (!confirm("Delete this trail camera and its photos?")) return; api.remove(c.id).then(function () { closePop(); load(true); }, function () { alert("Couldn't delete it right now."); }); }
+    else if (k === "ok") api.setStatus(c.id, "ok").then(function () { closePop(); load(true); });
+  });
+  // adding / editing a camera
+  var sheet = document.createElement("div"); sheet.className = "cam-sheet"; sheet.setAttribute("role", "dialog"); sheet.setAttribute("aria-modal", "true"); sheet.setAttribute("aria-label", "Your trail camera");
+  document.body.appendChild(sheet);
+  var draft = null, picker = null;
+  function closeSheet() { sheet.classList.remove("open"); draft = null; }
+  function shrink(file) { // photos are made small (longest side 1024 px, JPEG) so a camera stays under the storage limit
+    return new Promise(function (res, rej) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () { var s = Math.min(1, 1024 / Math.max(img.width, img.height)), cv = document.createElement("canvas"); cv.width = Math.round(img.width * s); cv.height = Math.round(img.height * s);
+        cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url); var q = 0.72, d = cv.toDataURL("image/jpeg", q); while (d.length > 190000 && q > 0.35) { q -= 0.1; d = cv.toDataURL("image/jpeg", q); } res(d); };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(); }; img.src = url;
+    });
+  }
+  function names() { var o = []; document.querySelectorAll("#grid .card").forEach(function (c, i) { if (i < 4300) o.push(c.dataset.name); }); return o; }
+  function paintSheet(msg, err) {
+    var me = api.me(), d = draft;
+    if (!me) {
+      sheet.innerHTML = '<div class="cam-card"><h2>Add your trail camera</h2><p class="cam-sub">To add a camera you need a SnakeList account, so only you can change it.</p><div class="row"><button type="button" class="primary" data-s="signin">Sign in or create an account</button><button type="button" data-s="close">Cancel</button></div></div>';
+      return;
+    }
+    var media = d.media || [];
+    sheet.innerHTML = '<div class="cam-card"><h2>' + (d.id ? "Edit your trail camera" : "Add your trail camera") + "</h2>" +
+      '<p class="cam-sub">It shows on the map as a blue dot (purple if it has a live stream), with the snake photos and videos you add.</p>' +
+      '<p class="cam-safe">&#128274; Stay safe: the place is rounded to about 1 km so nobody can find the exact spot - never put a camera at your home address on a public map. A new camera is only shown to everyone after the SnakeList creator has checked it.</p>' +
+      '<label class="f"><span>Camera name</span><input type="text" id="cam-title" maxlength="60" placeholder="e.g. Stream camera in the woods" value="' + esc(d.title || "") + '"></label>' +
+      '<div class="f" style="margin-bottom:12px"><span style="display:block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:5px">Where it is</span>' +
+      '<p id="cam-where" style="margin:0 0 6px">' + (isFinite(d.lat) ? "About " + d.lat.toFixed(2) + ", " + d.lon.toFixed(2) + (d.place ? " · " + esc(d.place) : "") : "Not chosen yet") + "</p>" +
+      '<div class="row"><button type="button" data-s="gps">Use my location</button><button type="button" data-s="map">Pick on the map</button></div><div class="cam-pick" id="cam-pick" hidden></div></div>' +
+      '<label class="chk"><input type="checkbox" id="cam-showname"' + (d.showName ? " checked" : "") + "> <span>Show my name (" + esc(me.name) + ") on this camera</span></label>" +
+      '<label class="f"><span>Live stream link (if it has one)</span><input type="url" id="cam-live" placeholder="https://www.youtube.com/..." value="' + esc(d.live || "") + '"></label>' +
+      '<div class="f"><span style="display:block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:5px">Snakes it caught</span>' +
+      '<div class="cam-media">' + media.map(function (m, i) {
+        return '<div class="m">' + (m.kind === "photo" ? '<img src="' + m.data + '" alt="">' : '<span>&#9654; video</span>') +
+          '<input type="text" list="cam-sp" data-i="' + i + '" data-f="species" placeholder="Which snake?" value="' + esc(m.species || "") + '">' +
+          '<button type="button" data-s="rm" data-i="' + i + '" aria-label="Remove">&times;</button></div>';
+      }).join("") + '</div><datalist id="cam-sp">' + names().slice(0, 4300).map(function (n) { return '<option value="' + esc(n) + '">'; }).join("") + "</datalist>" +
+      '<div class="row"><button type="button" data-s="photo">+ Add photos</button><button type="button" data-s="video">+ Add a video link</button></div>' +
+      '<input type="file" id="cam-file" accept="image/*" multiple hidden></div>' +
+      '<p class="cam-msg' + (err ? " err" : "") + '" id="cam-msg">' + esc(msg || "") + "</p>" +
+      '<div class="row" style="margin-top:12px"><button type="button" class="primary" data-s="save">' + (d.id ? "Save changes" : "Add my camera") + '</button><button type="button" data-s="close">Cancel</button></div></div>';
+  }
+  function grab() { // keep what's typed when the sheet is redrawn
+    if (!draft || !sheet.querySelector("#cam-title")) return;
+    draft.title = sheet.querySelector("#cam-title").value.trim(); draft.showName = sheet.querySelector("#cam-showname").checked; draft.live = sheet.querySelector("#cam-live").value.trim();
+    sheet.querySelectorAll("[data-f=species]").forEach(function (el) { var m = draft.media[+el.dataset.i]; if (m) m.species = el.value.trim(); });
+  }
+  function openSheet(c) {
+    closePop();
+    draft = c ? JSON.parse(JSON.stringify(c)) : { title: "", showName: false, live: "", media: [] };
+    picker = null; paintSheet(); sheet.classList.add("open");
+  }
+  function setPlace(lat, lon, hint) {
+    draft.lat = Math.round(lat * 100) / 100; draft.lon = Math.round(lon * 100) / 100; // ~1 km
+    draft.place = window.SL_placeLabel ? String(window.SL_placeLabel(lat, lon, hint) || "").replace(/^-?[\d.]+, -?[\d.]+$/, "") : "";
+    var w = sheet.querySelector("#cam-where"); if (w) w.textContent = "About " + draft.lat.toFixed(2) + ", " + draft.lon.toFixed(2) + (draft.place ? " · " + draft.place : "");
+  }
+  sheet.addEventListener("click", function (e) {
+    if (e.target === sheet) { closeSheet(); return; }
+    var t = e.target.closest("[data-s]"); if (!t) return;
+    var s = t.getAttribute("data-s");
+    if (s === "close") { closeSheet(); return; }
+    if (s === "signin") { closeSheet(); var hb = document.querySelector('.auth-btn[data-auth="open"]'); if (hb) hb.click(); return; }
+    grab();
+    if (s === "gps") {
+      if (!navigator.geolocation) { paintSheet("This browser can't share a location - pick it on the map.", true); return; }
+      navigator.geolocation.getCurrentPosition(function (p) { setPlace(p.coords.latitude, p.coords.longitude); }, function () { var m = sheet.querySelector("#cam-msg"); if (m) { m.textContent = "Couldn't get your location - pick it on the map."; m.classList.add("err"); } }, { timeout: 15000 });
+    } else if (s === "map") {
+      var pk = sheet.querySelector("#cam-pick"); pk.hidden = false;
+      if (window.SL_MAP_GEO_WARM) window.SL_MAP_GEO_WARM();
+      if (window.SL_buildPicker) window.SL_buildPicker(pk, function (lat, lon, hint) { setPlace(lat, lon, hint); }, null);
+    } else if (s === "photo") { var f = sheet.querySelector("#cam-file"); f.value = ""; f.click(); }
+    else if (s === "video") {
+      var u = prompt("Paste the link to the video (YouTube or similar, starting with https://):");
+      if (u && safeUrl(u)) { draft.media.push({ kind: "video", url: safeUrl(u), species: "" }); paintSheet(); }
+      else if (u) paintSheet("That link doesn't look right - it must start with https://", true);
+    } else if (s === "rm") { draft.media.splice(+t.getAttribute("data-i"), 1); paintSheet(); }
+    else if (s === "save") {
+      if (!draft.title) { paintSheet("Give your camera a name.", true); return; }
+      if (!isFinite(draft.lat)) { paintSheet("Choose where the camera is.", true); return; }
+      if (draft.live && !safeUrl(draft.live)) { paintSheet("The live link must start with https://", true); return; }
+      var me = api.me(); draft.name = draft.showName && me ? me.name : "";
+      if (JSON.stringify(draft).length > 900000) { paintSheet("That's too many photos for one camera - remove one.", true); return; }
+      t.disabled = true; t.textContent = "Saving…";
+      api.save(draft).then(function () { closeSheet(); load(true); if (window.SL_offerUndo) {} var m = document.getElementById("sl-sync-toast"); }, function (er) {
+        paintSheet(er && er.message === "signin" ? "Sign in first." : "Couldn't save it right now - check your connection and try again.", true);
+      });
+    }
+  });
+  sheet.addEventListener("change", function (e) {
+    if (e.target.id !== "cam-file") return; grab();
+    var files = [].slice.call(e.target.files || []), room = MAXPH - draft.media.filter(function (m) { return m.kind === "photo"; }).length;
+    if (files.length > room) files = files.slice(0, Math.max(0, room));
+    if (!files.length) { paintSheet("Up to " + MAXPH + " photos per camera.", true); return; }
+    Promise.all(files.map(shrink)).then(function (ds) { ds.forEach(function (d) { draft.media.push({ kind: "photo", data: d, species: "", date: new Date().toISOString().slice(0, 10) }); }); paintSheet(); }, function () { paintSheet("That photo couldn't be read.", true); });
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (sheet.classList.contains("open")) closeSheet(); else if (!pop.hidden) closePop(); } });
+  // the creator's review list
+  function openReview() {
+    var pend = CAMS.filter(function (c) { return c.status === "pending"; });
+    sheet.innerHTML = '<div class="cam-card cam-review"><h2>Cameras waiting for you</h2><p class="cam-sub">Check the photos and the place before they go public.</p>' +
+      pend.map(function (c) { return '<div class="rv"><b>' + esc(c.title) + "</b> · " + (c.name ? esc(c.name) + " · " : "") + c.lat + ", " + c.lon + " · " + (c.media || []).length + ' item(s)<div class="row" style="margin-top:6px"><button type="button" data-r="see" data-id="' + esc(c.id) + '">See it</button><button type="button" class="primary" data-r="ok" data-id="' + esc(c.id) + '">Approve</button><button type="button" data-r="no" data-id="' + esc(c.id) + '">Delete</button></div></div>'; }).join("") +
+      '<div class="row"><button type="button" data-r="close">Close</button></div></div>';
+    sheet.classList.add("open");
+  }
+  sheet.addEventListener("click", function (e) {
+    var r = e.target.closest("[data-r]"); if (!r) return;
+    var k = r.getAttribute("data-r"), id = r.getAttribute("data-id"), c = CAMS.find(function (x) { return x.id === id; });
+    if (k === "close") { closeSheet(); return; }
+    if (k === "see" && c) { closeSheet(); if (window.SL_FLY_BOX) window.SL_FLY_BOX(c.lon - 1, c.lon + 1, c.lat - 0.6, c.lat + 0.6); setTimeout(function () { if (c.sx != null) openPop(c); }, 1300); }
+    if (k === "ok") api.setStatus(id, "ok").then(function () { load(true).then(openReview); });
+    if (k === "no" && confirm("Delete this camera?")) api.remove(id).then(function () { load(true).then(openReview); });
+  });
+  window.SL_CAMS_DEBUG = { load: load, list: function () { return CAMS; } };
 })();
 </script>
