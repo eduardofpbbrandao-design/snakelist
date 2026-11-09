@@ -1091,7 +1091,7 @@
   .ach-toast-star { animation-name: ach-toast-spin; }
   .ach-toast-quiz { animation-name: ach-toast-wobble; }
   .ach-toast-flash { position: absolute; inset: 0; background: #fff; pointer-events: none;
-    animation: ach-toast-flash-pop 0.5s ease-out; }
+    animation: ach-toast-flash-pop 0.55s 0.45s ease-out both; }
   @keyframes ach-toast-pop {
     0% { opacity: 0; transform: scale(0.3); }
     60% { opacity: 1; transform: scale(1.12); }
@@ -1105,7 +1105,7 @@
     0% { opacity: 0; transform: translateY(-10px); }
     100% { opacity: 1; transform: translateY(0); }
   }
-  @keyframes ach-toast-flash-pop { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+  @keyframes ach-toast-flash-pop { 0% { opacity: 0; } 15% { opacity: 0.85; } 100% { opacity: 0; } }
   @keyframes ach-toast-spin {
     0% { opacity: 0; transform: scale(0.2) rotate(-120deg); }
     70% { opacity: 1; transform: scale(1.1) rotate(8deg); }
@@ -1119,6 +1119,64 @@
     100% { transform: rotate(0deg); }
   }
   @keyframes ach-toast-out { to { opacity: 0; transform: translateX(24px) scale(0.9); } }
+  /* themed unlock effects, the same on the toast's icon and on a medal won since the tab was last
+     opened: Sightings - the tick draws and a snake slithers past; Dates - calendar pages flip
+     away; Photos - a shutter snaps shut and flashes; Full records - a clipboard check is stamped
+     on; Quiz - a spark and a burst of question marks. Transform and opacity only, all under 1.2s */
+  .ach-toast-icon { position: relative; }
+  /* --fx-t: when this one starts - later for each extra fresh medal, so several don't fire at once */
+  .ach-fx { position: absolute; inset: 0; pointer-events: none; --fx-t: calc(var(--fx-d, 0ms) + var(--fx-i, 0) * 140ms); }
+  .ach-fx > *, .ach-fx .fx-clip > * { position: absolute; will-change: transform, opacity; }
+  .ach-fx .fx-clip { inset: 0; border-radius: 50%; overflow: hidden; will-change: auto; }
+  .ach-fx .fx-wipe { background: radial-gradient(circle at 34% 28%, #a6e58a 0%, #58b351 46%, #2f7a35 100%); }
+  /* Sightings */
+  .ach-fx .fx-wipe { inset: 0; transform-origin: right center; animation: fx-wipe 0.5s calc(var(--fx-t) + 0.2s) cubic-bezier(0.5,0,0.3,1) both; }
+  @keyframes fx-wipe { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+  .ach-fx .fx-snake { left: 0; top: -12px; width: 100%; height: 12px; color: var(--gold); animation: fx-slither 1.05s calc(var(--fx-t) + 0.1s) linear both; }
+  .ach-fx .fx-snake svg { display: block; width: 30px; height: 10px; animation: fx-wiggle 0.24s ease-in-out 5 alternate; }
+  .ach-toast .ach-fx .fx-snake { left: -14px; width: 300px; top: auto; bottom: -11px; }
+  .ach-toast .ach-fx .fx-snake svg { width: 40px; height: 12px; }
+  @keyframes fx-slither { 0% { transform: translateX(-40px); opacity: 0; } 12% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(100%); opacity: 0; } }
+  @keyframes fx-wiggle { from { transform: translateY(-1.5px) rotate(-4deg); } to { transform: translateY(1.5px) rotate(4deg); } }
+  /* Dates */
+  .ach-fx .fx-page { left: 24%; right: 24%; top: 26%; bottom: 20%; border-radius: 3px; transform-origin: top center;
+    background: linear-gradient(#e2543a 0 30%, #fffdf7 30%); box-shadow: 0 1px 2px rgba(0,0,0,0.25); animation: fx-flip 0.42s calc(var(--fx-t) + 0.2s) ease-in both; }
+  .ach-fx .fx-page.fx-p2 { animation-delay: calc(var(--fx-t) + 0.55s); }
+  @keyframes fx-flip { 0% { transform: perspective(90px) rotateX(0deg); opacity: 1; } 100% { transform: perspective(90px) rotateX(-120deg) translateY(-2px); opacity: 0; } }
+  /* Photos */
+  .ach-fx .fx-shut { left: 0; right: 0; height: 52%; background: #142019; animation: fx-shut-top 0.55s calc(var(--fx-t) + 0.15s) ease-in-out both; }
+  .ach-fx .fx-shut.fx-top { top: 0; }
+  .ach-fx .fx-shut.fx-bot { bottom: 0; animation-name: fx-shut-bot; }
+  @keyframes fx-shut-top { 0%, 100% { transform: translateY(-101%); } 45%, 55% { transform: translateY(0); } }
+  @keyframes fx-shut-bot { 0%, 100% { transform: translateY(101%); } 45%, 55% { transform: translateY(0); } }
+  .ach-fx .fx-flash { inset: 0; background: #fff; animation: fx-flash 0.6s calc(var(--fx-t) + 0.45s) ease-out both; }
+  @keyframes fx-flash { 0% { opacity: 0; } 15% { opacity: 0.95; } 100% { opacity: 0; } }
+  /* Full records */
+  .ach-fx .fx-clipboard { right: -7px; bottom: -6px; width: 46%; height: 46%; color: var(--gold); animation: fx-stamp 1.1s calc(var(--fx-t) + 0.2s) cubic-bezier(0.2,0.9,0.3,1.2) both; }
+  .ach-fx .fx-clipboard svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3)); }
+  @keyframes fx-stamp { 0% { transform: scale(2.4) rotate(-25deg); opacity: 0; } 30% { transform: scale(1) rotate(-8deg); opacity: 1; } 78% { transform: scale(1) rotate(-8deg); opacity: 1; } 100% { transform: scale(0.8) rotate(-8deg); opacity: 0; } }
+  .ach-fx .fx-shine { top: -20%; bottom: -20%; left: 0; width: 35%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.75), transparent);
+    animation: fx-shine 0.6s calc(var(--fx-t) + 0.45s) ease-in-out both; }
+  @keyframes fx-shine { from { transform: translateX(-120%) skewX(-18deg); } to { transform: translateX(320%) skewX(-18deg); } }
+  /* Quiz */
+  .ach-fx .fx-ring { inset: 0; border-radius: 50%; border: 2px solid #ffd75e; animation: fx-ring 0.6s calc(var(--fx-t) + 0.15s) ease-out both; }
+  @keyframes fx-ring { 0% { transform: scale(0.7); opacity: 1; } 100% { transform: scale(1.9); opacity: 0; } }
+  .ach-fx .fx-q { left: 50%; top: 50%; margin: -8px 0 0 -4px; font: 700 13px/16px 'Fraunces', serif; color: var(--gold); animation: fx-q 0.95s calc(var(--fx-t) + 0.2s) cubic-bezier(0.2,0.7,0.4,1) both; }
+  .ach-fx .fx-q:nth-child(odd) { color: #e0a72a; }
+  @keyframes fx-q { 0% { transform: translate(0, 0) scale(0.4) rotate(0deg); opacity: 0; } 15% { opacity: 1; }
+    75% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(1) rotate(var(--r)); opacity: 0; } }
+  .ach-fx .fx-q1 { --dx: 30px; --dy: -24px; --r: 30deg; } .ach-fx .fx-q2 { --dx: -30px; --dy: -22px; --r: -35deg; }
+  .ach-fx .fx-q3 { --dx: 38px; --dy: 10px; --r: 50deg; } .ach-fx .fx-q4 { --dx: -36px; --dy: 14px; --r: -45deg; }
+  .ach-fx .fx-q5 { --dx: 6px; --dy: -36px; --r: 15deg; } .ach-fx .fx-q6 { --dx: 14px; --dy: 30px; --r: -20deg; }
+  .ach-toast .ach-fx .fx-q3 { --dx: 120px; --dy: 4px; } .ach-toast .ach-fx .fx-q5 { --dx: 70px; --dy: -14px; } .ach-toast .ach-fx .fx-q6 { --dx: 160px; --dy: 12px; }
+  /* a medal won since you last looked pops in before its effect plays */
+  .ach.fresh .ach-medal, .ach-newest.fresh .ach-medal { animation: ach-medal-in 0.5s cubic-bezier(0.2,0.9,0.3,1.25) both;
+    animation-delay: calc(var(--fx-d, 0ms) + var(--fx-i, 0) * 140ms); }
+  @keyframes ach-medal-in { 0% { transform: scale(0.55); opacity: 0.4; } 100% { transform: scale(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .ach-fx, .ach-toast span .ach-fx { display: none; }
+    .ach.fresh .ach-medal, .ach-newest.fresh .ach-medal { animation: none; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .ach-toast, .ach-toast-flash, .ach-toast-wrap { animation: none; }
   }
@@ -1228,6 +1286,55 @@
     border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); outline: none; }
   .quiz-answer-field input:focus { border-color: var(--gold); }
   .quiz-actions { display: flex; gap: 10px; }
+  /* Impossible: the scary one - ember-dark in both themes, full width under the other three */
+  .quiz-level-btn.quiz-level-imp { flex-basis: 100%; max-width: 624px; position: relative; overflow: hidden; isolation: isolate;
+    border: 1px solid #7a1f14; color: #ffe3dc;
+    background: radial-gradient(120% 170% at 50% 0%, #62190f 0%, #2c0c08 58%, #140504 100%);
+    box-shadow: inset 0 0 0 1px rgba(255,120,90,0.14), 0 6px 18px rgba(90,20,10,0.22); }
+  .quiz-level-btn.quiz-level-imp::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(60% 90% at 50% 110%, rgba(255,92,56,0.42), transparent 70%); opacity: 0.35;
+    animation: imp-ember 2.6s ease-in-out infinite; }
+  @keyframes imp-ember { 50% { opacity: 1; } }
+  .quiz-level-btn.quiz-level-imp:hover { border-color: #e2543a; }
+  .quiz-level-imp b { display: inline-flex; align-items: center; gap: 7px; letter-spacing: 0.05em; color: #ffd6cb; }
+  .quiz-level-imp b svg { flex: none; }
+  .quiz-level-btn.quiz-level-imp span { color: rgba(255,214,203,0.78); }
+  .quiz-level-imp em { font: 600 10.5px/1.2 'JetBrains Mono', monospace; font-style: normal; color: #ff9b84; }
+  .quiz-level-imp em:empty { display: none; }
+  .quiz-panel.imp-mode .quiz-level-tag { background: #2c0c08; color: #ff9b84; }
+  .quiz-panel.imp-mode .quiz-map-box { display: none; }
+  .quiz-imp-hud { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 8px;
+    font: 500 12px/1.2 'JetBrains Mono', monospace; color: var(--text-muted); }
+  .quiz-imp-hud[hidden] { display: none; }
+  .imp-lives { display: inline-flex; gap: 2px; }
+  .imp-heart { color: var(--rust); font-size: 17px; line-height: 1; }
+  .imp-heart.lost { opacity: 0.35; }
+  .imp-streak b, .imp-best b { color: var(--text); font-weight: 700; }
+  .imp-clock { margin-left: auto; min-width: 4.5ch; text-align: right; font: 700 19px/1 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums; color: var(--text); }
+  .imp-clock.low { color: var(--rust); }
+  /* the bar drains as a transform and reddens as an opacity layer - both on the graphics chip */
+  .quiz-timer-fill.imp-run { position: relative; width: 100%; transition: none; transform-origin: left center; will-change: transform;
+    animation: imp-drain 7s linear var(--imp-d, 0ms) forwards; }
+  .quiz-timer-fill.imp-run::after { content: ""; position: absolute; inset: 0; background: var(--rust); opacity: 0;
+    animation: imp-redden 7s linear var(--imp-d, 0ms) forwards; }
+  .quiz-timer-fill.imp-paused, .quiz-timer-fill.imp-paused::after { animation-play-state: paused; }
+  @keyframes imp-drain { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+  @keyframes imp-redden { 0%, 40% { opacity: 0; } 75%, 100% { opacity: 1; } }
+  .imp-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 480px) { .imp-choices:not(.yn) { grid-template-columns: minmax(0, 1fr); } }
+  .imp-choices .quiz-choice { min-width: 0; display: flex; align-items: center; gap: 10px; text-align: left;
+    font-size: 14px; padding: 11px 12px; overflow-wrap: anywhere; }
+  .imp-choices.yn .quiz-choice { justify-content: center; }
+  .imp-choices kbd { flex: none; width: 20px; height: 20px; border-radius: 6px; border: 1px solid currentColor; opacity: 0.55;
+    display: inline-flex; align-items: center; justify-content: center; font: 600 10.5px/1 'JetBrains Mono', monospace; }
+  @media (hover: none) { .imp-choices kbd { display: none; } }
+  .imp-photo { margin: 0; }
+  .imp-photo img { display: block; width: 100%; aspect-ratio: 3 / 2; max-height: 300px; object-fit: cover; border-radius: 12px; background: var(--surface-hover); }
+  .imp-photo figcaption { margin-top: 4px; text-align: right; font: 400 10px/1.3 'JetBrains Mono', monospace; color: var(--text-muted); }
+  .imp-final { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--rust); }
+  .imp-final span { display: block; font: 700 19px/1.2 'Fraunces', serif; color: var(--rust); }
+  @media (prefers-reduced-motion: reduce) { .quiz-level-btn.quiz-level-imp::before { animation: none; } }
   .quiz-submit { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; padding: 11px 20px;
     border-radius: 10px; border: 1px solid var(--gold); background: var(--gold-fill); color: var(--on-fill); cursor: pointer; }
   .quiz-submit:disabled { opacity: 0.5; cursor: default; }
@@ -6120,6 +6227,10 @@
           <button class="quiz-level-btn" data-level="hard" type="button">
             <b>Hard</b><span>Rare snakes, exact &middot; 12s</span>
           </button>
+          <button class="quiz-level-btn quiz-level-imp" data-level="impossible" type="button">
+            <b><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a8 8 0 0 0-8 8c0 2.6 1.3 4.4 3 5.5V20h10v-3.5c1.7-1.1 3-2.9 3-5.5a8 8 0 0 0-8-8z"></path><circle cx="9" cy="11.5" r="1.5" fill="currentColor"></circle><circle cx="15" cy="11.5" r="1.5" fill="currentColor"></circle><path d="M10 20v-2.5M14 20v-2.5"></path></svg> Impossible</b><span>Snakes almost nobody has seen &middot; cities, families, photos &middot; 7s &middot; 3 lives</span>
+            <em id="quiz-imp-best"></em>
+          </button>
         </div>
       </div>
       <div class="quiz-play" id="quiz-play" hidden>
@@ -8042,6 +8153,15 @@
   // tracks which badges were already won, so a fresh unlock can be toasted exactly once -
   // null until the first check, so page load never toasts everything already earned
   let wonBadgeNames = null;
+  // the effect layer laid over a badge's icon - one per kind of badge (see the .ach-fx CSS)
+  const ACH_FX = {
+    check: '<span class="fx-clip"><span class="fx-wipe"></span></span><span class="fx-snake"><svg viewBox="0 0 40 12" aria-hidden="true"><path d="M2 7c3.5-5 7.5-5 11 0s7.5 5 11 0 6.5-5 10-2" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path><ellipse cx="35.5" cy="4.6" rx="3.4" ry="2.6" fill="currentColor"></ellipse><path d="M38.6 4.4h1.4" stroke="#e2543a" stroke-width="0.9" stroke-linecap="round"></path></svg></span>',
+    calendar: '<span class="fx-clip"><span class="fx-page fx-p2"></span><span class="fx-page"></span></span>',
+    camera: '<span class="fx-clip"><span class="fx-shut fx-top"></span><span class="fx-shut fx-bot"></span><span class="fx-flash"></span></span>',
+    star: '<span class="fx-clip"><span class="fx-shine"></span></span><span class="fx-clipboard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="4" width="15" height="18" rx="2.2" fill="#fffdf7" stroke="currentColor" stroke-width="2"></rect><rect x="8.5" y="2.2" width="7" height="4" rx="1.2" fill="#fffdf7" stroke="currentColor" stroke-width="2"></rect><path d="m8.3 13.6 2.6 2.6 4.9-5.4" fill="none" stroke="#3f9a43" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>',
+    quiz: '<span class="fx-ring"></span>' + [1, 2, 3, 4, 5, 6].map((i) => '<span class="fx-q fx-q' + i + '">?</span>').join(""),
+  };
+  const achFx = (icon) => '<span class="ach-fx" aria-hidden="true">' + (ACH_FX[icon] || ACH_FX.check) + "</span>";
   function toastBadge(b) {
     const region = document.getElementById("ach-toast-region");
     if (!region || !b) return;
@@ -8049,7 +8169,7 @@
     // each category plays its own distinct entrance, not just a different icon on the
     // same slide: a check pops, a calendar flips, a camera flashes, a star spins in
     el.className = "ach-toast-wrap";
-    el.innerHTML = '<div class="ach-toast ach-toast-' + (b.icon || "check") + '"><span class="ach-toast-icon">' + (ICON[b.icon] || ICON.check) + "</span>" +
+    el.innerHTML = '<div class="ach-toast ach-toast-' + (b.icon || "check") + '"><span class="ach-toast-icon">' + (ICON[b.icon] || ICON.check) + achFx(b.icon) + "</span>" +
       "<span><b>Achievement unlocked</b><span>" + b.name + "</span></span>" +
       (b.icon === "camera" ? '<span class="ach-toast-flash"></span>' : "") + "</div>";
     region.appendChild(el);
@@ -8068,6 +8188,24 @@
   // otherwise the very first badge earned after a fresh load would wrongly be treated as
   // baseline too (checkNewBadges only ever toasts starting from its *second* call)
   checkNewBadges(computeStats());
+  // which won badges the Achievements tab has already shown - a first visit after this update
+  // takes everything already won as seen, so only badges won from now on animate there
+  try { if (localStorage.getItem("sl-ach-seen") === null) localStorage.setItem("sl-ach-seen", JSON.stringify([...wonBadgeNames])); } catch (err) {}
+  const achFreshAt = {}; // badge name -> when the tab first showed it as new (this visit)
+  function achFreshNow(won) {
+    let seen = null;
+    try { seen = JSON.parse(localStorage.getItem("sl-ach-seen")); } catch (err) {}
+    if (!Array.isArray(seen)) return {};
+    const now = performance.now(), had = new Set(seen);
+    let changed = false;
+    won.forEach((b) => { if (!had.has(b.name)) { had.add(b.name); achFreshAt[b.name] = now; changed = true; } });
+    if (changed) try { localStorage.setItem("sl-ach-seen", JSON.stringify([...had])); } catch (err) {}
+    // still "fresh" for as long as its effect runs, so a quick re-render doesn't cut it off
+    const out = {};
+    let i = 0;
+    won.forEach((b) => { const t = achFreshAt[b.name]; if (t != null && now - t < 1300 && i < 8) out[b.name] = { i: i++, t: Math.round(now - t) }; });
+    return out;
+  }
 
   // the Achievements tab: a summary, then the badges grouped by what earns them
   const ACH_GROUPS = [
@@ -8082,7 +8220,8 @@
   const achTier = (b) => b.goal === TOTAL && b.statKey !== "quizCorrect" && b.statKey !== "quizWrong" ? "ALL"
     : b.goal >= 1000 ? (b.goal / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + "K" : "×" + b.goal;
   const achEsc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-  function achMedal(b) { return '<span class="ach-medal" aria-hidden="true">' + (ICON[b.icon] || ICON.check) + '<span class="ach-tier">' + achTier(b) + "</span></span>"; }
+  function achMedal(b, fx) { return '<span class="ach-medal" aria-hidden="true">' + (ICON[b.icon] || ICON.check) + (fx ? achFx(b.icon) : "") + '<span class="ach-tier">' + achTier(b) + "</span></span>"; }
+  const achFreshAttr = (f) => f ? ' style="--fx-i:' + f.i + ";--fx-d:-" + f.t + 'ms"' : "";
   function renderAchievements() {
     const s = computeStats();
     checkNewBadges(s);
@@ -8092,6 +8231,7 @@
     let newest = null;
     try { const n = localStorage.getItem("sl-ach-newest"); newest = won.find((b) => b.name === n) || null; } catch (err) {}
     if (!newest && won.length) newest = won.slice().sort((a, b) => b.goal - a.goal)[0];
+    const fresh = achFreshNow(won);
     // the closest badge still to win, for the "next up" line
     const next = BADGES.filter((b) => !isWon(b)).sort((a, b) => (s[b.statKey] / b.goal) - (s[a.statKey] / a.goal) || a.goal - b.goal)[0];
     const pct = BADGES.length ? won.length / BADGES.length : 0, C = 2 * Math.PI * 42;
@@ -8109,10 +8249,10 @@
           '<span class="ach-ring-txt" aria-hidden="true"><b>' + won.length + "</b><span>of " + BADGES.length + "</span></span></div>" +
         '<div class="ach-hero-main"><h2>Badges won</h2><p>' + nextLine + "</p></div>" +
           '<ul class="ach-stats">' + stat(s.seen, "seen") + stat(s.dated, "dated") + stat(s.photographed, "photos") + stat(s.fullyLogged, "full records") + stat(s.quizCorrect, "quiz right") + "</ul>" +
-        (newest ? '<div class="ach-newest">' + achMedal(newest) + "<span><small>Newest badge</small><strong>" + achEsc(newest.name) + "</strong></span></div>" : "") +
+        (newest ? '<div class="ach-newest' + (fresh[newest.name] ? " fresh" : "") + '"' + achFreshAttr(fresh[newest.name]) + ">" + achMedal(newest, fresh[newest.name]) + "<span><small>Newest badge</small><strong>" + achEsc(newest.name) + "</strong></span></div>" : "") +
       "</div>";
     document.getElementById("ach-grid").className = "ach-groups";
-    document.getElementById("ach-grid").innerHTML = ACH_GROUPS.map((g) => {
+    const gridHtml = ACH_GROUPS.map((g) => {
       const list = BADGES.filter((b) => g.keys.indexOf(b.statKey) >= 0);
       const nWon = list.filter(isWon).length;
       // the first badge not yet won in each ladder is the one to aim for
@@ -8126,15 +8266,20 @@
           const have = Math.min(s[b.statKey] || 0, b.goal), got = have >= b.goal;
           const isNext = !got && nextOf[b.statKey] === b, isNew = got && newest === b;
           const p = Math.round(have / b.goal * 100);
-          return '<div class="ach' + (got ? " won" : isNext ? " next" : " locked") + (isNew ? " newest" : "") + '">' +
+          const fr = got && fresh[b.name];
+          return '<div class="ach' + (got ? " won" : isNext ? " next" : " locked") + (isNew ? " newest" : "") + (fr ? " fresh" : "") + '"' + achFreshAttr(fr) + ">" +
             (isNew ? '<span class="ach-flag">Newest</span>' : isNext ? '<span class="ach-flag">Next up</span>' : "") +
-            achMedal(b) +
+            achMedal(b, fr) +
             '<h4 class="ach-name">' + b.name + "</h4>" +
             '<p class="ach-note">' + b.note + "</p>" +
             '<div class="ach-prog"><div class="ach-bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + b.goal + '" aria-valuenow="' + have + '" aria-label="' + achEsc(b.name) + '"><div class="ach-fill" style="width:' + (have && p < 3 ? 3 : p) + '%"></div></div>' +
             '<span class="ach-count">' + (got ? "&#10003; Won &middot; " : "") + have.toLocaleString() + " / " + b.goal.toLocaleString() + "</span></div></div>";
         }).join("") + "</div></section>";
     }).join("");
+    // refresh() can re-render this several times a second; leaving identical markup alone
+    // keeps a running unlock effect from restarting
+    const gridEl = document.getElementById("ach-grid");
+    if (gridEl._achHtml !== gridHtml) { gridEl.innerHTML = gridHtml; gridEl._achHtml = gridHtml; }
   }
 
   // Chrome only — deliberately touches nothing inside the sync region, so it is safe to
@@ -9403,13 +9548,28 @@
   let quizLevel = null, quizTimerId = null, quizTimeLeft = 0, quizScore = { right: 0, total: 0 }, quizCurrent = null, quizAnswered = false;
 
   function initQuizTab() {
-    if (quizLevel) return; // a quiz already in progress - don't reset it just because refresh() ran
+    if (quizLevel) {
+      // back from another tab mid-question in Impossible: the clock was stopped, so it picks
+      // up again from the same deadline (time away still counts)
+      if (imp && !quizAnswered && imp.deadline && !quizTimerId) {
+        // a hidden tab restarts CSS animations, so the bar is put back to where the clock is
+        const gone = IMP_TIME * 1000 - Math.max(0, imp.deadline - performance.now());
+        const fill = document.getElementById("quiz-timer-fill");
+        fill.style.setProperty("--imp-d", -Math.round(gone) + "ms");
+        fill.classList.remove("imp-run"); void fill.offsetWidth; fill.classList.add("imp-run");
+        quizTimerId = setInterval(impClock, 100);
+      }
+      return; // a quiz already in progress - don't reset it just because refresh() ran
+    }
     showQuizLevels();
   }
   function stopQuizTimer() { if (quizTimerId) { clearInterval(quizTimerId); quizTimerId = null; } }
   function showQuizLevels() {
     stopQuizTimer();
     quizLevel = null;
+    impStop();
+    let impBest = 0; try { impBest = +localStorage.getItem("sl-quiz-imp-best") || 0; } catch (err) {}
+    document.getElementById("quiz-imp-best").textContent = impBest ? "Your best streak: " + impBest : "";
     document.getElementById("quiz-left").hidden = true;
     document.getElementById("quiz-levels").hidden = false;
     document.getElementById("quiz-play").hidden = true;
@@ -9421,6 +9581,7 @@
     document.getElementById("quiz-levels").hidden = true;
     document.getElementById("quiz-play").hidden = false;
     document.getElementById("quiz-level-tag").textContent = level;
+    if (level === "impossible") impStart(); else impStop();
     nextQuizQuestion();
   }
   // wrong answers get roasted - short and dry, never actually mean
@@ -9479,6 +9640,7 @@
   function nextQuizQuestion() {
     stopQuizTimer();
     quizAnswered = false;
+    if (imp) { impQuestion(); return; }
     if (Math.random() < 0.33) { factQuizQuestion(quizPoolFor(quizLevel)); return; }
     const tierPool = quizPoolFor(quizLevel);
     const statePool = quizLevel === "hard" ? tierPool.filter((c) => c.getAttribute("data-states") || c.getAttribute("data-provinces")) : [];
@@ -9597,6 +9759,7 @@
     if (quizAnswered) return; // the timer and a manual submit can otherwise both fire for one question
     quizAnswered = true;
     stopQuizTimer();
+    if (quizCurrent && quizCurrent.imp) { impSubmit(timedOut); return; }
     if (quizCurrent && quizCurrent.fact) {
       const ok = !timedOut && quizCurrent.given === quizCurrent.answer;
       quizScore.total++; if (ok) quizScore.right++;
@@ -9674,6 +9837,313 @@
     });
   }
   function redoQuiz() { startQuiz(quizLevel); }
+
+  // ---- Impossible: obscure snakes, multiple choice, 7 seconds, three lives ---------------
+  // Only snakes with very few iNaturalist records (rarity-data) come up, and every question is
+  // built from SnakeList's own data - its countries, its states/provinces, its family, whether
+  // it's venomous, its photo - so it's hard but never a trick. Wrong options are only ever
+  // places the data says it does NOT live (a country not on its list, or for US snakes - whose
+  // state lists are sourced - another US state), never a guess about patchy province data.
+  const IMP_TIME = 7, IMP_LIVES = 3;
+  QUIZ_TIME.impossible = IMP_TIME;
+  let imp = null; // { lives, streak, best, deadline, timer }
+  let IMP_D = null; // lazily built lookup tables
+  const impPick = (a) => a[Math.floor(Math.random() * a.length)];
+  const impShuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const impProv = (p) => p.slice(3).replace(/ \(\d+\)$/, "");
+  const impEsc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  function impData() {
+    if (IMP_D) return IMP_D;
+    const listOf = (c, a) => (c.getAttribute(a) || "").split("|").filter(Boolean);
+    // which continent each country is on, read off the snakes found on just one continent
+    const contVotes = {};
+    cards.forEach((c) => {
+      const k = listOf(c, "data-continents");
+      if (k.length !== 1) return;
+      listOf(c, "data-countries").forEach((n) => { (contVotes[n] = contVotes[n] || {})[k[0]] = (contVotes[n][k[0]] || 0) + 1; });
+    });
+    const cont = {};
+    Object.keys(contVotes).forEach((n) => { cont[n] = Object.keys(contVotes[n]).sort((a, b) => contVotes[n][b] - contVotes[n][a])[0]; });
+    // which country a province code (CN:, MX:...) is in: from snakes found in a single country,
+    // else the browser's own country names when they match one of ours
+    const ccName = {};
+    cards.forEach((c) => {
+      const cs = listOf(c, "data-countries"), pcs = [...new Set(listOf(c, "data-provinces").map((p) => p.slice(0, 2)))];
+      if (cs.length === 1 && pcs.length === 1 && !ccName[pcs[0]]) ccName[pcs[0]] = cs[0];
+    });
+    ccName.US = "United States";
+    let dn = null; try { dn = new Intl.DisplayNames(["en"], { type: "region" }); } catch (err) {}
+    const COUNTRY_SET = new Set(COUNTRIES);
+    const countryOfCC = (cc) => {
+      if (ccName[cc]) return ccName[cc];
+      const n = dn && dn.of(cc);
+      return n && COUNTRY_SET.has(n) ? (ccName[cc] = n) : null;
+    };
+    // every province on the list, once, with its country
+    const provs = {};
+    cards.forEach((c) => listOf(c, "data-provinces").forEach((p) => {
+      const key = p.slice(0, 3) + impProv(p), country = countryOfCC(p.slice(0, 2));
+      if (country && !provs[key]) provs[key] = { key, name: impProv(p), country };
+    }));
+    const cities = (window.SL_CITIES || []).map((r) => ({ name: r[0], country: r[1], area: r[4] || null }));
+    const obscure = cards.filter((c) => {
+      const id = c.dataset.id;
+      return Object.prototype.hasOwnProperty.call(RAR, id) && RAR[id] <= 12 && !EXTINCT[id] &&
+        c.dataset.popular !== "1" && listOf(c, "data-countries").length && c.dataset.family;
+    });
+    const famCount = {};
+    cards.forEach((c) => { const f = c.dataset.family; if (f) famCount[f] = (famCount[f] || 0) + 1; });
+    const families = Object.keys(famCount).filter((f) => famCount[f] >= 4);
+    IMP_D = { listOf, cont, countryOfCC, provs: Object.values(provs), cities, obscure, families, famCount };
+    return IMP_D;
+  }
+  // everything we know about where one snake lives
+  function impRange(card) {
+    const D = impData(), id = card.dataset.id;
+    const countries = new Set(D.listOf(card, "data-countries"));
+    const states = new Set(D.listOf(card, "data-states"));
+    const inv = (window.SL_INVASIVE || {})[id] || [];
+    inv.forEach((pl) => { countries.add(pl.name); (pl.states || []).forEach((s) => states.add(s)); });
+    const invText = card.dataset.invasive || "";
+    // places: "US:TX" and "CN:Guangxi" - the same keys SL_CITIES uses
+    const places = new Set([...states].map((s) => "US:" + s).concat(D.listOf(card, "data-provinces").map((p) => p.slice(0, 3) + impProv(p))));
+    const conts = new Set([...countries].map((n) => D.cont[n]).filter(Boolean));
+    // a country it's safe to call "not here": not on its list and not named in its invasive note
+    const notHome = (n) => !countries.has(n) && !(invText && invText.indexOf(n) >= 0);
+    return { countries, states, places, conts, notHome, usStates: states.size > 0 };
+  }
+  // up to n wrong options, nearby ones (same continent) first so they aren't giveaways, and
+  // spread over different countries (groupOf) so the odd one out isn't simply the answer
+  function impDistract(cands, near, n, keyOf, groupOf) {
+    const seen = new Set(), groups = new Set(), out = [], all = impShuffle(near).concat(impShuffle(cands));
+    [true, false].forEach((spread) => all.forEach((x) => {
+      const k = keyOf(x), g = groupOf ? groupOf(x) : k;
+      if (out.length < n && !seen.has(k) && !(spread && groups.has(g))) { seen.add(k); groups.add(g); out.push(x); }
+    }));
+    return out;
+  }
+  // each kind returns null when this snake can't support it, so another is tried
+  const IMP_KINDS = {
+    country(card, R) {
+      const D = impData(), right = impPick([...R.countries].filter((n) => D.listOf(card, "data-countries").includes(n)));
+      if (!right) return null;
+      const bad = COUNTRIES.filter(R.notHome);
+      const wrong = impDistract(bad, bad.filter((n) => R.conts.has(D.cont[n])), 3, (x) => x);
+      if (wrong.length < 3) return null;
+      return { q: "Which country is the " + card.dataset.name + " found in?", right, wrong,
+        why: "It lives in " + [...R.countries].slice(0, 6).join(", ") + (R.countries.size > 6 ? "..." : "") + "." };
+    },
+    region(card, R) {
+      const D = impData();
+      // US snakes: their state lists are sourced, so other US states are fair wrong answers
+      if (R.usStates && Math.random() < 0.7) {
+        const S = window.STATE_NAME || {};
+        const mine = [...R.states].filter((s) => S[s]);
+        if (!mine.length) return null;
+        const right = S[impPick(mine)];
+        const wrong = impShuffle(Object.keys(S).filter((s) => !R.states.has(s)).map((s) => S[s])).slice(0, 3);
+        if (wrong.length < 3) return null;
+        return { q: "Which US state is the " + card.dataset.name + " found in?", right, wrong,
+          why: "Its US states: " + mine.map((s) => S[s]).join(", ") + "." };
+      }
+      const mine = D.provs.filter((p) => R.places.has(p.key));
+      if (!mine.length) return null;
+      const r = impPick(mine);
+      const bad = D.provs.filter((p) => R.notHome(p.country));
+      const lbl = (p) => p.name + ", " + p.country;
+      const wrong = impDistract(bad, bad.filter((p) => R.conts.has(D.cont[p.country])), 3, lbl, (p) => p.country);
+      if (wrong.length < 3) return null;
+      return { q: "Which of these places is the " + card.dataset.name + " found in?", right: lbl(r), wrong: wrong.map(lbl),
+        why: "It's recorded in " + mine.slice(0, 5).map(lbl).join("; ") + (mine.length > 5 ? "..." : "") + "." };
+    },
+    city(card, R) {
+      const D = impData();
+      const mine = D.cities.filter((c) => c.area && R.places.has(c.area));
+      if (!mine.length) return null;
+      const r = impPick(mine);
+      // wrong cities: in a country it isn't found in - or, for US snakes, a US state it isn't found in
+      const bad = D.cities.filter((c) => R.notHome(c.country) ||
+        (R.usStates && c.country === "United States" && c.area && !R.places.has(c.area)));
+      const near = bad.filter((c) => (R.usStates && c.country === "United States") || R.conts.has(D.cont[c.country]));
+      const wrong = impDistract(bad.filter((c) => c.name !== r.name), near.filter((c) => c.name !== r.name), 3, (c) => c.name,
+        (c) => c.country === "United States" ? c.area : c.country);
+      if (wrong.length < 3) return null;
+      const lbl = (c) => c.name + ", " + c.country;
+      const where = r.area.slice(0, 2) === "US" ? (window.STATE_NAME || {})[r.area.slice(3)] || r.area.slice(3) : r.area.slice(3);
+      return { q: "Which of these cities is in a state or province where the " + card.dataset.name + " lives?",
+        right: lbl(r), wrong: wrong.map(lbl), why: r.name + " is in " + where + ", part of its range." };
+    },
+    family(card) {
+      const D = impData(), right = card.dataset.family;
+      // wrong families are the big, familiar ones, so none can be ruled out as obviously odd
+      const common = D.families.filter((f) => f !== right).sort((a, b) => D.famCount[b] - D.famCount[a]).slice(0, 12);
+      const wrong = impShuffle(common).slice(0, 3);
+      if (wrong.length < 3) return null;
+      return { q: "Which family does the " + card.dataset.name + " belong to?", right, wrong, why: "It's in the family " + right + "." };
+    },
+    venom(card) {
+      const v = card.dataset.venomous === "1";
+      return { q: "Is the " + card.dataset.name + " venomous?", right: v ? "Yes" : "No", wrong: [v ? "No" : "Yes"], yesNo: true,
+        why: v ? "SnakeList lists it as venomous." : "SnakeList lists it as not venomous." };
+    },
+    photo(card) {
+      const P = window.SL_PHOTOS, it = P && P.items && P.items[card.dataset.id];
+      if (!it) return null;
+      const D = impData();
+      const pool = D.obscure.filter((c) => c !== card && c.dataset.name !== card.dataset.name && P.items[c.dataset.id]);
+      // look-alikes: the same family first, so it can't be told apart by the name alone
+      const wrong = impDistract(pool, pool.filter((c) => c.dataset.family === card.dataset.family), 3, (c) => c.dataset.name).map((c) => c.dataset.name);
+      if (wrong.length < 3) return null;
+      return { q: "Which snake is this?", right: card.dataset.name, wrong, hideName: true,
+        photo: "species-photos/t/" + it[0] + "-" + it[1] + ".webp", credit: it[2] || "",
+        why: "It's the " + card.dataset.name + " (" + card.querySelector(".card-sci").textContent + ")." };
+    },
+  };
+  const IMP_WEIGHTS = [["city", 26], ["region", 20], ["country", 16], ["photo", 16], ["family", 13], ["venom", 9]];
+  let impRecent = [];
+  function impBuild() {
+    const D = impData();
+    for (let tries = 0; tries < 40; tries++) {
+      let r = Math.random() * 100, kind = "country";
+      for (const [k, w] of IMP_WEIGHTS) { if ((r -= w) < 0) { kind = k; break; } }
+      const fresh = D.obscure.filter((c) => impRecent.indexOf(c) < 0);
+      const card = impPick(fresh.length ? fresh : D.obscure);
+      const q = IMP_KINDS[kind](card, impRange(card));
+      if (!q) continue;
+      impRecent.push(card); if (impRecent.length > 40) impRecent.shift();
+      q.kind = kind; q.card = card;
+      q.choices = q.yesNo ? ["Yes", "No"] : impShuffle([q.right].concat(q.wrong));
+      return q;
+    }
+    return null;
+  }
+  function impHud() {
+    let hud = document.getElementById("quiz-imp-hud");
+    if (!hud) {
+      hud = document.createElement("div");
+      hud.id = "quiz-imp-hud"; hud.className = "quiz-imp-hud";
+      const track = document.querySelector("#quiz-play .quiz-timer-track");
+      track.parentNode.insertBefore(hud, track);
+    }
+    return hud;
+  }
+  function impPaintHud() {
+    const hud = impHud();
+    hud.hidden = !imp;
+    if (!imp) return;
+    const hearts = Array.from({ length: IMP_LIVES }, (_, i) => '<span class="imp-heart' + (i < imp.lives ? "" : " lost") + '">' + (i < imp.lives ? "&#9829;" : "&#9825;") + "</span>").join("");
+    hud.innerHTML = '<span class="imp-lives" aria-label="' + imp.lives + ' lives left">' + hearts + "</span>" +
+      '<span class="imp-streak">Streak <b>' + imp.streak + "</b></span>" +
+      '<span class="imp-best">Best <b>' + imp.best + "</b></span>" +
+      '<span class="imp-clock" id="quiz-imp-clock" aria-hidden="true"></span>';
+    document.getElementById("quiz-score").textContent = "";
+  }
+  function impStart() {
+    let best = 0; try { best = +localStorage.getItem("sl-quiz-imp-best") || 0; } catch (err) {}
+    imp = { lives: IMP_LIVES, streak: 0, best, right: 0, total: 0 };
+    impRecent = [];
+    document.getElementById("quiz-panel").classList.add("imp-mode");
+    impPaintHud();
+  }
+  function impStop() {
+    imp = null;
+    document.getElementById("quiz-panel").classList.remove("imp-mode");
+    const hud = document.getElementById("quiz-imp-hud"); if (hud) hud.hidden = true;
+    const fill = document.getElementById("quiz-timer-fill"); fill.classList.remove("imp-run", "imp-paused");
+  }
+  function impClock() {
+    const left = Math.max(0, (imp.deadline - performance.now()) / 1000);
+    const el = document.getElementById("quiz-imp-clock");
+    if (el) { el.textContent = left.toFixed(1) + "s"; el.classList.toggle("low", left <= 2.5); }
+    if (left <= 0) submitQuizAnswer(true);
+  }
+  function impStartTimer() {
+    if (quizAnswered || !imp) return;
+    const fill = document.getElementById("quiz-timer-fill");
+    // the bar empties on the graphics chip (a transform animation), turning red as it goes
+    fill.classList.remove("imp-run", "imp-paused", "low"); fill.style.transition = "none"; fill.style.width = "100%";
+    void fill.offsetWidth;
+    fill.style.removeProperty("--imp-d");
+    fill.classList.add("imp-run");
+    imp.deadline = performance.now() + IMP_TIME * 1000;
+    stopQuizTimer();
+    quizTimerId = setInterval(impClock, 100);
+    impClock();
+  }
+  function impQuestion() {
+    const q = impBuild();
+    if (!q) { leaveQuiz(); return; }
+    quizCurrent = Object.assign({ imp: true, name: q.card.dataset.name, sci: q.card.querySelector(".card-sci").textContent,
+      countries: [], answers: [], need: 1 }, q);
+    document.getElementById("quiz-question").textContent = q.q;
+    document.getElementById("quiz-sci").textContent = q.hideName ? "" : quizCurrent.sci;
+    document.getElementById("quiz-result").hidden = true;
+    document.getElementById("quiz-submit").hidden = true;
+    const fill = document.getElementById("quiz-timer-fill");
+    fill.classList.remove("imp-run", "imp-paused", "low"); fill.style.transition = "none"; fill.style.width = "100%";
+    imp.deadline = 0;
+    const el = document.getElementById("quiz-imp-clock"); if (el) { el.textContent = IMP_TIME.toFixed(1) + "s"; el.classList.remove("low"); }
+    document.getElementById("quiz-answers").innerHTML =
+      (q.photo ? '<figure class="imp-photo"><img alt="A snake to identify" decoding="async"><figcaption>' + impEsc(q.credit) + "</figcaption></figure>" : "") +
+      '<div class="quiz-choices imp-choices' + (q.yesNo ? " yn" : "") + '">' + q.choices.map((c, i) =>
+        '<button type="button" class="quiz-choice" data-i="' + i + '"><kbd>' + (i + 1) + "</kbd>" + impEsc(c) + "</button>").join("") + "</div>";
+    document.querySelectorAll("#quiz-answers .quiz-choice").forEach((b) => b.addEventListener("click", () => {
+      if (quizAnswered) return;
+      quizCurrent.given = q.choices[+b.dataset.i]; submitQuizAnswer(false);
+    }));
+    if (q.photo) {
+      // the clock only starts once the photo is on screen - a slow connection shouldn't cost a life
+      const img = document.querySelector(".imp-photo img");
+      let started = false;
+      const go = () => { if (!started) { started = true; impStartTimer(); } };
+      img.addEventListener("load", go); img.addEventListener("error", go);
+      setTimeout(go, 4000);
+      img.src = q.photo;
+      if (img.complete) go();
+    } else impStartTimer();
+  }
+  function impSubmit(timedOut) {
+    const q = quizCurrent;
+    const ok = !timedOut && q.given === q.right;
+    document.getElementById("quiz-timer-fill").classList.add("imp-paused");
+    imp.total++; quizScore.total++;
+    if (ok) { imp.right++; quizScore.right++; imp.streak++; } else { imp.lives--; imp.streak = 0; }
+    if (imp.streak > imp.best) { imp.best = imp.streak; try { localStorage.setItem("sl-quiz-imp-best", imp.best); } catch (err) {} }
+    bumpQuizStat(ok ? "correct" : "wrong");
+    checkNewBadges(computeStats());
+    impPaintHud();
+    document.querySelectorAll("#quiz-answers .quiz-choice").forEach((b) => {
+      const v = q.choices[+b.dataset.i];
+      b.disabled = true;
+      b.classList.toggle("right", v === q.right);
+      b.classList.toggle("wrong", v === q.given && !ok);
+    });
+    const over = imp.lives <= 0;
+    const res = document.getElementById("quiz-result");
+    res.hidden = false;
+    res.className = "quiz-result " + (ok ? "right" : "wrong") + (over ? " imp-over" : "");
+    const head = timedOut ? QUIZ_TIMEOUT_MESSAGES[Math.floor(Math.random() * QUIZ_TIMEOUT_MESSAGES.length)] : ok ? "Correct!" : QUIZ_WRONG_MESSAGES[Math.floor(Math.random() * QUIZ_WRONG_MESSAGES.length)];
+    let html = "<b>" + head + "</b>" + (ok ? "" : "Answer: <strong>" + impEsc(q.right) + "</strong>. ") + impEsc(q.why);
+    if (over) {
+      html += '<div class="imp-final"><span>Game over</span>' + imp.right + " right out of " + imp.total +
+        " &middot; best streak ever: <b>" + imp.best + "</b></div>" +
+        '<div class="quiz-result-actions"><button class="quiz-next" id="quiz-next" type="button">Play again</button>' +
+        '<button class="quiz-see-map" id="quiz-imp-levels" type="button">Change difficulty</button></div>';
+    } else html += '<div class="quiz-result-actions"><button class="quiz-next" id="quiz-next" type="button">Next question</button></div>';
+    res.innerHTML = html;
+    if (over) {
+      document.getElementById("quiz-next").addEventListener("click", () => startQuiz("impossible"));
+      document.getElementById("quiz-imp-levels").addEventListener("click", showQuizLevels);
+    } else document.getElementById("quiz-next").addEventListener("click", nextQuizQuestion);
+    const nb = document.getElementById("quiz-next"); if (nb) nb.focus({ preventScroll: true });
+  }
+  // 1-4 answers, so seven seconds is about knowing, not about finding the button
+  document.addEventListener("keydown", (e) => {
+    if (!imp || quizAnswered || tab !== "quiz" || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    const b = document.querySelector('#quiz-answers .quiz-choice[data-i="' + (+e.key - 1) + '"]');
+    if (b) { e.preventDefault(); b.click(); }
+  });
 
   // ---- the quiz map: drop a marker where you think this snake lives -------------------
   let quizMapSvg = null, quizGuess = null, quizMapUnbig = null;
@@ -9967,6 +10437,7 @@
   document.getElementById("quiz-redo").addEventListener("click", redoQuiz);
   document.getElementById("quiz-submit").addEventListener("click", () => submitQuizAnswer(false));
   document.getElementById("quiz-answers").addEventListener("keydown", (e) => {
+    if (imp) return; // Impossible is all buttons - Enter on one just presses it
     if (e.key === "Enter") {
       e.preventDefault();
       // a half-typed answer with a suggestion showing takes the top suggestion first
