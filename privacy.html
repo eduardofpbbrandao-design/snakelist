@@ -87,7 +87,7 @@ p, li { color: var(--text); overflow-wrap: break-word; }
 <h1>Privacy policy</h1>
 <p class="updated">Last updated 8 November 2026</p>
 <p>SnakeList (snakelist.com) is a free snake checklist, map and quiz made by Eduardo Brandao. This page explains what SnakeList keeps on your device, what reaches other services when you use it, and how to remove it.</p>
-<nav class="toc" aria-label="On this page"><a href="#device">On your device</a><a href="#analytics">Cookies and visit counting</a><a href="#google">Sign in with Google</a><a href="#camera">Camera and location</a><a href="#services">Other services</a><a href="#email">Reports and photos</a><a href="#remove">Removing your data</a></nav>
+<nav class="toc" aria-label="On this page"><a href="#device">On your device</a><a href="#analytics">Cookies and visit counting</a><a href="#google">Sign in with Google</a><a href="#accounts">SnakeList accounts</a><a href="#camera">Camera and location</a><a href="#services">Other services</a><a href="#email">Reports and photos</a><a href="#remove">Removing your data</a></nav>
 
 <h2 id="device">What stays on your device</h2>
 <p>Your lists (Seen, Want to see, Following, favourites), the notes, dates, places and photos you add to sightings, your settings, quiz progress and achievements are saved in your own browser on your own device. If you make more than one account on a device, each one's list is kept separately on that device. SnakeList has no server of its own and no database of users, so the creator can't see your list.</p>
@@ -105,6 +105,9 @@ p, li { color: var(--text); overflow-wrap: break-word; }
 <p>You can sign out at any time. To remove the synced file and SnakeList's access, go to <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a> and remove SnakeList.</p>
 <p>SnakeList's use of information received from Google APIs follows the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
 
+<h2 id="accounts">SnakeList accounts (email and password)</h2>
+<p>You can also make a SnakeList account with an email address and a password. These accounts run on Google Firebase. Firebase Authentication keeps your email address, the name you type and a scrambled (hashed) form of your password &ndash; never the password itself. Your list (seen, want to see, followed, dates and places) is saved in a Firebase database so it can sync between your devices. The database rules only let you, while signed in, read or change your own list; nobody else using SnakeList can see it. As the owner of the Firebase project the creator could technically open it, but does not look at people's lists. Your own photos stay on your device and are not uploaded with an email account.</p>
+<p>To delete your SnakeList account and its saved list, email the creator (see Contact below) from the address you signed up with.</p>
 <h2 id="camera">Camera and location</h2>
 <ul>
 <li><b>Snake photos you identify</b> are looked at by a recogniser that runs inside your browser. The photo is not uploaded.</li>
@@ -131,6 +134,7 @@ p, li { color: var(--text); overflow-wrap: break-word; }
 <h2 id="remove">Removing your data</h2>
 <ul>
 <li>Your lists and settings: clear SnakeList's site data in your browser, or uninstall the installed app. (This deletes your list on that device, so sign in first if you want a copy in your Google Drive.)</li>
+<li>Your SnakeList account (email and password): email the creator from that address and it will be deleted with its list.</li>
 <li>Your Google Drive copy and SnakeList's access: <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>.</li>
 </ul>
 
