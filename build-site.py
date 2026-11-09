@@ -171,7 +171,7 @@ for f in ("app/snakelist.webmanifest", "app/manifest.webmanifest"):
 # the offline helper: pages always from the network first (so updates show at once), with the
 # last copy kept for when there's no connection; photos, map data and icons are kept after
 # their first load and refreshed in the background
-open("sw.js", "w").write("""const CACHE = 'snakelist-v7';
+open("sw.js", "w").write("""const CACHE = 'snakelist-v8';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => c.add('./'))); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
@@ -192,9 +192,14 @@ self.addEventListener('fetch', (e) => {
   }
   if (/\\/(species-photos|data|vendor)\\//.test(url.pathname)) {
     e.respondWith(caches.open(CACHE).then((c) => c.match(req).then((hit) => {
+      // photos never change and versioned data files (?v=...) are new files when they change:
+      // a saved copy is used as it is, with no download at all (works offline, saves data)
+      if (hit && (/\\/species-photos\\//.test(url.pathname) || url.search)) return hit;
       const net = fetch(req).then((r) => {
         if (r.ok) {
           c.put(req, r.clone());
+          // the offline copy keeps at most ~600 snake photos (about 20 MB): the oldest go first
+          if (/\\/species-photos\\//.test(url.pathname)) c.keys().then((ks) => { const ph = ks.filter((k) => /\\/species-photos\\//.test(k.url)); ph.slice(0, Math.max(0, ph.length - 600)).forEach((k) => c.delete(k)); });
           // a new version of a data file: drop the older copies of the same file
           if (url.search) c.keys().then((ks) => ks.forEach((k) => { const u = new URL(k.url); if (u.pathname === url.pathname && u.search !== url.search) c.delete(k); }));
         }
