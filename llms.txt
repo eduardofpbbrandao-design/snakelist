@@ -1,6 +1,6 @@
 # SnakeList
 
-> SnakeList (https://snakelist.com/) is a free snake life list, map and quiz made by Eduardo Brandao. It covers 4,205 snake species with photos, range maps down to states and provinces, habitats, venom and constrictor classification, and a checklist people can tick off.
+> SnakeList (https://snakelist.com/) is a free snake life list, map and quiz made by Eduardo Brandao. It covers 4,247 snake species with photos, range maps down to states and provinces, habitats, venom and constrictor classification, and a checklist people can tick off.
 
 The app itself is one large interactive page. Every species also has its own small static page with its facts, range and links - those are the best pages to read.
 
