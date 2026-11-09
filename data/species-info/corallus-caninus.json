@@ -1,0 +1,139 @@
+{
+  "id": "corallus-caninus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "reproduction": {
+      "text": "Gives birth to live young, usually about 10",
+      "src": [
+        "adw"
+      ]
+    },
+    "activity": {
+      "text": "At night, in trees",
+      "src": [
+        "copeia"
+      ]
+    },
+    "diet": {
+      "text": "Lizards when young; birds, rodents and marsupials as adults",
+      "src": [
+        "copeia"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Emerald Tree Boa is a bright green, tree-dwelling boa of the rainforests of northern South America. It spends almost all its life in the trees and hunts at night. Since 2009 its name has been restricted to the populations of the Guiana Shield, with Amazonian animals treated as a separate species.",
+        "src": [
+          "copeia",
+          "wiki"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Adults are almost always green, usually with white markings or crossbars along the back. Newborns look completely different: they are usually red-orange, and only rarely green.",
+        "src": [
+          "copeia",
+          "wiki"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "In the narrow sense used since 2009, the Guiana Shield of north-eastern South America - the Guianas, southern Venezuela and adjoining northern Brazil. SnakeList's map may still include Amazonian records made under the older, broader use of the name.",
+        "src": [
+          "copeia"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Tropical rainforest, where it lives in the trees and stays hidden among the foliage, its colour giving it excellent camouflage.",
+        "src": [
+          "adw",
+          "wiki"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Almost entirely arboreal and active at night. The Guianan Crested Eagle is the only predator known to take it.",
+        "src": [
+          "copeia",
+          "adw"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Newborns feed on lizards; adults eat birds, rodents and marsupials.",
+        "src": [
+          "copeia"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young after a pregnancy of about six to seven months. Litters average about 10 young and can reach about 20.",
+        "src": [
+          "adw"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "In 2009 Henderson, Passos and Feitosa studied geographic variation in Emerald Tree Boas and revived the name *Corallus batesii* for the Amazon basin populations, leaving *C. caninus* for those of the Guiana Shield.",
+        "src": [
+          "copeia",
+          "wiki-b"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "corallus-batesii",
+      "text": "Bates' Tree Boa of the Amazon basin, split from this species in 2009; it grows larger, approaching 2.7 m.",
+      "src": [
+        "wiki-b",
+        "copeia"
+      ]
+    },
+    {
+      "id": "morelia-viridis",
+      "text": "the Green Tree Python of New Guinea and Australia looks remarkably similar and rests in the same way, but lives on the other side of the world - a classic example of convergent evolution.",
+      "src": [
+        "wiki"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "Emerald tree boa",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Emerald_tree_boa"
+    },
+    "wiki-b": {
+      "title": "Corallus batesii",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Corallus_batesii"
+    },
+    "adw": {
+      "title": "Corallus caninus (Emerald Tree Boa)",
+      "publisher": "Animal Diversity Web, University of Michigan",
+      "url": "https://animaldiversity.org/accounts/Corallus_caninus/"
+    },
+    "copeia": {
+      "title": "Geographic Variation in the Emerald Treeboa, Corallus caninus (Squamata: Boidae)",
+      "authors": "Henderson, Passos & Feitosa",
+      "publisher": "Copeia 2009(3): 572-582",
+      "year": 2009,
+      "url": "https://complete.bioone.org/journals/copeia/volume-2009/issue-3/CH-08-190/Geographic-Variation-in-the-Emerald-Treeboa-Corallus-caninus-Squamata/10.1643/CH-08-190.full"
+    }
+  }
+}

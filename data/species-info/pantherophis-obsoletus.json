@@ -1,0 +1,173 @@
+{
+  "id": "pantherophis-obsoletus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Say, 1823)",
+  "facts": {
+    "length": {
+      "text": "Usually about 1.1-1.8 m; occasionally over 2 m",
+      "src": [
+        "mdc"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "adw",
+        "mdc"
+      ]
+    },
+    "diet": {
+      "text": "Rodents and other small mammals, birds and eggs, lizards and frogs",
+      "src": [
+        "adw",
+        "mdc"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Western Rat Snake (often called the Black Rat Snake or Texas Rat Snake) is a large, non-venomous constrictor of the central United States west of the Mississippi River. It climbs extremely well and is often found around barns and farm buildings, where it eats rodents.",
+        "src": [
+          "mdc",
+          "wlf"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Adults vary from mostly black, with traces of a blotched pattern, to brownish or yellowish with dark blotches, depending on the region. Young snakes are boldly blotched grey and brown.",
+        "src": [
+          "mdc",
+          "wlf"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Missouri's Department of Conservation gives 107-183 cm (3½-6 ft) for adults, occasionally to 218 cm (86 in).",
+        "src": [
+          "mdc"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The central United States west of the Mississippi River, from Iowa and Nebraska south through Missouri, Kansas, Oklahoma and Arkansas to Louisiana and eastern Texas.",
+        "src": [
+          "mdc",
+          "wlf"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Wooded valleys and bluffs, woodland edges, rocky hillsides, farmland and old fields, often near buildings.",
+        "src": [
+          "mdc",
+          "wlf"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "An agile climber that hunts actively and kills its prey by constriction. Rat snakes are sometimes seen perched on branches near cave mouths, trying to catch bats as they fly out.",
+        "src": [
+          "adw",
+          "wiki"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Constricts its prey. It eats rats, mice and other small mammals, birds and their eggs, lizards and frogs. One snake was recorded eating a whole clutch of Mallard eggs.",
+        "src": [
+          "adw",
+          "mdc"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Females lay eggs in summer. Animal Diversity Web gives an average clutch of about 15 eggs, ranging from 4 to 44; other sources give narrower ranges of about 12-20.",
+        "src": [
+          "adw"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "Since Burbrink's 2001 study, the old Rat Snake has usually been split into three species, with *P. obsoletus* kept for the western lineage. The split rests mainly on mitochondrial DNA, and some herpetologists, including Hillis (2022), have questioned whether these lineages should be full species.",
+        "src": [
+          "wiki",
+          "cnah"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "pantherophis-spiloides",
+      "text": "the Gray Rat Snake, its neighbour east of the Mississippi, which keeps a grey blotched pattern as an adult.",
+      "src": [
+        "wiki-spil"
+      ]
+    },
+    {
+      "id": "pantherophis-emoryi",
+      "text": "the Great Plains Rat Snake, a smaller relative of the plains that keeps a blotched pattern as an adult.",
+      "src": [
+        "wiki-emo"
+      ]
+    }
+  ],
+  "synonyms": {
+    "names": [
+      "*Elaphe obsoleta* (Say, 1823)",
+      "*Elaphe obsoleta lindheimeri* (Texas Rat Snake)"
+    ],
+    "src": [
+      "wiki"
+    ]
+  },
+  "sources": {
+    "mdc": {
+      "title": "Western Ratsnake",
+      "publisher": "Missouri Department of Conservation",
+      "url": "https://mdc.mo.gov/discover-nature/field-guide/western-ratsnake"
+    },
+    "wlf": {
+      "title": "Western Ratsnake",
+      "publisher": "Louisiana Department of Wildlife and Fisheries",
+      "url": "https://www.wlf.louisiana.gov/snake-species-field-guide/western-ratsnake"
+    },
+    "adw": {
+      "title": "Pantherophis obsoletus",
+      "publisher": "Animal Diversity Web, University of Michigan",
+      "url": "https://animaldiversity.org/accounts/Pantherophis_obsoletus/"
+    },
+    "cnah": {
+      "title": "Pantherophis obsoletus (Kansas)",
+      "publisher": "The Center for North American Herpetology",
+      "url": "https://cnah.org/cnah/kansas/species/pantherophis-obsoletus"
+    },
+    "wiki": {
+      "title": "Pantherophis obsoletus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Pantherophis_obsoletus"
+    },
+    "wiki-spil": {
+      "title": "Gray ratsnake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Gray_ratsnake"
+    },
+    "wiki-emo": {
+      "title": "Pantherophis emoryi",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Pantherophis_emoryi"
+    }
+  }
+}

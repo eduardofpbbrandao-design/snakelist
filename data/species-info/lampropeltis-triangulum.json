@@ -1,0 +1,149 @@
+{
+  "id": "lampropeltis-triangulum",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Lacépède, 1789)",
+  "facts": {
+    "length": {
+      "text": "Usually about 60-90 cm; rarely over 1.3 m",
+      "src": [
+        "maine",
+        "tce"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, usually one clutch in early summer",
+      "src": [
+        "tce",
+        "cnah"
+      ]
+    },
+    "diet": {
+      "text": "Mainly small mammals; young eat mostly small snakes",
+      "src": [
+        "tce",
+        "cnah"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Milk Snake - in its current, narrower sense the Eastern Milksnake - is a medium-sized, non-venomous constrictor of eastern North America, from southern Ontario and Quebec through the north-eastern and central United States. Its name comes from an old myth that it sneaks into barns to drink milk from cows; in fact it visits barns because they are full of rodents.",
+        "src": [
+          "tce",
+          "cnah"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Greyish or tan with large, dark-edged reddish-brown blotches along the back and smaller blotches on the sides. There is often a pale Y- or V-shaped mark on the back of the head.",
+        "src": [
+          "maine",
+          "inherp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Medium-sized: Maine's wildlife agency gives about 60-90 cm (24-36 in). Most are under a metre, though individuals over 130 cm are known.",
+        "src": [
+          "maine",
+          "tce"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern Ontario and Quebec in Canada and much of the north-eastern and central United States. Where its range meets that of related milksnakes to the west and south, the boundaries between species are still debated.",
+        "src": [
+          "tce",
+          "cnah"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Rocky hillsides, open woodland, woodland edges, clearings and old fields, and also farm buildings and rock outcrops. It spends winter in rock crevices, mammal burrows or building foundations.",
+        "src": [
+          "tce",
+          "maine"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Adults eat mainly small mammals, as well as birds, snakes and lizards; young milksnakes feed largely on the young of other snakes. Prey is killed by constriction, though eggs and very small mice may be swallowed alive.",
+        "src": [
+          "tce",
+          "cnah"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Females usually lay one clutch a year in June or July, in rotting logs, leaf piles, burrows, compost or under rocks. Reported clutch sizes differ by region: about 8-16 eggs in Canada, and 3-24 (usually five to seven) in Kansas. The eggs hatch after about two months.",
+        "src": [
+          "tce",
+          "cnah"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "The milksnake used to be treated as one species with many subspecies ranging from Canada to South America. In 2014 Ruane and colleagues split it into several species using genetic data, leaving *L. triangulum* for the eastern populations. Chambers and Hillis (2019) reanalysed the data and disagreed with parts of the split, and the debate continues.",
+        "src": [
+          "cnah",
+          "tce"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "lampropeltis-elapsoides",
+      "text": "the Scarlet Kingsnake of the south-east, which was split from the milksnake; it is ringed in red, black and yellow.",
+      "src": [
+        "wiki-sk"
+      ]
+    }
+  ],
+  "funfacts": [
+    {
+      "text": "No snake drinks milk from cows. Milksnakes were simply found in barns, where they hunt the mice and rats that gather there.",
+      "src": [
+        "tce"
+      ]
+    }
+  ],
+  "sources": {
+    "tce": {
+      "title": "Eastern Milksnake",
+      "publisher": "The Canadian Encyclopedia",
+      "url": "https://thecanadianencyclopedia.ca/en/article/eastern-milksnake"
+    },
+    "maine": {
+      "title": "Eastern Milksnake",
+      "publisher": "Maine Department of Inland Fisheries and Wildlife",
+      "url": "https://www.maine.gov/ifw/fish-wildlife/wildlife/species-information/reptiles-amphibians/eastern-milksnake.html"
+    },
+    "cnah": {
+      "title": "Lampropeltis triangulum (Kansas)",
+      "publisher": "The Center for North American Herpetology",
+      "url": "https://cnah.org/cnah/kansas/species/lampropeltis-triangulum"
+    },
+    "inherp": {
+      "title": "Eastern Milksnake Lampropeltis triangulum",
+      "publisher": "Indiana Herp Atlas",
+      "url": "https://www.inherpatlas.org/species/lampropeltis_triangulum"
+    },
+    "wiki-sk": {
+      "title": "Scarlet kingsnake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Scarlet_kingsnake"
+    }
+  }
+}

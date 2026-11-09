@@ -1,0 +1,165 @@
+{
+  "id": "echis-carinatus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Schneider, 1801)",
+  "facts": {
+    "length": {
+      "text": "About 38-80 cm; usually under 60 cm",
+      "src": [
+        "wiki"
+      ]
+    },
+    "reproduction": {
+      "text": "Indian populations give birth to live young",
+      "src": [
+        "wiki"
+      ]
+    },
+    "activity": {
+      "text": "Mostly at night",
+      "src": [
+        "wiki"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Saw-scaled Viper is a small but dangerous viper of dry country from the Middle East and Central Asia to India and Sri Lanka. It is the smallest member of India's \"Big Four\" - the four species responsible for most serious snakebites there - and it causes a large share of those bites.",
+        "src": [
+          "wiki",
+          "dw"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A short, stocky viper with a pear-shaped head, large eyes and rough, keeled scales. The scales along the flanks are angled and serrated, and the snake rubs them together to make its warning sound.",
+        "src": [
+          "wiki",
+          "dw"
+        ]
+      },
+      {
+        "text": "Colour varies with the ground it lives on, usually shades of brown, grey or sand with a row of pale blotches or a wavy pale line along each side.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Between about 38 and 80 cm in total length, and usually less than 60 cm. Some popular sources give larger figures, up to about 90 cm.",
+        "src": [
+          "wiki",
+          "dw"
+        ]
+      }
+    ],
+    "variation": [
+      {
+        "label": "Subspecies",
+        "text": "Several subspecies have been named. *E. c. sochureki* is listed from Afghanistan, Pakistan, northern India, Iran and the Arabian Gulf coast (Oman and the UAE), and *E. c. multisquamatus* from Uzbekistan and Turkmenistan to Iran and western Pakistan. Sources disagree on how many subspecies to recognise.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Parts of the Middle East and Central Asia east through Pakistan and India to Sri Lanka. SnakeList's map shows the countries where it is recorded.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Dry open places on a wide range of ground: sand, rock, soft soil and scrubland. It often hides under loose stones, and is sometimes found climbing in bushes up to about 2 m above the ground.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Mostly active at night. When threatened it forms C-shaped coils and rubs its serrated side scales against each other, producing a rasping, sizzling sound as a warning before striking.",
+        "src": [
+          "wiki",
+          "dw"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "label": "India",
+        "text": "Regional: the Indian population gives birth to live young. In northern India mating takes place in winter and young are born from about April to August.",
+        "src": [
+          "wiki"
+        ]
+      },
+      {
+        "label": "Elsewhere",
+        "text": "Some sources report that *E. c. sochureki* lays eggs; this has not been confirmed here by a second source.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "conservation": [
+      {
+        "label": "Snakebite",
+        "text": "It is one of the most medically important snakes in South Asia. Estimates of how many deaths it causes each year vary widely between sources, so no single figure is given here.",
+        "src": [
+          "dw",
+          "wiki"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "echis-ocellatus",
+      "text": "an African relative from West Africa; it looks much alike, and the two ranges do not meet.",
+      "src": [
+        "wiki-g"
+      ]
+    },
+    {
+      "id": "echis-pyramidum",
+      "text": "the Egyptian Saw-scaled Viper of north-east Africa and Arabia, another closely related, similar-looking species.",
+      "src": [
+        "wiki-g"
+      ]
+    }
+  ],
+  "funfacts": [
+    {
+      "text": "Instead of a rattle, it makes its warning sound by rubbing its saw-edged side scales together as it writhes in a coil.",
+      "src": [
+        "wiki",
+        "dw"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "Echis carinatus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Echis_carinatus"
+    },
+    "dw": {
+      "title": "Saw-scaled viper",
+      "publisher": "BBC Wildlife (Discover Wildlife)",
+      "url": "https://www.discoverwildlife.com/animal-facts/reptiles/saw-scaled-viper"
+    },
+    "wiki-g": {
+      "title": "Echis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Echis"
+    }
+  }
+}

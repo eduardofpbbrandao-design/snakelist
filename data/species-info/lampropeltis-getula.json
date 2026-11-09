@@ -1,0 +1,183 @@
+{
+  "id": "lampropeltis-getula",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Linnaeus, 1766)",
+  "facts": {
+    "length": {
+      "text": "Typically 90-122 cm; maximum about 2.08 m",
+      "src": [
+        "flmnh",
+        "plazi"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wiki"
+      ]
+    },
+    "diet": {
+      "text": "Other snakes (including venomous ones), rodents, lizards, eggs",
+      "src": [
+        "flmnh"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Common or Eastern Kingsnake is a glossy, powerful, non-venomous constrictor of the eastern United States, famous for eating other snakes - including venomous ones such as rattlesnakes, copperheads and cottonmouths, whose venom it appears to resist.",
+        "src": [
+          "flmnh",
+          "wiki"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Shiny black or dark brown with narrow white or yellow crossbands that split along the sides and link up, giving a chain-like pattern - hence the old name Chain Kingsnake. The amount of pale colour varies from place to place.",
+        "src": [
+          "flmnh",
+          "wiki"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Typical adults",
+        "text": "About 90-122 cm (36-48 in) in total length.",
+        "src": [
+          "flmnh"
+        ]
+      },
+      {
+        "label": "Largest",
+        "text": "The largest member of its genus, with a maximum recorded total length of 208 cm.",
+        "src": [
+          "plazi"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "In the narrow sense",
+        "text": "As defined by Pyron and Burbrink in 2009, the Eastern Kingsnake ranges from New Jersey south to the Florida Keys and west to the Florida panhandle and south-eastern Alabama.",
+        "src": [
+          "plazi"
+        ]
+      },
+      {
+        "label": "In the broad sense",
+        "text": "Many books and some herpetological societies still use the name *L. getula* for the whole group, which spans much of the United States and northern Mexico. SnakeList's map reflects records under this name.",
+        "src": [
+          "swhs"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Uses a wide range of habitats, from pine woods and hardwood forest to the edges of swamps, fields and farmland.",
+        "src": [
+          "flmnh",
+          "wiki"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "A generalist that kills by constriction. Besides snakes, it eats small mammals, birds and their eggs, frogs, lizards, and turtles and their eggs.",
+        "src": [
+          "flmnh"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "In 2009 Pyron and Burbrink split the traditional Common Kingsnake into five species: [[lampropeltis-getula|*L. getula*]] (east), [[lampropeltis-nigra|*L. nigra*]] (Mississippi valley), [[lampropeltis-holbrooki|*L. holbrooki*]] (central), *L. splendida* (desert) and [[lampropeltis-californiae|*L. californiae*]] (west). The eastern species includes the former subspecies *getula*, *floridana* and *meansi*.",
+        "src": [
+          "plazi",
+          "zootaxa"
+        ]
+      },
+      {
+        "text": "Not everyone accepts the split: the Southwestern Herpetologists Society, for example, keeps the traditional single species, arguing the split rests mostly on mitochondrial DNA.",
+        "src": [
+          "swhs"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "lampropeltis-nigra",
+      "text": "the Black Kingsnake of the Mississippi valley, mostly black with only faint pale speckling.",
+      "src": [
+        "wiki-nigra"
+      ]
+    },
+    {
+      "id": "lampropeltis-holbrooki",
+      "text": "the Speckled Kingsnake, which has a pale spot on nearly every scale instead of crossbands.",
+      "src": [
+        "wiki-holb"
+      ]
+    }
+  ],
+  "funfacts": [
+    {
+      "text": "The \"king\" in its name refers to its habit of eating other snakes - even venomous ones, whose venom it appears to shrug off.",
+      "src": [
+        "flmnh",
+        "wiki"
+      ]
+    }
+  ],
+  "sources": {
+    "flmnh": {
+      "title": "Eastern Kingsnake (Florida Snake ID Guide)",
+      "publisher": "Florida Museum of Natural History",
+      "url": "https://www.floridamuseum.ufl.edu/florida-snake-id/snake/eastern-kingsnake/"
+    },
+    "wiki": {
+      "title": "Lampropeltis getula",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Lampropeltis_getula"
+    },
+    "plazi": {
+      "title": "Lampropeltis getula (Linnaeus 1766) (taxonomic treatment)",
+      "publisher": "Plazi TreatmentBank",
+      "url": "https://treatment.plazi.org/GgServer/html/03F2AA3FFFE6401023E0F8B5A35BFEB0"
+    },
+    "zootaxa": {
+      "title": "Systematics of the Common Kingsnake (Lampropeltis getula) and the burden of heritage in taxonomy",
+      "authors": "Pyron & Burbrink",
+      "publisher": "Zootaxa 2241",
+      "year": 2009,
+      "url": "https://mapress.com/zootaxa/2009/f/z02241p032f.pdf"
+    },
+    "swhs": {
+      "title": "Taxonomic note: Lampropeltis getula",
+      "publisher": "Southwestern Herpetologists Society",
+      "url": "https://www.southwesternherp.com/taxonomic-notes-l-getula/"
+    },
+    "wiki-nigra": {
+      "title": "Lampropeltis nigra",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Lampropeltis_nigra"
+    },
+    "wiki-holb": {
+      "title": "Lampropeltis holbrooki",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Lampropeltis_holbrooki"
+    }
+  }
+}

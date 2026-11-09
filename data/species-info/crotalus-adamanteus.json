@@ -1,0 +1,197 @@
+{
+  "id": "crotalus-adamanteus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "Palisot de Beauvois, 1799",
+  "facts": {
+    "length": {
+      "text": "Usually about 1.1-1.8 m; record about 2.4 m",
+      "src": [
+        "orianne",
+        "wiki"
+      ]
+    },
+    "reproduction": {
+      "text": "Gives birth to live young",
+      "src": [
+        "wiki",
+        "gtc"
+      ]
+    },
+    "diet": {
+      "text": "Mainly small mammals such as rabbits and rats",
+      "src": [
+        "wiki",
+        "gtc"
+      ]
+    },
+    "iucn": {
+      "code": "LC",
+      "text": "Least Concern",
+      "long": "Listed as Least Concern on the IUCN Red List, although conservation groups report that it is declining across most of its range.",
+      "src": [
+        "wiki",
+        "gtc"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Eastern Diamondback is the largest rattlesnake and one of the heaviest venomous snakes of the Americas. It lives in the south-eastern United States, where it is closely tied to open, fire-maintained pine country and to the burrows dug by Gopher Tortoises.",
+        "src": [
+          "wiki",
+          "gtc",
+          "orianne"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A heavy-bodied rattlesnake with a pattern of dark diamonds, each outlined in pale cream or yellow, running down the back. The tail ends in a rattle, which it sounds as a warning.",
+        "src": [
+          "wiki",
+          "orianne"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Typical adults",
+        "text": "Most adults measure about 110-180 cm in total length, and specimens over about 1.8 m (6 ft) are rarely found.",
+        "src": [
+          "orianne",
+          "wiki"
+        ]
+      },
+      {
+        "label": "Largest records",
+        "text": "The record specimen was about 2.4 m long and weighed 15.4 kg. Orianne Society gives a maximum near 250 cm, so published maximums differ slightly.",
+        "src": [
+          "wiki",
+          "orianne"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The coastal plain of the south-eastern United States, from the Carolinas south through Florida and west along the Gulf Coast to Louisiana. SnakeList's map shows the states where it is recorded.",
+        "src": [
+          "wiki",
+          "gtc"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Open-canopy pine savannas kept open by fire are its stronghold, including longleaf pine sandhills and flatwoods, along with coastal hammocks and scrub.",
+        "src": [
+          "gtc",
+          "orianne"
+        ]
+      },
+      {
+        "text": "It depends heavily on underground shelter: Gopher Tortoise and armadillo burrows, stump holes, root channels and rotting logs protect it from heat, cold and prescribed fires.",
+        "src": [
+          "gtc",
+          "wiki"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "It often waits in ambush beside a trail used by prey, but also forages actively. It typically shelters underground and comes out in the morning or afternoon to bask.",
+        "src": [
+          "wiki",
+          "gtc"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Small mammals make up most of its prey, especially rabbits and rice rats, with squirrels, rats and mice also taken. Ground birds such as towhees and Bobwhite Quail are eaten occasionally.",
+        "src": [
+          "wiki",
+          "gtc"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Females give birth to live young after a pregnancy of roughly six to seven months; they do not feed while pregnant. Litters usually hold about a dozen young, and sources give typical counts of around 12-14, born between July and October.",
+        "src": [
+          "wiki",
+          "orianne",
+          "gtc"
+        ]
+      },
+      {
+        "text": "Logs, stump holes, fallen trees and the burrows of Gopher Tortoises and armadillos are commonly used as birth sites.",
+        "src": [
+          "orianne"
+        ]
+      }
+    ],
+    "conservation": [
+      {
+        "text": "Although the IUCN lists it as Least Concern, the Gopher Tortoise Council describes it as declining over most of its range because of habitat loss, road deaths, persecution, rattlesnake roundups and the loss of Gopher Tortoise burrows.",
+        "src": [
+          "gtc",
+          "wiki"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "crotalus-horridus",
+      "text": "the other large rattlesnake of the south-east; it has dark chevron-shaped crossbands rather than pale-edged diamonds, and a black tail.",
+      "src": [
+        "wiki-tim"
+      ]
+    },
+    {
+      "id": "sistrurus-miliarius",
+      "text": "shares much of its range but is a very small rattlesnake with a tiny rattle.",
+      "src": [
+        "wiki-pyg"
+      ]
+    }
+  ],
+  "funfacts": [
+    {
+      "text": "Much of its life depends on another reptile: the deep burrows of the Gopher Tortoise give it shelter from fire, heat and winter cold.",
+      "src": [
+        "gtc"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "Eastern diamondback rattlesnake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Eastern_diamondback_rattlesnake"
+    },
+    "orianne": {
+      "title": "Eastern Diamond-backed Rattlesnake",
+      "publisher": "The Orianne Society",
+      "url": "https://www.oriannesociety.org/priority-species/eastern-diamondbacked-rattlesnake/"
+    },
+    "gtc": {
+      "title": "The Eastern Diamondback Rattlesnake (brochure)",
+      "publisher": "Gopher Tortoise Council",
+      "url": "https://gophertortoisecouncil.org/pdf/diamondback_brochure.pdf"
+    },
+    "wiki-tim": {
+      "title": "Timber rattlesnake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Timber_rattlesnake"
+    },
+    "wiki-pyg": {
+      "title": "Sistrurus miliarius",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Sistrurus_miliarius"
+    }
+  }
+}

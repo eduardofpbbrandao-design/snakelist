@@ -1,0 +1,51 @@
+{
+  "id": "eryx-colubrinus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {"text": "Females rarely over 91 cm; males much smaller", "src": ["wiki", "bgsu"]},
+    "reproduction": {"text": "Gives birth to live young", "src": ["wiki"]},
+    "activity": {"text": "Mostly hidden under sand or soil", "src": ["wiki", "rm"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The East African or Kenyan Sand Boa is a small, thick-bodied, burrowing boa of the dry lands of north-eastern and East Africa. It spends most of its life buried in sand or loose soil, waiting for prey to come within reach. It is also one of the most commonly kept small snakes in captivity.", "src": ["wiki", "rm"]}
+    ],
+    "identification": [
+      {"text": "A short, stout snake with a small head that is barely wider than the neck, tiny eyes set high on the head and a short tail. It is usually orange or yellow with irregular dark brown blotches.", "src": ["wiki", "rm"]}
+    ],
+    "size": [
+      {"label": "Wild adults", "text": "Females are much larger than males: adult females are rarely more than about 91 cm in total length, and most adults are about 30-60 cm.", "src": ["wiki", "bgsu"]},
+      {"label": "Newborns", "text": "About 20-25 cm long at birth.", "src": ["wiki"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "North-eastern and East Africa, from Egypt west to Niger (the Aïr mountains) and south through Sudan, Ethiopia and Somalia to Kenya and northern Tanzania. SnakeList's map shows the countries where it is recorded.", "src": ["wiki"]}
+    ],
+    "habitat": [
+      {"text": "Semi-desert, dry scrub savanna and rocky outcrops, wherever there is loose sand or soil to burrow into.", "src": ["wiki"]}
+    ],
+    "behaviour": [
+      {"text": "A burrowing ambush hunter: it lies buried with only its head showing and seizes passing prey from below, often at night, before pulling it under the sand.", "src": ["rm", "wiki"]}
+    ],
+    "diet": [
+      {"text": "Kills its prey by constriction. In the wild it eats small vertebrates such as rodents and lizards.", "src": ["wiki", "rm"]}
+    ],
+    "reproduction": [
+      {"text": "Gives birth to live young (some sources describe it as ovoviviparous, with eggs hatching inside the mother).", "src": ["wiki"]},
+      {"label": "Captivity", "text": "In captivity in the United States it breeds readily from about November to April, and litters average about 10-20 young, born from spring to late summer.", "src": ["wiki"]}    ],
+    "taxonomy": [
+      {"text": "Some authors place it in the genus *Gongylophis* as *Gongylophis colubrinus*, a name still common in the pet trade; most current lists use *Eryx colubrinus*. A form from Kenya and Tanzania has been named *E. c. loveridgei*.", "src": ["wiki", "rm"]}
+    ]
+  },
+  "similar": [
+    {"id": "eryx-johnii", "text": "the Red Sand Boa of South Asia, a larger, plainer brown or reddish sand boa with a blunt tail that looks like a second head.", "src": ["wiki-ej"]}
+  ],
+  "synonyms": {"names": ["*Gongylophis colubrinus* (Linnaeus, 1758)"], "src": ["wiki"]},
+  "sources": {
+    "wiki": {"title": "Eryx colubrinus", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Eryx_colubrinus"},
+    "rm": {"title": "Kenyan Sand Boa", "publisher": "Reptiles Magazine", "url": "https://reptilesmagazine.com/listings/snakes-care-sheets/kenyan-sand-boa/"},
+    "bgsu": {"title": "Kenyan Sand Boa", "publisher": "Bowling Green State University Herpetarium", "url": "https://www.bgsu.edu/arts-and-sciences/biological-sciences/facilities-and-resources/bgsu-herpetarium/animals/reptiles/kenyan-sand-boa"},
+    "wiki-ej": {"title": "Eryx johnii", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Eryx_johnii"}
+  }
+}

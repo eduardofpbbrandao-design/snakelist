@@ -1,0 +1,46 @@
+{
+  "id": "opheodrys-aestivus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Linnaeus, 1766)",
+  "facts": {
+    "length": {"text": "Most adults about 35-82 cm; record 116 cm", "src": ["mdc", "flmnh"]},
+    "reproduction": {"text": "Lays eggs", "src": ["adw", "flmnh"]},
+    "activity": {"text": "By day, in shrubs and trees", "src": ["adw"]},
+    "diet": {"text": "Insects and spiders", "src": ["adw", "flmnh"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Rough Greensnake is a slender, bright green, harmless snake of the south-eastern and central United States. It lives in shrubs and low trees, often above water, and feeds almost entirely on insects and spiders.", "src": ["adw", "flmnh"]}
+    ],
+    "identification": [
+      {"text": "Very thin, with a long tail, plain bright green above and whitish or yellowish below. Its back scales are keeled (they have a ridge down the middle), which gives the \"rough\" in its name and separates it from the Smooth Greensnake.", "src": ["flmnh", "mdc"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Most adults are about 35-82 cm (14-33 in) in total length; the record is 116 cm. Some sources give ranges up to about 114 cm (45 in) for large adults.", "src": ["mdc", "flmnh"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "The south-eastern and south-central United States, from New Jersey to Florida and west to Kansas, Oklahoma and Texas, with records extending into north-eastern Mexico. SnakeList's map shows the states where it is recorded.", "src": ["adw"]}
+    ],
+    "habitat": [
+      {"text": "Dense vegetation - shrubs, vines and low trees - especially along the edges of streams, lakes and wetlands, where it often rests in branches overhanging water.", "src": ["adw", "mdc"]}
+    ],
+    "behaviour": [
+      {"text": "Largely active by day and an excellent climber. Its green colour and habit of staying still among leaves make it hard to spot.", "src": ["adw", "flmnh"]}
+    ],
+    "diet": [
+      {"text": "Mostly insects and spiders: crickets, grasshoppers and caterpillars make up much of what it eats. Snails and small tree frogs are taken occasionally.", "src": ["adw", "flmnh"]}
+    ],
+    "reproduction": [
+      {"text": "Females lay eggs, usually about 3-12 per clutch (sources range from 1 to 14). Several females sometimes share a nest site, and up to 75 eggs have been found together in one such communal nest.", "src": ["adw", "flmnh"]}
+    ]
+  },
+  "similar": [
+    {"id": "opheodrys-vernalis", "text": "the Smooth Greensnake of more northern and western areas, which has smooth, unkeeled scales and is generally smaller.", "src": ["mdc"]}
+  ],
+  "sources": {
+    "adw": {"title": "Opheodrys aestivus (Rough Greensnake)", "publisher": "Animal Diversity Web, University of Michigan", "url": "https://animaldiversity.org/accounts/Opheodrys_aestivus/"},
+    "flmnh": {"title": "Rough Greensnake (Florida Snake ID Guide)", "publisher": "Florida Museum of Natural History", "url": "https://www.floridamuseum.ufl.edu/florida-snake-id/snake/rough-greensnake/"},
+    "mdc": {"title": "Northern Rough Greensnake", "publisher": "Missouri Department of Conservation", "url": "https://mdc.mo.gov/discover-nature/field-guide/rough-greensnake"}
+  }
+}

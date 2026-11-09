@@ -1,0 +1,51 @@
+{
+  "id": "pseudonaja-textilis",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Duméril, Bibron & Duméril, 1854)",
+  "facts": {
+    "length": {"text": "Slender; up to about 2 m", "src": ["wiki"]},
+    "reproduction": {"text": "Lays eggs", "src": ["wiki"]},
+    "activity": {"text": "Mostly by day", "src": ["wiki", "am"]},
+    "diet": {"text": "Vertebrates, especially introduced rats and mice", "src": ["am"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Eastern Brown Snake is a fast, slender and highly venomous elapid of eastern Australia, with a population in southern New Guinea. It thrives in farmland and on the edges of towns, where introduced mice and rats are plentiful, so it is one of the snakes Australians meet most often.", "src": ["wiki", "am"]}
+    ],
+    "identification": [
+      {"text": "Adults are usually a plain shade of brown, from pale fawn to almost black, with a paler, often cream or yellowish belly that may be marked with orange or grey blotches. Juveniles can be banded and often have a dark head and a dark band across the neck.", "src": ["wiki", "am"]},
+      {"text": "Its fangs are small for such a dangerous snake: about 2.8 mm on average, and up to 4 mm in large specimens.", "src": ["wiki"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "A slender snake that can reach about 2 m in length.", "src": ["wiki"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "Eastern Australia, from northern Queensland through New South Wales and Victoria to South Australia, with scattered populations in the Northern Territory, and parts of southern New Guinea. SnakeList's map shows where it is recorded.", "src": ["wiki", "am"]}
+    ],
+    "habitat": [
+      {"text": "Most habitats except dense forest, including grassland, woodland, scrub and especially farmland and the outskirts of cities.", "src": ["wiki"]}
+    ],
+    "behaviour": [
+      {"text": "Active mainly by day. When threatened it may raise the front of its body high off the ground in an S-shape with its mouth open, ready to strike.", "src": ["wiki", "am"]}
+    ],
+    "diet": [
+      {"text": "In the wild it eats a wide range of vertebrates - frogs, reptiles and reptile eggs, birds and mammals - and especially introduced House Mice and rats.", "src": ["am"]}
+    ],
+    "reproduction": [
+      {"text": "Females lay eggs.", "src": ["wiki"]}
+    ],
+    "conservation": [
+      {"text": "Broad-scale clearing of land for farming, harmful to many native animals, has helped this species by creating open country full of rodents.", "src": ["am"]},
+      {"label": "Snakebite", "text": "It is highly venomous and causes many of Australia's serious snakebites. Bites need urgent medical treatment with antivenom.", "src": ["wiki", "am"]}
+    ]
+  },
+  "similar": [
+    {"id": "pseudonaja-nuchalis", "text": "the Gwardar or Northern Brown Snake, a close relative of northern and inland Australia; brown snakes vary a lot in colour and are hard to tell apart.", "src": ["wiki-pn"]}
+  ],
+  "sources": {
+    "wiki": {"title": "Eastern brown snake", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Eastern_brown_snake"},
+    "wiki-pn": {"title": "Pseudonaja nuchalis", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Pseudonaja_nuchalis"},
+    "am": {"title": "Eastern Brown Snake, Pseudonaja textilis", "publisher": "Australian Museum", "url": "https://australian.museum/learn/animals/reptiles/eastern-brown-snake/"}
+  }
+}

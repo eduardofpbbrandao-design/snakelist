@@ -1,0 +1,49 @@
+{
+  "id": "dendroaspis-viridis",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Hallowell, 1844)",
+  "facts": {
+    "length": {"text": "Usually about 1.4-2.1 m; large ones near 2.4 m", "src": ["wiki", "asi"]},
+    "reproduction": {"text": "Lays eggs", "src": ["wiki"]},
+    "activity": {"text": "By day, mostly in trees", "src": ["wiki"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Western Green Mamba is a long, slender, highly venomous mamba of the coastal forests of West Africa. It spends most of its life in trees, but comes down to the ground more often than its eastern relative.", "src": ["wiki", "asi"]}
+    ],
+    "identification": [
+      {"text": "Bright green above with yellowish tones. Its scales are rimmed in black, which gives the body a fine net-like pattern.", "src": ["wiki"]},
+      {"text": "Scale counts help confirm it: it has only 13 rows of long, narrow scales around the middle of the body - fewer than similar species - and 211-225 belly scales.", "src": ["wiki"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Most adults are between about 1.4 and 2.1 m long, and large individuals approach 2.4 m. The African Snakebite Institute gives an average of about 1.8 m and a maximum near 2.3 m; some websites claim over 3 m, which is not well supported.", "src": ["wiki", "asi"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "West Africa, from the Gambia and southern Senegal east to Benin. In Togo it reaches into drier open forest and Guinea savanna as well as the coast. An isolated record from the Central African Republic is sometimes mentioned.", "src": ["wiki"]}
+    ],
+    "habitat": [
+      {"text": "Mainly coastal tropical rainforest, thicket and woodland.", "src": ["wiki"]}
+    ],
+    "behaviour": [
+      {"text": "Active by day and mostly in the canopy, sometimes high above the ground. It is usually nervous and quick to escape; when cornered it may hiss loudly and strike repeatedly.", "src": ["wiki"]}
+    ],
+    "diet": [
+      {"text": "Mainly birds and small mammals such as rodents and squirrels; it may take birds' eggs and occasionally lizards.", "src": ["wiki"]}
+    ],
+    "reproduction": [
+      {"text": "Females lay eggs. Reported clutch sizes are about 6-14, but this figure comes from secondary sources and is not well documented.", "src": ["wiki"]}
+    ],
+    "conservation": [
+      {"label": "Snakebite", "text": "Its venom is dangerous, but bites are poorly documented, and the number of serious bites it causes each year is not known.", "src": ["wiki"]}
+    ]
+  },
+  "similar": [
+    {"id": "dendroaspis-angusticeps", "text": "the Eastern Green Mamba of East and southern Africa, uniformly green without black-edged scales; the ranges do not overlap.", "src": ["wiki"]},
+    {"id": "dendroaspis-jamesoni", "text": "Jameson's Mamba of Central and West Africa, another green, tree-living mamba whose range lies mostly further east; scale counts help tell them apart.", "src": ["wiki"]}
+  ],
+  "sources": {
+    "wiki": {"title": "Western green mamba", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Western_green_mamba"},
+    "asi": {"title": "West African Green Mamba", "publisher": "African Snakebite Institute", "url": "https://africansnakebiteinstitute.com/?p=12664"}
+  }
+}

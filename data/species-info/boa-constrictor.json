@@ -1,0 +1,195 @@
+{
+  "id": "boa-constrictor",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "Linnaeus, 1758",
+  "facts": {
+    "length": {
+      "text": "Most 2-3 m; longest reported just over 4 m",
+      "src": [
+        "adw"
+      ]
+    },
+    "reproduction": {
+      "text": "Gives birth to live young, about 25 on average",
+      "src": [
+        "adw"
+      ]
+    },
+    "diet": {
+      "text": "Mammals, birds and reptiles; prey size grows with the snake",
+      "src": [
+        "adw",
+        "gisd"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Boa Constrictor is a large, heavy-bodied, non-venomous snake of tropical South America that kills its prey by constriction. It is one of the best-known snakes in the world and is widely kept in captivity. Escaped or released boas have founded invasive populations on several Caribbean islands.",
+        "src": [
+          "adw",
+          "gisd"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Patterned with dark, saddle-shaped blotches on a tan, grey or brownish background; toward the tail the saddles usually become reddish, which is why it is often called the Red-tailed Boa.",
+        "src": [
+          "adw",
+          "natzoo"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Most adults are 2-3 m long, and the longest reported was slightly over 4 m. The Smithsonian's National Zoo gives a maximum of about 3.9 m (13 ft). Females are generally larger than males.",
+        "src": [
+          "adw",
+          "natzoo"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Tropical South America, from Colombia, Venezuela and the Guianas south through the Amazon basin to Bolivia, Paraguay and northern Argentina, and on Trinidad and Tobago. SnakeList treats the boas of Central America and Mexico as a separate species, [[boa-imperator|*Boa imperator*]].",
+        "src": [
+          "adw",
+          "repfocus"
+        ]
+      },
+      {
+        "label": "Introduced",
+        "text": "Breeding populations of introduced boas exist on Aruba (first documented in 1999), Cozumel, Puerto Rico and St Croix. A study on St Croix found many animals showing a mix of Central and South American boa traits.",
+        "src": [
+          "reinert",
+          "dcbd-aruba",
+          "dcbd-stx"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "A very adaptable snake found in rainforest, dry forest, savanna, scrub and farmland, both on the ground and in trees.",
+        "src": [
+          "adw"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "A carnivore with a broad diet: birds, bats and other mammals, and reptiles, the size of the prey increasing with the size of the snake. On Aruba, a long-term study found a shift toward larger prey once snakes reach about 1 m in length.",
+        "src": [
+          "gisd",
+          "dcbd-aruba"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young: the embryos develop inside the mother. Litters average about 25 young and range from about 10 to 64. The newborns are independent from birth.",
+        "src": [
+          "adw",
+          "gisd"
+        ]
+      },
+      {
+        "label": "Lifespan",
+        "text": "Wild boas may live around 20 years on average, according to Animal Diversity Web; the National Zoo gives 20-30 years in the wild.",
+        "src": [
+          "adw",
+          "natzoo"
+        ]
+      }
+    ],
+    "conservation": [
+      {
+        "label": "As an invader",
+        "text": "Introduced boas on Caribbean islands prey on native wildlife, and the Global Invasive Species Database lists the Central American form as an invasive species.",
+        "src": [
+          "gisd",
+          "reinert"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "Boas from Mexico and Central America were long treated as a subspecies, *Boa constrictor imperator*. Reynolds, Niemiller and Revell (2014) treated them as a separate species, *Boa imperator*, but not every authority follows this, so many sources still use *Boa constrictor* for all of them.",
+        "src": [
+          "repfocus"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "boa-imperator",
+      "text": "the Central American (Colombian) Boa, formerly a subspecies; the two are separated mainly by range and genetics.",
+      "src": [
+        "repfocus"
+      ]
+    },
+    {
+      "id": "eunectes-murinus",
+      "text": "the Green Anaconda shares much of its range but is olive with round black spots and lives in and around water.",
+      "src": [
+        "wiki-ana"
+      ]
+    }
+  ],
+  "synonyms": {
+    "names": [
+      "*Boa constrictor constrictor* Linnaeus, 1758 (nominate subspecies)"
+    ],
+    "src": [
+      "repfocus"
+    ]
+  },
+  "sources": {
+    "adw": {
+      "title": "Boa constrictor",
+      "publisher": "Animal Diversity Web, University of Michigan",
+      "url": "https://animaldiversity.org/accounts/Boa_constrictor/"
+    },
+    "natzoo": {
+      "title": "Boa constrictor",
+      "publisher": "Smithsonian's National Zoo & Conservation Biology Institute",
+      "url": "https://nationalzoo.si.edu/animals/boa-constrictor"
+    },
+    "gisd": {
+      "title": "Boa constrictor imperator - species profile",
+      "publisher": "Global Invasive Species Database (IUCN SSC Invasive Species Specialist Group)",
+      "url": "https://www.iucngisd.org/gisd/species.php?sc=1439"
+    },
+    "dcbd-aruba": {
+      "title": "A Long-term Dietary Assessment of Invasive Boa constrictor on Aruba",
+      "publisher": "Dutch Caribbean Biodiversity Database",
+      "url": "https://www.dcbd.nl/node/2885"
+    },
+    "repfocus": {
+      "title": "Boa (genus overview and taxonomy)",
+      "publisher": "RepFocus",
+      "url": "https://repfocus.dk/Boa.html"
+    },
+    "reinert": {
+      "title": "Reinert et al. 2021 (invasive Boa on Aruba)",
+      "publisher": "Herpetological Conservation and Biology 16(1)",
+      "year": 2021,
+      "url": "https://www.herpconbio.org/Volume_16/Issue_1/Reinert_etal_2021.pdf"
+    },
+    "dcbd-stx": {
+      "title": "The Isle of Misfit Species: Ecology of the invasive Boa on St. Croix, U.S. Virgin Islands",
+      "publisher": "Dutch Caribbean Biodiversity Database",
+      "url": "https://www.dcbd.nl/node/3573"
+    },
+    "wiki-ana": {
+      "title": "Green anaconda",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Green_anaconda"
+    }
+  }
+}
