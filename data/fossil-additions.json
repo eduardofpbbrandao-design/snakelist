@@ -1,0 +1,1037 @@
+[
+ {
+  "id": "titanoboa-cerrejonensis",
+  "sci": "Titanoboa cerrejonensis",
+  "name": "Titanoboa",
+  "family": "Boidae",
+  "type": "Boa",
+  "countries": [
+   "Colombia"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "venomous": 0,
+  "period": "middle-late Paleocene",
+  "mya": 58,
+  "length_m": 12.8,
+  "length_note": "Estimate from vertebra size: about 12.8 m, give or take 2.2 m (Head et al. 2009). Estimated weight about 1,135 kg.",
+  "discovered": "2009, Jason Head and colleagues (fossils from the Cerrejón coal mine)",
+  "fact": "Titanoboa was the biggest snake ever found - longer than a school bus - and lived in a hot rainforest about 8 million years after the big dinosaurs died out.",
+  "sources": [
+   "https://www.nature.com/articles/nature07671",
+   "https://newsinfo.iu.edu/web/page/normal/9773.html",
+   "https://www.britannica.com/animal/Titanoboa"
+  ]
+ },
+ {
+  "id": "vasuki-indicus",
+  "sci": "Vasuki indicus",
+  "name": "Vasuki",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "India"
+  ],
+  "continents": [
+   "Asia"
+  ],
+  "venomous": 0,
+  "period": "middle Eocene",
+  "mya": 47,
+  "length_m": 13,
+  "length_note": "Estimate from 27 vertebrae: about 10.9 to 15.2 m (Datta & Bajpai 2024); the authors say the estimate is uncertain.",
+  "discovered": "2024, Debajit Datta and Sunil Bajpai (Panandhro lignite mine, Kutch, Gujarat)",
+  "fact": "Vasuki is named after the serpent king that coils around the god Shiva's neck, and it may have been nearly as long as Titanoboa.",
+  "sources": [
+   "https://www.nature.com/articles/s41598-024-58377-0",
+   "https://phys.org/news/2024-04-discovery-ancient-giant-snake-india.html"
+  ]
+ },
+ {
+  "id": "gigantophis-garstini",
+  "sci": "Gigantophis garstini",
+  "name": "Gigantophis",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Egypt"
+  ],
+  "continents": [
+   "Africa"
+  ],
+  "venomous": 0,
+  "period": "late Eocene",
+  "mya": 37,
+  "length_m": 6.9,
+  "length_note": "Disputed estimate: older figures were about 9.3-10.7 m, but a 2017 study (Rio & Mannion) estimated 6.9 m, give or take 0.3 m.",
+  "discovered": "1901, Charles William Andrews (Fayum, Egypt)",
+  "fact": "For over 100 years Gigantophis was thought to be the longest snake that ever lived, until Titanoboa was found in 2009.",
+  "dispute": "Length estimates differ a lot between studies.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Gigantophis",
+   "https://bioone.org/journals/journal-of-vertebrate-paleontology/volume-37/issue-4/02724634.2017.1347179/The-Osteology-of-the-Giant-Snake-Gigantophis-garstini-from-the/10.1080/02724634.2017.1347179.short"
+  ]
+ },
+ {
+  "id": "madtsoia-bai",
+  "sci": "Madtsoia bai",
+  "name": "Madtsoia bai",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Argentina"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "venomous": 0,
+  "period": "Eocene",
+  "mya": 45,
+  "length_m": 9.5,
+  "length_note": "Estimate: about 9-10 m. Age given here is approximate (the 'Notostylops beds' of Patagonia, Eocene).",
+  "discovered": "1933, George Gaylord Simpson (Patagonia, Argentina)",
+  "fact": "Madtsoia bai was a giant constricting snake from Patagonia, and the whole Madtsoiidae family is named after its genus.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Madtsoia",
+   "https://digitallibrary.amnh.org/items/6ed3b357-0c2a-423e-ae54-27e03b696e86/full"
+  ]
+ },
+ {
+  "id": "madtsoia-madagascariensis",
+  "sci": "Madtsoia madagascariensis",
+  "name": "Madtsoia madagascariensis",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Madagascar"
+  ],
+  "continents": [
+   "Africa"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Maastrichtian)",
+  "mya": 68,
+  "length_m": 8,
+  "length_note": "Estimate: 'almost 8 m' (LaDuke et al. 2010).",
+  "discovered": "1961, Robert Hoffstetter (Maevarano Formation, Madagascar)",
+  "fact": "This heavy, nearly 8-metre snake was an ambush hunter on Madagascar at the same time as dinosaurs like Majungasaurus.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Madtsoia",
+   "https://bioone.org/journals/journal-of-vertebrate-paleontology/volume-30/issue-1/02724630903409188/A-Late-Cretaceous-Maastrichtian-Snake-Assemblage-from-the-Maevarano-Formation/10.1080/02724630903409188.full"
+  ]
+ },
+ {
+  "id": "madtsoia-pisdurensis",
+  "sci": "Madtsoia pisdurensis",
+  "name": "Madtsoia pisdurensis",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "India"
+  ],
+  "continents": [
+   "Asia"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Maastrichtian)",
+  "mya": 66,
+  "length_m": 5,
+  "length_note": "Estimate from vertebrae: about 5 m (Mohabey, Head & Wilson 2011).",
+  "discovered": "2011, Dhananjay Mohabey, Jason Head and Jeffrey Wilson (Pisdura, central India)",
+  "fact": "Its vertebrae were found at Pisdura in India, a place famous for dinosaur fossils, and it was a close cousin of the later giant Vasuki.",
+  "sources": [
+   "https://www.tandfonline.com/doi/full/10.1080/02724634.2011.560220",
+   "https://www.nature.com/articles/s41598-024-58377-0"
+  ]
+ },
+ {
+  "id": "madtsoia-camposi",
+  "sci": "Madtsoia camposi",
+  "name": "Madtsoia camposi",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Brazil"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "venomous": 0,
+  "period": "late Paleocene-early Eocene",
+  "mya": 53,
+  "length_m": null,
+  "length_note": "No published length found.",
+  "discovered": "1998, Jean-Claude Rage (São José de Itaboraí, Brazil)",
+  "fact": "Madtsoia camposi was found in an old limestone quarry near Rio de Janeiro that holds some of South America's oldest snake fossils.",
+  "dispute": "Rage noted that putting it in the genus Madtsoia might be provisional.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Madtsoia",
+   "https://palaeovertebrata.com/Articles/view/228"
+  ]
+ },
+ {
+  "id": "wonambi-naracoortensis",
+  "sci": "Wonambi naracoortensis",
+  "name": "Wonambi naracoortensis",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Australia"
+  ],
+  "continents": [
+   "Oceania"
+  ],
+  "venomous": 0,
+  "period": "late Pleistocene",
+  "mya": 0.05,
+  "length_m": 5,
+  "length_note": "Estimate: about 4-6 m. It survived until roughly 50,000-40,000 years ago.",
+  "discovered": "1976, Meredith Smith (Naracoorte Caves, South Australia)",
+  "fact": "Wonambi was still alive when the first people reached Australia, and it is named after a giant rainbow serpent from Aboriginal stories.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Wonambi",
+   "https://www.nature.com/articles/35000188"
+  ]
+ },
+ {
+  "id": "wonambi-barriei",
+  "sci": "Wonambi barriei",
+  "name": "Wonambi barriei",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Australia"
+  ],
+  "continents": [
+   "Oceania"
+  ],
+  "venomous": 0,
+  "period": "early Miocene",
+  "mya": 18,
+  "length_m": 3,
+  "length_note": "Estimate: under 3 m. Known from early Miocene (possibly late Oligocene) deposits at Riversleigh; the age here is approximate.",
+  "discovered": "2000, John Scanlon and Michael Lee (Riversleigh, Queensland)",
+  "fact": "Wonambi barriei was a smaller, older cousin of Wonambi naracoortensis that lived in the ancient rainforests of Riversleigh in Queensland.",
+  "sources": [
+   "https://www.nature.com/articles/35000188",
+   "https://tb.plazi.org/GgServer/html/2E3487FEFFFFC4755A5CFBB23348FBD5"
+  ]
+ },
+ {
+  "id": "yurlunggur-camfieldensis",
+  "sci": "Yurlunggur camfieldensis",
+  "name": "Yurlunggur",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Australia"
+  ],
+  "continents": [
+   "Oceania"
+  ],
+  "venomous": 0,
+  "period": "middle Miocene",
+  "mya": 13,
+  "length_m": 5,
+  "length_note": "Estimate: typically about 4.5-6 m; one vertebra may come from a 7-8 m individual (speculative).",
+  "discovered": "1992, John Scanlon (Camfield Beds, Northern Territory)",
+  "fact": "Yurlunggur was a big Australian constrictor named after a great serpent in Aboriginal stories of Arnhem Land.",
+  "sources": [
+   "https://www.wikipedia.org/wiki/Yurlunggur",
+   "https://austhrutime.com/yurlunggur.htm"
+  ]
+ },
+ {
+  "id": "nanowana-godthelpi",
+  "sci": "Nanowana godthelpi",
+  "name": "Nanowana godthelpi",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Australia"
+  ],
+  "continents": [
+   "Oceania"
+  ],
+  "venomous": 0,
+  "period": "early-middle Miocene",
+  "mya": 15,
+  "length_m": null,
+  "length_note": "Small (the name means 'dwarf serpent'); no published length found.",
+  "discovered": "1997, John Scanlon (Riversleigh, Queensland)",
+  "fact": "Its name starts with 'nano', Greek for dwarf, because it was a small member of a family full of giant snakes.",
+  "sources": [
+   "https://bionames.org/names/cluster/1258383",
+   "https://www.wikipedia.org/wiki/Madtsoiid"
+  ]
+ },
+ {
+  "id": "nanowana-schrenki",
+  "sci": "Nanowana schrenki",
+  "name": "Nanowana schrenki",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Australia"
+  ],
+  "continents": [
+   "Oceania"
+  ],
+  "venomous": 0,
+  "period": "early-middle Miocene",
+  "mya": 15,
+  "length_m": null,
+  "length_note": "Small; no published length found.",
+  "discovered": "1997, John Scanlon (Riversleigh, Queensland)",
+  "fact": "Nanowana schrenki shared the Riversleigh rainforests of ancient Queensland with its cousin Nanowana godthelpi.",
+  "sources": [
+   "https://bionames.org/names/cluster/1258384",
+   "https://www.wikipedia.org/wiki/Madtsoiid"
+  ]
+ },
+ {
+  "id": "sanajeh-indicus",
+  "sci": "Sanajeh indicus",
+  "name": "Sanajeh",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "India"
+  ],
+  "continents": [
+   "Asia"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Maastrichtian)",
+  "mya": 67,
+  "length_m": 3.5,
+  "length_note": "About 3.5 m, from a partial skeleton (Wilson et al. 2010).",
+  "discovered": "2010, Jeffrey Wilson, Dhananjay Mohabey, Shanan Peters and Jason Head (Dholi Dungri, Gujarat)",
+  "fact": "Sanajeh was found fossilised coiled around a dinosaur egg next to a baby sauropod - it probably raided dinosaur nests for hatchlings.",
+  "sources": [
+   "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1000322",
+   "https://pmc.ncbi.nlm.nih.gov/articles/PMC2830453"
+  ]
+ },
+ {
+  "id": "menarana-nosymena",
+  "sci": "Menarana nosymena",
+  "name": "Menarana nosymena",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Madagascar"
+  ],
+  "continents": [
+   "Africa"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Maastrichtian)",
+  "mya": 68,
+  "length_m": 2.4,
+  "length_note": "Estimate from secondary sources: about 2.4 m.",
+  "discovered": "2010, Thomas LaDuke, David Krause, John Scanlon and Nathan Kley (Maevarano Formation, Madagascar)",
+  "fact": "Menarana may have dug through soil head-first, hunting small animals while dinosaurs walked above it on ancient Madagascar.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Menarana",
+   "https://bioone.org/journals/journal-of-vertebrate-paleontology/volume-30/issue-1/02724630903409188/A-Late-Cretaceous-Maastrichtian-Snake-Assemblage-from-the-Maevarano-Formation/10.1080/02724630903409188.full"
+  ]
+ },
+ {
+  "id": "menarana-laurasiae",
+  "sci": "Menarana laurasiae",
+  "name": "Menarana laurasiae",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Spain"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (late Campanian)",
+  "mya": 72,
+  "length_m": null,
+  "length_note": "No published length found.",
+  "discovered": "1996, Jean-Claude Rage (as Madtsoia laurasiae, Laño, Spain); moved to Menarana in 2010",
+  "fact": "This snake from Spain was first put in Madtsoia, then moved to Menarana after its cousin was found in Madagascar.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Menarana",
+   "https://www.wikipedia.org/wiki/Madtsoiid"
+  ]
+ },
+ {
+  "id": "herensugea-caristiorum",
+  "sci": "Herensugea caristiorum",
+  "name": "Herensugea caristiorum",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Spain"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (late Campanian)",
+  "mya": 72,
+  "length_m": null,
+  "length_note": "No published length found.",
+  "discovered": "1996, Jean-Claude Rage (Laño, Basque Country, Spain)",
+  "fact": "Herensugea is named after a dragon-serpent from Basque legends, fitting for a snake that lived alongside dinosaurs in Spain.",
+  "sources": [
+   "https://www.wikipedia.org/wiki/Madtsoiid",
+   "https://bioone.org/journals/journal-of-vertebrate-paleontology/volume-33/issue-5/02724634.2013.764882/A-New-Madtsoiid-Snake-from-the-Upper-Cretaceous-of-the/10.1080/02724634.2013.764882.full"
+  ]
+ },
+ {
+  "id": "nidophis-insularis",
+  "sci": "Nidophis insularis",
+  "name": "Nidophis insularis",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Romania"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Maastrichtian)",
+  "mya": 68,
+  "length_m": null,
+  "length_note": "Small; one secondary source suggests about 1 m (unconfirmed).",
+  "discovered": "2013, Ştefan Vasile and colleagues (Haţeg Basin, Romania)",
+  "fact": "Nidophis means 'nest snake' - it was found right next to a nest of dinosaur eggs on an ancient island in Romania.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Nidophis",
+   "https://bioone.org/journals/journal-of-vertebrate-paleontology/volume-33/issue-5/02724634.2013.764882/A-New-Madtsoiid-Snake-from-the-Upper-Cretaceous-of-the/10.1080/02724634.2013.764882.full"
+  ]
+ },
+ {
+  "id": "alamitophis-argentinus",
+  "sci": "Alamitophis argentinus",
+  "name": "Alamitophis argentinus",
+  "family": "Madtsoiidae",
+  "type": "Other",
+  "countries": [
+   "Argentina"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Campanian-Maastrichtian)",
+  "mya": 70,
+  "length_m": null,
+  "length_note": "No published length found.",
+  "discovered": "1986, Adriana Albino (Los Alamitos, Patagonia, Argentina)",
+  "fact": "Alamitophis was one of several kinds of snakes slithering around Patagonia near the very end of the age of dinosaurs.",
+  "sources": [
+   "https://www.wikipedia.org/wiki/Madtsoiid",
+   "https://www.doi.org/10.4202/APP.2012.0091"
+  ]
+ },
+ {
+  "id": "kelyophis-hechti",
+  "sci": "Kelyophis hechti",
+  "name": "Kelyophis hechti",
+  "family": "Nigerophiidae",
+  "type": "Other",
+  "countries": [
+   "Madagascar"
+  ],
+  "continents": [
+   "Africa"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Maastrichtian)",
+  "mya": 68,
+  "length_m": 1,
+  "length_note": "Less than 1 m - the smallest snake of its fossil site (LaDuke et al. 2010).",
+  "discovered": "2010, Thomas LaDuke, David Krause, John Scanlon and Nathan Kley (Maevarano Formation, Madagascar)",
+  "fact": "Its name means 'small serpent', mixing a Malagasy word for small with the Greek word for snake.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Kelyophis",
+   "https://bioone.org/journals/journal-of-vertebrate-paleontology/volume-30/issue-1/02724630903409188/A-Late-Cretaceous-Maastrichtian-Snake-Assemblage-from-the-Maevarano-Formation/10.1080/02724630903409188.full"
+  ]
+ },
+ {
+  "id": "najash-rionegrina",
+  "sci": "Najash rionegrina",
+  "name": "Najash",
+  "family": "",
+  "type": "Other",
+  "countries": [
+   "Argentina"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Cenomanian)",
+  "mya": 95,
+  "length_m": null,
+  "length_note": "No published length found.",
+  "discovered": "2006, Sebastián Apesteguía and Hussam Zaher (Candeleros Formation, Río Negro, Argentina)",
+  "fact": "Najash had two small back legs with a real hip, and is named after the snake in the Bible's Garden of Eden story that had legs.",
+  "dispute": "An early snake not placed in any family; where it sits in the snake family tree is still debated.",
+  "sources": [
+   "https://www.wikipedia.org/wiki/Najash",
+   "https://phys.org/news/2006-04-snake-hips-primitive.html",
+   "https://tb.plazi.org/GgServer/html/039F87A4A57DFFFD230FF8FFFABE881A"
+  ]
+ },
+ {
+  "id": "dinilysia-patagonica",
+  "sci": "Dinilysia patagonica",
+  "name": "Dinilysia",
+  "family": "Dinilysiidae",
+  "type": "Other",
+  "countries": [
+   "Argentina"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Santonian-Campanian)",
+  "mya": 80,
+  "length_m": 2,
+  "length_note": "Estimate from secondary sources: about 1.8-2 m (some say up to 3 m).",
+  "discovered": "1901, Arthur Smith Woodward (Neuquén, Patagonia, Argentina)",
+  "fact": "Dinilysia is one of the few dinosaur-age snakes known from whole skulls, so scientists use it to study how snake heads evolved.",
+  "sources": [
+   "https://www.wikipedia.com/wiki/Dinilysia",
+   "https://ri.conicet.gov.ar/handle/11336/76486"
+  ]
+ },
+ {
+  "id": "pachyrhachis-problematicus",
+  "sci": "Pachyrhachis problematicus",
+  "name": "Pachyrhachis",
+  "family": "Simoliophiidae",
+  "type": "Other",
+  "countries": [
+   "Palestine"
+  ],
+  "continents": [
+   "Asia"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (early Cenomanian)",
+  "mya": 97,
+  "length_m": null,
+  "length_note": "No published length confirmed.",
+  "discovered": "1979, Georg Haas (Ein Yabrud quarries, north of Jerusalem, West Bank)",
+  "fact": "Pachyrhachis was a sea snake with tiny back legs that still had hip, knee and ankle joints - at first it was even mistaken for a lizard.",
+  "dispute": "Family placement and its exact spot among snakes are debated.",
+  "sources": [
+   "https://www2.geo.utexas.edu/specimens/Pachyrhachis_problematicus",
+   "https://www.nature.com/articles/386705a0.pdf",
+   "https://palaeo-electronica.org/2005_1/polcyn26/polcyn26.pdf"
+  ]
+ },
+ {
+  "id": "haasiophis-terrasanctus",
+  "sci": "Haasiophis terrasanctus",
+  "name": "Haasiophis",
+  "family": "Simoliophiidae",
+  "type": "Other",
+  "countries": [
+   "Palestine"
+  ],
+  "continents": [
+   "Asia"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (early Cenomanian)",
+  "mya": 97,
+  "length_m": 1,
+  "length_note": "A little over 1 m (single fossil).",
+  "discovered": "2000, Eitan Tchernov and colleagues (Ein Yabrud, West Bank)",
+  "fact": "Haasiophis had back legs only about 2 cm long, but they still had all their bones right down to the toes.",
+  "dispute": "Some scientists have suggested it could be a young Pachyrhachis, but its skull and teeth are quite different.",
+  "sources": [
+   "https://en.wikipedia.com/wiki/Haasiophis",
+   "https://palaeo-electronica.org/2005_1/polcyn26/polcyn26.pdf"
+  ]
+ },
+ {
+  "id": "eupodophis-descouensi",
+  "sci": "Eupodophis descouensi",
+  "name": "Eupodophis",
+  "family": "Simoliophiidae",
+  "type": "Other",
+  "countries": [
+   "Lebanon"
+  ],
+  "continents": [
+   "Asia"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Cenomanian)",
+  "mya": 95,
+  "length_m": 0.5,
+  "length_note": "The fossil is about 50 cm long.",
+  "discovered": "2000, Jean-Claude Rage and François Escuillié (Lebanon)",
+  "fact": "In 2011 scientists used super-powerful X-rays to find a second tiny leg hidden inside the rock of this 95-million-year-old snake.",
+  "sources": [
+   "https://www.esrf.fr/news/general/Snake-with-leg",
+   "https://www.scientificamerican.com/article/an-ancient-snake-shows-some-leg/"
+  ]
+ },
+ {
+  "id": "simoliophis-rochebrunei",
+  "sci": "Simoliophis rochebrunei",
+  "name": "Simoliophis rochebrunei",
+  "family": "Simoliophiidae",
+  "type": "Other",
+  "countries": [
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Cenomanian)",
+  "mya": 95,
+  "length_m": null,
+  "length_note": "No published length found.",
+  "discovered": "1880, Henri-Émile Sauvage (Charentes, France)",
+  "fact": "Simoliophis was a slow-swimming sea snake from the same family as the legged snakes Pachyrhachis and Eupodophis, living in shallow seas over what is now France.",
+  "sources": [
+   "https://hal.archives-ouvertes.fr/insu-01228989",
+   "https://peeref.com/works/2108415"
+  ]
+ },
+ {
+  "id": "lapparentophis-defrennei",
+  "sci": "Lapparentophis defrennei",
+  "name": "Lapparentophis defrennei",
+  "family": "Lapparentophiidae",
+  "type": "Other",
+  "countries": [
+   "Algeria"
+  ],
+  "continents": [
+   "Africa"
+  ],
+  "venomous": 0,
+  "period": "Cretaceous (late Albian or Cenomanian)",
+  "mya": 100,
+  "length_m": null,
+  "length_note": "Known only from three vertebrae; no length.",
+  "discovered": "1959, Robert Hoffstetter (In Akhamil, Algeria)",
+  "fact": "Known from just three small backbones found in the Sahara, Lapparentophis was once thought to be the oldest snake in the world.",
+  "dispute": "Later studies place it in Ophidia (the wider snake group) rather than among true snakes.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Lapparentophis",
+   "https://hal-insu.archives-ouvertes.fr/insu-02317387/file/Vullo-CRPalevol-2019.pdf"
+  ]
+ },
+ {
+  "id": "seismophis-septentrionalis",
+  "sci": "Seismophis septentrionalis",
+  "name": "Seismophis septentrionalis",
+  "family": "",
+  "type": "Other",
+  "countries": [
+   "Brazil"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Cenomanian)",
+  "mya": 95,
+  "length_m": null,
+  "length_note": "Known from one vertebra; no length.",
+  "discovered": "2014, Annie Hsiou, Adriana Albino, Manuel Medeiros and Raquel Santos (Cajual Island, Maranhão, Brazil)",
+  "fact": "Seismophis is one of the oldest snakes known from Brazil, found on an island off the coast of Maranhão.",
+  "dispute": "Family not known.",
+  "sources": [
+   "https://www.doi.org/10.4202/APP.2012.0091",
+   "https://bioone.org/journals/acta-palaeontologica-polonica/volume-59/issue-3/app.2012.0091/The-oldest-Brazilian-Snakes-from-the-Cenomanian-Early-Late-Cretaceous/10.4202/app.2012.0091.full"
+  ]
+ },
+ {
+  "id": "xiaophis-myanmarensis",
+  "sci": "Xiaophis myanmarensis",
+  "name": "Xiaophis",
+  "family": "",
+  "type": "Other",
+  "countries": [
+   "Myanmar"
+  ],
+  "continents": [
+   "Asia"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Cenomanian)",
+  "mya": 99,
+  "length_m": 0.05,
+  "length_note": "The only fossil is a baby about 4.75 cm long (missing its head); adult size unknown.",
+  "discovered": "2018, Lida Xing, Michael Caldwell and colleagues (amber from Myanmar)",
+  "fact": "Xiaophis is a baby snake trapped in tree resin 99 million years ago - the first baby snake ever found preserved in amber.",
+  "dispute": "Family not known.",
+  "sources": [
+   "https://globalnews.ca/news/4338896/baby-snake-fossil-in-amber-xiaophis-myanmarensis",
+   "https://cosmosmagazine.com/biology/an-ancient-baby-snake-preserved-in-amber",
+   "https://www.guinnessworldrecords.com/world-records/545766-first-baby-snake-preserved-in-amber"
+  ]
+ },
+ {
+  "id": "coniophis-precedens",
+  "sci": "Coniophis precedens",
+  "name": "Coniophis precedens",
+  "family": "",
+  "type": "Other",
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "venomous": 0,
+  "period": "Late Cretaceous (Maastrichtian)",
+  "mya": 66,
+  "length_m": null,
+  "length_note": "Small; sources disagree on the length.",
+  "discovered": "1892, Othniel Charles Marsh (Lance Formation, Wyoming); redescribed 2012 by Nicholas Longrich and colleagues",
+  "fact": "Coniophis had a snake's body but a lizard-like head, and probably burrowed in the soil of floodplains alongside T. rex.",
+  "dispute": "A very early snake not placed in any living family.",
+  "sources": [
+   "https://www.nature.com/articles/nature11227",
+   "https://blogs.scientificamerican.com/observations/first-prehistoric-snake-slithered-out-on-land-not-at-sea/"
+  ]
+ },
+ {
+  "id": "portugalophis-lignites",
+  "sci": "Portugalophis lignites",
+  "name": "Portugalophis",
+  "family": "Parviraptoridae",
+  "type": "Other",
+  "countries": [
+   "Portugal"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "venomous": 0,
+  "period": "Late Jurassic",
+  "mya": 155,
+  "length_m": 1,
+  "length_note": "Estimate: about 1 m.",
+  "discovered": "2015, Michael Caldwell, Randall Nydam, Alessandro Palci and Sebastián Apesteguía (Guimarota coal mine, near Leiria, Portugal)",
+  "fact": "Portugalophis was found in an old coal mine in Portugal and lived about 155 million years ago, when Portugal was a swampy coast full of dinosaurs.",
+  "dispute": "Named as one of the oldest snakes in 2015, but a 2025 study argues the parviraptorids were snake-like lizard relatives, not true snakes. Still debated.",
+  "sources": [
+   "https://www.ualberta.ca/folio/2015/01/oldest-known-snake-fossils-identified.html",
+   "https://www.sciencedaily.com/releases/2015/01/150127122446.htm",
+   "https://www.amnh.org/about/press-center/fossil-lizard"
+  ]
+ },
+ {
+  "id": "diablophis-gilmorei",
+  "sci": "Diablophis gilmorei",
+  "name": "Diablophis gilmorei",
+  "family": "Parviraptoridae",
+  "type": "Other",
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "venomous": 0,
+  "period": "Late Jurassic",
+  "mya": 150,
+  "length_m": null,
+  "length_note": "No published length found.",
+  "discovered": "2015, Michael Caldwell and colleagues (Morrison Formation, Colorado)",
+  "fact": "Diablophis, the 'devil snake', lived in Colorado at the same time as Stegosaurus and Allosaurus.",
+  "dispute": "A 2025 study argues it was a snake-like lizard relative, not a true snake. Still debated.",
+  "sources": [
+   "https://www.sci.news/paleontology/science-eophis-underwoodi-oldest-known-snake-fossils-02440.html",
+   "https://www.amnh.org/about/press-center/fossil-lizard"
+  ]
+ },
+ {
+  "id": "parviraptor-estesi",
+  "sci": "Parviraptor estesi",
+  "name": "Parviraptor estesi",
+  "family": "Parviraptoridae",
+  "type": "Other",
+  "countries": [
+   "United Kingdom"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "venomous": 0,
+  "period": "Early Cretaceous",
+  "mya": 143,
+  "length_m": null,
+  "length_note": "No published length found.",
+  "discovered": "1994, Susan Evans (Purbeck Limestone, Dorset, England)",
+  "fact": "Parviraptor means 'little robber' and was found in rocks on the south coast of England.",
+  "dispute": "Called a stem snake in 2015, but its describer and a 2025 study think it was a snake-like lizard relative instead.",
+  "sources": [
+   "https://www.wikipedia.org/wiki/Parviraptor",
+   "https://www.amnh.org/about/press-center/fossil-lizard"
+  ]
+ },
+ {
+  "id": "eophis-underwoodi",
+  "sci": "Eophis underwoodi",
+  "name": "Eophis underwoodi",
+  "family": "Parviraptoridae",
+  "type": "Other",
+  "countries": [
+   "United Kingdom"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "venomous": 0,
+  "period": "Middle Jurassic",
+  "mya": 167,
+  "length_m": null,
+  "length_note": "Known only from tiny jaw pieces; no reliable length.",
+  "discovered": "2015, Michael Caldwell and colleagues (Kirtlington, Oxfordshire, England)",
+  "fact": "When it was named in 2015 Eophis, the 'dawn snake', was called the oldest snake in the world at about 167 million years old.",
+  "dispute": "A 2025 study treats the name as doubtful and the group as snake-like lizard relatives, not true snakes. Still debated.",
+  "sources": [
+   "https://www.sci.news/paleontology/science-eophis-underwoodi-oldest-known-snake-fossils-02440.html",
+   "https://www.ualberta.ca/folio/2015/01/oldest-known-snake-fossils-identified.html",
+   "https://www.amnh.org/about/press-center/fossil-lizard"
+  ]
+ },
+ {
+  "id": "palaeophis-colossaeus",
+  "sci": "Palaeophis colossaeus",
+  "name": "Palaeophis colossaeus",
+  "family": "Palaeophiidae",
+  "type": "Other",
+  "countries": [
+   "Mali"
+  ],
+  "continents": [
+   "Africa"
+  ],
+  "venomous": 0,
+  "period": "middle Eocene",
+  "mya": 45,
+  "length_m": 9,
+  "length_note": "Estimate: suggested to exceed 9 m (Rage 1983); the 2018 study by McCartney and colleagues re-estimated its size from vertebrae.",
+  "discovered": "1983, Jean-Claude Rage (Tamaguélelt, Mali)",
+  "fact": "Palaeophis colossaeus was the biggest sea snake ever, swimming in a shallow sea that once flooded what is now the Sahara Desert.",
+  "sources": [
+   "https://www.app.pan.pl/archive/published/app63/app004422017.html",
+   "https://treatment.plazi.org/GgServer/html/03878781FF980F40A4D0CED4FD908FFD"
+  ]
+ },
+ {
+  "id": "palaeophis-maghrebianus",
+  "sci": "Palaeophis maghrebianus",
+  "name": "Palaeophis maghrebianus",
+  "family": "Palaeophiidae",
+  "type": "Other",
+  "countries": [
+   "Morocco"
+  ],
+  "continents": [
+   "Africa"
+  ],
+  "venomous": 0,
+  "period": "early Eocene",
+  "mya": 52,
+  "length_m": null,
+  "length_note": "Large vertebrae suggest it may have been longer than any living snake (estimate, Houssaye et al. 2013).",
+  "discovered": "1952, Camille Arambourg (Ouled Abdoun phosphates, Morocco)",
+  "fact": "This giant sea snake's bones show it grew fast, and its fossil vertebrae are still dug up in Moroccan phosphate mines.",
+  "sources": [
+   "https://palass.org/publications/palaeontology-journal/archive/56/3/article_pp647-661",
+   "https://serpentresearch.com/2013/02/20/2013-02-a-very-large-aquatic-palaeophiine-snake-from-morrocos-eocene/"
+  ]
+ },
+ {
+  "id": "pterosphenus-schucherti",
+  "sci": "Pterosphenus schucherti",
+  "name": "Pterosphenus schucherti",
+  "family": "Palaeophiidae",
+  "type": "Other",
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "venomous": 0,
+  "period": "late Eocene",
+  "mya": 34,
+  "length_m": null,
+  "length_note": "No published length found.",
+  "discovered": "1898/1899 (sources differ), Frederic Augustus Lucas (Cocoa, Alabama)",
+  "fact": "Pterosphenus had a flat, tall body like a ribbon to help it swim, and its bones were found next to those of early whales in Alabama.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Pterosphenus",
+   "https://publication.plazi.org/GgServer/html/03A08794FFFFFF86CA44FC20E6BADCAB"
+  ]
+ },
+ {
+  "id": "archaeophis-proavus",
+  "sci": "Archaeophis proavus",
+  "name": "Archaeophis",
+  "family": "Palaeophiidae",
+  "type": "Other",
+  "countries": [
+   "Italy"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "venomous": 0,
+  "period": "early Eocene",
+  "mya": 49,
+  "length_m": null,
+  "length_note": "No published length found.",
+  "discovered": "1859, Abramo Massalongo (Monte Bolca, Italy)",
+  "fact": "Archaeophis may have had more backbones than any other snake known - about 565 of them (an older count says 507).",
+  "dispute": "The vertebra count differs between sources.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Archaeophis",
+   "https://naturalhistory.si.edu/sites/default/files/media/translated_publications/Janensch_06.pdf"
+  ]
+ },
+ {
+  "id": "eoconstrictor-fischeri",
+  "sci": "Eoconstrictor fischeri",
+  "name": "Eoconstrictor fischeri",
+  "family": "Boidae",
+  "type": "Boa",
+  "countries": [
+   "Germany"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "venomous": 0,
+  "period": "middle Eocene",
+  "mya": 47,
+  "length_m": null,
+  "length_note": "Medium to large; no single published length.",
+  "discovered": "2004, Stephan Schaal (as Palaeopython fischeri, Messel Pit); moved to Eoconstrictor in 2020 by Agustín Scanferla and Krister Smith",
+  "fact": "This boa from the Messel Pit in Germany had heat-sensing pits on its lips - the oldest sign of a snake that could 'see' warmth.",
+  "dispute": "The heat-sensing interpretation is the authors' reading of the fossil.",
+  "sources": [
+   "https://www.senckenberg.de/en/press-releases/fossil-snake-with-infrared-vision/",
+   "https://en.wikipedia.com/wiki/Eoconstrictor"
+  ]
+ },
+ {
+  "id": "boavus-idelmani",
+  "sci": "Boavus idelmani",
+  "name": "Boavus idelmani",
+  "family": "Boidae",
+  "type": "Boa",
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "venomous": 0,
+  "period": "early Eocene",
+  "mya": 52,
+  "length_m": 1.5,
+  "length_note": "Estimate for the genus: 1-2 m.",
+  "discovered": "1938, Charles Gilmore (Green River Formation, Wyoming)",
+  "fact": "Boavus idelmani was found in the rocks of an ancient lake in Wyoming that also preserved fish, birds and bats in amazing detail.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Boavus",
+   "https://home.nps.gov/fobu/learn/nature/fossil-reptiles.htm"
+  ]
+ },
+ {
+  "id": "eoanilius-europae",
+  "sci": "Eoanilius europae",
+  "name": "Eoanilius europae",
+  "family": "Aniliidae",
+  "type": "Other",
+  "countries": [
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "venomous": 0,
+  "period": "late Eocene",
+  "mya": 37,
+  "length_m": null,
+  "length_note": "Small; no published length found.",
+  "discovered": "1974, Jean-Claude Rage (Phosphorites du Quercy, France)",
+  "fact": "Eoanilius was a small burrowing snake from France, a distant cousin of the red pipe snake that still lives in South America.",
+  "dispute": "Exact age is uncertain because many Quercy fossil sites are poorly dated.",
+  "sources": [
+   "https://palaeovertebrata.com/articles/view/175",
+   "https://sjg.springeropen.com/articles/10.1007/s00015-019-00341-6/figures/15"
+  ]
+ },
+ {
+  "id": "python-europaeus",
+  "sci": "Python europaeus",
+  "name": "Python europaeus",
+  "family": "Pythonidae",
+  "type": "Python",
+  "countries": [
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "venomous": 0,
+  "period": "early-middle Miocene",
+  "mya": 15,
+  "length_m": null,
+  "length_note": "No published length found.",
+  "discovered": "2003, Zbigniew Szyndlar and Jean-Claude Rage (Vieux Collonges, France)",
+  "fact": "Pythons once lived in Europe - Python europaeus slithered around France about 15 million years ago when it was much warmer.",
+  "dispute": "Putting it in the genus Python rests mainly on one skull bone.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Python_europaeus",
+   "https://publication.plazi.org/GgServer/html/03F57B1BFFCCFFE1FD195663FDF9F75E"
+  ]
+ },
+ {
+  "id": "boa-blanchardensis",
+  "sci": "Boa blanchardensis",
+  "name": "Boa blanchardensis",
+  "family": "Boidae",
+  "type": "Boa",
+  "countries": [
+   "France"
+  ],
+  "provinces": [
+   "FR:Guadeloupe"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "venomous": 0,
+  "period": "late Pleistocene",
+  "mya": 0.012,
+  "length_m": 1.1,
+  "length_note": "Estimate: 73-139 cm, a dwarf island boa.",
+  "discovered": "2018, Corentin Bochaton and Salvador Bailon (Blanchard Cave, Marie-Galante, Guadeloupe)",
+  "fact": "This small boa lived in caves on the Caribbean island of Marie-Galante and disappeared around the end of the last Ice Age.",
+  "dispute": "Probably extinct at the end of the Pleistocene; it may possibly have survived a little into the Holocene.",
+  "sources": [
+   "https://en.wikipedia.org/wiki/Boa_blanchardensis",
+   "https://bioone.org/journals/Journal-of-Vertebrate-Paleontology/volume-38/issue-3/02724634.2018.1462829/A-New-Fossil-Species-of-iBoa-i-Linnaeus-1758-Squamata/10.1080/02724634.2018.1462829.full"
+  ]
+ }
+]
