@@ -6,16 +6,16 @@ Status: ✅ done · 🔧 in progress · ⏳ to do · ⚠️ partly done (see not
 ## 2026-11-09 — batch "trail cameras, cities, pages, impossible quiz"
 | # | Request | Status |
 |---|---|---|
-| 1 | Trail cameras on the map: a filter inside the Snake Sightings button; see people's cameras (and live ones if any); add your own; choose to show your name or not; add photos/videos of snakes; own dot colour; key in the bottom-left corner like the heatmap | 🔧 |
-| 2 | Snake Sightings must not look confusing; no numbers on the sightings dots | 🔧 |
-| 3 | Button on species (checklist, pages, map) to see a model of how the snake looks in real life | 🔧 |
+| 1 | Trail cameras on the map: a filter inside the Snake Sightings button; see people's cameras (and live ones if any); add your own; choose to show your name or not; add photos/videos of snakes; own dot colour; key in the bottom-left corner like the heatmap | ⚠️ v4.54 — built; needs Eduardo to add the new Firebase rules before cameras can be saved |
+| 2 | Snake Sightings must not look confusing; no numbers on the sightings dots | ✅ v4.54 |
+| 3 | Button on species (checklist, pages, map) to see a model of how the snake looks in real life | 🔧 buttons added v4.54; viewer on species pages coming |
 | 4 | Quiz mode "Impossible": unknown species, answer with cities etc., very short timer | 🔧 |
 | 5 | Species pages: who found (described) the species + info about that person; when they found it; how old (or an estimate) | 🔧 |
-| 6 | Heatmap preview in the map-style panel should look like the real heatmap | 🔧 |
-| 7 | Lots of extinct species, like Titanoboa | 🔧 |
+| 6 | Heatmap preview in the map-style panel should look like the real heatmap | ✅ v4.54 |
+| 7 | Lots of extinct species, like Titanoboa | ✅ v4.55 (42 added) |
 | 8 | Achievement animations that match each achievement | 🔧 |
-| 9 | Country panel: "Most species" and everything states can do, for cities too; cities that don't show up in See cities get added; not every city at once — a Show more button; prefer cities where lots of snakes live | 🔧 |
-| 10 | City heatmap like the states one; cities can do everything states can | 🔧 |
+| 9 | Country panel: "Most species" and everything states can do, for cities too; cities that don't show up in See cities get added; not every city at once — a Show more button; prefer cities where lots of snakes live | ✅ v4.54 (+4,000 towns) |
+| 10 | City heatmap like the states one; cities can do everything states can | ⚠️ v4.54 — cities shaded by species, Most species, Show more; city pages coming |
 | 11 | Pages for states and cities with A TON of info (families, who found the most common species, etc.), not just species | 🔧 |
 | 12 | Keep track of everything Eduardo says (this file) | ✅ |
 
