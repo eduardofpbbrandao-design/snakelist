@@ -1,0 +1,209 @@
+{
+  "id": "natrix-maura",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "Small: up to about 80 cm",
+      "src": [
+        "fws"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wiki"
+      ]
+    },
+    "diet": {
+      "text": "Fish and amphibians",
+      "src": [
+        "wiki",
+        "fws"
+      ]
+    },
+    "iucn": {
+      "code": "LC",
+      "text": "Least Concern",
+      "long": "Listed as Least Concern on the IUCN Red List.",
+      "src": [
+        "fishi"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Viperine Snake is a small, harmless water snake of south-western Europe and north-western Africa. It spends much of its life in and around rivers, ponds and streams, hunting fish and frogs. Its zigzag pattern, triangular-looking head and bad temper make many people mistake it for a viper - which is how it got its name - but it has no dangerous venom.",
+        "src": [
+          "wiki",
+          "fws"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Grey, brown or reddish above, with a dark zigzag stripe along the middle of the back and a row of dark eye-spots with yellowish centres along each side. Viper-like markings and a head that can look triangular are the reason it is confused with vipers.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "A relatively small snake, reaching up to about 80 cm in total length.",
+        "src": [
+          "fws"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Portugal, Spain (including Gibraltar), France, south-western Switzerland and north-western Italy, plus Sardinia, and in North Africa Morocco, Algeria, Tunisia and Libya. SnakeList's map below currently shows only its European countries.",
+        "src": [
+          "rdb",
+          "wiki"
+        ]
+      },
+      {
+        "label": "Introduced",
+        "text": "Mallorca and Menorca in the Balearic Islands. A genetic study suggests it reached Mallorca from south-eastern France in Roman times, so after some 2,000 years the Balearic authorities treat it as part of the islands' fauna rather than as a modern invasive snake.",
+        "src": [
+          "guicking",
+          "mdb",
+          "fws"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Closely tied to fresh water: rivers, streams, ponds, lakes, irrigation channels and other wetlands, where it hunts in the water and basks on the banks.",
+        "src": [
+          "fws",
+          "wiki"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "When threatened on land it hisses and strikes in a viper-like way, but usually does not actually bite.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly fish and amphibians, caught in the water. On Mallorca it preys on Perez's Frog, among other animals.",
+        "src": [
+          "wiki",
+          "fws"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs. In one study, females did not lay bigger or more frequent clutches when food was more plentiful, unlike many other snakes.",
+        "src": [
+          "wiki",
+          "raco"
+        ]
+      }
+    ],
+    "conservation": [
+      {
+        "text": "Not threatened overall. As a water snake it depends on clean rivers and wetlands.",
+        "src": [
+          "fishi",
+          "wiki"
+        ]
+      },
+      {
+        "label": "On Mallorca",
+        "text": "Predation by viperine snakes is believed to be one of the causes of the decline of the rare Mallorcan Midwife Toad, and removing snakes has been tried at some toad sites.",
+        "src": [
+          "moore",
+          "cej"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "natrix-astreptophora",
+      "text": "the other Natrix of Iberia; it has reddish eyes and lacks the Viperine Snake's dark zigzag along the back.",
+      "src": [
+        "moroccoherps",
+        "wiki"
+      ]
+    }
+  ],
+  "funfacts": [
+    {
+      "text": "Its name means it pretends to be a viper - it copies a viper's looks and behaviour, but it is harmless.",
+      "src": [
+        "wiki"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "Natrix maura",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Natrix_maura"
+    },
+    "rdb": {
+      "title": "Natrix maura",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Natrix&species=maura"
+    },
+    "fws": {
+      "title": "Ecological Risk Screening Summary: Viperine Water Snake (Natrix maura)",
+      "publisher": "U.S. Fish and Wildlife Service",
+      "url": "https://www.fws.gov/sites/default/files/documents/Ecological-Risk-Screening-Summary-Viperine-Water-Snake.pdf"
+    },
+    "guicking": {
+      "title": "Introduced alien or persecuted native? Resolving the origin of the viperine snake (Natrix maura) on Mallorca",
+      "authors": "Guicking et al.",
+      "year": 2006,
+      "publisher": "Biodiversity and Conservation",
+      "url": "https://heibib.ub.uni-heidelberg.de/search/Record/1549889672/Details"
+    },
+    "mdb": {
+      "title": "Mallorca joins fight against invasive snakes in the Balearics",
+      "publisher": "Majorca Daily Bulletin",
+      "year": 2025,
+      "url": "https://amp.majorcadailybulletin.com/news/did-you-know/2025/10/08/137091/mallorca-joins-fight-against-invasive-snakes-balearics.html"
+    },
+    "raco": {
+      "title": "Reproductive study of Natrix maura",
+      "publisher": "Miscel·lània Zoològica (RACO)",
+      "url": "https://raco.cat/index.php/Mzoologica/article/download/90043/169213"
+    },
+    "fishi": {
+      "title": "Viperine snake",
+      "publisher": "Fishipedia",
+      "url": "https://www.fishi-pedia.com/reptiles/natrix-maura"
+    },
+    "moroccoherps": {
+      "title": "Natrix astreptophora",
+      "publisher": "MoroccoHerps",
+      "url": "https://www.moroccoherps.com/en/?p=3149"
+    },
+    "moore": {
+      "title": "Conservation biology of the Mallorcan midwife toad (PhD thesis)",
+      "authors": "R. Moore",
+      "year": 2002,
+      "publisher": "University of Kent",
+      "url": "https://kar.kent.ac.uk/86039"
+    },
+    "cej": {
+      "title": "The ferreret, the management of a critically ill species",
+      "publisher": "Conservation Evidence Journal",
+      "url": "https://conservationevidencejournal.com/individual-study/5065"
+    }
+  }
+}

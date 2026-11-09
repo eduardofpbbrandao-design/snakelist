@@ -1,0 +1,47 @@
+{
+  "id": "agkistrodon-contortrix",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "Usually about 60-90 cm", "src": ["uga"]},
+    "reproduction": {"text": "Live young, typically 6-9", "src": ["uga"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Copperhead is a medium-sized pit viper of the eastern United States, named for its coppery head. Its pattern of hourglass-shaped bands makes it hard to spot among dead leaves. It is venomous, but it usually bites only if someone steps on it, grabs it or comes very close.", "src": ["uga", "pfw"]}
+    ],
+    "identification": [
+      {"text": "A tan to pinkish snake with chestnut-brown or mahogany crossbands. Seen from above the bands are narrow in the middle of the back and wide on the sides, like an hourglass; sometimes they are broken in the middle.", "src": ["uga", "inherp"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Usually about 61 to 91 cm (24 to 36 in) long; northern adults are often 66 to 86 cm.", "src": ["uga", "pfw"]}
+    ],
+    "variation": [
+      {"label": "Young", "text": "Babies have a bright yellow tail tip, which they wiggle like a worm or caterpillar to lure frogs and lizards within striking range.", "src": ["orianne"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "The eastern United States.", "src": ["orianne"]}
+    ],
+    "habitat": [
+      {"text": "In many areas it lives in high, dry, rocky, well-wooded places dominated by oaks and hickories.", "src": ["inherp"]}
+    ],
+    "diet": [
+      {"text": "Frogs, toads, lizards, insects and caterpillars, mice and birds.", "src": ["uga", "pfw"]}
+    ],
+    "reproduction": [
+      {"text": "Gives birth to live young in late summer or autumn. Litters range from 2 to 17, usually 6 to 9; in Indiana, females give birth to 4 to 8 young every other year.", "src": ["uga", "inherp"]}
+    ],
+    "taxonomy": [
+      {"text": "A 2015 genetic study proposed splitting the copperhead into two species: the Eastern Copperhead (*A. contortrix*) and the Broad-banded Copperhead (*A. laticinctus*) of the south-central United States.", "src": ["orianne", "uga"]}
+    ]
+  },
+  "funfacts": [
+    {"text": "Baby copperheads use their yellow tail tips as fishing lures.", "src": ["orianne"]}
+  ],
+  "sources": {
+    "uga": {"title": "Natural History Series: Copperhead", "publisher": "University of Georgia Cooperative Extension", "url": "https://fieldreport.caes.uga.edu/publications/C866-1/natural-history-series-copperhead/"},
+    "pfw": {"title": "Copperhead fact sheet", "publisher": "Purdue University Fort Wayne herpetology", "url": "https://sites.pfw.edu/herpetology-dev/outreach/Accounts/Viperidae/Agkistrodon/Copperhead%20(Agkistrodon%20contortrix)/CopperheadFactSheet.pdf"},
+    "orianne": {"title": "Eastern Copperhead", "publisher": "The Orianne Society", "url": "https://www.oriannesociety.org/priority-species/eastern-copperhead/"},
+    "inherp": {"title": "Eastern Copperhead (Agkistrodon contortrix)", "publisher": "Indiana Herp Atlas", "url": "https://www.inherpatlas.org/species/agkistrodon_contortrix"}
+  }
+}

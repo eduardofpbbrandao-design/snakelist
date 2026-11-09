@@ -1,0 +1,46 @@
+{
+  "id": "oxyuranus-microlepidotus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "About 1.8-2.5 m", "src": ["taronga", "am"]},
+    "reproduction": {"text": "Lays eggs (about 12-20)", "src": ["billabong"]},
+    "diet": {"text": "Mainly the Long-haired Rat", "src": ["am"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Inland Taipan has the most toxic venom of any land snake in laboratory tests on mice. Yet it is far from the most dangerous snake to people: it is shy, prefers to escape, and lives in remote, dry inland Australia, so bites are very rare.", "src": ["am", "taronga"]}
+    ],
+    "identification": [
+      {"text": "A medium-large elapid whose colour changes with the seasons: darker in winter and paler in summer. The darker winter colour probably helps it soak up more of the sun's heat when it is cold.", "src": ["am", "billabong"]}
+    ],
+    "size": [
+      {"label": "Adults", "text": "Sources give lengths of around 1.8 to 2.5 m, with about 2 m typical.", "src": ["taronga", "billabong"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "Found only in Australia: south-western Queensland and north-eastern and central South Australia.", "src": ["billabong", "am"]}
+    ],
+    "habitat": [
+      {"text": "Remote semi-arid country in the interior of Australia.", "src": ["taronga"]}
+    ],
+    "behaviour": [
+      {"text": "Very shy: it nearly always tries to flee rather than defend itself.", "src": ["billabong", "taronga"]}
+    ],
+    "diet": [
+      {"text": "Mostly small mammals. Its favourite prey is the Long-haired Rat; it also eats house mice and small marsupials called dasyurids.", "src": ["am"]}
+    ],
+    "reproduction": [
+      {"text": "Lays eggs; one source reports clutches of 12 to 20 eggs that hatch after about 66 days.", "src": ["billabong"]}
+    ]
+  },
+  "funfacts": [
+    {"text": "In tests on mice, the venom from one bite would be enough to kill around 250,000 mice.", "src": ["dino"]},
+    {"text": "It turns darker in winter, like putting on a heat-absorbing coat.", "src": ["am"]}
+  ],
+  "sources": {
+    "am": {"title": "Inland Taipan", "publisher": "Australian Museum", "url": "https://australian.museum/learn/animals/reptiles/inland-taipan/"},
+    "taronga": {"title": "Inland Taipan", "publisher": "Taronga Conservation Society Australia", "url": "https://cdn.taronga.org.au/animals/inland-taipan"},
+    "billabong": {"title": "Inland Taipan", "publisher": "Billabong Sanctuary", "url": "https://www.billabongsanctuary.com.au/?p=2602"},
+    "dino": {"title": "Inland taipan", "publisher": "DinoAnimals", "url": "https://dinoanimals.com/?p=1480"}
+  }
+}

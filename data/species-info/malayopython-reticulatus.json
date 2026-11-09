@@ -1,0 +1,161 @@
+{
+  "id": "malayopython-reticulatus",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {
+      "text": "Commonly 3-6 m; verified record 6.95 m",
+      "src": [
+        "brit",
+        "activewild"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs; the mother coils around them",
+      "src": [
+        "brit"
+      ]
+    },
+    "diet": {
+      "text": "Mammals and birds",
+      "src": [
+        "brit",
+        "columbus"
+      ]
+    },
+    "iucn": {
+      "code": "LC",
+      "text": "Least Concern",
+      "long": "Listed as Least Concern by Britannica and zoo sources citing the IUCN; one source says it has not been assessed, so treat this with some care.",
+      "src": [
+        "brit",
+        "columbus",
+        "activewild"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Reticulated Python is the longest snake in the world: a non-venomous constrictor of the forests and rivers of Southeast Asia. Its name comes from the net-like (reticulated) pattern on its back. It swims very well, which helped it reach many small islands across its range.",
+        "src": [
+          "brit",
+          "activewild"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A long, fairly slender python with a complex, net-like (reticulated) pattern along the back - the feature that gives it its name.",
+        "src": [
+          "brit"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Typical adults",
+        "text": "Most adults measure a few metres; zoo sources give a range of about 1.5 to 6.5 m, with 3 to 6 m common.",
+        "src": [
+          "columbus",
+          "activewild"
+        ]
+      },
+      {
+        "label": "Largest records",
+        "text": "The longest scientifically verified specimen measured 6.95 m (22.8 ft) and weighed 59 kg. Reports of snakes up to 10 m exist but are not verified, and sources disagree about them.",
+        "src": [
+          "activewild",
+          "brit"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southeast Asia, from Bangladesh and Myanmar through Indochina and the Malay Peninsula to Indonesia and the Philippines, and on islands west of New Guinea.",
+        "src": [
+          "activewild",
+          "brit"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Tropical forest, usually near rivers and other water.",
+        "src": [
+          "brit",
+          "activewild"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Young pythons eat small prey such as rats; as they grow they take larger mammals - up to deer and pigs - and also birds.",
+        "src": [
+          "columbus",
+          "brit"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs - usually 20 to 50, though clutches of more than 100 have been recorded. The female coils around the eggs to keep them warm. Well-fed females may breed every one to three years.",
+        "src": [
+          "brit",
+          "activewild"
+        ]
+      }
+    ],
+    "conservation": [
+      {
+        "text": "Still widespread, but large numbers are collected for their skins, for meat and for the pet trade, and big pythons are often killed out of fear.",
+        "src": [
+          "brit",
+          "activewild"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "Long called *Python reticulatus*. Genetic studies published in 2014 moved it, with the Timor Python, into a new genus, *Malayopython*.",
+        "src": [
+          "activewild"
+        ]
+      }
+    ]
+  },
+  "synonyms": {
+    "names": [
+      "*Python reticulatus*"
+    ],
+    "src": [
+      "activewild"
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "It is the world's longest snake - the record verified specimen was nearly 7 m long.",
+      "src": [
+        "activewild"
+      ]
+    }
+  ],
+  "sources": {
+    "brit": {
+      "title": "Reticulated python",
+      "publisher": "Encyclopaedia Britannica",
+      "url": "https://www.britannica.com/animal/reticulated-python"
+    },
+    "activewild": {
+      "title": "Reticulated python facts",
+      "publisher": "Active Wild",
+      "url": "https://www.activewild.com/reticulated-python-facts/"
+    },
+    "columbus": {
+      "title": "Reticulated python",
+      "publisher": "Columbus Zoo and Aquarium",
+      "url": "https://columbuszoo.org/animals/reticulated-python"
+    }
+  }
+}

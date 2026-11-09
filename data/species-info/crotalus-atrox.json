@@ -1,0 +1,226 @@
+{
+  "id": "crotalus-atrox",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "Baird & Girard, 1853",
+  "facts": {
+    "length": {
+      "text": "Commonly about 1.2 m; record 2.13 m",
+      "src": [
+        "wiki"
+      ]
+    },
+    "reproduction": {
+      "text": "Gives birth to live young",
+      "src": [
+        "adw",
+        "arp"
+      ]
+    },
+    "diet": {
+      "text": "Mostly small mammals",
+      "src": [
+        "wiki",
+        "adw"
+      ]
+    },
+    "iucn": {
+      "code": "LC",
+      "text": "Least Concern",
+      "long": "Listed as Least Concern on the IUCN Red List, thanks to its very wide range and large population.",
+      "src": [
+        "wiki",
+        "pierre"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Western Diamond-backed Rattlesnake is a large, heavy pit viper of the dry south-western United States and Mexico. It is one of the best-known rattlesnakes in North America, recognised by the diamond pattern on its back and the bold black-and-white rings just in front of its rattle. Its venom is dangerous to people: it is thought to cause most snakebite deaths in northern Mexico.",
+        "src": [
+          "wiki",
+          "adw"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A thick-bodied rattlesnake with a broad, triangular head and heat-sensing pits between eye and nostril. The back is grey, brown or pinkish, marked with darker, light-edged diamonds, and the scales are speckled with dark spots, giving a dusty look.",
+        "src": [
+          "adw",
+          "rss"
+        ]
+      },
+      {
+        "text": "The tail just before the rattle has black and white rings of about the same width - the reason for its nickname, coon tail.",
+        "src": [
+          "adw",
+          "rss",
+          "wiki"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Typical adults",
+        "text": "Adults commonly reach about 120 cm; snakes over 150 cm are uncommon.",
+        "src": [
+          "wiki"
+        ]
+      },
+      {
+        "label": "Largest record",
+        "text": "The largest reliably measured specimen was about 213 cm long.",
+        "src": [
+          "wiki"
+        ]
+      },
+      {
+        "label": "Newborns",
+        "text": "Babies are about 30 cm long at birth.",
+        "src": [
+          "arp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The south-western United States - Texas, Oklahoma, New Mexico and Arizona, reaching southern California and Nevada - and much of northern and central Mexico.",
+        "src": [
+          "adw",
+          "wiki"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Very adaptable. It lives in deserts, grasslands, scrubland, rocky canyons and even pine-oak forest, from coastal lowlands up to about 2,100 m (7,000 ft). It shelters in rock crevices and in burrows dug by mammals.",
+        "src": [
+          "adw",
+          "peec"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Lives on the ground. It is more active by day in spring and autumn, and mostly at dusk and at night in the heat of summer. In the cooler parts of its range it is usually inactive from late autumn to early spring.",
+        "src": [
+          "wiki",
+          "mtl"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly small mammals such as rodents and rabbits; it also eats birds, lizards and amphibians. Young snakes eat more lizards than adults do.",
+        "src": [
+          "wiki",
+          "adw"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young instead of laying eggs. Litters of up to about 25 babies have been reported, and the young are on their own soon after birth. Females mature at around three years old.",
+        "src": [
+          "arp",
+          "adw"
+        ]
+      }
+    ],
+    "conservation": [
+      {
+        "text": "Not threatened overall and locally common. It is still collected in large numbers at rattlesnake round-ups in Texas, which have been criticised by wildlife groups.",
+        "src": [
+          "pierre",
+          "e360"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "crotalus-scutulatus",
+      "text": "shares much of its range. The Mojave usually has white tail rings wider than the black ones (about 2:1), two or three large scales between the scales above the eyes instead of several small ones, and a pale stripe behind the eye that runs past the corner of the mouth. Both species vary, so check several features together.",
+      "src": [
+        "rss",
+        "ths",
+        "birdhike"
+      ]
+    }
+  ],
+  "funfacts": [
+    {
+      "text": "Its nickname coon tail comes from the black-and-white rings on its tail, which look like a raccoon's.",
+      "src": [
+        "adw",
+        "wiki"
+      ]
+    },
+    {
+      "text": "A rattlesnake adds a new segment to its rattle each time it sheds its skin - but segments also break off, so you can't count them to find its age.",
+      "src": [
+        "natgeo"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "Western diamondback rattlesnake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Western_diamondback_rattlesnake"
+    },
+    "adw": {
+      "title": "Crotalus atrox",
+      "publisher": "Animal Diversity Web, University of Michigan",
+      "url": "https://animaldiversity.org/accounts/Crotalus_atrox/"
+    },
+    "arp": {
+      "title": "Western diamondback rattlesnake",
+      "publisher": "Australian Reptile Park",
+      "url": "https://www.reptilepark.com.au/about/meet-our-animals/western-diamondback-rattlesnake"
+    },
+    "peec": {
+      "title": "Western Diamondback Rattlesnake",
+      "publisher": "Pajarito Environmental Education Center (PEEC) Nature",
+      "url": "https://peecnature.org/?p=50836"
+    },
+    "pierre": {
+      "title": "Crotalus atrox",
+      "publisher": "Pierre Wildlife",
+      "url": "https://pierrewildlife.com/?p=6079"
+    },
+    "rss": {
+      "title": "How to tell the difference between a Mojave Rattlesnake and a Western Diamondback Rattlesnake",
+      "publisher": "Rattlesnake Solutions",
+      "url": "https://rattlesnakesolutions.com/snakeblog/?p=1085"
+    },
+    "ths": {
+      "title": "Mojave Rattlesnake",
+      "publisher": "Tucson Herpetological Society",
+      "url": "https://www.tucsonherpsociety.info/?p=2684"
+    },
+    "birdhike": {
+      "title": "Mohave Rattlesnake (Crotalus scutulatus)",
+      "publisher": "Bird and Hike",
+      "url": "https://birdandhike.com/Wildlife/Snake/Cro_scu/_Cro_scu.htm"
+    },
+    "mtl": {
+      "title": "Western Diamond-backed Rattlesnake",
+      "publisher": "Mexican Terrestrial Life",
+      "url": "https://mexican-terrestrial-life.org/western-diamond-backed-rattlesnake/"
+    },
+    "e360": {
+      "title": "Rattlesnake roundups",
+      "publisher": "Yale Environment 360",
+      "url": "https://e360.yale.edu/features/rattlesnake-roundups"
+    },
+    "natgeo": {
+      "title": "Rattlesnakes, venom and conservation",
+      "publisher": "National Geographic",
+      "url": "https://www.nationalgeographic.com/animals/article/rattlesnakes-venom-conservation"
+    }
+  }
+}

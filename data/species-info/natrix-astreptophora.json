@@ -1,0 +1,186 @@
+{
+  "id": "natrix-astreptophora",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "authority": "(Seoane, 1884)",
+  "facts": {
+    "length": {
+      "text": "Males about 55-85 cm, females about 90-120 cm",
+      "src": [
+        "fishi"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wiki",
+        "fishi"
+      ]
+    },
+    "diet": {
+      "text": "Mainly fish and amphibians",
+      "src": [
+        "wiki"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Iberian Grass Snake, also called the Red-eyed Grass Snake, is the grass snake of Portugal, Spain, southern France and the coast of north-western Africa. For a long time it was treated as part of the common Grass Snake, but in 2016 scientists showed it is a separate species. It is harmless to people and lives near water, where it hunts fish and frogs.",
+        "src": [
+          "wiki",
+          "scinews"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Its most reliable feature is the reddish colour of the iris, which sets it apart from all other grass snakes. Compared with them it also has fewer belly scales and a differently shaped skull - details that need a specimen in the hand.",
+        "src": [
+          "scinews",
+          "pokrant"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Females grow much larger than males: about 90-120 cm, against about 55-85 cm for males.",
+        "src": [
+          "fishi"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The Iberian Peninsula (Portugal and Spain), neighbouring southern France, and coastal parts of the Maghreb from around Tangier to Tunisia. The North African snakes are treated as a separate subspecies, *N. a. algerica*. SnakeList's map below currently shows only its European countries.",
+        "src": [
+          "wiki",
+          "fritz2020"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Slow-flowing and still fresh water - streams, rivers, ponds and their banks - usually in the shallows. In Iberian rivers it is more numerous where there are no invasive fish.",
+        "src": [
+          "fishi",
+          "wiki"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly fish and amphibians; small mammals and young birds are also eaten.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs. Sources disagree on clutch size: young females are thought to lay around ten eggs, while large, older females may lay many more (figures of 50 and even 100 are given).",
+        "src": [
+          "wiki",
+          "fishi"
+        ]
+      }
+    ],
+    "conservation": [
+      {
+        "text": "Sources disagree on its global status: one lists it as Least Concern in the European and global IUCN Red Lists, another as not yet evaluated. Andorra's national Red List rates it Vulnerable there.",
+        "src": [
+          "wiki",
+          "fishi",
+          "nrl"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "Described by Seoane in the 1880s, then treated for over a century as a subspecies of the Grass Snake (*Natrix natrix astreptophora*). A 2016 study of its body shape, skull and DNA recognised it as a full species. Older field guides therefore call it a grass snake.",
+        "src": [
+          "pokrant",
+          "scinews"
+        ]
+      },
+      {
+        "text": "Fossils of this snake from Spain date from the late Pliocene to the late Pleistocene.",
+        "src": [
+          "wiki"
+        ]
+      }
+    ]
+  },
+  "similar": [
+    {
+      "id": "natrix-maura",
+      "text": "shares its rivers in Iberia; the Viperine Snake is smaller and has a dark zigzag along its back and dark side spots, while the Iberian Grass Snake has reddish eyes.",
+      "src": [
+        "wiki",
+        "scinews"
+      ]
+    },
+    {
+      "id": "natrix-helvetica",
+      "text": "the Barred Grass Snake, which meets it in France; it lacks the red iris.",
+      "src": [
+        "scinews"
+      ]
+    }
+  ],
+  "synonyms": {
+    "names": [
+      "*Natrix natrix astreptophora* (Seoane, 1884) - as a subspecies of the Grass Snake"
+    ],
+    "src": [
+      "pokrant",
+      "wiki"
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Scientists only recognised this snake as its own species in 2016 - it had been hiding in plain sight as a kind of grass snake.",
+      "src": [
+        "scinews"
+      ]
+    }
+  ],
+  "sources": {
+    "wiki": {
+      "title": "Natrix astreptophora",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Natrix_astreptophora"
+    },
+    "scinews": {
+      "title": "Iberian Grass Snake: cryptic new species of snake identified",
+      "publisher": "Sci.News",
+      "year": 2016,
+      "url": "https://www.sci.news/biology/iberian-grass-snake-natrix-astreptophora-cryptic-new-species-03650.html"
+    },
+    "pokrant": {
+      "title": "Natrix astreptophora (Seoane, 1884) should be recognized as a distinct species",
+      "authors": "Pokrant et al.",
+      "publisher": "Biological Journal of the Linnean Society",
+      "year": 2016,
+      "url": "https://is.muni.cz/publication/1366169"
+    },
+    "fritz2020": {
+      "title": "Natrix astreptophora",
+      "publisher": "MoroccoHerps (citing Fritz & Schmidtler 2020)",
+      "url": "https://www.moroccoherps.com/en/?p=3149"
+    },
+    "fishi": {
+      "title": "Natrix astreptophora",
+      "publisher": "Fishipedia",
+      "url": "https://fishi-pedia.com/reptiles/natrix-astreptophora"
+    },
+    "nrl": {
+      "title": "Andorra 2023 - Natrix astreptophora",
+      "publisher": "National Red List",
+      "url": "https://www.nationalredlist.org/node/53783"
+    }
+  }
+}

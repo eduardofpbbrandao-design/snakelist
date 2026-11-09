@@ -1,0 +1,37 @@
+{
+  "id": "bitis-arietans",
+  "reviewed": "2026-11-09",
+  "status": "rich",
+  "facts": {
+    "length": {"text": "Usually about 1 m; large ones about 1.9 m", "src": ["wiki"]},
+    "reproduction": {"text": "Live young, sometimes very many", "src": ["wiki"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "The Puff Adder is a thick-bodied viper found across most of Africa and in south-western Arabia. It is thought to cause more snakebite deaths than any other African snake - because it is so widespread, often lives near people, and is quick to bite when disturbed.", "src": ["wiki", "dw"]}
+    ],
+    "size": [
+      {"label": "Typical adults", "text": "Usually about 1 m in total length.", "src": ["wiki"]},
+      {"label": "Largest", "text": "Big specimens reach around 190 cm. Snakes from Saudi Arabia are smaller, usually under 80 cm.", "src": ["wiki"]}
+    ],
+    "distribution": [
+      {"label": "Native", "text": "Most of Africa except the Sahara and the rainforests, plus south-western Arabia (Saudi Arabia, Yemen and possibly southern Oman).", "src": ["wiki"]}
+    ],
+    "habitat": [
+      {"text": "Open country such as savanna and grassland.", "src": ["wiki"]}
+    ],
+    "behaviour": [
+      {"text": "Named for the way it hisses and puffs itself up when approached.", "src": ["wiki"]}
+    ],
+    "reproduction": [
+      {"text": "Gives birth to live young. Very large females, especially from East Africa, have the biggest litters: a female from Kenya kept in a Czech zoo gave birth to 156 babies, the largest litter recorded for any snake.", "src": ["wiki"]}
+    ]
+  },
+  "funfacts": [
+    {"text": "A Puff Adder holds the record for the most babies born at once to any snake: 156.", "src": ["wiki"]}
+  ],
+  "sources": {
+    "wiki": {"title": "Puff adder", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Puff_adder"},
+    "dw": {"title": "Deadliest snakes in Africa", "publisher": "BBC Discover Wildlife", "url": "https://www.discoverwildlife.com/animal-facts/reptiles/deadliest-snakes-in-africa"}
+  }
+}
