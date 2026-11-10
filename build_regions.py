@@ -377,7 +377,7 @@ def region_page(r, L, ctx):
                        sub=esc("%s %s of %s" % (B.an(word).capitalize(), word, B.the_place(r["country"]))), lead=esc(lead), stats=stats_html(r, L, ctx),
                        cta=('<a class="cy-btn" href="../../?map=%s">View on SnakeList map</a>' % esc(quote(r["name"]))), about=about, toc=toc(S, order),
                        body=sections_html(S, order), robots="index,follow,max-image-preview:large" if n >= MIN_INDEX else "noindex,follow",
-                       site_head=B.site_header("../../", "species"), site_foot=B.site_footer("../../", "Photos: iNaturalist observers (CC licences) - credited on each species page."), author=B.AUTHOR)
+                       site_head=B.site_header("../../", "species"), site_foot=B.site_footer("../../", "Every photo belongs to its photographer and is used under the Creative Commons licence they chose, credited with it."), author=B.AUTHOR)
 
 
 def city_page(city, r, L, ctx):
@@ -410,7 +410,7 @@ def city_page(city, r, L, ctx):
                        h1="Snakes around " + esc(city["name"]), sub=sub, lead=esc(lead), stats=stats_html(r, L, ctx),
                        cta='<a class="cy-btn" href="../region/%s">All about %s</a>' % (r["key"], esc(r["name"])), about=about, toc=toc(S, order), body=sections_html(S, order),
                        robots="index,follow,max-image-preview:large" if n >= MIN_INDEX else "noindex,follow",
-                       site_head=B.site_header("../../", "species"), site_foot=B.site_footer("../../", "Photos: iNaturalist observers (CC licences) - credited on each species page."), author=B.AUTHOR)
+                       site_head=B.site_header("../../", "species"), site_foot=B.site_footer("../../", "Every photo belongs to its photographer and is used under the Creative Commons licence they chose, credited with it."), author=B.AUTHOR)
 
 
 def og_img(L):
