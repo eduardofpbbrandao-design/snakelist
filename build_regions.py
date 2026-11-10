@@ -173,6 +173,10 @@ def build(cards, by_id, info, invasive, iso, harm):
         html = region_page(r, L, ctx)
         open("%s/region/%s.html" % (B.OUT, k), "w", encoding="utf-8").write(html); keep.add(k + ".html")
         if len(L) >= MIN_INDEX: urls.append(B.SITE + "species/region/" + k)
+    # the app's map links to these pages: its own place keys ("US:TX", "PT:Lisboa") and city rows -> page names
+    pages = {"r": {"%s:%s" % (cc.upper(), raw): k for (cc, raw), k in RAW.items()},
+             "c": {"%s|%s" % (city["name"], city["country"]): sl for sl, city in CITY.items()}}
+    open(B.OUT + "/pages.js", "w", encoding="utf-8").write("window.SL_PAGES=" + json.dumps(pages, ensure_ascii=False, separators=(",", ":"), sort_keys=True) + ";\n")
     keepc = set()
     for sl, city in CITY.items():
         r = REG[city["region"]]

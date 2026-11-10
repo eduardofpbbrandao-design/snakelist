@@ -1321,6 +1321,9 @@ var s=document.createElement('p');s.className='src';s.innerHTML='From <a href="'
 # species (each card's own built-in photo tile, never another species'), and - for lists long
 # enough to need them - search, venom/family filters and sorting, all over that country's own
 # species only. Everything is in the HTML (crawlable); country.js only filters, sorts and pages.
+# the names as the countries themselves write them (the app's SL_DISPLAY_NAME); page addresses stay the same
+COUNTRY_DISPLAY = {"Sao Tome and Principe": "São Tomé and Príncipe", "Ivory Coast": "Côte d'Ivoire", "Turkey": "Türkiye",
+                   "Cape Verde": "Cabo Verde", "Reunion": "Réunion", "Curacao": "Curaçao"}
 def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
     """one template for the country, family and genus pages (kind): photo cards, search, filters
     and sorting over that group's own species only"""
@@ -1347,6 +1350,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
         if nv == n: return "all venomous" if n > 1 else "venomous"
         if nv == 0: return "none venomous" if n > 1 else "non-venomous"
         return "%s venomous and %s non-venomous" % ("{:,}".format(nv), "{:,}".format(n - nv))
+    dn = COUNTRY_DISPLAY.get(name, name) if kind == "country" else name
     if kind == "family":
         h1 = name
         lead = "The family %s%s has %s in SnakeList (%s), in %s." % (name, (" (%s)" % FAMILY_INFO[name]["common"]) if FAMILY_INFO.get(name, {}).get("common") else "", plural(n, "species", "species"), vsplit(), plural(nfam, "genus", "genera"))
@@ -1357,15 +1361,15 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
             name, " (family %s)" % family if family else "", plural(n, "species", "species"), vsplit(), plural(ncountry, "country", "countries"))
         title = "%s snakes: all %s, with photos | SnakeList" % (name, plural(n, "species", "species"))
     elif n:
-        h1 = "Snakes of %s" % name
+        h1 = "Snakes of %s" % dn
         lead = "%s %s recorded in %s in SnakeList: %d venomous and %d non-venomous%s." % (
-            plural(n, "snake species", "snake species"), "is" if n == 1 else "are", the_place(name), nv, n - nv,
+            plural(n, "snake species", "snake species"), "is" if n == 1 else "are", the_place(dn), nv, n - nv,
             ", from %s" % plural(nfam, "family", "families") if nfam else "")
-        title = "Snakes of %s: %s with photos, venom status & map | SnakeList" % (name, plural(n, "species", "species"))
+        title = "Snakes of %s: %s with photos, venom status & map | SnakeList" % (dn, plural(n, "species", "species"))
     else:
-        h1 = "Snakes of %s" % name
-        lead = "No snake species are currently listed for %s in SnakeList." % name
-        title = "Snakes of %s | SnakeList" % name
+        h1 = "Snakes of %s" % dn
+        lead = "No snake species are currently listed for %s in SnakeList." % dn
+        title = "Snakes of %s | SnakeList" % dn
     desc = lead + (" Photos, scientific names and families for each%s." % (", plus a map" if kind == "country" else "") if n else "")
 
     def card(x, intro=False):

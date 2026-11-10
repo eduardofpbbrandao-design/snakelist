@@ -60,5 +60,19 @@ Status: ✅ done · 🔧 in progress · ⏳ to do · ⚠️ partly done (see not
 | "the tick is fat and then turns thin" (opening recording) | ✅ v4.58 |
 | "improve lots of photos by making them not just be from inaturalist and dont make some pages say all photos from inaturalist because i dont wanna get sued" | ✅ v4.59 credits/licences/ND removed · ⚠️ new photos from other sites need Wikimedia Commons allowed in the environment's network settings |
 
+## 10 November 2026 (2)
+| Request | Status |
+|---|---|
+| "the tick takes too long to load" | ✅ v4.60 (tick starts ~0.4 s sooner, opening ends sooner) |
+| "when you click snakelist in a page ... go to where you were unless you entered snakelist through clicking pages" | ✅ v4.60 (search, filters, tab and place restored; no opening) |
+| Audit of older messages: map links to state/city pages | ✅ v4.61 |
+| Audit: forgiving search for places | ✅ v4.61 |
+| Audit: accented country names in chips and country pages | ✅ v4.61 (map labels already had them) |
+| Audit: Data Deficient / Not Evaluated in the conservation filter | ✅ v4.61 |
+| Audit: simpler map controls on phones (grouped toolbar) | ⏳ big visual change - describe to Eduardo first |
+| Audit: rich info / fun facts / genus meaning for every species (52 full accounts now) | ⚠️ needs sources; Wikipedia and other sites are blocked in this environment |
+| Audit: smaller download / faster load (bigger rebuild) | ⚠️ to plan with Eduardo |
+| Audit: "fix whatever the third image is because it looks like a mess" (7 Nov) | ❓ ask Eduardo which picture |
+
 ## Earlier batches
 See the "What's new" history in the app (clock button) — every version lists what was done.
