@@ -53,5 +53,11 @@ Status: ✅ done · 🔧 in progress · ⏳ to do · ⚠️ partly done (see not
 | Hover lights up instead of underlining | ✅ v4.49 |
 | Smoother opening + Mark Seen; nicer Achievements | ✅ v4.53 |
 
+## 10 November 2026
+| Request | Status |
+|---|---|
+| "Make the snake module thing show the snake in whatever its habitat is but dont publish it yet" | 👀 preview at claude.ai/artifact/SANxYzEb78bg9Jz1cp2Gyy - waiting for Eduardo's OK |
+| "the tick is fat and then turns thin" (opening recording) | ✅ v4.58 |
+
 ## Earlier batches
 See the "What's new" history in the app (clock button) — every version lists what was done.
