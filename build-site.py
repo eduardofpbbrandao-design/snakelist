@@ -124,7 +124,7 @@ The app itself is one large interactive page. Every species also has its own sma
 - [Install SnakeList]({SITE}install.html) - how to install SnakeList on Android, iPhone, iPad, Windows and Mac
 - [About the creator]({SITE}about.html)
 - [Privacy]({SITE}privacy.html) - lists are kept on the visitor's own device or their own Google Drive; there is no user database
-- Photos come from iNaturalist photographers under Creative Commons licences, credited on each species page
+- Each photo belongs to its photographer and is used under the Creative Commons licence they chose; full list: {SITE}species/photo-credits.html
 """)
 import build_species, datetime
 TODAY = datetime.date.today().isoformat()

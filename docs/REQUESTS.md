@@ -58,6 +58,7 @@ Status: ✅ done · 🔧 in progress · ⏳ to do · ⚠️ partly done (see not
 |---|---|
 | "Make the snake module thing show the snake in whatever its habitat is but dont publish it yet" | 👀 preview at claude.ai/artifact/SANxYzEb78bg9Jz1cp2Gyy - waiting for Eduardo's OK |
 | "the tick is fat and then turns thin" (opening recording) | ✅ v4.58 |
+| "improve lots of photos by making them not just be from inaturalist and dont make some pages say all photos from inaturalist because i dont wanna get sued" | ✅ v4.59 credits/licences/ND removed · ⚠️ new photos from other sites need Wikimedia Commons allowed in the environment's network settings |
 
 ## Earlier batches
 See the "What's new" history in the app (clock button) — every version lists what was done.

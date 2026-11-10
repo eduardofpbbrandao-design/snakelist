@@ -40,8 +40,17 @@ def site_header(rel, here=""):
 def site_footer(rel, note=""):
     return ('<footer class="sl-foot"><p><a class="sl-flogo" href="%s">SnakeList</a> &middot; made by <a href="%sabout.html">Eduardo Brandao</a></p>'
             '<p class="sl-flinks"><a href="%s">Open the app</a><a href="%sspecies/">All species</a><a href="%sinstall.html">Install app</a>'
-            '<a href="%sabout-snakelist.html">About SnakeList</a><a href="%sabout.html">About me</a><a href="%sprivacy.html">Privacy</a><a href="%sterms.html">Terms</a></p>%s</footer>') % (
-        rel, rel, rel, rel, rel, rel, rel, rel, rel, ('<p class="sl-fnote">%s</p>' % note) if note else "")
+            '<a href="%sabout-snakelist.html">About SnakeList</a><a href="%sabout.html">About me</a><a href="%sprivacy.html">Privacy</a><a href="%sterms.html">Terms</a><a href="%sspecies/photo-credits.html">Photo credits</a></p>%s</footer>') % (
+        rel, rel, rel, rel, rel, rel, rel, rel, rel, rel, ('<p class="sl-fnote">%s</p>' % note) if note else "")
+# Creative Commons licences, each linked to its official deed (the attribution the licences ask for)
+def lic_url(lic):
+    l = (lic or "").upper().replace("CC-", "CC ").strip()
+    if l == "CC0": return "https://creativecommons.org/publicdomain/zero/1.0/"
+    m = re.match(r"CC ((?:BY)(?:-(?:NC|SA|ND))*)$", l)
+    return "https://creativecommons.org/licenses/%s/4.0/" % m.group(1).lower() if m else ""
+def lic_link(lic):
+    l = (lic or "").replace("CC-", "CC ").strip(); u = lic_url(l)
+    return ('<a href="%s" rel="license noopener">%s</a>' % (u, H.escape(l))) if u else H.escape(l)
 def an(word):
     """'a' or 'an' before a word (an Inland Taipan, a Boa, an elapid)"""
     w = (word or "").strip().lower()
@@ -745,10 +754,10 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             if not who: who, lic = p[2], ""
             pid = p[4].split(".")[0] if len(p) >= 5 else ""
             ph = ('<figure class="sp-photo"><img src="%s" data-fb="../species-photos/t/%d-%d.webp" alt="%s" width="500" height="333" fetchpriority="high">'
-                  '<figcaption>Photo: %s%s, via iNaturalist</figcaption></figure>') % (
+                  '<figcaption>Photo &copy; %s%s%s</figcaption></figure>') % (
                 esc(photo), p[0], p[1], esc("Photo of %s" % ((nm + " (" + sci + ")") if not c["is_sci"] else sci)),
-                ('<a href="https://www.inaturalist.org/photos/%s" rel="noopener">%s</a>' % (esc(pid), esc(who))) if pid.isdigit() else esc(who),
-                (" (%s)" % esc(lic)) if lic else "")
+                esc(who), (", " + lic_link(lic)) if lic else "",
+                (' &middot; cropped &middot; <a href="https://www.inaturalist.org/photos/%s" rel="noopener">original photo</a>' % esc(pid)) if pid.isdigit() else "")
         elif p:
             ph = '<figure class="sp-photo"><div class="sp-sprite" role="img" aria-label="%s" style="%s"></div><figcaption>%s</figcaption></figure>' % (esc("Illustration of " + label), sprite(c), esc(p[2]))
         else:
@@ -839,7 +848,10 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if refs: src += '<h3>References</h3>%s' % refs
         else: src += ('<p>SnakeList has no reviewed species account for this snake yet. The facts on this page come from SnakeList&rsquo;s own checklist '
                       'data (names, family, venom, and the countries, states and provinces where it is recorded).</p>')
-        if photo: src += '<p><b>Photo:</b> %s, shared on iNaturalist under a Creative Commons licence.</p>' % esc(p[2])
+        if photo:
+            w3, _, l3 = p[2].rpartition(", ")
+            src += '<p><b>Photo:</b> &copy; %s, used under %s; cropped and resized by SnakeList. <a href="photo-credits.html#%s">All photo credits</a>.</p>' % (
+                esc(w3 or p[2]), lic_link(l3) if w3 else "its Creative Commons licence", esc(c["id"]))
         if not c["fossil"]:
             g0, _, s0 = sci.partition(" ")
             src += ('<h3>Look it up</h3><p class="sp-links"><a href="https://reptile-database.reptarium.cz/species?genus=%s&amp;species=%s" rel="noopener">The Reptile Database</a>'
@@ -929,7 +941,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     cslugs = json.dumps({n: slugify(n) for n, k in countries}, ensure_ascii=False).replace("</", "<\\/")
     open(OUT + "/index.html", "w", encoding="utf-8").write(INDEX.format(n="{:,}".format(len(cards)), body=body, author=AUTHOR, url=SITE + "species/",
         nfam=len([f for f, L in fams if f]), ncountry="{:,}".format(len(countries)), cslugs=cslugs,
-        site_head=site_header("../", "species"), site_foot=site_footer("../", "Photos: iNaturalist observers (CC licences) - credited on each species page.")))
+        site_head=site_header("../", "species"), site_foot=site_footer("../", "Every photo belongs to its photographer and is used under the Creative Commons licence they chose, credited with it.")))
+    credits_page(cards, esc)
     reg_urls = build_regions.build(cards, by_id, INFO, invasive, iso, harm)
     return [SITE + "species/"] + [SITE + "species/" + page_name(c) for c in links] + hubs(cards, esc, img_of, invasive) + reg_urls
 
@@ -956,6 +969,54 @@ def scene_of(c, info):
     kinds = {}
     for h in c["habitats"]: k = hab_kind(h); kinds[k] = kinds.get(k, 0) + 1
     return SCENE_KIND.get(max(kinds, key=kinds.get), "forest") if kinds else "forest"
+
+
+def credits_page(cards, esc):
+    """species/photo-credits.html: every photo SnakeList shows, with its photographer, its licence
+    (linked to the official Creative Commons deed), a link to the original and what SnakeList changed"""
+    rows = []
+    for c in sorted(cards, key=lambda x: x["name"].lower()):
+        p = c.get("photo")
+        if not p or "Illustration" in p[2]: continue
+        who, _, lic = p[2].rpartition(", ")
+        if not who: who, lic = p[2], ""
+        pid = p[4].split(".")[0] if len(p) >= 5 else ""
+        orig = ('<a href="https://www.inaturalist.org/photos/%s" rel="noopener">original</a>' % esc(pid)) if pid.isdigit() else "&ndash;"
+        rows.append('<tr id="%s"><td><a href="%s">%s</a></td><td>%s</td><td>%s</td><td>%s</td></tr>' % (
+            esc(c["id"]), page_name(c), esc(c["name"]), esc(who), lic_link(lic), orig))
+    fam = json.loads(re.search(r'<script type="application/json" id="family-photos">(.*?)</script>', APP[0], re.S).group(1))
+    frows = []
+    for f, v in sorted(fam.items()):
+        b = re.sub(r"^\(c\)\s*", "", v.get("by", "")).replace(", via iNaturalist", "")
+        who, _, lic = b.rpartition(", ")
+        frows.append('<tr><td>%s</td><td>%s</td><td>%s</td></tr>' % (esc(f), esc(who or b), lic_link(lic)))
+    ill = sum(1 for c in cards if c.get("photo") and "Illustration" in c["photo"][2])
+    html = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Photo credits | SnakeList</title><meta name="description" content="Who took every snake photo on SnakeList, and the Creative Commons licence each one is used under.">
+<link rel="canonical" href="%sspecies/photo-credits.html"><meta name="robots" content="index,follow"><link rel="icon" href="../favicon.ico" sizes="any"><link rel="stylesheet" href="sp.css">
+<style>.pc-wrap{overflow-x:auto}.pc{border-collapse:collapse;width:100%%;font-size:14px}.pc th,.pc td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.pc th{font-weight:600;position:sticky;top:0;background:var(--bg)}.pc tr:target{background:var(--tag)}.pc-q{width:100%%;max-width:420px;font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text)}</style>
+</head><body>
+%s
+<main class="sp-main"><nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../">SnakeList</a> &rsaquo; <a href="./">All species</a> &rsaquo; <span aria-current="page">Photo credits</span></nav>
+<h1>Photo credits</h1>
+<p>Every snake photo on SnakeList was taken by the person named below and is used under the Creative Commons licence <em>they</em> chose for it. SnakeList is free, has no ads and makes no money from these photos.</p>
+<p>To fit SnakeList, each photo is <b>cropped and resized</b>; nothing else about it is changed. The &ldquo;original&rdquo; link opens the photo as the photographer shared it (they shared these photos on iNaturalist, where each one has its own page and licence).</p>
+<p>Photos marked &ldquo;No Derivatives&rdquo; (ND) are not used, because cropping counts as changing a photo. The %s fossil snakes are shown with SnakeList&rsquo;s own illustrations, as no photo of them can exist.</p>
+<p class="sp-note">If you took one of these photos and want the credit changed or the photo removed, contact SnakeList through the <a href="../about.html">About me</a> page and it will be done.</p>
+<h2>Snake photos (%s)</h2>
+<p><label for="pc-q">Find a snake or photographer</label><br><input id="pc-q" class="pc-q" type="search" autocomplete="off"></p>
+<div class="pc-wrap"><table class="pc" id="pc-t"><thead><tr><th>Snake</th><th>Photographer</th><th>Licence</th><th>Photo</th></tr></thead><tbody>%s</tbody></table></div>
+<h2>Family pictures (%s)</h2>
+<div class="pc-wrap"><table class="pc"><thead><tr><th>Family</th><th>Photographer</th><th>Licence</th></tr></thead><tbody>%s</tbody></table></div>
+</main>
+%s
+<script>(function(){var q=document.getElementById('pc-q'),r=[].slice.call(document.querySelectorAll('#pc-t tbody tr')),t;r.forEach(function(e){e._t=e.textContent.toLowerCase()});
+q.addEventListener('input',function(){clearTimeout(t);t=setTimeout(function(){var v=q.value.trim().toLowerCase();r.forEach(function(e){e.hidden=v&&e._t.indexOf(v)<0})},120)})})();</script>
+</body></html>
+""" % (SITE, site_header("../", "species"), ill, "{:,}".format(len(rows)), "".join(rows), len(frows), "".join(frows), site_footer("../"))
+    open(OUT + "/photo-credits.html", "w", encoding="utf-8").write(html)
 
 
 def len_attr(info):
@@ -1437,7 +1498,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
                           h1=("<i>%s</i>" % esc(h1)) if kind == "genus" else esc(h1), crumbs=crumbs_html, jump=jump,
                           cta_href=esc(cta[0]), cta_label=cta[1], controls=controls, count=count, grid=grid, intro=intro_sec, overview=overview,
                           author=AUTHOR, big=" cy-big" if big else "", total=n,
-                          site_head=site_header("../../", "species"), site_foot=site_footer("../../", "Photos: iNaturalist observers (CC licences) - credited on each species page."),
+                          site_head=site_header("../../", "species"), site_foot=site_footer("../../", "Every photo belongs to its photographer and is used under the Creative Commons licence they chose, credited with it."),
                           robots="index,follow,max-image-preview:large" if n else "noindex,follow")
 
 

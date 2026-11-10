@@ -19,4 +19,4 @@ The app itself is one large interactive page. Every species also has its own sma
 - [Install SnakeList](https://snakelist.com/install.html) - how to install SnakeList on Android, iPhone, iPad, Windows and Mac
 - [About the creator](https://snakelist.com/about.html)
 - [Privacy](https://snakelist.com/privacy.html) - lists are kept on the visitor's own device or their own Google Drive; there is no user database
-- Photos come from iNaturalist photographers under Creative Commons licences, credited on each species page
+- Each photo belongs to its photographer and is used under the Creative Commons licence they chose; full list: https://snakelist.com/species/photo-credits.html
