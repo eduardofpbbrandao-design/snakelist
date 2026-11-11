@@ -953,6 +953,11 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if syn and syn.get("names"):
             tx += '<details class="sp-det"><summary>Other scientific names it has had (%d)</summary><ul>%s</ul>%s</details>' % (
                 len(syn["names"]), "".join("<li>%s</li>" % R.rich(s) for s in syn["names"]), ('<p class="sp-note">Source%s</p>' % R.cite(syn.get("src"))) if syn.get("src") else "")
+        if not c["fossil"]:  # the Reptile Database keeps the older names (synonyms) with who used them and when: point there
+            g1, _, s1 = sci.partition(" ")
+            tx += ('<p class="sp-note">%s <a href="https://reptile-database.reptarium.cz/species?genus=%s&amp;species=%s" rel="noopener">The Reptile Database</a> '
+                   'keeps a list of its older scientific names, with who used them and when.</p>') % (
+                "For more," if syn and syn.get("names") else "SnakeList doesn&rsquo;t list its older scientific names.", quote(g1), quote(s1.split(" ")[0]))
         secs.append(("taxonomy", "Taxonomy", tx))
         # sources: the numbered references, the photo, where to look further, provenance and the dates
         src = ""
