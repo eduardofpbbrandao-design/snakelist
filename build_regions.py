@@ -493,10 +493,12 @@ def regions_of(c, cc):
     return [p.partition(":")[2] for p in c["provinces"] if p.partition(":")[0].lower() == cc]
 
 
-def all_list(L, title_id, where, rel_species="../"):
-    """every species, as a compact list with a search box and Show more (all in the HTML)"""
-    items = "".join('<li>%s%s</li>' % (sp_a(c, rel_species),
-                    ' <span class="rg-v" title="Venomous">venomous</span>' if c["venom"] else "") for c in L)
+def all_list(L, title_id, where, rel_species="../", intro_ids=()):
+    """every species, as a compact list with a search box and Show more (all in the HTML);
+    populations brought by people are marked "introduced" (they live here, but are not native)"""
+    items = "".join('<li>%s%s%s</li>' % (sp_a(c, rel_species),
+                    ' <span class="rg-v" title="Venomous">venomous</span>' if c["venom"] else "",
+                    ' <span class="rg-i" title="Not native here: brought by people">introduced</span>' if c["id"] in intro_ids else "") for c in L)
     tools = ('<label class="rg-pq"><span class="cy-sr">Search the snakes of %s</span><input type="search" placeholder="Search %s..." autocomplete="off"></label>' % (esc(where), nf(len(L)) + " species")) if len(L) > 12 else ""
     return ('<div class="rg-pl" data-page="60">%s<ul class="rg-cols rg-pul">%s</ul><p class="cy-note rg-pempty" hidden>No snake here matches that.</p>'
             '<p class="cy-more-wrap"><button type="button" class="cy-more rg-pmore" hidden>Show more</button></p></div>') % (tools, items)
@@ -569,15 +571,15 @@ def region_page(r, L, G, P, ctx):
     T = r["the"]; t = r["type"]
     nfam = len({c["family"] for c in L if c["family"]})
     S = {}
+    it = ctx["intro"].get(r["key"], [])
     S["all"] = (("The %s recorded in %s" % (B.nplural(n, "living species", "living species"), esc(T)) if n > 1 else "The living species recorded in %s" % esc(T)) if n else "Species recorded in %s" % esc(T),
-                ('<p class="cy-note">Every living snake species SnakeList records in %s. Each is recorded somewhere in the %s, not necessarily all over it.</p>%s' % (esc(T), esc(t), all_list(L, "all", T)))
+                ('<p class="cy-note">Every living snake species SnakeList records in %s. Each is recorded somewhere in the %s, not necessarily all over it.</p>%s' % (esc(T), esc(t), all_list(L, "all", T, intro_ids={c["id"] for c, nt in it})))
                 if n else '<p>No living snake species %s recorded in %s in SnakeList&rsquo;s data.</p>' % ("is", esc(T)))
     ps = possible_section(r, P, T)
     if ps: S["possible"] = ps
-    it = ctx["intro"].get(r["key"], [])
     if it:
-        S["introduced"] = ("Introduced by people", '<p class="cy-note">Not native here: SnakeList records %s as brought to %s by people. %s not counted in the totals.</p><ul class="rg-cols">%s</ul>' % (
-            "this species" if len(it) == 1 else "these species", esc(T), "It is" if len(it) == 1 else "They are",
+        S["introduced"] = ("Introduced by people", '<p class="cy-note">Not native here: SnakeList records %s as brought to %s by people. %s in the list above too, marked &ldquo;introduced&rdquo;, because %s here now.</p><ul class="rg-cols">%s</ul>' % (
+            "this species" if len(it) == 1 else "these species", esc(T), "It is" if len(it) == 1 else "They are", "it lives" if len(it) == 1 else "they live",
             "".join("<li>%s%s</li>" % (sp_a(c), (" <small>(%s)</small>" % esc(nt)) if nt else "") for c, nt in it)))
     if n:
         S["venom"] = venom_section(L, ctx)
@@ -659,12 +661,12 @@ def city_page(city, r, L, P, ctx):
         '<p class="cy-note"><b>These species are recorded in %s; their presence within %s city has not been confirmed by this dataset.</b> '
         'SnakeList records snakes by %s, not by city, and many of them may not live in or near %s.%s</p>%s') % (
             rlink, esc(cn), esc(kword(r["cc"])), esc(cn), " (The city is placed in %s by its map position.)" % esc(T) if city["how"] == "coords" else "",
-            all_list(L, "district", T)) if n else '<p>No living snake species are recorded in %s in SnakeList&rsquo;s data.</p>' % rlink)
+            all_list(L, "district", T, intro_ids={c["id"] for c, nt in ctx["intro"].get(r["key"], [])})) if n else '<p>No living snake species are recorded in %s in SnakeList&rsquo;s data.</p>' % rlink)
     ps = possible_section(r, P, T)
     if ps: S["possible"] = ps
     it = ctx["intro"].get(r["key"], [])
     if it:
-        S["introduced"] = ("Introduced in %s" % esc(T), '<p class="cy-note">Not native: SnakeList records %s as brought to %s by people. %s not counted above.</p><ul class="rg-cols">%s</ul>' % (
+        S["introduced"] = ("Introduced in %s" % esc(T), '<p class="cy-note">Not native: SnakeList records %s as brought to %s by people. %s in the list above too, marked &ldquo;introduced&rdquo;.</p><ul class="rg-cols">%s</ul>' % (
             "this species" if len(it) == 1 else "these species", rlink, "It is" if len(it) == 1 else "They are",
             "".join("<li>%s%s</li>" % (sp_a(c), (" <small>(%s)</small>" % esc(nt)) if nt else "") for c, nt in it)))
     near = sorted((km((city["lat"], city["lon"]), (o["lat"], o["lon"])), o) for o in CITIES if o is not city)[:8]
@@ -776,7 +778,7 @@ REGION_CSS = """.rg-sub{margin:4px 0 0;color:var(--muted);font-size:15px}
 .rg-split i.v,.rg-key i.v{background:#c4562f}.rg-split i.nv,.rg-key i.nv{background:var(--g)}
 .rg-key{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:14px}.rg-key span{display:inline-flex;align-items:center;gap:6px}.rg-key i{width:12px;height:12px;border-radius:3px;display:inline-block}
 .rg-cols{columns:3 210px;column-gap:24px;padding-left:18px;margin:0;font-size:14.5px}.rg-cols li{break-inside:avoid;margin:0 0 4px}.rg-cols small{color:var(--muted)}.rg-cols i{color:var(--muted);font-size:13px}
-.rg-v{font-size:11px;font-weight:700;color:#b5452a}
+.rg-v{font-size:11px;font-weight:700;color:#b5452a}.rg-i{font-size:11px;font-weight:700;color:#8a6d1f}
 .rg-pq{display:block;margin:0 0 10px;max-width:420px}.rg-pq input{width:100%;font:inherit;font-size:15px;min-height:40px;padding:6px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text)}
 .rg-who{padding-left:18px;margin:0 0 8px;font-size:14.5px}.rg-who li{margin:0 0 6px}.rg-who i{color:var(--muted)}.rg-by{color:var(--text)}.rg-by.rg-miss{color:var(--muted)}
 .rg-warn{border-color:#e0b25c;background:#fdf4e2}.rg-warn p{margin:0}
@@ -784,7 +786,7 @@ REGION_CSS = """.rg-sub{margin:4px 0 0;color:var(--muted);font-size:15px}
 .cy-cmp-wrap{overflow-x:auto}.cy-cmp{border-collapse:collapse;font-size:14px;min-width:100%}.cy-cmp th,.cy-cmp td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 .cy-cmp th{font-size:13px;color:var(--muted);font-weight:600}.cy-cmp td small{color:var(--muted)}
 .sp-ago{color:var(--muted)}
-@media (prefers-color-scheme:dark){.rg-v{color:#f0a04b}.rg-warn{background:#4a4220;border-color:#a8833d}.rg-split i.v,.rg-key i.v{background:#e07a4f}}
+@media (prefers-color-scheme:dark){.rg-v{color:#f0a04b}.rg-i{color:#e6c46a}.rg-warn{background:#4a4220;border-color:#a8833d}.rg-split i.v,.rg-key i.v{background:#e07a4f}}
 @media (max-width:560px){.rg-bars li{grid-template-columns:minmax(0,1fr) 30% 2.4em}.rg-cols{columns:1}}
 """
 

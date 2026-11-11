@@ -78,7 +78,9 @@ var main=document.querySelector('.sp-main[data-sci]'),w=document.getElementById(
 if(main&&w){fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(main.dataset.sci.replace(/ /g,'_'))).then(function(r){return r.ok?r.json():null}).then(function(d){
 if(!d||!d.extract||d.type==='disambiguation')return;var p=document.createElement('p');p.textContent=d.extract;w.appendChild(p);
 var s=document.createElement('p');s.className='src';s.innerHTML='From <a href="'+d.content_urls.desktop.page+'" rel="noopener" target="_blank">Wikipedia</a> (CC BY-SA)';w.appendChild(s)}).catch(function(){})}
-})();
+})();// a numbered citation, or a link to a place inside closed details (references, states): open it first
+function opn(h){var t=h&&h.charAt(0)==='#'&&document.getElementById(h.slice(1));if(!t)return;for(var e=t.parentNode;e&&e!==document;e=e.parentNode)if(e.tagName==='DETAILS')e.open=true}
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(a)opn(a.getAttribute('href'))});opn(location.hash);
 
 (function(){var b=document.querySelector('.sp-realbtn'),m=document.querySelector('.sp-main[data-sci]');if(!b||!m)return;
 var sci=m.dataset.sci,name=(document.querySelector('h1')||{}).textContent||sci,dlg=null;

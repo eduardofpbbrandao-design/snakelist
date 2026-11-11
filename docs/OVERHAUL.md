@@ -17,12 +17,12 @@ Environment limits: iNaturalist, Wikipedia, Wikidata, GBIF and the Reptile Datab
 | 4 | Bounded, smooth camera (orbit, limited zoom, reset/fullscreen/views; mouse/touch/keys; limits scale with model) | R | A | ⏳ | |
 | 5 | Reliable 3D: on demand, loading/fail/retry, device-scaled quality, pause when hidden, dispose, context loss, reduced motion, honest "no model" | R | A | ⏳ | |
 | 6 | Polished viewer UI: large view, compact toolbar, settings panel, labelled length comparison, appearance details, credits | R | A | ⏳ | |
-| 7 | Species fact grid redesign (labels Venom, Adult length, Diet, Reproduction, Conservation status, Distribution; etymology out of the grid) | R | B | ⏳ | |
-| 8 | Species page reading order, separate actions, section nav, no repeated panels | R | B | ⏳ | |
-| 9 | More sourced information; unknowns stay unknown | P | B | ⏳ | |
-| 10 | Viperine Snake distribution (North Africa missing from map/summary), countries vs territories, introduced vs invasive | D/I | B | ⏳ | |
-| 11 | Fossils separated from living species everywhere (counts, map lists, related lists) | D | B+C+D | ⚠️ | C: place pages done (fossils in own section, not counted). B (species pages) and D (map lists) pending. |
-| 12 | Author/year attribution fixed at source (Malpolon "Faber 1912" → Hermann 1804); no implementation messages in content | D | B | ⏳ | |
+| 7 | Species fact grid redesign (labels Venom, Adult length, Diet, Reproduction, Conservation status, Distribution; etymology out of the grid) | R | B | ✅ | B: six fixed labels (Venom, Adult length, Diet, Reproduction, Conservation status, Distribution) with "Not known" for gaps; fossils get Status, Geological age, Fossils found in, Estimated length, Diet, First described; etymology moved to Taxonomy. |
+| 8 | Species page reading order, separate actions, section nav, no repeated panels | R | B | ✅ | B: header → key facts + actions → Identification → Distribution → Behaviour → Conservation → Similar/related → Taxonomy → Sources; sticky section nav; Mark seen / Want to see open the app at the card (never mark by themselves). |
+| 9 | More sourced information; unknowns stay unknown | P | B | ⚠️ | B: rewritten Natrix maura, Malpolon, Bitis gabonica, Python bivittatus; fossil accounts Titanoboa, Portugalophis. Other 46 accounts not expanded; 4,195 species still have no account (sources like Wikipedia/Reptile Database not reachable here). |
+| 10 | Viperine Snake distribution (North Africa missing from map/summary), countries vs territories, introduced vs invasive | D/I | B | ✅ | B: Natrix maura 9 countries + Gibraltar, Africa + Europe; "N countries and N territories" on every page; data/introduced-status.json separates introduced vs invasive; Mallorca/Menorca "Introduced … in antiquity". Lead: region pages tag introduced species in their lists. |
+| 11 | Fossils separated from living species everywhere (counts, map lists, related lists) | D | B+C+D | ⚠️ | B: species pages done (badge, geology, no habitat/conservation/sightings). C: place pages done (fossils in own section, not counted). B (species pages) and D (map lists) pending. |
+| 12 | Author/year attribution fixed at source (Malpolon "Faber 1912" → Hermann 1804); no implementation messages in content | D | B | ✅ | B: wd.js uses the taxon's own taxon-author statement and checks surname + year against the authority; data/authorities.json; Porto shows Hermann 1804; tests/wd-authority.js 23/23 (mocked Wikidata). |
 | 13 | Correct administrative terms (Porto = district), place identity, explicit wording | D/I | C | ✅ | C: admin terms from the app SUBDIV/NON_SOVEREIGN tables; places stored with id/type/parent/country; Porto District vs Porto city wording. |
 | 14 | Map vs page counts reconciled (Porto 10 vs 8), every count defined | D | C+D | ⚠️ | C: root cause found (map livesNear pools BYCODE incl. fossils + country-only records); pages define every count; species/place-counts.js produced. App (D) still to use it. |
 | 15 | "Fewest species" excludes zero, shows ties, full dataset; cities/regions/islands | R | D | ⏳ | |
@@ -38,7 +38,7 @@ Environment limits: iNaturalist, Wikipedia, Wikidata, GBIF and the Reptile Datab
 | 25 | Weak habitat estimates replaced or clearly labelled; not used for 3D scenery | I | C+A | ✅ | C: habitat bar counts removed; region pages quote reviewed-account habitat text with sources, clearly general. |
 | 26 | Country/region/city/family/genus/fossil templates each with a real purpose; honest "most recorded" | R | C | ✅ | C: region/city/country/family/genus/fossil templates reordered with distinct purposes; "Most recorded worldwide" labelled global. |
 | 27 | Full wording and terminology review in templates and generated text | I | B+C+E | ⏳ | |
-| 28 | Conservation with provider/category/year/scope; citations that support statements; meaningful review dates | I | B | ⏳ | |
+| 28 | Conservation with provider/category/year/scope; citations that support statements; meaningful review dates | I | B | ⚠️ | B: provider/category/scope/year/link shown; Natrix maura, Bitis gabonica, Python bivittatus citations checked; others not line-by-line; Red List years for 4 species from secondary sources (flagged). |
 | 29 | Reference-site patterns used selectively (AirNav, Florida Museum, Reptile Database, iNaturalist) | P | A+B | ⏳ | |
 | 30 | Consistent visual system across app and pages; contrast; both themes; zoom; narrow screens | R | E | ⏳ | |
 | 31 | Supporting flows audit (checklist, sightings, want/following, achievements, quiz, camera ID, install, About, creator, credits, privacy, terms); stale totals | I/U | E | ⏳ | |
@@ -55,6 +55,9 @@ Environment limits: iNaturalist, Wikipedia, Wikidata, GBIF and the Reptile Datab
 
 ## Additional issues found during the work
 (added as they are found)
+- B: Malpolon monspessulanus was also missing its North African range - fixed. Natrix astreptophora and Hemorrhois hippocrepis still lack North African countries.
+- B: Bitis gabonica Red List category conflicting in sources (VU vs NT) - shown as not confirmed.
+- Lead: region/city pages said introduced species were "not counted" while counting them - now tagged "introduced" in the list and the note says so.
 - C: fossil ages under 1 million years were shown 1,000x too young (Crotalus potterensis "about 20 years ago") - fixed.
 - C: some big cities fall in the wrong region where the map has no shape for them (Addis Ababa -> Oromia) - not fixed.
 - E: "Harmless" filter renamed "Low risk" (non-venomous is not a promise a snake cannot bite).
