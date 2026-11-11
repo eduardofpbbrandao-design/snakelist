@@ -22046,7 +22046,7 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
   /* ---- 3D mode on the map (v4.63): one small "3D" button in the map's bottom-right corner. On, it
      only lights up; a species box then shows a "3D" action for snakes that have a model, and that
      opens the model right in the map area, with "Back to map". ---- */
-  .td-toggle { position: absolute; right: 10px; bottom: calc(30px + env(safe-area-inset-bottom, 0px)); z-index: 5;
+  .td-toggle { position: absolute; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 5;
     display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 44px; min-height: 36px; padding: 0 12px; box-sizing: border-box;
     border-radius: 10px; border: 1px solid rgba(255,255,255,.28); background: rgba(22,34,28,.86); color: #fff;
     font: 700 13px/1 Inter, system-ui, sans-serif; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
@@ -22054,8 +22054,10 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
   .td-toggle.on, .td-toggle.on:hover { background: #2c7a57; border-color: #9be07c; box-shadow: 0 0 0 2px rgba(155,224,124,.35), 0 2px 8px rgba(0,0,0,.25); }
   .td-toggle:focus-visible { outline: 3px solid #9be07c; outline-offset: 2px; }
   .globe-stage.heat-only .td-toggle { display: none; }
+  /* level with the "Drag to explore" words: on wide screens they fit on one short line, so the button sits a little lower to share their middle */
+  @media (min-width: 641px) { .td-toggle { bottom: calc(3px + env(safe-area-inset-bottom, 0px)); } }
   /* the colour key and the hint keep clear of it */
-  .globe-stage .map-legend { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  .globe-stage .map-legend { bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
   .globe-stage .globe-hint { max-width: calc(100% - 90px); border-radius: 10px; }
   @media (max-width: 640px) {
     .globe-stage.full:has(.country-panel:not([hidden])) .td-toggle { bottom: calc(48% + 8px); }
