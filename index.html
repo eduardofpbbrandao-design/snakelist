@@ -1017,6 +1017,10 @@
     padding: 3px 9px; border-radius: 999px; border: 1px solid var(--map-on); background: transparent; color: var(--map-on); cursor: pointer; }
   .cp-photo:hover { background: var(--map-on); color: #fff; }
   .cp-row:has(.cp-photo) b { padding-right: 84px; }
+  .cp-acts { position: absolute; top: 5px; right: 6px; display: flex; gap: 5px; }
+  .cp-acts .cp-photo { position: static; }
+  .cp-row:has(.cp-acts) > b, .cp-row:has(.cp-acts) > i { display: block; padding-right: 180px; }
+  @media (max-width: 480px) { .cp-row:has(.cp-acts) > b, .cp-row:has(.cp-acts) > i { padding-right: 0; } .cp-acts { position: static; margin: 4px 0 0; } .cp-row:has(.cp-acts) { display: flex; flex-direction: column; } .cp-acts { order: 9; } }
   .cp-state-pill[data-prov], .cp-state-pick { cursor: pointer; }
   .cp-state-pill[data-prov]:hover { filter: brightness(1.12); text-decoration: underline; }
   /* an inset ring, not an outline: the list scrolls, so an outline was clipped at its sides and only showed top and bottom */
@@ -13242,7 +13246,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     all.textContent = "See all " + names.length + (names.length === 1 ? (NON_SOVEREIGN[names[0]] ? " territory" : " country") : names.some(function (n) { return NON_SOVEREIGN[n]; }) ? " countries & territories" : " countries");
 
     pendingWorldCity = (worldCityMatch && !cityReveal) ? { key: foldedQ, data: worldCityMatch } : null;
-    document.getElementById("see-species").hidden = !worldCityMatch;
+    // v4.63: "See species" is always there when the map shows snakes (a search or filters too)
+    document.getElementById("see-species").hidden = !(worldCityMatch || (matched && matched.length && (q || MFSET)));
 
     PINS = []; labelPin = null; citiesProv = null;
     if (worldCityMatch) {
@@ -15233,9 +15238,11 @@ window.SL_GEO_READY = new Promise(function (res) {
   var provKeyOf = {};
   function attrEsc(t) { return String(t).replace(/&/g, "&amp;").replace(/"/g, "&quot;"); }
   // "See photo" in the corner of a species row - only when that species has a photo
+  // v4.63: and "See species" beside it on every species row - it opens that snake's species page
   function photoBtn(sp) {
-    return window.SL_PHOTOS && window.SL_PHOTOS.items[sp.id]
-      ? '<button type="button" class="cp-photo" data-sp="' + attrEsc(sp.id) + '">See photo</button>' : "";
+    return '<span class="cp-acts">' + (window.SL_PHOTOS && window.SL_PHOTOS.items[sp.id]
+      ? '<button type="button" class="cp-photo" data-sp="' + attrEsc(sp.id) + '">See photo</button>' : "") +
+      '<button type="button" class="cp-photo cp-seesp" data-seesp="' + attrEsc(sp.id) + '">See species</button></span>';
   }
   // tapping a state's name: the map flies there, outlines it and lists what lives in it
   function showProvinceByKey(cc, key) {
@@ -15259,6 +15266,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     fillProvince(cc, st);
   }
   document.getElementById("cp-list").addEventListener("click", function (e) {
+    var ssp = e.target.closest(".cp-seesp");
+    if (ssp) { e.stopPropagation(); spGoPage(ssp.getAttribute("data-seesp")); return; }
     var ph = e.target.closest(".cp-photo");
     if (ph) {
       var sp = INDEX.find(function (x) { return x.id === ph.getAttribute("data-sp"); });
@@ -15519,6 +15528,23 @@ window.SL_GEO_READY = new Promise(function (res) {
     popPanel();
   }
 
+  // v4.63: "See species" with a search or filters and no place picked: the snakes the map shows
+  function fillSearchSpecies() {
+    panelKind = "searchlist"; pageFor = null;
+    stopCityFactObserver();
+    var rows = (matched || []).slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+    var hq = (document.getElementById("heat-search") || {}).value || "";
+    var cpTitle = document.getElementById("cp-title");
+    cpTitle.textContent = hq.trim() ? "Matching “" + hq.trim() + "”" : "Your filters";
+    cpTitle.classList.add("cp-title-place");
+    var CAP = 400;
+    document.getElementById("cp-sub").textContent = rows.length + (rows.length === 1 ? " living species" : " living species") + (rows.length > CAP ? " · the first " + CAP + " are listed - search or filter to narrow it" : "");
+    document.getElementById("cp-list").innerHTML = rows.slice(0, CAP).map(function (sp) {
+      return '<div class="cp-row cp-sp" data-sp="' + attrEsc(sp.id) + '">' + photoBtn(sp) + "<b>" + sp.name + "</b><i>" + sp.sci + "</i></div>";
+    }).join("") || '<div class="cp-row"><b>No species match.</b></div>';
+    popPanel();
+    invalidate();
+  }
   // one clicked state/province: how many of the country's listed species live there, and which
   function fillProvince(cc, s) {
     panelKind = "prov";
@@ -16244,6 +16270,12 @@ window.SL_GEO_READY = new Promise(function (res) {
       paint();
       return;
     }
+    // a search or filters, with no country, state or place picked: list the snakes it found
+    if (!selected && !statesMode && !pickedProvince && matched && matched.length && (panelKind === null || panelKind === "searchlist" || document.getElementById("country-panel").hidden)) {
+      fillSearchSpecies();
+      document.getElementById("country-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
     // with the country's states on and none picked, this button reads "List states" and lists
     // them; a picked state shows its own snakes
     if (statesMode && statesMode === lastCountryCode && !pickedProvince) showProvinces();
@@ -16309,6 +16341,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     // and it is there whenever the panel holds a place's snakes
     var cpEl = document.getElementById("country-panel");
     if (sb.hidden && cpEl && !cpEl.hidden && document.querySelector("#cp-list .cp-sp")) sb.hidden = false;
+    // and whenever a search or filters put snakes on the map (v4.63)
+    var hsv = document.getElementById("heat-search");
+    if (sb.hidden && matched && matched.length && ((hsv && hsv.value.trim()) || MFSET) && mapSearchKind !== "place") sb.hidden = false;
     var qT = (multi ? "Hide " : "See ") + qb.textContent.replace(/^(See|Hide) /, "");
     if (qb.textContent !== qT) qb.textContent = qT;
     var key = TOPP ? [TOPP.cc, TOPP.key, TOPP.n, TOPP.ties, TOPP.low ? TOPP.low.key + ":" + TOPP.low.n + ":" + TOPP.low.ties : TOPP.allSame].join("|") : "";
