@@ -1,0 +1,514 @@
+{
+ "_about": "Made-up observations in the iNaturalist API v1 /observations shape (not real records), for tests/sightings-bar.js: a 4 x 3 grid over central Portugal; 7005 has no photo.",
+ "results": [
+  {
+   "id": 7001,
+   "uri": "https://www.inaturalist.org/observations/7001",
+   "quality_grade": "needs_id",
+   "observed_on": "2025-03-01",
+   "observed_on_details": {
+    "date": "2025-03-01"
+   },
+   "time_observed_at": "2025-03-01T08:00:00+01:00",
+   "observed_time_zone": "Europe/Lisbon",
+   "created_at": "2025-03-02T20:00:00+00:00",
+   "user": {
+    "login": "fixture_user_1",
+    "name": "Ana Silva"
+   },
+   "place_guess": "Fixture place 1, Portugal",
+   "positional_accuracy": 10,
+   "obscured": false,
+   "geoprivacy": null,
+   "taxon": {
+    "id": 26093,
+    "name": "Natrix maura",
+    "rank": "species",
+    "preferred_common_name": "Viperine Water Snake"
+   },
+   "geojson": {
+    "type": "Point",
+    "coordinates": [
+     -9.15,
+     40.15
+    ]
+   },
+   "description": null,
+   "annotations": [],
+   "photos": [
+    {
+     "id": 70010,
+     "url": "https://static.inaturalist.org/photos/7001-0/square.jpg",
+     "attribution": "(c) Ana Silva, some rights reserved (CC BY-NC)",
+     "license_code": "cc-by-nc"
+    }
+   ]
+  },
+  {
+   "id": 7002,
+   "uri": "https://www.inaturalist.org/observations/7002",
+   "quality_grade": "research",
+   "observed_on": "2025-04-03",
+   "observed_on_details": {
+    "date": "2025-04-03"
+   },
+   "time_observed_at": "2025-04-03T09:05:00+01:00",
+   "observed_time_zone": "Europe/Lisbon",
+   "created_at": "2025-04-04T20:00:00+00:00",
+   "user": {
+    "login": "fixture_user_2",
+    "name": "Bruno Costa"
+   },
+   "place_guess": "Fixture place 2, Portugal",
+   "positional_accuracy": 11,
+   "obscured": false,
+   "geoprivacy": null,
+   "taxon": {
+    "id": 30715,
+    "name": "Vipera latastei",
+    "rank": "species",
+    "preferred_common_name": "Lataste's Viper"
+   },
+   "geojson": {
+    "type": "Point",
+    "coordinates": [
+     -8.75,
+     40.15
+    ]
+   },
+   "description": null,
+   "annotations": [],
+   "photos": [
+    {
+     "id": 70020,
+     "url": "https://static.inaturalist.org/photos/7002-0/square.jpg",
+     "attribution": "(c) Bruno Costa, some rights reserved (CC BY-NC)",
+     "license_code": "cc-by-nc"
+    }
+   ]
+  },
+  {
+   "id": 7003,
+   "uri": "https://www.inaturalist.org/observations/7003",
+   "quality_grade": "research",
+   "observed_on": "2025-05-05",
+   "observed_on_details": {
+    "date": "2025-05-05"
+   },
+   "time_observed_at": "2025-05-05T10:10:00+01:00",
+   "observed_time_zone": "Europe/Lisbon",
+   "created_at": "2025-05-06T20:00:00+00:00",
+   "user": {
+    "login": "fixture_user_3",
+    "name": "Carla Dias"
+   },
+   "place_guess": "Fixture place 3, Portugal",
+   "positional_accuracy": 12,
+   "obscured": false,
+   "geoprivacy": null,
+   "taxon": {
+    "id": 26093,
+    "name": "Natrix maura",
+    "rank": "species",
+    "preferred_common_name": "Viperine Water Snake"
+   },
+   "geojson": {
+    "type": "Point",
+    "coordinates": [
+     -8.35,
+     40.15
+    ]
+   },
+   "description": null,
+   "annotations": [],
+   "photos": [
+    {
+     "id": 70030,
+     "url": "https://static.inaturalist.org/photos/7003-0/square.jpg",
+     "attribution": "(c) Carla Dias, some rights reserved (CC BY-NC)",
+     "license_code": "cc-by-nc"
+    }
+   ]
+  },
+  {
+   "id": 7004,
+   "uri": "https://www.inaturalist.org/observations/7004",
+   "quality_grade": "needs_id",
+   "observed_on": "2025-06-07",
+   "observed_on_details": {
+    "date": "2025-06-07"
+   },
+   "time_observed_at": "2025-06-07T11:15:00+01:00",
+   "observed_time_zone": "Europe/Lisbon",
+   "created_at": "2025-06-08T20:00:00+00:00",
+   "user": {
+    "login": "fixture_user_4",
+    "name": "Duarte Lopes"
+   },
+   "place_guess": "Fixture place 4, Portugal",
+   "positional_accuracy": 13,
+   "obscured": false,
+   "geoprivacy": null,
+   "taxon": {
+    "id": 30715,
+    "name": "Vipera latastei",
+    "rank": "species",
+    "preferred_common_name": "Lataste's Viper"
+   },
+   "geojson": {
+    "type": "Point",
+    "coordinates": [
+     -7.95,
+     40.15
+    ]
+   },
+   "description": null,
+   "annotations": [],
+   "photos": [
+    {
+     "id": 70040,
+     "url": "https://static.inaturalist.org/photos/7004-0/square.jpg",
+     "attribution": "(c) Duarte Lopes, some rights reserved (CC BY-NC)",
+     "license_code": "cc-by-nc"
+    }
+   ]
+  },
+  {
+   "id": 7005,
+   "uri": "https://www.inaturalist.org/observations/7005",
+   "quality_grade": "research",
+   "observed_on": "2025-07-09",
+   "observed_on_details": {
+    "date": "2025-07-09"
+   },
+   "time_observed_at": "2025-07-09T12:20:00+01:00",
+   "observed_time_zone": "Europe/Lisbon",
+   "created_at": "2025-07-10T20:00:00+00:00",
+   "user": {
+    "login": "fixture_user_5",
+    "name": "Eva Martins"
+   },
+   "place_guess": "Fixture place 5, Portugal",
+   "positional_accuracy": 14,
+   "obscured": false,
+   "geoprivacy": null,
+   "taxon": {
+    "id": 26093,
+    "name": "Natrix maura",
+    "rank": "species",
+    "preferred_common_name": "Viperine Water Snake"
+   },
+   "geojson": {
+    "type": "Point",
+    "coordinates": [
+     -9.15,
+     39.4
+    ]
+   },
+   "description": null,
+   "annotations": [],
+   "photos": []
+  },
+  {
+   "id": 7006,
+   "uri": "https://www.inaturalist.org/observations/7006",
+   "quality_grade": "research",
+   "observed_on": "2025-08-11",
+   "observed_on_details": {
+    "date": "2025-08-11"
+   },
+   "time_observed_at": "2025-08-11T13:25:00+01:00",
+   "observed_time_zone": "Europe/Lisbon",
+   "created_at": "2025-08-12T20:00:00+00:00",
+   "user": {
+    "login": "fixture_user_6",
+    "name": "Filipe Rocha"
+   },
+   "place_guess": "Fixture place 6, Portugal",
+   "positional_accuracy": 15,
+   "obscured": false,
+   "geoprivacy": null,
+   "taxon": {
+    "id": 30715,
+    "name": "Vipera latastei",
+    "rank": "species",
+    "preferred_common_name": "Lataste's Viper"
+   },
+   "geojson": {
+    "type": "Point",
+    "coordinates": [
+     -8.75,
+     39.4
+    ]
+   },
+   "description": null,
+   "annotations": [],
+   "photos": [
+    {
+     "id": 70060,
+     "url": "https://static.inaturalist.org/photos/7006-0/square.jpg",
+     "attribution": "(c) Filipe Rocha, some rights reserved (CC BY-NC)",
+     "license_code": "cc-by-nc"
+    }
+   ]
+  },
+  {
+   "id": 7007,
+   "uri": "https://www.inaturalist.org/observations/7007",
+   "quality_grade": "needs_id",
+   "observed_on": "2025-09-13",
+   "observed_on_details": {
+    "date": "2025-09-13"
+   },
+   "time_observed_at": "2025-09-13T14:30:00+01:00",
+   "observed_time_zone": "Europe/Lisbon",
+   "created_at": "2025-09-14T20:00:00+00:00",
+   "user": {
+    "login": "fixture_user_7",
+    "name": "Gabriela Nunes"
+   },
+   "place_guess": "Fixture place 7, Portugal",
+   "positional_accuracy": 16,
+   "obscured": false,
+   "geoprivacy": null,
+   "taxon": {
+    "id": 26093,
+    "name": "Natrix maura",
+    "rank": "species",
+    "preferred_common_name": "Viperine Water Snake"
+   },
+   "geojson": {
+    "type": "Point",
+    "coordinates": [
+     -8.35,
+     39.4
+    ]
+   },
+   "description": null,
+   "annotations": [],
+   "photos": [
+    {
+     "id": 70070,
+     "url": "https://static.inaturalist.org/photos/7007-0/square.jpg",
+     "attribution": "(c) Gabriela Nunes, some rights reserved (CC BY-NC)",
+     "license_code": "cc-by-nc"
+    }
+   ]
+  },
+  {
+   "id": 7008,
+   "uri": "https://www.inaturalist.org/observations/7008",
+   "quality_grade": "research",
+   "observed_on": "2025-10-15",
+   "observed_on_details": {
+    "date": "2025-10-15"
+   },
+   "time_observed_at": "2025-10-15T15:35:00+01:00",
+   "observed_time_zone": "Europe/Lisbon",
+   "created_at": "2025-10-16T20:00:00+00:00",
+   "user": {
+    "login": "fixture_user_8",
+    "name": "Hugo Pires"
+   },
+   "place_guess": "Fixture place 8, Portugal",
+   "positional_accuracy": 17,
+   "obscured": false,
+   "geoprivacy": null,
+   "taxon": {
+    "id": 30715,
+    "name": "Vipera latastei",
+    "rank": "species",
+    "preferred_common_name": "Lataste's Viper"
+   },
+   "geojson": {
+    "type": "Point",
+    "coordinates": [
+     -7.95,
+     39.4
+    ]
+   },
+   "description": null,
+   "annotations": [],
+   "photos": [
+    {
+     "id": 70080,
+     "url": "https://static.inaturalist.org/photos/7008-0/square.jpg",
+     "attribution": "(c) Hugo Pires, some rights reserved (CC BY-NC)",
+     "license_code": "cc-by-nc"
+    }
+   ]
+  },
+  {
+   "id": 7009,
+   "uri": "https://www.inaturalist.org/observations/7009",
+   "quality_grade": "research",
+   "observed_on": "2025-03-17",
+   "observed_on_details": {
+    "date": "2025-03-17"
+   },
+   "time_observed_at": "2025-03-17T16:40:00+01:00",
+   "observed_time_zone": "Europe/Lisbon",
+   "created_at": "2025-03-18T20:00:00+00:00",
+   "user": {
+    "login": "fixture_user_9",
+    "name": "Ines Sousa"
+   },
+   "place_guess": "Fixture place 9, Portugal",
+   "positional_accuracy": 18,
+   "obscured": false,
+   "geoprivacy": null,
+   "taxon": {
+    "id": 26093,
+    "name": "Natrix maura",
+    "rank": "species",
+    "preferred_common_name": "Viperine Water Snake"
+   },
+   "geojson": {
+    "type": "Point",
+    "coordinates": [
+     -9.15,
+     38.65
+    ]
+   },
+   "description": null,
+   "annotations": [],
+   "photos": [
+    {
+     "id": 70090,
+     "url": "https://static.inaturalist.org/photos/7009-0/square.jpg",
+     "attribution": "(c) Ines Sousa, some rights reserved (CC BY-NC)",
+     "license_code": "cc-by-nc"
+    }
+   ]
+  },
+  {
+   "id": 7010,
+   "uri": "https://www.inaturalist.org/observations/7010",
+   "quality_grade": "needs_id",
+   "observed_on": "2025-04-19",
+   "observed_on_details": {
+    "date": "2025-04-19"
+   },
+   "time_observed_at": "2025-04-19T17:45:00+01:00",
+   "observed_time_zone": "Europe/Lisbon",
+   "created_at": "2025-04-20T20:00:00+00:00",
+   "user": {
+    "login": "fixture_user_10",
+    "name": "Joao Teixeira"
+   },
+   "place_guess": "Fixture place 10, Portugal",
+   "positional_accuracy": 19,
+   "obscured": false,
+   "geoprivacy": null,
+   "taxon": {
+    "id": 30715,
+    "name": "Vipera latastei",
+    "rank": "species",
+    "preferred_common_name": "Lataste's Viper"
+   },
+   "geojson": {
+    "type": "Point",
+    "coordinates": [
+     -8.75,
+     38.65
+    ]
+   },
+   "description": null,
+   "annotations": [],
+   "photos": [
+    {
+     "id": 70100,
+     "url": "https://static.inaturalist.org/photos/7010-0/square.jpg",
+     "attribution": "(c) Joao Teixeira, some rights reserved (CC BY-NC)",
+     "license_code": "cc-by-nc"
+    }
+   ]
+  },
+  {
+   "id": 7011,
+   "uri": "https://www.inaturalist.org/observations/7011",
+   "quality_grade": "research",
+   "observed_on": "2025-05-21",
+   "observed_on_details": {
+    "date": "2025-05-21"
+   },
+   "time_observed_at": "2025-05-21T18:50:00+01:00",
+   "observed_time_zone": "Europe/Lisbon",
+   "created_at": "2025-05-22T20:00:00+00:00",
+   "user": {
+    "login": "fixture_user_11",
+    "name": "Leonor Vaz"
+   },
+   "place_guess": "Fixture place 11, Portugal",
+   "positional_accuracy": 20,
+   "obscured": false,
+   "geoprivacy": null,
+   "taxon": {
+    "id": 26093,
+    "name": "Natrix maura",
+    "rank": "species",
+    "preferred_common_name": "Viperine Water Snake"
+   },
+   "geojson": {
+    "type": "Point",
+    "coordinates": [
+     -8.35,
+     38.65
+    ]
+   },
+   "description": null,
+   "annotations": [],
+   "photos": [
+    {
+     "id": 70110,
+     "url": "https://static.inaturalist.org/photos/7011-0/square.jpg",
+     "attribution": "(c) Leonor Vaz, some rights reserved (CC BY-NC)",
+     "license_code": "cc-by-nc"
+    }
+   ]
+  },
+  {
+   "id": 7012,
+   "uri": "https://www.inaturalist.org/observations/7012",
+   "quality_grade": "research",
+   "observed_on": "2025-06-23",
+   "observed_on_details": {
+    "date": "2025-06-23"
+   },
+   "time_observed_at": "2025-06-23T19:55:00+01:00",
+   "observed_time_zone": "Europe/Lisbon",
+   "created_at": "2025-06-24T20:00:00+00:00",
+   "user": {
+    "login": "fixture_user_12",
+    "name": "Miguel Ramos"
+   },
+   "place_guess": "Fixture place 12, Portugal",
+   "positional_accuracy": 21,
+   "obscured": false,
+   "geoprivacy": null,
+   "taxon": {
+    "id": 30715,
+    "name": "Vipera latastei",
+    "rank": "species",
+    "preferred_common_name": "Lataste's Viper"
+   },
+   "geojson": {
+    "type": "Point",
+    "coordinates": [
+     -7.95,
+     38.65
+    ]
+   },
+   "description": null,
+   "annotations": [],
+   "photos": [
+    {
+     "id": 70120,
+     "url": "https://static.inaturalist.org/photos/7012-0/square.jpg",
+     "attribution": "(c) Miguel Ramos, some rights reserved (CC BY-NC)",
+     "license_code": "cc-by-nc"
+    }
+   ]
+  }
+ ]
+}

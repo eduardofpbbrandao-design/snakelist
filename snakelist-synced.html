@@ -17943,9 +17943,23 @@ window.SL_GEO_READY = new Promise(function (res) {
     });
   }
   // the line under the buttons: which snakes, how many of how many, from when - and Load more
+  // v4.63: the Sightings bar and its Options sit just above the map, not on it, so no dot is ever
+  // under them. Full screen has no "above": there they go back on the map, and a tap on the bar's
+  // text (not its buttons) goes through to the map (CSS pointer-events), so a dot under it still opens.
+  var sgDock = document.createElement("div"), gRow = document.getElementById("globe-row");
+  sgDock.className = "sg-dock"; sgDock.id = "sg-dock"; sgDock.hidden = true;
+  if (gRow && sgBar) gRow.parentNode.insertBefore(sgDock, gRow);
+  function sgDockPlace() {
+    if (!sgBar || !gRow) return;
+    var onMap = stage.classList.contains("full"), home = onMap ? stage.querySelector(".map-tools") : sgDock;
+    if (home && sgBar.parentNode !== home) { home.appendChild(sgBar); home.appendChild(sgOpts); }
+    sgDock.hidden = onMap || sgBar.hidden || stage.classList.contains("heat-only");
+  }
+  if (window.MutationObserver) new MutationObserver(sgDockPlace).observe(stage, { attributes: true, attributeFilter: ["class"] });
   function sgStatus() {
     if (!sgBar) return;
     sgBar.hidden = !SG.on;
+    sgDockPlace();
     if (!SG.on) return;
     var n = SG.list.length, tot = SG.total, dates = SG.range === "any" ? "any date" : SG_RANGES[SG.range].label.toLowerCase();
     var txt = "";
@@ -21635,6 +21649,14 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
 .sg-opts { box-sizing: border-box; max-width: min(360px, 100%); padding: 10px 12px; border-radius: 12px; background: var(--surface, #fff); color: var(--text, #222); border: 1px solid var(--border, rgba(0,0,0,.12)); box-shadow: 0 10px 30px rgba(0,0,0,.28); font: 13px/1.4 'Inter', sans-serif; }
 .sg-opts[hidden] { display: none; }
 .sg-opts-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+/* the bar's dock just above the map (v4.63): the same bar, off the map, so it never covers a dot */
+.sg-dock { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin: 0 0 8px; }
+.sg-dock[hidden] { display: none; }
+/* on the map (full screen) only the buttons take taps: the bar's text and the gaps between the
+   map buttons let a tap through to a dot under them */
+.map-tools { pointer-events: none; }
+.map-tools > *, .map-tools .sg-bar button, .map-tools .sg-opts { pointer-events: auto; }
+.map-tools > .sg-bar { pointer-events: none; }
 .sg-opts-x { border: 0; background: none; font-size: 20px; line-height: 1; cursor: pointer; color: var(--text-muted); }
 .sg-opts fieldset { border: 0; margin: 6px 0; padding: 0; }
 .sg-opts legend { font: 600 10.5px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; padding: 0; }
