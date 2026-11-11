@@ -289,6 +289,8 @@ function buildBody(P, F, pose, quality) {
   const bumps = [];
   if (Hd.brow) bumps.push({ x: Hd.eyeX * F.Hl, xs: F.Hl * 0.16, th: eyeA - 0.42, ts: 0.32, amp: Hd.brow, mirror: true });
   if (Hd.pits === 'loreal') bumps.push({ x: F.Hl * 0.15, xs: F.Hl * 0.035, th: Math.PI * 0.5, ts: 0.09, amp: -0.07, mirror: true });
+  // heat pits only where the species has them: one loreal pit (pit vipers), a row in the lip scales (pythons)
+  if (Hd.pits === 'labial') for (let k = 0; k < 5; k++) bumps.push({ x: F.Hl * (0.03 + k * 0.06), xs: F.Hl * 0.016, th: Math.PI * (k ? 0.52 : 0.2), ts: 0.05, amp: -0.05, mirror: true });
   bumps.push({ x: F.Hl * 0.05, xs: F.Hl * 0.022, th: Hd.nostrilA != null ? (Hd.nostrilA * Math.PI) / 180 : eyeA * 0.62, ts: 0.1, amp: -0.06, mirror: true }); // nostril (upward-facing in water snakes)
   if (Hd.snoutUp) bumps.push({ x: F.Hl * 0.03, xs: F.Hl * 0.05, th: 0, ts: 0.7, amp: Hd.snoutUp });
   const nTop = (x) => lerp(Hd.canthus, 2.15, sstep(F.Hl * 0.8, F.Hl * 1.6, x));
@@ -1158,7 +1160,7 @@ export function mount(host, opts) {
     const S = P.scales, gl = S.gloss;
     const mat = new THREE.MeshPhysicalMaterial({
       map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(1.25, 1.25), aoMap: tiles.cavity, aoMapIntensity: 0.9, roughnessMap: tiles.cavity,
-      roughness: lerp(0.82, 0.58, gl), metalness: 0, clearcoat: gl * 0.35, clearcoatRoughness: lerp(0.55, 0.3, gl), sheen: 0.12, sheenRoughness: 0.7, sheenColor: new THREE.Color('#ffffff').multiplyScalar(0.12),
+      roughness: lerp(0.82, 0.58, gl), metalness: 0, clearcoat: gl * 0.35, clearcoatRoughness: lerp(0.55, 0.3, gl), sheen: S.sheen != null ? S.sheen : 0.12, sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
       iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.65,
     });
     // the cavity map also darkens the skin between scales in direct light (as in real snakes)

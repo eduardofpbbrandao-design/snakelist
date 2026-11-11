@@ -243,8 +243,11 @@
    "scales": {
     "rows": 37,
     "keel": 0.95,
-    "gloss": 0.04,
-    "cavity": 0.5
+    "gloss": 0.02,
+    "cavity": 0.5,
+    "sheen": 0.8,
+    "sheenRough": 0.5,
+    "sheenColor": "#e8dccb"
    },
    "colors": {
     "dorsal": "#47302a",
@@ -389,11 +392,11 @@
     }
    ],
    "pose": {
-    "kind": "coil",
-    "pitch": 2.25,
-    "lead": 0.36,
-    "lift": 0.0,
-    "headBend": -0.9
+    "kind": "stack",
+    "pitch": 0.95,
+    "lead": 0.3,
+    "lift": 0.1,
+    "tight": 0.65
    },
    "scene": {
     "kind": "rainforest",
@@ -609,10 +612,11 @@
     "rattleColor": "#a39686"
    },
    "pose": {
-    "kind": "coil",
-    "pitch": 2.3,
-    "lead": 0.34,
-    "lift": 0.15
+    "kind": "stack",
+    "pitch": 0.95,
+    "lead": 0.32,
+    "lift": 0.25,
+    "tight": 0.6
    },
    "scene": {
     "kind": "arid",
@@ -899,7 +903,8 @@
     "eye": 0.15,
     "iris": "#a8662f",
     "irisInner": "#c98a48",
-    "pupil": "round"
+    "pupil": "round",
+    "plates": true
    },
    "scales": {
     "rows": 19,
@@ -1012,6 +1017,16 @@
       ]
      ],
      "color": "#3f3025"
+    },
+    {
+     "type": "shields",
+     "color": "#3a3027",
+     "alpha": 0.5,
+     "wid": 0.011,
+     "barColor": "#3a3027",
+     "barAlpha": 0.25,
+     "barWid": 0.01,
+     "labials": 7
     }
    ],
    "pose": {
@@ -1197,7 +1212,8 @@
     "eyeA": 50,
     "eye": 0.13,
     "iris": "#2a2418",
-    "pupil": "round"
+    "pupil": "round",
+    "plates": true
    },
    "scales": {
     "rows": 47,
@@ -1266,6 +1282,14 @@
      "color": "#15161a",
      "warp": 1.0,
      "belly": true
+    },
+    {
+     "type": "shields",
+     "color": "#000000",
+     "alpha": 0.35,
+     "wid": 0.01,
+     "barAlpha": 0.0,
+     "labials": 7
     }
    ],
    "pose": {
