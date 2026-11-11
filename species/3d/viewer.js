@@ -1102,7 +1102,9 @@ export function mount(host, opts) {
   const reduceMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const reduce = () => reduceMQ.matches;
   const lowDevice = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4 || Math.min(screen.width, screen.height) < 500;
-  let quality = opts.quality || (lowDevice ? 'low' : 'high');
+  // software rendering (no GPU: SwiftShader, llvmpipe) is treated as a low-end device
+  const softGL = (() => { try { const c = document.createElement('canvas'), g = c.getContext('webgl2') || c.getContext('webgl'), e = g && g.getExtension('WEBGL_debug_renderer_info'), r = e ? String(g.getParameter(e.UNMASKED_RENDERER_WEBGL)) : ''; if (g && g.getExtension('WEBGL_lose_context')) g.getExtension('WEBGL_lose_context').loseContext(); return /swiftshader|llvmpipe|software/i.test(r); } catch (err) { return false; } })();
+  let quality = opts.quality || window.SL_3D_QUALITY || (lowDevice || softGL ? 'low' : 'high');
   const disposables = new Set(), cleanups = [];
   const track = (o) => { disposables.add(o); return o; };
   const on = (t, ev, fn, o) => { t.addEventListener(ev, fn, o); cleanups.push(() => t.removeEventListener(ev, fn, o)); };
@@ -1146,7 +1148,7 @@ export function mount(host, opts) {
   const maxPR = quality === 'low' ? 1.25 : 2;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxPR));
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.86;
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = quality === 'low' ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   const ctx = { renderer, scene: null, track };
   let snakeGroup, cam, controls, info, extras, raf = 0, dirty = true, lost = false, alive = true, scaleObj = null, markers = [];
 

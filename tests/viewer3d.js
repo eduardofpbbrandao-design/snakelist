@@ -19,8 +19,10 @@ const COUNT_LISTENERS = () => {
   window.__lcount = () => live.size;
 };
 
+let lastCtx = null;
 async function newPage(br, opts = {}) {
-  const ctx = await br.newContext(Object.assign({ viewport: { width: 1280, height: 900 } }, opts.ctx || {}));
+  if (lastCtx) await lastCtx.close().catch(() => {}); // one page at a time: software WebGL is slow and memory-hungry
+  const ctx = lastCtx = await br.newContext(Object.assign({ viewport: { width: 1280, height: 900 } }, opts.ctx || {}));
   const pg = await ctx.newPage();
   const reqs = [];
   pg.on('request', (r) => reqs.push(r.url()));
@@ -97,6 +99,7 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     st = await pg.evaluate(() => { const s = window.__sp3d, i = s.info(); return { d: s.controls.st.d, dFit: i.dFit, el: s.controls.st.el }; });
     ok('R resets the view', Math.abs(st.d - st.dFit) / st.dFit < 0.01 && Math.abs(st.el - Math.PI / 6) < 0.01, JSON.stringify(st));
     // no spin: after release with no movement, nothing keeps moving
+    await pg.waitForFunction(() => !window.__sp3d.controls.st.goal, null, { timeout: 120000 }).catch(() => {}); // software rendering is slow; wait for the reset to finish
     const az2 = await pg.evaluate(() => window.__sp3d.controls.st.az); await pg.waitForTimeout(1500);
     ok('no unexpected spin at rest', Math.abs((await pg.evaluate(() => window.__sp3d.controls.st.az)) - az2) < 1e-6);
     // touch: two synthetic touch pointers pinching apart zoom in; one finger orbits
@@ -266,6 +269,7 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
   {
     const { pg } = await newPage(br);
     await pg.goto(BASE + 'smooth-snake-coronella-austriaca.html#real'); await waitViewer(pg);
+    await pg.evaluate(() => window.__sp3d.envReady); await pg.waitForTimeout(1500); // the photo surroundings arrive once, then nothing moves
     const r = await pg.evaluate(async () => {
       const ren = window.__sp3d.renderer; let n = 0; const o = ren.render.bind(ren); ren.render = (a, b) => { n++; o(a, b); };
       await new Promise((r) => setTimeout(r, 1000)); const idle = n;
