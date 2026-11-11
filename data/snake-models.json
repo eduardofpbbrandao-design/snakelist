@@ -682,12 +682,12 @@
     "jaw": 0.76,
     "eyeX": 0.3,
     "eyeA": 52,
-    "eye": 0.17,
+    "eye": 0.2,
     "iris": "#b0722c",
     "irisInner": "#d9a24a",
     "pupil": "round",
     "brow": 0.03,
-    "embed": 0.6,
+    "embed": 0.55,
     "shape": "tri",
     "neckLen": 0.55,
     "mid": 0.8,
@@ -732,13 +732,13 @@
      "a": 0.5,
      "mirror": true,
      "alt": true,
-     "wid": 0.105,
-     "len": 0.5,
+     "wid": 0.1,
+     "len": 0.55,
      "shape": "round",
      "color": "#352d22",
      "inner": {
-      "r": 0.36,
-      "color": "#ab9660"
+      "r": 0.3,
+      "color": "#9a8758"
      },
      "warp": 0.6,
      "aa": 0.25,
@@ -820,16 +820,18 @@
      "alpha": 0.55,
      "wid": 0.011,
      "barColor": "#251f18",
-     "barWid": 0.016,
+     "barWid": 0.012,
      "labials": 8,
-     "barAlpha": 0.6
+     "barAlpha": 0.5
     }
    ],
    "pose": {
     "kind": "stack",
-    "pitch": 0.8,
+    "pitch": 0.85,
     "lead": 0.34,
-    "lift": 0.25
+    "lift": 0.25,
+    "wobble": 0.35,
+    "squash": 0.18
    },
    "scene": {
     "kind": "riverbank",

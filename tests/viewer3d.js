@@ -234,6 +234,25 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     await (await pg.$('.sp-rl')).screenshot({ path: OUT + 'test-limits-' + label.replace(/ /g, '-') + '.png' });
   }
 
+  // 9. close zoom never puts the camera inside the snake (stacked coil, so body parts sit above the ground)
+  {
+    const { pg, errs } = await newPage(br);
+    await pg.goto(BASE + 'viperine-snake-natrix-maura.html#real'); await waitViewer(pg);
+    const r = await pg.evaluate(() => {
+      const s = window.__sp3d, c = s.controls, i = s.info(), F = i.F, B = i.body;
+      // independent check: distance from the camera to the body's centre line minus the body's half-size there
+      const inside = () => { let m = 1e9; for (let k = 0; k <= 600; k++) { const x = (k / 600) * F.L, d = s.cam.position.distanceTo(B.spine(x)) - Math.max(F.W(x), F.Hh(x)); if (d < m) m = d; } return m; };
+      let worst = 1e9, n = 0, below = 0;
+      for (let a = 0; a < 36; a++) for (const el of [0.14, 0.4, 0.9, 1.3]) for (const dk of [0.6, 1, 1.6]) {
+        c.setGoal({ az: (a / 36) * Math.PI * 2, el, d: i.dMin * dk }, true); s.frame(); n++;
+        const m = inside(); if (m < worst) worst = m; if (s.cam.position.y <= 0) below++;
+      }
+      return { probes: n, worstClearance: +worst.toFixed(5), near: +s.cam.near.toFixed(5), below, L: F.L };
+    });
+    ok('close zoom: camera never inside the snake (432 probes round a stacked coil)', r.worstClearance > 0 && r.below === 0, JSON.stringify(r));
+    ok('viperine snake: no page errors', errs.length === 0, errs.join(' | '));
+  }
+
   // 6. WebGL unavailable: fallback message, photos offered
   {
     const { pg } = await newPage(br, { init: () => { const g = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function (t, o) { return /webgl/.test(t) ? null : g.call(this, t, o); }; } });

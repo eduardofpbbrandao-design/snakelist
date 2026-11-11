@@ -995,7 +995,7 @@ function applyEnv(ctx, P, F, poseInfo, env) {
   sky.position.y = sea ? 0 : camH - 0.002; sky.renderOrder = -2; scene.add(sky); ctx.track(sky.geometry); ctx.track(sky.material);
   scene.background = env.horizon.clone();
   // fade the near ground (and water) into the projected photo ground
-  const gR = ctx.groundR, fade = canvasTex(256, (x, s) => { const g = x.createRadialGradient(s / 2, s / 2, s * 0.18, s / 2, s / 2, s * 0.5); g.addColorStop(0, '#fff'); g.addColorStop(1, '#000'); x.fillStyle = g; x.fillRect(0, 0, s, s); }, 1, false);
+  const gR = ctx.groundR, fade = canvasTex(256, (x, s) => { const g = x.createRadialGradient(s / 2, s / 2, s * 0.1, s / 2, s / 2, s * 0.36); g.addColorStop(0, '#fff'); g.addColorStop(1, '#000'); x.fillStyle = g; x.fillRect(0, 0, s, s); }, 1, false);
   fade.wrapS = fade.wrapT = THREE.ClampToEdgeWrapping; fade.repeat.set(1, 1); ctx.track(fade);
   if (!sea) for (const m of ctx.fadeMats) { m.alphaMap = fade; if (m.transparent) { m.opacity *= 1; } else m.alphaHash = true; m.needsUpdate = true; }
   scene.fog = sea ? new THREE.Fog(env.horizon, gR * 0.4, gR * 0.98) : null;
@@ -1229,6 +1229,7 @@ export function mount(host, opts) {
     let sxx = 0, szz = 0, sxz = 0; for (const p of pose.pts) { sxx += p[0] * p[0]; szz += p[1] * p[1]; sxz += p[0] * p[1]; }
     const axisAng = 0.5 * Math.atan2(2 * sxz, sxx - szz);
     info = { F, body, center: new THREE.Vector3(center.x, Math.min(center.y, hMax * 0.5), center.z), Rb, hMax, headPos, headDir, axisAng, eyePos, size };
+    info.collide = []; for (let i = 0, n = 240; i <= n; i++) { const x = (i / n) * F.L; info.collide.push({ p: body.spine(x), r: Math.max(F.W(x), F.Hh(x)) * 1.05 }); }
     extras = { mat };
     // camera
     cam = new THREE.PerspectiveCamera(38, 1, Rb * 0.001, Rb * 40);
@@ -1274,9 +1275,17 @@ export function mount(host, opts) {
     else controls.setGoal({ az: controls.st.az, el: (80 * Math.PI) / 180, d: (info.Rb * 1.12) / Math.tan(Math.min(info.vf, info.hf)) + info.hMax });
   }
 
+  // the camera never enters the body: its distance to the body's centre line must exceed the body's
+  // half-thickness there plus a margin for the near plane; if not, it backs away along its line of sight
+  function bodyClearance(p) {
+    let m = 1e9; for (const c of info.collide) { const d = p.distanceTo(c.p) - c.r; if (d < m) m = d; } return m;
+  }
   function placeCamera() {
-    const st = controls.st, t = targetFor(st.d);
-    cam.position.set(t.x + st.d * Math.cos(st.el) * Math.sin(st.az), t.y + st.d * Math.sin(st.el), t.z + st.d * Math.cos(st.el) * Math.cos(st.az));
+    const st = controls.st;
+    let t = targetFor(st.d);
+    const put = () => cam.position.set(t.x + st.d * Math.cos(st.el) * Math.sin(st.az), t.y + st.d * Math.sin(st.el), t.z + st.d * Math.cos(st.el) * Math.cos(st.az));
+    put();
+    for (let k = 0; k < 40 && bodyClearance(cam.position) < st.d * 0.06; k++) { st.d = Math.min(st.d * 1.05, info.dMax); if (st.goal && st.goal.d < st.d) st.goal.d = st.d; t = targetFor(st.d); put(); if (st.d >= info.dMax) break; }
     cam.near = Math.max(st.d * 0.02, 1e-4); cam.far = Math.max(info.Rb * 40, 300); cam.updateProjectionMatrix(); cam.lookAt(t);
   }
   function resize() {
@@ -1436,7 +1445,7 @@ export function mount(host, opts) {
   function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; disposeScene(); build(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
 
   build(); resize();
-  if (opts.testing) window.__sp3d = { THREE, renderer, get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, frame: () => { controls.update(); placeCamera(); updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); } };
+  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, frame: () => { controls.update(); placeCamera(); updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); } };
 
   return {
     canvas,
