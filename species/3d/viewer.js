@@ -770,8 +770,8 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   if (PR.reeds && ctx.waterInfo) {
     // reeds and rushes along the water's edge, behind the snake
     const spots = []; const wi = ctx.waterInfo, tng = new THREE.Vector2(-wi.dir.y, wi.dir.x);
-    for (let i = 0; i < 26; i++) { const s = (R() - 0.5) * Rb * 7, off = wi.edge + Rb * (0.15 + R() * 0.9); const x = wi.dir.x * off + tng.x * s, z = wi.dir.y * off + tng.y * s; if (dist2snake(x, z) > Rb * 0.5) spots.push([x, z]); }
-    const g = bladeTuft(seed + 3, 22, clamp(L * 0.9, 0.4, 1.2), '#55693a', '#a6a46a', 0.05), im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.85 }), spots.length);
+    for (let i = 0; i < 26; i++) { const s = (R() - 0.5) * Rb * 7, off = wi.edge + Rb * (0.15 + R() * 0.9); const x = wi.dir.x * off + tng.x * s, z = wi.dir.y * off + tng.y * s; if (dist2snake(x, z) > Math.max(Rb * 0.5, clamp(L * 0.9, 0.4, 1.2) * 0.5)) spots.push([x, z]); }
+    const g = bladeTuft(seed + 3, 40, clamp(L * 0.9, 0.4, 1.2), '#55693a', '#a6a46a', 0.06, { w: 0.01, lean: 0.25 }), im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.85 }), spots.length);
     im.castShadow = true;
     spots.forEach(([x, z], i) => { const s = 0.7 + R() * 0.6; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s, s, s); pv.set(x, -0.02, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); addOcc(im, i, m4, clamp(L * 0.9, 0.4, 1.2) * s * 0.7); });
     scene.add(im);
@@ -1098,8 +1098,8 @@ export function mount(host, opts) {
     const t = targetFor(controls.st.d), cp = cam.position; od.subVectors(t, cp); const len2 = od.lengthSq(), sr = Math.min(info.Rb, controls.st.d * 0.4);
     const dirty = new Set();
     for (const o of list) {
-      ov.subVectors(o.c, cp); const tt = ov.dot(od) / len2; let hide = false;
-      if (tt > 0.02 && tt < 1.05) { const perp = ov.addScaledVector(od, -tt).length(); hide = perp < o.r + sr * Math.min(1, tt) * 0.9; }
+      ov.subVectors(o.c, cp); const tt = ov.dot(od) / len2; let hide = ov.length() < o.r * 1.6; // also anything right in front of the lens
+      if (!hide && tt > 0.02 && tt < 1.05) { const perp = ov.addScaledVector(od, -tt).length(); hide = perp < o.r + sr * Math.min(1, tt) * 0.9; }
       if (hide === o.hid) continue; o.hid = hide;
       if (o.mesh) o.mesh.visible = !hide && (cScene.checked); else { o.im.setMatrixAt(o.i, hide ? zeroM : o.m); dirty.add(o.im); }
     }
