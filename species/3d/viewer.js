@@ -860,7 +860,10 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
       const dir = new THREE.Vector2(Math.cos(poseInfo.waterDir), Math.sin(poseInfo.waterDir)), edge = poseInfo.waterDist, depth = Math.max(0.03, Rb * 0.12);
       const pp = geo.attributes.position, uvs = geo.attributes.uv;
       for (let i = 0; i < pp.count; i++) {
-        const x = pp.getX(i), z = pp.getZ(i), s = x * dir.x + z * dir.y;
+        // squeeze the grid toward the middle: fine cells near the snake for a smooth, irregular shoreline
+        let x = pp.getX(i) / groundR, z = pp.getZ(i) / groundR; x = Math.sign(x) * x * x * groundR; z = Math.sign(z) * z * z * groundR;
+        pp.setX(i, x); pp.setZ(i, z); uvs.setXY(i, x / (2 * groundR) + 0.5, 0.5 - z / (2 * groundR));
+        const along = -x * dir.y + z * dir.x, s = x * dir.x + z * dir.y + (fbm(along / Rb * 1.3, 3.1, 0.7, seed + 19, 3) - 0.5) * Rb * 0.7;
         pp.setY(i, -depth * sstep(edge - Rb * 0.25, edge + Rb * 0.7, s) + (fbm(x / Rb * 2, z / Rb * 2, 1, seed, 2) - 0.5) * Rb * 0.02 * sstep(Rb * 0.3, Rb * 0.9, Math.abs(s - edge)));
       }
       geo.computeVertexNormals();
