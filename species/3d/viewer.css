@@ -1,0 +1,28 @@
+/* Styles for the 3D viewer (species/3d/viewer.js), shared by species pages and the app. Copied from species/sp.css. */
+.sp3d-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;min-height:min(56vh,480px);padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.sp3d-msg p{margin:0;max-width:440px}
+.sp3d-spin{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--g);animation:sp3dspin 1s linear infinite}@keyframes sp3dspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.sp3d-spin{animation-duration:3s}}
+.sp3d-wrap{position:relative;background:var(--card)}
+.sp3d-stage{position:relative;height:min(64vh,600px);min-height:280px;border-radius:14px;overflow:hidden;background:#c9d1c3;touch-action:none}
+.sp3d-canvas{display:block;width:100%;height:100%;outline:none;cursor:grab;touch-action:none}.sp3d-canvas:active{cursor:grabbing}
+.sp3d-canvas:focus-visible{box-shadow:inset 0 0 0 3px var(--g)}
+.sp3d-hint{position:absolute;left:8px;top:8px;margin:0;max-width:calc(100% - 16px);padding:4px 10px;border-radius:999px;background:rgba(12,26,18,.72);color:#fff;font:500 12.5px/1.4 Inter,system-ui,sans-serif;pointer-events:none;transition:opacity .6s}
+.sp3d-hint-off{opacity:0}
+.sp3d-status{position:absolute;inset:auto 12px 12px 12px;padding:10px 14px;border-radius:12px;background:rgba(12,26,18,.85);color:#fff;font-size:14px;text-align:center}
+.sp3d-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.sp3d-mk{position:absolute;left:0;top:0;display:flex;align-items:center;gap:5px;margin:-6px 0 0 -6px;white-space:nowrap}.sp3d-mk[hidden]{display:none}
+.sp3d-dot{flex:none;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--g);box-shadow:0 1px 3px rgba(0,0,0,.5)}
+.sp3d-mt{padding:2px 8px;border-radius:8px;background:rgba(12,26,18,.82);color:#fff;font:500 12px/1.4 Inter,system-ui,sans-serif;max-width:200px;white-space:normal}
+.sp3d-sl{margin:0}.sp3d-sl .sp3d-mt{transform:translate(-50%,-100%)}.sp3d-back{opacity:.45}.sp3d-moved .sp3d-dot{opacity:.35}
+@media (max-width:560px){.sp3d-mt{font-size:11px;max-width:150px;padding:1px 6px}}
+.sp3d-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 0 0}
+.sp3d-views{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}.sp3d-views .sp3d-b{border:0;border-radius:0}.sp3d-views .sp3d-b+.sp3d-b{border-left:1px solid var(--line)}
+.sp3d-b{font:600 13.5px Inter,system-ui,sans-serif;min-height:38px;padding:6px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);cursor:pointer}
+.sp3d-b:hover{border-color:var(--tagline)}.sp3d-b[aria-pressed=true],.sp3d-b[aria-expanded=true]{background:var(--g);border-color:var(--g);color:#fff}.sp3d-set{margin-left:auto}
+.sp3d-panel{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:8px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px}.sp3d-panel[hidden]{display:none}
+.sp3d-panel select{font:inherit;margin-left:6px;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text)}
+.sp3d-cap{font-size:13.5px;color:var(--muted);margin:8px 0 0}.sp3d-cap p{margin:2px 0}.sp3d-recon{font-weight:600;color:var(--text)}
+.sp3d-about{margin:10px 0 0;font-size:14px}.sp3d-about summary{cursor:pointer;font-weight:600}.sp3d-about ul{margin:6px 0 0;padding-left:20px}.sp3d-about p{margin:6px 0}
+.sp3d-wrap:fullscreen{padding:10px;background:var(--card);display:flex;flex-direction:column}.sp3d-wrap:fullscreen .sp3d-stage{flex:1;height:auto}
+.sp3d-max{position:fixed;inset:0;z-index:2147483000;padding:10px;background:var(--card);display:flex;flex-direction:column}.sp3d-max .sp3d-stage{flex:1;height:auto}
+@media (max-width:560px){.sp3d-stage{height:max(300px,calc(100dvh - 300px))}.sp3d-b{padding:6px 10px;font-size:13px}.sp3d-set{margin-left:0}}

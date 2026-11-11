@@ -21958,3 +21958,171 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
   window.SL_CAMS_DEBUG = { load: load, list: function () { return CAMS; } };
 })();
 </script>
+<style>
+  /* ---- 3D snakes on the map: the "3D" button, its panel, "See 3D" on species rows and the full-screen viewer ---- */
+  .map-tools .hm-toggle.td-toggle.on, .map-tools .hm-toggle.td-toggle.on:hover { background: linear-gradient(135deg, #2c7a57 0%, #256846 100%); border-color: #2f7a45; color: #fff; filter: none; }
+  .td-panel { width: 290px; }
+  .td-panel .td-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .td-panel .td-head b { font-size: 14px; flex: 1; }
+  .td-panel .td-x { background: none; border: 0; color: inherit; font-size: 22px; line-height: 1; cursor: pointer; padding: 0 4px; }
+  .td-panel p { margin: 0 0 8px; opacity: .92; }
+  .td-panel .td-find { width: 100%; box-sizing: border-box; font: inherit; padding: 6px 9px; border-radius: 9px; border: 1px solid rgba(160,222,140,.4); background: rgba(0,0,0,.18); color: inherit; margin-bottom: 8px; }
+  .td-panel .td-find::placeholder { color: rgba(240,248,236,.7); }
+  .td-list { max-height: min(46vh, 340px); overflow-y: auto; display: grid; gap: 4px; padding-right: 2px; }
+  .td-row { display: flex; align-items: center; gap: 8px; padding: 5px 6px 5px 8px; border-radius: 9px; background: rgba(0,0,0,.14); }
+  .td-row span { flex: 1; min-width: 0; }
+  .td-row b { display: block; font-weight: 600; font-size: 12.5px; }
+  .td-row i { display: block; font-size: 11.5px; opacity: .8; }
+  .td-see { flex: none; font: 600 12px/1 Inter, system-ui, sans-serif; padding: 6px 10px; border-radius: 999px; border: 1px solid #2f7a45; background: #e8f5e1; color: #1d5a33; cursor: pointer; white-space: nowrap; }
+  .td-see:hover, .td-see:focus-visible { background: #fff; outline: 2px solid #9be07c; outline-offset: 1px; }
+  .cp-row .td-see { margin-left: 6px; }
+  .sl3d-ov { position: fixed; inset: 0; z-index: 2147483000; display: flex; flex-direction: column; gap: 6px;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px));
+    --bg:#f1f6ee; --card:#fbfdf9; --text:#183020; --muted:#55705b; --line:#d5e4cf; --g:#2f8a3a; --tag:#e3f0dc; --tagline:#a9cf9c;
+    background: var(--card); color: var(--text); font-family: Inter, system-ui, sans-serif; overflow-y: auto; }
+  [data-sl-theme="dark"] .sl3d-ov { --bg:#111a14; --card:#16211a; --text:#e3eedf; --muted:#9db59f; --line:#2c3d30; --g:#4fa64a; --tag:#1f3323; --tagline:#3f6a45; }
+  .sl3d-hd { display: flex; align-items: center; gap: 10px; }
+  .sl3d-hd h2 { flex: 1; margin: 0; font-size: 18px; line-height: 1.25; }
+  .sl3d-hd h2 i { font-weight: 400; color: var(--muted); font-size: 14px; }
+  .sl3d-x { flex: none; min-width: 40px; min-height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font-size: 22px; cursor: pointer; }
+  .sl3d-host { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .sl3d-host .sp3d-wrap { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .sl3d-host .sp3d-stage { flex: 1; height: auto; min-height: 260px; }
+</style>
+<script>
+/* 3D snakes on the map. The "3D" button lists every snake that has a 3D model; with it on, species rows in
+   the map lists get a "See 3D" button. The viewer (species/3d/) is only downloaded when a model is opened. */
+(function () {
+  "use strict";
+  var BASE = "species/3d/", models = null, modP = null, viewer = null, on = false, ov = null, lastFocus = null, tries = 0;
+  var stage = document.querySelector(".globe-stage");
+  if (!stage) return;
+  function slug(s) { return String(s || "").trim().toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-+|-+$/g, ""); }
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function abs(u) { return new URL(BASE + u, location.href).href; }
+  function getModels() {
+    if (models) return Promise.resolve(models);
+    return fetch(abs("models.json")).then(function (r) { if (!r.ok) throw new Error("models " + r.status); return r.json(); })
+      .then(function (d) { models = (d && d.species) || {}; return models; });
+  }
+  function getViewer() {
+    if (!modP) {
+      var imp, q = tries++ ? "?r=" + tries : "";
+      try { imp = new Function("u", "return import(u)"); } catch (e) { return Promise.reject(e); }
+      modP = Promise.all([imp(abs("three.module.min.js" + q)), imp(abs("viewer.js" + q))])
+        .then(function (r) { r[1].useThree(r[0]); return r[1]; }).catch(function (e) { modP = null; throw e; });
+    }
+    return modP;
+  }
+  function css() {
+    if (document.getElementById("sl3d-css")) return;
+    var l = document.createElement("link"); l.rel = "stylesheet"; l.id = "sl3d-css"; l.href = abs("viewer.css"); document.head.appendChild(l);
+  }
+  function gl() { try { var c = document.createElement("canvas"); return !!(window.WebGLRenderingContext && (c.getContext("webgl2") || c.getContext("webgl"))); } catch (e) { return false; } }
+
+  // ---- the button ----
+  var btn = document.createElement("button");
+  btn.type = "button"; btn.className = "hm-toggle td-toggle"; btn.id = "td-toggle";
+  btn.setAttribute("aria-pressed", "false"); btn.setAttribute("aria-controls", "td-panel"); btn.title = "See snakes as 3D models";
+  btn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"></path><path d="M3 7l9 5 9-5M12 12v10"></path></svg> <span>3D</span>';
+  function place() { var t = stage.querySelector(".map-tools"); if (t && btn.parentNode !== t) t.appendChild(btn); return !!t; }
+  if (!place() && window.MutationObserver) { var mo = new MutationObserver(function () { if (place()) mo.disconnect(); }); mo.observe(stage, { childList: true, subtree: true }); }
+
+  // ---- the panel ----
+  var panel = document.createElement("div");
+  panel.className = "hm-panel td-panel"; panel.id = "td-panel"; panel.hidden = true;
+  panel.setAttribute("role", "dialog"); panel.setAttribute("aria-label", "3D snakes");
+  panel.innerHTML = '<div class="td-head"><b>3D snakes</b><button type="button" class="td-x" aria-label="Close 3D snakes">&times;</button></div>' +
+    '<p class="td-msg">Loading&hellip;</p><input type="text" class="td-find" id="td-find" placeholder="Find a snake&hellip;" aria-label="Find a snake with a 3D model" hidden>' +
+    '<div class="td-list" role="list"></div>';
+  stage.appendChild(panel);
+  var list = panel.querySelector(".td-list"), msg = panel.querySelector(".td-msg"), find = panel.querySelector(".td-find");
+  function fill() {
+    var q = find.value.trim().toLowerCase(), ids = Object.keys(models).sort(function (a, b) { return String(models[a].name).localeCompare(models[b].name); });
+    var rows = ids.filter(function (id) { return !q || (models[id].name + " " + id.replace(/-/g, " ")).toLowerCase().indexOf(q) >= 0; });
+    list.innerHTML = rows.map(function (id) {
+      var sci = id.replace(/-/g, " "); sci = sci.charAt(0).toUpperCase() + sci.slice(1);
+      return '<div class="td-row" role="listitem"><span><b>' + esc(models[id].name) + '</b><i>' + esc(sci) + '</i></span><button type="button" class="td-see" data-td="' + esc(id) + '">See 3D</button></div>';
+    }).join("") || '<p>No snake with a 3D model matches that.</p>';
+  }
+  find.addEventListener("input", fill);
+  function setOn(v) {
+    on = v; btn.classList.toggle("on", v); btn.setAttribute("aria-pressed", String(v)); panel.hidden = !v;
+    if (!v) { [].slice.call(document.querySelectorAll(".cp-row .td-see")).forEach(function (b) { b.remove(); }); return; }
+    getModels().then(function (m) {
+      var n = Object.keys(m).length;
+      msg.textContent = n + " snakes have a 3D model so far. Press See 3D to look at one. The same button appears on these snakes in the map's species lists.";
+      find.hidden = false; fill(); decorate();
+    }).catch(function () { msg.textContent = navigator.onLine === false ? "You seem to be offline, so the 3D models can't be loaded." : "The list of 3D models couldn't be loaded. Turn 3D off and on to try again."; });
+  }
+  btn.addEventListener("click", function () { setOn(!on); });
+  panel.querySelector(".td-x").addEventListener("click", function () { setOn(false); btn.focus(); });
+
+  // ---- "See 3D" on species rows in the map lists ----
+  function decorate() {
+    if (!on || !models) return;
+    [].slice.call(document.querySelectorAll(".cp-row.cp-sp")).forEach(function (r) {
+      if (r.querySelector(".td-see")) return;
+      var i = r.querySelector("i"), id = i && slug(i.textContent);
+      if (!id || !models[id]) return;
+      var b = document.createElement("button"); b.type = "button"; b.className = "td-see"; b.setAttribute("data-td", id); b.textContent = "See 3D";
+      b.setAttribute("aria-label", "See " + models[id].name + " in 3D");
+      r.appendChild(b);
+    });
+  }
+  if (window.MutationObserver) new MutationObserver(function () { if (on) decorate(); }).observe(document.body, { childList: true, subtree: true });
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest(".td-see");
+    if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    open(b.getAttribute("data-td"), b);
+  }, true);
+
+  // ---- the full-screen viewer ----
+  function say(t, retry) {
+    var h = ov.querySelector(".sl3d-host"); h.innerHTML = "";
+    var d = document.createElement("div"); d.className = "sp3d-msg"; d.setAttribute("role", "alert");
+    var p = document.createElement("p"); p.textContent = t; d.appendChild(p);
+    if (retry) { var r = document.createElement("button"); r.type = "button"; r.className = "sp3d-b"; r.textContent = "Retry"; r.addEventListener("click", retry); d.appendChild(r); }
+    h.appendChild(d);
+  }
+  function close() {
+    if (!ov) return;
+    if (viewer) { try { viewer.dispose(); } catch (e) {} viewer = null; }
+    ov.remove(); ov = null; document.documentElement.style.overflow = "";
+    document.removeEventListener("keydown", onKey, true);
+    if (lastFocus && lastFocus.focus) try { lastFocus.focus(); } catch (e) {}
+  }
+  function onKey(e) { if (e.key === "Escape" && ov && !document.fullscreenElement) { e.stopPropagation(); close(); } }
+  function open(id, from) {
+    close(); lastFocus = from || document.activeElement; css();
+    var p = models && models[id], sci = id.replace(/-/g, " "); sci = sci.charAt(0).toUpperCase() + sci.slice(1);
+    ov = document.createElement("div"); ov.className = "sl3d-ov"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true");
+    ov.setAttribute("aria-label", (p ? p.name : sci) + " in 3D");
+    ov.innerHTML = '<div class="sl3d-hd"><h2>' + esc(p ? p.name : sci) + ' <i>' + esc(sci) + '</i></h2><button type="button" class="sl3d-x" aria-label="Close the 3D view">&times;</button></div><div class="sl3d-host"></div>';
+    document.body.appendChild(ov); document.documentElement.style.overflow = "hidden";
+    ov.querySelector(".sl3d-x").addEventListener("click", close);
+    document.addEventListener("keydown", onKey, true);
+    ov.querySelector(".sl3d-x").focus();
+    start(id);
+  }
+  function start(id) {
+    var my = ov; say("Loading the 3D model…");
+    getModels().then(function (m) {
+      var p = m[id];
+      if (!p) { say("This snake doesn't have a 3D model yet."); return; }
+      if (!gl()) { say("This browser or device can't show 3D graphics (WebGL is off or not supported)."); return; }
+      return getViewer().then(function (mod) {
+        if (ov !== my) return;
+        var h = ov.querySelector(".sl3d-host"); h.innerHTML = "";
+        try { viewer = mod.mount(h, { profile: p, id: id, name: p.name }); }
+        catch (e) { viewer = null; say("The 3D view couldn't start on this device.", function () { start(id); }); }
+      });
+    }).catch(function () {
+      if (ov !== my) return;
+      say(navigator.onLine === false ? "You seem to be offline, and the 3D viewer hasn't been downloaded yet." : "The 3D viewer couldn't be loaded just now.", function () { start(id); });
+    });
+  }
+  window.SL_3D = { open: function (id) { return getModels().then(function () { open(id); }); }, close: close, setOn: setOn };
+})();
+</script>
