@@ -136,12 +136,9 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     ok('context loss shows a message, restore rebuilds and renders', !!lost.shown && lost.hiddenAfter && lost.canvases === 1 && pix > 20, JSON.stringify(lost) + ' avg ' + pix.toFixed(0));
     await pg.screenshot({ path: OUT + 'test-after-context-restore.png' });
 
-    // fullscreen
-    await pg.click('.sp3d-b:text-is("Fullscreen")'); await pg.waitForTimeout(800);
-    const fs = await pg.evaluate(() => ({ fs: !!document.fullscreenElement || !!document.querySelector('.sp3d-max'), w: document.querySelector('.sp3d-canvas').clientWidth, h: document.querySelector('.sp3d-canvas').clientHeight, rw: window.__sp3d.renderer.domElement.width }));
-    await pg.screenshot({ path: OUT + 'test-fullscreen.png' });
-    ok('fullscreen enlarges the viewer', fs.fs && fs.w >= 1200, JSON.stringify(fs));
-    await pg.click('.sp3d-b:text-is("Exit fullscreen")').catch(() => {}); await pg.waitForTimeout(500);
+    // v4.63: only Reset stays under the model
+    const bar = await pg.evaluate(() => [].map.call(document.querySelectorAll('.sp3d-bar button'), (b) => b.textContent));
+    ok('the only button under the model is Reset', bar.length === 1 && bar[0] === 'Reset', JSON.stringify(bar));
     // resize to phone width
     await pg.setViewportSize({ width: 390, height: 844 }); await pg.waitForTimeout(800);
     const rs = await pg.evaluate(() => { const c = document.querySelector('.sp3d-canvas'); return { cw: c.clientWidth, ch: c.clientHeight, bw: c.width / (window.devicePixelRatio || 1), aspect: window.__sp3d.cam.aspect, docW: document.documentElement.scrollWidth }; });

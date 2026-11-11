@@ -4321,8 +4321,8 @@
     "lift": 0.5
    },
    "scene": {
-    "kind": "arid",
-    "basis": "Account habitat: \"Remote semi-arid country in the interior of Australia.\" Shown on stony semi-arid ground."
+    "kind": "gibber",
+    "basis": "Account habitat: \"Remote semi-arid country in the interior of Australia.\" Shown on the stony gibber plains of the inland, like the Moon Plain."
    },
    "details": [
     [

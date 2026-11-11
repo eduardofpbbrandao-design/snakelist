@@ -186,8 +186,18 @@ def build(app):
     open(OUT + "/sp.js", "w").write(JS + build_regions.REAL_JS)
     # "Explore in 3D": the reviewed model profiles, next to the viewer (species/3d/viewer.js)
     os.makedirs(OUT + "/3d", exist_ok=True)
+    # v4.63: every other species (living, extinct and fossil) gets a generated profile (tools/auto_models.py)
+    import sys as _sys; _sys.path.insert(0, "tools"); import auto_models
+    M = json.load(open("data/snake-models.json", encoding="utf-8"))
+    by_id = {c["id"]: c for c in cards}
+    lens = {}
+    for i, inf in load_info(by_id).items():
+        lm = build_regions.length_m(inf)
+        if lm: lens[i] = lm
+    gen = auto_models.build(cards, lens, hab_kind, M["species"], HAB_SEC.get)
+    M["species"].update(gen)
     with open(OUT + "/3d/models.json", "w", encoding="utf-8") as fh:
-        json.dump(json.load(open("data/snake-models.json", encoding="utf-8")), fh, ensure_ascii=False, separators=(",", ":"))
+        json.dump(M, fh, ensure_ascii=False, separators=(",", ":"))
     return pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll, paths, boxes, region)
 
 
@@ -870,14 +880,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             ident = paras("identification", "Appearance") + paras("juvenile", "Adults and young") + paras("variation", "Variation") + paras("size", "Size")
             if ident: secs.append(("identification", "Identification", ident))
         # range: the published account, then SnakeList's country-level map and regions, then observations
-        obs = ""
-        if not c["fossil"]:
-            q = quote(sci)
-            obs = ('<h3>Observation records</h3><p>%s These are individual sightings people have shared: they show where it has been photographed, '
-                   'not how common it is.</p><p class="sp-links"><a href="https://www.inaturalist.org/observations?taxon_name=%s&amp;verifiable=true" rel="noopener">iNaturalist observations</a>'
-                   '<a href="https://www.gbif.org/species/search?q=%s" rel="noopener">GBIF occurrence records</a></p>') % (
-                ("SnakeList found research-grade iNaturalist records of it in %s." % nplural(c["spots"], "place")) if c["spots"] else
-                "SnakeList found no confirmed iNaturalist records of it.", q, q)
+        obs = ""  # (v4.63: no iNaturalist records section)
         secs.append(("range", "Where its fossils were found" if c["fossil"] else "Distribution", None))  # filled in by the template (the map)
         pub_html = paras("distribution", "Published distribution")
         if IST and not S.get("distribution"):
@@ -1043,7 +1046,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             site_head=site_header("../", "species"), site_foot=site_footer("../"),
             crumb_tax=((' &rsaquo; <a href="family/%s">%s</a>' % (slugify(c["family"]), esc(c["family"]))) if c["family"] else "") + ((' &rsaquo; <a href="genus/%s"><i>%s</i></a>' % (slugify(c["genus"]), esc(c["genus"]))) if c["genus"] and not c["fossil"] else ""),
             author=AUTHOR, venom_cls="v" if c["venom"] else "nv",
-            realbtn="" if c["fossil"] else '<button type="button" class="sp-btn sp-btn2 sp-realbtn" aria-haspopup="dialog">Explore in 3D</button>',
+            realbtn='<button type="button" class="sp-btn sp-btn2 sp-realbtn" aria-haspopup="dialog">Explore in 3D</button>',
             lenattr=len_attr(info),
             mapnote=('<p class="sp-note sp-mapnote">%s</p>' % ("The shaded country is where its fossils were found &ndash; not a living range." if c["fossil"] else
                      ("Shaded countries are those where it was recorded &ndash; it did not live everywhere inside them." if gone else

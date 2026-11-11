@@ -76,6 +76,60 @@ function normProfile(p) {
   return q;
 }
 
+// ---------- generated profiles (v4.63): every species without a hand-made profile ----------
+// tools/auto_models.py writes a short entry ({ auto: { p plan, L length, d/c/b colours, t pattern, n marks,
+// s scene, k keeled, x flags } }); this turns it into a full profile with the same layer types the
+// hand-made ones use. Flags: f fossil, e extinct, g colours guessed, l length typical for its group.
+function hexOf(rgb) { return '#' + rgb.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join(''); }
+function shade(c, k) { const v = hex(c); return hexOf(k >= 1 ? mixc(v, [255, 250, 235], Math.min(1, k - 1)) : v.map((x) => x * k)); }
+function lumOf(c) { const v = hex(c); return (0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]) / 255; }
+export function autoProfile(p) {
+  if (!p || !p.auto) return p;
+  const a = p.auto, x = a.x || '', d = a.d, c = a.c, b = a.b, n = a.n || 36, fossil = x.includes('f');
+  const pale = lumOf(c) > lumOf(d) ? c : shade(d, 1.45), dark = lumOf(c) < lumOf(d) ? c : shade(d, 0.45);
+  const pat = [];
+  const T = (o) => pat.push(Object.assign({ t: [0.06, 0.97], warp: 0.55, jit: 0.14, sj: 0.2, aj: 0.04 }, o));
+  switch (a.t) {
+    case 'blotch':
+      T({ type: 'blotch', count: n, a: 0, wid: 0.34, len: 0.62, shape: 'round', color: c, edgeColor: shade(c, 0.6), edge: 0.12 });
+      T({ type: 'blotch', count: n, phase: 0.5, a: 0.56, mirror: true, wid: 0.13, len: 0.42, shape: 'round', color: c, alpha: 0.85, jit: 0.22, sj: 0.3 }); break;
+    case 'saddle': T({ type: 'blotch', count: n, a: 0, wid: 0.44, len: 0.42, shape: 'saddle', color: c, edgeColor: shade(c, 0.65), edge: 0.1 }); break;
+    case 'diamond':
+      T({ type: 'blotch', t: [0.06, 0.86], count: Math.round(n * 0.8), a: 0, wid: 0.44, len: 1.0, shape: 'diamond', color: c, edgeColor: pale, edge: 0.16, edgeOut: true, warp: 0.35, jit: 0.05 });
+      T({ type: 'band', t: [0.87, 0.985], count: 6, len: 0.5, color: '#17130f', warp: 0.2, jit: 0.02 }); break;
+    case 'hourglass': T({ type: 'blotch', count: Math.round(n * 0.8), a: 0, wid: 0.62, len: 0.82, shape: 'hourglass', color: c, edgeColor: pale, edge: 0.12, edgeOut: true, warp: 0.4 }); break;
+    case 'chevron': T({ type: 'blotch', count: Math.round(n * 0.7), a: 0, wid: 0.42, len: 0.55, shape: 'chevron', color: c, edgeColor: pale, edge: 0.14, edgeOut: true }); break;
+    case 'zigzag':
+      T({ type: 'zigzag', count: n, amp: 0.12, wid: 0.075, color: c, warp: 0.6, aa: 0.2 });
+      T({ type: 'blotch', count: n, a: 0.5, mirror: true, wid: 0.09, len: 0.4, shape: 'round', color: c, alpha: 0.8 }); break;
+    case 'band': T({ type: 'band', count: Math.round(n * 0.7), len: 0.36, color: c, warp: 0.3, jit: 0.06 }); break;
+    case 'coral':
+      T({ type: 'band', count: Math.round(n * 0.55), len: 0.42, color: '#141110', edgeColor: '#e9c94e', edge: 0.32, edgeOut: true, warp: 0.15, jit: 0.04 });
+      pat.push({ type: 'cap', x0: 0, x1: 0.62, wid: 1, color: '#141110' }); break;
+    case 'stripe':
+      T({ type: 'stripe', t: [0.04, 1], a: 0, wid: 0.05, color: pale, aa: 0.3 });
+      T({ type: 'stripe', t: [0.04, 1], a: 0.42, mirror: true, wid: 0.045, color: pale, aa: 0.3, alpha: 0.85 });
+      T({ type: 'stripe', t: [0.04, 1], a: 0.2, mirror: true, wid: 0.06, color: dark, aa: 0.35, alpha: 0.55 }); break;
+    case 'spot':
+      T({ type: 'blotch', count: Math.round(n * 1.2), a: 0.2, mirror: true, alt: true, wid: 0.11, len: 0.28, shape: 'round', color: c, jit: 0.3, sj: 0.3, aj: 0.06 });
+      T({ type: 'blotch', count: Math.round(n * 1.2), phase: 0.5, a: 0.5, mirror: true, wid: 0.08, len: 0.22, shape: 'round', color: c, alpha: 0.8, jit: 0.3, sj: 0.3 }); break;
+    case 'collar': T({ type: 'band', t: [0.05, 0.085], count: 1, len: 0.95, color: c === d ? pale : (lumOf(c) > lumOf(d) ? c : dark), warp: 0.1, jit: 0 }); break;
+    case 'plain': T({ type: 'tint', t: [0.55, 1], ramp: 0.35, color: shade(d, 0.8), alpha: 0.35 }); break;
+  }
+  const colors = { dorsal: d, lateral: hexOf(mixc(hex(d), hex(b), 0.18)), belly: b, mottle: fossil ? 0.12 : 0.08, var: 0.05 };
+  if (a.t === 'speckle') { colors.speckle = { p: 0.16, color: c, k: 0.6 }; colors.mottle = 0.14; }
+  if (a.t === 'coral') colors.lateral = d;
+  const o = { name: p.name, plan: a.p, length: a.L, colors, pattern: pat, scene: { kind: a.s }, generated: x, details: [] };
+  if (a.k) o.scales = { keel: 0.7 };
+  else if (a.p === 'colubrid' || a.p === 'elapid') o.scales = { keel: 0 };
+  if (a.o) o.body = { tail: 0.05 };
+  if (a.p !== 'blind') o.head = { iris: lumOf(d) < 0.25 ? '#3a2e22' : shade(d, 0.75), irisInner: shade(d, 1.3) };
+  if (x.includes('l')) o.lengthNote = 'a typical size for its group - SnakeList has no measured length for this species yet';
+  else if (fossil) o.lengthNote = 'estimated from its fossil bones';
+  o.details = fossil ? [['back', 'Colours are a guess: fossils keep no colour']] : x.includes('g') ? [['back', 'Colours are a guess: no photo yet']] : [];
+  return o;
+}
+
 // ---------- the snake: body profile functions ----------
 function makeBodyFns(P, quality) {
   const L = P.length, B = P.body, Hd = P.head;
@@ -624,6 +678,8 @@ function eyeTexture(P) {
 const SCENES = {
   litter:   { sky: ['#b9c7b0', '#d7ddcc'], fog: '#c3cbb9', sun: 1.6, hemi: 0.75, sunEl: 55, tile: 1.1, ground: 'litter', props: { leaves: 1, twigs: 1, rocks: 0.15, grass: 0.1 } },
   forest:   { sky: ['#a9bca6', '#ccd6c3'], fog: '#b9c6b2', sun: 1.7, hemi: 0.75, sunEl: 52, tile: 1.2, ground: 'litter', props: { leaves: 1, twigs: 1, log: 1, rocks: 0.2, grass: 0.15 } },
+  // gibber (stony) plains of inland Australia, like the Moon Plain: red clay under a pavement of shiny stones
+  gibber:   { sky: ['#8fb6dc', '#f1dcc4'], fog: '#ead2b8', sun: 2.4, hemi: 0.5, sunEl: 46, tile: 0.9, ground: 'gibber', props: { rocks: 0.35, grass: 0.06 } },
   arid:     { sky: ['#9fc0dd', '#efe3cf'], fog: '#e6dccb', sun: 2.2, hemi: 0.55, sunEl: 48, tile: 0.8, ground: 'gravel', props: { rocks: 1, grass: 0.5, twigs: 0.4 } },
   heath:    { sky: ['#a8bfd4', '#e4e7e3'], fog: '#d9ddd8', sun: 1.8, hemi: 0.6, sunEl: 40, tile: 0.8, ground: 'heath', props: { heather: 1, grass: 0.7, rocks: 0.1, twigs: 0.3 } },
   riverbank:{ sky: ['#a6c2d8', '#e2e9e4'], fog: '#d4ddd7', sun: 2.2, hemi: 0.7, sunEl: 46, tile: 0.9, ground: 'pebbles', water: 'river', props: { rocks: 0.6, reeds: 1, grass: 0.4, pebbles: 1 } },
@@ -637,7 +693,7 @@ const SCENES = {
 // ---------- photographic surroundings: CC0 Polyhaven panoramas (via @pmndrs/assets), see CREDITS.txt ----------
 // each habitat gets the panorama that fits it best; the snake's own ground is drawn up close and fades
 // into the photo's ground, which is projected onto a flat floor so it meets the horizon without a seam
-const ENV_FOR = { riverbank: 'park', forest: 'forest', rainforest: 'forest', litter: 'forest', soil: 'forest', grass: 'sunrise', heath: 'sunrise', arid: 'dawn', sand: 'dawn', sea: 'sky' };
+const ENV_FOR = { gibber: 'dawn', riverbank: 'park', forest: 'forest', rainforest: 'forest', litter: 'forest', soil: 'forest', grass: 'sunrise', heath: 'sunrise', arid: 'dawn', sand: 'dawn', sea: 'sky' };
 const ENV_CACHE = new Map();
 function parseHDR(buf) {
   const b = new Uint8Array(buf); let p = 0, line = '';
@@ -712,7 +768,7 @@ function groundTexture(kind, seed) {
   return canvasTex(1024, (x, S) => {
     // draw fn at the position and at its wrapped copies, so the texture tiles without seams
     const wrapAt = (cx, cy, r, fn) => { for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) { const X = cx + ox, Y = cy + oy; if (X + r < 0 || X - r > S || Y + r < 0 || Y - r > S) continue; x.save(); x.translate(X, Y); fn(); x.restore(); } };
-    const base = { litter: '#3b2e22', gravel: '#b7a58c', heath: '#6f5f4a', pebbles: '#6f675a', soil: '#3f3024', dry: '#6f6a44', sand: '#d8c39a' }[kind] || '#777';
+    const base = { gibber: '#a8613a', litter: '#3b2e22', gravel: '#b7a58c', heath: '#6f5f4a', pebbles: '#6f675a', soil: '#3f3024', dry: '#6f6a44', sand: '#d8c39a' }[kind] || '#777';
     x.fillStyle = base; x.fillRect(0, 0, S, S);
     const tone = (amt, fine) => {
       const img = x.getImageData(0, 0, S, S), d = img.data;
@@ -722,7 +778,7 @@ function groundTexture(kind, seed) {
       }
       x.putImageData(img, 0, 0);
     };
-    tone(kind === 'sand' ? 0.25 : 0.4, kind === 'sand' || kind === 'gravel' ? 0.2 : 0.1);
+    tone(kind === 'sand' ? 0.25 : 0.4, 0); // (v4.63: no per-pixel grain - it showed as dots)
     const shade = (hexc, k) => { const c = hex(hexc); return 'rgb(' + c.map((v) => Math.round(clamp(v * k, 0, 255))).join(',') + ')'; };
     const leaf = (l, w, col, curl) => {
       // soft shadow, then the blade with a light-to-dark gradient, an edge and veins
@@ -750,13 +806,18 @@ function groundTexture(kind, seed) {
         const cx = R() * S, cy = R() * S, l = 20 + R() * 110, a = R() * TAU, w = 1 + R() * 2.5;
         wrapAt(cx, cy, l, () => { x.rotate(a); x.strokeStyle = 'rgba(0,0,0,.3)'; x.lineWidth = w + 1.5; x.beginPath(); x.moveTo(1, 2); x.lineTo(l + 1, 2); x.stroke(); x.strokeStyle = R() < 0.5 ? '#4a3826' : '#6a5438'; x.lineWidth = w; x.beginPath(); x.moveTo(0, 0); x.lineTo(l, 0); x.stroke(); });
       }
-      if (kind === 'soil') for (let i = 0; i < 3500; i++) { const cx = R() * S, cy = R() * S, r = 0.8 + R() ** 2 * 5; wrapAt(cx, cy, r * 2, () => stone(r, r * (0.6 + R() * 0.4), '#6e5845', '#3a2b20', true)); }
+      if (kind === 'soil') for (let i = 0; i < 700; i++) { const cx = R() * S, cy = R() * S, r = 2.5 + R() ** 2 * 6; wrapAt(cx, cy, r * 2, () => stone(r, r * (0.6 + R() * 0.4), '#6e5845', '#3a2b20', true)); }
       tone(0.25, 0);
     } else if (kind === 'gravel' || kind === 'sand') {
       const cols = [['#d8cab4', '#9c8b76'], ['#c4b29a', '#7d6d5a'], ['#e0d6c8', '#a39a8b'], ['#b29c85', '#6c5a48'], ['#cdb593', '#8a7254'], ['#a8a39a', '#6a665e']];
-      const n = kind === 'gravel' ? 7000 : 600;
-      for (let i = 0; i < n; i++) { const cx = R() * S, cy = R() * S, r = 1 + R() ** 3 * (kind === 'gravel' ? 6 : 3), c = cols[(R() * cols.length) | 0]; wrapAt(cx, cy, r * 2, () => { x.rotate(R() * 3); stone(r, r * (0.55 + R() * 0.4), c[0], c[1]); }); }
+      const n = kind === 'gravel' ? 2600 : 250;
+      for (let i = 0; i < n; i++) { const cx = R() * S, cy = R() * S, r = 2.5 + R() ** 3 * (kind === 'gravel' ? 8 : 3), c = cols[(R() * cols.length) | 0]; wrapAt(cx, cy, r * 2, () => { x.rotate(R() * 3); stone(r, r * (0.55 + R() * 0.4), c[0], c[1]); }); }
       for (let i = 0; i < 30; i++) { const cx = R() * S, cy = R() * S, l = 20 + R() * 60, a = R() * TAU; wrapAt(cx, cy, l, () => { x.rotate(a); x.strokeStyle = 'rgba(70,55,35,.7)'; x.lineWidth = 1 + R(); x.beginPath(); x.moveTo(0, 0); x.lineTo(l, (R() - 0.5) * 8); x.stroke(); }); }
+    } else if (kind === 'gibber') {
+      // a close pavement of rounded, wind-polished stones in reds, browns and near-black, with red clay between
+      const cols = [['#8c3f26', '#5a2416'], ['#7a3a22', '#4a2012'], ['#5e3324', '#33190f'], ['#9a5233', '#62301c'], ['#3d2a22', '#1e130d'], ['#a8683f', '#6e3d22']];
+      for (let i = 0; i < 1500; i++) { const cx = R() * S, cy = R() * S, r = 5 + R() ** 2 * 18, c = cols[(R() * cols.length) | 0]; wrapAt(cx, cy, r * 2, () => { x.rotate(R() * 3); stone(r, r * (0.6 + R() * 0.35), c[0], c[1], R() < 0.5); }); }
+      tone(0.12, 0);
     } else if (kind === 'pebbles') {
       const cols = [['#8f877a', '#6a6357'], ['#857b6b', '#5f564a'], ['#959087', '#716c63'], ['#7f7262', '#5a4d3f'], ['#7d807a', '#5b5e58'], ['#8e7c66', '#665441']];
       for (let i = 0; i < 2600; i++) { const cx = R() * S, cy = R() * S, r = 3 + R() ** 2.5 * 16, c = cols[(R() * cols.length) | 0]; wrapAt(cx, cy, r * 2, () => { x.rotate(R() * 3); stone(r, r * (0.6 + R() * 0.35), c[0], c[1], R() < 0.12); }); }
@@ -829,7 +890,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
 
   // environment light from a simple sky/ground gradient (soft reflections; no image is fetched)
   const envScene = new THREE.Scene();
-  const eg = new THREE.SphereGeometry(10, 32, 16), ec = [], ep = eg.attributes.position, gcol = new THREE.Color(S.ground ? ({ litter: '#4a3a29', gravel: '#b49f86', heath: '#7d6b52', pebbles: '#8f8677', soil: '#4a3828', dry: '#9b8a62', sand: '#d8c39a' }[S.ground]) : '#2c5d7a');
+  const eg = new THREE.SphereGeometry(10, 32, 16), ec = [], ep = eg.attributes.position, gcol = new THREE.Color(S.ground ? ({ gibber: '#9a5a38', litter: '#4a3a29', gravel: '#b49f86', heath: '#7d6b52', pebbles: '#8f8677', soil: '#4a3828', dry: '#9b8a62', sand: '#d8c39a' }[S.ground]) : '#2c5d7a');
   for (let i = 0; i < ep.count; i++) { const y = ep.getY(i) / 10, c = y > 0 ? hor.clone().lerp(sky, sstep(0, 0.6, y)).multiplyScalar(1.15) : gcol.clone().multiplyScalar(0.7); ec.push(c.r, c.g, c.b); }
   eg.setAttribute('color', new THREE.Float32BufferAttribute(ec, 3));
   envScene.add(new THREE.Mesh(eg, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
@@ -854,7 +915,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   if (S.ground) {
     const gg = new THREE.CircleGeometry(groundR, 128, 0, TAU); gg.rotateX(-Math.PI / 2);
     // finer rings near the middle so the riverbank slope is smooth
-    const tex = groundTexture(S.ground, seed + 5); tex.anisotropy = ctx.renderer.capabilities.getMaxAnisotropy(); const rep = (groundR * 2) / clamp(Math.min(S.tile, L * 1.1), S.tile * 0.5, S.tile); tex.repeat.set(rep, rep);
+    const tex = groundTexture(S.ground, seed + 5); tex.anisotropy = ctx.renderer.capabilities.getMaxAnisotropy(); const rep = (groundR * 2) / (clamp(Math.min(S.tile, L * 1.1), S.tile * 0.5, S.tile) * clamp(L / 2, 1, 4)); tex.repeat.set(rep, rep); // big snakes: bigger ground detail, never a fine grain
     const gm = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.96, metalness: 0, bumpMap: tex, bumpScale: Math.min(1, L * 0.5) * 0.6 });
     if (S.water === 'river') {
       // the bank slopes down into shallow water on one side, away from the snake
@@ -893,8 +954,9 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   // props tall enough to hide the snake are hidden while they stand between the camera and the snake
   const occ = ctx.occ = [];
   const addOcc = (im, i, mtx, r) => { const c = new THREE.Vector3().setFromMatrixPosition(mtx); c.y += r * 0.5; occ.push({ im, i, m: mtx.clone(), c, r, hid: false }); };
+  // v4.63: the surroundings reach twice as far (more of the habitat around the snake)
   const place = (n, rMin, rMax, clear, tries = 40) => {
-    const out = [];
+    const out = []; n = Math.round(n * (quality === 'low' ? 1.6 : 2.4)); rMax = rMin + (rMax - rMin) * 2;
     for (let i = 0; i < n; i++) for (let t = 0; t < tries; t++) {
       const a = R() * TAU, r = rMin + (rMax - rMin) * Math.sqrt(R()), x = Math.cos(a) * r, z = Math.sin(a) * r;
       if (dist2snake(x, z) < clear) continue;
@@ -936,7 +998,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   if (PR.reeds && ctx.waterInfo) {
     // reeds and rushes along the water's edge, behind the snake
     const spots = []; const wi = ctx.waterInfo, tng = new THREE.Vector2(-wi.dir.y, wi.dir.x);
-    for (let i = 0; i < 26; i++) { const s = (R() - 0.5) * Rb * 7, off = wi.edge + Rb * (0.15 + R() * 0.9); const x = wi.dir.x * off + tng.x * s, z = wi.dir.y * off + tng.y * s; if (dist2snake(x, z) > Math.max(Rb * 0.5, clamp(L * 0.9, 0.4, 1.2) * 0.5)) spots.push([x, z]); }
+    for (let i = 0; i < 52; i++) { const s = (R() - 0.5) * Rb * 14, off = wi.edge + Rb * (0.15 + R() * 0.9); const x = wi.dir.x * off + tng.x * s, z = wi.dir.y * off + tng.y * s; if (dist2snake(x, z) > Math.max(Rb * 0.5, clamp(L * 0.9, 0.4, 1.2) * 0.5)) spots.push([x, z]); }
     const g = bladeTuft(seed + 3, 40, clamp(L * 0.9, 0.4, 1.2), '#55693a', '#a6a46a', 0.06, { w: 0.01, lean: 0.25 }), im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.85 }), spots.length);
     im.castShadow = true;
     spots.forEach(([x, z], i) => { const s = 0.7 + R() * 0.6; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s, s, s); pv.set(x, -0.02, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); addOcc(im, i, m4, clamp(L * 0.9, 0.4, 1.2) * s * 0.7); });
@@ -1000,9 +1062,10 @@ function applyEnv(ctx, P, F, poseInfo, env) {
   sky.position.y = sea ? 0 : camH - 0.002; sky.renderOrder = -2; scene.add(sky); ctx.track(sky.geometry); ctx.track(sky.material);
   scene.background = env.horizon.clone();
   // fade the near ground (and water) into the projected photo ground
-  const gR = ctx.groundR, fade = canvasTex(256, (x, s) => { const g = x.createRadialGradient(s / 2, s / 2, s * 0.1, s / 2, s / 2, s * 0.36); g.addColorStop(0, '#fff'); g.addColorStop(1, '#000'); x.fillStyle = g; x.fillRect(0, 0, s, s); }, 1, false);
+  const gR = ctx.groundR, fade = canvasTex(256, (x, s) => { const g = x.createRadialGradient(s / 2, s / 2, s * 0.22, s / 2, s / 2, s * 0.49); g.addColorStop(0, '#fff'); g.addColorStop(1, '#000'); x.fillStyle = g; x.fillRect(0, 0, s, s); }, 1, false);
   fade.wrapS = fade.wrapT = THREE.ClampToEdgeWrapping; fade.repeat.set(1, 1); ctx.track(fade);
-  if (!sea) for (const m of ctx.fadeMats) { m.alphaMap = fade; if (m.transparent) { m.opacity *= 1; } else m.alphaHash = true; m.needsUpdate = true; }
+  // a smooth fade (v4.63: not a random dither, which showed as dots all over the ground)
+  if (!sea) for (const m of ctx.fadeMats) { m.alphaMap = fade; if (!m.transparent) { m.transparent = true; m.depthWrite = true; } m.needsUpdate = true; }
   scene.fog = sea ? new THREE.Fog(env.horizon, gR * 0.4, gR * 0.98) : null;
   // light: the sun from the photo, sky light from the panorama; the gradient hemisphere light stays only as a faint fill
   const sun = ctx.sun, el = Math.max(Math.asin(env.sunDir.y), (22 * Math.PI) / 180), az = Math.atan2(env.sunDir.z, env.sunDir.x), r = sun.position.length();
@@ -1098,7 +1161,7 @@ function personShape(h) {
 
 // ---------- the viewer ----------
 export function mount(host, opts) {
-  const P = normProfile(opts.profile), seed = strSeed(opts.id || P.name || 'snake');
+  const P = normProfile(autoProfile(opts.profile)), seed = strSeed(opts.id || P.name || 'snake');
   const reduceMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const reduce = () => reduceMQ.matches;
   const lowDevice = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4 || Math.min(screen.width, screen.height) < 500;
@@ -1126,6 +1189,8 @@ export function mount(host, opts) {
   const bReset = btn('Reset', 'Reset the view (R)'), bFull = btn('Fullscreen', 'Fullscreen'), bScale = btn('Scale', 'Compare with a typical adult\'s length'), bDet = btn('Details', 'Show what to look for');
   const bSet = btn('Settings', 'Settings', 'sp3d-set'); bSet.setAttribute('aria-expanded', 'false');
   bScale.setAttribute('aria-pressed', 'false'); bDet.setAttribute('aria-pressed', 'false');
+  // v4.63: only Reset stays under the model; the views, Fullscreen, Scale, Details and Settings are gone
+  [vg, bFull, bScale, bDet, bSet].forEach((b) => b.remove());
   const panel = el('div', 'sp3d-panel'); panel.hidden = true; panel.id = 'sp3d-panel-' + seed; bSet.setAttribute('aria-controls', panel.id);
   const mkCheck = (label, checked) => { const l = el('label', 'sp3d-opt'), c = document.createElement('input'); c.type = 'checkbox'; c.checked = checked; l.append(c, document.createTextNode(' ' + label)); panel.appendChild(l); return c; };
   const cScene = mkCheck('Show surroundings', true);
@@ -1133,7 +1198,10 @@ export function mount(host, opts) {
   [['high', 'High detail'], ['low', 'Light (faster)']].forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; if (v === quality) o.selected = true; qs.appendChild(o); });
   ql.append(document.createTextNode('Quality '), qs); panel.appendChild(ql);
   const cap = el('div', 'sp3d-cap');
-  const recon = el('p', 'sp3d-recon', 'Representative reconstruction - not a photograph of a real encounter.');
+  const gx = P.generated, gf = gx != null && gx.includes('f');
+  const recon = el('p', 'sp3d-recon', gx == null ? 'Representative reconstruction - not a photograph of a real encounter.'
+    : gf ? 'Reconstruction of how it may have looked: body shape from its family and size from its fossils. Colours are a guess - fossils keep no colour.'
+    : 'Generated model: body shape from its family' + (gx.includes('g') ? ', colours a guess for its group (no photo yet).' : ', colours from its SnakeList photo.') + ' Not a scan of a real snake.');
   const lenP = el('p', 'sp3d-len'); const scaleP = el('p', 'sp3d-scale'); scaleP.hidden = true;
   cap.append(recon, lenP, scaleP);
   wrap.append(stage, bar, panel);
