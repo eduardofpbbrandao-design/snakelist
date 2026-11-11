@@ -3,11 +3,11 @@
 // v4.63 3D mode on the map, on desktop (1280 x 900) and phone portrait (390 x 844):
 //  - the "3D" button sits inside the map's bottom-right corner, clear of the zoom buttons, the colour key
 //    and the hint, and pressing it only lights it up: no panel, drawer, pop-up or species picker opens;
-//  - with 3D on, choosing a species in the map's list opens that species' own box (not a new page), and
-//    the box shows a 3D action only for a snake with a model; a species box that is already open gets
-//    the action as soon as 3D goes on, and loses it when 3D goes off;
-//  - the action opens that exact snake's model in the map area, and "Back to map" leaves the map's zoom,
-//    the picked country and the species box as they were;
+//  - with 3D on, choosing a species in the map's list opens that exact snake's model in the map area
+//    straight away (no box or extra step first), and "Back to map" leaves the map's zoom, the picked
+//    country and the list as they were; a snake with no model yet gets its box, saying so;
+//  - a species box that is already open gets a 3D action as soon as 3D goes on, and loses it when 3D
+//    goes off;
 //  - with 3D off, a species row still opens the species page, as before.
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const PORT = process.env.PORT || 8766, BASE = 'http://localhost:' + PORT + '/';
@@ -49,19 +49,13 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) { fails
     ok(JSON.stringify(before) === JSON.stringify(after) && p.url() === url0, `${label}: no panel, drawer, pop-up or species picker opens (${JSON.stringify(after)})`);
     if (SHOTS) await (await p.$('#globe-stage')).screenshot({ path: `${SHOTS}/3d-${label}-on.png` });
 
-    // ---- a species with a model: its own box, with a 3D action ----
+    // ---- a species with a model: its model, straight away ----
     const view0 = await p.evaluate(() => JSON.stringify(window.SL_MAP_VIEW()));
     const row = await p.$('#cp-list .cp-row.cp-sp:has(i:text-is("Natrix maura")) > b');
     ok(!!row, `${label}: Natrix maura is in Spain's list`);
     await row.scrollIntoViewIfNeeded(); await row.click(); await p.waitForTimeout(900);
-    let box = await p.evaluate(() => { const w = document.querySelector('.sp-info-wrap'), b = document.querySelector('.sp-info-3d');
-      return { open: w && !w.hidden, name: (document.getElementById('sp-info-name') || {}).textContent, td: b ? b.getAttribute('data-td') : null, nextTo: b ? !!b.closest('.sp-info-acts') : false, page: /species\//.test(location.pathname) }; });
-    ok(box.open && !box.page && /Viperine/.test(box.name), `${label}: with 3D on, choosing the species opens its own box over the map (${box.name})`);
-    ok(box.td === 'natrix-maura' && box.nextTo, `${label}: the box shows a 3D action beside its other actions`);
-    if (SHOTS) await p.screenshot({ path: `${SHOTS}/3d-${label}-box.png` });
-
-    // ---- the model, in the map area ----
-    await p.click('.sp-info-3d');
+    ok(await p.evaluate(() => !!document.querySelector('#globe-stage .sl3d-ov') && !/species\//.test(location.pathname) && document.querySelector('.sp-info-wrap').hidden),
+      `${label}: with 3D on, choosing the species opens its 3D model right away (no species box or page first)`);
     const t0 = Date.now();
     const got = await p.waitForFunction(() => { const c = document.querySelector('#globe-stage .sl3d-ov .sp3d-canvas, #globe-stage .sl3d-ov .sp3d-msg:not(:has(.sp3d-spin))'); return c && (c.classList.contains('sp3d-canvas') ? 'canvas' : /Loading/.test(c.textContent) ? null : c.textContent); }, null, { timeout: 180000 }).then(h => h.jsonValue()).catch(() => null);
     const ov = await p.evaluate(() => { const o = document.querySelector('.sl3d-ov'), s = document.getElementById('globe-stage').getBoundingClientRect(); if (!o) return null; const r = o.getBoundingClientRect();
@@ -75,16 +69,16 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) { fails
     await p.click('.sl3d-back'); await p.waitForTimeout(800);
     const back = await p.evaluate(() => ({ ov: !!document.querySelector('.sl3d-ov'), box: !document.querySelector('.sp-info-wrap').hidden && getComputedStyle(document.querySelector('.sp-info-wrap')).display !== 'none',
       name: (document.getElementById('sp-info-name') || {}).textContent, view: JSON.stringify(window.SL_MAP_VIEW()), place: document.getElementById('cp-title').textContent }));
-    ok(!back.ov && back.box && /Viperine/.test(back.name) && back.place === 'Spain', `${label}: Back to map closes the model and the species box and Spain are still there`);
+    ok(!back.ov && !back.box && back.place === 'Spain' && await p.evaluate(() => !!document.querySelector('#cp-list .cp-row.cp-sp')), `${label}: Back to map closes the model and Spain's list is still there`);
     ok(back.view === view0, `${label}: the map's zoom and position are unchanged`);
-    await p.click('.sp-info-x'); await p.waitForTimeout(400);
 
     // ---- a species with no model: its box, no 3D action ----
     const noModel = await p.evaluate(() => fetch('species/3d/models.json').then(r => r.json()).then(m => { const rows = [].slice.call(document.querySelectorAll('#cp-list .cp-row.cp-sp'));
       const r = rows.find(x => { const i = x.querySelector('i'); return i && !m.species[i.textContent.trim().toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '')]; }); return r ? r.querySelector('i').textContent : null; }));
     if (noModel) {
       const r2 = await p.$(`#cp-list .cp-row.cp-sp:has(i:text-is("${noModel}")) > b`); await r2.scrollIntoViewIfNeeded(); await r2.click(); await p.waitForTimeout(700);
-      ok(await p.evaluate(() => !document.querySelector('.sp-info-wrap').hidden && !document.querySelector('.sp-info-3d')), `${label}: ${noModel} (no model yet) gets its box but no 3D action`);
+      ok(await p.evaluate(() => !document.querySelector('.sp-info-wrap').hidden && !document.querySelector('.sp-info-3d') && !document.querySelector('.sl3d-ov') && /No 3D model yet/.test(document.querySelector('.sp-info-acts').textContent)),
+        `${label}: ${noModel} (no model yet) gets its box, which says "No 3D model yet"`);
       await p.click('.sp-info-x'); await p.waitForTimeout(300);
     } else ok(false, `${label}: found a Spanish snake with no model`);
 

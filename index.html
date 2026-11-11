@@ -2834,6 +2834,7 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
   }
   /* the 3D action in the species box */
   .sp-info-acts .sp-info-3d { display: inline-flex; align-items: center; gap: 5px; }
+  .sp-info-acts .sp-info-no3d { align-self: center; font-size: 12px; opacity: .75; }
   /* the model, inside the map area */
   .sl3d-ov { position: absolute; inset: 0; z-index: 40; display: flex; flex-direction: column; gap: 6px; padding: 8px 10px 10px;
     --bg:#f1f6ee; --card:#fbfdf9; --text:#183020; --muted:#55705b; --line:#d5e4cf; --g:#2f8a3a; --tag:#e3f0dc; --tagline:#a9cf9c;
@@ -15419,6 +15420,13 @@ window.SL_GEO_READY = new Promise(function (res) {
     spScroll = null;
   }
   var spScroll = null;
+  // 3D mode on: a species opens its model right away (the box is only used to read its name, then hidden
+  // again); one with no model yet keeps its box, which says so
+  function sp3d(id, from) {
+    if (!(window.SL_3D_ON && window.SL_3D_ON()) || !spOpen(id)) return false;
+    if (window.SL_3D_SHOW && window.SL_3D_SHOW(from)) { spWrap.hidden = true; spCur = null; spScroll = null; }
+    return true;
+  }
   window.SL_MAP_SPECIES_INFO = spOpen;
   spWrap.addEventListener("click", function (e) {
     if (e.target === spWrap || e.target.closest(".sp-info-x")) { spClose(); return; } // a tap outside the panel, on the map
@@ -15481,13 +15489,13 @@ window.SL_GEO_READY = new Promise(function (res) {
     var row = e.target.closest(".cp-row");
     if (!row || row.hasAttribute("data-city") || row.hasAttribute("data-country") || row.hasAttribute("data-prov") || row.hasAttribute("data-island")) return;
     // a species row: anywhere on it (not its buttons) opens that snake's own page
-    // (3D mode on: it opens the snake's box over the map instead, where its 3D action is)
-    if (row.dataset.sp) { if (window.SL_3D_ON && window.SL_3D_ON() && spOpen(row.dataset.sp)) return; spGoPage(row.dataset.sp); return; }
+    // (3D mode on: it opens the snake's 3D model in the map area straight away; a snake with no model yet gets its box)
+    if (row.dataset.sp) { if (sp3d(row.dataset.sp, row)) return; spGoPage(row.dataset.sp); return; }
     if (!e.target.closest("b, i")) return;
     var nmEl = row.querySelector("b"), sciEl = row.querySelector("i");
     var nm = nmEl ? nmEl.textContent.trim() : "", sci = sciEl ? sciEl.textContent.trim() : "";
     var sp = INDEX && (INDEX.find(function (x) { return x.name === nm && x.sci === sci; }) || INDEX.find(function (x) { return x.sci === sci; }));
-    if (sp) { if (window.SL_3D_ON && window.SL_3D_ON() && spOpen(sp.id)) return; spGoPage(sp.id); }
+    if (sp) { if (sp3d(sp.id, row)) return; spGoPage(sp.id); }
   });
   function showProvinces() {
     if (!lastCountryCode) return;
@@ -22193,7 +22201,7 @@ window.SL_welcome = function (u, back) {
   // ---- the corner button: on/off, nothing else ----
   var btn = document.createElement("button");
   btn.type = "button"; btn.className = "td-toggle"; btn.id = "td-toggle";
-  btn.setAttribute("aria-pressed", "false"); btn.title = "3D mode: species boxes get a 3D button";
+  btn.setAttribute("aria-pressed", "false"); btn.title = "3D mode: pick a snake to see its 3D model";
   btn.textContent = "3D"; // just the word, no picture
   stage.appendChild(btn);
   function setOn(v) {
@@ -22217,6 +22225,13 @@ window.SL_welcome = function (u, back) {
     var old = document.querySelector(".sp-info-3d");
     var id = bx ? slug(bx.sci.split(/\s+/).slice(0, 2).join(" ")) : "";
     var want = on && models && acts && id && models[id];
+    var no = document.querySelector(".sp-info-no3d");
+    if (on && models && acts && id && !models[id]) { // 3D mode on, but this snake has no model yet: say so in its box
+      if (old) old.remove();
+      if (!no || !acts.contains(no)) { if (no) no.remove(); no = document.createElement("span"); no.className = "sp-info-no3d"; no.textContent = "No 3D model yet"; acts.appendChild(no); }
+      return;
+    }
+    if (no) no.remove();
     if (!want) { if (old) old.remove(); return; }
     if (old && old.getAttribute("data-td") === id && acts.contains(old)) return;
     if (old) old.remove();
@@ -22226,6 +22241,12 @@ window.SL_welcome = function (u, back) {
     if (seen && seen.nextSibling) acts.insertBefore(b, seen.nextSibling); else acts.appendChild(b);
   }
   window.SL_3D_DECORATE = decorate; // the species box calls this each time it draws
+  // 3D mode: a species picked from the map list opens its model straight away (true when it has one)
+  window.SL_3D_SHOW = function (from) {
+    var bx = boxSci(), id = bx ? slug(bx.sci.split(/\s+/).slice(0, 2).join(" ")) : "";
+    if (!on || !models || !id || !models[id]) return false;
+    open(id, from); return true;
+  };
   if (window.MutationObserver) new MutationObserver(function () { decorate(); }).observe(stage, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden"] });
   stage.addEventListener("click", function (e) {
     var b = e.target.closest && e.target.closest(".sp-info-3d");
