@@ -55,10 +55,11 @@
     "distribution": [
       {
         "label": "Native",
-        "text": "The Iberian Peninsula (Portugal and Spain), neighbouring southern France, and coastal parts of the Maghreb from around Tangier to Tunisia. The North African snakes are treated as a separate subspecies, *N. a. algerica*. SnakeList's map below currently shows only its European countries.",
+        "text": "The Iberian Peninsula (Portugal and Spain), neighbouring southern France, and scattered coastal areas of north-western Africa, in Morocco, Algeria and Tunisia. The snakes of Algeria and Tunisia are treated as a separate subspecies, *N. a. algerica*, and those of northern Morocco were described in 2025 as *N. a. soumiafahdae*. In North Africa it is rare and lives in small, separate patches.",
         "src": [
           "wiki",
-          "fritz2020"
+          "fritz2020",
+          "zootaxa2025"
         ]
       }
     ],
@@ -181,6 +182,12 @@
       "title": "Andorra 2023 - Natrix astreptophora",
       "publisher": "National Red List",
       "url": "https://www.nationalredlist.org/node/53783"
+    },
+    "zootaxa2025": {
+      "title": "Description of the Moroccan subspecies Natrix astreptophora soumiafahdae",
+      "publisher": "Zootaxa 5693(1)",
+      "year": 2025,
+      "url": "https://mapress.com/zt/article/view/zootaxa.5693.1.3"
     }
   }
 }
