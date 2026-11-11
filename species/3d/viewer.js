@@ -289,7 +289,7 @@ function buildBody(P, F, pose, quality) {
   const bumps = [];
   if (Hd.brow) bumps.push({ x: Hd.eyeX * F.Hl, xs: F.Hl * 0.16, th: eyeA - 0.42, ts: 0.32, amp: Hd.brow, mirror: true });
   if (Hd.pits === 'loreal') bumps.push({ x: F.Hl * 0.15, xs: F.Hl * 0.035, th: Math.PI * 0.5, ts: 0.09, amp: -0.07, mirror: true });
-  bumps.push({ x: F.Hl * 0.045, xs: F.Hl * 0.022, th: eyeA * 0.62, ts: 0.12, amp: -0.05, mirror: true }); // nostril
+  bumps.push({ x: F.Hl * 0.05, xs: F.Hl * 0.022, th: Hd.nostrilA != null ? (Hd.nostrilA * Math.PI) / 180 : eyeA * 0.62, ts: 0.1, amp: -0.06, mirror: true }); // nostril (upward-facing in water snakes)
   if (Hd.snoutUp) bumps.push({ x: F.Hl * 0.03, xs: F.Hl * 0.05, th: 0, ts: 0.7, amp: Hd.snoutUp });
   const nTop = (x) => lerp(Hd.canthus, 2.15, sstep(F.Hl * 0.8, F.Hl * 1.6, x));
 
@@ -320,7 +320,8 @@ function buildBody(P, F, pose, quality) {
     return [W * sx * k, H * sy * k];
   };
 
-  const nV = nR * (M + 1), pos = new Float32Array(nV * 3), uv = new Float32Array(nV * 2);
+  const nV = nR * (M + 1), pos = new Float32Array(nV * 3), uv = new Float32Array(nV * 2), hd = new Float32Array(nV);
+  const plates = P.head.plates ? 1 : 0; // big head shields: the small body-scale relief fades out on the head
   const frames = [];
   for (let i = 0; i < nR; i++) {
     const x = ringX[i], c = spine(x), f = frameAt(x); frames.push({ x, c, f });
@@ -328,13 +329,13 @@ function buildBody(P, F, pose, quality) {
     for (let j = 0; j <= M; j++) {
       const u = j / M, th = TAU * u - Math.PI, s = section(x, th), k = (i * (M + 1) + j);
       pos[k * 3] = c.x + f.S.x * s[0] + f.U.x * s[1]; pos[k * 3 + 1] = c.y + f.S.y * s[0] + f.U.y * s[1]; pos[k * 3 + 2] = c.z + f.S.z * s[0] + f.U.z * s[1];
-      uv[k * 2] = u; uv[k * 2 + 1] = v;
+      uv[k * 2] = u; uv[k * 2 + 1] = v; hd[k] = plates * (1 - sstep(F.Hl * 0.92, F.Hl * 1.12, x)) * (Math.abs(th) < Math.PI * 0.62 ? 1 : 0.4);
     }
   }
   const idx = [];
   for (let i = 0; i < nR - 1; i++) for (let j = 0; j < M; j++) { const a = i * (M + 1) + j, b = a + M + 1; idx.push(a, a + 1, b, a + 1, b + 1, b); }
   const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setAttribute('aHead', new THREE.BufferAttribute(hd, 1));
   geo.setIndex(nV > 65535 ? new THREE.Uint32BufferAttribute(idx, 1) : new THREE.Uint16BufferAttribute(idx, 1));
   geo.computeVertexNormals();
   // seam (belly midline) and the two tips: make the normals continuous
@@ -430,6 +431,7 @@ function patternTexture(P, F, body, lat, quality, seed) {
   const C = P.colors, dors = hex(C.dorsal), latc = hex(C.lateral), bel = hex(C.belly);
   const bellyA = C.bellyA || 0.74, bs = C.bellySharp || 0.06, mott = C.mottle, vari = C.var;
   const layers = (P.pattern || []).map((l) => prepLayer(l, F, body));
+  for (const Ly of layers) if (Ly.type === 'shields') { Ly.segs = shieldSegs(P.head, Ly); Ly.bcol = Ly.barColor ? hex(Ly.barColor) : Ly.col; }
   const quant = P.quant != null ? P.quant : 0.15;
   const data = new Uint8ClampedArray(Wp * Hp * 4);
   const L = F.L, Hl = F.Hl;
@@ -456,7 +458,7 @@ function patternTexture(P, F, body, lat, quality, seed) {
         const res = evalLayer(Ly, aq, gq, t, xn, warp, cl, seed);
         if (res) col = mixc(col, res[0], res[1]);
       }
-      const sv = 1 + vari * (hash1(cl.id, seed + 5) - 0.5) * 2 * (0.35 + 0.65 * cl.w);
+      const sv = 1 + vari * (hash1(cl.id, seed + 5) - 0.5) * 2 * (0.35 + 0.65 * cl.w) * (P.head.plates ? sstep(Hl * 0.95, Hl * 1.1, x) : 1);
       col = [col[0] * sv, col[1] * sv, col[2] * sv];
       if (C.scaleEdge && !cl.v) col = mixc(col, hex(C.scaleEdge.color), (C.scaleEdge.k || 0.8) * Math.pow(1 - cl.w, 1.6));
       if (C.speckle && !cl.v && x > Hl) { const hs = hash1(cl.id, seed + 11); if (hs < C.speckle.p) col = mixc(col, hex(C.speckle.color), (C.speckle.k || 0.6) * (0.6 + hs / C.speckle.p * 0.4) * Math.sqrt(cl.w)); }
@@ -473,7 +475,7 @@ function prepLayer(l, F, body) {
   const o = Object.assign({ t0: (F.Hl * 1.25) / F.L, t1: 1, a: 0, wid: 0.3, len: 0.6, phase: 0, warp: 0.5, edge: 0, aa: 0.1, jit: 0.12, sj: 0.18, aj: 0.05 }, l);
   if (l.t) { o.t0 = l.t[0]; o.t1 = l.t[1]; }
   o.col = hex(o.color); o.ecol = o.edgeColor ? hex(o.edgeColor) : null; o.icol = o.inner ? hex(o.inner.color) : null;
-  o.head = ['line', 'poly', 'spot', 'cap'].includes(o.type);
+  o.head = ['line', 'poly', 'spot', 'cap', 'shields'].includes(o.type);
   o.g0 = body.gOf(o.t0 * F.L); o.g1 = body.gOf(o.t1 * F.L);
   if (o.count) o.period = (o.g1 - o.g0) / o.count;
   if (o.type === 'poly' && o.pts) o.pts2 = o.pts;
@@ -495,7 +497,43 @@ function cover(d, aa) { return 1 - sstep(1 - aa, 1 + aa, d); }
 function segDist(px, py, ax, ay, bx, by) { const dx = bx - ax, dy = by - ay, t = clamp(((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy || 1), 0, 1); return Math.hypot(px - ax - dx * t, py - ay - dy * t); }
 function inPoly(x, y, pts) { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) c = !c; } return c; }
 
+// the large head plates of colubrids and elapids, as suture lines in (xn along the head, a around it),
+// placed relative to the eye: rostral, internasals, prefrontals, frontal, supraoculars, parietals,
+// pre- and postoculars, loreal, and the rows of upper and lower lip scales
+function shieldSegs(H, Ly) {
+  const E = H.eyeX, eA = H.eyeA / 180, er = (H.eye || 0.15) * 0.55, mA = 0.56, n = Ly.labials || 8, segs = [];
+  const S = (x0, a0, x1, a1, bar) => segs.push([x0, a0, x1, a1, bar ? 1 : 0]);
+  const f0 = E - er * 0.6, f1 = E + 0.3;               // frontal from beside the front of the eye to behind it
+  S(0.0, 0, 0.055, 0); S(0.055, 0, f0, 0); S(f1, 0, 0.98, 0);  // midline sutures (none across the frontal)
+  S(0.05, 0, 0.05, 0.2);                               // rostral / internasals
+  S(0.13, 0, 0.13, 0.24);                              // internasals / prefrontals
+  S(f0, 0, f0, eA - er * 0.7);                         // prefrontals / frontal and supraoculars
+  S(f0, 0.085, E + 0.12, 0.08); S(E + 0.12, 0.08, f1, 0);       // frontal outline (a shield narrowing behind)
+  S(E + 0.16, 0.085, E + 0.18, eA - er * 0.5);                // supraocular back edge
+  S(f0, eA - er * 0.7, E + 0.16, eA - er * 0.5);              // supraocular rim over the eye
+  S(E + 0.16, 0.24, 0.98, 0.36); S(E + 0.18, eA - er * 0.4, E + 0.3, eA + 0.02); // parietal outer edge, temporals
+  S(E - er * 1.1, eA - er * 0.3, E - er * 1.1, eA + er * 0.6);  // preocular
+  S(E + er * 1.1, eA - er * 0.6, E + er * 1.2, eA + er * 0.7);  // postoculars
+  S(E + er * 1.15, eA, E + er * 1.7, eA + 0.01);
+  S(0.13, 0.24, 0.13, 0.42); S(0.05, 0.2, 0.06, 0.44); S(0.13, 0.33, E - er * 1.1, 0.33); // nasal, loreal
+  S(0.03, mA - 0.13, E + 0.3, mA - 0.13);                     // top edge of the upper lip scales
+  for (let k = 1; k < n; k++) { const x = 0.04 + (k / n) * (E + 0.48); S(x, mA - 0.14, x + 0.01, mA - 0.005, 1); S(x - 0.02, mA + 0.005, x - 0.03, mA + 0.1, 2); }
+  return segs;
+}
+
 function evalLayer(Ly, a, g, t, xn, warp, cl, seed) {
+  if (Ly.type === 'shields') {
+    if (xn > 1.05) return null;
+    let d = 1e9, bar = 0; const aa = Math.abs(a);
+    for (const q of Ly.segs) { const v = segDist(xn, aa, q[0], q[1], q[2], q[3]) / (q[4] ? Ly.barWid || Ly.wid * 2.2 : Ly.wid); if (v < d) { d = v; bar = q[4]; } }
+    const c = cover(d + warp * 0.15, Ly.aa || 0.35); return c > 0.01 ? [bar ? Ly.bcol : Ly.col, c * (bar ? (Ly.barAlpha || 0.85) * (bar === 2 ? 0.45 : 1) : Ly.alpha || 0.6)] : null;
+  }
+  if (Ly.type === 'checker') {
+    // chequered belly: each ventral plate is dark on one side and light on the other, alternating
+    if (!cl.v) return null; const j = Math.floor(cl.id / 7919), side = cl.id % 7919;
+    if (((j + side) & 1) === 0 && hash1(j * 13 + side, seed + 41) > (Ly.skip || 0)) return [Ly.col, (Ly.alpha || 0.9) * (0.75 + 0.25 * hash1(j, seed + 43))];
+    return null;
+  }
   const fadeT = Ly.head ? 1 : sstep(Ly.t0 - 0.02, Ly.t0 + 0.01, t) * (1 - sstep(Ly.t1 - 0.01, Ly.t1 + 0.02, t));
   if (fadeT <= 0) return null;
   const sides = Ly.mirror ? [1, -1] : [1];
@@ -573,6 +611,7 @@ function eyeTexture(P) {
   x.fillStyle = g; x.beginPath(); x.arc(S / 2, S / 2, S * 0.47, 0, TAU); x.fill();
   for (let i = 0; i < 160; i++) { const a = R() * TAU, r0 = S * (0.12 + R() * 0.2), r1 = r0 + S * (0.05 + R() * 0.12); x.strokeStyle = R() < 0.5 ? 'rgba(0,0,0,.18)' : 'rgba(255,240,200,.12)'; x.lineWidth = 1 + R(); x.beginPath(); x.moveTo(S / 2 + Math.cos(a) * r0, S / 2 + Math.sin(a) * r0); x.lineTo(S / 2 + Math.cos(a) * r1, S / 2 + Math.sin(a) * r1); x.stroke(); }
   if (H.eyeStripe) { x.fillStyle = H.eyeStripe; x.globalAlpha = 0.75; x.fillRect(0, S * 0.36, S, S * 0.28); x.globalAlpha = 1; }
+  if (H.eyeRing) { x.strokeStyle = H.eyeRing; x.lineWidth = S * 0.09; x.beginPath(); x.arc(S / 2, S / 2, S * 0.43, 0, TAU); x.stroke(); }
   x.fillStyle = '#050505';
   if (H.pupil === 'slit') { x.beginPath(); x.ellipse(S / 2, S / 2, S * 0.055, S * 0.36, 0, 0, TAU); x.fill(); }
   else if (H.pupil === 'round') { x.beginPath(); x.arc(S / 2, S / 2, S * 0.2, 0, TAU); x.fill(); }
@@ -592,6 +631,74 @@ const SCENES = {
   sand:     { sky: ['#9cc0de', '#f2e6cf'], fog: '#efe2cb', sun: 2.2, hemi: 0.5, sunEl: 50, tile: 1.0, ground: 'sand', props: { rocks: 0.3, grass: 0.3, twigs: 0.3 } },
   rainforest:{ sky: ['#9fb39b', '#c3cfbb'], fog: '#aebba7', sun: 1.3, hemi: 0.85, sunEl: 60, tile: 1.1, ground: 'litter', props: { leaves: 1.3, twigs: 1, rocks: 0.1, ferns: 1 } },
 };
+
+// ---------- photographic surroundings: CC0 Polyhaven panoramas (via @pmndrs/assets), see CREDITS.txt ----------
+// each habitat gets the panorama that fits it best; the snake's own ground is drawn up close and fades
+// into the photo's ground, which is projected onto a flat floor so it meets the horizon without a seam
+const ENV_FOR = { riverbank: 'park', forest: 'forest', rainforest: 'forest', litter: 'forest', soil: 'forest', grass: 'sunrise', heath: 'sunrise', arid: 'dawn', sand: 'dawn', sea: 'sky' };
+const ENV_CACHE = new Map();
+function parseHDR(buf) {
+  const b = new Uint8Array(buf); let p = 0, line = '';
+  const readLine = () => { let s = ''; while (p < b.length && b[p] !== 10) s += String.fromCharCode(b[p++]); p++; return s; };
+  if (!readLine().startsWith('#?')) throw new Error('hdr');
+  while ((line = readLine()) !== '') { /* header lines */ }
+  const m = readLine().match(/-Y (\d+) \+X (\d+)/); if (!m) throw new Error('hdr size');
+  const h = +m[1], w = +m[2], px = new Uint8Array(w * h * 4), sc = new Uint8Array(w * 4);
+  for (let y = 0; y < h; y++) {
+    if (b[p] === 2 && b[p + 1] === 2 && ((b[p + 2] << 8) | b[p + 3]) === w) {
+      p += 4;
+      for (let c = 0; c < 4; c++) { let x = 0; while (x < w) { let n = b[p++]; if (n > 128) { n -= 128; const v = b[p++]; while (n--) sc[(x++) * 4 + c] = v; } else { while (n--) sc[(x++) * 4 + c] = b[p++]; } } }
+      px.set(sc, y * w * 4);
+    } else { px.set(b.subarray(p, p + w * 4), y * w * 4); p += w * 4; }
+  }
+  // float RGBA, bottom row first (v = 0 is straight down, as three.js samples equirectangular maps)
+  const f = new Float32Array(w * h * 4);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const s = ((h - 1 - y) * w + x) * 4, d = (y * w + x) * 4, e = px[s + 3];
+    const k = e ? Math.pow(2, e - 136) : 0; f[d] = px[s] * k; f[d + 1] = px[s + 1] * k; f[d + 2] = px[s + 2] * k; f[d + 3] = 1;
+  }
+  return { w, h, f };
+}
+function prepEnv(raw) {
+  // normalise the sky to an average luminance of 1, find the sun, and take the sun out of the map
+  // (a directional light with shadows stands in for it, so it is not counted twice)
+  const { w, h, f } = raw, lum = (i) => f[i] * 0.2126 + f[i + 1] * 0.7152 + f[i + 2] * 0.0722;
+  let sum = 0, n = 0, best = -1, bi = 0;
+  for (let y = h >> 1; y < h; y++) for (let x = 0; x < w; x++) { const i = (y * w + x) * 4, l = lum(i), wgt = Math.cos(((y + 0.5) / h - 0.5) * Math.PI); sum += Math.min(l, 50) * wgt; n += wgt; }
+  for (let y = 1; y < h - 1; y++) for (let x = 0; x < w; x++) { let l = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) l += lum(((y + dy) * w + ((x + dx + w) % w)) * 4); if (l > best) { best = l; bi = y * w + x; } }
+  const k = 0.45 / Math.max(1e-6, sum / n), peak = (best / 9) * k / 0.45;
+  const sx = bi % w, sy = Math.floor(bi / w), phi = ((sx + 0.5) / w - 0.5) * TAU, th = ((sy + 0.5) / h - 0.5) * Math.PI;
+  const sunDir = new THREE.Vector3(Math.cos(th) * Math.cos(phi), Math.sin(th), Math.cos(th) * Math.sin(phi)).normalize();
+  // (the sun disc in these files is clipped to an unusable colour, so its colour comes from its height: warmer when low)
+  const sunCol = new THREE.Color('#ffcf9a').lerp(new THREE.Color('#fff5e8'), sstep(0.05, 0.6, sunDir.y));
+  // white balance, as a camera would: most of the cast of a blue sky is taken out (a little is kept)
+  const avg = [0, 0, 0]; for (let y = 0; y < h; y++) { const wgt = Math.cos(((y + 0.5) / h - 0.5) * Math.PI); for (let x = 0; x < w; x++) { const i = (y * w + x) * 4, l = Math.max(f[i], f[i + 1], f[i + 2]), s = l > 20 ? 20 / l : 1; avg[0] += f[i] * s * wgt; avg[1] += f[i + 1] * s * wgt; avg[2] += f[i + 2] * s * wgt; } }
+  const al = avg[0] * 0.2126 + avg[1] * 0.7152 + avg[2] * 0.0722, wb = avg.map((v) => Math.pow(al / Math.max(v, 1e-6), 0.8));
+  const cap = 3.5, data = new Float32Array(f.length);
+  const hot = [sunCol.r * cap, sunCol.g * cap, sunCol.b * cap];
+  for (let i = 0; i < f.length; i += 4) {
+    const r = f[i] * k * wb[0], g = f[i + 1] * k * wb[1], b = f[i + 2] * k * wb[2], m = Math.max(r, g, b);
+    if (m > cap * 4) { data[i] = hot[0]; data[i + 1] = hot[1]; data[i + 2] = hot[2]; } // the sun disc itself
+    else { const s = m > cap ? cap / m : 1; data[i] = r * s; data[i + 1] = g * s; data[i + 2] = b * s; }
+    data[i + 3] = 1;
+  }
+  // colour just above the horizon (for fog and the far edge of the water)
+  const hor = [0, 0, 0]; { const y = Math.round(h * 0.53); for (let x = 0; x < w; x++) { const i = (y * w + x) * 4; hor[0] += data[i]; hor[1] += data[i + 1]; hor[2] += data[i + 2]; } }
+  return { w, h, data, sunDir, sunCol, sunny: clamp(Math.log10(Math.max(1, peak)) / 2.2, 0.25, 1), horizon: new THREE.Color(hor[0] / w, hor[1] / w, hor[2] / w) };
+}
+function loadEnv(name) {
+  if (ENV_CACHE.has(name)) return ENV_CACHE.get(name);
+  const pr = fetch(new URL('env/' + name + '.hdr', import.meta.url).href).then((r) => { if (!r.ok) throw new Error('env ' + r.status); return r.arrayBuffer(); }).then((b) => prepEnv(parseHDR(b)));
+  pr.catch(() => ENV_CACHE.delete(name)); ENV_CACHE.set(name, pr); return pr;
+}
+// a sphere whose lower half is pressed flat onto the ground: the panorama's own ground then lies on a
+// floor at the camera height it was shot from (as three.js's GroundedSkybox does)
+function groundedSkyGeometry(height, radius) {
+  const g = new THREE.SphereGeometry(radius, 96, 48); g.scale(1, 1, -1);
+  const pos = g.attributes.position, v = new THREE.Vector3(), y1 = -height * 1.5;
+  for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i); if (v.y < 0) { const f = v.y < y1 ? -height / v.y : 1 - (v.y * v.y) / (3 * y1 * y1); v.multiplyScalar(f); v.toArray(pos.array, i * 3); } }
+  pos.needsUpdate = true; g.computeBoundingSphere(); return g;
+}
 
 function canvasTex(S, draw, rep, srgb = true) {
   const cv = document.createElement('canvas'); cv.width = cv.height = S; const x = cv.getContext('2d'); draw(x, S);
@@ -714,7 +821,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   for (let i = 0; i < p.count; i++) { const y = p.getY(i) / (groundR * 1.6), c = hor.clone().lerp(sky, sstep(0.0, 0.55, y)); if (y < 0) c.copy(hor); cols.push(c.r, c.g, c.b); }
   skyGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
   const skyMesh = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false }));
-  skyMesh.renderOrder = -1; scene.add(skyMesh);
+  skyMesh.renderOrder = -1; scene.add(skyMesh); ctx.skyMesh = skyMesh; ctx.groundR = groundR; ctx.fadeMats = [];
   scene.fog = new THREE.Fog(hor, Math.max(Rb * 5.5, envR * 3.2), groundR * 0.72);
   scene.background = hor;
 
@@ -728,7 +835,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   scene.environment = envRT.texture; ctx.track(envRT);
 
   // lights
-  const hemi = new THREE.HemisphereLight(sky.clone().lerp(new THREE.Color('#ffffff'), 0.4), gcol, S.hemi); scene.add(hemi);
+  const hemi = new THREE.HemisphereLight(sky.clone().lerp(new THREE.Color('#ffffff'), 0.4), gcol, S.hemi); scene.add(hemi); ctx.hemi = hemi; ctx.envRT = envRT;
   const sun = new THREE.DirectionalLight('#fff4e2', S.sun);
   const el = (S.sunEl * Math.PI) / 180, az = 0.9;
   sun.position.set(Math.cos(az) * Math.cos(el), Math.sin(el), Math.sin(az) * Math.cos(el)).multiplyScalar(Rb * 6);
@@ -757,14 +864,14 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
         pp.setY(i, -depth * sstep(edge - Rb * 0.25, edge + Rb * 0.7, s) + (fbm(x / Rb * 2, z / Rb * 2, 1, seed, 2) - 0.5) * Rb * 0.02 * sstep(Rb * 0.3, Rb * 0.9, Math.abs(s - edge)));
       }
       geo.computeVertexNormals();
-      const g2 = new THREE.Mesh(geo, gm); g2.receiveShadow = true; scene.add(g2);
+      const g2 = new THREE.Mesh(geo, gm); g2.receiveShadow = true; scene.add(g2); ctx.fadeMats.push(gm);
       const wm = new THREE.MeshPhysicalMaterial({ color: '#4d6d6a', roughness: 0.06, metalness: 0, transparent: true, opacity: 0.55, normalMap: waterNormal(seed), normalScale: new THREE.Vector2(0.25, 0.25) });
       wm.normalMap.repeat.set(groundR / Math.max(0.6, Rb), groundR / Math.max(0.6, Rb));
       const wg = new THREE.PlaneGeometry(groundR * 2, groundR * 2); wg.rotateX(-Math.PI / 2);
-      const water = new THREE.Mesh(wg, wm); water.position.y = -depth * 0.35; water.renderOrder = 2; scene.add(water);
+      const water = new THREE.Mesh(wg, wm); water.position.y = -depth * 0.35; water.renderOrder = 2; scene.add(water); ctx.fadeMats.push(wm);
       ctx.waterInfo = { dir, edge };
     } else {
-      const g2 = new THREE.Mesh(gg, gm); g2.receiveShadow = true; scene.add(g2);
+      const g2 = new THREE.Mesh(gg, gm); g2.receiveShadow = true; scene.add(g2); ctx.fadeMats.push(gm);
     }
   }
   if (S.water === 'sea') {
@@ -871,6 +978,36 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     scene.add(im);
   }
 }
+// swap the stand-in gradient sky for the panorama: image-based light, a grounded photo background,
+// the sun where the photo has it, and the near ground fading into the photo's ground
+function applyEnv(ctx, P, F, poseInfo, env) {
+  const { scene, renderer } = ctx, S = SCENES[P.scene.kind] || SCENES.litter, sea = S.water === 'sea';
+  if (!env.half) { env.half = new Uint16Array(env.data.length); for (let i = 0; i < env.data.length; i++) env.half[i] = THREE.DataUtils.toHalfFloat(env.data[i]); }
+  const tex = new THREE.DataTexture(env.half, env.w, env.h, THREE.RGBAFormat, THREE.HalfFloatType);
+  tex.mapping = THREE.EquirectangularReflectionMapping; tex.colorSpace = THREE.LinearSRGBColorSpace;
+  tex.magFilter = THREE.LinearFilter; tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false; tex.needsUpdate = true; ctx.track(tex);
+  const pm = new THREE.PMREMGenerator(renderer), rt = pm.fromEquirectangular(tex); pm.dispose(); ctx.track(rt);
+  if (ctx.envRT) ctx.envRT.dispose();
+  scene.environment = rt.texture;
+  if (ctx.skyMesh) { scene.remove(ctx.skyMesh); ctx.skyMesh.geometry.dispose(); ctx.skyMesh.material.dispose(); ctx.skyMesh = null; }
+  // the photo world is at real size: shot from about 1.7 m up, floor out to 120 m
+  const camH = 1.7, skyR = 120, sky = new THREE.Mesh(sea ? new THREE.SphereGeometry(skyR, 64, 32).scale(1, 1, -1) : groundedSkyGeometry(camH, skyR), new THREE.MeshBasicMaterial({ map: tex, depthWrite: false, fog: false }));
+  sky.position.y = sea ? 0 : camH - 0.002; sky.renderOrder = -2; scene.add(sky); ctx.track(sky.geometry); ctx.track(sky.material);
+  scene.background = env.horizon.clone();
+  // fade the near ground (and water) into the projected photo ground
+  const gR = ctx.groundR, fade = canvasTex(256, (x, s) => { const g = x.createRadialGradient(s / 2, s / 2, s * 0.18, s / 2, s / 2, s * 0.5); g.addColorStop(0, '#fff'); g.addColorStop(1, '#000'); x.fillStyle = g; x.fillRect(0, 0, s, s); }, 1, false);
+  fade.wrapS = fade.wrapT = THREE.ClampToEdgeWrapping; fade.repeat.set(1, 1); ctx.track(fade);
+  if (!sea) for (const m of ctx.fadeMats) { m.alphaMap = fade; if (m.transparent) { m.opacity *= 1; } else m.alphaHash = true; m.needsUpdate = true; }
+  scene.fog = sea ? new THREE.Fog(env.horizon, gR * 0.4, gR * 0.98) : null;
+  // light: the sun from the photo, sky light from the panorama; the gradient hemisphere light stays only as a faint fill
+  const sun = ctx.sun, el = Math.max(Math.asin(env.sunDir.y), (22 * Math.PI) / 180), az = Math.atan2(env.sunDir.z, env.sunDir.x), r = sun.position.length();
+  sun.position.set(Math.cos(el) * Math.cos(az), Math.sin(el), Math.cos(el) * Math.sin(az)).multiplyScalar(r);
+  sun.color.copy(env.sunCol).lerp(new THREE.Color('#ffffff'), 0.35); sun.intensity = 6.5 * env.sunny; // about three times the sky's light on a sunlit face, as outdoors
+  sun.shadow.radius = lerp(8, 3, env.sunny); sun.shadow.blurSamples = 16;
+  if (ctx.hemi) ctx.hemi.intensity *= 0.25;
+  ctx.envName = env.name;
+}
+
 function mergeGeos(list) {
   let n = 0; for (const g of list) n += g.index ? g.index.count : g.attributes.position.count;
   const pos = new Float32Array(n * 3); let o = 0;
@@ -1022,7 +1159,12 @@ export function mount(host, opts) {
       iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.65,
     });
     // the cavity map also darkens the skin between scales in direct light (as in real snakes)
-    mat.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\n#ifdef USE_AOMAP\n diffuseColor.rgb *= mix(1.0, texture2D(aoMap, vAoMapUv).r, ' + (S.cavity != null ? S.cavity : 0.45).toFixed(2) + ');\n#endif'); };
+    mat.onBeforeCompile = (sh) => {
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead;');
+      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying float vHead;')
+        .replace('#include <map_fragment>', '#include <map_fragment>\n#ifdef USE_AOMAP\n diffuseColor.rgb *= mix(1.0, texture2D(aoMap, vAoMapUv).r, ' + (S.cavity != null ? S.cavity : 0.45).toFixed(2) + ' * (1.0 - vHead * 0.9));\n#endif')
+        .replace('mapN.xy *= normalScale;', 'mapN.xy *= normalScale * (1.0 - vHead * 0.88);');
+    };
     const mesh = new THREE.Mesh(body.geo, mat); mesh.castShadow = mesh.receiveShadow = true;
     snakeGroup = new THREE.Group(); snakeGroup.add(mesh);
 
@@ -1074,6 +1216,12 @@ export function mount(host, opts) {
     if (P.scene.kind !== 'sea') scene.add(contactShadow(poseInfo, F, Rb));
     buildScene(ctx, P, F, body, poseInfo, seed, quality);
     if (!cScene.checked) setSceneVisible(false);
+    // the photographic surroundings arrive a moment later (cached after the first time)
+    const envName = P.scene.env || ENV_FOR[P.scene.kind], myScene = scene;
+    ctx.envReady = envName && !opts.noEnv ? loadEnv(envName).then((env) => {
+      if (!alive || ctx.scene !== myScene) return false;
+      env.name = envName; applyEnv(ctx, P, F, poseInfo, env); if (!cScene.checked) setSceneVisible(false); dirty = true; kick(); return true;
+    }).catch(() => false) : Promise.resolve(false);
 
     const headPos = body.surf(F.Hl * 0.45, 0).p;
     const headDir = body.frameAt(F.Hl * 0.5).T.clone().negate(); // pointing out of the snout
@@ -1129,7 +1277,7 @@ export function mount(host, opts) {
   function placeCamera() {
     const st = controls.st, t = targetFor(st.d);
     cam.position.set(t.x + st.d * Math.cos(st.el) * Math.sin(st.az), t.y + st.d * Math.sin(st.el), t.z + st.d * Math.cos(st.el) * Math.cos(st.az));
-    cam.near = Math.max(st.d * 0.02, 1e-4); cam.far = Math.max(info.Rb * 40, 60); cam.updateProjectionMatrix(); cam.lookAt(t);
+    cam.near = Math.max(st.d * 0.02, 1e-4); cam.far = Math.max(info.Rb * 40, 300); cam.updateProjectionMatrix(); cam.lookAt(t);
   }
   function resize() {
     const w = stage.clientWidth || 300, h = stage.clientHeight || 200;
@@ -1288,7 +1436,7 @@ export function mount(host, opts) {
   function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; disposeScene(); build(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
 
   build(); resize();
-  if (opts.testing) window.__sp3d = { THREE, renderer, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, frame: () => { controls.update(); placeCamera(); updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); } };
+  if (opts.testing) window.__sp3d = { THREE, renderer, get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, frame: () => { controls.update(); placeCamera(); updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); } };
 
   return {
     canvas,
@@ -1304,4 +1452,4 @@ export function mount(host, opts) {
 }
 function fmtLen(m) { return m < 1 ? Math.round(m * 100) + ' cm' : (Math.round(m * 100) / 100) + ' m'; }
 export function webglAvailable() { try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { return false; } }
-export const _internals = { normProfile, makeBodyFns, makePose }; // for offline checks
+export const _internals = { normProfile, makeBodyFns, makePose, loadEnv }; // for offline checks
