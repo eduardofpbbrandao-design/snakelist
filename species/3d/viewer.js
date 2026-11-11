@@ -200,6 +200,28 @@ function makePose(P, F, seed) {
       if (!overlaps(p)) pts = p;
     }
   }
+  let stacked = false;
+  if (pose.kind === 'stack') {
+    // a resting pile: the tail end is laid down first as a tight spiral whose turns touch, then the
+    // forebody leaves the outer turn and swings back across the coil, so the neck and head rest on top
+    const pitch = wMax * 2 * (pose.pitch || 1.08), b = pitch / TAU, out = [];
+    let r = pitch * (pose.inner || 0.9), th = R() * TAU, s = 0;
+    const coilLen = L * (1 - (pose.lead != null ? pose.lead : 0.32)), sq = 1 - (pose.squash != null ? pose.squash : 0.12);
+    const wob = pose.wobble != null ? pose.wobble : 0.25, ph0 = R() * TAU;
+    while (s < coilLen) { out.push([Math.cos(th) * r, Math.sin(th) * r * sq]); const dth = ds / Math.sqrt(r * r + b * b); th += dth; r += b * dth * (1 + wob * Math.sin(th * 1.3 + ph0)); s += ds; }
+    let cx = out[out.length - 1][0], cz = out[out.length - 1][1];
+    const a0 = out[out.length - 2]; let heading = Math.atan2(cz - a0[1], cx - a0[0]);
+    const nLead = N - out.length, tight = pose.tight || 0.6, bendEnd = (pose.headBend || 0) / (L * 0.1);
+    for (let i = 0; i < nLead; i++) {
+      out.push([cx, cz]);
+      const f = i / nLead;
+      // keep curling the same way but tighter than the coil, so the forebody crosses back over it;
+      // the neck straightens and the head ends with a slight turn
+      const k = lerp(1 / r, 1 / (r * tight), sstep(0.05, 0.3, f)) * (1 - sstep(0.7, 0.95, f)) + bendEnd * sstep(0.9, 1, f);
+      heading += k * ds; cx += Math.cos(heading) * ds; cz += Math.sin(heading) * ds;
+    }
+    pts = out.reverse().slice(0, N); stacked = true;
+  }
   if (!pts) { pts = []; for (let i = 0; i < N; i++) pts.push([i * ds, 0]); }
   // centre the footprint at the origin
   let mnx = 1e9, mxx = -1e9, mnz = 1e9, mxz = -1e9;
@@ -209,8 +231,40 @@ function makePose(P, F, seed) {
   const at = (x) => { const f = clamp(x / ds, 0, N - 1.0001), i = Math.floor(f), t = f - i; return [lerp(pts[i][0], pts[i + 1][0], t), lerp(pts[i][1], pts[i + 1][1], t)]; };
   // a slight lift of the head and neck off the ground (in head heights)
   const lift = (pose.lift != null ? pose.lift : 0.35) * F.Hh(F.Hl * 0.6) * 2, liftLen = F.Hl * (pose.liftLen || 2.6);
-  const Ly = (x) => lift * (1 - sstep(F.Hl * 0.7, liftLen, x));
-  return { pts, at, Ly, ds, N };
+  // drape: wherever the body crosses a part laid down before it (the tail end is laid first), it rests
+  // on top of it; the rise and fall are smoothed so the body bends over the coil like a real one
+  const E = new Float32Array(N);
+  if (stacked) {
+    const H = new Float32Array(N), Wd = new Float32Array(N);
+    for (let i = 0; i < N; i++) { H[i] = F.Hh(i * ds); Wd[i] = F.W(i * ds); }
+    const cell = wMax * 2, grid = new Map(), key = (x, z) => Math.floor(x / cell) + ',' + Math.floor(z / cell);
+    for (let i = 0; i < N; i += 2) { const k = key(pts[i][0], pts[i][1]); if (!grid.has(k)) grid.set(k, []); grid.get(k).push(i); }
+    const need = new Float32Array(N);
+    for (let pass = 0; pass < 3; pass++) {
+      for (let i = N - 1; i >= 0; i--) {
+        let m = 0; const p = pts[i], gx = Math.floor(p[0] / cell), gz = Math.floor(p[1] / cell);
+        for (let ox = -1; ox <= 1; ox++) for (let oz = -1; oz <= 1; oz++) {
+          const l = grid.get((gx + ox) + ',' + (gz + oz)); if (!l) continue;
+          for (const j of l) {
+            if (j <= i + 2 || (j - i) * ds < (Wd[i] + Wd[j]) * 3) continue; // only parts laid earlier (nearer the tail), and not its own neighbourhood
+            const d = Math.hypot(p[0] - pts[j][0], p[1] - pts[j][1]), rr = (Wd[i] + Wd[j]) * 0.98; if (d >= rr) continue;
+            const top = E[j] + H[j] * F.bf + (H[j] + H[i] * F.bf) * Math.sqrt(1 - (d / rr) ** 2) - H[i] * F.bf;
+            if (top > m) m = top;
+          }
+        }
+        need[i] = m;
+        E[i] = Math.max(m, pass ? E[i] : 0);
+      }
+      // slope limit, then smoothing that never sinks below what is needed
+      const sl = (pose.slope || 0.55) * ds;
+      for (let i = 1; i < N; i++) E[i] = Math.max(E[i], E[i - 1] - sl);
+      for (let i = N - 2; i >= 0; i--) E[i] = Math.max(E[i], E[i + 1] - sl);
+      for (let it = 0; it < 30; it++) for (let i = 1; i < N - 1; i++) E[i] = Math.max(need[i], (E[i - 1] + E[i] * 2 + E[i + 1]) / 4);
+    }
+  }
+  const eAt = (x) => { const f = clamp(x / ds, 0, N - 1.0001), i = Math.floor(f), t = f - i; return lerp(E[i], E[i + 1], t); };
+  const Ly = (x) => lift * (1 - sstep(F.Hl * 0.7, liftLen, x)) + eAt(x);
+  return { pts, at, Ly, ds, N, stacked };
 }
 
 // ---------- the body mesh (snout, head, neck, body and tail are one seamless sweep) ----------
@@ -1250,3 +1304,4 @@ export function mount(host, opts) {
 }
 function fmtLen(m) { return m < 1 ? Math.round(m * 100) + ' cm' : (Math.round(m * 100) / 100) + ' m'; }
 export function webglAvailable() { try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { return false; } }
+export const _internals = { normProfile, makeBodyFns, makePose }; // for offline checks

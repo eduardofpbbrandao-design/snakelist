@@ -828,11 +828,10 @@
     }
    ],
    "pose": {
-    "kind": "wave",
-    "waves": 1.7,
-    "amp": 70,
-    "bend": 60,
-    "lift": 0.6
+    "kind": "stack",
+    "pitch": 0.8,
+    "lead": 0.34,
+    "lift": 0.25
    },
    "scene": {
     "kind": "riverbank",
