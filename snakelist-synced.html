@@ -1837,7 +1837,7 @@
           <span class="chip" id="chip-nophoto" role="button" tabindex="0" title="Species nobody has a photo of on SnakeList yet">No photos</span>
           <span class="chip" id="chip-extinct" role="button" tabindex="0" title="Snakes that have died out">Extinct</span>
           <span class="chip" id="chip-harmful" role="button" tabindex="0" title="Snakes documented as dangerous to people">Harmful</span>
-          <span class="chip" id="chip-harmless" role="button" tabindex="0" title="Non-venomous snakes that aren't giant constrictors">Harmless</span>
+          <span class="chip" id="chip-harmless" role="button" tabindex="0" title="Not venomous and not a giant constrictor - low risk to people, though any snake can bite">Low risk</span>
         </div>
 </div>
         </div>
@@ -8756,7 +8756,7 @@
     document.getElementById("chip-rare").innerHTML = 'Rare <b class="chip-n">' + countTotal({ rare: true }).toLocaleString() + '</b>';
     document.getElementById("chip-rare").classList.toggle("active", rareOnly);
     [["chip-snakeeater", "Snake eater", { snakeEater: true }, snakeEaterOnly], ["chip-nophoto", "No photos", { noPhoto: true }, noPhotoOnly], ["chip-extinct", "Extinct", { extinct: true }, extinctOnly],
-      ["chip-harmful", "Harmful", { harmful: true }, harmfulOnly], ["chip-harmless", "Harmless", { harmless: true }, harmlessOnly]].forEach((x) => {
+      ["chip-harmful", "Harmful", { harmful: true }, harmfulOnly], ["chip-harmless", "Low risk", { harmless: true }, harmlessOnly]].forEach((x) => {
       const el = document.getElementById(x[0]);
       el.innerHTML = x[1] + ' <b class="chip-n">' + countTotal(x[2]).toLocaleString() + "</b>";
       el.classList.toggle("active", x[3]);
@@ -16145,7 +16145,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       var fav = isFav(s.id);
       return '<article class="fp' + (fav ? " fav" : "") + '" data-i="' + i + '">' + photoHTML(s) +
         '<div class="fp-body"><h3>' + esc(s.name) + '</h3><p class="fp-sci">' + esc(s.sci !== s.name ? s.sci : "") + '</p>' +
-        '<div class="fp-chips">' + (fav ? '<span class="fp-favtag">Favourite</span>' : "") + '<span class="' + (s.venom ? "fp-v" : "fp-h") + '">' + (s.venom ? "Venomous" : "Harmless to people") + '</span>' +
+        '<div class="fp-chips">' + (fav ? '<span class="fp-favtag">Favourite</span>' : "") + '<span class="' + (s.venom ? "fp-v" : "fp-h") + '">' + (s.venom ? "Venomous" : "Not venomous") + '</span>' +
         (s.countries.length ? '<button type="button" class="fp-place" title="' + (s.countries.length === 1 ? "See it on the map" : "See where it lives") + '">' +
           (s.countries.length === 1 ? esc(s.countries[0]) : s.countries.length + " countries") + '</button>' : "") + '</div>' +
         '<ul class="fp-facts"><li class="fp-wait">Loading facts&hellip;</li></ul>' +
