@@ -63,7 +63,7 @@ const PLANS = {
   viper:    { body: { ld: 15, neck: 0.42, peak: 0.45, vent: 0.62, tail: 0.10, xs: 1.32, bf: 0.72 }, head: { shape: 'tri', len: 0.065, w: 1.05, h: 0.52, snout: 0.5, jaw: 0.78, eyeX: 0.27, eyeA: 70, taper: 0.3, eye: 0.13, pupil: 'slit', brow: 0.10, canthus: 3.0 }, scales: { rows: 31, keel: 0.85, gloss: 0.12, aV: 0.76 }, pose: { kind: 'coil' } },
   pitviper: { body: { ld: 22, neck: 0.48, peak: 0.45, vent: 0.62, tail: 0.085, xs: 1.25, bf: 0.74 }, head: { shape: 'tri', len: 0.05, w: 1.0, h: 0.55, snout: 0.5, jaw: 0.8, eyeX: 0.3, eyeA: 70, taper: 0.3, eye: 0.12, pupil: 'slit', brow: 0.10, canthus: 3.0, pits: 'loreal' }, scales: { rows: 27, keel: 0.85, gloss: 0.12, aV: 0.76 }, pose: { kind: 'coil' } },
   python:   { body: { ld: 30, neck: 0.55, peak: 0.5, vent: 0.62, tail: 0.12, xs: 1.18, bf: 0.76 }, head: { len: 0.035, w: 0.68, h: 0.6, snout: 0.62, jaw: 0.78, eyeX: 0.3, eyeA: 62, eye: 0.13, pupil: 'slit', brow: 0.03, canthus: 2.6, pits: 'labial' }, scales: { rows: 71, keel: 0, gloss: 0.5, aV: 0.8 }, pose: { kind: 'coil' } },
-  colubrid: { body: { ld: 36, neck: 0.78, peak: 0.42, vent: 0.62, tail: 0.24, xs: 1.08, bf: 0.8 }, head: { len: 0.035, w: 1.05, h: 0.68, snout: 0.7, jaw: 0.72, eyeX: 0.3, eyeA: 60, eye: 0.18, pupil: 'round', brow: 0.02, canthus: 2.4 }, scales: { rows: 19, keel: 0, gloss: 0.4, aV: 0.76 }, pose: { kind: 'wave' } },
+  colubrid: { body: { ld: 36, neck: 0.78, peak: 0.42, vent: 0.62, tail: 0.24, xs: 1.08, bf: 0.8 }, head: { len: 0.035, w: 1.05, h: 0.68, snout: 0.7, jaw: 0.72, eyeX: 0.3, eyeA: 60, eye: 0.16, pupil: 'round', brow: 0.02, canthus: 2.4 }, scales: { rows: 19, keel: 0, gloss: 0.4, aV: 0.76 }, pose: { kind: 'wave' } },
   elapid:   { body: { ld: 45, neck: 0.85, peak: 0.45, vent: 0.62, tail: 0.18, xs: 1.05, bf: 0.8 }, head: { len: 0.032, w: 0.95, h: 0.62, snout: 0.62, jaw: 0.75, eyeX: 0.3, eyeA: 60, eye: 0.15, pupil: 'round', brow: 0.02, canthus: 2.6 }, scales: { rows: 17, keel: 0, gloss: 0.45, aV: 0.76 }, pose: { kind: 'wave' } },
   blind:    { body: { ld: 42, neck: 1.0, peak: 0.5, vent: 0.97, tail: 0.022, xs: 1.0, bf: 0.9, blunt: true }, head: { shape: 'blunt', len: 0.022, w: 0.98, h: 0.8, snout: 0.9, jaw: 0.6, eyeX: 0.32, eyeA: 55, eye: 0.16, pupil: 'none', brow: 0, canthus: 2.0 }, scales: { rows: 20, keel: 0, gloss: 0.85, aV: 0.97, kind: 'cycloid' }, pose: { kind: 'wave' } },
   sea:      { body: { ld: 30, neck: 0.62, peak: 0.55, vent: 0.75, tail: 0.11, xs: 0.72, bf: 0.85, paddle: true }, head: { len: 0.045, w: 0.75, h: 0.72, snout: 0.6, jaw: 0.75, eyeX: 0.3, eyeA: 52, eye: 0.13, pupil: 'round', brow: 0, canthus: 2.2 }, scales: { rows: 47, keel: 0, gloss: 0.35, aV: 0.95, kind: 'juxta' }, pose: { kind: 'wave' } },
@@ -431,6 +431,7 @@ function shapeD(shape, dv, da) {
     case 'diamond': return v + u;
     case 'rect': return Math.pow(v ** 4 + u ** 4, 0.25);
     case 'hourglass': return Math.max(v / (0.35 + 0.65 * u), u);
+    case 'chevron': return Math.max(Math.abs(dv + 1.1 * u), u); // a V whose arms run forward down the flanks (apex toward the tail)
     case 'saddle': return Math.max(Math.pow(v ** 3 + u ** 3, 1 / 3), u);
     case 'round': return Math.pow(v ** 2.6 + u ** 2.6, 1 / 2.6);
     default: return Math.sqrt(v * v + u * u);
@@ -983,7 +984,7 @@ export function mount(host, opts) {
         if (sg < 0) n.negate();
         const out = n.clone().addScaledVector(s.f.T, -0.22).normalize();
         const up = s.f.U.clone().addScaledVector(out, -s.f.U.dot(out)).normalize(), xa = new THREE.Vector3().crossVectors(up, out);
-        const m = new THREE.Mesh(eg, em); m.position.copy(s.p).addScaledVector(n, -eyeR * (H.embed || 0.5));
+        const m = new THREE.Mesh(eg, em); m.position.copy(s.p).addScaledVector(n, -eyeR * (H.embed || 0.62));
         m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xa, up, out)); m.castShadow = false; m.receiveShadow = true;
         snakeGroup.add(m); eyePos.push(m.position.clone());
       }

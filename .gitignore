@@ -8,3 +8,6 @@
 *.new
 *.tmp
 __pycache__/
+
+# viewer3d.js test output
+tests/out/

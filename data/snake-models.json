@@ -1079,9 +1079,9 @@
     "cavity": 0.2
    },
    "colors": {
-    "dorsal": "#3a2621",
-    "lateral": "#3f2a24",
-    "belly": "#5c463d",
+    "dorsal": "#2e2622",
+    "lateral": "#332a25",
+    "belly": "#4e423a",
     "bellyA": 0.8,
     "bellySharp": 0.15,
     "mottle": 0.04,
@@ -1780,8 +1780,8 @@
      ],
      "count": 14,
      "a": 0,
-     "wid": 0.86,
-     "len": 0.6,
+     "wid": 0.72,
+     "len": 0.78,
      "shape": "hourglass",
      "color": "#7e4a33",
      "edgeColor": "#5c321f",
@@ -2133,9 +2133,9 @@
      ],
      "count": 22,
      "a": 0,
-     "wid": 0.86,
-     "len": 0.32,
-     "shape": "diamond",
+     "wid": 0.8,
+     "len": 0.34,
+     "shape": "chevron",
      "color": "#2a2018",
      "warp": 0.5
     },
@@ -2432,8 +2432,8 @@
     "rows": 21
    },
    "colors": {
-    "dorsal": "#a39a8a",
-    "lateral": "#9e9484",
+    "dorsal": "#8f8676",
+    "lateral": "#8a8072",
     "belly": "#5a5450"
    },
    "pattern": [
@@ -2532,9 +2532,9 @@
      ],
      "count": 20,
      "a": 0,
-     "wid": 0.32,
-     "len": 0.62,
-     "shape": "rect",
+     "wid": 0.5,
+     "len": 0.42,
+     "shape": "chevron",
      "color": "#3a2e22",
      "edgeColor": "#e2cf9a",
      "edge": 0.18,
@@ -2549,7 +2549,7 @@
      ],
      "count": 20,
      "phase": 0.5,
-     "a": 0.6,
+     "a": 0.66,
      "mirror": true,
      "wid": 0.14,
      "len": 0.5,
@@ -3470,7 +3470,7 @@
     "ld": 34
    },
    "head": {
-    "w": 1.0,
+    "w": 0.9,
     "iris": "#3a3028"
    },
    "scales": {
@@ -4155,7 +4155,8 @@
     "h": 0.6,
     "snout": 0.72,
     "snoutUp": 0.45,
-    "iris": "#7a6040"
+    "iris": "#7a6040",
+    "eye": 0.13
    },
    "scales": {
     "rows": 25,
@@ -4413,7 +4414,9 @@
     "eyeA": 45,
     "iris": "#6a5a3a",
     "pits": null,
-    "brow": 0
+    "brow": 0,
+    "back": 1.0,
+    "neckLen": 0.7
    },
    "scales": {
     "rows": 45,
@@ -4742,8 +4745,8 @@
     "keel": 0.9
    },
    "colors": {
-    "dorsal": "#7a6e52",
-    "lateral": "#7c7056",
+    "dorsal": "#76654a",
+    "lateral": "#7a6a4e",
     "belly": "#d8cc9a"
    },
    "pattern": [
