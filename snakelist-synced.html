@@ -88,6 +88,18 @@
     .eyebrow-row .eyebrow { flex: 1 1 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.12em; }
     .hdr-actions { flex: 1 1 100%; flex-wrap: wrap; justify-content: flex-start; gap: 6px; }
   }
+  /* ordinary phones (360-420 px): all the header buttons on one row, none left alone on a second line */
+  @media (max-width: 430px) {
+    .hdr-actions { gap: 5px; }
+    .hdr-actions .theme-btn { width: 32px; height: 32px; padding: 6px; }
+    .hdr-actions .install-btn, .hdr-actions > button:not(.theme-btn) { padding-left: 10px; padding-right: 10px; }
+  }
+  @media (max-width: 380px) {
+    .hdr-actions { gap: 4px; }
+    .hdr-actions .theme-btn { width: 30px; height: 30px; padding: 5px; }
+    .hdr-actions .install-btn svg { display: none; }
+    .hdr-actions .install-btn, .hdr-actions > button:not(.theme-btn) { padding-left: 9px; padding-right: 9px; }
+  }
   .theme-btn:hover { border-color: var(--gold-soft); }
   .theme-btn { padding: 7px; width: 34px; height: 34px; }
   .theme-btn svg { width: 16px; height: 16px; }
@@ -1458,7 +1470,7 @@
   .note-actions #note-clear { color: var(--text-muted); }
   .note-actions .primary { background: var(--gold-fill); border-color: var(--gold-fill); color: var(--on-fill); margin-left: auto; }
   .note-actions .primary:disabled { opacity: .6; cursor: default; }
-  .cap-link { font: inherit; color: inherit; background: none; border: 0; padding: 0 2px; border-radius: 4px; cursor: pointer; font-weight: 700; box-shadow: inset 0 -2px 0 var(--map-on, #58b351); }
+  .cap-link { font: inherit; color: inherit; background: none; border: 0; padding: 0 1px; cursor: pointer; font-weight: 700; text-decoration: underline; text-decoration-color: var(--map-on, #58b351); text-decoration-thickness: 2px; text-underline-offset: 3px; }
   .cap-intro { color: var(--rust, #c8641e); }
   .cp-more-cities { display: block; width: 100%; margin: 6px 0 2px; padding: 9px; border-radius: 10px; border: 1px dashed var(--map-on, #58b351); background: transparent; color: var(--text); font: 600 13px 'Inter', sans-serif; cursor: pointer; }
   .cp-row.cp-most { border-left: 3px solid var(--map-on, #58b351); }
@@ -16017,6 +16029,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   @media (max-width: 640px) { .fsecs { grid-template-columns: 1fr; } }
   .fbar, #result-count { max-width: 900px; margin-left: auto !important; margin-right: auto !important; }
   .fsec { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+  /* light theme: the filter boxes stand off the pale page (a firmer edge and a faint lift), instead of pale green on pale green */
+  :root:not([data-sl-theme="dark"]) .fsec { background: #fbfdf8; border-color: #b9cbab; box-shadow: 0 1px 2px rgba(31, 90, 58, 0.07); }
   .fsec > summary { list-style: none; display: flex; align-items: center; gap: 10px; padding: 8px 16px; cursor: pointer; font: 600 15px 'Inter', sans-serif; color: var(--text); min-height: 42px; border-radius: 14px; }
   .fsec > summary::-webkit-details-marker { display: none; }
   .fsec > summary:hover { background: rgba(127,199,106,0.08); }
@@ -21565,7 +21579,7 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
 </style>
 <style>
 /* ---- map overhaul (v4.62): rankings, fossil section, Sightings bar/options/markers/panel, Cameras ---- */
-.cap-fossil { font: inherit; color: inherit; background: none; border: 0; padding: 0 2px; border-radius: 4px; cursor: pointer; font-weight: 700; box-shadow: inset 0 -2px 0 var(--map-on, #58b351); }
+.cap-fossil { font: inherit; color: inherit; background: none; border: 0; padding: 0 1px; cursor: pointer; font-weight: 700; text-decoration: underline; text-decoration-color: var(--map-on, #58b351); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .cp-ranks { display: grid; gap: 6px; margin: 2px 0 8px; }
 .cp-rank { border: 1px solid var(--border); border-radius: 10px; padding: 6px 8px; margin: 0 0 6px; background: var(--surface-hover, rgba(127,199,106,.08)); }
 .cp-ranks .cp-rank { margin: 0; }

@@ -40,8 +40,8 @@ Environment limits: iNaturalist, Wikipedia, Wikidata, GBIF and the Reptile Datab
 | 27 | Full wording and terminology review in templates and generated text | I | B+C+E | ⏳ | |
 | 28 | Conservation with provider/category/year/scope; citations that support statements; meaningful review dates | I | B | ⚠️ | B: provider/category/scope/year/link shown; Natrix maura, Bitis gabonica, Python bivittatus citations checked; others not line-by-line; Red List years for 4 species from secondary sources (flagged). |
 | 29 | Reference-site patterns used selectively (AirNav, Florida Museum, Reptile Database, iNaturalist) | P | A+B | ⏳ | |
-| 30 | Consistent visual system across app and pages; contrast; both themes; zoom; narrow screens | R | E | ⏳ | |
-| 31 | Supporting flows audit (checklist, sightings, want/following, achievements, quiz, camera ID, install, About, creator, credits, privacy, terms); stale totals | I/U | E | ⏳ | |
+| 30 | Consistent visual system across app and pages; contrast; both themes; zoom; narrow screens | R | E | 🔧 | E: light-theme filter boxes get a firmer edge (no pale-on-pale); header buttons fit one row on 360-430 px phones; map caption links use straight underlines (the rounded ones looked like stray commas). No horizontal overflow at 390/1280 in either theme. Species-page and place-page styles come from streams B/C. |
+| 31 | Supporting flows audit (checklist, sightings, want/following, achievements, quiz, camera ID, install, About, creator, credits, privacy, terms); stale totals | I/U | E | ⚠️ | E: About photo total from data; feature descriptions match (sightings not "live", Impossible quiz, email accounts); Wikidata in privacy list; "Harmless" filter -> "Low risk". Quiz levels show their timing. Saved records/sync/backups not re-tested in this pass. |
 | 32 | Complete, reviewable result: this checklist, validation set, previews, honest report | — | all | ⏳ | |
 
 ## Validation set
