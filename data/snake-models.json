@@ -245,9 +245,9 @@
     "keel": 0.95,
     "gloss": 0.02,
     "cavity": 0.5,
-    "sheen": 0.8,
-    "sheenRough": 0.5,
-    "sheenColor": "#e8dccb"
+    "sheen": 0.3,
+    "sheenRough": 0.6,
+    "sheenColor": "#8a7a68"
    },
    "colors": {
     "dorsal": "#47302a",
