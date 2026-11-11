@@ -74,7 +74,7 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) { fails
 
     // ---- v4.63: every snake has a model (living, extinct and fossil) ----
     const missing = await p.evaluate(() => fetch('species/3d/models.json').then(r => r.json()).then(m => [].filter.call(document.querySelectorAll('#cp-list .cp-row.cp-sp'),
-      x => { const i = x.querySelector('i'); return i && !m.species[i.textContent.trim().split(/\s+/).slice(0, 2).join(' ').toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '')]; }).length));
+      x => !m.species[x.dataset.sp]).length));
     ok(missing === 0, `${label}: every snake in Spain's list has a 3D model (${missing} missing)`);
 
     // ---- a box already open when 3D goes on / off ----
