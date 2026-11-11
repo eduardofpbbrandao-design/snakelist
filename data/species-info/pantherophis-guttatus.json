@@ -3,42 +3,140 @@
   "reviewed": "2026-11-09",
   "status": "rich",
   "facts": {
-    "length": {"text": "About 0.6-1.8 m", "src": ["azan"]},
-    "reproduction": {"text": "Lays eggs (about 10-30)", "src": ["idaho"]},
-    "diet": {"text": "Mostly rodents", "src": ["adw"]},
-    "iucn": {"code": "LC", "text": "Least Concern", "long": "Listed as Least Concern on the IUCN Red List, with a stable population.", "src": ["adw", "azan"]}
+    "length": {
+      "text": "About 0.6-1.8 m",
+      "src": [
+        "azan"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs (about 10-30)",
+      "src": [
+        "idaho"
+      ]
+    },
+    "diet": {
+      "text": "Mostly rodents",
+      "src": [
+        "adw"
+      ]
+    },
+    "iucn": {
+      "code": "LC",
+      "text": "Least Concern",
+      "long": "Listed as Least Concern on the IUCN Red List, with a stable population.",
+      "src": [
+        "adw",
+        "azan"
+      ]
+    }
   },
   "sections": {
     "overview": [
-      {"text": "The Corn Snake, also called the Red Rat Snake, is a colourful, harmless constrictor of the south-eastern and south-central United States. It is one of the most popular pet snakes in the world, and many colour forms have been bred in captivity.", "src": ["adw", "livesci"]}
+      {
+        "text": "The Corn Snake, also called the Red Rat Snake, is a colourful, non-venomous constrictor of the south-eastern and south-central United States. It is one of the most popular pet snakes in the world, and many colour forms have been bred in captivity.",
+        "src": [
+          "adw",
+          "livesci"
+        ]
+      }
     ],
     "size": [
-      {"label": "Adults", "text": "Adults are usually about 61 to 182 cm (2 to 6 ft) long.", "src": ["azan"]},
-      {"label": "Hatchlings", "text": "Babies are about 25 to 30 cm long when they hatch.", "src": ["kyiv"]}
+      {
+        "label": "Adults",
+        "text": "Adults are usually about 61 to 182 cm (2 to 6 ft) long.",
+        "src": [
+          "azan"
+        ]
+      },
+      {
+        "label": "Hatchlings",
+        "text": "Babies are about 25 to 30 cm long when they hatch.",
+        "src": [
+          "kyiv"
+        ]
+      }
     ],
     "distribution": [
-      {"label": "Native", "text": "The south-eastern and south-central United States, from about New Jersey south to Florida and west to Texas.", "src": ["adw", "azan"]}
+      {
+        "label": "Native",
+        "text": "The south-eastern and south-central United States, from about New Jersey south to Florida and west to Texas.",
+        "src": [
+          "adw",
+          "azan"
+        ]
+      }
     ],
     "habitat": [
-      {"text": "Forest edges and woodland, fields, swamps and hardwood hammocks; it also turns up in barns and abandoned buildings, where it hunts rodents.", "src": ["azan", "outforia"]}
+      {
+        "text": "Forest edges and woodland, fields, swamps and hardwood hammocks; it also turns up in barns and abandoned buildings, where it hunts rodents.",
+        "src": [
+          "azan",
+          "outforia"
+        ]
+      }
     ],
     "diet": [
-      {"text": "A constrictor that squeezes its prey. Adults eat mostly rodents and other small mammals, plus birds and their eggs; young snakes also take lizards, small snakes and frogs.", "src": ["adw"]}
+      {
+        "text": "A constrictor that squeezes its prey. Adults eat mostly rodents and other small mammals, plus birds and their eggs; young snakes also take lizards, small snakes and frogs.",
+        "src": [
+          "adw"
+        ]
+      }
     ],
     "reproduction": [
-      {"text": "Females lay about 10 to 30 eggs in early summer, which hatch from July to September. The parents give no care to the eggs or young.", "src": ["idaho", "chatt"]}
+      {
+        "text": "Females lay about 10 to 30 eggs in early summer, which hatch from July to September. The parents give no care to the eggs or young.",
+        "src": [
+          "idaho",
+          "chatt"
+        ]
+      }
     ],
     "conservation": [
-      {"text": "Common and not threatened over most of its range.", "src": ["adw"]}
+      {
+        "text": "Common and not threatened over most of its range.",
+        "src": [
+          "adw"
+        ]
+      }
     ]
   },
   "sources": {
-    "adw": {"title": "Pantherophis guttatus", "publisher": "Animal Diversity Web, University of Michigan", "url": "https://animaldiversity.org/accounts/Pantherophis_guttatus/"},
-    "azan": {"title": "Corn Snake", "publisher": "A-Z Animals", "url": "https://a-z-animals.com/animals/corn-snake/"},
-    "livesci": {"title": "Corn snakes: morphs, colors and other facts", "publisher": "Live Science", "url": "https://www.livescience.com/44008-corn-snakes.html"},
-    "kyiv": {"title": "Corn snake", "publisher": "Kyiv Zoo", "url": "https://zoo.kyiv.ua/en/corn-snake/"},
-    "idaho": {"title": "Corn Snake fact sheet", "publisher": "Idaho Falls Zoo", "url": "https://idahofallsidaho.getanchor.io/DocumentCenter/View/5070/Corn%EF%B9%AA20Snake.pdf"},
-    "chatt": {"title": "Corn Snake", "publisher": "Chattanooga Nature Center", "url": "https://chattnaturecenter.org/visit/experience/wildlife/animal-facts/corn-snake"},
-    "outforia": {"title": "Corn snake", "publisher": "Outforia", "url": "https://outforia.com/corn-snake"}
+    "adw": {
+      "title": "Pantherophis guttatus",
+      "publisher": "Animal Diversity Web, University of Michigan",
+      "url": "https://animaldiversity.org/accounts/Pantherophis_guttatus/"
+    },
+    "azan": {
+      "title": "Corn Snake",
+      "publisher": "A-Z Animals",
+      "url": "https://a-z-animals.com/animals/corn-snake/"
+    },
+    "livesci": {
+      "title": "Corn snakes: morphs, colors and other facts",
+      "publisher": "Live Science",
+      "url": "https://www.livescience.com/44008-corn-snakes.html"
+    },
+    "kyiv": {
+      "title": "Corn snake",
+      "publisher": "Kyiv Zoo",
+      "url": "https://zoo.kyiv.ua/en/corn-snake/"
+    },
+    "idaho": {
+      "title": "Corn Snake fact sheet",
+      "publisher": "Idaho Falls Zoo",
+      "url": "https://idahofallsidaho.getanchor.io/DocumentCenter/View/5070/Corn%EF%B9%AA20Snake.pdf"
+    },
+    "chatt": {
+      "title": "Corn Snake",
+      "publisher": "Chattanooga Nature Center",
+      "url": "https://chattnaturecenter.org/visit/experience/wildlife/animal-facts/corn-snake"
+    },
+    "outforia": {
+      "title": "Corn snake",
+      "publisher": "Outforia",
+      "url": "https://outforia.com/corn-snake"
+    }
   }
 }

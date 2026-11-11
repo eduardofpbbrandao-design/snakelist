@@ -91,7 +91,7 @@
     ],
     "behaviour": [
       {
-        "text": "Swims with its body riding high on the surface, unlike most harmless water snakes. It is reluctant to flee and relies on its gaping threat display, but bites mostly happen when it is stepped on or handled.",
+        "text": "Swims with its body riding high on the surface, unlike most non-venomous water snakes. It is reluctant to flee and relies on its gaping threat display, but bites mostly happen when it is stepped on or handled.",
         "src": [
           "wiki",
           "twra"
@@ -136,7 +136,7 @@
     },
     {
       "id": "nerodia-sipedon",
-      "text": "harmless water snakes are often mistaken for Cottonmouths; they have slimmer heads without facial pits and usually flee into the water.",
+      "text": "non-venomous water snakes are often mistaken for Cottonmouths; they have slimmer heads without facial pits and usually flee into the water.",
       "src": [
         "wiki"
       ]

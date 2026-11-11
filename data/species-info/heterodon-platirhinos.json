@@ -28,7 +28,7 @@
   "sections": {
     "overview": [
       {
-        "text": "The Eastern Hognose Snake is a stout, harmless snake of eastern North America, named for its upturned, shovel-like snout. It is best known for its dramatic bluff: when threatened it spreads its neck like a cobra and hisses, and if that fails it rolls over and plays dead.",
+        "text": "The Eastern Hognose Snake is a stout, non-venomous snake of eastern North America, named for its upturned, shovel-like snout. It is best known for its dramatic bluff: when threatened it spreads its neck like a cobra and hisses, and if that fails it rolls over and plays dead.",
         "src": [
           "wiki",
           "ct"
@@ -63,7 +63,7 @@
     "distribution": [
       {
         "label": "Native",
-        "text": "Much of the eastern and central United States, from New England and southern Ontario south to Florida and west to the Great Plains and Texas. SnakeList's map shows the states and provinces where it is recorded.",
+        "text": "Much of the eastern and central United States, from New England and southern Ontario south to Florida and west to the Great Plains and Texas.",
         "src": [
           "wiki",
           "cosewic"

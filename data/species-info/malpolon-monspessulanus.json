@@ -1,35 +1,119 @@
 {
   "id": "malpolon-monspessulanus",
-  "reviewed": "2026-11-09",
+  "reviewed": "2026-11-11",
   "status": "rich",
   "facts": {
-    "length": {"text": "Up to about 2 m (some sources 2.5 m)", "src": ["wiki"]},
-    "activity": {"text": "By day", "src": ["wiki"]},
-    "diet": {"text": "Mainly lizards", "src": ["wiki", "moroccoherps"]}
+    "length": {
+      "text": "Up to about 2 m (some sources 2.5 m)",
+      "src": [
+        "wiki"
+      ]
+    },
+    "activity": {
+      "text": "By day",
+      "src": [
+        "wiki"
+      ]
+    },
+    "diet": {
+      "text": "Mainly lizards",
+      "src": [
+        "wiki",
+        "moroccoherps"
+      ]
+    }
   },
   "sections": {
     "overview": [
-      {"text": "The Montpellier Snake is a large, fast, day-active snake of the western Mediterranean, very common in Spain and Portugal. It is mildly venomous with fangs at the back of the mouth, but only a few cases of people being envenomed are known.", "src": ["wiki"]}
+      {
+        "text": "The Montpellier Snake is a large, fast, day-active snake of the western Mediterranean, very common in Spain and Portugal. It is mildly venomous with fangs at the back of the mouth, but only a few cases of people being envenomed are known.",
+        "src": [
+          "wiki"
+        ]
+      }
     ],
     "size": [
-      {"label": "Adults", "text": "Sources usually give a maximum of about 2 m; some give up to 2.55 m and 2 kg. Often described as Spain's longest snake.", "src": ["wiki", "snakeradar"]}
+      {
+        "label": "Adults",
+        "text": "Sources usually give a maximum of about 2 m; some give up to 2.55 m and 2 kg. Often described as Spain's longest snake.",
+        "src": [
+          "wiki",
+          "snakeradar"
+        ]
+      }
     ],
     "distribution": [
-      {"label": "Native", "text": "Spain, Portugal and north-western Africa, also reaching the Mediterranean coast of southern France.", "src": ["wiki"]}
+      {
+        "label": "Native",
+        "text": "The Iberian Peninsula, France and Liguria in north-western Italy, and north-western Africa (Morocco and north-western Algeria). Snakes further east, from the Balkans and Anatolia to the Middle East, are now treated as a separate species, *Malpolon insignitus*; where the two meet in eastern Morocco and Algeria is still debated.",
+        "src": [
+          "mangiacotti",
+          "moroccoherps"
+        ]
+      }
     ],
     "behaviour": [
-      {"text": "Active during the day. Like its relatives the sand snakes, it has been seen rubbing its body - both young and adults do this - a habit that may play a part in social life and breeding.", "src": ["wiki", "moroccoherps"]}
+      {
+        "text": "Active during the day. Like its relatives the sand snakes, it has been seen rubbing its body - both young and adults do this - a habit that may play a part in social life and breeding.",
+        "src": [
+          "wiki",
+          "moroccoherps"
+        ]
+      }
     ],
     "diet": [
-      {"text": "Mainly lizards; rodents, other snakes and small birds are also eaten.", "src": ["wiki", "moroccoherps"]}
+      {
+        "text": "Mainly lizards; rodents, other snakes and small birds are also eaten.",
+        "src": [
+          "wiki",
+          "moroccoherps"
+        ]
+      }
     ],
     "taxonomy": [
-      {"text": "It belongs to the family Psammophiidae (sand snakes and allies).", "src": ["moroccoherps"]}
+      {
+        "text": "It belongs to the family Psammophiidae (sand snakes and allies).",
+        "src": [
+          "moroccoherps"
+        ]
+      },
+      {
+        "text": "It was first described in 1804 as *Coluber monspessulanus*, in a work by Johann Hermann published after his death; the name refers to Montpellier.",
+        "src": [
+          "mnhn"
+        ]
+      }
     ]
   },
   "sources": {
-    "wiki": {"title": "Montpellier snake", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Montpellier_snake"},
-    "moroccoherps": {"title": "Malpolon monspessulanus", "publisher": "MoroccoHerps", "url": "https://www.moroccoherps.com/en/?p=3197"},
-    "snakeradar": {"title": "11 facts about the Montpellier snake", "publisher": "Snake Radar", "url": "https://snakeradar.com/?p=2077"}
-  }
+    "wiki": {
+      "title": "Montpellier snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Montpellier_snake"
+    },
+    "moroccoherps": {
+      "title": "Malpolon monspessulanus",
+      "publisher": "MoroccoHerps",
+      "url": "https://www.moroccoherps.com/en/?p=3197"
+    },
+    "snakeradar": {
+      "title": "11 facts about the Montpellier snake",
+      "publisher": "Snake Radar",
+      "url": "https://snakeradar.com/?p=2077"
+    },
+    "mangiacotti": {
+      "title": "Head shape variation in eastern and western Montpellier snakes",
+      "authors": "Mangiacotti, Limongi, Sannolo, Sacchi, Zuffi & Scali",
+      "publisher": "Acta Herpetologica 9(2)",
+      "year": 2014,
+      "url": "https://doi.org/10.13128/Acta_Herpetol-14194"
+    },
+    "mnhn": {
+      "title": "Jean Hermann, l'holotype et le néotype de la Couleuvre de Montpellier, Coluber monspessulanus Hermann, 1804",
+      "publisher": "Zoosystema 39(2), Muséum national d'Histoire naturelle",
+      "year": 2017,
+      "url": "https://sciencepress.mnhn.fr/en/periodiques/zoosystema/39/2/jean-hermann-l-holotype-et-le-neotype-de-la-couleuvre-de-montpellier-coluber-monspessulanus-hermann-1804-reptilia-squamata"
+    }
+  },
+  "authority": "(Hermann, 1804)"
 }

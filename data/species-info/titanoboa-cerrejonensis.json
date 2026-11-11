@@ -1,0 +1,30 @@
+{
+  "id": "titanoboa-cerrejonensis",
+  "reviewed": "2026-11-11",
+  "status": "rich",
+  "authority": "Head, Bloch, Hastings, Bourque, Cadena, Herrera, Polly & Jaramillo, 2009",
+  "facts": {
+    "length": {"text": "About 13 m (estimated from its vertebrae)", "src": ["nature"]}
+  },
+  "sections": {
+    "overview": [
+      {"text": "Titanoboa is an extinct relative of today's boas from the Paleocene of Colombia, known only from fossil vertebrae and ribs. Estimated at about 13 m long and over a tonne, it is the largest snake known.", "src": ["nature"]}
+    ],
+    "fossils": [
+      {"text": "Vertebrae and ribs from the Cerrejón coal mine in north-eastern Colombia, belonging to 28 individuals. It was named in 2009.", "src": ["nature"]}
+    ],
+    "geology": [
+      {"text": "The fossils come from the Cerrejón Formation, dated to about 58 to 60 million years ago (middle to late Paleocene) - some 6 to 8 million years after the non-bird dinosaurs died out.", "src": ["nature"]}
+    ],
+    "size": [
+      {"text": "From the size of its vertebrae, compared with living boas, its describers estimated a body length of about 13 m and a mass of about 1,135 kg. These are estimates, not measurements of a complete skeleton.", "src": ["nature"]}
+    ],
+    "uncertainty": [
+      {"text": "Its describers argued that a snake this large needed a mean annual temperature of at least 30 to 34 °C, so the Paleocene tropics were hotter than today. Other scientists questioned whether today's snakes' temperature limits can be scaled up to Titanoboa, and whether a small sample of backbones shows the species' usual size.", "src": ["nature", "npr"]}
+    ]
+  },
+  "sources": {
+    "nature": {"title": "Giant boid snake from the Palaeocene neotropics reveals hotter past equatorial temperatures", "authors": "Head, Bloch, Hastings, Bourque, Cadena, Herrera, Polly & Jaramillo", "publisher": "Nature 457", "year": 2009, "url": "https://www.nature.com/articles/nature07671"},
+    "npr": {"title": "1-ton snakes once slithered in the tropics", "publisher": "NPR", "year": 2009, "url": "https://www.npr.org/2009/02/05/100262412/1-ton-snakes-once-slithered-in-the-tropics"}
+  }
+}

@@ -24,7 +24,7 @@
     ]
   },
   "similar": [
-    {"id": "natrix-maura", "text": "a harmless water snake that copies viper patterns and behaviour; it lacks the upturned snout and is usually found in or near water.", "src": ["wiki-nm"]}
+    {"id": "natrix-maura", "text": "a non-venomous water snake that copies viper patterns and behaviour; it lacks the upturned snout and is usually found in or near water.", "src": ["wiki-nm"]}
   ],
   "sources": {
     "wiki": {"title": "Vipera latastei", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Vipera_latastei"},

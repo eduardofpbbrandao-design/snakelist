@@ -1,6 +1,6 @@
 {
   "id": "crotalus-atrox",
-  "reviewed": "2026-11-09",
+  "reviewed": "2026-11-11",
   "status": "rich",
   "authority": "Baird & Girard, 1853",
   "facts": {
@@ -31,7 +31,10 @@
       "src": [
         "wiki",
         "pierre"
-      ]
+      ],
+      "scope": "global",
+      "year": 2007,
+      "url": "https://www.iucnredlist.org/species/64311/12763519"
     }
   },
   "sections": {

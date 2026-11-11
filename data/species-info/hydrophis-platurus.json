@@ -1,6 +1,6 @@
 {
   "id": "hydrophis-platurus",
-  "reviewed": "2026-11-09",
+  "reviewed": "2026-11-11",
   "status": "rich",
   "authority": "(Linnaeus, 1766)",
   "facts": {
@@ -30,7 +30,9 @@
       "src": [
         "azan",
         "wiki"
-      ]
+      ],
+      "scope": "global",
+      "year": 2009
     }
   },
   "sections": {
