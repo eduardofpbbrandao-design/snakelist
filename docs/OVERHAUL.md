@@ -66,3 +66,9 @@ Environment limits: iNaturalist, Wikipedia, Wikidata, GBIF and the Reptile Datab
 - Firestore rules in the repo (firestore.rules) only allow users/{uid}; the Cameras layer writes to cams/ - either the deployed rules differ or adding a camera fails in production. Not changed here (needs the Firebase console).
 - E: "Harmless" filter renamed "Low risk" (non-venomous is not a promise a snake cannot bite).
 - E: About page photo total now computed from the photo index (was "about 3,100 of the 4,254").
+
+## Simplification round (Eduardo's review)
+- Sightings: one button (muted teal when on), one set of same-size dots, numbered groups that zoom in or list. No bar, Options, Load more, dot key or Cameras button; the newest 600 in view load by themselves. One compact card: the sighting's own photo (opened only once it has loaded), name, date, observer, "View original observation", and More details (photo credit, licence, place, identification). "No photo available for this sighting." Heatmap's own switch now says "Where seen".
+- 3D: a small "3D" button in the map's bottom-right corner only turns 3D mode on/off (no panel). With it on, a species row opens that snake's box over the map, with a 3D action when a model exists; the model opens in the map area with "Back to map" (zoom, place and box kept).
+- Also: no "+ N fossil or extinct" line under the map; the countries/territories counts are plain text again; Antarctica's hover label said "World Map" (now "Antarctica"); "Clear" sits next to "Close"; the Heatmap map style has no subtitle.
+- Tests: map-sightings 54/54, sightings-card 21/21 (was sightings-bar), sightings-empty-search 10/10, wd-authority 23/23, map-3d-mode 42/42 (desktop + phone).

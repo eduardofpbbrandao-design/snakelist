@@ -4,9 +4,11 @@
 // follow the documented API v1 shape of /observations (list, bounding box, paging, total_results)
 // and /observations/{id}. Covers: one marker = one observation id, the right record and photos per
 // marker, no stale photo after a quick second tap, no substitute photo, failures + Retry, deleted
-// records, dedupe across pages, Load more, a species change while loading, clusters, Most/Fewest
-// (ties, zeros), fossils kept out of living counts, Close vs Clear selection, Reset view, the
-// Cameras layer, and the map state coming back after a species page.
+// records, dedupe across pages, the newest pages loading by themselves (no Load more), a species
+// change while loading, clusters, the v4.63 one-button layer (no bar, options, key or Cameras button)
+// and compact card (photo, name, date, observer, one link, More details), Most/Fewest (ties, zeros),
+// fossils kept out of living counts, Close vs Clear selection, Reset view, and the map state coming
+// back after a species page.
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const PORT = process.env.PORT || 8766, BASE = 'http://localhost:' + PORT + '/';
 const SHOTS = process.argv[2] || null;
@@ -114,6 +116,8 @@ async function route(r) {
     await p.waitForTimeout(150); await p.mouse.click(r[0] + x, r[1] + y); };
   const panelText = p => p.evaluate(() => { const s = document.getElementById('sg-pop'); return s.hidden ? '' : s.innerText; });
   const panelImgs = p => p.evaluate(() => [].map.call(document.querySelectorAll('#sg-pop .sg-ph img'), i => i.getAttribute('src')));
+  // the observation the open card belongs to: read from its one "View original observation" link
+  const cardId = p => p.evaluate(() => { const s = document.getElementById('sg-pop'), a = s.querySelector('a.sg-orig'); const m = !s.hidden && a && a.href.match(/observations\/(\d+)/); return m ? +m[1] : null; });
 
   // ================= desktop, light =================
   let { ctx, p, errs } = await run({ width: 1280, height: 900 }, 'light');
@@ -121,31 +125,18 @@ async function route(r) {
   await shot(p, 'desktop-light-sightings-off', '#globe-stage');
   await p.click('#sg-toggle'); await p.waitForTimeout(2500);
   let d = await dbg(p);
-  const firstList = M.listUrls[M.listUrls.length - 1] || '';
+  const firstList = M.listUrls.find(u => /[?&]page=1$/.test(u)) || '';
   ok(/swlat=/.test(firstList) && /nelng=/.test(firstList) && /per_page=200/.test(firstList) && /page=1/.test(firstList), 'sightings load for the view (bounding box), 200 per page');
-  ok(d.n === 200 && d.total === 450, 'first page: 200 observations of 450 (' + d.n + ' of ' + d.total + ')');
-  let bar = await p.evaluate(() => document.getElementById('sg-bar').innerText);
-  ok(/200 observations on the map/.test(bar) && /newest 200 of 450/.test(bar), 'the bar says "N of M" honestly: ' + bar.replace(/\s+/g, ' '));
-  ok(!/live/i.test(bar), 'the bar never calls the records live');
+  await p.waitForTimeout(2500); d = await dbg(p);
+  ok(d.n === 450 && new Set(d.ids).size === d.ids.length && M.listUrls.some(u => /page=2/.test(u)) && M.listUrls.some(u => /page=3/.test(u)),
+    'the newest pages load by themselves, no duplicate ids (' + d.n + ' of ' + d.total + ')');
+  ok(await p.evaluate(() => !document.querySelector('#sg-bar, #sg-opts, #sg-opt-btn, #sg-more, #sg-key, #sg-dock, #cam-toggle, #cam-key:not([hidden])')),
+    'one button, one set of dots: no Sightings bar, options, Load more, key or Cameras button');
+  ok(await p.evaluate(() => !/Sightings/.test(document.getElementById('hm-measure').textContent)), 'the heatmap has no second "Sightings" switch');
   ok(await p.evaluate(() => document.getElementById('sg-toggle').innerText.trim()) === 'Sightings', 'the button label is just "Sightings"');
-  ok(await p.evaluate(() => getComputedStyle(document.getElementById('sg-toggle')).backgroundColor) === 'rgb(11, 106, 99)', 'Sightings on: deep teal, not red');
-  ok(await p.evaluate(() => !document.querySelector('#sg-key input, #cam-key input')), 'no tick boxes in the legends (one toggle per layer)');
-  ok(await p.evaluate(() => document.querySelectorAll('#sg-toggle').length === 1 && !document.querySelector('.sg-key2')), 'one Sightings toggle only');
+  ok(await p.evaluate(() => getComputedStyle(document.getElementById('sg-toggle')).backgroundColor) === 'rgb(61, 124, 117)', 'Sightings on: muted teal');
+  ok(await p.evaluate(() => document.querySelectorAll('#sg-toggle').length === 1), 'one Sightings toggle only');
   await shot(p, 'desktop-light-sightings-on', '#globe-stage');
-  // Load more: page 2 overlaps page 1 by 20 ids -> deduped
-  await p.click('#sg-more'); await p.waitForTimeout(1500);
-  d = await dbg(p);
-  ok(new Set(d.ids).size === d.ids.length, 'no duplicate observation ids after Load more (' + d.ids.length + ')');
-  ok(d.n === 380 && d.page === 2, 'Load more added page 2 without the 20 repeated ids (' + d.n + ')');
-  ok(M.listUrls.some(u => /page=2/.test(u)), 'Load more asked for &page=2');
-  // options panel
-  await p.click('#sg-opt-btn'); await p.waitForTimeout(300);
-  ok(await p.evaluate(() => !document.getElementById('sg-opts').hidden && /Observed/.test(document.getElementById('sg-opts').textContent)), 'options panel opens with the date range');
-  await shot(p, 'desktop-light-options', '#globe-stage');
-  await p.check('#sg-opts input[value="y1"]'); await p.waitForTimeout(1500);
-  ok(/&d1=\d{4}-\d{2}-\d{2}/.test(M.listUrls[M.listUrls.length - 1]), 'a date range adds d1= to the request');
-  await p.check('#sg-opts input[value="any"]'); await p.waitForTimeout(1500);
-  await p.keyboard.press('Escape');
   // the right record per marker: tap single dots, compare the panel with the marker's own id
   await p.evaluate(() => window.SL_FLY_BOX(-9, -8, 39, 40)); await p.waitForTimeout(1500);
   d = await dbg(p);
@@ -154,29 +145,36 @@ async function route(r) {
   for (const dot of d.dots.slice(0, 3)) {
     await cvClick(p, dot.x, dot.y); await p.waitForTimeout(700);
     const t = await panelText(p), im = await panelImgs(p);
-    const okRec = t.includes('Observation #' + dot.id) && t.includes('Observer ' + dot.id) && (im.length ? im[0].includes('/photos/' + dot.id + '-0/medium.') : /No photo available/.test(t));
+    const okRec = (await cardId(p)) === dot.id && t.includes('Seen by Observer ' + dot.id) && im.length === 1 && im[0].includes('/photos/' + dot.id + '-0/medium.');
     if (okRec) good++; else console.log('   wrong panel for', dot.id, t.slice(0, 200), im);
   }
   ok(good === 3, 'each marker opens its own observation (id, observer, its own photo)');
   const t1 = await panelText(p);
-  ok(/Observed/.test(t1) && /Lisbon time/.test(t1) && /Uploaded/.test(t1) && /Quality/.test(t1) && /Place of/.test(t1), 'panel: observed date+time with time zone, uploaded date, quality, locality');
-  ok(/CC BY-NC/.test(t1) && /\(c\) Observer/.test(t1), 'panel: photo attribution and licence');
-  ok(await p.evaluate(() => [].some.call(document.querySelectorAll('#sg-pop a'), a => /inaturalist\.org\/observations\/\d+/.test(a.href)) && [].some.call(document.querySelectorAll('#sg-pop a'), a => /species\//.test(a.href))), 'panel: link to the observation and a separate SnakeList species link');
+  const card = await p.evaluate(() => { const s = document.getElementById('sg-pop'), det = s.querySelector('details.sg-det');
+    return { links: [].map.call(s.querySelectorAll('a'), a => a.textContent.trim()), name: (s.querySelector('.sg-name') || {}).textContent, det: det ? det.textContent : '', open: det ? det.open : null,
+      shown: s.innerText, done: [].every.call(s.querySelectorAll('img'), i => i.complete && i.naturalWidth > 0) }; });
+  ok(card.name === 'Viperine Water Snake' || card.name === "Lataste's Viper", 'card: the snake\'s name (' + card.name + ')');
+  ok(/2024/.test(t1) && /May/.test(t1) && /Seen by Observer/.test(t1), 'card: the date observed and the observer');
+  ok(card.links.length === 1 && card.links[0] === 'View original observation', 'card: one link, "View original observation" (' + card.links.join(', ') + ')');
+  ok(card.open === false && /CC BY-NC/.test(card.det) && /\(c\) Observer/.test(card.det) && /Place of/.test(card.det) && /Identified to species/.test(card.det) && !/CC BY-NC|Place of/.test(card.shown),
+    'card: photo credit, licence, place and identification sit under More details (closed)');
+  ok(card.done, 'card: it opens with its photo already loaded');
   await shot(p, 'desktop-light-observation', '#globe-stage');
   // no stale photo: A is slow, B is quick; the panel must end on B, and never show A's photo
   const A = d.dots[3], B = d.dots[4];
   M.slowIds[A.id] = 2000;
   await cvClick(p, A.x, A.y); await p.waitForTimeout(150);
-  ok(/Loading observation/.test(await panelText(p)) && (await panelImgs(p)).length === 0, 'a new tap empties the panel and shows Loading (no old photo)');
+  ok(await p.evaluate(() => document.getElementById('sg-pop').hidden && /Loading sighting/.test(document.getElementById('sg-note').textContent)) && (await panelImgs(p)).length === 0,
+    'a new tap closes the open card at once (no old photo or details) and says Loading');
   await cvClick(p, B.x, B.y); await p.waitForTimeout(2600);
   let tB = await panelText(p), imB = await panelImgs(p);
-  ok(tB.includes('#' + B.id) && !tB.includes('#' + A.id) && imB.every(s => !s.includes('/photos/' + A.id + '-')), 'the slow answer for the first tap is ignored (panel shows ' + B.id + ')');
+  ok((await cardId(p)) === B.id && tB.includes('Observer ' + B.id) && imB.length === 1 && imB[0].includes('/photos/' + B.id + '-'), 'the slow answer for the first tap is ignored (card shows ' + B.id + ' with its own photo)');
   // no substitute photo
   const C = d.dots[5]; M.noPhoto[C.id] = 1;
   await cvClick(p, C.x, C.y); await p.waitForTimeout(800);
-  ok(/No photo available for this observation/.test(await panelText(p)) && (await panelImgs(p)).length === 0 && !M.defaultPhotoAsked, 'no photo: says so, and no species/default photo is used');
+  ok(/No photo available for this sighting\./.test(await panelText(p)) && (await panelImgs(p)).length === 0 && !M.defaultPhotoAsked, 'no photo: says so, and no species/default photo is used');
   // a photo that fails to load: message + Retry, no other picture
-  const Dd = d.dots[6]; M.brokenPhoto[Dd.id] = 1;
+  const Dd = d.dots[6]; M.brokenPhoto[Dd.id] = 2; // the card waits for the photo once, then shows it failed
   await cvClick(p, Dd.x, Dd.y); await p.waitForTimeout(900);
   ok(/This photo couldn.t load/.test(await panelText(p)), 'a broken photo says so, with Retry');
   await p.click('#sg-pop .sg-ph-retry'); await p.waitForTimeout(700);
@@ -184,12 +182,12 @@ async function route(r) {
   // detail request fails -> Retry
   const E = d.dots[7]; M.failOnce[E.id] = 1;
   await cvClick(p, E.x, E.y); await p.waitForTimeout(900);
-  ok(/Couldn.t load this observation/.test(await panelText(p)), 'a failed observation request shows an error with Retry');
+  ok(/Couldn.t load this sighting/.test(await panelText(p)), 'a failed observation request shows an error with Retry');
   await p.click('#sg-pop .sg-retry2'); await p.waitForTimeout(900);
-  ok((await panelText(p)).includes('Observation #' + E.id), 'Retry loads the observation');
+  ok((await cardId(p)) === E.id, 'Retry loads the observation');
   // cached: a second open makes no new request
   const nDet = M.detailUrls.length; await cvClick(p, B.x, B.y); await p.waitForTimeout(400);
-  ok(M.detailUrls.length === nDet && (await panelText(p)).includes('#' + B.id), 'observations are cached by id');
+  ok(M.detailUrls.length === nDet && (await cardId(p)) === B.id, 'observations are cached by id');
   // deleted record
   const G = d.dots[8]; M.gone[G.id] = 1; const nBefore = (await dbg(p)).n;
   await cvClick(p, G.x, G.y); await p.waitForTimeout(900);
@@ -206,9 +204,9 @@ async function route(r) {
   const stackC = d.clusters.find(c => c.n >= 6);
   ok(!!stackC, 'observations at one exact spot stay one cluster at close zoom');
   if (stackC) { await cvClick(p, stackC.x, stackC.y); await p.waitForTimeout(500); }
-  ok(/observations at this exact spot/.test(await panelText(p)), 'tapping a cluster that cannot split lists its observations');
+  ok(/6 sightings here - pick one/.test(await panelText(p)), 'tapping a numbered group that cannot split lists its sightings to pick from');
   await p.click('#sg-pop [data-oid]'); await p.waitForTimeout(800);
-  ok(/Observation #9000\d/.test(await panelText(p)), 'picking one from the list opens it');
+  ok((await cardId(p)) >= 90000, 'picking one from the list opens it');
   await p.click('#sg-pop .sg-x'); M.stack = {};
   // list failure + Retry
   M.listMode = 'fail'; await p.evaluate(() => window.SL_FLY_BOX(-9.5, -7, 38, 40)); await p.waitForTimeout(3500);
@@ -223,7 +221,7 @@ async function route(r) {
   await p.fill('#heat-search', 'Vipera latastei'); await p.keyboard.press('Enter'); await p.waitForTimeout(4500);
   d = await dbg(p);
   ok(d.n > 0 && d.ids.every(id => id >= 50000), 'after changing species mid-load, only the new species is on the map');
-  ok(/Lataste/.test(await p.evaluate(() => document.getElementById('sg-what').textContent)), 'the bar names the species shown');
+  ok(/Lataste/.test((await dbg(p)).what), 'the layer is for the species searched');
   M.listDelay = 0;
   // hit testing after full screen and a resize: the tapped dot is still the one opened
   await p.click('#globe-full'); await p.waitForTimeout(1200);
@@ -232,21 +230,10 @@ async function route(r) {
   const cvs = await p.evaluate(() => { const c = document.getElementById('globe').getBoundingClientRect(); return [c.width, c.height]; });
   const mid = d.dots.find(o => o.x > cvs[0] * 0.35 && o.x < cvs[0] * 0.65 && o.y > cvs[1] * 0.45 && o.y < cvs[1] * 0.75);
   if (mid) { await cvClick(p, mid.x, mid.y); await p.waitForTimeout(900); }
-  ok(mid && (await panelText(p)).includes('#' + mid.id), 'after full screen + resize, a tap opens the dot under it');
+  ok(mid && (await cardId(p)) === mid.id, 'after full screen + resize, a tap opens the dot under it');
   const edge = await p.evaluate(() => { const s = document.getElementById('sg-pop').getBoundingClientRect(), g = document.getElementById('globe-stage').getBoundingClientRect(); return s.left >= g.left - 1 && s.right <= g.right + 1 && s.top >= g.top - 1 && s.bottom <= g.bottom + 1; });
   ok(edge, 'the observation panel stays inside the map');
   await p.evaluate(() => { const x = document.querySelector('#sg-pop .sg-x'); if (x) x.click(); }); await p.click('#globe-full'); await p.setViewportSize({ width: 1280, height: 900 }); await p.waitForTimeout(800);
-  // Cameras layer
-  await p.fill('#heat-search', ''); await p.keyboard.press('Escape'); await p.waitForTimeout(800);
-  await p.evaluate(() => window.SL_FLY_BOX(-10, -6, 37, 42.2)); await p.waitForTimeout(800);
-  await p.click('#cam-toggle'); await p.waitForTimeout(800);
-  ok(await p.evaluate(() => !document.getElementById('cam-key').hidden && /3 cameras added by SnakeList users/.test(document.getElementById('cam-key').innerText)), 'Cameras is its own layer with its own key and source');
-  const camTxt = await p.evaluate(() => document.getElementById('cam-key').innerText);
-  ok(!/\blive\b/i.test(camTxt) && /not checked/.test(camTxt), 'camera key never claims a camera is live');
-  await shot(p, 'desktop-light-cameras', '#globe-stage');
-  await p.click('#sg-toggle'); await p.waitForTimeout(400);
-  ok(await p.evaluate(() => window.SL_CAMS_ON() && !window.SL_SG_ON()), 'Cameras stay on when Sightings goes off (separate layers)');
-  await p.click('#cam-toggle');
   console.log('  page errors:', errs);
   ok(!errs.length, 'no page errors (desktop)');
   await ctx.close();
@@ -312,16 +299,11 @@ async function route(r) {
     await p.evaluate(() => window.SL_FLY_BOX(-10, -6, 37, 42.2)); await p.waitForTimeout(500);
     await p.evaluate(() => document.getElementById('sg-toggle').click()); await p.waitForTimeout(2500);
     await shot(p, nm + '-sightings', '#globe-stage');
-    await p.evaluate(() => document.getElementById('sg-opt-btn').click()); await p.waitForTimeout(300);
-    await shot(p, nm + '-options', '#globe-stage');
-    await p.evaluate(() => document.getElementById('sg-opt-btn').click());
     await p.evaluate(() => window.SL_FLY_BOX(-9, -8, 39, 40)); await p.waitForTimeout(1500);
     const dd = await dbg(p);
     if (dd.dots[0]) { await p.evaluate(x => window.SL_MAP_TAP(x.x, x.y), dd.dots[0]); await p.waitForTimeout(900); }
     await shot(p, nm + '-observation', vp.width < 600 ? null : '#globe-stage');
     await p.evaluate(() => document.querySelector('#sg-pop .sg-x') && document.querySelector('#sg-pop .sg-x').click());
-    await p.evaluate(() => { window.SL_FLY_BOX(-10, -6, 37, 42.2); document.getElementById('cam-toggle').click(); }); await p.waitForTimeout(1200);
-    await shot(p, nm + '-cameras', '#globe-stage');
     ok(!errs.length, 'no page errors (' + nm + ')' + (errs.length ? ' ' + errs : ''));
     await ctx.close();
   }

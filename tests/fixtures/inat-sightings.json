@@ -1,5 +1,5 @@
 {
- "_about": "Made-up observations in the iNaturalist API v1 /observations shape (not real records), for tests/sightings-bar.js: a 4 x 3 grid over central Portugal; 7005 has no photo.",
+ "_about": "Made-up observations in the iNaturalist API v1 /observations shape (not real records), for tests/sightings-card.js: a 4 x 3 grid over central Portugal; 7005 has no photo.",
  "results": [
   {
    "id": 7001,

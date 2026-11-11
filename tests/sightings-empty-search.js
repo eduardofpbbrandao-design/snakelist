@@ -13,7 +13,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1;};
   return r.abort();});
  await p.addInitScript(()=>{localStorage.setItem('sl-consent','essential');localStorage.setItem('sl-tour-seen','1');localStorage.setItem('sl-news-off','1');});
  await p.goto('http://localhost:'+(process.env.PORT||9017)+'/index.html?tab=map',{waitUntil:'load'});await p.waitForFunction(()=>window.SL_MAP_GEO_DONE,null,{timeout:60000}).catch(()=>{});await p.waitForTimeout(2500);
- const state=()=>p.evaluate(()=>({what:(document.getElementById('sg-what')||{}).textContent,note:(document.getElementById('sg-note')||{}).hidden?'':(document.getElementById('sg-note')||{}).textContent}));
+ const state=()=>p.evaluate(()=>({what:window.SL_SG_DEBUG().what,note:(document.getElementById('sg-note')||{}).hidden?'':(document.getElementById('sg-note')||{}).textContent}));
  const search=async q=>{await p.fill('#heat-search',q);await p.keyboard.press('Enter');await p.waitForTimeout(2500);};
  await search('Burmese python');
  await p.click('#sg-toggle');await p.waitForTimeout(3000);
@@ -23,7 +23,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1;};
  const n0=obs.length;await search('zzzznotasnake');await p.waitForTimeout(1500);s=await state();console.log('  nonsense:',JSON.stringify(s));
  ok(!/all snakes/.test(s.what),'nonsense search does NOT say "all snakes" ('+s.what+')');
  ok(!obs.slice(n0).some(u=>/taxon_id=85553/.test(u)),'nonsense search does NOT load every snake\'s sightings');
- ok(/No snake matches/.test(s.note),'it explains why there are no dots');
+ ok(/No snakes match/.test(s.note),'it explains why there are no dots');
  const dots=await p.evaluate(()=>window.SL_SG_COUNT?window.SL_SG_COUNT():-1);ok(dots===0,'no sighting markers left on the map ('+dots+')');
  // filter combination with zero matches: family Pythonidae + search "cobra"
  await search('cobra');
