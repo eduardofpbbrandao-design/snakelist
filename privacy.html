@@ -85,12 +85,12 @@ p, li { color: var(--text); overflow-wrap: break-word; }
 <main id="main"><div class="page"><nav class="crumbs" aria-label="Breadcrumb"><a href="./">SnakeList</a><span aria-hidden="true">/</span><span aria-current="page">Privacy policy</span></nav>
 <div class="card doc">
 <h1>Privacy policy</h1>
-<p class="updated">Last updated 8 November 2026</p>
+<p class="updated">Last updated 11 November 2026</p>
 <p>SnakeList (snakelist.com) is a free snake checklist, map and quiz made by Eduardo Brandao. This page explains what SnakeList keeps on your device, what reaches other services when you use it, and how to remove it.</p>
-<nav class="toc" aria-label="On this page"><a href="#device">On your device</a><a href="#analytics">Cookies and visit counting</a><a href="#google">Sign in with Google</a><a href="#accounts">SnakeList accounts</a><a href="#camera">Camera and location</a><a href="#services">Other services</a><a href="#email">Reports and photos</a><a href="#remove">Removing your data</a></nav>
+<nav class="toc" aria-label="On this page"><a href="#device">On your device</a><a href="#analytics">Cookies and visit counting</a><a href="#google">Sign in with Google</a><a href="#accounts">SnakeList accounts</a><a href="#cams">Trail cameras</a><a href="#camera">Camera and location</a><a href="#services">Other services</a><a href="#email">Reports and photos</a><a href="#remove">Removing your data</a></nav>
 
 <h2 id="device">What stays on your device</h2>
-<p>Your lists (Seen, Want to see, Following, favourites), the notes, dates, places and photos you add to sightings, your settings, quiz progress and achievements are saved in your own browser on your own device. If you make more than one account on a device, each one's list is kept separately on that device. SnakeList has no server of its own and no database of users, so the creator can't see your list.</p>
+<p>Your lists (Seen, Want to see, Following, favourites), the notes, dates, places and photos you add to sightings, your settings, quiz progress and achievements are saved in your own browser on your own device. If you make more than one account on a device, each one's list is kept separately on that device. SnakeList has no server of its own: unless you make a SnakeList account (see below), your list is only on your device, so the creator can't see it.</p>
 
 <h2 id="analytics">Cookies and visit counting</h2>
 <p>On snakelist.com, SnakeList uses <b>Google Analytics</b> to count visits and see which parts are used. The first time you visit, SnakeList asks about cookies:</p>
@@ -108,6 +108,8 @@ p, li { color: var(--text); overflow-wrap: break-word; }
 <h2 id="accounts">SnakeList accounts (email and password)</h2>
 <p>You can also make a SnakeList account with an email address and a password. These accounts run on Google Firebase. Firebase Authentication keeps your email address, the name you type and a scrambled (hashed) form of your password &ndash; never the password itself. Your list (seen, want to see, followed, dates and places) is saved in a Firebase database so it can sync between your devices. The database rules only let you, while signed in, read or change your own list; nobody else using SnakeList can see it. As the owner of the Firebase project the creator could technically open it, but does not look at people's lists. Your own photos stay on your device and are not uploaded with an email account.</p>
 <p>To delete your SnakeList account and its saved list, email the creator (see Contact below) from the address you signed up with.</p>
+<h2 id="cams">Trail cameras you add to the map</h2>
+<p>With a SnakeList account you can add a trail camera to the map's Cameras layer. What you fill in &ndash; its title, its place (rounded to about 1 km), the snake photos and video links you add, and your name only if you tick &ldquo;Show my name&rdquo; &ndash; is saved in SnakeList's Firebase database. A new camera is only shown to everyone after the creator has checked and approved it. You can edit or delete your camera and its photos on the map at any time.</p>
 <h2 id="camera">Camera and location</h2>
 <ul>
 <li><b>Snake photos you identify</b> are looked at by a recogniser that runs inside your browser. The photo is not uploaded.</li>
@@ -115,7 +117,7 @@ p, li { color: var(--text); overflow-wrap: break-word; }
 </ul>
 
 <h2 id="services">Other services SnakeList loads from</h2>
-<p>Some parts of SnakeList come live from other services. Your browser asks them directly, so like any website they receive your IP address and basic browser information, plus what is needed for the request, and handle it under their own privacy policies:</p>
+<p>Some parts of SnakeList are loaded from other services while you use it. Your browser asks them directly, so like any website they receive your IP address and basic browser information, plus what is needed for the request, and handle it under their own privacy policies:</p>
 <ul>
 <li><b>iNaturalist</b> &ndash; snake photos, sightings (people's shared observations) in the part of the map you're looking at, conservation status and nearby species. The request includes the species or map area concerned.</li>
 <li><b>Wikipedia</b> &ndash; the short description on species pages.</li>
@@ -134,7 +136,8 @@ p, li { color: var(--text); overflow-wrap: break-word; }
 
 <h2 id="remove">Removing your data</h2>
 <ul>
-<li>Your lists and settings: clear SnakeList's site data in your browser, or uninstall the installed app. (This deletes your list on that device, so sign in first if you want a copy in your Google Drive.)</li>
+<li>Your lists and settings: clear SnakeList's site data in your browser, or uninstall the installed app. (This deletes your list on that device, so sign in or use &ldquo;Download a backup&rdquo; first if you want to keep a copy.)</li>
+<li>A trail camera you added: delete it on the map, or email the creator.</li>
 <li>Your SnakeList account (email and password): email the creator from that address and it will be deleted with its list.</li>
 <li>Your Google Drive copy and SnakeList's access: <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>.</li>
 </ul>

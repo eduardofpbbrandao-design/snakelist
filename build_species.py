@@ -499,7 +499,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     def plist(L, n=6):
         L = list(L)
         if len(L) <= 1: return "".join(L)
-        return (", ".join(L[:-1]) + " and " + L[-1]) if len(L) <= n else ", ".join(L[:n]) + " and %d more" % (len(L) - n)
+        return (", ".join(L[:-1]) + " and " + L[-1]) if len(L) <= n + 1 else ", ".join(L[:n]) + " and %d more" % (len(L) - n)
     # photos that came with the photographer's name printed on them: SnakeList keeps a cleaned
     # copy (the name cropped off; the credit is shown under the photo), used instead of the original
     CLEANED = set(['0-9', '102-12', '104-7', '108-7', '109-3', '16-19', '16-2', '21-20', '22-14', '24-12', '28-13', '29-19', '3-2', '33-4', '35-23', '40-12', '40-7', '43-24', '43-8', '49-22', '50-10', '50-14', '50-6', '61-10', '61-18', '61-2', '69-4', '7-9', '72-1', '80-16', '88-10', '9-5', '93-9', '97-2', '97-7', '98-5'])
@@ -667,7 +667,9 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         icodes, dots, ishapes, iboxes = [], [], [], []
         for x in inv:
             cc = x["code"] or iso.get(x["name"], "")
-            rows.append("<li><b>Introduced:</b> %s%s</li>" % (esc(x["note"]) + " (" + place(x["name"]) + ")" if x.get("note") else place(x["name"]),
+            # the same word as the summary and key facts: "Invasive" only where a cited source says so
+            lab = "Invasive" if any(y["status"] == "invasive" and y["area"] == (x.get("note") or x["name"]) for y in IST) else "Introduced"
+            rows.append("<li><b>" + lab + ":</b> %s%s</li>" % (esc(x["note"]) + " (" + place(x["name"]) + ")" if x.get("note") else place(x["name"]),
                         "" if x.get("note") or not x["name"] in NONSOV else ' <small class="sp-terr">territory</small>'))
             rg = region(cc, x.get("states") or []) if cc and x.get("states") else None
             if rg:  # only the states/provinces it was brought to, not the whole country
@@ -795,6 +797,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             if F.get("venom"): vt = fact("venom")
             elif c["venom"]: vt = "Venomous &ndash; dangerous to people" if hm == "harmful" else "Mildly venomous &ndash; no serious bites to people documented"
             else: vt = "Not venomous &ndash; but big enough to injure people" if hm == "harmful" else "Not venomous to people &ndash; it can still bite"
+            if gone and not F.get("venom"): vt = "Venomous" if c["venom"] else "Not venomous"  # an extinct snake bites nobody now
             kf.append(("Venom", vt))
             kf.append(("Adult length", fact("length") or UNK))
             kf.append(("Diet", fact("diet") or UNK))
@@ -950,6 +953,11 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if syn and syn.get("names"):
             tx += '<details class="sp-det"><summary>Other scientific names it has had (%d)</summary><ul>%s</ul>%s</details>' % (
                 len(syn["names"]), "".join("<li>%s</li>" % R.rich(s) for s in syn["names"]), ('<p class="sp-note">Source%s</p>' % R.cite(syn.get("src"))) if syn.get("src") else "")
+        if not c["fossil"]:  # the Reptile Database keeps the older names (synonyms) with who used them and when: point there
+            g1, _, s1 = sci.partition(" ")
+            tx += ('<p class="sp-note">%s <a href="https://reptile-database.reptarium.cz/species?genus=%s&amp;species=%s" rel="noopener">The Reptile Database</a> '
+                   'keeps a list of its older scientific names, with who used them and when.</p>') % (
+                "For more," if syn and syn.get("names") else "SnakeList doesn&rsquo;t list its older scientific names.", quote(g1), quote(s1.split(" ")[0]))
         secs.append(("taxonomy", "Taxonomy", tx))
         # sources: the numbered references, the photo, where to look further, provenance and the dates
         src = ""
@@ -976,7 +984,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
                 '%s<li id="sp-wdprov">%s</li></ul></details>') % (
             "<li>Facts with numbered references come from the reviewed species account; anything the sources do not cover is shown as &ldquo;Not known&rdquo;.</li>" if info else "",
             ("Who described it: from the authority %s%s." % (esc(am[0]), " in the reviewed account" if (info and info.get("authority")) else " (checked by SnakeList)")) if am else
-            "Who described it: no checked authority on file; Wikidata is asked in your browser and its answer is shown only if it passes basic checks.")
+            "Who described it: SnakeList has no checked record yet, so a name from Wikidata is shown only if it passes basic checks.")
         src += '<p class="sp-dates">%s<span>Page generated %s</span></p>' % (
             ('<span>Information last reviewed %s</span>' % fmt_date(info["reviewed"])) if info and info.get("reviewed") else "", GEN_MARK)
         secs.append(("sources", "Sources", src))
@@ -1024,7 +1032,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             cities_json=esc(json.dumps([[round(t[3], 2), round(t[4], 2), t[0]] for t in cities], ensure_ascii=False)),
             cities_list=('<div class="sp-cities"><h3>Cities in its range</h3><p class="sp-note">Big cities inside the states and provinces where it is recorded - not individual sightings.</p><ul class="sp-where">%s</ul></div>' % "".join(
                 "<li>%s <small>%s</small></li>" % (esc(t[0]), esc(t[1])) for t in cities)) if cities and not c["fossil"] else "",
-            states=('<details class="sp-states sp-det"><summary>States, provinces and islands where it is recorded</summary><p class="sp-note">More detail than the countries, but still approximate. The number after each place is how many snake species SnakeList records there <b>in all</b>, not how many records there are of this snake.</p><ul class="sp-where">%s</ul></details>' % "".join(st_rows)) if (st_rows or ns) and not c["fossil"] else "",
+            states=('<details class="sp-states sp-det"><summary>States, provinces and islands where it %s recorded</summary><p class="sp-note">More detail than the countries, but still approximate. The number after each place is how many snake species SnakeList records there <b>in all</b>, not how many records there are of this snake.</p><ul class="sp-where">%s</ul></details>' % ("was" if gone else "is", "".join(st_rows))) if (st_rows or ns) and not c["fossil"] else "",
             codes=esc(" ".join(codes)), intro_codes=esc(" ".join(icodes)),
             ishapes="".join('<path class="in" d="%s"/>' % d for d in ishapes),
             dots=esc(" ".join("%.1f,%.1f,%s,%.2g" % ((lo + 180) * 4, (90 - la) * 4, k, sz) for lo, la, k, sz in dots)),
@@ -1038,7 +1046,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             realbtn="" if c["fossil"] else '<button type="button" class="sp-btn sp-btn2 sp-realbtn" aria-haspopup="dialog">Explore in 3D</button>',
             lenattr=len_attr(info),
             mapnote=('<p class="sp-note sp-mapnote">%s</p>' % ("The shaded country is where its fossils were found &ndash; not a living range." if c["fossil"] else
-                     "Shaded countries are those where it %s recorded &ndash; it does not live everywhere inside them." % ("was" if gone else "is")))
+                     ("Shaded countries are those where it was recorded &ndash; it did not live everywhere inside them." if gone else
+                      "Shaded countries are those where it is recorded &ndash; it does not live everywhere inside them.")))
                     if codes or icodes or ishapes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
         page = page.replace(GEN_MARK, fmt_date(dates.get(page_name(c), page)))
         open("%s/%s.html" % (OUT, page_name(c)), "w", encoding="utf-8").write(page)
@@ -1291,10 +1300,10 @@ CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:center;widt
 .sx-chips a{display:inline-block;padding:4px 11px;border-radius:999px;border:1px solid var(--tagline);background:var(--tag);color:var(--text);text-decoration:none;font-size:13px}.sx-chips small{color:var(--muted)}
 .sx-searching #by-country,.sx-searching #by-family,.sx-searching .sx-chips{display:none}.sx-fam{scroll-margin-top:12px}.sx-fam h2 a{color:inherit}
 .sp-hubs{columns:3 200px;column-gap:24px;padding:0;list-style:none}.sp-hubs li{break-inside:avoid;margin:2px 0}
-:root{--bg:#f1f6ee;--card:#fbfdf9;--text:#183020;--muted:#55705b;--line:#d5e4cf;--g:#58b351;--land:#d7dccb;--on:#58b351;--in:#e07a1f;--sea:#e3ecef;--tag:#e3f0dc;--tagline:#a9cf9c}
-@media (prefers-color-scheme:dark){:root{--bg:#22623f;--card:#256846;--text:#eef6ee;--muted:#b5d4bf;--line:#37855f;--g:#58b351;--land:#3a7c5a;--on:#58b351;--in:#f0a04b;--sea:#1b5034;--tag:#2c7a57;--tagline:#4a9a6c}}
+:root{--bg:#f1f6ee;--card:#fbfdf9;--text:#183020;--muted:#55705b;--line:#d5e4cf;--g:#58b351;--land:#d7dccb;--on:#58b351;--in:#e07a1f;--sea:#e3ecef;--tag:#e3f0dc;--tagline:#a9cf9c;--link:#2a7a2f}
+@media (prefers-color-scheme:dark){:root{--bg:#22623f;--card:#256846;--text:#eef6ee;--muted:#c4e0cc;--line:#37855f;--g:#58b351;--land:#3a7c5a;--on:#58b351;--in:#f0a04b;--sea:#1b5034;--tag:#2c7a57;--tagline:#4a9a6c;--link:#dcf7d0}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
-a{color:var(--g)}.sp-top{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:980px;margin:0 auto;padding:14px 16px}
+a{color:var(--link)}.sp-top{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:980px;margin:0 auto;padding:14px 16px}
 .sp-logo{font:700 26px Georgia,'Times New Roman',serif;color:var(--g);text-decoration:none}.sp-top nav{display:flex;gap:16px;font-size:14px}
 .sp-main{max-width:980px;margin:0 auto;padding:0 16px 30px}.sp-crumbs{font-size:13px;color:var(--muted);margin:4px 0 14px}
 .sp-head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:start}
@@ -1311,17 +1320,17 @@ section{background:var(--card);border:1px solid var(--line);border-radius:18px;p
 .sp-map path{fill:var(--land);stroke:var(--sea);stroke-width:.6;vector-effect:non-scaling-stroke;stroke-linejoin:round}.sp-map path.on{fill:var(--on)}.sp-map path.in{fill:var(--in)}
 .sp-map circle{stroke:var(--card);stroke-width:1.2;vector-effect:non-scaling-stroke}.sp-map circle.on{fill:var(--on)}.sp-map circle.in{fill:var(--in)}
 .sp-zoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px}
-.sp-zoom button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--g);font:600 20px/1 Inter,system-ui,sans-serif;cursor:pointer;padding:0;touch-action:manipulation}
+.sp-zoom button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--link);font:600 20px/1 Inter,system-ui,sans-serif;cursor:pointer;padding:0;touch-action:manipulation}
 .sp-zoom button:disabled{opacity:.45;cursor:default}
 .sp-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 0 0;font-size:13px;color:var(--muted)}.sp-legend span{display:inline-flex;align-items:center;gap:6px}
 .sp-legend i{width:14px;height:14px;border-radius:4px;display:inline-block}.sp-legend i.on{background:var(--on)}.sp-legend i.in{background:var(--in)}
 .sp-tags{list-style:none;padding:0;margin:4px 0 10px;display:flex;flex-wrap:wrap;gap:6px}
-.sp-tags a{display:inline-block;background:var(--tag);border:1px solid var(--tagline);color:var(--g);text-decoration:none;font-size:13px;font-weight:600;padding:3px 12px;border-radius:999px}
+.sp-tags a{display:inline-block;background:var(--tag);border:1px solid var(--tagline);color:var(--link);text-decoration:none;font-size:13px;font-weight:600;padding:3px 12px;border-radius:999px}
 .sp-tags a:hover,.sp-pills a:hover{background:var(--g);border-color:var(--g);color:#fff}
-.sp-where a{color:inherit;text-decoration:underline;text-decoration-color:var(--tagline);text-underline-offset:2px}.sp-where a:hover{color:var(--g)}
+.sp-where a{color:inherit;text-decoration:underline;text-decoration-color:var(--tagline);text-underline-offset:2px}.sp-where a:hover{color:var(--link)}
 .sp-where{columns:2 260px;padding-left:18px;font-size:14px}.sp-where li{break-inside:avoid;margin-bottom:4px}
 .sp-pills{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px}.sp-pills li{border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:13.5px}.sp-pills li:has(a){border:0;padding:0}
-.sp-pills a{display:inline-block;border:1px solid var(--tagline);background:var(--tag);color:var(--g);text-decoration:none;border-radius:999px;padding:3px 11px;font-size:13.5px}
+.sp-pills a{display:inline-block;border:1px solid var(--tagline);background:var(--tag);color:var(--link);text-decoration:none;border-radius:999px;padding:3px 11px;font-size:13.5px}
 .sp-rel,.sp-az{columns:3 220px;padding-left:18px}.sp-rel i,.sp-az i{color:var(--muted);font-size:13px}.sp-muted{color:var(--muted)}
 .sp-lb{position:fixed;inset:0;z-index:50;background:rgba(5,15,9,.92);display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
 .sp-lb img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;cursor:default}.sp-lb-x{position:fixed;top:12px;right:14px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:26px;cursor:pointer}
@@ -1330,26 +1339,26 @@ section{background:var(--card);border:1px solid var(--line);border-radius:18px;p
 .sl-brand{display:inline-flex;align-items:center;gap:9px;font:700 24px/1 Fraunces,Georgia,'Times New Roman',serif;color:#58b351;text-decoration:none}
 .sl-brand img{width:32px;height:32px;border-radius:8px;display:block}
 .sl-top nav{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14.5px}.sl-top nav a{color:var(--muted);text-decoration:none;padding:6px 0}
-.sl-top nav a:hover,.sl-top nav a[aria-current]{color:var(--g)}.sl-top nav a[aria-current]{font-weight:600}
+.sl-top nav a:hover,.sl-top nav a[aria-current]{color:var(--link)}.sl-top nav a[aria-current]{font-weight:600}
 .sl-foot{margin-top:30px;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:13.5px;padding:20px 16px 30px}
 .sl-foot p{margin:4px 0}.sl-flogo{font:700 18px Fraunces,Georgia,serif;color:#58b351!important;text-decoration:none}
 .sl-flinks{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px}.sl-foot a{color:var(--muted)}.sl-fnote{font-size:12px}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--g);outline-offset:2px;border-radius:4px}
 .sp-relh{font:700 16px Georgia,serif;margin:10px 0 4px}.sp-relh small{font:500 12.5px Inter,sans-serif;color:var(--muted)}
-.sp-habd{margin-top:10px}.sp-habd summary{cursor:pointer;color:var(--g);font-size:14px}.sp-habd .sp-pills{margin-top:8px}
+.sp-habd{margin-top:10px}.sp-habd summary{cursor:pointer;color:var(--link);font-size:14px}.sp-habd .sp-pills{margin-top:8px}
 @media (max-width:560px){.sl-top{padding:12px}.sl-top nav{gap:2px 14px;font-size:14px}.sl-brand{font-size:21px}}
 .sp-head{margin-bottom:6px;grid-template-areas:'photo title' 'key title';grid-template-rows:auto 1fr;row-gap:16px}.sp-head>.sp-photo{grid-area:photo}.sp-head>.sp-title{grid-area:title}.sp-head>.sp-key{grid-area:key;align-self:start;margin:0}@media (max-width:720px){.sp-head{grid-template-areas:'photo' 'title' 'key';row-gap:14px}}.sp-title{min-width:0}.sp-sci{margin:6px 0 12px}.sp-sci i{font-style:italic}.sp-auth{font-style:normal;font-size:14px;color:var(--muted)}
 .sp-intro{font-size:17px;line-height:1.6;margin:0 0 14px}
 .sp-key{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px;margin:0 0 16px;border-top:1px solid var(--line)}
 .sp-key div{padding:7px 0;border-bottom:1px solid var(--line);min-width:0}.sp-key dt{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.sp-key dd{margin:0;font-weight:600;font-size:14.5px;line-height:1.4;overflow-wrap:anywhere}.sp-key dd small{font-weight:400;color:var(--muted)}.sp-key a{color:var(--g)}
+.sp-key dd{margin:0;font-weight:600;font-size:14.5px;line-height:1.4;overflow-wrap:anywhere}.sp-key dd small{font-weight:400;color:var(--muted)}.sp-key a{color:var(--link)}
 @media (max-width:380px){.sp-key{grid-template-columns:1fr}}
-.sp-actions{display:flex;flex-wrap:wrap;gap:8px}.sp-actions .sp-btn{padding:10px 16px;font-size:15px}.sp-btn2{background:var(--card);color:var(--g);border:1px solid var(--tagline)}.sp-btn2:hover{background:var(--tag)}
+.sp-actions{display:flex;flex-wrap:wrap;gap:8px}.sp-actions .sp-btn{padding:10px 16px;font-size:15px}.sp-btn2{background:var(--card);color:var(--link);border:1px solid var(--tagline)}.sp-btn2:hover{background:var(--tag)}
 .sp-actnote{font-size:12.5px;color:var(--muted);margin:6px 0 0}
 .sp-photo figcaption{font-size:13px;color:var(--text);opacity:.8}.sp-photo figcaption a{color:inherit}
 .sp-toc{position:sticky;top:0;z-index:5;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:18px -16px 0;padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
 .sp-toc::-webkit-scrollbar{display:none}.sp-toc a{flex:none;padding:5px 12px;border-radius:999px;font-size:14px;font-weight:600;text-decoration:none;color:var(--muted)}
-.sp-toc a:hover,.sp-toc a:focus-visible{background:var(--tag);color:var(--g)}
+.sp-toc a:hover,.sp-toc a:focus-visible{background:var(--tag);color:var(--link)}
 .sp-sec{scroll-margin-top:60px}.sp-sec h3{font:700 17px Georgia,serif;margin:16px 0 4px}.sp-sec h2+h3{margin-top:4px}.sp-sec h3 small{font:500 12.5px Inter,sans-serif;color:var(--muted)}
 .sp-sec p{margin:0 0 10px}.sp-ref{font-size:11px;line-height:0;margin-left:2px;white-space:nowrap}.sp-ref a{text-decoration:none}
 .sp-limited{background:var(--tag);border:1px solid var(--tagline);border-radius:12px;padding:10px 14px}
@@ -1360,12 +1369,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .sp-iucn{display:flex;gap:12px;align-items:center}.sp-cat{flex:none;display:inline-grid;place-items:center;width:44px;height:44px;border-radius:50%;font:700 15px Inter,sans-serif;color:#fff;background:#6b7d72}
 .sp-cat.cat-LC{background:#3d8b55}.sp-cat.cat-NT{background:#7d9a2e}.sp-cat.cat-VU{background:#c9a400;color:#1c1c1c}.sp-cat.cat-EN{background:#d9741a}.sp-cat.cat-CR{background:#c4302b}.sp-cat.cat-DD{background:#8a8f8c}.sp-cat.cat-NE{background:#a3aaa6;color:#1c1c1c}
 .sp-tax{display:grid;gap:4px;margin:0 0 10px}.sp-tax div{display:flex;gap:10px;flex-wrap:wrap}.sp-tax dt{min-width:70px;color:var(--muted);font-size:14px}.sp-tax dd{margin:0;flex:1 1 220px;min-width:0}.sp-ety{color:var(--muted)}
-.sp-det{margin:10px 0 0}.sp-det summary{cursor:pointer;color:var(--g);font-size:14.5px;font-weight:600}.sp-det ul{margin:8px 0;padding-left:20px;font-size:14.5px}
+.sp-det{margin:10px 0 0}.sp-det summary{cursor:pointer;color:var(--link);font-size:14.5px;font-weight:600}.sp-det ul{margin:8px 0;padding-left:20px;font-size:14.5px}
 .sp-refs{padding-left:22px;font-size:14px;margin:0 0 10px}.sp-refs li{margin:0 0 6px;overflow-wrap:anywhere}.sp-refs li:target{background:var(--tag);border-radius:6px}
 .sp-dates{display:flex;flex-wrap:wrap;gap:4px 20px;font-size:13px;color:var(--muted);margin-top:14px!important;padding-top:10px;border-top:1px solid var(--line)}
 .sp-mapnote{margin:8px 0 0}.sp-intro-box p{margin:0 0 10px}
 .cy-about{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 18px;margin:14px 0 0;max-width:820px}.cy-about p{margin:0 0 8px;line-height:1.6}
-.cy-about .sp-ref{font-size:11px}.cy-about .sp-refs{font-size:13px;margin:6px 0 0}.cy-about details summary{cursor:pointer;color:var(--g);font-size:13.5px;font-weight:600}.cy-about .sp-note{margin:4px 0 0}
+.cy-about .sp-ref{font-size:11px}.cy-about .sp-refs{font-size:13px;margin:6px 0 0}.cy-about details summary{cursor:pointer;color:var(--link);font-size:13.5px;font-weight:600}.cy-about .sp-note{margin:4px 0 0}
 .sp-head{grid-template-areas:'photo title';grid-template-rows:auto;margin-bottom:0}@media (max-width:720px){.sp-head{grid-template-areas:'photo' 'title'}}
 .sp-vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .sp-fossil-flag{display:inline-block;margin:0 0 8px;padding:3px 12px;border-radius:999px;font-size:13px;font-weight:600;background:#5b4a3a;color:#fff}
@@ -1379,10 +1388,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .sp-unk{color:var(--muted);font-weight:400}
 .sp-keybox .sp-actions{gap:8px}.sp-keybox .sp-actnote{margin:8px 0 0}
 .sp-actions .sp-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1px solid transparent;cursor:pointer;font:600 15px Inter,system-ui,sans-serif}
-.sp-actions .sp-btn2{border-color:var(--tagline)}.sp-actions .sp-btn span{margin-right:6px}.sp-keybox a.sp-btn{color:#fff;text-decoration:none}.sp-keybox a.sp-btn2{color:var(--g)}
+.sp-actions .sp-btn2{border-color:var(--tagline)}.sp-actions .sp-btn span{margin-right:6px}.sp-keybox a.sp-btn{color:#fff;text-decoration:none}.sp-keybox a.sp-btn2{color:var(--link)}
 .sp-keybox a.sp-btn:hover{filter:brightness(1.06)}
 @media (max-width:560px){.sp-actions{display:grid;grid-template-columns:1fr 1fr}.sp-actions .sp-btn:only-child{grid-column:1/-1}.sp-keybox{padding:4px 14px 14px}}
-.sp-sec a,.sp-keybox a,.sp-intro a{color:var(--g);text-decoration:underline;text-decoration-color:var(--tagline);text-underline-offset:2px}
+.sp-sec a,.sp-keybox a,.sp-intro a{color:var(--link);text-decoration:underline;text-decoration-color:var(--tagline);text-underline-offset:2px}
 .sp-sec a:hover,.sp-keybox a:hover{text-decoration-color:currentColor}.sp-sec .sp-tags a,.sp-sec .sp-pills a,.sp-ref a{text-decoration:none}
 .sp-ext{display:inline-block;margin-left:4px;padding:0 7px;border-radius:999px;font-size:11.5px;font-weight:600;background:#5b4a3a;color:#fff;line-height:1.6}
 .sp-terr{color:var(--muted);font-weight:400}
@@ -1391,7 +1400,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .sp-iucn{display:flex;gap:14px;align-items:center;margin:0 0 12px}.sp-iucn p{margin:0!important}.sp-iucn .sp-note{margin:2px 0 0!important}
 .sp-ety{color:var(--text)}
 .sp-whereh{margin-top:16px!important}
-.sp-states{margin-top:12px}.sp-states>summary,.sp-det>summary{cursor:pointer;color:var(--g);font-size:14.5px;font-weight:600;padding:4px 0}
+.sp-states{margin-top:12px}.sp-states>summary,.sp-det>summary{cursor:pointer;color:var(--link);font-size:14.5px;font-weight:600;padding:4px 0}
 .sp-states .sp-note{margin:6px 0 8px}.sp-refd{margin:0 0 10px}.sp-refd .sp-refs{margin-top:8px}
 .sp-prov ul{font-size:14px;color:var(--muted)}
 .sp-who{margin:14px 0 0}.sp-who h3{margin:0 0 4px}.sp-person{display:flex;gap:12px;align-items:flex-start;margin:10px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
@@ -1543,13 +1552,13 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
         h1 = name
         lead = "The family %s%s has %s in SnakeList (%s), in %s%s." % (name, common, plural(n, "living species", "living species"), vsplit(), plural(nfam, "genus", "genera"),
                                                                    (", plus %s listed separately" % gone_txt) if gone_txt else "")
-        title = "%s: all %s, with photos | SnakeList" % (name, plural(n, "living snake species", "living snake species"))
+        title = ("%s: all %s, with photos | SnakeList" if n > 1 else "%s: %s | SnakeList") % (name, plural(n, "living snake species", "living snake species"))
     elif kind == "genus":
         h1 = name
         lead = "The genus %s%s has %s in SnakeList (%s), recorded in %s%s." % (
             name, " (family %s)" % family if family else "", plural(n, "living species", "living species"), vsplit(), places_txt,
             ("; %s %s listed separately" % (gone_txt, "is" if len(G) == 1 else "are")) if gone_txt else "")
-        title = "%s snakes: all %s, with photos | SnakeList" % (name, plural(n, "species", "species"))
+        title = ("%s snakes: all %s, with photos | SnakeList" if n > 1 else "%s snakes: %s | SnakeList") % (name, plural(n, "species", "species"))
     elif n:
         h1 = "Snakes of %s" % dn
         lead = "%s %s recorded in %s in SnakeList: %s venomous and %s non-venomous%s." % (
@@ -1665,7 +1674,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
     cta = ("../../?map=%s" % quote_param(name), "View snakes on map") if kind == "country" else (
         ("../../?fam=%s" % quote_param(name), "Open the family in SnakeList") if kind == "family" else ("../../?q=%s" % quote_param(name), "Open the genus in SnakeList"))
     crumbs_html = "".join('<li><a href="%s">%s</a></li>' % (c0[2], esc(c0[0])) for c0 in crumbs)
-    jump = ('<form class="cy-jump" id="cy-jump" role="search" action="../#by-country"><label for="cy-jq" class="cy-sr">Go to another country</label><input id="cy-jq" list="cy-clist" placeholder="Another country..." autocomplete="off"><datalist id="cy-clist"></datalist><button type="submit">Go</button></form>'
+    jump = ('<form class="cy-jump" id="cy-jump" role="search" action="../#by-country"><label for="cy-jq" class="cy-sr">Go to another country or territory</label><input id="cy-jq" list="cy-clist" placeholder="Another country or territory..." autocomplete="off"><datalist id="cy-clist"></datalist><button type="submit">Go</button></form>'
             if kind == "country" else "")
     # the introduction: what this family is (its reviewed text), what the genus name means, or
     # for a country, what its totals count
@@ -1771,6 +1780,7 @@ COUNTRY_CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:cen
 .cy-stats{grid-column:1;list-style:none;margin:2px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .cy-stats li{display:flex;align-items:baseline;gap:6px;background:var(--tag);border:1px solid var(--tagline);border-radius:12px;padding:5px 12px;font-size:13.5px;color:var(--muted)}
 .cy-stats b{font-size:18px;color:var(--text)}
+@media (prefers-color-scheme:dark){.cy-stats li{color:var(--text)}}
 .cy-cta{grid-column:2;grid-row:1/span 2;margin:0}
 .cy-btn{display:inline-flex;align-items:center;min-height:44px;background:var(--g);color:#fff;text-decoration:none;font-weight:600;padding:10px 18px;border-radius:12px;white-space:nowrap}
 .cy-btn:hover{filter:brightness(.95)}
@@ -1794,7 +1804,7 @@ COUNTRY_CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:cen
 .cy-b.x{color:var(--muted)}.cy-b.i{background:#fdf1df;border-color:#ecc995;color:#7a4a0c}
 .cy-fam{font-size:12.5px;color:var(--muted)}
 .cy-empty,.cy-none{background:var(--card);border:1px dashed var(--tagline);border-radius:14px;padding:18px 20px;margin:4px 0 0}
-.cy-none p{margin:4px 0}.cy-link{font:inherit;background:none;border:0;color:var(--g);text-decoration:underline;cursor:pointer;padding:0}
+.cy-none p{margin:4px 0}.cy-link{font:inherit;background:none;border:0;color:var(--link);text-decoration:underline;cursor:pointer;padding:0}
 .cy-more-wrap{text-align:center;margin:16px 0 0}.cy-more{font:600 14px Inter,system-ui,sans-serif;min-height:42px;padding:8px 22px;border-radius:12px;border:1px solid var(--tagline);background:var(--card);color:var(--text);cursor:pointer}
 .cy-sec{margin-top:26px}.cy-sec h2{font:700 21px Georgia,serif;margin:0 0 6px}.cy-note{margin:0 0 12px;color:var(--muted);font-size:14px}
 .cy-facts{margin:0;padding-left:18px}.cy-facts li{margin:4px 0}
