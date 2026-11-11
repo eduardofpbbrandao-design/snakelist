@@ -1,0 +1,1340 @@
+{
+ "about": "Parameters for SnakeList's procedural 3D snake models (species/3d/viewer.js). Lengths are metres; body.ld is length / mid-body diameter; head.len is head length / total length; head.w is head width / body width; pattern positions use t (0 = snout, 1 = tail tip) along the body and a around it (0 = middle of the back, 0.5 = flank, 1 = belly midline); head markings use xn (0 = snout tip, 1 = back of the head). Every profile cites the references its shape, colours and scenery were taken from. The build copies this file to species/3d/models.json.",
+ "species": {
+  "malayopython-reticulatus": {
+   "name": "Reticulated Python",
+   "plan": "python",
+   "length": 4.5,
+   "lengthNote": "most adults 3-6 m",
+   "max": "6.95 m (verified record)",
+   "body": {
+    "ld": 32,
+    "neck": 0.5,
+    "peak": 0.48,
+    "vent": 0.6,
+    "tail": 0.13,
+    "xs": 1.15
+   },
+   "head": {
+    "len": 0.032,
+    "w": 0.62,
+    "h": 0.55,
+    "snout": 0.55,
+    "jaw": 0.78,
+    "eyeX": 0.3,
+    "eye": 0.16,
+    "iris": "#c9782a",
+    "irisInner": "#e3a352",
+    "pupil": "slit",
+    "pits": "labial"
+   },
+   "scales": {
+    "rows": 71,
+    "keel": 0,
+    "gloss": 0.55,
+    "iridescence": 0.3,
+    "cavity": 0.35
+   },
+   "colors": {
+    "dorsal": "#1d150c",
+    "lateral": "#211810",
+    "belly": "#e2d4a2",
+    "bellyA": 0.8,
+    "mottle": 0.06,
+    "var": 0.05
+   },
+   "pattern": [
+    {
+     "type": "blotch",
+     "t": [
+      0.05,
+      0.97
+     ],
+     "count": 64,
+     "a": 0,
+     "wid": 0.36,
+     "len": 0.97,
+     "shape": "diamond",
+     "color": "#9a8150",
+     "edgeColor": "#c49a3e",
+     "edge": 0.12,
+     "warp": 0.8,
+     "inner": {
+      "r": 0.45,
+      "color": "#8a7a52"
+     },
+     "jit": 0.2,
+     "sj": 0.28,
+     "aj": 0.07
+    },
+    {
+     "type": "blotch",
+     "t": [
+      0.05,
+      0.97
+     ],
+     "count": 64,
+     "phase": 0.5,
+     "a": 0.5,
+     "mirror": true,
+     "wid": 0.19,
+     "len": 0.8,
+     "shape": "round",
+     "color": "#b58a33",
+     "inner": {
+      "r": 0.24,
+      "color": "#dccfae"
+     },
+     "warp": 0.8,
+     "jit": 0.2,
+     "sj": 0.28,
+     "aj": 0.07
+    },
+    {
+     "type": "blotch",
+     "t": [
+      0.05,
+      0.97
+     ],
+     "count": 64,
+     "a": 0.7,
+     "mirror": true,
+     "wid": 0.12,
+     "len": 0.7,
+     "shape": "round",
+     "color": "#b08a42",
+     "warp": 0.8,
+     "jit": 0.2,
+     "sj": 0.28,
+     "aj": 0.07
+    },
+    {
+     "type": "cap",
+     "x0": 0,
+     "x1": 1.04,
+     "wid": 0.86,
+     "color": "#a9731f"
+    },
+    {
+     "type": "line",
+     "p0": [
+      0.04,
+      0
+     ],
+     "p1": [
+      1.25,
+      0
+     ],
+     "wid": 0.022,
+     "color": "#120c06"
+    },
+    {
+     "type": "line",
+     "p0": [
+      0.33,
+      0.37
+     ],
+     "p1": [
+      1.0,
+      0.53
+     ],
+     "wid": 0.035,
+     "color": "#120c06",
+     "mirror": true
+    },
+    {
+     "type": "line",
+     "p0": [
+      0.04,
+      0.66
+     ],
+     "p1": [
+      0.82,
+      0.64
+     ],
+     "wid": 0.07,
+     "color": "#d8c27a",
+     "mirror": true
+    }
+   ],
+   "pose": {
+    "kind": "wave",
+    "waves": 2.4,
+    "amp": 88,
+    "bend": 160,
+    "lift": 0.5
+   },
+   "scene": {
+    "kind": "forest",
+    "basis": "Account habitat: \"Tropical forest, usually near rivers and other water.\" Shown on a forest floor with leaf litter and a fallen log."
+   },
+   "details": [
+    [
+     "crown",
+     "Thin black line along the top of the head"
+    ],
+    [
+     "postocular",
+     "Black line behind the eye"
+    ],
+    [
+     "lip",
+     "Heat-sensing pits along the lips"
+    ],
+    [
+     "back",
+     "Net-like (reticulated) pattern"
+    ],
+    [
+     "side",
+     "Smooth, iridescent scales"
+    ]
+   ],
+   "refs": [
+    {
+     "t": "SnakeList species account (Smithsonian's National Zoo, Wikipedia and others)",
+     "u": "../data/species-info/malayopython-reticulatus.json",
+     "acct": 1
+    },
+    {
+     "t": "SnakeList reference photo by fatahabib92 (CC BY-NC), via iNaturalist",
+     "u": "https://www.inaturalist.org/photos/7478345"
+    },
+    {
+     "t": "Scale rows (about 69-79 at mid-body) and head pattern: Malayopython reticulatus, Wikipedia",
+     "u": "https://en.wikipedia.org/wiki/Reticulated_python"
+    }
+   ]
+  },
+  "bitis-gabonica": {
+   "name": "Gaboon Viper",
+   "plan": "viper",
+   "length": 1.4,
+   "lengthNote": "adults usually 1.25-1.55 m",
+   "max": "about 1.8 m (a 2.05 m snake often quoted is now treated as the West African Gaboon Viper)",
+   "body": {
+    "ld": 11,
+    "neck": 0.3,
+    "peak": 0.5,
+    "vent": 0.5,
+    "tail": 0.065,
+    "xs": 1.45,
+    "bf": 0.7
+   },
+   "head": {
+    "len": 0.085,
+    "w": 1.0,
+    "h": 0.42,
+    "snout": 0.78,
+    "jaw": 0.8,
+    "eyeX": 0.3,
+    "eyeA": 64,
+    "eye": 0.1,
+    "iris": "#cdbf97",
+    "irisInner": "#e6dcc0",
+    "pupil": "slit",
+    "brow": 0.12,
+    "horns": "nasal",
+    "hornColor": "#a68f68",
+    "canthus": 3.2
+   },
+   "scales": {
+    "rows": 37,
+    "keel": 0.95,
+    "gloss": 0.04,
+    "cavity": 0.5
+   },
+   "colors": {
+    "dorsal": "#47302a",
+    "lateral": "#523a2e",
+    "belly": "#d3c3a0",
+    "bellyA": 0.8,
+    "mottle": 0.1,
+    "var": 0.06
+   },
+   "pattern": [
+    {
+     "type": "blotch",
+     "t": [
+      0.1,
+      0.95
+     ],
+     "count": 17,
+     "a": 0,
+     "wid": 0.17,
+     "len": 0.66,
+     "shape": "rect",
+     "color": "#bba47d",
+     "inner": {
+      "r": 0.3,
+      "color": "#a88d62"
+     },
+     "warp": 0.35
+    },
+    {
+     "type": "blotch",
+     "t": [
+      0.1,
+      0.95
+     ],
+     "count": 17,
+     "phase": 0.5,
+     "a": 0.0,
+     "wid": 0.3,
+     "len": 0.32,
+     "shape": "hourglass",
+     "color": "#3c281c",
+     "edgeColor": "#c8b070",
+     "edge": 0.12,
+     "edgeOut": true,
+     "warp": 0.3
+    },
+    {
+     "type": "blotch",
+     "t": [
+      0.1,
+      0.95
+     ],
+     "count": 17,
+     "phase": 0.5,
+     "a": 0.47,
+     "mirror": true,
+     "wid": 0.2,
+     "len": 0.95,
+     "shape": "diamond",
+     "color": "#6c4d57",
+     "edgeColor": "#c6b48b",
+     "edge": 0.16,
+     "edgeOut": true,
+     "inner": {
+      "r": 0.38,
+      "color": "#9a7466"
+     },
+     "warp": 0.35
+    },
+    {
+     "type": "blotch",
+     "t": [
+      0.1,
+      0.95
+     ],
+     "count": 17,
+     "a": 0.55,
+     "mirror": true,
+     "wid": 0.1,
+     "len": 0.4,
+     "shape": "diamond",
+     "color": "#a3845e",
+     "warp": 0.35
+    },
+    {
+     "type": "blotch",
+     "t": [
+      0.1,
+      0.95
+     ],
+     "count": 34,
+     "a": 0.7,
+     "mirror": true,
+     "wid": 0.07,
+     "len": 0.5,
+     "shape": "round",
+     "color": "#b7a27c",
+     "warp": 0.4
+    },
+    {
+     "type": "cap",
+     "x0": 0,
+     "x1": 0.96,
+     "wid": 0.44,
+     "color": "#a68f68"
+    },
+    {
+     "type": "line",
+     "p0": [
+      0.1,
+      0
+     ],
+     "p1": [
+      0.98,
+      0
+     ],
+     "wid": 0.016,
+     "color": "#47331f"
+    },
+    {
+     "type": "poly",
+     "mirror": true,
+     "pts": [
+      [
+       0.24,
+       0.38
+      ],
+      [
+       0.36,
+       0.38
+      ],
+      [
+       0.44,
+       0.62
+      ],
+      [
+       0.12,
+       0.62
+      ]
+     ],
+     "color": "#43301f"
+    },
+    {
+     "type": "poly",
+     "mirror": true,
+     "pts": [
+      [
+       0.38,
+       0.42
+      ],
+      [
+       0.95,
+       0.47
+      ],
+      [
+       0.9,
+       0.62
+      ],
+      [
+       0.52,
+       0.62
+      ]
+     ],
+     "color": "#a68a62"
+    }
+   ],
+   "pose": {
+    "kind": "coil",
+    "pitch": 2.25,
+    "lead": 0.36,
+    "lift": 0.0,
+    "headBend": -0.9
+   },
+   "scene": {
+    "kind": "rainforest",
+    "basis": "Account habitat: \"Rainforest and the woodland around it ... where it lies hidden in leaf litter.\""
+   },
+   "details": [
+    [
+     "snout",
+     "Pair of small horn-like scales between the nostrils"
+    ],
+    [
+     "eye",
+     "Dark triangle from the eye to the lip"
+    ],
+    [
+     "crown",
+     "Broad, flat, pale head with a thin dark midline"
+    ],
+    [
+     "back",
+     "Pale oblongs and dark hourglasses along the back"
+    ],
+    [
+     "side",
+     "Strongly keeled, matt scales"
+    ],
+    [
+     "neck",
+     "Very thin neck behind the huge head"
+    ]
+   ],
+   "refs": [
+    {
+     "t": "SnakeList species account (Wikipedia, Reptile Database and others)",
+     "u": "../data/species-info/bitis-gabonica.json",
+     "acct": 1
+    },
+    {
+     "t": "SnakeList reference photo by koenbetjes (CC BY-NC), via iNaturalist",
+     "u": "https://www.inaturalist.org/photos/114284072"
+    },
+    {
+     "t": "Keeled scales in 28-46 rows; pattern of pale rectangles, hourglasses and lateral rhombs: Bitis gabonica, Wikipedia",
+     "u": "https://en.wikipedia.org/wiki/Gaboon_viper"
+    }
+   ]
+  },
+  "crotalus-atrox": {
+   "name": "Western Diamond-backed Rattlesnake",
+   "plan": "pitviper",
+   "length": 1.2,
+   "lengthNote": "adults commonly about 1.2 m",
+   "max": "2.13 m (largest reliably measured)",
+   "body": {
+    "ld": 20,
+    "neck": 0.42,
+    "peak": 0.46,
+    "vent": 0.58,
+    "tail": 0.075,
+    "xs": 1.28
+   },
+   "head": {
+    "len": 0.052,
+    "w": 1.0,
+    "h": 0.55,
+    "snout": 0.6,
+    "jaw": 0.8,
+    "eyeX": 0.31,
+    "eyeA": 66,
+    "eye": 0.11,
+    "iris": "#978770",
+    "irisInner": "#b9a98d",
+    "pupil": "slit",
+    "brow": 0.15,
+    "pits": "loreal"
+   },
+   "scales": {
+    "rows": 27,
+    "keel": 0.9,
+    "gloss": 0.08
+   },
+   "colors": {
+    "dorsal": "#8d8174",
+    "lateral": "#978b7d",
+    "belly": "#d9d0bf",
+    "bellyA": 0.76,
+    "mottle": 0.07,
+    "var": 0.07,
+    "speckle": {
+     "p": 0.22,
+     "color": "#4b423c",
+     "k": 0.5
+    }
+   },
+   "pattern": [
+    {
+     "type": "blotch",
+     "t": [
+      0.075,
+      0.86
+     ],
+     "count": 31,
+     "a": 0,
+     "wid": 0.4,
+     "len": 0.92,
+     "shape": "diamond",
+     "color": "#5c4d44",
+     "edgeColor": "#ddd5c6",
+     "edge": 0.17,
+     "edgeOut": true,
+     "inner": {
+      "r": 0.5,
+      "color": "#7a6b5f"
+     },
+     "warp": 0.22
+    },
+    {
+     "type": "blotch",
+     "t": [
+      0.075,
+      0.86
+     ],
+     "count": 31,
+     "phase": 0.5,
+     "a": 0.6,
+     "mirror": true,
+     "wid": 0.12,
+     "len": 0.5,
+     "shape": "round",
+     "color": "#6c5e54",
+     "warp": 0.4,
+     "alpha": 0.8
+    },
+    {
+     "type": "tint",
+     "t": [
+      0.862,
+      1
+     ],
+     "ramp": 0.004,
+     "color": "#dcd6cb"
+    },
+    {
+     "type": "band",
+     "t": [
+      0.866,
+      0.995
+     ],
+     "count": 5,
+     "phase": 0.25,
+     "len": 0.5,
+     "color": "#1d1918",
+     "warp": 0.15
+    },
+    {
+     "type": "line",
+     "p0": [
+      0.26,
+      0.4
+     ],
+     "p1": [
+      0.16,
+      0.62
+     ],
+     "wid": 0.035,
+     "color": "#e4ddcf",
+     "mirror": true
+    },
+    {
+     "type": "line",
+     "p0": [
+      0.4,
+      0.42
+     ],
+     "p1": [
+      0.85,
+      0.64
+     ],
+     "wid": 0.04,
+     "color": "#e4ddcf",
+     "mirror": true
+    },
+    {
+     "type": "poly",
+     "mirror": true,
+     "pts": [
+      [
+       0.3,
+       0.42
+      ],
+      [
+       0.4,
+       0.42
+      ],
+      [
+       0.82,
+       0.6
+      ],
+      [
+       0.66,
+       0.66
+      ],
+      [
+       0.26,
+       0.62
+      ]
+     ],
+     "color": "#5d4f46"
+    }
+   ],
+   "tail": {
+    "rattle": 7,
+    "rattleColor": "#a39686"
+   },
+   "pose": {
+    "kind": "coil",
+    "pitch": 2.3,
+    "lead": 0.34,
+    "lift": 0.15
+   },
+   "scene": {
+    "kind": "arid",
+    "basis": "Account habitat: \"deserts, grasslands, scrubland, rocky canyons ... shelters in rock crevices\". Shown on gravelly desert ground with rocks and dry grass."
+   },
+   "details": [
+    [
+     "pit",
+     "Heat-sensing pit between eye and nostril"
+    ],
+    [
+     "postocular",
+     "Pale diagonal lines on the face"
+    ],
+    [
+     "back",
+     "Dark, light-edged diamonds"
+    ],
+    [
+     "side",
+     "Keeled scales with dusty dark speckles"
+    ],
+    [
+     "tail",
+     "Black-and-white \"coon tail\" rings"
+    ],
+    [
+     "rattle",
+     "Rattle"
+    ]
+   ],
+   "refs": [
+    {
+     "t": "SnakeList species account (Wikipedia, Texas Parks and Wildlife and others)",
+     "u": "../data/species-info/crotalus-atrox.json",
+     "acct": 1
+    },
+    {
+     "t": "SnakeList reference photo by Ron Savage (CC BY-NC-SA), via iNaturalist",
+     "u": "https://www.inaturalist.org/photos/166106"
+    },
+    {
+     "t": "Keeled scales in 25-27 rows; two pale facial stripes: Crotalus atrox, Wikipedia",
+     "u": "https://en.wikipedia.org/wiki/Western_diamondback_rattlesnake"
+    }
+   ]
+  },
+  "natrix-maura": {
+   "name": "Viperine Snake",
+   "plan": "colubrid",
+   "length": 0.6,
+   "lengthNote": "most adults stay well below the 80-85 cm maximum",
+   "max": "about 80-85 cm (records near 93 cm)",
+   "body": {
+    "ld": 30,
+    "neck": 0.7,
+    "peak": 0.42,
+    "vent": 0.62,
+    "tail": 0.2,
+    "xs": 1.12
+   },
+   "head": {
+    "len": 0.043,
+    "w": 0.95,
+    "h": 0.62,
+    "snout": 0.68,
+    "jaw": 0.7,
+    "eyeX": 0.28,
+    "eyeA": 55,
+    "eye": 0.15,
+    "iris": "#b88f4a",
+    "irisInner": "#d8b06a",
+    "pupil": "round",
+    "brow": 0.02,
+    "embed": 0.6
+   },
+   "scales": {
+    "rows": 21,
+    "keel": 0.75,
+    "gloss": 0.22
+   },
+   "colors": {
+    "dorsal": "#706651",
+    "lateral": "#776b52",
+    "belly": "#c9a24c",
+    "bellyA": 0.76,
+    "mottle": 0.09,
+    "var": 0.06
+   },
+   "pattern": [
+    {
+     "type": "zigzag",
+     "t": [
+      0.06,
+      0.88
+     ],
+     "count": 46,
+     "amp": 0.13,
+     "wid": 0.075,
+     "color": "#332c22",
+     "warp": 0.45,
+     "aa": 0.16
+    },
+    {
+     "type": "blotch",
+     "t": [
+      0.06,
+      0.9
+     ],
+     "count": 40,
+     "a": 0.5,
+     "mirror": true,
+     "alt": true,
+     "wid": 0.1,
+     "len": 0.55,
+     "shape": "round",
+     "color": "#3a3326",
+     "inner": {
+      "r": 0.36,
+      "color": "#8f7f4c"
+     },
+     "warp": 0.4,
+     "aa": 0.18
+    },
+    {
+     "type": "blotch",
+     "t": [
+      0.06,
+      0.95
+     ],
+     "count": 60,
+     "a": 0.9,
+     "mirror": true,
+     "alt": true,
+     "belly": true,
+     "wid": 0.08,
+     "len": 0.5,
+     "shape": "rect",
+     "color": "#2a241f",
+     "warp": 0.2,
+     "alpha": 0.85
+    },
+    {
+     "type": "line",
+     "p0": [
+      1.05,
+      0.0
+     ],
+     "p1": [
+      1.7,
+      0.28
+     ],
+     "wid": 0.05,
+     "color": "#2b251c",
+     "mirror": true
+    },
+    {
+     "type": "line",
+     "p0": [
+      0.22,
+      0.56
+     ],
+     "p1": [
+      0.22,
+      0.7
+     ],
+     "wid": 0.02,
+     "color": "#2b251c",
+     "mirror": true
+    },
+    {
+     "type": "line",
+     "p0": [
+      0.4,
+      0.55
+     ],
+     "p1": [
+      0.4,
+      0.7
+     ],
+     "wid": 0.02,
+     "color": "#2b251c",
+     "mirror": true
+    },
+    {
+     "type": "line",
+     "p0": [
+      0.58,
+      0.55
+     ],
+     "p1": [
+      0.6,
+      0.7
+     ],
+     "wid": 0.02,
+     "color": "#2b251c",
+     "mirror": true
+    },
+    {
+     "type": "line",
+     "p0": [
+      0.05,
+      0.64
+     ],
+     "p1": [
+      0.7,
+      0.64
+     ],
+     "wid": 0.06,
+     "color": "#c7b27a",
+     "mirror": true,
+     "alpha": 0.6
+    }
+   ],
+   "pose": {
+    "kind": "wave",
+    "waves": 1.7,
+    "amp": 70,
+    "bend": 60,
+    "lift": 0.6
+   },
+   "scene": {
+    "kind": "riverbank",
+    "basis": "Account habitat: \"Closely tied to fresh water: rivers, streams, ponds ... it hunts in the water and basks on the banks.\" Shown on a pebbly bank at the water's edge."
+   },
+   "details": [
+    [
+     "back",
+     "Dark zigzag along the back"
+    ],
+    [
+     "side",
+     "Dark eye-spots with pale centres"
+    ],
+    [
+     "eye",
+     "Eyes set high on the head"
+    ],
+    [
+     "neck",
+     "Dark V on the neck"
+    ],
+    [
+     "tail",
+     "Keeled scales"
+    ]
+   ],
+   "refs": [
+    {
+     "t": "SnakeList species account (Wikipedia, Fishipedia and others)",
+     "u": "../data/species-info/natrix-maura.json",
+     "acct": 1
+    },
+    {
+     "t": "SnakeList reference photo by James Steamer (CC BY-NC), via iNaturalist",
+     "u": "https://www.inaturalist.org/photos/1791110"
+    },
+    {
+     "t": "Strongly keeled scales in 21 rows; adult size: Natrix maura, Wikipedia",
+     "u": "https://en.wikipedia.org/wiki/Natrix_maura"
+    }
+   ]
+  },
+  "coronella-austriaca": {
+   "name": "Smooth Snake",
+   "plan": "colubrid",
+   "length": 0.65,
+   "lengthNote": "both sexes average about 60-75 cm",
+   "body": {
+    "ld": 40,
+    "neck": 0.85,
+    "peak": 0.45,
+    "vent": 0.62,
+    "tail": 0.2,
+    "xs": 1.06
+   },
+   "head": {
+    "len": 0.032,
+    "w": 0.98,
+    "h": 0.6,
+    "snout": 0.6,
+    "jaw": 0.72,
+    "eyeX": 0.3,
+    "eyeA": 58,
+    "eye": 0.15,
+    "iris": "#a8662f",
+    "irisInner": "#c98a48",
+    "pupil": "round"
+   },
+   "scales": {
+    "rows": 19,
+    "keel": 0,
+    "gloss": 0.6
+   },
+   "colors": {
+    "dorsal": "#7a6855",
+    "lateral": "#7f6c58",
+    "belly": "#6e4f42",
+    "bellyA": 0.74,
+    "mottle": 0.06,
+    "var": 0.04
+   },
+   "pattern": [
+    {
+     "type": "blotch",
+     "t": [
+      0.06,
+      0.92
+     ],
+     "count": 64,
+     "a": 0.11,
+     "mirror": true,
+     "wid": 0.05,
+     "len": 0.36,
+     "shape": "round",
+     "color": "#3b2d23",
+     "warp": 0.35
+    },
+    {
+     "type": "blotch",
+     "t": [
+      0.06,
+      0.92
+     ],
+     "count": 64,
+     "phase": 0.5,
+     "a": 0.42,
+     "mirror": true,
+     "wid": 0.04,
+     "len": 0.3,
+     "shape": "round",
+     "color": "#4a3a2d",
+     "warp": 0.35,
+     "alpha": 0.75
+    },
+    {
+     "type": "line",
+     "p0": [
+      0.03,
+      0.33
+     ],
+     "p1": [
+      0.3,
+      0.36
+     ],
+     "wid": 0.045,
+     "color": "#3a2a1f",
+     "mirror": true
+    },
+    {
+     "type": "line",
+     "p0": [
+      0.3,
+      0.36
+     ],
+     "p1": [
+      1.6,
+      0.52
+     ],
+     "wid": 0.05,
+     "color": "#3a2a1f",
+     "mirror": true
+    },
+    {
+     "type": "poly",
+     "pts": [
+      [
+       0.72,
+       0
+      ],
+      [
+       0.86,
+       0.13
+      ],
+      [
+       1.28,
+       0.2
+      ],
+      [
+       1.4,
+       0.1
+      ],
+      [
+       1.22,
+       0
+      ],
+      [
+       1.4,
+       -0.1
+      ],
+      [
+       1.28,
+       -0.2
+      ],
+      [
+       0.86,
+       -0.13
+      ]
+     ],
+     "color": "#3f3025"
+    }
+   ],
+   "pose": {
+    "kind": "wave",
+    "waves": 2.2,
+    "amp": 75,
+    "bend": 140,
+    "lift": 0.5
+   },
+   "scene": {
+    "kind": "heath",
+    "basis": "Account habitat: \"Confined to lowland heathland\" (UK). Shown on sandy heath with heather and dry grass."
+   },
+   "details": [
+    [
+     "postocular",
+     "Dark stripe through the eye (masked look)"
+    ],
+    [
+     "crown",
+     "Dark mark on the back of the head"
+    ],
+    [
+     "back",
+     "Small paired dark spots"
+    ],
+    [
+     "side",
+     "Smooth, glossy scales"
+    ]
+   ],
+   "refs": [
+    {
+     "t": "SnakeList species account (Wikipedia, UK government and others)",
+     "u": "../data/species-info/coronella-austriaca.json",
+     "acct": 1
+    },
+    {
+     "t": "SnakeList reference photo by Jakob Fahr (CC BY-NC), via iNaturalist",
+     "u": "https://www.inaturalist.org/photos/934335"
+    },
+    {
+     "t": "Smooth scales in 19 rows; paired dorsal spots and dark head mark: Coronella austriaca, Wikipedia",
+     "u": "https://en.wikipedia.org/wiki/Smooth_snake"
+    }
+   ]
+  },
+  "indotyphlops-braminus": {
+   "name": "Brahminy Blind Snake",
+   "plan": "blind",
+   "length": 0.11,
+   "lengthNote": "adults about 5-10 cm, occasionally 15 cm",
+   "max": "about 15-16.5 cm",
+   "body": {
+    "ld": 38
+   },
+   "head": {
+    "iris": "#000000"
+   },
+   "scales": {
+    "rows": 20,
+    "gloss": 0.9,
+    "iridescence": 0.45,
+    "cavity": 0.2
+   },
+   "colors": {
+    "dorsal": "#3a2621",
+    "lateral": "#3f2a24",
+    "belly": "#5c463d",
+    "bellyA": 0.8,
+    "bellySharp": 0.15,
+    "mottle": 0.04,
+    "var": 0.03
+   },
+   "pattern": [
+    {
+     "type": "spot",
+     "p": [
+      0.0,
+      0
+     ],
+     "r": [
+      0.45,
+      1.2
+     ],
+     "color": "#8a6a58",
+     "alpha": 0.55
+    },
+    {
+     "type": "spot",
+     "p": [
+      0.34,
+      0.36
+     ],
+     "r": [
+      0.06,
+      0.05
+     ],
+     "color": "#0b0605",
+     "mirror": true
+    },
+    {
+     "type": "tint",
+     "t": [
+      0.985,
+      1
+     ],
+     "ramp": 0.01,
+     "color": "#7d5d4c",
+     "alpha": 0.6
+    }
+   ],
+   "tail": {
+    "spine": true
+   },
+   "pose": {
+    "kind": "wave",
+    "waves": 2.0,
+    "amp": 78,
+    "bend": 70,
+    "lift": 0.3
+   },
+   "scene": {
+    "kind": "soil",
+    "basis": "Lives in loose soil, leaf litter and under logs and stones (Species of Thailand; plazi treatment). Shown on moist soil with leaf fragments."
+   },
+   "details": [
+    [
+     "eye",
+     "Tiny eyes, covered by scales"
+    ],
+    [
+     "back",
+     "Glossy, uniform dark brown"
+    ],
+    [
+     "tip",
+     "Short tail ending in a tiny spine"
+    ],
+    [
+     "snout",
+     "Rounded, paler snout"
+    ]
+   ],
+   "refs": [
+    {
+     "t": "SnakeList reference photo by Daniel Pineda Vera (CC BY), via iNaturalist",
+     "u": "https://www.inaturalist.org/photos/1961511"
+    },
+    {
+     "t": "Size (5-10 cm, up to 15 cm), colour, eyes and tail spine: Indotyphlops braminus, Wikipedia",
+     "u": "https://en.wikipedia.org/wiki/Indotyphlops_braminus"
+    },
+    {
+     "t": "Body scales in 20 rows; glossy reddish or blackish brown: plazi treatment",
+     "u": "https://tb.plazi.org/GgServer/html/947987D8FFC3FFBF16951CC6B1032C9C"
+    },
+    {
+     "t": "Habitat in soil and leaf litter: Species of Thailand",
+     "u": "https://www.thainationalparks.com/species/indotyphlops-braminus"
+    }
+   ]
+  },
+  "hydrophis-platurus": {
+   "name": "Yellow-bellied Sea Snake",
+   "plan": "sea",
+   "length": 0.65,
+   "lengthNote": "adults about 60-75 cm; this species reaches about 80 cm",
+   "max": "about 80-88 cm",
+   "body": {
+    "ld": 28,
+    "neck": 0.6,
+    "tail": 0.11,
+    "xs": 0.72
+   },
+   "head": {
+    "len": 0.05,
+    "w": 0.78,
+    "h": 0.7,
+    "snout": 0.55,
+    "jaw": 0.75,
+    "eyeX": 0.28,
+    "eyeA": 50,
+    "eye": 0.13,
+    "iris": "#2a2418",
+    "pupil": "round"
+   },
+   "scales": {
+    "rows": 47,
+    "gloss": 0.4
+   },
+   "colors": {
+    "dorsal": "#16171a",
+    "lateral": "#1b1b1c",
+    "belly": "#d6a73a",
+    "bellyA": 0.5,
+    "bellySharp": 0.015,
+    "bellyWarp": 0.05,
+    "mottle": 0.05,
+    "var": 0.04
+   },
+   "pattern": [
+    {
+     "type": "stripe",
+     "a": 0.5,
+     "mirror": true,
+     "wid": 0.035,
+     "color": "#8c6a2c",
+     "alpha": 0.7,
+     "t": [
+      0.06,
+      0.9
+     ]
+    },
+    {
+     "type": "tint",
+     "t": [
+      0.885,
+      1
+     ],
+     "ramp": 0.01,
+     "color": "#d9ab3e"
+    },
+    {
+     "type": "blotch",
+     "t": [
+      0.89,
+      0.995
+     ],
+     "count": 6,
+     "a": 0.0,
+     "wid": 0.55,
+     "len": 0.5,
+     "shape": "round",
+     "color": "#15161a",
+     "warp": 1.0,
+     "belly": true
+    },
+    {
+     "type": "blotch",
+     "t": [
+      0.89,
+      0.995
+     ],
+     "count": 6,
+     "phase": 0.5,
+     "a": 0.75,
+     "mirror": true,
+     "wid": 0.18,
+     "len": 0.45,
+     "shape": "round",
+     "color": "#15161a",
+     "warp": 1.0,
+     "belly": true
+    }
+   ],
+   "pose": {
+    "kind": "wave",
+    "waves": 1.6,
+    "amp": 62,
+    "bend": 40,
+    "lift": 0.3
+   },
+   "scene": {
+    "kind": "sea",
+    "float": 1.05,
+    "basis": "Account habitat: \"Completely pelagic ... often found along slicks and drift lines\". Shown floating at the sea surface near a line of drifting debris."
+   },
+   "details": [
+    [
+     "back",
+     "Black above"
+    ],
+    [
+     "side",
+     "Sharp line between black back and yellow belly"
+    ],
+    [
+     "tail",
+     "Paddle-shaped tail, yellow with black spots"
+    ],
+    [
+     "snout",
+     "Long, narrow head"
+    ]
+   ],
+   "refs": [
+    {
+     "t": "SnakeList species account (Wikipedia, NOAA and others)",
+     "u": "../data/species-info/hydrophis-platurus.json",
+     "acct": 1
+    },
+    {
+     "t": "SnakeList reference photo by Dion Maple (CC BY-NC), via iNaturalist",
+     "u": "https://www.inaturalist.org/photos/78092142"
+    },
+    {
+     "t": "Size and body scales (juxtaposed, 45-47 rows): SANBI Biodiversity Advisor",
+     "u": "https://biodiversityadvisor.sanbi.org/search/detail/80973"
+    }
+   ]
+  }
+ }
+}

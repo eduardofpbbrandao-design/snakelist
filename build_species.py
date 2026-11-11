@@ -174,6 +174,10 @@ def build(app):
     import build_regions
     open(OUT + "/sp.css", "w").write(CSS + build_regions.REAL_CSS)
     open(OUT + "/sp.js", "w").write(JS + build_regions.REAL_JS)
+    # "Explore in 3D": the reviewed model profiles, next to the viewer (species/3d/viewer.js)
+    os.makedirs(OUT + "/3d", exist_ok=True)
+    with open(OUT + "/3d/models.json", "w", encoding="utf-8") as fh:
+        json.dump(json.load(open("data/snake-models.json", encoding="utf-8")), fh, ensure_ascii=False, separators=(",", ":"))
     return pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll, paths, boxes, region)
 
 
@@ -898,8 +902,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             site_head=site_header("../", "species"), site_foot=site_footer("../"),
             crumb_tax=((' &rsaquo; <a href="family/%s">%s</a>' % (slugify(c["family"]), esc(c["family"]))) if c["family"] else "") + ((' &rsaquo; <a href="genus/%s"><i>%s</i></a>' % (slugify(c["genus"]), esc(c["genus"]))) if c["genus"] and not c["fossil"] else ""),
             author=AUTHOR, venom_cls="v" if c["venom"] else "nv",
-            realbtn="" if c["fossil"] else '<button type="button" class="sp-btn sp-btn2 sp-realbtn" aria-haspopup="dialog">See it in real life</button>',
-            lenattr=len_attr(info) + (' data-scene="%s"' % scene_of(c, info) if len_attr(info) else ""),
+            realbtn="" if c["fossil"] else '<button type="button" class="sp-btn sp-btn2 sp-realbtn" aria-haspopup="dialog">Explore in 3D</button>',
+            lenattr=len_attr(info),
             mapnote=('<p class="sp-note sp-mapnote">Shaded countries are those where it %s recorded &ndash; it does not live everywhere inside them.</p>' % ("was" if gone else "is"))
                     if codes or icodes or ishapes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
         page = page.replace(GEN_MARK, fmt_date(dates.get(page_name(c), page)))
@@ -945,30 +949,6 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     credits_page(cards, esc)
     reg_urls = build_regions.build(cards, by_id, INFO, invasive, iso, harm)
     return [SITE + "species/"] + [SITE + "species/" + page_name(c) for c in links] + hubs(cards, esc, img_of, invasive) + reg_urls
-
-
-# "See it in real life" draws the size picture inside a little scene of where the snake lives.
-# The scene comes from the reviewed account's habitat text (the habitat it names first), else from
-# the kind of snake, else from the commonest kind of habitat in its range estimate.
-SCENE_WORDS = [("ocean", r"pelagic|open ocean|\bsea\b|coral|reef"), ("water", r"water|swamp|marsh|river|stream|lake|pond|wetland|creek|everglades"),
-               ("rainforest", r"rainforest|humid (lowland )?forest|tropical forest"), ("desert", r"desert|semi-arid|\bsand\b|dune|creosote"),
-               ("heath", r"heath"), ("savanna", r"savanna|grassland|open country|open areas|grassy|plains|fields|farmland"),
-               ("rocks", r"rock|stony|scrub|chaparral|canyon|talus"), ("forest", r"forest|wood|oak|hammock|foliage|trees")]
-SCENE_KIND = {"Rainforests": "rainforest", "Forests & woodlands": "forest", "Savannas & grasslands": "savanna", "Shrublands & heath": "rocks",
-              "Deserts & dunes": "desert", "Mountains & rocks": "rocks", "Underground & forest floor": "forest", "Wetlands & swamps": "water",
-              "Rivers & lakes": "water", "Coasts & sea": "ocean", "Around people": "savanna"}
-def scene_of(c, info):
-    txt = " ".join(x.get("text", "") for x in ((info or {}).get("sections") or {}).get("habitat") or [] if isinstance(x, dict)).lower()
-    txt = re.sub(r"\b(except|avoids?)\b[^.,;:]*", "", txt)  # "most habitats except dense forest" is not a forest snake
-    hits = [(m.start(), k) for k, rx in SCENE_WORDS for m in [re.search(rx, txt)] if m]
-    if hits:
-        k = min(hits)[1]
-        return "rainforest" if k == "forest" and "rainforest" in txt else k
-    if c["type"] == "Sea Snake": return "ocean"
-    if c["type"] == "Watersnake": return "water"
-    kinds = {}
-    for h in c["habitats"]: k = hab_kind(h); kinds[k] = kinds.get(k, 0) + 1
-    return SCENE_KIND.get(max(kinds, key=kinds.get), "forest") if kinds else "forest"
 
 
 def credits_page(cards, esc):
@@ -1020,7 +1000,7 @@ q.addEventListener('input',function(){clearTimeout(t);t=setTimeout(function(){va
 
 
 def len_attr(info):
-    """a species page's sourced adult length, for the size picture in "See it in real life":
+    """a species page's sourced adult length, for the size picture in "Explore in 3D" (photos tab):
     data-lenlo/-hi in metres, the account's own words and its first source (none without an account)"""
     import build_regions
     lm = build_regions.length_m(info)
