@@ -89,6 +89,14 @@ def hab_kind(h):
     return "Forests & woodlands"
 APP = [""]
 CITIES = {}
+NONSOV = set()
+
+
+def places_txt(names, link=None):
+    """'5 countries and 1 territory': countries and territories (NON_SOVEREIGN) counted apart"""
+    t = sum(1 for n in names if n in NONSOV); c = len(names) - t
+    bits = ([nplural(c, "country", "countries")] if c else []) + ([nplural(t, "territory", "territories")] if t else [])
+    return " and ".join(bits) or "no recorded countries"
 
 
 def build(app):
@@ -110,6 +118,8 @@ def build(app):
         return "about %s million years ago" % (round(m) if m >= 10 else (round(m * 10) / 10 if m % 1 else int(m))) if m >= 1 else "about {:,} years ago".format(round(m * 1000))
     fossils = set(re.findall(r'"([a-z0-9-]+)"', app.split("// prehistoric snakes known only from fossil bones", 1)[1].split("]", 1)[0]))
     eaters = set(re.findall(r'"([A-Z][a-z]+)"', app.split("const SNAKE_EATERS = new Set([", 1)[1].split("]", 1)[0]))
+    # places that are not countries of their own (Gibraltar, Puerto Rico...): the app's NON_SOVEREIGN
+    NONSOV.clear(); NONSOV.update(re.findall(r'"([^"]+)":1', app.split("var NON_SOVEREIGN = {", 1)[1].split("};", 1)[0]))
     intro = {}
     for m in re.finditer(r'"([a-z0-9-]+)":\s*\[(\{ area: [^\]]*)\]', app.split("var INTRODUCED = {", 1)[1].split("};", 1)[0]):
         intro[m.group(1)] = re.findall(r'area: "([^"]*)"', m.group(2))
@@ -380,6 +390,9 @@ GENUS_FILE = "data/genus-info.json"
 FAMILY_FILE = "data/family-info.json"
 GENUS_INFO, FAMILY_INFO = {}, {}
 GEN_MARK = "@@PAGE-GENERATED@@"
+INTRO_FILE = "data/introduced-status.json"   # introduced vs invasive, with sources
+FOSSIL_FILE = "data/fossil-additions.json"   # fossil snakes: age, find site, size estimate, debate, sources
+AUTH_FILE = "data/authorities.json"          # verified "Author, year" for species without an account
 MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 
@@ -426,8 +439,8 @@ class Refs:
         for k in keys or []:
             if k not in self.src: print("species-info %s: unknown source %s" % (self.who, k)); continue
             if k not in self.order: self.order.append(k)
-            n = self.order.index(k) + 1
-            out.append('<a href="#src-%d" aria-label="source %d">%d</a>' % (n, n, n))
+            out.append(self.order.index(k) + 1)
+        out = ['<a href="#src-%d" aria-label="source %d">%d</a>' % (n, n, n) for n in sorted(set(out))]
         return '<sup class="sp-ref">[%s]</sup>' % ",".join(out) if out else ""
 
     def rich(self, t):
@@ -451,7 +464,7 @@ class Refs:
             t = H.escape(s.get("title", ""))
             if s.get("url"): t = '<a href="%s" rel="noopener">%s</a>' % (H.escape(s["url"]), t or H.escape(s["url"]))
             bits = [t] + [H.escape(str(s[x])) for x in ("authors", "publisher", "year") if s.get(x)]
-            return ". ".join(b for b in bits if b) + "."
+            return ". ".join(b.rstrip(".") if not b.endswith("</a>") else b for b in bits if b) + "."
         return '<ol class="sp-refs">%s</ol>' % "".join('<li id="src-%d">%s</li>' % (i + 1, one(k)) for i, k in enumerate(self.order))
 
 
@@ -481,7 +494,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     def esc(t): return H.escape(str(t), quote=True)
     def plist(L, n=6):
         L = list(L)
-        return ", ".join(L) if len(L) <= n else ", ".join(L[:n]) + " and %d more" % (len(L) - n)
+        if len(L) <= 1: return "".join(L)
+        return (", ".join(L[:-1]) + " and " + L[-1]) if len(L) <= n else ", ".join(L[:n]) + " and %d more" % (len(L) - n)
     # photos that came with the photographer's name printed on them: SnakeList keeps a cleaned
     # copy (the name cropped off; the credit is shown under the photo), used instead of the original
     CLEANED = set(['0-9', '102-12', '104-7', '108-7', '109-3', '16-19', '16-2', '21-20', '22-14', '24-12', '28-13', '29-19', '3-2', '33-4', '35-23', '40-12', '40-7', '43-24', '43-8', '49-22', '50-10', '50-14', '50-6', '61-10', '61-18', '61-2', '69-4', '7-9', '72-1', '80-16', '88-10', '9-5', '93-9', '97-2', '97-7', '98-5'])
@@ -500,7 +514,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             photos["path"].replace("%d", str(p[0])), photos["cols"] * 100, photos["rows"] * 100,
             col / (photos["cols"] - 1) * 100, row / (photos["rows"] - 1) * 100)
     def kind(c):
-        t = {"Other": "snake", "Pit Viper": "pit viper", "Sea Snake": "sea snake", "Watersnake": "water snake"}.get(c["type"], c["type"].lower())
+        t = {"Other": "snake", "Colubrid": "snake", "Elapid": "snake", "Pit Viper": "pit viper", "Sea Snake": "sea snake", "Watersnake": "water snake"}.get(c["type"], c["type"].lower())
         return t if t.endswith("snake") or t in ("pit viper",) else t
     def rarity_txt(c):
         if c["extinct"] or c["fossil"]: return ""
@@ -568,23 +582,33 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         full = ('<details class="sp-habd"><summary>The %s habitat types in the estimate</summary><ul class="sp-pills">%s</ul></details>') % (
             "{:,}".format(len(hs)), "".join('<li><a href="../?hab=%s">%s</a></li>' % (esc(quote(h)), esc(h)) for h in hs))
         return note + pills + full
+    def ext_lab(x):
+        return ' <small class="sp-ext">fossil</small>' if x["fossil"] else ' <small class="sp-ext">extinct</small>' if x["extinct"] else ""
     def rel_html(c, rg, rf):
         out = ""
         if rg:
             out += '<h3 class="sp-relh">Same genus: <a href="genus/%s"><i>%s</i></a> <small>%s</small></h3><ul class="sp-rel sp-clip">%s</ul>%s' % (
                 slugify(c["genus"]), esc(c["genus"]), "closest relatives" if len(rg) > 1 else "its closest relative",
-                "".join('<li%s><a href="%s">%s</a> <i>%s</i></li>' % (xcls(i, len(rg)), page_name(x), esc(x["name"]), esc(x["sci"] if not x["is_sci"] else "")) for i, x in enumerate(rg)),
+                "".join('<li%s><a href="%s">%s</a> <i>%s</i>%s</li>' % (xcls(i, len(rg)), page_name(x), esc(x["name"]), esc(x["sci"] if not x["is_sci"] else ""), ext_lab(x)) for i, x in enumerate(rg)),
                 see_all("of the genus", len(rg)))
         if rf:
             out += '<h3 class="sp-relh">Same family: <a href="family/%s">%s</a> <small>other genera</small></h3><ul class="sp-rel">%s</ul>' % (
                 slugify(c["family"]), esc(c["family"]),
-                "".join('<li><a href="%s">%s</a> <i>%s</i></li>' % (page_name(x), esc(x["name"]), esc(x["sci"] if not x["is_sci"] else "")) for x in rf))
+                "".join('<li><a href="%s">%s</a> <i>%s</i>%s</li>' % (page_name(x), esc(x["name"]), esc(x["sci"] if not x["is_sci"] else ""), ext_lab(x)) for x in rf))
         return out or '<p class="sp-muted">No other species of its genus or family in SnakeList.</p>'
     by_id = {c["id"]: c for c in cards}
     INFO = load_info(by_id)
     GENUS_INFO.clear(); GENUS_INFO.update(load_json(GENUS_FILE)); FAMILY_INFO.clear(); FAMILY_INFO.update(load_json(FAMILY_FILE))
     dates = PageDates()
     links = []
+    ISTAT = load_json(INTRO_FILE); FOSSIL = {x["id"]: x for x in (load_json(FOSSIL_FILE) or [])}
+    AUTH = {k: v for k, v in load_json(AUTH_FILE).items() if not k.startswith("_")}
+    def intro_status(c):
+        """its introduced populations: [{area, status ('introduced' or 'invasive'), when, text, src}], from
+        data/introduced-status.json - "invasive" only where a cited source calls it that"""
+        st = ISTAT.get(c["id"])
+        if st: return st
+        return [{"area": a.strip(), "status": "introduced", "text": "", "src": None} for a in (c["invasive"].split(",") if c["invasive"] else c["intro"])]
     for c in cards:
         nm, sci = c["name"], c["sci"]
         info = INFO.get(c["id"])
@@ -593,7 +617,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         venom = "venomous" if c["venom"] else "non-venomous"
         if c["fossil"]:
             fa = c["died"]
-            lead = "%s is a prehistoric snake known only from fossils%s.%s" % (label, " of the family %s" % c["family"] if c["family"] else "",
+            lead = "%s is a prehistoric snake%s, known only from fossils.%s" % (label, " of the family %s" % c["family"] if c["family"] else "",
                 (" It died out in the %s, %s." % fa) if fa else "")
         elif c["extinct"]:  # died out: everything about it in the past tense
             lead = "%s was %s %s %s%s%s." % (label, an(venom), venom, kind(c), " of the family %s" % c["family"] if c["family"] else "",
@@ -605,7 +629,10 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         extra = []
         if c["extinct"]: extra.append(c["extinct"].replace(" - ", ": ", 1) + ".")
         if c["eater"]: extra.append("It was known to eat other snakes." if gone else "It is known to eat other snakes.")
-        if c["invasive"] or c["intro"]: extra.append("It has also been introduced by people outside its native range (%s)." % (c["invasive"] or ", ".join(c["intro"])))
+        IST = intro_status(c) if (c["invasive"] or c["intro"]) else []
+        for x in IST:
+            extra.append(("It is invasive in %s, where people introduced it." if x["status"] == "invasive" else
+                          "People introduced it to %s" + ((" " + x["when"]) if x.get("when") else "") + ".") % x["area"])
         rt = rarity_txt(c)
         about = lead + " " + " ".join(extra)
         title = ("%s - %s" % (nm, sci) if not c["is_sci"] else sci) + ": identification, range map, photos & facts | SnakeList"
@@ -620,18 +647,24 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         for pkey in c["provinces"]:
             cc, _, pn = pkey.partition(":"); provs.setdefault(cc.lower(), []).append(pn)
         if c["states"]: provs.setdefault("us", []).extend(c["states"])
+        # a province it was only brought to (the Balearics for the Viperine Snake) is not native range
+        for x in invasive.get(c["id"]) or []:
+            if x.get("code") and x.get("areas") and x["code"] in provs:
+                provs[x["code"]] = [n for n in provs[x["code"]] if n not in x["areas"]]
+                if not provs[x["code"]]: del provs[x["code"]]
         def place(n):  # a country name, linking to the app's map on that country
             return '<a href="../?map=%s">%s</a>' % (esc(quote(n)), esc(n)) if n in iso else esc(n)
         rows = []
         for i, n in enumerate(c["countries"]):  # countries only - the states are on the map
-            rows.append("<li%s><b>%s</b></li>" % (xcls(i, len(c["countries"])), place(n)))
+            rows.append("<li%s><b>%s</b>%s</li>" % (xcls(i, len(c["countries"])), place(n), ' <small class="sp-terr">territory</small>' if n in NONSOV else ""))
         codes = [iso[n] for n in c["countries"] if n in iso]
         # introduced / invasive places: their own colour on the map (unless also native there)
         inv = invasive.get(c["id"]) or [{"name": a, "code": "", "note": ""} for a in c["intro"]]
         icodes, dots, ishapes, iboxes = [], [], [], []
         for x in inv:
             cc = x["code"] or iso.get(x["name"], "")
-            rows.append("<li><b>Introduced:</b> %s</li>" % place(x["name"]))
+            rows.append("<li><b>Introduced:</b> %s%s</li>" % (esc(x["note"]) + " (" + place(x["name"]) + ")" if x.get("note") else place(x["name"]),
+                        "" if x.get("note") or not x["name"] in NONSOV else ' <small class="sp-terr">territory</small>'))
             rg = region(cc, x.get("states") or []) if cc and x.get("states") else None
             if rg:  # only the states/provinces it was brought to, not the whole country
                 ishapes.append(rg[0]); iboxes.append((0,) + rg[1])
@@ -705,51 +738,90 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if rt.startswith("Rare"): tags.append(("Rarely recorded on iNaturalist", "f=chip-rare"))
         tags.append(("Venomous", "f=chip-venom") if c["venom"] else ("Non-venomous", "f=chip-nonvenom"))
         hm = harm(c)
-        if hm: tags.append((hm.capitalize(), "f=chip-" + hm))
+        if hm: tags.append(("Dangerous to people" if hm == "harmful" else "Not dangerous to people", "f=chip-" + hm))
         cons = constriction(c)  # documented for its family or genus, same list as the app (#constrictor-data)
         if cons == "yes": tags.append(("Constrictor", "f=chip-constrictor"))
         elif cons == "no": tags.append(("Non-constrictor", "f=chip-nonconstrictor"))
-        if c["invasive"]: tags.append(("Invasive in " + plist([x.strip() for x in c["invasive"].split(",")], 2), "f=chip-invasive"))
+        if c["invasive"]:  # the app's filter groups every introduced population; the label says which they are
+            inv_areas = [x["area"] for x in IST if x["status"] == "invasive"]
+            tags.append((("Invasive in " + plist(inv_areas, 2)) if inv_areas else ("Introduced to " + plist([x["area"] for x in IST], 2)), "f=chip-invasive"))
         if c["eater"]: tags.append(("Snake eater", "f=chip-snakeeater"))
         if c["extinct"] or c["fossil"]: tags.append(("Fossil" if c["fossil"] else c["extinct"].split(" - ")[0].split(" since")[0], "f=chip-extinct"))
         if c["type"] and c["type"] != "Other": tags.append((c["type"], "type=" + quote(c["type"])))
         if c["family"]: tags.append((c["family"], "fam=" + quote(c["family"])))
+        if c["fossil"]:  # nothing about living snakes (venom, danger, iNaturalist, where it is exotic) applies to a fossil
+            tags = [t for t in tags if t[1] in ("f=chip-extinct",) or t[1].startswith(("type=", "fam="))]
         # related: its own genus first (its closest relatives), then - when the genus is small - a
         # few more of its family, each group labelled with how it's related
-        def relkey(x): return (not x["popular"], x["name"].lower())
+        def relkey(x): return (bool(x["fossil"] or x["extinct"]), not x["popular"], x["name"].lower())
         rel_g = sorted([x for x in by_genus.get(c["genus"], []) if x is not c], key=relkey)
         rel_f = sorted([x for x in by_family.get(c["family"], []) if x is not c and x["genus"] != c["genus"]], key=relkey)[:max(0, 8 - len(rel_g))] if c["family"] else []
         S = (info or {}).get("sections", {})
         F = (info or {}).get("facts", {})
+        FI = FOSSIL.get(c["id"], {}) if c["fossil"] else {}
         G = GENUS_INFO.get(c["genus"]) if c["genus"] else None
         if G: R.add("genus", {"title": "Meaning of the name %s" % c["genus"], **G["source"]})
-        intro_html = R.para(ov[0], "sp-intro") if ov else '<p class="sp-intro">%s</p>' % esc(lead)
+        for x in IST:
+            if x.get("src"): R.add("intro-%s" % slugify(x["area"]), x["src"])
+        if ov:
+            intro_html = R.para(ov[0], "sp-intro") + "".join(R.para(x, "sp-intro2") for x in ov[1:])
+        else:
+            intro_html = '<p class="sp-intro">%s</p>' % esc(" ".join([lead] + extra)).replace("(%s)" % esc(sci), "(<i>%s</i>)" % esc(sci), 1)
+        if info and info.get("status") == "limited":
+            intro_html += ('<p class="sp-limited"><b>Little is known about this species.</b> Only a few published studies describe it, so this page gives just '
+                           'what they record and says &ldquo;Not known&rdquo; for the rest.</p>')
+        if not info and not c["fossil"]: intro_html += '<div id="sp-wiki"></div>'
 
-        # ---- key facts beside the photo: a few useful ones, each said once ----
+        # ---- key facts: the same six labels on every living species' page (fossils get their own) ----
+        UNK = '<span class="sp-unk">Not known</span>'
+        def fact(k):
+            f = F.get(k)
+            return (R.rich(f["text"]) + R.cite(f.get("src"))) if f and f.get("text") else None
+        am = build_regions.authority(INFO, c)
         kf = []
-        if not c["fossil"]:
-            kf.append(("Venom", ("Venomous, dangerous to people" if hm == "harmful" else "Venomous (mild; no serious bites documented)") if c["venom"] else
-                       ("Not venomous" + (", harmful to people" if hm == "harmful" else ""))))
-        for k, lab in (("length", "Adult length"), ("reproduction", "Young"), ("activity", "Active"), ("diet", "Main food"), ("iucn", "IUCN Red List")):
-            if k in F: kf.append((lab, R.rich(F[k]["text"]) + R.cite(F[k].get("src")), True))
-        if cons in ("yes", "no") and "diet" not in F: kf.append(("Kills prey", "By constriction" if cons == "yes" else "Not by constriction"))
-        if c["family"]: kf.append(("Family", '<a href="family/%s">%s</a>' % (slugify(c["family"]), esc(c["family"])), True))
-        if c["genus"] and not c["fossil"]:
-            kf.append(("Genus", '<a href="genus/%s"><i>%s</i></a>%s' % (slugify(c["genus"]), esc(c["genus"]),
-                       (' <small>&ldquo;%s&rdquo;%s</small>' % (esc(G["short"]), R.cite(["genus"]))) if G and G.get("short") else ""), True))
-        if c["countries"]:
-            kf.append(("Range", '<a href="#range">%s</a>%s' % (nplural(len(c["countries"]), "country", "countries"), (" &middot; " + esc(", ".join(c["continents"]))) if c["continents"] else ""), True))
-        if (c["invasive"] or c["intro"]) and not S.get("distribution"): kf.append(("Introduced to", c["invasive"] or ", ".join(c["intro"])))
-        if c["extinct"]: kf.append(("Status", c["extinct"].split(" - ")[0]))
         if c["fossil"]:
-            kf.append(("Status", "Known only from fossils"))
             fa = c["died"]
-            if fa: kf.append(("Died out", "%s, %s" % (fa[0][0].upper() + fa[0][1:], fa[1])))
-        keyfacts = "".join("<div><dt>%s</dt><dd>%s</dd></div>" % (esc(f[0]), f[1] if len(f) > 2 else esc(f[1])) for f in kf)
+            kf.append(("Status", "Extinct &ndash; known only from fossils"))
+            kf.append(("Geological age", esc("%s, %s" % (fa[0][0].upper() + fa[0][1:], fa[1])) if fa else UNK))
+            kf.append(("Fossils found in", '<a href="#range">%s</a>' % esc(plist(c["countries"], 3)) if c["countries"] else UNK))
+            kf.append(("Estimated length", fact("length") or UNK))
+            kf.append(("Diet", fact("diet") or UNK))
+            kf.append(("First described", esc(("%s et al., %d" % (re.split(r",|&| and ", am[1])[0].strip(), am[2])) if am[1].count(",") >= 2 else "%s, %d" % (am[1], am[2])) if am else UNK))
+        else:
+            if F.get("venom"): vt = fact("venom")
+            elif c["venom"]: vt = "Venomous &ndash; dangerous to people" if hm == "harmful" else "Mildly venomous &ndash; no serious bites to people documented"
+            else: vt = "Not venomous &ndash; but big enough to injure people" if hm == "harmful" else "Not venomous to people &ndash; it can still bite"
+            kf.append(("Venom", vt))
+            kf.append(("Adult length", fact("length") or UNK))
+            kf.append(("Diet", fact("diet") or UNK))
+            kf.append(("Reproduction", fact("reproduction") or UNK))
+            if c["extinct"]:
+                cs = esc(c["extinct"].split(" - ")[0])
+            elif F.get("iucn"):
+                fi = F["iucn"]
+                meta = ", ".join(x for x in ("IUCN Red List", fi.get("scope", ""), str(fi.get("year", "")) if fi.get("year") else "") if x)
+                cs = ('%s <small>(%s)</small>%s' % (esc(fi["text"]), esc(meta), R.cite(fi.get("src")))) if fi.get("code") else (
+                    '<span class="sp-unk">Category not confirmed</span> <small>(%s)</small>' % esc(meta))
+            else:
+                cs = '<span class="sp-unk">Not reviewed yet</span>'
+            kf.append(("Conservation status", cs))
+            if c["countries"]:
+                dist = '<a href="#range">%s</a>' % (("Formerly " if c["extinct"] else "") + places_txt(c["countries"]))
+                if c["continents"]: dist += " <small>&middot; %s</small>" % esc(", ".join(c["continents"]))
+            else:
+                dist = UNK
+            if IST:
+                dist += "<small class=\"sp-kintro\">%s</small>" % "; ".join(
+                    esc(("Invasive in %s" if x["status"] == "invasive" else "Introduced to %s") % x["area"]) for x in IST)
+            kf.append(("Distribution", dist))
+        keyfacts = "".join('<div><dt>%s</dt><dd>%s</dd></div>' % (esc(f[0]), f[1]) for f in kf)
 
         # ---- photo, with a readable credit linking to the original record ----
         photo = img_of(c); p = c["photo"]
-        if photo:
+        if c["fossil"]:  # no photo can exist, and its colours are unknown: no painted life reconstruction
+            ph = ('<figure class="sp-photo sp-nophoto sp-fossilfig"><div><b>Known only from fossils</b><span>No photo can exist, and its colours '
+                  'and pattern are unknown, so SnakeList shows no life reconstruction.</span></div></figure>')
+        elif photo:
             who, _, lic = p[2].rpartition(", ")
             if not who: who, lic = p[2], ""
             pid = p[4].split(".")[0] if len(p) >= 5 else ""
@@ -763,43 +835,33 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         else:
             ph = '<figure class="sp-photo sp-nophoto"><div>No photo of this snake yet</div></figure>'
 
-        # ---- the sections ----
+        # ---- the sections, in reading order ----
         def paras(key, h3=None):
             ps = S.get(key) or []
             if not ps: return ""
             return ('<h3>%s</h3>' % h3 if h3 else "") + "".join(R.para(x) for x in ps)
-        ov_body = "".join(R.para(x) for x in ov[1:]) if ov else ("<p>%s</p>" % esc(" ".join(extra)) if extra else "")
-        if info and info.get("status") == "limited":
-            ov_body += ('<p class="sp-limited"><b>Little is known about this snake.</b> Only a few published studies describe it, so this page gives just '
-                        'what they record and leaves the rest blank rather than guessing.</p>')
-        if info and info.get("funfacts"):
-            ov_body += '<div class="sp-fun"><h3>Did you know?</h3><ul>%s</ul></div>' % "".join(
-                "<li>%s%s</li>" % (R.rich(x["text"]), R.cite(x.get("src"))) for x in info["funfacts"])
-        if not info: ov_body += '<div id="sp-wiki"></div>'
-        # who described it: the reviewed account's authority, with the person (and, without an
-        # account, the whole answer) looked up on Wikidata by wd.js; fossils add their geological age
-        am = build_regions.authority(INFO, c)
-        who = ""
-        if am:
-            who = '<p class="sp-who-s">First described by <b>%s</b> in <b>%d</b><span class="sp-ago" data-y="%d"></span>.%s</p>' % (
-                esc(am[1]), am[2], am[2], (" The brackets in its name&rsquo;s authority, %s, mean it was first described under a different genus." % esc(am[0])) if am[3] else "")
-        if c["fossil"] and c["died"]:
-            who += '<p><b>Geological age:</b> known from fossils; it died out in the %s, %s.</p>' % (esc(c["died"][0]), esc(c["died"][1]))
-        ov_body += '<div class="sp-who" id="sp-who" data-sci="%s" data-auth="%s"%s%s><h3>Who described it</h3>%s<div class="sp-who-p"></div></div>' % (
-            esc(sci), esc(am[0] if am else ""), (' data-y="%d"' % am[2]) if am else "", "" if who else " hidden", who if am else '<p class="sp-who-s"></p>' + who)
-        ov_body += '<p class="sp-tagh">Find snakes like it in the SnakeList app:</p><ul class="sp-tags" aria-label="SnakeList filters">%s</ul>' % "".join(
-            '<li><a href="../?%s">%s</a></li>' % (esc(q), esc(t)) for t, q in tags)
-        secs = [("overview", "Overview", ov_body)]
-        ident = paras("identification", "Appearance") + paras("size", "Size") + paras("variation", "Variation")
-        if info and info.get("similar"):
-            items = []
-            for x in info["similar"]:
-                o = by_id.get(x["id"])
-                if not o: print("species-info %s: unknown similar species %s" % (c["id"], x["id"])); continue
-                items.append('<li><a href="%s">%s</a>%s &ndash; %s%s</li>' % (page_name(o), esc(o["name"]), (" <i>%s</i>" % esc(o["sci"])) if not o["is_sci"] else "",
-                                                                         R.rich(x["text"]), R.cite(x.get("src"))))
-            ident += '<h3>Similar species</h3><ul class="sp-sim">%s</ul>' % "".join(items)
-        if ident: secs.append(("identification", "Identification", ident))
+        secs = []
+        if c["fossil"]:
+            # what the fossils are, where and when - and how sure anyone can be
+            fos = paras("fossils", "What has been found") + paras("geology", "Geological age and setting")
+            if not S.get("geology") and c["died"]:
+                fos += '<h3>Geological age</h3><p>It lived in the %s, %s%s.</p>' % (esc(c["died"][0]), esc(c["died"][1]),
+                        (" (dated from the rocks its fossils were found in)") if FI else "")
+            if not S.get("fossils") and FI.get("discovered"):
+                fos += '<h3>Where it was found</h3><p>%s.</p>' % esc(FI["discovered"])
+            fos += paras("size", "Size estimate")
+            if not S.get("size") and FI.get("length_note"):
+                fos += '<h3>Size estimate</h3><p>%s</p>' % esc(FI["length_note"])
+            fos += paras("uncertainty", "What is uncertain")
+            if not S.get("uncertainty") and FI.get("dispute"):
+                fos += '<h3>What is uncertain</h3><p>%s</p>' % esc(FI["dispute"])
+            fos += paras("palaeoenvironment", "Its world") + paras("diet", "Diet")
+            if not S and FI.get("sources"):
+                fos += '<p class="sp-note">From: %s</p>' % ", ".join('<a href="%s" rel="noopener">%s</a>' % (esc(u), esc(re.sub(r"^https?://(www\.)?", "", u).split("/")[0])) for u in FI["sources"])
+            secs.append(("fossil", "Fossils and geological context", fos or '<p class="sp-muted">Not known.</p>'))
+        else:
+            ident = paras("identification", "Appearance") + paras("juvenile", "Adults and young") + paras("variation", "Variation") + paras("size", "Size")
+            if ident: secs.append(("identification", "Identification", ident))
         # range: the published account, then SnakeList's country-level map and regions, then observations
         obs = ""
         if not c["fossil"]:
@@ -809,46 +871,94 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
                    '<a href="https://www.gbif.org/species/search?q=%s" rel="noopener">GBIF occurrence records</a></p>') % (
                 ("SnakeList found research-grade iNaturalist records of it in %s." % nplural(c["spots"], "place")) if c["spots"] else
                 "SnakeList found no confirmed iNaturalist records of it.", q, q)
-        secs.append(("range", "Range", None))  # filled in by the template (the map)
+        secs.append(("range", "Where its fossils were found" if c["fossil"] else "Distribution", None))  # filled in by the template (the map)
         pub_html = paras("distribution", "Published distribution")
-        eco = paras("habitat", "Habitat") or ('<h3>Habitat types in its range <small>rough estimate</small></h3>' + hab_html(c, gone))
-        eco += paras("behaviour", "Behaviour") + paras("diet", "Diet") + paras("reproduction", "Reproduction")
-        secs.append(("ecology", "Ecology", eco))
-        cons_html = ""
-        if "iucn" in F:
-            fi = F["iucn"]
-            cons_html += '<p class="sp-iucn"><span class="sp-cat cat-%s">%s</span><span>%s%s</span></p>' % (esc(fi.get("code", "")), esc(fi.get("code", "")), R.rich(fi["long"] if fi.get("long") else fi["text"]), R.cite(fi.get("src")))
-        cons_html += paras("conservation")
-        if not cons_html and not c["fossil"]:
-            cons_html = ('<p>%s</p><p class="sp-muted">SnakeList has not reviewed this snake&rsquo;s conservation status yet. '
-                         '<a href="https://www.iucnredlist.org/search?query=%s&amp;searchType=species" rel="noopener">Check the IUCN Red List</a>.</p>') % (
-                esc(c["extinct"].replace(" - ", ": ", 1) + ".") if c["extinct"] else "", quote(sci))
-            cons_html = cons_html.replace("<p></p>", "")
-        if cons_html: secs.append(("conservation", "Conservation", cons_html))
-        # taxonomy: the classification, the genus name's meaning, then names it has had
-        auth = (info or {}).get("authority", "")
+        if IST and not S.get("distribution"):
+            pub_html += "<h3>Introduced populations</h3>" + "".join(
+                "<p><b>%s:</b> %s%s%s</p>" % (esc(x["area"]), "Invasive. " if x["status"] == "invasive" else "Introduced by people%s. " % ((" " + x["when"]) if x.get("when") else ""),
+                                            esc(x.get("text", "")), R.cite(["intro-%s" % slugify(x["area"])]) if x.get("src") else "") for x in IST)
+        if not c["fossil"]:
+            eco = paras("habitat", "Habitat") or ('<h3>Habitat types in its range <small>rough estimate</small></h3>' + hab_html(c, gone))
+            # the one-line activity fact only where no fuller behaviour text says it again
+            eco += paras("activity", "Activity") or (("<h3>Activity</h3><p>%s</p>" % fact("activity")) if F.get("activity") and not S.get("behaviour") else "")
+            eco += paras("behaviour", "Behaviour") + paras("diet", "Diet") + paras("reproduction", "Reproduction") + paras("longevity", "Lifespan")
+            if info and info.get("funfacts"):
+                eco += '<div class="sp-fun"><h3>Did you know?</h3><ul>%s</ul></div>' % "".join(
+                    "<li>%s%s</li>" % (R.rich(x["text"]), R.cite(x.get("src"))) for x in info["funfacts"])
+            secs.append(("ecology", "Behaviour and ecology", eco))
+            cons_html = ""
+            if "iucn" in F:
+                fi = F["iucn"]
+                meta = []
+                meta.append("%s assessment" % fi["scope"].capitalize() if fi.get("scope") else "Scope not recorded")
+                meta.append("assessed %s" % fi["year"] if fi.get("year") else "assessment year not recorded")
+                if fi.get("url"): meta.append('<a href="%s" rel="noopener">IUCN assessment</a>' % esc(fi["url"]))
+                cons_html += ('<div class="sp-iucn">%s<div><p><b>%s</b>%s%s</p>'
+                              '<p class="sp-note">%s</p></div></div>') % (
+                    ('<span class="sp-cat cat-%s" aria-hidden="true">%s</span>' % (esc(fi["code"]), esc(fi["code"]))) if fi.get("code") else "",
+                    esc(fi["text"]), " on the IUCN Red List" if fi.get("code") else "", R.cite(fi.get("src")), " &middot; ".join(meta))
+                if fi.get("long") and fi["long"] != "Listed as %s on the IUCN Red List." % fi["text"]: cons_html += "<p>%s</p>" % R.rich(fi["long"])
+            cons_html += paras("conservation")
+            if c["extinct"]: cons_html = '<p><b>%s.</b></p>' % esc(c["extinct"].replace(" - ", ": ", 1)) + cons_html
+            if "iucn" not in F and not c["extinct"]:
+                cons_html += ('<p class="sp-muted">SnakeList has not reviewed this snake&rsquo;s Red List status yet. '
+                              '<a href="https://www.iucnredlist.org/search?query=%s&amp;searchType=species" rel="noopener">Search the IUCN Red List</a>.</p>') % quote(sci)
+            secs.append(("conservation", "Conservation", cons_html))
+        else:
+            eco = paras("behaviour", "Behaviour") + paras("habitat", "Habitat")
+            if eco: secs.append(("ecology", "What it may have been like", '<p class="sp-note">Inferred from the fossils and the rocks around them, not observed.</p>' + eco))
+        # similar species (how to tell them apart), its relatives, and the app's filters for snakes like it
+        relx = ""
+        if info and info.get("similar"):
+            items = []
+            for x in info["similar"]:
+                o = by_id.get(x["id"])
+                if not o: print("species-info %s: unknown similar species %s" % (c["id"], x["id"])); continue
+                items.append('<li><a href="%s">%s</a>%s &ndash; %s%s</li>' % (page_name(o), esc(o["name"]), (" <i>%s</i>" % esc(o["sci"])) if not o["is_sci"] else "",
+                                                                         R.rich(x["text"]), R.cite(x.get("src"))))
+            relx += '<h3>Similar species and how to tell them apart</h3><ul class="sp-sim">%s</ul>' % "".join(items)
+        relx += rel_html(c, rel_g, rel_f)
+        relx += '<h3>Find snakes like it in the app</h3><ul class="sp-tags" aria-label="SnakeList filters">%s</ul>' % "".join(
+            '<li><a href="../?%s">%s</a></li>' % (esc(q), esc(t)) for t, q in tags)
+        secs.append(("related", "Similar and related snakes", relx))
+        # taxonomy: the classification, who described it, what the genus name means, names it has had
+        auth = am[0] if am else ""
+        # a long list of authors: "Head et al., 2009" where space is short, the full authority in Taxonomy
+        auth_short = ("%s et al., %d" % (re.split(r",|&| and ", am[1])[0].strip(), am[2])) if am and am[1].count(",") >= 2 else auth
         tx = '<dl class="sp-tax">'
         if c["family"]:
             fi = FAMILY_INFO.get(c["family"], {})
             tx += '<div><dt>Family</dt><dd><a href="family/%s">%s</a>%s</dd></div>' % (slugify(c["family"]), esc(c["family"]), (" (%s)" % esc(fi["common"])) if fi.get("common") else "")
         if c["genus"]:
-            tx += '<div><dt>Genus</dt><dd><a href="genus/%s"><i>%s</i></a>%s</dd></div>' % (slugify(c["genus"]), esc(c["genus"]),
-                  (' <span class="sp-ety">&ndash; %s%s</span>' % (R.rich(G["meaning"]), R.cite(["genus"]))) if G else "")
+            tx += '<div><dt>Genus</dt><dd><a href="genus/%s"><i>%s</i></a></dd></div>' % (slugify(c["genus"]), esc(c["genus"]))
         tx += '<div><dt>Species</dt><dd><i>%s</i>%s</dd></div></dl>' % (esc(sci), (" " + esc(auth)) if auth else "")
-        tx += paras("taxonomy")
+        if am:
+            who = '<p class="sp-who-s">First described by <b>%s</b> in <b>%d</b><span class="sp-ago" data-y="%d"></span>.%s</p>' % (
+                esc(am[1]), am[2], am[2], (" The brackets around the authority, %s, mean it was first described in a different genus." % esc(am[0])) if am[3] else "")
+        else:
+            who = '<p class="sp-who-s sp-muted">Author details not available.</p>'
+        tx += '<div class="sp-who" id="sp-who" data-sci="%s" data-auth="%s"%s><h3>Who described it</h3>%s<div class="sp-who-p"></div></div>' % (
+            esc(sci), esc(auth), (' data-y="%d"' % am[2]) if am else "", who)
+        if G:
+            tx += '<h3>What the name means</h3><p class="sp-ety"><i>%s</i>: %s%s</p>' % (esc(c["genus"]), R.rich(G["meaning"]), R.cite(["genus"]))
+        tx += paras("taxonomy", "Classification notes")
         syn = (info or {}).get("synonyms")
         if syn and syn.get("names"):
             tx += '<details class="sp-det"><summary>Other scientific names it has had (%d)</summary><ul>%s</ul>%s</details>' % (
                 len(syn["names"]), "".join("<li>%s</li>" % R.rich(s) for s in syn["names"]), ('<p class="sp-note">Source%s</p>' % R.cite(syn.get("src"))) if syn.get("src") else "")
         secs.append(("taxonomy", "Taxonomy", tx))
-        secs.append(("related", "Related snakes", rel_html(c, rel_g, rel_f)))
-        # sources: the numbered references, the photo, where to look further, and the two dates
+        # sources: the numbered references, the photo, where to look further, provenance and the dates
         src = ""
+        if FI.get("sources") and not info:
+            for k, u in enumerate(FI["sources"]):
+                R.add("fos%d" % k, {"title": re.sub(r"^https?://(www\.)?", "", u).split("/")[0], "url": u}); R.cite(["fos%d" % k])
         refs = R.list_html()
-        if refs: src += '<h3>References</h3>%s' % refs
-        else: src += ('<p>SnakeList has no reviewed species account for this snake yet. The facts on this page come from SnakeList&rsquo;s own checklist '
-                      'data (names, family, venom, and the countries, states and provinces where it is recorded).</p>')
-        if photo:
+        if refs:
+            src += '<details class="sp-det sp-refd"%s><summary>References (%d)</summary>%s</details>' % (" open" if len(R.order) <= 8 else "", len(R.order), refs)
+        else:
+            src += ('<p>SnakeList has no reviewed species account for this snake yet. The facts on this page come from SnakeList&rsquo;s own checklist '
+                    'data (names, family, venom, and the countries, states and provinces where it is recorded).</p>')
+        if photo and not c["fossil"]:
             w3, _, l3 = p[2].rpartition(", ")
             src += '<p><b>Photo:</b> &copy; %s, used under %s; cropped and resized by SnakeList. <a href="photo-credits.html#%s">All photo credits</a>.</p>' % (
                 esc(w3 or p[2]), lic_link(l3) if w3 else "its Creative Commons licence", esc(c["id"]))
@@ -857,15 +967,23 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             src += ('<h3>Look it up</h3><p class="sp-links"><a href="https://reptile-database.reptarium.cz/species?genus=%s&amp;species=%s" rel="noopener">The Reptile Database</a>'
                     '<a href="https://www.inaturalist.org/taxa/search?q=%s" rel="noopener">iNaturalist</a><a href="https://www.iucnredlist.org/search?query=%s&amp;searchType=species" rel="noopener">IUCN Red List</a>'
                     '<a href="https://www.gbif.org/species/search?q=%s" rel="noopener">GBIF</a></p>') % (quote(g0), quote(s0.split(" ")[0]), quote(sci), quote(sci), quote(sci))
+        src += ('<details class="sp-det sp-prov"><summary>How this page is made</summary><ul>'
+                '<li>Countries, states and provinces, venom and family come from SnakeList&rsquo;s checklist; the map shades whole countries and regions, not exact range.</li>'
+                '%s<li id="sp-wdprov">%s</li></ul></details>') % (
+            "<li>Facts with numbered references come from the reviewed species account; anything the sources do not cover is shown as &ldquo;Not known&rdquo;.</li>" if info else "",
+            ("Who described it: from the authority %s%s." % (esc(am[0]), " in the reviewed account" if (info and info.get("authority")) else " (checked by SnakeList)")) if am else
+            "Who described it: no checked authority on file; Wikidata is asked in your browser and its answer is shown only if it passes basic checks.")
         src += '<p class="sp-dates">%s<span>Page generated %s</span></p>' % (
             ('<span>Information last reviewed %s</span>' % fmt_date(info["reviewed"])) if info and info.get("reviewed") else "", GEN_MARK)
         secs.append(("sources", "Sources", src))
-        toc_names = {"overview": "Overview", "identification": "Identification", "range": "Range", "ecology": "Ecology", "conservation": "Conservation", "sources": "Sources"}
+        toc_names = {"fossil": "Fossils", "identification": "Identification", "range": "Where found" if c["fossil"] else "Distribution",
+                     "ecology": "Behaviour" if not c["fossil"] else "Way of life", "conservation": "Conservation", "related": "Related", "taxonomy": "Taxonomy", "sources": "Sources"}
         toc = "".join('<a href="#%s">%s</a>' % (k, toc_names[k]) for k, _, _ in secs if k in toc_names)
         def sec_html(k, h, body):
             return '<section id="%s" class="sp-sec"><h2>%s</h2>%s</section>' % (k, h, body)
-        before = "".join(sec_html(*s) for s in secs[:[s[0] for s in secs].index("range")])
-        after = "".join(sec_html(*s) for s in secs[[s[0] for s in secs].index("range") + 1:])
+        ri = [s[0] for s in secs].index("range")
+        before = "".join(sec_html(*s) for s in secs[:ri])
+        after = "".join(sec_html(*s) for s in secs[ri + 1:])
         ld = [{"@context": "https://schema.org", "@type": "Taxon", "name": sci, "alternateName": [nm] if not c["is_sci"] else [],
                "taxonRank": "species", "url": url, "image": img, "description": desc,
                "parentTaxon": {"@type": "Taxon", "name": c["genus"], "taxonRank": "genus",
@@ -874,33 +992,49 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
                   {"@type": "ListItem", "position": 1, "name": "SnakeList", "item": SITE},
                   {"@type": "ListItem", "position": 2, "name": "All species", "item": SITE + "species/"},
                   {"@type": "ListItem", "position": 3, "name": nm, "item": url}]}]
+        nterr = sum(1 for n in c["countries"] if n in NONSOV)
+        if c["fossil"]:
+            actions = '<a class="sp-btn sp-btn2" href="../?sp=%s">Open in the SnakeList app</a>' % c["id"]
+            actnote = "Fossil snakes are in the app&rsquo;s checklist too, but there is nothing alive to see."
+        else:
+            actions = ('<a class="sp-btn" href="../?sp=%s&amp;do=seen"><span aria-hidden="true">&#10003; </span>Mark seen</a>'
+                       '<a class="sp-btn sp-btn2" href="../?sp=%s&amp;do=want"><span aria-hidden="true">&#9734; </span>Want to see</a>') % (c["id"], c["id"])
+            if c["countries"]: actions += '<a class="sp-btn sp-btn2" href="../?map=%s">View on map</a>' % esc(quote(sci))
+            actnote = ("&ldquo;Mark seen&rdquo; and &ldquo;Want to see&rdquo; open this snake in the SnakeList app, where your lists are kept on your device &ndash; "
+                       "tap the highlighted button on its card. &ldquo;View on map&rdquo; opens the app&rsquo;s map on it.")
         page = PAGE.format(
             title=esc(title), desc=esc(desc), url=url, img=esc(img), ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"),
-            h1=esc(nm), sub=('<i>%s</i>%s' % (esc(sci), (' <span class="sp-auth">%s</span>' % esc(auth)) if auth else "")) if not c["is_sci"] else (esc(auth) if auth else ""),
+            h1=esc(nm), sub=('<i>%s</i>%s' % (esc(sci), (' <span class="sp-auth">%s</span>' % esc(auth_short)) if auth else "")) if not c["is_sci"] else (esc(auth_short) if auth else ""),
+            fossil_flag=('<p class="sp-fossil-flag">Extinct &middot; fossil snake%s</p>' % (" &middot; " + esc(c["died"][0]) if c["died"] else "")) if c["fossil"] else
+                        ('<p class="sp-fossil-flag">%s</p>' % esc(c["extinct"].split(" - ")[0])) if c["extinct"] else "",
             photo=ph, intro=intro_html, keyfacts=keyfacts, toc=toc, before=before, after=after,
+            actions=actions, actnote=actnote, range_h=dict((k, h) for k, h, _ in secs)["range"],
             pub=pub_html, obs=obs,
-            where="".join(rows) or "<li>No range recorded yet.</li>", where_all=see_all("countries", len(c["countries"])),
+            where_h=("Country where the fossils were found" if len(c["countries"]) == 1 else "Countries where the fossils were found") if c["fossil"] else
+                    "%s where it %s recorded <small>(%s)</small>" % ("Countries and territories" if nterr else "Countries", "was" if gone else "is", places_txt(c["countries"])) if c["countries"] else "Countries",
+            where="".join(rows) or "<li>No range recorded yet.</li>", where_all=see_all("places", len(c["countries"])),
             st=esc(json.dumps(st_data, ensure_ascii=False, separators=(",", ":"))) if st_data else "", sview=esc(sview or "0 0 1440 720"),
             ns=esc(json.dumps(ns, separators=(",", ":"))) if ns else "",
-            stbtn=('<button type="button" class="sp-all sp-stbtn" aria-pressed="false">Show states &amp; provinces</button>' if st_rows or ns else "") +
+            stbtn="" if c["fossil"] else ('<button type="button" class="sp-all sp-stbtn" aria-pressed="false">Show states &amp; provinces</button>' if st_rows or ns else "") +
                   ('<button type="button" class="sp-all sp-ctbtn" aria-pressed="false">See cities</button>' if cities else ""),
             cities_json=esc(json.dumps([[round(t[3], 2), round(t[4], 2), t[0]] for t in cities], ensure_ascii=False)),
             cities_list=('<div class="sp-cities"><h3>Cities in its range</h3><p class="sp-note">Big cities inside the states and provinces where it is recorded - not individual sightings.</p><ul class="sp-where">%s</ul></div>' % "".join(
-                "<li>%s <small>%s</small></li>" % (esc(t[0]), esc(t[1])) for t in cities)) if cities else "",
-            states=('<div class="sp-states"><h3>States, provinces and islands</h3><p class="sp-note">The regions where it is recorded - more detail than the countries, but still approximate. The number after each place is how many snake species SnakeList records there <b>in all</b>, not how many records there are of this snake.</p><ul class="sp-where">%s</ul></div>' % "".join(st_rows)) if st_rows or ns else "",
+                "<li>%s <small>%s</small></li>" % (esc(t[0]), esc(t[1])) for t in cities)) if cities and not c["fossil"] else "",
+            states=('<details class="sp-states sp-det"><summary>States, provinces and islands where it is recorded</summary><p class="sp-note">More detail than the countries, but still approximate. The number after each place is how many snake species SnakeList records there <b>in all</b>, not how many records there are of this snake.</p><ul class="sp-where">%s</ul></details>' % "".join(st_rows)) if (st_rows or ns) and not c["fossil"] else "",
             codes=esc(" ".join(codes)), intro_codes=esc(" ".join(icodes)),
             ishapes="".join('<path class="in" d="%s"/>' % d for d in ishapes),
             dots=esc(" ".join("%.1f,%.1f,%s,%.2g" % ((lo + 180) * 4, (90 - la) * 4, k, sz) for lo, la, k, sz in dots)),
-            legend=('<p class="sp-legend"><span><i class="on"></i>%s</span>%s</p>' % ("Former range (by country)" if gone else "Native (by country)",
+            legend=('<p class="sp-legend"><span><i class="on"></i>%s</span>%s</p>' % ("Fossil find (by country)" if c["fossil"] else "Former range (by country)" if gone else "Native (by country)",
                 '<span><i class="in"></i>Introduced by people</span>' if icodes or ishapes or any(d[2] == "in" for d in dots) else "")) if codes or icodes or ishapes or dots else "", view=esc(view or "0 0 1440 720"), sci_attr=esc(sci), id=c["id"],
-            sci_q=esc(quote(sci)), maplink="" if c["fossil"] or not c["countries"] else '<a class="sp-btn sp-btn2" href="../?map=%s">View on SnakeList map</a>' % esc(quote(sci)),
-            nplaces_txt=nplural(len(c["countries"]), "country", "countries") if c["countries"] else "the places", lives="lived" if gone else "lives", safe_hidden=" hidden" if gone else "",
+            sci_q=esc(quote(sci)),
+            nplaces_txt=places_txt(c["countries"]) if c["countries"] else "the places", lives="lived" if gone else "lives", safe_hidden=" hidden" if gone else "",
             site_head=site_header("../", "species"), site_foot=site_footer("../"),
             crumb_tax=((' &rsaquo; <a href="family/%s">%s</a>' % (slugify(c["family"]), esc(c["family"]))) if c["family"] else "") + ((' &rsaquo; <a href="genus/%s"><i>%s</i></a>' % (slugify(c["genus"]), esc(c["genus"]))) if c["genus"] and not c["fossil"] else ""),
             author=AUTHOR, venom_cls="v" if c["venom"] else "nv",
             realbtn="" if c["fossil"] else '<button type="button" class="sp-btn sp-btn2 sp-realbtn" aria-haspopup="dialog">See it in real life</button>',
             lenattr=len_attr(info),
-            mapnote=('<p class="sp-note sp-mapnote">Shaded countries are those where it %s recorded &ndash; it does not live everywhere inside them.</p>' % ("was" if gone else "is"))
+            mapnote=('<p class="sp-note sp-mapnote">%s</p>' % ("The shaded country is where its fossils were found &ndash; not a living range." if c["fossil"] else
+                     "Shaded countries are those where it %s recorded &ndash; it does not live everywhere inside them." % ("was" if gone else "is")))
                     if codes or icodes or ishapes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
         page = page.replace(GEN_MARK, fmt_date(dates.get(page_name(c), page)))
         open("%s/%s.html" % (OUT, page_name(c)), "w", encoding="utf-8").write(page)
@@ -1071,17 +1205,17 @@ PAGE = """<!doctype html>
 <nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../">SnakeList</a> &rsaquo; <a href="./">All species</a>{crumb_tax} &rsaquo; <span aria-current="page">{h1}</span></nav>
 <article>
 <header class="sp-head">{photo}
-<div class="sp-title"><h1>{h1}</h1><p class="sp-sci">{sub}</p>
+<div class="sp-title">{fossil_flag}<h1>{h1}</h1><p class="sp-sci">{sub}</p>
 {intro}
-
-<div class="sp-actions"><a class="sp-btn" href="../?sp={id}">Mark Seen / Want to see</a>{realbtn}{maplink}</div>
-<p class="sp-actnote">Opens this snake in the SnakeList app, where you can tick it as Seen or add it to your Want to see list.</p>
-</div><dl class="sp-key">{keyfacts}</dl></header>
+</div></header>
+<div class="sp-keybox"><h2 class="sp-vh">Key facts</h2><dl class="sp-key">{keyfacts}</dl>
+<div class="sp-actions">{actions}{realbtn}</div>
+<p class="sp-actnote">{actnote}</p></div>
 <nav class="sp-toc" aria-label="On this page">{toc}</nav>
-{before}<section id="range" class="sp-sec"><h2>Range</h2>{pub}
-<h3>Country-level recorded distribution</h3>
+{before}<section id="range" class="sp-sec"><h2>{range_h}</h2>{pub}
+<h3>Map</h3>
 <div class="sp-map" data-codes="{codes}" data-intro="{intro_codes}" data-dots="{dots}" data-view="{view}" data-st="{st}" data-ns="{ns}" data-sview="{sview}" data-cities="{cities_json}" aria-label="Map of {nplaces_txt} where {h1} {lives}"></div><template class="sp-ishapes">{ishapes}</template><div class="sp-mapbar">{legend}{stbtn}</div>{mapnote}{states}{cities_list}
-<ul class="sp-where sp-clip">{where}</ul>{where_all}{obs}</section>
+<h3 class="sp-whereh">{where_h}</h3><ul class="sp-where sp-clip">{where}</ul>{where_all}{obs}</section>
 {after}
 <p class="sp-safe"{safe_hidden}><b>Stay safe:</b> a photo or a web page can never tell you for certain that a snake is harmless. Keep your distance, never handle a wild snake, and get medical help straight away after any bite.</p>
 </article></main>
@@ -1206,6 +1340,39 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .sp-mapnote{margin:8px 0 0}.sp-intro-box p{margin:0 0 10px}
 .cy-about{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 18px;margin:14px 0 0;max-width:820px}.cy-about p{margin:0 0 8px;line-height:1.6}
 .cy-about .sp-ref{font-size:11px}.cy-about .sp-refs{font-size:13px;margin:6px 0 0}.cy-about details summary{cursor:pointer;color:var(--g);font-size:13.5px;font-weight:600}.cy-about .sp-note{margin:4px 0 0}
+.sp-head{grid-template-areas:'photo title';grid-template-rows:auto;margin-bottom:0}@media (max-width:720px){.sp-head{grid-template-areas:'photo' 'title'}}
+.sp-vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sp-fossil-flag{display:inline-block;margin:0 0 8px;padding:3px 12px;border-radius:999px;font-size:13px;font-weight:600;background:#5b4a3a;color:#fff}
+.sp-intro2{margin:0 0 12px}
+.sp-keybox{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:6px 20px 16px}
+.sp-keybox .sp-key{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:0 24px;margin:0 0 14px;border-top:0}
+.sp-keybox .sp-key div{padding:10px 0;border-bottom:1px solid var(--line)}
+.sp-keybox .sp-key dt{font-size:12px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted);margin-bottom:2px}
+.sp-keybox .sp-key dd{font-weight:500;font-size:15px;line-height:1.45}.sp-keybox .sp-key dd small{display:inline;font-size:13px}
+.sp-keybox .sp-key dd .sp-kintro{display:block;margin-top:2px}
+.sp-unk{color:var(--muted);font-weight:400}
+.sp-keybox .sp-actions{gap:8px}.sp-keybox .sp-actnote{margin:8px 0 0}
+.sp-actions .sp-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1px solid transparent;cursor:pointer;font:600 15px Inter,system-ui,sans-serif}
+.sp-actions .sp-btn2{border-color:var(--tagline)}.sp-actions .sp-btn span{margin-right:6px}.sp-keybox a.sp-btn{color:#fff;text-decoration:none}.sp-keybox a.sp-btn2{color:var(--g)}
+.sp-keybox a.sp-btn:hover{filter:brightness(1.06)}
+@media (max-width:560px){.sp-actions{display:grid;grid-template-columns:1fr 1fr}.sp-actions .sp-btn:only-child{grid-column:1/-1}.sp-keybox{padding:4px 14px 14px}}
+.sp-sec a,.sp-keybox a,.sp-intro a{color:var(--g);text-decoration:underline;text-decoration-color:var(--tagline);text-underline-offset:2px}
+.sp-sec a:hover,.sp-keybox a:hover{text-decoration-color:currentColor}.sp-sec .sp-tags a,.sp-sec .sp-pills a,.sp-ref a{text-decoration:none}
+.sp-ext{display:inline-block;margin-left:4px;padding:0 7px;border-radius:999px;font-size:11.5px;font-weight:600;background:#5b4a3a;color:#fff;line-height:1.6}
+.sp-terr{color:var(--muted);font-weight:400}
+.sp-fossilfig div{display:flex!important;flex-direction:column;gap:6px;padding:20px;text-align:center;background:repeating-linear-gradient(135deg,var(--line) 0 12px,var(--tag) 12px 24px)!important;color:var(--text)!important}
+.sp-fossilfig div{justify-content:center;align-items:center}@media (max-width:720px){.sp-fossilfig div{aspect-ratio:auto!important;min-height:130px}}.sp-fossilfig b{font:700 18px Georgia,serif}.sp-fossilfig span{font-size:14px;max-width:34ch}
+.sp-iucn{display:flex;gap:14px;align-items:center;margin:0 0 12px}.sp-iucn p{margin:0!important}.sp-iucn .sp-note{margin:2px 0 0!important}
+.sp-ety{color:var(--text)}
+.sp-whereh{margin-top:16px!important}
+.sp-states{margin-top:12px}.sp-states>summary,.sp-det>summary{cursor:pointer;color:var(--g);font-size:14.5px;font-weight:600;padding:4px 0}
+.sp-states .sp-note{margin:6px 0 8px}.sp-refd{margin:0 0 10px}.sp-refd .sp-refs{margin-top:8px}
+.sp-prov ul{font-size:14px;color:var(--muted)}
+.sp-who{margin:14px 0 0}.sp-who h3{margin:0 0 4px}.sp-person{display:flex;gap:12px;align-items:flex-start;margin:10px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+.sp-person img{flex:none;width:64px;height:80px;object-fit:cover;border-radius:10px;background:var(--line)}.sp-person-t{min-width:0}.sp-person p{margin:0 0 2px}
+.sp-person-n{font-weight:700}.sp-person-d{font-size:14px}.sp-person-m{font-size:13.5px;color:var(--muted)}
+.sp-rel li{break-inside:avoid}
+@media (prefers-color-scheme:dark){.sp-fossil-flag,.sp-ext{background:#d8c3a5;color:#2b2016}}
 """
 
 JS = """(function(){function nf(t){if(!t||t.tagName!=='IMG'||t.dataset.nf)return;if(t.dataset.fb){var fb=t.dataset.fb;t.removeAttribute('data-fb');t.src=fb;return}t.dataset.nf=1;var d=document.createElement('span');d.className='sl-nophoto';d.setAttribute('role','img');d.setAttribute('aria-label',t.alt||'Photo unavailable');d.textContent='Photo unavailable';if(t.width&&t.height)d.style.aspectRatio=t.width+'/'+t.height;t.replaceWith(d)}
@@ -1288,7 +1455,9 @@ var main=document.querySelector('.sp-main[data-sci]'),w=document.getElementById(
 if(main&&w){fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(main.dataset.sci.replace(/ /g,'_'))).then(function(r){return r.ok?r.json():null}).then(function(d){
 if(!d||!d.extract||d.type==='disambiguation')return;var p=document.createElement('p');p.textContent=d.extract;w.appendChild(p);
 var s=document.createElement('p');s.className='src';s.innerHTML='From <a href="'+d.content_urls.desktop.page+'" rel="noopener" target="_blank">Wikipedia</a> (CC BY-SA)';w.appendChild(s)}).catch(function(){})}
-})();
+})();// a numbered citation, or a link to a place inside closed details (references, states): open it first
+function opn(h){var t=h&&h.charAt(0)==='#'&&document.getElementById(h.slice(1));if(!t)return;for(var e=t.parentNode;e&&e!==document;e=e.parentNode)if(e.tagName==='DETAILS')e.open=true}
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(a)opn(a.getAttribute('href'))});opn(location.hash);
 """
 
 
