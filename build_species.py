@@ -107,7 +107,7 @@ def build(app):
     extinct = dict(re.findall(r'"([a-z0-9-]+)": "((?:Extinct|Possibly extinct)[^"]*)"', app.split("const EXTINCT = ", 1)[1].split("};", 1)[0]))
     fossil_age = json.loads(app.split("const FOSSIL_AGE = ", 1)[1].split(";\n", 1)[0])
     def ago(m):
-        return "about %s million years ago" % (round(m) if m >= 10 else (round(m * 10) / 10 if m % 1 else int(m))) if m >= 1 else "about {:,} years ago".format(round(m * 1000))
+        return "about %s million years ago" % (round(m) if m >= 10 else (round(m * 10) / 10 if m % 1 else int(m))) if m >= 1 else "about {:,} years ago".format(int(round(m * 1000000, -3)))
     fossils = set(re.findall(r'"([a-z0-9-]+)"', app.split("// prehistoric snakes known only from fossil bones", 1)[1].split("]", 1)[0]))
     eaters = set(re.findall(r'"([A-Z][a-z]+)"', app.split("const SNAKE_EATERS = new Set([", 1)[1].split("]", 1)[0]))
     intro = {}
@@ -917,7 +917,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     fams = sorted(by_family.items(), key=lambda kv: (kv[0] == "", kv[0]))
     cnt = {}
     for c in cards:
-        for n in c["countries"]: cnt[n] = cnt.get(n, 0) + 1
+        for n in c["countries"]: cnt[n] = cnt.get(n, 0) + (0 if c["fossil"] or c["extinct"] else 1)  # living species, as the country pages count them
     countries = [(n, k) for n, k in sorted(cnt.items()) if slugify(n)]
     fid = lambda f: "f-" + (slugify(f) or "other")
     tools = ('<div class="sx-tools">'
@@ -1031,9 +1031,31 @@ def len_attr(info):
                                                               (' data-lensrc="%s"' % e("%s|%s" % (s.get("publisher") or s.get("title", ""), s.get("url", "")))) if s else "")
 
 
+INFO_ALL = [{}]  # the reviewed species accounts, for the genus pages' comparison table
+
+
+def genus_compare(L, info, esc):
+    """a genus page's species side by side: venom, where recorded, and the reviewed adult length"""
+    import build_regions
+    rows = []
+    for x in L:
+        f = ((info.get(x["id"]) or {}).get("facts") or {}).get("length")
+        conts = sorted(set(x["continents"]))
+        rows.append('<tr><td><a href="../%s">%s</a>%s</td><td>%s</td><td>%s%s</td><td>%s</td></tr>' % (
+            page_name(x), esc(x["sci"] if x["is_sci"] else x["name"]), "" if x["is_sci"] else " <small><i>%s</i></small>" % esc(x["sci"]),
+            "Venomous" if x["venom"] else "Non-venomous", esc(build_regions.count_places(set(x["countries"])) or "No country recorded"),
+            (" <small>(%s)</small>" % esc(", ".join(conts))) if conts else "", esc(plain(f["text"])) if f else '<small>No reviewed account yet</small>'))
+    tbl = ('<div class="cy-cmp-wrap"><table class="cy-cmp"><thead><tr><th scope="col">Species</th><th scope="col">Venom</th><th scope="col">Recorded in</th>'
+           '<th scope="col">Adult length (reviewed accounts)</th></tr></thead><tbody>%s</tbody></table></div>') % "".join(rows)
+    if len(L) > 25: tbl = '<details><summary>Show the table of all %d species</summary>%s</details>' % (len(L), tbl)
+    return ('<section class="cy-sec" id="compare" aria-labelledby="cy-cmp-h"><h2 id="cy-cmp-h">Compare its species</h2>'
+            '<p class="cy-note">Its living species side by side. Lengths come only from SnakeList&rsquo;s reviewed, sourced accounts; the others are left blank rather than guessed.</p>%s</section>') % tbl
+
+
 def hubs(cards, esc, img_of, invasive=None):
     """crawlable landing pages - snakes of each country, each family, each genus - linking to the species pages"""
     import build_regions
+    INFO_ALL[0] = load_info({c["id"]: c for c in cards})
     groups = {"country": {}, "family": {}, "genus": {}}
     for c in cards:
         for n in c["countries"]: groups["country"].setdefault(n, []).append(c)
@@ -1336,39 +1358,60 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
     # the second filter: a family page filters by genus, the others by family
     grp = (lambda x: x["genus"]) if kind == "family" else (lambda x: x["family"])
     def key(c): return ((1 if c["is_sci"] else 0), (c["sci"] if c["is_sci"] else c["name"]).lower(), c["sci"].lower())
-    L = sorted(L, key=key); intro_here = sorted(intro_here, key=key)
+    # living species only in the counts and the grid; fossil and extinct taxa get their own labelled sections
+    G = sorted([x for x in L if x["extinct"] or x["fossil"]], key=key)
+    L = sorted([x for x in L if not (x["extinct"] or x["fossil"])], key=key); intro_here = sorted(intro_here, key=key)
+    import build_regions
+    land = build_regions.land_word(name) if kind == "country" else "country"
+    nfos = sum(1 for x in G if x["fossil"])
     n = len(L); nv = sum(1 for x in L if x["venom"]); fams = {}
     for x in L: fams[grp(x) or ""] = fams.get(grp(x) or "", 0) + 1
     nfam = len([f for f in fams if f])
     fam_word = ("genus", "genera") if kind == "family" else ("family", "families")
     family = next((x["family"] for x in L if x["family"]), "")
     ncountry = len({k for x in L for k in x["countries"]})
+    places_txt = build_regions.count_places({k for x in (L or G) for k in x["countries"]})
     only = [x for x in L if x["countries"] == [name]]
-    gone = [x for x in L if x["extinct"] or x["fossil"]]
     def plural(k, one, many=None): return "{:,} {}".format(k, one if k == 1 else (many or one + "s"))
     def vsplit():
         if nv == n: return "all venomous" if n > 1 else "venomous"
         if nv == 0: return "none venomous" if n > 1 else "non-venomous"
         return "%s venomous and %s non-venomous" % ("{:,}".format(nv), "{:,}".format(n - nv))
+    # fossil and extinct members, said apart from the living ones
+    gone_txt = ""
+    if G:
+        bits = ([plural(nfos, "fossil species", "fossil species")] if nfos else []) + ([plural(len(G) - nfos, "recently extinct species", "recently extinct species")] if len(G) > nfos else [])
+        gone_txt = " and ".join(bits)
     dn = COUNTRY_DISPLAY.get(name, name) if kind == "country" else name
-    if kind == "family":
+    common = (" (%s)" % FAMILY_INFO[name]["common"]) if kind == "family" and FAMILY_INFO.get(name, {}).get("common") else ""
+    if kind in ("family", "genus") and not n:  # a group known only from fossils (Titanoboa, Madtsoiidae)
         h1 = name
-        lead = "The family %s%s has %s in SnakeList (%s), in %s." % (name, (" (%s)" % FAMILY_INFO[name]["common"]) if FAMILY_INFO.get(name, {}).get("common") else "", plural(n, "species", "species"), vsplit(), plural(nfam, "genus", "genera"))
-        title = "%s: all %s, with photos | SnakeList" % (name, plural(n, "snake species", "snake species"))
+        lead = "The %s %s%s is known only from fossils: SnakeList has %s and no living species%s." % (
+            kind, name, common or (" (family %s)" % family if kind == "genus" and family else ""), gone_txt,
+            (", found in %s" % (" and ".join(sorted({k for x in G for k in x["countries"]})) if len({k for x in G for k in x["countries"]}) <= 3 else places_txt)) if places_txt else "")
+        title = "%s: %s | SnakeList" % (name, gone_txt)
+    elif kind == "family":
+        h1 = name
+        lead = "The family %s%s has %s in SnakeList (%s), in %s%s." % (name, common, plural(n, "living species", "living species"), vsplit(), plural(nfam, "genus", "genera"),
+                                                                   (", plus %s listed separately" % gone_txt) if gone_txt else "")
+        title = "%s: all %s, with photos | SnakeList" % (name, plural(n, "living snake species", "living snake species"))
     elif kind == "genus":
         h1 = name
-        lead = "The genus %s%s has %s in SnakeList (%s), recorded in %s." % (
-            name, " (family %s)" % family if family else "", plural(n, "species", "species"), vsplit(), plural(ncountry, "country", "countries"))
+        lead = "The genus %s%s has %s in SnakeList (%s), recorded in %s%s." % (
+            name, " (family %s)" % family if family else "", plural(n, "living species", "living species"), vsplit(), places_txt,
+            ("; %s %s listed separately" % (gone_txt, "is" if len(G) == 1 else "are")) if gone_txt else "")
         title = "%s snakes: all %s, with photos | SnakeList" % (name, plural(n, "species", "species"))
     elif n:
         h1 = "Snakes of %s" % dn
-        lead = "%s %s recorded in %s in SnakeList: %d venomous and %d non-venomous%s." % (
-            plural(n, "snake species", "snake species"), "is" if n == 1 else "are", the_place(dn), nv, n - nv,
+        lead = "%s %s recorded in %s in SnakeList: %s venomous and %s non-venomous%s." % (
+            plural(n, "living snake species", "living snake species"), "is" if n == 1 else "are", the_place(dn), "{:,}".format(nv), "{:,}".format(n - nv),
             ", from %s" % plural(nfam, "family", "families") if nfam else "")
+        if gone_txt: lead += " %s found here %s listed separately and not counted." % (gone_txt[0].upper() + gone_txt[1:], "is" if len(G) == 1 else "are")
         title = "Snakes of %s: %s with photos, venom status & map | SnakeList" % (dn, plural(n, "species", "species"))
     else:
         h1 = "Snakes of %s" % dn
-        lead = "No snake species are currently listed for %s in SnakeList." % dn
+        lead = "No living snake species are currently listed for %s in SnakeList." % the_place(dn)
+        if gone_txt: lead += " %s found here %s listed below." % (gone_txt[0].upper() + gone_txt[1:], "is" if len(G) == 1 else "are")
         title = "Snakes of %s | SnakeList" % dn
     desc = lead + (" Photos, scientific names and families for each%s." % (", plus a map" if kind == "country" else "") if n else "")
 
@@ -1392,10 +1435,14 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
             ('<span class="cy-fam">%s</span>' % esc(grp(x))) if grp(x) and kind != "genus" else "")
 
     stats = ""
-    if n:
-        stats = '<ul class="cy-stats" aria-label="At a glance">%s</ul>' % "".join('<li><b>%s</b><span>%s</span></li>' % (v, k) for v, k in [
-            ("{:,}".format(n), "species"), ("{:,}".format(nv), "venomous"), ("{:,}".format(n - nv), "non-venomous"),
-            (("{:,}".format(ncountry), "countries" if ncountry != 1 else "country") if kind == "genus" else ("{:,}".format(nfam), fam_word[1] if nfam != 1 else fam_word[0]))] if not (v == "0" and k in ("venomous", "non-venomous")))
+    if n or G:
+        nland = len({k for x in L for k in x["countries"] if not build_regions.is_territory(k)})
+        srows = [("{:,}".format(n), "living species"), ("{:,}".format(nv), "venomous"), ("{:,}".format(n - nv), "non-venomous"),
+                 (("{:,}".format(nland), "countries" if nland != 1 else "country") if kind == "genus" else ("{:,}".format(nfam), fam_word[1] if nfam != 1 else fam_word[0]))]
+        srows = [r0 for r0 in srows if not (r0[0] == "0" and r0[1] != "living species")]
+        if nfos: srows.append(("{:,}".format(nfos), "fossil, not counted" if kind == "country" else "fossil"))
+        if len(G) > nfos: srows.append(("{:,}".format(len(G) - nfos), "recently extinct"))
+        stats = '<ul class="cy-stats" aria-label="At a glance: unique living species">%s</ul>' % "".join('<li><b>%s</b><span>%s</span></li>' % (v, k) for v, k in srows)
     big = n > 6
     controls = ""
     if big:
@@ -1413,14 +1460,22 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
     count = '<p class="cy-count" id="cy-count" aria-live="polite">Showing %s</p>' % plural(n, "species", "species") if n else ""
     grid = ('<ul class="cy-grid" id="cy-grid">%s</ul><p class="cy-empty" id="cy-empty" hidden>No snakes in %s match. <button type="button" class="cy-link" id="cy-clear">Clear the search and filters</button></p>'
             '<p class="cy-more-wrap"><button type="button" class="cy-more" id="cy-more" hidden>Show more</button></p>' % ("".join(card(x) for x in L), esc(name))) if n else (
+            "" if G else
             '<div class="cy-none"><p><b>No snake species are currently listed for %s in SnakeList.</b></p><p>That only means none are in SnakeList yet - not that no snakes live there.</p>'
-            '<p><a href="../#by-country">All countries</a> &middot; <a href="../">All species</a></p></div>' % esc(name))
+            '<p><a href="../#by-country">All countries</a> &middot; <a href="../">All species</a></p></div>' % esc(the_place(name)))
     intro_sec = ""
     if intro_here:
         intro_sec = ('<section class="cy-sec" aria-labelledby="cy-intro-h"><h2 id="cy-intro-h">Introduced to %s</h2><p class="cy-note">Not native here: SnakeList records %s brought to %s by people.</p>'
                      '<ul class="cy-grid cy-grid-intro">%s</ul></section>') % (esc(name), "this snake as" if len(intro_here) == 1 else "these snakes as", esc(name), "".join(card(x, True) for x in intro_here))
+    # fossil and extinct taxa: their own labelled sections (with geological age), never in the living counts
+    GS = build_regions.gone_sections(G, the_place(dn), "../", local=(kind == "country"))
+    intro_sec += "".join('<section class="cy-sec rg-sec" id="%s" aria-labelledby="h-%s"><h2 id="h-%s">%s</h2>%s</section>' % (k, k, k, GS[k][0], GS[k][1]) for k in ("fossils", "extinct") if k in GS)
     # the overview: only facts that come straight from the data
     facts = []
+    if kind in ("family", "genus") and (L or G):
+        conts = sorted({k for x in (L or G) for k in x["continents"]})
+        facts.append("<li><b>Distribution:</b> %s recorded in %s%s.</li>" % (
+            "living species" if L else "fossils", places_txt or "no country yet", (", on %s: %s" % ("one continent" if len(conts) == 1 else "%d continents" % len(conts), ", ".join(conts))) if conts else ""))
     if kind == "family" and n >= 2:
         top = sorted([(k, f) for f, k in fams.items() if f], key=lambda t: (-t[0], t[1]))
         facts.append("<li><b>Genera:</b> %s.</li>" % ", ".join('<a href="../genus/%s"><i>%s</i></a> %d' % (slugify(f), esc(f), k) for k, f in top))
@@ -1429,21 +1484,20 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
         cc = {}
         for x in L:
             for k in x["countries"]: cc[k] = cc.get(k, 0) + 1
-        if cc: facts.append("<li><b>Recorded in:</b> %s.</li>" % ", ".join('<a href="../country/%s">%s</a>' % (slugify(k), esc(k)) for k in sorted(cc)[:40]) + (" and %d more" % (len(cc) - 40) if len(cc) > 40 else ""))
+        if cc: facts.append("<li><b>Countries and territories:</b> %s%s.</li>" % (", ".join('<a href="../country/%s">%s</a>' % (slugify(k), esc(k)) for k in sorted(cc)[:40]), (" and %d more" % (len(cc) - 40)) if len(cc) > 40 else ""))
     if kind == "country" and n >= 2:
         top = sorted([(k, f) for f, k in fams.items() if f], key=lambda t: (-t[0], t[1]))
         if top:
             facts.append("<li><b>Families:</b> %s.</li>" % ", ".join('<a href="../family/%s">%s</a> %d' % (slugify(f), esc(f), k) for k, f in top))
         if only:
-            facts.append("<li><b>%s</b> %s recorded in no other country in SnakeList: %s.</li>" % (
+            facts.append("<li><b>%s</b> %s recorded in no other country or territory in SnakeList: %s.</li>" % (
                 len(only), "is" if len(only) == 1 else "are", ", ".join('<a href="../%s">%s</a>' % (page_name(x), esc(x["sci"] if x["is_sci"] else x["name"])) for x in only[:12]) + (" and %d more" % (len(only) - 12) if len(only) > 12 else "")))
-        if gone:
-            facts.append("<li><b>%s</b> %s extinct or known only from fossils.</li>" % (len(gone), "is" if len(gone) == 1 else "are"))
     if kind == "country" and len(facts) == 1 and nfam < 3: facts = []  # just the family split the header already gives
     ov_h = ("%s&rsquo;s snakes in numbers" % esc(name)) if kind == "country" else ("About the %s %s" % ("family" if kind == "family" else "genus", esc(name)))
     if kind == "country":  # its states/provinces and cities, each with its own page (build_regions.py)
-        import build_regions
-        facts_extra = build_regions.country_sections(name)
+        facts_extra = build_regions.country_sections(name, n)
+    elif kind == "genus" and n >= 2:
+        facts_extra = genus_compare(L, INFO_ALL[0], esc)
     else: facts_extra = ""
     overview = ('<section class="cy-sec" aria-labelledby="cy-ov-h"><h2 id="cy-ov-h">%s</h2><ul class="cy-facts">%s</ul></section>' % (ov_h, "".join(facts))) if facts else ""
     overview += facts_extra
@@ -1475,17 +1529,20 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
                  '<details><summary>Sources for this introduction</summary>%s<p class="sp-note">Information last reviewed %s.</p></details></section>') % (
             paras, R.list_html(), fmt_date(fi["reviewed"]))
     elif kind == "genus":
-        G = GENUS_INFO.get(name); bits = []
-        if G:
-            R = Refs({"sources": {"g": {"title": "Meaning of the name %s" % name, **G["source"]}}}, {}, page_name, "../"); R.who = name
-            bits.append('<p><b>What the name means:</b> <i>%s</i> &ndash; %s.%s</p>' % (esc(name), R.rich(G["meaning"]), R.cite(["g"])))
-            bits.append('<details><summary>Source</summary>%s<p class="sp-note">Information last reviewed %s.</p></details>' % (R.list_html(), fmt_date(G["reviewed"])))
+        GI = GENUS_INFO.get(name); bits = []
+        if GI:
+            R = Refs({"sources": {"g": {"title": "Meaning of the name %s" % name, **GI["source"]}}}, {}, page_name, "../"); R.who = name
+            bits.append('<p><b>What the name means:</b> <i>%s</i> &ndash; %s.%s</p>' % (esc(name), R.rich(GI["meaning"]), R.cite(["g"])))
+            bits.append('<details><summary>Source</summary>%s<p class="sp-note">Information last reviewed %s.</p></details>' % (R.list_html(), fmt_date(GI["reviewed"])))
         fi = FAMILY_INFO.get(family)
         if fi and fi.get("common"):
             bits.insert(0, '<p>A genus of the family <a href="../family/%s">%s</a> (%s).</p>' % (slugify(family), esc(family), esc(fi["common"])))
         if bits: about = '<section class="cy-about" aria-labelledby="cy-ab-h"><h2 id="cy-ab-h" class="cy-sr">About the genus</h2>%s</section>' % "".join(bits)
-    elif kind == "country" and n:
-        bits = ["These totals count the snakes SnakeList records as living in %s%s." % (esc(the_place(name)), (", including %s" % nplural(len(gone), "extinct or fossil species", "extinct or fossil species")) if gone else "")]
+    elif kind == "country" and (n or G):
+        bits = []
+        if land == "territory": bits.append("%s is a territory, not a sovereign country; SnakeList lists it as a place of its own." % esc(the_place(dn)[:1].upper() + the_place(dn)[1:]))
+        bits.append("These totals count the unique living snake species SnakeList records in %s%s." % (esc(the_place(dn)), (
+            "; the %s found here %s listed separately and not counted" % (esc(gone_txt), "is" if len(G) == 1 else "are")) if G else ""))
         if intro_here: bits.append("The %s brought here by people (introduced, not native) %s listed separately below and %s not in the total." % (
             nplural(len(intro_here), "species", "species"), "is" if len(intro_here) == 1 else "are", "is" if len(intro_here) == 1 else "are"))
         TERR = {"United States": ["Puerto Rico", "Guam", "American Samoa", "US Virgin Islands", "Northern Mariana Islands"],
@@ -1496,14 +1553,14 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
         terr = [t for t in TERR.get(name, []) if t in listed]
         if terr: bits.append("Territories that SnakeList lists as places of their own (%s) have their own pages and are not counted here." % ", ".join(
             '<a href="%s">%s</a>' % (slugify(t), esc(t)) for t in terr))
-        bits.append("A species counts if it is recorded anywhere in the country, so not every snake lives in every region.")
+        bits.append("A species counts if it is recorded anywhere in the %s, so not every snake lives in every part of it." % land)
         about = '<section class="cy-about cy-about-note" aria-label="What the totals count"><p>%s</p></section>' % " ".join(bits)
     return COUNTRY.format(about=about, title=esc(title), desc=esc(desc), url=url, img=img, ld=ld, name=esc(name), lead=esc(lead), stats=stats,
                           h1=("<i>%s</i>" % esc(h1)) if kind == "genus" else esc(h1), crumbs=crumbs_html, jump=jump,
                           cta_href=esc(cta[0]), cta_label=cta[1], controls=controls, count=count, grid=grid, intro=intro_sec, overview=overview,
                           author=AUTHOR, big=" cy-big" if big else "", total=n,
                           site_head=site_header("../../", "species"), site_foot=site_footer("../../", "Every photo belongs to its photographer and is used under the Creative Commons licence they chose, credited with it."),
-                          robots="index,follow,max-image-preview:large" if n else "noindex,follow")
+                          robots="index,follow,max-image-preview:large" if n or G else "noindex,follow")
 
 
 def the_place(name):
