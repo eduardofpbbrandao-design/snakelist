@@ -8562,7 +8562,10 @@
       const go = (n) => { if (!window.__introDone && document.getElementById("intro") && n < 40) { setTimeout(() => go(n + 1), 250); return; }
         const b = document.getElementById("tab-" + s.tab); if (b && !b.classList.contains("active")) b.click();
         if (!/^(sightings|wish|follow)$/.test(s.tab) && s.ty) requestAnimationFrame(() => window.scrollTo(0, s.ty)); };
-      go(0);
+      // the tab buttons are wired further down the page: with no opening to wait for (coming back
+      // skips it), clicking now would do nothing, so wait until the page has finished setting up
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => setTimeout(() => go(0), 0), { once: true });
+      else setTimeout(() => go(0), 0);
     }
   } catch (err) {}
   // where you are in each list, noted while it is on screen (hiding it for the map lets the
