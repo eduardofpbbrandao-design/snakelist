@@ -21,7 +21,7 @@ What the data can and cannot say, and how the pages word it:
 - Who described a snake: the reviewed account's authority where there is one; otherwise the page
   asks Wikidata in the visitor's browser (wd.js) and says where the answer came from.
 """
-import json, re, os, math, html as H
+import json, re, os, math, unicodedata, html as H
 from urllib.parse import quote
 import build_species as B
 
@@ -35,6 +35,7 @@ MIN_INDEX = 3  # a region (or its cities) with fewer species is still a page, bu
 
 COUNTRY_ONLY = {}  # cc -> living species recorded in the country with no state/district record there
 GONE = {}     # cc -> fossil and extinct species of the country (never counted as living there)
+SHAPES = [None]  # region.provinces: every map shape of a country, recorded or not (for placing cities)
 
 # ---- what each country calls its parts --------------------------------------------------------
 # The app's own table (SUBDIV in snakelist-synced.html, used by its subdivWord()) is read from
@@ -52,7 +53,18 @@ TYPE_OF = {("us", "DC"): "federal district", ("us", "PR"): "territory", ("us", "
            ("in", "Dadra and Nagar Haveli and Daman and Diu"): "union territory",
            ("pk", "Islamabad"): "territory", ("pk", "Gilgit-Baltistan"): "territory", ("pk", "Azad Kashmir"): "territory",
            ("es", "Ceuta"): "autonomous city", ("es", "Melilla"): "autonomous city",
-           ("my", "Kuala Lumpur"): "federal territory", ("pg", "of Bougainville"): "autonomous region", ("pt", "Azores"): "autonomous region", ("pt", "Madeira"): "autonomous region"}
+           ("my", "Kuala Lumpur"): "federal territory",
+           # cities that are a first-level unit of their own, not part of the region around them
+           ("et", "Addis Ababa"): "chartered city", ("et", "Dire Dawa"): "chartered city",
+           ("kr", "Seoul"): "special city", ("kr", "Sejong"): "special self-governing city", ("kr", "Busan"): "metropolitan city",
+           ("kr", "Daegu"): "metropolitan city", ("kr", "Incheon"): "metropolitan city", ("kr", "Gwangju"): "metropolitan city",
+           ("kr", "Daejeon"): "metropolitan city", ("kr", "Ulsan"): "metropolitan city",
+           ("cn", "Beijing"): "municipality", ("cn", "Shanghai"): "municipality", ("cn", "Tianjin"): "municipality", ("cn", "Chongqing"): "municipality",
+           ("vn", "Hanoi"): "municipality", ("vn", "Ho Chi Minh"): "municipality", ("vn", "Da Nang"): "municipality",
+           ("vn", "Haiphong"): "municipality", ("vn", "Cần Thơ"): "municipality",
+           ("ru", "Moscow"): "federal city", ("ru", "Saint Petersburg"): "federal city",
+           ("br", "Distrito Federal"): "federal district", ("ng", "Federal Capital Territory"): "territory",
+           ("th", "Bangkok"): "special administrative area", ("kh", "Phnom Penh"): "municipality", ("hu", "Budapest"): "capital city", ("pg", "of Bougainville"): "autonomous region", ("pt", "Azores"): "autonomous region", ("pt", "Madeira"): "autonomous region"}
 
 
 # a name the map data carries cut short ("of Bougainville", from "Autonomous Region of Bougainville")
@@ -130,6 +142,7 @@ def index(cards, region, iso, app):
     """which regions exist (one per state/province name the cards use, the numbered duplicates of
     the map's shapes - 'Lima (2)' - joined to their name), their outlines, neighbours and cities"""
     REG.clear(); RAW.clear(); BY_CC.clear(); CITIES.clear(); CITY.clear(); COUNTRY_ONLY.clear(); GONE.clear()
+    SHAPES[0] = region.provinces
     load_terms(app)
     in_cards = {n for c in cards for n in c["countries"]}
     cc2name = {}
@@ -200,9 +213,11 @@ def index(cards, region, iso, app):
         nm, cn, lat, lon = ct[0], ct[1], ct[2], ct[3]
         cc = iso.get(cn, ""); key = None; how = "listed"
         if len(ct) > 4 and ":" in ct[4]:
+            # the app names its state/district: that one or none (a district with no records - Bogota
+            # D.C. - is not swapped for the department around it)
             c2, _, pn = ct[4].partition(":"); cc = c2.lower(); key = RAW.get((cc, pn))
-        if not key and cc in BY_CC:
-            key = locate(cc, lon, lat); how = "coords"
+        elif cc in BY_CC:
+            key = locate(cc, lon, lat, nm); how = "coords"
         if not key: continue
         r = REG[key]
         city = {"name": nm, "country": cn, "cc": r["cc"], "lat": lat, "lon": lon, "region": key, "rank": rank, "how": how, "page": None,
@@ -228,24 +243,49 @@ def index(cards, region, iso, app):
         r["the"] = ("the " + r["title"]) if re.search(r"(Territory|Territories|Islands|Republic)$", r["title"]) and not r["title"].startswith("The ") else r["title"]
 
 
-def locate(cc, lon, lat):
-    """the region of one country a point falls in (the smallest, for enclaves like Berlin), or one
-    whose border is within ~20 km (a city on the coast just outside the simplified outline)"""
-    best = None
-    for k in BY_CC.get(cc, []):
-        r = REG[k]; b = r["box"]
-        if not b or not (b[0] <= lon <= b[1] and b[2] <= lat <= b[3]): continue
-        if any(pip(lon, lat, ring) for ring in r["rings"]):
-            a = (b[1] - b[0]) * (b[3] - b[2])
-            if best is None or a < best[0]: best = (a, k)
-    if best: return best[1]
-    near = None
-    for k in BY_CC.get(cc, []):
-        r = REG[k]; b = r["box"]
-        if not b or not (b[0] - .3 <= lon <= b[1] + .3 and b[2] - .3 <= lat <= b[3] + .3): continue
-        d = min(((p[0] - lon) * math.cos(math.radians(lat))) ** 2 + (p[1] - lat) ** 2 for ring in r["rings"] for p in ring)
-        if d < .2 ** 2 and (near is None or d < near[0]): near = (d, k)
-    return near[1] if near else None
+def fold(t):
+    return re.sub(r"[^a-z]+", " ", unicodedata.normalize("NFKD", t).encode("ascii", "ignore").decode().lower()).strip()
+
+
+def locate(cc, lon, lat, name=""):
+    """the region of one country a city falls in, looked up among ALL the map's shapes of that country
+    (the same lookup as the app's cityArea()), then matched to a region page. In order:
+    a shape with the city's own name close by (Addis Ababa, Busan, Tunis: chartered cities and capital
+    districts, whose simplified outline can lose the point to the region around them); else the
+    smallest shape the point is in (Berlin inside Brandenburg); else one whose border is within ~20 km
+    (a coastal city just outside the simplified outline). A city whose shape has no species records
+    of its own is left without a region - never given the neighbouring one's (Brussels is not in
+    Flemish Brabant, Malabo not in Bioko Sur)."""
+    shapes = SHAPES[0](cc) if SHAPES[0] else {}
+    def near_box(b, pad): return b[0] - pad <= lon <= b[1] + pad and b[2] - pad <= lat <= b[3] + pad
+    inside = None
+    for nm, e in shapes.items():
+        if not near_box(e["box"], 0): continue
+        for ring in e["rings"]:
+            if pip(lon, lat, ring):
+                xs = [p[0] for p in ring]; ys = [p[1] for p in ring]
+                a = (max(xs) - min(xs)) * (max(ys) - min(ys))
+                if inside is None or a < inside[0]: inside = (a, nm)
+    pick = None
+    # the shape it is in already carries its name (Vientiane in Vientiane Prefecture): that one
+    if name and inside and fold(name) in fold(strip_n(inside[1])): pick = inside[1]
+    if name and not pick:
+        same = sorted(((e["box"][1] - e["box"][0]) * (e["box"][3] - e["box"][2]), nm) for nm, e in shapes.items()
+                      if fold(strip_n(nm)) == fold(name) and near_box(e["box"], .3))
+        if same: pick = same[0][1]
+    if not pick and inside: pick = inside[1]
+    if not pick:
+        near = None
+        for nm, e in shapes.items():
+            if not near_box(e["box"], .3): continue
+            d = min(((p[0] - lon) * math.cos(math.radians(lat))) ** 2 + (p[1] - lat) ** 2 for ring in e["rings"] for p in ring)
+            if d < .2 ** 2 and (near is None or d < near[0]): near = (d, nm)
+        if near: pick = near[1]
+    if not pick: return None
+    if (cc, pick) in RAW: return RAW[(cc, pick)]
+    for a in sorted(shapes[pick]["also"]):  # a shape inside a named group (ID:Java)
+        if (cc, a) in RAW: return RAW[(cc, a)]
+    return None
 
 
 def key_of(cc, raw):
@@ -651,6 +691,9 @@ def city_page(city, r, L, P, ctx):
     in its district/state, then those only possible from country-level records - never one list"""
     n = len(L); T = r["the"]; t = r["type"]; cn = city["name"]; cslug = B.slugify(r["country"])
     rlink = '<a href="../region/%s">%s</a>' % (r["key"], esc(T))
+    # a city that is a region of its own (Addis Ababa, Busan, Beijing): never "a city in Addis Ababa Chartered City"
+    own = fold(cn) == fold(strip_n(r["name"])) and re.search(r"city|municipality|federal district|special administrative", t)
+    is_a = ("a %s of %s &ndash; a city that is also a region of its own" % (esc(t), esc(city["country"]))) if own else None
     S = {}
     inat = "https://www.inaturalist.org/observations?lat=%.4f&lng=%.4f&radius=10&taxon_id=85553" % (city["lat"], city["lon"])
     S["incity"] = ("Observed in %s itself" % esc(cn), (
@@ -678,19 +721,19 @@ def city_page(city, r, L, P, ctx):
         S["cities"] = ("Other cities in %s" % esc(T), '<ul class="rg-cols">%s</ul>' % "".join(
             "<li>%s</li>" % (('<a href="%s">%s</a>' % (o["page"], esc(o["name"]))) if o["page"] else esc(o["name"])) for o in same[:15]))
     order = ["incity", "district", "possible", "introduced", "nearby", "cities"]
-    about = ('<section class="cy-about rg-warn" aria-label="What this page can and cannot say"><p><b>What is known here:</b> %s is a city in %s (%s). '
+    about = ('<section class="cy-about rg-warn" aria-label="What this page can and cannot say"><p><b>What is known here:</b> %s is %s. '
              'SnakeList has no snake records for the city itself. Below are, separately, the species recorded in %s and those only possible from records for %s as a whole. '
              'For the %s&rsquo;s families, venomous snakes and habitats, see %s.</p></section>') % (
-        esc(cn), rlink, esc(a_type(r)), esc(T), esc(B.the_place(r["country"])), esc(t), rlink)
-    lead = "%s is a city in %s, %s. SnakeList has no snake records for the city itself: %s %s recorded in %s" % (
-        cn, T, city["country"], B.nplural(n, "living species", "living species"), is_are(n), T)
+        esc(cn), is_a or ("a city in %s (%s)" % (rlink, esc(a_type(r)))), esc(T), esc(B.the_place(r["country"])), esc(t), rlink)
+    lead = "%s is %s. SnakeList has no snake records for the city itself: %s %s recorded in %s" % (
+        cn, H.unescape(is_a) if is_a else "a city in %s, %s" % (T, city["country"]), B.nplural(n, "living species", "living species"), is_are(n), T)
     lead += (", and %s more %s possible from records for %s as a whole." % (nf(len(P)), is_are(len(P)), B.the_place(r["country"]))) if P else "."
     title = "Snakes around %s, %s: %s recorded in %s | SnakeList" % (cn, city["country"], B.nplural(n, "species", "species"), T)
     url = B.SITE + "species/city/" + city["page"]
     crumbs = [("Countries", "../#by-country"), (r["country"], "../country/" + cslug), (T, "../region/" + r["key"])]
     ld = ld_json("Snakes around %s" % cn, url, lead, L, [("Countries", B.SITE + "species/#by-country"), (r["country"], B.SITE + "species/country/" + cslug),
                                                         (T, B.SITE + "species/region/" + r["key"])])
-    sub = "A city in %s, %s &middot; %.2f&deg;%s, %.2f&deg;%s" % (esc(T), esc(city["country"]), abs(city["lat"]), "N" if city["lat"] >= 0 else "S", abs(city["lon"]), "E" if city["lon"] >= 0 else "W")
+    sub = ("A %s of %s" % (esc(t), esc(city["country"])) if own else "A city in %s, %s" % (esc(T), esc(city["country"]))) + " &middot; %.2f&deg;%s, %.2f&deg;%s" % (abs(city["lat"]), "N" if city["lat"] >= 0 else "S", abs(city["lon"]), "E" if city["lon"] >= 0 else "W")
     rows = [("No data", "confirmed in the city"), (nf(n), "recorded in the %s" % t)]
     if P: rows.append((nf(len(P)), "possible (%s-level)" % land_word(r["country"])))
     return PAGE.format(title=esc(title), desc=esc(lead), url=url, img=og_img(L), ld=ld, crumbs=crumbs_html(crumbs),
