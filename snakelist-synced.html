@@ -22047,7 +22047,7 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
      only lights up; a species box then shows a "3D" action for snakes that have a model, and that
      opens the model right in the map area, with "Back to map". ---- */
   .td-toggle { position: absolute; right: 10px; bottom: calc(30px + env(safe-area-inset-bottom, 0px)); z-index: 5;
-    display: inline-flex; align-items: center; gap: 5px; min-width: 44px; min-height: 36px; padding: 0 11px; box-sizing: border-box;
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 44px; min-height: 36px; padding: 0 12px; box-sizing: border-box;
     border-radius: 10px; border: 1px solid rgba(255,255,255,.28); background: rgba(22,34,28,.86); color: #fff;
     font: 700 13px/1 Inter, system-ui, sans-serif; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
   .td-toggle:hover { background: rgba(32,48,40,.94); }
@@ -22115,13 +22115,12 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
     var l = document.createElement("link"); l.id = "sl3d-css"; l.rel = "stylesheet"; l.href = abs("viewer.css"); document.head.appendChild(l);
   }
   function gl() { try { var c = document.createElement("canvas"); return !!(window.WebGLRenderingContext && (c.getContext("webgl2") || c.getContext("webgl"))); } catch (e) { return false; } }
-  var CUBE = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"></path><path d="M3 7l9 5 9-5M12 12v10"></path></svg>';
 
   // ---- the corner button: on/off, nothing else ----
   var btn = document.createElement("button");
   btn.type = "button"; btn.className = "td-toggle"; btn.id = "td-toggle";
   btn.setAttribute("aria-pressed", "false"); btn.title = "3D mode: species boxes get a 3D button";
-  btn.innerHTML = CUBE + "<span>3D</span>";
+  btn.textContent = "3D"; // just the word, no picture
   stage.appendChild(btn);
   function setOn(v) {
     on = !!v; btn.classList.toggle("on", on); btn.setAttribute("aria-pressed", String(on));
@@ -22148,7 +22147,7 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
     if (old && old.getAttribute("data-td") === id && acts.contains(old)) return;
     if (old) old.remove();
     var b = document.createElement("button"); b.type = "button"; b.className = "sp-info-3d"; b.setAttribute("data-td", id);
-    b.innerHTML = CUBE + "<span>3D</span>"; b.setAttribute("aria-label", "See " + models[id].name + " in 3D");
+    b.textContent = "3D"; b.setAttribute("aria-label", "See " + models[id].name + " in 3D");
     var seen = acts.querySelector('[data-sp="wish"]') || acts.querySelector('[data-sp="seen"]');
     if (seen && seen.nextSibling) acts.insertBefore(b, seen.nextSibling); else acts.appendChild(b);
   }
