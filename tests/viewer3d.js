@@ -19,8 +19,10 @@ const COUNT_LISTENERS = () => {
   window.__lcount = () => live.size;
 };
 
+let lastCtx = null;
 async function newPage(br, opts = {}) {
-  const ctx = await br.newContext(Object.assign({ viewport: { width: 1280, height: 900 } }, opts.ctx || {}));
+  if (lastCtx) await lastCtx.close().catch(() => {}); // one page at a time: software WebGL is slow and memory-hungry
+  const ctx = lastCtx = await br.newContext(Object.assign({ viewport: { width: 1280, height: 900 } }, opts.ctx || {}));
   const pg = await ctx.newPage();
   const reqs = [];
   pg.on('request', (r) => reqs.push(r.url()));
@@ -97,6 +99,7 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     st = await pg.evaluate(() => { const s = window.__sp3d, i = s.info(); return { d: s.controls.st.d, dFit: i.dFit, el: s.controls.st.el }; });
     ok('R resets the view', Math.abs(st.d - st.dFit) / st.dFit < 0.01 && Math.abs(st.el - Math.PI / 6) < 0.01, JSON.stringify(st));
     // no spin: after release with no movement, nothing keeps moving
+    await pg.waitForFunction(() => !window.__sp3d.controls.st.goal, null, { timeout: 120000 }).catch(() => {}); // software rendering is slow; wait for the reset to finish
     const az2 = await pg.evaluate(() => window.__sp3d.controls.st.az); await pg.waitForTimeout(1500);
     ok('no unexpected spin at rest', Math.abs((await pg.evaluate(() => window.__sp3d.controls.st.az)) - az2) < 1e-6);
     // touch: two synthetic touch pointers pinching apart zoom in; one finger orbits
@@ -234,6 +237,25 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     await (await pg.$('.sp-rl')).screenshot({ path: OUT + 'test-limits-' + label.replace(/ /g, '-') + '.png' });
   }
 
+  // 9. close zoom never puts the camera inside the snake (stacked coil, so body parts sit above the ground)
+  {
+    const { pg, errs } = await newPage(br);
+    await pg.goto(BASE + 'viperine-snake-natrix-maura.html#real'); await waitViewer(pg);
+    const r = await pg.evaluate(() => {
+      const s = window.__sp3d, c = s.controls, i = s.info(), F = i.F, B = i.body;
+      // independent check: distance from the camera to the body's centre line minus the body's half-size there
+      const inside = () => { let m = 1e9; for (let k = 0; k <= 600; k++) { const x = (k / 600) * F.L, d = s.cam.position.distanceTo(B.spine(x)) - Math.max(F.W(x), F.Hh(x)); if (d < m) m = d; } return m; };
+      let worst = 1e9, n = 0, below = 0;
+      for (let a = 0; a < 36; a++) for (const el of [0.14, 0.4, 0.9, 1.3]) for (const dk of [0.6, 1, 1.6]) {
+        c.setGoal({ az: (a / 36) * Math.PI * 2, el, d: i.dMin * dk }, true); s.frame(); n++;
+        const m = inside(); if (m < worst) worst = m; if (s.cam.position.y <= 0) below++;
+      }
+      return { probes: n, worstClearance: +worst.toFixed(5), near: +s.cam.near.toFixed(5), below, L: F.L };
+    });
+    ok('close zoom: camera never inside the snake (432 probes round a stacked coil)', r.worstClearance > 0 && r.below === 0, JSON.stringify(r));
+    ok('viperine snake: no page errors', errs.length === 0, errs.join(' | '));
+  }
+
   // 6. WebGL unavailable: fallback message, photos offered
   {
     const { pg } = await newPage(br, { init: () => { const g = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function (t, o) { return /webgl/.test(t) ? null : g.call(this, t, o); }; } });
@@ -247,6 +269,7 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
   {
     const { pg } = await newPage(br);
     await pg.goto(BASE + 'smooth-snake-coronella-austriaca.html#real'); await waitViewer(pg);
+    await pg.evaluate(() => window.__sp3d.envReady); await pg.waitForTimeout(1500); // the photo surroundings arrive once, then nothing moves
     const r = await pg.evaluate(async () => {
       const ren = window.__sp3d.renderer; let n = 0; const o = ren.render.bind(ren); ren.render = (a, b) => { n++; o(a, b); };
       await new Promise((r) => setTimeout(r, 1000)); const idle = n;

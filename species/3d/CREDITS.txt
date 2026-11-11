@@ -1,0 +1,18 @@
+Surroundings in the 3D viewer (species/3d/env/*.hdr)
+
+These panoramas are Poly Haven HDRIs (https://polyhaven.com), released under CC0 1.0 (public domain),
+in the reduced 512 x 256 versions published in the npm package @pmndrs/assets 1.7.0 (CC0 1.0,
+https://github.com/pmndrs/assets). They were decoded from that package's EXR files and saved as
+run-length-encoded Radiance .hdr files with no other change.
+
+  park.hdr     @pmndrs/assets hdri/park.exr     (Poly Haven "Rooitou Park")
+  forest.hdr   @pmndrs/assets hdri/forest.exr   (Poly Haven "Forest Slope")
+  sunrise.hdr  @pmndrs/assets hdri/sunrise.exr
+  dawn.hdr     @pmndrs/assets hdri/dawn.exr     (Poly Haven "Kiara 1 Dawn")
+  sky.hdr      @pmndrs/assets hdri/sky.exr
+
+CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/
+No attribution is required; it is given here as a courtesy and so the sources can be checked.
+
+three.js (three.module.min.js) is MIT licensed; see three-LICENSE.txt.
+All other textures (snake skin, ground, rocks, plants) are generated in the browser by viewer.js.
