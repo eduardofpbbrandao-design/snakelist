@@ -2,16 +2,22 @@
 built from the same app data as the species pages. Called by build_species.pages().
 
 What the data can and cannot say, and how the pages word it:
-- SnakeList records each snake by country and - for most countries - by state, province or island
-  (the cards' data-states / data-provinces). Nothing is recorded per city, so a city page shows the
-  snakes of the state/province the city is in, and says so.
-- "Most widely recorded" uses #rarity-data: in how many places each species has research-grade
-  iNaturalist records across its WHOLE range. That is how widely it has been photographed, not how
-  many live in the region.
-- "Found only here" means: no other country, state or province in SnakeList's data - not a claim
-  that it is endemic in the scientific literature.
-- Habitats are SnakeList's estimate from where each snake is recorded (see build_species), counted
-  over the region's species.
+- SnakeList records each snake by country and - for most countries - by state, district, province or
+  island (the cards' data-states / data-provinces). Each place is called what its country calls it
+  (the app's SUBDIV table, read from the app): Porto is a district, Texas a state. A place's identity
+  is its key (country code + its own name; "region:pt-porto", "city:pt-porto"), never its name alone,
+  and a district named like a city of its country is always titled with its type ("Porto District").
+- Counts are unique LIVING species. Fossil and extinct taxa are listed in their own sections with
+  their age and never counted; introduced snakes are listed apart too.
+- Species recorded in a country with no state/district record there are "possible", listed apart on
+  each part's page - never as recorded there (the app's map used to count them, see place-counts.js).
+- Nothing is recorded per city: a city page says so, then lists the district's species and the
+  possible ones separately, with the explicit wording that presence in the city is not confirmed.
+- "Most recorded worldwide" uses #rarity-data: in how many places each species has research-grade
+  iNaturalist records across its WHOLE range - a global ranking, labelled as such.
+- "Found only here" means: no other place in SnakeList's data - not a claim of endemism.
+- Habitats: only what the reviewed, sourced species accounts (data/species-info) say about each
+  species in general; the old per-place habitat counts (estimated from ranges) are gone.
 - Who described a snake: the reviewed account's authority where there is one; otherwise the page
   asks Wikidata in the visitor's browser (wd.js) and says where the answer came from.
 """
@@ -27,11 +33,78 @@ CITY = {}     # "cc-slug" -> the cities that get their own page
 CITY_CAP = 25  # city pages per country: the biggest ones (SL_CITIES is in population order)
 MIN_INDEX = 3  # a region (or its cities) with fewer species is still a page, but kept out of search results
 
-KIND_WORD = {"us": ("state", "states"), "id": ("island", "islands"), "au": ("state or territory", "states and territories"),
-             "ca": ("province or territory", "provinces and territories")}
+COUNTRY_ONLY = {}  # cc -> living species recorded in the country with no state/district record there
+GONE = {}     # cc -> fossil and extinct species of the country (never counted as living there)
+
+# ---- what each country calls its parts --------------------------------------------------------
+# The app's own table (SUBDIV in snakelist-synced.html, used by its subdivWord()) is read from
+# the app at build time, so the pages and the map always use the same word: Portugal's parts are
+# districts, Spain's provinces, France's regions. A few places differ from the rest of their
+# country (a territory among states); those are named here.
+SUBDIV = {}           # cc -> "districts", "states & territories", ...
+NON_SOVEREIGN = set()  # the app's NON_SOVEREIGN: places in the checklist that are territories, not countries
+TYPE_OF = {("us", "DC"): "federal district", ("us", "PR"): "territory", ("us", "GU"): "territory", ("us", "AS"): "territory",
+           ("us", "MP"): "territory", ("us", "VI"): "territory",
+           ("ca", "Yukon"): "territory", ("ca", "Northwest Territories"): "territory", ("ca", "Nunavut"): "territory",
+           ("in", "Delhi"): "union territory", ("in", "Puducherry"): "union territory", ("in", "Chandigarh"): "union territory",
+           ("in", "Jammu and Kashmir"): "union territory", ("in", "Ladakh"): "union territory", ("in", "Lakshadweep"): "union territory",
+           ("in", "Andaman and Nicobar"): "union territory", ("in", "Andaman and Nicobar Islands"): "union territory",
+           ("in", "Dadra and Nagar Haveli and Daman and Diu"): "union territory",
+           ("pk", "Islamabad"): "territory", ("pk", "Gilgit-Baltistan"): "territory", ("pk", "Azad Kashmir"): "territory",
+           ("es", "Ceuta"): "autonomous city", ("es", "Melilla"): "autonomous city",
+           ("my", "Kuala Lumpur"): "federal territory", ("pg", "of Bougainville"): "autonomous region", ("pt", "Azores"): "autonomous region", ("pt", "Madeira"): "autonomous region"}
 
 
-def kword(cc, many=False): return KIND_WORD.get(cc, ("state or province", "states and provinces"))[1 if many else 0]
+# a name the map data carries cut short ("of Bougainville", from "Autonomous Region of Bougainville")
+NAME_FIX = {("pg", "of Bougainville"): "Bougainville"}
+
+
+def load_terms(app):
+    SUBDIV.clear(); NON_SOVEREIGN.clear()
+    m = re.search(r'var SUBDIV = \{\};\s*\((.*?)\)\.split\("\|"\)', app, re.S)
+    if m:
+        s = "".join(re.findall(r'"([^"]*)"', m.group(1)))
+        for grp in s.split("|"):
+            w, _, ccs = grp.partition(":")
+            for cc in ccs.split(): SUBDIV[cc] = w
+    m = re.search(r"var NON_SOVEREIGN = \{(.*?)\};", app, re.S)
+    if m: NON_SOVEREIGN.update(H.unescape(x) for x in re.findall(r'"([^"]+)":1', m.group(1)))
+
+
+def one_word(w):
+    """the app's own singular rule (subdivWord(..., one=true)): districts -> district, counties -> county"""
+    return "castello" if w == "castelli" else re.sub(r"s$", "", re.sub(r"(sh|ch)es$", r"\1", re.sub(r"ies$", "y", w)))
+
+
+def place_type(cc, raw=""):
+    """what one state/district/province is called: Porto is a district, Texas a state, Guam a territory"""
+    if (cc, raw) in TYPE_OF: return TYPE_OF[(cc, raw)]
+    w = SUBDIV.get(cc, "regions")
+    parts = [one_word(p) for p in w.split(" & ")]
+    if len(parts) > 1:  # "Northern Territory", "Chin State", "Sarajevo Canton": the name says which
+        hit = next((p for p in parts if re.search(r"\b%s\b" % p.split()[-1], raw, re.I)), None)
+        if hit: return hit
+        return {"mm": "region", "ba": "region"}.get(cc, parts[0])
+    return parts[0]
+
+
+def kword(cc, many=False):
+    """the word for a country's parts in general: "districts" (Portugal), "states and territories" (Australia)"""
+    w = SUBDIV.get(cc, "regions")
+    return w.replace(" & ", " and ") if many else " or ".join(one_word(p) for p in w.split(" & "))
+
+
+def is_territory(name): return name in NON_SOVEREIGN
+
+
+def count_places(names):
+    """the app's countPlaces(): "3 countries (+1 territory)" - territories are not counted as countries"""
+    t = sum(1 for n in names if n in NON_SOVEREIGN); c = len(names) - t
+    if not names: return ""
+    out = B.nplural(c, "country", "countries") if c else ""
+    if t: out = (out + " (+%s)" % B.nplural(t, "territory", "territories")) if c else B.nplural(t, "territory", "territories")
+    return out
+def land_word(name): return "territory" if is_territory(name) else "country"
 def esc(t): return H.escape(str(t), quote=True)
 def strip_n(n): return re.sub(r" \(\d+\)$", "", n)
 def nf(k): return "{:,}".format(k)
@@ -56,7 +129,8 @@ def pip(lon, lat, ring):
 def index(cards, region, iso, app):
     """which regions exist (one per state/province name the cards use, the numbered duplicates of
     the map's shapes - 'Lima (2)' - joined to their name), their outlines, neighbours and cities"""
-    REG.clear(); RAW.clear(); BY_CC.clear(); CITIES.clear(); CITY.clear()
+    REG.clear(); RAW.clear(); BY_CC.clear(); CITIES.clear(); CITY.clear(); COUNTRY_ONLY.clear(); GONE.clear()
+    load_terms(app)
     in_cards = {n for c in cards for n in c["countries"]}
     cc2name = {}
     for n, code in iso.items():
@@ -64,15 +138,31 @@ def index(cards, region, iso, app):
     for c in cards:
         pairs = [(p.partition(":")[0].lower(), p.partition(":")[2]) for p in c["provinces"]] + [("us", s) for s in c["states"]]
         for cc, raw in pairs:
-            disp = region.us_names.get(raw, raw) if cc == "us" else strip_n(raw)
+            disp = region.us_names.get(raw, raw) if cc == "us" else NAME_FIX.get((cc, raw), strip_n(raw))
             sl = B.slugify(disp)
             if not sl: continue
             key = cc + "-" + sl
             r = REG.get(key)
             if not r:
-                r = REG[key] = {"key": key, "cc": cc, "name": disp, "raw": set(), "ids": set(), "country": cc2name.get(cc, cc.upper()), "cities": []}
+                # a place's identity is its key (country code + its own name), never its name alone:
+                # Porto District (pt-porto, a region) and Porto city (a city row) are different places
+                r = REG[key] = {"key": key, "id": "region:" + key, "cc": cc, "name": disp, "raw": set(), "ids": set(), "country": cc2name.get(cc, cc.upper()),
+                                "parent": "country:" + cc, "type": place_type(cc, raw), "cities": []}
             r["raw"].add(raw); r["ids"].add(c["id"]); RAW[(cc, raw)] = key
     for k in sorted(REG): BY_CC.setdefault(REG[k]["cc"], []).append(k)
+    # what is counted: living species only. Fossil and recently extinct taxa are listed apart, never
+    # as snakes that live in a place
+    gone = {c["id"] for c in cards if c["fossil"] or c["extinct"]}
+    for r in REG.values():
+        r["living"] = r["ids"] - gone; r["gone"] = r["ids"] & gone
+    # species recorded in a country (with state/district data) but with no state/district there:
+    # they may live in any part of it, so a part's page lists them apart as "possible", never as recorded
+    for c in cards:
+        for n in c["countries"]:
+            cc = iso.get(n, "")
+            if cc not in BY_CC: continue
+            if c["id"] in gone: GONE.setdefault(cc, set()).add(c["id"])
+            elif not regions_of(c, cc): COUNTRY_ONLY.setdefault(cc, set()).add(c["id"])
     # outlines: the map's shapes with the same name, or that belong to a named group (ID:Nusa Tenggara)
     for k, r in REG.items():
         shapes = region.provinces(r["cc"]); rings, bx = [], []
@@ -115,7 +205,8 @@ def index(cards, region, iso, app):
             key = locate(cc, lon, lat); how = "coords"
         if not key: continue
         r = REG[key]
-        city = {"name": nm, "country": cn, "cc": r["cc"], "lat": lat, "lon": lon, "region": key, "rank": rank, "how": how, "page": None}
+        city = {"name": nm, "country": cn, "cc": r["cc"], "lat": lat, "lon": lon, "region": key, "rank": rank, "how": how, "page": None,
+                "type": "city", "parent": r["id"], "id": None, "app": "%s|%s" % (nm, cn)}
         CITIES.append(city); r["cities"].append(city)
         if per_cc.get(r["cc"], 0) < CITY_CAP:
             per_cc[r["cc"]] = per_cc.get(r["cc"], 0) + 1
@@ -123,6 +214,18 @@ def index(cards, region, iso, app):
             if sl in used: sl = sl + "-" + key.split("-", 1)[1]
             if sl in used: continue
             used.add(sl); city["page"] = sl; CITY[sl] = city
+        city["id"] = "city:" + (city["page"] or r["cc"] + "-" + B.slugify(nm) + "@" + key)
+    # a region named like a city of its country (Porto, Lisbon, New York) or like the country
+    # itself is always called by its type as well - "Porto District" - so the two never read as one
+    fold = lambda t: B.slugify(t)
+    city_names = {}
+    for ct in rows: city_names.setdefault(iso.get(ct[1], ""), set()).add(fold(ct[0]))
+    for r in REG.values():
+        clash = fold(r["name"]) in city_names.get(r["cc"], set()) or fold(r["name"]) == fold(r["country"])
+        t = r["type"]
+        r["title"] = r["name"] if not clash or re.search(r"\b%s\b" % re.escape(t.split()[-1]), r["name"], re.I) else "%s %s" % (r["name"], t.title())
+        # in running text: "the Northern Territory", "the Balearic Islands" - but "Porto District", "Texas"
+        r["the"] = ("the " + r["title"]) if re.search(r"(Territory|Territories|Islands|Republic)$", r["title"]) and not r["title"].startswith("The ") else r["title"]
 
 
 def locate(cc, lon, lat):
@@ -166,28 +269,71 @@ def build(cards, by_id, info, invasive, iso, harm):
                 k = RAW.get((cc, raw)) or (cc + "-" + B.slugify(raw) if (cc + "-" + B.slugify(raw)) in REG else None)
                 if k: intro.setdefault(k, []).append((c, x.get("note", "")))
     ctx = {"by_id": by_id, "info": info, "intro": intro, "harm": harm}
+    srt = lambda ids: sorted((by_id[i] for i in ids if i in by_id), key=skey)
     urls = []
     keep = set()
     for k, r in REG.items():
-        L = sorted((by_id[i] for i in r["ids"]), key=skey)
-        html = region_page(r, L, ctx)
+        L, G, P = srt(r["living"]), srt(r["gone"]), srt(COUNTRY_ONLY.get(r["cc"], set()) - r["ids"])
+        html = region_page(r, L, G, P, ctx)
         open("%s/region/%s.html" % (B.OUT, k), "w", encoding="utf-8").write(html); keep.add(k + ".html")
         if len(L) >= MIN_INDEX: urls.append(B.SITE + "species/region/" + k)
     # the app's map links to these pages: its own place keys ("US:TX", "PT:Lisboa") and city rows -> page names
     pages = {"r": {"%s:%s" % (cc.upper(), raw): k for (cc, raw), k in RAW.items()},
              "c": {"%s|%s" % (city["name"], city["country"]): sl for sl, city in CITY.items()}}
     open(B.OUT + "/pages.js", "w", encoding="utf-8").write("window.SL_PAGES=" + json.dumps(pages, ensure_ascii=False, separators=(",", ":"), sort_keys=True) + ";\n")
+    open(B.OUT + "/place-counts.js", "w", encoding="utf-8").write(place_counts_js(cards, invasive, iso, by_id))
     keepc = set()
     for sl, city in CITY.items():
         r = REG[city["region"]]
-        L = sorted((by_id[i] for i in r["ids"]), key=skey)
-        open("%s/city/%s.html" % (B.OUT, sl), "w", encoding="utf-8").write(city_page(city, r, L, ctx)); keepc.add(sl + ".html")
+        L, P = srt(r["living"]), srt(COUNTRY_ONLY.get(r["cc"], set()) - r["ids"])
+        open("%s/city/%s.html" % (B.OUT, sl), "w", encoding="utf-8").write(city_page(city, r, L, P, ctx)); keepc.add(sl + ".html")
         if len(L) >= MIN_INDEX: urls.append(B.SITE + "species/city/" + sl)
     # pages from an earlier build that no longer exist (a renamed province): removed, not left stale
     for d, ok in (("region", keep), ("city", keepc)):
         for f in os.listdir(B.OUT + "/" + d):
             if f.endswith(".html") and f not in ok: os.remove("%s/%s/%s" % (B.OUT, d, f))
     return urls
+
+
+def app_key(r):
+    """the app's own key for a region ("US:TX", "PT:Porto"); a region joined from numbered map shapes takes its plain name"""
+    raws = sorted(r["raw"], key=lambda x: (x != r["name"] and not r["cc"] == "us", x))
+    return "%s:%s" % (r["cc"].upper(), raws[0])
+
+
+def place_counts_js(cards, invasive, iso, by_id):
+    """species/place-counts.js: the counts the pages show, for the app's map to show the same.
+    Every number is unique living species (fossil and extinct taxa never count as living anywhere)."""
+    country = {}
+    for c in cards:
+        for n in c["countries"]:
+            e = country.setdefault(n, [set(), set(), set(), set()])
+            e[1 if c["fossil"] else 2 if c["extinct"] else 0].add(c["id"])
+    for sid, L in invasive.items():
+        c = by_id.get(sid)
+        if not c: continue
+        for x in L:
+            if x["name"] and x["name"] not in c["countries"]: country.setdefault(x["name"], [set(), set(), set(), set()])[3].add(sid)
+    region = {}
+    for (cc, raw), k in RAW.items():
+        r = REG[k]
+        region["%s:%s" % (cc.upper(), raw)] = [len(r["living"]), len(COUNTRY_ONLY.get(cc, set()) - r["ids"]), len(r["gone"]), r["type"], k]
+    city = {}
+    for ct in CITIES:
+        r = REG[ct["region"]]
+        city.setdefault(ct["app"], [app_key(r), len(r["living"]), len(COUNTRY_ONLY.get(r["cc"], set()) - r["ids"]), ct["page"]])
+    out = {
+        "v": 1,
+        "about": "Counts of unique living snake species, as the SnakeList place pages show them. Fossil and extinct taxa are never counted as living.",
+        "fields": {
+            "country": ["living (recorded in the country or territory)", "fossil (known only from fossils found there)", "extinct (recently extinct, last recorded there)", "introduced (brought by people, not native; not in living)"],
+            "region": ["living (recorded in this state/district/province)", "countryOnly (living, recorded in the country with no state/district record there: possible, not recorded here)",
+                       "fossilOrExtinct (not counted)", "type (what this place is: district, state, province, territory...)", "page (species/region/<page>.html)"],
+            "city": ["region (the app key of the state/district the city is in)", "living in that region (the city itself has no records)", "countryOnly (possible, see region)",
+                     "page (species/city/<page>.html, or null)"]},
+        "country": {n: [len(e[0]), len(e[1]), len(e[2]), len(e[3])] for n, e in sorted(country.items())},
+        "region": region, "city": city}
+    return "window.SL_PLACE_COUNTS=" + json.dumps(out, ensure_ascii=False, separators=(",", ":"), sort_keys=True) + ";\n"
 
 
 def skey(c): return ((1 if c["is_sci"] else 0), (c["sci"] if c["is_sci"] else c["name"]).lower())
@@ -217,70 +363,124 @@ def authority(info, c):
     return (a, m.group(1).strip(), int(m.group(2)), a.strip().startswith("(")) if m else None
 
 
-def summary(r, L, ctx, rel_species="../"):
-    """the facts both page kinds share, as {section id: (heading, html)} in page order"""
-    n = len(L); nv = sum(1 for c in L if c["venom"])
+def is_are(k): return "is" if k == 1 else "are"
+
+
+def age_text(c):
+    if c["fossil"]: return (c["died"][0] + ", " + c["died"][1]) if c["died"] else "fossil; age not recorded in SnakeList"
+    return c["extinct"].split(" - ")[0]
+
+
+def gone_sections(G, where, rel_species="../", local=True):
+    """fossil and recently extinct taxa, listed apart from the living species and never counted as them.
+    local: a place page ("Fossil snakes found here"), else a family or genus page ("Fossil species")"""
     S = {}
-    living = [c for c in L if not (c["fossil"] or c["extinct"])]
-    top = sorted([c for c in living if c["spots"]], key=lambda c: (-c["spots"], skey(c)))
-    if top:
-        S["recorded"] = ("Most widely recorded", '<p class="cy-note">The species here that have research-grade iNaturalist records in the most places '
-                         '<b>across their whole range</b> - not just in %s. That shows how often people have photographed them, not how many live here.</p>'
-                         '<ul class="cy-grid rg-top">%s</ul>' % (esc(r["name"]), "".join(photo_card(c, "Recorded in %s" % B.nplural(c["spots"], "place")) for c in top[:8])))
+    fos = [c for c in G if c["fossil"]]; ext = [c for c in G if not c["fossil"]]
+    if fos:
+        one = len(fos) == 1
+        S["fossils"] = ("Fossil snakes found here" if local else "Fossil species", (
+            '<p class="cy-note">%s known only from fossils%s. %s not %s and %s not counted in this page&rsquo;s totals. '
+            '%s approximate: %s from the rock layers the fossils were found in, and the dating and classification of fossil snakes are revised as new material is studied.</p>'
+            '<ul class="rg-cols rg-fos">%s</ul>') % (
+                ("This snake is" if one else "These snakes are") if local else ("This species is" if one else "These species are"),
+                (" found in %s" % esc(where)) if local else "", "It is" if one else "They are", "a living species" if one else "living species", "is" if one else "are",
+                "The geological age given is" if one else "The geological ages given are", "it comes" if one else "they come",
+                "".join("<li>%s <small>(%s)</small></li>" % (sp_a(c, rel_species), esc(age_text(c))) for c in fos)))
+    if ext:
+        one = len(ext) == 1
+        S["extinct"] = ("Extinct in recent times", (
+            '<p class="cy-note">%s extinct or possibly extinct, last recorded %s in historical times, so %s not counted as living.</p><ul class="rg-cols">%s</ul>') % (
+                "This snake is" if one else "These snakes are", ("in " + esc(where)) if local else "in the wild", "it is" if one else "they are",
+                "".join("<li>%s <small>(%s)</small></li>" % (sp_a(c, rel_species), esc(age_text(c))) for c in ext)))
+    return S
+
+
+def habitat_section(L, info, places, rel_species="../"):
+    """what the reviewed, sourced species accounts say about each species' habitat - the species'
+    habitat in general, not a measurement of this place. Regional notes about somewhere else are left out."""
+    rows = []
+    for c in L:
+        d = info.get(c["id"])
+        if not d: continue
+        for e in (d.get("sections") or {}).get("habitat") or []:
+            lab = e.get("label", "")
+            if lab and not any(p and p.lower() in lab.lower() for p in places): continue
+            srcs = [d.get("sources", {}).get(s) for s in e.get("src", [])]
+            src = ", ".join('<a href="%s" rel="noopener">%s</a>' % (esc(s["url"]), esc(s.get("publisher") or s.get("title", ""))) for s in srcs if s and s.get("url"))
+            rows.append('<li>%s: %s%s</li>' % (sp_a(c, rel_species), esc(B.plain(e["text"])), (' <small>Source: %s.</small>' % src) if src else ""))
+            break
+    if not rows: return None
+    left = len(L) - len(rows)
+    return ("Habitats from reviewed species accounts", (
+        '<p class="cy-note">What SnakeList&rsquo;s reviewed, sourced accounts say about where each species lives <b>in general</b>, across its range. '
+        'They do not describe %s in particular.%s</p><ul class="rg-hab">%s</ul>') % (
+            esc(places[0]), (" The other %s here %s no reviewed account yet, so nothing is said about %s." % (
+                B.nplural(left, "species", "species"), "has" if left == 1 else "have", "its habitat" if left == 1 else "their habitats")) if left else "", "".join(rows)))
+
+
+def venom_section(L, ctx, rel_species="../"):
+    n = len(L); nv = sum(1 for c in L if c["venom"])
+    hm = [c for c in L if ctx["harm"](c) == "harmful"]
+    vb = ('<div class="rg-split" role="img" aria-label="%d venomous, %d non-venomous"><i class="v" style="width:%.1f%%"></i><i class="nv" style="width:%.1f%%"></i></div>'
+          '<p class="rg-key"><span><i class="v"></i>Venomous: <b>%s</b> of %s</span><span><i class="nv"></i>Non-venomous: <b>%s</b></span></p>') % (
+        nv, n - nv, nv * 100 / max(1, n), (n - nv) * 100 / max(1, n), nf(nv), nf(n), nf(n - nv))
+    if hm:
+        vb += ('<p><b>%s</b> %s listed by SnakeList as dangerous to people: %s.</p>' % (nf(len(hm)), is_are(len(hm)),
+               ", ".join(sp_a(c, rel_species) for c in hm[:30]) + (" and %d more" % (len(hm) - 30) if len(hm) > 30 else "")))
+    if nv > len(hm):
+        k = nv - len(hm)
+        vb += ('<p class="cy-note">The other venomous species has mild venom: no serious bites to people are documented for it.</p>' if k == 1 else
+               '<p class="cy-note">The other %s venomous species have mild venom: no serious bites to people are documented for them.</p>' % nf(k))
+    return ("Venomous and non-venomous", vb)
+
+
+def families_section(L):
     fams = {}
     for c in L: fams[c["family"] or ""] = fams.get(c["family"] or "", 0) + 1
     fl = sorted(fams.items(), key=lambda t: (-t[1], t[0] or "~"))
-    if fl:
-        mx = fl[0][1]
-        S["families"] = ("Snake families", '<ul class="rg-bars">%s</ul>' % "".join(
-            '<li><span class="rg-bl">%s</span><span class="rg-bar"><i style="width:%.1f%%"></i></span><b>%d</b></li>' % (
-                ('<a href="../family/%s">%s</a>%s' % (B.slugify(f), esc(f), (' <small>%s</small>' % esc(B.FAMILY_INFO[f]["common"])) if B.FAMILY_INFO.get(f, {}).get("common") else "")) if f else "Family not recorded",
-                max(2, k * 100 / mx), k) for f, k in fl))
-    hm = [c for c in L if ctx["harm"](c) == "harmful"]
-    vb = ('<div class="rg-split" role="img" aria-label="%d venomous, %d non-venomous"><i class="v" style="width:%.1f%%"></i><i class="nv" style="width:%.1f%%"></i></div>'
-          '<p class="rg-key"><span><i class="v"></i>Venomous: <b>%s</b></span><span><i class="nv"></i>Non-venomous: <b>%s</b></span></p>') % (
-        nv, n - nv, nv * 100 / max(1, n), (n - nv) * 100 / max(1, n), nf(nv), nf(n - nv))
-    if hm:
-        vb += ('<p><b>%s</b> %s listed by SnakeList as dangerous to people: %s.</p>' % (nf(len(hm)), "is" if len(hm) == 1 else "are",
-               ", ".join(sp_a(c, rel_species) for c in hm[:30]) + (" and %d more" % (len(hm) - 30) if len(hm) > 30 else "")))
-    if nv > len(hm):
-        vb += '<p class="cy-note">The other venomous ones have mild venom: no serious bites to people are documented for them.</p>'
-    S["venom"] = ("Venomous and non-venomous", vb)
-    only = [c for c in L if c["countries"] == [r["country"]] and {RAW.get((r["cc"], x)) for x in regions_of(c, r["cc"])} == {r["key"]}]
-    if only:
-        S["only"] = ("Found only here", '<p class="cy-note">Recorded in no other %s or country in SnakeList&rsquo;s data. That may mean it lives only here, '
-                     'but it can also mean it has not been recorded elsewhere yet.</p><ul class="rg-cols">%s</ul>' % (
-                         kword(r["cc"]), "".join("<li>%s</li>" % sp_a(c, rel_species) for c in only)))
-    it = ctx["intro"].get(r["key"], [])
-    if it:
-        S["introduced"] = ("Introduced by people", '<p class="cy-note">Not native here: SnakeList records these as brought to %s by people. They are not counted in the totals.</p><ul class="rg-cols">%s</ul>' % (
-            esc(r["name"]), "".join("<li>%s%s</li>" % (sp_a(c, rel_species), (" <small>(%s)</small>" % esc(nt)) if nt else "") for c, nt in it)))
-    gone = [c for c in L if c["fossil"] or c["extinct"]]
-    if gone:
-        S["extinct"] = ("Extinct and fossil snakes", '<ul class="rg-cols">%s</ul>' % "".join(
-            "<li>%s <small>(%s)</small></li>" % (sp_a(c, rel_species), esc(("fossil, " + c["died"][0] + ", " + c["died"][1]) if c["fossil"] and c["died"] else "known from fossils" if c["fossil"] else c["extinct"].split(" - ")[0]))
-            for c in gone))
-    kinds = {}
-    for c in living:
-        for kd in {B.hab_kind(h) for h in c["habitats"]}: kinds[kd] = kinds.get(kd, 0) + 1
-    if kinds:
-        mx = max(kinds.values())
-        S["habitats"] = ("Habitats (rough estimate)", '<p class="cy-note">How many of its living snakes have each kind of habitat in SnakeList&rsquo;s estimate. '
-                         'That estimate comes from every country, state and province where each snake is recorded - <b>not</b> from a survey of %s, and not checked species by species.</p>'
-                         '<ul class="rg-bars">%s</ul>' % (esc(r["name"]), "".join(
-                             '<li><span class="rg-bl"><a href="../../?hab=%s">%s</a></span><span class="rg-bar"><i style="width:%.1f%%"></i></span><b>%d</b></li>' % (
-                                 esc(quote(kd)), esc(kd), max(2, kinds[kd] * 100 / mx), kinds[kd]) for kd in B.HAB_KIND_ORDER if kd in kinds)))
-    if top:
-        items = []
-        for c in top[:8]:
-            a = authority(ctx["info"], c)
-            by = ('<span class="rg-by" data-done="1">described by %s in %d<span class="sp-ago" data-y="%d"></span>%s</span>' % (
-                esc(a[1]), a[2], a[2], " (under another genus name)" if a[3] else "")) if a else '<span class="rg-by"></span>'
-            items.append('<li data-sci="%s">%s - %s</li>' % (esc(c["sci"]), sp_a(c, rel_species), by))
-        S["who"] = ("Who described them", '<p class="cy-note">The scientists who first described its most widely recorded snakes, and when.</p>'
-                    '<ul class="rg-who" data-wd="1">%s</ul><p class="cy-note rg-wdnote">Names and dates come from SnakeList&rsquo;s reviewed species accounts; '
-                    'the others are looked up on <a href="https://www.wikidata.org/" rel="noopener">Wikidata</a> (CC0) when this page opens.</p>' % "".join(items))
-    return S
+    if not fl: return None
+    mx = fl[0][1]
+    return ("Snake families", '<p class="cy-note">Living species recorded here, by family.</p><ul class="rg-bars">%s</ul>' % "".join(
+        '<li><span class="rg-bl">%s</span><span class="rg-bar"><i style="width:%.1f%%"></i></span><b>%d</b></li>' % (
+            ('<a href="../family/%s">%s</a>%s' % (B.slugify(f), esc(f), (' <small>%s</small>' % esc(B.FAMILY_INFO[f]["common"])) if B.FAMILY_INFO.get(f, {}).get("common") else "")) if f else "Family not recorded",
+            max(2, k * 100 / mx), k) for f, k in fl))
+
+
+def only_here(r, L):
+    return [c for c in L if c["countries"] == [r["country"]] and {RAW.get((r["cc"], x)) for x in regions_of(c, r["cc"])} == {r["key"]}]
+
+
+def recorded_section(r, L, ctx, rel_species="../"):
+    """the global ranking (iNaturalist research-grade records across each species' whole range) - SnakeList has no local counts"""
+    top = sorted([c for c in L if c["spots"]], key=lambda c: (-c["spots"], skey(c)))
+    if not top: return None, []
+    return ("Most recorded worldwide", '<p class="cy-note"><b>A global ranking, not a local one.</b> These are the species here with research-grade iNaturalist records in the most places '
+            '<b>across their whole range</b> (worldwide records). SnakeList has no counts of records within %s, so this says nothing about which snakes are commonest here.</p>'
+            '<ul class="cy-grid rg-top">%s</ul>' % (esc(r["the"]), "".join(photo_card(c, "Recorded worldwide in %s" % B.nplural(c["spots"], "place")) for c in top[:8]))), top
+
+
+def who_section(top, ctx, rel_species="../"):
+    if not top: return None
+    items = []
+    for c in top[:8]:
+        a = authority(ctx["info"], c)
+        by = ('<span class="rg-by" data-done="1">described by %s in %d<span class="sp-ago" data-y="%d"></span>%s</span>' % (
+            esc(a[1]), a[2], a[2], " (under another genus name)" if a[3] else "")) if a else '<span class="rg-by"></span>'
+        items.append('<li data-sci="%s">%s - %s</li>' % (esc(c["sci"]), sp_a(c, rel_species), by))
+    return ("Who described them", '<p class="cy-note">The scientists who first described the species above, and when.</p>'
+            '<ul class="rg-who" data-wd="1">%s</ul><p class="cy-note rg-wdnote">Names and dates come from SnakeList&rsquo;s reviewed species accounts; '
+            'the others are looked up on <a href="https://www.wikidata.org/" rel="noopener">Wikidata</a> (CC0) when this page opens.</p>' % "".join(items))
+
+
+def possible_section(r, P, scope):
+    """species recorded in the country with no state/district record: possible, never counted as recorded here"""
+    if not P: return None
+    t = kword(r["cc"]); k = len(P)
+    return ("Possible here: %s-level records only" % land_word(r["country"]), (
+        '<p class="cy-note">SnakeList records %s in %s without saying in which %s, so %s may or may not live in %s. '
+        '%s not counted among the species recorded here.</p>%s') % (
+            "this species" if k == 1 else "these %s species" % nf(k), esc(B.the_place(r["country"])), esc(t), "it" if k == 1 else "each", esc(scope),
+            "It is" if k == 1 else "They are", all_list(P, "possible", r["title"])))
 
 
 def regions_of(c, cc):
@@ -304,115 +504,192 @@ def place_list(items, what, page=24):
             '<p class="cy-more-wrap"><button type="button" class="cy-more rg-pmore" hidden>Show more</button></p></div>') % (page, tools, "".join(items))
 
 
-def country_sections(name):
-    """the "States and provinces" and "Cities" sections of a country page"""
+def country_sections(name, n_living=None):
+    """the country page's distribution context, its states/districts/provinces and its cities"""
     keys = [k for k, r in REG.items() if r["country"] == name]
     if not keys: return ""
     cc = REG[keys[0]]["cc"]
     keys.sort(key=lambda k: B.slugify(REG[k]["name"]))
-    out = ('<section class="cy-sec" id="regions" aria-labelledby="cy-rg-h"><h2 id="cy-rg-h">%s</h2><p class="cy-note">The %s where SnakeList records snakes, with how many species each has. '
-           'Each page has its families, venomous snakes, the species found only there, its cities and neighbours.</p>%s</section>') % (
-        esc(kword(cc, True).capitalize()), kword(cc, True), place_list(['<li data-t="%s"><a href="../region/%s">%s</a> <small>%s</small></li>' % (
-            esc(REG[k]["name"].lower()), k, esc(REG[k]["name"]), B.nplural(len(REG[k]["ids"]), "species", "species")) for k in keys], kword(cc, True)))
+    many, one = kword(cc, True), kword(cc)
+    out = ""
+    co = COUNTRY_ONLY.get(cc, set())
+    if n_living:
+        withreg = n_living - len(co)
+        out += ('<section class="cy-sec" id="distribution" aria-labelledby="cy-ds-h"><h2 id="cy-ds-h">How precisely they are recorded</h2>'
+                '<p>Of the %s living species recorded in %s, <b>%s</b> %s recorded by %s in SnakeList&rsquo;s data%s. '
+                'SnakeList records each species by %s, not by exact spot, so a species listed for a %s may live in only part of it.</p></section>') % (
+            nf(n_living), esc(B.the_place(name)), nf(withreg), is_are(withreg), esc(one),
+            ("; <b>%s</b> %s recorded only for %s as a whole, so the %s pages list %s as possible rather than recorded" % (
+                nf(len(co)), is_are(len(co)), esc(B.the_place(name)), esc(one), "it" if len(co) == 1 else "them")) if co else "",
+            esc(one), esc(one.split(" or ")[0]))
+    out += ('<section class="cy-sec" id="regions" aria-labelledby="cy-rg-h"><h2 id="cy-rg-h">%s</h2><p class="cy-note">The %s where SnakeList records snakes, with how many living species are recorded in each. '
+            'Each page has its species, venomous snakes, families, the species found only there, its cities and neighbours.</p>%s</section>') % (
+        esc(many[:1].upper() + many[1:]), esc(many), place_list(['<li data-t="%s"><a href="../region/%s">%s</a> <small>%s</small></li>' % (
+            esc(REG[k]["name"].lower()), k, esc(REG[k]["name"]), B.nplural(len(REG[k]["living"]), "species", "species")) for k in keys], many))
     cs = [ct for k in keys for ct in REG[k]["cities"] if ct["page"]]
     cs.sort(key=lambda ct: ct["rank"])
     if cs:
-        out += ('<section class="cy-sec" id="cities" aria-labelledby="cy-ct-h"><h2 id="cy-ct-h">Cities</h2><p class="cy-note">Its biggest cities, biggest first. Snakes are recorded by %s, '
-                'not by city, so each city page shows the snakes of the %s it is in.</p>%s</section>') % (
-            kword(cc), kword(cc), place_list(['<li data-t="%s"><a href="../city/%s">%s</a> <small>%s</small></li>' % (
-                esc((ct["name"] + " " + REG[ct["region"]]["name"]).lower()), ct["page"], esc(ct["name"]), esc(REG[ct["region"]]["name"])) for ct in cs], "cities", 18))
+        out += ('<section class="cy-sec" id="cities" aria-labelledby="cy-ct-h"><h2 id="cy-ct-h">Cities</h2><p class="cy-note">Its biggest cities, biggest first. SnakeList records snakes by %s, '
+                'not by city, so each city page shows the species recorded in its %s and, separately, those only possible there - not species confirmed in the city.</p>%s</section>') % (
+            esc(one), esc(one), place_list(['<li data-t="%s"><a href="../city/%s">%s</a> <small>%s</small></li>' % (
+                esc((ct["name"] + " " + REG[ct["region"]]["name"]).lower()), ct["page"], esc(ct["name"]), esc(REG[ct["region"]]["title"])) for ct in cs], "cities", 18))
     return out
 
 
-def stats_html(r, L, ctx):
-    n = len(L); nv = sum(1 for c in L if c["venom"])
-    fams = len({c["family"] for c in L if c["family"]})
-    only = [c for c in L if c["countries"] == [r["country"]] and {RAW.get((r["cc"], x)) for x in regions_of(c, r["cc"])} == {r["key"]}]
-    rows = [(nf(n), "species"), (nf(nv), "venomous"), (nf(n - nv), "non-venomous"), (nf(fams), "families" if fams != 1 else "family")]
-    if only: rows.append((nf(len(only)), "found only here"))
-    it = ctx["intro"].get(r["key"])
-    if it: rows.append((nf(len(it)), "introduced"))
-    return '<ul class="cy-stats" aria-label="At a glance">%s</ul>' % "".join('<li><b>%s</b><span>%s</span></li>' % (v, k) for v, k in rows if not (v == "0" and k in ("venomous", "non-venomous")))
+def stats_html(rows, label):
+    return '<ul class="cy-stats" aria-label="%s">%s</ul>' % (esc(label), "".join('<li><b>%s</b><span>%s</span></li>' % (v, k) for v, k in rows))
 
 
 def sections_html(S, order):
     return "".join('<section class="cy-sec rg-sec" id="%s" aria-labelledby="h-%s"><h2 id="h-%s">%s</h2>%s</section>' % (k, k, k, S[k][0], S[k][1]) for k in order if k in S)
 
 
-def toc(S, order, extra=()):
-    names = {"recorded": "Most recorded", "families": "Families", "venom": "Venomous", "only": "Only here", "introduced": "Introduced", "extinct": "Extinct",
-             "habitats": "Habitats", "who": "Who described them", "cities": "Cities", "nearby": "Nearby", "neighbours": "Neighbours", "all": "All species"}
-    return '<nav class="rg-toc" aria-label="On this page">%s</nav>' % "".join('<a href="#%s">%s</a>' % (k, names[k]) for k in order if k in S or k in extra)
+TOC = {"all": "Species", "district": "In the area", "incity": "In the city", "possible": "Possible", "recorded": "Most recorded worldwide", "families": "Families",
+       "venom": "Venomous", "only": "Only here", "introduced": "Introduced", "fossils": "Fossils", "extinct": "Extinct", "habitats": "Habitats",
+       "who": "Who described them", "cities": "Cities", "nearby": "Nearby cities", "neighbours": "Neighbours"}
 
 
-def region_page(r, L, ctx):
+def toc(S, order, names=None):
+    nm = dict(TOC, **(names or {}))
+    return '<nav class="rg-toc" aria-label="On this page">%s</nav>' % "".join('<a href="#%s">%s</a>' % (k, nm[k]) for k in order if k in S)
+
+
+def a_type(r):
+    """"a district of Portugal", "a territory of the United States" """
+    return "%s %s of %s" % (B.an(r["type"]), r["type"], B.the_place(r["country"]))
+
+
+def region_page(r, L, G, P, ctx):
     n = len(L); nv = sum(1 for c in L if c["venom"]); cslug = B.slugify(r["country"])
-    word = kword(r["cc"])
-    S = summary(r, L, ctx)
+    T = r["the"]; t = r["type"]
+    nfam = len({c["family"] for c in L if c["family"]})
+    S = {}
+    S["all"] = (("The %s recorded in %s" % (B.nplural(n, "living species", "living species"), esc(T)) if n > 1 else "The living species recorded in %s" % esc(T)) if n else "Species recorded in %s" % esc(T),
+                ('<p class="cy-note">Every living snake species SnakeList records in %s. Each is recorded somewhere in the %s, not necessarily all over it.</p>%s' % (esc(T), esc(t), all_list(L, "all", T)))
+                if n else '<p>No living snake species %s recorded in %s in SnakeList&rsquo;s data.</p>' % ("is", esc(T)))
+    ps = possible_section(r, P, T)
+    if ps: S["possible"] = ps
+    it = ctx["intro"].get(r["key"], [])
+    if it:
+        S["introduced"] = ("Introduced by people", '<p class="cy-note">Not native here: SnakeList records %s as brought to %s by people. %s not counted in the totals.</p><ul class="rg-cols">%s</ul>' % (
+            "this species" if len(it) == 1 else "these species", esc(T), "It is" if len(it) == 1 else "They are",
+            "".join("<li>%s%s</li>" % (sp_a(c), (" <small>(%s)</small>" % esc(nt)) if nt else "") for c, nt in it)))
+    if n:
+        S["venom"] = venom_section(L, ctx)
+        fs = families_section(L)
+        if fs: S["families"] = fs
+    only = only_here(r, L)
+    if only:
+        S["only"] = ("Found only here", '<p class="cy-note">Recorded in no other %s, country or territory in SnakeList&rsquo;s data. That may mean %s only here, '
+                     'but it can also mean %s not been recorded elsewhere yet.</p><ul class="rg-cols">%s</ul>' % (
+                         esc(t), "it lives" if len(only) == 1 else "they live", "it has" if len(only) == 1 else "they have", "".join("<li>%s</li>" % sp_a(c) for c in only)))
+    hs = habitat_section(L, ctx["info"], [T, r["name"], r["country"]])
+    if hs: S["habitats"] = hs
+    S.update(gone_sections(G, T))
     cs = sorted(r["cities"], key=lambda ct: ct["rank"])
     if cs:
-        S["cities"] = ("Biggest cities", '<p class="cy-note">The biggest cities in %s from SnakeList&rsquo;s city list, biggest first%s.</p><ul class="rg-cols">%s</ul>' % (
-            esc(r["name"]), " (placed here by their map position)" if any(ct["how"] == "coords" for ct in cs) else "",
+        S["cities"] = ("Biggest cities", '<p class="cy-note">The biggest cities in %s from SnakeList&rsquo;s city list, biggest first%s. SnakeList has no records for the cities themselves.</p><ul class="rg-cols">%s</ul>' % (
+            esc(T), " (placed here by their map position)" if any(ct["how"] == "coords" for ct in cs) else "",
             "".join("<li>%s</li>" % (('<a href="../city/%s">%s</a>' % (ct["page"], esc(ct["name"]))) if ct["page"] else esc(ct["name"])) for ct in cs[:15])))
     def reg_li(o):
         R = REG[o]
-        return '<li><a href="%s">%s</a>%s <small>%s</small></li>' % (o, esc(R["name"]), (" <small>(%s)</small>" % esc(R["country"])) if R["country"] != r["country"] else "",
-                                                                     B.nplural(len(R["ids"]), "species", "species"))
-    if r["nb"]:
-        S["neighbours"] = ("Neighbouring %s" % kword(r["cc"], True), '<p class="cy-note">Places in SnakeList that share a border with %s.</p><ul class="rg-cols">%s</ul>' % (
-            esc(r["name"]), "".join(reg_li(o) for o in r["nb"])))
-    elif r["near"]:
-        S["neighbours"] = ("Nearby %s" % kword(r["cc"], True), '<p class="cy-note">The closest other %s of %s in SnakeList.</p><ul class="rg-cols">%s</ul>' % (
-            kword(r["cc"], True), esc(r["country"]), "".join(reg_li(o) for o in r["near"])))
-    S["all"] = ("All %s" % B.nplural(n, "species", "species"), all_list(L, "all", r["name"]))
-    order = ["recorded", "families", "venom", "only", "introduced", "extinct", "habitats", "who", "cities", "neighbours", "all"]
+        return '<li><a href="%s">%s</a>%s <small>%s</small></li>' % (o, esc(R["title"]), (" <small>(%s, %s)</small>" % (esc(R["type"]), esc(R["country"]))) if R["country"] != r["country"] else "",
+                                                                     B.nplural(len(R["living"]), "species", "species"))
+    nb = r["nb"] or r["near"]
+    if nb:
+        same = all(REG[o]["cc"] == r["cc"] for o in nb)
+        types = {REG[o]["type"] for o in nb}
+        word = (types.pop() + "s") if same and len(types) == 1 else "places"
+        word = re.sub(r"ys$", "ies", word)
+        if r["nb"]:
+            S["neighbours"] = ("Neighbouring %s" % word, '<p class="cy-note">Places in SnakeList that share a border with %s, with their living species.</p><ul class="rg-cols">%s</ul>' % (
+                esc(T), "".join(reg_li(o) for o in nb)))
+        else:
+            S["neighbours"] = ("Nearby %s" % word, '<p class="cy-note">The closest other parts of %s in SnakeList.</p><ul class="rg-cols">%s</ul>' % (
+                esc(B.the_place(r["country"])), "".join(reg_li(o) for o in nb)))
+    rs, top = recorded_section(r, L, ctx)
+    if rs: S["recorded"] = rs
+    ws = who_section(top, ctx)
+    if ws: S["who"] = ws
+    order = ["all", "possible", "introduced", "venom", "families", "only", "habitats", "fossils", "extinct", "cities", "neighbours", "recorded", "who"]
     merged = len(r["raw"]) > 1 and r["cc"] != "us"
-    about = ('<section class="cy-about cy-about-note" aria-label="What this page counts"><p>SnakeList records where snakes live by country and by %s, not by exact spot, '
-             'so a species listed here may live in only part of %s. %s<a href="../country/%s">All snakes of %s</a>.</p></section>') % (
-        word, esc(r["name"]), ("SnakeList&rsquo;s map has %d areas called %s; they are counted together here. " % (len(r["raw"]), esc(r["name"]))) if merged else "", cslug, esc(B.the_place(r["country"])))
-    lead = "%s %s recorded in %s, %s %s of %s, in SnakeList: %s venomous and %s non-venomous, from %s." % (
-        B.nplural(n, "snake species", "snake species"), "is" if n == 1 else "are", r["name"], B.an(word), word, B.the_place(r["country"]), nf(nv), nf(n - nv),
-        B.nplural(len({c["family"] for c in L if c["family"]}), "family", "families"))
-    title = "Snakes of %s, %s: %s with photos | SnakeList" % (r["name"], r["country"], B.nplural(n, "species", "species"))
+    about = ('<section class="cy-about cy-about-note" aria-label="What this page counts"><p>%s is %s. SnakeList records where snakes live by %s, not by exact spot, '
+             'so a species counted here may live in only part of it. The counts are unique living species; fossils, extinct species and introduced snakes are listed apart. %s<a href="../country/%s">All snakes of %s</a>.</p></section>') % (
+        esc(T[:1].upper() + T[1:]), esc(a_type(r)), esc(kword(r["cc"])), ("SnakeList&rsquo;s map has %d areas called %s; they are counted together here. " % (len(r["raw"]), esc(r["name"]))) if merged else "",
+        cslug, esc(B.the_place(r["country"])))
+    lead = "%s %s recorded in %s, %s, in SnakeList's data" % (B.nplural(n, "living snake species", "living snake species"), is_are(n), T, a_type(r))
+    split = ("it is venomous" if nv else "it is non-venomous") if n == 1 else "all venomous" if nv == n else "none venomous" if nv == 0 else "%s venomous and %s non-venomous" % (nf(nv), nf(n - nv))
+    lead += (". It is %s." % ("venomous" if nv else "non-venomous") if n == 1 else ": %s, from %s." % (split, B.nplural(nfam, "family", "families"))) if n else "."
+    if P: lead += " %s more %s possible: recorded in %s without %s detail." % (nf(len(P)), is_are(len(P)), B.the_place(r["country"]), kword(r["cc"]))
+    rows = [(nf(n), "living species"), (nf(nv), "venomous"), (nf(n - nv), "non-venomous"), (nf(nfam), "families" if nfam != 1 else "family")]
+    rows = [x for x in rows if not (x[0] == "0" and x[1] in ("venomous", "non-venomous", "families"))]
+    if only: rows.append((nf(len(only)), "found only here"))
+    if P: rows.append((nf(len(P)), "more possible"))
+    if it: rows.append((nf(len(it)), "introduced"))
+    if G: rows.append((nf(len(G)), "fossil" if all(c["fossil"] for c in G) else "fossil or extinct"))
+    title = "Snakes of %s, %s: %s with photos | SnakeList" % (T, r["country"], B.nplural(n, "living species", "living species"))
     url = B.SITE + "species/region/" + r["key"]
     crumbs = [("Countries", "../#by-country"), (r["country"], "../country/" + cslug)]
-    ld = ld_json("Snakes of %s" % r["name"], url, lead, L, [("Countries", B.SITE + "species/#by-country"), (r["country"], B.SITE + "species/country/" + cslug)])
-    return PAGE.format(title=esc(title), desc=esc(lead), url=url, img=og_img(L), ld=ld, crumbs=crumbs_html(crumbs), h1="Snakes of " + esc(r["name"]),
-                       sub=esc("%s %s of %s" % (B.an(word).capitalize(), word, B.the_place(r["country"]))), lead=esc(lead), stats=stats_html(r, L, ctx),
+    ld = ld_json("Snakes of %s" % T, url, lead, L, [("Countries", B.SITE + "species/#by-country"), (r["country"], B.SITE + "species/country/" + cslug)])
+    return PAGE.format(title=esc(title), desc=esc(lead), url=url, img=og_img(L), ld=ld, crumbs=crumbs_html(crumbs), h1="Snakes of " + esc(T),
+                       sub=esc(a_type(r)[:1].upper() + a_type(r)[1:]), lead=esc(lead),
+                       stats=stats_html(rows, "At a glance: unique living species recorded in %s" % T),
                        cta=('<a class="cy-btn" href="../../?map=%s">View on SnakeList map</a>' % esc(quote(r["name"]))), about=about, toc=toc(S, order),
                        body=sections_html(S, order), robots="index,follow,max-image-preview:large" if n >= MIN_INDEX else "noindex,follow",
                        site_head=B.site_header("../../", "species"), site_foot=B.site_footer("../../", "Every photo belongs to its photographer and is used under the Creative Commons licence they chose, credited with it."), author=B.AUTHOR)
 
 
-def city_page(city, r, L, ctx):
-    n = len(L); word = kword(r["cc"]); cslug = B.slugify(r["country"])
-    S = summary(r, L, ctx)
+def city_page(city, r, L, P, ctx):
+    """a city: honest about what is known locally (no city-level records), then the species recorded
+    in its district/state, then those only possible from country-level records - never one list"""
+    n = len(L); T = r["the"]; t = r["type"]; cn = city["name"]; cslug = B.slugify(r["country"])
+    rlink = '<a href="../region/%s">%s</a>' % (r["key"], esc(T))
+    S = {}
+    inat = "https://www.inaturalist.org/observations?lat=%.4f&lng=%.4f&radius=10&taxon_id=85553" % (city["lat"], city["lon"])
+    S["incity"] = ("Observed in %s itself" % esc(cn), (
+        '<p><b>No city-level data.</b> SnakeList has no observation records for a defined %s city area, so this page lists no species as confirmed in the city. '
+        'Community observations of snakes within 10 km of the city centre can be browsed on <a href="%s" rel="noopener">iNaturalist</a> '
+        '(not checked or counted by SnakeList).</p>') % (esc(cn), esc(inat)))
+    S["district"] = (("Recorded in %s: %s" % (esc(T), B.nplural(n, "species", "species"))) if n else "Recorded in %s" % esc(T), (
+        '<p class="cy-note"><b>These species are recorded in %s; their presence within %s city has not been confirmed by this dataset.</b> '
+        'SnakeList records snakes by %s, not by city, and many of them may not live in or near %s.%s</p>%s') % (
+            rlink, esc(cn), esc(kword(r["cc"])), esc(cn), " (The city is placed in %s by its map position.)" % esc(T) if city["how"] == "coords" else "",
+            all_list(L, "district", T)) if n else '<p>No living snake species are recorded in %s in SnakeList&rsquo;s data.</p>' % rlink)
+    ps = possible_section(r, P, T)
+    if ps: S["possible"] = ps
+    it = ctx["intro"].get(r["key"], [])
+    if it:
+        S["introduced"] = ("Introduced in %s" % esc(T), '<p class="cy-note">Not native: SnakeList records %s as brought to %s by people. %s not counted above.</p><ul class="rg-cols">%s</ul>' % (
+            "this species" if len(it) == 1 else "these species", rlink, "It is" if len(it) == 1 else "They are",
+            "".join("<li>%s%s</li>" % (sp_a(c), (" <small>(%s)</small>" % esc(nt)) if nt else "") for c, nt in it)))
     near = sorted((km((city["lat"], city["lon"]), (o["lat"], o["lon"])), o) for o in CITIES if o is not city)[:8]
     S["nearby"] = ("Nearby cities", '<p class="cy-note">The closest cities in SnakeList&rsquo;s city list, as the crow flies.</p><ul class="rg-cols">%s</ul>' % "".join(
         "<li>%s <small>%s km &middot; %s, %s</small></li>" % (('<a href="%s">%s</a>' % (o["page"], esc(o["name"]))) if o["page"] else esc(o["name"]), nf(round(d)),
-                                                           esc(REG[o["region"]]["name"]), esc(o["country"])) for d, o in near))
+                                                           esc(REG[o["region"]]["title"]), esc(o["country"])) for d, o in near))
     same = [o for o in sorted(r["cities"], key=lambda o: o["rank"]) if o is not city]
     if same:
-        S["cities"] = ("Other cities in %s" % esc(r["name"]), '<ul class="rg-cols">%s</ul>' % "".join(
+        S["cities"] = ("Other cities in %s" % esc(T), '<ul class="rg-cols">%s</ul>' % "".join(
             "<li>%s</li>" % (('<a href="%s">%s</a>' % (o["page"], esc(o["name"]))) if o["page"] else esc(o["name"])) for o in same[:15]))
-    S["all"] = ("All %s of %s" % (B.nplural(n, "species", "species"), esc(r["name"])), all_list(L, "all", r["name"]))
-    order = ["recorded", "venom", "families", "only", "introduced", "extinct", "habitats", "who", "nearby", "cities", "all"]
-    rlink = '<a href="../region/%s">%s</a>' % (r["key"], esc(r["name"]))
-    about = ('<section class="cy-about rg-warn" aria-label="How precise this is"><p><b>These are the snakes of %s, not of %s itself.</b> SnakeList records snakes by %s, '
-             'not by city, so this page lists the %s recorded anywhere in %s, the %s %s is in%s. Many of them may not live in or near the city.</p></section>') % (
-        rlink, esc(city["name"]), word, B.nplural(n, "species", "species"), rlink, word, esc(city["name"]),
-        " (worked out from the city&rsquo;s map position)" if city["how"] == "coords" else "")
-    lead = "%s is a city in %s, %s. %s %s recorded in %s in SnakeList." % (city["name"], r["name"], city["country"], B.nplural(n, "snake species", "snake species"),
-                                                                       "is" if n == 1 else "are", r["name"])
-    title = "Snakes around %s, %s: the %s of %s | SnakeList" % (city["name"], city["country"], B.nplural(n, "species", "species"), r["name"])
+    order = ["incity", "district", "possible", "introduced", "nearby", "cities"]
+    about = ('<section class="cy-about rg-warn" aria-label="What this page can and cannot say"><p><b>What is known here:</b> %s is a city in %s (%s). '
+             'SnakeList has no snake records for the city itself. Below are, separately, the species recorded in %s and those only possible from records for %s as a whole. '
+             'For the %s&rsquo;s families, venomous snakes and habitats, see %s.</p></section>') % (
+        esc(cn), rlink, esc(a_type(r)), esc(T), esc(B.the_place(r["country"])), esc(t), rlink)
+    lead = "%s is a city in %s, %s. SnakeList has no snake records for the city itself: %s %s recorded in %s" % (
+        cn, T, city["country"], B.nplural(n, "living species", "living species"), is_are(n), T)
+    lead += (", and %s more %s possible from records for %s as a whole." % (nf(len(P)), is_are(len(P)), B.the_place(r["country"]))) if P else "."
+    title = "Snakes around %s, %s: %s recorded in %s | SnakeList" % (cn, city["country"], B.nplural(n, "species", "species"), T)
     url = B.SITE + "species/city/" + city["page"]
-    crumbs = [("Countries", "../#by-country"), (r["country"], "../country/" + cslug), (r["name"], "../region/" + r["key"])]
-    ld = ld_json("Snakes around %s" % city["name"], url, lead, L, [("Countries", B.SITE + "species/#by-country"), (r["country"], B.SITE + "species/country/" + cslug),
-                                                                  (r["name"], B.SITE + "species/region/" + r["key"])])
-    sub = "%s, %s &middot; %.2f&deg;%s, %.2f&deg;%s" % (esc(r["name"]), esc(city["country"]), abs(city["lat"]), "N" if city["lat"] >= 0 else "S", abs(city["lon"]), "E" if city["lon"] >= 0 else "W")
-    return PAGE.format(title=esc(title), desc=esc(lead + " SnakeList records snakes by %s, not by city." % word), url=url, img=og_img(L), ld=ld, crumbs=crumbs_html(crumbs),
-                       h1="Snakes around " + esc(city["name"]), sub=sub, lead=esc(lead), stats=stats_html(r, L, ctx),
-                       cta='<a class="cy-btn" href="../region/%s">All about %s</a>' % (r["key"], esc(r["name"])), about=about, toc=toc(S, order), body=sections_html(S, order),
+    crumbs = [("Countries", "../#by-country"), (r["country"], "../country/" + cslug), (T, "../region/" + r["key"])]
+    ld = ld_json("Snakes around %s" % cn, url, lead, L, [("Countries", B.SITE + "species/#by-country"), (r["country"], B.SITE + "species/country/" + cslug),
+                                                        (T, B.SITE + "species/region/" + r["key"])])
+    sub = "A city in %s, %s &middot; %.2f&deg;%s, %.2f&deg;%s" % (esc(T), esc(city["country"]), abs(city["lat"]), "N" if city["lat"] >= 0 else "S", abs(city["lon"]), "E" if city["lon"] >= 0 else "W")
+    rows = [("No data", "confirmed in the city"), (nf(n), "recorded in the %s" % t)]
+    if P: rows.append((nf(len(P)), "possible (%s-level)" % land_word(r["country"])))
+    return PAGE.format(title=esc(title), desc=esc(lead), url=url, img=og_img(L), ld=ld, crumbs=crumbs_html(crumbs),
+                       h1="Snakes around " + esc(cn), sub=sub, lead=esc(lead), stats=stats_html(rows, "What is known: unique living species, by evidence level"),
+                       cta='<a class="cy-btn" href="../region/%s">All about %s</a>' % (r["key"], esc(T)), about=about,
+                       toc=toc(S, order, {"district": "In the %s" % t}), body=sections_html(S, order),
                        robots="index,follow,max-image-preview:large" if n >= MIN_INDEX else "noindex,follow",
                        site_head=B.site_header("../../", "species"), site_foot=B.site_footer("../../", "Every photo belongs to its photographer and is used under the Creative Commons licence they chose, credited with it."), author=B.AUTHOR)
 
@@ -498,6 +775,9 @@ REGION_CSS = """.rg-sub{margin:4px 0 0;color:var(--muted);font-size:15px}
 .rg-pq{display:block;margin:0 0 10px;max-width:420px}.rg-pq input{width:100%;font:inherit;font-size:15px;min-height:40px;padding:6px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text)}
 .rg-who{padding-left:18px;margin:0 0 8px;font-size:14.5px}.rg-who li{margin:0 0 6px}.rg-who i{color:var(--muted)}.rg-by{color:var(--text)}.rg-by.rg-miss{color:var(--muted)}
 .rg-warn{border-color:#e0b25c;background:#fdf4e2}.rg-warn p{margin:0}
+.rg-hab{padding-left:18px;margin:0;font-size:14.5px}.rg-hab li{margin:0 0 8px}.rg-hab small{color:var(--muted)}
+.cy-cmp-wrap{overflow-x:auto}.cy-cmp{border-collapse:collapse;font-size:14px;min-width:100%}.cy-cmp th,.cy-cmp td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.cy-cmp th{font-size:13px;color:var(--muted);font-weight:600}.cy-cmp td small{color:var(--muted)}
 .sp-ago{color:var(--muted)}
 @media (prefers-color-scheme:dark){.rg-v{color:#f0a04b}.rg-warn{background:#4a4220;border-color:#a8833d}.rg-split i.v,.rg-key i.v{background:#e07a4f}}
 @media (max-width:560px){.rg-bars li{grid-template-columns:minmax(0,1fr) 30% 2.4em}.rg-cols{columns:1}}
