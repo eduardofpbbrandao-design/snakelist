@@ -21,12 +21,12 @@ Environment limits: iNaturalist, Wikipedia, Wikidata, GBIF and the Reptile Datab
 | 8 | Species page reading order, separate actions, section nav, no repeated panels | R | B | ⏳ | |
 | 9 | More sourced information; unknowns stay unknown | P | B | ⏳ | |
 | 10 | Viperine Snake distribution (North Africa missing from map/summary), countries vs territories, introduced vs invasive | D/I | B | ⏳ | |
-| 11 | Fossils separated from living species everywhere (counts, map lists, related lists) | D | B+C+D | ⏳ | |
+| 11 | Fossils separated from living species everywhere (counts, map lists, related lists) | D | B+C+D | ⚠️ | C: place pages done (fossils in own section, not counted). B (species pages) and D (map lists) pending. |
 | 12 | Author/year attribution fixed at source (Malpolon "Faber 1912" → Hermann 1804); no implementation messages in content | D | B | ⏳ | |
-| 13 | Correct administrative terms (Porto = district), place identity, explicit wording | D/I | C | ⏳ | |
-| 14 | Map vs page counts reconciled (Porto 10 vs 8), every count defined | D | C+D | ⏳ | |
+| 13 | Correct administrative terms (Porto = district), place identity, explicit wording | D/I | C | ✅ | C: admin terms from the app SUBDIV/NON_SOVEREIGN tables; places stored with id/type/parent/country; Porto District vs Porto city wording. |
+| 14 | Map vs page counts reconciled (Porto 10 vs 8), every count defined | D | C+D | ⚠️ | C: root cause found (map livesNear pools BYCODE incl. fossils + country-only records); pages define every count; species/place-counts.js produced. App (D) still to use it. |
 | 15 | "Fewest species" excludes zero, shows ties, full dataset; cities/regions/islands | R | D | ⏳ | |
-| 16 | City evidence levels separated (in city / in district / possible by range); "nearby" wording | I | C+D | ⏳ | |
+| 16 | City evidence levels separated (in city / in district / possible by range); "nearby" wording | I | C+D | ⚠️ | C: city pages split into observed-in-city (no offline data - says so) / recorded in district / possible by country. App list wording pending (D). |
 | 17 | Sightings button: restrained teal, label "Sightings", one toggle, options panel | R | D | ⏳ | |
 | 18 | Sightings markers: consistent, clusters with counts, hit areas, overlap lists | R | D | ⏳ | |
 | 19 | Honest sightings totals; viewport loading; date range; load more; dedupe by id; no "live" misuse | R | D | ⏳ | |
@@ -35,8 +35,8 @@ Environment limits: iNaturalist, Wikipedia, Wikidata, GBIF and the Reptile Datab
 | 22 | Trail cameras separated into their own "Cameras" layer, honest wording | R | D | ⏳ | |
 | 23 | Predictable map state (close vs clear, return from pages, back/forward, reset view vs reset filters); keep zero-match fix | R | D | ⏳ | |
 | 24 | Full map correctness audit (races, filters, alignment, islands, hit tests, popups, touch, failures, legends) | U | D | ⏳ | |
-| 25 | Weak habitat estimates replaced or clearly labelled; not used for 3D scenery | I | C+A | ⏳ | |
-| 26 | Country/region/city/family/genus/fossil templates each with a real purpose; honest "most recorded" | R | C | ⏳ | |
+| 25 | Weak habitat estimates replaced or clearly labelled; not used for 3D scenery | I | C+A | ✅ | C: habitat bar counts removed; region pages quote reviewed-account habitat text with sources, clearly general. |
+| 26 | Country/region/city/family/genus/fossil templates each with a real purpose; honest "most recorded" | R | C | ✅ | C: region/city/country/family/genus/fossil templates reordered with distinct purposes; "Most recorded worldwide" labelled global. |
 | 27 | Full wording and terminology review in templates and generated text | I | B+C+E | ⏳ | |
 | 28 | Conservation with provider/category/year/scope; citations that support statements; meaningful review dates | I | B | ⏳ | |
 | 29 | Reference-site patterns used selectively (AirNav, Florida Museum, Reptile Database, iNaturalist) | P | A+B | ⏳ | |
@@ -55,3 +55,7 @@ Environment limits: iNaturalist, Wikipedia, Wikidata, GBIF and the Reptile Datab
 
 ## Additional issues found during the work
 (added as they are found)
+- C: fossil ages under 1 million years were shown 1,000x too young (Crotalus potterensis "about 20 years ago") - fixed.
+- C: some big cities fall in the wrong region where the map has no shape for them (Addis Ababa -> Oromia) - not fixed.
+- E: "Harmless" filter renamed "Low risk" (non-venomous is not a promise a snake cannot bite).
+- E: About page photo total now computed from the photo index (was "about 3,100 of the 4,254").
