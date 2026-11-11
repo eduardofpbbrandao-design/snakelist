@@ -81,16 +81,14 @@ var s=document.createElement('p');s.className='src';s.innerHTML='From <a href="'
 })();
 
 (function(){var b=document.querySelector('.sp-realbtn'),m=document.querySelector('.sp-main[data-sci]');if(!b||!m)return;
-var sci=m.dataset.sci,name=(document.querySelector('h1')||{}).textContent||sci,dlg=null;
+var sci=m.dataset.sci,sid=m.dataset.id,name=(document.querySelector('h1')||{}).textContent||sci,dlg=null,me=document.currentScript&&document.currentScript.src||location.href;
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
 function lic(c){c=String(c||'').toLowerCase();return c==='cc0'?'CC0':c.replace(/^cc-/,'CC ').toUpperCase()}
-var SCN={rainforest:'a rainforest',forest:'a forest',savanna:'a savanna',desert:'a desert',rocks:'rocky scrub',heath:'heathland',water:'fresh water',ocean:'the open sea'};
-function size(){var lo=+m.dataset.lenlo,hi=+m.dataset.lenhi;if(!hi)return null;var W=340,P=1.5,s=Math.min((W-40)/(hi+0.55),74),NS='http://www.w3.org/2000/svg',ph=P*s,H=Math.max(ph+46,128),g=H-26,sc=SCN[m.dataset.scene]?m.dataset.scene:'';
+function size(){var lo=+m.dataset.lenlo,hi=+m.dataset.lenhi;if(!hi)return null;var W=340,P=1.5,s=Math.min((W-40)/(hi+0.55),74),NS='http://www.w3.org/2000/svg',ph=P*s,H=Math.max(ph+46,128),g=H-26;
 var svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.setAttribute('role','img');
-svg.setAttribute('aria-label',name+': about '+rng(lo,hi)+' long, next to a person 1.5 m tall'+(sc?', in '+SCN[sc]:''));
+svg.setAttribute('aria-label',name+': about '+rng(lo,hi)+' long, next to a person 1.5 m tall');
 function a(t,o,p){var e=document.createElementNS(NS,t);for(var k in o)e.setAttribute(k,o[k]);(p||svg).appendChild(e);return e}
 var px=14+0.2*s,hr=Math.max(3,0.11*s),x0=px+0.2*s+18,th=Math.max(5,Math.min(12,0.06*s)),y=g-th/2-1;
-if(sc){svg.setAttribute('class','scn-on');scene(sc,W,g,x0,a,NS,svg)}
 a('line',{x1:6,y1:g,x2:W-6,y2:g,'class':'gr'});
 a('circle',{cx:px,cy:g-ph+hr,r:hr,'class':'pp'});a('path',{d:'M'+(px-0.2*s)+' '+g+'L'+(px-0.13*s)+' '+(g-ph*0.52)+'L'+(px-0.2*s)+' '+(g-ph*0.82)+'Q'+px+' '+(g-ph*0.9)+' '+(px+0.2*s)+' '+(g-ph*0.82)+'L'+(px+0.13*s)+' '+(g-ph*0.52)+'L'+(px+0.2*s)+' '+g+'Z','class':'pp'});
 var t=a('text',{x:px,y:g+16,'text-anchor':'middle'});t.textContent='1.5 m';
@@ -101,57 +99,54 @@ return a('path',{d:'M'+x0+' '+y+'L'+(x0+tl)+' '+(y-h)+'L'+(x0+L-hl)+' '+(y-h)+'C
 if(hi>lo)body(hi*s,'sn2');body(lo*s,'sn');if(lo*s>=th*2)a('circle',{cx:x0+lo*s-Math.min(th*1.7,lo*s/3)*0.45,cy:y-th*0.18,r:Math.max(1,th*0.13),'class':'eye'});
 var t2=a('text',{x:Math.min(Math.max(x0+hi*s/2,x0+30),W-50),y:y-th/2-7,'text-anchor':'middle','class':'ln'});t2.textContent=rng(lo,hi);
 return svg}
-// a simple painted scene of the snake's habitat, behind the size picture (fixed colours, the same in dark mode)
-function scene(k,W,g,x0,a,NS,svg){var G=a('g',{'class':'scn'}),r=7;function R(){r=(r*9301+49297)%233280;return r/233280}
-for(var i=0,h=0;i<(m.dataset.sci||'').length;i++)h=(h*31+m.dataset.sci.charCodeAt(i))%233280;r=h||7;
-var id='sky'+Math.round(R()*1e6),sky={rainforest:['#2c5e3a','#5c9654'],forest:['#cde5f1','#eef6e6'],savanna:['#f3dfa6','#fbf2d6'],desert:['#f6cf93','#fcefd6'],rocks:['#d3e2ec','#eef1e8'],heath:['#d8dfec','#eeeff2'],water:['#cbe6f3','#eaf5f1'],ocean:['#b8e0f4','#e4f4fb']}[k];
-var df=a('defs',{},G),lg=a('linearGradient',{id:id,x1:0,y1:0,x2:0,y2:1},df);a('stop',{offset:0,'stop-color':sky[0]},lg);a('stop',{offset:1,'stop-color':sky[1]},lg);
-var cp=a('clipPath',{id:id+'c'},df);a('path',{d:'M0 8Q0 0 8 0H'+(W-8)+'Q'+W+' 0 '+W+' 8V'+g+'H0Z'},cp);G.setAttribute('clip-path','url(#'+id+'c)');
-a('rect',{x:0,y:0,width:W,height:g,fill:'url(#'+id+')'},G);
-function P(d,f,o){return a('path',{d:d,fill:f,opacity:o==null?1:o},G)}function C(x,y,rr,f,o){return a('circle',{cx:x,cy:y,r:rr,fill:f,opacity:o==null?1:o},G)}
-function E(x,y,rx,ry,f,o){return a('ellipse',{cx:x,cy:y,rx:rx,ry:ry,fill:f,opacity:o==null?1:o},G)}function Rc(x,y,w,h,f,o){return a('rect',{x:x,y:y,width:w,height:h,fill:f,opacity:o==null?1:o},G)}
-function hills(y0,amp,f,o){var d='M0 '+g+'L0 '+y0;for(var x=0;x<=W;x+=34)d+='Q'+(x+17)+' '+(y0-amp*(0.4+R()))+' '+(x+34)+' '+y0;P(d+'L'+W+' '+g+'Z',f,o)}
-function tufts(f,n,hh){for(var i=0;i<n;i++){var x=R()*W,q=hh*(0.6+R()*0.6);P('M'+(x-3)+' '+g+'L'+(x-1)+' '+(g-q)+'L'+x+' '+g+'L'+(x+2)+' '+(g-q*0.9)+'L'+(x+3)+' '+g+'Z',f)}}
-if(k==='rainforest'){for(var i=0;i<7;i++){var x=R()*W;Rc(x,0,5+R()*7,g,'#1d4529',0.8)}
-for(i=0;i<16;i++)E(R()*W,R()*g*0.45,20+R()*26,10+R()*12,['#2f7a3c','#3f8d45','#246330'][i%3],0.9);
-for(i=0;i<5;i++){var vx=R()*W;P('M'+vx+' 0Q'+(vx+8)+' '+(g*0.3)+' '+(vx-2)+' '+(g*(0.45+R()*0.25))+'l2 0Q'+(vx+10)+' '+(g*0.3)+' '+(vx+2)+' 0Z','#1f5a2c')}
-hills(g-14,6,'#2a5a2f');Rc(0,g-5,W,5,'#4b3a22');for(i=0;i<6;i++){var fx=i<3?R()*30:W-R()*30;P('M'+fx+' '+g+'Q'+(fx-14)+' '+(g-16)+' '+(fx-22)+' '+(g-12)+'Q'+(fx-10)+' '+(g-8)+' '+fx+' '+g+'Q'+(fx+14)+' '+(g-18)+' '+(fx+22)+' '+(g-13)+'Q'+(fx+10)+' '+(g-8)+' '+fx+' '+g,'#3d9a48')}}
-else if(k==='forest'){hills(g-26,10,'#a9cfa0',0.8);for(var i=0;i<6;i++){var x=20+R()*(W-40),hh=g*(0.45+R()*0.3);Rc(x-3,g-hh,6,hh,'#7a5a3a');C(x,g-hh,16+R()*10,['#5e9b4f','#4f8a45','#6aa85a'][i%3]);C(x-10,g-hh+8,12,'#4f8a45',0.9)}
-Rc(0,g-6,W,6,'#8fb36b');tufts('#6f9a4d',18,6)}
-else if(k==='savanna'){C(W-40,24,13,'#f7c95b');hills(g-18,5,'#e4cf8e');var ax=W*0.62+R()*40,ah=g*0.45;Rc(ax-2,g-ah,4,ah,'#6b5236');E(ax,g-ah,34,8,'#7d9a48');E(ax-14,g-ah+5,18,6,'#6f8c3e');
-if(R()>0.3){var bx=W*0.25+R()*40;Rc(bx-1.5,g-ah*0.6,3,ah*0.6,'#6b5236',0.8);E(bx,g-ah*0.6,20,5,'#8aa452',0.8)}Rc(0,g-6,W,6,'#d8b35a');tufts('#c39a3e',30,9)}
-else if(k==='desert'){C(W-46,26,15,'#fbe08a');P('M0 '+(g-24)+'Q'+(W*0.3)+' '+(g-44)+' '+(W*0.6)+' '+(g-22)+'T'+W+' '+(g-30)+'L'+W+' '+g+'L0 '+g+'Z','#ebc584');
-P('M0 '+(g-10)+'Q'+(W*0.4)+' '+(g-22)+' '+(W*0.75)+' '+(g-8)+'T'+W+' '+(g-12)+'L'+W+' '+g+'L0 '+g+'Z','#dfb16c');for(var i=0;i<4;i++)E(R()*W,g-2,4+R()*5,3,'#a98a62');
-var sx=W*0.8;for(i=0;i<5;i++)P('M'+sx+' '+g+'L'+(sx-10+i*5)+' '+(g-10-R()*6),'none').setAttribute('stroke','#7b7a4a')}
-else if(k==='rocks'){hills(g-34,14,'#b9c5b2');hills(g-16,8,'#a6b29c');for(var i=0;i<5;i++){var x=R()*W;E(x,g-6,10+R()*12,7+R()*7,['#9aa39a','#878f87','#a9b0a6'][i%3])}
-for(i=0;i<5;i++)C(R()*W,g-6,5+R()*5,'#6f8f55');Rc(0,g-4,W,4,'#9a8d74')}
-else if(k==='heath'){hills(g-30,10,'#b3bfae');for(var i=0;i<14;i++)E(R()*W,g-4,14+R()*16,6+R()*6,['#9a78a6','#7f9a5c','#8a6c96'][i%3]);Rc(0,g-3,W,3,'#6e5a4a')}
-else if(k==='water'){hills(g-28,10,'#9cc790');for(var i=0;i<4;i++){var x=W*0.3+R()*W*0.7,hh=g*(0.3+R()*0.25);Rc(x-2,g-hh-12,4,hh,'#7a5a3a',0.8);C(x,g-hh-12,13,'#6aa85a',0.85)}
-Rc(0,g-12,W,12,'#5aa3c8');for(i=0;i<6;i++)Rc(x0+R()*(W-x0-30),g-9+R()*6,14+R()*14,1.2,'#d4ecf6',0.8);P('M0 '+g+'L0 '+(g-14)+'L'+(x0-12)+' '+(g-14)+'Q'+(x0-4)+' '+(g-8)+' '+(x0-8)+' '+g+'Z','#7a9a52');
-for(i=0;i<9;i++){var rx=W-6-R()*36;P('M'+rx+' '+(g-8)+'L'+(rx+1)+' '+(g-30-R()*14)+'L'+(rx+2.4)+' '+(g-8)+'Z','#5b7f3a')}}
-else if(k==='ocean'){Rc(0,g-34,W,34,'#3f8fc0');Rc(0,g-34,W,2,'#2c6f9e',0.6);for(var i=0;i<10;i++){var x=R()*W,yy=g-30+R()*26;P('M'+x+' '+yy+'q6 -4 12 0q6 4 12 0','none').setAttribute('stroke','#cbe8f6')}
-P('M0 '+g+'L0 '+(g-12)+'Q'+(x0*0.6)+' '+(g-16)+' '+(x0-4)+' '+(g-5)+'L'+(x0-1)+' '+g+'Z','#e9d39a');if(R()>0.2){P('M'+(W*0.7)+' '+(g-34)+'q22 -16 44 0Z','#8bb07a')}}
-[].forEach.call(G.querySelectorAll('path[fill="none"]'),function(e){e.setAttribute('stroke-width','1.4');e.setAttribute('stroke-linecap','round')})}
 function fmt(v){return v<1?Math.round(v*100)+' cm':(Math.round(v*100)/100)+' m'}
 function rng(lo,hi){if(lo===hi)return fmt(hi);if(lo>=1)return (Math.round(lo*100)/100)+'–'+fmt(hi);if(hi<1)return Math.round(lo*100)+'–'+fmt(hi);return fmt(lo)+'–'+fmt(hi)}
-function open(){if(!dlg)build();if(dlg.showModal){if(!dlg.open)dlg.showModal()}else dlg.setAttribute('open','');load()}
-function close(){if(dlg.close)dlg.close();else dlg.removeAttribute('open')}
-var grid,stat,got=0;
-function build(){dlg=el('dialog','sp-rl');dlg.setAttribute('aria-labelledby','sp-rl-h');var inn=el('div','sp-rl-in'),hd=el('div','sp-rl-hd'),h=el('h2','',name+' in real life');h.id='sp-rl-h';
+// the model profiles and the viewer code are fetched only when the viewer is opened
+var models=null,modP=null,viewer=null,tabs,p3d,pph,host,about,note,stat,grid,got=0,busy=0;
+function getModels(){if(models)return Promise.resolve(models);return fetch(new URL('3d/models.json',me).href).then(function(r){if(!r.ok)throw new Error('models '+r.status);return r.json()}).then(function(d){models=d;return d})}
+var tries=0;function getViewer(){if(!modP){var imp,q=tries++?'?r='+tries:'';try{imp=new Function('u','return import(u)')}catch(e){return Promise.reject(e)}
+modP=Promise.all([imp(new URL('3d/three.module.min.js'+q,me).href),imp(new URL('3d/viewer.js'+q,me).href)]).then(function(r){r[1].useThree(r[0]);return r[1]}).catch(function(e){modP=null;throw e})}return modP}
+function gl(){try{var c=document.createElement('canvas');return !!(window.WebGLRenderingContext&&(c.getContext('webgl2')||c.getContext('webgl')))}catch(e){return false}}
+function open(){if(!dlg)build();if(dlg.showModal){if(!dlg.open)dlg.showModal()}else dlg.setAttribute('open','');start()}
+function close(){if(dlg.close)dlg.close();else{dlg.removeAttribute('open');closed()}}
+function closed(){if(viewer){viewer.dispose();viewer=null}busy=0;b.focus();if(location.hash==='#real')history.replaceState(null,'',location.pathname+location.search)}
+function pick(which){var is3=which==='3d';tabs[0].setAttribute('aria-selected',is3);tabs[1].setAttribute('aria-selected',!is3);tabs[0].tabIndex=is3?0:-1;tabs[1].tabIndex=is3?-1:0;p3d.hidden=!is3;pph.hidden=is3;if(!is3)load()}
+function msg(t,retry,photos){host.innerHTML='';var d=el('div','sp3d-msg');d.setAttribute('role','alert');d.appendChild(el('p','',t));if(retry){var r=el('button','sp-btn sp-btn2','Retry');r.type='button';r.addEventListener('click',start);d.appendChild(r)}
+if(photos){var q=el('button','sp-btn sp-btn2','See photos instead');q.type='button';q.addEventListener('click',function(){pick('ph');tabs[1].focus()});d.appendChild(q)}host.appendChild(d)}
+function start(){if(viewer||busy)return;busy=1;host.innerHTML='';var ld=el('div','sp3d-msg sp3d-loading');ld.setAttribute('role','status');ld.appendChild(el('span','sp3d-spin'));ld.appendChild(el('p','','Loading the 3D model...'));host.appendChild(ld);
+getModels().then(function(d){var p=d&&d.species&&d.species[sid];
+if(!p){busy=0;nomodel();return}
+fillAbout(p);
+if(!gl()){busy=0;msg('This browser or device cannot show 3D graphics (WebGL is turned off or not supported), so the 3D model cannot be shown. The photos are still available.',false,true);return}
+return getViewer().then(function(mod){if(!dlg.open&&!dlg.hasAttribute('open')){busy=0;return}host.innerHTML='';
+try{viewer=mod.mount(host,{profile:p,id:sid,name:name,testing:!!window.SL_3D_TEST})}catch(e){viewer=null;busy=0;msg(e&&e.message==='webgl'?'The 3D view could not start on this device (WebGL is not available). The photos are still available.':'The 3D view could not start.',true,true);return}busy=0})})
+.catch(function(){busy=0;msg(navigator.onLine===false?'You seem to be offline, and the 3D viewer has not been downloaded yet.':'The 3D viewer could not be loaded just now.',true,true)})}
+function nomodel(){tabs[0].parentNode.hidden=true;p3d.hidden=true;pph.hidden=false;note.hidden=false;load()}
+function fillAbout(p){if(about.dataset.done)return;about.dataset.done=1;var s=el('summary','','About this model and its sources');about.appendChild(s);
+about.appendChild(el('p','','A reconstruction built by SnakeList from the sources below: body proportions, head shape, scale rows and keels, colours and markings of a typical adult. It is not a scan of a real snake, and individual snakes vary.'));
+if(p.scene&&p.scene.basis)about.appendChild(el('p','','Surroundings: '+p.scene.basis));var ul=el('ul');(p.refs||[]).forEach(function(r){var li=el('li'),a=el('a','',r.t);a.href=r.acct?'#sources':r.u;if(!r.acct){a.rel='noopener';a.target='_blank'}else a.addEventListener('click',close);li.appendChild(a);ul.appendChild(li)});about.appendChild(ul)}
+function build(){dlg=el('dialog','sp-rl');dlg.setAttribute('aria-labelledby','sp-rl-h');var inn=el('div','sp-rl-in'),hd=el('div','sp-rl-hd'),h=el('h2','','Explore in 3D: ');h.appendChild(el('span','sp-rl-nm',name));h.id='sp-rl-h';
 var x=el('button','sp-rl-x','×');x.type='button';x.setAttribute('aria-label','Close');x.addEventListener('click',close);hd.appendChild(h);hd.appendChild(x);inn.appendChild(hd);
-stat=el('p','sp-rl-st','Loading photos from iNaturalist...');stat.setAttribute('role','status');inn.appendChild(stat);grid=el('ul','sp-rl-grid');inn.appendChild(grid);
+var tl=el('div','sp-rl-tabs');tl.setAttribute('role','tablist');tl.setAttribute('aria-label','View');tabs=[el('button','sp-rl-tab','3D model'),el('button','sp-rl-tab','Photos')];
+tabs.forEach(function(t,i){t.type='button';t.setAttribute('role','tab');t.id='sp-rl-t'+i;t.setAttribute('aria-controls','sp-rl-p'+i);t.addEventListener('click',function(){pick(i?'ph':'3d')});
+t.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();var j=1-i;pick(j?'ph':'3d');tabs[j].focus()}});tl.appendChild(t)});inn.appendChild(tl);
+p3d=el('section','sp-rl-p');p3d.id='sp-rl-p0';p3d.setAttribute('role','tabpanel');p3d.setAttribute('aria-labelledby','sp-rl-t0');host=el('div','sp3d-host');p3d.appendChild(host);about=el('details','sp3d-about');p3d.appendChild(about);inn.appendChild(p3d);
+pph=el('section','sp-rl-p');pph.id='sp-rl-p1';pph.setAttribute('role','tabpanel');pph.setAttribute('aria-labelledby','sp-rl-t1');pph.hidden=true;
+note=el('p','sp3d-none','No accurate 3D model of this snake exists yet. SnakeList only shows a 3D model when it can be built from reliable descriptions and photos of the species, so here are photos of it instead.');note.hidden=true;pph.appendChild(note);
+var pf=document.querySelector('.sp-photo img'),pc=document.querySelector('.sp-photo figcaption');if(pf){var f0=el('figure','sp-rl-own'),im=new Image();im.src=pf.getAttribute('data-fb')||pf.src;im.alt=pf.alt;im.width=540;im.height=360;f0.appendChild(im);if(pc)f0.appendChild(pc.cloneNode(true));pph.appendChild(f0)}
+stat=el('p','sp-rl-st','Loading photos from iNaturalist...');stat.setAttribute('role','status');pph.appendChild(stat);grid=el('ul','sp-rl-grid');pph.appendChild(grid);
 var sz=size();if(sz){var f=el('figure','sp-rl-size');f.appendChild(el('h3','','How big is it?'));f.appendChild(sz);var cap=el('figcaption');cap.appendChild(document.createTextNode('Adult length: '+(m.dataset.lentxt||'')+' '));
 var src=m.dataset.lensrc;if(src){var p=src.split('|');var aa=el('a','',p[0]);if(p[1]){aa.href=p[1];aa.rel='noopener'}cap.appendChild(document.createTextNode('(source: '));cap.appendChild(p[1]?aa:document.createTextNode(p[0]));cap.appendChild(document.createTextNode(')'))}
-cap.appendChild(el('span','sp-note',' Drawn stretched out, to scale with a person 1.5 m tall'+(SCN[m.dataset.scene]?', in '+SCN[m.dataset.scene]+' - the kind of place it lives':'')+'. Real snakes vary.'));f.appendChild(cap);inn.appendChild(f)}
+cap.appendChild(el('span','sp-note',' Drawn stretched out, to scale with a person 1.5 m tall. Real snakes vary.'));f.appendChild(cap);pph.appendChild(f)}
 var n=el('p','sp-note sp-rl-n');n.appendChild(document.createTextNode('Research-grade observations shared on '));var ia=el('a','','iNaturalist');ia.href='https://www.inaturalist.org/observations?taxon_name='+encodeURIComponent(sci)+'&quality_grade=research';ia.rel='noopener';n.appendChild(ia);
-n.appendChild(document.createTextNode('. Only photos their photographers shared under an open licence are shown; each links to its observation.'));inn.appendChild(n);
-dlg.appendChild(inn);document.body.appendChild(dlg);dlg.addEventListener('click',function(e){if(e.target===dlg)close()});dlg.addEventListener('close',function(){b.focus();if(location.hash==='#real')history.replaceState(null,'',location.pathname+location.search)})}
+n.appendChild(document.createTextNode('. Only photos their photographers shared under an open licence are shown; each links to its observation.'));pph.appendChild(n);inn.appendChild(pph);pick('3d');
+dlg.appendChild(inn);document.body.appendChild(dlg);dlg.addEventListener('click',function(e){if(e.target===dlg)close()});dlg.addEventListener('close',closed)}
 function load(){if(got)return;if(navigator.onLine===false){stat.textContent='You seem to be offline. These photos come from iNaturalist, so they need an internet connection.';return}got=1;stat.textContent='Loading photos from iNaturalist...';
 var c=window.AbortController?new AbortController():null,t=setTimeout(function(){if(c)c.abort()},12000);
 fetch('https://api.inaturalist.org/v1/observations?taxon_name='+encodeURIComponent(sci)+'&photos=true&quality_grade=research&per_page=12',c?{signal:c.signal}:{}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){clearTimeout(t);var k=0;
 ((d&&d.results)||[]).forEach(function(o){var ph=(o.photos||[])[0];if(!ph||!ph.license_code||!ph.url)return;var who=(o.user&&(o.user.name||o.user.login))||'an iNaturalist user',u='https://www.inaturalist.org/observations/'+o.id;
 var li=el('li'),f=el('figure'),a=el('a');a.href=u;a.rel='noopener';a.target='_blank';var i=new Image();i.src=ph.url.replace('/square.','/medium.');i.alt='Photo of '+name+' by '+who;i.loading='lazy';i.width=320;i.height=240;a.appendChild(i);f.appendChild(a);
 var cap=el('figcaption');cap.appendChild(document.createTextNode('© '+who+' ('+lic(ph.license_code)+') '));var l2=el('a','','observation'+(o.observed_on?' from '+o.observed_on.slice(0,4):''));l2.href=u;l2.rel='noopener';l2.target='_blank';cap.appendChild(l2);f.appendChild(cap);li.appendChild(f);grid.appendChild(li);k++});
-stat.textContent=k?k+' photo'+(k>1?'s':'')+' of '+name+' by iNaturalist observers.':'No openly licensed research-grade photos of this snake are on iNaturalist yet.'})
+stat.textContent=k?k+' more photo'+(k>1?'s':'')+' of '+name+' by iNaturalist observers.':'No openly licensed research-grade photos of this snake are on iNaturalist yet.'})
 .catch(function(){clearTimeout(t);got=0;stat.textContent='Could not reach iNaturalist just now (it may be offline or blocked on this network). Try again later.'})}
 b.addEventListener('click',open);if(location.hash==='#real')open();window.addEventListener('hashchange',function(){if(location.hash==='#real')open()})})();

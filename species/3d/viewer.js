@@ -222,6 +222,7 @@ function buildBody(P, F, pose, quality) {
   if (Hd.brow) bumps.push({ x: Hd.eyeX * F.Hl, xs: F.Hl * 0.16, th: eyeA - 0.42, ts: 0.32, amp: Hd.brow, mirror: true });
   if (Hd.pits === 'loreal') bumps.push({ x: F.Hl * 0.15, xs: F.Hl * 0.035, th: Math.PI * 0.5, ts: 0.09, amp: -0.07, mirror: true });
   bumps.push({ x: F.Hl * 0.045, xs: F.Hl * 0.022, th: eyeA * 0.62, ts: 0.12, amp: -0.05, mirror: true }); // nostril
+  if (Hd.snoutUp) bumps.push({ x: F.Hl * 0.03, xs: F.Hl * 0.05, th: 0, ts: 0.7, amp: Hd.snoutUp });
   const nTop = (x) => lerp(Hd.canthus, 2.15, sstep(F.Hl * 0.8, F.Hl * 1.6, x));
 
   // spine point & frame at x
@@ -389,6 +390,7 @@ function patternTexture(P, F, body, lat, quality, seed) {
       }
       const sv = 1 + vari * (hash1(cl.id, seed + 5) - 0.5) * 2 * (0.35 + 0.65 * cl.w);
       col = [col[0] * sv, col[1] * sv, col[2] * sv];
+      if (C.scaleEdge && !cl.v) col = mixc(col, hex(C.scaleEdge.color), (C.scaleEdge.k || 0.8) * Math.pow(1 - cl.w, 1.6));
       if (C.speckle && !cl.v && x > Hl) { const hs = hash1(cl.id, seed + 11); if (hs < C.speckle.p) col = mixc(col, hex(C.speckle.color), (C.speckle.k || 0.6) * (0.6 + hs / C.speckle.p * 0.4) * Math.sqrt(cl.w)); }
       const k = (r * Wp + c) * 4; data[k] = col[0]; data[k + 1] = col[1]; data[k + 2] = col[2]; data[k + 3] = 255;
     }
@@ -438,12 +440,16 @@ function evalLayer(Ly, a, g, t, xn, warp, cl, seed) {
     return k > 0 ? [Ly.col, k * (Ly.alpha || 1)] : null;
   }
   if (Ly.type === 'zigzag') {
-    const ph = (g - Ly.g0) / Ly.period + Ly.phase, tri = 2 * Math.abs(2 * (ph - Math.floor(ph + 0.5))) - 1;
-    const ac = Ly.a + Ly.amp * tri + warp * Ly.warp * 0.06, w = Ly.wid * (1 + warp * 0.3);
-    const d = Math.abs(a - ac) / w;
-    let c = cover(d, Ly.aa) * fadeT;
-    if (Ly.ecol && d < 1 + Ly.edge && d >= 1 - Ly.aa) return [Ly.ecol, (1 - sstep(1 + Ly.edge - Ly.aa, 1 + Ly.edge + Ly.aa, d)) * fadeT];
-    return c > 0.001 ? [Ly.col, c * (Ly.alpha || 1)] : null;
+    for (const sg of sides) {
+      const ph = (g - Ly.g0) / Ly.period + Ly.phase + (sg < 0 && Ly.alt ? 0.5 : 0), tri = 2 * Math.abs(2 * (ph - Math.floor(ph + 0.5))) - 1;
+      const ac = (Ly.a + Ly.amp * tri) * sg + warp * Ly.warp * 0.06, w = Ly.wid * (1 + warp * 0.3);
+      const d = Math.abs(a - ac) / w;
+      let r = null;
+      if (Ly.ecol && d < 1 + Ly.edge + Ly.aa && d >= 1 - Ly.aa) r = [Ly.ecol, (1 - sstep(1 + Ly.edge - Ly.aa, 1 + Ly.edge + Ly.aa, d)) * fadeT];
+      else { const c = cover(d, Ly.aa) * fadeT; if (c > 0.001) r = [Ly.col, c * (Ly.alpha || 1)]; }
+      if (r && (!best || r[1] > best[1])) best = r;
+    }
+    return best;
   }
   if (Ly.type === 'line' || Ly.type === 'spot' || Ly.type === 'poly' || Ly.type === 'cap') {
     // head markings: xn = position along the head (0 snout tip, 1 back of the head), a = around
@@ -508,13 +514,13 @@ function eyeTexture(P) {
 const SCENES = {
   litter:   { sky: ['#b9c7b0', '#d7ddcc'], fog: '#c3cbb9', sun: 1.6, hemi: 0.75, sunEl: 55, tile: 1.1, ground: 'litter', props: { leaves: 1, twigs: 1, rocks: 0.15, grass: 0.1 } },
   forest:   { sky: ['#a9bca6', '#ccd6c3'], fog: '#b9c6b2', sun: 1.7, hemi: 0.75, sunEl: 52, tile: 1.2, ground: 'litter', props: { leaves: 1, twigs: 1, log: 1, rocks: 0.2, grass: 0.15 } },
-  arid:     { sky: ['#9fc0dd', '#efe3cf'], fog: '#e6dccb', sun: 2.6, hemi: 0.6, sunEl: 48, tile: 0.8, ground: 'gravel', props: { rocks: 1, grass: 0.5, twigs: 0.4 } },
-  heath:    { sky: ['#a8bfd4', '#e4e7e3'], fog: '#d9ddd8', sun: 2.1, hemi: 0.7, sunEl: 40, tile: 0.8, ground: 'heath', props: { heather: 1, grass: 0.7, rocks: 0.1, twigs: 0.3 } },
+  arid:     { sky: ['#9fc0dd', '#efe3cf'], fog: '#e6dccb', sun: 2.2, hemi: 0.55, sunEl: 48, tile: 0.8, ground: 'gravel', props: { rocks: 1, grass: 0.5, twigs: 0.4 } },
+  heath:    { sky: ['#a8bfd4', '#e4e7e3'], fog: '#d9ddd8', sun: 1.8, hemi: 0.6, sunEl: 40, tile: 0.8, ground: 'heath', props: { heather: 1, grass: 0.7, rocks: 0.1, twigs: 0.3 } },
   riverbank:{ sky: ['#a6c2d8', '#e2e9e4'], fog: '#d4ddd7', sun: 2.2, hemi: 0.7, sunEl: 46, tile: 0.9, ground: 'pebbles', water: 'river', props: { rocks: 0.6, reeds: 1, grass: 0.4, pebbles: 1 } },
   soil:     { sky: ['#b3bfae', '#d8dccf'], fog: '#c8cec0', sun: 1.5, hemi: 0.8, sunEl: 58, tile: 0.35, ground: 'soil', props: { leaves: 0.5, twigs: 0.6, crumbs: 1 } },
   sea:      { sky: ['#7fb0d6', '#e3eef2'], fog: '#cfdfe6', sun: 2.6, hemi: 0.7, sunEl: 50, tile: 1, ground: null, water: 'sea', props: { drift: 1 } },
-  grass:    { sky: ['#a3c1da', '#e6ead9'], fog: '#dde2d2', sun: 2.3, hemi: 0.7, sunEl: 48, tile: 0.9, ground: 'dry', props: { grass: 1, rocks: 0.2, twigs: 0.3 } },
-  sand:     { sky: ['#9cc0de', '#f2e6cf'], fog: '#efe2cb', sun: 2.7, hemi: 0.6, sunEl: 50, tile: 1.0, ground: 'sand', props: { rocks: 0.3, grass: 0.3, twigs: 0.3 } },
+  grass:    { sky: ['#a3c1da', '#e6ead9'], fog: '#dde2d2', sun: 2.0, hemi: 0.6, sunEl: 48, tile: 0.9, ground: 'dry', props: { grass: 2.6, rocks: 0.2, twigs: 0.3 } },
+  sand:     { sky: ['#9cc0de', '#f2e6cf'], fog: '#efe2cb', sun: 2.2, hemi: 0.5, sunEl: 50, tile: 1.0, ground: 'sand', props: { rocks: 0.3, grass: 0.3, twigs: 0.3 } },
   rainforest:{ sky: ['#9fb39b', '#c3cfbb'], fog: '#aebba7', sun: 1.3, hemi: 0.85, sunEl: 60, tile: 1.1, ground: 'litter', props: { leaves: 1.3, twigs: 1, rocks: 0.1, ferns: 1 } },
 };
 
@@ -528,7 +534,7 @@ function groundTexture(kind, seed) {
   return canvasTex(1024, (x, S) => {
     // draw fn at the position and at its wrapped copies, so the texture tiles without seams
     const wrapAt = (cx, cy, r, fn) => { for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) { const X = cx + ox, Y = cy + oy; if (X + r < 0 || X - r > S || Y + r < 0 || Y - r > S) continue; x.save(); x.translate(X, Y); fn(); x.restore(); } };
-    const base = { litter: '#3b2e22', gravel: '#b7a58c', heath: '#6f5f4a', pebbles: '#6f675a', soil: '#3f3024', dry: '#9b8a62', sand: '#d8c39a' }[kind] || '#777';
+    const base = { litter: '#3b2e22', gravel: '#b7a58c', heath: '#6f5f4a', pebbles: '#6f675a', soil: '#3f3024', dry: '#6f6a44', sand: '#d8c39a' }[kind] || '#777';
     x.fillStyle = base; x.fillRect(0, 0, S, S);
     const tone = (amt, fine) => {
       const img = x.getImageData(0, 0, S, S), d = img.data;
@@ -578,7 +584,7 @@ function groundTexture(kind, seed) {
       for (let i = 0; i < 2600; i++) { const cx = R() * S, cy = R() * S, r = 3 + R() ** 2.5 * 16, c = cols[(R() * cols.length) | 0]; wrapAt(cx, cy, r * 2, () => { x.rotate(R() * 3); stone(r, r * (0.6 + R() * 0.35), c[0], c[1], R() < 0.12); }); }
       tone(0.15, 0);
     } else if (kind === 'heath' || kind === 'dry') {
-      const strokes = kind === 'heath' ? ['#3a2f25', '#5a4a38', '#8a7a5c', '#b4a27c', '#4a3f30', '#6b4f5a'] : ['#b9a676', '#8f8456', '#c7b88a', '#6f6a40', '#a89a6a'];
+      const strokes = kind === 'heath' ? ['#3a2f25', '#5a4a38', '#8a7a5c', '#b4a27c', '#4a3f30', '#6b4f5a'] : ['#a89a66', '#7d7a46', '#b8aa78', '#5d6634', '#8c8a52', '#4f5a2c'];
       for (let i = 0; i < 5200; i++) { const cx = R() * S, cy = R() * S, l = 6 + R() * 30, a = R() * TAU, col = strokes[(R() * strokes.length) | 0], w = 0.6 + R() * 1.4; wrapAt(cx, cy, l, () => { x.rotate(a); x.strokeStyle = col; x.lineWidth = w; x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(l * 0.5, (R() - 0.5) * 6, l, (R() - 0.5) * 4); x.stroke(); }); }
       if (kind === 'heath') for (let i = 0; i < 40; i++) { const cx = R() * S, cy = R() * S, r = 14 + R() * 34; wrapAt(cx, cy, r * 1.3, () => { for (let k = 0; k < 160; k++) { const a = R() * TAU, rr = r * Math.sqrt(R()); x.fillStyle = ['rgba(62,78,36,.55)', 'rgba(84,98,46,.5)', 'rgba(48,60,30,.5)'][k % 3]; x.beginPath(); x.arc(Math.cos(a) * rr, Math.sin(a) * rr * 0.75, 1 + R() * 2.2, 0, TAU); x.fill(); } }); }
       tone(0.2, 0);
@@ -632,7 +638,7 @@ function leafGeometry() {
 function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   const { scene } = ctx, S = SCENES[P.scene.kind] || SCENES.litter, R = rng(seed + 77);
   const Rb = poseInfo.radius, L = F.L;
-  const groundR = Rb * 16;
+  const envR = poseInfo.envR || Rb, groundR = Math.max(Rb * 16, envR * 9);
   const sky = new THREE.Color(S.sky[0]), hor = new THREE.Color(S.fog);
   // sky dome (gradient, no image): believable from any angle, fades into the same haze as the fog
   const skyGeo = new THREE.SphereGeometry(groundR * 1.6, 32, 16), cols = [], p = skyGeo.attributes.position;
@@ -640,7 +646,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   skyGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
   const skyMesh = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false }));
   skyMesh.renderOrder = -1; scene.add(skyMesh);
-  scene.fog = new THREE.Fog(hor, Rb * 5.5, groundR * 0.95);
+  scene.fog = new THREE.Fog(hor, Math.max(Rb * 5.5, envR * 3.2), groundR * 0.72);
   scene.background = hor;
 
   // environment light from a simple sky/ground gradient (soft reflections; no image is fetched)
@@ -808,17 +814,18 @@ function contactShadow(poseInfo, F, Rb) {
   const S = 512, cv = document.createElement('canvas'); cv.width = cv.height = S; const x = cv.getContext('2d');
   const ext = Rb * 1.25, toPx = (v) => ((v + ext) / (2 * ext)) * S;
   x.lineCap = 'round'; x.lineJoin = 'round';
-  for (let pass = 0; pass < 6; pass++) {
-    x.strokeStyle = `rgba(0,0,0,${0.16 - pass * 0.02})`;
+  for (let pass = 0; pass < 5; pass++) {
+    x.strokeStyle = `rgba(0,0,0,${0.13 - pass * 0.02})`;
     for (let i = 0; i < poseInfo.pts.length - 4; i += 4) {
       const xx = i * poseInfo.ds, lift = poseInfo.Ly(xx); if (lift > F.Hh(xx) * 0.8) continue;
       const a = poseInfo.pts[i], b = poseInfo.pts[i + 4];
-      x.lineWidth = Math.max(1, (F.W(xx) * 2 * (1 + pass * 0.35)) / (2 * ext) * S);
-      x.beginPath(); x.moveTo(toPx(a[0]), toPx(a[1])); x.lineTo(toPx(b[0]), toPx(b[1])); x.stroke();
+      x.lineWidth = Math.max(1, (F.W(xx) * 2 * (0.9 + pass * 0.16)) / (2 * ext) * S);
+      // canvas rows run toward -z once the plane is laid flat
+      x.beginPath(); x.moveTo(toPx(a[0]), toPx(-a[1])); x.lineTo(toPx(b[0]), toPx(-b[1])); x.stroke();
     }
   }
   const t = new THREE.CanvasTexture(cv);
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(ext * 2, ext * 2).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, opacity: 0.7, color: '#000000', alphaMap: t }));
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(ext * 2, ext * 2).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, opacity: 0.8, color: '#ffffff' }));
   t.flipY = false; m.position.y = Math.max(1e-4, F.L * 0.0006); m.renderOrder = 1;
   return m;
 }
@@ -893,7 +900,7 @@ export function mount(host, opts) {
   host.innerHTML = '';
   const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
   const wrap = el('div', 'sp3d-wrap'), stage = el('div', 'sp3d-stage'), labels = el('div', 'sp3d-labels'), status = el('div', 'sp3d-status');
-  const hint = el('p', 'sp3d-hint', 'Drag to rotate around the snake · pinch or scroll to zoom');
+  const hint = el('p', 'sp3d-hint', (window.innerWidth < 520 ? 'Drag to rotate around it · pinch to zoom' : 'Drag to rotate around the snake · pinch or scroll to zoom · arrow keys work too'));
   status.setAttribute('role', 'status'); status.hidden = true;
   const canvas = document.createElement('canvas'); canvas.className = 'sp3d-canvas'; canvas.tabIndex = 0;
   canvas.setAttribute('role', 'img'); canvas.setAttribute('aria-label', '3D model of ' + opts.name + '. Arrow keys rotate, plus and minus zoom, R resets the view.');
@@ -972,6 +979,9 @@ export function mount(host, opts) {
     if (H.horns === 'nasal') {
       for (const sg of [1, -1]) { const x = F.Hl * 0.06, th = sg * 0.32, s = body.surf(x, th), hh = F.W(x) * 0.55; const g = new THREE.ConeGeometry(hh * 0.28, hh, 10); const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: P.head.hornColor || P.colors.dorsal, roughness: 0.8 })); m.position.copy(s.p).addScaledVector(s.f.U, hh * 0.3); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), s.f.U.clone().addScaledVector(s.f.T, -0.5).normalize()); m.castShadow = true; snakeGroup.add(m); }
     }
+    if (H.horns === 'supraocular') {
+      for (const sg of [1, -1]) { const x = H.eyeX * F.Hl, th = sg * (body.eyeA - 0.55), s = body.surf(x, th), hh = F.W(x) * 0.42; const g = new THREE.ConeGeometry(hh * 0.3, hh, 10); g.translate(0, hh / 2, 0); const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: P.head.hornColor || P.colors.dorsal, roughness: 0.8 })); m.position.copy(s.p).addScaledVector(s.f.U, -hh * 0.1); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), s.f.U.clone().addScaledVector(s.f.S, sg * 0.45).addScaledVector(s.f.T, 0.25).normalize()); m.castShadow = true; snakeGroup.add(m); }
+    }
     if (P.tail.rattle) {
       const n = P.tail.rattle, f = body.frameAt(F.L), c = body.spine(F.L), w = F.W(F.L * 0.999) * 1.15;
       let off = -w * 0.25;
@@ -988,7 +998,7 @@ export function mount(host, opts) {
     const bb = new THREE.Box3().setFromObject(snakeGroup), size = bb.getSize(new THREE.Vector3()), center = bb.getCenter(new THREE.Vector3());
     const Rb = Math.max(size.x, size.z) / 2 * 1.05 + F.w0;
     const hMax = bb.max.y;
-    const poseInfo = { pts: pose.pts, ds: pose.ds, Ly: pose.Ly, radius: Rb, seaLevel: F.Hh(F.L * 0.5) * F.bf * (P.scene.float || 1.1) };
+    const poseInfo = { pts: pose.pts, ds: pose.ds, Ly: pose.Ly, radius: Rb, envR: P.length >= 0.4 ? Rb + 1.0 : Rb * 1.3, seaLevel: F.Hh(F.L * 0.5) * F.bf * (P.scene.float || 1.1) };
     // water side for riverbank: the side of the snake with most open space
     if ((SCENES[P.scene.kind] || {}).water === 'river') { let best = 0, bd = -1; for (let i = 0; i < 16; i++) { const a = (i / 16) * TAU; let m = -1e9; for (const p of pose.pts) m = Math.max(m, p[0] * Math.cos(a) + p[1] * Math.sin(a)); if (bd < 0 || m < bd) { bd = m; best = a; } } poseInfo.waterDir = best; poseInfo.waterDist = bd + F.w0 * 2.5 + Rb * 0.12; }
     scene.add(snakeGroup);
@@ -1023,32 +1033,34 @@ export function mount(host, opts) {
   function fitLimits() {
     const r = info.Rb, asp = Math.max(0.4, (stage.clientWidth || 1) / (stage.clientHeight || 1));
     const vf = (cam.fov * Math.PI) / 360, hf = Math.atan(Math.tan(vf) * asp);
-    // the snake lies flat: fit its footprint across the view, and its foreshortened depth (seen from 30 degrees) up and down
-    info.dFit = Math.max((r * 1.1) / Math.tan(hf), (r * 0.62) / Math.tan(vf)) + r * 0.4;
+    info.portrait = asp < 0.8; info.vf = vf; info.hf = hf;
+    // the snake lies flat: fit its footprint across the view, and its foreshortened depth (seen from above at an angle) up and down
+    info.dFit = Math.max((r * (info.portrait ? 0.98 : 1.1)) / Math.tan(hf), (r * (info.portrait ? 0.8 : 0.62)) / Math.tan(vf)) + r * 0.4;
     info.dMax = info.dFit * 1.55;
     info.dMin = Math.max(info.F.Hl * 3.2, info.F.w0 * 5);
     info.scaleK = 1;
   }
   function targetFor(d) {
     // zooming in moves the point you orbit around from the middle of the snake to its head
-    const k = sstep(info.dFit * 0.75, info.dMin * 1.2, d);
-    return info.center.clone().lerp(info.headPos, k);
+    const k = sstep(info.dFit * 0.75, info.dMin * 1.2, d), t = info.center.clone().lerp(info.headPos, k);
+    if (scaleObj && scaleObj.visible && info.F.L >= 0.4) t.y += 0.55 * sstep(info.dFit, info.dFit * 1.6, d); // keep the 1.5 m figure in view
+    return t;
   }
   function viewAz(kind) {
     const hd = info.headDir; const a = Math.atan2(hd.x, hd.z);
     if (kind === 'front') return a; if (kind === 'side') return -info.axisAng + Math.PI / 2; return a + 0.9;
   }
-  function resetView(instant) { controls.setGoal({ az: viewAz('default'), el: (30 * Math.PI) / 180, d: info.dFit }, instant); }
+  function resetView(instant) { controls.setGoal({ az: viewAz('default'), el: ((info.portrait ? 40 : 30) * Math.PI) / 180, d: info.dFit }, instant); }
   function setView(kind) {
     if (kind === 'front') controls.setGoal({ az: viewAz('front'), el: (14 * Math.PI) / 180, d: Math.max(info.dMin * 1.6, info.dFit * 0.42) });
     else if (kind === 'side') controls.setGoal({ az: viewAz('side'), el: (12 * Math.PI) / 180, d: info.dFit * 1.0 });
-    else controls.setGoal({ az: controls.st.az, el: (80 * Math.PI) / 180, d: info.dFit * 1.0 });
+    else controls.setGoal({ az: controls.st.az, el: (80 * Math.PI) / 180, d: (info.Rb * 1.12) / Math.tan(Math.min(info.vf, info.hf)) + info.hMax });
   }
 
   function placeCamera() {
     const st = controls.st, t = targetFor(st.d);
     cam.position.set(t.x + st.d * Math.cos(st.el) * Math.sin(st.az), t.y + st.d * Math.sin(st.el), t.z + st.d * Math.cos(st.el) * Math.cos(st.az));
-    cam.near = Math.max(st.d * 0.02, 1e-4); cam.far = info.Rb * 40; cam.updateProjectionMatrix(); cam.lookAt(t);
+    cam.near = Math.max(st.d * 0.02, 1e-4); cam.far = Math.max(info.Rb * 40, 60); cam.updateProjectionMatrix(); cam.lookAt(t);
   }
   function resize() {
     const w = stage.clientWidth || 300, h = stage.clientHeight || 200;
@@ -1094,19 +1106,25 @@ export function mount(host, opts) {
       const rw = Math.max(L * 0.025, 0.004), rg = new THREE.BoxGeometry(L, rw * 0.25, rw);
       const ruler = new THREE.Mesh(rg, [m, m, new THREE.MeshStandardMaterial({ map: tickT, roughness: 0.7 }), m, m, m]);
       ruler.position.copy(rulerAt).addScaledVector(new THREE.Vector3(0, 1, 0), rw * 0.125); ruler.rotation.y = -info.axisAng; ruler.castShadow = true; scaleObj.add(ruler);
-      scaleObj.userData.labels = [{ p: ruler.position.clone().add(new THREE.Vector3(0, rw * 2, 0)), t: fmtLen(L) + ' (typical adult, laid straight)' }];
+      scaleObj.userData.labels = [{ p: ruler.position.clone().addScaledVector(side, L * 0.5).add(new THREE.Vector3(0, rw * 2, 0)), t: fmtLen(L) + ' ruler (typical adult, laid straight)' }];
       if (L >= 0.4) {
         const pg = personShape(1.5), person = new THREE.Mesh(pg, new THREE.MeshStandardMaterial({ color: '#4d5a52', roughness: 0.9 }));
         const pp = info.center.clone().addScaledVector(side, info.Rb + 0.45); pp.y = 0; person.position.copy(pp); person.lookAt(new THREE.Vector3(info.center.x, 0, info.center.z)); person.rotateY(Math.PI / 2); person.castShadow = true; scaleObj.add(person);
         scaleObj.userData.labels.push({ p: pp.clone().add(new THREE.Vector3(0, 1.58, 0)), t: 'Person 1.5 m' });
-        info.scaleK = Math.max(1, (info.Rb + 0.6 + 1.6) / info.Rb * 0.75);
+
       }
       ctx.scene.add(scaleObj);
     }
     if (scaleObj) scaleObj.visible = onv;
     scaleP.hidden = !onv;
     scaleP.textContent = onv ? 'Scale: the ruler is ' + fmtLen(info.F.L) + ' long, the length of a typical adult' + (P.lengthNote ? ' (' + P.lengthNote + ')' : '') + (info.F.L >= 0.4 ? '; the figure is a person 1.5 m tall.' : '.') + (P.max ? ' The longest recorded was ' + P.max + '; that is not drawn.' : '') : '';
-    if (onv) controls.setGoal({ d: info.dFit * Math.max(1, info.scaleK) }); else controls.setGoal({ d: Math.min(controls.st.d, info.dMax) });
+    if (onv) {
+      const Rf = info.F.L >= 0.4 ? Math.max(info.Rb + 0.8, 1.0) : info.Rb * 1.35, dS = Math.max((Rf * 1.12) / Math.sin(Math.min(info.vf, info.hf)), info.F.L >= 0.4 ? 1.0 / Math.tan(info.vf) : 0);
+      info.scaleK = Math.max(1, (dS * 1.25) / info.dMax);
+      // look across the ruler, with the person standing beside the snake rather than in front of it
+      const pa = info.axisAng + Math.PI / 2;
+      controls.setGoal({ d: Math.max(dS, info.dFit), el: (22 * Math.PI) / 180, az: Math.atan2(Math.cos(pa), Math.sin(pa)) });
+    } else controls.setGoal({ d: Math.min(controls.st.d, info.dMax) });
     rebuildMarkers(); kick();
   }
 
@@ -1143,11 +1161,16 @@ export function mount(host, opts) {
   }
   const v3 = new THREE.Vector3();
   function updateMarkers() {
-    if (!markers.length) return; const w = stage.clientWidth, h = stage.clientHeight;
-    for (const m of markers) {
-      v3.copy(m.p).project(cam); const vis = v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05;
-      m.el.hidden = !vis; if (!vis) continue;
-      m.el.style.transform = 'translate(' + ((v3.x * 0.5 + 0.5) * w).toFixed(1) + 'px,' + ((-v3.y * 0.5 + 0.5) * h).toFixed(1) + 'px)';
+    if (!markers.length) return; const w = stage.clientWidth, h = stage.clientHeight, placed = [];
+    const list = markers.map((m) => { v3.copy(m.p).project(cam); return { m, x: (v3.x * 0.5 + 0.5) * w, y: (-v3.y * 0.5 + 0.5) * h, vis: v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05 }; }).sort((a, b) => a.y - b.y);
+    for (const o of list) {
+      const m = o.m; m.el.hidden = !o.vis; if (!o.vis) continue;
+      if (!m.sz) m.sz = [m.el.offsetWidth || 120, m.el.offsetHeight || 20];
+      let x = Math.min(o.x, w - m.sz[0] + 6), y = o.y;
+      if (!m.scale) for (const q of placed) if (x < q[0] + q[2] && x + m.sz[0] > q[0] && y < q[1] + q[3] && y + m.sz[1] > q[1]) y = q[1] + q[3] + 2;
+      placed.push([x, y, m.sz[0], m.sz[1]]);
+      m.el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
+      m.el.classList.toggle('sp3d-moved', Math.abs(y - o.y) > 1 || Math.abs(x - o.x) > 1);
       if (m.n) { const facing = m.n.dot(cam.position.clone().sub(m.p).normalize()); m.el.classList.toggle('sp3d-back', facing < -0.1); }
     }
   }

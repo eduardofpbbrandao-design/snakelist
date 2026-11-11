@@ -11,12 +11,12 @@ Environment limits: iNaturalist, Wikipedia, Wikidata, GBIF and the Reptile Datab
 
 | # | Requirement | Type | Stream | Status | Notes |
 |---|---|---|---|---|---|
-| 1 | Real-life module rebuilt around appearance: "Explore in 3D", photos kept as reference gallery | R | A | ⏳ | |
-| 2 | Anatomically and visually convincing, species-specific models (proportions, taper, head, eyes, scales, keels, pattern, pose, lighting) | R | A | ⏳ | |
-| 3 | Believable scenery from well-supported species habitat only; labelled as reconstruction | R | A | ⏳ | |
-| 4 | Bounded, smooth camera (orbit, limited zoom, reset/fullscreen/views; mouse/touch/keys; limits scale with model) | R | A | ⏳ | |
-| 5 | Reliable 3D: on demand, loading/fail/retry, device-scaled quality, pause when hidden, dispose, context loss, reduced motion, honest "no model" | R | A | ⏳ | |
-| 6 | Polished viewer UI: large view, compact toolbar, settings panel, labelled length comparison, appearance details, credits | R | A | ⏳ | |
+| 1 | Real-life module rebuilt around appearance: "Explore in 3D", photos kept as reference gallery | R | A | ✅ | Button and app label "Explore in 3D"; dialog with a 3D model tab and a Photos tab (page photo + iNaturalist research-grade gallery). |
+| 2 | Anatomically and visually convincing, species-specific models (proportions, taper, head, eyes, scales, keels, pattern, pose, lighting) | R | A | ⚠️ | 40 species profiles in `data/snake-models.json` (including the 7 living validation species), each citing its account, reference photo and any extra sources. Procedural: swept body with real taper, species head and eyes, generated scale normal map (keeled/smooth/juxtaposed), layered patterns. Still visibly procedural up close (see stream A report). |
+| 3 | Believable scenery from well-supported species habitat only; labelled as reconstruction | R | A | ✅ | Ground, props, fog and sky dome per profile scene; habitat taken from the species account (quoted under "About this model"), never from country estimates; labelled "Representative reconstruction - not a photograph of a real encounter." |
+| 4 | Bounded, smooth camera (orbit, limited zoom, reset/fullscreen/views; mouse/touch/keys; limits scale with model) | R | A | ✅ | Bounded orbit (8-80 degrees, camera kept above the body), zoom limits from model size, zooming in moves the focus to the head, no pan; Reset/Fullscreen/Front/Side/Top; mouse, touch, keys. Tested with Playwright. |
+| 5 | Reliable 3D: on demand, loading/fail/retry, device-scaled quality, pause when hidden, dispose, context loss, reduced motion, honest "no model" | R | A | ✅ | three.js vendored in species/3d and loaded on open; loading/error/Retry; WebGL fallback; context loss and restore; render on demand, paused when hidden; full dispose on close; no idle animation. Tested with Playwright. |
+| 6 | Polished viewer UI: large view, compact toolbar, settings panel, labelled length comparison, appearance details, credits | R | A | ✅ | Toolbar (views, Reset, Fullscreen, Scale, Details, Settings); Scale = typical-adult ruler + 1.5 m figure (maximum only as text); detail markers; credits; phone and desktop, light and dark. |
 | 7 | Species fact grid redesign (labels Venom, Adult length, Diet, Reproduction, Conservation status, Distribution; etymology out of the grid) | R | B | ⏳ | |
 | 8 | Species page reading order, separate actions, section nav, no repeated panels | R | B | ⏳ | |
 | 9 | More sourced information; unknowns stay unknown | P | B | ⏳ | |
@@ -35,11 +35,11 @@ Environment limits: iNaturalist, Wikipedia, Wikidata, GBIF and the Reptile Datab
 | 22 | Trail cameras separated into their own "Cameras" layer, honest wording | R | D | ⏳ | |
 | 23 | Predictable map state (close vs clear, return from pages, back/forward, reset view vs reset filters); keep zero-match fix | R | D | ⏳ | |
 | 24 | Full map correctness audit (races, filters, alignment, islands, hit tests, popups, touch, failures, legends) | U | D | ⏳ | |
-| 25 | Weak habitat estimates replaced or clearly labelled; not used for 3D scenery | I | C+A | ⏳ | |
+| 25 | Weak habitat estimates replaced or clearly labelled; not used for 3D scenery | I | C+A | ⚠️ | A: 3D scenery uses only the species account habitat (or the cited profile); the old habitat-scene size picture (`scene_of`, `SCENE_WORDS`) is removed. C part not done by stream A. |
 | 26 | Country/region/city/family/genus/fossil templates each with a real purpose; honest "most recorded" | R | C | ⏳ | |
 | 27 | Full wording and terminology review in templates and generated text | I | B+C+E | ⏳ | |
 | 28 | Conservation with provider/category/year/scope; citations that support statements; meaningful review dates | I | B | ⏳ | |
-| 29 | Reference-site patterns used selectively (AirNav, Florida Museum, Reptile Database, iNaturalist) | P | A+B | ⏳ | |
+| 29 | Reference-site patterns used selectively (AirNav, Florida Museum, Reptile Database, iNaturalist) | P | A+B | ⚠️ | A: photo gallery tab with credits (iNaturalist pattern) and listed model references. |
 | 30 | Consistent visual system across app and pages; contrast; both themes; zoom; narrow screens | R | E | ⏳ | |
 | 31 | Supporting flows audit (checklist, sightings, want/following, achievements, quiz, camera ID, install, About, creator, credits, privacy, terms); stale totals | I/U | E | ⏳ | |
 | 32 | Complete, reviewable result: this checklist, validation set, previews, honest report | — | all | ⏳ | |
