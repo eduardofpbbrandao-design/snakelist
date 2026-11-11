@@ -669,7 +669,7 @@ REAL_CSS = """
 .sp-rl-size .sn{fill:var(--g)}.sp-rl-size .sn2{fill:var(--g);opacity:.4}.sp-rl-size text{fill:var(--text);font:600 12px Inter,system-ui,sans-serif}.sp-rl-size .eye{fill:#1a1208}.sp-rl-size text.tk{fill:var(--muted);font-weight:500;font-size:10.5px}
 .sp-rl-size figcaption{font-size:13.5px}.sp-rl-size .sp-note{display:block;margin:4px 0 0}.sp-rl-n{margin:12px 0 0}
 .sp3d-none{margin:0 0 12px;padding:10px 14px;border:1px solid var(--tagline);border-radius:12px;background:var(--tag);font-size:15px}
-.sp3d-host{position:relative}
+.sp-rl .sp-rl-p{background:none;border:0;border-radius:0;padding:0;margin:0}.sp3d-host{position:relative}
 .sp3d-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;min-height:min(56vh,480px);padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.sp3d-msg p{margin:0;max-width:440px}
 .sp3d-spin{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--g);animation:sp3dspin 1s linear infinite}@keyframes sp3dspin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.sp3d-spin{animation-duration:3s}}
@@ -684,7 +684,8 @@ REAL_CSS = """
 .sp3d-mk{position:absolute;left:0;top:0;display:flex;align-items:center;gap:5px;margin:-6px 0 0 -6px;white-space:nowrap}.sp3d-mk[hidden]{display:none}
 .sp3d-dot{flex:none;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--g);box-shadow:0 1px 3px rgba(0,0,0,.5)}
 .sp3d-mt{padding:2px 8px;border-radius:8px;background:rgba(12,26,18,.82);color:#fff;font:500 12px/1.4 Inter,system-ui,sans-serif;max-width:200px;white-space:normal}
-.sp3d-sl{margin:0}.sp3d-sl .sp3d-mt{transform:translate(-50%,-100%)}.sp3d-back{opacity:.45}
+.sp3d-sl{margin:0}.sp3d-sl .sp3d-mt{transform:translate(-50%,-100%)}.sp3d-back{opacity:.45}.sp3d-moved .sp3d-dot{opacity:.35}
+@media (max-width:560px){.sp3d-mt{font-size:11px;max-width:150px;padding:1px 6px}}
 .sp3d-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 0 0}
 .sp3d-views{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}.sp3d-views .sp3d-b{border:0;border-radius:0}.sp3d-views .sp3d-b+.sp3d-b{border-left:1px solid var(--line)}
 .sp3d-b{font:600 13.5px Inter,system-ui,sans-serif;min-height:38px;padding:6px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);cursor:pointer}
