@@ -14104,7 +14104,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       '<div class="sp-info-acts">' +
         '<button type="button" data-sp="seen"' + (ext ? " hidden" : "") + (done ? ' class="on"' : "") + ' aria-pressed="' + done + '">' + (done ? "&#10003; Seen" : "Mark Seen") + "</button>" +
         '<button type="button" data-sp="wish"' + (ext || done ? " hidden" : "") + (wish ? ' class="on"' : "") + ' aria-pressed="' + wish + '">' + (wish ? "&#9733; Want to see" : "&#9734; Want to see") + "</button>" +
-        '<a class="sp-info-page sp-info-real" href="' + spEsc(spPageUrl(c)) + '#real"' + (window.claude && window.claude.use ? ' target="_blank" rel="noopener"' : "") + ">See it in real life</a>" +
+        '<a class="sp-info-page sp-info-real" href="' + spEsc(spPageUrl(c)) + '#real"' + (window.claude && window.claude.use ? ' target="_blank" rel="noopener"' : "") + ">Explore in 3D</a>" +
         '<a class="sp-info-page" href="' + spEsc(spPageUrl(c)) + '"' + (window.claude && window.claude.use ? ' target="_blank" rel="noopener"' : "") + ">View full species page</a>" +
       "</div></div>";
   }
@@ -15930,7 +15930,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     cap.innerHTML = "";
     var b = document.createElement("b"); b.textContent = name || ""; cap.appendChild(b);
     var i = document.createElement("i"); i.textContent = sci && sci !== name ? sci : ""; cap.appendChild(i);
-    var rl = document.createElement("a"); rl.className = "pl-compare pl-real"; rl.textContent = "See it in real life";
+    var rl = document.createElement("a"); rl.className = "pl-compare pl-real"; rl.textContent = "Explore in 3D";
     rl.href = "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html") + "#real"; cap.appendChild(rl);
     if (window.SL_compare) { var cb0 = document.createElement("button"); cb0.type = "button"; cb0.className = "pl-compare"; cb0.textContent = "Compare with similar snakes";
       cb0.addEventListener("click", function (ev) { ev.stopPropagation(); close(); window.SL_compare(id); }); cap.appendChild(cb0); }
