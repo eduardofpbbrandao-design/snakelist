@@ -1,6 +1,6 @@
 {
   "id": "malayopython-reticulatus",
-  "reviewed": "2026-11-09",
+  "reviewed": "2026-11-11",
   "status": "rich",
   "facts": {
     "length": {
@@ -31,7 +31,9 @@
         "brit",
         "columbus",
         "activewild"
-      ]
+      ],
+      "scope": "global",
+      "year": 2018
     }
   },
   "sections": {
@@ -157,5 +159,6 @@
       "publisher": "Columbus Zoo and Aquarium",
       "url": "https://columbuszoo.org/animals/reticulated-python"
     }
-  }
+  },
+  "authority": "(Schneider, 1801)"
 }

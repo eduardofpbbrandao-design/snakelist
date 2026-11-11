@@ -1,6 +1,6 @@
 {
   "id": "python-bivittatus",
-  "reviewed": "2026-11-09",
+  "reviewed": "2026-11-11",
   "status": "rich",
   "authority": "Kuhl, 1820",
   "facts": {
@@ -26,10 +26,19 @@
     "iucn": {
       "code": "VU",
       "text": "Vulnerable",
-      "long": "Listed as Vulnerable on the IUCN Red List (global assessment by Stuart and colleagues, 2012), reflecting declines in its native range.",
       "src": [
         "wiki",
         "zoosprint"
+      ],
+      "scope": "global",
+      "year": 2012,
+      "url": "https://www.iucnredlist.org/species/193451/151341916"
+    },
+    "diet": {
+      "text": "Mainly mammals and birds",
+      "src": [
+        "usgs-fl",
+        "orianne"
       ]
     }
   },
@@ -87,7 +96,7 @@
     "distribution": [
       {
         "label": "Native",
-        "text": "Tropical South and Southeast Asia, including Myanmar, Thailand, Vietnam and Indonesia. SnakeList's map below shows the countries where it is recorded.",
+        "text": "Tropical South and Southeast Asia, including Myanmar, Thailand, Vietnam and Indonesia.",
         "src": [
           "wiki",
           "cmz"
@@ -158,6 +167,13 @@
         "src": [
           "usgs-fl",
           "fwc-id"
+        ]
+      },
+      {
+        "label": "Effect in Florida",
+        "text": "Road surveys in Everglades National Park from 2003 to 2011 found raccoons and opossums down by about 99% and bobcats by about 88% where pythons had become common; the authors found little support for other explanations.",
+        "src": [
+          "usgs-decl"
         ]
       }
     ],
@@ -256,6 +272,13 @@
       "title": "Reptile profile citing the IUCN global assessment (Stuart et al. 2012)",
       "publisher": "Zoo's Print",
       "url": "https://zoosprint.org/index.php/zp/article/download/281/278/278"
+    },
+    "usgs-decl": {
+      "title": "Severe mammal declines coincide with proliferation of invasive Burmese pythons in Everglades National Park",
+      "authors": "Dorcas et al.",
+      "year": 2012,
+      "publisher": "PNAS (U.S. Geological Survey)",
+      "url": "https://www.usgs.gov/publications/severe-mammal-declines-coincide-proliferation-invasive-burmese-pythons-everglades"
     }
   }
 }

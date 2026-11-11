@@ -3,35 +3,101 @@
   "reviewed": "2026-11-09",
   "status": "rich",
   "facts": {
-    "diet": {"text": "Almost only amphibians", "src": ["wiki"]}
+    "diet": {
+      "text": "Almost entirely amphibians",
+      "src": [
+        "wiki"
+      ]
+    }
   },
   "sections": {
     "overview": [
-      {"text": "The Grass Snake (now often called the Eastern Grass Snake) is a harmless, non-venomous snake of Eurasia, usually found near water. In 2017 a DNA study showed that the grass snakes of western Europe are a separate species, the Barred Grass Snake, so the name *Natrix natrix* now covers the populations from Scandinavia and central Europe eastwards.", "src": ["wiki", "kindler"]}
+      {
+        "text": "The Grass Snake (now often called the Eastern Grass Snake) is a non-venomous snake of Eurasia, usually found near water. In 2017 a DNA study showed that the grass snakes of western Europe are a separate species, the Barred Grass Snake, so the name *Natrix natrix* now covers the populations from Scandinavia and central Europe eastwards.",
+        "src": [
+          "wiki",
+          "kindler"
+        ]
+      }
     ],
     "identification": [
-      {"text": "Its most familiar feature is the pale collar behind the head - white or pale yellow.", "src": ["wiki"]}
+      {
+        "text": "Its most familiar feature is the pale collar behind the head - white or pale yellow.",
+        "src": [
+          "wiki"
+        ]
+      }
     ],
     "distribution": [
-      {"label": "Native", "text": "Much of Scandinavia and central and eastern Europe, east to Central Asia. Grass snakes in Britain belong to the Barred Grass Snake; records of *N. natrix* there are thought to come from imported animals.", "src": ["wildlifeonline", "wiki"]}
+      {
+        "label": "Native",
+        "text": "Much of Scandinavia and central and eastern Europe, east to Central Asia. Grass snakes in Britain belong to the Barred Grass Snake; records of *N. natrix* there are thought to come from imported animals.",
+        "src": [
+          "wildlifeonline",
+          "wiki"
+        ]
+      }
     ],
     "habitat": [
-      {"text": "Usually found near water.", "src": ["wiki"]}
+      {
+        "text": "Usually found near water.",
+        "src": [
+          "wiki"
+        ]
+      }
     ],
     "diet": [
-      {"text": "Feeds almost entirely on amphibians.", "src": ["wiki"]}
+      {
+        "text": "Feeds almost entirely on amphibians.",
+        "src": [
+          "wiki"
+        ]
+      }
     ],
     "taxonomy": [
-      {"text": "A 2017 study in Scientific Reports, using mitochondrial and nuclear DNA, raised the western grass snakes to a species of their own, *Natrix helvetica* (Barred Grass Snake), found from about the Rhine west to the Pyrenees and in Britain. The Iberian and North African grass snakes had already been recognised in 2016 as *N. astreptophora*.", "src": ["kindler", "wildlifeonline", "iber"]}
+      {
+        "text": "A 2017 study in Scientific Reports, using mitochondrial and nuclear DNA, raised the western grass snakes to a species of their own, *Natrix helvetica* (Barred Grass Snake), found from about the Rhine west to the Pyrenees and in Britain. The Iberian and North African grass snakes had already been recognised in 2016 as *N. astreptophora*.",
+        "src": [
+          "kindler",
+          "wildlifeonline",
+          "iber"
+        ]
+      }
     ]
   },
   "similar": [
-    {"id": "natrix-helvetica", "text": "the Barred Grass Snake of western Europe, split from it in 2017 using DNA; the two meet and hybridise in contact zones in central Europe.", "src": ["kindler"]}
+    {
+      "id": "natrix-helvetica",
+      "text": "the Barred Grass Snake of western Europe, split from it in 2017 using DNA; the two meet and hybridise in contact zones in central Europe.",
+      "src": [
+        "kindler"
+      ]
+    }
   ],
   "sources": {
-    "wiki": {"title": "Grass snake", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Grass_snake"},
-    "kindler": {"title": "Hybridization patterns in two contact zones of grass snakes reveal a new Central European snake species", "authors": "Kindler et al.", "publisher": "Scientific Reports", "year": 2017, "url": "https://doaj.org/article/95052888d5864715b56b0e64048a685a"},
-    "wildlifeonline": {"title": "Barred grass snake", "publisher": "Wildlife Online", "url": "https://www.wildlifeonline.me.uk/animals/species/barred-grass-snake"},
-    "iber": {"title": "Natrix astreptophora (Seoane, 1884) should be recognized as a distinct species", "authors": "Pokrant et al.", "publisher": "Biological Journal of the Linnean Society", "year": 2016, "url": "https://is.muni.cz/publication/1366169"}
+    "wiki": {
+      "title": "Grass snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Grass_snake"
+    },
+    "kindler": {
+      "title": "Hybridization patterns in two contact zones of grass snakes reveal a new Central European snake species",
+      "authors": "Kindler et al.",
+      "publisher": "Scientific Reports",
+      "year": 2017,
+      "url": "https://doaj.org/article/95052888d5864715b56b0e64048a685a"
+    },
+    "wildlifeonline": {
+      "title": "Barred grass snake",
+      "publisher": "Wildlife Online",
+      "url": "https://www.wildlifeonline.me.uk/animals/species/barred-grass-snake"
+    },
+    "iber": {
+      "title": "Natrix astreptophora (Seoane, 1884) should be recognized as a distinct species",
+      "authors": "Pokrant et al.",
+      "publisher": "Biological Journal of the Linnean Society",
+      "year": 2016,
+      "url": "https://is.muni.cz/publication/1366169"
+    }
   }
 }

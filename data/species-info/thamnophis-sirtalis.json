@@ -3,39 +3,123 @@
   "reviewed": "2026-11-09",
   "status": "rich",
   "facts": {
-    "length": {"text": "Usually 46-76 cm; rarely over 1.2 m", "src": ["sdherps", "inhs"]},
-    "activity": {"text": "By day", "src": ["ups"]},
-    "diet": {"text": "Mainly amphibians", "src": ["inhs"]}
+    "length": {
+      "text": "Usually 46-76 cm; rarely over 1.2 m",
+      "src": [
+        "sdherps",
+        "inhs"
+      ]
+    },
+    "activity": {
+      "text": "By day",
+      "src": [
+        "ups"
+      ]
+    },
+    "diet": {
+      "text": "Mainly frogs, toads and salamanders",
+      "src": [
+        "inhs"
+      ]
+    }
   },
   "sections": {
     "overview": [
-      {"text": "The Common Gartersnake is one of North America's most widespread snakes, found across most of the non-desert parts of the continent, and it reaches farther north than any other North American snake. It is harmless to people and copes with cold better than most snakes.", "src": ["ups", "inhs"]}
+      {
+        "text": "The Common Gartersnake is one of North America's most widespread snakes, found across most of the non-desert parts of the continent, and it reaches farther north than any other North American snake. It is not dangerous to people and copes with cold better than most snakes.",
+        "src": [
+          "ups",
+          "inhs"
+        ]
+      }
     ],
     "identification": [
-      {"text": "Most have yellowish stripes along a black, brown or green body, but the colours vary a great deal - including green, blue, gold, red and orange forms.", "src": ["ups", "ccg"]}
+      {
+        "text": "Most have yellowish stripes along a black, brown or green body, but the colours vary a great deal - including green, blue, gold, red and orange forms.",
+        "src": [
+          "ups",
+          "ccg"
+        ]
+      }
     ],
     "size": [
-      {"label": "Adults", "text": "In South Dakota adults measure about 46 to 76 cm (18 to 30 in). Few grow longer than about 1.2 m; the maximum given is about 137 cm.", "src": ["sdherps", "inhs"]}
+      {
+        "label": "Adults",
+        "text": "In South Dakota adults measure about 46 to 76 cm (18 to 30 in). Few grow longer than about 1.2 m; the maximum given is about 137 cm.",
+        "src": [
+          "sdherps",
+          "inhs"
+        ]
+      }
     ],
     "distribution": [
-      {"label": "Native", "text": "Much of North America, from the south of Canada through most of the non-desert United States.", "src": ["ups", "inhs"]}
+      {
+        "label": "Native",
+        "text": "Much of North America, from the south of Canada through most of the non-desert United States.",
+        "src": [
+          "ups",
+          "inhs"
+        ]
+      }
     ],
     "behaviour": [
-      {"text": "Mostly active by day. It handles colder temperatures than many snakes and may even bask on rocks on mild winter days.", "src": ["ups"]},
-      {"label": "Winter", "text": "Gartersnakes hibernate in large groups and mate in spring as they come out of their winter dens. In Manitoba, Canada, the huge spring gatherings of the Red-sided Gartersnake at Narcisse draw visitors from around the world.", "src": ["ups", "cancyc"]}
+      {
+        "text": "Mostly active by day. It handles colder temperatures than many snakes and may even bask on rocks on mild winter days.",
+        "src": [
+          "ups"
+        ]
+      },
+      {
+        "label": "Winter",
+        "text": "Gartersnakes hibernate in large groups and mate in spring as they come out of their winter dens. In Manitoba, Canada, the huge spring gatherings of the Red-sided Gartersnake at Narcisse draw visitors from around the world.",
+        "src": [
+          "ups",
+          "cancyc"
+        ]
+      }
     ],
     "diet": [
-      {"text": "Mainly frogs, toads and salamanders, but a wide range of other prey has been recorded, from earthworms and fish to voles.", "src": ["inhs"]}
+      {
+        "text": "Mainly frogs, toads and salamanders, but a wide range of other prey has been recorded, from earthworms and fish to voles.",
+        "src": [
+          "inhs"
+        ]
+      }
     ]
   },
   "funfacts": [
-    {"text": "No other North American snake lives as far north as the Common Gartersnake.", "src": ["inhs"]}
+    {
+      "text": "No other North American snake lives as far north as the Common Gartersnake.",
+      "src": [
+        "inhs"
+      ]
+    }
   ],
   "sources": {
-    "ups": {"title": "Common Garter Snake (Thamnophis sirtalis)", "publisher": "University of Puget Sound Slater Museum", "url": "https://www.pugetsound.edu/common-garter-snake"},
-    "inhs": {"title": "Common Gartersnake", "publisher": "Illinois Natural History Survey", "url": "https://herpetology.inhs.illinois.edu/resources/species-lists/ilspecies/common-gartersnake/"},
-    "sdherps": {"title": "Common Gartersnake (Thamnophis sirtalis)", "publisher": "South Dakota Amphibians and Reptiles", "url": "https://www.sdherps.org/species/thamnophis_sirtalis"},
-    "ccg": {"title": "Thamnophis sirtalis (Common Garter Snake)", "publisher": "California Conservation Genomics Project", "url": "https://www.ccgproject.org/species/thamnophis-sirtalis-common-garter-snake"},
-    "cancyc": {"title": "Garter snake", "publisher": "The Canadian Encyclopedia", "url": "https://www.thecanadianencyclopedia.ca/en/article/garter-snake"}
+    "ups": {
+      "title": "Common Garter Snake (Thamnophis sirtalis)",
+      "publisher": "University of Puget Sound Slater Museum",
+      "url": "https://www.pugetsound.edu/common-garter-snake"
+    },
+    "inhs": {
+      "title": "Common Gartersnake",
+      "publisher": "Illinois Natural History Survey",
+      "url": "https://herpetology.inhs.illinois.edu/resources/species-lists/ilspecies/common-gartersnake/"
+    },
+    "sdherps": {
+      "title": "Common Gartersnake (Thamnophis sirtalis)",
+      "publisher": "South Dakota Amphibians and Reptiles",
+      "url": "https://www.sdherps.org/species/thamnophis_sirtalis"
+    },
+    "ccg": {
+      "title": "Thamnophis sirtalis (Common Garter Snake)",
+      "publisher": "California Conservation Genomics Project",
+      "url": "https://www.ccgproject.org/species/thamnophis-sirtalis-common-garter-snake"
+    },
+    "cancyc": {
+      "title": "Garter snake",
+      "publisher": "The Canadian Encyclopedia",
+      "url": "https://www.thecanadianencyclopedia.ca/en/article/garter-snake"
+    }
   }
 }

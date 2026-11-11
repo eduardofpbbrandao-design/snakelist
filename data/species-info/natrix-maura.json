@@ -1,6 +1,6 @@
 {
   "id": "natrix-maura",
-  "reviewed": "2026-11-09",
+  "reviewed": "2026-11-11",
   "status": "rich",
   "authority": "(Linnaeus, 1758)",
   "facts": {
@@ -17,7 +17,7 @@
       ]
     },
     "diet": {
-      "text": "Fish and amphibians",
+      "text": "Mainly fish and amphibians",
       "src": [
         "wiki",
         "fws"
@@ -26,16 +26,16 @@
     "iucn": {
       "code": "LC",
       "text": "Least Concern",
-      "long": "Listed as Least Concern on the IUCN Red List.",
+      "scope": "global",
       "src": [
-        "fishi"
+        "rdb"
       ]
     }
   },
   "sections": {
     "overview": [
       {
-        "text": "The Viperine Snake is a small, harmless water snake of south-western Europe and north-western Africa. It spends much of its life in and around rivers, ponds and streams, hunting fish and frogs. Its zigzag pattern, triangular-looking head and bad temper make many people mistake it for a viper - which is how it got its name - but it has no dangerous venom.",
+        "text": "The Viperine Snake is a small water snake of south-western Europe and north-western Africa. It spends much of its life in and around rivers, ponds and streams, hunting fish and frogs. Its zigzag pattern, a head that can look triangular and a viper-like defensive display make many people mistake it for a viper - which is how it got its common name - but it has no venom dangerous to people.",
         "src": [
           "wiki",
           "fws"
@@ -53,28 +53,41 @@
     "size": [
       {
         "label": "Adults",
-        "text": "A relatively small snake, reaching up to about 80 cm in total length.",
+        "text": "A relatively small snake, reaching up to about 80 cm in total length; a typical adult length is not given in SnakeList's sources.",
         "src": [
           "fws"
+        ]
+      },
+      {
+        "label": "Males and females",
+        "text": "Females are the larger sex: in studies in Sardinia and in the Ebro Delta (Spain), females were longer than males.",
+        "src": [
+          "raco",
+          "ebro"
         ]
       }
     ],
     "distribution": [
       {
         "label": "Native",
-        "text": "Portugal, Spain (including Gibraltar), France, south-western Switzerland and north-western Italy, plus Sardinia, and in North Africa Morocco, Algeria, Tunisia and Libya. SnakeList's map below currently shows only its European countries.",
+        "text": "Portugal, Spain (including Gibraltar), France, south-western Switzerland and north-western Italy, plus Sardinia; and in North Africa, Morocco, northern Algeria, Tunisia and north-western Libya.",
         "src": [
           "rdb",
           "wiki"
         ]
       },
       {
-        "label": "Introduced",
-        "text": "Mallorca and Menorca in the Balearic Islands. A genetic study suggests it reached Mallorca from south-eastern France in Roman times, so after some 2,000 years the Balearic authorities treat it as part of the islands' fauna rather than as a modern invasive snake.",
+        "label": "Central Algeria",
+        "text": "A 2024 record from central Algeria extended its known range southwards, into the Sahara.",
         "src": [
-          "guicking",
-          "mdb",
-          "fws"
+          "amz2024"
+        ]
+      },
+      {
+        "label": "Introduced",
+        "text": "Mallorca and Menorca in the Balearic Islands. A genetic study suggests it reached Mallorca from south-eastern France around Roman times, so it is an ancient introduction rather than a recent one.",
+        "src": [
+          "guicking"
         ]
       }
     ],
@@ -97,10 +110,24 @@
     ],
     "diet": [
       {
-        "text": "Mainly fish and amphibians, caught in the water. On Mallorca it preys on Perez's Frog, among other animals.",
+        "text": "Mainly fish and amphibians, caught in the water.",
         "src": [
           "wiki",
           "fws"
+        ]
+      },
+      {
+        "label": "Young snakes (Ebro Delta, Spain)",
+        "text": "Juveniles ate a more varied diet than adults, taking many tadpoles and earthworms; adults ate mostly fish. Males took more small carp and large females more frogs.",
+        "src": [
+          "ebro"
+        ]
+      },
+      {
+        "label": "On Mallorca",
+        "text": "It preys on Perez's Frog, among other animals.",
+        "src": [
+          "wiki"
         ]
       }
     ],
@@ -115,9 +142,8 @@
     ],
     "conservation": [
       {
-        "text": "Not threatened overall. As a water snake it depends on clean rivers and wetlands.",
+        "text": "Listed as Least Concern globally, although its numbers are reported to be declining.",
         "src": [
-          "fishi",
           "wiki"
         ]
       },
@@ -137,14 +163,6 @@
       "text": "the other Natrix of Iberia; it has reddish eyes and lacks the Viperine Snake's dark zigzag along the back.",
       "src": [
         "moroccoherps",
-        "wiki"
-      ]
-    }
-  ],
-  "funfacts": [
-    {
-      "text": "Its name means it pretends to be a viper - it copies a viper's looks and behaviour, but it is harmless.",
-      "src": [
         "wiki"
       ]
     }
@@ -172,21 +190,11 @@
       "publisher": "Biodiversity and Conservation",
       "url": "https://heibib.ub.uni-heidelberg.de/search/Record/1549889672/Details"
     },
-    "mdb": {
-      "title": "Mallorca joins fight against invasive snakes in the Balearics",
-      "publisher": "Majorca Daily Bulletin",
-      "year": 2025,
-      "url": "https://amp.majorcadailybulletin.com/news/did-you-know/2025/10/08/137091/mallorca-joins-fight-against-invasive-snakes-balearics.html"
-    },
     "raco": {
-      "title": "Reproductive study of Natrix maura",
-      "publisher": "Miscel·lània Zoològica (RACO)",
-      "url": "https://raco.cat/index.php/Mzoologica/article/download/90043/169213"
-    },
-    "fishi": {
-      "title": "Viperine snake",
-      "publisher": "Fishipedia",
-      "url": "https://www.fishi-pedia.com/reptiles/natrix-maura"
+      "title": "Life-history and diet of two populations of Natrix maura from contrasted habitats in Sardinia",
+      "publisher": "Miscel·lània Zoològica 23.1",
+      "url": "https://raco.cat/index.php/Mzoologica/article/download/90043/169213",
+      "year": 2000
     },
     "moroccoherps": {
       "title": "Natrix astreptophora",
@@ -204,6 +212,18 @@
       "title": "The ferreret, the management of a critically ill species",
       "publisher": "Conservation Evidence Journal",
       "url": "https://conservationevidencejournal.com/individual-study/5065"
+    },
+    "ebro": {
+      "title": "Sexual and size-related differences in the diet of the snake Natrix maura from the Ebro Delta, Spain",
+      "publisher": "The Herpetological Journal 8(3)",
+      "year": 1998,
+      "url": "https://www.thebhs.org/publications/the-herpetological-journal/volume-8-number-3-july-1998/1541-05-sexual-and-size-related-differences-in-the-diet-of-the-snake-natrix-maura-from-the-ebro-delta-spain"
+    },
+    "amz2024": {
+      "title": "Swimming in the Sahara: a new locality record and range extension of Natrix maura from central Algeria",
+      "publisher": "Arxius de Miscel·lània Zoològica 22",
+      "year": 2024,
+      "url": "https://museucienciesjournals.cat/amz/issue/22-2024-amz/swimming-in-the-sahara-a-new-locality-record-and-range-extension-of-natrix-maura-linnaeus-1758-squamata-colubridae-from-central-algeria"
     }
   }
 }

@@ -21,7 +21,7 @@
       {"label": "Adults", "text": "A slender snake that can reach about 2 m in length.", "src": ["wiki"]}
     ],
     "distribution": [
-      {"label": "Native", "text": "Eastern Australia, from northern Queensland through New South Wales and Victoria to South Australia, with scattered populations in the Northern Territory, and parts of southern New Guinea. SnakeList's map shows where it is recorded.", "src": ["wiki", "am"]}
+      {"label": "Native", "text": "Eastern Australia, from northern Queensland through New South Wales and Victoria to South Australia, with scattered populations in the Northern Territory, and parts of southern New Guinea.", "src": ["wiki", "am"]}
     ],
     "habitat": [
       {"text": "Most habitats except dense forest, including grassland, woodland, scrub and especially farmland and the outskirts of cities.", "src": ["wiki"]}

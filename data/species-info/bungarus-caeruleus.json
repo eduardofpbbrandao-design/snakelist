@@ -69,7 +69,7 @@
     "distribution": [
       {
         "label": "Native",
-        "text": "The Indian subcontinent, from Sindh in Pakistan east to the plains of West Bengal and south through peninsular India to Sri Lanka; also recorded from Afghanistan, Nepal and Bangladesh. SnakeList's map shows the countries where it is recorded.",
+        "text": "The Indian subcontinent, from Sindh in Pakistan east to the plains of West Bengal and south through peninsular India to Sri Lanka; also recorded from Afghanistan, Nepal and Bangladesh.",
         "src": [
           "wiki",
           "mp"
@@ -87,7 +87,7 @@
     ],
     "behaviour": [
       {
-        "text": "Strictly nocturnal, active from late evening to early morning. By day it is usually docile and hides its head under its coils if disturbed; at night it is far more active.",
+        "text": "Strictly nocturnal, active from late evening to early morning. By day it rarely bites and often hides its head under its coils if disturbed; at night it is far more active.",
         "src": [
           "mp",
           "wiki"
@@ -131,7 +131,7 @@
   "similar": [
     {
       "id": "lycodon-aulicus",
-      "text": "a harmless, banded wolf snake that is often mistaken for a krait.",
+      "text": "a non-venomous, banded wolf snake that is often mistaken for a krait.",
       "src": [
         "wiki-lyc"
       ]

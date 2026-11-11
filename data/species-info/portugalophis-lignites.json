@@ -1,0 +1,32 @@
+{
+  "id": "portugalophis-lignites",
+  "reviewed": "2026-11-11",
+  "status": "limited",
+  "authority": "Caldwell, Nydam, Palci & Apesteguía, 2015",
+  "facts": {},
+  "sections": {
+    "overview": [
+      {"text": "*Portugalophis lignites* is an extinct reptile from the Late Jurassic of Portugal, known only from pieces of its jaws. It was described in 2015 as one of the oldest known snakes, but a 2025 study of its group, the parviraptorids, left open whether they were snakes at all.", "src": ["caldwell", "benson"]}
+    ],
+    "fossils": [
+      {"text": "Two upper jaw bones (maxillae) and one lower jaw bone (dentary), from coal beds (lignites) in Portugal, which gave the species its name.", "src": ["caldwell", "wiki"]},
+      {"label": "Find site", "text": "The Guimarota coal mine near Leiria.", "src": ["ualberta"]}
+    ],
+    "geology": [
+      {"text": "Late Jurassic (Kimmeridgian), about 155 million years ago.", "src": ["wiki", "ualberta"]}
+    ],
+    "size": [
+      {"text": "Not known: jaw fragments alone do not give a reliable body length.", "src": ["caldwell"]}
+    ],
+    "uncertainty": [
+      {"text": "When it was described, it was placed among the earliest snakes. Parviraptorids had been known only from very incomplete remains; a much more complete skeleton from the Isle of Skye, described in 2025, showed a mix of snake-like jaws and teeth with a lizard-like body. Its authors placed parviraptorids in their own family and left open whether they are early relatives of snakes or more primitive squamates that evolved snake-like jaws independently.", "src": ["benson", "amnh"]}
+    ]
+  },
+  "sources": {
+    "caldwell": {"title": "The oldest known snakes from the Middle Jurassic-Lower Cretaceous provide insights on snake evolution", "authors": "Caldwell, Nydam, Palci & Apesteguía", "publisher": "Nature Communications 6: 5996", "year": 2015, "url": "https://www.nature.com/articles/ncomms6996"},
+    "ualberta": {"title": "Oldest known snake fossils identified", "publisher": "University of Alberta (Folio)", "year": 2015, "url": "https://www.ualberta.ca/folio/2015/01/oldest-known-snake-fossils-identified.html"},
+    "benson": {"title": "Mosaic anatomy in an early fossil squamate", "authors": "Benson et al.", "publisher": "Nature", "year": 2025, "url": "https://www.wits.ac.za/news/latest-news/general-news/2025/2025-10/mosaic-anatomy-in-an-early-fossil-squamate.html"},
+    "amnh": {"title": "Researchers discover new species of ancient hook-toothed reptile", "publisher": "American Museum of Natural History", "year": 2025, "url": "https://www.amnh.org/explore/news-blogs/fossil-lizard"},
+    "wiki": {"title": "Portugalophis", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Portugalophis"}
+  }
+}
