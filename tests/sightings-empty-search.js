@@ -12,7 +12,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1;};
    return J({total_results:2,results:[{id:all?7:5,geojson:{coordinates:[100,15]},observed_on:'2024-01-01',taxon:{name:all?'Naja naja':'Python bivittatus'}},{id:all?8:6,geojson:{coordinates:[101,16]},observed_on:'2024-01-01',taxon:{name:all?'Vipera berus':'Python bivittatus'}}]});}
   return r.abort();});
  await p.addInitScript(()=>{localStorage.setItem('sl-consent','essential');localStorage.setItem('sl-tour-seen','1');localStorage.setItem('sl-news-off','1');});
- await p.goto('http://localhost:9017/index.html?tab=map',{waitUntil:'load'});await p.waitForFunction(()=>window.SL_MAP_GEO_DONE,null,{timeout:60000}).catch(()=>{});await p.waitForTimeout(2500);
+ await p.goto('http://localhost:'+(process.env.PORT||9017)+'/index.html?tab=map',{waitUntil:'load'});await p.waitForFunction(()=>window.SL_MAP_GEO_DONE,null,{timeout:60000}).catch(()=>{});await p.waitForTimeout(2500);
  const state=()=>p.evaluate(()=>({what:(document.getElementById('sg-what')||{}).textContent,note:(document.getElementById('sg-note')||{}).hidden?'':(document.getElementById('sg-note')||{}).textContent}));
  const search=async q=>{await p.fill('#heat-search',q);await p.keyboard.press('Enter');await p.waitForTimeout(2500);};
  await search('Burmese python');

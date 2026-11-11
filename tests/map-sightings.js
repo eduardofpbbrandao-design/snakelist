@@ -106,7 +106,12 @@ async function route(r) {
   };
   const shot = async (p, name, el) => { if (!SHOTS) return; const t = el ? await p.$(el) : null; await (t || p).screenshot({ path: SHOTS + '/' + name + '.png' }); };
   const dbg = p => p.evaluate(() => window.SL_SG_DEBUG());
-  const cvClick = async (p, x, y) => { const r = await p.evaluate(() => { const c = document.getElementById('globe').getBoundingClientRect(); return [c.left, c.top]; }); await p.mouse.click(r[0] + x, r[1] + y); };
+  const cvClick = async (p, x, y) => {
+    // the dot may sit below the window: scroll it into view first (a real user would scroll too)
+    const r = await p.evaluate((y) => { let c = document.getElementById('globe').getBoundingClientRect();
+      if (c.top + y < 40 || c.top + y > innerHeight - 40) { window.scrollBy(0, c.top + y - innerHeight / 2); c = document.getElementById('globe').getBoundingClientRect(); }
+      return [c.left, c.top]; }, y);
+    await p.waitForTimeout(150); await p.mouse.click(r[0] + x, r[1] + y); };
   const panelText = p => p.evaluate(() => { const s = document.getElementById('sg-pop'); return s.hidden ? '' : s.innerText; });
   const panelImgs = p => p.evaluate(() => [].map.call(document.querySelectorAll('#sg-pop .sg-ph img'), i => i.getAttribute('src')));
 
