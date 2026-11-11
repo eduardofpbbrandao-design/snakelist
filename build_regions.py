@@ -811,7 +811,7 @@ PAGE = """<!doctype html>
 REGION_CSS = """.rg-sub{margin:4px 0 0;color:var(--muted);font-size:15px}
 .rg-toc{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:16px 0 0;padding:6px 0;position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
 .rg-toc::-webkit-scrollbar{display:none}.rg-toc a{flex:none;padding:5px 12px;border-radius:999px;font-size:14px;font-weight:600;text-decoration:none;color:var(--muted)}
-.rg-toc a:hover,.rg-toc a:focus-visible{background:var(--tag);color:var(--g)}
+.rg-toc a:hover,.rg-toc a:focus-visible{background:var(--tag);color:var(--link)}
 .rg-sec{scroll-margin-top:56px}.rg-sec>p{margin:0 0 10px}
 .rg-top{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
 .rg-bars{list-style:none;margin:0;padding:0;display:grid;gap:6px}.rg-bars li{display:grid;grid-template-columns:minmax(0,15em) minmax(40px,1fr) 3em;gap:10px;align-items:center;font-size:14.5px}
@@ -829,7 +829,7 @@ REGION_CSS = """.rg-sub{margin:4px 0 0;color:var(--muted);font-size:15px}
 .cy-cmp-wrap{overflow-x:auto}.cy-cmp{border-collapse:collapse;font-size:14px;min-width:100%}.cy-cmp th,.cy-cmp td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 .cy-cmp th{font-size:13px;color:var(--muted);font-weight:600}.cy-cmp td small{color:var(--muted)}
 .sp-ago{color:var(--muted)}
-@media (prefers-color-scheme:dark){.rg-v{color:#f0a04b}.rg-i{color:#e6c46a}.rg-warn{background:#4a4220;border-color:#a8833d}.rg-split i.v,.rg-key i.v{background:#e07a4f}}
+@media (prefers-color-scheme:dark){.rg-v{color:#ffd39c}.rg-i{color:#e6c46a}.rg-warn{background:#4a4220;border-color:#a8833d}.rg-split i.v,.rg-key i.v{background:#e07a4f}}
 @media (max-width:560px){.rg-bars li{grid-template-columns:minmax(0,1fr) 30% 2.4em}.rg-cols{columns:1}}
 """
 
