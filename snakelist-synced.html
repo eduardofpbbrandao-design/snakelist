@@ -6247,7 +6247,7 @@
     <div class="cam-panel" id="cam-panel" hidden>
       <div class="cam-card">
         <h2 class="cam-h">What snake is this?</h2>
-        <p class="cam-sub">Take a photo and SnakeList guesses the species, from the snakes that live where you are. It all happens on your device &mdash; the photo isn&rsquo;t uploaded anywhere.</p>
+        <p class="cam-sub">Take a photo and SnakeList guesses the species, from the snakes that live where you are. The guessing happens on your device &mdash; the photo isn&rsquo;t uploaded anywhere. Only the place is sent to iNaturalist, to check which snakes are seen there.</p>
         <div class="cam-step" id="cam-loc">
           <div class="cam-num">1</div>
           <div class="cam-body"><b>Where are you?</b><span id="cam-loc-txt">Needed so SnakeList only suggests snakes that live there - use your location, pick the spot on a map, or choose a photo that has its location saved in it.</span></div>
@@ -6272,7 +6272,7 @@
           <div class="cam-status" id="cam-status"></div>
         </div>
         <div class="cam-results" id="cam-results"></div>
-        <p class="cam-safe">Never touch or approach a snake, even one SnakeList calls harmless &mdash; guesses can be wrong. If someone is bitten, call your local emergency number straight away.</p>
+        <p class="cam-safe">Never touch or approach a snake, even one SnakeList calls low risk &mdash; guesses can be wrong. If someone is bitten, call your local emergency number straight away.</p>
       </div>
     </div>
 
@@ -8690,7 +8690,7 @@
       ? "No snakes found."
       : tab === "follow" ? "You're not following any snakes yet - tap the bell next to a snake's name to follow it."
       : tab === "wish" ? "No snakes on your list yet - tap \u2606 Want to see on any snake in the Species Checklist."
-      : "You haven't logged any sightings yet — find one in the Species Checklist and tap Seen.";
+      : "You haven't logged any sightings yet — find one in the Species Checklist and tap Mark Seen.";
 
     document.getElementById("clear").classList.toggle("show", query.length > 0);
     if (!skipChips) renderChips();
@@ -9713,8 +9713,8 @@
     } else {
       const inv = cards.filter((c) => c.dataset.invasive);
       card = yes ? pick(inv) : pick(pool.filter((c) => !c.dataset.invasive));
-      q = "Has the " + named(card) + " become invasive somewhere outside its home range?"; answer = card.dataset.invasive ? "Yes" : "No";
-      why = card.dataset.invasive ? "It's invasive in " + card.dataset.invasive + "." : "No known invasive populations.";
+      q = "Have people brought the " + named(card) + " to a place outside its home range, where it now lives wild?"; answer = card.dataset.invasive ? "Yes" : "No";
+      why = card.dataset.invasive ? "People brought it to " + card.dataset.invasive + "." : "No known populations brought by people.";
     }
     quizCurrent = { fact: true, name: named(card), sci: card.querySelector(".card-sci").textContent, card, answer, why,
       countries: card.dataset.countries.split("|").filter(Boolean), states: [], answers: [], answerKind: "fact", need: 1 };
@@ -10778,9 +10778,9 @@ window.SL_GEO_READY = new Promise(function (res) {
       if (g && !g.classList.contains("on")) g.classList.add("invasive");
     });
     document.getElementById("map-count").textContent = (names.length
-      ? hit + " of " + names.length + (names.length === 1 ? " country shown" : " countries shown")
+      ? hit + " of " + names.length + (names.length === 1 ? (NON_SOVEREIGN[names[0]] ? " territory shown" : " country shown") : names.some(function (n) { return NON_SOVEREIGN[n]; }) ? " countries and territories shown" : " countries shown")
       : "No range recorded for this species.") +
-      (inv.length ? " · invasive in " + inv.map(function (pl) { return pl.note ? pl.note : pl.name; }).join(", ") + " (orange)" : "");
+      (inv.length ? " · brought by people to " + inv.map(function (pl) { return pl.note ? pl.note : pl.name; }).join(", ") + " (orange)" : "");
     sheetCard = card;
     sheetMode(null);
     setSheetBig(true); // opens wide - the map as big as the screen allows
@@ -14100,7 +14100,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       "<dt>Family</dt><dd>" + spEsc(fam || "Not documented") + "</dd>" +
       "<dt>Venom</dt><dd>" + (c.dataset.venomous === "1" ? "Venomous" : "Non-venomous") + "</dd>" +
       "<dt>Constrictor</dt><dd>" + (cons === "yes" ? "Yes" : cons === "no" ? "No" : "Not documented") + "</dd>" +
-      (harm ? "<dt>Harm</dt><dd>" + (harm === "harmful" ? "Harmful" : harm === "harmless" ? "Harmless" : "Not documented") + "</dd>" : "") +
+      (harm ? "<dt>Harm</dt><dd>" + (harm === "harmful" ? "Harmful" : harm === "harmless" ? "Low risk" : "Not documented") + "</dd>" : "") +
       (ext ? "<dt>Status</dt><dd>" + spEsc(ext) + "</dd>" : "") + "</dl>" +
       '<p class="sp-info-h">' + (ctry.length === 1 ? "Country" : "Countries" + (ctry.length ? " (" + ctry.length + ")" : "")) + "</p>" +
       '<p class="sp-info-txt">' + (ctry.length ? spEsc(ctry.join(", ")) : "Not recorded") + "</p>" +
@@ -14450,7 +14450,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var IUCN_CODES = [["LC", "Least Concern"], ["NT", "Near Threatened"], ["VU", "Vulnerable"], ["EN", "Endangered"], ["CR", "Critically Endangered"], ["EW", "Extinct in the Wild"], ["EX", "Extinct (Red List)"], ["DD", "Data Deficient"], ["SLX", "Fossil or extinct (SnakeList's own list)"], ["NONE", "Not Evaluated (no status found)"]];
   var EXTRA_LABEL = { popular: "Popular", uncommon: "Uncommon", exotic: "Exotic", constrictor: "Constrictor", nonConstrictor: "Non-constrictor",
     invasive: "Invasive", common: "Common", rare: "Rare", snakeEater: "Snake eater", noPhoto: "No photo yet", extinct: "Extinct",
-    harmful: "Harmful to people", harmless: "Harmless to people", mFollow: "Following", mWish: "Want to see", mSeen: "My sightings" };
+    harmful: "Harmful to people", harmless: "Low risk to people", mFollow: "Following", mWish: "Want to see", mSeen: "My sightings" };
   function mfCount() {
     var n = MF.families.length + (MF.venom ? 1 : 0) + (MF.safe ? 1 : 0) + MF.countries.length + MF.places.length + MF.habitats.length + MF.iucn.length;
     return n + mfExtraChips().length;
@@ -16293,7 +16293,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   window.SL_getJSON = getJSON;
   // why live data didn't load, in plain words
   function whyOffline(e) {
-    if (window.claude && window.claude.use) return "Live sightings only load on snakelist.com - this claude.ai version of the app blocks outside websites.";
+    if (window.claude && window.claude.use) return "Sightings only load on snakelist.com - this copy of the app inside claude.ai can't reach other websites.";
     if (typeof navigator !== "undefined" && navigator.onLine === false) return "You're offline - sightings will load when you're back online.";
     if (e && e.status === 429) return "iNaturalist is busy right now - tap Retry in a moment.";
     return "iNaturalist didn't answer" + (e && e.message ? " (" + e.message + ")" : "") + " - tap Retry.";
@@ -16976,7 +16976,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     '<div class="hm-panel" id="hm-panel" hidden>' +
     '<div class="hm-head"><span>Species heatmap</span><button type="button" class="hm-collapse" id="hm-collapse" aria-label="Hide filters" aria-expanded="true"></button></div>' +
     '<div class="hm-row hm-pick"><input type="text" id="hm-q" placeholder="Search a snake species&hellip;" aria-label="Heatmap: search a snake species to map" autocomplete="off"><select id="hm-cat" hidden aria-hidden="true" tabindex="-1">' + Object.keys(CATS).map(function (k) { return '<option value="' + k + '">' + CATS[k].label + "</option>"; }).join("") + '</select></div>' +
-    '<div class="hm-row hm-seg" id="hm-measure"><button type="button" data-v="live">Where they live</button><button type="button" data-v="obs">Live sightings</button></div>' +
+    '<div class="hm-row hm-seg" id="hm-measure"><button type="button" data-v="live">Where they live</button><button type="button" data-v="obs">Sightings</button></div>' +
     '<div class="hm-row hm-seg" id="hm-time">' + [["day", "Today"], ["month", "This month"], ["year", "This year"], ["all", "All time"]].map(function (t) { return '<button type="button" data-v="' + t[0] + '">' + t[1] + "</button>"; }).join("") + '</div>' +
     '<div class="hm-legend" id="hm-legend"></div>' +
     '<p class="hm-status" id="hm-status"></p></div>' +
@@ -17661,7 +17661,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   function rangeStatus(R) {
     var nc = Object.keys(R.counts).length;
-    var note = meas() === "obs" && !liveOK ? " Live sightings can't load in this copy of the app" + (window.claude && window.claude.use ? " - open snakelist.com for them." : ".") : "";
+    var note = meas() === "obs" && !liveOK ? " Sightings can't load in this copy of the app" + (window.claude && window.claude.use ? " - open snakelist.com for them." : ".") : "";
     if (!R.nsp) { setStatus("None of the checklist's snakes match this filter."); return; }
     var places = window.SL_countPlaces ? window.SL_countPlaces(R.names) : nc + " countries";
     if (R.single) setStatus(nc ? displayName() + (R.gone ? " lived in " : " lives in ") + places + ". Tap a country for its details." + note : "No range on record for this species yet." + note);
@@ -21064,7 +21064,7 @@ window.SL_welcome = function (u, back) {
       '<dl class="qp-facts"><dt>Type</dt><dd>' + esc(c.dataset.type || "") + "</dd>" + (fam ? "<dt>Family</dt><dd>" + esc(fam) + "</dd>" : "") +
       "<dt>Venom</dt><dd>" + (c.dataset.venomous === "1" ? "Venomous" : "Non-venomous") + "</dd>" +
       "<dt>Constrictor</dt><dd>" + (cons === "yes" ? "Yes" : cons === "no" ? "No" : "Not documented") + "</dd>" +
-      "<dt>Harm</dt><dd>" + (harm === "harmful" ? "Harmful" : harm === "harmless" ? "Harmless" : "Not documented") + "</dd>" +
+      "<dt>Harm</dt><dd>" + (harm === "harmful" ? "Harmful" : harm === "harmless" ? "Low risk" : "Not documented") + "</dd>" +
       (ext ? "<dt>Status</dt><dd>" + esc(ext) + "</dd>" : "") + "</dl>" +
       '<p class="qp-h">' + (ctry.length === 1 ? "Country" : "Countries (" + ctry.length + ")") + '</p><p class="qp-countries">' + (ctry.length ? esc(ctry.join(", ")) : "Not recorded") + "</p>" +
       '<div class="qp-acts">' +

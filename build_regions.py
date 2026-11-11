@@ -514,7 +514,7 @@ def who_section(top, ctx, rel_species="../"):
         items.append('<li data-sci="%s">%s - %s</li>' % (esc(c["sci"]), sp_a(c, rel_species), by))
     return ("Who described them", '<p class="cy-note">The scientists who first described the species above, and when.</p>'
             '<ul class="rg-who" data-wd="1">%s</ul><p class="cy-note rg-wdnote">Names and dates come from SnakeList&rsquo;s reviewed species accounts; '
-            'the others are looked up on <a href="https://www.wikidata.org/" rel="noopener">Wikidata</a> (CC0) when this page opens.</p>' % "".join(items))
+            'the others come from <a href="https://www.wikidata.org/" rel="noopener">Wikidata</a> (CC0) and are only shown if they pass basic checks.</p>' % "".join(items))
 
 
 def possible_section(r, P, scope):

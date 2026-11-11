@@ -318,7 +318,7 @@ body > .wrap { flex: 1; width: 100%; }
           <ol class="steps">
             <li>Open <b>snakelist.com</b> in <b>Chrome</b> (or Edge or Samsung Internet).</li>
             <li>If an <span class="k">Install</span> bar or button appears, tap it. If not, tap the browser menu <span class="k" aria-label="three dots"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></span>.</li>
-            <li>Choose <span class="k">Install app</span> or <span class="k">Add to Home screen</span> - the name depends on the browser. In Samsung Internet it's <span class="k">Add page to</span> then <span class="k">Home screen</span>.</li>
+            <li>Choose <span class="k">Install app</span> or <span class="k">Add to Home screen</span> - the name depends on the browser. In Samsung Internet, tap <span class="k">Add page to</span>, then <span class="k">Home screen</span>.</li>
             <li>Confirm with <span class="k">Install</span> (or <span class="k">Add</span>).</li>
             <li>Open <b>SnakeList</b> from your home screen or app drawer.</li>
           </ol>
@@ -438,8 +438,8 @@ body > .wrap { flex: 1; width: 100%; }
       <div class="why">
         <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div><h3>Quick Access</h3><p>Open SnakeList directly from your home screen, Dock, Start menu or taskbar.</p></div>
         <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg></div><h3>App-Like Experience</h3><p>On supported devices SnakeList opens in its own window, without the browser's address bar and tabs.</p></div>
-        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3z"/><path d="M9 3v15M15 6v15"/></svg></div><h3>Interactive Snake Maps</h3><p>Explore where every snake lives - down to states and provinces - with the heatmap, sightings and habitats.</p></div>
-        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div><h3>Discover Species</h3><p>Browse all 4,247 snake species, with photos, venom, habitats and where each one lives.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3z"/><path d="M9 3v15M15 6v15"/></svg></div><h3>Interactive Snake Maps</h3><p>Explore where every snake lives - for many, down to states and provinces - with the heatmap, sightings and habitats.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div><h3>Discover Species</h3><p>Browse all 4,247 snake species, with venom, where each one lives and a photo for most of them.</p></div>
         <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div><h3>No Complicated Setup</h3><p>No app store and no account needed - install in a few steps from your browser.</p></div>
       </div>
     </section>
@@ -517,7 +517,7 @@ body > .wrap { flex: 1; width: 100%; }
     if (hl) hl.textContent = window.SL_INSTALL_EVT ? "Install SnakeList" : "See install steps";
     if (!window.SL_INSTALL_EVT && !standalone && !installedNow && !related && (!note.textContent || /one-tap|Share menu/.test(note.textContent))) note.textContent = device === "ios"
       ? "iPhone and iPad install from Safari's Share menu - the button shows you the steps."
-      : "Your browser hasn't offered one-tap install on this page, so the button shows the steps for your device instead.";
+      : "No one-tap install in this browser, so the button shows the steps instead.";
     else if (window.SL_INSTALL_EVT && /one-tap|Share menu/.test(note.textContent)) note.textContent = "";
     if (standalone) {
       card.classList.add("ok"); stIco.innerHTML = ICON_OK;

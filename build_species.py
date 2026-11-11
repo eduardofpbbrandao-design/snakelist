@@ -499,7 +499,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     def plist(L, n=6):
         L = list(L)
         if len(L) <= 1: return "".join(L)
-        return (", ".join(L[:-1]) + " and " + L[-1]) if len(L) <= n else ", ".join(L[:n]) + " and %d more" % (len(L) - n)
+        return (", ".join(L[:-1]) + " and " + L[-1]) if len(L) <= n + 1 else ", ".join(L[:n]) + " and %d more" % (len(L) - n)
     # photos that came with the photographer's name printed on them: SnakeList keeps a cleaned
     # copy (the name cropped off; the credit is shown under the photo), used instead of the original
     CLEANED = set(['0-9', '102-12', '104-7', '108-7', '109-3', '16-19', '16-2', '21-20', '22-14', '24-12', '28-13', '29-19', '3-2', '33-4', '35-23', '40-12', '40-7', '43-24', '43-8', '49-22', '50-10', '50-14', '50-6', '61-10', '61-18', '61-2', '69-4', '7-9', '72-1', '80-16', '88-10', '9-5', '93-9', '97-2', '97-7', '98-5'])
@@ -667,7 +667,9 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         icodes, dots, ishapes, iboxes = [], [], [], []
         for x in inv:
             cc = x["code"] or iso.get(x["name"], "")
-            rows.append("<li><b>Introduced:</b> %s%s</li>" % (esc(x["note"]) + " (" + place(x["name"]) + ")" if x.get("note") else place(x["name"]),
+            # the same word as the summary and key facts: "Invasive" only where a cited source says so
+            lab = "Invasive" if any(y["status"] == "invasive" and y["area"] == (x.get("note") or x["name"]) for y in IST) else "Introduced"
+            rows.append("<li><b>" + lab + ":</b> %s%s</li>" % (esc(x["note"]) + " (" + place(x["name"]) + ")" if x.get("note") else place(x["name"]),
                         "" if x.get("note") or not x["name"] in NONSOV else ' <small class="sp-terr">territory</small>'))
             rg = region(cc, x.get("states") or []) if cc and x.get("states") else None
             if rg:  # only the states/provinces it was brought to, not the whole country
@@ -795,6 +797,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             if F.get("venom"): vt = fact("venom")
             elif c["venom"]: vt = "Venomous &ndash; dangerous to people" if hm == "harmful" else "Mildly venomous &ndash; no serious bites to people documented"
             else: vt = "Not venomous &ndash; but big enough to injure people" if hm == "harmful" else "Not venomous to people &ndash; it can still bite"
+            if gone and not F.get("venom"): vt = "Venomous" if c["venom"] else "Not venomous"  # an extinct snake bites nobody now
             kf.append(("Venom", vt))
             kf.append(("Adult length", fact("length") or UNK))
             kf.append(("Diet", fact("diet") or UNK))
@@ -976,7 +979,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
                 '%s<li id="sp-wdprov">%s</li></ul></details>') % (
             "<li>Facts with numbered references come from the reviewed species account; anything the sources do not cover is shown as &ldquo;Not known&rdquo;.</li>" if info else "",
             ("Who described it: from the authority %s%s." % (esc(am[0]), " in the reviewed account" if (info and info.get("authority")) else " (checked by SnakeList)")) if am else
-            "Who described it: no checked authority on file; Wikidata is asked in your browser and its answer is shown only if it passes basic checks.")
+            "Who described it: SnakeList has no checked record yet, so a name from Wikidata is shown only if it passes basic checks.")
         src += '<p class="sp-dates">%s<span>Page generated %s</span></p>' % (
             ('<span>Information last reviewed %s</span>' % fmt_date(info["reviewed"])) if info and info.get("reviewed") else "", GEN_MARK)
         secs.append(("sources", "Sources", src))
@@ -1024,7 +1027,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             cities_json=esc(json.dumps([[round(t[3], 2), round(t[4], 2), t[0]] for t in cities], ensure_ascii=False)),
             cities_list=('<div class="sp-cities"><h3>Cities in its range</h3><p class="sp-note">Big cities inside the states and provinces where it is recorded - not individual sightings.</p><ul class="sp-where">%s</ul></div>' % "".join(
                 "<li>%s <small>%s</small></li>" % (esc(t[0]), esc(t[1])) for t in cities)) if cities and not c["fossil"] else "",
-            states=('<details class="sp-states sp-det"><summary>States, provinces and islands where it is recorded</summary><p class="sp-note">More detail than the countries, but still approximate. The number after each place is how many snake species SnakeList records there <b>in all</b>, not how many records there are of this snake.</p><ul class="sp-where">%s</ul></details>' % "".join(st_rows)) if (st_rows or ns) and not c["fossil"] else "",
+            states=('<details class="sp-states sp-det"><summary>States, provinces and islands where it %s recorded</summary><p class="sp-note">More detail than the countries, but still approximate. The number after each place is how many snake species SnakeList records there <b>in all</b>, not how many records there are of this snake.</p><ul class="sp-where">%s</ul></details>' % ("was" if gone else "is", "".join(st_rows))) if (st_rows or ns) and not c["fossil"] else "",
             codes=esc(" ".join(codes)), intro_codes=esc(" ".join(icodes)),
             ishapes="".join('<path class="in" d="%s"/>' % d for d in ishapes),
             dots=esc(" ".join("%.1f,%.1f,%s,%.2g" % ((lo + 180) * 4, (90 - la) * 4, k, sz) for lo, la, k, sz in dots)),
@@ -1038,7 +1041,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             realbtn="" if c["fossil"] else '<button type="button" class="sp-btn sp-btn2 sp-realbtn" aria-haspopup="dialog">Explore in 3D</button>',
             lenattr=len_attr(info),
             mapnote=('<p class="sp-note sp-mapnote">%s</p>' % ("The shaded country is where its fossils were found &ndash; not a living range." if c["fossil"] else
-                     "Shaded countries are those where it %s recorded &ndash; it does not live everywhere inside them." % ("was" if gone else "is")))
+                     ("Shaded countries are those where it was recorded &ndash; it did not live everywhere inside them." if gone else
+                      "Shaded countries are those where it is recorded &ndash; it does not live everywhere inside them.")))
                     if codes or icodes or ishapes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
         page = page.replace(GEN_MARK, fmt_date(dates.get(page_name(c), page)))
         open("%s/%s.html" % (OUT, page_name(c)), "w", encoding="utf-8").write(page)
@@ -1543,13 +1547,13 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
         h1 = name
         lead = "The family %s%s has %s in SnakeList (%s), in %s%s." % (name, common, plural(n, "living species", "living species"), vsplit(), plural(nfam, "genus", "genera"),
                                                                    (", plus %s listed separately" % gone_txt) if gone_txt else "")
-        title = "%s: all %s, with photos | SnakeList" % (name, plural(n, "living snake species", "living snake species"))
+        title = ("%s: all %s, with photos | SnakeList" if n > 1 else "%s: %s | SnakeList") % (name, plural(n, "living snake species", "living snake species"))
     elif kind == "genus":
         h1 = name
         lead = "The genus %s%s has %s in SnakeList (%s), recorded in %s%s." % (
             name, " (family %s)" % family if family else "", plural(n, "living species", "living species"), vsplit(), places_txt,
             ("; %s %s listed separately" % (gone_txt, "is" if len(G) == 1 else "are")) if gone_txt else "")
-        title = "%s snakes: all %s, with photos | SnakeList" % (name, plural(n, "species", "species"))
+        title = ("%s snakes: all %s, with photos | SnakeList" if n > 1 else "%s snakes: %s | SnakeList") % (name, plural(n, "species", "species"))
     elif n:
         h1 = "Snakes of %s" % dn
         lead = "%s %s recorded in %s in SnakeList: %s venomous and %s non-venomous%s." % (
@@ -1665,7 +1669,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
     cta = ("../../?map=%s" % quote_param(name), "View snakes on map") if kind == "country" else (
         ("../../?fam=%s" % quote_param(name), "Open the family in SnakeList") if kind == "family" else ("../../?q=%s" % quote_param(name), "Open the genus in SnakeList"))
     crumbs_html = "".join('<li><a href="%s">%s</a></li>' % (c0[2], esc(c0[0])) for c0 in crumbs)
-    jump = ('<form class="cy-jump" id="cy-jump" role="search" action="../#by-country"><label for="cy-jq" class="cy-sr">Go to another country</label><input id="cy-jq" list="cy-clist" placeholder="Another country..." autocomplete="off"><datalist id="cy-clist"></datalist><button type="submit">Go</button></form>'
+    jump = ('<form class="cy-jump" id="cy-jump" role="search" action="../#by-country"><label for="cy-jq" class="cy-sr">Go to another country or territory</label><input id="cy-jq" list="cy-clist" placeholder="Another country or territory..." autocomplete="off"><datalist id="cy-clist"></datalist><button type="submit">Go</button></form>'
             if kind == "country" else "")
     # the introduction: what this family is (its reviewed text), what the genus name means, or
     # for a country, what its totals count
