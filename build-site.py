@@ -10,11 +10,15 @@ app = open("snakelist-synced.html", encoding="utf-8").read()
 # how many snakes SnakeList lists: the one source for every "N species" on the static pages
 N_SPECIES = len(re.findall(r'<div class="card" data-id=', app))
 N_TXT = "{:,}".format(N_SPECIES)
+# how many of them have a real photo (not a fossil illustration): "about N of the 4,247" on the static pages
+_pi = re.search(r'<script type="application/json" id="photo-index">(.*?)</script>', app, re.S)
+P_TXT = "{:,}".format(sum(1 for v in __import__("json").loads(_pi.group(1))["items"].values() if "Illustration" not in v[2])) if _pi else "0"
 def _fix_totals(path):
     try: t = open(path, encoding="utf-8").read()
     except OSError: return
     t2 = re.sub(r"\b\d,\d{3}(?=(?:</[a-z]+>)? (?:snake )?species\b)", N_TXT, t)
     t2 = re.sub(r'(<span data-sl-total>)[\d,]+(</span>)', r"\g<1>" + N_TXT + r"\2", t2)
+    t2 = re.sub(r'(<span data-sl-photos>)[\d,]+(</span>)', r"\g<1>" + P_TXT + r"\2", t2)
     if t2 != t: open(path, "w", encoding="utf-8").write(t2)
 for _p in ("about.html", "about-snakelist.html", "install.html", "privacy.html", "terms.html"): _fix_totals(_p)
 title = "SnakeList - the snake life list, map and quiz"
