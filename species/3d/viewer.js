@@ -416,7 +416,7 @@ function buildBody(P, F, pose, quality) {
 // ---------- textures generated per species ----------
 function scaleLattice(P, gTotal) {
   const S = P.scales, aV = S.aV, R = S.rows, rw = (2 * aV) / R;
-  const Wt = R > 40 ? 1024 : 512;
+  const Wt = R > 40 ? 2048 : 1024; // v4.72: twice as sharp
   // scale pitch along the body (girth units), rounded so the tile has a whole number of pixels
   let Ht = Math.max(8, Math.round(Wt * (S.kind === 'juxta' ? 1.0 : 1.25) * aV / R * (S.pitch || 1)));
   if (Ht % 2) Ht++;
@@ -483,8 +483,8 @@ function scaleTextures(P, lat) {
 
 // the colour pattern, generated from the profile's layers over the whole body (no tiling, no seam)
 function patternTexture(P, F, body, lat, quality, seed) {
-  const Wp = quality === 'low' ? 192 : 256;
-  const Hp = clamp(Math.round(body.gTotal * Wp * 0.62), 256, quality === 'low' ? 2048 : 4096);
+  const Wp = quality === 'low' ? 192 : 512; // v4.72: twice as sharp on good devices
+  const Hp = clamp(Math.round(body.gTotal * Wp * 0.62), 256, quality === 'low' ? 2048 : 8192);
   const C = P.colors, dors = hex(C.dorsal), latc = hex(C.lateral), bel = hex(C.belly);
   const bellyA = C.bellyA || 0.74, bs = C.bellySharp || 0.06, mott = C.mottle, vari = C.var;
   const layers = (P.pattern || []).map((l) => prepLayer(l, F, body));
@@ -878,17 +878,19 @@ function canvasTex(S, draw, rep, srgb = true) {
   const t = new THREE.CanvasTexture(cv); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; if (rep) t.repeat.set(rep, rep);
   t.anisotropy = 4; return t;
 }
-function groundTexture(kind, seed) {
+function groundTexture(kind, seed, hi) {
   const R = rng(seed);
-  return canvasTex(1024, (x, S) => {
+  // v4.72: drawn at twice the resolution on good devices (same layout, finer detail)
+  return canvasTex(hi ? 2048 : 1024, (x, SS) => {
+    const S = 1024; x.scale(SS / S, SS / S);
     // draw fn at the position and at its wrapped copies, so the texture tiles without seams
     const wrapAt = (cx, cy, r, fn) => { for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) { const X = cx + ox, Y = cy + oy; if (X + r < 0 || X - r > S || Y + r < 0 || Y - r > S) continue; x.save(); x.translate(X, Y); fn(); x.restore(); } };
     const base = { gibber: '#a8613a', litter: '#3b2e22', gravel: '#b7a58c', heath: '#6f5f4a', pebbles: '#6f675a', soil: '#3f3024', dry: '#6f6a44', sand: '#d8c39a' }[kind] || '#777';
     x.fillStyle = base; x.fillRect(0, 0, S, S);
     const tone = (amt, fine) => {
-      const img = x.getImageData(0, 0, S, S), d = img.data;
-      for (let j = 0; j < S; j++) for (let i = 0; i < S; i++) {
-        const n = tfbm(i / S * 6, j / S * 6, 6, seed + 1, 5) - 0.5, f = 1 + n * amt, g = 1 + (R() - 0.5) * fine, k = (j * S + i) * 4;
+      const W = x.canvas.width, img = x.getImageData(0, 0, W, W), d = img.data;
+      for (let j = 0; j < W; j++) for (let i = 0; i < W; i++) {
+        const n = tfbm(i / W * 6, j / W * 6, 6, seed + 1, 5) - 0.5, f = 1 + n * amt, g = 1 + (R() - 0.5) * fine, k = (j * W + i) * 4;
         d[k] *= f * g; d[k + 1] *= f * g; d[k + 2] *= f * g;
       }
       x.putImageData(img, 0, 0);
@@ -1001,7 +1003,14 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   for (let i = 0; i < p.count; i++) { const y = p.getY(i) / skyR, c = hor.clone().lerp(sky, sstep(0.0, 0.5, y)); if (y < 0) c.copy(hor); cols.push(c.r, c.g, c.b); }
   skyGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
   const skyMesh = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false }));
-  skyMesh.renderOrder = -1; scene.add(skyMesh); ctx.skyMesh = skyMesh; ctx.groundR = groundR; ctx.fadeMats = [];
+  skyMesh.renderOrder = -1; scene.add(skyMesh);
+  // v4.72: a soft glow where the sun is and a few soft clouds, so the sky is not a flat colour
+  { const glowT = canvasTex(256, (x, s2) => { const g = x.createRadialGradient(s2 / 2, s2 / 2, 0, s2 / 2, s2 / 2, s2 / 2); g.addColorStop(0, 'rgba(255,250,235,0.95)'); g.addColorStop(0.15, 'rgba(255,244,214,0.55)'); g.addColorStop(1, 'rgba(255,240,210,0)'); x.fillStyle = g; x.fillRect(0, 0, s2, s2); }, 1, true);
+    const se = (S.sunEl * Math.PI) / 180, sa = 0.9, sd = new THREE.Vector3(Math.cos(sa) * Math.cos(se), Math.sin(se), Math.sin(sa) * Math.cos(se));
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowT, transparent: true, depthWrite: false, fog: false })); glow.position.copy(sd).multiplyScalar(skyR * 0.9); glow.scale.setScalar(skyR * 0.5); glow.renderOrder = -1; scene.add(glow); ctx.sunGlow = glow;
+    const cloudT = canvasTex(256, (x, s2) => { for (let i = 0; i < 9; i++) { const cx = s2 * (0.2 + R() * 0.6), cy = s2 * (0.4 + R() * 0.2), r = s2 * (0.12 + R() * 0.14), g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, 'rgba(255,255,255,0.55)'); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(0, 0, s2, s2); } }, 1, true);
+    for (let i = 0; i < 7; i++) { const a = R() * TAU, el2 = 0.18 + R() * 0.35, c = new THREE.Sprite(new THREE.SpriteMaterial({ map: cloudT, transparent: true, depthWrite: false, fog: false, opacity: 0.55 + R() * 0.3 }));
+      c.position.set(Math.cos(a) * Math.cos(el2), Math.sin(el2), Math.sin(a) * Math.cos(el2)).multiplyScalar(skyR * 0.85); c.scale.set(skyR * (0.5 + R() * 0.3), skyR * 0.18, 1); c.renderOrder = -1; scene.add(c); } } ctx.skyMesh = skyMesh; ctx.groundR = groundR; ctx.fadeMats = [];
   scene.fog = new THREE.Fog(hor, Math.max(Rb * 6, envR * 3.5), farR * 0.95); ctx.farR = farR;
   scene.background = hor;
 
@@ -1020,7 +1029,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   const el = (S.sunEl * Math.PI) / 180, az = 0.9;
   sun.position.set(Math.cos(az) * Math.cos(el), Math.sin(el), Math.sin(az) * Math.cos(el)).multiplyScalar(Rb * 6);
   sun.castShadow = true;
-  const sm = quality === 'low' ? 1024 : 2048; sun.shadow.mapSize.set(sm, sm);
+  const sm = quality === 'low' ? 1024 : 4096; sun.shadow.mapSize.set(sm, sm); // v4.72: crisper shadows
   const sc = sun.shadow.camera; sc.left = sc.bottom = -Rb * 1.5; sc.right = sc.top = Rb * 1.5; sc.near = Rb * 0.5; sc.far = Rb * 14;
   sun.shadow.bias = -0.0004; sun.shadow.normalBias = F.w0 * 0.04; sun.shadow.radius = 3;
   scene.add(sun); scene.add(sun.target);
@@ -1032,7 +1041,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   if (S.ground) {
     const gg = new THREE.CircleGeometry(groundR, 128, 0, TAU); gg.rotateX(-Math.PI / 2);
     // finer rings near the middle so the riverbank slope is smooth
-    const tex = groundTexture(S.ground, seed + 5); tex.anisotropy = ctx.renderer.capabilities.getMaxAnisotropy(); const rep = (groundR * 2) / (clamp(Math.min(S.tile, L * 1.1), S.tile * 0.5, S.tile) * clamp(L / 2, 1, 4)); tex.repeat.set(rep, rep); // big snakes: bigger ground detail, never a fine grain
+    const tex = groundTexture(S.ground, seed + 5, quality !== 'low'); tex.anisotropy = ctx.renderer.capabilities.getMaxAnisotropy(); const rep = (groundR * 2) / (clamp(Math.min(S.tile, L * 1.1), S.tile * 0.5, S.tile) * clamp(L / 2, 1, 4)); tex.repeat.set(rep, rep); // big snakes: bigger ground detail, never a fine grain
     const gm = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.96, metalness: 0, bumpMap: tex, bumpScale: Math.min(1, L * 0.5) * 0.6 });
     if (S.water === 'river') {
       // the bank slopes down into shallow water on one side, away from the snake
@@ -1194,6 +1203,7 @@ function applyEnv(ctx, P, F, poseInfo, env) {
   // light: the sun from the photo, sky light from the panorama; the gradient hemisphere light stays only as a faint fill
   const sun = ctx.sun, el = Math.max(Math.asin(env.sunDir.y), (22 * Math.PI) / 180), az = Math.atan2(env.sunDir.z, env.sunDir.x), r = sun.position.length();
   sun.position.set(Math.cos(el) * Math.cos(az), Math.sin(el), Math.cos(el) * Math.sin(az)).multiplyScalar(r);
+  if (ctx.sunGlow) ctx.sunGlow.position.copy(sun.position).normalize().multiplyScalar(ctx.sunGlow.position.length());
   sun.color.copy(env.sunCol).lerp(new THREE.Color('#ffffff'), 0.35); sun.intensity = 6.5 * env.sunny; // about three times the sky's light on a sunlit face, as outdoors
   sun.shadow.radius = lerp(8, 3, env.sunny); sun.shadow.blurSamples = 16;
   if (ctx.hemi) ctx.hemi.intensity *= 0.25;
@@ -1223,17 +1233,17 @@ function farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality) {
   if (leafy > 0) {
     const pine = S.ground === 'heath' || S.ground === 'pebbles', parts = [];
     const add = (g, col) => { const c = new THREE.Color(col), n = g.attributes.position.count, a = []; for (let i = 0; i < n; i++) a.push(c.r, c.g, c.b); g.setAttribute('color', new THREE.Float32BufferAttribute(a, 3)); parts.push(g.toNonIndexed ? g.toNonIndexed() : g); };
-    add(new THREE.CylinderGeometry(0.035, 0.05, 0.45, 6).translate(0, 0.225, 0), '#5a4330');
-    if (pine) { add(new THREE.ConeGeometry(0.3, 0.55, 8).translate(0, 0.55, 0), '#3d5a36'); add(new THREE.ConeGeometry(0.22, 0.45, 8).translate(0, 0.85, 0), '#46663c'); }
-    else { add(new THREE.IcosahedronGeometry(0.32, 1).scale(1, 0.85, 1).translate(0, 0.72, 0), S.ground === 'dry' ? '#7a8a4a' : '#4c6a3a'); add(new THREE.IcosahedronGeometry(0.22, 1).translate(0.16, 0.92, 0.05), S.ground === 'dry' ? '#8a9a55' : '#58783f'); }
+    add(new THREE.CylinderGeometry(0.035, 0.05, 0.45, 12).translate(0, 0.225, 0), '#5a4330');
+    if (pine) { add(new THREE.ConeGeometry(0.3, 0.55, 18).translate(0, 0.55, 0), '#3d5a36'); add(new THREE.ConeGeometry(0.22, 0.45, 18).translate(0, 0.85, 0), '#46663c'); }
+    else { add(new THREE.IcosahedronGeometry(0.32, 3).scale(1, 0.85, 1).translate(0, 0.72, 0), S.ground === 'dry' ? '#7a8a4a' : '#4c6a3a'); add(new THREE.IcosahedronGeometry(0.22, 3).translate(0.16, 0.92, 0.05), S.ground === 'dry' ? '#8a9a55' : '#58783f'); }
     let n = 0; for (const g of parts) n += g.attributes.position.count;
     const pos = new Float32Array(n * 3), col = new Float32Array(n * 3); let o = 0;
     for (const g of parts) { pos.set(g.attributes.position.array, o); col.set(g.attributes.color.array, o); o += g.attributes.position.array.length; }
     const tree = new THREE.BufferGeometry(); tree.setAttribute('position', new THREE.BufferAttribute(pos, 3)); tree.setAttribute('color', new THREE.BufferAttribute(col, 3)); tree.computeVertexNormals();
-    put(tree, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, flatShading: true }), Math.round((low ? 90 : 180) * leafy), groundR * 1.1, farR * 0.92, tall);
+    put(tree, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 }), Math.round((low ? 90 : 180) * leafy), groundR * 1.1, farR * 0.92, tall);
   } else {
-    const rock = new THREE.IcosahedronGeometry(1, 1), rp = rock.attributes.position; for (let i = 0; i < rp.count; i++) { const f = 0.75 + R() * 0.45; rp.setXYZ(i, rp.getX(i) * f, rp.getY(i) * f * 0.6, rp.getZ(i) * f); } rock.computeVertexNormals();
-    put(rock, new THREE.MeshStandardMaterial({ color: gcol.clone().multiplyScalar(0.8), roughness: 0.95, flatShading: true }), low ? 40 : 80, groundR * 1.1, farR * 0.9, Math.max(Rb * 0.8, farR * 0.02));
+    const rock = new THREE.IcosahedronGeometry(1, 3), rp = rock.attributes.position; for (let i = 0; i < rp.count; i++) { const x0 = rp.getX(i), y0 = rp.getY(i), z0 = rp.getZ(i), f = 0.8 + fbm(x0 * 1.7, y0 * 1.7, z0 * 1.7, seed + 13, 3) * 0.45; rp.setXYZ(i, x0 * f, y0 * f * 0.6, z0 * f); } rock.computeVertexNormals(); // smooth, weathered boulders
+    put(rock, new THREE.MeshStandardMaterial({ color: gcol.clone().multiplyScalar(0.8), roughness: 0.93 }), low ? 40 : 80, groundR * 1.1, farR * 0.9, Math.max(Rb * 0.8, farR * 0.02));
   }
 }
 
@@ -1419,8 +1429,8 @@ export function mount(host, opts) {
       // v4.72: raised 3D scales - stronger relief, deeper gaps between them, and real bumps on good devices
       map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1), aoMap: tiles.cavity, aoMapIntensity: 1.15, roughnessMap: tiles.cavity,
       ...(quality === 'low' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
-      roughness: lerp(0.82, 0.58, gl), metalness: 0, clearcoat: gl * 0.35, clearcoatRoughness: lerp(0.55, 0.3, gl), sheen: S.sheen != null ? S.sheen : 0.12, sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
-      iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.65,
+      roughness: lerp(0.82, 0.58, gl), metalness: 0, clearcoat: 0.12 + gl * 0.5, clearcoatRoughness: lerp(0.5, 0.22, gl), sheen: S.sheen != null ? S.sheen : 0.12, sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
+      iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.85,
     });
     // the cavity map also darkens the skin between scales in direct light (as in real snakes)
     mat.onBeforeCompile = (sh) => {
