@@ -376,7 +376,7 @@ def place_counts_js(cards, invasive, iso, by_id):
     return "window.SL_PLACE_COUNTS=" + json.dumps(out, ensure_ascii=False, separators=(",", ":"), sort_keys=True) + ";\n"
 
 
-def skey(c): return ((1 if c["is_sci"] else 0), (c["sci"] if c["is_sci"] else c["name"]).lower())
+def skey(c): return ((1 if c["is_sci"] else 0), (c["sci"] if c["is_sci"] else c["name"]).lower(), c["sci"].lower(), c["id"])  # same order every build
 def label(c): return c["sci"] if c["is_sci"] else c["name"]
 
 
@@ -973,24 +973,25 @@ return svg}
 function fmt(v){return v<1?Math.round(v*100)+' cm':(Math.round(v*100)/100)+' m'}
 function rng(lo,hi){if(lo===hi)return fmt(hi);if(lo>=1)return (Math.round(lo*100)/100)+'–'+fmt(hi);if(hi<1)return Math.round(lo*100)+'–'+fmt(hi);return fmt(lo)+'–'+fmt(hi)}
 // the model profiles and the viewer code are fetched only when the viewer is opened
-var models=null,modP=null,viewer=null,tabs,p3d,pph,host,about,note,stat,grid,got=0,busy=0;
+var models=null,modP=null,viewer=null,tabs,p3d,pph,host,about,note,stat,grid,got=0,busy=0,toTop=0;
 function getModels(){if(models)return Promise.resolve(models);return fetch(new URL('3d/models.json',me).href).then(function(r){if(!r.ok)throw new Error('models '+r.status);return r.json()}).then(function(d){models=d;return d})}
 var tries=0;function getViewer(){if(!modP){var imp,q=tries++?'?r='+tries:'';try{imp=new Function('u','return import(u)')}catch(e){return Promise.reject(e)}
 modP=Promise.all([imp(new URL('3d/three.module.min.js'+q,me).href),imp(new URL('3d/viewer.js'+q,me).href)]).then(function(r){r[1].useThree(r[0]);return r[1]}).catch(function(e){modP=null;throw e})}return modP}
 function gl(){try{var c=document.createElement('canvas');return !!(window.WebGLRenderingContext&&(c.getContext('webgl2')||c.getContext('webgl')))}catch(e){return false}}
-function open(){if(!dlg)build();if(dlg.showModal){if(!dlg.open)dlg.showModal()}else dlg.setAttribute('open','');start()}
+function open(){if(!dlg)build();if(dlg.showModal){if(!dlg.open)dlg.showModal()}else dlg.setAttribute('open','');document.documentElement.style.overflow='hidden';document.body.style.overflow='hidden';start()}
 function close(){if(dlg.close)dlg.close();else{dlg.removeAttribute('open');closed()}}
-function closed(){if(viewer){viewer.dispose();viewer=null}busy=0;b.focus();if(location.hash==='#real')history.replaceState(null,'',location.pathname+location.search)}
+function closed(){document.documentElement.style.overflow='';document.body.style.overflow='';if(viewer){viewer.dispose();viewer=null}busy=0;
+if(toTop){toTop=0;try{b.focus({preventScroll:true})}catch(e){}window.scrollTo(0,0)}else b.focus();if(location.hash==='#real')history.replaceState(null,'',location.pathname+location.search)}
 function pick(which){var is3=which==='3d';tabs[0].setAttribute('aria-selected',is3);tabs[1].setAttribute('aria-selected',!is3);tabs[0].tabIndex=is3?0:-1;tabs[1].tabIndex=is3?-1:0;p3d.hidden=!is3;pph.hidden=is3;if(!is3)load()}
 function msg(t,retry,photos){host.innerHTML='';var d=el('div','sp3d-msg');d.setAttribute('role','alert');d.appendChild(el('p','',t));if(retry){var r=el('button','sp-btn sp-btn2','Retry');r.type='button';r.addEventListener('click',start);d.appendChild(r)}
-if(photos){var q=el('button','sp-btn sp-btn2','See photos instead');q.type='button';q.addEventListener('click',function(){pick('ph');tabs[1].focus()});d.appendChild(q)}host.appendChild(d)}
+if(photos){var q=el('button','sp-btn sp-btn2','See information instead');q.type='button';q.addEventListener('click',function(){pick('ph');tabs[1].focus()});d.appendChild(q)}host.appendChild(d)}
 function start(){if(viewer||busy)return;busy=1;host.innerHTML='';var ld=el('div','sp3d-msg sp3d-loading');ld.setAttribute('role','status');ld.appendChild(el('span','sp3d-spin'));ld.appendChild(el('p','','Loading the 3D model...'));host.appendChild(ld);
 getModels().then(function(d){var p=d&&d.species&&d.species[sid];
 if(!p){busy=0;nomodel();return}
 fillAbout(p);
-if(!gl()){busy=0;msg('This browser or device cannot show 3D graphics (WebGL is turned off or not supported), so the 3D model cannot be shown. The photos are still available.',false,true);return}
+if(!gl()){busy=0;msg('This browser or device cannot show 3D graphics (WebGL is turned off or not supported), so the 3D model cannot be shown. The information about it is still there.',false,true);return}
 return getViewer().then(function(mod){if(!dlg.open&&!dlg.hasAttribute('open')){busy=0;return}host.innerHTML='';
-try{viewer=mod.mount(host,{profile:p,id:sid,name:name,testing:!!window.SL_3D_TEST})}catch(e){viewer=null;busy=0;msg(e&&e.message==='webgl'?'The 3D view could not start on this device (WebGL is not available). The photos are still available.':'The 3D view could not start.',true,true);return}busy=0})})
+try{viewer=mod.mount(host,{profile:p,id:sid,name:name,testing:!!window.SL_3D_TEST})}catch(e){viewer=null;busy=0;msg(e&&e.message==='webgl'?'The 3D view could not start on this device (WebGL is not available). The information about it is still there.':'The 3D view could not start.',true,true);return}busy=0})})
 .catch(function(){busy=0;msg(navigator.onLine===false?'You seem to be offline, and the 3D viewer has not been downloaded yet.':'The 3D viewer could not be loaded just now.',true,true)})}
 function nomodel(){tabs[0].parentNode.hidden=true;p3d.hidden=true;pph.hidden=false;note.hidden=false;load()}
 function fillAbout(p){if(about.dataset.done)return;about.dataset.done=1;var s=el('summary','','About this model and its sources');about.appendChild(s);
@@ -999,19 +1000,33 @@ about.appendChild(el('p','','A reconstruction built by SnakeList from the source
 if(p.scene&&p.scene.basis)about.appendChild(el('p','','Surroundings: '+p.scene.basis));var ul=el('ul');(p.refs||[]).forEach(function(r){var li=el('li'),a=el('a','',r.t);a.href=r.acct?'#sources':r.u;if(!r.acct){a.rel='noopener';a.target='_blank'}else a.addEventListener('click',close);li.appendChild(a);ul.appendChild(li)});about.appendChild(ul)}
 function build(){dlg=el('dialog','sp-rl');dlg.setAttribute('aria-labelledby','sp-rl-h');var inn=el('div','sp-rl-in'),hd=el('div','sp-rl-hd'),h=el('h2','','Explore in 3D: ');h.appendChild(el('span','sp-rl-nm',name));h.id='sp-rl-h';
 var x=el('button','sp-rl-x','×');x.type='button';x.setAttribute('aria-label','Close');x.addEventListener('click',close);hd.appendChild(h);hd.appendChild(x);inn.appendChild(hd);
-var tl=el('div','sp-rl-tabs');tl.setAttribute('role','tablist');tl.setAttribute('aria-label','View');tabs=[el('button','sp-rl-tab','3D model'),el('button','sp-rl-tab','Photos')];
+var tl=el('div','sp-rl-tabs');tl.setAttribute('role','tablist');tl.setAttribute('aria-label','View');tabs=[el('button','sp-rl-tab','3D model'),el('button','sp-rl-tab','Information')];
 tabs.forEach(function(t,i){t.type='button';t.setAttribute('role','tab');t.id='sp-rl-t'+i;t.setAttribute('aria-controls','sp-rl-p'+i);t.addEventListener('click',function(){pick(i?'ph':'3d')});
 t.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();var j=1-i;pick(j?'ph':'3d');tabs[j].focus()}});tl.appendChild(t)});inn.appendChild(tl);
 p3d=el('section','sp-rl-p');p3d.id='sp-rl-p0';p3d.setAttribute('role','tabpanel');p3d.setAttribute('aria-labelledby','sp-rl-t0');host=el('div','sp3d-host');p3d.appendChild(host);about=el('details','sp3d-about');p3d.appendChild(about);inn.appendChild(p3d);
 pph=el('section','sp-rl-p');pph.id='sp-rl-p1';pph.setAttribute('role','tabpanel');pph.setAttribute('aria-labelledby','sp-rl-t1');pph.hidden=true;
-note=el('p','sp3d-none','No accurate 3D model of this snake exists yet. SnakeList only shows a 3D model when it can be built from reliable descriptions and photos of the species, so here are photos of it instead.');note.hidden=true;pph.appendChild(note);
-var pf=document.querySelector('.sp-photo img'),pc=document.querySelector('.sp-photo figcaption');if(pf){var f0=el('figure','sp-rl-own'),im=new Image();im.src=pf.getAttribute('data-fb')||pf.src;im.alt=pf.alt;im.width=540;im.height=360;f0.appendChild(im);if(pc)f0.appendChild(pc.cloneNode(true));pph.appendChild(f0)}
-var sz=size();if(sz){var f=el('figure','sp-rl-size');f.appendChild(el('h3','','How big is it?'));f.appendChild(sz);var cap=el('figcaption');cap.appendChild(document.createTextNode('Adult length: '+(m.dataset.lentxt||'')+' '));
+note=el('p','sp3d-none','No accurate 3D model of this snake exists yet. SnakeList only shows a 3D model when it can be built from reliable descriptions and photos of the species, so here is what SnakeList knows about it instead.');note.hidden=true;pph.appendChild(note);
+var D={};try{var dn=document.querySelector('.sp-info-data');if(dn)D=JSON.parse(dn.textContent)||{}}catch(e){D={}}
+var cols=el('div','sp-rl-info'),c1=el('div','sp-rl-ic'),c2=el('div','sp-rl-ic');cols.appendChild(c1);cols.appendChild(c2);pph.appendChild(cols);
+var pf=document.querySelector('.sp-photo img'),pc=document.querySelector('.sp-photo figcaption');if(pf){var f0=el('figure','sp-rl-own'),im=new Image();im.src=pf.getAttribute('data-fb')||pf.src;im.alt=pf.alt;im.width=540;im.height=360;f0.appendChild(im);if(pc)f0.appendChild(pc.cloneNode(true));c1.appendChild(f0)}
+info(c2,D);
+var sz=size();if(!sz){var f1=el('div','sp-rl-size');f1.appendChild(el('h3','','How big is it?'));var lf=(D.facts||[]).filter(function(x){return /length/i.test(x[0])})[0];
+f1.appendChild(el('p','sp-rl-t',lf&&!/^Not known/.test(lf[1])?lf[0]+': '+lf[1]:'SnakeList has no checked adult length for it yet.'));f1.appendChild(el('span','sp-note','SnakeList draws it next to a person only when a reviewed account gives its length.'));c1.appendChild(f1)}
+if(sz){var f=el('figure','sp-rl-size');f.appendChild(el('h3','','How big is it?'));f.appendChild(sz);var cap=el('figcaption');cap.appendChild(document.createTextNode('Adult length: '+(m.dataset.lentxt||'')+' '));
 var src=m.dataset.lensrc;if(src){var p=src.split('|');var aa=el('a','',p[0]);if(p[1]){aa.href=p[1];aa.rel='noopener'}cap.appendChild(document.createTextNode('(source: '));cap.appendChild(p[1]?aa:document.createTextNode(p[0]));cap.appendChild(document.createTextNode(')'))}
-cap.appendChild(el('span','sp-note',' Drawn stretched out, to scale with a person 1.5 m tall. Real snakes vary.'));f.appendChild(cap);pph.appendChild(f)}
+cap.appendChild(el('span','sp-note',' Drawn stretched out, to scale with a person 1.5 m tall. Real snakes vary.'));f.appendChild(cap);c1.appendChild(f)}
+var fb=el('div','sp-rl-fullrow'),fu=el('button','sp-btn sp-rl-full','Open the full page');fu.type='button';fu.addEventListener('click',function(){toTop=1;close()});fb.appendChild(fu);
+fb.appendChild(el('span','sp-note','Everything here comes from this page, where the sources are listed.'));pph.appendChild(fb);
 inn.appendChild(pph);pick('3d');
 dlg.appendChild(inn);document.body.appendChild(dlg);dlg.addEventListener('click',function(e){if(e.target===dlg)close()});dlg.addEventListener('close',closed)}
 function load(){}
+// the Information tab: only what this page already says (the data block written with the page)
+function info(w,D){function h(t){w.appendChild(el('h3','',t))}function p(t,c){var e=el('p',c||'',t);w.appendChild(e);return e}
+h('About it');(D.intro||[]).forEach(function(t){p(t,'sp-rl-t')});if(D.limited)p('Little is known about this species: only a few published studies describe it.','sp-note');
+if(D.facts&&D.facts.length){h('Key facts');var dl=el('dl','sp-rl-facts');D.facts.forEach(function(f){var d=el('div');if(f[1].length>70)d.className='sp-rl-wide';d.appendChild(el('dt','',f[0]));d.appendChild(el('dd','',f[1]));dl.appendChild(d)});w.appendChild(dl)}
+h('Fangs and teeth');if(D.fangs&&D.fangs.length){D.fangs.forEach(function(t){p(t,'sp-rl-t')});if(!D.fangsize)p('SnakeList has no record of how long its fangs are.','sp-note')}else p('SnakeList has no record of its fang size.','sp-rl-t sp-rl-unk');
+h(D.gone?'Lifespan':'Lifespan and age');if(D.life&&D.life.length)D.life.forEach(function(t){p(t,'sp-rl-t')});else p('Not known: SnakeList has no record of how long it '+(D.gone?'lived.':'lives.'),'sp-rl-t sp-rl-unk');
+if(D.fun&&D.fun.length){h('Did you know?');var ul=el('ul','sp-rl-fun');D.fun.forEach(function(t){ul.appendChild(el('li','',t))});w.appendChild(ul)}}
 b.addEventListener('click',open);if(location.hash==='#real')open();window.addEventListener('hashchange',function(){if(location.hash==='#real')open()})})();
 """
 
@@ -1032,6 +1047,13 @@ REAL_CSS = """
 .sp-rl-size{margin:16px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.sp-rl-size h3{margin:0 0 6px;font:700 17px Georgia,serif}
 .sp-rl-size svg{display:block;width:100%;max-width:520px;height:auto}.sp-rl-size .gr{stroke:var(--tagline);stroke-width:2}.sp-rl-size .pp{fill:var(--muted)}
 .sp-rl-size .sn{fill:var(--g)}.sp-rl-size .sn2{fill:var(--g);opacity:.4}.sp-rl-size text{fill:var(--text);font:600 12px Inter,system-ui,sans-serif}.sp-rl-size .eye{fill:#1a1208}.sp-rl-size text.tk{fill:var(--muted);font-weight:500;font-size:10.5px}
+.sp-rl-info{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:18px;align-items:start}@media (max-width:760px){.sp-rl-info{grid-template-columns:1fr}}
+.sp-rl-ic>h3{margin:14px 0 4px;font:700 17px Georgia,serif}.sp-rl-ic>h3:first-child{margin-top:0}.sp-rl-t{margin:0 0 8px;font-size:15px;line-height:1.55}.sp-rl-unk{color:var(--muted)}.sp-rl-ic .sp-note{margin:0 0 8px}
+.sp-rl-facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(170px,100%),1fr));gap:8px;margin:4px 0 6px}.sp-rl-facts div{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:7px 11px}
+.sp-rl-facts .sp-rl-wide{grid-column:1/-1}.sp-rl-facts .sp-rl-wide dd{font-weight:500}.sp-rl-facts dt{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.sp-rl-facts dd{margin:0;font-weight:600;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.sp-rl-fun{margin:4px 0 0;padding-left:20px;font-size:15px}.sp-rl-fun li{margin:0 0 4px}
+.sp-rl-fullrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:18px 0 0;padding:14px 0 0;border-top:1px solid var(--line)}.sp-rl-fullrow .sp-note{margin:0}
+.sp-rl-full{border:0;font:600 15px Inter,system-ui,sans-serif;cursor:pointer}
 .sp-rl-size figcaption{font-size:13.5px}.sp-rl-size .sp-note{display:block;margin:4px 0 0}.sp-rl-n{margin:12px 0 0}
 .sp3d-none{margin:0 0 12px;padding:10px 14px;border:1px solid var(--tagline);border-radius:12px;background:var(--tag);font-size:15px}
 .sp-rl .sp-rl-p{background:none;border:0;border-radius:0;padding:0;margin:0}.sp3d-host{position:relative}
@@ -1039,6 +1061,7 @@ REAL_CSS = """
 .sp3d-spin{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--g);animation:sp3dspin 1s linear infinite}@keyframes sp3dspin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.sp3d-spin{animation-duration:3s}}
 .sp3d-wrap{position:relative;background:var(--card)}
+dialog.sp-rl{overscroll-behavior:contain}
 .sp3d-stage{position:relative;height:min(64vh,600px);min-height:280px;border-radius:14px;overflow:hidden;background:#c9d1c3;touch-action:none}
 .sp3d-canvas{display:block;width:100%;height:100%;outline:none;cursor:grab;touch-action:none}.sp3d-canvas:active{cursor:grabbing}
 .sp3d-canvas:focus-visible{box-shadow:inset 0 0 0 3px var(--g)}

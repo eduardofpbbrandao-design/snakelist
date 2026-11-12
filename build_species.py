@@ -88,6 +88,8 @@ def hab_kind(h):
         if re.search(rx, t): return k
     return "Forests & woodlands"
 APP = [""]
+MODELS = {}       # "Explore in 3D": each species' model profile (species/3d/models.json), for its JSON-LD
+PAGE_LASTMOD = {} # species page URL -> the day its content last changed (data/page-dates.json), for sitemap.xml
 CITIES = {}
 NONSOV = set()
 
@@ -196,6 +198,7 @@ def build(app):
         if lm: lens[i] = lm
     gen = auto_models.build(cards, lens, hab_kind, M["species"], HAB_SEC.get)
     M["species"].update(gen)
+    MODELS.clear(); MODELS.update(M["species"])
     with open(OUT + "/3d/models.json", "w", encoding="utf-8") as fh:
         json.dump(M, fh, ensure_ascii=False, separators=(",", ":"))
     return pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll, paths, boxes, region)
@@ -649,12 +652,26 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
                           "People introduced it to %s" + ((" " + x["when"]) if x.get("when") else "") + ".") % x["area"])
         rt = rarity_txt(c)
         about = lead + " " + " ".join(extra)
-        title = ("%s - %s" % (nm, sci) if not c["is_sci"] else sci) + ": identification, range map, photos & facts | SnakeList"
+        # the title names the snake both ways and the 3D viewer, kept short enough for search results
+        for title in [label + " \u2013 Explore in 3D | SnakeList", label + " \u2013 Explore in 3D", nm + " \u2013 Explore in 3D | SnakeList"]:
+            if len(title) <= 70: break
+        else: title = label + " \u2013 Explore in 3D"
         ov = (info or {}).get("sections", {}).get("overview") or []
         desc = (plain(ov[0]["text"]) if ov else (lead + (" " + extra[0] if extra else "")))
         desc = desc if len(desc) <= 300 else desc[:297].rsplit(" ", 1)[0] + "..."
+        # the meta description: the 3D viewer first (so it survives truncation), then what the page says
+        cut = desc.startswith(label + " ")
+        has = (["photos"] if img_of(c) else []) + (["facts", "where its fossils were found"] if c["fossil"] else (["a range map"] if c["countries"] else []) + ["facts"])
+        mdesc = ("Explore %s in 3D, with %s. " % (label if c["is_sci"] else "the " + label, ", ".join(has[:-1]) + " and " + has[-1] if len(has) > 1 else has[0])) + (
+            ("It " + desc[len(label) + 1:]) if cut else desc)
+        mdesc = mdesc if len(mdesc) <= 300 else mdesc[:297].rsplit(" ", 1)[0] + "..."
         url = SITE + "species/" + page_name(c)
-        img = img_of(c, "large") or (SITE + "snakelist-logo.png")
+        # link previews: SnakeList's own copy of the photo on snakelist.com where it has one
+        p0 = c["photo"]
+        own = ("species-photos/t/%d-%d.webp" % (p0[0], p0[1])) if p0 and len(p0) >= 5 and "Illustration" not in p0[2] else None
+        own = SITE + own if own and os.path.exists(own) else None
+        img = own or img_of(c, "large") or (SITE + "snakelist-logo.png")
+        img_alt = ("Photo of " + label) if (own or img_of(c)) else "SnakeList logo"
         R = Refs(info, by_id, page_name)
         # where it lives, country by country, with its states/provinces
         provs = {}
@@ -999,14 +1016,71 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         ri = [s[0] for s in secs].index("range")
         before = "".join(sec_html(*s) for s in secs[:ri])
         after = "".join(sec_html(*s) for s in secs[ri + 1:])
-        ld = [{"@context": "https://schema.org", "@type": "Taxon", "name": sci, "alternateName": [nm] if not c["is_sci"] else [],
+        # ---- "Explore in 3D" > Information: what this page says, as data for the dialog (sp.js) ----
+        def txt(h):  # a key fact's HTML as plain text, without its little source numbers
+            h = re.sub(r'<sup class="sp-ref">.*?</sup>', "", h)
+            h = re.sub(r'<small class="sp-kintro">', "; ", h)
+            h = re.sub(r"<small[^>]*>", " ", h)
+            return re.sub(r"\s+", " ", H.unescape(re.sub(r"<[^>]+>", "", h))).strip()
+        def sentences(t): return [x.strip() for x in re.split(r"(?<=[.!?])\s+(?=[A-Z])", plain(t)) if x.strip()]
+        funp = list((info or {}).get("funfacts") or [])
+        allp = [x for k in sorted(S) for x in S[k]] + funp
+        fang_s, life_s = [], []
+        for x in allp:
+            if x in funp and fang_s and re.search(r"\bfang", x["text"], re.I): continue  # a fun fact saying it again
+            lab = (x.get("label") or "").lower()
+            if lab in ("lifespan", "longevity", "life span"):
+                life_s.append(plain(x["text"])); continue
+            for t in sentences(x["text"]):
+                if re.search(r"\bfang", t, re.I) and t not in fang_s: fang_s.append(t)
+                if re.search(r"lifespan|life span|longevity|\blive[sd]?\b[^.]*\b\d+\s*years|\bage of \d+", t, re.I) and t not in life_s: life_s.append(t)
+        measured = [t for t in fang_s if re.search(r"\d\s*(?:mm|cm)\b", t)]
+        if measured: fang_s = measured  # the sentences with the fang sizes
+        for x in S.get("longevity") or []:
+            if plain(x["text"]) not in life_s: life_s.append(plain(x["text"]))
+        hab = " ".join(plain(x["text"]) for x in (S.get("habitat") or [])[:1])
+        if not hab and not c["fossil"] and c["habitats"]:
+            kinds = [k for k in HAB_KIND_ORDER if any(hab_kind(h) == k for h in c["habitats"])]
+            if kinds: hab = "A rough estimate from the places where it %s recorded (not checked for this species): %s." % ("was" if gone else "is", ", ".join(kinds).lower())
+        sp_info = {"intro": [plain(x["text"]) for x in ov] or [" ".join([lead] + extra)],
+                   "limited": bool(info and info.get("status") == "limited"),
+                   "facts": [[f[0], txt(f[1])] for f in kf] + ([["Habitat", hab]] if hab else []),
+                   "fangs": fang_s, "fangsize": any(re.search(r"\d\s*(?:mm|cm)\b", t) for t in fang_s),
+                   "life": life_s, "fun": [plain(x["text"]) for x in (info or {}).get("funfacts") or []][:4],
+                   "fossil": c["fossil"], "gone": gone, "acct": bool(info)}
+        info_json = '<script type="application/json" class="sp-info-data">%s</script>' % json.dumps(sp_info, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+        mp = MODELS.get(c["id"])
+        ax = ((mp or {}).get("auto") or {}).get("x", "") if mp else ""
+        if not mp: m3 = None
+        elif not (mp or {}).get("auto"):
+            m3 = "An interactive 3D reconstruction of %s, built by SnakeList from published descriptions and photos: the body proportions, head shape, scales, colours and markings of a typical adult." % label
+        elif "f" in ax:
+            m3 = "An interactive 3D reconstruction of how %s may have looked, from the body shape of its family and the size estimated from its fossil bones. Its colours are a guess, because fossils keep no colour." % label
+        else:
+            m3 = "An interactive 3D model of %s generated by SnakeList from the body shape of its family, %s and %s." % (
+                label, "a typical size for its group" if "l" in ax else "its recorded size",
+                "colours that are a guess for its group" if "g" in ax else "colours and markings taken from its SnakeList photo")
+        the = label if c["is_sci"] else "the " + label
+        m3 = m3.replace(" of " + label, " of " + the, 1).replace(" how " + label, " how " + the, 1) if m3 else m3
+        tax_id = url + "#taxon"
+        ld = [{"@context": "https://schema.org", "@type": "Taxon", "@id": tax_id, "name": sci, "alternateName": [nm] if not c["is_sci"] else [],
                "taxonRank": "species", "url": url, "image": img, "description": desc,
                "parentTaxon": {"@type": "Taxon", "name": c["genus"], "taxonRank": "genus",
-                               "parentTaxon": {"@type": "Taxon", "name": c["family"], "taxonRank": "family"}} if c["genus"] else None},
+                               "parentTaxon": {"@type": "Taxon", "name": c["family"], "taxonRank": "family"} if c["family"] else None} if c["genus"] else None},
               {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
                   {"@type": "ListItem", "position": 1, "name": "SnakeList", "item": SITE},
                   {"@type": "ListItem", "position": 2, "name": "All species", "item": SITE + "species/"},
                   {"@type": "ListItem", "position": 3, "name": nm, "item": url}]}]
+        if not ld[0]["alternateName"]: del ld[0]["alternateName"]
+        if not ld[0]["parentTaxon"]: del ld[0]["parentTaxon"]
+        elif not ld[0]["parentTaxon"]["parentTaxon"]: del ld[0]["parentTaxon"]["parentTaxon"]
+        if m3:
+            ld[0]["subjectOf"] = {"@id": url + "#real"}
+            ld.append({"@context": "https://schema.org", "@type": "3DModel", "@id": url + "#real", "name": "%s 3D model" % (nm if not c["is_sci"] else sci),
+                       "url": url + "#real", "description": m3 + " It opens in an interactive WebGL viewer on this page (\u201cExplore in 3D\u201d); it is not a scan of a real snake.",
+                       "about": {"@id": tax_id}, "isPartOf": {"@type": "WebPage", "@id": url, "url": url, "name": title},
+                       "image": img, "isAccessibleForFree": True, "inLanguage": "en",
+                       "creator": {"@type": "Organization", "name": "SnakeList", "url": SITE}})
         nterr = sum(1 for n in c["countries"] if n in NONSOV)
         if c["fossil"]:
             actions = '<a class="sp-btn sp-btn2" href="../?sp=%s">Open in the SnakeList app</a>' % c["id"]
@@ -1018,7 +1092,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             actnote = ("&ldquo;Mark seen&rdquo; and &ldquo;Want to see&rdquo; open this snake in the SnakeList app, where your lists are kept on your device &ndash; "
                        "tap the highlighted button on its card. &ldquo;View on map&rdquo; opens the app&rsquo;s map on it.")
         page = PAGE.format(
-            title=esc(title), desc=esc(desc), url=url, img=esc(img), ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"),
+            title=esc(title), desc=esc(mdesc), url=url, img=esc(img), img_alt=esc(img_alt), info_json=info_json, ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"),
             h1=esc(nm), sub=('<i>%s</i>%s' % (esc(sci), (' <span class="sp-auth">%s</span>' % esc(auth_short)) if auth else "")) if not c["is_sci"] else (esc(auth_short) if auth else ""),
             fossil_flag=('<p class="sp-fossil-flag">Extinct &middot; fossil snake%s</p>' % (" &middot; " + esc(c["died"][0]) if c["died"] else "")) if c["fossil"] else
                         ('<p class="sp-fossil-flag">%s</p>' % esc(c["extinct"].split(" - ")[0])) if c["extinct"] else "",
@@ -1052,7 +1126,9 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
                      ("Shaded countries are those where it was recorded &ndash; it did not live everywhere inside them." if gone else
                       "Shaded countries are those where it is recorded &ndash; it does not live everywhere inside them.")))
                     if codes or icodes or ishapes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
-        page = page.replace(GEN_MARK, fmt_date(dates.get(page_name(c), page)))
+        pd = dates.get(page_name(c), page)
+        PAGE_LASTMOD[url] = pd
+        page = page.replace(GEN_MARK, fmt_date(pd))
         open("%s/%s.html" % (OUT, page_name(c)), "w", encoding="utf-8").write(page)
         if page_name(c) != c["id"]:  # the old address (and the app's ?sp ids) still lead here
             open("%s/%s.html" % (OUT, c["id"]), "w", encoding="utf-8").write(REDIRECT.format(name=esc(c["name"]), url=url, page=page_name(c)))
@@ -1231,15 +1307,16 @@ PAGE = """<!doctype html>
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
 <meta property="og:type" content="article"><meta property="og:site_name" content="SnakeList by {author}">
 <meta property="og:title" content="{title}"><meta property="og:description" content="{desc}">
-<meta property="og:url" content="{url}"><meta property="og:image" content="{img}">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:url" content="{url}"><meta property="og:image" content="{img}"><meta property="og:image:alt" content="{img_alt}">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{title}"><meta name="twitter:description" content="{desc}">
+<meta name="twitter:image" content="{img}"><meta name="twitter:image:alt" content="{img_alt}">
 <meta name="theme-color" content="#1F5A3A">
 <link rel="icon" href="../favicon.ico" sizes="any"><link rel="manifest" href="../app/snakelist.webmanifest">
 <link rel="stylesheet" href="sp.css"><script>document.documentElement.className+=" js"</script>
 <script type="application/ld+json">{ld}</script>
 </head><body>
 {site_head}
-<main class="sp-main" data-id="{id}" data-sci="{sci_attr}"{lenattr}>
+<main class="sp-main" data-id="{id}" data-sci="{sci_attr}"{lenattr}>{info_json}
 <nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../">SnakeList</a> &rsaquo; <a href="./">All species</a>{crumb_tax} &rsaquo; <span aria-current="page">{h1}</span></nav>
 <article>
 <header class="sp-head">{photo}
@@ -1313,7 +1390,7 @@ a{color:var(--link)}.sp-top{display:flex;align-items:center;justify-content:spac
 @media (max-width:720px){.sp-head{grid-template-columns:1fr}}
 .sp-photo{margin:0}.sp-photo img,.sp-sprite{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:18px;display:block;background:var(--line)}
 .sp-photo figcaption{font-size:12px;color:var(--muted);margin-top:6px}.sp-nophoto div{aspect-ratio:3/2;border-radius:18px;display:grid;place-items:center;background:var(--line);color:var(--muted)}
-h1{font:700 clamp(30px,5vw,44px)/1.1 Georgia,serif;margin:0}.sp-sci{font-style:italic;color:var(--muted);margin:4px 0 10px;font-size:18px}
+h1{font:700 clamp(30px,5vw,44px)/1.1 Georgia,serif;margin:0}.sp-title h1{color:#1f7a3a}@media (prefers-color-scheme:dark){.sp-title h1{color:#a8ef94}}.sp-sci{font-style:italic;color:var(--muted);margin:4px 0 10px;font-size:18px}
 .sp-badge{display:none}.sp-facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(140px,100%),1fr));gap:8px;margin:18px 0 12px}.sp-facts dd{overflow-wrap:anywhere}
 .sp-facts div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px}.sp-facts dt{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.sp-facts dd{margin:0;font-weight:600}
 .sp-btn{display:inline-block;background:var(--g);color:#fff;text-decoration:none;font-weight:600;padding:11px 18px;border-radius:12px}

@@ -141,6 +141,11 @@ DATES_FILE = "data/sitemap-dates.json"
 try: DATES = json.load(open(DATES_FILE))
 except Exception: DATES = {}
 def lastmod(u):
+    # a species page: the day its content last changed, from build_species (data/page-dates.json,
+    # a hash of the page itself) - the same date the page shows as "Page generated"
+    if u in build_species.PAGE_LASTMOD:
+        DATES.pop(u, None)
+        return build_species.PAGE_LASTMOD[u]
     rel = u[len(SITE):] or "index.html"
     if rel.endswith("/"): rel += "index.html"
     elif not rel.endswith(".html"): rel += ".html"
@@ -152,7 +157,7 @@ def lastmod(u):
 ALL_URLS = [SITE, SITE + "install.html", SITE + "about-snakelist.html", SITE + "about.html", SITE + "privacy.html", SITE + "terms.html"] + SPECIES_URLS
 open("sitemap.xml", "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     "".join("  <url><loc>%s</loc><lastmod>%s</lastmod></url>\n" % (u, lastmod(u)) for u in ALL_URLS) + "</urlset>\n")
-json.dump(DATES, open(DATES_FILE, "w"), separators=(",", ":"))
+json.dump(DATES, open(DATES_FILE, "w"), separators=(",", ":"), sort_keys=True)
 import json
 MANIFEST = json.dumps({
     "name": "SnakeList", "short_name": "SnakeList", "description": desc + " Made by Eduardo Brandao.",
