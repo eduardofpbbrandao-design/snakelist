@@ -1004,7 +1004,8 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   skyGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
   const skyMesh = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false }));
   skyMesh.renderOrder = -1; scene.add(skyMesh);
-  // (v4.72: a sun glow and clouds were tried here, but the big see-through sprites washed out half the view - removed) ctx.skyMesh = skyMesh; ctx.groundR = groundR; ctx.fadeMats = [];
+  // (v4.72: a sun glow and clouds were tried here, but the big see-through sprites washed out half the view - removed)
+  ctx.skyMesh = skyMesh; ctx.groundR = groundR; ctx.fadeMats = [];
   scene.fog = new THREE.Fog(hor, Math.max(Rb * 6, envR * 3.5), farR * 0.95); ctx.farR = farR; ctx.fogNear0 = scene.fog.near;
   scene.background = hor;
 
