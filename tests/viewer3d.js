@@ -116,12 +116,10 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     ok('one-finger touch orbits', pinch.orbited);
     ok('two-finger pinch zooms (bounded)', pinch.d1 < pinch.d0 && pinch.d1 >= pinch.dMin * 0.999, JSON.stringify(pinch));
 
-    // views
-    for (const v of ['front', 'side', 'top']) {
-      await pg.click('.sp3d-b:text-is("' + v[0].toUpperCase() + v.slice(1) + '")'); await settle(pg);
-    }
+    // views (v4.63: only Reset is shown under the model; the views still work from code)
+    for (const v of ['front', 'side', 'top']) { await pg.evaluate((k) => window.__sp3d.setView(k), v); await settle(pg); }
     st = await pg.evaluate(() => window.__sp3d.controls.st.el * 180 / Math.PI);
-    ok('Top view button', Math.abs(st - 80) < 0.5, st.toFixed(1));
+    ok('Top view', Math.abs(st - 80) < 0.5, st.toFixed(1));
 
     // context loss
     const lost = await pg.evaluate(async () => {
@@ -160,7 +158,7 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
   {
     const { pg } = await newPage(br, { ctx: { reducedMotion: 'reduce' } });
     await pg.goto(BASE + 'smooth-snake-coronella-austriaca.html#real'); await waitViewer(pg);
-    await pg.click('.sp3d-b:text-is("Top")');
+    await pg.evaluate(() => window.__sp3d.setView('top'));
     const r = await pg.evaluate(() => ({ el: window.__sp3d.controls.st.el * 180 / Math.PI, goal: window.__sp3d.controls.st.goal }));
     ok('reduced motion: views jump without animation', Math.abs(r.el - 80) < 0.01 && r.goal === null, JSON.stringify(r));
     const box = await (await pg.$('.sp3d-canvas')).boundingBox();
