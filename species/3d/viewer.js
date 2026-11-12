@@ -1439,7 +1439,7 @@ export function mount(host, opts) {
     snakeGroup = new THREE.Group(); snakeGroup.add(mesh);
 
     // eyes
-    const H = P.head, eyeX = H.eyeX * F.Hl, eyeR = H.eye * F.W(eyeX) * 2 * 0.5 * 1.18; // v4.72: a little bigger
+    const H = P.head, eyeX = H.eyeX * F.Hl, eyeR = H.eye * F.W(eyeX) * 2 * 0.5 * 1.04; // v4.78: back near true size (bigger looked like they were popping out)
     const eyePos = [], eyeMeshes = [];
     if (H.pupil !== 'none') {
       const et = eyeTexture(P), em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.2 });
@@ -1450,7 +1450,7 @@ export function mount(host, opts) {
         if (sg < 0) n.negate();
         const out = n.clone().addScaledVector(s.f.T, -0.22).normalize();
         const up = s.f.U.clone().addScaledVector(out, -s.f.U.dot(out)).normalize(), xa = new THREE.Vector3().crossVectors(up, out);
-        const m = new THREE.Mesh(eg, em); m.position.copy(s.p).addScaledVector(n, -eyeR * (H.embed || 0.62));
+        const m = new THREE.Mesh(eg, em); m.position.copy(s.p).addScaledVector(n, -eyeR * (H.embed || 0.74)); // set deeper into the head
         m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xa, up, out)); m.castShadow = false; m.receiveShadow = true;
         snakeGroup.add(m); eyePos.push(m.position.clone()); eyeMeshes.push(m);
       }
