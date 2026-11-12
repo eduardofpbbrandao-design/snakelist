@@ -37,6 +37,7 @@ head = f"""<!doctype html>
 <script type="application/ld+json">{{"@context":"https://schema.org","@type":"WebApplication","name":"SnakeList","url":"{SITE}","applicationCategory":"EducationalApplication","operatingSystem":"Any","description":"{desc}","author":{{"@type":"Person","name":"Eduardo Brandao"}},"creator":{{"@type":"Person","name":"Eduardo Brandao"}},"publisher":{{"@type":"Person","name":"Eduardo Brandao"}},"offers":{{"@type":"Offer","price":"0","priceCurrency":"USD"}}}}</script>
 <link rel="canonical" href="{SITE}">
 <link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="96x96" href="app/favicon-96-s.png">
 <link rel="icon" type="image/png" sizes="48x48" href="app/favicon-48-s.png">
 <link rel="apple-touch-icon" href="app/apple-touch-icon-s.png">
