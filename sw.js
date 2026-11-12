@@ -1,6 +1,10 @@
 const CACHE = 'snakelist-v8';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => c.add('./'))); });
-self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
+// photos that were changed in place (v4.79: white borders cropped) - their saved copies are thrown away once
+const REFRESHED = ['/species-photos/p2.jpg', '/species-photos/p44.jpg', '/species-photos/p65.jpg', '/species-photos/t/2-13.webp', '/species-photos/t/44-10.webp', '/species-photos/t/65-18.webp'];
+self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+  .then(() => caches.open(CACHE)).then((c) => c.keys().then((ks) => Promise.all(ks.filter((k) => REFRESHED.some((p) => new URL(k.url).pathname.endsWith(p))).map((k) => c.delete(k)))))
+  .then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== location.origin) return;
