@@ -167,15 +167,12 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     ok('reduced motion: no inertia after a fling', Math.abs((await pg.evaluate(() => window.__sp3d.controls.st.az)) - a1) < 1e-6);
   }
 
-  // 4. species without a profile: honest message + photos, no 3D code downloaded
+  // 4. a snake without a hand-made profile (v4.63: every snake has a model) gets a generated one
   {
-    const { pg, reqs } = await newPage(br);
-    await pg.goto(BASE + 'common-gartersnake-thamnophis-sirtalis.html#real');
-    await pg.waitForFunction(() => document.querySelector('.sp3d-none') && !document.querySelector('.sp3d-none').hidden, null, { timeout: 30000 });
-    const r = await pg.evaluate(() => ({ note: document.querySelector('.sp3d-none').textContent, tabsHidden: document.querySelector('.sp-rl-tabs').hidden, photo: !!document.querySelector('.sp-rl-own img'), canvas: document.querySelectorAll('canvas.sp3d-canvas').length }));
-    ok('no profile: plain message, photos shown, no canvas', /No accurate 3D model/.test(r.note) && r.photo && r.canvas === 0 && r.tabsHidden, JSON.stringify(r));
-    ok('no profile: three.js never downloaded', !reqs.some((u) => /three\.module|viewer\.js/.test(u)));
-    await (await pg.$('.sp-rl')).screenshot({ path: OUT + 'test-no-profile.png' });
+    const { pg } = await newPage(br);
+    await pg.goto(BASE + 'common-gartersnake-thamnophis-sirtalis.html#real'); await waitViewer(pg);
+    const r = await pg.evaluate(() => ({ canvas: document.querySelectorAll('canvas.sp3d-canvas').length, none: !!document.querySelector('.sp3d-none:not([hidden])'), cap: (document.querySelector('.sp3d-cap') || {}).textContent || '' }));
+    ok('generated model: a 3D model is shown, with no "no model" note', r.canvas === 1 && !r.none && /Generated model/.test(r.cap), JSON.stringify(r));
   }
 
   // 5. load failure + Retry
