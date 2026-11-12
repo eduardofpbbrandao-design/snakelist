@@ -70,3 +70,24 @@ s.appendChild(document.createTextNode('described by '));r.people.forEach(functio
 s.appendChild(link('https://www.wikidata.org/wiki/'+p.id,p.label))});s.appendChild(document.createTextNode(' in '+r.year));var g=ago(r.year);if(g)s.appendChild(el('span','sp-ago',' ('+g+')'))})})
 .catch(function(){lis.forEach(function(li){none(li.querySelector('.rg-by'))})})});
 })();
+
+// v4.70: a long paragraph shows its first lines and a "See more" button (See less to fold it back)
+(function(){
+if(!document.querySelector||!window.getComputedStyle)return;
+var st=document.createElement('style');st.textContent='.sl-clamp:not(.sl-open){max-height:var(--sl-clamp);overflow:hidden;-webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}'+
+'.sl-more-btn{display:inline-flex;align-items:center;gap:4px;margin:2px 0 6px;padding:5px 14px;border:1px solid var(--line,#cfd8cf);border-radius:999px;background:transparent;color:var(--g,#2e7d4f);font:600 14px/1.2 Inter,system-ui,sans-serif;cursor:pointer}'+
+'.sl-more-btn:hover{border-color:var(--g,#2e7d4f)}.sl-more-btn:focus-visible{outline:2px solid var(--g,#2e7d4f);outline-offset:2px}';
+document.head.appendChild(st);
+function lh(p){var c=getComputedStyle(p),v=parseFloat(c.lineHeight);return v||parseFloat(c.fontSize)*1.5||24}
+function clamp(p){
+if(p.dataset.slMore||p.classList.contains('src')||p.closest('details,nav,footer,figure,table,dialog,.sp-rl,.sl-noclamp'))return;
+var h=lh(p);if(!p.offsetHeight||p.scrollHeight<=h*8.5)return;
+p.dataset.slMore='1';p.classList.add('sl-clamp');p.style.setProperty('--sl-clamp',Math.round(h*5)+'px');
+var b=document.createElement('button');b.type='button';b.className='sl-more-btn';b.textContent='See more';b.setAttribute('aria-expanded','false');
+b.addEventListener('click',function(){var o=p.classList.toggle('sl-open');b.textContent=o?'See less':'See more';b.setAttribute('aria-expanded',String(o));if(!o&&p.getBoundingClientRect().top<0)p.scrollIntoView({block:'start'})});
+p.parentNode.insertBefore(b,p.nextSibling)}
+function run(){[].forEach.call(document.querySelectorAll('main p'),clamp)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
+window.addEventListener('load',run);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(run);
+var w=document.getElementById('sp-wiki');if(w&&window.MutationObserver)new MutationObserver(run).observe(w,{childList:true});
+})();
