@@ -44,6 +44,7 @@
   gtag('config', 'G-PY2LJV389K');
 </script>
 <title>SnakeList - the snake life list, map and quiz</title>
+<link rel="preload" as="image" href="species-photos/hero/whipsnake-1600.webp" imagesrcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" imagesizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" type="image/webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1638,6 +1639,89 @@
   .sl-browse b { font-weight: 600; }
 </style>
 <style>
+  /* ---- Opening hero (v4.80) ----
+     A full-screen photograph of a living snake at the very top of the Species Checklist.
+     The photo stays sharp at the top, then blurs a little more with every step down
+     (six copies of the same picture, each blurred twice as much as the one under it and
+     faded in with a soft, overlapping mask), and its lower part fades to nothing - so the
+     page's own background (light or dark) shows through and the hero melts into the page
+     with no line. Only the Checklist shows it; the other tabs open without it. */
+  .sl-hero { position: relative; height: 100vh; height: 100svh; min-height: 480px; overflow: hidden; isolation: isolate;
+    color: #f4f8ee; overflow-anchor: none; }
+  .sl-hero[hidden] { display: none; }
+  .hero-media { position: absolute; inset: 0; z-index: -1; overflow: hidden;
+    /* the photo's own colours, tiny and blurred: shown while the real photo arrives */
+    background: #5f665a url("data/ui/ccab8c10024029.webp") center / cover no-repeat;
+    --hero-fade: linear-gradient(180deg, #000 0%, #000 60%, rgba(0,0,0,0.975) 64.5%, rgba(0,0,0,0.93) 69%, rgba(0,0,0,0.85) 73.5%,
+      rgba(0,0,0,0.73) 78%, rgba(0,0,0,0.58) 82.5%, rgba(0,0,0,0.42) 86.5%, rgba(0,0,0,0.27) 90.3%, rgba(0,0,0,0.15) 93.5%,
+      rgba(0,0,0,0.065) 96.3%, rgba(0,0,0,0.018) 98.6%, transparent 100%);
+    -webkit-mask-image: var(--hero-fade); mask-image: var(--hero-fade); }
+  .hero-l { position: absolute; inset: 0; overflow: hidden; }
+  /* every copy is the same size and in the same place - 96px bigger than the hero on every side,
+     so a blurred copy never shows its soft see-through edge */
+  .hero-l img { position: absolute; top: -96px; left: -96px; width: calc(100% + 192px); height: calc(100% + 192px);
+    max-width: none; object-fit: cover; object-position: 30% 50%; display: block; user-select: none; -webkit-user-drag: none; }
+  .hero-l1 img { filter: blur(0.75px); } .hero-l2 img { filter: blur(1.5px); } .hero-l3 img { filter: blur(3px); }
+  .hero-l4 img { filter: blur(6px); }    .hero-l5 img { filter: blur(12px); } .hero-l6 img { filter: blur(24px); }
+  .hero-l1 { --m: linear-gradient(180deg, transparent 46%, #000 61%); }
+  .hero-l2 { --m: linear-gradient(180deg, transparent 52%, #000 67%); }
+  .hero-l3 { --m: linear-gradient(180deg, transparent 57%, #000 73%); }
+  .hero-l4 { --m: linear-gradient(180deg, transparent 62%, #000 80%); }
+  .hero-l5 { --m: linear-gradient(180deg, transparent 67%, #000 87%); }
+  .hero-l6 { --m: linear-gradient(180deg, transparent 73%, #000 94%); }
+  .hero-l1, .hero-l2, .hero-l3, .hero-l4, .hero-l5, .hero-l6 { -webkit-mask-image: var(--m); mask-image: var(--m); }
+  /* low down, the blurred photo leans toward the page's own colour before it fades, so the
+     melt into the page is one even change of colour (grey-brown photo -> page green), not a muddy band */
+  .hero-tint { position: absolute; inset: 0; pointer-events: none; background: var(--page-under);
+    --t: linear-gradient(180deg, transparent 56%, rgba(0,0,0,0.10) 66%, rgba(0,0,0,0.26) 76%, rgba(0,0,0,0.42) 86%, rgba(0,0,0,0.5) 100%);
+    -webkit-mask-image: var(--t); mask-image: var(--t); }
+  /* a soft, local shade behind the words only - not a dark layer over the whole photo */
+  .hero-shade { position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 60% 30% at 50% 22%, rgba(8,24,15,0.34) 0%, rgba(8,24,15,0.16) 48%, rgba(8,24,15,0) 100%),
+      linear-gradient(180deg, rgba(8,24,15,0.22) 0%, rgba(8,24,15,0) 22%); }
+  .hero-copy { position: absolute; left: 0; right: 0; top: 10%; padding: 0 20px; text-align: center; }
+  .hero-copy > p { margin: 0 auto; }
+  .hero-title { display: inline-block; font-size: clamp(60px, 10.5vw, 160px); line-height: 0.95; white-space: nowrap;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.38)) drop-shadow(0 6px 26px rgba(0,0,0,0.30)); }
+  .hero-mark { font-family: 'EB Garamond', serif; font-weight: 600; letter-spacing: 0.010em; color: #9fe08a; }
+  .hero-mark em { font-style: normal; font-weight: 500; }
+  .hero-mark .snake-s { height: 0.71em; }
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .hero-mark { background-image: radial-gradient(circle at 30% 40%, #b4ec98 0%, #8fd873 30%, #6cc052 62%, #4f9e3d 100%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  }
+  .hero-copy > .hero-sub { margin-top: clamp(10px, 1.6vh, 18px); max-width: 44ch; font: 500 clamp(15.5px, 1.45vw, 21px)/1.5 'Inter', sans-serif;
+    letter-spacing: 0.005em; text-wrap: balance; color: rgba(246,250,240,0.95); text-shadow: 0 1px 2px rgba(0,0,0,0.45), 0 2px 18px rgba(0,0,0,0.35); }
+  .hero-cue { position: absolute; left: 50%; bottom: max(18px, 5.5svh); transform: translateX(-50%); display: flex; flex-direction: column;
+    align-items: center; gap: 2px; padding: 8px 14px; border: 0; border-radius: 999px; background: none; cursor: pointer;
+    color: var(--text); font: 600 11px/1 'JetBrains Mono', monospace; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.78; }
+  .hero-cue:hover { opacity: 1; }
+  .hero-cue:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; opacity: 1; }
+  .hero-cue svg { width: 22px; height: 22px; animation: hero-nudge 2.6s ease-in-out 1.8s infinite; }
+  @keyframes hero-nudge { 0%, 55%, 100% { transform: translateY(0); } 70% { transform: translateY(5px); } 85% { transform: translateY(1px); } }
+  .hero-credit { position: absolute; top: 10px; right: 12px; font: 400 10.5px/1.3 'Inter', sans-serif; color: rgba(246,250,240,0.66);
+    text-decoration: none; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+  .hero-credit:hover, .hero-credit:focus-visible { color: #fff; text-decoration: underline; }
+  /* phones and tablets held upright: the snake's head stays in view */
+  @media (max-aspect-ratio: 1/1) { .hero-l img { object-position: 21% 50%; } .hero-copy { top: 15%; } }
+  /* very wide screens: the photo fits the width, so pick which band of it shows */
+  @media (min-aspect-ratio: 17/10) { .hero-l img { object-position: 30% 42%; } }
+  /* short landscape phones: a little smaller, so the words don't cover the snake */
+  @media (max-height: 520px) and (min-aspect-ratio: 1/1) { .hero-copy { top: 9%; } .hero-title { font-size: clamp(52px, 9vw, 96px); } .hero-sub { font-size: 14.5px; } }
+  /* the words rise in gently once the opening has gone */
+  .sl-hero.hero-wait .hero-copy > *, .sl-hero.hero-wait .hero-cue { opacity: 0; }
+  .sl-hero.hero-wait .hero-copy > * { transform: translateY(14px); }
+  .sl-hero.hero-go .hero-copy > *, .sl-hero.hero-go .hero-cue { transition: opacity 1.1s ease, transform 1.3s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .sl-hero.hero-go .hero-sub { transition-delay: 0.18s; }
+  .sl-hero.hero-go .hero-cue { transition-delay: 0.7s; }
+  @media (prefers-reduced-motion: reduce) {
+    .sl-hero.hero-wait .hero-copy > * { transform: none; }
+    .sl-hero.hero-go .hero-copy > *, .sl-hero.hero-go .hero-cue { transition: opacity 0.4s ease; transition-delay: 0s; }
+    .hero-cue svg { animation: none; }
+  }
+  @media print { .sl-hero { display: none; } }
+</style>
+<style>
   #grid .card-name, #grid .card-sci { cursor: pointer; }
   #grid .card-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 </style>
@@ -2246,8 +2330,8 @@
   #grid .card .seen-btn { margin-left: 0; }
   #grid .card .map-btn { margin-left: 4px; }
   .td-card-btn { position: absolute; box-sizing: border-box; width: 34px; height: 31px; padding: 0; display: grid; place-items: center; border-radius: 8px;
-    border: 1px solid var(--gold); background: transparent; color: var(--gold); font: 700 11.5px 'Inter', sans-serif; letter-spacing: .02em; cursor: pointer; transition: background .15s ease; }
-  .td-card-btn:hover { background: var(--ver-bg); }
+    border: 1px solid var(--border); background: transparent; color: var(--text); font: 600 12px 'Inter', sans-serif; letter-spacing: .02em; cursor: pointer; transition: all .15s ease; } /* v4.80: the same border as Mark Seen on every card */
+  .td-card-btn:hover { border-color: var(--gold-soft, var(--gold)); }
   .td-card-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   [data-sl-theme="dark"] .td-card-btn { color: var(--text); }
   /* "See more info": a deeper green from the same palette, so its white label passes WCAG AA
@@ -2922,7 +3006,8 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
   /* v4.73: with a model open in the map, only the model shows - the map's own buttons above it (See provinces, See species, the search...) step aside */
   body.sl3d-on .globe-btns, body.sl3d-on .heat-search, body.sl3d-on .map-caption, body.sl3d-on #map-chip { display: none !important; }
   .sl3d-hd { display: flex; align-items: center; gap: 10px; }
-  .sl3d-hd h2 { flex: 1; min-width: 0; margin: 0; font-size: 16px; line-height: 1.25; }
+  .sl3d-hd h2 { flex: 1; min-width: 0; margin: 0; font-size: 16px; line-height: 1.25; color: #1f7a3a; } /* v4.80: the same green as the name on the species pages */
+  [data-sl-theme="dark"] .sl3d-hd h2 { color: #a8ef94; }
   .sl3d-hd h2 i { font-weight: 400; color: var(--muted); font-size: 13px; }
   .sl3d-back { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line);
     background: var(--bg); color: var(--text); font: 600 13.5px Inter, system-ui, sans-serif; cursor: pointer; }
@@ -3094,9 +3179,65 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
   </script>
 
   
+
+<section class="sl-hero hero-wait" id="sl-hero" aria-label="Welcome to SnakeList">
+  <div class="hero-media" aria-hidden="true">
+    <div class="hero-l hero-l0"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" fetchpriority="high" decoding="async"></div>
+    <div class="hero-l hero-l1"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l2"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l3"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l4"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l5"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l6"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
+    <div class="hero-tint"></div>
+    <div class="hero-shade"></div>
+  </div>
+  <div class="hero-copy">
+    <p class="hero-title"><span class="sr-only">SnakeList</span><span class="hero-mark" aria-hidden="true"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span></p>
+    <p class="hero-sub">All <span data-sl-total>4,205</span> of the world's snake species in one place &mdash; photos, range maps and a life list to tick off the ones you find.</p>
+  </div>
+  <a class="hero-credit" href="https://www.inaturalist.org/photos/138665198" target="_blank" rel="noopener" title="Travancore whipsnake (Ahaetulla travancorica) - photo by Paulmathi Vinod, CC BY 4.0, cropped">Photo: Paulmathi Vinod &middot; CC BY</a>
+  <button class="hero-cue" type="button" id="hero-cue" aria-label="Scroll down to the checklist"><span aria-hidden="true">Explore</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+</section>
+<script>
+  // the opening hero: its words rise in as the opening fades, its arrow scrolls to the
+  // checklist, and it only shows on the Species Checklist tab (the other tabs open without it)
+  (function () {
+    var hero = document.getElementById("sl-hero"); if (!hero) return;
+    var shown = false, go = function () { if (shown) return; shown = true;
+      requestAnimationFrame(function () { hero.classList.add("hero-go"); hero.classList.remove("hero-wait"); }); };
+    var intro = document.getElementById("intro");
+    if (window.__introDone || !intro) go();
+    else {
+      document.addEventListener("sl-intro-done", go, { once: true });
+      if (window.MutationObserver) new MutationObserver(function () { if (/intro-(wipe|gone)/.test(intro.className)) go(); }).observe(intro, { attributes: true, attributeFilter: ["class"] });
+    }
+    setTimeout(go, 9000); // never leave the words hidden
+    document.getElementById("hero-cue").addEventListener("click", function () {
+      var to = hero.nextElementSibling; while (to && to.offsetHeight === 0) to = to.nextElementSibling;
+      var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: to ? to.getBoundingClientRect().top + window.scrollY : hero.offsetHeight, behavior: calm ? "auto" : "smooth" });
+    });
+    // window.SL_heroEnd(): where the page below the hero starts (0 when the hero is hidden)
+    window.SL_heroEnd = function () { return hero.hidden ? 0 : hero.getBoundingClientRect().bottom + window.scrollY; };
+    function wire() {
+      var tg = document.getElementById("tab-guide"); if (!tg) return;
+      var sync = function () {
+        var on = tg.classList.contains("active"); if (on === !hero.hidden) return;
+        // keep the tab row exactly where it was on screen while the hero comes or goes above it
+        var tabs = document.querySelector(".tabs"), y0 = tabs ? tabs.getBoundingClientRect().top : 0;
+        hero.hidden = !on;
+        if (tabs && window.scrollY > 0) { var dy = tabs.getBoundingClientRect().top - y0; if (Math.abs(dy) > 1) window.scrollBy(0, dy); }
+      };
+      sync();
+      if (window.MutationObserver) new MutationObserver(sync).observe(tg, { attributes: true, attributeFilter: ["class"] });
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
+  })();
+</script>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.79</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.80</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-head"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-head)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All <span data-sl-total>4,205</span> snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -9206,7 +9347,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
       if (!target) { advance(); return; }
       // the tab row scrolls horizontally on narrow screens - bring the target fully into view
       // before measuring it, so the spotlight/callout never land on a half-scrolled button
-      if (!follow) target.scrollIntoView({ block: "center", inline: "nearest" });
+      if (!follow && !(step.center && i === 0 && window.scrollY < 40)) target.scrollIntoView({ block: "center", inline: "nearest" }); // v4.80: the welcome box opens over the hero photo, not scrolled past it
       document.getElementById("tour-step-num").textContent = "Step " + (i + 1) + " of " + steps.length;
       document.getElementById("tour-title").textContent = step.title;
       document.getElementById("tour-text").textContent = (step.textFn && step.textFn(target)) || step.text;
@@ -19786,6 +19927,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v4.80", d: "2026-11-13", items: ["A new opening: a big snake photo that gently blurs and fades into SnakeList.", "3D snakes: eyes sit properly in the head, and the open mouth shows the palate teeth, the glottis (breathing tube) and the tongue sheath.", "New Anatomy button (on species pages and in 3D): every part labelled - fangs, teeth, glottis, tongue, scales, vent and more.", "New See bite button in 3D: watch the snake bite a see-through arm and how deep the fang goes.", "More realistic 3D trees, rocks and 3D leaves on the ground.", "Map cities are dark green and show their name when you tap them.", "Every dropdown opens as a SnakeList panel; See more buttons instead of little triangles; greener species pages.", "The Speckled Kingsnake photo no longer shows it eating."] },
     { v: "v4.79", d: "2026-11-12", items: ["Three snake photos that had white borders or strips are cropped clean."] },
     { v: "v4.78", d: "2026-11-12", items: ["The opening tick appears more smoothly.", "What's new never shows before the opening has finished.", "Tutorial: bigger boxes, general explanations in the middle of the screen, the highlight ring follows the shape of what it circles (no light corners), and steps for buttons you don't have are skipped.", "Elaphe hodgsoni is now called Hodgson's Ratsnake (it showed a placeholder name)."] },
     { v: "v4.77", d: "2026-11-12", items: ["Cards pop out less, so they cover the cards next to them less.", "What's new now pops up every 10 updates (v4.80, v4.90...) and lists everything new since you last saw it."] },
@@ -22717,6 +22859,75 @@ window.SL_welcome = function (u, back) {
     // a panel over the whole app (the photo viewer's Explore in 3D); id = the scientific name as a slug
     panel: function (id, from, name) { open(id, from, name || true); return true; } };
 })();
+</script>
+<script>
+// v4.80: every dropdown (Sort by, Venom, Family...) opens as a SnakeList panel, not the browser's plain list.
+// The real <select> stays (hidden) underneath, so everything that reads or changes it keeps working.
+(function(){
+if(!document.querySelector||window.__slDd)return;window.__slDd=1;
+var st=document.createElement('style');st.textContent=
+'.sl-dd{position:relative;display:inline-block;vertical-align:middle;max-width:100%}'+
+'.sl-dd>select.sl-dd-native{position:absolute!important;left:0;top:0;width:100%!important;height:100%!important;opacity:0!important;pointer-events:none!important}'+
+'.sl-dd-btn{display:inline-flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;text-align:left;max-width:100%;background-image:none!important}'+
+'.sl-dd-btn>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'+
+'.sl-dd-btn::after{content:"";flex:none;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg);opacity:.75;transition:transform .15s}'+
+'.sl-dd-btn[aria-expanded=true]::after{transform:translateY(2px) rotate(-135deg)}'+
+'.sl-dd-list{position:absolute;z-index:3000;left:0;top:calc(100% + 6px);min-width:100%;max-width:min(360px,calc(100vw - 24px));max-height:min(340px,60vh);overflow:auto;margin:0;padding:6px;list-style:none;box-sizing:border-box;'+
+'background:var(--surface,var(--card,#fbfdf9));color:var(--text,#183020);border:1px solid var(--border,var(--line,#d5e4cf));border-radius:12px;box-shadow:0 12px 32px rgba(10,40,20,.22);font:500 14.5px/1.35 Inter,system-ui,sans-serif}'+
+'.sl-dd-list[hidden]{display:none}.sl-dd-up .sl-dd-list{top:auto;bottom:calc(100% + 6px)}.sl-dd-right .sl-dd-list{left:auto;right:0}'+
+'.sl-dd-list li{display:flex;align-items:center;gap:8px;padding:8px 12px 8px 10px;border-radius:8px;cursor:pointer;white-space:nowrap}'+
+'.sl-dd-list li::before{content:"";flex:none;width:14px;text-align:center;font-weight:700;color:#3f9a45}'+
+'.sl-dd-list li[aria-selected=true]{font-weight:650;color:#2e7d4f}.sl-dd-list li[aria-selected=true]::before{content:"\\2713"}'+
+'.sl-dd-list li.act{background:rgba(88,179,81,.18)}.sl-dd-list li[aria-disabled=true]{opacity:.45;cursor:default}'+
+'[data-sl-theme=dark] .sl-dd-list li[aria-selected=true]{color:#9be07c}@media (prefers-color-scheme:dark){:root:not([data-sl-theme=light]) .sl-dd-list li[aria-selected=true]{color:#9be07c}}';
+document.head.appendChild(st);
+var n=0;
+function enhance(sel){
+  if(sel.dataset.slDd||sel.multiple||sel.size>1||sel.closest('.sl-dd'))return;
+  if(sel.hidden||sel.getAttribute('aria-hidden')==='true')return;
+  sel.dataset.slDd='1';var id='sl-dd-'+(++n);
+  var w=document.createElement('span');w.className='sl-dd';sel.parentNode.insertBefore(w,sel);w.appendChild(sel);
+  var cs=getComputedStyle(sel),b=document.createElement('button');b.type='button';b.className='sl-dd-btn '+(sel.className||'');
+  ['font','color','background-color','border','border-radius','padding','min-height','height','box-shadow','letter-spacing'].forEach(function(k){b.style.setProperty(k,cs.getPropertyValue(k))});
+  if(cs.width&&cs.display!=='none'&&sel.offsetWidth)b.style.minWidth=sel.offsetWidth+'px';
+  b.setAttribute('aria-haspopup','listbox');b.setAttribute('aria-expanded','false');b.setAttribute('aria-controls',id);
+  var lab=sel.getAttribute('aria-label')||(sel.labels&&sel.labels[0]&&sel.labels[0].textContent.trim())||'';if(lab)b.setAttribute('aria-label',lab);
+  var txt=document.createElement('span');b.appendChild(txt);
+  sel.classList.add('sl-dd-native');sel.tabIndex=-1;sel.setAttribute('aria-hidden','true');
+  var list=document.createElement('ul');list.className='sl-dd-list';list.id=id;list.setAttribute('role','listbox');list.hidden=true;
+  w.appendChild(b);w.appendChild(list);
+  var act=-1;
+  function label(){var o=sel.options[sel.selectedIndex];txt.textContent=o?o.text:''}
+  function build(){list.innerHTML='';[].forEach.call(sel.options,function(o,i){var li=document.createElement('li');li.setAttribute('role','option');li.textContent=o.text;li.dataset.i=i;li.id=id+'-'+i;
+    if(i===sel.selectedIndex)li.setAttribute('aria-selected','true');if(o.disabled)li.setAttribute('aria-disabled','true');list.appendChild(li)})}
+  function hi(i){var ls=list.children;if(act>=0&&ls[act])ls[act].classList.remove('act');act=Math.max(0,Math.min(ls.length-1,i));if(ls[act]){ls[act].classList.add('act');b.setAttribute('aria-activedescendant',ls[act].id);var r=ls[act];if(r.offsetTop<list.scrollTop)list.scrollTop=r.offsetTop;else if(r.offsetTop+r.offsetHeight>list.scrollTop+list.clientHeight)list.scrollTop=r.offsetTop+r.offsetHeight-list.clientHeight}}
+  function open(){if(sel.disabled)return;build();list.hidden=false;b.setAttribute('aria-expanded','true');
+    var r=w.getBoundingClientRect();w.classList.toggle('sl-dd-up',r.bottom+Math.min(340,list.scrollHeight)+12>innerHeight&&r.top>innerHeight/2);w.classList.toggle('sl-dd-right',r.left+list.offsetWidth>innerWidth-12);
+    hi(sel.selectedIndex>=0?sel.selectedIndex:0)}
+  function close(){if(list.hidden)return;list.hidden=true;b.setAttribute('aria-expanded','false');b.removeAttribute('aria-activedescendant')}
+  function pick(i){var o=sel.options[i];if(!o||o.disabled)return;if(sel.selectedIndex!==i){sel.selectedIndex=i;sel.dispatchEvent(new Event('input',{bubbles:true}));sel.dispatchEvent(new Event('change',{bubbles:true}))}label();close();b.focus()}
+  b.addEventListener('click',function(e){e.stopPropagation();list.hidden?open():close()});
+  list.addEventListener('mousedown',function(e){e.preventDefault()});
+  list.addEventListener('click',function(e){var li=e.target.closest('li');if(li)pick(+li.dataset.i)});
+  list.addEventListener('mousemove',function(e){var li=e.target.closest('li');if(li&&+li.dataset.i!==act)hi(+li.dataset.i)});
+  b.addEventListener('keydown',function(e){var k=e.key;
+    if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();if(list.hidden)open();else hi(act+(k==='ArrowDown'?1:-1))}
+    else if(k==='Home'&&!list.hidden){e.preventDefault();hi(0)}else if(k==='End'&&!list.hidden){e.preventDefault();hi(list.children.length-1)}
+    else if((k==='Enter'||k===' ')&&!list.hidden){e.preventDefault();pick(act)}
+    else if(k==='Escape'&&!list.hidden){e.preventDefault();e.stopPropagation();close()}
+    else if(k==='Tab')close()});
+  document.addEventListener('click',function(e){if(!w.contains(e.target))close()});
+  sel.addEventListener('change',label);
+  // code that sets .value or .selectedIndex straight on the select: keep the button's text right
+  ['value','selectedIndex'].forEach(function(p){var d=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,p);if(d&&d.set)Object.defineProperty(sel,p,{configurable:true,get:function(){return d.get.call(this)},set:function(v){d.set.call(this,v);label()}})});
+  new MutationObserver(label).observe(sel,{childList:true,subtree:true,attributes:true,attributeFilter:['selected']});
+  label();
+}
+function scan(root){[].forEach.call((root||document).querySelectorAll('select'),enhance)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){scan()});else scan();
+if(window.MutationObserver)new MutationObserver(function(ms){ms.forEach(function(m){[].forEach.call(m.addedNodes,function(nd){if(nd.nodeType!==1)return;if(nd.tagName==='SELECT')enhance(nd);else if(nd.querySelector&&nd.querySelector('select'))scan(nd)})})}).observe(document.documentElement,{childList:true,subtree:true});
+})();
+
 </script>
 
 </body>

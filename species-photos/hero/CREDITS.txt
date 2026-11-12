@@ -1,0 +1,20 @@
+SnakeList homepage hero photograph
+==================================
+
+Files:    whipsnake-2048.webp, whipsnake-1600.webp, whipsnake-1200.webp, whipsnake-800.webp
+Subject:  Travancore whipsnake / Travancore vine snake (Ahaetulla travancorica), a living
+          snake photographed in the wild (as identified on iNaturalist; it is also the
+          photo SnakeList already uses for this species - see species/photo-credits.html)
+Author:   Paulmathi Vinod
+Source:   https://www.inaturalist.org/photos/138665198
+          (original file: https://inaturalist-open-data.s3.amazonaws.com/photos/138665198/original.jpg,
+          2048 x 1365 px, from the iNaturalist Open Data bucket, which only holds openly licensed photos)
+Licence:  Creative Commons Attribution 4.0 International (CC BY 4.0)
+          https://creativecommons.org/licenses/by/4.0/
+Changes:  cropped (top 160 px removed, giving 2048 x 1205), resized to 1600/1200/800 px wide copies,
+          saved as WebP. On the page the lower part is progressively blurred and faded into the
+          background. The photographer does not endorse SnakeList.
+
+The hero shows a small credit line ("Photo: Paulmathi Vinod - CC BY 4.0") linking to the source.
+If the photo is ever replaced, give the new files NEW names (the offline helper keeps photos
+under species-photos/ forever once saved) and update this file.

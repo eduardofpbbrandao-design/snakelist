@@ -934,6 +934,73 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 window.addEventListener('load',run);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(run);
 var w=document.getElementById('sp-wiki');if(w&&window.MutationObserver)new MutationObserver(run).observe(w,{childList:true});
 })();
+
+// v4.80: every dropdown (Sort by, Venom, Family...) opens as a SnakeList panel, not the browser's plain list.
+// The real <select> stays (hidden) underneath, so everything that reads or changes it keeps working.
+(function(){
+if(!document.querySelector||window.__slDd)return;window.__slDd=1;
+var st=document.createElement('style');st.textContent=
+'.sl-dd{position:relative;display:inline-block;vertical-align:middle;max-width:100%}'+
+'.sl-dd>select.sl-dd-native{position:absolute!important;left:0;top:0;width:100%!important;height:100%!important;opacity:0!important;pointer-events:none!important}'+
+'.sl-dd-btn{display:inline-flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;text-align:left;max-width:100%;background-image:none!important}'+
+'.sl-dd-btn>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'+
+'.sl-dd-btn::after{content:"";flex:none;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg);opacity:.75;transition:transform .15s}'+
+'.sl-dd-btn[aria-expanded=true]::after{transform:translateY(2px) rotate(-135deg)}'+
+'.sl-dd-list{position:absolute;z-index:3000;left:0;top:calc(100% + 6px);min-width:100%;max-width:min(360px,calc(100vw - 24px));max-height:min(340px,60vh);overflow:auto;margin:0;padding:6px;list-style:none;box-sizing:border-box;'+
+'background:var(--surface,var(--card,#fbfdf9));color:var(--text,#183020);border:1px solid var(--border,var(--line,#d5e4cf));border-radius:12px;box-shadow:0 12px 32px rgba(10,40,20,.22);font:500 14.5px/1.35 Inter,system-ui,sans-serif}'+
+'.sl-dd-list[hidden]{display:none}.sl-dd-up .sl-dd-list{top:auto;bottom:calc(100% + 6px)}.sl-dd-right .sl-dd-list{left:auto;right:0}'+
+'.sl-dd-list li{display:flex;align-items:center;gap:8px;padding:8px 12px 8px 10px;border-radius:8px;cursor:pointer;white-space:nowrap}'+
+'.sl-dd-list li::before{content:"";flex:none;width:14px;text-align:center;font-weight:700;color:#3f9a45}'+
+'.sl-dd-list li[aria-selected=true]{font-weight:650;color:#2e7d4f}.sl-dd-list li[aria-selected=true]::before{content:"\\2713"}'+
+'.sl-dd-list li.act{background:rgba(88,179,81,.18)}.sl-dd-list li[aria-disabled=true]{opacity:.45;cursor:default}'+
+'[data-sl-theme=dark] .sl-dd-list li[aria-selected=true]{color:#9be07c}@media (prefers-color-scheme:dark){:root:not([data-sl-theme=light]) .sl-dd-list li[aria-selected=true]{color:#9be07c}}';
+document.head.appendChild(st);
+var n=0;
+function enhance(sel){
+  if(sel.dataset.slDd||sel.multiple||sel.size>1||sel.closest('.sl-dd'))return;
+  if(sel.hidden||sel.getAttribute('aria-hidden')==='true')return;
+  sel.dataset.slDd='1';var id='sl-dd-'+(++n);
+  var w=document.createElement('span');w.className='sl-dd';sel.parentNode.insertBefore(w,sel);w.appendChild(sel);
+  var cs=getComputedStyle(sel),b=document.createElement('button');b.type='button';b.className='sl-dd-btn '+(sel.className||'');
+  ['font','color','background-color','border','border-radius','padding','min-height','height','box-shadow','letter-spacing'].forEach(function(k){b.style.setProperty(k,cs.getPropertyValue(k))});
+  if(cs.width&&cs.display!=='none'&&sel.offsetWidth)b.style.minWidth=sel.offsetWidth+'px';
+  b.setAttribute('aria-haspopup','listbox');b.setAttribute('aria-expanded','false');b.setAttribute('aria-controls',id);
+  var lab=sel.getAttribute('aria-label')||(sel.labels&&sel.labels[0]&&sel.labels[0].textContent.trim())||'';if(lab)b.setAttribute('aria-label',lab);
+  var txt=document.createElement('span');b.appendChild(txt);
+  sel.classList.add('sl-dd-native');sel.tabIndex=-1;sel.setAttribute('aria-hidden','true');
+  var list=document.createElement('ul');list.className='sl-dd-list';list.id=id;list.setAttribute('role','listbox');list.hidden=true;
+  w.appendChild(b);w.appendChild(list);
+  var act=-1;
+  function label(){var o=sel.options[sel.selectedIndex];txt.textContent=o?o.text:''}
+  function build(){list.innerHTML='';[].forEach.call(sel.options,function(o,i){var li=document.createElement('li');li.setAttribute('role','option');li.textContent=o.text;li.dataset.i=i;li.id=id+'-'+i;
+    if(i===sel.selectedIndex)li.setAttribute('aria-selected','true');if(o.disabled)li.setAttribute('aria-disabled','true');list.appendChild(li)})}
+  function hi(i){var ls=list.children;if(act>=0&&ls[act])ls[act].classList.remove('act');act=Math.max(0,Math.min(ls.length-1,i));if(ls[act]){ls[act].classList.add('act');b.setAttribute('aria-activedescendant',ls[act].id);var r=ls[act];if(r.offsetTop<list.scrollTop)list.scrollTop=r.offsetTop;else if(r.offsetTop+r.offsetHeight>list.scrollTop+list.clientHeight)list.scrollTop=r.offsetTop+r.offsetHeight-list.clientHeight}}
+  function open(){if(sel.disabled)return;build();list.hidden=false;b.setAttribute('aria-expanded','true');
+    var r=w.getBoundingClientRect();w.classList.toggle('sl-dd-up',r.bottom+Math.min(340,list.scrollHeight)+12>innerHeight&&r.top>innerHeight/2);w.classList.toggle('sl-dd-right',r.left+list.offsetWidth>innerWidth-12);
+    hi(sel.selectedIndex>=0?sel.selectedIndex:0)}
+  function close(){if(list.hidden)return;list.hidden=true;b.setAttribute('aria-expanded','false');b.removeAttribute('aria-activedescendant')}
+  function pick(i){var o=sel.options[i];if(!o||o.disabled)return;if(sel.selectedIndex!==i){sel.selectedIndex=i;sel.dispatchEvent(new Event('input',{bubbles:true}));sel.dispatchEvent(new Event('change',{bubbles:true}))}label();close();b.focus()}
+  b.addEventListener('click',function(e){e.stopPropagation();list.hidden?open():close()});
+  list.addEventListener('mousedown',function(e){e.preventDefault()});
+  list.addEventListener('click',function(e){var li=e.target.closest('li');if(li)pick(+li.dataset.i)});
+  list.addEventListener('mousemove',function(e){var li=e.target.closest('li');if(li&&+li.dataset.i!==act)hi(+li.dataset.i)});
+  b.addEventListener('keydown',function(e){var k=e.key;
+    if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();if(list.hidden)open();else hi(act+(k==='ArrowDown'?1:-1))}
+    else if(k==='Home'&&!list.hidden){e.preventDefault();hi(0)}else if(k==='End'&&!list.hidden){e.preventDefault();hi(list.children.length-1)}
+    else if((k==='Enter'||k===' ')&&!list.hidden){e.preventDefault();pick(act)}
+    else if(k==='Escape'&&!list.hidden){e.preventDefault();e.stopPropagation();close()}
+    else if(k==='Tab')close()});
+  document.addEventListener('click',function(e){if(!w.contains(e.target))close()});
+  sel.addEventListener('change',label);
+  // code that sets .value or .selectedIndex straight on the select: keep the button's text right
+  ['value','selectedIndex'].forEach(function(p){var d=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,p);if(d&&d.set)Object.defineProperty(sel,p,{configurable:true,get:function(){return d.get.call(this)},set:function(v){d.set.call(this,v);label()}})});
+  new MutationObserver(label).observe(sel,{childList:true,subtree:true,attributes:true,attributeFilter:['selected']});
+  label();
+}
+function scan(root){[].forEach.call((root||document).querySelectorAll('select'),enhance)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){scan()});else scan();
+if(window.MutationObserver)new MutationObserver(function(ms){ms.forEach(function(m){[].forEach.call(m.addedNodes,function(nd){if(nd.nodeType!==1)return;if(nd.tagName==='SELECT')enhance(nd);else if(nd.querySelector&&nd.querySelector('select'))scan(nd)})})}).observe(document.documentElement,{childList:true,subtree:true});
+})();
 """
 
 # (REGION_CSS goes into country.css, which the country, region and city pages all load)
@@ -991,14 +1058,14 @@ if(!p){busy=0;nomodel();return}
 fillAbout(p);
 if(!gl()){busy=0;msg('This browser or device cannot show 3D graphics (WebGL is turned off or not supported), so the 3D model cannot be shown. The information about it is still there.',false,true);return}
 return getViewer().then(function(mod){if(!dlg.open&&!dlg.hasAttribute('open')){busy=0;return}host.innerHTML='';
-try{viewer=mod.mount(host,{profile:p,id:sid,name:name,testing:!!window.SL_3D_TEST})}catch(e){viewer=null;busy=0;msg(e&&e.message==='webgl'?'The 3D view could not start on this device (WebGL is not available). The information about it is still there.':'The 3D view could not start.',true,true);return}busy=0})})
+try{viewer=mod.mount(host,{profile:p,id:sid,name:name,testing:!!window.SL_3D_TEST});anat()}catch(e){viewer=null;busy=0;msg(e&&e.message==='webgl'?'The 3D view could not start on this device (WebGL is not available). The information about it is still there.':'The 3D view could not start.',true,true);return}busy=0})})
 .catch(function(){busy=0;msg(navigator.onLine===false?'You seem to be offline, and the 3D viewer has not been downloaded yet.':'The 3D viewer could not be loaded just now.',true,true)})}
 function nomodel(){tabs[0].parentNode.hidden=true;p3d.hidden=true;pph.hidden=false;note.hidden=false;load()}
 function fillAbout(p){if(about.dataset.done)return;about.dataset.done=1;var s=el('summary','','About this model and its sources');about.appendChild(s);
 if(p.auto){var x=p.auto.x||'';about.appendChild(el('p','',x.indexOf('f')>=0?'A reconstruction of how this fossil snake may have looked: the body shape of its family and the size estimated from its fossil bones. Colours and markings are a guess, because fossils keep no colour.':'A model generated by SnakeList: the body shape, head and scales of its family, '+(x.indexOf('l')>=0?'a typical size for its group, ':'its recorded size, ')+(x.indexOf('g')>=0?'and colours that are a guess for its group (SnakeList has no photo of it yet).':'and colours and markings taken from its SnakeList photo and its name.')+' It is not a scan of a real snake, and individual snakes vary.'));return}
 about.appendChild(el('p','','A reconstruction built by SnakeList from the sources below: body proportions, head shape, scale rows and keels, colours and markings of a typical adult. It is not a scan of a real snake, and individual snakes vary.'));
 if(p.scene&&p.scene.basis)about.appendChild(el('p','','Surroundings: '+p.scene.basis));var ul=el('ul');(p.refs||[]).forEach(function(r){var li=el('li'),a=el('a','',r.t);a.href=r.acct?'#sources':r.u;if(!r.acct){a.rel='noopener';a.target='_blank'}else a.addEventListener('click',close);li.appendChild(a);ul.appendChild(li)});about.appendChild(ul)}
-function build(){dlg=el('dialog','sp-rl');dlg.setAttribute('aria-labelledby','sp-rl-h');var inn=el('div','sp-rl-in'),hd=el('div','sp-rl-hd'),h=el('h2','','Explore in 3D: ');h.appendChild(el('span','sp-rl-nm',name));h.id='sp-rl-h';
+function build(){dlg=el('dialog','sp-rl');dlg.setAttribute('aria-labelledby','sp-rl-h');var inn=el('div','sp-rl-in'),hd=el('div','sp-rl-hd'),h=el('h2','','');h.appendChild(el('span','sp-rl-nm',name));h.id='sp-rl-h';
 var x=el('button','sp-rl-x','×');x.type='button';x.setAttribute('aria-label','Close');x.addEventListener('click',close);hd.appendChild(h);hd.appendChild(x);inn.appendChild(hd);
 var tl=el('div','sp-rl-tabs');tl.setAttribute('role','tablist');tl.setAttribute('aria-label','View');tabs=[el('button','sp-rl-tab','3D model'),el('button','sp-rl-tab','Information')];
 tabs.forEach(function(t,i){t.type='button';t.setAttribute('role','tab');t.id='sp-rl-t'+i;t.setAttribute('aria-controls','sp-rl-p'+i);t.addEventListener('click',function(){pick(i?'ph':'3d')});
@@ -1027,11 +1094,11 @@ if(D.facts&&D.facts.length){h('Key facts');var dl=el('dl','sp-rl-facts');D.facts
 h('Fangs and teeth');if(D.fangs&&D.fangs.length){D.fangs.forEach(function(t){p(t,'sp-rl-t')});if(!D.fangsize)p('SnakeList has no record of how long its fangs are.','sp-note')}else p('SnakeList has no record of its fang size.','sp-rl-t sp-rl-unk');
 h(D.gone?'Lifespan':'Lifespan and age');if(D.life&&D.life.length)D.life.forEach(function(t){p(t,'sp-rl-t')});else p('Not known: SnakeList has no record of how long it '+(D.gone?'lived.':'lives.'),'sp-rl-t sp-rl-unk');
 if(D.fun&&D.fun.length){h('Did you know?');var ul=el('ul','sp-rl-fun');D.fun.forEach(function(t){ul.appendChild(el('li','',t))});w.appendChild(ul)}}
-b.addEventListener('click',open);if(location.hash==='#real')open();window.addEventListener('hashchange',function(){if(location.hash==='#real')open()})})();
+b.addEventListener('click',open);var ab=document.querySelector('.sp-anatbtn'),wantA=0;function anat(){if(!wantA)return;var x=document.querySelector('.sp3d-wrap .sp3d-b[title^="Show the parts"]');if(x){wantA=0;if(x.getAttribute('aria-pressed')!=='true')setTimeout(function(){x.click()},300)}}if(ab)ab.addEventListener('click',function(){wantA=1;open();anat()});if(location.hash==='#real')open();window.addEventListener('hashchange',function(){if(location.hash==='#real')open()})})();
 """
 
 REAL_CSS = """
-.sp-realbtn{font:inherit;cursor:pointer}.sp-ago{color:var(--muted)}
+.sp-realbtn,.sp-anatbtn{font:inherit;cursor:pointer}.sp-ago{color:var(--muted)}
 .sp-rl{width:min(1040px,calc(100vw - 24px));max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--line);border-radius:18px;background:var(--card);color:var(--text)}
 .sp-rl::backdrop{background:rgba(5,15,9,.72)}.sp-rl-in{padding:12px 18px 18px}
 .sp-rl-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 0 8px}
@@ -1089,4 +1156,20 @@ dialog.sp-rl{overscroll-behavior:contain}
 .sp-person-n{font-weight:700}.sp-person-d{font-size:14px}.sp-person-m{font-size:13.5px;color:var(--muted)}.sp-who-src{margin:8px 0 0!important}
 @media (max-width:560px){.sp-rl{width:100vw;max-width:100vw;max-height:100dvh;height:100dvh;border-radius:0;margin:0}.sp-rl-in{padding:10px 12px 16px}.sp-rl-hd h2{font-size:18px}
 .sp3d-stage{height:min(46vh,380px);min-height:240px}.sp3d-b{padding:6px 10px;font-size:13px}.sp3d-set{margin-left:0}}
+
+/* v4.80: the scientific name and the text about the snake in green, like the name */
+.sp-sci{color:#2e7d4f}.sp-intro,#sp-wiki p:not(.src){color:#1d5233}
+@media (prefers-color-scheme:dark){.sp-sci{color:#8fd98a}.sp-intro,#sp-wiki p:not(.src){color:#cdeec4}}
+/* v4.80: fold-out parts (Source, References, States...) open with a See more button, not a triangle */
+details>summary{list-style:none;display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+details>summary::-webkit-details-marker{display:none}
+details>summary::marker{content:""}
+details>summary::after{content:"See more";display:inline-block;padding:3px 12px;border:1px solid var(--line,#cfd8cf);border-radius:999px;font:600 13px/1.4 Inter,system-ui,sans-serif;color:var(--g,#2e7d4f);background:transparent}
+details[open]>summary::after{content:"See less"}
+details>summary:hover::after{border-color:var(--g,#2e7d4f)}
+.sp-rl-hd h2,.sp-rl-hd h2 .sp-rl-nm{color:#1f7a3a}@media (prefers-color-scheme:dark){.sp-rl-hd h2,.sp-rl-hd h2 .sp-rl-nm{color:#a8ef94}}
 """
+
+
+# v4.80: the SnakeList dropdown panel (also used by the country, family and genus pages via country.js)
+_i = WD_JS.find("// v4.80: every dropdown"); DD_JS = WD_JS[_i:WD_JS.find("})();", WD_JS.find("observe(docume", _i)) + 5]

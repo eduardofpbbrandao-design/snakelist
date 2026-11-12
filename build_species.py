@@ -1120,7 +1120,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             site_head=site_header("../", "species"), site_foot=site_footer("../"),
             crumb_tax=((' &rsaquo; <a href="family/%s">%s</a>' % (slugify(c["family"]), esc(c["family"]))) if c["family"] else "") + ((' &rsaquo; <a href="genus/%s"><i>%s</i></a>' % (slugify(c["genus"]), esc(c["genus"]))) if c["genus"] and not c["fossil"] else ""),
             author=AUTHOR, venom_cls="v" if c["venom"] else "nv",
-            realbtn='<button type="button" class="sp-btn sp-btn2 sp-realbtn" aria-haspopup="dialog">Explore in 3D</button>',
+            realbtn='<button type="button" class="sp-btn sp-btn2 sp-realbtn" aria-haspopup="dialog">Explore in 3D</button><button type="button" class="sp-btn sp-btn2 sp-anatbtn" aria-haspopup="dialog" title="See its fangs, teeth, glottis, tongue, scales and more, labelled on the 3D model">Anatomy</button>',
             lenattr=len_attr(info),
             mapnote=('<p class="sp-note sp-mapnote">%s</p>' % ("The shaded country is where its fossils were found &ndash; not a living range." if c["fossil"] else
                      ("Shaded countries are those where it was recorded &ndash; it did not live everywhere inside them." if gone else
@@ -1268,7 +1268,7 @@ def hubs(cards, esc, img_of, invasive=None):
         os.makedirs(OUT + "/" + kind, exist_ok=True)
         if kind == "country":  # the redesigned country pages (country_page below) and the country picker's list
             open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS + build_regions.REGION_CSS)
-            open(OUT + "/country.js", "w", encoding="utf-8").write(COUNTRY_JS + build_regions.PLIST_JS)
+            open(OUT + "/country.js", "w", encoding="utf-8").write(COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS)
             with open(OUT + "/countries.json", "w", encoding="utf-8") as fh:
                 json.dump({n: slugify(n) for n in sorted(G) if slugify(n)}, fh, ensure_ascii=False, separators=(",", ":"))
             for name, L in G.items():
@@ -1288,7 +1288,7 @@ def hubs(cards, esc, img_of, invasive=None):
                     country_page(H.unescape(m.group(1).strip()), [], {"_cards": cards}, invasive or {}, esc, f[:-5]))
             continue
         open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS + build_regions.REGION_CSS)
-        open(OUT + "/country.js", "w", encoding="utf-8").write(COUNTRY_JS + build_regions.PLIST_JS)
+        open(OUT + "/country.js", "w", encoding="utf-8").write(COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS)
         for name, L in G.items():
             slug = slugify(name)
             if not slug: continue
@@ -1371,7 +1371,7 @@ CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:center;widt
 .js .sp-all{display:inline-block}.js .sp-clip:not(.sp-open)>.sp-x{display:none}
 .sp-mapbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}.sp-mapbar .sp-legend{margin-right:auto}.sp-mapbar .sp-legend,.sp-mapbar .sp-all{margin-top:8px}
 .sp-states{margin-top:12px}.sp-n{color:var(--muted);font-size:.85em}.sp-shade{display:inline-flex;align-items:center;gap:6px}.sp-ramp{display:inline-block;width:46px!important;height:12px;border-radius:4px;background:linear-gradient(90deg,#b8e2aa,#1f5c28)}.sp-cities{margin-top:12px}.js .sp-cities:not(.sp-open){display:none}.sp-cities h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-cities .sp-where{margin:0}.sp-cities small{color:var(--muted)}
-.sp-map circle.ct{fill:#e0a526;stroke:#fff;stroke-width:1.2px;vector-effect:non-scaling-stroke}.sp-states h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-states .sp-where{margin:0;columns:1}
+.sp-map circle.ct{fill:#1b5e30;stroke:#fff;stroke-width:1.2px;vector-effect:non-scaling-stroke;cursor:pointer}.sp-map circle.ct.on{fill:#0f3d1e}.sp-map text.ctl{font-family:Inter,system-ui,sans-serif;font-weight:700;fill:#0f2a17;paint-order:stroke;stroke:#fff;stroke-linejoin:round;pointer-events:none}.sp-states h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-states .sp-where{margin:0;columns:1}
 .sp-az .v{font-size:11px;font-weight:700;color:#b5452a;margin-left:4px}@media (prefers-color-scheme:dark){.sp-az .v{color:#f0a04b}}
 .sx-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0}.sx-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .sx-box label{display:block;font-weight:600;font-size:14px;margin:0 0 6px}.sx-box input{width:100%;min-width:0;font:inherit;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
@@ -1539,7 +1539,10 @@ if(cb)cb.addEventListener('click',function(){var on=!cg;
 if(!on){cg.remove();cg=null;if(cz){f=cz[0];minW=cz[1];cz=null;fit()}}else{
 if(cs.length){var X=cs.map(function(c){return(c[1]+180)*4}),Y=cs.map(function(c){return(90-c[0])*4}),x0=Math.min.apply(0,X),x1=Math.max.apply(0,X),y0=Math.min.apply(0,Y),y1=Math.max.apply(0,Y),
 bw=Math.max((x1-x0)*1.5,110),bh=Math.max((y1-y0)*1.5,55);cz=[f,minW];f=[(x0+x1)/2-bw/2,(y0+y1)/2-bh/2,bw,bh];minW=Math.min(minW,110);fit()}
-cg=document.createElementNS(NS,'g');var k=v.w/Math.max(1,m.clientWidth);cs.forEach(function(c){var d=document.createElementNS(NS,'circle');d.setAttribute('cx',((c[1]+180)*4).toFixed(1));d.setAttribute('cy',((90-c[0])*4).toFixed(1));d.setAttribute('r',(4.5*k).toFixed(2));d.setAttribute('class','ct');var t=document.createElementNS(NS,'title');t.textContent=c[2];d.appendChild(t);cg.appendChild(d)});s.appendChild(cg)}
+cg=document.createElementNS(NS,'g');var k=v.w/Math.max(1,m.clientWidth);cs.forEach(function(c){var d=document.createElementNS(NS,'circle');d.setAttribute('cx',((c[1]+180)*4).toFixed(1));d.setAttribute('cy',((90-c[0])*4).toFixed(1));d.setAttribute('r',(4.5*k).toFixed(2));d.setAttribute('class','ct');var t=document.createElementNS(NS,'title');t.textContent=c[2];d.appendChild(t);
+// v4.80: click a city to see its name on the map
+d.addEventListener('click',function(ev){ev.stopPropagation();var old=cg.querySelector('text.ctl');if(old)old.remove();[].forEach.call(cg.querySelectorAll('circle.on'),function(x){x.classList.remove('on')});d.classList.add('on');
+var lb=document.createElementNS(NS,'text');lb.setAttribute('class','ctl');lb.setAttribute('x',(+d.getAttribute('cx')+7*k).toFixed(1));lb.setAttribute('y',(+d.getAttribute('cy')+4*k).toFixed(1));lb.setAttribute('font-size',(13*k).toFixed(2));lb.setAttribute('stroke-width',(3.5*k).toFixed(2));lb.textContent=c[2];cg.appendChild(lb)});cg.appendChild(d)});s.appendChild(cg)}
 cb.textContent=on?'Hide cities':'See cities';cb.setAttribute('aria-pressed',on?'true':'false');if(cl)cl.classList.toggle('sp-open',on)});
 }).catch(function(){})}
 [].forEach.call(document.querySelectorAll('.sp-all[data-all]'),function(b){b.addEventListener('click',function(){var l=b.previousElementSibling,o=!l.classList.contains('sp-open');l.classList.toggle('sp-open',o);b.textContent=o?'Show less':b.dataset.all;b.setAttribute('aria-expanded',o?'true':'false')})});

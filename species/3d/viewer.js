@@ -6,6 +6,8 @@
 // three.js (species/3d/three.module.min.js, vendored) is loaded by the page next to this module and
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
+// v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
+import * as NATURE from './nature.js';
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -730,10 +732,10 @@ function buildMouth(P, F, body, group, eyes) {
     const idx = []; for (let k = 0; k < n; k++) { const a = k * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); } g.setIndex(idx); g.computeVertexNormals(); return g;
   };
   const lining = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.45, side: THREE.DoubleSide });
-  const palateG = strip(mA - 0.06, -(mA - 0.06), 0.18, '#e7a3a2'), palate = new THREE.Mesh(palateG, lining), palateOrig = palateG.attributes.position.array.slice();
-  const floorG = strip(mA + 0.08, -(mA + 0.08), 0.22, '#df9a98'), floor = new THREE.Mesh(floorG, lining), floorOrig = floorG.attributes.position.array.slice();
+  const palateG = strip(mA - 0.06, -(mA - 0.06), 0.18, '#f2b9b5'), palate = new THREE.Mesh(palateG, lining), palateOrig = palateG.attributes.position.array.slice();
+  const floorG = strip(mA + 0.08, -(mA + 0.08), 0.22, '#eaa9a5'), floor = new THREE.Mesh(floorG, lining), floorOrig = floorG.attributes.position.array.slice();
   // the throat at the back
-  const throat = new THREE.Mesh(new THREE.CircleGeometry(F.W(xh) * 0.55, 20), new THREE.MeshStandardMaterial({ color: '#3a1218', roughness: 0.8, side: THREE.DoubleSide }));
+  const throat = new THREE.Mesh(new THREE.CircleGeometry(F.W(xh) * 0.55, 20), new THREE.MeshStandardMaterial({ color: '#5a1c26', roughness: 0.8, side: THREE.DoubleSide }));
   throat.position.copy(body.spine(xh * 0.97)); throat.lookAt(body.spine(xh * 0.97).clone().sub(fr.T));
   const inside = new THREE.Group(); inside.add(palate, floor, throat); inside.visible = false; group.add(inside);
   // teeth: small backward-pointing cones along both jaws; fangs at the front of the upper jaw
@@ -751,6 +753,43 @@ function buildMouth(P, F, body, group, eyes) {
       tooth(lowerT, lo, f.U.clone().addScaledVector(f.T, 0.55), tl * 0.85, tr);       // pointing up and back
     }
   }
+  // v4.80: what a real open snake mouth shows - two inner rows of palate teeth on pink ridges (palatine and
+  // pterygoid), the glottis (the breathing tube, pushed forward so it can breathe while swallowing) on the
+  // floor of the mouth, and in front of it the tongue sheath with the forked tongue
+  const anchors = { teeth: new THREE.Object3D(), palate: new THREE.Object3D(), glottis: new THREE.Object3D(), sheath: new THREE.Object3D(), fang: null, hinge: new THREE.Object3D() };
+  const chord = (x, th, s2, inset) => { const a = body.surf(x, th).p, b = body.surf(x, -th).p; return a.lerp(b, s2).lerp(body.spine(x), inset); };
+  const ridgeM = new THREE.MeshStandardMaterial({ color: '#e59a99', roughness: 0.5 });
+  if (plan !== 'blind') {
+    for (const s2 of [0.3, 0.7]) {
+      const pts = []; for (let k = 0; k <= 12; k++) pts.push(chord(Hl * 0.16 + (xh * 0.8 - Hl * 0.16) * (k / 12), mA - 0.06, s2, 0.2));
+      const ridge = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, F.W(xh * 0.5) * 0.07, 8, false), ridgeM); upperT.add(ridge);
+      const nI = Math.round(7 * many);
+      for (let k = 0; k < nI; k++) { const x = Hl * 0.2 + (xh * 0.72 - Hl * 0.2) * (k / Math.max(1, nI - 1)), f = body.frameAt(x);
+        tooth(upperT, chord(x, mA - 0.06, s2, 0.2), f.U.clone().negate().addScaledVector(f.T, 0.6), tl * 0.7, tr * 0.85); }
+    }
+    anchors.palate.position.copy(chord(xh * 0.45, mA - 0.06, 0.5, 0.2)); upperT.add(anchors.palate);
+    anchors.teeth.position.copy(body.surf(Hl * 0.3, mA - 0.05).p.lerp(body.spine(Hl * 0.3), 0.12)); upperT.add(anchors.teeth);
+    const softM = new THREE.MeshStandardMaterial({ color: '#e39c9c', roughness: 0.42 });
+    // the glottis: a short tube lying on the floor of the mouth, open towards the front
+    const gx0 = Hl * 0.24, gx1 = Hl * 0.4, fl = (x) => chord(x, mA + 0.08, 0.5, 0.22), gr = F.W((gx0 + gx1) / 2) * 0.075;
+    const fU = body.frameAt((gx0 + gx1) / 2).U;
+    const gA = fl(gx0).addScaledVector(fU, gr * 0.9), gB = fl(gx1).addScaledVector(fU, gr * 0.7);
+    const glottis = new THREE.Mesh(new THREE.CylinderGeometry(gr, gr * 1.15, gA.distanceTo(gB), 16, 1, true), softM);
+    glottis.position.copy(gA).add(gB).multiplyScalar(0.5); glottis.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), gA.clone().sub(gB).normalize()); lowerT.add(glottis);
+    const hole = new THREE.Mesh(new THREE.CircleGeometry(gr * 0.55, 16).scale(0.45, 1, 1), new THREE.MeshBasicMaterial({ color: '#2a0a10', side: THREE.DoubleSide }));
+    hole.position.copy(gA); hole.lookAt(gA.clone().add(gA.clone().sub(gB))); lowerT.add(hole);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(gr * 0.85, gr * 0.22, 8, 20), softM); rim.position.copy(gA); rim.lookAt(gA.clone().add(gA.clone().sub(gB))); lowerT.add(rim);
+    anchors.glottis.position.copy(gA).add(gB).multiplyScalar(0.5).addScaledVector(fU, gr); lowerT.add(anchors.glottis);
+    // the tongue sheath just in front, with the tip of the forked tongue showing
+    const sx = Hl * 0.19, sp = fl(sx).addScaledVector(fU, gr * 0.35);
+    const sheath = new THREE.Mesh(new THREE.SphereGeometry(gr * 1.2, 16, 10), softM); sheath.scale.set(1, 0.45, 1.6); sheath.position.copy(sp);
+    sheath.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), body.frameAt(sx).T); lowerT.add(sheath);
+    anchors.sheath.position.copy(sp).addScaledVector(fU, gr * 0.6); lowerT.add(anchors.sheath);
+    const tongueM = new THREE.MeshStandardMaterial({ color: '#3b1d2a', roughness: 0.35 }), fT = body.frameAt(sx).T, fS = body.frameAt(sx).S.clone().normalize();
+    for (const sg of [1, -1]) { const tipLen = Hl * 0.045, t0 = sp.clone().addScaledVector(fT, -gr * 1.2), t1 = t0.clone().addScaledVector(fT, -tipLen).addScaledVector(fS, sg * tipLen * 0.3);
+      const tg = new THREE.Mesh(new THREE.CylinderGeometry(gr * 0.12, gr * 0.3, t0.distanceTo(t1), 6), tongueM); tg.position.copy(t0).add(t1).multiplyScalar(0.5); tg.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), t1.clone().sub(t0).normalize()); lowerT.add(tg); }
+    anchors.hinge.position.copy(hinge); group.add(anchors.hinge);
+  }
   const fangs = [];
   if (plan === 'viper' || plan === 'pitviper' || plan === 'elapid' || plan === 'sea') {
     const big = plan === 'viper' || plan === 'pitviper', x = Hl * (big ? 0.1 : 0.12), f = body.frameAt(x), c = body.spine(x);
@@ -758,6 +797,11 @@ function buildMouth(P, F, body, group, eyes) {
       const base = body.surf(x, sg * (mA - 0.1)).p.lerp(c, 0.1);
       fangs.push(tooth(upperT, base, f.U.clone().negate().addScaledVector(f.T, big ? 0.35 : 0.2), Hl * (big ? 0.34 : 0.12), Hl * (big ? 0.024 : 0.02)));
     }
+    // the fang tip (for the labels and the bite)
+    const fg = fangs[0]; anchors.fang = new THREE.Object3D(); anchors.fang.position.copy(new THREE.Vector3(0, 1, 0).applyQuaternion(fg.quaternion).multiplyScalar(fg.scale.y).add(fg.position)); upperT.add(anchors.fang);
+    anchors.fangLen = fg.scale.y;
+  } else {
+    const x = Hl * 0.14, f = body.frameAt(x); anchors.fang = new THREE.Object3D(); anchors.fang.position.copy(body.surf(x, mA - 0.05).p.lerp(body.spine(x), 0.12)).addScaledVector(f.U, -tl); upperT.add(anchors.fang); anchors.fangLen = tl;
   }
   let t = 0;
   function set(v) {
@@ -786,7 +830,7 @@ function buildMouth(P, F, body, group, eyes) {
     for (let i = 0; i < body.nR; i++) { const a = i * (M + 1), b = a + M; for (let q2 = 0; q2 < 3; q2++) { const m = (nrm[a * 3 + q2] + nrm[b * 3 + q2]) / 2; nrm[a * 3 + q2] = nrm[b * 3 + q2] = m; } }
     geo.attributes.normal.needsUpdate = true;
   }
-  return { set, settle, get t() { return t; }, headX: xh };
+  return { set, settle, get t() { return t; }, headX: xh, anchors, fanged: fangs.length > 0 };
 }
 
 // ---------- ground and props ----------
@@ -1077,7 +1121,9 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
       edge.dispose(); // (a see-through edge made things behind it look washed out - the hills and the haze hide the edge instead)
       const g2 = new THREE.Mesh(rg, gm); g2.receiveShadow = true; scene.add(g2); ctx.fadeMats.push(gm);
     }
-    farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality);
+    // nature.js can take over the far scenery (return true) and add its own realistic details
+    const natureOwnsFar = NATURE.build ? NATURE.build({ THREE, ctx, scene, S, kind: P.scene.kind, groundR, farR, Rb, F, L, seed, quality, gcol, rng, fbm, sstep, clamp, dist2snake, poseInfo }) : false;
+    if (!natureOwnsFar) farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality);
   }
   if (S.water === 'sea') {
     const wm = new THREE.MeshPhysicalMaterial({ color: '#1f4e63', roughness: 0.12, metalness: 0, transparent: true, opacity: 0.82, normalMap: waterNormal(seed), normalScale: new THREE.Vector2(0.35, 0.35) });
@@ -1380,6 +1426,9 @@ export function mount(host, opts) {
   // (Full body, Head close-up, Pattern from above) and Size (a ruler and a 1.5 m person); still no Fullscreen, Details or Settings
   [vg, bFull, bScale, bDet, bSet].forEach((b) => b.remove());
   const bMouth = btn('Open mouth', 'Open the mouth to see the teeth and fangs'); bMouth.setAttribute('aria-pressed', 'false');
+  // v4.80: Anatomy (labelled parts, mouth open) and See bite (a gentle demonstration of a bite on an arm)
+  const bAnat = btn('Anatomy', 'Show the parts of this snake: fangs, teeth, glottis, tongue, scales and more'); bAnat.setAttribute('aria-pressed', 'false');
+  const bBite = btn('See bite', 'Watch how it bites: the arm turns see-through to show the fang going in');
   const vg2 = el('span', 'sp3d-views'); vg2.setAttribute('role', 'group'); vg2.setAttribute('aria-label', 'Camera views');
   const bVBody = btn('Full body', 'See the whole snake'), bVHead = btn('Head close-up', 'Close up on the head and its scales'), bVTop = btn('Pattern from above', 'Look down on the pattern of its back');
   vg2.append(bVBody, bVHead, bVTop); bar.appendChild(vg2); bar.appendChild(bScale); bScale.textContent = 'Size vs person'; bScale.title = 'Show its adult length next to a ruler and a person 1.5 m tall';
@@ -1411,7 +1460,7 @@ export function mount(host, opts) {
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.86;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = quality === 'low' ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   const ctx = { renderer, scene: null, track };
-  let snakeGroup, cam, controls, info, extras, raf = 0, dirty = true, lost = false, alive = true, scaleObj = null, markers = [];
+  let snakeGroup, cam, controls, info, extras, raf = 0, dirty = true, lost = false, alive = true, scaleObj = null, markers = [], bite = null;
 
   function build() {
     const scene = new THREE.Scene(); ctx.scene = scene;
@@ -1447,11 +1496,12 @@ export function mount(host, opts) {
       for (let i = 0; i < ep.count; i++) { const x = ep.getX(i) / eyeR, y = ep.getY(i) / eyeR; euv.setXY(i, 0.5 + x * 0.5, 0.5 + y * 0.5); }
       for (const sg of [1, -1]) {
         const th = sg * body.eyeA, s = body.surf(eyeX, th), n = body.surfNormal(eyeX, th);
-        if (sg < 0) n.negate();
+        // v4.80: the normal must point out of the head on both sides (one eye used to sit outside the head)
+        if (n.dot(s.p.clone().sub(body.spine(eyeX))) < 0) n.negate();
         const out = n.clone().addScaledVector(s.f.T, -0.22).normalize();
         const up = s.f.U.clone().addScaledVector(out, -s.f.U.dot(out)).normalize(), xa = new THREE.Vector3().crossVectors(up, out);
-        const m = new THREE.Mesh(eg, em); m.position.copy(s.p).addScaledVector(n, -eyeR * (H.embed || 0.74)); // set deeper into the head
-        m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xa, up, out)); m.castShadow = false; m.receiveShadow = true;
+        const m = new THREE.Mesh(eg, em); m.position.copy(s.p).addScaledVector(n, -eyeR * (H.embed || 0.5)); // v4.80: a flattened eye, its front a little proud of the head like a real snake's spectacle
+        m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xa, up, out)); m.scale.set(1, 1, 0.8); m.castShadow = false; m.receiveShadow = true;
         snakeGroup.add(m); eyePos.push(m.position.clone()); eyeMeshes.push(m);
       }
     }
@@ -1500,7 +1550,9 @@ export function mount(host, opts) {
     const axisAng = 0.5 * Math.atan2(2 * sxz, sxx - szz);
     info = { F, body, center: new THREE.Vector3(center.x, Math.min(center.y, hMax * 0.5), center.z), Rb, hMax, headPos, headDir, axisAng, eyePos, size };
     info.collide = []; for (let i = 0, n = 240; i <= n; i++) { const x = (i / n) * F.L; info.collide.push({ p: body.spine(x), r: Math.max(F.W(x), F.Hh(x)) * 1.05 }); }
-    extras = { mat, mouth: P.plan === 'blind' ? null : buildMouth(P, F, body, snakeGroup, eyeMeshes) };
+    extras = { mat, eyes: eyeMeshes, mouth: P.plan === 'blind' ? null : buildMouth(P, F, body, snakeGroup, eyeMeshes) };
+    bite = null; bBite.disabled = false; bBite.textContent = 'See bite'; bAnat.hidden = bBite.hidden = !extras.mouth;
+    if (bAnat.getAttribute('aria-pressed') === 'true') { bAnat.setAttribute('aria-pressed', 'false'); markers.filter((m) => m.anat).forEach((m) => m.el.remove()); markers = markers.filter((m) => !m.anat); }
     if (bMouth) { bMouth.hidden = !extras.mouth; mouthGoal = 0; bMouth.setAttribute('aria-pressed', 'false'); bMouth.textContent = 'Open mouth'; }
     // camera
     cam = new THREE.PerspectiveCamera(38, 1, Rb * 0.001, Rb * 40);
@@ -1574,6 +1626,7 @@ export function mount(host, opts) {
     let moving = controls.update();
     // the jaw opens and shuts smoothly
     const mo = extras && extras.mouth;
+    if (bite && stepBite()) moving = true;
     if (mo && Math.abs(mo.t - mouthGoal) > 1e-3) { const nt = reduce() ? mouthGoal : mo.t + clamp(mouthGoal - mo.t, -0.07, 0.07); mo.set(nt); if (Math.abs(nt - mouthGoal) <= 1e-3) mo.settle(); moving = true; }
     placeCamera();
     updateOccluders();
@@ -1666,6 +1719,7 @@ export function mount(host, opts) {
   const v3 = new THREE.Vector3();
   function updateMarkers() {
     if (!markers.length) return; const w = stage.clientWidth, h = stage.clientHeight, placed = [];
+    for (const m of markers) if (m.fn) m.p = m.fn();
     const list = markers.map((m) => { v3.copy(m.p).project(cam); return { m, x: (v3.x * 0.5 + 0.5) * w, y: (-v3.y * 0.5 + 0.5) * h, vis: v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05 }; }).sort((a, b) => a.y - b.y);
     for (const o of list) {
       const m = o.m; m.el.hidden = !o.vis; if (!o.vis) continue;
@@ -1705,6 +1759,82 @@ export function mount(host, opts) {
     kick();
   }
   on(bMouth, 'click', () => toggleMouth());
+  // ---- v4.80: Anatomy ----
+  const wpos = (o) => () => o.getWorldPosition(new THREE.Vector3());
+  function anatomyList() {
+    const mo = extras.mouth, A = mo.anchors, F = info.F, b = info.body, L = [], ap = (k) => { const a = anchorPos(k); return () => a.p.clone().add(snakeGroup.position); };
+    if (extras.eyes[0]) L.push(['Eye: no eyelids - a clear scale covers it', wpos(extras.eyes[0])]);
+    L.push(['Nostril', ap('nostril')]);
+    if (P.head.pits) L.push(['Heat pit: feels the warmth of prey', ap('pit')]);
+    if (A.fang) L.push([mo.fanged ? 'Fang: hollow, injects venom' : 'Teeth: curved backwards to hold prey', wpos(A.fang)]);
+    if (mo.fanged) L.push(['Teeth: hold prey, no venom', wpos(A.teeth)]);
+    L.push(['Palate teeth: walk food into the throat', wpos(A.palate)]);
+    L.push(['Glottis: breathing tube - it can breathe while swallowing', wpos(A.glottis)]);
+    L.push(['Tongue sheath: the forked tongue smells the air', wpos(A.sheath)]);
+    L.push(['Jaw hinge: very loose, to swallow big prey', wpos(A.hinge)]);
+    L.push([P.scales.keel > 0.3 ? 'Keeled scales (each has a ridge)' : 'Smooth scales', ap('back')]);
+    L.push(['Belly scales: grip the ground to move', ap('belly')]);
+    const vx = F.L * (1 - P.body.tail), vp = b.surf(vx, Math.PI * 0.92).p; L.push(['Vent: where the tail begins', () => vp.clone().add(snakeGroup.position)]);
+    L.push(P.tail.rattle ? ['Rattle: buzzes to warn enemies', ap('rattle')] : ['Tail', ap('tail')]);
+    return L;
+  }
+  function toggleAnatomy(force) {
+    if (!extras || !extras.mouth) return;
+    const onv = force != null ? force : bAnat.getAttribute('aria-pressed') !== 'true'; bAnat.setAttribute('aria-pressed', String(onv));
+    markers.filter((m) => m.anat).forEach((m) => m.el.remove()); markers = markers.filter((m) => !m.anat);
+    if (onv) {
+      for (const [txt, fn] of anatomyList()) { const e = el('div', 'sp3d-mk sp3d-an'); e.appendChild(el('span', 'sp3d-dot')); e.appendChild(el('span', 'sp3d-mt', txt)); labels.appendChild(e); markers.push({ el: e, fn, p: fn(), n: null, anat: true }); }
+      toggleMouth(true);
+      const d = Math.max(info.dMin * 2.2, info.F.Hl * 9), kk = sstep(info.dFit * 0.75, info.dMin * 1.2, d), tg = info.headPos.clone().sub(info.center.clone().lerp(info.headPos, kk));
+      controls.setGoal({ az: viewAz('front') + 0.75, el: (32 * Math.PI) / 180, d, px: tg.x, pz: tg.z }); // the head in the middle, far enough for the labels to spread out
+    }
+    kick();
+  }
+  on(bAnat, 'click', () => toggleAnatomy());
+  // ---- v4.80: See bite - the snake strikes a (see-through) arm so you can see how deep the fang goes ----
+  const ease = (x) => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+  function startBite() {
+    if (!extras || !extras.mouth || bite) return;
+    const mo = extras.mouth, A = mo.anchors, Hl = info.F.Hl, OPEN = 0.8;
+    const t0 = mo.t; mo.set(OPEN); snakeGroup.updateMatrixWorld(true); const tip = A.fang.getWorldPosition(new THREE.Vector3()).sub(snakeGroup.position); mo.set(t0);
+    const hd = info.headDir.clone().setY(0).normalize(), side = new THREE.Vector3().crossVectors(hd, new THREE.Vector3(0, 1, 0)).normalize();
+    const R = Math.max(0.035, Hl * 0.9), depth = A.fangLen * 0.85, lunge = Hl * 0.9, dy = R * 0.45, half = Math.sqrt(R * R - dy * dy);
+    const c = tip.clone().addScaledVector(hd, lunge + half - depth); c.y = tip.y + dy;
+    // the arm runs away from the camera, its near end just past the bite, so you look into it along its length
+    const arm = new THREE.Group(); arm.position.copy(c).addScaledVector(side, R * 1.0); arm.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), side);
+    const mk = (r, len, col, op) => { const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 8, 24), new THREE.MeshPhysicalMaterial({ color: col, roughness: 0.6, transparent: true, opacity: op, depthWrite: false })); arm.add(m); return m; };
+    const skin = mk(R, R * 4, '#d8a888', 0), muscle = mk(R * 0.8, R * 3.8, '#c97a70', 0), bone = mk(R * 0.2, R * 3.7, '#efe6d2', 0);
+    skin.renderOrder = 3; muscle.renderOrder = 2; bone.renderOrder = 1;
+    const venom = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), new THREE.MeshStandardMaterial({ color: '#f0cf55', emissive: '#6b5410', transparent: true, opacity: 0.8 })); venom.visible = false; ctx.scene.add(venom);
+    ctx.scene.add(arm);
+    const az = Math.atan2(-side.x, -side.z) - 0.75, d = Math.max(info.dMin * 1.1, (Hl * 1.2 + R * 1.6) / Math.tan(info.vf));
+    const kk = sstep(info.dFit * 0.75, info.dMin * 1.2, d), tg = tip.clone().addScaledVector(hd, lunge * 0.6).sub(info.center.clone().lerp(info.headPos, kk)); // look at the bite
+    controls.setGoal({ az, el: 0.22, d, px: tg.x, pz: tg.z });
+    const e = el('div', 'sp3d-mk sp3d-an'); e.appendChild(el('span', 'sp3d-dot')); e.appendChild(el('span', 'sp3d-mt', (mo.fanged ? 'Fang' : 'Tooth') + ' goes in about ' + Math.max(1, Math.round(depth * 1000)) + ' mm')); e.hidden = true; labels.appendChild(e);
+    const lab = { el: e, fn: wpos(A.fang), p: tip.clone(), n: null, anat: true, bite: true };
+    bite = { start: performance.now(), arm, skin, muscle, bone, venom, hd, lunge, R, lab, wasAnat: bAnat.getAttribute('aria-pressed') === 'true', fanged: mo.fanged };
+    mouthGoal = OPEN; bMouth.setAttribute('aria-pressed', 'true'); bMouth.textContent = 'Close mouth';
+    bBite.disabled = true; bBite.textContent = 'Biting...'; kick();
+  }
+  function stepBite() {
+    const B = bite, s2 = ((B.freeze != null ? B.start + B.freeze : performance.now()) - B.start) / 1000 / (reduce() ? 0.6 : 1), A = extras.mouth.anchors;
+    const arm = ease(s2 / 0.8) * (1 - ease((s2 - 5.0) / 0.7)), strike = ease((s2 - 1.0) / 0.22) * (1 - ease((s2 - 4.4) / 0.5)), xr = ease((s2 - 1.4) / 0.7) * (1 - ease((s2 - 4.4) / 0.6));
+    snakeGroup.position.copy(B.hd).multiplyScalar(B.lunge * strike);
+    B.skin.material.opacity = arm * (1 - xr * 0.75); B.skin.material.depthWrite = arm > 0.99 && xr < 0.01;
+    B.muscle.material.opacity = arm * xr * 0.35; B.bone.material.opacity = arm * xr * 0.6;
+    const vk = B.fanged ? ease((s2 - 2.0) / 1.5) * xr : 0; B.venom.visible = vk > 0.01;
+    if (B.venom.visible) { B.venom.position.copy(A.fang.getWorldPosition(new THREE.Vector3())); B.venom.scale.setScalar(B.R * 0.18 * vk); }
+    if (!markers.includes(B.lab) && s2 > 1.8 && s2 < 4.4) markers.push(B.lab);
+    if (markers.includes(B.lab) && s2 >= 4.4) { B.lab.el.remove(); markers = markers.filter((m) => m !== B.lab); }
+    if (s2 > 4.5 && mouthGoal) { mouthGoal = B.wasAnat ? 1 : 0; bMouth.setAttribute('aria-pressed', String(!!mouthGoal)); bMouth.textContent = mouthGoal ? 'Close mouth' : 'Open mouth'; }
+    if (s2 > 5.8) {
+      B.lab.el.remove(); markers = markers.filter((m) => m !== B.lab); snakeGroup.position.set(0, 0, 0);
+      for (const o of [B.arm, B.venom]) { ctx.scene.remove(o); o.traverse((q) => { if (q.geometry) q.geometry.dispose(); if (q.material) q.material.dispose(); }); }
+      bite = null; bBite.disabled = false; bBite.textContent = 'See bite'; return true;
+    }
+    return true;
+  }
+  on(bBite, 'click', startBite);
   on(bVBody, 'click', () => resetView());
   on(bVHead, 'click', () => controls.setGoal({ az: viewAz('front') + 0.9, el: (20 * Math.PI) / 180, d: Math.max(info.dMin * 1.3, info.F.Hl * 4.5), px: 0, pz: 0 }));
   on(bVTop, 'click', () => controls.setGoal({ az: controls.st.az, el: (80 * Math.PI) / 180, d: (info.Rb * 1.12) / Math.tan(Math.min(info.vf, info.hf)) + info.hMax, px: 0, pz: 0 })); on(bFull, 'click', toggleFull); on(bScale, 'click', () => toggleScale()); on(bDet, 'click', toggleDetails);
@@ -1736,7 +1866,7 @@ export function mount(host, opts) {
   function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; disposeScene(); build(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
 
   build(); resize();
-  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, frame: () => { controls.update(); placeCamera(); updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); } };
+  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy, startBite, get bite() { return bite; }, frame: () => { controls.update(); placeCamera(); updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); } };
 
   return {
     canvas,
