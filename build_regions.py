@@ -1044,5 +1044,5 @@ REAL_CSS = """
 .sp-person img{flex:none;width:64px;height:80px;object-fit:cover;border-radius:10px;background:var(--line)}.sp-person-t{min-width:0}.sp-person p{margin:0 0 2px}
 .sp-person-n{font-weight:700}.sp-person-d{font-size:14px}.sp-person-m{font-size:13.5px;color:var(--muted)}.sp-who-src{margin:8px 0 0!important}
 @media (max-width:560px){.sp-rl{width:100vw;max-width:100vw;max-height:100dvh;height:100dvh;border-radius:0;margin:0}.sp-rl-in{padding:10px 12px 16px}.sp-rl-hd h2{font-size:18px}
-.sp3d-stage{height:max(300px,calc(100dvh - 300px))}.sp3d-b{padding:6px 10px;font-size:13px}.sp3d-set{margin-left:0}}
+.sp3d-stage{height:min(46vh,380px);min-height:240px}.sp3d-b{padding:6px 10px;font-size:13px}.sp3d-set{margin-left:0}}
 """

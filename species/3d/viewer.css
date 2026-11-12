@@ -25,4 +25,4 @@
 .sp3d-about{margin:10px 0 0;font-size:14px}.sp3d-about summary{cursor:pointer;font-weight:600}.sp3d-about ul{margin:6px 0 0;padding-left:20px}.sp3d-about p{margin:6px 0}
 .sp3d-wrap:fullscreen{padding:10px;background:var(--card);display:flex;flex-direction:column}.sp3d-wrap:fullscreen .sp3d-stage{flex:1;height:auto}
 .sp3d-max{position:fixed;inset:0;z-index:2147483000;padding:10px;background:var(--card);display:flex;flex-direction:column}.sp3d-max .sp3d-stage{flex:1;height:auto}
-@media (max-width:560px){.sp3d-stage{height:max(300px,calc(100dvh - 300px))}.sp3d-b{padding:6px 10px;font-size:13px}.sp3d-set{margin-left:0}}
+@media (max-width:560px){.sp3d-stage{height:min(46vh,380px);min-height:240px}.sp3d-b{padding:6px 10px;font-size:13px}.sp3d-set{margin-left:0}}

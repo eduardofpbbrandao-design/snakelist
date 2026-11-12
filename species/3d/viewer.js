@@ -1117,7 +1117,7 @@ function Controls(dom, cam, opt) {
   const onDown = (e) => { if (e.button > 0) return; try { dom.setPointerCapture(e.pointerId); } catch (err) { /* synthetic or already released pointer */ } ptrs.set(e.pointerId, [e.clientX, e.clientY]); if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); d0 = st.d; } st.dragging = true; st.vaz = st.vel = 0; last = performance.now(); st.goal = null; };
   const onMove = (e) => {
     if (!ptrs.has(e.pointerId)) return; const p = ptrs.get(e.pointerId), dx = e.clientX - p[0], dy = e.clientY - p[1]; ptrs.set(e.pointerId, [e.clientX, e.clientY]);
-    if (ptrs.size === 1) { const k = (2.6 * Math.PI) / Math.max(400, dom.clientWidth * 1.6); rot(dx * k, dy * k); const now = performance.now(), dt = Math.max(8, now - last); last = now; st.vaz = (-dx * k) / dt * 16; st.vel = (dy * k) / dt * 16; opt.kick(); }
+    if (ptrs.size === 1) { const k = (2.6 * Math.PI) / Math.max(400, dom.clientWidth * 1.6); rot(dx * k * 1.5, dy * k * 0.6); const now = performance.now(), dt = Math.max(8, now - last); last = now; st.vaz = (-dx * k * 1.5) / dt * 16; st.vel = (dy * k * 0.6) / dt * 16; opt.kick(); }
     else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()], pd = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pinch0 > 0) { st.d = clamp(d0 * (pinch0 / pd), opt.dMin(), opt.dMax()); st.el = limitEl(st.el, st.d); opt.kick(); } }
   };
   const onUp = (e) => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch0 = 0; if (!ptrs.size) { st.dragging = false; if (reduce() || performance.now() - last > 80) { st.vaz = st.vel = 0; } opt.kick(); } };
@@ -1176,7 +1176,7 @@ export function mount(host, opts) {
   host.innerHTML = '';
   const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
   const wrap = el('div', 'sp3d-wrap'), stage = el('div', 'sp3d-stage'), labels = el('div', 'sp3d-labels'), status = el('div', 'sp3d-status');
-  const hint = el('p', 'sp3d-hint', (window.innerWidth < 520 ? 'Drag to rotate around it · pinch to zoom' : 'Drag to rotate around the snake · pinch or scroll to zoom · arrow keys work too'));
+  const hint = el('p', 'sp3d-hint', (window.innerWidth < 520 ? 'Drag sideways to go round it · pinch to zoom' : 'Drag sideways to go round the snake, up or down to tilt · pinch or scroll to zoom · arrow keys work too'));
   status.setAttribute('role', 'status'); status.hidden = true;
   const canvas = document.createElement('canvas'); canvas.className = 'sp3d-canvas'; canvas.tabIndex = 0;
   canvas.setAttribute('role', 'img'); canvas.setAttribute('aria-label', '3D model of ' + opts.name + '. Arrow keys rotate, plus and minus zoom, R resets the view.');
