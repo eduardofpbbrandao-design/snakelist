@@ -1004,14 +1004,8 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   skyGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
   const skyMesh = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false }));
   skyMesh.renderOrder = -1; scene.add(skyMesh);
-  // v4.72: a soft glow where the sun is and a few soft clouds, so the sky is not a flat colour
-  { const glowT = canvasTex(256, (x, s2) => { const g = x.createRadialGradient(s2 / 2, s2 / 2, 0, s2 / 2, s2 / 2, s2 / 2); g.addColorStop(0, 'rgba(255,250,235,0.95)'); g.addColorStop(0.15, 'rgba(255,244,214,0.55)'); g.addColorStop(1, 'rgba(255,240,210,0)'); x.fillStyle = g; x.fillRect(0, 0, s2, s2); }, 1, true);
-    const se = (S.sunEl * Math.PI) / 180, sa = 0.9, sd = new THREE.Vector3(Math.cos(sa) * Math.cos(se), Math.sin(se), Math.sin(sa) * Math.cos(se));
-    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowT, transparent: true, depthWrite: false, fog: false })); glow.position.copy(sd).multiplyScalar(skyR * 0.9); glow.scale.setScalar(skyR * 0.5); glow.renderOrder = -1; scene.add(glow); ctx.sunGlow = glow;
-    const cloudT = canvasTex(256, (x, s2) => { for (let i = 0; i < 9; i++) { const cx = s2 * (0.2 + R() * 0.6), cy = s2 * (0.4 + R() * 0.2), r = s2 * (0.12 + R() * 0.14), g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, 'rgba(255,255,255,0.55)'); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(0, 0, s2, s2); } }, 1, true);
-    for (let i = 0; i < 7; i++) { const a = R() * TAU, el2 = 0.18 + R() * 0.35, c = new THREE.Sprite(new THREE.SpriteMaterial({ map: cloudT, transparent: true, depthWrite: false, fog: false, opacity: 0.55 + R() * 0.3 }));
-      c.position.set(Math.cos(a) * Math.cos(el2), Math.sin(el2), Math.sin(a) * Math.cos(el2)).multiplyScalar(skyR * 0.85); c.scale.set(skyR * (0.5 + R() * 0.3), skyR * 0.18, 1); c.renderOrder = -1; scene.add(c); } } ctx.skyMesh = skyMesh; ctx.groundR = groundR; ctx.fadeMats = [];
-  scene.fog = new THREE.Fog(hor, Math.max(Rb * 6, envR * 3.5), farR * 0.95); ctx.farR = farR;
+  // (v4.72: a sun glow and clouds were tried here, but the big see-through sprites washed out half the view - removed) ctx.skyMesh = skyMesh; ctx.groundR = groundR; ctx.fadeMats = [];
+  scene.fog = new THREE.Fog(hor, Math.max(Rb * 6, envR * 3.5), farR * 0.95); ctx.farR = farR; ctx.fogNear0 = scene.fog.near;
   scene.background = hor;
 
   // environment light from a simple sky/ground gradient (soft reflections; no image is fetched)
@@ -1052,12 +1046,12 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
         // squeeze the grid toward the middle: fine cells near the snake for a smooth, irregular shoreline
         let x = pp.getX(i) / groundR, z = pp.getZ(i) / groundR; x = Math.sign(x) * x * x * groundR; z = Math.sign(z) * z * z * groundR;
         pp.setX(i, x); pp.setZ(i, z); uvs.setXY(i, x / (2 * groundR) + 0.5, 0.5 - z / (2 * groundR));
-        const along = -x * dir.y + z * dir.x, s = x * dir.x + z * dir.y + (fbm(along / Rb * 1.3, 3.1, 0.7, seed + 19, 3) - 0.5) * Rb * 0.7;
+        const along = -x * dir.y + z * dir.x, s = x * dir.x + z * dir.y + (fbm(along / Rb * 1.3, 3.1, 0.7, seed + 19, 3) - 0.5) * Rb * 1.8; // a wavy shoreline
         pp.setY(i, -depth * sstep(edge - Rb * 0.25, edge + Rb * 0.7, s) + (fbm(x / Rb * 2, z / Rb * 2, 1, seed, 2) - 0.5) * Rb * 0.02 * sstep(Rb * 0.3, Rb * 0.9, Math.abs(s - edge)));
       }
       geo.computeVertexNormals();
       const g2 = new THREE.Mesh(geo, gm); g2.receiveShadow = true; scene.add(g2); ctx.fadeMats.push(gm);
-      const wm = new THREE.MeshPhysicalMaterial({ color: '#4d6d6a', roughness: 0.06, metalness: 0, transparent: true, opacity: 0.55, normalMap: waterNormal(seed), normalScale: new THREE.Vector2(0.25, 0.25) });
+      const wm = new THREE.MeshPhysicalMaterial({ color: '#2f4d48', roughness: 0.16, metalness: 0, transparent: true, opacity: 0.72, envMapIntensity: 0.45, normalMap: waterNormal(seed), normalScale: new THREE.Vector2(0.35, 0.35) }); // v4.72: clear dark river water (not a pale sheet)
       wm.normalMap.repeat.set(groundR / Math.max(0.6, Rb), groundR / Math.max(0.6, Rb));
       const wg = new THREE.PlaneGeometry(groundR * 2, groundR * 2); wg.rotateX(-Math.PI / 2);
       const water = new THREE.Mesh(wg, wm); water.position.y = -depth * 0.35; water.renderOrder = 2; scene.add(water); ctx.fadeMats.push(wm);
@@ -1078,6 +1072,8 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
         pp.setY(i, y);
       }
       rg.computeVertexNormals();
+      const edge = canvasTex(256, (x2, s2) => { const g = x2.createRadialGradient(s2 / 2, s2 / 2, s2 * 0.36, s2 / 2, s2 / 2, s2 * 0.5); g.addColorStop(0, '#fff'); g.addColorStop(1, '#000'); x2.fillStyle = g; x2.fillRect(0, 0, s2, s2); }, 1, false);
+      edge.dispose(); // (a see-through edge made things behind it look washed out - the hills and the haze hide the edge instead)
       const g2 = new THREE.Mesh(rg, gm); g2.receiveShadow = true; scene.add(g2); ctx.fadeMats.push(gm);
     }
     farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality);
@@ -1203,7 +1199,6 @@ function applyEnv(ctx, P, F, poseInfo, env) {
   // light: the sun from the photo, sky light from the panorama; the gradient hemisphere light stays only as a faint fill
   const sun = ctx.sun, el = Math.max(Math.asin(env.sunDir.y), (22 * Math.PI) / 180), az = Math.atan2(env.sunDir.z, env.sunDir.x), r = sun.position.length();
   sun.position.set(Math.cos(el) * Math.cos(az), Math.sin(el), Math.cos(el) * Math.sin(az)).multiplyScalar(r);
-  if (ctx.sunGlow) ctx.sunGlow.position.copy(sun.position).normalize().multiplyScalar(ctx.sunGlow.position.length());
   sun.color.copy(env.sunCol).lerp(new THREE.Color('#ffffff'), 0.35); sun.intensity = 6.5 * env.sunny; // about three times the sky's light on a sunlit face, as outdoors
   sun.shadow.radius = lerp(8, 3, env.sunny); sun.shadow.blurSamples = 16;
   if (ctx.hemi) ctx.hemi.intensity *= 0.25;
@@ -1214,8 +1209,8 @@ function applyEnv(ctx, P, F, poseInfo, env) {
 // or boulders (desert, sand, gibber) standing on it; the fog melts it into the sky
 function farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality) {
   const { scene } = ctx, R = rng(seed + 991), low = quality === 'low';
-  const r0 = groundR * 0.9, hillA = Math.min(farR * 0.08, Rb * 6 + farR * 0.04);
-  const hillH = (x, z) => { const r = Math.hypot(x, z); return (fbm(x / (farR * 0.18), z / (farR * 0.18), 1, seed + 71, 4) - 0.3) * hillA * sstep(r0, r0 + farR * 0.25, r) + (fbm(x / (Rb * 6), z / (Rb * 6), 1, seed + 53, 3) - 0.35) * Rb * 0.9; };
+  const r0 = groundR * 0.92, hillA = Math.min(farR * 0.08, Rb * 6 + farR * 0.04);
+  const hillH = (x, z) => { const r = Math.hypot(x, z); return (fbm(x / (farR * 0.18), z / (farR * 0.18), 1, seed + 71, 4) - 0.3) * hillA * sstep(r0, r0 + farR * 0.25, r) + (fbm(x / (Rb * 6), z / (Rb * 6), 1, seed + 53, 3) - 0.35) * Rb * 0.9 * sstep(Rb * 7, groundR * 0.95, r); }; // the same gentle rise as the near ground, so they meet without a step
   const ring = new THREE.RingGeometry(r0, farR, 128, low ? 24 : 40); ring.rotateX(-Math.PI / 2);
   const pp = ring.attributes.position, cols = [], base = gcol.clone(), tint = new THREE.Color(S.fog);
   for (let i = 0; i < pp.count; i++) { const x = pp.getX(i), z = pp.getZ(i), y = hillH(x, z); pp.setY(i, y - Rb * 0.05);
@@ -1332,7 +1327,7 @@ function Controls(dom, cam, opt) {
     if (!st.dragging && (st.vaz || st.vel)) { st.az += st.vaz; st.el = limitEl(st.el + st.vel, st.d); st.vaz *= 0.92; st.vel *= 0.92; if (Math.abs(st.vaz) < 1e-4 && Math.abs(st.vel) < 1e-4) st.vaz = st.vel = 0; else moving = true; }
     if (!st.dragging && (st.vpx || st.vpz)) { st.px += st.vpx; st.pz += st.vpz; clampPan(); st.vpx *= 0.9; st.vpz *= 0.9; if (Math.hypot(st.vpx, st.vpz) < st.d * 1e-5) st.vpx = st.vpz = 0; else moving = true; }
     if (st.goal) {
-      const k = 0.16; st.az += (st.goal.az - st.az) * k; st.d += (st.goal.d - st.d) * k; st.el = limitEl(st.el + (st.goal.el - st.el) * k, st.d); st.px += (st.goal.px - st.px) * k; st.pz += (st.goal.pz - st.pz) * k;
+      const k = 0.2; st.az += (st.goal.az - st.az) * k; st.d += (st.goal.d - st.d) * k; st.el = limitEl(st.el + (st.goal.el - st.el) * k, st.d); st.px += (st.goal.px - st.px) * k; st.pz += (st.goal.pz - st.pz) * k;
       if (Math.abs(st.goal.az - st.az) < 1e-4 && Math.abs(st.goal.d - st.d) / st.d < 1e-4 && Math.abs(st.goal.el - st.el) < 1e-4 && Math.hypot(st.goal.px - st.px, st.goal.pz - st.pz) < st.d * 1e-4) { st.az = st.goal.az; st.d = st.goal.d; st.px = st.goal.px; st.pz = st.goal.pz; st.goal = null; } else moving = true;
     }
     st.el = limitEl(st.el, st.d);
@@ -1564,6 +1559,8 @@ export function mount(host, opts) {
     put();
     for (let k = 0; k < 40 && bodyClearance(cam.position) < st.d * 0.06; k++) { st.d = Math.min(st.d * 1.05, info.dMax); if (st.goal && st.goal.d < st.d) st.goal.d = st.d; t = targetFor(st.d); put(); if (st.d >= info.dMax) break; }
     cam.near = Math.max(st.d * 0.02, 1e-4); cam.far = Math.max(info.Rb * 40, 300); cam.updateProjectionMatrix(); cam.lookAt(t);
+    // v4.72: the haze begins beyond the snake from wherever you look, never on it
+    const fog = ctx.scene && ctx.scene.fog; if (fog && ctx.fogNear0 != null) { fog.near = Math.max(ctx.fogNear0, st.d * 1.6); fog.far = Math.max((ctx.farR || 60) * 0.95, fog.near * 3); }
   }
   function resize() {
     const w = stage.clientWidth || 300, h = stage.clientHeight || 200;

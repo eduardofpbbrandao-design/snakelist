@@ -136,7 +136,7 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
 
     // v4.63: only Reset stays under the model
     const bar = await pg.evaluate(() => [].map.call(document.querySelectorAll('.sp3d-bar button'), (b) => b.textContent));
-    ok('the only button under the model is Reset', bar.length === 1 && bar[0] === 'Reset', JSON.stringify(bar));
+    ok('the buttons under the model: Reset, Open mouth, the three views and Size (v4.72)', JSON.stringify(bar) === JSON.stringify(['Reset', 'Open mouth', 'Full body', 'Head close-up', 'Pattern from above', 'Size vs person']), JSON.stringify(bar));
     // resize to phone width
     await pg.setViewportSize({ width: 390, height: 844 }); await pg.waitForTimeout(800);
     const rs = await pg.evaluate(() => { const c = document.querySelector('.sp3d-canvas'); return { cw: c.clientWidth, ch: c.clientHeight, bw: c.width / (window.devicePixelRatio || 1), aspect: window.__sp3d.cam.aspect, docW: document.documentElement.scrollWidth }; });
@@ -254,7 +254,7 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     await pg.goto(BASE + 'viperine-snake-natrix-maura.html#real');
     await pg.waitForSelector('.sp3d-msg[role=alert]', { timeout: 30000 });
     const t = await pg.textContent('.sp3d-msg[role=alert]');
-    ok('no WebGL: fallback message with photos button', /WebGL/.test(t) && !!(await pg.$('.sp3d-msg button:text-is("See photos instead")')), t);
+    ok('no WebGL: fallback message with an information button', /WebGL/.test(t) && !!(await pg.$('.sp3d-msg button:text-is("See information instead")')), t);
   }
 
   // 7. hidden tab pauses rendering
