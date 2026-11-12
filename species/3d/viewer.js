@@ -123,7 +123,8 @@ export function autoProfile(p) {
   if (a.k) o.scales = { keel: 0.7 };
   else if (a.p === 'colubrid' || a.p === 'elapid') o.scales = { keel: 0 };
   if (a.o) o.body = { tail: 0.05 };
-  if (a.p !== 'blind') o.head = { iris: lumOf(d) < 0.25 ? '#3a2e22' : shade(d, 0.75), irisInner: shade(d, 1.3) };
+  // v4.72: the iris takes its group's typical eye colour (see IRIS), not a darker copy of the body
+  if (a.p === 'blind') o.head = {};
   if (x.includes('l')) o.lengthNote = 'a typical size for its group - SnakeList has no measured length for this species yet';
   else if (fossil) o.lengthNote = 'estimated from its fossil bones';
   o.details = fossil ? [['back', 'Colours are a guess: fossils keep no colour']] : x.includes('g') ? [['back', 'Colours are a guess: no photo yet']] : [];
@@ -323,7 +324,7 @@ function makePose(P, F, seed) {
 
 // ---------- the body mesh (snout, head, neck, body and tail are one seamless sweep) ----------
 function buildBody(P, F, pose, quality) {
-  const L = F.L, M = quality === 'low' ? 48 : 64;
+  const L = F.L, M = quality === 'low' ? 48 : 96;
   // girth units: distance along the body measured in circumferences, so scales and markings keep
   // a natural size as the body narrows (scale rows around the body are constant in real snakes)
   const NX = 6000, xs = new Float64Array(NX), gs = new Float64Array(NX);
@@ -335,7 +336,7 @@ function buildBody(P, F, pose, quality) {
   const gOf = (x) => { const f = clamp(x / L, 0, 1) * (NX - 1), i = Math.min(NX - 2, Math.floor(f)); return lerp(gs[i], gs[i + 1], f - i); };
   const xOf = (gv) => { let lo = 0, hi = NX - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (gs[m] < gv) lo = m; else hi = m; } const t = (gv - gs[lo]) / Math.max(1e-12, gs[hi] - gs[lo]); return lerp(xs[lo], xs[hi], clamp(t, 0, 1)); };
   // rings: equal steps in girth units, so quads keep their shape everywhere
-  const nR = clamp(Math.round(gTotal * M / 2.2), 220, quality === 'low' ? 900 : 1500);
+  const nR = clamp(Math.round(gTotal * M / 2.2), 220, quality === 'low' ? 900 : 2400);
   const ringX = []; for (let i = 0; i < nR; i++) ringX.push(xOf((i / (nR - 1)) * gTotal));
   ringX[0] = 0; ringX[nR - 1] = L;
 
@@ -409,7 +410,7 @@ function buildBody(P, F, pose, quality) {
     const e = 0.02, a = surf(x, th - e).p, b = surf(x, th + e).p, dx = F.Hl * 0.02, c = surf(Math.max(0, x - dx), th).p, d = surf(x + dx, th).p;
     return new THREE.Vector3().crossVectors(b.sub(a), d.sub(c)).normalize();
   };
-  return { geo, gTotal, gOf, xOf, nR, M, spine, frameAt, section, surf, surfNormal, eyeA, mouthA };
+  return { geo, gTotal, gOf, xOf, nR, M, ringX, spine, frameAt, section, surf, surfNormal, eyeA, mouthA };
 }
 
 // ---------- textures generated per species ----------
@@ -658,20 +659,134 @@ function evalLayer(Ly, a, g, t, xn, warp, cl, seed) {
   return best;
 }
 
+// v4.72: real coloured eyes, not dark dots - each group's typical iris colour (golden in vipers and
+// pythons, amber in most colubrids, bronze in elapids), kept bright even on a dark snake
+const IRIS = { viper: ['#c79a3e', '#f0d27a'], pitviper: ['#c9a23a', '#f2dc7e'], python: ['#b98a46', '#e9c784'], colubrid: ['#c8862f', '#f1c063'],
+  elapid: ['#8f6a3a', '#d9b06a'], sea: ['#8a7b56', '#cdbb88'], blind: ['#5a4a3a', '#8a7a62'] };
+function brightIris(P) {
+  const def = IRIS[P.plan] || IRIS.colubrid, H = P.head || {};
+  let c = new THREE.Color(H.iris || def[0]), inner = new THREE.Color(H.irisInner || def[1]);
+  const hsl = {}; c.getHSL(hsl); if (hsl.l < 0.38) c.setHSL(hsl.h, Math.max(hsl.s, 0.45), 0.42); // a dark iris read as a black dot
+  inner.getHSL(hsl); if (hsl.l < 0.55) inner.setHSL(hsl.h, Math.max(hsl.s, 0.5), 0.62);
+  return ['#' + c.getHexString(), '#' + inner.getHexString()];
+}
 function eyeTexture(P) {
-  const S = 128, cv = document.createElement('canvas'); cv.width = cv.height = S; const x = cv.getContext('2d');
-  const H = P.head, iris = H.iris || '#9a8a5a', R = rng(strSeed(iris));
+  const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S; const x = cv.getContext('2d');
+  const H = P.head, [iris, irisIn] = brightIris(P), R = rng(strSeed(iris));
   x.fillStyle = '#0b0a08'; x.fillRect(0, 0, S, S);
   const g = x.createRadialGradient(S / 2, S / 2, S * 0.05, S / 2, S / 2, S * 0.47);
-  g.addColorStop(0, H.irisInner || iris); g.addColorStop(0.75, iris); g.addColorStop(1, '#14100a');
+  g.addColorStop(0, irisIn); g.addColorStop(0.6, iris); g.addColorStop(0.92, '#3a2a14'); g.addColorStop(1, '#0d0a06');
   x.fillStyle = g; x.beginPath(); x.arc(S / 2, S / 2, S * 0.47, 0, TAU); x.fill();
   for (let i = 0; i < 160; i++) { const a = R() * TAU, r0 = S * (0.12 + R() * 0.2), r1 = r0 + S * (0.05 + R() * 0.12); x.strokeStyle = R() < 0.5 ? 'rgba(0,0,0,.18)' : 'rgba(255,240,200,.12)'; x.lineWidth = 1 + R(); x.beginPath(); x.moveTo(S / 2 + Math.cos(a) * r0, S / 2 + Math.sin(a) * r0); x.lineTo(S / 2 + Math.cos(a) * r1, S / 2 + Math.sin(a) * r1); x.stroke(); }
   if (H.eyeStripe) { x.fillStyle = H.eyeStripe; x.globalAlpha = 0.75; x.fillRect(0, S * 0.36, S, S * 0.28); x.globalAlpha = 1; }
   if (H.eyeRing) { x.strokeStyle = H.eyeRing; x.lineWidth = S * 0.09; x.beginPath(); x.arc(S / 2, S / 2, S * 0.43, 0, TAU); x.stroke(); }
   x.fillStyle = '#050505';
-  if (H.pupil === 'slit') { x.beginPath(); x.ellipse(S / 2, S / 2, S * 0.055, S * 0.36, 0, 0, TAU); x.fill(); }
-  else if (H.pupil === 'round') { x.beginPath(); x.arc(S / 2, S / 2, S * 0.2, 0, TAU); x.fill(); }
-  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
+  if (H.pupil === 'slit') { x.beginPath(); x.ellipse(S / 2, S / 2, S * 0.05, S * 0.34, 0, 0, TAU); x.fill(); }
+  else if (H.pupil === 'round') { x.beginPath(); x.arc(S / 2, S / 2, S * 0.17, 0, TAU); x.fill(); }
+  // a soft shine, so it reads as a wet, living eye from any angle
+  const sh = x.createRadialGradient(S * 0.38, S * 0.34, 0, S * 0.38, S * 0.34, S * 0.12); sh.addColorStop(0, 'rgba(255,255,255,.85)'); sh.addColorStop(1, 'rgba(255,255,255,0)');
+  x.fillStyle = sh; x.beginPath(); x.arc(S * 0.38, S * 0.34, S * 0.12, 0, TAU); x.fill();
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+}
+
+// ---------- v4.72: the mouth, opened with "Open mouth" ----------
+// The lower jaw swings down about its hinge at the back of the head (the throat skin stretches
+// behind it); inside are the pink mouth lining, the dark throat, rows of small backward-pointing
+// teeth on both jaws, and the fangs each group really has: long folding fangs at the very front
+// in vipers and pit vipers, short fixed front fangs in elapids and sea snakes, none in pythons,
+// colubrids and blind snakes (pythons have many more and bigger teeth instead).
+function buildMouth(P, F, body, group, eyes) {
+  const geo = body.geo, pos = geo.attributes.position, orig = pos.array.slice(), M = body.M, Hl = F.Hl;
+  const xh = Hl * (P.head.jaw || 0.75) * 1.02, xEnd = xh * 1.3, mA = body.mouthA;
+  const plan = P.plan || 'colubrid', gape = { viper: 1.25, pitviper: 1.25, python: 1.0, colubrid: 0.85, elapid: 0.8, sea: 0.7, blind: 0.35 }[plan] || 0.85;
+  // the hinge: the mouth corners at the back of the jaw; turning axis across the head
+  const cL = body.surf(xh, mA).p, cR = body.surf(xh, -mA).p, hinge = cL.clone().add(cR).multiplyScalar(0.5);
+  const fr = body.frameAt(xh), axis = fr.S.clone().normalize();
+  // pick the turning direction that drops the tip of the jaw
+  const tip0 = body.surf(Hl * 0.03, Math.PI).p, q = new THREE.Quaternion();
+  q.setFromAxisAngle(axis, 0.5); const test = tip0.clone().sub(hinge).applyQuaternion(q);
+  const sign = test.dot(fr.U) < tip0.clone().sub(hinge).dot(fr.U) ? 1 : -1;
+  const weight = (x) => 1 - sstep(xh * 0.92, xEnd, x);
+  // the head's vertices: upper jaw (lifts, like a real gape) or lower jaw (drops a little - it rests on the ground)
+  const lower = [], upper = [];
+  for (let i = 0; i < body.nR; i++) { const x = body.ringX[i]; if (x > xEnd) break;
+    for (let j = 0; j <= M; j++) { const th = TAU * (j / M) - Math.PI; (Math.abs(th) > mA ? lower : upper).push(i * (M + 1) + j, weight(x)); } }
+  const UP = 0.72, DN = 0.28; // share of the gape: top of the head up, lower jaw down
+  // the skin along the mouth line is cut while the mouth is open (otherwise it stretches across and hides the inside)
+  const ix = geo.index, cut = [];
+  const isLow = (j) => Math.abs(TAU * (j / M) - Math.PI) > mA;
+  for (let i = 0; i < body.nR - 1 && body.ringX[i] < xh * 0.97; i++) for (let j = 0; j < M; j++) if (isLow(j) !== isLow(j + 1)) { const at = (i * M + j) * 6; cut.push(at, ix.array.slice(at, at + 6)); }
+  let isCut = false;
+  const setCut = (v) => { if (v === isCut) return; isCut = v; for (let k = 0; k < cut.length; k += 2) { const at = cut[k], o = cut[k + 1]; for (let q2 = 0; q2 < 6; q2++) ix.array[at + q2] = v ? o[0] : o[q2]; } ix.needsUpdate = true; };
+  const eyeOrig = (eyes || []).map((m) => ({ m, p: m.position.clone(), q: m.quaternion.clone() }));
+  const headRings = (() => { let n = 0; while (n < body.nR && body.ringX[n] <= xEnd * 1.05) n++; return n; })();
+  // inside: palate (upper) and floor (lower) strips between the two mouth lines, slightly inside the head
+  const n = 28, xs = []; for (let k = 0; k <= n; k++) xs.push(Hl * 0.025 + (xh - Hl * 0.025) * (k / n));
+  const strip = (thL, thR, inset, col) => {
+    const pts = [], cols = [], c0 = new THREE.Color(col), cT = new THREE.Color('#5a1f26');
+    for (const x of xs) { const a = body.surf(x, thL).p, b = body.surf(x, thR).p, c = body.spine(x), f = body.frameAt(x);
+      for (const e of [a, b]) { const v = e.clone().lerp(new THREE.Vector3(c.x, c.y, c.z), inset); pts.push(v.x, v.y, v.z); const cc = c0.clone().lerp(cT, sstep(xh * 0.55, xh, x)); cols.push(cc.r, cc.g, cc.b); } }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+    const idx = []; for (let k = 0; k < n; k++) { const a = k * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); } g.setIndex(idx); g.computeVertexNormals(); return g;
+  };
+  const lining = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.45, side: THREE.DoubleSide });
+  const palateG = strip(mA - 0.06, -(mA - 0.06), 0.18, '#e7a3a2'), palate = new THREE.Mesh(palateG, lining), palateOrig = palateG.attributes.position.array.slice();
+  const floorG = strip(mA + 0.08, -(mA + 0.08), 0.22, '#df9a98'), floor = new THREE.Mesh(floorG, lining), floorOrig = floorG.attributes.position.array.slice();
+  // the throat at the back
+  const throat = new THREE.Mesh(new THREE.CircleGeometry(F.W(xh) * 0.55, 20), new THREE.MeshStandardMaterial({ color: '#3a1218', roughness: 0.8, side: THREE.DoubleSide }));
+  throat.position.copy(body.spine(xh * 0.97)); throat.lookAt(body.spine(xh * 0.97).clone().sub(fr.T));
+  const inside = new THREE.Group(); inside.add(palate, floor, throat); inside.visible = false; group.add(inside);
+  // teeth: small backward-pointing cones along both jaws; fangs at the front of the upper jaw
+  const toothM = new THREE.MeshStandardMaterial({ color: '#f3eee0', roughness: 0.35 });
+  const upperT = new THREE.Group(), lowerT = new THREE.Group(); inside.add(upperT, lowerT);
+  const many = plan === 'python' ? 1.6 : plan === 'blind' ? 0 : 1, tl = Hl * (plan === 'python' ? 0.075 : 0.05), tr = Hl * 0.013;
+  const cone = new THREE.ConeGeometry(1, 1, 8).translate(0, 0.5, 0);
+  const tooth = (parent, base, dir, len, rad) => { const m = new THREE.Mesh(cone, toothM); m.position.copy(base); m.scale.set(rad, len, rad); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize()); parent.add(m); return m; };
+  const nT = Math.round(9 * many);
+  for (let k = 0; k < nT; k++) {
+    const x = Hl * 0.14 + (xh * 0.78 - Hl * 0.14) * (k / Math.max(1, nT - 1)), f = body.frameAt(x), c = body.spine(x);
+    for (const sg of [1, -1]) {
+      const up = body.surf(x, sg * (mA - 0.05)).p.lerp(c, 0.12), lo = body.surf(x, sg * (mA + 0.07)).p.lerp(c, 0.14);
+      tooth(upperT, up, f.U.clone().negate().addScaledVector(f.T, 0.55), tl, tr);   // pointing down and back
+      tooth(lowerT, lo, f.U.clone().addScaledVector(f.T, 0.55), tl * 0.85, tr);       // pointing up and back
+    }
+  }
+  const fangs = [];
+  if (plan === 'viper' || plan === 'pitviper' || plan === 'elapid' || plan === 'sea') {
+    const big = plan === 'viper' || plan === 'pitviper', x = Hl * (big ? 0.1 : 0.12), f = body.frameAt(x), c = body.spine(x);
+    for (const sg of [1, -1]) {
+      const base = body.surf(x, sg * (mA - 0.1)).p.lerp(c, 0.1);
+      fangs.push(tooth(upperT, base, f.U.clone().negate().addScaledVector(f.T, big ? 0.35 : 0.2), Hl * (big ? 0.34 : 0.12), Hl * (big ? 0.024 : 0.02)));
+    }
+  }
+  let t = 0;
+  function set(v) {
+    t = clamp(v, 0, 1); inside.visible = t > 0.01; setCut(t > 0.01);
+    const ang = sign * gape * (1 - Math.pow(1 - t, 2)), a = pos.array, aD = ang * DN, aU = -ang * UP;
+    const qq = new THREE.Quaternion(), v3 = new THREE.Vector3();
+    const turn = (list, an) => { for (let k = 0; k < list.length; k += 2) { const vi = list[k], w = list[k + 1];
+      v3.set(orig[vi * 3], orig[vi * 3 + 1], orig[vi * 3 + 2]);
+      if (w > 0 && an) { qq.setFromAxisAngle(axis, an * w); v3.sub(hinge).applyQuaternion(qq).add(hinge); }
+      a[vi * 3] = v3.x; a[vi * 3 + 1] = v3.y; a[vi * 3 + 2] = v3.z; } };
+    turn(lower, aD); turn(upper, aU);
+    pos.needsUpdate = true;
+    // the mouth lining and the teeth go with their jaws
+    const strip2 = (g, o, an) => { const fp = g.attributes.position.array;
+      for (let k = 0; k < fp.length; k += 3) { v3.set(o[k], o[k + 1], o[k + 2]); const x = xs[Math.floor(k / 6)]; qq.setFromAxisAngle(axis, an * weight(x)); v3.sub(hinge).applyQuaternion(qq).add(hinge); fp[k] = v3.x; fp[k + 1] = v3.y; fp[k + 2] = v3.z; }
+      g.attributes.position.needsUpdate = true; g.computeVertexNormals(); };
+    strip2(floorG, floorOrig, aD); strip2(palateG, palateOrig, aU);
+    const place = (grp, an) => { qq.setFromAxisAngle(axis, an); grp.position.copy(hinge).sub(hinge.clone().applyQuaternion(qq)); grp.quaternion.copy(qq); };
+    place(lowerT, aD); place(upperT, aU);
+    for (const e of eyeOrig) { qq.setFromAxisAngle(axis, aU); e.m.position.copy(e.p).sub(hinge).applyQuaternion(qq).add(hinge); e.m.quaternion.copy(qq).multiply(e.q); }
+    // fangs swing forward as the mouth opens (vipers fold them flat when it is shut)
+    for (const fg of fangs) fg.visible = t > 0.25;
+  }
+  function settle() { // normals once the jaw stops (the seam along the belly kept smooth, like buildBody does)
+    geo.computeVertexNormals(); const nrm = geo.attributes.normal.array;
+    for (let i = 0; i < body.nR; i++) { const a = i * (M + 1), b = a + M; for (let q2 = 0; q2 < 3; q2++) { const m = (nrm[a * 3 + q2] + nrm[b * 3 + q2]) / 2; nrm[a * 3 + q2] = nrm[b * 3 + q2] = m; } }
+    geo.attributes.normal.needsUpdate = true;
+  }
+  return { set, settle, get t() { return t; }, headX: xh };
 }
 
 // ---------- ground and props ----------
@@ -880,12 +995,14 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   const envR = poseInfo.envR || Rb, groundR = Math.max(Rb * 16, envR * 9);
   const sky = new THREE.Color(S.sky[0]), hor = new THREE.Color(S.fog);
   // sky dome (gradient, no image): believable from any angle, fades into the same haze as the fog
-  const skyGeo = new THREE.SphereGeometry(groundR * 1.6, 32, 16), cols = [], p = skyGeo.attributes.position;
-  for (let i = 0; i < p.count; i++) { const y = p.getY(i) / (groundR * 1.6), c = hor.clone().lerp(sky, sstep(0.0, 0.55, y)); if (y < 0) c.copy(hor); cols.push(c.r, c.g, c.b); }
+  // v4.72: a real 3D world all round (hills, trees or rocks out to farR), no photo backdrop
+  const farR = Math.max(groundR * 4, 60), skyR = farR * 1.3;
+  const skyGeo = new THREE.SphereGeometry(skyR, 48, 24), cols = [], p = skyGeo.attributes.position;
+  for (let i = 0; i < p.count; i++) { const y = p.getY(i) / skyR, c = hor.clone().lerp(sky, sstep(0.0, 0.5, y)); if (y < 0) c.copy(hor); cols.push(c.r, c.g, c.b); }
   skyGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
   const skyMesh = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false }));
   skyMesh.renderOrder = -1; scene.add(skyMesh); ctx.skyMesh = skyMesh; ctx.groundR = groundR; ctx.fadeMats = [];
-  scene.fog = new THREE.Fog(hor, Math.max(Rb * 5.5, envR * 3.2), groundR * 0.72);
+  scene.fog = new THREE.Fog(hor, Math.max(Rb * 6, envR * 3.5), farR * 0.95); ctx.farR = farR;
   scene.background = hor;
 
   // environment light from a simple sky/ground gradient (soft reflections; no image is fetched)
@@ -937,8 +1054,24 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
       const water = new THREE.Mesh(wg, wm); water.position.y = -depth * 0.35; water.renderOrder = 2; scene.add(water); ctx.fadeMats.push(wm);
       ctx.waterInfo = { dir, edge };
     } else {
-      const g2 = new THREE.Mesh(gg, gm); g2.receiveShadow = true; scene.add(g2); ctx.fadeMats.push(gm);
+      // v4.72: the floor is real 3D - sand in ripples, litter and soil in little lumps, flat right under the snake
+      const rg = new THREE.RingGeometry(0, groundR, 160, quality === 'low' ? 60 : 110); rg.rotateX(-Math.PI / 2);
+      const kind = S.ground, rip = kind === 'sand' || kind === 'dry' || kind === 'gibber' || kind === 'gravel';
+      const pp = rg.attributes.position, w0 = F.w0, ripA = w0 * (kind === 'sand' ? 0.4 : 0.25), lumpA = w0 * 0.45;
+      for (let i = 0; i < pp.count; i++) {
+        const x = pp.getX(i), z = pp.getZ(i), r = Math.hypot(x, z);
+        const near = sstep(w0 * 1.5, w0 * 6, r < Rb * 3 ? dist2snake(x, z) : 1e9); // nothing lifts under or right beside the snake
+        let y = 0;
+        if (rip) { const u = x * 0.8 + z * 0.6 + (fbm(x / Rb, z / Rb, 1, seed + 41, 2) - 0.5) * Rb * 0.6; y += Math.sin(u / (w0 * 5)) * ripA * (0.6 + fbm(x / Rb * 0.7, z / Rb * 0.7, 1, seed + 43, 2) * 0.8); }
+        else y += (fbm(x / (w0 * 6), z / (w0 * 6), 1, seed + 47, 3) - 0.5) * 2 * lumpA;
+        y *= near;
+        y += (fbm(x / (Rb * 6), z / (Rb * 6), 1, seed + 53, 3) - 0.35) * Rb * 0.9 * sstep(Rb * 7, groundR * 0.95, r); // gentle rise to the hills
+        pp.setY(i, y);
+      }
+      rg.computeVertexNormals();
+      const g2 = new THREE.Mesh(rg, gm); g2.receiveShadow = true; scene.add(g2); ctx.fadeMats.push(gm);
     }
+    farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality);
   }
   if (S.water === 'sea') {
     const wm = new THREE.MeshPhysicalMaterial({ color: '#1f4e63', roughness: 0.12, metalness: 0, transparent: true, opacity: 0.82, normalMap: waterNormal(seed), normalScale: new THREE.Vector2(0.35, 0.35) });
@@ -1056,17 +1189,8 @@ function applyEnv(ctx, P, F, poseInfo, env) {
   const pm = new THREE.PMREMGenerator(renderer), rt = pm.fromEquirectangular(tex); pm.dispose(); ctx.track(rt);
   if (ctx.envRT) ctx.envRT.dispose();
   scene.environment = rt.texture;
-  if (ctx.skyMesh) { scene.remove(ctx.skyMesh); ctx.skyMesh.geometry.dispose(); ctx.skyMesh.material.dispose(); ctx.skyMesh = null; }
-  // the photo world is at real size: shot from about 1.7 m up, floor out to 120 m
-  const camH = 1.7, skyR = 120, sky = new THREE.Mesh(sea ? new THREE.SphereGeometry(skyR, 64, 32).scale(1, 1, -1) : groundedSkyGeometry(camH, skyR), new THREE.MeshBasicMaterial({ map: tex, depthWrite: false, fog: false }));
-  sky.position.y = sea ? 0 : camH - 0.002; sky.renderOrder = -2; scene.add(sky); ctx.track(sky.geometry); ctx.track(sky.material);
-  scene.background = env.horizon.clone();
-  // fade the near ground (and water) into the projected photo ground
-  const gR = ctx.groundR, fade = canvasTex(256, (x, s) => { const g = x.createRadialGradient(s / 2, s / 2, s * 0.22, s / 2, s / 2, s * 0.49); g.addColorStop(0, '#fff'); g.addColorStop(1, '#000'); x.fillStyle = g; x.fillRect(0, 0, s, s); }, 1, false);
-  fade.wrapS = fade.wrapT = THREE.ClampToEdgeWrapping; fade.repeat.set(1, 1); ctx.track(fade);
-  // a smooth fade (v4.63: not a random dither, which showed as dots all over the ground)
-  if (!sea) for (const m of ctx.fadeMats) { m.alphaMap = fade; if (!m.transparent) { m.transparent = true; m.depthWrite = true; } m.needsUpdate = true; }
-  scene.fog = sea ? new THREE.Fog(env.horizon, gR * 0.4, gR * 0.98) : null;
+  // v4.72: the panorama only lights the scene (reflections, sun direction and colour); what you see all round
+  // is the 3D world built in buildScene - sky dome, rolling ground, trees or rocks - not a photo backdrop
   // light: the sun from the photo, sky light from the panorama; the gradient hemisphere light stays only as a faint fill
   const sun = ctx.sun, el = Math.max(Math.asin(env.sunDir.y), (22 * Math.PI) / 180), az = Math.atan2(env.sunDir.z, env.sunDir.x), r = sun.position.length();
   sun.position.set(Math.cos(el) * Math.cos(az), Math.sin(el), Math.cos(el) * Math.sin(az)).multiplyScalar(r);
@@ -1074,6 +1198,43 @@ function applyEnv(ctx, P, F, poseInfo, env) {
   sun.shadow.radius = lerp(8, 3, env.sunny); sun.shadow.blurSamples = 16;
   if (ctx.hemi) ctx.hemi.intensity *= 0.25;
   ctx.envName = env.name;
+}
+
+// v4.72: the 3D land all round: a ring of rolling hills out to farR, with trees (forest, grass, heath, riverbank)
+// or boulders (desert, sand, gibber) standing on it; the fog melts it into the sky
+function farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality) {
+  const { scene } = ctx, R = rng(seed + 991), low = quality === 'low';
+  const r0 = groundR * 0.9, hillA = Math.min(farR * 0.08, Rb * 6 + farR * 0.04);
+  const hillH = (x, z) => { const r = Math.hypot(x, z); return (fbm(x / (farR * 0.18), z / (farR * 0.18), 1, seed + 71, 4) - 0.3) * hillA * sstep(r0, r0 + farR * 0.25, r) + (fbm(x / (Rb * 6), z / (Rb * 6), 1, seed + 53, 3) - 0.35) * Rb * 0.9; };
+  const ring = new THREE.RingGeometry(r0, farR, 128, low ? 24 : 40); ring.rotateX(-Math.PI / 2);
+  const pp = ring.attributes.position, cols = [], base = gcol.clone(), tint = new THREE.Color(S.fog);
+  for (let i = 0; i < pp.count; i++) { const x = pp.getX(i), z = pp.getZ(i), y = hillH(x, z); pp.setY(i, y - Rb * 0.05);
+    const c = base.clone().lerp(tint, 0.15 + 0.25 * fbm(x / farR * 6, z / farR * 6, 1, seed + 77, 2)); cols.push(c.r, c.g, c.b); }
+  ring.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); ring.computeVertexNormals();
+  const land = new THREE.Mesh(ring, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 })); land.receiveShadow = true; scene.add(land);
+  const leafy = { litter: 1, soil: 1, pebbles: 0.6, heath: 0.3, dry: 0.35 }[S.ground] || 0; // trees where trees grow; bare land gets boulders
+  const tall = Math.max(Rb * 3, Math.min(14, farR * 0.18)); // trees about 6-14 m, never tiny next to a big snake
+  const put = (geo, mat, n, rMin, rMax, size) => {
+    if (n <= 0) return; const im = new THREE.InstancedMesh(geo, mat, n), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), sv = new THREE.Vector3();
+    for (let i = 0; i < n; i++) { const a = R() * TAU, r = rMin + (rMax - rMin) * Math.sqrt(R()), x = Math.cos(a) * r, z = Math.sin(a) * r, k = size * (0.6 + R() * 0.8);
+      q.setFromEuler(e.set((R() - 0.5) * 0.08, R() * TAU, (R() - 0.5) * 0.08)); v.set(x, hillH(x, z) - k * 0.05, z); sv.set(k, k * (0.8 + R() * 0.5), k); m4.compose(v, q, sv); im.setMatrixAt(i, m4); }
+    im.instanceMatrix.needsUpdate = true; im.castShadow = false; im.receiveShadow = true; scene.add(im); ctx.track && ctx.track(geo);
+  };
+  if (leafy > 0) {
+    const pine = S.ground === 'heath' || S.ground === 'pebbles', parts = [];
+    const add = (g, col) => { const c = new THREE.Color(col), n = g.attributes.position.count, a = []; for (let i = 0; i < n; i++) a.push(c.r, c.g, c.b); g.setAttribute('color', new THREE.Float32BufferAttribute(a, 3)); parts.push(g.toNonIndexed ? g.toNonIndexed() : g); };
+    add(new THREE.CylinderGeometry(0.035, 0.05, 0.45, 6).translate(0, 0.225, 0), '#5a4330');
+    if (pine) { add(new THREE.ConeGeometry(0.3, 0.55, 8).translate(0, 0.55, 0), '#3d5a36'); add(new THREE.ConeGeometry(0.22, 0.45, 8).translate(0, 0.85, 0), '#46663c'); }
+    else { add(new THREE.IcosahedronGeometry(0.32, 1).scale(1, 0.85, 1).translate(0, 0.72, 0), S.ground === 'dry' ? '#7a8a4a' : '#4c6a3a'); add(new THREE.IcosahedronGeometry(0.22, 1).translate(0.16, 0.92, 0.05), S.ground === 'dry' ? '#8a9a55' : '#58783f'); }
+    let n = 0; for (const g of parts) n += g.attributes.position.count;
+    const pos = new Float32Array(n * 3), col = new Float32Array(n * 3); let o = 0;
+    for (const g of parts) { pos.set(g.attributes.position.array, o); col.set(g.attributes.color.array, o); o += g.attributes.position.array.length; }
+    const tree = new THREE.BufferGeometry(); tree.setAttribute('position', new THREE.BufferAttribute(pos, 3)); tree.setAttribute('color', new THREE.BufferAttribute(col, 3)); tree.computeVertexNormals();
+    put(tree, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, flatShading: true }), Math.round((low ? 90 : 180) * leafy), groundR * 1.1, farR * 0.92, tall);
+  } else {
+    const rock = new THREE.IcosahedronGeometry(1, 1), rp = rock.attributes.position; for (let i = 0; i < rp.count; i++) { const f = 0.75 + R() * 0.45; rp.setXYZ(i, rp.getX(i) * f, rp.getY(i) * f * 0.6, rp.getZ(i) * f); } rock.computeVertexNormals();
+    put(rock, new THREE.MeshStandardMaterial({ color: gcol.clone().multiplyScalar(0.8), roughness: 0.95, flatShading: true }), low ? 40 : 80, groundR * 1.1, farR * 0.9, Math.max(Rb * 0.8, farR * 0.02));
+  }
 }
 
 function mergeGeos(list) {
@@ -1106,21 +1267,35 @@ function contactShadow(poseInfo, F, Rb) {
 
 // ---------- camera control: bounded orbit, limited zoom, no panning ----------
 function Controls(dom, cam, opt) {
-  const st = { az: 0, el: 0.5, d: 1, vaz: 0, vel: 0, goal: null, dragging: false };
-  const ptrs = new Map(); let pinch0 = 0, d0 = 0, last = null;
+  // v4.72: px/pz = how far you have flown from the snake (sideways, along the ground), never further than panMax
+  const st = { az: 0, el: 0.5, d: 1, vaz: 0, vel: 0, px: 0, pz: 0, vpx: 0, vpz: 0, goal: null, dragging: false };
+  const ptrs = new Map(); let pinch0 = 0, d0 = 0, last = null, panBtn = false, mid0 = null;
+  const panMax = () => (opt.panMax ? opt.panMax() : 0);
+  function clampPan() { const m = panMax(), l = Math.hypot(st.px, st.pz); if (l > m && l > 0) { st.px *= m / l; st.pz *= m / l; } }
+  // move along the ground: dx to the right of the view, dy away from you (screen pixels)
+  function pan(dx, dy) {
+    const k = st.d * 0.0021, ca = Math.cos(st.az), sa = Math.sin(st.az);
+    const mx = -dx * k * ca - dy * k * sa, mz = dx * k * sa - dy * k * ca;
+    st.px += mx; st.pz += mz; clampPan(); return [mx, mz];
+  }
   const reduce = opt.reduce;
   const limitEl = (el, d) => clamp(el, opt.minEl(d), opt.maxEl);
   function setGoal(g, instant) { if (g.az != null) g = Object.assign({}, g, { az: st.az + Math.atan2(Math.sin(g.az - st.az), Math.cos(g.az - st.az)) }); // always the short way round
-    st.goal = { az: g.az != null ? g.az : st.az, el: g.el != null ? g.el : st.el, d: g.d != null ? clamp(g.d, opt.dMin(), opt.dMax()) : st.d }; if (instant || reduce()) { st.az = st.goal.az; st.d = st.goal.d; st.el = limitEl(st.goal.el, st.d); st.goal = null; } opt.kick(); }
+    st.goal = { az: g.az != null ? g.az : st.az, el: g.el != null ? g.el : st.el, d: g.d != null ? clamp(g.d, opt.dMin(), opt.dMax()) : st.d, px: g.px != null ? g.px : st.px, pz: g.pz != null ? g.pz : st.pz }; if (instant || reduce()) { st.az = st.goal.az; st.d = st.goal.d; st.el = limitEl(st.goal.el, st.d); st.px = st.goal.px; st.pz = st.goal.pz; st.goal = null; } opt.kick(); }
   function rot(dx, dy) { st.az -= dx; st.el = limitEl(st.el + dy, st.d); st.goal = null; }
   function zoom(f) { const d = clamp((st.goal ? st.goal.d : st.d) * f, opt.dMin(), opt.dMax()); setGoal({ d, az: st.goal ? st.goal.az : st.az, el: st.goal ? st.goal.el : st.el }); }
-  const onDown = (e) => { if (e.button > 0) return; try { dom.setPointerCapture(e.pointerId); } catch (err) { /* synthetic or already released pointer */ } ptrs.set(e.pointerId, [e.clientX, e.clientY]); if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); d0 = st.d; } st.dragging = true; st.vaz = st.vel = 0; last = performance.now(); st.goal = null; };
+  const onDown = (e) => { if (e.button === 1 || e.button > 2) return; panBtn = e.button === 2 || e.shiftKey || e.ctrlKey; try { dom.setPointerCapture(e.pointerId); } catch (err) { /* synthetic or already released pointer */ } ptrs.set(e.pointerId, [e.clientX, e.clientY]); if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); d0 = st.d; mid0 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; } st.dragging = true; st.vaz = st.vel = st.vpx = st.vpz = 0; last = performance.now(); st.goal = null; };
+  const onCtx = (e) => e.preventDefault();
   const onMove = (e) => {
     if (!ptrs.has(e.pointerId)) return; const p = ptrs.get(e.pointerId), dx = e.clientX - p[0], dy = e.clientY - p[1]; ptrs.set(e.pointerId, [e.clientX, e.clientY]);
-    if (ptrs.size === 1) { const k = (2.6 * Math.PI) / Math.max(400, dom.clientWidth * 1.6); rot(dx * k * 1.5, dy * k * 0.6); const now = performance.now(), dt = Math.max(8, now - last); last = now; st.vaz = (-dx * k * 1.5) / dt * 16; st.vel = (dy * k * 0.6) / dt * 16; opt.kick(); }
-    else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()], pd = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pinch0 > 0) { st.d = clamp(d0 * (pinch0 / pd), opt.dMin(), opt.dMax()); st.el = limitEl(st.el, st.d); opt.kick(); } }
+    const now = performance.now(), dt = Math.max(8, now - last);
+    if (ptrs.size === 1 && panBtn) { const m = pan(dx, dy); last = now; st.vpx = m[0] / dt * 16; st.vpz = m[1] / dt * 16; opt.kick(); }
+    else if (ptrs.size === 1) { const k = (2.6 * Math.PI) / Math.max(400, dom.clientWidth * 1.6); rot(dx * k * 1.5, dy * k * 0.6); last = now; st.vaz = (-dx * k * 1.5) / dt * 16; st.vel = (dy * k * 0.6) / dt * 16; opt.kick(); }
+    else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()], pd = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pinch0 > 0) { st.d = clamp(d0 * (pinch0 / pd), opt.dMin(), opt.dMax()); st.el = limitEl(st.el, st.d); }
+      // two fingers moving together fly you along the ground
+      const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; if (mid0) { const m = pan(mid[0] - mid0[0], mid[1] - mid0[1]); last = now; st.vpx = m[0] / dt * 16; st.vpz = m[1] / dt * 16; } mid0 = mid; opt.kick(); }
   };
-  const onUp = (e) => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch0 = 0; if (!ptrs.size) { st.dragging = false; if (reduce() || performance.now() - last > 80) { st.vaz = st.vel = 0; } opt.kick(); } };
+  const onUp = (e) => { ptrs.delete(e.pointerId); if (ptrs.size < 2) { pinch0 = 0; mid0 = null; } if (!ptrs.size) { st.dragging = false; panBtn = false; if (reduce() || performance.now() - last > 80) { st.vaz = st.vel = st.vpx = st.vpz = 0; } opt.kick(); } };
   const onWheel = (e) => { e.preventDefault(); zoom(Math.exp(clamp(e.deltaY, -120, 120) * 0.0016)); };
   const onKey = (e) => {
     const k = e.key, s = 0.17;
@@ -1131,23 +1306,29 @@ function Controls(dom, cam, opt) {
     else if (k === '+' || k === '=' || k === 'Add') zoom(0.82);
     else if (k === '-' || k === '_' || k === 'Subtract') zoom(1.22);
     else if (k === 'r' || k === 'R') opt.reset();
+    // W A S D fly along the ground around the snake
+    else if (k === 'w' || k === 'W' || k === 's' || k === 'S' || k === 'a' || k === 'A' || k === 'd' || k === 'D') {
+      const step = 60, kk = k.toLowerCase(); pan(kk === 'a' ? -step : kk === 'd' ? step : 0, kk === 'w' ? -step : kk === 's' ? step : 0); opt.kick();
+    }
     else return;
     e.preventDefault();
   };
-  dom.addEventListener('pointerdown', onDown); dom.addEventListener('pointermove', onMove); dom.addEventListener('pointerup', onUp); dom.addEventListener('pointercancel', onUp);
+  dom.addEventListener('pointerdown', onDown); dom.addEventListener('pointermove', onMove); dom.addEventListener('pointerup', onUp); dom.addEventListener('pointercancel', onUp); dom.addEventListener('contextmenu', onCtx);
   dom.addEventListener('wheel', onWheel, { passive: false }); dom.addEventListener('keydown', onKey);
   // returns true while still moving
   function update() {
     let moving = false;
-    if (!st.dragging && (st.vaz || st.vel)) { st.az += st.vaz; st.el = limitEl(st.el + st.vel, st.d); st.vaz *= 0.86; st.vel *= 0.86; if (Math.abs(st.vaz) < 1e-4 && Math.abs(st.vel) < 1e-4) st.vaz = st.vel = 0; else moving = true; }
+    // a fling keeps gliding a little longer (smoother than it was)
+    if (!st.dragging && (st.vaz || st.vel)) { st.az += st.vaz; st.el = limitEl(st.el + st.vel, st.d); st.vaz *= 0.92; st.vel *= 0.92; if (Math.abs(st.vaz) < 1e-4 && Math.abs(st.vel) < 1e-4) st.vaz = st.vel = 0; else moving = true; }
+    if (!st.dragging && (st.vpx || st.vpz)) { st.px += st.vpx; st.pz += st.vpz; clampPan(); st.vpx *= 0.9; st.vpz *= 0.9; if (Math.hypot(st.vpx, st.vpz) < st.d * 1e-5) st.vpx = st.vpz = 0; else moving = true; }
     if (st.goal) {
-      const k = 0.2; st.az += (st.goal.az - st.az) * k; st.d += (st.goal.d - st.d) * k; st.el = limitEl(st.el + (st.goal.el - st.el) * k, st.d);
-      if (Math.abs(st.goal.az - st.az) < 1e-4 && Math.abs(st.goal.d - st.d) / st.d < 1e-4 && Math.abs(st.goal.el - st.el) < 1e-4) { st.az = st.goal.az; st.d = st.goal.d; st.goal = null; } else moving = true;
+      const k = 0.16; st.az += (st.goal.az - st.az) * k; st.d += (st.goal.d - st.d) * k; st.el = limitEl(st.el + (st.goal.el - st.el) * k, st.d); st.px += (st.goal.px - st.px) * k; st.pz += (st.goal.pz - st.pz) * k;
+      if (Math.abs(st.goal.az - st.az) < 1e-4 && Math.abs(st.goal.d - st.d) / st.d < 1e-4 && Math.abs(st.goal.el - st.el) < 1e-4 && Math.hypot(st.goal.px - st.px, st.goal.pz - st.pz) < st.d * 1e-4) { st.az = st.goal.az; st.d = st.goal.d; st.px = st.goal.px; st.pz = st.goal.pz; st.goal = null; } else moving = true;
     }
     st.el = limitEl(st.el, st.d);
     return moving;
   }
-  function dispose() { dom.removeEventListener('pointerdown', onDown); dom.removeEventListener('pointermove', onMove); dom.removeEventListener('pointerup', onUp); dom.removeEventListener('pointercancel', onUp); dom.removeEventListener('wheel', onWheel); dom.removeEventListener('keydown', onKey); }
+  function dispose() { dom.removeEventListener('pointerdown', onDown); dom.removeEventListener('pointermove', onMove); dom.removeEventListener('pointerup', onUp); dom.removeEventListener('pointercancel', onUp); dom.removeEventListener('wheel', onWheel); dom.removeEventListener('keydown', onKey); dom.removeEventListener('contextmenu', onCtx); }
   return { st, setGoal, update, dispose, zoom };
 }
 
@@ -1176,7 +1357,7 @@ export function mount(host, opts) {
   host.innerHTML = '';
   const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
   const wrap = el('div', 'sp3d-wrap'), stage = el('div', 'sp3d-stage'), labels = el('div', 'sp3d-labels'), status = el('div', 'sp3d-status');
-  const hint = el('p', 'sp3d-hint', (window.innerWidth < 520 ? 'Drag sideways to go round it · pinch to zoom' : 'Drag sideways to go round the snake, up or down to tilt · pinch or scroll to zoom · arrow keys work too'));
+  const hint = el('p', 'sp3d-hint', (window.innerWidth < 520 ? 'Drag to go round it · two fingers to fly around · pinch to zoom' : 'Drag to go round the snake · right-drag, Shift-drag or W A S D to fly around it · scroll to zoom'));
   status.setAttribute('role', 'status'); status.hidden = true;
   const canvas = document.createElement('canvas'); canvas.className = 'sp3d-canvas'; canvas.tabIndex = 0;
   canvas.setAttribute('role', 'img'); canvas.setAttribute('aria-label', '3D model of ' + opts.name + '. Arrow keys rotate, plus and minus zoom, R resets the view.');
@@ -1189,8 +1370,14 @@ export function mount(host, opts) {
   const bReset = btn('Reset', 'Reset the view (R)'), bFull = btn('Fullscreen', 'Fullscreen'), bScale = btn('Scale', 'Compare with a typical adult\'s length'), bDet = btn('Details', 'Show what to look for');
   const bSet = btn('Settings', 'Settings', 'sp3d-set'); bSet.setAttribute('aria-expanded', 'false');
   bScale.setAttribute('aria-pressed', 'false'); bDet.setAttribute('aria-pressed', 'false');
-  // v4.63: only Reset stays under the model; the views, Fullscreen, Scale, Details and Settings are gone
+  // v4.63: only Reset stayed under the model. v4.72: Open mouth next to it, then three camera views
+  // (Full body, Head close-up, Pattern from above) and Size (a ruler and a 1.5 m person); still no Fullscreen, Details or Settings
   [vg, bFull, bScale, bDet, bSet].forEach((b) => b.remove());
+  const bMouth = btn('Open mouth', 'Open the mouth to see the teeth and fangs'); bMouth.setAttribute('aria-pressed', 'false');
+  const vg2 = el('span', 'sp3d-views'); vg2.setAttribute('role', 'group'); vg2.setAttribute('aria-label', 'Camera views');
+  const bVBody = btn('Full body', 'See the whole snake'), bVHead = btn('Head close-up', 'Close up on the head and its scales'), bVTop = btn('Pattern from above', 'Look down on the pattern of its back');
+  vg2.append(bVBody, bVHead, bVTop); bar.appendChild(vg2); bar.appendChild(bScale); bScale.textContent = 'Size vs person'; bScale.title = 'Show its adult length next to a ruler and a person 1.5 m tall';
+  let mouthGoal = 0;
   const panel = el('div', 'sp3d-panel'); panel.hidden = true; panel.id = 'sp3d-panel-' + seed; bSet.setAttribute('aria-controls', panel.id);
   const mkCheck = (label, checked) => { const l = el('label', 'sp3d-opt'), c = document.createElement('input'); c.type = 'checkbox'; c.checked = checked; l.append(c, document.createTextNode(' ' + label)); panel.appendChild(l); return c; };
   const cScene = mkCheck('Show surroundings', true);
@@ -1229,7 +1416,9 @@ export function mount(host, opts) {
     pat.anisotropy = renderer.capabilities.getMaxAnisotropy();
     const S = P.scales, gl = S.gloss;
     const mat = new THREE.MeshPhysicalMaterial({
-      map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(1.25, 1.25), aoMap: tiles.cavity, aoMapIntensity: 0.9, roughnessMap: tiles.cavity,
+      // v4.72: raised 3D scales - stronger relief, deeper gaps between them, and real bumps on good devices
+      map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1), aoMap: tiles.cavity, aoMapIntensity: 1.15, roughnessMap: tiles.cavity,
+      ...(quality === 'low' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
       roughness: lerp(0.82, 0.58, gl), metalness: 0, clearcoat: gl * 0.35, clearcoatRoughness: lerp(0.55, 0.3, gl), sheen: S.sheen != null ? S.sheen : 0.12, sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
       iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.65,
     });
@@ -1244,8 +1433,8 @@ export function mount(host, opts) {
     snakeGroup = new THREE.Group(); snakeGroup.add(mesh);
 
     // eyes
-    const H = P.head, eyeX = H.eyeX * F.Hl, eyeR = H.eye * F.W(eyeX) * 2 * 0.5;
-    const eyePos = [];
+    const H = P.head, eyeX = H.eyeX * F.Hl, eyeR = H.eye * F.W(eyeX) * 2 * 0.5 * 1.18; // v4.72: a little bigger
+    const eyePos = [], eyeMeshes = [];
     if (H.pupil !== 'none') {
       const et = eyeTexture(P), em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.2 });
       const eg = new THREE.SphereGeometry(eyeR, 32, 24), ep = eg.attributes.position, euv = eg.attributes.uv;
@@ -1257,7 +1446,7 @@ export function mount(host, opts) {
         const up = s.f.U.clone().addScaledVector(out, -s.f.U.dot(out)).normalize(), xa = new THREE.Vector3().crossVectors(up, out);
         const m = new THREE.Mesh(eg, em); m.position.copy(s.p).addScaledVector(n, -eyeR * (H.embed || 0.62));
         m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xa, up, out)); m.castShadow = false; m.receiveShadow = true;
-        snakeGroup.add(m); eyePos.push(m.position.clone());
+        snakeGroup.add(m); eyePos.push(m.position.clone()); eyeMeshes.push(m);
       }
     }
     // horns, rattle
@@ -1305,7 +1494,8 @@ export function mount(host, opts) {
     const axisAng = 0.5 * Math.atan2(2 * sxz, sxx - szz);
     info = { F, body, center: new THREE.Vector3(center.x, Math.min(center.y, hMax * 0.5), center.z), Rb, hMax, headPos, headDir, axisAng, eyePos, size };
     info.collide = []; for (let i = 0, n = 240; i <= n; i++) { const x = (i / n) * F.L; info.collide.push({ p: body.spine(x), r: Math.max(F.W(x), F.Hh(x)) * 1.05 }); }
-    extras = { mat };
+    extras = { mat, mouth: P.plan === 'blind' ? null : buildMouth(P, F, body, snakeGroup, eyeMeshes) };
+    if (bMouth) { bMouth.hidden = !extras.mouth; mouthGoal = 0; bMouth.setAttribute('aria-pressed', 'false'); bMouth.textContent = 'Open mouth'; }
     // camera
     cam = new THREE.PerspectiveCamera(38, 1, Rb * 0.001, Rb * 40);
     if (!controls) {
@@ -1313,6 +1503,7 @@ export function mount(host, opts) {
         reduce, maxEl: (80 * Math.PI) / 180,
         minEl: (d) => Math.max((8 * Math.PI) / 180, Math.asin(clamp((info.hMax * 1.3 - targetFor(d).y) / d, 0, 0.95))),
         dMin: () => info.dMin, dMax: () => info.dMax * (scaleObj && scaleObj.visible ? info.scaleK : 1), kick: () => kick(), reset: () => resetView(),
+        panMax: () => info.Rb * 1.4, // you can fly around the snake, never away from it
       });
     }
     fitLimits();
@@ -1336,6 +1527,7 @@ export function mount(host, opts) {
   function targetFor(d) {
     // zooming in moves the point you orbit around from the middle of the snake to its head
     const k = sstep(info.dFit * 0.75, info.dMin * 1.2, d), t = info.center.clone().lerp(info.headPos, k);
+    if (controls) { t.x += controls.st.px; t.z += controls.st.pz; }
     if (scaleObj && scaleObj.visible && info.F.L >= 0.4) t.y += 0.55 * sstep(info.dFit, info.dFit * 1.6, d); // keep the 1.5 m figure in view
     return t;
   }
@@ -1343,7 +1535,7 @@ export function mount(host, opts) {
     const hd = info.headDir; const a = Math.atan2(hd.x, hd.z);
     if (kind === 'front') return a; if (kind === 'side') return -info.axisAng + Math.PI / 2; return a + 0.9;
   }
-  function resetView(instant) { controls.setGoal({ az: viewAz('default'), el: ((info.portrait ? 40 : 30) * Math.PI) / 180, d: info.dFit }, instant); }
+  function resetView(instant) { controls.setGoal({ az: viewAz('default'), el: ((info.portrait ? 40 : 30) * Math.PI) / 180, d: info.dFit, px: 0, pz: 0 }, instant); }
   function setView(kind) {
     if (kind === 'front') controls.setGoal({ az: viewAz('front'), el: (14 * Math.PI) / 180, d: Math.max(info.dMin * 1.6, info.dFit * 0.42) });
     else if (kind === 'side') controls.setGoal({ az: viewAz('side'), el: (12 * Math.PI) / 180, d: info.dFit * 1.0 });
@@ -1371,7 +1563,10 @@ export function mount(host, opts) {
   function frame() {
     raf = 0; if (!alive || lost || !cam) return;
     if (document.hidden || !host.isConnected || host.offsetParent === null && !document.fullscreenElement) { dirty = true; return; } // paused while hidden
-    const moving = controls.update();
+    let moving = controls.update();
+    // the jaw opens and shuts smoothly
+    const mo = extras && extras.mouth;
+    if (mo && Math.abs(mo.t - mouthGoal) > 1e-3) { const nt = reduce() ? mouthGoal : mo.t + clamp(mouthGoal - mo.t, -0.07, 0.07); mo.set(nt); if (Math.abs(nt - mouthGoal) <= 1e-3) mo.settle(); moving = true; }
     placeCamera();
     updateOccluders();
     renderer.render(ctx.scene, cam);
@@ -1491,7 +1686,20 @@ export function mount(host, opts) {
 
   // events
   on(bFront, 'click', () => setView('front')); on(bSide, 'click', () => setView('side')); on(bTop, 'click', () => setView('top'));
-  on(bReset, 'click', () => resetView()); on(bFull, 'click', toggleFull); on(bScale, 'click', () => toggleScale()); on(bDet, 'click', toggleDetails);
+  on(bReset, 'click', () => { resetView(); if (mouthGoal) toggleMouth(false); });
+  function toggleMouth(force) {
+    if (!extras || !extras.mouth) return;
+    const v = force != null ? force : !mouthGoal; mouthGoal = v ? 1 : 0;
+    bMouth.setAttribute('aria-pressed', String(v)); bMouth.textContent = v ? 'Close mouth' : 'Open mouth';
+    if (v) { // turn to face the head, close enough to see inside
+      controls.setGoal({ az: viewAz('front') + 0.55, el: (16 * Math.PI) / 180, d: Math.max(info.dMin * 1.5, info.F.Hl * 5.5), px: 0, pz: 0 });
+    }
+    kick();
+  }
+  on(bMouth, 'click', () => toggleMouth());
+  on(bVBody, 'click', () => resetView());
+  on(bVHead, 'click', () => controls.setGoal({ az: viewAz('front') + 0.9, el: (20 * Math.PI) / 180, d: Math.max(info.dMin * 1.3, info.F.Hl * 4.5), px: 0, pz: 0 }));
+  on(bVTop, 'click', () => controls.setGoal({ az: controls.st.az, el: (80 * Math.PI) / 180, d: (info.Rb * 1.12) / Math.tan(Math.min(info.vf, info.hf)) + info.hMax, px: 0, pz: 0 })); on(bFull, 'click', toggleFull); on(bScale, 'click', () => toggleScale()); on(bDet, 'click', toggleDetails);
   on(bSet, 'click', () => { panel.hidden = !panel.hidden; bSet.setAttribute('aria-expanded', String(!panel.hidden)); });
   on(cScene, 'change', () => setSceneVisible(cScene.checked));
   on(qs, 'change', () => { quality = qs.value; renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality === 'low' ? 1.25 : 2)); rebuild(); });
