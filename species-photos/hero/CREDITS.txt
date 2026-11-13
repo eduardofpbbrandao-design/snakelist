@@ -1,9 +1,9 @@
 SnakeList homepage hero photograph
 ==================================
 
-Files:    rough-green-2048.webp, rough-green-1600.webp, rough-green-1200.webp, rough-green-800.webp
+Files:    rough-green-hq-2560.webp, rough-green-hq-2000.webp, rough-green-hq-1400.webp, rough-green-hq-900.webp
 Subject:  Rough green snake (Opheodrys aestivus), close-up of the head among grass
 Source:   supplied by Eduardo (SnakeList's owner) on 2026-11-13, 1024 x 663 px.
           Photographer and licence not yet recorded - add them here and as a credit on the hero.
-Changes:  enlarged to 2048 px in two gentle steps, lightly sharpened, slight contrast boost,
+Changes:  cleaned of compression blocks (non-local means), enlarged to 2560 px with Lanczos, edge-aware detail boost and
           saved as 2048/1600/1200/800 px WebP copies.

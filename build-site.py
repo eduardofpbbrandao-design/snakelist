@@ -109,6 +109,7 @@ if _late:
     site_app = site_app[:body_at] + _css + "\n</head>\n<body>\n" + _rest
 else:
     site_app = site_app[:body_at] + "</head>\n<body>\n" + site_app[body_at:]
+site_app = re.sub(r'(<span data-sl-total>)[\d,]+(</span>)', r"\g<1>" + N_TXT + r"\2", site_app)  # the right count from the very first frame
 open("index.html", "w", encoding="utf-8").write(head + site_app + "\n</body>\n</html>\n")
 # every crawler is welcome on the public pages; the AI ones named too, so it's never in doubt
 open("robots.txt", "w").write("User-agent: *\nAllow: /\n\n" + "".join("User-agent: %s\nAllow: /\n\n" % b for b in (
