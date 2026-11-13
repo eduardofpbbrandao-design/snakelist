@@ -3,6 +3,7 @@ world map they colour in (species/world.svg) and their style/script - all genera
 file, so the pages always match the checklist. Called by build-site.py.
 """
 import json, re, html as H, os, base64, unicodedata
+import sys as _sys_e; _sys_e.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools")); import etymology as ETY  # where the names come from
 
 SITE = "https://snakelist.com/"
 OUT = "species"
@@ -829,16 +830,14 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             kf.append(("Adult length", fact("length") or UNK))
             kf.append(("Diet", fact("diet") or UNK))
             kf.append(("Reproduction", fact("reproduction") or UNK))
+            # no conservation status (it came from iNaturalist): the snake's size instead, from the sourced
+            # adult length: under 50 cm small, 50-150 cm medium, over 150 cm large (nothing without a length)
+            lm = build_regions.length_m(info)
+            if lm:
+                mid = (lm[0] + lm[1]) / 2
+                kf.append(("Size", "Small-sized" if mid < 0.5 else "Medium-sized" if mid <= 1.5 else "Large-sized"))
             if c["extinct"]:
-                cs = esc(c["extinct"].split(" - ")[0])
-            elif F.get("iucn"):
-                fi = F["iucn"]
-                meta = ", ".join(x for x in ("IUCN Red List", fi.get("scope", ""), str(fi.get("year", "")) if fi.get("year") else "") if x)
-                cs = ('%s <small>(%s)</small>%s' % (esc(fi["text"]), esc(meta), R.cite(fi.get("src")))) if fi.get("code") else (
-                    '<span class="sp-unk">Category not confirmed</span> <small>(%s)</small>' % esc(meta))
-            else:
-                cs = '<span class="sp-unk">Not reviewed yet</span>'
-            kf.append(("Conservation status", cs))
+                kf.append(("Status", esc(c["extinct"].split(" - ")[0])))
             if c["countries"]:
                 dist = '<a href="#range">%s</a>' % (("Formerly " if c["extinct"] else "") + places_txt(c["countries"]))
                 if c["continents"]: dist += " <small>&middot; %s</small>" % esc(", ".join(c["continents"]))
@@ -913,24 +912,10 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
                 eco += '<div class="sp-fun"><h3>Did you know?</h3><ul>%s</ul></div>' % "".join(
                     "<li>%s%s</li>" % (R.rich(x["text"]), R.cite(x.get("src"))) for x in info["funfacts"])
             secs.append(("ecology", "Behaviour and ecology", eco))
-            cons_html = ""
-            if "iucn" in F:
-                fi = F["iucn"]
-                meta = []
-                meta.append("%s assessment" % fi["scope"].capitalize() if fi.get("scope") else "Scope not recorded")
-                meta.append("assessed %s" % fi["year"] if fi.get("year") else "assessment year not recorded")
-                if fi.get("url"): meta.append('<a href="%s" rel="noopener">IUCN assessment</a>' % esc(fi["url"]))
-                cons_html += ('<div class="sp-iucn">%s<div><p><b>%s</b>%s%s</p>'
-                              '<p class="sp-note">%s</p></div></div>') % (
-                    ('<span class="sp-cat cat-%s" aria-hidden="true">%s</span>' % (esc(fi["code"]), esc(fi["code"]))) if fi.get("code") else "",
-                    esc(fi["text"]), " on the IUCN Red List" if fi.get("code") else "", R.cite(fi.get("src")), " &middot; ".join(meta))
-                if fi.get("long") and fi["long"] != "Listed as %s on the IUCN Red List." % fi["text"]: cons_html += "<p>%s</p>" % R.rich(fi["long"])
-            cons_html += paras("conservation")
+            # no Red List status on the pages (it came from iNaturalist); only sourced conservation notes
+            cons_html = paras("conservation")
             if c["extinct"]: cons_html = '<p><b>%s.</b></p>' % esc(c["extinct"].replace(" - ", ": ", 1)) + cons_html
-            if "iucn" not in F and not c["extinct"]:
-                cons_html += ('<p class="sp-muted">SnakeList has not reviewed this snake&rsquo;s Red List status yet. '
-                              '<a href="https://www.iucnredlist.org/search?query=%s&amp;searchType=species" rel="noopener">Search the IUCN Red List</a>.</p>') % quote(sci)
-            secs.append(("conservation", "Conservation", cons_html))
+            if cons_html: secs.append(("conservation", "Conservation", cons_html))
         else:
             eco = paras("behaviour", "Behaviour") + paras("habitat", "Habitat")
             if eco: secs.append(("ecology", "What it may have been like", '<p class="sp-note">Inferred from the fossils and the rocks around them, not observed.</p>' + eco))
@@ -966,8 +951,23 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             who = '<p class="sp-who-s sp-muted">Author details not available.</p>'
         tx += '<div class="sp-who" id="sp-who" data-sci="%s" data-auth="%s"%s><h3>Who described it</h3>%s<div class="sp-who-p"></div></div>' % (
             esc(sci), esc(auth), (' data-y="%d"' % am[2]) if am else "", who)
+        # where the names come from: the genus (sourced, or its plain Greek/Latin roots), the second
+        # word of the scientific name, and the parts of the common name (tools/etymology.py)
+        ety, epi = [], sci.split(" ")[1] if " " in sci else ""
+        cname = "" if c["is_sci"] else c["name"]
         if G:
-            tx += '<h3>What the name means</h3><p class="sp-ety"><i>%s</i>: %s%s</p>' % (esc(c["genus"]), R.rich(G["meaning"]), R.cite(["genus"]))
+            ety.append('<p class="sp-ety"><i>%s</i>: %s%s</p>' % (esc(c["genus"]), R.rich(G["meaning"]), R.cite(["genus"])))
+        elif ETY.genus(c["genus"]):
+            ety.append('<p class="sp-ety"><i>%s</i>: %s</p>' % (esc(c["genus"]), ETY.genus(c["genus"])))
+        ei = ETY.epithet(epi, c["countries"] + c["provinces"] + c["continents"], cname) if epi else None
+        if ei: ety.append('<p class="sp-ety"><i>%s</i>: %s</p>' % (esc(epi), ei[1]))
+        cn = ETY.common_name(cname, epi, ei, c["countries"] + c["provinces"] + c["continents"]) if cname else None
+        if cn:
+            ety.append('<p class="sp-ety"><b>%s</b>: %s.</p>' % (esc(cname), "; ".join(
+                "&lsquo;%s&rsquo; &ndash; %s" % (esc(w), t) for w, t in cn)))
+        if ety:
+            tx += ('<h3>Where the name comes from</h3>%s<p class="sp-note">Worked out from the Latin and Greek roots and the words in the name; '
+                   'parts SnakeList can&rsquo;t explain are left out.</p>') % "".join(ety)
         tx += paras("taxonomy", "Classification notes")
         syn = (info or {}).get("synonyms")
         if syn and syn.get("names"):
@@ -1390,7 +1390,10 @@ a{color:var(--link)}.sp-top{display:flex;align-items:center;justify-content:spac
 @media (max-width:720px){.sp-head{grid-template-columns:1fr}}
 .sp-photo{margin:0}.sp-photo img,.sp-sprite{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:18px;display:block;background:var(--line)}
 .sp-photo figcaption{font-size:12px;color:var(--muted);margin-top:6px}.sp-nophoto div{aspect-ratio:3/2;border-radius:18px;display:grid;place-items:center;background:var(--line);color:var(--muted)}
-h1{font:700 clamp(30px,5vw,44px)/1.1 Georgia,serif;margin:0}.sp-title h1{color:#1f7a3a}@media (prefers-color-scheme:dark){.sp-title h1{color:#a8ef94}}.sp-sci{font-style:italic;color:var(--muted);margin:4px 0 10px;font-size:18px}
+h1{font:700 clamp(30px,5vw,44px)/1.1 Georgia,serif;margin:0}.sp-sci{font-style:italic;color:var(--muted);margin:4px 0 10px;font-size:18px}
+/* every page's main heading in the species pages' green, and the line under it in the lighter green */
+h1,.sp-title h1,.cy-head h1{color:#1f7a3a}.sp-title .sp-sci,.cy-htext .cy-lead,.cy-htext .rg-sub,h1+.sp-muted,h1+p{color:#2e7d4f}
+@media (prefers-color-scheme:dark){h1,.sp-title h1,.cy-head h1{color:#a8ef94}.sp-title .sp-sci,.cy-htext .cy-lead,.cy-htext .rg-sub,h1+.sp-muted,h1+p{color:#8fd98a}}
 .sp-badge{display:none}.sp-facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(140px,100%),1fr));gap:8px;margin:18px 0 12px}.sp-facts dd{overflow-wrap:anywhere}
 .sp-facts div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px}.sp-facts dt{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.sp-facts dd{margin:0;font-weight:600}
 .sp-btn{display:inline-block;background:var(--g);color:#fff;text-decoration:none;font-weight:600;padding:11px 18px;border-radius:12px}
