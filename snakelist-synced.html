@@ -338,8 +338,8 @@
   .sl-sub { color: var(--text-muted); font-size: 14.5px; margin: 10px 0 0; max-width: 46ch; }
   /* v4.81: "About me" (the creator's page) right under the SnakeList title */
   .sl-me { margin: 10px 0 0; }
-  .sl-me a { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px 4px 9px; border: 1px solid var(--border); border-radius: 999px; color: var(--gold); font: 600 12.5px/1.2 'Inter', sans-serif; text-decoration: none; transition: background .15s ease, border-color .15s ease; }
-  .sl-me a:hover { background: var(--ver-bg); border-color: var(--gold); }
+  .sl-me a { color: var(--gold); font: 600 13px/1.2 'Inter', sans-serif; text-decoration: none; } /* v4.86: just a word */
+  .sl-me a:hover { text-decoration: underline; }
   .sl-me a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
 
@@ -1890,15 +1890,19 @@
      with no line. Only the Checklist shows it; the other tabs open without it. */
   /* v4.80 (Eduardo's design): the opening is its own full screen - a sharp photo, not blended into SnakeList.
      Any scroll on it glides you down to SnakeList (like the button); scrolling up at the top of SnakeList glides back. */
-  .sl-hero { position: relative; height: 100vh; min-height: 480px; overflow: hidden; isolation: isolate; color: #f4f8ee; overflow-anchor: none; background: #0f2a17; }
+  .sl-hero { position: relative; height: 100vh; height: 100lvh; min-height: 480px; overflow: hidden; isolation: isolate; color: #f4f8ee; overflow-anchor: none; background: #0f2a17; }
   .sl-hero[hidden] { display: none; }
   .hero-media { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: #2d5a1e center / cover no-repeat; }
-  .hero-media img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: 38% 40%; display: block; user-select: none; -webkit-user-drag: none; }
+  .hero-media img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: contain; object-position: 50% 30%; display: block; user-select: none; -webkit-user-drag: none; }
+  /* v4.86: the whole photo shows (not zoomed in); a soft, blurred copy of it fills the space around it */
+  .hero-media img:not(.hero-fill) { --pw: 155vh; -webkit-mask-image: linear-gradient(90deg, transparent calc(50% - var(--pw) / 2), #000 calc(50% - var(--pw) / 2 + 120px), #000 calc(50% + var(--pw) / 2 - 120px), transparent calc(50% + var(--pw) / 2));
+    mask-image: linear-gradient(90deg, transparent calc(50% - var(--pw) / 2), #000 calc(50% - var(--pw) / 2 + 120px), #000 calc(50% + var(--pw) / 2 - 120px), transparent calc(50% + var(--pw) / 2)); } /* soft sides, no hard edge */
+  .hero-media .hero-fill { object-fit: cover; filter: blur(28px) saturate(1.1) brightness(0.8); transform: scale(1.12); }
   /* a soft shade at the top and bottom so the words read, and a gentle dark edge at the bottom of the screen */
   .hero-shade { position: absolute; inset: 0; pointer-events: none;
     background: linear-gradient(180deg, rgba(4,16,8,0.25) 0%, rgba(4,16,8,0) 22%, rgba(4,16,8,0) 50%, rgba(4,16,8,0.45) 78%, rgba(4,16,8,0.72) 100%); }
-  .hero-copy { position: absolute; left: 6%; right: auto; bottom: 17%; max-width: 46%; padding: 0 20px; text-align: left; } /* in the soft, blurry corner - away from the snake's head */
-  .hero-copy > p { margin: 0; } .hero-copy > .hero-sub { margin-left: 0; }
+  .hero-copy { position: absolute; left: 0; right: 0; bottom: 13%; padding: 0 20px; text-align: center; } /* v4.86: centred, the paragraph right under the logo */
+  .hero-copy > p { margin: 0 auto; } .hero-title.hero-wm { display: flex; justify-content: center; width: max-content; }
   @media (max-aspect-ratio: 1/1) { .hero-copy > p, .hero-copy > .hero-sub { margin-left: auto; margin-right: auto; } }
   .hero-title { display: inline-block; font-size: clamp(46px, min(8.5vw, 15vh), 170px); line-height: 0.95; white-space: nowrap;
     filter: drop-shadow(0 1px 2px rgba(0,0,0,0.45)) drop-shadow(0 4px 18px rgba(0,0,0,0.35)); }
@@ -1906,7 +1910,7 @@
   .hero-mark em { font-style: normal; font-weight: 500; }
   .hero-mark .snake-s { height: 0.71em; }
   /* v4.81: the hero shows the same SnakeList wordmark as the header (darker green + the tick), not the pale one */
-  .hero-title.hero-wm { display: inline-flex; align-items: baseline; --mark-grad: radial-gradient(circle at 30% 40%, #96dd78 0%, #6fc255 0%, #57ab45 32%, #38802a 100%);
+  .hero-title.hero-wm { display: inline-flex; align-items: baseline;
     --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.5)) drop-shadow(0 4px 14px rgba(0,0,0,0.35)); filter: none; }
   .hero-title.hero-wm .sl-titletext .snake-s { height: 0.71em; }
   /* v4.84: the letters come in quickly one after another, left to right, once the opening has gone */
@@ -1927,7 +1931,7 @@
   }
   .hero-copy > .hero-sub { margin-top: clamp(6px, 1.2vh, 14px); max-width: 44ch; font: 600 clamp(14px, min(1.3vw, 2.4vh), 22px)/1.5 'Inter', sans-serif;
     letter-spacing: 0.005em; text-wrap: balance; color: #9fe08a; text-shadow: 0 1px 2px rgba(0,0,0,0.85), 0 0 14px rgba(0,0,0,0.7); }
-  .hero-cue { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); display: flex; flex-direction: column;
+  .hero-cue { position: fixed; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); z-index: 3; transform: translateX(-50%); display: flex; flex-direction: column;
     align-items: center; gap: 4px; padding: 8px 14px; border: 0; border-radius: 999px; background: none; cursor: pointer;
     color: #9fe08a; font: 700 clamp(11px, 0.9vw, 15px)/1 'JetBrains Mono', monospace; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.95;
     text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
@@ -1936,7 +1940,8 @@
   .hero-cue svg { width: 22px; height: 22px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); animation: hero-nudge 2.6s ease-in-out 1.8s infinite; }
   @keyframes hero-nudge { 0%, 55%, 100% { transform: translateY(0); } 70% { transform: translateY(5px); } 85% { transform: translateY(1px); } }
   /* phones held upright: the snake's head stays in view */
-  @media (max-aspect-ratio: 1/1) { .hero-media img { object-position: 36% 40%; } .hero-copy { left: 0; right: 0; max-width: none; bottom: 15%; text-align: center; } .hero-title { font-size: clamp(44px, 14vw, 110px); } }
+  @media (max-aspect-ratio: 1544/1000) { .hero-media img:not(.hero-fill) { -webkit-mask-image: none; mask-image: none; } }
+  @media (max-aspect-ratio: 1/1) { .hero-media img:not(.hero-fill) { object-fit: cover; object-position: 36% 40%; } .hero-copy { left: 0; right: 0; max-width: none; bottom: 15%; text-align: center; } .hero-title { font-size: clamp(44px, 14vw, 110px); } }
   @media (max-height: 520px) and (min-aspect-ratio: 1/1) { .hero-copy { bottom: 18%; } .hero-title { font-size: clamp(40px, 14vh, 90px); } }
   /* the words rise in gently once the opening has gone */
   .sl-hero.hero-wait .hero-copy > *, .sl-hero.hero-wait .hero-cue { opacity: 0; }
@@ -1953,6 +1958,7 @@
 </style>
 <section class="sl-hero hero-wait" id="sl-hero" aria-label="Welcome to SnakeList">
   <div class="hero-media" aria-hidden="true">
+    <img class="hero-fill" src="species-photos/hero/rough-green-hq-2560.webp" srcset="species-photos/hero/rough-green-hq-900.webp 900w, species-photos/hero/rough-green-hq-1400.webp 1400w, species-photos/hero/rough-green-hq-2000.webp 2000w, species-photos/hero/rough-green-hq-2560.webp 2560w" sizes="(min-aspect-ratio: 1544/1000) 100vw, 155vh" alt="" decoding="async">
     <img src="species-photos/hero/rough-green-hq-2560.webp" srcset="species-photos/hero/rough-green-hq-900.webp 900w, species-photos/hero/rough-green-hq-1400.webp 1400w, species-photos/hero/rough-green-hq-2000.webp 2000w, species-photos/hero/rough-green-hq-2560.webp 2560w" sizes="(min-aspect-ratio: 1544/1000) 100vw, 155vh" alt="" fetchpriority="high" decoding="async">
     <div class="hero-shade"></div>
   </div>
@@ -1998,25 +2004,30 @@
     var entered = false;
     function enter() {
       if (entered || hero.hidden) return; entered = true; gliding = true;
-      var calm = calmQ && calmQ.matches, done = function () { hero.hidden = true; window.scrollTo(0, 0); gliding = false; window.__heroEntered = true; document.dispatchEvent(new Event("sl-hero-entered")); };
+      var calm = calmQ && calmQ.matches, done = function () { hero.hidden = true; window.scrollTo(0, 0); gliding = false; window.__heroEntered = true; document.dispatchEvent(new Event("sl-hero-entered")); window.dispatchEvent(new Event("resize")); }; // resize: the 3D buttons on the cards are placed again at once
       if (calm) { done(); return; }
-      window.scrollTo({ top: heroH(), behavior: "smooth" });
-      var t0 = performance.now(), wait = function () { if (Math.abs(window.scrollY - heroH()) <= 2 || performance.now() - t0 > 1400) done(); else requestAnimationFrame(wait); };
-      requestAnimationFrame(wait);
+      var y0 = window.scrollY, y1 = heroH(), t0 = performance.now(), D = 450;
+      (function step(now) { var k = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - k, 3); window.scrollTo(0, y0 + (y1 - y0) * e); if (k < 1) requestAnimationFrame(step); else done(); })(t0);
     }
     function want(dir, e) {
       if (blocked()) return;
       if (gliding || (dir < 0 && onHero())) { if (e && e.cancelable) e.preventDefault(); return; }
       if (dir > 0 && onHero()) { if (e && e.cancelable) e.preventDefault(); enter(); }
     }
-    window.addEventListener("wheel", function (e) { if (Math.abs(e.deltaY) < 2 || e.ctrlKey) return; if (e.target.closest && e.target.closest(".sl-dd-list, .lang-menu, [role=dialog]")) return; want(e.deltaY > 0 ? 1 : -1, e); }, { passive: false });
+    // v4.86: these listeners only exist while the photo is on screen - afterwards scrolling and tapping are
+    // left entirely to the browser (a "not passive" listener on every touch made iPads slow)
     var ty = null;
-    window.addEventListener("touchstart", function (e) { ty = e.touches.length === 1 ? e.touches[0].clientY : null; }, { passive: true });
-    window.addEventListener("touchmove", function (e) { if (ty == null) return; var dy = ty - e.touches[0].clientY; if (Math.abs(dy) < 12) return; want(dy > 0 ? 1 : -1, e); ty = null; }, { passive: false });
-    window.addEventListener("keydown", function (e) {
+    var onWheel = function (e) { if (Math.abs(e.deltaY) < 2 || e.ctrlKey) return; if (e.target.closest && e.target.closest(".sl-dd-list, .lang-menu, [role=dialog]")) return; want(e.deltaY > 0 ? 1 : -1, e); };
+    var onTs = function (e) { ty = e.touches.length === 1 ? e.touches[0].clientY : null; };
+    var onTm = function (e) { if (ty == null) return; var dy = ty - e.touches[0].clientY; if (Math.abs(dy) < 12) return; want(dy > 0 ? 1 : -1, e); ty = null; };
+    var onKey = function (e) {
       var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
       var k = e.key; if (k === "ArrowDown" || k === "PageDown" || (k === " " && !e.shiftKey)) want(1, e); else if (k === "ArrowUp" || k === "PageUp" || (k === " " && e.shiftKey)) want(-1, e);
-    });
+    };
+    function listen(on) { var f = on ? "addEventListener" : "removeEventListener";
+      window[f]("wheel", onWheel, { passive: false }); window[f]("touchstart", onTs, { passive: true }); window[f]("touchmove", onTm, { passive: false }); window[f]("keydown", onKey); }
+    if (!entered) listen(true);
+    document.addEventListener("sl-hero-entered", function () { listen(false); }, { once: true });
     document.getElementById("hero-cue").addEventListener("click", enter);
     hero.addEventListener("click", function (e) { if (e.target.closest("a, button")) return; if (!blocked()) enter(); }); // clicking the photo does the same
     hero.style.cursor = "pointer";
@@ -2032,9 +2043,9 @@
     }, { passive: true });
     // the opening is exactly one screen tall, set in pixels (and again only if the width changes - never from vh,
     // which keeps changing on phones as the address bar slides, and inside frames that grow with their page)
-    var hw = -1; function sizeHero() { var w = window.innerWidth; if (w === hw) return; hw = w;
-      hero.style.height = Math.max(480, Math.min(window.innerHeight || 800, 1400)) + "px"; }
-    sizeHero(); window.addEventListener("resize", sizeHero);
+    function sizeHero() { var vv = window.visualViewport, h = Math.max(Math.round(vv ? vv.height : 0), window.innerHeight || 0, 420); hero.style.height = h + "px";
+      var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (im) im.style.setProperty("--pw", Math.round(h * 2560 / 1658) + "px"); } // the photo's width on screen
+    sizeHero(); window.addEventListener("resize", sizeHero); if (window.visualViewport) window.visualViewport.addEventListener("resize", sizeHero);
     // window.SL_heroEnd(): where the page below the hero starts (0 when the hero is hidden)
     window.SL_heroEnd = function () { return hero.hidden ? 0 : hero.getBoundingClientRect().bottom + window.scrollY; };
     function wire() {
@@ -2060,7 +2071,7 @@
         });
         var tk = dst.querySelector(".sl-tick"); if (tk) { tk.classList.add("hl"); tk.style.setProperty("--i", k++); } } }
     // coming back from a SnakeList page (or a link that opens a place in the app): straight back to where you were, no photo
-    if (window.SL_CAME_BACK || /[?&](sp|map|f|hab|type|fam|q)=/.test(location.search)) { entered = true; window.__heroEntered = true; }
+    if (window.SL_CAME_BACK || /[?&](sp|map|f|hab|type|fam|q)=/.test(location.search)) { entered = true; window.__heroEntered = true; listen(false); }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { wordmark(); wire(); }); else { wordmark(); wire(); }
   })();
 </script>
@@ -2068,7 +2079,7 @@
     <header class="sl-header">
       <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.85</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-head"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-head)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
-      <p class="sl-me"><a href="https://snakelist.com/about.html"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>About me</a></p>
+      <p class="sl-me"><a href="https://snakelist.com/about.html">About me</a></p>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All <span data-sl-total>4,247</span> snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
     </header>
@@ -19688,9 +19699,12 @@ window.SL_GEO_READY = new Promise(function (res) {
     // v4.78: never before the opening animation has finished (however long it takes), nor over the tutorial
     var intro = document.getElementById("intro");
     if (!window.__introDone || (intro && !intro.hidden && intro.offsetParent !== null)) { setTimeout(function () { whenFree(fn, tries); }, 500); return; }
+    var hero = document.getElementById("sl-hero"); // v4.86: never over the opening photo either
+    if (hero && !hero.hidden && !window.__heroEntered) { setTimeout(function () { whenFree(fn, tries); }, 500); return; }
     if (tourOpen() || document.querySelector(".sl-intro, .intro-overlay:not([hidden])")) { if ((tries || 0) < 40) setTimeout(function () { whenFree(fn, (tries || 0) + 1); }, 700); return; }
     fn();
   }
+  var firstVisit = !get("sl-tour-seen"); // v4.86: decided now - after the welcome/tutorial this is set, and What's new must still stay away
   setTimeout(function () {
     whenFree(function () {
       // it pops up by itself only for a big new version - v5.00, v6.00... (v4.48: not every small
@@ -19699,7 +19713,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       // v4.77: every 10 updates (v4.80, v4.90, v5.00...) - Eduardo's rule - instead of only whole versions
       var major = function (v) { return Math.floor((parseFloat(String(v || "").replace(/^v/, "")) || 0) * 10 + 1e-6); };
       var bigNew = major(VER) > major(get("sl-seen-ver"));
-      if (get("sl-tour-seen") && bigNew && !newsOff()) openNews();
+      if (!firstVisit && get("sl-tour-seen") && bigNew && !newsOff()) openNews();
       else { if (!get("sl-seen-ver") || bigNew) set("sl-seen-ver", VER); maybeCookies(); }
     });
   }, 2600);
@@ -20547,7 +20561,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (token && tokExp - Date.now() > 5 * 60000) return;      // still fresh
     if (Date.now() - lastRenew < 60000) return;                 // one try a minute at most
     lastRenew = Date.now(); if (token && tokExp < Date.now()) token = null;
-    signIn(true, true);
+    // v4.86: never open Google's window by itself in the middle of a tap (it showed Chrome's "sign in / sync"
+    // screen on iPads) - the list stays saved on this device, and the account box offers "Sync now" instead
+    paintUser();
   }, true);
   // signed in: straight back to the checklist, not left on the sign-in page
   function backHome() {
@@ -21014,6 +21030,7 @@ window.SL_GEO_READY = new Promise(function (res) {
      in its own layer over the cards (nothing inside the synced list changes); the card's
      bottom row only keeps a gap for it, styled from out here */
   #td-layer { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 5; }
+  body:has(#sl-hero:not([hidden])) #td-layer { visibility: hidden; }
   body.tab-map #td-layer, body.tab-quiz #td-layer, body.tab-ach #td-layer, body.tab-cam #td-layer { display: none; }
   #grid .card { container-type: inline-size; }
   #grid .card-bottom::before { content: ""; order: 2; flex: none; width: 34px; height: 31px; margin-left: auto; }
