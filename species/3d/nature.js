@@ -473,6 +473,53 @@ function buildAll(A) {
     inst(tuftGeo(rng(seed + 77), low ? 12 : 18, 1.5, '#55693a', '#a6a46a', 0.25, { w: 0.008, lean: 0.25 }), grassMat(), list, { tag: 'reeds' });
   }
 
+  // ---------- 3b. v4.81: real 3D ground cover on the near ground, round the snake ----------
+  // grass and dry grass with ripe seed heads (the painted "wheat" became real blades), heather and grass on heath,
+  // and small loose stones on gravel, gibber and sand; densest near the snake, never on it
+  {
+    const L0 = clamp(Math.min(L * 0.07, F.w0 * 5), 0.02, 0.14), clearS = (x, z, h) => dist2snake(x, z) > F.w0 * 2.2 + h * 0.5, SP = A.sceneP || {};
+    const hasNear = (k) => ({ grass: 1, meadow: 1, heath: 1 })[k];
+    if (hasNear(U)) {
+      const dry = U === 'grass', heath = U === 'heath', h = L0 * (heath ? 0.8 : 1);
+      const colA = SP.grassA || (dry ? '#7d7a3e' : heath ? '#55602f' : '#4f7a2e'), colB = SP.grassB || (dry ? '#cdb877' : heath ? '#8a8350' : '#90a64e'), lush = !!SP.grassA && !/^#[89a-f]/i.test(SP.grassA);
+      const nTuft = Math.round(3600 * (heath ? 0.7 : 1));
+      const rIn = Math.max(F.w0 * 2, Rb * 0.05), rOut = Math.min(near0, Math.max(Rb * 5, 3));
+      put('carpet', (Rn, v) => grassGeo(Rn, low ? 8 : 13, h, colA, colB, h * 0.22, { heads: dry && !lush ? (v === 0 ? 0.22 : 0.1) : heath ? 0 : 0.06, headCol: dry && !lush ? '#cdb06a' : '#9a9a58', tip: dry && !lush ? '#d8c58c' : null, w: 0.035 }),
+        grassMat(), nTuft, rIn, rOut, [0.6, 1.25], { variants: 3, distr: 'lin', ok: (x, z) => clearS(x, z, h), tilt: 0.15, recv: true, col: () => tint(0.85, 1.12, 0.08) });
+      if (heath) put('heather', (Rn) => grassGeo(Rn, low ? 20 : 40, h * 0.9, '#4a5530', '#6a6442', h * 0.5, { lean: 0.8, w: 0.018, tip: '#9a6f8c', heads: 0 }), grassMat(), 700, rIn, rOut, [0.6, 1.2], { variants: 2, distr: 'lin', ok: (x, z) => clearS(x, z, h), col: () => tint(0.85, 1.1, 0.1) });
+    }
+    if (U === 'arid' || U === 'gibber' || U === 'sand') {
+      const sz = clamp(L * 0.012, 0.004, 0.03), n = U === 'gibber' ? 3000 : U === 'arid' ? 1600 : 420;
+      rocks(n, Math.max(F.w0 * 2, Rb * 0.05), Math.min(near0, Math.max(Rb * 4.5, 2.5)), [sz, sz * (U === 'gibber' ? 4 : 3)], { variants: 3, detail: low ? 0 : 1, flat: U === 'gibber' ? 0.5 : 0.65, lift: -0.15, recv: true, distr: 'lin', ok: (x, z) => dist2snake(x, z) > F.w0 * 1.3 + sz * 3 });
+    }
+  }
+  function grassGeo(Rn, n, h, cA, cB, spread, o = {}) { // blades that curve over, some with a ripe seed head (an ear of grass)
+    const pos = [], col = [], ca = new THREE.Color(cA), cb = new THREE.Color(cB), tip = o.tip ? new THREE.Color(o.tip) : null, hc = new THREE.Color(o.headCol || '#d6c07a'), seg = 4;
+    const quad = (a, b, c, d, cc) => { pos.push(...a, ...b, ...c, ...b, ...d, ...c); for (let k = 0; k < 6; k++) col.push(cc.r, cc.g, cc.b); };
+    for (let b = 0; b < n; b++) {
+      const a = Rn() * TAU, r = Math.sqrt(Rn()) * spread, x0 = Math.cos(a) * r, z0 = Math.sin(a) * r, head = Rn() < (o.heads || 0);
+      const hh = h * (head ? 1.1 + Rn() * 0.5 : 0.45 + Rn() * 0.7), lean = (o.lean || 0.4) * (head ? 0.5 : 0.4 + Rn() * 1.2), la = a + (Rn() - 0.5) * 1.2, w = h * (o.w || 0.03) * (head ? 0.45 : 0.7 + Rn() * 0.6);
+      const c = ca.clone().lerp(cb, Rn()); let prev = null, top = null;
+      for (let s = 0; s <= seg; s++) {
+        const f = s / seg, y = hh * f * (1 - 0.3 * lean * f), off = lean * hh * f * f * 0.7, cx = x0 + Math.cos(la) * off, cz = z0 + Math.sin(la) * off, ww = w * (1 - f * (head ? 0.3 : 0.88));
+        const Lp = [cx - Math.sin(la) * ww, y, cz + Math.cos(la) * ww], Rp = [cx + Math.sin(la) * ww, y, cz - Math.cos(la) * ww];
+        if (prev) quad(prev[0], prev[1], Lp, Rp, (tip && f > 0.5 ? c.clone().lerp(tip, (f - 0.5) * 1.6) : c.clone()).multiplyScalar(0.5 + 0.5 * f));
+        prev = [Lp, Rp]; top = [cx, y, cz];
+      }
+      if (head) { // two crossed spindle-shaped cards: the ear, nodding a little
+        const hl = h * (0.16 + Rn() * 0.08), hw = w * 2.4, dir = [Math.cos(la) * 0.35, 1, Math.sin(la) * 0.35], dl = Math.hypot(...dir);
+        for (const rot of [0, Math.PI / 2]) {
+          const px = Math.cos(la + rot), pz = Math.sin(la + rot); let pv = null;
+          for (let k = 0; k <= 4; k++) { const f = k / 4, wd = hw * Math.sin(Math.PI * Math.min(1, 0.15 + f * 0.85)) * (1 - f * 0.4), cx = top[0] + dir[0] / dl * hl * f, cy = top[1] + dir[1] / dl * hl * f, cz = top[2] + dir[2] / dl * hl * f;
+            const Lp = [cx - px * wd, cy, cz - pz * wd], Rp = [cx + px * wd, cy, cz + pz * wd]; if (pv) quad(pv[0], pv[1], Lp, Rp, hc.clone().multiplyScalar(0.8 + 0.3 * f)); pv = [Lp, Rp]; }
+        }
+      }
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); g.computeVertexNormals();
+    const nr = g.attributes.normal; for (let i = 0; i < nr.count; i++) { const v = V(nr.getX(i), nr.getY(i), nr.getZ(i)); if (v.y < 0) v.negate(); v.lerp(UP, 0.5).normalize(); nr.setXYZ(i, v.x, v.y, v.z); }
+    return g;
+  }
+
   // ---------- 4. a carpet of real 3D fallen leaves ----------
   if (K.litter && (S.ground === 'litter' || S.ground === 'soil')) leafCarpet();
   function leafCarpet() {

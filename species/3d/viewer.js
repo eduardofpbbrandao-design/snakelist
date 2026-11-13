@@ -12,6 +12,8 @@ import * as EXTRA from './extras.js'; // v4.81: Slither, See it eat, See eye shi
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
+// load-time profiling (tests only): window.__slPerf = { step: ms }
+const perfT = (name, t0) => { if (typeof window !== 'undefined' && window.SL_3D_TEST) { const p = window.__slPerf || (window.__slPerf = {}); p[name] = Math.round((p[name] || 0) + performance.now() - t0); } };
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 const lerp = (a, b, t) => a + (b - a) * t;
 const sstep = (a, b, v) => { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
@@ -76,6 +78,12 @@ function normProfile(p) {
   const base = PLANS[p.plan] || PLANS.colubrid;
   const q = merge(merge(base, { colors: { dorsal: '#776655', lateral: null, belly: '#d8cfb8', mottle: 0.08, var: 0.05 }, pattern: [], tail: {}, scene: { kind: 'litter' } }), p);
   q.colors.lateral = q.colors.lateral || q.colors.dorsal;
+  // v4.81: colubrids, elapids and sea snakes have big head shields: their sutures are drawn on the head, and the
+  // small-scale relief is left off it
+  if ((q.plan === 'colubrid' || q.plan === 'elapid' || q.plan === 'sea' || !PLANS[q.plan]) && q.head.plates == null) {
+    q.head = Object.assign({}, q.head, { plates: true });
+    if (!q.pattern.some((l) => l.type === 'shields')) q.pattern = q.pattern.concat([{ type: 'shields', color: shade(q.colors.dorsal, 0.55), alpha: 0.3, wid: 0.009, barColor: shade(q.colors.dorsal, 0.5), barAlpha: 0.22, barWid: 0.009, labials: q.plan === 'elapid' ? 7 : 8 }]);
+  }
   return q;
 }
 
@@ -118,7 +126,31 @@ export function autoProfile(p) {
       T({ type: 'blotch', count: Math.round(n * 1.2), phase: 0.5, a: 0.5, mirror: true, wid: 0.08, len: 0.22, shape: 'round', color: c, alpha: 0.8, jit: 0.3, sj: 0.3 }); break;
     case 'collar': T({ type: 'band', t: [0.05, 0.085], count: 1, len: 0.95, color: c === d ? pale : (lumOf(c) > lumOf(d) ? c : dark), warp: 0.1, jit: 0 }); break;
     case 'plain': T({ type: 'tint', t: [0.55, 1], ramp: 0.35, color: shade(d, 0.8), alpha: 0.35 }); break;
+    // v4.81: more of the patterns real snakes have (chosen by tools/auto_models.py, often for a named species)
+    case 'vert': // a vertebral row of pale scales and a few pale flecks (green tree python)
+      T({ type: 'blotch', count: Math.round(n * 2.4), a: 0, wid: 0.035, len: 0.42, shape: 'round', color: c, jit: 0.25, sj: 0.4, skip: 0.25, warp: 0.2 });
+      T({ type: 'blotch', count: Math.round(n * 1.2), a: 0.16, mirror: true, alt: true, wid: 0.03, len: 0.3, shape: 'round', color: c, alpha: 0.85, jit: 0.4, sj: 0.4, aj: 0.12, skip: 0.45, warp: 0.2 }); break;
+    case 'crossbar': // pale bars across the back from a pale vertebral line, not reaching the belly (emerald tree boa)
+      T({ type: 'blotch', count: Math.round(n * 0.8), a: 0, wid: 0.34, len: 0.17, shape: 'chevron', color: c, warp: 0.6, jit: 0.3, sj: 0.45, aj: 0.05, skip: 0.08 });
+      T({ type: 'stripe', a: 0, wid: 0.022, color: c, aa: 0.3, alpha: 0.9 }); break;
+    case 'tricolor': // red, black and yellow (or white) rings, the red bordered by black (milk and scarlet kingsnakes)
+      T({ type: 'band', count: Math.round(n * 0.55), len: 0.5, color: '#121010', warp: 0.15, jit: 0.03 });
+      T({ type: 'band', count: Math.round(n * 0.55), len: 0.2, color: c, warp: 0.15, jit: 0.03 }); break;
+    case 'collar2': // a pale collar with a black one behind it (grass snake), small dark bars down the flanks
+      T({ type: 'blotch', t: [0.045, 0.075], count: 1, a: 0.42, mirror: true, wid: 0.2, len: 0.9, shape: 'round', color: c, warp: 0.15, jit: 0 });
+      T({ type: 'blotch', t: [0.07, 0.1], count: 1, a: 0.4, mirror: true, wid: 0.24, len: 0.9, shape: 'round', color: '#141210', warp: 0.15, jit: 0 });
+      T({ type: 'blotch', t: [0.1, 0.95], count: Math.round(n * 1.3), a: 0.5, mirror: true, alt: true, wid: 0.06, len: 0.3, shape: 'rect', color: shade(d, 0.35), alpha: 0.8 }); break;
+    case 'ocelli': // big round dark spots on the back, pale-centred ones along the flanks (anacondas)
+      T({ type: 'blotch', count: Math.round(n * 1.1), a: 0.12, mirror: true, alt: true, wid: 0.14, len: 0.5, shape: 'round', color: c, warp: 0.4, jit: 0.2, sj: 0.25 });
+      T({ type: 'blotch', count: Math.round(n * 1.6), a: 0.52, mirror: true, wid: 0.1, len: 0.32, shape: 'round', color: c, inner: { r: 0.55, color: a.oc || shade(b, 0.95) }, warp: 0.4, jit: 0.3, sj: 0.3 }); break;
   }
+  // optional extras on any pattern: a pale upper lip, a stripe along the flanks or the spine, a coloured tail tip or head
+  if (a.lip) pat.push({ type: 'line', p0: [0.03, 0.5], p1: [1.15, 0.54], wid: 0.05, color: a.lip, mirror: true, aa: 0.4 });
+  if (a.ls) T({ type: 'stripe', t: [0.03, 0.9], a: a.ls[1] != null ? a.ls[1] : 0.6, mirror: true, wid: a.ls[2] || 0.03, color: a.ls[0], aa: 0.35 });
+  if (a.vs) T({ type: 'stripe', t: [0.03, 0.97], a: 0, wid: a.vs[1] || 0.03, color: a.vs[0], aa: 0.35 });
+  if (a.tt) T({ type: 'tint', t: [0.86, 1], ramp: 0.06, color: a.tt, alpha: 0.95 });
+  if (a.hc) pat.push({ type: 'cap', x0: 0, x1: a.hcx || 1.0, wid: 0.62, color: a.hc });
+  if (a.pat) for (const l of a.pat) pat.push(Object.assign({}, l));
   const colors = { dorsal: d, lateral: hexOf(mixc(hex(d), hex(b), 0.18)), belly: b, mottle: fossil ? 0.12 : 0.08, var: 0.05 };
   if (a.t === 'speckle') { colors.speckle = { p: 0.16, color: c, k: 0.6 }; colors.mottle = 0.14; }
   if (a.t === 'coral') colors.lateral = d;
@@ -128,6 +160,15 @@ export function autoProfile(p) {
   if (a.o) o.body = { tail: 0.05 };
   // v4.72: the iris takes its group's typical eye colour (see IRIS), not a darker copy of the body
   if (a.p === 'blind') o.head = {};
+  // v4.81: hand-checked details for well-known species (tools/auto_models.py CURATED): eye, head, scales, body, scene
+  if (a.h) o.head = Object.assign(o.head || {}, a.h);
+  if (a.cx) Object.assign(colors, a.cx);
+  if (a.sx) o.scales = Object.assign(o.scales || {}, a.sx);
+  if (a.bx) o.body = Object.assign(o.body || {}, a.bx);
+  if (a.ps) o.pose = a.ps;
+  if (a.sp) Object.assign(o.scene, a.sp);
+  if (a.lat) colors.lateral = a.lat;
+  if (a.tl) o.tail = a.tl;
   if (x.includes('l')) o.lengthNote = 'a typical size for its group - SnakeList has no measured length for this species yet';
   else if (fossil) o.lengthNote = 'estimated from its fossil bones';
   o.details = fossil ? [['back', 'Colours are a guess: fossils keep no colour']] : x.includes('g') ? [['back', 'Colours are a guess: no photo yet']] : [];
@@ -326,10 +367,20 @@ function makePose(P, F, seed) {
 }
 
 // ---------- the body mesh (snout, head, neck, body and tail are one seamless sweep) ----------
+// girth units: distance along the body measured in circumferences, so scales and markings keep
+// a natural size as the body narrows (scale rows around the body are constant in real snakes)
+function girthOf(F) {
+  const L = F.L, NX = 6000, xs = new Float64Array(NX), gs = new Float64Array(NX);
+  let Cmax = 0; const circ = (x) => { const a = F.W(x), b = F.Hh(x); return Math.PI * (3 * (a + b) - Math.sqrt((3 * a + b) * (a + 3 * b))); };
+  for (let i = 0; i < 40; i++) Cmax = Math.max(Cmax, circ((i / 39) * F.Hl));
+  let g = 0;
+  for (let i = 0; i < NX; i++) { const x = (i / (NX - 1)) * L; xs[i] = x; if (i) g += (L / (NX - 1)) / Math.max(circ(x - L / (NX - 1) / 2), Cmax * 0.32); gs[i] = g; }
+  const gOf = (x) => { const f = clamp(x / L, 0, 1) * (NX - 1), i = Math.min(NX - 2, Math.floor(f)); return lerp(gs[i], gs[i + 1], f - i); };
+  const xOf = (gv) => { let lo = 0, hi = NX - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (gs[m] < gv) lo = m; else hi = m; } const t = (gv - gs[lo]) / Math.max(1e-12, gs[hi] - gs[lo]); return lerp(xs[lo], xs[hi], clamp(t, 0, 1)); };
+  return { gTotal: g, gOf, xOf, circ };
+}
 function buildBody(P, F, pose, quality) {
   const L = F.L, M = quality === 'low' ? 48 : 96;
-  // girth units: distance along the body measured in circumferences, so scales and markings keep
-  // a natural size as the body narrows (scale rows around the body are constant in real snakes)
   const NX = 6000, xs = new Float64Array(NX), gs = new Float64Array(NX);
   let Cmax = 0; const circ = (x) => { const a = F.W(x), b = F.Hh(x); return Math.PI * (3 * (a + b) - Math.sqrt((3 * a + b) * (a + 3 * b))); };
   for (let i = 0; i < 40; i++) Cmax = Math.max(Cmax, circ((i / 39) * F.Hl));
@@ -352,6 +403,10 @@ function buildBody(P, F, pose, quality) {
   bumps.push({ x: F.Hl * 0.05, xs: F.Hl * 0.022, th: Hd.nostrilA != null ? (Hd.nostrilA * Math.PI) / 180 : eyeA * 0.62, ts: 0.1, amp: -0.06, mirror: true }); // nostril (upward-facing in water snakes)
   if (Hd.snoutUp) bumps.push({ x: F.Hl * 0.03, xs: F.Hl * 0.05, th: 0, ts: 0.7, amp: Hd.snoutUp });
   const nTop = (x) => lerp(Hd.canthus, 2.15, sstep(F.Hl * 0.8, F.Hl * 1.6, x));
+  // v4.81: an eye socket - the skin dips gently where the eye sits, so the domed eye under its clear
+  // spectacle scale lies flush with the head (never standing out of its outline)
+  const eyeX0 = Hd.eyeX * F.Hl, eyeRad = (Hd.eye || 0.15) * F.W(eyeX0) * 1.04, eyeRl = (F.W(eyeX0) + F.Hh(eyeX0)) / 2;
+  if (Hd.pupil !== 'none') bumps.push({ x: eyeX0, xs: eyeRad * 0.95, th: eyeA, ts: (eyeRad * 0.95) / eyeRl, amp: -(eyeRad * 0.2) / eyeRl, mirror: true, sock: true });
 
   // spine point & frame at x
   const spine = (x) => { const p = pose.at(x); return new THREE.Vector3(p[0], F.Hh(x) * F.bf + pose.Ly(x), p[1]); };
@@ -361,7 +416,7 @@ function buildBody(P, F, pose, quality) {
     const S = new THREE.Vector3().crossVectors(T, U).normalize(); return { T, U, S };
   };
   // the cross-section point at x and angle th (0 = top of the back, +/-pi = belly midline)
-  const section = (x, th) => {
+  const section = (x, th, noSock) => {
     const W = F.W(x), H = F.Hh(x), st = Math.sin(th), ct = Math.cos(th), head = x < F.Hl * 1.05;
     const n = ct >= 0 ? nTop(x) : 3.0;
     let sx = Math.sign(st) * Math.abs(st) ** (2 / n), sy = Math.sign(ct) * Math.abs(ct) ** (2 / n);
@@ -369,7 +424,7 @@ function buildBody(P, F, pose, quality) {
     if (head && ct > 0) sx *= 1 - (Hd.taper || 0.2) * sy * (1 - sstep(F.Hl * 0.85, F.Hl * 1.25, x));
     let k = 1;
     for (const b of bumps) {
-      const dx = (x - b.x) / b.xs; if (Math.abs(dx) > 3) continue;
+      const dx = (x - b.x) / b.xs; if (Math.abs(dx) > 3 || (noSock && b.sock)) continue;
       const dth1 = Math.atan2(Math.sin(th - b.th), Math.cos(th - b.th)), dth2 = Math.atan2(Math.sin(th + b.th), Math.cos(th + b.th));
       k += b.amp * Math.exp(-dx * dx) * (Math.exp(-((dth1 / b.ts) ** 2)) + (b.mirror ? Math.exp(-((dth2 / b.ts) ** 2)) : 0));
     }
@@ -380,22 +435,24 @@ function buildBody(P, F, pose, quality) {
     return [W * sx * k, H * sy * k];
   };
 
-  const nV = nR * (M + 1), pos = new Float32Array(nV * 3), uv = new Float32Array(nV * 2), hd = new Float32Array(nV);
+  const nV = nR * (M + 1), pos = new Float32Array(nV * 3), uv = new Float32Array(nV * 2), hd = new Float32Array(nV), met = new Float32Array(nV * 3);
   const plates = P.head.plates ? 1 : 0; // big head shields: the small body-scale relief fades out on the head
   const frames = [];
   for (let i = 0; i < nR; i++) {
     const x = ringX[i], c = spine(x), f = frameAt(x); frames.push({ x, c, f });
-    const v = gOf(x) / gTotal;
+    const v = gOf(x) / gTotal, cx = circ(x), headW = (1 - plates) * (1 - sstep(F.Hl * 0.82, F.Hl * 1.18, x));
     for (let j = 0; j <= M; j++) {
       const u = j / M, th = TAU * u - Math.PI, s = section(x, th), k = (i * (M + 1) + j);
       pos[k * 3] = c.x + f.S.x * s[0] + f.U.x * s[1]; pos[k * 3 + 1] = c.y + f.S.y * s[0] + f.U.y * s[1]; pos[k * 3 + 2] = c.z + f.S.z * s[0] + f.U.z * s[1];
-      uv[k * 2] = u; uv[k * 2 + 1] = v; hd[k] = plates * (1 - sstep(F.Hl * 0.92, F.Hl * 1.12, x)) * (Math.abs(th) < Math.PI * 0.62 ? 1 : 0.4);
+      uv[k * 2] = u; uv[k * 2 + 1] = v; hd[k] = plates * (1 - sstep(F.Hl * 0.92, F.Hl * 1.12, x)) * (Math.abs(th) < Math.PI * 0.62 ? 1 : 0.85);
+      // v4.81: true distances on the skin (around, along) for the small head scales drawn in the shader
+      met[k * 3] = (u - 0.5) * cx; met[k * 3 + 1] = x; met[k * 3 + 2] = headW;
     }
   }
   const idx = [];
   for (let i = 0; i < nR - 1; i++) for (let j = 0; j < M; j++) { const a = i * (M + 1) + j, b = a + M + 1; idx.push(a, a + 1, b, a + 1, b + 1, b); }
   const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setAttribute('aHead', new THREE.BufferAttribute(hd, 1));
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setAttribute('aHead', new THREE.BufferAttribute(hd, 1)); geo.setAttribute('aMet', new THREE.BufferAttribute(met, 3));
   geo.setIndex(nV > 65535 ? new THREE.Uint32BufferAttribute(idx, 1) : new THREE.Uint16BufferAttribute(idx, 1));
   geo.computeVertexNormals();
   // seam (belly midline) and the two tips: make the normals continuous
@@ -408,12 +465,12 @@ function buildBody(P, F, pose, quality) {
   geo.attributes.normal.needsUpdate = true;
   geo.computeBoundingBox(); geo.computeBoundingSphere();
 
-  const surf = (x, th) => { const c = spine(x), f = frameAt(x), s = section(x, th); return { p: c.clone().addScaledVector(f.S, s[0]).addScaledVector(f.U, s[1]), f }; };
+  const surf = (x, th, noSock) => { const c = spine(x), f = frameAt(x), s = section(x, th, noSock); return { p: c.clone().addScaledVector(f.S, s[0]).addScaledVector(f.U, s[1]), f }; };
   const surfNormal = (x, th) => {
     const e = 0.02, a = surf(x, th - e).p, b = surf(x, th + e).p, dx = F.Hl * 0.02, c = surf(Math.max(0, x - dx), th).p, d = surf(x + dx, th).p;
     return new THREE.Vector3().crossVectors(b.sub(a), d.sub(c)).normalize();
   };
-  return { geo, gTotal, gOf, xOf, nR, M, ringX, spine, frameAt, section, surf, surfNormal, eyeA, mouthA };
+  return { geo, gTotal, gOf, xOf, nR, M, ringX, spine, frameAt, section, surf, surfNormal, eyeA, mouthA, eyeRad, eyeRl };
 }
 
 // ---------- textures generated per species ----------
@@ -486,8 +543,38 @@ function scaleTextures(P, lat) {
 
 // the colour pattern, generated from the profile's layers over the whole body (no tiling, no seam)
 function patternTexture(P, F, body, lat, quality, seed) {
-  const Wp = quality === 'low' ? 192 : 512; // v4.72: twice as sharp on good devices
-  const Hp = clamp(Math.round(body.gTotal * Wp * 0.62), 256, quality === 'low' ? 2048 : 8192);
+  const d = patternData(P, F, body, lat, quality, seed);
+  return patternTex(d);
+}
+function patternTex(d) {
+  const tex = new THREE.DataTexture(d.data, d.Wp, d.Hp, THREE.RGBAFormat);
+  tex.colorSpace = THREE.SRGBColorSpace; tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.needsUpdate = true;
+  return tex;
+}
+// v4.81: the full-detail pattern is painted in a background worker (this same module) while the model is already
+// on screen with a quick, coarser one; on its own the full one took 1-2 s before anything could be shown
+function patternInWorker(P, quality, seed) {
+  return new Promise((res, rej) => {
+    let w; try { w = new Worker(import.meta.url, { type: 'module' }); } catch (e) { rej(e); return; }
+    const t = setTimeout(() => { w.terminate(); rej(new Error('timeout')); }, 30000);
+    w.onmessage = (e) => { clearTimeout(t); w.terminate(); if (e.data && e.data.data) res(e.data); else rej(new Error('worker')); };
+    w.onerror = (e) => { clearTimeout(t); w.terminate(); rej(e); };
+    w.postMessage({ slPattern: 1, P, quality, seed });
+  });
+}
+if (typeof window === 'undefined' && typeof self !== 'undefined' && typeof self.postMessage === 'function') {
+  self.onmessage = (e) => {
+    const m = e.data; if (!m || !m.slPattern) return;
+    try {
+      const F = makeBodyFns(m.P, m.quality), g = girthOf(F), lat = scaleLattice(m.P, g.gTotal), d = patternData(m.P, F, g, lat, m.quality, m.seed);
+      self.postMessage(d, [d.data.buffer]);
+    } catch (err) { self.postMessage({ error: String(err) }); }
+  };
+}
+function patternData(P, F, body, lat, quality, seed) {
+  const Wp = quality === 'low' ? 192 : quality === 'preview' ? 160 : 512; // v4.72: twice as sharp on good devices
+  const Hp = clamp(Math.round(body.gTotal * Wp * 0.62), 256, quality === 'high' ? 8192 : 2048);
   const C = P.colors, dors = hex(C.dorsal), latc = hex(C.lateral), bel = hex(C.belly);
   const bellyA = C.bellyA || 0.74, bs = C.bellySharp || 0.06, mott = C.mottle, vari = C.var;
   const layers = (P.pattern || []).map((l) => prepLayer(l, F, body));
@@ -500,11 +587,13 @@ function patternTexture(P, F, body, lat, quality, seed) {
   for (let c = 0; c < Wp; c++) { const a = ((c + 0.5) / Wp) * 2 - 1; cosA[c] = Math.cos(Math.PI * a); sinA[c] = Math.sin(Math.PI * a); }
   for (let r = 0; r < Hp; r++) {
     const g = ((r + 0.5) / Hp) * body.gTotal, x = body.xOf(g), t = x / L, xn = x / Hl;
+    // v4.81: on the narrowing head the noise follows the real girth, so it does not streak towards the snout
+    const rk = x < Hl * 1.6 ? clamp((F.W(x) + F.Hh(x)) / (F.W(Hl * 1.6) + F.Hh(Hl * 1.6)), 0.12, 1) : 1;
     for (let c = 0; c < Wp; c++) {
       const a = ((c + 0.5) / Wp) * 2 - 1, cl = lat.cell(a, g);
       const q = x < Hl * 1.1 ? 0.25 : quant;
       const aq = a + (cl.ac - a) * q, gq = g + (cl.gc - g) * q;
-      const nx = Math.cos(Math.PI * aq) * 0.9, ny = Math.sin(Math.PI * aq) * 0.9;
+      const nx = Math.cos(Math.PI * aq) * 0.9 * rk, ny = Math.sin(Math.PI * aq) * 0.9 * rk;
       const wn = vnoise(nx * 2.2, ny * 2.2, gq * 4.1, seed) - 0.5, wn2 = vnoise(nx * 6, ny * 6, gq * 11, seed + 9) - 0.5;
       const warp = wn + wn2 * 0.45;
       const aa = Math.abs(aq);
@@ -518,17 +607,14 @@ function patternTexture(P, F, body, lat, quality, seed) {
         const res = evalLayer(Ly, aq, gq, t, xn, warp, cl, seed);
         if (res) col = mixc(col, res[0], res[1]);
       }
-      const sv = 1 + vari * (hash1(cl.id, seed + 5) - 0.5) * 2 * (0.35 + 0.65 * cl.w) * (P.head.plates ? sstep(Hl * 0.95, Hl * 1.1, x) : 1);
+      const sv = 1 + vari * (hash1(cl.id, seed + 5) - 0.5) * 2 * (0.35 + 0.65 * cl.w) * sstep(Hl * 0.95, Hl * 1.15, x); // (v4.81: none on the head, where the body's scale cells would show as stripes)
       col = [col[0] * sv, col[1] * sv, col[2] * sv];
-      if (C.scaleEdge && !cl.v) col = mixc(col, hex(C.scaleEdge.color), (C.scaleEdge.k || 0.8) * Math.pow(1 - cl.w, 1.6));
+      if (C.scaleEdge && !cl.v && x > Hl * 1.05) col = mixc(col, hex(C.scaleEdge.color), (C.scaleEdge.k || 0.8) * Math.pow(1 - cl.w, 1.6));
       if (C.speckle && !cl.v && x > Hl) { const hs = hash1(cl.id, seed + 11); if (hs < C.speckle.p) col = mixc(col, hex(C.speckle.color), (C.speckle.k || 0.6) * (0.6 + hs / C.speckle.p * 0.4) * Math.sqrt(cl.w)); }
       const k = (r * Wp + c) * 4; data[k] = col[0]; data[k + 1] = col[1]; data[k + 2] = col[2]; data[k + 3] = 255;
     }
   }
-  const tex = new THREE.DataTexture(data, Wp, Hp, THREE.RGBAFormat);
-  tex.colorSpace = THREE.SRGBColorSpace; tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.ClampToEdgeWrapping;
-  tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.needsUpdate = true;
-  return tex;
+  return { data, Wp, Hp };
 }
 
 function prepLayer(l, F, body) {
@@ -669,27 +755,98 @@ const IRIS = { viper: ['#c79a3e', '#f0d27a'], pitviper: ['#c9a23a', '#f2dc7e'], 
 function brightIris(P) {
   const def = IRIS[P.plan] || IRIS.colubrid, H = P.head || {};
   let c = new THREE.Color(H.iris || def[0]), inner = new THREE.Color(H.irisInner || def[1]);
+  if (H.irisDark) return ['#' + c.getHexString(), '#' + inner.getHexString()]; // v4.81: some snakes really have a near-black iris (green snakes)
   const hsl = {}; c.getHSL(hsl); if (hsl.l < 0.38) c.setHSL(hsl.h, Math.max(hsl.s, 0.45), 0.42); // a dark iris read as a black dot
   inner.getHSL(hsl); if (hsl.l < 0.55) inner.setHSL(hsl.h, Math.max(hsl.s, 0.5), 0.62);
   return ['#' + c.getHexString(), '#' + inner.getHexString()];
 }
+// v4.81: the iris drawn like a real snake's - fine radial fibres and flecks, a darker rim, the pupil the species has
+// (round, vertical slit, or the horizontal keyhole of vine snakes), an optional pale ring or a dark stripe through it
+const EYE_TEX = new Map();
 function eyeTexture(P) {
-  const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S; const x = cv.getContext('2d');
-  const H = P.head, [iris, irisIn] = brightIris(P), R = rng(strSeed(iris));
-  x.fillStyle = '#0b0a08'; x.fillRect(0, 0, S, S);
-  const g = x.createRadialGradient(S / 2, S / 2, S * 0.05, S / 2, S / 2, S * 0.47);
-  g.addColorStop(0, irisIn); g.addColorStop(0.6, iris); g.addColorStop(0.92, '#3a2a14'); g.addColorStop(1, '#0d0a06');
-  x.fillStyle = g; x.beginPath(); x.arc(S / 2, S / 2, S * 0.47, 0, TAU); x.fill();
-  for (let i = 0; i < 160; i++) { const a = R() * TAU, r0 = S * (0.12 + R() * 0.2), r1 = r0 + S * (0.05 + R() * 0.12); x.strokeStyle = R() < 0.5 ? 'rgba(0,0,0,.18)' : 'rgba(255,240,200,.12)'; x.lineWidth = 1 + R(); x.beginPath(); x.moveTo(S / 2 + Math.cos(a) * r0, S / 2 + Math.sin(a) * r0); x.lineTo(S / 2 + Math.cos(a) * r1, S / 2 + Math.sin(a) * r1); x.stroke(); }
-  if (H.eyeStripe) { x.fillStyle = H.eyeStripe; x.globalAlpha = 0.75; x.fillRect(0, S * 0.36, S, S * 0.28); x.globalAlpha = 1; }
-  if (H.eyeRing) { x.strokeStyle = H.eyeRing; x.lineWidth = S * 0.09; x.beginPath(); x.arc(S / 2, S / 2, S * 0.43, 0, TAU); x.stroke(); }
-  x.fillStyle = '#050505';
-  if (H.pupil === 'slit') { x.beginPath(); x.ellipse(S / 2, S / 2, S * 0.05, S * 0.34, 0, 0, TAU); x.fill(); }
-  else if (H.pupil === 'round') { x.beginPath(); x.arc(S / 2, S / 2, S * 0.17, 0, TAU); x.fill(); }
-  // a soft shine, so it reads as a wet, living eye from any angle
-  const sh = x.createRadialGradient(S * 0.38, S * 0.34, 0, S * 0.38, S * 0.34, S * 0.12); sh.addColorStop(0, 'rgba(255,255,255,.85)'); sh.addColorStop(1, 'rgba(255,255,255,0)');
-  x.fillStyle = sh; x.beginPath(); x.arc(S * 0.38, S * 0.34, S * 0.12, 0, TAU); x.fill();
-  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+  const H = P.head, [iris, irisIn] = brightIris(P), key = [iris, irisIn, H.pupil, H.eyeStripe, H.eyeRing, H.pupilW].join('|');
+  if (!EYE_TEX.has(key)) {
+    const S = 512, cv = document.createElement('canvas'); cv.width = cv.height = S; const x = cv.getContext('2d'), R = rng(strSeed(key));
+    const C = S / 2, RI = S * 0.47;
+    x.fillStyle = '#070605'; x.fillRect(0, 0, S, S);
+    const g = x.createRadialGradient(C, C, S * 0.04, C, C, RI);
+    g.addColorStop(0, irisIn); g.addColorStop(0.55, iris); g.addColorStop(0.86, shade(iris, 0.62)); g.addColorStop(0.97, '#1a130b'); g.addColorStop(1, '#070605');
+    x.fillStyle = g; x.beginPath(); x.arc(C, C, RI, 0, TAU); x.fill();
+    // radial fibres, then small dark and gold flecks
+    for (let i = 0; i < 520; i++) { const a = R() * TAU, r0 = RI * (0.18 + R() * 0.4), r1 = r0 + RI * (0.12 + R() * 0.38); x.strokeStyle = R() < 0.55 ? 'rgba(0,0,0,.16)' : 'rgba(255,244,210,.13)'; x.lineWidth = 0.6 + R() * 1.6; x.beginPath(); x.moveTo(C + Math.cos(a) * r0, C + Math.sin(a) * r0); x.quadraticCurveTo(C + Math.cos(a + 0.05) * (r0 + r1) / 2, C + Math.sin(a + 0.05) * (r0 + r1) / 2, C + Math.cos(a) * r1, C + Math.sin(a) * r1); x.stroke(); }
+    for (let i = 0; i < 90; i++) { const a = R() * TAU, r = RI * (0.25 + R() * 0.62); x.fillStyle = R() < 0.6 ? 'rgba(10,6,2,.22)' : 'rgba(255,236,170,.18)'; x.beginPath(); x.arc(C + Math.cos(a) * r, C + Math.sin(a) * r, 1 + R() * 3.5, 0, TAU); x.fill(); }
+    if (H.eyeStripe) { x.save(); x.beginPath(); x.arc(C, C, RI, 0, TAU); x.clip(); x.fillStyle = H.eyeStripe; x.globalAlpha = 0.78; x.fillRect(0, S * 0.37, S, S * 0.26); x.restore(); }
+    if (H.eyeRing) { x.strokeStyle = H.eyeRing; x.lineWidth = S * 0.035; x.beginPath(); x.arc(C, C, RI * 0.97, 0, TAU); x.stroke(); }
+    // the pupil, with a soft dark halo so its edge is not a hard cut-out
+    const pupil = (grow, col) => { x.fillStyle = col; x.beginPath();
+      if (H.pupil === 'slit') x.ellipse(C, C, S * (H.pupilW || 0.045) + grow, S * 0.36 + grow, 0, 0, TAU);
+      else if (H.pupil === 'hslit') { x.ellipse(C, C, S * 0.3 + grow, S * 0.07 + grow, 0, 0, TAU); x.ellipse(C, C, S * 0.11 + grow, S * 0.11 + grow, 0, 0, TAU); }
+      else if (H.pupil === 'round') x.arc(C, C, S * (H.pupilW || 0.2) + grow, 0, TAU);
+      x.fill(); };
+    if (H.pupil && H.pupil !== 'none') { pupil(S * 0.018, 'rgba(0,0,0,.35)'); pupil(0, '#020202'); }
+    // a faint painted catch-light (the real reflections come from the glossy spectacle over the eye)
+    const sh = x.createRadialGradient(S * 0.38, S * 0.34, 0, S * 0.38, S * 0.34, S * 0.1); sh.addColorStop(0, 'rgba(255,255,255,.35)'); sh.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = sh; x.beginPath(); x.arc(S * 0.38, S * 0.34, S * 0.1, 0, TAU); x.fill();
+    EYE_TEX.set(key, cv);
+  }
+  const t = new THREE.CanvasTexture(EYE_TEX.get(key)); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+}
+
+// ---------- v4.81: the eyes ----------
+// Each eye is a shallow dome laid on the head's own surface (not a ball pushed into it): its rim is tucked
+// under the skin of a gentle socket (see buildBody) and its top rises only a hair above the head's outline,
+// so it can never stand out from any side. Over it lies the spectacle (brille), the clear scale snakes have
+// instead of eyelids: a glossy cap that blends into the skin colour of the scales round the eye.
+function buildEyes(P, F, body, pat) {
+  const H = P.head, xe = H.eyeX * F.Hl, R0 = body.eyeRad, rl = body.eyeRl, NR = 14, NA = 40, out = [];
+  const et = eyeTexture(P); et.wrapS = et.wrapT = THREE.ClampToEdgeWrapping;
+  const em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.35, metalness: 0, clearcoat: 0.6, clearcoatRoughness: 0.15, envMapIntensity: 0.9 });
+  const sm = new THREE.MeshPhysicalMaterial({ vertexColors: true, transparent: true, roughness: 0.04, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.4, depthWrite: false, specularIntensity: 1 });
+  const lm = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, roughness: 0.6, metalness: 0, depthWrite: false, envMapIntensity: 0.8 });
+  // the skin colour right round the eye, read from the body's own pattern texture
+  const img = pat && pat.image, skinAt = (x, th) => {
+    if (!img || !img.data) return [0.4, 0.4, 0.35];
+    const u = clamp((th + Math.PI) / TAU, 0, 0.999), v = clamp(body.gOf(x) / body.gTotal, 0, 0.999), k = (Math.floor(v * img.height) * img.width + Math.floor(u * img.width)) * 4;
+    const lin = (c) => Math.pow(c / 255, 2.2); return [lin(img.data[k]), lin(img.data[k + 1]), lin(img.data[k + 2])];
+  };
+  const bulge = H.bulge != null ? H.bulge : 0.1; // how far the spectacle rises above the head's outline (in eye radii)
+  for (const sg of [1, -1]) {
+    const th0 = sg * body.eyeA, c = body.surf(xe, th0, true).p;
+    const eye = [], spec = [], uv = [], col = [], spa = [];
+    for (let i = 0; i <= NR; i++) {
+      const rho = (i / NR) * 1.18;
+      for (let j = 0; j <= NA; j++) {
+        const ph = (j / NA) * TAU, a = rho * Math.cos(ph), b = rho * Math.sin(ph);
+        const x = xe + a * R0, th = th0 - sg * b * (R0 / rl);
+        const p = body.surf(x, th, true).p, n = body.surfNormal(x, th);
+        if (n.dot(p.clone().sub(body.spine(x))) < 0) n.negate();
+        // dome over the eye, then a steep tuck under the skin past the rim
+        const h = rho <= 1 ? R0 * (bulge * (1 - rho * rho) - 0.035) : R0 * (-0.035 - 1.6 * (rho - 1));
+        const pe = p.clone().addScaledVector(n, h - R0 * 0.02).sub(c), ps = p.clone().addScaledVector(n, h + R0 * 0.025).sub(c);
+        eye.push(pe.x, pe.y, pe.z); spec.push(ps.x, ps.y, ps.z);
+        uv.push(0.5 + a * 0.47 * sg, 0.5 + b * 0.47);
+        // the spectacle: clear in the middle, taking on the skin's colour at its rim, where the scales round the eye overlap it
+        const rim = sstep(0.82, 1.06, rho), sk = skinAt(x, th);
+        col.push(sk[0], sk[1], sk[2], rim); spa.push(0.16 * (1 - sstep(0.88, 1.02, rho)));
+      }
+    }
+    const idx = [];
+    for (let i = 0; i < NR; i++) for (let j = 0; j < NA; j++) { const a = i * (NA + 1) + j, b = a + NA + 1; idx.push(a, b, a + 1, a + 1, b, b + 1); }
+    const mk = (arr, withUv, withCol) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3)); if (withUv) g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); if (withCol) g.setAttribute('color', new THREE.Float32BufferAttribute(col, 4)); g.setIndex(idx); g.computeVertexNormals(); return g; };
+    const eg = mk(eye, true, false), sgeo = mk(spec, false, true);
+    // wind the triangles so they face out of the head on both sides
+    const fixFacing = (g) => { const nr = g.attributes.normal, mid = Math.round(NR * 0.3) * (NA + 1), q = new THREE.Vector3(nr.getX(mid), nr.getY(mid), nr.getZ(mid)), want = body.surfNormal(xe, th0);
+      if (want.dot(c.clone().sub(body.spine(xe))) < 0) want.negate();
+      if (q.dot(want) < 0) { const ia = g.index.array; for (let k = 0; k < ia.length; k += 3) { const t = ia[k + 1]; ia[k + 1] = ia[k + 2]; ia[k + 2] = t; } g.index.needsUpdate = true; g.computeVertexNormals(); } };
+    fixFacing(eg); fixFacing(sgeo);
+    const m = new THREE.Mesh(eg, em); m.position.copy(c); m.receiveShadow = true; m.castShadow = false;
+    // the clear glossy spectacle, and round its edge the skin of the scales that ring the eye, overlapping it
+    const sg2 = sgeo.clone(), ca = sg2.attributes.color; for (let i = 0; i < ca.count; i++) ca.setXYZW(i, 1, 1, 1, spa[i]);
+    const sp = new THREE.Mesh(sg2, sm); sp.renderOrder = 3; sp.receiveShadow = false; m.add(sp);
+    const lid = new THREE.Mesh(sgeo, lm); lid.renderOrder = 2; lid.receiveShadow = true; m.add(lid);
+    m.userData.spectacle = sp; out.push(m);
+  }
+  return out;
 }
 
 // ---------- v4.72: the mouth, opened with "Open mouth" ----------
@@ -698,7 +855,7 @@ function eyeTexture(P) {
 // teeth on both jaws, and the fangs each group really has: long folding fangs at the very front
 // in vipers and pit vipers, short fixed front fangs in elapids and sea snakes, none in pythons,
 // colubrids and blind snakes (pythons have many more and bigger teeth instead).
-function buildMouth(P, F, body, group, eyes) {
+function buildMouth(P, F, body, group, eyes, pat) {
   const geo = body.geo, pos = geo.attributes.position, orig = pos.array.slice(), M = body.M, Hl = F.Hl;
   const xh = Hl * (P.head.jaw || 0.75) * 1.02, xEnd = xh * 1.3, mA = body.mouthA;
   const plan = P.plan || 'colubrid', gape = { viper: 1.25, pitviper: 1.25, python: 1.0, colubrid: 0.85, elapid: 0.8, sea: 0.7, blind: 0.35 }[plan] || 0.85;
@@ -723,86 +880,163 @@ function buildMouth(P, F, body, group, eyes) {
   const setCut = (v) => { if (v === isCut) return; isCut = v; for (let k = 0; k < cut.length; k += 2) { const at = cut[k], o = cut[k + 1]; for (let q2 = 0; q2 < 6; q2++) ix.array[at + q2] = v ? o[0] : o[q2]; } ix.needsUpdate = true; };
   const eyeOrig = (eyes || []).map((m) => ({ m, p: m.position.clone(), q: m.quaternion.clone() }));
   const headRings = (() => { let n = 0; while (n < body.nR && body.ringX[n] <= xEnd * 1.05) n++; return n; })();
-  // inside: palate (upper) and floor (lower) strips between the two mouth lines, slightly inside the head
-  const n = 28, xs = []; for (let k = 0; k <= n; k++) xs.push(Hl * 0.025 + (xh - Hl * 0.025) * (k / n));
-  const strip = (thL, thR, inset, col) => {
-    const pts = [], cols = [], c0 = new THREE.Color(col), cT = new THREE.Color('#5a1f26');
-    for (const x of xs) { const a = body.surf(x, thL).p, b = body.surf(x, thR).p, c = body.spine(x), f = body.frameAt(x);
-      for (const e of [a, b]) { const v = e.clone().lerp(new THREE.Vector3(c.x, c.y, c.z), inset); pts.push(v.x, v.y, v.z); const cc = c0.clone().lerp(cT, sstep(xh * 0.55, xh, x)); cols.push(cc.r, cc.g, cc.b); } }
-    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
-    const idx = []; for (let k = 0; k < n; k++) { const a = k * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); } g.setIndex(idx); g.computeVertexNormals(); return g;
+  // v4.81: the inside of the mouth is modelled, not two flat strips. Each jaw has rounded lips (the lip scales
+  // roll inwards from the skin to the gums, so the edge of the upper jaw is no longer a thin shell), a vaulted pink
+  // roof with the two rows of palate teeth on low ridges, a soft floor with the tongue sheath and glottis on a raised
+  // midline, wet-looking lining that darkens towards the throat (and in the grooves beside the gums), a dark throat
+  // tunnel at the back and soft folds of skin at the corners of the mouth. Everything turns with its own jaw.
+  const n = 44, xs = []; for (let k = 0; k <= n; k++) xs.push(Hl * 0.03 + (xh - Hl * 0.03) * Math.pow(k / n, 0.9));
+  const img = pat && pat.image, skinAt = (x, th) => {
+    if (!img || !img.data) return new THREE.Color(P.colors.lateral || P.colors.dorsal);
+    const u = clamp((th + Math.PI) / TAU, 0, 0.999), v = clamp(body.gOf(x) / body.gTotal, 0, 0.999), k = (Math.floor(v * img.height) * img.width + Math.floor(u * img.width)) * 4;
+    return new THREE.Color().setRGB(img.data[k] / 255, img.data[k + 1] / 255, img.data[k + 2] / 255, THREE.SRGBColorSpace);
   };
-  const lining = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.45, side: THREE.DoubleSide });
-  const palateG = strip(mA - 0.06, -(mA - 0.06), 0.18, '#f2b9b5'), palate = new THREE.Mesh(palateG, lining), palateOrig = palateG.attributes.position.array.slice();
-  const floorG = strip(mA + 0.08, -(mA + 0.08), 0.22, '#eaa9a5'), floor = new THREE.Mesh(floorG, lining), floorOrig = floorG.attributes.position.array.slice();
-  // the throat at the back
-  const throat = new THREE.Mesh(new THREE.CircleGeometry(F.W(xh) * 0.55, 20), new THREE.MeshStandardMaterial({ color: '#5a1c26', roughness: 0.8, side: THREE.DoubleSide }));
-  throat.position.copy(body.spine(xh * 0.97)); throat.lookAt(body.spine(xh * 0.97).clone().sub(fr.T));
-  const inside = new THREE.Group(); inside.add(palate, floor, throat); inside.visible = false; group.add(inside);
-  // teeth: small backward-pointing cones along both jaws; fangs at the front of the upper jaw
-  const toothM = new THREE.MeshStandardMaterial({ color: '#f3eee0', roughness: 0.35 });
+  const pink = new THREE.Color(P.head.mouthColor || (plan === 'python' ? '#e8a49c' : '#ec9f9a')), deep = new THREE.Color('#5b1a24'), black = new THREE.Color('#1a0608');
+  if (P.head.mouthColor && /^#[0-3]/.test(P.head.mouthColor)) deep.set('#120c0c'); // a black mouth (black mamba) stays black
+  const chord = (x, th, s2, inset) => { const a = body.surf(x, th).p, b = body.surf(x, -th).p; return a.lerp(b, s2).lerp(body.spine(x), inset); };
+  const bump = (s, c, w) => Math.exp(-(((s - c) / w) ** 2));
+  const labN = P.head.labials || (plan === 'python' ? 13 : plan === 'viper' || plan === 'pitviper' ? 11 : 8), labLen = (xh * 0.95) / labN;
+  // one jaw's lining: lip (outer edge -> rolled under -> gum), then the roof or floor across, then the other lip
+  function jawLining(upper) {
+    const NS = 18, NL = 5, rows = [], cols = [], xv = [];
+    const sgU = upper ? -1 : 1; // the lips roll towards the opening: down for the upper jaw, up for the lower
+    for (const x of xs) {
+      const f = body.frameAt(x), Hh = F.Hh(x), W = F.W(x), back = sstep(xh * 0.5, xh * 1.0, x);
+      const thE = upper ? mA - 0.015 : mA + 0.015, thI = upper ? mA - 0.07 : mA + 0.09;
+      const across = (s) => { // the roof (vaulted, two ridges for the palate teeth) or the floor (a raised soft midline)
+        const p = chord(x, thI, s, upper ? 0.2 : 0.22);
+        if (upper) p.addScaledVector(f.U, Hh * (0.16 * Math.sin(Math.PI * s) * (1 - 0.4 * back) - 0.045 * (bump(s, 0.3, 0.07) + bump(s, 0.7, 0.07))));
+        else p.addScaledVector(f.U, Hh * (0.07 * bump(s, 0.5, 0.14) - 0.13 * Math.sin(Math.PI * s) * (1 - 0.5 * back)));
+        return p;
+      };
+      const lip = (side, k) => { // k = 0 at the skin's cut edge, 1 at the gum
+        const A = body.surf(x, side * thE).p, B = across(side > 0 ? 0 : 1), lr = Hh * (upper ? 0.16 : 0.12) * (1 - 0.5 * back);
+        const C = A.clone().addScaledVector(f.U, sgU * lr).lerp(B, 0.25), t2 = k;
+        return A.clone().multiplyScalar((1 - t2) ** 2).addScaledVector(C, 2 * (1 - t2) * t2).addScaledVector(B, t2 * t2);
+      };
+      const row = [];
+      for (let k = 0; k < NL; k++) row.push([lip(1, k / NL), 'lip', k / NL, 1]);
+      for (let k = 0; k <= NS; k++) row.push([across(k / NS), 'in', k / NS, 0]);
+      for (let k = NL - 1; k >= 0; k--) row.push([lip(-1, k / NL), 'lip', k / NL, -1]);
+      // colours: the lip scales take the skin colour with dark sutures between them; the lining is pink, darker
+      // in the grooves beside the gums, on the ridges a little lighter, and fading to deep red and black in the throat
+      const suture = 1 - 0.45 * Math.pow(Math.abs(Math.cos(Math.PI * x / labLen)), 14) * sstep(Hl * 0.05, Hl * 0.12, x);
+      for (const [p, kind, s, side] of row) {
+        let c;
+        if (kind === 'lip') { const sk = skinAt(x, side * (upper ? mA - 0.06 : mA + 0.08)), lipC = sk.clone().lerp(new THREE.Color(P.colors.belly), upper ? 0.25 : 0.5); c = lipC.multiplyScalar(suture * lerp(1, 0.7, sstep(0.55, 1, s))).lerp(pink, sstep(0.8, 1, s) * 0.6); }
+        else {
+          c = pink.clone();
+          const groove = Math.max(bump(s, 0, 0.12), bump(s, 1, 0.12)), ridge = upper ? bump(s, 0.3, 0.06) + bump(s, 0.7, 0.06) : bump(s, 0.5, 0.1);
+          c.multiplyScalar((1 - 0.35 * groove) * (1 + 0.12 * ridge) * (0.94 + 0.12 * hash1((x / Hl * 300) | 0, (s * 97) | 0)));
+          c.lerp(deep, sstep(0.45, 0.95, x / xh) * 0.85).lerp(black, sstep(0.8, 1.0, x / xh) * 0.7 * (1 - 0.5 * ridge));
+        }
+        rows.push(p.x, p.y, p.z); cols.push(c.r, c.g, c.b); xv.push(x);
+      }
+    }
+    const per = 2 * NL + NS + 1, g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(rows, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+    const idx = []; for (let i = 0; i < xs.length - 1; i++) for (let k = 0; k < per - 1; k++) { const a = i * per + k, b = a + per; idx.push(a, a + 1, b, a + 1, b + 1, b); }
+    g.setIndex(idx); g.computeVertexNormals();
+    return { g, o: g.attributes.position.array.slice(), xv, per, row: (x, s) => { const i = clamp(Math.round(xs.findIndex((q) => q >= x)), 0, xs.length - 1), k = NL + Math.round(s * NS); return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); }, gum: (x, side) => { const i = Math.max(0, xs.findIndex((q) => q >= x)), k = side > 0 ? NL - 1 : per - NL; return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); } };
+  }
+  const lining = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.4, metalness: 0, clearcoat: 0.4, clearcoatRoughness: 0.28, emissive: new THREE.Color('#2a0709'), emissiveIntensity: 0.6, side: THREE.DoubleSide, envMapIntensity: 0.45 }); // (a faint glow stands in for light passing through the soft tissue)
+  const roof = jawLining(true), floorJ = jawLining(false);
+  const palate = new THREE.Mesh(roof.g, lining), floor = new THREE.Mesh(floorJ.g, lining);
+  palate.receiveShadow = floor.receiveShadow = true;
+  // the corners of the mouth: a short fold of skin between the two jaws, just in front of the hinge
+  const cheekX = xs.filter((x) => x >= xh * 0.84), cheekK = 6, cheekPts = [], cheekCols = [], cheekInfo = [];
+  for (const x of cheekX) for (const side of [1, -1]) {
+    const a = roof.gum(x, side), b = floorJ.gum(x, side), mid = body.spine(x), reach = sstep(xh * 0.84, xh * 1.0, x);
+    for (let k = 0; k <= cheekK; k++) { const s = k / cheekK, p = a.clone().lerp(b, s).lerp(mid, 0.12 * Math.sin(Math.PI * s)); cheekPts.push(p.x, p.y, p.z); const c = pink.clone().lerp(deep, 0.75 + 0.25 * Math.sin(Math.PI * s)).multiplyScalar(0.7); cheekCols.push(c.r, c.g, c.b); cheekInfo.push(s, reach, x); }
+  }
+  const cheekG = new THREE.BufferGeometry(); cheekG.setAttribute('position', new THREE.Float32BufferAttribute(cheekPts, 3)); cheekG.setAttribute('color', new THREE.Float32BufferAttribute(cheekCols, 3));
+  { const idx = [], per = (cheekK + 1); for (let i = 0; i < cheekX.length - 1; i++) for (const sd of [0, 1]) for (let k = 0; k < cheekK; k++) { const a = (i * 2 + sd) * per + k, b = a + 2 * per; idx.push(a, a + 1, b, a + 1, b + 1, b); } cheekG.setIndex(idx); cheekG.computeVertexNormals(); }
+  const cheekOrig = cheekG.attributes.position.array.slice(), cheeks = new THREE.Mesh(cheekG, lining);
+  // the throat: a dark tunnel going back into the neck
+  const thrR = F.W(xh) * 0.5, thrH = F.Hh(xh) * 0.42, thrL = Hl * 0.35, thrG = new THREE.CylinderGeometry(1, 0.35, 1, 24, 6, true), tp = thrG.attributes.position, tc = [];
+  for (let i = 0; i < tp.count; i++) { const y = tp.getY(i) + 0.5, c = deep.clone().lerp(black, 0.4 + 0.6 * (1 - y)); tc.push(c.r, c.g, c.b); }
+  thrG.setAttribute('color', new THREE.Float32BufferAttribute(tc, 3));
+  const throat = new THREE.Mesh(thrG, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, side: THREE.DoubleSide }));
+  { const p0 = body.spine(xh * 0.9), ft = body.frameAt(xh * 0.9); throat.position.copy(p0).addScaledVector(ft.T, thrL * 0.5).addScaledVector(ft.U, -F.Hh(xh) * 0.08); throat.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(ft.S, ft.T.clone().negate(), ft.U)); throat.scale.set(thrR, thrL, thrH); }
+  const inside = new THREE.Group(); inside.add(palate, floor, cheeks, throat); inside.visible = false; group.add(inside);
+  // teeth: slim, slightly curved, backward-pointing; fangs at the front of the upper jaw
+  const toothM = new THREE.MeshPhysicalMaterial({ color: '#f6f1e4', roughness: 0.22, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.1, sheen: 0.4, sheenColor: new THREE.Color('#fff8e8') });
   const upperT = new THREE.Group(), lowerT = new THREE.Group(); inside.add(upperT, lowerT);
-  const many = plan === 'python' ? 1.6 : plan === 'blind' ? 0 : 1, tl = Hl * (plan === 'python' ? 0.075 : 0.05), tr = Hl * 0.013;
-  const cone = new THREE.ConeGeometry(1, 1, 8).translate(0, 0.5, 0);
-  const tooth = (parent, base, dir, len, rad) => { const m = new THREE.Mesh(cone, toothM); m.position.copy(base); m.scale.set(rad, len, rad); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize()); parent.add(m); return m; };
-  const nT = Math.round(9 * many);
+  const many = plan === 'python' ? 1.6 : plan === 'blind' ? 0 : 1, tl = Hl * (plan === 'python' ? 0.07 : plan === 'colubrid' ? 0.036 : 0.042), tr = Hl * (plan === 'python' ? 0.011 : 0.008);
+  const curvedTooth = (bend) => { // a cone along a gentle curve, its tip turned back (local +y = base to tip)
+    const pts = []; for (let k = 0; k <= 6; k++) { const s = k / 6; pts.push(new THREE.Vector3(0, s, bend * s * s)); }
+    const crv = new THREE.CatmullRomCurve3(pts), g = new THREE.TubeGeometry(crv, 8, 1, 8, false), p = g.attributes.position, q = new THREE.Vector3();
+    // taper the tube to a point (TubeGeometry is a constant radius: pull each ring to its centre line)
+    for (let i = 0; i < p.count; i++) { const ring = Math.floor(i / 9), s = ring / 8; crv.getPointAt(s, q); const cx = q.x, cy = q.y, cz = q.z, k = Math.pow(1 - s, 0.85) + 0.02; p.setXYZ(i, cx + (p.getX(i) - cx) * k, cy + (p.getY(i) - cy) * k, cz + (p.getZ(i) - cz) * k); }
+    g.computeVertexNormals(); return g;
+  };
+  const toothG = curvedTooth(0.35);
+  const tooth = (parent, base, dir, len, rad, back, g) => { const m = new THREE.Mesh(g || toothG, toothM); m.position.copy(base); m.scale.set(rad, len, rad); const y = dir.clone().normalize(), z = back.clone().addScaledVector(y, -back.dot(y)).normalize(), xx = new THREE.Vector3().crossVectors(y, z); m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xx, y, z)); m.castShadow = false; parent.add(m); return m; };
+  const nT = Math.round(10 * many);
   for (let k = 0; k < nT; k++) {
-    const x = Hl * 0.14 + (xh * 0.78 - Hl * 0.14) * (k / Math.max(1, nT - 1)), f = body.frameAt(x), c = body.spine(x);
+    const x = Hl * 0.14 + (xh * 0.78 - Hl * 0.14) * (k / Math.max(1, nT - 1)), f = body.frameAt(x), sz = 1 - 0.35 * (k / nT);
     for (const sg of [1, -1]) {
-      const up = body.surf(x, sg * (mA - 0.05)).p.lerp(c, 0.12), lo = body.surf(x, sg * (mA + 0.07)).p.lerp(c, 0.14);
-      tooth(upperT, up, f.U.clone().negate().addScaledVector(f.T, 0.55), tl, tr);   // pointing down and back
-      tooth(lowerT, lo, f.U.clone().addScaledVector(f.T, 0.55), tl * 0.85, tr);       // pointing up and back
+      tooth(upperT, roof.gum(x, sg), f.U.clone().negate().addScaledVector(f.T, 0.45), tl * sz, tr * sz, f.T);   // pointing down and back
+      tooth(lowerT, floorJ.gum(x, sg), f.U.clone().addScaledVector(f.T, 0.45), tl * 0.85 * sz, tr * sz, f.T);  // pointing up and back
     }
   }
-  // v4.80: what a real open snake mouth shows - two inner rows of palate teeth on pink ridges (palatine and
-  // pterygoid), the glottis (the breathing tube, pushed forward so it can breathe while swallowing) on the
-  // floor of the mouth, and in front of it the tongue sheath with the forked tongue
-  const anchors = { teeth: new THREE.Object3D(), palate: new THREE.Object3D(), glottis: new THREE.Object3D(), sheath: new THREE.Object3D(), fang: null, hinge: new THREE.Object3D() };
-  const chord = (x, th, s2, inset) => { const a = body.surf(x, th).p, b = body.surf(x, -th).p; return a.lerp(b, s2).lerp(body.spine(x), inset); };
-  const ridgeM = new THREE.MeshStandardMaterial({ color: '#e59a99', roughness: 0.5 });
+  // v4.80: two inner rows of palate teeth on the ridges (palatine and pterygoid), the glottis and the tongue sheath
+  const anchors = { teeth: new THREE.Object3D(), palate: new THREE.Object3D(), glottis: new THREE.Object3D(), sheath: new THREE.Object3D(), fang: null, hinge: new THREE.Object3D(), tongue: null };
   if (plan !== 'blind') {
     for (const s2 of [0.3, 0.7]) {
-      const pts = []; for (let k = 0; k <= 12; k++) pts.push(chord(Hl * 0.16 + (xh * 0.8 - Hl * 0.16) * (k / 12), mA - 0.06, s2, 0.2));
-      const ridge = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, F.W(xh * 0.5) * 0.07, 8, false), ridgeM); upperT.add(ridge);
-      const nI = Math.round(7 * many);
+      const nI = Math.round(8 * many);
       for (let k = 0; k < nI; k++) { const x = Hl * 0.2 + (xh * 0.72 - Hl * 0.2) * (k / Math.max(1, nI - 1)), f = body.frameAt(x);
-        tooth(upperT, chord(x, mA - 0.06, s2, 0.2), f.U.clone().negate().addScaledVector(f.T, 0.6), tl * 0.7, tr * 0.85); }
+        tooth(upperT, roof.row(x, s2), f.U.clone().negate().addScaledVector(f.T, 0.6), tl * 0.62, tr * 0.8, f.T); }
     }
-    anchors.palate.position.copy(chord(xh * 0.45, mA - 0.06, 0.5, 0.2)); upperT.add(anchors.palate);
-    anchors.teeth.position.copy(body.surf(Hl * 0.3, mA - 0.05).p.lerp(body.spine(Hl * 0.3), 0.12)); upperT.add(anchors.teeth);
-    const softM = new THREE.MeshStandardMaterial({ color: '#e39c9c', roughness: 0.42 });
+    anchors.palate.position.copy(roof.row(xh * 0.45, 0.5)); upperT.add(anchors.palate);
+    anchors.teeth.position.copy(roof.gum(Hl * 0.3, 1)); upperT.add(anchors.teeth);
+    const softM = new THREE.MeshPhysicalMaterial({ color: pink.clone().multiplyScalar(0.92), roughness: 0.35, clearcoat: 0.6, clearcoatRoughness: 0.25 });
     // the glottis: a short tube lying on the floor of the mouth, open towards the front
-    const gx0 = Hl * 0.24, gx1 = Hl * 0.4, fl = (x) => chord(x, mA + 0.08, 0.5, 0.22), gr = F.W((gx0 + gx1) / 2) * 0.075;
+    const gx0 = Hl * 0.24, gx1 = Hl * 0.42, fl = (x) => floorJ.row(x, 0.5), gr = F.W((gx0 + gx1) / 2) * 0.07;
     const fU = body.frameAt((gx0 + gx1) / 2).U;
-    const gA = fl(gx0).addScaledVector(fU, gr * 0.9), gB = fl(gx1).addScaledVector(fU, gr * 0.7);
-    const glottis = new THREE.Mesh(new THREE.CylinderGeometry(gr, gr * 1.15, gA.distanceTo(gB), 16, 1, true), softM);
+    const gA = fl(gx0).addScaledVector(fU, gr * 0.9), gB = fl(gx1).addScaledVector(fU, gr * 0.6);
+    const glottis = new THREE.Mesh(new THREE.CylinderGeometry(gr, gr * 1.25, gA.distanceTo(gB), 18, 1, true), softM);
     glottis.position.copy(gA).add(gB).multiplyScalar(0.5); glottis.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), gA.clone().sub(gB).normalize()); lowerT.add(glottis);
-    const hole = new THREE.Mesh(new THREE.CircleGeometry(gr * 0.55, 16).scale(0.45, 1, 1), new THREE.MeshBasicMaterial({ color: '#2a0a10', side: THREE.DoubleSide }));
+    const hole = new THREE.Mesh(new THREE.CircleGeometry(gr * 0.6, 16).scale(0.4, 1, 1), new THREE.MeshBasicMaterial({ color: '#1a0508', side: THREE.DoubleSide }));
     hole.position.copy(gA); hole.lookAt(gA.clone().add(gA.clone().sub(gB))); lowerT.add(hole);
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(gr * 0.85, gr * 0.22, 8, 20), softM); rim.position.copy(gA); rim.lookAt(gA.clone().add(gA.clone().sub(gB))); lowerT.add(rim);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(gr * 0.85, gr * 0.25, 10, 24), softM); rim.position.copy(gA); rim.lookAt(gA.clone().add(gA.clone().sub(gB))); lowerT.add(rim);
     anchors.glottis.position.copy(gA).add(gB).multiplyScalar(0.5).addScaledVector(fU, gr); lowerT.add(anchors.glottis);
-    // the tongue sheath just in front, with the tip of the forked tongue showing
-    const sx = Hl * 0.19, sp = fl(sx).addScaledVector(fU, gr * 0.35);
-    const sheath = new THREE.Mesh(new THREE.SphereGeometry(gr * 1.2, 16, 10), softM); sheath.scale.set(1, 0.45, 1.6); sheath.position.copy(sp);
-    sheath.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), body.frameAt(sx).T); lowerT.add(sheath);
-    anchors.sheath.position.copy(sp).addScaledVector(fU, gr * 0.6); lowerT.add(anchors.sheath);
-    const tongueM = new THREE.MeshStandardMaterial({ color: '#3b1d2a', roughness: 0.35 }), fT = body.frameAt(sx).T, fS = body.frameAt(sx).S.clone().normalize();
-    for (const sg of [1, -1]) { const tipLen = Hl * 0.045, t0 = sp.clone().addScaledVector(fT, -gr * 1.2), t1 = t0.clone().addScaledVector(fT, -tipLen).addScaledVector(fS, sg * tipLen * 0.3);
-      const tg = new THREE.Mesh(new THREE.CylinderGeometry(gr * 0.12, gr * 0.3, t0.distanceTo(t1), 6), tongueM); tg.position.copy(t0).add(t1).multiplyScalar(0.5); tg.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), t1.clone().sub(t0).normalize()); lowerT.add(tg); }
+    // the tongue sheath just in front, and the forked tongue: dark, thin, its two tines slightly apart and lifted
+    const sx = Hl * 0.17, fT = body.frameAt(sx).T, fS = body.frameAt(sx).S.clone().normalize(), fU2 = body.frameAt(sx).U, sp = fl(sx).addScaledVector(fU2, gr * 0.3);
+    const sheath = new THREE.Mesh(new THREE.SphereGeometry(gr * 1.2, 20, 12), softM); sheath.scale.set(1, 0.42, 1.8); sheath.position.copy(sp);
+    sheath.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fS, fU2, fT)); lowerT.add(sheath);
+    anchors.sheath.position.copy(sp).addScaledVector(fU2, gr * 0.6); lowerT.add(anchors.sheath);
+    const tongueCol = P.head.tongue || { python: '#2b1d24', viper: '#22191d', pitviper: '#1f1a20', elapid: '#141015', sea: '#2a2226' }[plan] || '#16121a';
+    const tongueM = new THREE.MeshPhysicalMaterial({ color: tongueCol, roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.2 });
+    const tongue = new THREE.Group(), tLen = Hl * 0.38, tr0 = gr * 0.32, stem = Hl * 0.2;
+    const pts = []; for (let k = 0; k <= 8; k++) { const s = k / 8; pts.push(new THREE.Vector3(0, gr * 0.5 * Math.sin(Math.PI * s * 0.8), -stem * s)); }
+    const tube = (curvePts, r0, r1) => { const g = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(curvePts), 16, 1, 8, false), p = g.attributes.position; const c = new THREE.CatmullRomCurve3(curvePts);
+      for (let i = 0; i < p.count; i++) { const ring = Math.floor(i / 9), s = ring / 16, q = c.getPointAt(s), k = lerp(r0, r1, s); p.setXYZ(i, q.x + (p.getX(i) - q.x) * k, q.y + (p.getY(i) - q.y) * k, q.z + (p.getZ(i) - q.z) * k); } g.computeVertexNormals(); return g; };
+    tongue.add(new THREE.Mesh(tube(pts, tr0, tr0 * 0.75), tongueM));
+    const fork = pts[pts.length - 1];
+    for (const sg of [1, -1]) { const tp2 = []; for (let k = 0; k <= 6; k++) { const s = k / 6; tp2.push(new THREE.Vector3(sg * (tLen - stem) * 0.32 * s * s, fork.y + gr * 0.25 * s, fork.z - (tLen - stem) * s)); } tongue.add(new THREE.Mesh(tube(tp2, tr0 * 0.72, tr0 * 0.12), tongueM)); }
+    // the tongue lies in the sheath and its tips just show past the front of the lower jaw
+    tongue.position.copy(sp).addScaledVector(fT, gr * 1.4).addScaledVector(fU2, gr * 0.2);
+    tongue.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fS, fU2, fT));
+    lowerT.add(tongue); anchors.tongue = tongue;
     anchors.hinge.position.copy(hinge); group.add(anchors.hinge);
   }
   const fangs = [];
   if (plan === 'viper' || plan === 'pitviper' || plan === 'elapid' || plan === 'sea') {
-    const big = plan === 'viper' || plan === 'pitviper', x = Hl * (big ? 0.1 : 0.12), f = body.frameAt(x), c = body.spine(x);
+    const big = plan === 'viper' || plan === 'pitviper', x = Hl * (big ? 0.1 : 0.12), f = body.frameAt(x);
+    const fangG = curvedTooth(big ? 0.28 : 0.18), sheathM = new THREE.MeshPhysicalMaterial({ color: pink.clone().lerp(new THREE.Color('#ffffff'), 0.15), roughness: 0.4, transparent: true, opacity: 0.88, clearcoat: 0.5 });
     for (const sg of [1, -1]) {
-      const base = body.surf(x, sg * (mA - 0.1)).p.lerp(c, 0.1);
-      fangs.push(tooth(upperT, base, f.U.clone().negate().addScaledVector(f.T, big ? 0.35 : 0.2), Hl * (big ? 0.34 : 0.12), Hl * (big ? 0.024 : 0.02)));
+      const base = roof.gum(x, sg), len = Hl * (big ? 0.34 : 0.12), r = Hl * (big ? 0.022 : 0.018), dir = f.U.clone().negate().addScaledVector(f.T, big ? 0.35 : 0.2);
+      const fg = tooth(upperT, base, dir, len, r, f.T, fangG); fangs.push(fg);
+      if (big) { // the soft sheath of gum the folded fang rests in, pushed up round its base
+        const sh = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), sheathM); sh.scale.set(r * 2.1, len * 0.3, r * 2.4); sh.position.copy(base).addScaledVector(dir.clone().normalize(), len * 0.16); sh.quaternion.copy(fg.quaternion); upperT.add(sh); fangs.push(sh);
+      }
     }
     // the fang tip (for the labels and the bite)
-    const fg = fangs[0]; anchors.fang = new THREE.Object3D(); anchors.fang.position.copy(new THREE.Vector3(0, 1, 0).applyQuaternion(fg.quaternion).multiplyScalar(fg.scale.y).add(fg.position)); upperT.add(anchors.fang);
+    const fg = fangs[0]; anchors.fang = new THREE.Object3D(); fg.updateMatrix(); anchors.fang.position.copy(new THREE.Vector3(0, 1, 0.28 * (big ? 1 : 0.6)).applyMatrix4(fg.matrix)); upperT.add(anchors.fang);
     anchors.fangLen = fg.scale.y;
   } else {
-    const x = Hl * 0.14, f = body.frameAt(x); anchors.fang = new THREE.Object3D(); anchors.fang.position.copy(body.surf(x, mA - 0.05).p.lerp(body.spine(x), 0.12)).addScaledVector(f.U, -tl); upperT.add(anchors.fang); anchors.fangLen = tl;
+    const x = Hl * 0.14, f = body.frameAt(x); anchors.fang = new THREE.Object3D(); anchors.fang.position.copy(roof.gum(x, 1)).addScaledVector(f.U, -tl); upperT.add(anchors.fang); anchors.fangLen = tl;
   }
   let t = 0;
   function set(v) {
@@ -816,10 +1050,15 @@ function buildMouth(P, F, body, group, eyes) {
     turn(lower, aD); turn(upper, aU);
     pos.needsUpdate = true;
     // the mouth lining and the teeth go with their jaws
-    const strip2 = (g, o, an) => { const fp = g.attributes.position.array;
-      for (let k = 0; k < fp.length; k += 3) { v3.set(o[k], o[k + 1], o[k + 2]); const x = xs[Math.floor(k / 6)]; qq.setFromAxisAngle(axis, an * weight(x)); v3.sub(hinge).applyQuaternion(qq).add(hinge); fp[k] = v3.x; fp[k + 1] = v3.y; fp[k + 2] = v3.z; }
-      g.attributes.position.needsUpdate = true; g.computeVertexNormals(); };
-    strip2(floorG, floorOrig, aD); strip2(palateG, palateOrig, aU);
+    const strip2 = (J, an) => { const fp = J.g.attributes.position.array, o = J.o;
+      for (let k = 0, i = 0; k < fp.length; k += 3, i++) { v3.set(o[k], o[k + 1], o[k + 2]); qq.setFromAxisAngle(axis, an * weight(J.xv[i])); v3.sub(hinge).applyQuaternion(qq).add(hinge); fp[k] = v3.x; fp[k + 1] = v3.y; fp[k + 2] = v3.z; }
+      J.g.attributes.position.needsUpdate = true; J.g.computeVertexNormals(); };
+    strip2(floorJ, aD); strip2(roof, aU);
+    // the folds at the corners of the mouth stretch between the two jaws
+    { const fp = cheekG.attributes.position.array;
+      for (let k = 0, i = 0; k < fp.length; k += 3, i++) { const s = cheekInfo[i * 3], reach = cheekInfo[i * 3 + 1], x = cheekInfo[i * 3 + 2], an = lerp(aU, aD, sstep(0.5 - 0.5 * reach - 1e-3, 0.5 + 0.5 * reach + 1e-3, s)) * weight(x);
+        v3.set(cheekOrig[k], cheekOrig[k + 1], cheekOrig[k + 2]); qq.setFromAxisAngle(axis, an); v3.sub(hinge).applyQuaternion(qq).add(hinge); fp[k] = v3.x; fp[k + 1] = v3.y; fp[k + 2] = v3.z; }
+      cheekG.attributes.position.needsUpdate = true; cheekG.computeVertexNormals(); }
     const place = (grp, an) => { qq.setFromAxisAngle(axis, an); grp.position.copy(hinge).sub(hinge.clone().applyQuaternion(qq)); grp.quaternion.copy(qq); };
     place(lowerT, aD); place(upperT, aU);
     for (const e of eyeOrig) { qq.setFromAxisAngle(axis, aU); e.m.position.copy(e.p).sub(hinge).applyQuaternion(qq).add(hinge); e.m.quaternion.copy(qq).multiply(e.q); }
@@ -906,7 +1145,7 @@ function prepEnv(raw) {
 }
 function loadEnv(name) {
   if (ENV_CACHE.has(name)) return ENV_CACHE.get(name);
-  const pr = fetch(new URL('env/' + name + '.hdr', import.meta.url).href).then((r) => { if (!r.ok) throw new Error('env ' + r.status); return r.arrayBuffer(); }).then((b) => prepEnv(parseHDR(b)));
+  const pr = fetch(new URL('env/' + name + '.hdr', import.meta.url).href).then((r) => { if (!r.ok) throw new Error('env ' + r.status); return r.arrayBuffer(); }).then((b) => { const t0 = performance.now(), e = prepEnv(parseHDR(b)); perfT('envParse', t0); return e; });
   pr.catch(() => ENV_CACHE.delete(name)); ENV_CACHE.set(name, pr); return pr;
 }
 // a sphere whose lower half is pressed flat onto the ground: the panorama's own ground then lies on a
@@ -923,40 +1162,50 @@ function canvasTex(S, draw, rep, srgb = true) {
   const t = new THREE.CanvasTexture(cv); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; if (rep) t.repeat.set(rep, rep);
   t.anisotropy = 4; return t;
 }
-function groundTexture(kind, seed, hi) {
-  const R = rng(seed);
+// v4.81: each kind of ground is drawn once per visit and reused (opening another species is much faster)
+const GROUND_CACHE = new Map();
+function groundTexture(kind, seed0, hi) {
+  const key = kind + (hi ? '@hi' : '@lo'), hit = GROUND_CACHE.get(key);
+  if (hit) { const t = new THREE.CanvasTexture(hit); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; return t; }
+  if (GROUND_CACHE.size > 1) GROUND_CACHE.delete(GROUND_CACHE.keys().next().value);
+  const seed = strSeed(kind) + 5, R = rng(seed);
   // v4.72: drawn at twice the resolution on good devices (same layout, finer detail)
-  return canvasTex(hi ? 2048 : 1024, (x, SS) => {
+  const out = canvasTex(hi ? 2048 : 1024, (x, SS) => {
     const S = 1024; x.scale(SS / S, SS / S);
     // draw fn at the position and at its wrapped copies, so the texture tiles without seams
     const wrapAt = (cx, cy, r, fn) => { for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) { const X = cx + ox, Y = cy + oy; if (X + r < 0 || X - r > S || Y + r < 0 || Y - r > S) continue; x.save(); x.translate(X, Y); fn(); x.restore(); } };
     const base = { gibber: '#a8613a', litter: '#3b2e22', gravel: '#b7a58c', heath: '#6f5f4a', pebbles: '#6f675a', soil: '#3f3024', dry: '#6f6a44', sand: '#d8c39a' }[kind] || '#777';
-    x.fillStyle = base; x.fillRect(0, 0, S, S);
-    const tone = (amt, fine) => {
-      const W = x.canvas.width, img = x.getImageData(0, 0, W, W), d = img.data;
-      for (let j = 0; j < W; j++) for (let i = 0; i < W; i++) {
-        const n = tfbm(i / W * 6, j / W * 6, 6, seed + 1, 5) - 0.5, f = 1 + n * amt, g = 1 + (R() - 0.5) * fine, k = (j * W + i) * 4;
-        d[k] *= f * g; d[k + 1] *= f * g; d[k + 2] *= f * g;
-      }
-      x.putImageData(img, 0, 0);
+    // v4.81: light and dark patches from a small tileable noise image drawn scaled up (no per-pixel work and no
+    // read-back), and leaves and stones stamped from a few pre-drawn sprites: about 10x faster to make
+    const NG = 128, noiseCanvas = (fn) => {
+      const c = document.createElement('canvas'); c.width = c.height = NG + 2; const g = c.getContext('2d'), img = g.createImageData(NG + 2, NG + 2);
+      for (let j = 0; j < NG + 2; j++) for (let i = 0; i < NG + 2; i++) { const n = tfbm(((i + NG - 1) % NG) / NG * 6, ((j + NG - 1) % NG) / NG * 6, 6, seed + 1, 5) - 0.5, v = fn(n), k = (j * (NG + 2) + i) * 4; img.data[k] = v[0]; img.data[k + 1] = v[1]; img.data[k + 2] = v[2]; img.data[k + 3] = 255; }
+      g.putImageData(img, 0, 0); return c;
     };
-    tone(kind === 'sand' ? 0.25 : 0.4, 0); // (v4.63: no per-pixel grain - it showed as dots)
+    const bc = hex(base);
+    x.drawImage(noiseCanvas((n) => bc.map((v) => v * (1 + n * (kind === 'sand' ? 0.25 : 0.4)))), 1, 1, NG, NG, 0, 0, S, S);
+    const tone = (amt) => { x.save(); x.globalCompositeOperation = 'soft-light'; x.drawImage(noiseCanvas((n) => { const v = clamp(128 + n * amt * 2 * 255, 0, 255); return [v, v, v]; }), 1, 1, NG, NG, 0, 0, S, S); x.restore(); };
     const shade = (hexc, k) => { const c = hex(hexc); return 'rgb(' + c.map((v) => Math.round(clamp(v * k, 0, 255))).join(',') + ')'; };
-    const leaf = (l, w, col, curl) => {
-      // soft shadow, then the blade with a light-to-dark gradient, an edge and veins
-      x.fillStyle = 'rgba(0,0,0,.28)'; x.beginPath(); x.ellipse(l * 0.04, w * 0.35, l * 0.52, w * 1.05, 0, 0, TAU); x.fill();
-      const g = x.createLinearGradient(-l / 2, -w, l / 2, w); g.addColorStop(0, shade(col, 1.12 + curl * 0.1)); g.addColorStop(1, shade(col, 0.78));
-      x.fillStyle = g; x.beginPath(); x.moveTo(-l / 2, 0); x.bezierCurveTo(-l * 0.25, -w * 1.3, l * 0.25, -w * 1.1, l / 2, 0); x.bezierCurveTo(l * 0.25, w * 1.1, -l * 0.25, w * 1.3, -l / 2, 0); x.fill();
-      x.strokeStyle = 'rgba(20,12,6,.35)'; x.lineWidth = 0.8; x.stroke();
-      x.strokeStyle = 'rgba(255,235,200,.18)'; x.beginPath(); x.moveTo(-l / 2, 0); x.lineTo(l / 2, 0); for (let v = -0.3; v < 0.4; v += 0.14) { x.moveTo(l * v, 0); x.lineTo(l * (v + 0.1), -w * 0.7); x.moveTo(l * v, 0); x.lineTo(l * (v + 0.1), w * 0.7); } x.stroke();
-    };
-    const stone = (r, ry, c0, c1, wet) => {
-      x.fillStyle = 'rgba(0,0,0,.2)'; x.beginPath(); x.ellipse(r * 0.12, r * 0.15, r * 1.04, ry * 1.04, 0, 0, TAU); x.fill();
-      const g = x.createRadialGradient(-r * 0.35, -ry * 0.4, r * 0.05, 0, 0, r * 1.05); g.addColorStop(0, c0); g.addColorStop(0.7, c1); g.addColorStop(1, shade(c1, 0.7));
-      x.fillStyle = g; x.beginPath(); x.ellipse(0, 0, r, ry, 0, 0, TAU); x.fill();
-      if (wet) { x.fillStyle = 'rgba(255,255,255,.12)'; x.beginPath(); x.ellipse(-r * 0.35, -ry * 0.45, r * 0.25, ry * 0.12, -0.4, 0, TAU); x.fill(); }
-      for (let i = 0; i < 4; i++) { x.fillStyle = R() < 0.5 ? 'rgba(0,0,0,.12)' : 'rgba(255,255,255,.1)'; x.beginPath(); x.arc((R() - 0.5) * r, (R() - 0.5) * ry, r * 0.12, 0, TAU); x.fill(); }
-    };
+    const sprite = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); g.translate(w / 2, h / 2); draw(g); return c; };
+    const LS = new Map(), leafSprite = (col, curl) => { const k = col + (curl * 3 | 0); if (!LS.has(k)) LS.set(k, sprite(256, 128, (g) => {
+      // soft shadow, then the blade with a light-to-dark gradient, an edge and veins (drawn at l = 220, w = 40)
+      const l = 220, w = 40, cu = (curl * 3 | 0) / 3;
+      g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(l * 0.04, w * 0.35, l * 0.52, w * 1.05, 0, 0, TAU); g.fill();
+      const gr = g.createLinearGradient(-l / 2, -w, l / 2, w); gr.addColorStop(0, shade(col, 1.12 + cu * 0.1)); gr.addColorStop(1, shade(col, 0.78));
+      g.fillStyle = gr; g.beginPath(); g.moveTo(-l / 2, 0); g.bezierCurveTo(-l * 0.25, -w * 1.3, l * 0.25, -w * 1.1, l / 2, 0); g.bezierCurveTo(l * 0.25, w * 1.1, -l * 0.25, w * 1.3, -l / 2, 0); g.fill();
+      g.strokeStyle = 'rgba(20,12,6,.35)'; g.lineWidth = 1.6; g.stroke();
+      g.strokeStyle = 'rgba(255,235,200,.18)'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(-l / 2, 0); g.lineTo(l / 2, 0); for (let v = -0.3; v < 0.4; v += 0.14) { g.moveTo(l * v, 0); g.lineTo(l * (v + 0.1), -w * 0.7); g.moveTo(l * v, 0); g.lineTo(l * (v + 0.1), w * 0.7); } g.stroke();
+    })); return LS.get(k); };
+    const leaf = (l, w, col, curl) => { x.drawImage(leafSprite(col, curl), -l * 128 / 220, -(w / 40) * 64, l * 256 / 220, (w / 40) * 128); };
+    const SS2 = new Map(), stoneSprite = (c0, c1, wet, v) => { const k = c0 + c1 + (wet ? 1 : 0) + v; if (!SS2.has(k)) SS2.set(k, sprite(128, 128, (g) => {
+      const r = 52, Rr = rng(seed + v * 7 + c0.length);
+      g.fillStyle = 'rgba(0,0,0,.2)'; g.beginPath(); g.ellipse(r * 0.12, r * 0.15, r * 1.04, r * 1.04, 0, 0, TAU); g.fill();
+      const gr = g.createRadialGradient(-r * 0.35, -r * 0.4, r * 0.05, 0, 0, r * 1.05); gr.addColorStop(0, c0); gr.addColorStop(0.7, c1); gr.addColorStop(1, shade(c1, 0.7));
+      g.fillStyle = gr; g.beginPath(); g.arc(0, 0, r, 0, TAU); g.fill();
+      if (wet) { g.fillStyle = 'rgba(255,255,255,.12)'; g.beginPath(); g.ellipse(-r * 0.35, -r * 0.45, r * 0.25, r * 0.12, -0.4, 0, TAU); g.fill(); }
+      for (let i = 0; i < 4; i++) { g.fillStyle = Rr() < 0.5 ? 'rgba(0,0,0,.12)' : 'rgba(255,255,255,.1)'; g.beginPath(); g.arc((Rr() - 0.5) * r, (Rr() - 0.5) * r, r * 0.12, 0, TAU); g.fill(); }
+    })); return SS2.get(k); };
+    const stone = (r, ry, c0, c1, wet) => { x.drawImage(stoneSprite(c0, c1, wet, (R() * 3) | 0), -r * 64 / 52, -ry * 64 / 52, r * 128 / 52, ry * 128 / 52); };
     if (kind === 'litter' || kind === 'soil') {
       const pal = kind === 'litter' ? ['#6a4a2e', '#7d5a36', '#8c6a42', '#55402a', '#6b5536', '#3e2e20', '#86663f', '#9a7a4e', '#5e5032', '#4a3a26'] : ['#5a4532', '#6b5236', '#4a3826', '#7a6044'];
       const n = kind === 'litter' ? 2600 : 220;
@@ -969,7 +1218,7 @@ function groundTexture(kind, seed, hi) {
         wrapAt(cx, cy, l, () => { x.rotate(a); x.strokeStyle = 'rgba(0,0,0,.3)'; x.lineWidth = w + 1.5; x.beginPath(); x.moveTo(1, 2); x.lineTo(l + 1, 2); x.stroke(); x.strokeStyle = R() < 0.5 ? '#4a3826' : '#6a5438'; x.lineWidth = w; x.beginPath(); x.moveTo(0, 0); x.lineTo(l, 0); x.stroke(); });
       }
       if (kind === 'soil') for (let i = 0; i < 700; i++) { const cx = R() * S, cy = R() * S, r = 2.5 + R() ** 2 * 6; wrapAt(cx, cy, r * 2, () => stone(r, r * (0.6 + R() * 0.4), '#6e5845', '#3a2b20', true)); }
-      tone(0.25, 0);
+      tone(0.25);
     } else if (kind === 'gravel' || kind === 'sand') {
       const cols = [['#d8cab4', '#9c8b76'], ['#c4b29a', '#7d6d5a'], ['#e0d6c8', '#a39a8b'], ['#b29c85', '#6c5a48'], ['#cdb593', '#8a7254'], ['#a8a39a', '#6a665e']];
       const n = kind === 'gravel' ? 2600 : 250;
@@ -979,18 +1228,19 @@ function groundTexture(kind, seed, hi) {
       // a close pavement of rounded, wind-polished stones in reds, browns and near-black, with red clay between
       const cols = [['#8c3f26', '#5a2416'], ['#7a3a22', '#4a2012'], ['#5e3324', '#33190f'], ['#9a5233', '#62301c'], ['#3d2a22', '#1e130d'], ['#a8683f', '#6e3d22']];
       for (let i = 0; i < 1500; i++) { const cx = R() * S, cy = R() * S, r = 5 + R() ** 2 * 18, c = cols[(R() * cols.length) | 0]; wrapAt(cx, cy, r * 2, () => { x.rotate(R() * 3); stone(r, r * (0.6 + R() * 0.35), c[0], c[1], R() < 0.5); }); }
-      tone(0.12, 0);
+      tone(0.12);
     } else if (kind === 'pebbles') {
       const cols = [['#8f877a', '#6a6357'], ['#857b6b', '#5f564a'], ['#959087', '#716c63'], ['#7f7262', '#5a4d3f'], ['#7d807a', '#5b5e58'], ['#8e7c66', '#665441']];
       for (let i = 0; i < 2600; i++) { const cx = R() * S, cy = R() * S, r = 3 + R() ** 2.5 * 16, c = cols[(R() * cols.length) | 0]; wrapAt(cx, cy, r * 2, () => { x.rotate(R() * 3); stone(r, r * (0.6 + R() * 0.35), c[0], c[1], R() < 0.12); }); }
-      tone(0.15, 0);
+      tone(0.15);
     } else if (kind === 'heath' || kind === 'dry') {
       const strokes = kind === 'heath' ? ['#3a2f25', '#5a4a38', '#8a7a5c', '#b4a27c', '#4a3f30', '#6b4f5a'] : ['#a89a66', '#7d7a46', '#b8aa78', '#5d6634', '#8c8a52', '#4f5a2c'];
       for (let i = 0; i < 5200; i++) { const cx = R() * S, cy = R() * S, l = 6 + R() * 30, a = R() * TAU, col = strokes[(R() * strokes.length) | 0], w = 0.6 + R() * 1.4; wrapAt(cx, cy, l, () => { x.rotate(a); x.strokeStyle = col; x.lineWidth = w; x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(l * 0.5, (R() - 0.5) * 6, l, (R() - 0.5) * 4); x.stroke(); }); }
       if (kind === 'heath') for (let i = 0; i < 40; i++) { const cx = R() * S, cy = R() * S, r = 14 + R() * 34; wrapAt(cx, cy, r * 1.3, () => { for (let k = 0; k < 160; k++) { const a = R() * TAU, rr = r * Math.sqrt(R()); x.fillStyle = ['rgba(62,78,36,.55)', 'rgba(84,98,46,.5)', 'rgba(48,60,30,.5)'][k % 3]; x.beginPath(); x.arc(Math.cos(a) * rr, Math.sin(a) * rr * 0.75, 1 + R() * 2.2, 0, TAU); x.fill(); } }); }
-      tone(0.2, 0);
+      tone(0.2);
     }
   }, 1);
+  GROUND_CACHE.set(key, out.image); return out;
 }
 function waterNormal(seed) {
   const S = 256, d = new Uint8Array(S * S * 4), h = new Float32Array(S * S);
@@ -1081,7 +1331,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   if (S.ground) {
     const gg = new THREE.CircleGeometry(groundR, 128, 0, TAU); gg.rotateX(-Math.PI / 2);
     // finer rings near the middle so the riverbank slope is smooth
-    const tex = groundTexture(S.ground, seed + 5, quality !== 'low'); tex.anisotropy = ctx.renderer.capabilities.getMaxAnisotropy(); const rep = (groundR * 2) / (clamp(Math.min(S.tile, L * 1.1), S.tile * 0.5, S.tile) * clamp(L / 2, 1, 4)); tex.repeat.set(rep, rep); // big snakes: bigger ground detail, never a fine grain
+    const tG = performance.now(); const tex = groundTexture(S.ground, seed + 5, quality !== 'low'); perfT('groundTex', tG); tex.anisotropy = ctx.renderer.capabilities.getMaxAnisotropy(); const rep = (groundR * 2) / (clamp(Math.min(S.tile, L * 1.1), S.tile * 0.5, S.tile) * clamp(L / 2, 1, 4)); tex.repeat.set(rep, rep); // big snakes: bigger ground detail, never a fine grain
     const gm = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.96, metalness: 0, bumpMap: tex, bumpScale: Math.min(1, L * 0.5) * 0.6 });
     if (S.water === 'river') {
       // the bank slopes down into shallow water on one side, away from the snake
@@ -1105,7 +1355,8 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     } else {
       // v4.72: the floor is real 3D - sand in ripples, litter and soil in little lumps, flat right under the snake
       const rg = new THREE.RingGeometry(0, groundR, 160, quality === 'low' ? 60 : 110); rg.rotateX(-Math.PI / 2);
-      const kind = S.ground, rip = kind === 'sand' || kind === 'dry' || kind === 'gibber' || kind === 'gravel';
+      const kind = S.ground, rip = kind === 'sand' || kind === 'gibber' || kind === 'gravel'; // (v4.81: no sand ripples under grass)
+      const fineR = kind === 'sand' ? Math.max(Rb * 2.3, Math.min(1.4, Rb * 7)) : 0; // v4.81: real sand ripples close to the snake (finer mesh below)
       const pp = rg.attributes.position, w0 = F.w0, ripA = w0 * (kind === 'sand' ? 0.4 : 0.25), lumpA = w0 * 0.45;
       for (let i = 0; i < pp.count; i++) {
         const x = pp.getX(i), z = pp.getZ(i), r = Math.hypot(x, z);
@@ -1114,6 +1365,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
         if (rip) { const u = x * 0.8 + z * 0.6 + (fbm(x / Rb, z / Rb, 1, seed + 41, 2) - 0.5) * Rb * 0.6; y += Math.sin(u / (w0 * 5)) * ripA * (0.6 + fbm(x / Rb * 0.7, z / Rb * 0.7, 1, seed + 43, 2) * 0.8); }
         else y += (fbm(x / (w0 * 6), z / (w0 * 6), 1, seed + 47, 3) - 0.5) * 2 * lumpA;
         y *= near;
+        if (fineR) y = lerp(-ripA - 0.02, y, sstep(fineR * 0.82, fineR * 1.02, r)); // tucked under the fine sand
         y += (fbm(x / (Rb * 6), z / (Rb * 6), 1, seed + 53, 3) - 0.35) * Rb * 0.9 * sstep(Rb * 7, groundR * 0.95, r); // gentle rise to the hills
         pp.setY(i, y);
       }
@@ -1121,10 +1373,38 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
       const edge = canvasTex(256, (x2, s2) => { const g = x2.createRadialGradient(s2 / 2, s2 / 2, s2 * 0.36, s2 / 2, s2 / 2, s2 * 0.5); g.addColorStop(0, '#fff'); g.addColorStop(1, '#000'); x2.fillStyle = g; x2.fillRect(0, 0, s2, s2); }, 1, false);
       edge.dispose(); // (a see-through edge made things behind it look washed out - the hills and the haze hide the edge instead)
       const g2 = new THREE.Mesh(rg, gm); g2.receiveShadow = true; scene.add(g2); ctx.fadeMats.push(gm);
+      if (fineR) {
+        // wind ripples at their real size (about 8-12 cm apart, a centimetre high): a gentle slope up the windward
+        // side and a steep drop on the lee side, crests that wander, fork and fade; smoothed flat under the snake
+        const segs = quality === 'low' ? 170 : 280, side = fineR * 2, lam = Math.max(0.085, (side / segs) * 6), A = lam * 0.15;
+        const fg = new THREE.PlaneGeometry(side, side, segs, segs); fg.rotateX(-Math.PI / 2);
+        const fp = fg.attributes.position, dirA = R() * TAU, ca = Math.cos(dirA), sa = Math.sin(dirA);
+        for (let i = 0; i < fp.count; i++) {
+          const x = fp.getX(i), z = fp.getZ(i), r = Math.hypot(x, z);
+          if (r > fineR * 1.04) { fp.setY(i, -ripA * 2 - A * 2); continue; }
+          const along = x * ca + z * sa, across = -x * sa + z * ca;
+          const ph = along / lam + (fbm(across / (lam * 9), along / (lam * 14), 3, seed + 61, 2) - 0.5) * 3.2 + (vnoise(x / (lam * 3), z / (lam * 3), 5, seed + 63) - 0.5) * 0.5;
+          const f = ph - Math.floor(ph), prof = f < 0.72 ? sstep(0, 0.72, f) : 1 - sstep(0.72, 1, f);
+          const amp = A * (0.55 + 0.9 * vnoise(x / (lam * 6), z / (lam * 6), 7, seed + 67)), near = sstep(F.w0 * 0.6, F.w0 * 2.6, dist2snake(x, z));
+          fp.setY(i, ((prof - 0.35) * amp * near + A * 0.3) * (1 - sstep(fineR * 0.8, fineR, r)) - (0.02 + ripA) * sstep(fineR * 0.97, fineR * 1.03, r));
+        }
+        fg.computeVertexNormals();
+        const uvs = fg.attributes.uv; for (let i = 0; i < uvs.count; i++) uvs.setXY(i, fp.getX(i) / (2 * groundR) + 0.5, 0.5 - fp.getZ(i) / (2 * groundR));
+        const fm = new THREE.Mesh(fg, gm); fm.receiveShadow = true; scene.add(fm);
+      }
     }
     // nature.js can take over the far scenery (return true) and add its own realistic details
-    const natureOwnsFar = NATURE.build ? NATURE.build({ THREE, ctx, scene, S, kind: P.scene.kind, groundR, farR, Rb, F, L, seed, quality, gcol, rng, fbm, sstep, clamp, dist2snake, poseInfo }) : false;
-    if (!natureOwnsFar) farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality);
+    // v4.81: the far scenery (trees, shrubs, ground cover) is built just after the first picture is shown, so the
+    // snake appears without waiting for it; it fades in a moment later
+    const runNature = () => {
+      if (ctx.scene !== scene) return;
+      const tN = performance.now();
+      const natureOwnsFar = NATURE.build ? NATURE.build({ THREE, ctx, scene, S, kind: P.scene.kind, groundR, farR, Rb, F, L, seed, quality, gcol, rng, fbm, sstep, clamp, dist2snake, poseInfo, sceneP: P.scene }) : false;
+      perfT('nature', tN);
+      if (!natureOwnsFar) farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality);
+      if (ctx.afterNature) ctx.afterNature();
+    };
+    ctx.natureReady = typeof requestAnimationFrame === 'function' ? new Promise((res) => requestAnimationFrame(() => setTimeout(() => { try { runNature(); } finally { res(); } }, 0))) : (runNature(), Promise.resolve());
   }
   if (S.water === 'sea') {
     const wm = new THREE.MeshPhysicalMaterial({ color: '#1f4e63', roughness: 0.12, metalness: 0, transparent: true, opacity: 0.82, normalMap: waterNormal(seed), normalScale: new THREE.Vector2(0.35, 0.35) });
@@ -1489,8 +1769,13 @@ export function mount(host, opts) {
 
   function build() {
     const scene = new THREE.Scene(); ctx.scene = scene;
-    const F = makeBodyFns(P, quality), pose = makePose(P, F, seed), body = buildBody(P, F, pose, quality);
-    const lat = scaleLattice(P, body.gTotal), tiles = scaleTextures(P, lat), pat = patternTexture(P, F, body, lat, quality, seed);
+    { const en = !opts.noEnv && (P.scene.env || ENV_FOR[P.scene.kind]); if (en) loadEnv(en).catch(() => {}); } // v4.81: start downloading the panorama now
+    let t0 = performance.now();
+    const F = makeBodyFns(P, quality), pose = makePose(P, F, seed); perfT('pose', t0); t0 = performance.now();
+    const body = buildBody(P, F, pose, quality); perfT('body', t0); t0 = performance.now();
+    const lat = scaleLattice(P, body.gTotal), tiles = scaleTextures(P, lat); perfT('scaleTex', t0); t0 = performance.now();
+    // v4.81: on good devices a quick pattern first, the full-detail one painted in a worker and swapped in when ready
+    const hiPat = quality !== 'low', pat = patternTexture(P, F, body, lat, hiPat ? 'preview' : 'low', seed); perfT('patternTex', t0);
     const rep = body.gTotal / lat.Pt;
     for (const t of [tiles.normal, tiles.cavity]) { t.repeat.set(1, rep); t.anisotropy = renderer.capabilities.getMaxAnisotropy(); }
     pat.anisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -1503,40 +1788,56 @@ export function mount(host, opts) {
       iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.85,
     });
     // the cavity map also darkens the skin between scales in direct light (as in real snakes)
+    // v4.81: heads without big shields (vipers, pythons, boas) get small scales of their own, drawn in the shader
+    // from true distances on the skin, so they keep their shape right to the tip of the snout (the body's scale
+    // texture used to stretch into stripes there); they fade out where they would be smaller than a pixel
+    const qS = (TAU * F.w0 * 0.92) / Math.max(12, S.rows) * (P.head.scaleK || (P.plan === 'python' ? 0.9 : 0.62));
+    const hsU = { uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 } };
     mat.onBeforeCompile = (sh) => {
-      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead;');
-      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying float vHead;')
-        .replace('#include <map_fragment>', '#include <map_fragment>\n#ifdef USE_AOMAP\n diffuseColor.rgb *= mix(1.0, texture2D(aoMap, vAoMapUv).r, ' + (S.cavity != null ? S.cavity : 0.45).toFixed(2) + ' * (1.0 - vHead * 0.9));\n#endif')
-        .replace('mapN.xy *= normalScale;', 'mapN.xy *= normalScale * (1.0 - vHead * 0.88);');
+      Object.assign(sh.uniforms, hsU);
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;\nattribute vec3 aMet;\nvarying vec3 vMet;').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead; vMet = aMet;')
+        .replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z)');
+      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
+varying float vHead; varying vec3 vMet; uniform vec2 uHS; uniform float uKeel; uniform float uCavH;
+float slScale(vec2 m) {
+  float row = floor(m.y), off = mod(row, 2.0) * 0.5;
+  vec2 l = m - vec2(floor(m.x + off) - off + 0.5, row + 0.5);
+  float t = clamp(l.y + 0.5, 0.0, 1.0), wx = 0.52 * (1.0 - 0.4 * t * t), d = (l.x / wx) * (l.x / wx) + (l.y / 0.56) * (l.y / 0.56);
+  float h = d < 1.0 ? sqrt(1.0 - d) * 0.55 + 0.45 * t : 0.0;
+  return h + (d < 1.0 ? uKeel * 0.32 * exp(-pow(l.x / 0.09, 2.0)) * smoothstep(-0.45, 0.25, l.y) : 0.0);
+}`)
+        .replace('#include <map_fragment>', `#include <map_fragment>
+ vec2 slM = vMet.xy * uHS; float slFade = vMet.z * (1.0 - smoothstep(0.3, 0.75, length(fwidth(slM))));
+ float slH = 0.0, slDa = 0.0, slDx = 0.0;
+ if (slFade > 0.001) { slH = slScale(slM); slDa = (slScale(slM + vec2(0.03, 0.0)) - slScale(slM - vec2(0.03, 0.0))) / 0.06; slDx = (slScale(slM + vec2(0.0, 0.03)) - slScale(slM - vec2(0.0, 0.03))) / 0.06;
+   diffuseColor.rgb *= mix(1.0, 0.55 + 0.45 * smoothstep(0.0, 0.3, slH), uCavH * slFade); }
+#ifdef USE_AOMAP
+ diffuseColor.rgb *= mix(1.0, texture2D(aoMap, vAoMapUv).r, uCavH * (1.0 - vHead * 0.9) * (1.0 - vMet.z));
+#endif`)
+        .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n roughnessFactor = mix(roughnessFactor, roughness * (0.9 + 0.25 * slH), vMet.z);')
+        .replace('mapN.xy *= normalScale;', 'mapN.xy *= normalScale * (1.0 - vHead * 0.88);\n mapN = normalize(mix(mapN, normalize(vec3(-slDa * 0.55, -slDx * 0.55, 1.0)), vMet.z));');
     };
+    mat.customProgramCacheKey = () => 'sl-skin-v481';
     const mesh = new THREE.Mesh(body.geo, mat); mesh.castShadow = mesh.receiveShadow = true;
+    if (hiPat) {
+      const sceneNow = ctx.scene, swap = (d) => { if (!alive || ctx.scene !== sceneNow) return; const t = patternTex(d); t.anisotropy = pat.anisotropy; mat.map = t; pat.dispose(); track(t); dirty = true; kick(); };
+      ctx.patternReady = patternInWorker(P, quality, seed).then(swap).catch(() => new Promise((r) => setTimeout(() => { if (alive && ctx.scene === sceneNow) swap(patternData(P, F, body, lat, quality, seed)); r(); }, 60)));
+    } else ctx.patternReady = Promise.resolve();
     snakeGroup = new THREE.Group(); snakeGroup.add(mesh);
 
-    // eyes
-    const H = P.head, eyeX = H.eyeX * F.Hl, eyeR = H.eye * F.W(eyeX) * 2 * 0.5 * 1.04; // v4.78: back near true size (bigger looked like they were popping out)
-    const eyePos = [], eyeMeshes = [];
-    if (H.pupil !== 'none') {
-      const et = eyeTexture(P), em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.2 });
-      const eg = new THREE.SphereGeometry(eyeR, 32, 24), ep = eg.attributes.position, euv = eg.attributes.uv;
-      for (let i = 0; i < ep.count; i++) { const x = ep.getX(i) / eyeR, y = ep.getY(i) / eyeR; euv.setXY(i, 0.5 + x * 0.5, 0.5 + y * 0.5); }
-      for (const sg of [1, -1]) {
-        const th = sg * body.eyeA, s = body.surf(eyeX, th), n = body.surfNormal(eyeX, th);
-        // v4.80: the normal must point out of the head on both sides (one eye used to sit outside the head)
-        if (n.dot(s.p.clone().sub(body.spine(eyeX))) < 0) n.negate();
-        const out = n.clone().addScaledVector(s.f.T, -0.22).normalize();
-        const up = s.f.U.clone().addScaledVector(out, -s.f.U.dot(out)).normalize(), xa = new THREE.Vector3().crossVectors(up, out);
-        const m = new THREE.Mesh(eg, em); m.position.copy(s.p).addScaledVector(n, -eyeR * (H.embed || 0.5)); // v4.80: a flattened eye, its front a little proud of the head like a real snake's spectacle
-        m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xa, up, out)); m.scale.set(1, 1, 0.8); m.castShadow = false; m.receiveShadow = true;
-        snakeGroup.add(m); eyePos.push(m.position.clone()); eyeMeshes.push(m);
-      }
-    }
+    // eyes (v4.81: domed eyes sunk flush into sockets, under a clear spectacle scale; see buildEyes)
+    const H = P.head, eyePos = [], eyeMeshes = H.pupil !== 'none' ? buildEyes(P, F, body, pat) : [];
+    for (const m of eyeMeshes) { snakeGroup.add(m); eyePos.push(m.position.clone()); }
     // horns, rattle
     const keratin = new THREE.MeshStandardMaterial({ color: P.tail.rattleColor || '#b8a589', roughness: 0.55 });
+    // v4.81: horns are scales of the upper jaw - they go up with it when the mouth opens (headParts -> buildMouth)
+    const headParts = [], hornM = new THREE.MeshStandardMaterial({ color: P.head.hornColor || P.colors.dorsal, roughness: 0.75 });
+    const hornGeo = (r, h) => { const g = new THREE.ConeGeometry(r, h, 14, 4); g.translate(0, h / 2, 0); const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const y = p.getY(i) / h, k = Math.pow(1 - y, 0.6) / Math.max(1e-3, 1 - y); if (y < 0.999) { p.setX(i, p.getX(i) * k); p.setZ(i, p.getZ(i) * k); } } g.computeVertexNormals(); return g; };
     if (H.horns === 'nasal') {
-      for (const sg of [1, -1]) { const x = F.Hl * 0.06, th = sg * 0.32, s = body.surf(x, th), hh = F.W(x) * 0.55; const g = new THREE.ConeGeometry(hh * 0.28, hh, 10); const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: P.head.hornColor || P.colors.dorsal, roughness: 0.8 })); m.position.copy(s.p).addScaledVector(s.f.U, hh * 0.3); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), s.f.U.clone().addScaledVector(s.f.T, -0.5).normalize()); m.castShadow = true; snakeGroup.add(m); }
+      for (const sg of [1, -1]) { const x = F.Hl * 0.06, th = sg * 0.32, s = body.surf(x, th), hh = F.W(x) * 0.55; const m = new THREE.Mesh(hornGeo(hh * 0.26, hh), hornM); m.position.copy(s.p).addScaledVector(s.f.U, -hh * 0.12); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), s.f.U.clone().addScaledVector(s.f.T, -0.5).normalize()); m.castShadow = true; snakeGroup.add(m); headParts.push(m); }
     }
     if (H.horns === 'supraocular') {
-      for (const sg of [1, -1]) { const x = H.eyeX * F.Hl, th = sg * (body.eyeA - 0.55), s = body.surf(x, th), hh = F.W(x) * 0.42; const g = new THREE.ConeGeometry(hh * 0.3, hh, 10); g.translate(0, hh / 2, 0); const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: P.head.hornColor || P.colors.dorsal, roughness: 0.8 })); m.position.copy(s.p).addScaledVector(s.f.U, -hh * 0.1); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), s.f.U.clone().addScaledVector(s.f.S, sg * 0.45).addScaledVector(s.f.T, 0.25).normalize()); m.castShadow = true; snakeGroup.add(m); }
+      for (const sg of [1, -1]) { const x = H.eyeX * F.Hl, th = sg * (body.eyeA - 0.55), s = body.surf(x, th), hh = F.W(x) * 0.42; const m = new THREE.Mesh(hornGeo(hh * 0.3, hh), hornM); m.position.copy(s.p).addScaledVector(s.f.U, -hh * 0.1); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), s.f.U.clone().addScaledVector(s.f.S, sg * 0.45).addScaledVector(s.f.T, 0.25).normalize()); m.castShadow = true; snakeGroup.add(m); headParts.push(m); }
     }
     if (P.tail.rattle) {
       const n = P.tail.rattle, f = body.frameAt(F.L), c = body.spine(F.L), w = F.W(F.L * 0.999) * 1.15;
@@ -1559,14 +1860,16 @@ export function mount(host, opts) {
     if ((SCENES[P.scene.kind] || {}).water === 'river') { let best = 0, bd = -1; for (let i = 0; i < 16; i++) { const a = (i / 16) * TAU; let m = -1e9; for (const p of pose.pts) m = Math.max(m, p[0] * Math.cos(a) + p[1] * Math.sin(a)); if (bd < 0 || m < bd) { bd = m; best = a; } } poseInfo.waterDir = best; poseInfo.waterDist = bd + F.w0 * 2.5 + Rb * 0.12; }
     scene.add(snakeGroup);
     if (P.scene.kind !== 'sea') scene.add(contactShadow(poseInfo, F, Rb));
-    buildScene(ctx, P, F, body, poseInfo, seed, quality);
+    ctx.natureReady = null; ctx.afterNature = () => { if (!cScene.checked) setSceneVisible(false); dirty = true; kick(); };
+    t0 = performance.now(); buildScene(ctx, P, F, body, poseInfo, seed, quality); perfT('scene', t0);
     if (!cScene.checked) setSceneVisible(false);
     // the photographic surroundings arrive a moment later (cached after the first time)
     const envName = P.scene.env || ENV_FOR[P.scene.kind], myScene = scene;
     ctx.envReady = envName && !opts.noEnv ? loadEnv(envName).then((env) => {
       if (!alive || ctx.scene !== myScene) return false;
-      env.name = envName; applyEnv(ctx, P, F, poseInfo, env); if (!cScene.checked) setSceneVisible(false); dirty = true; kick(); return true;
+      const tE = performance.now(); env.name = envName; applyEnv(ctx, P, F, poseInfo, env); perfT('applyEnv', tE); if (!cScene.checked) setSceneVisible(false); dirty = true; kick(); return true;
     }).catch(() => false) : Promise.resolve(false);
+    ctx.envReady = Promise.all([ctx.envReady, ctx.natureReady, ctx.patternReady]).then((r) => r[0]); // (tests wait for everything)
 
     const headPos = body.surf(F.Hl * 0.45, 0).p;
     const headDir = body.frameAt(F.Hl * 0.5).T.clone().negate(); // pointing out of the snout
@@ -1575,7 +1878,8 @@ export function mount(host, opts) {
     const axisAng = 0.5 * Math.atan2(2 * sxz, sxx - szz);
     info = { F, body, center: new THREE.Vector3(center.x, Math.min(center.y, hMax * 0.5), center.z), Rb, hMax, headPos, headDir, axisAng, eyePos, size };
     info.collide = []; for (let i = 0, n = 240; i <= n; i++) { const x = (i / n) * F.L; info.collide.push({ p: body.spine(x), r: Math.max(F.W(x), F.Hh(x)) * 1.05 }); }
-    extras = { mat, eyes: eyeMeshes, mouth: P.plan === 'blind' ? null : buildMouth(P, F, body, snakeGroup, eyeMeshes) };
+    t0 = performance.now();
+    extras = { mat, eyes: eyeMeshes, mouth: P.plan === 'blind' ? null : buildMouth(P, F, body, snakeGroup, eyeMeshes.concat(headParts), pat) }; perfT('mouth', t0);
     bite = null; bBite.disabled = false; bBite.textContent = 'See bite'; bAnat.hidden = bBite.hidden = !extras.mouth;
     if (bAnat.getAttribute('aria-pressed') === 'true') { bAnat.setAttribute('aria-pressed', 'false'); markers.filter((m) => m.anat).forEach((m) => m.el.remove()); markers = markers.filter((m) => !m.anat); }
     if (bMouth) { bMouth.hidden = !extras.mouth; mouthGoal = 0; bMouth.setAttribute('aria-pressed', 'false'); bMouth.textContent = 'Open mouth'; }
