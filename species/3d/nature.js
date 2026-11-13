@@ -282,7 +282,7 @@ function buildAll(A) {
       let p; for (let t = 0; t < 20; t++) { p = V(Rn() * 2 - 1, Rn() * 2 - 1, Rn() * 2 - 1); if (p.lengthSq() < 1) break; }
       p.multiplyScalar(Math.pow(p.length(), -0.45) || 1); p.set(p.x * rx, Math.max(p.y * ry, -ry * 0.75), p.z * rx).add(c);
       const out = p.clone().sub(c).normalize(); nrm.set(Rn() - 0.5, Rn() - 0.5, Rn() - 0.5).normalize().lerp(out, 0.4).normalize();
-      card(fol, p, cs * (0.75 + Rn() * 0.5), cs * (0.75 + Rn() * 0.5), nrm, out.clone().addScaledVector(UP, 0.8), c, Math.max(rx, ry));
+      card(fol, p, cs * (0.75 + Rn() * 0.5), cs * (0.75 + Rn() * 0.5), nrm, out.clone().addScaledVector(UP, 0.8), c, Math.max(rx, ry), { dark: o.bright || 1 });
     }
     return { wood: wood.geo(), fol: fol.geo() };
   }
@@ -447,7 +447,7 @@ function buildAll(A) {
     rocks(30, groundR * 1.0, 50, [0.3, 1.5]);
   } else if (U === 'arid') {
     put('spinifex', (Rn) => tuftGeo(Rn, low ? 30 : 70, 0.55, '#8a8a52', '#c9b98a', 0.25, { lean: 0.9, w: 0.012, outward: 1 }), grassMat(), 500, near0, 50, [0.6, 1.4], { variants: 3, sy: [0.6, 0.9], col: () => tint(0.8, 1.1, 0.1) });
-    put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 26, wide: 1.2 }), foliageMat(tex.spray('saltbush')), 160, groundR * 1.0, 60, [0.5, 1.4], { variants: 2, wmat: twigMat(), col: () => tint(0.85, 1.1, 0.08) });
+    put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 34, wide: 1.2, bright: 1.35 }), foliageMat(tex.spray('saltbush')), 160, groundR * 1.0, 60, [0.5, 1.4], { variants: 2, wmat: twigMat(), col: () => tint(0.85, 1.1, 0.08) });
     // outcrops: clusters of big boulders, and stones between
     const centres = scatter(Math.round(14 * (low ? 0.6 : 1)), groundR * 1.6, farR * 1.1, 10, null, 'area');
     const okNear = (x, z) => centres.some((c) => (c.x - x) ** 2 + (c.z - z) ** 2 < 36);
@@ -455,11 +455,11 @@ function buildAll(A) {
     rocks(160, groundR * 1.0, 45, [0.08, 0.5], { variants: 2, detail: 1 });
   } else if (U === 'sand') {
     put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 260, near0, 50, [0.35, 0.8], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
-    put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 20, wide: 1.3 }), foliageMat(tex.spray('saltbush')), 40, groundR * 1.1, 60, [0.4, 1.0], { variants: 2, wmat: twigMat(), col: () => tint(0.85, 1.1, 0.08) });
+    put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 30, wide: 1.3, bright: 1.35 }), foliageMat(tex.spray('saltbush')), 40, groundR * 1.1, 60, [0.4, 1.0], { variants: 2, wmat: twigMat(), col: () => tint(0.85, 1.1, 0.08) });
     rocks(16, groundR * 1.2, 60, [0.3, 1.4]);
   } else if (U === 'gibber') {
     rocks(2200, near0, 32, [0.04, 0.22], { variants: 3, lift: -0.2, flat: 0.55, recv: false, detail: 0 });
-    put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 22, wide: 1.3, stems: 0 }), foliageMat(tex.spray('saltbush')), 140, groundR * 1.0, 60, [0.3, 0.8], { variants: 2, wmat: twigMat(), col: () => tint(0.85, 1.1, 0.08) });
+    put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 30, wide: 1.3, stems: 0, bright: 1.35 }), foliageMat(tex.spray('saltbush')), 140, groundR * 1.0, 60, [0.3, 0.8], { variants: 2, wmat: twigMat(), col: () => tint(0.85, 1.1, 0.08) });
     put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 220, near0, 45, [0.25, 0.5], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     rocks(18, groundR * 1.3, 60, [0.3, 1.0]);
   }
@@ -616,10 +616,10 @@ function makeTextures(THREE, rng, fbm, seed, track) {
     } else {
       for (const layer of [0, 1]) walk((u, v, ang, k, f) => {
         if (Rn() < 0.35) return;
-        const sd = k % 2 ? 1 : -1, l = (P.l[0] + Rn() * (P.l[1] - P.l[0])) * (layer ? 1 : 1.1), w = l * P.w, an = ang + sd * (0.55 + Rn() * 0.5), col = P.pal[(Rn() * P.pal.length) | 0], lit = layer ? 0.9 + Rn() * 0.45 : 0.6 + Rn() * 0.25;
+        const sd = k % 2 ? 1 : -1, l = (P.l[0] + Rn() * (P.l[1] - P.l[0])) * (layer ? 1 : 1.1), w = l * P.w, an = ang + sd * (0.55 + Rn() * 0.5), col = P.pal[(Rn() * P.pal.length) | 0], lit = (layer ? 0.9 + Rn() * 0.45 : 0.6 + Rn() * 0.25) * (P.twig ? 1.15 : 1);
         x.save(); x.translate(u, v); x.rotate(an); leafPath(x, l, w);
         const g = x.createLinearGradient(0, -w / 2, 0, w / 2); g.addColorStop(0, shade(col, lit * 1.15)); g.addColorStop(1, shade(col, lit * 0.8)); x.fillStyle = g; x.fill();
-        x.strokeStyle = 'rgba(20,30,10,.35)'; x.lineWidth = 1; x.stroke();
+        if (!P.twig) { x.strokeStyle = 'rgba(20,30,10,.35)'; x.lineWidth = 1; x.stroke(); }
         x.strokeStyle = 'rgba(230,240,190,.22)'; x.lineWidth = 1.2; x.beginPath(); x.moveTo(1, 0); x.lineTo(l * 0.92, 0); x.stroke();
         x.restore();
       }, layer ? 24 : 30);

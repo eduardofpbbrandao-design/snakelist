@@ -1191,7 +1191,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   }
   if (PR.heather) {
     const spots = place(Math.round(26 * PR.heather), Rb * 0.9, Rb * 4.2, F.w0 * 4 + clamp(L * 0.3, 0.12, 0.35) * 0.4);
-    const hh = clamp(L * 0.22, 0.08, 0.25), g = bladeTuft(seed + 31, 160, hh, '#2f2a1e', '#4a3d34', hh * 0.55, { lean: 0.8, w: 0.008, tip: '#5e4a56', green: '#3b4524' });
+    const hh = clamp(L * 0.22, 0.08, 0.25), g = bladeTuft(seed + 31, 160, hh, '#4f5a33', '#6f6a45', hh * 0.55, { lean: 0.8, w: 0.012, tip: '#9a6f8c', green: '#5f7036' }); // v4.80: living heather green with purple tips, not black
     const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.95 }), spots.length); im.castShadow = im.receiveShadow = true;
     spots.forEach(([x, z], i) => { const s = 0.6 + R() * 0.7; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s, s * (0.7 + R() * 0.5), s); pv.set(x, 0, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); addOcc(im, i, m4, hh * s * 0.8); });
     scene.add(im);
