@@ -92,6 +92,12 @@ p, li { color: var(--text); overflow-wrap: break-word; }
 .timeline { list-style: none; padding: 0; margin: 8px 0 0; border-left: 2px solid var(--line); }
 .timeline li { position: relative; padding: 0 0 12px 18px; }
 .timeline li::before { content: ""; position: absolute; left: -7px; top: 9px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+/* headings in the species pages' green, and the line under the main heading in the lighter green */
+:root { --sl-h:#1f7a3a; --sl-sub:#2e7d4f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sl-h:#a8ef94; --sl-sub:#8fd98a; } }
+:root[data-theme="dark"] { --sl-h:#a8ef94; --sl-sub:#8fd98a; }
+h1 { color: var(--sl-h); }
+h1 + p { color: var(--sl-sub) !important; }
 </style>
 </head>
 <body>
@@ -105,6 +111,10 @@ p, li { color: var(--text); overflow-wrap: break-word; }
 <p class="lead">A free life list for every snake species in the world &ndash; tick off the snakes you've seen, find out where each one lives, and test yourself.</p>
 </div>
 
+<h2>Why SnakeList was made, and who made it</h2>
+<p>SnakeList was made by <a href="about.html">Eduardo</a>, a snake enthusiast from Portugal who is <span id="my-age">11</span> years old. He made it for two reasons: to keep a life list of the snakes he finds, and to help everyone learn about every snake species in the world.</p>
+<p>He wanted one place to tick off every snake he had ever seen, instead of keeping a checklist in Google Keep. He couldn't find an app that worked the way he wanted &ndash; iNaturalist can work as a list if you upload photos, but he wanted a real checklist &ndash; so he decided to make his own. The name SnakeList is his own idea.</p>
+
 <h2>What SnakeList is</h2>
 <p>SnakeList is a checklist of all <b>4,247 snake species</b> in the world, from the tiniest blind snakes to the biggest pythons. You can mark the snakes you've seen (with the date, the place and your own photos), keep a list of the ones you want to see, and follow your favourites. It works on a computer, a tablet or a phone, and you can <a href="install.html">install it like an app</a>.</p>
 <div class="features">
@@ -116,10 +126,6 @@ p, li { color: var(--text); overflow-wrap: break-word; }
 <a class="feature" href="./?tab=ach"><b>Achievements</b><span>Badges for the snakes you see and the quizzes you finish.</span><i>See achievements &rarr;</i></a>
 </div>
 <p class="center" style="margin-top:22px"><a class="btn" href="./">Open SnakeList</a></p>
-
-<h2>Why it was made</h2>
-<p>SnakeList was made by <a href="about.html">Eduardo Brandao</a>, a new herpetologist who loves snakes. He wanted one place to tick off every snake he had ever seen, instead of keeping a checklist in Google Keep. He couldn't find an app that worked the way he wanted &ndash; iNaturalist can work as a list if you upload photos, but he wanted a real checklist &ndash; so he decided to make his own.</p>
-<p>The name SnakeList is his own idea.</p>
 
 <h2>When</h2>
 <ul class="timeline">
@@ -147,6 +153,19 @@ p, li { color: var(--text); overflow-wrap: break-word; }
 </div>
 </div></main>
 <footer class="site-foot"><p><a class="brand" href="about-snakelist.html">SnakeList</a> &middot; made by <a href="about.html">Eduardo Brandao</a></p><p class="links"><a href="./">Open the app</a> &middot; <a href="species/">All species</a> &middot; <a href="install.html">Install app</a> &middot; <a href="about-snakelist.html">About SnakeList</a> &middot; <a href="about.html">About me</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></p></footer>
-
+<script>
+// Eduardo's age, worked out from today's date in Portugal (the same as on the About me page): it goes up by one every 30 October
+(function () {
+  var BY = 2015, BM = 10, BD = 30, el = document.getElementById("my-age");
+  if (!el) return;
+  var y, m, d;
+  try {
+    var parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Lisbon", year: "numeric", month: "numeric", day: "numeric" }).formatToParts(new Date());
+    parts.forEach(function (p) { if (p.type === "year") y = +p.value; if (p.type === "month") m = +p.value; if (p.type === "day") d = +p.value; });
+  } catch (e) {}
+  if (!y) { var t = new Date(); y = t.getFullYear(); m = t.getMonth() + 1; d = t.getDate(); }
+  el.textContent = y - BY - (m < BM || (m === BM && d < BD) ? 1 : 0);
+})();
+</script>
 </body>
 </html>

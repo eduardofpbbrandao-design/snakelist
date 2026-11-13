@@ -254,6 +254,12 @@ body > .wrap { flex: 1; width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+/* headings in the species pages' green, and the line under the main heading in the lighter green */
+:root { --sl-h:#1f7a3a; --sl-sub:#2e7d4f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sl-h:#a8ef94; --sl-sub:#8fd98a; } }
+:root[data-theme="dark"] { --sl-h:#a8ef94; --sl-sub:#8fd98a; }
+h1 { color: var(--sl-h); }
+h1 + p { color: var(--sl-sub) !important; }
 </style>
 </head>
 <body>

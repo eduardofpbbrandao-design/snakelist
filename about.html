@@ -82,6 +82,12 @@ p, li { color: var(--text); overflow-wrap: break-word; }
 .me-photo img { display: block; width: 100%; height: auto; border-radius: 16px; border: 1px solid var(--line); }
 .me-photo figcaption { margin-top: 8px; font-size: 14px; color: var(--muted); text-align: center; }
 body { padding-bottom: 0; }
+/* headings in the species pages' green, and the line under the main heading in the lighter green */
+:root { --sl-h:#1f7a3a; --sl-sub:#2e7d4f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sl-h:#a8ef94; --sl-sub:#8fd98a; } }
+:root[data-theme="dark"] { --sl-h:#a8ef94; --sl-sub:#8fd98a; }
+h1 { color: var(--sl-h); }
+h1 + p { color: var(--sl-sub) !important; }
 </style>
 </head>
 <body>

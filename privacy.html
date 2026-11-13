@@ -78,6 +78,12 @@ p, li { color: var(--text); overflow-wrap: break-word; }
 .doc li { margin: 4px 0; }
 .updated { color: var(--muted); margin: 0; }
 .toc { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 16px 0 0; padding: 12px 14px; border-radius: 14px; background: var(--bg2); border: 1px solid var(--line); font-size: 15px; }
+/* headings in the species pages' green, and the line under the main heading in the lighter green */
+:root { --sl-h:#1f7a3a; --sl-sub:#2e7d4f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sl-h:#a8ef94; --sl-sub:#8fd98a; } }
+:root[data-theme="dark"] { --sl-h:#a8ef94; --sl-sub:#8fd98a; }
+h1 { color: var(--sl-h); }
+h1 + p { color: var(--sl-sub) !important; }
 </style>
 </head>
 <body>
