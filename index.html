@@ -44,7 +44,7 @@
   gtag('config', 'G-PY2LJV389K');
 </script>
 <title>SnakeList - the snake life list, map and quiz</title>
-<link rel="preload" as="image" href="species-photos/hero/wagler-wide-2400.webp" imagesrcset="species-photos/hero/wagler-wide-1200.webp 1200w, species-photos/hero/wagler-wide-1800.webp 1800w, species-photos/hero/wagler-wide-2400.webp 2400w, species-photos/hero/wagler-wide-3000.webp 3000w" imagesizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(180vh + 346px)" type="image/webp" fetchpriority="high">
+<link rel="preload" as="image" href="species-photos/hero/rough-green-2048.webp" imagesrcset="species-photos/hero/rough-green-800.webp 800w, species-photos/hero/rough-green-1200.webp 1200w, species-photos/hero/rough-green-1600.webp 1600w, species-photos/hero/rough-green-2048.webp 2048w" imagesizes="(min-aspect-ratio: 1544/1000) 100vw, 155vh" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1647,52 +1647,20 @@
      faded in with a soft, overlapping mask), and its lower part fades to nothing - so the
      page's own background (light or dark) shows through and the hero melts into the page
      with no line. Only the Checklist shows it; the other tabs open without it. */
-  .sl-hero { position: relative; height: 118vh; height: 118svh; min-height: 560px; overflow: hidden; isolation: isolate;
-    color: #f4f8ee; overflow-anchor: none; }
+  /* v4.80 (Eduardo's design): the opening is its own full screen - a sharp photo, not blended into SnakeList.
+     Any scroll on it glides you down to SnakeList (like the button); scrolling up at the top of SnakeList glides back. */
+  .sl-hero { position: relative; height: 100vh; min-height: 480px; overflow: hidden; isolation: isolate; color: #f4f8ee; overflow-anchor: none; background: #0f2a17; }
   .sl-hero[hidden] { display: none; }
-  .hero-media { position: absolute; inset: 0; overflow: hidden; will-change: transform;
-    /* the photo's own colours, tiny and blurred: shown while the real photo arrives */
-    background: #0a1f12 url("data/ui/b2cebb9e41e16c.webp") center / cover no-repeat;
-    --hero-fade: linear-gradient(180deg, #000 0%, #000 62%, rgba(0,0,0,0.975) 65.5%, rgba(0,0,0,0.93) 69%, rgba(0,0,0,0.85) 72.5%,
-      rgba(0,0,0,0.73) 76%, rgba(0,0,0,0.58) 79.5%, rgba(0,0,0,0.42) 82.5%, rgba(0,0,0,0.27) 85.5%, rgba(0,0,0,0.15) 88%,
-      rgba(0,0,0,0.065) 90%, rgba(0,0,0,0.018) 91.5%, transparent 93%);
-    -webkit-mask-image: var(--hero-fade); mask-image: var(--hero-fade); }
-  .hero-l { position: absolute; inset: 0; overflow: hidden; }
-  /* v4.80: a fade that stays put at the bottom while the photo slides under it, so the photo always melts into the page */
-  .hero-fadeout { position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(180deg, rgba(22,74,44,0) 50%, rgba(22,74,44,0.4) 58%, rgba(22,74,44,0.82) 65%, #164a2c 72%, #12402a 100%); } /* v4.80: dark at the bottom, not light */
-  /* every copy is the same size and in the same place - 96px bigger than the hero on every side,
-     so a blurred copy never shows its soft see-through edge */
-  .hero-l img { position: absolute; top: -96px; left: -96px; width: calc(100% + 192px); height: calc(100% + 192px);
-    max-width: none; object-fit: cover; object-position: 78% 40%; display: block; user-select: none; -webkit-user-drag: none; }
-  .hero-l1 img { filter: blur(0.75px); } .hero-l2 img { filter: blur(1.5px); } .hero-l3 img { filter: blur(3px); }
-  .hero-l4 img { filter: blur(6px); }    .hero-l5 img { filter: blur(12px); } .hero-l6 img { filter: blur(24px); }
-  .hero-l1 { --m: linear-gradient(180deg, transparent 46%, #000 61%); }
-  .hero-l2 { --m: linear-gradient(180deg, transparent 52%, #000 67%); }
-  .hero-l3 { --m: linear-gradient(180deg, transparent 57%, #000 73%); }
-  .hero-l4 { --m: linear-gradient(180deg, transparent 62%, #000 80%); }
-  .hero-l5 { --m: linear-gradient(180deg, transparent 67%, #000 87%); }
-  .hero-l6 { --m: linear-gradient(180deg, transparent 73%, #000 94%); }
-  .hero-l1, .hero-l2, .hero-l3, .hero-l4, .hero-l5, .hero-l6 { -webkit-mask-image: var(--m); mask-image: var(--m); }
-  /* low down, the blurred photo leans toward the page's own colour before it fades, so the
-     melt into the page is one even change of colour (grey-brown photo -> page green), not a muddy band */
-  .sl-hero { background: none; }
-  /* the photo, its green night and the fade sit in one layer that turns see-through at the bottom, so the page's own
-     background (which stays still while you scroll) shows through - no line where SnakeList starts */
-  .hero-bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: #164a2c;
-    --hb: linear-gradient(180deg, #000 0%, #000 86%, rgba(0,0,0,0.82) 90%, rgba(0,0,0,0.5) 94%, rgba(0,0,0,0.18) 97.5%, transparent 100%);
-    -webkit-mask-image: var(--hb); mask-image: var(--hb); } /* v4.80: dark under the photo, not pale green */
-  .hero-tint { position: absolute; inset: 0; pointer-events: none; background: #103a23;
-    --t: linear-gradient(180deg, transparent 56%, rgba(0,0,0,0.10) 66%, rgba(0,0,0,0.26) 76%, rgba(0,0,0,0.42) 86%, rgba(0,0,0,0.5) 100%);
-    -webkit-mask-image: var(--t); mask-image: var(--t); }
-  /* a soft, local shade behind the words only - not a dark layer over the whole photo */
+  .hero-media { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: #2d5a1e center / cover no-repeat; }
+  .hero-media img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: 38% 40%; display: block; user-select: none; -webkit-user-drag: none; }
+  /* a soft shade at the top and bottom so the words read, and a gentle dark edge at the bottom of the screen */
   .hero-shade { position: absolute; inset: 0; pointer-events: none;
-    background: radial-gradient(ellipse 62% 34% at 50% 24%, rgba(6,22,13,0.45) 0%, rgba(6,22,13,0.28) 45%, rgba(6,22,13,0) 100%),
-      linear-gradient(180deg, rgba(6,22,13,0.25) 0%, rgba(6,22,13,0) 30%); } /* v4.80: darker behind the words, so the green writing reads on the green snake */
-  .hero-copy { position: absolute; left: 0; right: 0; top: 5%; padding: 0 20px; text-align: center; }
-  .hero-copy > p { margin: 0 auto; }
-  .hero-title { display: inline-block; font-size: clamp(76px, min(15vw, 27vh), 330px); line-height: 0.95; white-space: nowrap;
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.38)) drop-shadow(0 6px 26px rgba(0,0,0,0.30)); }
+    background: linear-gradient(180deg, rgba(4,16,8,0.25) 0%, rgba(4,16,8,0) 22%, rgba(4,16,8,0) 50%, rgba(4,16,8,0.45) 78%, rgba(4,16,8,0.72) 100%); }
+  .hero-copy { position: absolute; left: 6%; right: auto; bottom: 17%; max-width: 46%; padding: 0 20px; text-align: left; } /* in the soft, blurry corner - away from the snake's head */
+  .hero-copy > p { margin: 0; } .hero-copy > .hero-sub { margin-left: 0; }
+  @media (max-aspect-ratio: 1/1) { .hero-copy > p, .hero-copy > .hero-sub { margin-left: auto; margin-right: auto; } }
+  .hero-title { display: inline-block; font-size: clamp(46px, min(8.5vw, 15vh), 170px); line-height: 0.95; white-space: nowrap;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.45)) drop-shadow(0 4px 18px rgba(0,0,0,0.35)); }
   .hero-mark { font-family: 'EB Garamond', serif; font-weight: 600; letter-spacing: 0.010em; color: #9fe08a; }
   .hero-mark em { font-style: normal; font-weight: 500; }
   .hero-mark .snake-s { height: 0.71em; }
@@ -1700,24 +1668,19 @@
     .hero-mark { background-image: radial-gradient(circle at 30% 40%, #b4ec98 0%, #8fd873 30%, #6cc052 62%, #4f9e3d 100%);
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   }
-  .hero-copy > .hero-sub { margin-top: clamp(10px, 1.6vh, 18px); max-width: 44ch; font: 500 clamp(15.5px, 1.45vw, 21px)/1.5 'Inter', sans-serif;
-    letter-spacing: 0.005em; text-wrap: balance; color: #9fe08a; font-size: clamp(16px, min(1.7vw, 3vh), 30px); text-shadow: 0 1px 2px rgba(0,0,0,0.85), 0 0 14px rgba(0,0,0,0.75), 0 2px 26px rgba(0,0,0,0.6); font-weight: 600; }
-  .hero-cue { position: absolute; left: 50%; bottom: 21%; transform: translateX(-50%); display: flex; flex-direction: column;
-    align-items: center; gap: 2px; padding: 8px 14px; border: 0; border-radius: 999px; background: none; cursor: pointer;
-    color: #9fe08a; font: 700 clamp(11px, 0.9vw, 15px)/1 'JetBrains Mono', monospace; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.92; }
+  .hero-copy > .hero-sub { margin-top: clamp(6px, 1.2vh, 14px); max-width: 44ch; font: 600 clamp(14px, min(1.3vw, 2.4vh), 22px)/1.5 'Inter', sans-serif;
+    letter-spacing: 0.005em; text-wrap: balance; color: #9fe08a; text-shadow: 0 1px 2px rgba(0,0,0,0.85), 0 0 14px rgba(0,0,0,0.7); }
+  .hero-cue { position: absolute; left: 50%; bottom: max(18px, 5%); transform: translateX(-50%); display: flex; flex-direction: column;
+    align-items: center; gap: 4px; padding: 8px 14px; border: 0; border-radius: 999px; background: none; cursor: pointer;
+    color: #9fe08a; font: 700 clamp(11px, 0.9vw, 15px)/1 'JetBrains Mono', monospace; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.95;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
   .hero-cue:hover { opacity: 1; }
   .hero-cue:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; opacity: 1; }
-  .hero-cue svg { width: 22px; height: 22px; animation: hero-nudge 2.6s ease-in-out 1.8s infinite; }
+  .hero-cue svg { width: 22px; height: 22px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); animation: hero-nudge 2.6s ease-in-out 1.8s infinite; }
   @keyframes hero-nudge { 0%, 55%, 100% { transform: translateY(0); } 70% { transform: translateY(5px); } 85% { transform: translateY(1px); } }
-  .hero-credit { position: absolute; top: 10px; right: 12px; font: 400 10.5px/1.3 'Inter', sans-serif; color: rgba(246,250,240,0.66);
-    text-decoration: none; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-  .hero-credit:hover, .hero-credit:focus-visible { color: #fff; text-decoration: underline; }
-  /* phones and tablets held upright: the snake's head stays in view */
-  @media (max-aspect-ratio: 1/1) { .hero-l img { object-position: 66% 40%; } .hero-copy { top: 6%; } }
-  /* very wide screens: the photo fits the width, so pick which band of it shows */
-  @media (min-aspect-ratio: 17/10) { .hero-l img { object-position: 70% 40%; } .hero-copy { top: 4%; } }
-  /* short landscape phones: a little smaller, so the words don't cover the snake */
-  @media (max-height: 520px) and (min-aspect-ratio: 1/1) { .hero-copy { top: 7%; } .hero-title { font-size: clamp(60px, 26vh, 130px); } .hero-sub { font-size: 14.5px; } }
+  /* phones held upright: the snake's head stays in view */
+  @media (max-aspect-ratio: 1/1) { .hero-media img { object-position: 36% 40%; } .hero-copy { left: 0; right: 0; max-width: none; bottom: 15%; text-align: center; } .hero-title { font-size: clamp(44px, 14vw, 110px); } }
+  @media (max-height: 520px) and (min-aspect-ratio: 1/1) { .hero-copy { bottom: 18%; } .hero-title { font-size: clamp(40px, 14vh, 90px); } }
   /* the words rise in gently once the opening has gone */
   .sl-hero.hero-wait .hero-copy > *, .sl-hero.hero-wait .hero-cue { opacity: 0; }
   .sl-hero.hero-wait .hero-copy > * { transform: translateY(14px); }
@@ -3204,26 +3167,15 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
   
 
 <section class="sl-hero hero-wait" id="sl-hero" aria-label="Welcome to SnakeList">
-  <div class="hero-bg" aria-hidden="true">
   <div class="hero-media" aria-hidden="true">
-    <div class="hero-l hero-l0"><img src="species-photos/hero/wagler-wide-2400.webp" srcset="species-photos/hero/wagler-wide-1200.webp 1200w, species-photos/hero/wagler-wide-1800.webp 1800w, species-photos/hero/wagler-wide-2400.webp 2400w, species-photos/hero/wagler-wide-3000.webp 3000w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(180vh + 346px)" alt="" fetchpriority="high" decoding="async"></div>
-    <div class="hero-l hero-l1"><img src="species-photos/hero/wagler-wide-2400.webp" srcset="species-photos/hero/wagler-wide-1200.webp 1200w, species-photos/hero/wagler-wide-1800.webp 1800w, species-photos/hero/wagler-wide-2400.webp 2400w, species-photos/hero/wagler-wide-3000.webp 3000w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(180vh + 346px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l2"><img src="species-photos/hero/wagler-wide-2400.webp" srcset="species-photos/hero/wagler-wide-1200.webp 1200w, species-photos/hero/wagler-wide-1800.webp 1800w, species-photos/hero/wagler-wide-2400.webp 2400w, species-photos/hero/wagler-wide-3000.webp 3000w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(180vh + 346px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l3"><img src="species-photos/hero/wagler-wide-2400.webp" srcset="species-photos/hero/wagler-wide-1200.webp 1200w, species-photos/hero/wagler-wide-1800.webp 1800w, species-photos/hero/wagler-wide-2400.webp 2400w, species-photos/hero/wagler-wide-3000.webp 3000w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(180vh + 346px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l4"><img src="species-photos/hero/wagler-wide-2400.webp" srcset="species-photos/hero/wagler-wide-1200.webp 1200w, species-photos/hero/wagler-wide-1800.webp 1800w, species-photos/hero/wagler-wide-2400.webp 2400w, species-photos/hero/wagler-wide-3000.webp 3000w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(180vh + 346px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l5"><img src="species-photos/hero/wagler-wide-2400.webp" srcset="species-photos/hero/wagler-wide-1200.webp 1200w, species-photos/hero/wagler-wide-1800.webp 1800w, species-photos/hero/wagler-wide-2400.webp 2400w, species-photos/hero/wagler-wide-3000.webp 3000w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(180vh + 346px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l6"><img src="species-photos/hero/wagler-wide-2400.webp" srcset="species-photos/hero/wagler-wide-1200.webp 1200w, species-photos/hero/wagler-wide-1800.webp 1800w, species-photos/hero/wagler-wide-2400.webp 2400w, species-photos/hero/wagler-wide-3000.webp 3000w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(180vh + 346px)" alt="" decoding="async"></div>
-    <div class="hero-tint"></div>
+    <img src="species-photos/hero/rough-green-2048.webp" srcset="species-photos/hero/rough-green-800.webp 800w, species-photos/hero/rough-green-1200.webp 1200w, species-photos/hero/rough-green-1600.webp 1600w, species-photos/hero/rough-green-2048.webp 2048w" sizes="(min-aspect-ratio: 1544/1000) 100vw, 155vh" alt="" fetchpriority="high" decoding="async">
     <div class="hero-shade"></div>
-  </div>
-  <div class="hero-fadeout" aria-hidden="true"></div>
   </div>
   <div class="hero-copy">
     <p class="hero-title"><span class="sr-only">SnakeList</span><span class="hero-mark" aria-hidden="true"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span></p>
     <p class="hero-sub">All <span data-sl-total>4,205</span> of the world's snake species in one place &mdash; photos, range maps and a life list to tick off the ones you find.</p>
   </div>
-  <a class="hero-credit" href="https://www.inaturalist.org/photos/106537980" target="_blank" rel="noopener" title="Wagler&#39;s pit viper (Tropidolaemus wagleri) - photo by Nico, CC BY-NC 4.0">Photo: Nico &middot; CC BY-NC</a>
-  <button class="hero-cue" type="button" id="hero-cue" aria-label="Scroll down to the checklist"><span aria-hidden="true">Explore</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+  <button class="hero-cue" type="button" id="hero-cue" aria-label="Scroll to continue to SnakeList"><span aria-hidden="true">Scroll to continue</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
 </section>
 <script>
   // the opening hero: its words rise in as the opening fades, its arrow scrolls to the
@@ -3239,24 +3191,52 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
       if (window.MutationObserver) new MutationObserver(function () { if (/intro-(wipe|gone)/.test(intro.className)) go(); }).observe(intro, { attributes: true, attributeFilter: ["class"] });
     }
     setTimeout(go, 9000); // never leave the words hidden
-    document.getElementById("hero-cue").addEventListener("click", function () {
-      var to = hero.nextElementSibling; while (to && to.offsetHeight === 0) to = to.nextElementSibling;
-      var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      window.scrollTo({ top: to ? to.getBoundingClientRect().top + window.scrollY : hero.offsetHeight, behavior: calm ? "auto" : "smooth" });
+    // v4.80: the opening is its own screen. Any scroll down on it (wheel, trackpad, finger, keys) glides you to
+    // SnakeList, just like "Scroll to continue"; scrolling up at the very top of SnakeList glides back to the photo.
+    var calmQ = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)");
+    function heroH() { return hero.hidden ? 0 : hero.offsetHeight; }
+    var gliding = false, glideT = 0;
+    function glide(to) {
+      gliding = true; clearTimeout(glideT);
+      window.scrollTo({ top: to, behavior: calmQ && calmQ.matches ? "auto" : "smooth" });
+      glideT = setTimeout(function () { gliding = false; }, 900);
+    }
+    function blocked() { // the opening animation, the tutorial or a pop-up has the screen: leave scrolling alone
+      return hero.hidden || !window.__introDone || document.documentElement.classList.contains("sl-intro-lock")
+        || (document.getElementById("tour-layer") && !document.getElementById("tour-layer").hidden)
+        || document.querySelector(".wn-sheet.open, #wn-sheet.open, dialog[open]");
+    }
+    function onHero() { var h = heroH(); return h && window.scrollY < h - 4; }
+    function atTop() { var h = heroH(); return h && Math.abs(window.scrollY - h) <= 4; }
+    function want(dir, e) {
+      if (blocked()) return;
+      if (gliding) { if (e && e.cancelable) e.preventDefault(); return; }
+      if (dir > 0 && onHero()) { if (e && e.cancelable) e.preventDefault(); glide(heroH()); }
+      else if (dir < 0 && (atTop() || (onHero() && window.scrollY > 0))) { if (e && e.cancelable) e.preventDefault(); glide(0); }
+    }
+    window.addEventListener("wheel", function (e) { if (Math.abs(e.deltaY) < 2 || e.ctrlKey) return; if (e.target.closest && e.target.closest(".sl-dd-list, .lang-menu, [role=dialog]")) return; want(e.deltaY > 0 ? 1 : -1, e); }, { passive: false });
+    var ty = null;
+    window.addEventListener("touchstart", function (e) { ty = e.touches.length === 1 ? e.touches[0].clientY : null; }, { passive: true });
+    window.addEventListener("touchmove", function (e) { if (ty == null) return; var dy = ty - e.touches[0].clientY; if (Math.abs(dy) < 12) return; want(dy > 0 ? 1 : -1, e); ty = null; }, { passive: false });
+    window.addEventListener("keydown", function (e) {
+      var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      var k = e.key; if (k === "ArrowDown" || k === "PageDown" || (k === " " && !e.shiftKey)) want(1, e); else if (k === "ArrowUp" || k === "PageUp" || (k === " " && e.shiftKey)) want(-1, e);
     });
-    // v4.80: as you scroll, the photo moves at half speed - it slides gently under the page instead of rushing off
-    // v4.80: the hero's height is set once in pixels (and again only if the width changes), never from vh -
-    // inside a frame that grows with its page, or on a phone whose address bar slides away, vh kept changing
-    // and the page jumped
+    document.getElementById("hero-cue").addEventListener("click", function () { glide(heroH()); });
+    // never left resting half on the photo: when scrolling stops inside it, settle on the photo or on SnakeList
+    var lastY = window.scrollY, dirY = 0, restT = 0;
+    window.addEventListener("scroll", function () {
+      var y = window.scrollY; if (y !== lastY) dirY = y > lastY ? 1 : -1; lastY = y;
+      clearTimeout(restT); restT = setTimeout(function () {
+        if (gliding || blocked()) return; var h = heroH(), yy = window.scrollY;
+        if (h && yy > 2 && yy < h - 2) glide(dirY > 0 ? h : 0);
+      }, 160);
+    }, { passive: true });
+    // the opening is exactly one screen tall, set in pixels (and again only if the width changes - never from vh,
+    // which keeps changing on phones as the address bar slides, and inside frames that grow with their page)
     var hw = -1; function sizeHero() { var w = window.innerWidth; if (w === hw) return; hw = w;
-      var h = Math.min(window.innerHeight || 800, (window.screen && screen.availHeight) || 1200, 1400); hero.style.height = Math.max(560, Math.round(h * 1.18)) + "px"; }
+      hero.style.height = Math.max(480, Math.min(window.innerHeight || 800, 1400)) + "px"; }
     sizeHero(); window.addEventListener("resize", sizeHero);
-    var media = hero.querySelector(".hero-media"), copy = hero.querySelector(".hero-copy"), praf = 0;
-    var calmP = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)");
-    function par() { praf = 0; if (hero.hidden || (calmP && calmP.matches)) { media.style.transform = copy.style.transform = ""; return; }
-      var y = Math.max(0, Math.min(window.scrollY, hero.offsetHeight));
-      media.style.transform = "translate3d(0," + (y * 0.5).toFixed(1) + "px,0)"; copy.style.transform = "translate3d(0," + (y * 0.3).toFixed(1) + "px,0)"; copy.style.opacity = String(Math.max(0, 1 - y / (hero.offsetHeight * 0.55))); }
-    window.addEventListener("scroll", function () { if (!praf) praf = requestAnimationFrame(par); }, { passive: true }); par();
     // window.SL_heroEnd(): where the page below the hero starts (0 when the hero is hidden)
     window.SL_heroEnd = function () { return hero.hidden ? 0 : hero.getBoundingClientRect().bottom + window.scrollY; };
     function wire() {
