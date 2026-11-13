@@ -44,7 +44,7 @@
   gtag('config', 'G-PY2LJV389K');
 </script>
 <title>SnakeList - the snake life list, map and quiz</title>
-<link rel="preload" as="image" href="species-photos/hero/whipsnake-1600.webp" imagesrcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" imagesizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" type="image/webp" fetchpriority="high">
+<link rel="preload" as="image" href="species-photos/hero/inland-taipan-1600.webp" imagesrcset="species-photos/hero/inland-taipan-800.webp 800w, species-photos/hero/inland-taipan-1200.webp 1200w, species-photos/hero/inland-taipan-1600.webp 1600w, species-photos/hero/inland-taipan-2048.webp 2048w" imagesizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" type="image/webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1651,16 +1651,16 @@
   .sl-hero[hidden] { display: none; }
   .hero-media { position: absolute; inset: 0; z-index: -1; overflow: hidden;
     /* the photo's own colours, tiny and blurred: shown while the real photo arrives */
-    background: #5f665a url("data/ui/ccab8c10024029.webp") center / cover no-repeat;
-    --hero-fade: linear-gradient(180deg, #000 0%, #000 60%, rgba(0,0,0,0.975) 64.5%, rgba(0,0,0,0.93) 69%, rgba(0,0,0,0.85) 73.5%,
-      rgba(0,0,0,0.73) 78%, rgba(0,0,0,0.58) 82.5%, rgba(0,0,0,0.42) 86.5%, rgba(0,0,0,0.27) 90.3%, rgba(0,0,0,0.15) 93.5%,
-      rgba(0,0,0,0.065) 96.3%, rgba(0,0,0,0.018) 98.6%, transparent 100%);
+    background: #16110c url("data/ui/ffafefcd00f66d.webp") center / cover no-repeat;
+    --hero-fade: linear-gradient(180deg, #000 0%, #000 56%, rgba(0,0,0,0.975) 60%, rgba(0,0,0,0.93) 64%, rgba(0,0,0,0.85) 68%,
+      rgba(0,0,0,0.73) 72%, rgba(0,0,0,0.58) 76%, rgba(0,0,0,0.42) 79.5%, rgba(0,0,0,0.27) 83%, rgba(0,0,0,0.15) 86%,
+      rgba(0,0,0,0.065) 88.5%, rgba(0,0,0,0.018) 90.5%, transparent 92%);
     -webkit-mask-image: var(--hero-fade); mask-image: var(--hero-fade); }
   .hero-l { position: absolute; inset: 0; overflow: hidden; }
   /* every copy is the same size and in the same place - 96px bigger than the hero on every side,
      so a blurred copy never shows its soft see-through edge */
   .hero-l img { position: absolute; top: -96px; left: -96px; width: calc(100% + 192px); height: calc(100% + 192px);
-    max-width: none; object-fit: cover; object-position: 30% 50%; display: block; user-select: none; -webkit-user-drag: none; }
+    max-width: none; object-fit: cover; object-position: 50% 30%; display: block; user-select: none; -webkit-user-drag: none; }
   .hero-l1 img { filter: blur(0.75px); } .hero-l2 img { filter: blur(1.5px); } .hero-l3 img { filter: blur(3px); }
   .hero-l4 img { filter: blur(6px); }    .hero-l5 img { filter: blur(12px); } .hero-l6 img { filter: blur(24px); }
   .hero-l1 { --m: linear-gradient(180deg, transparent 46%, #000 61%); }
@@ -1672,16 +1672,17 @@
   .hero-l1, .hero-l2, .hero-l3, .hero-l4, .hero-l5, .hero-l6 { -webkit-mask-image: var(--m); mask-image: var(--m); }
   /* low down, the blurred photo leans toward the page's own colour before it fades, so the
      melt into the page is one even change of colour (grey-brown photo -> page green), not a muddy band */
-  .hero-tint { position: absolute; inset: 0; pointer-events: none; background: var(--page-under);
+  .sl-hero { background: linear-gradient(180deg, #120f0b 0%, #0f0f0b 62%, #0d1a12 80%, var(--page-under) 100%); } /* v4.80: dark under the photo, not pale green */
+  .hero-tint { position: absolute; inset: 0; pointer-events: none; background: #0d0f0b;
     --t: linear-gradient(180deg, transparent 56%, rgba(0,0,0,0.10) 66%, rgba(0,0,0,0.26) 76%, rgba(0,0,0,0.42) 86%, rgba(0,0,0,0.5) 100%);
     -webkit-mask-image: var(--t); mask-image: var(--t); }
   /* a soft, local shade behind the words only - not a dark layer over the whole photo */
   .hero-shade { position: absolute; inset: 0; pointer-events: none;
     background: radial-gradient(ellipse 60% 30% at 50% 22%, rgba(8,24,15,0.34) 0%, rgba(8,24,15,0.16) 48%, rgba(8,24,15,0) 100%),
       linear-gradient(180deg, rgba(8,24,15,0.22) 0%, rgba(8,24,15,0) 22%); }
-  .hero-copy { position: absolute; left: 0; right: 0; top: 10%; padding: 0 20px; text-align: center; }
+  .hero-copy { position: absolute; left: 0; right: 0; top: 6%; padding: 0 20px; text-align: center; }
   .hero-copy > p { margin: 0 auto; }
-  .hero-title { display: inline-block; font-size: clamp(60px, 10.5vw, 160px); line-height: 0.95; white-space: nowrap;
+  .hero-title { display: inline-block; font-size: clamp(76px, min(15vw, 27vh), 330px); line-height: 0.95; white-space: nowrap;
     filter: drop-shadow(0 1px 2px rgba(0,0,0,0.38)) drop-shadow(0 6px 26px rgba(0,0,0,0.30)); }
   .hero-mark { font-family: 'EB Garamond', serif; font-weight: 600; letter-spacing: 0.010em; color: #9fe08a; }
   .hero-mark em { font-style: normal; font-weight: 500; }
@@ -1691,10 +1692,10 @@
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   }
   .hero-copy > .hero-sub { margin-top: clamp(10px, 1.6vh, 18px); max-width: 44ch; font: 500 clamp(15.5px, 1.45vw, 21px)/1.5 'Inter', sans-serif;
-    letter-spacing: 0.005em; text-wrap: balance; color: rgba(246,250,240,0.95); text-shadow: 0 1px 2px rgba(0,0,0,0.45), 0 2px 18px rgba(0,0,0,0.35); }
+    letter-spacing: 0.005em; text-wrap: balance; color: #9fe08a; font-size: clamp(16px, min(1.7vw, 3vh), 30px); text-shadow: 0 1px 2px rgba(0,0,0,0.45), 0 2px 18px rgba(0,0,0,0.35); }
   .hero-cue { position: absolute; left: 50%; bottom: max(18px, 5.5svh); transform: translateX(-50%); display: flex; flex-direction: column;
     align-items: center; gap: 2px; padding: 8px 14px; border: 0; border-radius: 999px; background: none; cursor: pointer;
-    color: var(--text); font: 600 11px/1 'JetBrains Mono', monospace; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.78; }
+    color: #9fe08a; font: 700 clamp(11px, 0.9vw, 15px)/1 'JetBrains Mono', monospace; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.92; }
   .hero-cue:hover { opacity: 1; }
   .hero-cue:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; opacity: 1; }
   .hero-cue svg { width: 22px; height: 22px; animation: hero-nudge 2.6s ease-in-out 1.8s infinite; }
@@ -1703,11 +1704,11 @@
     text-decoration: none; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
   .hero-credit:hover, .hero-credit:focus-visible { color: #fff; text-decoration: underline; }
   /* phones and tablets held upright: the snake's head stays in view */
-  @media (max-aspect-ratio: 1/1) { .hero-l img { object-position: 21% 50%; } .hero-copy { top: 15%; } }
+  @media (max-aspect-ratio: 1/1) { .hero-l img { object-position: 58% 30%; } .hero-copy { top: 6%; } }
   /* very wide screens: the photo fits the width, so pick which band of it shows */
-  @media (min-aspect-ratio: 17/10) { .hero-l img { object-position: 30% 42%; } }
+  @media (min-aspect-ratio: 17/10) { .hero-l img { object-position: 50% 24%; } .hero-copy { top: 5%; } }
   /* short landscape phones: a little smaller, so the words don't cover the snake */
-  @media (max-height: 520px) and (min-aspect-ratio: 1/1) { .hero-copy { top: 9%; } .hero-title { font-size: clamp(52px, 9vw, 96px); } .hero-sub { font-size: 14.5px; } }
+  @media (max-height: 520px) and (min-aspect-ratio: 1/1) { .hero-copy { top: 7%; } .hero-title { font-size: clamp(60px, 26vh, 130px); } .hero-sub { font-size: 14.5px; } }
   /* the words rise in gently once the opening has gone */
   .sl-hero.hero-wait .hero-copy > *, .sl-hero.hero-wait .hero-cue { opacity: 0; }
   .sl-hero.hero-wait .hero-copy > * { transform: translateY(14px); }
@@ -3005,6 +3006,14 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
   .globe-stage.sl3d-open .sp-info-wrap, .globe-stage.sl3d-open .td-toggle { display: none; }
   /* v4.73: with a model open in the map, only the model shows - the map's own buttons above it (See provinces, See species, the search...) step aside */
   body.sl3d-on .globe-btns, body.sl3d-on .heat-search, body.sl3d-on .map-caption, body.sl3d-on #map-chip { display: none !important; }
+  /* v4.80: a little "NEW" tag on everything to do with 3D */
+  .td-card-btn, .td-toggle, .sp-info-acts .sp-info-3d, .photo-lightbox .pl-real { overflow: visible; }
+  .td-card-btn::after, .td-toggle::after, .sp-info-acts .sp-info-3d::after, .photo-lightbox .pl-real::after, .sl3d-hd h2::after {
+    content: "NEW"; font: 800 8.5px/1 'Inter', sans-serif; letter-spacing: .06em; color: #fff; background: #e0712b;
+    padding: 2.5px 4px 2px; border-radius: 999px; box-shadow: 0 1px 3px rgba(0,0,0,.25); pointer-events: none; white-space: nowrap; }
+  .td-card-btn::after, .td-toggle::after, .sp-info-acts .sp-info-3d::after, .photo-lightbox .pl-real::after { position: absolute; top: -7px; right: -9px; z-index: 2; }
+  .sp-info-acts .sp-info-3d, .photo-lightbox .pl-real { position: relative; }
+  .sl3d-hd h2::after { display: inline-block; vertical-align: middle; margin-left: 8px; position: relative; top: -2px; }
   .sl3d-hd { display: flex; align-items: center; gap: 10px; }
   .sl3d-hd h2 { flex: 1; min-width: 0; margin: 0; font-size: 16px; line-height: 1.25; color: #1f7a3a; } /* v4.80: the same green as the name on the species pages */
   [data-sl-theme="dark"] .sl3d-hd h2 { color: #a8ef94; }
@@ -3182,13 +3191,13 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
 
 <section class="sl-hero hero-wait" id="sl-hero" aria-label="Welcome to SnakeList">
   <div class="hero-media" aria-hidden="true">
-    <div class="hero-l hero-l0"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" fetchpriority="high" decoding="async"></div>
-    <div class="hero-l hero-l1"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l2"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l3"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l4"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l5"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l6"><img src="species-photos/hero/whipsnake-1600.webp" srcset="species-photos/hero/whipsnake-800.webp 800w, species-photos/hero/whipsnake-1200.webp 1200w, species-photos/hero/whipsnake-1600.webp 1600w, species-photos/hero/whipsnake-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l0"><img src="species-photos/hero/inland-taipan-1600.webp" srcset="species-photos/hero/inland-taipan-800.webp 800w, species-photos/hero/inland-taipan-1200.webp 1200w, species-photos/hero/inland-taipan-1600.webp 1600w, species-photos/hero/inland-taipan-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" fetchpriority="high" decoding="async"></div>
+    <div class="hero-l hero-l1"><img src="species-photos/hero/inland-taipan-1600.webp" srcset="species-photos/hero/inland-taipan-800.webp 800w, species-photos/hero/inland-taipan-1200.webp 1200w, species-photos/hero/inland-taipan-1600.webp 1600w, species-photos/hero/inland-taipan-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l2"><img src="species-photos/hero/inland-taipan-1600.webp" srcset="species-photos/hero/inland-taipan-800.webp 800w, species-photos/hero/inland-taipan-1200.webp 1200w, species-photos/hero/inland-taipan-1600.webp 1600w, species-photos/hero/inland-taipan-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l3"><img src="species-photos/hero/inland-taipan-1600.webp" srcset="species-photos/hero/inland-taipan-800.webp 800w, species-photos/hero/inland-taipan-1200.webp 1200w, species-photos/hero/inland-taipan-1600.webp 1600w, species-photos/hero/inland-taipan-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l4"><img src="species-photos/hero/inland-taipan-1600.webp" srcset="species-photos/hero/inland-taipan-800.webp 800w, species-photos/hero/inland-taipan-1200.webp 1200w, species-photos/hero/inland-taipan-1600.webp 1600w, species-photos/hero/inland-taipan-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l5"><img src="species-photos/hero/inland-taipan-1600.webp" srcset="species-photos/hero/inland-taipan-800.webp 800w, species-photos/hero/inland-taipan-1200.webp 1200w, species-photos/hero/inland-taipan-1600.webp 1600w, species-photos/hero/inland-taipan-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l6"><img src="species-photos/hero/inland-taipan-1600.webp" srcset="species-photos/hero/inland-taipan-800.webp 800w, species-photos/hero/inland-taipan-1200.webp 1200w, species-photos/hero/inland-taipan-1600.webp 1600w, species-photos/hero/inland-taipan-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
     <div class="hero-tint"></div>
     <div class="hero-shade"></div>
   </div>
@@ -3196,7 +3205,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     <p class="hero-title"><span class="sr-only">SnakeList</span><span class="hero-mark" aria-hidden="true"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span></p>
     <p class="hero-sub">All <span data-sl-total>4,205</span> of the world's snake species in one place &mdash; photos, range maps and a life list to tick off the ones you find.</p>
   </div>
-  <a class="hero-credit" href="https://www.inaturalist.org/photos/138665198" target="_blank" rel="noopener" title="Travancore whipsnake (Ahaetulla travancorica) - photo by Paulmathi Vinod, CC BY 4.0, cropped">Photo: Paulmathi Vinod &middot; CC BY</a>
+  <a class="hero-credit" href="https://www.inaturalist.org/photos/577556750" target="_blank" rel="noopener" title="Inland taipan (Oxyuranus microlepidotus) - photo by Will Hunt, CC BY-NC 4.0">Photo: Will Hunt &middot; CC BY-NC</a>
   <button class="hero-cue" type="button" id="hero-cue" aria-label="Scroll down to the checklist"><span aria-hidden="true">Explore</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
 </section>
 <script>

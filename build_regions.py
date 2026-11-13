@@ -1101,6 +1101,9 @@ REAL_CSS = """
 .sp-realbtn,.sp-anatbtn{font:inherit;cursor:pointer}.sp-ago{color:var(--muted)}
 .sp-rl{width:min(1040px,calc(100vw - 24px));max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--line);border-radius:18px;background:var(--card);color:var(--text)}
 .sp-rl::backdrop{background:rgba(5,15,9,.72)}.sp-rl-in{padding:12px 18px 18px}
+/* v4.80: a little "NEW" tag on everything to do with 3D */
+.sp-realbtn,.sp-anatbtn{position:relative;overflow:visible}.sp-realbtn::after,.sp-anatbtn::after,.sp-rl-hd h2::after,.sp-rl-tab:first-child::after{content:"NEW";font:800 8.5px/1 Inter,system-ui,sans-serif;letter-spacing:.06em;color:#fff;background:#e0712b;padding:2.5px 4px 2px;border-radius:999px;box-shadow:0 1px 3px rgba(0,0,0,.25);pointer-events:none;white-space:nowrap}
+.sp-realbtn::after,.sp-anatbtn::after{position:absolute;top:-7px;right:-9px;z-index:2}.sp-rl-hd h2::after{display:inline-block;vertical-align:middle;margin-left:8px;position:relative;top:-3px}.sp-rl-tab:first-child::after{display:inline-block;vertical-align:middle;margin-left:6px;position:relative;top:-1px}
 .sp-rl-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 0 8px}
 .sp-rl-hd h2{margin:0;font:700 21px/1.2 Georgia,serif}.sp-rl-x{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:24px;line-height:1;cursor:pointer}
 .sp-rl-tabs{display:flex;gap:4px;margin:0 0 10px;border-bottom:1px solid var(--line)}.sp-rl-tabs[hidden]{display:none}
