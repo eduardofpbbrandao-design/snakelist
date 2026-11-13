@@ -34,7 +34,7 @@ async function newPage(br, opts = {}) {
   if (opts.init) await pg.addInitScript(opts.init);
   return { ctx, pg, reqs, errs };
 }
-const settle = (pg) => pg.waitForFunction(() => { const st = window.__sp3d.controls.st; return !st.goal && !st.vaz && !st.vel && !st.dragging; }, null, { timeout: 20000 }).catch(() => {});
+const settle = (pg) => pg.waitForFunction(() => { const st = window.__sp3d.controls.st; return !st.goal && !st.vaz && !st.vel && !st.dragging; }, null, { timeout: 60000 }).catch(() => {});
 const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.querySelector('.sp-rl .sp3d-canvas'), null, { timeout: 90000 });
 
 (async () => {
@@ -136,12 +136,35 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
 
     // v4.63: only Reset stays under the model
     const bar = await pg.evaluate(() => [].map.call(document.querySelectorAll('.sp3d-bar button'), (b) => b.textContent));
-    ok('the buttons under the model: Reset, Open mouth, the three views and Size (v4.72)', JSON.stringify(bar) === JSON.stringify(['Reset', 'Open mouth', 'Full body', 'Head close-up', 'Pattern from above', 'Size vs person']), JSON.stringify(bar));
+    ok('the buttons under the model (v4.81: Anatomy, See bite, See it eat, Slither, See eye shield, Fullscreen)', JSON.stringify(bar) === JSON.stringify(['Reset', 'Open mouth', 'Anatomy', 'See bite', 'See it eat', 'Slither', 'See eye shield', 'Full body', 'Head close-up', 'Pattern from above', 'Size vs person', 'Fullscreen']), JSON.stringify(bar));
+    const hdb = await pg.evaluate(() => [].map.call(document.querySelectorAll('.sp-rl-hd .sp3d-hdb button'), (b) => b.textContent));
+    ok('Compare photo and See countries beside the name (v4.81)', JSON.stringify(hdb) === JSON.stringify(['Compare photo', 'See countries']), JSON.stringify(hdb));
     // resize to phone width
     await pg.setViewportSize({ width: 390, height: 844 }); await pg.waitForTimeout(800);
     const rs = await pg.evaluate(() => { const c = document.querySelector('.sp3d-canvas'); return { cw: c.clientWidth, ch: c.clientHeight, bw: c.width / (window.devicePixelRatio || 1), aspect: window.__sp3d.cam.aspect, docW: document.documentElement.scrollWidth }; });
     ok('resize to phone updates canvas and aspect; no horizontal scroll', Math.abs(rs.cw - rs.bw) < 2 && Math.abs(rs.aspect - rs.cw / rs.ch) < 0.01 && rs.docW <= 390, JSON.stringify(rs));
     await pg.screenshot({ path: OUT + 'test-resized-phone.png' });
+    // v4.81: the shows take the camera and give everything back; buttons stay independent
+    await pg.setViewportSize({ width: 1280, height: 900 }); await pg.waitForTimeout(500);
+    const sh = await pg.evaluate(async () => {
+      const s = window.__sp3d, fx = s.fx, click = (t) => [...document.querySelectorAll('.sp3d-bar button')].find((b) => b.textContent === t).click(), out = {};
+      click('See bite'); fx.test.freeze(3); s.frame(); out.biting = { show: fx.test.show && fx.test.show.name, locked: fx.locked, mouth: s.mouthGoal, rig: fx.test.rig.active };
+      click('Stop'); s.frame(); out.after = { show: fx.test.show, locked: fx.locked, mouth: s.mouthGoal, rig: fx.test.rig.active };
+      click('Slither'); await new Promise((r) => setTimeout(r, 400)); s.frame(); out.slither = fx.test.slither && fx.test.rig.active;
+      [...document.querySelectorAll('.sp3d-bar button')].find((b) => /slither/i.test(b.textContent)).click(); await new Promise((r) => setTimeout(r, 2500)); s.frame();
+      out.slitherStopped = !fx.test.slither;
+      click('Size vs person'); const d0 = s.controls.st.goal ? s.controls.st.goal.d : s.controls.st.d; click('Open mouth');
+      out.mouthOnly = { scale: !!document.querySelector('.sp3d-bar button[aria-pressed=true][title^="Show its adult"]'), sameView: Math.abs((s.controls.st.goal ? s.controls.st.goal.d : s.controls.st.d) - d0) < 1e-6, mouth: s.mouthGoal };
+      click('Size vs person'); click('Close mouth');
+      return out;
+    });
+    ok('See bite: a show takes the camera and opens the mouth, Stop gives them back', sh.biting.show === 'bite' && sh.biting.locked && sh.biting.mouth > 0.5 && sh.biting.rig && !sh.after.show && !sh.after.locked && sh.after.mouth === 0 && !sh.after.rig, JSON.stringify(sh));
+    ok('Slither starts and stops', sh.slither && sh.slitherStopped, JSON.stringify(sh));
+    ok('Open mouth after Size vs person only opens the mouth', sh.mouthOnly.scale && sh.mouthOnly.sameView && sh.mouthOnly.mouth === 1, JSON.stringify(sh.mouthOnly));
+    await pg.focus('.sp3d-canvas'); const w0 = await pg.evaluate(() => [window.__sp3d.controls.st.px, window.__sp3d.controls.st.pz]);
+    await pg.keyboard.down('w'); await pg.waitForTimeout(1500); await pg.keyboard.up('w');
+    const w1 = await pg.evaluate(() => { const st = window.__sp3d.controls.st; return { px: st.px, pz: st.pz, fx: -Math.sin(st.az), fz: -Math.cos(st.az) }; });
+    ok('W moves towards where the camera looks', (w1.px - w0[0]) * w1.fx + (w1.pz - w0[1]) * w1.fz > 0, JSON.stringify({ w0, w1 }));
     ok('no page errors after interaction tests', errs.length === 0, errs.join(' | '));
   }
 

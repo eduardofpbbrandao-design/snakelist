@@ -23309,6 +23309,19 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     ov.querySelector(".sl3d-back").focus({ preventScroll: true });
     start(id);
   }
+  // v4.81: the snake's photo (the same tile its card shows) and its species page's map, for the panel beside the model
+  function photoOf(id) {
+    var P = window.SL_PHOTOS, it = P && P.items && P.items[id];
+    if (it) return { src: new URL("species-photos/t/" + it[0] + "-" + it[1] + ".webp", location.href).href, alt: "Photo of " + ((models && models[id] && models[id].name) || id), credit: it[2] ? (/^Illustration/.test(it[2]) ? esc(it[2]) : "Photo &copy; " + esc(it[2]) + " &middot; via iNaturalist") : "" };
+    var X = window.SL_EXTRA_PHOTOS && window.SL_EXTRA_PHOTOS[id];
+    if (X && X.url) return { src: X.url, alt: "Photo of " + id, credit: X.by || X.credit ? "Photo: " + esc(X.by || X.credit) : "" };
+    return null;
+  }
+  function mapOf(id, p) {
+    var u = window.SL_SP_PAGE_URL ? window.SL_SP_PAGE_URL(id) : "";
+    if (!u) { var nm = slug(p && p.name || ""); u = "species/" + (nm && nm !== id ? nm + "-" : "") + id + ".html"; }
+    return u + (u.indexOf("?") < 0 ? "?" : "&") + "embed=map";
+  }
   function start(id) {
     var my = ov; say("Loading the 3D model…");
     getModels().then(function (m) {
@@ -23318,7 +23331,8 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
       return getViewer().then(function (mod) {
         if (ov !== my) return;
         var h = ov.querySelector(".sl3d-host"); h.innerHTML = "";
-        try { viewer = mod.mount(h, { profile: p, id: id, name: p.name }); }
+        // v4.81: the name's header gets Compare photo (the card's own photo) and See countries (the species page's map)
+        try { viewer = mod.mount(h, { profile: p, id: id, name: p.name, head: ov.querySelector(".sl3d-hd h2"), photo: function () { return photoOf(id); }, mapUrl: function () { return mapOf(id, p); } }); }
         catch (e) { viewer = null; say("The 3D view couldn't start on this device.", function () { start(id); }); }
       });
     }).catch(function () {

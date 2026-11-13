@@ -8,6 +8,7 @@
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
 import * as NATURE from './nature.js';
+import * as EXTRA from './extras.js'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -1322,6 +1323,8 @@ function Controls(dom, cam, opt) {
   // v4.72: px/pz = how far you have flown from the snake (sideways, along the ground), never further than panMax
   const st = { az: 0, el: 0.5, d: 1, vaz: 0, vel: 0, px: 0, pz: 0, vpx: 0, vpz: 0, goal: null, dragging: false };
   const ptrs = new Map(); let pinch0 = 0, d0 = 0, last = null, panBtn = false, mid0 = null;
+  const locked = () => !!(opt.locked && opt.locked()); // v4.81: while a show runs, the camera moves by itself
+  const held = new Set(); let kv = [0, 0], lastU = 0; // v4.81: W A S D held down glide smoothly
   const panMax = () => (opt.panMax ? opt.panMax() : 0);
   function clampPan() { const m = panMax(), l = Math.hypot(st.px, st.pz); if (l > m && l > 0) { st.px *= m / l; st.pz *= m / l; } }
   // move along the ground: dx to the right of the view, dy away from you (screen pixels)
@@ -1336,7 +1339,7 @@ function Controls(dom, cam, opt) {
     st.goal = { az: g.az != null ? g.az : st.az, el: g.el != null ? g.el : st.el, d: g.d != null ? clamp(g.d, opt.dMin(), opt.dMax()) : st.d, px: g.px != null ? g.px : st.px, pz: g.pz != null ? g.pz : st.pz }; if (instant || reduce()) { st.az = st.goal.az; st.d = st.goal.d; st.el = limitEl(st.goal.el, st.d); st.px = st.goal.px; st.pz = st.goal.pz; st.goal = null; } opt.kick(); }
   function rot(dx, dy) { st.az -= dx; st.el = limitEl(st.el + dy, st.d); st.goal = null; }
   function zoom(f) { const d = clamp((st.goal ? st.goal.d : st.d) * f, opt.dMin(), opt.dMax()); setGoal({ d, az: st.goal ? st.goal.az : st.az, el: st.goal ? st.goal.el : st.el }); }
-  const onDown = (e) => { if (e.button === 1 || e.button > 2) return; panBtn = e.button === 2 || e.shiftKey || e.ctrlKey; try { dom.setPointerCapture(e.pointerId); } catch (err) { /* synthetic or already released pointer */ } ptrs.set(e.pointerId, [e.clientX, e.clientY]); if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); d0 = st.d; mid0 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; } st.dragging = true; st.vaz = st.vel = st.vpx = st.vpz = 0; last = performance.now(); st.goal = null; };
+  const onDown = (e) => { if (e.button === 1 || e.button > 2 || locked()) return; panBtn = e.button === 2 || e.shiftKey || e.ctrlKey; try { dom.setPointerCapture(e.pointerId); } catch (err) { /* synthetic or already released pointer */ } ptrs.set(e.pointerId, [e.clientX, e.clientY]); if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); d0 = st.d; mid0 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; } st.dragging = true; st.vaz = st.vel = st.vpx = st.vpz = 0; last = performance.now(); st.goal = null; };
   const onCtx = (e) => e.preventDefault();
   const onMove = (e) => {
     if (!ptrs.has(e.pointerId)) return; const p = ptrs.get(e.pointerId), dx = e.clientX - p[0], dy = e.clientY - p[1]; ptrs.set(e.pointerId, [e.clientX, e.clientY]);
@@ -1348,9 +1351,10 @@ function Controls(dom, cam, opt) {
       const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; if (mid0) { const m = pan(mid[0] - mid0[0], mid[1] - mid0[1]); last = now; st.vpx = m[0] / dt * 16; st.vpz = m[1] / dt * 16; } mid0 = mid; opt.kick(); }
   };
   const onUp = (e) => { ptrs.delete(e.pointerId); if (ptrs.size < 2) { pinch0 = 0; mid0 = null; } if (!ptrs.size) { st.dragging = false; panBtn = false; if (reduce() || performance.now() - last > 80) { st.vaz = st.vel = st.vpx = st.vpz = 0; } opt.kick(); } };
-  const onWheel = (e) => { e.preventDefault(); zoom(Math.exp(clamp(e.deltaY, -120, 120) * 0.0016)); };
+  const onWheel = (e) => { e.preventDefault(); if (locked()) return; zoom(Math.exp(clamp(e.deltaY, -120, 120) * 0.0016)); };
   const onKey = (e) => {
     const k = e.key, s = 0.17;
+    if (locked()) return;
     if (k === 'ArrowLeft') setGoal({ az: (st.goal ? st.goal.az : st.az) + s });
     else if (k === 'ArrowRight') setGoal({ az: (st.goal ? st.goal.az : st.az) - s });
     else if (k === 'ArrowUp') setGoal({ el: limitEl((st.goal ? st.goal.el : st.el) + s, st.d) });
@@ -1358,18 +1362,30 @@ function Controls(dom, cam, opt) {
     else if (k === '+' || k === '=' || k === 'Add') zoom(0.82);
     else if (k === '-' || k === '_' || k === 'Subtract') zoom(1.22);
     else if (k === 'r' || k === 'R') opt.reset();
-    // W A S D fly along the ground around the snake
+    // W A S D: W moves towards where you look (along the ground), S back, A and D sideways - smoothly while held
     else if (k === 'w' || k === 'W' || k === 's' || k === 'S' || k === 'a' || k === 'A' || k === 'd' || k === 'D') {
-      const step = 60, kk = k.toLowerCase(); pan(kk === 'a' ? -step : kk === 'd' ? step : 0, kk === 'w' ? -step : kk === 's' ? step : 0); opt.kick();
+      if (e.ctrlKey || e.metaKey || e.altKey) return; held.add(k.toLowerCase()); lastU = 0; opt.kick();
     }
     else return;
     e.preventDefault();
   };
   dom.addEventListener('pointerdown', onDown); dom.addEventListener('pointermove', onMove); dom.addEventListener('pointerup', onUp); dom.addEventListener('pointercancel', onUp); dom.addEventListener('contextmenu', onCtx);
-  dom.addEventListener('wheel', onWheel, { passive: false }); dom.addEventListener('keydown', onKey);
+  const onKeyUp = (e) => { if (held.delete(String(e.key).toLowerCase())) e.preventDefault(); };
+  const onBlur = () => held.clear();
+  dom.addEventListener('wheel', onWheel, { passive: false }); dom.addEventListener('keydown', onKey); dom.addEventListener('keyup', onKeyUp); dom.addEventListener('blur', onBlur);
   // returns true while still moving
   function update() {
     let moving = false;
+    const tnow = performance.now(), dt = lastU ? clamp((tnow - lastU) / 1000, 0, 0.2) : 1 / 60; lastU = tnow;
+    if (held.size && locked()) held.clear();
+    if (held.size || kv[0] || kv[1]) {
+      const f = (held.has('w') ? 1 : 0) - (held.has('s') ? 1 : 0), r = (held.has('d') ? 1 : 0) - (held.has('a') ? 1 : 0), n = Math.hypot(f, r) || 1;
+      const sp = st.d * 0.85, ca = Math.cos(st.az), sa = Math.sin(st.az); // the camera looks along -(sin az, cos az); its right is (cos az, -sin az)
+      const wx = ((-sa * f + ca * r) / n) * sp, wz = ((-ca * f - sa * r) / n) * sp, a = reduce() ? 1 : 1 - Math.exp(-dt * (held.size ? 9 : 7));
+      kv[0] += (wx - kv[0]) * a; kv[1] += (wz - kv[1]) * a; st.px += kv[0] * dt; st.pz += kv[1] * dt; clampPan();
+      if (st.goal) { st.goal.px = st.px; st.goal.pz = st.pz; }
+      if (!held.size && Math.hypot(kv[0], kv[1]) < st.d * 0.01) kv = [0, 0]; else moving = true;
+    }
     // a fling keeps gliding a little longer (smoother than it was)
     if (!st.dragging && (st.vaz || st.vel)) { st.az += st.vaz; st.el = limitEl(st.el + st.vel, st.d); st.vaz *= 0.92; st.vel *= 0.92; if (Math.abs(st.vaz) < 1e-4 && Math.abs(st.vel) < 1e-4) st.vaz = st.vel = 0; else moving = true; }
     if (!st.dragging && (st.vpx || st.vpz)) { st.px += st.vpx; st.pz += st.vpz; clampPan(); st.vpx *= 0.9; st.vpz *= 0.9; if (Math.hypot(st.vpx, st.vpz) < st.d * 1e-5) st.vpx = st.vpz = 0; else moving = true; }
@@ -1380,7 +1396,7 @@ function Controls(dom, cam, opt) {
     st.el = limitEl(st.el, st.d);
     return moving;
   }
-  function dispose() { dom.removeEventListener('pointerdown', onDown); dom.removeEventListener('pointermove', onMove); dom.removeEventListener('pointerup', onUp); dom.removeEventListener('pointercancel', onUp); dom.removeEventListener('wheel', onWheel); dom.removeEventListener('keydown', onKey); dom.removeEventListener('contextmenu', onCtx); }
+  function dispose() { dom.removeEventListener('pointerdown', onDown); dom.removeEventListener('pointermove', onMove); dom.removeEventListener('pointerup', onUp); dom.removeEventListener('pointercancel', onUp); dom.removeEventListener('wheel', onWheel); dom.removeEventListener('keydown', onKey); dom.removeEventListener('keyup', onKeyUp); dom.removeEventListener('blur', onBlur); dom.removeEventListener('contextmenu', onCtx); }
   return { st, setGoal, update, dispose, zoom };
 }
 
@@ -1409,7 +1425,7 @@ export function mount(host, opts) {
   host.innerHTML = '';
   const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
   const wrap = el('div', 'sp3d-wrap'), stage = el('div', 'sp3d-stage'), labels = el('div', 'sp3d-labels'), status = el('div', 'sp3d-status');
-  const hint = el('p', 'sp3d-hint', (window.innerWidth < 520 ? 'Drag to go round it · two fingers to fly around · pinch to zoom' : 'Drag to go round the snake · right-drag, Shift-drag or W A S D to fly around it · scroll to zoom'));
+  const hint = el('p', 'sp3d-hint', (window.innerWidth < 520 ? 'Drag to go round it · two fingers to move · pinch or double-tap to zoom' : 'Drag to go round the snake · W A S D or right-drag to move around it · scroll or double-click to zoom'));
   status.setAttribute('role', 'status'); status.hidden = true;
   const canvas = document.createElement('canvas'); canvas.className = 'sp3d-canvas'; canvas.tabIndex = 0;
   canvas.setAttribute('role', 'img'); canvas.setAttribute('aria-label', '3D model of ' + opts.name + '. Arrow keys rotate, plus and minus zoom, R resets the view.');
@@ -1433,10 +1449,19 @@ export function mount(host, opts) {
   const bVBody = btn('Full body', 'See the whole snake'), bVHead = btn('Head close-up', 'Close up on the head and its scales'), bVTop = btn('Pattern from above', 'Look down on the pattern of its back');
   vg2.append(bVBody, bVHead, bVTop); bar.appendChild(vg2); bar.appendChild(bScale); bScale.textContent = 'Size vs person'; bScale.title = 'Show its adult length next to a ruler and a person 1.5 m tall';
   let mouthGoal = 0;
+  // v4.81: everything you can do with the model beyond looking at it lives in extras.js (Slither, See it eat,
+  // See eye shield, See bite, Anatomy, Fullscreen, Compare photo / See countries beside the model, double-click zoom)
+  const V = { THREE, P, opts, el, on, wrap, stage, labels, bar, canvas, btn, bBite, bAnat, reduce,
+    get cam() { return cam; }, get controls() { return controls; }, get info() { return info; }, get extras() { return extras; }, get group() { return snakeGroup; }, get scene() { return ctx.scene; },
+    kick: () => kick(), toggleFull: () => toggleFull(), scaleOn: () => !!(scaleObj && scaleObj.visible),
+    get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
+    focus: (p, d, elv) => focusOn(p, d, elv), view: (g) => controls.setGoal(Object.assign({ az: controls.st.az, d: info.dFit, px: 0, pz: 0 }, g)) };
+  const fx = EXTRA.create(V);
   const panel = el('div', 'sp3d-panel'); panel.hidden = true; panel.id = 'sp3d-panel-' + seed; bSet.setAttribute('aria-controls', panel.id);
   const mkCheck = (label, checked) => { const l = el('label', 'sp3d-opt'), c = document.createElement('input'); c.type = 'checkbox'; c.checked = checked; l.append(c, document.createTextNode(' ' + label)); panel.appendChild(l); return c; };
   const cScene = mkCheck('Show surroundings', true);
   const ql = el('label', 'sp3d-opt'), qs = document.createElement('select');
+  qs.dataset.slDd = '1'; // v4.81: the (hidden) settings list keeps the plain browser dropdown, so the page's dropdown script leaves no listeners behind
   [['high', 'High detail'], ['low', 'Light (faster)']].forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; if (v === quality) o.selected = true; qs.appendChild(o); });
   ql.append(document.createTextNode('Quality '), qs); panel.appendChild(ql);
   const cap = el('div', 'sp3d-cap');
@@ -1560,8 +1585,9 @@ export function mount(host, opts) {
       controls = Controls(canvas, cam, {
         reduce, maxEl: (80 * Math.PI) / 180,
         minEl: (d) => Math.max((8 * Math.PI) / 180, Math.asin(clamp((info.hMax * 1.3 - targetFor(d).y) / d, 0, 0.95))),
-        dMin: () => info.dMin, dMax: () => info.dMax * (scaleObj && scaleObj.visible ? info.scaleK : 1), kick: () => kick(), reset: () => resetView(),
+        dMin: () => info.dMin, dMax: () => info.dMax * Math.max(scaleObj && scaleObj.visible ? info.scaleK : 1, fx.zoomOut), kick: () => kick(), reset: () => resetView(),
         panMax: () => info.Rb * 1.4, // you can fly around the snake, never away from it
+        locked: () => fx.locked,
       });
     }
     fitLimits();
@@ -1617,7 +1643,7 @@ export function mount(host, opts) {
   }
   function resize() {
     const w = stage.clientWidth || 300, h = stage.clientHeight || 200;
-    renderer.setSize(w, h, false); if (cam) { cam.aspect = w / h; cam.updateProjectionMatrix(); fitLimits(); controls && (controls.st.d = clamp(controls.st.d, info.dMin, controls.st.goal ? 1e9 : info.dMax * (scaleObj && scaleObj.visible ? info.scaleK : 1))); }
+    renderer.setSize(w, h, false); if (cam) { cam.aspect = w / h; cam.updateProjectionMatrix(); fitLimits(); controls && (controls.st.d = clamp(controls.st.d, info.dMin, controls.st.goal ? 1e9 : info.dMax * Math.max(scaleObj && scaleObj.visible ? info.scaleK : 1, fx.zoomOut))); }
     kick();
   }
   function frame() {
@@ -1626,12 +1652,14 @@ export function mount(host, opts) {
     let moving = controls.update();
     // the jaw opens and shuts smoothly
     const mo = extras && extras.mouth;
-    if (bite && stepBite()) moving = true;
     if (mo && Math.abs(mo.t - mouthGoal) > 1e-3) { const nt = reduce() ? mouthGoal : mo.t + clamp(mouthGoal - mo.t, -0.07, 0.07); mo.set(nt); if (Math.abs(nt - mouthGoal) <= 1e-3) mo.settle(); moving = true; }
+    if (fx.step()) moving = true; // v4.81: slithering, the shows (they may move the jaw and bend the body)
     placeCamera();
+    if (fx.camera()) moving = true; // a show moves the camera by itself
     updateOccluders();
     renderer.render(ctx.scene, cam);
     updateMarkers();
+    fx.after();
     if (moving) kick();
   }
   const zeroM = new THREE.Matrix4().makeScale(0, 0, 0), ov = new THREE.Vector3(), od = new THREE.Vector3();
@@ -1663,12 +1691,13 @@ export function mount(host, opts) {
       const rw = Math.max(L * 0.025, 0.004), rg = new THREE.BoxGeometry(L, rw * 0.25, rw);
       const ruler = new THREE.Mesh(rg, [m, m, new THREE.MeshStandardMaterial({ map: tickT, roughness: 0.7 }), m, m, m]);
       ruler.position.copy(rulerAt).addScaledVector(new THREE.Vector3(0, 1, 0), rw * 0.125); ruler.rotation.y = -info.axisAng; ruler.castShadow = true; scaleObj.add(ruler);
-      scaleObj.userData.labels = [{ p: ruler.position.clone().addScaledVector(side, L * 0.5).add(new THREE.Vector3(0, rw * 2, 0)), t: fmtLen(L) + ' ruler (typical adult, laid straight)' }];
+      // v4.81: labels sit above the far end of the ruler and beside the person's head, never on the snake
+      scaleObj.userData.labels = [{ p: ruler.position.clone().addScaledVector(side, L * 0.5).add(new THREE.Vector3(0, Math.max(rw * 3, L * 0.04), 0)), t: fmtLen(L) + ' ruler (typical adult, laid straight)' }];
       if (L >= 0.4) {
-        const pg = personShape(1.5), person = new THREE.Mesh(pg, new THREE.MeshStandardMaterial({ color: '#4d5a52', roughness: 0.9 }));
-        const pp = info.center.clone().addScaledVector(side, info.Rb + 0.45); pp.y = 0; person.position.copy(pp); person.lookAt(new THREE.Vector3(info.center.x, 0, info.center.z)); person.rotateY(Math.PI / 2); person.castShadow = true; scaleObj.add(person);
-        scaleObj.userData.labels.push({ p: pp.clone().add(new THREE.Vector3(0, 1.58, 0)), t: 'Person 1.5 m' });
-
+        // v4.81: a real-looking person (T-shirt, jeans, skin, hair, face) instead of a flat cut-out
+        const person = EXTRA.buildPerson(THREE, 1.5);
+        const pp = info.center.clone().addScaledVector(side, info.Rb + 0.45), pa0 = info.axisAng + Math.PI / 2; pp.y = 0; person.position.copy(pp); person.rotation.y = Math.atan2(Math.cos(pa0), Math.sin(pa0)) + 0.5; scaleObj.add(person); // facing the camera, turned a little towards the snake
+        scaleObj.userData.labels.push({ p: pp.clone().addScaledVector(side, 0.42).add(new THREE.Vector3(0, 1.42, 0)), t: 'Person 1.5 m' });
       }
       ctx.scene.add(scaleObj);
     }
@@ -1725,7 +1754,8 @@ export function mount(host, opts) {
       const m = o.m; m.el.hidden = !o.vis; if (!o.vis) continue;
       if (!m.sz) m.sz = [m.el.offsetWidth || 120, m.el.offsetHeight || 20];
       let x = Math.min(o.x, w - m.sz[0] + 6), y = o.y;
-      if (!m.scale) for (const q of placed) if (x < q[0] + q[2] && x + m.sz[0] > q[0] && y < q[1] + q[3] && y + m.sz[1] > q[1]) y = q[1] + q[3] + 2;
+      if (!m.scale) { for (const q of placed) if (x < q[0] + q[2] && x + m.sz[0] > q[0] && y < q[1] + q[3] && y + m.sz[1] > q[1]) y = q[1] + q[3] + 2; }
+      else { const mt = m.el.firstChild, wl = (mt && mt.offsetWidth) || m.sz[0], hl = (mt && mt.offsetHeight) || m.sz[1]; [x, y] = fx.avoid(clamp(o.x, wl / 2 + 2, w - wl / 2 - 2), y, wl, hl); } // v4.81: a size label never covers the snake
       placed.push([x, y, m.sz[0], m.sz[1]]);
       m.el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
       m.el.classList.toggle('sp3d-moved', Math.abs(y - o.y) > 1 || Math.abs(x - o.x) > 1);
@@ -1744,97 +1774,24 @@ export function mount(host, opts) {
     if (isFull()) { if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document); else { wrap.classList.remove('sp3d-max'); syncFull(); } }
     else { const rq = wrap.requestFullscreen || wrap.webkitRequestFullscreen; if (rq) { try { const pr = rq.call(wrap); if (pr && pr.catch) pr.catch(() => { wrap.classList.add('sp3d-max'); syncFull(); }); } catch (e) { wrap.classList.add('sp3d-max'); syncFull(); } } else { wrap.classList.add('sp3d-max'); syncFull(); } }
   }
-  function syncFull() { const f = isFull(); bFull.textContent = f ? 'Exit fullscreen' : 'Fullscreen'; bFull.setAttribute('aria-pressed', String(f)); setTimeout(resize, 30); }
+  function syncFull() { const f = isFull(); bFull.textContent = f ? 'Exit fullscreen' : 'Fullscreen'; bFull.setAttribute('aria-pressed', String(f)); fx.syncFull(f); setTimeout(resize, 30); }
+  // v4.81: centre the view on a point (along the ground) at distance d
+  function focusOn(p, d, elv) { d = clamp(d, info.dMin, info.dMax); const k = sstep(info.dFit * 0.75, info.dMin * 1.2, d), b = info.center.clone().lerp(info.headPos, k); controls.setGoal(Object.assign({ d, px: p.x - b.x, pz: p.z - b.z }, elv != null ? { el: elv } : {})); }
 
   // events
   on(bFront, 'click', () => setView('front')); on(bSide, 'click', () => setView('side')); on(bTop, 'click', () => setView('top'));
-  on(bReset, 'click', () => { resetView(); if (mouthGoal) toggleMouth(false); });
+  on(bReset, 'click', () => resetView()); // v4.81: Reset only resets the view (the mouth, size and anatomy stay as they are)
   function toggleMouth(force) {
     if (!extras || !extras.mouth) return;
     const v = force != null ? force : !mouthGoal; mouthGoal = v ? 1 : 0;
     bMouth.setAttribute('aria-pressed', String(v)); bMouth.textContent = v ? 'Close mouth' : 'Open mouth';
-    if (v) { // turn to face the head, close enough to see inside
+    if (v && !(scaleObj && scaleObj.visible) && !fx.anatOn() && controls.st.d > info.dFit * 0.55) { // turn to face the head, close enough to see inside (v4.81: only from the whole-snake view; Open mouth changes nothing else)
       controls.setGoal({ az: viewAz('front') + 0.55, el: (16 * Math.PI) / 180, d: Math.max(info.dMin * 1.5, info.F.Hl * 5.5), px: 0, pz: 0 });
     }
     kick();
   }
   on(bMouth, 'click', () => toggleMouth());
-  // ---- v4.80: Anatomy ----
-  const wpos = (o) => () => o.getWorldPosition(new THREE.Vector3());
-  function anatomyList() {
-    const mo = extras.mouth, A = mo.anchors, F = info.F, b = info.body, L = [], ap = (k) => { const a = anchorPos(k); return () => a.p.clone().add(snakeGroup.position); };
-    if (extras.eyes[0]) L.push(['Eye: no eyelids - a clear scale covers it', wpos(extras.eyes[0])]);
-    L.push(['Nostril', ap('nostril')]);
-    if (P.head.pits) L.push(['Heat pit: feels the warmth of prey', ap('pit')]);
-    if (A.fang) L.push([mo.fanged ? 'Fang: hollow, injects venom' : 'Teeth: curved backwards to hold prey', wpos(A.fang)]);
-    if (mo.fanged) L.push(['Teeth: hold prey, no venom', wpos(A.teeth)]);
-    L.push(['Palate teeth: walk food into the throat', wpos(A.palate)]);
-    L.push(['Glottis: breathing tube - it can breathe while swallowing', wpos(A.glottis)]);
-    L.push(['Tongue sheath: the forked tongue smells the air', wpos(A.sheath)]);
-    L.push(['Jaw hinge: very loose, to swallow big prey', wpos(A.hinge)]);
-    L.push([P.scales.keel > 0.3 ? 'Keeled scales (each has a ridge)' : 'Smooth scales', ap('back')]);
-    L.push(['Belly scales: grip the ground to move', ap('belly')]);
-    const vx = F.L * (1 - P.body.tail), vp = b.surf(vx, Math.PI * 0.92).p; L.push(['Vent: where the tail begins', () => vp.clone().add(snakeGroup.position)]);
-    L.push(P.tail.rattle ? ['Rattle: buzzes to warn enemies', ap('rattle')] : ['Tail', ap('tail')]);
-    return L;
-  }
-  function toggleAnatomy(force) {
-    if (!extras || !extras.mouth) return;
-    const onv = force != null ? force : bAnat.getAttribute('aria-pressed') !== 'true'; bAnat.setAttribute('aria-pressed', String(onv));
-    markers.filter((m) => m.anat).forEach((m) => m.el.remove()); markers = markers.filter((m) => !m.anat);
-    if (onv) {
-      for (const [txt, fn] of anatomyList()) { const e = el('div', 'sp3d-mk sp3d-an'); e.appendChild(el('span', 'sp3d-dot')); e.appendChild(el('span', 'sp3d-mt', txt)); labels.appendChild(e); markers.push({ el: e, fn, p: fn(), n: null, anat: true }); }
-      toggleMouth(true);
-      const d = Math.max(info.dMin * 2.2, info.F.Hl * 9), kk = sstep(info.dFit * 0.75, info.dMin * 1.2, d), tg = info.headPos.clone().sub(info.center.clone().lerp(info.headPos, kk));
-      controls.setGoal({ az: viewAz('front') + 0.75, el: (32 * Math.PI) / 180, d, px: tg.x, pz: tg.z }); // the head in the middle, far enough for the labels to spread out
-    }
-    kick();
-  }
-  on(bAnat, 'click', () => toggleAnatomy());
-  // ---- v4.80: See bite - the snake strikes a (see-through) arm so you can see how deep the fang goes ----
-  const ease = (x) => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
-  function startBite() {
-    if (!extras || !extras.mouth || bite) return;
-    const mo = extras.mouth, A = mo.anchors, Hl = info.F.Hl, OPEN = 0.8;
-    const t0 = mo.t; mo.set(OPEN); snakeGroup.updateMatrixWorld(true); const tip = A.fang.getWorldPosition(new THREE.Vector3()).sub(snakeGroup.position); mo.set(t0);
-    const hd = info.headDir.clone().setY(0).normalize(), side = new THREE.Vector3().crossVectors(hd, new THREE.Vector3(0, 1, 0)).normalize();
-    const R = Math.max(0.035, Hl * 0.9), depth = A.fangLen * 0.85, lunge = Hl * 0.9, dy = R * 0.45, half = Math.sqrt(R * R - dy * dy);
-    const c = tip.clone().addScaledVector(hd, lunge + half - depth); c.y = tip.y + dy;
-    // the arm runs away from the camera, its near end just past the bite, so you look into it along its length
-    const arm = new THREE.Group(); arm.position.copy(c).addScaledVector(side, R * 1.0); arm.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), side);
-    const mk = (r, len, col, op) => { const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 8, 24), new THREE.MeshPhysicalMaterial({ color: col, roughness: 0.6, transparent: true, opacity: op, depthWrite: false })); arm.add(m); return m; };
-    const skin = mk(R, R * 4, '#d8a888', 0), muscle = mk(R * 0.8, R * 3.8, '#c97a70', 0), bone = mk(R * 0.2, R * 3.7, '#efe6d2', 0);
-    skin.renderOrder = 3; muscle.renderOrder = 2; bone.renderOrder = 1;
-    const venom = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), new THREE.MeshStandardMaterial({ color: '#f0cf55', emissive: '#6b5410', transparent: true, opacity: 0.8 })); venom.visible = false; ctx.scene.add(venom);
-    ctx.scene.add(arm);
-    const az = Math.atan2(-side.x, -side.z) - 0.75, d = Math.max(info.dMin * 1.1, (Hl * 1.2 + R * 1.6) / Math.tan(info.vf));
-    const kk = sstep(info.dFit * 0.75, info.dMin * 1.2, d), tg = tip.clone().addScaledVector(hd, lunge * 0.6).sub(info.center.clone().lerp(info.headPos, kk)); // look at the bite
-    controls.setGoal({ az, el: 0.22, d, px: tg.x, pz: tg.z });
-    const e = el('div', 'sp3d-mk sp3d-an'); e.appendChild(el('span', 'sp3d-dot')); e.appendChild(el('span', 'sp3d-mt', (mo.fanged ? 'Fang' : 'Tooth') + ' goes in about ' + Math.max(1, Math.round(depth * 1000)) + ' mm')); e.hidden = true; labels.appendChild(e);
-    const lab = { el: e, fn: wpos(A.fang), p: tip.clone(), n: null, anat: true, bite: true };
-    bite = { start: performance.now(), arm, skin, muscle, bone, venom, hd, lunge, R, lab, wasAnat: bAnat.getAttribute('aria-pressed') === 'true', fanged: mo.fanged };
-    mouthGoal = OPEN; bMouth.setAttribute('aria-pressed', 'true'); bMouth.textContent = 'Close mouth';
-    bBite.disabled = true; bBite.textContent = 'Biting...'; kick();
-  }
-  function stepBite() {
-    const B = bite, s2 = ((B.freeze != null ? B.start + B.freeze : performance.now()) - B.start) / 1000 / (reduce() ? 0.6 : 1), A = extras.mouth.anchors;
-    const arm = ease(s2 / 0.8) * (1 - ease((s2 - 5.0) / 0.7)), strike = ease((s2 - 1.0) / 0.22) * (1 - ease((s2 - 4.4) / 0.5)), xr = ease((s2 - 1.4) / 0.7) * (1 - ease((s2 - 4.4) / 0.6));
-    snakeGroup.position.copy(B.hd).multiplyScalar(B.lunge * strike);
-    B.skin.material.opacity = arm * (1 - xr * 0.75); B.skin.material.depthWrite = arm > 0.99 && xr < 0.01;
-    B.muscle.material.opacity = arm * xr * 0.35; B.bone.material.opacity = arm * xr * 0.6;
-    const vk = B.fanged ? ease((s2 - 2.0) / 1.5) * xr : 0; B.venom.visible = vk > 0.01;
-    if (B.venom.visible) { B.venom.position.copy(A.fang.getWorldPosition(new THREE.Vector3())); B.venom.scale.setScalar(B.R * 0.18 * vk); }
-    if (!markers.includes(B.lab) && s2 > 1.8 && s2 < 4.4) markers.push(B.lab);
-    if (markers.includes(B.lab) && s2 >= 4.4) { B.lab.el.remove(); markers = markers.filter((m) => m !== B.lab); }
-    if (s2 > 4.5 && mouthGoal) { mouthGoal = B.wasAnat ? 1 : 0; bMouth.setAttribute('aria-pressed', String(!!mouthGoal)); bMouth.textContent = mouthGoal ? 'Close mouth' : 'Open mouth'; }
-    if (s2 > 5.8) {
-      B.lab.el.remove(); markers = markers.filter((m) => m !== B.lab); snakeGroup.position.set(0, 0, 0);
-      for (const o of [B.arm, B.venom]) { ctx.scene.remove(o); o.traverse((q) => { if (q.geometry) q.geometry.dispose(); if (q.material) q.material.dispose(); }); }
-      bite = null; bBite.disabled = false; bBite.textContent = 'See bite'; return true;
-    }
-    return true;
-  }
-  on(bBite, 'click', startBite);
+  // v4.81: Anatomy and See bite moved to extras.js (see-through anatomy you can tap; a bite with an x-ray of the arm)
   on(bVBody, 'click', () => resetView());
   on(bVHead, 'click', () => controls.setGoal({ az: viewAz('front') + 0.9, el: (20 * Math.PI) / 180, d: Math.max(info.dMin * 1.3, info.F.Hl * 4.5), px: 0, pz: 0 }));
   on(bVTop, 'click', () => controls.setGoal({ az: controls.st.az, el: (80 * Math.PI) / 180, d: (info.Rb * 1.12) / Math.tan(Math.min(info.vf, info.hf)) + info.hMax, px: 0, pz: 0 })); on(bFull, 'click', toggleFull); on(bScale, 'click', () => toggleScale()); on(bDet, 'click', toggleDetails);
@@ -1863,17 +1820,17 @@ export function mount(host, opts) {
     ctx.scene.clear(); ctx.scene = null; scaleObj = null;
     markers.forEach((m) => m.el.remove()); markers = [];
   }
-  function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; disposeScene(); build(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
+  function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
 
-  build(); resize();
-  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy, startBite, get bite() { return bite; }, frame: () => { controls.update(); placeCamera(); updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); } };
+  build(); fx.onBuild(); resize();
+  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), startBite: () => bBite.click(), fx, get bite() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
 
   return {
     canvas,
     dispose() {
       alive = false; if (raf) cancelAnimationFrame(raf); raf = 0;
       if (document.fullscreenElement === wrap) { try { document.exitFullscreen(); } catch (e) {} }
-      controls && controls.dispose(); cleanups.forEach((f) => f()); cleanups.length = 0;
+      controls && controls.dispose(); fx.dispose(); cleanups.forEach((f) => f()); cleanups.length = 0;
       disposeScene(); renderer.dispose(); renderer.forceContextLoss && renderer.forceContextLoss();
       host.innerHTML = '';
       if (window.__sp3d && window.__sp3d.renderer === renderer) delete window.__sp3d;
