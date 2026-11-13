@@ -829,16 +829,13 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             kf.append(("Adult length", fact("length") or UNK))
             kf.append(("Diet", fact("diet") or UNK))
             kf.append(("Reproduction", fact("reproduction") or UNK))
+            # v4.81: no conservation status on SnakeList any more: its size instead (Small / Medium / Large-sized),
+            # from a typical adult length - and nothing at all when SnakeList has none
             if c["extinct"]:
-                cs = esc(c["extinct"].split(" - ")[0])
-            elif F.get("iucn"):
-                fi = F["iucn"]
-                meta = ", ".join(x for x in ("IUCN Red List", fi.get("scope", ""), str(fi.get("year", "")) if fi.get("year") else "") if x)
-                cs = ('%s <small>(%s)</small>%s' % (esc(fi["text"]), esc(meta), R.cite(fi.get("src")))) if fi.get("code") else (
-                    '<span class="sp-unk">Category not confirmed</span> <small>(%s)</small>' % esc(meta))
-            else:
-                cs = '<span class="sp-unk">Not reviewed yet</span>'
-            kf.append(("Conservation status", cs))
+                kf.append(("Status", esc(c["extinct"].split(" - ")[0])))
+            sz = size_class(c, info)
+            if sz:
+                kf.append(("Size", '%s-sized <small>(%s about %s)</small>' % (sz[0], "a typical adult of its genus is" if sz[2] == "genus" else "adults", fmt_len(sz[1]))))
             if c["countries"]:
                 dist = '<a href="#range">%s</a>' % (("Formerly " if c["extinct"] else "") + places_txt(c["countries"]))
                 if c["continents"]: dist += " <small>&middot; %s</small>" % esc(", ".join(c["continents"]))
@@ -913,24 +910,6 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
                 eco += '<div class="sp-fun"><h3>Did you know?</h3><ul>%s</ul></div>' % "".join(
                     "<li>%s%s</li>" % (R.rich(x["text"]), R.cite(x.get("src"))) for x in info["funfacts"])
             secs.append(("ecology", "Behaviour and ecology", eco))
-            cons_html = ""
-            if "iucn" in F:
-                fi = F["iucn"]
-                meta = []
-                meta.append("%s assessment" % fi["scope"].capitalize() if fi.get("scope") else "Scope not recorded")
-                meta.append("assessed %s" % fi["year"] if fi.get("year") else "assessment year not recorded")
-                if fi.get("url"): meta.append('<a href="%s" rel="noopener">IUCN assessment</a>' % esc(fi["url"]))
-                cons_html += ('<div class="sp-iucn">%s<div><p><b>%s</b>%s%s</p>'
-                              '<p class="sp-note">%s</p></div></div>') % (
-                    ('<span class="sp-cat cat-%s" aria-hidden="true">%s</span>' % (esc(fi["code"]), esc(fi["code"]))) if fi.get("code") else "",
-                    esc(fi["text"]), " on the IUCN Red List" if fi.get("code") else "", R.cite(fi.get("src")), " &middot; ".join(meta))
-                if fi.get("long") and fi["long"] != "Listed as %s on the IUCN Red List." % fi["text"]: cons_html += "<p>%s</p>" % R.rich(fi["long"])
-            cons_html += paras("conservation")
-            if c["extinct"]: cons_html = '<p><b>%s.</b></p>' % esc(c["extinct"].replace(" - ", ": ", 1)) + cons_html
-            if "iucn" not in F and not c["extinct"]:
-                cons_html += ('<p class="sp-muted">SnakeList has not reviewed this snake&rsquo;s Red List status yet. '
-                              '<a href="https://www.iucnredlist.org/search?query=%s&amp;searchType=species" rel="noopener">Search the IUCN Red List</a>.</p>') % quote(sci)
-            secs.append(("conservation", "Conservation", cons_html))
         else:
             eco = paras("behaviour", "Behaviour") + paras("habitat", "Habitat")
             if eco: secs.append(("ecology", "What it may have been like", '<p class="sp-note">Inferred from the fossils and the rocks around them, not observed.</p>' + eco))
@@ -997,8 +976,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if not c["fossil"]:
             g0, _, s0 = sci.partition(" ")
             src += ('<h3>Look it up</h3><p class="sp-links"><a href="https://reptile-database.reptarium.cz/species?genus=%s&amp;species=%s" rel="noopener">The Reptile Database</a>'
-                    '<a href="https://www.inaturalist.org/taxa/search?q=%s" rel="noopener">iNaturalist</a><a href="https://www.iucnredlist.org/search?query=%s&amp;searchType=species" rel="noopener">IUCN Red List</a>'
-                    '<a href="https://www.gbif.org/species/search?q=%s" rel="noopener">GBIF</a></p>') % (quote(g0), quote(s0.split(" ")[0]), quote(sci), quote(sci), quote(sci))
+                    '<a href="https://www.inaturalist.org/taxa/search?q=%s" rel="noopener">iNaturalist</a>'
+                    '<a href="https://www.gbif.org/species/search?q=%s" rel="noopener">GBIF</a></p>') % (quote(g0), quote(s0.split(" ")[0]), quote(sci), quote(sci))
         src += ('<details class="sp-det sp-prov"><summary>How this page is made</summary><ul>'
                 '<li>Countries, states and provinces, venom and family come from SnakeList&rsquo;s checklist; the map shades whole countries and regions, not exact range.</li>'
                 '%s<li id="sp-wdprov">%s</li></ul></details>') % (
@@ -1204,7 +1183,7 @@ def credits_page(cards, esc):
 <main class="sp-main"><nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../">SnakeList</a> &rsaquo; <a href="./">All species</a> &rsaquo; <span aria-current="page">Photo credits</span></nav>
 <h1>Photo credits</h1>
 <p>Every snake photo on SnakeList was taken by the person named below and is used under the Creative Commons licence <em>they</em> chose for it. SnakeList is free, has no ads and makes no money from these photos.</p>
-<p>To fit SnakeList, each photo is <b>cropped and resized</b>; nothing else about it is changed. The &ldquo;original&rdquo; link opens the photo as the photographer shared it (they shared these photos on iNaturalist, where each one has its own page and licence).</p>
+<p>To fit SnakeList, each photo is <b>cropped and resized</b>; nothing else about it is changed. The &ldquo;original&rdquo; link opens the photo as the photographer shared it (on iNaturalist, where each of these photos has its own page and licence).</p>
 <p>Photos marked &ldquo;No Derivatives&rdquo; (ND) are not used, because cropping counts as changing a photo. The %s fossil snakes are shown with SnakeList&rsquo;s own illustrations, as no photo of them can exist.</p>
 <p class="sp-note">If you took one of these photos and want the credit changed or the photo removed, contact SnakeList through the <a href="../about.html">About me</a> page and it will be done.</p>
 <h2>Snake photos (%s)</h2>
@@ -1219,6 +1198,37 @@ q.addEventListener('input',function(){clearTimeout(t);t=setTimeout(function(){va
 </body></html>
 """ % (SITE, site_header("../", "species"), ill, "{:,}".format(len(rows)), "".join(rows), len(frows), "".join(frows), site_footer("../"))
     open(OUT + "/photo-credits.html", "w", encoding="utf-8").write(html)
+
+
+def size_class(c, info):
+    """v4.81: Small / Medium / Large-sized, from a typical adult length (under 50 cm, up to 1.5 m, over 1.5 m):
+    the reviewed account's adult length, a hand-made 3D model's length, a fossil's estimate, or else the
+    typical adult length of its genus (tools/auto_models.py). None when SnakeList has no length for it."""
+    import build_regions
+    L, how = None, ""
+    lm = build_regions.length_m(info) if info else None
+    if lm:
+        L = (lm[0] + lm[1]) / 2
+    else:
+        p = MODELS.get(c["id"]) or {}
+        a = p.get("auto")
+        if a is None and p.get("length"):
+            L = p["length"]
+        elif a and "l" not in (a.get("x") or ""):
+            L = a.get("L")
+        else:
+            try:
+                import auto_models
+                L = auto_models.GENUS_LEN.get((c.get("genus") or "").lower())
+                how = "genus"
+            except Exception:
+                L = None
+    if not L: return None
+    return ("Small" if L < 0.5 else "Medium" if L <= 1.5 else "Large"), L, how
+
+
+def fmt_len(L):
+    return ("%d cm" % round(L * 100)) if L < 1 else ("%s m" % ("%.1f" % L).rstrip("0").rstrip("."))
 
 
 def len_attr(info):
@@ -1488,6 +1498,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .sp-person-n{font-weight:700}.sp-person-d{font-size:14px}.sp-person-m{font-size:13.5px;color:var(--muted)}
 .sp-rel li{break-inside:avoid}
 @media (prefers-color-scheme:dark){.sp-fossil-flag,.sp-ext{background:#d8c3a5;color:#2b2016}}
+/* v4.81: the snake pills pop out a little under a real mouse, like the app's cards */
+@media (hover:hover) and (pointer:fine){.sp-tags a{transition:background .15s,border-color .15s,color .15s,transform .18s ease-out,box-shadow .18s ease-out}.sp-tags a:hover{transform:translateY(-1px) scale(1.04);box-shadow:0 4px 10px rgba(20,60,30,.16)}}
+@media (prefers-reduced-motion:reduce){.sp-tags a:hover{transform:none}}
 """
 
 JS = """(function(){function nf(t){if(!t||t.tagName!=='IMG'||t.dataset.nf)return;if(t.dataset.fb){var fb=t.dataset.fb;t.removeAttribute('data-fb');t.src=fb;return}t.dataset.nf=1;var d=document.createElement('span');d.className='sl-nophoto';d.setAttribute('role','img');d.setAttribute('aria-label',t.alt||'Photo unavailable');d.textContent='Photo unavailable';if(t.width&&t.height)d.style.aspectRatio=t.width+'/'+t.height;t.replaceWith(d)}
@@ -1903,6 +1916,10 @@ COUNTRY_CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:cen
 .cy-card a{flex-direction:row;min-height:96px}.cy-img{flex:0 0 112px;width:112px;aspect-ratio:auto;align-self:stretch}.cy-body{padding:9px 12px}
 .cy-name{font-size:15.5px}.cy-stats b{font-size:16px}}
 @media (prefers-reduced-motion:reduce){.cy-card a{transition:none}}
+/* v4.81: snake cards pop out a little under a real mouse, like the app's checklist cards (no layout shift: a transform) */
+@media (hover:hover) and (pointer:fine){.cy-card a{transition:border-color .15s,box-shadow .18s ease-out,transform .18s ease-out}
+.cy-card a:hover{position:relative;z-index:1;transform:translateY(-3px) scale(1.03);box-shadow:0 10px 24px rgba(20,50,25,.18),0 3px 8px rgba(20,50,25,.10)}}
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:reduce){.cy-card a:hover{transform:none}}
 """
 
 COUNTRY_JS = r"""(function(){function nf(t){if(!t||t.tagName!=='IMG'||t.dataset.nf)return;t.dataset.nf=1;var d=document.createElement('span');d.className='sl-nophoto';d.setAttribute('role','img');d.setAttribute('aria-label',t.alt||'Photo unavailable');d.textContent='Photo unavailable';if(t.width&&t.height)d.style.aspectRatio=t.width+'/'+t.height;t.replaceWith(d)}

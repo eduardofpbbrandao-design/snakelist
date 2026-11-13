@@ -1097,13 +1097,30 @@ if(D.fun&&D.fun.length){h('Did you know?');var ul=el('ul','sp-rl-fun');D.fun.for
 b.addEventListener('click',open);var ab=document.querySelector('.sp-anatbtn'),wantA=0;function anat(){if(!wantA)return;var x=document.querySelector('.sp3d-wrap .sp3d-b[title^="Show the parts"]');if(x){wantA=0;if(x.getAttribute('aria-pressed')!=='true')setTimeout(function(){x.click()},300)}}if(ab)ab.addEventListener('click',function(){wantA=1;open();anat()});if(location.hash==='#real')open();window.addEventListener('hashchange',function(){if(location.hash==='#real')open()})})();
 """
 
+# v4.81: the NEW tags on the species pages - the same rules as in the app: shown only until 3D has been
+# used (remembered in localStorage, shared with the app) and gone for everyone 20 versions after they
+# came in. The version is SnakeList's own (.sl-ver in the app, read at build time), or the newer one
+# the app has saved on this device.
+def _app_ver():
+    try:
+        m = re.search(r'class="sl-ver">v(\d+)\.(\d+)<', open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "snakelist-synced.html"), encoding="utf-8").read())
+        return int(m.group(1)) * 100 + int(m.group(2))
+    except Exception:
+        return 0
+NEW_JS = r"""
+(function(){var T={'3d':{v:480,sel:'.sp-realbtn,.sp-anatbtn,.sp-rl'}},V=__SLVER__,d=document.documentElement;try{var a=+localStorage.getItem('sl-ver-n');if(a>V)V=a}catch(e){}
+Object.keys(T).forEach(function(k){var seen=0;try{seen=localStorage.getItem('sl-new-seen-'+k)}catch(e){}if(V&&V<T[k].v+20&&!seen)d.classList.add('sl-new-'+k);
+document.addEventListener('click',function(e){if(!d.classList.contains('sl-new-'+k)||!e.target.closest||!e.target.closest(T[k].sel))return;try{localStorage.setItem('sl-new-seen-'+k,'1')}catch(x){}d.classList.remove('sl-new-'+k)},true)})})();
+""".replace("__SLVER__", str(_app_ver()))
+REAL_JS += NEW_JS
+
 REAL_CSS = """
 .sp-realbtn,.sp-anatbtn{font:inherit;cursor:pointer}.sp-ago{color:var(--muted)}
 .sp-rl{width:min(1040px,calc(100vw - 24px));max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--line);border-radius:18px;background:var(--card);color:var(--text)}
 .sp-rl::backdrop{background:rgba(5,15,9,.72)}.sp-rl-in{padding:12px 18px 18px}
-/* v4.80: a little "NEW" tag on everything to do with 3D */
-.sp-realbtn,.sp-anatbtn{position:relative;overflow:visible}.sp-realbtn::after,.sp-anatbtn::after,.sp-rl-hd h2::after,.sp-rl-tab:first-child::after{content:"NEW";font:800 8.5px/1 Inter,system-ui,sans-serif;letter-spacing:.06em;color:#fff;background:#e0712b;padding:2.5px 4px 2px;border-radius:999px;box-shadow:0 1px 3px rgba(0,0,0,.25);pointer-events:none;white-space:nowrap}
-.sp-realbtn::after,.sp-anatbtn::after{position:absolute;top:-7px;right:-9px;z-index:2}.sp-rl-hd h2::after{display:inline-block;vertical-align:middle;margin-left:8px;position:relative;top:-3px}.sp-rl-tab:first-child::after{display:inline-block;vertical-align:middle;margin-left:6px;position:relative;top:-1px}
+/* v4.80: a little "NEW" tag on everything to do with 3D (v4.81: blue, only while <html> has sl-new-3d - see NEW_JS) */
+.sp-realbtn,.sp-anatbtn{position:relative;overflow:visible}.sl-new-3d .sp-realbtn::after,.sl-new-3d .sp-anatbtn::after,.sl-new-3d .sp-rl-hd h2::after,.sl-new-3d .sp-rl-tab:first-child::after{content:"NEW";font:800 8.5px/1 Inter,system-ui,sans-serif;letter-spacing:.06em;color:#fff;background:#2563eb;padding:2.5px 4px 2px;border-radius:999px;box-shadow:0 1px 3px rgba(0,0,0,.25);pointer-events:none;white-space:nowrap}
+.sl-new-3d .sp-realbtn::after,.sl-new-3d .sp-anatbtn::after{position:absolute;top:-7px;right:-9px;z-index:2}.sl-new-3d .sp-rl-hd h2::after{display:inline-block;vertical-align:middle;margin-left:8px;position:relative;top:-3px}.sl-new-3d .sp-rl-tab:first-child::after{display:inline-block;vertical-align:middle;margin-left:6px;position:relative;top:-1px}
 .sp-rl-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 0 8px}
 .sp-rl-hd h2{margin:0;font:700 21px/1.2 Georgia,serif}.sp-rl-x{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:24px;line-height:1;cursor:pointer}
 .sp-rl-tabs{display:flex;gap:4px;margin:0 0 10px;border-bottom:1px solid var(--line)}.sp-rl-tabs[hidden]{display:none}
