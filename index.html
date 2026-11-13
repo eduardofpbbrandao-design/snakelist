@@ -30,7 +30,14 @@
 <script>
   // installable app: the offline helper, and the browser's install prompt kept for the Install button
   window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.SL_INSTALL_EVT = e; });
-  if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEventListener('load', function () { var had = !!navigator.serviceWorker.controller; navigator.serviceWorker.addEventListener('controllerchange', function () { if (!had || window.SL_SW_RELOADED) return; if (!window.SL_TOUCHED) { window.SL_SW_RELOADED = 1; location.reload(); return; } if (document.getElementById('sl-newver')) return; var b = document.createElement('div'); b.id = 'sl-newver'; b.setAttribute('role', 'status'); b.style.cssText = 'position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:9300;display:flex;gap:12px;align-items:center;max-width:calc(100vw - 32px);padding:10px 12px 10px 16px;border-radius:14px;background:#256846;color:#fff;font:500 14px/1.35 Inter,system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28)'; b.innerHTML = '<span>A new version of SnakeList is ready. Your list is already saved.</span><button type="button" style="font:600 14px Inter,sans-serif;color:#256846;background:#fff;border:0;border-radius:9px;padding:7px 14px;cursor:pointer">Refresh</button><button type="button" aria-label="Later" style="background:none;border:0;color:#fff;font-size:20px;cursor:pointer">&times;</button>'; var bs = b.querySelectorAll('button'); bs[0].onclick = function () { if (document.querySelector('.note-sheet.open') && !confirm('You have a sighting open that is not saved yet. Refresh anyway?')) return; window.SL_SW_RELOADED = 1; location.reload(); }; bs[1].onclick = function () { b.remove(); }; document.body.appendChild(b); }); navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function (r) { r.update(); }).catch(function () {}); });
+  // v4.81: SnakeList opens from the copy saved on this device and the offline helper fetches the newest
+  // one in the background; when it is different, this bar offers Refresh. The page never reloads by
+  // itself (on poor wifi a reload meant downloading everything again, and offline nothing came).
+  if ('serviceWorker' in navigator) {
+    window.SL_SHOW_NEW = function () { if (document.getElementById('sl-newver') || !document.body) return; var b = document.createElement('div'); b.id = 'sl-newver'; b.setAttribute('role', 'status'); b.style.cssText = 'position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:9300;display:flex;gap:12px;align-items:center;max-width:calc(100vw - 32px);padding:10px 12px 10px 16px;border-radius:14px;background:#256846;color:#fff;font:500 14px/1.35 Inter,system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28)'; b.innerHTML = '<span>A new version of SnakeList is ready. Your list is already saved.</span><button type="button" style="font:600 14px Inter,sans-serif;color:#256846;background:#fff;border:0;border-radius:9px;padding:7px 14px;cursor:pointer">Refresh</button><button type="button" aria-label="Later" style="background:none;border:0;color:#fff;font-size:20px;cursor:pointer">&times;</button>'; var bs = b.querySelectorAll('button'); bs[0].onclick = function () { if (document.querySelector('.note-sheet.open') && !confirm('You have a sighting open that is not saved yet. Refresh anyway?')) return; location.reload(); }; bs[1].onclick = function () { b.remove(); }; document.body.appendChild(b); };
+    navigator.serviceWorker.addEventListener('message', function (e) { if (e.data && e.data.type === 'sl-update') { if (document.body) window.SL_SHOW_NEW(); else document.addEventListener('DOMContentLoaded', window.SL_SHOW_NEW); } });
+    if (location.protocol === 'https:') window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function (r) { if (navigator.onLine !== false) r.update().catch(function () {}); }).catch(function () {}); });
+  }
 </script>
 <!-- Google tag (gtag.js) - visitor statistics for snakelist.com -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PY2LJV389K"></script>
@@ -47,7 +54,7 @@
 <link rel="preload" as="image" href="species-photos/hero/rough-green-2048.webp" imagesrcset="species-photos/hero/rough-green-800.webp 800w, species-photos/hero/rough-green-1200.webp 1200w, species-photos/hero/rough-green-1600.webp 1600w, species-photos/hero/rough-green-2048.webp 2048w" imagesizes="(min-aspect-ratio: 1544/1000) 100vw, 155vh" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
   /* SnakeList commits to one light, field-guide look on purpose: warm paper ground,
      forest ink, rust for venomous. Every colour is painted explicitly so the page
@@ -381,6 +388,11 @@
   .signin-msg.info { color: var(--text-muted); }
 
   .sl-sub { color: var(--text-muted); font-size: 14.5px; margin: 10px 0 0; max-width: 46ch; }
+  /* v4.81: "About me" (the creator's page) right under the SnakeList title */
+  .sl-me { margin: 10px 0 0; }
+  .sl-me a { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px 4px 9px; border: 1px solid var(--border); border-radius: 999px; color: var(--gold); font: 600 12.5px/1.2 'Inter', sans-serif; text-decoration: none; transition: background .15s ease, border-color .15s ease; }
+  .sl-me a:hover { background: var(--ver-bg); border-color: var(--gold); }
+  .sl-me a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
 
   .tabs { max-width: 900px; margin: 20px auto 18px; display: flex; gap: 6px; border-bottom: 1px solid var(--border);
@@ -1250,6 +1262,130 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .ach-toast, .ach-toast-flash, .ach-toast-wrap { animation: none; }
+  }
+  /* ==== v4.81: Achievements, games-console style (Xbox / PlayStation): a dark trophy room with the
+     completion ring, a SnakeList score (points, like a Gamerscore), trophies by tier (bronze, silver,
+     gold, platinum), and a tile per achievement - its picture in the tier's frame, title, how to
+     earn it, a progress bar, tier, points and rarity. Locked ones are grey with a padlock. ==== */
+  .ach-panel { --xa-bg: #0d1511; --xa-card: #15211a; --xa-card2: #1b2a21; --xa-line: #273b2f; --xa-text: #eef5ef; --xa-muted: #a3b8a9; --xa-acc: #6fd14f; }
+  .xa-bronze { --t1: #e7a066; --t2: #8c4f22; --tt: #2a1608; }
+  .xa-silver { --t1: #eef2f5; --t2: #8e98a3; --tt: #1c2228; }
+  .xa-gold { --t1: #ffe07a; --t2: #b8860f; --tt: #2b1f02; }
+  .xa-platinum { --t1: #e6f4ff; --t2: #7da3c6; --tt: #0f1d2a; }
+  .xa-hero { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px 24px; padding: 20px 22px; border-radius: 18px;
+    color: var(--xa-text); background: radial-gradient(120% 160% at 0% 0%, rgba(111,209,79,0.22), transparent 55%), linear-gradient(160deg, #13201a, var(--xa-bg));
+    border: 1px solid var(--xa-line); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+  .xa-ring { position: relative; width: 116px; height: 116px; }
+  .xa-ring svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
+  .xa-ring .r-bg { fill: none; stroke: rgba(255,255,255,0.09); stroke-width: 9; }
+  .xa-ring .r-fg { fill: none; stroke: var(--xa-acc); stroke-width: 9; stroke-linecap: round; filter: drop-shadow(0 0 5px rgba(111,209,79,0.55)); }
+  .xa-ring-txt { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
+  .xa-ring-txt b { font: 800 30px/1 'Inter', sans-serif; letter-spacing: -0.02em; }
+  .xa-ring-txt b small { font-size: 15px; font-weight: 700; margin-left: 1px; }
+  .xa-ring-txt span { margin-top: 5px; font: 500 11px/1 'JetBrains Mono', monospace; color: var(--xa-muted); }
+  .xa-hero-main { min-width: 0; }
+  .xa-kicker { margin: 0 0 2px; font: 600 11px/1.2 'JetBrains Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--xa-acc); }
+  .xa-hero-main h2 { margin: 0 0 8px; font: 800 24px/1.15 'Inter', sans-serif; letter-spacing: -0.01em; color: var(--xa-text); }
+  .xa-score { display: flex; align-items: baseline; gap: 7px; margin: 0 0 10px; font: 500 13px 'Inter', sans-serif; color: var(--xa-muted); }
+  .xa-score b { font: 800 22px/1 'Inter', sans-serif; color: var(--xa-text); }
+  .xa-g { align-self: center; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--xa-acc); color: #0b1a0e; font: 800 12px/1 'Inter', sans-serif; }
+  .xa-tiers { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 10px; padding: 0; list-style: none; }
+  .xa-tiers li { display: inline-flex; align-items: center; gap: 4px; font: 500 12.5px 'Inter', sans-serif; color: var(--xa-muted); }
+  .xa-tiers li b { font-weight: 800; font-size: 15px; color: var(--xa-text); }
+  .xa-tiers li.xa-none { opacity: 0.55; }
+  .xa-cup { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(145deg, var(--t1), var(--t2)); color: var(--tt); box-shadow: inset 0 1px 0 rgba(255,255,255,0.45); }
+  .xa-cup svg, .xa-tro svg { width: 15px; height: 15px; display: block; }
+  .xa-next { margin: 0; font: 400 13.5px/1.5 'Inter', sans-serif; color: var(--xa-muted); }
+  .xa-next b { color: var(--xa-text); font-weight: 600; }
+  .xa-latest { display: flex; align-items: center; gap: 12px; max-width: 260px; padding: 10px 14px 10px 10px; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid var(--xa-line); }
+  .xa-latest > span:last-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .xa-latest small { font: 600 10.5px 'JetBrains Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--xa-muted); }
+  .xa-latest strong { font: 700 14.5px/1.25 'Inter', sans-serif; color: var(--xa-text); }
+  .xa-latest em { font: 600 12px 'Inter', sans-serif; font-style: normal; color: var(--t1); }
+  .xa-stats { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 0; padding: 0; list-style: none; }
+  .xa-stats li { display: inline-flex; align-items: baseline; gap: 5px; padding: 5px 11px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid var(--xa-line); font: 500 12px 'Inter', sans-serif; color: var(--xa-muted); }
+  .xa-stats li b { font-weight: 700; color: var(--xa-text); }
+  .xa-groups { display: flex; flex-direction: column; gap: 14px; }
+  .xa-sec { padding: 16px; border-radius: 18px; background: var(--xa-bg); border: 1px solid var(--xa-line); color: var(--xa-text); }
+  .xa-sec-head { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
+  .xa-sec-ic { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; background: rgba(111,209,79,0.14); color: var(--xa-acc); }
+  .xa-sec-ic svg { width: 19px; height: 19px; }
+  .xa-sec-t { flex: 1; min-width: 0; }
+  .xa-sec-t h3 { margin: 0; font: 800 17px/1.2 'Inter', sans-serif; color: var(--xa-text); }
+  .xa-sec-t p { margin: 2px 0 0; font: 400 12.5px/1.4 'Inter', sans-serif; color: var(--xa-muted); }
+  .xa-sec-n { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; font: 500 12px 'JetBrains Mono', monospace; color: var(--xa-muted); }
+  .xa-sec-n b { color: var(--xa-text); font-size: 14px; }
+  .xa-sec-n > i { display: block; width: 70px; height: 4px; border-radius: 4px; background: rgba(255,255,255,0.1); overflow: hidden; }
+  .xa-sec-n > i > i { display: block; height: 100%; background: var(--xa-acc); }
+  .xa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; }
+  .xa-tile { position: relative; display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 12px; background: var(--xa-card); border: 1px solid var(--xa-line); min-width: 0; }
+  .xa-tile.won { background: linear-gradient(150deg, var(--xa-card2), var(--xa-card)); }
+  .xa-tile.next { border-color: rgba(111,209,79,0.65); box-shadow: 0 0 0 1px rgba(111,209,79,0.25), 0 0 18px rgba(111,209,79,0.12); }
+  .xa-tile.newest { border-color: color-mix(in srgb, var(--t1) 70%, transparent); }
+  .xa-art { position: relative; flex: none; width: 64px; height: 64px; padding: 3px; border-radius: 13px; background: linear-gradient(145deg, var(--t1), var(--t2)); box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
+  .xa-art-ic { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 10px; color: var(--t1);
+    background: radial-gradient(circle at 32% 26%, #2e4c38, #0f1a14 75%); }
+  .xa-art-ic svg { width: 28px; height: 28px; stroke-width: 2.2; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--t1) 45%, transparent)); }
+  .xa-art-n { position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); padding: 2px 6px; border-radius: 999px; background: linear-gradient(145deg, var(--t1), var(--t2));
+    color: var(--tt); font: 800 10px/1.2 'Inter', sans-serif; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+  .xa-art.xa-off { filter: grayscale(1) brightness(0.62); }
+  .xa-lock { position: absolute; top: -6px; right: -6px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #0b120e; color: #c9d4cc; border: 1px solid #3a4a40; }
+  .xa-lock svg { width: 12px; height: 12px; }
+  .xa-art .ach-fx .fx-clip { border-radius: 10px; }
+  .xa-body { flex: 1; min-width: 0; }
+  .xa-flag { float: right; margin: 0 0 4px 8px; padding: 2px 7px; border-radius: 999px; background: var(--xa-acc); color: #0b1a0e; font: 800 9.5px/1.3 'Inter', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
+  .xa-tile.newest .xa-flag { background: linear-gradient(145deg, var(--t1), var(--t2)); color: var(--tt); }
+  .xa-name { margin: 0; font: 700 14.5px/1.25 'Inter', sans-serif; color: var(--xa-text); }
+  .xa-note { margin: 3px 0 8px; font: 400 12.5px/1.4 'Inter', sans-serif; color: var(--xa-muted); }
+  .xa-bar { height: 6px; border-radius: 6px; background: rgba(255,255,255,0.09); overflow: hidden; }
+  .xa-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #3fa52f, var(--xa-acc)); }
+  .xa-tile.won .xa-bar i { background: linear-gradient(90deg, var(--t2), var(--t1)); }
+  .xa-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 7px; font: 600 11.5px 'Inter', sans-serif; color: var(--xa-muted); }
+  .xa-tro { display: inline-flex; align-items: center; gap: 3px; color: var(--t1); }
+  .xa-pts { color: var(--xa-text); }
+  .xa-rare { font-weight: 500; }
+  .xa-count { margin-left: auto; font: 500 11.5px 'JetBrains Mono', monospace; }
+  .xa-tile.won .xa-count { color: var(--xa-acc); font-weight: 700; }
+  .xa-tile.locked .xa-name { color: #c4d0c7; }
+  .xa-tile.locked .xa-tro { color: var(--xa-muted); }
+  .xa-tile.fresh .xa-art, .xa-latest.fresh .xa-art { animation: ach-medal-in 0.5s cubic-bezier(0.2,0.9,0.3,1.25) both; animation-delay: calc(var(--fx-d, 0ms) + var(--fx-i, 0) * 140ms); }
+  @media (hover: hover) and (pointer: fine) {
+    .xa-tile { transition: transform .18s ease-out, box-shadow .18s ease-out, border-color .18s ease; }
+    .xa-tile:hover { z-index: 2; transform: translateY(-3px) scale(1.03); box-shadow: 0 10px 24px rgba(0,0,0,0.4); border-color: color-mix(in srgb, var(--t1) 55%, transparent); }
+  }
+  @media (max-width: 700px) {
+    .xa-hero { grid-template-columns: auto 1fr; padding: 16px 14px; }
+    .xa-latest { grid-column: 1 / -1; max-width: none; }
+    .xa-ring { width: 92px; height: 92px; }
+    .xa-ring-txt b { font-size: 24px; }
+    .xa-hero-main h2 { font-size: 20px; }
+    .xa-sec { padding: 12px; }
+    .xa-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 380px) { .xa-hero { grid-template-columns: 1fr; justify-items: start; } }
+  /* the "Achievement unlocked" pop-up: a round trophy pops in at the bottom of the screen, the bar
+     opens out of it, then the words slide in - and it all slips away after a few seconds */
+  #ach-toast-region { top: auto; right: auto; left: 50%; bottom: 22px; transform: translateX(-50%); align-items: center; max-width: calc(100vw - 24px); z-index: 9400; }
+  .xa-toast-wrap { animation: xa-up 0.35s cubic-bezier(0.2,0.9,0.3,1) both, xa-out 0.4s 4.6s ease-in forwards; }
+  .xa-toast { display: flex; align-items: center; gap: 12px; height: 58px; padding: 0 24px 0 7px; border-radius: 999px; max-width: min(460px, calc(100vw - 24px));
+    background: linear-gradient(160deg, #1c2b22, #0d1511); color: #fff; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 12px 34px rgba(0,0,0,0.45);
+    animation: xa-open 0.55s 0.3s cubic-bezier(0.3,0.8,0.3,1) both; }
+  .xa-toast-ic { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(145deg, var(--t1), var(--t2)); color: var(--tt);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.08), 0 0 16px color-mix(in srgb, var(--t1) 60%, transparent); animation: xa-pop 0.45s cubic-bezier(0.2,0.9,0.3,1.4) both; }
+  .xa-toast-ic svg { width: 24px; height: 24px; }
+  .xa-toast-txt { display: flex; flex-direction: column; min-width: 0; animation: xa-txt 0.4s 0.65s ease-out both; }
+  .xa-toast-txt small { font: 600 11px 'Inter', sans-serif; color: #b9cbbd; }
+  .xa-toast-txt b { font: 700 14.5px/1.3 'Inter', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .xa-toast-g { color: var(--t1); }
+  @keyframes xa-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes xa-out { to { transform: translateY(30px); opacity: 0; } }
+  @keyframes xa-open { from { clip-path: inset(0 calc(100% - 58px) 0 0 round 999px); } to { clip-path: inset(0 0 0 0 round 999px); } }
+  @keyframes xa-pop { 0% { transform: scale(0.3) rotate(-25deg); } 100% { transform: none; } }
+  @keyframes xa-txt { from { transform: translateX(-10px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .xa-toast-wrap { animation: xa-out 0.01s 4.6s forwards; }
+    .xa-toast, .xa-toast-ic, .xa-toast-txt, .xa-tile.fresh .xa-art, .xa-latest.fresh .xa-art { animation: none; }
+    .xa-tile:hover { transform: none; }
   }
   .country-opt span { white-space: nowrap; flex: none; }
   .globe-stage.full { position: fixed; inset: 0; z-index: 300; margin: 0;
@@ -2137,7 +2273,8 @@
   .wn-hl { display: flex; gap: 12px; align-items: center; margin: 4px 0 6px; padding: 12px 14px; border-radius: 12px;
     background: rgba(88,179,81,0.16); border: 1px solid rgba(160,222,140,0.35); font-size: 13.5px; line-height: 1.45; }
   .wn-hl b { font-weight: 600; }
-  .wn-hl-3d { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: #9be07c; color: #0e2f1e; font: 700 14px 'Inter', sans-serif; letter-spacing: .02em; }
+  /* v4.81: the "3D" here looks just like the small 3D button on the checklist cards */
+  .wn-hl-3d { flex: none; box-sizing: border-box; display: grid; place-items: center; width: 34px; height: 31px; border-radius: 8px; border: 1px solid var(--border, rgba(160,222,140,0.35)); background: transparent; color: inherit; font: 600 12px 'Inter', sans-serif; letter-spacing: .02em; }
   .ck-bar { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 95; max-width: 720px; margin: 0 auto; display: flex; gap: 14px; align-items: center;
     padding: 14px 16px; border-radius: 16px; background: linear-gradient(160deg, #256846, #22623f); color: #f0f8ec; border: 1px solid rgba(160,222,140,0.3);
     box-shadow: 0 14px 40px rgba(0,0,0,0.4); font: 13px/1.45 'Inter', sans-serif; animation: wnUp .3s ease-out; }
@@ -2569,6 +2706,31 @@
   .sl-foot a { color: var(--moss); }
 </style>
 <style>
+  /* v4.81: a small "Offline" note while there's no connection - SnakeList keeps working from what's saved */
+  .sl-offline { position: fixed; left: 12px; bottom: 12px; z-index: 9200; display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border-radius: 999px;
+    background: rgba(28,44,33,.92); color: #eef6ea; font: 600 12px/1.2 'Inter', system-ui, sans-serif; box-shadow: 0 4px 14px rgba(0,0,0,.22); pointer-events: none; }
+  .sl-offline[hidden] { display: none; }
+  .sl-offline i { width: 7px; height: 7px; border-radius: 50%; background: #e2a23b; }
+  /* v4.81: the checklist cards' pop-out (v4.72) everywhere else snakes come as boxes: the map's
+     species lists, Compare similar snakes, the Following tab and the checklist's filter buttons. A transform only (nothing around them moves), only for a real mouse,
+     and no growing with reduced motion - just the lift's shadow */
+  @media (hover: hover) and (pointer: fine) {
+    .cp-row.cp-sp, .cmp-col, article.fp, .chip:not(#sl-nx):not(#sl-ny) {
+      transition: background .15s ease, color .15s ease, border-color .15s ease, filter .2s ease, opacity .2s ease, box-shadow .18s ease-out, transform .18s ease-out; }
+    .cmp-col:hover, article.fp:hover { position: relative; z-index: 2; transform: translateY(-3px) scale(1.03); box-shadow: 0 10px 24px rgba(20,50,25,0.22), 0 3px 8px rgba(20,50,25,0.12); }
+    article.fp:hover { transform: translateY(-3px) scale(1.012); }
+    /* Compare's columns sit in a sideways scroller, which would cut off a grown column: room for it, with no change in size */
+    .cmp-cols { padding: 12px 8px; margin: -12px -8px; }
+    .cmp-col:hover { transform: translateY(-3px) scale(1.02); }
+    article.fp.fav:hover { box-shadow: 0 0 0 2px #e0a526, 0 10px 24px rgba(20,50,25,0.22); }
+    .cp-row.cp-sp:hover { z-index: 2; transform: translateY(-1px) scale(1.015); box-shadow: 0 6px 16px rgba(20,50,25,0.2); }
+    .chip:not(#sl-nx):not(#sl-ny):hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 6px 14px rgba(20,50,25,0.22); }
+  }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+    .cp-row.cp-sp:hover, .cmp-col:hover, article.fp:hover, .chip:not(#sl-nx):not(#sl-ny):hover { transform: none; }
+  }
+</style>
+<style>
   /* ==== v3.78 - the checklist on bigger screens: wider page, more cards per row, easier reading,
      compact filters, sort, quick preview, tab overflow, back to top, install nudge ==== */
   :root { --sci-ink: #46553f; --label-ink: #4a6845; --tag-ink: #4f5d49; --tag-hover: #58b351; --focus-ring: #58b351; }
@@ -2987,14 +3149,16 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
   .globe-stage.sl3d-open .sp-info-wrap, .globe-stage.sl3d-open .td-toggle { display: none; }
   /* v4.73: with a model open in the map, only the model shows - the map's own buttons above it (See provinces, See species, the search...) step aside */
   body.sl3d-on .globe-btns, body.sl3d-on .heat-search, body.sl3d-on .map-caption, body.sl3d-on #map-chip { display: none !important; }
-  /* v4.80: a little "NEW" tag on everything to do with 3D */
+  /* v4.80: a little "NEW" tag on everything to do with 3D. v4.81: blue, and only while <html> has
+     the class sl-new-3d - the NEW-tags script (SL_NEW) takes it away once 3D has been used, and for
+     everyone 20 versions after the tag came in */
   .td-card-btn, .td-toggle, .sp-info-acts .sp-info-3d, .photo-lightbox .pl-real { overflow: visible; }
-  .td-card-btn::after, .td-toggle::after, .sp-info-acts .sp-info-3d::after, .photo-lightbox .pl-real::after, .sl3d-hd h2::after {
-    content: "NEW"; font: 800 8.5px/1 'Inter', sans-serif; letter-spacing: .06em; color: #fff; background: #e0712b;
+  html.sl-new-3d .td-card-btn::after, html.sl-new-3d .td-toggle::after, html.sl-new-3d .sp-info-acts .sp-info-3d::after, html.sl-new-3d .photo-lightbox .pl-real::after, html.sl-new-3d .sl3d-hd h2::after {
+    content: "NEW"; font: 800 8.5px/1 'Inter', sans-serif; letter-spacing: .06em; color: #fff; background: #2563eb;
     padding: 2.5px 4px 2px; border-radius: 999px; box-shadow: 0 1px 3px rgba(0,0,0,.25); pointer-events: none; white-space: nowrap; }
-  .td-card-btn::after, .td-toggle::after, .sp-info-acts .sp-info-3d::after, .photo-lightbox .pl-real::after { position: absolute; top: -7px; right: -9px; z-index: 2; }
+  html.sl-new-3d .td-card-btn::after, html.sl-new-3d .td-toggle::after, html.sl-new-3d .sp-info-acts .sp-info-3d::after, html.sl-new-3d .photo-lightbox .pl-real::after { position: absolute; top: -7px; right: -9px; z-index: 2; }
   .sp-info-acts .sp-info-3d, .photo-lightbox .pl-real { position: relative; }
-  .sl3d-hd h2::after { display: inline-block; vertical-align: middle; margin-left: 8px; position: relative; top: -2px; }
+  html.sl-new-3d .sl3d-hd h2::after { display: inline-block; vertical-align: middle; margin-left: 8px; position: relative; top: -2px; }
   .sl3d-hd { display: flex; align-items: center; gap: 10px; }
   .sl3d-hd h2 { flex: 1; min-width: 0; margin: 0; font-size: 16px; line-height: 1.25; color: #1f7a3a; } /* v4.80: the same green as the name on the species pages */
   [data-sl-theme="dark"] .sl3d-hd h2 { color: #a8ef94; }
@@ -3281,8 +3445,9 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
 </script>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.81</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.82</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-head"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-head)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
+      <p class="sl-me"><a href="https://snakelist.com/about.html"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>About me</a></p>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All <span data-sl-total>4,205</span> snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
     </header>
@@ -9867,18 +10032,29 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     quiz: '<span class="fx-ring"></span>' + [1, 2, 3, 4, 5, 6].map((i) => '<span class="fx-q fx-q' + i + '">?</span>').join(""),
   };
   const achFx = (icon) => '<span class="ach-fx" aria-hidden="true">' + (ACH_FX[icon] || ACH_FX.check) + "</span>";
+  // v4.81: trophy tiers, points and rarity, like a games console's achievements. Read off each
+  // badge's goal (nothing new is stored): the first steps are bronze, the bigger ones silver and
+  // gold, the whole checklist platinum. Points add up to a SnakeList score (like a Gamerscore).
+  const achTrophy = (b) => b.statKey === "quizWrong" || b.goal < 10 ? "bronze" : b.goal < 100 ? "silver" : b.goal < 4000 ? "gold" : "platinum";
+  const ACH_TIER = {
+    bronze: { name: "Bronze", pts: 15, rare: "Common" },
+    silver: { name: "Silver", pts: 30, rare: "Uncommon" },
+    gold: { name: "Gold", pts: 90, rare: "Rare" },
+    platinum: { name: "Platinum", pts: 180, rare: "Ultra rare" },
+  };
+  const ACH_CUP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v2h3.2v2.6A4.4 4.4 0 0 1 16 12a5 5 0 0 1-3 2.6V17h3.2v3H7.8v-3H11v-2.4A5 5 0 0 1 8 12a4.4 4.4 0 0 1-4.2-4.4V5H7V3Zm-1.4 4v.6c0 1 .6 1.9 1.5 2.3A9 9 0 0 1 7 7H5.6Zm11.4 0a9 9 0 0 1-.1 2.9 2.5 2.5 0 0 0 1.5-2.3V7H17Z" fill="currentColor"></path></svg>';
+  const ACH_LOCK = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.2" fill="currentColor"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2.2"></path></svg>';
   function toastBadge(b) {
     const region = document.getElementById("ach-toast-region");
     if (!region || !b) return;
+    const t = achTrophy(b), T = ACH_TIER[t];
     const el = document.createElement("div");
-    // each category plays its own distinct entrance, not just a different icon on the
-    // same slide: a check pops, a calendar flips, a camera flashes, a star spins in
-    el.className = "ach-toast-wrap";
-    el.innerHTML = '<div class="ach-toast ach-toast-' + (b.icon || "check") + '"><span class="ach-toast-icon">' + (ICON[b.icon] || ICON.check) + achFx(b.icon) + "</span>" +
-      "<span><b>Achievement unlocked</b><span>" + b.name + "</span></span>" +
-      (b.icon === "camera" ? '<span class="ach-toast-flash"></span>' : "") + "</div>";
+    // the console look: a round trophy pops in, the bar opens out of it, then the words slide in
+    el.className = "xa-toast-wrap";
+    el.innerHTML = '<div class="xa-toast xa-' + t + '"><span class="xa-toast-ic">' + ACH_CUP + "</span>" +
+      '<span class="xa-toast-txt"><small>Achievement unlocked</small><b><span class="xa-toast-g">' + T.pts + ' G</span> &ndash; ' + achEsc(b.name) + "</b></span></div>";
     region.appendChild(el);
-    setTimeout(() => el.remove(), 4000);
+    setTimeout(() => el.remove(), 5200);
     // the Achievements tab shows the newest win with a ribbon
     try { localStorage.setItem("sl-ach-newest", b.name); } catch (err) {}
   }
@@ -9927,6 +10103,12 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
   const achEsc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   function achMedal(b, fx) { return '<span class="ach-medal" aria-hidden="true">' + (ICON[b.icon] || ICON.check) + (fx ? achFx(b.icon) : "") + '<span class="ach-tier">' + achTier(b) + "</span></span>"; }
   const achFreshAttr = (f) => f ? ' style="--fx-i:' + f.i + ";--fx-d:-" + f.t + 'ms"' : "";
+  // a badge's picture: its trophy tier's frame, the category's icon and the number to reach;
+  // locked ones are grey with a padlock
+  function achArt(b, got, fx) {
+    return '<span class="xa-art xa-' + achTrophy(b) + (got ? "" : " xa-off") + '" aria-hidden="true"><span class="xa-art-ic">' + (ICON[b.icon] || ICON.check) + "</span>" +
+      (fx ? achFx(b.icon) : "") + '<span class="xa-art-n">' + achTier(b) + "</span>" + (got ? "" : '<span class="xa-lock">' + ACH_LOCK + "</span>") + "</span>";
+  }
   function renderAchievements() {
     const s = computeStats();
     checkNewBadges(s);
@@ -9940,45 +10122,59 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     // the closest badge still to win, for the "next up" line
     const next = BADGES.filter((b) => !isWon(b)).sort((a, b) => (s[b.statKey] / b.goal) - (s[a.statKey] / a.goal) || a.goal - b.goal)[0];
     const pct = BADGES.length ? won.length / BADGES.length : 0, C = 2 * Math.PI * 42;
+    const pts = (L) => L.reduce((n, b) => n + ACH_TIER[achTrophy(b)].pts, 0);
+    const score = pts(won), maxScore = pts(BADGES);
     const stat = (n, label) => "<li><b>" + (n || 0).toLocaleString() + "</b>" + label + "</li>";
-    let nextLine = won.length ? "Great work! " : "Your first badge is one tap away. ";
+    let nextLine = won.length ? "" : "Your first trophy is one tap away. ";
     if (next) {
       const left = next.goal - (s[next.statKey] || 0);
-      nextLine += "Next up: <b>" + achEsc(next.name) + "</b> - " + left.toLocaleString() + " more " + ACH_UNIT[next.statKey][left === 1 ? 0 : 1] + " to go.";
-    } else nextLine = "You have won every single badge. Legendary!";
+      nextLine += "Next up: <b>" + achEsc(next.name) + "</b> &ndash; " + left.toLocaleString() + " more " + ACH_UNIT[next.statKey][left === 1 ? 0 : 1] + " to go.";
+    } else nextLine = "You have unlocked every single achievement. Legendary!";
+    const tiers = ["platinum", "gold", "silver", "bronze"].map((t) => {
+      const all = BADGES.filter((b) => achTrophy(b) === t), w = all.filter(isWon).length;
+      return '<li class="xa-' + t + (w ? "" : " xa-none") + '" title="' + ACH_TIER[t].name + " trophies: " + w + " of " + all.length + '"><span class="xa-cup">' + ACH_CUP + "</span><b>" + w + "</b><span>/" + all.length + "</span>" +
+        '<span class="sr-only"> ' + ACH_TIER[t].name + "</span></li>";
+    }).join("");
     document.getElementById("ach-lead").innerHTML =
-      '<div class="ach-hero">' +
-        '<div class="ach-ring" role="img" aria-label="' + won.length + " of " + BADGES.length + ' badges won">' +
+      '<div class="xa-hero">' +
+        '<div class="xa-ring" role="img" aria-label="' + Math.round(pct * 100) + "% complete: " + won.length + " of " + BADGES.length + ' achievements unlocked">' +
           '<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="r-bg" cx="50" cy="50" r="42"></circle>' +
           (won.length ? '<circle class="r-fg" cx="50" cy="50" r="42" stroke-dasharray="' + (C * pct).toFixed(1) + " " + C.toFixed(1) + '"></circle>' : "") + "</svg>" +
-          '<span class="ach-ring-txt" aria-hidden="true"><b>' + won.length + "</b><span>of " + BADGES.length + "</span></span></div>" +
-        '<div class="ach-hero-main"><h2>Badges won</h2><p>' + nextLine + "</p></div>" +
-          '<ul class="ach-stats">' + stat(s.seen, "seen") + stat(s.dated, "dated") + stat(s.photographed, "photos") + stat(s.fullyLogged, "full records") + stat(s.quizCorrect, "quiz right") + "</ul>" +
-        (newest ? '<div class="ach-newest' + (fresh[newest.name] ? " fresh" : "") + '"' + achFreshAttr(fresh[newest.name]) + ">" + achMedal(newest, fresh[newest.name]) + "<span><small>Newest badge</small><strong>" + achEsc(newest.name) + "</strong></span></div>" : "") +
+          '<span class="xa-ring-txt" aria-hidden="true"><b>' + Math.round(pct * 100) + "<small>%</small></b><span>" + won.length + " / " + BADGES.length + "</span></span></div>" +
+        '<div class="xa-hero-main"><p class="xa-kicker">SnakeList achievements</p><h2>Trophy room</h2>' +
+          '<p class="xa-score" title="SnakeList score: points from every achievement unlocked"><span class="xa-g" aria-hidden="true">G</span><b>' + score.toLocaleString() + "</b><span>/ " + maxScore.toLocaleString() + " points</span></p>" +
+          '<ul class="xa-tiers" aria-label="Trophies by tier">' + tiers + "</ul>" +
+          '<p class="xa-next">' + nextLine + "</p></div>" +
+        (newest ? '<div class="xa-latest' + (fresh[newest.name] ? " fresh" : "") + '"' + achFreshAttr(fresh[newest.name]) + ">" + achArt(newest, true, fresh[newest.name]) +
+          "<span><small>Latest unlock</small><strong>" + achEsc(newest.name) + '</strong><em class="xa-' + achTrophy(newest) + '">' + ACH_TIER[achTrophy(newest)].name + " &middot; " + ACH_TIER[achTrophy(newest)].pts + " G</em></span></div>" : "") +
+        '<ul class="xa-stats">' + stat(s.seen, "seen") + stat(s.dated, "dated") + stat(s.photographed, "photos") + stat(s.fullyLogged, "full records") + stat(s.quizCorrect, "quiz right") + "</ul>" +
       "</div>";
-    document.getElementById("ach-grid").className = "ach-groups";
+    document.getElementById("ach-grid").className = "ach-groups xa-groups";
     const gridHtml = ACH_GROUPS.map((g) => {
       const list = BADGES.filter((b) => g.keys.indexOf(b.statKey) >= 0);
       const nWon = list.filter(isWon).length;
       // the first badge not yet won in each ladder is the one to aim for
       const nextOf = {};
       list.forEach((b) => { if (!isWon(b) && !nextOf[b.statKey]) nextOf[b.statKey] = b; });
-      return '<section class="ach-sec" aria-label="' + g.title + ' badges">' +
-        '<div class="ach-sec-head"><span class="ach-sec-ic" aria-hidden="true">' + ICON[g.icon] + '</span>' +
-          '<div class="ach-sec-t"><h3>' + g.title + "</h3><p>" + g.blurb + "</p></div>" +
-          '<span class="ach-sec-n' + (nWon ? "" : " none") + '">' + nWon + " / " + list.length + "</span></div>" +
-        '<div class="ach-grid">' + list.map((b) => {
+      return '<section class="xa-sec" aria-label="' + g.title + ' achievements">' +
+        '<div class="xa-sec-head"><span class="xa-sec-ic" aria-hidden="true">' + ICON[g.icon] + '</span>' +
+          '<div class="xa-sec-t"><h3>' + g.title + "</h3><p>" + g.blurb + "</p></div>" +
+          '<span class="xa-sec-n' + (nWon ? "" : " none") + '"><span><b>' + nWon + "</b> / " + list.length + '</span><i><i style="width:' + Math.round(nWon / list.length * 100) + '%"></i></i></span></div>' +
+        '<div class="xa-grid">' + list.map((b) => {
           const have = Math.min(s[b.statKey] || 0, b.goal), got = have >= b.goal;
           const isNext = !got && nextOf[b.statKey] === b, isNew = got && newest === b;
           const p = Math.round(have / b.goal * 100);
-          const fr = got && fresh[b.name];
-          return '<div class="ach' + (got ? " won" : isNext ? " next" : " locked") + (isNew ? " newest" : "") + (fr ? " fresh" : "") + '"' + achFreshAttr(fr) + ">" +
-            (isNew ? '<span class="ach-flag">Newest</span>' : isNext ? '<span class="ach-flag">Next up</span>' : "") +
-            achMedal(b, fr) +
-            '<h4 class="ach-name">' + b.name + "</h4>" +
-            '<p class="ach-note">' + b.note + "</p>" +
-            '<div class="ach-prog"><div class="ach-bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + b.goal + '" aria-valuenow="' + have + '" aria-label="' + achEsc(b.name) + '"><div class="ach-fill" style="width:' + (have && p < 3 ? 3 : p) + '%"></div></div>' +
-            '<span class="ach-count">' + (got ? "&#10003; Won &middot; " : "") + have.toLocaleString() + " / " + b.goal.toLocaleString() + "</span></div></div>";
+          const fr = got && fresh[b.name], t = achTrophy(b), T = ACH_TIER[t];
+          return '<div class="xa-tile xa-' + t + (got ? " won" : isNext ? " next" : " locked") + (isNew ? " newest" : "") + (fr ? " fresh" : "") + '"' + achFreshAttr(fr) + ">" +
+            achArt(b, got, fr) +
+            '<div class="xa-body">' +
+              (isNew ? '<span class="xa-flag">Latest</span>' : isNext ? '<span class="xa-flag">Next up</span>' : "") +
+              '<h4 class="xa-name">' + b.name + "</h4>" +
+              '<p class="xa-note">' + b.note + "</p>" +
+              '<div class="xa-bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + b.goal + '" aria-valuenow="' + have + '" aria-label="' + achEsc(b.name) + '"><i style="width:' + (have && p < 3 ? 3 : p) + '%"></i></div>' +
+              '<div class="xa-foot"><span class="xa-tro">' + ACH_CUP + T.name + '</span><span class="xa-pts">' + T.pts + ' G</span><span class="xa-rare">' + T.rare + "</span>" +
+                '<span class="xa-count">' + (got ? "Unlocked" : have.toLocaleString() + " / " + b.goal.toLocaleString()) + "</span></div>" +
+            "</div></div>";
         }).join("") + "</div></section>";
     }).join("");
     // refresh() can re-render this several times a second; leaving identical markup alone
@@ -19971,6 +20167,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v4.82", d: "2026-11-13", items: ["Achievements look like a games console's: bronze, silver, gold and platinum trophies, points, a completion ring, locked ones with a padlock, and an Achievement unlocked pop-up.", "SnakeList opens straight away from your device, even on slow wifi, and works offline with everything already saved - a small Offline note shows when there's no connection, and it never keeps reloading.", "The NEW tags are blue, and go away once you've tried 3D.", "Snake boxes everywhere (map lists, Compare similar snakes, Following, filter buttons, Achievements and country pages) pop out a little under the mouse, like the checklist cards.", "Species pages show how big a snake is (small, medium or large) instead of a conservation status.", "An About me link right under the SnakeList title."] },
     { v: "v4.81", d: "2026-11-13", items: ["The opening is now a big photo of a Rough Green Snake: click it or scroll to go into SnakeList.", "Tap the snake's name in the corner of the opening to open its page.", "The opening uses the real SnakeList logo."] },
     { v: "v4.80", d: "2026-11-13", items: ["A new opening: a big snake photo that gently blurs and fades into SnakeList.", "3D snakes: eyes sit properly in the head, and the open mouth shows the palate teeth, the glottis (breathing tube) and the tongue sheath.", "New Anatomy button (on species pages and in 3D): every part labelled - fangs, teeth, glottis, tongue, scales, vent and more.", "New See bite button in 3D: watch the snake bite a see-through arm and how deep the fang goes.", "More realistic 3D trees, rocks and 3D leaves on the ground.", "Map cities are dark green and show their name when you tap them.", "Every dropdown opens as a SnakeList panel; See more buttons instead of little triangles; greener species pages.", "The Speckled Kingsnake photo no longer shows it eating."] },
     { v: "v4.79", d: "2026-11-12", items: ["Three snake photos that had white borders or strips are cropped clean."] },
@@ -21856,6 +22053,42 @@ window.SL_welcome = function (u, back) {
 <script>
   // the footer belongs after everything else on the page
   (function () { var f = document.getElementById("sl-foot"); if (f) document.body.appendChild(f); })();
+</script>
+
+<script>
+// ---- v4.81: NEW tags. One table: each feature's key and the version its NEW tags came in. The
+// tags show only while <html> has the class sl-new-<key> (see the CSS for each tag); they go once
+// the feature has been used on this device (localStorage sl-new-seen-<key>, shared with the species
+// pages) and for everyone 20 versions after they came in (read from the version label) ----
+(function () {
+  var NEW = {
+    "3d": { v: "4.80", sel: ".td-card-btn, .td-toggle, .sp-info-3d, .pl-real, .sl3d-ov, .sl3d-bd" }
+  };
+  var n = function (t) { var m = /(\d+)\.(\d+)/.exec(t || ""); return m ? +m[1] * 100 + +m[2] : 0; };
+  var vEl = document.querySelector(".sl-ver"), cur = n(vEl && vEl.textContent), root = document.documentElement;
+  try { if (cur) localStorage.setItem("sl-ver-n", String(cur)); } catch (e) {}
+  function seen(k) { try { return !!localStorage.getItem("sl-new-seen-" + k); } catch (e) { return false; } }
+  function used(k) { if (!root.classList.contains("sl-new-" + k)) return; try { localStorage.setItem("sl-new-seen-" + k, "1"); } catch (e) {} root.classList.remove("sl-new-" + k); }
+  Object.keys(NEW).forEach(function (k) {
+    if (!cur || cur >= n(NEW[k].v) + 20 || seen(k)) return;
+    root.classList.add("sl-new-" + k);
+    document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest(NEW[k].sel)) used(k); }, true);
+  });
+  // a 3D model opened any other way (a link, the tutorial...) counts too
+  if (root.classList.contains("sl-new-3d") && window.MutationObserver) {
+    var mo = new MutationObserver(function () { if (document.body.classList.contains("sl3d-on") || document.querySelector("body > .sl3d-bd")) { used("3d"); mo.disconnect(); } });
+    mo.observe(document.body, { attributes: true, attributeFilter: ["class"], childList: true });
+  }
+  window.SL_NEW_USED = used;
+})();
+// ---- v4.81: no connection: say so quietly and carry on with what's saved (never reload) ----
+(function () {
+  var b = document.createElement("div"); b.className = "sl-offline"; b.id = "sl-offline"; b.setAttribute("role", "status"); b.hidden = true;
+  b.innerHTML = '<i aria-hidden="true"></i>Offline &middot; showing what&rsquo;s saved on this device';
+  document.body.appendChild(b);
+  function paint() { b.hidden = navigator.onLine !== false; }
+  window.addEventListener("online", paint); window.addEventListener("offline", paint); paint();
+})();
 </script>
 
 <script>

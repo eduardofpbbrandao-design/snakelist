@@ -55,6 +55,10 @@
 .cy-card a{flex-direction:row;min-height:96px}.cy-img{flex:0 0 112px;width:112px;aspect-ratio:auto;align-self:stretch}.cy-body{padding:9px 12px}
 .cy-name{font-size:15.5px}.cy-stats b{font-size:16px}}
 @media (prefers-reduced-motion:reduce){.cy-card a{transition:none}}
+/* v4.81: snake cards pop out a little under a real mouse, like the app's checklist cards (no layout shift: a transform) */
+@media (hover:hover) and (pointer:fine){.cy-card a{transition:border-color .15s,box-shadow .18s ease-out,transform .18s ease-out}
+.cy-card a:hover{position:relative;z-index:1;transform:translateY(-3px) scale(1.03);box-shadow:0 10px 24px rgba(20,50,25,.18),0 3px 8px rgba(20,50,25,.10)}}
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:reduce){.cy-card a:hover{transform:none}}
 .rg-sub{margin:4px 0 0;color:var(--muted);font-size:15px}
 .rg-toc{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:16px 0 0;padding:6px 0;position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
 .rg-toc::-webkit-scrollbar{display:none}.rg-toc a{flex:none;padding:5px 12px;border-radius:999px;font-size:14px;font-weight:600;text-decoration:none;color:var(--muted)}
