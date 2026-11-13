@@ -1,7 +1,7 @@
 SnakeList homepage hero photograph
 ==================================
 
-Files:    emerald-boa-2600.webp, emerald-boa-2000.webp, emerald-boa-1400.webp, emerald-boa-900.webp
+Files:    emerald-boa-g-2600.webp, emerald-boa-g-2000.webp, emerald-boa-g-1400.webp, emerald-boa-g-900.webp
 Subject:  Emerald tree boa (Corallus caninus), a living snake on a branch at night
           (the photo SnakeList already uses for this species - see species/photo-credits.html)
 Author:   Sebastien Sant (Sébastien SANT on iNaturalist)
@@ -11,7 +11,7 @@ Source:   https://www.inaturalist.org/photos/75478606
 Licence:  Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
           https://creativecommons.org/licenses/by-nc/4.0/
 Changes:  scaled to 82%, placed on a wider black canvas (3200 x 2100) with softly faded edges so the
-          snake sits in the sharp middle of the screen, resized to 2600/2000/1400/900 px wide copies,
+          snake sits in the sharp middle of the screen, the black night background turned SnakeList green, resized to 2600/2000/1400/900 px wide copies,
           saved as WebP. On the page the lower part is progressively blurred and faded into the
           background. The photographer does not endorse SnakeList.
 

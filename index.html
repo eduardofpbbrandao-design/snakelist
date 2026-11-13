@@ -44,7 +44,7 @@
   gtag('config', 'G-PY2LJV389K');
 </script>
 <title>SnakeList - the snake life list, map and quiz</title>
-<link rel="preload" as="image" href="species-photos/hero/emerald-boa-2000.webp" imagesrcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" imagesizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" type="image/webp" fetchpriority="high">
+<link rel="preload" as="image" href="species-photos/hero/emerald-boa-g-2000.webp" imagesrcset="species-photos/hero/emerald-boa-g-900.webp 900w, species-photos/hero/emerald-boa-g-1400.webp 1400w, species-photos/hero/emerald-boa-g-2000.webp 2000w, species-photos/hero/emerald-boa-g-2600.webp 2600w" imagesizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" type="image/webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1651,7 +1651,7 @@
   .sl-hero[hidden] { display: none; }
   .hero-media { position: absolute; inset: 0; z-index: -1; overflow: hidden;
     /* the photo's own colours, tiny and blurred: shown while the real photo arrives */
-    background: #020200 url("data/ui/d37cf46530c3a4.webp") center / cover no-repeat;
+    background: #124026 url("data/ui/505cfcd0d1424e.webp") center / cover no-repeat;
     --hero-fade: linear-gradient(180deg, #000 0%, #000 62%, rgba(0,0,0,0.975) 65.5%, rgba(0,0,0,0.93) 69%, rgba(0,0,0,0.85) 72.5%,
       rgba(0,0,0,0.73) 76%, rgba(0,0,0,0.58) 79.5%, rgba(0,0,0,0.42) 82.5%, rgba(0,0,0,0.27) 85.5%, rgba(0,0,0,0.15) 88%,
       rgba(0,0,0,0.065) 90%, rgba(0,0,0,0.018) 91.5%, transparent 93%);
@@ -1672,14 +1672,14 @@
   .hero-l1, .hero-l2, .hero-l3, .hero-l4, .hero-l5, .hero-l6 { -webkit-mask-image: var(--m); mask-image: var(--m); }
   /* low down, the blurred photo leans toward the page's own colour before it fades, so the
      melt into the page is one even change of colour (grey-brown photo -> page green), not a muddy band */
-  .sl-hero { background: linear-gradient(180deg, #020200 0%, #050603 62%, #0b1a10 82%, var(--page-under) 100%); } /* v4.80: dark under the photo, not pale green */
-  .hero-tint { position: absolute; inset: 0; pointer-events: none; background: #0d0f0b;
+  .sl-hero { background: linear-gradient(180deg, #124026 0%, #124026 62%, #103a23 80%, var(--page-under) 100%); } /* v4.80: dark under the photo, not pale green */
+  .hero-tint { position: absolute; inset: 0; pointer-events: none; background: #103a23;
     --t: linear-gradient(180deg, transparent 56%, rgba(0,0,0,0.10) 66%, rgba(0,0,0,0.26) 76%, rgba(0,0,0,0.42) 86%, rgba(0,0,0,0.5) 100%);
     -webkit-mask-image: var(--t); mask-image: var(--t); }
   /* a soft, local shade behind the words only - not a dark layer over the whole photo */
   .hero-shade { position: absolute; inset: 0; pointer-events: none;
-    background: radial-gradient(ellipse 62% 34% at 50% 24%, rgba(6,14,9,0.62) 0%, rgba(6,14,9,0.42) 45%, rgba(6,14,9,0) 100%),
-      linear-gradient(180deg, rgba(6,14,9,0.40) 0%, rgba(6,14,9,0) 30%); } /* v4.80: darker behind the words, so the green writing reads on the green snake */
+    background: radial-gradient(ellipse 62% 34% at 50% 24%, rgba(6,22,13,0.45) 0%, rgba(6,22,13,0.28) 45%, rgba(6,22,13,0) 100%),
+      linear-gradient(180deg, rgba(6,22,13,0.25) 0%, rgba(6,22,13,0) 30%); } /* v4.80: darker behind the words, so the green writing reads on the green snake */
   .hero-copy { position: absolute; left: 0; right: 0; top: 6%; padding: 0 20px; text-align: center; }
   .hero-copy > p { margin: 0 auto; }
   .hero-title { display: inline-block; font-size: clamp(76px, min(15vw, 27vh), 330px); line-height: 0.95; white-space: nowrap;
@@ -3191,13 +3191,13 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
 
 <section class="sl-hero hero-wait" id="sl-hero" aria-label="Welcome to SnakeList">
   <div class="hero-media" aria-hidden="true">
-    <div class="hero-l hero-l0"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" fetchpriority="high" decoding="async"></div>
-    <div class="hero-l hero-l1"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l2"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l3"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l4"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l5"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l6"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l0"><img src="species-photos/hero/emerald-boa-g-2000.webp" srcset="species-photos/hero/emerald-boa-g-900.webp 900w, species-photos/hero/emerald-boa-g-1400.webp 1400w, species-photos/hero/emerald-boa-g-2000.webp 2000w, species-photos/hero/emerald-boa-g-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" fetchpriority="high" decoding="async"></div>
+    <div class="hero-l hero-l1"><img src="species-photos/hero/emerald-boa-g-2000.webp" srcset="species-photos/hero/emerald-boa-g-900.webp 900w, species-photos/hero/emerald-boa-g-1400.webp 1400w, species-photos/hero/emerald-boa-g-2000.webp 2000w, species-photos/hero/emerald-boa-g-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l2"><img src="species-photos/hero/emerald-boa-g-2000.webp" srcset="species-photos/hero/emerald-boa-g-900.webp 900w, species-photos/hero/emerald-boa-g-1400.webp 1400w, species-photos/hero/emerald-boa-g-2000.webp 2000w, species-photos/hero/emerald-boa-g-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l3"><img src="species-photos/hero/emerald-boa-g-2000.webp" srcset="species-photos/hero/emerald-boa-g-900.webp 900w, species-photos/hero/emerald-boa-g-1400.webp 1400w, species-photos/hero/emerald-boa-g-2000.webp 2000w, species-photos/hero/emerald-boa-g-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l4"><img src="species-photos/hero/emerald-boa-g-2000.webp" srcset="species-photos/hero/emerald-boa-g-900.webp 900w, species-photos/hero/emerald-boa-g-1400.webp 1400w, species-photos/hero/emerald-boa-g-2000.webp 2000w, species-photos/hero/emerald-boa-g-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l5"><img src="species-photos/hero/emerald-boa-g-2000.webp" srcset="species-photos/hero/emerald-boa-g-900.webp 900w, species-photos/hero/emerald-boa-g-1400.webp 1400w, species-photos/hero/emerald-boa-g-2000.webp 2000w, species-photos/hero/emerald-boa-g-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l6"><img src="species-photos/hero/emerald-boa-g-2000.webp" srcset="species-photos/hero/emerald-boa-g-900.webp 900w, species-photos/hero/emerald-boa-g-1400.webp 1400w, species-photos/hero/emerald-boa-g-2000.webp 2000w, species-photos/hero/emerald-boa-g-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
     <div class="hero-tint"></div>
     <div class="hero-shade"></div>
   </div>
