@@ -197,7 +197,7 @@ async function route(r) {
   M.stack = { n: 6, lon: -8.5, lat: 39.5 };
   await p.evaluate(() => window.SL_FLY_BOX(-10, -6, 37, 42.2)); await p.waitForTimeout(1800);
   d = await dbg(p);
-  ok(d.clusters.length > 0, 'nearby observations are drawn as numbered clusters (' + d.clusters.length + ')');
+  ok(d.clusters.length > 0, 'nearby observations are drawn as clusters - one plain dot, no number (v4.80) (' + d.clusters.length + ')');
   await shot(p, 'desktop-light-clusters', '#globe-stage');
   await p.evaluate(() => window.SL_FLY_BOX(-8.52, -8.48, 39.49, 39.51)); await p.waitForTimeout(1800);
   d = await dbg(p);
