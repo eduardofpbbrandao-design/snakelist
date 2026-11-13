@@ -133,6 +133,7 @@
   /* while the opening plays, the browser skips laying out and drawing the (huge) page behind it,
      so every frame goes to the opening; the page is drawn just before the fade reveals it */
   .sl-root.intro-on > :not(#intro):not(script):not(style) { content-visibility: hidden; }
+  html.sl-intro-lock, html.sl-intro-lock body { overflow: hidden !important; overscroll-behavior: none; } /* v4.80: the page can't move behind the opening */
   /* the tick: a GPU layer of its own and a softer, longer draw */
   .intro-box { transform: translateZ(0); backface-visibility: hidden; }
   .intro-wipe { opacity: 0; transform: scale(1.03); transition: opacity 0.45s ease, transform 0.45s ease; pointer-events: none; }
@@ -1685,6 +1686,11 @@
     (function () {
       var intro = document.getElementById("intro");
       var done = false;
+      // v4.80: while the opening plays the page underneath can't scroll (a scroll there used to leave you
+      // part-way down, and the tutorial then slid you to the start of SnakeList); when it ends you're at the top
+      var lockOn = !(/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search) || window.SL_CAME_BACK);
+      if (lockOn) document.documentElement.classList.add("sl-intro-lock");
+      document.addEventListener("sl-intro-done", function () { if (!lockOn) return; document.documentElement.classList.remove("sl-intro-lock"); window.scrollTo(0, 0); }, { once: true });
       window.__dismissIntro = function () {
         if (done) return;
         done = true;
@@ -1764,7 +1770,7 @@
   .hero-l { position: absolute; inset: 0; overflow: hidden; }
   /* v4.80: a fade that stays put at the bottom while the photo slides under it, so the photo always melts into the page */
   .hero-fadeout { position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(180deg, rgba(11,36,21,0) 50%, rgba(11,36,21,0.4) 58%, rgba(11,36,21,0.82) 65%, #0b2415 72%, #0b2415 100%); } /* v4.80: dark at the bottom, not light */
+    background: linear-gradient(180deg, rgba(22,74,44,0) 50%, rgba(22,74,44,0.4) 58%, rgba(22,74,44,0.82) 65%, #164a2c 72%, #12402a 100%); } /* v4.80: dark at the bottom, not light */
   /* every copy is the same size and in the same place - 96px bigger than the hero on every side,
      so a blurred copy never shows its soft see-through edge */
   .hero-l img { position: absolute; top: -96px; left: -96px; width: calc(100% + 192px); height: calc(100% + 192px);
@@ -1783,7 +1789,7 @@
   .sl-hero { background: none; }
   /* the photo, its green night and the fade sit in one layer that turns see-through at the bottom, so the page's own
      background (which stays still while you scroll) shows through - no line where SnakeList starts */
-  .hero-bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: #0b2415;
+  .hero-bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: #164a2c;
     --hb: linear-gradient(180deg, #000 0%, #000 86%, rgba(0,0,0,0.82) 90%, rgba(0,0,0,0.5) 94%, rgba(0,0,0,0.18) 97.5%, transparent 100%);
     -webkit-mask-image: var(--hb); mask-image: var(--hb); } /* v4.80: dark under the photo, not pale green */
   .hero-tint { position: absolute; inset: 0; pointer-events: none; background: #103a23;
@@ -1817,7 +1823,7 @@
     text-decoration: none; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
   .hero-credit:hover, .hero-credit:focus-visible { color: #fff; text-decoration: underline; }
   /* phones and tablets held upright: the snake's head stays in view */
-  @media (max-aspect-ratio: 1/1) { .hero-l img { object-position: 74% 40%; } .hero-copy { top: 6%; } }
+  @media (max-aspect-ratio: 1/1) { .hero-l img { object-position: 66% 40%; } .hero-copy { top: 6%; } }
   /* very wide screens: the photo fits the width, so pick which band of it shows */
   @media (min-aspect-ratio: 17/10) { .hero-l img { object-position: 70% 40%; } .hero-copy { top: 4%; } }
   /* short landscape phones: a little smaller, so the words don't cover the snake */
@@ -8018,7 +8024,7 @@
       if (!target) { advance(); return; }
       // the tab row scrolls horizontally on narrow screens - bring the target fully into view
       // before measuring it, so the spotlight/callout never land on a half-scrolled button
-      if (!follow && !(step.center && i === 0 && window.scrollY < 40)) target.scrollIntoView({ block: "center", inline: "nearest", behavior: (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) ? "auto" : "smooth" }); // v4.80: glides (no jump); the welcome box opens over the hero photo, not scrolled past it
+      if (!follow && !step.center) target.scrollIntoView({ block: "center", inline: "nearest", behavior: (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) ? "auto" : "smooth" }); // v4.80: glides (no jump); the welcome box opens over the hero photo, not scrolled past it
       document.getElementById("tour-step-num").textContent = "Step " + (i + 1) + " of " + steps.length;
       document.getElementById("tour-title").textContent = step.title;
       document.getElementById("tour-text").textContent = (step.textFn && step.textFn(target)) || step.text;
@@ -8113,12 +8119,12 @@
     function finish() {
       clearTry();
       layer.hidden = true;
-      try { localStorage.setItem(TOUR_KEY, "1"); } catch (err) {}
+      try { localStorage.setItem(TOUR_KEY, "1"); } catch (err) {} try { sessionStorage.setItem(TOUR_KEY, "1"); } catch (err) {} window.__slTourSeen = true;
     }
 
     function start() {
       let seen = false;
-      try { seen = !!localStorage.getItem(TOUR_KEY); } catch (err) {}
+      try { seen = !!localStorage.getItem(TOUR_KEY); } catch (err) {} try { seen = seen || !!sessionStorage.getItem(TOUR_KEY); } catch (err) {} seen = seen || !!window.__slTourSeen;
       if (seen) return;
       i = 0;
       go();
@@ -11548,7 +11554,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // no snakes living there): one solid grey, clearly apart from the palest green of "a few"
   var NO_SPECIES_COLOR = "#AEB7B1";
   function cityDotColor(t) {
-    var lo = [199, 235, 183], hi = [17, 56, 26];
+    var lo = [46, 125, 79], hi = [12, 46, 22]; // v4.80: always dark green
     var rgb = lo.map(function (c0, i) { return Math.round(c0 + (hi[i] - c0) * t); });
     return "rgb(" + rgb.join(",") + ")";
   }
