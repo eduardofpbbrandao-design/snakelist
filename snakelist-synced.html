@@ -1817,7 +1817,7 @@
       var done = false;
       // v4.80: while the opening plays the page underneath can't scroll (a scroll there used to leave you
       // part-way down, and the tutorial then slid you to the start of SnakeList); when it ends you're at the top
-      var lockOn = !(/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search) || window.SL_CAME_BACK);
+      var lockOn = false; // v4.83: the photo is the opening now - the old animated opening never plays
       if (lockOn) document.documentElement.classList.add("sl-intro-lock");
       document.addEventListener("sl-intro-done", function () { if (!lockOn) return; document.documentElement.classList.remove("sl-intro-lock"); window.scrollTo(0, 0); }, { once: true });
       window.__dismissIntro = function () {
@@ -1842,7 +1842,7 @@
         setTimeout(fade, 2500); // never hold the opening longer than this
       };
       // opened from a species page link (?sp= ?map= ?f= ?hab= ?type= ?fam=): no opening, straight there
-      if (/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search) || window.SL_CAME_BACK) {
+      if (true) { // v4.83: no animated opening any more (the photo opening replaces it)
         intro.classList.add("intro-gone"); done = true; window.__introDone = true; var rt = intro.closest(".sl-root"); if (rt) rt.classList.remove("intro-on");
         document.addEventListener("DOMContentLoaded", function () { document.dispatchEvent(new Event("sl-intro-done")); });
       } else {
@@ -1989,7 +1989,7 @@
     var entered = false;
     function enter() {
       if (entered || hero.hidden) return; entered = true; gliding = true;
-      var calm = calmQ && calmQ.matches, done = function () { hero.hidden = true; window.scrollTo(0, 0); gliding = false; try { sessionStorage.setItem("sl-hero-done", "1"); } catch (e) {} };
+      var calm = calmQ && calmQ.matches, done = function () { hero.hidden = true; window.scrollTo(0, 0); gliding = false; window.__heroEntered = true; document.dispatchEvent(new Event("sl-hero-entered")); };
       if (calm) { done(); return; }
       window.scrollTo({ top: heroH(), behavior: "smooth" });
       var t0 = performance.now(), wait = function () { if (Math.abs(window.scrollY - heroH()) <= 2 || performance.now() - t0 > 1400) done(); else requestAnimationFrame(wait); };
@@ -2042,13 +2042,14 @@
     }
     function wordmark() { var src = document.querySelector(".sl-header .sl-title"), dst = hero.querySelector(".hero-title");
       if (src && dst) { dst.innerHTML = '<span class="sr-only">SnakeList</span>' + src.innerHTML; dst.classList.add("hero-wm"); } }
-    try { if (sessionStorage.getItem("sl-hero-done") === "1" && !document.getElementById("intro")) entered = true; } catch (e) {}
+    // coming back from a SnakeList page (or a link that opens a place in the app): straight back to where you were, no photo
+    if (window.SL_CAME_BACK || /[?&](sp|map|f|hab|type|fam|q)=/.test(location.search)) { entered = true; window.__heroEntered = true; }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { wordmark(); wire(); }); else { wordmark(); wire(); }
   })();
 </script>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.82</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.83</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-head"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-head)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-me"><a href="https://snakelist.com/about.html"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>About me</a></p>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
@@ -8108,6 +8109,8 @@
       { sel: "#search", act: "click", tryIt: "Try it: click the search box.", title: "Search", text: "Type a snake's name, a family, a type of snake or a country to find it fast." },
       { sel: 'details.fsec[data-sec="family"] > summary', act: "click", tryIt: "Try it: click Snake family to open it.", title: "Filters", text: "Open these to narrow the list: snake family, location, habitat, characteristics (like venomous or constrictor), other filters and your own lists." },
       { sel: ".sl-sort-wrap", title: "Sort", text: "Change the order of the list - by name, venomous first, family and more." },
+      { sel: "#ck-yes", cookie: true, go: () => { if (window.SL_showCookies) window.SL_showCookies(); return false; }, title: "Picked for you",
+        text: "SnakeList can put the snakes you're most likely to love at the top of your list - that's \u201cPicked for you\u201d. Go ahead and click Accept cookies to unlock this feature!" },
       { sel: firstCard, act: "hover", tryIt: "Try it: point at the card with your mouse.", title: "A snake card", text: "Each card is one species: its photo, name, scientific name, where it lives, its family and tags like Venomous or Rare." },
       { sel: inCard(".wish-row, .wish-btn"), title: "Want to see", text: "Add a snake to the list of snakes you'd love to find one day." },
       { sel: inCard(".follow-btn"), title: "Follow", text: "Tap the bell to follow a snake and get news about it." },
@@ -8164,7 +8167,11 @@
       document.getElementById("tour-title").textContent = step.title;
       document.getElementById("tour-text").textContent = (step.textFn && step.textFn(target)) || step.text;
       if (!follow) setTry(step, target);
-      document.getElementById("tour-next").textContent = i === steps.length - 1 ? "Explore SnakeList" : "Next";
+      document.getElementById("tour-next").textContent = i === 0 ? "Start tutorial" : i === steps.length - 1 ? "Explore SnakeList" : "Next";
+      document.getElementById("tour-skip").textContent = i === 0 ? "Explore SnakeList" : "Skip tutorial";
+      document.body.classList.toggle("tour-ck", !!step.cookie); // the cookie bar sits under the tutorial, its Accept button circled
+      if (step.cookie) setTimeout(() => { const bar = document.getElementById("ck-bar"); if (!bar || bar.hidden || steps[i] !== step) return; const r = bar.getBoundingClientRect();
+        callout.style.top = Math.max(window.scrollY + 8, window.scrollY + r.top - callout.offsetHeight - 14) + "px"; arrow.style.display = "none"; }, 0);
 
       layer.hidden = false;
       sizeLayer();
@@ -8254,6 +8261,8 @@
     function finish() {
       clearTry();
       layer.hidden = true;
+      document.body.classList.remove("tour-ck");
+      setTimeout(() => { if (window.SL_showCookies) window.SL_showCookies(); }, 400); // not answered in the tutorial: asked now, on its own
       try { localStorage.setItem(TOUR_KEY, "1"); } catch (err) {} try { sessionStorage.setItem(TOUR_KEY, "1"); } catch (err) {} window.__slTourSeen = true;
     }
 
@@ -8265,10 +8274,13 @@
       go();
     }
 
-    if (window.__introDone) start();
-    else document.addEventListener("sl-intro-done", start, { once: true });
+    // v4.83: the welcome (and the tutorial) waits until you've scrolled past the opening photo
+    const whenIn = () => { const h = document.getElementById("sl-hero"); if (window.__heroEntered || !h || h.hidden) start(); else document.addEventListener("sl-hero-entered", start, { once: true }); };
+    if (window.__introDone) whenIn(); else document.addEventListener("sl-intro-done", whenIn, { once: true });
     document.getElementById("tour-skip").addEventListener("click", finish);
     document.getElementById("tour-next").addEventListener("click", advance);
+    // answering the cookie question during its step moves the tutorial on
+    document.addEventListener("sl-consent-answered", () => { if (!layer.hidden && steps[i] && steps[i].cookie) setTimeout(advance, 500); });
     window.addEventListener("resize", () => { if (!layer.hidden) place(true); });
     // v4.78: if the page moves after the step was placed (the list settling, a scroll), the ring and box follow it
     let followRaf = 0;
@@ -19298,6 +19310,13 @@ window.SL_GEO_READY = new Promise(function (res) {
     padding: 14px 16px; border-radius: 16px; background: linear-gradient(160deg, #256846, #22623f); color: #f0f8ec; border: 1px solid rgba(160,222,140,0.3);
     box-shadow: 0 14px 40px rgba(0,0,0,0.4); font: 13px/1.45 'Inter', sans-serif; animation: wnUp .3s ease-out; }
   .ck-bar[hidden] { display: none; }
+  body.tour-ck .ck-bar { z-index: 79; }
+  .keep-nudge { position: fixed; left: 50%; bottom: 18px; z-index: 96; transform: translate(-50%, 140%); transition: transform .35s cubic-bezier(.2,.8,.2,1); display: flex; align-items: center; gap: 10px;
+    padding: 10px 10px 10px 16px; border-radius: 999px; background: #1f5338; color: #f0f8ec; font: 600 14px 'Inter', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,.3); max-width: calc(100vw - 24px); }
+  .keep-nudge.on { transform: translate(-50%, 0); }
+  .keep-go { border: 0; border-radius: 999px; padding: 8px 16px; background: #58b351; color: #fff; font: 700 13.5px 'Inter', sans-serif; cursor: pointer; }
+  .keep-x { border: 0; background: none; color: #cfe8c4; font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px; }
+
   .ck-bar p { margin: 0; flex: 1; }
   .ck-bar b { font-weight: 600; }
   .ck-btns { display: flex; gap: 8px; flex: none; }
@@ -19331,6 +19350,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v4.83", d: "2026-11-13", items: ["The snake photo is the opening now - scroll (or tap it) when you're ready.", "First time here? A welcome box: Start tutorial or Explore SnakeList.", "The cookie question comes inside the tutorial, at Picked for you - never on top of other pop-ups.", "After a while: want to keep your progress? Sign in.", "Map: islands filled in, lighter colours, double-click to zoom, a checklist-style grid of species, species counts for states and cities, the heatmap on its own, plain green sightings dots, panels that scroll on their own.", "Species pages: where the names come from, size instead of conservation status, green headings on every page."] },
     { v: "v4.82", d: "2026-11-13", items: ["Achievements look like a games console's: bronze, silver, gold and platinum trophies, points, a completion ring, locked ones with a padlock, and an Achievement unlocked pop-up.", "SnakeList opens straight away from your device, even on slow wifi, and works offline with everything already saved - a small Offline note shows when there's no connection, and it never keeps reloading.", "The NEW tags are blue, and go away once you've tried 3D.", "Snake boxes everywhere (map lists, Compare similar snakes, Following, filter buttons, Achievements and country pages) pop out a little under the mouse, like the checklist cards.", "Species pages show how big a snake is (small, medium or large) instead of a conservation status.", "An About me link right under the SnakeList title."] },
     { v: "v4.81", d: "2026-11-13", items: ["The opening is now a big photo of a Rough Green Snake: click it or scroll to go into SnakeList.", "Tap the snake's name in the corner of the opening to open its page.", "The opening uses the real SnakeList logo."] },
     { v: "v4.80", d: "2026-11-13", items: ["A new opening: a big snake photo that gently blurs and fades into SnakeList.", "3D snakes: eyes sit properly in the head, and the open mouth shows the palate teeth, the glottis (breathing tube) and the tongue sheath.", "New Anatomy button (on species pages and in 3D): every part labelled - fangs, teeth, glottis, tongue, scales, vent and more.", "New See bite button in 3D: watch the snake bite a see-through arm and how deep the fang goes.", "More realistic 3D trees, rocks and 3D leaves on the ground.", "Map cities are dark green and show their name when you tap them.", "Every dropdown opens as a SnakeList panel; See more buttons instead of little triangles; greener species pages.", "The Speckled Kingsnake photo no longer shows it eating."] },
@@ -19668,11 +19688,37 @@ window.SL_GEO_READY = new Promise(function (res) {
   // ---- cookies (the website; the claude.ai copy has no cookies or analytics) ----
   var web = !(window.claude && window.claude.use);
   var bar = document.getElementById("ck-bar");
-  function maybeCookies() { if (web && !get("sl-consent")) bar.hidden = false; }
+  function tourOn() { var l = document.getElementById("tour-layer"); return !!(l && !l.hidden); }
+  function tourSeen() { try { return !!(localStorage.getItem("sl-tour-seen") || sessionStorage.getItem("sl-tour-seen")); } catch (e) { return true; } }
+  // v4.83: the cookie question never shows at the same time as the welcome, the tutorial or What's new -
+  // first-timers are asked inside the tutorial (at Picked for you), everyone else on its own
+  function maybeCookies() { if (web && !get("sl-consent") && tourSeen() && !tourOn() && !sheet.classList.contains("open")) bar.hidden = false; }
+  window.SL_showCookies = function () { if (web && !get("sl-consent") && !sheet.classList.contains("open")) bar.hidden = false; };
+  // v4.83: after a while in SnakeList without an account: "Want to keep your progress? Sign in" (once per visit)
+  (function () {
+    var shown = false, used = 0, last = Date.now();
+    function signedIn() { try { return !!JSON.parse(localStorage.getItem("sl-google") || "null"); } catch (e) { return false; } }
+    function busy() { return tourOn() || sheet.classList.contains("open") || !bar.hidden || document.querySelector("dialog[open], .sl3d-bd, .signin-sheet.open"); }
+    function show() {
+      if (shown || signedIn()) return; shown = true;
+      var t = document.createElement("div"); t.className = "keep-nudge"; t.setAttribute("role", "status");
+      t.innerHTML = '<span>Want to keep your progress?</span><button type="button" class="keep-go">Sign in</button><button type="button" class="keep-x" aria-label="Not now">&times;</button>';
+      document.body.appendChild(t); requestAnimationFrame(function () { t.classList.add("on"); });
+      var bye = function () { t.classList.remove("on"); setTimeout(function () { t.remove(); }, 400); };
+      t.querySelector(".keep-x").addEventListener("click", bye);
+      t.querySelector(".keep-go").addEventListener("click", function () { bye(); var b = document.querySelector('.auth-btn[data-auth="open"]') || document.querySelector(".auth-btn"); if (b) b.click(); });
+      setTimeout(bye, 20000);
+    }
+    setInterval(function () { // counts only time the page is actually being used
+      var now = Date.now(); if (!document.hidden && now - last < 70000) used += 15000; 
+      if (!shown && used >= 4 * 60000 && !busy() && !signedIn()) show();
+    }, 15000);
+    ["pointerdown", "keydown", "wheel", "touchstart"].forEach(function (ev) { window.addEventListener(ev, function () { last = Date.now(); }, { passive: true }); });
+  })();
   // asked straight away on the first visit - it sits above the tutorial and the What's new popup
   setTimeout(maybeCookies, 1200);
   function consent(yes) {
-    set("sl-consent", yes ? "yes" : "no"); bar.hidden = true;
+    set("sl-consent", yes ? "yes" : "no"); bar.hidden = true; document.dispatchEvent(new Event("sl-consent-answered"));
     if (window.gtag) window.gtag("consent", "update", { analytics_storage: yes ? "granted" : "denied" });
     if (yes) pick(); else { try { localStorage.removeItem("sl-interests"); } catch (e) {} }
   }
