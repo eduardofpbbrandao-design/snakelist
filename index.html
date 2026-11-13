@@ -44,7 +44,7 @@
   gtag('config', 'G-PY2LJV389K');
 </script>
 <title>SnakeList - the snake life list, map and quiz</title>
-<link rel="preload" as="image" href="species-photos/hero/pit-viper-1600.webp" imagesrcset="species-photos/hero/pit-viper-800.webp 800w, species-photos/hero/pit-viper-1200.webp 1200w, species-photos/hero/pit-viper-1600.webp 1600w, species-photos/hero/pit-viper-2048.webp 2048w" imagesizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" type="image/webp" fetchpriority="high">
+<link rel="preload" as="image" href="species-photos/hero/emerald-boa-2000.webp" imagesrcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" imagesizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" type="image/webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1651,16 +1651,16 @@
   .sl-hero[hidden] { display: none; }
   .hero-media { position: absolute; inset: 0; z-index: -1; overflow: hidden;
     /* the photo's own colours, tiny and blurred: shown while the real photo arrives */
-    background: #2e2d2a url("data/ui/e8e74bba0558a5.webp") center / cover no-repeat;
-    --hero-fade: linear-gradient(180deg, #000 0%, #000 56%, rgba(0,0,0,0.975) 60%, rgba(0,0,0,0.93) 64%, rgba(0,0,0,0.85) 68%,
-      rgba(0,0,0,0.73) 72%, rgba(0,0,0,0.58) 76%, rgba(0,0,0,0.42) 79.5%, rgba(0,0,0,0.27) 83%, rgba(0,0,0,0.15) 86%,
-      rgba(0,0,0,0.065) 88.5%, rgba(0,0,0,0.018) 90.5%, transparent 92%);
+    background: #020200 url("data/ui/d37cf46530c3a4.webp") center / cover no-repeat;
+    --hero-fade: linear-gradient(180deg, #000 0%, #000 62%, rgba(0,0,0,0.975) 65.5%, rgba(0,0,0,0.93) 69%, rgba(0,0,0,0.85) 72.5%,
+      rgba(0,0,0,0.73) 76%, rgba(0,0,0,0.58) 79.5%, rgba(0,0,0,0.42) 82.5%, rgba(0,0,0,0.27) 85.5%, rgba(0,0,0,0.15) 88%,
+      rgba(0,0,0,0.065) 90%, rgba(0,0,0,0.018) 91.5%, transparent 93%);
     -webkit-mask-image: var(--hero-fade); mask-image: var(--hero-fade); }
   .hero-l { position: absolute; inset: 0; overflow: hidden; }
   /* every copy is the same size and in the same place - 96px bigger than the hero on every side,
      so a blurred copy never shows its soft see-through edge */
   .hero-l img { position: absolute; top: -96px; left: -96px; width: calc(100% + 192px); height: calc(100% + 192px);
-    max-width: none; object-fit: cover; object-position: 50% 22%; display: block; user-select: none; -webkit-user-drag: none; }
+    max-width: none; object-fit: cover; object-position: 50% 0%; display: block; user-select: none; -webkit-user-drag: none; }
   .hero-l1 img { filter: blur(0.75px); } .hero-l2 img { filter: blur(1.5px); } .hero-l3 img { filter: blur(3px); }
   .hero-l4 img { filter: blur(6px); }    .hero-l5 img { filter: blur(12px); } .hero-l6 img { filter: blur(24px); }
   .hero-l1 { --m: linear-gradient(180deg, transparent 46%, #000 61%); }
@@ -1672,7 +1672,7 @@
   .hero-l1, .hero-l2, .hero-l3, .hero-l4, .hero-l5, .hero-l6 { -webkit-mask-image: var(--m); mask-image: var(--m); }
   /* low down, the blurred photo leans toward the page's own colour before it fades, so the
      melt into the page is one even change of colour (grey-brown photo -> page green), not a muddy band */
-  .sl-hero { background: linear-gradient(180deg, #120f0b 0%, #0f0f0b 62%, #0d1a12 80%, var(--page-under) 100%); } /* v4.80: dark under the photo, not pale green */
+  .sl-hero { background: linear-gradient(180deg, #020200 0%, #050603 62%, #0b1a10 82%, var(--page-under) 100%); } /* v4.80: dark under the photo, not pale green */
   .hero-tint { position: absolute; inset: 0; pointer-events: none; background: #0d0f0b;
     --t: linear-gradient(180deg, transparent 56%, rgba(0,0,0,0.10) 66%, rgba(0,0,0,0.26) 76%, rgba(0,0,0,0.42) 86%, rgba(0,0,0,0.5) 100%);
     -webkit-mask-image: var(--t); mask-image: var(--t); }
@@ -1704,9 +1704,9 @@
     text-decoration: none; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
   .hero-credit:hover, .hero-credit:focus-visible { color: #fff; text-decoration: underline; }
   /* phones and tablets held upright: the snake's head stays in view */
-  @media (max-aspect-ratio: 1/1) { .hero-l img { object-position: 16% 62%; } .hero-copy { top: 6%; } }
+  @media (max-aspect-ratio: 1/1) { .hero-l img { object-position: 54% 50%; } .hero-copy { top: 6%; } }
   /* very wide screens: the photo fits the width, so pick which band of it shows */
-  @media (min-aspect-ratio: 17/10) { .hero-l img { object-position: 50% 34%; } .hero-copy { top: 5%; } }
+  @media (min-aspect-ratio: 17/10) { .hero-l img { object-position: 50% 30%; } .hero-copy { top: 4%; } }
   /* short landscape phones: a little smaller, so the words don't cover the snake */
   @media (max-height: 520px) and (min-aspect-ratio: 1/1) { .hero-copy { top: 7%; } .hero-title { font-size: clamp(60px, 26vh, 130px); } .hero-sub { font-size: 14.5px; } }
   /* the words rise in gently once the opening has gone */
@@ -3191,13 +3191,13 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
 
 <section class="sl-hero hero-wait" id="sl-hero" aria-label="Welcome to SnakeList">
   <div class="hero-media" aria-hidden="true">
-    <div class="hero-l hero-l0"><img src="species-photos/hero/pit-viper-1600.webp" srcset="species-photos/hero/pit-viper-800.webp 800w, species-photos/hero/pit-viper-1200.webp 1200w, species-photos/hero/pit-viper-1600.webp 1600w, species-photos/hero/pit-viper-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" fetchpriority="high" decoding="async"></div>
-    <div class="hero-l hero-l1"><img src="species-photos/hero/pit-viper-1600.webp" srcset="species-photos/hero/pit-viper-800.webp 800w, species-photos/hero/pit-viper-1200.webp 1200w, species-photos/hero/pit-viper-1600.webp 1600w, species-photos/hero/pit-viper-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l2"><img src="species-photos/hero/pit-viper-1600.webp" srcset="species-photos/hero/pit-viper-800.webp 800w, species-photos/hero/pit-viper-1200.webp 1200w, species-photos/hero/pit-viper-1600.webp 1600w, species-photos/hero/pit-viper-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l3"><img src="species-photos/hero/pit-viper-1600.webp" srcset="species-photos/hero/pit-viper-800.webp 800w, species-photos/hero/pit-viper-1200.webp 1200w, species-photos/hero/pit-viper-1600.webp 1600w, species-photos/hero/pit-viper-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l4"><img src="species-photos/hero/pit-viper-1600.webp" srcset="species-photos/hero/pit-viper-800.webp 800w, species-photos/hero/pit-viper-1200.webp 1200w, species-photos/hero/pit-viper-1600.webp 1600w, species-photos/hero/pit-viper-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l5"><img src="species-photos/hero/pit-viper-1600.webp" srcset="species-photos/hero/pit-viper-800.webp 800w, species-photos/hero/pit-viper-1200.webp 1200w, species-photos/hero/pit-viper-1600.webp 1600w, species-photos/hero/pit-viper-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
-    <div class="hero-l hero-l6"><img src="species-photos/hero/pit-viper-1600.webp" srcset="species-photos/hero/pit-viper-800.webp 800w, species-photos/hero/pit-viper-1200.webp 1200w, species-photos/hero/pit-viper-1600.webp 1600w, species-photos/hero/pit-viper-2048.webp 2048w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(170vh + 326px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l0"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" fetchpriority="high" decoding="async"></div>
+    <div class="hero-l hero-l1"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l2"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l3"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l4"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l5"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
+    <div class="hero-l hero-l6"><img src="species-photos/hero/emerald-boa-2000.webp" srcset="species-photos/hero/emerald-boa-900.webp 900w, species-photos/hero/emerald-boa-1400.webp 1400w, species-photos/hero/emerald-boa-2000.webp 2000w, species-photos/hero/emerald-boa-2600.webp 2600w" sizes="(min-aspect-ratio: 17/10) calc(100vw + 192px), calc(152vh + 292px)" alt="" decoding="async"></div>
     <div class="hero-tint"></div>
     <div class="hero-shade"></div>
   </div>
@@ -3205,7 +3205,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     <p class="hero-title"><span class="sr-only">SnakeList</span><span class="hero-mark" aria-hidden="true"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span></p>
     <p class="hero-sub">All <span data-sl-total>4,205</span> of the world's snake species in one place &mdash; photos, range maps and a life list to tick off the ones you find.</p>
   </div>
-  <a class="hero-credit" href="https://www.inaturalist.org/photos/670179774" target="_blank" rel="noopener" title="Pope's pit viper (Trimeresurus popeiorum) - photo by Biang Syiem, CC BY-NC 4.0">Photo: Biang Syiem &middot; CC BY-NC</a>
+  <a class="hero-credit" href="https://www.inaturalist.org/photos/75478606" target="_blank" rel="noopener" title="Emerald tree boa (Corallus caninus) - photo by S&eacute;bastien Sant, CC BY-NC 4.0">Photo: S&eacute;bastien Sant &middot; CC BY-NC</a>
   <button class="hero-cue" type="button" id="hero-cue" aria-label="Scroll down to the checklist"><span aria-hidden="true">Explore</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
 </section>
 <script>
