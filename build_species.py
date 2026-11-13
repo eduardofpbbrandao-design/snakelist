@@ -1490,7 +1490,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 @media (prefers-color-scheme:dark){.sp-fossil-flag,.sp-ext{background:#d8c3a5;color:#2b2016}}
 """
 
-JS = """(function(){function nf(t){if(!t||t.tagName!=='IMG'||t.dataset.nf)return;if(t.dataset.fb){var fb=t.dataset.fb;t.removeAttribute('data-fb');t.src=fb;return}t.dataset.nf=1;var d=document.createElement('span');d.className='sl-nophoto';d.setAttribute('role','img');d.setAttribute('aria-label',t.alt||'Photo unavailable');d.textContent='Photo unavailable';if(t.width&&t.height)d.style.aspectRatio=t.width+'/'+t.height;t.replaceWith(d)}
+JS = """// v4.81: ?embed=map shows only the range map (with See states / See cities and the list of countries), for the 3D viewer's "See countries" panel
+(function(){if(!/[?&]embed=map(&|$)/.test(location.search))return;var r=document.getElementById('range');if(!r)return;var de=document.documentElement;de.classList.add('sp-embed');
+for(var n=r;n&&n!==document.body;n=n.parentNode)[].forEach.call(n.parentNode.children,function(c){if(c!==n&&c.tagName!=='SCRIPT'&&c.tagName!=='TEMPLATE')c.style.display='none'});
+var mh=[].filter.call(r.querySelectorAll(':scope>h3'),function(h){return /^Map/.test(h.textContent)})[0];if(mh)for(var k=r.firstElementChild;k&&k!==mh.nextElementSibling;k=k.nextElementSibling)k.style.display='none';
+var b=document.createElement('base');b.target='_blank';document.head.appendChild(b);var st=document.createElement('style');
+st.textContent='html.sp-embed body>*:not(main){display:none!important}html.sp-embed body{margin:0;padding:8px 10px 12px;min-width:0}html.sp-embed main,html.sp-embed article{margin:0;padding:0;max-width:none;width:auto}html.sp-embed #range{margin:0;padding:0;border:0;box-shadow:none;background:none}html.sp-embed #range>h2{font-size:17px;margin:0 0 6px}html.sp-embed #range h3{margin:10px 0 4px}html.sp-embed .sp-map{max-height:none}';
+document.head.appendChild(st)})();
+(function(){function nf(t){if(!t||t.tagName!=='IMG'||t.dataset.nf)return;if(t.dataset.fb){var fb=t.dataset.fb;t.removeAttribute('data-fb');t.src=fb;return}t.dataset.nf=1;var d=document.createElement('span');d.className='sl-nophoto';d.setAttribute('role','img');d.setAttribute('aria-label',t.alt||'Photo unavailable');d.textContent='Photo unavailable';if(t.width&&t.height)d.style.aspectRatio=t.width+'/'+t.height;t.replaceWith(d)}
 window.addEventListener('error',function(e){nf(e.target)},true);[].forEach.call(document.images,function(i){if(i.complete&&!i.naturalWidth&&i.getAttribute('src'))nf(i)})})();
 (function(){
 var m=document.querySelector('.sp-map');
