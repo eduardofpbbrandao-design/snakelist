@@ -1,20 +1,20 @@
 SnakeList homepage hero photograph
 ==================================
 
-Files:    emerald-boa-g-2600.webp, emerald-boa-g-2000.webp, emerald-boa-g-1400.webp, emerald-boa-g-900.webp
-Subject:  Emerald tree boa (Corallus caninus), a living snake on a branch at night
+Files:    wagler-wide-3000.webp, wagler-wide-2400.webp, wagler-wide-1800.webp, wagler-wide-1200.webp
+Subject:  Wagler's pit viper (Tropidolaemus wagleri), a living snake among green leaves in its habitat
           (the photo SnakeList already uses for this species - see species/photo-credits.html)
-Author:   Sebastien Sant (Sébastien SANT on iNaturalist)
-Source:   https://www.inaturalist.org/photos/75478606
-          (original file: https://inaturalist-open-data.s3.amazonaws.com/photos/75478606/original.jpg,
-          2048 x 1365 px, from the iNaturalist Open Data bucket, which only holds openly licensed photos)
+Author:   Nico (iNaturalist)
+Source:   https://www.inaturalist.org/photos/106537980
+          (original file: https://inaturalist-open-data.s3.amazonaws.com/photos/106537980/original.jpg,
+          1536 x 2048 px, from the iNaturalist Open Data bucket, which only holds openly licensed photos)
 Licence:  Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
           https://creativecommons.org/licenses/by-nc/4.0/
-Changes:  scaled to 82%, placed on a wider black canvas (3200 x 2100) with softly faded edges so the
-          snake sits in the sharp middle of the screen, the black night background turned SnakeList green, resized to 2600/2000/1400/900 px wide copies,
-          saved as WebP. On the page the lower part is progressively blurred and faded into the
-          background. The photographer does not endorse SnakeList.
+Changes:  top 18% cropped, slight contrast boost, placed on a wide canvas (3000 x 1680) whose background is
+          a heavily blurred, darkened copy of the same photo (its own green leaves), resized to
+          3000/2400/1800/1200 px wide copies, saved as WebP. On the page the lower part is progressively
+          blurred and faded into the background. The photographer does not endorse SnakeList.
 
-The hero shows a credit line ("Photo: Sebastien Sant - CC BY-NC") linking to the source.
+The hero shows a credit line ("Photo: Nico - CC BY-NC") linking to the source.
 If the photo is ever replaced, give the new files NEW names (the offline helper keeps photos
 under species-photos/ forever once saved) and update this file.
