@@ -1211,22 +1211,27 @@
   @media (prefers-reduced-motion: reduce) {
     .ach-toast, .ach-toast-flash, .ach-toast-wrap { animation: none; }
   }
-  /* ==== v4.81: Achievements, games-console style (Xbox / PlayStation): a dark trophy room with the
-     completion ring, a SnakeList score (points, like a Gamerscore), trophies by tier (bronze, silver,
-     gold, platinum), and a tile per achievement - its picture in the tier's frame, title, how to
-     earn it, a progress bar, tier, points and rarity. Locked ones are grey with a padlock. ==== */
-  .ach-panel { --xa-bg: #0d1511; --xa-card: #15211a; --xa-card2: #1b2a21; --xa-line: #273b2f; --xa-text: #eef5ef; --xa-muted: #a3b8a9; --xa-acc: #6fd14f; }
+  /* ==== v4.81 / v4.86: Achievements, games-console style: a trophy room in SnakeList's own greens -
+     the completion ring, a points score, trophies by tier (bronze, silver, gold, platinum and, the
+     very hardest, diamond), then each kind of achievement in a box that opens like the checklist's
+     filter boxes, with a tile per achievement - its picture in the tier's frame, title, how to earn
+     it, a progress bar, tier, points and rarity. Locked ones are grey with a padlock. Tier colours
+     only on the trophies and frames; everything else is the app's flat greens. ==== */
+  .ach-panel { --xa-bg: var(--surface); --xa-card: var(--bg); --xa-card2: var(--surface-hover); --xa-line: var(--border); --xa-text: var(--text); --xa-muted: var(--text-muted);
+    --xa-acc: var(--gold); --xa-fill: #58b351; --xa-track: rgba(255,255,255,0.13); --xa-art: #1b412b; }
+  :root:not([data-sl-theme="dark"]) .ach-panel { --xa-bg: #fbfdf8; --xa-line: #b9cbab; --xa-card2: #e6efdc; --xa-track: rgba(63,125,67,0.15); --xa-art: #1f5a3a; }
   .xa-bronze { --t1: #e7a066; --t2: #8c4f22; --tt: #2a1608; }
   .xa-silver { --t1: #eef2f5; --t2: #8e98a3; --tt: #1c2228; }
   .xa-gold { --t1: #ffe07a; --t2: #b8860f; --tt: #2b1f02; }
-  .xa-platinum { --t1: #e6f4ff; --t2: #7da3c6; --tt: #0f1d2a; }
-  .xa-hero { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px 24px; padding: 20px 22px; border-radius: 18px;
-    color: var(--xa-text); background: radial-gradient(120% 160% at 0% 0%, rgba(111,209,79,0.22), transparent 55%), linear-gradient(160deg, #13201a, var(--xa-bg));
-    border: 1px solid var(--xa-line); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+  .xa-platinum { --t1: #f3f0ff; --t2: #9d94c2; --tt: #1d1830; }
+  .xa-diamond { --t1: #f4feff; --t2: #56c6de; --tt: #062a33; }
+  .xa-hero { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px 24px; padding: 18px 20px; border-radius: 14px;
+    color: var(--xa-text); background: var(--xa-bg); border: 1px solid var(--xa-line); }
+  :root:not([data-sl-theme="dark"]) .xa-hero, :root:not([data-sl-theme="dark"]) .xa-sec { box-shadow: 0 1px 2px rgba(31, 90, 58, 0.07); }
   .xa-ring { position: relative; width: 116px; height: 116px; }
   .xa-ring svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
-  .xa-ring .r-bg { fill: none; stroke: rgba(255,255,255,0.09); stroke-width: 9; }
-  .xa-ring .r-fg { fill: none; stroke: var(--xa-acc); stroke-width: 9; stroke-linecap: round; filter: drop-shadow(0 0 5px rgba(111,209,79,0.55)); }
+  .xa-ring .r-bg { fill: none; stroke: var(--xa-track); stroke-width: 9; }
+  .xa-ring .r-fg { fill: none; stroke: var(--xa-fill); stroke-width: 9; stroke-linecap: round; }
   .xa-ring-txt { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
   .xa-ring-txt b { font: 800 30px/1 'Inter', sans-serif; letter-spacing: -0.02em; }
   .xa-ring-txt b small { font-size: 15px; font-weight: 700; margin-left: 1px; }
@@ -1234,72 +1239,77 @@
   .xa-hero-main { min-width: 0; }
   .xa-kicker { margin: 0 0 2px; font: 600 11px/1.2 'JetBrains Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--xa-acc); }
   .xa-hero-main h2 { margin: 0 0 8px; font: 800 24px/1.15 'Inter', sans-serif; letter-spacing: -0.01em; color: var(--xa-text); }
-  .xa-score { display: flex; align-items: baseline; gap: 7px; margin: 0 0 10px; font: 500 13px 'Inter', sans-serif; color: var(--xa-muted); }
+  .xa-score { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px; margin: 0 0 10px; font: 500 13px 'Inter', sans-serif; color: var(--xa-muted); }
   .xa-score b { font: 800 22px/1 'Inter', sans-serif; color: var(--xa-text); }
-  .xa-g { align-self: center; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--xa-acc); color: #0b1a0e; font: 800 12px/1 'Inter', sans-serif; }
   .xa-tiers { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 10px; padding: 0; list-style: none; }
   .xa-tiers li { display: inline-flex; align-items: center; gap: 4px; font: 500 12.5px 'Inter', sans-serif; color: var(--xa-muted); }
   .xa-tiers li b { font-weight: 800; font-size: 15px; color: var(--xa-text); }
-  .xa-tiers li.xa-none { opacity: 0.55; }
-  .xa-cup { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(145deg, var(--t1), var(--t2)); color: var(--tt); box-shadow: inset 0 1px 0 rgba(255,255,255,0.45); }
-  .xa-cup svg, .xa-tro svg { width: 15px; height: 15px; display: block; }
+  .xa-tiers li.xa-none { opacity: 0.5; }
+  .xa-cup { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(145deg, var(--t1), var(--t2)); color: var(--tt); box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 0 0 1px rgba(0,0,0,0.08); }
+  .xa-cup svg { width: 15px; height: 15px; display: block; }
+  .xa-cup.s { width: 18px; height: 18px; }
+  .xa-cup.s svg { width: 12px; height: 12px; }
   .xa-next { margin: 0; font: 400 13.5px/1.5 'Inter', sans-serif; color: var(--xa-muted); }
   .xa-next b { color: var(--xa-text); font-weight: 600; }
-  .xa-latest { display: flex; align-items: center; gap: 12px; max-width: 260px; padding: 10px 14px 10px 10px; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid var(--xa-line); }
+  .xa-latest { display: flex; align-items: center; gap: 12px; max-width: 260px; padding: 10px 14px 10px 10px; border-radius: 12px; background: var(--xa-card); border: 1px solid var(--xa-line); }
   .xa-latest > span:last-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .xa-latest small { font: 600 10.5px 'JetBrains Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--xa-muted); }
   .xa-latest strong { font: 700 14.5px/1.25 'Inter', sans-serif; color: var(--xa-text); }
-  .xa-latest em { font: 600 12px 'Inter', sans-serif; font-style: normal; color: var(--t1); }
+  .xa-latest em { display: inline-flex; align-items: center; gap: 5px; font: 600 12px 'Inter', sans-serif; font-style: normal; color: var(--xa-muted); }
   .xa-stats { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 0; padding: 0; list-style: none; }
-  .xa-stats li { display: inline-flex; align-items: baseline; gap: 5px; padding: 5px 11px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid var(--xa-line); font: 500 12px 'Inter', sans-serif; color: var(--xa-muted); }
+  .xa-stats li { display: inline-flex; align-items: baseline; gap: 5px; padding: 5px 11px; border-radius: 999px; background: var(--xa-card); border: 1px solid var(--xa-line); font: 500 12px 'Inter', sans-serif; color: var(--xa-muted); }
   .xa-stats li b { font-weight: 700; color: var(--xa-text); }
-  .xa-groups { display: flex; flex-direction: column; gap: 14px; }
-  .xa-sec { padding: 16px; border-radius: 18px; background: var(--xa-bg); border: 1px solid var(--xa-line); color: var(--xa-text); }
-  .xa-sec-head { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
-  .xa-sec-ic { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; background: rgba(111,209,79,0.14); color: var(--xa-acc); }
-  .xa-sec-ic svg { width: 19px; height: 19px; }
+  .xa-groups { display: flex; flex-direction: column; gap: 8px; }
+  /* each kind of achievement is a box that opens and closes exactly like the checklist's filter boxes (.fsec) */
+  .xa-sec { border-radius: 14px; background: var(--xa-bg); border: 1px solid var(--xa-line); color: var(--xa-text); }
+  .xa-sec > summary { list-style: none; display: flex; align-items: center; gap: 10px; padding: 8px 16px; cursor: pointer; font: 600 15px 'Inter', sans-serif; color: var(--text); min-height: 42px; border-radius: 14px; }
+  .xa-sec > summary::-webkit-details-marker { display: none; }
+  .xa-sec > summary:hover { background: rgba(127,199,106,0.08); }
+  .xa-sec > summary:focus-visible { outline: 2px solid var(--focus-ring, #58b351); outline-offset: 2px; }
+  .xa-sec-ic { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: rgba(88,179,81,0.16); color: var(--xa-acc); }
+  .xa-sec-ic svg { width: 16px; height: 16px; }
   .xa-sec-t { flex: 1; min-width: 0; }
-  .xa-sec-t h3 { margin: 0; font: 800 17px/1.2 'Inter', sans-serif; color: var(--xa-text); }
-  .xa-sec-t p { margin: 2px 0 0; font: 400 12.5px/1.4 'Inter', sans-serif; color: var(--xa-muted); }
-  .xa-sec-n { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; font: 500 12px 'JetBrains Mono', monospace; color: var(--xa-muted); }
-  .xa-sec-n b { color: var(--xa-text); font-size: 14px; }
-  .xa-sec-n > i { display: block; width: 70px; height: 4px; border-radius: 4px; background: rgba(255,255,255,0.1); overflow: hidden; }
-  .xa-sec-n > i > i { display: block; height: 100%; background: var(--xa-acc); }
+  .xa-sec-cups { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 8px; }
+  .xa-sec-cups > span { display: inline-flex; align-items: center; gap: 3px; font: 700 12px 'Inter', sans-serif; color: var(--xa-text); }
+  .xa-sec-n { flex: none; font: 700 11.5px 'Inter', sans-serif; padding: 2px 9px; border-radius: 999px; background: #58b351; color: #fff; white-space: nowrap; }
+  .xa-sec-n.none { background: var(--xa-card2); color: var(--xa-muted); }
+  .xa-arrow { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s ease; opacity: .75; }
+  .xa-sec[open] .xa-arrow { transform: rotate(180deg); }
+  .xa-sec-body { padding: 2px 16px 14px; }
+  .xa-sec-blurb { margin: 2px 0 10px; font: 400 13px/1.4 'Inter', sans-serif; color: var(--xa-muted); }
   .xa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; }
   .xa-tile { position: relative; display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 12px; background: var(--xa-card); border: 1px solid var(--xa-line); min-width: 0; }
-  .xa-tile.won { background: linear-gradient(150deg, var(--xa-card2), var(--xa-card)); }
-  .xa-tile.next { border-color: rgba(111,209,79,0.65); box-shadow: 0 0 0 1px rgba(111,209,79,0.25), 0 0 18px rgba(111,209,79,0.12); }
-  .xa-tile.newest { border-color: color-mix(in srgb, var(--t1) 70%, transparent); }
-  .xa-art { position: relative; flex: none; width: 64px; height: 64px; padding: 3px; border-radius: 13px; background: linear-gradient(145deg, var(--t1), var(--t2)); box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
-  .xa-art-ic { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 10px; color: var(--t1);
-    background: radial-gradient(circle at 32% 26%, #2e4c38, #0f1a14 75%); }
-  .xa-art-ic svg { width: 28px; height: 28px; stroke-width: 2.2; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--t1) 45%, transparent)); }
+  .xa-tile.won { background: var(--xa-card2); }
+  .xa-tile.next { border-color: var(--xa-fill); box-shadow: 0 0 0 1px var(--xa-fill); }
+  .xa-tile.newest { border-color: var(--t2); }
+  .xa-art { position: relative; flex: none; width: 64px; height: 64px; padding: 3px; border-radius: 13px; background: linear-gradient(145deg, var(--t1), var(--t2)); box-shadow: 0 2px 6px rgba(20,50,30,0.25); box-sizing: border-box; }
+  .xa-art.xa-diamond:not(.xa-off) { box-shadow: 0 0 0 1px rgba(86,198,222,0.5), 0 0 14px rgba(120,220,240,0.55); }
+  .xa-art-ic { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 10px; color: var(--t1); background: var(--xa-art); }
+  .xa-art-ic svg { width: 28px; height: 28px; stroke-width: 2.2; }
   .xa-art-n { position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); padding: 2px 6px; border-radius: 999px; background: linear-gradient(145deg, var(--t1), var(--t2));
-    color: var(--tt); font: 800 10px/1.2 'Inter', sans-serif; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
-  .xa-art.xa-off { filter: grayscale(1) brightness(0.62); }
-  .xa-lock { position: absolute; top: -6px; right: -6px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #0b120e; color: #c9d4cc; border: 1px solid #3a4a40; }
+    color: var(--tt); font: 800 10px/1.2 'Inter', sans-serif; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+  .xa-art.xa-off { filter: grayscale(1) brightness(0.8); opacity: 0.85; }
+  .xa-lock { position: absolute; top: -6px; right: -6px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--xa-bg); color: var(--xa-muted); border: 1px solid var(--xa-line); }
   .xa-lock svg { width: 12px; height: 12px; }
   .xa-art .ach-fx .fx-clip { border-radius: 10px; }
   .xa-body { flex: 1; min-width: 0; }
-  .xa-flag { float: right; margin: 0 0 4px 8px; padding: 2px 7px; border-radius: 999px; background: var(--xa-acc); color: #0b1a0e; font: 800 9.5px/1.3 'Inter', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
+  .xa-flag { float: right; margin: 0 0 4px 8px; padding: 2px 7px; border-radius: 999px; background: #58b351; color: #fff; font: 800 9.5px/1.3 'Inter', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
   .xa-tile.newest .xa-flag { background: linear-gradient(145deg, var(--t1), var(--t2)); color: var(--tt); }
   .xa-name { margin: 0; font: 700 14.5px/1.25 'Inter', sans-serif; color: var(--xa-text); }
   .xa-note { margin: 3px 0 8px; font: 400 12.5px/1.4 'Inter', sans-serif; color: var(--xa-muted); }
-  .xa-bar { height: 6px; border-radius: 6px; background: rgba(255,255,255,0.09); overflow: hidden; }
-  .xa-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #3fa52f, var(--xa-acc)); }
-  .xa-tile.won .xa-bar i { background: linear-gradient(90deg, var(--t2), var(--t1)); }
+  .xa-bar { height: 6px; border-radius: 6px; background: var(--xa-track); overflow: hidden; }
+  .xa-bar i { display: block; height: 100%; border-radius: inherit; background: var(--xa-fill); }
   .xa-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 7px; font: 600 11.5px 'Inter', sans-serif; color: var(--xa-muted); }
-  .xa-tro { display: inline-flex; align-items: center; gap: 3px; color: var(--t1); }
+  .xa-tro { display: inline-flex; align-items: center; gap: 4px; color: var(--xa-text); }
   .xa-pts { color: var(--xa-text); }
   .xa-rare { font-weight: 500; }
   .xa-count { margin-left: auto; font: 500 11.5px 'JetBrains Mono', monospace; }
   .xa-tile.won .xa-count { color: var(--xa-acc); font-weight: 700; }
-  .xa-tile.locked .xa-name { color: #c4d0c7; }
-  .xa-tile.locked .xa-tro { color: var(--xa-muted); }
+  .xa-tile.locked .xa-tro .xa-cup { filter: grayscale(1); opacity: 0.6; }
   .xa-tile.fresh .xa-art, .xa-latest.fresh .xa-art { animation: ach-medal-in 0.5s cubic-bezier(0.2,0.9,0.3,1.25) both; animation-delay: calc(var(--fx-d, 0ms) + var(--fx-i, 0) * 140ms); }
   @media (hover: hover) and (pointer: fine) {
     .xa-tile { transition: transform .18s ease-out, box-shadow .18s ease-out, border-color .18s ease; }
-    .xa-tile:hover { z-index: 2; transform: translateY(-3px) scale(1.03); box-shadow: 0 10px 24px rgba(0,0,0,0.4); border-color: color-mix(in srgb, var(--t1) 55%, transparent); }
+    .xa-tile:hover { z-index: 2; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(20,50,30,0.18); border-color: var(--xa-fill); }
   }
   @media (max-width: 700px) {
     .xa-hero { grid-template-columns: auto 1fr; padding: 16px 14px; }
@@ -1307,24 +1317,27 @@
     .xa-ring { width: 92px; height: 92px; }
     .xa-ring-txt b { font-size: 24px; }
     .xa-hero-main h2 { font-size: 20px; }
-    .xa-sec { padding: 12px; }
+    .xa-sec > summary { padding: 9px 14px; flex-wrap: wrap; row-gap: 4px; }
+    .xa-sec-cups { order: 5; flex-basis: 100%; justify-content: flex-start; padding-left: 38px; }
+    .xa-sec-cups:empty { display: none; }
+    .xa-sec-body { padding: 2px 12px 12px; }
     .xa-grid { grid-template-columns: 1fr; }
   }
   @media (max-width: 380px) { .xa-hero { grid-template-columns: 1fr; justify-items: start; } }
-  /* the "Achievement unlocked" pop-up: a round trophy pops in at the bottom of the screen, the bar
-     opens out of it, then the words slide in - and it all slips away after a few seconds */
+  /* the "Achievement unlocked" pop-up, in SnakeList's deep green: a round trophy pops in at the
+     bottom of the screen, the bar opens out of it, then the words slide in - and it all slips away */
   #ach-toast-region { top: auto; right: auto; left: 50%; bottom: 22px; transform: translateX(-50%); align-items: center; max-width: calc(100vw - 24px); z-index: 9400; }
   .xa-toast-wrap { animation: xa-up 0.35s cubic-bezier(0.2,0.9,0.3,1) both, xa-out 0.4s 4.6s ease-in forwards; }
   .xa-toast { display: flex; align-items: center; gap: 12px; height: 58px; padding: 0 24px 0 7px; border-radius: 999px; max-width: min(460px, calc(100vw - 24px));
-    background: linear-gradient(160deg, #1c2b22, #0d1511); color: #fff; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 12px 34px rgba(0,0,0,0.45);
+    background: #1f5a3a; color: #eef6ee; border: 1px solid #37855f; box-shadow: 0 10px 26px rgba(14,47,30,0.35);
     animation: xa-open 0.55s 0.3s cubic-bezier(0.3,0.8,0.3,1) both; }
   .xa-toast-ic { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(145deg, var(--t1), var(--t2)); color: var(--tt);
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.08), 0 0 16px color-mix(in srgb, var(--t1) 60%, transparent); animation: xa-pop 0.45s cubic-bezier(0.2,0.9,0.3,1.4) both; }
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.1); animation: xa-pop 0.45s cubic-bezier(0.2,0.9,0.3,1.4) both; }
   .xa-toast-ic svg { width: 24px; height: 24px; }
   .xa-toast-txt { display: flex; flex-direction: column; min-width: 0; animation: xa-txt 0.4s 0.65s ease-out both; }
-  .xa-toast-txt small { font: 600 11px 'Inter', sans-serif; color: #b9cbbd; }
-  .xa-toast-txt b { font: 700 14.5px/1.3 'Inter', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .xa-toast-g { color: var(--t1); }
+  .xa-toast-txt small { font: 600 11px 'Inter', sans-serif; color: #a8c9b4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .xa-toast-txt small b { font: inherit; color: #9be07c; }
+  .xa-toast-txt > b { font: 700 14.5px/1.3 'Inter', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   @keyframes xa-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
   @keyframes xa-out { to { transform: translateY(30px); opacity: 0; } }
   @keyframes xa-open { from { clip-path: inset(0 calc(100% - 58px) 0 0 round 999px); } to { clip-path: inset(0 0 0 0 round 999px); } }
@@ -1333,8 +1346,11 @@
   @media (prefers-reduced-motion: reduce) {
     .xa-toast-wrap { animation: xa-out 0.01s 4.6s forwards; }
     .xa-toast, .xa-toast-ic, .xa-toast-txt, .xa-tile.fresh .xa-art, .xa-latest.fresh .xa-art { animation: none; }
+    .xa-arrow { transition: none; }
     .xa-tile:hover { transform: none; }
   }
+  /* My Sightings tab: the SnakeList snake S from the logo, in the tab's own colour */
+  #tab-sightings .snake-s { --sl-snake: currentColor; --sl-pat: rgba(0,0,0,0.22); height: 15px; width: 15px; margin: 0; }
   .country-opt span { white-space: nowrap; flex: none; }
   .globe-stage.full { position: fixed; inset: 0; z-index: 300; margin: 0;
     border: none; border-radius: 0; overflow-y: auto; }
@@ -2087,7 +2103,7 @@
 
     <div class="tabs">
       <button class="tab-btn active" id="tab-guide" type="button"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg> Species Checklist</button>
-      <button class="tab-btn" id="tab-sightings" type="button"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg> My Sightings <span class="tab-n"><span class="sr-only">(</span>0<span class="sr-only">)</span></span></button>
+      <button class="tab-btn" id="tab-sightings" type="button"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" width="15" height="15" aria-hidden="true"><use href="#mark-snake"></use></svg> My Sightings <span class="tab-n"><span class="sr-only">(</span>0<span class="sr-only">)</span></span></button>
       <button class="tab-btn" id="tab-wish" type="button"><span class="tab-star" aria-hidden="true">&#9733;</span> Want to see <span class="tab-n"><span class="sr-only">(</span>0<span class="sr-only">)</span></span></button>
       <button class="tab-btn" id="tab-follow" type="button"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg> Following <span class="tab-n"><span class="sr-only">(</span>0<span class="sr-only">)</span></span></button>
       <button class="tab-btn" id="tab-ach" type="button"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"></path><path d="M7 6H4.5A2.5 2.5 0 0 0 7 10.5M17 6h2.5A2.5 2.5 0 0 1 17 10.5"></path><path d="M12 14v3M9 20h6M10 17h4"></path></svg> Achievements</button>
@@ -8678,14 +8694,23 @@
   // v4.81: trophy tiers, points and rarity, like a games console's achievements. Read off each
   // badge's goal (nothing new is stored): the first steps are bronze, the bigger ones silver and
   // gold, the whole checklist platinum. Points add up to a SnakeList score (like a Gamerscore).
-  const achTrophy = (b) => b.statKey === "quizWrong" || b.goal < 10 ? "bronze" : b.goal < 100 ? "silver" : b.goal < 4000 ? "gold" : "platinum";
+  // v4.86: five tiers, best first: diamond (the whole checklist - the top one in each section),
+  // platinum (1,000 and up), gold (100 and up), silver (10 and up), bronze (the first steps).
+  const achTrophy = (b) => b.statKey === "quizWrong" || b.goal < 10 ? "bronze" : b.goal < 100 ? "silver" : b.goal < 1000 ? "gold" : b.goal < TOTAL ? "platinum" : "diamond";
   const ACH_TIER = {
     bronze: { name: "Bronze", pts: 15, rare: "Common" },
     silver: { name: "Silver", pts: 30, rare: "Uncommon" },
     gold: { name: "Gold", pts: 90, rare: "Rare" },
     platinum: { name: "Platinum", pts: 180, rare: "Ultra rare" },
+    diamond: { name: "Diamond", pts: 300, rare: "Legendary" },
   };
+  const ACH_TIER_ORDER = ["diamond", "platinum", "gold", "silver", "bronze"];
+  const achPts = (n) => n.toLocaleString() + (n === 1 ? " point" : " points");
   const ACH_CUP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v2h3.2v2.6A4.4 4.4 0 0 1 16 12a5 5 0 0 1-3 2.6V17h3.2v3H7.8v-3H11v-2.4A5 5 0 0 1 8 12a4.4 4.4 0 0 1-4.2-4.4V5H7V3Zm-1.4 4v.6c0 1 .6 1.9 1.5 2.3A9 9 0 0 1 7 7H5.6Zm11.4 0a9 9 0 0 1-.1 2.9 2.5 2.5 0 0 0 1.5-2.3V7H17Z" fill="currentColor"></path></svg>';
+  // the diamond tier's trophy is a cut gem instead of a cup
+  const ACH_GEM = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5h10.8L22 9.2 12 21 2 9.2Z" fill="currentColor"></path><path d="M2.6 9.2h18.8M9.3 3.8 7.6 9.2 12 20.4l4.4-11.2-1.7-5.4M7.6 9.2 12 3.8l4.4 5.4" fill="none" stroke="#fff" stroke-opacity="0.6" stroke-width="1.1" stroke-linejoin="round"></path></svg>';
+  const achCup = (t) => t === "diamond" ? ACH_GEM : ACH_CUP;
+  const achCoin = (t, small) => '<span class="xa-cup' + (small ? " s" : "") + " xa-" + t + '" aria-hidden="true">' + achCup(t) + "</span>";
   const ACH_LOCK = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.2" fill="currentColor"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2.2"></path></svg>';
   function toastBadge(b) {
     const region = document.getElementById("ach-toast-region");
@@ -8694,8 +8719,8 @@
     const el = document.createElement("div");
     // the console look: a round trophy pops in, the bar opens out of it, then the words slide in
     el.className = "xa-toast-wrap";
-    el.innerHTML = '<div class="xa-toast xa-' + t + '"><span class="xa-toast-ic">' + ACH_CUP + "</span>" +
-      '<span class="xa-toast-txt"><small>Achievement unlocked</small><b><span class="xa-toast-g">' + T.pts + ' G</span> &ndash; ' + achEsc(b.name) + "</b></span></div>";
+    el.innerHTML = '<div class="xa-toast xa-' + t + '"><span class="xa-toast-ic">' + achCup(t) + "</span>" +
+      '<span class="xa-toast-txt"><small>Achievement unlocked &middot; <b>' + achPts(T.pts) + "</b></small><b>" + achEsc(b.name) + "</b></span></div>";
     region.appendChild(el);
     setTimeout(() => el.remove(), 5200);
     // the Achievements tab shows the newest win with a ribbon
@@ -8773,9 +8798,9 @@
       const left = next.goal - (s[next.statKey] || 0);
       nextLine += "Next up: <b>" + achEsc(next.name) + "</b> &ndash; " + left.toLocaleString() + " more " + ACH_UNIT[next.statKey][left === 1 ? 0 : 1] + " to go.";
     } else nextLine = "You have unlocked every single achievement. Legendary!";
-    const tiers = ["platinum", "gold", "silver", "bronze"].map((t) => {
+    const tiers = ACH_TIER_ORDER.map((t) => {
       const all = BADGES.filter((b) => achTrophy(b) === t), w = all.filter(isWon).length;
-      return '<li class="xa-' + t + (w ? "" : " xa-none") + '" title="' + ACH_TIER[t].name + " trophies: " + w + " of " + all.length + '"><span class="xa-cup">' + ACH_CUP + "</span><b>" + w + "</b><span>/" + all.length + "</span>" +
+      return '<li class="xa-' + t + (w ? "" : " xa-none") + '" title="' + ACH_TIER[t].name + " trophies: " + w + " of " + all.length + '">' + achCoin(t) + "<b>" + w + "</b><span>/" + all.length + "</span>" +
         '<span class="sr-only"> ' + ACH_TIER[t].name + "</span></li>";
     }).join("");
     document.getElementById("ach-lead").innerHTML =
@@ -8785,11 +8810,11 @@
           (won.length ? '<circle class="r-fg" cx="50" cy="50" r="42" stroke-dasharray="' + (C * pct).toFixed(1) + " " + C.toFixed(1) + '"></circle>' : "") + "</svg>" +
           '<span class="xa-ring-txt" aria-hidden="true"><b>' + Math.round(pct * 100) + "<small>%</small></b><span>" + won.length + " / " + BADGES.length + "</span></span></div>" +
         '<div class="xa-hero-main"><p class="xa-kicker">SnakeList achievements</p><h2>Trophy room</h2>' +
-          '<p class="xa-score" title="SnakeList score: points from every achievement unlocked"><span class="xa-g" aria-hidden="true">G</span><b>' + score.toLocaleString() + "</b><span>/ " + maxScore.toLocaleString() + " points</span></p>" +
+          '<p class="xa-score" title="Every achievement you unlock earns points - harder trophies earn more"><b>' + score.toLocaleString() + "</b><span>/ " + maxScore.toLocaleString() + " points</span></p>" +
           '<ul class="xa-tiers" aria-label="Trophies by tier">' + tiers + "</ul>" +
           '<p class="xa-next">' + nextLine + "</p></div>" +
         (newest ? '<div class="xa-latest' + (fresh[newest.name] ? " fresh" : "") + '"' + achFreshAttr(fresh[newest.name]) + ">" + achArt(newest, true, fresh[newest.name]) +
-          "<span><small>Latest unlock</small><strong>" + achEsc(newest.name) + '</strong><em class="xa-' + achTrophy(newest) + '">' + ACH_TIER[achTrophy(newest)].name + " &middot; " + ACH_TIER[achTrophy(newest)].pts + " G</em></span></div>" : "") +
+          "<span><small>Latest unlock</small><strong>" + achEsc(newest.name) + '</strong><em>' + achCoin(achTrophy(newest), true) + ACH_TIER[achTrophy(newest)].name + " &middot; " + achPts(ACH_TIER[achTrophy(newest)].pts) + "</em></span></div>" : "") +
         '<ul class="xa-stats">' + stat(s.seen, "seen") + stat(s.dated, "dated") + stat(s.photographed, "photos") + stat(s.fullyLogged, "full records") + stat(s.quizCorrect, "quiz right") + "</ul>" +
       "</div>";
     document.getElementById("ach-grid").className = "ach-groups xa-groups";
@@ -8799,10 +8824,19 @@
       // the first badge not yet won in each ladder is the one to aim for
       const nextOf = {};
       list.forEach((b) => { if (!isWon(b) && !nextOf[b.statKey]) nextOf[b.statKey] = b; });
-      return '<section class="xa-sec" aria-label="' + g.title + ' achievements">' +
-        '<div class="xa-sec-head"><span class="xa-sec-ic" aria-hidden="true">' + ICON[g.icon] + '</span>' +
-          '<div class="xa-sec-t"><h3>' + g.title + "</h3><p>" + g.blurb + "</p></div>" +
-          '<span class="xa-sec-n' + (nWon ? "" : " none") + '"><span><b>' + nWon + "</b> / " + list.length + '</span><i><i style="width:' + Math.round(nWon / list.length * 100) + '%"></i></i></span></div>' +
+      // the trophies already won in this section, best tier first
+      const cups = ACH_TIER_ORDER.map((t) => {
+        const w = list.filter((b) => isWon(b) && achTrophy(b) === t).length;
+        return w ? '<span title="' + ACH_TIER[t].name + ": " + w + '">' + achCoin(t, true) + w + '<span class="sr-only"> ' + ACH_TIER[t].name + "</span></span>" : "";
+      }).join("");
+      // a box that opens and closes like the checklist's filter boxes
+      return '<details class="xa-sec" data-sec="' + g.keys[0] + '"><summary>' +
+          '<span class="xa-sec-ic" aria-hidden="true">' + ICON[g.icon] + "</span>" +
+          '<span class="xa-sec-t">' + g.title + "</span>" +
+          '<span class="xa-sec-cups">' + cups + "</span>" +
+          '<span class="xa-sec-n' + (nWon ? "" : " none") + '" title="' + nWon + " of " + list.length + ' unlocked">' + nWon + " / " + list.length + "</span>" +
+          '<svg class="xa-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>' +
+        '<div class="xa-sec-body"><p class="xa-sec-blurb">' + g.blurb + "</p>" +
         '<div class="xa-grid">' + list.map((b) => {
           const have = Math.min(s[b.statKey] || 0, b.goal), got = have >= b.goal;
           const isNext = !got && nextOf[b.statKey] === b, isNew = got && newest === b;
@@ -8815,15 +8849,31 @@
               '<h4 class="xa-name">' + b.name + "</h4>" +
               '<p class="xa-note">' + b.note + "</p>" +
               '<div class="xa-bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + b.goal + '" aria-valuenow="' + have + '" aria-label="' + achEsc(b.name) + '"><i style="width:' + (have && p < 3 ? 3 : p) + '%"></i></div>' +
-              '<div class="xa-foot"><span class="xa-tro">' + ACH_CUP + T.name + '</span><span class="xa-pts">' + T.pts + ' G</span><span class="xa-rare">' + T.rare + "</span>" +
+              '<div class="xa-foot"><span class="xa-tro">' + achCoin(t, true) + T.name + '</span><span class="xa-pts">' + achPts(T.pts) + '</span><span class="xa-rare">' + T.rare + "</span>" +
                 '<span class="xa-count">' + (got ? "Unlocked" : have.toLocaleString() + " / " + b.goal.toLocaleString()) + "</span></div>" +
             "</div></div>";
-        }).join("") + "</div></section>";
+        }).join("") + "</div></div></details>";
     }).join("");
     // refresh() can re-render this several times a second; leaving identical markup alone
     // keeps a running unlock effect from restarting
     const gridEl = document.getElementById("ach-grid");
-    if (gridEl._achHtml !== gridHtml) { gridEl.innerHTML = gridHtml; gridEl._achHtml = gridHtml; }
+    if (gridEl._achHtml !== gridHtml) {
+      gridEl.innerHTML = gridHtml; gridEl._achHtml = gridHtml;
+      // reopen the boxes that were open last time (the Sightings box on a first visit)
+      let open = null;
+      try { open = JSON.parse(localStorage.getItem("sl-ach-open")); } catch (err) {}
+      if (!Array.isArray(open)) open = ["seen"];
+      gridEl.querySelectorAll("details.xa-sec").forEach((d) => { d.open = open.indexOf(d.dataset.sec) >= 0; });
+    }
+    if (!gridEl._achToggle) {
+      gridEl._achToggle = true;
+      // "toggle" doesn't bubble, so listen while it travels down
+      gridEl.addEventListener("toggle", (e) => {
+        if (!e.target.matches || !e.target.matches("details.xa-sec")) return;
+        const open = [].map.call(gridEl.querySelectorAll("details.xa-sec[open]"), (d) => d.dataset.sec);
+        try { localStorage.setItem("sl-ach-open", JSON.stringify(open)); } catch (err) {}
+      }, true);
+    }
   }
 
   // Chrome only — deliberately touches nothing inside the sync region, so it is safe to
@@ -8831,10 +8881,12 @@
   // the tabs' counts: a small quiet badge after the label (read out as "(3)" to screen readers)
   function tabN(n) { return ' <span class="tab-n"><span class="sr-only">(</span>' + n + '<span class="sr-only">)</span></span>'; }
   var TAB_STAR = '<span class="tab-star" aria-hidden="true">&#9733;</span>';
+  // My Sightings tab: the SnakeList snake S from the logo (a function, so it's ready however early it's asked for)
+  function sightIcon() { return '<svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" width="15" height="15" aria-hidden="true"><use href="#mark-snake"></use></svg>'; }
   function refreshCounts() {
     const seen = cards.filter((c) => c.classList.contains("done")).length;
     const t = document.getElementById("tab-sightings");
-    if (t) t.innerHTML = ICON.compass + " My Sightings" + tabN(seen);
+    if (t) t.innerHTML = sightIcon() + " My Sightings" + tabN(seen);
     const w = document.getElementById("tab-wish");
     if (w) w.innerHTML = TAB_STAR + " Want to see" + tabN(wishCount());
     const fl = document.getElementById("tab-follow");
@@ -9106,7 +9158,7 @@
     const seen = cards.filter((c) => c.classList.contains("done")).length;
 
     document.getElementById("tab-guide").innerHTML = ICON.book + " Species Checklist";
-    document.getElementById("tab-sightings").innerHTML = ICON.compass + " My Sightings" + tabN(seen);
+    document.getElementById("tab-sightings").innerHTML = sightIcon() + " My Sightings" + tabN(seen);
     document.getElementById("tab-guide").classList.toggle("active", tab === "guide");
     document.getElementById("tab-sightings").classList.toggle("active", tab === "sightings");
     document.getElementById("tab-wish").innerHTML = TAB_STAR + " Want to see" + tabN(wishCount());
