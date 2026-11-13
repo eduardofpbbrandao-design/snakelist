@@ -1774,6 +1774,15 @@
   .hero-mark { font-family: 'EB Garamond', serif; font-weight: 600; letter-spacing: 0.010em; color: #9fe08a; }
   .hero-mark em { font-style: normal; font-weight: 500; }
   .hero-mark .snake-s { height: 0.71em; }
+  /* v4.81: the hero shows the same SnakeList wordmark as the header (darker green + the tick), not the pale one */
+  .hero-title.hero-wm { display: inline-flex; align-items: baseline; --mark-grad: radial-gradient(circle at 30% 40%, #96dd78 0%, #6fc255 0%, #57ab45 32%, #38802a 100%);
+    --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.5)) drop-shadow(0 4px 14px rgba(0,0,0,0.35)); filter: none; }
+  .hero-title.hero-wm .sl-titletext .snake-s { height: 0.71em; }
+  .hero-title.hero-wm .sl-tick { height: 0.70em; width: auto; margin-left: 0.071em; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4)); }
+  .hero-sp { position: absolute; left: 16px; bottom: 14px; z-index: 2; font: 600 13px/1.3 'Inter', sans-serif; color: #e9f6e2; text-decoration: none;
+    padding: 6px 11px; border-radius: 999px; background: rgba(6,20,11,0.45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+  .hero-sp i { font-weight: 400; opacity: 0.85; margin-left: 4px; }
+  .hero-sp:hover, .hero-sp:focus-visible { background: rgba(6,20,11,0.7); text-decoration: underline; }
   @supports ((-webkit-background-clip: text) or (background-clip: text)) {
     .hero-mark { background-image: radial-gradient(circle at 30% 40%, #b4ec98 0%, #8fd873 30%, #6cc052 62%, #4f9e3d 100%);
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
@@ -1813,6 +1822,7 @@
     <p class="hero-title"><span class="sr-only">SnakeList</span><span class="hero-mark" aria-hidden="true"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span></p>
     <p class="hero-sub">All <span data-sl-total>4,205</span> of the world's snake species in one place &mdash; photos, range maps and a life list to tick off the ones you find.</p>
   </div>
+  <a class="hero-sp" id="hero-sp" href="species/rough-greensnake-opheodrys-aestivus" title="Open its SnakeList page">Rough Green Snake <i>Opheodrys aestivus</i></a>
   <button class="hero-cue" type="button" id="hero-cue" aria-label="Scroll to continue to SnakeList"><span aria-hidden="true">Scroll to continue</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
 </section>
 <script>
@@ -1846,11 +1856,20 @@
     }
     function onHero() { var h = heroH(); return h && window.scrollY < h - 4; }
     function atTop() { var h = heroH(); return h && Math.abs(window.scrollY - h) <= 4; }
+    // v4.81: one way only - once you're in SnakeList the photo is gone (you can't scroll back up to it)
+    var entered = false;
+    function enter() {
+      if (entered || hero.hidden) return; entered = true; gliding = true;
+      var calm = calmQ && calmQ.matches, done = function () { hero.hidden = true; window.scrollTo(0, 0); gliding = false; try { sessionStorage.setItem("sl-hero-done", "1"); } catch (e) {} };
+      if (calm) { done(); return; }
+      window.scrollTo({ top: heroH(), behavior: "smooth" });
+      var t0 = performance.now(), wait = function () { if (Math.abs(window.scrollY - heroH()) <= 2 || performance.now() - t0 > 1400) done(); else requestAnimationFrame(wait); };
+      requestAnimationFrame(wait);
+    }
     function want(dir, e) {
       if (blocked()) return;
-      if (gliding) { if (e && e.cancelable) e.preventDefault(); return; }
-      if (dir > 0 && onHero()) { if (e && e.cancelable) e.preventDefault(); glide(heroH()); }
-      else if (dir < 0 && (atTop() || (onHero() && window.scrollY > 0))) { if (e && e.cancelable) e.preventDefault(); glide(0); }
+      if (gliding || (dir < 0 && onHero())) { if (e && e.cancelable) e.preventDefault(); return; }
+      if (dir > 0 && onHero()) { if (e && e.cancelable) e.preventDefault(); enter(); }
     }
     window.addEventListener("wheel", function (e) { if (Math.abs(e.deltaY) < 2 || e.ctrlKey) return; if (e.target.closest && e.target.closest(".sl-dd-list, .lang-menu, [role=dialog]")) return; want(e.deltaY > 0 ? 1 : -1, e); }, { passive: false });
     var ty = null;
@@ -1860,14 +1879,17 @@
       var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
       var k = e.key; if (k === "ArrowDown" || k === "PageDown" || (k === " " && !e.shiftKey)) want(1, e); else if (k === "ArrowUp" || k === "PageUp" || (k === " " && e.shiftKey)) want(-1, e);
     });
-    document.getElementById("hero-cue").addEventListener("click", function () { glide(heroH()); });
+    document.getElementById("hero-cue").addEventListener("click", enter);
+    hero.addEventListener("click", function (e) { if (e.target.closest("a, button")) return; if (!blocked()) enter(); }); // clicking the photo does the same
+    hero.style.cursor = "pointer";
+    var sp = document.getElementById("hero-sp"); if (sp && !(location.protocol === "https:" && /snakelist\.com$/.test(location.hostname))) sp.href += ".html";
     // never left resting half on the photo: when scrolling stops inside it, settle on the photo or on SnakeList
     var lastY = window.scrollY, dirY = 0, restT = 0;
     window.addEventListener("scroll", function () {
       var y = window.scrollY; if (y !== lastY) dirY = y > lastY ? 1 : -1; lastY = y;
       clearTimeout(restT); restT = setTimeout(function () {
         if (gliding || blocked()) return; var h = heroH(), yy = window.scrollY;
-        if (h && yy > 2 && yy < h - 2) glide(dirY > 0 ? h : 0);
+        if (h && yy > 2 && yy < h - 2) enter();
       }, 160);
     }, { passive: true });
     // the opening is exactly one screen tall, set in pixels (and again only if the width changes - never from vh,
@@ -1880,7 +1902,7 @@
     function wire() {
       var tg = document.getElementById("tab-guide"); if (!tg) return;
       var sync = function () {
-        var on = tg.classList.contains("active"); if (on === !hero.hidden) return;
+        var on = tg.classList.contains("active") && !entered; if (on === !hero.hidden) return;
         // keep the tab row exactly where it was on screen while the hero comes or goes above it
         var tabs = document.querySelector(".tabs"), y0 = tabs ? tabs.getBoundingClientRect().top : 0;
         hero.hidden = !on;
@@ -1889,12 +1911,15 @@
       sync();
       if (window.MutationObserver) new MutationObserver(sync).observe(tg, { attributes: true, attributeFilter: ["class"] });
     }
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
+    function wordmark() { var src = document.querySelector(".sl-header .sl-title"), dst = hero.querySelector(".hero-title");
+      if (src && dst) { dst.innerHTML = '<span class="sr-only">SnakeList</span>' + src.innerHTML; dst.classList.add("hero-wm"); } }
+    try { if (sessionStorage.getItem("sl-hero-done") === "1" && !document.getElementById("intro")) entered = true; } catch (e) {}
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { wordmark(); wire(); }); else { wordmark(); wire(); }
   })();
 </script>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.80</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.81</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-head"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-head)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All <span data-sl-total>4,205</span> snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -19024,6 +19049,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v4.81", d: "2026-11-13", items: ["The opening is now a big photo of a Rough Green Snake: click it or scroll to go into SnakeList.", "Tap the snake's name in the corner of the opening to open its page.", "The opening uses the real SnakeList logo."] },
     { v: "v4.80", d: "2026-11-13", items: ["A new opening: a big snake photo that gently blurs and fades into SnakeList.", "3D snakes: eyes sit properly in the head, and the open mouth shows the palate teeth, the glottis (breathing tube) and the tongue sheath.", "New Anatomy button (on species pages and in 3D): every part labelled - fangs, teeth, glottis, tongue, scales, vent and more.", "New See bite button in 3D: watch the snake bite a see-through arm and how deep the fang goes.", "More realistic 3D trees, rocks and 3D leaves on the ground.", "Map cities are dark green and show their name when you tap them.", "Every dropdown opens as a SnakeList panel; See more buttons instead of little triangles; greener species pages.", "The Speckled Kingsnake photo no longer shows it eating."] },
     { v: "v4.79", d: "2026-11-12", items: ["Three snake photos that had white borders or strips are cropped clean."] },
     { v: "v4.78", d: "2026-11-12", items: ["The opening tick appears more smoothly.", "What's new never shows before the opening has finished.", "Tutorial: bigger boxes, general explanations in the middle of the screen, the highlight ring follows the shape of what it circles (no light corners), and steps for buttons you don't have are skipped.", "Elaphe hodgsoni is now called Hodgson's Ratsnake (it showed a placeholder name)."] },
