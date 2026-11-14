@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Add or replace species photos from a photo-audit batch (a folder with photo_changes.csv).
 
-    python3 tools/import_photo_batch.py BATCH_DIR [--crops crops.json] [--dry-run]
+    python3 tools/import_photo_batch.py BATCH_DIR [--crops crops.json] [--skip "Genus species,..."] [--dry-run]
 
 photo_changes.csv columns: scientific_name, action (add|replace), file, width, height, credit,
 license, license_url, source, reason.
@@ -35,11 +35,13 @@ def who_of(credit):
     m = re.match(r"^\(c\)\s*(.*?),\s*(some|all) rights reserved", c, re.I)
     if m: return m.group(1).strip()
     c = re.sub(r"^\(c\)\s*", "", c)
-    return re.sub(r",?\s*uploaded by .*$", "", c).strip()
+    c = re.sub(r",?\s*uploaded by .*$", "", c)
+    return re.sub(r"\s*\([^)]*(CC|licen|observer|public domain)[^)]*\)\s*$", "", c, flags=re.I).strip()  # "Name (iNaturalist observer, CC0)" -> "Name"
 
 
 def licence(code):
     k = (code or "").strip()
+    if re.match(r"^(cc0|cc-?0)(\s*1\.0)?$", k, re.I): return "CC0"
     return LIC.get(k.lower(), k)
 
 
@@ -72,6 +74,9 @@ def main():
     crops = {}
     if "--crops" in args: crops = json.load(open(args[args.index("--crops") + 1]))
     rows = list(csv.DictReader(open(os.path.join(bdir, "photo_changes.csv"), encoding="utf-8-sig")))
+    if "--skip" in args:  # --skip "Genus species,Genus species": rows left out (e.g. a photo that fails the checks)
+        sk = {x.strip().lower() for x in args[args.index("--skip") + 1].split(",")}
+        rows = [r for r in rows if r["scientific_name"].strip().lower() not in sk]
     app = open(APP, encoding="utf-8").read()
     m = re.search(r'(<script type="application/json" id="photo-index">)(.*?)(</script>)', app, re.S)
     D = json.loads(m.group(2)); items = D["items"]
