@@ -47,11 +47,17 @@ def site_footer(rel, note=""):
 def lic_url(lic):
     l = (lic or "").upper().replace("CC-", "CC ").strip()
     if l == "CC0": return "https://creativecommons.org/publicdomain/zero/1.0/"
-    m = re.match(r"CC ((?:BY)(?:-(?:NC|SA|ND))*)$", l)
-    return "https://creativecommons.org/licenses/%s/4.0/" % m.group(1).lower() if m else ""
+    m = re.match(r"CC ((?:BY)(?:-(?:NC|SA|ND))*)(?: (\d\.\d))?$", l)  # a version ("CC BY-SA 2.0") links to that version's deed
+    return "https://creativecommons.org/licenses/%s/%s/" % (m.group(1).lower(), m.group(2) or "4.0") if m else ""
 def lic_link(lic):
     l = (lic or "").replace("CC-", "CC ").strip(); u = lic_url(l)
     return ('<a href="%s" rel="license noopener">%s</a>' % (u, H.escape(l))) if u else H.escape(l)
+def src_link(p, word):
+    """the link to where a photo came from: its iNaturalist photo, or the source stored with it"""
+    pid = p[4].split(".")[0] if len(p) >= 5 and p[4] else ""
+    if pid.isdigit(): return '<a href="https://www.inaturalist.org/photos/%s" rel="noopener">%s</a>' % (H.escape(pid), word)
+    if len(p) >= 6 and p[5]: return '<a href="%s" rel="noopener">%s</a>' % (H.escape(p[5]), word)
+    return ""
 def an(word):
     """'a' or 'an' before a word (an Inland Taipan, a Boa, an elapid)"""
     w = (word or "").strip().lower()
@@ -516,11 +522,11 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         return (", ".join(L[:-1]) + " and " + L[-1]) if len(L) <= n + 1 else ", ".join(L[:n]) + " and %d more" % (len(L) - n)
     # photos that came with the photographer's name printed on them: SnakeList keeps a cleaned
     # copy (the name cropped off; the credit is shown under the photo), used instead of the original
-    CLEANED = set(['0-9', '102-12', '104-7', '108-7', '109-3', '16-19', '16-2', '21-20', '22-14', '24-12', '28-13', '29-19', '3-2', '33-4', '35-23', '40-12', '40-7', '43-24', '43-8', '49-22', '50-10', '50-14', '50-6', '61-10', '61-18', '61-2', '69-4', '7-9', '72-1', '80-16', '88-10', '9-5', '93-9', '97-2', '97-7', '98-5'])
+    CLEANED = set(['0-9', '1-1', '1-17', '102-12', '104-7', '108-7', '109-3', '16-19', '16-2', '2-22', '21-20', '22-14', '24-10', '24-12', '28-13', '29-19', '3-2', '32-6', '33-4', '35-23', '4-6', '40-12', '40-7', '43-24', '43-8', '49-22', '50-10', '50-14', '50-6', '51-16', '54-15', '54-16', '61-10', '61-18', '61-2', '69-4', '7-9', '72-1', '80-16', '88-10', '9-5', '93-9', '97-2', '97-7', '98-5'])
     def img_of(c, size="medium"):
         p = c["photo"]
         if not p or len(p) < 5 or "Illustration" in p[2]: return None
-        if "%d-%d" % (p[0], p[1]) in CLEANED:
+        if "%d-%d" % (p[0], p[1]) in CLEANED or not p[4]:  # cleaned copy, or not an iNaturalist photo: SnakeList's own tile
             return SITE + "species-photos/t/%d-%d.webp" % (p[0], p[1])
         pid, ext = p[4].split(".")
         return "https://inaturalist-open-data.s3.amazonaws.com/photos/%s/%s.%s" % (pid, size, ext)
@@ -856,12 +862,12 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         elif photo:
             who, _, lic = p[2].rpartition(", ")
             if not who: who, lic = p[2], ""
-            pid = p[4].split(".")[0] if len(p) >= 5 else ""
+            lk = src_link(p, "original photo")
             ph = ('<figure class="sp-photo"><img src="%s" data-fb="../species-photos/t/%d-%d.webp" alt="%s" width="500" height="333" fetchpriority="high">'
                   '<figcaption>Photo &copy; %s%s%s</figcaption></figure>') % (
                 esc(photo), p[0], p[1], esc("Photo of %s" % ((nm + " (" + sci + ")") if not c["is_sci"] else sci)),
                 esc(who), (", " + lic_link(lic)) if lic else "",
-                (' &middot; cropped &middot; <a href="https://www.inaturalist.org/photos/%s" rel="noopener">original photo</a>' % esc(pid)) if pid.isdigit() else "")
+                (' &middot; cropped &middot; ' + lk) if lk else "")
         elif p:
             ph = '<figure class="sp-photo"><div class="sp-sprite" role="img" aria-label="%s" style="%s"></div><figcaption>%s</figcaption></figure>' % (esc("Illustration of " + label), sprite(c), esc(p[2]))
         else:
@@ -1177,8 +1183,7 @@ def credits_page(cards, esc):
         if not p or "Illustration" in p[2]: continue
         who, _, lic = p[2].rpartition(", ")
         if not who: who, lic = p[2], ""
-        pid = p[4].split(".")[0] if len(p) >= 5 else ""
-        orig = ('<a href="https://www.inaturalist.org/photos/%s" rel="noopener">original</a>' % esc(pid)) if pid.isdigit() else "&ndash;"
+        orig = src_link(p, "original") or "&ndash;"
         rows.append('<tr id="%s"><td><a href="%s">%s</a></td><td>%s</td><td>%s</td><td>%s</td></tr>' % (
             esc(c["id"]), page_name(c), esc(c["name"]), esc(who), lic_link(lic), orig))
     fam = json.loads(re.search(r'<script type="application/json" id="family-photos">(.*?)</script>', APP[0], re.S).group(1))
