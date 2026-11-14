@@ -430,38 +430,38 @@ function buildAll(A) {
     // fallen logs, mossy
     const logGeo = (Rn) => { const gb = new GB(), len = 2 + Rn() * 2.5, pts = []; for (let k = 0; k <= 6; k++) pts.push(V(-len / 2 + (len * k) / 6, 0, (Rn() - 0.5) * 0.15)); tube(gb, pts, pts.map((_, k) => 0.22 * (1 - k / 14)), low ? 7 : 12, { uRep: 3, vLen: 1, col: (y, t) => { const m = 0.4 + 0.3 * Math.sin(t * 9); return [lerp(1, 0.66, m), lerp(1, 0.86, m), lerp(1, 0.52, m)]; } }); return gb.geo(); };
     put('logs', logGeo, barkMat(tex.bark('furrow'), '#9a8e7c'), 14, groundR * 1.1, 40, [0.7, 1.3], { variants: 2, lift: 0.06, span: 1.5 });
-    rocks(30, groundR * 1.05, 45, [0.3, 1.6]);
+    rocks(10, groundR * 1.05, 45, [0.3, 1.6], { minD: 2.5 });
   } else if (U === 'meadow') {
     put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassG'), { alphaTest: 0.35 }), 1700, near0, 36, [0.5, 1.1], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 30 }), foliageMat(tex.spray('broad')), 60, groundR * 1.1, 45, [0.8, 2.2], { variants: 2, wmat: twigMat(), col: () => tint(0.8, 1.1, 0.12) });
-    rocks(40, groundR * 1.0, 30, [0.2, 0.8]);
+    rocks(13, groundR * 1.0, 30, [0.2, 0.8], { minD: 2.5 });
   } else if (U === 'grass') {
     put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 3200, near0, 45, [0.6, 1.2], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 1600, 45, 90, [0.8, 1.4], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 28 }), foliageMat(tex.spray('olive')), 70, groundR * 1.1, 60, [0.8, 2.0], { variants: 2, wmat: twigMat(), col: () => tint(0.8, 1.1, 0.12) });
-    rocks(20, groundR * 1.0, 45, [0.3, 1.2]);
+    rocks(6, groundR * 1.0, 45, [0.3, 1.2], { minD: 2.5 });
   } else if (U === 'heath') {
     put('heather', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 24, wide: 1.25, stems: 0, card: 0.55 }), foliageMat(tex.spray('heather')), 1100, near0, 45, [0.35, 0.8], { variants: 3, sy: [0.55, 0.85], lift: -0.12, col: () => tint(0.8, 1.15, 0.12) });
     put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassG'), { alphaTest: 0.35 }), 800, near0, 40, [0.35, 0.7], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 26, card: 0.45 }), foliageMat(tex.spray('needle')), 90, groundR * 1.1, 55, [0.7, 1.8], { variants: 2, wmat: twigMat(), col: () => tint(0.75, 1.0, 0.1) });
-    rocks(30, groundR * 1.0, 50, [0.3, 1.5]);
+    rocks(10, groundR * 1.0, 50, [0.3, 1.5], { minD: 2.5 });
   } else if (U === 'arid') {
     put('spinifex', (Rn) => tuftGeo(Rn, low ? 30 : 70, 0.55, '#8a8a52', '#c9b98a', 0.25, { lean: 0.9, w: 0.012, outward: 1 }), grassMat(), 500, near0, 50, [0.6, 1.4], { variants: 3, sy: [0.6, 0.9], col: () => tint(0.8, 1.1, 0.1) });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 34, wide: 1.2, bright: 1.35 }), foliageMat(tex.spray('saltbush')), 160, groundR * 1.0, 60, [0.5, 1.4], { variants: 2, wmat: twigMat(), col: () => tint(0.85, 1.1, 0.08) });
     // outcrops: clusters of big boulders, and stones between
     const centres = scatter(Math.round(14 * (low ? 0.6 : 1)), groundR * 1.6, farR * 1.1, 10, null, 'area');
     const okNear = (x, z) => centres.some((c) => (c.x - x) ** 2 + (c.z - z) ** 2 < 36);
-    rocks(90, groundR * 1.3, farR * 1.15, [0.6, 3.8], { ok: okNear, minD: 1.2 });
-    rocks(160, groundR * 1.0, 45, [0.08, 0.5], { variants: 2, detail: 1 });
+    rocks(45, groundR * 1.3, farR * 1.15, [0.6, 3.8], { ok: okNear, minD: 2 });
+    rocks(36, groundR * 1.2, 45, [0.08, 0.5], { variants: 2, detail: 1, minD: 3 }); // v5.05: far fewer loose rocks
   } else if (U === 'sand') {
     put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 260, near0, 50, [0.35, 0.8], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 30, wide: 1.3, bright: 1.35 }), foliageMat(tex.spray('saltbush')), 40, groundR * 1.1, 60, [0.4, 1.0], { variants: 2, wmat: twigMat(), col: () => tint(0.85, 1.1, 0.08) });
-    rocks(16, groundR * 1.2, 60, [0.3, 1.4]);
+    rocks(6, groundR * 1.2, 60, [0.3, 1.4], { minD: 2.5 });
   } else if (U === 'gibber') {
     rocks(2200, near0, 32, [0.04, 0.22], { variants: 3, lift: -0.2, flat: 0.55, recv: false, detail: 0 });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 30, wide: 1.3, stems: 0, bright: 1.35 }), foliageMat(tex.spray('saltbush')), 140, groundR * 1.0, 60, [0.3, 0.8], { variants: 2, wmat: twigMat(), col: () => tint(0.85, 1.1, 0.08) });
     put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 220, near0, 45, [0.25, 0.5], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
-    rocks(18, groundR * 1.3, 60, [0.3, 1.0]);
+    rocks(6, groundR * 1.3, 60, [0.3, 1.0], { minD: 2.5 });
   }
   if (wi) { // reeds along both banks of the river beyond the near ground
     const tng = V(-wi.dir.y, 0, wi.dir.x), list = [];
@@ -489,7 +489,7 @@ function buildAll(A) {
       if (heath) put('heather', (Rn) => grassGeo(Rn, low ? 20 : 40, h * 0.9, '#4a5530', '#6a6442', h * 0.5, { lean: 0.8, w: 0.018, tip: '#9a6f8c', heads: 0 }), grassMat(), 700, rIn, rOut, [0.6, 1.2], { variants: 2, distr: 'lin', ok: (x, z) => clearS(x, z, h), col: () => tint(0.85, 1.1, 0.1) });
     }
     if (U === 'arid' || U === 'gibber' || U === 'sand') {
-      const sz = clamp(L * 0.012, 0.004, 0.03), n = U === 'gibber' ? 3000 : U === 'arid' ? 1600 : 420;
+      const sz = clamp(L * 0.012, 0.004, 0.03), n = U === 'gibber' ? 1500 : U === 'arid' ? 500 : 200; // v5.05: fewer small stones
       rocks(n, Math.max(F.w0 * 2, Rb * 0.05), Math.min(near0, Math.max(Rb * 4.5, 2.5)), [sz, sz * (U === 'gibber' ? 4 : 3)], { variants: 3, detail: low ? 0 : 1, flat: U === 'gibber' ? 0.5 : 0.65, lift: -0.15, recv: true, distr: 'lin', ok: (x, z) => dist2snake(x, z) > F.w0 * 1.3 + sz * 3 });
     }
   }
