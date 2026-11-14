@@ -126,22 +126,25 @@
     position: fixed; inset: 0; z-index: 50;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden; background: #08180f;
+    /* v4.93: not an empty dark screen - a soft glow of SnakeList green the photographs rise out of */
+    background: radial-gradient(85% 70% at 50% 46%, #1d5234 0%, #12371f 42%, #0a2013 75%, #06140b 100%);
   }
   /* held on its first frame while the (very long) page is still arriving, so it plays in one
      go instead of starting, freezing and starting again; it ends with a fade (smooth on the GPU) */
   .intro.intro-hold, .intro.intro-hold * { animation-play-state: paused !important; }
   /* while the opening plays, the browser skips laying out and drawing the (huge) page behind it,
      so every frame goes to the opening; the page is drawn just before the fade reveals it */
-  .sl-root.intro-on > :not(#intro):not(script):not(style) { content-visibility: hidden; }
+  .sl-root.intro-on > :not(#intro):not(script):not(style):not(#sl-hero) { content-visibility: hidden; } /* v4.93: the photo screen is drawn early, the rest of SnakeList after the opening */
   html.sl-intro-lock, html.sl-intro-lock body { overflow: hidden !important; overscroll-behavior: none; } /* v4.80: the page can't move behind the opening */
   /* the tick: a GPU layer of its own and a softer, longer draw */
   .intro-box { transform: translateZ(0); backface-visibility: hidden; }
   /* v4.92: a plain, slower crossfade (no zoom) - the photo underneath is already drawn, so nothing flashes */
   .intro-wipe { opacity: 0; transition: opacity 0.8s cubic-bezier(.4,0,.2,1); pointer-events: none; }
   /* v4.92: the wall and its shade dissolve into the photo while the logo glides down to its place on it */
-  .intro.intro-glide { background-color: transparent; transition: background-color 1s cubic-bezier(.4,0,.2,1); }
-  .intro.intro-glide .photo-zoom, .intro.intro-glide .photo-scrim { opacity: 0; transition: opacity 1s cubic-bezier(.4,0,.2,1); }
-  .intro.intro-glide.intro-wipe { transition: opacity 0.4s ease; }
+  .intro.intro-glide { background: transparent; transition: background-color 1s cubic-bezier(.4,0,.2,1); }
+  .intro.intro-glide .photo-zoom, .intro.intro-glide .photo-scrim { opacity: 0; transition: opacity 1.1s cubic-bezier(.4,0,.2,1), scale 1.3s cubic-bezier(.3,0,.2,1); }
+  .intro.intro-glide .photo-zoom { scale: 1.06; } /* v4.93: a slow push through the wall into the photo */
+  .intro.intro-glide.intro-wipe { transition: opacity 0.22s ease; } /* v4.93: a quick hand-over, no double logo */
   .intro-line { transform-origin: 50% 50%; will-change: transform; }
   .intro-gone { display: none; }
 
@@ -1851,7 +1854,10 @@
         if (done) return;
         done = true;
         // draw the page behind first (two frames), then fade the opening away over it
-        var root = intro.closest(".sl-root"); if (root) root.classList.remove("intro-on");
+        // v4.93: when the photo screen is what comes next, only it is drawn now - the rest of SnakeList (thousands
+        // of cards) is laid out after the opening, under the photo, so the transition starts at once and stays smooth
+        var root = intro.closest(".sl-root"), heroNext = document.querySelector("#sl-hero:not([hidden])");
+        if (root && !heroNext) root.classList.remove("intro-on");
         // ...and let it settle (its first layout and paint) before the fade starts, so the fade runs smoothly
         var faded = false, fade = function () {
           if (faded) return; faded = true;
@@ -1859,25 +1865,35 @@
             intro.classList.add("intro-wipe");
             setTimeout(function () {
               intro.classList.add("intro-gone");
+              if (root) root.classList.remove("intro-on");
               window.__introDone = true;
               document.dispatchEvent(new Event("sl-intro-done"));
             }, ms);
           };
           // v4.92: the logo is shown once. It glides from the middle of the screen to its place on the photo
           // while the wall of photos dissolves into it, then hands over to the photo's own logo in the same spot.
+          var hp = document.querySelector("#sl-hero .hero-media img:not(.hero-fill)");
+          if (hp && !hp.complete && !fade.waited) { // v4.93: never dissolve into a photo that hasn't arrived (no dark flash)
+            fade.waited = true; faded = false;
+            var go2 = function () { if (!faded) fade(); };
+            hp.addEventListener("load", go2, { once: true }); hp.addEventListener("error", go2, { once: true }); setTimeout(go2, 1800);
+            return;
+          }
+          var heroEl = document.getElementById("sl-hero"); if (heroEl) heroEl.classList.add("hero-reveal");
           var line = intro.querySelector(".intro-line"), ht = document.querySelector("#sl-hero:not([hidden]) .hero-title");
           var calm = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
           var a = line && line.getBoundingClientRect(), b = ht && ht.getBoundingClientRect();
           if (calm || !a || !b || !a.width || !b.width || b.bottom > window.innerHeight + 2) { finish(820); return; }
           var k = b.width / a.width, dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
           intro.classList.add("intro-glide");
-          line.style.transition = "transform 1s cubic-bezier(.45,0,.2,1)";
+          line.style.transition = "transform 1.1s cubic-bezier(.45,0,.2,1)";
           line.style.transform = "translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px) scale(" + k.toFixed(4) + ")";
-          setTimeout(function () { finish(420); }, 1000);
+          setTimeout(function () { finish(420); }, 1100);
         };
         requestAnimationFrame(function () { requestAnimationFrame(function () {
           // (a short wait: the fade runs on the GPU, so it stays smooth even while the page finishes its own work)
-          if (window.requestIdleCallback) requestIdleCallback(fade, { timeout: 300 }); else setTimeout(fade, 150);
+          if (window.__introSkipped) fade(); // v4.93: skipped - no waiting
+          else if (window.requestIdleCallback) requestIdleCallback(fade, { timeout: 300 }); else setTimeout(fade, 150);
         }); });
         setTimeout(fade, 2500); // never hold the opening longer than this (after the release below)
       };
@@ -1891,7 +1907,7 @@
           if (go) return; go = true;
           requestAnimationFrame(function () { requestAnimationFrame(function () {
             intro.classList.remove("intro-hold");
-            setTimeout(window.__dismissIntro, 2300); // v4.92: time to look at the photographs
+            setTimeout(window.__dismissIntro, 2600); // time to look at the photographs (the wall takes ~1.3 s to fill)
           }); });
         };
         var whenReady = function () {
@@ -1907,9 +1923,19 @@
           // ...and the wordmark's typeface, so the title doesn't jump to it halfway through rising
           try { if (document.fonts && document.fonts.load) pics.push(document.fonts.load('600 1em "EB Garamond"', "SnakeList").catch(function () {})); } catch (e) {}
           Promise.all(pics).then(release, release);
-          setTimeout(release, 1500);
+          setTimeout(release, 700); // v4.93: never hold the first frame longer than this
         };
-        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", whenReady); else whenReady();
+        // v4.93: the photographs are inside the page itself, so start as soon as they are decoded - no waiting
+        // for the rest of SnakeList to arrive first (that left a dark screen for seconds on slower connections)
+        whenReady();
+        // v4.93: never make anyone sit through it - a scroll, a swipe, a tap or a key goes straight to the photo
+        var skipEvs = ["wheel", "touchmove", "pointerdown", "keydown"], skip = function (e) {
+          if (e.type === "keydown" && !/^(ArrowDown|PageDown| |Enter|Escape|Spacebar)$/.test(e.key)) return;
+          skipEvs.forEach(function (n) { window.removeEventListener(n, skip, true); });
+          window.__introSkipped = true; release(); window.__dismissIntro();
+        };
+        skipEvs.forEach(function (n) { window.addEventListener(n, skip, { capture: true, passive: true }); });
+        document.addEventListener("sl-intro-done", function () { skipEvs.forEach(function (n) { window.removeEventListener(n, skip, true); }); }, { once: true });
         setTimeout(release, 20000); // a very slow device: never hold the opening forever
       }
     })();
@@ -1938,6 +1964,13 @@
   /* v4.86: the whole photo shows (not zoomed in); a soft, blurred copy of it fills the space around it */
   .hero-media img:not(.hero-fill) { --pw: 155vh; -webkit-mask-image: linear-gradient(90deg, transparent calc(50% - var(--pw) / 2), #000 calc(50% - var(--pw) / 2 + 120px), #000 calc(50% + var(--pw) / 2 - 120px), transparent calc(50% + var(--pw) / 2));
     mask-image: linear-gradient(90deg, transparent calc(50% - var(--pw) / 2), #000 calc(50% - var(--pw) / 2 + 120px), #000 calc(50% + var(--pw) / 2 - 120px), transparent calc(50% + var(--pw) / 2)); } /* soft sides, no hard edge */
+  /* v4.93: zoomed out - the photo no longer fills the whole height; it sits a little smaller in the upper part
+     of the screen, its edges melting into the soft blurred copy of itself behind it */
+  @media (min-aspect-ratio: 1/1) { .hero-media img:not(.hero-fill) { top: 2%; height: 82%; } }
+  /* v4.93: as the photo appears it settles slowly from a touch closer to its resting size (a gentle camera pull-back) */
+  .hero-media img { transition: scale 3.2s cubic-bezier(.16,.6,.2,1); }
+  .sl-hero.hero-wait:not(.hero-reveal) .hero-media img { scale: 1.07; }
+  @media (prefers-reduced-motion: reduce) { .hero-media img { transition: none; } .sl-hero.hero-wait:not(.hero-reveal) .hero-media img { scale: 1; } }
   .hero-media .hero-fill { object-fit: cover; filter: blur(28px) saturate(1.1) brightness(0.8); transform: scale(1.12); }
   /* a soft shade at the top and bottom so the words read, and a gentle dark edge at the bottom of the screen */
   .hero-shade { position: absolute; inset: 0; pointer-events: none;
@@ -1952,6 +1985,9 @@
   .hero-blur i:nth-child(3) { --b: 9px; -webkit-mask-image: linear-gradient(180deg, transparent 42%, #000 72%); mask-image: linear-gradient(180deg, transparent 42%, #000 72%); }
   .hero-blur i:nth-child(4) { --b: 18px; -webkit-mask-image: linear-gradient(180deg, transparent 64%, #000 94%); mask-image: linear-gradient(180deg, transparent 64%, #000 94%); }
   @media (prefers-reduced-transparency: reduce) { .hero-blur { display: none; } }
+  /* v4.93: ...and the very bottom fades into SnakeList's own background, so scrolling on feels like one page */
+  .hero-media::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 9%; pointer-events: none;
+    background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--bg) 6%, transparent) 40%, color-mix(in srgb, var(--bg) 22%, transparent) 70%, color-mix(in srgb, var(--bg) 58%, transparent) 90%, var(--bg) 100%); }
   .hero-copy { position: absolute; left: 0; right: 0; bottom: 13%; padding: 0 20px; text-align: center; } /* v4.86: centred, the paragraph right under the logo */
   .hero-copy > p { margin: 0 auto; } .hero-title.hero-wm { display: flex; justify-content: center; width: max-content; }
   @media (max-aspect-ratio: 1/1) { .hero-copy > p, .hero-copy > .hero-sub { margin-left: auto; margin-right: auto; } }
@@ -1962,7 +1998,7 @@
   .hero-mark .snake-s { height: 0.71em; }
   /* v4.81: the hero shows the same SnakeList wordmark as the header (darker green + the tick), not the pale one */
   .hero-title.hero-wm { display: inline-flex; align-items: baseline;
-    --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.5)) drop-shadow(0 4px 14px rgba(0,0,0,0.35)); filter: none; }
+    --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.6)) drop-shadow(0 5px 20px rgba(0,0,0,0.5)); filter: none; } /* v4.93: stands out from the green photo */
   .hero-title.hero-wm .sl-titletext .snake-s { height: 0.71em; }
   /* v4.84: the letters come in quickly one after another, left to right, once the opening has gone */
   /* v4.92: the logo only animates once (in the opening, which glides it here) - no second letter-by-letter reveal */
@@ -1981,28 +2017,34 @@
     .hero-mark { background-image: radial-gradient(circle at 30% 40%, #b4ec98 0%, #8fd873 30%, #6cc052 62%, #4f9e3d 100%);
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   }
-  .hero-copy > .hero-sub { margin-top: clamp(12px, 2.2vh, 24px); max-width: 42ch; font: 600 clamp(15.5px, min(1.5vw, 2.7vh), 25px)/1.55 'Inter', sans-serif;
-    letter-spacing: 0.006em; text-wrap: balance; color: #a9e795; text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 18px rgba(0,0,0,0.75); }
+  .hero-copy > .hero-sub { margin-top: clamp(14px, 2.4vh, 26px); max-width: 38ch; font: 500 clamp(17px, min(1.75vw, 3vh), 28px)/1.6 'Inter', sans-serif;
+    letter-spacing: 0.008em; text-wrap: balance; color: #b4ec9f; text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8); }
+  .hero-copy > .hero-sub [data-sl-total] { font-weight: 700; color: #d6f6c6; }
   /* v4.92: a soft dark pool behind the logo and the words, so they read on any part of the photo */
   .hero-copy::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 50%; width: min(1100px, 130%); height: 190%; transform: translate(-50%, -50%);
     background: radial-gradient(closest-side, rgba(4,16,8,0.5), rgba(4,16,8,0.28) 55%, rgba(4,16,8,0)); pointer-events: none; }
   .hero-cue { position: fixed; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); z-index: 3; transform: translateX(-50%); display: flex; flex-direction: column;
     align-items: center; gap: 4px; padding: 8px 14px; border: 0; border-radius: 999px; background: none; cursor: pointer;
-    color: #9fe08a; font: 700 clamp(11px, 0.9vw, 15px)/1 'JetBrains Mono', monospace; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.95;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+    color: #b4ec9f; font: 600 clamp(10.5px, 0.8vw, 13px)/1 'JetBrains Mono', monospace; letter-spacing: 0.24em; text-transform: uppercase; opacity: 0.95;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    /* v4.93: a soft frosted pill, so it reads over the photo and over the fade into the page */
+    padding: 9px 18px 7px; background: rgba(6,22,12,0.42); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: inset 0 0 0 1px rgba(180,236,159,0.18); }
   .hero-cue:hover { opacity: 1; }
   .hero-cue:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; opacity: 1; }
-  .hero-cue svg { width: 22px; height: 22px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); animation: hero-nudge 2.4s ease-in-out 1.8s infinite; will-change: transform; }
+  .hero-cue svg { width: 18px; height: 18px; stroke-width: 1.8; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); animation: hero-nudge 2.4s ease-in-out 1.8s infinite; will-change: transform; }
   @keyframes hero-nudge { 0%, 100% { transform: translateY(0); opacity: 0.75; } 50% { transform: translateY(5px); opacity: 1; } } /* v4.92: a slow, even bob */
   /* phones held upright: the snake's head stays in view */
   @media (max-aspect-ratio: 1544/1000) { .hero-media img:not(.hero-fill) { -webkit-mask-image: none; mask-image: none; } }
-  @media (max-aspect-ratio: 1/1) { .hero-media img:not(.hero-fill) { object-fit: cover; object-position: 42% 45%; top: 9%; height: calc(100vw / 1.544 * 1.08); -webkit-mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent); } .hero-copy { left: 0; right: 0; max-width: none; bottom: 15%; text-align: center; } .hero-title { font-size: clamp(44px, 14vw, 110px); } }
+  @media (max-aspect-ratio: 1/1) { .hero-media img:not(.hero-fill) { object-fit: cover; object-position: 42% 45%; top: 11%; height: calc(100vw / 1.544); /* v4.93: the whole photo, uncropped */ -webkit-mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent); } .hero-copy { left: 0; right: 0; max-width: none; bottom: 15%; text-align: center; } .hero-title { font-size: clamp(44px, 14vw, 110px); } }
   @media (max-height: 520px) and (min-aspect-ratio: 1/1) { .hero-copy { bottom: 18%; } .hero-title { font-size: clamp(40px, 14vh, 90px); } }
+  /* v4.93: the zoomed-out photo melts into its blurred copy on every side - top and bottom as well, so no straight edge */
+  @media (min-aspect-ratio: 1544/1000) { .hero-media img:not(.hero-fill) { -webkit-mask-image: linear-gradient(90deg, transparent calc(50% - var(--pw) / 2), #000 calc(50% - var(--pw) / 2 + 120px), #000 calc(50% + var(--pw) / 2 - 120px), transparent calc(50% + var(--pw) / 2)), linear-gradient(180deg, transparent 0%, #000 10%, #000 86%, transparent 100%); mask-image: linear-gradient(90deg, transparent calc(50% - var(--pw) / 2), #000 calc(50% - var(--pw) / 2 + 120px), #000 calc(50% + var(--pw) / 2 - 120px), transparent calc(50% + var(--pw) / 2)), linear-gradient(180deg, transparent 0%, #000 10%, #000 86%, transparent 100%); -webkit-mask-composite: source-in; mask-composite: intersect; } }
+  @media (min-aspect-ratio: 1/1) and (max-aspect-ratio: 1544/1000) { .hero-media img:not(.hero-fill) { -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 86%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 86%, transparent 100%); } }
   /* the words rise in gently once the opening has gone */
   .sl-hero.hero-wait .hero-copy > *, .sl-hero.hero-wait .hero-cue { opacity: 0; }
   .sl-hero.hero-wait .hero-copy > .hero-sub { transform: translateY(8px); }
   .sl-hero.hero-go .hero-copy > *, .sl-hero.hero-go .hero-cue { transition: opacity 0.9s ease, transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1); }
-  .sl-hero.hero-go .hero-title { transition: opacity 0.35s ease; } /* takes over from the gliding logo in the same spot */
+  .sl-hero.hero-go .hero-title { transition: opacity 0.2s ease; } /* takes over from the gliding logo in the same spot */
   .sl-hero.hero-go .hero-sub { transition-delay: 0.25s; }
   .sl-hero.hero-go .hero-cue { transition-delay: 0.8s; }
   @media (prefers-reduced-motion: reduce) {
@@ -2101,7 +2143,7 @@
     // the opening is exactly one screen tall, set in pixels (and again only if the width changes - never from vh,
     // which keeps changing on phones as the address bar slides, and inside frames that grow with their page)
     function sizeHero() { var vv = window.visualViewport, h = Math.max(Math.round(vv ? vv.height : 0), window.innerHeight || 0, 420); hero.style.height = h + "px";
-      var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (im) im.style.setProperty("--pw", Math.round(h * 2560 / 1658) + "px"); } // the photo's width on screen
+      var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (im) im.style.setProperty("--pw", Math.round((im.clientHeight || h) * 2560 / 1658) + "px"); } // the photo's width on screen (v4.93: from the photo's own height)
     sizeHero(); window.addEventListener("resize", sizeHero); if (window.visualViewport) window.visualViewport.addEventListener("resize", sizeHero);
     // window.SL_heroEnd(): where the page below the hero starts (0 when the hero is hidden)
     window.SL_heroEnd = function () { return hero.hidden ? 0 : hero.getBoundingClientRect().bottom + window.scrollY; };
@@ -2134,7 +2176,7 @@
 </script>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.92</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.93</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-head"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-head)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-me"><a href="https://snakelist.com/about.html">About me</a></p>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
@@ -19475,6 +19517,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v4.93", d: "2026-11-14", items: ["The opening starts right away with a soft green glow instead of a dark screen, and a scroll, tap or key skips straight to the photo.", "The photo wall pushes gently towards you as it dissolves into the rough green snake, which settles slowly into place - one smooth shot. The photo is zoomed out on every screen.", "Bigger, easier subtitle, a logo that stands out more, the bottom fades into the page, and a neater Scroll to continue."] },
     { v: "v4.92", d: "2026-11-14", items: ["The 3D button and the tags on the cards no longer jump when you move quickly from one card to another.", "A smoother, more cinematic opening: the photographs fade in gently and stay longer, the logo appears once and glides down onto the big snake photo while the photo wall dissolves into it - no flashes and no second reveal.", "The words under the logo are bigger and easier to read, the blur at the bottom of the photo builds up gradually, and Scroll to continue bobs gently."] },
     { v: "v4.91", d: "2026-11-13", items: ["3D snakes look much more real: eyes sit in the head under a clear eye shield with the right colour and pupil for each snake, round lips instead of a triangle mouth, a real-looking mouth inside with curved fangs and a forked tongue.", "Better colours and patterns for many snakes (the smooth green snake is bright green), rattles on rattlesnakes, Gaboon viper horns move with its head.", "3D grass, stones and sand ripples, and 3D opens about 5-10 times faster."] },
     { v: "v4.90", d: "2026-11-13", items: ["The opening photo is zoomed out on tablets and phones held upright, so you see much more of the snake."] },
