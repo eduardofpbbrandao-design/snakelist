@@ -83,12 +83,19 @@ def main():
         sci = r["scientific_name"].strip(); sid = re.sub(r"[^a-z-]", "", sci.lower().replace(" ", "-"))
         if sid not in cards: report.append("SKIP %s: no SnakeList card" % sci); continue
         act = r["action"].strip().lower()
-        if act == "replace" and sid in items and "Illustration" not in items[sid][2]: sheet, n = items[sid][0], items[sid][1]
+        if sid in items and "Illustration" not in items[sid][2]:  # it has a photo: the new one takes its slot (so re-running is safe)
+            sheet, n = items[sid][0], items[sid][1]
+            if act == "add": report.append("NOTE %s: already had a photo - replaced in its slot" % sci)
         else:
-            if sid in items and act == "add": report.append("NOTE %s: already had a photo, replaced" % sci)
             sheet, n = free.pop(0)
-        src = r["source"].strip()
-        pm = re.search(r"inaturalist\.org/photos/(\d+)", src)
+        src = (r.get("source") or "").strip()
+        # the photo's own iNaturalist record, wherever the batch put it (source, photo_page_with_license, ...)
+        pm = None
+        for v in [src] + [str(x) for k, x in r.items() if k != "source"]:
+            pm = re.search(r"inaturalist\.org/photos/(\d+)", v or "")
+            if pm: break
+        if not pm:  # otherwise the most specific page given: a photo page beats an observation, which beats a taxon
+            for v in [r.get(k, "") for k in r if "photo" in k.lower() and "http" in (r.get(k) or "")]: src = v.strip(); break
         ext = ext_on_inat(pm.group(1)) if pm else None
         lic = licence(r["license"])
         credit = "%s, %s" % (who_of(r["credit"]), lic) if lic else who_of(r["credit"])
