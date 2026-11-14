@@ -40,12 +40,16 @@ self.addEventListener('fetch', (e) => {
     if (home) {
       e.respondWith(caches.match(key).then((hit) => {
         if (!hit) return net.then(keep(key)).catch(() => caches.match('./'));
-        // opens at once from the saved copy; the newer one is fetched and saved in the background
-        e.waitUntil(net.then((r) => {
-          if (!r || !r.ok) return;
-          return samePage(hit, r).then((same) => { if (same) return; return caches.open(CACHE).then((c) => c.put(key, r.clone())).then(() => tell(e.resultingClientId, 15)); });
-        }).catch(() => {}));
-        return hit;
+        // v5.05: online, the newest SnakeList always opens (an unchanged page costs only a quick check);
+        // only when the network is slow or missing does the saved copy open, and the newer one is saved for next time
+        return within(net, 4000).then((r) => {
+          if (r && r.ok) { const copy = r.clone(); e.waitUntil(caches.open(CACHE).then((c) => c.put(key, copy))); return r; }
+          e.waitUntil(net.then((r2) => {
+            if (!r2 || !r2.ok) return;
+            return samePage(hit, r2).then((same) => { if (same) return; return caches.open(CACHE).then((c) => c.put(key, r2.clone())).then(() => tell(e.resultingClientId, 15)); });
+          }).catch(() => {}));
+          return hit;
+        });
       }));
       return;
     }
