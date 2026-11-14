@@ -55,6 +55,9 @@ const CSS = `
 .sp3d-info .sp3d-ix,.sp3d-list .sp3d-ix{position:absolute;right:5px;top:5px;width:26px;height:26px;border:0;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:16px;line-height:1;cursor:pointer}
 .sp3d-reg{position:absolute;left:0;top:0;display:flex;align-items:center;gap:6px;padding:3px 4px 3px 10px;border-radius:999px;background:rgba(12,26,18,.86);border:2px solid #9be07c;color:#fff;font:700 12.5px/1.3 Inter,system-ui,sans-serif;pointer-events:auto;white-space:nowrap;transform:translate(-50%,-100%)}
 .sp3d-reg button{font:600 11.5px/1.2 Inter,system-ui,sans-serif;padding:4px 9px;border-radius:999px;border:0;background:#9be07c;color:#10261a;cursor:pointer}
+.sp3d-reg.sp3d-lab{transform:none;cursor:pointer;z-index:2}.sp3d-reg.sp3d-lab[hidden]{display:none}
+.sp3d-ldot{position:absolute;left:0;top:0;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:#9be07c;border:2px solid #10261a;box-shadow:0 0 0 1px rgba(255,255,255,.5);pointer-events:auto;cursor:pointer;z-index:2}.sp3d-ldot[hidden]{display:none}
+.sp3d-lines{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:1}
 .sp3d-ring{position:absolute;left:0;top:0;border:2px dashed #9be07c;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%)}
 .sp3d-ring[hidden]{display:none}
 .sp3d-list{position:absolute;left:8px;top:8px;max-height:calc(100% - 16px);overflow:auto;width:min(240px,48%);background:rgba(12,26,18,.9);color:#fff;border-radius:12px;padding:8px 8px 6px;pointer-events:auto;border:2px solid #9be07c;font:13px/1.4 Inter,system-ui,sans-serif}
@@ -63,7 +66,7 @@ const CSS = `
 .sp3d-list button.sp3d-li:hover,.sp3d-list button.sp3d-li[aria-current=true]{border-color:#9be07c;background:rgba(155,224,124,.18)}
 .sp3d-tip{position:absolute;left:8px;bottom:8px;max-width:calc(100% - 16px);padding:4px 10px;border-radius:999px;background:rgba(12,26,18,.8);color:#fff;font:500 12px/1.4 Inter,system-ui,sans-serif;pointer-events:none}
 .sp3d-tip[hidden]{display:none}
-@media (max-width:560px){.sp3d-list{width:min(175px,46%);max-height:calc(100% - 120px);font-size:12px}.sp3d-list button.sp3d-li{font-size:11.5px;padding:4px 6px}.sp3d-capt{font-size:12.5px;padding:6px 10px;bottom:8px}.sp3d-info{font-size:12px;width:min(230px,78%)}}
+@media (max-width:560px){.sp3d-list{width:min(175px,46%);max-height:calc(52% - 12px);font-size:12px}.sp3d-list button.sp3d-li{font-size:11.5px;padding:4px 6px}.sp3d-capt{font-size:12.5px;padding:6px 10px;bottom:8px}.sp3d-info{font-size:12px;width:min(230px,78%)}}
 `;
 function injectCSS() {
   if (typeof document === 'undefined' || document.getElementById('sp3d-x-css')) return;
@@ -531,7 +534,7 @@ export function create(V) {
   // ================================================================= shows (automatic: the camera moves by itself)
   function startShow(def) {
     if (!V.info || !V.extras) return;
-    stopShow(true); stopSlither(); if (anat && anat.on) anat.set(false, true);
+    stopShow(true); stopSlither(); if (anat && anat.on) anat.set(false, true); V.scaleOff();
     ensureRig();
     show = Object.assign({ t0: now(), time: 0, freeze: null, objs: [] }, def);
     show.mouth0 = V.mouthGoal;
@@ -813,7 +816,8 @@ export function create(V) {
       if (!held && prey.matrixAutoUpdate === false) prey.matrixAutoUpdate = true;
     };
     show.dur = total(phases);
-    show.step = (s) => { const i = runPhases(phases, s); stepPrey(); stepTag.hidden = false; stepTag.textContent = (i + 1) + ' / ' + phases.length; return i; };
+    let shown = false;
+    show.step = (s) => { const i = runPhases(phases, s); if (i > 0 && !shown) { shown = true; fadeTree(prey, 1); } stepPrey(); /* fully faded in even if a slow frame skipped the end of the first step */ stepTag.hidden = false; stepTag.textContent = (i + 1) + ' / ' + phases.length; return i; };
     show.cam = () => camKey;
     show.diet = kind;
   }
@@ -1065,12 +1069,15 @@ export function create(V) {
   function clearProps(pts, rad) { // hide scenery standing on a path ([x, z] points); returns the undo
     const undo = [], m4 = new THREE.Matrix4(), p = new THREE.Vector3(), sc = new THREE.Vector3(), q = new THREE.Quaternion();
     const near = (x, z, r) => pts.some((c) => (c[0] - x) ** 2 + (c[1] - z) ** 2 < (rad + r) ** 2);
+    // v5.09: only solid things (rocks, logs, twigs) move out of the way; grass, ferns and heather stay - a snake lies
+    // among them, and taking them away left a bare, oddly lit patch in the meadow
+    const soft = (m) => !!m && (m.side === THREE.DoubleSide || m.alphaTest > 0 || m.transparent);
     const occ = V.occ || [];
-    for (const o of occ) if (near(o.c.x, o.c.z, o.r * 0.6)) { o.force = true; undo.push(() => { o.force = false; }); }
+    for (const o of occ) if (!soft(o.im && o.im.material) && near(o.c.x, o.c.z, o.r * 0.6)) { o.force = true; undo.push(() => { o.force = false; }); }
     V.scene.children.forEach((o) => {
       if (o === V.group || o.isLight || !o.visible) return;
       if (o.isInstancedMesh) {
-        if (o.count > 60000) return; let changed = false; if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere(); const gr = o.geometry.boundingSphere.radius;
+        if (o.count > 60000 || soft(o.material)) return; let changed = false; if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere(); const gr = o.geometry.boundingSphere.radius;
         for (let i = 0; i < o.count; i++) {
           if (occ.some((c) => c.im === o && c.i === i)) continue;
           o.getMatrixAt(i, m4); m4.decompose(p, q, sc); const r = gr * Math.max(sc.x, sc.z) * 0.7;
@@ -1098,14 +1105,48 @@ export function create(V) {
       const ins = mo.anchors.teeth.parent.parent; ins.visible = true; ins.children.forEach((c) => { if (c.userData.mpart === 'throat') c.visible = mo.t > 0.05; });
     }
     // the Head / Ribs / Body / Tail pills sit on their part of the body (v5.05: and hide while a part is picked)
+    // v5.09: every label is just a short name and a green See more pill (the explanation shows only when tapped).
+    // Tapping the dot, the name or See more picks that part (green outline + its card). The labels stack in rows
+    // ABOVE the snake (below it only when there is no room), each with a line down to a dot on its part, so they
+    // never cover the snake. Zoomed out: Head, Ribs, Body and Tail; zoomed in: the parts in view.
+    const lines = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); lines.setAttribute('class', 'sp3d-lines'); lines.setAttribute('aria-hidden', 'true'); labels.insertBefore(lines, labels.firstChild);
+    const REG = {
+      head: ['Head', 'The head holds the brain, the eyes, the smell organ, the teeth' + (venomous ? ', the fangs and venom glands' : '') + ' and jaws that open very wide.'],
+      ribs: null,
+      body: ['Body', 'Most of the snake: the heart, the long lung, the liver, stomach, intestines and kidneys all lie one behind the other inside it.'],
+      tail: ['Tail', 'From the vent to the tip: backbone and muscles, but no ribs and no big organs.'],
+    };
+    function mkLabel(name, act) {
+      const e = el('div', 'sp3d-reg sp3d-lab'); e.appendChild(el('span', '', name)); const b = el('button', '', 'See more'); b.type = 'button'; b.setAttribute('aria-label', 'See more about: ' + name); e.appendChild(b); e.hidden = true; labels.appendChild(e);
+      const dot = el('div', 'sp3d-ldot'); dot.hidden = true; dot.title = name; labels.appendChild(dot);
+      const go = (ev) => { ev.stopPropagation(); ev.preventDefault(); act(); };
+      on(e, 'click', go); on(dot, 'click', go);
+      return { el: e, dot, sz: null };
+    }
     function regions() {
-      st.regs.forEach((r) => r.el.remove()); st.regs = [];
+      st.regs.forEach((r) => { r.el.remove(); r.dot.remove(); }); st.regs = [];
       const F = V.info.F, L = F.L, svl = st.data.svl;
       for (const [k, name, x] of [['head', 'Head', F.Hl * 0.5], ['ribs', 'Ribs', svl * 0.2], ['body', 'Body', svl * 0.55], ['tail', 'Tail', (svl + L) / 2]]) {
-        const e = el('div', 'sp3d-reg'); e.appendChild(el('span', '', name)); const b = el('button', '', 'See more'); b.type = 'button'; e.appendChild(b); labels.appendChild(e);
-        on(b, 'click', (ev) => { ev.stopPropagation(); seeMore(k); });
-        st.regs.push({ el: e, k, x });
+        const lb = mkLabel(name, () => seeMore(k)); lb.region = k; lb.anchor = () => rig.point(x, 0, F.Hh(clamp(x, 0, L)) * 0.8); st.regs.push(lb);
       }
+      for (const p of st.data.parts) { const lb = mkLabel(p.name, () => select(p)); lb.part = p; lb.anchor = () => partAnchor(p); st.regs.push(lb); }
+    }
+    // where a part is now (its meshes bend with the body and move with the jaws)
+    const av = new THREE.Vector3(), aw = new THREE.Vector3();
+    function meshAnchor(m, out) {
+      const pa = m.geometry && m.geometry.attributes.position; if (!pa) return null;
+      const n = pa.count, mid = n >> 1, span = n <= 2400 ? n : Math.min(n, 120), a = n <= 2400 ? 0 : Math.max(0, mid - 60);
+      out.set(0, 0, 0); for (let i = a; i < a + span; i++) out.add(av.fromBufferAttribute(pa, i)); out.multiplyScalar(1 / span);
+      return out.applyMatrix4(m.matrixWorld);
+    }
+    function partAnchor(p) {
+      const F = V.info.F;
+      if (p.key === 'pits') return rig.point(F.Hl * 0.15, F.W(F.Hl * 0.15) * 0.9, 0);
+      if (p.skin) return rig.point(F.L * 0.42, F.W(F.L * 0.42), 0);
+      if (p.key === 'ribs') return rig.point(p.x, F.W(p.x) * 0.8, 0);
+      const out = new THREE.Vector3(); let n = 0;
+      for (const m of p.meshes.slice(0, 6)) { if (meshAnchor(m, aw)) { out.add(aw); n++; } }
+      return n ? out.multiplyScalar(1 / n) : rig.point(p.x);
     }
     function seeMore(k) {
       const F = V.info.F, L = F.L, svl = st.data.svl;
@@ -1119,6 +1160,7 @@ export function create(V) {
       for (const p2 of st.data.parts.filter((q) => q.region === k)) { const b = el('button', 'sp3d-li', p2.name); b.type = 'button'; on(b, 'click', () => select(p2)); ls.appendChild(b); p2.li = b; }
       labels.appendChild(ls); st.list = ls;
       if (k === 'ribs') { const rp = st.data.parts.find((q) => q.key === 'ribs'); if (rp) select(rp, true); }
+      else { const ps = st.data.parts.filter((q) => q.region === k && !q.skin); select({ key: 'region-' + k, name: REG[k][0], text: REG[k][1], region: k, meshes: [].concat(...ps.map((q) => q.meshes)), x }, true); }
       V.kick();
     }
     function clearSel() {
@@ -1163,18 +1205,63 @@ export function create(V) {
       insideVisible();
       const w = stage.clientWidth, h = stage.clientHeight, F = V.info.F;
       const busy = !!show || !!st.sel || st.k < 0.98;
-      for (const r of st.regs) {
-        ndc.copy(rig.point(r.x, 0, F.Hh(clamp(r.x, 0, F.L)) * 1.35)).project(V.cam); const vis = !busy && ndc.z < 1 && Math.abs(ndc.x) < 0.98 && Math.abs(ndc.y) < 0.98;
-        r.el.hidden = !vis; if (vis) r.el.style.transform = 'translate(' + ((ndc.x * 0.5 + 0.5) * w).toFixed(1) + 'px,' + ((-ndc.y * 0.5 + 0.5) * h).toFixed(1) + 'px) translate(-50%,-100%)';
-      }
+      if (!slither) tip.hidden = !!st.sel;
+      layoutLabels(busy, w, h);
       for (const o of st.outline) if (o.material.uniforms && o.material.uniforms.uRes) o.material.uniforms.uRes.value.set(V.canvas.width || 1, V.canvas.height || 1);
       if (!st.sel) return;
       // heat pits have no mesh: a green ring marks them
       if (st.sel.key === 'pits') { ndc.copy(rig.point(F.Hl * 0.15, F.W(F.Hl * 0.15) * 0.9, 0)).project(V.cam); ring.hidden = !(ndc.z < 1); const rr = 26; ring.style.width = ring.style.height = rr * 2 + 'px'; ring.style.left = ((ndc.x * 0.5 + 0.5) * w) + 'px'; ring.style.top = ((-ndc.y * 0.5 + 0.5) * h) + 'px'; }
       const cw = card.offsetWidth || 240, ch = card.offsetHeight || 90;
       let cx = w - cw - 10, cy = 10; // top right, clear of the parts list (top left)
-      if (w < 520) { cx = w - cw - 8; cy = h - ch - 34; }
+      if (w < 520) { cx = w - cw - 8; cy = h - ch - 8; } // phones: bottom right (the tip line hides meanwhile)
       card.style.transform = 'translate(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px)';
+    }
+    function layoutLabels(busy, w, h) {
+      const F = V.info.F, svl = st.data.svl, hide = (r) => { r.el.hidden = true; r.dot.hidden = true; };
+      while (lines.firstChild) lines.removeChild(lines.firstChild);
+      if (busy) { st.regs.forEach(hide); return; }
+      // the snake on screen: its top and bottom edges
+      let top = 1e9, bot = -1e9; const pts = [];
+      for (let i = 0; i <= 80; i++) { const x = (i / 80) * F.L, c = rig.point(x); for (const u of [1, -1]) { ndc.copy(c).addScaledVector(V3(0, 1, 0), u * F.Hh(x)).project(V.cam); if (ndc.z > 1 || Math.abs(ndc.x) > 1.1 || Math.abs(ndc.y) > 1.1) continue; const sy = (-ndc.y * 0.5 + 0.5) * h; top = Math.min(top, sy); bot = Math.max(bot, sy); } }
+      if (top > bot) { st.regs.forEach(hide); return; }
+      // zoomed in (the body much wider than the view): the parts in view; else the four regions
+      const zoomed = V.controls.st.d < svl * 0.42;
+      const cand = [];
+      for (const r of st.regs) {
+        if (!!r.region === zoomed) { hide(r); continue; }
+        const a = r.anchor(); if (!a) { hide(r); continue; } ndc.copy(a).project(V.cam);
+        const sx = (ndc.x * 0.5 + 0.5) * w, sy = (-ndc.y * 0.5 + 0.5) * h;
+        if (ndc.z > 1 || sx < 4 || sx > w - 4 || sy < 4 || sy > h - 4) { hide(r); continue; }
+        cand.push({ r, sx, sy, dc: Math.abs(sx - w / 2) + Math.abs(sy - h / 2) });
+      }
+      // the nearest to the middle of the view first, at most 12
+      cand.sort((p, q) => p.dc - q.dc); cand.slice(12).forEach((c) => hide(c.r));
+      const list = cand.slice(0, 12).sort((p, q) => p.sx - q.sx);
+      const gap = 6, rows = [];
+      for (const c of list) {
+        const e = c.r.el; e.hidden = false; if (!c.r.sz || !c.r.sz[0]) c.r.sz = [e.offsetWidth || 120, e.offsetHeight || 26];
+        const [lw, lh] = c.r.sz, xc = clamp(c.sx - lw / 2, 4, w - lw - 4);
+        let placed = null;
+        for (const dir of [-1, 1]) { // rows above the snake, going up (sliding sideways to find room); only then rows below it
+          if (placed) break;
+          for (let k = 0; k < 6 && !placed; k++) {
+            const y = dir < 0 ? top - 16 - lh - k * (lh + gap) : bot + 16 + k * (lh + gap);
+            if (y < 4 || y + lh > h - 4) continue;
+            const row = rows.filter((q) => Math.abs(q.y - y) < 1);
+            for (let sh = 0; sh <= 6 && !placed; sh++) for (const sg of sh ? [1, -1] : [1]) {
+              const x0 = xc + sg * sh * (lw * 0.55 + gap); if (x0 < 4 || x0 + lw > w - 4) continue;
+              if (row.some((q) => x0 < q.x + q.w + gap && x0 + lw + gap > q.x)) continue;
+              placed = { x: x0, y, w: lw, dir }; break;
+            }
+          }
+        }
+        if (!placed) { hide(c.r); continue; }
+        rows.push(placed);
+        e.style.transform = 'translate(' + placed.x.toFixed(1) + 'px,' + placed.y.toFixed(1) + 'px)';
+        const d = c.r.dot; d.hidden = false; d.style.transform = 'translate(' + c.sx.toFixed(1) + 'px,' + c.sy.toFixed(1) + 'px)';
+        const lx = clamp(c.sx, placed.x + 10, placed.x + lw - 10), ly = placed.dir < 0 ? placed.y + lh : placed.y;
+        for (const [col, wid] of [['rgba(12,26,18,.75)', 3.5], ['#9be07c', 1.6]]) { const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line'); ln.setAttribute('x1', lx); ln.setAttribute('y1', ly); ln.setAttribute('x2', c.sx); ln.setAttribute('y2', c.sy); ln.setAttribute('stroke', col); ln.setAttribute('stroke-width', wid); ln.setAttribute('stroke-linecap', 'round'); lines.appendChild(ln); }
+      }
     }
     const ray = new THREE.Raycaster();
     function pick(e) {
@@ -1237,7 +1324,7 @@ export function create(V) {
           st.view = { az: V.controls.st.az, el: 0.6, d: Math.max(need, info.dMin) }; V.view(st.view);
         }
       } else {
-        clearSel(); skinSeeThrough(false); setOrganVis(false); st.regs.forEach((r) => r.el.remove()); st.regs = []; if (st.list) { st.list.remove(); st.list = null; }
+        clearSel(); skinSeeThrough(false); setOrganVis(false); st.regs.forEach((r) => { r.el.remove(); r.dot.remove(); }); st.regs = []; while (lines.firstChild) lines.removeChild(lines.firstChild); if (st.list) { st.list.remove(); st.list = null; }
         const mo = V.extras.mouth; if (mo && mo.anchors && mo.anchors.teeth && mo.anchors.teeth.parent) { const ins = mo.anchors.teeth.parent.parent; ins.visible = mo.t > 0.01; ins.children.forEach((c) => { c.visible = true; }); }
         if (!slither) tip.hidden = true;
         fx.reach = 0; if (fx.zoomOut > 1) { fx.zoomOut = 1; if (!instant) V.controls.setGoal({ d: V.info.dFit, px: 0, pz: 0, el: (V.info.portrait ? 40 : 30) * Math.PI / 180 }); }
@@ -1247,7 +1334,7 @@ export function create(V) {
     }
     function setOrganVis(v) { if (st.data) st.data.own.forEach((m) => { m.visible = v; }); }
     function refresh() { if (st.on) { skinSeeThrough(true); insideVisible(); } }
-    function reset() { clearSel(); st.regs.forEach((r) => r.el.remove()); st.regs = []; if (st.list) st.list.remove(); st.list = null; if (st.undoProps) st.undoProps(); st.undoProps = null; st.on = false; st.data = null; st.mat0 = null; st.pose = null; st.k = 0; card.remove(); ring.remove(); }
+    function reset() { clearSel(); st.regs.forEach((r) => { r.el.remove(); r.dot.remove(); }); st.regs = []; lines.remove(); if (st.list) st.list.remove(); st.list = null; if (st.undoProps) st.undoProps(); st.undoProps = null; st.on = false; st.data = null; st.mat0 = null; st.pose = null; st.k = 0; card.remove(); ring.remove(); }
     function resetView() { if (!st.on || !st.view) return false; clearSel(); V.view(st.view); return true; } // Reset shows the whole stretched-out snake again
     return { get on() { return st.on; }, get k() { return st.k; }, set, resetView, toggle: () => set(!st.on), after, pick, select, clearSel, refresh, reset, seeMore, stepPose, get parts() { return st.data && st.data.parts; }, get selCenter() { return st.sel ? st.selC : null; } };
   }
@@ -1256,8 +1343,17 @@ export function create(V) {
   on(bBite, 'click', () => { if (show && show.name === 'bite') { stopShow(); return; } startShow({ name: 'bite', btn: bBite }); bite(); });
   on(bEat, 'click', () => { if (show && show.name === 'eat') { stopShow(); return; } startShow({ name: 'eat', btn: bEat }); eat(); });
   on(bEye, 'click', () => { if (show && show.name === 'eye') { stopShow(); return; } startShow({ name: 'eye', btn: bEye }); eyeShow(); });
-  on(bSlither, 'click', () => { if (slither && !slither.stopping) stopSlither(true); else startSlither(); });
-  on(bAnat, 'click', () => anat && anat.toggle());
+  on(bSlither, 'click', () => { if (slither && !slither.stopping) stopSlither(true); else { exclusive('slither'); startSlither(); } });
+  on(bAnat, 'click', () => { if (!anat) return; if (!anat.on) exclusive('anatomy'); anat.toggle(); });
+  // v5.09: starting one thing turns off whatever else is on - except the ones that go together (Anatomy and Open mouth)
+  function exclusive(kind) {
+    if (show) stopShow(true);
+    if (slither && kind !== 'slither') stopSlither();
+    if (kind !== 'scale') V.scaleOff();
+    if (anat && anat.on && kind !== 'mouth' && kind !== 'view' && kind !== 'anatomy') anat.set(false, true);
+    if (kind === 'slither' || kind === 'scale') V.closeMouth();
+    return false;
+  }
   on(bFull, 'click', () => V.toggleFull());
   // a tap (not a drag) picks a part while Anatomy is on; a double-click zooms in, or back out
   let down = null;
@@ -1309,6 +1405,7 @@ export function create(V) {
     },
     camera() { return camera(); },
     moreButtons: [bEye, bFull],
+    exclusive: (k) => exclusive(k),
     after() { if (anat) anat.after(); },
     get locked() { return !!show; },
     // v5.05: zooming in goes towards the part picked in Anatomy (or the head where it now is), and the camera keeps
@@ -1321,16 +1418,20 @@ export function create(V) {
     anatOn: () => !!(anat && anat.on),
     syncFull(f) { if (hdb) { if (f) bar.appendChild(hdb); else if (V.opts.head && V.opts.head.parentNode) V.opts.head.parentNode.insertBefore(hdb, V.opts.head.nextSibling); } bFull.innerHTML = (f ? ICON.exit : ICON.full) + '<span>' + (f ? 'Exit fullscreen' : 'Fullscreen') + '</span>'; bFull.setAttribute('aria-pressed', String(f)); },
     // scale labels never sit on the snake: move a label (x, y = its anchor; the box hangs above it, centred) out of the way
-    avoid(x, y, w, h) {
+    avoid(x, y, w, h, extra) {
+      // v5.09: a label always sits ABOVE the snake (below it only when there is no room above), never on it
       const info = V.info; if (!info || !V.cam) return [x, y];
       const W = stage.clientWidth, H = stage.clientHeight, v = new THREE.Vector3(); let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
-      for (let i = 0; i <= 30; i++) { const p = rig && rig.active ? rig.point((i / 30) * info.F.L) : info.body.spine((i / 30) * info.F.L); v.copy(p).project(V.cam); if (v.z > 1) continue; const sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H; x0 = Math.min(x0, sx); y0 = Math.min(y0, sy); x1 = Math.max(x1, sx); y1 = Math.max(y1, sy); }
-      const m = 10; x0 -= m; y0 -= m * 1.6; x1 += m; y1 += m;
-      const L = x - w / 2, Rr = x + w / 2, T = y - h, Bm = y;
-      if (Rr < x0 || L > x1 || Bm < y0 || T > y1) return [x, y];
-      const up = y0 - 4, dn = y1 + h + 4;
-      if (up - h > 2) return [x, up]; if (dn < H - 2) return [x, dn];
-      return [x < (x0 + x1) / 2 ? Math.max(w / 2 + 2, x0 - w / 2 - 4) : Math.min(W - w / 2 - 2, x1 + w / 2 + 4), y];
+      for (let i = 0; i <= 40; i++) { const xx = (i / 40) * info.F.L, p = rig && rig.active ? rig.point(xx) : info.body.spine(xx); for (const u of [1, -1]) { v.copy(p); v.y += u * info.F.Hh(xx); v.project(V.cam); if (v.z > 1) continue; const sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H; x0 = Math.min(x0, sx); y0 = Math.min(y0, sy); x1 = Math.max(x1, sx); y1 = Math.max(y1, sy); } }
+      for (const p of extra || []) { v.copy(p).project(V.cam); if (v.z > 1) continue; const sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H; x0 = Math.min(x0, sx); y0 = Math.min(y0, sy); x1 = Math.max(x1, sx); y1 = Math.max(y1, sy); } // (and the ruler)
+      x = clamp(x, w / 2 + 4, W - w / 2 - 4); y -= 8; // (a little above its own point, clear of the ruler)
+      if (x1 < x0) return [x, Math.max(h + 4, y)];
+      const m = 12; x0 -= m; y0 -= m; x1 += m; y1 += m;
+      const L = x - w / 2, Rr = x + w / 2;
+      if (Rr < x0 || L > x1 || y < y0) return [x, Math.max(h + 4, y)]; // beside the snake or already above it
+      if (y0 - h > 4) return [x, y0]; // just above the snake
+      if (y1 + h + 4 < H) return [x, y1 + h]; // no room above: just below it
+      return [x < (x0 + x1) / 2 ? Math.max(w / 2 + 4, x0 - w / 2 - 4) : Math.min(W - w / 2 - 4, x1 + w / 2 + 4), y];
     },
     dispose() { alive = false; fx.reset(); if (hdb) hdb.remove(); closeSide(); },
     // for tests: freeze a show at s seconds

@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js';
-import * as EXTRA from './extras.js'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=509'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=509'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -409,7 +409,11 @@ function buildBody(P, F, pose, quality) {
   if (Hd.pupil !== 'none') bumps.push({ x: eyeX0, xs: eyeRad * 0.95, th: eyeA, ts: (eyeRad * 0.95) / eyeRl, amp: -(eyeRad * 0.2) / eyeRl, mirror: true, sock: true });
 
   // spine point & frame at x
-  const spine = (x) => { const p = pose.at(x); return new THREE.Vector3(p[0], F.Hh(x) * F.bf + pose.Ly(x), p[1]); };
+  // v5.09: towards the snout tip the centre line keeps the height it has a little further back (it used to dip to the
+  // ground with the shrinking head, tilting the last cross-sections forward: the top of the snout jutted out over the
+  // chin and left a wedge/notch at the front of the jaw)
+  const xa = F.Hl * 0.1, hX = (x) => (x < 2 * xa ? xa + (x * x) / (4 * xa) : x);
+  const spine = (x) => { const p = pose.at(x); return new THREE.Vector3(p[0], F.Hh(hX(x)) * F.bf + pose.Ly(x), p[1]); };
   const frameAt = (x) => {
     const e = Math.max(L * 0.0015, 1e-5), a = spine(Math.max(0, x - e)), b = spine(Math.min(L, x + e));
     const T = b.sub(a).normalize(); const U = new THREE.Vector3(0, 1, 0).addScaledVector(T, -T.y).normalize();
@@ -420,7 +424,9 @@ function buildBody(P, F, pose, quality) {
     const W = F.W(x), H = F.Hh(x), st = Math.sin(th), ct = Math.cos(th), head = x < F.Hl * 1.05;
     const n = ct >= 0 ? nTop(x) : 3.0;
     let sx = Math.sign(st) * Math.abs(st) ** (2 / n), sy = Math.sign(ct) * Math.abs(ct) ** (2 / n);
-    if (ct < 0) { sy *= F.bf; if (head) sx *= lerp(0.86, 1, sstep(F.Hl * 0.6, F.Hl * 1.1, x)); }
+    // v5.09: the lower jaw narrows smoothly from the side of the head towards the chin (it used to step in by 14% right at
+    // the side line, which left a notch - a little triangle - at the front of the jaw under the snout)
+    if (ct < 0) { sy *= F.bf; if (head) sx *= lerp(1, lerp(0.86, 1, sstep(F.Hl * 0.6, F.Hl * 1.1, x)), sstep(0, 0.7, -ct)); }
     if (head && ct > 0) sx *= 1 - (Hd.taper || 0.2) * sy * (1 - sstep(F.Hl * 0.85, F.Hl * 1.25, x));
     let k = 1;
     for (const b of bumps) {
@@ -947,6 +953,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
   const roof = jawLining(true), floorJ = jawLining(false);
   const palate = new THREE.Mesh(roof.g, lining), floor = new THREE.Mesh(floorJ.g, lining);
   palate.receiveShadow = floor.receiveShadow = true;
+  palate.castShadow = floor.castShadow = true; // v5.09: with the mouth open the head is an open shell; the lining closes it in the shadow too (no thin loop on the ground)
   // the corners of the mouth: a short fold of skin between the two jaws, just in front of the hinge
   const cheekX = xs.filter((x) => x >= xh * 0.84), cheekK = 10, cheekPts = [], cheekCols = [], cheekInfo = [];
   for (const x of cheekX) for (const side of [1, -1]) {
@@ -955,7 +962,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
   }
   const cheekG = new THREE.BufferGeometry(); cheekG.setAttribute('position', new THREE.Float32BufferAttribute(cheekPts, 3)); cheekG.setAttribute('color', new THREE.Float32BufferAttribute(cheekCols, 3));
   { const idx = [], per = (cheekK + 1); for (let i = 0; i < cheekX.length - 1; i++) for (const sd of [0, 1]) for (let k = 0; k < cheekK; k++) { const a = (i * 2 + sd) * per + k, b = a + 2 * per; idx.push(a, a + 1, b, a + 1, b + 1, b); } cheekG.setIndex(idx); cheekG.computeVertexNormals(); }
-  const cheekOrig = cheekG.attributes.position.array.slice(), cheeks = new THREE.Mesh(cheekG, lining);
+  const cheekOrig = cheekG.attributes.position.array.slice(), cheeks = new THREE.Mesh(cheekG, lining); cheeks.castShadow = true;
   // the throat: a dark tunnel going back into the neck
   const thrR = F.W(xh) * 0.5, thrH = F.Hh(xh) * 0.42, thrL = Hl * 0.35, thrG = new THREE.CylinderGeometry(1, 0.35, 1, 24, 6, true), tp = thrG.attributes.position, tc = [];
   for (let i = 0; i < tp.count; i++) { const y = tp.getY(i) + 0.5, c = deep.clone().lerp(black, 0.4 + 0.6 * (1 - y)); tc.push(c.r, c.g, c.b); }
@@ -1740,7 +1747,7 @@ export function mount(host, opts) {
   const V = { THREE, P, opts, el, on, wrap, stage, labels, bar, canvas, btn, bBite, bAnat, reduce,
     get cam() { return cam; }, get controls() { return controls; }, get info() { return info; }, get extras() { return extras; }, get group() { return snakeGroup; }, get scene() { return ctx.scene; },
     kick: () => kick(), toggleFull: () => toggleFull(), scaleOn: () => !!(scaleObj && scaleObj.visible),
-    get occ() { return ctx.occ; }, get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
+    get occ() { return ctx.occ; }, scaleOff: () => { if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(false); }, closeMouth: () => { if (mouthGoal) toggleMouth(false); }, get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
     focus: (p, d, elv) => focusOn(p, d, elv), view: (g) => controls.setGoal(Object.assign({ az: controls.st.az, d: info.dFit, px: 0, pz: 0 }, g)) };
   const fx = EXTRA.create(V);
   // v5.05: the main buttons stay in view; the rest (eye shield, camera views, size, fullscreen) are behind See more / Show less
@@ -2008,6 +2015,7 @@ float slScale(vec2 m) {
       const rw = Math.max(L * 0.025, 0.004), rg = new THREE.BoxGeometry(L, rw * 0.25, rw);
       const ruler = new THREE.Mesh(rg, [m, m, new THREE.MeshStandardMaterial({ map: tickT, roughness: 0.7 }), m, m, m]);
       ruler.position.copy(rulerAt).addScaledVector(new THREE.Vector3(0, 1, 0), rw * 0.125); ruler.rotation.y = -info.axisAng; ruler.castShadow = true; scaleObj.add(ruler);
+      scaleObj.userData.ends = [-0.5, -0.25, 0, 0.25, 0.5].map((k) => ruler.position.clone().addScaledVector(side, L * k)); // (labels keep off the ruler too)
       // v4.81: labels sit above the far end of the ruler and beside the person's head, never on the snake
       scaleObj.userData.labels = [{ p: ruler.position.clone().addScaledVector(side, L * 0.5).add(new THREE.Vector3(0, Math.max(rw * 3, L * 0.04), 0)), t: fmtLen(L) + ' ruler (typical adult, laid straight)' }];
       if (L >= 0.4) {
@@ -2064,7 +2072,7 @@ float slScale(vec2 m) {
   }
   const v3 = new THREE.Vector3();
   function updateMarkers() {
-    if (!markers.length) return; const w = stage.clientWidth, h = stage.clientHeight, placed = [];
+    if (!markers.length) return; const w = stage.clientWidth, h = stage.clientHeight, placed = [], sBoxes = [];
     for (const m of markers) if (m.fn) m.p = m.fn();
     const list = markers.map((m) => { v3.copy(m.p).project(cam); return { m, x: (v3.x * 0.5 + 0.5) * w, y: (-v3.y * 0.5 + 0.5) * h, vis: v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05 }; }).sort((a, b) => a.y - b.y);
     for (const o of list) {
@@ -2072,7 +2080,7 @@ float slScale(vec2 m) {
       if (!m.sz) m.sz = [m.el.offsetWidth || 120, m.el.offsetHeight || 20];
       let x = Math.min(o.x, w - m.sz[0] + 6), y = o.y;
       if (!m.scale) { for (const q of placed) if (x < q[0] + q[2] && x + m.sz[0] > q[0] && y < q[1] + q[3] && y + m.sz[1] > q[1]) y = q[1] + q[3] + 2; }
-      else { const mt = m.el.firstChild, wl = (mt && mt.offsetWidth) || m.sz[0], hl = (mt && mt.offsetHeight) || m.sz[1]; [x, y] = fx.avoid(clamp(o.x, wl / 2 + 2, w - wl / 2 - 2), y, wl, hl); } // v4.81: a size label never covers the snake
+      else { const mt = m.el.firstChild, wl = (mt && mt.offsetWidth) || m.sz[0], hl = (mt && mt.offsetHeight) || m.sz[1]; [x, y] = fx.avoid(clamp(o.x, wl / 2 + 2, w - wl / 2 - 2), y, wl, hl, scaleObj && scaleObj.userData.ends); for (let t = 0; t < 4 && (m._sb = sBoxes.find((q) => Math.abs(q[0] - x) < (q[2] + wl) / 2 + 4 && Math.abs(q[1] - y) < Math.max(q[3], hl) + 4)); t++) y = m._sb[1] - m._sb[3] - 6; sBoxes.push([x, y, wl, hl]); } // (and never on another size label) // v4.81: a size label never covers the snake
       placed.push([x, y, m.sz[0], m.sz[1]]);
       m.el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
       m.el.classList.toggle('sp3d-moved', Math.abs(y - o.y) > 1 || Math.abs(x - o.x) > 1);
@@ -2107,11 +2115,11 @@ float slScale(vec2 m) {
     }
     kick();
   }
-  on(bMouth, 'click', () => toggleMouth());
+  on(bMouth, 'click', () => { if (!mouthGoal) fx.exclusive('mouth'); toggleMouth(); }); // v5.09: one thing at a time (Open mouth goes with Anatomy)
   // v4.81: Anatomy and See bite moved to extras.js (see-through anatomy you can tap; a bite with an x-ray of the arm)
-  on(bVBody, 'click', () => resetView());
-  on(bVHead, 'click', () => controls.setGoal({ az: viewAz('front') + 0.9, el: (20 * Math.PI) / 180, d: Math.max(info.dMin * 1.3, info.F.Hl * 4.5), px: 0, pz: 0 }));
-  on(bVTop, 'click', () => controls.setGoal({ az: controls.st.az, el: (80 * Math.PI) / 180, d: (info.Rb * 1.12) / Math.tan(Math.min(info.vf, info.hf)) + info.hMax, px: 0, pz: 0 })); on(bFull, 'click', toggleFull); on(bScale, 'click', () => toggleScale()); on(bDet, 'click', toggleDetails);
+  on(bVBody, 'click', () => { fx.exclusive('view'); resetView(); });
+  on(bVHead, 'click', () => fx.exclusive('view') || controls.setGoal({ az: viewAz('front') + 0.9, el: (20 * Math.PI) / 180, d: Math.max(info.dMin * 1.3, info.F.Hl * 4.5), px: 0, pz: 0 }));
+  on(bVTop, 'click', () => fx.exclusive('view') || controls.setGoal({ az: controls.st.az, el: (80 * Math.PI) / 180, d: (info.Rb * 1.12) / Math.tan(Math.min(info.vf, info.hf)) + info.hMax, px: 0, pz: 0 })); on(bFull, 'click', toggleFull); on(bScale, 'click', () => { if (bScale.getAttribute('aria-pressed') !== 'true') fx.exclusive('scale'); toggleScale(); }); on(bDet, 'click', toggleDetails);
   on(bSet, 'click', () => { panel.hidden = !panel.hidden; bSet.setAttribute('aria-expanded', String(!panel.hidden)); });
   on(cScene, 'change', () => setSceneVisible(cScene.checked));
   on(qs, 'change', () => { quality = qs.value; renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality === 'low' ? 1.25 : 2)); rebuild(); });

@@ -486,6 +486,11 @@ function buildAll(A) {
       const rIn = Math.max(F.w0 * 2, Rb * 0.05), rOut = Math.min(near0, Math.max(Rb * 5, 3));
       put('carpet', (Rn, v) => grassGeo(Rn, low ? 8 : 13, h, colA, colB, h * 0.22, { heads: dry && !lush ? (v === 0 ? 0.22 : 0.1) : heath ? 0 : 0.06, headCol: dry && !lush ? '#cdb06a' : '#9a9a58', tip: dry && !lush ? '#d8c58c' : null, w: 0.035 }),
         grassMat(), nTuft, rIn, rOut, [0.6, 1.25], { variants: 3, distr: 'lin', ok: (x, z) => clearS(x, z, h), tilt: 0.15, recv: true, col: () => tint(0.85, 1.12, 0.08) });
+      // v5.09: beyond it the grass thins out gradually (it used to stop at a hard edge: a dark green ring of grass
+      // with bare straw-coloured ground right after it)
+      const rFar = Math.min(near0 * 1.6, rOut * 2.6), Rf = rng(seed + 977);
+      put('carpet', (Rn, v) => grassGeo(Rn, low ? 7 : 11, h, colA, colB, h * 0.22, { heads: dry && !lush ? 0.15 : heath ? 0 : 0.05, headCol: dry && !lush ? '#cdb06a' : '#9a9a58', tip: dry && !lush ? '#d8c58c' : null, w: 0.035 }),
+        grassMat(), Math.round(nTuft * 0.9), rOut * 0.85, rFar, [0.6, 1.25], { variants: 2, distr: 'area', ok: (x, z, r) => Rf() < 1 - sstep(rOut, rFar, r) * 0.92, tilt: 0.15, recv: true, col: () => tint(0.85, 1.12, 0.08) });
       if (heath) put('heather', (Rn) => grassGeo(Rn, low ? 20 : 40, h * 0.9, '#4a5530', '#6a6442', h * 0.5, { lean: 0.8, w: 0.018, tip: '#9a6f8c', heads: 0 }), grassMat(), 700, rIn, rOut, [0.6, 1.2], { variants: 2, distr: 'lin', ok: (x, z) => clearS(x, z, h), col: () => tint(0.85, 1.1, 0.1) });
     }
     if (U === 'arid' || U === 'gibber' || U === 'sand') {
