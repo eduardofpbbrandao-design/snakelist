@@ -188,36 +188,44 @@
   html.sl-intro-lock, html.sl-intro-lock body { overflow: hidden !important; overscroll-behavior: none; } /* v4.80: the page can't move behind the opening */
   /* the tick: a GPU layer of its own and a softer, longer draw */
   .intro-box { transform: translateZ(0); backface-visibility: hidden; }
-  .intro-wipe { opacity: 0; transform: scale(1.03); transition: opacity 0.45s ease, transform 0.45s ease; pointer-events: none; }
+  /* v4.92: a plain, slower crossfade (no zoom) - the photo underneath is already drawn, so nothing flashes */
+  .intro-wipe { opacity: 0; transition: opacity 0.8s cubic-bezier(.4,0,.2,1); pointer-events: none; }
+  /* v4.92: the wall and its shade dissolve into the photo while the logo glides down to its place on it */
+  .intro.intro-glide { background-color: transparent; transition: background-color 1s cubic-bezier(.4,0,.2,1); }
+  .intro.intro-glide .photo-zoom, .intro.intro-glide .photo-scrim { opacity: 0; transition: opacity 1s cubic-bezier(.4,0,.2,1); }
+  .intro.intro-glide.intro-wipe { transition: opacity 0.4s ease; }
+  .intro-line { transform-origin: 50% 50%; will-change: transform; }
   .intro-gone { display: none; }
 
   /* the zoom-in and the slow drift sit on two elements: two transform animations on one element
      can't run on the GPU, so the drift used to run on the main thread and froze whenever the page
      behind was being drawn (the end of the opening) - now the browser animates both on its own */
-  .photo-zoom { position: absolute; inset: -4%; will-change: transform; animation: wall-in 0.8s ease both; }
+  .photo-zoom { position: absolute; inset: -4%; will-change: transform, opacity; animation: wall-in 1.6s cubic-bezier(.25,.6,.3,1) both; }
   .photo-wall {
     will-change: transform;
     contain: paint;
     position: absolute; inset: 0;
     display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr);
-    gap: 4px;
-    animation: wall-drift 12s 0.8s ease-in-out infinite alternate;
+    gap: 3px;
+    animation: wall-drift 16s 1.6s ease-in-out infinite alternate;
   }
-  .photo-wall .ph { background-size: cover; background-position: center; opacity: 0; will-change: opacity, transform; animation: ph-in 0.5s ease forwards; }
-  .photo-wall .ph-1 { animation-delay: 0.03s } .photo-wall .ph-2 { animation-delay: 0.08s }
-  .photo-wall .ph-3 { animation-delay: 0.13s } .photo-wall .ph-4 { animation-delay: 0.18s }
-  .photo-wall .ph-5 { animation-delay: 0.23s } .photo-wall .ph-6 { animation-delay: 0.28s }
-  .photo-wall .ph-7 { animation-delay: 0.33s } .photo-wall .ph-8 { animation-delay: 0.38s }
-  @keyframes ph-in   { from { opacity: 0; transform: scale(1.08); } to { opacity: 1; transform: scale(1); } }
-  @keyframes wall-in { from { transform: scale(1.12); } to { transform: scale(1); } }
+  .photo-wall .ph { background-size: cover; background-position: center; opacity: 0; will-change: opacity, transform; animation: ph-in 1.1s cubic-bezier(.25,.6,.3,1) forwards; }
+  .photo-wall .ph-1 { animation-delay: 0.05s } .photo-wall .ph-2 { animation-delay: 0.14s }
+  .photo-wall .ph-3 { animation-delay: 0.23s } .photo-wall .ph-4 { animation-delay: 0.32s }
+  .photo-wall .ph-5 { animation-delay: 0.41s } .photo-wall .ph-6 { animation-delay: 0.50s }
+  .photo-wall .ph-7 { animation-delay: 0.59s } .photo-wall .ph-8 { animation-delay: 0.68s }
+  @keyframes ph-in   { from { opacity: 0; transform: scale(1.05); } to { opacity: 1; transform: scale(1); } }
+  @keyframes wall-in { from { transform: scale(1.08); } to { transform: scale(1); } }
   @keyframes wall-drift { from { transform: scale(1); } to { transform: scale(1.07); } }
 
   /* Deep green wash so the photographs read as atmosphere and the type stays legible. */
   .photo-scrim {
     position: absolute; inset: 0;
     background:
-      radial-gradient(78% 62% at 50% 50%, rgba(8,24,15,0.18) 0%, rgba(8,24,15,0.52) 62%, rgba(8,24,15,0.86) 100%),
-      linear-gradient(180deg, rgba(18,66,38,0.28), rgba(8,24,15,0.5));
+      /* v4.92: the wall is no longer darkest at its edges - a soft dark pool sits only behind the logo */
+      radial-gradient(46% 30% at 50% 50%, rgba(6,20,12,0.62) 0%, rgba(6,20,12,0.42) 55%, rgba(6,20,12,0) 100%),
+      radial-gradient(120% 90% at 50% 50%, rgba(8,24,15,0.22) 40%, rgba(8,24,15,0.55) 100%),
+      linear-gradient(180deg, rgba(18,66,38,0.18), rgba(8,24,15,0.32));
   }
 
   .intro-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; }
@@ -314,7 +322,7 @@
 
   @media (max-width: 640px) {
     .photo-wall { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); }
-    .intro-line { gap: 12px; }
+    .intro-line { gap: 12px; font-size: min(108px, 16.5vw); } /* v4.92: fits inside a phone screen with a margin */
   }
   @media (prefers-reduced-motion: reduce) {
     .photo-zoom, .photo-wall, .photo-wall .ph, .intro-box, .box-tick, .intro-title { animation: none; }
@@ -1812,7 +1820,17 @@
   .hero-media .hero-fill { object-fit: cover; filter: blur(28px) saturate(1.1) brightness(0.8); transform: scale(1.12); }
   /* a soft shade at the top and bottom so the words read, and a gentle dark edge at the bottom of the screen */
   .hero-shade { position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(180deg, rgba(4,16,8,0.25) 0%, rgba(4,16,8,0) 22%, rgba(4,16,8,0) 50%, rgba(4,16,8,0.45) 78%, rgba(4,16,8,0.72) 100%); }
+    background: linear-gradient(180deg, rgba(4,16,8,0.25) 0%, rgba(4,16,8,0.08) 12%, rgba(4,16,8,0) 24%, rgba(4,16,8,0) 46%, rgba(4,16,8,0.08) 56%,
+      rgba(4,16,8,0.24) 66%, rgba(4,16,8,0.44) 77%, rgba(4,16,8,0.62) 88%, rgba(4,16,8,0.74) 100%); }
+  /* v4.92: the blur grows step by step toward the bottom - four layers, each blurring twice as much, each faded
+     in over the one before with an overlapping soft mask, so there is never a visible edge */
+  .hero-blur { position: absolute; left: 0; right: 0; bottom: 0; height: 58%; pointer-events: none; }
+  .hero-blur i { position: absolute; inset: 0; -webkit-backdrop-filter: blur(var(--b)); backdrop-filter: blur(var(--b)); }
+  .hero-blur i:nth-child(1) { --b: 1.5px; -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%); mask-image: linear-gradient(180deg, transparent 0%, #000 30%); }
+  .hero-blur i:nth-child(2) { --b: 4px; -webkit-mask-image: linear-gradient(180deg, transparent 20%, #000 50%); mask-image: linear-gradient(180deg, transparent 20%, #000 50%); }
+  .hero-blur i:nth-child(3) { --b: 9px; -webkit-mask-image: linear-gradient(180deg, transparent 42%, #000 72%); mask-image: linear-gradient(180deg, transparent 42%, #000 72%); }
+  .hero-blur i:nth-child(4) { --b: 18px; -webkit-mask-image: linear-gradient(180deg, transparent 64%, #000 94%); mask-image: linear-gradient(180deg, transparent 64%, #000 94%); }
+  @media (prefers-reduced-transparency: reduce) { .hero-blur { display: none; } }
   .hero-copy { position: absolute; left: 0; right: 0; bottom: 13%; padding: 0 20px; text-align: center; } /* v4.86: centred, the paragraph right under the logo */
   .hero-copy > p { margin: 0 auto; } .hero-title.hero-wm { display: flex; justify-content: center; width: max-content; }
   @media (max-aspect-ratio: 1/1) { .hero-copy > p, .hero-copy > .hero-sub { margin-left: auto; margin-right: auto; } }
@@ -1826,8 +1844,8 @@
     --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.5)) drop-shadow(0 4px 14px rgba(0,0,0,0.35)); filter: none; }
   .hero-title.hero-wm .sl-titletext .snake-s { height: 0.71em; }
   /* v4.84: the letters come in quickly one after another, left to right, once the opening has gone */
-  .hero-title.hero-wm .hl { display: inline-block; opacity: 0; transform: translateY(0.18em) scale(0.92); }
-  .sl-hero.hero-go .hero-title.hero-wm .hl { animation: hero-letter .42s cubic-bezier(.2,.8,.2,1) forwards; animation-delay: calc(480ms + var(--i) * 60ms); }
+  /* v4.92: the logo only animates once (in the opening, which glides it here) - no second letter-by-letter reveal */
+  .hero-title.hero-wm .hl { display: inline-block; }
   @keyframes hero-letter { to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) { .hero-title.hero-wm .hl { opacity: 1; transform: none; animation: none !important; } }
   /* the letters are split, so the gradient goes on each one */
@@ -1842,26 +1860,30 @@
     .hero-mark { background-image: radial-gradient(circle at 30% 40%, #b4ec98 0%, #8fd873 30%, #6cc052 62%, #4f9e3d 100%);
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   }
-  .hero-copy > .hero-sub { margin-top: clamp(6px, 1.2vh, 14px); max-width: 44ch; font: 600 clamp(14px, min(1.3vw, 2.4vh), 22px)/1.5 'Inter', sans-serif;
-    letter-spacing: 0.005em; text-wrap: balance; color: #9fe08a; text-shadow: 0 1px 2px rgba(0,0,0,0.85), 0 0 14px rgba(0,0,0,0.7); }
+  .hero-copy > .hero-sub { margin-top: clamp(12px, 2.2vh, 24px); max-width: 42ch; font: 600 clamp(15.5px, min(1.5vw, 2.7vh), 25px)/1.55 'Inter', sans-serif;
+    letter-spacing: 0.006em; text-wrap: balance; color: #a9e795; text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 18px rgba(0,0,0,0.75); }
+  /* v4.92: a soft dark pool behind the logo and the words, so they read on any part of the photo */
+  .hero-copy::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 50%; width: min(1100px, 130%); height: 190%; transform: translate(-50%, -50%);
+    background: radial-gradient(closest-side, rgba(4,16,8,0.5), rgba(4,16,8,0.28) 55%, rgba(4,16,8,0)); pointer-events: none; }
   .hero-cue { position: fixed; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); z-index: 3; transform: translateX(-50%); display: flex; flex-direction: column;
     align-items: center; gap: 4px; padding: 8px 14px; border: 0; border-radius: 999px; background: none; cursor: pointer;
     color: #9fe08a; font: 700 clamp(11px, 0.9vw, 15px)/1 'JetBrains Mono', monospace; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.95;
     text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
   .hero-cue:hover { opacity: 1; }
   .hero-cue:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; opacity: 1; }
-  .hero-cue svg { width: 22px; height: 22px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); animation: hero-nudge 2.6s ease-in-out 1.8s infinite; }
-  @keyframes hero-nudge { 0%, 55%, 100% { transform: translateY(0); } 70% { transform: translateY(5px); } 85% { transform: translateY(1px); } }
+  .hero-cue svg { width: 22px; height: 22px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); animation: hero-nudge 2.4s ease-in-out 1.8s infinite; will-change: transform; }
+  @keyframes hero-nudge { 0%, 100% { transform: translateY(0); opacity: 0.75; } 50% { transform: translateY(5px); opacity: 1; } } /* v4.92: a slow, even bob */
   /* phones held upright: the snake's head stays in view */
   @media (max-aspect-ratio: 1544/1000) { .hero-media img:not(.hero-fill) { -webkit-mask-image: none; mask-image: none; } }
   @media (max-aspect-ratio: 1/1) { .hero-media img:not(.hero-fill) { object-fit: cover; object-position: 42% 45%; top: 9%; height: calc(100vw / 1.544 * 1.08); -webkit-mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent); } .hero-copy { left: 0; right: 0; max-width: none; bottom: 15%; text-align: center; } .hero-title { font-size: clamp(44px, 14vw, 110px); } }
   @media (max-height: 520px) and (min-aspect-ratio: 1/1) { .hero-copy { bottom: 18%; } .hero-title { font-size: clamp(40px, 14vh, 90px); } }
   /* the words rise in gently once the opening has gone */
   .sl-hero.hero-wait .hero-copy > *, .sl-hero.hero-wait .hero-cue { opacity: 0; }
-  .sl-hero.hero-wait .hero-copy > * { transform: translateY(14px); }
-  .sl-hero.hero-go .hero-copy > *, .sl-hero.hero-go .hero-cue { transition: opacity 1.1s ease, transform 1.3s cubic-bezier(0.2, 0.7, 0.2, 1); }
-  .sl-hero.hero-go .hero-sub { transition-delay: 0.18s; }
-  .sl-hero.hero-go .hero-cue { transition-delay: 0.7s; }
+  .sl-hero.hero-wait .hero-copy > .hero-sub { transform: translateY(8px); }
+  .sl-hero.hero-go .hero-copy > *, .sl-hero.hero-go .hero-cue { transition: opacity 0.9s ease, transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .sl-hero.hero-go .hero-title { transition: opacity 0.35s ease; } /* takes over from the gliding logo in the same spot */
+  .sl-hero.hero-go .hero-sub { transition-delay: 0.25s; }
+  .sl-hero.hero-go .hero-cue { transition-delay: 0.8s; }
   @media (prefers-reduced-motion: reduce) {
     .sl-hero.hero-wait .hero-copy > * { transform: none; }
     .sl-hero.hero-go .hero-copy > *, .sl-hero.hero-go .hero-cue { transition: opacity 0.4s ease; transition-delay: 0s; }
@@ -3354,18 +3376,31 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
         // ...and let it settle (its first layout and paint) before the fade starts, so the fade runs smoothly
         var faded = false, fade = function () {
           if (faded) return; faded = true;
-          intro.classList.add("intro-wipe");
-          setTimeout(function () {
-            intro.classList.add("intro-gone");
-            window.__introDone = true;
-            document.dispatchEvent(new Event("sl-intro-done"));
-          }, 520);
+          var finish = function (ms) {
+            intro.classList.add("intro-wipe");
+            setTimeout(function () {
+              intro.classList.add("intro-gone");
+              window.__introDone = true;
+              document.dispatchEvent(new Event("sl-intro-done"));
+            }, ms);
+          };
+          // v4.92: the logo is shown once. It glides from the middle of the screen to its place on the photo
+          // while the wall of photos dissolves into it, then hands over to the photo's own logo in the same spot.
+          var line = intro.querySelector(".intro-line"), ht = document.querySelector("#sl-hero:not([hidden]) .hero-title");
+          var calm = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+          var a = line && line.getBoundingClientRect(), b = ht && ht.getBoundingClientRect();
+          if (calm || !a || !b || !a.width || !b.width || b.bottom > window.innerHeight + 2) { finish(820); return; }
+          var k = b.width / a.width, dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+          intro.classList.add("intro-glide");
+          line.style.transition = "transform 1s cubic-bezier(.45,0,.2,1)";
+          line.style.transform = "translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px) scale(" + k.toFixed(4) + ")";
+          setTimeout(function () { finish(420); }, 1000);
         };
         requestAnimationFrame(function () { requestAnimationFrame(function () {
           // (a short wait: the fade runs on the GPU, so it stays smooth even while the page finishes its own work)
           if (window.requestIdleCallback) requestIdleCallback(fade, { timeout: 300 }); else setTimeout(fade, 150);
         }); });
-        setTimeout(fade, 2500); // never hold the opening longer than this
+        setTimeout(fade, 2500); // never hold the opening longer than this (after the release below)
       };
       // opened from a species page link (?sp= ?map= ?f= ?hab= ?type= ?fam=): no opening, straight there
       if (/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search) || window.SL_CAME_BACK) {
@@ -3377,7 +3412,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
           if (go) return; go = true;
           requestAnimationFrame(function () { requestAnimationFrame(function () {
             intro.classList.remove("intro-hold");
-            setTimeout(window.__dismissIntro, 1300);
+            setTimeout(window.__dismissIntro, 2300); // v4.92: time to look at the photographs
           }); });
         };
         var whenReady = function () {
@@ -3387,6 +3422,9 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
             var im = new Image(); im.src = m[2];
             return im.decode ? im.decode().catch(function () {}) : Promise.resolve();
           });
+          // v4.92: ...and the big photo that comes next, so the crossfade never shows an empty (dark) screen
+          var hp = document.querySelector("#sl-hero .hero-media img:not(.hero-fill)");
+          if (hp && hp.decode) pics.push(hp.decode().catch(function () {}));
           // ...and the wordmark's typeface, so the title doesn't jump to it halfway through rising
           try { if (document.fonts && document.fonts.load) pics.push(document.fonts.load('600 1em "EB Garamond"', "SnakeList").catch(function () {})); } catch (e) {}
           Promise.all(pics).then(release, release);
@@ -3404,6 +3442,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
   <div class="hero-media" aria-hidden="true">
     <img class="hero-fill" src="species-photos/hero/rough-green-hq-2560.webp" srcset="species-photos/hero/rough-green-hq-900.webp 900w, species-photos/hero/rough-green-hq-1400.webp 1400w, species-photos/hero/rough-green-hq-2000.webp 2000w, species-photos/hero/rough-green-hq-2560.webp 2560w" sizes="(min-aspect-ratio: 1544/1000) 100vw, 155vh" alt="" decoding="async">
     <img src="species-photos/hero/rough-green-hq-2560.webp" srcset="species-photos/hero/rough-green-hq-900.webp 900w, species-photos/hero/rough-green-hq-1400.webp 1400w, species-photos/hero/rough-green-hq-2000.webp 2000w, species-photos/hero/rough-green-hq-2560.webp 2560w" sizes="(min-aspect-ratio: 1544/1000) 100vw, 155vh" alt="" fetchpriority="high" decoding="async">
+    <div class="hero-blur"><i></i><i></i><i></i><i></i></div>
     <div class="hero-shade"></div>
   </div>
   <div class="hero-copy">
@@ -3521,7 +3560,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
 </script>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.91</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v4.92</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-head"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-head)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-me"><a href="https://snakelist.com/about.html">About me</a></p>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
@@ -20412,6 +20451,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v4.92", d: "2026-11-14", items: ["The 3D button and the tags on the cards no longer jump when you move quickly from one card to another.", "A smoother, more cinematic opening: the photographs fade in gently and stay longer, the logo appears once and glides down onto the big snake photo while the photo wall dissolves into it - no flashes and no second reveal.", "The words under the logo are bigger and easier to read, the blur at the bottom of the photo builds up gradually, and Scroll to continue bobs gently."] },
     { v: "v4.91", d: "2026-11-13", items: ["3D snakes look much more real: eyes sit in the head under a clear eye shield with the right colour and pupil for each snake, round lips instead of a triangle mouth, a real-looking mouth inside with curved fangs and a forked tongue.", "Better colours and patterns for many snakes (the smooth green snake is bright green), rattles on rattlesnakes, Gaboon viper horns move with its head.", "3D grass, stones and sand ripples, and 3D opens about 5-10 times faster."] },
     { v: "v4.90", d: "2026-11-13", items: ["The opening photo is zoomed out on tablets and phones held upright, so you see much more of the snake."] },
     { v: "v4.89", d: "2026-11-13", items: ["Achievements: every achievement has its own number of snake points (SP) - the harder it is, the more it's worth. Your score shows your SP, with a note saying what SP means."] },
@@ -22050,6 +22090,8 @@ window.SL_welcome = function (u, back) {
       room.textContent = extra.length ? extra.map(function (id) { return '#grid .card[data-id="' + id + '"] .card-tags'; }).join(",") + "{margin-bottom:26px}" : "";
       later();
     }
+    // v4.92: a card that was shrinking back was held at rest for the measuring: it stays at rest (its parts were just redrawn there)
+    shrink.id = "";
     popApply(true);
   }
   function later() { if (!raf) raf = requestAnimationFrame(paint); }
@@ -22067,7 +22109,7 @@ window.SL_welcome = function (u, back) {
   }
   function popHold() {
     // no transitions for the card(s) involved, and their transform off, so the measuring sees them as laid out
-    var ids = [popId, popPrev].filter(Boolean); if (!ids.length) return;
+    var ids = [popId, popPrev].concat(shrinkIds()).filter(Boolean); if (!ids.length) return; // v4.92: the cards still shrinking back too
     popSt.textContent = ids.map(popSel).join(",") + "{transition:none!important;transform:none!important}";
   }
   // v4.75: where each layer part of a card grows from, kept for a card that is shrinking back too - without it
@@ -22076,6 +22118,10 @@ window.SL_welcome = function (u, back) {
     var c = id && cardById && cardById[id]; if (!c || !c.offsetParent) return "";
     var td = '#td-layer [data-card="' + id + '"]', css = "";
     var r = c.getBoundingClientRect();
+    // v4.92: measured as it is right now, even mid-pop: it grows from its middle, so only its lift moves that point
+    var tf = getComputedStyle(c).transform, lift = { x: 0, y: 0 };
+    if (tf && tf !== "none" && window.DOMMatrixReadOnly) { var M = new DOMMatrixReadOnly(tf); lift.x = M.e; lift.y = M.f; }
+    r = { left: r.left - lift.x, top: r.top - lift.y, width: r.width, height: r.height };
     popParts(id).forEach(function (el, i) {
       var host = el.offsetParent || el.parentNode, hr = host && host.getBoundingClientRect ? host.getBoundingClientRect() : { left: -window.scrollX, top: -window.scrollY };
       var cx = r.left - hr.left + r.width / 2 + (host && host.scrollLeft || 0), cy = r.top - hr.top + r.height / 2 + (host && host.scrollTop || 0);
@@ -22087,21 +22133,22 @@ window.SL_welcome = function (u, back) {
     });
     return css;
   }
-  var shrink = { id: "", css: "", t: 0 };
+  // v4.92: every card still shrinking back keeps its own growth points until it has finished (moving fast across
+  // three cards used to drop the first one's, and its 3D button and tags jumped)
+  var shrinks = {};
+  var shrink = { get id() { return Object.keys(shrinks)[0] || ""; }, set id(v) { if (!v) { Object.keys(shrinks).forEach(function (k) { clearTimeout(shrinks[k].t); }); shrinks = {}; } },
+    get css() { return Object.keys(shrinks).map(function (k) { return shrinks[k].css; }).join(""); }, set css(v) {}, t: 0 };
+  function shrinkIds() { return Object.keys(shrinks); }
   function popApply(instant) {
     var c = popId && cardById && cardById[popId];
-    var keep = shrink.css; // a card still shrinking back keeps its growth points
+    var keep = shrink.css; // the cards still shrinking back keep their growth points
     if (!c || !c.offsetParent) { popSt.textContent = keep; popPrev = ""; return; }
     var sel = popSel(popId), td = '#td-layer [data-card="' + popId + '"]', motion = !still.matches;
     var css = sel + "{z-index:4;box-shadow:0 10px 24px rgba(20,50,25,0.22),0 3px 8px rgba(20,50,25,0.12)" + (motion ? ";transform:translateY(-3px) scale(1.035)" : "") + "}";
-    if (motion) {
-      // measured at the card's normal size: the layers' parts grow from the same middle point
-      popSt.textContent = keep + sel + "{transition:none!important;transform:none!important}";
-      css += partsCss(popId, true);
-    }
+    if (motion) css += partsCss(popId, true); // the layers' parts grow from the card's middle point (v4.92: no snapping it flat to measure)
     if (instant) {
       // the layers were just redrawn: straight back to popped out, without playing the grow again
-      popSt.textContent = keep + css + sel + "," + td + ",#fav-layer [data-pop]{transition:none!important}";
+      popSt.textContent = keep + css + sel + "," + td + ',#fav-layer [data-pop^="' + popId + '~"]{transition:none!important}'; // v4.92: only this card's parts (others may still be shrinking)
       void getComputedStyle(c).transform;
       popPrev = "";
     }
@@ -22112,9 +22159,12 @@ window.SL_welcome = function (u, back) {
     var was = popId;
     popPrev = popId; popId = id;
     // the card being left shrinks back from the same points it grew from
-    clearTimeout(shrink.t);
-    shrink.id = was; shrink.css = was && !still.matches ? partsCss(was, false) : "";
-    shrink.t = setTimeout(function () { shrink.id = ""; shrink.css = ""; if (popId) popApply(true); else popSt.textContent = ""; }, 260);
+    if (shrinks[id]) { clearTimeout(shrinks[id].t); delete shrinks[id]; } // coming back to a card that was shrinking
+    if (was && !still.matches) {
+      if (shrinks[was]) clearTimeout(shrinks[was].t);
+      shrinks[was] = { css: partsCss(was, false), t: setTimeout(function () {
+        delete shrinks[was]; if (popId) popApply(true); else popSt.textContent = shrink.css; }, 260) };
+    }
     if (id) popApply(false); else popSt.textContent = shrink.css;
   }
   document.addEventListener("pointerover", function (e) {
@@ -22148,7 +22198,9 @@ window.SL_welcome = function (u, back) {
     Object.keys(tdBtn).forEach(function (id) { if (!keep[id]) { if (document.activeElement !== tdBtn[id]) { tdBtn[id].remove(); delete tdBtn[id]; } else tdBtn[id].style.top = "-9999px"; } });
   }
   // Mark Seen / See more info ease to a new size (a narrower card): place the 3D button again once they've settled
-  grid.addEventListener("transitionend", function (e) { if (e.target.matches && e.target.matches(".seen-btn, .map-btn")) later(); });
+  // v4.92: only when their SIZE changed - a colour fading in as the mouse passes over them used to re-place every
+  // button on screen in the middle of a card popping out, and the 3D buttons and tags jumped
+  grid.addEventListener("transitionend", function (e) { if (e.target.matches && e.target.matches(".seen-btn, .map-btn") && /^(width|height|min-|max-|padding|margin|font|flex|inline-size|block-size)/.test(e.propertyName || "")) later(); });
   tdLayer.addEventListener("click", function (e) {
     var b = e.target.closest(".td-card-btn"); if (!b) return;
     e.preventDefault(); e.stopPropagation();
