@@ -2025,7 +2025,7 @@
     background: radial-gradient(closest-side, rgba(4,16,8,0.5), rgba(4,16,8,0.28) 55%, rgba(4,16,8,0)); pointer-events: none; }
   .hero-cue { position: fixed; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); z-index: 3; transform: translateX(-50%); display: flex; flex-direction: column;
     align-items: center; gap: 4px; padding: 8px 14px; border: 0; border-radius: 999px; background: none; cursor: pointer;
-    color: #8fe06f; /* v5.01: the earlier cue, in green letters */ font: 700 clamp(11px, 0.9vw, 15px)/1 'JetBrains Mono', monospace; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.95;
+    color: #8fe06f; /* v5.01: the earlier cue, in green letters */ white-space: nowrap; font: 700 clamp(11px, 0.9vw, 15px)/1 'JetBrains Mono', monospace; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.95;
     text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
   .hero-cue:hover { opacity: 1; }
   .hero-cue:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; opacity: 1; }
@@ -2037,6 +2037,20 @@
   @media (max-height: 520px) and (min-aspect-ratio: 1/1) { .hero-copy { bottom: 18%; } .hero-title { font-size: clamp(40px, 14vh, 90px); } }
   /* v4.93: the zoomed-out photo melts into its blurred copy on every side - top and bottom as well, so no straight edge */
   @media (min-aspect-ratio: 1/1) { .hero-media img:not(.hero-fill) { -webkit-mask-image: linear-gradient(90deg, transparent calc(50% - var(--pw) / 2), #000 calc(50% - var(--pw) / 2 + 120px), #000 calc(50% + var(--pw) / 2 - 120px), transparent calc(50% + var(--pw) / 2)), linear-gradient(180deg, transparent 0%, #000 10%, #000 86%, transparent 100%); mask-image: linear-gradient(90deg, transparent calc(50% - var(--pw) / 2), #000 calc(50% - var(--pw) / 2 + 120px), #000 calc(50% + var(--pw) / 2 - 120px), transparent calc(50% + var(--pw) / 2)), linear-gradient(180deg, transparent 0%, #000 10%, #000 86%, transparent 100%); -webkit-mask-composite: source-in; mask-composite: intersect; } }
+  /* v5.02: only the SnakeList logo sits on the photo, in its quiet dark lower-left (never over the head or eye);
+     the welcome sentence sits under the photo. Their exact spots come from placeLogo() below. */
+  .hero-copy { left: 0; top: 0; right: auto; bottom: auto; padding: 0; text-align: left; visibility: hidden; }
+  .hero-copy.hero-placed { visibility: visible; }
+  .hero-copy::before { width: 150%; height: 230%; background: radial-gradient(closest-side, rgba(4,16,8,0.38), rgba(4,16,8,0.18) 55%, rgba(4,16,8,0)); }
+  .hero-below { position: absolute; left: 0; right: 0; top: 72%; padding: 0 20px; text-align: center; pointer-events: none; }
+  .hero-below .hero-sub { margin: 0 auto; max-width: 46ch; font: 500 clamp(15px, min(1.4vw, 2.5vh), 22px)/1.55 'Inter', sans-serif; letter-spacing: 0.008em;
+    text-wrap: balance; color: #b4ec9f; text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8); pointer-events: auto; }
+  .hero-below .hero-sub [data-sl-total] { font-weight: 700; color: #d6f6c6; }
+  .sl-hero.hero-wait .hero-below { opacity: 0; transform: translateY(8px); }
+  .sl-hero.hero-go .hero-below { transition: opacity 0.9s ease 0.25s, transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.25s; }
+  @media (prefers-reduced-motion: reduce) { .sl-hero.hero-wait .hero-below { transform: none; } .sl-hero.hero-go .hero-below { transition: opacity 0.4s ease; } }
+  /* phones and tablets held upright: a taller crop of the photo - the head at the top, the quiet dark part under it for the logo */
+  @media (max-aspect-ratio: 1/1) { .hero-media img:not(.hero-fill) { top: 7%; left: 4%; width: 92%; height: min(92vw, 62vh); object-position: 57% 40%; } }
   /* the words rise in gently once the opening has gone */
   .sl-hero.hero-wait .hero-copy > *, .sl-hero.hero-wait .hero-cue { opacity: 0; }
   .sl-hero.hero-wait .hero-copy > .hero-sub { transform: translateY(8px); }
@@ -2060,6 +2074,8 @@
   </div>
   <div class="hero-copy">
     <p class="hero-title"><span class="sr-only">SnakeList</span><span class="hero-mark" aria-hidden="true"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span></p>
+  </div>
+  <div class="hero-below">
     <p class="hero-sub">All <span data-sl-total>4,247</span> of the world's snake species in one place &mdash; photos, range maps and a life list to tick off the ones you find.</p>
   </div>
   <a class="hero-sp" id="hero-sp" href="species/rough-greensnake-opheodrys-aestivus" title="Open its SnakeList page">Rough Green Snake <i>Opheodrys aestivus</i></a>
@@ -2140,8 +2156,35 @@
     // the opening is exactly one screen tall, set in pixels (and again only if the width changes - never from vh,
     // which keeps changing on phones as the address bar slides, and inside frames that grow with their page)
     function sizeHero() { var vv = window.visualViewport, h = Math.max(Math.round(vv ? vv.height : 0), window.innerHeight || 0, 420); hero.style.height = h + "px";
-      var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (im) im.style.setProperty("--pw", Math.round((im.clientHeight || h) * 2560 / 1658) + "px"); } // the photo's width on screen (v4.93: from the photo's own height)
-    sizeHero(); window.addEventListener("resize", sizeHero); if (window.visualViewport) window.visualViewport.addEventListener("resize", sizeHero);
+      var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (im) im.style.setProperty("--pw", Math.round((im.clientHeight || h) * 2560 / 1658) + "px"); if (hero.__placeLogo) hero.__placeLogo(); } // the photo's width on screen (v4.93: from the photo's own height)
+    // v5.02: the logo goes in a quiet, dark part of the photo (as fractions of the photo: left of the neck,
+    // under the chin), as big as fits there but never the main thing; the sentence goes just under the photo
+    var QUIET = [[0.03, 0.62, 0.64, 0.80], [0.03, 0.60, 0.56, 0.95]];
+    function placeLogo() {
+      var im = hero.querySelector(".hero-media img:not(.hero-fill)"), cp = hero.querySelector(".hero-copy"), tt = hero.querySelector(".hero-title"), bl = hero.querySelector(".hero-below");
+      if (!im || !cp || !tt || hero.hidden) return;
+      var hr = hero.getBoundingClientRect(), r = im.getBoundingClientRect(); if (!r.width || !r.height) return;
+      var cs = getComputedStyle(im), cover = cs.objectFit === "cover", ratio = 2560 / 1658;
+      var s = cover ? Math.max(r.width / ratio, r.height) : Math.min(r.width / ratio, r.height), dw = s * ratio, dh = s;
+      var pos = (cs.objectPosition || "50% 50%").split(" ").map(function (v) { return parseFloat(v) / 100; });
+      var ox = r.left - hr.left + (r.width - dw) * pos[0], oy = r.top - hr.top + (r.height - dh) * pos[1];
+      var visL = Math.max(ox, r.left - hr.left), visR = Math.min(ox + dw, r.right - hr.left), visB = Math.min(oy + dh, r.bottom - hr.top);
+      tt.style.fontSize = "100px"; var lw = tt.offsetWidth, lh = tt.offsetHeight; if (!lw) return;
+      var cap = (visR - visL) * (cover ? 0.8 : 0.58), best = null;
+      QUIET.forEach(function (q) {
+        var x0 = Math.max(ox + q[0] * dw, visL + 10, 12), x1 = Math.min(ox + q[2] * dw, visR - 10), y0 = oy + q[1] * dh, y1 = Math.min(oy + q[3] * dh, visB - 6);
+        var fs = Math.min(100 * (x1 - x0) / lw, 100 * (y1 - y0) / lh, 100 * cap / lw, 150);
+        if (!best || fs > best.fs) best = { fs: fs, x0: x0, x1: x1, y0: y0, y1: y1 };
+      });
+      var fs = Math.max(best.fs, 30), w = lw * fs / 100, h = lh * fs / 100;
+      tt.style.fontSize = fs.toFixed(1) + "px";
+      cp.style.left = Math.max(12, best.x0 + (best.x1 - best.x0 - w) / 2).toFixed(1) + "px";
+      cp.style.top = (best.y0 + (best.y1 - best.y0 - h) / 2).toFixed(1) + "px";
+      cp.classList.add("hero-placed");
+      if (bl) bl.style.top = Math.round(visB + Math.max(10, hr.height * 0.015)) + "px";
+    }
+    hero.__placeLogo = placeLogo;
+    sizeHero(); (function () { var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (im && !im.complete) im.addEventListener("load", placeLogo); if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeLogo); })(); window.addEventListener("resize", sizeHero); if (window.visualViewport) window.visualViewport.addEventListener("resize", sizeHero);
     // window.SL_heroEnd(): where the page below the hero starts (0 when the hero is hidden)
     window.SL_heroEnd = function () { return hero.hidden ? 0 : hero.getBoundingClientRect().bottom + window.scrollY; };
     function wire() {
@@ -2150,7 +2193,7 @@
         var on = tg.classList.contains("active") && !entered; if (on === !hero.hidden) return;
         // keep the tab row exactly where it was on screen while the hero comes or goes above it
         var tabs = document.querySelector(".tabs"), y0 = tabs ? tabs.getBoundingClientRect().top : 0;
-        hero.hidden = !on;
+        hero.hidden = !on; if (on) placeLogo();
         if (tabs && window.scrollY > 0) { var dy = tabs.getBoundingClientRect().top - y0; if (Math.abs(dy) > 1) window.scrollBy(0, dy); }
       };
       sync();
@@ -2168,12 +2211,12 @@
         var tk = dst.querySelector(".sl-tick"); if (tk) { tk.classList.add("hl"); tk.style.setProperty("--i", k++); } } }
     // coming back from a SnakeList page (or a link that opens a place in the app): straight back to where you were, no photo
     if (window.SL_CAME_BACK || /[?&](sp|map|f|hab|type|fam|q)=/.test(location.search)) { entered = true; window.__heroEntered = true; listen(false); }
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { wordmark(); wire(); }); else { wordmark(); wire(); }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { wordmark(); wire(); placeLogo(); }); else { wordmark(); wire(); placeLogo(); }
   })();
 </script>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v5.01</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v5.02</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-head"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-head)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-me"><a href="https://snakelist.com/about.html">About me</a></p>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
@@ -19514,6 +19557,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v5.02", d: "2026-11-14", items: ["The opening photo shows just the SnakeList logo, in a quiet dark part of the picture away from the snake's head; the welcome sentence is now under the photo", "On phones and upright tablets the photo is cropped taller, so the snake's head and the whole logo both show"] },
     { v: "v5.01", d: "2026-11-14", items: ["The \"Scroll to continue\" button looks like it did before, in green letters"] },
     { v: "v5.00", d: "2026-11-14", items: ["Corrected photo batch 4: new photos of the Oman saw-scaled viper and the western diamondback rattlesnake (resting, not eating)", "First photo of the Barbados threadsnake, the world's smallest snake (S. Blair Hedges)", "Jerdon's pitviper, the slender hognose viper and Gumprecht's pit viper keep their earlier photos"] },
     { v: "v4.99", d: "2026-11-14", items: ["Photo batch 4: better photos of Field's horned viper, Jerdon's pitviper, the slender hognose viper, the basilisk rattlesnake and Gumprecht's pit viper, and a first photo of the Yunnan reed snake (Calamaria yunnanensis)"] },
