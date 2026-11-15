@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=528'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=528'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=529'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=529'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -641,7 +641,7 @@ function patternData(P, F, body, lat, quality, seed) {
   const bellyA = C.bellyA || 0.74, bs = C.bellySharp || 0.06, mott = C.mottle, vari = C.var;
   const layers = (P.pattern || []).map((l) => prepLayer(l, F, body));
   for (const Ly of layers) if (Ly.type === 'shields') { Ly.segs = shieldSegs(P.head, Ly); Ly.bcol = Ly.barColor ? hex(Ly.barColor) : Ly.col; }
-  const quant = P.quant != null ? P.quant : 0.15;
+  const quant = P.quant != null ? P.quant : 0.5; // v5.29: pattern edges follow the scales (a blotch edge is made of whole scales, stepped)
   const data = new Uint8ClampedArray(Wp * Hp * 4);
   const L = F.L, Hl = F.Hl;
   const tHead = (Hl * 1.15) / L;
@@ -669,13 +669,19 @@ function patternData(P, F, body, lat, quality, seed) {
         const res = evalLayer(Ly, aq, gq, t, xn, warp, cl, seed);
         if (res) col = mixc(col, res[0], res[1]);
       }
-      const sv = 1 + vari * (hash1(cl.id, seed + 5) - 0.5) * 2 * (0.35 + 0.65 * cl.w) * sstep(Hl * 0.95, Hl * 1.15, x); // (v4.81: none on the head, where the body's scale cells would show as stripes)
+      const sv = 1 + Math.max(vari, 0.08) * (hash1(cl.id, seed + 5) - 0.5) * 2 * (0.35 + 0.65 * cl.w) * sstep(Hl * 0.95, Hl * 1.15, x); // (v4.81: none on the head, where the body's scale cells would show as stripes)
       col = [col[0] * sv, col[1] * sv, col[2] * sv];
       if (C.scaleEdge && !cl.v && x > Hl * 1.05) col = mixc(col, hex(C.scaleEdge.color), (C.scaleEdge.k || 0.8) * Math.pow(1 - cl.w, 1.6));
       // v5.18: every scale reads as a scale - a soft darker rim round each dorsal scale (the skin between scales), and the
       // edge of each wide belly scute; snakes with granular or glassy skin (file snakes, blind snakes) much less
       else if (x > Hl * 1.05 && !C.noEdge) {
-        const kE = (P.scales.kind === 'juxta' || P.scales.kind === 'cycloid' ? 0.12 : 0.3) * (C.edgeK != null ? C.edgeK : 1);
+        const kE = (P.scales.kind === 'juxta' || P.scales.kind === 'cycloid' ? 0.12 : 0.3) * (C.edgeK != null ? C.edgeK : 1) * (0.45 + 1.1 * hash1(cl.id, seed + 17)); // v5.29: no two scales alike - each its own edge
+        // a few scales carry tiny flecks of a darker or paler tone, and some a lighter rim, as in close-up photos
+        if (!cl.v) {
+          const hf = hash1(cl.id, seed + 19);
+          if (hf < 0.3 && hash3(r, c, 7, seed + 23) < 0.06 * cl.w) { const k2 = hf < 0.15 ? 0.72 : 1.18; col = [col[0] * k2, col[1] * k2, col[2] * k2]; }
+          if (hf > 0.85) col = mixc(col, [Math.min(255, col[0] * 1.25), Math.min(255, col[1] * 1.25), Math.min(255, col[2] * 1.25)], 0.5 * Math.pow(1 - cl.w, 3));
+        }
         if (!cl.v) col = mixc(col, [col[0] * 0.5, col[1] * 0.5, col[2] * 0.5], kE * Math.pow(1 - cl.w, 2.2));
         else {
           const vy = Math.abs(g - cl.gc) / lat.Pt; col = mixc(col, [col[0] * 0.55, col[1] * 0.55, col[2] * 0.55], kE * 1.4 * Math.exp(-(((0.5 - vy) / 0.07) ** 2)));
