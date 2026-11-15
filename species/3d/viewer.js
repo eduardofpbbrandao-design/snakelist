@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=521'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=521'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=522'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=522'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -133,6 +133,9 @@ export function autoProfile(p) {
       T({ type: 'blotch', count: Math.round(n * 2), a: 0.3, mirror: true, alt: true, wid: 0.06, len: 0.32, shape: 'rect', color: shade(d, 0.45), alpha: 0.7 }); break;
     // v5.21: saddles with a black border (rat snakes, corn and fox snakes), rings with paler centres (rainbow boas),
     // boa saddles (dark on the back, oval on the flanks), and narrow crossbands (snail-eaters, death adders)
+    // v5.22: lanceheads (Bothrops) - dark triangles/trapezoids on each flank, pale-edged, their tips meeting over the back
+    case 'trap':
+      T({ type: 'blotch', count: Math.round(n * 0.6), a: 0.36, mirror: true, alt: true, wid: 0.34, len: 0.85, shape: 'diamond', color: c, edgeColor: pale, edge: 0.14, edgeOut: true, warp: 0.3, jit: 0.05 }); break;
     case 'esaddle':
       T({ type: 'blotch', count: Math.round(n * 0.85), a: 0, wid: 0.36, len: 0.6, shape: 'saddle', color: c, edgeColor: shade(c, 0.35), edge: 0.14, warp: 0.35, jit: 0.08 });
       T({ type: 'blotch', count: Math.round(n * 0.85), phase: 0.5, a: 0.6, mirror: true, wid: 0.1, len: 0.42, shape: 'round', color: c, edgeColor: shade(c, 0.35), edge: 0.18, alpha: 0.85 }); break;

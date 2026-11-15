@@ -148,8 +148,15 @@ def pattern_of(c, plan, con, green=False):
         # v5.21: the banded montane rattlesnakes, the speckled ones, the rest blotched
         if c["id"].split("-")[1] in ("lepidus", "klauberi", "morulus", "transversus", "aquilus", "pusillus", "tancitarensis", "intermedius", "pricei", "willardi", "triseriatus", "ravus"): return "xband"
         if c["id"].split("-")[1] in ("mitchellii", "stephensi", "pyrrhus", "angelensis", "tigris", "polisi"): return "xband"  # (with speckling, added below)
+        sp = c["id"].split("-")[1]
+        if sp in ("durissus", "simus", "culminatus", "totonacus", "tzabcan", "vegrandis", "unicolor"): return "diamond"  # neotropical rattlesnakes: rhombic blotches
+        if sp in ("molossus", "basiliscus", "ornatus", "estebanensis", "oaxacus", "polystictus"): return "hourglass"  # black-tailed group: dark pale-centred blotches
+        if sp in ("cerastes",): return "spot"  # sidewinder: rows of small spots
         return "rblotch"
     if g == "daboia": return "daboia"
+    if g == "bothrops": return "trap"
+    if g == "telescopus": return "blotch"
+    if g == "corallus" and green: return "crossbar"
     # v5.21: more groups, from photos
     if g in ("pantherophis", "zamenis", "pseudelaphe") or (g == "elaphe" and not re.search(r"strip|lined|four", n)): return "esaddle"
     if g in ("epicrates",): return "rings"
@@ -290,6 +297,21 @@ CURATED = {
     "sistrurus-miliarius": {"d": "#8a7a6a", "c": "#2a2420", "b": "#e2d8c8", "t": "spot", "vs": ["#c26a3a", 0.035]},
     "bothrops-atrox": {"d": "#8a7a5a", "c": "#3a2e20", "b": "#ddd2b6"},
     "chrysopelea-ornata": {"d": "#8fb03a", "lat": "#98b844", "c": "#141a0c", "b": "#d8e0a0", "t": "band", "n": 60, "cx": {"scaleEdge": {"color": "#141a0c", "k": 0.7}}},
+    "hierophis-cypriensis": {"d": "#18181a", "lat": "#1c1c1e", "b": "#5a5a58", "t": "plain"},
+    "malpolon-insignitus": {"d": "#8a7458", "lat": "#8e7a5e", "b": "#e0d8c4", "t": "plain"},
+    "erythrolamprus-andinus": {"d": "#7a3a2a", "lat": "#80402e", "b": "#d8c0a0", "t": "plain"},
+    "leptodeira-septentrionalis": {"d": "#c88a52", "c": "#2a1e16", "b": "#efe0c6", "t": "blotch", "n": 30},
+    "corallus-cropanii": {"d": "#8a7a5a", "c": "#2a2218", "b": "#d8cca8", "t": "blotch", "n": 40},
+    "hoplocephalus-bungaroides": {"d": "#151513", "lat": "#171715", "b": "#7a7462", "t": "plain", "cx": {"speckle": {"p": 0.35, "color": "#e8d870", "k": 0.85}}},
+    "aspidelaps-lubricus": {"d": "#d8743a", "c": "#151210", "b": "#efe0c6", "t": "band", "n": 30},
+    "aspidelaps-scutatus": {"d": "#b8824e", "c": "#151210", "b": "#e2d2b0", "t": "plain", "cx": {"speckle": {"p": 0.3, "color": "#3a2a1e", "k": 0.6}}, "pat": [{"type": "band", "t": [0.07, 0.17], "count": 1, "len": 0.9, "color": "#151210", "warp": 0.1, "jit": 0}]},
+    "atheris-matildae": {"d": "#1c1c14", "lat": "#20201a", "b": "#c8c070", "t": "plain", "k": 1, "cx": {"speckle": {"p": 0.6, "color": "#d8d040", "k": 0.85}}},
+    "atheris-subocularis": {"d": "#d8a250", "lat": "#dca856", "b": "#ecd8a8", "t": "plain", "k": 1},
+    # v5.22: fixes from photo checks
+    "atractus-modestus": {"d": "#d8d23a", "lat": "#dcd640", "b": "#e8e070", "t": "plain"},
+    "atractus-ukupacha": {"d": "#1c1816", "c": "#d2703a", "b": "#d8b090", "t": "xband"},
+    "atractus-medusa": {"d": "#a8462c", "lat": "#ac4a30", "c": "#2a1e18", "b": "#d8a080", "t": "blotch"},
+    "causus-lichtensteinii": {"d": "#5a6e2e", "lat": "#627634", "b": "#c8d0a0", "t": "plain"},
     "morelia-spilota": {"d": "#b4ab92", "lat": "#aca286", "c": "#1e1c18", "b": "#e2dcc6", "t": "blotch", "n": 50, "L": 2.0, "s": "forest", "sx": {"gloss": 0.5, "iridescence": 0.1}},
     # v5.19: patterns checked against photos
     "crotalus-ruber": {"d": "#b5826a", "c": "#7a3c2a", "b": "#e8dccb", "t": "diamond", "n": 34, "L": 1.1, "s": "arid", "tl": {"rattle": 7}, "pat": [{"type": "band", "t": [0.88, 0.985], "count": 5, "len": 0.5, "color": "#1a1512", "warp": 0.2, "jit": 0.02}]},
@@ -492,6 +514,13 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         if g == "dendrelaphis" and not re.search(r"green", nm): a["d"] = "#8a6a3e"; a["lat"] = "#8e6e42"; a["t"] = "plain"  # bronzebacks are bronze-brown
         if g == "dendrelaphis": a.setdefault("ls", ["#141210", 0.5, 0.045]); a["pat"] = a.get("pat", []) + [{"type": "stripe", "t": [0.04, 1], "a": 0.62, "mirror": True, "wid": 0.025, "color": "#ece2b8", "aa": 0.35}]
         if g == "crotalus" and c["id"].split("-")[1] in ("mitchellii", "stephensi", "pyrrhus", "angelensis", "tigris", "polisi"): a["cx"] = dict(a.get("cx") or {}, speckle={"p": 0.3, "color": tone(d, 0.55), "k": 0.6}, mottle=0.14)
+        # v5.22: wolf snakes: pale bands on a dark ground (never dark bands on pale)
+        if g == "corallus" and a["t"] == "crossbar": a["c"] = "#eef0dc"  # white crossbars on the green tree boas
+        if g == "lycodon" and a["t"] == "band" and lum(a["d"]) > lum(a["c"]): a["d"], a["c"] = a["c"], a["d"]
+        # Australian black snakes and brown snakes read grey from photos: most are brown or coppery
+        if g in ("pseudechis", "pseudonaja") and not re.search(r"black|gr[ae]y|dusky|spotted|butler|blue|collett|papuan", nm + " " + c["id"]):
+            r_, g_, b_ = hx(a["d"]); H_, L_, S_ = colorsys.rgb_to_hls(r_, g_, b_)
+            if S_ < 0.25: a["d"] = "#9a6a42"; a["lat"] = "#a07048"
         if g == "tantilla": a.setdefault("hc", "#1a1614"); a.setdefault("hcx", 1.0)  # the black head of centipede snakes
         if g == "oligodon" and a["t"] == "speckle": a["t"] = "saddle"
         if g in ("typhlops", "afrotyphlops", "indotyphlops", "amerotyphlops", "letheobia", "anilios", "ramphotyphlops", "argyrophis", "madatyphlops", "antillotyphlops", "xerotyphlops", "myriopholis", "leptotyphlops", "epictia", "trilepida", "liotyphlops", "gerrhopilus") and a["t"] not in ("stripe",): a["t"] = "plain"
