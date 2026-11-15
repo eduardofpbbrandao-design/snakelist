@@ -245,6 +245,17 @@ CURATED = {
     "sistrurus-miliarius": {"d": "#8a7a6a", "c": "#2a2420", "b": "#e2d8c8", "t": "spot", "vs": ["#c26a3a", 0.035]},
     "bothrops-atrox": {"d": "#8a7a5a", "c": "#3a2e20", "b": "#ddd2b6"},
     "chrysopelea-ornata": {"d": "#8fb03a", "lat": "#98b844", "c": "#141a0c", "b": "#d8e0a0", "t": "band", "n": 60, "cx": {"scaleEdge": {"color": "#141a0c", "k": 0.7}}},
+    # v5.16: black snakes whose photos were read as grey or brown (night shots, pale ground, a hand)
+    "azemiops-feae": {"d": "#17171d", "lat": "#1b1b22", "b": "#3a3a44", "c": "#e8e4da", "t": "plain", "pat": [{"type": "band", "t": [0.1, 0.97], "count": 14, "len": 0.1, "color": "#e3a25c", "warp": 0.1, "jit": 0.02}], "L": 0.7, "s": "forest", "hc": "#d9873c", "hcx": 0.55, "h": {"irisDark": 1, "pupil": "round", "iris": "#1a1614", "irisInner": "#2a2420"}},
+    "hebius-taronensis": {"d": "#19191a", "lat": "#1c1c1c", "b": "#c8c4b4", "t": "plain", "L": 0.6, "lip": "#d8d4c4"},
+    "blythia-hmuifang": {"d": "#2c2a2e", "lat": "#302e32", "b": "#4a4650", "t": "plain", "L": 0.35},
+    "erythrolamprus-oligolepis": {"d": "#171616", "lat": "#1b1a1a", "b": "#2c2a28", "t": "plain"},
+    "oligodon-trilineatus": {"d": "#151313", "lat": "#181515", "b": "#c2402c", "t": "plain", "vs": ["#b02a22", 0.05], "ls": ["#b02a22", 0.55, 0.03]},
+    "madatyphlops-domerguei": {"d": "#2a2422", "lat": "#2e2826", "b": "#5a4a44", "t": "plain"},
+    "bungarus-niger": {"t": "plain", "b": "#d8d2c4"}, "bungarus-lividus": {"t": "plain", "b": "#d8d2c4"},
+    "bungarus-bungaroides": {"d": "#161616", "c": "#d9d4c8", "b": "#d9d4c8", "t": "band", "n": 50, "s": "forest"},
+    "rhinobothryum-lentiginosum": {"d": "#e8e2d6", "c": "#c43a2e", "b": "#e8e2d6", "t": "tricolor", "n": 28, "L": 1.4, "s": "rainforest"},
+    "atractus-elaps": {"d": "#b8382c", "c": "#141110", "b": "#c84a3a", "t": "band", "n": 30},
     # v5.12: Australian coral snakes are orange-brown with faint pale bands (not red-black-yellow)
     "brachyurophis-australis": {"d": "#b8724a", "c": "#d9a07a", "b": "#efe2cc", "t": "band", "n": 46, "L": 0.5, "s": "arid", "hc": "#3a2a22", "hcx": 0.45},
     "brachyurophis-semifasciatus": {"d": "#c8834e", "c": "#3a2a22", "b": "#efe2cc", "t": "band", "n": 40, "L": 0.4, "s": "gibber"},
@@ -326,6 +337,11 @@ CURATED = {
 
 # (Gaboon viper: the purple was too strong and the head too pale; a darker, warmer iris)
 HAND_FIXES = {
+    # v5.16: bushmaster - separate dark rhomboid blotches (pale centres) on a pinkish tan ground; they had merged into bands
+    "lachesis-muta": [(("colors", "dorsal"), "#c9a37e"), (("colors", "lateral"), "#c8a27c"), (("pattern", 0, "wid"), 0.3), (("pattern", 0, "len"), 0.92),
+                      (("pattern", 0, "count"), 24), (("pattern", 0, "warp"), 0.15), (("pattern", 0, "inner", "r"), 0.38), (("pattern", 0, "inner", "color"), "#9a7652")],
+    # v5.16: yellow-bellied sea snake - the water line lower on its body, so the bright yellow lower flanks show above the water line
+    "hydrophis-platurus": [(("colors", "belly"), "#f0c23a"), (("colors", "bellyA"), 0.34), (("scene", "float"), 0.3)],
     "bitis-gabonica": [(("head", "iris"), "#b49f74"), (("head", "irisInner"), "#d6c8a2"), (("pattern", 2, "color"), "#634842"),
                        (("pattern", 2, "inner", "color"), "#8a6a58"), (("pattern", 5, "color"), "#b8a079")],
 }
@@ -375,6 +391,17 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         # the belly: paler and less coloured than the back (a dark snake keeps a darker belly)
         b = mix(tone(d, 1.45 if lum(d) < 0.5 else 1.1, 0.55), "#e6dcc4", 0.35) if plan != "blind" else tone(d, 1.2, 0.8)
         if t == "coral": d, p, b = "#b3352a", "#141110", "#c9463a"
+        # v5.16: snakes named for being black all over (Black Snake, Greater Black Krait, Black Python, epithet ater/niger/
+        # nigra/nigrescens...) are black - photos at night or on pale ground were read as grey or brown
+        sp_ep = c["id"].split("-")[-1]
+        if (re.search(r"(^|[ (])black(ish)?(?![-a-z])", nm) and not re.search(r"red-black|black-and|and black", nm)) or sp_ep in ("ater", "atra", "atratus", "niger", "nigra", "nigrum", "nigrescens"):
+          if c["id"] not in ("atractus-elaps",):
+            d = "#19191b" if "ish" not in nm else "#2e2a28"
+            b = tone(d, 2.2, 0.4) if b and lum(b) < 0.25 else b
+            if t == "coral": t = "plain"
+            if t in ("band",): p = "#d9d4c8"
+            elif t not in ("plain", "stripe"): t = "plain"
+            green = False
         if c["fossil"]: t = {"band": "blotch", "stripe": "blotch", "coral": "blotch"}.get(t, t) if t != "plain" else "blotch"
         # how dark marks are against the main colour: always visible, never black-on-black
         if t not in ("plain", "coral") and abs(lum(p) - lum(d)) < 0.08: p = tone(d, 0.5) if lum(d) > 0.2 else tone(d, 2.2, 0.6)
