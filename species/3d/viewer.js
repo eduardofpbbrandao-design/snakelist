@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=525'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=525'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=527'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=527'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -78,6 +78,8 @@ function normProfile(p) {
   const base = PLANS[p.plan] || PLANS.colubrid;
   const q = merge(merge(base, { colors: { dorsal: '#776655', lateral: null, belly: '#d8cfb8', mottle: 0.08, var: 0.05 }, pattern: [], tail: {}, scene: { kind: 'litter' } }), p);
   q.colors.lateral = q.colors.lateral || q.colors.dorsal;
+  // v5.27: viper heads are broad triangles behind a narrow neck (they were barely wider than the neck from above)
+  if ((q.head.shape || 'oval') === 'tri' && !q.head.wFixed) q.head = Object.assign({}, q.head, { w: q.head.w * 1.17 });
   // v4.81: colubrids, elapids and sea snakes have big head shields: their sutures are drawn on the head, and the
   // small-scale relief is left off it
   if ((q.plan === 'colubrid' || q.plan === 'elapid' || q.plan === 'sea' || !PLANS[q.plan]) && q.head.plates == null) {
@@ -473,7 +475,7 @@ function buildBody(P, F, pose, quality) {
     let sx = Math.sign(st) * Math.abs(st) ** (2 / n), sy = Math.sign(ct) * Math.abs(ct) ** (2 / n);
     // v5.09: the lower jaw narrows smoothly from the side of the head towards the chin (it used to step in by 14% right at
     // the side line, which left a notch - a little triangle - at the front of the jaw under the snout)
-    if (ct < 0) { sy *= F.bf; if (head) sx *= lerp(1, lerp(0.86, 1, sstep(F.Hl * 0.6, F.Hl * 1.1, x)), sstep(0, 0.7, -ct)); }
+    if (ct < 0) { sy *= F.bf; if (head) sx *= lerp(1, lerp(0.9, 1, sstep(F.Hl * 0.75, F.Hl * 1.1, x)), sstep(0, 0.7, -ct)); } // (v5.27: the lower jaw tucked in under the upper one)
     if (head && ct > 0) sx *= 1 - (Hd.taper || 0.2) * sy * (1 - sstep(F.Hl * 0.85, F.Hl * 1.25, x));
     let k = 1;
     for (const b of bumps) {
@@ -697,6 +699,25 @@ function patternData(P, F, body, lat, quality, seed) {
     for (let c = 0; c < Wp; c++) {
       const aa = Math.abs(((c + 0.5) / Wp) * 2 - 1), base = mixc(mixc(dors, latc, sstep(0.18, 0.5, aa)), lipC, sstep(0.52, 0.62, aa)), k = (r * Wp + c) * 4;
       for (let q = 0; q < 3; q++) data[k + q] = data[k + q] + (base[q] - data[k + q]) * w;
+    }
+  }
+  // v5.27: on every head, the lip line (the edge of the mouth, upturned at the back in vipers - their "smile") with the
+  // sutures between the lip scales, and the nostrils, dark, on the front sides of the snout (on top in water snakes)
+  const Hd = P.head, tri = Hd.shape === 'tri', mA0 = 0.56, xJ = Hl * (Hd.jaw || 0.75), nA = (Hd.nostrilA != null ? Hd.nostrilA : Hd.eyeA * 0.62) / 180, nX = Hl * 0.06, nR = Hl * 0.022;
+  const nLab = Hd.labials || (P.plan === 'python' ? 13 : tri ? 11 : 8);
+  for (let r = 0; r < Hp; r++) {
+    const g = ((r + 0.5) / Hp) * body.gTotal, x = body.xOf(g); if (x > xJ * 1.08) break;
+    const circ = Math.PI * 2 * (F.W(x) + F.Hh(x)) / 2, aPx = 2 / Wp; // (one texel around, as a fraction of a)
+    const mA = mA0 - (tri ? 0.07 * sstep(xJ * 0.45, xJ, x) : 0.02 * sstep(xJ * 0.7, xJ, x)), lw = Math.max(aPx * 0.8, (Hl * 0.012) / Math.max(1e-6, circ) * 2);
+    const fadeIn = sstep(Hl * 0.08, Hl * 0.2, x), fadeOut = 1 - sstep(xJ * 0.98, xJ * 1.08, x);
+    const sut = Math.pow(Math.abs(Math.cos(Math.PI * x / (xJ / nLab))), 18) * sstep(Hl * 0.1, Hl * 0.18, x);
+    for (let c = 0; c < Wp; c++) {
+      const a = ((c + 0.5) / Wp) * 2 - 1, aa = Math.abs(a), k = (r * Wp + c) * 4;
+      let dk = 0.7 * Math.exp(-(((aa - mA) / lw) ** 2)) * fadeIn * fadeOut;                                  // the lip line
+      if (aa < mA && aa > mA - 0.12) dk = Math.max(dk, 0.22 * sut * fadeOut * sstep(mA - 0.12, mA - 0.06, aa)); // sutures between upper lip scales
+      const nd = Math.hypot((x - nX) / nR, (aa - nA) * circ / 2 / (nR * 0.8));                                  // the nostril
+      dk = Math.max(dk, 0.85 * (1 - sstep(0.7, 1.05, nd)));
+      if (dk > 0.01) for (let q = 0; q < 3; q++) data[k + q] *= 1 - dk * 0.85;
     }
   }
   return { data, Wp, Hp };
