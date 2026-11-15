@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=523'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=523'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=525'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=525'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -530,7 +530,11 @@ function buildBody(P, F, pose, quality) {
 function scaleLattice(P, gTotal) {
   const S = P.scales, aV = S.aV, R = S.rows, rw = (2 * aV) / R;
   // v5.23: an enlarged vertebral row (kraits, cat snakes, bronzebacks): the middle row is vert x wider, the others share the rest
-  const vk = S.vert && R % 2 ? S.vert : 1, wO = (2 * aV) / (R - 1 + vk), RB = [-aV]; for (let i = 0; i < R; i++) RB.push(RB[i] + (i === (R - 1) / 2 ? wO * vk : wO));
+  // v5.25: and the lowest rows on each flank a little larger than those on the back (as in most snakes)
+  const lk = S.latK != null ? S.latK : (S.kind === 'juxta' || S.kind === 'cycloid' ? 0 : 0.35), wts = [];
+  for (let i = 0; i < R; i++) { const u = Math.abs(i - (R - 1) / 2) / Math.max(1, (R - 1) / 2); wts.push((i === (R - 1) / 2 && S.vert && R % 2 ? S.vert : 1) * (1 + lk * u ** 3)); }
+  const wsum = wts.reduce((p, q) => p + q, 0), RB = [-aV]; for (let i = 0; i < R; i++) RB.push(RB[i] + (2 * aV) * wts[i] / wsum);
+  const vk = lk > 0 || (S.vert && R % 2) ? 2 : 1; // (2: use the row table)
   const rowOf = (a) => { if (vk === 1) return Math.floor((a + aV) / rw); let lo = 0, hi = R; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (RB[m] <= a) lo = m; else hi = m; } return lo; };
   const Wt = R > 40 ? 2048 : 1024; // v4.72: twice as sharp
   // scale pitch along the body (girth units), rounded so the tile has a whole number of pixels
@@ -1615,7 +1619,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     const bark = canvasTex(256, (x, s) => { x.fillStyle = '#5a4632'; x.fillRect(0, 0, s, s); for (let i = 0; i < 300; i++) { x.strokeStyle = ['#3a2c1e', '#6f5a40', '#4a3a28', '#7d6a50'][(R() * 4) | 0]; x.lineWidth = 1 + R() * 3; const y = R() * s; x.beginPath(); x.moveTo(0, y); x.bezierCurveTo(s * 0.3, y + (R() - 0.5) * 20, s * 0.6, y + (R() - 0.5) * 20, s, y); x.stroke(); } });
     const bm = new THREE.MeshStandardMaterial({ map: bark, roughness: 0.95 });
     const nT = Math.round(10 * (PR.twigs || 0)), spots = place(nT, Rb * 0.6, Rb * 4, F.w0 * 3);
-    spots.forEach(([x, z]) => { const len = clamp(L * 0.25, 0.05, 0.9) * (0.5 + R()), rad = len * 0.025; const g = new THREE.CylinderGeometry(rad * 0.6, rad, len, 7, 1); g.rotateZ(Math.PI / 2); const m = new THREE.Mesh(g, bm); m.position.set(x, rad, z); m.rotation.y = R() * TAU; m.castShadow = m.receiveShadow = true; scene.add(m); });
+    spots.forEach(([x, z]) => { const len = clamp(L * 0.25, 0.05, 0.9) * (0.5 + R()), rad = len * 0.025, ry = R() * TAU, cx = Math.cos(ry) * len / 2, cz = -Math.sin(ry) * len / 2; if ([[x + cx, z + cz], [x - cx, z - cz], [x + cx / 2, z + cz / 2], [x - cx / 2, z - cz / 2]].some(([qx, qz]) => dist2snake(qx, qz) < F.w0 * 1.5 + rad * 2)) return; /* v5.25: no twig across the snake */ const g = new THREE.CylinderGeometry(rad * 0.6, rad, len, 7, 1); g.rotateZ(Math.PI / 2); const m = new THREE.Mesh(g, bm); m.position.set(x, rad, z); m.rotation.y = ry; m.castShadow = m.receiveShadow = true; scene.add(m); });
     if (PR.log) {
       // one fallen log at a safe distance behind the snake
       const len = clamp(L * 0.55, 0.4, 3), rad = clamp(L * 0.045, 0.03, 0.25);

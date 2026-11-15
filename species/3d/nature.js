@@ -438,7 +438,7 @@ function buildAll(A) {
     put('logs', logGeo, barkMat(tex.bark('furrow'), '#9a8e7c'), 14, groundR * 1.1, 40, [0.7, 1.3], { variants: 2, lift: 0.06, span: 1.5 });
     // v5.12: soft cushions of moss on the forest floor, some close to the snake (never on it)
     const mossMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), color: '#6f8f3a', roughness: 1, metalness: 0, vertexColors: true }));
-    put('moss', (Rn, v) => rockGeo(seed + 900 + v * 7, low ? 1 : 2, { flat: 0.28 }), mossMat, jungle ? 90 : 70, Math.max(Rb * 0.9, F.w0 * 6), near0, [Math.max(0.06, F.w0 * 4), 0.45], { variants: 3, lift: -0.08, tilt: 0.08, ok: (x, z) => dist2snake(x, z) > F.w0 * 3 + 0.2, col: () => tint(0.75, 1.15, 0.12) });
+    put('moss', (Rn, v) => rockGeo(seed + 900 + v * 7, low ? 1 : 2, { flat: 0.28 }), mossMat, jungle ? 90 : 70, Math.max(Rb * 1.2, F.w0 * 8), near0, [F.w0 * 3, Math.min(0.45, F.w0 * 40)], /* v5.25: cushions in scale with the snake (a tiny blind snake had moss mountains round it) */ { variants: 3, lift: -0.08, tilt: 0.08, ok: (x, z) => dist2snake(x, z) > F.w0 * 3 + 0.2, col: () => tint(0.75, 1.15, 0.12) });
     rocks(10, groundR * 1.05, 45, [0.3, 1.6], { minD: 2.5 });
   } else if (U === 'meadow') {
     put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassG'), { alphaTest: 0.35 }), 1700, near0, 36, [0.5, 1.1], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });

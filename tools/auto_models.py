@@ -297,6 +297,14 @@ CURATED = {
     "sistrurus-miliarius": {"d": "#8a7a6a", "c": "#2a2420", "b": "#e2d8c8", "t": "spot", "vs": ["#c26a3a", 0.035]},
     "bothrops-atrox": {"d": "#8a7a5a", "c": "#3a2e20", "b": "#ddd2b6"},
     "chrysopelea-ornata": {"d": "#8fb03a", "lat": "#98b844", "c": "#141a0c", "b": "#d8e0a0", "t": "band", "n": 60, "cx": {"scaleEdge": {"color": "#141a0c", "k": 0.7}}},
+    # v5.25: from the round-B photo checks
+    "pantherophis-bairdi": {"d": "#8a7a62", "c": "#3e3428", "b": "#e6d8b8", "t": "stripe", "s": "arid"},
+    "masticophis-taeniatus": {"d": "#2a2a26", "lat": "#33312a", "c": "#e8e2c8", "b": "#e8dcc8", "t": "stripe"},
+    "calamaria-yunnanensis": {"d": "#18171a", "lat": "#1a191c", "b": "#e0782a", "t": "plain", "ls": ["#e0782a", 0.62, 0.05]},
+    "atretium-schistosum": {"d": "#5e6a3e", "lat": "#66703f", "b": "#e0b850", "t": "plain"},
+    "rhadinella-kinkelini": {"d": "#8a4a32", "lat": "#8e4e36", "b": "#e8c8a8", "t": "plain"},
+    "ninia-psephota": {"d": "#2a2826", "lat": "#2e2c2a", "b": "#d8cfc0", "t": "plain"},
+    "masticophis-barbouri": {"d": "#2c2a26", "lat": "#34302a", "c": "#d8d0b8", "b": "#e2dac4", "t": "stripe"},
     "hierophis-cypriensis": {"d": "#18181a", "lat": "#1c1c1e", "b": "#5a5a58", "t": "plain"},
     "malpolon-insignitus": {"d": "#8a7458", "lat": "#8e7a5e", "b": "#e0d8c4", "t": "plain"},
     "erythrolamprus-andinus": {"d": "#7a3a2a", "lat": "#80402e", "b": "#d8c0a0", "t": "plain"},
@@ -443,6 +451,12 @@ REGIONLESS = {"Rainforests", "Forests & woodlands", "Savannas & grasslands", "Sh
               "Underground & forest floor", "Wetlands & swamps", "Rivers & lakes", "Coasts & sea", "Around people"}
 
 
+PHOTO_MASK = {}
+MASK_USED = []
+try: PHOTO_MASK = json.load(open(os.path.join(ROOT, "data/snake-model-photo.json"), encoding="utf-8"))
+except (OSError, ValueError): pass
+
+
 def build(cards, lengths, hab_kind, existing, hab_sec=None):
     """cards: the app's cards (build_species); lengths: id -> (lo, hi) from reviewed accounts;
     existing: the hand-made profiles (kept). Returns id -> generated entry."""
@@ -471,6 +485,15 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
             con = cc["c"]
         else:
             d, p, con = gd, gp, 0.3; flags += "g"
+        # v5.25: the snake cut out of its photo (tools/photo_mask.py): its colour replaces a dull grey reading only when the
+        # cut-out is clean, the colour is clearly a coloured one, and it is neither leaf green nor skin (a holding hand)
+        pmc = PHOTO_MASK.get(c["id"]) if not c["fossil"] else None
+        if pmc and pmc["q"] >= 0.6:
+            r_, g_, b_ = hx(d); _, _, S0 = colorsys.rgb_to_hls(r_, g_, b_)
+            r2, g2, b2 = hx(pmc["d"]); H2, L2, S2 = colorsys.rgb_to_hls(r2, g2, b2)
+            leafy = 70 / 360 <= H2 <= 170 / 360 and c["genus"].lower() not in GREEN_IN_LIFE
+            skin = 10 / 360 <= H2 <= 35 / 360 and 0.45 < L2 < 0.8 and 0.2 < S2 < 0.55
+            if S0 < 0.15 and S2 >= 0.25 and 0.1 < L2 < 0.8 and not leafy and not skin: d = pmc["d"]; MASK_USED.append(c["id"])
         green = is_green(d)
         if green and lum(d) < 0.55:  # photos make green snakes look dull and olive: a living green snake is vivid
             d = tone(d, 1.12, 1.35)
@@ -480,8 +503,21 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         # v5.12: a near-black colour read from a photo is usually shadow, unless the snake's name says it is dark
         if not green and lum(d) < (0.15 if c["genus"].lower() in ("crotalus", "sistrurus") else 0.06) and not re.search(r"black|dark|melan|nigr|ebon|coal|ink|night|obscur|mole", nm + " " + c["id"]): d = mix(d, gd, 0.6)
         t = pattern_of(c, plan, con, green)
+        # v5.25: a "pattern colour" much paler than the snake, read only from photo contrast, is mostly the ground behind a
+        # dark snake (photo checks: plain snakes came out with pale bands) - such snakes are left plain
+        if t in ("saddle", "speckle") and lum(p) > lum(d) + 0.18 and not (cc and cc.get("q", 0) >= 0.9 and con >= 0.7): t = "plain"
+        if c["genus"].lower() == "arizona": t = "blotch"
+        if c["genus"].lower() in ("ninia", "rhabdops", "achalinus", "rhadinella", "rhadinaea", "plagiopholis") and t in ("saddle", "speckle", "band"): t = "plain"
         # the belly: paler and less coloured than the back (a dark snake keeps a darker belly)
-        b = mix(tone(d, 1.45 if lum(d) < 0.5 else 1.1, 0.55), "#e6dcc4", 0.35) if plan != "blind" else tone(d, 1.2, 0.8)
+        # v5.25: most snakes' bellies are pale - cream, white or yellowish - whatever colour the back is; green snakes pale
+        # yellow-green, kraits white; dark-bellied groups (and the blind snakes, coloured all round) keep a darker belly
+        g0 = c["genus"].lower()
+        if plan == "blind": b = tone(d, 1.2, 0.8)
+        elif g0 in ("bungarus",): b = "#ece8dc"
+        elif green: b = mix(d, "#f2efc8", 0.75)
+        elif re.search(r"black-bellied|dark-bellied|blackbelly|red-bellied|redbelly|orange-bellied|blue-bellied|yellow-bellied", (c["name"] if not c["is_sci"] else "").lower()) or g0 in ("pseudechis", "storeria", "farancia", "regina", "liodytes", "carphophis", "diadophis", "calamaria", "atractus", "geophis", "pseudorabdion", "tantilla", "apostolepis", "micrurus", "calliophis", "oxyrhopus"):
+            b = mix(tone(d, 1.45 if lum(d) < 0.5 else 1.1, 0.55), "#e6dcc4", 0.35)
+        else: b = mix(tone(d, 1.3, 0.35), "#ece5d0", 0.65)
         if t == "coral": d, p, b = "#b3352a", "#141110", "#c9463a"
         # v5.16: snakes named for being black all over (Black Snake, Greater Black Krait, Black Python, epithet ater/niger/
         # nigra/nigrescens...) are black - photos at night or on pale ground were read as grey or brown
