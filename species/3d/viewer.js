@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=518'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=518'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=519'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=519'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -109,6 +109,10 @@ export function autoProfile(p) {
       T({ type: 'blotch', t: [0.06, 0.86], count: Math.round(n * 0.8), a: 0, wid: 0.44, len: 1.0, shape: 'diamond', color: c, edgeColor: pale, edge: 0.16, edgeOut: true, warp: 0.35, jit: 0.05 });
       T({ type: 'band', t: [0.87, 0.985], count: 6, len: 0.5, color: '#17130f', warp: 0.2, jit: 0.02 }); break;
     case 'hourglass': T({ type: 'blotch', count: Math.round(n * 0.8), a: 0, wid: 0.62, len: 0.82, shape: 'hourglass', color: c, edgeColor: pale, edge: 0.12, edgeOut: true, warp: 0.4 }); break;
+    // v5.19: copperhead-type crossbands (narrow over the spine, wide on the flanks), kingsnake chains, a reticulated net
+    case 'hourglass2': T({ type: 'blotch', count: Math.round(n * 0.5), a: 0, wid: 0.95, len: 0.75, shape: 'hourglass2', color: c, edgeColor: shade(c, 0.7), edge: 0.12, warp: 0.25, jit: 0.06 }); break;
+    case 'chain': T({ type: 'chain', count: Math.round(n * 0.6), na: 1.6, wid: 0.1, color: c, warp: 0.25 }); break;
+    case 'net': T({ type: 'net', count: Math.round(n * 0.8), na: 2.0, wid: 0.09, color: c, edgeColor: pale, edge: 0.5, warp: 0.3 }); break;
     case 'chevron': T({ type: 'blotch', count: Math.round(n * 0.7), a: 0, wid: 0.42, len: 0.55, shape: 'chevron', color: c, edgeColor: pale, edge: 0.14, edgeOut: true }); break;
     case 'zigzag':
       T({ type: 'zigzag', count: n, amp: 0.12, wid: 0.075, color: c, warp: 0.6, aa: 0.2 });
@@ -151,6 +155,7 @@ export function autoProfile(p) {
   if (a.tt) T({ type: 'tint', t: [0.86, 1], ramp: 0.06, color: a.tt, alpha: 0.95 });
   if (a.hc) pat.push({ type: 'cap', x0: 0, x1: a.hcx || 1.0, wid: 0.62, color: a.hc });
   if (a.pat) for (const l of a.pat) pat.push(Object.assign({}, l));
+  if (a.ck) pat.push({ type: 'checker', belly: true, color: a.ck === 1 ? '#161412' : a.ck, alpha: 0.85, skip: 0.15 }); // v5.19: chequered belly
   const colors = { dorsal: d, lateral: hexOf(mixc(hex(d), hex(b), 0.18)), belly: b, mottle: fossil ? 0.12 : 0.08, var: 0.05 };
   if (a.t === 'speckle') { colors.speckle = { p: 0.16, color: c, k: 0.6 }; colors.mottle = 0.14; }
   if (a.t === 'coral') colors.lateral = d;
@@ -665,6 +670,7 @@ function shapeD(shape, dv, da) {
     case 'diamond': return v + u;
     case 'rect': return Math.pow(v ** 4 + u ** 4, 0.25);
     case 'hourglass': return Math.max(v / (0.35 + 0.65 * u), u);
+    case 'hourglass2': return Math.max(v / (0.18 + 0.82 * u * u), u); // v5.19: copperhead crossbands - narrow over the spine, wide on the flanks
     case 'chevron': return Math.max(Math.abs(dv + 1.1 * u), u); // a V whose arms run forward down the flanks (apex toward the tail)
     case 'saddle': return Math.max(Math.pow(v ** 3 + u ** 3, 1 / 3), u);
     case 'round': return Math.pow(v ** 2.6 + u ** 2.6, 1 / 2.6);
@@ -747,6 +753,20 @@ function evalLayer(Ly, a, g, t, xn, warp, cl, seed) {
       if (c > 0.001 && (!best || c > best[1])) best = [Ly.col, c * (Ly.alpha || 1)];
     }
     return best;
+  }
+  // v5.19: a net of dark lines (reticulated python) and the chain of kingsnakes: pale crossbands over the back that fork
+  // on the flanks and join their neighbours (a chain-link pattern). per: length of one link; na: links around the body
+  if (Ly.type === 'net' || Ly.type === 'chain') {
+    const per = Ly.period; if (!per) return null;
+    const u = (g - Ly.g0) / per + Ly.phase + warp * Ly.warp * 0.25, aa = Math.abs(a), na = Ly.na || 2.2;
+    const fr = (z) => Math.abs(z - Math.floor(z + 0.5)); // distance to the nearest whole number
+    let d;
+    if (Ly.type === 'net') { const v = aa * na; d = Math.min(fr(u + v), fr(u - v)) / Ly.wid; }
+    else { const a0 = Ly.a0 != null ? Ly.a0 : 0.32; d = aa < a0 ? fr(u) / Ly.wid : Math.min(fr(u + (aa - a0) * na), fr(u - (aa - a0) * na)) / Ly.wid; if (aa > (Ly.a1 || 0.8)) d = 9; }
+    let c = cover(d, Ly.aa || 0.25), col = Ly.col;
+    if (Ly.ecol && d >= 1 - Ly.aa && d < 1 + Ly.edge + Ly.aa) { const ce = 1 - sstep(1 + Ly.edge - Ly.aa, 1 + Ly.edge + Ly.aa, d); if (ce > c) { col = Ly.ecol; c = ce; } }
+    c *= fadeT * (Ly.alpha || 1);
+    return c > 0.001 ? [col, c] : null;
   }
   // periodic marks: blotch / band / diamond ... along the body
   const per = Ly.period; if (!per) return null;

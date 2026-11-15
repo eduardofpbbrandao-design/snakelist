@@ -155,6 +155,10 @@ def pattern_of(c, plan, con, green=False):
     if re.search(r"saddle|blotch|mosaic|checker|chequer|tessellat|carpet|rock python|cat|chain", n): return "blotch"
     if g in ("vipera", "pelias") or re.search(r"zigzag|adder", n) and plan == "viper": return "zigzag"
     if g == "bitis": return "chevron"
+    # v5.19: copperheads and cottonmouths: crossbands narrow over the spine, wide on the flanks; the getula-group kingsnakes: a chain
+    if g == "agkistrodon": return "hourglass2"
+    if c["id"] in ("lampropeltis-getula", "lampropeltis-floridana", "lampropeltis-meansi", "lampropeltis-nigrita"): return "chain"
+    if g == "malayopython": return "net"
     if g in ("bothrops", "porthidium", "bothrocophias", "atropoides", "metlapilcoatlus", "agkistrodon", "gloydius", "deinagkistrodon", "calloselasma", "cerrophidion", "lachesis"): return "hourglass"
     if g in ("daboia", "echis"): return "spot"
     if g in ("python", "morelia", "boa", "epicrates", "chilabothrus", "eryx", "pantherophis", "elaphe", "zamenis", "pituophis", "acrantophis", "sanzinia", "liasis", "simalia", "malayopython"): return "blotch"
@@ -265,6 +269,12 @@ CURATED = {
     "sistrurus-miliarius": {"d": "#8a7a6a", "c": "#2a2420", "b": "#e2d8c8", "t": "spot", "vs": ["#c26a3a", 0.035]},
     "bothrops-atrox": {"d": "#8a7a5a", "c": "#3a2e20", "b": "#ddd2b6"},
     "chrysopelea-ornata": {"d": "#8fb03a", "lat": "#98b844", "c": "#141a0c", "b": "#d8e0a0", "t": "band", "n": 60, "cx": {"scaleEdge": {"color": "#141a0c", "k": 0.7}}},
+    "morelia-spilota": {"d": "#b4ab92", "lat": "#aca286", "c": "#1e1c18", "b": "#e2dcc6", "t": "blotch", "n": 50, "L": 2.0, "s": "forest", "sx": {"gloss": 0.5, "iridescence": 0.1}},
+    # v5.19: patterns checked against photos
+    "crotalus-ruber": {"d": "#b5826a", "c": "#7a3c2a", "b": "#e8dccb", "t": "diamond", "n": 34, "L": 1.1, "s": "arid", "tl": {"rattle": 7}, "pat": [{"type": "band", "t": [0.88, 0.985], "count": 5, "len": 0.5, "color": "#1a1512", "warp": 0.2, "jit": 0.02}]},
+    "nerodia-sipedon": {"d": "#6e604c", "lat": "#74644e", "c": "#2e2218", "b": "#e2d6c0", "t": "band", "n": 32, "L": 0.9, "s": "riverbank", "k": 1, "ck": "#7a3a2a"},
+    "laticauda-laticaudata": {"d": "#5f7fa6", "lat": "#6a88ac", "c": "#121214", "b": "#d8d8c8", "t": "band", "n": 40, "L": 1.0, "s": "sea"},
+    "thamnophis-sirtalis": {"d": "#2a2a22", "lat": "#36322a", "b": "#d3cb9c", "c": "#121110", "t": "plain", "vs": ["#e4cf62", 0.045], "ls": ["#e8d77a", 0.52, 0.05], "k": 1, "L": 0.7, "s": "grass", "h": {"iris": "#c8a050", "irisInner": "#e6c878"}, "pat": [{"type": "blotch", "count": 70, "a": 0.3, "mirror": True, "alt": True, "wid": 0.07, "len": 0.35, "shape": "rect", "color": "#121110"}]},
     # v5.18: iconic species checked against their photos
     "heterodon-nasicus": {"d": "#b89a72", "c": "#6a4a32", "b": "#2a2622", "t": "blotch", "n": 40, "L": 0.55, "s": "grass", "bx": {"ld": 16}},
     "pantherophis-alleghaniensis": {"d": "#1f201f", "lat": "#252524", "c": "#3a3a36", "b": "#d8d2c0", "t": "plain", "L": 1.4, "s": "forest", "cx": {"speckle": {"p": 0.18, "color": "#b8b2a2", "k": 0.45}}, "sx": {"keel": 0.25, "gloss": 0.55}},
@@ -364,11 +374,19 @@ CURATED = {
 
 # (Gaboon viper: the purple was too strong and the head too pale; a darker, warmer iris)
 HAND_FIXES = {
+    # v5.19: patterns checked against photos (chequered bellies, reticulated net, copperhead hourglasses, timber chevrons, diamond chain, kingsnake chain, bushmaster rhomboids)
+    'pantherophis-guttatus': [(('pattern',), [{'type': 'blotch', 't': [0.06, 0.95], 'count': 36, 'a': 0, 'wid': 0.3, 'len': 0.62, 'shape': 'round', 'color': '#a8331f', 'edgeColor': '#1a1210', 'edge': 0.15, 'warp': 0.3}, {'type': 'blotch', 't': [0.06, 0.95], 'count': 36, 'phase': 0.5, 'a': 0.6, 'mirror': True, 'alt': True, 'wid': 0.1, 'len': 0.4, 'color': '#a8331f', 'edgeColor': '#2a1a14', 'edge': 0.2}, {'type': 'blotch', 't': [0.06, 0.97], 'count': 70, 'a': 0.9, 'mirror': True, 'alt': True, 'belly': True, 'wid': 0.06, 'len': 0.5, 'shape': 'rect', 'color': '#1a1512'}, {'type': 'poly', 'pts': [[0.25, 0], [0.6, 0.12], [1.3, 0.14], [1.3, -0.14], [0.6, -0.12]], 'color': '#b03a22'}, {'type': 'line', 'p0': [0.3, 0.4], 'p1': [1.0, 0.62], 'wid': 0.06, 'color': '#a8331f', 'mirror': True}, {'type': 'checker', 'belly': True, 'color': '#141210', 'alpha': 0.9, 'skip': 0.1}])],
+    'pantherophis-obsoletus': [(('pattern',), [{'type': 'blotch', 't': [0.06, 0.95], 'count': 34, 'a': 0, 'wid': 0.3, 'len': 0.6, 'color': '#2c2824', 'alpha': 0.8}, {'type': 'line', 'p0': [0.05, 0.66], 'p1': [0.9, 0.64], 'wid': 0.1, 'color': '#d8d2c2', 'mirror': True}, {'type': 'checker', 'belly': True, 'color': '#2a2824', 'alpha': 0.6, 'skip': 0.1}])],
+    'malayopython-reticulatus': [(('colors', 'dorsal'), '#9a7c44'), (('colors', 'lateral'), '#a08040'), (('pattern',), [{'type': 'net', 't': [0.05, 0.97], 'count': 46, 'na': 2.1, 'wid': 0.11, 'color': '#15100a', 'edgeColor': '#e0cc8e', 'edge': 0.4, 'warp': 0.7}, {'type': 'blotch', 't': [0.05, 0.97], 'count': 46, 'phase': 0.5, 'a': 0.62, 'mirror': True, 'wid': 0.08, 'len': 0.3, 'shape': 'diamond', 'color': '#e2dccb', 'warp': 0.4}, {'type': 'cap', 'x0': 0, 'x1': 1.04, 'wid': 0.6, 'color': '#9a7a40'}, {'type': 'line', 'p0': [0.04, 0], 'p1': [1.2, 0], 'wid': 0.018, 'color': '#120c06'}, {'type': 'line', 'p0': [0.33, 0.37], 'p1': [1.0, 0.54], 'wid': 0.03, 'color': '#120c06', 'mirror': True}, {'type': 'line', 'p0': [0.04, 0.64], 'p1': [0.82, 0.63], 'wid': 0.06, 'color': '#d6c48c', 'mirror': True}])],
+    'agkistrodon-contortrix': [(('pattern', 0, 'shape'), 'hourglass2'), (('pattern', 0, 'wid'), 0.98), (('pattern', 0, 'len'), 0.7), (('colors', 'dorsal'), '#cba68c'), (('colors', 'lateral'), '#c6a288')],
+    'agkistrodon-piscivorus': [(('pattern', 0, 'shape'), 'hourglass2'), (('pattern', 0, 'alpha'), 0.7), (('pattern', 0, 'wid'), 0.98)],
+    'crotalus-horridus': [(('pattern', 1, 'wid'), 0.55), (('pattern', 1, 'len'), 0.42), (('pattern', 1, 'warp'), 0.3)],
+    'crotalus-adamanteus': [(('pattern', 0, 'len'), 1.08), (('pattern', 0, 'wid'), 0.36)],
+    'lampropeltis-getula': [(('pattern',), [{'type': 'chain', 't': [0.05, 0.96], 'count': 24, 'na': 1.5, 'wid': 0.065, 'color': '#ece6cf', 'warp': 0.25, 'a0': 0.3, 'a1': 0.86}, {'type': 'checker', 'belly': True, 'color': '#ece6cf', 'alpha': 0.7, 'skip': 0.1}])],
+    'lachesis-muta': [(('colors', 'dorsal'), '#c9a37e'), (('colors', 'lateral'), '#c8a27c'), (('pattern', 0, 'warp'), 0.12), (('pattern', 0, 'inner', 'r'), 0.4), (('pattern', 0, 'inner', 'color'), '#9a7652'), (('pattern', 0, 'len'), 0.72), (('pattern', 0, 'wid'), 0.32), (('pattern', 0, 'count'), 28)],
     # v5.18: eastern milksnake - wider red-brown saddles edged in black on a grey-tan ground
     "lampropeltis-triangulum": [(("pattern", 0, "wid"), 0.46), (("pattern", 0, "color"), "#8e3a26"), (("pattern", 1, "color"), "#8e3a26"), (("colors", "dorsal"), "#9d9686")],
     # v5.16: bushmaster - separate dark rhomboid blotches (pale centres) on a pinkish tan ground; they had merged into bands
-    "lachesis-muta": [(("colors", "dorsal"), "#c9a37e"), (("colors", "lateral"), "#c8a27c"), (("pattern", 0, "wid"), 0.3), (("pattern", 0, "len"), 0.92),
-                      (("pattern", 0, "count"), 24), (("pattern", 0, "warp"), 0.15), (("pattern", 0, "inner", "r"), 0.38), (("pattern", 0, "inner", "color"), "#9a7652")],
     # v5.16: yellow-bellied sea snake - the water line lower on its body, so the bright yellow lower flanks show above the water line
     "hydrophis-platurus": [(("colors", "belly"), "#f0c23a"), (("colors", "bellyA"), 0.34), (("scene", "float"), 0.3)],
     "bitis-gabonica": [(("head", "iris"), "#b49f74"), (("head", "irisInner"), "#d6c8a2"), (("pattern", 2, "color"), "#634842"),
@@ -444,6 +462,7 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         if flags: a["x"] = flags
         g = c["genus"].lower()
         if g in ("crotalus", "sistrurus"): a["tl"] = {"rattle": 7 if g == "crotalus" else 5}
+        if g in ("pantherophis", "elaphe", "pituophis", "lampropeltis", "pseudelaphe", "senticolis", "bogertophis", "arizona", "zamenis", "euprepiophis", "oreocryptophis") and t not in ("tricolor",): a["ck"] = 1  # v5.19: chequered belly
         if c["id"] in CURATED:  # v4.81: hand-checked against its photo
             a.update(CURATED[c["id"]]); a["x"] = a.get("x", "").replace("g", "").replace("l", "" if "L" in CURATED[c["id"]] else "l")
             if not a["x"]: a.pop("x")
