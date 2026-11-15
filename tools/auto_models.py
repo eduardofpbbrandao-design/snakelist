@@ -451,6 +451,37 @@ REGIONLESS = {"Rainforests", "Forests & woodlands", "Savannas & grasslands", "Sh
               "Underground & forest floor", "Wetlands & swamps", "Rivers & lakes", "Coasts & sea", "Around people"}
 
 
+# v5.31: head shape per family and group (from photos of each): width against the body, length, snout shape, where
+# the eyes and nostrils sit (on top in water snakes), pits
+def head_of(c, g, plan):
+    f = c["family"]
+    if f == "Viperidae":
+        if g in ("causus", "azemiops"): return {"shape": "oval", "w": 0.95, "snout": 0.7}  # narrow, colubrid-like heads
+        if g in ("bitis", "cerastes", "pseudocerastes", "eristicophis"): return {"w": 1.15, "len": 0.07}
+        if g in ("atheris", "bothriechis", "tropidolaemus"): return {"w": 1.1}
+        return {}
+    if f == "Elapidae":
+        if plan == "sea": return {"nostrilA": 22, "eyeA": 50, "w": 0.8}
+        if g in ("naja", "ophiophagus", "hemachatus", "pseudohaje", "walterinnesia", "aspidelaps"): return {"w": 1.05, "snout": 0.7}
+        if g in ("acanthophis",): return {"shape": "tri", "w": 1.2, "len": 0.06}
+        return {"w": 0.92, "snout": 0.65}
+    if f == "Pythonidae": return {"pits": "labial", "snout": 0.68, "w": 0.8}
+    if f == "Boidae":
+        if g in ("eryx", "gongylophis", "charina", "lichanura"): return {"len": 0.03, "snout": 0.85, "w": 0.95, "tip": 0.8}  # stubby, shovel snout
+        if g in ("corallus", "epicrates", "chilabothrus"): return {"pits": "labial", "w": 0.95}
+        return {"pits": "labial" if g == "boa" else None, "w": 0.85} if False else {}
+    if f in ("Homalopsidae", "Acrochordidae"): return {"nostrilA": 25, "eyeA": 45}
+    if f == "Xenopeltidae": return {"plates": True, "h": 0.52}
+    if f in ("Uropeltidae",): return {"snout": 0.45, "tip": 0.35}
+    if f in ("Atractaspididae", "Lamprophiidae", "Prosymnidae", "Pseudoxyrhophiidae"): return {"w": 0.9, "snout": 0.8, "len": 0.03}
+    if f == "Colubridae" or plan == "colubrid":
+        if g in ("pantherophis", "elaphe", "zamenis", "ptyas", "coluber", "masticophis", "hierophis", "platyceps"): return {"w": 1.05, "snout": 0.68}
+        if g in ("natrix", "nerodia", "thamnophis", "hebius", "rhabdophis", "fowlea", "amphiesma", "regina", "trimerodytes", "sinonatrix", "tropidonophis"): return {"w": 1.12}
+        if g in ("dasypeltis",): return {"snout": 0.85, "w": 1.0}
+        if g in ("ahaetulla", "oxybelis", "langaha", "uromacer", "thelotornis", "imantodes"): return {"len": 0.045, "snout": 0.4, "tip": 0.3}
+    return {}
+
+
 PHOTO_MASK = {}
 MASK_USED = []
 try: PHOTO_MASK = json.load(open(os.path.join(ROOT, "data/snake-model-photo.json"), encoding="utf-8"))
@@ -561,6 +592,8 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         if g == "tantilla": a.setdefault("hc", "#1a1614"); a.setdefault("hcx", 1.0)  # the black head of centipede snakes
         if g == "oligodon" and a["t"] == "speckle": a["t"] = "saddle"
         if g in ("typhlops", "afrotyphlops", "indotyphlops", "amerotyphlops", "letheobia", "anilios", "ramphotyphlops", "argyrophis", "madatyphlops", "antillotyphlops", "xerotyphlops", "myriopholis", "leptotyphlops", "epictia", "trilepida", "liotyphlops", "gerrhopilus") and a["t"] not in ("stripe",): a["t"] = "plain"
+        hd = head_of(c, c["genus"].lower(), plan)
+        if hd: a["h"] = dict(hd, **(a.get("h") or {}))
         if c["id"] in CURATED:  # v4.81: hand-checked against its photo
             a.update(CURATED[c["id"]]); a["x"] = a.get("x", "").replace("g", "").replace("l", "" if "L" in CURATED[c["id"]] else "l")
             if not a["x"]: a.pop("x")
