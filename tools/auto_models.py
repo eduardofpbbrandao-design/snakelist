@@ -469,13 +469,14 @@ def head_of(c, g, plan):
     if f == "Boidae":
         if g in ("eryx", "gongylophis", "charina", "lichanura"): return {"len": 0.03, "snout": 0.85, "w": 0.95, "tip": 0.8}  # stubby, shovel snout
         if g in ("corallus", "epicrates", "chilabothrus"): return {"pits": "labial", "w": 0.95}
-        return {"pits": "labial" if g == "boa" else None, "w": 0.85} if False else {}
+        return {}
     if f in ("Homalopsidae", "Acrochordidae"): return {"nostrilA": 25, "eyeA": 45}
     if f == "Xenopeltidae": return {"plates": True, "h": 0.52}
-    if f in ("Uropeltidae",): return {"snout": 0.45, "tip": 0.35}
-    if f in ("Atractaspididae", "Lamprophiidae", "Prosymnidae", "Pseudoxyrhophiidae"): return {"w": 0.9, "snout": 0.8, "len": 0.03}
+    if f in ("Uropeltidae",): return {"snout": 0.45, "tip": 0.35, "w": 0.85, "eye": 0.08, "len": 0.03}  # small conical heads, tiny eyes, no neck
+    if f == "Atractaspididae": return {"w": 0.85, "snout": 0.75, "len": 0.028, "eye": 0.09}
+    if f in ("Lamprophiidae", "Prosymnidae", "Pseudoxyrhophiidae"): return {"w": 0.95, "snout": 0.72, "len": 0.032}
     if f == "Colubridae" or plan == "colubrid":
-        if g in ("pantherophis", "elaphe", "zamenis", "ptyas", "coluber", "masticophis", "hierophis", "platyceps"): return {"w": 1.05, "snout": 0.68}
+        if g in ("pantherophis", "elaphe", "zamenis", "ptyas", "coluber", "masticophis", "hierophis", "platyceps"): return {"w": 1.05, "snout": 0.58}
         if g in ("natrix", "nerodia", "thamnophis", "hebius", "rhabdophis", "fowlea", "amphiesma", "regina", "trimerodytes", "sinonatrix", "tropidonophis"): return {"w": 1.12}
         if g in ("dasypeltis",): return {"snout": 0.85, "w": 1.0}
         if g in ("ahaetulla", "oxybelis", "langaha", "uromacer", "thelotornis", "imantodes"): return {"len": 0.045, "snout": 0.4, "tip": 0.3}
