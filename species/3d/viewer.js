@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=529'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=529'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=530'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=530'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -450,8 +450,17 @@ function buildBody(P, F, pose, quality) {
   // heat pits only where the species has them: one loreal pit (pit vipers), a row in the lip scales (pythons)
   if (Hd.pits === 'labial') for (let k = 0; k < 5; k++) bumps.push({ x: F.Hl * (0.03 + k * 0.06), xs: F.Hl * 0.016, th: Math.PI * (k ? 0.52 : 0.2), ts: 0.05, amp: -0.05, mirror: true });
   bumps.push({ x: F.Hl * 0.045, xs: F.Hl * 0.018, th: Hd.nostrilA != null ? (Hd.nostrilA * Math.PI) / 180 : Math.PI * 0.4, ts: 0.08, amp: -0.06, mirror: true }); // v5.28: on the side of the snout near the tip // nostril (upward-facing in water snakes)
-  if (Hd.snoutUp) bumps.push({ x: F.Hl * 0.03, xs: F.Hl * 0.05, th: 0, ts: 0.7, amp: Hd.snoutUp });
-  const nTop = (x) => lerp(Hd.canthus, 2.15, sstep(F.Hl * 0.8, F.Hl * 1.6, x));
+  // v5.30: the hognose's upturned, keeled rostral: a narrow ridge rising at the snout tip
+  if (Hd.snoutUp) { bumps.push({ x: F.Hl * 0.03, xs: F.Hl * 0.05, th: 0, ts: 0.7, amp: Hd.snoutUp * 0.6 }); bumps.push({ x: F.Hl * 0.06, xs: F.Hl * 0.06, th: 0, ts: 0.22, amp: Hd.snoutUp * 1.4 }); }
+  // v5.30: vipers - a sharp canthus ridge from the eye to the snout, a ledge (supraocular) over each eye, and cheeks that
+  // bulge at the jaw angles over the venom glands
+  if ((Hd.shape || 'oval') === 'tri') {
+    const eX = Hd.eyeX * F.Hl;
+    for (let q = 0; q < 6; q++) bumps.push({ x: F.Hl * 0.06 + (eX - F.Hl * 0.06) * (q / 5), xs: (eX - F.Hl * 0.06) / 7, th: eyeA - 0.36, ts: 0.1, amp: 0.045, mirror: true });
+    bumps.push({ x: eX, xs: F.Hl * 0.09, th: eyeA - 0.3, ts: 0.12, amp: 0.07, mirror: true });
+    bumps.push({ x: F.Hl * 0.78, xs: F.Hl * 0.14, th: Math.PI * 0.52, ts: 0.3, amp: 0.07, mirror: true });
+  }
+  const nTop = (x) => lerp(Hd.canthus * ((Hd.shape || 'oval') === 'tri' ? 1.25 : 1), 2.15, sstep(F.Hl * 0.8, F.Hl * 1.6, x)); // (v5.30: vipers' crowns flat)
   // v4.81: an eye socket - the skin dips gently where the eye sits, so the domed eye under its clear
   // spectacle scale lies flush with the head (never standing out of its outline)
   const eyeX0 = Hd.eyeX * F.Hl, eyeRad = (Hd.eye || 0.15) * F.W(eyeX0) * 1.04, eyeRl = (F.W(eyeX0) + F.Hh(eyeX0)) / 2;
@@ -715,7 +724,7 @@ function patternData(P, F, body, lat, quality, seed) {
     const g = ((r + 0.5) / Hp) * body.gTotal, x = body.xOf(g); if (x > xJ * 1.08) break;
     const circ = Math.PI * 2 * (F.W(x) + F.Hh(x)) / 2, aPx = 2 / Wp; // (one texel around, as a fraction of a)
     const mA = mA0 - (tri ? 0.07 * sstep(xJ * 0.45, xJ, x) : 0.02 * sstep(xJ * 0.7, xJ, x)), lw = Math.max(aPx * 0.8, (Hl * 0.012) / Math.max(1e-6, circ) * 2);
-    const fadeIn = sstep(Hl * 0.08, Hl * 0.2, x), fadeOut = 1 - sstep(xJ * 0.98, xJ * 1.08, x);
+    const fadeIn = sstep(Hl * 0.2, Hl * 0.34, x), fadeOut = 1 - sstep(xJ * 0.98, xJ * 1.08, x); // (v5.30: none round the front - no cartoon smile)
     const sut = Math.pow(Math.abs(Math.cos(Math.PI * x / (xJ / nLab))), 18) * sstep(Hl * 0.1, Hl * 0.18, x);
     for (let c = 0; c < Wp; c++) {
       const a = ((c + 0.5) / Wp) * 2 - 1, aa = Math.abs(a), k = (r * Wp + c) * 4;
