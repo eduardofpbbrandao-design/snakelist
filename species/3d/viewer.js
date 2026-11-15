@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=522'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=522'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=523'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=523'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -529,6 +529,9 @@ function buildBody(P, F, pose, quality) {
 // ---------- textures generated per species ----------
 function scaleLattice(P, gTotal) {
   const S = P.scales, aV = S.aV, R = S.rows, rw = (2 * aV) / R;
+  // v5.23: an enlarged vertebral row (kraits, cat snakes, bronzebacks): the middle row is vert x wider, the others share the rest
+  const vk = S.vert && R % 2 ? S.vert : 1, wO = (2 * aV) / (R - 1 + vk), RB = [-aV]; for (let i = 0; i < R; i++) RB.push(RB[i] + (i === (R - 1) / 2 ? wO * vk : wO));
+  const rowOf = (a) => { if (vk === 1) return Math.floor((a + aV) / rw); let lo = 0, hi = R; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (RB[m] <= a) lo = m; else hi = m; } return lo; };
   const Wt = R > 40 ? 2048 : 1024; // v4.72: twice as sharp
   // scale pitch along the body (girth units), rounded so the tile has a whole number of pixels
   let Ht = Math.max(8, Math.round(Wt * (S.kind === 'juxta' ? 1.0 : 1.25) * aV / R * (S.pitch || 1)));
@@ -536,17 +539,17 @@ function scaleLattice(P, gTotal) {
   const Pt = Ht / Wt;
   const cell = (a, g) => {
     if (Math.abs(a) > aV) { const j = Math.floor(g / Pt); return { ac: a, gc: (j + 0.5) * Pt, id: j * 7919 + (a > 0 ? 1 : 2), v: true, w: 1 }; }
-    const i = Math.floor((a + aV) / rw), off = (i & 1) * Pt / 2, j = Math.floor((g - off) / Pt);
-    const ac = -aV + (i + 0.5) * rw, gc = off + (j + 0.5) * Pt, lx = (a - ac) / rw, ly = (g - gc) / Pt;
+    const i = rowOf(a), wI = vk === 1 ? rw : RB[i + 1] - RB[i], off = (i & 1) * Pt / 2, j = Math.floor((g - off) / Pt);
+    const ac = vk === 1 ? -aV + (i + 0.5) * rw : (RB[i] + RB[i + 1]) / 2, gc = off + (j + 0.5) * Pt, lx = (a - ac) / wI, ly = (g - gc) / Pt;
     // w: how far inside the scale (1 in the middle, 0 at its edges), so per-scale colour blends softly
     return { ac, gc, id: i * 100003 + j * 7, v: false, i, j, w: clamp(1 - (lx * lx * 3.2 + ly * ly * 2.6), 0, 1) };
   };
-  return { aV, R, rw, Wt, Ht, Pt, cell };
+  return { aV, R, rw, Wt, Ht, Pt, cell, rowOf, RB, vk };
 }
 
 // the scale tile: normal map (rgb) plus a cavity/roughness map, one tile = full circumference x one scale pitch
 function scaleTextures(P, lat) {
-  const { Wt, Ht, aV, rw, Pt } = lat, S = P.scales, keel = S.keel || 0, kind = S.kind || 'imbricate';
+  const { Wt, Ht, aV, rw, Pt, rowOf, RB, vk } = lat, S = P.scales, keel = S.keel || 0, kind = S.kind || 'imbricate';
   const h = new Float32Array(Wt * Ht);
   for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) {
     const a = ((x + 0.5) / Wt) * 2 - 1, g = ((y + 0.5) / Ht) * Pt;
@@ -555,12 +558,12 @@ function scaleTextures(P, lat) {
       const yy = g / Pt; best = 0.55 + 0.35 * yy - 0.5 * Math.exp(-(((yy) / 0.06) ** 2)) - 0.5 * Math.exp(-(((1 - yy) / 0.04) ** 2));
       best -= 0.4 * Math.exp(-(((Math.abs(a) - aV) / 0.01) ** 2));
     } else {
-      const i0 = Math.floor((a + aV) / rw);
+      const i0 = rowOf(a);
       for (let di = -1; di <= 1; di++) {
-        const i = i0 + di, ac = -aV + (i + 0.5) * rw, off = (((i % 2) + 2) % 2) * Pt / 2;
+        const i = i0 + di, wI = vk === 1 || i < 0 || i >= RB.length - 1 ? rw : RB[i + 1] - RB[i], ac = vk === 1 || i < 0 || i >= RB.length - 1 ? -aV + (i + 0.5) * rw : (RB[i] + RB[i + 1]) / 2, off = (((i % 2) + 2) % 2) * Pt / 2;
         for (let dj = -1; dj <= 2; dj++) {
           const j = Math.floor((g - off) / Pt) + dj - 1, gc = off + (j + 0.5) * Pt;
-          const lx = (a - ac) / rw, ly = (g - gc) / Pt;
+          const lx = (a - ac) / wI, ly = (g - gc) / Pt;
           let hv;
           if (kind === 'juxta' || kind === 'cycloid') {
             const wx = kind === 'juxta' ? 0.52 : 0.66, wy = kind === 'juxta' ? 0.52 : 0.72;
@@ -668,7 +671,11 @@ function patternData(P, F, body, lat, quality, seed) {
       else if (x > Hl * 1.05 && !C.noEdge) {
         const kE = (P.scales.kind === 'juxta' || P.scales.kind === 'cycloid' ? 0.12 : 0.3) * (C.edgeK != null ? C.edgeK : 1);
         if (!cl.v) col = mixc(col, [col[0] * 0.5, col[1] * 0.5, col[2] * 0.5], kE * Math.pow(1 - cl.w, 2.2));
-        else { const vy = Math.abs(g - cl.gc) / lat.Pt; col = mixc(col, [col[0] * 0.55, col[1] * 0.55, col[2] * 0.55], kE * 1.4 * Math.exp(-(((0.5 - vy) / 0.07) ** 2))); }
+        else {
+          const vy = Math.abs(g - cl.gc) / lat.Pt; col = mixc(col, [col[0] * 0.55, col[1] * 0.55, col[2] * 0.55], kE * 1.4 * Math.exp(-(((0.5 - vy) / 0.07) ** 2)));
+          // v5.23: under the tail the scutes are paired (subcaudals): a seam down the middle, the pairs offset by half a scute
+          if (x > L * (1 - (P.body.tail || 0.12)) && !P.body.blunt) { const am = 1 - aa; col = mixc(col, [col[0] * 0.5, col[1] * 0.5, col[2] * 0.5], kE * 1.6 * Math.exp(-((am / 0.012) ** 2))); }
+        }
       }
       if (C.speckle && !cl.v && x > Hl) { const hs = hash1(cl.id, seed + 11); if (hs < C.speckle.p) col = mixc(col, hex(C.speckle.color), (C.speckle.k || 0.6) * (0.6 + hs / C.speckle.p * 0.4) * Math.sqrt(cl.w)); }
       const k = (r * Wp + c) * 4; data[k] = col[0]; data[k + 1] = col[1]; data[k + 2] = col[2]; data[k + 3] = 255;

@@ -284,7 +284,7 @@ CURATED = {
     "laticauda-colubrina": {"d": "#7d93a8", "lat": "#8aa0b2", "b": "#e6dc96", "c": "#121214", "t": "band", "n": 40, "lip": "#e6d36a", "h": dict(DARK_EYE, iris="#1a1a1c", irisInner="#2a2a30")},
     "drymarchon-couperi": {"d": "#141821", "lat": "#1b2030", "b": "#2a3040", "t": "plain", "sx": {"gloss": 0.9, "iridescence": 0.6}, "lip": "#a8503a", "h": dict(DARK_EYE, iris="#1a1614", irisInner="#2a2220")},
     "lampropeltis-elapsoides": {"d": "#f0da66", "c": "#c8302a", "b": "#efe2b0", "t": "tricolor", "n": 36, "k": 0, "hc": "#c8302a", "hcx": 0.75},
-    "xenopeltis-unicolor": {"d": "#3a2a24", "lat": "#3d2e28", "b": "#e6e2d6", "t": "plain", "sx": {"gloss": 1, "iridescence": 1}, "h": dict(DARK_EYE, iris="#2a1e18", irisInner="#3e2c22")},
+    "xenopeltis-unicolor": {"d": "#3a2a24", "lat": "#3d2e28", "b": "#e6e2d6", "t": "plain", "sx": {"gloss": 1, "iridescence": 1}, "h": dict(DARK_EYE, iris="#2a1e18", irisInner="#3e2c22", plates=True)},
     "acanthophis-antarcticus": {"d": "#8a6e5a", "c": "#5a4234", "b": "#e3d6c0", "t": "band", "n": 50, "tt": "#e8dcc0", "bx": {"ld": 14, "neck": 0.5, "tail": 0.11}, "h": {"pupil": "slit", "iris": "#b9915a", "irisInner": "#dcb880", "w": 1.3}},
     "aspidites-ramsayi": {"d": "#d7964a", "c": "#8a5428", "b": "#f0e2c0", "t": "band", "n": 50, "hc": "#e2b070", "h": {"iris": "#5a3a22", "irisInner": "#7a5432"}},
     "boiga-dendrophila": {"d": "#141414", "lat": "#181816", "c": "#f0d040", "b": "#2c2c26", "t": "band", "n": 44, "lip": "#f2d84a", "h": {"iris": "#2a2018", "irisInner": "#3a2c20", "irisDark": 1, "pupil": "slit"}, "sx": {"gloss": 0.75}},
@@ -417,6 +417,7 @@ CURATED = {
 
 # (Gaboon viper: the purple was too strong and the head too pale; a darker, warmer iris)
 HAND_FIXES = {
+    'bungarus-caeruleus': [(('scales', 'vert'), 2.2)],  # v5.23: enlarged hexagonal middle row
     # v5.19: patterns checked against photos (chequered bellies, reticulated net, copperhead hourglasses, timber chevrons, diamond chain, kingsnake chain, bushmaster rhomboids)
     'pantherophis-guttatus': [(('pattern',), [{'type': 'blotch', 't': [0.06, 0.95], 'count': 36, 'a': 0, 'wid': 0.3, 'len': 0.62, 'shape': 'round', 'color': '#a8331f', 'edgeColor': '#1a1210', 'edge': 0.15, 'warp': 0.3}, {'type': 'blotch', 't': [0.06, 0.95], 'count': 36, 'phase': 0.5, 'a': 0.6, 'mirror': True, 'alt': True, 'wid': 0.1, 'len': 0.4, 'color': '#a8331f', 'edgeColor': '#2a1a14', 'edge': 0.2}, {'type': 'blotch', 't': [0.06, 0.97], 'count': 70, 'a': 0.9, 'mirror': True, 'alt': True, 'belly': True, 'wid': 0.06, 'len': 0.5, 'shape': 'rect', 'color': '#1a1512'}, {'type': 'poly', 'pts': [[0.25, 0], [0.6, 0.12], [1.3, 0.14], [1.3, -0.14], [0.6, -0.12]], 'color': '#b03a22'}, {'type': 'line', 'p0': [0.3, 0.4], 'p1': [1.0, 0.62], 'wid': 0.06, 'color': '#a8331f', 'mirror': True}, {'type': 'checker', 'belly': True, 'color': '#141210', 'alpha': 0.9, 'skip': 0.1}])],
     'pantherophis-obsoletus': [(('pattern',), [{'type': 'blotch', 't': [0.06, 0.95], 'count': 34, 'a': 0, 'wid': 0.3, 'len': 0.6, 'color': '#2c2824', 'alpha': 0.8}, {'type': 'line', 'p0': [0.05, 0.66], 'p1': [0.9, 0.64], 'wid': 0.1, 'color': '#d8d2c2', 'mirror': True}, {'type': 'checker', 'belly': True, 'color': '#2a2824', 'alpha': 0.6, 'skip': 0.1}])],
@@ -530,6 +531,11 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         if c["family"] == "Uropeltidae" or c["family"] == "Cylindrophiidae" or c["family"] == "Aniliidae": a["o"] = 1  # short blunt tail
         # v5.18: the real number of scale rows (so scales are the right size), and granular or glassy skin where the genus has it
         if g in GENUS_ROWS and "rows" not in (a.get("sx") or {}): a["sx"] = dict(a.get("sx") or {}, rows=GENUS_ROWS[g])
+        # v5.23: an enlarged middle row of back scales in kraits, cat snakes and bronzebacks; glossy skin where it is
+        if g in ("bungarus",): a["sx"] = dict(a.get("sx") or {}, vert=2.2)
+        elif g in ("boiga", "dendrelaphis", "toxicodryas", "chrysopelea"): a["sx"] = dict(a.get("sx") or {}, vert=1.7)
+        if g in ("calamaria", "atractus", "geophis", "pseudorabdion", "xenopeltis", "cylindrophis", "anilius", "loxocemus") and "gloss" not in (a.get("sx") or {}): a["sx"] = dict(a.get("sx") or {}, gloss=0.85)
+        if g == "xenopeltis": a["h"] = dict(a.get("h") or {}, plates=True)  # sunbeam snakes have big head plates
         if g in GENUS_KIND: a["sx"] = dict(a.get("sx") or {}, kind=GENUS_KIND[g][0], rows=GENUS_KIND[g][1], aV=1.0 if g == "acrochordus" else (a.get("sx") or {}).get("aV", 0.8))
         if g == "acanthophis" and "bx" not in a: a["bx"] = {"ld": 14, "neck": 0.5, "tail": 0.11}; a.setdefault("h", {}).setdefault("pupil", "slit")  # v5.12: death adders are short and stout
         out[c["id"]] = {"name": c["sci"] if c["is_sci"] else c["name"], "auto": a}
