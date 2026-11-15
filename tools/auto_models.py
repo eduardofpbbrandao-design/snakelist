@@ -141,9 +141,20 @@ def pattern_of(c, plan, con, green=False):
     n, g = (c["name"] if not c["is_sci"] else "").lower(), c["genus"].lower()
     # v5.12: "coral snake" in Australia and Africa (Brachyurophis, Aspidelaps) is plain or banded, not red-black-yellow
     if g in ("micrurus", "micruroides", "leptomicrurus", "sinomicrurus", "calliophis") or (re.search(r"coral", n) and set(c.get("continents", [])) & {"North America", "South America"}): return "coral"
-    # v5.12: only the diamond-backs have diamonds; most rattlesnakes have rounded blotches or crossbands
-    if re.search(r"diamond", n) or c["id"] in ("crotalus-ruber", "crotalus-scutulatus"): return "diamond"
-    if g in ("crotalus", "sistrurus") or re.search(r"rattle", n): return "blotch"
+    # v5.20: genus by genus, from photos of each group
+    if g in ("crotalus", "sistrurus"):
+        if c["id"] in ("crotalus-adamanteus", "crotalus-atrox", "crotalus-ruber", "crotalus-scutulatus", "crotalus-tortugensis", "crotalus-exsul", "crotalus-catalinensis") or re.search(r"diamond", n): return "diamond"
+        if c["id"] in ("crotalus-horridus",): return "chevron"
+        return "rblotch"
+    if g == "daboia": return "daboia"
+    if g == "echis": return "echis"
+    if g == "thamnophis": return "garter"
+    if g == "nerodia" and not green: return "band"
+    if g == "tantilla": return "plain"
+    if g == "natrix" and c["id"] != "natrix-natrix": return "spot"
+    if g == "coronella": return "spot"
+    if re.search(r"diamond", n): return "diamond"
+    if re.search(r"rattle", n): return "rblotch"
     if re.search(r"collared|ring-?necked|ringneck|necked|hooded", n): return "collar"
     # v5.12: prairie and mole kingsnakes are blotched, not ringed
     if c["id"] in ("lampropeltis-calligaster", "lampropeltis-occipitolineata", "lampropeltis-rhombomaculata"): return "blotch"
@@ -381,7 +392,8 @@ HAND_FIXES = {
     'agkistrodon-contortrix': [(('pattern', 0, 'shape'), 'hourglass2'), (('pattern', 0, 'wid'), 0.98), (('pattern', 0, 'len'), 0.7), (('colors', 'dorsal'), '#cba68c'), (('colors', 'lateral'), '#c6a288')],
     'agkistrodon-piscivorus': [(('pattern', 0, 'shape'), 'hourglass2'), (('pattern', 0, 'alpha'), 0.7), (('pattern', 0, 'wid'), 0.98)],
     'crotalus-horridus': [(('pattern', 1, 'wid'), 0.55), (('pattern', 1, 'len'), 0.42), (('pattern', 1, 'warp'), 0.3)],
-    'crotalus-adamanteus': [(('pattern', 0, 'len'), 1.08), (('pattern', 0, 'wid'), 0.36)],
+    'crotalus-adamanteus': [(('pattern', 0, 'len'), 1.25), (('pattern', 0, 'wid'), 0.19), (('pattern', 0, 'edge'), 0.2)],
+    'crotalus-atrox': [(('pattern', 0, 'len'), 1.25), (('pattern', 0, 'wid'), 0.19), (('pattern', 0, 'edge'), 0.2), (('pattern', 1, 'a'), 0.52)],
     'lampropeltis-getula': [(('pattern',), [{'type': 'chain', 't': [0.05, 0.96], 'count': 24, 'na': 1.5, 'wid': 0.065, 'color': '#ece6cf', 'warp': 0.25, 'a0': 0.3, 'a1': 0.86}, {'type': 'checker', 'belly': True, 'color': '#ece6cf', 'alpha': 0.7, 'skip': 0.1}])],
     'lachesis-muta': [(('colors', 'dorsal'), '#c9a37e'), (('colors', 'lateral'), '#c8a27c'), (('pattern', 0, 'warp'), 0.12), (('pattern', 0, 'inner', 'r'), 0.4), (('pattern', 0, 'inner', 'color'), '#9a7652'), (('pattern', 0, 'len'), 0.72), (('pattern', 0, 'wid'), 0.32), (('pattern', 0, 'count'), 28)],
     # v5.18: eastern milksnake - wider red-brown saddles edged in black on a grey-tan ground
@@ -463,6 +475,15 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         g = c["genus"].lower()
         if g in ("crotalus", "sistrurus"): a["tl"] = {"rattle": 7 if g == "crotalus" else 5}
         if g in ("pantherophis", "elaphe", "pituophis", "lampropeltis", "pseudelaphe", "senticolis", "bogertophis", "arizona", "zamenis", "euprepiophis", "oreocryptophis") and t not in ("tricolor",): a["ck"] = 1  # v5.19: chequered belly
+        # v5.20: the marks each group really has, beyond its main pattern
+        if g in ("trimeresurus", "craspedocephalus", "viridovipera", "popeia", "cryptelytrops") and (green or is_green(a["d"])):
+            a.setdefault("ls", ["#e9f0c6", 0.58, 0.028]); a.setdefault("tt", "#a8552e")  # pale line low on the flanks, rusty tail tip
+            if a["t"] in ("speckle", "blotch", "spot"): a["t"] = "plain"
+        if g == "dendrelaphis" and not re.search(r"green", nm): a["d"] = "#8a6a3e"; a["lat"] = "#8e6e42"; a["t"] = "plain"  # bronzebacks are bronze-brown
+        if g == "dendrelaphis": a.setdefault("ls", ["#141210", 0.5, 0.045]); a["pat"] = a.get("pat", []) + [{"type": "stripe", "t": [0.04, 1], "a": 0.62, "mirror": True, "wid": 0.025, "color": "#ece2b8", "aa": 0.35}]
+        if g == "tantilla": a.setdefault("hc", "#1a1614"); a.setdefault("hcx", 1.0)  # the black head of centipede snakes
+        if g == "oligodon" and a["t"] == "speckle": a["t"] = "saddle"
+        if g in ("typhlops", "afrotyphlops", "indotyphlops", "amerotyphlops", "letheobia", "anilios", "ramphotyphlops", "argyrophis", "madatyphlops", "antillotyphlops", "xerotyphlops", "myriopholis", "leptotyphlops", "epictia", "trilepida", "liotyphlops", "gerrhopilus") and a["t"] not in ("stripe",): a["t"] = "plain"
         if c["id"] in CURATED:  # v4.81: hand-checked against its photo
             a.update(CURATED[c["id"]]); a["x"] = a.get("x", "").replace("g", "").replace("l", "" if "L" in CURATED[c["id"]] else "l")
             if not a["x"]: a.pop("x")

@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=519'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=519'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=520'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=520'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -91,6 +91,7 @@ function normProfile(p) {
 // tools/auto_models.py writes a short entry ({ auto: { p plan, L length, d/c/b colours, t pattern, n marks,
 // s scene, k keeled, x flags } }); this turns it into a full profile with the same layer types the
 // hand-made ones use. Flags: f fossil, e extinct, g colours guessed, l length typical for its group.
+function mixHex(a, b, t) { return hexOf(mixc(hex(a), hex(b), t)); }
 function hexOf(rgb) { return '#' + rgb.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join(''); }
 function shade(c, k) { const v = hex(c); return hexOf(k >= 1 ? mixc(v, [255, 250, 235], Math.min(1, k - 1)) : v.map((x) => x * k)); }
 function lumOf(c) { const v = hex(c); return (0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]) / 255; }
@@ -106,10 +107,30 @@ export function autoProfile(p) {
       T({ type: 'blotch', count: n, phase: 0.5, a: 0.56, mirror: true, wid: 0.13, len: 0.42, shape: 'round', color: c, alpha: 0.85, jit: 0.22, sj: 0.3 }); break;
     case 'saddle': T({ type: 'blotch', count: n, a: 0, wid: 0.44, len: 0.42, shape: 'saddle', color: c, edgeColor: shade(c, 0.65), edge: 0.1 }); break;
     case 'diamond':
-      T({ type: 'blotch', t: [0.06, 0.86], count: Math.round(n * 0.8), a: 0, wid: 0.44, len: 1.0, shape: 'diamond', color: c, edgeColor: pale, edge: 0.16, edgeOut: true, warp: 0.35, jit: 0.05 });
+      // v5.20: closed diamonds centred on the spine, joined tip to tip, a pale border round each, the ground between paler
+      T({ type: 'blotch', t: [0.06, 0.86], count: Math.round(n * 0.75), a: 0, wid: 0.19, len: 1.25, shape: 'diamond', color: c, edgeColor: pale, edge: 0.2, edgeOut: true, inner: { r: 0.5, color: mixHex(c, d, 0.45) }, warp: 0.2, jit: 0.02, sj: 0.08 });
+      T({ type: 'blotch', t: [0.06, 0.86], count: Math.round(n * 0.75), phase: 0.5, a: 0.42, mirror: true, wid: 0.12, len: 0.55, shape: 'diamond', color: shade(c, 1.15), alpha: 0.45, warp: 0.3, jit: 0.04 });
       T({ type: 'band', t: [0.87, 0.985], count: 6, len: 0.5, color: '#17130f', warp: 0.2, jit: 0.02 }); break;
     case 'hourglass': T({ type: 'blotch', count: Math.round(n * 0.8), a: 0, wid: 0.62, len: 0.82, shape: 'hourglass', color: c, edgeColor: pale, edge: 0.12, edgeOut: true, warp: 0.4 }); break;
     // v5.19: copperhead-type crossbands (narrow over the spine, wide on the flanks), kingsnake chains, a reticulated net
+    // v5.20: rattlesnake blotches (rounded, dark, with a pale rim), a row of smaller ones on each flank, banded tail
+    case 'rblotch':
+      T({ type: 'blotch', t: [0.07, 0.86], count: Math.round(n * 0.85), a: 0, wid: 0.32, len: 0.62, shape: 'saddle', color: c, edgeColor: pale, edge: 0.14, edgeOut: true, warp: 0.35, jit: 0.06 });
+      T({ type: 'blotch', t: [0.07, 0.86], count: Math.round(n * 0.85), phase: 0.5, a: 0.5, mirror: true, wid: 0.12, len: 0.42, shape: 'round', color: c, alpha: 0.8, warp: 0.35 });
+      T({ type: 'band', t: [0.87, 0.985], count: 5, len: 0.45, color: shade(c, 0.7), warp: 0.2, jit: 0.02 }); break;
+    // v5.20: Russell's vipers - three rows of dark ovals, each ringed in black and edged in white
+    case 'daboia':
+      T({ type: 'blotch', t: [0.06, 0.95], count: Math.round(n * 0.7), a: 0, wid: 0.2, len: 0.66, shape: 'round', color: c, edgeColor: '#f2ecdc', edge: 0.18, edgeOut: true, inner: { r: 0.8, color: shade(c, 1.35) }, warp: 0.15, jit: 0.04 });
+      T({ type: 'blotch', t: [0.06, 0.95], count: Math.round(n * 0.7), phase: 0.5, a: 0.45, mirror: true, wid: 0.15, len: 0.6, shape: 'round', color: c, edgeColor: '#f2ecdc', edge: 0.18, edgeOut: true, inner: { r: 0.8, color: shade(c, 1.35) }, warp: 0.15, jit: 0.04 }); break;
+    // v5.20: saw-scaled vipers - pale saddles over the back and a pale wavy line low on each flank
+    case 'echis':
+      T({ type: 'blotch', t: [0.06, 0.95], count: Math.round(n * 0.9), a: 0, wid: 0.22, len: 0.45, shape: 'saddle', color: pale, alpha: 0.85, edgeColor: c, edge: 0.18, edgeOut: true, warp: 0.3 });
+      T({ type: 'zigzag', count: Math.round(n * 1.2), a: 0.55, mirror: true, amp: 0.07, wid: 0.03, color: pale, warp: 0.3 }); break;
+    // v5.20: garter snakes - a pale stripe down the spine, one low on each flank (scale rows 2-3), dark checks between
+    case 'garter': { const gs = lumOf(pale) < 0.4 ? '#d9c26a' : pale; // (a dark garter snake still has bright stripes)
+      T({ type: 'stripe', t: [0.04, 1], a: 0, wid: 0.05, color: gs, aa: 0.3 });
+      T({ type: 'stripe', t: [0.04, 1], a: 0.6, mirror: true, wid: 0.055, color: gs, aa: 0.3, alpha: 0.9 }); }
+      T({ type: 'blotch', count: Math.round(n * 2), a: 0.3, mirror: true, alt: true, wid: 0.06, len: 0.32, shape: 'rect', color: shade(d, 0.45), alpha: 0.7 }); break;
     case 'hourglass2': T({ type: 'blotch', count: Math.round(n * 0.5), a: 0, wid: 0.95, len: 0.75, shape: 'hourglass2', color: c, edgeColor: shade(c, 0.7), edge: 0.12, warp: 0.25, jit: 0.06 }); break;
     case 'chain': T({ type: 'chain', count: Math.round(n * 0.6), na: 1.6, wid: 0.1, color: c, warp: 0.25 }); break;
     case 'net': T({ type: 'net', count: Math.round(n * 0.8), na: 2.0, wid: 0.09, color: c, edgeColor: pale, edge: 0.5, warp: 0.3 }); break;
