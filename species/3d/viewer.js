@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=509'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=509'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=512'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=512'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -200,11 +200,13 @@ function makeBodyFns(P, quality) {
   else pts.push([L * (1 - B.tail * 0.55), B.vent * 0.5], [L * (1 - B.tail * 0.12), B.vent * 0.16], [L, 0]);
   // keep x strictly increasing
   for (let i = 1; i < pts.length; i++) if (pts[i][0] <= pts[i - 1][0]) pts[i][0] = pts[i - 1][0] + 1e-6 * L;
-  const wr = pchip(pts);
+  const wr = pchip(pts), xr = Hl * (Hd.shape === 'blunt' ? 0.12 : Hd.shape === 'tri' ? 0.16 : 0.2);
   const rattleEnd = !!P.tail.rattle;
   const W = (x) => {
     let v = wr(x) * w0;
-    if (x < Hl * 0.03) v *= Math.sqrt(clamp(x / (Hl * 0.03), 0, 1)) * 0.25 + 0.75 * clamp(x / (Hl * 0.03), 0, 1) ** 0.35;
+    // v5.12: the snout ends in a rounded dome (the rostral scale), not a point: within xr of the tip the outline is a
+    // quarter ellipse, so seen from the front the head is round, with no flat plate or wedge under the snout
+    if (x < xr) { const t = clamp(x / xr, 0, 1); v = wr(xr) * w0 * Math.sqrt(1 - (1 - t) * (1 - t)); }
     if (!rattleEnd) { const e = L - x, r = B.blunt ? w0 * 0.5 : w0 * 0.12; if (e < r) v *= Math.sqrt(clamp(e / r, 0, 1)); }
     return Math.max(v, 0);
   };
@@ -221,7 +223,7 @@ function makeBodyFns(P, quality) {
   const Hh = (x) => {
     let h = W(x) / XS(x);
     if (x < Hl * (1 + neckLen)) {
-      const tipF = x < Hl * 0.13 ? Math.sqrt(clamp(W(x) / (hw * w0 * sn), 0, 1)) : 1;
+      const tipF = x < xr ? Math.sqrt(clamp(W(x) / (wr(xr) * w0), 0, 1)) : 1; // (the dome is round from the side too)
       const hd = headH * lerp(snH, 1, sstep(0, Hl * 0.55, x)) * tipF;
       h = lerp(hd, h, sstep(Hl * 0.85, Hl * (1 + neckLen * 0.9), x));
     }
@@ -390,9 +392,12 @@ function buildBody(P, F, pose, quality) {
   const gOf = (x) => { const f = clamp(x / L, 0, 1) * (NX - 1), i = Math.min(NX - 2, Math.floor(f)); return lerp(gs[i], gs[i + 1], f - i); };
   const xOf = (gv) => { let lo = 0, hi = NX - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (gs[m] < gv) lo = m; else hi = m; } const t = (gv - gs[lo]) / Math.max(1e-12, gs[hi] - gs[lo]); return lerp(xs[lo], xs[hi], clamp(t, 0, 1)); };
   // rings: equal steps in girth units, so quads keep their shape everywhere
-  const nR = clamp(Math.round(gTotal * M / 2.2), 220, quality === 'low' ? 900 : 2400);
-  const ringX = []; for (let i = 0; i < nR; i++) ringX.push(xOf((i / (nR - 1)) * gTotal));
-  ringX[0] = 0; ringX[nR - 1] = L;
+  const nR0 = clamp(Math.round(gTotal * M / 2.2), 220, quality === 'low' ? 900 : 2400);
+  let ringX = []; for (let i = 0; i < nR0; i++) ringX.push(xOf((i / (nR0 - 1)) * gTotal));
+  ringX[0] = 0; ringX[nR0 - 1] = L;
+  // v5.12: extra rings over the rounded snout tip (they bunch up towards the tip, where the dome curves fastest)
+  { const xt = F.Hl * 0.26, extra = []; for (let k = 1; k < 20; k++) extra.push(xt * (1 - Math.cos((k / 20) * Math.PI / 2))); ringX = [0].concat(extra, ringX.filter((x) => x >= xt)); }
+  const nR = ringX.length;
 
   const Hd = P.head, eyeA = (Hd.eyeA * Math.PI) / 180, mouthA = Math.PI * 0.56;
   const bumps = [];
@@ -436,7 +441,7 @@ function buildBody(P, F, pose, quality) {
     }
     if (x < F.Hl * Hd.jaw * 1.1 && x > F.Hl * 0.02) { // the mouth line
       const dm = Math.min(Math.abs(Math.abs(th) - mouthA), 1);
-      k -= 0.055 * Math.exp(-((dm / 0.085) ** 2)) * sstep(F.Hl * 0.02, F.Hl * 0.1, x) * (1 - sstep(F.Hl * Hd.jaw * 0.85, F.Hl * Hd.jaw * 1.1, x));
+      k -= 0.055 * Math.exp(-((dm / 0.085) ** 2)) * sstep(F.Hl * 0.1, F.Hl * 0.26, x) /* v5.12: the lip line fades out over the rounded snout tip */ * (1 - sstep(F.Hl * Hd.jaw * 0.85, F.Hl * Hd.jaw * 1.1, x));
     }
     return [W * sx * k, H * sy * k];
   };
@@ -620,6 +625,11 @@ function patternData(P, F, body, lat, quality, seed) {
       const k = (r * Wp + c) * 4; data[k] = col[0]; data[k + 1] = col[1]; data[k + 2] = col[2]; data[k + 3] = 255;
     }
   }
+  // v5.12: the texture wraps round the body, so towards the snout tip (where the girth shrinks to nothing) every
+  // marking bunches up into a dark star on the front of the head. The rounded tip (the rostral scale) takes the
+  // colours the snout has a little further back instead: dorsal colour on top, the lip colour round the sides
+  let rT = 0; while (rT < Hp - 1 && body.xOf(((rT + 0.5) / Hp) * body.gTotal) < Hl * 0.14) rT++;
+  for (let r = 0; r < rT; r++) data.copyWithin(r * Wp * 4, rT * Wp * 4, (rT + 1) * Wp * 4);
   return { data, Wp, Hp };
 }
 
@@ -970,7 +980,13 @@ function buildMouth(P, F, body, group, eyes, pat) {
   const throat = new THREE.Mesh(thrG, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, side: THREE.DoubleSide }));
   { const p0 = body.spine(xh * 0.9), ft = body.frameAt(xh * 0.9); throat.position.copy(p0).addScaledVector(ft.T, thrL * 0.5).addScaledVector(ft.U, -F.Hh(xh) * 0.08); throat.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(ft.S, ft.T.clone().negate(), ft.U)); throat.scale.set(thrR, thrL, thrH); }
   throat.userData.mpart = 'throat';
-  const inside = new THREE.Group(); inside.add(palate, floor, cheeks, throat); inside.visible = false; group.add(inside);
+  // v5.12: the back of the mouth is sealed by a dark gullet: from inside the open mouth the body's own skin faces away
+  // (it is not drawn from inside), so without this you could see the outside world through the back of the head
+  const sealX = xh * 1.08, sealL = Hl * 0.42, sealM = new THREE.MeshStandardMaterial({ color: '#140507', roughness: 0.85, metalness: 0, emissive: '#0a0203' });
+  let sW = 1e9, sH = 1e9; for (let k = 0; k <= 8; k++) { const x = sealX - sealL + (2 * sealL * k) / 8; sW = Math.min(sW, F.W(x)); sH = Math.min(sH, F.Hh(x)); }
+  const seal = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 18), sealM); { const fS = body.frameAt(sealX); seal.position.copy(body.spine(sealX)).addScaledVector(fS.U, -sH * 0.05); seal.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fS.S.clone().negate(), fS.U, fS.T)); seal.scale.set(sW * 0.86, sH * 0.8, sealL); }
+  seal.userData.mpart = 'throat'; seal.castShadow = false;
+  const inside = new THREE.Group(); inside.add(palate, floor, cheeks, throat, seal); inside.visible = false; group.add(inside);
   // teeth: slim, slightly curved, backward-pointing; fangs at the front of the upper jaw
   const toothM = new THREE.MeshPhysicalMaterial({ color: '#f6f1e4', roughness: 0.22, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.1, sheen: 0.4, sheenColor: new THREE.Color('#fff8e8') });
   const upperT = new THREE.Group(), lowerT = new THREE.Group(); inside.add(upperT, lowerT);
@@ -1020,13 +1036,15 @@ function buildMouth(P, F, body, group, eyes, pat) {
     anchors.sheath.position.copy(sp).addScaledVector(fU2, gr * 0.6); lowerT.add(anchors.sheath);
     const tongueCol = P.head.tongue || { python: '#2b1d24', viper: '#22191d', pitviper: '#1f1a20', elapid: '#141015', sea: '#2a2226' }[plan] || '#16121a';
     const tongueM = new THREE.MeshPhysicalMaterial({ color: tongueCol, roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.2 });
-    const tongue = new THREE.Group(), tLen = Hl * 0.38, tr0 = gr * 0.32, stem = Hl * 0.2;
-    const pts = []; for (let k = 0; k <= 8; k++) { const s = k / 8; pts.push(new THREE.Vector3(0, gr * 0.5 * Math.sin(Math.PI * s * 0.8), -stem * s)); }
+    // v5.12: the tongue lies in its sheath: only the forked tips show, resting on the floor of the mouth just in front of
+    // the sheath (it used to be twice as long, its thin tips sticking out past the chin like wires)
+    const tongue = new THREE.Group(), tLen = Hl * 0.14, tr0 = gr * 0.42, stem = Hl * 0.07;
+    const pts = []; for (let k = 0; k <= 8; k++) { const s = k / 8; pts.push(new THREE.Vector3(0, gr * 0.15 * Math.sin(Math.PI * s * 0.8), -stem * s)); }
     const tube = (curvePts, r0, r1) => { const g = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(curvePts), 16, 1, 8, false), p = g.attributes.position; const c = new THREE.CatmullRomCurve3(curvePts);
       for (let i = 0; i < p.count; i++) { const ring = Math.floor(i / 9), s = ring / 16, q = c.getPointAt(s), k = lerp(r0, r1, s); p.setXYZ(i, q.x + (p.getX(i) - q.x) * k, q.y + (p.getY(i) - q.y) * k, q.z + (p.getZ(i) - q.z) * k); } g.computeVertexNormals(); return g; };
     tongue.add(new THREE.Mesh(tube(pts, tr0, tr0 * 0.75), tongueM));
     const fork = pts[pts.length - 1];
-    for (const sg of [1, -1]) { const tp2 = []; for (let k = 0; k <= 6; k++) { const s = k / 6; tp2.push(new THREE.Vector3(sg * (tLen - stem) * 0.32 * s * s, fork.y + gr * 0.25 * s, fork.z - (tLen - stem) * s)); } tongue.add(new THREE.Mesh(tube(tp2, tr0 * 0.72, tr0 * 0.12), tongueM)); }
+    for (const sg of [1, -1]) { const tp2 = []; for (let k = 0; k <= 6; k++) { const s = k / 6; tp2.push(new THREE.Vector3(sg * (tLen - stem) * 0.28 * s * s, fork.y - gr * 0.1 * s, fork.z - (tLen - stem) * s)); } tongue.add(new THREE.Mesh(tube(tp2, tr0 * 0.72, tr0 * 0.12), tongueM)); }
     // the tongue lies in the sheath and its tips just show past the front of the lower jaw
     tongue.position.copy(sp).addScaledVector(fT, gr * 1.4).addScaledVector(fU2, gr * 0.2);
     tongue.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fS, fU2, fT));
@@ -1228,6 +1246,17 @@ function groundTexture(kind, seed0, hi) {
       for (let i = 0; i < (kind === 'litter' ? 90 : 40); i++) {
         const cx = R() * S, cy = R() * S, l = 20 + R() * 110, a = R() * TAU, w = 1 + R() * 2.5;
         wrapAt(cx, cy, l, () => { x.rotate(a); x.strokeStyle = 'rgba(0,0,0,.3)'; x.lineWidth = w + 1.5; x.beginPath(); x.moveTo(1, 2); x.lineTo(l + 1, 2); x.stroke(); x.strokeStyle = R() < 0.5 ? '#4a3826' : '#6a5438'; x.lineWidth = w; x.beginPath(); x.moveTo(0, 0); x.lineTo(l, 0); x.stroke(); });
+      }
+      // v5.12: cushions of moss between the leaves, as on a real damp forest floor (many tiny green tufts in soft patches)
+      if (kind === 'litter') {
+        const mossC = ['#4d6a26', '#5f7d2e', '#6f8f36', '#3f5a22', '#87a046', '#56722a'];
+        for (let pch = 0; pch < 22; pch++) {
+          const px = R() * S, py = R() * S, pr = 40 + R() * 110;
+          for (let i = 0; i < pr * 9; i++) {
+            const a = R() * TAU, rr = pr * Math.sqrt(R()) * (0.75 + 0.25 * Math.sin(a * 3 + pch)), cx = px + Math.cos(a) * rr, cy = py + Math.sin(a) * rr, r = 1.5 + R() * 3.5 * (1 - rr / pr * 0.6);
+            wrapAt(cx, cy, r, () => { x.fillStyle = mossC[(R() * mossC.length) | 0]; x.globalAlpha = 0.55 + R() * 0.45; x.beginPath(); x.arc(0, 0, r, 0, TAU); x.fill(); x.globalAlpha = 1; });
+          }
+        }
       }
       if (kind === 'soil') for (let i = 0; i < 700; i++) { const cx = R() * S, cy = R() * S, r = 2.5 + R() ** 2 * 6; wrapAt(cx, cy, r * 2, () => stone(r, r * (0.6 + R() * 0.4), '#6e5845', '#3a2b20', true)); }
       tone(0.25);
@@ -1639,12 +1668,12 @@ function Controls(dom, cam, opt) {
     const now = performance.now(), dt = Math.max(8, now - last);
     if (ptrs.size === 1 && panBtn) { const m = pan(dx, dy); last = now; st.vpx = m[0] / dt * 16; st.vpz = m[1] / dt * 16; opt.kick(); }
     else if (ptrs.size === 1) { const k = (2.6 * Math.PI) / Math.max(400, dom.clientWidth * 1.6); rot(dx * k * 1.5, dy * k * 0.6); last = now; st.vaz = (-dx * k * 1.5) / dt * 16; st.vel = (dy * k * 0.6) / dt * 16; opt.kick(); }
-    else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()], pd = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pinch0 > 0) { st.d = clamp(d0 * (pinch0 / pd), opt.dMin(), opt.dMax()); st.el = limitEl(st.el, st.d); }
+    else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()], pd = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pinch0 > 0) { const nd = clamp(d0 * (pinch0 / pd), opt.dMin(), opt.dMax()), f = nd / Math.max(1e-9, st.d); if (!(opt.pointZoom && opt.pointZoom((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, f, true))) st.d = nd; st.el = limitEl(st.el, st.d); }
       // two fingers moving together fly you along the ground
       const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; if (mid0) { const m = pan(mid[0] - mid0[0], mid[1] - mid0[1]); last = now; st.vpx = m[0] / dt * 16; st.vpz = m[1] / dt * 16; } mid0 = mid; opt.kick(); }
   };
   const onUp = (e) => { ptrs.delete(e.pointerId); if (ptrs.size < 2) { pinch0 = 0; mid0 = null; } if (!ptrs.size) { st.dragging = false; panBtn = false; if (reduce() || performance.now() - last > 80) { st.vaz = st.vel = st.vpx = st.vpz = 0; } opt.kick(); } };
-  const onWheel = (e) => { e.preventDefault(); if (locked()) return; zoom(Math.exp(clamp(e.deltaY, -120, 120) * 0.0016)); };
+  const onWheel = (e) => { e.preventDefault(); if (locked()) return; const f = Math.exp(clamp(e.deltaY, -120, 120) * 0.0016); if (!(opt.pointZoom && opt.pointZoom(e.clientX, e.clientY, f))) zoom(f); }; // v5.12: towards the point under the pointer
   const onKey = (e) => {
     const k = e.key, s = 0.17;
     if (locked()) return;
@@ -1750,11 +1779,11 @@ export function mount(host, opts) {
     get occ() { return ctx.occ; }, scaleOff: () => { if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(false); }, closeMouth: () => { if (mouthGoal) toggleMouth(false); }, get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
     focus: (p, d, elv) => focusOn(p, d, elv), view: (g) => controls.setGoal(Object.assign({ az: controls.st.az, d: info.dFit, px: 0, pz: 0 }, g)) };
   const fx = EXTRA.create(V);
-  // v5.05: the main buttons stay in view; the rest (eye shield, camera views, size, fullscreen) are behind See more / Show less
-  const bMore = el('button', 'sp3d-b sp3d-morebtn', 'See more'); bMore.type = 'button'; bMore.setAttribute('aria-expanded', 'false'); bMore.title = 'Show all the buttons';
+  // v5.05: the main buttons stay in view; the rest (eye shield, camera views, size, fullscreen) are behind Show more / Show less
+  const bMore = el('button', 'sp3d-b sp3d-morebtn', 'Show more'); bMore.type = 'button'; bMore.setAttribute('aria-expanded', 'false'); bMore.title = 'Show all the buttons';
   [vg2, bScale].concat(fx.moreButtons || []).forEach((b) => b.classList.add('sp3d-more'));
   bar.classList.add('sp3d-few'); bar.appendChild(bMore);
-  on(bMore, 'click', () => { const open = bar.classList.toggle('sp3d-few') === false; bMore.textContent = open ? 'Show less' : 'See more'; bMore.setAttribute('aria-expanded', String(open)); bMore.title = open ? 'Show only the main buttons' : 'Show all the buttons'; });
+  on(bMore, 'click', () => { const open = bar.classList.toggle('sp3d-few') === false; bMore.textContent = open ? 'Show less' : 'Show more'; bMore.setAttribute('aria-expanded', String(open)); bMore.title = open ? 'Show only the main buttons' : 'Show all the buttons'; });
   const panel = el('div', 'sp3d-panel'); panel.hidden = true; panel.id = 'sp3d-panel-' + seed; bSet.setAttribute('aria-controls', panel.id);
   const mkCheck = (label, checked) => { const l = el('label', 'sp3d-opt'), c = document.createElement('input'); c.type = 'checkbox'; c.checked = checked; l.append(c, document.createTextNode(' ' + label)); panel.appendChild(l); return c; };
   const cScene = mkCheck('Show surroundings', true);
@@ -1810,13 +1839,13 @@ export function mount(host, opts) {
     // from true distances on the skin, so they keep their shape right to the tip of the snout (the body's scale
     // texture used to stretch into stripes there); they fade out where they would be smaller than a pixel
     const qS = (TAU * F.w0 * 0.92) / Math.max(12, S.rows) * (P.head.scaleK || (P.plan === 'python' ? 0.9 : 0.62));
-    const hsU = { uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 } };
+    const hsU = { uTip: { value: F.Hl * 0.22 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 } };
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, hsU);
       sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;\nattribute vec3 aMet;\nvarying vec3 vMet;').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead; vMet = aMet;')
-        .replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z)');
+        .replace('#include <common>\nattribute float aHead;', '#include <common>\nuniform float uTip;\nattribute float aHead;').replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z) * smoothstep(0.0, uTip, aMet.y)');
       sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
-varying float vHead; varying vec3 vMet; uniform vec2 uHS; uniform float uKeel; uniform float uCavH;
+varying float vHead; varying vec3 vMet; uniform vec2 uHS; uniform float uKeel; uniform float uCavH; uniform float uTip;
 float slScale(vec2 m) {
   float row = floor(m.y), off = mod(row, 2.0) * 0.5;
   vec2 l = m - vec2(floor(m.x + off) - off + 0.5, row + 0.5);
@@ -1825,17 +1854,19 @@ float slScale(vec2 m) {
   return h + (d < 1.0 ? uKeel * 0.32 * exp(-pow(l.x / 0.09, 2.0)) * smoothstep(-0.45, 0.25, l.y) : 0.0);
 }`)
         .replace('#include <map_fragment>', `#include <map_fragment>
- vec2 slM = vMet.xy * uHS; float slFade = vMet.z * (1.0 - smoothstep(0.3, 0.75, length(fwidth(slM))));
+ float slTip = smoothstep(0.0, uTip, vMet.y); /* v5.12: the rounded snout tip (the rostral scale) is smooth skin */
+ vec2 slM = vMet.xy * uHS; float slFade = vMet.z * slTip * (1.0 - smoothstep(0.3, 0.75, length(fwidth(slM))));
  float slH = 0.0, slDa = 0.0, slDx = 0.0;
  if (slFade > 0.001) { slH = slScale(slM); slDa = (slScale(slM + vec2(0.03, 0.0)) - slScale(slM - vec2(0.03, 0.0))) / 0.06; slDx = (slScale(slM + vec2(0.0, 0.03)) - slScale(slM - vec2(0.0, 0.03))) / 0.06;
    diffuseColor.rgb *= mix(1.0, 0.55 + 0.45 * smoothstep(0.0, 0.3, slH), uCavH * slFade); }
 #ifdef USE_AOMAP
- diffuseColor.rgb *= mix(1.0, texture2D(aoMap, vAoMapUv).r, uCavH * (1.0 - vHead * 0.9) * (1.0 - vMet.z));
+ diffuseColor.rgb *= mix(1.0, texture2D(aoMap, vAoMapUv).r, uCavH * (1.0 - vHead * 0.9) * (1.0 - vMet.z) * slTip);
 #endif`)
+        .replace('#include <aomap_fragment>', THREE.ShaderChunk.aomap_fragment.replace('aoMapIntensity + 1.0', 'aoMapIntensity * slTip + 1.0'))
         .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n roughnessFactor = mix(roughnessFactor, roughness * (0.9 + 0.25 * slH), vMet.z);')
-        .replace('mapN.xy *= normalScale;', 'mapN.xy *= normalScale * (1.0 - vHead * 0.88);\n mapN = normalize(mix(mapN, normalize(vec3(-slDa * 0.55, -slDx * 0.55, 1.0)), vMet.z));');
+        .replace('mapN.xy *= normalScale;', 'mapN.xy *= normalScale * (1.0 - vHead * 0.88) * slTip;\n mapN = normalize(mix(mapN, normalize(vec3(-slDa * 0.55, -slDx * 0.55, 1.0)), vMet.z));');
     };
-    mat.customProgramCacheKey = () => 'sl-skin-v481';
+    mat.customProgramCacheKey = () => 'sl-skin-v512';
     const mesh = new THREE.Mesh(body.geo, mat); mesh.castShadow = mesh.receiveShadow = true;
     if (hiPat) {
       const sceneNow = ctx.scene, swap = (d) => { if (!alive || ctx.scene !== sceneNow) return; const t = patternTex(d); t.anisotropy = pat.anisotropy; mat.map = t; pat.dispose(); track(t); dirty = true; kick(); };
@@ -1910,6 +1941,28 @@ float slScale(vec2 m) {
         dMin: () => info.dMin, dMax: () => info.dMax * Math.max(scaleObj && scaleObj.visible ? info.scaleK : 1, fx.zoomOut), kick: () => kick(), reset: () => resetView(),
         panMax: () => Math.max(info.Rb * 1.4, (fx.reach || 0) * 1.1), // you can fly around the snake, never away from it
         locked: () => fx.locked,
+        // v5.12: zooming goes towards the part of the snake under the pointer (or between the fingers); the point it zooms
+        // to is always on the snake, so you can never zoom away from it or lose it
+        pointZoom: (cx, cy, f, now) => {
+          const st = controls.st, d0 = st.goal ? st.goal.d : st.d, d = clamp(d0 * f, info.dMin, info.dMax * Math.max(scaleObj && scaleObj.visible ? info.scaleK : 1, fx.zoomOut));
+          if (Math.abs(d - d0) < 1e-9) return true;
+          const r = canvas.getBoundingClientRect(), ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1), cam);
+          const body = snakeGroup.children.find((o) => o.isMesh && o.geometry === info.body.geo); let p = null;
+          if (body) { body.geometry.computeBoundingSphere(); const h = ray.intersectObject(body, false)[0]; if (h) p = h.point; }
+          if (!p) { const t = -ray.ray.origin.y / (ray.ray.direction.y || -1e-6); if (t > 0) p = ray.ray.origin.clone().addScaledVector(ray.ray.direction, t); }
+          if (!p) return false;
+          // the nearest point of the snake to it (zooming in on bare ground homes in on the snake instead)
+          const list = (fx.collide && fx.collide()) || info.collide; let best = null, bd = 1e18; for (const c of list) { const q = p.distanceTo(c.p) - c.r; if (q < bd) { bd = q; best = c; } }
+          if (best && bd > info.F.w0 * 2) p = best.p.clone();
+          const gpx = st.goal ? st.goal.px : st.px, gpz = st.goal ? st.goal.pz : st.pz, T = targetFor(d0); T.x += gpx - st.px; T.z += gpz - st.pz; // (where the camera is heading, not where it is mid-glide)
+          const k = 1 - d / d0, Tn = T.clone().lerp(p, f < 1 ? k : 0);
+          const b = targetFor(d); b.x -= st.px; b.z -= st.pz; // (the target at that distance, without any panning)
+          let px = Tn.x - b.x, pz = Tn.z - b.z;
+          if (f > 1) { const g = Math.pow(d0 / d, 2); px = gpx * g; pz = gpz * g; } // zooming out drifts back to the whole snake
+          if (now) { st.d = d; st.px = px; st.pz = pz; if (st.goal) Object.assign(st.goal, { d, px, pz }); kick(); }
+          else controls.setGoal({ d, px, pz, az: st.goal ? st.goal.az : st.az, el: st.goal ? st.goal.el : st.el });
+          return true;
+        },
       });
     }
     fitLimits();
@@ -1934,7 +1987,7 @@ float slScale(vec2 m) {
     // zooming in moves the point you orbit around from the middle of the snake to its head
     const fp = fx.focusPoint && fx.focusPoint(), k = sstep(info.dFit * 0.75, Math.max(info.dMin * 1.2, info.F.Hl * 3.8), d), t = info.center.clone().lerp(fp || info.headPos, k);
     if (controls) { t.x += controls.st.px; t.z += controls.st.pz; }
-    if (scaleObj && scaleObj.visible && info.F.L >= 0.4) t.y += 0.55 * sstep(info.dFit, info.dFit * 1.6, d); // keep the 1.5 m figure in view
+    if (scaleObj && scaleObj.visible && info.F.L >= 0.4) t.y += 0.85 * sstep(info.dFit, info.dFit * 1.6, d); // keep the 1.7 m height line in view
     return t;
   }
   function viewAz(kind) {
@@ -1989,7 +2042,7 @@ float slScale(vec2 m) {
   const zeroM = new THREE.Matrix4().makeScale(0, 0, 0), ov = new THREE.Vector3(), od = new THREE.Vector3();
   function updateOccluders() {
     const list = ctx.occ; if (!list || !list.length) return;
-    const t = targetFor(controls.st.d), cp = cam.position; od.subVectors(t, cp); const len2 = od.lengthSq(), sr = Math.min(info.Rb, controls.st.d * 0.4);
+    const t = (fx.camTarget && fx.camTarget()) || targetFor(controls.st.d), cp = cam.position; od.subVectors(t, cp); const len2 = od.lengthSq(), sr = Math.min(info.Rb, Math.sqrt(len2) * 0.3); // (what the camera is really looking at, also during a show)
     const dirty = new Set();
     for (const o of list) {
       ov.subVectors(o.c, cp); const tt = ov.dot(od) / len2; let hide = !!o.force || ov.length() < o.r * 1.6; // also anything right in front of the lens (o.force: under the stretched-out snake)
@@ -2017,20 +2070,23 @@ float slScale(vec2 m) {
       ruler.position.copy(rulerAt).addScaledVector(new THREE.Vector3(0, 1, 0), rw * 0.125); ruler.rotation.y = -info.axisAng; ruler.castShadow = true; scaleObj.add(ruler);
       scaleObj.userData.ends = [-0.5, -0.25, 0, 0.25, 0.5].map((k) => ruler.position.clone().addScaledVector(side, L * k)); // (labels keep off the ruler too)
       // v4.81: labels sit above the far end of the ruler and beside the person's head, never on the snake
-      scaleObj.userData.labels = [{ p: ruler.position.clone().addScaledVector(side, L * 0.5).add(new THREE.Vector3(0, Math.max(rw * 3, L * 0.04), 0)), t: fmtLen(L) + ' ruler (typical adult, laid straight)' }];
+      scaleObj.userData.labels = [{ p: ruler.position.clone().add(new THREE.Vector3(0, Math.max(rw * 3, L * 0.04), 0)), t: 'Snake ' + fmtLen(L) + ' (typical adult, laid straight)' }];
+      // v5.12: no 3D person - a plain upright line as tall as an average adult (1.7 m), beside the snake's length line
       if (L >= 0.4) {
-        // v4.81: a real-looking person (T-shirt, jeans, skin, hair, face) instead of a flat cut-out
-        const person = EXTRA.buildPerson(THREE, 1.5);
-        const pp = info.center.clone().addScaledVector(side, info.Rb + 0.45), pa0 = info.axisAng + Math.PI / 2; pp.y = 0; person.position.copy(pp); person.rotation.y = Math.atan2(Math.cos(pa0), Math.sin(pa0)) + 0.5; scaleObj.add(person); // facing the camera, turned a little towards the snake
-        scaleObj.userData.labels.push({ p: pp.clone().addScaledVector(side, 0.42).add(new THREE.Vector3(0, 1.42, 0)), t: 'Person 1.5 m' });
+        const PH = 1.7, pm = new THREE.MeshStandardMaterial({ color: '#2e7d4f', roughness: 0.6 }), pr = Math.max(0.012, L * 0.008);
+        const pp = info.center.clone().addScaledVector(side, info.Rb + 0.35); pp.y = 0;
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(pr, pr, PH, 16), pm); pole.position.copy(pp).add(new THREE.Vector3(0, PH / 2, 0)); pole.castShadow = true; scaleObj.add(pole);
+        for (const y of [0, PH]) { const cap = new THREE.Mesh(new THREE.BoxGeometry(pr * 9, pr * 1.2, pr * 9), pm); cap.position.copy(pp).add(new THREE.Vector3(0, y + (y ? -pr * 0.6 : pr * 0.6), 0)); scaleObj.add(cap); }
+        for (let y = 0.5; y < PH; y += 0.5) { const tk = new THREE.Mesh(new THREE.BoxGeometry(pr * 5, pr * 0.8, pr * 5), pm); tk.position.copy(pp).add(new THREE.Vector3(0, y, 0)); scaleObj.add(tk); }
+        scaleObj.userData.labels.push({ p: pp.clone().add(new THREE.Vector3(0, PH + 0.06, 0)), t: 'Person 1.7 m (average adult height)' });
       }
       ctx.scene.add(scaleObj);
     }
     if (scaleObj) scaleObj.visible = onv;
     scaleP.hidden = !onv;
-    scaleP.textContent = onv ? 'Scale: the ruler is ' + fmtLen(info.F.L) + ' long, the length of a typical adult' + (P.lengthNote ? ' (' + P.lengthNote + ')' : '') + (info.F.L >= 0.4 ? '; the figure is a person 1.5 m tall.' : '.') + (P.max ? ' The longest recorded was ' + P.max + '; that is not drawn.' : '') : '';
+    scaleP.textContent = onv ? 'Scale: the ruler is ' + fmtLen(info.F.L) + ' long, the length of a typical adult' + (P.lengthNote ? ' (' + P.lengthNote + ')' : '') + (info.F.L >= 0.4 ? '; the upright line is the height of an average adult, 1.7 m.' : '.') + (P.max ? ' The longest recorded was ' + P.max + '; that is not drawn.' : '') : '';
     if (onv) {
-      const Rf = info.F.L >= 0.4 ? Math.max(info.Rb + 0.8, 1.0) : info.Rb * 1.35, dS = Math.max((Rf * 1.12) / Math.sin(Math.min(info.vf, info.hf)), info.F.L >= 0.4 ? 1.0 / Math.tan(info.vf) : 0);
+      const Rf = info.F.L >= 0.4 ? Math.max(info.Rb + 0.8, 1.0) : info.Rb * 1.35, dS = Math.max((Rf * 1.12) / Math.sin(Math.min(info.vf, info.hf)), info.F.L >= 0.4 ? 1.25 / Math.tan(info.vf) : 0);
       info.scaleK = Math.max(1, (dS * 1.25) / info.dMax);
       // look across the ruler, with the person standing beside the snake rather than in front of it
       const pa = info.axisAng + Math.PI / 2;
@@ -2111,7 +2167,7 @@ float slScale(vec2 m) {
     const v = force != null ? force : !mouthGoal; mouthGoal = v ? 1 : 0;
     bMouth.setAttribute('aria-pressed', String(v)); bMouth.textContent = v ? 'Close mouth' : 'Open mouth';
     if (v && !(scaleObj && scaleObj.visible) && !fx.anatOn() && controls.st.d > info.dFit * 0.55) { // turn to face the head, close enough to see inside (v4.81: only from the whole-snake view; Open mouth changes nothing else)
-      controls.setGoal({ az: viewAz('front') + 0.55, el: (16 * Math.PI) / 180, d: Math.max(info.dMin * 1.5, info.F.Hl * 5.5), px: 0, pz: 0 });
+      controls.setGoal({ az: viewAz('front') + 0.55, el: (16 * Math.PI) / 180, d: Math.max(info.dMin * 1.5, info.F.Hl * 3.4), px: 0, pz: 0 }); // (close enough to see inside; plants in the way step aside)
     }
     kick();
   }
@@ -2148,7 +2204,7 @@ float slScale(vec2 m) {
   function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
 
   build(); fx.onBuild(); resize();
-  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), startBite: () => bBite.click(), fx, get bite() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
+  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), startBite: () => bBite.click(), fx, get bite() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); if (window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
 
   return {
     canvas,

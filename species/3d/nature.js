@@ -99,6 +99,12 @@ function buildAll(A) {
     });
     im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true;
     im.castShadow = !!o.cast; im.receiveShadow = !!o.recv; scene.add(im); track(geo); track(mat);
+    // v5.12: plants, rocks and logs near the snake step aside (are hidden) while they stand between the camera and what
+    // it is looking at (the open mouth, a part in Anatomy, a show), so nothing blocks the view
+    if (ctx.occ && o.tag && !/^(carpet|reeds)$/.test(o.tag)) {
+      if (!geo.boundingSphere) geo.computeBoundingSphere(); const gr = geo.boundingSphere.radius, lim = Rb * 5;
+      list.forEach((t, i) => { if (Math.hypot(t.x, t.z) > lim) return; const r = gr * t.s * Math.max(t.sx || 1, t.sy || 1, t.sz || 1); if (r < F.w0 * 1.5) return; const m = new THREE.Matrix4(); im.getMatrixAt(i, m); ctx.occ.push({ im, i, m, c: new THREE.Vector3(t.x, t.y + r * 0.5, t.z), r, hid: false }); });
+    }
     addTris(o.tag || 'misc', ((geo.index ? geo.index.count : geo.attributes.position.count) / 3) * list.length);
     return im;
   }
@@ -430,6 +436,9 @@ function buildAll(A) {
     // fallen logs, mossy
     const logGeo = (Rn) => { const gb = new GB(), len = 2 + Rn() * 2.5, pts = []; for (let k = 0; k <= 6; k++) pts.push(V(-len / 2 + (len * k) / 6, 0, (Rn() - 0.5) * 0.15)); tube(gb, pts, pts.map((_, k) => 0.22 * (1 - k / 14)), low ? 7 : 12, { uRep: 3, vLen: 1, col: (y, t) => { const m = 0.4 + 0.3 * Math.sin(t * 9); return [lerp(1, 0.66, m), lerp(1, 0.86, m), lerp(1, 0.52, m)]; } }); return gb.geo(); };
     put('logs', logGeo, barkMat(tex.bark('furrow'), '#9a8e7c'), 14, groundR * 1.1, 40, [0.7, 1.3], { variants: 2, lift: 0.06, span: 1.5 });
+    // v5.12: soft cushions of moss on the forest floor, some close to the snake (never on it)
+    const mossMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), color: '#6f8f3a', roughness: 1, metalness: 0, vertexColors: true }));
+    put('moss', (Rn, v) => rockGeo(seed + 900 + v * 7, low ? 1 : 2, { flat: 0.28 }), mossMat, jungle ? 90 : 70, Math.max(Rb * 0.9, F.w0 * 6), near0, [Math.max(0.06, F.w0 * 4), 0.45], { variants: 3, lift: -0.08, tilt: 0.08, ok: (x, z) => dist2snake(x, z) > F.w0 * 3 + 0.2, col: () => tint(0.75, 1.15, 0.12) });
     rocks(10, groundR * 1.05, 45, [0.3, 1.6], { minD: 2.5 });
   } else if (U === 'meadow') {
     put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassG'), { alphaTest: 0.35 }), 1700, near0, 36, [0.5, 1.1], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });

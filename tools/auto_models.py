@@ -107,6 +107,10 @@ def length_of(c, lm, fossil_len):
     return TYPE_LEN.get(c["type"], 0.8), True
 
 
+# v5.12: genera whose species are green in life (unless their name says otherwise)
+GREEN_IN_LIFE = {"ahaetulla", "philothamnus", "hapsidophrys", "opheodrys", "trimeresurus", "gonyosoma", "rhadinophis", "cyclophiops", "uromacer", "leptophis", "rhamnophis", "viridovipera", "popeia", "chlorosoma", "dendrophidion"}
+
+
 def is_green(h):
     r, g, b = hx(h); H, L, S = colorsys.rgb_to_hls(r, g, b)
     return 70 / 360 <= H <= 170 / 360 and S >= 0.22 and 0.12 <= L <= 0.85
@@ -114,9 +118,16 @@ def is_green(h):
 
 def pattern_of(c, plan, con, green=False):
     n, g = (c["name"] if not c["is_sci"] else "").lower(), c["genus"].lower()
-    if re.search(r"coral", n) or g in ("micrurus", "micruroides", "leptomicrurus", "sinomicrurus", "calliophis"): return "coral"
-    if g == "crotalus" or re.search(r"diamond|rattle", n): return "diamond"
+    # v5.12: "coral snake" in Australia and Africa (Brachyurophis, Aspidelaps) is plain or banded, not red-black-yellow
+    if g in ("micrurus", "micruroides", "leptomicrurus", "sinomicrurus", "calliophis") or (re.search(r"coral", n) and set(c.get("continents", [])) & {"North America", "South America"}): return "coral"
+    # v5.12: only the diamond-backs have diamonds; most rattlesnakes have rounded blotches or crossbands
+    if re.search(r"diamond", n) or c["id"] in ("crotalus-ruber", "crotalus-scutulatus"): return "diamond"
+    if g in ("crotalus", "sistrurus") or re.search(r"rattle", n): return "blotch"
     if re.search(r"collared|ring-?necked|ringneck|necked|hooded", n): return "collar"
+    # v5.12: prairie and mole kingsnakes are blotched, not ringed
+    if c["id"] in ("lampropeltis-calligaster", "lampropeltis-occipitolineata", "lampropeltis-rhombomaculata"): return "blotch"
+    # v5.12: wolf snakes (Lycodon) are usually cross-banded (black and white or yellow) when their photo shows clear contrast
+    if g in ("lycodon", "dryocalamus") and con >= 0.3: return "band"
     if re.search(r"ringed|banded|band|annulat|zebra|barred|tiger|krait", n) or g in ("bungarus", "laticauda", "lampropeltis", "hydrophis", "aspidelaps", "vermicella", "simoselaps"): return "band"
     if re.search(r"striped|stripe|lined|ribbon|garter|line", n) or g in ("thamnophis", "psammophis", "coniophanes", "lygophis", "tachymenis"): return "stripe"
     if re.search(r"spotted|leopard|dotted|speckled|ocellat|freckle|pearl|jewel|flower", n): return "spot"
@@ -139,10 +150,13 @@ def pattern_of(c, plan, con, green=False):
 
 def scene_of(c, plan, kinds):
     t, g, f = c["type"], c["genus"].lower(), c["family"]
+    tot0 = float(sum(kinds.values())) or 1.0
+    desert = sum(kinds.get(k, 0) for k in ("Deserts & dunes",)) / tot0
     if plan == "sea": return "sea"
     if g in ("titanoboa", "eunectes", "gigantophis", "palaeophis"): return "riverbank"  # giant snakes of rivers and swamps
     if t == "Watersnake" or f in ("Homalopsidae", "Acrochordidae") or g in ("natrix", "nerodia", "helicops", "hydrops", "sinonatrix", "opisthotropis", "regina", "afronatrix", "grayia"): return "riverbank"
-    if plan == "blind" or f in ("Uropeltidae", "Atractaspididae", "Prosymnidae", "Anomochilidae", "Xenophidiidae") or g in ("calamaria", "tantilla", "geophis", "atractus", "apostolepis", "pseudorabdion", "carphophis", "virginia", "sonora", "ninia"): return "soil"
+    if plan == "blind" or f in ("Uropeltidae", "Atractaspididae", "Prosymnidae", "Anomochilidae", "Xenophidiidae") or g in ("calamaria", "tantilla", "geophis", "atractus", "apostolepis", "pseudorabdion", "carphophis", "virginia", "sonora", "ninia"):
+        return "arid" if desert >= 0.2 else "soil"  # v5.12: burrowers of deserts live under sand and stones, not forest soil
     if g in ("cerastes", "eryx", "pseudocerastes", "eristicophis", "chionactis", "phyllorhynchus", "lytorhynchus", "spalerosophis", "psammophis", "rhamphiophis", "echis"): return "sand"
     if not kinds: return "litter"
     tot = float(sum(kinds.values())) or 1.0
@@ -154,7 +168,8 @@ def scene_of(c, plan, kinds):
     if sh("Savannas & grasslands") >= 0.25: return "grass"
     if sh("Shrublands & heath") >= 0.2: return "heath"
     if sh("Wetlands & swamps", "Rivers & lakes") >= 0.3: return "riverbank"
-    if sh("Mountains & rocks") >= 0.3: return "arid"
+    # v5.12: rocky mountains are dry ground unless they are mostly forested (Himalayan and Chinese mountain forests)
+    if sh("Mountains & rocks") >= 0.3 and sh("Forests & woodlands", "Rainforests") < 0.3: return "arid"
     return "forest"
 
 
@@ -230,6 +245,40 @@ CURATED = {
     "sistrurus-miliarius": {"d": "#8a7a6a", "c": "#2a2420", "b": "#e2d8c8", "t": "spot", "vs": ["#c26a3a", 0.035]},
     "bothrops-atrox": {"d": "#8a7a5a", "c": "#3a2e20", "b": "#ddd2b6"},
     "chrysopelea-ornata": {"d": "#8fb03a", "lat": "#98b844", "c": "#141a0c", "b": "#d8e0a0", "t": "band", "n": 60, "cx": {"scaleEdge": {"color": "#141a0c", "k": 0.7}}},
+    # v5.12: Australian coral snakes are orange-brown with faint pale bands (not red-black-yellow)
+    "brachyurophis-australis": {"d": "#b8724a", "c": "#d9a07a", "b": "#efe2cc", "t": "band", "n": 46, "L": 0.5, "s": "arid", "hc": "#3a2a22", "hcx": 0.45},
+    "brachyurophis-semifasciatus": {"d": "#c8834e", "c": "#3a2a22", "b": "#efe2cc", "t": "band", "n": 40, "L": 0.4, "s": "gibber"},
+    # v5.12: kingsnakes and milksnakes - smooth glossy scales, real sizes; speckled kingsnake black with a yellow speck on every scale
+    'lampropeltis-holbrooki': {'d': '#141511', 'lat': '#181913', 'b': '#e2d47a', 't': 'plain', 'L': 1.1, 's': 'grass', 'cx': {'speckle': {'p': 0.55, 'color': '#e6d77a', 'k': 0.75}, 'mottle': 0.03, 'bellyA': 0.8}, 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-nigra': {'d': '#121211', 'lat': '#151514', 'b': '#2a2a24', 't': 'plain', 'L': 1.0, 's': 'forest', 'cx': {'speckle': {'p': 0.14, 'color': '#d9d7a8', 'k': 0.6}, 'mottle': 0.03, 'bellyA': 0.82}, 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-splendida': {'d': '#151410', 'lat': '#2a2718', 'b': '#d9cc78', 't': 'plain', 'L': 1.0, 's': 'arid', 'cx': {'speckle': {'p': 0.45, 'color': '#e8d880', 'k': 0.85}, 'mottle': 0.03, 'bellyA': 0.76}, 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-catalinensis': {'d': '#e6e0cc', 'c': '#141210', 'b': '#e6e0cc', 't': 'band', 'n': 40, 'L': 0.9, 's': 'arid', 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-alterna': {'d': '#8c8c88', 'c': '#c25a30', 'b': '#c8c4ba', 't': 'tricolor', 'n': 30, 'L': 0.85, 's': 'arid', 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-mexicana': {'d': '#9a968e', 'c': '#c2402c', 'b': '#d0ccc2', 't': 'tricolor', 'n': 34, 'L': 0.8, 's': 'arid', 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-greeri': {'d': '#a4a29a', 'c': '#c2432e', 'b': '#d0ccc2', 't': 'tricolor', 'n': 34, 'L': 0.8, 's': 'arid', 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-webbi': {'d': '#a39e94', 'c': '#b8432f', 'b': '#d0ccc2', 't': 'tricolor', 'n': 34, 'L': 0.8, 's': 'arid', 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-leonis': {'d': '#9c968c', 'c': '#c2402c', 'b': '#d0ccc2', 't': 'tricolor', 'n': 34, 'L': 0.8, 's': 'arid', 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-zonata': {'d': '#ede7d8', 'c': '#c8302a', 'b': '#ece4d0', 't': 'tricolor', 'n': 40, 'L': 0.85, 's': 'forest', 'hc': '#141210', 'hcx': 0.7, 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-pyromelana': {'d': '#ede7d8', 'c': '#c8302a', 'b': '#ece4d0', 't': 'tricolor', 'n': 44, 'L': 0.85, 's': 'arid', 'hc': '#141210', 'hcx': 0.7, 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-knoblochi': {'d': '#ede7d8', 'c': '#c8302a', 'b': '#ece4d0', 't': 'tricolor', 'n': 44, 'L': 0.85, 's': 'arid', 'hc': '#141210', 'hcx': 0.7, 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-ruthveni': {'d': '#eadfb8', 'c': '#c8382c', 'b': '#ece4cc', 't': 'tricolor', 'n': 34, 'L': 0.85, 's': 'arid', 'hc': '#141210', 'hcx': 0.7, 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-annulata': {'d': '#e9d9a0', 'c': '#c8302a', 'b': '#e8dcb4', 't': 'tricolor', 'n': 30, 'L': 0.9, 's': 'arid', 'hc': '#141210', 'hcx': 0.8, 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-polyzona': {'d': '#e9d48a', 'c': '#c8302a', 'b': '#e8dcb4', 't': 'tricolor', 'n': 30, 'L': 1.3, 's': 'forest', 'hc': '#141210', 'hcx': 0.8, 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-abnorma': {'d': '#e9d48a', 'c': '#c8302a', 'b': '#e8dcb4', 't': 'tricolor', 'n': 26, 'L': 1.5, 's': 'rainforest', 'hc': '#141210', 'hcx': 0.8, 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-gentilis': {'d': '#e9e0cc', 'c': '#b8402c', 'b': '#e6dfcf', 't': 'tricolor', 'n': 30, 'L': 0.8, 's': 'grass', 'hc': '#141210', 'hcx': 0.8, 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-micropholis': {'d': '#151413', 'lat': '#191817', 'b': '#3a3836', 't': 'plain', 'L': 1.6, 's': 'rainforest', 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-calligaster': {'d': '#a39272', 'c': '#6b4a32', 'b': '#d8cfb8', 't': 'blotch', 'n': 55, 'L': 1.0, 's': 'grass', 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-rhombomaculata': {'d': '#8e6a52', 'c': '#5a3a28', 'b': '#d0c2a8', 't': 'blotch', 'n': 55, 'L': 0.85, 's': 'forest', 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-occipitolineata': {'d': '#a38a6e', 'c': '#6e4a30', 'b': '#d6c8ae', 't': 'blotch', 'n': 55, 'L': 0.85, 's': 'forest', 'k': 0, 'sx': {'gloss': 0.7}},
+    'lampropeltis-extenuata': {'d': '#8f8e8a', 'c': '#3a3a36', 'b': '#d0ccc2', 't': 'blotch', 'n': 60, 'L': 0.5, 's': 'sand', 'bx': {'ld': 60}, 'k': 0, 'sx': {'gloss': 0.7}},
+    # v5.12: lyre snakes - pale grey or tan with dark brown saddles (pale centres, pale edges) and the lyre-shaped mark on the head
+    'trimorphodon-lyrophanes': {'d': '#a59d8b', 'c': '#5b4231', 'b': '#e6dfcd', 't': 'plain', 'n': 26, 'L': 0.75, 's': 'arid', 'k': 0, 'cx': {'mottle': 0.12, 'speckle': {'p': 0.08, 'color': '#5b4231', 'k': 0.4}}, 'h': {'pupil': 'slit', 'iris': '#b8a27a', 'irisInner': '#d8c8a0'}, 'pat': [{'type': 'blotch', 't': [0.08, 0.95], 'count': 26, 'a': 0, 'wid': 0.5, 'len': 0.55, 'shape': 'saddle', 'color': '#5b4231', 'edgeColor': '#d9cdb4', 'edge': 0.16, 'edgeOut': True, 'inner': {'r': 0.3, 'color': '#8a7a64'}, 'warp': 0.35, 'jit': 0.08}, {'type': 'line', 'p0': [0.12, 0.02], 'p1': [1.05, 0.2], 'wid': 0.05, 'color': '#4a3324', 'mirror': True, 'aa': 0.3}, {'type': 'line', 'p0': [0.55, 0.0], 'p1': [1.1, 0.0], 'wid': 0.05, 'color': '#4a3324', 'aa': 0.3}, {'type': 'line', 'p0': [0.25, 0.38], 'p1': [0.9, 0.42], 'wid': 0.04, 'color': '#4a3324', 'mirror': True, 'aa': 0.35}]},
+    'trimorphodon-lambda': {'d': '#b5a68e', 'c': '#5e4330', 'b': '#ece2cc', 't': 'plain', 'n': 26, 'L': 0.9, 's': 'arid', 'k': 0, 'cx': {'mottle': 0.12, 'speckle': {'p': 0.08, 'color': '#5e4330', 'k': 0.4}}, 'h': {'pupil': 'slit', 'iris': '#b8a27a', 'irisInner': '#d8c8a0'}, 'pat': [{'type': 'blotch', 't': [0.08, 0.95], 'count': 26, 'a': 0, 'wid': 0.5, 'len': 0.55, 'shape': 'saddle', 'color': '#5e4330', 'edgeColor': '#d9cdb4', 'edge': 0.16, 'edgeOut': True, 'inner': {'r': 0.3, 'color': '#8f7b62'}, 'warp': 0.35, 'jit': 0.08}, {'type': 'line', 'p0': [0.12, 0.02], 'p1': [1.05, 0.2], 'wid': 0.05, 'color': '#4a3324', 'mirror': True, 'aa': 0.3}, {'type': 'line', 'p0': [0.55, 0.0], 'p1': [1.1, 0.0], 'wid': 0.05, 'color': '#4a3324', 'aa': 0.3}, {'type': 'line', 'p0': [0.25, 0.38], 'p1': [0.9, 0.42], 'wid': 0.04, 'color': '#4a3324', 'mirror': True, 'aa': 0.35}]},
+    'trimorphodon-vilkinsonii': {'d': '#a9a49a', 'c': '#4e3a2c', 'b': '#e4e0d6', 't': 'plain', 'n': 22, 'L': 0.85, 's': 'arid', 'k': 0, 'cx': {'mottle': 0.12, 'speckle': {'p': 0.08, 'color': '#4e3a2c', 'k': 0.4}}, 'h': {'pupil': 'slit', 'iris': '#b8a27a', 'irisInner': '#d8c8a0'}, 'pat': [{'type': 'blotch', 't': [0.08, 0.95], 'count': 22, 'a': 0, 'wid': 0.5, 'len': 0.55, 'shape': 'saddle', 'color': '#4e3a2c', 'edgeColor': '#d9cdb4', 'edge': 0.16, 'edgeOut': True, 'inner': {'r': 0.3, 'color': '#7c6e60'}, 'warp': 0.35, 'jit': 0.08}, {'type': 'line', 'p0': [0.12, 0.02], 'p1': [1.05, 0.2], 'wid': 0.05, 'color': '#4a3324', 'mirror': True, 'aa': 0.3}, {'type': 'line', 'p0': [0.55, 0.0], 'p1': [1.1, 0.0], 'wid': 0.05, 'color': '#4a3324', 'aa': 0.3}, {'type': 'line', 'p0': [0.25, 0.38], 'p1': [0.9, 0.42], 'wid': 0.04, 'color': '#4a3324', 'mirror': True, 'aa': 0.35}]},
+    'trimorphodon-biscutatus': {'d': '#9c8c76', 'c': '#4f3a2a', 'b': '#e2d8c4', 't': 'plain', 'n': 28, 'L': 1.2, 's': 'forest', 'k': 0, 'cx': {'mottle': 0.12, 'speckle': {'p': 0.08, 'color': '#4f3a2a', 'k': 0.4}}, 'h': {'pupil': 'slit', 'iris': '#b8a27a', 'irisInner': '#d8c8a0'}, 'pat': [{'type': 'blotch', 't': [0.08, 0.95], 'count': 28, 'a': 0, 'wid': 0.5, 'len': 0.55, 'shape': 'saddle', 'color': '#4f3a2a', 'edgeColor': '#d9cdb4', 'edge': 0.16, 'edgeOut': True, 'inner': {'r': 0.3, 'color': '#7a6a56'}, 'warp': 0.35, 'jit': 0.08}, {'type': 'line', 'p0': [0.12, 0.02], 'p1': [1.05, 0.2], 'wid': 0.05, 'color': '#4a3324', 'mirror': True, 'aa': 0.3}, {'type': 'line', 'p0': [0.55, 0.0], 'p1': [1.1, 0.0], 'wid': 0.05, 'color': '#4a3324', 'aa': 0.3}, {'type': 'line', 'p0': [0.25, 0.38], 'p1': [0.9, 0.42], 'wid': 0.04, 'color': '#4a3324', 'mirror': True, 'aa': 0.35}]},
+    'trimorphodon-tau': {'d': '#b9a68a', 'c': '#4a3426', 'b': '#ece2cc', 't': 'plain', 'n': 30, 'L': 0.75, 's': 'arid', 'k': 0, 'cx': {'mottle': 0.12, 'speckle': {'p': 0.08, 'color': '#4a3426', 'k': 0.4}}, 'h': {'pupil': 'slit', 'iris': '#b8a27a', 'irisInner': '#d8c8a0'}, 'pat': [{'type': 'blotch', 't': [0.08, 0.95], 'count': 30, 'a': 0, 'wid': 0.5, 'len': 0.55, 'shape': 'saddle', 'color': '#4a3426', 'edgeColor': '#d9cdb4', 'edge': 0.16, 'edgeOut': True, 'inner': {'r': 0.3, 'color': '#8e7a62'}, 'warp': 0.35, 'jit': 0.08}, {'type': 'line', 'p0': [0.12, 0.02], 'p1': [1.05, 0.2], 'wid': 0.05, 'color': '#4a3324', 'mirror': True, 'aa': 0.3}, {'type': 'line', 'p0': [0.55, 0.0], 'p1': [1.1, 0.0], 'wid': 0.05, 'color': '#4a3324', 'aa': 0.3}, {'type': 'line', 'p0': [0.25, 0.38], 'p1': [0.9, 0.42], 'wid': 0.04, 'color': '#4a3324', 'mirror': True, 'aa': 0.35}]},
+    'trimorphodon-paucimaculatus': {'d': '#c3ad8c', 'c': '#5a3e2a', 'b': '#ece2cc', 't': 'plain', 'n': 22, 'L': 0.9, 's': 'forest', 'k': 0, 'cx': {'mottle': 0.12, 'speckle': {'p': 0.08, 'color': '#5a3e2a', 'k': 0.4}}, 'h': {'pupil': 'slit', 'iris': '#b8a27a', 'irisInner': '#d8c8a0'}, 'pat': [{'type': 'blotch', 't': [0.08, 0.95], 'count': 22, 'a': 0, 'wid': 0.5, 'len': 0.55, 'shape': 'saddle', 'color': '#5a3e2a', 'edgeColor': '#d9cdb4', 'edge': 0.16, 'edgeOut': True, 'inner': {'r': 0.3, 'color': '#937a5c'}, 'warp': 0.35, 'jit': 0.08}, {'type': 'line', 'p0': [0.12, 0.02], 'p1': [1.05, 0.2], 'wid': 0.05, 'color': '#4a3324', 'mirror': True, 'aa': 0.3}, {'type': 'line', 'p0': [0.55, 0.0], 'p1': [1.1, 0.0], 'wid': 0.05, 'color': '#4a3324', 'aa': 0.3}, {'type': 'line', 'p0': [0.25, 0.38], 'p1': [0.9, 0.42], 'wid': 0.04, 'color': '#4a3324', 'mirror': True, 'aa': 0.35}]},
+    'trimorphodon-quadruplex': {'d': '#8f8170', 'c': '#3e2e22', 'b': '#ddd3c0', 't': 'plain', 'n': 28, 'L': 1.1, 's': 'forest', 'k': 0, 'cx': {'mottle': 0.12, 'speckle': {'p': 0.08, 'color': '#3e2e22', 'k': 0.4}}, 'h': {'pupil': 'slit', 'iris': '#b8a27a', 'irisInner': '#d8c8a0'}, 'pat': [{'type': 'blotch', 't': [0.08, 0.95], 'count': 28, 'a': 0, 'wid': 0.5, 'len': 0.55, 'shape': 'saddle', 'color': '#3e2e22', 'edgeColor': '#d9cdb4', 'edge': 0.16, 'edgeOut': True, 'inner': {'r': 0.3, 'color': '#6e604e'}, 'warp': 0.35, 'jit': 0.08}, {'type': 'line', 'p0': [0.12, 0.02], 'p1': [1.05, 0.2], 'wid': 0.05, 'color': '#4a3324', 'mirror': True, 'aa': 0.3}, {'type': 'line', 'p0': [0.55, 0.0], 'p1': [1.1, 0.0], 'wid': 0.05, 'color': '#4a3324', 'aa': 0.3}, {'type': 'line', 'p0': [0.25, 0.38], 'p1': [0.9, 0.42], 'wid': 0.04, 'color': '#4a3324', 'mirror': True, 'aa': 0.35}]},
     # v5.09: green snakes whose photos read as brown/grey, or that got their group's typical length - plain green, real size
     "ptyas-major": {"s": "forest", "d": "#5fae38", "lat": "#6db840", "b": "#dde7a2", "t": "plain", "L": 1.0, "k": 0},
     "ptyas-semicarinata": {"d": "#5a9c3a", "lat": "#68a642", "b": "#d9e1a2", "t": "plain", "L": 1.4, "k": 1},
@@ -317,6 +366,11 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         green = is_green(d)
         if green and lum(d) < 0.55:  # photos make green snakes look dull and olive: a living green snake is vivid
             d = tone(d, 1.12, 1.35)
+        nm = (c["name"] if not c["is_sci"] else "").lower()
+        if (c["genus"].lower() in GREEN_IN_LIFE or (c["genus"].lower() == "dendroaspis" and "black" not in nm)) and not green and lum(d) < 0.3 and not re.search(r"brown|gr[ae]y|black|white|yellow|red|mangrove|bronze|spotted|striped|banded", nm):
+            d, green = "#5aa63a", True  # v5.12: the photo read leaves or shade as its colour - in life it is green
+        # v5.12: a near-black colour read from a photo is usually shadow, unless the snake's name says it is dark
+        if not green and lum(d) < (0.15 if c["genus"].lower() in ("crotalus", "sistrurus") else 0.06) and not re.search(r"black|dark|melan|nigr|ebon|coal|ink|night|obscur|mole", nm + " " + c["id"]): d = mix(d, gd, 0.6)
         t = pattern_of(c, plan, con, green)
         # the belly: paler and less coloured than the back (a dark snake keeps a darker belly)
         b = mix(tone(d, 1.45 if lum(d) < 0.5 else 1.1, 0.55), "#e6dcc4", 0.35) if plan != "blind" else tone(d, 1.2, 0.8)
@@ -338,5 +392,6 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
             a.update(CURATED[c["id"]]); a["x"] = a.get("x", "").replace("g", "").replace("l", "" if "L" in CURATED[c["id"]] else "l")
             if not a["x"]: a.pop("x")
         if c["family"] == "Uropeltidae" or c["family"] == "Cylindrophiidae" or c["family"] == "Aniliidae": a["o"] = 1  # short blunt tail
+        if g == "acanthophis" and "bx" not in a: a["bx"] = {"ld": 14, "neck": 0.5, "tail": 0.11}; a.setdefault("h", {}).setdefault("pupil", "slit")  # v5.12: death adders are short and stout
         out[c["id"]] = {"name": c["sci"] if c["is_sci"] else c["name"], "auto": a}
     return out

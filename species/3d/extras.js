@@ -22,7 +22,7 @@ const CSS = `
 .sp3d-row>.sp3d-stage{flex:1 1 auto;min-width:0}
 .sl3d-host .sp3d-wrap>.sp3d-row,.sl3d-host .sp3d-row{flex:1 1 auto}
 .sp3d-wrap:fullscreen .sp3d-row,.sp3d-max .sp3d-row{flex:1 1 auto}
-.sp3d-side{flex:0 0 min(44%,460px);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;background:var(--bg);overflow:hidden;min-height:0;min-width:0}
+.sp3d-side{flex:0 0 min(48%,560px);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;background:var(--bg);overflow:hidden;min-height:0;min-width:0}
 .sp3d-side[hidden]{display:none}
 .sp3d-side-hd{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 12px;border-bottom:1px solid var(--line);font:700 14px/1.3 Inter,system-ui,sans-serif;color:var(--text)}
 .sp3d-side-hd span{flex:1;min-width:0}
@@ -30,6 +30,8 @@ const CSS = `
 .sp3d-side-b{flex:1 1 auto;min-height:0;position:relative;display:flex;flex-direction:column}
 .sp3d-side figure{margin:0;flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 .sp3d-side figure img,.sp3d-side figure .sp3d-ph{flex:1 1 auto;min-height:0;width:100%;height:100%;object-fit:contain;background:#0f1a13 center/contain no-repeat;display:block}
+.sp3d-pz{position:relative;flex:1 1 auto;min-height:0;overflow:hidden;touch-action:none;cursor:zoom-in;background:#0f1a13}.sp3d-pz.sp3d-pz-on{cursor:grab}.sp3d-pz img{transform-origin:50% 50%;user-select:none;-webkit-user-drag:none}
+.sp3d-pzh{position:absolute;left:8px;bottom:8px;padding:3px 9px;border-radius:999px;background:rgba(12,26,18,.75);color:#fff;font:500 12px/1.4 Inter,system-ui,sans-serif;pointer-events:none}.sp3d-pz-on .sp3d-pzh{display:none}
 .sp3d-side figcaption{flex:none;font:12px/1.4 Inter,system-ui,sans-serif;color:var(--muted);padding:6px 10px}
 .sp3d-side iframe{flex:1 1 auto;display:block;width:100%;height:100%;min-height:260px;border:0;background:var(--card)}
 .sp3d-side .sp3d-none2{padding:16px;font-size:14px;color:var(--muted)}
@@ -38,6 +40,7 @@ const CSS = `
 .sp3d-b.sp3d-hb{min-height:32px;padding:4px 10px;font-size:12.5px;display:inline-flex;align-items:center;gap:5px}
 .sp3d-hb svg,.sp3d-fs svg{width:15px;height:15px;flex:none}
 .sp3d-fs{display:inline-flex;align-items:center;gap:6px}
+.sp3d-fsc{position:absolute;right:10px;bottom:10px;z-index:3;width:40px;height:40px;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:10px;background:rgba(12,26,18,.72);color:#fff;cursor:pointer}.sp3d-fsc:hover{background:rgba(12,26,18,.9)}.sp3d-fsc svg{width:22px;height:22px}.sp3d-fsc:focus-visible{outline:3px solid #9be07c;outline-offset:2px}
 .sl3d-hd h2{flex:0 1 auto}
 @media (max-width:640px){.sp-rl-hd,.sl3d-hd{flex-wrap:wrap}.sp-rl-hd .sp3d-hdb,.sl3d-hd .sp3d-hdb{order:3;flex-basis:100%}}
 .sp3d-b:disabled{opacity:.6;cursor:default}
@@ -317,8 +320,8 @@ export function create(V) {
   const mk = (txt, title) => { const b = V.btn(txt, title); if (before) bar.insertBefore(b, before); return b; };
   const bEat = mk('See it eat', 'Watch it catch and swallow its usual food');
   const bSlither = mk('Slither', 'Watch it slither along the ground'); bSlither.setAttribute('aria-pressed', 'false');
-  const bEye = mk('See eye shield', 'Snakes have no eyelids: see the clear scale that covers each eye');
-  const bFull = V.btn('Fullscreen', 'Show the 3D view on the whole screen'); bFull.classList.add('sp3d-fs'); bFull.setAttribute('aria-pressed', 'false'); bFull.innerHTML = ICON.full + '<span>Fullscreen</span>';
+  // v5.12: Fullscreen is just its icon, in the bottom-right corner of the 3D view
+  const bFull = el('button', 'sp3d-fsc'); bFull.type = 'button'; bFull.title = 'Fullscreen'; bFull.setAttribute('aria-label', 'Fullscreen'); bFull.setAttribute('aria-pressed', 'false'); bFull.innerHTML = ICON.full; stage.appendChild(bFull);
   const bBite = V.bBite, bAnat = V.bAnat;
   bBite.title = 'Watch it strike an arm, then look inside the arm to see how deep the fang goes';
   bAnat.title = 'Show the parts of this snake: see-through skin with its organs inside, plus teeth, fangs and tongue - tap any part';
@@ -343,9 +346,18 @@ export function create(V) {
     if (k === 'photo') {
       const ph = typeof V.opts.photo === 'function' ? V.opts.photo() : V.opts.photo;
       if (ph && ph.src) {
-        const f = el('figure'), im = new Image(); im.alt = ph.alt || ('Photo of ' + V.opts.name); im.decoding = 'async'; im.src = ph.src;
-        if (ph.fb) im.addEventListener('error', () => { if (im.src !== ph.fb) im.src = ph.fb; }, { once: true });
-        f.appendChild(im); if (ph.credit) { const c = el('figcaption'); c.innerHTML = ph.credit; f.appendChild(c); } b.appendChild(f);
+        const f = el('figure'), im = new Image(); im.alt = ph.alt || ('Photo of ' + V.opts.name); im.decoding = 'async';
+        // v5.12: the sharpest copy there is - iNaturalist's large photo (not the small medium one or the 540 px tile);
+        // if it does not load, the photo SnakeList was given, then its saved tile
+        const tries = [], it = window.SL_PHOTOS && window.SL_PHOTOS.items && window.SL_PHOTOS.items[V.opts.id], fn = it && /^\d+\.(jpe?g|png|webp)$/i.test(String(it[4] || '')) ? String(it[4]) : '';
+        if (/inaturalist-open-data[^/]*\/photos\/\d+\/(medium|small|square)\./.test(ph.src)) tries.push(ph.src.replace(/\/(medium|small|square)\./, '/large.'));
+        else if (fn) tries.push('https://inaturalist-open-data.s3.amazonaws.com/photos/' + fn.replace('.', '/large.'));
+        tries.push(ph.src); if (ph.fb) tries.push(ph.fb);
+        let ti = 0; im.src = tries[0]; on(im, 'error', () => { if (++ti < tries.length) im.src = tries[ti]; });
+        // v5.12: the photo zooms (wheel, pinch, double-click) and pans (drag) so you can compare the scales up close
+        const vp = el('div', 'sp3d-pz'); vp.appendChild(im); f.appendChild(vp); panZoom(vp, im);
+        const zh = el('div', 'sp3d-pzh', (window.innerWidth < 560 ? 'Pinch' : 'Scroll') + ' to zoom the photo, drag to move it, double-' + (window.innerWidth < 560 ? 'tap' : 'click') + ' to zoom in'); vp.appendChild(zh);
+        if (ph.credit) { const c = el('figcaption'); c.innerHTML = ph.credit; f.appendChild(c); } b.appendChild(f);
       } else b.appendChild(el('p', 'sp3d-none2', 'SnakeList has no photo of this snake yet.'));
     } else {
       const u = typeof V.opts.mapUrl === 'function' ? V.opts.mapUrl() : V.opts.mapUrl;
@@ -353,6 +365,26 @@ export function create(V) {
       else b.appendChild(el('p', 'sp3d-none2', 'No map for this snake yet.'));
     }
     V.kick();
+  }
+  function panZoom(vp, im) {
+    let z = 1, tx = 0, ty = 0; const ptr = new Map(); let pinch = 0, z0 = 1, last = null;
+    // the photo first fills the whole panel (cover); zooming out to 1 shows all of it (contain)
+    const coverK = () => { const w = vp.clientWidth, h = vp.clientHeight, iw = im.naturalWidth, ih = im.naturalHeight; if (!w || !h || !iw || !ih) return 1; const a = Math.min(w / iw, h / ih), b = Math.max(w / iw, h / ih); return b / a; };
+    const fit = () => { z = coverK(); tx = ty = 0; apply(); };
+    on(im, 'load', fit); if (window.ResizeObserver) { const ro = new ResizeObserver(() => { if (z <= coverK() + 0.01) fit(); else apply(); }); ro.observe(vp); }
+    const clampT = () => { const w = vp.clientWidth, h = vp.clientHeight, iw = im.naturalWidth || w, ih = im.naturalHeight || h, a = Math.min(w / iw, h / ih), mx = Math.max(0, (z * a * iw - w) / 2), my = Math.max(0, (z * a * ih - h) / 2); tx = clamp(tx, -mx, mx); ty = clamp(ty, -my, my); };
+    const apply = () => { clampT(); im.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + z + ')'; vp.classList.toggle('sp3d-pz-on', z > coverK() + 0.01); };
+    const zoomAt = (nz, cx, cy) => { nz = clamp(nz, 1, coverK() * 6); const r = vp.getBoundingClientRect(), px = cx - r.left - r.width / 2, py = cy - r.top - r.height / 2; tx = px - ((px - tx) * nz) / z; ty = py - ((py - ty) * nz) / z; z = nz; apply(); };
+    on(vp, 'wheel', (e) => { e.preventDefault(); zoomAt(z * Math.exp(-clamp(e.deltaY, -120, 120) * 0.0025), e.clientX, e.clientY); }, { passive: false });
+    on(vp, 'dblclick', (e) => { e.preventDefault(); const c = coverK(); zoomAt(z > c * 1.4 ? c : c * 2.5, e.clientX, e.clientY); });
+    on(vp, 'pointerdown', (e) => { try { vp.setPointerCapture(e.pointerId); } catch (er) { /* synthetic pointer */ } ptr.set(e.pointerId, [e.clientX, e.clientY]); if (ptr.size === 2) { const [a, b] = [...ptr.values()]; pinch = Math.hypot(a[0] - b[0], a[1] - b[1]); z0 = z; } last = [e.clientX, e.clientY]; });
+    on(vp, 'pointermove', (e) => {
+      if (!ptr.has(e.pointerId)) return; ptr.set(e.pointerId, [e.clientX, e.clientY]);
+      if (ptr.size === 2 && pinch) { const [a, b] = [...ptr.values()]; zoomAt(z0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch, (a[0] + b[0]) / 2, (a[1] + b[1]) / 2); return; }
+      if (last) { tx += e.clientX - last[0]; ty += e.clientY - last[1]; last = [e.clientX, e.clientY]; apply(); }
+    });
+    const up = (e) => { ptr.delete(e.pointerId); if (ptr.size < 2) pinch = 0; last = ptr.size ? [...ptr.values()][0] : null; };
+    on(vp, 'pointerup', up); on(vp, 'pointercancel', up);
   }
   function closeSide() { sideKind = null; side.hidden = true; side.innerHTML = ''; for (const q in hdbs) hdbs[q].setAttribute('aria-pressed', 'false'); V.kick(); }
 
@@ -539,7 +571,7 @@ export function create(V) {
     show = Object.assign({ t0: now(), time: 0, freeze: null, objs: [] }, def);
     show.mouth0 = V.mouthGoal;
     V.controls.st.goal = null; V.controls.st.vaz = V.controls.st.vel = V.controls.st.vpx = V.controls.st.vpz = 0;
-    for (const b of [bBite, bEat, bEye]) b.disabled = true;
+    for (const b of [bBite, bEat]) b.disabled = true;
     show.btn.disabled = false; show.btn.dataset.lbl = show.btn.textContent; show.btn.textContent = 'Stop'; show.btn.setAttribute('aria-pressed', 'true');
     stepTag.hidden = true; V.kick();
   }
@@ -551,7 +583,7 @@ export function create(V) {
     if (rig) rig.release();
     if (V.extras && V.extras.mouth) { V.extras.mouth.set(V.extras.mouth.t); V.mouthGoal = s.mouth0 || 0; }
     say(''); stepTag.hidden = true;
-    for (const b of [bBite, bEat, bEye]) { b.disabled = false; b.removeAttribute('aria-pressed'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
+    for (const b of [bBite, bEat]) { b.disabled = false; b.removeAttribute('aria-pressed'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
     if (s.cLast && !quiet) camBlend = { t0: now(), pos: s.cLast.pos.clone(), tgt: s.cLast.tgt.clone() };
     if (anat) anat.refresh();
     V.kick();
@@ -758,7 +790,7 @@ export function create(V) {
     const bulgeAt = (xFront, extra) => { // the swelling where the prey is inside the body
       for (let i = 0; i < R.N; i++) {
         const x = i * R.dx, u = (x - (xFront - Lp / 2)) / (Lp / 2); let k = 1;
-        if (Math.abs(u) < 1) { const need = prR * Math.sqrt(1 - u * u) * 1.12 / Math.max(1e-6, rB(x)); k = Math.max(1, need); if (x < Hl * 1.1) k = Math.min(k, 1.3); }
+        if (Math.abs(u) < 1) { const need = prR * Math.sqrt(1 - u * u) * 1.12 / Math.max(1e-6, rB(x)); k = Math.max(1, need); k = lerp(1, k, sstep(Hl * 1.0, Hl * 1.7, x)); } // v5.12: the head itself never swells (it used to swallow its own eyes)
         R.bul[i] = Math.max(1, lerp(1, k, extra));
       }
     };
@@ -799,7 +831,9 @@ export function create(V) {
       }
     } else phases.push([1.2, (u) => { R.setPose(R.blend(R.blend(rest, ext, 0.3), ext, ease(u))); R.apply(); setMouth(ease(u) * 0.9); if (u > 0.95) held = true; }]);
     phases.push([4.6, (u, s) => {
-      held = true; xp = lerp(xp0, xIn, ease(u)); const yaw = 0.13 * Math.sin(s * 6.5) * (1 - sstep(0.85, 1, u));
+      // jaw walking: the prey goes in in small pulls, one side of the jaw then the other (the head turns a little each way)
+      const e = ease(u), pull = e - Math.sin(e * TAU * 6) / (TAU * 6);
+      held = true; xp = lerp(xp0, xIn, pull); const yaw = 0.1 * Math.sin(e * TAU * 3) * (1 - sstep(0.85, 1, u));
       R.setPose(R.fore({ len: st.len, phi, lift, coil: 0, yaw })); bulgeAt(xp, 1); R.apply(); setMouth(lerp(0.75, 1, Math.sin(Math.min(1, u * 1.2) * Math.PI))); say(T.swallow);
       camKey = camSide(headPt().lerp(R.point(xp - Lp * 0.5), 0.3), fitD(Hl * 1.8 + Lp * 1.0), 0.36);
       preyHide = !anatOn() && xp - Lp > Hl * 0.95;
@@ -820,50 +854,6 @@ export function create(V) {
     show.step = (s) => { const i = runPhases(phases, s); if (i > 0 && !shown) { shown = true; fadeTree(prey, 1); } stepPrey(); /* fully faded in even if a slow frame skipped the end of the first step */ stepTag.hidden = false; stepTag.textContent = (i + 1) + ' / ' + phases.length; return i; };
     show.cam = () => camKey;
     show.diet = kind;
-  }
-
-  // ---------------------------------------------------------------- See eye shield (the spectacle)
-  function eyeShow() {
-    const eyes = (V.extras.eyes || []).filter((e) => e.userData.n); if (!eyes.length) return;
-    V.group.updateMatrixWorld(true);
-    const outOf = (e) => e.userData.n.clone().transformDirection(e.matrixWorld).normalize();
-    // v5.05: the eye on the open side of the coils (the camera looks at it from outside, never from inside the head)
-    const eye = eyes.map((e) => { const p = e.getWorldPosition(new THREE.Vector3()), o = outOf(e); return { e, k: o.dot(p.clone().sub(V.info.center).setY(0).normalize()) + o.y * 0.5 }; }).sort((a, b) => b.k - a.k)[0].e;
-    const er = eye.userData.r || 0.005;
-    // a shallow dome over the eye (the spectacle), its rim on the skin: a sphere of radius Rs cut at angle th0
-    const Rs = er * 1.75, th0 = Math.asin(1.08 / 1.75), capG = new THREE.SphereGeometry(Rs, 40, 14, 0, TAU, 0, th0).rotateX(Math.PI / 2).translate(0, 0, -Rs * Math.cos(th0) + er * 0.05);
-    const clearM = new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.02, transmission: 0, transparent: true, opacity: 0.18, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide, envMapIntensity: 1.5 });
-    const oldM = new THREE.MeshPhysicalMaterial({ color: '#a7c3df', roughness: 0.55, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
-    const rimM = new THREE.MeshBasicMaterial({ color: '#9be07c', transparent: true, opacity: 0, depthWrite: false });
-    const holder = new THREE.Group(); holder.quaternion.setFromUnitVectors(V3(0, 0, 1), eye.userData.n.clone().normalize());
-    const cap = new THREE.Mesh(capG, clearM), old = new THREE.Mesh(capG, oldM), rim = new THREE.Mesh(new THREE.TorusGeometry(er * 1.08, er * 0.05, 8, 48), rimM);
-    rim.position.z = er * 0.05; old.scale.setScalar(1.04); cap.renderOrder = old.renderOrder = rim.renderOrder = 4;
-    holder.add(cap, old, rim); eye.add(holder); show.objs.push(holder);
-    const mat = V.extras.mat, col0 = mat.color.clone(), dull = new THREE.Color('#b9c7d6');
-    const eyeW = () => eye.getWorldPosition(new THREE.Vector3());
-    // the camera looks at the eye from beside the head (along the eye's own outward direction), a little from the front and above
-    const camEye = (d, sideK = 0.35) => { const p = eyeW(), o = outOf(eye), hd = V.info.headDir.clone(); const dir = o.clone().addScaledVector(hd, sideK).add(V3(0, 0.3, 0)).normalize(); return { tgt: p, pos: p.clone().addScaledVector(dir, d) }; };
-    const T = [
-      'Snakes have <b>no eyelids</b>, so they can\'t blink or close their eyes - not even to sleep.',
-      'Each eye is covered by a clear scale called the <b>spectacle</b> (or <b>brille</b>), like a built-in contact lens.',
-      'Before shedding, fluid builds up under the old skin and the spectacle turns <b>cloudy blue</b>. For a few days the snake can hardly see.',
-      'When it <b>sheds</b>, the old spectacle comes off together with the rest of its old skin...',
-      '...and a <b>brand-new clear spectacle</b> is underneath. That is why snake eyes always look glassy.',
-    ];
-    let camKey = camEye(er * 22);
-    const phases = [
-      [1.4, (u) => { say(T[0]); camKey = camEye(er * 22); }],
-      [3.2, (u) => { say(T[0]); rimM.opacity = 0; }],
-      [3.4, (u, s) => { say(T[1]); rimM.opacity = 0.9 * ease(u * 3) * (0.75 + 0.25 * Math.sin(s * 5)); clearM.opacity = 0.18 + 0.12 * ease(u * 3); camKey = camEye(er * 13, 0.45); }],
-      [3.8, (u) => { say(T[2]); rimM.opacity = 0.6 * (1 - ease(u * 3)); oldM.opacity = 0.82 * ease(u * 1.6); mat.color.copy(col0).lerp(dull, ease(u * 1.6) * 0.55); }],
-      [3.4, (u) => { say(T[3]); const k = ease(u); old.position.set(-er * 1.6 * k, 0, er * 0.6 * k); old.rotation.y = -0.6 * k; /* peels off backwards with the old skin */ oldM.opacity = 0.82 * (1 - ease((u - 0.35) / 0.65)); mat.color.copy(col0).lerp(dull, 0.55 * (1 - k)); }],
-      [3.4, (u, s) => { say(T[4]); oldM.opacity = 0; mat.color.copy(col0); rimM.opacity = 0.9 * ease(u * 3) * (0.75 + 0.25 * Math.sin(s * 5)); }],
-      [1.2, (u) => { rimM.opacity = 0.9 * (1 - ease(u)); }],
-    ];
-    show.dur = total(phases);
-    show.step = (s) => { const i = runPhases(phases, s); stepTag.hidden = false; stepTag.textContent = Math.min(5, Math.max(1, i)) + ' / 5'; return i; };
-    show.cam = () => camKey;
-    show.end = () => { mat.color.copy(col0); };
   }
 
   // ---------------------------------------------------------------- Slither (loops until pressed again)
@@ -905,7 +895,7 @@ export function create(V) {
     };
     const rest = R.rest(), first = trackPose(s0), firstA = angles(first);
     const undo = clearProps(gIdx.filter((_, j) => j % 2 === 0).map((k) => pts[k]).concat([[cx, cz]]), F.w0 * 2.5 + A * 0.2);
-    const T0 = reduceK() < 1 ? 0.01 : 2.2; // seconds to uncoil
+    const T0 = reduceK() < 1 ? 0.01 : 0.7; // seconds for the coils to fall in behind the moving head
     slither = { t0: now(), stout, T0, s0, speed, rest, restA, first, firstA, trackPose, angles, between, stopping: 0, undo };
     bSlither.setAttribute('aria-pressed', 'true'); bSlither.textContent = 'Stop slithering';
     tip.hidden = false; tip.textContent = stout ? 'Heavy snakes often creep in a straight line ("caterpillar" crawling): belly scales grip and push in waves.' : 'It uncoils, then slithers: waves run down the body and push against the ground, so every part follows the path of the head (lateral undulation).';
@@ -918,11 +908,9 @@ export function create(V) {
     if (S.stopping) { // coil back up where it started
       const k = ease((now() - S.stopping) / 1800); pose = S.between(S.stopA, S.restA, S.stopPose, S.rest, k, N >> 1);
       if (k >= 1) { slither = null; R.release(); tip.hidden = true; unzoom(); if (S.undo) S.undo(); return false; }
-    } else if (t < S.T0) { // uncoiling into the first wave, the head leading
-      pose = S.between(S.restA, S.firstA, S.rest, S.first, ease(t / S.T0), 0);
-    } else { // gliding along the track, getting up to speed
-      const u = t - S.T0, ramp = 0.9, d = u < ramp ? (u * u) / (2 * ramp) : u - ramp / 2;
-      pose = S.trackPose(S.s0 + S.speed * d);
+    } else { // v5.12: it slithers off at once - the head leads along the track from the first moment, the body unwinding behind it
+      const tp = S.trackPose(S.s0 + S.speed * t);
+      pose = t < S.T0 ? S.between(S.restA, S.angles(tp), S.rest, tp, ease(t / S.T0), 0) : tp;
     }
     S.lastPose = pose;
     if (S.stout) { for (let i = 0; i < N; i++) R.bul[i] = 1 + 0.03 * Math.sin(TAU * (i * R.dx / (R.L * 0.1) - t * 1.4)) * sstep(R.ih, R.ih + 30, i); }
@@ -996,16 +984,16 @@ export function create(V) {
     add('oesophagus', 'Gullet (oesophagus)', 'A long, very stretchy tube from the mouth to the stomach. Food is pushed along it by muscles.', 'body', sweep(x0, svl * 0.5, 0.1, 0.24, (x) => rB(x) * 0.15, 170, 10), om(C.gullet));
     const hx = (heart0 + heart1) / 2;
     add('heart', 'Heart', 'About a quarter of the way along the body. It has three chambers and can slide a little, so big prey can squeeze past.', 'body', blob(hx, 0, -0.34, (heart1 - heart0) * 0.5, rB(hx) * 0.36, F.W(hx) * 0.34, 28), om(C.heart, { roughness: 0.38, clearcoat: 0.6 }));
-    add('lung', 'Right lung', 'Snakes have one long working lung on the right (the left one is tiny or missing), because their body is so narrow.', 'body', sweep(svl * 0.29, svl * 0.505, -0.2, 0.22, (x, t) => rB(x) * 0.3 * (1 - t * 0.2), 90, 12), om(C.lung, { roughness: 0.75, map: speckle('#e2a19d', 1600, 0.25, 4) }));
+    add('lung', 'Right lung', 'Snakes have one long working lung on the right (the left one is tiny or missing), because their body is so narrow.', 'body', sweep(svl * 0.29, svl * 0.505, -0.2, 0.22, (x, t) => rB(x) * 0.36 * (1 - t * 0.2), 90, 12), om(C.lung, { roughness: 0.75, map: speckle('#e2a19d', 1600, 0.25, 4) }));
     add('lungL', 'Left lung', 'Tiny in most snakes (and missing in many): there is only room for one big lung.', 'body', sweep(svl * 0.3, svl * 0.335, 0.26, 0.18, (x) => rB(x) * 0.12, 16, 10), om(C.lung, { roughness: 0.75 }));
     add('airsac', 'Air sac', 'The back part of the lung has no blood vessels: it is a thin bag that stores air, like a balloon.', 'body', sweep(svl * 0.495, svl * 0.72, -0.12, 0.3, (x, t) => rB(x) * 0.25 * (1 - t * 0.6), 70, 12), new THREE.MeshPhysicalMaterial({ color: C.sac, roughness: 0.25, transparent: true, opacity: 0.42, depthWrite: false, clearcoat: 1 }));
-    add('liver', 'Liver', 'Long and thin to fit the body. It cleans the blood and stores energy.', 'body', sweep(svl * 0.3, svl * 0.5, -0.06, -0.3, (x, t) => rB(x) * 0.3 * Math.min(1, 0.55 + t * 1.4) * (1 - 0.3 * t), 80, 12, 1.15), om(C.liver, { roughness: 0.35, clearcoat: 0.6 }));
-    add('stomach', 'Stomach', 'Very stretchy. Strong acid digests the whole prey - even bones.', 'body', sweep(svl * 0.495, svl * 0.6, 0.04, -0.12, (x, t) => rB(x) * 0.32 * (1 - Math.abs(t - 0.4) * 0.6), 40, 14), om(C.stomach, { map: canvasTex(64, (x, s) => { x.fillStyle = '#d6998d'; x.fillRect(0, 0, s, s); x.strokeStyle = 'rgba(140,60,50,.3)'; x.lineWidth = 2; for (let i = 0; i < s; i += 7) { x.beginPath(); x.moveTo(0, i); x.bezierCurveTo(s * 0.3, i + 4, s * 0.6, i - 4, s, i); x.stroke(); } }, 2, 3) }));
+    add('liver', 'Liver', 'Long and thin to fit the body. It cleans the blood and stores energy.', 'body', sweep(svl * 0.3, svl * 0.5, -0.06, -0.3, (x, t) => rB(x) * 0.34 * Math.min(1, 0.55 + t * 1.4) * (1 - 0.3 * t), 80, 12, 1.15), om(C.liver, { roughness: 0.35, clearcoat: 0.6 }));
+    add('stomach', 'Stomach', 'Very stretchy. Strong acid digests the whole prey - even bones.', 'body', sweep(svl * 0.495, svl * 0.6, 0.04, -0.12, (x, t) => rB(x) * 0.38 * (1 - Math.abs(t - 0.4) * 0.6), 40, 14), om(C.stomach, { map: canvasTex(64, (x, s) => { x.fillStyle = '#d6998d'; x.fillRect(0, 0, s, s); x.strokeStyle = 'rgba(140,60,50,.3)'; x.lineWidth = 2; for (let i = 0; i < s; i += 7) { x.beginPath(); x.moveTo(0, i); x.bezierCurveTo(s * 0.3, i + 4, s * 0.6, i - 4, s, i); x.stroke(); } }, 2, 3) }));
     const g0 = svl * 0.605;
     add('gall', 'Gall bladder', 'A small green bag just behind the stomach. It keeps bile, which helps to digest fat.', 'body', blob(g0, -0.18, -0.22, rB(g0) * 0.2, rB(g0) * 0.17, F.W(g0) * 0.15), om(C.gall, { roughness: 0.3, clearcoat: 0.8 }));
     add('pancreas', 'Pancreas', 'Makes juices that digest food and a hormone (insulin) that controls sugar in the blood.', 'body', blob(g0 + rB(g0) * 0.5, 0.05, -0.12, rB(g0) * 0.24, rB(g0) * 0.15, F.W(g0) * 0.17), om(C.pancreas));
     add('spleen', 'Spleen', 'A small dark red organ that helps to fight germs and cleans old blood cells.', 'body', blob(g0 - rB(g0) * 0.2, 0.22, 0.02, rB(g0) * 0.16, rB(g0) * 0.14, F.W(g0) * 0.13), om(C.spleen, { roughness: 0.4 }));
-    add('intestine', 'Small intestine', 'Takes the goodness out of the digested food. In snakes it is fairly short and loops gently along the body.', 'body', sweep(svl * 0.625, svl * 0.86, (x) => 0.16 * Math.sin((x / svl) * 150), (x) => -0.18 + 0.12 * Math.cos((x / svl) * 150), (x) => rB(x) * 0.14, 200, 8), om(C.small));
+    add('intestine', 'Small intestine', 'Takes the goodness out of the digested food. In snakes it is fairly short and loops gently along the body.', 'body', sweep(svl * 0.625, svl * 0.86, (x) => 0.16 * Math.sin((x / svl) * 150), (x) => -0.18 + 0.12 * Math.cos((x / svl) * 150), (x) => rB(x) * 0.17, 200, 8), om(C.small));
     add('colon', 'Large intestine', 'The last part of the gut. It takes water back out of what is left, then it goes out through the cloaca.', 'body', sweep(svl * 0.855, svl * 0.99, 0, -0.18, (x, t) => rB(x) * 0.19 * (1 - 0.3 * t), 40, 10), om(C.large));
     for (const [sg, a] of [[-1, 0.63], [1, 0.67]]) add('gonads', 'Ovaries or testes', 'The organs that make eggs (females) or sperm (males). One sits a little in front of the other, to fit the long body.', 'body', sweep(svl * a, svl * (a + 0.06), sg * 0.3, 0.3, (x) => rB(x) * 0.13, 24, 10), om(C.gonad));
     for (const [sg, a] of [[-1, 0.78], [1, 0.83]]) add('kidneys', 'Kidneys', 'Long and lobed, one in front of the other. They clean the blood; snakes save water by making a white paste (urates) instead of runny urine.', 'body', sweep(svl * a, svl * (a + 0.085), sg * 0.3, 0.3, (x, t) => rB(x) * 0.15 * (0.8 + 0.2 * Math.cos(t * 44)), 48, 10), om(C.kidney, { roughness: 0.45 }));
@@ -1105,8 +1093,8 @@ export function create(V) {
       const ins = mo.anchors.teeth.parent.parent; ins.visible = true; ins.children.forEach((c) => { if (c.userData.mpart === 'throat') c.visible = mo.t > 0.05; });
     }
     // the Head / Ribs / Body / Tail pills sit on their part of the body (v5.05: and hide while a part is picked)
-    // v5.09: every label is just a short name and a green See more pill (the explanation shows only when tapped).
-    // Tapping the dot, the name or See more picks that part (green outline + its card). The labels stack in rows
+    // v5.09: every label is just a short name and a green Show more pill (the explanation shows only when tapped).
+    // Tapping the dot, the name or Show more picks that part (green outline + its card). The labels stack in rows
     // ABOVE the snake (below it only when there is no room), each with a line down to a dot on its part, so they
     // never cover the snake. Zoomed out: Head, Ribs, Body and Tail; zoomed in: the parts in view.
     const lines = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); lines.setAttribute('class', 'sp3d-lines'); lines.setAttribute('aria-hidden', 'true'); labels.insertBefore(lines, labels.firstChild);
@@ -1117,7 +1105,7 @@ export function create(V) {
       tail: ['Tail', 'From the vent to the tip: backbone and muscles, but no ribs and no big organs.'],
     };
     function mkLabel(name, act) {
-      const e = el('div', 'sp3d-reg sp3d-lab'); e.appendChild(el('span', '', name)); const b = el('button', '', 'See more'); b.type = 'button'; b.setAttribute('aria-label', 'See more about: ' + name); e.appendChild(b); e.hidden = true; labels.appendChild(e);
+      const e = el('div', 'sp3d-reg sp3d-lab'); e.appendChild(el('span', '', name)); const b = el('button', '', 'Show more'); b.type = 'button'; b.setAttribute('aria-label', 'Show more about: ' + name); e.appendChild(b); e.hidden = true; labels.appendChild(e);
       const dot = el('div', 'sp3d-ldot'); dot.hidden = true; dot.title = name; labels.appendChild(dot);
       const go = (ev) => { ev.stopPropagation(); ev.preventDefault(); act(); };
       on(e, 'click', go); on(dot, 'click', go);
@@ -1300,6 +1288,9 @@ export function create(V) {
       return R.integrate(th, S.a, lerp(R.rc[S.a * 3], S.ax, e), lerp(R.rc[S.a * 3 + 2], S.az, e), ys);
     }
     function stepPose() {
+      // v5.12: Anatomy shows the snake as it is (no stretching out): nothing to animate
+      st.k = st.on ? 1 : 0; return false;
+      // eslint-disable-next-line no-unreachable
       const tn = now(), dt = st.t ? Math.min(0.1, (tn - st.t) / 1000) : 0; st.t = tn;
       if (!rig || show || slither) { st.k = 0; return false; }
       const goal = st.on ? 1 : 0; if (st.k === goal) return false;
@@ -1316,13 +1307,9 @@ export function create(V) {
         skinSeeThrough(true); setOrganVis(true); regions();
         const hint = stage.querySelector('.sp3d-hint'); if (hint) hint.classList.add('sp3d-hint-off');
         tip.hidden = false; tip.textContent = (window.innerWidth < 560 ? 'Tap' : 'Click') + ' any part to learn what it is. Scroll or pinch to zoom in close.';
-        // stretch out so the organs lie in a row, and look at it from the side
-        if (!st.pose || st.k === 0) { if (rig.active) rig.release(); st.pose = makeStretch(); if (st.undoProps) st.undoProps(); st.undoProps = clearProps(st.pose.pts, V.info.F.w0 * 3); }
-        if (!V.scaleOn()) {
-          const info = V.info, need = (st.pose.half * 1.28) / Math.tan(info.hf) + info.F.w0 * 4; // (room for the Head and Tail labels at the ends)
-          fx.zoomOut = Math.max(1, (need * 1.05) / info.dMax); fx.reach = st.pose.half;
-          st.view = { az: V.controls.st.az, el: 0.6, d: Math.max(need, info.dMin) }; V.view(st.view);
-        }
+        // v5.12: the snake stays as it is (Eduardo: "don't stretch the snake"); the whole snake in view, from a little higher
+        st.k = 1;
+        if (!V.scaleOn()) { st.view = { az: V.controls.st.az, el: 0.72, d: V.info.dFit * 1.1 }; V.view(st.view); }
       } else {
         clearSel(); skinSeeThrough(false); setOrganVis(false); st.regs.forEach((r) => { r.el.remove(); r.dot.remove(); }); st.regs = []; while (lines.firstChild) lines.removeChild(lines.firstChild); if (st.list) { st.list.remove(); st.list = null; }
         const mo = V.extras.mouth; if (mo && mo.anchors && mo.anchors.teeth && mo.anchors.teeth.parent) { const ins = mo.anchors.teeth.parent.parent; ins.visible = mo.t > 0.01; ins.children.forEach((c) => { c.visible = true; }); }
@@ -1342,7 +1329,6 @@ export function create(V) {
   // ================================================================= events
   on(bBite, 'click', () => { if (show && show.name === 'bite') { stopShow(); return; } startShow({ name: 'bite', btn: bBite }); bite(); });
   on(bEat, 'click', () => { if (show && show.name === 'eat') { stopShow(); return; } startShow({ name: 'eat', btn: bEat }); eat(); });
-  on(bEye, 'click', () => { if (show && show.name === 'eye') { stopShow(); return; } startShow({ name: 'eye', btn: bEye }); eyeShow(); });
   on(bSlither, 'click', () => { if (slither && !slither.stopping) stopSlither(true); else { exclusive('slither'); startSlither(); } });
   on(bAnat, 'click', () => { if (!anat) return; if (!anat.on) exclusive('anatomy'); anat.toggle(); });
   // v5.09: starting one thing turns off whatever else is on - except the ones that go together (Anatomy and Open mouth)
@@ -1382,9 +1368,9 @@ export function create(V) {
       layout();
       if (anat) anat.reset(); rig = null; anat = anatomyCtl(); show = null; slither = null; camBlend = null; fx.zoomOut = 1;
       const has = !!(V.extras && V.extras.mouth);
-      bEat.hidden = bBite.hidden = !has; bEye.hidden = !(V.extras && V.extras.eyes && V.extras.eyes.length);
+      bEat.hidden = bBite.hidden = !has;
       bAnat.hidden = !has; bAnat.setAttribute('aria-pressed', 'false');
-      for (const b of [bBite, bEat, bEye]) { b.disabled = false; b.removeAttribute('aria-pressed'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
+      for (const b of [bBite, bEat]) { b.disabled = false; b.removeAttribute('aria-pressed'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
       bSlither.setAttribute('aria-pressed', 'false'); bSlither.textContent = 'Slither';
       say(''); stepTag.hidden = true; tip.hidden = true;
     },
@@ -1404,7 +1390,8 @@ export function create(V) {
       return moving;
     },
     camera() { return camera(); },
-    moreButtons: [bEye, bFull],
+    camTarget() { return show && show.cLast ? show.cLast.tgt : null; },
+    moreButtons: [],
     exclusive: (k) => exclusive(k),
     after() { if (anat) anat.after(); },
     get locked() { return !!show; },
@@ -1416,7 +1403,7 @@ export function create(V) {
     resetView: () => !!(anat && anat.resetView()),
     zoomOut: 1, // > 1 while slithering: the camera may go further out to see the whole track
     anatOn: () => !!(anat && anat.on),
-    syncFull(f) { if (hdb) { if (f) bar.appendChild(hdb); else if (V.opts.head && V.opts.head.parentNode) V.opts.head.parentNode.insertBefore(hdb, V.opts.head.nextSibling); } bFull.innerHTML = (f ? ICON.exit : ICON.full) + '<span>' + (f ? 'Exit fullscreen' : 'Fullscreen') + '</span>'; bFull.setAttribute('aria-pressed', String(f)); },
+    syncFull(f) { if (hdb) { if (f) bar.appendChild(hdb); else if (V.opts.head && V.opts.head.parentNode) V.opts.head.parentNode.insertBefore(hdb, V.opts.head.nextSibling); } bFull.innerHTML = f ? ICON.exit : ICON.full; bFull.title = f ? 'Exit fullscreen' : 'Fullscreen'; bFull.setAttribute('aria-label', bFull.title); bFull.setAttribute('aria-pressed', String(f)); },
     // scale labels never sit on the snake: move a label (x, y = its anchor; the box hangs above it, centred) out of the way
     avoid(x, y, w, h, extra) {
       // v5.09: a label always sits ABOVE the snake (below it only when there is no room above), never on it

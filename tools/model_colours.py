@@ -77,6 +77,11 @@ def colours(cell, sid=""):
         # a hand holding the snake, or leaves around it: rarely the snake itself
         if 45 < L0 < 88 and 6 < A0 < 30 and 6 < B0 < 34: snake *= 0.12
         if A0 < -7 and B0 > 4 and not green_ok(sid): snake *= 0.15
+        # v5.12: deep shadow (crevices, the gap under a coil, a night background) and blown-out flash highlights or pale
+        # rock are rarely the snake's own colour: they were often taken for it (tan rattlesnakes came out black)
+        nm = NAMES.get(sid, "").lower()
+        if L0 < 20 and not re.search(r"black|dark|melan|nigr|ebon|coal|ink|night|obscur", nm + " " + sid): snake *= 0.5
+        if L0 > 88 and not re.search(r"white|pale|alb|snow|silver|ivory|pallid|bleach", nm + " " + sid): snake *= 0.4
         groups.append({"n": n, "snake": snake, "mshare": mshare, "rgb": rgb[m].mean(0), "L": cen[j][0], "lab": cen[j]})
     if not groups: return None
     cand = [g for g in groups if g["snake"] > 1.15 and g["mshare"] > 0.06]
