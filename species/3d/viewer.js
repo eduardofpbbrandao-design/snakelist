@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=527'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=527'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=528'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=528'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -67,9 +67,9 @@ function pchip(pts) {
 const PLANS = {
   viper:    { body: { ld: 15, neck: 0.42, peak: 0.45, vent: 0.62, tail: 0.10, xs: 1.32, bf: 0.72 }, head: { shape: 'tri', len: 0.065, w: 1.05, h: 0.58, snout: 0.5, jaw: 0.78, eyeX: 0.27, eyeA: 70, taper: 0.3, eye: 0.13, pupil: 'slit', brow: 0.10, canthus: 3.0 }, scales: { rows: 31, keel: 0.85, gloss: 0.12, aV: 0.76 }, pose: { kind: 'coil' } },
   pitviper: { body: { ld: 22, neck: 0.48, peak: 0.45, vent: 0.62, tail: 0.085, xs: 1.25, bf: 0.74 }, head: { shape: 'tri', len: 0.05, w: 1.0, h: 0.6, snout: 0.5, jaw: 0.8, eyeX: 0.3, eyeA: 70, taper: 0.3, eye: 0.12, pupil: 'slit', brow: 0.10, canthus: 3.0, pits: 'loreal' }, scales: { rows: 27, keel: 0.85, gloss: 0.12, aV: 0.76 }, pose: { kind: 'coil' } },
-  python:   { body: { ld: 30, neck: 0.55, peak: 0.5, vent: 0.62, tail: 0.12, xs: 1.18, bf: 0.76 }, head: { len: 0.035, w: 0.68, h: 0.6, snout: 0.62, jaw: 0.78, eyeX: 0.3, eyeA: 62, eye: 0.13, pupil: 'slit', brow: 0.03, canthus: 2.6, pits: 'labial' }, scales: { rows: 71, keel: 0, gloss: 0.5, aV: 0.8 }, pose: { kind: 'coil' } },
-  colubrid: { body: { ld: 36, neck: 0.78, peak: 0.42, vent: 0.62, tail: 0.24, xs: 1.08, bf: 0.8 }, head: { len: 0.035, w: 1.05, h: 0.68, snout: 0.7, jaw: 0.72, eyeX: 0.3, eyeA: 60, eye: 0.16, pupil: 'round', brow: 0.02, canthus: 2.4 }, scales: { rows: 19, keel: 0, gloss: 0.4, aV: 0.76 }, pose: { kind: 'wave' } },
-  elapid:   { body: { ld: 45, neck: 0.85, peak: 0.45, vent: 0.62, tail: 0.18, xs: 1.05, bf: 0.8 }, head: { len: 0.032, w: 0.95, h: 0.62, snout: 0.62, jaw: 0.75, eyeX: 0.3, eyeA: 60, eye: 0.15, pupil: 'round', brow: 0.02, canthus: 2.6 }, scales: { rows: 17, keel: 0, gloss: 0.45, aV: 0.76 }, pose: { kind: 'wave' } },
+  python:   { body: { ld: 30, neck: 0.55, peak: 0.5, vent: 0.62, tail: 0.12, xs: 1.18, bf: 0.76 }, head: { len: 0.035, w: 0.68, h: 0.6, snout: 0.62, jaw: 0.78, eyeX: 0.3, eyeA: 62, eye: 0.13, pupil: 'slit', brow: 0.03, canthus: 3.0, pits: 'labial' }, scales: { rows: 71, keel: 0, gloss: 0.5, aV: 0.8 }, pose: { kind: 'coil' } },
+  colubrid: { body: { ld: 36, neck: 0.78, peak: 0.42, vent: 0.62, tail: 0.24, xs: 1.08, bf: 0.8 }, head: { len: 0.035, w: 1.05, h: 0.68, snout: 0.7, jaw: 0.72, eyeX: 0.3, eyeA: 60, eye: 0.16, pupil: 'round', brow: 0.02, canthus: 2.8 }, scales: { rows: 19, keel: 0, gloss: 0.4, aV: 0.76 }, pose: { kind: 'wave' } },
+  elapid:   { body: { ld: 45, neck: 0.85, peak: 0.45, vent: 0.62, tail: 0.18, xs: 1.05, bf: 0.8 }, head: { len: 0.032, w: 0.95, h: 0.62, snout: 0.62, jaw: 0.75, eyeX: 0.3, eyeA: 60, eye: 0.15, pupil: 'round', brow: 0.02, canthus: 2.9 }, scales: { rows: 17, keel: 0, gloss: 0.45, aV: 0.76 }, pose: { kind: 'wave' } },
   blind:    { body: { ld: 42, neck: 1.0, peak: 0.5, vent: 0.97, tail: 0.022, xs: 1.0, bf: 0.9, blunt: true }, head: { shape: 'blunt', len: 0.022, w: 0.98, h: 0.8, snout: 0.9, jaw: 0.6, eyeX: 0.32, eyeA: 55, eye: 0.16, pupil: 'none', brow: 0, canthus: 2.0 }, scales: { rows: 20, keel: 0, gloss: 0.85, aV: 0.97, kind: 'cycloid' }, pose: { kind: 'wave' } },
   sea:      { body: { ld: 30, neck: 0.62, peak: 0.55, vent: 0.75, tail: 0.11, xs: 0.72, bf: 0.85, paddle: true }, head: { len: 0.045, w: 0.75, h: 0.72, snout: 0.6, jaw: 0.75, eyeX: 0.3, eyeA: 52, eye: 0.13, pupil: 'round', brow: 0, canthus: 2.2 }, scales: { rows: 47, keel: 0, gloss: 0.35, aV: 0.95, kind: 'juxta' }, pose: { kind: 'wave' } },
 };
@@ -230,8 +230,8 @@ function makeBodyFns(P, quality) {
   // step down to a thin neck), 'oval' (most other snakes: sides curve out quickly), 'blunt' (blind snakes)
   const shape = Hd.shape || 'oval', jaw = Hd.jaw, sn = Hd.snout;
   const mid = Hd.mid != null ? Hd.mid : shape === 'tri' ? lerp(sn, 1, (0.45 - 0.13) / (jaw - 0.13)) : shape === 'blunt' ? 1 : lerp(sn, 1, 0.72);
-  const back = Hd.back != null ? Hd.back : shape === 'blunt' ? 1 : lerp(0.92, 0.8, (hw - B.neck) / Math.max(0.01, hw)) * (shape === 'tri' ? 0.95 : 1);
-  const neckLen = Hd.neckLen != null ? Hd.neckLen : shape === 'tri' ? 0.32 : 0.5;
+  const back = Hd.back != null ? Hd.back : shape === 'blunt' ? 1 : lerp(0.92, 0.8, (hw - B.neck) / Math.max(0.01, hw)) * (shape === 'tri' ? 0.86 : 1); // v5.28: viper heads end in a sharp step to the neck
+  const neckLen = Hd.neckLen != null ? Hd.neckLen : shape === 'tri' ? 0.18 : 0.5;
   const tip = Hd.tip != null ? Hd.tip : shape === 'blunt' ? 0.75 : 0.55;
   const pts = [
     [0, 0], [Hl * 0.012, hw * sn * tip], [Hl * 0.045, hw * sn * lerp(tip, 1, 0.6)], [Hl * 0.13, hw * sn],
@@ -449,7 +449,7 @@ function buildBody(P, F, pose, quality) {
   if (Hd.pits === 'loreal') bumps.push({ x: F.Hl * 0.15, xs: F.Hl * 0.035, th: Math.PI * 0.5, ts: 0.09, amp: -0.07, mirror: true });
   // heat pits only where the species has them: one loreal pit (pit vipers), a row in the lip scales (pythons)
   if (Hd.pits === 'labial') for (let k = 0; k < 5; k++) bumps.push({ x: F.Hl * (0.03 + k * 0.06), xs: F.Hl * 0.016, th: Math.PI * (k ? 0.52 : 0.2), ts: 0.05, amp: -0.05, mirror: true });
-  bumps.push({ x: F.Hl * 0.05, xs: F.Hl * 0.022, th: Hd.nostrilA != null ? (Hd.nostrilA * Math.PI) / 180 : eyeA * 0.62, ts: 0.1, amp: -0.06, mirror: true }); // nostril (upward-facing in water snakes)
+  bumps.push({ x: F.Hl * 0.045, xs: F.Hl * 0.018, th: Hd.nostrilA != null ? (Hd.nostrilA * Math.PI) / 180 : Math.PI * 0.4, ts: 0.08, amp: -0.06, mirror: true }); // v5.28: on the side of the snout near the tip // nostril (upward-facing in water snakes)
   if (Hd.snoutUp) bumps.push({ x: F.Hl * 0.03, xs: F.Hl * 0.05, th: 0, ts: 0.7, amp: Hd.snoutUp });
   const nTop = (x) => lerp(Hd.canthus, 2.15, sstep(F.Hl * 0.8, F.Hl * 1.6, x));
   // v4.81: an eye socket - the skin dips gently where the eye sits, so the domed eye under its clear
@@ -471,7 +471,7 @@ function buildBody(P, F, pose, quality) {
   // the cross-section point at x and angle th (0 = top of the back, +/-pi = belly midline)
   const section = (x, th, noSock) => {
     const W = F.W(x), H = F.Hh(x), st = Math.sin(th), ct = Math.cos(th), head = x < F.Hl * 1.05;
-    const n = lerp(2.2, ct >= 0 ? nTop(x) : 3.0, sstep(0, F.Hl * 0.3, x)); // v5.17: the nose is a smooth round dome (no box edges meeting in a crease at the chin)
+    const n = lerp(Hd.shape === 'tri' ? 2.7 : 2.3, ct >= 0 ? nTop(x) : 3.0, sstep(0, F.Hl * (Hd.shape === 'tri' ? 0.12 : 0.2), x)); // v5.28: a squarer snout from the front in vipers // v5.17: the nose is a smooth round dome (no box edges meeting in a crease at the chin)
     let sx = Math.sign(st) * Math.abs(st) ** (2 / n), sy = Math.sign(ct) * Math.abs(ct) ** (2 / n);
     // v5.09: the lower jaw narrows smoothly from the side of the head towards the chin (it used to step in by 14% right at
     // the side line, which left a notch - a little triangle - at the front of the jaw under the snout)
@@ -703,7 +703,7 @@ function patternData(P, F, body, lat, quality, seed) {
   }
   // v5.27: on every head, the lip line (the edge of the mouth, upturned at the back in vipers - their "smile") with the
   // sutures between the lip scales, and the nostrils, dark, on the front sides of the snout (on top in water snakes)
-  const Hd = P.head, tri = Hd.shape === 'tri', mA0 = 0.56, xJ = Hl * (Hd.jaw || 0.75), nA = (Hd.nostrilA != null ? Hd.nostrilA : Hd.eyeA * 0.62) / 180, nX = Hl * 0.06, nR = Hl * 0.022;
+  const Hd = P.head, tri = Hd.shape === 'tri', mA0 = 0.56, xJ = Hl * (Hd.jaw || 0.75), nA = Hd.nostrilA != null ? Hd.nostrilA / 180 : 0.4, nX = Hl * 0.045, nR = Hl * 0.015;
   const nLab = Hd.labials || (P.plan === 'python' ? 13 : tri ? 11 : 8);
   for (let r = 0; r < Hp; r++) {
     const g = ((r + 0.5) / Hp) * body.gTotal, x = body.xOf(g); if (x > xJ * 1.08) break;
@@ -717,6 +717,9 @@ function patternData(P, F, body, lat, quality, seed) {
       if (aa < mA && aa > mA - 0.12) dk = Math.max(dk, 0.22 * sut * fadeOut * sstep(mA - 0.12, mA - 0.06, aa)); // sutures between upper lip scales
       const nd = Math.hypot((x - nX) / nR, (aa - nA) * circ / 2 / (nR * 0.8));                                  // the nostril
       dk = Math.max(dk, 0.85 * (1 - sstep(0.7, 1.05, nd)));
+      // the heat pits: one dark pit between eye and nostril (pit vipers), a row of slits in the lip scales (pythons, boas)
+      if (Hd.pits === 'loreal') { const pd = Math.hypot((x - Hl * 0.17) / (Hl * 0.03), (aa - 0.5) * circ / 2 / (Hl * 0.025)); dk = Math.max(dk, 0.9 * (1 - sstep(0.6, 1.0, pd))); }
+      if (Hd.pits === 'labial') for (let q = 1; q < 6; q++) { const pd = Math.hypot((x - Hl * (0.03 + q * 0.06)) / (Hl * 0.012), (aa - (mA - 0.035)) * circ / 2 / (Hl * 0.022)); dk = Math.max(dk, 0.8 * (1 - sstep(0.6, 1.0, pd))); }
       if (dk > 0.01) for (let q = 0; q < 3; q++) data[k + q] *= 1 - dk * 0.85;
     }
   }
