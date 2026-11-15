@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=512'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=512'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=517'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=517'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -427,7 +427,7 @@ function buildBody(P, F, pose, quality) {
   // the cross-section point at x and angle th (0 = top of the back, +/-pi = belly midline)
   const section = (x, th, noSock) => {
     const W = F.W(x), H = F.Hh(x), st = Math.sin(th), ct = Math.cos(th), head = x < F.Hl * 1.05;
-    const n = ct >= 0 ? nTop(x) : 3.0;
+    const n = lerp(2.2, ct >= 0 ? nTop(x) : 3.0, sstep(0, F.Hl * 0.3, x)); // v5.17: the nose is a smooth round dome (no box edges meeting in a crease at the chin)
     let sx = Math.sign(st) * Math.abs(st) ** (2 / n), sy = Math.sign(ct) * Math.abs(ct) ** (2 / n);
     // v5.09: the lower jaw narrows smoothly from the side of the head towards the chin (it used to step in by 14% right at
     // the side line, which left a notch - a little triangle - at the front of the jaw under the snout)
@@ -628,8 +628,17 @@ function patternData(P, F, body, lat, quality, seed) {
   // v5.12: the texture wraps round the body, so towards the snout tip (where the girth shrinks to nothing) every
   // marking bunches up into a dark star on the front of the head. The rounded tip (the rostral scale) takes the
   // colours the snout has a little further back instead: dorsal colour on top, the lip colour round the sides
-  let rT = 0; while (rT < Hp - 1 && body.xOf(((rT + 0.5) / Hp) * body.gTotal) < Hl * 0.14) rT++;
-  for (let r = 0; r < rT; r++) data.copyWithin(r * Wp * 4, rT * Wp * 4, (rT + 1) * Wp * 4);
+  // v5.17: and on the whole rounded nose the skin is one smooth colour field - dorsal colour on top, the lip and chin colour
+  // below, meeting in a clean lip line across the front - with no per-scale cells (they fanned out into a star there)
+  const xN0 = Hl * 0.1, xN1 = Hl * 0.26, lipC = mixc(latc, bel, 0.55);
+  for (let r = 0; r < Hp; r++) {
+    const x = body.xOf(((r + 0.5) / Hp) * body.gTotal); if (x >= xN1) break;
+    const w = x <= xN0 ? 1 : 1 - sstep(xN0, xN1, x);
+    for (let c = 0; c < Wp; c++) {
+      const aa = Math.abs(((c + 0.5) / Wp) * 2 - 1), base = mixc(mixc(dors, latc, sstep(0.18, 0.5, aa)), lipC, sstep(0.52, 0.62, aa)), k = (r * Wp + c) * 4;
+      for (let q = 0; q < 3; q++) data[k + q] = data[k + q] + (base[q] - data[k + q]) * w;
+    }
+  }
   return { data, Wp, Hp };
 }
 
@@ -1839,11 +1848,11 @@ export function mount(host, opts) {
     // from true distances on the skin, so they keep their shape right to the tip of the snout (the body's scale
     // texture used to stretch into stripes there); they fade out where they would be smaller than a pixel
     const qS = (TAU * F.w0 * 0.92) / Math.max(12, S.rows) * (P.head.scaleK || (P.plan === 'python' ? 0.9 : 0.62));
-    const hsU = { uTip: { value: F.Hl * 0.22 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 } };
+    const hsU = { uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 } };
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, hsU);
       sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;\nattribute vec3 aMet;\nvarying vec3 vMet;').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead; vMet = aMet;')
-        .replace('#include <common>\nattribute float aHead;', '#include <common>\nuniform float uTip;\nattribute float aHead;').replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z) * smoothstep(0.0, uTip, aMet.y)');
+        .replace('#include <common>\nattribute float aHead;', '#include <common>\nuniform float uTip;\nattribute float aHead;').replace('#include <displacementmap_vertex>', THREE.ShaderChunk.displacementmap_vertex.replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z) * smoothstep(uTip * 0.45, uTip, aMet.y)'));
       sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
 varying float vHead; varying vec3 vMet; uniform vec2 uHS; uniform float uKeel; uniform float uCavH; uniform float uTip;
 float slScale(vec2 m) {
@@ -1854,7 +1863,7 @@ float slScale(vec2 m) {
   return h + (d < 1.0 ? uKeel * 0.32 * exp(-pow(l.x / 0.09, 2.0)) * smoothstep(-0.45, 0.25, l.y) : 0.0);
 }`)
         .replace('#include <map_fragment>', `#include <map_fragment>
- float slTip = smoothstep(0.0, uTip, vMet.y); /* v5.12: the rounded snout tip (the rostral scale) is smooth skin */
+ float slTip = smoothstep(uTip * 0.45, uTip, vMet.y); /* v5.12: the rounded snout tip (the rostral scale) is smooth skin */
  vec2 slM = vMet.xy * uHS; float slFade = vMet.z * slTip * (1.0 - smoothstep(0.3, 0.75, length(fwidth(slM))));
  float slH = 0.0, slDa = 0.0, slDx = 0.0;
  if (slFade > 0.001) { slH = slScale(slM); slDa = (slScale(slM + vec2(0.03, 0.0)) - slScale(slM - vec2(0.03, 0.0))) / 0.06; slDx = (slScale(slM + vec2(0.0, 0.03)) - slScale(slM - vec2(0.0, 0.03))) / 0.06;
@@ -1863,10 +1872,10 @@ float slScale(vec2 m) {
  diffuseColor.rgb *= mix(1.0, texture2D(aoMap, vAoMapUv).r, uCavH * (1.0 - vHead * 0.9) * (1.0 - vMet.z) * slTip);
 #endif`)
         .replace('#include <aomap_fragment>', THREE.ShaderChunk.aomap_fragment.replace('aoMapIntensity + 1.0', 'aoMapIntensity * slTip + 1.0'))
-        .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n roughnessFactor = mix(roughnessFactor, roughness * (0.9 + 0.25 * slH), vMet.z);')
-        .replace('mapN.xy *= normalScale;', 'mapN.xy *= normalScale * (1.0 - vHead * 0.88) * slTip;\n mapN = normalize(mix(mapN, normalize(vec3(-slDa * 0.55, -slDx * 0.55, 1.0)), vMet.z));');
+        .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n roughnessFactor = mix(roughnessFactor, roughness * (0.9 + 0.25 * slH), vMet.z); roughnessFactor = mix(roughness, roughnessFactor, slTip);')
+        .replace('#include <normal_fragment_maps>', THREE.ShaderChunk.normal_fragment_maps.replace('mapN.xy *= normalScale;', 'mapN.xy *= normalScale * (1.0 - vHead * 0.88) * slTip;\n mapN = normalize(mix(mapN, normalize(vec3(-slDa * 0.55, -slDx * 0.55, 1.0)), vMet.z));\n mapN = normalize(mix(vec3(0.0, 0.0, 1.0), mapN, smoothstep(uTip * 0.5, uTip * 1.6, vMet.y))); /* v5.17: the scale relief fans out into a star on the rounded nose: none there */'));
     };
-    mat.customProgramCacheKey = () => 'sl-skin-v512';
+    mat.customProgramCacheKey = () => 'sl-skin-v517';
     const mesh = new THREE.Mesh(body.geo, mat); mesh.castShadow = mesh.receiveShadow = true;
     if (hiPat) {
       const sceneNow = ctx.scene, swap = (d) => { if (!alive || ctx.scene !== sceneNow) return; const t = patternTex(d); t.anisotropy = pat.anisotropy; mat.map = t; pat.dispose(); track(t); dirty = true; kick(); };
