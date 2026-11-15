@@ -300,7 +300,16 @@ CURATED = {
     # v5.25: from the round-B photo checks
     "pantherophis-bairdi": {"d": "#8a7a62", "c": "#3e3428", "b": "#e6d8b8", "t": "stripe", "s": "arid"},
     "masticophis-taeniatus": {"d": "#2a2a26", "lat": "#33312a", "c": "#e8e2c8", "b": "#e8dcc8", "t": "stripe"},
-    "calamaria-yunnanensis": {"d": "#18171a", "lat": "#1a191c", "b": "#e0782a", "t": "plain", "ls": ["#e0782a", 0.62, 0.05]},
+    "calamaria-yunnanensis": {"d": "#18171a", "lat": "#1a191c", "b": "#e0782a", "t": "plain", "ls": ["#e0782a", 0.56, 0.09]},
+    # v5.31: species whose photos showed the generated pattern was wrong
+    "bungarus-fasciatus": {"d": "#dcc66e", "lat": "#dcc66e", "c": "#141313", "b": "#ead9a0", "t": "band", "n": 36, "hc": "#161514", "hcx": 0.85},  # black and yellow bands
+    "trimetopon-slevini": {"d": "#7a4a2e", "lat": "#6e4430", "c": "#3a2418", "t": "stripe"},
+    "amastridium-sapperi": {"d": "#1d1b19", "lat": "#211e1b", "c": "#121110", "t": "plain", "hc": "#8e4426", "hcx": 0.9},  # black, rusty head
+    "lygophis-elegantissimus": {"d": "#1f1c1a", "c": "#e6dcc4", "t": "stripe", "ls": ["#c4442c", 0.26, 0.045]},
+    "limaformosa-capensis": {"d": "#7a7470", "lat": "#8e8280", "c": "#3c3a38", "t": "net", "vs": ["#d9d5ca", 0.04]},  # grey, pale keeled spine line
+    "epictia-tricolor": {"d": "#5a3a2a", "c": "#e0a850", "t": "stripe"},
+    "philodryas-patagoniensis": {"d": "#9a7a48", "c": "#4a3a22", "t": "net"},
+    "hemirhagerrhis-nototaenia": {"d": "#c4c6bf", "lat": "#c9cbc4", "c": "#3a3632", "t": "speckle"},  # mopane snake: pale speckles
     "atretium-schistosum": {"d": "#5e6a3e", "lat": "#66703f", "b": "#e0b850", "t": "plain"},
     "rhadinella-kinkelini": {"d": "#8a4a32", "lat": "#8e4e36", "b": "#e8c8a8", "t": "plain"},
     "ninia-psephota": {"d": "#2a2826", "lat": "#2e2c2a", "b": "#d8cfc0", "t": "plain"},
