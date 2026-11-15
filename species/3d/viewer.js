@@ -641,7 +641,7 @@ function patternData(P, F, body, lat, quality, seed) {
   const bellyA = C.bellyA || 0.74, bs = C.bellySharp || 0.06, mott = C.mottle, vari = C.var;
   const layers = (P.pattern || []).map((l) => prepLayer(l, F, body));
   for (const Ly of layers) if (Ly.type === 'shields') { Ly.segs = shieldSegs(P.head, Ly); Ly.bcol = Ly.barColor ? hex(Ly.barColor) : Ly.col; }
-  const quant = P.quant != null ? P.quant : 0.5; // v5.29: pattern edges follow the scales (a blotch edge is made of whole scales, stepped)
+  const quant = P.quant != null ? P.quant : 0.32; // v5.29: pattern edges follow the scales (a blotch edge is made of whole scales, stepped)
   const data = new Uint8ClampedArray(Wp * Hp * 4);
   const L = F.L, Hl = F.Hl;
   const tHead = (Hl * 1.15) / L;
