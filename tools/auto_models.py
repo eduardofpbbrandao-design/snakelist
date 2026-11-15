@@ -68,6 +68,27 @@ FAM_LEN = {"Typhlopidae": 0.25, "Leptotyphlopidae": 0.18, "Anomalepididae": 0.2,
            "Madtsoiidae": 4.0, "Simoliophiidae": 1.0, "Palaeophiidae": 3.0, "Parviraptoridae": 0.3, "Nigerophiidae": 0.8, "Dinilysiidae": 2.0,
            "Lapparentophiidae": 0.8}
 TYPE_LEN = {"Colubrid": 0.8, "Other": 0.6, "Pit Viper": 0.9, "Elapid": 1.0, "Watersnake": 0.8, "Viper": 0.6, "Boa": 1.5, "Sea Snake": 1.1, "Python": 2.5, "Cobra": 1.6}
+# v5.18: dorsal scale rows at mid-body (typical for the genus) - this sets the size of the scales against the body
+GENUS_ROWS = {
+    "opheodrys": 15, "micrurus": 15, "micruroides": 15, "calliophis": 13, "sinomicrurus": 13, "leptomicrurus": 15, "tantilla": 15, "sonora": 15, "carphophis": 13,
+    "diadophis": 15, "storeria": 15, "virginia": 17, "calamaria": 13, "pseudorabdion": 15, "geophis": 15, "atractus": 17, "ninia": 19, "coluber": 17,
+    "masticophis": 17, "dendroaspis": 19, "dendrelaphis": 15, "ahaetulla": 15, "chrysopelea": 17, "oxybelis": 17, "leptophis": 15, "philothamnus": 15,
+    "dispholidus": 19, "thelotornis": 19, "imantodes": 17, "dipsas": 15, "sibon": 15, "chironius": 12, "drymobius": 17, "dendrophidion": 17,
+    "thamnophis": 19, "natrix": 19, "nerodia": 25, "regina": 19, "hebius": 19, "rhabdophis": 19, "fowlea": 19, "lycodon": 17, "oligodon": 17,
+    "boiga": 21, "pantherophis": 27, "elaphe": 25, "zamenis": 23, "orthriophis": 25, "euprepiophis": 21, "gonyosoma": 21, "ptyas": 17, "lampropeltis": 23,
+    "pituophis": 29, "arizona": 29, "heterodon": 25, "coronella": 19, "hierophis": 19, "platyceps": 19, "malpolon": 19, "psammophis": 17, "dasypeltis": 25,
+    "boaedon": 27, "naja": 21, "ophiophagus": 15, "bungarus": 15, "pseudechis": 17, "pseudonaja": 17, "oxyuranus": 23, "notechis": 17, "acanthophis": 21,
+    "demansia": 15, "hoplocephalus": 21, "laticauda": 23, "hydrophis": 37, "aipysurus": 19, "emydocephalus": 17,
+    "crotalus": 25, "sistrurus": 23, "agkistrodon": 23, "bothrops": 27, "bothriechis": 21, "lachesis": 35, "trimeresurus": 21, "protobothrops": 25,
+    "gloydius": 21, "calloselasma": 21, "deinagkistrodon": 21, "craspedocephalus": 19, "tropidolaemus": 25, "vipera": 21, "macrovipera": 25,
+    "daboia": 29, "bitis": 33, "echis": 29, "cerastes": 31, "atheris": 21, "causus": 19, "pseudocerastes": 25, "montivipera": 23, "azemiops": 17,
+    "python": 65, "malayopython": 71, "morelia": 50, "simalia": 45, "liasis": 50, "antaresia": 41, "aspidites": 55, "leiopython": 45,
+    "boa": 75, "eunectes": 60, "epicrates": 47, "chilabothrus": 45, "corallus": 50, "eryx": 45, "charina": 45, "lichanura": 41,
+    "candoia": 35, "xenopeltis": 15, "cylindrophis": 21, "anilius": 21, "uropeltis": 17, "rhinophis": 17,
+}
+GENUS_KIND = {"acrochordus": ("juxta", 140), "xenopeltis": ("cycloid", 15)}
+
+
 KEELED_GENERA = {"natrix", "nerodia", "thamnophis", "pituophis", "regina", "storeria", "virginia", "rhabdophis", "hebius", "amphiesma", "fowlea", "xenochrophis",
                  "sinonatrix", "tropidonophis", "atretium", "macropisthodon", "dasypeltis", "heterodon", "arizona", "drymarchon", "spilotes", "zamenis",
                  "elaphe", "pantherophis", "lampropeltis", "opisthotropis", "afronatrix", "limnophis", "hydraethiops", "grayia", "acrochordus", "helicops"}
@@ -238,13 +259,19 @@ CURATED = {
     "hierophis-viridiflavus": {"d": "#1b1d16", "lat": "#1f2118", "c": "#c9c24a", "b": "#d8d4a0", "t": "plain", "cx": {"speckle": {"p": 0.5, "color": "#c9c24a", "k": 0.75}}, "h": {"iris": "#7a6a3a", "irisInner": "#b49a50"}},
     "calloselasma-rhodostoma": {"d": "#b9805a", "c": "#5a2e1e", "t": "hourglass", "vs": ["#4a2618", 0.03], "h": {"iris": "#a07040", "irisInner": "#c8985a"}},
     "crotalus-scutulatus": {"d": "#a39a6c", "c": "#5a4a32", "b": "#e2dcc0", "t": "diamond"},
-    "crotalus-viridis": {"d": "#8d8a60", "c": "#4a3d26", "b": "#e2dcc0", "t": "diamond"},
-    "crotalus-oreganus": {"d": "#7a6650", "c": "#3e3024", "b": "#e2d8c4", "t": "diamond"},
+    "crotalus-viridis": {"d": "#a8a07a", "c": "#5a4630", "b": "#e2dcc0", "t": "blotch", "n": 40},
+    "crotalus-oreganus": {"d": "#8a7660", "c": "#3e3024", "b": "#e2d8c4", "t": "blotch", "n": 36},
     "tropidolaemus-wagleri": {"d": "#2f8a2a", "lat": "#3a942e", "c": "#e6dc5a", "b": "#c8d880", "t": "band", "n": 36, "h": {"iris": "#c8b040", "irisInner": "#e6d070"}},
-    "pituophis-catenifer": {"d": "#d0b47a", "lat": "#c9ad75", "b": "#efe2c2", "c": "#3b2a1a", "t": "blotch", "n": 50, "k": 1, "s": "grass", "h": {"iris": "#b08850", "irisInner": "#d0aa70"}},
     "sistrurus-miliarius": {"d": "#8a7a6a", "c": "#2a2420", "b": "#e2d8c8", "t": "spot", "vs": ["#c26a3a", 0.035]},
     "bothrops-atrox": {"d": "#8a7a5a", "c": "#3a2e20", "b": "#ddd2b6"},
     "chrysopelea-ornata": {"d": "#8fb03a", "lat": "#98b844", "c": "#141a0c", "b": "#d8e0a0", "t": "band", "n": 60, "cx": {"scaleEdge": {"color": "#141a0c", "k": 0.7}}},
+    # v5.18: iconic species checked against their photos
+    "heterodon-nasicus": {"d": "#b89a72", "c": "#6a4a32", "b": "#2a2622", "t": "blotch", "n": 40, "L": 0.55, "s": "grass", "bx": {"ld": 16}},
+    "pantherophis-alleghaniensis": {"d": "#1f201f", "lat": "#252524", "c": "#3a3a36", "b": "#d8d2c0", "t": "plain", "L": 1.4, "s": "forest", "cx": {"speckle": {"p": 0.18, "color": "#b8b2a2", "k": 0.45}}, "sx": {"keel": 0.25, "gloss": 0.55}},
+    "elaphe-dione": {"d": "#8a8270", "c": "#3e3428", "b": "#d6d0bc", "t": "blotch", "n": 50, "L": 1.0, "s": "grass", "vs": ["#b8ae96", 0.03]},
+    "acrochordus-javanicus": {"d": "#3a362e", "lat": "#403a30", "c": "#5a5444", "b": "#6a6250", "t": "speckle", "L": 1.8, "s": "riverbank", "bx": {"ld": 16, "neck": 0.85}},
+    "acrochordus-granulatus": {"d": "#4a4a42", "c": "#d2ccb4", "b": "#bab49e", "t": "band", "n": 40, "L": 1.0, "s": "riverbank"},
+    "pituophis-catenifer": {"d": "#cdb27a", "lat": "#c7ab76", "b": "#efe2c2", "c": "#5a3e26", "t": "blotch", "n": 55, "k": 1, "s": "grass", "h": {"iris": "#b08850", "irisInner": "#d0aa70"}},
     # v5.16: black snakes whose photos were read as grey or brown (night shots, pale ground, a hand)
     "azemiops-feae": {"d": "#17171d", "lat": "#1b1b22", "b": "#3a3a44", "c": "#e8e4da", "t": "plain", "pat": [{"type": "band", "t": [0.1, 0.97], "count": 14, "len": 0.1, "color": "#e3a25c", "warp": 0.1, "jit": 0.02}], "L": 0.7, "s": "forest", "hc": "#d9873c", "hcx": 0.55, "h": {"irisDark": 1, "pupil": "round", "iris": "#1a1614", "irisInner": "#2a2420"}},
     "hebius-taronensis": {"d": "#19191a", "lat": "#1c1c1c", "b": "#c8c4b4", "t": "plain", "L": 0.6, "lip": "#d8d4c4"},
@@ -337,6 +364,8 @@ CURATED = {
 
 # (Gaboon viper: the purple was too strong and the head too pale; a darker, warmer iris)
 HAND_FIXES = {
+    # v5.18: eastern milksnake - wider red-brown saddles edged in black on a grey-tan ground
+    "lampropeltis-triangulum": [(("pattern", 0, "wid"), 0.46), (("pattern", 0, "color"), "#8e3a26"), (("pattern", 1, "color"), "#8e3a26"), (("colors", "dorsal"), "#9d9686")],
     # v5.16: bushmaster - separate dark rhomboid blotches (pale centres) on a pinkish tan ground; they had merged into bands
     "lachesis-muta": [(("colors", "dorsal"), "#c9a37e"), (("colors", "lateral"), "#c8a27c"), (("pattern", 0, "wid"), 0.3), (("pattern", 0, "len"), 0.92),
                       (("pattern", 0, "count"), 24), (("pattern", 0, "warp"), 0.15), (("pattern", 0, "inner", "r"), 0.38), (("pattern", 0, "inner", "color"), "#9a7652")],
@@ -419,6 +448,9 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
             a.update(CURATED[c["id"]]); a["x"] = a.get("x", "").replace("g", "").replace("l", "" if "L" in CURATED[c["id"]] else "l")
             if not a["x"]: a.pop("x")
         if c["family"] == "Uropeltidae" or c["family"] == "Cylindrophiidae" or c["family"] == "Aniliidae": a["o"] = 1  # short blunt tail
+        # v5.18: the real number of scale rows (so scales are the right size), and granular or glassy skin where the genus has it
+        if g in GENUS_ROWS and "rows" not in (a.get("sx") or {}): a["sx"] = dict(a.get("sx") or {}, rows=GENUS_ROWS[g])
+        if g in GENUS_KIND: a["sx"] = dict(a.get("sx") or {}, kind=GENUS_KIND[g][0], rows=GENUS_KIND[g][1], aV=1.0 if g == "acrochordus" else (a.get("sx") or {}).get("aV", 0.8))
         if g == "acanthophis" and "bx" not in a: a["bx"] = {"ld": 14, "neck": 0.5, "tail": 0.11}; a.setdefault("h", {}).setdefault("pupil", "slit")  # v5.12: death adders are short and stout
         out[c["id"]] = {"name": c["sci"] if c["is_sci"] else c["name"], "auto": a}
     return out

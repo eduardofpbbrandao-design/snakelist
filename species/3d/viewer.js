@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=517'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=517'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=518'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=518'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -621,6 +621,13 @@ function patternData(P, F, body, lat, quality, seed) {
       const sv = 1 + vari * (hash1(cl.id, seed + 5) - 0.5) * 2 * (0.35 + 0.65 * cl.w) * sstep(Hl * 0.95, Hl * 1.15, x); // (v4.81: none on the head, where the body's scale cells would show as stripes)
       col = [col[0] * sv, col[1] * sv, col[2] * sv];
       if (C.scaleEdge && !cl.v && x > Hl * 1.05) col = mixc(col, hex(C.scaleEdge.color), (C.scaleEdge.k || 0.8) * Math.pow(1 - cl.w, 1.6));
+      // v5.18: every scale reads as a scale - a soft darker rim round each dorsal scale (the skin between scales), and the
+      // edge of each wide belly scute; snakes with granular or glassy skin (file snakes, blind snakes) much less
+      else if (x > Hl * 1.05 && !C.noEdge) {
+        const kE = (P.scales.kind === 'juxta' || P.scales.kind === 'cycloid' ? 0.12 : 0.3) * (C.edgeK != null ? C.edgeK : 1);
+        if (!cl.v) col = mixc(col, [col[0] * 0.5, col[1] * 0.5, col[2] * 0.5], kE * Math.pow(1 - cl.w, 2.2));
+        else { const vy = Math.abs(g - cl.gc) / lat.Pt; col = mixc(col, [col[0] * 0.55, col[1] * 0.55, col[2] * 0.55], kE * 1.4 * Math.exp(-(((0.5 - vy) / 0.07) ** 2))); }
+      }
       if (C.speckle && !cl.v && x > Hl) { const hs = hash1(cl.id, seed + 11); if (hs < C.speckle.p) col = mixc(col, hex(C.speckle.color), (C.speckle.k || 0.6) * (0.6 + hs / C.speckle.p * 0.4) * Math.sqrt(cl.w)); }
       const k = (r * Wp + c) * 4; data[k] = col[0]; data[k + 1] = col[1]; data[k + 2] = col[2]; data[k + 3] = 255;
     }
