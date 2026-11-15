@@ -145,8 +145,18 @@ def pattern_of(c, plan, con, green=False):
     if g in ("crotalus", "sistrurus"):
         if c["id"] in ("crotalus-adamanteus", "crotalus-atrox", "crotalus-ruber", "crotalus-scutulatus", "crotalus-tortugensis", "crotalus-exsul", "crotalus-catalinensis") or re.search(r"diamond", n): return "diamond"
         if c["id"] in ("crotalus-horridus",): return "chevron"
+        # v5.21: the banded montane rattlesnakes, the speckled ones, the rest blotched
+        if c["id"].split("-")[1] in ("lepidus", "klauberi", "morulus", "transversus", "aquilus", "pusillus", "tancitarensis", "intermedius", "pricei", "willardi", "triseriatus", "ravus"): return "xband"
+        if c["id"].split("-")[1] in ("mitchellii", "stephensi", "pyrrhus", "angelensis", "tigris", "polisi"): return "xband"  # (with speckling, added below)
         return "rblotch"
     if g == "daboia": return "daboia"
+    # v5.21: more groups, from photos
+    if g in ("pantherophis", "zamenis", "pseudelaphe") or (g == "elaphe" and not re.search(r"strip|lined|four", n)): return "esaddle"
+    if g in ("epicrates",): return "rings"
+    if g in ("boa",): return "boa"
+    if g == "eunectes": return "ocelli"
+    if g in ("dipsas", "sibon", "tropidodipsas", "imantodes", "acanthophis", "causus") and not green: return "xband"
+    if g == "atractus" and not re.search(r"band|ring|spot|strip|line", n): return "xband" if con >= 0.35 else "plain"  # ground snakes: plain, or crossbanded when the photo shows contrast
     if g == "echis": return "echis"
     if g == "thamnophis": return "garter"
     if g == "nerodia" and not green: return "band"
@@ -481,6 +491,7 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
             if a["t"] in ("speckle", "blotch", "spot"): a["t"] = "plain"
         if g == "dendrelaphis" and not re.search(r"green", nm): a["d"] = "#8a6a3e"; a["lat"] = "#8e6e42"; a["t"] = "plain"  # bronzebacks are bronze-brown
         if g == "dendrelaphis": a.setdefault("ls", ["#141210", 0.5, 0.045]); a["pat"] = a.get("pat", []) + [{"type": "stripe", "t": [0.04, 1], "a": 0.62, "mirror": True, "wid": 0.025, "color": "#ece2b8", "aa": 0.35}]
+        if g == "crotalus" and c["id"].split("-")[1] in ("mitchellii", "stephensi", "pyrrhus", "angelensis", "tigris", "polisi"): a["cx"] = dict(a.get("cx") or {}, speckle={"p": 0.3, "color": tone(d, 0.55), "k": 0.6}, mottle=0.14)
         if g == "tantilla": a.setdefault("hc", "#1a1614"); a.setdefault("hcx", 1.0)  # the black head of centipede snakes
         if g == "oligodon" and a["t"] == "speckle": a["t"] = "saddle"
         if g in ("typhlops", "afrotyphlops", "indotyphlops", "amerotyphlops", "letheobia", "anilios", "ramphotyphlops", "argyrophis", "madatyphlops", "antillotyphlops", "xerotyphlops", "myriopholis", "leptotyphlops", "epictia", "trilepida", "liotyphlops", "gerrhopilus") and a["t"] not in ("stripe",): a["t"] = "plain"

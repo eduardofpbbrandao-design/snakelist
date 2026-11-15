@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=520'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=520'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=521'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=521'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -131,6 +131,19 @@ export function autoProfile(p) {
       T({ type: 'stripe', t: [0.04, 1], a: 0, wid: 0.05, color: gs, aa: 0.3 });
       T({ type: 'stripe', t: [0.04, 1], a: 0.6, mirror: true, wid: 0.055, color: gs, aa: 0.3, alpha: 0.9 }); }
       T({ type: 'blotch', count: Math.round(n * 2), a: 0.3, mirror: true, alt: true, wid: 0.06, len: 0.32, shape: 'rect', color: shade(d, 0.45), alpha: 0.7 }); break;
+    // v5.21: saddles with a black border (rat snakes, corn and fox snakes), rings with paler centres (rainbow boas),
+    // boa saddles (dark on the back, oval on the flanks), and narrow crossbands (snail-eaters, death adders)
+    case 'esaddle':
+      T({ type: 'blotch', count: Math.round(n * 0.85), a: 0, wid: 0.36, len: 0.6, shape: 'saddle', color: c, edgeColor: shade(c, 0.35), edge: 0.14, warp: 0.35, jit: 0.08 });
+      T({ type: 'blotch', count: Math.round(n * 0.85), phase: 0.5, a: 0.6, mirror: true, wid: 0.1, len: 0.42, shape: 'round', color: c, edgeColor: shade(c, 0.35), edge: 0.18, alpha: 0.85 }); break;
+    case 'rings':
+      T({ type: 'blotch', count: Math.round(n * 0.9), a: 0, wid: 0.2, len: 0.66, shape: 'round', color: shade(c, 0.35), inner: { r: 0.62, color: d }, warp: 0.2, jit: 0.05 });
+      T({ type: 'blotch', count: Math.round(n * 0.9), phase: 0.5, a: 0.48, mirror: true, wid: 0.14, len: 0.52, shape: 'round', color: shade(c, 0.35), inner: { r: 0.55, color: pale }, warp: 0.2, jit: 0.05 }); break;
+    case 'boa':
+      T({ type: 'blotch', t: [0.06, 0.7], count: Math.round(n * 0.55), a: 0, wid: 0.4, len: 0.55, shape: 'saddle', color: c, edgeColor: pale, edge: 0.12, edgeOut: true, warp: 0.4 });
+      T({ type: 'blotch', t: [0.7, 0.98], count: 6, a: 0, wid: 0.5, len: 0.6, shape: 'saddle', color: '#7a2e22', edgeColor: '#e6d8b8', edge: 0.12, edgeOut: true, warp: 0.3 });
+      T({ type: 'blotch', count: Math.round(n * 0.6), phase: 0.5, a: 0.6, mirror: true, wid: 0.12, len: 0.45, shape: 'diamond', color: c, warp: 0.4 }); break;
+    case 'xband': T({ type: 'band', count: Math.round(n * 0.75), len: 0.32, color: c, warp: 0.35, jit: 0.06, dorsalWide: 0.25 }); break;
     case 'hourglass2': T({ type: 'blotch', count: Math.round(n * 0.5), a: 0, wid: 0.95, len: 0.75, shape: 'hourglass2', color: c, edgeColor: shade(c, 0.7), edge: 0.12, warp: 0.25, jit: 0.06 }); break;
     case 'chain': T({ type: 'chain', count: Math.round(n * 0.6), na: 1.6, wid: 0.1, color: c, warp: 0.25 }); break;
     case 'net': T({ type: 'net', count: Math.round(n * 0.8), na: 2.0, wid: 0.09, color: c, edgeColor: pale, edge: 0.5, warp: 0.3 }); break;
