@@ -41,7 +41,7 @@ def site_header(rel, here=""):
 def site_footer(rel, note=""):
     return ('<footer class="sl-foot"><p><a class="sl-flogo" href="%s">SnakeList</a> &middot; made by <a href="%sabout.html">Eduardo Brandao</a></p>'
             '<p class="sl-flinks"><a href="%s">Open the app</a><a href="%sspecies/">All species</a><a href="%sinstall.html">Install app</a>'
-            '<a href="%sabout-snakelist.html">About SnakeList</a><a href="%sabout.html">About me</a><a href="%sprivacy.html">Privacy</a><a href="%sterms.html">Terms</a><a href="%sspecies/photo-credits.html">Photo credits</a></p>%s</footer>') % (
+            '<a href="%sabout-snakelist.html">About SnakeList</a><a href="%sabout.html">About creator</a><a href="%sprivacy.html">Privacy</a><a href="%sterms.html">Terms</a><a href="%sspecies/photo-credits.html">Photo credits</a></p>%s</footer>') % (
         rel, rel, rel, rel, rel, rel, rel, rel, rel, rel, ('<p class="sl-fnote">%s</p>' % note) if note else "")
 # Creative Commons licences, each linked to its official deed (the attribution the licences ask for)
 def lic_url(lic):
@@ -1206,7 +1206,7 @@ def credits_page(cards, esc):
 <p>Every snake photo on SnakeList was taken by the person named below and is used under the Creative Commons licence <em>they</em> chose for it. SnakeList is free, has no ads and makes no money from these photos.</p>
 <p>To fit SnakeList, each photo is <b>cropped and resized</b>; nothing else about it is changed. The &ldquo;original&rdquo; link opens the photo as the photographer shared it (on iNaturalist, where each of these photos has its own page and licence).</p>
 <p>Photos marked &ldquo;No Derivatives&rdquo; (ND) are not used, because cropping counts as changing a photo. The %s fossil snakes are shown with SnakeList&rsquo;s own illustrations, as no photo of them can exist.</p>
-<p class="sp-note">If you took one of these photos and want the credit changed or the photo removed, contact SnakeList through the <a href="../about.html">About me</a> page and it will be done.</p>
+<p class="sp-note">If you took one of these photos and want the credit changed or the photo removed, contact SnakeList through the <a href="../about.html">About creator</a> page and it will be done.</p>
 <h2>Snake photos (%s)</h2>
 <p><label for="pc-q">Find a snake or photographer</label><br><input id="pc-q" class="pc-q" type="search" autocomplete="off"></p>
 <div class="pc-wrap"><table class="pc" id="pc-t"><thead><tr><th>Snake</th><th>Photographer</th><th>Licence</th><th>Photo</th></tr></thead><tbody>%s</tbody></table></div>
