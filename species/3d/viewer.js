@@ -8,7 +8,7 @@
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
 import * as NATURE from './nature.js?r=536'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=543'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as EXTRA from './extras.js?r=544'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -1975,7 +1975,8 @@ export function mount(host, opts) {
   const gx = P.generated, gf = gx != null && gx.includes('f');
   const recon = el('p', 'sp3d-recon', gx == null ? 'Representative reconstruction - not a photograph of a real encounter.'
     : gf ? 'Reconstruction of how it may have looked: body shape from its family and size from its fossils. Colours are a guess - fossils keep no colour.'
-    : 'Generated model: body shape from its family' + (gx.includes('g') ? ', colours a guess for its group (no photo yet).' : ', colours from its SnakeList photo.') + ' Not a scan of a real snake.');
+    : ''); // v5.44: no "Generated model..." note under the generated snakes
+  if (!recon.textContent) recon.hidden = true;
   const lenP = el('p', 'sp3d-len'); const scaleP = el('p', 'sp3d-scale'); scaleP.hidden = true;
   cap.append(recon, lenP, scaleP);
   wrap.append(stage, bar, panel);
