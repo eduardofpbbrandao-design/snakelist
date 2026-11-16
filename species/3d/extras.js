@@ -45,9 +45,28 @@ const CSS = `
 @media (max-width:640px){.sp-rl-hd,.sl3d-hd{flex-wrap:wrap}.sp-rl-hd .sp3d-hdb,.sl3d-hd .sp3d-hdb{order:3;flex-basis:100%}}
 .sp3d-b:disabled{opacity:.6;cursor:default}
 .sp3d-bar.sp3d-few .sp3d-more:not([aria-pressed=true]){display:none}
-.sp3d-b.sp3d-morebtn{display:inline-flex;align-items:center;gap:6px;align-self:center;min-height:0;height:auto;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--muted,#5f6f5a);font:400 11.5px/1.3 Inter,system-ui,sans-serif;box-shadow:none}.sp3d-b.sp3d-morebtn:hover{border-color:#7fc76a;color:var(--ink,#24321f);background:var(--bg)}.sp3d-b.sp3d-morebtn[aria-expanded=true]{background:linear-gradient(135deg,#4fa64a 0%,#7fc266 145%);border-color:#3f8f3b;color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(36,50,31,.18)}
-.sp3d-b.sp3d-morebtn::after{content:"";width:6px;height:6px;margin:0;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-2px) rotate(45deg);transition:transform .15s ease}
+/* v5.50: like the map in fullscreen - every button sits INSIDE the 3D view: the main ones top-left, Compare photo and
+   See countries top-right, the hint bottom-left, fullscreen bottom-right; Show more on its own line under the buttons */
+.sp3d-stage>.sp3d-bar{position:absolute;left:10px;top:10px;right:300px;z-index:4;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;pointer-events:none}
+.sp3d-stage>.sp3d-bar>*{pointer-events:auto}
+.sp3d-stage>.sp3d-hdb{position:absolute;right:10px;top:10px;z-index:4;margin:0;display:flex;flex-wrap:nowrap;gap:6px}
+.sp3d-stage .sp3d-b,.sp3d-stage .sp3d-hb{min-height:34px;padding:5px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(12,26,18,.74);color:#fff;font:600 13px/1.2 Inter,system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.18);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.sp3d-stage .sp3d-b:hover,.sp3d-stage .sp3d-hb:hover{background:rgba(12,26,18,.9);border-color:rgba(155,224,124,.65);color:#fff}
+.sp3d-stage .sp3d-b[aria-pressed=true],.sp3d-stage .sp3d-hb[aria-pressed=true]{background:#4fa64a;border-color:#4fa64a;color:#fff}
+.sp3d-stage .sp3d-views{display:inline-flex;gap:6px;border:0;border-radius:0;overflow:visible}
+.sp3d-stage .sp3d-views .sp3d-b{border:1px solid rgba(255,255,255,.16);border-radius:10px}
+.sp3d-br{flex-basis:100%;height:0;order:1}.sp3d-bar .sp3d-morebtn{order:2}.sp3d-bar .sp3d-br+.sp3d-morebtn+.sp3d-br{order:3}.sp3d-bar .sp3d-more{order:4}
+.sp3d-bar.sp3d-few>.sp3d-br:last-child{display:none}
+.sp3d-stage .sp3d-b.sp3d-morebtn,.sp3d-stage .sp3d-b.sp3d-morebtn[aria-expanded=true]{display:inline-flex;align-items:center;gap:6px;min-height:0;padding:3px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(12,26,18,.6);color:rgba(255,255,255,.88);font:500 11.5px/1.35 Inter,system-ui,sans-serif;box-shadow:none}
+.sp3d-stage .sp3d-b.sp3d-morebtn:hover{background:rgba(12,26,18,.82);border-color:rgba(255,255,255,.3);color:#fff}
+.sp3d-b.sp3d-morebtn::after{content:"";width:6px;height:6px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-2px) rotate(45deg);transition:transform .15s ease}
 .sp3d-b.sp3d-morebtn[aria-expanded=true]::after{transform:translateY(1px) rotate(-135deg)}
+.sp3d-stage .sp3d-hint{top:auto;left:10px;bottom:10px;max-width:calc(100% - 80px);z-index:3}
+.sp3d-stage:has(>.sp3d-capt:not([hidden])) .sp3d-hint{opacity:0}
+.sp3d-stage:has(>.sp3d-tip:not([hidden])) .sp3d-hint{opacity:0}
+.sp3d-stage .sp3d-tip{left:10px;bottom:10px;max-width:calc(100% - 80px)}
+.sp3d-stage .sp3d-step{top:auto;right:10px;bottom:58px}
+@media (max-width:820px){.sp3d-stage>.sp3d-bar{right:10px;top:56px}.sp3d-stage .sp3d-b,.sp3d-stage .sp3d-hb{min-height:32px;padding:4px 10px;font-size:12.5px}}
 .sp3d-capt{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);width:max-content;max-width:min(92%,580px);padding:8px 14px;border-radius:12px;background:rgba(12,26,18,.88);color:#fff;font:500 14px/1.45 Inter,system-ui,sans-serif;text-align:center;pointer-events:none;box-shadow:0 2px 10px rgba(0,0,0,.3);transition:opacity .35s}
 .sp3d-capt[hidden]{display:none}.sp3d-capt b{color:#ffd66b}
 .sp3d-step{position:absolute;right:10px;top:10px;padding:3px 10px;border-radius:999px;background:rgba(12,26,18,.8);color:#fff;font:600 12px/1.5 Inter,system-ui,sans-serif;pointer-events:none}
@@ -333,7 +352,7 @@ export function create(V) {
     const mkH = (k, txt, icon, title) => { const b = el('button', 'sp3d-b sp3d-hb'); b.type = 'button'; b.title = title; b.innerHTML = icon + '<span>' + txt + '</span>'; b.setAttribute('aria-pressed', 'false'); hdb.appendChild(b); on(b, 'click', () => toggleSide(k)); hdbs[k] = b; return b; };
     mkH('photo', 'Compare photo', ICON.photo, 'Show its real photo beside the 3D model');
     mkH('map', 'See countries', ICON.map, 'Show the countries where it lives beside the 3D model');
-    V.opts.head.parentNode.insertBefore(hdb, V.opts.head.nextSibling);
+    stage.appendChild(hdb); // v5.50: inside the 3D view, in its top-right corner
   }
   let sideKind = null;
   function toggleSide(k) {
@@ -874,7 +893,7 @@ export function create(V) {
     const gy = groundYAt(gIdx.map((k) => pts[k]));
     const need = Math.max((ea + A + F.w0 * 2) * 1.12 / Math.tan(info.hf), (eb + A + F.w0 * 2) * 1.5 / Math.tan(info.vf)) + info.hMax;
     fx.zoomOut = Math.max(1, need * 1.08 / info.dMax);
-    V.controls.setGoal({ el: 0.8, d: need, px: 0, pz: 0 });
+    V.controls.setGoal({ el: 0.8, d: need, px: 0, pz: 0 }, true); // v5.50: the camera is there at once - no flying round before it slithers
     const tot = cum[M], at = (s) => { s = ((s % tot) + tot) % tot; let lo = 0, hi = M; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (cum[m] < s) lo = m; else hi = m; } const w = (s - cum[lo]) / Math.max(1e-9, cum[hi] - cum[lo]), kf = (lo + w) / gStep, g0 = Math.min(gy.length - 1, kf | 0), g1 = Math.min(gy.length - 1, g0 + 1); return [lerp(pts[lo][0], pts[hi][0], w), lerp(pts[lo][1], pts[hi][1], w), lerp(gy[g0], gy[g1], kf - g0)]; };
     // start where the track passes closest to the head
     const hx = R.rc[0], hz = R.rc[2]; let s0 = 0, bd = 1e18; for (let k = 0; k < M; k += 4) { const d = (pts[k][0] - hx) ** 2 + (pts[k][1] - hz) ** 2; if (d < bd) { bd = d; s0 = cum[k]; } }
@@ -895,10 +914,10 @@ export function create(V) {
     };
     const rest = R.rest(), first = trackPose(s0), firstA = angles(first);
     const undo = clearProps(gIdx.filter((_, j) => j % 2 === 0).map((k) => pts[k]).concat([[cx, cz]]), F.w0 * 2.5 + A * 0.2);
-    const T0 = reduceK() < 1 ? 0.01 : 0.7; // seconds for the coils to fall in behind the moving head
+    const T0 = 0; // v5.50: it slithers from the very first frame (Eduardo: no moving around first, then slithering)
     slither = { t0: now(), stout, T0, s0, speed, rest, restA, first, firstA, trackPose, angles, between, stopping: 0, undo };
     bSlither.setAttribute('aria-pressed', 'true'); bSlither.textContent = 'Stop slithering';
-    tip.hidden = false; tip.textContent = stout ? 'Heavy snakes often creep in a straight line ("caterpillar" crawling): belly scales grip and push in waves.' : 'It uncoils, then slithers: waves run down the body and push against the ground, so every part follows the path of the head (lateral undulation).';
+    tip.hidden = false; tip.textContent = stout ? 'Heavy snakes often creep in a straight line ("caterpillar" crawling): belly scales grip and push in waves.' : 'It slithers: waves run down the body and push against the ground, so every part follows the path of the head (lateral undulation).';
     V.kick();
   }
   const reduceK = () => (V.reduce() ? 0.5 : 1);
@@ -1403,7 +1422,7 @@ export function create(V) {
     resetView: () => !!(anat && anat.resetView()),
     zoomOut: 1, // > 1 while slithering: the camera may go further out to see the whole track
     anatOn: () => !!(anat && anat.on),
-    syncFull(f) { if (hdb) { if (f) bar.appendChild(hdb); else if (V.opts.head && V.opts.head.parentNode) V.opts.head.parentNode.insertBefore(hdb, V.opts.head.nextSibling); } bFull.innerHTML = f ? ICON.exit : ICON.full; bFull.title = f ? 'Exit fullscreen' : 'Fullscreen'; bFull.setAttribute('aria-label', bFull.title); bFull.setAttribute('aria-pressed', String(f)); },
+    syncFull(f) { bFull.innerHTML = f ? ICON.exit : ICON.full; bFull.title = f ? 'Exit fullscreen' : 'Fullscreen'; bFull.setAttribute('aria-label', bFull.title); bFull.setAttribute('aria-pressed', String(f)); },
     // scale labels never sit on the snake: move a label (x, y = its anchor; the box hangs above it, centred) out of the way
     avoid(x, y, w, h, extra) {
       // v5.09: a label always sits ABOVE the snake (below it only when there is no room above), never on it

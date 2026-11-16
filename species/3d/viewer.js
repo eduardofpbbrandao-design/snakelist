@@ -8,7 +8,7 @@
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
 import * as NATURE from './nature.js?r=536'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=544'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as EXTRA from './extras.js?r=550'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -1969,7 +1969,10 @@ export function mount(host, opts) {
   // v5.05: the main buttons stay in view; the rest (eye shield, camera views, size, fullscreen) are behind Show more / Show less
   const bMore = el('button', 'sp3d-b sp3d-morebtn', 'Show more'); bMore.type = 'button'; bMore.setAttribute('aria-expanded', 'false'); bMore.title = 'Show all the buttons';
   [vg2, bScale].concat(fx.moreButtons || []).forEach((b) => b.classList.add('sp3d-more'));
-  bar.classList.add('sp3d-few'); bar.appendChild(bMore);
+  bar.classList.add('sp3d-few');
+  // v5.50: Show more sits on its own line under the main buttons (like See all families), and the extra buttons open below it
+  const br1 = el('span', 'sp3d-br'), br2 = el('span', 'sp3d-br'); br1.setAttribute('aria-hidden', 'true'); br2.setAttribute('aria-hidden', 'true');
+  bar.append(br1, bMore, br2);
   on(bMore, 'click', () => { const open = bar.classList.toggle('sp3d-few') === false; bMore.textContent = open ? 'Show less' : 'Show more'; bMore.setAttribute('aria-expanded', String(open)); bMore.title = open ? 'Show only the main buttons' : 'Show all the buttons'; });
   const panel = el('div', 'sp3d-panel'); panel.hidden = true; panel.id = 'sp3d-panel-' + seed; bSet.setAttribute('aria-controls', panel.id);
   const mkCheck = (label, checked) => { const l = el('label', 'sp3d-opt'), c = document.createElement('input'); c.type = 'checkbox'; c.checked = checked; l.append(c, document.createTextNode(' ' + label)); panel.appendChild(l); return c; };
@@ -1986,7 +1989,9 @@ export function mount(host, opts) {
   if (!recon.textContent) recon.hidden = true;
   const lenP = el('p', 'sp3d-len'); const scaleP = el('p', 'sp3d-scale'); scaleP.hidden = true;
   cap.append(recon, lenP, scaleP);
-  wrap.append(stage, bar, panel);
+  // v5.50: the buttons live INSIDE the 3D view, like the map's buttons in fullscreen
+  stage.appendChild(bar);
+  wrap.append(stage, panel);
   host.append(wrap, cap);
   lenP.textContent = 'Modelled at ' + fmtLen(P.length) + ', a typical adult' + (P.lengthNote ? ' (' + P.lengthNote + ')' : '') + '.' + (P.max ? ' Longest recorded: ' + P.max + ' (not shown).' : '');
 
