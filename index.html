@@ -1159,6 +1159,79 @@
     .ach-ring { width: 88px; height: 88px; }
   }
 
+  /* v5.41: Achievements in the Checklist - the Snakes seen row, its button, the panel and the toast */
+  .sl-achrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 12px; }
+  .sl-seen { margin: 0; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-muted); }
+  .sl-seen b { color: var(--text); font-weight: 700; font-size: 15px; }
+  .sl-ach-btn { display: inline-flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+    padding: 6px 13px 6px 11px; border-radius: 999px; border: 1.5px solid var(--gold-soft); background: transparent; color: var(--moss); cursor: pointer;
+    transition: background-color .15s, border-color .15s; }
+  .sl-ach-btn svg { flex: none; }
+  .sl-ach-btn:hover { background: var(--surface-hover); border-color: var(--gold); }
+  .sl-ach-btn:focus-visible { outline: 2px solid var(--focus-ring, #58b351); outline-offset: 2px; }
+  @media (max-width: 360px) { .sl-seen { flex-basis: 100%; } }
+  .sl-achdlg { position: fixed; inset: 0; z-index: 2200; display: flex; align-items: center; justify-content: center; }
+  .sl-achdlg[hidden] { display: none; }
+  .sl-achdlg-bg { position: absolute; inset: 0; background: rgba(12,28,18,0.45); animation: sl-afade .2s ease-out; }
+  .sl-achbox { position: relative; box-sizing: border-box; width: min(420px, calc(100vw - 32px)); max-height: min(82vh, 640px); overflow: auto; overscroll-behavior: contain;
+    background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--menu-shadow);
+    padding: 16px 18px 20px; animation: sl-apop .22s cubic-bezier(.2,.9,.3,1); }
+  .sl-ahead { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 12px; }
+  .sl-ahead h2 { margin: 0; font-family: 'Fraunces', serif; font-size: 21px; font-weight: 600; color: var(--text); }
+  .sl-aclose { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); background: transparent; color: var(--text-muted);
+    display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+  .sl-aclose:hover { background: var(--surface-hover); color: var(--text); }
+  .sl-anext { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin: 0 0 12px; background: var(--bg); }
+  .sl-akick { margin: 0 0 2px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+  .sl-aname { margin: 0 0 9px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; color: var(--text); }
+  .sl-abar { display: block; height: 4px; border-radius: 99px; background: rgba(63,125,67,0.16); overflow: hidden; }
+  [data-sl-theme="dark"] .sl-abar { background: rgba(155,224,124,0.18); }
+  .sl-abar i { display: block; height: 100%; border-radius: inherit; background: var(--gold-fill); }
+  .sl-aprog { margin: 6px 0 0; font-family: 'Inter', sans-serif; font-size: 12.5px; color: var(--text-muted); }
+  .sl-alist { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+  .sl-abadge { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .sl-abadge.is-earned { background: #e4f2d9; border-color: #b7d7a4; }
+  [data-sl-theme="dark"] .sl-abadge.is-earned { background: #163d27; border-color: #2f6e49; }
+  .sl-abadge.is-progress { background: transparent; }
+  .sl-abadge.is-locked { background: #eef0eb; border-color: #d6dad1; }
+  [data-sl-theme="dark"] .sl-abadge.is-locked { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.14); }
+  .sl-abtn { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .sl-abtn:focus-visible { outline: 2px solid var(--focus-ring, #58b351); outline-offset: -2px; border-radius: 12px; }
+  .sl-aic { flex: none; width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+  .sl-aic svg { width: 17px; height: 17px; }
+  .is-earned .sl-aic { background: var(--gold-fill); color: #fff; }
+  .is-progress .sl-aic { background: rgba(63,125,67,0.14); color: var(--gold); }
+  .is-locked .sl-aic { background: rgba(0,0,0,0.06); color: var(--text-muted); }
+  [data-sl-theme="dark"] .is-locked .sl-aic { background: rgba(255,255,255,0.08); }
+  .sl-at { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; color: var(--text); }
+  .is-locked .sl-at { color: var(--text-muted); }
+  .sl-ast { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; padding: 3px 8px; border-radius: 999px; }
+  .is-earned .sl-ast { color: var(--gold); background: rgba(255,255,255,0.6); }
+  [data-sl-theme="dark"] .is-earned .sl-ast { background: rgba(0,0,0,0.22); }
+  .is-progress .sl-ast { color: var(--gold); border: 1px solid var(--gold-soft); }
+  .is-locked .sl-ast { color: var(--text-muted); }
+  .sl-alock svg { width: 12px; height: 12px; display: block; }
+  .sl-achev { flex: none; width: 16px; height: 16px; fill: none; stroke: var(--text-muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s; }
+  .sl-abadge.open .sl-achev { transform: rotate(180deg); }
+  .sl-adet { padding: 0 12px 12px 52px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text); }
+  .sl-adet p { margin: 0 0 7px; line-height: 1.45; }
+  .sl-adet .sl-adate, .sl-adet .sl-aprog { color: var(--text-muted); font-size: 12.5px; margin-top: 6px; }
+  @media (max-width: 640px) {
+    .sl-achdlg { align-items: flex-end; }
+    .sl-achbox { width: 100%; max-height: 86vh; border-radius: 18px 18px 0 0; border-bottom: 0; padding: 10px 16px calc(20px + env(safe-area-inset-bottom)); animation: sl-aup .28s cubic-bezier(.2,.9,.3,1); }
+    .sl-achbox::before { content: ""; display: block; width: 38px; height: 4px; border-radius: 99px; background: var(--border); margin: 0 auto 10px; }
+  }
+  @keyframes sl-afade { from { opacity: 0; } }
+  @keyframes sl-apop { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+  @keyframes sl-aup { from { transform: translateY(100%); } }
+  @media (prefers-reduced-motion: reduce) { .sl-achbox, .sl-achdlg-bg { animation: none; } }
+  .sl-mtoast { display: flex; align-items: center; gap: 9px; background: var(--surface); color: var(--text); border: 1px solid var(--gold-soft); border-radius: 12px;
+    padding: 9px 13px; box-shadow: var(--menu-shadow); font-family: 'Inter', sans-serif; font-size: 13px; pointer-events: none;
+    animation: sl-apop .3s cubic-bezier(.2,.9,.3,1); transition: opacity .4s, transform .4s; }
+  .sl-mtoast.out { opacity: 0; transform: translateY(-6px); }
+  .sl-mtoast b { font-weight: 600; }
+  .sl-mtoast-ic { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--gold-fill); color: #fff; display: inline-flex; align-items: center; justify-content: center; }
+  .sl-mtoast-ic svg { width: 15px; height: 15px; }
   /* the "achievement unlocked" toasts that pop up the instant a badge is earned, wherever
      you happen to be in the app - not just when looking at the Achievements tab */
   #ach-toast-region { position: fixed; top: 16px; right: 16px; z-index: 200;
@@ -3381,6 +3454,14 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     try { if (!localStorage.getItem("sl-new-seen-3d") && +(localStorage.getItem("sl-ver-n") || 0) < 500) document.documentElement.classList.add("sl-new-3d"); } catch (e) {}
     // a refresh starts at the top of the app, not wherever the page was scrolled to
     try { if ("scrollRestoration" in history) history.scrollRestoration = "manual"; } catch (e) {}
+    // a refresh starts fresh: drop the ?tab= the tabs put in the address, so it opens on the checklist
+    try {
+      var nv = performance.getEntriesByType("navigation")[0];
+      if (nv && nv.type === "reload" && /[?&]tab=/.test(location.search)) {
+        var u0 = new URL(location.href); u0.searchParams.delete("tab");
+        history.replaceState(null, "", u0.pathname + u0.search + u0.hash);
+      }
+    } catch (e) {}
     ["pointerdown", "keydown", "wheel", "touchstart"].forEach(function (t) { window.addEventListener(t, function () { window.SL_TOUCHED = true; }, { capture: true, passive: true }); });
   </script>
   <script>
@@ -3733,7 +3814,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
 </script>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v5.40</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v5.41</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-head"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-head)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All <span data-sl-total>4,247</span> snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -3746,13 +3827,16 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
       <button class="tab-btn" id="tab-sightings" type="button"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" width="15" height="15" aria-hidden="true"><use href="#mark-snake"></use></svg> My Sightings <span class="tab-n"><span class="sr-only">(</span>0<span class="sr-only">)</span></span></button>
       <button class="tab-btn" id="tab-wish" type="button"><span class="tab-star" aria-hidden="true">&#9733;</span> Want to see <span class="tab-n"><span class="sr-only">(</span>0<span class="sr-only">)</span></span></button>
       <button class="tab-btn" id="tab-follow" type="button"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg> Following <span class="tab-n"><span class="sr-only">(</span>0<span class="sr-only">)</span></span></button>
-      <button class="tab-btn" id="tab-ach" type="button"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"></path><path d="M7 6H4.5A2.5 2.5 0 0 0 7 10.5M17 6h2.5A2.5 2.5 0 0 1 17 10.5"></path><path d="M12 14v3M9 20h6M10 17h4"></path></svg> Achievements</button>
       <button class="tab-btn" id="tab-map" type="button"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3c2.5 2.7 3.8 5.8 3.8 9S14.5 18.3 12 21c-2.5-2.7-3.8-5.8-3.8-9S9.5 5.7 12 3z"></path></svg> Map</button>
       <button class="tab-btn" id="tab-quiz" type="button"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg> Quiz</button>
       <button class="tab-btn" id="tab-cam" type="button"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"></path><circle cx="12" cy="13" r="4"></circle></svg> Camera</button>
     </div>
 
     <div id="guide-controls">
+      <div class="sl-achrow" id="sl-achrow">
+        <p class="sl-seen"><span class="sl-seen-l">Snakes seen</span> <b id="sl-seen-n">0</b><span class="sl-seen-of"> of <span data-sl-total>4,247</span></span></p>
+        <button class="sl-ach-btn" id="sl-ach-btn" type="button" aria-haspopup="dialog" aria-controls="sl-achdlg"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"></path><path d="M7 6H4.5A2.5 2.5 0 0 0 7 10.5"></path><path d="M17 6h2.5A2.5 2.5 0 0 1 17 10.5"></path><path d="M12 14v3.5"></path><path d="M8.5 20.5h7"></path><path d="M9.5 20.5c0-1.7 1.1-3 2.5-3s2.5 1.3 2.5 3"></path></svg>Achievements</button>
+      </div>
       <div class="controls">
         <div class="search-box">
           <span class="icon-muted" id="search-icon"></span>
@@ -8206,10 +8290,6 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     <p class="empty-state" id="empty" hidden>No snakes found.</p>
 
     <div id="ach-toast-region" aria-live="polite"></div>
-    <div class="ach-panel" id="ach-panel" hidden>
-      <div class="ach-lead" id="ach-lead"></div>
-      <div class="ach-grid" id="ach-grid"></div>
-    </div>
     <div class="heat-panel" id="heat-panel" hidden>
       <div class="search-box heat-search">
         <input type="text" id="heat-search" placeholder="Search species, family, type, or country&hellip;" autocomplete="off" aria-label="Search species to map" />
@@ -9817,7 +9897,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
       { sel: "#tab-sightings", title: "My Sightings", text: "Every snake you've marked as seen." },
       { sel: "#tab-wish", title: "Want to see", text: "The snakes you'd love to find one day." },
       { sel: "#tab-follow", title: "Following", text: "The snakes you follow, with their news." },
-      { sel: "#tab-ach", title: "Achievements", text: "Badges you unlock as your list grows." },
+      { sel: "#sl-ach-btn", title: "Achievements", text: "How many snakes you have seen, and the milestones you earn as your list grows. Tap Achievements to see them." },
       { sel: "#tab-map", center: true, title: "Map", text: "Now let's go to the map - SnakeList will take you there." },
       { sel: "#globe-stage", center: true, go: goTab("map"), wait: 900, title: "The map", text: "The world map of snakes. Drag to move around, scroll or pinch to zoom, and click any country to see the snakes that live there." },
       { sel: "#hm-toggle", act: "click", tryIt: "Try it: click Species Heatmap to turn it on.", title: "Species Heatmap", text: "Colours every country by how many kinds of snakes live there - or where one snake you search for lives." },
@@ -10343,7 +10423,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
 
   // tracks which badges were already won, so a fresh unlock can be toasted exactly once -
   // null until the first check, so page load never toasts everything already earned
-  let wonBadgeNames = null;
+  let wonBadgeNames = null, mileReady = false;
   // the effect layer laid over a badge's icon - one per kind of badge (see the .ach-fx CSS)
   const ACH_FX = {
     check: '<span class="fx-clip"><span class="fx-wipe"></span></span><span class="fx-snake"><svg viewBox="0 0 40 12" aria-hidden="true"><path d="M2 7c3.5-5 7.5-5 11 0s7.5 5 11 0 6.5-5 10-2" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path><ellipse cx="35.5" cy="4.6" rx="3.4" ry="2.6" fill="currentColor"></ellipse><path d="M38.6 4.4h1.4" stroke="#e2543a" stroke-width="0.9" stroke-linecap="round"></path></svg></span>',
@@ -10393,10 +10473,9 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
   }
   function checkNewBadges(s) {
     const nowWon = new Set(BADGES.filter((b) => s[b.statKey] >= b.goal).map((b) => b.name));
-    if (wonBadgeNames) {
-      BADGES.forEach((b) => { if (nowWon.has(b.name) && !wonBadgeNames.has(b.name)) toastBadge(b); });
-    }
+    // v5.41: only the Checklist's milestones pop up now ("Achievement earned · First snake spotted")
     wonBadgeNames = nowWon;
+    if (typeof checkMilestones === "function" && mileReady) checkMilestones(s.seen);
   }
   // establish the "already earned" baseline right now, before any new action can happen -
   // otherwise the very first badge earned after a fresh load would wrongly be treated as
@@ -10542,6 +10621,129 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     }
   }
 
+  // v5.41: Achievements live in the Checklist - a trophy button beside "Snakes seen" opens a small
+  // panel (a sheet from the bottom on phones) with four milestones. Each species counts once (a
+  // species is one card, however many encounters it has). Older saved achievement data is kept.
+  const MILES = [
+    { goal: 1, name: "First snake spotted" },
+    { goal: 5, name: "5 different species spotted" },
+    { goal: 10, name: "10 different species spotted" },
+    { goal: 25, name: "25 different species spotted" },
+  ];
+  let mileHad = null, achOpenGoal = null, achLastFocus = null;
+  const mileDates = () => { try { const d = JSON.parse(localStorage.getItem("sl-ach-dates") || "{}"); return d && typeof d === "object" ? d : {}; } catch (err) { return {}; } };
+  const spotted = (n, g) => n.toLocaleString() + " of " + g.toLocaleString() + " species spotted";
+  function toastMile(m) {
+    const region = document.getElementById("ach-toast-region");
+    if (!region) return;
+    const el = document.createElement("div");
+    el.className = "sl-mtoast"; el.setAttribute("role", "status");
+    el.innerHTML = '<span class="sl-mtoast-ic" aria-hidden="true">' + ACH_TROPHY + "</span><span>Achievement earned &middot; <b>" + achEsc(m.name) + "</b></span>";
+    region.appendChild(el);
+    setTimeout(() => el.classList.add("out"), 3600);
+    setTimeout(() => el.remove(), 4100);
+  }
+  function checkMilestones(seen) {
+    const n = document.getElementById("sl-seen-n");
+    if (n) n.textContent = seen.toLocaleString();
+    const now = MILES.filter((m) => seen >= m.goal);
+    if (mileHad) {
+      const d = mileDates(); let changed = false;
+      now.forEach((m) => { if (mileHad.indexOf(m.goal) < 0) { toastMile(m); if (!d[m.goal]) { d[m.goal] = new Date().toISOString(); changed = true; } } });
+      if (changed) try { localStorage.setItem("sl-ach-dates", JSON.stringify(d)); } catch (err) {}
+    }
+    mileHad = now.map((m) => m.goal);
+    const dlg = document.getElementById("sl-achdlg");
+    if (dlg && !dlg.hidden) renderAchDlg();
+  }
+  const ACH_TROPHY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"></path><path d="M7 6H4.5A2.5 2.5 0 0 0 7 10.5"></path><path d="M17 6h2.5A2.5 2.5 0 0 1 17 10.5"></path><path d="M12 14v3.5"></path><path d="M8.5 20.5h7"></path><path d="M9.5 20.5c0-1.7 1.1-3 2.5-3s2.5 1.3 2.5 3"></path></svg>';
+  const ACH_SMALL_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="10.5" width="13" height="9.5" rx="2"></rect><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"></path></svg>';
+  const ACH_FLAG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>';
+  const achBar = (have, goal) => '<span class="sl-abar" role="progressbar" aria-valuemin="0" aria-valuemax="' + goal + '" aria-valuenow="' + Math.min(have, goal) + '"><i style="width:' + Math.round(Math.min(have, goal) / goal * 100) + '%"></i></span>';
+  function renderAchDlg() {
+    const box = document.getElementById("sl-achbody");
+    if (!box) return;
+    const seen = cards.filter((c) => c.classList.contains("done")).length;
+    const d = mileDates();
+    const next = MILES.find((m) => seen < m.goal);
+    let html = '<div class="sl-anext">';
+    if (next) html += '<p class="sl-akick">Next milestone</p><p class="sl-aname">' + next.name + "</p>" + achBar(seen, next.goal) + '<p class="sl-aprog">' + spotted(seen, next.goal) + "</p>";
+    else html += '<p class="sl-akick">All milestones earned</p><p class="sl-aname">You have spotted ' + seen.toLocaleString() + " different species</p>" + achBar(1, 1) + '<p class="sl-aprog">Every milestone here is yours.</p>';
+    html += '</div><ul class="sl-alist">';
+    MILES.forEach((m) => {
+      const st = seen >= m.goal ? "earned" : m === next ? "progress" : "locked";
+      const label = st === "earned" ? "Earned" : st === "progress" ? "In progress" : "Locked";
+      const open = achOpenGoal === m.goal;
+      let det;
+      if (st === "earned") {
+        const when = d[m.goal] ? new Date(d[m.goal]) : null;
+        det = "<p>" + (m.goal === 1 ? "You marked your first snake as seen." : "You marked " + m.goal + " different species as seen.") + "</p>" +
+          (when && !isNaN(when) ? '<p class="sl-adate">Earned ' + when.toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" }) + "</p>" : "");
+      } else {
+        const left = m.goal - seen;
+        det = "<p>" + (m.goal === 1 ? "Mark any snake as Seen in the Checklist to earn this." : "Spot " + left + " more different species to earn this. Each species counts once, however many times you log it.") + "</p>" +
+          achBar(seen, m.goal) + '<p class="sl-aprog">' + spotted(seen, m.goal) + "</p>";
+      }
+      html += '<li class="sl-abadge is-' + st + (open ? " open" : "") + '"><button type="button" class="sl-abtn" data-goal="' + m.goal + '" aria-expanded="' + open + '" aria-controls="sl-adet-' + m.goal + '">' +
+        '<span class="sl-aic" aria-hidden="true">' + (st === "earned" ? ACH_TROPHY : st === "locked" ? ACH_SMALL_LOCK : ACH_FLAG) + "</span>" +
+        '<span class="sl-at">' + m.name + "</span>" +
+        '<span class="sl-ast">' + (st === "locked" ? '<span class="sl-alock" aria-hidden="true">' + ACH_SMALL_LOCK + "</span>" : "") + label + "</span>" +
+        '<svg class="sl-achev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
+        '<div class="sl-adet" id="sl-adet-' + m.goal + '"' + (open ? "" : " hidden") + ">" + det + "</div></li>";
+    });
+    box.innerHTML = html + "</ul>";
+  }
+  function closeAch() {
+    const dlg = document.getElementById("sl-achdlg");
+    if (!dlg || dlg.hidden) return;
+    dlg.hidden = true;
+    document.documentElement.classList.remove("sl-achdlg-on");
+    const f = achLastFocus || document.getElementById("sl-ach-btn");
+    if (f && f.focus) try { f.focus({ preventScroll: true }); } catch (err) {}
+  }
+  function openAch() {
+    let dlg = document.getElementById("sl-achdlg");
+    if (!dlg) {
+      dlg = document.createElement("div");
+      dlg.className = "sl-achdlg"; dlg.id = "sl-achdlg"; dlg.hidden = true;
+      dlg.innerHTML = '<div class="sl-achdlg-bg"></div><div class="sl-achbox" role="dialog" aria-modal="true" aria-labelledby="sl-achttl">' +
+        '<div class="sl-ahead"><h2 id="sl-achttl">Achievements</h2><button type="button" class="sl-aclose" aria-label="Close achievements"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></div>' +
+        '<div id="sl-achbody"></div></div>';
+      document.body.appendChild(dlg);
+      dlg.querySelector(".sl-achdlg-bg").addEventListener("click", closeAch);
+      dlg.querySelector(".sl-aclose").addEventListener("click", closeAch);
+      // the page behind stays exactly where it was: no scrolling it through the dimmed backdrop
+      dlg.querySelector(".sl-achdlg-bg").addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
+      dlg.querySelector(".sl-achdlg-bg").addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+      dlg.addEventListener("click", (e) => {
+        const b = e.target.closest && e.target.closest(".sl-abtn");
+        if (!b) return;
+        const g = +b.dataset.goal;
+        achOpenGoal = achOpenGoal === g ? null : g;
+        renderAchDlg();
+        const nb = dlg.querySelector('.sl-abtn[data-goal="' + g + '"]'); if (nb) nb.focus({ preventScroll: true });
+      });
+      dlg.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") { e.preventDefault(); closeAch(); return; }
+        if (e.key !== "Tab") return;
+        const f = [].filter.call(dlg.querySelectorAll("button"), (x) => x.offsetParent !== null);
+        if (!f.length) return;
+        if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+        else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+      });
+    }
+    achLastFocus = document.activeElement && document.activeElement !== document.body ? document.activeElement : document.getElementById("sl-ach-btn");
+    achOpenGoal = null;
+    renderAchDlg();
+    dlg.hidden = false;
+    document.documentElement.classList.add("sl-achdlg-on");
+    const c = dlg.querySelector(".sl-aclose"); if (c) try { c.focus({ preventScroll: true }); } catch (err) {}
+  }
+  window.SL_openAch = openAch;
+  document.getElementById("sl-ach-btn").addEventListener("click", openAch);
+  mileReady = true;
+  checkMilestones(computeStats().seen);
+
   // Chrome only — deliberately touches nothing inside the sync region, so it is safe to
   // run when a tick arrives from another device (which is not a gesture here).
   // the tabs' counts: a small quiet badge after the label (read out as "(3)" to screen readers)
@@ -10551,6 +10753,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
   function sightIcon() { return '<svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" width="15" height="15" aria-hidden="true"><use href="#mark-snake"></use></svg>'; }
   function refreshCounts() {
     const seen = cards.filter((c) => c.classList.contains("done")).length;
+    const sn = document.getElementById("sl-seen-n"); if (sn) sn.textContent = seen.toLocaleString();
     const t = document.getElementById("tab-sightings");
     if (t) t.innerHTML = sightIcon() + " My Sightings" + tabN(seen);
     const w = document.getElementById("tab-wish");
@@ -10774,6 +10977,8 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     if (grid.offsetParent && listTab === tab) listY[tab] = window.scrollY;
   }, { passive: true });
   function refresh(skipChips) {
+    // v5.41: Achievements live in the Checklist now (the trophy button beside Snakes seen opens them)
+    if (tab === "ach") { tab = "guide"; if (window.SL_openAch) setTimeout(window.SL_openAch, 0); }
     // Every card stays in the document (the sync region is the record of what's been
     // seen), but only a page of them is shown at a time — 4,500 laid-out cards is far
     // too slow. Which page is showing is pure local view state, so it's driven entirely
@@ -10835,15 +11040,11 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     document.body.classList.toggle("tab-follow", tab === "follow");
     if (tab === "follow" && window.SL_renderFeed) window.SL_renderFeed();
     document.getElementById("tab-map").classList.toggle("active", tab === "map");
-    document.getElementById("tab-ach").classList.toggle("active", tab === "ach");
     document.getElementById("tab-quiz").classList.toggle("active", tab === "quiz");
     document.getElementById("tab-cam").classList.toggle("active", tab === "cam");
     document.body.classList.toggle("tab-cam", tab === "cam");
     document.getElementById("cam-panel").hidden = tab !== "cam";
-    const onAch = tab === "ach";
-    document.body.classList.toggle("tab-ach", onAch);
-    document.getElementById("ach-panel").hidden = !onAch;
-    if (onAch) { moreBtn.hidden = true; renderAchievements(); }
+    document.body.classList.remove("tab-ach");
     document.getElementById("guide-controls").style.display = tab === "guide" ? "" : "none";
     // #grid lives inside the sync region, so it is hidden from a class on <body> rather than
     // by touching the grid itself - a style attribute there would be saved to every device.
@@ -11279,7 +11480,6 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     refresh(true);
   });
   document.getElementById("tab-map").addEventListener("click", () => { tab = "map"; refresh(); });
-  document.getElementById("tab-ach").addEventListener("click", () => { tab = "ach"; refresh(); });
 
   const chipActivate = (container, handler) => {
     const act = (e) => {
@@ -18563,6 +18763,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var tabQ = q.get("tab");
   if (tabQ && /^(map|quiz|cam|ach|guide|sightings|wish|follow)$/.test(tabQ) && !map && !f && !hab && !type && !fam && !qs) {
     (function go(n) { if (!window.__introDone && document.getElementById("intro") && n < 40) { setTimeout(function () { go(n + 1); }, 300); return; }
+      if (tabQ === "ach") { if (window.SL_openAch) window.SL_openAch(); return; }
       var t = document.getElementById("tab-" + tabQ); if (t) t.click(); })(0);
     return;
   }
@@ -20656,6 +20857,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v5.41", d: "2026-11-16", items: ["Achievements moved into the Checklist: a trophy button beside Snakes seen opens your milestones (first snake, then 5, 10 and 25 different species), with a short message when you earn one", "Refreshing the page starts SnakeList fresh; coming back from one of its pages still takes you to where you were"] },
     { v: "v5.40", d: "2026-11-16", items: ["The soft edges all round the opening photo, the bottom too, are SnakeList green on every device"] },
     { v: "v5.39", d: "2026-11-16", items: ["3D: the twig snake and other vine snakes are thread-thin with long pointed heads and keyhole pupils, lying along a branch", "3D: the speckled kingsnake is glossy black with one yellow spot on every scale; 20 more snakes fixed against their photos, including the paradise tree snake", "3D full screen: the buttons are at the top; the photo beside the model says the snake's name, like \"Twig Snake photo\""] },
     { v: "v5.38", d: "2026-11-16", items: ["New photos: Hinds' viper, Namaqua dwarf adder, Madurai shieldtail, collared whipsnake, large-eyed pit viper, and a first photo of Erythrolamprus epinephelus", "Loading messages (3D, sightings and more) show a spinning circle", "Opening: the SnakeList logo never grows or shrinks while you watch, even on slow connections; the soft edges round the photo are always green, never white"] },
