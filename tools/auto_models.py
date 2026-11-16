@@ -271,7 +271,7 @@ CURATED = {
                             "h": {"iris": "#c8a050", "irisInner": "#e6c878"}, "pat": [{"type": "blotch", "count": 70, "a": 0.3, "mirror": True, "alt": True, "wid": 0.07, "len": 0.35, "shape": "rect", "color": "#121110", "alpha": 0.8, "t": [0.06, 0.95]}]},
     "cerastes-cerastes": {"d": "#d8bf93", "lat": "#dbc49c", "b": "#efe6d0", "c": "#a88a62", "t": "blotch", "s": "sand",
                           "h": {"horns": "supraocular", "hornColor": "#cdb48a", "iris": "#b8a070", "irisInner": "#dcc89a"}, "cx": {"mottle": 0.14, "speckle": {"p": 0.12, "color": "#9a7c58", "k": 0.5}}},
-    "natrix-natrix": {"d": "#6e6a4c", "lat": "#77704f", "b": "#d8d2bf", "c": "#f0c23a", "t": "collar2", "k": 1, "s": "riverbank",
+    "natrix-natrix": {"d": "#6e624a", "lat": "#74684e", "b": "#d8d2bf", "c": "#f0c23a", "t": "collar2", "k": 1, "s": "riverbank",
                       "h": {"iris": "#d0a040", "irisInner": "#ecc870", "pupil": "round"}, "cx": {"bellyA": 0.76}},
     "morelia-spilota": {"d": "#7a6a40", "c": "#2e2618", "b": "#e2d6a6", "t": "blotch", "n": 44},
     "python-molurus": {"d": "#c2a77a", "c": "#5a4228", "b": "#e8dcc0", "t": "blotch", "n": 38},
@@ -289,10 +289,7 @@ CURATED = {
     "aspidites-ramsayi": {"d": "#d7964a", "c": "#8a5428", "b": "#f0e2c0", "t": "band", "n": 50, "hc": "#e2b070", "h": {"iris": "#5a3a22", "irisInner": "#7a5432"}},
     "boiga-dendrophila": {"d": "#141414", "lat": "#181816", "c": "#f0d040", "b": "#2c2c26", "t": "band", "n": 44, "lip": "#f2d84a", "h": {"iris": "#2a2018", "irisInner": "#3a2c20", "irisDark": 1, "pupil": "slit"}, "sx": {"gloss": 0.75}},
     "hierophis-viridiflavus": {"d": "#1b1d16", "lat": "#1f2118", "c": "#c9c24a", "b": "#d8d4a0", "t": "plain", "cx": {"speckle": {"p": 0.5, "color": "#c9c24a", "k": 0.75}}, "h": {"iris": "#7a6a3a", "irisInner": "#b49a50"}},
-    "calloselasma-rhodostoma": {"d": "#b9805a", "c": "#5a2e1e", "t": "hourglass", "vs": ["#4a2618", 0.03], "h": {"iris": "#a07040", "irisInner": "#c8985a"}},
     "crotalus-scutulatus": {"d": "#a39a6c", "c": "#5a4a32", "b": "#e2dcc0", "t": "diamond"},
-    "crotalus-viridis": {"d": "#a8a07a", "c": "#5a4630", "b": "#e2dcc0", "t": "blotch", "n": 40},
-    "crotalus-oreganus": {"d": "#8a7660", "c": "#3e3024", "b": "#e2d8c4", "t": "blotch", "n": 36},
     "tropidolaemus-wagleri": {"d": "#2f8a2a", "lat": "#3a942e", "c": "#e6dc5a", "b": "#c8d880", "t": "band", "n": 36, "h": {"iris": "#c8b040", "irisInner": "#e6d070"}},
     "sistrurus-miliarius": {"d": "#8a7a6a", "c": "#2a2420", "b": "#e2d8c8", "t": "spot", "vs": ["#c26a3a", 0.035]},
     "bothrops-atrox": {"d": "#8a7a5a", "c": "#3a2e20", "b": "#ddd2b6"},
@@ -304,22 +301,13 @@ CURATED = {
     # v5.34: a random sample of 80 photos against their models
     # v5.35: an audit of 30 well-known and 60 random species against their photos
     "chrysopelea-paradisi": {"d": "#16180f", "lat": "#16180f", "c": "#c4402a", "b": "#b8d060", "t": "plain", "cx": {"speckle": {"p": 1.0, "dot": 0.45, "color": "#a8cc3a", "k": 0.92}, "noEdge": 1}, "vs": ["#c4402a", 0.025]},
-    "pantherophis-slowinskii": {"d": "#9a6a4a", "lat": "#9a6a4a", "c": "#4a2a1c"},
-    "ophryacus-sphenophrys": {"d": "#b07a40", "lat": "#b07a40", "c": "#6a4020", "t": "blotch"},
     "tropidonophis-elongatus": {"d": "#a0502c", "lat": "#a0502c", "t": "plain"},
     "boaedon-capensis": {"d": "#6a4a32", "lat": "#6a4a32", "t": "plain", "ls": ["#e2d2b0", 0.42, 0.03], "lip": "#e2d2b0"},
-    "lytorhynchus-paradoxus": {"d": "#d8c4a0", "lat": "#d8c4a0", "c": "#5a4030", "t": "blotch"},
-    "enulius-oligostichus": {"d": "#3a3a3c", "lat": "#3a3a3c", "t": "plain"},
     "tropidodipsas-tricolor": {"d": "#141210", "lat": "#141210", "c": "#e08a3a", "b": "#e0d8c8", "t": "band"},
-    "apostolepis-flavotorquata": {"d": "#a8452a", "lat": "#a8452a", "t": "collar", "c": "#e8d060"},
     "oxyrhopus-vanidicus": {"d": "#18181a", "lat": "#18181a", "c": "#e8c440", "t": "band"},
-    "arizona-elegans": {"d": "#d8c4a0", "lat": "#d8c4a0", "c": "#8a6440", "t": "blotch"},
     "lycophidion-variegatum": {"d": "#1c1c20", "lat": "#1c1c20", "t": "plain", "cx": {"speckle": {"p": 0.45, "color": "#e6e2da", "k": 0.85}, "mottle": 0.05}},
     "xenophidion-acanthognathus": {"d": "#7a5a48", "lat": "#7a5a48", "c": "#3a2a20", "t": "blotch"},
-    "micrurus-medemi": {"d": "#141416", "lat": "#141416", "c": "#d8dce0", "b": "#d8dce0", "t": "band"},
-    "rhinophis-karinthandani": {"d": "#22242c", "lat": "#22242c"},
     "rhabdophis-chrysargos": {"d": "#8a4a2a", "lat": "#8a4a2a"},
-    "hypnale-nepa": {"d": "#76736c", "lat": "#76736c", "c": "#55524c", "t": "speckle"},
     "masticophis-schotti": {"d": "#6a9a98", "lat": "#6a9a98", "ls": ["#e2a080", 0.6, 0.03]},
     "rhabdophis-himalayanus": {"d": "#2c3226", "lat": "#2c3226", "c": "#e0702a", "t": "spot"},
     "laticauda-crockeri": {"d": "#2a2226", "lat": "#2a2226", "t": "plain"},
@@ -395,11 +383,56 @@ CURATED = {
     "morelia-spilota": {"d": "#b4ab92", "lat": "#aca286", "c": "#1e1c18", "b": "#e2dcc6", "t": "blotch", "n": 50, "L": 2.0, "s": "forest", "sx": {"gloss": 0.5, "iridescence": 0.1}},
     # v5.19: patterns checked against photos
     "crotalus-ruber": {"d": "#b5826a", "c": "#7a3c2a", "b": "#e8dccb", "t": "diamond", "n": 34, "L": 1.1, "s": "arid", "tl": {"rattle": 7}, "pat": [{"type": "band", "t": [0.88, 0.985], "count": 5, "len": 0.5, "color": "#1a1512", "warp": 0.2, "jit": 0.02}]},
-    "nerodia-sipedon": {"d": "#6e604c", "lat": "#74644e", "c": "#2e2218", "b": "#e2d6c0", "t": "band", "n": 32, "L": 0.9, "s": "riverbank", "k": 1, "ck": "#7a3a2a"},
+    "nerodia-sipedon": {"d": "#5e4a3a", "lat": "#624e3c", "c": "#2a1a14", "b": "#e2d6c0", "t": "band", "n": 32, "L": 0.9, "s": "riverbank", "k": 1, "ck": "#7a3a2a"},
     "laticauda-laticaudata": {"d": "#5f7fa6", "lat": "#6a88ac", "c": "#121214", "b": "#d8d8c8", "t": "band", "n": 40, "L": 1.0, "s": "sea"},
     "thamnophis-sirtalis": {"d": "#2a2a22", "lat": "#36322a", "b": "#d3cb9c", "c": "#121110", "t": "plain", "vs": ["#e4cf62", 0.045], "ls": ["#e8d77a", 0.52, 0.05], "k": 1, "L": 0.7, "s": "grass", "h": {"iris": "#c8a050", "irisInner": "#e6c878"}, "pat": [{"type": "blotch", "count": 70, "a": 0.3, "mirror": True, "alt": True, "wid": 0.07, "len": 0.35, "shape": "rect", "color": "#121110"}]},
     # v5.18: iconic species checked against their photos
-    "heterodon-nasicus": {"d": "#b89a72", "c": "#6a4a32", "b": "#2a2622", "t": "blotch", "n": 40, "L": 0.55, "s": "grass", "bx": {"ld": 16}},
+    # (heterodon-nasicus: see GENUS_LOOK)
+    # v5.43: a second audit - well-known species re-rendered and compared with their photos
+    "crotalus-viridis": {"d": "#8e7c5e", "lat": "#8a785c", "c": "#4a3424", "b": "#e2dcc0", "t": "rblotch", "n": 40},
+    "crotalus-oreganus": {"d": "#9a8e78", "lat": "#968a74", "c": "#3e2e22", "b": "#e2d8c4", "t": "rblotch", "n": 36},
+    "sistrurus-catenatus": {"d": "#958670", "lat": "#90826c", "c": "#45301f", "b": "#d8d0c0", "t": "rblotch", "n": 42},
+    "pantherophis-emoryi": {"d": "#a39279", "lat": "#9e8d74", "c": "#6a4630", "b": "#e6dcc6"},
+    "elaphe-carinata": {"d": "#8a7a3a", "lat": "#86763a", "c": "#1e1a12", "b": "#e0cf6a", "t": "net", "n": 44},
+    "elaphe-climacophora": {"d": "#7e7a64", "lat": "#7a7660", "c": "#4a4a36", "b": "#e0dcbc", "t": "stripe"},
+    "masticophis-flagellum": {"d": "#a07050", "lat": "#a07254", "b": "#e8cfc0", "t": "plain"},
+    "hemachatus-haemachatus": {"d": "#2a2826", "lat": "#2c2a28", "c": "#b8b2a4", "b": "#1e1c1a", "t": "band", "n": 44},
+    "bungarus-multicinctus": {"d": "#141416", "lat": "#161618", "c": "#e6e4dc", "b": "#e8e4d8", "t": "band", "n": 60},
+    "pseudonaja-nuchalis": {"d": "#b8962e", "lat": "#b4922e", "b": "#e8d8a0", "t": "plain"},
+    "vipera-aspis": {"d": "#a07a58", "lat": "#9c7656", "c": "#4a2e1e", "b": "#4a403a"},
+    "vipera-ammodytes": {"c": "#3a2a1e"},
+    "bitis-nasicornis": {"d": "#5a6268", "lat": "#586066", "c": "#1a1a1c", "b": "#5a6a5a", "t": "chevron", "n": 34},
+    "python-sebae": {"d": "#9a845e", "lat": "#94805c", "c": "#4a3622", "b": "#e2d6b8", "t": "blotch", "n": 44},
+    "corallus-hortulana": {"d": "#b89a72", "lat": "#b4966e", "c": "#7a5a3c", "b": "#e6dcc4", "t": "blotch", "n": 40},
+    "aipysurus-laevis": {"d": "#9aa8a6", "lat": "#9eaca8", "b": "#d8dcd0", "t": "plain"},
+    "eryx-johnii": {"d": "#7a4a32", "lat": "#7e4e36", "b": "#c89a80", "t": "plain"},
+    "eryx-jaculus": {"d": "#b8946a", "lat": "#b4906a", "c": "#5a3c26", "b": "#e6d8c0", "t": "blotch", "n": 40},
+    "charina-bottae": {"d": "#9a8462", "lat": "#988262", "b": "#d8c890", "t": "plain"},
+    "nerodia-fasciata": {"d": "#8a5a3e", "lat": "#86583c", "c": "#2a2420", "b": "#e0c8a0", "t": "band", "n": 30, "k": 1},
+    "diadophis-punctatus": {"d": "#2e3034", "lat": "#303236", "c": "#e8a030", "b": "#e8b040", "t": "collar"},
+    "storeria-dekayi": {"d": "#7a6650", "lat": "#7a6650", "b": "#e0d0b8", "t": "plain", "vs": ["#a8987c", 0.05]},
+    "carphophis-amoenus": {"d": "#6a4e42", "lat": "#6e5246", "b": "#e09a8a", "t": "plain"},
+    "farancia-abacura": {"d": "#141416", "lat": "#161618", "b": "#d8402e", "t": "plain", "sx": {"gloss": 0.85},
+                         "pat": [{"type": "blotch", "t": [0.05, 0.98], "count": 40, "a": 0.72, "mirror": True, "alt": True, "wid": 0.3, "len": 0.5, "shape": "rect", "color": "#d8402e", "warp": 0.3}]},
+    "calloselasma-rhodostoma": {"d": "#b88a68", "lat": "#b48666", "c": "#5a2e1e", "b": "#e6d8c4", "t": "trap", "vs": ["#4a2618", 0.03], "h": {"iris": "#a07040", "irisInner": "#c8985a"}},
+    "deinagkistrodon-acutus": {"d": "#b8aa94", "lat": "#b4a690", "c": "#5a4030", "b": "#e2dccc", "t": "trap"},
+    "gloydius-halys": {"d": "#8a7a62", "lat": "#86765e", "c": "#4a3a2a", "b": "#d8d0bc", "t": "rblotch"},
+    "protobothrops-mucrosquamatus": {"d": "#9a7e5e", "lat": "#967a5a", "c": "#4a3020", "b": "#e2d8c4", "t": "blotch", "n": 50},
+    "antaresia-childreni": {"d": "#8a7660", "lat": "#86725c", "c": "#4a3a2a", "b": "#e2d8c4", "t": "blotch", "n": 50},
+    "liasis-mackloti": {"d": "#9c9a8c", "lat": "#989688", "c": "#5a5850", "b": "#e2e0d4", "t": "speckle"},
+    "candoia-carinata": {"d": "#7a6a58", "lat": "#766654", "c": "#2a241e", "b": "#d8ccb8", "t": "blotch", "n": 40},
+    "sanzinia-madagascariensis": {"d": "#8a6a40", "lat": "#86663e", "c": "#3a2a1a", "b": "#e0d0b0", "t": "blotch", "n": 36},
+    "acrantophis-madagascariensis": {"d": "#a89070", "lat": "#a48c6c", "c": "#3a2a1e", "b": "#e2d6c0", "t": "blotch", "n": 34},
+    # the v5.35 audit fixes, re-rendered
+    "enulius-oligostichus": {"d": "#4a3a32", "lat": "#4a3a32", "t": "plain"},
+    "lytorhynchus-paradoxus": {"d": "#c8ad84", "lat": "#c4a980", "c": "#5a4030", "t": "blotch"},
+    "apostolepis-flavotorquata": {"d": "#8a4a32", "lat": "#8a4a32", "t": "collar", "c": "#e8d060"},
+    "arizona-elegans": {"d": "#c2a37c", "lat": "#be9f78", "c": "#6e4a2c", "t": "blotch"},
+    "rhinophis-karinthandani": {"d": "#3a2a2e", "lat": "#3a2a2e"},
+    "hypnale-nepa": {"d": "#7a7068", "lat": "#7a7068", "c": "#55524c", "t": "speckle"},
+    "micrurus-medemi": {"d": "#141416", "lat": "#141416", "b": "#d8dce0", "t": "plain", "pat": [{"type": "band", "t": [0.06, 0.98], "count": 44, "len": 0.2, "color": "#d8dce0", "warp": 0.2, "jit": 0.04}]},
+    "pantherophis-slowinskii": {"d": "#9a8a74", "lat": "#968670", "c": "#4a3628"},
+    "ophryacus-sphenophrys": {"d": "#b07a40", "lat": "#b07a40", "c": "#94602c", "t": "blotch"},
     "pantherophis-alleghaniensis": {"d": "#1f201f", "lat": "#252524", "c": "#3a3a36", "b": "#d8d2c0", "t": "plain", "L": 1.4, "s": "forest", "cx": {"speckle": {"p": 0.18, "color": "#b8b2a2", "k": 0.45}}, "sx": {"keel": 0.25, "gloss": 0.55}},
     "elaphe-dione": {"d": "#8a8270", "c": "#3e3428", "b": "#d6d0bc", "t": "blotch", "n": 50, "L": 1.0, "s": "grass", "vs": ["#b8ae96", 0.03]},
     "acrochordus-javanicus": {"d": "#3a362e", "lat": "#403a30", "c": "#5a5444", "b": "#6a6250", "t": "speckle", "L": 1.8, "s": "riverbank", "bx": {"ld": 16, "neck": 0.85}},
@@ -498,12 +531,28 @@ CURATED = {
 
 # (Gaboon viper: the purple was too strong and the head too pale; a darker, warmer iris)
 HAND_FIXES = {
+    # v5.43: hand-made profiles that rendered much paler or greyer than their photos
+    "indotyphlops-braminus": [(("colors", "dorsal"), "#5a3428"), (("colors", "lateral"), "#5e382c")],
+    "vipera-berus": [(("colors", "dorsal"), "#6a5a44"), (("colors", "lateral"), "#665640")],
+    "vipera-latastei": [(("colors", "dorsal"), "#8a7660"), (("colors", "lateral"), "#86725c"), (("pattern", 0, "color"), "#4a3628")],
+    "bothrops-asper": [(("colors", "dorsal"), "#8e6648"), (("colors", "lateral"), "#8a6446"), (("pattern", 0, "color"), "#3a2418")],
+    # v5.43: eastern hognose - the upturned, keeled shovel snout of the genus (see GENUS_LOOK), short stout body; its photo
+    # shows the common grey phase: pale grey ground with big black blotches, black side blotches, dark head band and neck spots
+    "heterodon-platirhinos": [(("head",), {"w": 1.02, "h": 0.6, "snout": 0.42, "snoutH": 0.5, "snoutUp": 0.45, "upturn": 0.62, "upLen": 0.34, "eyeX": 0.36, "tip": 0.25, "tipR": 0.08,
+                                           "len": 0.036, "eye": 0.14, "iris": "#7a6040", "irisInner": "#b08a50"}),
+                              (("body",), {"ld": 19, "neck": 0.86, "tail": 0.15, "peak": 0.45}),
+                              (("colors",), {"dorsal": "#8f8a80", "lateral": "#88837a", "belly": "#8a857c", "mottle": 0.08}),
+                              (("pattern",), [{"type": "blotch", "t": [0.08, 0.93], "count": 26, "a": 0, "wid": 0.36, "len": 0.72, "shape": "rect", "color": "#1d1b19", "edgeColor": "#0e0d0c", "edge": 0.1, "warp": 0.6},
+                                              {"type": "blotch", "t": [0.08, 0.93], "count": 26, "phase": 0.5, "a": 0.62, "mirror": True, "alt": True, "wid": 0.18, "len": 0.62, "shape": "round", "color": "#1d1b19", "warp": 0.5},
+                                              {"type": "line", "p0": [0.2, 0.0], "p1": [0.27, 0.32], "wid": 0.045, "color": "#1d1b19", "mirror": True, "aa": 0.35},
+                                              {"type": "line", "p0": [0.36, 0.37], "p1": [0.82, 0.56], "wid": 0.045, "color": "#1d1b19", "mirror": True, "aa": 0.35},
+                                              {"type": "spot", "p": [1.4, 0.3], "r": [0.38, 0.15], "color": "#1d1b19", "mirror": True}])],
     'bungarus-caeruleus': [(('scales', 'vert'), 2.2)],  # v5.23: enlarged hexagonal middle row
     # v5.19: patterns checked against photos (chequered bellies, reticulated net, copperhead hourglasses, timber chevrons, diamond chain, kingsnake chain, bushmaster rhomboids)
     'pantherophis-guttatus': [(('pattern',), [{'type': 'blotch', 't': [0.06, 0.95], 'count': 36, 'a': 0, 'wid': 0.3, 'len': 0.62, 'shape': 'round', 'color': '#a8331f', 'edgeColor': '#1a1210', 'edge': 0.15, 'warp': 0.3}, {'type': 'blotch', 't': [0.06, 0.95], 'count': 36, 'phase': 0.5, 'a': 0.6, 'mirror': True, 'alt': True, 'wid': 0.1, 'len': 0.4, 'color': '#a8331f', 'edgeColor': '#2a1a14', 'edge': 0.2}, {'type': 'blotch', 't': [0.06, 0.97], 'count': 70, 'a': 0.9, 'mirror': True, 'alt': True, 'belly': True, 'wid': 0.06, 'len': 0.5, 'shape': 'rect', 'color': '#1a1512'}, {'type': 'poly', 'pts': [[0.25, 0], [0.6, 0.12], [1.3, 0.14], [1.3, -0.14], [0.6, -0.12]], 'color': '#b03a22'}, {'type': 'line', 'p0': [0.3, 0.4], 'p1': [1.0, 0.62], 'wid': 0.06, 'color': '#a8331f', 'mirror': True}, {'type': 'checker', 'belly': True, 'color': '#141210', 'alpha': 0.9, 'skip': 0.1}])],
     'pantherophis-obsoletus': [(('pattern',), [{'type': 'blotch', 't': [0.06, 0.95], 'count': 34, 'a': 0, 'wid': 0.3, 'len': 0.6, 'color': '#2c2824', 'alpha': 0.8}, {'type': 'line', 'p0': [0.05, 0.66], 'p1': [0.9, 0.64], 'wid': 0.1, 'color': '#d8d2c2', 'mirror': True}, {'type': 'checker', 'belly': True, 'color': '#2a2824', 'alpha': 0.6, 'skip': 0.1}])],
     'malayopython-reticulatus': [(('colors', 'dorsal'), '#9a7c44'), (('colors', 'lateral'), '#a08040'), (('pattern',), [{'type': 'net', 't': [0.05, 0.97], 'count': 46, 'na': 2.1, 'wid': 0.11, 'color': '#15100a', 'edgeColor': '#e0cc8e', 'edge': 0.4, 'warp': 0.7}, {'type': 'blotch', 't': [0.05, 0.97], 'count': 46, 'phase': 0.5, 'a': 0.62, 'mirror': True, 'wid': 0.08, 'len': 0.3, 'shape': 'diamond', 'color': '#e2dccb', 'warp': 0.4}, {'type': 'cap', 'x0': 0, 'x1': 1.04, 'wid': 0.6, 'color': '#9a7a40'}, {'type': 'line', 'p0': [0.04, 0], 'p1': [1.2, 0], 'wid': 0.018, 'color': '#120c06'}, {'type': 'line', 'p0': [0.33, 0.37], 'p1': [1.0, 0.54], 'wid': 0.03, 'color': '#120c06', 'mirror': True}, {'type': 'line', 'p0': [0.04, 0.64], 'p1': [0.82, 0.63], 'wid': 0.06, 'color': '#d6c48c', 'mirror': True}])],
-    'agkistrodon-contortrix': [(('pattern', 0, 'shape'), 'hourglass2'), (('pattern', 0, 'wid'), 0.98), (('pattern', 0, 'len'), 1.05), (('colors', 'dorsal'), '#cba68c'), (('colors', 'lateral'), '#c6a288')],
+    'agkistrodon-contortrix': [(('pattern', 0, 'shape'), 'hourglass2'), (('pattern', 0, 'wid'), 0.98), (('pattern', 0, 'len'), 1.05), (('colors', 'dorsal'), '#9a7050'), (('colors', 'lateral'), '#966c4e'), (('pattern', 0, 'color'), '#6a3420')],
     'agkistrodon-piscivorus': [(('pattern', 0, 'shape'), 'hourglass2'), (('pattern', 0, 'alpha'), 0.7), (('pattern', 0, 'wid'), 0.98)],
     'crotalus-horridus': [(('pattern', 1, 'wid'), 0.55), (('pattern', 1, 'len'), 0.42), (('pattern', 1, 'warp'), 0.3)],
     'crotalus-adamanteus': [(('pattern', 0, 'len'), 1.25), (('pattern', 0, 'wid'), 0.19), (('pattern', 0, 'edge'), 0.2)],
@@ -511,7 +560,7 @@ HAND_FIXES = {
     'lampropeltis-getula': [(('pattern',), [{'type': 'chain', 't': [0.05, 0.96], 'count': 24, 'na': 1.5, 'wid': 0.065, 'color': '#ece6cf', 'warp': 0.25, 'a0': 0.3, 'a1': 0.86}, {'type': 'checker', 'belly': True, 'color': '#ece6cf', 'alpha': 0.7, 'skip': 0.1}])],
     'lachesis-muta': [(('colors', 'dorsal'), '#c9a37e'), (('colors', 'lateral'), '#c8a27c'), (('pattern', 0, 'warp'), 0.12), (('pattern', 0, 'inner', 'r'), 0.4), (('pattern', 0, 'inner', 'color'), '#9a7652'), (('pattern', 0, 'len'), 0.72), (('pattern', 0, 'wid'), 0.32), (('pattern', 0, 'count'), 28)],
     # v5.18: eastern milksnake - wider red-brown saddles edged in black on a grey-tan ground
-    "lampropeltis-triangulum": [(("pattern", 0, "wid"), 0.46), (("pattern", 0, "color"), "#8e3a26"), (("pattern", 1, "color"), "#8e3a26"), (("colors", "dorsal"), "#9d9686")],
+    "lampropeltis-triangulum": [(("pattern", 0, "wid"), 0.46), (("pattern", 0, "color"), "#8e3a26"), (("pattern", 1, "color"), "#8e3a26"), (("colors", "dorsal"), "#857d6e"), (("colors", "lateral"), "#80786a")],
     # v5.16: bushmaster - separate dark rhomboid blotches (pale centres) on a pinkish tan ground; they had merged into bands
     # v5.16: yellow-bellied sea snake - the water line lower on its body, so the bright yellow lower flanks show above the water line
     "hydrophis-platurus": [(("colors", "belly"), "#f0c23a"), (("colors", "bellyA"), 0.34), (("scene", "float"), 0.3)],
@@ -575,6 +624,40 @@ VINE = {
 }
 ARBOREAL = {"boiga", "dendrelaphis", "ahaetulla", "chrysopelea", "imantodes", "oxybelis", "leptophis", "dispholidus", "thelotornis", "toxicodryas",
             "dipsadoboa", "philothamnus", "gonyosoma", "corallus", "uromacer", "langaha", "hapsidophrys", "rhamnophis", "thrasops", "xenoxybelis", "chironius"}
+
+
+# v5.43: hognose snakes (Heterodon) - short, stout and heavy-bodied with a short tail; a broad head barely wider than the
+# neck ending in an upturned, pointed, keeled rostral (a shovel snout); pale tan ground with rows of brown blotches finely
+# edged darker (a big row down the back, smaller ones on the flanks), a dark band across the head between the eyes, a dark
+# stripe from the eye to the angle of the jaw, and a pair of long dark blotches on the neck. Keeled scales, round pupils.
+def _hog_marks(col, edge, n=42, wid=0.1, ln=0.55):
+    # three rows of small squarish blotches each side of the spine (the middle one on the spine), alternating, finely edged darker
+    return [{"type": "blotch", "t": [0.07, 0.9], "count": n, "a": 0, "wid": wid, "len": ln, "shape": "rect", "color": col, "edgeColor": edge, "edge": 0.14, "warp": 0.3, "jit": 0.08, "sj": 0.15, "aj": 0.02},
+            {"type": "blotch", "t": [0.07, 0.9], "count": n, "phase": 0.5, "a": 0.36, "mirror": True, "wid": wid * 0.85, "len": ln * 0.95, "shape": "rect", "color": col, "edgeColor": edge, "edge": 0.14, "warp": 0.3, "jit": 0.12, "sj": 0.2},
+            {"type": "blotch", "t": [0.08, 0.9], "count": n, "a": 0.66, "mirror": True, "wid": wid * 0.7, "len": ln * 0.85, "shape": "round", "color": col, "alpha": 0.85, "jit": 0.2, "sj": 0.25},
+            {"type": "band", "t": [0.9, 0.99], "count": 5, "len": 0.45, "color": col, "warp": 0.25, "jit": 0.04},
+            {"type": "line", "p0": [0.2, 0.0], "p1": [0.27, 0.32], "wid": 0.045, "color": edge, "mirror": True, "aa": 0.35},
+            {"type": "line", "p0": [0.36, 0.37], "p1": [0.82, 0.56], "wid": 0.045, "color": edge, "mirror": True, "aa": 0.35},
+            {"type": "spot", "p": [1.32, 0.2], "r": [0.32, 0.1], "color": edge, "mirror": True, "aa": 0.25}]
+SHAPE_KEYS = {"h", "bx", "sx", "k", "L"}
+GENUS_LOOK = {
+    "heterodon": {
+        "h": {"upturn": 0.62, "upLen": 0.34, "eyeX": 0.36, "snoutUp": 0.45, "tip": 0.25, "tipR": 0.08, "snout": 0.42, "snoutH": 0.5, "w": 1.02, "h": 0.6, "len": 0.036,
+              "eye": 0.14, "iris": "#8a6232", "irisInner": "#c29452", "pupil": "round"},
+        "bx": {"ld": 19, "neck": 0.86, "tail": 0.15, "peak": 0.45}, "sx": {"rows": 25, "keel": 0.7, "gloss": 0.25}, "k": 1,
+        "d": "#bf9f74", "lat": "#b8996e", "c": "#8a5428", "b": "#2a2622", "t": "none", "n": 40, "cx": {"bellyA": 0.75, "mottle": 0.06},
+        "pat": _hog_marks("#8a5428", "#4a2c18"),
+        "sp": {
+            # western hognose: pale tan to cream, rich orange-brown blotches; belly largely black
+            "heterodon-nasicus": {"d": "#cdb08a", "lat": "#c8aa84", "c": "#8e4f22", "L": 0.55, "s": "grass", "pat": _hog_marks("#8e4f22", "#4a2814", 46)},
+            # Mexican hognose: like the western, a little yellower, smaller blotches; belly black
+            "heterodon-kennerlyi": {"d": "#b89a6c", "lat": "#b29466", "c": "#6e4424", "L": 0.55, "s": "arid", "pat": _hog_marks("#6e4424", "#3c2414", 46, 0.09, 0.5)},
+            # southern hognose: pale grey-tan with dark brown to blackish blotches; the most sharply upturned snout; pale belly
+            "heterodon-simus": {"d": "#ab9f8a", "lat": "#a69a86", "c": "#2e221a", "b": "#d0c8b8", "L": 0.5, "s": "sand",
+                                "h": {"upturn": 0.8, "snoutUp": 0.5}, "pat": _hog_marks("#2e221a", "#1e1610", 34, 0.13, 0.6)},
+        },
+    },
+}
 
 
 PHOTO_MASK = {}
@@ -684,6 +767,8 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         if g in ("pseudechis", "pseudonaja") and not re.search(r"black|gr[ae]y|dusky|spotted|butler|blue|collett|papuan", nm + " " + c["id"]):
             r_, g_, b_ = hx(a["d"]); H_, L_, S_ = colorsys.rgb_to_hls(r_, g_, b_)
             if S_ < 0.25: a["d"] = "#9a6a42"; a["lat"] = "#a07048"
+        if g == "thamnophis" and a["t"] == "garter" and c["id"] not in CURATED:  # v5.43: garter stripes are bright yellow to cream, the ground darker
+            a["c"] = mix(a["d"], "#efe0a0", 0.8)
         if g == "tantilla": a.setdefault("hc", "#1a1614"); a.setdefault("hcx", 1.0)  # the black head of centipede snakes
         if g == "oligodon" and a["t"] == "speckle": a["t"] = "saddle"
         # v5.34: genus rules from a random sample of 80 photos against their models: groups that are patterned in life
@@ -716,6 +801,14 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
                       "pat": [{"type": "cap", "x0": 0, "x1": 1.0, "wid": 0.42, "color": "#6c7a3c"}, {"type": "line", "p0": [0.02, 0.34], "p1": [1.15, 0.4], "wid": 0.045, "color": "#2a2018", "mirror": True}],
                       "cx": {"speckle": {"p": 0.22, "color": "#221c18", "k": 0.75}, "mottle": 0.16}})
             a["x"] = a.get("x", "").replace("g", "")
+        # v5.43: genera with a look of their own (shape for all their species, colours for living ones), species overrides inside
+        if g in GENUS_LOOK:
+            look = GENUS_LOOK[g]; sp_o = look.get("sp", {}).get(c["id"], {})
+            for k_, v_ in list(look.items()) + list(sp_o.items()):
+                if k_ == "sp" or (c["fossil"] and k_ not in SHAPE_KEYS): continue
+                a[k_] = dict(a.get(k_) or {}, **v_) if isinstance(v_, dict) else v_
+            if not c["fossil"]: a["x"] = a.get("x", "").replace("g", "")
+            if "x" in a and not a["x"]: a.pop("x")
         if c["id"] in CURATED:  # v4.81: hand-checked against its photo
             a.update(CURATED[c["id"]]); a["x"] = a.get("x", "").replace("g", "").replace("l", "" if "L" in CURATED[c["id"]] else "l")
             if not a["x"]: a.pop("x")
