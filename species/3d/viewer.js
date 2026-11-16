@@ -8,7 +8,7 @@
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
 import * as NATURE from './nature.js?r=536'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=536'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as EXTRA from './extras.js?r=543'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -1919,6 +1919,19 @@ export function mount(host, opts) {
   const canvas = document.createElement('canvas'); canvas.className = 'sp3d-canvas'; canvas.tabIndex = 0;
   canvas.setAttribute('role', 'img'); canvas.setAttribute('aria-label', '3D model of ' + opts.name + '. Arrow keys rotate, plus and minus zoom, R resets the view.');
   stage.append(canvas, labels, hint, status);
+  // v5.43: one loading cover over the whole 3D view while the snake and its surroundings are being built - it
+  // stays until everything is ready and the first full picture is drawn, then goes with it
+  if (!document.getElementById('sp3d-busy-css')) { const st = document.createElement('style'); st.id = 'sp3d-busy-css';
+    st.textContent = '.sp3d-busy{position:absolute;inset:0;z-index:6;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:12px;background:var(--bg,#f1f6ec);color:var(--ink,#24321f);font:500 15px/1.3 Inter,system-ui,sans-serif;border-radius:inherit;transition:opacity .3s ease}'
+      + '.sp3d-busy.out{opacity:0;pointer-events:none}.sp3d-busy i{flex:none;width:34px;height:34px;border-radius:50%;border:4px solid rgba(87,171,69,.22);border-top-color:#57ab45;animation:sp3dbusy .8s linear infinite;box-sizing:border-box}'
+      + '@keyframes sp3dbusy{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){.sp3d-busy i{animation-duration:2.4s}.sp3d-busy{transition:none}}';
+    document.head.appendChild(st); }
+  const busy = el('div', 'sp3d-busy'); busy.setAttribute('role', 'status'); busy.append(el('i'), el('span', '', 'Loading the 3D model\u2026'));
+  if (getComputedStyle(stage).position === 'static') stage.style.position = 'relative';
+  stage.appendChild(busy);
+  let busyFor = null;
+  const busyShow = () => { busy.hidden = false; busy.classList.remove('out'); };
+  const busyHide = (pr) => { if (pr !== busyFor) return; requestAnimationFrame(() => requestAnimationFrame(() => { if (pr !== busyFor) return; busy.classList.add('out'); setTimeout(() => { if (pr === busyFor) busy.hidden = true; }, 320); })); };
   const bar = el('div', 'sp3d-bar'); bar.setAttribute('role', 'toolbar'); bar.setAttribute('aria-label', '3D view controls');
   const btn = (txt, title, cls) => { const b = el('button', 'sp3d-b' + (cls ? ' ' + cls : ''), txt); b.type = 'button'; if (title) b.title = title; bar.appendChild(b); return b; };
   const vg = el('span', 'sp3d-views'); vg.setAttribute('role', 'group'); vg.setAttribute('aria-label', 'Views');
@@ -2107,6 +2120,7 @@ float slScale(vec2 m) {
       const tE = performance.now(); env.name = envName; applyEnv(ctx, P, F, poseInfo, env); perfT('applyEnv', tE); if (!cScene.checked) setSceneVisible(false); dirty = true; kick(); return true;
     }).catch(() => false) : Promise.resolve(false);
     ctx.envReady = Promise.all([ctx.envReady, ctx.natureReady, ctx.patternReady]).then((r) => r[0]); // (tests wait for everything)
+    { const pr = ctx.envReady; busyFor = pr; busyShow(); pr.finally(() => busyHide(pr)); }
 
     const headPos = body.surf(F.Hl * 0.45, 0).p;
     const headDir = body.frameAt(F.Hl * 0.5).T.clone().negate(); // pointing out of the snout

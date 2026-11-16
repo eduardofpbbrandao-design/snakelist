@@ -45,9 +45,9 @@ const CSS = `
 @media (max-width:640px){.sp-rl-hd,.sl3d-hd{flex-wrap:wrap}.sp-rl-hd .sp3d-hdb,.sl3d-hd .sp3d-hdb{order:3;flex-basis:100%}}
 .sp3d-b:disabled{opacity:.6;cursor:default}
 .sp3d-bar.sp3d-few .sp3d-more:not([aria-pressed=true]){display:none}
-.sp3d-b.sp3d-morebtn,.sp3d-b.sp3d-morebtn[aria-expanded=true]{background:var(--bg);color:var(--g);border-color:var(--g)}
-.sp3d-b.sp3d-morebtn::after{content:"";display:inline-block;width:6px;height:6px;margin:0 0 3px 7px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);vertical-align:middle}
-.sp3d-b.sp3d-morebtn[aria-expanded=true]::after{transform:rotate(-135deg);margin-bottom:-1px}
+.sp3d-b.sp3d-morebtn{display:inline-flex;align-items:center;gap:6px;align-self:center;min-height:0;height:auto;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--muted,#5f6f5a);font:400 11.5px/1.3 Inter,system-ui,sans-serif;box-shadow:none}.sp3d-b.sp3d-morebtn:hover{border-color:#7fc76a;color:var(--ink,#24321f);background:var(--bg)}.sp3d-b.sp3d-morebtn[aria-expanded=true]{background:linear-gradient(135deg,#4fa64a 0%,#7fc266 145%);border-color:#3f8f3b;color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(36,50,31,.18)}
+.sp3d-b.sp3d-morebtn::after{content:"";width:6px;height:6px;margin:0;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-2px) rotate(45deg);transition:transform .15s ease}
+.sp3d-b.sp3d-morebtn[aria-expanded=true]::after{transform:translateY(1px) rotate(-135deg)}
 .sp3d-capt{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);width:max-content;max-width:min(92%,580px);padding:8px 14px;border-radius:12px;background:rgba(12,26,18,.88);color:#fff;font:500 14px/1.45 Inter,system-ui,sans-serif;text-align:center;pointer-events:none;box-shadow:0 2px 10px rgba(0,0,0,.3);transition:opacity .35s}
 .sp3d-capt[hidden]{display:none}.sp3d-capt b{color:#ffd66b}
 .sp3d-step{position:absolute;right:10px;top:10px;padding:3px 10px;border-radius:999px;background:rgba(12,26,18,.8);color:#fff;font:600 12px/1.5 Inter,system-ui,sans-serif;pointer-events:none}
