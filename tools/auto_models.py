@@ -302,6 +302,9 @@ CURATED = {
     "masticophis-taeniatus": {"d": "#2a2a26", "lat": "#33312a", "c": "#e8e2c8", "b": "#e8dcc8", "t": "stripe"},
     "calamaria-yunnanensis": {"d": "#18171a", "lat": "#1a191c", "b": "#e0782a", "t": "plain", "ls": ["#e0782a", 0.56, 0.09]},
     # v5.34: a random sample of 80 photos against their models
+    "uropeltis-bhupathyi": {"d": "#24262c", "lat": "#26282e", "t": "plain"},
+    "uropeltis-macrolepis": {"d": "#1e2026", "lat": "#1e2026", "b": "#e8b830", "t": "plain", "ls": ["#e8b830", 0.66, 0.12]},
+    "hydrophis-cyanocinctus": {"d": "#c4c2a4", "lat": "#c4c2a4"},
     "bungarus-flaviceps": {"d": "#151416", "lat": "#151416", "t": "plain", "hc": "#c8402a", "hcx": 1.1, "tt": "#c8402a"},
     "pseudoboa-serrana": {"d": "#c8743a", "lat": "#c8743a", "t": "plain"},
     "clonophis-kirtlandii": {"d": "#9a5a3a", "lat": "#9a5a3a", "c": "#2a1a14", "t": "spot"},
@@ -520,7 +523,8 @@ def head_of(c, g, plan):
         return {}
     if f in ("Homalopsidae", "Acrochordidae"): return {"nostrilA": 25, "eyeA": 45}
     if f == "Xenopeltidae": return {"plates": True, "h": 0.52}
-    if f in ("Uropeltidae",): return {"snout": 0.45, "tip": 0.35, "w": 0.85, "eye": 0.08, "len": 0.03}  # small conical heads, tiny eyes, no neck
+    if f in ("Uropeltidae",):  # small conical heads ending in a point (the rostral), tiny eyes, no neck
+        return {"snout": 0.34 if g == "rhinophis" else 0.4, "tip": 0.28, "tipR": 0.07, "snoutH": 0.45, "chin": 0.6, "w": 0.8, "eye": 0.07, "len": 0.034, "minR": 1.4, "brow": 0}
     if f == "Atractaspididae": return {"w": 0.85, "snout": 0.75, "len": 0.028, "eye": 0.09}
     if f in ("Lamprophiidae", "Prosymnidae", "Pseudoxyrhophiidae"): return {"w": 0.95, "snout": 0.72, "len": 0.032}
     if f == "Colubridae" or plan == "colubrid":
