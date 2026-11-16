@@ -1221,6 +1221,27 @@
     .sl-achbox { width: 100%; max-height: 86vh; border-radius: 18px 18px 0 0; border-bottom: 0; padding: 10px 16px calc(20px + env(safe-area-inset-bottom)); animation: sl-aup .28s cubic-bezier(.2,.9,.3,1); }
     .sl-achbox::before { content: ""; display: block; width: 38px; height: 4px; border-radius: 99px; background: var(--border); margin: 0 auto 10px; }
   }
+  /* v5.45: three groups, the species steps card, small progress under locked names */
+  .sl-agrp { margin: 14px 0 0; }
+  .sl-agrp h3 { display: flex; align-items: baseline; justify-content: space-between; margin: 0 0 7px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .02em; color: var(--text); }
+  .sl-agrp h3 span { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; color: var(--text-muted); }
+  .sl-asub { display: block; margin-top: 1px; font-size: 11.5px; font-weight: 500; color: var(--text-muted); }
+  .sl-asteprow { list-style: none; display: flex; gap: 5px; margin: -2px 12px 11px 52px; padding: 0; flex-wrap: wrap; }
+  .sl-asteprow li { display: inline-flex; align-items: center; gap: 3px; min-width: 26px; justify-content: center; padding: 2px 7px; border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); background: rgba(0,0,0,0.05); border: 1px solid transparent; }
+  [data-sl-theme="dark"] .sl-asteprow li { background: rgba(255,255,255,0.07); }
+  .sl-asteprow li.on { background: var(--gold-fill); color: #fff; }
+  .sl-asteprow li svg { width: 11px; height: 11px; }
+  .sl-astepdet { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+  .sl-astepdet li { display: grid; grid-template-columns: 1fr auto; gap: 1px 10px; padding: 7px 9px; border-radius: 9px; background: rgba(0,0,0,0.04); }
+  [data-sl-theme="dark"] .sl-astepdet li { background: rgba(255,255,255,0.06); }
+  .sl-astepdet b { font-size: 12.5px; } .sl-astepdet span { grid-column: 1; font-size: 12px; color: var(--text-muted); }
+  .sl-astepdet em { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-style: normal; font-size: 11.5px; color: var(--text-muted); text-align: right; }
+  .sl-astepdet li.on em { color: var(--gold); font-weight: 600; }
+  .quiz-round-done { margin: 8px 0 0; font-weight: 600; }
+  /* the row sits in the same centred column as the search and filters (it drifted to the left on wide screens) */
+  .sl-achrow { max-width: 900px; margin-left: auto; margin-right: auto; }
+  @media (min-width: 960px) { .sl-achrow { max-width: 1280px; } }
   @keyframes sl-afade { from { opacity: 0; } }
   @keyframes sl-apop { from { opacity: 0; transform: translateY(8px) scale(.98); } }
   @keyframes sl-aup { from { transform: translateY(100%); } }
@@ -3825,7 +3846,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
 </script>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v5.44</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v5.45</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-head"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-head)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All <span data-sl-total>4,247</span> snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -9908,7 +9929,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
       { sel: "#tab-sightings", title: "My Sightings", text: "Every snake you've marked as seen." },
       { sel: "#tab-wish", title: "Want to see", text: "The snakes you'd love to find one day." },
       { sel: "#tab-follow", title: "Following", text: "The snakes you follow, with their news." },
-      { sel: "#sl-ach-btn", title: "Achievements", text: "How many snakes you have seen, and the milestones you earn as your list grows. Tap Achievements to see them." },
+      { sel: "#sl-ach-btn", title: "Achievements", text: "How many snakes you have seen, and the badges you earn for your life list, your own sightings and the quiz. Tap Achievements to see them." },
       { sel: "#tab-map", center: true, title: "Map", text: "Now let's go to the map - SnakeList will take you there." },
       { sel: "#globe-stage", center: true, go: goTab("map"), wait: 900, title: "The map", text: "The world map of snakes. Drag to move around, scroll or pinch to zoom, and click any country to see the snakes that live there." },
       { sel: "#hm-toggle", act: "click", tryIt: "Try it: click Species Heatmap to turn it on.", title: "Species Heatmap", text: "Colours every country by how many kinds of snakes live there - or where one snake you search for lives." },
@@ -10486,7 +10507,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     const nowWon = new Set(BADGES.filter((b) => s[b.statKey] >= b.goal).map((b) => b.name));
     // v5.41: only the Checklist's milestones pop up now ("Achievement earned · First snake spotted")
     wonBadgeNames = nowWon;
-    if (typeof checkMilestones === "function" && mileReady) checkMilestones(s.seen);
+    if (mileReady && window.SL_checkAch) window.SL_checkAch();
   }
   // establish the "already earned" baseline right now, before any new action can happen -
   // otherwise the very first badge earned after a fresh load would wrongly be treated as
@@ -10632,77 +10653,179 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     }
   }
 
-  // v5.41: Achievements live in the Checklist - a trophy button beside "Snakes seen" opens a small
-  // panel (a sheet from the bottom on phones) with four milestones. Each species counts once (a
-  // species is one card, however many encounters it has). Older saved achievement data is kept.
-  const MILES = [
-    { goal: 1, name: "First snake spotted" },
-    { goal: 5, name: "5 different species spotted" },
-    { goal: 10, name: "10 different species spotted" },
-    { goal: 25, name: "25 different species spotted" },
-  ];
-  let mileHad = null, achOpenGoal = null, achLastFocus = null;
-  const mileDates = () => { try { const d = JSON.parse(localStorage.getItem("sl-ach-dates") || "{}"); return d && typeof d === "object" ? d : {}; } catch (err) { return {}; } };
-  const spotted = (n, g) => n.toLocaleString() + " of " + g.toLocaleString() + " species spotted";
-  function toastMile(m) {
+  // v5.45: Achievements live in the Checklist - a trophy button beside "Snakes seen" opens a small
+  // panel (a sheet from the bottom on phones): your next milestone, then three groups - Life List,
+  // My Sightings and Quiz. Everything is worked out from what is already saved (the Checklist,
+  // your own sightings and photos, quiz history), so older progress counts too. Once earned, a
+  // badge stays earned: sl-ach-dates keeps { id: ISO date, or "" when the date isn't known }.
+  // Merged from the older badges (same thing rewarded): Mark seen 1/5/10/50/100 -> the species
+  // steps, Add a photo 1/x5 -> First Photo Record / Photo Life List, Log the date -> First Field Record.
+  const ACH_SECTIONS = [["life", "Life List"], ["sight", "My Sightings"], ["quiz", "Quiz"]];
+  const ACH_STEPS = [
+    { id: "sp1", goal: 1, name: "First Snake", note: "Mark your first species as seen.", old: "Mark seen" },
+    { id: "sp5", goal: 5, name: "Five Species", note: "Mark 5 different species as seen.", old: "Mark seen ×5" },
+    { id: "sp10", goal: 10, name: "Ten Species", note: "Mark 10 different species as seen.", old: "Mark seen ×10" },
+    { id: "sp25", goal: 25, name: "Twenty-Five Species", note: "Mark 25 different species as seen." },
+    { id: "sp50", goal: 50, name: "Fifty Species", note: "Mark 50 different species as seen.", old: "Mark seen ×50" },
+    { id: "sp100", goal: 100, name: "One Hundred Species", note: "Mark 100 different species as seen.", old: "Mark seen ×100" },
+  ].map((b) => Object.assign(b, { grp: "life", stat: "seen", unit: ["species seen", "species seen"] }));
+  const ACH_LIST = ACH_STEPS.concat([
+    { id: "fam3", grp: "life", stat: "families", goal: 3, name: "Family Explorer", note: "See snakes from 3 different families.", unit: ["family", "families"] },
+    { id: "fam5", grp: "life", stat: "families", goal: 5, name: "Family Collector", note: "See snakes from 5 different families.", unit: ["family", "families"] },
+    { id: "wish", grp: "life", stat: "wishFound", goal: 1, name: "Wishlist Find", note: "Mark a species as seen after saving it to Want to see.", unit: ["Want to see snake found", "Want to see snakes found"] },
+    { id: "rec1", grp: "sight", stat: "records", goal: 1, name: "First Field Record", note: "Save your first personal sighting (a date or a place on a snake you've seen).", unit: ["sighting", "sightings"], old: "Log the date" },
+    { id: "days5", grp: "sight", stat: "days", goal: 5, name: "Field Journal", note: "Save personal sightings on 5 different dates. This can be at your own pace.", unit: ["date", "dates"] },
+    { id: "ph1", grp: "sight", stat: "photos", goal: 1, name: "First Photo Record", note: "Add your own photo to one personal sighting.", unit: ["species with your photo", "species with your photos"], old: "Add a photo" },
+    { id: "ph5", grp: "sight", stat: "photos", goal: 5, name: "Photo Life List", note: "Add your own photos to sightings of 5 different species.", unit: ["species with your photo", "species with your photos"], old: "Add a photo ×5" },
+    { id: "cty2", grp: "sight", stat: "countries", goal: 2, name: "Two Countries", note: "Log personal sightings in 2 different countries (the places you enter on your own sightings).", unit: ["country", "countries"] },
+    { id: "cty5", grp: "sight", stat: "countries", goal: 5, name: "Five Countries", note: "Log personal sightings in 5 different countries (the places you enter on your own sightings).", unit: ["country", "countries"] },
+    { id: "q1", grp: "quiz", stat: "rounds", goal: 1, name: "First Quiz", note: "Finish any quiz round: 10 questions in a row on one difficulty, or a whole game of Impossible.", unit: ["round finished", "rounds finished"] },
+    { id: "qe", grp: "quiz", stat: "perfEasy", goal: 1, name: "Perfect Practice", note: "Get every answer right in an Easy round (10 out of 10).", unit: ["perfect Easy round", "perfect Easy rounds"] },
+    { id: "qm", grp: "quiz", stat: "perfMedium", goal: 1, name: "Perfect Round", note: "Get every answer right in a Medium round (10 out of 10).", unit: ["perfect Medium round", "perfect Medium rounds"] },
+    { id: "qh", grp: "quiz", stat: "perfHard", goal: 1, name: "Hard Mode Perfect", note: "Get every answer right in a Hard round (10 out of 10).", unit: ["perfect Hard round", "perfect Hard rounds"] },
+    { id: "qr", grp: "quiz", stat: "rangeOk", goal: 10, name: "Range Reader", note: "Get 10 correct answers across questions about where snakes live.", unit: ["correct answer", "correct answers"] },
+    { id: "qf", grp: "quiz", stat: "factOk", goal: 10, name: "Snake Facts", note: "Get 10 correct answers across snake-fact questions.", unit: ["correct answer", "correct answers"] },
+  ]);
+  const ACH_BY_ID = {}; ACH_LIST.forEach((b) => { ACH_BY_ID[b.id] = b; });
+  // the v5.41 milestones were saved by their goal number
+  const ACH_V541 = { 1: "sp1", 5: "sp5", 10: "sp10", 25: "sp25" };
+  let achHad = null, achOpenId = null, achLastFocus = null;
+  function achStore() {
+    let d = {};
+    try { d = JSON.parse(localStorage.getItem("sl-ach-dates") || "{}") || {}; } catch (err) {}
+    if (typeof d !== "object") d = {};
+    Object.keys(ACH_V541).forEach((g) => { if (d[g] != null) { if (d[ACH_V541[g]] == null) d[ACH_V541[g]] = d[g]; delete d[g]; } });
+    return d;
+  }
+  const achSave = (d) => { try { localStorage.setItem("sl-ach-dates", JSON.stringify(d)); } catch (err) {} };
+  // the countries a sighting's place names, read off the place you typed (its last part that is a country)
+  let achCountryIx = null;
+  function achCountryOf(where) {
+    if (!where) return "";
+    if (!achCountryIx) {
+      achCountryIx = {};
+      cards.forEach((c) => (c.dataset.countries || "").split("|").forEach((n) => { if (n) achCountryIx[n.toLowerCase()] = n; }));
+      const al = { "usa": "United States", "us": "United States", "u.s.": "United States", "u.s.a.": "United States", "united states of america": "United States", "america": "United States",
+        "uk": "United Kingdom", "u.k.": "United Kingdom", "england": "United Kingdom", "scotland": "United Kingdom", "wales": "United Kingdom", "great britain": "United Kingdom" };
+      Object.keys(al).forEach((k) => { if (!achCountryIx[k] && achCountryIx[al[k].toLowerCase()]) achCountryIx[k] = achCountryIx[al[k].toLowerCase()]; });
+    }
+    const parts = String(where).replace(/^≈\s*/, "").split(/[,;·]/).map((s) => s.trim().toLowerCase()).filter(Boolean);
+    for (let i = parts.length - 1; i >= 0; i--) if (achCountryIx[parts[i]]) return achCountryIx[parts[i]];
+    return "";
+  }
+  const achNum = (k) => { try { return +localStorage.getItem(k) || 0; } catch (err) { return 0; } };
+  function achStats() {
+    const s = { seen: 0, families: 0, wishFound: 0, records: 0, days: 0, photos: 0, countries: 0 };
+    const fam = new Set(), days = new Set(), ctys = new Set();
+    cards.forEach((c) => {
+      if (!c.classList.contains("done")) return;
+      s.seen++;
+      if (c.dataset.family) fam.add(c.dataset.family);
+      if (c.classList.contains("wish")) s.wishFound++;
+      const nb = c.querySelector(".note-btn"), enc = nb && window.SL_readEnc ? window.SL_readEnc(nb) : [];
+      s.records += enc.length;
+      enc.forEach((x) => { if (x.iso) days.add(x.iso); const k = achCountryOf(x.where); if (k) ctys.add(k); });
+      const pb = c.querySelector(".photo-btn");
+      if (pb && pb.classList.contains("has-photo")) s.photos++;
+    });
+    s.families = fam.size; s.days = days.size; s.countries = ctys.size;
+    s.rounds = achNum("sl-quiz-rounds"); s.perfEasy = achNum("sl-quiz-perfect-easy"); s.perfMedium = achNum("sl-quiz-perfect-medium"); s.perfHard = achNum("sl-quiz-perfect-hard");
+    s.rangeOk = achNum("sl-quiz-range-ok"); s.factOk = achNum("sl-quiz-fact-ok");
+    return s;
+  }
+  function toastMile(b) {
     const region = document.getElementById("ach-toast-region");
     if (!region) return;
     const el = document.createElement("div");
     el.className = "sl-mtoast"; el.setAttribute("role", "status");
-    el.innerHTML = '<span class="sl-mtoast-ic" aria-hidden="true">' + ACH_TROPHY + "</span><span>Achievement earned &middot; <b>" + achEsc(m.name) + "</b></span>";
+    el.innerHTML = '<span class="sl-mtoast-ic" aria-hidden="true">' + ACH_TROPHY + "</span><span>Achievement earned &middot; <b>" + achEsc(b.name) + "</b></span>";
     region.appendChild(el);
     setTimeout(() => el.classList.add("out"), 3600);
     setTimeout(() => el.remove(), 4100);
   }
-  function checkMilestones(seen) {
+  // works out what is earned; new unlocks get today's date and a short message, while the
+  // first look after loading (older progress) is recorded quietly, without a date
+  function checkAch() {
+    const s = achStats(), d = achStore();
     const n = document.getElementById("sl-seen-n");
-    if (n) n.textContent = seen.toLocaleString();
-    const now = MILES.filter((m) => seen >= m.goal);
-    if (mileHad) {
-      const d = mileDates(); let changed = false;
-      now.forEach((m) => { if (mileHad.indexOf(m.goal) < 0) { toastMile(m); if (!d[m.goal]) { d[m.goal] = new Date().toISOString(); changed = true; } } });
-      if (changed) try { localStorage.setItem("sl-ach-dates", JSON.stringify(d)); } catch (err) {}
+    if (n) n.textContent = s.seen.toLocaleString();
+    let changed = false;
+    if (!achHad) {
+      // older badges already won (the earlier Achievements tab's list) carry over to the badge that rewards the same thing
+      let oldWon = [];
+      try { oldWon = JSON.parse(localStorage.getItem("sl-ach-seen") || "[]") || []; } catch (err) {}
+      if (wonBadgeNames) oldWon = oldWon.concat([...wonBadgeNames]);
+      ACH_LIST.forEach((b) => { if (b.old && oldWon.indexOf(b.old) >= 0 && d[b.id] == null) { d[b.id] = ""; changed = true; } });
     }
-    mileHad = now.map((m) => m.goal);
+    const fresh = [];
+    ACH_LIST.forEach((b) => {
+      if (d[b.id] != null || s[b.stat] < b.goal) return;
+      if (achHad) { d[b.id] = new Date().toISOString(); fresh.push(b); } else d[b.id] = "";
+      changed = true;
+    });
+    if (changed) achSave(d);
+    achHad = true;
+    fresh.slice(0, 3).forEach((b, i) => setTimeout(() => toastMile(b), i * 900));
     const dlg = document.getElementById("sl-achdlg");
     if (dlg && !dlg.hidden) renderAchDlg();
   }
+  let achT = 0;
+  const achSoon = () => { clearTimeout(achT); achT = setTimeout(checkAch, 350); };
+  window.SL_checkAch = achSoon;
   const ACH_TROPHY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"></path><path d="M7 6H4.5A2.5 2.5 0 0 0 7 10.5"></path><path d="M17 6h2.5A2.5 2.5 0 0 1 17 10.5"></path><path d="M12 14v3.5"></path><path d="M8.5 20.5h7"></path><path d="M9.5 20.5c0-1.7 1.1-3 2.5-3s2.5 1.3 2.5 3"></path></svg>';
   const ACH_SMALL_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="10.5" width="13" height="9.5" rx="2"></rect><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"></path></svg>';
-  const ACH_FLAG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>';
+  const ACH_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>';
   const achBar = (have, goal) => '<span class="sl-abar" role="progressbar" aria-valuemin="0" aria-valuemax="' + goal + '" aria-valuenow="' + Math.min(have, goal) + '"><i style="width:' + Math.round(Math.min(have, goal) / goal * 100) + '%"></i></span>';
+  const achOf = (b, have) => Math.min(have, b.goal).toLocaleString() + " of " + b.goal.toLocaleString() + " " + (b.goal === 1 ? b.unit[0] : b.unit[1]);
+  const achWhen = (iso) => { const t = iso ? new Date(iso) : null; return t && !isNaN(t) ? "Earned " + t.toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" }) : "Earned (date not saved)"; };
+  function achDetail(b, s, d) {
+    const won = d[b.id] != null;
+    return "<p>" + achEsc(b.note) + "</p>" + (won ? '<p class="sl-adate">' + achWhen(d[b.id]) + "</p>"
+      : achBar(s[b.stat], b.goal) + '<p class="sl-aprog">' + achOf(b, s[b.stat]) + "</p>");
+  }
+  function achRow(b, s, d) {
+    const won = d[b.id] != null, open = achOpenId === b.id;
+    return '<li class="sl-abadge ' + (won ? "is-earned" : "is-locked") + (open ? " open" : "") + '"><button type="button" class="sl-abtn" data-aid="' + b.id + '" aria-expanded="' + open + '" aria-controls="sl-adet-' + b.id + '">' +
+      '<span class="sl-aic" aria-hidden="true">' + (won ? ACH_CHECK : ACH_SMALL_LOCK) + "</span>" +
+      '<span class="sl-at">' + achEsc(b.name) + (won ? "" : '<small class="sl-asub">' + Math.min(s[b.stat], b.goal).toLocaleString() + " / " + b.goal.toLocaleString() + "</small>") + "</span>" +
+      '<span class="sl-ast">' + (won ? "Earned" : "Locked") + "</span>" +
+      '<svg class="sl-achev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
+      '<div class="sl-adet" id="sl-adet-' + b.id + '"' + (open ? "" : " hidden") + ">" + achDetail(b, s, d) + "</div></li>";
+  }
+  // the species-count badges are one card with its steps, so the panel stays short
+  function achStepsCard(s, d) {
+    const open = achOpenId === "steps", won = ACH_STEPS.filter((b) => d[b.id] != null).length, all = won === ACH_STEPS.length;
+    const next = ACH_STEPS.find((b) => d[b.id] == null);
+    let h = '<li class="sl-abadge sl-asteps ' + (won ? "is-earned" : "is-locked") + (open ? " open" : "") + '"><button type="button" class="sl-abtn" data-aid="steps" aria-expanded="' + open + '" aria-controls="sl-adet-steps">' +
+      '<span class="sl-aic" aria-hidden="true">' + (won ? ACH_CHECK : ACH_SMALL_LOCK) + "</span>" +
+      '<span class="sl-at">Species seen<small class="sl-asub">' + won + " of " + ACH_STEPS.length + " steps</small></span>" +
+      '<span class="sl-ast">' + (all ? "Earned" : won ? won + " earned" : "Locked") + "</span>" +
+      '<svg class="sl-achev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
+      '<ol class="sl-asteprow" aria-label="Species steps">' + ACH_STEPS.map((b) => '<li class="' + (d[b.id] != null ? "on" : "") + '" title="' + achEsc(b.name) + '">' + (d[b.id] != null ? '<span aria-hidden="true">' + ACH_CHECK + "</span>" : "") + b.goal + '<span class="sr-only">' + (d[b.id] != null ? " earned" : " locked") + "</span></li>").join("") + "</ol>" +
+      '<div class="sl-adet" id="sl-adet-steps"' + (open ? "" : " hidden") + ">" +
+      "<p>Each species counts once, even if you have logged it several times.</p>" +
+      (next ? achBar(s.seen, next.goal) + '<p class="sl-aprog">' + achOf(next, s.seen) + " for " + achEsc(next.name) + "</p>" : "") +
+      '<ul class="sl-astepdet">' + ACH_STEPS.map((b) => '<li class="' + (d[b.id] != null ? "on" : "") + '"><b>' + achEsc(b.name) + "</b><span>" + achEsc(b.note) + "</span><em>" +
+        (d[b.id] != null ? achWhen(d[b.id]) : Math.min(s.seen, b.goal) + " / " + b.goal) + "</em></li>").join("") + "</ul></div></li>";
+    return h;
+  }
   function renderAchDlg() {
     const box = document.getElementById("sl-achbody");
     if (!box) return;
-    const seen = cards.filter((c) => c.classList.contains("done")).length;
-    const d = mileDates();
-    const next = MILES.find((m) => seen < m.goal);
+    const s = achStats(), d = achStore();
+    // your next milestone: the next species step, or else the locked badge you are closest to
+    let next = ACH_STEPS.find((b) => d[b.id] == null);
+    if (!next) next = ACH_LIST.filter((b) => d[b.id] == null).sort((x, y) => s[y.stat] / y.goal - s[x.stat] / x.goal)[0];
     let html = '<div class="sl-anext">';
-    if (next) html += '<p class="sl-akick">Next milestone</p><p class="sl-aname">' + next.name + "</p>" + achBar(seen, next.goal) + '<p class="sl-aprog">' + spotted(seen, next.goal) + "</p>";
-    else html += '<p class="sl-akick">All milestones earned</p><p class="sl-aname">You have spotted ' + seen.toLocaleString() + " different species</p>" + achBar(1, 1) + '<p class="sl-aprog">Every milestone here is yours.</p>';
-    html += '</div><ul class="sl-alist">';
-    MILES.forEach((m) => {
-      const st = seen >= m.goal ? "earned" : m === next ? "progress" : "locked";
-      const label = st === "earned" ? "Earned" : st === "progress" ? "In progress" : "Locked";
-      const open = achOpenGoal === m.goal;
-      let det;
-      if (st === "earned") {
-        const when = d[m.goal] ? new Date(d[m.goal]) : null;
-        det = "<p>" + (m.goal === 1 ? "You marked your first snake as seen." : "You marked " + m.goal + " different species as seen.") + "</p>" +
-          (when && !isNaN(when) ? '<p class="sl-adate">Earned ' + when.toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" }) + "</p>" : "");
-      } else {
-        const left = m.goal - seen;
-        det = "<p>" + (m.goal === 1 ? "Mark any snake as Seen in the Checklist to earn this." : "Spot " + left + " more different species to earn this. Each species counts once, however many times you log it.") + "</p>" +
-          achBar(seen, m.goal) + '<p class="sl-aprog">' + spotted(seen, m.goal) + "</p>";
-      }
-      html += '<li class="sl-abadge is-' + st + (open ? " open" : "") + '"><button type="button" class="sl-abtn" data-goal="' + m.goal + '" aria-expanded="' + open + '" aria-controls="sl-adet-' + m.goal + '">' +
-        '<span class="sl-aic" aria-hidden="true">' + (st === "earned" ? ACH_TROPHY : st === "locked" ? ACH_SMALL_LOCK : ACH_FLAG) + "</span>" +
-        '<span class="sl-at">' + m.name + "</span>" +
-        '<span class="sl-ast">' + (st === "locked" ? '<span class="sl-alock" aria-hidden="true">' + ACH_SMALL_LOCK + "</span>" : "") + label + "</span>" +
-        '<svg class="sl-achev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
-        '<div class="sl-adet" id="sl-adet-' + m.goal + '"' + (open ? "" : " hidden") + ">" + det + "</div></li>";
+    if (next) html += '<p class="sl-akick">Your next milestone</p><p class="sl-aname">' + achEsc(next.name) + "</p>" + achBar(s[next.stat], next.goal) + '<p class="sl-aprog">' + achOf(next, s[next.stat]) + "</p>";
+    else html += '<p class="sl-akick">Every achievement earned</p><p class="sl-aname">You have them all</p>' + achBar(1, 1);
+    html += "</div>";
+    ACH_SECTIONS.forEach(([g, label]) => {
+      const list = ACH_LIST.filter((b) => b.grp === g && !(g === "life" && b.stat === "seen"));
+      const won = ACH_LIST.filter((b) => b.grp === g && d[b.id] != null).length, tot = ACH_LIST.filter((b) => b.grp === g).length;
+      html += '<section class="sl-agrp"><h3>' + label + "<span>" + won + " / " + tot + '</span></h3><ul class="sl-alist">' + (g === "life" ? achStepsCard(s, d) : "") + list.map((b) => achRow(b, s, d)).join("") + "</ul></section>";
     });
-    box.innerHTML = html + "</ul>";
+    box.innerHTML = html;
   }
   function closeAch() {
     const dlg = document.getElementById("sl-achdlg");
@@ -10729,10 +10852,10 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
       dlg.addEventListener("click", (e) => {
         const b = e.target.closest && e.target.closest(".sl-abtn");
         if (!b) return;
-        const g = +b.dataset.goal;
-        achOpenGoal = achOpenGoal === g ? null : g;
+        const g = b.dataset.aid;
+        achOpenId = achOpenId === g ? null : g;
         renderAchDlg();
-        const nb = dlg.querySelector('.sl-abtn[data-goal="' + g + '"]'); if (nb) nb.focus({ preventScroll: true });
+        const nb = dlg.querySelector('.sl-abtn[data-aid="' + g + '"]'); if (nb) nb.focus({ preventScroll: true });
       });
       dlg.addEventListener("keydown", (e) => {
         if (e.key === "Escape") { e.preventDefault(); closeAch(); return; }
@@ -10744,7 +10867,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
       });
     }
     achLastFocus = document.activeElement && document.activeElement !== document.body ? document.activeElement : document.getElementById("sl-ach-btn");
-    achOpenGoal = null;
+    achOpenId = null;
     renderAchDlg();
     dlg.hidden = false;
     document.documentElement.classList.add("sl-achdlg-on");
@@ -10753,7 +10876,9 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
   window.SL_openAch = openAch;
   document.getElementById("sl-ach-btn").addEventListener("click", openAch);
   mileReady = true;
-  checkMilestones(computeStats().seen);
+  checkAch();
+  // anything changing on a card (Seen, Want to see, a sighting's date or place, a photo) is checked a moment later
+  new MutationObserver(achSoon).observe(document.getElementById("grid"), { subtree: true, attributes: true, attributeFilter: ["class", "data-iso", "data-where", "data-more"] });
 
   // Chrome only — deliberately touches nothing inside the sync region, so it is safe to
   // run when a tick arrives from another device (which is not a gesture here).
@@ -12072,8 +12197,24 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     document.getElementById("quiz-levels").hidden = false;
     document.getElementById("quiz-play").hidden = true;
   }
+  // v5.45: quiz history for the Achievements - a round is 10 questions in a row on one difficulty
+  // (or a whole game of Impossible); correct answers are counted apart for "where it lives" and snake facts
+  const QUIZ_ROUND = 10;
+  let quizRun = null;
+  const quizBump = (k) => { try { localStorage.setItem(k, (+localStorage.getItem(k) || 0) + 1); } catch (err) {} };
+  function quizTally(ok, kind) {
+    if (ok) quizBump(kind === "fact" ? "sl-quiz-fact-ok" : "sl-quiz-range-ok");
+    if (!quizRun || quizRun.level !== quizLevel) quizRun = { level: quizLevel, n: 0, right: 0 };
+    quizRun.n++; if (ok) quizRun.right++;
+    if (quizRun.n < QUIZ_ROUND) return "";
+    const r = quizRun; quizRun = null;
+    quizBump("sl-quiz-rounds");
+    if (r.right === r.n && /^(easy|medium|hard)$/.test(r.level)) quizBump("sl-quiz-perfect-" + r.level);
+    return '<p class="quiz-round-done">Round complete: ' + r.right + " / " + r.n + " right" + (r.right === r.n ? " - perfect!" : "") + "</p>";
+  }
   function startQuiz(level) {
     quizLevel = level;
+    quizRun = null;
     quizScore = { right: 0, total: 0 };
     document.getElementById("quiz-score").textContent = ""; // the last quiz's score shouldn't carry over
     document.getElementById("quiz-levels").hidden = true;
@@ -12262,6 +12403,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
       const ok = !timedOut && quizCurrent.given === quizCurrent.answer;
       quizScore.total++; if (ok) quizScore.right++;
       bumpQuizStat(ok ? "correct" : "wrong");
+      const roundNote = quizTally(ok, "fact");
       checkNewBadges(computeStats());
       document.getElementById("quiz-score").textContent = quizScore.right + " / " + quizScore.total + " correct";
       document.querySelectorAll(".quiz-choice").forEach((b) => { b.disabled = true; b.classList.toggle("right", b.dataset.v === quizCurrent.answer); b.classList.toggle("wrong", b.dataset.v === quizCurrent.given && !ok); });
@@ -12269,7 +12411,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
       res.hidden = false; res.className = "quiz-result " + (ok ? "right" : "wrong");
       const head = timedOut ? QUIZ_TIMEOUT_MESSAGES[Math.floor(Math.random() * QUIZ_TIMEOUT_MESSAGES.length)] : ok ? "Correct!" : QUIZ_WRONG_MESSAGES[Math.floor(Math.random() * QUIZ_WRONG_MESSAGES.length)];
       res.innerHTML = "<b>" + head + "</b>" + quizCurrent.answer + ". " + quizCurrent.why +
-        '<div class="quiz-result-actions"><button class="quiz-next" id="quiz-next" type="button">Next question</button></div>';
+        roundNote + '<div class="quiz-result-actions"><button class="quiz-next" id="quiz-next" type="button">Next question</button></div>';
       document.getElementById("quiz-next").addEventListener("click", nextQuizQuestion);
       return;
     }
@@ -12309,6 +12451,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     quizScore.total++;
     if (correct) quizScore.right++;
     bumpQuizStat(correct ? "correct" : "wrong");
+    const roundNote = quizTally(correct, "range");
     checkNewBadges(computeStats());
     document.getElementById("quiz-score").textContent = quizScore.right + " / " + quizScore.total + " correct";
     const result = document.getElementById("quiz-result");
@@ -12319,7 +12462,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     result.innerHTML = "<b>" + headline + "</b>" +
       "Lives in: " + '<span class="quiz-lives-in">' + quizCurrent.answers.map((a) =>
         (((window.SL_INVASIVE || {})[quizCurrent.card.dataset.id] || []).some((pl) => pl.name === a || (pl.states || []).some((c) => window.STATE_NAME[c] === a))
-          && !quizCurrent.card.dataset.countries.split("|").includes(a)) ? a + " (invasive)" : a).join(", ") + "</span>" +
+          && !quizCurrent.card.dataset.countries.split("|").includes(a)) ? a + " (invasive)" : a).join(", ") + "</span>" + roundNote +
       '<div class="quiz-result-actions"><button class="quiz-see-map" id="quiz-see-map" type="button">See countries</button>' +
       '<button class="quiz-next" id="quiz-next" type="button">Next question</button></div>';
     document.getElementById("quiz-submit").hidden = true;
@@ -12617,6 +12760,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
       b.classList.toggle("wrong", v === q.given && !ok);
     });
     const over = imp.lives <= 0;
+    if (over) { quizBump("sl-quiz-rounds"); if (window.SL_checkAch) window.SL_checkAch(); } // v5.45: a whole game of Impossible is a finished round
     const res = document.getElementById("quiz-result");
     res.hidden = false;
     res.className = "quiz-result " + (ok ? "right" : "wrong") + (over ? " imp-over" : "");
@@ -20868,6 +21012,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v5.45", d: "2026-11-16", items: ["Achievements: 21 badges in three groups - Life List, My Sightings and Quiz - with your next milestone at the top; older badges that rewarded the same thing are merged and stay earned", "A quiz round is now 10 questions in a row on one difficulty (or a whole game of Impossible)", "The Snakes seen row and the Achievements button sit at the top of the Checklist on wide screens too"] },
     { v: "v5.44", d: "2026-11-16", items: ["The opening photo is named correctly: it is a Smooth Green Snake", "3D: the 'Generated model...' note under the snake is gone"] },
     { v: "v5.43", d: "2026-11-16", items: ["The filter boxes and the tags on the snake cards now pop out exactly like the cards: they lift and grow a little", "3D: the Show more button is a small button like See all families", "3D: one loading screen covers the whole 3D view until the snake is ready, and goes away the moment it is (no more extra spinners)"] },
     { v: "v5.42", d: "2026-11-16", items: ["The filter boxes in the Checklist (Snake family, Location and the rest) pop out like the snake cards when you point at them", "The tags on each snake card pop out with their hover colours instead of getting an extra border"] },
@@ -21621,7 +21766,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // ---- several SnakeList accounts on one device: each keeps its own list, notes, favourites,
   // quiz score, badges and photos. The account in use lives in localStorage as always; the
   // others are put away in IndexedDB and swapped back in (then a reload) when you switch.
-  var ACCT_KEYS = ["sl-web-state", "sl-favs", "sl-follow-meta", "sl-pinned", "sl-quiz-correct", "sl-quiz-wrong", "sl-badges", "sl-interests",
+  var ACCT_KEYS = ["sl-web-state", "sl-favs", "sl-follow-meta", "sl-pinned", "sl-quiz-correct", "sl-quiz-wrong", "sl-badges", "sl-interests", "sl-ach-dates", "sl-ach-seen",
     "sl-google", "sl-gtoken", "sl-sync-base", "sl-sync-photos", "sl-last-sync"], ACCT_PRE = ["sl-sighting-photos:", "sl-sighting-photo:", "sl-quiz-"];
   function isAcctKey(k) { return ACCT_KEYS.indexOf(k) >= 0 || ACCT_PRE.some(function (p) { return k.indexOf(p) === 0; }); }
   function idbStore(mode, fn) {
@@ -21707,7 +21852,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (e.target.closest("#g-sync")) signIn(true);
   });
   // ---- what follows your account: the lists, notes, favourites, quiz score and your photos ----
-  var KV = ["sl-favs", "sl-pinned", "sl-follow-meta", "sl-quiz-correct", "sl-quiz-wrong", "sl-app-installs"], SETKV = { "sl-favs": 1 }, MAXKV = { "sl-quiz-correct": 1, "sl-quiz-wrong": 1 };
+  var QK = ["sl-quiz-rounds", "sl-quiz-perfect-easy", "sl-quiz-perfect-medium", "sl-quiz-perfect-hard", "sl-quiz-range-ok", "sl-quiz-fact-ok"]; // v5.45: quiz history for the Achievements
+  var KV = ["sl-favs", "sl-pinned", "sl-follow-meta", "sl-quiz-correct", "sl-quiz-wrong", "sl-app-installs"].concat(QK), SETKV = { "sl-favs": 1 }, MAXKV = { "sl-quiz-correct": 1, "sl-quiz-wrong": 1 };
+  QK.forEach(function (k) { MAXKV[k] = 1; });
   // "sl-app-installs" ({ "<account>:<device>": last seen ISO }, the installed app's heartbeat):
   // both sides' devices are kept, each with its latest time; anything not seen for 90 days drops out
   var STAMPKV = { "sl-app-installs": 1 };
