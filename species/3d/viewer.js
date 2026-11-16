@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=532'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=532'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=534'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=534'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -235,8 +235,8 @@ function makeBodyFns(P, quality) {
   // step down to a thin neck), 'oval' (most other snakes: sides curve out quickly), 'blunt' (blind snakes)
   const shape = Hd.shape || 'oval', jaw = Hd.jaw, sn = Hd.snout;
   const mid = Hd.mid != null ? Hd.mid : shape === 'tri' ? lerp(sn, 1, (0.45 - 0.13) / (jaw - 0.13)) : shape === 'blunt' ? 1 : lerp(sn, 1, 0.72);
-  const back = Hd.back != null ? Hd.back : shape === 'blunt' ? 1 : lerp(0.92, 0.8, (hw - B.neck) / Math.max(0.01, hw)) * (shape === 'tri' ? 0.86 : 1); // v5.28: viper heads end in a sharp step to the neck
-  const neckLen = Hd.neckLen != null ? Hd.neckLen : shape === 'tri' ? 0.18 : 0.5;
+  const back = Hd.back != null ? Hd.back : shape === 'blunt' ? 1 : lerp(0.92, 0.8, (hw - B.neck) / Math.max(0.01, hw)) * (shape === 'tri' ? 0.78 : 1); // v5.28: viper heads end in a sharp step to the neck
+  const neckLen = Hd.neckLen != null ? Hd.neckLen : shape === 'tri' ? 0.15 : 0.5;
   const tip = Hd.tip != null ? Hd.tip : shape === 'blunt' ? 0.75 : 0.55;
   const pts = [
     [0, 0], [Hl * 0.012, hw * sn * tip], [Hl * 0.045, hw * sn * lerp(tip, 1, 0.6)], [Hl * 0.13, hw * sn],
@@ -467,7 +467,7 @@ function buildBody(P, F, pose, quality) {
     const eX = Hd.eyeX * F.Hl;
     bumps.push({ x: eX, xs: F.Hl * 0.1, th: eyeA - 0.3, ts: 0.12, amp: 0.05, mirror: true });
   }
-  const nTop = (x) => lerp(Hd.canthus * ((Hd.shape || 'oval') === 'tri' ? 1.05 : 1), 2.15, sstep(F.Hl * 0.8, F.Hl * 1.6, x)); // (v5.30: vipers' crowns flat)
+  const nTop = (x) => lerp(Hd.canthus * ((Hd.shape || 'oval') === 'tri' ? 1.7 : 1), 2.15, sstep(F.Hl * 0.8, F.Hl * 1.6, x)); // (v5.30: vipers' crowns flat)
   // v4.81: an eye socket - the skin dips gently where the eye sits, so the domed eye under its clear
   // spectacle scale lies flush with the head (never standing out of its outline)
   const eyeX0 = Hd.eyeX * F.Hl, eyeRad = (Hd.eye || 0.15) * F.W(eyeX0) * 1.04, eyeRl = (F.W(eyeX0) + F.Hh(eyeX0)) / 2;
