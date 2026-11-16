@@ -301,6 +301,45 @@ CURATED = {
     "pantherophis-bairdi": {"d": "#8a7a62", "c": "#3e3428", "b": "#e6d8b8", "t": "stripe", "s": "arid"},
     "masticophis-taeniatus": {"d": "#2a2a26", "lat": "#33312a", "c": "#e8e2c8", "b": "#e8dcc8", "t": "stripe"},
     "calamaria-yunnanensis": {"d": "#18171a", "lat": "#1a191c", "b": "#e0782a", "t": "plain", "ls": ["#e0782a", 0.56, 0.09]},
+    # v5.34: a random sample of 80 photos against their models
+    "bungarus-flaviceps": {"d": "#151416", "lat": "#151416", "t": "plain", "hc": "#c8402a", "hcx": 1.1, "tt": "#c8402a"},
+    "pseudoboa-serrana": {"d": "#c8743a", "lat": "#c8743a", "t": "plain"},
+    "clonophis-kirtlandii": {"d": "#9a5a3a", "lat": "#9a5a3a", "c": "#2a1a14", "t": "spot"},
+    "drymobius-margaritiferus": {"d": "#2a2a1e", "lat": "#2a2a1e", "c": "#d8c44a", "t": "speckle"},
+    "oreocryptophis-porphyraceus": {"d": "#b8452c", "lat": "#b8452c", "c": "#2a1a14", "t": "band"},
+    "sinomicrurus-swinhoei": {"d": "#7a4a30", "lat": "#7a4a30", "c": "#141110", "b": "#d8c8a0", "t": "band"},
+    "erythrolamprus-frenatus": {"d": "#232325", "lat": "#232325", "c": "#c0442c", "t": "speckle"},
+    "scolecophis-atrocinctus": {"d": "#c84a32", "lat": "#c84a32", "c": "#141110", "t": "band"},
+    "atractus-tartarus": {"d": "#d8d2c4", "lat": "#d8d2c4", "t": "plain"},
+    "dasypeltis-gansi": {"d": "#c89a72", "lat": "#c89a72", "t": "plain"},
+    "dendrelaphis-nigroserratus": {"d": "#3a3630", "lat": "#3a3630"},
+    "spalerosophis-arenarius": {"d": "#d9a27a", "lat": "#d8a07a", "c": "#a8432c", "t": "spot"},
+    "synophis-niceforomariae": {"ls": ["#d8b040", 0.55, 0.04]},
+    "cemophora-lineri": {"d": "#e6d9bd", "lat": "#e6d9bd", "c": "#b8382a", "t": "saddle"},
+    "calamaria-banggaiensis": {"d": "#1e1e22", "lat": "#222226", "t": "plain"},
+    "lycodon-semicarinatus": {"d": "#c46a2a", "lat": "#c46a2a", "c": "#1a1614", "t": "band"},
+    "ninia-atrata": {"d": "#2a2a2e", "lat": "#2c2c30", "c": "#c0442c", "t": "collar"},
+    "mussurana-bicolor": {"hc": "#151414", "hcx": 1.0},
+    "enuliophis-sclateri": {"d": "#202022", "lat": "#232325", "t": "plain"},
+    "sonora-michoacanensis": {"d": "#c8402c", "lat": "#c8402c", "c": "#141110", "t": "band"},
+    "bothriechis-nigroviridis": {"d": "#5a9a3a", "lat": "#5e9e3e", "c": "#141812", "t": "speckle"},
+    "helicops-apiaka": {"d": "#7a6a52", "lat": "#7a6a52", "c": "#2a2018", "t": "band"},
+    "crotalus-totonacus": {"d": "#6a5a44", "lat": "#6e5e48", "c": "#2a2018"},
+    "prosymna-pitmani": {"d": "#3a3a3e", "lat": "#3c3c40", "b": "#e0dcd0"},
+    "sibynophis-sagittarius": {"d": "#8a6a48", "lat": "#8a6a48", "ls": ["#2a2018", 0.5, 0.04]},
+    "oligodon-erythrogaster": {"d": "#6a6660", "lat": "#6a6660", "c": "#2a2622", "t": "stripe"},
+    "sibynophis-triangularis": {"d": "#9a8a70", "lat": "#9a8a70"},
+    "micrurus-hemprichii": {"d": "#141110", "lat": "#141110", "c": "#e07a2a", "b": "#e07a2a", "t": "band"},
+    "gloydius-liupanensis": {"d": "#7a6650", "lat": "#7a6650", "c": "#3a2c20", "t": "blotch"},
+    "anilios-affinis": {"d": "#b08070", "lat": "#b08070"},
+    "antillotyphlops-catapontus": {"d": "#d89a88", "lat": "#d89a88"},
+    "erythrolamprus-sagittifer": {"d": "#d8ccb0", "lat": "#d8ccb0", "c": "#2a2420", "t": "spot"},
+    "hebius-atemporalis": {"d": "#5a2e24", "lat": "#5a2e24", "lip": "#e0d0a0"},
+    "aspidites-melanocephalus": {"d": "#c89a60", "lat": "#c89a60", "c": "#5a3a22"},
+    "lycodryas-pseudogranuliceps": {"d": "#c8a070", "lat": "#c8a070", "c": "#4a2a1a"},
+    "lycophidion-meleagre": {"d": "#2a2420", "lat": "#2a2420", "c": "#d8c8a8", "t": "speckle"},
+    "vermicella-parscauda": {"c": "#e8e8e0"},
+    "atheris-rungweensis": {"c": "#2a3a1a", "t": "speckle"},
     # v5.31: species whose photos showed the generated pattern was wrong
     "bungarus-fasciatus": {"d": "#dcc66e", "lat": "#dcc66e", "c": "#141313", "b": "#ead9a0", "t": "band", "n": 36, "hc": "#161514", "hcx": 0.85},  # black and yellow bands
     "trimetopon-slevini": {"d": "#7a4a2e", "lat": "#6e4430", "c": "#3a2418", "t": "stripe"},
@@ -492,6 +531,11 @@ def head_of(c, g, plan):
     return {}
 
 
+GENUS_T = {"pareas": "xband", "protobothrops": "blotch", "ovophis": "blotch", "lycodryas": "blotch", "aspidites": "band", "helicops": "blotch",
+           "hypsiglena": "blotch", "tropidophis": "blotch", "elapsoidea": "plain", "thamnodynastes": "stripe", "tropidonophis": "xband",
+           "xenodon": "blotch", "liophidium": "stripe", "cemophora": "saddle", "gloydius": "hourglass", "sonora": "band", "bitia": "band"}
+
+
 PHOTO_MASK = {}
 MASK_USED = []
 try: PHOTO_MASK = json.load(open(os.path.join(ROOT, "data/snake-model-photo.json"), encoding="utf-8"))
@@ -511,7 +555,7 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
                 o = prof
                 for k in path[:-1]: o = o[k]
                 o[path[-1]] = val
-    out = {}
+    out, names = {}, {}
     for c in cards:
         if c["id"] in existing: continue
         plan = plan_of(c)
@@ -601,6 +645,24 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
             if S_ < 0.25: a["d"] = "#9a6a42"; a["lat"] = "#a07048"
         if g == "tantilla": a.setdefault("hc", "#1a1614"); a.setdefault("hcx", 1.0)  # the black head of centipede snakes
         if g == "oligodon" and a["t"] == "speckle": a["t"] = "saddle"
+        # v5.34: genus rules from a random sample of 80 photos against their models: groups that are patterned in life
+        # but came out plain or speckled (their photos' contrast was too low to read the marks)
+        if g in GENUS_T and (a["t"] in ("plain", "speckle") or g in ("elapsoidea",)) and not c["fossil"]:
+            a["t"] = GENUS_T[g]
+            if a["t"] != "plain" and (lum(a["c"]) > lum(a["d"]) - 0.1): a["c"] = tone(a["d"], 0.45) if lum(a["d"]) > 0.2 else tone(a["d"], 2.2, 0.6)  # dark marks on a paler ground
+        # the species' own name, when it describes its pattern (taeniatus "ribboned", lineatus, vittatus, virgatus; cinctus "girdled",
+        # annulatus, fasciatus "banded"; maculatus "spotted"), for snakes that came out plain or speckled
+        ep = c["id"].split("-")[-1]
+        if a["t"] in ("plain", "speckle") and not c["fossil"] and plan != "blind" and not re.match(r"caudo|pauci|semi", ep):
+            if re.search(r"taeniat|lineat|vittat|virgat|strigat|striat|grammus|lineolat", ep): a["t"] = "stripe"
+            elif re.search(r"cinct|annulat|fasciat|zonat|anellat", ep): a["t"] = "band"
+            elif re.search(r"maculat|punctat|guttat|ocellat|stictus|stigma", ep): a["t"] = "spot"
+            if re.match(r"albo|leuco|flavo|xantho|argent|aureo", ep): a["c"] = mix(a["d"], "#efe8d0", 0.75)  # white or yellow marks
+            elif a["t"] != "plain" and lum(a["c"]) > lum(a["d"]) - 0.1 and a["t"] != "stripe": a["c"] = tone(a["d"], 0.45) if lum(a["d"]) > 0.2 else tone(a["d"], 2.2, 0.6)
+        if g == "oligodon" and a["t"] == "plain" and not re.search(r"plain|unicolor|black", nm + " " + c["id"]): a["t"] = "saddle"  # kukris: saddles or crossbands
+        if g == "sibynophis": a.setdefault("hc", "#1e1a16"); a.setdefault("hcx", 0.9)  # black-headed snakes
+        if g == "hebius" and a["t"] == "plain": a.setdefault("ls", [mix(a["d"], "#efe2b4", 0.6), 0.5, 0.03])  # keelbacks: a pale line or row of spots along each side
+        if g == "aspidites" and "melanocephalus" in c["id"] or c["id"] == "aspidites-ramsayi": a.setdefault("hc", "#141210" if "melanocephalus" in c["id"] else tone(a["d"], 0.8)); a.setdefault("hcx", 1.05)
         if g in ("typhlops", "afrotyphlops", "indotyphlops", "amerotyphlops", "letheobia", "anilios", "ramphotyphlops", "argyrophis", "madatyphlops", "antillotyphlops", "xerotyphlops", "myriopholis", "leptotyphlops", "epictia", "trilepida", "liotyphlops", "gerrhopilus") and a["t"] not in ("stripe",): a["t"] = "plain"
         hd = head_of(c, c["genus"].lower(), plan)
         if hd: a["h"] = dict(hd, **(a.get("h") or {}))
@@ -618,4 +680,22 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         if g in GENUS_KIND: a["sx"] = dict(a.get("sx") or {}, kind=GENUS_KIND[g][0], rows=GENUS_KIND[g][1], aV=1.0 if g == "acrochordus" else (a.get("sx") or {}).get("aV", 0.8))
         if g == "acanthophis" and "bx" not in a: a["bx"] = {"ld": 14, "neck": 0.5, "tail": 0.11}; a.setdefault("h", {}).setdefault("pupil", "slit")  # v5.12: death adders are short and stout
         out[c["id"]] = {"name": c["sci"] if c["is_sci"] else c["name"], "auto": a}
+        names[c["id"]] = (nm + " " + c["id"]).lower()
+    # v5.34: a pale grey snake whose name says nothing of white, grey or silver was mostly read from the rock, sand or
+    # concrete under it (photo checks: dark and brown snakes came out pale grey) - it takes its genus's usual colour
+    pal = lambda h: lum(h) > 0.6 and colorsys.rgb_to_hls(*hx(h))[2] < 0.12
+    by_g = {}
+    for k, v in out.items():
+        a = v["auto"]
+        if k not in CURATED and not pal(a["d"]) and a["p"] != "blind": by_g.setdefault(k.split("-")[0], []).append(a["d"])
+    for k, v in out.items():
+        a = v["auto"]
+        if k in CURATED or not pal(a["d"]) or a["p"] == "blind" or re.search(r"white|pale|gr[ae]y|silver|ash|albi|alba|leuc|blanc|cinere|argent|candid|ghost|sand|desert", names.get(k, "")): continue
+        cs = by_g.get(k.split("-")[0], [])
+        if k.split("-")[0] in GREEN_IN_LIFE: cs = [x for x in cs if is_green(x)] or cs
+        if len(cs) < 3: continue
+        mid = sorted(cs, key=lum)[len(cs) // 2]
+        if a.get("lat") in (None, a["d"]): a["lat"] = mid
+        a["d"] = mid; a["x"] = a.get("x", "") + ("g" if "g" not in a.get("x", "") else "")
+        if a["t"] not in ("plain", "coral") and abs(lum(a["c"]) - lum(mid)) < 0.08: a["c"] = tone(mid, 0.5) if lum(mid) > 0.2 else tone(mid, 2.2, 0.6)
     return out
