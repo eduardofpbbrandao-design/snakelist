@@ -110,7 +110,7 @@ export function autoProfile(p) {
   const T = (o) => pat.push(Object.assign({ t: [0.06, 0.97], warp: 0.55, jit: 0.14, sj: 0.2, aj: 0.04 }, o));
   switch (a.t) {
     case 'blotch':
-      T({ type: 'blotch', count: n, a: 0, wid: 0.34, len: 0.62, shape: 'round', color: c, edgeColor: shade(c, 0.6), edge: 0.12 });
+      T({ type: 'blotch', count: n, a: 0, wid: 0.27, len: 0.62, shape: 'round', color: c, edgeColor: shade(c, 0.6), edge: 0.12 }); // (v5.43: narrower - wider ones met over the back and read as bands)
       T({ type: 'blotch', count: n, phase: 0.5, a: 0.56, mirror: true, wid: 0.13, len: 0.42, shape: 'round', color: c, alpha: 0.85, jit: 0.22, sj: 0.3 }); break;
     case 'saddle': T({ type: 'blotch', count: n, a: 0, wid: 0.44, len: 0.42, shape: 'saddle', color: c, edgeColor: shade(c, 0.65), edge: 0.1 }); break;
     case 'diamond':
@@ -122,7 +122,7 @@ export function autoProfile(p) {
     // v5.19: copperhead-type crossbands (narrow over the spine, wide on the flanks), kingsnake chains, a reticulated net
     // v5.20: rattlesnake blotches (rounded, dark, with a pale rim), a row of smaller ones on each flank, banded tail
     case 'rblotch':
-      T({ type: 'blotch', t: [0.07, 0.86], count: Math.round(n * 0.85), a: 0, wid: 0.32, len: 0.62, shape: 'saddle', color: c, edgeColor: pale, edge: 0.14, edgeOut: true, warp: 0.35, jit: 0.06 });
+      T({ type: 'blotch', t: [0.07, 0.86], count: Math.round(n * 0.85), a: 0, wid: 0.25, len: 0.58, shape: 'saddle', color: c, edgeColor: pale, edge: 0.14, edgeOut: true, warp: 0.35, jit: 0.06 });
       T({ type: 'blotch', t: [0.07, 0.86], count: Math.round(n * 0.85), phase: 0.5, a: 0.5, mirror: true, wid: 0.12, len: 0.42, shape: 'round', color: c, alpha: 0.8, warp: 0.35 });
       T({ type: 'band', t: [0.87, 0.985], count: 5, len: 0.45, color: shade(c, 0.7), warp: 0.2, jit: 0.02 }); break;
     // v5.20: Russell's vipers - three rows of dark ovals, each ringed in black and edged in white
@@ -249,7 +249,10 @@ function makeBodyFns(P, quality) {
   else pts.push([L * (1 - B.tail * 0.55), B.vent * 0.5], [L * (1 - B.tail * 0.12), B.vent * 0.16], [L, 0]);
   // keep x strictly increasing
   for (let i = 1; i < pts.length; i++) if (pts[i][0] <= pts[i - 1][0]) pts[i][0] = pts[i - 1][0] + 1e-6 * L;
-  const wr = pchip(pts), xr = Hl * (Hd.tipR != null ? Hd.tipR : Hd.shape === 'blunt' ? 0.12 : Hd.shape === 'tri' ? 0.16 : 0.2);
+  const wr = pchip(pts); let xr = Hl * (Hd.tipR != null ? Hd.tipR : Hd.shape === 'blunt' ? 0.12 : Hd.shape === 'tri' ? 0.16 : 0.2);
+  // v5.43: the dome at the snout tip is at least nearly as long as it is wide (half-width): a short dome on a broad snout
+  // read as a flat round face, like the end of a cylinder
+  { const capK = Hd.capK != null ? Hd.capK : shape === 'tri' ? 0.6 : 0.9; for (let i = 0; i < 4; i++) xr = Math.max(xr, Math.min(Hl * 0.45, capK * wr(xr) * w0)); }
   const rattleEnd = !!P.tail.rattle;
   const W = (x) => {
     let v = wr(x) * w0;
@@ -283,7 +286,7 @@ function makeBodyFns(P, quality) {
   // blending into the body's belly depth along the neck
   const chin = Hd.chin != null ? Hd.chin : B.bf;
   const BF = (x) => lerp(chin * (shape === 'blunt' ? 1 : lerp(0.6, 1, sstep(0, Hl * 0.5, x))), B.bf, sstep(Hl * 0.8, Hl * (1 + neckLen), x)); // (the lower jaw thins towards the chin)
-  return { L, D, w0, Hl, W, Hh, XS, bf: B.bf, BF };
+  return { L, D, w0, Hl, W, Hh, XS, bf: B.bf, BF, xr };
 }
 
 // ---------- pose: a 2D centre line on the ground (x from snout to tail) ----------
@@ -482,7 +485,7 @@ function buildBody(P, F, pose, quality) {
   let ringX = []; for (let i = 0; i < nR0; i++) ringX.push(xOf((i / (nR0 - 1)) * gTotal));
   ringX[0] = 0; ringX[nR0 - 1] = L;
   // v5.12: extra rings over the rounded snout tip (they bunch up towards the tip, where the dome curves fastest)
-  { const xt = F.Hl * 0.26, extra = []; for (let k = 1; k < 20; k++) extra.push(xt * (1 - Math.cos((k / 20) * Math.PI / 2))); ringX = [0].concat(extra, ringX.filter((x) => x >= xt)); }
+  { const xt = Math.max(F.Hl * 0.26, F.xr * 1.15), extra = []; for (let k = 1; k < 20; k++) extra.push(xt * (1 - Math.cos((k / 20) * Math.PI / 2))); ringX = [0].concat(extra, ringX.filter((x) => x >= xt)); }
   const nR = ringX.length;
 
   const Hd = P.head, eyeA = (Hd.eyeA * Math.PI) / 180, mouthA = Math.PI * 0.56;
@@ -517,6 +520,7 @@ function buildBody(P, F, pose, quality) {
     const T = b.sub(a).normalize(); const U = new THREE.Vector3(0, 1, 0).addScaledVector(T, -T.y).normalize();
     const S = new THREE.Vector3().crossVectors(T, U).normalize(); return { T, U, S };
   };
+  const upK = Hd.upturn || 0, upL = F.Hl * (Hd.upLen || 0.4), upH = F.Hh(F.Hl * 0.5);
   // the cross-section point at x and angle th (0 = top of the back, +/-pi = belly midline)
   const section = (x, th, noSock) => {
     const W = F.W(x), H = F.Hh(x), st = Math.sin(th), ct = Math.cos(th), head = x < F.Hl * 1.05;
@@ -540,6 +544,9 @@ function buildBody(P, F, pose, quality) {
       const dm = Math.min(Math.abs(Math.abs(th) - mouthA), 1);
       k -= 0.055 * Math.exp(-((dm / 0.085) ** 2)) * sstep(F.Hl * 0.1, F.Hl * 0.26, x) /* v5.12: the lip line fades out over the rounded snout tip */ * (1 - sstep(F.Hl * Hd.jaw * 0.85, F.Hl * Hd.jaw * 1.1, x));
     }
+    // v5.43: an upturned rostral (hognose snakes): the front of the snout is lifted, its top more than its underside, so
+    // the narrow snout tip points forward and up like a shovel, with the chin left low beneath it
+    if (upK && x < upL) { const f = 1 - sstep(0, upL, x); return [W * sx * k, H * sy * k + upK * upH * f * (ct >= 0 ? 1 : lerp(1, 0.3, -ct))]; }
     return [W * sx * k, H * sy * k];
   };
 
