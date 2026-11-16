@@ -1053,7 +1053,7 @@ if(toTop){toTop=0;try{b.focus({preventScroll:true})}catch(e){}window.scrollTo(0,
 function pick(which){var is3=which==='3d';tabs[0].setAttribute('aria-selected',is3);tabs[1].setAttribute('aria-selected',!is3);tabs[0].tabIndex=is3?0:-1;tabs[1].tabIndex=is3?-1:0;p3d.hidden=!is3;pph.hidden=is3;if(!is3)load()}
 function msg(t,retry,photos){host.innerHTML='';var d=el('div','sp3d-msg');d.setAttribute('role','alert');d.appendChild(el('p','',t));if(retry){var r=el('button','sp-btn sp-btn2','Retry');r.type='button';r.addEventListener('click',start);d.appendChild(r)}
 if(photos){var q=el('button','sp-btn sp-btn2','See information instead');q.type='button';q.addEventListener('click',function(){pick('ph');tabs[1].focus()});d.appendChild(q)}host.appendChild(d)}
-function start(){if(viewer||busy)return;busy=1;host.innerHTML='';var ld=el('div','sp3d-msg sp3d-loading');ld.setAttribute('role','status');ld.appendChild(el('span','sp3d-spin'));ld.appendChild(el('p','','Loading the 3D model...'));host.appendChild(ld);
+function start(){if(viewer||busy)return;busy=1;host.innerHTML='';var ld=el('div','sp3d-msg sp3d-loading');ld.setAttribute('role','status');ld.appendChild(el('span','sp3d-spin'));ld.appendChild(el('p','','Loading\u2026'));host.appendChild(ld);
 getModels().then(function(d){var p=d&&d.species&&d.species[sid];
 if(!p){busy=0;nomodel();return}
 fillAbout(p);
@@ -1146,7 +1146,8 @@ REAL_CSS = """
 .sp3d-none{margin:0 0 12px;padding:10px 14px;border:1px solid var(--tagline);border-radius:12px;background:var(--tag);font-size:15px}
 .sp-rl .sp-rl-p{background:none;border:0;border-radius:0;padding:0;margin:0}.sp3d-host{position:relative}
 .sp3d-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;min-height:min(56vh,480px);padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.sp3d-msg p{margin:0;max-width:440px}
-.sp3d-spin{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--g);animation:sp3dspin 1s linear infinite}@keyframes sp3dspin{to{transform:rotate(360deg)}}
+.sp3d-loading{flex-direction:row;gap:12px}.sp3d-loading p{max-width:none}
+.sp3d-spin{flex:none;width:28px;height:28px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--g);animation:sp3dspin 1s linear infinite}@keyframes sp3dspin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.sp3d-spin{animation-duration:3s}}
 .sp3d-wrap{position:relative;background:var(--card)}
 dialog.sp-rl{overscroll-behavior:contain}
@@ -1172,6 +1173,8 @@ dialog.sp-rl{overscroll-behavior:contain}
 .sp3d-about{margin:10px 0 0;font-size:14px}.sp3d-about summary{cursor:pointer;font-weight:600}.sp3d-about ul{margin:6px 0 0;padding-left:20px}.sp3d-about p{margin:6px 0}
 .sp3d-wrap:fullscreen{padding:10px;background:var(--card);display:flex;flex-direction:column}.sp3d-wrap:fullscreen .sp3d-stage{flex:1;height:auto}
 .sp3d-max{position:fixed;inset:0;z-index:2147483000;padding:10px;background:var(--card);display:flex;flex-direction:column}.sp3d-max .sp3d-stage{flex:1;height:auto}
+/* v5.35: in fullscreen the buttons sit at the top of the screen, above the model */
+.sp3d-wrap:fullscreen>.sp3d-bar,.sp3d-max>.sp3d-bar{order:-2;padding:0 0 8px}.sp3d-wrap:fullscreen>.sp3d-panel,.sp3d-max>.sp3d-panel{order:-1;margin:0 0 8px}
 .sp-who{margin:14px 0 0}.sp-who h3{margin:0 0 4px}.sp-person{display:flex;gap:12px;align-items:flex-start;margin:10px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
 .sp-person img{flex:none;width:64px;height:80px;object-fit:cover;border-radius:10px;background:var(--line)}.sp-person-t{min-width:0}.sp-person p{margin:0 0 2px}
 .sp-person-n{font-weight:700}.sp-person-d{font-size:14px}.sp-person-m{font-size:13.5px;color:var(--muted)}.sp-who-src{margin:8px 0 0!important}

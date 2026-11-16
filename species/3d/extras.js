@@ -340,7 +340,7 @@ export function create(V) {
     if (sideKind === k) { closeSide(); return; }
     sideKind = k; side.innerHTML = ''; side.hidden = false;
     for (const q in hdbs) hdbs[q].setAttribute('aria-pressed', String(q === k));
-    const hd = el('div', 'sp3d-side-hd'), t = el('span', '', k === 'photo' ? 'Real photo' : 'Where it lives'), x = el('button', 'sp3d-side-x', '×');
+    const hd = el('div', 'sp3d-side-hd'), t = el('span', '', k === 'photo' ? ((V.opts.name || '').trim() ? V.opts.name.trim() + ' photo' : 'Photo') : 'Where it lives'), x = el('button', 'sp3d-side-x', '×');
     x.type = 'button'; x.setAttribute('aria-label', 'Close'); on(x, 'click', closeSide); hd.append(t, x); side.appendChild(hd);
     const b = el('div', 'sp3d-side-b'); side.appendChild(b);
     if (k === 'photo') {

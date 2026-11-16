@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=535'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=535'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=536'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=536'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -417,8 +417,41 @@ function makePose(P, F, seed) {
     }
   }
   const eAt = (x) => { const f = clamp(x / ds, 0, N - 1.0001), i = Math.floor(f), t = f - i; return lerp(E[i], E[i + 1], t); };
-  const Ly = (x) => lift * (1 - sstep(F.Hl * 0.7, liftLen, x)) + eAt(x);
-  return { pts, at, Ly, ds, N, stacked };
+  // v5.35: tree snakes lie along a branch above the ground (see addBranch)
+  const perch = pose.kind === 'branch' ? (pose.perch != null ? pose.perch : clamp(L * 0.28, 0.1, 0.5)) : 0;
+  const Ly = (x) => lift * (1 - sstep(F.Hl * 0.7, liftLen, x)) + eAt(x) + perch;
+  return { pts, at, Ly, ds, N, stacked, perch };
+}
+
+// v5.35: the branch a tree snake lies along: it follows the snake's line just under its belly, reaches past its head
+// to a thin tip, and past its tail bends down to the ground (so it never floats), with a few side twigs
+function addBranch(P, F, pose, seed) {
+  const R = rng(seed + 77), L = F.L, h = pose.perch, rB = Math.max(F.w0 * 1.5, 0.004), g = new THREE.Group();
+  const pt = (x) => { const a = pose.at(clamp(x, 0, L)); return new THREE.Vector3(a[0], h - rB * 0.92, a[1]); };
+  const dirAt = (x0, x1) => pt(x1).sub(pt(x0)).setY(0).normalize();
+  const pts = [], d0 = dirAt(F.Hl * 0.5, 0), d1 = dirAt(L * 0.9, L);
+  const reachH = Math.max(F.Hl * 3, L * 0.08), reachT = Math.max(h * 1.6, L * 0.15);
+  for (let k = 6; k >= 1; k--) pts.push(pt(0).addScaledVector(d0, reachH * k / 6).add(new THREE.Vector3(0, -reachH * 0.08 * (k / 6) ** 2, 0)));
+  for (let k = 0; k <= 40; k++) pts.push(pt((k / 40) * L));
+  for (let k = 1; k <= 8; k++) { const f = k / 8; pts.push(pt(L).addScaledVector(d1, reachT * f).add(new THREE.Vector3(0, -(h - rB) * Math.pow(f, 1.6), 0))); }
+  const curve = new THREE.CatmullRomCurve3(pts), n = 160, tg = new THREE.TubeGeometry(curve, n, rB, 10, false);
+  // thinner towards the head-end tip, thicker towards the ground
+  const pa = tg.attributes.position, tmp = new THREE.Vector3();
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, c = curve.getPointAt(t), k = lerp(0.35, 1.25, sstep(0, 0.9, t)) * (1 + 0.06 * Math.sin(t * 61));
+    for (let j = 0; j <= 10; j++) { const q = i * 11 + j; tmp.fromBufferAttribute(pa, q).sub(c).multiplyScalar(k).add(c); pa.setXYZ(q, tmp.x, tmp.y, tmp.z); }
+  }
+  tg.computeVertexNormals();
+  const bark = new THREE.MeshStandardMaterial({ color: P.scene.barkColor || '#6b5a47', roughness: 0.95 });
+  const m = new THREE.Mesh(tg, bark); m.castShadow = m.receiveShadow = true; g.add(m);
+  // side twigs, angled away from the snake
+  for (let k = 0; k < 5; k++) {
+    const t = 0.12 + R() * 0.7, c = curve.getPointAt(t), T = curve.getTangentAt(t), side = new THREE.Vector3(-T.z, 0, T.x).multiplyScalar(R() < 0.5 ? 1 : -1);
+    const dir = side.addScaledVector(T, 0.6).add(new THREE.Vector3(0, 0.3 + R() * 0.4, 0)).normalize(), len = rB * (8 + R() * 10);
+    const cg = new THREE.CylinderGeometry(rB * 0.12, rB * 0.45, len, 6); cg.translate(0, len / 2, 0);
+    const tw = new THREE.Mesh(cg, bark); tw.position.copy(c).addScaledVector(dir, rB * 0.5); tw.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir); tw.castShadow = true; g.add(tw);
+  }
+  return g;
 }
 
 // ---------- the body mesh (snout, head, neck, body and tail are one seamless sweep) ----------
@@ -709,7 +742,7 @@ function patternData(P, F, body, lat, quality, seed) {
           if (x > L * (1 - (P.body.tail || 0.12)) && !P.body.blunt) { const am = 1 - aa; col = mixc(col, [col[0] * 0.5, col[1] * 0.5, col[2] * 0.5], kE * 1.6 * Math.exp(-((am / 0.012) ** 2))); }
         }
       }
-      if (C.speckle && !cl.v && x > Hl) { const hs = hash1(cl.id, seed + 11); if (hs < C.speckle.p) col = mixc(col, hex(C.speckle.color), (C.speckle.k || 0.6) * (0.6 + hs / C.speckle.p * 0.4) * Math.sqrt(cl.w)); }
+      if (C.speckle && !cl.v && x > Hl) { const hs = hash1(cl.id, seed + 11); if (hs < C.speckle.p) col = mixc(col, hex(C.speckle.color), (C.speckle.k || 0.6) * (0.6 + hs / C.speckle.p * 0.4) * (C.speckle.dot ? sstep(C.speckle.dot, C.speckle.dot + 0.2, cl.w) : Math.sqrt(cl.w))); } // (v5.35: dot - one small spot centred on each scale, as in speckled kingsnakes)
       const k = (r * Wp + c) * 4; data[k] = col[0]; data[k + 1] = col[1]; data[k + 2] = col[2]; data[k + 3] = 255;
     }
   }
@@ -2053,6 +2086,7 @@ float slScale(vec2 m) {
       }
     }
 
+    if (pose.perch) snakeGroup.add(addBranch(P, F, pose, seed));
     if (P.tail.spine) { const f = body.frameAt(F.L), c = body.spine(F.L), r = F.w0 * 0.14, g = new THREE.ConeGeometry(r, r * 3, 8); const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: '#6a5246', roughness: 0.5 })); m.position.copy(c).addScaledVector(f.T, r * 1.2); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), f.T); snakeGroup.add(m); }
     // bounds
     const bb = new THREE.Box3().setFromObject(snakeGroup), size = bb.getSize(new THREE.Vector3()), center = bb.getCenter(new THREE.Vector3());
@@ -2148,7 +2182,7 @@ float slScale(vec2 m) {
     const hd = info.headDir; const a = Math.atan2(hd.x, hd.z);
     if (kind === 'front') return a; if (kind === 'side') return -info.axisAng + Math.PI / 2; return a + 0.9;
   }
-  function resetView(instant) { if (!instant && fx.resetView && fx.resetView()) return; controls.setGoal({ az: viewAz('default'), el: ((info.portrait ? 40 : 30) * Math.PI) / 180, d: info.dFit, px: 0, pz: 0 }, instant); }
+  function resetView(instant) { if (!instant && fx.resetView && fx.resetView()) return; controls.setGoal({ az: viewAz('default'), el: ((info.portrait ? 40 : 30) * Math.PI) / 180, d: info.dFit * (P.pose && P.pose.kind === 'branch' ? 0.42 : 1), px: 0, pz: 0 }, instant); } // (v5.35: thread-thin tree snakes start closer, head in view)
   function setView(kind) {
     if (kind === 'front') controls.setGoal({ az: viewAz('front'), el: (14 * Math.PI) / 180, d: Math.max(info.dMin * 1.6, info.dFit * 0.42) });
     else if (kind === 'side') controls.setGoal({ az: viewAz('side'), el: (12 * Math.PI) / 180, d: info.dFit * 1.0 });

@@ -1,6 +1,7 @@
 /* Styles for the 3D viewer (species/3d/viewer.js), shared by species pages and the app. Copied from species/sp.css. */
 .sp3d-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;min-height:min(56vh,480px);padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.sp3d-msg p{margin:0;max-width:440px}
-.sp3d-spin{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--g);animation:sp3dspin 1s linear infinite}@keyframes sp3dspin{to{transform:rotate(360deg)}}
+.sp3d-loading{flex-direction:row;gap:12px}.sp3d-loading p{max-width:none}
+.sp3d-spin{flex:none;width:28px;height:28px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--g);animation:sp3dspin 1s linear infinite}@keyframes sp3dspin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.sp3d-spin{animation-duration:3s}}
 .sp3d-wrap{position:relative;background:var(--card)}
 .sp3d-stage{position:relative;height:min(64vh,600px);min-height:280px;border-radius:14px;overflow:hidden;background:#c9d1c3;touch-action:none}
@@ -25,4 +26,6 @@
 .sp3d-about{margin:10px 0 0;font-size:14px}.sp3d-about summary{cursor:pointer;font-weight:600}.sp3d-about ul{margin:6px 0 0;padding-left:20px}.sp3d-about p{margin:6px 0}
 .sp3d-wrap:fullscreen{padding:10px;background:var(--card);display:flex;flex-direction:column}.sp3d-wrap:fullscreen .sp3d-stage{flex:1;height:auto}
 .sp3d-max{position:fixed;inset:0;z-index:2147483000;padding:10px;background:var(--card);display:flex;flex-direction:column}.sp3d-max .sp3d-stage{flex:1;height:auto}
+/* v5.35: in fullscreen the buttons sit at the top of the screen, above the model */
+.sp3d-wrap:fullscreen>.sp3d-bar,.sp3d-max>.sp3d-bar{order:-2;padding:0 0 8px}.sp3d-wrap:fullscreen>.sp3d-panel,.sp3d-max>.sp3d-panel{order:-1;margin:0 0 8px}
 @media (max-width:560px){.sp3d-stage{height:min(46vh,380px);min-height:240px}.sp3d-b{padding:6px 10px;font-size:13px}.sp3d-set{margin-left:0}}

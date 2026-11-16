@@ -302,6 +302,27 @@ CURATED = {
     "masticophis-taeniatus": {"d": "#2a2a26", "lat": "#33312a", "c": "#e8e2c8", "b": "#e8dcc8", "t": "stripe"},
     "calamaria-yunnanensis": {"d": "#18171a", "lat": "#1a191c", "b": "#e0782a", "t": "plain", "ls": ["#e0782a", 0.56, 0.09]},
     # v5.34: a random sample of 80 photos against their models
+    # v5.35: an audit of 30 well-known and 60 random species against their photos
+    "chrysopelea-paradisi": {"d": "#16180f", "lat": "#16180f", "c": "#c4402a", "b": "#b8d060", "t": "plain", "cx": {"speckle": {"p": 1.0, "dot": 0.45, "color": "#a8cc3a", "k": 0.92}, "noEdge": 1}, "vs": ["#c4402a", 0.025]},
+    "pantherophis-slowinskii": {"d": "#9a6a4a", "lat": "#9a6a4a", "c": "#4a2a1c"},
+    "ophryacus-sphenophrys": {"d": "#b07a40", "lat": "#b07a40", "c": "#6a4020", "t": "blotch"},
+    "tropidonophis-elongatus": {"d": "#a0502c", "lat": "#a0502c", "t": "plain"},
+    "boaedon-capensis": {"d": "#6a4a32", "lat": "#6a4a32", "t": "plain", "ls": ["#e2d2b0", 0.42, 0.03], "lip": "#e2d2b0"},
+    "lytorhynchus-paradoxus": {"d": "#d8c4a0", "lat": "#d8c4a0", "c": "#5a4030", "t": "blotch"},
+    "enulius-oligostichus": {"d": "#3a3a3c", "lat": "#3a3a3c", "t": "plain"},
+    "tropidodipsas-tricolor": {"d": "#141210", "lat": "#141210", "c": "#e08a3a", "b": "#e0d8c8", "t": "band"},
+    "apostolepis-flavotorquata": {"d": "#a8452a", "lat": "#a8452a", "t": "collar", "c": "#e8d060"},
+    "oxyrhopus-vanidicus": {"d": "#18181a", "lat": "#18181a", "c": "#e8c440", "t": "band"},
+    "arizona-elegans": {"d": "#d8c4a0", "lat": "#d8c4a0", "c": "#8a6440", "t": "blotch"},
+    "lycophidion-variegatum": {"d": "#1c1c20", "lat": "#1c1c20", "t": "plain", "cx": {"speckle": {"p": 0.45, "color": "#e6e2da", "k": 0.85}, "mottle": 0.05}},
+    "xenophidion-acanthognathus": {"d": "#7a5a48", "lat": "#7a5a48", "c": "#3a2a20", "t": "blotch"},
+    "micrurus-medemi": {"d": "#141416", "lat": "#141416", "c": "#d8dce0", "b": "#d8dce0", "t": "band"},
+    "rhinophis-karinthandani": {"d": "#22242c", "lat": "#22242c"},
+    "rhabdophis-chrysargos": {"d": "#8a4a2a", "lat": "#8a4a2a"},
+    "hypnale-nepa": {"d": "#76736c", "lat": "#76736c", "c": "#55524c", "t": "speckle"},
+    "masticophis-schotti": {"d": "#6a9a98", "lat": "#6a9a98", "ls": ["#e2a080", 0.6, 0.03]},
+    "rhabdophis-himalayanus": {"d": "#2c3226", "lat": "#2c3226", "c": "#e0702a", "t": "spot"},
+    "laticauda-crockeri": {"d": "#2a2226", "lat": "#2a2226", "t": "plain"},
     "uropeltis-bhupathyi": {"d": "#24262c", "lat": "#26282e", "t": "plain"},
     "uropeltis-macrolepis": {"d": "#1e2026", "lat": "#1e2026", "b": "#e8b830", "t": "plain", "ls": ["#e8b830", 0.66, 0.12]},
     "hydrophis-cyanocinctus": {"d": "#c4c2a4", "lat": "#c4c2a4"},
@@ -399,7 +420,8 @@ CURATED = {
     "brachyurophis-australis": {"d": "#b8724a", "c": "#d9a07a", "b": "#efe2cc", "t": "band", "n": 46, "L": 0.5, "s": "arid", "hc": "#3a2a22", "hcx": 0.45},
     "brachyurophis-semifasciatus": {"d": "#c8834e", "c": "#3a2a22", "b": "#efe2cc", "t": "band", "n": 40, "L": 0.4, "s": "gibber"},
     # v5.12: kingsnakes and milksnakes - smooth glossy scales, real sizes; speckled kingsnake black with a yellow speck on every scale
-    'lampropeltis-holbrooki': {'d': '#141511', 'lat': '#181913', 'b': '#e2d47a', 't': 'plain', 'L': 1.1, 's': 'grass', 'cx': {'speckle': {'p': 0.55, 'color': '#e6d77a', 'k': 0.75}, 'mottle': 0.03, 'bellyA': 0.8}, 'k': 0, 'sx': {'gloss': 0.7}},
+    # v5.35: glossy black, one small yellow-white spot in the middle of every scale, yellow lips and chin, yellow belly chequered black
+    'lampropeltis-holbrooki': {'d': '#111210', 'lat': '#121310', 'b': '#e2d47a', 't': 'plain', 'L': 1.1, 's': 'grass', 'lip': '#e2d47a', 'cx': {'speckle': {'p': 1.0, 'dot': 0.72, 'color': '#efe39a', 'k': 0.95}, 'mottle': 0.02, 'bellyA': 0.8, 'noEdge': 0}, 'k': 0, 'sx': {'gloss': 0.75}},
     'lampropeltis-nigra': {'d': '#121211', 'lat': '#151514', 'b': '#2a2a24', 't': 'plain', 'L': 1.0, 's': 'forest', 'cx': {'speckle': {'p': 0.14, 'color': '#d9d7a8', 'k': 0.6}, 'mottle': 0.03, 'bellyA': 0.82}, 'k': 0, 'sx': {'gloss': 0.7}},
     'lampropeltis-splendida': {'d': '#151410', 'lat': '#2a2718', 'b': '#d9cc78', 't': 'plain', 'L': 1.0, 's': 'arid', 'cx': {'speckle': {'p': 0.45, 'color': '#e8d880', 'k': 0.85}, 'mottle': 0.03, 'bellyA': 0.76}, 'k': 0, 'sx': {'gloss': 0.7}},
     'lampropeltis-catalinensis': {'d': '#e6e0cc', 'c': '#141210', 'b': '#e6e0cc', 't': 'band', 'n': 40, 'L': 0.9, 's': 'arid', 'k': 0, 'sx': {'gloss': 0.7}},
@@ -541,7 +563,7 @@ GENUS_T = {"pareas": "xband", "protobothrops": "blotch", "ovophis": "blotch", "l
 
 
 VINE = {
-    "thelotornis": ({"ld": 105, "neck": 0.55, "tail": 0.38}, {"len": 0.04, "w": 1.5, "snout": 0.36, "tip": 0.24, "tipR": 0.1, "pupil": "hslit", "eye": 0.2, "iris": "#c9b86e", "irisInner": "#e6d896", "eyeStripe": "#2a2018"}),
+    "thelotornis": ({"ld": 105, "neck": 0.55, "tail": 0.38}, {"len": 0.04, "w": 1.5, "snout": 0.36, "tip": 0.24, "tipR": 0.1, "pupil": "hslit", "eye": 0.3, "iris": "#c9b86e", "irisInner": "#e6d896", "eyeStripe": "#2a2018"}),
     "oxybelis": ({"ld": 95, "neck": 0.85, "tail": 0.36}, {"len": 0.048, "w": 1.1, "snout": 0.32, "tip": 0.2, "tipR": 0.08}),
     "ahaetulla": ({"ld": 95, "neck": 0.75, "tail": 0.34}, {"len": 0.044, "w": 1.25, "snout": 0.32, "tip": 0.2, "tipR": 0.08, "pupil": "hslit", "eye": 0.18}),
     "imantodes": ({"ld": 100, "neck": 0.45, "tail": 0.3}, {"len": 0.032, "w": 1.6, "snout": 0.7, "eye": 0.24, "pupil": "slit"}),
@@ -688,9 +710,10 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         # v5.35: vine and twig snakes - very slender, long thin tails, long pointed heads on a thin neck, lying along a branch
         if g in VINE:
             bx, hh = VINE[g]
-            a["bx"] = dict(a.get("bx") or {}, **bx); a["h"] = dict(a.get("h") or {}, **hh); a["ps"] = {"kind": "branch", "amp": 14, "waves": 1.1, "lift": 0.7, "liftLen": 4}
+            a["bx"] = dict(a.get("bx") or {}, **bx); a["h"] = dict(a.get("h") or {}, **hh); a["ps"] = {"kind": "branch", "amp": 14, "waves": 1.1, "lift": 0.35, "liftLen": 4}
         if g == "thelotornis":  # bark-grey to pinkish brown, finely speckled dark; olive-green head top, pale lips, dark stripe through the eye
-            a.update({"d": "#978575", "lat": "#a59084", "c": "#2a2420", "t": "speckle", "b": "#e6dfcc", "hc": "#6c7a3c", "hcx": 1.0, "lip": "#ece6d4",
+            a.update({"d": "#978575", "lat": "#a59084", "c": "#2a2420", "t": "speckle", "b": "#e6dfcc", "lip": "#ece6d4",
+                      "pat": [{"type": "cap", "x0": 0, "x1": 1.0, "wid": 0.42, "color": "#6c7a3c"}, {"type": "line", "p0": [0.02, 0.34], "p1": [1.15, 0.4], "wid": 0.045, "color": "#2a2018", "mirror": True}],
                       "cx": {"speckle": {"p": 0.22, "color": "#221c18", "k": 0.75}, "mottle": 0.16}})
             a["x"] = a.get("x", "").replace("g", "")
         if c["id"] in CURATED:  # v4.81: hand-checked against its photo
