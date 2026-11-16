@@ -496,7 +496,7 @@ function buildBody(P, F, pose, quality) {
     if (head && ct > 0) sx *= 1 - (Hd.taper || 0.2) * sy * (1 - sstep(F.Hl * 0.85, F.Hl * 1.25, x));
     // v5.34: snakes are flat underneath (above), most have a low ridge along the spine, and tree snakes and kraits a
     // slightly triangular body - sides sloping in to the ridge
-    if (ct > 0 && P.body.tri) sx *= 1 - P.body.tri * 0.3 * sy * sy * bodyF;
+    if (ct > 0 && P.body.tri) sx *= 1 - P.body.tri * 0.45 * sy * sy * bodyF;
     let k = 1 + (P.body.ridge || 0) * bodyF * Math.exp(-((th / 0.2) ** 2));
     for (const b of bumps) {
       const dx = (x - b.x) / b.xs; if (Math.abs(dx) > 3 || (noSock && b.sock)) continue;

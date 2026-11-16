@@ -540,6 +540,10 @@ GENUS_T = {"pareas": "xband", "protobothrops": "blotch", "ovophis": "blotch", "l
            "xenodon": "blotch", "liophidium": "stripe", "cemophora": "saddle", "gloydius": "hourglass", "sonora": "band", "bitia": "band"}
 
 
+ARBOREAL = {"boiga", "dendrelaphis", "ahaetulla", "chrysopelea", "imantodes", "oxybelis", "leptophis", "dispholidus", "thelotornis", "toxicodryas",
+            "dipsadoboa", "philothamnus", "gonyosoma", "corallus", "uromacer", "langaha", "hapsidophrys", "rhamnophis", "thrasops", "xenoxybelis", "chironius"}
+
+
 PHOTO_MASK = {}
 MASK_USED = []
 try: PHOTO_MASK = json.load(open(os.path.join(ROOT, "data/snake-model-photo.json"), encoding="utf-8"))
@@ -683,6 +687,9 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         if g == "xenopeltis": a["h"] = dict(a.get("h") or {}, plates=True)  # sunbeam snakes have big head plates
         if g in GENUS_KIND: a["sx"] = dict(a.get("sx") or {}, kind=GENUS_KIND[g][0], rows=GENUS_KIND[g][1], aV=1.0 if g == "acrochordus" else (a.get("sx") or {}).get("aV", 0.8))
         if g == "acanthophis" and "bx" not in a: a["bx"] = {"ld": 14, "neck": 0.5, "tail": 0.11}; a.setdefault("h", {}).setdefault("pupil", "slit")  # v5.12: death adders are short and stout
+        # v5.34: kraits have a raised spine and a triangular body; tree snakes a slightly triangular one (sides sloping in)
+        if g == "bungarus": a["bx"] = dict(a.get("bx") or {}, tri=0.5, ridge=0.07)
+        elif g in ARBOREAL: a["bx"] = dict(a.get("bx") or {}, tri=0.3, ridge=0.04)
         out[c["id"]] = {"name": c["sci"] if c["is_sci"] else c["name"], "auto": a}
         names[c["id"]] = (nm + " " + c["id"]).lower()
     # v5.34: a pale grey snake whose name says nothing of white, grey or silver was mostly read from the rock, sand or
