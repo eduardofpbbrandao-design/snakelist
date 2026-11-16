@@ -540,6 +540,17 @@ GENUS_T = {"pareas": "xband", "protobothrops": "blotch", "ovophis": "blotch", "l
            "xenodon": "blotch", "liophidium": "stripe", "cemophora": "saddle", "gloydius": "hourglass", "sonora": "band", "bitia": "band"}
 
 
+VINE = {
+    "thelotornis": ({"ld": 105, "neck": 0.55, "tail": 0.38}, {"len": 0.04, "w": 1.5, "snout": 0.36, "tip": 0.24, "tipR": 0.1, "pupil": "hslit", "eye": 0.2, "iris": "#c9b86e", "irisInner": "#e6d896", "eyeStripe": "#2a2018"}),
+    "oxybelis": ({"ld": 95, "neck": 0.85, "tail": 0.36}, {"len": 0.048, "w": 1.1, "snout": 0.32, "tip": 0.2, "tipR": 0.08}),
+    "ahaetulla": ({"ld": 95, "neck": 0.75, "tail": 0.34}, {"len": 0.044, "w": 1.25, "snout": 0.32, "tip": 0.2, "tipR": 0.08, "pupil": "hslit", "eye": 0.18}),
+    "imantodes": ({"ld": 100, "neck": 0.45, "tail": 0.3}, {"len": 0.032, "w": 1.6, "snout": 0.7, "eye": 0.24, "pupil": "slit"}),
+    "langaha": ({"ld": 75, "neck": 0.75, "tail": 0.33}, {"len": 0.05, "w": 1.1, "snout": 0.3, "tip": 0.18, "tipR": 0.06, "pupil": "slit"}),
+    "uromacer": ({"ld": 85, "neck": 0.8, "tail": 0.34}, {"len": 0.045, "snout": 0.36, "tip": 0.24}),
+    "dryophiops": ({"ld": 85, "neck": 0.8, "tail": 0.33}, {"len": 0.044, "snout": 0.34, "tip": 0.22, "pupil": "hslit"}),
+    "xenoxybelis": ({"ld": 90, "neck": 0.8, "tail": 0.35}, {"len": 0.046, "snout": 0.32, "tip": 0.2}),
+    "dendrelaphis": ({"ld": 62, "neck": 0.8, "tail": 0.33}, {"eye": 0.2}),
+}
 ARBOREAL = {"boiga", "dendrelaphis", "ahaetulla", "chrysopelea", "imantodes", "oxybelis", "leptophis", "dispholidus", "thelotornis", "toxicodryas",
             "dipsadoboa", "philothamnus", "gonyosoma", "corallus", "uromacer", "langaha", "hapsidophrys", "rhamnophis", "thrasops", "xenoxybelis", "chironius"}
 
@@ -674,6 +685,14 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         if g in ("typhlops", "afrotyphlops", "indotyphlops", "amerotyphlops", "letheobia", "anilios", "ramphotyphlops", "argyrophis", "madatyphlops", "antillotyphlops", "xerotyphlops", "myriopholis", "leptotyphlops", "epictia", "trilepida", "liotyphlops", "gerrhopilus") and a["t"] not in ("stripe",): a["t"] = "plain"
         hd = head_of(c, c["genus"].lower(), plan)
         if hd: a["h"] = dict(hd, **(a.get("h") or {}))
+        # v5.35: vine and twig snakes - very slender, long thin tails, long pointed heads on a thin neck, lying along a branch
+        if g in VINE:
+            bx, hh = VINE[g]
+            a["bx"] = dict(a.get("bx") or {}, **bx); a["h"] = dict(a.get("h") or {}, **hh); a["ps"] = {"kind": "branch", "amp": 14, "waves": 1.1, "lift": 0.7, "liftLen": 4}
+        if g == "thelotornis":  # bark-grey to pinkish brown, finely speckled dark; olive-green head top, pale lips, dark stripe through the eye
+            a.update({"d": "#978575", "lat": "#a59084", "c": "#2a2420", "t": "speckle", "b": "#e6dfcc", "hc": "#6c7a3c", "hcx": 1.0, "lip": "#ece6d4",
+                      "cx": {"speckle": {"p": 0.22, "color": "#221c18", "k": 0.75}, "mottle": 0.16}})
+            a["x"] = a.get("x", "").replace("g", "")
         if c["id"] in CURATED:  # v4.81: hand-checked against its photo
             a.update(CURATED[c["id"]]); a["x"] = a.get("x", "").replace("g", "").replace("l", "" if "L" in CURATED[c["id"]] else "l")
             if not a["x"]: a.pop("x")
