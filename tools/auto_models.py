@@ -569,6 +569,294 @@ HAND_FIXES = {
 }
 
 
+# ---------- v5.62: model accuracy (the 92-species audit, see the notes on each table) ----------
+# Body and tail by genus: girth (ld: length over diameter), head length (len, of total length), head/neck width (hn, the
+# documented ratio sets the neck), tail (fraction of total length) and its shape (ts: whip, taper, abrupt, blunt,
+# prehensile, lure). Tail ratios from published measurements (Virginia Herpetological Society samples: rough green 37.5%,
+# ribbon 32.5%, garter 22%, corn 15%, kingsnake 11.8%, copperhead 13.3%, timber rattlesnake 7.6%) and species accounts.
+GENUS_BODY = {
+    # colubrids
+    "lampropeltis": {"tail": 0.13, "ld": 30, "hn": 1.1}, "pantherophis": {"tail": 0.16, "hn": 1.3}, "pituophis": {"tail": 0.13, "ld": 28, "hn": 1.1},
+    "drymarchon": {"tail": 0.18, "hn": 1.15}, "thamnophis": {"tail": 0.23, "hn": 1.3}, "nerodia": {"tail": 0.22, "ld": 24, "hn": 1.35},
+    "natrix": {"tail": 0.19}, "dasypeltis": {"tail": 0.15, "hn": 1.15}, "rhinocheilus": {"tail": 0.13, "hn": 1.0}, "coluber": {"tail": 0.25, "ts": "whip"},
+    "masticophis": {"tail": 0.26, "ts": "whip"}, "dispholidus": {"tail": 0.27, "ts": "whip", "hn": 1.4}, "thelotornis": {"ts": "whip"},
+    "oxybelis": {"ts": "whip"}, "langaha": {"ts": "whip"}, "ahaetulla": {"ts": "whip", "tail": 0.34}, "chrysopelea": {"tail": 0.29}, "boiga": {"tail": 0.22, "hn": 1.6}, "malpolon": {"tail": 0.2},
+    "zamenis": {"tail": 0.18}, "myron": {"tail": 0.14, "ld": 28}, "erpeton": {"tail": 0.3, "ld": 20, "xs": 0.9}, "diadophis": {"tail": 0.2},
+    "cylindrophis": {"tail": 0.04, "ts": "blunt", "tailFlat": 0.7, "hn": 1.0, "ld": 30},
+    # elapids
+    "bungarus": {"tail": 0.11, "ts": "blunt", "hn": 1.0}, "vermicella": {"tail": 0.06, "ts": "blunt", "hn": 1.0}, "notechis": {"tail": 0.13},
+    "naja": {"tail": 0.16, "hn": 1.15}, "hemachatus": {"tail": 0.15}, "aspidelaps": {"tail": 0.12}, "pseudonaja": {"tail": 0.17, "hn": 1.05},
+    "oxyuranus": {"tail": 0.16}, "acanthophis": {"tail": 0.14, "ts": "lure", "hn": 1.75}, "micrurus": {"tail": 0.1, "ts": "blunt"}, "micruroides": {"tail": 0.1, "ts": "blunt"},
+    "pseudechis": {"tail": 0.17}, "dendroaspis": {"ts": "whip"},
+    # vipers and pit vipers (abrupt behind the vent; tree vipers prehensile)
+    "agkistrodon": {"tail": 0.13, "ts": "abrupt"}, "bothrops": {"tail": 0.13, "ts": "abrupt"}, "bothriechis": {"tail": 0.16, "ts": "prehensile"},
+    "trimeresurus": {"tail": 0.17, "ts": "prehensile"}, "tropidolaemus": {"tail": 0.15, "ts": "prehensile"}, "atheris": {"tail": 0.17, "ts": "prehensile"},
+    "lachesis": {"tail": 0.1}, "calloselasma": {"tail": 0.12, "ts": "abrupt"}, "bitis": {"tail": 0.1, "ts": "abrupt"}, "vipera": {"tail": 0.12, "ts": "abrupt"},
+    "echis": {"tail": 0.1, "ts": "abrupt"}, "cerastes": {"tail": 0.1, "ts": "abrupt"}, "daboia": {"tail": 0.13, "ts": "abrupt"},
+    # pythons and boas
+    "corallus": {"tail": 0.17, "ts": "prehensile", "hn": 1.9}, "eunectes": {"ld": 21, "tail": 0.11}, "python": {"tail": 0.11}, "candoia": {"tail": 0.1},
+    "charina": {"tail": 0.12, "ts": "blunt", "hn": 1.0}, "lichanura": {"tail": 0.12, "ts": "blunt", "hn": 1.05}, "eryx": {"ts": "blunt"}, "calabaria": {"ts": "blunt"},
+    "aspidites": {"tail": 0.1, "hn": 1.0}, "acrantophis": {"ld": 18}, "sanzinia": {"tail": 0.12, "hn": 1.5}, "morelia": {"tail": 0.15, "hn": 1.7},
+}
+SPECIES_BODY = {
+    "opheodrys-aestivus": {"tail": 0.375, "ld": 70, "ts": "whip", "hn": 1.2}, "thamnophis-saurita": {"tail": 0.325, "ts": "whip"}, "thamnophis-proximus": {"tail": 0.32, "ts": "whip"},
+    "thamnophis-sirtalis": {"tail": 0.22}, "pantherophis-guttatus": {"tail": 0.15}, "lampropeltis-getula": {"tail": 0.12}, "zamenis-situla": {"tail": 0.17},
+    "python-brongersmai": {"ld": 14, "tail": 0.09, "hn": 1.35}, "python-curtus": {"ld": 14, "tail": 0.09}, "python-breitensteini": {"ld": 14, "tail": 0.09},
+    "candoia-aspera": {"ld": 14, "tail": 0.08, "hn": 1.6, "ts": "abrupt"}, "morelia-viridis": {"tail": 0.17, "ts": "prehensile", "hn": 1.9}, "morelia-azurea": {"tail": 0.17, "ts": "prehensile", "hn": 1.9},
+    "python-sebae": {"tail": 0.13}, "bitis-arietans": {"tail": 0.1}, "dendroaspis-angusticeps": {"tail": 0.23},
+}
+# Eye diameter over head length (Z3): the family defaults are in viewer.js (EYE_L); these are genera that differ
+GENUS_EYE = {"ahaetulla": 0.19, "thelotornis": 0.18, "oxybelis": 0.16, "langaha": 0.15, "imantodes": 0.22, "dispholidus": 0.2, "boiga": 0.17, "chrysopelea": 0.16,
+             "dendrelaphis": 0.2, "leptophis": 0.18, "philothamnus": 0.18, "coluber": 0.17, "masticophis": 0.18, "malpolon": 0.2,
+             "cylindrophis": 0.04, "anilius": 0.04, "naja": 0.12, "hemachatus": 0.11, "dendroaspis": 0.11, "pseudonaja": 0.12, "oxyuranus": 0.11,
+             "acanthophis": 0.1, "vermicella": 0.05, "bungarus": 0.08, "micrurus": 0.08, "micruroides": 0.08, "laticauda": 0.07, "charina": 0.07, "lichanura": 0.07,
+             "eunectes": 0.07, "corallus": 0.1, "bothriechis": 0.11, "echis": 0.11, "lachesis": 0.07, "dasypeltis": 0.13, "myron": 0.1, "erpeton": 0.08,
+             "thamnophis": 0.15, "nerodia": 0.13, "crotalus": 0.09, "sistrurus": 0.1, "vipera": 0.1, "atheris": 0.11, "trimeresurus": 0.1}
+SPECIES_EYE = {"morelia-viridis": 0.1, "morelia-azurea": 0.1, "thamnophis-saurita": 0.16, "opheodrys-aestivus": 0.18, "pantherophis-guttatus": 0.14}
+# Fang length in mm (documented adult sizes, Z9), and rear fangs (opisthoglyphous snakes)
+GENUS_FANG = {"crotalus": 9, "sistrurus": 4, "agkistrodon": 7, "bitis": 15, "daboia": 16, "echis": 4.5, "vipera": 5, "cerastes": 5, "bothriechis": 5, "bothrops": 20,
+              "lachesis": 35, "trimeresurus": 6, "tropidolaemus": 7, "calloselasma": 8, "atheris": 5, "naja": 6.5, "ophiophagus": 11, "hemachatus": 4,
+              "dendroaspis": 6, "pseudonaja": 3, "oxyuranus": 11, "notechis": 3.5, "acanthophis": 7, "bungarus": 3, "micrurus": 1.5, "micruroides": 1.2,
+              "vermicella": 1, "laticauda": 2, "hydrophis": 1.5, "pseudechis": 4}
+SPECIES_FANG = {"crotalus-atrox": 10, "crotalus-adamanteus": 18, "crotalus-horridus": 11, "crotalus-viridis": 8, "crotalus-cerastes": 5, "crotalus-scutulatus": 8,
+                "agkistrodon-contortrix": 6, "agkistrodon-piscivorus": 10, "bitis-gabonica": 50, "bitis-arietans": 15, "bothrops-asper": 25, "dendroaspis-polylepis": 6.5,
+                "dendroaspis-angusticeps": 5, "naja-haje": 7, "hydrophis-platurus": 1}
+REAR_FANG = {"dispholidus": 4, "thelotornis": 3, "boiga": 3, "ahaetulla": 2, "oxybelis": 2, "malpolon": 4, "myron": 1.5, "erpeton": 1.5, "chrysopelea": 1.5,
+             "langaha": 2, "heterodon": 2.5, "philodryas": 3, "psammophis": 3, "rhamphiophis": 3, "imantodes": 1.5, "telescopus": 2}
+# Resting poses (S16): tree boas, tree pythons and tree vipers drape over a branch; cobras rise with the hood spread (S4)
+DRAPE = {"corallus", "bothriechis", "atheris", "tropidolaemus"}
+DRAPE_SP = {"morelia-viridis", "morelia-azurea", "trimeresurus-albolabris", "trimeresurus-stejnegeri", "trimeresurus-gramineus", "trimeresurus-macrops", "trimeresurus-insularis", "trimeresurus-popeiorum"}
+HOODED = {"naja": {"x0": 1.2, "xm": 2.7, "x1": 6.5, "w": 2.7, "flat": 0.45}, "hemachatus": {"x0": 1.2, "xm": 2.6, "x1": 6, "w": 2.3, "flat": 0.5},
+          "aspidelaps": {"x0": 1.3, "xm": 2.8, "x1": 5.5, "w": 1.9, "flat": 0.55}, "pseudohaje": {"x0": 1.4, "xm": 3.2, "x1": 7, "w": 1.8, "flat": 0.55},
+          "walterinnesia": {"x0": 1.4, "xm": 3, "x1": 6, "w": 1.6, "flat": 0.6}}
+# true rings (round the belly too); every other generated band or crossband stops at the belly (S6)
+RINGED = {"bungarus", "vermicella", "laticauda", "micrurus", "micruroides", "calliophis", "sinomicrurus", "leptomicrurus", "hydrophis", "aipysurus", "emydocephalus",
+          "simoselaps", "brachyurophis", "furina", "neelaps", "elapsoidea", "lycodon", "oligodon", "chilomeniscus", "chionactis", "sonora", "cemophora", "boiga"}
+
+
+# Species fixes from the audit's ranked table (worst first), checked against each species' SnakeList photo and the
+# documented look of one form (named in the note). Keys are the generated profile's keys; dicts (h, bx, sx, cx) merge.
+AUDIT_FIX = {
+    # 1 red-tailed pipe snake: a stout glossy cylinder, head no wider than the neck, tiny eyes; black with orange-red bars low on
+    # the flanks (as in its photo), red under the flattened tail
+    "cylindrophis-ruffus": {"d": "#18181c", "lat": "#1c1c20", "c": "#d2502a", "b": "#e9e2d0", "t": "none", "s": "litter",
+        "h": {"w": 0.92, "snout": 0.85, "tip": 0.75, "len": 0.03, "shape": "blunt", "brow": 0, "pupil": "round", "iris": "#1a1614", "irisInner": "#2a2420", "irisDark": 1},
+        "pat": [{"type": "blotch", "t": [0.05, 0.95], "count": 34, "a": 0.6, "mirror": True, "alt": True, "wid": 0.16, "len": 0.32, "shape": "rect", "color": "#d2502a", "warp": 0.4, "jit": 0.2, "sj": 0.3, "belly": True},
+                {"type": "band", "t": [0.05, 0.95], "count": 30, "len": 0.3, "color": "#efe8d6", "aMin": 0.8, "belly": True, "warp": 0.3, "jit": 0.2},
+                {"type": "tint", "t": [0.95, 1], "ramp": 0.02, "aRange": [0.45, 1], "color": "#d2502a"}]},
+    # 2 tentacled snake: two soft tentacles on the snout, stiff keeled body, small upward eyes; dark brown with darker stripes
+    "erpeton-tentaculatum": {"d": "#5a4a32", "lat": "#55462f", "c": "#2e2416", "b": "#b8ad92", "t": "none", "k": 1,
+        "h": {"horns": "tentacles", "hornLen": 0.26, "hornColor": "#5a4a32", "eyeA": 42, "nostrilA": 22, "w": 1.0},
+        "sx": {"keel": 1, "rows": 37, "gloss": 0.15}, "ls": ["#2e2416", 0.42, 0.09], "vs": ["#3a2e1c", 0.05]},
+    # 3 longnose snake (tricolour form): black saddles flecked cream, red interspaces, cream belly, long pointed snout
+    "rhinocheilus-lecontei": {"d": "#c8413a", "lat": "#cc5040", "c": "#141210", "b": "#efe6d0", "t": "tsaddle", "n": 32, "sc": "#e8dcc0", "hc": "#141210", "hcx": 0.95,
+        "h": {"snout": 0.5, "tip": 0.3, "len": 0.038}, "sx": {"rows": 23}, "cx": {"speckle": {"p": 0.12, "color": "#2a1e18", "k": 0.6}}},
+    # 4 common egg-eater (grey form, as in its photo): grey with dark rhombs, dark flank bars, a V on the neck, vertical pupil, few tiny teeth
+    "dasypeltis-scabra": {"d": "#8a8a86", "lat": "#86857f", "c": "#3c3a36", "b": "#dcd8cc", "t": "rhomb", "n": 50,
+        "h": {"pupil": "slit", "teeth": {"n": 0.2, "len": 0.5}, "iris": "#8a8478", "irisInner": "#b8b0a0"},
+        "pat": [{"type": "line", "p0": [1.15, 0.0], "p1": [2.4, 0.3], "wid": 0.12, "color": "#3c3a36", "mirror": True, "xMax": 2.8, "aa": 0.3},
+                {"type": "line", "p0": [0.75, 0.0], "p1": [1.6, 0.24], "wid": 0.09, "color": "#3c3a36", "mirror": True, "aa": 0.3}]},
+    # 5 Madagascar leaf-nosed snake (the long-nosed form in its photo): pale brown, a long flat nasal blade, pale lateral line
+    "langaha-madagascariensis": {"d": "#a07c56", "lat": "#a68560", "c": "#5a4028", "b": "#e6dcb0", "t": "none", "ls": ["#e8e0c0", 0.6, 0.03],
+        "h": {"horns": "rostral", "hornLen": 0.55, "hornUp": 0.05, "hornFlat": 0.35, "hornColor": "#9a7650", "w": 1.3}},
+    # 6 carpet python (jungle-type, as in its photo): pale-centred blotches with heavy black rims on a dark ground, a dark eye stripe
+    "morelia-spilota": {"d": "#2e2a22", "lat": "#34302a", "c": "#141210", "ic": "#c8c0a0", "b": "#e2dcc6", "t": "carpet", "n": 52,
+        "es": ["#141210", 0.06], "h": {"iris": "#a89878", "irisInner": "#cfc3a0"}},
+    # 7 monocled cobra (the common brown form): the O-shaped monocle on the back of the hood, pale throat, a dark band across it
+    "naja-kaouthia": {"d": "#5e5242", "lat": "#625646", "c": "#2a221a", "b": "#e2d8bc", "t": "plain",
+        "pat": [{"type": "ring", "p": [3.15, 0.0], "r": [0.45, 0.14], "w": 0.34, "color": "#1c1610", "fill": "#e6d8b0", "falpha": 0.95, "xMax": 4.0, "aa": 0.25, "warp": 0.15},
+                {"type": "spot", "p": [3.15, 0.0], "r": [0.12, 0.035], "color": "#1c1610", "xMax": 4.0},
+                {"type": "hband", "x0": 1.0, "x1": 2.4, "aMin": 0.42, "belly": True, "color": "#ece2c8", "xMax": 3.0, "alpha": 0.9, "warp": 0.2},
+                {"type": "hband", "x0": 2.7, "x1": 3.4, "aMin": 0.5, "belly": True, "color": "#2a221a", "xMax": 3.9, "warp": 0.2},
+                {"type": "spot", "p": [2.3, 0.6], "r": [0.28, 0.07], "mirror": True, "color": "#2a221a", "xMax": 3.2}]},
+    # 8 Egyptian cobra: the broad dark throat band and the dark "tear" under the eye
+    "naja-haje": {"d": "#6a5a44", "lat": "#6e5e48", "b": "#d6c8a6", "t": "plain", "ub": ["#2a221a", 0.1],
+        "tb": [["#2a221a", 2.6, 4.2, 0.42]], "pat": [{"type": "hband", "x0": 1.0, "x1": 2.5, "aMin": 0.45, "belly": True, "color": "#e0d2b0", "xMax": 3.0, "alpha": 0.8, "warp": 0.2}]},
+    # 9 blood python: blood-red to orange-brown, pale irregular blotches and dark flank marks, very stout, a pale crown line
+    "python-brongersmai": {"d": "#a0482e", "lat": "#a24c30", "c": "#e2c49a", "lc": "#3a1e14", "ec": "#5a2a1a", "b": "#e6d6b6", "t": "irregular", "n": 30,
+        "vs": ["#d8b48a", 0.03]},
+    # 10 rinkhals (banded form, as in its photo): dark with pale crossbands that stop at the belly, two pale bands across the dark throat, keeled
+    "hemachatus-haemachatus": {"d": "#2a2826", "lat": "#2c2a28", "c": "#a8a294", "b": "#1e1c1a", "t": "band", "n": 46, "sx": {"keel": 0.8},
+        "tb": [["#e6e0d0", 2.2, 2.7, 0.45], ["#e6e0d0", 3.3, 3.8, 0.45]]},
+    # 11 Richardson's mangrove snake: grey-green with dark crossbands (its photo)
+    "myron-richardsonii": {"d": "#7c8468", "lat": "#80886c", "c": "#2e3226", "b": "#dcdcc8", "t": "xband", "n": 44},
+    # 12 Indian cobra (spectacled): the spectacle mark on the back of the hood, dark bands across the throat only
+    "naja-naja": {"pat": [{"type": "ring", "p": [3.15, 0.17], "r": [0.46, 0.12], "w": 0.36, "color": "#1e1610", "fill": "#ead8a8", "falpha": 0.9, "mirror": True, "xMax": 4.0, "aa": 0.25, "warp": 0.15},
+                          {"type": "line", "p0": [2.7, 0.0], "p1": [2.8, 0.12], "wid": 0.06, "color": "#1e1610", "mirror": True, "xMax": 4.0},
+                          {"type": "hband", "x0": 1.0, "x1": 2.2, "aMin": 0.45, "belly": True, "color": "#ecdcb4", "xMax": 2.7, "alpha": 0.85, "warp": 0.2}],
+                  "tb": [["#3a2818", 2.4, 2.9, 0.45], ["#3a2818", 3.7, 4.1, 0.5, 0.8]]},
+    # 13 bandy-bandy: stark black and white rings of about equal width, a short blunt tail
+    "vermicella-annulata": {"d": "#f0ede4", "lat": "#f0ede4", "b": "#f0ede4", "c": "#121212", "t": "band", "n": 82, "bl": 0.5, "sx": {"rows": 15, "gloss": 0.7}, "cx": {"mottle": 0.03}},
+    # 14 New Guinea viper boa: short, very stout, viper-like; a dark zigzag on brown, keeled
+    "candoia-aspera": {"t": "zigzag", "n": 40, "c": "#3a3026", "k": 1, "sx": {"keel": 0.8}, "h": {"shape": "tri", "w": 1.15}},
+    # 15 common death adder: crossbands that stop at the belly, an ambush pile, only the lure tip pale
+    "acanthophis-antarcticus": {"tt": "#e8dcc0", "tts": 0.965, "ps": {"kind": "stack", "pitch": 0.95, "lead": 0.26, "lift": 0.15, "tight": 0.55}, "h": {"w": 1.45}},
+    # 16 African rock python: irregular dark-edged blotches merging into a wavy band, a dark spearhead and a dark mark under the eye
+    "python-sebae": {"t": "irregular", "c": "#5a3e24", "ec": "#2a1c10", "lc": "#5a3e24", "sx": {"rows": 85}, "sp": ["#5a3e24", 1.25], "ub": ["#3a2614", 0.12]},
+    # 17 Sanzinia: dark-rimmed, pale-centred saddles edged white, on grey-brown
+    "sanzinia-madagascariensis": {"t": "esaddle", "d": "#7a6a4c", "lat": "#7e6e50", "c": "#2a2016",
+        "pat": [{"type": "blotch", "count": 30, "a": 0, "wid": 0.44, "len": 0.6, "shape": "hourglass", "color": "#2a2016", "inner": {"r": 0.45, "color": "#a08860"}, "edgeColor": "#e8e0c8", "edge": 0.12, "edgeOut": True, "warp": 0.5, "jit": 0.15, "sj": 0.2}]},
+    # 18 leopard snake: red, black-edged blotches on pale grey
+    "zamenis-situla": {"d": "#b8b2a6", "lat": "#b4aea2", "c": "#b0402a", "b": "#e2dccc", "t": "none", "sx": {"rows": 25},
+        "pat": [{"type": "blotch", "count": 44, "a": 0, "wid": 0.3, "len": 0.6, "shape": "round", "color": "#b0402a", "edgeColor": "#141210", "edge": 0.2, "warp": 0.35, "jit": 0.1},
+                {"type": "blotch", "count": 44, "phase": 0.5, "a": 0.58, "mirror": True, "wid": 0.09, "len": 0.4, "shape": "round", "color": "#2a2420", "alpha": 0.85}], "es": ["#141210", 0.045]},
+    # 19 Mojave rattlesnake: broad diamonds, white tail rings wider than the black, pale facial stripes
+    "crotalus-scutulatus": {"bl": 0.35, "pat": [{"type": "line", "p0": [0.26, 0.4], "p1": [0.16, 0.62], "wid": 0.035, "color": "#e8e2cc", "mirror": True},
+                                                {"type": "line", "p0": [0.4, 0.42], "p1": [0.85, 0.64], "wid": 0.04, "color": "#e8e2cc", "mirror": True}]},
+    # 20 Montpellier snake (adult male): olive with a darker saddle on the forebody, a concave brow over a big eye
+    "malpolon-monspessulanus": {"d": "#6e7046", "lat": "#72744a", "b": "#d8d0a0", "h": {"brow": 0.12},
+        "pat": [{"type": "tint", "t": [0.08, 0.3], "ramp": 0.05, "aRange": [0, 0.6], "color": "#3a3a26", "alpha": 0.6}]},
+    # 22 bushmaster: see the hand fix; 23 eyelash viper on a branch; 24 prairie rattlesnake: white-edged blotches and facial stripes
+    "bothriechis-schlegelii": {},
+    "crotalus-viridis": {"pe": "#efe8d8", "pat": [{"type": "line", "p0": [0.26, 0.4], "p1": [0.16, 0.62], "wid": 0.035, "color": "#ece6d4", "mirror": True},
+                                 {"type": "line", "p0": [0.4, 0.42], "p1": [0.85, 0.64], "wid": 0.04, "color": "#ece6d4", "mirror": True}]},
+    # 25 green anaconda: the heaviest snake; large paired black ovals, eyes and nostrils on top of the head
+    "eunectes-murinus": {"h": {"eyeA": 40, "nostrilA": 22}},
+    # 26 Cape cobra: colour fine; the hood and raised pose come from the genus
+    # 28 nose-horned viper: the single horn on the snout, a bolder zigzag
+    "vipera-ammodytes": {"h": {"horns": "rostral", "hornLen": 0.24, "hornUp": 1.6}},
+    # 30 northern water snake: crossbands on the forebody, then alternating blotches
+    "nerodia-sipedon": {"t": "nerodia", "n": 40},
+    # 32 eastern ribbon snake: near-black with bright yellow stripes, a white spot before the eye
+    "thamnophis-saurita": {"d": "#2a2620", "lat": "#2c2822", "c": "#f0d850", "b": "#eef0d8",
+        "pat": [{"type": "spot", "p": [0.22, 0.42], "r": [0.06, 0.05], "color": "#f4f2e6", "mirror": True}]},
+    # 35 Amazon tree boa: rhomboid marks; on a branch
+    "corallus-hortulana": {"t": "none", "pat": [{"type": "blotch", "count": 36, "a": 0.3, "mirror": True, "alt": True, "wid": 0.32, "len": 0.8, "shape": "diamond", "color": "#7a5a3c", "edgeColor": "#d8c8a8", "edge": 0.1, "edgeOut": True, "warp": 0.4}]},
+    # 36 Sonoran coral snake: broad white or yellow rings about as wide as the black
+    "micruroides-euryxanthus": {"pat": [{"type": "band", "count": 20, "len": 0.36, "color": "#f0ead0", "warp": 0.15, "jit": 0.04, "phase": 0.5}]},
+    # 37 bullsnake: bigger squarish blotches, a dark line across the crown and through the eye
+    "pituophis-catenifer": {"t": "saddle", "n": 50, "es": ["#3a2a1a", 0.05], "pat": [{"type": "line", "p0": [0.3, 0.0], "p1": [0.32, 0.36], "wid": 0.045, "color": "#3a2a1a", "mirror": True}]},
+    # 38 Wagler's pit viper (adult female): black and yellow-green bands that stop at the belly
+    "tropidolaemus-wagleri": {"d": "#1c2416", "lat": "#1e2618", "c": "#c8d24a", "b": "#d8d890", "es": ["#c8d24a", 0.04]},
+    # 39 woma: broad, irregular bands, darker on the flanks
+    "aspidites-ramsayi": {"t": "none", "pat": [{"type": "band", "count": 34, "len": 0.5, "color": "#8a5428", "warp": 0.8, "jit": 0.3, "sj": 0.35, "aMax": 0.75}]},
+    # 40 emerald tree boa: draped over a branch, a big head on a thin neck, pale lips
+    "corallus-caninus": {"sx": {"rows": 70}, "lip": "#f4f0c0"},
+    # 43 coastal taipan: longer fangs (in GENUS_FANG); 44 eastern brown snake: orange spots on the belly
+    "pseudonaja-textilis": {"pat": [{"type": "blotch", "count": 60, "a": 0.9, "mirror": True, "alt": True, "belly": True, "wid": 0.06, "len": 0.4, "shape": "round", "color": "#d88a4a", "alpha": 0.6, "jit": 0.4, "skip": 0.3}]},
+    # 46 paradise tree snake: red spots in clusters, not a line
+    "chrysopelea-paradisi": {"vs": None, "pat": [{"type": "blotch", "count": 50, "a": 0, "wid": 0.06, "len": 0.5, "shape": "round", "color": "#c4402a", "jit": 0.2},
+                                                 {"type": "blotch", "count": 50, "phase": 0.15, "a": 0.08, "mirror": True, "wid": 0.04, "len": 0.4, "shape": "round", "color": "#c4402a", "alpha": 0.9, "jit": 0.2}]},
+    # 51 banded krait: short blunt tail (body table); 52 rubber boa: blunt head-like tail (body table)
+    # 55 rosy boa: contrasting stripes
+    "lichanura-trivirgata": {"d": "#c8c0b0", "lat": "#c4bcac", "c": "#6a3a20"},
+    # 67 common garter snake: the side stripe on scale rows 2-3, dark bars on the lips
+    "thamnophis-sirtalis": {"ls": ["#e8d77a", 0.62, 0.05]},
+    # 79 indigo snake: 17 rows
+    "drymarchon-couperi": {"sx": {"rows": 17}},
+    # 88 sea krait: lateral nostrils (it is amphibious)
+    "laticauda-colubrina": {"h": {"nostrilA": 78}},
+    # 89 rough green snake: a long whip tail (body table); big eye
+    # Gaboon-like under-eye mark for the puff adder is in the hand fixes
+}
+# head shape by genus where the audit measured it wrong: sea kraits breathe through nostrils on the side of the snout (only
+# true sea snakes have them on top); vine snakes' heads are shorter and deeper than drawn, so their big eyes fit
+GENUS_H = {"laticauda": {"nostrilA": 78}, "ahaetulla": {"len": 0.032, "h": 0.74}, "thelotornis": {"len": 0.034, "h": 0.74}, "oxybelis": {"len": 0.036, "h": 0.72},
+           "langaha": {"h": 0.72}, "cylindrophis": {"h": 0.8}}
+# generated-species head extras by genus (S9): postocular stripes, lip bars
+GENUS_HEADMARK = {"thamnophis": {"lb": ["#1a1612"]}, "nerodia": {"lb": ["#2a1e16"]}, "pantherophis": {"es": ["#2a1a12", 0.05]}, "elaphe": {"es": ["#2a1a12", 0.05]},
+                  "crotalus": {}, "natrix": {}, "ahaetulla": {"es": ["#2a3a1a", 0.03]}}
+
+# hand-made profiles (data/snake-models.json): fixes from the same audit, applied after HAND_FIXES
+_STACK = {"kind": "stack", "pitch": 1.0, "lead": 0.3, "lift": 0.2, "tight": 0.6}
+HAND_FIXES_562 = {
+    # 21 king cobra: forward-pointing pale chevrons, strongest on the forebody; a narrow long hood, raised; 15 rows; pale throat
+    "ophiophagus-hannah": [(("body", "hood"), {"x0": 1.4, "xm": 3.2, "x1": 7.5, "w": 1.8, "flat": 0.55}), (("body", "tail"), 0.21), (("scales", "rows"), 15),
+                           (("pose",), {"kind": "raised", "rise": 0.22, "hood": 0.75}), (("head", "eyeL"), 0.11), (("head", "fangMm"), 11),
+                           (("pattern",), [{"type": "blotch", "t": [0.07, 0.85], "count": 42, "a": 0, "wid": 0.62, "len": 0.3, "shape": "chevronF", "color": "#c8bc84", "alpha": 0.7, "warp": 0.35, "jit": 0.05},
+                                           {"type": "tint", "t": [0.8, 1], "ramp": 0.15, "color": "#2a2820", "alpha": 0.6},
+                                           {"type": "hband", "x0": 0.4, "x1": 3.6, "aMin": 0.42, "belly": True, "color": "#e6d8a4", "xMax": 4.0, "alpha": 0.85, "warp": 0.2}])],
+    # 27 tiger snake: irregular narrow pale crossbands that fade on the belly; tail 13%
+    "notechis-scutatus": [(("body", "tail"), 0.13), (("pattern", 0, "wid"), 0.75), (("pattern", 0, "jit"), 0.3), (("pattern", 0, "sj"), 0.4), (("pattern", 0, "warp"), 0.8)],
+    # 29 cottonmouth: the white "cotton" mouth, a bold cheek stripe, stronger bands, tail 14%
+    "agkistrodon-piscivorus": [(("head", "mouthColor"), "#f2efe6"), (("body", "tail"), 0.14), (("body", "tailShape"), "abrupt"), (("pattern", 0, "alpha"), 0.9),
+                               (("pattern", 1, "wid"), 0.07), (("pattern", 2, "alpha"), 1.0), (("pose",), _STACK), (("head", "fangMm"), 10)],
+    "agkistrodon-contortrix": [(("body", "tail"), 0.133), (("body", "tailShape"), "abrupt"), (("pose",), _STACK), (("head", "fangMm"), 6)],
+    # 31 corn snake: large squarish black-bordered saddles, narrow orange gaps; tail 15%
+    "pantherophis-guttatus": [(("pattern", 0, "shape"), "saddle"), (("pattern", 0, "wid"), 0.42), (("pattern", 0, "len"), 0.7), (("pattern", 0, "edge"), 0.18),
+                              (("pattern", 1, "a"), 0.62), (("body", "tail"), 0.15), (("head", "eyeL"), 0.14)],
+    # 41/42 diamondbacks: broad diamonds (were a thin chain)
+    "crotalus-atrox": [(("pattern", 0, "wid"), 0.40), (("pattern", 0, "len"), 1.15), (("pattern", 1, "a"), 0.62), (("head", "eyeL"), 0.09), (("head", "fangMm"), 10)],
+    "crotalus-adamanteus": [(("pattern", 0, "wid"), 0.42), (("pattern", 0, "len"), 1.15), (("pattern", 0, "edge"), 0.16), (("pose",), _STACK), (("head", "fangMm"), 18)],
+    "crotalus-horridus": [(("pose",), _STACK), (("head", "fangMm"), 11), (("pattern",), "+", {"type": "line", "p0": [0.36, 0.4], "p1": [1.0, 0.6], "wid": 0.06, "color": "#2a2018", "mirror": True})],
+    # 45 boa: pale-centred saddles, stouter
+    "boa-constrictor": [(("pattern", 0, "inner"), {"r": 0.35, "color": "#8a7058"}), (("body", "ld"), 18), (("pose",), {"kind": "stack", "pitch": 1.05, "lead": 0.3, "lift": 0.2, "tight": 0.62})],
+    # 47 black mamba: the inky-black mouth
+    "dendroaspis-polylepis": [(("head", "mouthColor"), "#141414"), (("head", "eyeL"), 0.11), (("head", "fangMm"), 6.5), (("body", "tailShape"), "whip")],
+    "dendroaspis-angusticeps": [(("head", "eyeL"), 0.11), (("body", "tail"), 0.23), (("body", "tailShape"), "whip")],
+    # 48 saw-scaled viper: the cross on the crown
+    "echis-carinatus": [(("pose",), _STACK), (("body", "tailShape"), "abrupt"), (("head", "fangMm"), 4.5),
+                        (("pattern",), "+", {"type": "poly", "pts": [[0.32, 0.0], [0.42, 0.05], [0.6, 0.05], [0.62, 0.16], [0.7, 0.16], [0.7, 0.05], [0.95, 0.04], [0.95, 0.0]], "mirror": True, "color": "#e6d8b8", "alpha": 0.9})],
+    # 49 reticulated python: a less regular net
+    "malayopython-reticulatus": [(("pattern", 0, "warp"), 1.2), (("pattern", 0, "jit"), 0.15), (("pattern", 1, "wid"), 0.12), (("pattern", 1, "color"), "#f0ece0")],
+    # 53 eastern hognose: more upturned snout
+    "heterodon-platirhinos": [(("head", "snoutUp"), 0.55)],
+    # 54/63/64 kingsnakes and milk snake: short tails
+    "lampropeltis-getula": [(("body", "tail"), 0.12)], "lampropeltis-californiae": [(("body", "tail"), 0.13)], "lampropeltis-triangulum": [(("body", "tail"), 0.14)],
+    # 56 Burmese python: big dark-edged blotches separated by a narrow pale net, on a pale tan ground
+    "python-bivittatus": [(("pattern", 0, "wid"), 0.42), (("pattern", 0, "len"), 0.95), (("pattern", 0, "edge"), 0.2), (("pattern", 1, "wid"), 0.2),
+                          (("colors", "dorsal"), "#c8b48a"), (("colors", "lateral"), "#c4b088"), (("pose",), {"kind": "stack", "pitch": 1.05, "lead": 0.3, "lift": 0.2, "tight": 0.62})],
+    # 57 adder: bolder zigzag
+    "vipera-berus": [(("pattern", 0, "wid"), 0.13), (("pattern", 0, "amp"), 0.18), (("pose",), _STACK), (("body", "tail"), 0.12), (("body", "tailShape"), "abrupt"), (("head", "fangMm"), 4.5)],
+    # 58 Gaboon viper: the dark triangle under each eye
+    "bitis-gabonica": [(("pattern",), "+", {"type": "poly", "mirror": True, "pts": [[0.24, 0.42], [0.36, 0.42], [0.5, 0.66], [0.2, 0.66]], "color": "#3a2418"}), (("head", "fangMm"), 50), (("body", "tailShape"), "abrupt")],
+    "bitis-arietans": [(("pose",), {"kind": "stack", "pitch": 0.95, "lead": 0.3, "lift": 0.1, "tight": 0.62}), (("body", "tail"), 0.1), (("body", "tailShape"), "abrupt"), (("head", "fangMm"), 15)],
+    # 59 fer-de-lance: tail 13%
+    "bothrops-asper": [(("body", "tail"), 0.13), (("body", "tailShape"), "abrupt"), (("pose",), _STACK), (("head", "fangMm"), 25)],
+    # 22 bushmaster: big black-brown rhombs reaching low on the flanks, light spots inside, a pinkish-tan ground; a bigger eye
+    "lachesis-muta": [(("pattern", 0, "wid"), 0.55), (("pattern", 0, "len"), 1.0), (("pattern", 0, "inner", "r"), 0.35), (("colors", "dorsal"), "#c49a6c"), (("colors", "lateral"), "#c29a6e"),
+                      (("head", "eyeL"), 0.07), (("pose",), _STACK), (("head", "fangMm"), 35)],
+    # 75 Russell's viper: tail 13%
+    "daboia-russelii": [(("body", "tail"), 0.13), (("body", "tailShape"), "abrupt"), (("pose",), _STACK), (("head", "fangMm"), 16)],
+    "bungarus-caeruleus": [(("body", "tailShape"), "blunt"), (("body", "tail"), 0.12)],
+    "epicrates-cenchria": [(("head", "eyeL"), 0.09)],
+    "hydrophis-platurus": [(("head", "eyeL"), 0.06), (("head", "fangMm"), 1)],
+}
+SKIP_562 = {"opheodrys-vernalis", "oxyuranus-microlepidotus"}  # (being rebuilt separately)
+
+
+def _merge_562(a, upd):
+    for k, v in upd.items():
+        if v is None: a.pop(k, None)
+        elif isinstance(v, dict) and isinstance(a.get(k), dict): a[k] = dict(a[k], **v)
+        else: a[k] = v
+
+
+def apply_562(a, c, g):
+    """v5.62: body and tail tables, eye size, fangs, poses, rings, head marks and the audit's species fixes."""
+    sid = c["id"]
+    if sid in SKIP_562 or c["fossil"]: return
+    bt = dict(GENUS_BODY.get(g, {}), **SPECIES_BODY.get(sid, {}))
+    if bt:
+        bx = {("tailShape" if k == "ts" else k): v for k, v in bt.items() if k != "len"}
+        a["bx"] = dict(a.get("bx") or {}, **bx)
+        if "len" in bt: a["h"] = dict(a.get("h") or {}, len=bt["len"])
+    e = SPECIES_EYE.get(sid, GENUS_EYE.get(g))
+    if e: a["h"] = dict(a.get("h") or {}, eyeL=e)
+    if a["p"] in ("viper", "pitviper", "elapid", "sea"):
+        fm = SPECIES_FANG.get(sid, GENUS_FANG.get(g))
+        if fm: a["h"] = dict(a.get("h") or {}, fangMm=fm)
+    if g in REAR_FANG: a["h"] = dict(a.get("h") or {}, rearFang=REAR_FANG[g])
+    if g in DRAPE or sid in DRAPE_SP: a["ps"] = {"kind": "drape"}
+    if g in HOODED: a["bx"] = dict(a.get("bx") or {}, hood=HOODED[g]); a["ps"] = {"kind": "raised"}
+    if g in RINGED: a["rg"] = 1
+    for k, v in GENUS_HEADMARK.get(g, {}).items(): a.setdefault(k, v)
+    if GENUS_H.get(g): a["h"] = dict(a.get("h") or {}, **GENUS_H[g])
+    if sid in AUDIT_FIX: _merge_562(a, AUDIT_FIX[sid])
+
+
+def apply_hand_562(existing):
+    for sid, fix in HAND_FIXES_562.items():
+        prof = existing.get(sid)
+        if not prof: continue
+        for f in fix:
+            path, val = f[0], f[1]
+            o = prof
+            for k in path[:-1]: o = o.setdefault(k, {}) if isinstance(k, str) else o[k]
+            if val == "+": o[path[-1]] = list(o.get(path[-1]) or []) + [f[2]]
+            else: o[path[-1]] = val
+
+
 REGIONLESS = {"Rainforests", "Forests & woodlands", "Savannas & grasslands", "Shrublands & heath", "Deserts & dunes", "Mountains & rocks",
               "Underground & forest floor", "Wetlands & swamps", "Rivers & lakes", "Coasts & sea", "Around people"}
 
@@ -679,6 +967,7 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
                 o = prof
                 for k in path[:-1]: o = o[k]
                 o[path[-1]] = val
+    apply_hand_562(existing)  # v5.62
     out, names = {}, {}
     for c in cards:
         if c["id"] in existing: continue
@@ -825,6 +1114,7 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         # v5.34: kraits have a raised spine and a triangular body; tree snakes a slightly triangular one (sides sloping in)
         if g == "bungarus": a["bx"] = dict(a.get("bx") or {}, tri=0.5, ridge=0.07)
         elif g in ARBOREAL: a["bx"] = dict(a.get("bx") or {}, tri=0.3, ridge=0.04)
+        apply_562(a, c, g)  # v5.62: model accuracy
         out[c["id"]] = {"name": c["sci"] if c["is_sci"] else c["name"], "auto": a}
         names[c["id"]] = (nm + " " + c["id"]).lower()
     # v5.34: a pale grey snake whose name says nothing of white, grey or silver was mostly read from the rock, sand or
@@ -836,7 +1126,7 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         if k not in CURATED and not pal(a["d"]) and a["p"] != "blind": by_g.setdefault(k.split("-")[0], []).append(a["d"])
     for k, v in out.items():
         a = v["auto"]
-        if k in CURATED or not pal(a["d"]) or a["p"] == "blind" or re.search(r"white|pale|gr[ae]y|silver|ash|albi|alba|leuc|blanc|cinere|argent|candid|ghost|sand|desert", names.get(k, "")): continue
+        if k in CURATED or k in AUDIT_FIX or not pal(a["d"]) or a["p"] == "blind" or re.search(r"white|pale|gr[ae]y|silver|ash|albi|alba|leuc|blanc|cinere|argent|candid|ghost|sand|desert", names.get(k, "")): continue
         cs = by_g.get(k.split("-")[0], [])
         if k.split("-")[0] in GREEN_IN_LIFE: cs = [x for x in cs if is_green(x)] or cs
         if len(cs) < 3: continue
