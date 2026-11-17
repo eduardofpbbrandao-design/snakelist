@@ -2952,7 +2952,14 @@
     .cmp-cols { padding: 12px 8px; margin: -12px -8px; }
     .cmp-col:hover { transform: translateY(-3px) scale(1.02); }
     article.fp.fav:hover { box-shadow: 0 0 0 2px #e0a526, 0 10px 24px rgba(20,50,25,0.22); }
-    .cp-row.cp-sp:hover { z-index: 2; transform: translateY(-1px) scale(1.015); box-shadow: 0 6px 16px rgba(20,50,25,0.2); }
+    /* the map's species boxes pop out exactly like the checklist cards (same lift, shadow and timing). A wide row would
+       grow far past its edges at the cards' 1.035 (its words slid left and it stuck out of the list), so --sl-pop (set
+       below) keeps its growth to what a card's is; the boxes in the grid view are card-sized and get the full 1.035 */
+    .cp-row.cp-sp:hover { position: relative; z-index: 2; transform: translateY(-3px) scale(var(--sl-pop, 1.035)); box-shadow: 0 10px 24px rgba(20,50,25,0.22), 0 3px 8px rgba(20,50,25,0.12); }
+    /* room inside the list for the popped box and its lift, with nothing around it moving (the extra padding is
+       taken back by the negative margin, and the height limits grow by the same padding) */
+    #cp-list { padding: 10px 10px; margin: -10px -10px; max-height: 360px; }
+    #country-panel.cp-gridv #cp-list { max-height: 580px; }
     .chip:not(#sl-nx):not(#sl-ny):hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(20,50,25,0.16); } /* v5.37: a small lift only - it stays the same size (no chubby grow) */    /* v5.42: the Checklist's filter boxes (Snake family, Location...) pop out exactly like the cards when the mouse is on
        a closed box or an open box's title row - the same lift, grow and shadow */
     .fsec { transition: box-shadow .18s ease-out, transform .18s ease-out; }
@@ -2963,6 +2970,57 @@
   }
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
     .cp-row.cp-sp:hover, .cmp-col:hover, article.fp:hover, .chip:not(#sl-nx):not(#sl-ny):hover , .fsec:not([open]):hover, .fsec:has(> summary:hover), .card-tags .tag:hover, .sl-tag:hover, #grid .card-tags .tag.venom:hover, #grid .card-tags .tag.tag-inv:hover { transform: none; }
+  }
+  /* the map's species list only ever scrolls up and down: a popped box used to stick out past its side, which made a
+     sideways scroll bar flick on and off at the bottom of the list (and the list jumped back when the mouse left) */
+  .cp-list { overflow-x: hidden; }
+</style>
+<style>
+  /* the map's species as checklist cards: the same photo, names, tags and buttons as on the checklist - a grid in the
+     map's list, and a sideways strip in the full screen map and on phones. Only the cards on screen (and a few either
+     side) are built; the others are empty boxes of the same size, so nothing moves while it scrolls */
+  :root { --map-hover: #dbf0cf; }
+  [data-sl-theme="dark"] { --map-hover: var(--surface-hover); }
+  #cp-list.cpc-on { --cpc-h: 352px; display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 12px; align-content: start; max-height: 640px; columns: auto; }
+  #cp-list.cpc-on > :not(.cp-sp) { grid-column: 1 / -1; }
+  #cp-list.cpc-on > .cp-row.cp-sp { height: var(--cpc-h); padding: 0; display: block; box-sizing: border-box; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); }
+  #cp-list.cpc-on > .cp-row.cp-sp.cpc-has { background: none; border: 0; }
+  #cp-list.cpc-on > .cp-row.cp-sp > :not(.cpc-card) { display: none !important; }
+  #cp-list .card.cpc-card { height: 100%; box-sizing: border-box; content-visibility: visible; contain-intrinsic-size: none; overflow: hidden; cursor: pointer; transition: background-color .15s ease; }
+  #cp-list .cpc-card .card-name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  #cp-list .cpc-card .cpc-extra { display: flex; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, #000 82%, transparent); mask-image: linear-gradient(90deg, #000 82%, transparent); }
+  #cp-list .cpc-card .cpc-extra > * { display: flex; flex-wrap: nowrap; gap: 4px; margin: 0; padding: 0; white-space: nowrap; }
+  #cp-list .cpc-card .card-bottom { flex-wrap: nowrap; }
+  #cp-list .cpc-card .card-bottom .td-card-btn { position: relative; order: 2; flex: none; width: 34px; height: auto; align-self: stretch; min-height: 31px; margin-left: auto; }
+  #cp-list .cpc-card .seen-btn { margin-left: 0; min-width: 0; padding-left: 9px; padding-right: 9px; white-space: nowrap; }
+  #cp-list .cpc-card .map-btn { margin-left: 0; padding-left: 9px; padding-right: 9px; white-space: nowrap; }
+  #cp-list .cpc-card .card-bottom .td-card-btn { width: 30px; }
+  /* the full screen map, and phones: one row of cards that scrolls sideways - by swipe, trackpad, the mouse wheel or
+     dragging, with no scroll bar under it */
+  .globe-stage.full #cp-list.cpc-on { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 272px; --cpc-h: 340px; overflow-x: auto; overflow-y: hidden; max-height: none; scrollbar-width: none; overscroll-behavior-x: contain; }
+  .globe-stage.full #cp-list.cpc-on::-webkit-scrollbar { display: none; }
+  .globe-stage.full #cp-list.cpc-on > :not(.cp-sp) { grid-column: auto; align-self: start; }
+  .globe-stage.full .country-panel:has(#cp-list.cpc-on) { max-height: min(64%, 500px); }
+  @media (max-width: 640px) {
+    #cp-list.cpc-on { --cpc-h: 330px; grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 262px; overflow-x: auto; overflow-y: hidden; max-height: none; scrollbar-width: none; overscroll-behavior-x: contain; padding-bottom: 4px; }
+    #cp-list.cpc-on::-webkit-scrollbar { display: none; }
+    #cp-list .card.cpc-card { padding: 12px; gap: 9px; }
+    #cp-list .card.cpc-card::before { margin: -12px -12px 0; }
+    #cp-list.cpc-on > :not(.cp-sp) { grid-column: auto; align-self: start; }
+    .globe-stage.full .country-panel:has(#cp-list.cpc-on) { max-height: min(66%, 480px); }
+  }
+  #cp-list.cpc-on.cpc-drag { cursor: grabbing; user-select: none; }
+  /* the cards pop out exactly like the checklist's (#pop-style): translateY(-3px) scale(1.035), the same two-layer
+     shadow, .18s ease-out and z-index 4 - the list keeps 10px of room round them so nothing is cut off */
+  @media (hover: hover) and (pointer: fine) {
+    #cp-list.cpc-on > .cp-row.cp-sp { --sl-pop: 1.035 !important; }
+    #cp-list.cpc-on > .cp-row.cp-sp:hover { z-index: 4; }
+  }
+  /* hovering a box or pill in the map: light green inside (not grey) */
+  @media (hover: hover) and (pointer: fine) {
+    #heat-panel #cp-list .cp-row.cp-sp:hover .cpc-card, #heat-panel .cp-row:not(.cp-sp):is([data-prov], [data-country], [data-island], [data-city]):hover,
+    #heat-panel .cp-state-pick:not(.cp-rank-pick):hover, #heat-panel div.cp-rank:hover, #heat-panel details.cp-rank:not([open]):hover, #heat-panel .map-list span[data-zoom]:hover { background-color: var(--map-hover); }
+    #heat-panel .cp-state-pill[data-prov]:hover { background-color: var(--map-hover); color: var(--text); }
   }
 </style>
 <style>
@@ -14470,7 +14528,7 @@ window.SL_GEO_READY = new Promise(function (res) {
 
   // ---- species index ------------------------------------------------------------------------
   function buildIndex() {
-    INDEX = [].slice.call(document.querySelectorAll(".card")).map(function (c) {
+    INDEX = [].slice.call(document.querySelectorAll("#grid .card")).map(function (c) { // (only the checklist's own: the map's list shows copies)
       // the continent tag (marked by its own pin icon) is excluded here - typing a
       // continent name like "asia" otherwise matches ~1,400 species across 120 countries
       // spanning every continent (many Asian species also range or were introduced
@@ -14948,7 +15006,14 @@ window.SL_GEO_READY = new Promise(function (res) {
   var frame = null;
   function invalidate() {
     if (frame) return;
-    frame = requestAnimationFrame(function () { frame = null; render(); });
+    frame = requestAnimationFrame(function () { frame = null; render(); mapDrew(); });
+  }
+  // the map just moved or changed under a still mouse (a click flies to the country, a zoom, a pick): the
+  // name tips are worked out again for what is under the pointer now - before, the tip kept naming the place
+  // the pointer was over before the map moved (Central African Republic over a just-picked DR Congo)
+  function mapDrew() {
+    if (typeof mapTip !== "undefined" && mapTip && !mapTip.hidden && tipEv && !tipRaf) tipRaf = requestAnimationFrame(tipAt);
+    if (window.SL_MAP_DREW) try { window.SL_MAP_DREW(); } catch (e) {}
   }
 
   function resize() {
@@ -16289,7 +16354,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   window.SL_MAP_PROVINCE_AT = function (cc, lon, lat) { var st = provinceAt(cc, lon, lat); return st ? (cc === "us" ? st.code : st.name) : null; };
   window.SL_MAP_GEO = function () { return { poly: POLY, iso: ISO, name: NAME, title: TITLE }; };
   window.SL_MAP_GEO_WARM = function () { if (!POLY) start(); }; // country outlines, so a tapped spot can be named
-  window.SL_MAP_PICK = function (x, y) { return at(x, y); };
+  window.SL_MAP_PICK = function (x, y) { return atSeen(x, y); }; // (the heatmap's tip: what the pointer looks to be on)
+  window.SL_MAP_PICK_RAW = function (x, y) { return at(x, y); };
   // the state/province under a map point while "See states" shows one country's states: its
   // name, the count its colour is drawn from (n - only the picked habitat's snakes, if one is),
   // and every listed species recorded there (all) - for the heatmap's hover label
@@ -16504,6 +16570,15 @@ window.SL_GEO_READY = new Promise(function (res) {
     var lat = 90 - (sy - b[1]) / b[3] * 180;
     if (lat > 90 || lat < -90) return null;
     return pick(lon, lat);
+  }
+  // what the pointer looks to be on: the picked country's thick outline is drawn half over its neighbours, so a
+  // pointer on that outline is on the picked country (it used to say "Central African Republic" right on the edge
+  // of a picked DR Congo)
+  function atSeen(sx, sy) {
+    var c = at(sx, sy);
+    if (!selected || c === selected) return c;
+    for (var k = 0; k < 8; k++) { var a = k * Math.PI / 4; if (at(sx + 3 * Math.cos(a), sy + 3 * Math.sin(a)) === selected) return selected; }
+    return c;
   }
 
   // the nearest marker within reach of the tap, so the right one of two close city dots wins
@@ -17247,7 +17322,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   if (window.ResizeObserver) new ResizeObserver(deoverlap).observe(stage);
   if (window.MutationObserver) new MutationObserver(function (ms) {
     // only changes to the controls themselves, not to the canvas or the tip
-    if (ms.some(function (m) { var t = m.target; return t !== cv && !(t.closest && t.closest(".map-tip")) && !(m.attributeName === "style" && t.dataset && t.dataset.deoTop !== undefined); })) deoverlap();
+    // (nor inside the species list: its cards come and go as it scrolls, which has nothing to do with the controls)
+    if (ms.some(function (m) { var t = m.target; return t !== cv && !(t.closest && t.closest(".map-tip")) && !(t.parentNode && t.parentNode.closest && t.parentNode.closest(".cp-list")) && !(m.attributeName === "style" && t.dataset && t.dataset.deoTop !== undefined); })) deoverlap();
   }).observe(stage, { attributes: true, attributeFilter: ["hidden", "class"], childList: true, subtree: true });
   window.addEventListener("resize", deoverlap);
   // ---- Map filters (v4.31) ------------------------------------------------------------------
@@ -17611,7 +17687,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   function tipAt() {
     tipRaf = 0; var e = tipEv; if (!e || drag || pinch) { mapTip.hidden = true; return; }
     var r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-    var code = POLY ? at(x, y) : null, txt = "", nTxt = null;
+    var code = POLY ? atSeen(x, y) : null, txt = "", nTxt = null;
     // how many species a place has, said the same short way everywhere ("Russia 31 species")
     var spN = function (n) { return n ? n.toLocaleString() + " species" : "no species recorded"; };
     // a city dot from "See cities" (or a city's sightings dot): the city and its own count
@@ -17646,10 +17722,21 @@ window.SL_GEO_READY = new Promise(function (res) {
     // the first corner round the pointer where the tip covers no name on the map
     var cands = [[mx + 14, my + 16], [mx + 14, my - th - 10], [mx - tw - 10, my + 16], [mx - tw - 10, my - th - 10], [mx + 14, my + 44], [mx + 14, my - th - 38]];
     var pick = null;
+    // and never sitting over the picked country while it names another: with DR Congo picked and the mouse just over
+    // the border in the Central African Republic, the tip used to hang over DR Congo saying "Central African Republic"
+    var other = selected && code && code !== selected && !(cpin && (cpin.cityPick || cpin.cityDot));
+    var overSel = function (c) {
+      if (!other) return false;
+      var pts = [[0.5, 0.5], [0.08, 0.15], [0.92, 0.15], [0.08, 0.85], [0.92, 0.85]];
+      for (var k = 0; k < pts.length; k++) if (at(c[0] - ox + tw * pts[k][0], c[1] - oy + th * pts[k][1]) === selected) return true;
+      return false;
+    };
+    for (var pass = 0; pass < 2 && !pick; pass++)
     for (var ci = 0; ci < cands.length && !pick; ci++) {
       var c = cands[ci]; if (c[0] < 4 || c[1] < 4 || c[0] + tw > sr.width - 4 || c[1] + th > sr.height - 4) continue;
       var bx0 = c[0] - ox, by0 = c[1] - oy, free = true;
       for (var li = 0; li < LBL.length; li++) { var q = LBL[li]; if (bx0 < q[2] && bx0 + tw > q[0] && by0 < q[3] && by0 + th > q[1]) { free = false; break; } }
+      if (free && !pass && overSel(c)) free = false;
       if (free) pick = c;
     }
     if (!pick) pick = [Math.min(Math.max(4, mx + 14), sr.width - tw - 4), Math.min(Math.max(4, my + 16), sr.height - th - 4)];
@@ -17659,7 +17746,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (e.pointerType === "mouse") { tipEv = e; if (!tipRaf) tipRaf = requestAnimationFrame(tipAt); }
   });
   cv.addEventListener("pointerleave", function () { tipEv = null; mapTip.hidden = true; });
-  cv.addEventListener("pointerdown", function () { mapTip.hidden = true; });
+  // a click or a tap puts the tip away until the mouse really moves again (a finger never gets one)
+  cv.addEventListener("pointerdown", function () { tipEv = null; mapTip.hidden = true; });
+  cv.addEventListener("pointercancel", function () { tipEv = null; mapTip.hidden = true; });
   cv.addEventListener("pointermove", function (e) {
     if (fingers[e.pointerId]) fingers[e.pointerId] = { x: e.clientX, y: e.clientY };
     if (pinch) {
@@ -17733,7 +17822,7 @@ window.SL_GEO_READY = new Promise(function (res) {
         if (cityOn) clearCities();
         statesMode = false;
         pickedProvince = null;
-        var tapped = at(mx, my);
+        var tapped = atSeen(mx, my);
         // a country outside what was searched (or opened from a country link) clears that search
         // for good: the search box empties and everything it showed - its pins, highlights, place
         // name, panel and lists - goes, so only the newly clicked country is on the map
@@ -18373,7 +18462,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     gv.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"></rect></svg>';
     grp.insertBefore(gv, clr);
     var cpEl = document.getElementById("country-panel"), cpL = document.getElementById("cp-list"), gvOn = false;
-    try { gvOn = localStorage.getItem("sl-map-gridv") === "1"; } catch (err) {}
+    // (the map's species are always checklist cards now - see "the map's species as checklist cards" - so this toggle stays away)
     // each species row gets what its checklist card shows: the photo band, and its type and family
     function gvDecorate() {
       if (!gvOn) return;
@@ -18397,7 +18486,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       });
     }
     function gvSync() {
-      gv.hidden = !cpL.querySelector(".cp-row.cp-sp");
+      gv.hidden = true;
       cpEl.classList.toggle("cp-gridv", gvOn && !gv.hidden);
       gv.classList.toggle("on", gvOn); gv.setAttribute("aria-pressed", String(gvOn));
       gv.setAttribute("aria-label", gvOn ? "Show as a list" : "Show as cards");
@@ -20349,7 +20438,12 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (!ALLC) { loadCards(); ALLC = {}; var iso = lastRange.geo.iso; CARDS.forEach(function (c) { c.countries.forEach(function (nm) { var k = iso[nm]; if (k) ALLC[k] = (ALLC[k] || 0) + 1; }); }); }
     return ALLC[cc] || 0;
   }
-  stage.addEventListener("pointermove", function (e) {
+  var tipE = null; // the last mouse position, so the tip follows the map when it moves under a still mouse
+  window.SL_MAP_DREW = function () { if (tipE && !tip.hidden) hmTipMove(tipE); };
+  stage.addEventListener("pointerdown", function () { tipE = null; tip.hidden = true; });
+  stage.addEventListener("pointermove", hmTipMove);
+  function hmTipMove(e) {
+    tipE = e.pointerType === "touch" ? null : { clientX: e.clientX, clientY: e.clientY, target: e.target, pointerType: e.pointerType };
     if (!heatOn() || (habOn && !st.hab) || !onCanvas() || !lastRange || e.pointerType === "touch" || !window.SL_MAP_PICK) { tip.hidden = true; return; }
     var r = stage.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
     if (e.target.closest(".hm-panel, .map-tools, .layers-wrap, .globe-zoom, .sg-pop")) { tip.hidden = true; return; }
@@ -20370,8 +20464,8 @@ window.SL_GEO_READY = new Promise(function (res) {
       lastRange.single ? " " + (n ? "lives here" + pct : "doesn't live here") : ofTxt(n, all));
     tip.hidden = false;
     tip.style.left = Math.min(r.width - tip.offsetWidth - 6, x + 14) + "px"; tip.style.top = Math.max(6, y - 30) + "px";
-  });
-  stage.addEventListener("pointerleave", function () { tip.hidden = true; });
+  }
+  stage.addEventListener("pointerleave", function () { tipE = null; tip.hidden = true; });
   stage.addEventListener("wheel", function () { tip.hidden = true; }, { passive: true });
   // on a phone the map is short, so the filters sit just under it instead of on top of it
   function placePanel() {
@@ -23246,6 +23340,117 @@ window.SL_welcome = function (u, back) {
   (function () { var f = document.getElementById("sl-foot"); if (f) document.body.appendChild(f); })();
 </script>
 
+<script>
+// the map's species boxes: how much the one under the mouse grows - like a checklist card (1.035), but a wide row
+// only grows by about a card's few pixels, so it stays inside the list's room for it and its words barely move
+(function () {
+  document.addEventListener("pointerover", function (e) {
+    var r = e.target && e.target.closest ? e.target.closest(".cp-row.cp-sp") : null;
+    if (!r) return;
+    var w = r.offsetWidth; if (!w || r._slPopW === w) return;
+    r._slPopW = w; r.style.setProperty("--sl-pop", Math.min(1.035, 1 + 9 / w).toFixed(4));
+  }, { passive: true });
+})();
+</script>
+
+<script>
+// the map's species as checklist cards (see the style above): each species row in the map's list gets a copy of its
+// checklist card while it is on screen (or close to it), and loses it again once it is far off - so a country with
+// hundreds of snakes never builds hundreds of cards. The copy's buttons work the real card's (Mark Seen, Want to see,
+// Follow...), so the checklist and the map always agree; anywhere else on it opens the snake, like the row did
+(function () {
+  var L = document.getElementById("cp-list"); if (!L || !window.IntersectionObserver) return;
+  var esc = function (s) { return window.CSS && CSS.escape ? CSS.escape(s) : String(s).replace(/"/g, '\\"'); };
+  function realCard(id) { var g = document.getElementById("grid"); return g && id ? g.querySelector('.card[data-id="' + esc(id) + '"]') : null; }
+  function build(row) {
+    if (row.querySelector(":scope > .cpc-card")) return;
+    var g = realCard(row.getAttribute("data-sp")), c;
+    if (g) { g.querySelector(".card-tags"); c = g.cloneNode(true); } // (asking for its tags makes a light card whole first)
+    else {
+      c = document.createElement("div"); c.className = "card";
+      c.innerHTML = '<div class="card-top"><div><div class="card-name"></div><div class="card-sci"></div></div></div><div class="card-tags"></div><div class="card-bottom"><button class="map-btn" type="button">See more info</button></div>';
+      var b = row.querySelector(":scope > b"), i = row.querySelector(":scope > i");
+      c.querySelector(".card-name").textContent = b ? b.textContent : ""; c.querySelector(".card-sci").textContent = i ? i.textContent : "";
+    }
+    c.classList.add("cpc-card"); c.removeAttribute("style"); c.removeAttribute("hidden"); c.removeAttribute("id");
+    c.setAttribute("aria-hidden", "true"); // the row itself is the link (named after the snake), for keyboards and readers
+    [].forEach.call(c.querySelectorAll("button, [tabindex]"), function (el) { el.tabIndex = -1; });
+    var tags = c.querySelector(".card-tags");
+    var add = function (txt, cls) { if (!tags || !txt) return; var t = document.createElement("span"); t.className = "tag " + cls; t.textContent = txt; tags.insertBefore(t, tags.firstChild); };
+    if (row.classList.contains("cp-intro")) add("Invasive here", "tag-inv");
+    var gone = row.querySelector(".cp-gone-tag"); if (gone) add(gone.textContent, "cpc-gone");
+    // what the row said about this place (its states, or a city's note): one line under the tags
+    var ex = row.querySelector(":scope > .cp-states, :scope > .cp-city-fact");
+    if (ex && tags) { var x = document.createElement("div"); x.className = "cpc-extra"; x.appendChild(ex.cloneNode(true)); tags.parentNode.insertBefore(x, tags.nextSibling); }
+    row.appendChild(c); row.classList.add("cpc-has");
+    // the tags take two lines at most (a third would be cut in half at the bottom of the card)
+    if (tags) { var tops = []; [].forEach.call(tags.children, function (t) { var y = t.offsetTop; if (tops.indexOf(y) < 0) tops.push(y); if (tops.indexOf(y) > 1) t.style.display = "none"; }); }
+  }
+  function drop(row) { var c = row.querySelector(":scope > .cpc-card"); if (c) { row.removeChild(c); row.classList.remove("cpc-has"); } }
+  var io = null;
+  function setup() {
+    var on = !!L.querySelector(":scope > .cp-row.cp-sp");
+    if (L.classList.contains("cpc-on") !== on) L.classList.toggle("cpc-on", on);
+    if (io) { io.disconnect(); io = null; }
+    if (!on) return;
+    io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) build(e.target); else drop(e.target); }); }, { root: L, rootMargin: "360px" });
+    [].forEach.call(L.querySelectorAll(":scope > .cp-row.cp-sp"), function (r) { io.observe(r); });
+  }
+  new MutationObserver(setup).observe(L, { childList: true });
+  setup();
+  // the copy shows the real card's state again after one of its buttons was used
+  function resync(row) {
+    var g = realCard(row.getAttribute("data-sp")), c = row.querySelector(":scope > .cpc-card"); if (!g || !c) return;
+    drop(row); build(row);
+  }
+  function strip() { var cs = getComputedStyle(L); return L.classList.contains("cpc-on") && cs.gridAutoFlow.indexOf("column") >= 0; }
+  // dragging the strip with the mouse scrolls it (a drag is never a click)
+  var dragX = null, dragged = false;
+  L.addEventListener("pointerdown", function (e) {
+    if (e.pointerType !== "mouse" || e.button !== 0 || !strip()) return;
+    dragX = { x: e.clientX, sl: L.scrollLeft }; dragged = false;
+  });
+  window.addEventListener("pointermove", function (e) {
+    if (!dragX) return;
+    var dx = e.clientX - dragX.x;
+    if (!dragged && Math.abs(dx) > 5) { dragged = true; L.classList.add("cpc-drag"); }
+    if (dragged) L.scrollLeft = dragX.sl - dx;
+  });
+  window.addEventListener("pointerup", function () { if (!dragX) return; dragX = null; L.classList.remove("cpc-drag"); setTimeout(function () { dragged = false; }, 0); });
+  L.addEventListener("dragstart", function (e) { if (e.target.closest && e.target.closest(".cpc-card")) e.preventDefault(); });
+  // the mouse wheel moves the strip sideways (a trackpad's sideways swipe already does)
+  L.addEventListener("wheel", function (e) {
+    if (e.ctrlKey || !strip() || Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
+    var d = e.deltaY * (e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? L.clientWidth : 1), max = L.scrollWidth - L.clientWidth;
+    if ((d < 0 && L.scrollLeft <= 0) || (d > 0 && L.scrollLeft >= max - 1)) return;
+    e.preventDefault(); L.scrollLeft = Math.max(0, Math.min(max, L.scrollLeft + d));
+  }, { passive: false });
+  // a click on a card: its buttons work the real card's; anywhere else opens the snake, as the row did
+  L.addEventListener("click", function (e) {
+    var c = e.target.closest && e.target.closest(".cpc-card"); if (!c) return;
+    e.stopPropagation(); e.preventDefault();
+    if (dragged) return;
+    var row = c.parentNode, id = row.getAttribute("data-sp"), g = realCard(id);
+    // a state pill (or the city note) under the tags does what it did on the row: shows that state
+    var pl = e.target.closest(".cpc-extra [data-prov]");
+    if (pl) { var op = row.querySelector(':scope > .cp-states [data-prov="' + esc(pl.getAttribute("data-prov")) + '"]'); if (op) op.click(); return; }
+    var b = e.target.closest("button, [role=button]");
+    var k = b && ["seen-btn", "wish-btn", "follow-btn", "note-btn", "photo-btn"].filter(function (n) { return b.classList.contains(n); })[0];
+    if (k && g) { var rb = g.querySelector("." + k); if (rb) { rb.click(); setTimeout(function () { resync(row); }, 80); return; } }
+    if (b && b.classList.contains("td-card-btn") && window.SL_MAP_SPECIES_INFO) {
+      // 3D: the snake's box on the map, opened straight onto its model
+      window.SL_MAP_SPECIES_INFO(id);
+      var t3 = document.querySelector(".sp-info-3d"); if (t3 && t3.offsetParent) t3.click();
+      return;
+    }
+    // the photo across the top: the bigger photo, like the row's "See photo"
+    var cr = c.getBoundingClientRect(), ph = row.querySelector(".cp-photo:not(.cp-seesp)");
+    if (!b && ph && e.clientY - cr.top < cr.width / 2.2) { ph.click(); return; }
+    var t = row.querySelector(":scope > b") || row;
+    t.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+  }, true);
+})();
+</script>
 <script>
 // ---- v4.81: NEW tags. One table: each feature's key and the version its NEW tags came in. The
 // tags show only while <html> has the class sl-new-<key> (see the CSS for each tag); they go once
