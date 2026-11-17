@@ -102,6 +102,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .sp-keybox .sp-key dt{font-size:12px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted);margin-bottom:2px}
 .sp-keybox .sp-key dd{font-weight:500;font-size:15px;line-height:1.45}.sp-keybox .sp-key dd small{display:inline;font-size:13px}
 .sp-keybox .sp-key dd .sp-kintro{display:block;margin-top:2px}
+.sp-filt{margin:0 0 14px}.sp-filt summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);padding:4px 0;min-height:32px;display:flex;align-items:center;gap:6px}
+.sp-filt summary::marker{color:var(--g)}.sp-keybox .sp-fkey{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:0 20px;margin:0}
+.sp-keybox .sp-fkey div{padding:7px 0}.sp-keybox .sp-fkey .sp-fwide{grid-column:1/-1}.sp-keybox .sp-fkey dd{font-size:14.5px}
 .sp-unk{color:var(--muted);font-weight:400}
 .sp-keybox .sp-actions{gap:8px}.sp-keybox .sp-actnote{margin:8px 0 0}
 .sp-actions .sp-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1px solid transparent;cursor:pointer;font:600 15px Inter,system-ui,sans-serif}

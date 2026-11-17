@@ -16,6 +16,23 @@
 .cy-stats li{display:flex;align-items:baseline;gap:6px;background:var(--tag);border:1px solid var(--tagline);border-radius:12px;padding:5px 12px;font-size:13.5px;color:var(--muted)}
 .cy-stats b{font-size:18px;color:var(--text)}
 @media (prefers-color-scheme:dark){.cy-stats li{color:var(--text)}}
+.cy-danger{grid-column:1;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px;margin-top:2px}
+.cy-dhead{margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}.cy-dhead span{text-transform:none;letter-spacing:0;font-weight:400}
+.cy-danger .cy-stats{margin:0}.cy-dnote{margin:0;font-size:12.5px;color:var(--muted);max-width:70ch}
+.cy-stats li:has(.cy-dbtn){padding:0;border:0;background:none}.cy-stats li.cy-d0{opacity:.6}
+.cy-fg{margin-top:16px}.cy-fg h2{font:700 19px Georgia,serif;margin:0 0 4px}.cy-fg .cy-note{margin:0 0 10px}
+.cy-fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
+.cy-fgrp{background:var(--card);border:1px solid var(--line);border-radius:14px}
+.cy-fgrp summary{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;cursor:pointer;padding:11px 14px;min-height:44px;box-sizing:border-box;list-style:none}
+.cy-fgrp summary::-webkit-details-marker{display:none}.cy-fgrp summary:after{content:"+";margin-left:auto;font:600 18px/1 Inter,system-ui,sans-serif;color:var(--g)}
+.cy-fgrp[open] summary:after{content:"\2212"}.cy-fgt{font-weight:700;color:var(--text)}.cy-fgrp summary small{color:var(--muted);font-size:13px}
+.cy-fgb{padding:0 14px 14px;display:flex;flex-direction:column;gap:8px}.cy-fgb .cy-stats{margin:0}
+a.cy-dbtn{text-decoration:none}
+.cy-dbtn{display:flex;align-items:baseline;gap:6px;font:inherit;font-size:13.5px;color:var(--muted);background:var(--tag);border:1px solid var(--tagline);border-radius:12px;padding:5px 12px;cursor:pointer;min-height:36px}
+.cy-dbtn b{font-size:18px;color:var(--text)}.cy-dbtn:hover{border-color:var(--g)}
+.cy-dbtn[aria-pressed=true]{background:var(--g);border-color:var(--g);color:#fff}.cy-dbtn[aria-pressed=true] b{color:#fff}
+.cy-d-v b,.cy-d-h b,.cy-d-dv b{color:#9c2f22}.cy-d-v>b,.cy-d-h>b,.cy-d-dv>b{color:#9c2f22}
+@media (prefers-color-scheme:dark){.cy-dbtn{color:var(--text)}.cy-d-v b,.cy-d-h b,.cy-d-dv b{color:#ff9f86}}
 .cy-cta{grid-column:2;grid-row:1/span 2;margin:0}
 .cy-btn{display:inline-flex;align-items:center;min-height:44px;background:var(--g);color:#fff;text-decoration:none;font-weight:600;padding:10px 18px;border-radius:12px;white-space:nowrap}
 .cy-btn:hover{filter:brightness(.95)}
@@ -53,7 +70,7 @@
 .cy-tools{padding:10px}.cy-tools label:not(.cy-q){flex:1 1 calc(50% - 6px)}.cy-tools select{width:100%}
 .cy-grid,.cy-list:not(.cy-big) .cy-grid,.cy-grid-intro{grid-template-columns:1fr;gap:10px}
 .cy-card a{flex-direction:row;min-height:96px}.cy-img{flex:0 0 112px;width:112px;aspect-ratio:auto;align-self:stretch}.cy-body{padding:9px 12px}
-.cy-name{font-size:15.5px}.cy-stats b{font-size:16px}}
+.cy-name{font-size:15.5px}.cy-stats b,.cy-dbtn b{font-size:16px}.cy-fgrid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.cy-card a{transition:none}}
 /* v4.81: snake cards pop out a little under a real mouse, like the app's checklist cards (no layout shift: a transform) */
 @media (hover:hover) and (pointer:fine){.cy-card a{transition:border-color .15s,box-shadow .18s ease-out,transform .18s ease-out}
