@@ -3526,6 +3526,9 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
       }
     } catch (e) {}
     ["pointerdown", "keydown", "wheel", "touchstart"].forEach(function (t) { window.addEventListener(t, function () { window.SL_TOUCHED = true; }, { capture: true, passive: true }); });
+    // v5.57: typing counts too (an iPad's keyboard, dictation or a suggestion tap may send no keydown) - the
+    // one quiet reload after the first sync must never happen in the middle of a search
+    window.addEventListener("input", function (e) { if (e.isTrusted) window.SL_TOUCHED = true; }, { capture: true, passive: true });
   </script>
   <script>
     // A phone is a touch screen whose shorter side is under 600 CSS px - read from the
@@ -3883,7 +3886,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
 </script>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v5.59</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v5.60</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" title="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" title="Language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea" title="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="updates-btn" type="button" aria-label="See every update" title="See every update"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial" title="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night" title="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-head"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-head)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All <span data-sl-total>4,247</span> snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -11791,17 +11794,30 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
   document.getElementById("search-icon").innerHTML = ICON.search;
   document.getElementById("clear").innerHTML = ICON.x;
 
-  document.getElementById("search").addEventListener("input", (e) => {
-    const raw = e.target.value.trim().toLowerCase();
+  // v5.57: typing waits for a short pause before the list is redrawn (one redraw per word, not one
+  // per letter - on an iPad every redraw of 4,247 cards was a long freeze); a search set by code
+  // (links, the closest-match fix) still redraws at once, and Enter shows the results straight away
+  let searchT = 0;
+  function runSearch() {
+    searchT = 0;
+    const v = document.getElementById("search").value, raw = v.trim().toLowerCase();
     // typing a world city (e.g. "Lisbon") filters the checklist exactly as typing its
     // country would - CITY_INDEX/updateCitySearch below is the separate US-only path that
     // shows real iNaturalist sighting data for a state instead of just filtering by text
     const worldCity = CITY_COUNTRY_INDEX[foldCityName(raw)];
     query = worldCity ? worldCity.country.toLowerCase() : raw;
-    updateCitySearch(e.target.value);
+    updateCitySearch(v);
     refresh();
+  }
+  document.getElementById("search").addEventListener("input", (e) => {
+    clearTimeout(searchT);
+    if (e.isTrusted) searchT = setTimeout(runSearch, 220); else runSearch();
+  });
+  document.getElementById("search").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); if (searchT) { clearTimeout(searchT); runSearch(); } }
   });
   document.getElementById("clear").addEventListener("click", () => {
+    clearTimeout(searchT); searchT = 0;
     query = "";
     document.getElementById("search").value = "";
     updateCitySearch("");
@@ -14120,12 +14136,21 @@ window.SL_GEO_READY = new Promise(function (res) {
         Object.keys(world).forEach(function (cc) {
           if (_countryProvincesCache[cc]) return;
           var k = world[cc][0];
+          // v5.57: each state's outline is unpacked only when something first needs it (drawing that
+          // country's states) - unpacking all ~700,000 points of every country at the first map search
+          // took ~30 MB at once, enough to make an iPad run out of memory and reload SnakeList
           _countryProvincesCache[cc] = world[cc][1].map(function (f) {
-            return { name: f[0], rings: f[1].map(function (flat) {
-              var ring = [], x = 0, y = 0;
-              for (var i = 0; i < flat.length; i += 2) { x += flat[i]; y += flat[i + 1]; ring.push([x / k, y / k]); }
-              return ring;
-            }) };
+            var o = { name: f[0] }, put = function (v) { Object.defineProperty(o, "rings", { value: v, writable: true, enumerable: true, configurable: true }); };
+            Object.defineProperty(o, "_nr", { value: f[1].length }); // how many outlines, without unpacking them
+            Object.defineProperty(o, "rings", { enumerable: true, configurable: true, set: put, get: function () {
+              var rings = f[1].map(function (flat) {
+                var ring = [], x = 0, y = 0;
+                for (var i = 0; i < flat.length; i += 2) { x += flat[i]; y += flat[i + 1]; ring.push([x / k, y / k]); }
+                return ring;
+              });
+              put(rings); return rings;
+            } });
+            return o;
           });
         });
       } catch (err) {}
@@ -14887,7 +14912,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       Object.keys(all).forEach(function (cc) {
         if (cc === "us") return;
         all[cc].forEach(function (st) {
-          if (!st.rings || !st.rings.length) return;
+          if (!(st._nr !== undefined ? st._nr : st.rings && st.rings.length)) return; // (v5.57: without unpacking every outline)
           var nm = st.name, m = /^(.*?)\s*\(([^)]*)\)\s*$/.exec(nm);
           add(nm, [cc, nm]);
           if (m) { add(m[1], [cc, nm]); if (!/region|\d/i.test(m[2])) add(m[2], [cc, nm]); }
@@ -17404,10 +17429,10 @@ window.SL_GEO_READY = new Promise(function (res) {
   mfPanel.setAttribute("role", "dialog"); mfPanel.setAttribute("aria-label", "Map filters");
   mfPanel.innerHTML = '<div class="mf-head"><b>Filters</b><span class="mf-res" aria-live="polite"></span><button type="button" class="mf-x" aria-label="Close filters">&times;</button></div>' +
     '<p class="mf-cnote"></p><div class="mf-body">' +
-    '<details class="mf-sec" data-s="fam"><summary>Snake family<i></i></summary><input type="text" class="mf-find" placeholder="Find a family&hellip;" aria-label="Find a family"><div class="mf-opts" data-k="fam"></div></details>' +
+    '<details class="mf-sec" data-s="fam"><summary>Snake family<i></i></summary><input type="text" class="mf-find" placeholder="Find a family&hellip;" aria-label="Find a family" autocomplete="off"><div class="mf-opts" data-k="fam"></div></details>' +
     '<details class="mf-sec" data-s="ven"><summary>Venom<i></i></summary><div class="mf-opts" data-k="ven"></div><p class="mf-note">The same venom data as the checklist.</p></details>' +
     '<details class="mf-sec" data-s="geo"><summary>Country &amp; region<i></i></summary><div class="mf-geo"><input type="text" class="mf-find mf-cfind" placeholder="Find a country&hellip;" aria-label="Find a country" autocomplete="off"><div class="mf-sugg" hidden></div></div><div class="mf-picked"></div></details>' +
-    '<details class="mf-sec" data-s="hab"><summary>Habitat<i></i></summary><input type="text" class="mf-find" placeholder="Find a habitat&hellip;" aria-label="Find a habitat"><div class="mf-opts" data-k="hab"></div></details>' +
+    '<details class="mf-sec" data-s="hab"><summary>Habitat<i></i></summary><input type="text" class="mf-find" placeholder="Find a habitat&hellip;" aria-label="Find a habitat" autocomplete="off"><div class="mf-opts" data-k="hab"></div></details>' +
     // the checklist's own filters, in its own groups (v4.63: these replace Conservation status)
     MF_GROUPS.map(function (g) { return '<details class="mf-sec" data-s="' + g[0] + '"><summary>' + g[1] + '<i></i></summary><div class="mf-opts" data-k="x" data-g="' + g[0] + '"></div>' + (g[3] ? '<p class="mf-note">' + g[3] + "</p>" : "") + "</details>"; }).join("") +
     '</div><div class="mf-foot"><button type="button" class="mf-clear">Clear all</button><button type="button" class="mf-done">Done</button></div>';
@@ -19130,8 +19155,26 @@ window.SL_GEO_READY = new Promise(function (res) {
 // links from a species page into the app:
 //   ?map=<country>  the map, on that country      ?f=<chip id>  that filter (chip-common, chip-rare...)
 //   ?hab=<habitat>  the map, by that habitat       ?type=<type> / ?fam=<family>  that kind of snake
+// v5.57: a SnakeList page's link like these, tapped when SnakeList is the page just before it, goes Back
+// to the SnakeList that's already open (no reload) and leaves the link in sessionStorage "sl-open-link":
+// it's opened here then, the same way, after clearing the old search and filters
 (function () {
-  var q = null; try { q = new URLSearchParams(location.search); } catch (e) {} if (!q) return;
+  function pendingLink() {
+    try { var p = JSON.parse(sessionStorage.getItem("sl-open-link") || "null"); sessionStorage.removeItem("sl-open-link"); if (p && typeof p.s === "string" && Date.now() - p.t < 60000) return p.s; } catch (e) {}
+    return null;
+  }
+  var own = /[?&](map|f|hab|type|fam|q|tab)=/.test(location.search), pd = pendingLink();
+  if (own) openLink(location.search, false); else if (pd && window.SL_CAME_BACK) openLink(pd, true);
+  window.addEventListener("pageshow", function (e) { if (!e.persisted) return; var p = pendingLink(); if (p) openLink(p, true); });
+  // the search and filters you had before: off first, so the link shows just what it names
+  function cleared(go) {
+    var sb = document.getElementById("search"), pills = function () { return document.querySelectorAll("#fbar-pills .fbar-pill").length; };
+    if (!pills() && !(sb && sb.value)) { go(); return; }
+    var r = document.getElementById("fbar-reset"); if (r) r.click();
+    var n = 0; (function wait() { if (pills() && n++ < 25) { setTimeout(wait, 80); return; } go(); })();
+  }
+  function openLink(search, back) {
+  var q = null; try { q = new URLSearchParams(search); } catch (e) {} if (!q) return;
   var map = q.get("map"), f = q.get("f"), hab = q.get("hab"), type = q.get("type"), fam = q.get("fam"), qs = q.get("q");
   // ?tab=map / quiz / cam / ach / guide: opens SnakeList on that tab (the About page's feature cards)
   var tabQ = q.get("tab");
@@ -19171,7 +19214,10 @@ window.SL_GEO_READY = new Promise(function (res) {
       if (on) { on.scrollIntoView({ behavior: "smooth", block: "center" }); on.classList.remove("chip-pulse"); void on.offsetWidth; on.classList.add("chip-pulse"); }
     }, 300);
   }
-  setTimeout(function () { ready(0); }, 50);
+  var start = function () { setTimeout(function () { if (back && (qs || f || type || fam)) cleared(function () { ready(0); }); else ready(0); }, 50); };
+  // back on a page that is loading again: once it has set itself up (its tabs, the map's own "as you left it")
+  if (back && document.readyState !== "complete") window.addEventListener("load", function () { setTimeout(start, 300); }, { once: true }); else start();
+  }
 })();
 </script>
 
@@ -21045,7 +21091,11 @@ window.SL_GEO_READY = new Promise(function (res) {
 // places, then snakes.
 (function () {
   function fold(t) { return String(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/-/g, ""); }
-  var PL = null, PLmap = null, plP = null;
+  // v5.57: the 135,000 places are kept as the one string they arrive as, with a sorted index of their
+  // folded names - not 135,000 objects, which took ~60 MB the moment you typed in the map search and
+  // made iPads run out of memory and reload SnakeList. A place becomes an object only when it's found.
+  var RAW = null, OFF = null, KEY = null, ORD = null, PLN = 0, PLc = {}, plP = null;
+  var tc = function (t) { return /[a-z]/.test(t) ? t : t.toLowerCase().replace(/(^|[\s\-'(])([a-z])/g, function (m, a, c) { return a + c.toUpperCase(); }); };
   function loadPlaces() {
     if (plP) return plP;
     plP = new Promise(function (res) {
@@ -21054,16 +21104,29 @@ window.SL_GEO_READY = new Promise(function (res) {
     }).then(function () {
       var raw = window.SL_PLACES_RAW || ""; window.SL_PLACES_RAW = null;
       if (!raw) return;
-      var tc = function (t) { return /[a-z]/.test(t) ? t : t.toLowerCase().replace(/(^|[\s\-'(])([a-z])/g, function (m, a, c) { return a + c.toUpperCase(); }); };
-      PL = raw.split("\n").map(function (l) { var f = l.split("\t"); return { name: tc(f[0]), cc: f[1], adm: f[2], lat: +f[3], lon: +f[4], kind: f[5], k: fold(f[0]) }; });
-      PLmap = {};
-      PL.forEach(function (p, i) { if (!(p.k in PLmap)) PLmap[p.k] = i; });
+      var n = 1, i, at = 0;
+      for (i = raw.indexOf("\n"); i >= 0; i = raw.indexOf("\n", i + 1)) n++;
+      var off = new Int32Array(n + 1), key = new Array(n);
+      for (i = 0; i < n; i++) {
+        off[i] = at; var e = raw.indexOf("\n", at); if (e < 0) e = raw.length;
+        var t = raw.indexOf("\t", at); key[i] = fold(raw.slice(at, t < 0 || t > e ? e : t)); at = e + 1;
+      }
+      off[n] = raw.length + 1;
+      var ord = new Int32Array(n); for (i = 0; i < n; i++) ord[i] = i;
+      ord.sort(function (a, b) { var x = key[a], y = key[b]; return x < y ? -1 : x > y ? 1 : a - b; });
+      RAW = raw; OFF = off; KEY = key; ORD = ord; PLN = n;
       // a search typed before the list arrived gets another go now
       var hs = document.getElementById("heat-search");
       if (hs && hs.value.trim()) hs.dispatchEvent(new Event("input"));
     });
     return plP;
   }
+  function place(i) {
+    var p = PLc[i]; if (p) return p;
+    var f = RAW.slice(OFF[i], OFF[i + 1] - 1).split("\t");
+    return (PLc[i] = { name: tc(f[0]), cc: f[1] || "", adm: f[2] || "", lat: +f[3], lon: +f[4], kind: f[5], k: KEY[i] });
+  }
+  function firstAt(q) { var lo = 0, hi = PLN; while (lo < hi) { var mid = (lo + hi) >> 1; if (KEY[ORD[mid]] < q) lo = mid + 1; else hi = mid; } return lo; }
   var CODE2NAME = null;
   function countryOf(p) {
     var geo = window.SL_MAP_GEO && window.SL_MAP_GEO();
@@ -21074,18 +21137,18 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   function asCity(p) { return { name: p.name, country: countryOf(p), lat: p.lat, lon: p.lon, kind: p.kind }; }
   window.SL_PLACE_LOOKUP = function (k) {
-    if (!PLmap) return null;
+    if (!ORD) return null;
     if (window.SL_PLACE_PICKED && window.SL_PLACE_PICKED.k === k) return asCity(window.SL_PLACE_PICKED);
-    var i = PLmap[k];
-    return i == null ? null : asCity(PL[i]);
+    var j = firstAt(k);
+    return j < PLN && KEY[ORD[j]] === k ? asCity(place(ORD[j])) : null;
   };
   function placeMatches(q, n) {
-    if (!PL || q.length < 2) return [];
-    var out = [], seen = {};
-    for (var i = 0; i < PL.length && out.length < n; i++) {
-      var p = PL[i];
-      if (p.k.lastIndexOf(q, 0) !== 0) continue;
-      var key = p.k + "|" + p.cc + "|" + p.adm;
+    if (!ORD || q.length < 2) return [];
+    var hit = [], out = [], seen = {}, j;
+    for (j = firstAt(q); j < PLN && KEY[ORD[j]].lastIndexOf(q, 0) === 0; j++) hit.push(ORD[j]);
+    hit.sort(function (a, b) { return a - b; }); // in the list's own order, as before
+    for (j = 0; j < hit.length && out.length < n; j++) {
+      var p = place(hit[j]), key = p.k + "|" + p.cc + "|" + p.adm;
       if (seen[key]) continue; seen[key] = 1;
       out.push(p);
     }
@@ -21231,6 +21294,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v5.60", d: "2026-11-17", items: ["Searching no longer makes SnakeList reload: the map search uses about half the memory, and the checklist search waits until you pause typing", "Links from snake, country, family and other pages back into SnakeList go Back instead of loading it again", "Search suggestions show in a green SnakeList panel instead of the browser's white list", "Pressing Enter in a search box on a phone just closes the keyboard"] },
     { v: "v5.59", d: "2026-11-17", items: ["On phones the Sign in reminder is tidy: the words wrap neatly and Sign in stays on one line"] },
     { v: "v5.58", d: "2026-11-17", items: ["Country pages: how many snakes are dangerously venomous, mildly venomous, giant constrictors, harmless and harmful - tap a number to see them", "Country pages: counts for every checklist filter (families, habitats, constrictors, snake eaters, popular, rare and more)", "Snake pages: a list like Venomous: No, Family, Habitats, Constrictor and more, the same as the checklist filters", "Country search box: no text inside and no Go button - just type and press Enter", "Writing on the pages is now SnakeList green", "Snakes with no common name now count correctly as constrictors and snake eaters"] },
     { v: "v5.57", d: "2026-11-17", items: ["Scientific names light up when you hover them, just like the snake names", "On phones the snake's name and Scroll to continue in the opening are smaller"] },
@@ -21732,6 +21796,13 @@ window.SL_GEO_READY = new Promise(function (res) {
       window.scrollTo({ top: to.getBoundingClientRect().top + window.scrollY - 70, behavior: "smooth" });
       if (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) sq.blur(); // phones: the keyboard goes away
     }, 60);
+  });
+  // v5.57: the other search boxes too - Enter (Go / Search on an iPad's keyboard) shows what was found and puts the keyboard away
+  document.addEventListener("keydown", function (e) {
+    var t = e.target;
+    if (e.key !== "Enter" || e.isComposing || !t || !t.matches || !t.matches("#heat-search, #hab-q, #hm-q, .mf-find, #quiz-map-q")) return;
+    if (!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches)) return;
+    setTimeout(function () { if (document.activeElement === t) t.blur(); }, 120);
   });
   if (sq) sq.addEventListener("input", function () {
     clearTimeout(sqT);
@@ -24093,7 +24164,7 @@ window.SL_welcome = function (u, back) {
       '<div class="f"><span style="display:block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:5px">Snakes it caught</span>' +
       '<div class="cam-media">' + media.map(function (m, i) {
         return '<div class="m">' + (m.kind === "photo" ? '<img src="' + m.data + '" alt="">' : '<span>&#9654; video</span>') +
-          '<input type="text" list="cam-sp" data-i="' + i + '" data-f="species" placeholder="Which snake?" value="' + esc(m.species || "") + '">' +
+          '<input type="text" list="cam-sp" autocomplete="off" data-i="' + i + '" data-f="species" placeholder="Which snake?" value="' + esc(m.species || "") + '">' +
           '<button type="button" data-s="rm" data-i="' + i + '" aria-label="Remove">&times;</button></div>';
       }).join("") + '</div><datalist id="cam-sp">' + names().slice(0, 4300).map(function (n) { return '<option value="' + esc(n) + '">'; }).join("") + "</datalist>" +
       '<div class="row"><button type="button" data-s="photo">+ Add photos</button><button type="button" data-s="video">+ Add a video link</button></div>' +
@@ -24441,6 +24512,65 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 if(window.MutationObserver)new MutationObserver(function(ms){ms.forEach(function(m){[].forEach.call(m.addedNodes,function(nd){if(nd.nodeType!==1)return;if(nd.tagName==='SELECT')enhance(nd);else if(nd.querySelector&&nd.querySelector('select'))scan(nd)})})}).observe(document.documentElement,{childList:true,subtree:true});
 })();
 
+</script>
+<script>
+// v5.57: a text box with suggestions (<input list="...">) shows them in a SnakeList panel - the green one the
+// Language button opens - not the browser's plain white list. The <datalist> stays as the list of options.
+(function(){
+if(!document.querySelector||window.__slSug)return;window.__slSug=1;
+var st=document.createElement('style');st.textContent=
+'.sl-sug-host{position:relative}'+
+'.sl-sug{position:absolute;z-index:3000;left:0;top:calc(100% + 6px);min-width:100%;width:max-content;max-width:min(360px,calc(100vw - 24px));max-height:min(320px,55vh);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin:0;padding:6px;list-style:none;box-sizing:border-box;'+
+'background:linear-gradient(160deg,#256846,#22623f);border:1px solid #37855f;border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.3);color:#eef6ee;font:500 14.5px/1.35 Inter,system-ui,sans-serif;text-align:left;scrollbar-width:thin}'+
+'.sl-sug[hidden]{display:none}.sl-sug-up>.sl-sug{top:auto;bottom:calc(100% + 6px)}'+
+'.sl-sug li{display:block;margin:0;padding:9px 11px;border-radius:8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#eef6ee}'+
+'.sl-sug li b{font-weight:700;color:#fff}.sl-sug li:hover,.sl-sug li.act{background:#2c7a57}'+
+'@media (pointer:coarse){.sl-sug li{padding:11px 12px;font-size:16px}}';
+document.head.appendChild(st);
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function fold(t){return String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
+var n=0;
+function enhance(inp){
+  var lid=inp.getAttribute('list');if(!lid||inp.dataset.slSug)return;
+  inp.dataset.slSug=lid;inp.removeAttribute('list');inp.setAttribute('autocomplete','off');
+  var id='sl-sug-'+(++n),host=inp.parentNode;host.classList.add('sl-sug-host');
+  var ul=document.createElement('ul');ul.className='sl-sug';ul.id=id;ul.setAttribute('role','listbox');ul.hidden=true;host.appendChild(ul);
+  inp.setAttribute('role','combobox');inp.setAttribute('aria-autocomplete','list');inp.setAttribute('aria-expanded','false');inp.setAttribute('aria-controls',id);
+  var items=[],act=-1;
+  function opts(){var dl=document.getElementById(lid);return dl?[].map.call(dl.getElementsByTagName('option'),function(o){return o.value}).filter(Boolean):[]}
+  function show(on){ul.hidden=!on;inp.setAttribute('aria-expanded',on?'true':'false');if(!on){act=-1;inp.removeAttribute('aria-activedescendant');return}
+    var r=inp.getBoundingClientRect();host.classList.toggle('sl-sug-up',r.bottom+Math.min(320,ul.scrollHeight)+12>innerHeight&&r.top>innerHeight/2)}
+  function render(){
+    var q=fold(inp.value.trim()),all=opts(),a=[],b=[];
+    for(var i=0;i<all.length&&a.length<300;i++){var f=fold(all[i]);if(!q||f.indexOf(q)===0)a.push(all[i]);else if(f.indexOf(q)>0&&b.length<100)b.push(all[i])}
+    items=a.concat(b).slice(0,300);
+    if(items.length===1&&fold(items[0])===q)items=[]; // exactly what's typed: nothing left to suggest
+    ul.innerHTML=items.map(function(v,i){var f=fold(v),k=q?f.indexOf(q):-1;
+      return '<li role="option" id="'+id+'-'+i+'" data-i="'+i+'">'+(k>=0&&v.length===f.length?esc(v.slice(0,k))+'<b>'+esc(v.slice(k,k+q.length))+'</b>'+esc(v.slice(k+q.length)):esc(v))+'</li>'}).join('');
+    ul.scrollTop=0;act=-1;show(items.length>0&&document.activeElement===inp)}
+  function hi(i){var ls=ul.children;if(ls[act])ls[act].classList.remove('act');act=i;if(ls[act]){ls[act].classList.add('act');inp.setAttribute('aria-activedescendant',ls[act].id);
+    var r=ls[act];if(r.offsetTop<ul.scrollTop)ul.scrollTop=r.offsetTop-6;else if(r.offsetTop+r.offsetHeight>ul.scrollTop+ul.clientHeight)ul.scrollTop=r.offsetTop+r.offsetHeight-ul.clientHeight+6}}
+  function pick(i){var v=items[i];if(v==null)return;inp.value=v;show(false);inp.dispatchEvent(new Event('input',{bubbles:true}));inp.dispatchEvent(new Event('change',{bubbles:true}))}
+  inp.addEventListener('input',function(e){if(e.isTrusted)render()});
+  inp.addEventListener('focus',render);
+  inp.addEventListener('click',function(){if(ul.hidden)render()});
+  inp.addEventListener('blur',function(){setTimeout(function(){if(document.activeElement!==inp)show(false)},150)});
+  inp.addEventListener('keydown',function(e){var k=e.key;if(e.isComposing)return;
+    if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();if(ul.hidden)render();if(items.length)hi(act<0?(k==='ArrowDown'?0:items.length-1):(act+(k==='ArrowDown'?1:-1)+items.length)%items.length)}
+    else if(k==='Enter'&&!ul.hidden&&act>=0){e.preventDefault();e.stopPropagation();pick(act)}
+    else if(k==='Enter')show(false);
+    else if(k==='Escape'&&!ul.hidden){e.preventDefault();e.stopPropagation();show(false)}
+    else if(k==='Tab')show(false)});
+  ul.addEventListener('mousedown',function(e){e.preventDefault()});
+  ul.addEventListener('click',function(e){var li=e.target.closest('li');if(li)pick(+li.dataset.i)});
+  ul.addEventListener('mousemove',function(e){var li=e.target.closest('li');if(li&&+li.dataset.i!==act)hi(+li.dataset.i)});
+  // options that arrive later (a list loaded the first time the box is used): shown as soon as they're there
+  var dl=document.getElementById(lid);if(dl&&window.MutationObserver)new MutationObserver(function(){if(document.activeElement===inp)render()}).observe(dl,{childList:true});
+}
+function scan(root){var ins=(root||document).getElementsByTagName('input');for(var i=0;i<ins.length;i++)if(ins[i].hasAttribute('list'))enhance(ins[i])}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){scan()});else scan();
+if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.length;j++){var a=ms[j].addedNodes;for(var i=0;i<a.length;i++){var nd=a[i];if(nd.nodeType!==1)continue;if(nd.tagName==='INPUT'){if(nd.hasAttribute('list'))enhance(nd)}else if(nd.getElementsByTagName&&nd.firstElementChild)scan(nd)}}}).observe(document.documentElement,{childList:true,subtree:true});
+})();
 </script>
 
 <script>

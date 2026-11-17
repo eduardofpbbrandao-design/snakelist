@@ -1,12 +1,18 @@
-// v5.55: links back to SnakeList go Back instead of loading it again, so the app comes back instantly (no reload on iPads/phones)
-(function(){var root;try{root=new URL('../',location.href)}catch(e){return}
+// links back to SnakeList go Back instead of loading it again when SnakeList is the page just before
+// this one, so the app comes back instantly, as it was (no reload on iPads/phones). A link that asks
+// SnakeList for something (?q= ?fam= ?map= ...) is left in sessionStorage for the app to open once it's back.
+(function(){var s=document.currentScript,root,moved=false;try{root=new URL('../',s&&s.src||location.href)}catch(e){return}
 function isRoot(u){return u.origin===root.origin&&(u.pathname===root.pathname||u.pathname===root.pathname+'index.html')}
-document.addEventListener('click',function(e){if(e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+addEventListener('hashchange',function(){moved=true});
+document.addEventListener('click',function(e){if(e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||moved)return;
 var a=e.target.closest&&e.target.closest('a[href]');if(!a||a.target&&a.target!=='_self'||a.hasAttribute('download'))return;
-var u;try{u=new URL(a.href)}catch(x){return}if(!isRoot(u)||u.search||u.hash)return;
+var u;try{u=new URL(a.href)}catch(x){return}if(!isRoot(u)||u.hash||u.search&&!/^\?([^#]*&)?(map|f|hab|type|fam|q|tab)=/.test(u.search))return;
 var r;try{r=new URL(document.referrer)}catch(x){return}if(!isRoot(r)||history.length<2)return;
-e.preventDefault();var left=false;addEventListener('pagehide',function(){left=true},{once:true});history.back();
-setTimeout(function(){if(!left)location.href=a.href},700)},true)})();
+e.preventDefault();try{if(u.search)sessionStorage.setItem('sl-open-link',JSON.stringify({s:u.search,t:Date.now()}));else sessionStorage.removeItem('sl-open-link')}catch(x){}
+var left=false;addEventListener('pagehide',function(){left=true},{once:true});history.back();
+setTimeout(function(){if(!left){try{sessionStorage.removeItem('sl-open-link')}catch(x){}location.href=a.href}},700)},true);
+document.addEventListener('keydown',function(e){var t=e.target;if(e.key!=='Enter'||e.isComposing||!t||t.tagName!=='INPUT'||t.type!=='search')return;
+if(window.matchMedia&&matchMedia('(pointer: coarse)').matches)setTimeout(function(){t.blur()},60)})})();
 // v4.81: ?embed=map shows only the range map (with See states / See cities and the list of countries), for the 3D viewer's "See countries" panel
 (function(){if(!/[?&]embed=map(&|$)/.test(location.search))return;var r=document.getElementById('range');if(!r)return;var de=document.documentElement;de.classList.add('sp-embed');
 for(var n=r;n&&n!==document.body;n=n.parentNode)[].forEach.call(n.parentNode.children,function(c){if(c!==n&&c.tagName!=='SCRIPT'&&c.tagName!=='TEMPLATE')c.style.display='none'});
@@ -194,6 +200,6 @@ body.id='sp-rl-m'+i;body.hidden=true;body.setAttribute('role','region');body.set
 bt.addEventListener('click',function(){var o=bt.getAttribute('aria-expanded')!=='true';bt.setAttribute('aria-expanded',String(o));body.hidden=!o});mw.appendChild(sec)});box.appendChild(mw)}}
 b.addEventListener('click',open);var ab=document.querySelector('.sp-anatbtn'),wantA=0;function anat(){if(!wantA)return;var x=document.querySelector('.sp3d-wrap .sp3d-b[title^="Show the parts"]');if(x){wantA=0;if(x.getAttribute('aria-pressed')!=='true')setTimeout(function(){x.click()},300)}}if(ab)ab.addEventListener('click',function(){wantA=1;open();anat()});if(location.hash==='#real')open();window.addEventListener('hashchange',function(){if(location.hash==='#real')open()})})();
 
-(function(){var T={'3d':{v:480,sel:'.sp-realbtn,.sp-anatbtn,.sp-rl'}},V=559,d=document.documentElement;try{var a=+localStorage.getItem('sl-ver-n');if(a>V)V=a}catch(e){}
+(function(){var T={'3d':{v:480,sel:'.sp-realbtn,.sp-anatbtn,.sp-rl'}},V=560,d=document.documentElement;try{var a=+localStorage.getItem('sl-ver-n');if(a>V)V=a}catch(e){}
 Object.keys(T).forEach(function(k){var seen=0;try{seen=localStorage.getItem('sl-new-seen-'+k)}catch(e){}if(V&&V<T[k].v+20&&!seen)d.classList.add('sl-new-'+k);
 document.addEventListener('click',function(e){if(!d.classList.contains('sl-new-'+k)||!e.target.closest||!e.target.closest(T[k].sel))return;try{localStorage.setItem('sl-new-seen-'+k,'1')}catch(x){}d.classList.remove('sl-new-'+k)},true)})})();
