@@ -7069,6 +7069,347 @@
   };
 })();
 </script>
+<!-- ==== Mark Seen smooth (begin) ==== -->
+<style id="sl-seen-ui-css">
+  /* Mark Seen -> Seen: the button keeps its size (both labels share one grid cell, so it is always as wide
+     as "Mark Seen"); only opacity and transforms move. The green comes in as a layer behind the label that
+     fades in, the tick draws itself, and the press is a small scale-down started at pointerdown (SL_SEEN_UI).
+     Everything is a transition, so a second click reverses it from wherever it has got to. */
+  .seen-btn { position: relative; isolation: isolate; display: grid; grid-template-areas: "sb"; place-items: center;
+    transition: border-color .3s ease, min-width .15s ease, padding .15s ease; -webkit-tap-highlight-color: transparent; }
+  .seen-btn::before { content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: inherit; background: var(--gold-fill);
+    opacity: 0; transform: scale(.9); pointer-events: none; transition: opacity .2s ease, transform .22s ease; }
+  .card.done .seen-btn { background: transparent; }
+  .card.done .seen-btn::before { opacity: 1; transform: none; transition: opacity .34s cubic-bezier(.3,.6,.3,1), transform .42s cubic-bezier(.2,.9,.3,1.15); }
+  /* the two labels, stacked */
+  .card .seen-btn > .lbl-mark, .card .seen-btn > .lbl-seen, .sl-sb > .lbl-mark, .sl-sb > .lbl-seen {
+    grid-area: sb; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
+  .card .seen-btn > .lbl-mark { color: var(--text); }
+  .card .seen-btn > .lbl-seen { color: var(--on-fill); }
+  .card .seen-btn > .lbl-mark, .sl-sb > .lbl-mark { opacity: 1; transform: none; visibility: visible;
+    transition: opacity .2s ease .08s, transform .3s cubic-bezier(.2,.9,.3,1.2) .08s, visibility 0s; }
+  .card.done .seen-btn > .lbl-mark, .sl-sb.on > .lbl-mark, .sl-sb.seen > .lbl-mark { opacity: 0; transform: scale(.86); visibility: hidden;
+    transition: opacity .14s ease, transform .2s ease, visibility 0s linear .2s; }
+  .card .seen-btn > .lbl-seen, .sl-sb > .lbl-seen { opacity: 0; transform: scale(.86); visibility: hidden;
+    transition: opacity .14s ease, transform .2s ease, visibility 0s linear .2s; }
+  .card.done .seen-btn > .lbl-seen, .sl-sb.on > .lbl-seen, .sl-sb.seen > .lbl-seen { opacity: 1; transform: none; visibility: visible;
+    transition: opacity .2s ease .07s, transform .34s cubic-bezier(.2,.9,.3,1.25) .07s, visibility 0s; }
+  /* the tick draws from its short arm down and up the long one, with a small turn into place */
+  .seen-btn .lbl-seen .ic, .sl-sb .lbl-seen .ic { stroke-dasharray: 24 24; stroke-dashoffset: -24; opacity: 0; transform: rotate(-16deg) scale(.6);
+    transition: stroke-dashoffset .12s ease, opacity .12s ease, transform .2s ease; }
+  .card.done .seen-btn .lbl-seen .ic, .sl-sb.on .lbl-seen .ic, .sl-sb.seen .lbl-seen .ic { stroke-dashoffset: 0; opacity: 1; transform: none;
+    transition: stroke-dashoffset .3s cubic-bezier(.4,.1,.3,1) .13s, opacity .1s ease .13s, transform .42s cubic-bezier(.25,1.6,.45,1) .11s; }
+  /* the button stays on top of the big tick that plays over the card */
+  .card:has(> .seen-flash) .seen-btn { z-index: 6; }
+  /* the other Mark Seen buttons (species preview, map species box, 3D window, Camera): same labels and tick;
+     their own colours ease across */
+  .sl-sb { display: inline-grid; grid-template-areas: "sb"; place-items: center; -webkit-tap-highlight-color: transparent;
+    transition: background-color .3s ease, border-color .3s ease, color .3s ease; }
+  .sl-sb[hidden] { display: none; }
+  /* the card's name and its Want to see button ease across too */
+  #grid .card .card-name { transition: color .3s ease; }
+  #grid .card .wish-row { transition: opacity .2s ease; }
+  #grid .card.done .wish-row { opacity: 0; pointer-events: none; }
+  /* the big tick over the card: 0.85s instead of 1.9s, so the card can move on afterwards (same look) */
+  .seen-flash, .seen-flash::before { animation-duration: .85s; }
+  /* unmarking: the card's green wash fades away instead of vanishing */
+  .seen-unwash { position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none;
+    background: linear-gradient(180deg, var(--done-wash), transparent 62%); }
+  /* Snakes seen: the number rolls to its new value; digits keep their width */
+  .sl-seen { position: relative; }
+  #sl-seen-n { display: inline-block; font-variant-numeric: tabular-nums; }
+  .sl-seen-ghost { position: absolute; pointer-events: none; white-space: nowrap; color: var(--text); font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; }
+  @media (prefers-reduced-motion: reduce) {
+    .seen-btn, .seen-btn::before, .seen-btn > span, .seen-btn .ic, .sl-sb, .sl-sb > span, .sl-sb .ic,
+    #grid .card .card-name, #grid .card .wish-row { transition: none !important; }
+    .seen-unwash, .sl-seen-ghost { display: none; }
+  }
+</style>
+<script>
+// ---- Mark Seen, smooth (SL_SEEN_UI) ------------------------------------------------------
+// The press starts at pointerdown, the button's Seen look is pure CSS transitions on .card.done (so it
+// always matches the saved state and reverses from wherever it is), the Snakes seen number changes at
+// the same moment, and anything that would move or hide the card (a sort, Want to see / My Sightings /
+// My lists) waits until the animation has finished (~0.8s after the last click). Then the cards move
+// smoothly to their new places (FLIP, translate only), keeping the card you clicked - or the first card
+// on screen - where it was, so the page never jumps. Nothing here changes the cards themselves: the
+// held layout lives in #sl-seen-hold (outside the synced list). Reduced motion: everything is instant.
+(function () {
+  var grid = document.getElementById("grid");
+  if (!grid) return;
+  var RM = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
+  var still = function () { return RM.matches; };
+  var canAnim = !!(Element.prototype.animate && window.CSS && CSS.supports && CSS.supports("translate", "1px"));
+  var SETTLE = 880; // after the last click: the button, the tick and the big tick have all finished by then
+  var SEL = "#grid .seen-btn, .sl-sb";
+  var EASE = "cubic-bezier(.2,.8,.2,1)";
+
+  // ---- the press ----
+  var pressed = null, pressAnim = null, pressT = 0;
+  function scaleOf(b) {
+    var t = getComputedStyle(b).transform;
+    if (!t || t === "none" || !window.DOMMatrixReadOnly) return 1;
+    return new DOMMatrixReadOnly(t).a || 1;
+  }
+  function down(b) {
+    if (still() || !canAnim) return;
+    var from = scaleOf(b);
+    if (pressAnim) pressAnim.cancel();
+    pressed = b; pressT = performance.now();
+    pressAnim = b.animate([{ transform: "scale(" + from + ")" }, { transform: "scale(.95)" }], { duration: 100, easing: "cubic-bezier(.2,.8,.3,1)", fill: "forwards" });
+  }
+  function up() {
+    var b = pressed; if (!b) return;
+    pressed = null;
+    var wait = Math.max(0, 80 - (performance.now() - pressT)); // a very quick tap still shows the press
+    setTimeout(function () {
+      if (pressed === b) return;
+      var from = scaleOf(b);
+      if (pressAnim) pressAnim.cancel();
+      pressAnim = b.animate([{ transform: "scale(" + from + ")" }, { transform: "scale(1.025)", offset: 0.5 }, { transform: "scale(1)" }], { duration: 360, easing: "cubic-bezier(.3,.7,.4,1)" });
+    }, wait);
+  }
+  document.addEventListener("pointerdown", function (e) {
+    if (e.button) return;
+    var b = e.target.closest && e.target.closest(SEL);
+    if (b && !b.disabled) down(b);
+  }, { capture: true, passive: true });
+  ["pointerup", "pointercancel", "dragstart"].forEach(function (t) { document.addEventListener(t, up, { capture: true, passive: true }); });
+  // the keyboard (Enter / Space): the same press, played at once
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest(SEL);
+    if (b && performance.now() - pressT > 700) { down(b); up(); }
+  }, true);
+
+  // ---- Snakes seen: the number rolls (old one out, new one in) whenever it changes, whoever changes it ----
+  var cn = document.getElementById("sl-seen-n"), last = cn ? cn.textContent : "", ghost = null;
+  var num = function (t) { return +String(t).replace(/[^\d]/g, "") || 0; };
+  function roll(old, now) {
+    if (ghost) { ghost.remove(); ghost = null; }
+    if (still() || !canAnim || !cn.offsetParent || !old) return;
+    var dir = num(now) >= num(old) ? -1 : 1; // counting up: the old number leaves upwards
+    var g = document.createElement("span");
+    g.className = "sl-seen-ghost"; g.setAttribute("aria-hidden", "true"); g.textContent = old;
+    g.style.left = cn.offsetLeft + "px"; g.style.top = cn.offsetTop + "px";
+    cn.parentNode.appendChild(g); ghost = g;
+    g.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(" + (dir * 0.6) + "em)", opacity: 0 }], { duration: 240, easing: "cubic-bezier(.4,0,.6,1)", fill: "forwards" })
+      .onfinish = function () { g.remove(); if (ghost === g) ghost = null; };
+    cn.animate([{ transform: "translateY(" + (-dir * 0.6) + "em)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 340, easing: "cubic-bezier(.2,.9,.3,1.2)" });
+  }
+  if (cn) new MutationObserver(function () {
+    var now = cn.textContent; if (now === last) return;
+    var old = last; last = now; roll(old, now);
+  }).observe(cn, { childList: true, characterData: true, subtree: true });
+  function setCount() {
+    if (!cn) return;
+    var n = document.querySelectorAll("#grid .card.done").length.toLocaleString();
+    if (cn.textContent !== n) cn.textContent = n;
+  }
+
+  // ---- held layout: until the animation ends, a card keeps its note row / Want to see as they were ----
+  var holdSt = document.createElement("style"); holdSt.id = "sl-seen-hold"; document.head.appendChild(holdSt);
+  var flipSt = document.createElement("style"); flipSt.id = "sl-seen-flip"; document.head.appendChild(flipSt);
+  var pending = {}, work = null, match = null, timer = 0, lastCard = null;
+  var esc = function (id) { return window.CSS && CSS.escape ? CSS.escape(id) : id; };
+  var cardSel = function (id) { return '#grid .card[data-id="' + esc(id) + '"]'; };
+  function writeHold() {
+    var css = "";
+    Object.keys(pending).forEach(function (id) {
+      var s = cardSel(id), row = s + " .note-btn," + s + " .photo-btn," + s + " .send-photo-btn";
+      css += pending[id].was ? row + "{display:block!important}" + s + " .wish-row{display:none!important}"
+        : row + "{display:none!important}" + s + " .wish-row{display:block!important}";
+    });
+    holdSt.textContent = css;
+  }
+  function hold(card, done) {
+    if (still() || !canAnim) return;
+    var id = card.dataset.id;
+    if (!pending[id]) pending[id] = { was: !done, card: card };
+    writeHold();
+  }
+  // the big tick, faded out from where it has got to (a second click while it plays)
+  function fadeOut(f) {
+    if (f._out) return; f._out = true;
+    if (!canAnim) { f.remove(); return; }
+    var cs = getComputedStyle(f), o = +cs.opacity, t = cs.transform;
+    f.style.animation = "none";
+    f.animate([{ opacity: o, transform: t }, { opacity: 0, transform: t }], { duration: 170, easing: "ease-out", fill: "forwards" }).onfinish = function () { f.remove(); };
+  }
+  // unmarking: the green wash goes softly
+  function unwash(card) {
+    if (still() || !canAnim) return;
+    var top = card.querySelector(".card-top"), h = top ? Math.max(0, top.offsetTop - 10) : 0;
+    var u = document.createElement("div"); u.className = "seen-unwash"; u.style.clipPath = "inset(" + h + "px 0 0 0)";
+    card.appendChild(u);
+    u.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320, easing: "ease-out", fill: "forwards" }).onfinish = function () { u.remove(); };
+  }
+  function toggled(card, done, w, m) {
+    work = w; match = m; lastCard = card;
+    setCount(); // the count changes with the button
+    if (!done) { card.querySelectorAll(".seen-unwash").forEach(function (u) { u.remove(); }); unwash(card); }
+    clearTimeout(timer);
+    if (still() || !canAnim) { timer = setTimeout(settle, 0); return; }
+    timer = setTimeout(settle, SETTLE);
+  }
+
+  // ---- after the animation: recount, re-sort / re-filter, and move the cards smoothly ----
+  var byId = null;
+  function cardById(id) {
+    if (!byId) { byId = {}; [].forEach.call(document.querySelectorAll("#grid .card"), function (c) { byId[c.getAttribute("data-id")] = c; }); }
+    return byId[id];
+  }
+  var vis = function (r, m) { return r.height > 0 && r.bottom > -m && r.top < innerHeight + m; };
+  function settle() {
+    timer = 0;
+    var list = Object.keys(pending).map(function (id) { return pending[id]; }), w = work;
+    if (!list.length || !grid.offsetParent || still() || !canAnim) { pending = {}; holdSt.textContent = ""; work = null; if (w) w(); return; }
+    // cards that a filter or tab will take away fade out first; a note row that is going away fades too
+    var pre = [];
+    list.forEach(function (p) {
+      var c = p.card, r = c.getBoundingClientRect();
+      if (!vis(r, 0)) return;
+      if (match && !match(c)) pre.push(c.animate([{ opacity: 1, scale: "1" }, { opacity: 0, scale: "0.96" }], { duration: 220, easing: "ease-in", fill: "forwards" }));
+      else if (p.was && !c.classList.contains("done"))
+        [].forEach.call(c.querySelectorAll(".note-btn, .photo-btn, .send-photo-btn"), function (el) { pre.push(el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: "ease-in", fill: "forwards" })); });
+    });
+    if (pre.length) setTimeout(function () { commit(pre); }, 200); else commit(pre);
+  }
+  // moving cards back from their old places: set in this same frame (so nothing is ever drawn in the new
+  // place first) and eased out frame by frame. The offset is written on the element itself, on the main
+  // thread, so the browser sees a transform easing out, not the page jumping (a composited animation is
+  // counted as a layout shift when it ends). [el, dx, dy, hold] - hold: keep the offset to the end.
+  function slide(list, dur) {
+    if (!list.length) return;
+    var put = function (k) {
+      var e = k >= 1 ? 0 : Math.pow(1 - k, 3);
+      list.forEach(function (x) { var f = x[3] ? (k >= 1 ? 0 : 1) : e; x[0].style.translate = f ? x[1] * f + "px " + x[2] * f + "px" : ""; if (!f && x[0].getAttribute("style") === "") x[0].removeAttribute("style"); });
+    };
+    put(0);
+    var t0 = 0;
+    requestAnimationFrame(function step(ts) {
+      if (!t0) t0 = ts;
+      var k = Math.min(1, (ts - t0) / dur); put(k);
+      if (k < 1) requestAnimationFrame(step);
+    });
+  }
+  // where a card is on the page, leaving out any transform (the hover pop-out, a slide still running)
+  function docTop(el) { var y = 0; for (var e = el; e; e = e.offsetParent) y += e.offsetTop; return y - window.scrollY; }
+  function parts(c) { return [].slice.call(c.querySelectorAll(".card-bottom, .card-bottom .seen-btn, .card-bottom .map-btn, .card-bottom .td-card-btn")); }
+  function commit(pre) {
+    if (timer) { pre.forEach(function (a) { a.cancel(); }); return; } // clicked again meanwhile: wait for that one
+    var list = Object.keys(pending).map(function (id) { return pending[id]; }), w = work;
+    pending = {}; work = null;
+    var M = innerHeight * 0.5, before = new Map(), order = [];
+    (window.SL_SHOWN_IDS || []).forEach(function (id) {
+      var c = cardById(id); if (!c) return;
+      var r = c.getBoundingClientRect(); if (!vis(r, M)) return;
+      before.set(c, { r: r, p: parts(c).map(function (b) { return [b, b.getBoundingClientRect()]; }) }); order.push(c);
+    });
+    // the anchor: the card just clicked if it stays, otherwise the first card on screen that stays
+    var leaving = function (c) { return match && list.some(function (p) { return p.card === c; }) && !match(c); };
+    var anchor = null;
+    if (lastCard && before.has(lastCard) && !leaving(lastCard) && vis(before.get(lastCard).r, 0)) anchor = lastCard;
+    if (!anchor && lastCard) { // it is leaving: the card before it stays put and the ones after it close up
+      var li = order.indexOf(lastCard);
+      for (var j = li - 1; j >= 0 && !anchor; j--) if (!leaving(order[j]) && vis(before.get(order[j]).r, 0)) anchor = order[j];
+      for (j = li + 1; li >= 0 && j < order.length && !anchor; j++) if (!leaving(order[j]) && vis(before.get(order[j]).r, 0)) anchor = order[j];
+    }
+    if (!anchor) order.slice().sort(function (a, b) { return before.get(a).r.top - before.get(b).r.top; }).some(function (c) {
+      var r = before.get(c).r; if (r.top >= 0 && r.top < innerHeight && !leaving(c)) { anchor = c; return true; } return false; });
+    var aTop = anchor ? docTop(anchor) : 0;
+    list.forEach(function (p) { [].forEach.call(p.card.querySelectorAll(".seen-flash"), function (f) { f.remove(); }); }); // (all but invisible by now)
+    holdSt.textContent = "";
+    try { if (w) w(); } catch (err) { setTimeout(function () { throw err; }); }
+    pre.forEach(function (a) { a.cancel(); });
+    if (anchor && anchor.getClientRects().length) {
+      var dy = docTop(anchor) - aTop;
+      if (Math.abs(dy) >= 1) window.scrollTo({ top: window.scrollY + dy, behavior: "instant" });
+    }
+    // every card on screen before or after: its old place is set at once (in #sl-seen-flip, in this same
+    // frame, so nothing is ever drawn in the new place first) and it then glides to the new one
+    var css = "", run = [], slides = [], moved = false, cvIds = [], opt = { duration: 420, easing: EASE };
+    var now = new Set();
+    (window.SL_SHOWN_IDS || []).forEach(function (id) { var c = cardById(id); if (c) now.add(c); });
+    var union = order.concat([].filter.call(now, function (c) { return !before.has(c); }));
+    union.forEach(function (c) {
+      if (!now.has(c) || !c.getClientRects().length) return;
+      var id = c.getAttribute("data-id"), s = "html " + cardSel(id), r = c.getBoundingClientRect(), b0 = before.get(c);
+      if (!b0) {
+        if (!vis(r, 0)) return;
+        css += s + "{opacity:.01}"; moved = true; // (.01, not 0: an invisible card is not painted, and would then count as "moved" when it shows)
+        run.push([c, [{ opacity: 0.01 }, { opacity: 1 }], { duration: 280, delay: 80, easing: "ease-out", fill: "backwards" }]);
+        return;
+      }
+      if (!vis(r, M) && !vis(b0.r, 0)) return;
+      var dx = b0.r.left - r.left, dy = b0.r.top - r.top, dh = r.height - b0.r.height, t = "";
+      if (Math.abs(dx) >= 1 || Math.abs(dy) >= 1) { slides.push([c, dx, dy]); moved = true; }
+      if (Math.abs(dh) >= 1) {
+        moved = true;
+        // the buttons glide to where the card's new height puts them (the row they sit in is held in its old
+        // place, and they move inside it)
+        var dcb = 0;
+        b0.p.forEach(function (x) {
+          if (!x[0].isConnected || !x[0].getClientRects().length) return;
+          var nb = x[0].getBoundingClientRect(), d = (x[1].top - b0.r.top) - (nb.top - r.top), k = x[0].classList[0], cb = k === "card-bottom";
+          if (cb) dcb = d; else d -= dcb;
+          if (Math.abs(d) >= 1) slides.push([x[0], 0, d]);
+        });
+        if (dh > 0) { // taller (the date & place row came in): the card opens downwards and the row fades in
+          var c0 = "inset(0 0 " + dh + "px 0 round 12px)";
+          t += "clip-path:" + c0 + ";";
+          run.push([c, [{ clipPath: c0 }, { clipPath: "inset(0 0 0 0 round 12px)" }], opt]);
+          [].forEach.call(c.querySelectorAll(".note-btn, .photo-btn, .send-photo-btn"), function (el) {
+            if (!el.getClientRects().length) return;
+            var inCb = el.parentNode && el.parentNode.classList.contains("card-bottom") && Math.abs(dcb) > 0.5, tr = inCb ? -dcb : 0;
+            css += s + " ." + el.classList[0] + "{opacity:.01}";
+            if (tr) slides.push([el, 0, tr, true]); // (stays where it appears while the row around it moves)
+            run.push([el, [{ opacity: 0.01 }, { opacity: 1 }], { duration: 300, delay: 120, easing: "ease-out", fill: "backwards" }]);
+          });
+        } else { // shorter: its old bottom closes up behind the buttons
+          var cs = getComputedStyle(c), bg = cs.backgroundColor, bd = cs.borderTopColor, k = -dh;
+          var sh0 = "0 " + k + "px 0 -1px " + bg + ", 0 " + k + "px 0 0 " + bd;
+          t += "box-shadow:" + sh0 + ";content-visibility:visible!important;"; cvIds.push(id);
+          run.push([c, [{ boxShadow: sh0 }, { boxShadow: "0 0 0 -1px " + bg + ", 0 0 0 0 " + bd }], opt]);
+        }
+      }
+      if (t) css += s + "{" + t + "}";
+    });
+    flipSt.textContent = css;
+    slide(slides, 420);
+    run.forEach(function (a) { a[0].animate(a[1], a[2]); });
+    // the static old places go once the animations are running (they take over from the first frame)
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      flipSt.textContent = cvIds.length ? cvIds.map(cardSel).join(",") + "{content-visibility:visible!important}" : "";
+      if (cvIds.length) setTimeout(function () { flipSt.textContent = ""; }, 460);
+    }); });
+    // the layer over the cards (favourite pins, badges) is placed for the new layout: it shows again once they have arrived
+    var L = moved && document.getElementById("fav-layer");
+    if (L) L.animate([{ opacity: 0 }, { opacity: 0, offset: 0.6 }, { opacity: 1 }], { duration: 650, easing: "ease-out" });
+  }
+
+  // ---- the other Mark Seen buttons (outside the card) ----
+  var HTML = '<span class="lbl-mark">Mark Seen</span><span class="lbl-seen"><svg class="ic" width="13" height="13" aria-hidden="true"><use href="#i-check"></use></svg> Seen</span>';
+  function sync(b, on) {
+    if (!b) return;
+    b.classList.toggle(b.classList.contains("cam-btn") ? "seen" : "on", !!on);
+    b.setAttribute("aria-pressed", String(!!on));
+  }
+  // a panel that redraws itself keeps its Mark Seen button (the same element), so its animation carries on
+  function keep(root, sel, render) {
+    var old = root && root.querySelector(sel);
+    render();
+    var nu = root && root.querySelector(sel);
+    if (old && nu && old !== nu && old.classList.contains("sl-sb")) {
+      old.hidden = nu.hidden; sync(old, nu.classList.contains("on") || nu.classList.contains("seen"));
+      nu.parentNode.replaceChild(old, nu);
+    }
+  }
+  window.SL_SEEN_UI = { hold: hold, toggled: toggled, fadeOut: fadeOut, html: function () { return HTML; }, sync: sync, keep: keep,
+    busy: function () { return !!timer || Object.keys(pending).length > 0; },
+    settleNow: function () { if (timer) { clearTimeout(timer); settle(); } } };
+})();
+</script>
+<!-- ==== Mark Seen smooth (end) ==== -->
 
     <button class="more-btn" id="more-btn" type="button" hidden></button>
     <p class="empty-state" id="empty" hidden>No snakes found.</p>
@@ -8385,16 +8726,22 @@
     // on this card's button until its current celebration has actually finished.
     // A click while the celebration is still playing means "no, undo that": the animation
     // stops right there and the species goes back to not seen.
+    // ==== Mark Seen smooth (begin) ====
+    // the burst is faded out from wherever it has got to (SL_SEEN_UI), not cut off
     if (card.dataset.flashLock) {
-      card.querySelectorAll(".seen-flash").forEach((f) => f.remove());
+      card.querySelectorAll(".seen-flash").forEach((f) => { if (window.SL_SEEN_UI) window.SL_SEEN_UI.fadeOut(f); else f.remove(); });
       clearTimeout(flashTimers.get(card));
       delete card.dataset.flashLock;
       window.SL_FLASH_UNTIL = 0;
     }
     const done = !card.classList.contains("done");
+    // the note row / Want to see stay as they are until the Seen animation has finished (no jump under the finger)
+    if (window.SL_SEEN_UI) window.SL_SEEN_UI.hold(card, done);
     card.classList.toggle("done", done);
+    // ==== Mark Seen smooth (end) ====
     // The date is never assumed - it is typed in through the note button below.
     if (!done) {
+      window.SL_FLASH_UNTIL = performance.now() + 420; // ==== Mark Seen smooth: unmarking animates too (keep the main thread free)
       const note = card.querySelector(".note-btn"), id = card.dataset.id;
       const keptNote = snapNote(note), keptPhotos = getPhotos(id), nEnc = readEnc(note).length;
       NOTE_ATTRS.forEach((a) => note.removeAttribute(a));
@@ -8424,7 +8771,7 @@
         '<g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></span></span>';
       card.dataset.flashLock = "1";
       // tells the page's own watchers (tag layout, saving) to keep the main thread free while it plays
-      window.SL_FLASH_UNTIL = performance.now() + 1900;
+      window.SL_FLASH_UNTIL = performance.now() + 900; // ==== Mark Seen smooth: the burst now lasts 0.85s (see SL_SEEN_UI) ====
       // only the flash's own pop animation should dismiss it - "animationend" bubbles up from
       // the tick's draw animation too, which used to remove the whole flash the instant the
       // checkmark finished drawing, cutting the celebration (and the tick's last frame) short
@@ -8437,7 +8784,7 @@
       flashTimers.set(card, setTimeout(() => { // backup in case prefers-reduced-motion skips the animation entirely
         flash.remove();
         delete card.dataset.flashLock;
-      }, 2050));
+      }, 1000));
     }
     // computeStats/refresh walk all 4,277 cards. requestAnimationFrame alone does NOT defer
     // past the browser's next paint - that callback runs as part of producing that very
@@ -8450,6 +8797,11 @@
     const later = window.requestIdleCallback
       ? (fn) => setTimeout(() => requestIdleCallback(fn, { timeout: 400 }), done ? 520 : 0)
       : (fn) => setTimeout(fn, done ? 560 : 0);
+    // ==== Mark Seen smooth (begin) ====
+    // the count changes now; the recount/re-sort waits until the Seen animation has finished and
+    // then moves the cards smoothly (SL_SEEN_UI.toggled). Quick repeated clicks wait for the last one.
+    if (window.SL_SEEN_UI) { window.SL_SEEN_UI.toggled(card, done, () => { checkNewBadges(computeStats()); refresh(true); }, (c) => matches(c)); return; }
+    // ==== Mark Seen smooth (end) ====
     later(() => {
       checkNewBadges(computeStats());
       refresh(true);
@@ -9523,7 +9875,7 @@
     if (dlg && !dlg.hidden) renderAchDlg();
   }
   let achT = 0;
-  const achSoon = () => { clearTimeout(achT); achT = setTimeout(checkAch, 350); };
+  const achSoon = () => { clearTimeout(achT); achT = setTimeout(checkAch, Math.max(350, (window.SL_FLASH_UNTIL || 0) - performance.now() + 60)); }; // (Mark Seen smooth: not in the middle of its animation)
   window.SL_checkAch = achSoon;
   const ACH_TROPHY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"></path><path d="M7 6H4.5A2.5 2.5 0 0 0 7 10.5"></path><path d="M17 6h2.5A2.5 2.5 0 0 1 17 10.5"></path><path d="M12 14v3.5"></path><path d="M8.5 20.5h7"></path><path d="M9.5 20.5c0-1.7 1.1-3 2.5-3s2.5 1.3 2.5 3"></path></svg>';
   const ACH_SMALL_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="10.5" width="13" height="9.5" rx="2"></rect><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"></path></svg>';
@@ -9649,7 +10001,7 @@
     if (w) w.innerHTML = TAB_STAR + " Want to see" + tabN(wishCount());
     const fl = document.getElementById("tab-follow");
     if (fl) fl.innerHTML = BELL_ICON + " Following" + tabN(followCount());
-    if (tab === "sightings" || tab === "wish" || tab === "follow") refresh();
+    if ((tab === "sightings" || tab === "wish" || tab === "follow") && !(window.SL_SEEN_UI && window.SL_SEEN_UI.busy())) refresh(); // (Mark Seen smooth: a just-clicked card leaves once its animation has finished)
   }
 
   const BELL_ICON = '<svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>';
@@ -15441,7 +15793,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       '<p class="sp-info-h">' + (ctry.length === 1 ? "Country" : "Countries" + (ctry.length ? " (" + ctry.length + ")" : "")) + "</p>" +
       '<p class="sp-info-txt">' + (ctry.length ? spEsc(ctry.join(", ")) : "Not recorded") + "</p>" +
       '<div class="sp-info-acts">' +
-        '<button type="button" data-sp="seen"' + (ext ? " hidden" : "") + (done ? ' class="on"' : "") + ' aria-pressed="' + done + '">' + (done ? "&#10003; Seen" : "Mark Seen") + "</button>" +
+        '<button type="button" data-sp="seen"' + (ext ? " hidden" : "") + ' class="sl-sb' + (done ? " on" : "") + '" aria-pressed="' + done + '">' + (window.SL_SEEN_UI ? window.SL_SEEN_UI.html() : done ? "&#10003; Seen" : "Mark Seen") + "</button>" + // (Mark Seen smooth)
         '<button type="button" data-sp="wish"' + (ext || done ? " hidden" : "") + (wish ? ' class="on"' : "") + ' aria-pressed="' + wish + '">' + (wish ? "&#9733; Want to see" : "&#9734; Want to see") + "</button>" +
         '<a class="sp-info-page" href="' + spEsc(spPageUrl(c)) + '"' + (window.claude && window.claude.use ? ' target="_blank" rel="noopener"' : "") + ">View full species page</a>" +
       "</div></div>";
@@ -15482,7 +15834,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     var k = b.getAttribute("data-sp"), c = spCur;
     if (k === "photo") { var nm = c.querySelector(".card-name"), sc = c.querySelector(".card-sci"); if (window.SL_openPhoto) window.SL_openPhoto(c.dataset.id, nm.textContent.trim(), nm.classList.contains("is-sci") ? "" : (sc ? sc.textContent.trim() : "")); return; }
     var btn = c.querySelector(k === "seen" ? ".seen-btn" : ".wish-btn");
-    if (btn) { btn.click(); setTimeout(function () { if (spCur === c) { spRender(); var nb = spBody.querySelector('[data-sp="' + k + '"]'); if (nb && !nb.hidden) nb.focus({ preventScroll: true }); } }, 60); }
+    if (btn) { btn.click(); var UI = k === "seen" && window.SL_SEEN_UI; if (UI) UI.sync(b, c.classList.contains("done")); // (Mark Seen smooth: the same button animates)
+      setTimeout(function () { if (spCur === c) { if (UI) UI.keep(spBody, '[data-sp="seen"]', spRender); else spRender(); var nb = spBody.querySelector('[data-sp="' + k + '"]'); if (nb && !nb.hidden) nb.focus({ preventScroll: true }); } }, 60); }
   });
   // nothing under the panel reacts while it's open: no map zoom, drag or hover label
   ["wheel", "pointerdown", "pointermove", "touchstart", "dblclick"].forEach(function (t) {
@@ -21880,7 +22233,7 @@ window.SL_GEO_READY = new Promise(function (res) {
         (x.near ? '<span class="cam-near">Seen ' + x.near + " time" + (x.near === 1 ? "" : "s") + " within " + near.r + " km</span>" : near && Object.keys(near.m).length ? '<span class="cam-near no">No sightings within ' + near.r + " km</span>" : "") + "</div></div>" +
         '<div class="cam-pct">' + (pct < 1 ? "<1" : pct) + '%</div><div class="cam-acts">' +
         '<button type="button" class="cam-btn" data-keep="' + esc(i.id) + '">Mark Seen &amp; keep this photo</button>' +
-        '<button type="button" class="cam-btn ghost' + (seen ? " seen" : "") + '" data-seen="' + esc(i.id) + '">' + (seen ? "&#10003; Seen" : "Mark Seen") + "</button>" +
+        '<button type="button" class="cam-btn ghost sl-sb' + (seen ? " seen" : "") + '" data-seen="' + esc(i.id) + '">' + (window.SL_SEEN_UI ? window.SL_SEEN_UI.html() : seen ? "&#10003; Seen" : "Mark Seen") + "</button>" + // (Mark Seen smooth)
         '<button type="button" class="cam-btn ghost" data-countries="' + esc(i.id) + '">See countries</button>' +
         '<button type="button" class="cam-btn ghost" data-see="' + esc(i.name) + '">See in checklist</button></div></div>';
     }).join("") + (anyHere || !here ? "" : '<p class="cam-note">No snakes are on record where you are, so these are from anywhere in the world.</p>') +
@@ -21900,13 +22253,13 @@ window.SL_GEO_READY = new Promise(function (res) {
       var r = window.SL_keepSighting(kp.getAttribute("data-keep"), c3.toDataURL("image/jpeg", 0.82), where);
       kp.textContent = r === "full" ? "Marked seen - but storage is full, the photo wasn't kept" : r ? "Saved to My Sightings" + (where ? " - " + where : "") : "Couldn't save";
       kp.disabled = true;
-      var sb = kp.parentNode.querySelector("[data-seen]"); if (sb) { sb.classList.add("seen"); sb.innerHTML = "&#10003; Seen"; }
+      var sb = kp.parentNode.querySelector("[data-seen]"); if (sb) { if (window.SL_SEEN_UI) window.SL_SEEN_UI.sync(sb, true); else { sb.classList.add("seen"); sb.innerHTML = "&#10003; Seen"; } } // (Mark Seen smooth)
       return;
     }
     var sn = e.target.closest("[data-seen]");
     if (sn) {
       var c = cardInfo(sn.getAttribute("data-seen")), btn = c && c.card.querySelector(".seen-btn");
-      if (btn) { btn.click(); var on = c.card.classList.contains("done"); sn.classList.toggle("seen", on); sn.innerHTML = on ? "&#10003; Seen" : "Mark Seen"; }
+      if (btn) { btn.click(); var on = c.card.classList.contains("done"); if (window.SL_SEEN_UI) window.SL_SEEN_UI.sync(sn, on); else { sn.classList.toggle("seen", on); sn.innerHTML = on ? "&#10003; Seen" : "Mark Seen"; } } // (Mark Seen smooth)
       return;
     }
     var mc = e.target.closest("[data-countries]");
@@ -23040,7 +23393,7 @@ window.SL_welcome = function (u, back) {
       (ext ? "<dt>Status</dt><dd>" + esc(ext) + "</dd>" : "") + "</dl>" +
       '<p class="qp-h">' + (ctry.length === 1 ? "Country" : "Countries (" + ctry.length + ")") + '</p><p class="qp-countries">' + (ctry.length ? esc(ctry.join(", ")) : "Not recorded") + "</p>" +
       '<div class="qp-acts">' +
-        '<button type="button" data-qp="seen"' + (ext ? " hidden" : "") + (done ? ' class="on"' : "") + ' aria-pressed="' + done + '">' + (done ? "&#10003; Seen" : "Mark Seen") + "</button>" +
+        '<button type="button" data-qp="seen"' + (ext ? " hidden" : "") + ' class="sl-sb' + (done ? " on" : "") + '" aria-pressed="' + done + '">' + (window.SL_SEEN_UI ? window.SL_SEEN_UI.html() : done ? "&#10003; Seen" : "Mark Seen") + "</button>" + // (Mark Seen smooth)
         '<button type="button" data-qp="wish"' + (ext || done ? " hidden" : "") + (wish ? ' class="on"' : "") + ' aria-pressed="' + wish + '">' + (wish ? "&#9733; Want to see" : "&#9734; Want to see") + "</button>" +
         '<button type="button" data-qp="follow"' + (fol ? ' class="on"' : "") + ' aria-pressed="' + fol + '">' + (fol ? "Following" : "Follow") + "</button>" +
         '<button type="button" data-qp="map">See countries</button></div>' +
@@ -23066,7 +23419,8 @@ window.SL_welcome = function (u, back) {
     if (k === "photo") { var nm = c.querySelector(".card-name"), sc = c.querySelector(".card-sci"); if (window.SL_openPhoto) window.SL_openPhoto(c.dataset.id, nm.textContent, nm.classList.contains("is-sci") ? "" : sc.textContent); return; }
     if (k === "map") { closePreview(); var mb = c.querySelector(".map-btn"); if (mb) mb.click(); return; }
     var sel = { seen: ".seen-btn", wish: ".wish-btn", follow: ".follow-btn" }[k], btn = sel && c.querySelector(sel);
-    if (btn) { btn.click(); setTimeout(function () { if (cur === c) { render(); var nb = qbody.querySelector('[data-qp="' + k + '"]'); if (nb && !nb.hidden) nb.focus(); } }, 50); }
+    if (btn) { btn.click(); var UI = k === "seen" && window.SL_SEEN_UI; if (UI) UI.sync(b, c.classList.contains("done")); // (Mark Seen smooth: the same button animates)
+      setTimeout(function () { if (cur === c) { if (UI) UI.keep(qbody, '[data-qp="seen"]', render); else render(); var nb = qbody.querySelector('[data-qp="' + k + '"]'); if (nb && !nb.hidden) nb.focus(); } }, 50); }
   });
   document.addEventListener("keydown", function (e) {
     if (!sheet.classList.contains("open")) return;
@@ -24256,7 +24610,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
     var box = document.createElement("span"); box.className = "sl3d-acts";
     var seen = document.createElement("button"); seen.type = "button"; seen.className = "sl3d-act sl3d-seen";
     var more = document.createElement("button"); more.type = "button"; more.className = "sl3d-act sl3d-more"; more.textContent = "See more info";
-    var paint = function () { var on = card.classList.contains("done"); seen.classList.toggle("on", on); seen.textContent = on ? "\u2713 Seen" : "Mark Seen"; seen.setAttribute("aria-pressed", String(on)); };
+    var paint = function () { var on = card.classList.contains("done"); seen.classList.toggle("on", on); if (window.SL_SEEN_UI) { if (!seen.firstElementChild) { seen.classList.add("sl-sb"); seen.innerHTML = window.SL_SEEN_UI.html(); } } else seen.textContent = on ? "\u2713 Seen" : "Mark Seen"; seen.setAttribute("aria-pressed", String(on)); }; // (Mark Seen smooth: the labels stay, only the class changes)
     paint(); new MutationObserver(paint).observe(card, { attributes: true, attributeFilter: ["class"] });
     seen.addEventListener("click", function () { var b = card.querySelector(".seen-btn"); if (b) b.click(); setTimeout(paint, 50); });
     more.addEventListener("click", function () { /* the snake's own page, like the card's See more info */ location.href = "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html"); });
