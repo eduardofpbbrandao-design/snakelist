@@ -101,6 +101,99 @@ CITIES = {}
 NONSOV = set()
 
 
+_APPJ = {}
+def app_json(i):
+    if i not in _APPJ: _APPJ[i] = json.loads(re.search(r'<script type="application/json" id="%s">(.*?)</script>' % i, APP[0], re.S).group(1))
+    return _APPJ[i]
+
+
+def harm_of(c):
+    """the app's harmOf() over #harm-data: 'harmful', 'harmless' (its "Low risk" chip) or '' (not documented:
+    mildly venomous rear-fanged snakes)"""
+    H_ = app_json("harm-data")["harmful"]
+    if (c["venom"] and c["family"] in H_["venomousFamilies"]) or c["genus"] in H_["genera"] or c["id"] in H_["species"]: return "harmful"
+    return "harmless" if not c["venom"] else ""
+
+
+def constriction_of(c):
+    """the app's constrictionOf() over #constrictor-data: 'yes', 'no' or 'unknown' (not documented)"""
+    C_ = app_json("constrictor-data")
+    if c["genus"] in C_["constrictor"]["genera"] or c["family"] in C_["constrictor"]["families"] or c["type"] in ("Boa", "Python"): return "yes"
+    if c["genus"] in C_["nonconstrictor"]["genera"] or c["family"] in C_["nonconstrictor"]["families"]: return "no"
+    return "unknown"
+
+
+def danger_of(c):
+    """venom flag x harm: 'dv' venomous and dangerous to people, 'mv' mildly venomous (no serious bites
+    documented), 'gc' not venomous but a dangerous giant constrictor, 'hl' not venomous and low risk"""
+    h = harm_of(c)
+    return ("dv" if h == "harmful" else "mv") if c["venom"] else ("gc" if h == "harmful" else "hl")
+
+
+# the app's checklist filters (its passes()), one test per chip, so a country's counts and a species
+# page's list say exactly what the app's filter panel would
+HAB_SECS = []  # the Habitats chips: the app's #habitat-data sections, in order
+TYPE_GROUPS = {"Cobra": "Elapid", "Pit Viper": "Viper", "Sea Snake": "Other", "Watersnake": "Other"}  # its MAIN_TYPE_GROUPS
+TYPE_ORDER = ["Boa", "Colubrid", "Elapid", "Python", "Viper", "Other"]
+COMMON_AT, RARE_UPTO = 75, 2
+def type_group(c): return TYPE_GROUPS.get(c["type"], c["type"])
+def hab_secs(c): return c.get("hab_secs", [])
+APP_FLAGS = [  # (key letter, the app's chip id, its label, test)
+    ("V", "chip-venom", "Venomous", lambda c: c["venom"]),
+    ("N", "chip-nonvenom", "Non-venomous", lambda c: not c["venom"]),
+    ("c", "chip-constrictor", "Constrictor", lambda c: constriction_of(c) == "yes"),
+    ("n", "chip-nonconstrictor", "Non-constrictor", lambda c: constriction_of(c) == "no"),
+    ("d", "", "Constriction not documented", lambda c: constriction_of(c) == "unknown"),
+    ("e", "chip-snakeeater", "Snake eater", lambda c: c["eater"]),
+    ("p", "chip-popular", "Popular", lambda c: c["popular"]),
+    ("u", "chip-uncommon", "Uncommon", lambda c: not c["popular"]),
+    ("x", "chip-exotic", "Exotic", lambda c: "North America" not in c["continents"]),
+    ("i", "chip-invasive", "Invasive", lambda c: bool(c["invasive"])),
+    ("m", "chip-common", "Common", lambda c: c["spots"] >= COMMON_AT),
+    ("r", "chip-rare", "Rare", lambda c: c["spots"] <= RARE_UPTO),
+    ("o", "chip-nophoto", "No photos", lambda c: not c["photo"]),
+    ("z", "chip-extinct", "Extinct", lambda c: bool(c["extinct"] or c["fossil"])),
+    ("h", "chip-harmful", "Harmful", lambda c: harm_of(c) == "harmful"),
+    ("l", "chip-harmless", "Low risk", lambda c: harm_of(c) == "harmless")]
+FLAG = {k: (cid, lab, f) for k, cid, lab, f in APP_FLAGS}
+def flags_of(c): return "".join(k for k, cid, lab, f in APP_FLAGS if f(c))
+
+
+def checklist_facts(c, rel="../"):
+    """v5.57: a species page's value for each of the app's checklist filters (the same tests as passes()),
+    each a link to that filter in the app; nothing is guessed - a value the data lacks says so"""
+    from urllib.parse import quote
+    e = lambda t: H.escape(str(t), quote=True)
+    def a(txt, q): return '<a href="%s?%s">%s</a>' % (rel, e(q), txt)
+    def yn(k, yes, no):
+        return a(yes, "f=" + FLAG[k][0]) if FLAG[k][2](c) else no
+    NR = '<span class="sp-unk">Not recorded</span>'
+    tg = type_group(c)
+    rows = [("Type", a(e(tg), "type=" + quote(tg)) if tg else NR),
+            ("Family", a(e(c["family"]), "fam=" + quote(c["family"])) if c["family"] else NR),
+            ("Continent", e(", ".join(c["continents"])) if c["continents"] else NR)]
+    hs = [HAB_SECS[h] for h in hab_secs(c)]
+    if not c["fossil"]:  # nothing about living snakes applies to a fossil (the same rule as its filter tags)
+        hm = harm_of(c); cons = constriction_of(c)
+        rows += [("Venomous", a("Yes", "f=chip-venom") if c["venom"] else a("No", "f=chip-nonvenom")),
+                 ("Dangerous to people", a("Yes", "f=chip-harmful") + " <small>(Harmful)</small>" if hm == "harmful" else
+                  a("No", "f=chip-harmless") + " <small>(Low risk)</small>" if hm == "harmless" else
+                  '<span class="sp-unk">Not documented</span> <small>(mildly venomous)</small>'),
+                 ("Constrictor", a("Yes", "f=chip-constrictor") if cons == "yes" else a("No", "f=chip-nonconstrictor") if cons == "no" else
+                  '<span class="sp-unk">Not documented</span>'),
+                 ("Snake eater", yn("e", "Yes", "No")),
+                 ("Popular", a("Yes", "f=chip-popular") if c["popular"] else a("No", "f=chip-uncommon") + " <small>(Uncommon)</small>"),
+                 ("Exotic", yn("x", "Yes", "No") + " <small>(%s)</small>" % ("not native to North America" if FLAG["x"][2](c) else "native to North America")),
+                 ("Invasive", yn("i", "Yes", "No")),
+                 ("Common or rare", (a("Common", "f=chip-common") if FLAG["m"][2](c) else a("Rare", "f=chip-rare") if FLAG["r"][2](c) else "Neither") +
+                  " <small>(%s on iNaturalist)</small>" % ("no confirmed records" if not c["spots"] else "recorded in %s place%s" % ("{:,}".format(c["spots"]), "" if c["spots"] == 1 else "s")))]
+    rows.append(("Photos", "Yes" if c["photo"] else a("No photos yet", "f=chip-nophoto")))
+    rows.append(("Extinct", a("Yes", "f=chip-extinct") + (" <small>(fossil)</small>" if c["fossil"] else "") if FLAG["z"][2](c) else "No"))
+    rows.append(("Habitats", (e(", ".join(hs)) + ' <small>(estimated, as in the app)</small>') if hs else NR))  # long: last, full width
+    return ('<details class="sp-filt" open><summary>In SnakeList&rsquo;s checklist filters</summary><dl class="sp-key sp-fkey">%s</dl></details>' %
+            "".join('<div%s><dt>%s</dt><dd>%s</dd></div>' % (' class="sp-fwide"' if k == "Habitats" else "", k, v) for k, v in rows))
+
+
 def places_txt(names, link=None):
     """'5 countries and 1 territory': countries and territories (NON_SOVEREIGN) counted apart"""
     t = sum(1 for n in names if n in NONSOV); c = len(names) - t
@@ -133,11 +226,12 @@ def build(app):
     for m in re.finditer(r'"([a-z0-9-]+)":\s*\[(\{ area: [^\]]*)\]', app.split("var INTRODUCED = {", 1)[1].split("};", 1)[0]):
         intro[m.group(1)] = re.findall(r'area: "([^"]*)"', m.group(2))
     # habitats: one bit per card, in card order
-    hab_names, hab_bits = [], []
-    HAB_SEC.clear()
+    hab_names, hab_bits, hab_sec_i = [], [], []
+    HAB_SEC.clear(); del HAB_SECS[:]; _APPJ.clear()
     for sec in hab["sections"]:
         for h in sec[1]:
-            hab_names.append(h[0]); hab_bits.append(base64.b64decode(h[1])); HAB_SEC[h[0]] = sec[0]
+            hab_names.append(h[0]); hab_bits.append(base64.b64decode(h[1])); HAB_SEC[h[0]] = sec[0]; hab_sec_i.append(len(HAB_SECS))
+        HAB_SECS.append(sec[0])
 
     cards = []
     for k, m in enumerate(re.finditer(r'<div class="card" (data-id="[^"]*"[^>]*)>(.*?)<div class="card-bottom">', app, re.S)):
@@ -159,6 +253,7 @@ def build(app):
         if c["is_sci"]: c["sci"] = c["name"]
         c["genus"] = c["sci"].split(" ")[0] if c["sci"] else ""
         c["habitats_raw"] = [hab_names[n] for n, b in enumerate(hab_bits) if k < hab["n"] and b[k >> 3] & (1 << (k & 7))]
+        c["hab_secs"] = sorted({hab_sec_i[n] for n, b in enumerate(hab_bits) if k < hab["n"] and b[k >> 3] & (1 << (k & 7))})  # the app's Habitats chips
         c["habitats"] = habitat_estimate(c["habitats_raw"], a.get("type", ""))
         c["spots"] = rarity.get(c["id"], 0)
         c["extinct"] = extinct.get(c["id"], "")
@@ -564,16 +659,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         return ('<button type="button" class="sp-all" aria-expanded="false" data-all="See all %s (%d)">See all %s (%d)</button>' % (what, n, what, n)) if clipped(n) else ""
     code_name = {v: k for k, v in iso.items()}
     prov_used = set()
-    HARM = json.loads(re.search(r'<script type="application/json" id="harm-data">(.*?)</script>', APP[0], re.S).group(1))["harmful"]
-    def harm(c):
-        """the app's #harm-data: dangerous to people, harmless, or not documented (mild rear-fanged venom)"""
-        if (c["venom"] and c["family"] in HARM["venomousFamilies"]) or c["genus"] in HARM["genera"] or c["id"] in HARM["species"]: return "harmful"
-        return "harmless" if not c["venom"] else ""
-    CONS = json.loads(re.search(r'<script type="application/json" id="constrictor-data">(.*?)</script>', APP[0], re.S).group(1))
-    def constriction(c):
-        if c["genus"] in CONS["constrictor"]["genera"] or c["family"] in CONS["constrictor"]["families"] or c["type"] in ("Boa", "Python"): return "yes"
-        if c["genus"] in CONS["nonconstrictor"]["genera"] or c["family"] in CONS["nonconstrictor"]["families"]: return "no"
-        return "unknown"
+    harm = harm_of  # the app's #harm-data and #constrictor-data, shared with the country pages (module level)
+    constriction = constriction_of
     # how many species live in each state/province (by the cards' own names), for "See precise area"
     def st_row(cc, cname, names, what):
         items = []
@@ -1194,7 +1281,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             h1=esc(nm), sub=('<i>%s</i>%s' % (esc(sci), (' <span class="sp-auth">%s</span>' % esc(auth_short)) if auth else "")) if not c["is_sci"] else (esc(auth_short) if auth else ""),
             fossil_flag=('<p class="sp-fossil-flag">Extinct &middot; fossil snake%s</p>' % (" &middot; " + esc(c["died"][0]) if c["died"] else "")) if c["fossil"] else
                         ('<p class="sp-fossil-flag">%s</p>' % esc(c["extinct"].split(" - ")[0])) if c["extinct"] else "",
-            photo=ph, intro=intro_html, keyfacts=keyfacts, toc=toc, before=before, after=after,
+            photo=ph, intro=intro_html, keyfacts=keyfacts, filtfacts=checklist_facts(c), toc=toc, before=before, after=after,
             actions=actions, actnote=actnote, range_h=dict((k, h) for k, h, _ in secs)["range"],
             pub=pub_html, obs=obs,
             where_h=("Country where the fossils were found" if len(c["countries"]) == 1 else "Countries where the fossils were found") if c["fossil"] else
@@ -1248,7 +1335,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
              '<form class="sx-box" role="search" onsubmit="return false"><label for="sx-q">Find a snake</label>'
              '<input id="sx-q" type="search" placeholder="Common or scientific name..." autocomplete="off"><p id="sx-n" class="sp-note" aria-live="polite"></p></form>'
              '<form class="sx-box" id="sx-cf" role="search" action="#by-country"><label for="sx-c">Snakes of a country</label><span class="sx-row">'
-             '<input id="sx-c" list="sx-cl" placeholder="Type a country..." autocomplete="off"><button type="submit">Go</button></span>'
+             '<input id="sx-c" list="sx-cl" enterkeyhint="go" autocomplete="off"></span>'
              '<datalist id="sx-cl">%s</datalist></form></div>') % "".join('<option value="%s">' % esc(n) for n, k in countries)
     jump = ('<nav class="sx-jump" aria-label="Jump to"><a href="#by-country">By country</a><a href="#by-family">Families</a><a href="#az">A-Z by family</a></nav>'
             '<nav class="sx-chips" aria-label="Families">%s</nav>') % "".join(
@@ -1451,7 +1538,7 @@ PAGE = """<!doctype html>
 <div class="sp-title">{fossil_flag}<h1>{h1}</h1><p class="sp-sci">{sub}</p>
 {intro}
 </div></header>
-<div class="sp-keybox"><h2 class="sp-vh">Key facts</h2><dl class="sp-key">{keyfacts}</dl>
+<div class="sp-keybox"><h2 class="sp-vh">Key facts</h2><dl class="sp-key">{keyfacts}</dl>{filtfacts}
 <div class="sp-actions">{actions}{realbtn}</div>
 <p class="sp-actnote">{actnote}</p></div>
 <nav class="sp-toc" aria-label="On this page">{toc}</nav>
@@ -1488,6 +1575,7 @@ q.addEventListener('input',function(){{clearTimeout(t0);t0=setTimeout(run,120)}}
 document.getElementById('sx-cf').addEventListener('submit',function(e){{var v=document.getElementById('sx-c').value.trim().toLowerCase();
 for(var k in C)if(k.toLowerCase()===v){{e.preventDefault();location.href='country/'+C[k];return}}
 for(var k in C)if(k.toLowerCase().indexOf(v)===0&&v){{e.preventDefault();location.href='country/'+C[k];return}}}});
+document.getElementById('sx-c').addEventListener('change',function(){{var v=this.value.trim().toLowerCase();for(var k in C)if(k.toLowerCase()===v){{location.href='country/'+C[k];return}}}});
 }})();</script>
 </body></html>
 """
@@ -1596,6 +1684,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .sp-keybox .sp-key dt{font-size:12px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted);margin-bottom:2px}
 .sp-keybox .sp-key dd{font-weight:500;font-size:15px;line-height:1.45}.sp-keybox .sp-key dd small{display:inline;font-size:13px}
 .sp-keybox .sp-key dd .sp-kintro{display:block;margin-top:2px}
+.sp-filt{margin:0 0 14px}.sp-filt summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);padding:4px 0;min-height:32px;display:flex;align-items:center;gap:6px}
+.sp-filt summary::marker{color:var(--g)}.sp-keybox .sp-fkey{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:0 20px;margin:0}
+.sp-keybox .sp-fkey div{padding:7px 0}.sp-keybox .sp-fkey .sp-fwide{grid-column:1/-1}.sp-keybox .sp-fkey dd{font-size:14.5px}
 .sp-unk{color:var(--muted);font-weight:400}
 .sp-keybox .sp-actions{gap:8px}.sp-keybox .sp-actnote{margin:8px 0 0}
 .sp-actions .sp-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1px solid transparent;cursor:pointer;font:600 15px Inter,system-ui,sans-serif}
@@ -1819,9 +1910,10 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
         if intro: badges += '<span class="cy-b i">Introduced</span>'
         title_html = ('<strong class="cy-name"><i>%s</i></strong>' % esc(nm)) if x["is_sci"] else (
             '<strong class="cy-name">%s</strong><i class="cy-sci">%s</i>' % (esc(x["name"]), esc(x["sci"])))
-        return ('<li class="cy-card" data-n="%s" data-s="%s" data-f="%s" data-v="%d"%s><a href="../%s">'
+        xa = (' data-h="%s" data-t="%s" data-k="%s" data-hb="%s"' % (danger_of(x), esc(type_group(x)), flags_of(x), " ".join(map(str, hab_secs(x))))) if kind == "country" and not intro else ""
+        return ('<li class="cy-card" data-n="%s" data-s="%s" data-f="%s" data-v="%d"%s%s><a href="../%s">'
                 '<span class="cy-img">%s</span><span class="cy-body">%s<span class="cy-meta">%s%s</span></span></a></li>') % (
-            esc(("~" + nm) if x["is_sci"] else nm.lower()), esc(x["sci"].lower()), esc(grp(x) or ""), 1 if x["venom"] else 0,
+            esc(("~" + nm) if x["is_sci"] else nm.lower()), esc(x["sci"].lower()), esc(grp(x) or ""), 1 if x["venom"] else 0, xa,
             ' data-i="1"' if intro else "", page_name(x), img, title_html, badges,
             ('<span class="cy-fam">%s</span>' % esc(grp(x))) if grp(x) and kind != "genus" else "")
 
@@ -1835,6 +1927,84 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
         if len(G) > nfos: srows.append(("{:,}".format(len(G) - nfos), "recently extinct"))
         stats = '<ul class="cy-stats" aria-label="At a glance: unique living species">%s</ul>' % "".join('<li><b>%s</b><span>%s</span></li>' % (v, k) for v, k in srows)
     big = n > 6
+    # v5.57: a country's species by venom and by danger to people - the app's own #harm-data split, so the four
+    # kinds (dv + mv + gc + hl) always add up to the living total - and below the header, how many of them
+    # each of the app's checklist filters picks out. A tap filters the list (when the page has one).
+    dk = {k: sum(1 for x in L if danger_of(x) == k) for k in ("dv", "mv", "gc", "hl")}
+    vfilter = big and (kind == "country" and len([k for k in dk if dk[k]]) > 1 or 0 < nv < n)
+    fgroups = ""
+    def dchip(cls, how, val, k, lab, tip, xl=""):
+        """one count; how = 'fv' (the Venom & danger menu), 'ff' (the Family menu), 'xf' (the extra filter) or '#' (a link)"""
+        inner = '<b>%s</b><span>%s</span>' % ("{:,}".format(k), lab)
+        can = k and (how == "#" or (how == "fv" and vfilter) or (how == "ff" and big and nfam > 1) or (how == "xf" and big))
+        if can and how == "#":
+            return '<li class="%s"><a class="cy-dbtn" href="%s" title="%s">%s</a></li>' % (cls, val, esc(tip), inner)
+        if can:
+            return '<li class="%s"><button type="button" class="cy-dbtn" data-%s="%s"%s aria-pressed="false" title="%s - tap to show only these">%s</button></li>' % (
+                cls, how, esc(val), (' data-xl="%s"' % esc(xl or lab)) if how == "xf" else "", esc(tip), inner)
+        return '<li class="%s%s" title="%s">%s</li>' % (cls, " cy-d0" if not k else "", esc(tip), inner)
+    if kind == "country" and n:
+        DROWS = [("cy-d-v", "fv", "1", nv, "venomous", "Venomous: dangerously or mildly venomous"),
+                 ("cy-d-nv", "fv", "0", n - nv, "non-venomous", "Not venomous: low-risk snakes and giant constrictors"),
+                 ("cy-d-h", "fv", "h", dk["dv"] + dk["gc"], "harmful to people", "The app's Harmful filter: documented as dangerous to people - dangerously venomous snakes and giant constrictors"),
+                 ("cy-d-dv", "fv", "dv", dk["dv"], "dangerously venomous", "Venomous and dangerous to people: elapids (cobras, kraits, mambas, sea snakes...), vipers, stiletto snakes, the boomslang, twig snakes and keelbacks"),
+                 ("cy-d-mv", "fv", "mv", dk["mv"], "mildly venomous", "Rear-fanged snakes with mild venom: no serious bites to people are documented"),
+                 ("cy-d-gc", "fv", "gc", dk["gc"], "giant constrictor" if dk["gc"] == 1 else "giant constrictors", "Not venomous, but big enough to be dangerous to people"),
+                 ("cy-d-hl", "fv", "hl", dk["hl"], "harmless", "The app's Low risk filter: not venomous and not a giant constrictor - though any snake can bite")]
+        # the header's own venomous / non-venomous counts become taps too (no second copy of them)
+        for r0 in DROWS[:2]:
+            stats = stats.replace('<li><b>%s</b><span>%s</span></li>' % ("{:,}".format(r0[3]), r0[4]), dchip(*r0), 1)
+        stats += ('<div class="cy-danger"><p class="cy-dhead">Danger to people%s</p>'
+                  '<ul class="cy-stats" aria-label="By danger to people">%s</ul>'
+                  '<p class="cy-dnote">%s</p></div>') % (
+            ' <span>&middot; tap a number to show only those snakes</span>' if vfilter else "",
+            "".join(dchip(*r0) for r0 in DROWS[2:]),
+            "Harmful = dangerously venomous + giant constrictors. Harmless = not venomous and not a giant constrictor. "
+            "Mildly venomous snakes have no serious bites to people documented. Any snake can bite.")
+        # the app's checklist filter panel, group by group, counted over this page's living species
+        tcount = {}
+        for x in L: tcount[type_group(x)] = tcount.get(type_group(x), 0) + 1
+        hcount = {}
+        for x in L:
+            for h in hab_secs(x): hcount[h] = hcount.get(h, 0) + 1
+        fl = {k: sum(1 for x in L if FLAG[k][2](x)) for k in FLAG}
+        famrows = sorted([(k, f) for f, k in fams.items() if f], key=lambda t: (-t[0], t[1]))
+        gone_href = "#extinct" if any(x["extinct"] and not x["fossil"] for x in G) else "#fossils"
+        def flag_chip(k, tip, lab=None):
+            return dchip("", "xf", "k:" + k, fl[k], (lab or FLAG[k][1]).lower() if lab is None else lab, tip, FLAG[k][1])
+        grp_html = [
+            ("Snake family", "%s, %s" % (nplural(len(tcount), "type", "types"), nplural(nfam, "family", "families")),
+             '<p class="cy-dhead">Type</p><ul class="cy-stats">%s</ul><p class="cy-dhead">Family</p><ul class="cy-stats">%s</ul>' % (
+                 "".join(dchip("", "xf", "t:" + t, tcount[t], t, "The app's %s type" % t) for t in TYPE_ORDER + sorted(set(tcount) - set(TYPE_ORDER)) if tcount.get(t)),
+                 "".join(dchip("", "ff", f, k, f, "Family %s" % f) for k, f in famrows) + (dchip("", "ff", "-", fams[""], "family not recorded", "No family recorded") if fams.get("") else ""))),
+            ("Habitats", nplural(len(hcount), "habitat group", "habitat groups"),
+             '<ul class="cy-stats">%s</ul><p class="cy-dnote">Habitats are estimated from where each snake is recorded and what kind of snake it is, '
+             'as in the app; a snake can count in several.</p>' % "".join(
+                 dchip("", "xf", "hb:%d" % h, hcount[h], HAB_SECS[h], "The app's %s habitat filter" % HAB_SECS[h]) for h in range(len(HAB_SECS)) if hcount.get(h))),
+            ("Characteristics", "%s venomous, %s constrictors" % ("{:,}".format(fl["V"]), "{:,}".format(fl["c"])),
+             '<ul class="cy-stats">%s</ul><p class="cy-dnote">Constrictor and Non-constrictor count only snakes whose family or genus is documented '
+             'as constricting or not; the rest are not documented.</p>' % "".join([
+                 dchip("", "fv", "1", fl["V"], "venomous", "The app's Venomous filter"), dchip("", "fv", "0", fl["N"], "non-venomous", "The app's Non-venomous filter"),
+                 flag_chip("c", "The app's Constrictor filter", "constrictors"), flag_chip("n", "The app's Non-constrictor filter", "non-constrictors"),
+                 flag_chip("d", "Constriction not documented for its family or genus", "constriction not documented"),
+                 flag_chip("e", "The app's Snake eater filter: snakes that eat other snakes", "snake eaters")])),
+            ("Other filters", "%s popular, %s rare" % ("{:,}".format(fl["p"]), "{:,}".format(fl["r"])),
+             '<ul class="cy-stats">%s</ul>' % "".join([
+                 flag_chip("p", "The app's Popular filter: well-known snakes", "popular"), flag_chip("u", "The app's Uncommon filter: less well-known snakes", "uncommon"),
+                 flag_chip("x", "The app's Exotic filter: not native to North America", "exotic"),
+                 flag_chip("i", "The app's Invasive filter: introduced and established in the wild somewhere outside its native range (not necessarily here)", "invasive"),
+                 flag_chip("m", "The app's Common filter: recorded in %d+ places on iNaturalist" % COMMON_AT, "common"),
+                 flag_chip("r", "The app's Rare filter: recorded in %d places or fewer on iNaturalist" % RARE_UPTO, "rare"),
+                 flag_chip("o", "The app's No photos filter: nobody has a photo of it on SnakeList yet", "no photos"),
+                 dchip("", "#", gone_href, len(G), "extinct", "The app's Extinct filter: extinct and fossil snakes recorded here - listed separately below, not in the %s living species" % "{:,}".format(n)),
+                 dchip("", "fv", "h", fl["h"], "harmful", "The app's Harmful filter: documented as dangerous to people"),
+                 dchip("", "fv", "hl", fl["l"], "low risk", "The app's Low risk filter: not venomous and not a giant constrictor")])),
+        ]
+        fgroups = ('<section class="cy-fg" aria-labelledby="cy-fg-h"><h2 id="cy-fg-h">In SnakeList&rsquo;s checklist filters</h2>'
+                   '<p class="cy-note">How many of the %s living species here each filter in the SnakeList app picks out%s.%s</p><div class="cy-fgrid">%s</div></section>') % (
+            "{:,}".format(n), " &ndash; tap a number to show only those snakes" if big else "",
+            (" The app&rsquo;s own counts for %s also include the %s listed separately below." % (esc(the_place(name)), gone_txt)) if G else "",
+            "".join('<details class="cy-fgrp"><summary><span class="cy-fgt">%s</span><small>%s</small></summary><div class="cy-fgb">%s</div></details>' % g0 for g0 in grp_html))
     controls = ""
     if big:
         fam_opts = "".join('<option value="%s">%s (%d)</option>' % (esc(f), esc(f), k) for f, k in sorted(fams.items()) if f)
@@ -1843,9 +2013,14 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
                     '<label class="cy-q"><span class="cy-sr">Search snakes in %s</span><input id="cy-q" type="search" placeholder="Search snakes in %s..." autocomplete="off"></label>'
                     '%s%s'
                     '<label><span class="cy-lab">Sort</span><select id="cy-s"><option value="n">Common name A-Z</option><option value="nr">Common name Z-A</option><option value="s">Scientific name A-Z</option>%s</select></label>'
-                    '<button type="button" id="cy-reset" class="cy-reset" hidden>Reset</button></div>') % (
+                    '<button type="button" id="cy-xfp" class="cy-reset cy-xfp" hidden></button><button type="button" id="cy-reset" class="cy-reset" hidden>Reset</button></div>') % (
             esc(name), esc(name),
-            ('<label><span class="cy-lab">Venom</span><select id="cy-v"><option value="">All species</option><option value="1">Venomous (%s)</option><option value="0">Non-venomous (%s)</option></select></label>' % ("{:,}".format(nv), "{:,}".format(n - nv))) if 0 < nv < n else "",
+            (('<label><span class="cy-lab">Venom &amp; danger</span><select id="cy-v"><option value="">All species</option>%s</select></label>' % "".join(
+                '<option value="%s">%s (%s)</option>' % (val, lab, "{:,}".format(k)) for val, lab, k in (
+                    ("1", "Venomous", nv), ("0", "Non-venomous", n - nv), ("h", "Harmful to people", dk["dv"] + dk["gc"]), ("dv", "Dangerously venomous", dk["dv"]),
+                    ("mv", "Mildly venomous", dk["mv"]), ("gc", "Giant constrictors", dk["gc"]), ("hl", "Harmless", dk["hl"])) if k))
+             if kind == "country" else
+             '<label><span class="cy-lab">Venom</span><select id="cy-v"><option value="">All species</option><option value="1">Venomous (%s)</option><option value="0">Non-venomous (%s)</option></select></label>' % ("{:,}".format(nv), "{:,}".format(n - nv))) if vfilter else "",
             ('<label><span class="cy-lab">%s</span><select id="cy-f"><option value="">All %s</option>%s</select></label>' % (fam_word[0].capitalize(), fam_word[1], fam_opts)) if nfam > 1 else "",
             "" if kind == "genus" else '<option value="f">%s</option>' % ("Genus" if kind == "family" else "Family"))
     count = '<p class="cy-count" id="cy-count" aria-live="polite">Showing %s</p>' % plural(n, "species", "species") if n else ""
@@ -1907,7 +2082,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
     cta = ("../../?map=%s" % quote_param(name), "View snakes on map") if kind == "country" else (
         ("../../?fam=%s" % quote_param(name), "Open the family in SnakeList") if kind == "family" else ("../../?q=%s" % quote_param(name), "Open the genus in SnakeList"))
     crumbs_html = "".join('<li><a href="%s">%s</a></li>' % (c0[2], esc(c0[0])) for c0 in crumbs)
-    jump = ('<form class="cy-jump" id="cy-jump" role="search" action="../#by-country"><label for="cy-jq" class="cy-sr">Go to another country or territory</label><input id="cy-jq" list="cy-clist" placeholder="Another country or territory..." autocomplete="off"><datalist id="cy-clist"></datalist><button type="submit">Go</button></form>'
+    jump = ('<form class="cy-jump" id="cy-jump" role="search" action="../#by-country"><label for="cy-jq" class="cy-sr">Go to another country or territory</label><input id="cy-jq" list="cy-clist" aria-label="Go to another country or territory" enterkeyhint="go" autocomplete="off"><datalist id="cy-clist"></datalist></form>'
             if kind == "country" else "")
     # the introduction: what this family is (its reviewed text), what the genus name means, or
     # for a country, what its totals count
@@ -1948,7 +2123,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
         about = '<section class="cy-about cy-about-note" aria-label="What the totals count"><p>%s</p></section>' % " ".join(bits)
     return COUNTRY.format(about=about, title=esc(title), desc=esc(desc), url=url, img=img, ld=ld, name=esc(name), lead=esc(lead), stats=stats,
                           h1=("<i>%s</i>" % esc(h1)) if kind == "genus" else esc(h1), crumbs=crumbs_html, jump=jump,
-                          cta_href=esc(cta[0]), cta_label=cta[1], controls=controls, count=count, grid=grid, intro=intro_sec, overview=overview,
+                          cta_href=esc(cta[0]), cta_label=cta[1], controls=controls, fgroups=fgroups, count=count, grid=grid, intro=intro_sec, overview=overview,
                           author=AUTHOR, big=" cy-big" if big else "", total=n,
                           site_head=site_header("../../", "species"), site_foot=site_footer("../../", "Every photo belongs to its photographer and is used under the Creative Commons licence they chose, credited with it."),
                           robots="index,follow,max-image-preview:large" if n or G else "noindex,follow")
@@ -1985,7 +2160,7 @@ COUNTRY = """<!doctype html>
 <div class="cy-htext"><h1>{h1}</h1><p class="cy-lead">{lead}</p></div>
 {stats}
 <p class="cy-cta"><a class="cy-btn" href="{cta_href}">{cta_label}</a></p>
-</header>{about}
+</header>{about}{fgroups}
 <section class="cy-list{big}" aria-labelledby="cy-list-h" data-total="{total}"><h2 id="cy-list-h" class="cy-sr">Species</h2>
 {controls}{count}{grid}
 </section>
@@ -2014,6 +2189,23 @@ COUNTRY_CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:cen
 .cy-stats li{display:flex;align-items:baseline;gap:6px;background:var(--tag);border:1px solid var(--tagline);border-radius:12px;padding:5px 12px;font-size:13.5px;color:var(--muted)}
 .cy-stats b{font-size:18px;color:var(--text)}
 @media (prefers-color-scheme:dark){.cy-stats li{color:var(--text)}}
+.cy-danger{grid-column:1;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px;margin-top:2px}
+.cy-dhead{margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}.cy-dhead span{text-transform:none;letter-spacing:0;font-weight:400}
+.cy-danger .cy-stats{margin:0}.cy-dnote{margin:0;font-size:12.5px;color:var(--muted);max-width:70ch}
+.cy-stats li:has(.cy-dbtn){padding:0;border:0;background:none}.cy-stats li.cy-d0{opacity:.6}
+.cy-fg{margin-top:16px}.cy-fg h2{font:700 19px Georgia,serif;margin:0 0 4px}.cy-fg .cy-note{margin:0 0 10px}
+.cy-fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
+.cy-fgrp{background:var(--card);border:1px solid var(--line);border-radius:14px}
+.cy-fgrp summary{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;cursor:pointer;padding:11px 14px;min-height:44px;box-sizing:border-box;list-style:none}
+.cy-fgrp summary::-webkit-details-marker{display:none}.cy-fgrp summary:after{content:"+";margin-left:auto;font:600 18px/1 Inter,system-ui,sans-serif;color:var(--g)}
+.cy-fgrp[open] summary:after{content:"\\2212"}.cy-fgt{font-weight:700;color:var(--text)}.cy-fgrp summary small{color:var(--muted);font-size:13px}
+.cy-fgb{padding:0 14px 14px;display:flex;flex-direction:column;gap:8px}.cy-fgb .cy-stats{margin:0}
+a.cy-dbtn{text-decoration:none}
+.cy-dbtn{display:flex;align-items:baseline;gap:6px;font:inherit;font-size:13.5px;color:var(--muted);background:var(--tag);border:1px solid var(--tagline);border-radius:12px;padding:5px 12px;cursor:pointer;min-height:36px}
+.cy-dbtn b{font-size:18px;color:var(--text)}.cy-dbtn:hover{border-color:var(--g)}
+.cy-dbtn[aria-pressed=true]{background:var(--g);border-color:var(--g);color:#fff}.cy-dbtn[aria-pressed=true] b{color:#fff}
+.cy-d-v b,.cy-d-h b,.cy-d-dv b{color:#9c2f22}.cy-d-v>b,.cy-d-h>b,.cy-d-dv>b{color:#9c2f22}
+@media (prefers-color-scheme:dark){.cy-dbtn{color:var(--text)}.cy-d-v b,.cy-d-h b,.cy-d-dv b{color:#ff9f86}}
 .cy-cta{grid-column:2;grid-row:1/span 2;margin:0}
 .cy-btn{display:inline-flex;align-items:center;min-height:44px;background:var(--g);color:#fff;text-decoration:none;font-weight:600;padding:10px 18px;border-radius:12px;white-space:nowrap}
 .cy-btn:hover{filter:brightness(.95)}
@@ -2051,7 +2243,7 @@ COUNTRY_CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:cen
 .cy-tools{padding:10px}.cy-tools label:not(.cy-q){flex:1 1 calc(50% - 6px)}.cy-tools select{width:100%}
 .cy-grid,.cy-list:not(.cy-big) .cy-grid,.cy-grid-intro{grid-template-columns:1fr;gap:10px}
 .cy-card a{flex-direction:row;min-height:96px}.cy-img{flex:0 0 112px;width:112px;aspect-ratio:auto;align-self:stretch}.cy-body{padding:9px 12px}
-.cy-name{font-size:15.5px}.cy-stats b{font-size:16px}}
+.cy-name{font-size:15.5px}.cy-stats b,.cy-dbtn b{font-size:16px}.cy-fgrid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.cy-card a{transition:none}}
 /* v4.81: snake cards pop out a little under a real mouse, like the app's checklist cards (no layout shift: a transform) */
 @media (hover:hover) and (pointer:fine){.cy-card a{transition:border-color .15s,box-shadow .18s ease-out,transform .18s ease-out}
@@ -2077,9 +2269,18 @@ items.forEach(function(li,i){li._t=(li.textContent+' '+li.dataset.f).toLowerCase
 function cmp(a,b){var s=fs?fs.value:'n',x,y;
 if(s==='s'){x=a.dataset.s;y=b.dataset.s}else if(s==='f'){x=(a.dataset.f||'~')+' '+a.dataset.n;y=(b.dataset.f||'~')+' '+b.dataset.n}else{x=a.dataset.n;y=b.dataset.n}
 var r=x<y?-1:x>y?1:(a.dataset.s<b.dataset.s?-1:a.dataset.s>b.dataset.s?1:0);if(s==='nr'){r=-r;if(a.dataset.n.charAt(0)==='~'!==(b.dataset.n.charAt(0)==='~'))r=-r}return r}
+function vok(li,v){var h=li.dataset.h;return v==='1'||v==='0'?li.dataset.v===v:v==='h'?(h==='dv'||h==='gc'):h===v}
+// the app's other checklist filters (type, habitat, constrictor, popular, rare...): one at a time, from the counts above
+var xf='',xl='',xfp=document.getElementById('cy-xfp');
+function xok(li){var p=xf.split(':');if(p[0]==='k')return (li.dataset.k||'').indexOf(p[1])>=0;if(p[0]==='t')return li.dataset.t===p[1];if(p[0]==='hb')return (' '+(li.dataset.hb||'')+' ').indexOf(' '+p[1]+' ')>=0;return true}
+var dbtn=[].slice.call(document.querySelectorAll('button.cy-dbtn'));
+dbtn.forEach(function(b){b.addEventListener('click',function(){var d=b.dataset;
+if(d.fv!=null){if(!fv)return;fv.value=fv.value===d.fv?'':d.fv}else if(d.ff!=null){if(!ff)return;ff.value=ff.value===d.ff?'':d.ff}else if(d.xf!=null){if(xf===d.xf){xf='';xl=''}else{xf=d.xf;xl=d.xl}}
+apply();var l=document.getElementById('cy-list-h');if(l&&b.getAttribute('aria-pressed')==='true'){var sec=l.parentNode,r=sec.getBoundingClientRect();if(r.top>innerHeight*.6||r.top<0)sec.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'})}})});
+if(xfp)xfp.addEventListener('click',function(){xf='';xl='';apply()});
 function apply(keep){
 var t=q?q.value.trim().toLowerCase():'',v=fv?fv.value:'',f=ff?ff.value:'';
-var hit=items.filter(function(li){return (!t||li._t.indexOf(t)>=0)&&(!v||li.dataset.v===v)&&(!f||(f==='-'?!li.dataset.f:li.dataset.f===f))});
+var hit=items.filter(function(li){return (!t||li._t.indexOf(t)>=0)&&(!v||vok(li,v))&&(!f||(f==='-'?!li.dataset.f:li.dataset.f===f))&&(!xf||xok(li))});
 hit.sort(cmp);if(!keep)shown=PAGE;
 var frag=document.createDocumentFragment();hit.forEach(function(li){frag.appendChild(li)});
 items.forEach(function(li){li.hidden=true});grid.appendChild(frag);
@@ -2088,9 +2289,11 @@ var vis=Math.min(hit.length,shown);
 if(count)count.textContent=hit.length===total?(vis===total?'Showing '+total+' species':'Showing '+vis+' of '+total+' species'):
 (vis<hit.length?'Showing '+vis+' of '+hit.length+' matching species ('+total+' in all)':'Showing '+hit.length+' of '+total+' species');
 empty.hidden=hit.length>0;more.hidden=hit.length<=shown;if(!more.hidden)more.textContent='Show more ('+(hit.length-shown)+' left)';
-if(reset)reset.hidden=!(t||v||f||(fs&&fs.value!=='n'))}
+if(reset)reset.hidden=!(t||v||f||xf||(fs&&fs.value!=='n'));
+if(xfp){xfp.hidden=!xf;xfp.textContent=xl+' ✕';xfp.setAttribute('aria-label','Remove the filter: '+xl)}
+dbtn.forEach(function(b){var d=b.dataset;b.setAttribute('aria-pressed',String(d.fv!=null?d.fv===v:d.ff!=null?d.ff===f:d.xf===xf))})}
 [q,fv,ff,fs].forEach(function(el){if(el)el.addEventListener(el===q?'input':'change',function(){apply()})});
-function clear(){if(q)q.value='';if(fv)fv.value='';if(ff)ff.value='';if(fs)fs.value='n';apply();(q||grid).focus&&q&&q.focus()}
+function clear(){xf='';xl='';if(q)q.value='';if(fv)fv.value='';if(ff)ff.value='';if(fs)fs.value='n';apply();(q||grid).focus&&q&&q.focus()}
 if(reset)reset.addEventListener('click',clear);var cl=document.getElementById('cy-clear');if(cl)cl.addEventListener('click',clear);
 more.addEventListener('click',function(){var first=shown;shown+=PAGE;apply(true);var li=grid.children[first];if(li){var a=li.querySelector('a');if(a)a.focus({preventScroll:true})}});
 apply(true);
