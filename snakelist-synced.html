@@ -15472,6 +15472,51 @@ window.SL_GEO_READY = new Promise(function (res) {
     return true;
   }
   window.SL_MAP_SPECIES_INFO = spOpen;
+  // ==== See near me (map side) - BEGIN ==========================================================
+  // The "See near me" button (its own script, "See near me - BEGIN" further down) asks here which
+  // snakes are recorded where you are. Only SnakeList's own range records are used: the country
+  // under the point (BYCODE) and, when the country has state/province records, the state/province
+  // under it (provinceAt + the cards' data-states / data-provinces) - the same rule as a city's list.
+  // The position is never sent anywhere; this only reads the map's own outlines.
+  window.SL_NEARME_MAP = {
+    ready: function () { return !!(ready && POLY && INDEX && BYCODE); },
+    warm: function () { if (!ready) start(); },
+    find: function (lat, lon) {
+      if (!POLY || !BYCODE) return null;
+      // the position is rounded to ~10 km, so a spot on the coast can land just in the sea: look round it a little
+      var OFF = [[0, 0], [0.1, 0], [-0.1, 0], [0, 0.1], [0, -0.1], [0.2, 0.2], [-0.2, 0.2], [0.2, -0.2], [-0.2, -0.2], [0.35, 0], [-0.35, 0], [0, 0.35], [0, -0.35]];
+      var cc = null, x = lon, y = lat, i, st = null;
+      for (i = 0; i < OFF.length && !cc; i++) { var c = pick(lon + OFF[i][0], lat + OFF[i][1]); if (c) { cc = c; x = lon + OFF[i][0]; y = lat + OFF[i][1]; } }
+      if (!cc) return { cc: null };
+      if (cc === "us" || (getCountryProvinces()[cc] || []).length) for (i = 0; i < OFF.length && !st; i++) st = provinceAt(cc, x + OFF[i][0], y + OFF[i][1]);
+      var CC = cc.toUpperCase(), want = {};
+      if (st) (cc === "us" ? ["US:" + st.code] : [st.name].concat(st.also || []).map(function (n) { return CC + ":" + n; })).forEach(function (k) { want[k] = 1; });
+      var inArea = [], countryOnly = [];
+      ((BYCODE && BYCODE[cc]) || []).forEach(function (sp) {
+        var keys = placeKeysOf(sp).filter(function (k) { return k.slice(0, 3) === CC + ":"; });
+        if (!st || !keys.length) countryOnly.push(sp); // recorded in the country, where in it not known
+        else if (keys.some(function (k) { return want[k]; })) inArea.push(sp); // recorded in your state/province
+      });
+      var cname = NAME[cc] ? (window.SL_DISPLAY_NAME ? window.SL_DISPLAY_NAME(NAME[cc]) : NAME[cc]) : cc.toUpperCase();
+      return { cc: cc, country: cname, area: st ? (cc === "us" && window.STATE_NAME && window.STATE_NAME[st.code]) || st.name : null,
+        inArea: inArea, countryOnly: countryOnly, snakeFree: !!NO_SNAKES[cc], continent: (NAME[cc] && COUNTRY_CONTINENT[NAME[cc]]) || "" };
+    },
+    // the map's own species list, filled like any other place's list (a row opens the snake the same way)
+    show: function (title, sub, html) {
+      if (window.SL_MAP_CLEAN) window.SL_MAP_CLEAN();
+      panelKind = "nearme"; pageFor = null; stopCityFactObserver();
+      var t = document.getElementById("cp-title"); t.textContent = title; t.classList.add("cp-title-place");
+      document.getElementById("cp-sub").textContent = sub;
+      document.getElementById("cp-list").innerHTML = html;
+      popPanel();
+      document.getElementById("see-provinces").hidden = true;
+      invalidate();
+    },
+    row: function (sp, extra) { return '<div class="cp-row cp-sp" data-sp="' + attrEsc(sp.id) + '">' + photoBtn(sp) + "<b>" + sp.name + "</b><i>" + sp.sci + "</i>" + (extra || "") + "</div>"; },
+    fly: function (lat, lon) { flyToLonLatBox(lon - 2.6, lon + 2.6, lat - 1.7, lat + 1.7, true); invalidate(); },
+    hide: function () { if (panelKind === "nearme") { document.getElementById("country-panel").hidden = true; panelKind = null; invalidate(); } }
+  };
+  // ==== See near me (map side) - END ============================================================
   spWrap.addEventListener("click", function (e) {
     if (e.target === spWrap || e.target.closest(".sp-info-x")) { spClose(); return; } // a tap outside the panel, on the map
     var b = e.target.closest("[data-sp]"); if (!b || !spCur) return;
@@ -21015,7 +21060,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // quiz score, badges and photos. The account in use lives in localStorage as always; the
   // others are put away in IndexedDB and swapped back in (then a reload) when you switch.
   var ACCT_KEYS = ["sl-web-state", "sl-favs", "sl-follow-meta", "sl-pinned", "sl-quiz-correct", "sl-quiz-wrong", "sl-badges", "sl-interests", "sl-ach-dates", "sl-ach-seen",
-    "sl-google", "sl-gtoken", "sl-sync-base", "sl-sync-photos", "sl-last-sync"], ACCT_PRE = ["sl-sighting-photos:", "sl-sighting-photo:", "sl-quiz-"];
+    "sl-google", "sl-gtoken", "sl-sync-base", "sl-sync-photos", "sl-last-sync", "sl-nearme" /* See near me: kept per account, never synced */], ACCT_PRE = ["sl-sighting-photos:", "sl-sighting-photo:", "sl-quiz-"];
   function isAcctKey(k) { return ACCT_KEYS.indexOf(k) >= 0 || ACCT_PRE.some(function (p) { return k.indexOf(p) === 0; }); }
   function idbStore(mode, fn) {
     return new Promise(function (res, rej) {
@@ -24375,6 +24420,248 @@ if(window.MutationObserver)new MutationObserver(function(ms){ms.forEach(function
 })();
 </script>
 
+<!-- ==== See near me (location panel, map button, list) - BEGIN ==================================== -->
+<style>
+  /* the location question looks just like the cookie bar (it IS a .ck-bar, so it stacks and waits like one) */
+  .nm-bar .ck-btns button[hidden] { display: none; }
+  .map-tools .hm-toggle.nm-toggle[hidden] { display: none; }
+  .map-tools .hm-toggle.nm-toggle.on, .map-tools .hm-toggle.nm-toggle.on:hover { background: linear-gradient(135deg, #2c7a57 0%, #256846 100%); border-color: #2f7a45; color: #fff; filter: none; }
+  .nm-toggle .nm-short { display: none; }
+  @media (max-width: 640px) { .map-tools .nm-toggle .nm-long { display: none; } .map-tools .nm-toggle .nm-short { display: inline; } }
+  .globe-stage.heat-only #nm-toggle { display: none; }
+  .cp-row .nm-how { margin-top: 3px; font: 11.5px/1.4 'Inter', sans-serif; color: var(--text); opacity: .85; }
+  .cp-row .nm-how .nm-k { font-weight: 600; }
+  .cp-row .nm-warn { margin-top: 3px; font: 600 11.5px/1.4 'Inter', sans-serif; color: var(--rust); }
+  .nm-off { margin: 6px 4px 10px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--map-on, #58b351); background: none; color: var(--text); font: 500 12.5px 'Inter', sans-serif; cursor: pointer; }
+  .nm-acct { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); font: 13px/1.4 'Inter', sans-serif; color: var(--text); }
+  .nm-acct[hidden] { display: none; }
+  .nm-acct span { flex: 1; min-width: 160px; }
+  .nm-acct button { padding: 7px 12px; border-radius: 10px; border: 1px solid #58b351; background: transparent; color: var(--text); font: 600 12.5px 'Inter', sans-serif; cursor: pointer; }
+  .nm-acct small { flex-basis: 100%; color: var(--text-muted); }
+  .nm-acct small:empty { display: none; }
+</style>
+<div class="ck-bar nm-bar" id="nm-bar" hidden role="dialog" aria-label="Your location">
+  <p id="nm-txt"><b>See snakes near you?</b> Let SnakeList use your location to show the snakes that live near you on the map. It stays on this device, rounded to about 10 km, and is never sent anywhere.</p>
+  <div class="ck-btns"><button type="button" class="ck-no" id="nm-no">Not now</button><button type="button" class="ck-yes" id="nm-yes">Use my location</button><button type="button" class="ck-yes" id="nm-ok" hidden>OK</button></div>
+</div>
+<script>
+// "See near me": after you sign in, SnakeList asks once (per account) if it may use your location.
+// Yes: the browser's position, rounded to 0.1 degree (~10 km), is kept in localStorage ("sl-nearme",
+// one of the account's own keys, never synced or sent anywhere), and the map gets a "See near me"
+// button: it flies to your area, puts a dot there and lists the snakes recorded there, each with
+// a "How to find it" line made only from what SnakeList already knows about that snake.
+(function () {
+  if (window.__slNearMe) return; window.__slNearMe = 1;
+  var KEY = "sl-nearme";
+  var bar = document.getElementById("nm-bar"), txt = document.getElementById("nm-txt");
+  var bYes = document.getElementById("nm-yes"), bNo = document.getElementById("nm-no"), bOk = document.getElementById("nm-ok");
+  var ASK = txt.innerHTML;
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function user() { try { return JSON.parse(lsGet("sl-google") || "null"); } catch (e) { return null; } }
+  function who(u) { return u ? String(u.email || u.name || "").toLowerCase() : ""; }
+  // this account's answer (an answer saved by someone else on this device doesn't count)
+  function rec() { var u = user(), r = null; if (!u) return null; try { r = JSON.parse(lsGet(KEY) || "null"); } catch (e) {} return r && r.who === who(u) ? r : null; }
+  function save(r) { var u = user(); if (!u) return; r.who = who(u); r.t = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(r)); } catch (e) {} paint(); }
+  function on() { var r = rec(); return !!(r && r.ans === "yes" && isFinite(r.lat) && isFinite(r.lon)); }
+  var r1 = function (x) { return Math.round(x * 10) / 10; };
+  function locate(cb) {
+    if (!navigator.geolocation) { save({ ans: "denied" }); cb(false, "This browser can't share its location, so See near me can't work here."); return; }
+    navigator.geolocation.getCurrentPosition(function (p) {
+      save({ ans: "yes", lat: r1(p.coords.latitude), lon: r1(p.coords.longitude) });
+      cb(true, "Done! Open the Map and tap See near me.");
+    }, function (e) {
+      save({ ans: "denied" });
+      cb(false, e && e.code === 1 ? "Location is blocked for SnakeList. You can allow it in your browser's settings, then turn it on again from your account."
+        : "SnakeList couldn't find where you are right now. You can try again later from your account.");
+    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
+  }
+  // ---- the question (once per account, after signing in) ----
+  var hideT = null, asked = false;
+  function vis(el) { // (fixed pop-ups have no offsetParent, so this asks the box itself)
+    if (!el || el.hidden || el.closest("[hidden]")) return false;
+    var cs = getComputedStyle(el), r = el.getBoundingClientRect();
+    return cs.display !== "none" && cs.visibility !== "hidden" && r.width > 0 && r.height > 0;
+  }
+  function busy() {
+    var de = document.documentElement;
+    if (!window.__introDone || de.classList.contains("sl-intro-lock") || document.querySelector(".sl-root.intro-on")) return true; // the opening animation
+    var seen = false; try { seen = !!(localStorage.getItem("sl-tour-seen") || sessionStorage.getItem("sl-tour-seen") || localStorage.getItem("sl-tour-done")); } catch (e) { seen = true; }
+    if (!seen || vis(document.getElementById("tour-layer"))) return true; // the tutorial (still to come, or showing)
+    var wn = document.getElementById("wn-sheet"); if (wn && wn.classList.contains("open")) return true; // What's new
+    if (vis(document.getElementById("ck-bar"))) return true; // the cookie question first
+    if (de.classList.contains("sl-modal-on") || window.SL_SWITCHING) return true; // sign-in page, a photo, 3D...
+    return !!document.querySelector("dialog[open], .signin-page.open, .signin-sheet.open");
+  }
+  function showBar() {
+    txt.innerHTML = ASK; bYes.hidden = false; bNo.hidden = false; bOk.hidden = true; bYes.disabled = false;
+    bar.hidden = false; asked = true;
+  }
+  function closeBar() { clearTimeout(hideT); bar.hidden = true; }
+  function tell(msg) {
+    txt.textContent = msg; bYes.hidden = true; bNo.hidden = true; bOk.hidden = false;
+    clearTimeout(hideT); hideT = setTimeout(closeBar, 9000);
+  }
+  bNo.addEventListener("click", function () { save({ ans: "no" }); closeBar(); });
+  bOk.addEventListener("click", closeBar);
+  bYes.addEventListener("click", function () {
+    bYes.disabled = true; txt.textContent = "Finding where you are…";
+    locate(function (ok, msg) { tell(msg); });
+  });
+  function check() {
+    if (bar.hidden) { if (!asked && user() && !rec() && !busy()) showBar(); }
+    else if (!user()) closeBar(); // signed out while it was showing
+    paint();
+  }
+  // ---- the map button ----
+  var stage = document.getElementById("globe-stage"), btn = null, dotOn = false;
+  function makeBtn() {
+    var t = stage && stage.querySelector(".map-tools"); if (!t) return false;
+    if (btn && btn.parentNode === t) return true;
+    if (!btn) {
+      btn = document.createElement("button"); btn.type = "button"; btn.className = "hm-toggle nm-toggle"; btn.id = "nm-toggle"; btn.hidden = true;
+      btn.title = "See near me: the snakes recorded where you are, and how to find them";
+      btn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path><circle cx="12" cy="12" r="7"></circle></svg> <span class="nm-long">See near me</span><span class="nm-short">Near me</span>';
+      btn.addEventListener("click", seeNear);
+    }
+    t.appendChild(btn); paint(); return true;
+  }
+  if (stage && !makeBtn() && window.MutationObserver) {
+    var mo = new MutationObserver(function () { if (makeBtn()) mo.disconnect(); });
+    mo.observe(stage, { childList: true, subtree: true });
+  }
+  // ---- "How to find it", only from SnakeList's own data ----
+  // the checklist's habitat lists (the Habitats filter), worked out once. Said by their broad group
+  // ("forests & woodlands", "wetlands & swamps"...); a snake listed only under one region's own
+  // habitats (Madagascar, Borneo...) gets those habitats' names instead
+  var habOf = null, REGION_OF = { "Madagascar": "Africa", "Africa": "Africa", "Borneo": "Asia", "South & Southeast Asia": "Asia", "East & Central Asia": "Asia", "Middle East": "Asia",
+    "South America": "South America", "North America": "North America", "Central America & Caribbean": "North America", "New Guinea & Australia": "Oceania", "Europe & Mediterranean": "Europe" };
+  function habitats(id, cont) {
+    if (!habOf) {
+      habOf = {}; var H = window.SL_HABITATS, n = 0;
+      if (H && H.sections) H.sections.forEach(function (sec) { sec[1].forEach(function (h) { H.ids(n++).forEach(function (sid) {
+        var o = habOf[sid] = habOf[sid] || { groups: [], by: {}, local: [] };
+        if (REGION_OF[sec[0]]) { o.local.push([REGION_OF[sec[0]], h]); return; }
+        if (!o.by[sec[0]]) { o.by[sec[0]] = []; o.groups.push(sec[0]); }
+        o.by[sec[0]].push(h);
+      }); }); });
+    }
+    var o = habOf[id]; if (!o) return [];
+    // the small, specific places (burrows, leaf litter, gardens, caves...) are named as they are listed for this snake
+    var NAMED = { "Underground & forest floor": 1, "Around people": 1, "Mountains & rocks": 1 };
+    // (a snake's habitats cover its whole range, so the named regional ones - Sonoran Desert... - are used
+    // only when it has no general ones, and then only those on your continent if there are any)
+    var gen = o.groups.map(function (g) { return NAMED[g] ? o.by[g].slice(0, 3).join(", ").toLowerCase() : g.toLowerCase().replace(" & ", " and "); });
+    if (gen.length) return gen;
+    var mine = o.local.filter(function (l) { return l[0] === cont; });
+    return (mine.length ? mine : o.local).map(function (l) { return l[1]; });
+  }
+  // when it is active, from the species pages' sourced facts (data/species-info/<id>.json, facts.activity)
+  var ACTIVE = { "bothrops-asper": "Mostly at night", "bungarus-caeruleus": "At night", "corallus-caninus": "At night, in trees", "dendroaspis-angusticeps": "By day, in trees",
+    "dendroaspis-polylepis": "By day", "dendroaspis-viridis": "By day, mostly in trees", "echis-carinatus": "Mostly at night", "eryx-colubrinus": "Mostly hidden under sand or soil",
+    "lachesis-muta": "Mostly at night", "malpolon-monspessulanus": "By day", "morelia-viridis": "At night; rests coiled on branches by day", "opheodrys-aestivus": "By day, in shrubs and trees",
+    "pseudonaja-textilis": "Mostly by day", "python-bivittatus": "Mostly at night", "thamnophis-sirtalis": "By day" };
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function card(id) { var g = document.getElementById("grid"); return g && g.querySelector('.card[data-id="' + id + '"]'); }
+  function spots(c) { try { return (window.SL_FACTS && window.SL_FACTS.spotsOf && c) ? window.SL_FACTS.spotsOf(c) : 0; } catch (e) { return 0; } }
+  function howTo(sp, cont) {
+    var c = card(sp.id), bits = [], F = window.SL_FACTS || {};
+    var type = c ? c.dataset.type : "";
+    if (type === "Sea Snake") bits.push("A sea snake");
+    else if (type === "Watersnake") bits.push("A water snake");
+    var hs = habitats(sp.id, cont);
+    if (hs.length) bits.push("Its habitats (across its whole range): " + hs.slice(0, 5).join("; ") + (hs.length > 5 ? "; and more" : ""));
+    if (ACTIVE[sp.id]) bits.push("Active: " + ACTIVE[sp.id].charAt(0).toLowerCase() + ACTIVE[sp.id].slice(1));
+    var n = spots(c);
+    if (n >= (F.COMMON_AT || 75)) bits.push("Often spotted (confirmed sightings in " + n + " places)");
+    else if (n > 0 && n <= (F.RARE_UPTO || 2)) bits.push("Rarely spotted (confirmed sightings in only " + n + (n === 1 ? " place" : " places") + ")");
+    var out = bits.length ? '<div class="nm-how"><span class="nm-k">How to find it:</span> ' + esc(bits.join(". ")) + ".</div>" : "";
+    var harm = window.SL_HARM ? window.SL_HARM(sp.id) : null;
+    if (c && c.dataset.venomous === "1") out += '<div class="nm-warn">Venomous - watch from a distance, never touch.</div>';
+    else if (harm === "harmful") out += '<div class="nm-warn">Can be dangerous - keep your distance, never touch.</div>';
+    return out;
+  }
+  // ---- See near me ----
+  function seeNear() {
+    var r = rec(), M = window.SL_NEARME_MAP; if (!r || !M || !on()) return;
+    btn.classList.add("on"); dotOn = true;
+    var tries = 0;
+    (function go() {
+      if (!M.ready()) { M.warm(); if (++tries < 300) setTimeout(go, 300); return; }
+      render(M, r.lat, r.lon);
+    })();
+  }
+  function render(M, lat, lon) {
+    var f = M.find(lat, lon) || { cc: null }, html = "", sub, byFind = function (a, b) { return spots(card(b.id)) - spots(card(a.id)) || a.name.localeCompare(b.name); };
+    var row = function (sp) { return M.row(sp, howTo(sp, f.continent)); };
+    var off = '<p class="cp-note">From SnakeList\'s range records, not from sightings. Not listed is not the same as absent. Your location stays on this device.</p>' +
+      '<button type="button" class="nm-off" id="nm-off">Turn off location</button>';
+    if (!f.cc) {
+      sub = "No snakes recorded here";
+      html = '<div class="cp-row"><b>No snakes recorded here.</b><i>You seem to be at sea or far from land - SnakeList has no range records for this spot.</i></div>';
+    } else {
+      var a = f.inArea.slice().sort(byFind), c = f.countryOnly.slice().sort(byFind), n = a.length + c.length;
+      var where = (f.area ? f.area + ", " : "") + f.country;
+      sub = where + " · " + (n ? (f.area ? a.length + " living species recorded in " + f.area : n + " living species recorded in " + f.country) +
+        (f.area && c.length ? " · " + c.length + " possible (country-level record only)" : "") : "no snakes recorded here");
+      if (!n) html = f.snakeFree ? '<div class="cp-row"><b>No snakes live here.</b><i>Too cold, or too remote for snakes ever to have reached.</i></div>'
+        : '<div class="cp-row"><b>No snakes recorded here.</b><i>SnakeList has no snake records for ' + esc(where) + ' yet.</i></div>';
+      else {
+        html = '<p class="cp-note">Most often spotted first. Tap a snake to open it.</p>';
+        if (a.length) html += '<p class="cp-group">Recorded in ' + esc(f.area) + "</p>" + a.map(row).join("");
+        if (c.length) html += (f.area ? '<p class="cp-group">Possible: recorded in ' + esc(f.country) + ', where in it not known</p>' : '<p class="cp-group">Recorded in ' + esc(f.country) + "</p>") + c.map(row).join("");
+      }
+    }
+    M.show("Near you", sub, html + off);
+    M.fly(lat, lon);
+    var o = document.getElementById("nm-off");
+    if (o) o.addEventListener("click", function (e) { e.stopPropagation(); turnOff(); });
+  }
+  function turnOff() { save({ ans: "no" }); dotOn = false; if (btn) btn.classList.remove("on"); if (window.SL_NEARME_MAP) window.SL_NEARME_MAP.hide(); if (window.SL_MAP_REDRAW) window.SL_MAP_REDRAW(); }
+  // the panel closed: the button is no longer "on" (the dot stays until location is turned off)
+  var cpClose = document.getElementById("cp-close");
+  if (cpClose) cpClose.addEventListener("click", function () { if (btn) btn.classList.remove("on"); });
+  // your spot on the map: a small blue dot with a white ring
+  var prevDraw = window.SL_OVERLAY_DRAW;
+  window.SL_OVERLAY_DRAW = function (ctx, b, w, h) {
+    if (prevDraw) prevDraw(ctx, b, w, h);
+    var r = dotOn && on() ? rec() : null; if (!r) return;
+    var x = b[0] + (r.lon + 180) / 360 * b[2], y = b[1] + (90 - r.lat) / 180 * b[3];
+    ctx.save();
+    ctx.beginPath(); ctx.arc(x, y, 11, 0, Math.PI * 2); ctx.fillStyle = "rgba(47,125,225,0.22)"; ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, 5.5, 0, Math.PI * 2); ctx.fillStyle = "#2f7de1"; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = "#fff"; ctx.stroke();
+    ctx.restore();
+  };
+  // ---- in your account (the sign-in page): change it or turn it off ----
+  var acct = document.createElement("div"); acct.className = "nm-acct"; acct.id = "nm-acct"; acct.hidden = true;
+  acct.innerHTML = '<span></span><button type="button"></button><small aria-live="polite"></small>';
+  (function place() { var me = document.getElementById("g-me"); if (me && me.parentNode) me.parentNode.insertBefore(acct, me.nextSibling); else setTimeout(place, 1000); })();
+  acct.querySelector("button").addEventListener("click", function () {
+    var sm = acct.querySelector("small");
+    if (on()) { turnOff(); sm.textContent = "Location is off. Your position was removed from this device."; return; }
+    sm.textContent = "Finding where you are…";
+    locate(function (ok, msg) { sm.textContent = ok ? "Location is on. Open the Map and tap See near me." : msg; });
+  });
+  var last = "";
+  function paint() {
+    var u = user(), yes = on(), k = (u ? who(u) : "") + "|" + yes;
+    if (btn) { btn.hidden = !(u && yes); if (btn.hidden) { btn.classList.remove("on"); dotOn = false; } }
+    if (!acct) return; // (the map button can be made before the account row below exists)
+    acct.hidden = !u;
+    if (k === last) return; last = k;
+    acct.querySelector("span").textContent = yes ? "See near me: on. The map shows snakes near you (your location stays on this device)." : "See near me: off. Let SnakeList show the snakes that live near you on the map.";
+    acct.querySelector("button").textContent = yes ? "Turn off location" : "Use my location";
+    if (!u) acct.querySelector("small").textContent = "";
+    if (window.SL_MAP_REDRAW) window.SL_MAP_REDRAW();
+  }
+  window.addEventListener("storage", function (e) { if (e.key === KEY || e.key === "sl-google") { last = ""; paint(); } });
+  setInterval(check, 1500);
+  setTimeout(check, 800);
+  window.SL_NEARME = { rec: rec, check: check, see: seeNear }; // (for the tests)
+})();
+</script>
+<!-- ==== See near me - END ========================================================================== -->
+
 <script>
 // ---- v5.49: pop-ups never sit on top of each other. Every small message and bar that floats over
 // the page (Undo, saved/sync messages, achievement messages, the cookie bar, the keep-your-list and
@@ -24404,6 +24691,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){ms.forEach(function
     return false;
   }
   function liftOf(el) { var m = /(-?[\d.]+)px\s*$/.exec(el.style.translate || ""); return m ? +m[1] : 0; }
+  function nowLift(el) { var t = getComputedStyle(el).translate, m = /^\S+\s+(-?[\d.]+)px/.exec(t || ""); return m ? +m[1] : 0; }
   function setLift(el, y) {
     y = Math.round(y);
     if (Math.abs(liftOf(el) - y) < 1) return;
@@ -24417,7 +24705,9 @@ if(window.MutationObserver)new MutationObserver(function(ms){ms.forEach(function
     els.forEach(function (el) {
       if (!shown(el)) { if (el.style.translate) el.style.translate = ""; seen.delete(el); return; }
       if (!seen.has(el)) seen.set(el, ++order);
-      var r = el.getBoundingClientRect(), y0 = liftOf(el);
+      // (where it is drawn right now: mid-move, that is not yet the lift it was given - measuring from the
+      // given lift there made a bar jump between two places instead of settling)
+      var r = el.getBoundingClientRect(), y0 = nowLift(el);
       // where it would be without our nudge
       live.push({ el: el, l: r.left, r: r.right, t: r.top - y0, b: r.bottom - y0, top: (r.top - y0 + r.bottom - y0) / 2 < innerHeight / 2,
         // the page's own fixed bits (Offline, back to top) keep their place; the rest in the order they appeared
