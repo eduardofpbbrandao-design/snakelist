@@ -13403,7 +13403,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var started = false;
   window.SL_LOAD_GEO = function () {
     if (started) return window.SL_GEO_READY; started = true;
-    var sc = document.createElement("script"); sc.src = "data/geo.js?v=7b343377c1"; sc.async = true;
+    var sc = document.createElement("script"); sc.src = "data/geo.js?v=0ce84b1bd6"; sc.async = true;
     sc.onload = function () { res(window.SL_GEO || null); document.dispatchEvent(new Event("sl-geo"));
       // and ~4,000 more towns for "See cities" (GeoNames) - small, and only once the map is wanted
       var sc = document.createElement("script"); sc.src = "data/cities-more.js?v=fb6f11eaec"; sc.async = true; var cm = sc;
@@ -15447,8 +15447,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     // the picked country: the same line, just thicker, along exactly the same outline
     if (selected) {
       shapePath(to, function (r) { return (r.code === selected || ENCLAVE[r.code] === selected) && (r.e - r.w) / 360 * vb[2] > 8; }, stride, true);
-      // a deep green of its own, not the grey of the other borders - grey on the green fill read as a pale halo
-      ctx.strokeStyle = window.SL_MAP_SAT ? lineColor : document.documentElement.getAttribute("data-sl-theme") === "dark" ? "rgba(225,245,215,0.8)" : "#1f4a26"; ctx.lineWidth = 1.4; ctx.lineJoin = "round";
+      // a green of its own, not the grey of the other borders - grey on the green fill read as a pale halo
+      // (light mode: the map's own SnakeList green, #3f7d43 - the old #1f4a26 read as an almost black line)
+      ctx.strokeStyle = window.SL_MAP_SAT ? lineColor : document.documentElement.getAttribute("data-sl-theme") === "dark" ? "rgba(225,245,215,0.8)" : "#3f7d43"; ctx.lineWidth = 1.4; ctx.lineJoin = "round";
       STROKE();
     }
   }
@@ -15814,8 +15815,13 @@ window.SL_GEO_READY = new Promise(function (res) {
       }
       for (var i = 0; i < n; i++) {
         var lo = ring[i][0], la = ring[i][1];
+        // coarser levels: each point snapped to a grid the size of the detail level, repeats
+        // dropped - the same for both states along a shared border, so they keep one line
+        // (skipping points by distance from the last one kept made two different lines there,
+        // with slivers of the country's own colour between them)
+        if (tol) { lo = Math.round(lo / tol) * tol; la = Math.round(la / tol) * tol; }
         if (forStroke && cut(i)) { broke = true; if (la < POLE_LAT) { open = false; continue; } P.moveTo(lo + 180, 90 - la); open = true; lx = lo; ly = la; continue; }
-        if (open && tol && i < n - 1 && Math.abs(lo - lx) < tol && Math.abs(la - ly) < tol) continue;
+        if (open && tol && lo === lx && la === ly) continue;
         if (!open) { P.moveTo(lo + 180, 90 - la); open = true; } else P.lineTo(lo + 180, 90 - la);
         lx = lo; ly = la;
       }
