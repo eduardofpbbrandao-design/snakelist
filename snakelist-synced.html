@@ -6889,6 +6889,183 @@
   window.addEventListener("pagehide", function () { if (timer) { clearTimeout(timer); save(); } });
 })();
 </script>
+<script>
+// ---- light cards (iPad / iPhone memory) -----------------------------------------------
+// Every species' card is in the page, but only a page of them is ever on screen. A whole card is
+// ~30 elements (tags, buttons, icons), so all of them came to ~125,000 elements - on iPads and
+// phones that much page is what made Safari run out of memory and reload SnakeList. So a card that
+// is not on screen is kept "light": the card itself stays (its Seen / Want to see / Following
+// classes and data-* never move), and so do its name, its scientific name and the two parts that
+// hold what you saved - the sighting button (.note-btn: your dates and places) and your photo
+// (.photo-btn). Those are the very same elements, never copies. The rest (tags, buttons, icons) is
+// taken out and put back exactly as it was the moment the card is shown, or as soon as anything
+// asks a light card for one of those parts. Only on the website: inside claude.ai the synced list
+// is never touched. window.SL_LIGHT.stats() says how many cards are light.
+(function () {
+  if (window.claude && window.claude.use) return;
+  var grid = document.getElementById("grid");
+  if (!grid) return;
+  var KEEP = ["card-name", "card-sci", "note-btn", "photo-btn"]; // stay in every card (the same elements)
+  var PARTS = ["card-top", "card-tags", "wish-row", "card-bottom"]; // what a light card leaves out, in order
+  var EXTRA = "send-photo-btn"; // added straight onto a card (after its parts) - stays
+  var EP = Element.prototype, qs = EP.querySelector, qsa = EP.querySelectorAll;
+  var light = new WeakMap(); // light card -> [shape, tags]: how to put its parts back
+  var shapes = new Map(), tagSets = new Map(); // most cards share the same shape and tags strings
+  var tpl = document.createElement("template"), tpl2 = document.createElement("template");
+  var stats = { light: 0, woken: 0, last: "", ms: 0, steps: 0 };
+  var byId = null;
+  function cardById(id) {
+    if (!byId || !byId[id]) { byId = {}; [].forEach.call(qsa.call(grid, ".card"), function (c) { byId[c.getAttribute("data-id")] = c; }); }
+    return byId[id];
+  }
+  function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/\u00a0/g, "&nbsp;").replace(/"/g, "&quot;"); }
+  function intern(m, s) { var x = m.get(s); if (x === undefined) { m.set(s, s); x = s; } return x; }
+  // the card's parts as markup: \u0001 = its tags, \u0002 = its id, \u0003 = its name
+  function expand(c, d) {
+    var s = d[0];
+    if (s.indexOf("\u0002") >= 0) s = s.split("\u0002").join(c.getAttribute("data-id") || "");
+    if (s.indexOf("\u0003") >= 0) s = s.split("\u0003").join(esc(c.getAttribute("data-name") || ""));
+    return s.split("\u0001").join(d[1]);
+  }
+  function cut(html, el, i) { // the kept element's own markup -> a placeholder (it must be there exactly once)
+    var o = el.outerHTML, at = html.indexOf(o);
+    if (at < 0 || html.indexOf(o, at + 1) >= 0) return null;
+    return html.slice(0, at) + '<i data-sl-keep="' + i + '"></i>' + html.slice(at + o.length);
+  }
+  // make one (hidden) card light. Anything unexpected about it and it is simply left whole.
+  function lighten(c) {
+    if (light.has(c) || c.hasAttribute("data-flash-lock")) return false;
+    var ch = c.childNodes, n = ch.length, i, k;
+    if (n < 4) return false;
+    for (i = 0; i < n; i++) if (ch[i].nodeType !== 1 || !ch[i].classList.contains(i < 4 ? PARTS[i] : EXTRA)) return false;
+    var keep = [];
+    for (k = 0; k < 4; k++) { var f = qsa.call(c, "." + KEEP[k]); if (f.length !== 1) return false; keep.push(f[0]); }
+    var top = ch[0], tags = ch[1], wish = ch[2], bottom = ch[3];
+    if (!top.contains(keep[0]) || !top.contains(keep[1]) || !bottom.contains(keep[2]) || !bottom.contains(keep[3])) return false;
+    var a = document.activeElement; if (a && a !== document.body && c.contains(a)) return false;
+    var t = cut(top.outerHTML, keep[0], 0); t = t && cut(t, keep[1], 1);
+    var b = cut(bottom.outerHTML, keep[2], 2); b = b && cut(b, keep[3], 3);
+    var to = tags.outerHTML, ti = tags.innerHTML, wo = wish.outerHTML;
+    if (!t || !b || to.slice(to.length - ti.length - 6) !== ti + "</div>") return false;
+    var rest = t + to.slice(0, to.length - ti.length - 6) + "\u0001</div>" + wo + b;
+    if (/[\u0001-\u0003]/.test(t + to + wo + b)) return false;
+    var whole = t + to + wo + b, id = c.getAttribute("data-id") || "", nm = esc(c.getAttribute("data-name") || "");
+    var shape = rest;
+    if (id.length > 2) shape = shape.split(id).join("\u0002");
+    if (nm.length > 2) shape = shape.split(nm).join("\u0003");
+    var d = [shape, ti];
+    if (expand(c, d) !== whole) { d[0] = rest; if (expand(c, d) !== whole) return false; }
+    d[0] = intern(shapes, d[0]); d[1] = intern(tagSets, d[1]);
+    // the kept parts move to the front of the card (the same elements), then the rest goes
+    for (k = 0; k < 4; k++) c.insertBefore(keep[k], top);
+    c.removeChild(top); c.removeChild(tags); c.removeChild(wish); c.removeChild(bottom);
+    light.set(c, d); stats.light++;
+    return true;
+  }
+  // put a light card's parts back, exactly as they were, with its kept parts back in their places
+  function full(c) {
+    var d = light.get(c); if (!d) return;
+    light.delete(c); stats.light--;
+    tpl.innerHTML = expand(c, d);
+    var frag = tpl.content, kept = [], kids = c.children, i, k;
+    for (k = 0; k < 4; k++) for (i = 0; i < kids.length; i++) if (kids[i].classList.contains(KEEP[k])) { kept[k] = kids[i]; break; }
+    [].forEach.call(frag.querySelectorAll("[data-sl-keep]"), function (p) {
+      var el = kept[+p.getAttribute("data-sl-keep")];
+      if (el) p.parentNode.replaceChild(el, p); else p.parentNode.removeChild(p);
+    });
+    c.insertBefore(frag, c.firstChild);
+    // what the page adds to every whole card (its 3D button, the buttons' tooltips) - added again
+    var h = window.SL_CARD_HOOKS;
+    if (h) for (i = 0; i < h.length; i++) try { h[i](c); } catch (e) {}
+  }
+  // A light card still answers questions about the parts it kept (its names, sighting, photo).
+  // Asked for anything else (a button, its tags), it is made whole first - so nothing anywhere
+  // can find a part missing.
+  var OK = /^\.(card-name|card-sci|note-btn|photo-btn|photo-btn-clear|send-photo-btn)(?![\w-])(?:[.#:[][^\s>+~]*)?$/, okSel = {};
+  function answers(s) {
+    s = String(s);
+    var v = okSel[s];
+    if (v === undefined) v = okSel[s] = s.split(",").every(function (p) { return OK.test(p.trim()); });
+    return v;
+  }
+  function wake(c, s) {
+    stats.woken++; stats.last = String(s);
+    if (window.SL_LIGHT_DEBUG) (window.SL_LIGHT_WOKEN = window.SL_LIGHT_WOKEN || []).push(String(s) + " @ " + (new Error().stack || "").split("\n").slice(3, 5).join(" < "));
+    full(c);
+    soon(5000); // light again once it is off screen and nothing has asked for a while
+  }
+  EP.querySelector = function (s) { if (light.has(this) && !answers(s)) wake(this, s); return qs.apply(this, arguments); };
+  EP.querySelectorAll = function (s) { if (light.has(this) && !answers(s)) wake(this, s); return qsa.apply(this, arguments); };
+  // the cards about to be shown: whole again (refresh() calls this as it shows them; #page-style too, just in case)
+  function show(ids) {
+    if (!stats.light || !ids) return;
+    for (var i = 0; i < ids.length; i++) { var c = cardById(ids[i]); if (c && light.has(c)) full(c); }
+  }
+  // the website (index.html) comes with its cards already light: build-site.py takes their parts out
+  // and lists them once here, so the page is half the size and a phone never builds them all
+  var pre = document.getElementById("sl-card-parts");
+  if (pre) {
+    var P = JSON.parse(pre.textContent), PS = P.shapes, PT = P.tags, PC = P.cards;
+    [].forEach.call(qsa.call(grid, ".card"), function (c) {
+      var e = PC[c.getAttribute("data-id")];
+      if (!e || light.has(c) || qs.call(c, ".card-top, .card-bottom")) return;
+      light.set(c, [intern(shapes, PS[e[0]]), intern(tagSets, PT[e[1]])]); stats.light++;
+    });
+    pre.parentNode.removeChild(pre);
+  }
+  var pageStyle = document.getElementById("page-style");
+  if (pageStyle) new MutationObserver(function () {
+    var t = pageStyle.textContent, e = t.indexOf("{display"), ids = [], m, re = /data-id="([^"]+)"/g;
+    t = e < 0 ? "" : t.slice(0, e);
+    while ((m = re.exec(t))) ids.push(m[1]);
+    show(ids); soon();
+  }).observe(pageStyle, { childList: true, characterData: true, subtree: true });
+  // not while Google Translate is at work on the page (it keeps track of the words it changed)
+  function allowed() {
+    var lang = null; try { lang = localStorage.getItem("sl-lang"); } catch (e) {}
+    return !(lang && lang !== "en") && !/\btranslated-/.test(document.documentElement.className);
+  }
+  // a few cards at a time, between frames (Safari has no requestIdleCallback)
+  var idle = window.requestIdleCallback ? function (f) { requestIdleCallback(f, { timeout: 150 }); } : function (f) { setTimeout(f, 24); };
+  var sweepT = 0, sweeping = false, ready = false;
+  function soon(ms) { if (!ready) return; clearTimeout(sweepT); sweepT = setTimeout(sweep, ms || 2500); }
+  // every card that is not on screen is made light, a few at a time when the page is idle
+  function sweep() {
+    sweepT = 0;
+    if (sweeping) { soon(); return; }
+    if (!allowed()) return;
+    var shownList = window.SL_SHOWN_IDS, on = new Set(shownList || []);
+    var list = [].filter.call(qsa.call(grid, ".card"), function (c) { return !light.has(c) && !on.has(c.getAttribute("data-id")); });
+    if (!list.length) return;
+    list = list.filter(function (c) { return !c.getClientRects().length; }); // nothing that is laid out
+    var i = 0; sweeping = true;
+    (function step(dl) {
+      // the list changed while this ran: start again from what is on screen now
+      if (window.SL_SHOWN_IDS !== shownList) { sweeping = false; soon(300); return; }
+      var t0 = Date.now(), ms = Math.min(16, Math.max(8, dl && dl.timeRemaining ? dl.timeRemaining() : 12));
+      while (i < list.length && Date.now() - t0 < ms) lighten(list[i++]);
+      stats.ms += Date.now() - t0; stats.steps++;
+      if (i < list.length) idle(step); else sweeping = false;
+    })();
+  }
+  // only once the page has loaded and set itself up (the 3D buttons, photos and titles go on whole cards first)
+  window.addEventListener("load", function () { setTimeout(function () { ready = true; soon(1); }, 2500); });
+  window.SL_LIGHT = {
+    show: show,
+    sweep: function () { soon(1); },
+    isLight: function (c) { return light.has(c); },
+    // a card's tag elements (read only) without making the card whole
+    tagEls: function (c) {
+      var d = light.get(c);
+      if (!d) return [].slice.call(qsa.call(c, ".card-tags .tag"));
+      tpl2.innerHTML = d[1];
+      return [].slice.call(tpl2.content.querySelectorAll(".tag"));
+    },
+    wakeAll: function () { [].forEach.call(qsa.call(grid, ".card"), full); },
+    stats: function () { return { light: stats.light, whole: qsa.call(grid, ".card").length - stats.light, woken: stats.woken, last: stats.last, ms: stats.ms, steps: stats.steps, shapes: shapes.size, tagSets: tagSets.size }; },
+  };
+})();
+</script>
 
     <button class="more-btn" id="more-btn" type="button" hidden></button>
     <p class="empty-state" id="empty" hidden>No snakes found.</p>
@@ -9724,6 +9901,7 @@
       ? shownIds.map((id) => '#grid .card[data-id="' + id + '"]').join(",") + "{display:flex}" +
         shownIds.map((id, i) => '#grid .card[data-id="' + id + '"]{order:' + i + "}").join("")
       : "";
+    if (window.SL_LIGHT) window.SL_LIGHT.show(shownIds); // the cards now on screen are whole (see "light cards")
     updateCityLookup(searchMatches.length === 1 ? searchMatches[0] : null);
     if (restoreY != null) { // after the opening animation, which starts at the top
       const y = restoreY, go = (n) => { if (!window.__introDone && document.getElementById("intro") && n < 30) { setTimeout(() => go(n + 1), 200); return; } requestAnimationFrame(() => window.scrollTo(0, y)); };
@@ -12837,7 +13015,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       // continent name like "asia" otherwise matches ~1,400 species across 120 countries
       // spanning every continent (many Asian species also range or were introduced
       // elsewhere), which reads as broken rather than like a real search result
-      var tags = [].slice.call(c.querySelectorAll(".card-tags .tag"))
+      var tags = (window.SL_LIGHT ? window.SL_LIGHT.tagEls(c) : [].slice.call(c.querySelectorAll(".card-tags .tag"))) // without waking light cards
         .filter(function (t) { return !t.querySelector('use[href="#i-pin"]'); })
         .map(function (t) { return t.textContent; });
       var name = c.querySelector(".card-name").textContent;
@@ -17493,6 +17671,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   if (tf) tf.title = "Following: news, new sightings and facts about the snakes you follow";
   document.querySelectorAll("#grid .wish-btn").forEach(function (b) { b.title = W; });
   document.querySelectorAll("#grid .follow-btn").forEach(function (b) { b.title = F; });
+  // and on each light card as it is made whole
+  (window.SL_CARD_HOOKS = window.SL_CARD_HOOKS || []).push(function (c) { var w = c.querySelector(".wish-btn"), f = c.querySelector(".follow-btn"); if (w) w.title = W; if (f) f.title = F; });
 })();
 // Back / Forward move between the tabs you opened, and the address names the tab you're on,
 // so a copied link opens the same tab (only your own taps add history - links opening a tab don't)
@@ -17592,7 +17772,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     var isSci = nm.classList.contains("is-sci");
     return { id: card.dataset.id, card: card, name: nm.textContent.trim(), sci: (isSci ? nm : sc).textContent.trim(),
       countries: (card.dataset.countries || "").split("|").filter(Boolean), venom: card.dataset.venomous === "1",
-      family: (card.querySelectorAll(".card-tags .tag")[2] || {}).textContent || "" };
+      family: ((window.SL_LIGHT ? window.SL_LIGHT.tagEls(card) : card.querySelectorAll(".card-tags .tag"))[2] || {}).textContent || "" }; // without waking a light card
   }
   function followed() { return [].slice.call(grid.querySelectorAll(".card.follow")).map(info); }
   // favourites among the snakes you follow - shown first in Following, and a strong hint for "Picked for you"
@@ -20492,6 +20672,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   function bump(map, key, w) { if (!key) return; map[key] = (map[key] || 0) + (w || 1); }
   function note() { P.n++; clearTimeout(saveT); saveT = setTimeout(function () { if (allowed()) set("sl-interests", JSON.stringify(P)); }, 400); }
   function famOf(card) {
+    if (card.dataset.family !== undefined) return card.dataset.family; // stored on the card (reading its tags would wake every light card)
     var f = ""; [].slice.call(card.querySelectorAll(".card-tags .tag")).forEach(function (t) { if (/idae$/.test(t.textContent.trim())) f = t.textContent.trim(); });
     return f;
   }
@@ -22066,6 +22247,7 @@ window.SL_welcome = function (u, back) {
   // v4.94: every card gets its own 3D button inside its bottom row (just before Mark Seen), so it is drawn
   // together with Mark Seen and See more info - it used to sit in a layer above the cards and arrived a moment later
   function add3d(c) {
+    if (window.SL_LIGHT && window.SL_LIGHT.isLight(c)) return; // a light card gets it as it is made whole (SL_CARD_HOOKS)
     var cb = c.querySelector && c.querySelector(".card-bottom"); if (!cb || cb.querySelector(".td-card-btn")) return;
     var id = c.dataset.id, nm = c.dataset.name || id.replace(/-/g, " ");
     var b = document.createElement("button"); b.type = "button"; b.className = "td-card-btn"; b.setAttribute("data-card", id); b.textContent = "3D";
@@ -22073,6 +22255,7 @@ window.SL_welcome = function (u, back) {
     cb.appendChild(b);
   }
   [].forEach.call(grid.querySelectorAll(".card"), add3d);
+  (window.SL_CARD_HOOKS = window.SL_CARD_HOOKS || []).push(add3d);
   new MutationObserver(function (ms) { ms.forEach(function (m) { [].forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && n.classList.contains("card")) add3d(n); }); }); }).observe(grid, { childList: true });
   // Mark Seen / See more info ease to a new size (a narrower card): place the 3D button again once they've settled
   // v4.92: only when their SIZE changed - a colour fading in as the mouse passes over them used to re-place every
