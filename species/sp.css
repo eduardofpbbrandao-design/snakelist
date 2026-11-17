@@ -14,8 +14,8 @@
 .sx-chips a{display:inline-block;padding:4px 11px;border-radius:999px;border:1px solid var(--tagline);background:var(--tag);color:var(--text);text-decoration:none;font-size:13px}.sx-chips small{color:var(--muted)}
 .sx-searching #by-country,.sx-searching #by-family,.sx-searching .sx-chips{display:none}.sx-fam{scroll-margin-top:12px}.sx-fam h2 a{color:inherit}
 .sp-hubs{columns:3 200px;column-gap:24px;padding:0;list-style:none}.sp-hubs li{break-inside:avoid;margin:2px 0}
-:root{--bg:#f1f6ee;--card:#fbfdf9;--text:#183020;--muted:#55705b;--line:#d5e4cf;--g:#58b351;--land:#d7dccb;--on:#58b351;--in:#e07a1f;--sea:#e3ecef;--tag:#e3f0dc;--tagline:#a9cf9c;--link:#2a7a2f}
-@media (prefers-color-scheme:dark){:root{--bg:#22623f;--card:#256846;--text:#eef6ee;--muted:#c4e0cc;--line:#37855f;--g:#58b351;--land:#3a7c5a;--on:#58b351;--in:#f0a04b;--sea:#1b5034;--tag:#2c7a57;--tagline:#4a9a6c;--link:#dcf7d0}}
+:root{--bg:#f1f6ee;--card:#fbfdf9;--text:#1d6b33;--muted:#4b7a55;--line:#d5e4cf;--g:#58b351;--land:#d7dccb;--on:#58b351;--in:#e07a1f;--sea:#e3ecef;--tag:#e3f0dc;--tagline:#a9cf9c;--link:#2a7a2f}
+@media (prefers-color-scheme:dark){:root{--bg:#22623f;--card:#256846;--text:#dff5d6;--muted:#bfe3c6;--line:#37855f;--g:#58b351;--land:#3a7c5a;--on:#58b351;--in:#f0a04b;--sea:#1b5034;--tag:#2c7a57;--tagline:#4a9a6c;--link:#dcf7d0}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
 a{color:var(--link)}.sp-top{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:980px;margin:0 auto;padding:14px 16px}
 .sp-logo{font:700 26px Georgia,'Times New Roman',serif;color:var(--g);text-decoration:none}.sp-top nav{display:flex;gap:16px;font-size:14px}
