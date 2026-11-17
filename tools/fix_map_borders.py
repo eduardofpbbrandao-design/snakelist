@@ -27,7 +27,7 @@ from shapely import STRtree
 
 PATH = os.environ.get("SL_GEO_PATH", "data/geo.js")
 GAP_WIDTH = 12          # map units (1/200 degree): gaps under ~6 km between neighbours are closed
-TOL = [float(t) for t in os.environ.get("SL_TOL", "24,7").split(",")]  # Douglas-Peucker tolerance per coarse level, map units
+TOL = [float(t) for t in os.environ.get("SL_TOL", "24,7.6").split(",")]  # Douglas-Peucker tolerance per coarse level, map units
 SMALL = 80              # the app keeps rings this small whole (see keep() in loadPrebuiltGeometry)
 
 

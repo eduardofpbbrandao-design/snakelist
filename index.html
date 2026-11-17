@@ -13403,7 +13403,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var started = false;
   window.SL_LOAD_GEO = function () {
     if (started) return window.SL_GEO_READY; started = true;
-    var sc = document.createElement("script"); sc.src = "data/geo.js?v=0ce84b1bd6"; sc.async = true;
+    var sc = document.createElement("script"); sc.src = "data/geo.js?v=2409fcb925"; sc.async = true;
     sc.onload = function () { res(window.SL_GEO || null); document.dispatchEvent(new Event("sl-geo"));
       // and ~4,000 more towns for "See cities" (GeoNames) - small, and only once the map is wanted
       var sc = document.createElement("script"); sc.src = "data/cities-more.js?v=fb6f11eaec"; sc.async = true; var cm = sc;
