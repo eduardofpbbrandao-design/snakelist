@@ -1912,6 +1912,9 @@
       }
     } catch (e) {}
     ["pointerdown", "keydown", "wheel", "touchstart"].forEach(function (t) { window.addEventListener(t, function () { window.SL_TOUCHED = true; }, { capture: true, passive: true }); });
+    // v5.57: typing counts too (an iPad's keyboard, dictation or a suggestion tap may send no keydown) - the
+    // one quiet reload after the first sync must never happen in the middle of a search
+    window.addEventListener("input", function (e) { if (e.isTrusted) window.SL_TOUCHED = true; }, { capture: true, passive: true });
   </script>
   <script>
     // A phone is a touch screen whose shorter side is under 600 CSS px - read from the
@@ -10324,17 +10327,30 @@
   document.getElementById("search-icon").innerHTML = ICON.search;
   document.getElementById("clear").innerHTML = ICON.x;
 
-  document.getElementById("search").addEventListener("input", (e) => {
-    const raw = e.target.value.trim().toLowerCase();
+  // v5.57: typing waits for a short pause before the list is redrawn (one redraw per word, not one
+  // per letter - on an iPad every redraw of 4,247 cards was a long freeze); a search set by code
+  // (links, the closest-match fix) still redraws at once, and Enter shows the results straight away
+  let searchT = 0;
+  function runSearch() {
+    searchT = 0;
+    const v = document.getElementById("search").value, raw = v.trim().toLowerCase();
     // typing a world city (e.g. "Lisbon") filters the checklist exactly as typing its
     // country would - CITY_INDEX/updateCitySearch below is the separate US-only path that
     // shows real iNaturalist sighting data for a state instead of just filtering by text
     const worldCity = CITY_COUNTRY_INDEX[foldCityName(raw)];
     query = worldCity ? worldCity.country.toLowerCase() : raw;
-    updateCitySearch(e.target.value);
+    updateCitySearch(v);
     refresh();
+  }
+  document.getElementById("search").addEventListener("input", (e) => {
+    clearTimeout(searchT);
+    if (e.isTrusted) searchT = setTimeout(runSearch, 220); else runSearch();
+  });
+  document.getElementById("search").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); if (searchT) { clearTimeout(searchT); runSearch(); } }
   });
   document.getElementById("clear").addEventListener("click", () => {
+    clearTimeout(searchT); searchT = 0;
     query = "";
     document.getElementById("search").value = "";
     updateCitySearch("");
@@ -12653,12 +12669,21 @@ window.SL_GEO_READY = new Promise(function (res) {
         Object.keys(world).forEach(function (cc) {
           if (_countryProvincesCache[cc]) return;
           var k = world[cc][0];
+          // v5.57: each state's outline is unpacked only when something first needs it (drawing that
+          // country's states) - unpacking all ~700,000 points of every country at the first map search
+          // took ~30 MB at once, enough to make an iPad run out of memory and reload SnakeList
           _countryProvincesCache[cc] = world[cc][1].map(function (f) {
-            return { name: f[0], rings: f[1].map(function (flat) {
-              var ring = [], x = 0, y = 0;
-              for (var i = 0; i < flat.length; i += 2) { x += flat[i]; y += flat[i + 1]; ring.push([x / k, y / k]); }
-              return ring;
-            }) };
+            var o = { name: f[0] }, put = function (v) { Object.defineProperty(o, "rings", { value: v, writable: true, enumerable: true, configurable: true }); };
+            Object.defineProperty(o, "_nr", { value: f[1].length }); // how many outlines, without unpacking them
+            Object.defineProperty(o, "rings", { enumerable: true, configurable: true, set: put, get: function () {
+              var rings = f[1].map(function (flat) {
+                var ring = [], x = 0, y = 0;
+                for (var i = 0; i < flat.length; i += 2) { x += flat[i]; y += flat[i + 1]; ring.push([x / k, y / k]); }
+                return ring;
+              });
+              put(rings); return rings;
+            } });
+            return o;
           });
         });
       } catch (err) {}
@@ -13420,7 +13445,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       Object.keys(all).forEach(function (cc) {
         if (cc === "us") return;
         all[cc].forEach(function (st) {
-          if (!st.rings || !st.rings.length) return;
+          if (!(st._nr !== undefined ? st._nr : st.rings && st.rings.length)) return; // (v5.57: without unpacking every outline)
           var nm = st.name, m = /^(.*?)\s*\(([^)]*)\)\s*$/.exec(nm);
           add(nm, [cc, nm]);
           if (m) { add(m[1], [cc, nm]); if (!/region|\d/i.test(m[2])) add(m[2], [cc, nm]); }
@@ -15937,10 +15962,10 @@ window.SL_GEO_READY = new Promise(function (res) {
   mfPanel.setAttribute("role", "dialog"); mfPanel.setAttribute("aria-label", "Map filters");
   mfPanel.innerHTML = '<div class="mf-head"><b>Filters</b><span class="mf-res" aria-live="polite"></span><button type="button" class="mf-x" aria-label="Close filters">&times;</button></div>' +
     '<p class="mf-cnote"></p><div class="mf-body">' +
-    '<details class="mf-sec" data-s="fam"><summary>Snake family<i></i></summary><input type="text" class="mf-find" placeholder="Find a family&hellip;" aria-label="Find a family"><div class="mf-opts" data-k="fam"></div></details>' +
+    '<details class="mf-sec" data-s="fam"><summary>Snake family<i></i></summary><input type="text" class="mf-find" placeholder="Find a family&hellip;" aria-label="Find a family" autocomplete="off"><div class="mf-opts" data-k="fam"></div></details>' +
     '<details class="mf-sec" data-s="ven"><summary>Venom<i></i></summary><div class="mf-opts" data-k="ven"></div><p class="mf-note">The same venom data as the checklist.</p></details>' +
     '<details class="mf-sec" data-s="geo"><summary>Country &amp; region<i></i></summary><div class="mf-geo"><input type="text" class="mf-find mf-cfind" placeholder="Find a country&hellip;" aria-label="Find a country" autocomplete="off"><div class="mf-sugg" hidden></div></div><div class="mf-picked"></div></details>' +
-    '<details class="mf-sec" data-s="hab"><summary>Habitat<i></i></summary><input type="text" class="mf-find" placeholder="Find a habitat&hellip;" aria-label="Find a habitat"><div class="mf-opts" data-k="hab"></div></details>' +
+    '<details class="mf-sec" data-s="hab"><summary>Habitat<i></i></summary><input type="text" class="mf-find" placeholder="Find a habitat&hellip;" aria-label="Find a habitat" autocomplete="off"><div class="mf-opts" data-k="hab"></div></details>' +
     // the checklist's own filters, in its own groups (v4.63: these replace Conservation status)
     MF_GROUPS.map(function (g) { return '<details class="mf-sec" data-s="' + g[0] + '"><summary>' + g[1] + '<i></i></summary><div class="mf-opts" data-k="x" data-g="' + g[0] + '"></div>' + (g[3] ? '<p class="mf-note">' + g[3] + "</p>" : "") + "</details>"; }).join("") +
     '</div><div class="mf-foot"><button type="button" class="mf-clear">Clear all</button><button type="button" class="mf-done">Done</button></div>';
@@ -17699,8 +17724,26 @@ window.SL_GEO_READY = new Promise(function (res) {
 // links from a species page into the app:
 //   ?map=<country>  the map, on that country      ?f=<chip id>  that filter (chip-common, chip-rare...)
 //   ?hab=<habitat>  the map, by that habitat       ?type=<type> / ?fam=<family>  that kind of snake
+// v5.57: a SnakeList page's link like these, tapped when SnakeList is the page just before it, goes Back
+// to the SnakeList that's already open (no reload) and leaves the link in sessionStorage "sl-open-link":
+// it's opened here then, the same way, after clearing the old search and filters
 (function () {
-  var q = null; try { q = new URLSearchParams(location.search); } catch (e) {} if (!q) return;
+  function pendingLink() {
+    try { var p = JSON.parse(sessionStorage.getItem("sl-open-link") || "null"); sessionStorage.removeItem("sl-open-link"); if (p && typeof p.s === "string" && Date.now() - p.t < 60000) return p.s; } catch (e) {}
+    return null;
+  }
+  var own = /[?&](map|f|hab|type|fam|q|tab)=/.test(location.search), pd = pendingLink();
+  if (own) openLink(location.search, false); else if (pd && window.SL_CAME_BACK) openLink(pd, true);
+  window.addEventListener("pageshow", function (e) { if (!e.persisted) return; var p = pendingLink(); if (p) openLink(p, true); });
+  // the search and filters you had before: off first, so the link shows just what it names
+  function cleared(go) {
+    var sb = document.getElementById("search"), pills = function () { return document.querySelectorAll("#fbar-pills .fbar-pill").length; };
+    if (!pills() && !(sb && sb.value)) { go(); return; }
+    var r = document.getElementById("fbar-reset"); if (r) r.click();
+    var n = 0; (function wait() { if (pills() && n++ < 25) { setTimeout(wait, 80); return; } go(); })();
+  }
+  function openLink(search, back) {
+  var q = null; try { q = new URLSearchParams(search); } catch (e) {} if (!q) return;
   var map = q.get("map"), f = q.get("f"), hab = q.get("hab"), type = q.get("type"), fam = q.get("fam"), qs = q.get("q");
   // ?tab=map / quiz / cam / ach / guide: opens SnakeList on that tab (the About page's feature cards)
   var tabQ = q.get("tab");
@@ -17740,7 +17783,10 @@ window.SL_GEO_READY = new Promise(function (res) {
       if (on) { on.scrollIntoView({ behavior: "smooth", block: "center" }); on.classList.remove("chip-pulse"); void on.offsetWidth; on.classList.add("chip-pulse"); }
     }, 300);
   }
-  setTimeout(function () { ready(0); }, 50);
+  var start = function () { setTimeout(function () { if (back && (qs || f || type || fam)) cleared(function () { ready(0); }); else ready(0); }, 50); };
+  // back on a page that is loading again: once it has set itself up (its tabs, the map's own "as you left it")
+  if (back && document.readyState !== "complete") window.addEventListener("load", function () { setTimeout(start, 300); }, { once: true }); else start();
+  }
 })();
 </script>
 <style>
@@ -19973,7 +20019,11 @@ window.SL_GEO_READY = new Promise(function (res) {
 // places, then snakes.
 (function () {
   function fold(t) { return String(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/-/g, ""); }
-  var PL = null, PLmap = null, plP = null;
+  // v5.57: the 135,000 places are kept as the one string they arrive as, with a sorted index of their
+  // folded names - not 135,000 objects, which took ~60 MB the moment you typed in the map search and
+  // made iPads run out of memory and reload SnakeList. A place becomes an object only when it's found.
+  var RAW = null, OFF = null, KEY = null, ORD = null, PLN = 0, PLc = {}, plP = null;
+  var tc = function (t) { return /[a-z]/.test(t) ? t : t.toLowerCase().replace(/(^|[\s\-'(])([a-z])/g, function (m, a, c) { return a + c.toUpperCase(); }); };
   function loadPlaces() {
     if (plP) return plP;
     plP = new Promise(function (res) {
@@ -19982,16 +20032,29 @@ window.SL_GEO_READY = new Promise(function (res) {
     }).then(function () {
       var raw = window.SL_PLACES_RAW || ""; window.SL_PLACES_RAW = null;
       if (!raw) return;
-      var tc = function (t) { return /[a-z]/.test(t) ? t : t.toLowerCase().replace(/(^|[\s\-'(])([a-z])/g, function (m, a, c) { return a + c.toUpperCase(); }); };
-      PL = raw.split("\n").map(function (l) { var f = l.split("\t"); return { name: tc(f[0]), cc: f[1], adm: f[2], lat: +f[3], lon: +f[4], kind: f[5], k: fold(f[0]) }; });
-      PLmap = {};
-      PL.forEach(function (p, i) { if (!(p.k in PLmap)) PLmap[p.k] = i; });
+      var n = 1, i, at = 0;
+      for (i = raw.indexOf("\n"); i >= 0; i = raw.indexOf("\n", i + 1)) n++;
+      var off = new Int32Array(n + 1), key = new Array(n);
+      for (i = 0; i < n; i++) {
+        off[i] = at; var e = raw.indexOf("\n", at); if (e < 0) e = raw.length;
+        var t = raw.indexOf("\t", at); key[i] = fold(raw.slice(at, t < 0 || t > e ? e : t)); at = e + 1;
+      }
+      off[n] = raw.length + 1;
+      var ord = new Int32Array(n); for (i = 0; i < n; i++) ord[i] = i;
+      ord.sort(function (a, b) { var x = key[a], y = key[b]; return x < y ? -1 : x > y ? 1 : a - b; });
+      RAW = raw; OFF = off; KEY = key; ORD = ord; PLN = n;
       // a search typed before the list arrived gets another go now
       var hs = document.getElementById("heat-search");
       if (hs && hs.value.trim()) hs.dispatchEvent(new Event("input"));
     });
     return plP;
   }
+  function place(i) {
+    var p = PLc[i]; if (p) return p;
+    var f = RAW.slice(OFF[i], OFF[i + 1] - 1).split("\t");
+    return (PLc[i] = { name: tc(f[0]), cc: f[1] || "", adm: f[2] || "", lat: +f[3], lon: +f[4], kind: f[5], k: KEY[i] });
+  }
+  function firstAt(q) { var lo = 0, hi = PLN; while (lo < hi) { var mid = (lo + hi) >> 1; if (KEY[ORD[mid]] < q) lo = mid + 1; else hi = mid; } return lo; }
   var CODE2NAME = null;
   function countryOf(p) {
     var geo = window.SL_MAP_GEO && window.SL_MAP_GEO();
@@ -20002,18 +20065,18 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   function asCity(p) { return { name: p.name, country: countryOf(p), lat: p.lat, lon: p.lon, kind: p.kind }; }
   window.SL_PLACE_LOOKUP = function (k) {
-    if (!PLmap) return null;
+    if (!ORD) return null;
     if (window.SL_PLACE_PICKED && window.SL_PLACE_PICKED.k === k) return asCity(window.SL_PLACE_PICKED);
-    var i = PLmap[k];
-    return i == null ? null : asCity(PL[i]);
+    var j = firstAt(k);
+    return j < PLN && KEY[ORD[j]] === k ? asCity(place(ORD[j])) : null;
   };
   function placeMatches(q, n) {
-    if (!PL || q.length < 2) return [];
-    var out = [], seen = {};
-    for (var i = 0; i < PL.length && out.length < n; i++) {
-      var p = PL[i];
-      if (p.k.lastIndexOf(q, 0) !== 0) continue;
-      var key = p.k + "|" + p.cc + "|" + p.adm;
+    if (!ORD || q.length < 2) return [];
+    var hit = [], out = [], seen = {}, j;
+    for (j = firstAt(q); j < PLN && KEY[ORD[j]].lastIndexOf(q, 0) === 0; j++) hit.push(ORD[j]);
+    hit.sort(function (a, b) { return a - b; }); // in the list's own order, as before
+    for (j = 0; j < hit.length && out.length < n; j++) {
+      var p = place(hit[j]), key = p.k + "|" + p.cc + "|" + p.adm;
       if (seen[key]) continue; seen[key] = 1;
       out.push(p);
     }
@@ -20712,6 +20775,13 @@ window.SL_GEO_READY = new Promise(function (res) {
       window.scrollTo({ top: to.getBoundingClientRect().top + window.scrollY - 70, behavior: "smooth" });
       if (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) sq.blur(); // phones: the keyboard goes away
     }, 60);
+  });
+  // v5.57: the other search boxes too - Enter (Go / Search on an iPad's keyboard) shows what was found and puts the keyboard away
+  document.addEventListener("keydown", function (e) {
+    var t = e.target;
+    if (e.key !== "Enter" || e.isComposing || !t || !t.matches || !t.matches("#heat-search, #hab-q, #hm-q, .mf-find, #quiz-map-q")) return;
+    if (!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches)) return;
+    setTimeout(function () { if (document.activeElement === t) t.blur(); }, 120);
   });
   if (sq) sq.addEventListener("input", function () {
     clearTimeout(sqT);
@@ -23915,7 +23985,7 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
       '<div class="f"><span style="display:block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:5px">Snakes it caught</span>' +
       '<div class="cam-media">' + media.map(function (m, i) {
         return '<div class="m">' + (m.kind === "photo" ? '<img src="' + m.data + '" alt="">' : '<span>&#9654; video</span>') +
-          '<input type="text" list="cam-sp" data-i="' + i + '" data-f="species" placeholder="Which snake?" value="' + esc(m.species || "") + '">' +
+          '<input type="text" list="cam-sp" autocomplete="off" data-i="' + i + '" data-f="species" placeholder="Which snake?" value="' + esc(m.species || "") + '">' +
           '<button type="button" data-s="rm" data-i="' + i + '" aria-label="Remove">&times;</button></div>';
       }).join("") + '</div><datalist id="cam-sp">' + names().slice(0, 4300).map(function (n) { return '<option value="' + esc(n) + '">'; }).join("") + "</datalist>" +
       '<div class="row"><button type="button" data-s="photo">+ Add photos</button><button type="button" data-s="video">+ Add a video link</button></div>' +
@@ -24348,6 +24418,65 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 if(window.MutationObserver)new MutationObserver(function(ms){ms.forEach(function(m){[].forEach.call(m.addedNodes,function(nd){if(nd.nodeType!==1)return;if(nd.tagName==='SELECT')enhance(nd);else if(nd.querySelector&&nd.querySelector('select'))scan(nd)})})}).observe(document.documentElement,{childList:true,subtree:true});
 })();
 
+</script>
+<script>
+// v5.57: a text box with suggestions (<input list="...">) shows them in a SnakeList panel - the green one the
+// Language button opens - not the browser's plain white list. The <datalist> stays as the list of options.
+(function(){
+if(!document.querySelector||window.__slSug)return;window.__slSug=1;
+var st=document.createElement('style');st.textContent=
+'.sl-sug-host{position:relative}'+
+'.sl-sug{position:absolute;z-index:3000;left:0;top:calc(100% + 6px);min-width:100%;width:max-content;max-width:min(360px,calc(100vw - 24px));max-height:min(320px,55vh);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin:0;padding:6px;list-style:none;box-sizing:border-box;'+
+'background:linear-gradient(160deg,#256846,#22623f);border:1px solid #37855f;border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.3);color:#eef6ee;font:500 14.5px/1.35 Inter,system-ui,sans-serif;text-align:left;scrollbar-width:thin}'+
+'.sl-sug[hidden]{display:none}.sl-sug-up>.sl-sug{top:auto;bottom:calc(100% + 6px)}'+
+'.sl-sug li{display:block;margin:0;padding:9px 11px;border-radius:8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#eef6ee}'+
+'.sl-sug li b{font-weight:700;color:#fff}.sl-sug li:hover,.sl-sug li.act{background:#2c7a57}'+
+'@media (pointer:coarse){.sl-sug li{padding:11px 12px;font-size:16px}}';
+document.head.appendChild(st);
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function fold(t){return String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
+var n=0;
+function enhance(inp){
+  var lid=inp.getAttribute('list');if(!lid||inp.dataset.slSug)return;
+  inp.dataset.slSug=lid;inp.removeAttribute('list');inp.setAttribute('autocomplete','off');
+  var id='sl-sug-'+(++n),host=inp.parentNode;host.classList.add('sl-sug-host');
+  var ul=document.createElement('ul');ul.className='sl-sug';ul.id=id;ul.setAttribute('role','listbox');ul.hidden=true;host.appendChild(ul);
+  inp.setAttribute('role','combobox');inp.setAttribute('aria-autocomplete','list');inp.setAttribute('aria-expanded','false');inp.setAttribute('aria-controls',id);
+  var items=[],act=-1;
+  function opts(){var dl=document.getElementById(lid);return dl?[].map.call(dl.getElementsByTagName('option'),function(o){return o.value}).filter(Boolean):[]}
+  function show(on){ul.hidden=!on;inp.setAttribute('aria-expanded',on?'true':'false');if(!on){act=-1;inp.removeAttribute('aria-activedescendant');return}
+    var r=inp.getBoundingClientRect();host.classList.toggle('sl-sug-up',r.bottom+Math.min(320,ul.scrollHeight)+12>innerHeight&&r.top>innerHeight/2)}
+  function render(){
+    var q=fold(inp.value.trim()),all=opts(),a=[],b=[];
+    for(var i=0;i<all.length&&a.length<300;i++){var f=fold(all[i]);if(!q||f.indexOf(q)===0)a.push(all[i]);else if(f.indexOf(q)>0&&b.length<100)b.push(all[i])}
+    items=a.concat(b).slice(0,300);
+    if(items.length===1&&fold(items[0])===q)items=[]; // exactly what's typed: nothing left to suggest
+    ul.innerHTML=items.map(function(v,i){var f=fold(v),k=q?f.indexOf(q):-1;
+      return '<li role="option" id="'+id+'-'+i+'" data-i="'+i+'">'+(k>=0&&v.length===f.length?esc(v.slice(0,k))+'<b>'+esc(v.slice(k,k+q.length))+'</b>'+esc(v.slice(k+q.length)):esc(v))+'</li>'}).join('');
+    ul.scrollTop=0;act=-1;show(items.length>0&&document.activeElement===inp)}
+  function hi(i){var ls=ul.children;if(ls[act])ls[act].classList.remove('act');act=i;if(ls[act]){ls[act].classList.add('act');inp.setAttribute('aria-activedescendant',ls[act].id);
+    var r=ls[act];if(r.offsetTop<ul.scrollTop)ul.scrollTop=r.offsetTop-6;else if(r.offsetTop+r.offsetHeight>ul.scrollTop+ul.clientHeight)ul.scrollTop=r.offsetTop+r.offsetHeight-ul.clientHeight+6}}
+  function pick(i){var v=items[i];if(v==null)return;inp.value=v;show(false);inp.dispatchEvent(new Event('input',{bubbles:true}));inp.dispatchEvent(new Event('change',{bubbles:true}))}
+  inp.addEventListener('input',function(e){if(e.isTrusted)render()});
+  inp.addEventListener('focus',render);
+  inp.addEventListener('click',function(){if(ul.hidden)render()});
+  inp.addEventListener('blur',function(){setTimeout(function(){if(document.activeElement!==inp)show(false)},150)});
+  inp.addEventListener('keydown',function(e){var k=e.key;if(e.isComposing)return;
+    if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();if(ul.hidden)render();if(items.length)hi(act<0?(k==='ArrowDown'?0:items.length-1):(act+(k==='ArrowDown'?1:-1)+items.length)%items.length)}
+    else if(k==='Enter'&&!ul.hidden&&act>=0){e.preventDefault();e.stopPropagation();pick(act)}
+    else if(k==='Enter')show(false);
+    else if(k==='Escape'&&!ul.hidden){e.preventDefault();e.stopPropagation();show(false)}
+    else if(k==='Tab')show(false)});
+  ul.addEventListener('mousedown',function(e){e.preventDefault()});
+  ul.addEventListener('click',function(e){var li=e.target.closest('li');if(li)pick(+li.dataset.i)});
+  ul.addEventListener('mousemove',function(e){var li=e.target.closest('li');if(li&&+li.dataset.i!==act)hi(+li.dataset.i)});
+  // options that arrive later (a list loaded the first time the box is used): shown as soon as they're there
+  var dl=document.getElementById(lid);if(dl&&window.MutationObserver)new MutationObserver(function(){if(document.activeElement===inp)render()}).observe(dl,{childList:true});
+}
+function scan(root){var ins=(root||document).getElementsByTagName('input');for(var i=0;i<ins.length;i++)if(ins[i].hasAttribute('list'))enhance(ins[i])}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){scan()});else scan();
+if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.length;j++){var a=ms[j].addedNodes;for(var i=0;i<a.length;i++){var nd=a[i];if(nd.nodeType!==1)continue;if(nd.tagName==='INPUT'){if(nd.hasAttribute('list'))enhance(nd)}else if(nd.getElementsByTagName&&nd.firstElementChild)scan(nd)}}}).observe(document.documentElement,{childList:true,subtree:true});
+})();
 </script>
 
 <script>

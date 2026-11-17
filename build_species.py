@@ -192,7 +192,7 @@ def build(app):
 
     import build_regions
     open(OUT + "/sp.css", "w").write(CSS + build_regions.REAL_CSS)
-    open(OUT + "/sp.js", "w").write(JS + build_regions.REAL_JS)
+    open(OUT + "/sp.js", "w").write(APP_BACK_JS + JS + build_regions.REAL_JS)
     # "Explore in 3D": the reviewed model profiles, next to the viewer (species/3d/viewer.js)
     os.makedirs(OUT + "/3d", exist_ok=True)
     # v4.63: every other species (living, extinct and fossil) gets a generated profile (tools/auto_models.py)
@@ -1247,7 +1247,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     tools = ('<div class="sx-tools">'
              '<form class="sx-box" role="search" onsubmit="return false"><label for="sx-q">Find a snake</label>'
              '<input id="sx-q" type="search" placeholder="Common or scientific name..." autocomplete="off"><p id="sx-n" class="sp-note" aria-live="polite"></p></form>'
-             '<form class="sx-box" id="sx-cf" role="search" action="#by-country"><label for="sx-c">Snakes of a country</label><span class="sx-row">'
+             '<form class="sx-box" id="sx-cf" role="search" action="#by-country" onsubmit="return false"><label for="sx-c">Snakes of a country</label><span class="sx-row">'
              '<input id="sx-c" list="sx-cl" placeholder="Type a country..." autocomplete="off"><button type="submit">Go</button></span>'
              '<datalist id="sx-cl">%s</datalist></form></div>') % "".join('<option value="%s">' % esc(n) for n, k in countries)
     jump = ('<nav class="sx-jump" aria-label="Jump to"><a href="#by-country">By country</a><a href="#by-family">Families</a><a href="#az">A-Z by family</a></nav>'
@@ -1264,7 +1264,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     body = tools + jump + hub_lists + body
     cslugs = json.dumps({n: slugify(n) for n, k in countries}, ensure_ascii=False).replace("</", "<\\/")
     open(OUT + "/index.html", "w", encoding="utf-8").write(INDEX.format(n="{:,}".format(len(cards)), body=body, author=AUTHOR, url=SITE + "species/",
-        nfam=len([f for f, L in fams if f]), ncountry="{:,}".format(len(countries)), cslugs=cslugs,
+        nfam=len([f for f, L in fams if f]), ncountry="{:,}".format(len(countries)), cslugs=cslugs, appback=APP_BACK_JS + SUGG_JS,
         site_head=site_header("../", "species"), site_foot=site_footer("../", "Every photo belongs to its photographer and is used under the Creative Commons licence they chose, credited with it.")))
     credits_page(cards, esc)
     reg_urls = build_regions.build(cards, by_id, INFO, invasive, iso, harm)
@@ -1396,7 +1396,7 @@ def hubs(cards, esc, img_of, invasive=None):
         os.makedirs(OUT + "/" + kind, exist_ok=True)
         if kind == "country":  # the redesigned country pages (country_page below) and the country picker's list
             open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS + build_regions.REGION_CSS)
-            open(OUT + "/country.js", "w", encoding="utf-8").write(COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS)
+            open(OUT + "/country.js", "w", encoding="utf-8").write(APP_BACK_JS + COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS + "\n" + SUGG_JS)
             with open(OUT + "/countries.json", "w", encoding="utf-8") as fh:
                 json.dump({n: slugify(n) for n in sorted(G) if slugify(n)}, fh, ensure_ascii=False, separators=(",", ":"))
             for name, L in G.items():
@@ -1416,7 +1416,7 @@ def hubs(cards, esc, img_of, invasive=None):
                     country_page(H.unescape(m.group(1).strip()), [], {"_cards": cards}, invasive or {}, esc, f[:-5]))
             continue
         open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS + build_regions.REGION_CSS)
-        open(OUT + "/country.js", "w", encoding="utf-8").write(COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS)
+        open(OUT + "/country.js", "w", encoding="utf-8").write(APP_BACK_JS + COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS + "\n" + SUGG_JS)
         for name, L in G.items():
             slug = slugify(name)
             if not slug: continue
@@ -1485,10 +1485,13 @@ secs.forEach(function(s){{s._li=[].slice.call(s.querySelectorAll('li')).map(func
 function run(){{var t=q.value.trim().toLowerCase(),hit=0;secs.forEach(function(s){{var k=0;s._li.forEach(function(e){{var m=!t||e[1].indexOf(t)>=0;e[0].hidden=!m;if(m)k++}});s.hidden=!k;hit+=k}});
 document.body.classList.toggle('sx-searching',!!t);none.hidden=hit>0;n.textContent=t?(hit===1?'1 match':hit.toLocaleString('en')+' matches'):''}}
 q.addEventListener('input',function(){{clearTimeout(t0);t0=setTimeout(run,120)}});
-document.getElementById('sx-cf').addEventListener('submit',function(e){{var v=document.getElementById('sx-c').value.trim().toLowerCase();
+document.getElementById('sx-c').addEventListener('change',function(){{var v=this.value.trim().toLowerCase();for(var k in C)if(k.toLowerCase()===v){{location.href='country/'+C[k];return}}}});
+document.getElementById('sx-cf').addEventListener('submit',function(e){{e.preventDefault();var v=document.getElementById('sx-c').value.trim().toLowerCase();
 for(var k in C)if(k.toLowerCase()===v){{e.preventDefault();location.href='country/'+C[k];return}}
-for(var k in C)if(k.toLowerCase().indexOf(v)===0&&v){{e.preventDefault();location.href='country/'+C[k];return}}}});
+for(var k in C)if(k.toLowerCase().indexOf(v)===0&&v){{e.preventDefault();location.href='country/'+C[k];return}}
+e.preventDefault();var bc=document.getElementById('by-country');if(bc)bc.scrollIntoView({{behavior:'smooth'}})}});
 }})();</script>
+<script>{appback}</script>
 </body></html>
 """
 
@@ -1624,16 +1627,86 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 @media (prefers-reduced-motion:reduce){.sp-tags a:hover{transform:none}}
 """
 
-JS = """// v5.55: links back to SnakeList go Back instead of loading it again, so the app comes back instantly (no reload on iPads/phones)
-(function(){var root;try{root=new URL('../',location.href)}catch(e){return}
+# v5.57: shared by the species pages (sp.js), the country / family / genus / region / city pages (country.js)
+# and the A-Z directory (inline): no SnakeList page ever reloads SnakeList when it can go Back to it,
+# and Enter in a search box puts a phone's keyboard away instead of doing anything else
+APP_BACK_JS = r"""// links back to SnakeList go Back instead of loading it again when SnakeList is the page just before
+// this one, so the app comes back instantly, as it was (no reload on iPads/phones). A link that asks
+// SnakeList for something (?q= ?fam= ?map= ...) is left in sessionStorage for the app to open once it's back.
+(function(){var s=document.currentScript,root,moved=false;try{root=new URL('../',s&&s.src||location.href)}catch(e){return}
 function isRoot(u){return u.origin===root.origin&&(u.pathname===root.pathname||u.pathname===root.pathname+'index.html')}
-document.addEventListener('click',function(e){if(e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+addEventListener('hashchange',function(){moved=true});
+document.addEventListener('click',function(e){if(e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||moved)return;
 var a=e.target.closest&&e.target.closest('a[href]');if(!a||a.target&&a.target!=='_self'||a.hasAttribute('download'))return;
-var u;try{u=new URL(a.href)}catch(x){return}if(!isRoot(u)||u.search||u.hash)return;
+var u;try{u=new URL(a.href)}catch(x){return}if(!isRoot(u)||u.hash||u.search&&!/^\?([^#]*&)?(map|f|hab|type|fam|q|tab)=/.test(u.search))return;
 var r;try{r=new URL(document.referrer)}catch(x){return}if(!isRoot(r)||history.length<2)return;
-e.preventDefault();var left=false;addEventListener('pagehide',function(){left=true},{once:true});history.back();
-setTimeout(function(){if(!left)location.href=a.href},700)},true)})();
-// v4.81: ?embed=map shows only the range map (with See states / See cities and the list of countries), for the 3D viewer's "See countries" panel
+e.preventDefault();try{if(u.search)sessionStorage.setItem('sl-open-link',JSON.stringify({s:u.search,t:Date.now()}));else sessionStorage.removeItem('sl-open-link')}catch(x){}
+var left=false;addEventListener('pagehide',function(){left=true},{once:true});history.back();
+setTimeout(function(){if(!left){try{sessionStorage.removeItem('sl-open-link')}catch(x){}location.href=a.href}},700)},true);
+document.addEventListener('keydown',function(e){var t=e.target;if(e.key!=='Enter'||e.isComposing||!t||t.tagName!=='INPUT'||t.type!=='search')return;
+if(window.matchMedia&&matchMedia('(pointer: coarse)').matches)setTimeout(function(){t.blur()},60)})})();
+"""
+
+SUGG_JS = r"""// v5.57: a text box with suggestions (<input list="...">) shows them in a SnakeList panel - the green one the
+// Language button opens - not the browser's plain white list. The <datalist> stays as the list of options.
+(function(){
+if(!document.querySelector||window.__slSug)return;window.__slSug=1;
+var st=document.createElement('style');st.textContent=
+'.sl-sug-host{position:relative}'+
+'.sl-sug{position:absolute;z-index:3000;left:0;top:calc(100% + 6px);min-width:100%;width:max-content;max-width:min(360px,calc(100vw - 24px));max-height:min(320px,55vh);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin:0;padding:6px;list-style:none;box-sizing:border-box;'+
+'background:linear-gradient(160deg,#256846,#22623f);border:1px solid #37855f;border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.3);color:#eef6ee;font:500 14.5px/1.35 Inter,system-ui,sans-serif;text-align:left;scrollbar-width:thin}'+
+'.sl-sug[hidden]{display:none}.sl-sug-up>.sl-sug{top:auto;bottom:calc(100% + 6px)}'+
+'.sl-sug li{display:block;margin:0;padding:9px 11px;border-radius:8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#eef6ee}'+
+'.sl-sug li b{font-weight:700;color:#fff}.sl-sug li:hover,.sl-sug li.act{background:#2c7a57}'+
+'@media (pointer:coarse){.sl-sug li{padding:11px 12px;font-size:16px}}';
+document.head.appendChild(st);
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function fold(t){return String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
+var n=0;
+function enhance(inp){
+  var lid=inp.getAttribute('list');if(!lid||inp.dataset.slSug)return;
+  inp.dataset.slSug=lid;inp.removeAttribute('list');inp.setAttribute('autocomplete','off');
+  var id='sl-sug-'+(++n),host=inp.parentNode;host.classList.add('sl-sug-host');
+  var ul=document.createElement('ul');ul.className='sl-sug';ul.id=id;ul.setAttribute('role','listbox');ul.hidden=true;host.appendChild(ul);
+  inp.setAttribute('role','combobox');inp.setAttribute('aria-autocomplete','list');inp.setAttribute('aria-expanded','false');inp.setAttribute('aria-controls',id);
+  var items=[],act=-1;
+  function opts(){var dl=document.getElementById(lid);return dl?[].map.call(dl.getElementsByTagName('option'),function(o){return o.value}).filter(Boolean):[]}
+  function show(on){ul.hidden=!on;inp.setAttribute('aria-expanded',on?'true':'false');if(!on){act=-1;inp.removeAttribute('aria-activedescendant');return}
+    var r=inp.getBoundingClientRect();host.classList.toggle('sl-sug-up',r.bottom+Math.min(320,ul.scrollHeight)+12>innerHeight&&r.top>innerHeight/2)}
+  function render(){
+    var q=fold(inp.value.trim()),all=opts(),a=[],b=[];
+    for(var i=0;i<all.length&&a.length<300;i++){var f=fold(all[i]);if(!q||f.indexOf(q)===0)a.push(all[i]);else if(f.indexOf(q)>0&&b.length<100)b.push(all[i])}
+    items=a.concat(b).slice(0,300);
+    if(items.length===1&&fold(items[0])===q)items=[]; // exactly what's typed: nothing left to suggest
+    ul.innerHTML=items.map(function(v,i){var f=fold(v),k=q?f.indexOf(q):-1;
+      return '<li role="option" id="'+id+'-'+i+'" data-i="'+i+'">'+(k>=0&&v.length===f.length?esc(v.slice(0,k))+'<b>'+esc(v.slice(k,k+q.length))+'</b>'+esc(v.slice(k+q.length)):esc(v))+'</li>'}).join('');
+    ul.scrollTop=0;act=-1;show(items.length>0&&document.activeElement===inp)}
+  function hi(i){var ls=ul.children;if(ls[act])ls[act].classList.remove('act');act=i;if(ls[act]){ls[act].classList.add('act');inp.setAttribute('aria-activedescendant',ls[act].id);
+    var r=ls[act];if(r.offsetTop<ul.scrollTop)ul.scrollTop=r.offsetTop-6;else if(r.offsetTop+r.offsetHeight>ul.scrollTop+ul.clientHeight)ul.scrollTop=r.offsetTop+r.offsetHeight-ul.clientHeight+6}}
+  function pick(i){var v=items[i];if(v==null)return;inp.value=v;show(false);inp.dispatchEvent(new Event('input',{bubbles:true}));inp.dispatchEvent(new Event('change',{bubbles:true}))}
+  inp.addEventListener('input',function(e){if(e.isTrusted)render()});
+  inp.addEventListener('focus',render);
+  inp.addEventListener('click',function(){if(ul.hidden)render()});
+  inp.addEventListener('blur',function(){setTimeout(function(){if(document.activeElement!==inp)show(false)},150)});
+  inp.addEventListener('keydown',function(e){var k=e.key;if(e.isComposing)return;
+    if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();if(ul.hidden)render();if(items.length)hi(act<0?(k==='ArrowDown'?0:items.length-1):(act+(k==='ArrowDown'?1:-1)+items.length)%items.length)}
+    else if(k==='Enter'&&!ul.hidden&&act>=0){e.preventDefault();e.stopPropagation();pick(act)}
+    else if(k==='Enter')show(false);
+    else if(k==='Escape'&&!ul.hidden){e.preventDefault();e.stopPropagation();show(false)}
+    else if(k==='Tab')show(false)});
+  ul.addEventListener('mousedown',function(e){e.preventDefault()});
+  ul.addEventListener('click',function(e){var li=e.target.closest('li');if(li)pick(+li.dataset.i)});
+  ul.addEventListener('mousemove',function(e){var li=e.target.closest('li');if(li&&+li.dataset.i!==act)hi(+li.dataset.i)});
+  // options that arrive later (a list loaded the first time the box is used): shown as soon as they're there
+  var dl=document.getElementById(lid);if(dl&&window.MutationObserver)new MutationObserver(function(){if(document.activeElement===inp)render()}).observe(dl,{childList:true});
+}
+function scan(root){var ins=(root||document).getElementsByTagName('input');for(var i=0;i<ins.length;i++)if(ins[i].hasAttribute('list'))enhance(ins[i])}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){scan()});else scan();
+if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.length;j++){var a=ms[j].addedNodes;for(var i=0;i<a.length;i++){var nd=a[i];if(nd.nodeType!==1)continue;if(nd.tagName==='INPUT'){if(nd.hasAttribute('list'))enhance(nd)}else if(nd.getElementsByTagName&&nd.firstElementChild)scan(nd)}}}).observe(document.documentElement,{childList:true,subtree:true});
+})();
+"""
+
+JS = """// v4.81: ?embed=map shows only the range map (with See states / See cities and the list of countries), for the 3D viewer's "See countries" panel
 (function(){if(!/[?&]embed=map(&|$)/.test(location.search))return;var r=document.getElementById('range');if(!r)return;var de=document.documentElement;de.classList.add('sp-embed');
 for(var n=r;n&&n!==document.body;n=n.parentNode)[].forEach.call(n.parentNode.children,function(c){if(c!==n&&c.tagName!=='SCRIPT'&&c.tagName!=='TEMPLATE')c.style.display='none'});
 var mh=[].filter.call(r.querySelectorAll(':scope>h3'),function(h){return /^Map/.test(h.textContent)})[0];if(mh)for(var k=r.firstElementChild;k&&k!==mh.nextElementSibling;k=k.nextElementSibling)k.style.display='none';
@@ -1907,7 +1980,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
     cta = ("../../?map=%s" % quote_param(name), "View snakes on map") if kind == "country" else (
         ("../../?fam=%s" % quote_param(name), "Open the family in SnakeList") if kind == "family" else ("../../?q=%s" % quote_param(name), "Open the genus in SnakeList"))
     crumbs_html = "".join('<li><a href="%s">%s</a></li>' % (c0[2], esc(c0[0])) for c0 in crumbs)
-    jump = ('<form class="cy-jump" id="cy-jump" role="search" action="../#by-country"><label for="cy-jq" class="cy-sr">Go to another country or territory</label><input id="cy-jq" list="cy-clist" placeholder="Another country or territory..." autocomplete="off"><datalist id="cy-clist"></datalist><button type="submit">Go</button></form>'
+    jump = ('<form class="cy-jump" id="cy-jump" role="search" action="../#by-country" onsubmit="return false"><label for="cy-jq" class="cy-sr">Go to another country or territory</label><input id="cy-jq" list="cy-clist" placeholder="Another country or territory..." autocomplete="off"><datalist id="cy-clist"></datalist><button type="submit">Go</button></form>'
             if kind == "country" else "")
     # the introduction: what this family is (its reviewed text), what the genus name means, or
     # for a country, what its totals count
@@ -2089,7 +2162,7 @@ if(count)count.textContent=hit.length===total?(vis===total?'Showing '+total+' sp
 (vis<hit.length?'Showing '+vis+' of '+hit.length+' matching species ('+total+' in all)':'Showing '+hit.length+' of '+total+' species');
 empty.hidden=hit.length>0;more.hidden=hit.length<=shown;if(!more.hidden)more.textContent='Show more ('+(hit.length-shown)+' left)';
 if(reset)reset.hidden=!(t||v||f||(fs&&fs.value!=='n'))}
-[q,fv,ff,fs].forEach(function(el){if(el)el.addEventListener(el===q?'input':'change',function(){apply()})});
+var qT=0;[q,fv,ff,fs].forEach(function(el){if(el)el.addEventListener(el===q?'input':'change',function(){clearTimeout(qT);if(el===q)qT=setTimeout(apply,150);else apply()})});
 function clear(){if(q)q.value='';if(fv)fv.value='';if(ff)ff.value='';if(fs)fs.value='n';apply();(q||grid).focus&&q&&q.focus()}
 if(reset)reset.addEventListener('click',clear);var cl=document.getElementById('cy-clear');if(cl)cl.addEventListener('click',clear);
 more.addEventListener('click',function(){var first=shown;shown+=PAGE;apply(true);var li=grid.children[first];if(li){var a=li.querySelector('a');if(a)a.focus({preventScroll:true})}});

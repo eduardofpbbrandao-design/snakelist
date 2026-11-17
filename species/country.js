@@ -1,3 +1,18 @@
+// links back to SnakeList go Back instead of loading it again when SnakeList is the page just before
+// this one, so the app comes back instantly, as it was (no reload on iPads/phones). A link that asks
+// SnakeList for something (?q= ?fam= ?map= ...) is left in sessionStorage for the app to open once it's back.
+(function(){var s=document.currentScript,root,moved=false;try{root=new URL('../',s&&s.src||location.href)}catch(e){return}
+function isRoot(u){return u.origin===root.origin&&(u.pathname===root.pathname||u.pathname===root.pathname+'index.html')}
+addEventListener('hashchange',function(){moved=true});
+document.addEventListener('click',function(e){if(e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||moved)return;
+var a=e.target.closest&&e.target.closest('a[href]');if(!a||a.target&&a.target!=='_self'||a.hasAttribute('download'))return;
+var u;try{u=new URL(a.href)}catch(x){return}if(!isRoot(u)||u.hash||u.search&&!/^\?([^#]*&)?(map|f|hab|type|fam|q|tab)=/.test(u.search))return;
+var r;try{r=new URL(document.referrer)}catch(x){return}if(!isRoot(r)||history.length<2)return;
+e.preventDefault();try{if(u.search)sessionStorage.setItem('sl-open-link',JSON.stringify({s:u.search,t:Date.now()}));else sessionStorage.removeItem('sl-open-link')}catch(x){}
+var left=false;addEventListener('pagehide',function(){left=true},{once:true});history.back();
+setTimeout(function(){if(!left){try{sessionStorage.removeItem('sl-open-link')}catch(x){}location.href=a.href}},700)},true);
+document.addEventListener('keydown',function(e){var t=e.target;if(e.key!=='Enter'||e.isComposing||!t||t.tagName!=='INPUT'||t.type!=='search')return;
+if(window.matchMedia&&matchMedia('(pointer: coarse)').matches)setTimeout(function(){t.blur()},60)})})();
 (function(){function nf(t){if(!t||t.tagName!=='IMG'||t.dataset.nf)return;t.dataset.nf=1;var d=document.createElement('span');d.className='sl-nophoto';d.setAttribute('role','img');d.setAttribute('aria-label',t.alt||'Photo unavailable');d.textContent='Photo unavailable';if(t.width&&t.height)d.style.aspectRatio=t.width+'/'+t.height;t.replaceWith(d)}
 window.addEventListener('error',function(e){nf(e.target)},true);[].forEach.call(document.images,function(i){if(i.complete&&!i.naturalWidth&&i.getAttribute('src'))nf(i)})})();
 (function(){
@@ -28,7 +43,7 @@ if(count)count.textContent=hit.length===total?(vis===total?'Showing '+total+' sp
 (vis<hit.length?'Showing '+vis+' of '+hit.length+' matching species ('+total+' in all)':'Showing '+hit.length+' of '+total+' species');
 empty.hidden=hit.length>0;more.hidden=hit.length<=shown;if(!more.hidden)more.textContent='Show more ('+(hit.length-shown)+' left)';
 if(reset)reset.hidden=!(t||v||f||(fs&&fs.value!=='n'))}
-[q,fv,ff,fs].forEach(function(el){if(el)el.addEventListener(el===q?'input':'change',function(){apply()})});
+var qT=0;[q,fv,ff,fs].forEach(function(el){if(el)el.addEventListener(el===q?'input':'change',function(){clearTimeout(qT);if(el===q)qT=setTimeout(apply,150);else apply()})});
 function clear(){if(q)q.value='';if(fv)fv.value='';if(ff)ff.value='';if(fs)fs.value='n';apply();(q||grid).focus&&q&&q.focus()}
 if(reset)reset.addEventListener('click',clear);var cl=document.getElementById('cy-clear');if(cl)cl.addEventListener('click',clear);
 more.addEventListener('click',function(){var first=shown;shown+=PAGE;apply(true);var li=grid.children[first];if(li){var a=li.querySelector('a');if(a)a.focus({preventScroll:true})}});
@@ -106,4 +121,61 @@ function enhance(sel){
 function scan(root){[].forEach.call((root||document).querySelectorAll('select'),enhance)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){scan()});else scan();
 if(window.MutationObserver)new MutationObserver(function(ms){ms.forEach(function(m){[].forEach.call(m.addedNodes,function(nd){if(nd.nodeType!==1)return;if(nd.tagName==='SELECT')enhance(nd);else if(nd.querySelector&&nd.querySelector('select'))scan(nd)})})}).observe(document.documentElement,{childList:true,subtree:true});
+})();
+// v5.57: a text box with suggestions (<input list="...">) shows them in a SnakeList panel - the green one the
+// Language button opens - not the browser's plain white list. The <datalist> stays as the list of options.
+(function(){
+if(!document.querySelector||window.__slSug)return;window.__slSug=1;
+var st=document.createElement('style');st.textContent=
+'.sl-sug-host{position:relative}'+
+'.sl-sug{position:absolute;z-index:3000;left:0;top:calc(100% + 6px);min-width:100%;width:max-content;max-width:min(360px,calc(100vw - 24px));max-height:min(320px,55vh);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin:0;padding:6px;list-style:none;box-sizing:border-box;'+
+'background:linear-gradient(160deg,#256846,#22623f);border:1px solid #37855f;border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.3);color:#eef6ee;font:500 14.5px/1.35 Inter,system-ui,sans-serif;text-align:left;scrollbar-width:thin}'+
+'.sl-sug[hidden]{display:none}.sl-sug-up>.sl-sug{top:auto;bottom:calc(100% + 6px)}'+
+'.sl-sug li{display:block;margin:0;padding:9px 11px;border-radius:8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#eef6ee}'+
+'.sl-sug li b{font-weight:700;color:#fff}.sl-sug li:hover,.sl-sug li.act{background:#2c7a57}'+
+'@media (pointer:coarse){.sl-sug li{padding:11px 12px;font-size:16px}}';
+document.head.appendChild(st);
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function fold(t){return String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
+var n=0;
+function enhance(inp){
+  var lid=inp.getAttribute('list');if(!lid||inp.dataset.slSug)return;
+  inp.dataset.slSug=lid;inp.removeAttribute('list');inp.setAttribute('autocomplete','off');
+  var id='sl-sug-'+(++n),host=inp.parentNode;host.classList.add('sl-sug-host');
+  var ul=document.createElement('ul');ul.className='sl-sug';ul.id=id;ul.setAttribute('role','listbox');ul.hidden=true;host.appendChild(ul);
+  inp.setAttribute('role','combobox');inp.setAttribute('aria-autocomplete','list');inp.setAttribute('aria-expanded','false');inp.setAttribute('aria-controls',id);
+  var items=[],act=-1;
+  function opts(){var dl=document.getElementById(lid);return dl?[].map.call(dl.getElementsByTagName('option'),function(o){return o.value}).filter(Boolean):[]}
+  function show(on){ul.hidden=!on;inp.setAttribute('aria-expanded',on?'true':'false');if(!on){act=-1;inp.removeAttribute('aria-activedescendant');return}
+    var r=inp.getBoundingClientRect();host.classList.toggle('sl-sug-up',r.bottom+Math.min(320,ul.scrollHeight)+12>innerHeight&&r.top>innerHeight/2)}
+  function render(){
+    var q=fold(inp.value.trim()),all=opts(),a=[],b=[];
+    for(var i=0;i<all.length&&a.length<300;i++){var f=fold(all[i]);if(!q||f.indexOf(q)===0)a.push(all[i]);else if(f.indexOf(q)>0&&b.length<100)b.push(all[i])}
+    items=a.concat(b).slice(0,300);
+    if(items.length===1&&fold(items[0])===q)items=[]; // exactly what's typed: nothing left to suggest
+    ul.innerHTML=items.map(function(v,i){var f=fold(v),k=q?f.indexOf(q):-1;
+      return '<li role="option" id="'+id+'-'+i+'" data-i="'+i+'">'+(k>=0&&v.length===f.length?esc(v.slice(0,k))+'<b>'+esc(v.slice(k,k+q.length))+'</b>'+esc(v.slice(k+q.length)):esc(v))+'</li>'}).join('');
+    ul.scrollTop=0;act=-1;show(items.length>0&&document.activeElement===inp)}
+  function hi(i){var ls=ul.children;if(ls[act])ls[act].classList.remove('act');act=i;if(ls[act]){ls[act].classList.add('act');inp.setAttribute('aria-activedescendant',ls[act].id);
+    var r=ls[act];if(r.offsetTop<ul.scrollTop)ul.scrollTop=r.offsetTop-6;else if(r.offsetTop+r.offsetHeight>ul.scrollTop+ul.clientHeight)ul.scrollTop=r.offsetTop+r.offsetHeight-ul.clientHeight+6}}
+  function pick(i){var v=items[i];if(v==null)return;inp.value=v;show(false);inp.dispatchEvent(new Event('input',{bubbles:true}));inp.dispatchEvent(new Event('change',{bubbles:true}))}
+  inp.addEventListener('input',function(e){if(e.isTrusted)render()});
+  inp.addEventListener('focus',render);
+  inp.addEventListener('click',function(){if(ul.hidden)render()});
+  inp.addEventListener('blur',function(){setTimeout(function(){if(document.activeElement!==inp)show(false)},150)});
+  inp.addEventListener('keydown',function(e){var k=e.key;if(e.isComposing)return;
+    if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();if(ul.hidden)render();if(items.length)hi(act<0?(k==='ArrowDown'?0:items.length-1):(act+(k==='ArrowDown'?1:-1)+items.length)%items.length)}
+    else if(k==='Enter'&&!ul.hidden&&act>=0){e.preventDefault();e.stopPropagation();pick(act)}
+    else if(k==='Enter')show(false);
+    else if(k==='Escape'&&!ul.hidden){e.preventDefault();e.stopPropagation();show(false)}
+    else if(k==='Tab')show(false)});
+  ul.addEventListener('mousedown',function(e){e.preventDefault()});
+  ul.addEventListener('click',function(e){var li=e.target.closest('li');if(li)pick(+li.dataset.i)});
+  ul.addEventListener('mousemove',function(e){var li=e.target.closest('li');if(li&&+li.dataset.i!==act)hi(+li.dataset.i)});
+  // options that arrive later (a list loaded the first time the box is used): shown as soon as they're there
+  var dl=document.getElementById(lid);if(dl&&window.MutationObserver)new MutationObserver(function(){if(document.activeElement===inp)render()}).observe(dl,{childList:true});
+}
+function scan(root){var ins=(root||document).getElementsByTagName('input');for(var i=0;i<ins.length;i++)if(ins[i].hasAttribute('list'))enhance(ins[i])}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){scan()});else scan();
+if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.length;j++){var a=ms[j].addedNodes;for(var i=0;i<a.length;i++){var nd=a[i];if(nd.nodeType!==1)continue;if(nd.tagName==='INPUT'){if(nd.hasAttribute('list'))enhance(nd)}else if(nd.getElementsByTagName&&nd.firstElementChild)scan(nd)}}}).observe(document.documentElement,{childList:true,subtree:true});
 })();
