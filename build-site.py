@@ -97,6 +97,45 @@ for _f in ("data/geo.js", "data/places.js", "data/islands.js", "data/cities-more
     if os.path.exists(_f):
         _v = hashlib.sha1(open(_f, "rb").read()).hexdigest()[:10]
         site_app = site_app.replace('sc.src = "%s"' % _f, 'sc.src = "%s?v=%s"' % (_f, _v))
+# "light cards" (see that script in snakelist-synced.html). On the website every card arrives
+# light: just the card, its names, its sighting button and its photo button - the elements that hold
+# what people save. The rest of each card (top row, tags, Want to see, bottom row) is listed once in
+# #sl-card-parts and only built for the cards on screen. Half the page to download and parse, and an
+# iPad or phone never has to hold ~125,000 card elements. A card that doesn't look exactly as expected
+# is left whole. snakelist-synced.html (the claude.ai app) keeps its whole cards.
+def _light_cards(html):
+    import json as _json
+    shapes, tags, cards = {}, {}, {}
+    KEEP = [r'<div class="card-name[^"<>]*">[^<]*</div>', r'<div class="card-sci[^"<>]*">[^<]*</div>',
+            r'<button class="note-btn"[^<>]*></button>', r'<span class="photo-btn"[^<>]*><button[^<>]*class="photo-btn-clear"[^<>]*>[^<]*</button></span>']
+    def one(m):
+        open_, inner = m.group(1), m.group(2)
+        cid = re.search(r' data-id="([^"]+)"', open_)
+        if not cid or cid.group(1) in cards: return m.group(0)
+        p = re.fullmatch(r'(<div class="card-top">.*?)<div class="card-tags">([^<]*(?:<(?!/?div\b)[^<]*)*)</div>(<div class="wish-row">(?:[^<]|<(?!/?div\b))*</div>)(<div class="card-bottom">(?:[^<]|<(?!/?div\b))*</div>)', inner, re.S)
+        if not p: return m.group(0)
+        top, tg, wish, bottom = p.group(1), p.group(2), p.group(3), p.group(4)
+        if "\x01" in inner or any(inner.count(c) != 1 for c in ('class="card-name', 'class="card-sci', 'class="note-btn"', 'class="photo-btn"', 'class="photo-btn-clear"')): return m.group(0)
+        kept = []
+        for i, rx in enumerate(KEEP):
+            part = top if i < 2 else bottom
+            f = re.findall(rx, part)
+            if len(f) != 1: return m.group(0)
+            kept.append(f[0])
+            part = part.replace(f[0], '<i data-sl-keep="%d"></i>' % i)
+            if i < 2: top = part
+            else: bottom = part
+        shape = top + '<div class="card-tags">\x01</div>' + wish + bottom
+        s = shapes.setdefault(shape, len(shapes)); t = tags.setdefault(tg, len(tags))
+        cards[cid.group(1)] = [s, t]
+        return open_ + "".join(kept) + "</div>"
+    out = re.sub(r'(<div class="card" [^>]*>)(<div class="card-top">.*?)</div>(?=\n)', one, html)
+    if not cards: return html
+    data = _json.dumps({"shapes": sorted(shapes, key=shapes.get), "tags": sorted(tags, key=tags.get), "cards": cards}, separators=(",", ":"), ensure_ascii=False).replace("</", "<\\/")
+    mark = "<script>\n// ---- light cards"
+    if out.count(mark) != 1: return html  # the script that builds them again isn't there: keep every card whole
+    return out.replace(mark, '<script type="application/json" id="sl-card-parts">' + data + "</script>\n" + mark)
+site_app = _light_cards(site_app)
 body_at = re.search(r"<(?!/?(?:title|style|script|link|meta|!--)\b)[a-zA-Z]", site_app).start()
 # every stylesheet goes up into the head, in the same order: the page is megabytes long, and a
 # style block near its end used to arrive seconds after the parts it styles - the Install
