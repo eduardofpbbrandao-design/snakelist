@@ -744,7 +744,14 @@ export function create(V) {
     const diet = dietOf(P, V.opts.id);
     const rB = (x) => Math.min(F.W(x), F.Hh(x));
     let kind = diet; if (kind === 'mouse' && L > 1.6) kind = 'rat';
-    const pr = clamp(rB(L * 0.35) * (kind === 'egg' ? 1.1 : kind === 'snake' ? 0.55 : kind === 'fish' ? 0.9 : kind === 'lizard' ? 0.8 : 0.95), Hl * 0.18, Hl * 0.6); // v5.05: a meal it can really swallow
+    // v5.50: the prey is a real animal of its real size (body radius in metres: a mouse 1.1-1.7 cm, a rat 2.2-4.2 cm...),
+    // never a mouse shrunk to fit a tiny snake or blown up for a python: a snake too small for the smallest real one
+    // takes a smaller animal instead, and a giant takes the biggest of its kind
+    const REAL = { mouse: [0.011, 0.017], rat: [0.022, 0.042], frog: [0.006, 0.03], fish: [0.005, 0.045], lizard: [0.003, 0.025], snake: [0.002, 0.02], egg: [0.009, 0.028] }, maxR = Hl * 0.6;
+    if (kind === 'rat' && REAL.rat[0] > maxR) kind = 'mouse';
+    if (kind === 'mouse' && REAL.mouse[0] > maxR) kind = 'lizard';
+    const hiR = Math.min(REAL[kind][1], maxR), loR = Math.min(hiR, Math.max(REAL[kind][0], Hl * 0.18));
+    const pr = clamp(rB(L * 0.35) * (kind === 'egg' ? 1.1 : kind === 'snake' ? 0.55 : kind === 'fish' ? 0.9 : kind === 'lizard' ? 0.8 : 0.95), loR, hiR); // v5.05: a meal it can really swallow
     const prey = buildPrey(kind, pr, 77); V.scene.add(prey); show.objs.push(prey);
     const Lp = prey.userData.len * (kind === 'snake' ? 1 : 0.92), prR = prey.userData.r;
     const restSnout = R.rest().subarray(0, 3);

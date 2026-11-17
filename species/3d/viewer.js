@@ -429,7 +429,8 @@ function makePose(P, F, seed) {
 // v5.35: the branch a tree snake lies along: it follows the snake's line just under its belly, reaches past its head
 // to a thin tip, and past its tail bends down to the ground (so it never floats), with a few side twigs
 function addBranch(P, F, pose, seed) {
-  const R = rng(seed + 77), L = F.L, h = pose.perch, rB = Math.max(F.w0 * 1.5, 0.004), g = new THREE.Group();
+  // v5.50: a real branch, 2-6 cm thick (thinner towards its tip), not one scaled to the snake
+  const R = rng(seed + 77), L = F.L, h = pose.perch, rB = clamp(F.w0 * 1.5, 0.011, 0.03), g = new THREE.Group();
   const pt = (x) => { const a = pose.at(clamp(x, 0, L)); return new THREE.Vector3(a[0], h - rB * 0.92, a[1]); };
   const dirAt = (x0, x1) => pt(x1).sub(pt(x0)).setY(0).normalize();
   const pts = [], d0 = dirAt(F.Hl * 0.5, 0), d1 = dirAt(L * 0.9, L);
@@ -1412,9 +1413,10 @@ function groundTexture(kind, seed0, hi) {
     const stone = (r, ry, c0, c1, wet) => { x.drawImage(stoneSprite(c0, c1, wet, (R() * 3) | 0), -r * 64 / 52, -ry * 64 / 52, r * 128 / 52, ry * 128 / 52); };
     if (kind === 'litter' || kind === 'soil') {
       const pal = kind === 'litter' ? ['#6a4a2e', '#7d5a36', '#8c6a42', '#55402a', '#6b5536', '#3e2e20', '#86663f', '#9a7a4e', '#5e5032', '#4a3a26'] : ['#5a4532', '#6b5236', '#4a3826', '#7a6044'];
-      const n = kind === 'litter' ? 2600 : 220;
+      // (v5.50: the soil tile is only 35 cm across, so its few leaves are drawn big - 4-9 cm, their real size - not as crumbs)
+      const n = kind === 'litter' ? 2600 : 26;
       for (let i = 0; i < n; i++) {
-        const cx = R() * S, cy = R() * S, big = R() < 0.15, l = (kind === 'litter' ? 18 : 10) + R() * (kind === 'litter' ? (big ? 70 : 34) : 16), w = l * (0.18 + R() * 0.17), a = R() * TAU, col = pal[(R() * pal.length) | 0], curl = R();
+        const cx = R() * S, cy = R() * S, big = R() < 0.15, l = kind === 'litter' ? 18 + R() * (big ? 70 : 34) : 115 + R() * 150, w = l * (0.18 + R() * 0.17), a = R() * TAU, col = pal[(R() * pal.length) | 0], curl = R();
         wrapAt(cx, cy, l, () => { x.rotate(a); leaf(l, w, col, curl); });
       }
       for (let i = 0; i < (kind === 'litter' ? 90 : 40); i++) {
@@ -1516,6 +1518,21 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   skyMesh.renderOrder = -1; scene.add(skyMesh);
   // (v4.72: a sun glow and clouds were tried here, but the big see-through sprites washed out half the view - removed)
   ctx.skyMesh = skyMesh; ctx.groundR = groundR; ctx.fadeMats = [];
+  // v5.50: the sky is blue above a low band of haze (it used to stay the haze's grey up to 30 degrees, so a low view
+  // showed a flat grey sky), deeper overhead, and warmer and brighter towards the sun; repainted when the sun moves
+  const skyDeep = sky.clone().multiplyScalar(0.8).lerp(new THREE.Color('#5d8fc4'), 0.25), warm = new THREE.Color('#fff0d2'), sv0 = new THREE.Vector3(), sc0 = new THREE.Color();
+  ctx.paintSky = (horizon) => {
+    if (horizon) ctx.skyHor = horizon.clone();
+    const hz = ctx.skyHor || hor, sd = ctx.sun ? ctx.sun.position.clone().normalize() : null, pp = skyGeo.attributes.position, cc = skyGeo.attributes.color;
+    for (let i = 0; i < pp.count; i++) {
+      sv0.fromBufferAttribute(pp, i).normalize(); const y = sv0.y;
+      sc0.copy(hz).lerp(sky, sstep(-0.01, 0.3, y)).lerp(skyDeep, sstep(0.35, 1, y) * 0.5);
+      if (sd && y > -0.05) sc0.lerp(warm, Math.pow(Math.max(0, sv0.dot(sd)), 6) * 0.45 * (1 - sstep(0.15, 0.7, y)));
+      if (y < 0) sc0.copy(hz);
+      cc.setXYZ(i, sc0.r, sc0.g, sc0.b);
+    }
+    cc.needsUpdate = true;
+  };
   scene.fog = new THREE.Fog(hor, Math.max(Rb * 6, envR * 3.5), farR * 0.95); ctx.farR = farR; ctx.fogNear0 = scene.fog.near;
   scene.background = hor;
 
@@ -1532,56 +1549,73 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   const hemi = new THREE.HemisphereLight(sky.clone().lerp(new THREE.Color('#ffffff'), 0.4), gcol, S.hemi); scene.add(hemi); ctx.hemi = hemi; ctx.envRT = envRT;
   const sun = new THREE.DirectionalLight('#fff4e2', S.sun);
   const el = (S.sunEl * Math.PI) / 180, az = 0.9;
-  sun.position.set(Math.cos(az) * Math.cos(el), Math.sin(el), Math.sin(az) * Math.cos(el)).multiplyScalar(Rb * 6);
+  // v5.50: the shadows reach the real-size grass, stones and logs round a small snake too (not only its own few cm)
+  const sunD = Math.max(Rb * 6, 3), shExt = Math.max(Rb * 1.5, quality === 'low' ? 0.5 : 0.75);
+  sun.position.set(Math.cos(az) * Math.cos(el), Math.sin(el), Math.sin(az) * Math.cos(el)).multiplyScalar(sunD);
   sun.castShadow = true;
   const sm = quality === 'low' ? 1024 : 4096; sun.shadow.mapSize.set(sm, sm); // v4.72: crisper shadows
-  const sc = sun.shadow.camera; sc.left = sc.bottom = -Rb * 1.5; sc.right = sc.top = Rb * 1.5; sc.near = Rb * 0.5; sc.far = Rb * 14;
+  const sc = sun.shadow.camera; sc.left = sc.bottom = -shExt; sc.right = sc.top = shExt; sc.near = Math.max(0.01, sunD - Math.max(Rb * 5.5, 2.5)); sc.far = sunD + Math.max(Rb * 8, 3);
   sun.shadow.bias = -0.0004; sun.shadow.normalBias = F.w0 * 0.04; sun.shadow.radius = 3;
   scene.add(sun); scene.add(sun.target);
-  ctx.sun = sun;
+  ctx.sun = sun; ctx.paintSky();
 
   // ground
   const waterY = { y: null };
   const dist2snake = (x, z) => { let m = 1e9; for (let i = 0; i < poseInfo.pts.length; i += 6) { const q = poseInfo.pts[i], d = Math.hypot(q[0] - x, q[1] - z) - F.W(i * poseInfo.ds); if (d < m) m = d; } return m; };
+  // v5.50: the world round the snake is real-world size, never scaled to the snake (a thread snake used to get tiny
+  // leaves, pebbles and hummocks and so looked as big as a python): the land's gentle rise is about a metre over
+  // 10-20 m, and it starts beyond the snake (and beyond a few metres round a small one)
+  const rise0 = Math.max(Rb * 7, 3), rise = (x, z, r) => (fbm(x / 12, z / 12, 1, seed + 53, 3) - 0.35) * 0.9 * sstep(rise0, rise0 + 9, r);
+  ctx.rise = rise;
+  let groundH = (x, z) => rise(x, z, Math.hypot(x, z)); // (what props stand on; the river bank sets its own below)
   if (S.ground) {
     const gg = new THREE.CircleGeometry(groundR, 128, 0, TAU); gg.rotateX(-Math.PI / 2);
     // finer rings near the middle so the riverbank slope is smooth
-    const tG = performance.now(); const tex = groundTexture(S.ground, seed + 5, quality !== 'low'); perfT('groundTex', tG); tex.anisotropy = ctx.renderer.capabilities.getMaxAnisotropy(); const rep = (groundR * 2) / (clamp(Math.min(S.tile, L * 1.1), S.tile * 0.5, S.tile) * clamp(L / 2, 1, 4)); tex.repeat.set(rep, rep); // big snakes: bigger ground detail, never a fine grain
+    const tG = performance.now(); const tex = groundTexture(S.ground, seed + 5, quality !== 'low'); perfT('groundTex', tG); tex.anisotropy = ctx.renderer.capabilities.getMaxAnisotropy(); const rep = (groundR * 2) / S.tile; tex.repeat.set(rep, rep); // v5.50: the leaves and stones painted on the ground keep their real size (S.tile metres per tile) for every snake
     const gm = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.96, metalness: 0, bumpMap: tex, bumpScale: Math.min(1, L * 0.5) * 0.6 });
     if (S.water === 'river') {
       // the bank slopes down into shallow water on one side, away from the snake
       const geo = new THREE.PlaneGeometry(groundR * 2, groundR * 2, 160, 160); geo.rotateX(-Math.PI / 2);
-      const dir = new THREE.Vector2(Math.cos(poseInfo.waterDir), Math.sin(poseInfo.waterDir)), edge = poseInfo.waterDist, depth = Math.max(0.03, Rb * 0.12);
+      // v5.50: a real bank (the water about 20 cm deep a little way out, the shore wandering by a few tens of cm), the
+      // same for every snake; the water's edge is just past the snake, wherever the wavy shoreline puts it
+      const dir = new THREE.Vector2(Math.cos(poseInfo.waterDir), Math.sin(poseInfo.waterDir)), depth = 0.2;
+      const wob = (al) => (fbm(al / 2.4, 3.1, 0.7, seed + 19, 3) - 0.5) * 1.1;
+      let edge = -1e9; for (let i = 0; i < poseInfo.pts.length; i += 3) { const q = poseInfo.pts[i]; edge = Math.max(edge, q[0] * dir.x + q[1] * dir.y + wob(-q[0] * dir.y + q[1] * dir.x)); }
+      edge += F.w0 * 2.5 + 0.06;
       const pp = geo.attributes.position, uvs = geo.attributes.uv;
       for (let i = 0; i < pp.count; i++) {
         // squeeze the grid toward the middle: fine cells near the snake for a smooth, irregular shoreline
         let x = pp.getX(i) / groundR, z = pp.getZ(i) / groundR; x = Math.sign(x) * x * x * groundR; z = Math.sign(z) * z * z * groundR;
         pp.setX(i, x); pp.setZ(i, z); uvs.setXY(i, x / (2 * groundR) + 0.5, 0.5 - z / (2 * groundR));
-        const along = -x * dir.y + z * dir.x, s = x * dir.x + z * dir.y + (fbm(along / Rb * 1.3, 3.1, 0.7, seed + 19, 3) - 0.5) * Rb * 1.8; // a wavy shoreline
-        pp.setY(i, -depth * sstep(edge - Rb * 0.25, edge + Rb * 0.7, s) + (fbm(x / Rb * 2, z / Rb * 2, 1, seed, 2) - 0.5) * Rb * 0.02 * sstep(Rb * 0.3, Rb * 0.9, Math.abs(s - edge)));
+        const along = -x * dir.y + z * dir.x, s = x * dir.x + z * dir.y + wob(along); // a wavy shoreline
+        pp.setY(i, -depth * sstep(edge - 0.06, edge + 0.55, s) + (fbm(x * 2.5, z * 2.5, 1, seed, 2) - 0.5) * 0.025 * sstep(0.15, 0.5, Math.abs(s - edge)));
       }
       geo.computeVertexNormals();
       const g2 = new THREE.Mesh(geo, gm); g2.receiveShadow = true; scene.add(g2); ctx.fadeMats.push(gm);
       const wm = new THREE.MeshPhysicalMaterial({ color: '#2f4d48', roughness: 0.16, metalness: 0, transparent: true, opacity: 0.72, envMapIntensity: 0.45, normalMap: waterNormal(seed), normalScale: new THREE.Vector2(0.35, 0.35) }); // v4.72: clear dark river water (not a pale sheet)
-      wm.normalMap.repeat.set(groundR / Math.max(0.6, Rb), groundR / Math.max(0.6, Rb));
+      wm.normalMap.repeat.set(groundR * 2 / 1.6, groundR * 2 / 1.6); // ripples at their real size (the pattern repeats every 1.6 m)
       const wg = new THREE.PlaneGeometry(groundR * 2, groundR * 2); wg.rotateX(-Math.PI / 2);
       const water = new THREE.Mesh(wg, wm); water.position.y = -depth * 0.35; water.renderOrder = 2; scene.add(water); ctx.fadeMats.push(wm);
-      ctx.waterInfo = { dir, edge };
+      ctx.waterInfo = { dir, edge, wob, depth };
+      groundH = (x, z) => -depth * sstep(edge - 0.06, edge + 0.55, x * dir.x + z * dir.y + wob(-x * dir.y + z * dir.x));
     } else {
       // v4.72: the floor is real 3D - sand in ripples, litter and soil in little lumps, flat right under the snake
       const rg = new THREE.RingGeometry(0, groundR, 160, quality === 'low' ? 60 : 110); rg.rotateX(-Math.PI / 2);
       const kind = S.ground, rip = kind === 'sand' || kind === 'gibber' || kind === 'gravel'; // (v4.81: no sand ripples under grass)
       const fineR = kind === 'sand' ? Math.max(Rb * 2.3, Math.min(1.4, Rb * 7)) : 0; // v4.81: real sand ripples close to the snake (finer mesh below)
-      const pp = rg.attributes.position, w0 = F.w0, ripA = w0 * (kind === 'sand' ? 0.4 : 0.25), lumpA = w0 * 0.45;
+      // v5.50: ripples and lumps at their real size (a few mm to a cm high, 10-30 cm apart), not scaled to the snake;
+      // where the mesh is too coarse to draw them (round a big snake) they are wider but no higher
+      const cell = groundR / (quality === 'low' ? 60 : 110), ripL = Math.max(0.1, cell * 6) / TAU, lumpL = Math.max(0.2, cell * 5);
+      const pp = rg.attributes.position, w0 = F.w0, ripA = (kind === 'sand' ? 0.006 : 0.003) * Math.min(1, 0.1 / (ripL * TAU)), lumpA = 0.01 * Math.min(1, 0.25 / lumpL);
       for (let i = 0; i < pp.count; i++) {
         const x = pp.getX(i), z = pp.getZ(i), r = Math.hypot(x, z);
         const near = sstep(w0 * 1.5, w0 * 6, r < Rb * 3 ? dist2snake(x, z) : 1e9); // nothing lifts under or right beside the snake
         let y = 0;
-        if (rip) { const u = x * 0.8 + z * 0.6 + (fbm(x / Rb, z / Rb, 1, seed + 41, 2) - 0.5) * Rb * 0.6; y += Math.sin(u / (w0 * 5)) * ripA * (0.6 + fbm(x / Rb * 0.7, z / Rb * 0.7, 1, seed + 43, 2) * 0.8); }
-        else y += (fbm(x / (w0 * 6), z / (w0 * 6), 1, seed + 47, 3) - 0.5) * 2 * lumpA;
+        if (rip) { const u = x * 0.8 + z * 0.6 + (fbm(x / 0.8, z / 0.8, 1, seed + 41, 2) - 0.5) * 0.5; y += Math.sin(u / ripL) * ripA * (0.6 + fbm(x / 1.2, z / 1.2, 1, seed + 43, 2) * 0.8); }
+        else y += (fbm(x / lumpL, z / lumpL, 1, seed + 47, 3) - 0.5) * 2 * lumpA;
         y *= near;
         if (fineR) y = lerp(-ripA - 0.02, y, sstep(fineR * 0.82, fineR * 1.02, r)); // tucked under the fine sand
-        y += (fbm(x / (Rb * 6), z / (Rb * 6), 1, seed + 53, 3) - 0.35) * Rb * 0.9 * sstep(Rb * 7, groundR * 0.95, r); // gentle rise to the hills
+        y += rise(x, z, r); // gentle rise to the hills
         pp.setY(i, y);
       }
       rg.computeVertexNormals();
@@ -1614,20 +1648,20 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     const runNature = () => {
       if (ctx.scene !== scene) return;
       const tN = performance.now();
-      const natureOwnsFar = NATURE.build ? NATURE.build({ THREE, ctx, scene, S, kind: P.scene.kind, groundR, farR, Rb, F, L, seed, quality, gcol, rng, fbm, sstep, clamp, dist2snake, poseInfo, sceneP: P.scene }) : false;
+      const natureOwnsFar = NATURE.build ? NATURE.build({ THREE, ctx, scene, S, kind: P.scene.kind, groundR, farR, Rb, F, L, seed, quality, gcol, rng, fbm, sstep, clamp, dist2snake, poseInfo, sceneP: P.scene, rise }) : false;
       perfT('nature', tN);
-      if (!natureOwnsFar) farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality);
+      if (!natureOwnsFar) farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality, rise);
       if (ctx.afterNature) ctx.afterNature();
     };
     ctx.natureReady = typeof requestAnimationFrame === 'function' ? new Promise((res) => requestAnimationFrame(() => setTimeout(() => { try { runNature(); } finally { res(); } }, 0))) : (runNature(), Promise.resolve());
   }
   if (S.water === 'sea') {
     const wm = new THREE.MeshPhysicalMaterial({ color: '#1f4e63', roughness: 0.12, metalness: 0, transparent: true, opacity: 0.82, normalMap: waterNormal(seed), normalScale: new THREE.Vector2(0.35, 0.35) });
-    wm.normalMap.repeat.set(groundR / Math.max(0.3, Rb * 0.6), groundR / Math.max(0.3, Rb * 0.6));
+    wm.normalMap.repeat.set(groundR * 2 / 2.4, groundR * 2 / 2.4); // v5.50: ripples at their real size (repeating every 2.4 m)
     const wg = new THREE.CircleGeometry(groundR, 96); wg.rotateX(-Math.PI / 2);
     const water = new THREE.Mesh(wg, wm); water.position.y = poseInfo.seaLevel; water.receiveShadow = true; water.renderOrder = 2; scene.add(water);
     const deep = new THREE.Mesh(new THREE.CircleGeometry(groundR, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#0f2f3d' }));
-    deep.position.y = -Rb * 0.6; scene.add(deep);
+    deep.position.y = -1.5; scene.add(deep);
   }
 
   // props: placed around the snake, never touching it, denser near it and fading out with distance
@@ -1647,83 +1681,116 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     return out;
   };
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), sv = new THREE.Vector3(), pv = new THREE.Vector3();
-  const realK = clamp(L / 1.2, 0.15, 3.5); // prop scale follows the scene a little, but stays in real-world sizes
+  // v5.50: every prop has its real-world size, whatever the snake's size: fallen leaves 4-11 cm, grass 20-45 cm,
+  // pebbles 1-5 cm, rocks 10-60 cm, twigs 12-45 cm, a log 16-34 cm thick, reeds over a metre. Only how far round the
+  // snake they are spread follows the snake (the camera sees more ground round a big one), and how many there are
+  // follows that area (a real density per square metre), capped so a big snake's wide view stays fast
+  const veg = (m) => (NATURE.vegetation ? NATURE.vegetation(THREE, m) : m); // (v5.50: matt, lit the same from every side)
+  const lowQ = quality === 'low', perM2 = (dens, rMin, rMax, cap) => { const r1 = rMin + (rMax - rMin) * 2; return Math.round(Math.min(cap * (lowQ ? 0.45 : 1), dens * Math.PI * (r1 * r1 - rMin * rMin) * (lowQ ? 0.6 : 1))); };
+  const wiP = ctx.waterInfo, wet = (x, z) => !!wiP && x * wiP.dir.x + z * wiP.dir.y + wiP.wob(-x * wiP.dir.y + z * wiP.dir.x) > wiP.edge - 0.02;
+  const placeN = (n, rMin, rMax, clear, o = {}) => { // n real spots (place() above multiplies its count)
+    const out = []; rMax = rMin + (rMax - rMin) * 2;
+    for (let i = 0; i < n; i++) for (let t = 0; t < (o.tries || 12); t++) {
+      const a = R() * TAU, r = rMin + (rMax - rMin) * Math.sqrt(R()), x = Math.cos(a) * r, z = Math.sin(a) * r;
+      if (dist2snake(x, z) < clear) continue;
+      if (o.dry && wet(x, z)) continue;
+      out.push([x, z]); break;
+    }
+    return out;
+  };
   if (PR.rocks) {
     // v5.05: only a few rocks, well apart and never crowding round the snake (there used to be dozens)
-    const spots = []; for (const sp of place(Math.round(3 + 4 * PR.rocks), Rb * 1.7, Rb * 5, Rb * 0.9 + F.w0 * 4 + 0.32 * realK * (P.scene.rockSize || 1), 60)) if (spots.length < Math.round(2 + 3 * PR.rocks) && spots.every((q) => Math.hypot(q[0] - sp[0], q[1] - sp[1]) > Rb * 1.6)) spots.push(sp);
+    // v5.50: 10-60 cm across (smaller right beside a small snake, so none lies over it), clear of the body by their own size
+    const rsK = P.scene.rockSize || 1, spots = [];
+    for (const sp of place(Math.round(3 + 4 * PR.rocks), Rb * 1.7, Rb * 5, Rb * 0.9 + F.w0 * 4, 60)) {
+      if (spots.length >= Math.round(2 + 3 * PR.rocks) || !spots.every((q) => Math.hypot(q[0] - sp[0], q[1] - sp[1]) > Math.max(Rb * 1.6, 0.8))) continue;
+      const d = dist2snake(sp[0], sp[1]), s = Math.min((0.05 + R() ** 2.2 * 0.25) * rsK, Math.max(0.03, (d - F.w0 * 3) / 1.5));
+      spots.push([sp[0], sp[1], s]);
+    }
     const geos = [rockGeometry(seed + 1, 3), rockGeometry(seed + 2, 3), rockGeometry(seed + 3, 2)];
     const rt = canvasTex(256, (x, s) => { const img = x.createImageData(s, s); for (let j = 0; j < s; j++) for (let i = 0; i < s; i++) { const n = tfbm(i / s * 6, j / s * 6, 6, seed + 9, 4), k = (j * s + i) * 4, v = 120 + n * 110; img.data[k] = v; img.data[k + 1] = v * 0.96; img.data[k + 2] = v * 0.9; img.data[k + 3] = 255; } x.putImageData(img, 0, 0); }, 2);
-    const rm = new THREE.MeshStandardMaterial({ map: rt, roughness: 0.92, color: P.scene.rock || (S.ground === 'pebbles' ? '#8f887c' : '#b4aa9c') });
+    const rm = new THREE.MeshStandardMaterial({ map: rt, roughness: 0.92, color: P.scene.rock || (S.ground === 'pebbles' ? '#7a7368' : '#b4aa9c') });
     geos.forEach((g, gi) => {
       const mine = spots.filter((_, i) => i % 3 === gi); if (!mine.length) return;
       const im = new THREE.InstancedMesh(g, rm, mine.length); im.castShadow = im.receiveShadow = true;
-      mine.forEach(([x, z], i) => { const s = (0.03 + R() ** 2.5 * 0.16) * realK * (P.scene.rockSize || 1); e.set(R() * 0.3, R() * TAU, R() * 0.3); q.setFromEuler(e); sv.set(s * (0.8 + R() * 0.5), s, s * (0.8 + R() * 0.5)); pv.set(x, s * 0.25, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); addOcc(im, i, m4, s * 1.2); });
+      mine.forEach(([x, z, s], i) => { e.set(R() * 0.3, R() * TAU, R() * 0.3); q.setFromEuler(e); sv.set(s * (0.8 + R() * 0.5), s * (0.9 + R() * 0.4), s * (0.8 + R() * 0.5)); pv.set(x, groundH(x, z) + s * 0.12, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); addOcc(im, i, m4, s * 1.2); });
       scene.add(im);
     });
   }
   if (PR.pebbles) {
-    const spots = place(Math.round(70 * PR.pebbles), Rb * 0.5, Rb * 4, F.w0 * 1.5 + 0.06 * realK, 10), g = rockGeometry(seed + 7, 2);
+    const n = perM2(70 * PR.pebbles, Rb * 0.5, Rb * 4, 1600), spots = placeN(n, Rb * 0.5, Rb * 4, F.w0 * 1.5 + 0.035), g = rockGeometry(seed + 7, 1); // (small: 80 triangles each is plenty)
     const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ roughness: 0.8, color: '#ffffff' }), spots.length); im.castShadow = im.receiveShadow = true;
     const pc = new THREE.Color();
-    spots.forEach(([x, z], i) => { const s = (0.012 + R() * 0.03) * realK; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s * 1.3, s * 0.8, s); pv.set(x, s * 0.2, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); pc.setHSL(0.08 + R() * 0.05, 0.06 + R() * 0.08, 0.12 + R() * 0.14); /* linear: mid-grey river stones, not white */ im.setColorAt(i, pc); });
+    // and a few cobbles, 10-25 cm, scattered further out (real size: round a giant they read as small stones)
+    const cob = placeN(perM2(0.8 * PR.pebbles, Rb * 1.2, Rb * 4, 260), Rb * 1.2, Rb * 4, F.w0 * 3 + 0.15, { dry: true }), cg = rockGeometry(seed + 8, lowQ ? 1 : 2);
+    if (cob.length) { const ci = new THREE.InstancedMesh(cg, im.material, cob.length); ci.castShadow = ci.receiveShadow = true; cob.forEach(([x, z], i) => { const s = Math.min(0.05 + R() ** 2 * 0.075, Math.max(0.02, (dist2snake(x, z) - F.w0 * 3) / 1.5)); e.set((R() - 0.5) * 0.3, R() * TAU, (R() - 0.5) * 0.3); q.setFromEuler(e); sv.set(s * 1.25, s * (0.8 + R() * 0.3), s); pv.set(x, groundH(x, z) + s * 0.1, z); m4.compose(pv, q, sv); ci.setMatrixAt(i, m4); pc.setHSL(0.08 + R() * 0.05, 0.05 + R() * 0.07, 0.14 + R() * 0.12); ci.setColorAt(i, pc); }); scene.add(ci); }
+    spots.forEach(([x, z], i) => { const s = 0.005 + R() ** 2 * 0.014; e.set((R() - 0.5) * 0.3, R() * TAU, (R() - 0.5) * 0.3); q.setFromEuler(e); sv.set(s * 1.25, s * (0.85 + R() * 0.35), s); pv.set(x, groundH(x, z) + s * 0.12, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); pc.setHSL(0.08 + R() * 0.05, 0.06 + R() * 0.08, 0.12 + R() * 0.14); /* linear: mid-grey river stones, not white */ im.setColorAt(i, pc); });
     scene.add(im);
   }
-  const grassTuft = (n, h, cA, cB, rMin, rMax, clear, spread) => {
-    const spots = place(n, rMin, rMax, clear); if (!spots.length) return;
-    const g = bladeTuft(seed + n, 14, h, cA, cB, spread || h * 0.12), im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.9 }), spots.length);
+  // a clump of grass (or ferns, heather): real height; tall plants keep back from the snake, and the ones nearest it
+  // are shorter (trodden, grazed), so a small snake lies in a little clearing in grass that towers over it, in view
+  const grassTuft = (n, h, cA, cB, rMin, rMax, clear, spread, o = {}) => {
+    const spots = placeN(n, rMin, rMax, clear, { dry: true }); if (!spots.length) return;
+    const g = bladeTuft(seed + n, o.blades || 14, h, cA, cB, spread || h * 0.12, o), im = new THREE.InstancedMesh(g, veg(new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: o.rough || 0.9 })), spots.length);
     im.castShadow = true; im.receiveShadow = true;
-    spots.forEach(([x, z], i) => { const s = 0.7 + R() * 0.6; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s, s, s); pv.set(x, 0, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); addOcc(im, i, m4, h * s * 0.8); });
+    spots.forEach(([x, z], i) => { const k = 0.4 + 0.6 * sstep(clear, clear + h * 2.5, dist2snake(x, z)), s = (0.7 + R() * 0.6) * k; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s, s * (o.sy ? o.sy[0] + R() * (o.sy[1] - o.sy[0]) : 1), s); pv.set(x, groundH(x, z), z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); addOcc(im, i, m4, h * s * 0.8); });
     scene.add(im);
   };
-  const tuftH = clamp(L * 0.12, 0.04, 0.35) * (P.scene.grassH || 1);
-  if (PR.grass) grassTuft(Math.round(40 * PR.grass), tuftH, P.scene.grassA || '#6f7a3a', P.scene.grassB || '#c2b47a', Rb * 0.8, Rb * 4.5, F.w0 * 3 + tuftH * 0.3);
+  if (PR.grass) { const h = 0.3 * (P.scene.grassH || 1); grassTuft(perM2(5 * PR.grass, Rb * 0.8, Rb * 4.5, 700), h, P.scene.grassA || '#6f7a3a', P.scene.grassB || '#c2b47a', Rb * 0.8, Rb * 4.5, F.w0 * 3 + h * 0.7); }
   if (PR.reeds && ctx.waterInfo) {
-    // reeds and rushes along the water's edge, behind the snake
-    const spots = []; const wi = ctx.waterInfo, tng = new THREE.Vector2(-wi.dir.y, wi.dir.x);
-    for (let i = 0; i < 52; i++) { const s = (R() - 0.5) * Rb * 14, off = wi.edge + Rb * (0.15 + R() * 0.9); const x = wi.dir.x * off + tng.x * s, z = wi.dir.y * off + tng.y * s; if (dist2snake(x, z) > Math.max(Rb * 0.5, clamp(L * 0.9, 0.4, 1.2) * 0.5)) spots.push([x, z]); }
-    const g = bladeTuft(seed + 3, 40, clamp(L * 0.9, 0.4, 1.2), '#55693a', '#a6a46a', 0.06, { w: 0.01, lean: 0.25 }), im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.85 }), spots.length);
-    im.castShadow = true;
-    spots.forEach(([x, z], i) => { const s = 0.7 + R() * 0.6; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s, s, s); pv.set(x, -0.02, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); addOcc(im, i, m4, clamp(L * 0.9, 0.4, 1.2) * s * 0.7); });
+    // reeds and rushes along the water's edge, behind the snake: 0.8-1.6 m tall
+    const spots = [], wi = ctx.waterInfo, tng = new THREE.Vector2(-wi.dir.y, wi.dir.x), span = Math.max(Rb * 14, 6), hR = 1.1, nR = clamp(Math.round(span / 0.35), 52, lowQ ? 90 : 220);
+    for (let i = 0; i < nR; i++) { const s = (R() - 0.5) * span, off = wi.edge + 0.1 + R() * Math.max(Rb * 0.9, 0.9); const x = wi.dir.x * off + tng.x * s, z = wi.dir.y * off + tng.y * s; if (dist2snake(x, z) > Math.max(Rb * 0.5, hR * 0.5)) spots.push([x, z]); }
+    const g = bladeTuft(seed + 3, lowQ ? 26 : 40, hR, '#55693a', '#a6a46a', 0.06, { w: 0.01, lean: 0.25 }), im = new THREE.InstancedMesh(g, veg(new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.85 })), spots.length);
+    im.castShadow = false; // (v5.50: the long shadows of the thin blades lay across the bank and the snake as dark streaks)
+    spots.forEach(([x, z], i) => { const s = 0.7 + R() * 0.6; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s, s, s); pv.set(x, groundH(x, z) - 0.02, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); addOcc(im, i, m4, hR * s * 0.7); });
     scene.add(im);
   }
-  if (PR.heather) {
-    const spots = place(Math.round(26 * PR.heather), Rb * 0.9, Rb * 4.2, F.w0 * 4 + clamp(L * 0.3, 0.12, 0.35) * 0.4);
-    const hh = clamp(L * 0.22, 0.08, 0.25), g = bladeTuft(seed + 31, 160, hh, '#4f5a33', '#6f6a45', hh * 0.55, { lean: 0.8, w: 0.012, tip: '#9a6f8c', green: '#5f7036' }); // v4.80: living heather green with purple tips, not black
-    const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.95 }), spots.length); im.castShadow = im.receiveShadow = true;
-    spots.forEach(([x, z], i) => { const s = 0.6 + R() * 0.7; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s, s * (0.7 + R() * 0.5), s); pv.set(x, 0, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); addOcc(im, i, m4, hh * s * 0.8); });
-    scene.add(im);
-  }
+  if (PR.heather) { const hh = 0.28; grassTuft(perM2(4 * PR.heather, Rb * 0.9, Rb * 4.2, 160), hh, '#4f5a33', '#6f6a45', Rb * 0.9, Rb * 4.2, F.w0 * 4 + hh * 0.6, hh * 0.55, { blades: lowQ ? 90 : 160, lean: 0.8, w: 0.012, tip: '#9a6f8c', green: '#5f7036', rough: 0.95, sy: [0.7, 1.2] }); } // v4.80: living heather green with purple tips, not black
   if (PR.leaves || PR.drift) {
-    const drift = !!PR.drift, n = Math.round((drift ? 60 : 260) * (PR.leaves || PR.drift) * (quality === 'low' ? 0.6 : 1));
-    const spots = drift ? [] : place(n, Rb * 0.25, Rb * 4.5, F.w0 * 1.2, 6);
-    if (drift) { const ang = R() * TAU, dx = Math.cos(ang), dz = Math.sin(ang), off = Rb * 1.4; for (let i = 0; i < n; i++) { const s = (R() - 0.5) * Rb * 8, w = (R() - 0.5) * Rb * 0.5; spots.push([-dz * off + dx * s + -dz * w, dx * off + dz * s + dx * w]); } }
+    const drift = !!PR.drift, n = drift ? Math.round(60 * PR.drift * (lowQ ? 0.6 : 1)) : perM2(70 * PR.leaves, Rb * 0.25, Rb * 4.5, 3500);
+    const spots = drift ? [] : placeN(n, Rb * 0.25, Rb * 4.5, F.w0 * 1.2, { tries: 6, dry: true });
+    if (drift) { const ang = R() * TAU, dx = Math.cos(ang), dz = Math.sin(ang), off = Math.max(Rb * 1.4, 0.3); for (let i = 0; i < n; i++) { const s = (R() - 0.5) * Math.max(Rb * 8, 2), w = (R() - 0.5) * Math.max(Rb * 0.5, 0.15); spots.push([-dz * off + dx * s + -dz * w, dx * off + dz * s + dx * w]); } }
     const lt = canvasTex(128, (x, s) => { x.fillStyle = '#ffffff'; x.fillRect(0, 0, s, s); x.strokeStyle = 'rgba(0,0,0,.35)'; x.lineWidth = 2; x.beginPath(); x.moveTo(0, s / 2); x.lineTo(s, s / 2); x.stroke(); x.lineWidth = 1; for (let i = 1; i < 7; i++) { x.beginPath(); x.moveTo(i * s / 7, s / 2); x.lineTo(i * s / 7 + 12, s / 2 - 22); x.moveTo(i * s / 7, s / 2); x.lineTo(i * s / 7 + 12, s / 2 + 22); x.stroke(); } });
     const lg = leafGeometry(), lm = new THREE.MeshStandardMaterial({ map: lt, side: THREE.DoubleSide, roughness: 0.85 });
     const im = new THREE.InstancedMesh(lg, lm, spots.length); im.castShadow = !drift; im.receiveShadow = true;
-    const lc = new THREE.Color(), lsize = drift ? clamp(L * 0.06, 0.02, 0.06) : clamp(L * 0.08, 0.03, 0.14) * (P.scene.leafSize || 1);
+    const lc = new THREE.Color(), lsize = drift ? 0.04 : 0.075 * (P.scene.leafSize || 1); // v5.50: real leaves, 4-11 cm (bits of weed on the sea, about 4 cm)
     const pal = drift ? ['#5d4a2a', '#6b5a32', '#4a5a2a', '#7a6a3a'] : (P.scene.leafCols || ['#7a5532', '#94683a', '#a8804a', '#5e4128', '#6f4f2c', '#b08850', '#4f3a22']);
-    spots.forEach(([x, z], i) => { const s = lsize * (0.6 + R() * 0.8); e.set((R() - 0.5) * 0.4, R() * TAU, (R() - 0.5) * 0.4); q.setFromEuler(e); sv.set(s, s * (0.6 + R() * 0.8), s * (0.45 + R() * 0.3)); pv.set(x, drift ? poseInfo.seaLevel + 0.002 : s * 0.02, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); lc.set(pal[(R() * pal.length) | 0]); im.setColorAt(i, lc); });
+    spots.forEach(([x, z], i) => { const s = lsize * (0.6 + R() * 0.8); e.set((R() - 0.5) * 0.4, R() * TAU, (R() - 0.5) * 0.4); q.setFromEuler(e); sv.set(s, s * (0.6 + R() * 0.8), s * (0.45 + R() * 0.3)); pv.set(x, drift ? poseInfo.seaLevel + 0.002 : groundH(x, z) + s * 0.02, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); lc.set(pal[(R() * pal.length) | 0]); im.setColorAt(i, lc); });
     scene.add(im);
   }
   if (PR.twigs || PR.log) {
     const bark = canvasTex(256, (x, s) => { x.fillStyle = '#5a4632'; x.fillRect(0, 0, s, s); for (let i = 0; i < 300; i++) { x.strokeStyle = ['#3a2c1e', '#6f5a40', '#4a3a28', '#7d6a50'][(R() * 4) | 0]; x.lineWidth = 1 + R() * 3; const y = R() * s; x.beginPath(); x.moveTo(0, y); x.bezierCurveTo(s * 0.3, y + (R() - 0.5) * 20, s * 0.6, y + (R() - 0.5) * 20, s, y); x.stroke(); } });
     const bm = new THREE.MeshStandardMaterial({ map: bark, roughness: 0.95 });
-    const nT = Math.round(10 * (PR.twigs || 0)), spots = place(nT, Rb * 0.6, Rb * 4, F.w0 * 3);
-    spots.forEach(([x, z]) => { const len = clamp(L * 0.25, 0.05, 0.9) * (0.5 + R()), rad = len * 0.025, ry = R() * TAU, cx = Math.cos(ry) * len / 2, cz = -Math.sin(ry) * len / 2; if ([[x + cx, z + cz], [x - cx, z - cz], [x + cx / 2, z + cz / 2], [x - cx / 2, z - cz / 2]].some(([qx, qz]) => dist2snake(qx, qz) < F.w0 * 1.5 + rad * 2)) return; /* v5.25: no twig across the snake */ const g = new THREE.CylinderGeometry(rad * 0.6, rad, len, 7, 1); g.rotateZ(Math.PI / 2); const m = new THREE.Mesh(g, bm); m.position.set(x, rad, z); m.rotation.y = ry; m.castShadow = m.receiveShadow = true; scene.add(m); });
+    // twigs 12-45 cm long and about a centimetre thick, one instanced mesh; never across the snake
+    const spots = placeN(perM2(2.5 * (PR.twigs || 0), Rb * 0.6, Rb * 4, 260), Rb * 0.6, Rb * 4, F.w0 * 3, { dry: true }), tw = [];
+    spots.forEach(([x, z]) => { const len = 0.12 + R() * 0.33, rad = 0.003 + len * 0.012, ry = R() * TAU, cx = Math.cos(ry) * len / 2, cz = -Math.sin(ry) * len / 2; for (let k = -4; k <= 4; k++) if (dist2snake(x + cx * k / 4, z + cz * k / 4) < F.w0 * 1.5 + rad * 2) return; /* v5.25: no twig across the snake */ tw.push([x, z, len, rad, ry]); });
+    if (tw.length) {
+      const g = new THREE.CylinderGeometry(0.6, 1, 1, 7, 1); g.rotateZ(Math.PI / 2); const im = new THREE.InstancedMesh(g, bm, tw.length); im.castShadow = im.receiveShadow = true;
+      tw.forEach(([x, z, len, rad, ry], i) => { e.set(0, ry, (R() - 0.5) * 0.08); q.setFromEuler(e); sv.set(len, rad, rad); pv.set(x, groundH(x, z) + rad, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); });
+      scene.add(im);
+    }
     if (PR.log) {
-      // one fallen log at a safe distance behind the snake
-      const len = clamp(L * 0.55, 0.4, 3), rad = clamp(L * 0.045, 0.03, 0.25);
+      // one fallen log at a safe distance behind the snake: 1.2-2.4 m long, 16-34 cm thick
+      const len = 1.2 + R() * 1.2, rad = 0.08 + R() * 0.09;
       const g = new THREE.CylinderGeometry(rad * 0.92, rad, len, 18, 6, false), pp = g.attributes.position;
       for (let i = 0; i < pp.count; i++) { const y = pp.getY(i), a = Math.atan2(pp.getZ(i), pp.getX(i)), k = 1 + (vnoise(a * 2, y / len * 6, 1, seed) - 0.5) * 0.18; pp.setX(i, pp.getX(i) * k); pp.setZ(i, pp.getZ(i) * k); }
       g.computeVertexNormals(); g.rotateZ(Math.PI / 2);
-      for (let t = 0; t < 60; t++) { const a = R() * TAU, r = Rb * (1.15 + R() * 0.8), x = Math.cos(a) * r, z = Math.sin(a) * r; const ry = R() * TAU, dx = Math.cos(ry) * len / 2, dz = -Math.sin(ry) * len / 2; if (dist2snake(x + dx, z + dz) < rad * 3 || dist2snake(x - dx, z - dz) < rad * 3 || dist2snake(x, z) < rad * 3) continue; const m = new THREE.Mesh(g, bm); m.position.set(x, rad * 0.85, z); m.rotation.y = ry; m.castShadow = m.receiveShadow = true; scene.add(m); occ.push({ mesh: m, c: m.position.clone(), r: Math.max(rad * 2, len * 0.35), hid: false }); break; }
+      for (let t = 0; t < 80; t++) {
+        const a = R() * TAU, r = Math.max(Rb * (1.15 + R() * 0.8), rad * 3 + F.w0 * 4 + R() * len * 0.4), x = Math.cos(a) * r, z = Math.sin(a) * r; const ry = R() * TAU, dx = Math.cos(ry) * len / 2, dz = -Math.sin(ry) * len / 2;
+        let bad = false; for (let k = -6; k <= 6 && !bad; k++) bad = dist2snake(x + dx * k / 6, z + dz * k / 6) < rad * 2.2 + F.w0 * 3 || wet(x + dx * k / 6, z + dz * k / 6); if (bad) continue;
+        // (v5.50: the bark's grain runs along the log, at its real scale, not in rings round it)
+        const lt = bark.clone(); lt.wrapS = lt.wrapT = THREE.RepeatWrapping; lt.center.set(0.5, 0.5); lt.rotation = Math.PI / 2; lt.repeat.set(len / 0.5, 2); lt.needsUpdate = true;
+        const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: lt, roughness: 0.95, color: '#ffffff' })); m.position.set(x, groundH(x, z) + rad * 0.85, z); m.rotation.y = ry; m.castShadow = m.receiveShadow = true; scene.add(m); occ.push({ mesh: m, c: m.position.clone(), r: Math.max(rad * 2, len * 0.35), hid: false }); break;
+      }
     }
   }
-  if (PR.ferns) grassTuft(10, clamp(L * 0.3, 0.15, 0.5), '#3f6a2c', '#7a9a48', Rb * 1.4, Rb * 4, Rb * 0.6, 0.02);
+  if (PR.ferns) { const hF = 0.45; grassTuft(perM2(2.5, Rb * 1.4, Rb * 4, 120), hF, '#3f6a2c', '#7a9a48', Rb * 1.4, Rb * 4, F.w0 * 3 + hF * 0.6, 0.03); }
   if (PR.crumbs) {
-    const spots = place(90, Rb * 0.2, Rb * 3, F.w0 * 1.2, 8), g = rockGeometry(seed + 4, 1);
+    // crumbs of soil and grit, 2-10 mm
+    const spots = placeN(perM2(250, Rb * 0.2, Rb * 3, 2000), Rb * 0.2, Rb * 3, F.w0 * 1.2, { tries: 8 }), g = rockGeometry(seed + 4, lowQ ? 0 : 1);
     const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ color: '#4a382a', roughness: 1 }), spots.length); im.castShadow = im.receiveShadow = true;
-    spots.forEach(([x, z], i) => { const s = (0.0008 + R() ** 2 * 0.0025) * (L / 0.12); e.set(R() * 0.5, R() * TAU, R() * 0.5); q.setFromEuler(e); sv.set(s, s * 0.7, s); pv.set(x, s * 0.2, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); });
+    spots.forEach(([x, z], i) => { const s = 0.001 + R() ** 2 * 0.004; e.set(R() * 0.5, R() * TAU, R() * 0.5); q.setFromEuler(e); sv.set(s, s * 0.7, s); pv.set(x, groundH(x, z) + s * 0.2, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); });
     scene.add(im);
   }
 }
@@ -1747,14 +1814,15 @@ function applyEnv(ctx, P, F, poseInfo, env) {
   sun.shadow.radius = lerp(8, 3, env.sunny); sun.shadow.blurSamples = 16;
   if (ctx.hemi) ctx.hemi.intensity *= 0.25;
   ctx.envName = env.name;
+  if (ctx.paintSky) ctx.paintSky(); // (the glow follows the sun)
 }
 
 // v4.72: the 3D land all round: a ring of rolling hills out to farR, with trees (forest, grass, heath, riverbank)
 // or boulders (desert, sand, gibber) standing on it; the fog melts it into the sky
-function farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality) {
+function farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality, rise) {
   const { scene } = ctx, R = rng(seed + 991), low = quality === 'low';
-  const r0 = groundR * 0.92, hillA = Math.min(farR * 0.08, Rb * 6 + farR * 0.04);
-  const hillH = (x, z) => { const r = Math.hypot(x, z); return (fbm(x / (farR * 0.18), z / (farR * 0.18), 1, seed + 71, 4) - 0.3) * hillA * sstep(r0, r0 + farR * 0.25, r) + (fbm(x / (Rb * 6), z / (Rb * 6), 1, seed + 53, 3) - 0.35) * Rb * 0.9 * sstep(Rb * 7, groundR * 0.95, r); }; // the same gentle rise as the near ground, so they meet without a step
+  const r0 = groundR * 0.92, hillA = farR * 0.06;
+  const hillH = (x, z) => { const r = Math.hypot(x, z); return (fbm(x / (farR * 0.18), z / (farR * 0.18), 1, seed + 71, 4) - 0.3) * hillA * sstep(r0, r0 + farR * 0.25, r) + (rise ? rise(x, z, r) : 0); }; // the same gentle rise as the near ground, so they meet without a step
   const ring = new THREE.RingGeometry(r0, farR, 128, low ? 24 : 40); ring.rotateX(-Math.PI / 2);
   const pp = ring.attributes.position, cols = [], base = gcol.clone(), tint = new THREE.Color(S.fog);
   for (let i = 0; i < pp.count; i++) { const x = pp.getX(i), z = pp.getZ(i), y = hillH(x, z); pp.setY(i, y - Rb * 0.05);
@@ -1762,7 +1830,7 @@ function farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality) {
   ring.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); ring.computeVertexNormals();
   const land = new THREE.Mesh(ring, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 })); land.receiveShadow = true; scene.add(land);
   const leafy = { litter: 1, soil: 1, pebbles: 0.6, heath: 0.3, dry: 0.35 }[S.ground] || 0; // trees where trees grow; bare land gets boulders
-  const tall = Math.max(Rb * 3, Math.min(14, farR * 0.18)); // trees about 6-14 m, never tiny next to a big snake
+  const tall = 10; // v5.50: trees about 6-14 m tall, whatever the snake's size
   const put = (geo, mat, n, rMin, rMax, size) => {
     if (n <= 0) return; const im = new THREE.InstancedMesh(geo, mat, n), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), sv = new THREE.Vector3();
     for (let i = 0; i < n; i++) { const a = R() * TAU, r = rMin + (rMax - rMin) * Math.sqrt(R()), x = Math.cos(a) * r, z = Math.sin(a) * r, k = size * (0.6 + R() * 0.8);
@@ -1782,7 +1850,7 @@ function farScenery(ctx, S, groundR, farR, Rb, seed, gcol, quality) {
     put(tree, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 }), Math.round((low ? 90 : 180) * leafy), groundR * 1.1, farR * 0.92, tall);
   } else {
     const rock = new THREE.IcosahedronGeometry(1, 3), rp = rock.attributes.position; for (let i = 0; i < rp.count; i++) { const x0 = rp.getX(i), y0 = rp.getY(i), z0 = rp.getZ(i), f = 0.8 + fbm(x0 * 1.7, y0 * 1.7, z0 * 1.7, seed + 13, 3) * 0.45; rp.setXYZ(i, x0 * f, y0 * f * 0.6, z0 * f); } rock.computeVertexNormals(); // smooth, weathered boulders
-    put(rock, new THREE.MeshStandardMaterial({ color: gcol.clone().multiplyScalar(0.8), roughness: 0.93 }), low ? 40 : 80, groundR * 1.1, farR * 0.9, Math.max(Rb * 0.8, farR * 0.02));
+    put(rock, new THREE.MeshStandardMaterial({ color: gcol.clone().multiplyScalar(0.8), roughness: 0.93 }), low ? 40 : 80, groundR * 1.1, farR * 0.9, 1.2);
   }
 }
 

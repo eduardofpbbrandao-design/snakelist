@@ -55,18 +55,22 @@ function buildAll(A) {
 
   // ---------- one height function for the whole land ----------
   const wi = S.water === 'river' ? ctx.waterInfo : null;
-  const depth = Math.max(0.03, Rb * 0.12), riverW = clamp(groundR * 1.1, 6, 26);
-  const riverS = (x, z) => { const al = -x * wi.dir.y + z * wi.dir.x; return x * wi.dir.x + z * wi.dir.y + (fbm(al / Rb * 1.3, 3.1, 0.7, seed + 19, 3) - 0.5) * Rb * 1.8; };
+  // v5.50: the bank, the shoreline's wander and the land's gentle rise are real sizes (viewer.js shares them), not the snake's
+  const depth = wi && wi.depth != null ? wi.depth : Math.max(0.03, Rb * 0.12), riverW = clamp(groundR * 1.1, 6, 26);
+  const wob = wi && wi.wob ? wi.wob : (al) => (fbm(al / Rb * 1.3, 3.1, 0.7, seed + 19, 3) - 0.5) * Rb * 1.8;
+  const riverS = (x, z) => { const al = -x * wi.dir.y + z * wi.dir.x; return x * wi.dir.x + z * wi.dir.y + wob(al); };
+  const bankIn = wi && wi.wob ? 0.06 : Rb * 0.25, bankOut = wi && wi.wob ? 0.55 : Rb * 0.7, shelf = wi && wi.wob ? 1 : Rb;
+  const rise = A.rise || ((x, z, r) => (fbm(x / (Rb * 6), z / (Rb * 6), 1, seed + 53, 3) - 0.35) * Rb * 0.9 * sstep(Rb * 7, groundR * 0.95, r));
   const inRiver = (x, z, m = 1) => { if (!wi) return false; const s = riverS(x, z); return s > wi.edge - m && s < wi.edge + riverW + m; };
   const hs = wi ? groundR * 1.45 : groundR;
   const rEnd = farR * (K.forest ? 1.6 : 3);
   const base = (x, z, r) => {
     if (wi) {
       const s = riverS(x, z), e = wi.edge;
-      return -depth * sstep(e - Rb * 0.25, e + Rb * 0.7, s) - depth * 0.8 * sstep(e + Rb, e + Rb * 4, s) * (1 - sstep(e + riverW - 2, e + riverW, s))
+      return -depth * sstep(e - bankIn, e + bankOut, s) - depth * 0.8 * sstep(e + shelf, e + shelf * 4, s) * (1 - sstep(e + riverW - 2, e + riverW, s))
         + (depth * 1.8 + 0.35) * sstep(e + riverW, e + riverW + Math.max(2, riverW * 0.2), s);
     }
-    return (fbm(x / (Rb * 6), z / (Rb * 6), 1, seed + 53, 3) - 0.35) * Rb * 0.9 * sstep(Rb * 7, groundR * 0.95, r); // the near ground's own gentle rise
+    return rise(x, z, r); // the near ground's own gentle rise
   };
   const drop = (r) => (Rb * 0.04 + F.w0 * 0.3) * (1 - sstep(groundR, groundR * 1.25, r)); // tucked just under the near ground's edge
   const amp = (K.hills || 0) * farR;
@@ -101,7 +105,8 @@ function buildAll(A) {
     im.castShadow = !!o.cast; im.receiveShadow = !!o.recv; scene.add(im); track(geo); track(mat);
     // v5.12: plants, rocks and logs near the snake step aside (are hidden) while they stand between the camera and what
     // it is looking at (the open mouth, a part in Anatomy, a show), so nothing blocks the view
-    if (ctx.occ && o.tag && !/^(carpet|reeds)$/.test(o.tag)) {
+    // v5.50: the real-size grass carpet too (round a small snake it is taller than the camera is high)
+    if (ctx.occ && o.tag && o.tag !== 'reeds') {
       if (!geo.boundingSphere) geo.computeBoundingSphere(); const gr = geo.boundingSphere.radius, lim = Rb * 5;
       list.forEach((t, i) => { if (Math.hypot(t.x, t.z) > lim) return; const r = gr * t.s * Math.max(t.sx || 1, t.sy || 1, t.sz || 1); if (r < F.w0 * 1.5) return; const m = new THREE.Matrix4(); im.getMatrixAt(i, m); ctx.occ.push({ im, i, m, c: new THREE.Vector3(t.x, t.y + r * 0.5, t.z), r, hid: false }); });
     }
@@ -347,9 +352,7 @@ function buildAll(A) {
   // foliage keeps its crown-shaped normals on both faces (no dark backs), so a crown reads as one soft mass
   const foliageMat = (map, o = {}) => {
     const m = new THREE.MeshStandardMaterial({ map, alphaTest: o.alphaTest || 0.42, side: THREE.DoubleSide, vertexColors: true, roughness: 0.8, metalness: 0, color: o.color || '#ffffff' });
-    m.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <normal_fragment_begin>', THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', '')); };
-    m.customProgramCacheKey = () => 'sl-foliage';
-    return track(m);
+    return track(vegetation(THREE, m));
   };
   const barkMat = (map, tint) => track(new THREE.MeshStandardMaterial({ map, bumpMap: map, bumpScale: 1.5, roughness: 0.95, metalness: 0, vertexColors: true, color: tint }));
 
@@ -411,7 +414,9 @@ function buildAll(A) {
     if (!spots.length) return;
     const nv = o.variants || 2, lists = Array.from({ length: nv }, () => []);
     for (const p of spots) {
-      const s = size[0] + (size[1] - size[0]) * R();
+      let s = size[0] + (size[1] - size[0]) * R();
+      if (o.sizeAt) s *= o.sizeAt(p.x, p.z, p.r);
+      if (o.clr && dist2snake(p.x, p.z) < o.clr(s)) continue;
       if (o.span) { // long things (logs) lie along the slope, both ends on the ground
         const ry = R() * TAU, hl = o.span * s, c = Math.cos(ry), sn = Math.sin(ry), h1 = groundAt(p.x + c * hl, p.z - sn * hl), h2 = groundAt(p.x - c * hl, p.z + sn * hl);
         lists[(R() * nv) | 0].push({ x: p.x, y: (h1 + h2) / 2 + (o.lift || 0) * s, z: p.z, ry, rz: Math.atan2(h1 - h2, 2 * hl), s }); continue;
@@ -419,7 +424,7 @@ function buildAll(A) {
       lists[(R() * nv) | 0].push({ x: p.x, y: groundAt(p.x, p.z) + (o.lift || 0) * s, z: p.z, ry: R() * TAU, rx: (R() - 0.5) * (o.tilt || 0.1), rz: (R() - 0.5) * (o.tilt || 0.1), s, sy: o.sy ? lerp(o.sy[0], o.sy[1], R()) : 1, col: o.col ? o.col() : null }); }
     lists.forEach((lst, v) => { if (!lst.length) return; const g = makeGeo(rng(seed + name.length * 131 + v * 17), v); if (g.wood) { inst(g.wood, o.wmat, lst, { tag: name }); inst(g.fol, mat, lst, { tag: name }); } else inst(g, mat, lst, { tag: name, cast: o.cast, recv: o.recv }); });
   };
-  const grassMat = () => track(new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.92, metalness: 0 }));
+  const grassMat = () => track(vegetation(THREE, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.92, metalness: 0 })));
   const twigMat = () => barkMat(tex.bark('furrow'), '#8a7d6c');
   const rockStyle = { moss: ['#8d8a80', '#6f8a4a'], grey: ['#9a958a', null], red: ['#9a5a3e', null], sandstone: ['#b98e62', null], gibber: ['#6e3422', null] }[K.rock];
   const rockMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), bumpMap: tex.rock(), bumpScale: 2, roughness: 0.9, metalness: 0, vertexColors: true, color: rockStyle[0] }));
@@ -438,7 +443,7 @@ function buildAll(A) {
     put('logs', logGeo, barkMat(tex.bark('furrow'), '#9a8e7c'), 14, groundR * 1.1, 40, [0.7, 1.3], { variants: 2, lift: 0.06, span: 1.5 });
     // v5.12: soft cushions of moss on the forest floor, some close to the snake (never on it)
     const mossMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), color: '#6f8f3a', roughness: 1, metalness: 0, vertexColors: true }));
-    put('moss', (Rn, v) => rockGeo(seed + 900 + v * 7, low ? 1 : 2, { flat: 0.28 }), mossMat, jungle ? 90 : 70, Math.max(Rb * 1.2, F.w0 * 8), near0, [F.w0 * 3, Math.min(0.45, F.w0 * 40)], /* v5.25: cushions in scale with the snake (a tiny blind snake had moss mountains round it) */ { variants: 3, lift: -0.08, tilt: 0.08, ok: (x, z) => dist2snake(x, z) > F.w0 * 3 + 0.2, col: () => tint(0.75, 1.15, 0.12) });
+    put('moss', (Rn, v) => rockGeo(seed + 900 + v * 7, low ? 1 : 2, { flat: 0.28 }), mossMat, Math.round(Math.min(jungle ? 90 : 70, (jungle ? 1.6 : 1.2) * Math.PI * (near0 * near0 - Math.max(Rb * 1.2, F.w0 * 8) ** 2))), Math.max(Rb * 1.2, F.w0 * 8), near0, [0.06, 0.32], /* v5.50: cushions their real size, 12-60 cm across, and kept clear of the snake by their own size */ { variants: 3, lift: -0.08, tilt: 0.08, ok: (x, z) => dist2snake(x, z) > F.w0 * 3 + 0.05, clr: (s) => F.w0 * 3 + s * 1.15, col: () => tint(0.75, 1.15, 0.12) });
     rocks(10, groundR * 1.05, 45, [0.3, 1.6], { minD: 2.5 });
   } else if (U === 'meadow') {
     put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassG'), { alphaTest: 0.35 }), 1700, near0, 36, [0.5, 1.1], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
@@ -486,25 +491,32 @@ function buildAll(A) {
   // grass and dry grass with ripe seed heads (the painted "wheat" became real blades), heather and grass on heath,
   // and small loose stones on gravel, gibber and sand; densest near the snake, never on it
   {
-    const L0 = clamp(Math.min(L * 0.07, F.w0 * 5), 0.02, 0.14), clearS = (x, z, h) => dist2snake(x, z) > F.w0 * 2.2 + h * 0.5, SP = A.sceneP || {};
+    // v5.50: grass its real height (a 20 cm snake in a meadow is shorter than the grass), not scaled to the snake. Round the
+    // snake it is shorter and keeps back (a little trodden clearing, as in a photo): within reach of the snake no blade
+    // is taller than about half its distance from the body, so from the usual viewing angle nothing hides the snake
+    const SP = A.sceneP || {}, clearS = (x, z) => dist2snake(x, z) > F.w0 * 2.2 + 0.015;
+    const bowl = (h) => (x, z) => { const k = 0.5 * (dist2snake(x, z) - F.w0 * 2) / h; return k >= 1 ? 1 : Math.max(0.12, k * (0.8 + R() * 0.3)); };
+    const dens = (n, perM2, r0, r1) => Math.round(Math.min(n, perM2 * Math.PI * (r1 * r1 - r0 * r0)));
     const hasNear = (k) => ({ grass: 1, meadow: 1, heath: 1 })[k];
     if (hasNear(U)) {
-      const dry = U === 'grass', heath = U === 'heath', h = L0 * (heath ? 0.8 : 1);
+      const dry = U === 'grass', heath = U === 'heath', h = (dry ? 0.3 : heath ? 0.17 : 0.24) * (SP.grassH || 1);
       const colA = SP.grassA || (dry ? '#7d7a3e' : heath ? '#55602f' : '#4f7a2e'), colB = SP.grassB || (dry ? '#cdb877' : heath ? '#8a8350' : '#90a64e'), lush = !!SP.grassA && !/^#[89a-f]/i.test(SP.grassA);
-      const nTuft = Math.round(3600 * (heath ? 0.7 : 1));
       const rIn = Math.max(F.w0 * 2, Rb * 0.05), rOut = Math.min(near0, Math.max(Rb * 5, 3));
+      const nTuft = dens(Math.round(3600 * (heath ? 0.7 : 1)), 260, rIn, rOut); // (a real density, at most 3600 tufts)
       put('carpet', (Rn, v) => grassGeo(Rn, low ? 8 : 13, h, colA, colB, h * 0.22, { heads: dry && !lush ? (v === 0 ? 0.22 : 0.1) : heath ? 0 : 0.06, headCol: dry && !lush ? '#cdb06a' : '#9a9a58', tip: dry && !lush ? '#d8c58c' : null, w: 0.035 }),
-        grassMat(), nTuft, rIn, rOut, [0.6, 1.25], { variants: 3, distr: 'lin', ok: (x, z) => clearS(x, z, h), tilt: 0.15, recv: true, col: () => tint(0.85, 1.12, 0.08) });
+        grassMat(), nTuft, rIn, rOut, [0.6, 1.25], { variants: 3, distr: 'lin', ok: clearS, sizeAt: bowl(h), tilt: 0.15, recv: true, col: () => tint(0.85, 1.12, 0.08) });
       // v5.09: beyond it the grass thins out gradually (it used to stop at a hard edge: a dark green ring of grass
       // with bare straw-coloured ground right after it)
       const rFar = Math.min(near0 * 1.6, rOut * 2.6), Rf = rng(seed + 977);
       put('carpet', (Rn, v) => grassGeo(Rn, low ? 7 : 11, h, colA, colB, h * 0.22, { heads: dry && !lush ? 0.15 : heath ? 0 : 0.05, headCol: dry && !lush ? '#cdb06a' : '#9a9a58', tip: dry && !lush ? '#d8c58c' : null, w: 0.035 }),
-        grassMat(), Math.round(nTuft * 0.9), rOut * 0.85, rFar, [0.6, 1.25], { variants: 2, distr: 'area', ok: (x, z, r) => Rf() < 1 - sstep(rOut, rFar, r) * 0.92, tilt: 0.15, recv: true, col: () => tint(0.85, 1.12, 0.08) });
-      if (heath) put('heather', (Rn) => grassGeo(Rn, low ? 20 : 40, h * 0.9, '#4a5530', '#6a6442', h * 0.5, { lean: 0.8, w: 0.018, tip: '#9a6f8c', heads: 0 }), grassMat(), 700, rIn, rOut, [0.6, 1.2], { variants: 2, distr: 'lin', ok: (x, z) => clearS(x, z, h), col: () => tint(0.85, 1.1, 0.1) });
+        grassMat(), dens(Math.round(nTuft * 0.9), 120, rOut * 0.85, rFar), rOut * 0.85, rFar, [0.6, 1.25], { variants: 2, distr: 'area', ok: (x, z, r) => Rf() < 1 - sstep(rOut, rFar, r) * 0.92 && clearS(x, z), sizeAt: bowl(h), tilt: 0.15, recv: true, col: () => tint(0.85, 1.12, 0.08) });
+      if (heath) put('heather', (Rn) => grassGeo(Rn, low ? 20 : 40, h * 0.9, '#4a5530', '#6a6442', h * 0.5, { lean: 0.8, w: 0.018, tip: '#9a6f8c', heads: 0 }), grassMat(), dens(700, 60, rIn, rOut), rIn, rOut, [0.6, 1.2], { variants: 2, distr: 'lin', ok: clearS, sizeAt: bowl(h * 0.9), col: () => tint(0.85, 1.1, 0.1) });
     }
     if (U === 'arid' || U === 'gibber' || U === 'sand') {
-      const sz = clamp(L * 0.012, 0.004, 0.03), n = U === 'gibber' ? 1500 : U === 'arid' ? 500 : 200; // v5.05: fewer small stones
-      rocks(n, Math.max(F.w0 * 2, Rb * 0.05), Math.min(near0, Math.max(Rb * 4.5, 2.5)), [sz, sz * (U === 'gibber' ? 4 : 3)], { variants: 3, detail: low ? 0 : 1, flat: U === 'gibber' ? 0.5 : 0.65, lift: -0.15, recv: true, distr: 'lin', ok: (x, z) => dist2snake(x, z) > F.w0 * 1.3 + sz * 3 });
+      // v5.50: loose stones their real size (gibber 2-8 cm across, gravel and grit 1-4 cm), not the snake's
+      const sz = U === 'gibber' ? 0.01 : 0.006, r0 = Math.max(F.w0 * 2, Rb * 0.05), r1 = Math.min(near0, Math.max(Rb * 4.5, 2.5));
+      const n = dens(U === 'gibber' ? 1500 : U === 'arid' ? 500 : 200, U === 'gibber' ? 110 : U === 'arid' ? 70 : 30, r0, r1); // v5.05: fewer small stones
+      rocks(n, r0, r1, [sz, sz * 3], { variants: 3, detail: low ? 0 : 1, flat: U === 'gibber' ? 0.5 : 0.65, lift: -0.15, recv: true, distr: 'lin', ok: (x, z) => dist2snake(x, z) > F.w0 * 1.3 + 0.005, clr: (s) => F.w0 * 1.3 + s * 1.6 });
     }
   }
   function grassGeo(Rn, n, h, cA, cB, spread, o = {}) { // blades that curve over, some with a ripe seed head (an ear of grass)
@@ -539,14 +551,16 @@ function buildAll(A) {
   function leafCarpet() {
     const dens = K.litter * (S.props && S.props.leaves ? Math.min(1.3, 0.5 + S.props.leaves * 0.5) : 0.5);
     const atlas = tex.litter(), mat = track(new THREE.MeshStandardMaterial({ map: atlas, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.85, metalness: 0 }));
-    const len0 = clamp(0.035 + L * 0.025, 0.05, 0.16) * (kind === 'rainforest' ? 1.25 : 1);
+    // v5.50: real fallen leaves, 4-11 cm long (rainforest leaves a little bigger), for every snake; round a big snake the
+    // carpet is capped (and thinner further out), and the ground's own painted leaves, also real size, fill in
+    const len0 = 0.075 * (kind === 'rainforest' ? 1.25 : 1);
     const rIn = clamp(Math.max(Rb * 3.2, len0 * 14), 0, groundR * 0.6), rOut = groundR * 1.1;
-    const leafA = 0.3 * len0 * len0, capIn = (low ? 900 : 3600) * Math.min(1, dens), capOut = (low ? 2400 : 9000) * Math.min(1, dens);
+    const leafA = 0.3 * len0 * len0, capIn = (low ? 1400 : 5000) * Math.min(1, dens), capOut = (low ? 2400 : 9000) * Math.min(1, dens);
     const nIn = Math.round(Math.min(capIn, ((Math.PI * rIn * rIn * 1.7) / leafA) * dens)), dIn = nIn / (Math.PI * rIn * rIn);
     const nOut = Math.round(Math.min(capOut, dIn * TAU * rIn * (rOut - rIn)));
     let poseR = 0; for (const p of poseInfo.pts) poseR = Math.max(poseR, Math.hypot(p[0], p[1]));
     poseR += F.w0 * 2 + len0;
-    const clear = (x, z, l) => Math.hypot(x, z) > poseR + l || dist2snake(x, z) > F.w0 * 0.6 + l * 0.45;
+    const clear = (x, z, l) => Math.hypot(x, z) > poseR + l || dist2snake(x, z) > F.w0 * 0.6 + l * 0.55; // (v5.50: no real-size leaf reaches under a thin snake)
     const pal = kind === 'soil' ? ['#5a4532', '#6b5236', '#4a3826', '#7a6044', '#584430', '#6e5a40']
       : ['#7a5532', '#94683a', '#a8804a', '#5e4128', '#6f4f2c', '#b08850', '#4f3a22', '#8c6a42', '#6b5536', '#9a7a4e', '#5e5032', '#86663f'];
     if (kind === 'rainforest') pal.push('#6f6a3a', '#857a40', '#5c5a30', '#8a6a3a');
@@ -603,7 +617,8 @@ function buildAll(A) {
     const far = K.forest ? farR * 1.45 : farR * 2.9; ctx.farR = far / 0.95; scene.fog.near = ctx.fogNear0; scene.fog.far = far;
   }
   const sk = ctx.skyMesh;
-  if (sk && sk.geometry.attributes.color) {
+  if (ctx.paintSky) ctx.paintSky(fogCol); // v5.50: viewer.js paints it (blue above the haze, a glow towards the sun)
+  else if (sk && sk.geometry.attributes.color) {
     const p = sk.geometry.attributes.position, c = sk.geometry.attributes.color, rad = sk.geometry.parameters.radius || 1, top = new THREE.Color(S.sky[0]), t = new THREE.Color();
     for (let i = 0; i < p.count; i++) { const y = p.getY(i) / rad; t.copy(fogCol).lerp(top, sstep(0, 0.5, y)); c.setXYZ(i, t.r, t.g, t.b); }
     c.needsUpdate = true;
@@ -611,6 +626,29 @@ function buildAll(A) {
   if (wi && water) { const k = rEnd / groundR; water.scale.set(k, 1, k); const nmap = water.material.normalMap; if (nmap) nmap.repeat.multiplyScalar(k); }
   stats.total = Object.keys(stats).filter((k) => !/Count|total/.test(k)).reduce((s, k) => s + stats[k], 0);
   if (typeof window !== 'undefined' && window.SL_3D_TEST) window.__natureStats = stats;
+}
+
+// v5.50: how leaves and grass take the light, the same from every side and every camera angle:
+// - both faces keep the plant's own (mostly upward, or crown-shaped) normal: with the usual flip, the half of the
+//   blades seen from behind had their normals turned to face the ground and went near black (front-lit grass looked
+//   dark blue-green, and which half depended on where you stood)
+// - almost no glossy reflection: grass and leaves are matt, but those upward normals mirrored the sun and the bright
+//   sky when you looked towards the sun, and the grass went white
+// - a little light through the leaves when the sun is behind them, so backlit trees and grass glow softly instead
+//   of standing as black cut-outs
+export function vegetation(THREE, m) {
+  m.onBeforeCompile = (sh) => {
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <normal_fragment_begin>', THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', ''))
+      .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
+      reflectedLight.directSpecular *= 0.1; reflectedLight.indirectSpecular *= 0.25;
+      #if NUM_DIR_LIGHTS > 0
+      { vec3 sl_L = directionalLights[ 0 ].direction; float sl_t = clamp( 0.35 - dot( normal, sl_L ), 0.0, 1.0 ) * ( 0.35 + 0.65 * clamp( dot( -geometryViewDir, sl_L ), 0.0, 1.0 ) );
+        reflectedLight.directDiffuse += diffuseColor.rgb * directionalLights[ 0 ].color * sl_t * 0.22; }
+      #endif`);
+  };
+  m.customProgramCacheKey = () => 'sl-veg';
+  return m;
 }
 
 // height of a RingGeometry ground (rotated flat) at x, z, read straight from its vertices
