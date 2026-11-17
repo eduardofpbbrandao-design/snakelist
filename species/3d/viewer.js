@@ -1718,7 +1718,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     });
   }
   if (PR.pebbles) {
-    const n = perM2(70 * PR.pebbles, Rb * 0.5, Rb * 4, 2600), spots = placeN(n, Rb * 0.5, Rb * 4, F.w0 * 1.5 + 0.035), g = rockGeometry(seed + 7, lowQ ? 1 : 2);
+    const n = perM2(70 * PR.pebbles, Rb * 0.5, Rb * 4, 1600), spots = placeN(n, Rb * 0.5, Rb * 4, F.w0 * 1.5 + 0.035), g = rockGeometry(seed + 7, 1); // (small: 80 triangles each is plenty)
     const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ roughness: 0.8, color: '#ffffff' }), spots.length); im.castShadow = im.receiveShadow = true;
     const pc = new THREE.Color();
     // and a few cobbles, 10-25 cm, scattered further out (real size: round a giant they read as small stones)
@@ -1779,7 +1779,9 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
       for (let t = 0; t < 80; t++) {
         const a = R() * TAU, r = Math.max(Rb * (1.15 + R() * 0.8), rad * 3 + F.w0 * 4 + R() * len * 0.4), x = Math.cos(a) * r, z = Math.sin(a) * r; const ry = R() * TAU, dx = Math.cos(ry) * len / 2, dz = -Math.sin(ry) * len / 2;
         let bad = false; for (let k = -6; k <= 6 && !bad; k++) bad = dist2snake(x + dx * k / 6, z + dz * k / 6) < rad * 2.2 + F.w0 * 3 || wet(x + dx * k / 6, z + dz * k / 6); if (bad) continue;
-        const m = new THREE.Mesh(g, bm); m.position.set(x, groundH(x, z) + rad * 0.85, z); m.rotation.y = ry; m.castShadow = m.receiveShadow = true; scene.add(m); occ.push({ mesh: m, c: m.position.clone(), r: Math.max(rad * 2, len * 0.35), hid: false }); break;
+        // (v5.50: the bark's grain runs along the log, at its real scale, not in rings round it)
+        const lt = bark.clone(); lt.wrapS = lt.wrapT = THREE.RepeatWrapping; lt.center.set(0.5, 0.5); lt.rotation = Math.PI / 2; lt.repeat.set(len / 0.5, 2); lt.needsUpdate = true;
+        const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: lt, roughness: 0.95, color: '#ffffff' })); m.position.set(x, groundH(x, z) + rad * 0.85, z); m.rotation.y = ry; m.castShadow = m.receiveShadow = true; scene.add(m); occ.push({ mesh: m, c: m.position.clone(), r: Math.max(rad * 2, len * 0.35), hid: false }); break;
       }
     }
   }
