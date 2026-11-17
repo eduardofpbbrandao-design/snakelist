@@ -600,7 +600,7 @@ export function create(V) {
     for (const o of s.objs) disposeTree(o);
     (s.undo || []).forEach((f) => f());
     if (rig) rig.release();
-    if (V.extras && V.extras.mouth) { V.extras.mouth.set(V.extras.mouth.t); V.mouthGoal = s.mouth0 || 0; }
+    if (V.extras && V.extras.mouth) { V.extras.mouth.set(V.extras.mouth.t); V.mouthGoal = s.mouth0 || 0; flick(0); }
     say(''); stepTag.hidden = true;
     for (const b of [bBite, bEat]) { b.disabled = false; b.removeAttribute('aria-pressed'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
     if (s.cLast && !quiet) camBlend = { t0: now(), pos: s.cLast.pos.clone(), tgt: s.cLast.tgt.clone() };
@@ -608,6 +608,8 @@ export function create(V) {
     V.kick();
   }
   function setMouth(t) { const mo = V.extras.mouth; if (!mo) return; if (Math.abs(mo.t - t) > 1e-4) mo.set(t); V.mouthGoal = t; }
+  // v5.53: a tongue flick (s from 0 to 1: out through the notch in the lips, the tips wave, back in; 0 = in its sheath)
+  function flick(s) { const mo = V.extras && V.extras.mouth; if (mo && mo.flick) mo.flick(s); }
   // a show is a list of [duration, fn(u, s)] phases
   function runPhases(list, s) { let t = 0; for (let i = 0; i < list.length; i++) { const [d, f] = list[i]; if (s < t + d || i === list.length - 1) { f(clamp((s - t) / d, 0, 1), s, i); return i; } t += d; } return -1; }
   const total = (list) => list.reduce((a, p) => a + p[0], 0);
@@ -832,7 +834,7 @@ export function create(V) {
       digest: 'Digesting a big meal can take days to weeks. Then it is hungry again.',
     };
     const phases = [];
-    phases.push([1.3, (u) => { fadeTree(prey, ease(u * 1.5)); R.setPose(R.blend(rest, strikes ? coil : ext, ease(u) * (strikes ? 1 : 0.3))); R.apply(); say(T.intro); }]);
+    phases.push([1.3, (u) => { fadeTree(prey, ease(u * 1.5)); R.setPose(R.blend(rest, strikes ? coil : ext, ease(u) * (strikes ? 1 : 0.3))); R.apply(); say(T.intro); flick(clamp(u * 1.15, 0, 1)); }]); // (it tastes the air)
     if (strikes) {
       phases.push([0.9, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 + 0.05 * Math.sin(s * 9) })); R.apply(); }]);
       phases.push([0.3, (u) => { R.setPose(R.blend(coil, ext, ease(u * 1.15))); R.apply(); setMouth(0.75 * ease(u * 3)); say(T.strike); if (u >= 0.98) held = true; }]);
@@ -841,7 +843,7 @@ export function create(V) {
       if (viperWait) {
         phases.push([0.6, (u) => { held = false; R.setPose(R.blend(ext, coil, ease(u))); R.apply(); setMouth(0.55 * (1 - ease(u))); say(T.release); if (u > 0.5) camKey = camSide(prey.position.clone().lerp(V.info.headPos, 0.5), wideD); }]);
         phases.push([1.6, (u) => { R.setPose(coil); R.apply(); rolled(ease(u)); }]);
-        phases.push([1.5, (u) => { R.setPose(R.blend(coil, ext, ease(u))); R.apply(); setMouth(0.6 * ease(u)); say(T.track); rolled(1 - sstep(0.5, 0.97, u)); if (u > 0.97) held = true; }]); // (picked up smoothly, no jump)
+        phases.push([1.5, (u) => { R.setPose(R.blend(coil, ext, ease(u))); R.apply(); setMouth(0.6 * ease(u)); say(T.track); rolled(1 - sstep(0.5, 0.97, u)); if (u > 0.97) held = true; const f2 = u / 0.7; flick(f2 < 1 ? (f2 * 2) % 1 : 0); }]); // (picked up smoothly, no jump; flicking its tongue along the trail)
       }
       if (constrict) {
         phases.push([1.5, (u) => { held = true; R.setPose(R.blend(ext, spiral, ease(u))); R.apply(); setMouth(0.55); say(T.coil); camKey = camSide(prey.position.clone(), fitD(Math.max(prR * 7, F.W(L * 0.3) * 14)), 0.85, 0.1); }]);
@@ -870,7 +872,8 @@ export function create(V) {
     };
     show.dur = total(phases);
     let shown = false;
-    show.step = (s) => { const i = runPhases(phases, s); if (i > 0 && !shown) { shown = true; fadeTree(prey, 1); } stepPrey(); /* fully faded in even if a slow frame skipped the end of the first step */ stepTag.hidden = false; stepTag.textContent = (i + 1) + ' / ' + phases.length; return i; };
+    let lastI = -1;
+    show.step = (s) => { const i0 = lastI; const i = runPhases(phases, s); if (i !== i0) { if (i0 >= 0) flick(0); lastI = i; } /* (a slow frame may skip the end of a flick) */ if (i > 0 && !shown) { shown = true; fadeTree(prey, 1); } stepPrey(); /* fully faded in even if a slow frame skipped the end of the first step */ stepTag.hidden = false; stepTag.textContent = (i + 1) + ' / ' + phases.length; return i; };
     show.cam = () => camKey;
     show.diet = kind;
   }
@@ -926,12 +929,13 @@ export function create(V) {
     let pose;
     if (S.stopping) { // coil back up where it started
       const k = ease((now() - S.stopping) / 1800); pose = S.between(S.stopA, S.restA, S.stopPose, S.rest, k, N >> 1);
-      if (k >= 1) { slither = null; R.release(); tip.hidden = true; unzoom(); if (S.undo) S.undo(); return false; }
+      if (k >= 1) { slither = null; flick(0); R.release(); tip.hidden = true; unzoom(); if (S.undo) S.undo(); return false; }
     } else { // v5.12: it slithers off at once - the head leads along the track from the first moment, the body unwinding behind it
       const tp = S.trackPose(S.s0 + S.speed * t);
       pose = t < S.T0 ? S.between(S.restA, S.angles(tp), S.rest, tp, ease(t / S.T0), 0) : tp;
     }
     S.lastPose = pose;
+    { const ph = S.stopping || V.reduce() ? 1 : ((t + 0.8) % 2.8) / 0.75; flick(ph < 1 ? ph : 0); } // v5.53: it flicks its tongue now and then as it goes
     if (S.stout) { for (let i = 0; i < N; i++) R.bul[i] = 1 + 0.03 * Math.sin(TAU * (i * R.dx / (R.L * 0.1) - t * 1.4)) * sstep(R.ih, R.ih + 30, i); }
     R.setPose(pose); R.apply(); return true;
   }
@@ -939,7 +943,7 @@ export function create(V) {
     if (!slither) return;
     bSlither.setAttribute('aria-pressed', 'false'); bSlither.textContent = 'Slither';
     if (soft && !V.reduce()) { if (!slither.stopping && slither.lastPose) { slither.stopping = now(); slither.stopPose = slither.lastPose; slither.stopA = slither.angles(slither.lastPose); rig.bul.fill(1); } V.kick(); return; }
-    const S = slither; slither = null; if (rig) rig.release(); tip.hidden = true; unzoom(); if (S.undo) S.undo();
+    const S = slither; slither = null; flick(0); if (rig) rig.release(); tip.hidden = true; unzoom(); if (S.undo) S.undo();
   }
   function unzoom() { if (fx.zoomOut > 1) { fx.zoomOut = 1; V.controls.setGoal({ d: Math.min(V.controls.st.goal ? V.controls.st.goal.d : V.controls.st.d, V.info.dMax), el: (V.info.portrait ? 40 : 30) * Math.PI / 180 }); } }
 

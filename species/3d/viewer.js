@@ -68,10 +68,10 @@ const PLANS = {
   viper:    { body: { ld: 15, neck: 0.42, peak: 0.45, vent: 0.62, tail: 0.10, xs: 1.32, bf: 0.72 }, head: { shape: 'tri', len: 0.074, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.05, h: 0.58, snout: 0.5, jaw: 0.78, eyeX: 0.27, eyeA: 70, taper: 0.3, eye: 0.13, pupil: 'slit', brow: 0.10, canthus: 3.0 }, scales: { rows: 31, keel: 0.85, gloss: 0.08, aV: 0.73 }, pose: { kind: 'coil' } },
   pitviper: { body: { ld: 22, neck: 0.48, peak: 0.45, vent: 0.62, tail: 0.085, xs: 1.25, bf: 0.74 }, head: { shape: 'tri', len: 0.06, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.0, h: 0.6, snout: 0.5, jaw: 0.8, eyeX: 0.3, eyeA: 70, taper: 0.3, eye: 0.12, pupil: 'slit', brow: 0.10, canthus: 3.0, pits: 'loreal' }, scales: { rows: 27, keel: 0.85, gloss: 0.08, aV: 0.73 }, pose: { kind: 'coil' } },
   python:   { body: { ld: 30, neck: 0.55, peak: 0.5, vent: 0.62, tail: 0.12, xs: 1.18, bf: 0.76, ridge: 0.025 }, head: { len: 0.04, chin: 0.62, tipR: 0.13, snoutH: 0.7, w: 0.68, h: 0.6, snout: 0.62, jaw: 0.78, eyeX: 0.3, eyeA: 62, eye: 0.13, pupil: 'slit', brow: 0.03, canthus: 3.0, pits: 'labial' }, scales: { rows: 71, keel: 0, gloss: 0.5, aV: 0.77 }, pose: { kind: 'coil' } },
-  colubrid: { body: { ld: 36, neck: 0.78, peak: 0.42, vent: 0.62, tail: 0.24, xs: 1.08, bf: 0.8, ridge: 0.02 }, head: { len: 0.035, w: 1.05, h: 0.68, snout: 0.62, chin: 0.66, jaw: 0.72, eyeX: 0.3, eyeA: 60, eye: 0.16, pupil: 'round', brow: 0.02, canthus: 2.8 }, scales: { rows: 19, keel: 0, gloss: 0.5, aV: 0.73 }, pose: { kind: 'wave' } },
-  elapid:   { body: { ld: 45, neck: 0.85, peak: 0.45, vent: 0.62, tail: 0.18, xs: 1.05, bf: 0.8, ridge: 0.015 }, head: { len: 0.032, w: 0.95, h: 0.62, snout: 0.58, chin: 0.66, jaw: 0.75, eyeX: 0.3, eyeA: 60, eye: 0.15, pupil: 'round', brow: 0.02, canthus: 2.9 }, scales: { rows: 17, keel: 0, gloss: 0.55, aV: 0.73 }, pose: { kind: 'wave' } },
+  colubrid: { body: { ld: 36, neck: 0.78, peak: 0.42, vent: 0.62, tail: 0.24, xs: 1.08, bf: 0.8, ridge: 0.02 }, head: { len: 0.035, w: 1.05, h: 0.64, snout: 0.57, chin: 0.66, jaw: 0.72, eyeX: 0.3, eyeA: 60, eye: 0.16, pupil: 'round', brow: 0.04, canthus: 3.1 }, scales: { rows: 19, keel: 0, gloss: 0.5, aV: 0.73 }, pose: { kind: 'wave' } },
+  elapid:   { body: { ld: 45, neck: 0.85, peak: 0.45, vent: 0.62, tail: 0.18, xs: 1.05, bf: 0.8, ridge: 0.015 }, head: { len: 0.032, w: 0.95, h: 0.6, snout: 0.56, chin: 0.66, jaw: 0.75, eyeX: 0.3, eyeA: 60, eye: 0.15, pupil: 'round', brow: 0.035, canthus: 3.1 }, scales: { rows: 17, keel: 0, gloss: 0.55, aV: 0.73 }, pose: { kind: 'wave' } },
   blind:    { body: { ld: 42, neck: 1.0, peak: 0.5, vent: 0.97, tail: 0.022, xs: 1.0, bf: 0.9, blunt: true }, head: { shape: 'blunt', len: 0.022, w: 0.98, h: 0.8, snout: 0.9, jaw: 0.6, eyeX: 0.32, eyeA: 55, eye: 0.16, pupil: 'none', brow: 0, canthus: 2.0 }, scales: { rows: 20, keel: 0, gloss: 0.85, aV: 0.97, kind: 'cycloid' }, pose: { kind: 'wave' } },
-  sea:      { body: { ld: 30, neck: 0.62, peak: 0.55, vent: 0.75, tail: 0.11, xs: 0.72, bf: 0.85, paddle: true }, head: { len: 0.045, w: 0.75, h: 0.72, snout: 0.6, jaw: 0.75, eyeX: 0.3, eyeA: 52, eye: 0.13, pupil: 'round', brow: 0, canthus: 2.2 }, scales: { rows: 47, keel: 0, gloss: 0.35, aV: 0.95, kind: 'juxta' }, pose: { kind: 'wave' } },
+  sea:      { body: { ld: 30, neck: 0.62, peak: 0.55, vent: 0.75, tail: 0.11, xs: 0.72, bf: 0.85, paddle: true }, head: { len: 0.045, w: 0.75, h: 0.72, snout: 0.6, jaw: 0.75, eyeX: 0.3, eyeA: 52, eye: 0.13, pupil: 'round', brow: 0, canthus: 2.2, nostrilA: 32 }, scales: { rows: 47, keel: 0, gloss: 0.35, aV: 0.95, kind: 'juxta' }, pose: { kind: 'wave' } },
 };
 function merge(a, b) { const o = Object.assign({}, a); for (const k in b) o[k] = b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) && a && typeof a[k] === 'object' ? merge(a[k], b[k]) : b[k]; return o; }
 function normProfile(p) {
@@ -87,10 +87,8 @@ function normProfile(p) {
     if (minR && r < minR) { const k = Math.sqrt(minR / r); q.head = Object.assign({}, q.head, { len: q.head.len * k, w: q.head.w / k }); } }
   // v4.81: colubrids, elapids and sea snakes have big head shields: their sutures are drawn on the head, and the
   // small-scale relief is left off it
-  if ((q.plan === 'colubrid' || q.plan === 'elapid' || q.plan === 'sea' || !PLANS[q.plan]) && q.head.plates == null) {
-    q.head = Object.assign({}, q.head, { plates: true });
-    if (!q.pattern.some((l) => l.type === 'shields')) q.pattern = q.pattern.concat([{ type: 'shields', color: shade(q.colors.dorsal, 0.55), alpha: 0.3, wid: 0.009, barColor: shade(q.colors.dorsal, 0.5), barAlpha: 0.22, barWid: 0.009, labials: q.plan === 'elapid' ? 7 : 8 }]);
-  }
+  // v5.53: the plates are now real scales in the head's own textures (headData), not painted lines
+  if ((q.plan === 'colubrid' || q.plan === 'elapid' || q.plan === 'sea' || !PLANS[q.plan]) && q.head.plates == null) q.head = Object.assign({}, q.head, { plates: true });
   return q;
 }
 
@@ -491,7 +489,7 @@ function buildBody(P, F, pose, quality) {
   const Hd = P.head, eyeA = (Hd.eyeA * Math.PI) / 180, mouthA = Math.PI * 0.56;
   const bumps = [];
   if (Hd.brow) bumps.push({ x: Hd.eyeX * F.Hl, xs: F.Hl * 0.16, th: eyeA - 0.42, ts: 0.32, amp: Hd.brow, mirror: true });
-  if (Hd.pits === 'loreal') bumps.push({ x: F.Hl * 0.19, xs: F.Hl * 0.025, th: Math.PI * 0.55, ts: 0.06, amp: -0.05, mirror: true });
+  if (Hd.pits === 'loreal') bumps.push({ x: F.Hl * ((0.075 + Hd.eyeX - 0.06) / 2 + 0.01), xs: F.Hl * 0.025, th: Math.PI * Math.min(0.47, ((Hd.nostrilA != null ? Hd.nostrilA / 180 : 0.44) + Hd.eyeA / 180) / 2 + 0.06), ts: 0.06, amp: -0.05, mirror: true }); // (v5.53: between the nostril and the eye, above the lip scales)
   // heat pits only where the species has them: one loreal pit (pit vipers), a row in the lip scales (pythons)
   if (Hd.pits === 'labial') for (let k = 0; k < 5; k++) bumps.push({ x: F.Hl * (0.03 + k * 0.06), xs: F.Hl * 0.016, th: Math.PI * (k ? 0.52 : 0.2), ts: 0.05, amp: -0.05, mirror: true });
   bumps.push({ x: F.Hl * 0.07, xs: F.Hl * 0.014, th: Hd.nostrilA != null ? (Hd.nostrilA * Math.PI) / 180 : Math.PI * 0.44, ts: 0.06, amp: -0.035, mirror: true }); // v5.28: on the side of the snout near the tip // nostril (upward-facing in water snakes)
@@ -542,7 +540,7 @@ function buildBody(P, F, pose, quality) {
     }
     if (x < F.Hl * Hd.jaw * 1.1 && x > F.Hl * 0.02) { // the mouth line
       const dm = Math.min(Math.abs(Math.abs(th) - mouthA), 1);
-      k -= 0.055 * Math.exp(-((dm / 0.085) ** 2)) * sstep(F.Hl * 0.1, F.Hl * 0.26, x) /* v5.12: the lip line fades out over the rounded snout tip */ * (1 - sstep(F.Hl * Hd.jaw * 0.85, F.Hl * Hd.jaw * 1.1, x));
+      k -= 0.03 * Math.exp(-((dm / 0.07) ** 2)) /* v5.53: a fine crease (a deep one read as a separate shell) */ * sstep(F.Hl * 0.1, F.Hl * 0.26, x) /* v5.12: the lip line fades out over the rounded snout tip */ * (1 - sstep(F.Hl * Hd.jaw * 0.85, F.Hl * Hd.jaw * 1.1, x));
     }
     // v5.43: an upturned rostral (hognose snakes): the front of the snout is lifted, its top more than its underside, so
     // the narrow snout tip points forward and up like a shovel, with the chin left low beneath it
@@ -551,7 +549,7 @@ function buildBody(P, F, pose, quality) {
   };
 
   const nV = nR * (M + 1), pos = new Float32Array(nV * 3), uv = new Float32Array(nV * 2), hd = new Float32Array(nV), met = new Float32Array(nV * 3);
-  const plates = P.head.plates ? 1 : 0; // big head shields: the small body-scale relief fades out on the head
+  const plates = 1; // v5.53: every head has its own scales (headData): the body's scale relief fades out on it
   const frames = [];
   for (let i = 0; i < nR; i++) {
     const x = ringX[i], c = spine(x), f = frameAt(x); frames.push({ x, c, f });
@@ -663,6 +661,206 @@ function scaleTextures(P, lat) {
   return { normal: mk(nData), cavity: mk(cData) };
 }
 
+// ---------- v5.53: the scales of the head ----------
+// The head gets its own two small textures, laid over it from the snout tip to just behind the jaws (rows by the
+// distance along the head, columns all the way round it, like the body's): the relief (normal, the dark grooves between
+// scales, how shiny each is) and a colour layer (pale lip scales, dark bars between them, nostrils, heat pits, spots).
+// The scales are cells round hand-placed centres, each with its own size (a weighted Voronoi tiling): the big plates of
+// colubrids and elapids (rostral, internasals, prefrontals, frontal, supraoculars, parietals, nasal, loreal, pre- and
+// postoculars, temporals, the upper and lower lip scales, mental and chin shields), the few enlarged scales of vipers and
+// pythons with small ones everywhere else, the big rostral and ocular scales of blind snakes - and small scales where the
+// head meets the neck. The grooves between cells are the same width everywhere on the skin.
+const HEAD_GENUS = { // v5.53: head colours some snakes are known by
+  thamnophis: { lips: 'barred', napeSpots: true, tongue: '#c0262e', tongueTip: '#141012' }, // garter snakes: pale lip scales with black bars between them, two pale spots on the parietals, a red tongue with black tips
+  nerodia: { lips: 'barred' }, regina: { lips: 'barred' }, natrix: { lips: 'barred' }, storeria: { lips: 'pale' },
+  pantherophis: { lips: 'barred' }, lampropeltis: { lips: 'barred' }, pituophis: { lips: 'barred' }, coronella: { lips: 'pale' },
+};
+function eyeOf(P, F) { // the eye's size and place, and the mouth line (as buildBody makes them; the pattern worker has no body)
+  const Hd = P.head, x = Hd.eyeX * F.Hl;
+  return { eyeRad: (Hd.eye || 0.15) * F.W(x) * 1.04, eyeRl: (F.W(x) + F.Hh(x)) / 2, mouthA: Math.PI * 0.56 };
+}
+function headLayout(P, F, body) {
+  const H = P.head, Hl = F.Hl, plan = P.plan || 'colubrid', tri = (H.shape || 'oval') === 'tri', pit = plan === 'pitviper';
+  const hc = (x) => Math.max(Hl * 0.004, Math.PI * (2 * F.W(x) + F.Hh(x) * (1 + F.BF(x))) / 4); // half the girth round the head at x
+  const E = H.eyeX, eA = H.eyeA / 180, noEye = H.pupil === 'none';
+  const erx = body.eyeRad / Hl, era = body.eyeRad / body.eyeRl / Math.PI, mA = body.mouthA / Math.PI, J = H.jaw || 0.75;
+  const nA = H.nostrilA != null ? H.nostrilA / 180 : 0.44, nX = 0.075;
+  const plates = plan === 'colubrid' || plan === 'elapid' || plan === 'sea' || (H.plates && plan !== 'blind');
+  const seeds = [], big = [];
+  // one scale: centre (x in head lengths, a round the head: 0 top, 1 belly), half-sizes (rx in head lengths, ra in a)
+  const S = (x, a, rx, ra, k, o) => { for (const sg of a > 0.004 && a < 0.996 ? [1, -1] : [1]) { const s = Object.assign({ x: x * Hl, a: a * sg, rx: rx * Hl, ra, k, low: a > mA, id: seeds.length, gw: 0.011 * Hl }, o); seeds.push(s); big.push(s); } };
+  const wrapA = (d) => d - 2 * Math.round(d / 2);
+  const dist = (s, x, a) => Math.hypot((x - s.x) / s.rx, wrapA(a - s.a) / s.ra);
+  const nLab = H.labials || (plan === 'python' ? 13 : tri ? 12 : plan === 'blind' ? 4 : plan === 'elapid' || plan === 'sea' ? 7 : 8);
+  if (plan === 'blind') {
+    S(0.0, 0, 0.2, 0.55, 'rost'); S(0.17, nA * 0.8, 0.07, 0.16, 'nas'); S(E, eA, 0.12, 0.15, 'ocu'); S(E - 0.1, eA + 0.08, 0.05, 0.1, 'pre');
+    S(E + 0.2, 0.08, 0.1, 0.12, 'pla'); S(0.03, 1, 0.08, 0.3, 'ment');
+    for (let k = 0; k < nLab; k++) S(0.12 + k * 0.1, mA - 0.06, 0.05, 0.07, 'lab');
+  } else {
+    S(0.0, 0, tri ? 0.055 : 0.07, mA * 1.15, 'rost');
+    S(0.012, 1, 0.06, 0.26, 'ment');
+    const x0 = 0.075, x1 = J * 0.97, sp = (x1 - x0) / nLab;
+    for (let k = 0; k < nLab; k++) { const xc = x0 + (k + 0.5) * sp, under = noEye ? 0 : Math.exp(-(((xc - E) / Math.max(0.06, erx * 1.3)) ** 2)), ra = 0.055 + (plates ? 0.035 : 0.012) * under; S(xc, mA - ra * 0.92, sp * 0.56, ra, 'lab', { n: k }); }
+    const nI = nLab + (plates ? 1 : 2), y0 = 0.045, y1 = J * 0.95, sq = (y1 - y0) / nI;
+    for (let k = 0; k < nI; k++) S(y0 + (k + 0.5) * sq, mA + 0.06, sq * 0.56, 0.055, 'ilab', { n: k });
+    if (plates) {
+      if (nA > 0.3) S(0.085, 0.1, 0.045, 0.12, 'pla'); // internasals (sea snakes: the nasals meet on top instead)
+      S(nX, Math.max(0.09, nA), 0.05, 0.11, 'nas');
+      S(0.185, 0.12, 0.055, 0.14, 'pla'); // prefrontals
+      if (plan === 'colubrid') S((0.12 + E - erx) / 2 + 0.02, Math.min(eA + 0.08, mA - 0.13), 0.04, 0.07, 'pla'); // loreal (elapids have none)
+      if (!noEye) {
+        S(E - erx * 1.3, eA, 0.022, Math.max(0.05, era * 0.95), 'pre');
+        S(E + erx * 1.3, eA - era * 0.45, 0.02, Math.max(0.035, era * 0.5), 'post'); S(E + erx * 1.3, eA + era * 0.5, 0.02, Math.max(0.035, era * 0.5), 'post');
+      }
+      const sa = Math.max(0.135, eA - era - 0.055);
+      S(E + 0.02, sa, 0.1, Math.max(0.05, Math.min(0.08, sa - 0.07)), 'sup');
+      S(E + 0.07, 0, 0.15, Math.max(0.055, sa - 0.075), 'pla'); // frontal
+      S(E + 0.38, 0.115, 0.2, 0.135, 'pla'); // parietals
+      S(E + erx * 1.3 + 0.11, Math.min(eA + 0.06, mA - 0.1), 0.07, 0.06, 'pla'); S(E + 0.47, Math.min(eA + 0.02, mA - 0.14), 0.07, 0.06, 'pla'); S(E + 0.47, Math.min(eA + 0.13, mA - 0.06), 0.07, 0.055, 'pla'); // temporals
+      S(0.17, 0.86, 0.075, 0.1, 'chin'); S(0.33, 0.88, 0.08, 0.085, 'chin'); // chin shields
+    } else {
+      S(0.07, 0.09, 0.035, 0.09, 'pla'); S(0.06, Math.max(0.1, nA), 0.04, 0.1, 'nas'); // internasals, nasal
+      if (pit || plan === 'python') S(0.16, 0.11, 0.045, 0.1, 'pla'); // canthals / prefrontals
+      if (!noEye) {
+        const sa = Math.max(0.12, eA - era - 0.045);
+        S(E + 0.01, sa, pit ? 0.11 : plan === 'python' ? 0.085 : 0.065, pit ? 0.07 : 0.05, 'sup');
+        S(E - erx * 1.3, eA - era * 0.4, 0.02, Math.max(0.03, era * 0.5), 'pre'); S(E - erx * 1.3, eA + era * 0.45, 0.02, Math.max(0.03, era * 0.5), 'pre');
+      }
+      S(0.15, 0.87, 0.06, 0.08, 'chin');
+    }
+  }
+  // small scales everywhere the big ones leave free: a jittered staggered lattice (mirrored left/right)
+  const R = rng(strSeed(P.name || 'head') + 7), rows = Math.max(12, P.scales.rows || 19);
+  const sBody = (2 * hc(Hl * 1.15)) / rows / Hl; // a body scale's width, in head lengths
+  const lattice = (xa, xb, aLo, aHi, s, k, keel) => {
+    let row = 0;
+    for (let xn = xa; xn <= xb; xn += s * 0.87, row++) {
+      const h = hc(xn * Hl), sa = (s * Hl) / h; if (sa > 0.5) continue;
+      for (let a = aLo + sa * ((row & 1) * 0.5); a <= aHi + 1e-6; a += sa) {
+        const q = { x: (xn + (R() - 0.5) * 0.3 * s) * Hl, a: clamp(a + (R() - 0.5) * 0.3 * sa, 0, 1), rx: s * Hl * 0.6, ra: sa * 0.6, k, small: true, keel, gw: Math.min(0.011 * Hl, s * Hl * 0.14) };
+        q.low = q.a > mA;
+        let inside = false; for (const b of big) if (b.low === q.low && dist(b, q.x, q.a) < 1.08) { inside = true; break; }
+        if (inside) continue;
+        for (const sg of q.a > sa * 0.35 && q.a < 1 - sa * 0.35 ? [1, -1] : [1]) seeds.push(Object.assign({}, q, { a: q.a * sg, id: seeds.length }));
+      }
+    }
+  };
+  const keel = Math.min(1, P.scales.keel || 0);
+  if (plan === 'blind') lattice(0.25, 1.32, 0, 1, Math.max(0.09, sBody), 'sm', 0);
+  else if (plates) { const xs = Math.max(0.8, E + 0.5); lattice(xs, 1.32, 0, 1, sBody, 'sm', keel); lattice(0.42, xs - 0.02, mA + 0.02, 1, Math.max(sBody * 0.8, 0.05), 'gul', 0); }
+  else { const s = plan === 'python' ? Math.max(0.045, sBody * 0.65) : Math.max(0.038, sBody * 0.6); lattice(0.02, 1.32, 0, 1, s, 'sm', plan === 'python' ? 0 : keel); }
+  return { seeds, big, hc, mA, J, E, eA, erx, era, nA, nX, plates, dist, wrapA, nLab };
+}
+const HEAD_X = 1.3; // the head textures run from the snout tip to 1.3 head lengths
+function headData(P, F, quality) {
+  const Hl = F.Hl, Xh = Hl * HEAD_X, low = quality !== 'high', Wh = low ? 256 : 512, Hh = low ? 128 : 256;
+  const Lo = headLayout(P, F, eyeOf(P, F)), { seeds, hc, mA, J, wrapA } = Lo, H = P.head, plan = P.plan || 'colubrid';
+  const n = Wh * Hh, fd = new Float32Array(n), id1 = new Int32Array(n), id2 = new Int32Array(n), d1a = new Float32Array(n);
+  const hcR = new Float32Array(Hh); for (let r = 0; r < Hh; r++) hcR[r] = hc(((r + 0.5) / Hh) * Xh); // (the girth per row, worked out once)
+  // candidates per row: the scales near that x (the search is limited to them)
+  const half = Wh >> 1;
+  for (let r = 0; r < Hh; r++) {
+    const x = ((r + 0.5) / Hh) * Xh, jawSplit = x < J * Hl * 1.02;
+    // the big scales near this row, and the small ones sorted round the head (searched in a window that slides with a)
+    const bigC = [], sm = [];
+    for (const s of seeds) { if (Math.abs(x - s.x) > s.rx * 2.6) continue; if (!s.small) bigC.push(s); else { sm.push([s.a, s]); if (s.a < -0.5) sm.push([s.a + 2, s]); } }
+    sm.sort((p, q) => p[0] - q[0]); let wR = 0; for (const [, s2] of sm) wR = Math.max(wR, s2.ra * 2.6);
+    let lo = 0;
+    for (let c = half; c < Wh; c++) {
+      const a = ((c + 0.5) / Wh) * 2 - 1, lowSide = a > mA;
+      let b1 = 1e9, b2 = 1e9, i1 = -1, i2 = -1;
+      for (let q = 0, nb = bigC.length + sm.length; q < nb; q++) {
+        let s;
+        if (q < bigC.length) s = bigC[q]; else { const qq = q - bigC.length; if (qq === 0) { while (lo < sm.length && sm[lo][0] < a - wR) lo++; q = bigC.length + lo; if (q >= nb) break; } s = sm[q - bigC.length][1]; if (sm[q - bigC.length][0] > a + wR) break; }
+        if (jawSplit && s.low !== lowSide) continue;
+        const da = wrapA(a - s.a) / s.ra; if (da > 2.6 || da < -2.6) continue;
+        const dx = (x - s.x) / s.rx, d = dx * dx + da * da;
+        if (d < b1) { b2 = b1; i2 = i1; b1 = d; i1 = s.id; } else if (d < b2) { b2 = d; i2 = s.id; }
+      }
+      b1 = Math.sqrt(b1); b2 = Math.sqrt(b2);
+      const k = r * Wh + c, m = r * Wh + (Wh - 1 - c);
+      fd[k] = fd[m] = i2 < 0 ? 9 : b2 - b1; d1a[k] = d1a[m] = b1; id1[k] = id1[m] = i1; id2[k] = id2[m] = i2; // (the other side is its mirror image)
+    }
+  }
+  // distance to the nearest groove on the skin (the field's value over its slope, both measured on the skin)
+  const hgt = new Float32Array(n), gdist = new Float32Array(n), dX = Xh / Hh;
+  const lipCol = [], bars = H.lips === 'barred';
+  for (let r = 0; r < Hh; r++) {
+    const x = ((r + 0.5) / Hh) * Xh, hx0 = hcR[r], dY = (2 / Wh) * hx0, rp = Math.min(Hh - 1, r + 1), rm = Math.max(0, r - 1);
+    for (let c = 0; c < Wh; c++) {
+      const k = r * Wh + c, cp = r * Wh + ((c + 1) % Wh), cm = r * Wh + ((c - 1 + Wh) % Wh);
+      const gx = (fd[rp * Wh + c] - fd[rm * Wh + c]) / ((rp - rm) * dX), gy = (fd[cp] - fd[cm]) / (2 * dY);
+      let g = fd[k] / Math.max(1e-9, Math.hypot(gx, gy));
+      const a = ((c + 0.5) / Wh) * 2 - 1, aa = Math.abs(a);
+      if (x < J * Hl) g = Math.min(g, Math.abs(aa - mA) * hx0 * 0.8); // the edge of the mouth
+      const s = seeds[id1[k]] || {}, gw = s.gw || 0.011 * Hl;
+      gdist[k] = g / gw;
+      let h = sstep(0, 1.5, g / gw) * 0.75 + 0.25 * (1 - Math.min(1, d1a[k]) ** 2);
+      if (s.small) { const lx = (x - s.x) / s.rx; h += 0.25 * clamp(lx, -1, 1); if (s.keel) h += s.keel * 0.45 * Math.exp(-((wrapA(a - s.a) * hx0 / (s.rx * 0.22)) ** 2)) * sstep(-0.9, 0.1, lx); } // (small scales overlap backwards, some are keeled)
+      hgt[k] = h * gw * 0.9;
+    }
+  }
+  // the nostrils and heat pits: dark, sunk into the skin
+  const holes = [];
+  { const nr = Hl * 0.016, x = Lo.nX * Hl; holes.push({ x, a: Lo.nA, rx: nr * 1.1, ry: nr * 0.8, dark: 0.85 }); }
+  if (plan !== 'blind') holes.push({ x: Hl * 0.012, a: mA, rx: Hl * 0.012, ry: Hl * 0.006, dark: 0.7 }); // the notch in the lips the tongue comes out through
+  if (H.pits === 'loreal') holes.push({ x: Hl * ((Lo.nX + Lo.E - Lo.erx) / 2 + 0.01), a: Math.min(mA - 0.09, (Lo.nA + Lo.eA) / 2 + 0.06), rx: Hl * 0.026, ry: Hl * 0.022, dark: 0.92 });
+  if (H.pits === 'labial') {
+    for (const s of seeds) if ((s.k === 'lab' && (s.n < 4 || s.n > Lo.nLab - 5)) || (s.k === 'ilab' && s.n > Lo.nLab - 6)) { if (s.a < 0) continue; holes.push({ x: s.x, a: s.low ? s.a - 0.012 : s.a + 0.012, rx: Math.min(s.rx * 0.45, Hl * 0.016), ry: Hl * 0.014, dark: 0.8 }); }
+    holes.push({ x: Hl * 0.02, a: 0.3, rx: Hl * 0.012, ry: Hl * 0.02, dark: 0.75 });
+  }
+  // (drawn once into a field over their own small boxes; the passes below read it)
+  const hf = new Float32Array(n);
+  for (const o of holes) {
+    const r0 = Math.max(0, Math.floor(((o.x - o.rx * 1.4) / Xh) * Hh)), r1 = Math.min(Hh - 1, Math.ceil(((o.x + o.rx * 1.4) / Xh) * Hh));
+    for (let r = r0; r <= r1; r++) {
+      const x = ((r + 0.5) / Hh) * Xh, wa = (o.ry * 1.4) / hcR[r];
+      for (const sg of [1, -1]) {
+        const c0 = Math.max(0, Math.floor(((sg * o.a - wa + 1) / 2) * Wh)), c1 = Math.min(Wh - 1, Math.ceil(((sg * o.a + wa + 1) / 2) * Wh));
+        for (let c = c0; c <= c1; c++) { const a = ((c + 0.5) / Wh) * 2 - 1, d = Math.hypot((x - o.x) / o.rx, (Math.abs(a) - o.a) * hcR[r] / o.ry); if (d < 1.1) hf[r * Wh + c] = Math.max(hf[r * Wh + c], o.dark * (1 - sstep(0.55, 1.05, d))); }
+      }
+    }
+  }
+  const holeAt = (r, c) => hf[clamp(r, 0, Hh - 1) * Wh + ((c + Wh) % Wh)];
+  // colours: pale lip scales where the belly is paler than the flanks (dark bars between them in some snakes)
+  const lat = hex(P.colors.lateral || P.colors.dorsal), bel = hex(P.colors.belly), dor = hex(P.colors.dorsal);
+  const lum = (c) => (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255, paler = lum(bel) - lum(lat);
+  const lipK = H.lips === 'none' ? 0 : H.lips ? 0.8 : paler > 0.12 ? { colubrid: 0.55, elapid: 0.5, viper: 0.3, pitviper: 0.3, python: 0.35 }[plan] || 0 : 0;
+  const lipC = H.lipColor ? hex(H.lipColor) : mixc(lat, bel, bars ? 0.95 : 0.8), barC = H.barColor ? hex(H.barColor) : mixc(dor, [8, 8, 8], 0.55);
+  const barSegs = []; // [x at the lip, a at the lip, a at the top, half-width, x at the top]
+  if (bars) for (const k of ['lab', 'ilab']) { const row = seeds.filter((q) => q.k === k && q.a > 0).sort((p, q) => p.x - q.x);
+    for (let i = 0; i + 1 < row.length; i++) { const p = row[i], q = row[i + 1], xm = (p.x + q.x) / 2, up = k === 'lab', aTop = up ? Math.max(mA - 0.12, Math.min(p.a - p.ra * 0.9, q.a - q.ra * 0.9)) : Math.max(p.a + p.ra * 0.8, q.a + q.ra * 0.8); barSegs.push([xm, mA, aTop, Hl * 0.016, xm + (up ? 0.25 : 0.15) * (q.x - p.x) * 0.3]); } }
+  const nData = new Uint8Array(n * 4), cData = new Uint8Array(n * 4);
+  for (let r = 0; r < Hh; r++) {
+    const x = ((r + 0.5) / Hh) * Xh, dY = (2 / Wh) * hcR[r], rp = Math.min(Hh - 1, r + 1), rm = Math.max(0, r - 1);
+    for (let c = 0; c < Wh; c++) {
+      const k = r * Wh + c, a = ((c + 0.5) / Wh) * 2 - 1, hole = hf[k];
+      const hx = (hgt[rp * Wh + c] - hgt[rm * Wh + c]) / ((rp - rm) * dX), hy = (hgt[r * Wh + ((c + 1) % Wh)] - hgt[r * Wh + ((c - 1 + Wh) % Wh)]) / (2 * dY);
+      let nx = -hy, ny = -hx; const hl = holeAt(r + 1, c) - holeAt(r - 1, c), hh2 = holeAt(r, c + 1) - holeAt(r, c - 1); nx += hh2 * 0.35; ny += hl * 0.35; // (the rim of a pit)
+      const l = Math.hypot(nx, ny, 1); nData[k * 4] = (nx / l * 0.5 + 0.5) * 255; nData[k * 4 + 1] = (ny / l * 0.5 + 0.5) * 255;
+      const s = seeds[id1[k]] || {}, groove = 1 - sstep(0.15, 1.25, gdist[k]), hs = hash1(id1[k] + 1, 913);
+      nData[k * 4 + 2] = clamp((1 - 0.6 * groove) * (0.93 + 0.12 * hs) * (1 - hole * 0.6), 0, 1) * 255; // cavity: the grooves dark
+      nData[k * 4 + 3] = clamp((s.small ? 0.62 : 0.5) + 0.12 * hs + 0.3 * groove, 0, 1) * 255; // roughness
+      // the colour layer
+      let col = null, al = 0;
+      const lab = s.k === 'lab' || s.k === 'ilab' || (s.k === 'rost' && Math.abs(a) > mA - 0.16) || s.k === 'ment';
+      if (lipK && lab) { col = lipC; al = lipK * (1 - sstep(0.075, 0.13, Math.abs(Math.abs(a) - mA)) * (s.k === 'rost' ? 0 : 0.85)); } // (pale along the lips, fading out higher up the lip scales)
+      if (bars && x < J * Hl * 1.05) { // dark bars along the sutures between lip scales, widest at the lip
+        let bd = 1e9, aa = Math.abs(a); for (const b of barSegs) { if (Math.abs(x - b[0]) > b[3] * 3) continue; const t = clamp((aa - b[1]) / (b[2] - b[1]), 0, 1), w = lerp(b[3], b[3] * 0.45, t), e = Math.hypot(x - lerp(b[0], b[4], t), (aa - lerp(b[1], b[2], t)) * hcR[r]) / w; if (e < bd) bd = e; }
+        if (bd < 1.4) { const w2 = 0.75 * (1 - sstep(0.6, 1.3, bd)); col = col ? mixc(col, barC, w2 / Math.max(w2, al || w2)) : barC; al = Math.max(al, w2); }
+      }
+      if (H.napeSpots) { const d = Math.hypot((x - Hl * 0.86) / (Hl * 0.035), (Math.abs(a) - 0.045) * hcR[r] / (Hl * 0.028)); if (d < 1.2) { col = lipC; al = 0.95 * (1 - sstep(0.7, 1.1, d)); } }
+      if (hole > 0.01) { const hc2 = [18, 12, 10]; col = col ? mixc(col, hc2, hole) : hc2; al = Math.max(al, hole); }
+      if (col) { cData[k * 4] = col[0]; cData[k * 4 + 1] = col[1]; cData[k * 4 + 2] = col[2]; cData[k * 4 + 3] = al * 255; }
+    }
+  }
+  return { relief: nData, color: cData, Wh, Hh, Xh };
+}
+function headTex(d) {
+  const mk = (a, srgb) => { const t = new THREE.DataTexture(a, d.Wh, d.Hh, THREE.RGBAFormat); t.wrapS = THREE.RepeatWrapping; t.wrapT = THREE.ClampToEdgeWrapping; t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter; if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.needsUpdate = true; return t; };
+  return { relief: mk(d.relief, false), color: mk(d.color, true), Xh: d.Xh };
+}
+
 // the colour pattern, generated from the profile's layers over the whole body (no tiling, no seam)
 function patternTexture(P, F, body, lat, quality, seed) {
   const d = patternData(P, F, body, lat, quality, seed);
@@ -690,7 +888,8 @@ if (typeof window === 'undefined' && typeof self !== 'undefined' && typeof self.
     const m = e.data; if (!m || !m.slPattern) return;
     try {
       const F = makeBodyFns(m.P, m.quality), g = girthOf(F), lat = scaleLattice(m.P, g.gTotal), d = patternData(m.P, F, g, lat, m.quality, m.seed);
-      self.postMessage(d, [d.data.buffer]);
+      d.head = headData(m.P, F, m.quality); // v5.53: and the sharp head scales
+      self.postMessage(d, [d.data.buffer, d.head.relief.buffer, d.head.color.buffer]);
     } catch (err) { self.postMessage({ error: String(err) }); }
   };
 }
@@ -699,8 +898,7 @@ function patternData(P, F, body, lat, quality, seed) {
   const Hp = clamp(Math.round(body.gTotal * Wp * 0.62), 256, quality === 'high' ? 8192 : 2048);
   const C = P.colors, dors = hex(C.dorsal), latc = hex(C.lateral), bel = hex(C.belly);
   const bellyA = C.bellyA || 0.74, bs = C.bellySharp || 0.06, mott = C.mottle, vari = C.var;
-  const layers = (P.pattern || []).map((l) => prepLayer(l, F, body));
-  for (const Ly of layers) if (Ly.type === 'shields') { Ly.segs = shieldSegs(P.head, Ly); Ly.bcol = Ly.barColor ? hex(Ly.barColor) : Ly.col; }
+  const layers = (P.pattern || []).filter((l) => l.type !== 'shields').map((l) => prepLayer(l, F, body)); // (v5.53: head plates are in the head textures)
   const quant = P.quant != null ? P.quant : 0.32; // v5.29: pattern edges follow the scales (a blotch edge is made of whole scales, stepped)
   const data = new Uint8ClampedArray(Wp * Hp * 4);
   const L = F.L, Hl = F.Hl;
@@ -767,28 +965,7 @@ function patternData(P, F, body, lat, quality, seed) {
       for (let q = 0; q < 3; q++) data[k + q] = data[k + q] + (base[q] - data[k + q]) * w;
     }
   }
-  // v5.27: on every head, the lip line (the edge of the mouth, upturned at the back in vipers - their "smile") with the
-  // sutures between the lip scales, and the nostrils, dark, on the front sides of the snout (on top in water snakes)
-  const Hd = P.head, tri = Hd.shape === 'tri', mA0 = 0.56, xJ = Hl * (Hd.jaw || 0.75), nA = Hd.nostrilA != null ? Hd.nostrilA / 180 : 0.44, nX = Hl * 0.07, nR = Hl * 0.011;
-  const nLab = Hd.labials || (P.plan === 'python' ? 13 : tri ? 11 : 8);
-  for (let r = 0; r < Hp; r++) {
-    const g = ((r + 0.5) / Hp) * body.gTotal, x = body.xOf(g); if (x > xJ * 1.08) break;
-    const circ = Math.PI * 2 * (F.W(x) + F.Hh(x)) / 2, aPx = 2 / Wp; // (one texel around, as a fraction of a)
-    const mA = mA0 - (tri ? 0.07 * sstep(xJ * 0.45, xJ, x) : 0.02 * sstep(xJ * 0.7, xJ, x)), lw = Math.max(aPx * 0.8, (Hl * 0.012) / Math.max(1e-6, circ) * 2);
-    const fadeIn = sstep(Hl * 0.2, Hl * 0.34, x), fadeOut = 1 - sstep(xJ * 0.98, xJ * 1.08, x); // (v5.30: none round the front - no cartoon smile)
-    const sut = Math.pow(Math.abs(Math.cos(Math.PI * x / (xJ / nLab))), 18) * sstep(Hl * 0.1, Hl * 0.18, x);
-    for (let c = 0; c < Wp; c++) {
-      const a = ((c + 0.5) / Wp) * 2 - 1, aa = Math.abs(a), k = (r * Wp + c) * 4;
-      let dk = 0.7 * Math.exp(-(((aa - mA) / lw) ** 2)) * fadeIn * fadeOut;                                  // the lip line
-      if (aa < mA && aa > mA - 0.12) dk = Math.max(dk, 0.22 * sut * fadeOut * sstep(mA - 0.12, mA - 0.06, aa)); // sutures between upper lip scales
-      const nd = Math.hypot((x - nX) / nR, (aa - nA) * circ / 2 / (nR * 0.8));                                  // the nostril
-      dk = Math.max(dk, 0.6 * (1 - sstep(0.6, 1.05, nd)));
-      // the heat pits: one dark pit between eye and nostril (pit vipers), a row of slits in the lip scales (pythons, boas)
-      if (Hd.pits === 'loreal') { const pd = Math.hypot((x - Hl * 0.19) / (Hl * 0.022), (aa - 0.55) * circ / 2 / (Hl * 0.018)); dk = Math.max(dk, 0.6 * (1 - sstep(0.5, 1.0, pd))); }
-      if (Hd.pits === 'labial') for (let q = 1; q < 6; q++) { const pd = Math.hypot((x - Hl * (0.03 + q * 0.06)) / (Hl * 0.012), (aa - (mA - 0.035)) * circ / 2 / (Hl * 0.022)); dk = Math.max(dk, 0.8 * (1 - sstep(0.6, 1.0, pd))); }
-      if (dk > 0.01) for (let q = 0; q < 3; q++) data[k + q] *= 1 - dk * 0.85;
-    }
-  }
+  // (v5.53: the lip line, lip scales, nostrils and heat pits are drawn by headData)
   return { data, Wp, Hp };
 }
 
@@ -797,6 +974,7 @@ function prepLayer(l, F, body) {
   if (l.t) { o.t0 = l.t[0]; o.t1 = l.t[1]; }
   o.col = hex(o.color); o.ecol = o.edgeColor ? hex(o.edgeColor) : null; o.icol = o.inner ? hex(o.inner.color) : null;
   o.head = ['line', 'poly', 'spot', 'cap', 'shields'].includes(o.type);
+  if (!o.head && o.type !== 'tint' && o.type !== 'checker') o.t0 = Math.max(o.t0, (F.Hl * 0.97) / F.L); // v5.53: body markings start behind the head plates (a stripe ran on over the crown)
   o.g0 = body.gOf(o.t0 * F.L); o.g1 = body.gOf(o.t1 * F.L);
   if (o.count) o.period = (o.g1 - o.g0) / o.count;
   if (o.type === 'poly' && o.pts) o.pts2 = o.pts;
@@ -819,37 +997,7 @@ function cover(d, aa) { return 1 - sstep(1 - aa, 1 + aa, d); }
 function segDist(px, py, ax, ay, bx, by) { const dx = bx - ax, dy = by - ay, t = clamp(((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy || 1), 0, 1); return Math.hypot(px - ax - dx * t, py - ay - dy * t); }
 function inPoly(x, y, pts) { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) c = !c; } return c; }
 
-// the large head plates of colubrids and elapids, as suture lines in (xn along the head, a around it),
-// placed relative to the eye: rostral, internasals, prefrontals, frontal, supraoculars, parietals,
-// pre- and postoculars, loreal, and the rows of upper and lower lip scales
-function shieldSegs(H, Ly) {
-  const E = H.eyeX, eA = H.eyeA / 180, er = (H.eye || 0.15) * 0.55, mA = 0.56, n = Ly.labials || 8, segs = [];
-  const S = (x0, a0, x1, a1, bar) => segs.push([x0, a0, x1, a1, bar ? 1 : 0]);
-  const f0 = E - er * 0.6, f1 = E + 0.3;               // frontal from beside the front of the eye to behind it
-  S(0.0, 0, 0.055, 0); S(0.055, 0, f0, 0); S(f1, 0, 0.98, 0);  // midline sutures (none across the frontal)
-  S(0.05, 0, 0.05, 0.2);                               // rostral / internasals
-  S(0.13, 0, 0.13, 0.24);                              // internasals / prefrontals
-  S(f0, 0, f0, eA - er * 0.7);                         // prefrontals / frontal and supraoculars
-  S(f0, 0.085, E + 0.12, 0.08); S(E + 0.12, 0.08, f1, 0);       // frontal outline (a shield narrowing behind)
-  S(E + 0.16, 0.085, E + 0.18, eA - er * 0.5);                // supraocular back edge
-  S(f0, eA - er * 0.7, E + 0.16, eA - er * 0.5);              // supraocular rim over the eye
-  S(E + 0.16, 0.24, 0.98, 0.36); S(E + 0.18, eA - er * 0.4, E + 0.3, eA + 0.02); // parietal outer edge, temporals
-  S(E - er * 1.1, eA - er * 0.3, E - er * 1.1, eA + er * 0.6);  // preocular
-  S(E + er * 1.1, eA - er * 0.6, E + er * 1.2, eA + er * 0.7);  // postoculars
-  S(E + er * 1.15, eA, E + er * 1.7, eA + 0.01);
-  S(0.13, 0.24, 0.13, 0.42); S(0.05, 0.2, 0.06, 0.44); S(0.13, 0.33, E - er * 1.1, 0.33); // nasal, loreal
-  S(0.03, mA - 0.13, E + 0.3, mA - 0.13);                     // top edge of the upper lip scales
-  for (let k = 1; k < n; k++) { const x = 0.04 + (k / n) * (E + 0.48); S(x, mA - 0.14, x + 0.01, mA - 0.005, 1); S(x - 0.02, mA + 0.005, x - 0.03, mA + 0.1, 2); }
-  return segs;
-}
-
 function evalLayer(Ly, a, g, t, xn, warp, cl, seed) {
-  if (Ly.type === 'shields') {
-    if (xn > 1.05) return null;
-    let d = 1e9, bar = 0; const aa = Math.abs(a);
-    for (const q of Ly.segs) { const v = segDist(xn, aa, q[0], q[1], q[2], q[3]) / (q[4] ? Ly.barWid || Ly.wid * 2.2 : Ly.wid); if (v < d) { d = v; bar = q[4]; } }
-    const c = cover(d + warp * 0.15, Ly.aa || 0.35); return c > 0.01 ? [bar ? Ly.bcol : Ly.col, c * (bar ? (Ly.barAlpha || 0.85) * (bar === 2 ? 0.45 : 1) : Ly.alpha || 0.6)] : null;
-  }
   if (Ly.type === 'checker') {
     // chequered belly: each ventral plate is dark on one side and light on the other, alternating
     if (!cl.v) return null; const j = Math.floor(cl.id / 7919), side = cl.id % 7919;
@@ -990,8 +1138,10 @@ function eyeTexture(P) {
 function buildEyes(P, F, body, pat) {
   const H = P.head, xe = H.eyeX * F.Hl, R0 = body.eyeRad, rl = body.eyeRl, NR = 14, NA = 40, out = [];
   const et = eyeTexture(P); et.wrapS = et.wrapT = THREE.ClampToEdgeWrapping;
-  const em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.35, metalness: 0, clearcoat: 0.6, clearcoatRoughness: 0.15, envMapIntensity: 0.9 });
-  const sm = new THREE.MeshPhysicalMaterial({ vertexColors: true, transparent: true, roughness: 0.04, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.4, depthWrite: false, specularIntensity: 1 });
+  // v5.53: the eye under it is not shiny itself (a broad sheen over the iris made it look like a pale painted disc); the
+  // spectacle on top gives the small sharp highlight
+  const em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.62, metalness: 0, envMapIntensity: 0.55 });
+  const sm = new THREE.MeshPhysicalMaterial({ vertexColors: true, transparent: true, roughness: 0.03, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.0, depthWrite: false, specularIntensity: 1 });
   const lm = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, roughness: 0.6, metalness: 0, depthWrite: false, envMapIntensity: 0.8 });
   // the skin colour right round the eye, read from the body's own pattern texture
   const img = pat && pat.image, skinAt = (x, th) => {
@@ -1017,7 +1167,7 @@ function buildEyes(P, F, body, pat) {
         uv.push(0.5 + a * 0.47 * sg, 0.5 + b * 0.47);
         // the spectacle: clear in the middle, taking on the skin's colour at its rim, where the scales round the eye overlap it
         const rim = sstep(0.82, 1.06, rho), sk = skinAt(x, th);
-        col.push(sk[0], sk[1], sk[2], rim); spa.push(0.16 * (1 - sstep(0.88, 1.02, rho)));
+        col.push(sk[0], sk[1], sk[2], rim); spa.push(0.05 * (1 - sstep(0.88, 1.02, rho))); // (v5.53: a clear spectacle - a milky one made the eye a pale disc)
       }
     }
     const idx = [];
@@ -1042,7 +1192,7 @@ function buildEyes(P, F, body, pat) {
 
 // ---------- v4.72: the mouth, opened with "Open mouth" ----------
 // The lower jaw swings down about its hinge at the back of the head (the throat skin stretches
-// behind it); inside are the pink mouth lining, the dark throat, rows of small backward-pointing
+// behind it); inside are the pink mouth lining, the gullet, rows of small backward-pointing
 // teeth on both jaws, and the fangs each group really has: long folding fangs at the very front
 // in vipers and pit vipers, short fixed front fangs in elapids and sea snakes, none in pythons,
 // colubrids and blind snakes (pythons have many more and bigger teeth instead).
@@ -1077,15 +1227,15 @@ function buildMouth(P, F, body, group, eyes, pat) {
   // v4.81: the inside of the mouth is modelled, not two flat strips. Each jaw has rounded lips (the lip scales
   // roll inwards from the skin to the gums, so the edge of the upper jaw is no longer a thin shell), a vaulted pink
   // roof with the two rows of palate teeth on low ridges, a soft floor with the tongue sheath and glottis on a raised
-  // midline, wet-looking lining that darkens towards the throat (and in the grooves beside the gums), a dark throat
-  // tunnel at the back and soft folds of skin at the corners of the mouth. Everything turns with its own jaw.
+  // midline, wet-looking lining that darkens towards the throat (and in the grooves beside the gums), a soft back
+  // wall with the gullet in it (v5.53) and soft folds of skin at the corners of the mouth. Everything turns with its own jaw.
   const n = 44, xs = []; for (let k = 0; k <= n; k++) xs.push(Hl * 0.03 + (xh - Hl * 0.03) * Math.pow(k / n, 0.9));
   const img = pat && pat.image, skinAt = (x, th) => {
     if (!img || !img.data) return new THREE.Color(P.colors.lateral || P.colors.dorsal);
     const u = clamp((th + Math.PI) / TAU, 0, 0.999), v = clamp(body.gOf(x) / body.gTotal, 0, 0.999), k = (Math.floor(v * img.height) * img.width + Math.floor(u * img.width)) * 4;
     return new THREE.Color().setRGB(img.data[k] / 255, img.data[k + 1] / 255, img.data[k + 2] / 255, THREE.SRGBColorSpace);
   };
-  const pink = new THREE.Color(P.head.mouthColor || (plan === 'python' ? '#e8a49c' : '#ec9f9a')), deep = new THREE.Color('#5b1a24'), black = new THREE.Color('#1a0608');
+  const pink = new THREE.Color(P.head.mouthColor || (plan === 'python' ? '#e8a49c' : '#ec9f9a')), deep = new THREE.Color('#a24f5a'), black = new THREE.Color('#3a1219'); // (v5.53: pink right back to the gullet, as in real snakes)
   if (P.head.mouthColor && /^#[0-3]/.test(P.head.mouthColor)) deep.set('#120c0c'); // a black mouth (black mamba) stays black
   const chord = (x, th, s2, inset) => { const a = body.surf(x, th).p, b = body.surf(x, -th).p; return a.lerp(b, s2).lerp(body.spine(x), inset); };
   const bump = (s, c, w) => Math.exp(-(((s - c) / w) ** 2));
@@ -1119,10 +1269,10 @@ function buildMouth(P, F, body, group, eyes, pat) {
         let c;
         if (kind === 'lip') { const sk = skinAt(x, side * (upper ? mA - 0.06 : mA + 0.08)), lipC = sk.clone().lerp(new THREE.Color(P.colors.belly), upper ? 0.25 : 0.5); c = lipC.multiplyScalar(suture * lerp(1, 0.7, sstep(0.55, 1, s))).lerp(pink, sstep(0.8, 1, s) * 0.6); }
         else {
-          c = pink.clone();
+          c = pink.clone().lerp(new THREE.Color(upper ? '#f6d4d0' : '#f0c0bc'), 0.3); // (v5.53: paler, as the roof of a real snake's mouth)
           const groove = Math.max(bump(s, 0, 0.12), bump(s, 1, 0.12)), ridge = upper ? bump(s, 0.3, 0.06) + bump(s, 0.7, 0.06) : bump(s, 0.5, 0.1);
           c.multiplyScalar((1 - 0.35 * groove) * (1 + 0.12 * ridge) * (0.94 + 0.12 * hash1((x / Hl * 300) | 0, (s * 97) | 0)));
-          c.lerp(deep, sstep(0.45, 0.95, x / xh) * 0.85).lerp(black, sstep(0.8, 1.0, x / xh) * 0.7 * (1 - 0.5 * ridge));
+          c.lerp(deep, sstep(0.55, 1.0, x / xh) * 0.6).lerp(black, sstep(0.9, 1.02, x / xh) * 0.45 * (1 - 0.5 * ridge));
         }
         rows.push(p.x, p.y, p.z); cols.push(c.r, c.g, c.b); xv.push(x);
       }
@@ -1131,11 +1281,12 @@ function buildMouth(P, F, body, group, eyes, pat) {
     g.setAttribute('position', new THREE.Float32BufferAttribute(rows, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
     const idx = []; for (let i = 0; i < xs.length - 1; i++) for (let k = 0; k < per - 1; k++) { const a = i * per + k, b = a + per; idx.push(a, a + 1, b, a + 1, b + 1, b); }
     g.setIndex(idx); g.computeVertexNormals();
-    return { g, o: g.attributes.position.array.slice(), xv, per, row: (x, s) => { const i = clamp(Math.round(xs.findIndex((q) => q >= x)), 0, xs.length - 1), k = NL + Math.round(s * NS); return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); }, gum: (x, side) => { const i = Math.max(0, xs.findIndex((q) => q >= x)), k = side > 0 ? NL - 1 : per - NL; return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); } };
+    return { g, o: g.attributes.position.array.slice(), xv, per, row: (x, s) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = NL + Math.round(s * NS); return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); }, gum: (x, side) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = side > 0 ? NL - 1 : per - NL; return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); } };
   }
-  const lining = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.4, metalness: 0, clearcoat: 0.4, clearcoatRoughness: 0.28, emissive: new THREE.Color('#2a0709'), emissiveIntensity: 0.6, side: THREE.DoubleSide, envMapIntensity: 0.45 }); // (a faint glow stands in for light passing through the soft tissue)
+  const lining = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.4, metalness: 0, clearcoat: 0.4, clearcoatRoughness: 0.28, emissive: new THREE.Color('#6a3036'), emissiveIntensity: 0.5, side: THREE.DoubleSide, envMapIntensity: 0.45 }); // (a faint glow stands in for light passing through the soft tissue)
   const roof = jawLining(true), floorJ = jawLining(false);
-  const palate = new THREE.Mesh(roof.g, lining), floor = new THREE.Mesh(floorJ.g, lining);
+  const roofM = lining.clone(); roofM.emissive.set('#b06a6e'); roofM.emissiveIntensity = 0.55; // (v5.53: the roof faces down, away from the light: a little more glow keeps it pink, not maroon)
+  const palate = new THREE.Mesh(roof.g, roofM), floor = new THREE.Mesh(floorJ.g, lining);
   palate.receiveShadow = floor.receiveShadow = true;
   palate.castShadow = floor.castShadow = true; // v5.09: with the mouth open the head is an open shell; the lining closes it in the shadow too (no thin loop on the ground)
   // the corners of the mouth: a short fold of skin between the two jaws, just in front of the hinge
@@ -1146,83 +1297,116 @@ function buildMouth(P, F, body, group, eyes, pat) {
   }
   const cheekG = new THREE.BufferGeometry(); cheekG.setAttribute('position', new THREE.Float32BufferAttribute(cheekPts, 3)); cheekG.setAttribute('color', new THREE.Float32BufferAttribute(cheekCols, 3));
   { const idx = [], per = (cheekK + 1); for (let i = 0; i < cheekX.length - 1; i++) for (const sd of [0, 1]) for (let k = 0; k < cheekK; k++) { const a = (i * 2 + sd) * per + k, b = a + 2 * per; idx.push(a, a + 1, b, a + 1, b + 1, b); } cheekG.setIndex(idx); cheekG.computeVertexNormals(); }
-  const cheekOrig = cheekG.attributes.position.array.slice(), cheeks = new THREE.Mesh(cheekG, lining); cheeks.castShadow = true;
-  // the throat: a dark tunnel going back into the neck
-  const thrR = F.W(xh) * 0.5, thrH = F.Hh(xh) * 0.42, thrL = Hl * 0.35, thrG = new THREE.CylinderGeometry(1, 0.35, 1, 24, 6, true), tp = thrG.attributes.position, tc = [];
-  for (let i = 0; i < tp.count; i++) { const y = tp.getY(i) + 0.5, c = deep.clone().lerp(black, 0.4 + 0.6 * (1 - y)); tc.push(c.r, c.g, c.b); }
-  thrG.setAttribute('color', new THREE.Float32BufferAttribute(tc, 3));
-  const throat = new THREE.Mesh(thrG, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, side: THREE.DoubleSide }));
-  { const p0 = body.spine(xh * 0.9), ft = body.frameAt(xh * 0.9); throat.position.copy(p0).addScaledVector(ft.T, thrL * 0.5).addScaledVector(ft.U, -F.Hh(xh) * 0.08); throat.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(ft.S, ft.T.clone().negate(), ft.U)); throat.scale.set(thrR, thrL, thrH); }
-  throat.userData.mpart = 'throat';
-  // v5.12: the back of the mouth is sealed by a dark gullet: from inside the open mouth the body's own skin faces away
-  // (it is not drawn from inside), so without this you could see the outside world through the back of the head
-  const sealX = xh * 1.08, sealL = Hl * 0.42, sealM = new THREE.MeshStandardMaterial({ color: '#140507', roughness: 0.85, metalness: 0, emissive: '#0a0203' });
-  let sW = 1e9, sH = 1e9; for (let k = 0; k <= 8; k++) { const x = sealX - sealL + (2 * sealL * k) / 8; sW = Math.min(sW, F.W(x)); sH = Math.min(sH, F.Hh(x)); }
-  const seal = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 18), sealM); { const fS = body.frameAt(sealX); seal.position.copy(body.spine(sealX)).addScaledVector(fS.U, -sH * 0.05); seal.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fS.S.clone().negate(), fS.U, fS.T)); seal.scale.set(sW * 0.86, sH * 0.8, sealL); }
-  seal.userData.mpart = 'throat'; seal.castShadow = false;
-  const inside = new THREE.Group(); inside.add(palate, floor, cheeks, throat, seal); inside.visible = false; group.add(inside);
-  // teeth: slim, slightly curved, backward-pointing; fangs at the front of the upper jaw
-  const toothM = new THREE.MeshPhysicalMaterial({ color: '#f6f1e4', roughness: 0.22, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.1, sheen: 0.4, sheenColor: new THREE.Color('#fff8e8') });
+  let cheekOrig = cheekG.attributes.position.array.slice(); const cheeks = new THREE.Mesh(cheekG, lining); cheeks.castShadow = true;
+  const inside = new THREE.Group(); inside.add(palate, floor, cheeks); inside.visible = false; group.add(inside); // (v5.53: the soft back wall below closes the mouth; the dark tunnel and plug that stood in front of it are gone)
+  // v5.53: the back of the mouth is closed by soft pink tissue stretched between the jaws, with the gullet a dark slit in
+  // its middle (it was a big black hole). It is part of the folds' mesh, so it stretches with them as the mouth opens.
+  { const xb = xs[xs.length - 1], CW = 14, MW = 10, base = cheekPts.length / 3, fT = body.frameAt(xb).T, depth = F.Hh(xb) * 0.35;
+    for (let m = 0; m <= MW; m++) for (let c = 0; c <= CW; c++) {
+      const u = c / CW, w = m / MW, A2 = roof.row(xb, u), B2 = floorJ.row(xb, u), pp = A2.clone().lerp(B2, w).addScaledVector(fT, depth * Math.sin(Math.PI * w) * (0.35 + 0.65 * Math.sin(Math.PI * u)));
+      cheekPts.push(pp.x, pp.y, pp.z); const g = Math.hypot((u - 0.5) / 0.2, (w - 0.5) / 0.16), cc = pink.clone().lerp(deep, 0.55 + 0.25 * Math.sin(Math.PI * w)).lerp(black, 0.95 * (1 - sstep(0.6, 1.1, g)));
+      cheekCols.push(cc.r, cc.g, cc.b); cheekInfo.push(w, 1, xb); }
+    const idx = Array.from(cheekG.index.array);
+    for (let m = 0; m < MW; m++) for (let c = 0; c < CW; c++) { const a = base + m * (CW + 1) + c, b = a + CW + 1; idx.push(a, a + 1, b, a + 1, b + 1, b); }
+    cheekG.setAttribute('position', new THREE.Float32BufferAttribute(cheekPts, 3)); cheekG.setAttribute('color', new THREE.Float32BufferAttribute(cheekCols, 3)); cheekG.setIndex(idx); cheekG.computeVertexNormals(); cheekOrig = cheekG.attributes.position.array.slice(); }
+  // teeth (v5.53): many small, sharp, backward-curved teeth in the rows each family has - on the upper jaw the maxillary row
+  // just inside the lip (none in vipers: their maxilla carries only the fang), two inner rows on the palate (palatine and
+  // pterygoid), and the dentary row in the lower jaw. Each row is one merged mesh (a few draw calls, not one per tooth).
+  const toothM = new THREE.MeshPhysicalMaterial({ color: '#f3eee0', roughness: 0.3, metalness: 0, clearcoat: 0.8, clearcoatRoughness: 0.15 });
   const upperT = new THREE.Group(), lowerT = new THREE.Group(); inside.add(upperT, lowerT);
-  const many = plan === 'python' ? 1.6 : plan === 'blind' ? 0 : 1, tl = Hl * (plan === 'python' ? 0.07 : plan === 'colubrid' ? 0.036 : 0.042), tr = Hl * (plan === 'python' ? 0.011 : 0.008);
+  const py = plan === 'python', vip = plan === 'viper' || plan === 'pitviper', el = plan === 'elapid' || plan === 'sea';
+  const tl = Hl * (py ? 0.055 : plan === 'colubrid' ? 0.032 : 0.03);
   const curvedTooth = (bend) => { // a cone along a gentle curve, its tip turned back (local +y = base to tip)
-    const pts = []; for (let k = 0; k <= 6; k++) { const s = k / 6; pts.push(new THREE.Vector3(0, s, bend * s * s)); }
-    const crv = new THREE.CatmullRomCurve3(pts), g = new THREE.TubeGeometry(crv, 8, 1, 8, false), p = g.attributes.position, q = new THREE.Vector3();
+    const pts = []; for (let k = 0; k <= 6; k++) { const s2 = k / 6; pts.push(new THREE.Vector3(0, s2, bend * s2 * s2)); }
+    const crv = new THREE.CatmullRomCurve3(pts), g = new THREE.TubeGeometry(crv, 6, 1, 6, false), p = g.attributes.position, q = new THREE.Vector3();
     // taper the tube to a point (TubeGeometry is a constant radius: pull each ring to its centre line)
-    for (let i = 0; i < p.count; i++) { const ring = Math.floor(i / 9), s = ring / 8; crv.getPointAt(s, q); const cx = q.x, cy = q.y, cz = q.z, k = Math.pow(1 - s, 0.85) + 0.02; p.setXYZ(i, cx + (p.getX(i) - cx) * k, cy + (p.getY(i) - cy) * k, cz + (p.getZ(i) - cz) * k); }
+    for (let i = 0; i < p.count; i++) { const ring = Math.floor(i / 7), s2 = ring / 6; crv.getPointAt(s2, q); const cx = q.x, cy = q.y, cz = q.z, k = Math.pow(1 - s2, 0.85) + 0.02; p.setXYZ(i, cx + (p.getX(i) - cx) * k, cy + (p.getY(i) - cy) * k, cz + (p.getZ(i) - cz) * k); }
     g.computeVertexNormals(); return g;
   };
-  const toothG = curvedTooth(0.35);
-  const tooth = (parent, base, dir, len, rad, back, g) => { const m = new THREE.Mesh(g || toothG, toothM); m.position.copy(base); m.scale.set(rad, len, rad); const y = dir.clone().normalize(), z = back.clone().addScaledVector(y, -back.dot(y)).normalize(), xx = new THREE.Vector3().crossVectors(y, z); m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xx, y, z)); m.castShadow = false; parent.add(m); return m; };
-  const nT = Math.round(10 * many);
-  for (let k = 0; k < nT; k++) {
-    const x = Hl * 0.14 + (xh * 0.78 - Hl * 0.14) * (k / Math.max(1, nT - 1)), f = body.frameAt(x), sz = 1 - 0.35 * (k / nT);
-    for (const sg of [1, -1]) {
-      tooth(upperT, roof.gum(x, sg), f.U.clone().negate().addScaledVector(f.T, 0.45), tl * sz, tr * sz, f.T).userData.mpart = 'teeth';   // pointing down and back
-      tooth(lowerT, floorJ.gum(x, sg), f.U.clone().addScaledVector(f.T, 0.45), tl * 0.85 * sz, tr * sz, f.T).userData.mpart = 'teeth';  // pointing up and back
-    }
-  }
-  // v4.80: two inner rows of palate teeth on the ridges (palatine and pterygoid), the glottis and the tongue sheath
-  const anchors = { teeth: new THREE.Object3D(), palate: new THREE.Object3D(), glottis: new THREE.Object3D(), sheath: new THREE.Object3D(), fang: null, hinge: new THREE.Object3D(), tongue: null };
+  const toothG = curvedTooth(0.45), qT = new THREE.Quaternion();
+  const toothMatrix = (base, dir, len, rad, back) => { const y = dir.clone().normalize(), z = back.clone().addScaledVector(y, -back.dot(y)).normalize(), xx = new THREE.Vector3().crossVectors(y, z); qT.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xx, y, z)); return new THREE.Matrix4().compose(base, qT, new THREE.Vector3(rad, len, rad)); };
+  const tooth = (parent, base, dir, len, rad, back, g) => { const m = new THREE.Mesh(g || toothG, toothM); toothMatrix(base, dir, len, rad, back).decompose(m.position, m.quaternion, m.scale); m.castShadow = false; parent.add(m); return m; };
+  const toothRow = (parent, list, part) => { // many teeth merged into one mesh
+    if (!list.length) return null;
+    const pc = toothG.attributes.position.count, ic = toothG.index.count, P3 = new Float32Array(list.length * pc * 3), N3 = new Float32Array(list.length * pc * 3), I = new (list.length * pc > 65535 ? Uint32Array : Uint16Array)(list.length * ic);
+    const v = new THREE.Vector3(), nm = new THREE.Matrix3();
+    list.forEach((M4, t) => { nm.getNormalMatrix(M4); for (let i = 0; i < pc; i++) { v.fromBufferAttribute(toothG.attributes.position, i).applyMatrix4(M4); P3.set([v.x, v.y, v.z], (t * pc + i) * 3); v.fromBufferAttribute(toothG.attributes.normal, i).applyMatrix3(nm).normalize(); N3.set([v.x, v.y, v.z], (t * pc + i) * 3); } for (let i = 0; i < ic; i++) I[t * ic + i] = toothG.index.array[i] + t * pc; });
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P3, 3)); g.setAttribute('normal', new THREE.BufferAttribute(N3, 3)); g.setIndex(new THREE.BufferAttribute(I, 1));
+    const m = new THREE.Mesh(g, toothM); m.castShadow = false; m.userData.mpart = part; parent.add(m); return m;
+  };
+  const rowTeeth = (J, x0, x1, n, s2, len, up, rake) => { const out = [];
+    for (let k = 0; k < n; k++) { const x = x0 + (x1 - x0) * (k / Math.max(1, n - 1)), f = body.frameAt(x), sz = (1 - 0.3 * (k / n)) * (0.85 + 0.3 * hash1(k * 7 + Math.round(s2 * 100), 77));
+      for (const ss of [s2, 1 - s2]) { const b = J.row(x, ss).addScaledVector(f.U, up ? Hl * 0.003 : -Hl * 0.003), dir = f.U.clone().multiplyScalar(up ? -1 : 1).addScaledVector(f.T, rake).addScaledVector(f.S, (ss < 0.5 ? 1 : -1) * 0.12); out.push(toothMatrix(b, dir, len * sz, len * sz * 0.2, f.T)); } }
+    return out; };
+  const many = py ? 1.3 : 1, nMax = Math.round((vip ? 0 : el ? 7 : 18) * many), nPal = Math.round((vip ? 12 : el ? 12 : 16) * many), nDen = Math.round((vip ? 14 : el ? 14 : 18) * many);
   if (plan !== 'blind') {
-    for (const s2 of [0.3, 0.7]) {
-      const nI = Math.round(8 * many);
-      for (let k = 0; k < nI; k++) { const x = Hl * 0.2 + (xh * 0.72 - Hl * 0.2) * (k / Math.max(1, nI - 1)), f = body.frameAt(x);
-        tooth(upperT, roof.row(x, s2), f.U.clone().negate().addScaledVector(f.T, 0.6), tl * 0.62, tr * 0.8, f.T).userData.mpart = 'palate'; }
-    }
+    toothRow(upperT, rowTeeth(roof, el ? Hl * 0.24 : Hl * 0.1, xh * 0.8, nMax, 0.035, tl, true, 0.55), 'teeth');
+    toothRow(upperT, rowTeeth(roof, Hl * 0.17, xh * 0.86, nPal, 0.27, tl * 0.72, true, 0.65), 'palate');
+    toothRow(lowerT, rowTeeth(floorJ, Hl * 0.07, xh * 0.8, nDen, 0.045, tl * 0.9, false, 0.55), 'teeth');
+  }
+  // the glottis, the tongue sheath and the tongue
+  const anchors = { teeth: new THREE.Object3D(), palate: new THREE.Object3D(), glottis: new THREE.Object3D(), sheath: new THREE.Object3D(), fang: null, hinge: new THREE.Object3D(), tongue: null };
+  let tongueUpd = null;
+  if (plan !== 'blind') {
     anchors.palate.position.copy(roof.row(xh * 0.45, 0.5)); upperT.add(anchors.palate);
     anchors.teeth.position.copy(roof.gum(Hl * 0.3, 1)); upperT.add(anchors.teeth);
-    const softM = new THREE.MeshPhysicalMaterial({ color: pink.clone().multiplyScalar(0.92), roughness: 0.35, clearcoat: 0.6, clearcoatRoughness: 0.25 });
-    // the glottis: a short tube lying on the floor of the mouth, open towards the front
-    const gx0 = Hl * 0.24, gx1 = Hl * 0.42, fl = (x) => floorJ.row(x, 0.5), gr = F.W((gx0 + gx1) / 2) * 0.07;
-    const fU = body.frameAt((gx0 + gx1) / 2).U;
-    const gA = fl(gx0).addScaledVector(fU, gr * 0.9), gB = fl(gx1).addScaledVector(fU, gr * 0.6);
-    const glottis = new THREE.Mesh(new THREE.CylinderGeometry(gr, gr * 1.25, gA.distanceTo(gB), 18, 1, true), softM);
+    const softM = new THREE.MeshPhysicalMaterial({ color: pink.clone().multiplyScalar(0.95), roughness: 0.38, clearcoat: 0.6, clearcoatRoughness: 0.25 });
+    const fAt = (x) => body.frameAt(x), fl = (x) => { const xc = Math.min(x, xs[xs.length - 1]); return floorJ.row(xc, 0.5).addScaledVector(fAt(xc).T, x - xc); }; // (past the hinge: straight on back)
+    // the tongue sheath: a low soft ridge along the floor of the mouth, open at its front end just behind the chin
+    const r0 = Math.max(Hl * 0.014, F.W(Hl * 0.2) * 0.06); // the tongue's thickness
+    const shx0 = Hl * 0.075, shx1 = Hl * 0.42, shW = Math.max(F.W(Hl * 0.2) * 0.12, r0 * 2.4), shH = Math.max(F.Hh(Hl * 0.2) * 0.05, r0 * 1.5), fS0 = fAt((shx0 + shx1) / 2);
+    const sheath = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12), softM); sheath.scale.set(shW, shH, (shx1 - shx0) / 2); sheath.position.copy(fl((shx0 + shx1) / 2));
+    sheath.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fS0.S.clone().normalize().negate(), fS0.U, fS0.T)); // (a right-handed basis: S, U, T is left-handed) lowerT.add(sheath); sheath.userData.mpart = 'sheath';
+    const opening = new THREE.Mesh(new THREE.CircleGeometry(1, 16), new THREE.MeshBasicMaterial({ color: '#2a0a10', side: THREE.DoubleSide }));
+    { const f0 = fAt(shx0 + Hl * 0.02); opening.scale.set(shW * 0.55, shH * 0.6, 1); opening.position.copy(fl(shx0 + Hl * 0.02)).addScaledVector(f0.U, shH * 0.35).addScaledVector(f0.T, -Hl * 0.005); opening.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(f0.S.clone().normalize().negate(), f0.U, f0.T)); lowerT.add(opening); opening.userData.mpart = 'sheath'; }
+    anchors.sheath.position.copy(fl(Hl * 0.2)).addScaledVector(fS0.U, shH); lowerT.add(anchors.sheath);
+    // the glottis: a small tube lying on the sheath just behind its opening, its slit facing forward and up
+    const gx0 = Hl * 0.14, gx1 = Hl * 0.27, gr = F.W((gx0 + gx1) / 2) * 0.05, gU = fAt((gx0 + gx1) / 2).U;
+    const gA = fl(gx0).addScaledVector(gU, shH + gr * 0.9), gB = fl(gx1).addScaledVector(gU, shH * 0.6 + gr * 0.4);
+    const glottis = new THREE.Mesh(new THREE.CylinderGeometry(gr, gr * 1.3, gA.distanceTo(gB), 16, 1, true), softM);
     glottis.position.copy(gA).add(gB).multiplyScalar(0.5); glottis.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), gA.clone().sub(gB).normalize()); lowerT.add(glottis); glottis.userData.mpart = 'glottis';
-    const hole = new THREE.Mesh(new THREE.CircleGeometry(gr * 0.6, 16).scale(0.4, 1, 1), new THREE.MeshBasicMaterial({ color: '#1a0508', side: THREE.DoubleSide }));
+    const hole = new THREE.Mesh(new THREE.CircleGeometry(gr * 0.75, 16).scale(0.35, 1, 1), new THREE.MeshBasicMaterial({ color: '#1e070b', side: THREE.DoubleSide }));
     hole.position.copy(gA); hole.lookAt(gA.clone().add(gA.clone().sub(gB))); lowerT.add(hole); hole.userData.mpart = 'glottis';
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(gr * 0.85, gr * 0.25, 10, 24), softM); rim.position.copy(gA); rim.lookAt(gA.clone().add(gA.clone().sub(gB))); lowerT.add(rim); rim.userData.mpart = 'glottis';
-    anchors.glottis.position.copy(gA).add(gB).multiplyScalar(0.5).addScaledVector(fU, gr); lowerT.add(anchors.glottis);
-    // the tongue sheath just in front, and the forked tongue: dark, thin, its two tines slightly apart and lifted
-    const sx = Hl * 0.17, fT = body.frameAt(sx).T, fS = body.frameAt(sx).S.clone().normalize(), fU2 = body.frameAt(sx).U, sp = fl(sx).addScaledVector(fU2, gr * 0.3);
-    const sheath = new THREE.Mesh(new THREE.SphereGeometry(gr * 1.2, 20, 12), softM); sheath.scale.set(1, 0.42, 1.8); sheath.position.copy(sp);
-    sheath.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fS, fU2, fT)); lowerT.add(sheath); sheath.userData.mpart = 'sheath';
-    anchors.sheath.position.copy(sp).addScaledVector(fU2, gr * 0.6); lowerT.add(anchors.sheath);
-    const tongueCol = P.head.tongue || { python: '#2b1d24', viper: '#22191d', pitviper: '#1f1a20', elapid: '#141015', sea: '#2a2226' }[plan] || '#16121a';
-    const tongueM = new THREE.MeshPhysicalMaterial({ color: tongueCol, roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.2 });
-    // v5.12: the tongue lies in its sheath: only the forked tips show, resting on the floor of the mouth just in front of
-    // the sheath (it used to be twice as long, its thin tips sticking out past the chin like wires)
-    const tongue = new THREE.Group(), tLen = Hl * 0.14, tr0 = gr * 0.42, stem = Hl * 0.07;
-    const pts = []; for (let k = 0; k <= 8; k++) { const s = k / 8; pts.push(new THREE.Vector3(0, gr * 0.15 * Math.sin(Math.PI * s * 0.8), -stem * s)); }
-    const tube = (curvePts, r0, r1) => { const g = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(curvePts), 16, 1, 8, false), p = g.attributes.position; const c = new THREE.CatmullRomCurve3(curvePts);
-      for (let i = 0; i < p.count; i++) { const ring = Math.floor(i / 9), s = ring / 16, q = c.getPointAt(s), k = lerp(r0, r1, s); p.setXYZ(i, q.x + (p.getX(i) - q.x) * k, q.y + (p.getY(i) - q.y) * k, q.z + (p.getZ(i) - q.z) * k); } g.computeVertexNormals(); return g; };
-    tongue.add(new THREE.Mesh(tube(pts, tr0, tr0 * 0.75), tongueM));
-    const fork = pts[pts.length - 1];
-    for (const sg of [1, -1]) { const tp2 = []; for (let k = 0; k <= 6; k++) { const s = k / 6; tp2.push(new THREE.Vector3(sg * (tLen - stem) * 0.28 * s * s, fork.y - gr * 0.1 * s, fork.z - (tLen - stem) * s)); } tongue.add(new THREE.Mesh(tube(tp2, tr0 * 0.72, tr0 * 0.12), tongueM)); }
-    // the tongue lies in the sheath and its tips just show past the front of the lower jaw
-    tongue.position.copy(sp).addScaledVector(fT, gr * 1.4).addScaledVector(fU2, gr * 0.2);
-    tongue.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fS, fU2, fT));
-    lowerT.add(tongue); anchors.tongue = tongue; tongue.traverse((o) => { o.userData.mpart = 'tongue'; });
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(gr * 0.9, gr * 0.22, 8, 20), softM); rim.position.copy(gA); rim.lookAt(gA.clone().add(gA.clone().sub(gB))); rim.scale.set(0.6, 1, 1); lowerT.add(rim); rim.userData.mpart = 'glottis';
+    anchors.glottis.position.copy(gA).add(gB).multiplyScalar(0.5).addScaledVector(gU, gr); lowerT.add(anchors.glottis);
+    // the forked tongue (v5.53): one tongue, its base deep in the sheath. At rest only the tips show at the sheath's opening;
+    // a flick slides it forward along a fixed track - out of the sheath, up through the notch at the front of the lips
+    // (the mouth can stay shut) and out in front of the snout - where the two tips spread and wave, then it slides back.
+    const tongueCol = new THREE.Color(P.head.tongue || { python: '#2b1d24', viper: '#22191d', pitviper: '#1f1a20', elapid: '#141015', sea: '#2a2226' }[plan] || '#16121a'), tipCol = new THREE.Color(P.head.tongueTip || P.head.tongue || '#16121a').multiplyScalar(P.head.tongueTip ? 1 : 0.7);
+    const tongueM = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.32, clearcoat: 0.7, clearcoatRoughness: 0.2 });
+    const fN = fAt(Hl * 0.05), notch = body.surf(Hl * 0.012, mA).p.add(body.surf(Hl * 0.012, -mA).p).multiplyScalar(0.5), fwd0 = fN.T.clone().negate(), fwd = fwd0.clone().lerp(new THREE.Vector3(fwd0.x, 0, fwd0.z).normalize(), 0.75).normalize(), dn = fN.U.clone().negate(); // (out nearly level, even from a head that rests tilted on its coils)
+    const pOpen = fl(Hl * 0.095).addScaledVector(fN.U, shH * 0.45);
+    const trackPts = [fl(Hl * 0.95).addScaledVector(fAt(Hl * 0.95).U, -F.Hh(Hl * 0.9) * 0.1), fl(Hl * 0.55).addScaledVector(fAt(Hl * 0.55).U, -shH * 1.2), fl(Hl * 0.3).addScaledVector(fAt(Hl * 0.3).U, -shH * 0.25), fl(Hl * 0.17).addScaledVector(fAt(Hl * 0.17).U, shH * 0.15),
+      pOpen, notch.clone().addScaledVector(fwd0, -Hl * 0.025).addScaledVector(dn, Hl * 0.004), notch.clone(), notch.clone().addScaledVector(fwd, Hl * 0.4).addScaledVector(dn, Hl * 0.05), notch.clone().addScaledVector(fwd, Hl * 1.2).addScaledVector(dn, Hl * 0.12)];
+    const crv = new THREE.CatmullRomCurve3(trackPts, false, 'centripetal'), NTk = 160, tk = crv.getSpacedPoints(NTk), cum = [0];
+    for (let i = 1; i <= NTk; i++) cum.push(cum[i - 1] + tk[i].distanceTo(tk[i - 1]));
+    const along = (d, out) => { if (d <= 0) return out.copy(tk[1]).sub(tk[0]).normalize().multiplyScalar(d).add(tk[0]); if (d >= cum[NTk]) return out.copy(tk[NTk]).sub(tk[NTk - 1]).normalize().multiplyScalar(d - cum[NTk]).add(tk[NTk]);
+      let lo = 0, hi = NTk; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (cum[m] < d) lo = m; else hi = m; } return out.copy(tk[lo]).lerp(tk[hi], (d - cum[lo]) / Math.max(1e-12, cum[hi] - cum[lo])); };
+    const nearestD = (p) => { let b = 0, bd = 1e18; for (let i = 0; i <= NTk; i++) { const d = tk[i].distanceToSquared(p); if (d < bd) { bd = d; b = i; } } return cum[b]; };
+    const dOpen = nearestD(pOpen), dNotch = nearestD(notch), Lt = Hl * 1.0, Lf = Lt * 0.24, tipRest = dOpen + Hl * 0.025, tipOut = dNotch + Hl * 0.62;
+    const side = fN.S.clone().normalize(), NS = 28, NT2 = 12, RS = 7;
+    const nV = (NS + 1) * RS + 2 * (NT2 + 1) * RS, tPos = new Float32Array(nV * 3), tCol = new Float32Array(nV * 3), tIdx = [];
+    const ringIdx = (o, n) => { for (let i = 0; i < n; i++) for (let k = 0; k < RS; k++) { const a = o + i * RS + k, b = o + i * RS + (k + 1) % RS, c = a + RS, d = b + RS; tIdx.push(a, c, b, b, c, d); } };
+    ringIdx(0, NS); ringIdx((NS + 1) * RS, NT2); ringIdx((NS + 1) * RS + (NT2 + 1) * RS, NT2);
+    for (let v = 0; v < nV; v++) { const c = v >= (NS + 1) * RS ? tipCol : tongueCol; tCol.set([c.r, c.g, c.b], v * 3); }
+    const tG = new THREE.BufferGeometry(); tG.setAttribute('position', new THREE.BufferAttribute(tPos, 3)); tG.setAttribute('color', new THREE.BufferAttribute(tCol, 3)); tG.setIndex(tIdx);
+    const tongue = new THREE.Mesh(tG, tongueM); tongue.frustumCulled = false; tongue.castShadow = false; lowerT.add(tongue); tongue.userData.mpart = 'tongue';
+    const q0 = new THREE.Vector3(), q1 = new THREE.Vector3(), tv = new THREE.Vector3(), nv = new THREE.Vector3(), bv = new THREE.Vector3();
+    // ext: 0 in the sheath .. 1 fully out; ph: the phase of the up-and-down wave of the tips
+    tongueUpd = (ext, ph) => {
+      const dTip = lerp(tipRest, tipOut, ext), spread = sstep(dNotch + Hl * 0.05, dNotch + Hl * 0.4, dTip) * Hl * 0.09;
+      const wave = (d) => { const o = d - dNotch; return o <= 0 ? 0 : Hl * 0.06 * sstep(0, Hl * 0.35, o) * Math.sin(ph - o / (Hl * 0.25)) * sstep(0.2, 0.6, ext); };
+      const at = (d, lat, out) => along(d, out).addScaledVector(dn, -wave(d)).addScaledVector(side, lat);
+      const ring = (o, d, lat, r, latBack) => { at(d - Hl * 0.01, latBack, q0); at(d + Hl * 0.01, lat, q1); tv.subVectors(q1, q0).normalize(); bv.crossVectors(tv, side).normalize(); nv.crossVectors(bv, tv).normalize(); at(d, lat, q0);
+        for (let k = 0; k < RS; k++) { const an = (k / RS) * TAU, ca = Math.cos(an) * r, sa = Math.sin(an) * r * 0.75; tPos[(o + k) * 3] = q0.x + bv.x * ca + nv.x * sa; tPos[(o + k) * 3 + 1] = q0.y + bv.y * ca + nv.y * sa; tPos[(o + k) * 3 + 2] = q0.z + bv.z * ca + nv.z * sa; } };
+      const dFork = dTip - Lf;
+      for (let i = 0; i <= NS; i++) { const s2 = i / NS, d = dTip - Lt + (Lt - Lf) * s2; ring(i * RS, d, 0, r0 * lerp(1, 0.62, s2), 0); }
+      for (const [o, sg] of [[(NS + 1) * RS, 1], [(NS + 1) * RS + (NT2 + 1) * RS, -1]])
+        for (let i = 0; i <= NT2; i++) { const s2 = i / NT2, d = dFork + Lf * s2, latOf = (z) => sg * (spread * Math.pow(Math.max(0, z), 1.4) + r0 * 0.3 * Math.max(0, z)); ring(o + i * RS, d, latOf(s2), r0 * 0.6 * Math.pow(1 - s2, 0.8) + Hl * 0.0015, latOf(s2 - 0.01 / Lf * Hl)); }
+      tG.attributes.position.needsUpdate = true; tG.computeVertexNormals(); tG.computeBoundingSphere();
+    };
+    tongueUpd(0, 0);
+    anchors.tongue = tongue;
     anchors.hinge.position.copy(hinge); group.add(anchors.hinge);
   }
   const fangs = [];
@@ -1244,7 +1428,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
   }
   let t = 0;
   function set(v) {
-    t = clamp(v, 0, 1.45); inside.visible = t > 0.01; setCut(t > 0.01);
+    t = clamp(v, 0, 1.45); inside.visible = t > 0.01 || flickShut; setCut(t > 0.01); if (flickShut && t > 0.01) showOnlyTongue(false);
     const ang = sign * gape * (t <= 1 ? 1 - Math.pow(1 - t, 2) : 1 + (t - 1) * 1.1), /* past 1: the extra-wide gape of a strike */ a = pos.array, aD = ang * DN, aU = -ang * UP;
     const qq = new THREE.Quaternion(), v3 = new THREE.Vector3();
     const turn = (list, an) => { for (let k = 0; k < list.length; k += 2) { const vi = list[k], w = list[k + 1];
@@ -1274,7 +1458,22 @@ function buildMouth(P, F, body, group, eyes, pat) {
     for (let i = 0; i < body.nR; i++) { const a = i * (M + 1), b = a + M; for (let q2 = 0; q2 < 3; q2++) { const m = (nrm[a * 3 + q2] + nrm[b * 3 + q2]) / 2; nrm[a * 3 + q2] = nrm[b * 3 + q2] = m; } }
     geo.attributes.normal.needsUpdate = true;
   }
-  return { set, settle, get t() { return t; }, headX: xh, anchors, fanged: fangs.length > 0 };
+  // v5.53: a tongue flick, s from 0 to 1 (out, the tips wave up and down, back in); 0 or 1 leaves it in its sheath. With the
+  // mouth shut only the tongue of everything inside is shown: it comes out through the notch at the front of the lips.
+  let flickShut = false;
+  function showOnlyTongue(on) {
+    if (on === flickShut || !anchors.tongue) return; flickShut = on;
+    for (const c of inside.children) c.visible = !on || c === lowerT;
+    for (const c of lowerT.children) c.visible = !on || c === anchors.tongue;
+    inside.visible = t > 0.01 || on;
+  }
+  function flick(s) {
+    if (!tongueUpd) return;
+    const on = s > 0 && s < 1, ext = on ? sstep(0, 0.28, s) * (1 - sstep(0.72, 1, s)) : 0;
+    tongueUpd(ext, s * TAU * 3.2);
+    showOnlyTongue(on && t <= 0.01);
+  }
+  return { set, settle, flick, get t() { return t; }, headX: xh, anchors, fanged: fangs.length > 0 };
 }
 
 // ---------- ground and props ----------
@@ -1907,6 +2106,7 @@ function personShape(h) {
 // ---------- the viewer ----------
 export function mount(host, opts) {
   const P = normProfile(autoProfile(opts.profile)), seed = strSeed(opts.id || P.name || 'snake');
+  { const gH = HEAD_GENUS[String(opts.id || '').split('-')[0]]; if (gH) P.head = Object.assign({}, gH, P.head); } // v5.53
   const reduceMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const reduce = () => reduceMQ.matches;
   const lowDevice = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4 || Math.min(screen.width, screen.height) < 500;
@@ -2016,6 +2216,10 @@ export function mount(host, opts) {
     const lat = scaleLattice(P, body.gTotal), tiles = scaleTextures(P, lat); perfT('scaleTex', t0); t0 = performance.now();
     // v4.81: on good devices a quick pattern first, the full-detail one painted in a worker and swapped in when ready
     const hiPat = quality !== 'low', pat = patternTexture(P, F, body, lat, hiPat ? 'preview' : 'low', seed); perfT('patternTex', t0);
+    // v5.53: the scales of the head (on good devices a quick version first; the sharp one comes from the worker with the pattern)
+    t0 = performance.now(); let headT = headTex(headData(P, F, hiPat ? 'low' : quality)); perfT('headTex', t0);
+    const headAniso = (h) => { for (const t of [h.relief, h.color]) { t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); track(t); } };
+    headAniso(headT);
     const rep = body.gTotal / lat.Pt;
     for (const t of [tiles.normal, tiles.cavity]) { t.repeat.set(1, rep); t.anisotropy = renderer.capabilities.getMaxAnisotropy(); }
     pat.anisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -2034,14 +2238,14 @@ export function mount(host, opts) {
     const qS = (TAU * F.w0 * 0.92) / Math.max(12, S.rows) * (P.head.scaleK || (P.plan === 'python' ? 0.9 : 0.62));
     // v5.30: the scale rows' edges around the body (for the per-scale variation in the shader)
     const rbArr = new Float32Array(96); lat.RB.forEach((v, i) => { if (i < 96) rbArr[i] = v; });
-    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 } };
+    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 }, uHeadN: { value: headT.relief }, uHeadC: { value: headT.color }, uHX: { value: headT.Xh } };
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, hsU);
       sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;\nattribute vec3 aMet;\nvarying vec3 vMet;').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead; vMet = aMet;')
-        .replace('#include <common>\nattribute float aHead;', '#include <common>\nuniform float uTip;\nattribute float aHead;').replace('#include <displacementmap_vertex>', THREE.ShaderChunk.displacementmap_vertex.replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z) * smoothstep(uTip * 0.45, uTip, aMet.y)'));
+        .replace('#include <common>\nattribute float aHead;', '#include <common>\nuniform float uTip;\nattribute float aHead;').replace('#include <displacementmap_vertex>', THREE.ShaderChunk.displacementmap_vertex.replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z) * (1.0 - aHead) * smoothstep(uTip * 0.45, uTip, aMet.y)'));
       sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
 varying float vHead; varying vec3 vMet; uniform vec2 uHS; uniform float uKeel; uniform float uCavH; uniform float uTip;
-uniform float uRB[96]; uniform int uRows; uniform float uAV;
+uniform float uRB[96]; uniform int uRows; uniform float uAV; uniform sampler2D uHeadN; uniform sampler2D uHeadC; uniform float uHX;
 float slHash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 float slScale(vec2 m) {
   float row = floor(m.y), off = mod(row, 2.0) * 0.5;
@@ -2074,16 +2278,28 @@ float slScale(vec2 m) {
    diffuseColor.rgb *= mix(1.0, 0.55 + 0.45 * smoothstep(0.0, 0.3, slH), uCavH * slFade); }
 #ifdef USE_AOMAP
  diffuseColor.rgb *= mix(1.0, texture2D(aoMap, slUv).r, uCavH * (1.0 - vHead * 0.9) * (1.0 - vMet.z) * slTip);
-#endif`)
-        .replace('#include <aomap_fragment>', THREE.ShaderChunk.aomap_fragment.replace('aoMapIntensity + 1.0', 'aoMapIntensity * slTip + 1.0'))
-        .replace('#include <roughnessmap_fragment>', THREE.ShaderChunk.roughnessmap_fragment.replace('vRoughnessMapUv', 'slUv') + '\n roughnessFactor *= mix(1.0, slRough, (1.0 - vMet.z) * slTip);\n roughnessFactor = mix(roughnessFactor, roughness * (0.9 + 0.25 * slH), vMet.z); roughnessFactor = mix(roughness, roughnessFactor, slTip);')
-        .replace('#include <normal_fragment_maps>', THREE.ShaderChunk.normal_fragment_maps.replace(/vNormalMapUv/g, 'slUv').replace('mapN.xy *= normalScale;', 'mapN.xy = mapN.xy * mix(1.0, slStr, 1.0 - vMet.z) + slTilt * (1.0 - vMet.z) * slTip;\n mapN.xy *= normalScale * (1.0 - vHead * 0.88) * slTip;\n mapN = normalize(mix(mapN, normalize(vec3(-slDa * 0.55, -slDx * 0.55, 1.0)), vMet.z));\n mapN = normalize(mix(vec3(0.0, 0.0, 1.0), mapN, smoothstep(uTip * 0.5, uTip * 1.6, vMet.y))); /* v5.17: the scale relief fans out into a star on the rounded nose: none there */'));
+#endif
+ /* v5.53: the head's own scales - their colours, the dark grooves between them, their shine and relief */
+ float slHW = 0.0; vec4 slHN = vec4(0.5, 0.5, 1.0, 0.5);
+ if (vMet.y < uHX) {
+   slHW = 1.0 - smoothstep(uHX * 0.72, uHX * 0.9, vMet.y);
+   vec2 slHUv = vec2(vMapUv.x, vMet.y / uHX); slHN = texture2D(uHeadN, slHUv); vec4 slHC = texture2D(uHeadC, slHUv);
+   diffuseColor.rgb = mix(diffuseColor.rgb, slHC.rgb, slHC.a * slHW);
+   diffuseColor.rgb *= mix(1.0, slHN.b, slHW);
+ }`)
+        .replace('#include <aomap_fragment>', THREE.ShaderChunk.aomap_fragment.replace('aoMapIntensity + 1.0', 'aoMapIntensity * slTip * (1.0 - slHW) + 1.0'))
+        .replace('#include <roughnessmap_fragment>', THREE.ShaderChunk.roughnessmap_fragment.replace('vRoughnessMapUv', 'slUv') + '\n roughnessFactor *= mix(1.0, slRough, (1.0 - vMet.z) * slTip);\n roughnessFactor = mix(roughnessFactor, roughness * (0.9 + 0.25 * slH), vMet.z); roughnessFactor = mix(roughness, roughnessFactor, slTip);\n roughnessFactor = mix(roughnessFactor, max(roughness, 0.42) * (0.6 + 0.8 * slHN.a), slHW);')
+        .replace('#include <normal_fragment_maps>', THREE.ShaderChunk.normal_fragment_maps.replace(/vNormalMapUv/g, 'slUv').replace('mapN.xy *= normalScale;', 'mapN.xy = mapN.xy * mix(1.0, slStr, 1.0 - vMet.z) + slTilt * (1.0 - vMet.z) * slTip;\n mapN.xy *= normalScale * (1.0 - vHead * 0.88) * slTip;\n mapN = normalize(mix(mapN, normalize(vec3(-slDa * 0.55, -slDx * 0.55, 1.0)), vMet.z));\n mapN = normalize(mix(vec3(0.0, 0.0, 1.0), mapN, smoothstep(uTip * 0.5, uTip * 1.6, vMet.y))); /* v5.17: the scale relief fans out into a star on the rounded nose: none there */').replace('normal = normalize( tbn * mapN );', 'normal = normalize( tbn * mapN );\n if (slHW > 0.0) { vec2 hn = slHN.xy * 2.0 - 1.0; vec3 hT = tbn[0], hB = tbn[1]; float lT = length(hT), lB = length(hB);\n   if (lT > 1e-6 && lB > 1e-6) { vec3 nH = normalize(hT / lT * hn.x + hB / lB * hn.y + nonPerturbedNormal * sqrt(max(0.0, 1.0 - dot(hn, hn)))); normal = normalize(mix(normal, nH, slHW)); } }'))
+        .replace('#include <clearcoat_normal_fragment_begin>', '#ifdef USE_CLEARCOAT\n vec3 clearcoatNormal = normalize(mix(nonPerturbedNormal, normal, 0.75 * slHW));\n#endif')
+        .replace('#include <lights_physical_fragment>', '#include <lights_physical_fragment>\n#ifdef USE_CLEARCOAT\n material.clearcoat *= 1.0 - 0.55 * slHW; material.clearcoatRoughness = mix(material.clearcoatRoughness, max(material.clearcoatRoughness, 0.3), slHW);\n#endif');
     };
-    mat.customProgramCacheKey = () => 'sl-skin-v530';
+    mat.customProgramCacheKey = () => 'sl-skin-v553';
     const mesh = new THREE.Mesh(body.geo, mat); mesh.castShadow = mesh.receiveShadow = true;
     if (hiPat) {
-      const sceneNow = ctx.scene, swap = (d) => { if (!alive || ctx.scene !== sceneNow) return; const t = patternTex(d); t.anisotropy = pat.anisotropy; mat.map = t; pat.dispose(); track(t); dirty = true; kick(); };
-      ctx.patternReady = patternInWorker(P, quality, seed).then(swap).catch(() => new Promise((r) => setTimeout(() => { if (alive && ctx.scene === sceneNow) swap(patternData(P, F, body, lat, quality, seed)); r(); }, 60)));
+      const sceneNow = ctx.scene, swap = (d) => { if (!alive || ctx.scene !== sceneNow) return; const t = patternTex(d); t.anisotropy = pat.anisotropy; mat.map = t; pat.dispose(); track(t);
+        if (d.head) { const h = headTex(d.head); headAniso(h); hsU.uHeadN.value = h.relief; hsU.uHeadC.value = h.color; headT.relief.dispose(); headT.color.dispose(); headT = h; }
+        dirty = true; kick(); };
+      ctx.patternReady = patternInWorker(P, quality, seed).then(swap).catch(() => new Promise((r) => setTimeout(() => { if (alive && ctx.scene === sceneNow) { const d = patternData(P, F, body, lat, quality, seed); d.head = headData(P, F, quality); swap(d); } r(); }, 60)));
     } else ctx.patternReady = Promise.resolve();
     snakeGroup = new THREE.Group(); snakeGroup.add(mesh);
 
