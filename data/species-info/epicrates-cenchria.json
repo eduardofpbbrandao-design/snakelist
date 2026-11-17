@@ -110,6 +110,29 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Orange to reddish-brown, with a row of large dark rings along the back, each with a paler centre.",
+      "src": [
+        "adw",
+        "seaworld"
+      ]
+    },
+    {
+      "text": "Dark spots along the sides.",
+      "src": [
+        "adw",
+        "seaworld"
+      ]
+    },
+    {
+      "text": "Smooth scales with a rainbow sheen in the light.",
+      "src": [
+        "adw",
+        "seaworld"
+      ]
+    }
+  ],
   "similar": [
     {
       "id": "epicrates-maurus",

@@ -404,7 +404,9 @@ def world_map(out):
 #    "sections": {"overview"|"identification"|"size"|"variation"|"distribution"|"habitat"|"behaviour"|
 #                 "diet"|"reproduction"|"conservation"|"taxonomy": [{"text", "src": [keys], "label"?}]},
 #    "similar": [{"id", "text", "src"}], "synonyms": {"names": [...], "src": [keys]},
-#    "funfacts": [{"text", "src"}], "sources": {key: {"title", "publisher", "url", "year"?}}}
+#    "funfacts": [{"text", "src"}], "sources": {key: {"title", "publisher", "url", "year"?}},
+#    "recognise": [{"text", "src", "label"?}]}   (short, checkable "How to recognise it" points)
+# "sections" may also have "teeth" (what its teeth and fangs are like).
 # In any text, *Genus species* is set in italics and [[genus-species]] or [[genus-species|label]]
 # links to that species' page.
 # data/genus-info.json: {Genus: {"meaning", "short"?, "source": {"title"?, "publisher", "url"}, "reviewed"}}
@@ -898,7 +900,10 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
                 fos += '<p class="sp-note">From: %s</p>' % ", ".join('<a href="%s" rel="noopener">%s</a>' % (esc(u), esc(re.sub(r"^https?://(www\.)?", "", u).split("/")[0])) for u in FI["sources"])
             secs.append(("fossil", "Fossils and geological context", fos or '<p class="sp-muted">Not known.</p>'))
         else:
-            ident = paras("identification", "Appearance") + paras("juvenile", "Adults and young") + paras("variation", "Variation") + paras("size", "Size")
+            rcg = (info or {}).get("recognise") or []
+            ident = ('<h3>How to recognise it</h3><ul class="sp-rcg">%s</ul>' % "".join(
+                "<li>%s%s%s</li>" % (("<b>%s:</b> " % H.escape(x["label"])) if x.get("label") else "", R.rich(x["text"]), R.cite(x.get("src"))) for x in rcg)) if rcg else ""
+            ident += paras("identification", "Appearance") + paras("juvenile", "Adults and young") + paras("variation", "Variation") + paras("size", "Size")
             if ident: secs.append(("identification", "Identification", ident))
         # range: the published account, then SnakeList's country-level map and regions, then observations
         obs = ""  # (v4.63: no iNaturalist records section)
@@ -912,7 +917,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             eco = paras("habitat", "Habitat") or ('<h3>Habitat types in its range <small>rough estimate</small></h3>' + hab_html(c, gone))
             # the one-line activity fact only where no fuller behaviour text says it again
             eco += paras("activity", "Activity") or (("<h3>Activity</h3><p>%s</p>" % fact("activity")) if F.get("activity") and not S.get("behaviour") else "")
-            eco += paras("behaviour", "Behaviour") + paras("diet", "Diet") + paras("reproduction", "Reproduction") + paras("longevity", "Lifespan")
+            eco += paras("behaviour", "Behaviour") + paras("diet", "Diet") + paras("teeth", "Teeth") + paras("reproduction", "Reproduction") + paras("longevity", "Lifespan")
             if info and info.get("funfacts"):
                 eco += '<div class="sp-fun"><h3>Did you know?</h3><ul>%s</ul></div>' % "".join(
                     "<li>%s%s</li>" % (R.rich(x["text"]), R.cite(x.get("src"))) for x in info["funfacts"])
@@ -1039,15 +1044,107 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if measured: fang_s = measured  # the sentences with the fang sizes
         for x in S.get("longevity") or []:
             if plain(x["text"]) not in life_s: life_s.append(plain(x["text"]))
-        hab = " ".join(plain(x["text"]) for x in (S.get("habitat") or [])[:1])
-        if not hab and not c["fossil"] and c["habitats"]:
-            kinds = [k for k in HAB_KIND_ORDER if any(hab_kind(h) == k for h in c["habitats"])]
-            if kinds: hab = "A rough estimate from the places where it %s recorded (not checked for this species): %s." % ("was" if gone else "is", ", ".join(kinds).lower())
-        sp_info = {"intro": [plain(x["text"]) for x in ov] or [" ".join([lead] + extra)],
-                   "limited": bool(info and info.get("status") == "limited"),
-                   "facts": [[f[0], txt(f[1])] for f in kf] + ([["Habitat", hab]] if hab else []),
-                   "fangs": fang_s, "fangsize": any(re.search(r"\d\s*(?:mm|cm)\b", t) for t in fang_s),
-                   "life": life_s, "fun": [plain(x["text"]) for x in (info or {}).get("funfacts") or []][:4],
+        # the Information tab ("Explore in 3D"): a short description and a few quick facts, then "How to recognise it"
+        # and fold-out Habitat / Behaviour / Life cycle / Teeth - each fact once, and nothing that only says "Not
+        # known" (the rough habitat estimate is left out: only an account's own habitat text is shown)
+        def srcs(keys):  # [[publisher or title, url]] for the panel's small "Sources" lines
+            out = []
+            for k in keys or []:
+                x = R.src.get(k)
+                if not x: continue
+                v = [x.get("publisher") or x.get("title") or "", x.get("url", "")]
+                if v[0] and v not in out: out.append(v)
+            return out
+        def block(ps0):  # paragraphs as [{"t", "l"?}], and their source keys
+            ps, ks = [], []
+            for x in ps0:
+                if not x or not x.get("text"): continue
+                ps.append(dict({"t": plain(x["text"])}, **({"l": x["label"]} if x.get("label") else {})))
+                ks += x.get("src") or []
+            return ps, ks
+        def words(t): return set(re.findall(r"[a-z]{4,}", t.lower()))
+        shown = []  # what the panel already says, so that no fact is said twice
+        def fresh(t, k=0.7):
+            w = words(t)
+            return not any(len(w & words(u)) >= k * max(1, len(w)) for u in shown)
+        if ov:
+            desc = " ".join(sentences(ov[0]["text"])[:3])
+        elif c["fossil"]:
+            desc = lead
+        else:  # no account: what kind of snake it is (its venom and where it lives are quick facts below)
+            desc = "%s %s %s %s%s." % (nm, "was" if c["extinct"] else "is", an(kind(c)), kind(c), (" of the family %s" % c["family"]) if c["family"] else "")
+            desc += "".join(" " + x for x in extra if not x.startswith(("People introduced", "It is invasive")))
+        shown += sentences(desc)
+        quick = []  # [key, label, text]
+        if c["fossil"]:
+            fa = c["died"]
+            if fa: quick.append(["age", "Lived", "%s, %s" % (fa[0][0].upper() + fa[0][1:], fa[1])])
+            if c["countries"]: quick.append(["where", "Fossils found in", plist(c["countries"], 4)])
+            if F.get("length"): quick.append(["len", "Estimated length", txt(fact("length"))])
+        else:
+            quick.append(["venom", "Venom", txt(vt)])
+            if F.get("length"): quick.append(["len", "Usual adult length", txt(fact("length"))])
+            elif sz: quick.append(["size", "Size", "%s-sized (%s about %s)" % (sz[0], "a typical adult of its genus is" if sz[2] == "genus" else "adults", fmt_len(sz[1]))])
+            dn = [x for x in S.get("distribution") or [] if (x.get("label") or "Native") == "Native"]
+            if dn: wh = plain(dn[0]["text"]).rstrip(".")
+            elif c["countries"]: wh = plist(c["countries"], 4) + (" (%s)" % ", ".join(c["continents"]) if c["continents"] and len(c["countries"]) <= 5 else "")
+            else: wh = ""
+            for x in IST: wh += ("; " if wh else "") + ("invasive in %s" if x["status"] == "invasive" else "introduced by people to %s") % x["area"]
+            if wh: quick.append(["where", "Where it lived" if gone else "Where it lives", wh[0].upper() + wh[1:]])
+        diet_ps = list(S.get("diet") or [])
+        if F.get("diet"):
+            dt = plain(F["diet"]["text"]); d0 = sentences(diet_ps[0]["text"]) if diet_ps else []
+            if d0 and d0[0].lower().startswith(dt.lower()[:20]) and len(d0[0]) <= 170:  # the diet text's fuller first sentence
+                dt = d0[0].rstrip("."); diet_ps[0] = dict(diet_ps[0], text=" ".join(d0[1:]))
+            quick.append(["eats", "Ate" if gone else "Eats", dt])
+        shown += [q[2] for q in quick]
+        rec, rec_k = block((info or {}).get("recognise") or [])
+        shown += [x["t"] for x in rec]
+        fun = [plain(x["text"]) for x in funp if fresh(plain(x["text"]), 0.4)][:1]  # a "did you know" must be new
+        shown += fun
+        more = []
+        def add(key, h, ps, ks):
+            ps = [x for x in ps if x["t"]]
+            if ps: more.append({"id": key, "h": h, "p": ps, "src": srcs(ks)}); shown.extend(x["t"] for x in ps)
+        add("habitat", "Habitat", *block(S.get("habitat") or []))
+        # Behaviour: when it is active, how it behaves, what it eats and how it hunts
+        bp, bk = block((S.get("activity") or []) + (S.get("behaviour") or []))
+        if F.get("activity") and not any(re.search(r"\b(day|night|nocturnal|diurnal|dusk|dawn|crepuscular)", x["t"], re.I) for x in bp):
+            bp.insert(0, {"t": plain(F["activity"]["text"]) + ".", "l": "Active"}); bk += F["activity"].get("src") or []
+        dp, dk = block([x for x in diet_ps if x.get("text")])
+        for x in dp: x.setdefault("l", "Food and hunting")
+        add("behaviour", "Behaviour", [x for x in bp + dp if fresh(x["t"])], bk + dk)
+        # Life cycle: eggs or live young, how many, and how long it lives
+        lp, lk = block(S.get("reproduction") or [])
+        if not lp and F.get("reproduction"):
+            lp, lk = [{"t": plain(F["reproduction"]["text"]) + ".", "l": "Eggs or live young"}], list(F["reproduction"].get("src") or [])
+        lp += [{"t": t, "l": "Lifespan"} for t in life_s if fresh(t)]
+        lk += [k for x in (S.get("longevity") or []) for k in x.get("src") or []]
+        add("life", "Life cycle", lp, lk)
+        # Teeth: the account's own words, its family's fangs (the family's sourced text) and what Open mouth shows
+        tp, tk = block(S.get("teeth") or [])
+        tp += [{"t": t} for t in fang_s if fresh(t) and all(t not in x["t"] for x in tp)]
+        tk += [k for x in allp for k in (x.get("src") or []) if any(t["t"] in plain(x["text"]) for t in tp)]
+        mp0 = MODELS.get(c["id"]) or {}; plan = mp0.get("plan") or (mp0.get("auto") or {}).get("p", "")
+        FIi = FAMILY_INFO.get(c["family"]) or {}
+        fam_t = [(t, x) for x in FIi.get("text") or [] for t in sentences(x["text"]) if re.search(r"\bfangs?\b", t, re.I)] if c["family"] in ("Viperidae", "Elapidae") else []
+        if fam_t and not c["fossil"]:
+            tp.append({"t": fam_t[0][0], "l": {"Viperidae": "All vipers", "Elapidae": "All elapids"}[c["family"]]})
+            for k in fam_t[0][1].get("src") or []:
+                fs = (FIi.get("sources") or {}).get(k)
+                if fs: R.src.setdefault("fam-" + k, fs); tk.append("fam-" + k)
+        if tp and not c["fossil"] and mp0:
+            if plan in ("viper", "pitviper") and c["family"] == "Viperidae":
+                tp.append({"t": "Press Open mouth: its two long fangs at the front of the upper jaw swing forward as the mouth opens. Behind them are rows of small teeth that point backwards, to hold prey.", "l": "On the 3D model"})
+            elif plan in ("elapid", "sea") and c["family"] == "Elapidae":
+                tp.append({"t": "Press Open mouth to see its two short, fixed fangs at the very front of the upper jaw, ahead of rows of small teeth that point backwards.", "l": "On the 3D model"})
+            elif plan in ("colubrid", "python", "blind"):
+                rear = any(re.search(r"rear|back of the (mouth|jaw)", x["t"], re.I) for x in tp)
+                tp.append({"t": "Press Open mouth to see the rows of small teeth on both jaws, which point backwards to hold prey%s." % (
+                    " (its fangs, far back in the mouth, are not drawn on the model)" if rear else ""), "l": "On the 3D model"})
+        add("teeth", "Teeth", tp, tk)
+        sp_info = {"sci": "" if c["is_sci"] else sci, "desc": desc, "limited": bool(info and info.get("status") == "limited"),
+                   "quick": quick, "fun": fun, "rec": rec, "recsrc": srcs(rec_k), "more": more,
                    "fossil": c["fossil"], "gone": gone, "acct": bool(info)}
         info_json = '<script type="application/json" class="sp-info-data">%s</script>' % json.dumps(sp_info, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
         mp = MODELS.get(c["id"])

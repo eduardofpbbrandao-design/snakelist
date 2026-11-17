@@ -51,6 +51,9 @@
       }
     ]
   },
+  "recognise": [
+    {"text": "It looks almost exactly like its relative [[malayotyphlops-luzonensis|*Malayotyphlops luzonensis*]]: the two can only be told apart by tiny head scales, seen up close on a specimen.", "src": ["plazi"]}
+  ],
   "sources": {
     "plazi": {
       "title": "Malayotyphlops andyi Wynn, Diesmos, and Brown, 2016 (taxonomic treatment)",

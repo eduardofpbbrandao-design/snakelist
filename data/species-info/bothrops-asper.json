@@ -42,6 +42,11 @@
   "similar": [
     {"id": "bothrops-atrox", "text": "its close relative in the Amazon basin and east of the Andes, very similar in shape and pattern; the two are mostly separated by range.", "src": ["wiki-atrox"]}
   ],
+  "recognise": [
+    {"text": "A broad, flat, arrow-shaped head, clearly wider than the neck.", "src": ["wiki"]},
+    {"text": "An olive, grey or brown body with a row of dark triangles along each side; their pale edges form X- or V-shapes along the back.", "src": ["wiki"]},
+    {"text": "The underside of the chin is often yellow.", "src": ["wiki"]}
+  ],
   "sources": {
     "wiki": {"title": "Bothrops asper", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Bothrops_asper"},
     "adw": {"title": "Bothrops asper", "publisher": "Animal Diversity Web, University of Michigan", "url": "https://animaldiversity.org/accounts/Bothrops_asper/"},

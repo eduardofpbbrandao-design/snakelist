@@ -114,6 +114,22 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Three rows of large dark-brown spots run the length of the body, each ringed in black and edged with white or yellow.",
+      "src": [
+        "wiki",
+        "brit"
+      ]
+    },
+    {
+      "text": "A stout body and a flat, triangular head.",
+      "src": [
+        "wiki",
+        "brit"
+      ]
+    }
+  ],
   "similar": [
     {
       "id": "daboia-siamensis",

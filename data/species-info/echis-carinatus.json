@@ -120,6 +120,28 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "A short, stocky viper with a pear-shaped head and large eyes.",
+      "src": [
+        "wiki",
+        "dw"
+      ]
+    },
+    {
+      "text": "Rough, keeled scales; those on the flanks are angled and saw-edged.",
+      "src": [
+        "wiki",
+        "dw"
+      ]
+    },
+    {
+      "text": "Brown, grey or sandy, matching the ground it lives on, with a row of pale blotches or a wavy pale line along each side.",
+      "src": [
+        "wiki"
+      ]
+    }
+  ],
   "similar": [
     {
       "id": "echis-ocellatus",

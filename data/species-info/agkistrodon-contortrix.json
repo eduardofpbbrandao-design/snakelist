@@ -38,6 +38,11 @@
   "funfacts": [
     {"text": "Baby copperheads use their yellow tail tips as fishing lures.", "src": ["orianne"]}
   ],
+  "recognise": [
+    {"text": "A tan to pinkish body with chestnut-brown or mahogany crossbands.", "src": ["uga", "inherp"]},
+    {"text": "Seen from above, each band is narrow in the middle of the back and wide on the sides, like an hourglass; some bands are broken in the middle.", "src": ["uga", "inherp"]},
+    {"text": "Babies have a bright yellow tail tip.", "src": ["orianne"], "label": "Young"}
+  ],
   "sources": {
     "uga": {"title": "Natural History Series: Copperhead", "publisher": "University of Georgia Cooperative Extension", "url": "https://fieldreport.caes.uga.edu/publications/C866-1/natural-history-series-copperhead/"},
     "pfw": {"title": "Copperhead fact sheet", "publisher": "Purdue University Fort Wayne herpetology", "url": "https://sites.pfw.edu/herpetology-dev/outreach/Accounts/Viperidae/Agkistrodon/Copperhead%20(Agkistrodon%20contortrix)/CopperheadFactSheet.pdf"},

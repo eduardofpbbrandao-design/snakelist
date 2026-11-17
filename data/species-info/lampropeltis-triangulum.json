@@ -119,6 +119,10 @@
       ]
     }
   ],
+  "recognise": [
+    {"text": "Greyish or tan, with large, dark-edged reddish-brown blotches along the back and smaller ones on the sides.", "src": ["maine", "inherp"]},
+    {"text": "Often a pale Y- or V-shaped mark on the back of the head.", "src": ["maine", "inherp"]}
+  ],
   "sources": {
     "tce": {
       "title": "Eastern Milksnake",

@@ -128,6 +128,34 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Glossy black, dark brown or bluish-grey, crossed by narrow white bands that are often in pairs.",
+      "src": [
+        "mp",
+        "wiki"
+      ]
+    },
+    {
+      "text": "Towards the head the bands fade, and may be reduced to white spots along the spine.",
+      "src": [
+        "mp",
+        "wiki"
+      ]
+    },
+    {
+      "text": "A row of enlarged six-sided scales runs down the middle of the back.",
+      "src": [
+        "mp"
+      ]
+    },
+    {
+      "text": "A white belly and an all-black eye.",
+      "src": [
+        "mp"
+      ]
+    }
+  ],
   "similar": [
     {
       "id": "lycodon-aulicus",

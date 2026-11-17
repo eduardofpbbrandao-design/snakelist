@@ -133,6 +133,10 @@
       "wiki"
     ]
   },
+  "recognise": [
+    {"text": "Adults vary by region, from mostly black with traces of blotches to brownish or yellowish with dark blotches.", "src": ["mdc", "wlf"], "label": "Regional colours"},
+    {"text": "Young ones are boldly blotched grey and brown.", "src": ["mdc", "wlf"], "label": "Young"}
+  ],
   "sources": {
     "mdc": {
       "title": "Western Ratsnake",

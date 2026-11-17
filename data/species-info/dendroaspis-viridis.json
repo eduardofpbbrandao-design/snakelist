@@ -42,6 +42,11 @@
     {"id": "dendroaspis-angusticeps", "text": "the Eastern Green Mamba of East and southern Africa, uniformly green without black-edged scales; the ranges do not overlap.", "src": ["wiki"]},
     {"id": "dendroaspis-jamesoni", "text": "Jameson's Mamba of Central and West Africa, another green, tree-living mamba whose range lies mostly further east; scale counts help tell them apart.", "src": ["wiki"]}
   ],
+  "recognise": [
+    {"text": "Bright green with yellowish tones.", "src": ["wiki"]},
+    {"text": "Each scale is rimmed in black, giving a fine net-like pattern.", "src": ["wiki"]},
+    {"text": "Only 13 rows of long, narrow scales around the middle of the body.", "src": ["wiki"]}
+  ],
   "sources": {
     "wiki": {"title": "Western green mamba", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Western_green_mamba"},
     "asi": {"title": "West African Green Mamba", "publisher": "African Snakebite Institute", "url": "https://africansnakebiteinstitute.com/?p=12664"}

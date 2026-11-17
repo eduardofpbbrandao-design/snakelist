@@ -95,6 +95,23 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Adults are green, usually with white markings or crossbars along the back.",
+      "src": [
+        "copeia",
+        "wiki"
+      ]
+    },
+    {
+      "text": "Newborns are usually red-orange, and only rarely green.",
+      "src": [
+        "copeia",
+        "wiki"
+      ],
+      "label": "Young"
+    }
+  ],
   "similar": [
     {
       "id": "corallus-batesii",

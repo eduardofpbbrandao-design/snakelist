@@ -43,6 +43,11 @@
   "similar": [
     {"id": "pseudonaja-nuchalis", "text": "the Gwardar or Northern Brown Snake, a close relative of northern and inland Australia; brown snakes vary a lot in colour and are hard to tell apart.", "src": ["wiki-pn"]}
   ],
+  "recognise": [
+    {"text": "Adults are usually plain brown, from pale fawn to almost black.", "src": ["wiki", "am"]},
+    {"text": "A paler belly, often cream or yellowish, sometimes with orange or grey blotches.", "src": ["wiki", "am"]},
+    {"text": "Juveniles can be banded, and often have a dark head and a dark band across the neck.", "src": ["wiki", "am"], "label": "Young"}
+  ],
   "sources": {
     "wiki": {"title": "Eastern brown snake", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Eastern_brown_snake"},
     "wiki-pn": {"title": "Pseudonaja nuchalis", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Pseudonaja_nuchalis"},

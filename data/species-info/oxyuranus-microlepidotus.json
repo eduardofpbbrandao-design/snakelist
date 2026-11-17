@@ -37,6 +37,9 @@
     {"text": "In tests on mice, the venom from one bite would be enough to kill around 250,000 mice.", "src": ["dino"]},
     {"text": "It turns darker in winter, like putting on a heat-absorbing coat.", "src": ["am"]}
   ],
+  "recognise": [
+    {"text": "Its colour changes with the seasons: darker in winter and paler in summer.", "src": ["am", "billabong"]}
+  ],
   "sources": {
     "am": {"title": "Inland Taipan", "publisher": "Australian Museum", "url": "https://australian.museum/learn/animals/reptiles/inland-taipan/"},
     "taronga": {"title": "Inland Taipan", "publisher": "Taronga Conservation Society Australia", "url": "https://cdn.taronga.org.au/animals/inland-taipan"},

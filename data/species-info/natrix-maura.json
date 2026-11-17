@@ -167,6 +167,12 @@
       ]
     }
   ],
+  "recognise": [
+    {"text": "Grey, brown or reddish, with a dark zigzag stripe along the middle of the back.", "src": ["wiki"]},
+    {"text": "A row of dark eye-spots with yellowish centres along each side.", "src": ["wiki"]},
+    {"text": "Strongly keeled scales, in 21 rows around the body.", "src": ["wiki"]},
+    {"text": "Its markings and a head that can look triangular make it easy to mistake for a viper.", "src": ["wiki"]}
+  ],
   "sources": {
     "wiki": {
       "title": "Natrix maura",

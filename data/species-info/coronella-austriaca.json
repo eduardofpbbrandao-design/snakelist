@@ -1,6 +1,6 @@
 {
   "id": "coronella-austriaca",
-  "reviewed": "2026-11-11",
+  "reviewed": "2026-11-16",
   "status": "rich",
   "facts": {
     "length": {
@@ -109,6 +109,26 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "A dark line runs from the eye along the side of the head, giving it a masked look.",
+      "src": [
+        "florafauna"
+      ]
+    },
+    {
+      "text": "Small dark spots in pairs along the back, and a dark mark on the back of the head.",
+      "src": [
+        "wiki"
+      ]
+    },
+    {
+      "text": "Smooth scales, with no ridges.",
+      "src": [
+        "wiki"
+      ]
+    }
+  ],
   "similar": [
     {
       "id": "vipera-berus",
@@ -161,6 +181,11 @@
       "title": "Adder",
       "publisher": "Froglife",
       "url": "https://www.froglife.org/info-advice/amphibians-and-reptiles/adder/"
+    },
+    "wiki": {
+      "title": "Smooth snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Smooth_snake"
     }
   },
   "authority": "Laurenti, 1768"

@@ -143,6 +143,11 @@
       ]
     }
   ],
+  "recognise": [
+    {"text": "A very thick body with a bold pattern of pale oblongs and dark hourglass shapes down the back - camouflage among dead leaves.", "src": ["wiki"]},
+    {"text": "A pair of small horn-like scales between the raised nostrils.", "src": ["wiki"]},
+    {"text": "Keeled scales: each has a ridge down the middle.", "src": ["wiki"]}
+  ],
   "sources": {
     "wiki": {
       "title": "Gaboon viper",

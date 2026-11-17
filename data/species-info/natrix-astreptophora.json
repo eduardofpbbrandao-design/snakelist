@@ -115,6 +115,15 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "A reddish iris - the feature that sets it apart from all other grass snakes.",
+      "src": [
+        "scinews",
+        "pokrant"
+      ]
+    }
+  ],
   "similar": [
     {
       "id": "natrix-maura",

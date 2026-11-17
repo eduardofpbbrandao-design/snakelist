@@ -119,6 +119,29 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Black or dark brown on the back and bright yellow underneath, with a sharp line between the two.",
+      "src": [
+        "wiki",
+        "naturemapr"
+      ]
+    },
+    {
+      "text": "A paddle-shaped tail, flattened from side to side, yellow with black spots or bars.",
+      "src": [
+        "wiki",
+        "naturemapr"
+      ]
+    },
+    {
+      "text": "A long, narrow head.",
+      "src": [
+        "wiki",
+        "naturemapr"
+      ]
+    }
+  ],
   "funfacts": [
     {
       "text": "It is the only sea snake ever recorded in Hawaii.",

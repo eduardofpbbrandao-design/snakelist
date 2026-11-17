@@ -143,6 +143,37 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Grey, brown or pinkish, with darker, light-edged diamonds along the back.",
+      "src": [
+        "adw",
+        "rss"
+      ]
+    },
+    {
+      "text": "The scales are speckled with dark spots, giving a dusty look.",
+      "src": [
+        "adw",
+        "rss"
+      ]
+    },
+    {
+      "text": "Black and white rings of about the same width just before the rattle - its \"coon tail\".",
+      "src": [
+        "adw",
+        "rss",
+        "wiki"
+      ]
+    },
+    {
+      "text": "Two pale diagonal stripes on each side of the face, and a heat-sensing pit between the eye and the nostril.",
+      "src": [
+        "wiki",
+        "adw"
+      ]
+    }
+  ],
   "similar": [
     {
       "id": "crotalus-scutulatus",

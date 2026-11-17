@@ -123,6 +123,28 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Most wild ones are banded, with alternating dark brown or black and white or cream rings.",
+      "src": [
+        "wiki"
+      ]
+    },
+    {
+      "text": "Some populations include striped snakes, with one pale stripe along the back instead of bands.",
+      "src": [
+        "wiki"
+      ],
+      "label": "Colour forms"
+    },
+    {
+      "text": "Pet-trade snakes come in many other colours, including albinos.",
+      "src": [
+        "wiki"
+      ],
+      "label": "Colour forms"
+    }
+  ],
   "similar": [
     {
       "id": "lampropeltis-getula",

@@ -225,6 +225,11 @@
       ]
     }
   ],
+  "recognise": [
+    {"text": "Light brown to yellowish tan, covered in large dark reddish-brown blotches edged in black that fit together like puzzle pieces.", "src": ["fwc-id", "ufl"]},
+    {"text": "A dark arrowhead mark on top of the head, and dark wedges behind each eye and below it.", "src": ["fwc-id"]},
+    {"text": "Smooth scales on a thick, muscular body.", "src": ["fwc-id", "ufl"]}
+  ],
   "sources": {
     "wiki": {
       "title": "Burmese python",

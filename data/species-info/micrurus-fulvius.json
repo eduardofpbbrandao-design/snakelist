@@ -29,6 +29,10 @@
       {"text": "Lays about three to 12 eggs in June, which hatch in September.", "src": ["ncw"]}
     ]
   },
+  "recognise": [
+    {"text": "Rings of red, yellow and black go all the way around the body.", "src": ["ncw", "wiki"]},
+    {"text": "The red rings touch the yellow ones. Never rely on a colour rhyme to decide whether a snake is safe.", "src": ["ncw", "wiki"]}
+  ],
   "sources": {
     "wiki": {"title": "Micrurus fulvius", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Micrurus_fulvius"},
     "ncw": {"title": "Eastern Coral Snake", "publisher": "North Carolina Wildlife Resources Commission", "url": "https://www.ncwildlife.gov/species/eastern-coral-snake"},

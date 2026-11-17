@@ -110,6 +110,23 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Many have pale yellowish and dark crossbands like a tiger; others are plain olive, brown or black.",
+      "src": [
+        "wiki",
+        "tas"
+      ],
+      "label": "Colour forms"
+    },
+    {
+      "text": "When threatened it flattens its neck and raises its head off the ground.",
+      "src": [
+        "wiki",
+        "tas"
+      ]
+    }
+  ],
   "synonyms": {
     "names": [
       "*Notechis ater* (Krefft, 1866)",

@@ -1,6 +1,6 @@
 {
   "id": "bitis-arietans",
-  "reviewed": "2026-11-09",
+  "reviewed": "2026-11-16",
   "status": "rich",
   "facts": {
     "length": {"text": "Usually about 1 m; large ones about 1.9 m", "src": ["wiki"]},
@@ -30,7 +30,16 @@
   "funfacts": [
     {"text": "A Puff Adder holds the record for the most babies born at once to any snake: 156.", "src": ["wiki"]}
   ],
+  "recognise": [
+    {"text": "Bold chevron (V-shaped) markings along the back, in shades of yellow, brown, olive or grey.", "src": ["sanbi", "brit"]},
+    {"text": "A pale band curves over each eye towards the back of the head.", "src": ["britk"]},
+    {"text": "Colour varies from place to place: from light tan or lemon yellow to almost black, and reddish around Port Elizabeth and the Transkei in South Africa.", "src": ["asi"], "label": "Regional colours"}
+  ],
   "sources": {
+    "sanbi": {"title": "Puff adder", "publisher": "South African National Biodiversity Institute (SANBI)", "url": "https://www.sanbi.org/animal-of-the-week/puff-adder/"},
+    "brit": {"title": "Puff adder", "publisher": "Encyclopaedia Britannica", "url": "https://www.britannica.com/animal/puff-adder"},
+    "britk": {"title": "puff adder", "publisher": "Britannica Kids", "url": "https://kids.britannica.com/students/article/puff-adder/313089"},
+    "asi": {"title": "Puff Adder", "publisher": "African Snakebite Institute", "url": "https://www.africansnakebiteinstitute.com/snake/african-snakes-puff-adder/"},
     "wiki": {"title": "Puff adder", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Puff_adder"},
     "dw": {"title": "Deadliest snakes in Africa", "publisher": "BBC Discover Wildlife", "url": "https://www.discoverwildlife.com/animal-facts/reptiles/deadliest-snakes-in-africa"}
   }

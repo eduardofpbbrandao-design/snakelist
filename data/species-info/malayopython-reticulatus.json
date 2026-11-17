@@ -1,6 +1,6 @@
 {
   "id": "malayopython-reticulatus",
-  "reviewed": "2026-11-11",
+  "reviewed": "2026-11-16",
   "status": "rich",
   "facts": {
     "length": {
@@ -127,6 +127,26 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "A complex, net-like (reticulated) pattern along the back - the feature that gives it its name.",
+      "src": [
+        "brit"
+      ]
+    },
+    {
+      "text": "A thin black line along the top of the head, and a black line behind each eye.",
+      "src": [
+        "wiki"
+      ]
+    },
+    {
+      "text": "Long and fairly slender for a python.",
+      "src": [
+        "brit"
+      ]
+    }
+  ],
   "synonyms": {
     "names": [
       "*Python reticulatus*"
@@ -158,6 +178,11 @@
       "title": "Reticulated python",
       "publisher": "Columbus Zoo and Aquarium",
       "url": "https://columbuszoo.org/animals/reticulated-python"
+    },
+    "wiki": {
+      "title": "Reticulated python",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Reticulated_python"
     }
   },
   "authority": "(Schneider, 1801)"

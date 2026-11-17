@@ -123,6 +123,30 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "A short, upturned scale with a ridge at the tip of the snout.",
+      "src": [
+        "flmnh",
+        "ct"
+      ]
+    },
+    {
+      "text": "A thick body.",
+      "src": [
+        "flmnh",
+        "ct"
+      ]
+    },
+    {
+      "text": "Colour varies enormously with region and individual: yellow, orange, red, brown, olive, grey or all black, plain or blotched.",
+      "src": [
+        "flmnh",
+        "ct"
+      ],
+      "label": "Colour forms"
+    }
+  ],
   "similar": [
     {
       "id": "heterodon-simus",

@@ -119,6 +119,29 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Rough, strongly keeled scales.",
+      "src": [
+        "wiki",
+        "uwi"
+      ]
+    },
+    {
+      "text": "Tan, yellowish or reddish-brown, with a row of dark diamond-shaped blotches along the back.",
+      "src": [
+        "wiki",
+        "uwi"
+      ]
+    },
+    {
+      "text": "The tail ends in a short spine of modified scales.",
+      "src": [
+        "wiki",
+        "uwi"
+      ]
+    }
+  ],
   "similar": [
     {
       "id": "lachesis-stenophrys",

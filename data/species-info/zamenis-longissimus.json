@@ -37,6 +37,11 @@
   "funfacts": [
     {"text": "The snake on the medical symbol, the Rod of Asclepius, is believed to be an Aesculapian Snake.", "src": ["wiki"]}
   ],
+  "recognise": [
+    {"text": "Light brown to bronze, with smooth scales that have a metallic sheen; sometimes small white dots.", "src": ["wiki", "wildside"]},
+    {"text": "The belly scales are angled sharply at the sides, which helps it climb.", "src": ["wiki", "wildside"]},
+    {"text": "Juveniles are light green or brownish-green, with darker markings along the back and sides.", "src": ["wiki"], "label": "Young"}
+  ],
   "sources": {
     "wiki": {"title": "Aesculapian snake", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Aesculapian_snake"},
     "wiki-lin": {"title": "Italian Aesculapian snake", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Italian_Aesculapian_snake"},

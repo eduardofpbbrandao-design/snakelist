@@ -1,6 +1,6 @@
 {
   "id": "thamnophis-sirtalis",
-  "reviewed": "2026-11-09",
+  "reviewed": "2026-11-16",
   "status": "rich",
   "facts": {
     "length": {
@@ -20,6 +20,14 @@
       "text": "Mainly frogs, toads and salamanders",
       "src": [
         "inhs"
+      ]
+    },
+    "reproduction": {
+      "text": "Gives birth to live young, often 10-20",
+      "src": [
+        "sdherps",
+        "inhs",
+        "ups"
       ]
     }
   },
@@ -62,6 +70,15 @@
         ]
       }
     ],
+    "habitat": [
+      {
+        "text": "Usually close to water: along rivers, lakes and reservoirs, in wetlands and in the strips of plants beside streams. It also turns up at forest edges and even in vacant lots in towns, but is rarely found in dry places far from water.",
+        "src": [
+          "sdherps",
+          "inhs"
+        ]
+      }
+    ],
     "behaviour": [
       {
         "text": "Mostly active by day. It handles colder temperatures than many snakes and may even bask on rocks on mild winter days.",
@@ -76,6 +93,14 @@
           "ups",
           "cancyc"
         ]
+      },
+      {
+        "text": "It finds prey mainly by smell and sight, sometimes waiting in ambush. It does not squeeze (constrict) its prey: it grabs it and quickly swallows it whole.",
+        "src": [
+          "adw",
+          "sdherps"
+        ],
+        "label": "Hunting"
       }
     ],
     "diet": [
@@ -85,8 +110,65 @@
           "inhs"
         ]
       }
+    ],
+    "teeth": [
+      {
+        "text": "It subdues prey with its teeth and quick reflexes. Its saliva may be mildly toxic to some small prey, which makes them easier to handle.",
+        "src": [
+          "adw"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "It gives birth to live young in late summer and autumn - no eggs are laid. Most litters are of about 10 to 20 young, but large females can have many more (up to about 80 have been recorded). Newborns are about 15 to 20 cm long.",
+        "src": [
+          "ups",
+          "sdherps",
+          "inhs"
+        ]
+      }
     ]
   },
+  "recognise": [
+    {
+      "text": "Three light stripes: one down the middle of the back and one low on each side, on the second and third rows of scales up from the belly.",
+      "src": [
+        "sdherps",
+        "inhs"
+      ]
+    },
+    {
+      "text": "Between the stripes the body is dark - black, brown, grey or green - often with rows of dark spots; some have red between the scales on the sides.",
+      "src": [
+        "inhs",
+        "sdherps"
+      ]
+    },
+    {
+      "text": "A pale belly - whitish, light yellow or grey-green - with dark spots along the edges of the belly scales.",
+      "src": [
+        "sdherps",
+        "inhs"
+      ]
+    },
+    {
+      "text": "Keeled scales (a ridge down each one), faint black bars on the upper lip and round pupils.",
+      "src": [
+        "sdherps",
+        "inhs",
+        "flmnh-id"
+      ]
+    },
+    {
+      "text": "Colours vary a great deal: besides the usual yellowish stripes there are green, blue, gold, red and orange forms.",
+      "src": [
+        "ups",
+        "ccg"
+      ],
+      "label": "Colour forms"
+    }
+  ],
   "funfacts": [
     {
       "text": "No other North American snake lives as far north as the Common Gartersnake.",
@@ -120,6 +202,16 @@
       "title": "Garter snake",
       "publisher": "The Canadian Encyclopedia",
       "url": "https://www.thecanadianencyclopedia.ca/en/article/garter-snake"
+    },
+    "flmnh-id": {
+      "title": "Common Gartersnake",
+      "publisher": "Florida Museum of Natural History",
+      "url": "https://www.floridamuseum.ufl.edu/florida-snake-id/snake/common-gartersnake/"
+    },
+    "adw": {
+      "title": "Thamnophis sirtalis (Common Garter Snake)",
+      "publisher": "Animal Diversity Web, University of Michigan",
+      "url": "https://animaldiversity.org/accounts/Thamnophis_sirtalis/"
     }
   }
 }

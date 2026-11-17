@@ -196,6 +196,12 @@
       ]
     }
   ],
+  "recognise": [
+    {"text": "A very long snake with smooth scales and a hood it spreads when alarmed.", "src": ["wiki", "whk"]},
+    {"text": "Pale bands often run across the body and converge towards the head.", "src": ["wiki", "whk"]},
+    {"text": "Adult colour depends on the region: pale olive in Malaysia, bronze-brown in eastern India, glossy black with pale crossbars in the Western Ghats.", "src": ["wiki", "whk"], "label": "Regional colours"},
+    {"text": "Hatchlings are jet black with bright yellow or white crossbands, which fade as they grow.", "src": ["wiki", "whk"], "label": "Young"}
+  ],
   "sources": {
     "adw": {
       "title": "Ophiophagus hannah",

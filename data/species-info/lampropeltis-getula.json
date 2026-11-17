@@ -116,6 +116,30 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Shiny black or dark brown.",
+      "src": [
+        "flmnh",
+        "wiki"
+      ]
+    },
+    {
+      "text": "Narrow white or yellow crossbands that split on the sides and link up, like a chain.",
+      "src": [
+        "flmnh",
+        "wiki"
+      ]
+    },
+    {
+      "text": "How much pale colour it has varies from place to place.",
+      "src": [
+        "flmnh",
+        "wiki"
+      ],
+      "label": "Regional colours"
+    }
+  ],
   "similar": [
     {
       "id": "lampropeltis-nigra",

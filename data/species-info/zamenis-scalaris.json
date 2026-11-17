@@ -26,6 +26,10 @@
   "funfacts": [
     {"text": "Only young Ladder Snakes show the ladder pattern that gives the species its name.", "src": ["wiki"]}
   ],
+  "recognise": [
+    {"text": "Adults are yellowish to dark brown, with two darker stripes from the neck to the tail.", "src": ["wiki"]},
+    {"text": "Juveniles are brighter, with a black \"ladder\" pattern along the back that fades into the two stripes with age.", "src": ["wiki"], "label": "Young"}
+  ],
   "sources": {
     "wiki": {"title": "Ladder snake", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Ladder_snake"},
     "pleg": {"title": "Diet study of the ladder snake (368 snakes)", "authors": "Pleguezuelos et al.", "publisher": "Contributions to Zoology", "year": 2007, "url": "https://repository.naturalis.nl/pub/256128/"}

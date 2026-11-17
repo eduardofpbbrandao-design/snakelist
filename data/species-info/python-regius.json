@@ -1,6 +1,6 @@
 {
   "id": "python-regius",
-  "reviewed": "2026-11-09",
+  "reviewed": "2026-11-16",
   "status": "rich",
   "facts": {
     "length": {"text": "Usually 0.9-1.5 m; up to about 1.8 m", "src": ["wiki", "worldatlas"]},
@@ -30,7 +30,16 @@
   "funfacts": [
     {"text": "It is named for the way it rolls up into a ball when scared.", "src": ["wiki"]}
   ],
+  "recognise": [
+    {"text": "Dark, with large irregular brown or golden-brown patches.", "src": ["adw"]},
+    {"text": "A pale stripe on each side of the head, from the snout across the eye to the back of the jaw.", "src": ["britk", "adw"]},
+    {"text": "A pale, ivory-white belly.", "src": ["adw"]},
+    {"text": "Captive-bred ball pythons come in many colour and pattern forms (\"morphs\"), some looking very different from wild ones.", "src": ["g3"], "label": "Colour forms"}
+  ],
   "sources": {
+    "adw": {"title": "Python regius (Ball Python, Royal Python)", "publisher": "Animal Diversity Web, University of Michigan", "url": "https://animaldiversity.org/accounts/Python_regius/"},
+    "britk": {"title": "royal python", "publisher": "Britannica Kids", "url": "https://kids.britannica.com/students/article/royal-python/313300"},
+    "g3": {"title": "Stripes and loss of color in ball pythons (Python regius) are associated with variants affecting endothelin signaling", "publisher": "G3: Genes, Genomes, Genetics (via PubMed Central)", "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10320763/"},
     "wiki": {"title": "Ball python", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Ball_python"},
     "worldatlas": {"title": "Ball python", "publisher": "WorldAtlas", "url": "https://animals.worldatlas.com/animals/ball-python.html"},
     "cites": {"title": "Case study on the trade in Python regius (AC28 Inf. 4)", "publisher": "CITES Animals Committee", "url": "https://cites.org/sites/default/files/eng/com/ac/28/Inf/E-AC28-Inf-04.pdf"}

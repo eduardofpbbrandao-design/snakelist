@@ -157,6 +157,11 @@
       ]
     }
   ],
+  "recognise": [
+    {"text": "Olive, khaki, grey-brown or gunmetal grey - rarely truly black - with a paler belly.", "src": ["sanbi", "stl"]},
+    {"text": "A long, thin body, a narrow coffin-shaped head and smooth scales.", "src": ["sanbi", "stl"]},
+    {"text": "The inside of the mouth is blue-black.", "src": ["sanbi", "stl"]}
+  ],
   "sources": {
     "sanbi": {
       "title": "Black mamba (Animal of the week)",

@@ -1,6 +1,6 @@
 {
   "id": "pantherophis-guttatus",
-  "reviewed": "2026-11-09",
+  "reviewed": "2026-11-16",
   "status": "rich",
   "facts": {
     "length": {
@@ -102,6 +102,36 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Orange to reddish-brown, with black-edged blotches down the back (about 27 to 41 of them).",
+      "src": [
+        "srel",
+        "vhs"
+      ]
+    },
+    {
+      "text": "A spear-point mark on top of the head, its tip between or in front of the eyes.",
+      "src": [
+        "vhs",
+        "srel"
+      ]
+    },
+    {
+      "text": "A black-and-white checkerboard belly, and two black stripes under the tail.",
+      "src": [
+        "flmnh",
+        "vhs"
+      ]
+    },
+    {
+      "text": "Snakes from the coastal plain tend to be brighter orange; those from the uplands are darker.",
+      "src": [
+        "srel"
+      ],
+      "label": "Regional colours"
+    }
+  ],
   "sources": {
     "adw": {
       "title": "Pantherophis guttatus",
@@ -137,6 +167,21 @@
       "title": "Corn snake",
       "publisher": "Outforia",
       "url": "https://outforia.com/corn-snake"
+    },
+    "srel": {
+      "title": "Corn Snake (Pantherophis guttatus)",
+      "publisher": "Savannah River Ecology Laboratory Herpetology, University of Georgia",
+      "url": "https://srelherp.uga.edu/snakes/corn-snake/"
+    },
+    "vhs": {
+      "title": "Red Cornsnake (Pantherophis guttatus)",
+      "publisher": "Virginia Herpetological Society",
+      "url": "https://www.virginiaherpetologicalsociety.com/reptiles/snakes/corn-snake/"
+    },
+    "flmnh": {
+      "title": "Red Cornsnake",
+      "publisher": "Florida Museum of Natural History",
+      "url": "https://floridamuseum.ufl.edu/herpetology/fl-snakes/list/pantherophis-guttatus"
     }
   }
 }

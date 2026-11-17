@@ -26,6 +26,9 @@
   "similar": [
     {"id": "natrix-maura", "text": "a non-venomous water snake that copies viper patterns and behaviour; it lacks the upturned snout and is usually found in or near water.", "src": ["wiki-nm"]}
   ],
+  "recognise": [
+    {"text": "The tip of the snout turns up into a small \"nose horn\".", "src": ["wiki", "wildside"]}
+  ],
   "sources": {
     "wiki": {"title": "Vipera latastei", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Vipera_latastei"},
     "uicnmed": {"title": "Vipera latastei (Mediterranean reptile summary)", "publisher": "IUCN Centre for Mediterranean Cooperation", "url": "https://www.uicnmed.org/web2007/cd_rep_amp/materials/reptile_summery/vipera_latastei.pdf"},

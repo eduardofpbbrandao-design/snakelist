@@ -149,6 +149,38 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Adults are bright green, often with scattered white or yellow scales along the back.",
+      "src": [
+        "wiki",
+        "adw"
+      ]
+    },
+    {
+      "text": "It rests with its coils looped over a branch and its head in the middle.",
+      "src": [
+        "wiki",
+        "adw"
+      ]
+    },
+    {
+      "text": "Hatchlings are lemon yellow or brick red, and turn green as they grow - at roughly 65 cm long or a little less.",
+      "src": [
+        "cites",
+        "wiki"
+      ],
+      "label": "Young"
+    },
+    {
+      "text": "Yellow young are found throughout its range; red ones only in parts of New Guinea.",
+      "src": [
+        "wiki",
+        "ouci"
+      ],
+      "label": "Regional colours"
+    }
+  ],
   "similar": [
     {
       "id": "morelia-azurea",

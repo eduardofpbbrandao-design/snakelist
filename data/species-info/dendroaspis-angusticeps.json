@@ -45,6 +45,11 @@
   "funfacts": [
     {"text": "It was long confused with the black mamba - two very different-looking snakes - until a comparison of specimens in the 20th century separated them.", "src": ["wiki"]}
   ],
+  "recognise": [
+    {"text": "Plain bright green above, paler yellowish-green below.", "src": ["wiki"]},
+    {"text": "A long, thin body, a narrow coffin-shaped head and smooth scales.", "src": ["wiki"]},
+    {"text": "Hatchlings are more bluish-green.", "src": ["wiki"], "label": "Young"}
+  ],
   "sources": {
     "wiki": {"title": "Eastern green mamba", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Eastern_green_mamba"},
     "wiki-w": {"title": "Western green mamba", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Western_green_mamba"},

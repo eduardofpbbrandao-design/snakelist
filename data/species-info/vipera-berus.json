@@ -37,6 +37,11 @@
   "funfacts": [
     {"text": "The adder is the only snake known to live north of the Arctic Circle.", "src": ["livesci"]}
   ],
+  "recognise": [
+    {"text": "A dark zigzag stripe down the middle of the back.", "src": ["froglife"]},
+    {"text": "Usually a V- or X-shaped mark on top of the head.", "src": ["froglife"]},
+    {"text": "Completely black adders are common in some areas.", "src": ["froglife"], "label": "Colour forms"}
+  ],
   "sources": {
     "wildlifeonline": {"title": "European adder", "publisher": "Wildlife Online", "url": "https://www.wildlifeonline.me.uk/animals/species/european-adder"},
     "livesci": {"title": "Facts about adders", "publisher": "Live Science", "url": "https://www.livescience.com/54227-adder-facts.html"},

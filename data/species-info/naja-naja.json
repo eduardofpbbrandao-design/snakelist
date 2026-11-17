@@ -29,6 +29,10 @@
   "funfacts": [
     {"text": "It gets the name Spectacled Cobra from the glasses-like pattern on the back of its hood.", "src": ["wiki"]}
   ],
+  "recognise": [
+    {"text": "When alarmed it rears up and spreads a broad hood.", "src": ["wiki"]},
+    {"text": "The back of the hood usually has a \"spectacles\" mark: two rings joined by a curved line. A few snakes lack it.", "src": ["wiki"]}
+  ],
   "sources": {
     "wiki": {"title": "Indian cobra", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Indian_cobra"},
     "roundglass": {"title": "Spectacled cobra", "publisher": "Roundglass Sustain", "url": "https://roundglasssustain.com/species/spectacled-cobra"},

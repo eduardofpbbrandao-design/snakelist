@@ -125,6 +125,22 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Dark, saddle-shaped blotches on a tan, grey or brownish background.",
+      "src": [
+        "adw",
+        "natzoo"
+      ]
+    },
+    {
+      "text": "Towards the tail the saddles usually turn reddish - why it is often called the Red-tailed Boa.",
+      "src": [
+        "adw",
+        "natzoo"
+      ]
+    }
+  ],
   "similar": [
     {
       "id": "boa-imperator",

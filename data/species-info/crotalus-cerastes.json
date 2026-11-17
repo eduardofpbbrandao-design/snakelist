@@ -33,6 +33,10 @@
       {"text": "Gives birth to live young, on average eight to ten (other sources give 5 to 18).", "src": ["nps", "azan"]}
     ]
   },
+  "recognise": [
+    {"text": "Enlarged, pointed scales above each eye look like little horns.", "src": ["wiki"]},
+    {"text": "A small rattlesnake: the tail ends in a rattle.", "src": ["wiki"]}
+  ],
   "sources": {
     "wiki": {"title": "Crotalus cerastes", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Crotalus_cerastes"},
     "nps": {"title": "Mojave Desert Sidewinder", "publisher": "U.S. National Park Service, Death Valley", "url": "https://www.nps.gov/deva/learn/nature/sidewinder.htm"},

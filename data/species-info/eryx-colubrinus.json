@@ -42,6 +42,11 @@
     {"id": "eryx-johnii", "text": "the Red Sand Boa of South Asia, a larger, plainer brown or reddish sand boa with a blunt tail that looks like a second head.", "src": ["wiki-ej"]}
   ],
   "synonyms": {"names": ["*Gongylophis colubrinus* (Linnaeus, 1758)"], "src": ["wiki"]},
+  "recognise": [
+    {"text": "A short, stout body and a short tail.", "src": ["wiki", "rm"]},
+    {"text": "A small head barely wider than the neck, with tiny eyes set high on it.", "src": ["wiki", "rm"]},
+    {"text": "Orange or yellow with irregular dark brown blotches.", "src": ["wiki", "rm"]}
+  ],
   "sources": {
     "wiki": {"title": "Eryx colubrinus", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Eryx_colubrinus"},
     "rm": {"title": "Kenyan Sand Boa", "publisher": "Reptiles Magazine", "url": "https://reptilesmagazine.com/listings/snakes-care-sheets/kenyan-sand-boa/"},

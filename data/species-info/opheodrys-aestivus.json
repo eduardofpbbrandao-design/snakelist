@@ -107,6 +107,29 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Very thin, with a long tail.",
+      "src": [
+        "flmnh",
+        "mdc"
+      ]
+    },
+    {
+      "text": "Plain bright green above, whitish or yellowish below.",
+      "src": [
+        "flmnh",
+        "mdc"
+      ]
+    },
+    {
+      "text": "Keeled back scales (a ridge down each one) - the \"rough\" in its name, and how to tell it from the Smooth Greensnake.",
+      "src": [
+        "flmnh",
+        "mdc"
+      ]
+    }
+  ],
   "similar": [
     {
       "id": "opheodrys-vernalis",

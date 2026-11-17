@@ -143,6 +143,22 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "Dark diamonds outlined in pale cream or yellow run down the back.",
+      "src": [
+        "wiki",
+        "orianne"
+      ]
+    },
+    {
+      "text": "A heavy body, and a rattle at the end of the tail.",
+      "src": [
+        "wiki",
+        "orianne"
+      ]
+    }
+  ],
   "similar": [
     {
       "id": "crotalus-horridus",

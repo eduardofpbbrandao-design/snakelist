@@ -65,6 +65,14 @@
       }
     ]
   },
+  "recognise": [
+    {
+      "text": "A pale collar behind the head, white or pale yellow.",
+      "src": [
+        "wiki"
+      ]
+    }
+  ],
   "similar": [
     {
       "id": "natrix-helvetica",

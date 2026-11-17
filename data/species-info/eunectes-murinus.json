@@ -1,6 +1,6 @@
 {
   "id": "eunectes-murinus",
-  "reviewed": "2026-11-09",
+  "reviewed": "2026-11-16",
   "status": "rich",
   "authority": "(Linnaeus, 1758)",
   "facts": {
@@ -31,7 +31,15 @@
   "funfacts": [
     {"text": "Its genus name *Eunectes* means good swimmer.", "src": ["wiki-ana"]}
   ],
+  "recognise": [
+    {"text": "Dark olive-green above, shading to yellow underneath.", "src": ["adw"]},
+    {"text": "Dark oval spots along the back; the spots along the sides have yellow centres.", "src": ["nzoo-ga"]},
+    {"text": "A dark stripe runs from each eye back to the corner of the jaw.", "src": ["adw", "nzoo-ga"]},
+    {"text": "The eyes and nostrils sit on top of the head, so it can watch and breathe while almost completely under water.", "src": ["natgeo"]}
+  ],
   "sources": {
+    "adw": {"title": "Eunectes murinus (Green Anaconda)", "publisher": "Animal Diversity Web, University of Michigan", "url": "https://animaldiversity.org/accounts/Eunectes_murinus/"},
+    "nzoo-ga": {"title": "Green anaconda", "publisher": "Smithsonian's National Zoo & Conservation Biology Institute", "url": "https://nationalzoo.si.edu/animals/green-anaconda"},
     "guinness": {"title": "Heaviest species of snake", "publisher": "Guinness World Records", "url": "https://www.guinnessworldrecords.com/world-records/70277-heaviest-species-of-snake"},
     "rivas": {"title": "Description of the northern green anaconda (Eunectes akayima)", "authors": "Rivas et al.", "publisher": "Diversity", "year": 2024, "url": "https://repository.naturalis.nl/pub/800678/Rivas-2024-Description-of-the-northern-green-anaconda-A.pdf"},
     "dm": {"title": "New species of Amazon anaconda discovered", "publisher": "Daily Maverick", "year": 2024, "url": "https://www.dailymaverick.co.za/article/2024-03-01-new-species-of-amazon-anaconda-worlds-largest-snake-discovered/"},

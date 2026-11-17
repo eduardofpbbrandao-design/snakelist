@@ -29,6 +29,11 @@
       {"label": "Dens", "text": "In parts of Virginia, its life centres on communal dens used for generations (hibernacula) and on sites where females give birth (rookeries).", "src": ["vhs"]}
     ]
   },
+  "recognise": [
+    {"text": "Yellowish, grey, brown or black, with darker blotches or crossbands.", "src": ["maine"]},
+    {"text": "The tail ends in a rattle.", "src": ["maine"]},
+    {"text": "Snakes from cooler places - farther north or higher up - are often darker.", "src": ["maine"], "label": "Regional colours"}
+  ],
   "sources": {
     "wiki": {"title": "Timber rattlesnake", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Timber_rattlesnake"},
     "vazoo": {"title": "Timber Rattlesnake", "publisher": "Virginia Zoo", "url": "https://virginiazoo.org/animal/timber-rattlesnake/"},

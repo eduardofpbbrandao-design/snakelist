@@ -123,6 +123,10 @@
       "wiki"
     ]
   },
+  "recognise": [
+    {"text": "In the north, adults are mostly shiny black; in the south-east they can be yellowish or greyish with four dark stripes along the body.", "src": ["wiki", "gtc"], "label": "Regional colours"},
+    {"text": "Young ones are pale grey with dark blotches and look quite different from adults.", "src": ["wiki", "gtc"], "label": "Young"}
+  ],
   "sources": {
     "wiki": {
       "title": "Pantherophis alleghaniensis",

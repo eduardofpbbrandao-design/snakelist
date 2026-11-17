@@ -33,6 +33,11 @@
   "funfacts": [
     {"text": "In 1957 the famous American herpetologist Karl Patterson Schmidt died after being bitten by a young boomslang.", "src": ["doccheck", "wiki"]}
   ],
+  "recognise": [
+    {"text": "Very large eyes with round pupils.", "src": ["wiki", "adw"]},
+    {"text": "A slim body; colour varies from plain brown to green.", "src": ["wiki", "adw"]},
+    {"text": "Males are usually more colourful than females; female hatchlings are pale brown.", "src": ["adw", "wiki"], "label": "Males and females"}
+  ],
   "sources": {
     "wiki": {"title": "Boomslang", "publisher": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Boomslang"},
     "adw": {"title": "Dispholidus typus", "publisher": "Animal Diversity Web, University of Michigan", "url": "https://animaldiversity.org/accounts/Dispholidus_typus/"},
