@@ -606,10 +606,21 @@ function scaleLattice(P, gTotal) {
   const Pt = Ht / Wt;
   const cell = (a, g) => {
     if (Math.abs(a) > aV) { const j = Math.floor(g / Pt); return { ac: a, gc: (j + 0.5) * Pt, id: j * 7919 + (a > 0 ? 1 : 2), v: true, w: 1 }; }
-    const i = rowOf(a), wI = vk === 1 ? rw : RB[i + 1] - RB[i], off = (i & 1) * Pt / 2, j = Math.floor((g - off) / Pt);
-    const ac = vk === 1 ? -aV + (i + 0.5) * rw : (RB[i] + RB[i + 1]) / 2, gc = off + (j + 0.5) * Pt, lx = (a - ac) / wI, ly = (g - gc) / Pt;
+    // v5.58 (rendering): DIAMOND scale cells. The rows are staggered by half a pitch, so the scale whose centre is nearest in
+    // the diamond measure |da|/width + |dg|/(pitch/2) tiles the skin exactly with rhombi, as the real overlapping scales lie;
+    // the old brick-shaped cells (one row, one pitch) gave every scale a square block of colour - "digital camouflage"
+    const i0 = rowOf(a); let best = null;
+    for (let di = -1; di <= 1; di++) {
+      const i = i0 + di; if (i < 0 || i >= R) continue;
+      const wI = vk === 1 ? rw : RB[i + 1] - RB[i], off = (i & 1) * Pt / 2, ac = vk === 1 ? -aV + (i + 0.5) * rw : (RB[i] + RB[i + 1]) / 2;
+      const jm = Math.floor((g - off) / Pt);
+      for (let dj = 0; dj <= 1; dj++) { const j = jm + dj - ((g - off) / Pt - jm < 0.5 ? 1 : 0), gc = off + (j + 0.5) * Pt;
+        const d = Math.abs(a - ac) / wI + Math.abs(g - gc) / (Pt / 2);
+        if (!best || d < best.d) best = { d, i, j, ac, gc, wI }; }
+    }
+    const { i, j, ac, gc, wI } = best, lx = (a - ac) / wI, ly = (g - gc) / Pt;
     // w: how far inside the scale (1 in the middle, 0 at its edges), so per-scale colour blends softly
-    return { ac, gc, id: i * 100003 + j * 7, v: false, i, j, w: clamp(1 - (lx * lx * 3.2 + ly * ly * 2.6), 0, 1) };
+    return { ac, gc, id: i * 100003 + j * 7, v: false, i, j, w: clamp(1 - Math.pow(best.d, 1.6), 0, 1) * clamp(1 - (lx * lx * 0.6 + ly * ly * 0.4), 0, 1) };
   };
   return { aV, R, rw, Wt, Ht, Pt, cell, rowOf, RB, vk };
 }
@@ -947,7 +958,7 @@ function patternData(P, F, body, lat, quality, seed) {
         const res = evalLayer(Ly, aq, gq, t, xn, warp, cl, seed);
         if (res) col = mixc(col, res[0], res[1]);
       }
-      const sv = 1 + Math.max(vari, 0.04) * (hash1(cl.id, seed + 5) - 0.5) * 2 * (0.35 + 0.65 * cl.w) * sstep(Hl * 0.95, Hl * 1.15, x); // (v4.81: none on the head, where the body's scale cells would show as stripes)
+      const sv = 1 + (vari != null ? vari : 0.05) * (hash1(cl.id, seed + 5) - 0.5) * 2 * (0.2 + 0.8 * cl.w) /* v5.58 (rendering): no forced floor (it was +-8%): each species' own var */ * sstep(Hl * 0.95, Hl * 1.15, x); // (v4.81: none on the head, where the body's scale cells would show as stripes)
       col = [col[0] * sv, col[1] * sv, col[2] * sv];
       if (C.scaleEdge && !cl.v && x > Hl * 1.05) col = mixc(col, hex(C.scaleEdge.color), (C.scaleEdge.k || 0.8) * Math.pow(1 - cl.w, 1.6));
       // v5.18: every scale reads as a scale - a soft darker rim round each dorsal scale (the skin between scales), and the
@@ -1160,7 +1171,7 @@ function buildEyes(P, F, body, pat) {
   const et = eyeTexture(P); et.wrapS = et.wrapT = THREE.ClampToEdgeWrapping;
   // v5.53: the eye under it is not shiny itself (a broad sheen over the iris made it look like a pale painted disc); the
   // spectacle on top gives the small sharp highlight
-  const em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.62, metalness: 0, envMapIntensity: 0.55, clearcoat: 1, clearcoatRoughness: 0.06 }); // (v5.58: the wet, glassy shine of the spectacle, with its small sharp highlight - the see-through spectacle on top lost its reflections to its own transparency)
+  const em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.62, metalness: 0, envMapIntensity: 0.4, clearcoat: 0.8, clearcoatRoughness: 0.06 }); // (v5.58: the wet, glassy shine of the spectacle, with its small sharp highlight - the see-through spectacle on top lost its reflections to its own transparency)
   const sm = new THREE.MeshPhysicalMaterial({ vertexColors: true, transparent: true, roughness: 0.03, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.0, depthWrite: false, specularIntensity: 1 });
   const lm = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, roughness: 0.6, metalness: 0, depthWrite: false, envMapIntensity: 0.8 });
   // the skin colour right round the eye, read from the body's own pattern texture
