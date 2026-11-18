@@ -1453,7 +1453,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
         let c;
         if (kind === 'lip') { const sk = skinAt(x, side * (upper ? mA - 0.06 : mA + 0.08)), lipC = sk.clone().lerp(new THREE.Color(P.colors.belly), upper ? 0.25 : 0.5); c = lipC.multiplyScalar(suture * lerp(1, 0.7, sstep(0.55, 1, s))).lerp(pink, sstep(0.8, 1, s) * 0.6); }
         else {
-          c = pink.clone().lerp(new THREE.Color(upper ? '#f6d4d0' : '#f0c0bc'), 0.3); // (v5.53: paler, as the roof of a real snake's mouth)
+          c = pink.clone().lerp(new THREE.Color(upper ? '#f6d4d0' : '#f0c0bc'), P.head.mouthColor ? 0.04 : 0.3); // (v5.62: a species' own mouth colour - black mamba, cottonmouth - is not paled) // (v5.53: paler, as the roof of a real snake's mouth)
           const groove = Math.max(bump(s, 0, 0.12), bump(s, 1, 0.12)), ridge = upper ? bump(s, 0.3, 0.06) + bump(s, 0.7, 0.06) : bump(s, 0.5, 0.1);
           c.multiplyScalar((1 - 0.35 * groove) * (1 + 0.12 * ridge) * (0.94 + 0.12 * hash1((x / Hl * 300) | 0, (s * 97) | 0)));
           c.lerp(deep, sstep(0.55, 1.0, x / xh) * 0.6).lerp(black, sstep(0.9, 1.02, x / xh) * 0.45 * (1 - 0.5 * ridge));
@@ -1467,7 +1467,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
     g.setIndex(idx); g.computeVertexNormals();
     return { g, o: g.attributes.position.array.slice(), xv, per, row: (x, s) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = NL + Math.round(s * NS); return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); }, gum: (x, side) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = side > 0 ? NL - 1 : per - NL; return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); } };
   }
-  const lining = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.4, metalness: 0, clearcoat: 0.4, clearcoatRoughness: 0.28, emissive: new THREE.Color('#6a3036'), emissiveIntensity: 0.5, side: THREE.DoubleSide, envMapIntensity: 0.45 }); // (a faint glow stands in for light passing through the soft tissue)
+  const lining = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.4, metalness: 0, clearcoat: 0.4, clearcoatRoughness: 0.28, emissive: P.head.mouthColor ? new THREE.Color(P.head.mouthColor).multiplyScalar(0.25) : new THREE.Color('#6a3036'), emissiveIntensity: 0.5, /* (v5.62: the glow takes the species' mouth colour) */ side: THREE.DoubleSide, envMapIntensity: 0.45 }); // (a faint glow stands in for light passing through the soft tissue)
   const roof = jawLining(true), floorJ = jawLining(false);
   const roofM = lining.clone(); roofM.emissive.set('#b06a6e'); roofM.emissiveIntensity = 0.55; // (v5.53: the roof faces down, away from the light: a little more glow keeps it pink, not maroon)
   const palate = new THREE.Mesh(roof.g, roofM), floor = new THREE.Mesh(floorJ.g, lining);
