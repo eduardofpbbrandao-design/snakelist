@@ -619,8 +619,11 @@ function scaleLattice(P, gTotal) {
         if (!best || d < best.d) best = { d, i, j, ac, gc, wI }; }
     }
     const { i, j, ac, gc, wI } = best, lx = (a - ac) / wI, ly = (g - gc) / Pt;
+    // (pattern edges still step along the scale ROWS - the cell in the texel's own row - so a stripe keeps a straight edge
+    // instead of a saw-tooth; only colour, shading and the scale's own variation follow the diamonds)
+    const o0 = (i0 & 1) * Pt / 2, qac = vk === 1 ? -aV + (i0 + 0.5) * rw : (RB[i0] + RB[i0 + 1]) / 2, qgc = o0 + (Math.floor((g - o0) / Pt) + 0.5) * Pt;
     // w: how far inside the scale (1 in the middle, 0 at its edges), so per-scale colour blends softly
-    return { ac, gc, id: i * 100003 + j * 7, v: false, i, j, w: clamp(1 - Math.pow(best.d, 1.6), 0, 1) * clamp(1 - (lx * lx * 0.6 + ly * ly * 0.4), 0, 1) };
+    return { ac, gc, qac, qgc, id: i * 100003 + j * 7, v: false, i, j, w: clamp(1 - Math.pow(best.d, 1.6), 0, 1) * clamp(1 - (lx * lx * 0.6 + ly * ly * 0.4), 0, 1) };
   };
   return { aV, R, rw, Wt, Ht, Pt, cell, rowOf, RB, vk };
 }
@@ -940,7 +943,7 @@ function patternData(P, F, body, lat, quality, seed) {
     for (let c = 0; c < Wp; c++) {
       const a = ((c + 0.5) / Wp) * 2 - 1, cl = lat.cell(a, g);
       const q = x < Hl * 1.1 ? 0.25 : quant;
-      const aq = a + (cl.ac - a) * q, gq = g + (cl.gc - g) * q;
+      const aq = a + ((cl.qac != null ? cl.qac : cl.ac) - a) * q, gq = g + ((cl.qgc != null ? cl.qgc : cl.gc) - g) * q;
       const nx = Math.cos(Math.PI * aq) * 0.9 * rk, ny = Math.sin(Math.PI * aq) * 0.9 * rk;
       const wn = vnoise(nx * 2.2, ny * 2.2, gq * 4.1, seed) - 0.5, wn2 = vnoise(nx * 6, ny * 6, gq * 11, seed + 9) - 0.5;
       const warp = wn + wn2 * 0.45;
