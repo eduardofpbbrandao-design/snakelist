@@ -189,6 +189,7 @@ export function autoProfile(p) {
     case 'ocelli': // big round dark spots on the back, pale-centred ones along the flanks (anacondas)
       T({ type: 'blotch', count: Math.round(n * 1.1), a: 0.12, mirror: true, alt: true, wid: 0.14, len: 0.5, shape: 'round', color: c, warp: 0.4, jit: 0.2, sj: 0.25 });
       T({ type: 'blotch', count: Math.round(n * 1.6), a: 0.52, mirror: true, wid: 0.1, len: 0.32, shape: 'round', color: c, inner: { r: 0.55, color: a.oc || shade(b, 0.95) }, warp: 0.4, jit: 0.3, sj: 0.3 }); break;
+    case 'uniform': break; // v5.58: one even colour from head to tail (smooth green snake): not even the darker tail of 'plain'
   }
   // optional extras on any pattern: a pale upper lip, a stripe along the flanks or the spine, a coloured tail tip or head
   if (a.lip) pat.push({ type: 'line', p0: [0.03, 0.5], p1: [1.15, 0.54], wid: 0.05, color: a.lip, mirror: true, aa: 0.4 });
@@ -216,6 +217,7 @@ export function autoProfile(p) {
   if (a.sp) Object.assign(o.scene, a.sp);
   if (a.lat) colors.lateral = a.lat;
   if (a.tl) o.tail = a.tl;
+  if (a.mx) o.max = a.mx; // v5.58: the longest recorded (said under the model, not shown)
   if (x.includes('l')) o.lengthNote = 'a typical size for its group - SnakeList has no measured length for this species yet';
   else if (fossil) o.lengthNote = 'estimated from its fossil bones';
   o.details = fossil ? [['back', 'Colours are a guess: fossils keep no colour']] : x.includes('g') ? [['back', 'Colours are a guess: no photo yet']] : [];
@@ -506,7 +508,7 @@ function buildBody(P, F, pose, quality) {
   // v4.81: an eye socket - the skin dips gently where the eye sits, so the domed eye under its clear
   // spectacle scale lies flush with the head (never standing out of its outline)
   const eyeX0 = Hd.eyeX * F.Hl, eyeRad = (Hd.eye || 0.15) * F.W(eyeX0) * 1.04, eyeRl = (F.W(eyeX0) + F.Hh(eyeX0)) / 2;
-  if (Hd.pupil !== 'none') bumps.push({ x: eyeX0, xs: eyeRad * 0.95, th: eyeA, ts: (eyeRad * 0.95) / eyeRl, amp: -(eyeRad * 0.2) / eyeRl, mirror: true, sock: true });
+  if (Hd.pupil !== 'none') bumps.push({ x: eyeX0, xs: eyeRad * 1.1, th: eyeA, ts: (eyeRad * 1.1) / eyeRl, amp: -(eyeRad * 0.27) / eyeRl, mirror: true, sock: true }); // (v5.58: a little wider and deeper, so the whole round eye shows - its edge was lost under the skin in places, leaving an egg shape)
 
   // spine point & frame at x
   // v5.09: towards the snout tip the centre line keeps the height it has a little further back (it used to dip to the
@@ -604,10 +606,24 @@ function scaleLattice(P, gTotal) {
   const Pt = Ht / Wt;
   const cell = (a, g) => {
     if (Math.abs(a) > aV) { const j = Math.floor(g / Pt); return { ac: a, gc: (j + 0.5) * Pt, id: j * 7919 + (a > 0 ? 1 : 2), v: true, w: 1 }; }
-    const i = rowOf(a), wI = vk === 1 ? rw : RB[i + 1] - RB[i], off = (i & 1) * Pt / 2, j = Math.floor((g - off) / Pt);
-    const ac = vk === 1 ? -aV + (i + 0.5) * rw : (RB[i] + RB[i + 1]) / 2, gc = off + (j + 0.5) * Pt, lx = (a - ac) / wI, ly = (g - gc) / Pt;
+    // v5.58 (rendering): DIAMOND scale cells. The rows are staggered by half a pitch, so the scale whose centre is nearest in
+    // the diamond measure |da|/width + |dg|/(pitch/2) tiles the skin exactly with rhombi, as the real overlapping scales lie;
+    // the old brick-shaped cells (one row, one pitch) gave every scale a square block of colour - "digital camouflage"
+    const i0 = rowOf(a); let best = null;
+    for (let di = -1; di <= 1; di++) {
+      const i = i0 + di; if (i < 0 || i >= R) continue;
+      const wI = vk === 1 ? rw : RB[i + 1] - RB[i], off = (i & 1) * Pt / 2, ac = vk === 1 ? -aV + (i + 0.5) * rw : (RB[i] + RB[i + 1]) / 2;
+      const jm = Math.floor((g - off) / Pt);
+      for (let dj = 0; dj <= 1; dj++) { const j = jm + dj - ((g - off) / Pt - jm < 0.5 ? 1 : 0), gc = off + (j + 0.5) * Pt;
+        const d = Math.abs(a - ac) / wI + Math.abs(g - gc) / (Pt / 2);
+        if (!best || d < best.d) best = { d, i, j, ac, gc, wI }; }
+    }
+    const { i, j, ac, gc, wI } = best, lx = (a - ac) / wI, ly = (g - gc) / Pt;
+    // (pattern edges still step along the scale ROWS - the cell in the texel's own row - so a stripe keeps a straight edge
+    // instead of a saw-tooth; only colour, shading and the scale's own variation follow the diamonds)
+    const o0 = (i0 & 1) * Pt / 2, qac = vk === 1 ? -aV + (i0 + 0.5) * rw : (RB[i0] + RB[i0 + 1]) / 2, qgc = o0 + (Math.floor((g - o0) / Pt) + 0.5) * Pt;
     // w: how far inside the scale (1 in the middle, 0 at its edges), so per-scale colour blends softly
-    return { ac, gc, id: i * 100003 + j * 7, v: false, i, j, w: clamp(1 - (lx * lx * 3.2 + ly * ly * 2.6), 0, 1) };
+    return { ac, gc, qac, qgc, id: i * 100003 + j * 7, v: false, i, j, w: clamp(1 - Math.pow(best.d, 1.6), 0, 1) * clamp(1 - (lx * lx * 0.6 + ly * ly * 0.4), 0, 1) };
   };
   return { aV, R, rw, Wt, Ht, Pt, cell, rowOf, RB, vk };
 }
@@ -616,11 +632,15 @@ function scaleLattice(P, gTotal) {
 function scaleTextures(P, lat) {
   const { Wt, Ht, aV, rw, Pt, rowOf, RB, vk } = lat, S = P.scales, keel = S.keel || 0, kind = S.kind || 'imbricate';
   const h = new Float32Array(Wt * Ht);
+  // v5.58: edge (scales.edge = { k, dir: [towards the head, towards the belly], from, pow }): how dark each scale's own visible
+  // edge is, on one side (the inland taipan's blackish lower front edges that line up into a herringbone) - kept in the cavity
+  // map's blue channel, so the dark edge follows the scale's real outline (the colour texture's square cells did not)
+  const SE = S.edge, ed = SE ? new Float32Array(Wt * Ht) : null;
   for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) {
     const a = ((x + 0.5) / Wt) * 2 - 1, g = ((y + 0.5) / Ht) * Pt;
-    let best = 0;
+    let best = 0, bE = 0;
     if (Math.abs(a) > aV) { // ventral scutes: wide plates
-      const yy = g / Pt; best = 0.55 + 0.35 * yy - 0.5 * Math.exp(-(((yy) / 0.06) ** 2)) - 0.5 * Math.exp(-(((1 - yy) / 0.04) ** 2));
+      const yy = g / Pt; best = 0.55 + 0.24 * yy - 0.32 * Math.exp(-(((yy) / 0.075) ** 2)) - 0.32 * Math.exp(-(((1 - yy) / 0.055) ** 2)); // (v5.58: a gentler step at each scute's edge - it shone as a row of white ticks along the belly)
       best -= 0.4 * Math.exp(-(((Math.abs(a) - aV) / 0.01) ** 2));
     } else {
       const i0 = rowOf(a);
@@ -639,13 +659,22 @@ function scaleTextures(P, lat) {
             const d = (lx / wx) ** 2 + (ly / wy) ** 2; if (d >= 1) continue;
             hv = Math.sqrt(1 - d) * 0.45 + 0.55 * t; // rises toward the free (rear) tip that overlaps the next scale
             if (keel) hv += keel * 0.38 * Math.exp(-((lx / 0.075) ** 2)) * sstep(-0.9, -0.2, ly / wy);
+            if (SE && hv > best) { const dir = SE.dir || [1, 1], sd = clamp(0.5 + dir[0] * -ly * 1.3 + dir[1] * Math.sign(a || 1) * lx * 2.2, 0, 1);
+              bE = Math.pow(sstep(SE.from != null ? SE.from : 0.3, 0.97, Math.sqrt(d)), SE.pow || 1) * sstep(0.2, 0.85, sd); }
           }
           if (hv > best) best = hv;
         }
       }
     }
-    h[y * Wt + x] = best;
+    h[y * Wt + x] = best; if (ed) ed[y * Wt + x] = bE;
   }
+  // v5.58: a light blur (one pixel each way) so the overlapping edges are soft steps, not one-pixel cliffs that flicker
+  { const t = new Float32Array(Wt * Ht);
+    for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) t[y * Wt + x] = (h[y * Wt + ((x + Wt - 1) % Wt)] + 2 * h[y * Wt + x] + h[y * Wt + ((x + 1) % Wt)]) / 4;
+    for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) h[y * Wt + x] = (t[((y + Ht - 1) % Ht) * Wt + x] + 2 * t[y * Wt + x] + t[((y + 1) % Ht) * Wt + x]) / 4;
+    if (ed) for (let pass = 0; pass < 2; pass++) { // (the dark edges too, twice: they were saw-toothed)
+      for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) t[y * Wt + x] = (ed[y * Wt + ((x + Wt - 1) % Wt)] + 2 * ed[y * Wt + x] + ed[y * Wt + ((x + 1) % Wt)]) / 4;
+      for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) ed[y * Wt + x] = (t[((y + Ht - 1) % Ht) * Wt + x] + 2 * t[y * Wt + x] + t[((y + 1) % Ht) * Wt + x]) / 4; } }
   const nData = new Uint8Array(Wt * Ht * 4), cData = new Uint8Array(Wt * Ht * 4);
   const str = (S.normal || 1) * (kind === 'imbricate' ? 2.2 : 1.6);
   const H = (x, y) => h[((y + Ht) % Ht) * Wt + ((x + Wt) % Wt)];
@@ -656,7 +685,7 @@ function scaleTextures(P, lat) {
     const hv = H(x, y), cav = sstep(0.0, 0.3, hv);
     cData[k] = (0.35 + 0.65 * cav) * 255;                    // cavity (darkens the skin between scales)
     cData[k + 1] = (lerp(1.0, 0.82, cav) + keel * 0.08) * 230; // roughness
-    cData[k + 2] = 255; cData[k + 3] = 255;
+    cData[k + 2] = ed ? ed[y * Wt + x] * 255 : 0; cData[k + 3] = 255; // (blue: the dark scale edge, see S.edge)
   }
   const mk = (d) => { const t = new THREE.DataTexture(d, Wt, Ht, THREE.RGBAFormat); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter; t.needsUpdate = true; return t; };
   return { normal: mk(nData), cavity: mk(cData) };
@@ -798,7 +827,7 @@ function headData(P, F, quality) {
       gdist[k] = g / gw;
       let h = sstep(0, 1.5, g / gw) * 0.75 + 0.25 * (1 - Math.min(1, d1a[k]) ** 2);
       if (s.small) { const lx = (x - s.x) / s.rx; h += 0.25 * clamp(lx, -1, 1); if (s.keel) h += s.keel * 0.45 * Math.exp(-((wrapA(a - s.a) * hx0 / (s.rx * 0.22)) ** 2)) * sstep(-0.9, 0.1, lx); } // (small scales overlap backwards, some are keeled)
-      hgt[k] = h * gw * 0.9;
+      hgt[k] = h * gw * 0.9 * (H.headRelief != null ? H.headRelief : 1); // (v5.58: headRelief - flatter, smoother shields in some snakes)
     }
   }
   // the nostrils and heat pits: dark, sunk into the skin
@@ -840,7 +869,7 @@ function headData(P, F, quality) {
       let nx = -hy, ny = -hx; const hl = holeAt(r + 1, c) - holeAt(r - 1, c), hh2 = holeAt(r, c + 1) - holeAt(r, c - 1); nx += hh2 * 0.35; ny += hl * 0.35; // (the rim of a pit)
       const l = Math.hypot(nx, ny, 1); nData[k * 4] = (nx / l * 0.5 + 0.5) * 255; nData[k * 4 + 1] = (ny / l * 0.5 + 0.5) * 255;
       const s = seeds[id1[k]] || {}, groove = 1 - sstep(0.15, 1.25, gdist[k]), hs = hash1(id1[k] + 1, 913);
-      nData[k * 4 + 2] = clamp((1 - 0.6 * groove) * (0.93 + 0.12 * hs) * (1 - hole * 0.6), 0, 1) * 255; // cavity: the grooves dark
+      nData[k * 4 + 2] = clamp((1 - (H.groove != null ? H.groove : 0.6) * groove) * (0.93 + 0.12 * hs) * (1 - hole * 0.6), 0, 1) * 255; // cavity: the grooves dark
       nData[k * 4 + 3] = clamp((s.small ? 0.62 : 0.5) + 0.12 * hs + 0.3 * groove, 0, 1) * 255; // roughness
       // the colour layer
       let col = null, al = 0;
@@ -899,6 +928,7 @@ function patternData(P, F, body, lat, quality, seed) {
   const Hp = clamp(Math.round(body.gTotal * Wp * 0.62), 256, quality === 'high' ? 8192 : 2048);
   const C = P.colors, dors = hex(C.dorsal), latc = hex(C.lateral), bel = hex(C.belly);
   const bellyA = C.bellyA || 0.74, bs = C.bellySharp || 0.06, mott = C.mottle, vari = C.var;
+  const lumc = (c) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2], chinUp = C.chin !== false && bellyA > 0.6 && lumc(bel) - lumc(latc) > 30;
   const layers = (P.pattern || []).filter((l) => l.type !== 'shields').map((l) => prepLayer(l, F, body)); // (v5.53: head plates are in the head textures)
   const quant = P.quant != null ? P.quant : 0.32; // v5.29: pattern edges follow the scales (a blotch edge is made of whole scales, stepped)
   const data = new Uint8ClampedArray(Wp * Hp * 4);
@@ -913,13 +943,16 @@ function patternData(P, F, body, lat, quality, seed) {
     for (let c = 0; c < Wp; c++) {
       const a = ((c + 0.5) / Wp) * 2 - 1, cl = lat.cell(a, g);
       const q = x < Hl * 1.1 ? 0.25 : quant;
-      const aq = a + (cl.ac - a) * q, gq = g + (cl.gc - g) * q;
+      const aq = a + ((cl.qac != null ? cl.qac : cl.ac) - a) * q, gq = g + ((cl.qgc != null ? cl.qgc : cl.gc) - g) * q;
       const nx = Math.cos(Math.PI * aq) * 0.9 * rk, ny = Math.sin(Math.PI * aq) * 0.9 * rk;
       const wn = vnoise(nx * 2.2, ny * 2.2, gq * 4.1, seed) - 0.5, wn2 = vnoise(nx * 6, ny * 6, gq * 11, seed + 9) - 0.5;
       const warp = wn + wn2 * 0.45;
       const aa = Math.abs(aq);
       let col = mixc(dors, latc, sstep(0.18, 0.62, aa));
-      col = mixc(col, bel, sstep(bellyA - bs, bellyA + bs, aa + warp * (C.bellyWarp || 0.04)));
+      // v5.58: under the head the pale belly colour reaches up to the lower lip (the chin and throat), as in most snakes with a
+      // paler belly; it eases back down to the belly's own edge along the neck
+      const bA = chinUp ? lerp(0.6, bellyA, sstep(Hl * 0.85, Hl * 1.7, x)) : bellyA;
+      col = mixc(col, bel, sstep(bA - bs, bA + bs, aa + warp * (C.bellyWarp || 0.04)));
       const m = 1 + mott * (fbm(nx * 3, ny * 3, gq * 5.5, seed + 3, 3) - 0.5) * 2.4;
       col = [col[0] * m, col[1] * m, col[2] * m];
       for (const Ly of layers) {
@@ -928,7 +961,7 @@ function patternData(P, F, body, lat, quality, seed) {
         const res = evalLayer(Ly, aq, gq, t, xn, warp, cl, seed);
         if (res) col = mixc(col, res[0], res[1]);
       }
-      const sv = 1 + Math.max(vari, 0.08) * (hash1(cl.id, seed + 5) - 0.5) * 2 * (0.35 + 0.65 * cl.w) * sstep(Hl * 0.95, Hl * 1.15, x); // (v4.81: none on the head, where the body's scale cells would show as stripes)
+      const sv = 1 + (vari != null ? vari : 0.05) * (hash1(cl.id, seed + 5) - 0.5) * 2 * (0.2 + 0.8 * cl.w) /* v5.58 (rendering): no forced floor (it was +-8%): each species' own var */ * sstep(Hl * 0.95, Hl * 1.15, x); // (v4.81: none on the head, where the body's scale cells would show as stripes)
       col = [col[0] * sv, col[1] * sv, col[2] * sv];
       if (C.scaleEdge && !cl.v && x > Hl * 1.05) col = mixc(col, hex(C.scaleEdge.color), (C.scaleEdge.k || 0.8) * Math.pow(1 - cl.w, 1.6));
       // v5.18: every scale reads as a scale - a soft darker rim round each dorsal scale (the skin between scales), and the
@@ -936,7 +969,7 @@ function patternData(P, F, body, lat, quality, seed) {
       else if (x > Hl * 1.05 && !C.noEdge) {
         const kE = (P.scales.kind === 'juxta' || P.scales.kind === 'cycloid' ? 0.12 : 0.3) * (C.edgeK != null ? C.edgeK : 1) * (0.45 + 1.1 * hash1(cl.id, seed + 17)); // v5.29: no two scales alike - each its own edge
         // a few scales carry tiny flecks of a darker or paler tone, and some a lighter rim, as in close-up photos
-        if (!cl.v) {
+        if (!cl.v && C.flecks !== 0) { // (v5.58: none on snakes whose scales are clean, plain and glossy)
           const hf = hash1(cl.id, seed + 19);
           if (hf < 0.3 && hash3(r, c, 7, seed + 23) < 0.06 * cl.w) { const k2 = hf < 0.15 ? 0.72 : 1.18; col = [col[0] * k2, col[1] * k2, col[2] * k2]; }
           if (hf > 0.85) col = mixc(col, [Math.min(255, col[0] * 1.25), Math.min(255, col[1] * 1.25), Math.min(255, col[2] * 1.25)], 0.5 * Math.pow(1 - cl.w, 3));
@@ -1014,7 +1047,7 @@ function evalLayer(Ly, a, g, t, xn, warp, cl, seed) {
     return best;
   }
   if (Ly.type === 'tint') {
-    const aw = Ly.aRange || [0, 1]; const k = sstep(Ly.t0, Ly.t0 + (Ly.ramp || 0.1), t) * (1 - sstep(Ly.t1 - 0.001, Ly.t1, t)) * (Math.abs(a) >= aw[0] && Math.abs(a) <= aw[1] ? 1 : 0);
+    const aw = Ly.aRange || [0, 1]; const k = sstep(Ly.t0, Ly.t0 + (Ly.ramp || 0.1), t) * (1 - sstep(Ly.t1 - (Ly.fade || 0.001), Ly.t1, t)) /* (v5.58: fade - a soft end) */ * (Math.abs(a) >= aw[0] && Math.abs(a) <= aw[1] ? 1 : 0);
     return k > 0 ? [Ly.col, k * (Ly.alpha || 1)] : null;
   }
   if (Ly.type === 'zigzag') {
@@ -1115,7 +1148,7 @@ function eyeTexture(P) {
     for (let i = 0; i < 520; i++) { const a = R() * TAU, r0 = RI * (0.18 + R() * 0.4), r1 = r0 + RI * (0.12 + R() * 0.38); x.strokeStyle = R() < 0.55 ? 'rgba(0,0,0,.16)' : 'rgba(255,244,210,.13)'; x.lineWidth = 0.6 + R() * 1.6; x.beginPath(); x.moveTo(C + Math.cos(a) * r0, C + Math.sin(a) * r0); x.quadraticCurveTo(C + Math.cos(a + 0.05) * (r0 + r1) / 2, C + Math.sin(a + 0.05) * (r0 + r1) / 2, C + Math.cos(a) * r1, C + Math.sin(a) * r1); x.stroke(); }
     for (let i = 0; i < 90; i++) { const a = R() * TAU, r = RI * (0.25 + R() * 0.62); x.fillStyle = R() < 0.6 ? 'rgba(10,6,2,.22)' : 'rgba(255,236,170,.18)'; x.beginPath(); x.arc(C + Math.cos(a) * r, C + Math.sin(a) * r, 1 + R() * 3.5, 0, TAU); x.fill(); }
     if (H.eyeStripe) { x.save(); x.beginPath(); x.arc(C, C, RI, 0, TAU); x.clip(); x.fillStyle = H.eyeStripe; x.globalAlpha = 0.78; x.fillRect(0, S * 0.37, S, S * 0.26); x.restore(); }
-    if (H.eyeRing) { x.strokeStyle = H.eyeRing; x.lineWidth = S * 0.035; x.beginPath(); x.arc(C, C, RI * 0.97, 0, TAU); x.stroke(); }
+    if (H.eyeRing) { x.strokeStyle = H.eyeRing; x.lineWidth = S * 0.03; x.beginPath(); x.arc(C, C, RI * 0.86, 0, TAU); x.stroke(); } // (v5.58: inside the rim the spectacle's edge tints, so it shows)
     // the pupil, with a soft dark halo so its edge is not a hard cut-out
     const pupil = (grow, col) => { x.fillStyle = col; x.beginPath();
       if (H.pupil === 'slit') x.ellipse(C, C, S * (H.pupilW || 0.045) + grow, S * 0.36 + grow, 0, 0, TAU);
@@ -1141,7 +1174,7 @@ function buildEyes(P, F, body, pat) {
   const et = eyeTexture(P); et.wrapS = et.wrapT = THREE.ClampToEdgeWrapping;
   // v5.53: the eye under it is not shiny itself (a broad sheen over the iris made it look like a pale painted disc); the
   // spectacle on top gives the small sharp highlight
-  const em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.62, metalness: 0, envMapIntensity: 0.55 });
+  const em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.62, metalness: 0, envMapIntensity: 0.4, clearcoat: 0.8, clearcoatRoughness: 0.06 }); // (v5.58: the wet, glassy shine of the spectacle, with its small sharp highlight - the see-through spectacle on top lost its reflections to its own transparency)
   const sm = new THREE.MeshPhysicalMaterial({ vertexColors: true, transparent: true, roughness: 0.03, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.0, depthWrite: false, specularIntensity: 1 });
   const lm = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, roughness: 0.6, metalness: 0, depthWrite: false, envMapIntensity: 0.8 });
   // the skin colour right round the eye, read from the body's own pattern texture
@@ -1273,7 +1306,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
           c = pink.clone().lerp(new THREE.Color(upper ? '#f6d4d0' : '#f0c0bc'), 0.3); // (v5.53: paler, as the roof of a real snake's mouth)
           const groove = Math.max(bump(s, 0, 0.12), bump(s, 1, 0.12)), ridge = upper ? bump(s, 0.3, 0.06) + bump(s, 0.7, 0.06) : bump(s, 0.5, 0.1);
           c.multiplyScalar((1 - 0.35 * groove) * (1 + 0.12 * ridge) * (0.94 + 0.12 * hash1((x / Hl * 300) | 0, (s * 97) | 0)));
-          c.lerp(deep, sstep(0.55, 1.0, x / xh) * 0.6).lerp(black, sstep(0.9, 1.02, x / xh) * 0.45 * (1 - 0.5 * ridge));
+          c.lerp(deep, sstep(0.55, 1.0, x / xh) * 0.5).lerp(black, sstep(0.9, 1.02, x / xh) * 0.25 * (1 - 0.5 * ridge));
         }
         rows.push(p.x, p.y, p.z); cols.push(c.r, c.g, c.b); xv.push(x);
       }
@@ -1305,7 +1338,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
   { const xb = xs[xs.length - 1], CW = 14, MW = 10, base = cheekPts.length / 3, fT = body.frameAt(xb).T, depth = F.Hh(xb) * 0.35;
     for (let m = 0; m <= MW; m++) for (let c = 0; c <= CW; c++) {
       const u = c / CW, w = m / MW, A2 = roof.row(xb, u), B2 = floorJ.row(xb, u), pp = A2.clone().lerp(B2, w).addScaledVector(fT, depth * Math.sin(Math.PI * w) * (0.35 + 0.65 * Math.sin(Math.PI * u)));
-      cheekPts.push(pp.x, pp.y, pp.z); const g = Math.hypot((u - 0.5) / 0.2, (w - 0.5) / 0.16), cc = pink.clone().lerp(deep, 0.55 + 0.25 * Math.sin(Math.PI * w)).lerp(black, 0.95 * (1 - sstep(0.6, 1.1, g)));
+      cheekPts.push(pp.x, pp.y, pp.z); const g = Math.hypot((u - 0.5) / 0.15, (w - 0.5) / 0.075), cc = pink.clone().lerp(deep, 0.4 + 0.25 * Math.sin(Math.PI * w)).lerp(black, 0.9 * (1 - sstep(0.55, 1.15, g))); // (v5.58: the gullet a narrow closed slit, as in real snakes, not a big dark hole)
       cheekCols.push(cc.r, cc.g, cc.b); cheekInfo.push(w, 1, xb); }
     const idx = Array.from(cheekG.index.array);
     for (let m = 0; m < MW; m++) for (let c = 0; c < CW; c++) { const a = base + m * (CW + 1) + c, b = a + CW + 1; idx.push(a, a + 1, b, a + 1, b + 1, b); }
@@ -1357,7 +1390,8 @@ function buildMouth(P, F, body, group, eyes, pat) {
     const r0 = Math.max(Hl * 0.014, F.W(Hl * 0.2) * 0.06); // the tongue's thickness
     const shx0 = Hl * 0.075, shx1 = Hl * 0.42, shW = Math.max(F.W(Hl * 0.2) * 0.12, r0 * 2.4), shH = Math.max(F.Hh(Hl * 0.2) * 0.05, r0 * 1.5), fS0 = fAt((shx0 + shx1) / 2);
     const sheath = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12), softM); sheath.scale.set(shW, shH, (shx1 - shx0) / 2); sheath.position.copy(fl((shx0 + shx1) / 2));
-    sheath.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fS0.S.clone().normalize().negate(), fS0.U, fS0.T)); // (a right-handed basis: S, U, T is left-handed) lowerT.add(sheath); sheath.userData.mpart = 'sheath';
+    sheath.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fS0.S.clone().normalize().negate(), fS0.U, fS0.T)); // (a right-handed basis: S, U, T is left-handed)
+    lowerT.add(sheath); sheath.userData.mpart = 'sheath'; // (v5.58: this was inside the comment above, so the sheath was never shown)
     const opening = new THREE.Mesh(new THREE.CircleGeometry(1, 16), new THREE.MeshBasicMaterial({ color: '#2a0a10', side: THREE.DoubleSide }));
     { const f0 = fAt(shx0 + Hl * 0.02); opening.scale.set(shW * 0.55, shH * 0.6, 1); opening.position.copy(fl(shx0 + Hl * 0.02)).addScaledVector(f0.U, shH * 0.35).addScaledVector(f0.T, -Hl * 0.005); opening.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(f0.S.clone().normalize().negate(), f0.U, f0.T)); lowerT.add(opening); opening.userData.mpart = 'sheath'; }
     anchors.sheath.position.copy(fl(Hl * 0.2)).addScaledVector(fS0.U, shH); lowerT.add(anchors.sheath);
@@ -2011,7 +2045,7 @@ function applyEnv(ctx, P, F, poseInfo, env) {
   sun.position.set(Math.cos(el) * Math.cos(az), Math.sin(el), Math.cos(el) * Math.sin(az)).multiplyScalar(r);
   sun.color.copy(env.sunCol).lerp(new THREE.Color('#ffffff'), 0.35); sun.intensity = 6.5 * env.sunny; // about three times the sky's light on a sunlit face, as outdoors
   sun.shadow.radius = lerp(8, 3, env.sunny); sun.shadow.blurSamples = 16;
-  if (ctx.hemi) ctx.hemi.intensity *= 0.25;
+  if (ctx.hemi) ctx.hemi.intensity *= 0.4; // (v5.58: a little more fill, so the shaded side of a dark snake keeps its scales and colour)
   ctx.envName = env.name;
   if (ctx.paintSky) ctx.paintSky(); // (the glow follows the sun)
 }
@@ -2294,7 +2328,8 @@ export function mount(host, opts) {
     const S = P.scales, gl = S.gloss;
     const mat = new THREE.MeshPhysicalMaterial({
       // v4.72: raised 3D scales - stronger relief, deeper gaps between them, and real bumps on good devices
-      map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1), aoMap: tiles.cavity, aoMapIntensity: 1.15, roughnessMap: tiles.cavity,
+      map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1).multiplyScalar(S.relief != null ? S.relief : (S.keel || 0) > 0.3 ? 1 : 0.85), // (v5.58: smooth scales lie flatter than keeled ones)
+      aoMap: tiles.cavity, aoMapIntensity: 1.15, roughnessMap: tiles.cavity,
       ...(quality === 'low' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
       roughness: lerp(0.82, 0.58, gl), metalness: 0, clearcoat: 0.12 + gl * 0.5, clearcoatRoughness: lerp(0.5, 0.22, gl), sheen: S.sheen != null ? S.sheen : 0.12, sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
       iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.85,
@@ -2306,13 +2341,13 @@ export function mount(host, opts) {
     const qS = (TAU * F.w0 * 0.92) / Math.max(12, S.rows) * (P.head.scaleK || (P.plan === 'python' ? 0.9 : 0.62));
     // v5.30: the scale rows' edges around the body (for the per-scale variation in the shader)
     const rbArr = new Float32Array(96); lat.RB.forEach((v, i) => { if (i < 96) rbArr[i] = v; });
-    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 }, uHeadN: { value: headT.relief }, uHeadC: { value: headT.color }, uHX: { value: headT.Xh } };
+    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 }, uEdgeC: { value: new THREE.Color(S.edge && S.edge.color || '#000000') }, uEdgeK: { value: S.edge ? (S.edge.k != null ? S.edge.k : 0.8) : 0 }, uHeadN: { value: headT.relief }, uHeadC: { value: headT.color }, uHX: { value: headT.Xh } };
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, hsU);
       sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;\nattribute vec3 aMet;\nvarying vec3 vMet;').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead; vMet = aMet;')
         .replace('#include <common>\nattribute float aHead;', '#include <common>\nuniform float uTip;\nattribute float aHead;').replace('#include <displacementmap_vertex>', THREE.ShaderChunk.displacementmap_vertex.replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z) * (1.0 - aHead) * smoothstep(uTip * 0.45, uTip, aMet.y)'));
       sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
-varying float vHead; varying vec3 vMet; uniform vec2 uHS; uniform float uKeel; uniform float uCavH; uniform float uTip;
+varying float vHead; varying vec3 vMet; uniform vec2 uHS; uniform float uKeel; uniform float uCavH; uniform float uTip; uniform vec3 uEdgeC; uniform float uEdgeK;
 uniform float uRB[96]; uniform int uRows; uniform float uAV; uniform sampler2D uHeadN; uniform sampler2D uHeadC; uniform float uHX;
 float slHash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 float slScale(vec2 m) {
@@ -2334,10 +2369,12 @@ float slScale(vec2 m) {
      float off = mod(float(si), 2.0) * 0.5, sj = floor(vNormalMapUv.y - off);
      vec2 cid = vec2(float(si), sj); float h1 = slHash(cid), h2 = slHash(cid + 17.3), h3 = slHash(cid + 41.7), h4 = slHash(cid + 73.1);
      vec2 cen = vec2((r0 + r1) * 0.25 + 0.5, sj + off + 0.5), wid = vec2((r1 - r0) * 0.5, 1.0);
-     vec2 l = (vNormalMapUv - cen) / wid;
-     l = l * (1.0 + (h3 - 0.5) * 0.18) + vec2((h1 - 0.5) * 0.14, (h2 - 0.5) * 0.12);
+     /* v5.58: the variation fades out towards the edges of the scale's cell, so neighbouring cells meet without a step (it
+        used to cut each scale's relief along straight lines: a patchwork of light and dark squares) */
+     vec2 l0 = (vNormalMapUv - cen) / wid; float slE = (1.0 - smoothstep(0.24, 0.5, abs(l0.x))) * (1.0 - smoothstep(0.24, 0.5, abs(l0.y)));
+     vec2 l = l0 * (1.0 + (h3 - 0.5) * 0.12 * slE) + vec2((h1 - 0.5) * 0.08, (h2 - 0.5) * 0.07) * slE;
      slUv = cen + l * wid;
-     slStr = 0.7 + 0.6 * h4; slRough = 0.82 + 0.36 * h1; slTilt = (vec2(h2, h3) - 0.5) * 0.18;
+     slStr = mix(1.0, 0.78 + 0.44 * h4, slE); slRough = mix(1.0, 0.86 + 0.28 * h1, slE); slTilt = (vec2(h2, h3) - 0.5) * 0.09 * slE;
    } else { float h = slHash(vec2(sign(sa), floor(vNormalMapUv.y))); slStr = 0.85 + 0.3 * h; slRough = 0.9 + 0.2 * h; }
  }
  vec2 slM = vMet.xy * uHS; float slFade = vMet.z * slTip * (1.0 - smoothstep(0.3, 0.75, length(fwidth(slM))));
@@ -2345,7 +2382,9 @@ float slScale(vec2 m) {
  if (slFade > 0.001) { slH = slScale(slM); slDa = (slScale(slM + vec2(0.03, 0.0)) - slScale(slM - vec2(0.03, 0.0))) / 0.06; slDx = (slScale(slM + vec2(0.0, 0.03)) - slScale(slM - vec2(0.0, 0.03))) / 0.06;
    diffuseColor.rgb *= mix(1.0, 0.55 + 0.45 * smoothstep(0.0, 0.3, slH), uCavH * slFade); }
 #ifdef USE_AOMAP
- diffuseColor.rgb *= mix(1.0, texture2D(aoMap, slUv).r, uCavH * (1.0 - vHead * 0.9) * (1.0 - vMet.z) * slTip);
+ { vec4 slCv = texture2D(aoMap, slUv);
+   diffuseColor.rgb *= mix(1.0, slCv.r, uCavH * (1.0 - vHead * 0.9) * (1.0 - vMet.z) * slTip);
+   if (uEdgeK > 0.0) diffuseColor.rgb = mix(diffuseColor.rgb, uEdgeC, uEdgeK * slCv.b * (1.0 - vHead) * slTip); } /* v5.58: the scales' own dark edges */
 #endif
  /* v5.53: the head's own scales - their colours, the dark grooves between them, their shine and relief */
  float slHW = 0.0; vec4 slHN = vec4(0.5, 0.5, 1.0, 0.5);
@@ -2361,7 +2400,7 @@ float slScale(vec2 m) {
         .replace('#include <clearcoat_normal_fragment_begin>', '#ifdef USE_CLEARCOAT\n vec3 clearcoatNormal = normalize(mix(nonPerturbedNormal, normal, 0.75 * slHW));\n#endif')
         .replace('#include <lights_physical_fragment>', '#include <lights_physical_fragment>\n#ifdef USE_CLEARCOAT\n material.clearcoat *= 1.0 - 0.55 * slHW; material.clearcoatRoughness = mix(material.clearcoatRoughness, max(material.clearcoatRoughness, 0.3), slHW);\n#endif');
     };
-    mat.customProgramCacheKey = () => 'sl-skin-v553';
+    mat.customProgramCacheKey = () => 'sl-skin-v558';
     const mesh = new THREE.Mesh(body.geo, mat); mesh.castShadow = mesh.receiveShadow = true;
     if (hiPat) {
       const sceneNow = ctx.scene, swap = (d) => { if (!alive || ctx.scene !== sceneNow) return; const t = patternTex(d); t.anisotropy = pat.anisotropy; mat.map = t; pat.dispose(); track(t);
