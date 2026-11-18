@@ -795,6 +795,7 @@ export function create(V) {
     const thin = { snake: 0.42, lizard: 0.7, centipede: 0.42, worm: 0.38, caterpillar: 0.5, slug: 0.6, fish: 0.85 };
     const typOf = (k) => k === 'egg' ? 2.4 : thin[k] ? Math.min(thin[k], RATIO[0]) : RATIO[0], maxOf = (k) => k === 'egg' ? 3.4 : thin[k] ? Math.min(thin[k] * 1.35, RATIO[1]) : RATIO[1];
     const fits = (k) => REAL[k][0] <= headR * maxOf(k);
+    if (kind === 'mouse' && REAL.rat[0] <= headR * typOf('rat')) kind = 'rat'; // (a big-headed snake, like a ball python, takes a rat even if it is not long)
     for (const [a, b] of [['rat', 'mouse'], ['bird', 'lizard'], ['mouse', 'lizard'], ['frog', 'lizard'], ['fish', 'lizard'], ['lizard', 'centipede'], ['snake', 'worm']]) if (kind === a && !fits(a)) kind = b;
     const hiR = Math.min(REAL[kind][1], headR * maxOf(kind)), loR = Math.min(hiR, REAL[kind][0]);
     const pr = clamp(headR * typOf(kind), loR, hiR);
