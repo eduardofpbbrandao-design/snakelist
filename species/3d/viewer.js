@@ -573,7 +573,7 @@ function addDrapeBranch(P, F, pose, seed) {
   pts.push(tipE.clone().add(new THREE.Vector3(0, -d.hB * 0.04, 0)), A.clone().addScaledVector(dir, -span * 0.2), A, B, farE);
   for (let k = 1; k <= 6; k++) { const f = k / 6; pts.push(farE.clone().addScaledVector(dir, d.hB * 0.35 * f).add(new THREE.Vector3(0, -(d.hB - rB) * Math.pow(f, 1.4), 0))); }
   const curve = new THREE.CatmullRomCurve3(pts), n = 120, tg = new THREE.TubeGeometry(curve, n, rB, 12, false), pa = tg.attributes.position, tmp = new THREE.Vector3();
-  for (let i = 0; i <= n; i++) { const t = i / n, c = curve.getPointAt(t), k = lerp(0.45, 1.3, sstep(0, 0.95, t)) * (1 + 0.05 * Math.sin(t * 53)); for (let j = 0; j <= 12; j++) { const q = i * 13 + j; tmp.fromBufferAttribute(pa, q).sub(c).multiplyScalar(k).add(c); pa.setXYZ(q, tmp.x, tmp.y, tmp.z); } }
+  for (let i = 0; i <= n; i++) { const t = i / n, c = curve.getPointAt(t), sA = tmp.copy(c).sub(A).dot(dir) / span, k = (sA < 0 ? lerp(1, 0.5, clamp(-sA / 0.6, 0, 1)) : sA > 1 ? 1 + 0.3 * clamp((sA - 1) / 0.4, 0, 1) : 1) * (1 + 0.03 * Math.sin(t * 53)); /* (v5.62: full thickness under the coils, so they rest on it with no gap) */ for (let j = 0; j <= 12; j++) { const q = i * 13 + j; tmp.fromBufferAttribute(pa, q).sub(c).multiplyScalar(k).add(c); pa.setXYZ(q, tmp.x, tmp.y, tmp.z); } }
   tg.computeVertexNormals();
   const m = new THREE.Mesh(tg, new THREE.MeshStandardMaterial({ color: P.scene.barkColor || '#6b5a47', roughness: 0.95 })); m.castShadow = m.receiveShadow = true; g.add(m);
   return g;
@@ -2628,7 +2628,7 @@ float slScale(vec2 m) {
     // main body axis (for the side view): principal direction of the footprint
     let sxx = 0, szz = 0, sxz = 0; for (const p of pose.pts) { sxx += p[0] * p[0]; szz += p[1] * p[1]; sxz += p[0] * p[1]; }
     const axisAng = 0.5 * Math.atan2(2 * sxz, sxx - szz);
-    info = { F, body, center: new THREE.Vector3(center.x, pose.drape ? center.y : Math.min(center.y, hMax * 0.5), center.z), Rb, hMax: pose.drape ? hMax - bb0.min.y : hMax, raised: pose.raised, headPos, headDir, axisAng, eyePos, size };
+    info = { F, body, center: new THREE.Vector3(center.x, pose.drape ? center.y : Math.min(center.y, hMax * 0.5), center.z), Rb, hMax: pose.drape ? hMax - bb0.min.y : hMax, raised: pose.raised, drapeAz: pose.drape ? Math.atan2(-(pose.drape.b[1] - pose.drape.a[1]), pose.drape.b[0] - pose.drape.a[0]) + 0.45 : null, headPos, headDir, axisAng, eyePos, size };
     info.collide = []; for (let i = 0, n = 240; i <= n; i++) { const x = (i / n) * F.L; info.collide.push({ p: body.spine(x), r: Math.max(F.W(x), F.Hh(x)) * 1.05 }); }
     t0 = performance.now();
     extras = { mat, eyes: eyeMeshes, mouth: P.plan === 'blind' ? null : buildMouth(P, F, body, snakeGroup, eyeMeshes.concat(headParts), pat) }; perfT('mouth', t0);
@@ -2677,7 +2677,7 @@ float slScale(vec2 m) {
   function setSceneVisible(v) { if (!ctx.scene) return; (ctx.occ || []).forEach((o) => { if (o.hid) { o.hid = false; if (o.im) { o.im.setMatrixAt(o.i, o.m); o.im.instanceMatrix.needsUpdate = true; } } }); ctx.scene.traverse((o) => { if (o !== ctx.scene && o.parent === ctx.scene && o !== snakeGroup && !o.isLight && o !== scaleObj) o.visible = v; }); kick(); }
 
   function fitLimits() {
-    const r = Math.max(info.Rb, info.hMax * 0.8), asp = Math.max(0.4, (stage.clientWidth || 1) / (stage.clientHeight || 1)); // (v5.62: a raised cobra or a snake up on a branch is taller than it is wide)
+    const r = Math.max(info.Rb, info.hMax * (P.pose && P.pose.kind === 'drape' ? 1.3 : 0.8)), asp = Math.max(0.4, (stage.clientWidth || 1) / (stage.clientHeight || 1)); // (v5.62: a raised cobra or a snake up on a branch is taller than it is wide)
     const vf = (cam.fov * Math.PI) / 360, hf = Math.atan(Math.tan(vf) * asp);
     info.portrait = asp < 0.8; info.vf = vf; info.hf = hf;
     // the snake lies flat: fit its footprint across the view, and its foreshortened depth (seen from above at an angle) up and down
@@ -2695,7 +2695,7 @@ float slScale(vec2 m) {
   }
   function viewAz(kind) {
     const hd = info.headDir; const a = Math.atan2(hd.x, hd.z);
-    if (kind === 'front') return a; if (kind === 'side') return -info.axisAng + Math.PI / 2; return a + (info.raised ? 0.5 : 0.9); // (v5.62: a raised cobra is seen nearly from the front, its hood spread toward you)
+    if (kind === 'front') return a; if (kind === 'side') return -info.axisAng + Math.PI / 2; if (info.drapeAz != null) return info.drapeAz; /* (v5.62: a draped snake is seen across its branch, the loops hanging on both sides) */ return a + (info.raised ? 0.5 : 0.9); // (v5.62: a raised cobra is seen nearly from the front, its hood spread toward you)
   }
   function resetView(instant) { if (!instant && fx.resetView && fx.resetView()) return; controls.setGoal({ az: viewAz('default'), el: ((info.portrait ? 40 : 30) * Math.PI) / 180, d: info.dFit * (P.pose && P.pose.kind === 'branch' ? 0.42 : 1), px: 0, pz: 0 }, instant); } // (v5.35: thread-thin tree snakes start closer, head in view)
   function setView(kind) {
