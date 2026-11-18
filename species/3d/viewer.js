@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=556'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=556'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=566'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=566'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -1457,24 +1457,39 @@ function buildMouth(P, F, body, group, eyes, pat) {
     }
     // the fang tip (for the labels and the bite)
     const fg = fangs[0]; anchors.fang = new THREE.Object3D(); fg.updateMatrix(); anchors.fang.position.copy(new THREE.Vector3(0, 1, 0.28 * (big ? 1 : 0.6)).applyMatrix4(fg.matrix)); upperT.add(anchors.fang);
-    anchors.fangLen = fg.scale.y;
+    anchors.fangLen = fg.scale.y; for (const f2 of fangs) f2.visible = false; // (folded away while the mouth is shut, as set() does)
   } else {
     const x = Hl * 0.14, f = body.frameAt(x); anchors.fang = new THREE.Object3D(); anchors.fang.position.copy(roof.gum(x, 1)).addScaledVector(f.U, -tl); upperT.add(anchors.fang); anchors.fangLen = tl;
   }
-  let t = 0;
-  function set(v) {
+  let t = 0, ver = 0, spread = 0, walk = 0;
+  // v5.57: swallowing a big meal the two halves of the lower jaw spread apart (the stretchy chin and the swinging quadrate
+  // bones) and walk forward in turn: warp a point of the lower jaw (rest shape) by its side of the head, w = its jaw weight
+  const jawC = hinge.clone(), jawT = fr.T.clone().normalize(), jawHalf = Math.max(1e-6, F.W(xh * 0.7));
+  const jw = new THREE.Vector3();
+  const jawWarp = (v, w) => {
+    if ((!spread && !walk) || w <= 0) return v;
+    const l = jw.subVectors(v, jawC).dot(axis), side = Math.tanh(l / (jawHalf * 0.35));
+    const along = Math.max(0, -jw.dot(jawT)) / xh; // 0 at the hinge .. 1 at the chin
+    v.addScaledVector(axis, l * spread * (0.55 + 0.45 * (1 - along)) * w);
+    v.addScaledVector(jawT, -walk * side * Hl * 0.07 * w);
+    return v;
+  };
+  const lowT = []; // the lower teeth rows, warped with the jaw (they stay in their gums)
+  lowerT.traverse((o) => { if (o.isMesh && o.userData.mpart === 'teeth') lowT.push({ g: o.geometry, o: o.geometry.attributes.position.array.slice() }); });
+  function set(v, opt) {
+    const sp2 = opt && opt.spread || 0, wk2 = opt && opt.walk || 0, warpChanged = sp2 !== spread || wk2 !== walk; spread = sp2; walk = wk2; ver++;
     t = clamp(v, 0, 1.45); inside.visible = t > 0.01 || flickShut; setCut(t > 0.01); if (flickShut && t > 0.01) showOnlyTongue(false);
     const ang = sign * gape * (t <= 1 ? 1 - Math.pow(1 - t, 2) : 1 + (t - 1) * 1.1), /* past 1: the extra-wide gape of a strike */ a = pos.array, aD = ang * DN, aU = -ang * UP;
     const qq = new THREE.Quaternion(), v3 = new THREE.Vector3();
     const turn = (list, an) => { for (let k = 0; k < list.length; k += 2) { const vi = list[k], w = list[k + 1];
-      v3.set(orig[vi * 3], orig[vi * 3 + 1], orig[vi * 3 + 2]);
+      v3.set(orig[vi * 3], orig[vi * 3 + 1], orig[vi * 3 + 2]); if (list === lower) jawWarp(v3, w);
       if (w > 0 && an) { qq.setFromAxisAngle(axis, an * w); v3.sub(hinge).applyQuaternion(qq).add(hinge); }
       a[vi * 3] = v3.x; a[vi * 3 + 1] = v3.y; a[vi * 3 + 2] = v3.z; } };
     turn(lower, aD); turn(upper, aU);
     pos.needsUpdate = true;
     // the mouth lining and the teeth go with their jaws
     const strip2 = (J, an) => { const fp = J.g.attributes.position.array, o = J.o;
-      for (let k = 0, i = 0; k < fp.length; k += 3, i++) { v3.set(o[k], o[k + 1], o[k + 2]); qq.setFromAxisAngle(axis, an * weight(J.xv[i])); v3.sub(hinge).applyQuaternion(qq).add(hinge); fp[k] = v3.x; fp[k + 1] = v3.y; fp[k + 2] = v3.z; }
+      for (let k = 0, i = 0; k < fp.length; k += 3, i++) { v3.set(o[k], o[k + 1], o[k + 2]); if (J === floorJ) jawWarp(v3, weight(J.xv[i])); qq.setFromAxisAngle(axis, an * weight(J.xv[i])); v3.sub(hinge).applyQuaternion(qq).add(hinge); fp[k] = v3.x; fp[k + 1] = v3.y; fp[k + 2] = v3.z; }
       J.g.attributes.position.needsUpdate = true; J.g.computeVertexNormals(); };
     strip2(floorJ, aD); strip2(roof, aU);
     // the folds at the corners of the mouth stretch between the two jaws
@@ -1484,6 +1499,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
       cheekG.attributes.position.needsUpdate = true; cheekG.computeVertexNormals(); }
     const place = (grp, an) => { qq.setFromAxisAngle(axis, an); grp.position.copy(hinge).sub(hinge.clone().applyQuaternion(qq)); grp.quaternion.copy(qq); };
     place(lowerT, aD); place(upperT, aU);
+    if (warpChanged) for (const q of lowT) { const a2 = q.g.attributes.position.array; for (let k = 0; k < a2.length; k += 3) { v3.set(q.o[k], q.o[k + 1], q.o[k + 2]); jawWarp(v3, 1); a2[k] = v3.x; a2[k + 1] = v3.y; a2[k + 2] = v3.z; } q.g.attributes.position.needsUpdate = true; q.g.computeBoundingSphere(); }
     for (const e of eyeOrig) { qq.setFromAxisAngle(axis, aU); e.m.position.copy(e.p).sub(hinge).applyQuaternion(qq).add(hinge); e.m.quaternion.copy(qq).multiply(e.q); }
     // fangs swing forward as the mouth opens (vipers fold them flat when it is shut)
     for (const fg of fangs) fg.visible = t > 0.25;
@@ -1495,11 +1511,11 @@ function buildMouth(P, F, body, group, eyes, pat) {
   }
   // v5.53: a tongue flick, s from 0 to 1 (out, the tips wave up and down, back in); 0 or 1 leaves it in its sheath. With the
   // mouth shut only the tongue of everything inside is shown: it comes out through the notch at the front of the lips.
-  let flickShut = false;
-  function showOnlyTongue(on) {
+  let flickShut = false; const hidden = [];
+  function showOnlyTongue(on) { // v5.57: puts back only what it hid (Anatomy's jaw bones live in the jaw groups too, and stay hidden outside Anatomy)
     if (on === flickShut || !anchors.tongue) return; flickShut = on;
-    for (const c of inside.children) c.visible = !on || c === lowerT;
-    for (const c of lowerT.children) c.visible = !on || c === anchors.tongue;
+    if (on) { hidden.length = 0; for (const c of inside.children.concat(lowerT.children)) if (c !== lowerT && c !== anchors.tongue && c.visible) { c.visible = false; hidden.push(c); } }
+    else { for (const c of hidden) c.visible = true; hidden.length = 0; }
     inside.visible = t > 0.01 || on;
   }
   function flick(s) {
@@ -1508,7 +1524,10 @@ function buildMouth(P, F, body, group, eyes, pat) {
     tongueUpd(ext, s * TAU * 3.2);
     showOnlyTongue(on && t <= 0.01);
   }
-  return { set, settle, flick, get t() { return t; }, headX: xh, anchors, fanged: fangs.length > 0 };
+  // v5.57: how far the mouth must open (t) for the jaws to part by 'sep' near their front, for prey of that width
+  const angOf = (v) => gape * (v <= 1 ? 1 - Math.pow(1 - v, 2) : 1 + (v - 1) * 1.1);
+  function tFor(sep) { for (let k = 0; k <= 58; k++) { const v = k / 40; if (xh * 0.85 * Math.sin(Math.min(1.5, angOf(v))) >= sep) return Math.max(0.3, v); } return 1.45; }
+  return { set, settle, flick, tFor, get t() { return t; }, get ver() { return ver; }, get spread() { return spread; }, get walk() { return walk; }, headX: xh, anchors, fanged: fangs.length > 0 };
 }
 
 // ---------- ground and props ----------

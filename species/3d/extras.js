@@ -272,6 +272,37 @@ function buildPrey(kind, r, seed) {
     const eggM = new THREE.MeshPhysicalMaterial({ color: '#ffffff', map: speckle('#efe6d2', 500, 0.25, seed), roughness: 0.42, clearcoat: 0.3 });
     add(along(lathe([[0, -0.5], [0.55, -0.42], [0.88, -0.2], [1, 0.05], [0.9, 0.25], [0.6, 0.42], [0, 0.5]].map(([a, b]) => [a * r, b * len]), 32)), eggM, 0, r, 0);
     g.userData = { len, r, name: 'a bird\'s egg', y: r };
+  } else if (kind === 'bird') { // v5.57: a nestling or small bird (tree snakes and some mambas take birds)
+    len = r * 3.6;
+    const feath = new THREE.MeshPhysicalMaterial({ color: '#ffffff', map: speckle('#8a7356', 2600, 0.35, seed, 256, true), roughness: 0.9, sheen: 0.8, sheenRoughness: 0.7, sheenColor: new THREE.Color('#d9c8ad') });
+    const beakM = new THREE.MeshStandardMaterial({ color: '#d8b04a', roughness: 0.45 }), eyeM = new THREE.MeshPhysicalMaterial({ color: '#0b0908', roughness: 0.08, clearcoat: 1 }), legM = new THREE.MeshStandardMaterial({ color: '#c98f5a', roughness: 0.6 });
+    add(along(lathe([[0, -0.5], [0.5, -0.43], [0.86, -0.22], [1, 0.0], [0.9, 0.2], [0.55, 0.33], [0.5, 0.38], [0, 0.4]].map(([a, b]) => [a * r, b * len]), 28)), feath, 0, r, 0, 1, 0.92, 1); // body
+    add(S(r * 0.62, 20, 14), feath, 0, r * 1.25, len * 0.42); // head
+    add(new THREE.ConeGeometry(r * 0.2, r * 0.55, 10).rotateX(Math.PI / 2), beakM, 0, r * 1.18, len * 0.42 + r * 0.75);
+    for (const sg of [-1, 1]) {
+      add(S(r * 0.1, 12, 8), eyeM, sg * r * 0.4, r * 1.42, len * 0.47);
+      add(S(r * 0.62, 18, 10), feath, sg * r * 0.78, r * 1.08, -len * 0.04, 0.32, 0.62, 1.25, 0.15, 0, 0); // folded wing
+      add(new THREE.CapsuleGeometry(r * 0.06, r * 0.4, 3, 6), legM, sg * r * 0.3, r * 0.1, len * 0.02, 1, 1, 1, Math.PI / 2, 0, 0);
+    }
+    const tl = new THREE.Shape(); tl.moveTo(-r * 0.35, 0); tl.lineTo(r * 0.35, 0); tl.lineTo(r * 0.45, -r * 1.1); tl.lineTo(-r * 0.45, -r * 1.1); tl.lineTo(-r * 0.35, 0);
+    add(new THREE.ShapeGeometry(tl), new THREE.MeshStandardMaterial({ color: '#6e5a42', roughness: 0.9, side: THREE.DoubleSide }), 0, r * 1.05, -len * 0.42, 1, 1, 1, -Math.PI / 2 - 0.2, 0, 0);
+    g.userData = { len: len * 1.1, r, name: 'a small bird', y: r * 0.95 };
+  } else if (kind === 'centipede' || kind === 'worm' || kind === 'slug' || kind === 'caterpillar') { // v5.57: small long prey of small snakes
+    const cent = kind === 'centipede', slug = kind === 'slug';
+    len = r * (cent ? 16 : slug ? 6 : kind === 'caterpillar' ? 9 : 22);
+    const col = { centipede: '#9a5a2a', worm: '#c98b84', slug: '#7a6450', caterpillar: '#7fa04a' }[kind];
+    const tex = canvasTex(128, (x, s2) => { x.fillStyle = col; x.fillRect(0, 0, s2, s2); x.fillStyle = cent ? 'rgba(40,20,8,.55)' : 'rgba(60,30,30,.25)'; for (let yy = 0; yy < s2; yy += 8) x.fillRect(0, yy, s2, cent ? 2 : 1); }, 1, cent ? 10 : slug ? 2 : 12);
+    const m = new THREE.MeshPhysicalMaterial({ color: '#ffffff', map: tex, roughness: slug || kind === 'worm' ? 0.3 : 0.5, clearcoat: slug || kind === 'worm' ? 0.9 : 0.4 });
+    const n = 30, pts = []; for (let i = 0; i <= n; i++) { const t = i / n; pts.push(V3(Math.sin(t * (slug ? 1.5 : 5)) * r * (slug ? 0.3 : 1.6) * t, r * (slug ? 0.7 : 0.9), len * (0.5 - t))); }
+    const bt = new THREE.Mesh(varTube(pts, (t) => r * (slug ? Math.sin(Math.PI * clamp(t * 1.15, 0.08, 0.98)) * (1 - t * 0.3) : (t < 0.06 ? 0.65 + t * 6 : 1 - Math.max(0, t - 0.85) * 3.5)), 12, 60), m); bt.castShadow = true; g.add(bt);
+    if (slug) bt.scale.set(1.15, 0.75, 1);
+    if (cent) { // legs, a pair on each segment, and feelers
+      const lm = new THREE.MeshStandardMaterial({ color: '#c88a4a', roughness: 0.6 }), lg = new THREE.CylinderGeometry(r * 0.08, r * 0.05, r * 1.4, 4);
+      for (let i = 2; i < n - 1; i++) for (const sg of [-1, 1]) { const q = pts[i]; add(lg, lm, q.x + sg * r * 1.1, r * 0.35, q.z, 1, 1, 1, 0, 0, sg * 1.1); }
+      for (const sg of [-1, 1]) add(new THREE.CylinderGeometry(r * 0.05, r * 0.03, r * 3, 4), lm, sg * r * 0.6, r * 1.1, len * 0.5 + r * 1.3, 1, 1, 1, Math.PI / 2 - 0.3, 0, sg * 0.5);
+    }
+    if (slug) for (const sg of [-1, 1]) add(new THREE.CylinderGeometry(r * 0.08, r * 0.1, r * 0.9, 6), m, sg * r * 0.3, r * 1.2, len * 0.42, 1, 1, 1, 0.6, 0, -sg * 0.3);
+    g.userData = { len, r, name: { centipede: 'a centipede', worm: 'an earthworm', slug: 'a slug', caterpillar: 'a caterpillar' }[kind], y: r * 0.7 };
   } else { // lizard or a small snake
     const snake = kind === 'snake'; len = r * (snake ? 26 : 7);
     const lt = canvasTex(256, (x, s) => { x.fillStyle = snake ? '#6b6250' : '#7b6a45'; x.fillRect(0, 0, s, s); const R = rnd(seed); for (let yy = 0; yy < s; yy += 6) for (let xx = 0; xx < s; xx += 6) { x.fillStyle = `rgba(${R() < 0.5 ? '30,20,10' : '230,220,170'},${R() * 0.22})`; x.fillRect(xx + 1, yy + 1, 4, 4); } if (snake) { x.fillStyle = 'rgba(25,20,15,.55)'; for (let yy = 0; yy < s; yy += 32) x.fillRect(0, yy, s, 9); } else { x.fillStyle = 'rgba(235,225,180,.5)'; x.fillRect(s * 0.42, 0, s * 0.16, s); } }, 1, snake ? 8 : 2);
@@ -290,10 +321,16 @@ function dietOf(P, id) {
   const sci = String(id || '').toLowerCase(), nm = String(P.name || '').toLowerCase(), gen = sci.split('-')[0], plan = P.plan || 'colubrid';
   const has = (list) => list.includes(gen);
   if (/egg.?eater/.test(nm) || has(['dasypeltis', 'elachistodon'])) return 'egg';
+  // v5.57: small snakes that eat invertebrates (Ernst & Ernst 2003, Snakes of the United States and Canada; SnakeList species notes)
+  if (/hook.?nose|centipede|black.?headed snake|ground snake|shovel.?nose|scorpion/.test(nm) || has(['gyalopion', 'tantilla', 'sonora', 'chionactis', 'stenorrhina', 'scolecophis', 'tantillita', 'ficimia', 'aparallactus'])) return 'centipede';
+  if (/slug|snail/.test(nm) || has(['contia', 'dipsas', 'sibon', 'pareas', 'duberria', 'tropidodipsas', 'storeria'])) return 'slug';
+  if (/worm ?snake|earth ?snake/.test(nm) || has(['carphophis', 'virginia', 'haldea', 'calamaria'])) return 'worm';
+  if (/green snake/.test(nm) || has(['opheodrys'])) return 'caterpillar';
+  if (has(['boiga', 'corallus', 'thelotornis']) || /green mamba|jameson.?s mamba|cat ?snake/.test(nm)) return 'bird';
   if (plan === 'sea' || /sea ?snake|sea ?krait|water ?snake|watersnake|mud ?snake|fishing|file ?snake|mangrove/.test(nm) || has(['hydrophis', 'laticauda', 'aipysurus', 'emydocephalus', 'nerodia', 'enhydris', 'homalopsis', 'cerberus', 'acrochordus', 'regina', 'erpeton', 'farancia', 'hypsirhina', 'myron', 'fordonia', 'agkistrodon'].filter((g) => g !== 'agkistrodon' || /cottonmouth|water/.test(nm)))) return 'fish';
   if (/king ?cobra|kingsnake|king snake|krait|coral ?snake|snake.?eater|mussurana/.test(nm) || has(['ophiophagus', 'lampropeltis', 'bungarus', 'micrurus', 'calliophis', 'micruroides', 'drymarchon', 'clelia', 'aspidelaps'])) return 'snake';
   if (/frog|toad|keelback|garter|ribbon|hognose|grass snake|cat.?eyed/.test(nm) || has(['thamnophis', 'natrix', 'rhabdophis', 'xenodon', 'leptodeira', 'heterodon', 'amphiesma', 'hebius', 'fowlea', 'xenochrophis', 'erythrolamprus', 'liophis', 'leioheterodon', 'tropidonophis', 'lycodryas'])) return 'frog';
-  if (/whipsnake|racer|sand snake|lizard|smooth snake|leaf.?nosed|vine snake|tree snake|bronzeback|desert/.test(nm) || has(['coronella', 'psammophis', 'hemorrhois', 'masticophis', 'dendrelaphis', 'chrysopelea', 'ahaetulla', 'oxybelis', 'philodryas', 'macroprotodon', 'malpolon', 'acanthophis', 'demansia', 'eirenis', 'rhinocheilus', 'chionactis', 'sonora', 'tantilla'])) return 'lizard';
+  if (/whipsnake|racer|sand snake|lizard|smooth snake|leaf.?nosed|vine snake|tree snake|bronzeback|desert/.test(nm) || has(['coronella', 'psammophis', 'hemorrhois', 'masticophis', 'dendrelaphis', 'chrysopelea', 'ahaetulla', 'oxybelis', 'philodryas', 'macroprotodon', 'malpolon', 'acanthophis', 'demansia', 'eirenis', 'rhinocheilus', 'dispholidus'])) return 'lizard';
   return 'mouse';
 }
 
@@ -460,7 +497,7 @@ export function create(V) {
     let jawVerts = 0;
     for (let i = 0; i < body.nR; i++) { bx.fill(body.ringX[i], i * (M + 1), (i + 1) * (M + 1)); if (body.ringX[i] <= xEnd) jawVerts = (i + 1) * (M + 1); }
     const bodySkin = addSkin(body.geo, bx, { bulge: true, body: true });
-    let lastT = mo ? mo.t : 0, active = false;
+    const mver = () => (mo ? (mo.ver != null ? mo.ver : mo.t) : 0); let lastT = mver(), active = false;
     const contact = V.scene && V.scene.children.find((o) => o.isMesh && o.renderOrder === 1 && o.material && o.material.map && o.material.transparent && o.geometry && o.geometry.type === 'PlaneGeometry');
     const mA = new THREE.Matrix4(), mB = new THREE.Matrix4(), tv = new THREE.Vector3();
     const basis = (arr1, arr2, arr3, i, m) => m.set(arr1[i * 3], arr2[i * 3], arr3[i * 3], 0, arr1[i * 3 + 1], arr2[i * 3 + 1], arr3[i * 3 + 1], 0, arr1[i * 3 + 2], arr2[i * 3 + 2], arr3[i * 3 + 2], 0, 0, 0, 0, 1);
@@ -497,7 +534,7 @@ export function create(V) {
     }
     function seam(geo) { const nr = geo.attributes.normal.array; for (let i = 0; i < body.nR; i++) { const a = i * (M + 1), b = a + M; for (let q = 0; q < 3; q++) { const m = (nr[a * 3 + q] + nr[b * 3 + q]) / 2; nr[a * 3 + q] = nr[b * 3 + q] = m; } } geo.attributes.normal.needsUpdate = true; }
     function apply() {
-      if (mo && mo.t !== lastT) { localize(bodySkin, 0, jawVerts, bodySkin.pa.array); lastT = mo.t; } // the jaw moved: take its new shape
+      if (mo && mver() !== lastT) { localize(bodySkin, 0, jawVerts, bodySkin.pa.array); lastT = mver(); } // the jaw moved: take its new shape
       frames();
       headRig.matrix.copy(hM); headRig.matrixWorldNeedsUpdate = true; tailRig.matrix.copy(tM); tailRig.matrixWorldNeedsUpdate = true;
       for (const s of skins) deform(s);
@@ -507,7 +544,7 @@ export function create(V) {
       if (!active) return; active = false;
       nc.set(rc); nT.set(rT); nU.set(rU); nS.set(rS); bul.fill(1);
       for (const s of skins) { s.pa.array.set(s.src); s.pa.needsUpdate = true; if (!s.body) { s.geo.computeVertexNormals(); s.geo.computeBoundingSphere(); } }
-      if (mo) { mo.set(mo.t); mo.settle(); lastT = mo.t; } else { body.geo.computeVertexNormals(); seam(body.geo); }
+      if (mo) { mo.set(mo.t); mo.settle(); lastT = mver(); } else { body.geo.computeVertexNormals(); seam(body.geo); }
       body.geo.computeBoundingSphere();
       headRig.matrix.identity(); tailRig.matrix.identity(); headRig.matrixWorldNeedsUpdate = tailRig.matrixWorldNeedsUpdate = true;
       if (contact) contact.visible = true;
@@ -555,7 +592,7 @@ export function create(V) {
       return { c, T, U, S };
     }
     function point(x, s = 0, u = 0) { const f = frameAtX(x); return f.c.addScaledVector(f.S, s).addScaledVector(f.U, u); }
-    function sync() { if (active && mo && mo.t !== lastT) apply(); } // the mouth opened or shut while the body is posed
+    function sync() { if (active && mo && mver() !== lastT) apply(); } // the mouth opened or shut while the body is posed
     return { N, dx, ih, L, rc, rth, rh, restY, bul, headRig, tailRig, addSkin, apply, release, sync, integrate, fore, headMatrixFor, setPose, blend, frameAtX, point, get active() { return active; }, rest: () => rc.slice() };
   }
   function ensureRig() { if (!rig && V.info && V.group) rig = makeRig(); return rig; }
@@ -607,7 +644,7 @@ export function create(V) {
     if (anat) anat.refresh();
     V.kick();
   }
-  function setMouth(t) { const mo = V.extras.mouth; if (!mo) return; if (Math.abs(mo.t - t) > 1e-4) mo.set(t); V.mouthGoal = t; }
+  function setMouth(t, opt) { const mo = V.extras.mouth; if (!mo) return; const sp = (opt && opt.spread) || 0, wk = (opt && opt.walk) || 0; if (Math.abs(mo.t - t) > 1e-4 || Math.abs((mo.spread || 0) - sp) > 1e-4 || Math.abs((mo.walk || 0) - wk) > 1e-4) mo.set(t, { spread: sp, walk: wk }); V.mouthGoal = t; }
   // v5.53: a tongue flick (s from 0 to 1: out through the notch in the lips, the tips wave, back in; 0 = in its sheath)
   function flick(s) { const mo = V.extras && V.extras.mouth; if (mo && mo.flick) mo.flick(s); }
   // a show is a list of [duration, fn(u, s)] phases
@@ -749,19 +786,30 @@ export function create(V) {
     // v5.50: the prey is a real animal of its real size (body radius in metres: a mouse 1.1-1.7 cm, a rat 2.2-4.2 cm...),
     // never a mouse shrunk to fit a tiny snake or blown up for a python: a snake too small for the smallest real one
     // takes a smaller animal instead, and a giant takes the biggest of its kind
-    const REAL = { mouse: [0.011, 0.017], rat: [0.022, 0.042], frog: [0.006, 0.03], fish: [0.005, 0.045], lizard: [0.003, 0.025], snake: [0.002, 0.02], egg: [0.009, 0.028] }, maxR = Hl * 0.6;
-    if (kind === 'rat' && REAL.rat[0] > maxR) kind = 'mouse';
-    if (kind === 'mouse' && REAL.mouse[0] > maxR) kind = 'lizard';
-    const hiR = Math.min(REAL[kind][1], maxR), loR = Math.min(hiR, Math.max(REAL[kind][0], Hl * 0.18));
-    const pr = clamp(rB(L * 0.35) * (kind === 'egg' ? 1.1 : kind === 'snake' ? 0.55 : kind === 'fish' ? 0.9 : kind === 'lizard' ? 0.8 : 0.95), loR, hiR); // v5.05: a meal it can really swallow
+    // v5.57: and no wider than this snake's jaws can pass: measured against its own head (a prey's width over the head's
+    // width, typical / at most: ~1-1.5 in colubrids and elapids, more in vipers, ~3 in big pythons, 3-4 for the eggs of
+    // egg-eaters - Gans 1961, Am. Zool. 1:217; Arnold 1983, Copeia 1983:94; King 2002, Herpetol. Rev.)
+    const REAL = { mouse: [0.011, 0.017], rat: [0.022, 0.042], frog: [0.006, 0.03], fish: [0.005, 0.045], lizard: [0.003, 0.025], snake: [0.002, 0.02], egg: [0.009, 0.028], bird: [0.012, 0.04], centipede: [0.0012, 0.006], worm: [0.001, 0.005], slug: [0.002, 0.008], caterpillar: [0.0015, 0.006] };
+    let headR = 0; for (let k = 0; k <= 24; k++) headR = Math.max(headR, F.W(Hl * k / 24)); // half the head's width
+    const RATIO = { python: [1.7, 3.0], viper: [1.35, 1.9], pitviper: [1.35, 1.9], elapid: [1.0, 1.35], sea: [0.9, 1.25], colubrid: [1.05, 1.5] }[plan] || [1.05, 1.5];
+    const thin = { snake: 0.42, lizard: 0.7, centipede: 0.42, worm: 0.38, caterpillar: 0.5, slug: 0.6, fish: 0.85 };
+    const typOf = (k) => k === 'egg' ? 2.4 : thin[k] ? Math.min(thin[k], RATIO[0]) : RATIO[0], maxOf = (k) => k === 'egg' ? 3.4 : thin[k] ? Math.min(thin[k] * 1.35, RATIO[1]) : RATIO[1];
+    const fits = (k) => REAL[k][0] <= headR * maxOf(k);
+    if (kind === 'mouse' && REAL.rat[0] <= headR * typOf('rat')) kind = 'rat'; // (a big-headed snake, like a ball python, takes a rat even if it is not long)
+    for (const [a, b] of [['rat', 'mouse'], ['bird', 'lizard'], ['mouse', 'lizard'], ['frog', 'lizard'], ['fish', 'lizard'], ['lizard', 'centipede'], ['snake', 'worm']]) if (kind === a && !fits(a)) kind = b;
+    const hiR = Math.min(REAL[kind][1], headR * maxOf(kind)), loR = Math.min(hiR, REAL[kind][0]);
+    const pr = clamp(headR * typOf(kind), loR, hiR);
     const prey = buildPrey(kind, pr, 77); V.scene.add(prey); show.objs.push(prey);
-    const Lp = prey.userData.len * (kind === 'snake' ? 1 : 0.92), prR = prey.userData.r;
+    const longPrey = kind === 'snake' || kind === 'centipede' || kind === 'worm' || kind === 'caterpillar';
+    const Lp = prey.userData.len * (longPrey ? 1 : 0.92), prR = prey.userData.r;
+    // v5.57: how wide the jaws open, and how far the two halves of the lower jaw spread, for this prey
+    const tNeed = mo.tFor ? mo.tFor(prR * 2 * 0.9) : 0.9, tHold = clamp(tNeed * 0.8, 0.3, 1.1), spreadNeed = clamp((prR * 0.95 - headR * 0.8) / headR, 0, 0.6);
     const restSnout = R.rest().subarray(0, 3);
     const lift = Math.max(0, prR * 0.95 - restSnout[1]) + Hl * 0.05;
     const phi = aim(st, lift), ext = R.fore({ len: st.len, phi, lift, coil: 0 }), coil = R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 }), rest = R.rest();
-    const constrict = (plan === 'python' || (plan === 'colubrid' && (kind === 'mouse' || kind === 'rat' || (kind === 'snake' && !venomous)))) && kind !== 'egg';
-    const envenom = venomous && kind !== 'egg', viperWait = envenom && (plan === 'viper' || plan === 'pitviper') && (kind === 'mouse' || kind === 'rat');
-    const strikes = kind !== 'egg';
+    const constrict = (plan === 'python' || (plan === 'colubrid' && (kind === 'mouse' || kind === 'rat' || kind === 'bird' || (kind === 'snake' && !venomous)))) && kind !== 'egg';
+    const envenom = venomous && kind !== 'egg', viperWait = envenom && (plan === 'viper' || plan === 'pitviper') && (kind === 'mouse' || kind === 'rat' || kind === 'bird');
+    const strikes = kind !== 'egg' && kind !== 'worm' && kind !== 'slug' && kind !== 'caterpillar'; // (slow prey is just seized)
     // the prey, held: its front at body position xp (x > 0 inside the mouth), its head pointing down the throat
     const xp0 = Hl * 0.22;
     let held = false, xp = xp0, worldM = null, preyHide = false;
@@ -773,7 +821,7 @@ export function create(V) {
       for (let k = 0; k <= 16; k++) {
         const u = -1 + k / 8, x = xp - Lp / 2 + (u * Lp) / 2; if (x <= Hl * 0.05) continue;
         const prof = prR * Math.sqrt(Math.max(0, 1 - u * u)); if (prof < prR * 0.05) continue;
-        const i = clamp(Math.round(x / R.dx), 0, R.N - 1), cap = rB(x) * Math.max(1, R.bul[i]) * (x < xh ? lerp(1.7, 1.05, x / xh) : 1) * 0.92;
+        const i = clamp(Math.round(x / R.dx), 0, R.N - 1), cap = rB(x) * Math.max(1, R.bul[i]) * (x < xh ? lerp(1.7, 1.05, x / xh) * (1 + (mo.spread || 0)) : 1) * 0.92;
         sc = Math.min(sc, cap / prof);
       }
       return clamp(sc, 0.45, 1);
@@ -830,7 +878,7 @@ export function create(V) {
     const headPt = () => R.point(Hl * 0.5);
     const nm = prey.userData.name;
     const T = {
-      intro: { egg: 'Egg-eaters find <b>birds\' eggs</b> by smell.', fish: 'It hunts <b>' + nm + '</b>.', frog: 'It hunts <b>' + nm + '</b>, found by smell with its tongue.', snake: 'It hunts <b>' + nm + '</b> - some snakes eat other snakes!', lizard: 'It hunts <b>' + nm + '</b>.', mouse: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.', rat: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.' }[kind],
+      intro: { egg: 'Egg-eaters find <b>birds\' eggs</b> by smell.', fish: 'It hunts <b>' + nm + '</b>.', frog: 'It hunts <b>' + nm + '</b>, found by smell with its tongue.', snake: 'It hunts <b>' + nm + '</b> - some snakes eat other snakes!', lizard: 'It hunts <b>' + nm + '</b>.', bird: 'It hunts <b>' + nm + '</b>.', centipede: 'It hunts <b>' + nm + '</b> - small snakes like this one eat centipedes, scorpions and spiders.', worm: 'It finds <b>' + nm + '</b> by smell in damp soil.', slug: 'It finds <b>' + nm + '</b> by following its slime trail.', caterpillar: 'It hunts <b>' + nm + '</b> and other insects in the leaves.', mouse: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.', rat: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.' }[kind],
       strike: 'Strike! It grabs the prey with its backward-curved teeth.',
       inject: '<b>Venom</b> flows through the fangs into the prey.',
       release: 'Vipers <b>let go</b> straight away, so the prey cannot bite back, and wait for the venom to work.',
@@ -844,30 +892,32 @@ export function create(V) {
     phases.push([1.3, (u) => { fadeTree(prey, ease(u * 1.5)); R.setPose(R.blend(rest, strikes ? coil : ext, ease(u) * (strikes ? 1 : 0.3))); R.apply(); say(T.intro); flick(clamp(u * 1.15, 0, 1)); }]); // (it tastes the air)
     if (strikes) {
       phases.push([0.9, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 + 0.05 * Math.sin(s * 9) })); R.apply(); }]);
-      phases.push([0.3, (u) => { R.setPose(R.blend(coil, ext, ease(u * 1.15))); R.apply(); setMouth(0.75 * ease(u * 3)); say(T.strike); if (u >= 0.98) held = true; }]);
-      phases.push([0.5, () => { held = true; R.setPose(ext); R.apply(); setMouth(0.55); camKey = camSide(headPt().lerp(prey.position, 0.35), fitD(Hl * 2.4 + Lp * 1.3)); }]);
-      if (envenom) phases.push([1.2, (u, s) => { R.setPose(ext); R.apply(); setMouth(0.55 + 0.04 * Math.sin(s * 14)); say(T.inject); }]);
+      phases.push([0.3, (u) => { R.setPose(R.blend(coil, ext, ease(u * 1.15))); R.apply(); setMouth(Math.max(0.75, tHold) * ease(u * 3)); say(T.strike); if (u >= 0.98) held = true; }]);
+      phases.push([0.5, () => { held = true; R.setPose(ext); R.apply(); setMouth(tHold); camKey = camSide(headPt().lerp(prey.position, 0.35), fitD(Hl * 2.4 + Lp * 1.3)); }]);
+      if (envenom) phases.push([1.2, (u, s) => { R.setPose(ext); R.apply(); setMouth(tHold + 0.04 * Math.sin(s * 14)); say(T.inject); }]);
       if (viperWait) {
-        phases.push([0.6, (u) => { held = false; R.setPose(R.blend(ext, coil, ease(u))); R.apply(); setMouth(0.55 * (1 - ease(u))); say(T.release); if (u > 0.5) camKey = camSide(prey.position.clone().lerp(V.info.headPos, 0.5), wideD); }]);
+        phases.push([0.6, (u) => { held = false; R.setPose(R.blend(ext, coil, ease(u))); R.apply(); setMouth(tHold * (1 - ease(u))); say(T.release); if (u > 0.5) camKey = camSide(prey.position.clone().lerp(V.info.headPos, 0.5), wideD); }]);
         phases.push([1.6, (u) => { R.setPose(coil); R.apply(); rolled(ease(u)); }]);
-        phases.push([1.5, (u) => { R.setPose(R.blend(coil, ext, ease(u))); R.apply(); setMouth(0.6 * ease(u)); say(T.track); rolled(1 - sstep(0.5, 0.97, u)); if (u > 0.97) held = true; const f2 = u / 0.7; flick(f2 < 1 ? (f2 * 2) % 1 : 0); }]); // (picked up smoothly, no jump; flicking its tongue along the trail)
+        phases.push([1.5, (u) => { R.setPose(R.blend(coil, ext, ease(u))); R.apply(); setMouth(tHold * ease(u)); say(T.track); rolled(1 - sstep(0.5, 0.97, u)); if (u > 0.97) held = true; const f2 = u / 0.7; flick(f2 < 1 ? (f2 * 2) % 1 : 0); }]); // (picked up smoothly, no jump; flicking its tongue along the trail)
       }
       if (constrict) {
-        phases.push([1.5, (u) => { held = true; R.setPose(R.blend(ext, spiral, ease(u))); R.apply(); setMouth(0.55); say(T.coil); camKey = camSide(prey.position.clone(), fitD(Math.max(prR * 7, F.W(L * 0.3) * 14)), 0.85, 0.1); }]);
+        phases.push([1.5, (u) => { held = true; R.setPose(R.blend(ext, spiral, ease(u))); R.apply(); setMouth(tHold); say(T.coil); camKey = camSide(prey.position.clone(), fitD(Math.max(prR * 7, F.W(L * 0.3) * 14)), 0.85, 0.1); }]);
         phases.push([1.8, (u, s) => { R.setPose(spiral); sq(0.5 + 0.5 * Math.sin(s * 5)); R.apply(); }]);
         phases.push([1.2, (u) => { R.bul.fill(1); R.setPose(R.blend(spiral, ext, ease(u))); R.apply(); }]);
       }
-    } else phases.push([1.2, (u) => { R.setPose(R.blend(R.blend(rest, ext, 0.3), ext, ease(u))); R.apply(); setMouth(ease(u) * 0.9); if (u > 0.95) held = true; }]);
+    } else phases.push([1.2, (u) => { R.setPose(R.blend(R.blend(rest, ext, 0.3), ext, ease(u))); R.apply(); setMouth(ease(u) * tNeed, { spread: spreadNeed * ease(u) }); if (u > 0.95) held = true; }]);
     phases.push([4.6, (u, s) => {
       // jaw walking: the prey goes in in small pulls, one side of the jaw then the other (the head turns a little each way)
       const e = ease(u), pull = e - Math.sin(e * TAU * 6) / (TAU * 6);
       held = true; xp = lerp(xp0, xIn, pull); const yaw = 0.1 * Math.sin(e * TAU * 3) * (1 - sstep(0.85, 1, u));
-      R.setPose(R.fore({ len: st.len, phi, lift, coil: 0, yaw })); bulgeAt(xp, 1); R.apply(); setMouth(lerp(0.75, 1, Math.sin(Math.min(1, u * 1.2) * Math.PI))); say(T.swallow);
+      R.setPose(R.fore({ len: st.len, phi, lift, coil: 0, yaw })); bulgeAt(xp, 1); R.apply();
+      const inside = sstep(0, 0.15, u) * (1 - sstep(0.82, 1, u)); // the jaws spread round the prey and walk over it, one side then the other (the "pterygoid walk")
+      setMouth(lerp(tHold, tNeed, Math.sin(Math.min(1, u * 1.2) * Math.PI)), { spread: spreadNeed * inside, walk: Math.sin(e * TAU * 3) * inside * (spreadNeed > 0.05 ? 1 : 0.6) }); say(T.swallow);
       camKey = camSide(headPt().lerp(R.point(xp - Lp * 0.5), 0.3), fitD(Hl * 1.8 + Lp * 1.0), 0.36);
       preyHide = !anatOn() && xp - Lp > Hl * 0.95;
     }]);
     phases.push([3.4, (u) => {
-      xp = lerp(xIn, xEnd, ease(u)); R.setPose(R.blend(ext, rest, ease(u) * 0.6)); bulgeAt(xp, 1); R.apply(); setMouth(lerp(0.75, 0, ease(u * 2))); say(T.down);
+      xp = lerp(xIn, xEnd, ease(u)); R.setPose(R.blend(ext, rest, ease(u) * 0.6)); bulgeAt(xp, 1); R.apply(); setMouth(lerp(tHold, 0, ease(u * 2))); say(T.down);
       preyHide = !anatOn();
       camKey = camSide(R.point(xp - Lp / 2), fitD(Math.max(L * 0.22, Lp * 3.2)), 0.55);
     }]);
@@ -1008,22 +1058,36 @@ export function create(V) {
     if (venomous) add('venom', 'Venom glands', 'Changed saliva glands behind the eyes. Muscles squeeze the venom through a tube into the fangs.', 'head', mergeG([1, -1].map((sg) => blob(Hl * 0.62, sg * 0.6, -0.12, Hl * 0.17, F.Hh(Hl * 0.62) * 0.24, F.W(Hl * 0.62) * 0.2))), om(C.venom), { jaw: 'upper' });
     // ---- airways, gut and the rest (bend with the body). Behind the jaw hinge, so nothing is left behind when the mouth opens
     const x0 = Math.max(Hl * 1.08, mo ? mo.headX * 1.32 : 0), at = (f) => Math.max(x0, svl * f);
-    const heart0 = svl * 0.245, heart1 = svl * 0.29;
-    add('trachea', 'Windpipe (trachea)', 'Stiff rings keep it open. Its opening, the glottis, can be pushed out of the side of the mouth so the snake breathes while swallowing big prey.', 'body', sweep(x0, svl * 0.3, -0.06, -0.12, (x) => rB(x) * 0.11, 140, 10), om(C.trachea, { map: ringTex('#e9dcc6', 'rgba(150,120,100,.45)', 70) }));
-    if (plan !== 'python' && plan !== 'blind') add('tlung', 'Tracheal lung', 'Extra breathing tissue along the windpipe in front of the heart, which many snakes have.', 'body', sweep(at(0.12), heart0 * 0.99, -0.08, -0.08, (x) => rB(x) * 0.2, 40, 12), om(C.lung, { transparent: true, opacity: 0.8, roughness: 0.75 }));
-    add('oesophagus', 'Gullet (oesophagus)', 'A long, very stretchy tube from the mouth to the stomach. Food is pushed along it by muscles.', 'body', sweep(x0, svl * 0.5, 0.1, 0.24, (x) => rB(x) * 0.15, 170, 10), om(C.gullet));
+    // v5.57: where the organs lie depends on how the snake lives (as fractions of the snout-vent length, SVL):
+    // the heart sits closer to the head in climbing snakes (15-25% of the length), about a quarter to a third of the
+    // way along in ground snakes, and nearer the middle in sea snakes (Lillywhite 1987, Am. Zool. 27:81; Gartner et
+    // al. 2010, Physiol. Biochem. Zool. 83:43). One long right lung runs from the heart to about mid-body, its
+    // air-sac part on towards the vent (much further in sea snakes); the left lung is tiny or missing, except in boas
+    // and pythons where it is 50-85% as long as the right (Wallach 1998, The lungs of snakes, Biology of the Reptilia
+    // 19). Liver behind the heart, then the stomach, the gall bladder-pancreas-spleen cluster, the intestine, the
+    // gonads and the kidneys, the right ones in front of the left (Lillywhite 2014, How Snakes Work).
+    const climber = (P.pose && P.pose.kind === 'branch') || /vine ?snake|tree ?snake|bronzeback|boomslang|green mamba|tree ?boa|tree ?python|whip ?snake|flying/i.test(P.name || '');
+    const marine = plan === 'sea' || (P.scene && P.scene.kind === 'sea'), aquatic = marine || (P.scene && P.scene.kind === 'riverbank');
+    const heartC = marine ? 0.34 : climber ? 0.2 : aquatic ? 0.29 : plan === 'viper' || plan === 'pitviper' ? 0.27 : 0.265;
+    const heart0 = svl * (heartC - 0.024), heart1 = svl * (heartC + 0.024);
+    const lungEnd = svl * (marine ? 0.62 : plan === 'python' ? 0.55 : 0.5), sacEnd = svl * (marine ? 0.92 : plan === 'python' ? 0.7 : 0.72);
+    const liverEnd = svl * Math.max(heartC + 0.2, 0.48), stom0 = liverEnd - svl * 0.005, stom1 = stom0 + svl * 0.105;
+    add('trachea', 'Windpipe (trachea)', 'Stiff rings keep it open. Its opening, the glottis, can be pushed out of the side of the mouth so the snake breathes while swallowing big prey.', 'body', sweep(x0, heart0 + svl * 0.01, -0.06, -0.12, (x) => rB(x) * 0.11, 140, 10), om(C.trachea, { map: ringTex('#e9dcc6', 'rgba(150,120,100,.45)', 70) }));
+    if (plan !== 'python' && plan !== 'blind') add('tlung', 'Tracheal lung', 'Extra breathing tissue along the windpipe in front of the heart, which many snakes have.', 'body', sweep(Math.max(x0 * 1.3, heart0 * 0.45), heart0 * 0.99, -0.08, -0.08, (x) => rB(x) * 0.2, 40, 12), om(C.lung, { transparent: true, opacity: 0.8, roughness: 0.75 }));
+    add('oesophagus', 'Gullet (oesophagus)', 'A long, very stretchy tube from the mouth to the stomach. Food is pushed along it by muscles.', 'body', sweep(x0, stom0 + svl * 0.01, 0.1, 0.24, (x) => rB(x) * 0.15, 170, 10), om(C.gullet));
     const hx = (heart0 + heart1) / 2;
-    add('heart', 'Heart', 'About a quarter of the way along the body. It has three chambers and can slide a little, so big prey can squeeze past.', 'body', blob(hx, 0, -0.34, (heart1 - heart0) * 0.5, rB(hx) * 0.36, F.W(hx) * 0.34, 28), om(C.heart, { roughness: 0.38, clearcoat: 0.6 }));
-    add('lung', 'Right lung', 'Snakes have one long working lung on the right (the left one is tiny or missing), because their body is so narrow.', 'body', sweep(svl * 0.29, svl * 0.505, -0.2, 0.22, (x, t) => rB(x) * 0.36 * (1 - t * 0.2), 90, 12), om(C.lung, { roughness: 0.75, map: speckle('#e2a19d', 1600, 0.25, 4) }));
-    add('lungL', 'Left lung', 'Tiny in most snakes (and missing in many): there is only room for one big lung.', 'body', sweep(svl * 0.3, svl * 0.335, 0.26, 0.18, (x) => rB(x) * 0.12, 16, 10), om(C.lung, { roughness: 0.75 }));
-    add('airsac', 'Air sac', 'The back part of the lung has no blood vessels: it is a thin bag that stores air, like a balloon.', 'body', sweep(svl * 0.495, svl * 0.72, -0.12, 0.3, (x, t) => rB(x) * 0.25 * (1 - t * 0.6), 70, 12), new THREE.MeshPhysicalMaterial({ color: C.sac, roughness: 0.25, transparent: true, opacity: 0.42, depthWrite: false, clearcoat: 1 }));
-    add('liver', 'Liver', 'Long and thin to fit the body. It cleans the blood and stores energy.', 'body', sweep(svl * 0.3, svl * 0.5, -0.06, -0.3, (x, t) => rB(x) * 0.34 * Math.min(1, 0.55 + t * 1.4) * (1 - 0.3 * t), 80, 12, 1.15), om(C.liver, { roughness: 0.35, clearcoat: 0.6 }));
-    add('stomach', 'Stomach', 'Very stretchy. Strong acid digests the whole prey - even bones.', 'body', sweep(svl * 0.495, svl * 0.6, 0.04, -0.12, (x, t) => rB(x) * 0.38 * (1 - Math.abs(t - 0.4) * 0.6), 40, 14), om(C.stomach, { map: canvasTex(64, (x, s) => { x.fillStyle = '#d6998d'; x.fillRect(0, 0, s, s); x.strokeStyle = 'rgba(140,60,50,.3)'; x.lineWidth = 2; for (let i = 0; i < s; i += 7) { x.beginPath(); x.moveTo(0, i); x.bezierCurveTo(s * 0.3, i + 4, s * 0.6, i - 4, s, i); x.stroke(); } }, 2, 3) }));
-    const g0 = svl * 0.605;
+    add('heart', 'Heart', (climber ? 'Close to the head in climbing snakes, so blood still reaches the brain when they hold the head up. ' : marine ? 'Nearer the middle of the body in sea snakes. ' : 'About a quarter of the way along the body. ') + 'It has three chambers and can slide a little, so big prey can squeeze past.', 'body', blob(hx, 0, -0.34, (heart1 - heart0) * 0.5, rB(hx) * 0.36, F.W(hx) * 0.34, 28), om(C.heart, { roughness: 0.38, clearcoat: 0.6 }));
+    add('lung', 'Right lung', 'Snakes have one long working lung on the right (the left one is tiny or missing), because their body is so narrow.', 'body', sweep(heart1 * 1.0, lungEnd, -0.2, 0.22, (x, t) => rB(x) * 0.36 * (1 - t * 0.2), 90, 12), om(C.lung, { roughness: 0.75, map: speckle('#e2a19d', 1600, 0.25, 4) }));
+    if (plan === 'python') add('lungL', 'Left lung', 'Boas and pythons still have a good left lung, more than half as long as the right one.', 'body', sweep(heart1 * 1.01, heart1 + (lungEnd - heart1) * 0.62, 0.24, 0.2, (x, t) => rB(x) * 0.26 * (1 - t * 0.25), 60, 12), om(C.lung, { roughness: 0.75, map: speckle('#e2a19d', 1200, 0.25, 5) }));
+    else add('lungL', 'Left lung', 'Tiny in most snakes (and missing in many): there is only room for one big lung.', 'body', sweep(heart1 * 1.01, heart1 + svl * 0.035, 0.26, 0.18, (x) => rB(x) * 0.12, 16, 10), om(C.lung, { roughness: 0.75 }));
+    add('airsac', 'Air sac', 'The back part of the lung has no blood vessels: it is a thin bag that stores air, like a balloon.', 'body', sweep(lungEnd - svl * 0.01, sacEnd, -0.12, 0.3, (x, t) => rB(x) * 0.25 * (1 - t * 0.6), 70, 12), new THREE.MeshPhysicalMaterial({ color: C.sac, roughness: 0.25, transparent: true, opacity: 0.42, depthWrite: false, clearcoat: 1 }));
+    add('liver', 'Liver', 'Long and thin to fit the body. It cleans the blood and stores energy.', 'body', sweep(heart1 + svl * 0.008, liverEnd, -0.06, -0.3, (x, t) => rB(x) * 0.34 * Math.min(1, 0.55 + t * 1.4) * (1 - 0.3 * t), 80, 12, 1.15), om(C.liver, { roughness: 0.35, clearcoat: 0.6 }));
+    add('stomach', 'Stomach', 'Very stretchy. Strong acid digests the whole prey - even bones.', 'body', sweep(stom0, stom1, 0.04, -0.12, (x, t) => rB(x) * 0.38 * (1 - Math.abs(t - 0.4) * 0.6), 40, 14), om(C.stomach, { map: canvasTex(64, (x, s) => { x.fillStyle = '#d6998d'; x.fillRect(0, 0, s, s); x.strokeStyle = 'rgba(140,60,50,.3)'; x.lineWidth = 2; for (let i = 0; i < s; i += 7) { x.beginPath(); x.moveTo(0, i); x.bezierCurveTo(s * 0.3, i + 4, s * 0.6, i - 4, s, i); x.stroke(); } }, 2, 3) }));
+    const g0 = Math.max(svl * 0.605, stom1 + svl * 0.006);
     add('gall', 'Gall bladder', 'A small green bag just behind the stomach. It keeps bile, which helps to digest fat.', 'body', blob(g0, -0.18, -0.22, rB(g0) * 0.2, rB(g0) * 0.17, F.W(g0) * 0.15), om(C.gall, { roughness: 0.3, clearcoat: 0.8 }));
     add('pancreas', 'Pancreas', 'Makes juices that digest food and a hormone (insulin) that controls sugar in the blood.', 'body', blob(g0 + rB(g0) * 0.5, 0.05, -0.12, rB(g0) * 0.24, rB(g0) * 0.15, F.W(g0) * 0.17), om(C.pancreas));
     add('spleen', 'Spleen', 'A small dark red organ that helps to fight germs and cleans old blood cells.', 'body', blob(g0 - rB(g0) * 0.2, 0.22, 0.02, rB(g0) * 0.16, rB(g0) * 0.14, F.W(g0) * 0.13), om(C.spleen, { roughness: 0.4 }));
-    add('intestine', 'Small intestine', 'Takes the goodness out of the digested food. In snakes it is fairly short and loops gently along the body.', 'body', sweep(svl * 0.625, svl * 0.86, (x) => 0.16 * Math.sin((x / svl) * 150), (x) => -0.18 + 0.12 * Math.cos((x / svl) * 150), (x) => rB(x) * 0.17, 200, 8), om(C.small));
+    add('intestine', 'Small intestine', 'Takes the goodness out of the digested food. In snakes it is fairly short and loops gently along the body.', 'body', sweep(Math.max(svl * 0.625, g0 + svl * 0.02), svl * 0.86, (x) => 0.16 * Math.sin((x / svl) * 150), (x) => -0.18 + 0.12 * Math.cos((x / svl) * 150), (x) => rB(x) * 0.17, 200, 8), om(C.small));
     add('colon', 'Large intestine', 'The last part of the gut. It takes water back out of what is left, then it goes out through the cloaca.', 'body', sweep(svl * 0.855, svl * 0.99, 0, -0.18, (x, t) => rB(x) * 0.19 * (1 - 0.3 * t), 40, 10), om(C.large));
     for (const [sg, a] of [[-1, 0.63], [1, 0.67]]) add('gonads', 'Ovaries or testes', 'The organs that make eggs (females) or sperm (males). One sits a little in front of the other, to fit the long body.', 'body', sweep(svl * a, svl * (a + 0.06), sg * 0.3, 0.3, (x) => rB(x) * 0.13, 24, 10), om(C.gonad));
     for (const [sg, a] of [[-1, 0.78], [1, 0.83]]) add('kidneys', 'Kidneys', 'Long and lobed, one in front of the other. They clean the blood; snakes save water by making a white paste (urates) instead of runny urine.', 'body', sweep(svl * a, svl * (a + 0.085), sg * 0.3, 0.3, (x, t) => rB(x) * 0.15 * (0.8 + 0.2 * Math.cos(t * 44)), 48, 10), om(C.kidney, { roughness: 0.45 }));
@@ -1036,7 +1100,7 @@ export function create(V) {
     add('ribs', 'Ribs', 'Snakes can have 100 to more than 400 pairs of ribs - one pair on every bone of the backbone! They are not joined underneath, so the body can stretch round a big meal, and they help the snake to crawl and climb.', 'ribs', mergeG(ribs), om(C.bone, { roughness: 0.55, clearcoat: 0.15 }), { x: svl * 0.4 });
     add('spine', 'Backbone (vertebrae)', 'A chain of 100 to more than 400 small bones (vertebrae) from the head to the tip of the tail, joined so the body can bend in every direction.', 'ribs', sweep(Hl * 1.0, L * 0.995, 0, 0.58, (x) => rB(x) * 0.1, 300, 8), om(C.bone, { roughness: 0.55, clearcoat: 0.15, map: ringTex('#eee5cf', 'rgba(150,130,100,.5)', 220) }), { x: svl * 0.45 });
     // ---- tail
-    add('cloaca', 'Cloaca (vent)', 'One opening for droppings, urates, eggs and mating. The tail starts here.', 'tail', blob(svl, 0, -0.55, rB(svl) * 0.45, rB(svl) * 0.22, F.W(svl) * 0.3), om(C.cloaca));
+    add('cloaca', 'Cloaca (vent)', 'One opening for droppings, urates, eggs and mating. The tail starts here.', 'tail', blob(svl, 0, -0.5, rB(svl) * 0.45, rB(svl) * 0.2, F.W(svl) * 0.3), om(C.cloaca));
     add('tailp', 'Tail', 'From the vent to the tip. It has backbone but no ribs and no big organs (in males, the mating organs sit inside its base).' + (P.tail && P.tail.rattle ? ' Rattlesnakes add a new rattle segment each time they shed.' : ''), 'tail', sweep(svl * 1.01, L * 0.97, 0, 0.05, (x) => rB(x) * 0.42, 60, 10), om(C.tailM, { transparent: true, opacity: 0.35, depthWrite: false, roughness: 0.6 }));
     // the head parts go with their jaw (their shapes are made with the mouth shut: the jaw group carries them from there,
     // whether the mouth is open or shut right now)
@@ -1118,9 +1182,22 @@ export function create(V) {
       else if (st.mat0) { Object.assign(m, st.mat0); st.mat0 = null; } else return;
       m.needsUpdate = true;
     }
-    function insideVisible() { // the mouth's inside shows through the skin; its dark throat tunnel only while the mouth is open
+    // v5.57: the soft lining of the mouth (roof, floor, the folds and the back wall) is see-through too, like the skin: it
+    // used to stay solid and filled the see-through head with a pale pink block. It firms up as the mouth opens.
+    function liningMats() {
+      const mo = V.extras.mouth; if (!mo || !mo.anchors || !mo.anchors.teeth || !mo.anchors.teeth.parent) return [];
+      const out = []; for (const c of mo.anchors.teeth.parent.parent.children) if (c.isMesh && !c.userData.mpart && !c.userData.anat && c.material && !out.includes(c.material)) out.push(c.material);
+      return out;
+    }
+    function liningSeeThrough(v) {
+      if (v) { if (!st.lin0) st.lin0 = liningMats().map((m) => [m, { transparent: m.transparent, opacity: m.opacity, depthWrite: m.depthWrite }]); for (const [m] of st.lin0) if (!m.transparent) { m.transparent = true; m.depthWrite = false; m.needsUpdate = true; } }
+      else if (st.lin0) { for (const [m, o] of st.lin0) { Object.assign(m, o); m.needsUpdate = true; } st.lin0 = null; }
+    }
+    function insideVisible() { // the mouth's inside shows through the skin
       const mo = V.extras.mouth; if (!st.on || !mo || !mo.anchors || !mo.anchors.teeth || !mo.anchors.teeth.parent) return;
-      const ins = mo.anchors.teeth.parent.parent; ins.visible = true; ins.children.forEach((c) => { if (c.userData.mpart === 'throat') c.visible = mo.t > 0.05; });
+      const ins = mo.anchors.teeth.parent.parent; ins.visible = true;
+      if (!st.lin0) liningSeeThrough(true);
+      const op = st.skinOpaque ? 1 : lerp(0.3, 0.88, sstep(0.05, 0.7, mo.t)); for (const [m] of st.lin0) m.opacity = op;
     }
     // the Head / Ribs / Body / Tail pills sit on their part of the body (v5.05: and hide while a part is picked)
     // v5.09: every label is just a short name and a green Show more pill (the explanation shows only when tapped).
@@ -1234,16 +1311,40 @@ export function create(V) {
       if (w < 520) { cx = w - cw - 8; cy = h - ch - 8; } // phones: bottom right (the tip line hides meanwhile)
       card.style.transform = 'translate(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px)';
     }
+    // v5.57: each label goes close to its own point - just above or just below the snake there, alternating along the
+    // body - sliding sideways only as much as it must to keep clear of the other labels, the snake, the buttons on the
+    // view and the leader lines already drawn (it used to stack in rows above the whole snake, with long crossing lines)
+    let obst = [], obstT = 0;
+    function obstacles() { // the buttons and notes laid over the 3D view (looked up a few times a second, not every frame)
+      const t = now(); if (t - obstT < 400) return obst; obstT = t; const sr = stage.getBoundingClientRect(); obst = [];
+      stage.querySelectorAll('.sp3d-bar .sp3d-b, .sp3d-bar .sp3d-morebtn, .sp3d-hdb .sp3d-b, .sp3d-fsc, .sp3d-tip, .sp3d-capt, .sp3d-list, .sp3d-info').forEach((e) => {
+        if (e.hidden || e.closest('[hidden]')) return; const r = e.getBoundingClientRect(); if (r.width < 1 || r.height < 1) return;
+        obst.push({ x: r.left - sr.left - 4, y: r.top - sr.top - 4, w: r.width + 8, h: r.height + 8 });
+      });
+      return obst;
+    }
+    const segX = (a, b, c, d) => { const o = (p, q, r) => Math.sign((q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])); return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0; };
+    const segRect = (a, b, r) => { // does the segment a-b pass through the box r?
+      const inR = (p) => p[0] > r.x && p[0] < r.x + r.w && p[1] > r.y && p[1] < r.y + r.h; if (inR(a) || inR(b)) return true;
+      const c = [[r.x, r.y], [r.x + r.w, r.y], [r.x + r.w, r.y + r.h], [r.x, r.y + r.h]];
+      for (let i = 0; i < 4; i++) if (segX(a, b, c[i], c[(i + 1) % 4])) return true; return false;
+    };
     function layoutLabels(busy, w, h) {
-      const F = V.info.F, svl = st.data.svl, hide = (r) => { r.el.hidden = true; r.dot.hidden = true; };
+      const F = V.info.F, hide = (r) => { r.el.hidden = true; r.dot.hidden = true; };
       while (lines.firstChild) lines.removeChild(lines.firstChild);
       if (busy) { st.regs.forEach(hide); return; }
-      // the snake on screen: its top and bottom edges
-      let top = 1e9, bot = -1e9; const pts = [];
-      for (let i = 0; i <= 80; i++) { const x = (i / 80) * F.L, c = rig.point(x); for (const u of [1, -1]) { ndc.copy(c).addScaledVector(V3(0, 1, 0), u * F.Hh(x)).project(V.cam); if (ndc.z > 1 || Math.abs(ndc.x) > 1.1 || Math.abs(ndc.y) > 1.1) continue; const sy = (-ndc.y * 0.5 + 0.5) * h; top = Math.min(top, sy); bot = Math.max(bot, sy); } }
-      if (top > bot) { st.regs.forEach(hide); return; }
+      // the snake on screen: points along it with their half-thickness in pixels
+      const snk = []; let any = false;
+      for (let i = 0; i <= 100; i++) {
+        const x = (i / 100) * F.L, c = rig.point(x); ndc.copy(c).project(V.cam); if (ndc.z > 1) continue;
+        const sx = (ndc.x * 0.5 + 0.5) * w, sy = (-ndc.y * 0.5 + 0.5) * h; ndc.copy(c).addScaledVector(V3(0, 1, 0), Math.max(F.Hh(x), F.W(x))).project(V.cam);
+        const rr = Math.max(3, Math.abs((-ndc.y * 0.5 + 0.5) * h - sy)); snk.push([sx, sy, rr]); if (sx > -20 && sx < w + 20 && sy > -20 && sy < h + 20) any = true;
+      }
+      if (!any) { st.regs.forEach(hide); return; }
+      const hitsSnake = (r) => snk.some(([sx, sy, rr]) => sx > r.x - rr && sx < r.x + r.w + rr && sy > r.y - rr && sy < r.y + r.h + rr);
+      const localSpan = (x0, x1) => { let t = 1e9, b = -1e9; for (const [sx, sy, rr] of snk) if (sx > x0 && sx < x1) { t = Math.min(t, sy - rr); b = Math.max(b, sy + rr); } return [t, b]; };
       // zoomed in (the body much wider than the view): the parts in view; else the four regions
-      const zoomed = V.controls.st.d < svl * 0.42;
+      const zoomed = V.controls.st.d < st.data.svl * 0.42;
       const cand = [];
       for (const r of st.regs) {
         if (!!r.region === zoomed) { hide(r); continue; }
@@ -1252,34 +1353,49 @@ export function create(V) {
         if (ndc.z > 1 || sx < 4 || sx > w - 4 || sy < 4 || sy > h - 4) { hide(r); continue; }
         cand.push({ r, sx, sy, dc: Math.abs(sx - w / 2) + Math.abs(sy - h / 2) });
       }
-      // the nearest to the middle of the view first, at most 12
-      cand.sort((p, q) => p.dc - q.dc); cand.slice(12).forEach((c) => hide(c.r));
-      const list = cand.slice(0, 12).sort((p, q) => p.sx - q.sx);
-      const gap = 6, rows = [];
-      for (const c of list) {
+      // the nearest to the middle of the view first (fewer on a phone), then placed from left to right
+      const most = w < 520 ? 7 : 12;
+      cand.sort((p, q) => p.dc - q.dc); cand.slice(most).forEach((c) => hide(c.r));
+      const list = cand.slice(0, most).sort((p, q) => p.sx - q.sx);
+      const boxes = obstacles().slice(), segs = [], gap = 6, done = [];
+      list.forEach((c, n) => {
         const e = c.r.el; e.hidden = false; if (!c.r.sz || !c.r.sz[0]) c.r.sz = [e.offsetWidth || 120, e.offsetHeight || 26];
-        const [lw, lh] = c.r.sz, xc = clamp(c.sx - lw / 2, 4, w - lw - 4);
-        let placed = null;
-        for (const dir of [-1, 1]) { // rows above the snake, going up (sliding sideways to find room); only then rows below it
-          if (placed) break;
-          for (let k = 0; k < 6 && !placed; k++) {
-            const y = dir < 0 ? top - 16 - lh - k * (lh + gap) : bot + 16 + k * (lh + gap);
-            if (y < 4 || y + lh > h - 4) continue;
-            const row = rows.filter((q) => Math.abs(q.y - y) < 1);
-            for (let sh = 0; sh <= 6 && !placed; sh++) for (const sg of sh ? [1, -1] : [1]) {
-              const x0 = xc + sg * sh * (lw * 0.55 + gap); if (x0 < 4 || x0 + lw > w - 4) continue;
-              if (row.some((q) => x0 < q.x + q.w + gap && x0 + lw + gap > q.x)) continue;
-              placed = { x: x0, y, w: lw, dir }; break;
-            }
+        const [lw, lh] = c.r.sz, pref = n % 2 ? 1 : -1; // alternate above / below along the body
+        let best = null;
+        const tryBox = (x, y, lx, ly, extra) => { // score a place for the label (lx, ly: where its line leaves it)
+          if (y < 4 || y + lh > h - 4 || x < 4 || x + lw > w - 4) return;
+          const box = { x, y, w: lw, h: lh };
+          if (boxes.some((q) => x < q.x + q.w + gap && x + lw + gap > q.x && y < q.y + q.h + gap && y + lh + gap > q.y)) return;
+          if (hitsSnake(box)) return;
+          const seg = [[lx, ly], [c.sx, c.sy]];
+          let cost = Math.hypot(lx - c.sx, ly - c.sy) + extra;
+          for (const s2 of segs) if (segX(seg[0], seg[1], s2[0], s2[1])) cost += 120;
+          for (const q of boxes) if (segRect(seg[0], seg[1], q)) cost += 160;
+          for (const d2 of done) if (segRect(d2.seg[0], d2.seg[1], box)) cost += 160; // (nor over an earlier line)
+          if (!best || cost < best.cost) best = { box, seg, cost };
+        };
+        search: for (let k = 0; k < 7; k++) {
+          // just above or below the snake there (alternating along the body), sliding sideways a little
+          for (const dir of [pref, -pref]) for (const sh of [0, 0.35, -0.35, 0.7, -0.7, 1.1, -1.1, 1.6, -1.6]) {
+            if (best && best.cost < 26 + lh) break search;
+            const x = clamp(c.sx - lw / 2 + sh * lw, 4, w - lw - 4);
+            const [t0, b0] = localSpan(x - 6, x + lw + 6), top = Math.min(t0, c.sy - 6), bot = Math.max(b0, c.sy + 6);
+            const y = dir < 0 ? top - 12 - lh - k * (lh + gap) : bot + 12 + k * (lh + gap);
+            tryBox(x, y, clamp(c.sx, x + 10, x + lw - 10), dir < 0 ? y + lh : y, (dir !== pref ? 18 : 0) + Math.abs(sh) * 8);
+          }
+          // or beside its point, left or right (where the snake runs up and down the view, or parts crowd together)
+          for (const side of [1, -1]) for (const v of [0, -1, 1, -2, 2]) {
+            const x = side > 0 ? c.sx + 18 + k * 40 : c.sx - 18 - lw - k * 40, y = c.sy - lh / 2 + v * (lh + gap);
+            tryBox(x, y, side > 0 ? x : x + lw, clamp(c.sy, y + 6, y + lh - 6), 14 + Math.abs(v) * 6);
           }
         }
-        if (!placed) { hide(c.r); continue; }
-        rows.push(placed);
-        e.style.transform = 'translate(' + placed.x.toFixed(1) + 'px,' + placed.y.toFixed(1) + 'px)';
+        if (!best) { hide(c.r); return; }
+        boxes.push(best.box); segs.push(best.seg); done.push(best);
+        e.style.transform = 'translate(' + best.box.x.toFixed(1) + 'px,' + best.box.y.toFixed(1) + 'px)';
         const d = c.r.dot; d.hidden = false; d.style.transform = 'translate(' + c.sx.toFixed(1) + 'px,' + c.sy.toFixed(1) + 'px)';
-        const lx = clamp(c.sx, placed.x + 10, placed.x + lw - 10), ly = placed.dir < 0 ? placed.y + lh : placed.y;
+        const [[lx, ly]] = best.seg;
         for (const [col, wid] of [['rgba(12,26,18,.75)', 3.5], ['#9be07c', 1.6]]) { const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line'); ln.setAttribute('x1', lx); ln.setAttribute('y1', ly); ln.setAttribute('x2', c.sx); ln.setAttribute('y2', c.sy); ln.setAttribute('stroke', col); ln.setAttribute('stroke-width', wid); ln.setAttribute('stroke-linecap', 'round'); lines.appendChild(ln); }
-      }
+      });
     }
     const ray = new THREE.Raycaster();
     function pick(e) {
@@ -1341,7 +1457,7 @@ export function create(V) {
         st.k = 1;
         if (!V.scaleOn()) { st.view = { az: V.controls.st.az, el: 0.72, d: V.info.dFit * 1.1 }; V.view(st.view); }
       } else {
-        clearSel(); skinSeeThrough(false); setOrganVis(false); st.regs.forEach((r) => { r.el.remove(); r.dot.remove(); }); st.regs = []; while (lines.firstChild) lines.removeChild(lines.firstChild); if (st.list) { st.list.remove(); st.list = null; }
+        clearSel(); skinSeeThrough(false); liningSeeThrough(false); setOrganVis(false); st.regs.forEach((r) => { r.el.remove(); r.dot.remove(); }); st.regs = []; while (lines.firstChild) lines.removeChild(lines.firstChild); if (st.list) { st.list.remove(); st.list = null; }
         const mo = V.extras.mouth; if (mo && mo.anchors && mo.anchors.teeth && mo.anchors.teeth.parent) { const ins = mo.anchors.teeth.parent.parent; ins.visible = mo.t > 0.01; ins.children.forEach((c) => { c.visible = true; }); }
         if (!slither) tip.hidden = true;
         fx.reach = 0; if (fx.zoomOut > 1) { fx.zoomOut = 1; if (!instant) V.controls.setGoal({ d: V.info.dFit, px: 0, pz: 0, el: (V.info.portrait ? 40 : 30) * Math.PI / 180 }); }
@@ -1351,7 +1467,7 @@ export function create(V) {
     }
     function setOrganVis(v) { if (st.data) st.data.own.forEach((m) => { m.visible = v; }); }
     function refresh() { if (st.on) { skinSeeThrough(true); insideVisible(); } }
-    function reset() { clearSel(); st.regs.forEach((r) => { r.el.remove(); r.dot.remove(); }); st.regs = []; lines.remove(); if (st.list) st.list.remove(); st.list = null; if (st.undoProps) st.undoProps(); st.undoProps = null; st.on = false; st.data = null; st.mat0 = null; st.pose = null; st.k = 0; card.remove(); ring.remove(); }
+    function reset() { liningSeeThrough(false); clearSel(); st.regs.forEach((r) => { r.el.remove(); r.dot.remove(); }); st.regs = []; lines.remove(); if (st.list) st.list.remove(); st.list = null; if (st.undoProps) st.undoProps(); st.undoProps = null; st.on = false; st.data = null; st.mat0 = null; st.pose = null; st.k = 0; card.remove(); ring.remove(); }
     function resetView() { if (!st.on || !st.view) return false; clearSel(); V.view(st.view); return true; } // Reset shows the whole stretched-out snake again
     return { get on() { return st.on; }, get k() { return st.k; }, set, resetView, toggle: () => set(!st.on), after, pick, select, clearSel, refresh, reset, seeMore, stepPose, get parts() { return st.data && st.data.parts; }, get selCenter() { return st.sel ? st.selC : null; } };
   }
