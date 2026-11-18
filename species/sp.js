@@ -1,3 +1,13 @@
+// v5.68 (Eduardo): no text pops up when you rest the mouse on a button or link, on any SnakeList page. A title on a
+// button, link or other control (in the page or added later, e.g. by the 3D viewer) is taken off; when the control has
+// no words of its own, its text becomes its name for screen readers. The map's own place names (inside the map drawing) stay.
+(function(){if(window.__slNoTips)return;window.__slNoTips=1;var H='http://www.w3.org/1999/xhtml';
+function fix(el){if(!el||el.nodeType!==1||el.namespaceURI!==H||el.tagName==='IFRAME'||!el.hasAttribute('title'))return;var t=el.getAttribute('title');el.removeAttribute('title');
+if(t&&!el.hasAttribute('aria-label')&&!el.hasAttribute('aria-labelledby')&&!(el.textContent||'').trim())el.setAttribute('aria-label',t);}
+function sweep(r){if(!r||r.nodeType!==1)return;fix(r);var l=r.querySelectorAll('[title]');for(var i=0;i<l.length;i++)fix(l[i]);}
+sweep(document.documentElement);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){sweep(document.documentElement);});
+new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];if(m.type==='attributes')fix(m.target);else for(var j=0;j<m.addedNodes.length;j++)sweep(m.addedNodes[j]);}})
+.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['title']});})();
 // links back to SnakeList go Back instead of loading it again when SnakeList is the page just before
 // this one, so the app comes back instantly, as it was (no reload on iPads/phones). A link that asks
 // SnakeList for something (?q= ?fam= ?map= ...) is left in sessionStorage for the app to open once it's back.
@@ -13,6 +23,9 @@ var left=false;addEventListener('pagehide',function(){left=true},{once:true});hi
 setTimeout(function(){if(!left){try{sessionStorage.removeItem('sl-open-link')}catch(x){}location.href=a.href}},700)},true);
 document.addEventListener('keydown',function(e){var t=e.target;if(e.key!=='Enter'||e.isComposing||!t||t.tagName!=='INPUT'||t.type!=='search')return;
 if(window.matchMedia&&matchMedia('(pointer: coarse)').matches)setTimeout(function(){t.blur()},60)})})();
+// v5.68: the small See more under the key tags shows the rest of the checklist's values (and Show less hides them)
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.sp-fmore');if(!b)return;var l=document.getElementById(b.getAttribute('aria-controls'));if(!l)return;
+var o=!l.classList.contains('open');l.classList.toggle('open',o);b.setAttribute('aria-expanded',String(o));b.textContent=o?'Show less':'See more';});
 // v4.81: ?embed=map shows only the range map (with See states / See cities and the list of countries), for the 3D viewer's "See countries" panel
 (function(){if(!/[?&]embed=map(&|$)/.test(location.search))return;var r=document.getElementById('range');if(!r)return;var de=document.documentElement;de.classList.add('sp-embed');
 for(var n=r;n&&n!==document.body;n=n.parentNode)[].forEach.call(n.parentNode.children,function(c){if(c!==n&&c.tagName!=='SCRIPT'&&c.tagName!=='TEMPLATE')c.style.display='none'});

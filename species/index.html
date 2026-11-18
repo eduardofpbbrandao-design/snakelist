@@ -23,7 +23,17 @@ for(var k in C)if(k.toLowerCase().indexOf(v)===0&&v){e.preventDefault();location
 e.preventDefault();var bc=document.getElementById('by-country');if(bc)bc.scrollIntoView({behavior:'smooth'})});
 document.getElementById('sx-c').addEventListener('change',function(){var v=this.value.trim().toLowerCase();for(var k in C)if(k.toLowerCase()===v){location.href='country/'+C[k];return}});
 })();</script>
-<script>// links back to SnakeList go Back instead of loading it again when SnakeList is the page just before
+<script>// v5.68 (Eduardo): no text pops up when you rest the mouse on a button or link, on any SnakeList page. A title on a
+// button, link or other control (in the page or added later, e.g. by the 3D viewer) is taken off; when the control has
+// no words of its own, its text becomes its name for screen readers. The map's own place names (inside the map drawing) stay.
+(function(){if(window.__slNoTips)return;window.__slNoTips=1;var H='http://www.w3.org/1999/xhtml';
+function fix(el){if(!el||el.nodeType!==1||el.namespaceURI!==H||el.tagName==='IFRAME'||!el.hasAttribute('title'))return;var t=el.getAttribute('title');el.removeAttribute('title');
+if(t&&!el.hasAttribute('aria-label')&&!el.hasAttribute('aria-labelledby')&&!(el.textContent||'').trim())el.setAttribute('aria-label',t);}
+function sweep(r){if(!r||r.nodeType!==1)return;fix(r);var l=r.querySelectorAll('[title]');for(var i=0;i<l.length;i++)fix(l[i]);}
+sweep(document.documentElement);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){sweep(document.documentElement);});
+new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];if(m.type==='attributes')fix(m.target);else for(var j=0;j<m.addedNodes.length;j++)sweep(m.addedNodes[j]);}})
+.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['title']});})();
+// links back to SnakeList go Back instead of loading it again when SnakeList is the page just before
 // this one, so the app comes back instantly, as it was (no reload on iPads/phones). A link that asks
 // SnakeList for something (?q= ?fam= ?map= ...) is left in sessionStorage for the app to open once it's back.
 (function(){var s=document.currentScript,root,moved=false;try{root=new URL('../',s&&s.src||location.href)}catch(e){return}

@@ -537,8 +537,8 @@ def all_list(L, title_id, where, rel_species="../", intro_ids=()):
     """every species, as a compact list with a search box and Show more (all in the HTML);
     populations brought by people are marked "introduced" (they live here, but are not native)"""
     items = "".join('<li>%s%s%s</li>' % (sp_a(c, rel_species),
-                    ' <span class="rg-v" title="Venomous">venomous</span>' if c["venom"] else "",
-                    ' <span class="rg-i" title="Not native here: brought by people">introduced</span>' if c["id"] in intro_ids else "") for c in L)
+                    ' <span class="rg-v">venomous</span>' if c["venom"] else "",
+                    ' <span class="rg-i" aria-description="Not native here: brought by people">introduced</span>' if c["id"] in intro_ids else "") for c in L)
     tools = ('<label class="rg-pq"><span class="cy-sr">Search the snakes of %s</span><input type="search" placeholder="Search %s..." autocomplete="off"></label>' % (esc(where), nf(len(L)) + " species")) if len(L) > 12 else ""
     return ('<div class="rg-pl" data-page="60">%s<ul class="rg-cols rg-pul">%s</ul><p class="cy-note rg-pempty" hidden>No snake here matches that.</p>'
             '<p class="cy-more-wrap"><button type="button" class="cy-more rg-pmore" hidden>Show more</button></p></div>') % (tools, items)

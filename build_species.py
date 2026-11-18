@@ -169,16 +169,22 @@ def checklist_facts(c, rel="../"):
         return a(yes, "f=" + FLAG[k][0]) if FLAG[k][2](c) else no
     NR = '<span class="sp-unk">Not recorded</span>'
     tg = type_group(c)
+    # v5.68 (Eduardo): no "In SnakeList's checklist filters" heading - the key ones (venomous or not, harmful or harmless)
+    # are tags at the top of the key facts, and a small See more shows the rest of the checklist's values (never the tags again)
+    tags = []
+    if not c["fossil"]:
+        hm0 = harm_of(c)
+        tags.append(a("Venomous", "f=chip-venom") if c["venom"] else a("Non-venomous", "f=chip-nonvenom"))
+        if hm0 == "harmful": tags.append(a("Harmful", "f=chip-harmful"))
+        elif hm0 == "harmless": tags.append(a("Harmless", "f=chip-harmless"))
+    elif FLAG["z"][2](c): tags.append(a("Extinct", "f=chip-extinct") + " <small>(fossil)</small>")
     rows = [("Type", a(e(tg), "type=" + quote(tg)) if tg else NR),
             ("Family", a(e(c["family"]), "fam=" + quote(c["family"])) if c["family"] else NR),
             ("Continent", e(", ".join(c["continents"])) if c["continents"] else NR)]
     hs = [HAB_SECS[h] for h in hab_secs(c)]
     if not c["fossil"]:  # nothing about living snakes applies to a fossil (the same rule as its filter tags)
         hm = harm_of(c); cons = constriction_of(c)
-        rows += [("Venomous", a("Yes", "f=chip-venom") if c["venom"] else a("No", "f=chip-nonvenom")),
-                 ("Dangerous to people", a("Yes", "f=chip-harmful") + " <small>(Harmful)</small>" if hm == "harmful" else
-                  a("No", "f=chip-harmless") + " <small>(Low risk)</small>" if hm == "harmless" else
-                  '<span class="sp-unk">Not documented</span> <small>(mildly venomous)</small>'),
+        rows += ([] if hm in ("harmful", "harmless") else [("Dangerous to people", '<span class="sp-unk">Not documented</span> <small>(mildly venomous)</small>')]) + [
                  ("Constrictor", a("Yes", "f=chip-constrictor") if cons == "yes" else a("No", "f=chip-nonconstrictor") if cons == "no" else
                   '<span class="sp-unk">Not documented</span>'),
                  ("Snake eater", yn("e", "Yes", "No")),
@@ -188,10 +194,12 @@ def checklist_facts(c, rel="../"):
                  ("Common or rare", (a("Common", "f=chip-common") if FLAG["m"][2](c) else a("Rare", "f=chip-rare") if FLAG["r"][2](c) else "Neither") +
                   " <small>(%s on iNaturalist)</small>" % ("no confirmed records" if not c["spots"] else "recorded in %s place%s" % ("{:,}".format(c["spots"]), "" if c["spots"] == 1 else "s")))]
     rows.append(("Photos", "Yes" if c["photo"] else a("No photos yet", "f=chip-nophoto")))
-    rows.append(("Extinct", a("Yes", "f=chip-extinct") + (" <small>(fossil)</small>" if c["fossil"] else "") if FLAG["z"][2](c) else "No"))
+    if not (c["fossil"] and FLAG["z"][2](c)): rows.append(("Extinct", a("Yes", "f=chip-extinct") if FLAG["z"][2](c) else "No"))  # (a fossil says it in its tag)
     rows.append(("Habitats", (e(", ".join(hs)) + ' <small>(estimated, as in the app)</small>') if hs else NR))  # long: last, full width
-    return ('<details class="sp-filt" open><summary>In SnakeList&rsquo;s checklist filters</summary><dl class="sp-key sp-fkey">%s</dl></details>' %
-            "".join('<div%s><dt>%s</dt><dd>%s</dd></div>' % (' class="sp-fwide"' if k == "Habitats" else "", k, v) for k, v in rows))
+    return ('<div class="sp-ftop">%s<button type="button" class="sp-fmore" aria-expanded="false" aria-controls="sp-fmore-list">See more</button></div>'
+            '<dl class="sp-key sp-fkey" id="sp-fmore-list">%s</dl>' %
+            ("".join('<span class="sp-ftag">%s</span>' % t for t in tags),
+             "".join('<div%s><dt>%s</dt><dd>%s</dd></div>' % (' class="sp-fwide"' if k == "Habitats" else "", k, v) for k, v in rows)))
 
 
 def places_txt(names, link=None):
@@ -668,7 +676,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             shown = region.us_names.get(n, n) if cc == "us" else re.sub(r" \(\d+\)$", "", n)
             rk = build_regions.key_of(cc, n)  # its own page (species/region/...), else the app's map on it
             k = len(build_regions.REG[rk]["ids"]) if rk else prov_count(cc, [n])
-            items.append('<a href="%s">%s</a>%s' % (("region/" + rk) if rk else "../?map=" + esc(quote(shown)), esc(shown), (' <small class="sp-n" title="All snake species SnakeList records in %s - not records of this snake">(%s in all)</small>' % (esc(shown), nplural(k, "species", "species"))) if k else ""))
+            items.append('<a href="%s">%s</a>%s' % (("region/" + rk) if rk else "../?map=" + esc(quote(shown)), esc(shown), (' <small class="sp-n" aria-description="All snake species SnakeList records in %s - not records of this snake">(%s in all)</small>' % (esc(shown), nplural(k, "species", "species"))) if k else ""))
         return "<li><b>%s%s:</b> %s</li>" % (esc(cname), what, ", ".join(items))
     PROV_N = {}
     for c in cards:
@@ -1305,7 +1313,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             site_head=site_header("../", "species"), site_foot=site_footer("../"),
             crumb_tax=((' &rsaquo; <a href="family/%s">%s</a>' % (slugify(c["family"]), esc(c["family"]))) if c["family"] else "") + ((' &rsaquo; <a href="genus/%s"><i>%s</i></a>' % (slugify(c["genus"]), esc(c["genus"]))) if c["genus"] and not c["fossil"] else ""),
             author=AUTHOR, venom_cls="v" if c["venom"] else "nv",
-            realbtn='<button type="button" class="sp-btn sp-btn2 sp-realbtn" aria-haspopup="dialog">Explore in 3D</button><button type="button" class="sp-btn sp-btn2 sp-anatbtn" aria-haspopup="dialog" title="See its fangs, teeth, glottis, tongue, scales and more, labelled on the 3D model">Anatomy</button>',
+            realbtn='<button type="button" class="sp-btn sp-btn2 sp-realbtn" aria-haspopup="dialog">Explore in 3D</button><button type="button" class="sp-btn sp-btn2 sp-anatbtn" aria-haspopup="dialog" aria-description="See its fangs, teeth, glottis, tongue, scales and more, labelled on the 3D model">Anatomy</button>',
             lenattr=len_attr(info),
             mapnote=('<p class="sp-note sp-mapnote">%s</p>' % ("The shaded country is where its fossils were found &ndash; not a living range." if c["fossil"] else
                      ("Shaded countries are those where it was recorded &ndash; it did not live everywhere inside them." if gone else
@@ -1538,7 +1546,7 @@ PAGE = """<!doctype html>
 <div class="sp-title">{fossil_flag}<h1>{h1}</h1><p class="sp-sci">{sub}</p>
 {intro}
 </div></header>
-<div class="sp-keybox"><h2 class="sp-vh">Key facts</h2><dl class="sp-key">{keyfacts}</dl>{filtfacts}
+<div class="sp-keybox"><h2 class="sp-vh">Key facts</h2>{filtfacts}<dl class="sp-key">{keyfacts}</dl>
 <div class="sp-actions">{actions}{realbtn}</div>
 <p class="sp-actnote">{actnote}</p></div>
 <nav class="sp-toc" aria-label="On this page">{toc}</nav>
@@ -1691,6 +1699,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .sp-filt summary::marker{color:var(--g)}.sp-keybox .sp-fkey{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:0 20px;margin:0}
 .sp-keybox .sp-fkey div{padding:7px 0}.sp-keybox .sp-fkey .sp-fwide{grid-column:1/-1}.sp-keybox .sp-fkey dd{font-size:14.5px}
 .sp-unk{color:var(--muted);font-weight:400}
+.sp-ftop{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:12px 0 4px}
+.sp-ftag{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:999px;background:var(--tag,#e3f0dc);border:1px solid var(--line);font-size:13.5px;font-weight:600;line-height:1.3}
+.sp-keybox .sp-ftag a{color:var(--text,inherit);text-decoration:none}.sp-keybox .sp-ftag a:hover{text-decoration:underline}.sp-ftag small{font-weight:400;color:var(--muted)}
+.sp-fmore{display:inline-flex;align-items:center;gap:6px;min-height:0;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);font:500 11.5px/1.35 Inter,system-ui,sans-serif;cursor:pointer}
+.sp-fmore:hover{border-color:var(--g);color:var(--text,inherit)}
+.sp-fmore::after{content:"";width:6px;height:6px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-2px) rotate(45deg);transition:transform .15s ease}
+.sp-fmore[aria-expanded=true]::after{transform:translateY(1px) rotate(-135deg)}
+.js .sp-keybox .sp-fkey:not(.open){display:none}.sp-keybox .sp-fkey{margin:4px 0 6px;padding-bottom:4px}
 .sp-keybox .sp-actions{gap:8px}.sp-keybox .sp-actnote{margin:8px 0 0}
 .sp-actions .sp-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1px solid transparent;cursor:pointer;font:600 15px Inter,system-ui,sans-serif}
 .sp-actions .sp-btn2{border-color:var(--tagline)}.sp-actions .sp-btn span{margin-right:6px}.sp-keybox a.sp-btn{color:#fff;text-decoration:none}.sp-keybox a.sp-btn2{color:var(--link)}
@@ -1721,7 +1737,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 # v5.57: shared by the species pages (sp.js), the country / family / genus / region / city pages (country.js)
 # and the A-Z directory (inline): no SnakeList page ever reloads SnakeList when it can go Back to it,
 # and Enter in a search box puts a phone's keyboard away instead of doing anything else
-APP_BACK_JS = r"""// links back to SnakeList go Back instead of loading it again when SnakeList is the page just before
+APP_BACK_JS = r"""// v5.68 (Eduardo): no text pops up when you rest the mouse on a button or link, on any SnakeList page. A title on a
+// button, link or other control (in the page or added later, e.g. by the 3D viewer) is taken off; when the control has
+// no words of its own, its text becomes its name for screen readers. The map's own place names (inside the map drawing) stay.
+(function(){if(window.__slNoTips)return;window.__slNoTips=1;var H='http://www.w3.org/1999/xhtml';
+function fix(el){if(!el||el.nodeType!==1||el.namespaceURI!==H||el.tagName==='IFRAME'||!el.hasAttribute('title'))return;var t=el.getAttribute('title');el.removeAttribute('title');
+if(t&&!el.hasAttribute('aria-label')&&!el.hasAttribute('aria-labelledby')&&!(el.textContent||'').trim())el.setAttribute('aria-label',t);}
+function sweep(r){if(!r||r.nodeType!==1)return;fix(r);var l=r.querySelectorAll('[title]');for(var i=0;i<l.length;i++)fix(l[i]);}
+sweep(document.documentElement);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){sweep(document.documentElement);});
+new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];if(m.type==='attributes')fix(m.target);else for(var j=0;j<m.addedNodes.length;j++)sweep(m.addedNodes[j]);}})
+.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['title']});})();
+// links back to SnakeList go Back instead of loading it again when SnakeList is the page just before
 // this one, so the app comes back instantly, as it was (no reload on iPads/phones). A link that asks
 // SnakeList for something (?q= ?fam= ?map= ...) is left in sessionStorage for the app to open once it's back.
 (function(){var s=document.currentScript,root,moved=false;try{root=new URL('../',s&&s.src||location.href)}catch(e){return}
@@ -1797,7 +1823,10 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
 })();
 """
 
-JS = """// v4.81: ?embed=map shows only the range map (with See states / See cities and the list of countries), for the 3D viewer's "See countries" panel
+JS = """// v5.68: the small See more under the key tags shows the rest of the checklist's values (and Show less hides them)
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.sp-fmore');if(!b)return;var l=document.getElementById(b.getAttribute('aria-controls'));if(!l)return;
+var o=!l.classList.contains('open');l.classList.toggle('open',o);b.setAttribute('aria-expanded',String(o));b.textContent=o?'Show less':'See more';});
+// v4.81: ?embed=map shows only the range map (with See states / See cities and the list of countries), for the 3D viewer's "See countries" panel
 (function(){if(!/[?&]embed=map(&|$)/.test(location.search))return;var r=document.getElementById('range');if(!r)return;var de=document.documentElement;de.classList.add('sp-embed');
 for(var n=r;n&&n!==document.body;n=n.parentNode)[].forEach.call(n.parentNode.children,function(c){if(c!==n&&c.tagName!=='SCRIPT'&&c.tagName!=='TEMPLATE')c.style.display='none'});
 var mh=[].filter.call(r.querySelectorAll(':scope>h3'),function(h){return /^Map/.test(h.textContent)})[0];if(mh)for(var k=r.firstElementChild;k&&k!==mh.nextElementSibling;k=k.nextElementSibling)k.style.display='none';
@@ -2011,11 +2040,11 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
         inner = '<b>%s</b><span>%s</span>' % ("{:,}".format(k), lab)
         can = k and (how == "#" or (how == "fv" and vfilter) or (how == "ff" and big and nfam > 1) or (how == "xf" and big))
         if can and how == "#":
-            return '<li class="%s"><a class="cy-dbtn" href="%s" title="%s">%s</a></li>' % (cls, val, esc(tip), inner)
+            return '<li class="%s"><a class="cy-dbtn" href="%s" aria-description="%s">%s</a></li>' % (cls, val, esc(tip), inner)
         if can:
-            return '<li class="%s"><button type="button" class="cy-dbtn" data-%s="%s"%s aria-pressed="false" title="%s - tap to show only these">%s</button></li>' % (
+            return '<li class="%s"><button type="button" class="cy-dbtn" data-%s="%s"%s aria-pressed="false" aria-description="%s - tap to show only these">%s</button></li>' % (
                 cls, how, esc(val), (' data-xl="%s"' % esc(xl or lab)) if how == "xf" else "", esc(tip), inner)
-        return '<li class="%s%s" title="%s">%s</li>' % (cls, " cy-d0" if not k else "", esc(tip), inner)
+        return '<li class="%s%s" aria-description="%s">%s</li>' % (cls, " cy-d0" if not k else "", esc(tip), inner)
     if kind == "country" and n:
         DROWS = [("cy-d-v", "fv", "1", nv, "venomous", "Venomous: dangerously or mildly venomous"),
                  ("cy-d-nv", "fv", "0", n - nv, "non-venomous", "Not venomous: low-risk snakes and giant constrictors"),
