@@ -235,11 +235,17 @@ def scene_of(c, plan, kinds):
 DARK_EYE = {"irisDark": 1, "pupil": "round"}
 CURATED = {
     # v5.09: smooth green snake - small (adults 30-50 cm), slender, plain grass green, pale yellow-white belly, 15 rows of smooth scales
-    "opheodrys-vernalis": {"d": "#6cad3a", "lat": "#7fbb48", "b": "#f1efc6", "t": "plain", "s": "grass", "L": 0.45, "k": 0, "lip": "#e2e6a8", "sp": {"grassA": "#55803a", "grassB": "#9ab860"},
-                           "h": dict(DARK_EYE, iris="#1d1d14", irisInner="#34341f", eyeRing="#cfd09a", pupilW=0.25, eye=0.2, len=0.03, w=0.95), "bx": {"ld": 58, "neck": 0.9},
-                           "sx": {"gloss": 0.5, "rows": 15, "keel": 0}, "cx": {"bellyA": 0.7, "mottle": 0.04, "var": 0.03}},
+    # v5.58: re-checked against its SnakeList photo (kha, iNaturalist photo 10109512): one even grass green from head to tail (no
+    # darker tail), the green running down to the edge of the belly, pale yellow-green lip scales, a long head (about three times as
+    # long as the neck is deep) only a little wider than the neck, a big eye - about half the head's depth - set high, halfway along
+    # the mouth line, black with a round pupil and a thin pale rim; glossy smooth scales with no flecks; adults 36-51 cm, record ~66 cm;
+    # the tail about 31% of the total length (Virginia Herpetological Society: 25-37%, average 31.5%)
+    "opheodrys-vernalis": {"d": "#79bd45", "lat": "#86c650", "b": "#eef0c8", "t": "uniform", "s": "grass", "L": 0.45, "mx": "about 66 cm", "k": 0, "sp": {"grassA": "#55803a", "grassB": "#9ab860"},
+                           "h": dict(DARK_EYE, iris="#1c140c", irisInner="#4a3a22", eyeRing="#d2c99c", pupilW=0.26, eye=0.43, eyeX=0.4, eyeA=56, len=0.036, w=0.95, h=0.8, snoutH=0.74, jaw=0.8,
+                                     lips="pale", lipColor="#c8d968", bulge=0.16, brow=0.01, headRelief=0.3, groove=0.5), "bx": {"ld": 62, "neck": 0.78, "tail": 0.31},
+                           "sx": {"gloss": 0.68, "rows": 15, "keel": 0, "relief": 0.7}, "cx": {"bellyA": 0.7, "bellySharp": 0.045, "mottle": 0.02, "var": 0.02, "flecks": 0, "edgeK": 0.55}},
     "opheodrys-aestivus": {"d": "#76b13a", "lat": "#86bd45", "b": "#ecebb0", "t": "plain", "s": "forest", "L": 0.8, "k": 1, "lip": "#e2e6a8",
-                           "h": dict(DARK_EYE, iris="#1d1d14", irisInner="#34341f", eyeRing="#cfd09a", pupilW=0.25, eye=0.18), "bx": {"ld": 70, "neck": 0.9}, "sx": {"gloss": 0.4, "rows": 17}, "cx": {"bellyA": 0.7, "mottle": 0.04}},
+                           "h": dict(DARK_EYE, iris="#1d1d14", irisInner="#34341f", eyeRing="#cfd09a", pupilW=0.25, eye=0.33, eyeX=0.38, jaw=0.8), "bx": {"ld": 70, "neck": 0.9}, "sx": {"gloss": 0.4, "rows": 17}, "cx": {"bellyA": 0.7, "mottle": 0.04}},
     "morelia-viridis": {"d": "#4fa82c", "lat": "#5ab232", "b": "#e4e46a", "c": "#f3f6dc", "t": "vert", "n": 40, "s": "rainforest",
                         "h": {"iris": "#b6b49c", "irisInner": "#dad6bc", "pupil": "slit"}, "sx": {"gloss": 0.6, "iridescence": 0.1}, "cx": {"bellyA": 0.76, "mottle": 0.05}},
     "corallus-caninus": {"d": "#24903a", "lat": "#2c9a3e", "b": "#f0d838", "c": "#f2f5e6", "t": "crossbar", "n": 30, "s": "rainforest",

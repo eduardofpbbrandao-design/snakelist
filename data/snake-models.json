@@ -4278,39 +4278,78 @@
    "plan": "elapid",
    "length": 2.0,
    "lengthNote": "about 2 m typical",
+   "max": "about 2.5 m",
    "body": {
     "ld": 45,
-    "neck": 0.85
+    "neck": 0.82
    },
    "head": {
-    "len": 0.032,
-    "w": 0.9,
-    "h": 0.62,
-    "iris": "#3a2a1e"
+    "len": 0.036,
+    "w": 0.96,
+    "h": 0.74,
+    "snoutH": 0.76,
+    "capK": 1.0,
+    "jaw": 0.78,
+    "eyeX": 0.38,
+    "eyeA": 58,
+    "eye": 0.3,
+    "bulge": 0.12,
+    "iris": "#1e1610",
+    "irisInner": "#2a1f16",
+    "irisDark": 1,
+    "pupil": "round",
+    "pupilW": 0.22,
+    "lips": "none",
+    "headRelief": 0.45,
+    "groove": 0.55
    },
    "scales": {
     "rows": 23,
-    "gloss": 0.6,
-    "cavity": 0.7
+    "gloss": 0.72,
+    "cavity": 0.5,
+    "keel": 0,
+    "relief": 0.75,
+    "edge": {
+     "color": "#24150a",
+     "k": 0.78,
+     "dir": [
+      1.4,
+      0.65
+     ],
+     "from": 0.25,
+     "pow": 1.0
+    }
    },
    "colors": {
-    "dorsal": "#8a6a42",
-    "lateral": "#8e6e46",
-    "belly": "#e0d4a8",
-    "speckle": {
-     "p": 0.3,
-     "color": "#5a4228",
-     "k": 0.45
-    }
+    "dorsal": "#7a5631",
+    "lateral": "#80592e",
+    "belly": "#d4ae52",
+    "bellyA": 0.665,
+    "bellySharp": 0.075,
+    "mottle": 0.05,
+    "var": 0.05,
+    "flecks": 0,
+    "edgeK": 0.55
    },
    "pattern": [
     {
+     "type": "tint",
+     "t": [
+      -0.3,
+      0.085
+     ],
+     "ramp": 0.01,
+     "fade": 0.06,
+     "color": "#4a3320",
+     "alpha": 0.35
+    },
+    {
      "type": "cap",
      "x0": 0,
-     "x1": 1.15,
-     "wid": 0.9,
-     "color": "#3a2a1e",
-     "alpha": 0.8
+     "x1": 0.42,
+     "wid": 1,
+     "color": "#2e2016",
+     "alpha": 0.3
     }
    ],
    "pose": {
@@ -4327,11 +4366,15 @@
    "details": [
     [
      "crown",
-     "Darker head"
+     "Head and neck a little darker than the body, glossy; dark sutures between the head shields"
     ],
     [
      "back",
-     "Dark-edged scales; paler in summer, darker in winter"
+     "Blackish-brown lower front edge on each scale: a broken herringbone. This is its paler, brown phase - in winter it turns much darker, the head almost glossy black"
+    ],
+    [
+     "eye",
+     "Dark eye: the pupil hardly shows"
     ]
    ],
    "refs": [
@@ -4343,6 +4386,14 @@
     {
      "t": "SnakeList reference photo by will-hunt (CC BY-NC, via iNaturalist)",
      "u": "https://www.inaturalist.org/photos/577556750"
+    },
+    {
+     "t": "Australian Museum: Inland Taipan (seasonal colour; dark-edged scales in a broken herringbone; 23 smooth mid-body rows; dark eye)",
+     "u": "https://australian.museum/learn/animals/reptiles/inland-taipan/"
+    },
+    {
+     "t": "NSW threatened species profile: Inland Taipan (round snout; head and neck darker; blackish-brown eye with no coloured rim round the pupil)",
+     "u": "https://threatenedspecies.bionet.nsw.gov.au/profile.aspx?id=20169"
     }
    ]
   },
