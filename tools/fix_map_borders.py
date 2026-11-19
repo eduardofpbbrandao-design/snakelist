@@ -18,6 +18,7 @@ two shapes overlapped. This tool rebuilds the three levels of detail from one to
 
 Keeps the file format, the ring order and indices (SL_GEO.isle refers to them); pieces a ring
 splits into are appended at the end. Run from the repo root:  python3 tools/fix_map_borders.py
+Then run tools/fix_state_borders.py, which fits the states/provinces onto these outlines.
 """
 import json, re, sys, math, os
 import numpy as np
