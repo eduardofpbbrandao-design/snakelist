@@ -114,6 +114,8 @@
   #fs-btn .fs-out { display: none; }
   #fs-btn.on .fs-in { display: none; }
   #fs-btn.on .fs-out { display: block; }
+  /* the whole page in full screen: a little empty space at the very top */
+  html.sl-fs body { padding-top: 16px; }
   [data-sl-theme="dark"] .ico-moon { display: none; }
   [data-sl-theme="dark"] .ico-sun { display: block; }
   .hdr-actions { display: flex; align-items: center; gap: 8px; }
@@ -2570,6 +2572,7 @@
     var on = !!cur();
     b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on));
     b.setAttribute("aria-label", on ? "Leave full screen" : "Show SnakeList full screen");
+    de.classList.toggle("sl-fs", cur() === de); // (not the map's or a photo's own full screen)
   }
   b.addEventListener("click", function () {
     try {
