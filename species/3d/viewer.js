@@ -307,7 +307,7 @@ export function autoProfile(p) {
   // throat or neck [[colour, x0, x1, aMin], ...]; lb: dark bars between the lip scales [colour]
   { const hd = Object.assign({}, (PLANS[a.p] || PLANS.colubrid).head, a.h || {}), eX = hd.eyeX, eA = hd.eyeA / 180;
     if (a.es) { pat.push({ type: 'line', p0: [eX + 0.04, eA + 0.02], p1: [a.es[3] || 1.05, 0.6], wid: a.es[1] || 0.05, color: a.es[0], mirror: true, aa: 0.35, warp: 0.2 }); if (a.es[2]) pat.push({ type: 'line', p0: [0.06, eA + 0.04], p1: [eX - 0.03, eA], wid: (a.es[1] || 0.05) * 0.8, color: a.es[0], mirror: true, aa: 0.35, warp: 0.2 }); }
-    if (a.sp) pat.push({ type: 'poly', mirror: true, warp: 0.3, color: a.sp[0], pts: [[eX - 0.02, 0], [eX + 0.15, 0.09], [0.85, 0.15], [1.25, 0.13], [a.sp[1] || 2.1, 0.11], [a.sp[1] || 2.1, 0.04], [1.25, 0.05], [0.9, 0.06], [eX + 0.15, 0.035], [eX + 0.08, 0]] });
+    if (Array.isArray(a.sp)) pat.push({ type: 'poly', mirror: true, warp: 0.3, color: a.sp[0], pts: [[eX - 0.02, 0], [eX + 0.15, 0.09], [0.85, 0.15], [1.25, 0.13], [a.sp[1] || 2.1, 0.11], [a.sp[1] || 2.1, 0.04], [1.25, 0.05], [0.9, 0.06], [eX + 0.15, 0.035], [eX + 0.08, 0]] });
     if (a.ub) pat.push({ type: 'poly', mirror: true, warp: 0.15, color: a.ub[0], pts: [[eX - 0.08, eA + 0.06], [eX + 0.08, eA + 0.06], [eX + (a.ub[1] || 0.12), 0.6], [eX - 0.06, 0.6]] });
     if (a.tb) for (const b of a.tb) pat.push({ type: 'hband', x0: b[1], x1: b[2], aMin: b[3] != null ? b[3] : 0.5, belly: true, color: b[0], xMax: b[2] + 0.5, warp: 0.25, alpha: b[4] || 1 });
   }
@@ -330,7 +330,7 @@ export function autoProfile(p) {
   if (a.sx) o.scales = Object.assign(o.scales || {}, a.sx);
   if (a.bx) o.body = Object.assign(o.body || {}, a.bx);
   if (a.ps) o.pose = a.ps;
-  if (a.sp) Object.assign(o.scene, a.sp);
+  if (a.sp && !Array.isArray(a.sp)) Object.assign(o.scene, a.sp); // (v5.73: sp is the scene's extras when an object, a crown spearhead when a list - the smooth green snake's grass colours drew a garbage-coloured spearhead down its neck)
   if (a.lat) colors.lateral = a.lat;
   if (a.tl) o.tail = a.tl;
   if (a.mx) o.max = a.mx; // v5.58: the longest recorded (said under the model, not shown)
@@ -1152,7 +1152,7 @@ function headData(P, F, quality) {
   const lipC = H.lipColor ? hex(H.lipColor) : mixc(lat, bel, bars ? 0.62 : triL ? 0.4 : 0.6), barC = H.barColor ? hex(H.barColor) : mixc(dor, [8, 8, 8], 0.45);
   const barSegs = []; // [x at the lip, a at the lip, a at the top, half-width, x at the top]
   if (bars) for (const k of ['lab', 'ilab']) { const row = seeds.filter((q) => q.k === k && q.a > 0).sort((p, q) => p.x - q.x);
-    for (let i = 0; i + 1 < row.length; i++) { const p = row[i], q = row[i + 1], xm = (p.x + q.x) / 2, up = k === 'lab', aTop = up ? Math.max(mA - 0.12, Math.min(p.a - p.ra * 0.9, q.a - q.ra * 0.9)) : Math.max(p.a + p.ra * 0.8, q.a + q.ra * 0.8); barSegs.push([xm, mA, aTop, Hl * 0.009, xm + (up ? 0.25 : 0.15) * (q.x - p.x) * 0.3]); } } // (v5.73: thin - a dark suture, not a black bar)
+    for (let i = 0; i + 1 < row.length; i++) { const p = row[i], q = row[i + 1], xm = (p.x + q.x) / 2, up = k === 'lab', aTop = up ? Math.max(mA - 0.12, Math.min(p.a - p.ra * 0.9, q.a - q.ra * 0.9)) : mA + (Math.max(p.a + p.ra * 0.8, q.a + q.ra * 0.8) - mA) * 0.5; barSegs.push([xm, mA, aTop, Hl * (up ? 0.009 : 0.007), xm + (up ? 0.25 : 0.15) * (q.x - p.x) * 0.3, up ? 1 : 0.55]); } } // (v5.73: thin - a dark suture, not a black bar)
   const nData = new Uint8Array(n * 4), cData = new Uint8Array(n * 4);
   for (let r = 0; r < Hh; r++) {
     const x = ((r + 0.5) / Hh) * Xh, dY = (2 / Wh) * hcR[r], rp = Math.min(Hh - 1, r + 1), rm = Math.max(0, r - 1);
@@ -1167,10 +1167,12 @@ function headData(P, F, quality) {
       // the colour layer
       let col = null, al = 0;
       const lab = s.k === 'lab' || s.k === 'ilab' || (s.k === 'rost' && Math.abs(a) > mA - 0.16) || s.k === 'ment';
-      if (lipK && lab) { col = lipC; al = lipK * (1 - sstep(0.075, 0.13, Math.abs(Math.abs(a) - mA)) * (s.k === 'rost' ? 0 : 0.85)); } // (pale along the lips, fading out higher up the lip scales)
+      // (pale along the lips, fading out higher up the lip scales; v5.73: a soft wash from the mouth line, not filling each
+      // lip scale to its top edge - a row of pale blocks with hard tops read as bared teeth)
+      if (lipK && (lab || (x < J * Hl * 1.02 && Math.abs(Math.abs(a) - mA) < 0.1))) { const dm = Math.abs(Math.abs(a) - mA); col = lipC; al = lipK * (s.k === 'rost' && Math.abs(a) > mA - 0.16 ? 1 - sstep(0.06, 0.16, dm) * 0.6 : 1 - sstep(0.035, Math.abs(a) > mA ? 0.08 : 0.13, dm)) * (1 - sstep(J * 0.9, J * 1.02, x / Hl)); }
       if (bars && x < J * Hl * 1.05) { // dark bars along the sutures between lip scales, widest at the lip
-        let bd = 1e9, aa = Math.abs(a); for (const b of barSegs) { if (Math.abs(x - b[0]) > b[3] * 3) continue; const t = clamp((aa - b[1]) / (b[2] - b[1]), 0, 1), w = lerp(b[3], b[3] * 0.45, t), e = Math.hypot(x - lerp(b[0], b[4], t), (aa - lerp(b[1], b[2], t)) * hcR[r]) / w; if (e < bd) bd = e; }
-        if (bd < 1.4) { const w2 = 0.6 * (1 - sstep(0.6, 1.3, bd)); col = col ? mixc(col, barC, w2 / Math.max(w2, al || w2)) : barC; al = Math.max(al, w2); }
+        let bd = 1e9, bk = 1, aa = Math.abs(a); for (const b of barSegs) { if (Math.abs(x - b[0]) > b[3] * 3) continue; const t = clamp((aa - b[1]) / (b[2] - b[1]), 0, 1), w = lerp(b[3], b[3] * 0.45, t), e = Math.hypot(x - lerp(b[0], b[4], t), (aa - lerp(b[1], b[2], t)) * hcR[r]) / w; if (e < bd) { bd = e; bk = b[5]; } }
+        if (bd < 1.4) { const w2 = 0.6 * bk * (1 - sstep(0.6, 1.3, bd)); col = col ? mixc(col, barC, w2 / Math.max(w2, al || w2)) : barC; al = Math.max(al, w2); } // (v5.73: bk - fainter and shorter on the lower lip; seen from below they read as teeth)
       }
       if (H.napeSpots) { const d = Math.hypot((x - Hl * 0.86) / (Hl * 0.035), (Math.abs(a) - 0.045) * hcR[r] / (Hl * 0.028)); if (d < 1.2) { col = lipC; al = 0.95 * (1 - sstep(0.7, 1.1, d)); } }
       if (hole > 0.01) { const hc2 = [18, 12, 10]; col = col ? mixc(col, hc2, hole) : hc2; al = Math.max(al, hole); }
@@ -1245,8 +1247,11 @@ function patternData(P, F, body, lat, quality, seed) {
       let col = mixc(dors, latc, sstep(0.18, 0.62, aa));
       // v5.58: under the head the pale belly colour reaches up to the lower lip (the chin and throat), as in most snakes with a
       // paler belly; it eases back down to the belly's own edge along the neck
-      const bA = chinUp ? lerp(0.6, bellyA, sstep(Hl * 0.85, Hl * 1.7, x)) : bellyA;
-      col = mixc(col, bel, sstep(bA - bs, bA + bs, aa + warp * (C.bellyWarp || 0.04)));
+      // (v5.73: to the lower lip only, with a soft edge - reaching higher, it drew a hard-edged pale band over the upper lip
+      // scales, which read as a row of teeth; the pale upper lip is the head texture's own soft wash)
+      // (and a belly colour that reaches high on the flanks stays below the mouth line on the head)
+      const hk = 1 - sstep(Hl * 0.85, Hl * 1.7, x), bA = Math.max(chinUp ? lerp(0.66, bellyA, 1 - hk) : bellyA, lerp(bellyA, 0.64, hk)), bs2 = bs + 0.03 * hk;
+      col = mixc(col, bel, sstep(bA - bs2, bA + bs2, aa + warp * (C.bellyWarp || 0.04)));
       const m = 1 + mott * (fbm(nx * 3, ny * 3, gq * 5.5, seed + 3, 3) - 0.5) * 2.4;
       col = [col[0] * m, col[1] * m, col[2] * m];
       for (const Ly of layers) {

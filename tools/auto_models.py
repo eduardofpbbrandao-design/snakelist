@@ -627,7 +627,7 @@ GENUS_EYE = {"ahaetulla": 0.19, "thelotornis": 0.18, "oxybelis": 0.16, "langaha"
              "eunectes": 0.07, "corallus": 0.1, "bothriechis": 0.11, "echis": 0.11, "lachesis": 0.07, "dasypeltis": 0.13, "myron": 0.1, "erpeton": 0.08,
              "thamnophis": 0.19, "nerodia": 0.16, "regina": 0.18, "storeria": 0.19, "pantherophis": 0.19, "elaphe": 0.19, "zamenis": 0.19, "lampropeltis": 0.17, "pituophis": 0.17,
              "crotalus": 0.1, "sistrurus": 0.11, "vipera": 0.12, "atheris": 0.12, "trimeresurus": 0.11}
-SPECIES_EYE = {"morelia-viridis": 0.1, "morelia-azurea": 0.1, "thamnophis-saurita": 0.23, "opheodrys-aestivus": 0.23, "pantherophis-guttatus": 0.17}
+SPECIES_EYE = {"morelia-viridis": 0.1, "morelia-azurea": 0.1, "thamnophis-saurita": 0.21, "opheodrys-aestivus": 0.22, "pantherophis-guttatus": 0.17}
 # Fang length in mm (documented adult sizes, Z9), and rear fangs (opisthoglyphous snakes)
 GENUS_FANG = {"crotalus": 9, "sistrurus": 4, "agkistrodon": 7, "bitis": 15, "daboia": 16, "echis": 4.5, "vipera": 5, "cerastes": 5, "bothriechis": 5, "bothrops": 20,
               "lachesis": 35, "trimeresurus": 6, "tropidolaemus": 7, "calloselasma": 8, "atheris": 5, "naja": 6.5, "ophiophagus": 11, "hemachatus": 4,
