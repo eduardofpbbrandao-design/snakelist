@@ -1527,7 +1527,7 @@ export function create(V) {
     },
     dispose() { alive = false; fx.reset(); if (hdb) hdb.remove(); closeSide(); },
     // for tests: freeze a show at s seconds
-    test: { freeze(s) { if (show) show.freeze = s; V.kick(); }, get show() { return show && { name: show.name, time: show.time, dur: show.dur, diet: show.diet }; }, get slither() { return !!slither; }, get anat() { return anat; }, get rig() { return rig; }, get lastTap() { return lastTap; }, dietOf: () => dietOf(P, V.opts.id), side: (k) => toggleSide(k) },
+    test: { get P() { return P; }, freeze(s) { if (show) show.freeze = s; V.kick(); }, get show() { return show && { name: show.name, time: show.time, dur: show.dur, diet: show.diet }; }, get slither() { return !!slither; }, get anat() { return anat; }, get rig() { return rig; }, get lastTap() { return lastTap; }, dietOf: () => dietOf(P, V.opts.id), side: (k) => toggleSide(k) },
   };
   return fx;
 }
