@@ -13732,7 +13732,10 @@ window.SL_GEO_READY = new Promise(function (res) {
     // Nothing is tinted unless you are looking for something: the map stays the plain Earth,
     // and a search picks its countries out of it.
     HI = null;
-    if (q || MFSET) {
+    // Sightings on and a snake's name searched: the search only picks which sightings are shown -
+    // its range countries are not lit up (where it lives and where it was seen stay apart)
+    var sgOnly = mapSearchKind === "text" && !!(window.SL_SG_ON && window.SL_SG_ON());
+    if ((q || MFSET) && !sgOnly) {
       HI = {};
       Object.keys(tally).forEach(function (n) { if (ISO[n] && (!MFSET || tally[n])) HI[ISO[n]] = true; });
     }
@@ -13816,7 +13819,7 @@ window.SL_GEO_READY = new Promise(function (res) {
         cityDot: true, state: cityMatch.state, fromSearch: true,
       });
     }
-    if (q && !cityMatch && !continentMatch) {
+    if (q && !cityMatch && !continentMatch && !sgOnly) {
       var placed = {};
       matched.forEach(function (sp) {
         introducedOf(sp.id).forEach(function (p) {
@@ -13849,7 +13852,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     document.getElementById("see-search-cities").hidden = !q || !names.length || !!cityMatch || !!pendingCitySpecies;
     searchBtns = { all: !all.hidden, states: !document.getElementById("see-search-states").hidden };
 
-    if (q && !cityMatch) faceResults();
+    if (q && !cityMatch && !(sgOnly && fz > 1.5)) faceResults(); // (zoomed in with Sightings on: the map stays put)
     // jump straight there and zoom in close, rather than leaving the user to find a single
     // small pin on the world map themselves after typing an exact city name
     if (cityMatch) {
@@ -14112,6 +14115,8 @@ window.SL_GEO_READY = new Promise(function (res) {
       var hA = 90 - (0 - vb0[1]) / vb0[3] * 180, hB = 90 - (h - vb0[1]) / vb0[3] * 180;
       shapePath(toFlat, function (r) { return r.e >= vA && r.w <= vB && r.no >= hB && r.s <= hA; }, 1);
       ctx.fillStyle = cs.getPropertyValue("--map-off").trim() || "#c9ccbb"; FILL();
+      // Sightings on and zoomed in to towns and streets: real street-map tiles (Map Layers script)
+      if (window.SL_MAP_STREET_TILES) window.SL_MAP_STREET_TILES(ctx, b, w, h);
     } else {
       ctx.imageSmoothingEnabled = true;
       ctx.drawImage(BASE, 0, 0, TW, TH, b[0], b[1], b[2], b[3]);
@@ -15382,6 +15387,31 @@ window.SL_GEO_READY = new Promise(function (res) {
   window.SL_MAP_ZOOM_AT = function (k, x, y) { zoomAt(k, x, y); };
   // can the map zoom in any closer? (a cluster that can't split any more lists its records)
   window.SL_MAP_CAN_ZOOM = function () { return fz < zoomCap() * 0.999; };
+  // the exact camera (for the Sightings view's Back button): get it, and put it back - eased,
+  // with the zoom eased on a log scale so a street-level-to-country jump doesn't swoop sideways
+  window.SL_MAP_CAM = {
+    get: function () { return { fx: fx, fy: fy, fz: fz }; },
+    set: function (c, ms) {
+      if (!c) return;
+      var my = ++flyToken;
+      if (!ms) { fz = c.fz; fx = c.fx; fy = c.fy; clampPan(); invalidate(); return; }
+      var a = { fx: fx, fy: fy, fz: fz }, t0 = performance.now(), lz0 = Math.log(a.fz), lz1 = Math.log(c.fz);
+      (function step(t) {
+        if (my !== flyToken) return;
+        var p = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - p, 3);
+        fz = Math.exp(lz0 + (lz1 - lz0) * e); fx = a.fx + (c.fx - a.fx) * e; fy = a.fy + (c.fy - a.fy) * e;
+        invalidate();
+        if (p < 1) requestAnimationFrame(step);
+      })(t0);
+    },
+    // centre on a lon/lat at zoom z (eased), for "Show on map"
+    centre: function (lon, lat, z, ms) {
+      var cz = Math.min(zoomCap(), Math.max(1, z));
+      this.set({ fz: cz, fx: -((lon + 180) / 360 - 0.5), fy: (90 - lat) / 180 * -1 + 0.5 }, ms);
+    }
+  };
+  // run the map's search again (Sightings on/off changes what a species search shows)
+  window.SL_MAP_REPAINT = function () { if (ready && hsearch) paint(); };
   window.SL_MAP_RANK = rankBlock; // (for the map tests: Most / Fewest on a given list)
   // a species' own SnakeList page, by its card id (for the Sightings panel's link)
   window.SL_SP_PAGE_URL = function (id) { var c = spCardEl(id); return c ? spPageUrl(c) : ""; };
@@ -15424,6 +15454,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     // (and on Satellite: real imagery tiles hold detail much further in than the plain map)
     if (statesMode || islandsOn || multiOn() || window.SL_MAP_SAT || (window.SL_SG_ON && window.SL_SG_ON()) || PINS.some(function (p) { return p.cityPick || p.cityDot; })) cap = CLOSEZOOM;
     if (selected && POLY) cap = Math.max(cap, tinyZoom(selected));
+    // Sightings on: right down to street level - about tile zoom 19 (the real-map tiles are
+    // overzoomed past what they hold), so a single observation's spot can be seen up close
+    if (window.SL_SG_ON && window.SL_SG_ON()) { var bsc = baseSize(cv.clientWidth || sizeW || 900, cv.clientHeight || sizeH || 450); cap = Math.max(cap, 256 * Math.pow(2, 19) / Math.max(200, bsc[0])); }
     // a small island on screen (v4.50): let the map go in close enough to see it properly
     if (cap < CLOSEZOOM && POLY && fz > MAXZOOM * 0.5) {
       var v = viewLL();
@@ -19366,8 +19399,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   var TILES = {}, tileCount = 0, tileUse = 0, tileFails = 0, tileFailAt = 0, tileFlight = 0;
   var TILE_CAP = 170, TILE_KEEP = 125, TILE_FLIGHT = 10, TILE_VIEW = 96;
   function mercY(lat) { var s = Math.sin(lat * Math.PI / 180); return 0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI); }
-  function satTile(z, x, y, fetchIt) {
-    var k = z + "/" + x + "/" + y, t = TILES[k];
+  function satTile(z, x, y, fetchIt, tpl) {
+    var k = (tpl ? tpl.slice(8, 40) + "|" : "") + z + "/" + x + "/" + y, t = TILES[k];
     if (t) { t.use = ++tileUse; return t; }
     if (!fetchIt) return null;
     // tiles keep failing (offline, or a copy that can't reach outside sites): rest a minute
@@ -19380,9 +19413,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     t.img.onload = function () { tileFlight--; t.ok = true; tileFails = 0; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); };
     t.img.onerror = function () { tileFlight--; t.bad = true; tileFails++; tileFailAt = Date.now();
       // the satellite pictures can't be reached (offline, or blocked): say so once, on the map
-      if (tileFails === 8 && typeof sgNoteSet === "function") sgNoteSet("Satellite pictures can't load right now (no connection?) - the SnakeList map underneath still works. Switch to SnakeList map in the map styles.");
+      if (tileFails === 8 && !tpl && typeof sgNoteSet === "function") sgNoteSet("Satellite pictures can't load right now (no connection?) - the SnakeList map underneath still works. Switch to SnakeList map in the map styles.");
     };
-    t.img.src = SAT_URL.replace("{z}", z).replace("{y}", y).replace("{x}", x);
+    t.img.src = (tpl || SAT_URL).replace("{z}", z).replace("{y}", y).replace("{x}", x);
     if (tileCount > TILE_CAP) { // keep only the most recently used ones
       var keys = Object.keys(TILES).sort(function (a, b2) { return TILES[a].use - TILES[b2].use; });
       keys.slice(0, tileCount - TILE_KEEP).forEach(function (kk) {
@@ -19463,6 +19496,55 @@ window.SL_GEO_READY = new Promise(function (res) {
       ctx.font = "9.5px Inter, sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
       ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.shadowColor = "rgba(0,0,0,0.7)"; ctx.shadowBlur = 2;
       ctx.fillText(SAT_ATTR, w - 6, h - 4);
+      ctx.restore();
+    }
+  };
+  // ---- Street map, with Sightings on: the plain SnakeList map has countries and coastlines but
+  // no towns or roads, so once Sightings is on and the map is zoomed in to town level, real
+  // street-map tiles (CARTO's OpenStreetMap maps, light or dark with the theme) fade in over the
+  // land, drawn the same way as the satellite tiles above (Web Mercator strips on this lon/lat map).
+  // They hold detail to zoom 18 and are stretched past that, right down to a single garden.
+  var STREET = { light: "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png", dark: "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png" };
+  var STREET_MAX = 18, STREET_ATTR = "© OpenStreetMap contributors © CARTO";
+  window.SL_MAP_STREET_TILES = function (ctx, b, w, h) {
+    if (!(window.SL_SG_ON && window.SL_SG_ON()) || st.style !== "classic" || (window.claude && window.claude.use)) { window.SL_STREET_TILE_Z = 0; return; }
+    var dpr = ctx.getTransform ? ctx.getTransform().a : Math.min(2, window.devicePixelRatio || 1);
+    var lz = Math.log(b[2] * dpr / 256) / Math.LN2; // the tile zoom this view would need
+    var alpha = Math.max(0, Math.min(1, (lz - 7.2) / 1.6)); // fades in from about a region to a town
+    if (alpha <= 0) { window.SL_STREET_TILE_Z = 0; return; }
+    var dark = document.documentElement.getAttribute("data-sl-theme") === "dark", tpl = dark ? STREET.dark : STREET.light;
+    var z = Math.min(STREET_MAX, Math.max(1, Math.ceil(lz - 0.1))), n = 1 << z, zFloor = Math.max(3, z - 5);
+    var lonA = Math.max(-180, -b[0] / b[2] * 360 - 180), lonB = Math.min(180, (w - b[0]) / b[2] * 360 - 180);
+    var latA = Math.min(85.05, 90 + b[1] / b[3] * 180), latB = Math.max(-85.05, 90 - (h - b[1]) / b[3] * 180);
+    if (lonA >= lonB || latA <= latB) return;
+    var x0, x1, y0, y1;
+    for (;;) {
+      x0 = Math.max(0, Math.floor((lonA + 180) / 360 * n)); x1 = Math.min(n - 1, Math.floor((lonB + 180) / 360 * n));
+      y0 = Math.max(0, Math.floor(mercY(latA) * n)); y1 = Math.min(n - 1, Math.floor(mercY(latB) * n));
+      if ((x1 - x0 + 1) * (y1 - y0 + 1) <= TILE_VIEW || z <= zFloor) break;
+      z--; n = 1 << z;
+    }
+    window.SL_STREET_TILE_Z = z;
+    var gap = 0.6 / dpr, drawn = 0, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, list = [];
+    for (var ty = y0; ty <= y1; ty++) for (var tx = x0; tx <= x1; tx++) list.push([tx, ty]);
+    list.sort(function (p, q) { return Math.abs(p[0] - cx) + Math.abs(p[1] - cy) - Math.abs(q[0] - cx) - Math.abs(q[1] - cy); });
+    ctx.save();
+    ctx.globalAlpha = alpha; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+    list.forEach(function (p) {
+      var t = satTile(z, p[0], p[1], true, tpl);
+      if (t && t.ok) { drawSatTile(ctx, b, t.img, z, p[0], p[1], z, gap); drawn++; return; }
+      for (var za = z - 1; za >= zFloor; za--) { // a parent tile, scaled up, until this one arrives
+        var d = z - za, pt = satTile(za, p[0] >> d, p[1] >> d, false, tpl);
+        if (pt && pt.ok) { drawSatTile(ctx, b, pt.img, z, p[0], p[1], za, gap); drawn++; return; }
+      }
+    });
+    if (drawn && dark) { ctx.globalAlpha = alpha * 0.22; ctx.fillStyle = "#0f3a24"; ctx.fillRect(b[0], b[1], b[2], b[3]); } // a touch of the app's night green
+    ctx.restore();
+    if (drawn) {
+      ctx.save();
+      ctx.font = "9.5px Inter, sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+      ctx.fillStyle = dark ? "rgba(255,255,255,0.8)" : "rgba(30,40,30,0.8)"; ctx.shadowColor = dark ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.8)"; ctx.shadowBlur = 2;
+      ctx.fillText(STREET_ATTR, w - 62, h - 6); // (left of the 3D button)
       ctx.restore();
     }
   };
@@ -20068,9 +20150,12 @@ window.SL_GEO_READY = new Promise(function (res) {
   // details - never a generic species photo, never a guess.
   var SG_RANGES = { any: { label: "Any date" }, y10: { label: "Last 10 years", days: 3653 }, y1: { label: "Last 12 months", days: 365 }, m1: { label: "Last 30 days", days: 30 } };
   var SG_GRADES = { verifiable: { label: "Research grade and Needs ID", p: "&verifiable=true" }, research: { label: "Research grade only", p: "&quality_grade=research" } };
-  var SG_PER = 200, SG_MAXPAGES = 10, SG_AUTO = 3; // 2,000 at most at once - say so when that's the limit
+  // v5.68: every observation is its own small green dot at every zoom (no clusters). What's loaded
+  // stays on the map as you move (up to SG_KEEP), so panning never makes dots vanish and come
+  // back; a view already loaded in full isn't asked for again.
+  var SG_PER = 200, SG_MAXPAGES = 10, SG_AUTO = 5, SG_KEEP = 8000; // 2,000 at most per view - say so when that's the limit
   var SG = { on: false, list: [], ids: {}, want: "", t: null, token: 0, ptok: 0, layer: null, total: 0, page: 0, fetched: 0, base: "", busy: false, failed: false,
-    range: "any", grade: "verifiable", cache: {}, otok: 0, ctl: null, openM: null, clusters: [] };
+    range: "any", grade: "verifiable", cache: {}, otok: 0, ctl: null, openM: null, clusters: [], done: [], rkey: "", hist: [], view: null };
   try { var sgo = JSON.parse(localStorage.getItem("sl-sg-opts") || "null"); if (sgo) { if (SG_RANGES[sgo.range]) SG.range = sgo.range; if (SG_GRADES[sgo.grade]) SG.grade = sgo.grade; } } catch (e) {}
   var sgBtn = document.getElementById("sg-toggle"), sgPop = document.getElementById("sg-pop"), sgNote = document.getElementById("sg-note");
   var sgWhat = document.createElement("span"), sgBar = document.getElementById("sg-bar"), sgCount = document.getElementById("sg-count");
@@ -20143,6 +20228,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       return r.json();
     }, function (e) { clearTimeout(timer); var er = new Error(timedOut ? "timeout" : "network"); er.timeout = timedOut; er.aborted = !timedOut && !!(c && c.signal.aborted); throw er; });
   }
+  function sgInside(v, d) { return d.w <= v.w + 1e-6 && d.e >= v.e - 1e-6 && d.s <= v.s + 1e-6 && d.n >= v.n - 1e-6; }
   function sgLoad(force) {
     if (!SG.on) return;
     var my = ++SG.token;
@@ -20152,32 +20238,52 @@ window.SL_GEO_READY = new Promise(function (res) {
     }
     sgFilter().then(function (F) {
       if (my !== SG.token || !SG.on) return;
-      if (F.key !== SG.fkey) { SG.fkey = F.key; SG.list = []; SG.ids = {}; sgClose(); sgRender(); force = true; } // a different snake: its old panel goes too
+      // different snakes, dates or quality: start again (a new snake's dots only, never the old ones)
+      var rkey = F.key + "|" + SG.range + "|" + SG.grade;
+      if (rkey !== SG.rkey) { SG.rkey = rkey; SG.fkey = F.key; SG.list = []; SG.ids = {}; SG.done = []; sgCloseView(true); SG.hist = []; sgUndoBtn(); sgRender(); force = true; }
       SG.only = F.only || null;
       sgWhat.textContent = " · " + (F.label || "all snakes"); // always says which snakes the dots are
       if (!F.param) { // nothing to ask for: no dots at all (never the old ones, never every snake)
-        SG.ptok++; SG.want = ""; SG.list = []; SG.ids = {}; SG.total = 0; SG.fetched = 0; SG.page = 0; SG.busy = false; sgRender(); sgStatus();
+        SG.ptok++; SG.want = ""; SG.list = []; SG.ids = {}; SG.done = []; SG.total = 0; SG.fetched = 0; SG.page = 0; SG.busy = false; sgRender(); sgStatus();
         sgNoteSet(F.zero || "No sightings to show."); return;
       }
-      var v = sgView(), key = [v.w, v.e, v.s, v.n].map(function (x) { return x.toFixed(1); }).join(",") + F.key + SG.range + SG.grade;
+      var v = sgView(), key = [v.w, v.e, v.s, v.n].map(function (x) { return x.toFixed(4); }).join(",") + rkey;
       if (!force && key === SG.want) return;
+      // this whole view was already loaded in full (every observation in it): nothing to ask for
+      if (!force && SG.done.some(function (d) { return sgInside(v, d); })) { SG.want = key; sgNoteSet(""); return; }
       SG.want = key;
-      sgNoteSet(SG.list.length ? "" : "Loading sightings…"); // the old dots stay until the new ones arrive
+      sgNoteSet(SG.list.length ? "" : "Loading sightings…"); // the dots already loaded stay where they are
+      SG.view = v;
       SG.base = INAT + "observations?per_page=" + SG_PER + "&order_by=observed_on&order=desc" + SG_GRADES[SG.grade].p + F.param + sgDates() +
-        "&swlat=" + v.s.toFixed(3) + "&swlng=" + v.w.toFixed(3) + "&nelat=" + v.n.toFixed(3) + "&nelng=" + v.e.toFixed(3);
+        "&swlat=" + v.s.toFixed(4) + "&swlng=" + v.w.toFixed(4) + "&nelat=" + v.n.toFixed(4) + "&nelng=" + v.e.toFixed(4);
       SG.page = 0;
       sgFetch(SG.base, ++SG.ptok, 1);
     });
   }
-  // one page of observations. Page 1 replaces what's on the map (it's a new view or new snakes);
-  // later pages ("Load more") add to it. Every observation id is kept once.
+  // just what the dot and its view need from an observation (the list's own answer has it all,
+  // so a tapped dot opens at once - its full record is asked for alongside, to bring it up to date)
+  function sgTrim(o) {
+    var t = o.taxon || null, u = o.user || null;
+    return { id: o.id, uri: o.uri, quality_grade: o.quality_grade, observed_on: o.observed_on, observed_on_details: o.observed_on_details ? { date: o.observed_on_details.date } : null,
+      time_observed_at: o.time_observed_at, observed_time_zone: o.observed_time_zone, created_at: o.created_at,
+      user: u ? { id: u.id, login: u.login, name: u.name } : null, place_guess: o.place_guess, positional_accuracy: o.positional_accuracy, public_positional_accuracy: o.public_positional_accuracy,
+      obscured: o.obscured, geoprivacy: o.geoprivacy, taxon_geoprivacy: o.taxon_geoprivacy, geojson: o.geojson, species_guess: o.species_guess,
+      taxon: t ? { id: t.id, name: t.name, rank: t.rank, preferred_common_name: t.preferred_common_name } : null,
+      description: o.description ? String(o.description).slice(0, 4000) : "",
+      annotations: (o.annotations || []).map(function (a) { return { controlled_attribute_id: a.controlled_attribute_id, controlled_value_id: a.controlled_value_id }; }),
+      photos: (o.photos || []).filter(function (p) { return p && p.url; }).slice(0, 20).map(function (p) { return { url: p.url, attribution: p.attribution, license_code: p.license_code }; }),
+      identifications_count: o.identifications_count, num_identification_agreements: o.num_identification_agreements, num_identification_disagreements: o.num_identification_disagreements,
+      comments_count: o.comments_count, faves_count: o.faves_count };
+  }
+  // one page of observations for the view. Each observation id is kept once; what was already on
+  // the map stays (a dot never jumps or blinks when the map moves), up to SG_KEEP in all.
   function sgFetch(url, my, page) {
     SG.busy = true; SG.failed = false; sgStatus();
     sgGet(url + "&page=" + page).then(function (d) {
       if (my !== SG.ptok || !SG.on) return;
-      if (page === 1) { SG.list = []; SG.ids = {}; SG.fetched = 0; } // a new view or new snakes: the open panel stays open
+      if (page === 1) SG.fetched = 0;
       SG.page = page; SG.total = +d.total_results || 0; SG.busy = false;
-      var FS = window.SL_MAPF_SCI && window.SL_MAPF_SCI();
+      var FS = window.SL_MAPF_SCI && window.SL_MAPF_SCI(), added = 0;
       (d.results || []).forEach(function (o) {
         if (!o || o.id == null) return;
         SG.fetched++;
@@ -20189,13 +20295,23 @@ window.SL_GEO_READY = new Promise(function (res) {
         if (FS && !FS[sp2]) return;
         if (SG.only && !SG.only[sp2]) return;
         if (SG.fkey && SG.fkey.indexOf("hab:") === 0) { var hs2 = habSet(); if (hs2 && !hs2[sciToId(sp2)]) return; }
-        SG.ids[o.id] = 1;
-        // the marker keeps only what the list needs - its panel loads the observation itself by id
-        SG.list.push({ id: o.id, lon: +c[0], lat: +c[1], sci: t.name || "", common: t.preferred_common_name || "", rank: t.rank || "",
-          date: o.observed_on || (o.observed_on_details && o.observed_on_details.date) || "", fuzzy: !!(o.obscured || (o.geoprivacy && o.geoprivacy !== "open")) });
+        var m = { id: o.id, lon: +c[0], lat: +c[1], sci: t.name || "", common: t.preferred_common_name || "", rank: t.rank || "",
+          date: o.observed_on || (o.observed_on_details && o.observed_on_details.date) || "", fuzzy: !!(o.obscured || (o.geoprivacy && o.geoprivacy !== "open")), o: sgTrim(o) };
+        SG.ids[o.id] = m; SG.list.push(m); added++;
       });
-      if (SG.total > page * SG_PER && page < SG_AUTO && (d.results || []).length >= SG_PER) { SG.busy = true; setTimeout(function () { if (my === SG.ptok && SG.on) sgFetch(url, my, page + 1); }, 250); }
-      sgRender(); sgStatus();
+      // too many kept: the oldest ones outside the view go first
+      if (SG.list.length > SG_KEEP) {
+        var v = sgView(), drop = SG.list.length - SG_KEEP;
+        SG.list = SG.list.filter(function (m) {
+          if (drop > 0 && m !== SG.openM && (m.lon < v.w || m.lon > v.e || m.lat < v.s || m.lat > v.n)) { drop--; delete SG.ids[m.id]; return false; }
+          return true;
+        });
+      }
+      var more = SG.total > page * SG_PER && (d.results || []).length >= SG_PER;
+      if (!more && SG.view) { SG.done.push(SG.view); if (SG.done.length > 40) SG.done.shift(); } // every one in this view is here now
+      if (more && page < SG_AUTO) { SG.busy = true; setTimeout(function () { if (my === SG.ptok && SG.on) sgFetch(url, my, page + 1); }, 250); }
+      if (added || page === 1) { sgSpread(); sgRender(); }
+      sgStatus();
       var FSn = window.SL_MAPF_SCI && window.SL_MAPF_SCI();
       sgNoteSet(SG.list.length || SG.busy ? "" : FSn ? "No sightings of these snakes here. Move or zoom out the map."
         : "No sightings here" + (SG.fkey !== "all" ? " for " + sgWhat.textContent.replace(" · ", "") : "") + ". Move or zoom out the map.");
@@ -20249,7 +20365,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       '<fieldset><legend>Observed</legend>' + Object.keys(SG_RANGES).map(function (k) { return '<label><input type="radio" name="sg-range" value="' + k + '"' + (SG.range === k ? " checked" : "") + "> " + SG_RANGES[k].label + "</label>"; }).join("") + "</fieldset>" +
       '<fieldset><legend>Quality</legend>' + Object.keys(SG_GRADES).map(function (k) { return '<label><input type="radio" name="sg-grade" value="' + k + '"' + (SG.grade === k ? " checked" : "") + "> " + SG_GRADES[k].label + "</label>"; }).join("") + "</fieldset>" +
       '<p class="sg-opts-k"><span class="sg-k-dot" aria-hidden="true"></span>One observation, at its public location</p>' +
-      '<p class="sg-opts-k"><span class="sg-k-cl" aria-hidden="true"></span>A slightly bigger dot: several observations close together at this zoom - tap to zoom in, or to list them</p>' +
+      '<p class="sg-opts-k"><span class="sg-k-cl" aria-hidden="true"></span>Several at exactly the same spot are fanned out round it, so each can be tapped</p>' +
       '<p class="sg-opts-small">From iNaturalist, loaded for the part of the map in view, newest first, ' + SG_PER + " at a time (up to " + (SG_PER * SG_MAXPAGES).toLocaleString() + "). Each observation belongs to the person who made it. Old records are as they were reported - not live.</p>";
   }
   function sgOptsOpen(on) {
@@ -20272,117 +20388,186 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   window.SL_SG_COUNT = function () { return SG.list.length; };
   window.SL_SG_ON = function () { return !!SG.on && onCanvas(); };
-  window.SL_SG_DEBUG = function () { return { what: sgWhat.textContent, n: SG.list.length, ids: SG.list.map(function (m) { return m.id; }), total: SG.total, page: SG.page, fetched: SG.fetched, open: SG.openM ? SG.openM.id : null, clusters: (SG.clusters || []).map(function (g) { return { n: g.list.length, x: g.cx, y: g.cy, r: g.r }; }), dots: SG.list.filter(function (m) { return m.sx != null && !m.cl; }).map(function (m) { return { id: m.id, x: m.sx, y: m.sy }; }) }; };
+  window.SL_SG_DEBUG = function () { return { what: sgWhat.textContent, n: SG.list.length, ids: SG.list.map(function (m) { return m.id; }), total: SG.total, page: SG.page, fetched: SG.fetched, open: SG.openM ? SG.openM.id : null, view: !sgPop.hidden, hist: SG.hist.length, clusters: [], dots: SG.lastB ? SG.list.filter(function (m) { return sgPos(m, SG.lastB, SG.lastB[4], SG.lastB[5]) != null; }).map(function (m) { return { id: m.id, x: m.sx, y: m.sy }; }) : [] }; };
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  // ---- the dots ----
+  // SnakeList green (the same as the Sightings button when it's on), with a thin dark edge so a
+  // dot reads on the light map, the dark map, satellite and street tiles alike
+  var SG_GREEN = "#58b351", SG_EDGE = "rgba(12,46,18,0.92)";
+  // observations at exactly the same spot are fanned out round it by a few pixels (a short line
+  // back to the true spot), so each one can be tapped on its own - no "which one?" list
+  function sgSpread() {
+    var at = {}; SG.ver = (SG.ver || 0) + 1; // (the dots' layer is drawn again)
+    SG.list.forEach(function (m) { m.ox = 0; m.oy = 0; var k = m.lat.toFixed(5) + "," + m.lon.toFixed(5); (at[k] = at[k] || []).push(m); });
+    Object.keys(at).forEach(function (k) {
+      var g = at[k], n = g.length; if (n < 2) return;
+      g.sort(function (a, b) { return a.id - b.id; });
+      g.forEach(function (m, i) {
+        var r, a;
+        if (n <= 8) { r = Math.max(6.5, 6.4 / Math.sin(Math.PI / n)); a = -Math.PI / 2 + i * 2 * Math.PI / n; }
+        else { r = 6.2 * Math.sqrt(i + 0.8); a = i * 2.39996; } // a sunflower for big piles
+        m.ox = r * Math.cos(a); m.oy = r * Math.sin(a);
+      });
+    });
+  }
   function sgRender() {
     if (!onCanvas() && map) {
       if (!SG.layer) SG.layer = L.layerGroup().addTo(map);
       SG.layer.clearLayers();
       SG.list.forEach(function (m) {
-        L.circleMarker([m.lat, m.lon], { radius: 5.5, color: "#fff", weight: 1.8, fillColor: SG_TEAL, fillOpacity: 1, pane: "markerPane" })
-          .on("click", function (ev) { L.DomEvent.stopPropagation(ev); var p = map.latLngToContainerPoint([m.lat, m.lon]); sgOpen(m, p.x, p.y); })
+        L.circleMarker([m.lat, m.lon], { radius: 4.5, color: "#1c4a22", weight: 1.2, fillColor: SG_GREEN, fillOpacity: 1, pane: "markerPane" })
+          .on("click", function (ev) { L.DomEvent.stopPropagation(ev); sgOpen(m); })
           .addTo(SG.layer);
       });
     } else if (SG.layer && map) { SG.layer.clearLayers(); }
     window.SL_MAP_REDRAW && window.SL_MAP_REDRAW();
   }
-  // drawn by the SnakeList map on top of everything else, each frame
-  var SG_TEAL = "#3d7c75", SG_TEAL_DARK = "#2c5d57";
+  // where each dot is on screen for the map's box b (its fan-out offset included), or null off screen
+  function sgPos(m, b, w, h) {
+    var x = b[0] + (m.lon + 180) / 360 * b[2] + (m.ox || 0), y = b[1] + (90 - m.lat) / 180 * b[3] + (m.oy || 0);
+    m.sx = x; m.sy = y;
+    if (w != null && (x < -24 || y < -24 || x > w + 24 || y > h + 24)) m.sx = null;
+    return m.sx;
+  }
+  // The dots are drawn once into their own layer (a margin bigger than the map box) whenever the
+  // zoom or the dots change, and each frame of a pan just places that layer - one image, moved
+  // with the map in the same frame, so the dots stay glued to their places and dragging costs
+  // almost nothing however many there are. Zooming redraws it (each dot a little ready-made picture).
+  var sgLay = { cv: null, key: "", b0: 0, b1: 0, pad: 0 }, sgSprites = {};
+  function sgSprite(R, dpr) {
+    var k = R + "|" + dpr; if (sgSprites[k]) return sgSprites[k];
+    var S = Math.ceil((R + 1.5) * dpr) * 2 + 2, c = document.createElement("canvas"); c.width = c.height = S;
+    var g = c.getContext("2d"); g.beginPath(); g.arc(S / 2, S / 2, R * dpr, 0, Math.PI * 2); g.fillStyle = SG_GREEN; g.fill(); g.lineWidth = 1.3 * dpr; g.strokeStyle = SG_EDGE; g.stroke();
+    return (sgSprites[k] = c);
+  }
+  function sgLayerDraw(b, w, h, dpr, R) {
+    var pad = sgLay.pad = Math.round(Math.min(220, Math.max(w, h) * 0.3));
+    var W = Math.round((w + 2 * pad) * dpr), H = Math.round((h + 2 * pad) * dpr);
+    var c = sgLay.cv || (sgLay.cv = document.createElement("canvas"));
+    if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
+    var g = c.getContext("2d"); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, H);
+    sgLay.b0 = b[0]; sgLay.b1 = b[1];
+    var list = SG.list, n = list.length, i, m, x, y, legs = false, sp = sgSprite(R, dpr), half = sp.width / 2;
+    var bx = [b[0] + pad, b[1] + pad, b[2], b[3]], lw = w + 2 * pad, lh = h + 2 * pad;
+    g.beginPath();
+    for (i = 0; i < n; i++) {
+      m = list[i];
+      if (m.ox || m.oy) {
+        x = bx[0] + (m.lon + 180) / 360 * b[2]; y = bx[1] + (90 - m.lat) / 180 * b[3];
+        if (x > -20 && y > -20 && x < lw + 20 && y < lh + 20) { g.moveTo(x * dpr, y * dpr); g.lineTo((x + m.ox) * dpr, (y + m.oy) * dpr); legs = true; }
+      }
+    }
+    if (legs) { g.lineWidth = 1.2 * dpr; g.strokeStyle = "rgba(12,46,18,0.55)"; g.stroke(); }
+    for (i = 0; i < n; i++) {
+      m = list[i];
+      x = bx[0] + (m.lon + 180) / 360 * b[2] + (m.ox || 0); y = bx[1] + (90 - m.lat) / 180 * b[3] + (m.oy || 0);
+      if (x < -12 || y < -12 || x > lw + 12 || y > lh + 12) continue;
+      g.drawImage(sp, Math.round(x * dpr - half), Math.round(y * dpr - half));
+    }
+  }
   window.SL_OVERLAY_DRAW = function (ctx, b, w, h) {
     if (!SG.on || !onCanvas()) return;
-    // a lighter teal on the dark map, so the dots keep their contrast in both themes
-    var dark = document.documentElement.getAttribute("data-sl-theme") === "dark";
-    // the dots are the Sightings button's own green (v4.80), in both themes
-    SG_TEAL = "#3d7c75"; SG_TEAL_DARK = "#2c5d57";
-    var want = Math.round(b[0]) + "," + Math.round(b[1]) + "," + Math.round(b[2]);
+    SG.lastB = [b[0], b[1], b[2], b[3], w, h];
+    // load for the new view once the map has stopped moving (not on every frame of a drag)
+    var want = b[0].toFixed(1) + "," + b[1].toFixed(1) + "," + b[2].toFixed(1);
     if (want !== SG.lastBox) { SG.lastBox = want; clearTimeout(SG.t); SG.t = setTimeout(function () { sgLoad(false); }, 450); }
-    // observations closer than ~26 px on screen are drawn as one numbered circle (a cluster);
-    // one observation alone is a small teal dot - every dot is exactly one observation
+    if (!SG.list.length) return;
+    var dpr = ctx.getTransform ? ctx.getTransform().a : Math.min(2, window.devicePixelRatio || 1), R = b[2] > 60 * w ? 5 : 4.2, TAU = Math.PI * 2;
+    var key = [b[2].toFixed(4), w, h, dpr, R, SG.ver].join("|");
+    var dx = b[0] - sgLay.b0, dy = b[1] - sgLay.b1;
+    if (key !== sgLay.key || Math.abs(dx) > sgLay.pad - 2 || Math.abs(dy) > sgLay.pad - 2) { sgLayerDraw(b, w, h, dpr, R); sgLay.key = key; dx = 0; dy = 0; }
     ctx.save();
-    var CELL = 26, cells = {}, groups = [];
-    SG.list.forEach(function (m) {
-      var x = b[0] + (m.lon + 180) / 360 * b[2], y = b[1] + (90 - m.lat) / 180 * b[3];
-      m.sx = x; m.sy = y; m.cl = null;
-      if (x < -10 || y < -10 || x > w + 10 || y > h + 10) { m.sx = null; return; }
-      var key = Math.floor(x / CELL) + ":" + Math.floor(y / CELL), g = cells[key];
-      if (!g) { g = cells[key] = { list: [], x: 0, y: 0 }; groups.push(g); }
-      g.list.push(m); g.x += x; g.y += y;
-    });
-    SG.clusters = [];
-    var openDot = null;
-    groups.forEach(function (g) {
-      if (g.list.length === 1) {
-        var m = g.list[0];
-        if (m === SG.openM) { openDot = m; return; } // drawn last, on top
-        ctx.beginPath(); ctx.arc(m.sx, m.sy, 5, 0, Math.PI * 2);
-        ctx.fillStyle = SG_TEAL; ctx.fill(); ctx.lineWidth = 1.6; ctx.strokeStyle = "#fff"; ctx.stroke();
-        return;
-      }
-      // several close together: one plain dot (a touch bigger), no number on it (v4.80)
-      var cx = g.x / g.list.length, cy = g.y / g.list.length, r = 6.5;
-      g.list.forEach(function (m) { m.cl = g; });
-      g.cx = cx; g.cy = cy; g.r = r; SG.clusters.push(g);
-      var hasOpen = SG.openM && g.list.indexOf(SG.openM) >= 0;
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fillStyle = SG_TEAL; ctx.fill(); ctx.lineWidth = hasOpen ? 3 : 1.8; ctx.strokeStyle = hasOpen ? "#e0a800" : "#fff"; ctx.stroke();
-    });
-    if (openDot) { // the open observation: bigger, with a gold ring
-      ctx.beginPath(); ctx.arc(openDot.sx, openDot.sy, 8.5, 0, Math.PI * 2); ctx.lineWidth = 2.5; ctx.strokeStyle = dark ? "#fff" : "#1c2a26"; ctx.stroke();
-      ctx.beginPath(); ctx.arc(openDot.sx, openDot.sy, 5, 0, Math.PI * 2); ctx.fillStyle = SG_TEAL; ctx.fill(); ctx.lineWidth = 1.6; ctx.strokeStyle = "#fff"; ctx.stroke();
-    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // whole device pixels: crisp dots
+    ctx.drawImage(sgLay.cv, Math.round((dx - sgLay.pad) * dpr), Math.round((dy - sgLay.pad) * dpr));
     ctx.restore();
+    var open = SG.openM;
+    if (open && sgPos(open, b, w, h) != null) { // the open one: bigger, in a white ring with a green halo (v5.68: no more yellow)
+      ctx.save();
+      ctx.beginPath(); ctx.arc(open.sx, open.sy, R + 7.5, 0, TAU); ctx.lineWidth = 2; ctx.strokeStyle = "rgba(88,179,81,0.85)"; ctx.stroke();
+      ctx.beginPath(); ctx.arc(open.sx, open.sy, R + 3, 0, TAU); ctx.fillStyle = SG_GREEN; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = "#fff"; ctx.stroke();
+      ctx.beginPath(); ctx.arc(open.sx, open.sy, R + 4.8, 0, TAU); ctx.lineWidth = 1; ctx.strokeStyle = SG_EDGE; ctx.stroke();
+      ctx.restore();
+    }
   };
-  // a tap on the map: a cluster zooms in (or, when it can't split - the same spot, or the map
-  // can't zoom closer - lists its observations); a dot opens its observation. A dot is drawn
-  // 10 px wide but takes taps 28 px wide; several dots under one tap are listed to choose from.
+  // the dot under a point on the map (the nearest within reach of a finger or the mouse)
+  function sgHit(x, y, reach) {
+    var B = SG.lastB; if (!B) return null;
+    var best = null, bd = reach * reach;
+    for (var i = SG.list.length - 1; i >= 0; i--) {
+      var m = SG.list[i]; if (sgPos(m, B, B[4], B[5]) == null) continue;
+      var d = (m.sx - x) * (m.sx - x) + (m.sy - y) * (m.sy - y);
+      if (d < bd) { bd = d; best = m; }
+    }
+    return best;
+  }
+  // a tap on the map: a dot opens its own observation, every dot on its own
   window.SL_MAP_TAP = function (x, y) {
     if (!SG.on || !onCanvas()) return false;
-    var cl = null;
-    (SG.clusters || []).forEach(function (g) { var d = Math.hypot(g.cx - x, g.cy - y); if (d <= g.r + 6 && (!cl || d < Math.hypot(cl.cx - x, cl.cy - y))) cl = g; });
-    if (cl) {
-      var same = cl.list.every(function (m) { return Math.abs(m.lat - cl.list[0].lat) < 1e-4 && Math.abs(m.lon - cl.list[0].lon) < 1e-4; });
-      var canZoom = window.SL_MAP_CAN_ZOOM ? window.SL_MAP_CAN_ZOOM() : true;
-      if (same || !canZoom) { sgList(cl.list, cl.cx, cl.cy, same); return true; }
-      if (window.SL_MAP_ZOOM_AT) window.SL_MAP_ZOOM_AT(2.5, cl.cx, cl.cy);
-      return true;
-    }
-    var hits = [];
-    SG.list.forEach(function (m) { if (m.sx == null || m.cl) return; var d = (m.sx - x) * (m.sx - x) + (m.sy - y) * (m.sy - y); if (d <= 14 * 14) hits.push([d, m]); });
-    hits.sort(function (a, c) { return a[0] - c[0]; });
-    if (!hits.length) { if (!sgPop.hidden) { sgClose(); return true; } return false; }
-    if (hits.length > 1) { sgList(hits.map(function (h) { return h[1]; }), x, y, false); return true; }
-    sgOpen(hits[0][1], hits[0][1].sx, hits[0][1].sy);
+    var m = sgHit(x, y, window.matchMedia && matchMedia("(pointer: coarse)").matches ? 18 : 13);
+    if (!m) { if (SG.openM) { SG.openM = null; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); return true; } return false; }
+    sgOpen(m);
     return true;
   };
-  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
-  function sgPlace(x, y) {
-    sgPop.hidden = false;
-    var W = stage.clientWidth, H = stage.clientHeight, pw = sgPop.offsetWidth, phh = sgPop.offsetHeight;
-    if (W > 640) {
-      // kept inside the map on every side; above the marker when it fits, else below, else beside
-      // below the map's own buttons when there's room, so it never hides them
-      var tl = stage.querySelector(".map-tools"), minTop = tl ? tl.offsetTop + tl.offsetHeight + 6 : 8;
-      if (minTop + phh > H - 8) minTop = 8;
-      var left = Math.max(8, Math.min(W - pw - 8, x - pw / 2)), top = y - phh - 16;
-      if (top < minTop) top = y + 16;
-      if (top + phh > H - 8) top = Math.max(minTop, H - phh - 8);
-      sgPop.style.left = left + "px"; sgPop.style.top = top + "px";
-    } else { sgPop.style.left = ""; sgPop.style.top = ""; }
+  // the mouse over a dot: a pointing hand, and its photo starts loading before the click
+  var sgCv = document.getElementById("globe"), sgHoverRaf = 0, sgHoverEv = null, sgPre = {};
+  function sgPhotoUrl(p, size) { return String(p && p.url || "").replace(/\/(square|small|medium|large|original|thumb)\.(\w+)(\?.*)?$/, "/" + size + ".$2$3"); }
+  function sgPrefetch(m, size) {
+    var p = m && m.o && m.o.photos && m.o.photos[0]; if (!p) return;
+    var u = sgPhotoUrl(p, size || "medium"); if (sgPre[u]) return;
+    if (Object.keys(sgPre).length > 300) sgPre = {}; // (only ever the last few hundred)
+    var im = new Image(); sgPre[u] = im; im.decoding = "async"; im.onload = function () { im.ok = true; }; im.src = u;
   }
-  // several observations at one spot (or under one tap): a list to pick from
-  function sgList(list, x, y, same) {
-    SG.otok++; if (SG.ctl) try { SG.ctl.abort(); } catch (e) {}
-    SG.openM = null; SG.pt = [x, y];
-    var rows = list.slice().sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); });
-    sgNoteSet("");
-    sgPop.innerHTML = '<button type="button" class="sg-x" aria-label="Close">&times;</button><div class="sg-body sg-listbody"><p class="sg-h">' + rows.length + " sightings here - pick one</p><ul class=\"sg-pick\">" +
-      rows.slice(0, 60).map(function (m) { return '<li><button type="button" data-oid="' + m.id + '"><b>' + esc(m.common || m.sci || "Unidentified snake") + "</b><span>" + esc(fmtDate(m.date) || "Date not recorded") + "</span></button></li>"; }).join("") + "</ul>" +
-      (rows.length > 60 ? '<p class="sg-small">' + (rows.length - 60) + " more - zoom in to separate them.</p>" : "") + "</div>";
-    sgPop.setAttribute("aria-label", "Observations here");
-    sgPlace(x, y);
+  if (sgCv) {
+    sgCv.addEventListener("pointermove", function (e) {
+      if (!SG.on || e.pointerType !== "mouse") return;
+      sgHoverEv = e; if (sgHoverRaf) return;
+      sgHoverRaf = requestAnimationFrame(function () {
+        sgHoverRaf = 0; var ev = sgHoverEv; if (!ev || ev.buttons) return;
+        var r = sgCv.getBoundingClientRect(), m = sgHit(ev.clientX - r.left, ev.clientY - r.top, 12);
+        sgCv.style.cursor = m ? "pointer" : "";
+        if (m) sgPrefetch(m, "medium");
+      });
+    });
+    sgCv.addEventListener("pointerdown", function (e) { // a finger: the photo starts on touch, before the tap ends
+      if (!SG.on || e.pointerType === "mouse") return;
+      var r = sgCv.getBoundingClientRect(), m = sgHit(e.clientX - r.left, e.clientY - r.top, 18); if (m) sgPrefetch(m, "medium");
+    });
+    sgCv.addEventListener("pointerleave", function () { sgHoverEv = null; sgCv.style.cursor = ""; });
+  }
+  // let the browser open the connections to iNaturalist's photo servers early
+  (function () {
+    ["https://inaturalist-open-data.s3.amazonaws.com", "https://static.inaturalist.org"].forEach(function (h) {
+      var l = document.createElement("link"); l.rel = "preconnect"; l.href = h; l.crossOrigin = "anonymous"; document.head.appendChild(l);
+    });
+  })();
+
+  // ---- Back: the map as it was before a dot was opened (place, zoom and which dot was open) ----
+  var sgUndo = document.createElement("button");
+  sgUndo.type = "button"; sgUndo.className = "sg-undo"; sgUndo.id = "sg-undo"; sgUndo.hidden = true;
+  sgUndo.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg> Back';
+  sgUndo.title = "Back to the map as it was before you opened that sighting";
+  stage.appendChild(sgUndo);
+  sgUndo.addEventListener("pointerup", function (e) { e.stopPropagation(); });
+  sgUndo.addEventListener("click", function (e) { e.stopPropagation(); sgBack(); });
+  function sgUndoBtn() { if (!SG.hist.length) SG.jumped = false; sgUndo.hidden = !(SG.on && SG.jumped && SG.hist.length && sgPop.hidden); } // (on the map after Show on the map)
+  function sgBack() {
+    var s = SG.hist.pop();
+    SG.jumped = false;
+    sgCloseView(true);
+    if (s) {
+      if (window.SL_MAP_CAM && s.cam) window.SL_MAP_CAM.set(s.cam, 450);
+      SG.openM = s.open != null ? SG.ids[s.open] || null : null;
+    }
+    sgUndoBtn();
     window.SL_MAP_REDRAW && window.SL_MAP_REDRAW();
   }
-  var ANNOT = { 1: ["Life stage", { 2: "Adult", 7: "Egg", 8: "Juvenile" }], 9: ["Sex", { 10: "Female", 11: "Male" }], 17: ["Alive or dead", { 18: "Alive", 19: "Dead" }] };
-  var GRADE_TXT = { research: "Research grade (the community agrees on the identification)", needs_id: "Needs ID (not yet confirmed by the community)", casual: "Casual (missing date, location, photo or other evidence)" };
+
+  // ---- the big view: one observation over almost the whole screen ----
+  document.body.appendChild(sgPop); // over the whole app (and over the map in full screen)
+  sgPop.className = "sg-pop sg-view";
+  sgPop.setAttribute("aria-modal", "true");
+  var ANNOT = { 1: ["Life stage", { 2: "Adult", 3: "Teneral", 5: "Pupa", 6: "Nymph", 7: "Egg", 8: "Juvenile", 4: "Larva" }], 9: ["Sex", { 10: "Female", 11: "Male" }], 17: ["Alive or dead", { 18: "Alive", 19: "Dead", 20: "Cannot be determined" }] };
+  var GRADE = { research: ["Research grade", "the community agrees on the identification"], needs_id: ["Needs ID", "not yet confirmed by the community"], casual: ["Casual", "missing a date, place, photo or other evidence"] };
   function fmtDate(ymd) {
     var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(ymd || "")); if (!m) return "";
     var d = new Date(+m[1], +m[2] - 1, +m[3]);
@@ -20394,7 +20579,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (o.time_observed_at) {
       var tz = o.observed_time_zone || "", t = new Date(o.time_observed_at);
       if (!isNaN(t)) {
-        try { if (tz) return t.toLocaleString(undefined, { timeZone: tz, year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) + " (" + tz.replace(/_/g, " ") + " time)"; } catch (e) {}
+        try { if (tz) return t.toLocaleString(undefined, { timeZone: tz, weekday: "short", year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) + " (" + tz.replace(/_/g, " ") + " time)"; } catch (e) {}
         var off = /([+-]\d{2}:\d{2}|Z)$/.exec(o.time_observed_at), hm = /T(\d{2}:\d{2})/.exec(o.time_observed_at);
         return (fmtDate(day) || fmtDate(o.time_observed_at)) + (hm ? ", " + hm[1] + (off ? " (UTC" + (off[1] === "Z" ? "" : off[1]) + ")" : " (time zone not given)") : "");
       }
@@ -20406,104 +20591,267 @@ window.SL_GEO_READY = new Promise(function (res) {
     var c = String(code).toUpperCase();
     return c === "CC0" ? "CC0 (public domain)" : c.replace(/^CC-/, "CC ");
   }
-  function plainText(html) { var d = document.createElement("div"); d.innerHTML = String(html || ""); return (d.textContent || "").replace(/\s+/g, " ").trim(); }
-  // the photo shown on the card: the observation's own first photo (medium size)
-  function obsPhoto(o) {
-    var p = (o && o.photos || []).filter(function (q) { return q && q.url; })[0];
-    return p ? { url: String(p.url).replace("/square.", "/medium."), by: p.attribution || "", lic: p.license_code } : null;
+  function plainText(html) { var d = document.createElement("div"); d.innerHTML = String(html || "").replace(/<(br|\/p|\/div|\/li)\b[^>]*>/gi, "\n$&"); return (d.textContent || "").replace(/[ \t]+/g, " ").replace(/\n\s*\n+/g, "\n\n").trim(); }
+  function fmtCoord(lat, lon) {
+    return Math.abs(lat).toFixed(5) + "° " + (lat >= 0 ? "N" : "S") + ", " + Math.abs(lon).toFixed(5) + "° " + (lon >= 0 ? "E" : "W");
   }
-  // v4.63: one compact card - the observation's own photo, the snake, the date and who saw it,
-  // and one link to the original. Credit, licence, place and identification are under More details.
+  function fmtMetres(mm) { mm = +mm; return mm >= 1000 ? (mm / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + " km" : Math.round(mm).toLocaleString() + " m"; }
+  // SnakeList's own facts about the species seen: its card in the checklist, by scientific name
+  var sgHabOf = null, sgSize = {};
+  function sgHabitats(id) {
+    if (!sgHabOf) {
+      sgHabOf = {}; var H = window.SL_HABITATS, k = 0;
+      if (H && H.sections) H.sections.forEach(function (sec) { sec[1].forEach(function (hn) { H.ids(k++).forEach(function (sid) { (sgHabOf[sid] = sgHabOf[sid] || []).push(hn); }); }); });
+    }
+    return sgHabOf[id] || [];
+  }
+  function sgCard(sci) {
+    var sp2 = String(sci || "").toLowerCase().split(/\s+/).slice(0, 2).join(" ");
+    var id = sp2.indexOf(" ") > 0 ? sciToId(sp2) : "";
+    var c = id && document.querySelector('#grid .card[data-id="' + id + '"]');
+    return c ? { id: id, card: c } : null;
+  }
+  // the adult size is on the species' own page: read once, when a sighting of it is opened
+  function sgSizeOf(id, cb) {
+    if (sgSize[id] !== undefined) { cb(sgSize[id]); return; }
+    var u = window.SL_SP_PAGE_URL && window.SL_SP_PAGE_URL(id);
+    if (!u || /^https?:/.test(u) && u.indexOf(location.origin) !== 0) { sgSize[id] = null; cb(null); return; }
+    fetch(u).then(function (r) { return r.ok ? r.text() : ""; }).then(function (t) {
+      var d = new DOMParser().parseFromString(t || "", "text/html"), out = { len: "", size: "" };
+      [].forEach.call(d.querySelectorAll("dt"), function (dt) {
+        var k = dt.textContent.trim(), dd = dt.nextElementSibling, v = dd ? dd.textContent.replace(/\[\d+\]/g, "").replace(/\s+/g, " ").trim() : "";
+        if (!v || /^not known$/i.test(v)) return;
+        if (k === "Adult length" && !out.len) out.len = v; else if (k === "Size" && !out.size) out.size = v;
+      });
+      sgSize[id] = out.len || out.size ? out : null; cb(sgSize[id]);
+    }, function () { sgSize[id] = null; cb(null); });
+  }
+  function sgSpeciesHTML(o) {
+    var t = o.taxon || null, sp = t && sgCard(t.name);
+    if (!sp) return '<section class="sgv-sec sgv-sp"><h3>About this snake</h3><p class="sgv-muted">' +
+      (t && !/^(species|subspecies|variety|form)$/.test(t.rank || "") ? "Identified only to " + esc(t.rank || "a broader group") + " level (" + esc(t.name) + "), so there's no single species to describe." : "This snake isn't in SnakeList's checklist yet.") + "</p></section>";
+    var c = sp.card, ven = c.dataset.venomous === "1", hab = sgHabitats(sp.id), harm = window.SL_HARM ? window.SL_HARM(sp.id) : null;
+    var cons = window.SL_CONSTRICTION ? window.SL_CONSTRICTION(sp.id) : "unknown", cname = (c.querySelector(".card-name") || {}).textContent || "";
+    var has3d = !!(window.SL_3D && window.SL_3D.panel);
+    return '<section class="sgv-sec sgv-sp" data-sp="' + esc(sp.id) + '"><h3>About ' + esc(cname.trim() || t.name) + ' <small>from SnakeList</small></h3>' +
+      '<div class="sgv-chips"><span class="sgv-chip ' + (ven ? "sgv-ven" : "sgv-safe") + '">' + (ven ? "Venomous" : "Non-venomous") + "</span>" +
+      (harm ? '<span class="sgv-chip">' + (harm === "harmful" ? "Can harm people" : harm === "harmless" ? "Low risk to people" : "Risk not documented") + "</span>" : "") +
+      (cons === "yes" ? '<span class="sgv-chip">Constrictor</span>' : "") + "</div>" +
+      '<dl class="sgv-facts">' +
+      "<dt>Family</dt><dd>" + esc(c.dataset.family || "Not documented") + "</dd>" +
+      "<dt>Type</dt><dd>" + esc(c.dataset.type || "Not documented") + "</dd>" +
+      '<dt>Size</dt><dd class="sgv-size">Checking…</dd>' +
+      "<dt>Habitat</dt><dd>" + (hab.length ? esc(hab.slice(0, 6).join(", ")) + (hab.length > 6 ? " and " + (hab.length - 6) + " more" : "") + ' <small class="sgv-muted">(estimated from its range)</small>' : "Not documented") + "</dd>" +
+      "<dt>Range</dt><dd>" + esc((c.dataset.countries || "").split("|").filter(Boolean).slice(0, 8).join(", ") || "Not recorded") + ((c.dataset.countries || "").split("|").filter(Boolean).length > 8 ? " and more" : "") + "</dd>" +
+      "</dl>" +
+      '<div class="sgv-acts">' + (has3d ? '<button type="button" class="sgv-3d"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 9 5v10l-9 5-9-5V7z"></path><path d="m3 7 9 5 9-5M12 12v10"></path></svg> Explore in 3D</button>' : "") +
+      (window.SL_SP_PAGE_URL && window.SL_SP_PAGE_URL(sp.id) ? '<a class="sgv-page" href="' + esc(window.SL_SP_PAGE_URL(sp.id)) + '" target="_blank" rel="noopener">Species page</a>' : "") + "</div></section>";
+  }
+  // the exact spot: a small street map with a pin (and the accuracy circle), from the same tiles
+  function sgMiniMap(el, lat, lon, acc, fuzzy) {
+    var W = el.clientWidth || 320, H = el.clientHeight || 170, dpr = Math.min(2, window.devicePixelRatio || 1);
+    var c = document.createElement("canvas"); c.width = W * dpr; c.height = H * dpr; c.style.width = "100%"; c.style.height = H + "px";
+    el.insertBefore(c, el.firstChild);
+    var g = c.getContext("2d"); g.scale(dpr, dpr);
+    var z = fuzzy ? 10 : acc > 5000 ? 11 : acc > 1000 ? 13 : 15, n = 1 << z, world = 256 * n;
+    var px = (lon + 180) / 360 * world, py = mercY(lat) * world, left = px - W / 2, top = py - H / 2;
+    var dark = document.documentElement.getAttribute("data-sl-theme") === "dark", tpl = dark ? STREET.dark : STREET.light, pending = 0, ok = 0;
+    var mpp = 156543.03 * Math.cos(lat * Math.PI / 180) / n;
+    var draw = function () {
+      g.fillStyle = dark ? "#16261d" : "#e8ece4"; g.fillRect(0, 0, W, H);
+      tiles.forEach(function (t) { if (t.ok) g.drawImage(t.img, t.x * 256 - left, t.y * 256 - top, 256, 256); });
+      var x = W / 2, y = H / 2, ar = acc > 0 ? acc / mpp : 0;
+      if (ar > 6 && ar < W * 2) { g.beginPath(); g.arc(x, y, ar, 0, Math.PI * 2); g.fillStyle = "rgba(88,179,81,0.16)"; g.fill(); g.lineWidth = 1.5; g.strokeStyle = "rgba(46,133,55,0.8)"; g.stroke(); }
+      g.beginPath(); g.arc(x, y, 9, 0, Math.PI * 2); g.fillStyle = SG_GREEN; g.fill(); g.lineWidth = 3; g.strokeStyle = "#fff"; g.stroke();
+      g.beginPath(); g.arc(x, y, 10.6, 0, Math.PI * 2); g.lineWidth = 1; g.strokeStyle = SG_EDGE; g.stroke();
+    };
+    var tiles = [];
+    if (liveOK && !(window.claude && window.claude.use)) {
+      for (var ty = Math.floor(top / 256); ty <= Math.floor((top + H) / 256); ty++) for (var tx = Math.floor(left / 256); tx <= Math.floor((left + W) / 256); tx++) {
+        if (ty < 0 || ty >= n) continue;
+        var t = { x: tx, y: ty, img: new Image(), ok: false }; tiles.push(t); pending++;
+        t.img.onload = (function (t) { return function () { t.ok = true; ok++; draw(); }; })(t);
+        t.img.onerror = function () { if (--pending <= 0 && !ok) el.classList.add("sgv-nomap"); };
+        t.img.src = tpl.replace("{z}", z).replace("{x}", ((tx % n) + n) % n).replace("{y}", ty);
+      }
+    } else el.classList.add("sgv-nomap");
+    draw();
+  }
+  function sgPhotos(o) { return (o && o.photos || []).filter(function (p) { return p && p.url; }); }
+  // the view's photo: the first size that's already loaded (or the small one) at once, the large
+  // one swapped in as soon as it arrives - so the view never waits for a photo
+  function sgShowPhoto(i) {
+    var o = SG.vo, ps = sgPhotos(o), p = ps[i]; if (!p) return;
+    SG.pi = i;
+    var fig = sgPop.querySelector(".sg-ph"), im = fig && fig.querySelector("img"); if (!im) return;
+    var big = sgPhotoUrl(p, "large"), med = sgPhotoUrl(p, "medium"), sm = sgPhotoUrl(p, "small");
+    var first = sgPre[big] && sgPre[big].ok ? big : sgPre[med] && sgPre[med].ok ? med : sm;
+    fig.classList.remove("sg-ph-err"); var mm = fig.querySelector(".sg-ph-msg"); if (mm) mm.remove();
+    im.src = first; im.alt = (SG.vname || "Snake") + ", photo " + (i + 1) + " of " + ps.length + " from this sighting";
+    fig.querySelector("figcaption").textContent = (p.attribution || "Photo by the observer") + " · " + licTxt(p.license_code) + (ps.length > 1 ? " · photo " + (i + 1) + " of " + ps.length : "");
+    if (first !== big) {
+      var my = SG.otok, hi = sgPre[big] || new Image(); sgPre[big] = hi;
+      var swap = function () { if (my === SG.otok && SG.pi === i && im.isConnected) im.src = big; };
+      if (hi.ok) swap(); else { hi.addEventListener("load", function () { hi.ok = true; swap(); }); if (!hi.src) hi.src = big; }
+    }
+    [].forEach.call(sgPop.querySelectorAll(".sg-th"), function (b) { var on = +b.getAttribute("data-i") === i; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
+    // the next photo starts loading too
+    if (ps[i + 1]) sgPrefetch({ o: { photos: [ps[i + 1]] } }, "large");
+  }
   function obsHTML(o, m) {
-    var t = o.taxon || null, ph = obsPhoto(o);
-    var name = t ? (t.preferred_common_name || t.name) : "Not identified yet";
+    var t = o.taxon || null, ps = sgPhotos(o);
+    var name = t ? (t.preferred_common_name || t.name) : (o.species_guess || "Not identified yet");
     var rank = t && t.rank ? t.rank : "";
-    var sci = t && t.preferred_common_name ? '<i class="sg-sci' + (/^(species|subspecies|variety|form|hybrid|genus)$/.test(rank) ? "" : " sg-up") + '">' + esc(t.name) + "</i>" : "";
-    var day = (o.observed_on_details && o.observed_on_details.date) || o.observed_on || "";
-    var who = o.user ? (o.user.name || (o.user.login ? "@" + o.user.login : "")) : "";
+    var sci = t ? '<p class="sg-sci' + (/^(species|subspecies|variety|form|hybrid|genus)$/.test(rank) ? "" : " sg-up") + '">' + esc(t.preferred_common_name ? t.name : (rank && rank !== "species" ? rank.charAt(0).toUpperCase() + rank.slice(1) : "")) + "</p>" : "";
+    var u = o.user || null, who = u ? (u.name || (u.login ? "@" + u.login : "")) : "";
     var obsc = o.obscured || (o.geoprivacy && o.geoprivacy !== "open") || (o.taxon_geoprivacy && o.taxon_geoprivacy !== "open");
     var link = o.uri && /^https:\/\/(www\.)?inaturalist\.org\//.test(o.uri) ? o.uri : "https://www.inaturalist.org/observations/" + encodeURIComponent(o.id);
-    var idTxt = (t ? (rank && rank !== "species" ? "Identified to " + rank + " level" : "Identified to species") : "Not identified yet") +
-      (GRADE_TXT[o.quality_grade] ? " · " + GRADE_TXT[o.quality_grade] : "") +
-      (o.identifications_count ? " · " + o.identifications_count + (o.identifications_count === 1 ? " identification" : " identifications") : "");
-    var gal = ph ? '<figure class="sg-ph"><img src="' + esc(ph.url) + '" alt="' + esc(name) + ', the photo from this sighting" decoding="async"></figure>'
+    var c = o.geojson && o.geojson.coordinates, lat = c ? +c[1] : m.lat, lon = c ? +c[0] : m.lon;
+    var acc = +(o.positional_accuracy || o.public_positional_accuracy || 0);
+    var gr = GRADE[o.quality_grade];
+    var notes = plainText(o.description);
+    var idn = +o.identifications_count || 0, agree = o.num_identification_agreements, dis = o.num_identification_disagreements;
+    var ann = (o.annotations || []).map(function (a) { var A = ANNOT[a.controlled_attribute_id]; return A && A[1][a.controlled_value_id] ? [A[0], A[1][a.controlled_value_id]] : null; }).filter(Boolean);
+    SG.vname = name;
+    var gal = ps.length
+      ? '<figure class="sg-ph"><img alt="" decoding="async"><figcaption></figcaption>' +
+        (ps.length > 1 ? '<button type="button" class="sgv-nav sgv-prev" aria-label="Previous photo">&#8249;</button><button type="button" class="sgv-nav sgv-next" aria-label="Next photo">&#8250;</button>' : "") + "</figure>" +
+        (ps.length > 1 ? '<div class="sg-thumbs" role="group" aria-label="Photos of this sighting">' + ps.map(function (p, i) { return '<button type="button" class="sg-th" data-i="' + i + '" aria-label="Photo ' + (i + 1) + '"><img src="' + esc(sgPhotoUrl(p, "square")) + '" alt="" loading="lazy"></button>'; }).join("") + "</div>" : "")
       : '<div class="sg-nophoto">No photo available for this sighting.</div>';
-    return gal + '<div class="sg-body"><b class="sg-name">' + esc(name) + "</b>" + sci +
-      '<p class="sg-meta2"><span>' + esc(fmtDate(day) || "Date not recorded") + "</span><span>" + (who ? "Seen by " + esc(who) : "Observer not shown") + "</span></p>" +
-      '<a class="sg-orig" href="' + esc(link) + '" target="_blank" rel="noopener">View original observation</a>' +
-      '<details class="sg-det"><summary>More details</summary><dl class="sg-dl">' +
-      (ph ? "<dt>Photo</dt><dd>" + esc(ph.by || "Photo by the observer") + "</dd><dt>Licence</dt><dd>" + esc(licTxt(ph.lic)) + "</dd>" : "") +
-      "<dt>Place</dt><dd>" + esc(o.place_guess || "No public locality given") + (obsc ? " (location made approximate for privacy)" : "") + "</dd>" +
-      "<dt>ID</dt><dd>" + esc(idTxt) + "</dd>" +
-      "</dl></details></div>";
+    return '<div class="sgv-card">' +
+      '<header class="sgv-top"><button type="button" class="sgv-back" title="Back to the map as it was"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18 9 12l6-6"></path></svg> Back</button>' +
+      '<p class="sgv-ttl">Sighting on iNaturalist</p><button type="button" class="sg-x" aria-label="Close">&times;</button></header>' +
+      '<div class="sgv-scroll"><div class="sgv-media">' + gal + "</div>" +
+      '<div class="sgv-info"><h2 class="sg-name">' + esc(name) + "</h2>" + sci +
+      '<div class="sgv-chips">' + (gr ? '<span class="sgv-chip sgv-q-' + esc(o.quality_grade) + '" title="' + esc(gr[1]) + '">' + esc(gr[0]) + "</span>" : "") +
+      (idn ? '<span class="sgv-chip">' + idn + (idn === 1 ? " identification" : " identifications") + (agree != null ? " · " + agree + " agree" : "") + (dis ? " · " + dis + " disagree" : "") + "</span>" : "") + "</div>" +
+      '<dl class="sgv-facts">' +
+      "<dt>Found by</dt><dd>" + (who ? esc(who) + (u.login && u.name ? ' <span class="sgv-muted">@' + esc(u.login) + "</span>" : "") +
+        (u.login ? ' · <a href="https://www.inaturalist.org/people/' + encodeURIComponent(u.login) + '" target="_blank" rel="noopener">profile</a>' : "") : "Observer not shown") + "</dd>" +
+      "<dt>Observed</dt><dd>" + esc(observedTxt(o)) + "</dd>" +
+      "<dt>Where</dt><dd>" + esc(o.place_guess || "No place name given") + '<br><span class="sgv-mono">' + esc(fmtCoord(lat, lon)) + "</span></dd>" +
+      "<dt>Accuracy</dt><dd>" + (obsc ? "Location made approximate for privacy (the real spot is hidden)" + (acc ? " - within about " + esc(fmtMetres(acc)) : "") : acc ? "Within about " + esc(fmtMetres(acc)) : "Not recorded") + "</dd>" +
+      "<dt>Quality</dt><dd>" + (gr ? esc(gr[0]) + ' <span class="sgv-muted">- ' + esc(gr[1]) + "</span>" : "Not graded") + "</dd>" +
+      "<dt>Identification</dt><dd>" + (t ? (rank && rank !== "species" ? "To " + esc(rank) + " level" : "To species") : "Not identified yet") + (idn ? " · " + idn + (idn === 1 ? " identification" : " identifications") + (agree != null ? ", " + agree + " agreeing" : "") : "") + "</dd>" +
+      ann.map(function (a) { return "<dt>" + esc(a[0]) + "</dt><dd>" + esc(a[1]) + "</dd>"; }).join("") +
+      (o.created_at ? "<dt>Uploaded</dt><dd>" + esc(fmtDate(o.created_at)) + "</dd>" : "") +
+      "</dl>" +
+      (notes ? '<section class="sgv-sec sgv-notes"><h3>Observer\'s notes</h3><p>' + esc(notes).replace(/\n/g, "<br>") + "</p></section>" : "") +
+      '<section class="sgv-sec"><h3>Exact spot</h3><div class="sgv-map" data-lat="' + lat + '" data-lon="' + lon + '"><button type="button" class="sgv-onmap">Show on the map</button><span class="sgv-nomap-t">' + esc(fmtCoord(lat, lon)) + "</span></div></section>" +
+      sgSpeciesHTML(o) +
+      '<a class="sg-orig" href="' + esc(link) + '" target="_blank" rel="noopener">View original observation on iNaturalist</a>' +
+      '<p class="sgv-credit">Observation by ' + esc(who || "an iNaturalist user") + ", shared on iNaturalist" + (ps.length ? " · photos " + esc(licTxt(ps[0].license_code)) : "") + ". Records are as reported - not live.</p>" +
+      "</div></div></div>";
   }
-  function sgShow(html, label) {
-    sgPop.innerHTML = '<button type="button" class="sg-x" aria-label="Close">&times;</button>' + html;
-    sgPop.setAttribute("aria-label", label || "Observation");
+  // fill the view (straight away from what's known; again when the full record arrives)
+  function sgFill(m, o) {
+    var keepPi = SG.vo && SG.vo.id === o.id ? SG.pi || 0 : 0, sc = sgPop.querySelector(".sgv-scroll"), top = sc ? sc.scrollTop : 0, same = SG.vo && SG.vo.id === o.id;
+    SG.vo = o;
+    sgPop.innerHTML = obsHTML(o, m);
+    sgPop.setAttribute("aria-label", "Sighting: " + (SG.vname || "snake"));
+    if (sgPhotos(o).length) sgShowPhoto(Math.min(keepPi, sgPhotos(o).length - 1));
+    var mp = sgPop.querySelector(".sgv-map"); if (mp) sgMiniMap(mp, +mp.getAttribute("data-lat"), +mp.getAttribute("data-lon"), +(o.positional_accuracy || 0), !!(o.obscured || (o.geoprivacy && o.geoprivacy !== "open") || (o.taxon_geoprivacy && o.taxon_geoprivacy !== "open")));
+    var spEl = sgPop.querySelector(".sgv-sp[data-sp]");
+    if (spEl) { var sid = spEl.getAttribute("data-sp"); sgSizeOf(sid, function (z) { var d = sgPop.querySelector('.sgv-sp[data-sp="' + sid + '"] .sgv-size'); if (d) d.textContent = z ? z.len || z.size : "Not documented"; }); }
+    if (same && sc) { var sc2 = sgPop.querySelector(".sgv-scroll"); if (sc2) sc2.scrollTop = top; }
   }
-  // one observation, loaded by its own id. The panel is emptied first (no old photo can show
-  // under a new marker), answers to an older tap are thrown away, and each one is kept once loaded
-  function sgReady(m, my, c) {
-    // wait for the photo (up to 8 s) so the card opens whole
-    var ph = c && c.o ? obsPhoto(c.o) : null;
-    if (!ph) { sgPaint(m, c); return; }
-    var im = new Image(), done = false;
-    var go = function () { if (done) return; done = true; clearTimeout(tm); if (my !== SG.otok) return; sgPaint(m, c); };
-    var tm = setTimeout(go, 8000);
-    im.onload = im.onerror = go; im.src = ph.url;
+  // shown before it's filled (so the small map knows its size); focus goes to Back once it's filled
+  function sgShowView() {
+    if (!sgPop.hidden) return false;
+    SG.focusBack = document.activeElement;
+    sgPop.hidden = false; document.documentElement.classList.add("sgv-lock");
+    sgUndoBtn();
+    return true;
   }
-  function sgOpen(m, x, y) {
+  function sgFocusView() { var b = sgPop.querySelector(".sgv-back"); if (b) try { b.focus({ preventScroll: true }); } catch (e) {} }
+  function sgOpenView() { if (sgShowView()) sgFocusView(); }
+  // one observation: the view opens at once with what the dot already knows (names, date, place,
+  // photo, observer - the list's answer carries them), and the full record is asked for alongside
+  // to bring it up to date (or to find it was deleted). Answers to an older tap are thrown away.
+  function sgOpen(m) {
     var my = ++SG.otok;
     if (SG.ctl) try { SG.ctl.abort(); } catch (e) {}
-    SG.ctl = null; SG.openM = m; SG.lastM = m; SG.pt = [x, y];
-    sgPop.hidden = true; sgPop.innerHTML = ""; // the card that was open closes straight away
+    SG.ctl = null;
+    if (sgPop.hidden) { SG.hist.push({ cam: window.SL_MAP_CAM ? window.SL_MAP_CAM.get() : null, open: SG.openM ? SG.openM.id : null }); if (SG.hist.length > 30) SG.hist.shift(); }
+    SG.openM = m; SG.lastM = m; SG.pi = 0; SG.vo = null;
     window.SL_MAP_REDRAW && window.SL_MAP_REDRAW();
+    sgNoteSet("");
     var c = SG.cache[m.id];
-    if (c) { sgNoteSet(""); sgReady(m, my, c); return; }
-    if (!liveOK) { sgFail(m, "Sightings come from iNaturalist, which this copy of SnakeList can't reach."); return; }
-    sgNoteSet("Loading sighting…");
+    if (c && c.gone) { sgPaint(m, c); return; }
+    var known = (c && c.o) || m.o, first = sgPop.hidden;
+    if (known) { sgShowView(); sgFill(m, known); if (first) sgFocusView(); }
+    else { // nothing known yet (shouldn't happen - the list carries it): a light loading view
+      SG.vo = null;
+      sgPop.innerHTML = '<div class="sgv-card"><header class="sgv-top"><button type="button" class="sgv-back">Back</button><p class="sgv-ttl">Sighting on iNaturalist</p><button type="button" class="sg-x" aria-label="Close">&times;</button></header><div class="sgv-scroll"><div class="sgv-info"><h2 class="sg-name">' + esc(m.common || m.sci || "Snake sighting") + '</h2><p class="sgv-muted">Loading sighting…</p></div></div></div>';
+      sgOpenView();
+    }
+    if (c && c.o) return; // the full record is already here
+    if (!liveOK) { if (!known) sgFail(m, "Sightings come from iNaturalist, which this copy of SnakeList can't reach."); return; }
     var ctl = SG.ctl = window.AbortController ? new AbortController() : null;
     sgGet(INAT + "observations/" + encodeURIComponent(m.id), ctl, 15000).then(function (d) {
       if (my !== SG.otok) return; // another dot was tapped since
       var o = (d && d.results || []).filter(function (r) { return r && String(r.id) === String(m.id); })[0];
-      SG.cache[m.id] = o ? { o: o } : { gone: true };
-      sgReady(m, my, SG.cache[m.id]);
+      SG.cache[m.id] = o ? { o: sgTrim(o) } : { gone: true };
+      if (!o) { sgPaint(m, SG.cache[m.id]); return; }
+      var was = known ? JSON.stringify(known) : "";
+      m.o = SG.cache[m.id].o;
+      if (!sgPop.hidden && JSON.stringify(m.o) !== was) sgFill(m, m.o); // only redrawn if something changed
     }, function (e) {
       if (my !== SG.otok || (e && e.aborted)) return;
       if (e && (e.status === 404 || e.status === 410)) { SG.cache[m.id] = { gone: true }; sgPaint(m, SG.cache[m.id]); return; }
-      sgFail(m, e && e.timeout ? "iNaturalist took too long to answer." : e && e.status === 429 ? "iNaturalist is busy right now." : "Couldn't load this sighting.");
+      if (!known) sgFail(m, e && e.timeout ? "iNaturalist took too long to answer." : e && e.status === 429 ? "iNaturalist is busy right now." : "Couldn't load this sighting.");
     });
   }
   function sgFail(m, why) {
-    sgNoteSet("");
-    sgShow('<div class="sg-body sg-err"><b>' + esc(why) + '</b><button type="button" class="sg-retry2" data-oid="' + esc(m.id) + '">Retry</button></div>', "Observation not loaded");
-    sgPlace(SG.pt[0], SG.pt[1]);
+    sgPop.innerHTML = '<div class="sgv-card"><header class="sgv-top"><button type="button" class="sgv-back">Back</button><p class="sgv-ttl">Sighting on iNaturalist</p><button type="button" class="sg-x" aria-label="Close">&times;</button></header>' +
+      '<div class="sgv-scroll"><div class="sgv-info sg-err"><b>' + esc(why) + '</b> <button type="button" class="sg-retry2" data-oid="' + esc(m.id) + '">Retry</button></div></div></div>';
+    sgPop.setAttribute("aria-label", "Observation not loaded");
+    sgOpenView();
   }
   function sgPaint(m, c) {
-    sgNoteSet("");
     if (c.gone) {
-      sgShow('<div class="sg-body sg-err"><b>This sighting is no longer on iNaturalist</b><p class="sg-small">It was deleted or made private, so it has been taken off the map.</p></div>', "Sighting removed");
+      sgPop.innerHTML = '<div class="sgv-card"><header class="sgv-top"><button type="button" class="sgv-back">Back</button><p class="sgv-ttl">Sighting on iNaturalist</p><button type="button" class="sg-x" aria-label="Close">&times;</button></header>' +
+        '<div class="sgv-scroll"><div class="sgv-info sg-err"><b>This sighting is no longer on iNaturalist</b><p class="sgv-muted">It was deleted or made private, so it has been taken off the map.</p></div></div></div>';
+      sgPop.setAttribute("aria-label", "Sighting removed");
       var i = SG.list.indexOf(m); if (i >= 0) { SG.list.splice(i, 1); delete SG.ids[m.id]; }
-      sgRender(); sgStatus();
-    } else sgShow(obsHTML(c.o, m), "Sighting");
-    if (SG.pt) sgPlace(SG.pt[0], SG.pt[1]);
+      if (SG.openM === m) SG.openM = null;
+      sgSpread(); sgRender(); sgStatus();
+      sgOpenView();
+    }
   }
-  function sgClose() { if (SG.openM) sgNoteSet(""); SG.otok++; if (SG.ctl) try { SG.ctl.abort(); } catch (e) {} SG.ctl = null; sgPop.hidden = true; SG.openM = null; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); }
+  // close the view; the dot stays picked (white ring) unless quiet (a reset) says otherwise
+  function sgCloseView(quiet) {
+    SG.otok++; if (SG.ctl) try { SG.ctl.abort(); } catch (e) {} SG.ctl = null;
+    var was = !sgPop.hidden;
+    sgPop.hidden = true; sgPop.innerHTML = ""; SG.vo = null;
+    document.documentElement.classList.remove("sgv-lock");
+    if (quiet) SG.openM = null;
+    sgUndoBtn();
+    if (was && !quiet && SG.focusBack && SG.focusBack.focus) try { SG.focusBack.focus({ preventScroll: true }); } catch (e) {}
+    window.SL_MAP_REDRAW && window.SL_MAP_REDRAW();
+  }
+  function sgClose() { sgCloseView(true); }
   sgPop.addEventListener("click", function (e) {
     e.stopPropagation();
-    if (e.target.closest(".sg-x")) { sgClose(); return; }
-    var pick = e.target.closest("[data-oid]");
-    if (pick) {
-      var id = pick.getAttribute("data-oid"), m = SG.list.filter(function (x) { return String(x.id) === id; })[0] || (SG.lastM && String(SG.lastM.id) === id ? SG.lastM : null);
-      if (m) sgOpen(m, SG.pt ? SG.pt[0] : m.sx, SG.pt ? SG.pt[1] : m.sy);
+    if (e.target === sgPop || e.target.closest(".sg-x")) { sgCloseView(false); return; } // the margin round the card closes it too
+    if (e.target.closest(".sgv-back")) { sgBack(); return; }
+    var rt = e.target.closest(".sg-retry2");
+    if (rt) { var id = rt.getAttribute("data-oid"), m = SG.ids[id] || (SG.lastM && String(SG.lastM.id) === id ? SG.lastM : null); if (m) { var s0 = SG.hist.pop(); sgCloseView(false); sgOpen(m); if (s0) SG.hist[SG.hist.length - 1] = s0; } return; }
+    var th = e.target.closest(".sg-th");
+    if (th) { sgShowPhoto(+th.getAttribute("data-i")); return; }
+    var nv = e.target.closest(".sgv-nav");
+    if (nv) { var k = sgPhotos(SG.vo).length; if (k) sgShowPhoto(((SG.pi || 0) + (nv.classList.contains("sgv-next") ? 1 : -1) + k) % k); return; }
+    if (e.target.closest(".sgv-onmap")) { // the map, right at this spot, close up (Back returns)
+      var mo = SG.openM; if (!mo) return;
+      SG.jumped = true; sgCloseView(false); SG.openM = mo;
+      if (window.SL_MAP_CAM) window.SL_MAP_CAM.centre(mo.lon, mo.lat, (mo.fuzzy ? 256 * Math.pow(2, 12) : 256 * Math.pow(2, 16)) / Math.max(200, sgCv ? sgCv.clientWidth : 900), 650);
+      window.SL_MAP_REDRAW && window.SL_MAP_REDRAW();
       return;
     }
-    var th = e.target.closest(".sg-th");
-    if (th) { // another photo of the same observation
-      var o = SG.openM && SG.cache[SG.openM.id] && SG.cache[SG.openM.id].o, p = o && (o.photos || []).filter(function (q) { return q && q.url; })[+th.getAttribute("data-i")];
-      var f = sgPop.querySelector(".sg-ph");
-      if (p && f) { f.querySelector("img").src = String(p.url).replace("/square.", "/medium."); f.querySelector("figcaption").textContent = (p.attribution || "Photo by the observer") + " · " + licTxt(p.license_code); f.classList.remove("sg-ph-err"); }
-      [].forEach.call(sgPop.querySelectorAll(".sg-th"), function (b) { b.classList.toggle("on", b === th); });
+    var b3 = e.target.closest(".sgv-3d");
+    if (b3 && window.SL_3D && window.SL_3D.panel && SG.vo && SG.vo.taxon) {
+      var tx = SG.vo.taxon, key = String(tx.name || "").trim().toLowerCase().split(/\s+/).slice(0, 2).join("-").replace(/[^a-z-]+/g, "");
+      if (key) window.SL_3D.panel(key, b3, tx.preferred_common_name && tx.preferred_common_name !== tx.name ? tx.preferred_common_name : "");
       return;
     }
     var rp = e.target.closest(".sg-ph-retry");
@@ -20519,12 +20867,21 @@ window.SL_GEO_READY = new Promise(function (res) {
   }, true);
   sgPop.addEventListener("load", function (e) { var im = e.target; if (im && im.tagName === "IMG") { var fg = im.closest(".sg-ph"); if (fg) { fg.classList.remove("sg-ph-err"); var mm = fg.querySelector(".sg-ph-msg"); if (mm) mm.remove(); } } }, true);
   sgPop.addEventListener("pointerup", function (e) { e.stopPropagation(); });
+  document.addEventListener("keydown", function (e) {
+    if (sgPop.hidden || document.querySelector(".sl3d-bd")) return; // (the 3D panel on top closes first)
+    if (e.key === "Escape") { e.preventDefault(); sgCloseView(false); }
+    else if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && SG.vo && !/^(INPUT|TEXTAREA)$/.test((e.target || {}).tagName || "")) {
+      var k = sgPhotos(SG.vo).length; if (k > 1) sgShowPhoto(((SG.pi || 0) + (e.key === "ArrowRight" ? 1 : -1) + k) % k);
+    }
+  });
   function sgSet(on) {
     SG.on = on;
     sgBtn.classList.toggle("on", on); sgBtn.setAttribute("aria-pressed", String(on));
     st.sightings = on; save(); syncUI();
     if (sgKey) sgKey.hidden = !on;
-    if (!on) { SG.token++; SG.ptok++; SG.busy = false; SG.list = []; SG.ids = {}; SG.fkey = ""; SG.want = ""; clearTimeout(SG.t); sgClose(); sgNoteSet(""); sgOptsOpen(false); sgStatus(); if (SG.layer) SG.layer.clearLayers(); window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); return; }
+    // a species search shows its range countries with Sightings off, only its dots with it on
+    var msq = window.SL_MAP_SEARCH && window.SL_MAP_SEARCH(); if (msq && msq.kind === "text" && msq.q && window.SL_MAP_REPAINT) try { window.SL_MAP_REPAINT(); } catch (e) {} // (a place search stays as it is)
+    if (!on) { SG.token++; SG.ptok++; SG.busy = false; SG.list = []; SG.ids = {}; SG.done = []; SG.fkey = ""; SG.rkey = ""; SG.want = ""; SG.hist = []; clearTimeout(SG.t); sgClose(); sgNoteSet(""); sgOptsOpen(false); sgStatus(); sgUndoBtn(); if (SG.layer) SG.layer.clearLayers(); if (sgCv) sgCv.style.cursor = ""; sgLay.key = ""; if (sgLay.cv) sgLay.cv.width = sgLay.cv.height = 0; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); return; }
     // v4.62: turning Sightings on keeps the picked country, state or search (it no longer clears the map)
     SG.want = ""; sgStatus(); sgLoad(true); sgRender();
   }
@@ -20993,7 +21350,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
-    { v: "v5.69", d: "2026-11-19", items: ["Map borders fixed everywhere: every state and region now lines up exactly with its country, so no more doubled lines", "See near me is a round button above Full screen: tap to go to where you are, tap again to stop", "How to find it: where to look, what time of year and day, tips and safety for every snake near you", "Place buttons pop up on hover; map cards no longer turn green", "Regions of Portugal, States of the United States", "Clicking a continent shows it on the map; clicked places fit in the part of the map you can see", "Clicking on empty map cancels your search"] },
+    { v: "v5.69", d: "2026-11-19", items: ["Map borders fixed everywhere: every state and region now lines up exactly with its country, so no more doubled lines", "See near me is a round button above Full screen: tap to go to where you are, tap again to stop", "How to find it: where to look, what time of year and day, tips and safety for every snake near you", "Place buttons pop up on hover; map cards no longer turn green", "Regions of Portugal, States of the United States", "Clicking a continent shows it on the map; clicked places fit in the part of the map you can see", "Clicking on empty map cancels your search", "Sightings: every sighting is its own green dot, smooth moving, zoom to street level, a big view with who found it, when, exactly where, notes and an Explore in 3D button, plus Back"] },
     { v: "v5.68", d: "2026-11-18", items: ["Mark Seen: say if you found it alive or dead, and add as many finds as you like with where and when", "Pop-ups like Welcome back wait until the opening is over and you scroll down", "Species pages: venom and harm at the top of Key facts, with a small See more for the rest", "No hover text on buttons", "Bigger Achievements panel", "Opening photo name moves above Scroll to continue on small screens"] },
     { v: "v5.67", d: "2026-11-18", items: ["3D snakes look more like the real species: cobra hoods and raised pose, body and tail shapes per genus, correct eye sizes, better patterns and head marks", "Tentacles, leaf nose, nose horn, death adder lure, real fang lengths and mouth colours (black mamba inky black, cottonmouth white)", "Tree boas, tree pythons and green pit vipers drape properly on the branch", "Real adult sizes for 300+ genera (Western Hooknose is now 23 cm, not 80 cm)"] },
     { v: "v5.66", d: "2026-11-18", items: ["3D Anatomy: the head is see-through like the rest of the body - no more pale solid snout", "Anatomy labels sit right beside their parts instead of piling up", "Organs are in their real places for each kind of snake (heart, lungs, liver, stomach, kidneys and more), following the body's curves", "See it eat: each snake eats real prey from its diet, sized to its own head; the jaws open as wide as needed and walk the prey in, and a bulge travels down the body", "Every mode goes back exactly to normal after Reset"] },
@@ -24503,7 +24860,7 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
 <style>
 /* v4.50: count badges centred; v4.62: Sightings on = deep teal with a light ring and a tick (was bright red) */
 .tab-n { display: inline-flex; align-items: center; justify-content: center; line-height: 1; font-variant-numeric: tabular-nums; text-align: center; }
-.hm-toggle.sg-toggle.on, .hm-toggle.sg-toggle.on:hover { background: #3d7c75; border-color: #8db8b2; color: #fff; filter: none; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+.hm-toggle.sg-toggle.on, .hm-toggle.sg-toggle.on:hover { background: #58b351; border-color: #2f6f2b; color: #fff; filter: none; box-shadow: 0 2px 8px rgba(0,0,0,.2); text-shadow: 0 1px 1px rgba(10,40,14,.45); } /* v5.68: the dots' own green */
 .layers-pop .lp-txt { display: inline-flex; flex-direction: column; align-items: flex-start; line-height: 1.2; text-align: left; }
 .layers-pop .lp-rec { display: block; margin-top: 2px; font-style: normal; font-size: 10.5px; font-weight: 600; color: var(--gold, #58b351); letter-spacing: .02em; }
 .layers-pop .lp-rec.lp-sub { color: var(--text-muted); font-weight: 500; }
@@ -24651,13 +25008,88 @@ div.cp-rank > .cp-rank-pick i { margin: 0; }
 .sg-opts input { accent-color: #0b6a63; margin: 0; }
 .sg-opts-k { display: flex; gap: 8px; align-items: center; margin: 6px 0; font-size: 12.5px; }
 .sg-opts-small { font-size: 11.5px; color: var(--text-muted); margin: 8px 0 0; }
-.sg-k-dot { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 50%; background: #3d7c75; border: 1.6px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.25); }
-.sg-k-cl { display: inline-block; flex: none; width: 13px; height: 13px; box-sizing: border-box; border-radius: 50%; background: #3d7c75; border: 1.8px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.25); }
+.sg-k-dot { display: inline-block; flex: none; width: 9px; height: 9px; border-radius: 50%; background: #58b351; border: 1.3px solid rgba(12,46,18,.92); }
+.sg-k-cl { display: inline-block; flex: none; width: 13px; height: 13px; box-sizing: border-box; border-radius: 50%; background: radial-gradient(circle at 30% 50%, #58b351 0 2.6px, transparent 3px), radial-gradient(circle at 70% 50%, #58b351 0 2.6px, transparent 3px); border: 0; box-shadow: 0 0 0 1px rgba(0,0,0,.25); }
 .sg-key.sg-key, .globe-stage .sg-key { gap: 7px; border-radius: 12px; flex-wrap: wrap; max-width: calc(100% - 90px); }
-.sg-key span.sg-k-dot { width: 10px; height: 10px; background: #3d7c75; }
-.sg-key span.sg-k-cl { width: 13px; height: 13px; border-radius: 50%; background: #3d7c75; border: 1.8px solid #fff; margin-left: 6px; }
+.sg-key span.sg-k-dot { width: 9px; height: 9px; background: #58b351; }
+.sg-key span.sg-k-cl { width: 13px; height: 13px; border-radius: 50%; margin-left: 6px; }
 /* the observation panel */
 .sg-pop { width: 300px; max-height: calc(100% - 16px); overflow-y: auto; }
+/* v5.68 Sightings: an observation opens over almost the whole screen - big photos, who found it,
+   when, the exact spot, the species' own facts and Explore in 3D. Back returns the map as it was. */
+#sg-pop.sg-view { position: fixed; inset: 0; left: 0; top: 0; right: 0; bottom: 0; z-index: 1500; width: auto; max-height: none; overflow: hidden; border-radius: 0;
+  background: rgba(6,20,12,.62); padding: 18px; box-sizing: border-box; display: flex; align-items: stretch; justify-content: center; box-shadow: none; border: 0; color: var(--text, #222); }
+#sg-pop.sg-view[hidden] { display: none; }
+html.sgv-lock, html.sgv-lock body { overflow: hidden; }
+.sgv-card { position: relative; width: 100%; max-width: 1240px; height: 100%; background: var(--surface, #f6faf1); color: var(--text, #222); border-radius: 18px; overflow: hidden;
+  display: flex; flex-direction: column; box-shadow: 0 18px 60px rgba(0,0,0,.45); border: 1px solid var(--border, #c8d6bc); animation: sgvIn .16s ease-out; }
+@keyframes sgvIn { from { opacity: 0; transform: translateY(8px) scale(.99); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .sgv-card { animation: none; } }
+.sgv-top { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--border, #c8d6bc); flex: none; }
+.sgv-back, .sgv-3d, .sgv-onmap, .sg-undo { display: inline-flex; align-items: center; gap: 6px; font: 600 13.5px 'Inter', sans-serif; padding: 8px 15px 8px 10px; border-radius: 999px;
+  border: 1px solid #2f6f2b; background: #58b351; color: #fff; cursor: pointer; text-shadow: 0 1px 1px rgba(10,40,14,.4); }
+.sgv-back:hover, .sgv-3d:hover, .sgv-onmap:hover, .sg-undo:hover { filter: brightness(1.07); }
+.sgv-ttl { flex: 1; margin: 0; font: 600 11px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted, #667261); text-align: center; }
+#sg-pop.sg-view .sg-x { position: static; flex: none; width: 38px; height: 38px; font-size: 24px; line-height: 1; border-radius: 50%; background: var(--surface-hover, rgba(0,0,0,.06));
+  color: var(--text, #222); border: 1px solid var(--border, #c8d6bc); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 0 2px; }
+.sgv-scroll { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(340px, 1fr); }
+.sgv-media { background: #0b1710; display: flex; flex-direction: column; min-height: 0; }
+#sg-pop.sg-view .sg-ph { flex: 1; min-height: 0; margin: 0; position: relative; display: flex; flex-direction: column; background: #0b1710; }
+#sg-pop.sg-view .sg-ph img { flex: 1; min-height: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+#sg-pop.sg-view .sg-ph figcaption { flex: none; font-size: 11.5px; line-height: 1.35; padding: 6px 12px; color: rgba(255,255,255,.78); background: rgba(0,0,0,.35); }
+#sg-pop.sg-view .sg-ph-err img { visibility: hidden; }
+#sg-pop.sg-view .sg-ph-msg { height: auto; inset: 0; position: absolute; }
+.sgv-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: none; background: rgba(0,0,0,.5); color: #fff; font-size: 30px; line-height: 1; cursor: pointer; padding: 0 0 4px; }
+.sgv-prev { left: 10px; } .sgv-next { right: 10px; }
+#sg-pop.sg-view .sg-thumbs { flex: none; display: flex; gap: 6px; padding: 8px 10px; overflow-x: auto; flex-wrap: nowrap; background: #0b1710; }
+#sg-pop.sg-view .sg-th img { width: 56px; height: 56px; }
+#sg-pop.sg-view .sg-th.on { border-color: #58b351; }
+#sg-pop.sg-view .sg-nophoto { flex: 1; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.7); height: auto; min-height: 200px; background: #0b1710; padding: 0 16px; font-size: 14px; }
+.sgv-info { overflow-y: auto; overscroll-behavior: contain; padding: 18px 22px 26px; min-height: 0; }
+.sgv-info h2.sg-name { margin: 0; padding: 0; font: 700 26px/1.15 'Fraunces', Georgia, serif; display: block; }
+.sgv-info .sg-sci { margin: 4px 0 0; font-style: italic; color: var(--text-muted, #667261); font-size: 15.5px; }
+.sgv-info .sg-sci.sg-up { font-style: normal; }
+.sgv-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 2px; }
+.sgv-chip { font: 600 11.5px 'Inter', sans-serif; padding: 4px 10px; border-radius: 999px; background: var(--surface-hover, rgba(0,0,0,.05)); border: 1px solid var(--border, #c8d6bc); }
+.sgv-q-research { background: #58b351; color: #fff; border-color: #2f6f2b; }
+.sgv-q-needs_id { background: #f4e6b8; color: #5a4200; border-color: #d8c07a; }
+.sgv-ven { background: #b8402c; color: #fff; border-color: #8e2f20; }
+.sgv-safe { background: rgba(88,179,81,.16); border-color: rgba(88,179,81,.55); }
+.sgv-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 16px; margin: 14px 0 0; font-size: 14px; }
+.sgv-facts dt { font: 600 10.5px 'JetBrains Mono', monospace; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted, #667261); padding-top: 3px; }
+.sgv-facts dd { margin: 0; line-height: 1.45; overflow-wrap: anywhere; }
+.sgv-facts a, .sgv-page, #sg-pop.sg-view a.sg-orig { color: var(--gold, #3f7d43); font-weight: 600; }
+.sgv-muted { color: var(--text-muted, #667261); }
+.sgv-mono { font: 12.5px 'JetBrains Mono', monospace; }
+.sgv-sec { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border, #c8d6bc); }
+.sgv-sec h3 { margin: 0 0 8px; font: 700 15px 'Inter', sans-serif; }
+.sgv-sec h3 small { font-weight: 500; font-size: 12px; color: var(--text-muted, #667261); }
+.sgv-notes p { margin: 0; line-height: 1.55; font-size: 14px; }
+.sgv-map { position: relative; height: 180px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border, #c8d6bc); background: var(--surface-hover, rgba(0,0,0,.05)); }
+.sgv-map canvas { display: block; }
+.sgv-onmap { position: absolute; right: 8px; bottom: 8px; font-size: 12.5px; padding: 6px 13px; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.sgv-nomap-t { display: none; }
+.sgv-map.sgv-nomap .sgv-nomap-t { display: block; position: absolute; left: 10px; top: 8px; padding: 2px 7px; border-radius: 6px; background: var(--surface, #f6faf1); font: 12.5px 'JetBrains Mono', monospace; color: var(--text-muted, #667261); }
+.sgv-acts { display: flex; flex-wrap: wrap; gap: 10px 14px; margin-top: 14px; align-items: center; }
+.sgv-3d { padding: 9px 17px 9px 13px; }
+#sg-pop.sg-view a.sg-orig { display: inline-block; margin-top: 20px; font-size: 14px; }
+.sgv-credit { font-size: 11.5px; color: var(--text-muted, #667261); margin: 8px 0 0; }
+.sgv-info.sg-err { padding: 28px 22px; grid-column: 1 / -1; }
+.sgv-back:focus-visible, .sgv-3d:focus-visible, .sgv-onmap:focus-visible, .sg-undo:focus-visible, #sg-pop.sg-view button:focus-visible, #sg-pop.sg-view a:focus-visible { outline: 3px solid #9be07c; outline-offset: 2px; }
+.sg-undo { position: absolute; left: 50%; transform: translateX(-50%); bottom: 12px; z-index: 6; padding: 7px 14px 7px 10px; font-size: 13px; box-shadow: 0 3px 10px rgba(0,0,0,.3); }
+.sg-undo[hidden] { display: none; }
+@media (max-width: 760px) {
+  #sg-pop.sg-view { padding: 8px; }
+  .sgv-card { border-radius: 14px; }
+  .sgv-scroll { display: block; overflow-y: auto; overscroll-behavior: contain; }
+  .sgv-media { height: 48vh; min-height: 230px; }
+  .sgv-info { overflow: visible; padding: 14px 15px 22px; }
+  .sgv-info h2.sg-name { font-size: 22px; }
+  .sgv-ttl { font-size: 10px; }
+  .sgv-facts { grid-template-columns: 1fr; gap: 2px; }
+  .sgv-facts dd { margin-bottom: 7px; }
+}
+
 .sg-pop .sg-x { z-index: 3; }
 .sg-pop .sg-ph { margin: 0; position: relative; background: #1d2b22; }
 .sg-pop .sg-ph img { display: block; width: 100%; height: 180px; object-fit: cover; }
