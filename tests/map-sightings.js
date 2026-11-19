@@ -5,8 +5,9 @@
 // and /observations/{id}. Covers: one marker = one observation id, the right record and photos per
 // marker, no stale photo after a quick second tap, no substitute photo, failures + Retry, deleted
 // records, dedupe across pages, the newest pages loading by themselves (no Load more), a species
-// change while loading, clusters, the v4.63 one-button layer (no bar, options, key or Cameras button)
-// and compact card (photo, name, date, observer, one link, More details), Most/Fewest (ties, zeros),
+// change while loading, observations at one spot fanned out (v5.68: no clusters, no "pick one" list), the
+// one-button layer (no bar, options, key or Cameras button) and the big view (v5.68: photo, names, date,
+// observer, place, accuracy, quality, link - opened at once from what the list already knows), Most/Fewest (ties, zeros),
 // fossils kept out of living counts, Close vs Clear selection, Reset view, and the map state coming
 // back after a species page.
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
@@ -41,7 +42,8 @@ function listFor(u) {
   const q = new URL(u).searchParams, s = +q.get('swlat'), w = +q.get('swlng'), n = +q.get('nelat'), e = +q.get('nelng'), page = +q.get('page') || 1, per = +q.get('per_page') || 200;
   const taxa = q.get('taxon_id') || '';
   const sci = /30715/.test(taxa) && !/26093/.test(taxa) ? 'Vipera latastei' : null;
-  const base = sci ? 50000 : 1000;
+  // (each part of the map has its own observations: ids differ by the box asked for)
+  const base = sci ? 50000 : 1000 + (Math.abs(Math.round(w * 10)) % 40) * 1000;
   const res = [];
   const start = (page - 1) * per - (page > 1 ? 20 : 0);
   for (let i = start; i < Math.min(start + per, M.total); i++) {
@@ -58,7 +60,7 @@ async function route(r) {
   if (/static\.inaturalist\.org\/photos\//.test(u)) {
     const id = +((u.match(/photos\/(\d+)-/) || [])[1]);
     if (/TAXON-DEFAULT/.test(u)) M.defaultPhotoAsked = true;
-    if (M.brokenPhoto[id] > 0 && /medium/.test(u)) { M.brokenPhoto[id]--; return r.fulfill({ status: 404, body: '' }); }
+    if (M.brokenPhoto[id] > 0 && /(small|medium|large)\./.test(u)) { M.brokenPhoto[id]--; return r.fulfill({ status: 404, body: '' }); }
     return r.fulfill({ status: 200, contentType: 'image/png', body: PNG });
   }
   if (/api\.inaturalist\.org\/v1\/taxa\?/.test(u)) {
@@ -118,6 +120,7 @@ async function route(r) {
   const panelImgs = p => p.evaluate(() => [].map.call(document.querySelectorAll('#sg-pop .sg-ph img'), i => i.getAttribute('src')));
   // the observation the open card belongs to: read from its one "View original observation" link
   const cardId = p => p.evaluate(() => { const s = document.getElementById('sg-pop'), a = s.querySelector('a.sg-orig'); const m = !s.hidden && a && a.href.match(/observations\/(\d+)/); return m ? +m[1] : null; });
+  const closeView = p => p.evaluate(() => { const x = document.querySelector('#sg-pop .sg-x'); if (x && !document.getElementById('sg-pop').hidden) x.click(); });
 
   // ================= desktop, light =================
   let { ctx, p, errs } = await run({ width: 1280, height: 900 }, 'light');
@@ -134,18 +137,21 @@ async function route(r) {
     'one button, one set of dots: no Sightings bar, options, Load more, key or Cameras button');
   ok(await p.evaluate(() => !/Sightings/.test(document.getElementById('hm-measure').textContent)), 'the heatmap has no second "Sightings" switch');
   ok(await p.evaluate(() => document.getElementById('sg-toggle').innerText.trim()) === 'Sightings', 'the button label is just "Sightings"');
-  ok(await p.evaluate(() => getComputedStyle(document.getElementById('sg-toggle')).backgroundColor) === 'rgb(61, 124, 117)', 'Sightings on: muted teal');
+  ok(await p.evaluate(() => getComputedStyle(document.getElementById('sg-toggle')).backgroundColor) === 'rgb(88, 179, 81)', 'Sightings on: the dots\' SnakeList green');
   ok(await p.evaluate(() => document.querySelectorAll('#sg-toggle').length === 1), 'one Sightings toggle only');
   await shot(p, 'desktop-light-sightings-on', '#globe-stage');
   // the right record per marker: tap single dots, compare the panel with the marker's own id
-  await p.evaluate(() => window.SL_FLY_BOX(-9, -8, 39, 40)); await p.waitForTimeout(1500);
+  // (a box outside the view already loaded in full, so it is asked for)
+  await p.evaluate(() => window.SL_FLY_BOX(15, 16, 39, 40)); await p.waitForTimeout(2500);
   d = await dbg(p);
-  ok(d.dots.length >= 3, 'single markers at close zoom (' + d.dots.length + ')');
+  d.dots = d.dots.filter(o => o.x > 30 && o.y > 70 && o.x < 1200);
+  ok(d.dots.length >= 10, 'single markers at close zoom (' + d.dots.length + ')');
   let good = 0;
   for (const dot of d.dots.slice(0, 3)) {
+    await closeView(p);
     await cvClick(p, dot.x, dot.y); await p.waitForTimeout(700);
     const t = await panelText(p), im = await panelImgs(p);
-    const okRec = (await cardId(p)) === dot.id && t.includes('Seen by Observer ' + dot.id) && im.length === 1 && im[0].includes('/photos/' + dot.id + '-0/medium.');
+    const okRec = (await cardId(p)) === dot.id && t.includes('Observer ' + dot.id) && im.length === 1 && im[0].includes('/photos/' + dot.id + '-0/');
     if (okRec) good++; else console.log('   wrong panel for', dot.id, t.slice(0, 200), im);
   }
   ok(good === 3, 'each marker opens its own observation (id, observer, its own photo)');
@@ -154,62 +160,57 @@ async function route(r) {
     return { links: [].map.call(s.querySelectorAll('a'), a => a.textContent.trim()), name: (s.querySelector('.sg-name') || {}).textContent, det: det ? det.textContent : '', open: det ? det.open : null,
       shown: s.innerText, done: [].every.call(s.querySelectorAll('img'), i => i.complete && i.naturalWidth > 0) }; });
   ok(card.name === 'Viperine Water Snake' || card.name === "Lataste's Viper", 'card: the snake\'s name (' + card.name + ')');
-  ok(/2024/.test(t1) && /May/.test(t1) && /Seen by Observer/.test(t1), 'card: the date observed and the observer');
-  ok(card.links.length === 1 && card.links[0] === 'View original observation', 'card: one link, "View original observation" (' + card.links.join(', ') + ')');
-  ok(card.open === false && /CC BY-NC/.test(card.det) && /\(c\) Observer/.test(card.det) && /Place of/.test(card.det) && /Identified to species/.test(card.det) && !/CC BY-NC|Place of/.test(card.shown),
-    'card: photo credit, licence, place and identification sit under More details (closed)');
-  ok(card.done, 'card: it opens with its photo already loaded');
+  ok(/2024/.test(t1) && /May/.test(t1) && /FOUND BY|Found by/.test(t1) && /Observer \d+/.test(t1), 'view: the date observed and who found it');
+  ok(card.links.some(l => l === 'View original observation on iNaturalist'), 'view: a link to the original observation (' + card.links.join(', ') + ')');
+  ok(/CC BY-NC/.test(card.shown) && /\(c\) Observer/.test(card.shown) && /Place of/.test(card.shown) && /To species/.test(card.shown) && /Within about \d+ m|approximate/.test(card.shown) && /Research grade|Needs ID/.test(card.shown),
+    'view: photo credit, licence, place, accuracy, quality and identification shown');
   await shot(p, 'desktop-light-observation', '#globe-stage');
-  // no stale photo: A is slow, B is quick; the panel must end on B, and never show A's photo
+  // no stale record: A's full record is slow, B is quick; the view opens at once on A (from what the
+  // list knows), then B is opened - it must end on B, and never show A's photo
   const A = d.dots[3], B = d.dots[4];
   M.slowIds[A.id] = 2000;
+  await closeView(p);
   await cvClick(p, A.x, A.y); await p.waitForTimeout(150);
-  ok(await p.evaluate(() => document.getElementById('sg-pop').hidden && /Loading sighting/.test(document.getElementById('sg-note').textContent)) && (await panelImgs(p)).length === 0,
-    'a new tap closes the open card at once (no old photo or details) and says Loading');
+  ok((await cardId(p)) === A.id && (await panelImgs(p)).every(s => s.includes('/photos/' + A.id + '-')), 'a tap opens the view at once, before the full record arrives (no Loading wait)');
+  await closeView(p);
   await cvClick(p, B.x, B.y); await p.waitForTimeout(2600);
   let tB = await panelText(p), imB = await panelImgs(p);
   ok((await cardId(p)) === B.id && tB.includes('Observer ' + B.id) && imB.length === 1 && imB[0].includes('/photos/' + B.id + '-'), 'the slow answer for the first tap is ignored (card shows ' + B.id + ' with its own photo)');
   // no substitute photo
   const C = d.dots[5]; M.noPhoto[C.id] = 1;
-  await cvClick(p, C.x, C.y); await p.waitForTimeout(800);
+  await closeView(p); await cvClick(p, C.x, C.y); await p.waitForTimeout(800);
   ok(/No photo available for this sighting\./.test(await panelText(p)) && (await panelImgs(p)).length === 0 && !M.defaultPhotoAsked, 'no photo: says so, and no species/default photo is used');
   // a photo that fails to load: message + Retry, no other picture
-  const Dd = d.dots[6]; M.brokenPhoto[Dd.id] = 2; // the card waits for the photo once, then shows it failed
-  await cvClick(p, Dd.x, Dd.y); await p.waitForTimeout(900);
+  const Dd = d.dots[6]; M.brokenPhoto[Dd.id] = 2; // the shown size and the large one both fail once
+  await closeView(p); await cvClick(p, Dd.x, Dd.y); await p.waitForTimeout(900);
   ok(/This photo couldn.t load/.test(await panelText(p)), 'a broken photo says so, with Retry');
   await p.click('#sg-pop .sg-ph-retry'); await p.waitForTimeout(700);
   ok(!/This photo couldn.t load/.test(await panelText(p)), 'photo Retry loads it');
   // detail request fails -> Retry
   const E = d.dots[7]; M.failOnce[E.id] = 1;
-  await cvClick(p, E.x, E.y); await p.waitForTimeout(900);
-  ok(/Couldn.t load this sighting/.test(await panelText(p)), 'a failed observation request shows an error with Retry');
-  await p.click('#sg-pop .sg-retry2'); await p.waitForTimeout(900);
-  ok((await cardId(p)) === E.id, 'Retry loads the observation');
+  await closeView(p); await cvClick(p, E.x, E.y); await p.waitForTimeout(900);
+  ok((await cardId(p)) === E.id && !/Couldn.t load this sighting/.test(await panelText(p)), 'a failed full-record request still shows the observation (from the list)');
   // cached: a second open makes no new request
+  await closeView(p); await cvClick(p, B.x, B.y); await p.waitForTimeout(400); await closeView(p);
   const nDet = M.detailUrls.length; await cvClick(p, B.x, B.y); await p.waitForTimeout(400);
   ok(M.detailUrls.length === nDet && (await cardId(p)) === B.id, 'observations are cached by id');
   // deleted record
   const G = d.dots[8]; M.gone[G.id] = 1; const nBefore = (await dbg(p)).n;
-  await cvClick(p, G.x, G.y); await p.waitForTimeout(900);
+  await closeView(p); await cvClick(p, G.x, G.y); await p.waitForTimeout(900);
   ok(/no longer on iNaturalist/.test(await panelText(p)) && (await dbg(p)).n === nBefore - 1, 'a deleted observation says so and leaves the map');
   await p.click('#sg-pop .sg-x');
-  // clusters: 6 observations stacked on one spot
-  M.stack = { n: 6, lon: -8.5, lat: 39.5 };
-  await p.evaluate(() => window.SL_FLY_BOX(-10, -6, 37, 42.2)); await p.waitForTimeout(1800);
+  // v5.68: no clusters - 6 observations stacked on one spot are fanned out, each its own dot
+  M.stack = { n: 6, lon: 25.5, lat: 39.5 }; // (outside the parts of the map already loaded in full)
+  await p.evaluate(() => window.SL_FLY_BOX(24.5, 26.5, 38.5, 40.5)); await p.waitForTimeout(2200);
   d = await dbg(p);
-  ok(d.clusters.length > 0, 'nearby observations are drawn as clusters - one plain dot, no number (v4.80) (' + d.clusters.length + ')');
-  await shot(p, 'desktop-light-clusters', '#globe-stage');
-  await p.evaluate(() => window.SL_FLY_BOX(-8.52, -8.48, 39.49, 39.51)); await p.waitForTimeout(1800);
-  d = await dbg(p);
-  const stackC = d.clusters.find(c => c.n >= 6);
-  ok(!!stackC, 'observations at one exact spot stay one cluster at close zoom');
-  if (stackC) { await cvClick(p, stackC.x, stackC.y); await p.waitForTimeout(500); }
-  ok(/6 sightings here - pick one/.test(await panelText(p)), 'tapping a numbered group that cannot split lists its sightings to pick from');
-  await p.click('#sg-pop [data-oid]'); await p.waitForTimeout(800);
-  ok((await cardId(p)) >= 90000, 'picking one from the list opens it');
-  await p.click('#sg-pop .sg-x'); M.stack = {};
+  const st6 = d.dots.filter(o => o.id >= 90000);
+  ok(d.clusters.length === 0 && st6.length === 6 && st6.every((a, i) => st6.every((c, j) => i === j || Math.hypot(a.x - c.x, a.y - c.y) >= 8)), 'observations at one exact spot are fanned out, every one its own dot (' + st6.length + ')');
+  await shot(p, 'desktop-light-fanned', '#globe-stage');
+  if (st6[3]) { await cvClick(p, st6[3].x, st6[3].y); await p.waitForTimeout(500); }
+  ok(!/pick one/.test(await panelText(p)) && (await cardId(p)) === (st6[3] || {}).id, 'tapping one of them opens it straight away - no "pick one" list');
+  await closeView(p); M.stack = {};
   // list failure + Retry
-  M.listMode = 'fail'; await p.evaluate(() => window.SL_FLY_BOX(-9.5, -7, 38, 40)); await p.waitForTimeout(3500);
+  M.listMode = 'fail'; await p.evaluate(() => window.SL_FLY_BOX(40, 42, 38, 40)); await p.waitForTimeout(3500);
   let note = await p.evaluate(() => document.getElementById('sg-note').innerText);
   ok(/Couldn.t load sightings/.test(note) && /Retry/.test(note), 'a failed list request says so with Retry');
   M.listMode = 'ok'; await p.click('#sg-note .sg-retry'); await p.waitForTimeout(1500);
@@ -231,8 +232,8 @@ async function route(r) {
   const mid = d.dots.find(o => o.x > cvs[0] * 0.35 && o.x < cvs[0] * 0.65 && o.y > cvs[1] * 0.45 && o.y < cvs[1] * 0.75);
   if (mid) { await cvClick(p, mid.x, mid.y); await p.waitForTimeout(900); }
   ok(mid && (await cardId(p)) === mid.id, 'after full screen + resize, a tap opens the dot under it');
-  const edge = await p.evaluate(() => { const s = document.getElementById('sg-pop').getBoundingClientRect(), g = document.getElementById('globe-stage').getBoundingClientRect(); return s.left >= g.left - 1 && s.right <= g.right + 1 && s.top >= g.top - 1 && s.bottom <= g.bottom + 1; });
-  ok(edge, 'the observation panel stays inside the map');
+  const edge = await p.evaluate(() => { const s = document.querySelector('#sg-pop .sgv-card').getBoundingClientRect(); return s.left >= 0 && s.right <= innerWidth && s.top >= 0 && s.bottom <= innerHeight && s.width > innerWidth * 0.9; });
+  ok(edge, 'the observation view covers almost the whole window, inside it');
   await p.evaluate(() => { const x = document.querySelector('#sg-pop .sg-x'); if (x) x.click(); }); await p.click('#globe-full'); await p.setViewportSize({ width: 1280, height: 900 }); await p.waitForTimeout(800);
   console.log('  page errors:', errs);
   ok(!errs.length, 'no page errors (desktop)');

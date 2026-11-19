@@ -66,8 +66,8 @@ async function route(r) {
     const rightRecord = (pn, id) => {
       const o = BY_ID[id], d = new Date(o.observed_on + 'T12:00:00Z');
       const dateOk = pn.t.includes(String(d.getUTCDate())) && pn.t.includes(String(d.getUTCFullYear()));
-      const photoOk = o.photos.length ? pn.im.length === 1 && pn.im[0].includes('/photos/' + id + '-') && pn.done : /No photo available for this sighting\./.test(pn.t) && pn.im.length === 0;
-      return pn.id === id && pn.t.includes('Seen by ' + o.user.name) && dateOk && photoOk && pn.t.includes(o.taxon.preferred_common_name);
+      const photoOk = o.photos.length ? pn.im.length === 1 && pn.im[0].includes('/photos/' + id + '-') : /No photo available for this sighting\./.test(pn.t) && pn.im.length === 0;
+      return pn.id === id && pn.t.includes(o.user.name) && dateOk && photoOk && pn.t.includes(o.taxon.preferred_common_name);
     };
     for (const [zoom, box] of [['whole view', null], ['zoomed in', [-9.4, -8.6, 39.9, 40.4]]]) {
       if (box) { await closePanel(); await p.evaluate(bx => window.SL_FLY_BOX.apply(null, bx), box); await p.waitForTimeout(2200); }
