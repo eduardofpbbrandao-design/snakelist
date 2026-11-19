@@ -2864,10 +2864,11 @@ float slScale(vec2 m) {
     fx.after();
     if (moving) kick();
     else if (amb && alive) { // v5.73: the scenery keeps moving gently, at a calmer frame rate (lower still at the Light setting)
-      clearTimeout(ambT); ambT = setTimeout(() => { ambOnly = true; kick(); }, quality === 'low' ? 42 : 30);
+      clearTimeout(ambT); ambT = setTimeout(() => { ambOnly = true; kick(); }, performance.now() - lastUser > 45000 ? 125 : quality === 'low' ? 42 : 30); // (left alone for a while: slower still, to save the battery)
     }
   }
-  let ambT = 0, shadowAge = 0, ambOnly = false;
+  let ambT = 0, shadowAge = 0, ambOnly = false, lastUser = performance.now();
+  for (const ev of ['pointerdown', 'wheel', 'keydown', 'touchstart']) on(stage, ev, () => { lastUser = performance.now(); }, { passive: true });
   const zeroM = new THREE.Matrix4().makeScale(0, 0, 0), ov = new THREE.Vector3(), od = new THREE.Vector3();
   function updateOccluders() {
     const list = ctx.occ; if (!list || !list.length) return;

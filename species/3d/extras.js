@@ -1035,7 +1035,7 @@ export function create(V) {
       const dist = sh1 - sh0, spd = (inWater ? 0.24 : 0.13) * L, dA = clamp(dist / spd, 1.6, inWater ? 5 : 4.2);
       phases.push([dA, (u, s) => {
         const e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2, sh = lerp(sh0, sh1, lerp(u, e, 0.6)); // (a smooth start, then a steady glide)
-        const fp = fol(sh), c = sstep(0.62, 1, u); let pose = fp;
+        const fp = fol(sh), c = strikes ? sstep(0.62, 1, u) : 0; let pose = fp;
         if (c > 0) { const Bt = R.baseOf(fp, B.fl), cp = R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1, base: Bt }); pose = R.blend(fp, cp, ease(c)); }
         R.setPose(pose); R.apply(); alivePrey(s, 1 - sstep(0.5, 1, u)); say(T.stalk); flick(flicks(s, 1.3, 2)); wake(s);
         const h = R.point(Hl * 0.5); camKey = camSide(h.clone().lerp(preyPt(), 0.5), fitD(Math.max(h.distanceTo(preyPt()) * 2.6, st.len * 1.7)), 0.58, 0.05);
@@ -1186,7 +1186,10 @@ export function create(V) {
     S.lastPose = pose;
     { const ph = S.stopping || V.reduce() ? 1 : ((t + 0.8) % 2.8) / 0.75; flick(ph < 1 ? ph : 0); } // v5.53: it flicks its tongue now and then as it goes
     if (S.stout) { for (let i = 0; i < N; i++) R.bul[i] = 1 + 0.03 * Math.sin(TAU * (i * R.dx / (R.L * 0.1) - t * 1.4)) * sstep(R.ih, R.ih + 30, i); }
-    R.setPose(pose); R.apply(); return true;
+    R.setPose(pose); R.apply();
+    // v5.73: at sea it swims, leaving rings on the water behind its head
+    if (P.scene && P.scene.kind === 'sea' && V.NATURE && V.NATURE.ripple && t - (S.ripT || 0) > 0.3) { S.ripT = t; const h = R.point(R.ih * R.dx * 0.6); V.NATURE.ripple(h.x, h.z, 0.9, Math.max(V.info.F.w0 * 1.6, 0.01)); }
+    return true;
   }
   function stopSlither(soft) {
     if (!slither) return;
