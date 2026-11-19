@@ -65,8 +65,8 @@ function pchip(pts) {
 
 // ---------- body plans: defaults that each species profile overrides ----------
 const PLANS = {
-  viper:    { body: { ld: 15, neck: 0.42, peak: 0.45, vent: 0.62, tail: 0.10, xs: 1.32, bf: 0.72 }, head: { shape: 'tri', len: 0.074, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.05, h: 0.58, snout: 0.5, jaw: 0.78, eyeX: 0.27, eyeA: 70, taper: 0.3, eye: 0.13, pupil: 'slit', brow: 0.10, canthus: 3.0 }, scales: { rows: 31, keel: 0.85, gloss: 0.08, aV: 0.73 }, pose: { kind: 'stack', pitch: 1.0, lead: 0.3, lift: 0.25, tight: 0.58 } }, // (v5.62: an ambush pile, not a flat spiral)
-  pitviper: { body: { ld: 22, neck: 0.48, peak: 0.45, vent: 0.62, tail: 0.085, xs: 1.25, bf: 0.74 }, head: { shape: 'tri', len: 0.06, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.0, h: 0.6, snout: 0.5, jaw: 0.8, eyeX: 0.3, eyeA: 70, taper: 0.3, eye: 0.12, pupil: 'slit', brow: 0.10, canthus: 3.0, pits: 'loreal' }, scales: { rows: 27, keel: 0.85, gloss: 0.08, aV: 0.73 }, pose: { kind: 'stack', pitch: 1.0, lead: 0.32, lift: 0.25, tight: 0.6 } },
+  viper:    { body: { ld: 15, neck: 0.42, peak: 0.45, vent: 0.62, tail: 0.10, xs: 1.32, bf: 0.72 }, head: { shape: 'tri', len: 0.074, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.05, h: 0.58, snout: 0.5, jaw: 0.78, eyeX: 0.27, eyeA: 70, taper: 0.3, eye: 0.13, pupil: 'slit', brow: 0.13, canthus: 3.0 }, scales: { rows: 31, keel: 0.85, gloss: 0.08, aV: 0.73 }, pose: { kind: 'stack', pitch: 1.0, lead: 0.3, lift: 0.25, tight: 0.58 } }, // (v5.62: an ambush pile, not a flat spiral)
+  pitviper: { body: { ld: 22, neck: 0.48, peak: 0.45, vent: 0.62, tail: 0.085, xs: 1.25, bf: 0.74 }, head: { shape: 'tri', len: 0.06, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.0, h: 0.6, snout: 0.5, jaw: 0.8, eyeX: 0.3, eyeA: 70, taper: 0.3, eye: 0.12, pupil: 'slit', brow: 0.13, canthus: 3.0, pits: 'loreal' }, scales: { rows: 27, keel: 0.85, gloss: 0.08, aV: 0.73 }, pose: { kind: 'stack', pitch: 1.0, lead: 0.32, lift: 0.25, tight: 0.6 } },
   python:   { body: { ld: 30, neck: 0.55, peak: 0.5, vent: 0.62, tail: 0.12, xs: 1.18, bf: 0.76, ridge: 0.025 }, head: { len: 0.04, chin: 0.62, tipR: 0.13, snoutH: 0.7, w: 0.68, h: 0.6, snout: 0.62, jaw: 0.78, eyeX: 0.3, eyeA: 62, eye: 0.13, pupil: 'slit', brow: 0.03, canthus: 3.0, pits: 'labial' }, scales: { rows: 71, keel: 0, gloss: 0.5, aV: 0.77 }, pose: { kind: 'stack', pitch: 1.05, lead: 0.3, lift: 0.2, tight: 0.62 } }, // (v5.62: a heavy resting pile)
   colubrid: { body: { ld: 36, neck: 0.78, peak: 0.42, vent: 0.62, tail: 0.24, xs: 1.08, bf: 0.8, ridge: 0.02 }, head: { len: 0.035, w: 1.05, h: 0.64, snout: 0.57, chin: 0.66, jaw: 0.72, eyeX: 0.3, eyeA: 60, eye: 0.16, pupil: 'round', brow: 0.04, canthus: 3.1 }, scales: { rows: 19, keel: 0, gloss: 0.5, aV: 0.73 }, pose: { kind: 'wave' } },
   elapid:   { body: { ld: 45, neck: 0.85, peak: 0.45, vent: 0.62, tail: 0.18, xs: 1.05, bf: 0.8, ridge: 0.015 }, head: { len: 0.032, w: 0.95, h: 0.6, snout: 0.56, chin: 0.66, jaw: 0.75, eyeX: 0.3, eyeA: 60, eye: 0.15, pupil: 'round', brow: 0.035, canthus: 3.1 }, scales: { rows: 17, keel: 0, gloss: 0.55, aV: 0.73 }, pose: { kind: 'wave' } },
@@ -115,6 +115,15 @@ function headForm(plan, id) {
   if (k) return HEAD_FORM[k];
   return HEAD_FORM[{ colubrid: 'colubrine', elapid: 'elapid', sea: 'sea', viper: 'viper', pitviper: 'pitviper', python: 'python' }[plan] || ''] || null;
 }
+// v5.73: pupils by genus where they differ from the family's: vertical slits in the night-hunting colubrids (cat, lyre,
+// egg-eating, snail-eating, house and wolf snakes) and some Australian elapids; a horizontal keyhole in the vine snakes;
+// round in the night adders (Causus), the one viper genus with them
+const PUPIL_GENUS = {};
+for (const [k, l] of Object.entries({
+  slit: 'boiga toxicodryas dipsadoboa telescopus crotaphopeltis leptodeira imantodes dipsas sibon sibynomorphus tropidodipsas hypsiglena trimorphodon pareas aplopeltura asthenodipsas dasypeltis lycodon lycophidion boaedon lamprophis psammodynastes leioheterodon madagascarophis ithycyphus acanthophis suta denisonia hoplocephalus cryptophis paroplocephalus azemiops',
+  hslit: 'ahaetulla oxybelis thelotornis dryophiops xenoxybelis',
+  round: 'causus',
+})) for (const g of l.split(' ')) PUPIL_GENUS[g] = k;
 function normProfile(p, id) {
   const base = PLANS[p.plan] || PLANS.colubrid;
   const q = merge(merge(base, { colors: { dorsal: '#776655', lateral: null, belly: '#d8cfb8', mottle: 0.08, var: 0.05 }, pattern: [], tail: {}, scene: { kind: 'litter' } }), p);
@@ -124,6 +133,7 @@ function normProfile(p, id) {
   // v5.73: the head's length, width and neck from its group (HEAD_FORM): the length kept within the group's range, the
   // width set by the length-to-width ratio (never broader: a slender colubrid's head is long and narrow, not bulbous) and
   // kept within its range against the body; then the neck from the head-to-neck ratio (body.hn when the profile has one)
+  { const pu = PUPIL_GENUS[String(id || p.id || '').split('-')[0]]; if (pu && q.plan !== 'blind' && !(p.head && p.head.pupil)) q.head = Object.assign({}, q.head, { pupil: pu }); }
   const form = q.plan === 'blind' ? null : headForm(q.plan, id || p.id);
   if (form && !q.head.wFixed) {
     const sx = Math.sqrt(q.body.xs), lwT = q.head.lw != null ? q.head.lw : q.head.minR != null ? Math.max(q.head.minR, 1.2) : form.lw;
@@ -1027,6 +1037,8 @@ function headLayout(P, F, body) {
         const sa = Math.max(0.12, eA - era - 0.045);
         S(E + 0.01, sa, pit ? 0.11 : plan === 'python' ? 0.085 : 0.065, pit ? 0.07 : 0.05, 'sup');
         S(E - erx * 1.3, eA - era * 0.4, 0.02, Math.max(0.03, era * 0.5), 'pre'); S(E - erx * 1.3, eA + era * 0.45, 0.02, Math.max(0.03, era * 0.5), 'pre');
+        // v5.73: the ring of small circumorbital scales (post- and suboculars) that frame a viper's or python's eye
+        for (let k = 0; k < 9; k++) { const t = -0.35 * Math.PI + (k / 8) * 1.3 * Math.PI, cx = E + Math.cos(t) * erx * 1.32, ca = eA + Math.sin(t) * era * 1.32; if (ca < mA - 0.03) S(cx, ca, Math.max(0.016, erx * 0.38), Math.max(0.022, era * 0.4), 'post'); }
       }
       S(0.15, 0.87, 0.06, 0.08, 'chin');
     }
@@ -1491,7 +1503,7 @@ function buildEyes(P, F, body, pat) {
     const u = clamp((th + Math.PI) / TAU, 0, 0.999), v = clamp(body.gOf(x) / body.gTotal, 0, 0.999), k = (Math.floor(v * img.height) * img.width + Math.floor(u * img.width)) * 4;
     const lin = (c) => Math.pow(c / 255, 2.2); return [lin(img.data[k]), lin(img.data[k + 1]), lin(img.data[k + 2])];
   };
-  const bulge = H.bulge != null ? H.bulge : 0.1; // how far the spectacle rises above the head's outline (in eye radii)
+  const bulge = H.bulge != null ? H.bulge : 0.06; // how far the spectacle rises above the head's outline (in eye radii; v5.73: flush with the head, not a bulging ball)
   for (const sg of [1, -1]) {
     const th0 = sg * body.eyeA, c = body.surf(xe, th0, true).p;
     const eye = [], spec = [], uv = [], col = [], spa = [];
