@@ -167,7 +167,7 @@
   #fs-btn.on .fs-in { display: none; }
   #fs-btn.on .fs-out { display: block; }
   /* the whole page in full screen: a little empty space at the very top */
-  html.sl-fs body { padding-top: 16px; }
+  html.sl-fs .sl-root { padding-top: 16px; } /* (the page's own background, not a band of another colour) */
   [data-sl-theme="dark"] .ico-moon { display: none; }
   [data-sl-theme="dark"] .ico-sun { display: block; }
   .hdr-actions { display: flex; align-items: center; gap: 8px; }
@@ -3676,6 +3676,33 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   .nm-how-box .nm-sec ul { margin: 2px 0 0; padding-left: 18px; line-height: 1.5; }
   .nm-how-box .nm-sec.nm-safe { background: rgba(140,40,20,0.28); border: 1px solid rgba(255,170,140,0.28); }
   .nm-how-box .nm-src { margin: 8px 2px 0; font-size: 10.5px; line-height: 1.4; opacity: .7; }
+  /* v5.73: the panel sits beside the map (below it on a phone), so the best spot it marks stays in view */
+  .globe-stage .sp-info-wrap.nm-how-wrap { background: none; pointer-events: none; justify-content: flex-end; align-items: stretch; padding: 10px 58px 10px 10px; } /* (the zoom buttons stay free) */
+  .nm-how-wrap .nm-how-box { pointer-events: auto; width: min(410px, 46%); max-height: 100%; }
+  @media (max-width: 640px), (max-height: 520px) {
+    .globe-stage .sp-info-wrap.nm-how-wrap { position: fixed; inset: auto 0 0 0; z-index: 400; padding: 0; align-items: flex-end; }
+    .nm-how-wrap .nm-how-box { width: 100%; max-height: min(52vh, 460px); border-radius: 16px 16px 0 0; }
+  }
+  .nm-how-box .nm-spot-sec { background: rgba(255,210,63,0.12); border: 1px solid rgba(255,210,63,0.45); }
+  .nm-how-box .nm-spot-sec b { color: #fff; }
+  .nm-spot-go { margin-top: 7px; padding: 6px 12px; border-radius: 999px; border: 1px solid #ffd23f; background: rgba(0,0,0,0.2); color: #fff; font: 600 12px 'Inter', sans-serif; cursor: pointer; }
+  .nm-spot-go:hover { background: rgba(255,210,63,0.2); }
+  .nm-spot-go[hidden] { display: none; }
+  .nm-how-box .nm-cmp { margin-top: 7px; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(160,222,140,0.5); background: rgba(0,0,0,0.2); color: #fff; font: 600 12px 'Inter', sans-serif; cursor: pointer; }
+  .nm-months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; align-items: end; height: 46px; margin: 7px 0 2px; }
+  .nm-months span { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+  .nm-months i { display: block; width: 100%; min-height: 2px; height: var(--h); border-radius: 3px 3px 0 0; background: #58b351; }
+  .nm-months span.top i { background: #ffd23f; }
+  .nm-months em { font: 600 9.5px 'JetBrains Mono', monospace; font-style: normal; opacity: .8; margin-top: 2px; }
+  /* the best spot on the map: a pulsing yellow ring and its name, over the map's own mark */
+  .nm-spot { position: absolute; z-index: 5; width: 0; height: 0; pointer-events: none; }
+  .nm-spot[hidden] { display: none; }
+  .nm-spot-ring { position: absolute; left: -24px; top: -24px; width: 48px; height: 48px; border-radius: 50%; border: 3px solid #ffd23f; box-sizing: border-box; animation: nmPulse 1.8s ease-out infinite; }
+  .nm-spot-ring.r2 { animation-delay: .9s; }
+  @keyframes nmPulse { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
+  .nm-spot-lbl { position: absolute; left: 0; bottom: 14px; transform: translateX(-50%); white-space: nowrap; padding: 4px 10px; border-radius: 999px;
+    background: #1f5a3a; color: #fff; border: 1px solid #ffd23f; font: 600 11.5px/1.2 'Inter', sans-serif; box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
+  @media (prefers-reduced-motion: reduce) { .nm-spot-ring { animation: none; transform: scale(.9); } .nm-spot-ring.r2 { display: none; } }
   .nm-off { margin: 6px 4px 10px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--map-on, #58b351); background: none; color: var(--text); font: 500 12.5px 'Inter', sans-serif; cursor: pointer; }
   .nm-acct { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); font: 13px/1.4 'Inter', sans-serif; color: var(--text); }
   .nm-acct[hidden] { display: none; }
@@ -12166,7 +12193,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       const narrowed = st.tab !== "guide" || Object.keys(st).some((k) => k !== "tab" &&
         (Array.isArray(st[k]) ? st[k].length > 0 : typeof st[k] === "boolean" ? st[k] : k === "type" ? st[k] !== "All" : k === "q" ? !!st[k] : false));
       allBtn.hidden = moreBtn.hidden || !narrowed;
-      if (!showAllRun) { allBtn.disabled = false; allBtn.textContent = "Show all " + shown.toLocaleString(); }
+      if (!showAllRun) { allBtn.disabled = false; allBtn.textContent = "Show all"; }
     }
 
     document.getElementById("result-count").textContent =
@@ -12984,7 +13011,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       if (run !== showAllRun) return;
       if (lastSig !== sig0) { showAllRun = 0; refresh(true); return; } // the search or filters changed meanwhile
       const y = window.scrollY;
-      renderLimit += 120;
+      renderLimit += 200;
       refresh(true);
       if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
       if (!document.getElementById("more-btn").hidden) idle(step);
@@ -17233,7 +17260,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // v5.68: the part of the map that is really in view - the panels over it (the species strip along the bottom
   // of the full screen map, a list or filters panel down one side...) left out. For each panel the side it
   // is cut from is the one that leaves the most map. Canvas pixels: [left, top, right, bottom].
-  var COVER_SEL = "#country-panel, .hm-panel, .hab-panel, .mf-panel";
+  var COVER_SEL = "#country-panel, .hm-panel, .hab-panel, .mf-panel, .nm-how-wrap:not([hidden]) .nm-how-box";
   function visibleArea(cw, ch) {
     var a = [0, 0, cw, ch], cr = cv.getBoundingClientRect();
     if (!cr.width || !cr.height) return a;
@@ -18088,7 +18115,36 @@ window.SL_GEO_READY = new Promise(function (res) {
     },
     row: function (sp, extra) { return '<div class="cp-row cp-sp" data-sp="' + attrEsc(sp.id) + '">' + photoBtn(sp) + "<b>" + sp.name + "</b><i>" + sp.sci + "</i>" + (extra || "") + "</div>"; },
     fly: function (lat, lon) { flyToLonLatBox(lon - 2.6, lon + 2.6, lat - 1.7, lat + 1.7, true); invalidate(); },
-    hide: function () { if (panelKind === "nearme") { document.getElementById("country-panel").hidden = true; panelKind = null; invalidate(); } }
+    hide: function () { if (panelKind === "nearme") { document.getElementById("country-panel").hidden = true; panelKind = null; invalidate(); } },
+    // v5.73 "How to find it" - the best spot near you is worked out by the near me script; these answer the map's part.
+    // the nearest open sea to a point (where a sea snake can be), up to ~90 km away
+    coast: function (lat, lon) {
+      if (!POLY) return null;
+      if (!nmHit(lat, lon)) return { lat: lat, lon: lon, km: 0 };
+      for (var km = 3; km <= 90; km += 3) for (var i = 0; i < 24; i++) { var q = nmStep(lat, lon, km, 2 * Math.PI * i / 24); if (!nmHit(q[0], q[1])) return { lat: q[0], lon: q[1], km: km }; }
+      return null;
+    },
+    // the nearest place this snake is recorded in: the place you are in when it lists it ("here"), else the
+    // nearest point of the nearest state/province (or country) outline that does
+    nearest: function (id, lat, lon) {
+      var sp = INDEX && INDEX.filter(function (x) { return x.id === id && !x.gone; })[0]; if (!sp) return null;
+      var h = nmHit(lat, lon); if (h && nmIn(sp, h)) return { here: true, lat: lat, lon: lon, km: 0, name: nmName(h) || nmCountry(h.cc) };
+      var best = { km: Infinity }, by = nmKeysBy(sp);
+      function flat(fl, nm) { for (var q = 0; q < fl.length; q += 2) { var d = nmKm(lat, lon, fl[q + 1], fl[q]); if (d < best.km) best = { km: d, lat: fl[q + 1], lon: fl[q], name: nm }; } }
+      sp.countries.forEach(function (n) {
+        var cc = ISO[n]; if (!cc) return;
+        var ks = by[cc];
+        if (ks && ks.length) ks.forEach(function (k) { var e = nmProv(cc)[k.slice(3)]; if (e) { var nm = (cc === "us" && window.STATE_NAME && window.STATE_NAME[k.slice(3)]) || k.slice(3); e.flats().forEach(function (fl) { flat(fl, nm + ", " + nmCountry(cc)); }); } });
+        else POLY.forEach(function (r) { if (r.code !== cc) return; if (r.dot) { var d = nmKm(lat, lon, r.lat0, r.lon0); if (d < best.km) best = { km: d, lat: r.lat0, lon: r.lon0, name: nmCountry(cc) }; } else for (var i = 0; i < r.n; i++) { var d2 = nmKm(lat, lon, r.lat[i], r.lon[i]); if (d2 < best.km) best = { km: d2, lat: r.lat[i], lon: r.lon[i], name: nmCountry(cc) }; } });
+      });
+      return best.km < Infinity ? best : null;
+    },
+    // the map centred on a point, showing about km around it
+    flyTo: function (lat, lon, km) {
+      var dLat = km / NMK, dLon = km / (NMK * Math.max(0.2, Math.cos(lat * Math.PI / 180)));
+      flyToLonLatBox(lon - dLon, lon + dLon, Math.max(-85, lat - dLat), Math.min(85, lat + dLat), true); invalidate();
+    },
+    canvas: function () { return cv; }
   };
   // ==== See near me (map side) - END ============================================================
   spWrap.addEventListener("click", function (e) {
@@ -26257,7 +26313,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
 <!-- ==== See near me (location panel, map button, list) - BEGIN ==================================== -->
 
 <div class="ck-bar nm-bar" id="nm-bar" hidden role="dialog" aria-label="Your location">
-  <p id="nm-txt"><b>See snakes near you?</b> Let SnakeList use your location to show the snakes that live near you on the map. It stays on this device, rounded to about 10 km, and is never sent anywhere.</p>
+  <p id="nm-txt"><b>See snakes near you?</b> Let SnakeList use your location to show the snakes that live near you on the map. It stays on this device, rounded to about 10 km. Only when you tap How to find it is a rough area round it (about 100 km) sent to iNaturalist, to look up sightings.</p>
   <div class="ck-btns"><button type="button" class="ck-no" id="nm-no">Not now</button><button type="button" class="ck-yes" id="nm-yes">Use my location</button><button type="button" class="ck-yes" id="nm-ok" hidden>OK</button></div>
 </div>
 <script>
@@ -26418,7 +26474,8 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     Acrochordidae: { water: 1, txt: "A file snake: fully aquatic and rarely seen on land." }
   };
   function listJoin(a) { return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; }
-  function guide(sp, f, lat) {
+  function guide(sp, f, lat, X) {
+    X = X || {};
     var c = card(sp.id), F = window.SL_FACTS || {}, type = c ? c.dataset.type || "" : "", fam = c ? c.dataset.family || "" : "";
     var hs = habNames(sp.id), has = function (re) { return hs.some(function (h) { return re.test(h[1]); }); };
     var names = function (re) { return hs.filter(function (h) { return re.test(h[1]); }).map(function (h) { return h[1].toLowerCase(); }); };
@@ -26443,7 +26500,13 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     else if (a < 23.5) yr = "In the tropics, as you are, there is no real winter, so snakes can be active all year round. Where there is a rainy and a dry season, many are easier to find in the rainy season, when the animals they eat are most active. High up in the mountains it is cooler, and snakes there are most active in the warmest months.";
     else if (a < 35) yr = "Where you are, snakes are usually active from spring to autumn (" + (north ? "about March to November" : "about September to May") + "), and on warm days in winter. In the hottest months they tend to come out in the cooler hours.";
     else yr = "Where you are, snakes are usually active from " + (north ? "about April to October" : "about October to April") + " and spend the cold months hidden away. Spring (" + (north ? "April to June" : "October to December") + ") is often the best time: after the winter they bask in the open to warm up.";
-    secs.push(["Best time of year", "<p>" + esc(yr) + "</p>"]);
+    var yrHtml = "<p>" + esc(yr) + "</p>", M = X.months, mn = X.mn || 0;
+    if (M && mn >= 8) { // v5.73: from the months of this snake's iNaturalist sightings in your wider area
+      var mx = Math.max.apply(null, M), top = [];
+      M.forEach(function (v, i) { if (v >= mx * 0.6) top.push(MON[i]); });
+      yrHtml = "<p>" + esc("Most of this snake's " + mn + " iNaturalist sightings in your wider area (roughly 300 km across) were made in " + listJoin(top) + ", so that is likely the best time to look." + (sea ? "" : " (Months with few sightings may also just have fewer people looking.)")) + "</p>" + monthBars(M, mx);
+    } else if (M && mn > 0) yrHtml += "<p>" + esc("(Only " + mn + " iNaturalist sighting" + (mn === 1 ? "" : "s") + " in your wider area - too few to tell its season here.)") + "</p>";
+    secs.push(["Best time of year", yrHtml]);
     // 3. the time of day
     var td;
     if (act) td = "Active: " + act.charAt(0).toLowerCase() + act.slice(1) + " (from its species page's sources).";
@@ -26453,6 +26516,13 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     td += sea ? "" : a < 23.5 ? " Snakes are cold-blooded: in tropical heat most hide in the middle of the day, so look in the morning, late afternoon and on warm evenings" + (night ? ", and after dark" : "") + "."
       : " Snakes are cold-blooded: on cool days look in the warm middle of the day; in hot weather, in the morning, late afternoon or on warm evenings" + (night ? ", and after dark" : "") + ".";
     secs.push(["Best time of day", "<p>" + esc(td) + "</p>"]);
+    // v5.73: the weather to look in (snakes are cold-blooded: the weather matters more than the date)
+    var wx;
+    if (sea) wx = "Calm, sunny days with clear water and little wind are usually best; in rough or murky water you won't see them.";
+    else if (a < 23.5) wx = "It is warm enough here on most days. The hottest, driest hours are usually quiet; mornings, overcast or humid days and the hours after rain are often better.";
+    else wx = "Mild, sunny days (roughly 18-28 \u00b0C, 65-82 \u00b0F), especially after a cool night, are often the best: snakes come out to warm up in the sun. They usually stay hidden when it is cold, windy or pouring with rain, and in a heat wave come out mostly in the cooler hours.";
+    if (night && !sea) wx += " For a snake active at night, warm and humid evenings, especially after rain, can be good.";
+    secs.push(["Weather to look in", "<p>" + esc(wx) + "</p>"]);
     // 4. where exactly to look, from its habitats
     var spots2 = [];
     if (sea) spots2.push(names(/Coral|Seagrass|Shallow|Lagoon|Estuar|Mangrove/).length ? "in " + listJoin(names(/Coral|Seagrass|Shallow|Lagoon|Estuar|Mangrove/).slice(0, 4)) + " - usually seen from a boat or while snorkelling" : "in shallow coastal water - usually seen from a boat or while snorkelling");
@@ -26475,7 +26545,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     if (ppl.length) spots2.push("around people too: " + listJoin(ppl.slice(0, 4)));
     if (night && has(/Roadsides/)) spots2.push("on quiet roads on warm nights (carefully, and only where it is safe to stop)");
     if (!spots2.length) spots2.push("where the habitats above meet: edges between cover and open, sunny ground are often the best places to look");
-    secs.push(["Where to look", "<ul>" + spots2.map(function (t) { return "<li>" + esc(t.charAt(0).toUpperCase() + t.slice(1)) + "</li>"; }).join("") + "</ul>"]);
+    secs.push(["Where to look: microhabitats", "<ul>" + spots2.map(function (t) { return "<li>" + esc(t.charAt(0).toUpperCase() + t.slice(1)) + "</li>"; }).join("") + "</ul>"]);
     // 5. how it behaves
     var tips = [], n = spots(c);
     if (n >= (F.COMMON_AT || 75)) tips.push("Often spotted: confirmed sightings in " + n + " places on iNaturalist.");
@@ -26487,44 +26557,197 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     tips.push("Walk slowly and quietly and scan ahead: snakes usually feel you coming and move away before you see them.");
     if (floor.length || under) tips.push("If you turn over a stone or log, lift it towards you (so it shields you) and put it back exactly as it was.");
     secs.push(["Behaviour tips", '<ul class="nm-tips">' + tips.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>"]);
+    if (X.diet) secs.push(["What it eats", "<p>" + esc(X.diet) + " - so look where its food is.</p>"]);
+    // v5.73: snakes it could be mistaken for - SnakeList's own "similar" list (same genus, then family), the ones recorded near you first
+    var sim = window.SL_similar ? window.SL_similar(sp.id) : [], nearIds = {}, simTxt = [];
+    lastList.forEach(function (x) { nearIds[x.id] = 1; });
+    var simNear = sim.filter(function (id) { return nearIds[id]; }).slice(0, 3);
+    var simUse = simNear.length ? simNear : sim.slice(0, 2), genus = (sp.sci || "").split(" ")[0];
+    simUse.forEach(function (id) {
+      var sc = card(id); if (!sc) return;
+      var ssci = ((sc.querySelector(".card-sci") || {}).textContent || "").trim();
+      var rel = ssci.split(" ")[0] === genus ? "same genus" : "same family";
+      simTxt.push((sc.dataset.name || ssci) + " (" + rel + (sc.dataset.venomous === "1" ? ", venomous" : "") + ")");
+    });
+    if (simTxt.length) secs.push(["Could be confused with", "<p>" + esc((simNear.length ? "Related snakes also recorded near you: " : "Its closest relatives in SnakeList (not recorded right here): ") + listJoin(simTxt) +
+      ". Relatives can look alike - check the head, pattern and colours on each one's page before you are sure, and treat any snake you can't name as venomous.") + "</p>" +
+      (window.SL_compare ? '<button type="button" class="nm-cmp" data-cmp="' + esc(sp.id) + '">Compare side by side</button>' : "")]);
+    // what to bring
+    var bring = ["Closed shoes or boots and long trousers", "Water, sun protection and a charged phone - and tell someone where you are going",
+      "A phone or camera with a good zoom, and binoculars to check basking spots from a distance"];
+    if (night && !sea) bring.push("A head torch (and a spare) for looking after dark");
+    if (sea) bring.push("Snorkel gear, or a trip with a local boat or dive guide");
+    secs.push(["What to bring", "<ul>" + bring.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>"]);
+    // searching kindly
+    var eth = ["Watch, don't touch: never catch, handle, chase or corner a snake, and always leave it a way out.",
+      "Keep a few metres away and keep your visit short, especially at its hiding places."];
+    if (floor.length || under) eth.push("Lift stones and logs gently, only a little, and put them back exactly as they were, without crushing anything underneath.");
+    eth.push("Stay on paths, ask before going onto private land, and follow the rules of nature reserves - in many places disturbing or collecting wildlife is illegal.");
+    if (n > 0 && n <= 10) eth.push("It is rarely seen: if you share a sighting online, keep the exact spot private (iNaturalist can hide it for you).");
+    secs.push(["Search ethically", "<ul>" + eth.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>"]);
+    secs.push(["Photo tip", "<p>" + esc("Use the zoom and stay where you are - a photo is never worth getting closer. Get the head from the side and the pattern along the body, plus one picture of the place, with no flash in daylight. Then mark it as seen in SnakeList, and consider sharing it on iNaturalist to help map where it lives.") + "</p>"]);
     // 6. safety
     var harm = window.SL_HARM ? window.SL_HARM(sp.id) : null, ven = c && c.dataset.venomous === "1", safe = [];
     if (ven) safe.push("Venomous: never touch, pick up or try to move it. Keep at least a few metres away, and give it a way out.");
     else if (harm === "harmful") safe.push("Can be dangerous: never touch it or get close. Keep at least a few metres away.");
     else safe.push("Not venomous, but any snake can bite when it is grabbed or cornered: watch it, don't touch it.");
     safe.push("Wear closed shoes and long trousers, and never put your hands or feet where you can't see.");
-    if (ven || harm === "harmful") safe.push("If someone is bitten, keep them still and call emergency services at once.");
-    secs.push(["Stay safe", "<ul>" + safe.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>", "nm-safe"]);
+    if (ven || harm === "harmful") {
+      safe.push("If someone is bitten: call emergency services at once and say it may be a venomous snake. Keep the person calm and still, take off rings, watches and tight clothes near the bite, note the time, and follow what the emergency services tell you.");
+      safe.push("Don't cut the bite, suck out venom, use a tight tourniquet, ice or alcohol, and don't try to catch or kill the snake - a photo from a safe distance is enough.");
+    } else safe.push("If it does bite, wash the bite with soap and water, and see a doctor if it becomes red, swollen or painful.");
+    secs.push([ven || harm === "harmful" ? "Stay safe and first aid" : "Stay safe", "<ul>" + safe.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>", "nm-safe"]);
     return secs;
   }
-  var howWrap = null, howBack = null;
+  var MON = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  function monthBars(M, mx) {
+    return '<div class="nm-months" role="img" aria-label="iNaturalist sightings by month">' + M.map(function (v, i) {
+      return '<span class="' + (v >= mx * 0.6 ? "top" : "") + '" title="' + MON[i] + ": " + v + '"><i style="--h:' + Math.round(v / (mx || 1) * 100) + '%"></i><em>' + MON[i].charAt(0) + "</em></span>";
+    }).join("") + "</div>";
+  }
+  // ---- v5.73: the best spot near you to look for it ----
+  // 1. the nearest group of this snake's iNaturalist sightings to you; 2. else, for a sea snake, the nearest coast;
+  // 3. else the nearest place SnakeList records it in. Only a rough area is sent to iNaturalist: the ~1 degree
+  // square you are in and the squares round it (about 300 km across) - never your own position.
+  var INAT = "https://api.inaturalist.org/v1/", inatCache = {};
+  function kmTo(lat, lon, lat2, lon2) { var dx = (lon2 - lon) * Math.cos((lat + lat2) / 2 * Math.PI / 180) * 111.32, dy = (lat2 - lat) * 111.32; return Math.sqrt(dx * dx + dy * dy); }
+  function dirTo(lat, lon, lat2, lon2) {
+    var a = (Math.atan2((lon2 - lon) * Math.cos(lat * Math.PI / 180), lat2 - lat) * 180 / Math.PI + 360) % 360;
+    return ["north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"][Math.round(a / 45) % 8];
+  }
+  function inatData(sci, lat, lon) {
+    var la = Math.floor(lat), lo = Math.floor(lon), k = Math.ceil(1 / Math.max(0.35, Math.cos(lat * Math.PI / 180)));
+    var q = "&swlat=" + Math.max(-90, la - 1) + "&swlng=" + Math.max(-180, lo - k) + "&nelat=" + Math.min(90, la + 2) + "&nelng=" + Math.min(180, lo + 1 + k);
+    var key = sci + q; if (inatCache[key]) return inatCache[key];
+    var t = "taxon_name=" + encodeURIComponent(sci) + "&verifiable=true" + q;
+    var get = function (u) { return fetch(u).then(function (r) { if (!r.ok) throw new Error("iNat " + r.status); return r.json(); }); };
+    var slow = new Promise(function (res, rej) { setTimeout(function () { rej(new Error("slow")); }, 9000); });
+    var pr = Promise.race([Promise.all([get(INAT + "observations?" + t + "&per_page=200&order_by=observed_on"),
+      get(INAT + "observations/histogram?" + t + "&date_field=observed&interval=month_of_year").catch(function () { return null; })]), slow]).then(function (r) {
+      var pts = ((r[0] && r[0].results) || []).map(function (o) {
+        var c = o && o.geojson && o.geojson.coordinates;
+        return c && isFinite(c[0]) && isFinite(c[1]) ? { lat: +c[1], lon: +c[0], ob: !!(o.obscured || o.geoprivacy === "obscured" || o.taxon_geoprivacy === "obscured") } : null;
+      }).filter(Boolean);
+      var mo = r[1] && r[1].results && r[1].results.month_of_year, months = null, mn = 0;
+      if (mo) { months = []; for (var m = 1; m <= 12; m++) { months.push(+mo[m] || 0); mn += +mo[m] || 0; } }
+      return { pts: pts, months: months, mn: mn };
+    });
+    pr.catch(function () { delete inatCache[key]; }); // (offline: try again next time)
+    return (inatCache[key] = pr);
+  }
+  // sightings grouped in ~10 km squares; the best square is many sightings, not far away
+  function bestGroup(pts, lat, lon) {
+    var open = pts.filter(function (x) { return !x.ob; }), use = open.length ? open : pts, cells = {}, best = null;
+    use.forEach(function (x) {
+      var k = Math.round(x.lat * 10) + ":" + Math.round(x.lon * 10), c = cells[k] || (cells[k] = { n: 0, la: 0, lo: 0, d: Infinity });
+      c.n++; c.la += x.lat; c.lo += x.lon; c.d = Math.min(c.d, kmTo(lat, lon, x.lat, x.lon));
+    });
+    Object.keys(cells).forEach(function (k) { var c = cells[k]; c.lat = c.la / c.n; c.lon = c.lo / c.n; c.s = Math.pow(c.n, 0.7) / (8 + c.d); if (!best || c.s > best.s) best = c; });
+    if (best) best.approx = !open.length;
+    return best;
+  }
+  function findSpot(sp, r) {
+    var M = window.SL_NEARME_MAP, c = card(sp.id), sea = !!(c && c.dataset.type === "Sea Snake");
+    function fallback(d) {
+      var o = null, q;
+      if (sea && M && M.coast && (q = M.coast(r.lat, r.lon))) o = { lat: q.lat, lon: q.lon, kind: "coast" };
+      if (!o && M && M.nearest && (q = M.nearest(sp.id, r.lat, r.lon))) o = q.here || q.km < 12 ? { lat: r.lat, lon: r.lon, kind: "here", name: q.name } : { lat: q.lat, lon: q.lon, kind: "region", name: q.name }; // (within the rounding of your position: here)
+      if (!o) o = { lat: r.lat, lon: r.lon, kind: "here" };
+      o.inat = !!d; o.months = d && d.months; o.mn = d ? d.mn : 0;
+      return o;
+    }
+    var go = function () {
+      return inatData(sp.sci, r.lat, r.lon).then(function (d) {
+        var b = d.pts.length ? bestGroup(d.pts, r.lat, r.lon) : null;
+        return b ? { lat: b.lat, lon: b.lon, kind: "inat", n: b.n, approx: b.approx, inat: true, months: d.months, mn: d.mn } : fallback(d);
+      }, function () { return fallback(null); });
+    };
+    var pr; try { pr = window.fetch ? go() : Promise.resolve(fallback(null)); } catch (e) { pr = Promise.resolve(fallback(null)); }
+    return pr.then(function (o) { o.km = kmTo(r.lat, r.lon, o.lat, o.lon); o.dir = o.km >= 1 ? dirTo(r.lat, r.lon, o.lat, o.lon) : ""; return o; });
+  }
+  function spotHtml(o, sp) {
+    if (!o) return '<p class="sp-info-h">Best spot near you</p><p>Looking for the best spot near you…</p>';
+    var far = o.km < 2 ? "right around you" : "about " + (o.km < 10 ? o.km.toFixed(1) : Math.round(o.km)) + " km " + o.dir + " of you", t;
+    if (o.kind === "inat") t = "<b>" + esc(far.charAt(0).toUpperCase() + far.slice(1)) + "</b> (marked on the map): " + (o.n > 1 ? esc(o.n + " of its iNaturalist sightings were made within about 10 km of there - the closest group of sightings to you.") : "the nearest iNaturalist sighting of it to you was made there.") +
+      (o.approx ? " iNaturalist hides the exact place of this snake's sightings, so the mark is only approximate." : "") + " A good place to start - but snakes move about, so there's no guarantee.";
+    else if (o.kind === "coast") t = (o.inat ? "iNaturalist has no sightings of it close to you. " : "iNaturalist couldn't be reached, so this is from SnakeList's own map. ") + "A sea snake lives in the sea: the nearest coast is <b>" + esc(far) + "</b> (marked on the map). Look from a boat or while snorkelling, with a local guide.";
+    else if (o.kind === "region") t = (o.inat ? "iNaturalist has no sightings of it close to you. " : "iNaturalist couldn't be reached, so this is from SnakeList's own records. ") + "The nearest place SnakeList records it in is " + esc(o.name || "") + ", <b>" + esc(far) + "</b> (marked on the map).";
+    else t = "SnakeList records it where you are" + (o.name ? " (" + esc(o.name) + ")" : "") + ", but " + (o.inat ? "iNaturalist has no sightings of it close to you" : "iNaturalist couldn't be reached") + ", so there is no exact spot to point to. Search the habitats below around you.";
+    return '<p class="sp-info-h">Best spot near you</p><p>' + t + '</p><button type="button" class="nm-spot-go"' + (o.kind === "here" && o.km < 2 ? " hidden" : "") + ">Show on map</button>";
+  }
+  // the spot on the map (drawn by SL_OVERLAY_DRAW below) and the map moved so it is in view
+  var spotOn = null, spotEl = null;
+  function spotLabel(o) { return o.kind === "here" ? "Look around here" : "Best spot near you"; }
+  function showSpot(o) {
+    var M = window.SL_NEARME_MAP, r = rec(); if (!M || !r) return;
+    spotOn = o;
+    if (!spotEl) {
+      spotEl = document.createElement("div"); spotEl.className = "nm-spot"; spotEl.hidden = true; spotEl.setAttribute("aria-hidden", "true");
+      spotEl.innerHTML = '<span class="nm-spot-ring"></span><span class="nm-spot-ring r2"></span><b class="nm-spot-lbl"></b>';
+      stage.appendChild(spotEl);
+    }
+    spotEl.querySelector(".nm-spot-lbl").textContent = spotLabel(o);
+    // centred on the spot, with you still on the map when it is not too far
+    M.flyTo(o.lat, o.lon, Math.max(14, Math.min(260, o.km * 1.15 + 6)));
+    if (window.SL_MAP_REDRAW) window.SL_MAP_REDRAW();
+  }
+  function clearSpot() { spotOn = null; if (spotEl) spotEl.hidden = true; }
+  // the map scrolled into view (from the list under it); not in full screen, where it already fills the screen
+  function mapIntoView() {
+    if (!stage || stage.classList.contains("full")) return 0;
+    var rt = stage.getBoundingClientRect(), want = window.innerWidth <= 640 ? 4 : 8;
+    if (Math.abs(rt.top - want) < 6) return 0;
+    var smooth = !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+    window.scrollTo({ top: Math.max(0, window.scrollY + rt.top - want), behavior: smooth ? "smooth" : "auto" });
+    return smooth ? 480 : 30;
+  }
+  var howWrap = null, howBack = null, howId = null, howData = null;
+  function howPaint() {
+    var sp = lastList.filter(function (x) { return x.id === howId; })[0], r = rec(); if (!sp || !howWrap) return;
+    var D = howData || {}, f = lastFind || {}, o = D.spot;
+    var secs = guide(sp, f, r ? r.lat : 0, { months: o && o.months, mn: o ? o.mn : 0, diet: D.diet });
+    var box = howWrap.querySelector(".nm-how-box"), keep = box ? box.scrollTop : 0;
+    howWrap.querySelector(".nm-how-body").innerHTML = '<h3 id="nm-how-name">How to find the ' + esc(sp.name) + "</h3>" +
+      '<p class="sp-info-sci">' + esc(sp.sci) + "</p>" +
+      '<p class="nm-how-where">Near you: ' + esc((f.area ? f.area + ", " : "") + (f.country || "")) + "</p>" +
+      '<div class="nm-sec nm-spot-sec" aria-live="polite">' + spotHtml(o, sp) + "</div>" +
+      secs.map(function (x) { return '<div class="nm-sec' + (x[2] ? " " + x[2] : "") + '"><p class="sp-info-h">' + esc(x[0]) + "</p>" + x[1] + "</div>"; }).join("") +
+      '<p class="nm-src">Made from SnakeList\'s own data on this snake (its habitats, type, family, venom and sightings), iNaturalist\'s sightings where they could be loaded, and your rough location - only a rough area round it (about 100 km) is sent to iNaturalist. General advice: snakes don\'t always follow it.</p>';
+    if (box) box.scrollTop = keep;
+  }
   function howOpen(id) {
     var sp = lastList.filter(function (x) { return x.id === id; })[0], r = rec(); if (!sp || !stage) return;
     if (!howWrap) {
       howWrap = document.createElement("div"); howWrap.className = "sp-info-wrap nm-how-wrap"; howWrap.hidden = true;
-      howWrap.innerHTML = '<div class="sp-info nm-how-box" role="dialog" aria-modal="true" aria-labelledby="nm-how-name" tabindex="-1"><button type="button" class="sp-info-x" aria-label="Close">&times;</button><div class="nm-how-body"></div></div>';
+      howWrap.innerHTML = '<div class="sp-info nm-how-box" role="dialog" aria-labelledby="nm-how-name" tabindex="-1"><button type="button" class="sp-info-x" aria-label="Close">&times;</button><div class="nm-how-body"></div></div>';
       stage.appendChild(howWrap);
-      howWrap.addEventListener("click", function (e) { if (e.target === howWrap || e.target.closest(".sp-info-x")) howClose(); });
+      howWrap.addEventListener("click", function (e) {
+        if (e.target === howWrap || e.target.closest(".sp-info-x")) { howClose(); return; }
+        if (e.target.closest(".nm-spot-go") && howData && howData.spot) { mapIntoView(); showSpot(howData.spot); return; }
+        var cb = e.target.closest(".nm-cmp"); if (cb && window.SL_compare) window.SL_compare(cb.getAttribute("data-cmp"));
+      });
       ["wheel", "pointerdown", "pointermove", "touchstart", "dblclick"].forEach(function (t) { howWrap.addEventListener(t, function (e) { e.stopPropagation(); }, { passive: true }); });
       document.addEventListener("keydown", function (e) { if (e.key === "Escape" && howWrap && !howWrap.hidden) { e.stopPropagation(); howClose(); } }, true);
     }
-    var f = lastFind || {}, secs = guide(sp, f, r ? r.lat : 0);
-    howWrap.querySelector(".nm-how-body").innerHTML = '<h3 id="nm-how-name">How to find the ' + esc(sp.name) + "</h3>" +
-      '<p class="sp-info-sci">' + esc(sp.sci) + "</p>" +
-      '<p class="nm-how-where">Near you: ' + esc((f.area ? f.area + ", " : "") + (f.country || "")) + "</p>" +
-      secs.map(function (x) { return '<div class="nm-sec' + (x[2] ? " " + x[2] : "") + '"><p class="sp-info-h">' + esc(x[0]) + "</p>" + x[1] + "</div>"; }).join("") +
-      '<div class="nm-sec nm-diet" hidden></div>' +
-      '<p class="nm-src">Made from SnakeList\'s own data on this snake (its habitats, type, family, venom and sightings) and your rough location. General advice - snakes don\'t always follow it.</p>';
+    var mine = howData = { id: id, spot: null, diet: null };
+    howId = id; clearSpot();
+    howPaint();
     howBack = document.activeElement;
     howWrap.hidden = false;
     var x = howWrap.querySelector(".sp-info-x"); if (x) x.focus({ preventScroll: true });
+    // the map comes into view, then (once it has stopped scrolling) moves to the best spot
+    var t0 = Date.now(), wait = mapIntoView();
+    if (r) findSpot(sp, r).then(function (o) {
+      if (howData !== mine) return; // another snake was opened meanwhile
+      mine.spot = o; if (!howWrap.hidden) howPaint();
+      setTimeout(function () { if (howData === mine && dotOn) showSpot(o); }, Math.max(0, wait - (Date.now() - t0)));
+    });
     // what it eats, where its species page has a sourced answer
     try {
       fetch("data/species-info/" + encodeURIComponent(id) + ".json").then(function (q) { return q.ok ? q.json() : null; }).then(function (d) {
-        var dt = d && d.facts && d.facts.diet && d.facts.diet.text, box = howWrap.querySelector(".nm-diet");
-        if (!dt || !box || howWrap.hidden) return;
-        box.innerHTML = '<p class="sp-info-h">What it eats</p><p>' + esc(dt) + " - so look where its food is.</p>"; box.hidden = false;
-        var tips = howWrap.querySelector(".nm-tips"); if (tips) tips.closest(".nm-sec").after(box);
+        var dt = d && d.facts && d.facts.diet && d.facts.diet.text;
+        if (!dt || howData !== mine) return;
+        mine.diet = dt; if (!howWrap.hidden) howPaint();
       }).catch(function () {});
     } catch (e) {}
   }
@@ -26580,17 +26803,32 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     var o = document.getElementById("nm-off");
     if (o) o.addEventListener("click", function (e) { e.stopPropagation(); turnOff(); });
   }
-  function stopNear() { dotOn = false; setOn(false); howClose(); if (window.SL_NEARME_MAP) window.SL_NEARME_MAP.hide(); if (window.SL_MAP_REDRAW) window.SL_MAP_REDRAW(); }
+  function stopNear() { dotOn = false; setOn(false); howClose(); clearSpot(); if (window.SL_NEARME_MAP) window.SL_NEARME_MAP.hide(); if (window.SL_MAP_REDRAW) window.SL_MAP_REDRAW(); }
   function turnOff() { save({ ans: "no" }); stopNear(); }
   // the panel closed: near me is off (your spot goes with it; tap the button to see it again)
   var cpClose = document.getElementById("cp-close");
-  if (cpClose) cpClose.addEventListener("click", function () { if (btn && btn.classList.contains("on")) { dotOn = false; setOn(false); howClose(); if (window.SL_MAP_REDRAW) window.SL_MAP_REDRAW(); } });
+  if (cpClose) cpClose.addEventListener("click", function () { if (btn && btn.classList.contains("on")) { dotOn = false; setOn(false); howClose(); clearSpot(); if (window.SL_MAP_REDRAW) window.SL_MAP_REDRAW(); } });
   // your spot on the map: a small blue dot with a white ring
   var prevDraw = window.SL_OVERLAY_DRAW;
   window.SL_OVERLAY_DRAW = function (ctx, b, w, h) {
     if (prevDraw) prevDraw(ctx, b, w, h);
-    var r = dotOn && on() ? rec() : null; if (!r) return;
+    var r = dotOn && on() ? rec() : null; if (!r) { if (spotEl) spotEl.hidden = true; return; }
     var x = b[0] + (r.lon + 180) / 360 * b[2], y = b[1] + (90 - r.lat) / 180 * b[3];
+    if (spotOn) { // v5.73: the best spot near you
+      var sx = b[0] + (spotOn.lon + 180) / 360 * b[2], sy = b[1] + (90 - spotOn.lat) / 180 * b[3];
+      ctx.save();
+      if (Math.abs(sx - x) + Math.abs(sy - y) > 16) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(sx, sy); ctx.setLineDash([5, 4]); ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,210,63,0.9)"; ctx.stroke(); ctx.setLineDash([]); }
+      ctx.beginPath(); ctx.arc(sx, sy, spotOn.kind === "here" ? 22 : 15, 0, Math.PI * 2); ctx.fillStyle = "rgba(255,210,63,0.22)"; ctx.fill();
+      ctx.beginPath(); ctx.arc(sx, sy, 6.5, 0, Math.PI * 2); ctx.fillStyle = "#ffd23f"; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = "#1f5a3a"; ctx.stroke();
+      ctx.restore();
+      var M = window.SL_NEARME_MAP, cvEl = M && M.canvas && M.canvas();
+      if (spotEl && cvEl) {
+        var cr = cvEl.getBoundingClientRect(), sr = stage.getBoundingClientRect();
+        spotEl.style.left = (cr.left - sr.left - stage.clientLeft + stage.scrollLeft + sx) + "px";
+        spotEl.style.top = (cr.top - sr.top - stage.clientTop + stage.scrollTop + sy) + "px";
+        spotEl.hidden = sx < -10 || sy < -10 || sx > w + 10 || sy > h + 10;
+      }
+    } else if (spotEl) spotEl.hidden = true;
     ctx.save();
     ctx.beginPath(); ctx.arc(x, y, 11, 0, Math.PI * 2); ctx.fillStyle = "rgba(47,125,225,0.22)"; ctx.fill();
     ctx.beginPath(); ctx.arc(x, y, 5.5, 0, Math.PI * 2); ctx.fillStyle = "#2f7de1"; ctx.fill();
@@ -26622,7 +26860,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   window.addEventListener("storage", function (e) { if (e.key === KEY || e.key === "sl-google") { last = ""; paint(); } });
   setInterval(check, 1500);
   setTimeout(check, 800);
-  window.SL_NEARME = { rec: rec, check: check, see: seeNear, how: howOpen, guide: function (id) { var sp = lastList.filter(function (x) { return x.id === id; })[0]; var r = rec(); return sp ? guide(sp, lastFind || {}, r ? r.lat : 0) : null; } }; // (for the tests)
+  window.SL_NEARME = { rec: rec, check: check, see: seeNear, how: howOpen, spot: function () { return spotOn; }, guide: function (id) { var sp = lastList.filter(function (x) { return x.id === id; })[0]; var r = rec(); return sp ? guide(sp, lastFind || {}, r ? r.lat : 0) : null; } }; // (for the tests)
 })();
 </script>
 <!-- ==== See near me - END ========================================================================== -->

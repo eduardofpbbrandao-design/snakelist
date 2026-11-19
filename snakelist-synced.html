@@ -115,7 +115,7 @@
   #fs-btn.on .fs-in { display: none; }
   #fs-btn.on .fs-out { display: block; }
   /* the whole page in full screen: a little empty space at the very top */
-  html.sl-fs body { padding-top: 16px; }
+  html.sl-fs .sl-root { padding-top: 16px; } /* (the page's own background, not a band of another colour) */
   [data-sl-theme="dark"] .ico-moon { display: none; }
   [data-sl-theme="dark"] .ico-sun { display: block; }
   .hdr-actions { display: flex; align-items: center; gap: 8px; }
@@ -10490,7 +10490,7 @@
       const narrowed = st.tab !== "guide" || Object.keys(st).some((k) => k !== "tab" &&
         (Array.isArray(st[k]) ? st[k].length > 0 : typeof st[k] === "boolean" ? st[k] : k === "type" ? st[k] !== "All" : k === "q" ? !!st[k] : false));
       allBtn.hidden = moreBtn.hidden || !narrowed;
-      if (!showAllRun) { allBtn.disabled = false; allBtn.textContent = "Show all " + shown.toLocaleString(); }
+      if (!showAllRun) { allBtn.disabled = false; allBtn.textContent = "Show all"; }
     }
 
     document.getElementById("result-count").textContent =
@@ -11308,7 +11308,7 @@
       if (run !== showAllRun) return;
       if (lastSig !== sig0) { showAllRun = 0; refresh(true); return; } // the search or filters changed meanwhile
       const y = window.scrollY;
-      renderLimit += 120;
+      renderLimit += 200;
       refresh(true);
       if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
       if (!document.getElementById("more-btn").hidden) idle(step);
@@ -26159,7 +26159,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   .nm-how-box .nm-sec.nm-safe { background: rgba(140,40,20,0.28); border: 1px solid rgba(255,170,140,0.28); }
   .nm-how-box .nm-src { margin: 8px 2px 0; font-size: 10.5px; line-height: 1.4; opacity: .7; }
   /* v5.73: the panel sits beside the map (below it on a phone), so the best spot it marks stays in view */
-  .globe-stage .sp-info-wrap.nm-how-wrap { background: none; pointer-events: none; justify-content: flex-end; align-items: stretch; padding: 10px; }
+  .globe-stage .sp-info-wrap.nm-how-wrap { background: none; pointer-events: none; justify-content: flex-end; align-items: stretch; padding: 10px 58px 10px 10px; } /* (the zoom buttons stay free) */
   .nm-how-wrap .nm-how-box { pointer-events: auto; width: min(410px, 46%); max-height: 100%; }
   @media (max-width: 640px), (max-height: 520px) {
     .globe-stage .sp-info-wrap.nm-how-wrap { position: fixed; inset: auto 0 0 0; z-index: 400; padding: 0; align-items: flex-end; }
@@ -26532,7 +26532,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     function fallback(d) {
       var o = null, q;
       if (sea && M && M.coast && (q = M.coast(r.lat, r.lon))) o = { lat: q.lat, lon: q.lon, kind: "coast" };
-      if (!o && M && M.nearest && (q = M.nearest(sp.id, r.lat, r.lon))) o = { lat: q.lat, lon: q.lon, kind: q.here ? "here" : "region", name: q.name };
+      if (!o && M && M.nearest && (q = M.nearest(sp.id, r.lat, r.lon))) o = q.here || q.km < 12 ? { lat: r.lat, lon: r.lon, kind: "here", name: q.name } : { lat: q.lat, lon: q.lon, kind: "region", name: q.name }; // (within the rounding of your position: here)
       if (!o) o = { lat: r.lat, lon: r.lon, kind: "here" };
       o.inat = !!d; o.months = d && d.months; o.mn = d ? d.mn : 0;
       return o;
