@@ -667,7 +667,7 @@ export function create(V) {
     if (!V.info || !V.extras) return;
     idleStop(); stopShow(true); stopSlither(); if (anat && anat.on) anat.set(false, true); V.scaleOff();
     ensureRig();
-    show = Object.assign({ t0: now(), time: 0, freeze: null, objs: [] }, def);
+    show = Object.assign({ t0: now(), lastF: now(), time: 0, freeze: null, objs: [] }, def);
     show.mouth0 = V.mouthGoal;
     V.controls.st.goal = null; V.controls.st.vaz = V.controls.st.vel = V.controls.st.vpx = V.controls.st.vpz = 0;
     bEat.disabled = true;
@@ -776,7 +776,7 @@ export function create(V) {
     const sea = !!(P.scene && P.scene.kind === 'sea'), waterY = wMesh ? wMesh.position.y : null;
     const travel = !V.info.tree; // (up in a tree, or draped on a branch, it reaches from where it lies)
     const wet = travel && waterY != null && (sea || !!wi);
-    const yAt = (pts) => groundYAt(pts);
+    const yAt = (pts) => groundYAt(pts, true);
     const by0 = (i) => F.Hh(i * R.dx) * F.bf; // the centre line's height above what it lies on
     const W0 = F.W(L * 0.4), Hm = F.Hh(L * 0.4) * F.bf;
     // what the body rests on at a point: the ground, or (floating) the water surface
@@ -973,7 +973,7 @@ export function create(V) {
     const fitD = (sz) => sz / Math.tan(V.info.vf) * 0.62, wideD = fitD(Math.max(st.len * 1.25, Lp * 2.4));
     const headPt = () => R.point(Hl * 0.5);
     const preyPt = () => prey.position.clone();
-    let camKey = camSide(prey.position.clone().lerp(V.info.headPos, 0.5), Math.max(wideD, fitD(prey.position.distanceTo(V.info.headPos) * 1.9)));
+    let camKey = camSide(prey.position.clone().lerp(V.info.headPos, 0.5), Math.max(wideD, fitD(prey.position.distanceTo(V.info.headPos) * 2.4)), 0.55, 0.05);
     const nm = prey.userData.name;
     const T = {
       intro: { egg: 'Egg-eaters find <b>birds\' eggs</b> by smell.', fish: 'It hunts <b>' + nm + '</b>.', frog: 'It hunts <b>' + nm + '</b>, found by smell with its tongue.', snake: 'It hunts <b>' + nm + '</b> - some snakes eat other snakes!', lizard: 'It hunts <b>' + nm + '</b>.', bird: 'It hunts <b>' + nm + '</b>.', centipede: 'It hunts <b>' + nm + '</b> - small snakes like this one eat centipedes, scorpions and spiders.', worm: 'It finds <b>' + nm + '</b> by smell in damp soil.', slug: 'It finds <b>' + nm + '</b> by following its slime trail.', caterpillar: 'It hunts <b>' + nm + '</b> and other insects in the leaves.', mouse: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.', rat: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.' }[kind],
@@ -1008,13 +1008,13 @@ export function create(V) {
         const fp = fol(sh), c = sstep(0.62, 1, u); let pose = fp;
         if (c > 0) { const Bt = R.baseOf(fp, B.fl), cp = R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1, base: Bt }); pose = R.blend(fp, cp, ease(c)); }
         R.setPose(pose); R.apply(); alivePrey(s, 1 - sstep(0.5, 1, u)); say(T.stalk); flick(flicks(s, 1.3, 2)); wake(s);
-        const h = R.point(Hl * 0.5); camKey = camSide(h.clone().lerp(preyPt(), 0.45), fitD(Math.max(h.distanceTo(preyPt()) * 2.1, st.len * 1.2)), 0.42);
+        const h = R.point(Hl * 0.5); camKey = camSide(h.clone().lerp(preyPt(), 0.5), fitD(Math.max(h.distanceTo(preyPt()) * 2.6, st.len * 1.7)), 0.58, 0.05);
       }]);
     }
     if (!travel) { N1 = R.blend(rest, strikes ? coil : ext, 0.35); if (strikes) phases.push([0.9, (u, s) => { R.setPose(R.blend(N1, coil, ease(u))); R.apply(); flick(flicks(s, 0.9, 1)); }]); }
     if (strikes) {
       // 3. the S-coil strike pose (a slight tremor of tension)
-      phases.push([0.75, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 + 0.04 * Math.sin(s * 11), base: B })); R.apply(); alivePrey(s, 0); say(T.aim); flick(u < 0.55 ? flicks(u * 0.55, 0.55, 1) : 0); camKey = camSide(headPt().lerp(preyPt(), 0.5), fitD(Math.max(st.len * 1.1, Lp * 2.6)), 0.3, 0.1); }]);
+      phases.push([0.75, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 + 0.04 * Math.sin(s * 11), base: B })); R.apply(); alivePrey(s, 0); say(T.aim); flick(u < 0.55 ? flicks(u * 0.55, 0.55, 1) : 0); camKey = camSide(headPt().lerp(preyPt(), 0.5), fitD(Math.max(st.len * 1.5, Lp * 3.2)), 0.42, 0.05); }]);
       // 4. strike: ~0.16 s, the mouth opening as it lands
       phases.push([0.16, (u) => { const e = u * u * (3 - 2 * u); R.setPose(R.blend(coil, ext, e)); R.apply(); setMouth(Math.max(0.75, tHold) * sstep(0.25, 0.85, u)); say(T.strike); if (u >= 0.98) held = true; }]);
       phases.push([0.45, (u, s) => {
@@ -1064,7 +1064,7 @@ export function create(V) {
         const e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2, sh = lerp(sh1, shEnd, lerp(u, e, 0.7));
         R.setPose(fol(sh)); bulgeAt(xp, 1 - 0.4 * ease(u)); R.apply(); setMouth(0); say(T.digest); flick(flicks(s, 1.8, 2)); wake(s);
         let cx = 0, cz = 0; for (let i = 0; i < N; i += 24) { const p = R.point(i * R.dx); cx += p.x; cz += p.z; } const nn = Math.ceil(N / 24), c = V3(cx / nn, info.center.y, cz / nn);
-        camKey = camSide(c.lerp(info.center, ease(u)), fitD(V.info.Rb * 2.4 + L * 0.2), lerp(0.55, 0.6, u));
+        camKey = camSide(c.lerp(info.center, ease(u)), fitD(Math.max(L * 0.5, V.info.Rb * 1.5)), lerp(0.55, 0.6, u));
       }]);
       phases.push([0.8, (u) => { R.setPose(rest); bulgeAt(xp, 0.6 * (1 - ease(u))); R.apply(); }]);
     } else {
@@ -1081,7 +1081,7 @@ export function create(V) {
     show.step = (s) => { const i0 = lastI; const i = runPhases(phases, s); if (i !== i0) { if (i0 >= 0) flick(0); lastI = i; } /* (a slow frame may skip the end of a flick) */ if (i > 0 && !shown) { shown = true; fadeTree(prey, 1); } stepPrey(); /* fully faded in even if a slow frame skipped the end of the first step */ stepTag.hidden = false; stepTag.textContent = (i + 1) + ' / ' + phases.length; return i; };
     show.cam = () => camKey;
     show.diet = kind;
-    show.info = { kind, constrict, letGo, envenom, travel, wet, inWater, phases: phases.length };
+    show.info = { kind, constrict, letGo, envenom, travel, wet, inWater, phases: phases.length, waterY, gQ, Q: Q && [Q.x, Q.z], head: [head0.x, head0.z], prR };
   }
 
   // ---------------------------------------------------------------- Slither (loops until pressed again)
@@ -1130,6 +1130,16 @@ export function create(V) {
     V.kick();
   }
   const reduceK = () => (V.reduce() ? 0.5 : 1);
+  function steadyHead(pose, R) {
+    const N = R.N, k0 = Math.min(N - 2, Math.round(R.ih * 2.6)), m = Math.min(N - 1 - k0, Math.round(N * 0.12));
+    let ax = pose[k0 * 3] - pose[(k0 + m) * 3], az = pose[k0 * 3 + 2] - pose[(k0 + m) * 3 + 2]; const l = Math.hypot(ax, az) || 1; ax /= l; az /= l;
+    for (let i = k0 - 1; i >= 0; i--) {
+      const w = 0.55 * (1 - i / k0), dx0 = pose[i * 3] - pose[i * 3 + 3], dz0 = pose[i * 3 + 2] - pose[i * 3 + 5], h = Math.hypot(dx0, dz0) || 1e-9;
+      let dx = lerp(dx0 / h, ax, w), dz = lerp(dz0 / h, az, w); const l2 = Math.hypot(dx, dz) || 1; dx /= l2; dz /= l2;
+      pose[i * 3] = pose[i * 3 + 3] + dx * h; pose[i * 3 + 2] = pose[i * 3 + 5] + dz * h;
+    }
+    return pose;
+  }
   function stepSlither() {
     const S = slither, R = rig, t = (now() - S.t0) / 1000, N = R.N;
     let pose;
@@ -1137,7 +1147,10 @@ export function create(V) {
       const k = ease((now() - S.stopping) / 1800); pose = S.between(S.stopA, S.restA, S.stopPose, S.rest, k, N >> 1);
       if (k >= 1) { slither = null; flick(0); R.release(); tip.hidden = true; unzoom(); if (S.undo) S.undo(); return false; }
     } else { // v5.12: it slithers off at once - the head leads along the track from the first moment, the body unwinding behind it
-      const tp = S.trackPose(S.s0 + S.speed * t);
+      // v5.73: each wave gives a gentle surge (the speed rises and falls a little), and the head is held steadier
+      // than the body: it keeps closer to the mean direction of travel instead of swinging with every wave
+      const sp = S.speed * t + (S.stout ? 0 : S.speed * 0.07 * Math.sin(t * 2.3) / 2.3);
+      const tp = steadyHead(S.trackPose(S.s0 + sp), R);
       pose = t < S.T0 ? S.between(S.restA, S.angles(tp), S.rest, tp, ease(t / S.T0), 0) : tp;
     }
     S.lastPose = pose;
@@ -1299,10 +1312,10 @@ export function create(V) {
   }
 
   // the long, gently curved pose Anatomy shows the snake in (organs in a row along it), and props cleared from under it
-  function groundYAt(list) { // ground heights under points [x, z] (the 3D ground has ripples and lumps)
+  function groundYAt(list, below) { // ground heights under points [x, z] (the 3D ground has ripples and lumps; below: also under water)
     const grounds = []; V.scene.traverse((o) => { if (o.isMesh && !o.isInstancedMesh && o.receiveShadow && o.geometry && (o.geometry.type === 'RingGeometry' || o.geometry.type === 'PlaneGeometry') && o.material && !o.material.transparent) grounds.push(o); });
     const ray = new THREE.Raycaster(), down = V3(0, -1, 0);
-    return list.map(([x, z]) => { ray.set(V3(x, 50, z), down); const h = ray.intersectObjects(grounds, false); return h.length ? Math.max(0, ...h.map((q) => q.point.y)) : 0; });
+    return list.map(([x, z]) => { ray.set(V3(x, 50, z), down); const h = ray.intersectObjects(grounds, false); return h.length ? Math.max(below ? -1e9 : 0, ...h.map((q) => q.point.y)) : 0; });
   }
   function clearProps(pts, rad) { // hide scenery standing on a path ([x, z] points); returns the undo
     const undo = [], m4 = new THREE.Matrix4(), p = new THREE.Vector3(), sc = new THREE.Vector3(), q = new THREE.Quaternion();
@@ -1791,6 +1804,7 @@ export function create(V) {
       if (!alive) return false;
       let moving = false;
       if (show) {
+        if (show.freeze == null) { const tn = now(); if (show.lastF && tn - show.lastF > 250) show.t0 += tn - show.lastF - 50; show.lastF = tn; } // (v5.73: a long hitch - a shader compiling - never skips part of the show)
         show.time = show.freeze != null ? show.freeze : (now() - show.t0) / 1000;
         show.step(show.time); moving = true;
         if (show.freeze == null && show.time >= show.dur) stopShow();
