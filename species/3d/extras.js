@@ -763,9 +763,9 @@ export function create(V) {
     const lift = Math.max(0, prR * 0.95 - restSnout[1]) + Hl * 0.05;
     const constrict = !perch && (plan === 'python' || (plan === 'colubrid' && (kind === 'mouse' || kind === 'rat' || kind === 'bird' || (kind === 'snake' && !venomous)))) && kind !== 'egg';
     const envenom = venomous && kind !== 'egg';
-    // vipers let go of everything they bite; cobras, mambas and kraits let go of prey that could bite back (mammals,
-    // birds) and hold on to the rest; sea snakes hold their fish until it stops moving
-    const letGo = envenom && plan !== 'sea' && (plan === 'viper' || plan === 'pitviper' || kind === 'mouse' || kind === 'rat' || kind === 'bird');
+    // vipers, cobras, mambas and kraits let go of prey that could bite back (mammals, birds) and follow it when the venom
+    // has worked; frogs, lizards and fish are held until they stop moving (a cottonmouth holds its fish), as in sea snakes
+    const letGo = envenom && plan !== 'sea' && (kind === 'mouse' || kind === 'rat' || kind === 'bird');
     const strikes = kind !== 'egg' && kind !== 'worm' && kind !== 'slug' && kind !== 'caterpillar'; // (slow prey is just seized)
     const xp0 = Hl * 0.22;
 
@@ -780,7 +780,7 @@ export function create(V) {
     const by0 = (i) => F.Hh(i * R.dx) * F.bf; // the centre line's height above what it lies on
     const W0 = F.W(L * 0.4), Hm = F.Hh(L * 0.4) * F.bf;
     // what the body rests on at a point: the ground, or (floating) the water surface
-    const support = (g) => (!wet || sea ? g : Math.max(g, waterY - Hm * 0.8));
+    const support = (g) => (!wet || sea ? g : Math.max(g, waterY - Hm * 0.45)); // (a swimming snake floats with its back out of the water)
     const head0 = V3(R.rc[0], 0, R.rc[2]), hd = V3(info.headDir.x, 0, info.headDir.z).normalize();
     let Q = null, gQ = 0, inWater = false;
     if (travel) {
@@ -820,9 +820,9 @@ export function create(V) {
           if (prev) s += p.distanceTo(prev); prev = p.clone(); out.push([p, s]);
         }
         if (wave) { // waves across the path, growing in after the start and gone before the end (it ends straight at the prey)
-          const tot = s;
+          const tot = s, base = out.map((q) => q[0].clone()); // (directions from the smooth curve itself)
           for (let k = 0; k < out.length; k++) {
-            const [p, s1] = out[k], q = out[Math.min(out.length - 1, k + 1)][0], q0 = out[Math.max(0, k - 1)][0], tg = q.clone().sub(q0).setY(0).normalize(), nx = V3(-tg.z, 0, tg.x);
+            const [p, s1] = out[k], q = base[Math.min(out.length - 1, k + 1)], q0 = base[Math.max(0, k - 1)], tg = q.clone().sub(q0).setY(0).normalize(), nx = V3(-tg.z, 0, tg.x);
             const env = sstep(0, wave.lam * 0.6, s1) * (1 - sstep(tot - wave.lam * 1.1, tot - wave.lam * 0.35, s1));
             p.addScaledVector(nx, wave.A * env * Math.sin((TAU * s1) / wave.lam));
           }
@@ -1521,13 +1521,15 @@ export function create(V) {
       if (p.region === 'tail') return [Math.max(Hl * 3, (L - svl) * 1.4), Math.max(Hl * 6, (L - svl) * 2.8)];
       return [Math.max(Hl * 4, svl * 0.16), Math.max(Hl * 8, svl * 0.3)];
     }
+    const lookAt = new THREE.Vector3(), lookDir = new THREE.Vector3();
     function detailFade() {
       if (!st.data) return;
+      const dC = V.controls.st.d; lookAt.copy(V.cam.position).addScaledVector(V.cam.getWorldDirection(lookDir), dC); // (what the view is centred on)
       for (const p of st.data.parts) {
-        const [n0, n1] = zoneOf(p), dist = camDist(p);
+        const [n0, n1] = zoneOf(p), dist = camDist(p), a = partAnchor(p), near = a ? 1 - sstep(dC * 0.55, dC * 1.15, a.distanceTo(lookAt)) : 0;
         p.rev = st.sel === p || (st.sel && st.sel.key === 'region-' + p.region) ? 1 : 1 - sstep(n0, n1, dist);
         // labels: detail parts with their parts; the big organs from a bit further away; head parts only near the head
-        p.lr = p.detail || p.region === 'head' ? p.rev : 1 - sstep(n0 * 2.2, n1 * 2.2, dist);
+        p.lr = (p.detail || p.region === 'head' ? p.rev : 1 - sstep(n0 * 2.2, n1 * 2.2, dist)) * lerp(near, 1, sstep(st.data.svl * 0.2, st.data.svl * 0.4, dC)); // (close in: only what you are looking at)
         if (!p.detail) continue;
         for (const m of p.meshes) {
           if (!m.material || !m.userData.detail) continue;
@@ -1574,7 +1576,9 @@ export function create(V) {
       cand.slice(most).forEach((r) => { r.want = false; });
       const list = cand.slice(0, most);
       const boxes = obstacles().slice(), gap = 6;
-      const free = (box) => box.y >= 4 && box.y + box.h <= h - 4 && box.x >= 4 && box.x + box.w <= w - 4 && !boxes.some((q) => box.x < q.x + q.w + gap && box.x + box.w + gap > q.x && box.y < q.y + q.h + gap && box.y + box.h + gap > q.y) && !hitsSnake(box);
+      const overOk = d < st.data.svl * 0.2; // (right up close the see-through body fills the view: labels may lie over it, just not over the other labels' dots)
+      const dots = overOk ? list.map((r) => [r.sx, r.sy]) : [];
+      const free = (box) => box.y >= 4 && box.y + box.h <= h - 4 && box.x >= 4 && box.x + box.w <= w - 4 && !boxes.some((q) => box.x < q.x + q.w + gap && box.x + box.w + gap > q.x && box.y < q.y + q.h + gap && box.y + box.h + gap > q.y) && (overOk ? !dots.some(([x, y]) => x > box.x - 8 && x < box.x + box.w + 8 && y > box.y - 8 && y < box.y + box.h + 8) : !hitsSnake(box));
       list.forEach((r, n) => {
         const e = r.el; e.hidden = false; if (!r.sz || !r.sz[0]) r.sz = [e.offsetWidth || 120, e.offsetHeight || 26];
         const [lw, lh] = r.sz;
