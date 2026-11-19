@@ -983,7 +983,7 @@ function scaleTextures(P, lat) {
 // pythons with small ones everywhere else, the big rostral and ocular scales of blind snakes - and small scales where the
 // head meets the neck. The grooves between cells are the same width everywhere on the skin.
 const HEAD_GENUS = { // v5.53: head colours some snakes are known by
-  thamnophis: { lips: 'barred', napeSpots: true, tongue: '#c0262e', tongueTip: '#141012' }, // garter snakes: pale lip scales with black bars between them, two pale spots on the parietals, a red tongue with black tips
+  thamnophis: { lips: 'barred', lipColor: '#c4bf8c', napeSpots: true, tongue: '#c0262e', tongueTip: '#141012' }, // garter snakes: pale lip scales with black bars between them, two pale spots on the parietals, a red tongue with black tips
   nerodia: { lips: 'barred' }, regina: { lips: 'barred' }, natrix: { lips: 'barred' }, storeria: { lips: 'pale' },
   pantherophis: { lips: 'barred' }, lampropeltis: { lips: 'barred' }, pituophis: { lips: 'barred' }, coronella: { lips: 'pale' },
 };
@@ -1169,7 +1169,7 @@ function headData(P, F, quality) {
       const lab = s.k === 'lab' || s.k === 'ilab' || (s.k === 'rost' && Math.abs(a) > mA - 0.16) || s.k === 'ment';
       // (pale along the lips, fading out higher up the lip scales; v5.73: a soft wash from the mouth line, not filling each
       // lip scale to its top edge - a row of pale blocks with hard tops read as bared teeth)
-      if (lipK && (lab || (x < J * Hl * 1.02 && Math.abs(Math.abs(a) - mA) < 0.1))) { const dm = Math.abs(Math.abs(a) - mA); col = lipC; al = lipK * (s.k === 'rost' && Math.abs(a) > mA - 0.16 ? 1 - sstep(0.06, 0.16, dm) * 0.6 : 1 - sstep(0.015, Math.abs(a) > mA ? 0.07 : 0.075, dm)) * (1 - sstep(J * 0.9, J * 1.02, x / Hl)); }
+      if (lipK && (lab || (x < J * Hl * 1.02 && Math.abs(Math.abs(a) - mA) < 0.1))) { const dm = Math.abs(Math.abs(a) - mA); col = lipC; al = lipK * (s.k === 'rost' && Math.abs(a) > mA - 0.16 ? 1 - sstep(0.06, 0.16, dm) * 0.6 : 1 - sstep(0.015, Math.abs(a) > mA ? 0.07 : bars ? 0.11 : 0.075, dm)) * (1 - sstep(J * 0.9, J * 1.02, x / Hl)); }
       if (bars && x < J * Hl * 1.05) { // dark bars along the sutures between lip scales, widest at the lip
         let bd = 1e9, bk = 1, aa = Math.abs(a); for (const b of barSegs) { if (Math.abs(x - b[0]) > b[3] * 3) continue; const t = clamp((aa - b[1]) / (b[2] - b[1]), 0, 1), w = lerp(b[3], b[3] * 0.45, t), e = Math.hypot(x - lerp(b[0], b[4], t), (aa - lerp(b[1], b[2], t)) * hcR[r]) / w; if (e < bd) { bd = e; bk = b[5]; } }
         if (bd < 1.4) { const w2 = 0.6 * bk * (1 - sstep(0.6, 1.3, bd)); col = col ? mixc(col, barC, w2 / Math.max(w2, al || w2)) : barC; al = Math.max(al, w2); } // (v5.73: bk - fainter and shorter on the lower lip; seen from below they read as teeth)
