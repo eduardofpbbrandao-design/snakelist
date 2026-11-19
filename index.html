@@ -56,6 +56,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
+  /* v5.73: the opening logo's typeface is built into the page (EB Garamond itself, only the letters of "SnakeList", 3.5 KB),
+     so the opening never waits for the font to download and the logo never changes shape halfway through */
+  @font-face { font-family: 'SL Mark'; font-style: normal; font-weight: 400 800; font-display: block; unicode-range: U+4C, U+53, U+61, U+65, U+69, U+6B, U+6E, U+74;
+    src: url(data:font/woff2;base64,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) format('woff2'); }
   /* SnakeList commits to one light, field-guide look on purpose: warm paper ground,
      forest ink, rust for venomous. Every colour is painted explicitly so the page
      holds on either host theme. */
@@ -190,14 +194,17 @@
     /* v4.93: not an empty dark screen - a soft glow of SnakeList green the photographs rise out of */
     background: radial-gradient(85% 70% at 50% 46%, #1d5234 0%, #12371f 42%, #0a2013 75%, #06140b 100%);
   }
-  /* held on its first frame while the (very long) page is still arriving, so it plays in one
-     go instead of starting, freezing and starting again; it ends with a fade (smooth on the GPU) */
+  /* held on its first frame only for the moment it takes the script just under it to run (v5.73: it no longer waits for
+     the rest of the page, the big photo or the downloaded fonts - it starts the moment it is on screen) */
   .intro.intro-hold, .intro.intro-hold * { animation-play-state: paused !important; }
-  /* v5.52: while SnakeList is still loading, a loading screen (the opening then plays smoothly, once everything is in) */
+  /* v5.52: a loading screen - v5.73: only if the opening itself can't start yet after half a second */
   .intro-loading { position: absolute; left: 50%; top: 50%; z-index: 3; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 12px;
     font: 600 15px/1.3 'Inter', system-ui, sans-serif; color: #dff3d6; letter-spacing: .01em; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
   .intro-loading i { width: 30px; height: 30px; border-radius: 50%; border: 3.5px solid rgba(155,224,124,.25); border-top-color: #9be07c; box-sizing: border-box; animation: sl-introspin .8s linear infinite; }
-  .intro.intro-hold .intro-loading { opacity: 1; transition-delay: .35s; } /* only shows when loading takes a moment */
+  /* v5.73: only if the opening still can't start after half a second (never on a normal load). An animation, not a
+     transition: a transition never runs on the first frame, so the words used to show at once, from the very first frame */
+  .intro.intro-hold .intro-loading { animation: sl-ld-in .25s ease .5s both; }
+  @keyframes sl-ld-in { from { opacity: 0; } to { opacity: 1; } }
   .intro.intro-hold .intro-loading, .intro.intro-hold .intro-loading i { animation-play-state: running !important; }
   @keyframes sl-introspin { to { transform: rotate(360deg); } }
   @media (prefers-reduced-motion: reduce) { .intro-loading i { animation-duration: 2.4s; } }
@@ -234,6 +241,7 @@
   .photo-wall .ph-3 { animation-delay: 0.23s } .photo-wall .ph-4 { animation-delay: 0.32s }
   .photo-wall .ph-5 { animation-delay: 0.41s } .photo-wall .ph-6 { animation-delay: 0.50s }
   .photo-wall .ph-7 { animation-delay: 0.59s } .photo-wall .ph-8 { animation-delay: 0.68s }
+  .photo-wall .ph.ph-wait { animation-play-state: paused; } /* v5.73: its photo is still arriving - it fades in the moment it is ready */
   @keyframes ph-in   { from { opacity: 0; transform: scale(1.05); } to { opacity: 1; transform: scale(1); } }
   @keyframes wall-in { from { transform: scale(1.08); } to { transform: scale(1); } }
   @keyframes wall-drift { from { transform: scale(1); } to { transform: scale(1.07); } }
@@ -253,23 +261,27 @@
 
   /* box trimmed to the tick itself, so 0.70em really is cap height */
   /* the tick continues the wordmark: same colour the gradient reaches on the final letter */
-  .intro-box { flex-shrink: 0; width: auto; height: 0.70em; margin-left: 0.071em; opacity: 0; will-change: opacity, transform; --snake-mark: rgba(9,28,17,0.20); --snake-mark-line: rgba(9,28,17,0.20); animation: box-in 0.5s 0.28s cubic-bezier(.22,.61,.36,1) both; }
+  .intro-box { display: block; position: relative; flex-shrink: 0; width: calc(0.70em * 36.9 / 36); height: 0.70em; margin-left: 0.071em; opacity: 0; will-change: opacity, transform; --snake-mark: rgba(9,28,17,0.20); --snake-mark-line: rgba(9,28,17,0.20); animation: box-in 0.5s 0.28s cubic-bezier(.22,.61,.36,1) both; }
   /* v4.78: a smoother arrival - no bounce, it settles gently into place */
   @keyframes box-in { from { opacity: 0; transform: translateY(0.02em) scale(0.86); } to { opacity: 1; transform: translateY(0.02em) scale(1); } }
   .box-tick { stroke-dashoffset: 0; }
   /* hidden until it starts drawing: a not-yet-drawn round-capped line still shows a dot */
-  .intro-box .box-tick {
-    stroke-dasharray: 46; stroke-dashoffset: 46; opacity: 0;
-    animation: tick-draw 0.62s 0.42s cubic-bezier(.33,0,.2,1) forwards;
-  }
-  @keyframes tick-draw { from { opacity: 1; stroke-dashoffset: 46; } to { opacity: 1; stroke-dashoffset: 0; } }
+  /* v5.73: the tick is drawn by the graphics chip alone (a sliding window with a soft edge, following the line's own pace
+     and path from left to right), so it draws smoothly even while the rest of the page is still arriving - drawing the
+     line itself (stroke-dashoffset) is done by the page's own busy thread, and it stuttered then */
+  .intro-box span, .intro-box svg { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+  .intro-box .tick-wipe { overflow: hidden; transform: translateX(-100%); will-change: transform; animation: tick-wipe 0.62s 0.42s linear forwards;
+    -webkit-mask-image: linear-gradient(90deg, #000 93.2%, transparent); mask-image: linear-gradient(90deg, #000 93.2%, transparent); }
+  .intro-box .tick-unwipe { transform: translateX(100%); will-change: transform; animation: tick-unwipe 0.62s 0.42s linear forwards; }
+  @keyframes tick-wipe { 0% { transform: translateX(-74.72%); } 3.6% { transform: translateX(-74.41%); } 7.1% { transform: translateX(-73.19%); } 10.7% { transform: translateX(-70.93%); } 14.3% { transform: translateX(-67.28%); } 17.9% { transform: translateX(-61.94%); } 21.4% { transform: translateX(-54.61%); } 25% { transform: translateX(-44.69%); } 28.6% { transform: translateX(-34.94%); } 32.1% { transform: translateX(-29.09%); } 35.7% { transform: translateX(-24.36%); } 39.3% { transform: translateX(-20.32%); } 42.9% { transform: translateX(-16.83%); } 46.4% { transform: translateX(-13.89%); } 50% { transform: translateX(-11.38%); } 100% { transform: translateX(-11.38%); } }
+  @keyframes tick-unwipe { 0% { transform: translateX(74.72%); } 3.6% { transform: translateX(74.41%); } 7.1% { transform: translateX(73.19%); } 10.7% { transform: translateX(70.93%); } 14.3% { transform: translateX(67.28%); } 17.9% { transform: translateX(61.94%); } 21.4% { transform: translateX(54.61%); } 25% { transform: translateX(44.69%); } 28.6% { transform: translateX(34.94%); } 32.1% { transform: translateX(29.09%); } 35.7% { transform: translateX(24.36%); } 39.3% { transform: translateX(20.32%); } 42.9% { transform: translateX(16.83%); } 46.4% { transform: translateX(13.89%); } 50% { transform: translateX(11.38%); } 100% { transform: translateX(11.38%); } }
   /* the tick is a rattlesnake too: a fat stroke sweeping inside a tapered clip gives
      the drawing beat, then the markings and rattle arrive once it has landed. */
-  .intro-box .tick-dia, .intro-box .tick-rattle { opacity: 0; animation: tick-detail 0.45s 0.9s ease-out forwards; }
+  .intro-box .tick-detail { opacity: 0; will-change: opacity; animation: tick-detail 0.45s 0.9s ease-out forwards; }
   @keyframes tick-detail { to { opacity: 1; } }
 
   .intro-title {
-    font-family: 'EB Garamond', serif; font-weight: 600; font-size: 1em;
+    font-family: 'SL Mark', 'EB Garamond', serif; font-weight: 600; font-size: 1em;
     color: #58b351; opacity: 0; letter-spacing: 0.010em;
     filter: var(--mark-shadow);
     animation: fade-up 0.42s 0.22s ease forwards;
@@ -347,8 +359,8 @@
   @media (prefers-reduced-motion: reduce) {
     .photo-zoom, .photo-wall, .photo-wall .ph, .intro-box, .box-tick, .intro-title { animation: none; }
     .photo-wall .ph, .intro-box, .intro-title { opacity: 1; }
-    .intro-box .box-tick { stroke-dashoffset: 0; opacity: 1; }
-    .tick-dia, .tick-rattle { opacity: 1; animation: none; }
+    .intro-box .tick-wipe, .intro-box .tick-unwipe { transform: none; animation: none; -webkit-mask-image: none; mask-image: none; }
+    .intro-box .tick-detail, .tick-dia, .tick-rattle { opacity: 1; animation: none; }
     .intro-title { color: #9fe08a; }
     .intro-wipe { transition: none; }
   }
@@ -1935,6 +1947,7 @@
   @media (prefers-reduced-motion: reduce) { .rotate-gate svg { animation: none; transform: rotate(-90deg); } }
 
 </style>
+<script>/* v5.73: start reading the opening logo's built-in letters (above) straight away */ try { document.fonts.load('600 1em "SL Mark"', "SnakeList"); document.fonts.load('500 1em "SL Mark"', "List"); } catch (e) {}</script>
 
 <style>
   .sl-browse { margin: 6px 0 0; font: 500 12.5px/1.6 'Inter', sans-serif; color: var(--text-muted); }
@@ -1988,7 +2001,8 @@
   @media (max-aspect-ratio: 1/1) { .hero-copy > p, .hero-copy > .hero-sub { margin-left: auto; margin-right: auto; } }
   .hero-title { display: inline-block; font-size: clamp(46px, min(8.5vw, 15vh), 170px); line-height: 0.95; white-space: nowrap;
     filter: drop-shadow(0 1px 2px rgba(0,0,0,0.45)) drop-shadow(0 4px 18px rgba(0,0,0,0.35)); }
-  .hero-mark { font-family: 'EB Garamond', serif; font-weight: 600; letter-spacing: 0.010em; color: #9fe08a; }
+  .hero-mark, .hero-title .sl-titletext { font-family: 'SL Mark', 'EB Garamond', serif; } /* v5.73: the same built-in letters as the opening logo it takes over from */
+  .hero-mark { font-family: 'SL Mark', 'EB Garamond', serif; font-weight: 600; letter-spacing: 0.010em; color: #9fe08a; }
   .hero-mark em { font-style: normal; font-weight: 500; }
   .hero-mark .snake-s { height: 0.71em; }
   /* v4.81: the hero shows the same SnakeList wordmark as the header (darker green + the tick), not the pale one */
@@ -3780,7 +3794,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     <div class="intro-content">
       <div class="intro-line">
         <div class="intro-title" aria-label="SnakeList"><svg class="snake-s" viewBox="-23.5 2.0 144.7 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></div>
-        <svg class="intro-box" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-intro"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-intro)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg>
+        <span class="intro-box" aria-hidden="true"><span class="tick-wipe"><span class="tick-unwipe"><svg viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-intro"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-intro)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g></svg></span></span><svg class="tick-detail" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></span>
       </div>
     </div>
     <!-- Intro photographs: Photographs by Melissa Doherty, Chao Shi, Mark Wilson, Nickson De lira, Paul Hoekman, Rafael Duarte, Rosie, Stephanie Taylor &middot; CC0. Public domain (CC0); attribution not required. -->
@@ -3798,6 +3812,15 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       var lockOn = !(/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search) || window.SL_CAME_BACK); // v4.84: the opening animation is back, then the photo
       if (lockOn) document.documentElement.classList.add("sl-intro-lock");
       document.addEventListener("sl-intro-done", function () { if (!lockOn) return; document.documentElement.classList.remove("sl-intro-lock"); window.scrollTo(0, 0); }, { once: true });
+      // v5.73: the rest of SnakeList (thousands of cards) is drawn under the photo only once the photo has come to rest:
+      // drawing it took the browser a long moment, and doing that while the photo was still moving made it stop and start
+      // again. Going on into SnakeList (or the photo going away) draws it at once.
+      var slRoot = intro.closest(".sl-root"), unhidden = false, unhide = window.__introUnhide = function () { if (unhidden) return; unhidden = true; if (slRoot) slRoot.classList.remove("intro-on"); };
+      var unhideLater = function () {
+        if (!document.querySelector("#sl-hero:not([hidden])")) { unhide(); return; }
+        var rest = (window.__heroRevealT || 0) + 3300 - performance.now(); // the photo's slow settle (3.2 s) is over
+        setTimeout(function () { if (window.requestIdleCallback) requestIdleCallback(unhide, { timeout: 700 }); else unhide(); }, Math.max(0, rest));
+      };
       window.__dismissIntro = function () {
         if (done) return;
         done = true;
@@ -3805,7 +3828,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
         // v4.93: when the photo screen is what comes next, only it is drawn now - the rest of SnakeList (thousands
         // of cards) is laid out after the opening, under the photo, so the transition starts at once and stays smooth
         var root = intro.closest(".sl-root"), heroNext = document.querySelector("#sl-hero:not([hidden])");
-        if (root && !heroNext) root.classList.remove("intro-on");
+        if (root && !heroNext) unhide();
         // ...and let it settle (its first layout and paint) before the fade starts, so the fade runs smoothly
         var faded = false, fade = function () {
           if (faded) return; faded = true;
@@ -3813,21 +3836,23 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
             intro.classList.add("intro-wipe");
             setTimeout(function () {
               intro.classList.add("intro-gone");
-              if (root) root.classList.remove("intro-on");
               window.__introDone = true;
               document.dispatchEvent(new Event("sl-intro-done"));
+              unhideLater();
             }, ms);
           };
           // v4.92: the logo is shown once. It glides from the middle of the screen to its place on the photo
           // while the wall of photos dissolves into it, then hands over to the photo's own logo in the same spot.
           var hp = document.querySelector("#sl-hero .hero-media img:not(.hero-fill)");
-          if (hp && !hp.complete && !fade.waited) { // v4.93: never dissolve into a photo that hasn't arrived (no dark flash)
+          if (hp && heroNext && !fade.waited) { // v4.93: never dissolve into a photo that hasn't arrived (no dark flash)
+            // v5.73: ...or that isn't decoded yet (decoding it just as it starts to move made the motion stop for a moment)
             fade.waited = true; faded = false;
-            var go2 = function () { if (!faded) fade(); };
-            hp.addEventListener("load", go2, { once: true }); hp.addEventListener("error", go2, { once: true }); setTimeout(go2, 1800);
+            var go2 = function () { if (!faded) fade(); }, dec = function () { if (hp.decode) hp.decode().then(go2, go2); else go2(); };
+            if (hp.complete) dec(); else { hp.addEventListener("load", dec, { once: true }); hp.addEventListener("error", go2, { once: true }); }
+            setTimeout(go2, 1800);
             return;
           }
-          var heroEl = document.getElementById("sl-hero"); if (heroEl) heroEl.classList.add("hero-reveal");
+          var heroEl = document.getElementById("sl-hero"); if (heroEl) { heroEl.classList.add("hero-reveal"); window.__heroRevealT = performance.now(); }
           var line = intro.querySelector(".intro-line");
           // v5.12: the photo's logo (still hidden) takes the opening logo's exact size, so nothing grows or shrinks on screen
           try { if (line && window.__matchHeroLogo) window.__matchHeroLogo(line.offsetWidth); } catch (e) {}
@@ -3842,61 +3867,65 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
           setTimeout(function () { finish(420); }, 1100);
         };
         requestAnimationFrame(function () { requestAnimationFrame(function () {
-          // (a short wait: the fade runs on the GPU, so it stays smooth even while the page finishes its own work)
+          // v5.73: the move to the photo starts once the page has arrived and SnakeList's own start-up work has died down
+          // (the page has loaded and its thread answers on time for half a second); until then the wall simply keeps drifting. Moving on while
+          // that work was still going made the move stop and start again.
+          var calmly = function () {
+            var c0 = performance.now(), last = c0, quiet = 0;
+            (function check() {
+              var now = performance.now(); quiet = now - last - 50 < 25 ? quiet + 1 : 0; last = now;
+              if ((document.readyState === "complete" && quiet >= 10) || now - c0 > 3800) fade(); else setTimeout(check, 50);
+            })();
+          };
           if (window.__introSkipped) fade(); // v4.93: skipped - no waiting
-          else if (window.requestIdleCallback) requestIdleCallback(fade, { timeout: 300 }); else setTimeout(fade, 150);
+          else calmly();
         }); });
-        setTimeout(fade, 2500); // never hold the opening longer than this (after the release below)
+        setTimeout(fade, window.__introSkipped ? 2500 : 4500); // never hold the opening longer than this
       };
       // opened from a species page link (?sp= ?map= ?f= ?hab= ?type= ?fam=): no opening, straight there
       if (/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search) || window.SL_CAME_BACK) {
         intro.classList.add("intro-gone"); done = true; window.__introDone = true; var rt = intro.closest(".sl-root"); if (rt) rt.classList.remove("intro-on");
         document.addEventListener("DOMContentLoaded", function () { document.dispatchEvent(new Event("sl-intro-done")); });
       } else {
-        // play once the page has arrived and its photos are decoded (never wait more than ~6 s)
-        var go = false, release = function () {
-          if (go) return; go = true;
-          requestAnimationFrame(function () { requestAnimationFrame(function () {
-            try { if (window.__sizeIntroLogo) window.__sizeIntroLogo(); } catch (e) {} // v5.12: its final size, set once, the moment before it appears
-            intro.classList.remove("intro-hold");
-            // v5.38: if the logo's typeface arrives after it is already showing (slow iPad/phone connections), keep the
-            // logo exactly as wide as it first appeared - the letters swap shape, but it never grows or shrinks
-            try {
-              var il0 = intro.querySelector(".intro-line"), W0 = il0 ? il0.offsetWidth : 0;
-              var relock = function () {
-                if (!il0 || !W0 || intro.classList.contains("intro-glide") || intro.classList.contains("intro-gone")) return;
-                for (var n = 0; n < 3; n++) { var cur = parseFloat(getComputedStyle(il0).fontSize), w1 = il0.offsetWidth; if (!w1 || !cur || Math.abs(w1 - W0) < 0.5) break; il0.style.fontSize = (cur * W0 / w1).toFixed(2) + "px"; }
-              };
-              if (document.fonts) { document.fonts.addEventListener("loadingdone", relock); if (document.fonts.ready) document.fonts.ready.then(relock); }
-              [300, 800, 1600].forEach(function (ms) { setTimeout(relock, ms); });
-            } catch (e) {}
-            setTimeout(window.__dismissIntro, 2600); // time to look at the photographs (the wall takes ~1.3 s to fill)
-          }); });
+        // v5.73: the opening starts the moment it is on screen. It waits for nothing that has to be downloaded: not the
+        // rest of SnakeList, not the big photo (only needed at the very end) and not the fonts (the logo's letters are
+        // built into the page). A photo of the wall that hasn't arrived yet waits on its own and fades in once it's ready.
+        var go = false, t0 = 0, release = function () {
+          if (go) return; go = true; t0 = performance.now();
+          // v5.12: its final size (the photo's logo), set the moment before it appears
+          try { var hr0 = document.getElementById("sl-hero"); if (hr0 && hr0.__placeLogo) hr0.__placeLogo(); else if (window.__sizeIntroLogo) window.__sizeIntroLogo(); } catch (e) {}
+          intro.classList.remove("intro-hold");
+          // v5.38: if the logo's typeface arrives after it is already showing, keep the logo exactly as wide as it first
+          // appeared - the letters swap shape, but it never grows or shrinks (its width is taken once it can't be resized any more)
+          try {
+            var il0 = intro.querySelector(".intro-line"), W0 = 0;
+            var relock = function () {
+              if (!il0 || !W0 || intro.classList.contains("intro-glide") || intro.classList.contains("intro-gone")) return;
+              for (var n = 0; n < 3; n++) { var cur = parseFloat(getComputedStyle(il0).fontSize), w1 = il0.offsetWidth; if (!w1 || !cur || Math.abs(w1 - W0) < 0.5) break; il0.style.fontSize = (cur * W0 / w1).toFixed(2) + "px"; }
+            };
+            setTimeout(function () { W0 = il0 ? il0.offsetWidth : 0; }, 200);
+            if (document.fonts) { document.fonts.addEventListener("loadingdone", relock); if (document.fonts.ready) document.fonts.ready.then(relock); }
+            [300, 800, 1600].forEach(function (ms) { setTimeout(relock, ms); });
+          } catch (e) {}
+          setTimeout(window.__dismissIntro, 2600); // time to look at the photographs (the wall takes ~1.3 s to fill)
         };
-        var whenReady = function () {
-          var pics = [].slice.call(intro.querySelectorAll(".ph")).map(function (el) {
-            var m = /url\((['"]?)(.*?)\1\)/.exec(el.style.backgroundImage || getComputedStyle(el).backgroundImage || "");
-            if (!m) return Promise.resolve();
-            var im = new Image(); im.src = m[2];
-            return im.decode ? im.decode().catch(function () {}) : Promise.resolve();
-          });
-          // v4.92: ...and the big photo that comes next, so the crossfade never shows an empty (dark) screen
-          var hp = document.querySelector("#sl-hero .hero-media img:not(.hero-fill)");
-          if (hp && hp.decode) pics.push(hp.decode().catch(function () {}));
-          // ...and the wordmark's typeface, so the title doesn't jump to it halfway through rising
-          // v5.12: "List" is the lighter weight - wait for it too, or it swaps in later and the logo shrinks
-          try { if (document.fonts && document.fonts.load) { pics.push(document.fonts.load('600 1em "EB Garamond"', "SnakeList").catch(function () {})); pics.push(document.fonts.load('500 1em "EB Garamond"', "List").catch(function () {})); } } catch (e) {}
-          // v5.52: ...and SnakeList itself: the opening waits behind a loading screen until the whole page has arrived
-          // and settled, so it plays smoothly (on an iPad it used to start while the page was still loading and stutter)
-          pics.push(new Promise(function (res) {
-            var settle = function () { requestAnimationFrame(function () { if (window.requestIdleCallback) requestIdleCallback(function () { res(); }, { timeout: 1200 }); else setTimeout(res, 200); }); };
-            if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", settle, { once: true }); else settle();
-          }));
-          Promise.all(pics).then(release, release);
-        };
-        // v4.93: the photographs are inside the page itself, so start as soon as they are decoded - no waiting
-        // for the rest of SnakeList to arrive first (that left a dark screen for seconds on slower connections)
-        whenReady();
+        // the logo can still be given its final size while it is invisible (it starts fading in after 0.22 s): the photo's
+        // own script, just below, sizes it as soon as it runs
+        window.__introSizable = function () { return !go || performance.now() - t0 < 180; };
+        // each photo of the wall waits on its own until it has arrived and is decoded (the rest of the opening plays on)
+        [].slice.call(intro.querySelectorAll(".ph")).forEach(function (el) {
+          var m = /url\((['"]?)(.*?)\1\)/.exec(el.style.backgroundImage || "");
+          if (!m || !window.Image) return;
+          var im = new Image(); im.src = m[2];
+          el.classList.add("ph-wait");
+          var ok = function () { el.classList.remove("ph-wait"); };
+          if (im.decode) im.decode().then(ok, ok); else { im.onload = im.onerror = ok; if (im.complete) ok(); }
+        });
+        // the logo's built-in letters take a few milliseconds; never wait more than a quarter of a second for them
+        var fontsIn = Promise.resolve();
+        try { if (document.fonts && document.fonts.load) fontsIn = Promise.all([document.fonts.load('600 1em "SL Mark"', "SnakeList"), document.fonts.load('500 1em "SL Mark"', "List")]); } catch (e) {}
+        fontsIn.then(release, release);
+        setTimeout(release, 250);
         // v4.93: never make anyone sit through it - a scroll, a swipe, a tap or a key goes straight to the photo
         var skipEvs = ["wheel", "touchmove", "pointerdown", "keydown"], skip = function (e) {
           if (e.type === "keydown" && !/^(ArrowDown|PageDown| |Enter|Escape|Spacebar)$/.test(e.key)) return;
@@ -3905,7 +3934,6 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
         };
         skipEvs.forEach(function (n) { window.addEventListener(n, skip, { capture: true, passive: true }); });
         document.addEventListener("sl-intro-done", function () { skipEvs.forEach(function (n) { window.removeEventListener(n, skip, true); }); }, { once: true });
-        setTimeout(release, 60000); // a very slow device: never hold the opening forever (v5.52: the loading screen shows meanwhile)
       }
     })();
   </script>
@@ -3965,6 +3993,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     var entered = false;
     function enter() {
       if (entered || hero.hidden) return; entered = true; gliding = true;
+      if (window.__introUnhide) window.__introUnhide(); // v5.73: SnakeList under the photo is drawn now, if it wasn't yet
       var calm = calmQ && calmQ.matches, done = function () { hero.hidden = true; window.scrollTo(0, 0); gliding = false; window.__heroEntered = true; document.dispatchEvent(new Event("sl-hero-entered")); window.dispatchEvent(new Event("resize")); }; // resize: the 3D buttons on the cards are placed again at once
       if (calm) { done(); return; }
       var y0 = window.scrollY, y1 = heroH(), t0 = performance.now(), D = 450;
@@ -4020,6 +4049,9 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       var ox = r.left - hr.left + (r.width - dw) * pos[0], oy = r.top - hr.top + (r.height - dh) * pos[1];
       var visL = Math.max(ox, r.left - hr.left), visR = Math.min(ox + dw, r.right - hr.left), visB = Math.min(oy + dh, r.bottom - hr.top);
       tt.style.fontSize = "100px"; var lw = tt.offsetWidth, lh = tt.offsetHeight; if (!lw) return;
+      // v5.73: while the page is still arriving the photo's logo is only the word (its tick is added once SnakeList's header
+      // is there): the tick is counted in already, so the opening logo gets the same size it always had
+      if (!tt.classList.contains("hero-wm")) try { var ib = document.querySelector("#intro .intro-box"), ibs = ib && getComputedStyle(ib), f2 = ib && parseFloat(getComputedStyle(ib.parentNode).fontSize); if (f2 && parseFloat(ibs.width)) lw += (parseFloat(ibs.width) + (parseFloat(ibs.marginLeft) || 0)) * 100 / f2; } catch (e) {}
       var cx = (visL + visR) / 2, y0 = oy + 0.6 * dh, y1 = Math.min(oy + 0.9 * dh, visB); // v5.06: a little bigger, its top still under the chin
       var fs = Math.max(30, Math.min(100 * (visR - visL) * (cover ? 0.88 : 0.66) / lw, 100 * (hr.width - 24) / lw, 100 * (y1 - y0) / lh, 150));
       if (hero.__forceW) fs = 100 * hero.__forceW / lw; // v5.12: the same size as the opening logo
@@ -4030,7 +4062,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       hero.__logoW = w;
       window.__sizeIntroLogo = function () {
         var itr = document.getElementById("intro"), il = itr && itr.querySelector(".intro-line");
-        if (!il || !hero.__logoW || !itr.classList.contains("intro-hold")) return;
+        if (!il || !hero.__logoW || !(window.__introSizable ? window.__introSizable() : itr.classList.contains("intro-hold"))) return;
         for (var n = 0; n < 3; n++) { var cur = parseFloat(getComputedStyle(il).fontSize), lw0 = il.offsetWidth; if (!lw0 || !cur) break; il.style.fontSize = (cur * hero.__logoW / lw0).toFixed(2) + "px"; }
       };
       window.__sizeIntroLogo();
@@ -4044,6 +4076,9 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     // (each side repeats the photo's last strip of background), then blurred by CSS - never a zoomed-in snake
     function fillAround(im, hr, ox, oy, dw, dh) {
       var cv = hero.querySelector(".hero-fillc"), md = hero.querySelector(".hero-media"); if (!cv || !md || !im.naturalWidth) return;
+      // v5.73: drawn again only when something changed (redrawing it just as the opening moves on to the photo held that move up)
+      var key = [Math.round(hr.width), Math.round(hr.height), Math.round(ox), Math.round(oy), Math.round(dw), Math.round(dh), im.naturalWidth, im.currentSrc].join();
+      if (cv.__key === key && md.classList.contains("fill-drawn")) return;
       try {
         var k = 0.25, W = Math.max(2, Math.round(hr.width * k)), H = Math.max(2, Math.round(hr.height * k)); cv.width = W; cv.height = H;
         var c = cv.getContext("2d"), nw = im.naturalWidth, nh = im.naturalHeight, e = Math.max(2, Math.round(nw * 0.004));
@@ -4058,7 +4093,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
         if (y + h < H) c.drawImage(soft(0, nh - bv, nw, bv, 14, 1), 0, 0, 14, 1, x, y + h - 1, w, H - y - h + 1); // bottom
         var cs = [[0, 0, 0, 0, x, y], [nw - b, 0, x + w, 0, W - x - w, y], [0, nh - bv, 0, y + h, x, H - y - h], [nw - b, nh - bv, x + w, y + h, W - x - w, H - y - h]];
         cs.forEach(function (q) { if (q[4] > 0 && q[5] > 0) c.drawImage(soft(q[0], q[1], b, bv, 1, 1), 0, 0, 1, 1, q[2], q[3], q[4] + 1, q[5] + 1); }); // corners
-        md.classList.add("fill-drawn");
+        md.classList.add("fill-drawn"); cv.__key = key;
       } catch (err) {}
     }
     // v5.68: the snake's name stays in its corner when there is room; when it would sit on or right next to
@@ -4078,7 +4113,9 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     hero.__placeCredit = placeCredit;
     hero.__placeLogo = placeLogo;
     window.__matchHeroLogo = function (w) { if (!w) return; hero.__forceW = w; placeLogo(); };
-    sizeHero(); (function () { var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (im && !im.complete) im.addEventListener("load", placeLogo); if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { placeLogo(); placeCredit(); }); /* once shown, its width is held - a late font only changes the letter shapes, not the size */ })(); var lastVW = window.innerWidth, lastVH = window.innerHeight, resized = function () {
+    sizeHero(); (function () { var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (im && !im.complete) im.addEventListener("load", placeLogo);
+      // v5.73: decoded as soon as it arrives (while the opening plays), so it is ready long before it starts to move
+      if (im && im.decode) { var dec0 = function () { im.decode().catch(function () {}); }; if (im.complete) dec0(); else im.addEventListener("load", dec0, { once: true }); } if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { placeLogo(); placeCredit(); }); /* once shown, its width is held - a late font only changes the letter shapes, not the size */ })(); var lastVW = window.innerWidth, lastVH = window.innerHeight, resized = function () {
       // v5.13: a scrollbar appearing or a phone's address bar sliding is not a real resize - the logo keeps its size then
       var dw = Math.abs(window.innerWidth - lastVW), dh = Math.abs(window.innerHeight - lastVH);
       if (dw > 60 || dh > 160) { hero.__forceW = 0; lastVW = window.innerWidth; lastVH = window.innerHeight; }
@@ -4091,7 +4128,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
         var on = tg.classList.contains("active") && !entered; if (on === !hero.hidden) return;
         // keep the tab row exactly where it was on screen while the hero comes or goes above it
         var tabs = document.querySelector(".tabs"), y0 = tabs ? tabs.getBoundingClientRect().top : 0;
-        hero.hidden = !on; if (on) { placeLogo(); placeCredit(); }
+        hero.hidden = !on; if (on) { placeLogo(); placeCredit(); } else if (window.__introDone && window.__introUnhide) window.__introUnhide();
         if (tabs && window.scrollY > 0) { var dy = tabs.getBoundingClientRect().top - y0; if (Math.abs(dy) > 1) window.scrollBy(0, dy); }
       };
       sync();
@@ -26596,6 +26633,9 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     el.style.translate = y ? "0 " + y + "px" : "";
   }
   function tick() {
+    // v5.73: nothing floats over the opening or its photo while SnakeList under them isn't drawn yet - and measuring here
+    // then made the page's thread do its start-up drawing in the middle of the opening's move to the photo
+    if (document.querySelector(".sl-root.intro-on")) return;
     document.documentElement.classList.toggle("sl-modal-on", modalOpen());
     var els = [].slice.call(document.querySelectorAll(FLOAT));
     var live = [];
