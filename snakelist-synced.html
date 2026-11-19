@@ -26585,3 +26585,37 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   window.SL_restack = tick;
 })();
 </script>
+<style>
+  /* ---- light mode: SnakeList's menus and dropdown panels in the page's own light green (v5.73) ----
+     the sort menu, the search suggestion lists, the country/family/place pickers, the map's search
+     suggestions, the language menu and the tabs' "More" menu. Dark mode keeps its deep green. */
+  :root { --pl-bg: #eef1e2; --pl-ink: #1c3a22; --pl-sub: #4a5d45; --pl-line: #b9cbab; --pl-hi: #dce8cd; --pl-sel: #cadfb6; --pl-head: #2f6b33;
+    --pl-shadow: 0 12px 30px rgba(36,50,31,0.22); }
+  html:not([data-sl-theme="dark"]) .sl-sort-menu, html:not([data-sl-theme="dark"]) .lang-menu, html:not([data-sl-theme="dark"]) .sl-sug,
+  html:not([data-sl-theme="dark"]) .tab-menu, html:not([data-sl-theme="dark"]) .country-menu, html:not([data-sl-theme="dark"]) .gmenu,
+  html:not([data-sl-theme="dark"]) #heat-panel .gmenu, html:not([data-sl-theme="dark"]) #hm-panel .gmenu {
+    background: var(--pl-bg) !important; color: var(--pl-ink); border: 1px solid var(--pl-line) !important; box-shadow: var(--pl-shadow) !important; }
+  html:not([data-sl-theme="dark"]) .sl-sort-menu li, html:not([data-sl-theme="dark"]) .sl-sug li, html:not([data-sl-theme="dark"]) .tab-menu button,
+  html:not([data-sl-theme="dark"]) .country-menu .country-opt, html:not([data-sl-theme="dark"]) .gmenu .country-opt,
+  html:not([data-sl-theme="dark"]) #heat-panel .gmenu .country-opt, html:not([data-sl-theme="dark"]) #hm-panel .gmenu .country-opt { color: var(--pl-ink); }
+  html:not([data-sl-theme="dark"]) .sl-sug li b { color: #10261a; }
+  html:not([data-sl-theme="dark"]) .sl-sort-menu li.hi, html:not([data-sl-theme="dark"]) .sl-sug li:hover, html:not([data-sl-theme="dark"]) .sl-sug li.act,
+  html:not([data-sl-theme="dark"]) .lang-menu li:hover, html:not([data-sl-theme="dark"]) .lang-menu li.hi,
+  html:not([data-sl-theme="dark"]) .tab-menu button:hover, html:not([data-sl-theme="dark"]) .tab-menu button:focus-visible,
+  html:not([data-sl-theme="dark"]) .country-menu .country-opt:hover, html:not([data-sl-theme="dark"]) .country-menu .country-opt.cursor,
+  html:not([data-sl-theme="dark"]) .gmenu .country-opt:hover, html:not([data-sl-theme="dark"]) .gmenu .country-opt.cursor,
+  html:not([data-sl-theme="dark"]) #heat-panel .gmenu .country-opt:hover, html:not([data-sl-theme="dark"]) #heat-panel .gmenu .country-opt.cursor,
+  html:not([data-sl-theme="dark"]) #hm-panel .gmenu .country-opt:hover, html:not([data-sl-theme="dark"]) #hm-panel .gmenu .country-opt.cursor { background: var(--pl-hi); }
+  html:not([data-sl-theme="dark"]) .sl-sort-menu li[aria-selected="true"], html:not([data-sl-theme="dark"]) .lang-menu li[aria-selected="true"] { background: var(--pl-sel); color: #10261a; font-weight: 600; }
+  html:not([data-sl-theme="dark"]) .tab-menu button.active { color: var(--pl-head); }
+  html:not([data-sl-theme="dark"]) .country-menu .country-opt span, html:not([data-sl-theme="dark"]) .country-menu .opt-sub, html:not([data-sl-theme="dark"]) .country-menu .country-none,
+  html:not([data-sl-theme="dark"]) .gmenu .country-opt span, html:not([data-sl-theme="dark"]) .gmenu .opt-sub, html:not([data-sl-theme="dark"]) .gmenu .country-none,
+  html:not([data-sl-theme="dark"]) #heat-panel .gmenu .country-opt span, html:not([data-sl-theme="dark"]) #hm-panel .gmenu .country-opt span,
+  html:not([data-sl-theme="dark"]) #heat-panel .gmenu .country-none, html:not([data-sl-theme="dark"]) #hm-panel .gmenu .country-none,
+  html:not([data-sl-theme="dark"]) .lang-menu li small, html:not([data-sl-theme="dark"]) .lang-menu li[aria-selected="true"] small,
+  html:not([data-sl-theme="dark"]) .lang-menu .lang-none, html:not([data-sl-theme="dark"]) .lang-menu .lang-note { color: var(--pl-sub); }
+  html:not([data-sl-theme="dark"]) .gmenu .gm-h, html:not([data-sl-theme="dark"]) #heat-panel .gmenu .gm-h, html:not([data-sl-theme="dark"]) #hm-panel .gmenu .gm-h { color: var(--pl-head); }
+  html:not([data-sl-theme="dark"]) .lang-menu input { background: #fff; color: var(--pl-ink); border-color: var(--pl-line); }
+  html:not([data-sl-theme="dark"]) .lang-menu input::placeholder { color: #66775f; }
+  html:not([data-sl-theme="dark"]) .lang-menu input:focus { border-color: #3f7d43; }
+</style>
