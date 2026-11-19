@@ -613,6 +613,9 @@
   .more-btn { display: block; margin: 18px auto 0; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 20px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
   .more-btn:hover { border-color: var(--gold-soft); }
   .more-btn[hidden] { display: none; }
+  /* "Show all" sits right beside "Show 60 more" (only while a search or filter narrows the list) */
+  .more-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 0 10px; }
+  .more-row .more-btn { margin: 18px 0 0; }
   .result-count { max-width: 900px; margin: 4px auto 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); }
 
 
@@ -794,7 +797,7 @@
   /* ---- Following tab: activity feed, fun facts, and the news toast ---- */
   .follow-feed { max-width: 900px; margin: 0 auto 16px; }
   .follow-feed[hidden] { display: none; }
-  body.tab-follow #grid, body.tab-follow #empty, body.tab-follow #more-btn { display: none !important; }
+  body.tab-follow #grid, body.tab-follow #empty, body.tab-follow #more-btn, body.tab-follow #more-all-btn { display: none !important; }
   .ff-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
   .follow-feed h3 { font-family: 'Fraunces', serif; font-size: 18px; margin: 0; }
   .ff-sub, .ff-loading { font-size: 12.5px; color: var(--text-muted); }
@@ -7568,7 +7571,7 @@
 </script>
 <!-- ==== Mark Seen smooth (end) ==== -->
 
-    <button class="more-btn" id="more-btn" type="button" hidden></button>
+    <div class="more-row" id="more-row"><button class="more-btn" id="more-btn" type="button" hidden></button><button class="more-btn" id="more-all-btn" type="button" hidden>Show all</button></div>
     <p class="empty-state" id="empty" hidden>No snakes found.</p>
 
     <div id="ach-toast-region" aria-live="polite"></div>
@@ -8703,6 +8706,7 @@
   const PAGE = 60; // fewer cards rendered into the DOM at once - 300 was a lot to paint/manage
   let renderLimit = PAGE;
   let lastSig = null;
+  let showAllRun = 0; // a "Show all" in progress (see the more-all-btn handler)
   let popularOnly = false;
   let uncommonOnly = false;
   let exoticOnly = false;
@@ -10476,6 +10480,15 @@
     document.getElementById("quiz-panel").hidden = !onQuiz;
     if (onQuiz) { moreBtn.hidden = true; initQuizTab(); } else { stopQuizTimer(); }
     if (tab === "cam") moreBtn.hidden = true;
+    // "Show all": only while a search or a filter has narrowed the list - never on the whole world checklist
+    const allBtn = document.getElementById("more-all-btn");
+    if (allBtn) {
+      const st = filterState();
+      const narrowed = st.tab !== "guide" || Object.keys(st).some((k) => k !== "tab" &&
+        (Array.isArray(st[k]) ? st[k].length > 0 : typeof st[k] === "boolean" ? st[k] : k === "type" ? st[k] !== "All" : k === "q" ? !!st[k] : false));
+      allBtn.hidden = moreBtn.hidden || !narrowed;
+      if (!showAllRun) { allBtn.disabled = false; allBtn.textContent = "Show all " + shown.toLocaleString(); }
+    }
 
     document.getElementById("result-count").textContent =
       tab === "map" || tab === "ach" || tab === "quiz" || tab === "cam" ? ""
@@ -11282,6 +11295,24 @@
   });
 
   document.getElementById("more-btn").addEventListener("click", () => { renderLimit += PAGE; refresh(); });
+  // "Show all" draws the rest a chunk at a time (in idle moments) so the page never freezes,
+  // and holds the scroll where it was - the new cards only ever appear below
+  document.getElementById("more-all-btn").addEventListener("click", () => {
+    const btn = document.getElementById("more-all-btn"), run = ++showAllRun, sig0 = lastSig;
+    btn.disabled = true; btn.textContent = "Showing all\u2026";
+    const idle = window.requestIdleCallback ? (f) => requestIdleCallback(f, { timeout: 250 }) : (f) => setTimeout(f, 16);
+    const step = () => {
+      if (run !== showAllRun) return;
+      if (lastSig !== sig0) { showAllRun = 0; refresh(true); return; } // the search or filters changed meanwhile
+      const y = window.scrollY;
+      renderLimit += 120;
+      refresh(true);
+      if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
+      if (!document.getElementById("more-btn").hidden) idle(step);
+      else { showAllRun = 0; refresh(true); }
+    };
+    idle(step);
+  });
 
   // ---- city lookup: which of this species' major cities has the most/least real
   // observations on record, using iNaturalist's public citizen-science API live -----------
