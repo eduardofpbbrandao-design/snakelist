@@ -507,6 +507,35 @@ export function create(V) {
     const bodySkin = addSkin(body.geo, bx, { bulge: true, body: true });
     const mver = () => (mo ? (mo.ver != null ? mo.ver : mo.t) : 0); let lastT = mver(), active = false;
     const contact = V.scene && V.scene.children.find((o) => o.isMesh && o.renderOrder === 1 && o.material && o.material.map && o.material.transparent && o.geometry && o.geometry.type === 'PlaneGeometry');
+    // v5.73: while the body is posed (slithering, hunting) a soft contact shadow follows it on the ground - darkest where
+    // the belly touches, fading where the body lifts off (a coil, the raised head), and none on water - instead of the
+    // painted one for the resting pose, which used to just disappear
+    const rib = (() => {
+      if (!contact || !V.scene) return null;
+      const nS = 120, pos = new Float32Array((nS + 1) * 2 * 3), col = new Float32Array((nS + 1) * 2 * 4), uv = new Float32Array((nS + 1) * 2 * 2), idx = [];
+      for (let k = 0; k <= nS; k++) { uv.set([0, k / nS, 1, k / nS], k * 4); col.fill(0, k * 8, k * 8 + 8); if (k < nS) { const a = k * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); } }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 4)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); g.setIndex(idx);
+      const tex = canvasTex(64, (x, S) => { const gr = x.createLinearGradient(0, 0, S, 0); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(0.3, 'rgba(0,0,0,.55)'); gr.addColorStop(0.5, 'rgba(0,0,0,.8)'); gr.addColorStop(0.7, 'rgba(0,0,0,.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); x.clearRect(0, 0, S, S); x.fillStyle = gr; x.fillRect(0, 0, S, S); });
+      tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+      const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: tex, vertexColors: true, transparent: true, depthWrite: false, color: '#ffffff', polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+      m.renderOrder = 1; m.frustumCulled = false; m.visible = false; m.userData.noRig = true; m.raycast = () => {}; V.scene.add(m);
+      const wMesh = V.scene.children.find((o) => o.isMesh && o.renderOrder === 2 && o.material && o.material.transparent), wY = wMesh ? wMesh.position.y : -1e9, sea = !!(P.scene && P.scene.kind === 'sea');
+      const fl = new Float32Array(nS + 1);
+      function update() {
+        if (sea) return;
+        const step = (N - 1) / nS, win = Math.max(2, Math.round(nS * 0.06));
+        for (let k = 0; k <= nS; k++) { const i = Math.round(k * step); fl[k] = nc[i * 3 + 1] - F.Hh(i * dx) * F.bf; }
+        for (let k = 0; k <= nS; k++) {
+          const i = Math.round(k * step), x = i * dx; let lo = 1e9; for (let q = Math.max(0, k - win); q <= Math.min(nS, k + win); q++) lo = Math.min(lo, fl[q]);
+          const up = fl[k] - lo, a = (1 - sstep(F.Hh(x) * 0.15, F.Hh(x) * 1.6, up)) * (lo < wY + F.Hh(x) * 0.2 ? 0 : 1) * sstep(0, L * 0.02, x) * (1 - sstep(L * 0.9, L, x)) * 0.8;
+          const cx = nc[i * 3], cz = nc[i * 3 + 2], j = Math.min(N - 1, i + 1), j0 = Math.max(0, i - 1); let tx = nc[j * 3] - nc[j0 * 3], tz = nc[j * 3 + 2] - nc[j0 * 3 + 2]; const tl = Math.hypot(tx, tz) || 1; tx /= tl; tz /= tl;
+          const w = F.W(x) * 1.35 * (1 + up / Math.max(1e-6, F.Hh(x)) * 0.4), y = lo + Math.max(1e-4, L * 0.0006);
+          pos.set([cx - tz * w, y, cz + tx * w, cx + tz * w, y, cz - tx * w], k * 6); col[k * 8 + 3] = col[k * 8 + 7] = a;
+        }
+        g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true;
+      }
+      return { m, update };
+    })();
     const mA = new THREE.Matrix4(), mB = new THREE.Matrix4(), tv = new THREE.Vector3();
     const basis = (arr1, arr2, arr3, i, m) => m.set(arr1[i * 3], arr2[i * 3], arr3[i * 3], 0, arr1[i * 3 + 1], arr2[i * 3 + 1], arr3[i * 3 + 1], 0, arr1[i * 3 + 2], arr2[i * 3 + 2], arr3[i * 3 + 2], 0, 0, 0, 0, 1);
     function rigidAt(i, out) { // the move that carries rest frame i onto the new frame i
@@ -547,6 +576,7 @@ export function create(V) {
       headRig.matrix.copy(hM); headRig.matrixWorldNeedsUpdate = true; tailRig.matrix.copy(tM); tailRig.matrixWorldNeedsUpdate = true;
       for (const s of skins) deform(s);
       if (!active) { active = true; if (contact && !keepContact) contact.visible = false; }
+      if (rib) { rib.m.visible = !keepContact && V.sceneOn !== false && !(P.scene && P.scene.kind === 'sea'); if (rib.m.visible) rib.update(); }
     }
     function release() {
       if (!active) return; active = false;
@@ -555,7 +585,7 @@ export function create(V) {
       if (mo) { mo.set(mo.t); mo.settle(); lastT = mver(); } else { body.geo.computeVertexNormals(); seam(body.geo); }
       body.geo.computeBoundingSphere();
       headRig.matrix.identity(); tailRig.matrix.identity(); headRig.matrixWorldNeedsUpdate = tailRig.matrixWorldNeedsUpdate = true;
-      if (contact) contact.visible = true;
+      if (contact) contact.visible = true; if (rib) rib.m.visible = false;
     }
     // poses ------------------------------------------------------------
     // a centre line from turning angles th[i] (segment i -> i+1), anchored at sample a, heights ys
