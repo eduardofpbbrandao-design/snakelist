@@ -835,15 +835,16 @@ HAND_FIXES_562 = {
     "natrix-maura": [(("head", "eyeL"), 0.19)], "vipera-berus": [(("head", "eyeL"), 0.12)],
     "hydrophis-platurus": [(("head", "eyeL"), 0.06), (("head", "fangMm"), 1)],
     # v5.73: inland taipan, against its SnakeList photo (will-hunt, iNaturalist 577556750) and species accounts. It read as a
-    # different snake because: (1) its eye was a featureless black disc (irisDark) - the real eye is very dark brown with a
+    # different snake because: (1) its eye was a featureless black disc - the real eye is very dark brown with a
     # thin coppery ring round the round pupil and a paler rim; (2) a low, wedge-shaped snout - the real head is deep, with a
     # high, rounded snout (a "coffin" profile); (3) a chocolate, low-contrast body with the yellow belly hidden - the real
     # snake is olive- to golden-brown, each scale edged blackish (a herringbone), and the yellow belly shows on the lowest
-    # scale rows; (4) the darker head (it darkens further in winter) was only faint; (5) a grey sheen from too much gloss
-    "oxyuranus-microlepidotus": [(("head", "irisDark"), 0), (("head", "iris"), "#4a3220"), (("head", "irisInner"), "#7a5430"), (("head", "eyeRing"), "#9a7448"),
+    # scale rows; (4) the darker head (it darkens further in winter) was only faint; (5) a grey sheen from too much gloss;
+    # (6) too slender a body for this fairly stout snake
+    "oxyuranus-microlepidotus": [(("head", "irisDark"), 1), (("head", "iris"), "#2c1d12"), (("head", "irisInner"), "#4e3420"), (("head", "eyeRing"), "#7a5a34"), (("body", "ld"), 38),
                                  (("head", "eyeL"), 0.17), (("head", "eyeX"), 0.35), (("head", "eyeA"), 60), (("head", "snoutH"), 0.86), (("head", "bulge"), 0.06),
                                  (("colors", "dorsal"), "#7c5e30"), (("colors", "lateral"), "#866634"), (("colors", "belly"), "#dcb048"), (("colors", "bellyA"), 0.61),
-                                 (("scales", "gloss"), 0.6), (("pattern", 1, "alpha"), 0.5), (("pattern", 1, "x1"), 0.95)],
+                                 (("scales", "gloss"), 0.6), (("pattern", 1, "alpha"), 0.38), (("pattern", 1, "x1"), 0.95)],
 }
 SKIP_562 = {"opheodrys-vernalis", "oxyuranus-microlepidotus"}  # (being rebuilt separately)
 
