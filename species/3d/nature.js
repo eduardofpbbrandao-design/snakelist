@@ -887,7 +887,7 @@ export function water(THREE, mesh, o = {}) {
         transformed.y += slA * ( sin( dot( slW0.xz, vec2( 2.1, 1.3 ) ) - uSlT * 1.3 ) + 0.6 * sin( dot( slW0.xz, vec2( -1.2, 2.7 ) ) - uSlT * 1.9 ) ); }`)
       .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvSlW = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;');
     sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
-uniform float uSlT; uniform float uSlWind; uniform vec4 uRip[${RIPN}]; uniform float uRipS[${RIPN}]; uniform float uDrift; varying vec3 vSlW;
+uniform float uSlT; uniform float uSlWind; uniform vec4 uRip[${RIPN}]; uniform float uRipS[${RIPN}]; uniform float uDrift; varying vec3 vSlW;`).replace('#include <normalmap_pars_fragment>', `#include <normalmap_pars_fragment>
 vec3 slWaterN( vec2 uv ) {
   float d = uDrift * ( 0.4 + 0.6 * uSlWind );
   vec3 a = texture2D( normalMap, uv + vec2( uSlT * d, uSlT * d * 0.55 ) ).xyz * 2.0 - 1.0;
