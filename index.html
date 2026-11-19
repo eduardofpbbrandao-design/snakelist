@@ -166,6 +166,8 @@
   #fs-btn .fs-out { display: none; }
   #fs-btn.on .fs-in { display: none; }
   #fs-btn.on .fs-out { display: block; }
+  /* the whole page in full screen: a little empty space at the very top */
+  html.sl-fs body { padding-top: 16px; }
   [data-sl-theme="dark"] .ico-moon { display: none; }
   [data-sl-theme="dark"] .ico-sun { display: block; }
   .hdr-actions { display: flex; align-items: center; gap: 8px; }
@@ -665,6 +667,9 @@
   .more-btn { display: block; margin: 18px auto 0; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 20px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
   .more-btn:hover { border-color: var(--gold-soft); }
   .more-btn[hidden] { display: none; }
+  /* "Show all" sits right beside "Show 60 more" (only while a search or filter narrows the list) */
+  .more-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 0 10px; }
+  .more-row .more-btn { margin: 18px 0 0; }
   .result-count { max-width: 900px; margin: 4px auto 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); }
 
 
@@ -846,7 +851,7 @@
   /* ---- Following tab: activity feed, fun facts, and the news toast ---- */
   .follow-feed { max-width: 900px; margin: 0 auto 16px; }
   .follow-feed[hidden] { display: none; }
-  body.tab-follow #grid, body.tab-follow #empty, body.tab-follow #more-btn { display: none !important; }
+  body.tab-follow #grid, body.tab-follow #empty, body.tab-follow #more-btn, body.tab-follow #more-all-btn { display: none !important; }
   .ff-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
   .follow-feed h3 { font-family: 'Fraunces', serif; font-size: 18px; margin: 0; }
   .ff-sub, .ff-loading { font-size: 12.5px; color: var(--text-muted); }
@@ -3679,6 +3684,40 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   .nm-acct small { flex-basis: 100%; color: var(--text-muted); }
   .nm-acct small:empty { display: none; }
 </style>
+<style>
+  /* ---- light mode: SnakeList's menus and dropdown panels in the page's own light green (v5.73) ----
+     the sort menu, the search suggestion lists, the country/family/place pickers, the map's search
+     suggestions, the language menu and the tabs' "More" menu. Dark mode keeps its deep green. */
+  :root { --pl-bg: #eef1e2; --pl-ink: #1c3a22; --pl-sub: #4a5d45; --pl-line: #b9cbab; --pl-hi: #dce8cd; --pl-sel: #cadfb6; --pl-head: #2f6b33;
+    --pl-shadow: 0 12px 30px rgba(36,50,31,0.22); }
+  html:not([data-sl-theme="dark"]) .sl-sort-menu, html:not([data-sl-theme="dark"]) .lang-menu, html:not([data-sl-theme="dark"]) .sl-sug,
+  html:not([data-sl-theme="dark"]) .tab-menu, html:not([data-sl-theme="dark"]) .country-menu, html:not([data-sl-theme="dark"]) .gmenu,
+  html:not([data-sl-theme="dark"]) #heat-panel .gmenu, html:not([data-sl-theme="dark"]) #hm-panel .gmenu {
+    background: var(--pl-bg) !important; color: var(--pl-ink); border: 1px solid var(--pl-line) !important; box-shadow: var(--pl-shadow) !important; }
+  html:not([data-sl-theme="dark"]) .sl-sort-menu li, html:not([data-sl-theme="dark"]) .sl-sug li, html:not([data-sl-theme="dark"]) .tab-menu button,
+  html:not([data-sl-theme="dark"]) .country-menu .country-opt, html:not([data-sl-theme="dark"]) .gmenu .country-opt,
+  html:not([data-sl-theme="dark"]) #heat-panel .gmenu .country-opt, html:not([data-sl-theme="dark"]) #hm-panel .gmenu .country-opt { color: var(--pl-ink); }
+  html:not([data-sl-theme="dark"]) .sl-sug li b { color: #10261a; }
+  html:not([data-sl-theme="dark"]) .sl-sort-menu li.hi, html:not([data-sl-theme="dark"]) .sl-sug li:hover, html:not([data-sl-theme="dark"]) .sl-sug li.act,
+  html:not([data-sl-theme="dark"]) .lang-menu li:hover, html:not([data-sl-theme="dark"]) .lang-menu li.hi,
+  html:not([data-sl-theme="dark"]) .tab-menu button:hover, html:not([data-sl-theme="dark"]) .tab-menu button:focus-visible,
+  html:not([data-sl-theme="dark"]) .country-menu .country-opt:hover, html:not([data-sl-theme="dark"]) .country-menu .country-opt.cursor,
+  html:not([data-sl-theme="dark"]) .gmenu .country-opt:hover, html:not([data-sl-theme="dark"]) .gmenu .country-opt.cursor,
+  html:not([data-sl-theme="dark"]) #heat-panel .gmenu .country-opt:hover, html:not([data-sl-theme="dark"]) #heat-panel .gmenu .country-opt.cursor,
+  html:not([data-sl-theme="dark"]) #hm-panel .gmenu .country-opt:hover, html:not([data-sl-theme="dark"]) #hm-panel .gmenu .country-opt.cursor { background: var(--pl-hi); }
+  html:not([data-sl-theme="dark"]) .sl-sort-menu li[aria-selected="true"], html:not([data-sl-theme="dark"]) .lang-menu li[aria-selected="true"] { background: var(--pl-sel); color: #10261a; font-weight: 600; }
+  html:not([data-sl-theme="dark"]) .tab-menu button.active { color: var(--pl-head); }
+  html:not([data-sl-theme="dark"]) .country-menu .country-opt span, html:not([data-sl-theme="dark"]) .country-menu .opt-sub, html:not([data-sl-theme="dark"]) .country-menu .country-none,
+  html:not([data-sl-theme="dark"]) .gmenu .country-opt span, html:not([data-sl-theme="dark"]) .gmenu .opt-sub, html:not([data-sl-theme="dark"]) .gmenu .country-none,
+  html:not([data-sl-theme="dark"]) #heat-panel .gmenu .country-opt span, html:not([data-sl-theme="dark"]) #hm-panel .gmenu .country-opt span,
+  html:not([data-sl-theme="dark"]) #heat-panel .gmenu .country-none, html:not([data-sl-theme="dark"]) #hm-panel .gmenu .country-none,
+  html:not([data-sl-theme="dark"]) .lang-menu li small, html:not([data-sl-theme="dark"]) .lang-menu li[aria-selected="true"] small,
+  html:not([data-sl-theme="dark"]) .lang-menu .lang-none, html:not([data-sl-theme="dark"]) .lang-menu .lang-note { color: var(--pl-sub); }
+  html:not([data-sl-theme="dark"]) .gmenu .gm-h, html:not([data-sl-theme="dark"]) #heat-panel .gmenu .gm-h, html:not([data-sl-theme="dark"]) #hm-panel .gmenu .gm-h { color: var(--pl-head); }
+  html:not([data-sl-theme="dark"]) .lang-menu input { background: #fff; color: var(--pl-ink); border-color: var(--pl-line); }
+  html:not([data-sl-theme="dark"]) .lang-menu input::placeholder { color: #66775f; }
+  html:not([data-sl-theme="dark"]) .lang-menu input:focus { border-color: #3f7d43; }
+</style>
 </head>
 <body>
 <div class="sl-root intro-on">
@@ -4208,6 +4247,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     var on = !!cur();
     b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on));
     b.setAttribute("aria-label", on ? "Leave full screen" : "Show SnakeList full screen");
+    de.classList.toggle("sl-fs", cur() === de); // (not the map's or a photo's own full screen)
   }
   b.addEventListener("click", function () {
     try {
@@ -9210,7 +9250,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
 </script>
 <!-- ==== Mark Seen smooth (end) ==== -->
 
-    <button class="more-btn" id="more-btn" type="button" hidden></button>
+    <div class="more-row" id="more-row"><button class="more-btn" id="more-btn" type="button" hidden></button><button class="more-btn" id="more-all-btn" type="button" hidden>Show all</button></div>
     <p class="empty-state" id="empty" hidden>No snakes found.</p>
 
     <div id="ach-toast-region" aria-live="polite"></div>
@@ -10345,6 +10385,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   const PAGE = 60; // fewer cards rendered into the DOM at once - 300 was a lot to paint/manage
   let renderLimit = PAGE;
   let lastSig = null;
+  let showAllRun = 0; // a "Show all" in progress (see the more-all-btn handler)
   let popularOnly = false;
   let uncommonOnly = false;
   let exoticOnly = false;
@@ -12118,6 +12159,15 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     document.getElementById("quiz-panel").hidden = !onQuiz;
     if (onQuiz) { moreBtn.hidden = true; initQuizTab(); } else { stopQuizTimer(); }
     if (tab === "cam") moreBtn.hidden = true;
+    // "Show all": only while a search or a filter has narrowed the list - never on the whole world checklist
+    const allBtn = document.getElementById("more-all-btn");
+    if (allBtn) {
+      const st = filterState();
+      const narrowed = st.tab !== "guide" || Object.keys(st).some((k) => k !== "tab" &&
+        (Array.isArray(st[k]) ? st[k].length > 0 : typeof st[k] === "boolean" ? st[k] : k === "type" ? st[k] !== "All" : k === "q" ? !!st[k] : false));
+      allBtn.hidden = moreBtn.hidden || !narrowed;
+      if (!showAllRun) { allBtn.disabled = false; allBtn.textContent = "Show all " + shown.toLocaleString(); }
+    }
 
     document.getElementById("result-count").textContent =
       tab === "map" || tab === "ach" || tab === "quiz" || tab === "cam" ? ""
@@ -12924,6 +12974,24 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   });
 
   document.getElementById("more-btn").addEventListener("click", () => { renderLimit += PAGE; refresh(); });
+  // "Show all" draws the rest a chunk at a time (in idle moments) so the page never freezes,
+  // and holds the scroll where it was - the new cards only ever appear below
+  document.getElementById("more-all-btn").addEventListener("click", () => {
+    const btn = document.getElementById("more-all-btn"), run = ++showAllRun, sig0 = lastSig;
+    btn.disabled = true; btn.textContent = "Showing all\u2026";
+    const idle = window.requestIdleCallback ? (f) => requestIdleCallback(f, { timeout: 250 }) : (f) => setTimeout(f, 16);
+    const step = () => {
+      if (run !== showAllRun) return;
+      if (lastSig !== sig0) { showAllRun = 0; refresh(true); return; } // the search or filters changed meanwhile
+      const y = window.scrollY;
+      renderLimit += 120;
+      refresh(true);
+      if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
+      if (!document.getElementById("more-btn").hidden) idle(step);
+      else { showAllRun = 0; refresh(true); }
+    };
+    idle(step);
+  });
 
   // ---- city lookup: which of this species' major cities has the most/least real
   // observations on record, using iNaturalist's public citizen-science API live -----------
@@ -26636,6 +26704,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   window.SL_restack = tick;
 })();
 </script>
+
 
 </body>
 </html>

@@ -15557,7 +15557,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // v5.68: the part of the map that is really in view - the panels over it (the species strip along the bottom
   // of the full screen map, a list or filters panel down one side...) left out. For each panel the side it
   // is cut from is the one that leaves the most map. Canvas pixels: [left, top, right, bottom].
-  var COVER_SEL = "#country-panel, .hm-panel, .hab-panel, .mf-panel";
+  var COVER_SEL = "#country-panel, .hm-panel, .hab-panel, .mf-panel, .nm-how-wrap:not([hidden]) .nm-how-box";
   function visibleArea(cw, ch) {
     var a = [0, 0, cw, ch], cr = cv.getBoundingClientRect();
     if (!cr.width || !cr.height) return a;
@@ -16412,7 +16412,36 @@ window.SL_GEO_READY = new Promise(function (res) {
     },
     row: function (sp, extra) { return '<div class="cp-row cp-sp" data-sp="' + attrEsc(sp.id) + '">' + photoBtn(sp) + "<b>" + sp.name + "</b><i>" + sp.sci + "</i>" + (extra || "") + "</div>"; },
     fly: function (lat, lon) { flyToLonLatBox(lon - 2.6, lon + 2.6, lat - 1.7, lat + 1.7, true); invalidate(); },
-    hide: function () { if (panelKind === "nearme") { document.getElementById("country-panel").hidden = true; panelKind = null; invalidate(); } }
+    hide: function () { if (panelKind === "nearme") { document.getElementById("country-panel").hidden = true; panelKind = null; invalidate(); } },
+    // v5.73 "How to find it" - the best spot near you is worked out by the near me script; these answer the map's part.
+    // the nearest open sea to a point (where a sea snake can be), up to ~90 km away
+    coast: function (lat, lon) {
+      if (!POLY) return null;
+      if (!nmHit(lat, lon)) return { lat: lat, lon: lon, km: 0 };
+      for (var km = 3; km <= 90; km += 3) for (var i = 0; i < 24; i++) { var q = nmStep(lat, lon, km, 2 * Math.PI * i / 24); if (!nmHit(q[0], q[1])) return { lat: q[0], lon: q[1], km: km }; }
+      return null;
+    },
+    // the nearest place this snake is recorded in: the place you are in when it lists it ("here"), else the
+    // nearest point of the nearest state/province (or country) outline that does
+    nearest: function (id, lat, lon) {
+      var sp = INDEX && INDEX.filter(function (x) { return x.id === id && !x.gone; })[0]; if (!sp) return null;
+      var h = nmHit(lat, lon); if (h && nmIn(sp, h)) return { here: true, lat: lat, lon: lon, km: 0, name: nmName(h) || nmCountry(h.cc) };
+      var best = { km: Infinity }, by = nmKeysBy(sp);
+      function flat(fl, nm) { for (var q = 0; q < fl.length; q += 2) { var d = nmKm(lat, lon, fl[q + 1], fl[q]); if (d < best.km) best = { km: d, lat: fl[q + 1], lon: fl[q], name: nm }; } }
+      sp.countries.forEach(function (n) {
+        var cc = ISO[n]; if (!cc) return;
+        var ks = by[cc];
+        if (ks && ks.length) ks.forEach(function (k) { var e = nmProv(cc)[k.slice(3)]; if (e) { var nm = (cc === "us" && window.STATE_NAME && window.STATE_NAME[k.slice(3)]) || k.slice(3); e.flats().forEach(function (fl) { flat(fl, nm + ", " + nmCountry(cc)); }); } });
+        else POLY.forEach(function (r) { if (r.code !== cc) return; if (r.dot) { var d = nmKm(lat, lon, r.lat0, r.lon0); if (d < best.km) best = { km: d, lat: r.lat0, lon: r.lon0, name: nmCountry(cc) }; } else for (var i = 0; i < r.n; i++) { var d2 = nmKm(lat, lon, r.lat[i], r.lon[i]); if (d2 < best.km) best = { km: d2, lat: r.lat[i], lon: r.lon[i], name: nmCountry(cc) }; } });
+      });
+      return best.km < Infinity ? best : null;
+    },
+    // the map centred on a point, showing about km around it
+    flyTo: function (lat, lon, km) {
+      var dLat = km / NMK, dLon = km / (NMK * Math.max(0.2, Math.cos(lat * Math.PI / 180)));
+      flyToLonLatBox(lon - dLon, lon + dLon, Math.max(-85, lat - dLat), Math.min(85, lat + dLat), true); invalidate();
+    },
+    canvas: function () { return cv; }
   };
   // ==== See near me (map side) - END ============================================================
   spWrap.addEventListener("click", function (e) {
