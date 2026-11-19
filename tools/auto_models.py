@@ -248,7 +248,7 @@ CURATED = {
     # the mouth line, black with a round pupil and a thin pale rim; glossy smooth scales with no flecks; adults 36-51 cm, record ~66 cm;
     # the tail about 31% of the total length (Virginia Herpetological Society: 25-37%, average 31.5%)
     "opheodrys-vernalis": {"d": "#79bd45", "lat": "#86c650", "b": "#eef0c8", "t": "uniform", "s": "grass", "L": 0.45, "mx": "about 66 cm", "k": 0, "sp": {"grassA": "#55803a", "grassB": "#9ab860"},
-                           "h": dict(DARK_EYE, iris="#1c140c", irisInner="#4a3a22", eyeRing="#d2c99c", pupilW=0.26, eye=0.43, eyeX=0.4, eyeA=56, len=0.036, w=0.95, h=0.8, snoutH=0.74, jaw=0.8,
+                           "h": dict(DARK_EYE, iris="#1c140c", irisInner="#4a3a22", eyeRing="#d2c99c", pupilW=0.26, eye=0.43, eyeL=0.25, eyeX=0.4, eyeA=56, len=0.036, w=0.95, h=0.8, snoutH=0.74, jaw=0.8,
                                      lips="pale", lipColor="#c8d968", bulge=0.16, brow=0.01, headRelief=0.3, groove=0.5), "bx": {"ld": 62, "neck": 0.78, "tail": 0.31},
                            "sx": {"gloss": 0.68, "rows": 15, "keel": 0, "relief": 0.7}, "cx": {"bellyA": 0.7, "bellySharp": 0.045, "mottle": 0.02, "var": 0.02, "flecks": 0, "edgeK": 0.55}},
     "opheodrys-aestivus": {"d": "#76b13a", "lat": "#86bd45", "b": "#ecebb0", "t": "plain", "s": "forest", "L": 0.8, "k": 1, "lip": "#e2e6a8",
@@ -834,6 +834,16 @@ HAND_FIXES_562 = {
     # v5.73: the viperine snake's eye against its new, narrower head (it was sized against the old broad one); the adder's
     "natrix-maura": [(("head", "eyeL"), 0.19)], "vipera-berus": [(("head", "eyeL"), 0.12)],
     "hydrophis-platurus": [(("head", "eyeL"), 0.06), (("head", "fangMm"), 1)],
+    # v5.73: inland taipan, against its SnakeList photo (will-hunt, iNaturalist 577556750) and species accounts. It read as a
+    # different snake because: (1) its eye was a featureless black disc (irisDark) - the real eye is very dark brown with a
+    # thin coppery ring round the round pupil and a paler rim; (2) a low, wedge-shaped snout - the real head is deep, with a
+    # high, rounded snout (a "coffin" profile); (3) a chocolate, low-contrast body with the yellow belly hidden - the real
+    # snake is olive- to golden-brown, each scale edged blackish (a herringbone), and the yellow belly shows on the lowest
+    # scale rows; (4) the darker head (it darkens further in winter) was only faint; (5) a grey sheen from too much gloss
+    "oxyuranus-microlepidotus": [(("head", "irisDark"), 0), (("head", "iris"), "#4a3220"), (("head", "irisInner"), "#7a5430"), (("head", "eyeRing"), "#9a7448"),
+                                 (("head", "eyeL"), 0.17), (("head", "eyeX"), 0.35), (("head", "eyeA"), 60), (("head", "snoutH"), 0.86), (("head", "bulge"), 0.06),
+                                 (("colors", "dorsal"), "#7c5e30"), (("colors", "lateral"), "#866634"), (("colors", "belly"), "#dcb048"), (("colors", "bellyA"), 0.61),
+                                 (("scales", "gloss"), 0.6), (("pattern", 1, "alpha"), 0.5), (("pattern", 1, "x1"), 0.95)],
 }
 SKIP_562 = {"opheodrys-vernalis", "oxyuranus-microlepidotus"}  # (being rebuilt separately)
 
