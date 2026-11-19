@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=566'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=566'; // v4.81: Slither, See it eat, See eye shield, See bite, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=567'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=567'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -246,7 +246,7 @@ export function autoProfile(p) {
   if (a.hc) pat.push({ type: 'cap', x0: 0, x1: a.hcx || 1.0, wid: 0.62, color: a.hc });
   if (a.pat) for (const l of a.pat) pat.push(Object.assign({}, l));
   if (a.ck) pat.push({ type: 'checker', belly: true, color: a.ck === 1 ? '#161412' : a.ck, alpha: 0.85, skip: 0.15 }); // v5.19: chequered belly
-  const colors = { dorsal: d, lateral: hexOf(mixc(hex(d), hex(b), 0.18)), belly: b, mottle: fossil ? 0.12 : 0.08, var: 0.05 };
+  const colors = { dorsal: d, lateral: hexOf(mixc(hex(d), hex(b), 0.18)), belly: b, mottle: 0.08, var: 0.05 };
   if (a.t === 'speckle') { colors.speckle = { p: 0.16, color: c, k: 0.6 }; colors.mottle = 0.14; }
   if (a.t === 'coral') colors.lateral = d;
   const o = { name: p.name, plan: a.p, length: a.L, colors, pattern: pat, scene: { kind: a.s }, generated: x, details: [] };
@@ -268,7 +268,7 @@ export function autoProfile(p) {
   if (a.mx) o.max = a.mx; // v5.58: the longest recorded (said under the model, not shown)
   if (x.includes('l')) o.lengthNote = 'a typical size for its group - SnakeList has no measured length for this species yet';
   else if (fossil) o.lengthNote = 'estimated from its fossil bones';
-  o.details = fossil ? [['back', 'Colours are a guess: fossils keep no colour']] : x.includes('g') ? [['back', 'Colours are a guess: no photo yet']] : [];
+  o.details = fossil ? [['back', 'Colours of its living relatives: fossils keep no colour']] : x.includes('g') ? [['back', 'Colours are a guess: no photo yet']] : [];
   return o;
 }
 
@@ -500,7 +500,7 @@ function makePose(P, F, seed) {
   if (special) E.set(special.E);
   const eAt = (x) => { const f = clamp(x / ds, 0, N - 1.0001), i = Math.floor(f), t = f - i; return lerp(E[i], E[i + 1], t); };
   // v5.35: tree snakes lie along a branch above the ground (see addBranch)
-  const perch = pose.kind === 'branch' ? (pose.perch != null ? pose.perch : clamp(L * 0.28, 0.1, 0.5)) : 0;
+  const perch = pose.kind === 'branch' ? (pose.perch != null ? pose.perch : clamp(L * 0.55, 0.45, 1.1)) : 0; // (v5.68: up in a shrub or tree)
   const Ly = special ? eAt : (x) => lift * (1 - sstep(F.Hl * 0.7, liftLen, x)) + eAt(x) + perch;
   // (v5.62: a draped snake's 'up' at each point is away from the branch, so the belly lies on it)
   const upAt = special && special.N ? (x) => { const f = clamp(x / ds, 0, N - 1.0001), i = Math.floor(f), t = f - i, a = special.N[i], b = special.N[i + 1]; return new THREE.Vector3(lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)).normalize(); } : null;
@@ -552,7 +552,8 @@ function drapePose(P, F, pose, R, N, ds, wMax) {
   const sp = spiralLine(L, ds, pitch, pitch * (pose.inner || 0.75), pose.sqx || 1.0, pose.sqz || 1.5, R, 0.12, Math.PI / 2);
   const flat = resample(sp, N, ds);
   let hang = 0; for (const p of flat) hang = Math.max(hang, Math.abs(p[1]) - (Math.PI / 2) * Rr);
-  const hB = Math.max(hang + Rr + F.Hh(L * 0.5) * 2 + L * 0.03, L * 0.12); // the branch high enough that no loop touches the ground
+  // v5.68: up in a tree - the branch at a real perching height (about 0.5-1.3 m), never just off the ground
+  const hB = Math.max(hang + Rr + F.Hh(L * 0.5) * 2 + L * 0.03, clamp(L * 0.65, 0.5, 1.3));
   const pts = new Array(N), E = new Float32Array(N), Nn = new Array(N);
   for (let i = 0; i < N; i++) {
     const u = flat[i][0], v = flat[i][1], sg = v < 0 ? -1 : 1, s = Math.abs(v), q = (Math.PI / 2) * Rr;
@@ -565,48 +566,109 @@ function drapePose(P, F, pose, R, N, ds, wMax) {
   return { pts, E, N: Nn, drape: { hB, rB, u0, u1 } };
 }
 
-// v5.35: the branch a tree snake lies along: it follows the snake's line just under its belly, reaches past its head
-// to a thin tip, and past its tail bends down to the ground (so it never floats), with a few side twigs
-// v5.62 (model accuracy): the straight, level branch a tree boa or python is draped over; one end bends down to the ground
-function addDrapeBranch(P, F, pose, seed) {
-  const d = pose.drape, g = new THREE.Group(), A = new THREE.Vector3(d.a[0], d.hB, d.a[1]), B = new THREE.Vector3(d.b[0], d.hB, d.b[1]);
-  const dir = B.clone().sub(A).normalize(), span = A.distanceTo(B), pts = [], rB = d.rB;
-  const tipE = A.clone().addScaledVector(dir, -span * 0.45), farE = B.clone().addScaledVector(dir, span * 0.35);
-  pts.push(tipE.clone().add(new THREE.Vector3(0, -d.hB * 0.04, 0)), A.clone().addScaledVector(dir, -span * 0.2), A, B, farE);
-  for (let k = 1; k <= 6; k++) { const f = k / 6; pts.push(farE.clone().addScaledVector(dir, d.hB * 0.35 * f).add(new THREE.Vector3(0, -(d.hB - rB) * Math.pow(f, 1.4), 0))); }
-  const curve = new THREE.CatmullRomCurve3(pts), n = 120, tg = new THREE.TubeGeometry(curve, n, rB, 12, false), pa = tg.attributes.position, tmp = new THREE.Vector3();
-  for (let i = 0; i <= n; i++) { const t = i / n, c = curve.getPointAt(t), sA = tmp.copy(c).sub(A).dot(dir) / span, k = (sA < 0 ? lerp(1, 0.5, clamp(-sA / 0.6, 0, 1)) : sA > 1 ? 1 + 0.3 * clamp((sA - 1) / 0.4, 0, 1) : 1) * (1 + 0.03 * Math.sin(t * 53)); /* (v5.62: full thickness under the coils, so they rest on it with no gap) */ for (let j = 0; j <= 12; j++) { const q = i * 13 + j; tmp.fromBufferAttribute(pa, q).sub(c).multiplyScalar(k).add(c); pa.setXYZ(q, tmp.x, tmp.y, tmp.z); } }
+// v5.68: tree snakes live up in a real tree: a trunk rising from the ground, the branch they lie on growing out of it
+// (it used to be a branch lying on the forest floor). One bark material per tree, drawn once.
+function barkMaterial(P, seed) {
+  const R = rng(seed + 5), col = P.scene.barkColor || '#6b5a47';
+  const map = canvasTex(256, (x, S) => {
+    x.fillStyle = col; x.fillRect(0, 0, S, S);
+    for (let i = 0; i < 260; i++) { const y = R() * S, w = 2 + R() * 7, len = S * (0.2 + R() * 0.6), x0 = R() * S; x.fillStyle = R() < 0.6 ? 'rgba(20,14,8,' + (0.18 + R() * 0.3) + ')' : 'rgba(255,240,215,' + (0.06 + R() * 0.1) + ')'; x.fillRect(x0, y, len, w * 0.35); } // furrows along the wood
+    for (let i = 0; i < 40; i++) { x.fillStyle = 'rgba(' + (R() < 0.5 ? '70,90,40' : '120,120,90') + ',' + (0.08 + R() * 0.12) + ')'; x.beginPath(); x.ellipse(R() * S, R() * S, 4 + R() * 14, 3 + R() * 8, 0, 0, TAU); x.fill(); } // moss and lichen
+  });
+  return new THREE.MeshStandardMaterial({ color: '#ffffff', map, bumpMap: map, bumpScale: 0.6, roughness: 0.95 });
+}
+// a tube along points whose radius follows rad(t), t 0..1 along it (bark repeated along its length)
+function woodTube(pts, rad, mat, seg, radial, repLen) {
+  const curve = new THREE.CatmullRomCurve3(pts), tg = new THREE.TubeGeometry(curve, seg, 1, radial, false), pa = tg.attributes.position, tmp = new THREE.Vector3();
+  for (let i = 0; i <= seg; i++) { const t = i / seg, c = curve.getPointAt(t), r = rad(t); for (let j = 0; j <= radial; j++) { const q = i * (radial + 1) + j; tmp.fromBufferAttribute(pa, q).sub(c).multiplyScalar(r).add(c); pa.setXYZ(q, tmp.x, tmp.y, tmp.z); } }
   tg.computeVertexNormals();
-  const m = new THREE.Mesh(tg, new THREE.MeshStandardMaterial({ color: P.scene.barkColor || '#6b5a47', roughness: 0.95 })); m.castShadow = m.receiveShadow = true; g.add(m);
+  const uv = tg.attributes.uv, k = curve.getLength() / repLen; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * k, uv.getY(i) * 2);
+  const m = new THREE.Mesh(tg, mat); m.castShadow = m.receiveShadow = true; return m;
+}
+// leaves in a few loose clusters (instanced, a few dozen at most)
+function leafClusters(g, centres, size, seed, cols) {
+  const R = rng(seed + 9), per = 18, im = new THREE.InstancedMesh(leafGeometry(), new THREE.MeshStandardMaterial({ color: '#ffffff', side: THREE.DoubleSide, roughness: 0.8 }), centres.length * per);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), sv = new THREE.Vector3(), pv = new THREE.Vector3(), c = new THREE.Color(); let n = 0;
+  for (const [cp, rr] of centres) for (let i = 0; i < per; i++) {
+    pv.set((R() - 0.5) * 2, (R() - 0.3) * 1.2, (R() - 0.5) * 2).multiplyScalar(rr).add(cp); e.set((R() - 0.5) * 1.2, R() * TAU, (R() - 0.5) * 1.2); q.setFromEuler(e);
+    const sz = size * (0.7 + R() * 0.6); sv.set(sz, sz, sz * 0.45); m4.compose(pv, q, sv); im.setMatrixAt(n, m4); c.set(cols[n % cols.length]).multiplyScalar(0.85 + R() * 0.3); im.setColorAt(n, c); n++;
+  }
+  im.castShadow = true; im.receiveShadow = true; g.add(im);
+}
+// the trunk: from just under the ground up past the branch it carries (root flare at the foot, tapering, leaning a little),
+// with an upper limb or two going on up out of the view, and leaves
+function addTrunk(g, P, base, hJoin, rT, seed, bark, away) {
+  const R = rng(seed + 13), top = hJoin + Math.max(1.1, hJoin * 0.9), lean = new THREE.Vector3((R() - 0.5) * 0.12, 0, (R() - 0.5) * 0.12);
+  const pts = []; for (let k = 0; k <= 8; k++) { const f = k / 8, y = -0.08 + (top + 0.08) * f; pts.push(new THREE.Vector3(base.x + lean.x * f * top + Math.sin(f * 5 + seed) * rT * 0.3, y, base.z + lean.z * f * top + Math.cos(f * 4 + seed) * rT * 0.3)); }
+  const trunkAt = (y) => { const f = clamp((y + 0.08) / (top + 0.08), 0, 1); return new THREE.Vector3(base.x + lean.x * f * top + Math.sin(f * 5 + seed) * rT * 0.3, y, base.z + lean.z * f * top + Math.cos(f * 4 + seed) * rT * 0.3); };
+  g.add(woodTube(pts, (t) => rT * lerp(1, 0.45, t) * (1 + 0.7 * Math.pow(1 - clamp(t * (top + 0.08) / 0.35, 0, 1), 2.5)), bark, 64, 16, rT * 6));
+  // roots spreading into the ground
+  for (let k = 0; k < 4; k++) { const a = k * TAU / 4 + R() * 0.8, d = new THREE.Vector3(Math.cos(a), 0, Math.sin(a)); g.add(woodTube([base.clone().setY(0.06), base.clone().addScaledVector(d, rT * 1.6).setY(0.015), base.clone().addScaledVector(d, rT * 3.2).setY(-0.02)], (t) => rT * 0.4 * (1 - t * 0.8), bark, 10, 8, rT * 4)); }
+  // upper limbs going on up out of the picture, with leaves
+  const leaves = [];
+  for (let k = 0; k < 2; k++) {
+    const y0 = hJoin + (top - hJoin) * (0.35 + k * 0.35), o = trunkAt(y0), a = Math.atan2(away.z, away.x) + Math.PI * (k ? 0.7 : -0.6) + (R() - 0.5) * 0.5, d = new THREE.Vector3(Math.cos(a), 0.9, Math.sin(a)).normalize(), len = 0.6 + R() * 0.5;
+    const e = o.clone().addScaledVector(d, len); g.add(woodTube([o, o.clone().addScaledVector(d, len * 0.5).add(new THREE.Vector3(0, len * 0.05, 0)), e], (t) => rT * 0.32 * (1 - t * 0.75), bark, 16, 8, rT * 5));
+    leaves.push([e, 0.16], [o.clone().addScaledVector(d, len * 0.65), 0.12]);
+  }
+  leaves.push([trunkAt(top), 0.2]);
+  leafClusters(g, leaves, 0.07 * (P.scene.leafSize || 1), seed, ['#4f7a2e', '#5f8a35', '#3f6626', '#6c9440']);
+  return trunkAt;
+}
+// v5.62 (model accuracy): the straight, level branch a tree boa or python is draped over.
+// v5.68: it grows out of a tree trunk at one end and runs on, level, to a thin leafy tip at the other
+function addDrapeBranch(P, F, pose, seed) {
+  const d = pose.drape, g = new THREE.Group(); let A = new THREE.Vector3(d.a[0], d.hB, d.a[1]), B = new THREE.Vector3(d.b[0], d.hB, d.b[1]);
+  { // the trunk stands at the end of the branch away from the first view (drapeAz in mount), so it is seen behind the snake
+    const az = Math.atan2(-(d.b[1] - d.a[1]), d.b[0] - d.a[0]) + 0.45, cd = new THREE.Vector3(Math.sin(az), 0, Math.cos(az));
+    if (B.clone().sub(A).dot(cd) > 0) { const t = A; A = B; B = t; }
+  }
+  const dir = B.clone().sub(A).normalize(), span = A.distanceTo(B), rB = d.rB, bark = barkMaterial(P, seed);
+  const tipL = Math.max(span * 0.45, 0.45), gap = Math.max(span * 0.3, 0.22), rT = clamp(rB * 3.2, 0.06, 0.16);
+  const base = B.clone().addScaledVector(dir, gap + rT).setY(0), hJoin = d.hB - Math.min(0.12, d.hB * 0.12);
+  const trunkAt = addTrunk(g, P, base, hJoin, rT, seed, bark, dir.clone().negate());
+  const J = trunkAt(hJoin), tipE = A.clone().addScaledVector(dir, -tipL).add(new THREE.Vector3(0, -tipL * 0.08, 0));
+  // from the thin tip, level under the snake, then curving down a little into the trunk
+  const pts = [tipE, A.clone().addScaledVector(dir, -tipL * 0.55), A, B, B.clone().addScaledVector(dir, gap * 0.55).add(new THREE.Vector3(0, -(d.hB - hJoin) * 0.35, 0)), J];
+  const curve = new THREE.CatmullRomCurve3(pts), total = curve.getLength(), uTip = (tipL * 0.98) / total, uB = (tipL + span) / total;
+  g.add(woodTube(pts, (t) => rB * (t < uTip ? lerp(0.45, 1, t / uTip) : t > uB ? lerp(1, 1.5, (t - uB) / (1 - uB)) : 1) * (1 + 0.03 * Math.sin(t * 53)), bark, 140, 12, rB * 8)); // (full thickness under the coils, so they rest on it with no gap)
+  // a twig and leaves near the tip
+  const tw = A.clone().addScaledVector(dir, -tipL * 0.75), td = new THREE.Vector3(-dir.z, 0.6, dir.x).normalize(), te = tw.clone().addScaledVector(td, 0.18);
+  g.add(woodTube([tw, tw.clone().addScaledVector(td, 0.09), te], (t) => rB * 0.3 * (1 - t * 0.7), bark, 8, 6, rB * 8));
+  leafClusters(g, [[tipE, 0.08], [te, 0.08]], 0.06 * (P.scene.leafSize || 1), seed + 1, ['#4f7a2e', '#5f8a35', '#3f6626', '#6c9440']);
+  g.userData.noRig = true; g.name = 'tree';
+  // where prey can sit on the branch: the level part beyond the snake, towards the tip (used by See it eat)
+  g.userData.perch = { a: A.clone().setY(d.hB + rB), dir: dir.clone().negate(), len: tipL * 0.6, rB };
   return g;
 }
+// v5.35: the branch a tree snake lies along: it follows the snake's line just under its belly and reaches past its head
+// to a thin tip, with a few side twigs. v5.68: past its tail it curves into a tree trunk standing on the ground
 function addBranch(P, F, pose, seed) {
   // v5.50: a real branch, 2-6 cm thick (thinner towards its tip), not one scaled to the snake
-  const R = rng(seed + 77), L = F.L, h = pose.perch, rB = clamp(F.w0 * 1.5, 0.011, 0.03), g = new THREE.Group();
+  const R = rng(seed + 77), L = F.L, h = pose.perch, rB = clamp(F.w0 * 1.5, 0.011, 0.03), g = new THREE.Group(), bark = barkMaterial(P, seed);
   const pt = (x) => { const a = pose.at(clamp(x, 0, L)); return new THREE.Vector3(a[0], h - rB * 0.92, a[1]); };
   const dirAt = (x0, x1) => pt(x1).sub(pt(x0)).setY(0).normalize();
   const pts = [], d0 = dirAt(F.Hl * 0.5, 0), d1 = dirAt(L * 0.9, L);
-  const reachH = Math.max(F.Hl * 3, L * 0.08), reachT = Math.max(h * 1.6, L * 0.15);
-  for (let k = 6; k >= 1; k--) pts.push(pt(0).addScaledVector(d0, reachH * k / 6).add(new THREE.Vector3(0, -reachH * 0.08 * (k / 6) ** 2, 0)));
+  const reachH = Math.max(F.Hl * 3, L * 0.35), gap = Math.max(0.2, L * 0.12), rT = clamp(rB * 3.5, 0.05, 0.12);
+  for (let k = 6; k >= 1; k--) pts.push(pt(0).addScaledVector(d0, reachH * k / 6).add(new THREE.Vector3(0, -reachH * 0.03 * (k / 6) ** 2, 0)));
   for (let k = 0; k <= 40; k++) pts.push(pt((k / 40) * L));
-  for (let k = 1; k <= 8; k++) { const f = k / 8; pts.push(pt(L).addScaledVector(d1, reachT * f).add(new THREE.Vector3(0, -(h - rB) * Math.pow(f, 1.6), 0))); }
-  const curve = new THREE.CatmullRomCurve3(pts), n = 160, tg = new THREE.TubeGeometry(curve, n, rB, 10, false);
-  // thinner towards the head-end tip, thicker towards the ground
-  const pa = tg.attributes.position, tmp = new THREE.Vector3();
-  for (let i = 0; i <= n; i++) {
-    const t = i / n, c = curve.getPointAt(t), k = lerp(0.35, 1.25, sstep(0, 0.9, t)) * (1 + 0.06 * Math.sin(t * 61));
-    for (let j = 0; j <= 10; j++) { const q = i * 11 + j; tmp.fromBufferAttribute(pa, q).sub(c).multiplyScalar(k).add(c); pa.setXYZ(q, tmp.x, tmp.y, tmp.z); }
-  }
-  tg.computeVertexNormals();
-  const bark = new THREE.MeshStandardMaterial({ color: P.scene.barkColor || '#6b5a47', roughness: 0.95 });
-  const m = new THREE.Mesh(tg, bark); m.castShadow = m.receiveShadow = true; g.add(m);
-  // side twigs, angled away from the snake
+  const base = pt(L).addScaledVector(d1, gap + rT).setY(0), hJoin = h - rB - Math.min(0.1, h * 0.1);
+  const trunkAt = addTrunk(g, P, base, hJoin, rT, seed, bark, d1.clone().negate());
+  pts.push(pt(L).addScaledVector(d1, gap * 0.5).add(new THREE.Vector3(0, -(h - rB - hJoin) * 0.4, 0)), trunkAt(hJoin));
+  const curve = new THREE.CatmullRomCurve3(pts), n = 160, uH = reachH / curve.getLength();
+  g.add(woodTube(pts, (t) => rB * (t < uH ? lerp(0.35, 1, t / uH) : lerp(1, 1.25, (t - uH) / (1 - uH))) * (1 + 0.06 * Math.sin(t * 61)), bark, n, 10, rB * 8));
+  // side twigs, angled away from the snake, some with leaves
+  const lv = [[pts[0], 0.07]];
   for (let k = 0; k < 5; k++) {
     const t = 0.12 + R() * 0.7, c = curve.getPointAt(t), T = curve.getTangentAt(t), side = new THREE.Vector3(-T.z, 0, T.x).multiplyScalar(R() < 0.5 ? 1 : -1);
     const dir = side.addScaledVector(T, 0.6).add(new THREE.Vector3(0, 0.3 + R() * 0.4, 0)).normalize(), len = rB * (8 + R() * 10);
     const cg = new THREE.CylinderGeometry(rB * 0.12, rB * 0.45, len, 6); cg.translate(0, len / 2, 0);
     const tw = new THREE.Mesh(cg, bark); tw.position.copy(c).addScaledVector(dir, rB * 0.5); tw.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir); tw.castShadow = true; g.add(tw);
+    if (k % 2 === 0) lv.push([c.clone().addScaledVector(dir, len), 0.05]);
   }
+  leafClusters(g, lv, 0.055 * (P.scene.leafSize || 1), seed + 2, ['#4f7a2e', '#5f8a35', '#3f6626', '#6c9440']);
+  g.userData.noRig = true; g.name = 'tree';
+  g.userData.perch = { a: pt(0).setY(h), dir: d0.clone(), len: reachH * 0.7, rB };
   return g;
 }
 
@@ -1641,7 +1703,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
         const sh = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), sheathM); sh.scale.set(r * 2.1, len * 0.3, r * 2.4); sh.position.copy(base).addScaledVector(dir.clone().normalize(), len * 0.16); sh.quaternion.copy(fg.quaternion); upperT.add(sh); fangs.push(sh); sh.userData.mpart = 'fang';
       }
     }
-    // the fang tip (for the labels and the bite)
+    // the fang tip (for the labels)
     const fg = fangs[0]; anchors.fang = new THREE.Object3D(); fg.updateMatrix(); anchors.fang.position.copy(new THREE.Vector3(0, 1, 0.28 * (big ? 1 : 0.6)).applyMatrix4(fg.matrix)); upperT.add(anchors.fang);
     anchors.fangLen = fg.scale.y; for (const f2 of fangs) f2.visible = false; // (folded away while the mouth is shut, as set() does)
   } else {
@@ -2464,20 +2526,19 @@ export function mount(host, opts) {
   // (Full body, Head close-up, Pattern from above) and Size (a ruler and a 1.5 m person); still no Fullscreen, Details or Settings
   [vg, bFull, bScale, bDet, bSet].forEach((b) => b.remove());
   const bMouth = btn('Open mouth', 'Open the mouth to see the teeth and fangs'); bMouth.setAttribute('aria-pressed', 'false');
-  // v4.80: Anatomy (labelled parts, mouth open) and See bite (a gentle demonstration of a bite on an arm)
+  // v4.80: Anatomy (labelled parts, mouth open). (v5.68: See bite was taken out)
   const bAnat = btn('Anatomy', 'Show the parts of this snake: fangs, teeth, glottis, tongue, scales and more'); bAnat.setAttribute('aria-pressed', 'false');
-  const bBite = btn('See bite', 'Watch how it bites: the arm turns see-through to show the fang going in');
   const vg2 = el('span', 'sp3d-views'); vg2.setAttribute('role', 'group'); vg2.setAttribute('aria-label', 'Camera views');
   const bVBody = btn('Full body', 'See the whole snake'), bVHead = btn('Head close-up', 'Close up on the head and its scales'), bVTop = btn('Pattern from above', 'Look down on the pattern of its back');
   vg2.append(bVBody, bVHead, bVTop); bar.appendChild(vg2); bar.appendChild(bScale); bScale.textContent = 'Size vs person'; bScale.title = 'Show its adult length next to a ruler and a person 1.5 m tall';
   let mouthGoal = 0;
   // v4.81: everything you can do with the model beyond looking at it lives in extras.js (Slither, See it eat,
-  // See eye shield, See bite, Anatomy, Fullscreen, Compare photo / See countries beside the model, double-click zoom)
-  const V = { THREE, P, opts, el, on, wrap, stage, labels, bar, canvas, btn, bBite, bAnat, reduce,
+  // See eye shield, Anatomy, Fullscreen, Compare photo / See countries beside the model, double-click zoom)
+  const V = { THREE, P, opts, el, on, wrap, stage, labels, bar, canvas, btn, bAnat, reduce,
     get cam() { return cam; }, get controls() { return controls; }, get info() { return info; }, get extras() { return extras; }, get group() { return snakeGroup; }, get scene() { return ctx.scene; },
     kick: () => kick(), toggleFull: () => toggleFull(), scaleOn: () => !!(scaleObj && scaleObj.visible),
     get occ() { return ctx.occ; }, scaleOff: () => { if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(false); }, closeMouth: () => { if (mouthGoal) toggleMouth(false); }, get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
-    focus: (p, d, elv) => focusOn(p, d, elv), view: (g) => controls.setGoal(Object.assign({ az: controls.st.az, d: info.dFit, px: 0, pz: 0 }, g)) };
+    resetView: () => resetView(),     focus: (p, d, elv) => focusOn(p, d, elv), view: (g) => controls.setGoal(Object.assign({ az: controls.st.az, d: info.dFit, px: 0, pz: 0 }, g)) };
   const fx = EXTRA.create(V);
   // v5.05: the main buttons stay in view; the rest (eye shield, camera views, size, fullscreen) are behind Show more / Show less
   const bMore = el('button', 'sp3d-b sp3d-morebtn', 'Show more'); bMore.type = 'button'; bMore.setAttribute('aria-expanded', 'false'); bMore.title = 'Show all the buttons';
@@ -2494,19 +2555,11 @@ export function mount(host, opts) {
   qs.dataset.slDd = '1'; // v4.81: the (hidden) settings list keeps the plain browser dropdown, so the page's dropdown script leaves no listeners behind
   [['high', 'High detail'], ['low', 'Light (faster)']].forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; if (v === quality) o.selected = true; qs.appendChild(o); });
   ql.append(document.createTextNode('Quality '), qs); panel.appendChild(ql);
-  const cap = el('div', 'sp3d-cap');
-  const gx = P.generated, gf = gx != null && gx.includes('f');
-  const recon = el('p', 'sp3d-recon', gx == null ? 'Representative reconstruction - not a photograph of a real encounter.'
-    : gf ? 'Reconstruction of how it may have looked: body shape from its family and size from its fossils. Colours are a guess - fossils keep no colour.'
-    : ''); // v5.44: no "Generated model..." note under the generated snakes
-  if (!recon.textContent) recon.hidden = true;
-  const lenP = el('p', 'sp3d-len'); const scaleP = el('p', 'sp3d-scale'); scaleP.hidden = true;
-  cap.append(recon, lenP, scaleP);
+  // v5.68: no caption under the 3D view (the length and the reconstruction note were a line of text below the snake)
   // v5.50: the buttons live INSIDE the 3D view, like the map's buttons in fullscreen
   stage.appendChild(bar);
   wrap.append(stage, panel);
-  host.append(wrap, cap);
-  lenP.textContent = 'Modelled at ' + fmtLen(P.length) + ', a typical adult' + (P.lengthNote ? ' (' + P.lengthNote + ')' : '') + '.' + (P.max ? ' Longest recorded: ' + P.max + ' (not shown).' : '');
+  host.append(wrap);
 
   // renderer
   let renderer;
@@ -2515,10 +2568,11 @@ export function mount(host, opts) {
   } catch (err) { host.innerHTML = ''; throw new Error('webgl'); }
   const maxPR = quality === 'low' ? 1.25 : 2;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxPR));
+  renderer.localClippingEnabled = true; // v5.68: See it eat cuts the prey off at the throat (only the part in the open mouth shows)
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.86;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = quality === 'low' ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   const ctx = { renderer, scene: null, track };
-  let snakeGroup, cam, controls, info, extras, raf = 0, dirty = true, lost = false, alive = true, scaleObj = null, markers = [], bite = null;
+  let snakeGroup, cam, controls, info, extras, raf = 0, dirty = true, lost = false, alive = true, scaleObj = null, markers = [];
 
   function build() {
     const scene = new THREE.Scene(); ctx.scene = scene;
@@ -2657,11 +2711,14 @@ float slScale(vec2 m) {
       }
     }
 
-    if (pose.perch) snakeGroup.add(addBranch(P, F, pose, seed));
+    let tree = null; // v5.68: tree snakes are up in a tree
+    if (pose.perch) snakeGroup.add(tree = addBranch(P, F, pose, seed));
     if (P.tail.spine) { const f = body.frameAt(F.L), c = body.spine(F.L), r = F.w0 * 0.14, g = new THREE.ConeGeometry(r, r * 3, 8); const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: '#6a5246', roughness: 0.5 })); m.position.copy(c).addScaledVector(f.T, r * 1.2); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), f.T); snakeGroup.add(m); }
     // bounds
+    if (tree) snakeGroup.remove(tree); // (the view frames the snake, not the whole tree)
     const bb = new THREE.Box3().setFromObject(snakeGroup), bb0 = bb.clone(), size = bb.getSize(new THREE.Vector3()), center = bb.getCenter(new THREE.Vector3());
-    if (pose.drape) snakeGroup.add(addDrapeBranch(P, F, pose, seed)); // v5.62 (after the bounds: the view frames the snake, not the whole branch)
+    if (tree) snakeGroup.add(tree);
+    if (pose.drape) snakeGroup.add(tree = addDrapeBranch(P, F, pose, seed)); // v5.62 (after the bounds: the view frames the snake, not the whole branch)
     const Rb = Math.max(size.x, size.z) / 2 * 1.05 + F.w0;
     const hMax = bb.max.y;
     const poseInfo = { pts: pose.pts, ds: pose.ds, Ly: pose.Ly, radius: Rb, envR: P.length >= 0.4 ? Rb + 1.0 : Rb * 1.3, seaLevel: F.Hh(F.L * 0.5) * F.bf * (P.scene.float || 1.1) };
@@ -2686,11 +2743,12 @@ float slScale(vec2 m) {
     // main body axis (for the side view): principal direction of the footprint
     let sxx = 0, szz = 0, sxz = 0; for (const p of pose.pts) { sxx += p[0] * p[0]; szz += p[1] * p[1]; sxz += p[0] * p[1]; }
     const axisAng = 0.5 * Math.atan2(2 * sxz, sxx - szz);
-    info = { F, body, center: new THREE.Vector3(center.x, pose.drape ? center.y : Math.min(center.y, hMax * 0.5), center.z), Rb, hMax: pose.drape ? hMax - bb0.min.y : hMax, raised: pose.raised, drapeAz: pose.drape ? Math.atan2(-(pose.drape.b[1] - pose.drape.a[1]), pose.drape.b[0] - pose.drape.a[0]) + 0.45 : null, headPos, headDir, axisAng, eyePos, size };
+    const up = !!(pose.drape || pose.perch);
+    info = { F, body, tree, center: new THREE.Vector3(center.x, up ? center.y : Math.min(center.y, hMax * 0.5), center.z), Rb, hMax: up ? hMax - bb0.min.y : hMax, raised: pose.raised, drapeAz: pose.drape ? Math.atan2(-(pose.drape.b[1] - pose.drape.a[1]), pose.drape.b[0] - pose.drape.a[0]) + 0.45 : null, headPos, headDir, axisAng, eyePos, size };
     info.collide = []; for (let i = 0, n = 240; i <= n; i++) { const x = (i / n) * F.L; info.collide.push({ p: body.spine(x), r: Math.max(F.W(x), F.Hh(x)) * 1.05 }); }
     t0 = performance.now();
     extras = { mat, eyes: eyeMeshes, mouth: P.plan === 'blind' ? null : buildMouth(P, F, body, snakeGroup, eyeMeshes.concat(headParts), pat) }; perfT('mouth', t0);
-    bite = null; bBite.disabled = false; bBite.textContent = 'See bite'; bAnat.hidden = bBite.hidden = !extras.mouth;
+    bAnat.hidden = !extras.mouth;
     if (bAnat.getAttribute('aria-pressed') === 'true') { bAnat.setAttribute('aria-pressed', 'false'); markers.filter((m) => m.anat).forEach((m) => m.el.remove()); markers = markers.filter((m) => !m.anat); }
     if (bMouth) { bMouth.hidden = !extras.mouth; mouthGoal = 0; bMouth.setAttribute('aria-pressed', 'false'); bMouth.textContent = 'Open mouth'; }
     // camera
@@ -2755,7 +2813,7 @@ float slScale(vec2 m) {
     const hd = info.headDir; const a = Math.atan2(hd.x, hd.z);
     if (kind === 'front') return a; if (kind === 'side') return -info.axisAng + Math.PI / 2; if (info.drapeAz != null) return info.drapeAz; /* (v5.62: a draped snake is seen across its branch, the loops hanging on both sides) */ return a + (info.raised ? 0.5 : 0.9); // (v5.62: a raised cobra is seen nearly from the front, its hood spread toward you)
   }
-  function resetView(instant) { if (!instant && fx.resetView && fx.resetView()) return; controls.setGoal({ az: viewAz('default'), el: ((info.portrait ? 40 : 30) * Math.PI) / 180, d: info.dFit * (P.pose && P.pose.kind === 'branch' ? 0.42 : 1), px: 0, pz: 0 }, instant); } // (v5.35: thread-thin tree snakes start closer, head in view)
+  function resetView(instant) { if (!instant && fx.resetView && fx.resetView()) return; controls.setGoal({ az: viewAz('default'), el: ((info.tree ? (info.portrait ? 20 : 12) : info.portrait ? 40 : 30) * Math.PI) / 180, d: info.dFit * (P.pose && P.pose.kind === 'branch' ? 1.05 : 1), px: 0, pz: 0 }, instant); } // (v5.68: a snake up in a tree is seen from nearly level, so the trunk and the drop below show) // (v5.35: thread-thin tree snakes start closer, head in view)
   function setView(kind) {
     if (kind === 'front') controls.setGoal({ az: viewAz('front'), el: (14 * Math.PI) / 180, d: Math.max(info.dMin * 1.6, info.dFit * 0.42) });
     else if (kind === 'side') controls.setGoal({ az: viewAz('side'), el: (12 * Math.PI) / 180, d: info.dFit * 1.0 });
@@ -2844,8 +2902,6 @@ float slScale(vec2 m) {
       ctx.scene.add(scaleObj);
     }
     if (scaleObj) scaleObj.visible = onv;
-    scaleP.hidden = !onv;
-    scaleP.textContent = onv ? 'Scale: the ruler is ' + fmtLen(info.F.L) + ' long, the length of a typical adult' + (P.lengthNote ? ' (' + P.lengthNote + ')' : '') + (info.F.L >= 0.4 ? '; the upright line is the height of an average adult, 1.7 m.' : '.') + (P.max ? ' The longest recorded was ' + P.max + '; that is not drawn.' : '') : '';
     if (onv) {
       const Rf = info.F.L >= 0.4 ? Math.max(info.Rb + 0.8, 1.0) : info.Rb * 1.35, dS = Math.max((Rf * 1.12) / Math.sin(Math.min(info.vf, info.hf)), info.F.L >= 0.4 ? 1.25 / Math.tan(info.vf) : 0);
       info.scaleK = Math.max(1, (dS * 1.25) / info.dMax);
@@ -2898,6 +2954,10 @@ float slScale(vec2 m) {
       let x = Math.min(o.x, w - m.sz[0] + 6), y = o.y;
       if (!m.scale) { for (const q of placed) if (x < q[0] + q[2] && x + m.sz[0] > q[0] && y < q[1] + q[3] && y + m.sz[1] > q[1]) y = q[1] + q[3] + 2; }
       else { const mt = m.el.firstChild, wl = (mt && mt.offsetWidth) || m.sz[0], hl = (mt && mt.offsetHeight) || m.sz[1]; [x, y] = fx.avoid(clamp(o.x, wl / 2 + 2, w - wl / 2 - 2), y, wl, hl, scaleObj && scaleObj.userData.ends); for (let t = 0; t < 4 && (m._sb = sBoxes.find((q) => Math.abs(q[0] - x) < (q[2] + wl) / 2 + 4 && Math.abs(q[1] - y) < Math.max(q[3], hl) + 4)); t++) y = m._sb[1] - m._sb[3] - 6; sBoxes.push([x, y, wl, hl]); } // (and never on another size label) // v4.81: a size label never covers the snake
+      if (fx.keepClear) { // v5.68: never over the buttons laid on the view (Compare photo, See countries, the main buttons, fullscreen)
+        if (m.scale) { const mt = m.el.firstChild, wl = (mt && mt.offsetWidth) || m.sz[0], hl = (mt && mt.offsetHeight) || m.sz[1]; const q = fx.keepClear(x - wl / 2, y - hl, wl, hl); x = q[0] + wl / 2; y = q[1] + hl; }
+        else { const q = fx.keepClear(x - 6, y - 6, m.sz[0], m.sz[1]); x = q[0] + 6; y = q[1] + 6; }
+      }
       placed.push([x, y, m.sz[0], m.sz[1]]);
       m.el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
       m.el.classList.toggle('sp3d-moved', Math.abs(y - o.y) > 1 || Math.abs(x - o.x) > 1);
@@ -2933,7 +2993,7 @@ float slScale(vec2 m) {
     kick();
   }
   on(bMouth, 'click', () => { if (!mouthGoal) fx.exclusive('mouth'); toggleMouth(); }); // v5.09: one thing at a time (Open mouth goes with Anatomy)
-  // v4.81: Anatomy and See bite moved to extras.js (see-through anatomy you can tap; a bite with an x-ray of the arm)
+  // v4.81: Anatomy moved to extras.js (see-through anatomy you can tap)
   on(bVBody, 'click', () => { fx.exclusive('view'); resetView(); });
   on(bVHead, 'click', () => fx.exclusive('view') || controls.setGoal({ az: viewAz('front') + 0.9, el: (20 * Math.PI) / 180, d: Math.max(info.dMin * 1.3, info.F.Hl * 4.5), px: 0, pz: 0 }));
   on(bVTop, 'click', () => fx.exclusive('view') || controls.setGoal({ az: controls.st.az, el: (80 * Math.PI) / 180, d: (info.Rb * 1.12) / Math.tan(Math.min(info.vf, info.hf)) + info.hMax, px: 0, pz: 0 })); on(bFull, 'click', toggleFull); on(bScale, 'click', () => { if (bScale.getAttribute('aria-pressed') !== 'true') fx.exclusive('scale'); toggleScale(); }); on(bDet, 'click', toggleDetails);
@@ -2965,10 +3025,11 @@ float slScale(vec2 m) {
   function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
 
   build(); fx.onBuild(); resize();
-  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), startBite: () => bBite.click(), fx, get bite() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); if (window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
+  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), fx, get show() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); if (window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
 
   return {
     canvas,
+    leaveModes: () => fx.leaveModes(), // v5.68: a click on the panel's empty background leaves Anatomy, See it eat and the rest
     dispose() {
       alive = false; if (raf) cancelAnimationFrame(raf); raf = 0;
       if (document.fullscreenElement === wrap) { try { document.exitFullscreen(); } catch (e) {} }
