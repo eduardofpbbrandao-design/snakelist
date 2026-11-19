@@ -4,7 +4,7 @@
 //   fx.step()     every frame, after the jaw has moved    fx.camera()  after the orbit camera is placed
 //   fx.after()    after rendering (screen-space labels)   fx.dispose() when the viewer closes
 // What lives here: a "rig" that bends the body along any path (slithering, striking, coiling, swallowing),
-// the automatic shows (See bite, See it eat, See eye shield), Slither, the see-through Anatomy, a real-looking
+// the automatic shows (See it eat, See eye shield), Slither, the see-through Anatomy, a real-looking
 // person for "Size vs person", the side panel (Compare photo / See countries) and double-click zoom.
 
 let THREE = null;
@@ -67,7 +67,7 @@ const CSS = `
 .sp3d-stage .sp3d-tip{left:10px;bottom:10px;max-width:calc(100% - 80px)}
 .sp3d-stage .sp3d-step{top:auto;right:10px;bottom:58px}
 @media (max-width:820px){.sp3d-stage>.sp3d-bar{right:10px;top:56px}.sp3d-stage .sp3d-b,.sp3d-stage .sp3d-hb{min-height:32px;padding:4px 10px;font-size:12.5px}}
-.sp3d-capt{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);width:max-content;max-width:min(92%,580px);padding:8px 14px;border-radius:12px;background:rgba(12,26,18,.88);color:#fff;font:500 14px/1.45 Inter,system-ui,sans-serif;text-align:center;pointer-events:none;box-shadow:0 2px 10px rgba(0,0,0,.3);transition:opacity .35s}
+.sp3d-capt{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);width:max-content;max-width:min(calc(100% - 132px),580px);padding:8px 14px;border-radius:12px;background:rgba(12,26,18,.88);color:#fff;font:500 14px/1.45 Inter,system-ui,sans-serif;text-align:center;pointer-events:none;box-shadow:0 2px 10px rgba(0,0,0,.3);transition:opacity .35s}
 .sp3d-capt[hidden]{display:none}.sp3d-capt b{color:#ffd66b}
 .sp3d-step{position:absolute;right:10px;top:10px;padding:3px 10px;border-radius:999px;background:rgba(12,26,18,.8);color:#fff;font:600 12px/1.5 Inter,system-ui,sans-serif;pointer-events:none}
 .sp3d-step[hidden]{display:none}
@@ -334,26 +334,6 @@ function dietOf(P, id) {
   return 'mouse';
 }
 
-// ---------------------------------------------------------------- the forearm and hand used by See bite
-// axis: +y from the elbow (y = 0) to the fingertips; the forearm is flattened top-to-bottom (local z is up)
-function buildArm(R) {
-  const g = new THREE.Group(), skin = skinMat('#cf9a78', 31); skin.transparent = true;
-  const A = 0.26 / 0.035 * R; // forearm length for this radius (about 26 cm)
-  const prof = [[0.9, -0.05], [1.0, 0.0], [1.06, 0.12], [1.02, 0.3], [0.9, 0.55], [0.74, 0.8], [0.64, 0.97], [0.63, 1.0]];
-  const fore = new THREE.Mesh(lathe(prof.map(([r, y]) => [r * R, y * A]), 36), skin); fore.scale.set(1, 1, 0.8); fore.castShadow = true; g.add(fore);
-  // the upper arm, rising out of the picture
-  const up = new THREE.Mesh(new THREE.CapsuleGeometry(R * 1.02, A * 1.6, 8, 28), skin); up.position.set(0, -A * 0.62, A * 0.62); up.rotation.x = -0.85; up.castShadow = true; g.add(up);
-  const elbow = new THREE.Mesh(new THREE.SphereGeometry(R * 1.02, 24, 16), skin); elbow.scale.set(1, 1, 0.85); g.add(elbow);
-  const hand = new THREE.Group(); hand.position.y = A; g.add(hand);
-  const hm = (geo, x, y, z, sx, sy, sz, rx = 0, ry = 0, rz = 0) => { const m = new THREE.Mesh(geo, skin); m.position.set(x, y, z); m.scale.set(sx, sy, sz); m.rotation.set(rx, ry, rz); m.castShadow = true; hand.add(m); return m; };
-  hm(new THREE.SphereGeometry(1, 24, 16), 0, R * 1.35, 0, R * 1.02, R * 1.55, R * 0.5);   // palm and back of the hand
-  hm(new THREE.SphereGeometry(1, 16, 12), 0, R * 0.25, 0, R * 0.7, R * 0.6, R * 0.5);     // wrist
-  for (let f = 0; f < 4; f++) { const x = (-0.66 + f * 0.44) * R, l = R * (f === 0 ? 0.95 : f === 3 ? 0.8 : 1.12); hm(new THREE.CapsuleGeometry(1, 4.5, 4, 10), x, R * 2.7 + l * 0.5, -R * 0.08, R * 0.2, l * 0.2, R * 0.19, -0.18, 0, 0); }
-  hm(new THREE.CapsuleGeometry(1, 3.5, 4, 10), R * 1.05, R * 1.55, -R * 0.12, R * 0.22, R * 0.32, R * 0.21, 0, 0, -0.65); // thumb
-  g.userData.skin = skin; g.userData.A = A;
-  return g;
-}
-
 // ================================================================= create
 export function create(V) {
   THREE = V.THREE; injectCSS();
@@ -370,6 +350,29 @@ export function create(V) {
   const stepTag = el('div', 'sp3d-step'); stepTag.hidden = true; stage.appendChild(stepTag);
   const tip = el('div', 'sp3d-tip'); tip.hidden = true; stage.appendChild(tip);
   function say(html) { if (!html) { capt.hidden = true; capt.dataset.k = ''; return; } if (capt.dataset.k === html) return; capt.dataset.k = html; capt.innerHTML = html; capt.hidden = false; }
+  // v5.68: notes, lists and labels laid over the 3D view never cover its buttons (Compare photo, See countries, the main
+  // buttons, Show more, fullscreen): the buttons' boxes in the stage's own pixels (looked up a few times a second)
+  let btnR = [], btnT = 0;
+  function buttonRects() {
+    const t = now(); if (t - btnT < 300 && btnR.length) return btnR; btnT = t; btnR = [];
+    const sr = stage.getBoundingClientRect();
+    stage.querySelectorAll('.sp3d-bar .sp3d-b, .sp3d-hdb .sp3d-b, .sp3d-fsc').forEach((e) => {
+      if (e.hidden || e.closest('[hidden]')) return; const r = e.getBoundingClientRect(); if (r.width < 1 || r.height < 1) return;
+      btnR.push({ x: r.left - sr.left, y: r.top - sr.top, w: r.width, h: r.height });
+    });
+    return btnR;
+  }
+  // the lowest bottom edge of the buttons along the top of the view, in the columns x0..x1 (where a note may start)
+  function belowButtons(x0, x1, h) { let y = 0; for (const r of buttonRects()) if (r.x < x1 + 6 && r.x + r.w > x0 - 6 && r.y < h * 0.5) y = Math.max(y, r.y + r.h); return y + 8; }
+  // a box (top-left x, y; size w, h) moved down below any button it would cover (or up above one in the lower half)
+  function keepClear(x, y, w, h) {
+    const H = stage.clientHeight;
+    for (let k = 0; k < 6; k++) {
+      const r = buttonRects().find((q) => x < q.x + q.w + 4 && x + w + 4 > q.x && y < q.y + q.h + 4 && y + h + 4 > q.y); if (!r) break;
+      y = r.y < H * 0.5 ? r.y + r.h + 6 : r.y - h - 6;
+    }
+    return [x, y];
+  }
 
   // ---- buttons in the bar under the model (all .sp3d-b, so the NEW-tag logic of the pages and app keeps working)
   const before = bar.querySelector('.sp3d-views');
@@ -378,8 +381,7 @@ export function create(V) {
   const bSlither = mk('Slither', 'Watch it slither along the ground'); bSlither.setAttribute('aria-pressed', 'false');
   // v5.12: Fullscreen is just its icon, in the bottom-right corner of the 3D view
   const bFull = el('button', 'sp3d-fsc'); bFull.type = 'button'; bFull.title = 'Fullscreen'; bFull.setAttribute('aria-label', 'Fullscreen'); bFull.setAttribute('aria-pressed', 'false'); bFull.innerHTML = ICON.full; stage.appendChild(bFull);
-  const bBite = V.bBite, bAnat = V.bAnat;
-  bBite.title = 'Watch it strike an arm, then look inside the arm to see how deep the fang goes';
+  const bAnat = V.bAnat;
   bAnat.title = 'Show the parts of this snake: see-through skin with its organs inside, plus teeth, fangs and tongue - tap any part';
 
   // ---- header buttons beside the name: Compare photo, See countries
@@ -455,6 +457,7 @@ export function create(V) {
     const rc = new Float32Array(N * 3), rT = new Float32Array(N * 3), rU = new Float32Array(N * 3), rS = new Float32Array(N * 3);
     for (let i = 0; i < N; i++) { const x = i * dx, c = body.spine(x), f = body.frameAt(x); rc.set([c.x, c.y, c.z], i * 3); rT.set([f.T.x, f.T.y, f.T.z], i * 3); rU.set([f.U.x, f.U.y, f.U.z], i * 3); rS.set([f.S.x, f.S.y, f.S.z], i * 3); }
     const nc = rc.slice(), nT = rT.slice(), nU = rU.slice(), nS = rS.slice(), bul = new Float32Array(N).fill(1);
+    const hb = new Float32Array(N); for (let i = 0; i < N; i++) hb[i] = F.Hh(i * dx) * F.bf; // (v5.68: a swelling grows up and out from the belly, which stays on the ground)
     const xEnd = mo ? mo.headX * 1.3 : F.Hl * 0.95, xr = Math.min(L * 0.3, xEnd * 1.06);
     const ih = Math.max(2, Math.round(xr / dx)), it = N - 1 - Math.max(3, Math.round(N * 0.012));
     // rest headings and horizontal step lengths (for poses built from turning angles)
@@ -525,7 +528,7 @@ export function create(V) {
       const a = s.pa.array, loc = s.loc, fi = s.fi, bb = s.bulge;
       for (let v = 0; v < s.n; v++) {
         const f = fi[v], i = f | 0, w = f - i, i3 = i * 3, j3 = i3 + 3, l0 = loc[v * 3]; let l1 = loc[v * 3 + 1], l2 = loc[v * 3 + 2];
-        if (bb) { const k = bul[i] + (bul[i + 1] - bul[i]) * w; l1 *= k; l2 *= k; }
+        if (bb) { const k = bul[i] + (bul[i + 1] - bul[i]) * w; if (k !== 1) { const h0 = hb[i] + (hb[i + 1] - hb[i]) * w; l1 = (l1 + h0) * k - h0; l2 *= k; } }
         for (let c = 0; c < 3; c++) a[v * 3 + c] = nc[i3 + c] + (nc[j3 + c] - nc[i3 + c]) * w + (nT[i3 + c] + (nT[j3 + c] - nT[i3 + c]) * w) * l0 + (nU[i3 + c] + (nU[j3 + c] - nU[i3 + c]) * w) * l1 + (nS[i3 + c] + (nS[j3 + c] - nS[i3 + c]) * w) * l2;
       }
       s.pa.needsUpdate = true; s.geo.computeVertexNormals();
@@ -559,7 +562,9 @@ export function create(V) {
       return out;
     }
     const restY = new Float32Array(N); for (let i = 0; i < N; i++) restY[i] = rc[i * 3 + 1];
-    const baseY = (i) => F.Hh(i * dx) * F.bf;
+    // v5.68: a snake up in a tree reaches out at the height of its branch, not down to the ground
+    const perchY = V.info.tree && V.info.tree.userData.perch ? V.info.tree.userData.perch.a.y : 0; // (the top of its branch)
+    const baseY = (i) => F.Hh(i * dx) * F.bf + perchY;
     // the head-and-neck posture: forebody up to sample is pointed along heading phi (the direction T, from head to
     // tail, is phi + PI), curled into an S by amount 'coil'; lifted by 'lift' at the head; head turned by 'yaw'
     function fore(o) {
@@ -572,7 +577,7 @@ export function create(V) {
         if (o.yaw) a += o.yaw * (1 - sstep(ih * 0.9, ih * 2.4, i));
         th[i] = a;
         const ly = (o.lift || 0) * Math.pow(1 - i / is, 1.6) * (1 - (o.coil || 0) * 0.25);
-        ys[i] = lerp(restY[i], baseY(i) + Math.min(restY[i] - baseY(i), F.Hh(F.Hl) * 0.6), sstep(is, is * 0.7, i)) + ly;
+        ys[i] = lerp(restY[i], baseY(i) + clamp(restY[i] - baseY(i), 0, F.Hh(F.Hl) * 0.6), sstep(is, is * 0.7, i)) + ly;
       }
       for (let i = is; i < N - 1; i++) th[i] = rth[i];
       return integrate(th, is, rc[is * 3], rc[is * 3 + 2], ys);
@@ -627,7 +632,7 @@ export function create(V) {
     show = Object.assign({ t0: now(), time: 0, freeze: null, objs: [] }, def);
     show.mouth0 = V.mouthGoal;
     V.controls.st.goal = null; V.controls.st.vaz = V.controls.st.vel = V.controls.st.vpx = V.controls.st.vpz = 0;
-    for (const b of [bBite, bEat]) b.disabled = true;
+    bEat.disabled = true;
     show.btn.disabled = false; show.btn.dataset.lbl = show.btn.textContent; show.btn.textContent = 'Stop'; show.btn.setAttribute('aria-pressed', 'true');
     stepTag.hidden = true; V.kick();
   }
@@ -639,7 +644,7 @@ export function create(V) {
     if (rig) rig.release();
     if (V.extras && V.extras.mouth) { V.extras.mouth.set(V.extras.mouth.t); V.mouthGoal = s.mouth0 || 0; flick(0); }
     say(''); stepTag.hidden = true;
-    for (const b of [bBite, bEat]) { b.disabled = false; b.removeAttribute('aria-pressed'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
+    for (const b of [bEat]) { b.disabled = false; b.removeAttribute('aria-pressed'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
     if (s.cLast && !quiet) camBlend = { t0: now(), pos: s.cLast.pos.clone(), tgt: s.cLast.tgt.clone() };
     if (anat) anat.refresh();
     V.kick();
@@ -667,119 +672,18 @@ export function create(V) {
     st.aim = phi; return phi;
   }
 
-  // ---------------------------------------------------------------- See bite
-  function bite() {
-    const mo = V.extras.mouth; if (!mo) return;
-    const R = rig, A = mo.anchors, st = strikeSetup(0), F = st.F, Hl = F.Hl, OPEN = mo.fanged ? 1.4 : 0.9, armR = 0.035; // vipers and cobras strike with the mouth open very wide, fangs forward
-    const t0 = mo.t; mo.set(OPEN); V.group.updateMatrixWorld(true);
-    const tipRest = A.fang.getWorldPosition(new THREE.Vector3()), fx0 = Hl * 0.1, sp = V.info.body.spine(fx0), Sx = V.info.body.frameAt(fx0).S;
-    const tipRest2 = tipRest.clone().addScaledVector(Sx, -2 * tipRest.clone().sub(sp).dot(Sx));
-    // v5.05: the head's skin with the mouth open (to keep the arm clear of everything but the fang tips)
-    const Bd = V.info.body, gp = Bd.geo.attributes.position.array, headV = [];
-    for (let i = 0; i < Bd.nR && Bd.ringX[i] <= mo.headX * 1.35; i++) for (let j = 0; j <= Bd.M; j += 2) { const k = (i * (Bd.M + 1) + j) * 3; headV.push(V3(gp[k], gp[k + 1], gp[k + 2])); }
-    mo.set(t0);
-    const lift = Math.max(0, armR * 1.3 - tipRest.y) + Hl * 0.15;
-    const phi = aim(st, lift), ext = R.fore({ len: st.len, phi, lift, coil: 0 }), coil = R.fore({ len: st.len, phi, lift: lift * 0.8, coil: 1 }), rest = R.rest();
-    const hm = R.headMatrixFor(ext), tip = tipRest.clone().applyMatrix4(hm), tip2 = tipRest2.clone().applyMatrix4(hm);
-    const D = st.D, mid = tip.clone().add(tip2).multiplyScalar(0.5), axis = st.perp.clone(), up = V3(0, 1, 0); // the elbow goes away from the camera
-    // the arm: its axis crosses in front of the head; the bite lands on the forearm a little above the wrist
-    const arm = buildArm(armR), A2 = arm.userData.A, X = new THREE.Vector3().crossVectors(axis, up).normalize();
-    arm.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, axis, up));
-    // v5.05: place the arm so that only the fang tips go in - the jaws, lips and snout stay just outside its skin
-    // (it used to sit inside the open mouth, the head wrapped round it). Search heights and distances in front of the head.
-    const headW = headV.map((v) => v.applyMatrix4(hm)), rX = armR * 1.07, rU = armR * 0.8 * 1.07;
-    const inArm = (q, cc) => { const d = q.clone().sub(cc); d.addScaledVector(axis, -d.dot(axis)); return Math.hypot(d.dot(X) / rX, d.y / rU); }; // < 1: inside the arm
-    const want = Math.min(A.fangLen * (mo.fanged ? 0.85 : 0.75), armR * 0.9);
-    let best = null;
-    for (let dyk = -1.1; dyk <= 0.61; dyk += 0.1) {
-      const cy = mid.y + dyk * armR; if (cy < rU * 1.02) continue; // never through the ground
-      let lo = -armR * 2, hi = armR * 4; // the smallest distance along D that keeps the head out
-      const clear = (sD) => { const cc = mid.clone().addScaledVector(D, sD); cc.y = cy; return headW.every((q) => inArm(q, cc) > 0.93); }; // (the lips may just press into the skin)
-      if (!clear(hi)) continue;
-      for (let it = 0; it < 22; it++) { const m = (lo + hi) / 2; if (clear(m)) hi = m; else lo = m; }
-      const cc = mid.clone().addScaledVector(D, hi + armR * 0.01); cc.y = cy;
-      const pen = Math.min(1 - inArm(tip, cc), 1 - inArm(tip2, cc)) * armR * 0.85; // how far both fang tips are in
-      const score = Math.min(pen, want) - Math.max(0, pen - want) * 0.5;
-      if (!best || score > best.score) best = { cc, pen, score };
-    }
-    const c = best ? best.cc : mid.clone().addScaledVector(D, armR * 0.9).setY(Math.max(mid.y - armR * 0.25, rU));
-    const depth = clamp(best ? best.pen : want * 0.5, 0.0004, want);
-    arm.position.copy(c).addScaledVector(axis, -A2 * 0.72);
-    V.scene.add(arm); show.objs.push(arm); arm.updateMatrixWorld(true);
-    { const zone = []; for (let k = -6; k <= 3; k++) { const p = c.clone().addScaledVector(axis, k * armR * 2); zone.push([p.x, p.z]); } for (let i = 0; i < R.ih * 6 && i < R.N; i += 6) zone.push([ext[i * 3], ext[i * 3 + 2]]); show.undo = (show.undo || []).concat([clearProps(zone, armR * 2.5)]); }
-    // inside the arm (shown when the skin turns see-through): muscle, bone, fat, veins (blue) and arteries (red)
-    const inner = new THREE.Group(); arm.add(inner);
-    const q = arm.worldToLocal(mid.clone()), qa = Math.atan2(q.z, q.x), yb = q.y;
-    const mat = (col, op = 1, extra = {}) => new THREE.MeshPhysicalMaterial(Object.assign({ color: col, roughness: 0.45, transparent: true, opacity: 0, depthWrite: false }, extra));
-    const fat = new THREE.Mesh(lathe([[0.86, -0.02], [0.93, 0.05], [0.92, 0.3], [0.82, 0.55], [0.66, 0.8], [0.57, 0.98]].map(([r, y]) => [r * armR, y * A2]), 36), mat('#f0d29a', 1, { side: THREE.DoubleSide })); fat.scale.set(1, 1, 0.8); fat.userData.op = 0.28; inner.add(fat);
-    const musT = canvasTex(128, (x, s) => { x.fillStyle = '#b8473f'; x.fillRect(0, 0, s, s); for (let i = 0; i < s; i += 3) { x.fillStyle = `rgba(${i % 2 ? '255,190,180' : '90,20,20'},.18)`; x.fillRect(i, 0, 1, s); } }, 3, 1);
-    for (let m = 0; m < 4; m++) { const a = qa + (m - 1.5) * 0.9, rr = armR * 0.42; const g = new THREE.Mesh(lathe([[0, 0.03], [0.28, 0.12], [0.36, 0.35], [0.3, 0.6], [0.12, 0.85], [0, 0.9]].map(([r, y]) => [r * armR, y * A2]), 20), mat('#ffffff', 1, { map: musT })); g.position.set(Math.cos(a) * rr, 0, Math.sin(a) * rr * 0.8); g.userData.op = 0.5; inner.add(g); }
-    for (const bo of [-1, 1]) { const g = new THREE.Mesh(new THREE.CylinderGeometry(armR * 0.12, armR * 0.14, A2 * 1.02, 14), mat('#efe8d8')); g.position.set(Math.cos(qa + Math.PI) * armR * 0.12 + bo * armR * 0.2, A2 * 0.5, Math.sin(qa + Math.PI) * armR * 0.08 - armR * 0.1); g.userData.op = 0.8; inner.add(g); }
-    const vessel = (col, depthK, da, wig, rad) => {
-      const pts = []; for (let i = 0; i <= 24; i++) { const y = -0.02 * A2 + (i / 24) * A2 * 1.02, a = qa + da + Math.sin(i * 0.7 + da * 5) * wig, rr = armR * depthK; pts.push(V3(Math.cos(a) * rr, y, Math.sin(a) * rr * 0.8)); }
-      const g = new THREE.Mesh(varTube(pts, () => armR * rad, 10, 96, false), mat(col, 1, { emissive: col, emissiveIntensity: 0.25, roughness: 0.3, clearcoat: 0.6 })); g.userData.op = 1; inner.add(g); return pts;
-    };
-    const veinPts = vessel('#2f5bd3', 0.8, 0.18, 0.12, 0.05); vessel('#3a62c8', 0.78, -0.55, 0.1, 0.04); vessel('#2d55c0', 0.82, 0.85, 0.08, 0.035);
-    vessel('#d2232c', 0.55, -0.15, 0.06, 0.055); vessel('#c41f2a', 0.58, 0.55, 0.05, 0.045);
-    // tiny branches (capillaries) around where the fang goes in
-    const Rr = rnd(5);
-    for (let k = 0; k < 16; k++) { const a = qa + (Rr() - 0.5) * 1.2, y = yb + (Rr() - 0.5) * armR * 2.4, r0 = armR * (0.55 + Rr() * 0.3), r1 = r0 + armR * (0.1 + Rr() * 0.15), a1 = a + (Rr() - 0.5) * 0.5; const pts = [V3(Math.cos(a) * r0, y, Math.sin(a) * r0 * 0.8), V3(Math.cos((a + a1) / 2) * (r0 + r1) / 2, y + (Rr() - 0.5) * armR * 0.6, Math.sin((a + a1) / 2) * (r0 + r1) / 2 * 0.8), V3(Math.cos(a1) * r1, y + (Rr() - 0.5) * armR, Math.sin(a1) * r1 * 0.8)]; const col = k % 2 ? '#c8333a' : '#3c64cf'; const g = new THREE.Mesh(varTube(pts, () => armR * 0.018, 5, 12, false), mat(col, 1, { emissive: col, emissiveIntensity: 0.3 })); g.userData.op = 0.9; inner.add(g); }
-    markFade(inner); fadeTree(inner, 0); inner.traverse((o) => { o.renderOrder = 1; });
-    arm.userData.skin.opacity = 0; arm.renderOrder = 3; arm.children.forEach((o) => { if (o !== inner) o.renderOrder = 3; });
-    // venom (yellow) spreading from the fang tips, and blood at the two punctures
-    const venM = new THREE.MeshPhysicalMaterial({ color: '#d9e04a', emissive: '#7a7a10', emissiveIntensity: 0.5, transparent: true, opacity: 0, depthWrite: false, roughness: 0.3 });
-    const ven = new THREE.Group(); V.scene.add(ven); show.objs.push(ven);
-    const drops = []; const Rv = rnd(9);
-    for (let k = 0; k < 46; k++) { const m = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), venM); const dir = V3(Rv() - 0.5, Rv() - 0.5, Rv() - 0.5).normalize(); m.userData = { dir, d: 0.2 + Rv() * 0.8, s: 0.5 + Rv(), from: k % 2 ? tip : tip2 }; m.renderOrder = 2; ven.add(m); drops.push(m); }
-    const cloudM = new THREE.MeshPhysicalMaterial({ color: '#e8ec6a', transparent: true, opacity: 0, depthWrite: false, roughness: 0.6 });
-    const clouds = [tip, tip2].map((p) => { const m = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 14), cloudM); m.position.copy(p); m.renderOrder = 2; ven.add(m); return m; });
-    // venom travelling along the nearest vein
-    const vw = veinPts.map((p) => arm.localToWorld(p.clone())); const flow = [];
-    for (let k = 0; k < 8; k++) { const m = new THREE.Mesh(new THREE.SphereGeometry(armR * 0.06, 10, 8), venM); m.renderOrder = 2; ven.add(m); flow.push(m); }
-    const bloodM = new THREE.MeshPhysicalMaterial({ color: '#8e0d14', roughness: 0.15, clearcoat: 1, transparent: true, opacity: 0 });
-    const blood = [tip, tip2].map((p) => { const m = new THREE.Mesh(new THREE.SphereGeometry(armR * 0.07, 12, 10), bloodM); m.position.copy(p).addScaledVector(D, -depth * 0.95); m.scale.set(1, 1.6, 1); ven.add(m); return m; });
-    const mm = Math.max(1, Math.round(depth * 1000));
-    const kind = mo.fanged ? (plan === 'viper' || plan === 'pitviper' ? 'viper' : 'elapid') : plan === 'python' ? 'python' : 'colubrid';
-    const T1 = 'The snake pulls its neck back into an <b>S-shape</b>, ready to strike.';
-    const T2 = 'Strike! It takes less than a tenth of a second.';
-    const T3 = { viper: 'Its long <b>hollow fangs</b> swing forward and go in about <b>' + mm + ' mm</b>.', elapid: 'Its short, fixed <b>front fangs</b> go in about <b>' + mm + ' mm</b>.', python: 'No fangs: rows of sharp, backward-curved <b>teeth</b> grip about <b>' + mm + ' mm</b> deep.', colubrid: 'Its small <b>teeth</b> only go in about <b>' + mm + ' mm</b>.' }[kind];
-    const T4 = mo.fanged ? '<b>Venom</b> (yellow) is pushed through the fang into the tissue. <b>Veins</b> (blue) and <b>arteries</b> (red) can carry it round the body.' : 'Most bites like this are harmless: no venom, just small punctures that should be cleaned.';
-    const T5 = mo.fanged ? 'That is why a venomous bite needs a <b>hospital fast</b>: keep still and calm - doctors treat it with <b>antivenom</b>.' : (kind === 'python' ? 'Pythons have <b>no venom</b>. They hold on with their teeth and squeeze.' : 'A few rear-fanged snakes have mild venom, so any bite should still be checked by a doctor.');
-    const camWide = () => { const tg = c.clone().lerp(V.info.headPos, 0.45); const d = Math.max(st.len * 1.25, armR * 9) / Math.tan(V.info.vf) * 0.75; const dir = st.perp.clone().multiplyScalar(0.8).addScaledVector(D, -0.6).normalize(); return { tgt: tg, pos: tg.clone().addScaledVector(dir, d * Math.cos(0.45)).add(V3(0, d * Math.sin(0.45), 0)) }; };
-    const camClose = () => { const tg = mid.clone().addScaledVector(D, -depth); const dir = st.perp.clone().multiplyScalar(0.85).addScaledVector(up, 0.5).addScaledVector(D, -0.45).normalize(); return { tgt: tg, pos: tg.clone().addScaledVector(dir, armR * 6.5) }; };
-    // through the see-through arm, facing the snake: the fangs inside, the venom spreading
-    const camXray = () => { const tg = mid.clone().addScaledVector(D, depth * 0.2); const dir = st.perp.clone().multiplyScalar(0.5).addScaledVector(up, 0.55).addScaledVector(D, 0.75).normalize(); return { tgt: tg, pos: tg.clone().addScaledVector(dir, armR * 5.2) }; };
-    let camKey = camWide();
-    const xray = (k) => { arm.userData.skin.opacity = 1 - k * 0.8; arm.userData.skin.depthWrite = k < 0.01; fadeTree(inner, k); };
-    const venomOn = mo.fanged;
-    const phases = [
-      [1.2, (u) => { R.setPose(R.blend(rest, coil, ease(u))); R.apply(); arm.userData.skin.opacity = ease(u * 1.4); arm.userData.skin.depthWrite = u > 0.7; say(T1); stepTag.hidden = false; stepTag.textContent = '1 / 5'; camKey = camWide(); }],
-      [0.8, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift: lift * 0.8, coil: 1 + 0.06 * Math.sin(s * 9) })); R.apply(); setMouth(0); arm.userData.skin.opacity = 1; arm.userData.skin.depthWrite = true; }],
-      [0.28, (u) => { const k = ease(u * 1.15); R.setPose(R.blend(coil, ext, k)); R.apply(); setMouth(OPEN * ease(u * 3)); say(T2); stepTag.textContent = '2 / 5'; }],
-      [1.3, (u) => { R.setPose(ext); R.apply(); setMouth(OPEN); say(T3); stepTag.textContent = '3 / 5'; if (u > 0.25) camKey = camClose(); blood.forEach((b) => { b.material.opacity = ease(u * 2); }); }],
-      [1.0, (u) => { xray(ease(u)); if (u > 0.3) camKey = camXray(); }],
-      [venomOn ? 4.2 : 2.6, (u, s) => {
-        xray(1); say(u < 0.55 ? T4 : T5); stepTag.textContent = u < 0.55 ? '4 / 5' : '5 / 5';
-        if (venomOn) {
-          const k = ease(u * 1.3); venM.opacity = 0.85 * Math.min(1, u * 4); cloudM.opacity = 0.22 * k;
-          clouds.forEach((m) => m.scale.setScalar(armR * (0.08 + 0.5 * k)));
-          drops.forEach((m) => { const f = m.userData.from, dd = armR * m.userData.d * 0.75 * k; m.position.copy(f).addScaledVector(m.userData.dir, dd); m.scale.setScalar(armR * 0.022 * m.userData.s * (0.4 + k)); });
-          flow.forEach((m, j) => { const ph = ((s * 0.35 + j / flow.length) % 1) * clamp(u * 2, 0, 1), idx = ph * (vw.length - 1), i0 = Math.floor(idx), w = idx - i0; m.position.copy(vw[i0]).lerp(vw[Math.min(vw.length - 1, i0 + 1)], w); m.visible = u > 0.15; });
-        }
-      }],
-      [1.0, (u) => { const k = ease(u); xray(1 - k); venM.opacity = 0.85 * (1 - k); cloudM.opacity = 0.22 * (1 - k); R.setPose(R.blend(ext, coil, k)); R.apply(); setMouth(OPEN * (1 - k)); camKey = camWide(); say(''); stepTag.hidden = true; }],
-      [1.3, (u) => { R.setPose(R.blend(coil, rest, ease(u))); R.apply(); arm.userData.skin.opacity = 1 - ease(u); arm.userData.skin.depthWrite = false; blood.forEach((b) => { b.material.opacity = 1 - ease(u); }); }],
-    ];
-    show.dur = total(phases);
-    show.step = (s) => runPhases(phases, s);
-    show.cam = () => camKey;
-    show.end = () => { say(''); };
-  }
-
   // ---------------------------------------------------------------- See it eat
   function eat() {
     const mo = V.extras.mouth; if (!mo) return;
-    const R = rig, F = V.info.F, Hl = F.Hl, L = F.L, st = strikeSetup(0), D = st.D;
+    const R = rig, F = V.info.F, Hl = F.Hl, L = F.L, st = strikeSetup(0);
+    // v5.68: up in a tree the prey sits on the branch beyond the snake, and the snake reaches along the branch for it
+    const perch = V.info.tree && V.info.tree.userData.perch;
+    if (perch) {
+      const tg = perch.a.clone().addScaledVector(perch.dir, Math.min(perch.len, st.len * 0.6)), d = tg.sub(V.info.headPos).setY(0);
+      if (d.lengthSq() > 1e-8) { st.D = d.normalize(); st.phi = Math.atan2(st.D.z, st.D.x); st.perp = V3(-st.D.z, 0, st.D.x); if (st.perp.dot(V.info.center.clone().sub(V.info.headPos).setY(0)) > 0) st.perp.negate(); }
+    }
+    const D = st.D;
+    const onPerch = (p) => { const q = p.clone().sub(perch.a), u = clamp(q.dot(perch.dir), 0, perch.len * 1.6); return perch.a.clone().addScaledVector(perch.dir, u); }; // the nearest point on top of the branch
     const diet = dietOf(P, V.opts.id);
     const rB = (x) => Math.min(F.W(x), F.Hh(x));
     let kind = diet; if (kind === 'mouse' && L > 1.6) kind = 'rat';
@@ -791,7 +695,8 @@ export function create(V) {
     // egg-eaters - Gans 1961, Am. Zool. 1:217; Arnold 1983, Copeia 1983:94; King 2002, Herpetol. Rev.)
     const REAL = { mouse: [0.011, 0.017], rat: [0.022, 0.042], frog: [0.006, 0.03], fish: [0.005, 0.045], lizard: [0.003, 0.025], snake: [0.002, 0.02], egg: [0.009, 0.028], bird: [0.012, 0.04], centipede: [0.0012, 0.006], worm: [0.001, 0.005], slug: [0.002, 0.008], caterpillar: [0.0015, 0.006] };
     let headR = 0; for (let k = 0; k <= 24; k++) headR = Math.max(headR, F.W(Hl * k / 24)); // half the head's width
-    const RATIO = { python: [1.7, 3.0], viper: [1.35, 1.9], pitviper: [1.35, 1.9], elapid: [1.0, 1.35], sea: [0.9, 1.25], colubrid: [1.05, 1.5] }[plan] || [1.05, 1.5];
+    // v5.68: a typical meal, not the biggest it could manage (the old typical sizes looked like a giant rat in front of a small head)
+    const RATIO = { python: [1.3, 3.0], viper: [1.2, 1.9], pitviper: [1.2, 1.9], elapid: [0.95, 1.35], sea: [0.85, 1.25], colubrid: [1.0, 1.5] }[plan] || [1.0, 1.5];
     const thin = { snake: 0.42, lizard: 0.7, centipede: 0.42, worm: 0.38, caterpillar: 0.5, slug: 0.6, fish: 0.85 };
     const typOf = (k) => k === 'egg' ? 2.4 : thin[k] ? Math.min(thin[k], RATIO[0]) : RATIO[0], maxOf = (k) => k === 'egg' ? 3.4 : thin[k] ? Math.min(thin[k] * 1.35, RATIO[1]) : RATIO[1];
     const fits = (k) => REAL[k][0] <= headR * maxOf(k);
@@ -806,8 +711,13 @@ export function create(V) {
     const tNeed = mo.tFor ? mo.tFor(prR * 2 * 0.9) : 0.9, tHold = clamp(tNeed * 0.8, 0.3, 1.1), spreadNeed = clamp((prR * 0.95 - headR * 0.8) / headR, 0, 0.6);
     const restSnout = R.rest().subarray(0, 3);
     const lift = Math.max(0, prR * 0.95 - restSnout[1]) + Hl * 0.05;
-    const phi = aim(st, lift), ext = R.fore({ len: st.len, phi, lift, coil: 0 }), coil = R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 }), rest = R.rest();
-    const constrict = (plan === 'python' || (plan === 'colubrid' && (kind === 'mouse' || kind === 'rat' || kind === 'bird' || (kind === 'snake' && !venomous)))) && kind !== 'egg';
+    let phi = aim(st, lift);
+    if (perch) { // up in a tree: turn the reach until the head comes down right over the branch (Newton steps on its distance from it)
+      const n = V3(-perch.dir.z, 0, perch.dir.x), off = (ph) => V.info.headPos.clone().applyMatrix4(R.headMatrixFor(R.fore({ len: st.len, phi: ph, lift, coil: 0 }))).sub(perch.a).dot(n);
+      for (let k = 0; k < 5; k++) { const e = off(phi); if (Math.abs(e) < F.w0 * 0.2) break; const de = (off(phi + 0.02) - e) / 0.02; if (Math.abs(de) < 1e-6) break; phi -= clamp(e / de, -0.5, 0.5); }
+    }
+    const ext = R.fore({ len: st.len, phi, lift, coil: 0 }), coil = R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 }), rest = R.rest();
+    const constrict = !perch && (plan === 'python' || (plan === 'colubrid' && (kind === 'mouse' || kind === 'rat' || kind === 'bird' || (kind === 'snake' && !venomous)))) && kind !== 'egg';
     const envenom = venomous && kind !== 'egg', viperWait = envenom && (plan === 'viper' || plan === 'pitviper') && (kind === 'mouse' || kind === 'rat' || kind === 'bird');
     const strikes = kind !== 'egg' && kind !== 'worm' && kind !== 'slug' && kind !== 'caterpillar'; // (slow prey is just seized)
     // the prey, held: its front at body position xp (x > 0 inside the mouth), its head pointing down the throat
@@ -816,25 +726,36 @@ export function create(V) {
     // v5.05: while it is held and swallowed, the prey's girth is squeezed to fit inside the open mouth and the stretched
     // neck (nothing pokes out through the skin), and its whiskers are tucked away
     const whisk = []; prey.traverse((o) => { if (o.isLineSegments) whisk.push(o); });
+    // v5.68: the prey only ever shows between the open jaws: it is cut off by a plane across the throat, just in front of
+    // the corners of the mouth, so nothing of it can come through the neck or the body wall (the meal is the lump instead);
+    // while held it lies along the head's own axis, so it goes in through the mouth, head first
+    const xClip = mo.headX * 0.97, clip = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1e6); // (far away: nothing cut until it is held)
+    prey.traverse((o) => { if (!o.material) return; for (const m of [].concat(o.material)) { m.clippingPlanes = [clip]; m.clipShadows = true; if (o.isMesh) m.side = THREE.DoubleSide; } });
+    const unclip = () => { clip.normal.set(0, 1, 0); clip.constant = 1e6; };
     const fitScale = () => {
       let sc = 1; const xh = mo.headX;
       for (let k = 0; k <= 16; k++) {
-        const u = -1 + k / 8, x = xp - Lp / 2 + (u * Lp) / 2; if (x <= Hl * 0.05) continue;
+        const u = -1 + k / 8, x = xp - Lp / 2 + (u * Lp) / 2; if (x <= Hl * 0.05 || x > xClip) continue; // (behind the cut nothing shows)
         const prof = prR * Math.sqrt(Math.max(0, 1 - u * u)); if (prof < prR * 0.05) continue;
         const i = clamp(Math.round(x / R.dx), 0, R.N - 1), cap = rB(x) * Math.max(1, R.bul[i]) * (x < xh ? lerp(1.7, 1.05, x / xh) * (1 + (mo.spread || 0)) : 1) * 0.92;
         sc = Math.min(sc, cap / prof);
       }
       return clamp(sc, 0.45, 1);
     };
-    const placeHeld = () => { const xc = xp - Lp / 2, xa = Math.max(xc, Hl * 0.55), f = R.frameAtX(xa); if (xc < xa) f.c.addScaledVector(f.T, xc - xa); /* in front of the head: along its own axis (the snout tip dips) */ const m = new THREE.Matrix4().makeBasis(f.S.clone().negate(), f.U, f.T); prey.quaternion.setFromRotationMatrix(m); prey.position.copy(f.c); const sc = fitScale(); prey.scale.set(sc, sc, 1); whisk.forEach((w) => { w.visible = false; }); };
+    const placeHeld = () => {
+      const xc = xp - Lp / 2, xa = Hl * 0.5, f = R.frameAtX(xa); f.c.addScaledVector(f.T, xc - xa); // along the head's own axis
+      const m = new THREE.Matrix4().makeBasis(f.S.clone().negate(), f.U, f.T); prey.quaternion.setFromRotationMatrix(m); prey.position.copy(f.c);
+      const sc = fitScale(); prey.scale.set(sc, sc, 1); whisk.forEach((w) => { w.visible = false; });
+      const g = R.frameAtX(xClip); clip.normal.copy(g.T).negate(); clip.constant = -clip.normal.dot(g.c); // keep only what is in front of the throat
+    };
     // where the prey will sit when the strike lands: hold it there now (computed with the reaching pose)
     R.setPose(ext); R.apply(); placeHeld(); prey.updateMatrixWorld(true); worldM = prey.matrix.clone(); R.setPose(rest); R.apply();
     // lay it on the ground (its belly on y = 0)
-    const lay = () => { prey.matrix.copy(worldM); prey.matrix.decompose(prey.position, prey.quaternion, prey.scale); prey.scale.set(1, 1, 1); prey.position.y = Math.max(prey.position.y, prR * (kind === 'egg' ? 1.0 : 0.95)); whisk.forEach((w) => { w.visible = true; }); };
+    const lay = () => { unclip(); prey.matrix.copy(worldM); prey.matrix.decompose(prey.position, prey.quaternion, prey.scale); prey.scale.set(1, 1, 1); if (perch) { const q = onPerch(prey.position); prey.position.set(q.x, q.y + prR * 0.95, q.z); } else prey.position.y = Math.max(prey.position.y, prR * (kind === 'egg' ? 1.0 : 0.95)); whisk.forEach((w) => { w.visible = true; }); };
     const worldY = new THREE.Vector3().setFromMatrixPosition(worldM).y;
     const rolled = (a) => { // let go: the prey rolls onto its side on the ground (a = 1), or is picked up again (a = 0)
-      prey.matrix.copy(worldM); prey.matrix.decompose(prey.position, prey.quaternion, prey.scale); prey.scale.set(1, 1, 1);
-      prey.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(R.frameAtX(0).T, 1.3 * a)); prey.position.y = lerp(worldY, prR * 0.7, a); whisk.forEach((w) => { w.visible = a > 0.5; });
+      unclip(); prey.matrix.copy(worldM); prey.matrix.decompose(prey.position, prey.quaternion, prey.scale); prey.scale.set(1, 1, 1);
+      prey.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(R.frameAtX(0).T, 1.3 * a)); prey.position.y = lerp(worldY, (perch ? onPerch(prey.position).y : 0) + prR * 0.7, a); whisk.forEach((w) => { w.visible = a > 0.5; });
     };
     lay(); markFade(prey); fadeTree(prey, 0);
     { const zone = [[prey.position.x, prey.position.z]]; for (let i = 0; i < R.ih * 6 && i < R.N; i += 6) zone.push([ext[i * 3], ext[i * 3 + 2]]); const undo = clearProps(zone, Math.max(prR * 2.5, F.w0 * 3)); show.undo = (show.undo || []).concat([undo]); } // (v5.05: no rock or grass in the way)
@@ -863,15 +784,19 @@ export function create(V) {
       spiral.sLen = sLen;
     }
     const sq = (k) => { if (!spiral) return; const i0 = R.ih, i1 = Math.min(R.N - 1, R.ih + Math.round(spiral.sLen / R.dx)); for (let i = 0; i < R.N; i++) R.bul[i] = i >= i0 && i <= i1 ? 1 + k * 0.07 * sstep(i0, i0 + 12, i) * (1 - sstep(i1 - 12, i1, i)) : R.bul[i]; };
+    // v5.68: a modest, realistic lump - never a balloon: at most about 1.3-1.5 times the body's width (by prey), easing
+    // into that limit (a big rat in a ball python shows as a firm swelling, the skin stretched between the scales)
+    const CAP = { rat: 1.45, mouse: 1.4, bird: 1.42, egg: 1.5, frog: 1.36, fish: 1.3, lizard: 1.25, snake: 1.1, centipede: 1.08, worm: 1.08, caterpillar: 1.1, slug: 1.15 }[kind] || 1.35, cap1 = CAP - 1;
+    const minLump = longPrey ? 0.04 : kind === "fish" || kind === "lizard" ? 0.1 : 0.16;
+    const bodyLp = longPrey ? Lp : Lp * (kind === 'mouse' || kind === 'rat' ? 0.62 : 0.85); // (a tail or a bird's tail feathers make no lump)
     const bulgeAt = (xFront, extra) => { // the swelling where the prey is inside the body
       for (let i = 0; i < R.N; i++) {
-        const x = i * R.dx, u = (x - (xFront - Lp / 2)) / (Lp / 2); let k = 1;
-        if (Math.abs(u) < 1) { const need = prR * Math.sqrt(1 - u * u) * 1.12 / Math.max(1e-6, rB(x)); k = Math.max(1, need); k = lerp(1, k, sstep(Hl * 1.0, Hl * 1.7, x)); } // v5.12: the head itself never swells (it used to swallow its own eyes)
+        const x = i * R.dx, u = (x - (xFront - bodyLp / 2)) / (bodyLp / 2); let k = 1;
+        if (Math.abs(u) < 1) { const sh = Math.pow(1 - u * u, 0.6), need = prR * sh * 1.05 / Math.max(1e-6, rB(x)); k = need > 1 ? 1 + cap1 * Math.tanh((need - 1) / cap1) : 1; k = Math.max(k, 1 + minLump * sh); /* (always a visible lump, even in a stout python) */ k = lerp(1, k, sstep(Hl * 1.0, Hl * 1.7, x)); } // v5.12: the head itself never swells (it used to swallow its own eyes)
         R.bul[i] = Math.max(1, lerp(1, k, extra));
       }
     };
     const xIn = Hl * 1.15 + Lp, xEnd = Math.max(xIn + Lp * 0.2, L * 0.45);
-    const anatOn = () => !!(anat && anat.on);
     const camSide = (tg, d, el = 0.38, back = 0.25) => { const dir = st.perp.clone().addScaledVector(D, -back).normalize(); return { tgt: tg, pos: tg.clone().addScaledVector(dir, d * Math.cos(el)).add(V3(0, d * Math.sin(el), 0)) }; };
     const fitD = (sz) => sz / Math.tan(V.info.vf) * 0.62, wideD = fitD(Math.max(st.len * 1.25, Lp * 2.4));
     let camKey = camSide(prey.position.clone().lerp(V.info.headPos, 0.5), wideD);
@@ -909,16 +834,16 @@ export function create(V) {
     phases.push([4.6, (u, s) => {
       // jaw walking: the prey goes in in small pulls, one side of the jaw then the other (the head turns a little each way)
       const e = ease(u), pull = e - Math.sin(e * TAU * 6) / (TAU * 6);
-      held = true; xp = lerp(xp0, xIn, pull); const yaw = 0.1 * Math.sin(e * TAU * 3) * (1 - sstep(0.85, 1, u));
+      held = true; xp = lerp(xp0, xIn, pull); const yaw = 0.05 * Math.sin(e * TAU * 3) * (1 - sstep(0.85, 1, u));
       R.setPose(R.fore({ len: st.len, phi, lift, coil: 0, yaw })); bulgeAt(xp, 1); R.apply();
       const inside = sstep(0, 0.15, u) * (1 - sstep(0.82, 1, u)); // the jaws spread round the prey and walk over it, one side then the other (the "pterygoid walk")
       setMouth(lerp(tHold, tNeed, Math.sin(Math.min(1, u * 1.2) * Math.PI)), { spread: spreadNeed * inside, walk: Math.sin(e * TAU * 3) * inside * (spreadNeed > 0.05 ? 1 : 0.6) }); say(T.swallow);
       camKey = camSide(headPt().lerp(R.point(xp - Lp * 0.5), 0.3), fitD(Hl * 1.8 + Lp * 1.0), 0.36);
-      preyHide = !anatOn() && xp - Lp > Hl * 0.95;
+      preyHide = xp - Lp > xClip; // (all of it past the cut)
     }]);
     phases.push([3.4, (u) => {
       xp = lerp(xIn, xEnd, ease(u)); R.setPose(R.blend(ext, rest, ease(u) * 0.6)); bulgeAt(xp, 1); R.apply(); setMouth(lerp(tHold, 0, ease(u * 2))); say(T.down);
-      preyHide = !anatOn();
+      preyHide = true;
       camKey = camSide(R.point(xp - Lp / 2), fitD(Math.max(L * 0.22, Lp * 3.2)), 0.55);
     }]);
     phases.push([1.8, (u) => { const b = R.blend(ext, rest, 0.6 + 0.4 * ease(u)); R.setPose(b); bulgeAt(xp, 1 - ease(u) * 0.5); R.apply(); setMouth(0); say(T.digest); camKey = camSide(V.info.center.clone(), fitD(V.info.Rb * 2.2), 0.6); }]);
@@ -1303,13 +1228,22 @@ export function create(V) {
       if (!slither) tip.hidden = !!st.sel;
       layoutLabels(busy, w, h);
       for (const o of st.outline) if (o.material.uniforms && o.material.uniforms.uRes) o.material.uniforms.uRes.value.set(V.canvas.width || 1, V.canvas.height || 1);
+      placeNotes(w, h);
       if (!st.sel) return;
       // heat pits have no mesh: a green ring marks them
       if (st.sel.key === 'pits') { ndc.copy(rig.point(F.Hl * 0.15, F.W(F.Hl * 0.15) * 0.9, 0)).project(V.cam); ring.hidden = !(ndc.z < 1); const rr = 26; ring.style.width = ring.style.height = rr * 2 + 'px'; ring.style.left = ((ndc.x * 0.5 + 0.5) * w) + 'px'; ring.style.top = ((-ndc.y * 0.5 + 0.5) * h) + 'px'; }
-      const cw = card.offsetWidth || 240, ch = card.offsetHeight || 90;
-      let cx = w - cw - 10, cy = 10; // top right, clear of the parts list (top left)
-      if (w < 520) { cx = w - cw - 8; cy = h - ch - 8; } // phones: bottom right (the tip line hides meanwhile)
-      card.style.transform = 'translate(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px)';
+    }
+    // v5.68: the parts list (top left) and the part's card (top right; on phones bottom left) start below the buttons
+    // over the view and stay clear of fullscreen, so they never cover Compare photo, See countries or the main buttons
+    function placeNotes(w, h) {
+      const cw = card.offsetWidth || 240, ch = card.offsetHeight || 90, phone = w < 520;
+      let cx = w - cw - 10, cy = belowButtons(w - cw - 10, w - 10, h);
+      if (phone) { cx = 8; cy = h - ch - 8; } // phones: bottom left (clear of the fullscreen button; the tip line hides meanwhile)
+      if (!card.hidden) card.style.transform = 'translate(' + cx.toFixed(1) + 'px,' + Math.max(8, cy).toFixed(1) + 'px)';
+      if (st.list) {
+        const lw = st.list.offsetWidth || 240, top = Math.max(8, belowButtons(8, 8 + lw, h)), floor = !card.hidden && phone ? cy - 8 : h - 50;
+        st.list.style.top = top + 'px'; st.list.style.maxHeight = Math.max(60, floor - top) + 'px';
+      }
     }
     // v5.57: each label goes close to its own point - just above or just below the snake there, alternating along the
     // body - sliding sideways only as much as it must to keep clear of the other labels, the snake, the buttons on the
@@ -1473,7 +1407,6 @@ export function create(V) {
   }
 
   // ================================================================= events
-  on(bBite, 'click', () => { if (show && show.name === 'bite') { stopShow(); return; } startShow({ name: 'bite', btn: bBite }); bite(); });
   on(bEat, 'click', () => { if (show && show.name === 'eat') { stopShow(); return; } startShow({ name: 'eat', btn: bEat }); eat(); });
   on(bSlither, 'click', () => { if (slither && !slither.stopping) stopSlither(true); else { exclusive('slither'); startSlither(); } });
   on(bAnat, 'click', () => { if (!anat) return; if (!anat.on) exclusive('anatomy'); anat.toggle(); });
@@ -1488,14 +1421,37 @@ export function create(V) {
   }
   on(bFull, 'click', () => V.toggleFull());
   // a tap (not a drag) picks a part while Anatomy is on; a double-click zooms in, or back out
-  let down = null;
-  on(V.canvas, 'pointerdown', (e) => { down = [e.clientX, e.clientY, now()]; });
+  // v5.68: a plain click or tap on empty space (no snake, part or label under it) leaves whatever is on - Anatomy, See it
+  // eat, Slither, Open mouth, Size vs person - and goes back to the normal model, like Reset. Only a real click counts:
+  // little movement, short, one finger (dragging to turn or move, and pinching, never reset); a double-click still zooms.
+  let down = null, ptrs = 0, multi = false, leaveT = 0, lastTap = null;
+  on(V.canvas, 'pointerdown', (e) => { ptrs++; if (ptrs > 1) multi = true; else multi = false; down = [e.clientX, e.clientY, e.timeStamp || now()]; }); // (the events' own times: how long the button was really held)
+  const ptrOff = () => { ptrs = Math.max(0, ptrs - 1); };
+  on(V.canvas, 'pointercancel', () => { ptrOff(); multi = true; down = null; });
+  const anyMode = () => !!(show || slither || (anat && anat.on) || V.mouthGoal > 0.01 || V.scaleOn());
+  function hitsSnake(e) {
+    const r = V.canvas.getBoundingClientRect(), ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), V.cam);
+    const objs = []; if (V.group) V.group.traverse((o) => { if (o.isMesh && o.visible !== false) { if (o.geometry && !o.geometry.boundingSphere) o.geometry.computeBoundingSphere(); objs.push(o); } });
+    if (show) for (const o of show.objs) o.traverse((q) => { if (q.isMesh) objs.push(q); });
+    V.scene.updateMatrixWorld(); return ray.intersectObjects(objs, false).length > 0;
+  }
+  function leaveModes() {
+    if (!anyMode()) return false;
+    if (show) stopShow(); if (slither) stopSlither(); if (anat && anat.on) anat.set(false, true);
+    V.closeMouth(); V.scaleOff(); if (V.resetView) V.resetView(); V.kick(); return true;
+  }
   on(V.canvas, 'pointerup', (e) => {
-    if (!down || !anat || !anat.on || show) return; const moved = Math.hypot(e.clientX - down[0], e.clientY - down[1]); down = null; if (moved > 6) return;
-    const p = anat.pick(e); if (p) anat.select(p);
+    ptrOff(); if (!down) return; const moved = Math.hypot(e.clientX - down[0], e.clientY - down[1]), dt = (e.timeStamp || now()) - down[2]; down = null;
+    lastTap = { moved, dt, multi, button: e.button };
+    if (moved > 6 || dt > 650 || multi || e.button > 0) return;
+    if (anat && anat.on && !show) { const p = anat.pick(e); if (p) { lastTap.part = p.name; anat.select(p); return; } }
+    else if (hitsSnake(e)) { lastTap.snake = true; return; }
+    if (!anyMode()) return;
+    clearTimeout(leaveT); leaveT = setTimeout(() => { if (alive) leaveModes(); }, 280); // (a second click makes it a double-click: no reset)
   });
+  on(wrap, 'click', (e) => { if (e.target === wrap || e.target === row) leaveModes(); }); // (the empty space round the view)
   on(V.canvas, 'dblclick', (e) => {
-    e.preventDefault(); if (show) return;
+    clearTimeout(leaveT); e.preventDefault(); if (show) return;
     if (anat && anat.on && anat.pick(e)) return; // double-tapping a part only selects it
     const st = V.controls.st, info = V.info;
     if ((st.goal ? st.goal.d : st.d) < info.dFit * 0.8) { V.controls.setGoal({ d: info.dFit, px: 0, pz: 0, el: Math.max(st.el, (info.portrait ? 40 : 30) * Math.PI / 180) }); return; }
@@ -1514,9 +1470,9 @@ export function create(V) {
       layout();
       if (anat) anat.reset(); rig = null; anat = anatomyCtl(); show = null; slither = null; camBlend = null; fx.zoomOut = 1;
       const has = !!(V.extras && V.extras.mouth);
-      bEat.hidden = bBite.hidden = !has;
+      bEat.hidden = !has;
       bAnat.hidden = !has; bAnat.setAttribute('aria-pressed', 'false');
-      for (const b of [bBite, bEat]) { b.disabled = false; b.removeAttribute('aria-pressed'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
+      for (const b of [bEat]) { b.disabled = false; b.removeAttribute('aria-pressed'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
       bSlither.setAttribute('aria-pressed', 'false'); bSlither.textContent = 'Slither';
       say(''); stepTag.hidden = true; tip.hidden = true;
     },
@@ -1533,6 +1489,7 @@ export function create(V) {
       if (anat && anat.stepPose()) moving = true;
       if (rig) rig.sync();
       if (anat && anat.on) { anat.refresh(); }
+      { const tr = V.info && V.info.tree, down = !!slither || !!(anat && anat.on); if (tr && tr.visible === down) { tr.visible = !down; moving = true; } } // v5.68: the tree goes while it is down on the ground
       return moving;
     },
     camera() { return camera(); },
@@ -1549,6 +1506,8 @@ export function create(V) {
     resetView: () => !!(anat && anat.resetView()),
     zoomOut: 1, // > 1 while slithering: the camera may go further out to see the whole track
     anatOn: () => !!(anat && anat.on),
+    leaveModes: () => leaveModes(), // v5.68: a click on empty space around the view
+    keepClear: (x, y, w, h) => keepClear(x, y, w, h), // v5.68: labels never on the buttons over the view
     syncFull(f) { bFull.innerHTML = f ? ICON.exit : ICON.full; bFull.title = f ? 'Exit fullscreen' : 'Fullscreen'; bFull.setAttribute('aria-label', bFull.title); bFull.setAttribute('aria-pressed', String(f)); },
     // scale labels never sit on the snake: move a label (x, y = its anchor; the box hangs above it, centred) out of the way
     avoid(x, y, w, h, extra) {
@@ -1568,7 +1527,7 @@ export function create(V) {
     },
     dispose() { alive = false; fx.reset(); if (hdb) hdb.remove(); closeSide(); },
     // for tests: freeze a show at s seconds
-    test: { freeze(s) { if (show) show.freeze = s; V.kick(); }, get show() { return show && { name: show.name, time: show.time, dur: show.dur, diet: show.diet }; }, get slither() { return !!slither; }, get anat() { return anat; }, get rig() { return rig; }, dietOf: () => dietOf(P, V.opts.id), side: (k) => toggleSide(k) },
+    test: { freeze(s) { if (show) show.freeze = s; V.kick(); }, get show() { return show && { name: show.name, time: show.time, dur: show.dur, diet: show.diet }; }, get slither() { return !!slither; }, get anat() { return anat; }, get rig() { return rig; }, get lastTap() { return lastTap; }, dietOf: () => dietOf(P, V.opts.id), side: (k) => toggleSide(k) },
   };
   return fx;
 }

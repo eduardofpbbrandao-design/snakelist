@@ -668,7 +668,9 @@ AUDIT_FIX = {
     "dasypeltis-scabra": {"d": "#8a8a86", "lat": "#86857f", "c": "#3c3a36", "b": "#dcd8cc", "t": "rhomb", "n": 50,
         "h": {"pupil": "slit", "teeth": {"n": 0.2, "len": 0.5}, "iris": "#8a8478", "irisInner": "#b8b0a0"},
         "pat": [{"type": "line", "p0": [1.15, 0.0], "p1": [2.4, 0.3], "wid": 0.12, "color": "#3c3a36", "mirror": True, "xMax": 2.8, "aa": 0.3},
-                {"type": "line", "p0": [0.75, 0.0], "p1": [1.6, 0.24], "wid": 0.09, "color": "#3c3a36", "mirror": True, "aa": 0.3}]},
+                {"type": "line", "p0": [0.75, 0.0], "p1": [1.6, 0.24], "wid": 0.09, "color": "#3c3a36", "mirror": True, "aa": 0.3},
+                # v5.68 (references: species accounts - two V marks on top of the head and another on the neck)
+                {"type": "line", "p0": [0.36, 0.0], "p1": [0.95, 0.2], "wid": 0.07, "color": "#3c3a36", "mirror": True, "aa": 0.3}]},
     # 5 Madagascar leaf-nosed snake (the long-nosed form in its photo): pale brown, a long flat nasal blade, pale lateral line
     "langaha-madagascariensis": {"d": "#a07c56", "lat": "#a68560", "c": "#5a4028", "b": "#e6dcb0", "t": "none", "ls": ["#e8e0c0", 0.6, 0.03],
         "h": {"horns": "rostral", "hornLen": 0.55, "hornUp": 0.05, "hornFlat": 0.35, "hornColor": "#9a7650", "w": 1.3}},
@@ -687,7 +689,9 @@ AUDIT_FIX = {
         "tb": [["#2a221a", 2.6, 4.2, 0.42]], "pat": [{"type": "hband", "x0": 1.0, "x1": 2.5, "aMin": 0.45, "belly": True, "color": "#e0d2b0", "xMax": 3.0, "alpha": 0.8, "warp": 0.2}]},
     # 9 blood python: blood-red to orange-brown, pale irregular blotches and dark flank marks, very stout, a pale crown line
     "python-brongersmai": {"d": "#a0482e", "lat": "#a24c30", "c": "#e2c49a", "lc": "#3a1e14", "ec": "#5a2a1a", "b": "#e6d6b6", "t": "irregular", "n": 30,
-        "vs": ["#d8b48a", 0.03]},
+        "vs": ["#d8b48a", 0.03],
+        # v5.68 (reference: the species account - the head is usually grey, a white stripe runs down and back from the rear edge of the eye)
+        "hc": "#7c7470", "hcx": 1.0, "pat": [{"type": "line", "p0": [0.46, 0.4], "p1": [1.12, 0.66], "wid": 0.05, "color": "#ece6da", "mirror": True}]},
     # 10 rinkhals (banded form, as in its photo): dark with pale crossbands that stop at the belly, two pale bands across the dark throat, keeled
     "hemachatus-haemachatus": {"d": "#2a2826", "lat": "#2c2a28", "c": "#a8a294", "b": "#1e1c1a", "t": "band", "n": 46, "sx": {"keel": 0.8},
         "tb": [["#e6e0d0", 2.2, 2.7, 0.45], ["#e6e0d0", 3.3, 3.8, 0.45]]},
@@ -967,6 +971,44 @@ try: PHOTO_MASK = json.load(open(os.path.join(ROOT, "data/snake-model-photo.json
 except (OSError, ValueError): pass
 
 
+# v5.68: a fossil snake is shown as it would have looked alive, built like its closest living relatives (Eduardo: "show how
+# the snake would look like"): the model of a living species of the same genus, or of a genus its name is built on
+# (Palaeoelaphe -> Elaphe, Paleoheterodon -> Heterodon, Tropidonotus -> Natrix), or else a typical living member of its
+# family - Titanoboa as a giant boa, the madtsoiids as big pythons, the marine palaeophiids and simoliophiids like sea
+# snakes. Its own length (from its bones), surroundings and name stay; colours are those of the living relative.
+FOSSIL_ALIAS = {"tropidonotus": "natrix", "dinodon": "lycodon", "palaeoelaphe": "elaphe", "paleoheterodon": "heterodon", "miocoluber": "coluber",
+                "paracoluber": "coluber", "micronatrix": "natrix", "paraungaliophis": "ungaliophis", "nanowana": "morelia", "bavarioboa": "boa"}
+FOSSIL_FAMILY = {  # family -> living templates, in order of preference (the first that has a generated model)
+    "Boidae": ["boa-imperator", "boa-constrictor", "eunectes-notaeus"], "Pythonidae": ["python-sebae", "morelia-spilota"],
+    "Madtsoiidae": ["python-sebae", "liasis-olivaceus", "morelia-spilota"], "Dinilysiidae": ["boa-imperator", "eunectes-notaeus"],
+    "Aniliidae": ["anilius-scytale"], "Tropidophiidae": ["tropidophis-melanurus", "tropidophis-pardalis"], "Acrochordidae": ["acrochordus-arafurae"],
+    "Palaeophiidae": ["aipysurus-laevis", "acrochordus-granulatus"], "Simoliophiidae": ["aipysurus-laevis", "acrochordus-granulatus"], "Nigerophiidae": ["acrochordus-granulatus", "aipysurus-laevis"],
+    "Viperidae": ["macrovipera-lebetina", "vipera-ammodytes"], "Elapidae": ["naja-haje", "pseudechis-australis"], "Typhlopidae": ["typhlops-vermicularis"],
+    "Colubridae": ["elaphe-quatuorlineata", "zamenis-situla", "coluber-constrictor"], "Psammophiidae": ["psammophis-schokari"],
+}
+FOSSIL_SMALL_BOID = ["eryx-jaculus", "lichanura-trivirgata", "charina-bottae"]  # boids under a metre: sand boas and rosy boas
+FOSSIL_TYPE = {"Watersnake": ["natrix-natrix", "nerodia-sipedon"], "Cobra": ["naja-haje"], "Elapid": ["pseudechis-australis"], "Viper": ["macrovipera-lebetina"],
+               "Pit Viper": ["crotalus-viridis"], "Boa": ["boa-imperator"], "Python": ["python-sebae"], "Colubrid": ["elaphe-quatuorlineata"], "Other": ["elaphe-quatuorlineata"]}
+FOSSIL_GENUS = {"python": "python-sebae", "morelia": "morelia-spilota", "naja": "naja-haje", "crotalus": "crotalus-viridis", "bungarus": "bungarus-fasciatus", "heterodon": "heterodon-nasicus", "lampropeltis": "lampropeltis-holbrooki", "micrurus": "micrurus-tener"}  # the typical living species of a genus
+FOSSIL_KEEP = ("L", "s")  # its own: length from its bones, and its surroundings
+
+
+def fossil_template(c, out, L):
+    """the id of the living species whose model a fossil borrows, or None"""
+    live = lambda k: k in out and "f" not in out[k]["auto"].get("x", "")
+    g = c["genus"].lower(); g = FOSSIL_ALIAS.get(g, g)
+    same = sorted(k for k in out if k.split("-")[0] == g and live(k))
+    if FOSSIL_GENUS.get(g) in same: return FOSSIL_GENUS[g]
+    if same:  # the best-known living species of the genus: on the ground, hand-checked first, then one coloured from a photo
+        return sorted(same, key=lambda k: ((out[k]["auto"].get("ps") or {}).get("kind") == "drape", k not in CURATED and k not in AUDIT_FIX, "g" in out[k]["auto"].get("x", ""), k))[0]
+    if c["family"] == "Boidae" and L < 1.0: cands = FOSSIL_SMALL_BOID
+    elif c["family"] in ("Boidae", "Dinilysiidae") and L >= 5: cands = ["eunectes-murinus", "boa-imperator"]  # the giants (Titanoboa) as giant boas like the anaconda, their closest living size match
+    else: cands = FOSSIL_FAMILY.get(c["family"], []) + FOSSIL_TYPE.get(c["type"], []) + ["elaphe-quatuorlineata"]
+    for k in cands:
+        if live(k): return k
+    return None
+
+
 def build(cards, lengths, hab_kind, existing, hab_sec=None):
     """cards: the app's cards (build_species); lengths: id -> (lo, hi) from reviewed accounts;
     existing: the hand-made profiles (kept). Returns id -> generated entry."""
@@ -1147,4 +1189,15 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         if a.get("lat") in (None, a["d"]): a["lat"] = mid
         a["d"] = mid; a["x"] = a.get("x", "") + ("g" if "g" not in a.get("x", "") else "")
         if a["t"] not in ("plain", "coral") and abs(lum(a["c"]) - lum(mid)) < 0.08: a["c"] = tone(mid, 0.5) if lum(mid) > 0.2 else tone(mid, 2.2, 0.6)
+    # v5.68: fossils look like their living relatives (FOSSIL_FAMILY above)
+    for c in cards:
+        if not c["fossil"] or c["id"] not in out: continue
+        own = out[c["id"]]["auto"]; t = fossil_template(c, out, own["L"])
+        if not t: continue
+        a = json.loads(json.dumps(out[t]["auto"]))
+        for k in FOSSIL_KEEP: a[k] = own[k]
+        a.pop("tl", None) if c["genus"].lower() not in ("crotalus", "sistrurus") else None  # (no rattle on a fossil that was not a rattlesnake)
+        a["x"] = "f" + ("l" if "l" in own.get("x", "") else "")
+        a["like"] = t  # the living snake it is built like
+        out[c["id"]]["auto"] = a
     return out

@@ -136,7 +136,7 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
 
     // v4.63: only Reset stays under the model
     const bar = await pg.evaluate(() => [].map.call(document.querySelectorAll('.sp3d-bar button'), (b) => b.textContent));
-    ok('the buttons under the model (v4.81: Anatomy, See bite, See it eat, Slither, See eye shield, Fullscreen)', JSON.stringify(bar) === JSON.stringify(['Reset', 'Open mouth', 'Anatomy', 'See bite', 'See it eat', 'Slither', 'See eye shield', 'Full body', 'Head close-up', 'Pattern from above', 'Size vs person', 'Fullscreen']), JSON.stringify(bar));
+    ok('the buttons under the model (v4.81: Anatomy, See it eat, Slither, See eye shield, Fullscreen)', JSON.stringify(bar) === JSON.stringify(['Reset', 'Open mouth', 'Anatomy', 'See it eat', 'Slither', 'See eye shield', 'Full body', 'Head close-up', 'Pattern from above', 'Size vs person', 'Fullscreen']), JSON.stringify(bar));
     const hdb = await pg.evaluate(() => [].map.call(document.querySelectorAll('.sp-rl-hd .sp3d-hdb button'), (b) => b.textContent));
     ok('Compare photo and See countries beside the name (v4.81)', JSON.stringify(hdb) === JSON.stringify(['Compare photo', 'See countries']), JSON.stringify(hdb));
     // resize to phone width
@@ -148,7 +148,7 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     await pg.setViewportSize({ width: 1280, height: 900 }); await pg.waitForTimeout(500);
     const sh = await pg.evaluate(async () => {
       const s = window.__sp3d, fx = s.fx, click = (t) => [...document.querySelectorAll('.sp3d-bar button')].find((b) => b.textContent === t).click(), out = {};
-      click('See bite'); fx.test.freeze(3); s.frame(); out.biting = { show: fx.test.show && fx.test.show.name, locked: fx.locked, mouth: s.mouthGoal, rig: fx.test.rig.active };
+      click('See it eat'); fx.test.freeze(3); s.frame(); out.eating = { show: fx.test.show && fx.test.show.name, locked: fx.locked, mouth: s.mouthGoal, rig: fx.test.rig.active };
       click('Stop'); s.frame(); out.after = { show: fx.test.show, locked: fx.locked, mouth: s.mouthGoal, rig: fx.test.rig.active };
       click('Slither'); await new Promise((r) => setTimeout(r, 400)); s.frame(); out.slither = fx.test.slither && fx.test.rig.active;
       [...document.querySelectorAll('.sp3d-bar button')].find((b) => /slither/i.test(b.textContent)).click(); await new Promise((r) => setTimeout(r, 2500)); s.frame();
@@ -158,7 +158,7 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
       click('Size vs person'); click('Close mouth');
       return out;
     });
-    ok('See bite: a show takes the camera and opens the mouth, Stop gives them back', sh.biting.show === 'bite' && sh.biting.locked && sh.biting.mouth > 0.5 && sh.biting.rig && !sh.after.show && !sh.after.locked && sh.after.mouth === 0 && !sh.after.rig, JSON.stringify(sh));
+    ok('See it eat: a show takes the camera and opens the mouth, Stop gives them back', sh.eating.show === 'eat' && sh.eating.locked && sh.eating.mouth > 0.3 && sh.eating.rig && !sh.after.show && !sh.after.locked && sh.after.mouth === 0 && !sh.after.rig, JSON.stringify(sh));
     ok('Slither starts and stops', sh.slither && sh.slitherStopped, JSON.stringify(sh));
     ok('Open mouth after Size vs person only opens the mouth', sh.mouthOnly.scale && sh.mouthOnly.sameView && sh.mouthOnly.mouth === 1, JSON.stringify(sh.mouthOnly));
     await pg.focus('.sp3d-canvas'); const w0 = await pg.evaluate(() => [window.__sp3d.controls.st.px, window.__sp3d.controls.st.pz]);
@@ -195,7 +195,7 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     const { pg } = await newPage(br);
     await pg.goto(BASE + 'common-gartersnake-thamnophis-sirtalis.html#real'); await waitViewer(pg);
     const r = await pg.evaluate(() => ({ canvas: document.querySelectorAll('canvas.sp3d-canvas').length, none: !!document.querySelector('.sp3d-none:not([hidden])'), cap: (document.querySelector('.sp3d-cap') || {}).textContent || '' }));
-    ok('generated model: a 3D model is shown, with no "no model" note', r.canvas === 1 && !r.none && /Generated model/.test(r.cap), JSON.stringify(r));
+    ok('generated model: a 3D model is shown, with no "no model" note and no caption under it (v5.68)', r.canvas === 1 && !r.none && !r.cap, JSON.stringify(r));
   }
 
   // 5. load failure + Retry
