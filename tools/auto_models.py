@@ -619,13 +619,15 @@ SPECIES_BODY = {
     "python-sebae": {"tail": 0.13}, "bitis-arietans": {"tail": 0.1}, "dendroaspis-angusticeps": {"tail": 0.23},
 }
 # Eye diameter over head length (Z3): the family defaults are in viewer.js (EYE_L); these are genera that differ
-GENUS_EYE = {"ahaetulla": 0.19, "thelotornis": 0.18, "oxybelis": 0.16, "langaha": 0.15, "imantodes": 0.22, "dispholidus": 0.2, "boiga": 0.17, "chrysopelea": 0.16,
-             "dendrelaphis": 0.2, "leptophis": 0.18, "philothamnus": 0.18, "coluber": 0.17, "masticophis": 0.18, "malpolon": 0.2,
-             "cylindrophis": 0.04, "anilius": 0.04, "naja": 0.12, "hemachatus": 0.11, "dendroaspis": 0.11, "pseudonaja": 0.12, "oxyuranus": 0.11,
+# v5.73: natricines and racers 0.2-0.25 (the eye a fifth to a quarter of the head's length: it looked tiny), vipers ~0.1-0.12
+GENUS_EYE = {"ahaetulla": 0.19, "thelotornis": 0.18, "oxybelis": 0.16, "langaha": 0.15, "imantodes": 0.22, "dispholidus": 0.22, "boiga": 0.19, "chrysopelea": 0.2,
+             "dendrelaphis": 0.24, "leptophis": 0.22, "philothamnus": 0.22, "coluber": 0.23, "masticophis": 0.23, "malpolon": 0.23, "natrix": 0.21, "hierophis": 0.22, "platyceps": 0.22,
+             "cylindrophis": 0.04, "anilius": 0.04, "naja": 0.13, "hemachatus": 0.12, "dendroaspis": 0.14, "pseudonaja": 0.14, "oxyuranus": 0.13,
              "acanthophis": 0.1, "vermicella": 0.05, "bungarus": 0.08, "micrurus": 0.08, "micruroides": 0.08, "laticauda": 0.07, "charina": 0.07, "lichanura": 0.07,
              "eunectes": 0.07, "corallus": 0.1, "bothriechis": 0.11, "echis": 0.11, "lachesis": 0.07, "dasypeltis": 0.13, "myron": 0.1, "erpeton": 0.08,
-             "thamnophis": 0.15, "nerodia": 0.13, "crotalus": 0.09, "sistrurus": 0.1, "vipera": 0.1, "atheris": 0.11, "trimeresurus": 0.1}
-SPECIES_EYE = {"morelia-viridis": 0.1, "morelia-azurea": 0.1, "thamnophis-saurita": 0.16, "opheodrys-aestivus": 0.18, "pantherophis-guttatus": 0.14}
+             "thamnophis": 0.21, "nerodia": 0.18, "regina": 0.18, "storeria": 0.19, "pantherophis": 0.19, "elaphe": 0.19, "zamenis": 0.19, "lampropeltis": 0.17, "pituophis": 0.17,
+             "crotalus": 0.1, "sistrurus": 0.11, "vipera": 0.12, "atheris": 0.12, "trimeresurus": 0.11}
+SPECIES_EYE = {"morelia-viridis": 0.1, "morelia-azurea": 0.1, "thamnophis-saurita": 0.23, "opheodrys-aestivus": 0.23, "pantherophis-guttatus": 0.19}
 # Fang length in mm (documented adult sizes, Z9), and rear fangs (opisthoglyphous snakes)
 GENUS_FANG = {"crotalus": 9, "sistrurus": 4, "agkistrodon": 7, "bitis": 15, "daboia": 16, "echis": 4.5, "vipera": 5, "cerastes": 5, "bothriechis": 5, "bothrops": 20,
               "lachesis": 35, "trimeresurus": 6, "tropidolaemus": 7, "calloselasma": 8, "atheris": 5, "naja": 6.5, "ophiophagus": 11, "hemachatus": 4,
@@ -763,6 +765,8 @@ AUDIT_FIX = {
     "drymarchon-couperi": {"sx": {"rows": 17}},
     # 88 sea krait: lateral nostrils (it is amphibious)
     "laticauda-colubrina": {"h": {"nostrilA": 78}},
+    # v5.73: the dice snake's reddish-orange iris (photos), round pupil
+    "natrix-tessellata": {"h": {"iris": "#a84a2a", "irisInner": "#d0703a", "pupil": "round"}},
     # 89 rough green snake: a long whip tail (body table); big eye
     # Gaboon-like under-eye mark for the puff adder is in the hand fixes
 }
@@ -791,16 +795,16 @@ HAND_FIXES_562 = {
     "agkistrodon-contortrix": [(("body", "tail"), 0.133), (("body", "tailShape"), "abrupt"), (("pose",), _STACK), (("head", "fangMm"), 6)],
     # 31 corn snake: large squarish black-bordered saddles, narrow orange gaps; tail 15%
     "pantherophis-guttatus": [(("pattern", 0, "shape"), "saddle"), (("pattern", 0, "wid"), 0.42), (("pattern", 0, "len"), 0.7), (("pattern", 0, "edge"), 0.18),
-                              (("pattern", 1, "a"), 0.62), (("body", "tail"), 0.15), (("head", "eyeL"), 0.14)],
+                              (("pattern", 1, "a"), 0.62), (("body", "tail"), 0.15), (("head", "eyeL"), 0.19)],
     # 41/42 diamondbacks: broad diamonds (were a thin chain)
-    "crotalus-atrox": [(("pattern", 0, "wid"), 0.40), (("pattern", 0, "len"), 1.15), (("pattern", 1, "a"), 0.62), (("head", "eyeL"), 0.09), (("head", "fangMm"), 10)],
+    "crotalus-atrox": [(("pattern", 0, "wid"), 0.40), (("pattern", 0, "len"), 1.15), (("pattern", 1, "a"), 0.62), (("head", "eyeL"), 0.1), (("head", "fangMm"), 10)],
     "crotalus-adamanteus": [(("pattern", 0, "wid"), 0.42), (("pattern", 0, "len"), 1.15), (("pattern", 0, "edge"), 0.16), (("pose",), _STACK), (("head", "fangMm"), 18)],
     "crotalus-horridus": [(("pose",), _STACK), (("head", "fangMm"), 11), (("pattern",), "+", {"type": "line", "p0": [0.36, 0.4], "p1": [1.0, 0.6], "wid": 0.06, "color": "#2a2018", "mirror": True})],
     # 45 boa: pale-centred saddles, stouter
     "boa-constrictor": [(("pattern", 0, "inner"), {"r": 0.35, "color": "#8a7058"}), (("body", "ld"), 18), (("pose",), {"kind": "stack", "pitch": 1.05, "lead": 0.3, "lift": 0.2, "tight": 0.62})],
     # 47 black mamba: the inky-black mouth
-    "dendroaspis-polylepis": [(("head", "mouthColor"), "#141414"), (("head", "eyeL"), 0.11), (("head", "fangMm"), 6.5), (("body", "tailShape"), "whip")],
-    "dendroaspis-angusticeps": [(("head", "eyeL"), 0.11), (("body", "tail"), 0.23), (("body", "tailShape"), "whip")],
+    "dendroaspis-polylepis": [(("head", "mouthColor"), "#141414"), (("head", "eyeL"), 0.14), (("head", "fangMm"), 6.5), (("body", "tailShape"), "whip")],
+    "dendroaspis-angusticeps": [(("head", "eyeL"), 0.15), (("body", "tail"), 0.23), (("body", "tailShape"), "whip")],
     # 48 saw-scaled viper: the cross on the crown
     "echis-carinatus": [(("pose",), _STACK), (("body", "tailShape"), "abrupt"), (("head", "fangMm"), 4.5),
                         (("pattern",), "+", {"type": "poly", "pts": [[0.32, 0.0], [0.42, 0.05], [0.6, 0.05], [0.62, 0.16], [0.7, 0.16], [0.7, 0.05], [0.95, 0.04], [0.95, 0.0]], "mirror": True, "color": "#e6d8b8", "alpha": 0.9})],
@@ -827,6 +831,8 @@ HAND_FIXES_562 = {
     "daboia-russelii": [(("body", "tail"), 0.13), (("body", "tailShape"), "abrupt"), (("pose",), _STACK), (("head", "fangMm"), 16)],
     "bungarus-caeruleus": [(("body", "tailShape"), "blunt"), (("body", "tail"), 0.12)],
     "epicrates-cenchria": [(("head", "eyeL"), 0.09)],
+    # v5.73: the viperine snake's eye against its new, narrower head (it was sized against the old broad one); the adder's
+    "natrix-maura": [(("head", "eyeL"), 0.21)], "vipera-berus": [(("head", "eyeL"), 0.12)],
     "hydrophis-platurus": [(("head", "eyeL"), 0.06), (("head", "fangMm"), 1)],
 }
 SKIP_562 = {"opheodrys-vernalis", "oxyuranus-microlepidotus"}  # (being rebuilt separately)

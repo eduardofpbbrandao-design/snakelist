@@ -74,12 +74,69 @@ const PLANS = {
   sea:      { body: { ld: 30, neck: 0.62, peak: 0.55, vent: 0.75, tail: 0.11, xs: 0.72, bf: 0.85, paddle: true }, head: { len: 0.045, w: 0.75, h: 0.72, snout: 0.6, jaw: 0.75, eyeX: 0.3, eyeA: 52, eye: 0.13, pupil: 'round', brow: 0, canthus: 2.2, nostrilA: 32 }, scales: { rows: 47, keel: 0, gloss: 0.35, aV: 0.95, kind: 'juxta' }, pose: { kind: 'wave' } },
 };
 function merge(a, b) { const o = Object.assign({}, a); for (const k in b) o[k] = b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) && a && typeof a[k] === 'object' ? merge(a[k], b[k]) : b[k]; return o; }
-function normProfile(p) {
+// v5.73: head proportions by group (field-guide measurements and photos): lw head length over head width, hb the head's
+// width against the thickest part of the body [min, max], hn head width over neck width, len head length over total length
+// [min, max]. Colubrid heads were as wide as long and wider than the body (lw 1.1, hb 1.1): a bulbous, cobra-like blob.
+// Natricines and racers have a long, narrow head barely wider than the neck; vipers a broad triangle on a thin neck;
+// cobras a head about as wide as the neck, mambas a long coffin-shaped one; blind snakes no distinct head at all.
+const HEAD_FORM = {
+  natricine: { lw: 1.75, hb: [0.62, 0.85], hn: 1.25, len: [0.028, 0.044] },
+  colubrine: { lw: 1.7, hb: [0.6, 0.86], hn: 1.2, len: [0.026, 0.044] },
+  broad: { lw: 1.42, hb: [0.68, 1.15], hn: 1.5, len: [0.026, 0.05] }, // cat-eyed and tree snakes, snail-eaters, hognoses: a broad head on a thin neck
+  vine: { lw: 2.0, hb: [0.6, 1.7], hn: 1.5, len: [0.03, 0.055] }, // (a long head on a thin neck)
+  burrow: { lw: 1.35, hb: [0.6, 0.9], hn: 1.0, len: [0.02, 0.04] },
+  elapid: { lw: 1.65, hb: [0.6, 0.9], hn: 1.1, len: [0.025, 0.04] },
+  cobra: { lw: 1.55, hb: [0.65, 0.95], hn: 1.05, len: [0.025, 0.04] },
+  mamba: { lw: 2.05, hb: [0.6, 0.88], hn: 1.15, len: [0.025, 0.04] },
+  deathadder: { lw: 1.2, hb: [0.85, 1.25], hn: 1.75, len: [0.04, 0.07] },
+  sea: { lw: 1.7, hb: [0.5, 0.8], hn: 1.05, len: [0.025, 0.05] },
+  viper: { lw: 1.3, hb: [0.62, 1.2], hn: 2.0, len: [0.04, 0.06] },
+  bitis: { lw: 1.15, hb: [0.6, 1.25], hn: 2.1, len: [0.045, 0.075] },
+  pitviper: { lw: 1.3, hb: [0.7, 1.2], hn: 1.9, len: [0.04, 0.062] },
+  python: { lw: 1.55, hb: [0.5, 0.8], hn: 1.45, len: [0.03, 0.055] },
+  boa: { lw: 1.65, hb: [0.5, 0.8], hn: 1.4, len: [0.03, 0.055] },
+  sandboa: { lw: 1.25, hb: [0.6, 0.95], hn: 1.05, len: [0.025, 0.04] },
+};
+const HF_GENUS = {};
+for (const [k, l] of Object.entries({
+  natricine: 'natrix nerodia thamnophis regina storeria virginia clonophis tropidoclonion liodytes seminatrix hebius rhabdophis fowlea xenochrophis amphiesma sinonatrix trimerodytes tropidonophis atretium herpetoreas opisthotropis afronatrix limnophis natriciteres hydraethiops lycognathophis anoplohydrus parahelicops',
+  broad: 'boiga toxicodryas dipsadoboa telescopus crotaphopeltis leptodeira dipsas sibon tropidodipsas sibynomorphus pareas aplopeltura asthenodipsas heterodon paleoheterodon xenodon lystrophis waglerophis hypsiglena trimorphodon',
+  vine: 'ahaetulla thelotornis oxybelis langaha uromacer imantodes dryophiops xenoxybelis',
+  burrow: 'atractaspis amblyodipsas aparallactus polemon xenocalamus macrelaps micrelaps homoroselaps chilorhinophis brachyophis hypoptophis poecilopholis uropeltis rhinophis plectrurus melanophidium platyplectrurus teretrurus pseudoplectrurus plecturus cylindrophis anilius calamaria carphophis',
+  cobra: 'naja ophiophagus hemachatus pseudohaje walterinnesia aspidelaps',
+  mamba: 'dendroaspis', deathadder: 'acanthophis',
+  bitis: 'bitis cerastes pseudocerastes eristicophis',
+  colubrine: 'causus azemiops', // (narrow, colubrid-like viper heads)
+  boa: 'boa acrantophis sanzinia candoia epicrates chilabothrus eunectes corallus',
+  sandboa: 'eryx gongylophis charina lichanura calabaria',
+})) for (const g of l.split(' ')) HF_GENUS[g] = k;
+function headForm(plan, id) {
+  const k = HF_GENUS[String(id || '').split('-')[0]];
+  if (k) return HEAD_FORM[k];
+  return HEAD_FORM[{ colubrid: 'colubrine', elapid: 'elapid', sea: 'sea', viper: 'viper', pitviper: 'pitviper', python: 'python' }[plan] || ''] || null;
+}
+function normProfile(p, id) {
   const base = PLANS[p.plan] || PLANS.colubrid;
   const q = merge(merge(base, { colors: { dorsal: '#776655', lateral: null, belly: '#d8cfb8', mottle: 0.08, var: 0.05 }, pattern: [], tail: {}, scene: { kind: 'litter' } }), p);
   q.colors.lateral = q.colors.lateral || q.colors.dorsal;
   // v5.27: viper heads are broad triangles behind a narrow neck (they were barely wider than the neck from above)
   if ((q.head.shape || 'oval') === 'tri' && !q.head.wFixed) q.head = Object.assign({}, q.head, { w: q.head.w * 1.1 });
+  // v5.73: the head's length, width and neck from its group (HEAD_FORM): the length kept within the group's range, the
+  // width set by the length-to-width ratio (never broader: a slender colubrid's head is long and narrow, not bulbous) and
+  // kept within its range against the body; then the neck from the head-to-neck ratio (body.hn when the profile has one)
+  const form = q.plan === 'blind' ? null : headForm(q.plan, id || p.id);
+  if (form && !q.head.wFixed) {
+    const sx = Math.sqrt(q.body.xs), lwT = q.head.lw != null ? q.head.lw : q.head.minR != null ? Math.max(q.head.minR, 1.2) : form.lw;
+    let len = clamp(q.head.len, form.len[0], form.len[1]), w = q.head.w;
+    if ((len * q.body.ld) / (w * sx) < lwT) w = (len * q.body.ld) / (lwT * sx); // (too broad for its length: narrower)
+    w = Math.min(w, form.hb[1]);
+    if (w < form.hb[0]) { w = form.hb[0]; len = Math.min(Math.max(len, (lwT * w * sx) / q.body.ld), form.len[1]); }
+    // (a width-based eye was sized for the old head: a much narrower head takes its family's eye size instead)
+    const eyeL = q.head.eyeL == null && w < q.head.w * 0.92 && EYE_L[q.plan] ? EYE_L[q.plan] : q.head.eyeL;
+    q.head = Object.assign({}, q.head, { len, w, eyeL });
+    const hn = q.body.hn || form.hn;
+    if (hn) q.body = Object.assign({}, q.body, { neck: clamp(w / hn, 0.25, 1.05) });
+  }
   // v5.31: heads at least as long as they are wide (vipers), longer still in pythons: a short broad head reads as a blob
   // from every side. Too short a head is made a little longer and narrower, keeping its area
   { const minR = q.head.minR != null ? q.head.minR : (q.head.shape || 'oval') === 'tri' ? 1.05 : q.plan === 'python' ? 1.3 : q.plan === 'blind' ? 0 : 1.1;
@@ -91,14 +148,15 @@ function normProfile(p) {
   if ((q.plan === 'colubrid' || q.plan === 'elapid' || q.plan === 'sea' || !PLANS[q.plan]) && q.head.plates == null) q.head = Object.assign({}, q.head, { plates: true });
   // ---- v5.62 (model accuracy) ----
   // body.hn: the documented ratio of head width to neck width sets the neck (vipers ~2-3, colubrids ~1.3, pipe snakes 1)
-  if (q.body.hn) q.body = Object.assign({}, q.body, { neck: clamp(q.head.w / q.body.hn, 0.25, 1.05) });
+  if (q.body.hn && !form) q.body = Object.assign({}, q.body, { neck: clamp(q.head.w / q.body.hn, 0.25, 1.05) });
   // eye size against head LENGTH (head.eyeL = eye diameter / head length), the family's usual size unless the profile
   // gives one; a profile that sets the old width-based 'eye' keeps exactly the size it had (see eyeRadOf)
   if (q.head.eyeL == null && !(p.head && p.head.eye != null) && EYE_L[q.plan]) q.head = Object.assign({}, q.head, { eyeL: EYE_L[q.plan] });
   return q;
 }
 // v5.62: eye diameter / head length by family (field-guide norms): diurnal colubrids have big eyes, burrowers tiny ones
-const EYE_L = { colubrid: 0.15, elapid: 0.11, viper: 0.09, pitviper: 0.09, python: 0.085, sea: 0.065 };
+// (v5.73: colubrids 0.2 - a natricine's or racer's eye is a fifth to a quarter of its head's length)
+const EYE_L = { colubrid: 0.2, elapid: 0.13, viper: 0.11, pitviper: 0.1, python: 0.09, sea: 0.07 };
 function eyeRadOf(P, F) {
   const Hd = P.head, x = Hd.eyeX * F.Hl;
   if (Hd.eyeL == null) return (Hd.eye || 0.15) * F.W(x) * 1.04;
@@ -2480,7 +2538,7 @@ function personShape(h) {
 
 // ---------- the viewer ----------
 export function mount(host, opts) {
-  const P = normProfile(autoProfile(opts.profile)), seed = strSeed(opts.id || P.name || 'snake');
+  const P = normProfile(autoProfile(opts.profile), opts.id), seed = strSeed(opts.id || P.name || 'snake');
   { const gH = HEAD_GENUS[String(opts.id || '').split('-')[0]]; if (gH) P.head = Object.assign({}, gH, P.head); } // v5.53
   const reduceMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const reduce = () => reduceMQ.matches;
