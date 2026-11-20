@@ -1191,7 +1191,9 @@ export function create(V) {
     // v5.57: how wide the jaws open, and how far the two halves of the lower jaw spread, for this prey
     const tNeed = mo.tFor ? mo.tFor(prR * 2 * 0.9) : 0.9, tHold = clamp(tNeed * 0.8, 0.3, 1.1), spreadNeed = clamp((prR * 0.95 - headR * 0.8) / headR, 0, 0.6);
     const restSnout = R.rest().subarray(0, 3);
-    const lift = Math.max(0, prR * 0.95 - restSnout[1]) + Hl * 0.05;
+    // v5.83: up in a tree the head is held high enough that the prey, lying along the head's own axis, sits on top of
+    // the branch (it used to be pushed up out of the jaws, above and behind the head, cut off at the throat)
+    const lift = perch ? Math.max(0, (prey.userData.y || prR) * 0.92 - F.Hh(Hl * 0.5) * F.bf) + Hl * 0.08 : Math.max(0, prR * 0.95 - restSnout[1]) + Hl * 0.05;
     const constrict = !perch && (plan === 'python' || (plan === 'colubrid' && (kind === 'mouse' || kind === 'rat' || kind === 'bird' || (kind === 'snake' && !venomous)))) && kind !== 'egg';
     const envenom = venomous && kind !== 'egg';
     // vipers, cobras, mambas and kraits let go of prey that could bite back (mammals, birds) and follow it when the venom
@@ -1324,7 +1326,7 @@ export function create(V) {
       const m = new THREE.Matrix4().makeBasis(f.S.clone().negate(), f.U, f.T); prey.quaternion.setFromRotationMatrix(m); prey.position.copy(f.c);
       if (perch) { // v5.78: up in a tree the prey is held level, on top of its branch - never pushed down into the wood (out of sight)
         const top = onPerch(f.c).y + (prey.userData.y || prR) * 0.85;
-        if (prey.position.y < top) { const Tf = V3(f.T.x, f.T.y * 0.15, f.T.z).normalize(), Uf = V3(0, 1, 0).addScaledVector(Tf, -Tf.y).normalize(), Sf = Tf.clone().cross(Uf); prey.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(Sf.negate(), Uf, Tf)); prey.position.copy(R.point(0)).addScaledVector(Tf, xc); prey.position.y = Math.max(top, R.point(0).y); levT = Tf; } // (straight out in front of the snout)
+        if (prey.position.y < top - prR * 0.6) { const Tf = V3(f.T.x, f.T.y * 0.15, f.T.z).normalize(), Uf = V3(0, 1, 0).addScaledVector(Tf, -Tf.y).normalize(), Sf = Tf.clone().cross(Uf); prey.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(Sf.negate(), Uf, Tf)); prey.position.copy(R.point(0)).addScaledVector(Tf, xc); prey.position.y = Math.max(top, R.point(0).y); levT = Tf; } // (straight out in front of the snout)
       }
       const sc = fitScale(); prey.scale.set(sc, sc, 1); whisk.forEach((w) => { w.visible = false; });
       const g = R.frameAtX(xClip); clip.normal.copy(levT || g.T).negate(); clip.constant = -clip.normal.dot(g.c); levT = null; // keep only what is in front of the throat (held level: cut square across)
