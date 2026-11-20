@@ -1531,6 +1531,14 @@
   .globe-stage.full .globe-btns { position: absolute; top: 56px; left: 50%;
     transform: translateX(-50%); z-index: 5; margin: 0; justify-content: center;
     width: max-content; max-width: 90%; }
+  /* v5.78: what the search found, on its own line above the map's buttons, readable over the map */
+  .globe-stage.full .globe-btns .heat-caption { flex: 1 0 100%; box-sizing: border-box; margin: 0; padding: 5px 11px; border-radius: 9px; text-align: center;
+    background: rgba(255,255,255,0.92); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  [data-sl-theme="dark"] .globe-stage.full .globe-btns .heat-caption { background: rgba(10,20,32,0.84); border-color: rgba(255,255,255,0.18); }
+  .globe-stage.full .globe-btns .heat-caption:empty { display: none; }
+  /* a phone: two lines at most (the rest is in the list below) */
+  @media (max-width: 640px) { .globe-stage.full .globe-btns .heat-caption { text-align: left; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+    padding-top: 0; padding-bottom: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; } }
 
   .quiz-panel { max-width: 640px; margin: 0 auto; }
   .quiz-panel[hidden] { display: none; }
@@ -14251,6 +14259,32 @@ window.SL_GEO_READY = new Promise(function (res) {
     drawContinentShow(toFlat);
     drawPlaceLabels(toFlat);
     ctx.restore();
+    liftOverPanel();
+  }
+  // v5.78: in the full screen map the species panel across the bottom covered the 3D button and the colour key
+  // in the corner: while the panel is over that corner they sit just above it (back down once it closes)
+  function liftOverPanel() {
+    var cp = document.getElementById("country-panel"), sr = stage.getBoundingClientRect();
+    var on = cp && !cp.hidden && stage.classList.contains("full") && getComputedStyle(cp).position === "absolute";
+    var q = on ? cp.getBoundingClientRect() : null;
+    ["td-toggle", "map-legend"].forEach(function (id) {
+      var el = document.getElementById(id); if (!el) return;
+      if (el.style.bottom) el.style.bottom = "";
+      if (!q || el.hidden || !el.offsetParent) return;
+      var k = el.getBoundingClientRect();
+      if (k.right <= q.left || k.left >= q.right || k.bottom <= q.top) return;
+      el.style.bottom = Math.max(8, sr.bottom - q.top + 8) + (id === "map-legend" ? 46 : 0) + "px";
+    });
+    // a narrow full screen map: the Heatmap/Sightings/Habitats buttons sit below the search's row of buttons
+    // (and the line saying what it found), never under them
+    var mt = stage.querySelector(".map-tools"), br = document.getElementById("globe-btns");
+    if (mt) {
+      if (mt.style.top) mt.style.top = "";
+      if (stage.classList.contains("full") && br && br.parentNode === stage && br.offsetParent && innerWidth <= 900) {
+        var bb = br.getBoundingClientRect(), mr = mt.getBoundingClientRect();
+        if (bb.height && mr.top < bb.bottom + 6 && mr.bottom > bb.top) mt.style.top = Math.round(bb.bottom - sr.top + 8) + "px";
+      }
+    }
   }
 
   // Named spots too small to find on their own - North Sentinel Island is ~8 km across, under
@@ -18395,14 +18429,18 @@ window.SL_GEO_READY = new Promise(function (res) {
     var b = document.getElementById("globe-full");
     b.innerHTML = on ? '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"></path></svg>' : '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg>';
     b.setAttribute("aria-label", on ? "Leave full screen" : "Full screen"); b.title = on ? "Leave full screen" : "Full screen";
+    var cap = document.getElementById("heat-caption");
     if (on) {
       stage.appendChild(panel);
       if (searchBox) stage.appendChild(searchBox);
       stage.appendChild(btnRow);
+      // v5.78: the line saying what the search found ("found across 11 countries", "Snakes of Portugal"...) came
+      // too - the full screen map had no words at all about what its colours showed
+      btnRow.insertBefore(cap, btnRow.firstChild);
     } else {
       panelHome.appendChild(panel);
       if (searchBox && searchHome) searchHome.insertBefore(searchBox, searchHome.firstChild);
-      var cap = document.getElementById("heat-caption");
+      if (searchBox && searchBox.parentNode) searchBox.parentNode.insertBefore(cap, searchBox.nextSibling);
       cap.parentNode.insertBefore(btnRow, cap.nextSibling);
     }
     dirty = true;
@@ -19736,7 +19774,11 @@ window.SL_GEO_READY = new Promise(function (res) {
   #heat-panel .gmenu .country-opt, #hm-panel .gmenu .country-opt { color: #f0f8ec; }
   #heat-panel .gmenu .country-opt:hover, #heat-panel .gmenu .country-opt.cursor, #hm-panel .gmenu .country-opt:hover, #hm-panel .gmenu .country-opt.cursor { background: rgba(88,179,81,0.55); }
   #heat-panel .gmenu .country-opt span, #hm-panel .gmenu .country-opt span, #heat-panel .gmenu .country-none, #hm-panel .gmenu .country-none { color: rgba(240,248,236,0.7); }
-  #heat-panel .gmenu .gm-h, #hm-panel .gmenu .gm-h { color: #58b351; }
+  #heat-panel .gmenu .gm-h, #hm-panel .gmenu .gm-h { color: #a8e29a; } /* v5.78: was #58b351 - green on the green menu (3.3:1); now 5.7:1 */
+  /* v5.78: while the search's suggestions are open, the row of map buttons under the search box (Undo, See all...,
+     See species, See islands...) steps aside - in the full screen map it sat on top of the suggestions */
+  #heat-panel #globe-btns { transition: opacity .15s ease, visibility .15s; }
+  #heat-panel:has(.heat-search .gmenu:not([hidden])) #globe-btns { opacity: 0; visibility: hidden; pointer-events: none; }
   .hab-bar { display: flex; height: 10px; border-radius: 999px; overflow: hidden; }
   .hab-bar span { flex: 1; }
   .globe-stage.full .hab-list { max-height: max(90px, min(46vh, calc(100vh - 300px), 420px)); }
