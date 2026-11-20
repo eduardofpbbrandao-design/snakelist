@@ -252,9 +252,9 @@ CURATED = {
     # width), the snout lower than the crown, a slight brow over the eye; the eye a fifth of the head long, NOT bulging; the lip and
     # chin scales yellowish white; the tongue red with black tips (Ernst and Ernst 2003, Snakes of the United States and Canada)
     "opheodrys-vernalis": {"d": "#79bd45", "lat": "#86c650", "b": "#eef0c8", "t": "uniform", "s": "grass", "L": 0.45, "mx": "about 66 cm", "k": 0, "sp": {"grassA": "#55803a", "grassB": "#9ab860"},
-                           "h": dict(DARK_EYE, iris="#2a2214", irisInner="#4a3c22", eyeRing="#d9c27a", pupilW=0.24, eyeL=0.22, eyeX=0.37, eyeA=50, len=0.04, w=0.9, h=0.62, snoutH=0.6, jaw=0.82,
-                                     lips="pale", lipColor="#e6ebb6", bulge=0.07, brow=0.07, taper=0.3, headRelief=0.3, groove=0.5, tongue="#c42a38", tongueTip="#141012", lw=1.9, hFixed=1), "bx": {"ld": 62, "neck": 0.78, "tail": 0.31},
-                           "sx": {"gloss": 0.68, "rows": 15, "keel": 0, "relief": 0.7}, "cx": {"bellyA": 0.7, "bellySharp": 0.045, "mottle": 0.02, "var": 0.02, "flecks": 0, "edgeK": 0.55}},
+                           "h": dict(DARK_EYE, iris="#2a2214", irisInner="#4a3c22", eyeRing="#d9c27a", pupilW=0.24, eyeL=0.25, eyeX=0.36, eyeA=50, len=0.031, w=0.9, h=0.78, snoutH=0.64, jaw=0.82,
+                                     lips="pale", lipColor="#e6ebb6", lipFull=0.12, bulge=0.07, brow=0.07, taper=0.3, headRelief=0.14, groove=0.16, snout=0.52, tongue="#c42a38", tongueTip="#141012", lw=1.65, hFixed=1), "bx": {"ld": 62, "neck": 0.78, "tail": 0.31, "hn": 1.3},
+                           "sx": {"gloss": 0.78, "rows": 15, "keel": 0, "relief": 0.55, "cavity": 0.22}, "cx": {"bellyA": 0.7, "bellySharp": 0.045, "mottle": 0.02, "var": 0.02, "flecks": 0, "edgeK": 0.25}},
     "opheodrys-aestivus": {"d": "#76b13a", "lat": "#86bd45", "b": "#ecebb0", "t": "plain", "s": "forest", "L": 0.8, "k": 1, "lip": "#e2e6a8",
                            "h": dict(DARK_EYE, iris="#1d1d14", irisInner="#34341f", eyeRing="#cfd09a", pupilW=0.25, eye=0.18), "bx": {"ld": 70, "neck": 0.9}, "sx": {"gloss": 0.4, "rows": 17}, "cx": {"bellyA": 0.7, "mottle": 0.04}},
     "morelia-viridis": {"d": "#4fa82c", "lat": "#5ab232", "b": "#e4e46a", "c": "#f3f6dc", "t": "vert", "n": 40, "s": "rainforest",

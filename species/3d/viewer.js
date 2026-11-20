@@ -1172,7 +1172,7 @@ function headData(P, F, quality) {
       if (lipK && (lab || (x < J * Hl * 1.02 && Math.abs(Math.abs(a) - mA) < 0.1))) { const dm = Math.abs(Math.abs(a) - mA); col = lipC; al = lipK * (s.k === 'rost' && Math.abs(a) > mA - 0.16 ? 1 - sstep(0.06, 0.16, dm) * 0.6 : 1 - sstep(0.015, Math.abs(a) > mA ? 0.07 : bars ? 0.11 : 0.075, dm)) * (1 - sstep(J * 0.9, J * 1.02, x / Hl)); }
       // v5.78: head.lipFull - the whole upper and lower lip scales and the chin pale, with the sharp edge real green snakes have
       if (H.lipFull && x < J * Hl * 1.05) { const band = H.lipFull > 0.01 && H.lipFull < 1 ? H.lipFull : 0.12, aa2 = Math.abs(a); // (band: how far above the mouth line the upper lip scales are pale)
-        const k2 = aa2 >= mA ? 1 : sstep(mA - band - 0.012, mA - band + 0.012, aa2); if (k2 > 0.001) { col = lipC; al = 0.95 * k2 * (1 - sstep(J * 0.92, J * 1.05, x / Hl)); } }
+        const bnd = band * (1 - 0.6 * sstep(J * 0.6, J * 1.0, x / Hl)), k2 = aa2 >= mA ? 1 : sstep(mA - bnd - 0.012, mA - bnd + 0.012, aa2); if (k2 > 0.001) { col = lipC; al = 0.95 * k2 * (1 - sstep(J * 0.92, J * 1.05, x / Hl)); } }
       if (bars && x < J * Hl * 1.05) { // dark bars along the sutures between lip scales, widest at the lip
         let bd = 1e9, bk = 1, aa = Math.abs(a); for (const b of barSegs) { if (Math.abs(x - b[0]) > b[3] * 3) continue; const t = clamp((aa - b[1]) / (b[2] - b[1]), 0, 1), w = lerp(b[3], b[3] * 0.45, t), e = Math.hypot(x - lerp(b[0], b[4], t), (aa - lerp(b[1], b[2], t)) * hcR[r]) / w; if (e < bd) { bd = e; bk = b[5]; } }
         if (bd < 1.4) { const w2 = 0.6 * bk * (1 - sstep(0.6, 1.3, bd)); col = col ? mixc(col, barC, w2 / Math.max(w2, al || w2)) : barC; al = Math.max(al, w2); } // (v5.73: bk - fainter and shorter on the lower lip; seen from below they read as teeth)
@@ -1508,7 +1508,7 @@ function buildEyes(P, F, body, pat) {
   // its reflections of the sky and the sun, strongest at grazing angles (Fresnel). The gap between them gives the eye depth:
   // the iris shifts under the dome as you go round the head.
   const em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.5, metalness: 0, envMapIntensity: 0.3, specularIntensity: 0.35 });
-  const sm = new THREE.MeshPhysicalMaterial({ color: '#000000', transparent: true, blending: THREE.AdditiveBlending, roughness: 0.035, metalness: 0, ior: 1.38, specularIntensity: 1, envMapIntensity: 1.5, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  const sm = new THREE.MeshPhysicalMaterial({ color: '#000000', transparent: true, blending: THREE.AdditiveBlending, roughness: 0.035, metalness: 0, ior: 1.4, specularIntensity: 1, envMapIntensity: 2.2, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
   const lm = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, roughness: 0.6, metalness: 0, depthWrite: false, envMapIntensity: 0.8 });
   // the skin colour right round the eye, read from the body's own pattern texture
   const img = pat && pat.image, skinAt = (x, th) => {
@@ -1522,7 +1522,7 @@ function buildEyes(P, F, body, pat) {
     // v5.78: the eye is round on the skin itself - the grid's steps round the head and along it are measured on the surface
     // there (the head's average radius made it an oval or a teardrop on a flat-sided head)
     const eA0 = 0.01, arcA = body.surf(xe, th0 + eA0, true).p.distanceTo(body.surf(xe, th0 - eA0, true).p) / (2 * eA0), arcX = body.surf(xe + R0 * 0.05, th0, true).p.distanceTo(body.surf(xe - R0 * 0.05, th0, true).p) / (R0 * 0.1);
-    const eye = [], spec = [], uv = [], col = [], spa = [];
+    const eye = [], spec = [], uv = [], col = [], spa = [], lidP = [];
     for (let i = 0; i <= NR; i++) {
       const rho = (i / NR) * 1.18;
       for (let j = 0; j <= NA; j++) {
@@ -1530,32 +1530,35 @@ function buildEyes(P, F, body, pat) {
         const x = xe + a * R0 / Math.max(0.5, arcX), th = th0 - sg * b * (R0 / Math.max(1e-9, arcA));
         const p = body.surf(x, th, true).p, n = body.surfNormal(x, th);
         if (n.dot(p.clone().sub(body.spine(x))) < 0) n.negate();
-        // the spectacle: a dome over the eye, meeting the skin at its rim, then a steep tuck under the skin past it; the iris
-        // under it: a shallow cup about a sixth of the eye's radius deeper (v5.78)
-        const h = rho <= 1 ? R0 * (bulge * (1 - rho * rho) - 0.01) : R0 * (-0.01 - 1.6 * (rho - 1));
-        const hi = rho <= 1 ? R0 * (bulge * 0.3 * (1 - rho * rho) - 0.15 - 0.03 * rho * rho) : R0 * (-0.18 - 1.6 * (rho - 1));
+        // v5.78: the spectacle is a dome that rises from the socket's own rim (where the skin dips round the eye) to a little
+        // above the head's outline, then tucks steeply under the skin past it; the iris is a shallow cup a sixth of the eye's
+        // radius under the dome, its rim hidden under the skin; the scales round the eye (the lid) lie on the socket's skin
+        const dep = p.distanceTo(body.surf(x, th).p), r2 = Math.min(1, rho * rho);
+        const h = rho <= 1 ? R0 * bulge * (1 - r2) - dep * r2 * r2 : -dep - R0 * 1.6 * (rho - 1);
+        const hi = rho <= 1 ? h - R0 * (0.16 * (1 - r2) + 0.035) : h - R0 * 0.035;
         const pe = p.clone().addScaledVector(n, hi).sub(c), ps = p.clone().addScaledVector(n, h).sub(c);
-        eye.push(pe.x, pe.y, pe.z); spec.push(ps.x, ps.y, ps.z);
+        const pl = p.clone().addScaledVector(n, rho < 0.9 ? h + R0 * 0.004 : lerp(h, -dep, sstep(0.9, 1.0, rho)) + R0 * 0.006).sub(c);
+        eye.push(pe.x, pe.y, pe.z); spec.push(ps.x, ps.y, ps.z); lidP.push(pl.x, pl.y, pl.z);
         uv.push(0.5 + a * 0.47 * sg, 0.5 + b * 0.47);
         // the spectacle: clear in the middle, taking on the skin's colour at its rim, where the scales round the eye overlap it
-        const rim = sstep(0.82, 1.06, rho), sk = skinAt(x, th);
+        const rim = sstep(0.84, 1.0, rho) * (1 - sstep(1.06, 1.14, rho)), sk = skinAt(x, th);
         col.push(sk[0], sk[1], sk[2], rim); spa.push(0.05 * (1 - sstep(0.88, 1.02, rho))); // (v5.53: a clear spectacle - a milky one made the eye a pale disc)
       }
     }
     const idx = [];
     for (let i = 0; i < NR; i++) for (let j = 0; j < NA; j++) { const a = i * (NA + 1) + j, b = a + NA + 1; idx.push(a, b, a + 1, a + 1, b, b + 1); }
     const mk = (arr, withUv, withCol) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3)); if (withUv) g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); if (withCol) g.setAttribute('color', new THREE.Float32BufferAttribute(col, 4)); g.setIndex(idx); g.computeVertexNormals(); return g; };
-    const eg = mk(eye, true, false), sgeo = mk(spec, false, true);
+    const eg = mk(eye, true, false), sgeo = mk(spec, false, true), lgeo = mk(lidP, false, true);
     // wind the triangles so they face out of the head on both sides
     const fixFacing = (g) => { const nr = g.attributes.normal, mid = Math.round(NR * 0.3) * (NA + 1), q = new THREE.Vector3(nr.getX(mid), nr.getY(mid), nr.getZ(mid)), want = body.surfNormal(xe, th0);
       if (want.dot(c.clone().sub(body.spine(xe))) < 0) want.negate();
       if (q.dot(want) < 0) { const ia = g.index.array; for (let k = 0; k < ia.length; k += 3) { const t = ia[k + 1]; ia[k + 1] = ia[k + 2]; ia[k + 2] = t; } g.index.needsUpdate = true; g.computeVertexNormals(); } };
-    fixFacing(eg); fixFacing(sgeo);
+    fixFacing(eg); fixFacing(sgeo); fixFacing(lgeo);
     const m = new THREE.Mesh(eg, em); m.position.copy(c); m.receiveShadow = true; m.castShadow = false;
     // the clear glossy spectacle, and round its edge the skin of the scales that ring the eye, overlapping it
-    const sg2 = sgeo.clone(); sg2.deleteAttribute('color');
+    const sg2 = sgeo; sg2.deleteAttribute('color');
     const sp = new THREE.Mesh(sg2, sm); sp.renderOrder = 3; sp.receiveShadow = false; m.add(sp);
-    const lid = new THREE.Mesh(sgeo, lm); lid.renderOrder = 2; lid.receiveShadow = true; m.add(lid);
+    const lid = new THREE.Mesh(lgeo, lm); lid.renderOrder = 2; lid.receiveShadow = true; m.add(lid);
     const n0 = body.surfNormal(xe, th0); if (n0.dot(c.clone().sub(body.spine(xe))) < 0) n0.negate();
     m.userData.spectacle = sp; m.userData.n = n0; m.userData.r = R0; out.push(m); // n: the way the eye looks out (v5.05: See eye shield frames it from there)
   }
@@ -2165,7 +2168,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   const sun = new THREE.DirectionalLight('#fff4e2', S.sun);
   const el = (S.sunEl * Math.PI) / 180, az = 0.9;
   // v5.50: the shadows reach the real-size grass, stones and logs round a small snake too (not only its own few cm)
-  const sunD = Math.max(Rb * 6, 3), shExt = Math.max(Rb * 1.5, quality === 'low' ? 0.5 : 0.75);
+  const sunD = Math.max(Rb * 6, 3), shExt = Math.max(Rb * 1.5, quality === 'low' ? 0.45 : 0.55); // (v5.78: a little tighter round a small snake, so the 2048 map stays as sharp as the old 4096 one)
   sun.position.set(Math.cos(az) * Math.cos(el), Math.sin(el), Math.sin(az) * Math.cos(el)).multiplyScalar(sunD);
   sun.castShadow = true;
   const sm = quality === 'high' ? 2048 : 1024; sun.shadow.mapSize.set(sm, sm); // v5.78: 2048 (4096 took 128 MB of graphics memory for no visible gain over the snake's small area)
@@ -2690,7 +2693,7 @@ function uiCSSInject() {
 // v5.78: species rebuilt against photos in this version, ahead of the next models.json build (the same values are in
 // tools/auto_models.py CURATED, so a rebuild gives the same result): they override the profile's head
 const SPECIES_LOOK = {
-  'opheodrys-vernalis': { h: { iris: '#2a2214', irisInner: '#4a3c22', eyeRing: '#d9c27a', pupilW: 0.24, eye: null, eyeL: 0.24, eyeX: 0.36, eyeA: 50, len: 0.036, w: 0.9, h: 0.7, snoutH: 0.62, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.07, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.9, hFixed: 1, groove: 0.16, headRelief: 0.14, snout: 0.52, lipFull: 0.12 }, body: { hn: 1.3 },
+  'opheodrys-vernalis': { h: { iris: '#2a2214', irisInner: '#4a3c22', eyeRing: '#d9c27a', pupilW: 0.24, eye: null, eyeL: 0.25, eyeX: 0.36, eyeA: 50, len: 0.031, w: 0.9, h: 0.78, snoutH: 0.64, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.07, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.65, hFixed: 1, groove: 0.16, headRelief: 0.14, snout: 0.52, lipFull: 0.12 }, body: { hn: 1.3 },
     scales: { cavity: 0.22, gloss: 0.78, relief: 0.55 }, colors: { edgeK: 0.25 } },
   // the inland taipan against its SnakeList photo (will-hunt) and the Australian Museum account: a deep, rounded "coffin" head
   // (deeper than the body's own depth, the snout high and rounded), glossy smooth scales, and a warmer olive-brown
