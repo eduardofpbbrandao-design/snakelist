@@ -1366,7 +1366,7 @@ export function create(V) {
     const preyGround = () => (perch ? null : inWater ? (kind === 'fish' ? waterY - prR * 0.45 : waterY - prR * 0.55) : gQ);
     const lay = () => {
       unclip(); prey.matrix.copy(worldM); prey.matrix.decompose(prey.position, prey.quaternion, prey.scale); prey.scale.set(1, 1, 1);
-      if (perch) { const q = onPerch(prey.position); prey.position.set(q.x, q.y + prR * 0.95, q.z); }
+      if (perch) { const q = onPerch(prey.position); prey.position.set(q.x, q.y + (prey.userData.y || prR * 0.95), q.z); }
       else { const gy = preyGround(); prey.position.y = inWater ? gy : Math.max(prey.position.y, gy + (prey.userData.y || prR * (kind === 'egg' ? 1.0 : 0.95))); }
       whisk.forEach((w) => { w.visible = true; });
     };
@@ -1641,7 +1641,9 @@ export function create(V) {
       const g = new THREE.SphereGeometry(1, seg, Math.round(seg * 0.7)), f = B.frameAt(x), c = B.spine(x).addScaledVector(f.S, s * F.W(x)).addScaledVector(f.U, u * F.Hh(x));
       g.scale(rz, ry, rx); const m = new THREE.Matrix4().makeBasis(f.S.clone().negate(), f.U, f.T).setPosition(c); g.applyMatrix4(m); g.userData.x = x; return g; // (a right-handed basis, so the faces stay outside)
     };
-    const add = (key, name, text, region, geo, mat, opt = {}) => {
+    const usedM = new Set();
+    const add = (key, name, text, region, geo, mat0, opt = {}) => {
+      const mat = usedM.has(mat0) ? mat0.clone() : mat0; usedM.add(mat); // (each part its own material, so one can fade while another is picked)
       const mesh = new THREE.Mesh(geo, mat); mesh.castShadow = false; mesh.userData.part = key; mesh.userData.anat = true; grp.add(mesh); own.push(mesh);
       if (opt.detail) mesh.userData.detail = true; // v5.73: shown only when the camera comes close to it
       const xs = geo.userData.xs || new Float32Array(geo.attributes.position.count).fill(geo.userData.x || 0);
@@ -1689,7 +1691,15 @@ export function create(V) {
     if (plan !== 'python' && plan !== 'blind') add('tlung', 'Tracheal lung', 'Extra breathing tissue along the windpipe in front of the heart, which many snakes have.', 'body', sweep(Math.max(x0 * 1.3, heart0 * 0.45), heart0 * 0.99, -0.08, -0.08, (x) => rB(x) * 0.2, 40, 12), om(C.lung, { transparent: true, opacity: 0.8, roughness: 0.75 }), { detail: true });
     add('oesophagus', 'Gullet (oesophagus)', 'A long, very stretchy tube from the mouth to the stomach. Food is pushed along it by muscles.', 'body', sweep(x0, stom0 + svl * 0.01, 0.1, 0.24, (x) => rB(x) * 0.15, 170, 10), om(C.gullet));
     const hx = (heart0 + heart1) / 2;
-    add('heart', 'Heart', (climber ? 'Close to the head in climbing snakes, so blood still reaches the brain when they hold the head up. ' : marine ? 'Nearer the middle of the body in sea snakes. ' : 'About a quarter of the way along the body. ') + 'It has three chambers and can slide a little, so big prey can squeeze past.', 'body', blob(hx, 0, -0.34, (heart1 - heart0) * 0.5, rB(hx) * 0.36, F.W(hx) * 0.34, 28), om(C.heart, { roughness: 0.38, clearcoat: 0.6 }));
+    // v5.78: the heart with its shape: a ventricle tapering to a point towards the tail, two atria in front of it, the
+    // aortic arches leaving forwards
+    const heartGeo = (hx0) => { const hl = (heart1 - heart0) * 0.5, rr = rB(hx0), parts = [];
+      const v = new THREE.SphereGeometry(1, 28, 20), pa = v.attributes.position; for (let i = 0; i < pa.count; i++) { const zz = pa.getZ(i), k = zz > 0 ? 1 - 0.55 * zz * zz : 1; pa.setX(i, pa.getX(i) * k); pa.setY(i, pa.getY(i) * k); } // (pointed towards the tail: +z is along the body, towards the tail)
+      const fv = B.frameAt(hx0 + hl * 0.15), cv = B.spine(hx0 + hl * 0.15).addScaledVector(fv.U, -0.34 * F.Hh(hx0)); v.scale(rr * 0.33, rr * 0.34, hl * 0.95); v.computeVertexNormals(); v.applyMatrix4(new THREE.Matrix4().makeBasis(fv.S.clone().negate(), fv.U, fv.T).setPosition(cv)); v.userData.x = hx0; parts.push(v);
+      for (const sg of [1, -1]) parts.push(blob(hx0 - hl * 0.7, sg * 0.16, -0.26, hl * 0.32, rr * 0.22, F.W(hx0) * 0.2, 18));
+      for (const sg of [1, -1]) { const g2 = sweep(hx0 - hl * 1.6, hx0 - hl * 0.5, sg * 0.09, -0.12, () => rr * 0.055, 12, 8); parts.push(g2); }
+      return mergeG(parts); };
+    add('heart', 'Heart', (climber ? 'Close to the head in climbing snakes, so blood still reaches the brain when they hold the head up. ' : marine ? 'Nearer the middle of the body in sea snakes. ' : 'About a quarter of the way along the body. ') + 'It has three chambers and can slide a little, so big prey can squeeze past.', 'body', heartGeo(hx), om(C.heart, { roughness: 0.38, clearcoat: 0.6 }));
     add('lung', 'Right lung', 'Snakes have one long working lung on the right (the left one is tiny or missing), because their body is so narrow.', 'body', sweep(heart1 * 1.0, lungEnd, -0.2, 0.22, (x, t) => rB(x) * 0.36 * (1 - t * 0.2), 90, 12), om(C.lung, { roughness: 0.75, map: speckle('#e2a19d', 1600, 0.25, 4) }));
     if (plan === 'python') add('lungL', 'Left lung', 'Boas and pythons still have a good left lung, more than half as long as the right one.', 'body', sweep(heart1 * 1.01, heart1 + (lungEnd - heart1) * 0.62, 0.24, 0.2, (x, t) => rB(x) * 0.26 * (1 - t * 0.25), 60, 12), om(C.lung, { roughness: 0.75, map: speckle('#e2a19d', 1200, 0.25, 5) }));
     else add('lungL', 'Left lung', 'Tiny in most snakes (and missing in many): there is only room for one big lung.', 'body', sweep(heart1 * 1.01, heart1 + svl * 0.035, 0.26, 0.18, (x) => rB(x) * 0.12, 16, 10), om(C.lung, { roughness: 0.75 }), { detail: true });
@@ -1712,6 +1722,9 @@ export function create(V) {
     }
     add('ribs', 'Ribs', 'Snakes can have 100 to more than 400 pairs of ribs - one pair on every bone of the backbone! They are not joined underneath, so the body can stretch round a big meal, and they help the snake to crawl and climb.', 'ribs', mergeG(ribs), om(C.bone, { roughness: 0.55, clearcoat: 0.15 }), { x: svl * 0.4 });
     add('spine', 'Backbone (vertebrae)', 'A chain of 100 to more than 400 small bones (vertebrae) from the head to the tip of the tail, joined so the body can bend in every direction.', 'ribs', sweep(Hl * 1.0, L * 0.995, 0, 0.58, (x) => rB(x) * 0.1, 300, 8), om(C.bone, { roughness: 0.55, clearcoat: 0.15, map: ringTex('#eee5cf', 'rgba(150,130,100,.5)', 220) }), { x: svl * 0.45 });
+    // v5.78: the long back muscles either side of the backbone (they bend the body and pull on the ribs), see-through red
+    { const mt = canvasTex(64, (x, s2) => { x.fillStyle = '#b4544c'; x.fillRect(0, 0, s2, s2); x.strokeStyle = 'rgba(255,215,200,.35)'; x.lineWidth = 1; for (let i = 0; i < s2; i += 3) { x.beginPath(); x.moveTo(0, i); x.lineTo(s2, i + 6); x.stroke(); } x.fillStyle = 'rgba(240,225,215,.55)'; for (let i = 0; i < s2; i += 16) x.fillRect(0, i, s2, 2); }, 1, 160);
+      for (const sg of [1, -1]) add('muscle', 'Back muscles', 'Long bands of muscle along both sides of the backbone, joined to every vertebra and rib. Tightening one side bends the body - that is how a snake crawls, climbs and squeezes.', 'ribs', sweep(Hl * 1.25, L * 0.96, sg * 0.3, 0.38, (x, t) => rB(x) * 0.27 * (1 - t * 0.3), 220, 10, 1.25), om('#b4544c', { map: mt, transparent: true, opacity: 0.6, depthWrite: false, roughness: 0.55, clearcoat: 0.25 }), { x: svl * 0.35 }); }
     // ---- tail
     add('cloaca', 'Cloaca (vent)', 'One opening for droppings, urates, eggs and mating. The tail starts here.', 'tail', blob(svl, 0, -0.5, rB(svl) * 0.45, rB(svl) * 0.2, F.W(svl) * 0.3), om(C.cloaca), { detail: true });
     add('tailp', 'Tail', 'From the vent to the tip. It has backbone but no ribs and no big organs (in males, the mating organs sit inside its base).' + (P.tail && P.tail.rattle ? ' Rattlesnakes add a new rattle segment each time they shed.' : ''), 'tail', sweep(svl * 1.01, L * 0.97, 0, 0.05, (x) => rB(x) * 0.42, 60, 10), om(C.tailM, { transparent: true, opacity: 0.35, depthWrite: false, roughness: 0.6 }));
@@ -1929,6 +1942,7 @@ export function create(V) {
       const w = stage.clientWidth, h = stage.clientHeight, F = V.info.F;
       const busy = !!show || !!st.sel || st.k < 0.98;
       if (!slither) tip.hidden = !!st.sel;
+      detailFade(); // (v5.78: also while a part is picked - the others fade back)
       layoutLabels(busy, w, h);
       for (const o of st.outline) if (o.material.uniforms && o.material.uniforms.uRes) o.material.uniforms.uRes.value.set(V.canvas.width || 1, V.canvas.height || 1);
       placeNotes(w, h);
@@ -1942,6 +1956,9 @@ export function create(V) {
       const cw = card.offsetWidth || 240, ch = card.offsetHeight || 90, phone = w < 520;
       let cx = w - cw - 10, cy = belowButtons(w - cw - 10, w - 10, h);
       if (phone) { cx = 8; cy = h - ch - 8; } // phones: bottom left (clear of the fullscreen button; the tip line hides meanwhile)
+      // v5.78: never over the part it describes: if the part is under the card, the card goes to the other side (or the other end)
+      if (st.selC && !card.hidden) { ndc.copy(st.selC).project(V.cam); const sx = (ndc.x * 0.5 + 0.5) * w, sy = (-ndc.y * 0.5 + 0.5) * h, m = 28;
+        if (ndc.z < 1 && sx > cx - m && sx < cx + cw + m && sy > cy - m && sy < cy + ch + m) { if (phone) cy = Math.max(8, belowButtons(8, cw + 8, h)); else { const lw = st.list ? (st.list.offsetWidth || 240) + 16 : 0; cx = 8 + lw; cy = belowButtons(cx, cx + cw, h); if (sx > cx - m && sx < cx + cw + m && sy > cy - m && sy < cy + ch + m) { cx = w - cw - 10; cy = h - ch - 60; } } } }
       if (!card.hidden) card.style.transform = 'translate(' + cx.toFixed(1) + 'px,' + Math.max(8, cy).toFixed(1) + 'px)';
       if (st.list) {
         const lw = st.list.offsetWidth || 240, top = Math.max(8, belowButtons(8, 8 + lw, h)), floor = !card.hidden && phone ? cy - 8 : h - 50;
@@ -1989,11 +2006,15 @@ export function create(V) {
         p.rev = st.sel === p || (st.sel && st.sel.key === 'region-' + p.region) ? 1 : 1 - sstep(n0, n1, dist);
         // labels: detail parts with their parts; the big organs from a bit further away; head parts only near the head
         p.lr = (p.detail || p.region === 'head' ? p.rev : 1 - sstep(n0 * 2.2, n1 * 2.2, dist)) * lerp(near, 1, sstep(Math.max(st.data.svl * 0.2, V.info.F.Hl * 4), Math.max(st.data.svl * 0.4, V.info.F.Hl * 8), dC)); // (close in: only what you are looking at)
-        if (!p.detail) continue;
+        // v5.78: a part you pick stands out: the other organs and bones fade back (to about a fifth) while it is picked
+        const picked = !st.sel || st.sel === p || (st.sel.key === 'region-' + p.region) || p.skin;
+        p.dimK = lerp(p.dimK == null ? 1 : p.dimK, picked ? 1 : 0.2, 0.25); if (Math.abs(p.dimK - (picked ? 1 : 0.2)) > 0.01) V.kick();
+        if (!p.detail && p.dimK > 0.995 && !p.dimmed) continue;
+        p.dimmed = p.dimK < 0.995;
         for (const m of p.meshes) {
-          if (!m.material || !m.userData.detail) continue;
+          if (!m.material || !(m.userData.detail || (m.userData.anat && !p.detail))) continue;
           const mt = m.material; if (mt.userData.op0 == null) mt.userData.op0 = { op: mt.opacity, tr: mt.transparent, dw: mt.depthWrite };
-          const o = mt.userData.op0, v = p.rev, tr = o.tr || v < 0.99;
+          const o = mt.userData.op0, v = (p.detail ? p.rev : 1) * p.dimK, tr = o.tr || v < 0.99;
           if (mt.transparent !== tr) { mt.transparent = tr; mt.needsUpdate = true; }
           mt.opacity = o.op * v; mt.depthWrite = o.dw && v > 0.99; m.visible = v > 0.01;
         }
@@ -2006,7 +2027,6 @@ export function create(V) {
       const hide = (r) => { r.el.hidden = true; r.dot.hidden = true; r.opc = 0; r.off = r.offC = null; r.shown = false; };
       while (lines.firstChild) lines.removeChild(lines.firstChild);
       if (busy) { st.regs.forEach(hide); return; }
-      detailFade();
       // the snake on screen: points along it with their half-thickness in pixels
       const snk = []; let any = false;
       for (let i = 0; i <= 100; i++) {

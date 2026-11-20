@@ -85,11 +85,11 @@ const cranium = EL(V(0, 1.603, -0.014), V(0.073, 0.086, 0.097));
 const headParts = [
   cranium,
   EL(V(0, 1.622, 0.03), V(0.064, 0.05, 0.052)),          // forehead
-  EL(V(0, 1.566, 0.03), V(0.057, 0.068, 0.058)),          // face
+  EL(V(0, 1.57, 0.03), V(0.057, 0.064, 0.058)),           // face
   MIR(EL(V(0.042, 1.556, 0.05), V(0.024, 0.024, 0.028))), // cheeks
   MIR(EL(V(0.048, 1.574, 0.054), V(0.02, 0.011, 0.02))), // cheekbones
-  MIR(RC(V(0.052, 1.525, -0.016), V(0.02, 1.47, 0.058), 0.012, 0.0115)), // the jaw line
-  EL(V(0, 1.475, 0.07), V(0.021, 0.017, 0.015)),         // chin
+  MIR(RC(V(0.051, 1.53, -0.016), V(0.02, 1.484, 0.056), 0.011, 0.011)), // the jaw line
+  EL(V(0, 1.487, 0.068), V(0.02, 0.016, 0.015)),         // chin
   EL(V(0, 1.524, 0.073), V(0.03, 0.027, 0.024)),         // round the mouth
   MIR(EL(V(0.031, 1.6135, 0.08), V(0.026, 0.009, 0.012))), // brow ridge
   RC(V(0, 1.6, 0.088), V(0, 1.557, 0.11), 0.0062, 0.0082), // nose bridge
@@ -104,11 +104,11 @@ const ear = MIR((() => {
   const f = (x, y, z) => smax(smin(shell(x, y, z), lobe(x, y, z), 0.004), -bowl(x, y, z), 0.002); f.lo = [0.06, 1.53, -0.04]; f.hi = [0.095, 1.615, 0.015]; return f;
 })());
 const socket = MIR(EL(V(0.0315, 1.586, 0.087), V(0.0205, 0.0122, 0.0125)));
-const lid = MIR((() => { const s = SPH(EYE, EYE_R + 0.0012), op = EL(V(0.0315, 1.5866, 0.083), V(0.0146, 0.0057, 0.0112)); const f = (x, y, z) => smax(s(x, y, z), -op(x, y, z), 0.0012); f.lo = s.lo; f.hi = s.hi; return f; })());
+const lid = MIR((() => { const s = SPH(EYE, EYE_R + 0.0012), op = EL(V(0.0315, 1.5862, 0.083), V(0.0145, 0.0049, 0.0112)); const f = (x, y, z) => smax(s(x, y, z), -op(x, y, z), 0.0012); f.lo = s.lo; f.hi = s.hi; return f; })());
 const nostril = MIR(EL(V(0.0068, 1.5425, 0.1045), V(0.0038, 0.0025, 0.0048)));
 const mouthLine = EL(V(0, 1.5163, 0.0985), V(0.0238, 0.0011, 0.0085));
 const neck = RC(V(0, 1.392, -0.02), V(0, 1.53, -0.028), 0.058, 0.05);
-const scm = MIR(RC(V(0.058, 1.535, -0.024), V(0.013, 1.405, 0.045), 0.012, 0.0095));
+const scm = MIR(RC(V(0.05, 1.52, -0.026), V(0.012, 1.405, 0.04), 0.0075, 0.0065));
 function headSD(x, y, z) {
   let d = 1e9;
   for (const g of headParts) d = smin(d, g(x, y, z), 0.011);
@@ -188,7 +188,7 @@ const torsoU = U(torsoParts, 0.04);
 function bodySD(x, y, z) { // everything but the head: torso, neck, arms, legs
   const ax = Math.abs(x);
   let d = torsoU(x, y, z);
-  d = smin(d, smin(neck(x, y, z), scm(x, y, z), 0.012), 0.03);
+  d = smin(d, smin(neck(x, y, z), scm(x, y, z), 0.02), 0.03);
   if (ax > 0.1 || y > 0.6) d = smin(d, arm(ax, y, z), 0.03);
   if (y < 1.0) d = smin(d, legU(ax, y, z), 0.035);
   return d;
@@ -203,6 +203,7 @@ const sleeveA = S, sleeveB = lerp3(S, E, 0.44);
 const shirtParts = [
   ...torsoParts.slice(0, 8).map((g) => { const f = (x, y, z) => g(x, y, z) - 0.009; f.lo = g.lo.map((v) => v - 0.02); f.hi = g.hi.map((v) => v + 0.02); return f; }),
   MIR(RC(sleeveA, sleeveB, 0.06, 0.05)), // short sleeves, a little wider than the arm
+  MIR(EL(V(0.095, 0.875, -0.008), V(0.105, 0.075, 0.115))), // over the hips
 ];
 const shirtU = U(shirtParts, 0.05);
 const collar = U([RC(V(0, 1.38, -0.014), V(0, 1.62, -0.024), 0.071, 0.071), EL(V(0, 1.448, 0.012), V(0.074, 0.05, 0.075))], 0.02);
@@ -234,7 +235,7 @@ function jeansSD(x, y, z) {
   const kn = sstep(0.07, 0.0, Math.abs(y - 0.5)); d += 0.0028 * Math.sin(y * 210 + n * 4) * kn * sstep(0.0, -0.03, z - 0.012);
   d += 0.0022 * Math.sin((y - ax * 0.6) * 120 + n * 3) * sstep(0.9, 0.82, y) * sstep(0.74, 0.8, y) * sstep(0.03, 0.08, z);
   d += 0.0014 * n;
-  d = smax(d, y - 0.948, 0.004); // waist
+  d = smax(d, y - 0.91, 0.004); // waist (under the T-shirt)
   d = smax(d, 0.066 - y, 0.003); // hem, over the shoe
   return d;
 }
@@ -342,7 +343,7 @@ const parts = [
   { n: 'jeans', sd: jeansSD, box: [[-0.2, 0.05, -0.15], [0.2, 0.97, 0.14]], h: 0.0028, target: 9000, err: 0.0015,
     col: (x, y, z) => { // the outer seam and the waistband stitching, lighter wear on the thighs and knees
       const ax = Math.abs(x), seam = sstep(0.006, 0.0015, Math.abs(z - (-0.006 + 0.04 * (0.5 - y) * 0.1))) * sstep(0.06, 0.1, ax) * sstep(0.95, 0.9, y);
-      const wb = sstep(0.003, 0.0, Math.abs(y - 0.912)) * 0.7, wear = 0.08 * sstep(0.04, 0.0, Math.abs(y - 0.6)) * sstep(0.0, 0.04, z) + 0.06 * sstep(0.03, 0.0, Math.abs(y - 0.49)) * sstep(0.02, 0.05, z);
+      const wb = sstep(0.003, 0.0, Math.abs(y - 0.88)) * 0.7, wear = 0.08 * sstep(0.04, 0.0, Math.abs(y - 0.6)) * sstep(0.0, 0.04, z) + 0.06 * sstep(0.03, 0.0, Math.abs(y - 0.49)) * sstep(0.02, 0.05, z);
       const k = 1 + wear; return [k * (1 + 0.5 * seam + 0.4 * wb), k * (1 + 0.35 * seam + 0.3 * wb), k * (1 + 0.1 * seam)];
     } },
   { n: 'shoe', sd: shoeSD, box: [[-0.15, 0.0, -0.13], [0.15, 0.17, 0.19]], h: 0.0022, target: 4000, err: 0.001, drop: (x, y, z) => jeansSD(x, y, z) < -0.001,

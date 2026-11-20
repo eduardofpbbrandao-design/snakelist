@@ -865,7 +865,7 @@ function makeTextures(THREE, rng, fbm, seed, track) {
 // v5.73: living water - two layers of small waves drifting different ways (normals), a gentle swell in the surface
 // itself (fading out next to the snake, so it never cuts through a body lying in it), and rings spreading out where
 // something moves in it (ripple(x, z, strength, size)). All in the shaders; the CPU only sets the clock.
-const RIPN = 8;
+const RIPN = 16; // (v5.78: twice as many rings, so a swimming snake leaves a trail of them - its wake)
 export function ripple(x, z, k = 1, size = 0.02) {
   const r = AMB.rip; if (!r.length) for (let i = 0; i < RIPN; i++) r.push({ x: 0, z: 0, t: -99, k: 0, s: 0.02 });
   const q = r[AMB.ripN++ % RIPN]; q.x = x; q.z = z; q.t = AMB.uT.value; q.k = k; q.s = size;
@@ -902,9 +902,11 @@ vec3 slWaterN( vec2 uv ) {
     n.xy += ( r > 1e-5 ? dv / r : vec2( 0.0 ) ) * slope * vec2( 1.0, -1.0 ); // (the map's v runs against world z)
   }
   return n;
-}`).replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', 'vec3 mapN = slWaterN( vNormalMapUv );');
+}`).replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', 'vec3 mapN = slWaterN( vNormalMapUv );')
+      // v5.78: clearer looking down into it (the body under the surface shows), mirror-like towards the horizon (Fresnel)
+      .replace('#include <dithering_fragment>', '#include <dithering_fragment>\n{ float slFr = pow( 1.0 - clamp( dot( normalize( vViewPosition ), normal ), 0.0, 1.0 ), 4.0 ); gl_FragColor.a = clamp( gl_FragColor.a * mix( 0.6, 1.3, slFr ), 0.0, 1.0 ); }');
   };
-  m.customProgramCacheKey = () => 'sl-water';
+  m.customProgramCacheKey = () => 'sl-water2';
   m.needsUpdate = true;
   return U;
 }
@@ -953,8 +955,9 @@ export function perchTree(THREE, opt) {
     const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.setIndex(idx); geo.computeVertexNormals();
     // (the seam where each ring closes shares its normals)
     const nr = geo.attributes.normal.array; for (let i = 0; i <= seg; i++) { const a = i * (radial + 1), b = a + radial; for (let k = 0; k < 3; k++) { const m = (nr[a * 3 + k] + nr[b * 3 + k]) / 2; nr[a * 3 + k] = nr[b * 3 + k] = m; } }
-    const m = new THREE.Mesh(geo, bark); m.castShadow = m.receiveShadow = true; g.add(m); return c;
+    woods.push(geo); return c;
   };
+  const woods = []; // (all the wood is merged into one mesh at the end: one draw call)
   // the soft dark band where the snake's weight rests on the wood
   const contact = (q) => { let k = 1; for (const [p, r] of snk) { const d = q.distanceTo(p) - r; if (d < r * 1.6) k = Math.min(k, lerp(0.42, 1, sstep(-r * 0.2, r * 1.6, d))); } return k; };
   // ---- leaves: one leaf shape with veins, instanced along the twigs
@@ -1055,6 +1058,13 @@ export function perchTree(THREE, opt) {
     });
     im.castShadow = true; im.receiveShadow = true; g.add(im);
   } else { leafG.dispose(); leafMat.dispose(); ltex.dispose(); }
+  { // merge the wood
+    let nv = 0, ni = 0; for (const q of woods) { nv += q.attributes.position.count; ni += q.index.count; }
+    const pos = new Float32Array(nv * 3), nor = new Float32Array(nv * 3), uv = new Float32Array(nv * 2), col = new Float32Array(nv * 3), idx = new Uint32Array(ni); let o = 0, oi = 0;
+    for (const q of woods) { const n = q.attributes.position.count; pos.set(q.attributes.position.array, o * 3); nor.set(q.attributes.normal.array, o * 3); uv.set(q.attributes.uv.array, o * 2); col.set(q.attributes.color.array, o * 3); const ix = q.index.array; for (let k = 0; k < ix.length; k++) idx[oi++] = ix[k] + o; o += n; q.dispose(); }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.setIndex(new THREE.BufferAttribute(idx, 1)); geo.computeBoundingSphere();
+    const m = new THREE.Mesh(geo, bark); m.castShadow = m.receiveShadow = true; g.add(m);
+  }
   g.userData.perch = perch;
   return g;
 }
