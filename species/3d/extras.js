@@ -1325,7 +1325,7 @@ export function create(V) {
       const m = new THREE.Matrix4().makeBasis(f.S.clone().negate(), f.U, f.T); prey.quaternion.setFromRotationMatrix(m); prey.position.copy(f.c);
       if (perch) { // v5.78: up in a tree the prey is held level, on top of its branch - never pushed down into the wood (out of sight)
         const top = onPerch(f.c).y + (prey.userData.y || prR) * 0.85;
-        if (prey.position.y < top) { const Tf = V3(f.T.x, f.T.y * 0.15, f.T.z).normalize(), Uf = V3(0, 1, 0).addScaledVector(Tf, -Tf.y).normalize(), Sf = Tf.clone().cross(Uf); prey.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(Sf.negate(), Uf, Tf)); prey.position.y = top; levT = Tf; }
+        if (prey.position.y < top) { const Tf = V3(f.T.x, f.T.y * 0.15, f.T.z).normalize(), Uf = V3(0, 1, 0).addScaledVector(Tf, -Tf.y).normalize(), Sf = Tf.clone().cross(Uf); prey.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(Sf.negate(), Uf, Tf)); prey.position.copy(R.point(0)).addScaledVector(Tf, xc); prey.position.y = Math.max(top, R.point(0).y); levT = Tf; } // (straight out in front of the snout)
       }
       const sc = fitScale(); prey.scale.set(sc, sc, 1); whisk.forEach((w) => { w.visible = false; });
       const g = R.frameAtX(xClip); clip.normal.copy(levT || g.T).negate(); clip.constant = -clip.normal.dot(g.c); levT = null; // keep only what is in front of the throat (held level: cut square across)
