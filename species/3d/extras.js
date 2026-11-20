@@ -1388,6 +1388,7 @@ export function create(V) {
       if (inWater && s - (alivePrey.lt || 0) > 1.1 * (0.5 + k)) { alivePrey.lt = s; if (NAT.ripple) NAT.ripple(prey.position.x, prey.position.z, 0.5, prR * 1.2); }
     };
     markFade(prey); fadeTree(prey, 0);
+    if (perch && V.occ) { const pp = prey.position.clone(), hp0 = V.info.headPos.clone(), rr = Math.max(prR * 9, 0.16); for (const o of V.occ) if (o.leaf && !o.force) { const dd = Math.min(o.c.distanceTo(pp), o.c.distanceTo(hp0), o.c.distanceTo(pp.clone().lerp(hp0, 0.5))); if (dd < rr + o.r) { o.force = true; show.undo = (show.undo || []).concat([() => { o.force = false; }]); } } } // (no leaf near the prey or the head while it hunts)
     if (!travel) { const zone = [[prey.position.x, prey.position.z]]; for (let i = 0; i < R.ih * 6 && i < R.N; i += 6) zone.push([ext[i * 3], ext[i * 3 + 2]]); const undo = clearProps(zone, Math.max(prR * 2.5, F.w0 * 3)); show.undo = (show.undo || []).concat([undo, clearProps(zone, Math.max(prR * 4, F.w0 * 4), { flat: true })]); } // (v5.05: no rock or grass in the way)
     const sq = (k) => { if (!wrapP) return; const i0 = R.ih + 20, i1 = coilI1; for (let i = 0; i < R.N; i++) R.bul[i] = i >= i0 && i <= i1 ? 1 + k * 0.06 * sstep(i0, i0 + 14, i) * (1 - sstep(i1 - 14, i1, i)) : 1; };
     // v5.68: a modest, realistic lump - never a balloon: at most about 1.3-1.5 times the body's width (by prey), easing
@@ -2342,6 +2343,10 @@ export function create(V) {
       bSlither.setAttribute('aria-pressed', 'false'); bSlither.textContent = 'Slither';
       say(''); stepTag.hidden = true; tip.hidden = true;
       idleSetup();
+      // v5.78: the tree's leaves step aside (like the plants on the ground) whenever they come between the camera and what
+      // it is looking at - the head, the prey, a part in Anatomy - so they never hide the snake
+      { const tr = V.info && V.info.tree, occ = V.occ; if (tr && occ) { tr.updateMatrixWorld(true); const m4 = new THREE.Matrix4(), p = new THREE.Vector3(), q = new THREE.Quaternion(), sc = new THREE.Vector3();
+        tr.traverse((o) => { if (!o.isInstancedMesh) return; for (let i = 0; i < o.count; i++) { o.getMatrixAt(i, m4); m4.decompose(p, q, sc); const c = p.clone().applyMatrix4(o.matrixWorld); occ.push({ im: o, i, m: m4.clone(), c, r: Math.max(sc.x, sc.y, sc.z) * 0.8, hid: false, leaf: true }); } }); } }
     },
     reset() { if (show) { const s = show; show = null; for (const o of s.objs) disposeTree(o); (s.undo || []).forEach((f) => f()); } slither = null; if (sizeLay) sizeLay.end(true); sizeLay = null; if (anat) anat.reset(); anat = null; rig = null; camBlend = null; say(''); },
     step() {
