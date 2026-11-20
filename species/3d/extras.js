@@ -339,7 +339,7 @@ export function create(V) {
   THREE = V.THREE; injectCSS();
   const P = V.P, el = V.el, on = V.on, labels = V.labels, stage = V.stage, wrap = V.wrap, bar = V.bar;
   const now = () => performance.now();
-  let rig = null, show = null, slither = null, anat = null, camBlend = null, alive = true;
+  let rig = null, show = null, slither = null, anat = null, sizeLay = null, camBlend = null, alive = true;
   const plan = P.plan || 'colubrid', venomous = ['viper', 'pitviper', 'elapid', 'sea'].includes(plan);
   const fanged = () => !!(V.extras && V.extras.mouth && V.extras.mouth.fanged);
 
@@ -377,18 +377,17 @@ export function create(V) {
   // ---- buttons in the bar under the model (all .sp3d-b, so the NEW-tag logic of the pages and app keeps working)
   const before = bar.querySelector('.sp3d-views');
   const mk = (txt, title) => { const b = V.btn(txt, title); if (before) bar.insertBefore(b, before); return b; };
-  const bEat = mk('See it eat', 'Watch it catch and swallow its usual food');
+  const bEat = mk('See it eat', 'Watch it catch and swallow its usual food'); bEat.setAttribute('aria-pressed', 'false');
   const bSlither = mk('Slither', 'Watch it slither along the ground'); bSlither.setAttribute('aria-pressed', 'false');
   // v5.12: Fullscreen is just its icon, in the bottom-right corner of the 3D view
-  const bFull = el('button', 'sp3d-fsc'); bFull.type = 'button'; bFull.title = 'Fullscreen'; bFull.setAttribute('aria-label', 'Fullscreen'); bFull.setAttribute('aria-pressed', 'false'); bFull.innerHTML = ICON.full; stage.appendChild(bFull);
+  const bFull = el('button', 'sp3d-fsc'); bFull.type = 'button'; bFull.setAttribute('aria-label', 'Fullscreen'); bFull.setAttribute('aria-pressed', 'false'); bFull.innerHTML = ICON.full; stage.appendChild(bFull);
   const bAnat = V.bAnat;
-  bAnat.title = 'Show the parts of this snake: see-through skin with its organs inside, plus teeth, fangs and tongue - tap any part';
 
   // ---- header buttons beside the name: Compare photo, See countries
   let hdb = null; const hdbs = {};
   if (V.opts.head && V.opts.head.parentNode) {
     hdb = el('span', 'sp3d-hdb');
-    const mkH = (k, txt, icon, title) => { const b = el('button', 'sp3d-b sp3d-hb'); b.type = 'button'; b.title = title; b.innerHTML = icon + '<span>' + txt + '</span>'; b.setAttribute('aria-pressed', 'false'); hdb.appendChild(b); on(b, 'click', () => toggleSide(k)); hdbs[k] = b; return b; };
+    const mkH = (k, txt, icon, title) => { const b = el('button', 'sp3d-b sp3d-hb'); b.type = 'button'; b.innerHTML = icon + '<span>' + txt + '</span>'; b.setAttribute('aria-pressed', 'false'); hdb.appendChild(b); on(b, 'click', () => toggleSide(k)); hdbs[k] = b; return b; };
     mkH('photo', 'Compare photo', ICON.photo, 'Show its real photo beside the 3D model');
     mkH('map', 'See countries', ICON.map, 'Show the countries where it lives beside the 3D model');
     stage.appendChild(hdb); // v5.50: inside the 3D view, in its top-right corner
@@ -633,7 +632,7 @@ export function create(V) {
     show.mouth0 = V.mouthGoal;
     V.controls.st.goal = null; V.controls.st.vaz = V.controls.st.vel = V.controls.st.vpx = V.controls.st.vpz = 0;
     bEat.disabled = true;
-    show.btn.disabled = false; show.btn.dataset.lbl = show.btn.textContent; show.btn.textContent = 'Stop'; show.btn.setAttribute('aria-pressed', 'true');
+    show.btn.disabled = false; show.btn.dataset.lbl = show.btn.textContent; show.btn.textContent = 'Stop eating'; show.btn.setAttribute('aria-pressed', 'true');
     stepTag.hidden = true; V.kick();
   }
   function stopShow(quiet) {
@@ -644,7 +643,7 @@ export function create(V) {
     if (rig) rig.release();
     if (V.extras && V.extras.mouth) { V.extras.mouth.set(V.extras.mouth.t); V.mouthGoal = s.mouth0 || 0; flick(0); }
     say(''); stepTag.hidden = true;
-    for (const b of [bEat]) { b.disabled = false; b.removeAttribute('aria-pressed'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
+    for (const b of [bEat]) { b.disabled = false; b.setAttribute('aria-pressed', 'false'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
     if (s.cLast && !quiet) camBlend = { t0: now(), pos: s.cLast.pos.clone(), tgt: s.cLast.tgt.clone() };
     if (anat) anat.refresh();
     V.kick();
@@ -1138,7 +1137,7 @@ export function create(V) {
     };
     function mkLabel(name, act) {
       const e = el('div', 'sp3d-reg sp3d-lab'); e.appendChild(el('span', '', name)); const b = el('button', '', 'Show more'); b.type = 'button'; b.setAttribute('aria-label', 'Show more about: ' + name); e.appendChild(b); e.hidden = true; labels.appendChild(e);
-      const dot = el('div', 'sp3d-ldot'); dot.hidden = true; dot.title = name; labels.appendChild(dot);
+      const dot = el('div', 'sp3d-ldot'); dot.hidden = true; dot.setAttribute('aria-label', name); labels.appendChild(dot);
       const go = (ev) => { ev.stopPropagation(); ev.preventDefault(); act(); };
       on(e, 'click', go); on(dot, 'click', go);
       return { el: e, dot, sz: null };
@@ -1406,6 +1405,64 @@ export function create(V) {
     return { get on() { return st.on; }, get k() { return st.k; }, set, resetView, toggle: () => set(!st.on), after, pick, select, clearSel, refresh, reset, seeMore, stepPose, get parts() { return st.data && st.data.parts; }, get selCenter() { return st.sel ? st.selC : null; } };
   }
 
+  // ================================================================= Size vs person: the snake laid out loosely (v5.74)
+  // The body uncoils into a long, loose S lying on the ground across the view (head on the left), its length kept: the
+  // turning angles and step lengths are blended from the rest pose to the laid-out one, and every step of the laid-out
+  // centre line is one arc-length step of the body, so its length along the body is the model's own length.
+  function sizeLayCtl() {
+    const st = { e: 0, from: 0, to: 0, t0: 0, dur: 0, lay: null };
+    function start(o) {
+      if (show || slither || (anat && anat.on)) return null;
+      const R = ensureRig(); if (!R) return null;
+      const info = V.info, F = info.F, N = R.N, dx = R.dx, az = o.az, base0 = Math.atan2(-Math.sin(az), Math.cos(az)); // heading of T (head to tail) = the screen's right
+      const A = o.portrait ? 0.42 : 0.24, waves = o.portrait ? 1.75 : 1.25, thT = new Float32Array(N);
+      for (let i = 0; i < N; i++) { const u = i / (N - 1); thT[i] = base0 + A * Math.sin(TAU * waves * u + 0.5) * (0.35 + 0.65 * sstep(0, 0.15, u)); }
+      let sum = 0; for (let i = 0; i < N; i++) sum += R.rth[i] - thT[i];
+      const off = Math.round(sum / N / TAU) * TAU; for (let i = 0; i < N; i++) thT[i] += off;
+      const a = N >> 1, hT = new Float32Array(N).fill(dx), flat = new Float32Array(N); for (let i = 0; i < N; i++) flat[i] = F.Hh(i * dx) * F.bf;
+      const pose = integ(thT, hT, a, 0, 0, flat);
+      let cx = 0, cz = 0; for (let i = 0; i < N; i++) { cx += pose[i * 3]; cz += pose[i * 3 + 2]; } cx /= N; cz /= N;
+      const sx = info.center.x - cx, sz = info.center.z - cz; for (let i = 0; i < N; i++) { pose[i * 3] += sx; pose[i * 3 + 2] += sz; }
+      // on the 3D ground (ripples and lumps), the head held just clear of it
+      const step = 12, pts = []; for (let i = 0; i < N; i += step) pts.push([pose[i * 3], pose[i * 3 + 2]]); pts.push([pose[(N - 1) * 3], pose[(N - 1) * 3 + 2]]);
+      const gy = groundYAt(pts), ys = new Float32Array(N), Hl = F.Hl, lift = F.Hh(Hl * 0.6) * 0.25;
+      for (let i = 0; i < N; i++) { const f = i / step, j = Math.min(gy.length - 1, f | 0), j2 = Math.min(gy.length - 1, j + 1); ys[i] = flat[i] + lerp(gy[j], gy[j2], f - j) + lift * (1 - sstep(Hl * 0.8, Hl * 3, i * dx)); pose[i * 3 + 1] = ys[i]; }
+      let arc = 0; for (let i = 1; i < N; i++) arc += Math.hypot(pose[i * 3] - pose[i * 3 - 3], pose[i * 3 + 1] - pose[i * 3 - 2], pose[i * 3 + 2] - pose[i * 3 - 1]);
+      if (st.undo) st.undo(); st.undo = clearProps(pts, F.w0 * 2.5);
+      st.lay = { thT, ys, a, ax: pose[a * 3], az: pose[a * 3 + 2], pose, pts, arc };
+      let mx = 0, mz = 0; for (const p of pts) { mx += p[0]; mz += p[1]; }
+      return { pts, arc, center: V3(mx / pts.length, 0, mz / pts.length), head: V3(pose[0], pose[1], pose[2]), tail: V3(pose[(N - 1) * 3], pose[(N - 1) * 3 + 1], pose[(N - 1) * 3 + 2]) };
+    }
+    function integ(th, h, a, ax, az, ys) { // a centre line from turning angles and step lengths, anchored at sample a
+      const N = rig.N, out = new Float32Array(N * 3); out[a * 3] = ax; out[a * 3 + 2] = az;
+      for (let i = a + 1; i < N; i++) { out[i * 3] = out[i * 3 - 3] + Math.cos(th[i - 1]) * h[i - 1]; out[i * 3 + 2] = out[i * 3 - 1] + Math.sin(th[i - 1]) * h[i - 1]; }
+      for (let i = a - 1; i >= 0; i--) { out[i * 3] = out[i * 3 + 3] - Math.cos(th[i]) * h[i]; out[i * 3 + 2] = out[i * 3 + 5] - Math.sin(th[i]) * h[i]; }
+      for (let i = 0; i < N; i++) out[i * 3 + 1] = ys[i];
+      return out;
+    }
+    function poseAt(e) {
+      const R = rig, N = R.N, S = st.lay, th = new Float32Array(N), h = new Float32Array(N), ys = new Float32Array(N);
+      for (let i = 0; i < N; i++) { th[i] = R.rth[i] + (S.thT[i] - R.rth[i]) * e; h[i] = R.rh[i] + (R.dx - R.rh[i]) * e; ys[i] = R.restY[i] + (S.ys[i] - R.restY[i]) * e; }
+      return integ(th, h, S.a, lerp(R.rc[S.a * 3], S.ax, e), lerp(R.rc[S.a * 3 + 2], S.az, e), ys);
+    }
+    const cur = () => { const u = st.dur > 0 ? clamp((now() - st.t0) / st.dur, 0, 1) : 1, k = u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; return st.from + (st.to - st.from) * k; };
+    function go(to, dur) { st.from = cur(); st.to = to; st.t0 = now(); st.dur = V.reduce() ? 0 : dur; V.kick(); }
+    function step() {
+      if (!st.lay || !rig) return false;
+      if (show || slither) { end(true); return false; } // (something else took the body)
+      const e = cur(), moving = Math.abs(e - st.to) > 1e-4; st.e = e;
+      if (e <= 1e-4 && st.to === 0) { end(true); return true; }
+      rig.setPose(poseAt(e)); rig.apply(); return moving;
+    }
+    function end(instant) {
+      if (!instant) { go(0, 900); return; }
+      const had = !!st.lay; st.lay = null; st.e = st.from = st.to = 0; st.dur = 0;
+      if (had && rig && !show && !slither) rig.release();
+      if (st.undo) { st.undo(); st.undo = null; }
+    }
+    return { start, go, step, end, get e() { return st.lay ? st.e : 0; }, get moving() { return !!st.lay && Math.abs(cur() - st.to) > 1e-4; }, get on() { return !!st.lay; } };
+  }
+
   // ================================================================= events
   on(bEat, 'click', () => { if (show && show.name === 'eat') { stopShow(); return; } startShow({ name: 'eat', btn: bEat }); eat(); });
   on(bSlither, 'click', () => { if (slither && !slither.stopping) stopSlither(true); else { exclusive('slither'); startSlither(); } });
@@ -1414,7 +1471,7 @@ export function create(V) {
   function exclusive(kind) {
     if (show) stopShow(true);
     if (slither && kind !== 'slither') stopSlither();
-    if (kind !== 'scale') V.scaleOff();
+    if (kind === 'view') { if (V.scaleBack) V.scaleBack(true); } else if (kind !== 'scale') V.scaleOff(); // (v5.74: a camera button lets Size vs person glide back)
     if (anat && anat.on && kind !== 'mouth' && kind !== 'view' && kind !== 'anatomy') anat.set(false, true);
     if (kind === 'slither' || kind === 'scale') V.closeMouth();
     return false;
@@ -1438,7 +1495,8 @@ export function create(V) {
   function leaveModes() {
     if (!anyMode()) return false;
     if (show) stopShow(); if (slither) stopSlither(); if (anat && anat.on) anat.set(false, true);
-    V.closeMouth(); V.scaleOff(); if (V.resetView) V.resetView(); V.kick(); return true;
+    V.closeMouth(); if (V.scaleBack && V.scaleBack()) { V.kick(); return true; } // (v5.74: from Size vs person, back to exactly the view you had)
+    V.scaleOff(); if (V.resetView) V.resetView(); V.kick(); return true;
   }
   on(V.canvas, 'pointerup', (e) => {
     ptrOff(); if (!down) return; const moved = Math.hypot(e.clientX - down[0], e.clientY - down[1]), dt = (e.timeStamp || now()) - down[2]; down = null;
@@ -1468,15 +1526,15 @@ export function create(V) {
   const fx = {
     onBuild() {
       layout();
-      if (anat) anat.reset(); rig = null; anat = anatomyCtl(); show = null; slither = null; camBlend = null; fx.zoomOut = 1;
+      if (anat) anat.reset(); if (sizeLay) sizeLay.end(true); rig = null; anat = anatomyCtl(); sizeLay = sizeLayCtl(); show = null; slither = null; camBlend = null; fx.zoomOut = 1;
       const has = !!(V.extras && V.extras.mouth);
       bEat.hidden = !has;
       bAnat.hidden = !has; bAnat.setAttribute('aria-pressed', 'false');
-      for (const b of [bEat]) { b.disabled = false; b.removeAttribute('aria-pressed'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
+      for (const b of [bEat]) { b.disabled = false; b.setAttribute('aria-pressed', 'false'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
       bSlither.setAttribute('aria-pressed', 'false'); bSlither.textContent = 'Slither';
       say(''); stepTag.hidden = true; tip.hidden = true;
     },
-    reset() { if (show) { const s = show; show = null; for (const o of s.objs) disposeTree(o); (s.undo || []).forEach((f) => f()); } slither = null; if (anat) anat.reset(); anat = null; rig = null; camBlend = null; say(''); },
+    reset() { if (show) { const s = show; show = null; for (const o of s.objs) disposeTree(o); (s.undo || []).forEach((f) => f()); } slither = null; if (sizeLay) sizeLay.end(true); sizeLay = null; if (anat) anat.reset(); anat = null; rig = null; camBlend = null; say(''); },
     step() {
       if (!alive) return false;
       let moving = false;
@@ -1487,14 +1545,19 @@ export function create(V) {
       } else if (slither) moving = stepSlither() || !!slither;
       if (camBlend) moving = true;
       if (anat && anat.stepPose()) moving = true;
+      if (sizeLay && sizeLay.step()) moving = true; // v5.74: Size vs person lays the snake out (and coils it back)
       if (rig) rig.sync();
       if (anat && anat.on) { anat.refresh(); }
-      { const tr = V.info && V.info.tree, down = !!slither || !!(anat && anat.on); if (tr && tr.visible === down) { tr.visible = !down; moving = true; } } // v5.68: the tree goes while it is down on the ground
+      { const tr = V.info && V.info.tree, down = !!slither || !!(anat && anat.on) || !!(sizeLay && sizeLay.on); if (tr && tr.visible === down) { tr.visible = !down; moving = true; } } // v5.68: the tree goes while it is down on the ground
       return moving;
     },
     camera() { return camera(); },
     camTarget() { return show && show.cLast ? show.cLast.tgt : null; },
     moreButtons: [],
+    buttons: { eat: bEat, slither: bSlither }, // v5.74: grouped with Open mouth by viewer.js
+    get sizeLay() { return sizeLay; },
+    groundY: (list) => groundYAt(list),
+    clearProps: (pts, rad) => clearProps(pts, rad),
     exclusive: (k) => exclusive(k),
     after() { if (anat) anat.after(); },
     get locked() { return !!show; },
@@ -1508,7 +1571,7 @@ export function create(V) {
     anatOn: () => !!(anat && anat.on),
     leaveModes: () => leaveModes(), // v5.68: a click on empty space around the view
     keepClear: (x, y, w, h) => keepClear(x, y, w, h), // v5.68: labels never on the buttons over the view
-    syncFull(f) { bFull.innerHTML = f ? ICON.exit : ICON.full; bFull.title = f ? 'Exit fullscreen' : 'Fullscreen'; bFull.setAttribute('aria-label', bFull.title); bFull.setAttribute('aria-pressed', String(f)); },
+    syncFull(f) { bFull.innerHTML = f ? ICON.exit : ICON.full; bFull.setAttribute('aria-label', f ? 'Exit fullscreen' : 'Fullscreen'); bFull.setAttribute('aria-pressed', String(f)); },
     // scale labels never sit on the snake: move a label (x, y = its anchor; the box hangs above it, centred) out of the way
     avoid(x, y, w, h, extra) {
       // v5.09: a label always sits ABOVE the snake (below it only when there is no room above), never on it

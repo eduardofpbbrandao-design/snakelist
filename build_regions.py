@@ -1062,7 +1062,7 @@ if(!p){busy=0;nomodel();return}
 fillAbout(p);
 if(!gl()){busy=0;msg('This browser or device cannot show 3D graphics (WebGL is turned off or not supported), so the 3D model cannot be shown. The information about it is still there.',false,true);return}
 return getViewer().then(function(mod){if(!dlg.open&&!dlg.hasAttribute('open')){busy=0;return}host.innerHTML='';
-try{viewer=mod.mount(host,{profile:p,id:sid,name:name,testing:!!window.SL_3D_TEST,head:document.getElementById('sp-rl-h'),photo:photo3d,mapUrl:location.pathname+'?embed=map'});anat()}catch(e){viewer=null;busy=0;msg(e&&e.message==='webgl'?'The 3D view could not start on this device (WebGL is not available). The information about it is still there.':'The 3D view could not start.',true,true);return}busy=0})})
+try{viewer=mod.mount(host,{profile:p,id:sid,name:name,testing:!!window.SL_3D_TEST,head:document.getElementById('sp-rl-h'),photo:photo3d,mapUrl:location.pathname+'?embed=map',len:{lo:+m.dataset.lenlo||0,hi:+m.dataset.lenhi||0,txt:m.dataset.lentxt||'',src:m.dataset.lensrc||''}});anat()}catch(e){viewer=null;busy=0;msg(e&&e.message==='webgl'?'The 3D view could not start on this device (WebGL is not available). The information about it is still there.':'The 3D view could not start.',true,true);return}busy=0})})
 .catch(function(){busy=0;msg(navigator.onLine===false?'You seem to be offline, and the 3D viewer has not been downloaded yet.':'The 3D viewer could not be loaded just now.',true,true)})}
 function nomodel(){tabs[0].parentNode.hidden=true;p3d.hidden=true;pph.hidden=false;note.hidden=false;load()}
 function fillAbout(p){if(about.dataset.done)return;about.dataset.done=1;var s=el('summary','','About this model and its sources');about.appendChild(s);

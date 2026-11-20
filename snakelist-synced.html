@@ -9244,7 +9244,7 @@
       { sel: in3d(/^Anatomy$/), waitFor: true, act: "click", tryIt: "Try it: click Anatomy.", title: "Anatomy", text: "The skin turns see-through, so you can see its skeleton and organs. Click a label or its Show more to learn about that part - it gets a green outline so you can see where it is." },
       { sel: in3d(/^See it eat$/), waitFor: true, title: "See it eat", text: "Watch it catch and swallow its food the way this kind of snake really does." },
       { sel: in3d(/^Slither$/), waitFor: true, act: "click", tryIt: "Try it: click Slither.", title: "Slither", text: "Watch it move along the ground. Click Stop when you've seen enough." },
-      { sel: in3d(/^Show more/), waitFor: true, act: "click", tryIt: "Try it: click Show more.", title: "More buttons", text: "Even more to try: the full body, a close-up of the head, its pattern from above, and Size vs person - how long it is next to how tall a person is." },
+      { sel: in3d(/^Show more/), waitFor: true, act: "click", tryIt: "Try it: click Show more.", title: "More buttons", text: "The camera buttons: the full body, a close-up of the head and its pattern from above. Size vs person, next to Normal and Anatomy, shows how long it is next to a person 1.70 m tall." },
       { sel: ".sl3d-ov .sp3d-fsc", waitFor: true, title: "Full screen", text: "Make the 3D model fill your whole screen." },
       { sel: in3d(/Compare photo/), waitFor: true, title: "Compare photo", text: "Put a real photo of this snake next to the model. You can zoom into the photo too." },
       { sel: in3d(/See countries/), waitFor: true, title: "See countries", text: "See the countries and states where this snake lives." },
@@ -25785,7 +25785,8 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   .sl3d-act:focus-visible { outline: 3px solid #9be07c; outline-offset: 2px; }
   .sl3d-seen.on { background: #4fa64a; border-color: #4fa64a; color: #fff; }
   .sl3d-more { background: #4fa64a; border-color: #4fa64a; color: #fff; }
-  @media (max-width: 640px) { .sl3d-acts { order: 2; } .sl3d-act { min-height: 32px; padding: 0 10px; } }
+  @media (max-width: 640px) { .sl3d-acts { order: 2; } .sl3d-act { min-height: 44px; padding: 0 12px; } }
+  @media (max-width: 640px), (pointer: coarse) { .sl3d-back.sl3d-x { width: 44px; height: 44px; } .sl3d-act { min-height: 44px; } } /* v5.74: 44 px to tap on phones and tablets */
   .sl3d-host { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   .sl3d-host .sp3d-wrap { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   .sl3d-host .sp3d-stage { flex: 1; height: auto; min-height: 200px; }
@@ -25848,7 +25849,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   // ---- the corner button: on/off, nothing else ----
   var btn = document.createElement("button");
   btn.type = "button"; btn.className = "td-toggle"; btn.id = "td-toggle";
-  btn.setAttribute("aria-pressed", "false"); btn.title = "3D mode: pick a snake to see its 3D model";
+  btn.setAttribute("aria-pressed", "false"); // (v5.74: no title - SnakeList has no hover tooltips)
   btn.textContent = "3D"; // just the word, no picture
   stage.appendChild(btn);
   function setOn(v) {
@@ -25937,7 +25938,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     ov = document.createElement("div"); ov.className = "sl3d-ov"; ov.setAttribute("role", "region");
     ov.setAttribute("aria-label", nm + " in 3D");
     // v5.50: in the panel over the app, Close is just an X in the top-right corner
-    var xBtn = '<button type="button" class="sl3d-back sl3d-x" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>';
+    var xBtn = '<button type="button" class="sl3d-back sl3d-x" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>';
     ov.innerHTML = '<div class="sl3d-hd">' + (modal ? '' : '<button type="button" class="sl3d-back"><span aria-hidden="true">&larr;</span> Back to map</button>') + '<h2>' + esc(nm) + (nm !== sci ? ' <i>' + esc(sci) + '</i>' : '') + '</h2>' + (modal ? xBtn : '') + '</div><div class="sl3d-host"></div>';
     ["pointerdown", "pointermove", "pointerup", "wheel", "touchstart", "dblclick", "click"].forEach(function (t) { ov.addEventListener(t, function (e) { e.stopPropagation(); }, { passive: true }); });
     // v5.68: a click on the panel's empty background (not a button, the name or the model) leaves Anatomy, See it eat and the rest
@@ -25968,6 +25969,18 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     if (X && X.url) return { src: X.url, alt: "Photo of " + id, credit: X.by || X.credit ? "Photo: " + esc(X.by || X.credit) : "" };
     return null;
   }
+  // v5.74: the species page's own adult length (the numbers its Information tab shows), read once, for Size vs person
+  var lenOf = {};
+  function pageLenOf(id, p) {
+    if (lenOf[id]) return lenOf[id];
+    var u = window.SL_SP_PAGE_URL ? window.SL_SP_PAGE_URL(id) : "";
+    if (!u) { var nm = slug(p && p.name || ""); u = "species/" + (nm && nm !== id ? nm + "-" : "") + id + ".html"; }
+    if (/^https?:/.test(u) && u.indexOf(location.origin) !== 0) return (lenOf[id] = Promise.resolve(null));
+    return (lenOf[id] = fetch(u).then(function (r) { return r.ok ? r.text() : ""; }).then(function (t) {
+      var m = t && new DOMParser().parseFromString(t, "text/html").querySelector(".sp-main[data-sci]");
+      return m && +m.getAttribute("data-lenhi") > 0 ? { lo: +m.getAttribute("data-lenlo"), hi: +m.getAttribute("data-lenhi"), txt: m.getAttribute("data-lentxt") || "", src: m.getAttribute("data-lensrc") || "" } : null;
+    }).catch(function () { return null; }));
+  }
   function mapOf(id, p) {
     var u = window.SL_SP_PAGE_URL ? window.SL_SP_PAGE_URL(id) : "";
     if (!u) { var nm = slug(p && p.name || ""); u = "species/" + (nm && nm !== id ? nm + "-" : "") + id + ".html"; }
@@ -25997,7 +26010,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
         if (ov !== my) return;
         var h = ov.querySelector(".sl3d-host"); h.innerHTML = "";
         // v4.81: the name's header gets Compare photo (the card's own photo) and See countries (the species page's map)
-        try { viewer = mod.mount(h, { profile: p, id: id, name: p.name, testing: !!window.SL_3D_TEST, head: ov.querySelector(".sl3d-hd h2"), photo: function () { return photoOf(id); }, mapUrl: function () { return mapOf(id, p); } }); }
+        try { viewer = mod.mount(h, { profile: p, id: id, name: p.name, testing: !!window.SL_3D_TEST, head: ov.querySelector(".sl3d-hd h2"), photo: function () { return photoOf(id); }, mapUrl: function () { return mapOf(id, p); }, pageLen: function () { return pageLenOf(id, p); } }); }
         catch (e) { viewer = null; say("The 3D view couldn't start on this device.", function () { start(id); }); }
         cardActs(id);
       });

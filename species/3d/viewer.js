@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=567'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=567'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=570'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=570'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -2392,6 +2392,10 @@ function contactShadow(poseInfo, F, Rb) {
 function Controls(dom, cam, opt) {
   // v4.72: px/pz = how far you have flown from the snake (sideways, along the ground), never further than panMax
   const st = { az: 0, el: 0.5, d: 1, vaz: 0, vel: 0, px: 0, pz: 0, vpx: 0, vpz: 0, goal: null, dragging: false };
+  // v5.74: an eased glide (ease-in-out, about a second) for the big camera moves (Size vs person and back, the camera
+  // buttons, Reset); any drag, pinch, wheel or key takes over at once
+  let tw = null;
+  const user = () => { tw = null; if (opt.user) opt.user(); };
   const ptrs = new Map(); let pinch0 = 0, d0 = 0, last = null, panBtn = false, mid0 = null;
   const locked = () => !!(opt.locked && opt.locked()); // v4.81: while a show runs, the camera moves by itself
   const held = new Set(); let kv = [0, 0], lastU = 0; // v4.81: W A S D held down glide smoothly
@@ -2405,11 +2409,11 @@ function Controls(dom, cam, opt) {
   }
   const reduce = opt.reduce;
   const limitEl = (el, d) => clamp(el, opt.minEl(d), opt.maxEl);
-  function setGoal(g, instant) { if (g.az != null) g = Object.assign({}, g, { az: st.az + Math.atan2(Math.sin(g.az - st.az), Math.cos(g.az - st.az)) }); // always the short way round
+  function setGoal(g, instant) { tw = null; if (g.az != null) g = Object.assign({}, g, { az: st.az + Math.atan2(Math.sin(g.az - st.az), Math.cos(g.az - st.az)) }); // always the short way round
     st.goal = { az: g.az != null ? g.az : st.az, el: g.el != null ? g.el : st.el, d: g.d != null ? clamp(g.d, opt.dMin(), opt.dMax()) : st.d, px: g.px != null ? g.px : st.px, pz: g.pz != null ? g.pz : st.pz }; if (instant || reduce()) { st.az = st.goal.az; st.d = st.goal.d; st.el = limitEl(st.goal.el, st.d); st.px = st.goal.px; st.pz = st.goal.pz; st.goal = null; } opt.kick(); }
   function rot(dx, dy) { st.az -= dx; st.el = limitEl(st.el + dy, st.d); st.goal = null; }
   function zoom(f) { const d = clamp((st.goal ? st.goal.d : st.d) * f, opt.dMin(), opt.dMax()); setGoal({ d, az: st.goal ? st.goal.az : st.az, el: st.goal ? st.goal.el : st.el }); }
-  const onDown = (e) => { if (e.button === 1 || e.button > 2 || locked()) return; panBtn = e.button === 2 || e.shiftKey || e.ctrlKey; try { dom.setPointerCapture(e.pointerId); } catch (err) { /* synthetic or already released pointer */ } ptrs.set(e.pointerId, [e.clientX, e.clientY]); if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); d0 = st.d; mid0 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; } st.dragging = true; st.vaz = st.vel = st.vpx = st.vpz = 0; last = performance.now(); st.goal = null; };
+  const onDown = (e) => { if (e.button === 1 || e.button > 2 || locked()) return; user(); panBtn = e.button === 2 || e.shiftKey || e.ctrlKey; try { dom.setPointerCapture(e.pointerId); } catch (err) { /* synthetic or already released pointer */ } ptrs.set(e.pointerId, [e.clientX, e.clientY]); if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); d0 = st.d; mid0 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; } st.dragging = true; st.vaz = st.vel = st.vpx = st.vpz = 0; last = performance.now(); st.goal = null; };
   const onCtx = (e) => e.preventDefault();
   const onMove = (e) => {
     if (!ptrs.has(e.pointerId)) return; const p = ptrs.get(e.pointerId), dx = e.clientX - p[0], dy = e.clientY - p[1]; ptrs.set(e.pointerId, [e.clientX, e.clientY]);
@@ -2421,10 +2425,11 @@ function Controls(dom, cam, opt) {
       const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; if (mid0) { const m = pan(mid[0] - mid0[0], mid[1] - mid0[1]); last = now; st.vpx = m[0] / dt * 16; st.vpz = m[1] / dt * 16; } mid0 = mid; opt.kick(); }
   };
   const onUp = (e) => { ptrs.delete(e.pointerId); if (ptrs.size < 2) { pinch0 = 0; mid0 = null; } if (!ptrs.size) { st.dragging = false; panBtn = false; if (reduce() || performance.now() - last > 80) { st.vaz = st.vel = st.vpx = st.vpz = 0; } opt.kick(); } };
-  const onWheel = (e) => { e.preventDefault(); if (locked()) return; const f = Math.exp(clamp(e.deltaY, -120, 120) * 0.0016); if (!(opt.pointZoom && opt.pointZoom(e.clientX, e.clientY, f))) zoom(f); }; // v5.12: towards the point under the pointer
+  const onWheel = (e) => { e.preventDefault(); if (locked()) return; user(); const f = Math.exp(clamp(e.deltaY, -120, 120) * 0.0016); if (!(opt.pointZoom && opt.pointZoom(e.clientX, e.clientY, f))) zoom(f); }; // v5.12: towards the point under the pointer
   const onKey = (e) => {
     const k = e.key, s = 0.17;
     if (locked()) return;
+    if (/^(Arrow(Left|Right|Up|Down)|[-+=_wasdWASD]|Add|Subtract)$/.test(k) && !e.ctrlKey && !e.metaKey && !e.altKey) user();
     if (k === 'ArrowLeft') setGoal({ az: (st.goal ? st.goal.az : st.az) + s });
     else if (k === 'ArrowRight') setGoal({ az: (st.goal ? st.goal.az : st.az) - s });
     else if (k === 'ArrowUp') setGoal({ el: limitEl((st.goal ? st.goal.el : st.el) + s, st.d) });
@@ -2459,6 +2464,11 @@ function Controls(dom, cam, opt) {
     // a fling keeps gliding a little longer (smoother than it was)
     if (!st.dragging && (st.vaz || st.vel)) { st.az += st.vaz; st.el = limitEl(st.el + st.vel, st.d); st.vaz *= 0.92; st.vel *= 0.92; if (Math.abs(st.vaz) < 1e-4 && Math.abs(st.vel) < 1e-4) st.vaz = st.vel = 0; else moving = true; }
     if (!st.dragging && (st.vpx || st.vpz)) { st.px += st.vpx; st.pz += st.vpz; clampPan(); st.vpx *= 0.9; st.vpz *= 0.9; if (Math.hypot(st.vpx, st.vpz) < st.d * 1e-5) st.vpx = st.vpz = 0; else moving = true; }
+    if (tw) { // the eased glide: every channel together, the short way round
+      const u = clamp((tnow - tw.t0) / tw.dur, 0, 1), e = u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+      for (const q of ['az', 'el', 'd', 'px', 'pz']) st[q] = tw.from[q] + (tw.to[q] - tw.from[q]) * e;
+      if (u >= 1) tw = null; else moving = true;
+    }
     if (st.goal) {
       const k = 0.2; st.az += (st.goal.az - st.az) * k; st.d += (st.goal.d - st.d) * k; st.el = limitEl(st.el + (st.goal.el - st.el) * k, st.d); st.px += (st.goal.px - st.px) * k; st.pz += (st.goal.pz - st.pz) * k;
       if (Math.abs(st.goal.az - st.az) < 1e-4 && Math.abs(st.goal.d - st.d) / st.d < 1e-4 && Math.abs(st.goal.el - st.el) < 1e-4 && Math.hypot(st.goal.px - st.px, st.goal.pz - st.pz) < st.d * 1e-4) { st.az = st.goal.az; st.d = st.goal.d; st.px = st.goal.px; st.pz = st.goal.pz; st.goal = null; } else moving = true;
@@ -2467,7 +2477,15 @@ function Controls(dom, cam, opt) {
     return moving;
   }
   function dispose() { dom.removeEventListener('pointerdown', onDown); dom.removeEventListener('pointermove', onMove); dom.removeEventListener('pointerup', onUp); dom.removeEventListener('pointercancel', onUp); dom.removeEventListener('wheel', onWheel); dom.removeEventListener('keydown', onKey); dom.removeEventListener('keyup', onKeyUp); dom.removeEventListener('blur', onBlur); dom.removeEventListener('contextmenu', onCtx); }
-  return { st, setGoal, update, dispose, zoom };
+  function tween(g, dur = 1000) {
+    const from = { az: st.az, el: st.el, d: st.d, px: st.px, pz: st.pz }, to = Object.assign({}, from);
+    for (const q in to) if (g[q] != null) to[q] = g[q];
+    to.az = st.az + Math.atan2(Math.sin(to.az - st.az), Math.cos(to.az - st.az)); to.d = clamp(to.d, opt.dMin(), opt.dMax());
+    st.goal = null; st.vaz = st.vel = st.vpx = st.vpz = 0;
+    if (reduce() || dur <= 0) { Object.assign(st, to); tw = null; } else tw = { from, to, t0: performance.now(), dur };
+    opt.kick();
+  }
+  return { st, setGoal, update, dispose, zoom, tween, get tweening() { return !!tw; }, get aim() { return tw ? Object.assign({}, tw.to) : st.goal ? Object.assign({}, st.goal) : { az: st.az, el: st.el, d: st.d, px: st.px, pz: st.pz }; } };
 }
 
 // ---------- the person / ruler used for "Scale" ----------
@@ -2476,6 +2494,46 @@ function personShape(h) {
   const pts = [[0.1, 0], [0.12, 0.7], [0.16, 0.82], [0.2, 1.22], [0.18, 1.3], [0.07, 1.33], [0.06, 1.36], [0.1, 1.42], [0.09, 1.49], [0, 1.5]];
   s.moveTo(-pts[0][0] * k, 0); for (const [x, y] of pts) s.lineTo(x * k, y * k); for (let i = pts.length - 1; i >= 0; i--) s.lineTo(-pts[i][0] * k, pts[i][1] * k);
   const g = new THREE.ExtrudeGeometry(s, { depth: 0.18 * k, bevelEnabled: true, bevelThickness: 0.03 * k, bevelSize: 0.03 * k, bevelSegments: 2, curveSegments: 4 }); g.translate(0, 0, -0.09 * k); return g;
+}
+
+// ---------- v5.74: the buttons over the 3D view, in groups, and the Size vs person overlays ----------
+// (injected after extras.js's styles, so these win; the look stays SnakeList's: dark see-through pills, green when on)
+const UI_CSS = `
+.sp3d-stage>.sp3d-bar{gap:8px 14px}
+.sp3d-stage>.sp3d-bar>.sp3d-grp{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;pointer-events:auto}
+.sp3d-stage>.sp3d-bar>.sp3d-grp:empty{display:none}
+.sp3d-stage>.sp3d-bar>.sp3d-seg{gap:0;padding:2px;border-radius:12px;background:rgba(12,26,18,.74);border:1px solid rgba(255,255,255,.16);box-shadow:0 2px 8px rgba(0,0,0,.18);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.sp3d-stage>.sp3d-bar>.sp3d-seg>.sp3d-b{background:transparent;border-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;border-radius:10px}
+.sp3d-stage>.sp3d-bar>.sp3d-seg>.sp3d-b:hover{background:rgba(255,255,255,.1);border-color:transparent}
+.sp3d-stage>.sp3d-bar>.sp3d-seg>.sp3d-b[hidden]{display:none}
+.sp3d-stage .sp3d-b{transition:background-color .15s ease,border-color .15s ease,transform .08s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.sp3d-stage .sp3d-b:active:not(:disabled){transform:scale(.95)}
+.sp3d-stage .sp3d-b:focus-visible{outline:3px solid #9be07c;outline-offset:2px}
+.sp3d-stage>.sp3d-bar>.sp3d-grp .sp3d-b[aria-pressed=true],.sp3d-stage>.sp3d-bar>.sp3d-seg>.sp3d-b[aria-pressed=true],.sp3d-stage .sp3d-b.sp3d-backchip:active{background:#4fa64a;border-color:#4fa64a;color:#fff}
+.sp3d-stage>.sp3d-bar>.sp3d-seg>.sp3d-b[aria-pressed=true]{box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.sp3d-bar.sp3d-few .sp3d-more{display:none}
+.sp3d-stage .sp3d-backchip{position:absolute;left:10px;bottom:10px;z-index:5;display:inline-flex;align-items:center;gap:6px}
+.sp3d-stage .sp3d-backchip[hidden]{display:none}
+.sp3d-stage.sp3d-sizing .sp3d-hint{opacity:0}
+.sp3d-sizecap{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:4;width:max-content;max-width:min(calc(100% - 200px),620px);padding:7px 14px;border-radius:12px;background:rgba(12,26,18,.86);color:#fff;font:500 13.5px/1.45 Inter,system-ui,sans-serif;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.sp3d-sizecap[hidden]{display:none}.sp3d-sizecap a{color:#b8f0a0;text-decoration:underline;text-underline-offset:2px}
+.sp3d-szring{position:absolute;left:0;top:0;z-index:2;border:3px solid #ffd66b;border-radius:50%;box-shadow:0 0 0 2px rgba(12,26,18,.55),inset 0 0 0 2px rgba(12,26,18,.35);pointer-events:none}
+.sp3d-szring[hidden],.sp3d-szinset[hidden]{display:none}
+.sp3d-szinset{position:absolute;left:0;top:0;z-index:3;border:3px solid #ffd66b;border-radius:6px;box-shadow:0 0 0 2px rgba(12,26,18,.6),0 4px 14px rgba(0,0,0,.35);pointer-events:none;box-sizing:border-box}
+.sp3d-szzoom{position:absolute;left:6px;top:6px;padding:2px 8px;border-radius:999px;background:rgba(12,26,18,.86);color:#ffd66b;font:700 12px/1.4 Inter,system-ui,sans-serif}
+@media (max-width:820px){.sp3d-sizecap{left:10px;right:10px;bottom:62px;transform:none;width:auto;max-width:none;font-size:12.5px;padding:6px 10px}}
+/* phones and tablets: every button at least 44 px tall, with room between them */
+@media (max-width:820px),(pointer:coarse){
+.sp3d-stage .sp3d-b,.sp3d-stage .sp3d-hb,.sp3d-stage .sp3d-b.sp3d-morebtn,.sp3d-stage .sp3d-b.sp3d-morebtn[aria-expanded=true]{min-height:44px;padding:0 13px;font-size:13px}
+.sp3d-stage .sp3d-b.sp3d-morebtn,.sp3d-stage .sp3d-b.sp3d-morebtn[aria-expanded=true]{padding:0 14px;font-size:12.5px}
+.sp3d-stage>.sp3d-bar>.sp3d-seg{padding:0}
+.sp3d-stage>.sp3d-bar{gap:8px 10px}
+.sp3d-stage .sp3d-fsc{width:44px;height:44px}
+}
+`;
+function uiCSSInject() {
+  if (typeof document === 'undefined' || document.getElementById('sp3d-ui-css')) return;
+  const s = document.createElement('style'); s.id = 'sp3d-ui-css'; s.textContent = UI_CSS; document.head.appendChild(s);
 }
 
 // ---------- the viewer ----------
@@ -2515,7 +2573,8 @@ export function mount(host, opts) {
   const busyShow = () => { busy.hidden = false; busy.classList.remove('out'); };
   const busyHide = (pr) => { if (pr !== busyFor) return; requestAnimationFrame(() => requestAnimationFrame(() => { if (pr !== busyFor) return; busy.classList.add('out'); setTimeout(() => { if (pr === busyFor) busy.hidden = true; }, 320); })); };
   const bar = el('div', 'sp3d-bar'); bar.setAttribute('role', 'toolbar'); bar.setAttribute('aria-label', '3D view controls');
-  const btn = (txt, title, cls) => { const b = el('button', 'sp3d-b' + (cls ? ' ' + cls : ''), txt); b.type = 'button'; if (title) b.title = title; bar.appendChild(b); return b; };
+  // (v5.74: no title - SnakeList shows no text when you rest the pointer on a button; every button says what it does)
+  const btn = (txt, title, cls) => { const b = el('button', 'sp3d-b' + (cls ? ' ' + cls : ''), txt); b.type = 'button'; bar.appendChild(b); return b; };
   const vg = el('span', 'sp3d-views'); vg.setAttribute('role', 'group'); vg.setAttribute('aria-label', 'Views');
   const bFront = btn('Front', 'View the head from the front'), bSide = btn('Side', 'View from the side'), bTop = btn('Top', 'View from above');
   vg.append(bFront, bSide, bTop); bar.appendChild(vg);
@@ -2530,24 +2589,44 @@ export function mount(host, opts) {
   const bAnat = btn('Anatomy', 'Show the parts of this snake: fangs, teeth, glottis, tongue, scales and more'); bAnat.setAttribute('aria-pressed', 'false');
   const vg2 = el('span', 'sp3d-views'); vg2.setAttribute('role', 'group'); vg2.setAttribute('aria-label', 'Camera views');
   const bVBody = btn('Full body', 'See the whole snake'), bVHead = btn('Head close-up', 'Close up on the head and its scales'), bVTop = btn('Pattern from above', 'Look down on the pattern of its back');
-  vg2.append(bVBody, bVHead, bVTop); bar.appendChild(vg2); bar.appendChild(bScale); bScale.textContent = 'Size vs person'; bScale.title = 'Show its adult length next to a ruler and a person 1.5 m tall';
+  vg2.append(bVBody, bVHead, bVTop); bar.appendChild(vg2); bar.appendChild(bScale); bScale.textContent = 'Size vs person';
+  // v5.74: Normal - the plain model (no Anatomy, no Size vs person); with Anatomy and Size vs person it makes the View group
+  const bNormal = btn('Normal'); bNormal.setAttribute('aria-pressed', 'true');
   let mouthGoal = 0;
   // v4.81: everything you can do with the model beyond looking at it lives in extras.js (Slither, See it eat,
   // See eye shield, Anatomy, Fullscreen, Compare photo / See countries beside the model, double-click zoom)
   const V = { THREE, P, opts, el, on, wrap, stage, labels, bar, canvas, btn, bAnat, reduce,
     get cam() { return cam; }, get controls() { return controls; }, get info() { return info; }, get extras() { return extras; }, get group() { return snakeGroup; }, get scene() { return ctx.scene; },
-    kick: () => kick(), toggleFull: () => toggleFull(), scaleOn: () => !!(scaleObj && scaleObj.visible),
-    get occ() { return ctx.occ; }, scaleOff: () => { if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(false); }, closeMouth: () => { if (mouthGoal) toggleMouth(false); }, get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
+    kick: () => kick(), toggleFull: () => toggleFull(), scaleOn: () => sizeSt.on,
+    get occ() { return ctx.occ; }, scaleOff: () => { if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(false, { instant: true }); }, // (at once: something else takes over the snake and the camera)
+    scaleBack: (keepCam) => { if (bScale.getAttribute('aria-pressed') === 'true') { toggleScale(false, { keepCam }); return true; } return false; }, // (gliding back to the view you had) closeMouth: () => { if (mouthGoal) toggleMouth(false); }, get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
     resetView: () => resetView(),     focus: (p, d, elv) => focusOn(p, d, elv), view: (g) => controls.setGoal(Object.assign({ az: controls.st.az, d: info.dFit, px: 0, pz: 0 }, g)) };
   const fx = EXTRA.create(V);
-  // v5.05: the main buttons stay in view; the rest (eye shield, camera views, size, fullscreen) are behind Show more / Show less
-  const bMore = el('button', 'sp3d-b sp3d-morebtn', 'Show more'); bMore.type = 'button'; bMore.setAttribute('aria-expanded', 'false'); bMore.title = 'Show all the buttons';
-  [vg2, bScale].concat(fx.moreButtons || []).forEach((b) => b.classList.add('sp3d-more'));
+  uiCSSInject();
+  // v5.74: the buttons in groups - View (Normal / Anatomy / Size vs person, one at a time), Actions (Open mouth / See it
+  // eat / Slither) and Reset on the main lines; the camera buttons (Full body / Head close-up / Pattern from above)
+  // behind Show more. Every button that turns something on is green and aria-pressed while it is on.
+  const grp = (label, cls, list) => { const g = el('span', 'sp3d-grp' + (cls ? ' ' + cls : '')); g.setAttribute('role', 'group'); g.setAttribute('aria-label', label); list.filter(Boolean).forEach((b) => g.appendChild(b)); bar.appendChild(g); return g; };
+  const fb = fx.buttons || {};
+  [bMouth, fb.eat, fb.slither].forEach((b) => b && !b.hasAttribute('aria-pressed') && b.setAttribute('aria-pressed', 'false'));
+  const gView = grp('View', 'sp3d-seg', [bNormal, bAnat, bScale]), gAct = grp('Actions', '', [bMouth, fb.eat, fb.slither]), gReset = grp('Reset', '', [bReset]);
+  vg2.className = 'sp3d-grp sp3d-cam'; vg2.setAttribute('aria-label', 'Camera'); bar.appendChild(vg2);
+  [...bar.children].forEach((c) => { if (c.classList.contains('sp3d-b') && c !== bReset) gAct.appendChild(c); }); // (any other action button extras.js adds)
+  // v5.05: the main buttons stay in view; the camera buttons are behind Show more / Show less
+  const bMore = el('button', 'sp3d-b sp3d-morebtn', 'Show more'); bMore.type = 'button'; bMore.setAttribute('aria-expanded', 'false');
+  [vg2].concat(fx.moreButtons || []).forEach((b) => b.classList.add('sp3d-more'));
   bar.classList.add('sp3d-few');
   // v5.50: Show more sits on its own line under the main buttons (like See all families), and the extra buttons open below it
   const br1 = el('span', 'sp3d-br'), br2 = el('span', 'sp3d-br'); br1.setAttribute('aria-hidden', 'true'); br2.setAttribute('aria-hidden', 'true');
   bar.append(br1, bMore, br2);
-  on(bMore, 'click', () => { const open = bar.classList.toggle('sp3d-few') === false; bMore.textContent = open ? 'Show less' : 'Show more'; bMore.setAttribute('aria-expanded', String(open)); bMore.title = open ? 'Show only the main buttons' : 'Show all the buttons'; });
+  on(bMore, 'click', () => { const open = bar.classList.toggle('sp3d-few') === false; bMore.textContent = open ? 'Show less' : 'Show more'; bMore.setAttribute('aria-expanded', String(open)); });
+  // the View group always agrees with what is on: Normal is pressed when neither Anatomy nor Size vs person is
+  const syncViews = () => { const v = bAnat.getAttribute('aria-pressed') !== 'true' && bScale.getAttribute('aria-pressed') !== 'true'; if (bNormal.getAttribute('aria-pressed') !== String(v)) bNormal.setAttribute('aria-pressed', String(v)); };
+  if (window.MutationObserver) { const mo = new MutationObserver(syncViews); mo.observe(bAnat, { attributes: true, attributeFilter: ['aria-pressed', 'hidden'] }); mo.observe(bScale, { attributes: true, attributeFilter: ['aria-pressed'] }); cleanups.push(() => mo.disconnect()); }
+  // a camera button stays green while the camera is where it put it; turning or zooming yourself clears it
+  let camBtn = null;
+  const setCamBtn = (b) => { camBtn = b; for (const q of [bVBody, bVHead, bVTop]) q.setAttribute('aria-pressed', String(q === b)); };
+  setCamBtn(null);
   const panel = el('div', 'sp3d-panel'); panel.hidden = true; panel.id = 'sp3d-panel-' + seed; bSet.setAttribute('aria-controls', panel.id);
   const mkCheck = (label, checked) => { const l = el('label', 'sp3d-opt'), c = document.createElement('input'); c.type = 'checkbox'; c.checked = checked; l.append(c, document.createTextNode(' ' + label)); panel.appendChild(l); return c; };
   const cScene = mkCheck('Show surroundings', true);
@@ -2757,13 +2836,14 @@ float slScale(vec2 m) {
       controls = Controls(canvas, cam, {
         reduce, maxEl: (80 * Math.PI) / 180,
         minEl: (d) => { const near = sstep(info.dFit * 0.6, Math.max(info.dMin * 2, info.F.Hl * 4), d); return Math.max(lerp(8, 2, near) * Math.PI / 180, Math.asin(clamp((lerp(info.hMax * 1.3, info.F.w0 * 0.6, near) - targetFor(d).y) / d, 0, 0.95))); }, // v5.05: close up you can look from the side (at the eyes, the mouth, the organs)
-        dMin: () => info.dMin, dMax: () => info.dMax * Math.max(scaleObj && scaleObj.visible ? info.scaleK : 1, fx.zoomOut), kick: () => kick(), reset: () => resetView(),
+        dMin: () => info.dMin, dMax: () => info.dMax * Math.max(sizeBusy() ? info.scaleK : 1, fx.zoomOut), kick: () => kick(), reset: () => resetView(),
         panMax: () => Math.max(info.Rb * 1.4, (fx.reach || 0) * 1.1), // you can fly around the snake, never away from it
         locked: () => fx.locked,
+        user: () => { if (camBtn) setCamBtn(null); }, // v5.74: you moved the camera yourself: no camera button is lit any more
         // v5.12: zooming goes towards the part of the snake under the pointer (or between the fingers); the point it zooms
         // to is always on the snake, so you can never zoom away from it or lose it
         pointZoom: (cx, cy, f, now) => {
-          const st = controls.st, d0 = st.goal ? st.goal.d : st.d, d = clamp(d0 * f, info.dMin, info.dMax * Math.max(scaleObj && scaleObj.visible ? info.scaleK : 1, fx.zoomOut));
+          const st = controls.st, d0 = st.goal ? st.goal.d : st.d, d = clamp(d0 * f, info.dMin, info.dMax * Math.max(sizeBusy() ? info.scaleK : 1, fx.zoomOut));
           if (Math.abs(d - d0) < 1e-9) return true;
           const r = canvas.getBoundingClientRect(), ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1), cam);
           const body = snakeGroup.children.find((o) => o.isMesh && o.geometry === info.body.geo); let p = null;
@@ -2786,7 +2866,6 @@ float slScale(vec2 m) {
     }
     fitLimits();
     resetView(true);
-    if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(true);
     if (bDet.getAttribute('aria-pressed') === 'true') buildMarkers();
     kick();
   }
@@ -2806,14 +2885,16 @@ float slScale(vec2 m) {
     // zooming in moves the point you orbit around from the middle of the snake to its head
     const fp = fx.focusPoint && fx.focusPoint(), k = sstep(info.dFit * 0.75, Math.max(info.dMin * 1.2, info.F.Hl * 3.8), d), t = info.center.clone().lerp(fp || info.headPos, k);
     if (controls) { t.x += controls.st.px; t.z += controls.st.pz; }
-    if (scaleObj && scaleObj.visible && info.F.L >= 0.4) t.y += 0.85 * sstep(info.dFit, info.dFit * 1.6, d); // keep the 1.7 m height line in view
+    const sk = sizeBusy() ? skNow() : 0; // v5.74: Size vs person looks at the snake and the person together (blended in and out with the glide)
+    if (sk > 0) { const s2 = sizeSt.tgt.clone(); if (controls) { s2.x += controls.st.px; s2.z += controls.st.pz; } t.lerp(s2, sk); }
     return t;
   }
   function viewAz(kind) {
     const hd = info.headDir; const a = Math.atan2(hd.x, hd.z);
     if (kind === 'front') return a; if (kind === 'side') return -info.axisAng + Math.PI / 2; if (info.drapeAz != null) return info.drapeAz; /* (v5.62: a draped snake is seen across its branch, the loops hanging on both sides) */ return a + (info.raised ? 0.5 : 0.9); // (v5.62: a raised cobra is seen nearly from the front, its hood spread toward you)
   }
-  function resetView(instant) { if (!instant && fx.resetView && fx.resetView()) return; controls.setGoal({ az: viewAz('default'), el: ((info.tree ? (info.portrait ? 20 : 12) : info.portrait ? 40 : 30) * Math.PI) / 180, d: info.dFit * (P.pose && P.pose.kind === 'branch' ? 1.05 : 1), px: 0, pz: 0 }, instant); } // (v5.68: a snake up in a tree is seen from nearly level, so the trunk and the drop below show) // (v5.35: thread-thin tree snakes start closer, head in view)
+  function resetGoal() { return { az: viewAz('default'), el: ((info.tree ? (info.portrait ? 20 : 12) : info.portrait ? 40 : 30) * Math.PI) / 180, d: info.dFit * (P.pose && P.pose.kind === 'branch' ? 1.05 : 1), px: 0, pz: 0 }; }
+  function resetView(instant) { if (!instant && fx.resetView && fx.resetView()) return; if (instant) controls.setGoal(resetGoal(), true); else controls.tween(resetGoal(), 1000); } // (v5.74: an eased glide) // (v5.68: a snake up in a tree is seen from nearly level, so the trunk and the drop below show) // (v5.35: thread-thin tree snakes start closer, head in view)
   function setView(kind) {
     if (kind === 'front') controls.setGoal({ az: viewAz('front'), el: (14 * Math.PI) / 180, d: Math.max(info.dMin * 1.6, info.dFit * 0.42) });
     else if (kind === 'side') controls.setGoal({ az: viewAz('side'), el: (12 * Math.PI) / 180, d: info.dFit * 1.0 });
@@ -2838,7 +2919,7 @@ float slScale(vec2 m) {
   }
   function resize() {
     const w = stage.clientWidth || 300, h = stage.clientHeight || 200;
-    renderer.setSize(w, h, false); if (cam) { cam.aspect = w / h; cam.updateProjectionMatrix(); fitLimits(); controls && (controls.st.d = clamp(controls.st.d, info.dMin, controls.st.goal ? 1e9 : info.dMax * Math.max(scaleObj && scaleObj.visible ? info.scaleK : 1, fx.zoomOut))); }
+    renderer.setSize(w, h, false); if (cam) { cam.aspect = w / h; cam.updateProjectionMatrix(); fitLimits(); controls && (controls.st.d = clamp(controls.st.d, info.dMin, controls.st.goal ? 1e9 : info.dMax * Math.max(sizeBusy() ? info.scaleK : 1, fx.zoomOut))); }
     kick();
   }
   function frame() {
@@ -2849,11 +2930,13 @@ float slScale(vec2 m) {
     const mo = extras && extras.mouth;
     if (mo && Math.abs(mo.t - mouthGoal) > 1e-3) { const nt = reduce() ? mouthGoal : mo.t + clamp(mouthGoal - mo.t, -0.07, 0.07); mo.set(nt); if (Math.abs(nt - mouthGoal) <= 1e-3) mo.settle(); moving = true; }
     if (fx.step()) moving = true; // v4.81: slithering, the shows (they may move the jaw and bend the body)
+    if (sizeStep()) moving = true; // v5.74: Size vs person: the snake's scale, the person fading in or out
     placeCamera();
     if (fx.camera()) moving = true; // a show moves the camera by itself
     if (opts.testing && window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } // (tests: a fixed camera)
     updateOccluders();
     renderer.render(ctx.scene, cam);
+    sizeAfter(); // v5.74: the magnified inset of a small snake
     updateMarkers();
     fx.after();
     if (moving) kick();
@@ -2873,43 +2956,156 @@ float slScale(vec2 m) {
   }
   function kick() { if (!raf && alive) raf = requestAnimationFrame(frame); }
 
-  // scale comparison: a 1.5 m person (or a ruler for small snakes), both at true size
-  function toggleScale(force) {
-    const onv = force != null ? force : bScale.getAttribute('aria-pressed') !== 'true';
-    bScale.setAttribute('aria-pressed', String(onv));
-    if (onv && !scaleObj) {
-      scaleObj = new THREE.Group(); const L = info.F.L, side = new THREE.Vector3(Math.cos(info.axisAng), 0, Math.sin(info.axisAng)), perp = new THREE.Vector3(-side.z, 0, side.x);
-      const m = new THREE.MeshStandardMaterial({ color: '#5b6b62', roughness: 0.8 });
-      const rulerAt = info.center.clone().addScaledVector(perp, info.Rb * 1.05); rulerAt.y = 0;
-      // ruler: the typical adult length laid straight
-      const tickT = canvasTex(1024, (x, s) => { x.fillStyle = '#f3efe2'; x.fillRect(0, 0, s, s); x.fillStyle = '#2b2b2b'; const n = L >= 2 ? Math.round(L * 2) : L >= 0.5 ? Math.round(L * 10) : Math.round(L * 100); for (let i = 0; i <= n; i++) { const px = (i / n) * s * (n / (L >= 2 ? L * 2 : L >= 0.5 ? L * 10 : L * 100)); x.fillRect(Math.min(s - 4, px), 0, 4, i % (L >= 2 ? 2 : 5) === 0 ? s * 0.7 : s * 0.4); } });
-      tickT.wrapS = tickT.wrapT = THREE.ClampToEdgeWrapping; tickT.repeat.set(1, 1);
-      const rw = Math.max(L * 0.025, 0.004), rg = new THREE.BoxGeometry(L, rw * 0.25, rw);
-      const ruler = new THREE.Mesh(rg, [m, m, new THREE.MeshStandardMaterial({ map: tickT, roughness: 0.7 }), m, m, m]);
-      ruler.position.copy(rulerAt).addScaledVector(new THREE.Vector3(0, 1, 0), rw * 0.125); ruler.rotation.y = -info.axisAng; ruler.castShadow = true; scaleObj.add(ruler);
-      scaleObj.userData.ends = [-0.5, -0.25, 0, 0.25, 0.5].map((k) => ruler.position.clone().addScaledVector(side, L * k)); // (labels keep off the ruler too)
-      // v4.81: labels sit above the far end of the ruler and beside the person's head, never on the snake
-      scaleObj.userData.labels = [{ p: ruler.position.clone().add(new THREE.Vector3(0, Math.max(rw * 3, L * 0.04), 0)), t: 'Snake ' + fmtLen(L) + ' (typical adult, laid straight)' }];
-      // v5.12: no 3D person - a plain upright line as tall as an average adult (1.7 m), beside the snake's length line
-      if (L >= 0.4) {
-        const PH = 1.7, pm = new THREE.MeshStandardMaterial({ color: '#2e7d4f', roughness: 0.6 }), pr = Math.max(0.012, L * 0.008);
-        const pp = info.center.clone().addScaledVector(side, info.Rb + 0.35); pp.y = 0;
-        const pole = new THREE.Mesh(new THREE.CylinderGeometry(pr, pr, PH, 16), pm); pole.position.copy(pp).add(new THREE.Vector3(0, PH / 2, 0)); pole.castShadow = true; scaleObj.add(pole);
-        for (const y of [0, PH]) { const cap = new THREE.Mesh(new THREE.BoxGeometry(pr * 9, pr * 1.2, pr * 9), pm); cap.position.copy(pp).add(new THREE.Vector3(0, y + (y ? -pr * 0.6 : pr * 0.6), 0)); scaleObj.add(cap); }
-        for (let y = 0.5; y < PH; y += 0.5) { const tk = new THREE.Mesh(new THREE.BoxGeometry(pr * 5, pr * 0.8, pr * 5), pm); tk.position.copy(pp).add(new THREE.Vector3(0, y, 0)); scaleObj.add(tk); }
-        scaleObj.userData.labels.push({ p: pp.clone().add(new THREE.Vector3(0, PH + 0.06, 0)), t: 'Person 1.7 m (average adult height)' });
-      }
-      ctx.scene.add(scaleObj);
-    }
-    if (scaleObj) scaleObj.visible = onv;
+  // ---------------------------------------------------------------- Size vs person (v5.74)
+  // The snake and a person 1.70 m tall at the SAME scale, side by side on the same ground: the snake laid out loosely
+  // (extras.js bends it with the rig, keeping its length) and shown at its documented typical adult length - the same
+  // number and source as the Information tab (adultLength) - measured along its body (the arc length of its centre
+  // line, not its bounding box). The camera glides (eased, ~1 s) to a slightly raised three-quarter view with both fully
+  // in view; a small snake gets a ring and a magnified inset. Back to model (the same button) or the Back chip glides
+  // back to exactly the angle and zoom you had.
+  const sizeSt = { on: false, leaving: false, saved: null, len: null, lay: null, k: 1, piv: new THREE.Vector3(), tgt: new THREE.Vector3(), sk: { v: 0, from: 0, to: 0, t0: 0, dur: 0 }, undo: null, ready: false, pts: null, mid: new THREE.Vector3(), headTop: new THREE.Vector3(), small: false, N: 1 };
+  let pageLen = null; // the species page's own length (the Information tab's): given by the page, or read from it once
+  if (opts.len && +opts.len.hi > 0) pageLen = opts.len;
+  else if (typeof opts.pageLen === 'function') { try { Promise.resolve(opts.pageLen()).then((v) => { if (v && +v.hi > 0) pageLen = v; }, () => {}); } catch (e) { /* no page: the profile's own length */ } }
+  const lenInfo = () => adultLength(opts.profile, pageLen, opts.id);
+  const sizeBusy = () => sizeSt.on || sizeSt.leaving;
+  const easeIO = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
+  function skNow() { const a = sizeSt.sk, u = a.dur > 0 ? clamp((performance.now() - a.t0) / a.dur, 0, 1) : 1; a.v = a.from + (a.to - a.from) * easeIO(u); return a.v; }
+  function skGo(to, dur) { const a = sizeSt.sk; skNow(); a.from = a.v; a.to = to; a.t0 = performance.now(); a.dur = reduce() ? 0 : dur; kick(); }
+  const skMoving = () => Math.abs(skNow() - sizeSt.sk.to) > 1e-4;
+  // the overlays: a caption with the length and its source, the Back chip, a ring round a small snake and the magnified inset
+  const sizeCap = el('div', 'sp3d-sizecap'); sizeCap.hidden = true; sizeCap.setAttribute('aria-live', 'polite');
+  const sizeChip = el('button', 'sp3d-b sp3d-backchip'); sizeChip.type = 'button'; sizeChip.innerHTML = '<span aria-hidden="true">←</span> Back'; sizeChip.setAttribute('aria-label', 'Back to the model'); sizeChip.hidden = true;
+  const sizeRing = el('div', 'sp3d-szring'); sizeRing.hidden = true; sizeRing.setAttribute('aria-hidden', 'true');
+  const sizeInset = el('div', 'sp3d-szinset'); sizeInset.hidden = true; sizeInset.setAttribute('aria-hidden', 'true'); const insetTag = el('span', 'sp3d-szzoom'); sizeInset.appendChild(insetTag);
+  stage.append(sizeRing, sizeInset, sizeCap, sizeChip);
+  on(sizeChip, 'click', () => V.scaleBack());
+  const insetCam = new THREE.PerspectiveCamera(30, 1, 0.001, 100);
+  function sizeOverlays(show) {
+    sizeChip.hidden = !show; sizeCap.hidden = !show; if (!show) { sizeRing.hidden = true; sizeInset.hidden = true; }
+    stage.classList.toggle('sp3d-sizing', show);
+  }
+  function sizeCaption(L) {
+    sizeCap.innerHTML = ''; sizeCap.appendChild(el('span', '', L.line.replace(/ \(source: .*\)$/, '')));
+    if (L.src) { sizeCap.appendChild(document.createTextNode(' (source: ')); if (L.src[1]) { const a = el('a', '', L.src[0]); a.href = L.src[1]; a.target = '_blank'; a.rel = 'noopener'; sizeCap.appendChild(a); } else sizeCap.appendChild(document.createTextNode(L.src[0])); sizeCap.appendChild(document.createTextNode(')')); }
+    else { const m = L.line.match(/ \(source: .*\)$/); if (m) sizeCap.appendChild(document.createTextNode(m[0])); }
+  }
+  function personFade(op) { if (!scaleObj) return; scaleObj.traverse((o) => { const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; for (const m of ms) { m.transparent = op < 0.999; m.opacity = op; m.depthWrite = op >= 0.999; } if (o !== scaleObj) o.visible = op > 0.004; }); }
+  function sizeDropPerson() { if (!scaleObj) return; const g = scaleObj; scaleObj = null; if (g.parent) g.parent.remove(g); g.traverse((o) => { if (o.geometry) o.geometry.dispose(); const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; ms.forEach((m) => { for (const k in m) { const v = m[k]; if (v && v.isTexture) v.dispose(); } m.dispose(); }); }); }
+  // where everything goes: the snake laid out across the view (head on the left), the person a step beyond its tail
+  function sizeLayout() {
+    const L = sizeSt.len = lenInfo(), az = controls.aim.az;
+    const lay = fx.sizeLay ? fx.sizeLay.start({ az, portrait: info.portrait }) : null;
+    sizeSt.lay = lay;
+    const arc = lay ? lay.arc : info.F.L;
+    sizeSt.k = Math.abs(L.m / arc - 1) < 0.004 ? 1 : L.m / arc; // shown at exactly its documented length, measured along the body
+    sizeSt.piv.copy(lay ? lay.center : info.center).setY(0);
+    const R = new THREE.Vector3(Math.cos(az), 0, -Math.sin(az)), Fw = new THREE.Vector3(Math.sin(az), 0, Math.cos(az)), k = sizeSt.k, piv = sizeSt.piv;
+    const world = (q) => new THREE.Vector3(piv.x + (q[0] - piv.x) * k, 0, piv.z + (q[1] - piv.z) * k);
+    const pts = (lay ? lay.pts : [[info.center.x - info.Rb, info.center.z], [info.center.x + info.Rb, info.center.z]]).map(world);
+    let s0 = 1e9, s1 = -1e9, f0 = 1e9, f1 = -1e9;
+    for (const p of pts) { const d = p.clone().sub(piv); s0 = Math.min(s0, d.dot(R)); s1 = Math.max(s1, d.dot(R)); f0 = Math.min(f0, d.dot(Fw)); f1 = Math.max(f1, d.dot(Fw)); }
+    sizeSt.pts = pts; sizeSt.arc = arc * k;
+    sizeSt.mid = piv.clone().addScaledVector(R, (s0 + s1) / 2).addScaledVector(Fw, (f0 + f1) / 2); sizeSt.mid.y = info.F.w0 * k * 0.5;
+    const PH = 1.7, gap = Math.max(0.3, L.m * 0.1), px = s1 + gap + 0.22;
+    const pp = piv.clone().addScaledVector(R, px), gy = fx.groundY ? fx.groundY([[pp.x, pp.z]])[0] : 0; pp.y = gy || 0;
+    sizeSt.person = pp; sizeSt.headTop = pp.clone().add(new THREE.Vector3(0, PH + 0.04, 0));
+    sizeSt.box = { s0: s0 - Math.max(0.05, L.m * 0.04), s1: px + 0.3, f0: Math.min(f0, -0.2), f1: Math.max(f1, 0.2), h: PH + 0.08, R };
+    // the person: natural proportions (extras.js buildPerson), 1.70 m, turned towards the camera
+    sizeDropPerson();
+    scaleObj = new THREE.Group(); scaleObj.name = 'sizePerson';
+    const man = EXTRA.buildPerson ? EXTRA.buildPerson(THREE, PH) : new THREE.Mesh(personShape(PH), new THREE.MeshStandardMaterial({ color: '#7d8a80' }));
+    man.position.copy(pp); man.rotation.y = az + 0.35; scaleObj.add(man); ctx.scene.add(scaleObj); personFade(0);
+    if (sizeSt.undo) sizeSt.undo(); sizeSt.undo = fx.clearProps ? fx.clearProps([[pp.x, pp.z]], 0.35) : null;
+    scaleObj.userData.labels = [
+      { p: sizeSt.headTop.clone(), t: 'Person 1.70 m' },
+      { p: sizeSt.mid.clone().add(new THREE.Vector3(0, info.F.w0 * 2 * k, 0)), t: 'Snake ' + fmtAdult(L.m) + ' (along its body)' },
+    ];
+    scaleObj.userData.ends = pts.filter((_, i) => i % 6 === 0);
+    sizeCaption(L);
+  }
+  // the view that shows both whole: slightly raised, three-quarter, clear of the buttons on top and the caption below
+  function sizeGoal() {
+    const B = sizeSt.box, sr = stage.getBoundingClientRect(), br = bar.getBoundingClientRect(), H = Math.max(1, sr.height);
+    const top = clamp((br.bottom - sr.top + 10) / H, 0.06, 0.5), bot = clamp(((sizeCap.offsetHeight || 40) + 30) / H, 0.06, 0.3);
+    const azF = Math.atan2(B.R.x, B.R.z) - Math.PI / 2 + 0.35, elF = (11 * Math.PI) / 180; // (the snake's line seen about 20 degrees off square)
+    const W = B.s1 - B.s0, D = B.f1 - B.f0, hh = B.h;
+    const dW = ((W * Math.cos(0.35) + D * Math.sin(0.35)) * 0.5 * 1.12) / Math.tan(info.hf) + D * 0.5;
+    const dH = (hh * 1.08) / ((1 - top - bot) * 2 * Math.tan(info.vf)) + D * 0.5;
+    const d = Math.max(dW, dH, info.dMin * 2);
+    const visH = 2 * d * Math.tan(info.vf), c = sizeSt.piv.clone().addScaledVector(B.R, (B.s0 + B.s1) / 2);
+    sizeSt.tgt.set(c.x, hh * 0.5 + ((top - bot) / 2) * visH, c.z);
+    info.scaleK = Math.max(1, (d * 1.35) / info.dMax);
+    return { az: azF, el: elF, d, px: 0, pz: 0 };
+  }
+  function sizeFrame() { controls.tween(sizeGoal(), 1000); }
+  function toggleScale(force, o = {}) {
+    const onv = force != null ? !!force : !sizeSt.on;
+    if (onv === sizeSt.on) { if (!onv && o.instant && sizeSt.leaving) sizeFinish(); return; }
     if (onv) {
-      const Rf = info.F.L >= 0.4 ? Math.max(info.Rb + 0.8, 1.0) : info.Rb * 1.35, dS = Math.max((Rf * 1.12) / Math.sin(Math.min(info.vf, info.hf)), info.F.L >= 0.4 ? 1.25 / Math.tan(info.vf) : 0);
-      info.scaleK = Math.max(1, (dS * 1.25) / info.dMax);
-      // look across the ruler, with the person standing beside the snake rather than in front of it
-      const pa = info.axisAng + Math.PI / 2;
-      controls.setGoal({ d: Math.max(dS, info.dFit), el: (22 * Math.PI) / 180, az: Math.atan2(Math.cos(pa), Math.sin(pa)) });
-    } else controls.setGoal({ d: Math.min(controls.st.d, info.dMax) });
-    rebuildMarkers(); kick();
+      if (!info || !controls) return;
+      const wasLeaving = sizeSt.leaving; if (wasLeaving) sizeFinish(); // (pressed again while gliding back: keep the view saved before)
+      if (!wasLeaving || !sizeSt.saved) sizeSt.saved = controls.aim;
+      sizeSt.on = true; sizeSt.ready = false; bScale.setAttribute('aria-pressed', 'true'); bScale.textContent = 'Back to model'; setCamBtn(null);
+      sizeLayout(); sizeOverlays(true);
+      if (fx.sizeLay && sizeSt.lay) fx.sizeLay.go(1, 1000);
+      skGo(1, 1000); controls.tween(sizeGoal(), 1000);
+    } else {
+      sizeSt.on = false; bScale.setAttribute('aria-pressed', 'false'); bScale.textContent = 'Size vs person'; sizeOverlays(false); sizeSt.ready = false;
+      markers.filter((m) => m.scale).forEach((m) => m.el.remove()); markers = markers.filter((m) => !m.scale);
+      if (o.instant) { sizeFinish(); return; }
+      sizeSt.leaving = true;
+      if (fx.sizeLay && sizeSt.lay) fx.sizeLay.go(0, 900);
+      skGo(0, o.keepCam ? 700 : 1000);
+      if (!o.keepCam && sizeSt.saved) controls.tween(sizeSt.saved, 1000);
+    }
+    kick();
+  }
+  function sizeFinish() { // everything back as it was: the pose, the scale, no person, the props back where they stood
+    sizeSt.leaving = false; sizeSt.ready = false;
+    if (fx.sizeLay) fx.sizeLay.end(true);
+    sizeSt.k = 1; if (snakeGroup) { snakeGroup.scale.setScalar(1); snakeGroup.position.set(0, 0, 0); }
+    const a = sizeSt.sk; a.v = a.from = a.to = 0; a.dur = 0;
+    sizeDropPerson(); if (sizeSt.undo) { sizeSt.undo(); sizeSt.undo = null; }
+    if (info) info.scaleK = 1; sizeSt.lay = null; sizeSt.pts = null; sizeOverlays(false);
+    markers.filter((m) => m.scale).forEach((m) => m.el.remove()); markers = markers.filter((m) => !m.scale);
+    kick();
+  }
+  // every frame while Size vs person is on or leaving: the snake's scale follows its pose, the person fades in or out,
+  // and the labels, the ring and the inset come once the glide is over
+  function sizeStep() {
+    if (!sizeBusy() || !snakeGroup) return false;
+    const e = fx.sizeLay && sizeSt.lay ? fx.sizeLay.e : skNow(), kk = 1 + (sizeSt.k - 1) * e, pv = sizeSt.piv;
+    snakeGroup.scale.setScalar(kk); snakeGroup.position.set(pv.x * (1 - kk), 0, pv.z * (1 - kk));
+    personFade(clamp(skNow() * 1.4 - 0.2, 0, 1));
+    const moving = skMoving() || !!(fx.sizeLay && sizeSt.lay && fx.sizeLay.moving);
+    if (sizeSt.leaving && !moving) { sizeFinish(); return true; }
+    if (sizeSt.on && !moving && !sizeSt.ready) { sizeSt.ready = true; rebuildMarkers(); }
+    return moving;
+  }
+  const v3s = new THREE.Vector3();
+  function sizeAfter() { // the ring round a small snake, and the magnified inset (drawn into the same canvas)
+    if (!sizeSt.on || !sizeSt.ready || !sizeSt.pts) { sizeRing.hidden = true; sizeInset.hidden = true; return; }
+    const w = stage.clientWidth, h = stage.clientHeight; let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for (const p of sizeSt.pts) { v3s.copy(p).project(cam); if (v3s.z > 1) continue; const x = (v3s.x * 0.5 + 0.5) * w, y = (-v3s.y * 0.5 + 0.5) * h; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+    const span = Math.hypot(x1 - x0, y1 - y0), small = x1 > x0 && span < Math.max(90, w * 0.16);
+    sizeSt.small = small; sizeRing.hidden = !small; sizeInset.hidden = !small;
+    if (!small) return;
+    const r = Math.max(30, span / 2 + 16); sizeRing.style.width = sizeRing.style.height = r * 2 + 'px';
+    sizeRing.style.transform = 'translate(' + ((x0 + x1) / 2 - r).toFixed(1) + 'px,' + ((y0 + y1) / 2 - r).toFixed(1) + 'px)';
+    // the inset: the same snake close up, in a box on the right, saying how much it is magnified
+    const iw = Math.round(clamp(w * 0.34, 130, 260)), ih = Math.round(iw * 0.62), ix = w - iw - 12, iy = Math.max(8, h - ih - (sizeCap.offsetHeight || 40) - 34);
+    sizeInset.style.width = iw + 'px'; sizeInset.style.height = ih + 'px'; sizeInset.style.transform = 'translate(' + ix + 'px,' + iy + 'px)';
+    const L = sizeSt.arc || sizeSt.len.m, dirC = cam.position.clone().sub(sizeSt.mid); dirC.y = Math.max(dirC.y, dirC.length() * 0.35); dirC.normalize();
+    insetCam.aspect = iw / ih; const di = (L * 0.6) / Math.tan((insetCam.fov * Math.PI) / 360) / Math.min(1, insetCam.aspect) * 0.62;
+    insetCam.near = Math.max(1e-4, di * 0.02); insetCam.far = di * 60; insetCam.position.copy(sizeSt.mid).addScaledVector(dirC, di); insetCam.lookAt(sizeSt.mid); insetCam.updateProjectionMatrix();
+    // magnification: the inset's pixels per metre at the snake over the main view's
+    const mainPx = h / (2 * Math.tan((cam.fov * Math.PI) / 360) * cam.position.distanceTo(sizeSt.mid)), insPx = ih / (2 * Math.tan((insetCam.fov * Math.PI) / 360) * di);
+    const N = Math.max(2, Math.round(insPx / mainPx)); sizeSt.N = N; insetTag.textContent = '×' + N + ' zoom';
+    renderer.setScissorTest(true); renderer.setScissor(ix, h - iy - ih, iw, ih); renderer.setViewport(ix, h - iy - ih, iw, ih);
+    const vis = scaleObj ? scaleObj.visible : false; if (scaleObj) scaleObj.visible = false; // (the person never fills the inset)
+    renderer.render(ctx.scene, insetCam); if (scaleObj) scaleObj.visible = vis;
+    renderer.setScissorTest(false); renderer.setViewport(0, 0, w, h);
   }
 
   // appearance details: labelled markers at anatomical points
@@ -2940,7 +3136,7 @@ float slScale(vec2 m) {
   }
   function rebuildMarkers() {
     labels.querySelectorAll('.sp3d-sl').forEach((e) => e.remove());
-    if (scaleObj && scaleObj.visible) for (const l of scaleObj.userData.labels) { const e = el('div', 'sp3d-mk sp3d-sl'); e.appendChild(el('span', 'sp3d-mt', l.t)); labels.appendChild(e); markers.push({ el: e, p: l.p, n: null, scale: true }); }
+    if (scaleObj && sizeSt.on && sizeSt.ready) for (const l of scaleObj.userData.labels) { const e = el('div', 'sp3d-mk sp3d-sl'); e.appendChild(el('span', 'sp3d-mt', l.t)); labels.appendChild(e); markers.push({ el: e, p: l.p, n: null, scale: true }); }
     markers = markers.filter((m) => m.el.isConnected);
   }
   const v3 = new THREE.Vector3();
@@ -2982,21 +3178,28 @@ float slScale(vec2 m) {
 
   // events
   on(bFront, 'click', () => setView('front')); on(bSide, 'click', () => setView('side')); on(bTop, 'click', () => setView('top'));
-  on(bReset, 'click', () => resetView()); // v4.81: Reset only resets the view (the mouth, size and anatomy stay as they are)
+  // v4.81: Reset only resets the view (the mouth, size and anatomy stay as they are; in Size vs person it frames the snake and the person again)
+  on(bReset, 'click', () => { setCamBtn(null); if (sizeSt.on) sizeFrame(); else resetView(); });
+  // v5.74: Normal - back to the plain model: Anatomy off, Size vs person glides back to the view you had
+  on(bNormal, 'click', () => { if (fx.anatOn()) bAnat.click(); V.scaleBack(); syncViews(); });
   function toggleMouth(force) {
     if (!extras || !extras.mouth) return;
     const v = force != null ? force : !mouthGoal; mouthGoal = v ? 1 : 0;
     bMouth.setAttribute('aria-pressed', String(v)); bMouth.textContent = v ? 'Close mouth' : 'Open mouth';
-    if (v && !(scaleObj && scaleObj.visible) && !fx.anatOn() && controls.st.d > info.dFit * 0.55) { // turn to face the head, close enough to see inside (v4.81: only from the whole-snake view; Open mouth changes nothing else)
+    if (v && !sizeSt.on && !fx.anatOn() && controls.st.d > info.dFit * 0.55) { // turn to face the head, close enough to see inside (v4.81: only from the whole-snake view; Open mouth changes nothing else)
       controls.setGoal({ az: viewAz('front') + 0.55, el: (16 * Math.PI) / 180, d: Math.max(info.dMin * 1.5, info.F.Hl * 3.4), px: 0, pz: 0 }); // (close enough to see inside; plants in the way step aside)
     }
     kick();
   }
   on(bMouth, 'click', () => { if (!mouthGoal) fx.exclusive('mouth'); toggleMouth(); }); // v5.09: one thing at a time (Open mouth goes with Anatomy)
   // v4.81: Anatomy moved to extras.js (see-through anatomy you can tap)
-  on(bVBody, 'click', () => { fx.exclusive('view'); resetView(); });
-  on(bVHead, 'click', () => fx.exclusive('view') || controls.setGoal({ az: viewAz('front') + 0.9, el: (20 * Math.PI) / 180, d: Math.max(info.dMin * 1.3, info.F.Hl * 4.5), px: 0, pz: 0 }));
-  on(bVTop, 'click', () => fx.exclusive('view') || controls.setGoal({ az: controls.st.az, el: (80 * Math.PI) / 180, d: (info.Rb * 1.12) / Math.tan(Math.min(info.vf, info.hf)) + info.hMax, px: 0, pz: 0 })); on(bFull, 'click', toggleFull); on(bScale, 'click', () => { if (bScale.getAttribute('aria-pressed') !== 'true') fx.exclusive('scale'); toggleScale(); }); on(bDet, 'click', toggleDetails);
+  // v5.74: the camera buttons glide there (eased, about a second); leaving Size vs person first if it is on
+  const camGo = (b, g) => { fx.exclusive('view'); V.scaleBack(true); setCamBtn(b); controls.tween(g, 1000); };
+  on(bVBody, 'click', () => { if (fx.anatOn() && fx.resetView && fx.resetView()) { setCamBtn(bVBody); return; } camGo(bVBody, resetGoal()); }); // (in Anatomy: the whole snake as Anatomy shows it)
+  on(bVHead, 'click', () => camGo(bVHead, { az: viewAz('front') + 0.9, el: (20 * Math.PI) / 180, d: Math.max(info.dMin * 1.3, info.F.Hl * 4.5), px: 0, pz: 0 }));
+  on(bVTop, 'click', () => camGo(bVTop, { az: controls.st.az, el: (80 * Math.PI) / 180, d: (info.Rb * 1.12) / Math.tan(Math.min(info.vf, info.hf)) + info.hMax, px: 0, pz: 0 }));
+  on(bFull, 'click', toggleFull); on(bDet, 'click', toggleDetails);
+  on(bScale, 'click', () => { if (bScale.getAttribute('aria-pressed') !== 'true') { fx.exclusive('scale'); toggleScale(true); } else toggleScale(false); });
   on(bSet, 'click', () => { panel.hidden = !panel.hidden; bSet.setAttribute('aria-expanded', String(!panel.hidden)); });
   on(cScene, 'change', () => setSceneVisible(cScene.checked));
   on(qs, 'change', () => { quality = qs.value; renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality === 'low' ? 1.25 : 2)); rebuild(); });
@@ -3019,10 +3222,11 @@ float slScale(vec2 m) {
       if (o.shadow && o.shadow.map) o.shadow.map.dispose();
     });
     for (const d of disposables) d.dispose && d.dispose(); disposables.clear();
-    ctx.scene.clear(); ctx.scene = null; scaleObj = null;
+    ctx.scene.clear(); ctx.scene = null; scaleObj = null; sizeSt.on = sizeSt.leaving = false; sizeSt.lay = sizeSt.pts = null; sizeSt.undo = null; sizeSt.k = 1; sizeSt.sk.v = sizeSt.sk.from = sizeSt.sk.to = 0; sizeSt.sk.dur = 0;
+    bScale.setAttribute('aria-pressed', 'false'); bScale.textContent = 'Size vs person'; sizeOverlays(false);
     markers.forEach((m) => m.el.remove()); markers = [];
   }
-  function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
+  function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; if (sizeBusy()) toggleScale(false, { instant: true }); fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
 
   build(); fx.onBuild(); resize();
   if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), fx, get show() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); if (window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
@@ -3041,5 +3245,35 @@ float slScale(vec2 m) {
   };
 }
 function fmtLen(m) { return m < 1 ? Math.round(m * 100) + ' cm' : (Math.round(m * 100) / 100) + ' m'; }
+// v5.74: lengths written the way the species pages write them (build_species.py fmt_len): cm under a metre, else metres to 0.1
+export function fmtAdult(m) { return m < 1 ? Math.round(m * 100) + ' cm' : (+m.toFixed(1)) + ' m'; }
+// v5.74: THE typical adult length of a species, for Size vs person - the same number and source as the Information tab
+// and the species page's "Size" line (build_species.py size_class(), in the same order):
+//   1. its reviewed species account (the page's data-lenlo/-hi, the middle of the usual range, and that account's source),
+//   2. a hand-made 3D profile's documented length (with the reference it was taken from),
+//   3. a documented length for that species or a fossil's estimate (tools/auto_models.py),
+//   4. otherwise the typical adult length of its genus (or family) - "estimated from its genus".
+// page = { lo, hi, txt, src: 'Publisher|url' } (the species page's own numbers), or null when SnakeList has no account.
+const SPECIES_LEN_SRC = { // tools/auto_models.py SPECIES_LEN: where those lengths come from
+  'gyalopion-canum': ['Arizona Game and Fish Department, after Degenhardt et al. 1996', 'https://www.azgfd.com/'],
+  'gyalopion-quadrangulare': ['Arizona Game and Fish Department', 'https://www.azgfd.com/'],
+};
+export function adultLength(p, page, id) {
+  p = p || {}; const a = p.auto, x = (a && a.x) || '';
+  const out = (m, how, note, src) => {
+    const L = fmtAdult(m), s = src && src[0] ? src : null;
+    const lead = how === 'fossil' ? 'Estimated length ' : 'Typical adult length ';
+    const line = lead + L + (how === 'genus' ? ', estimated from its genus (no measurements of this species yet)' : how === 'fossil' ? ', estimated from its fossil bones' : '') + (note ? ' · ' + note : '') + (s ? ' (source: ' + s[0] + ')' : how === 'genus' || how === 'fossil' ? '' : ' (source: SnakeList species data)');
+    return { m, how, note: note || '', src: s, text: L, line };
+  };
+  if (page && +page.hi > 0) { const lo = +page.lo || +page.hi, hi = +page.hi, sp = String(page.src || '').split('|'); return out((lo + hi) / 2, 'account', page.txt ? 'usually ' + String(page.txt).replace(/^(about|usually|commonly|typically)\s+/i, '').replace(/;.*$/, '') : '', sp[0] ? [sp[0], sp[1] || ''] : null); }
+  if (!a && +p.length > 0) { const r = (p.refs || []).find((q) => /\b(size|length|long|cm\b|m\b)/i.test(q.t || '')) || null; return out(+p.length, 'model', p.lengthNote || '', r ? [String(r.t).replace(/^[^:]*:\s*/, '') || r.t, r.u || ''] : null); }
+  if (a && +a.L > 0) {
+    if (x.indexOf('f') >= 0) return out(+a.L, 'fossil', '', null);
+    if (x.indexOf('l') < 0) return out(+a.L, 'species', '', SPECIES_LEN_SRC[id] || null);
+    return out(+a.L, 'genus', '', null);
+  }
+  return out(+p.length || 1, 'genus', '', null);
+}
 export function webglAvailable() { try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { return false; } }
 export const _internals = { normProfile, makeBodyFns, makePose, loadEnv }; // for offline checks
