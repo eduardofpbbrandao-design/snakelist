@@ -1499,7 +1499,7 @@ function eyeTexture(P) {
 // so it can never stand out from any side. Over it lies the spectacle (brille), the clear scale snakes have
 // instead of eyelids: a glossy cap that blends into the skin colour of the scales round the eye.
 function buildEyes(P, F, body, pat) {
-  const H = P.head, xe = H.eyeX * F.Hl, R0 = body.eyeRad, rl = body.eyeRl, NR = 14, NA = 40, out = [];
+  const H = P.head, xe = H.eyeX * F.Hl, R0 = body.eyeRad, NR = 22, NA = 56, out = [];
   const et = eyeTexture(P); et.wrapS = et.wrapT = THREE.ClampToEdgeWrapping;
   // v5.53: the eye under it is not shiny itself (a broad sheen over the iris made it look like a pale painted disc); the
   // spectacle on top gives the small sharp highlight
@@ -1544,6 +1544,7 @@ function buildEyes(P, F, body, pat) {
         uv.push(0.5 + a * 0.47 * sg, 0.5 + b * 0.47);
         // the spectacle: clear in the middle, taking on the skin's colour at its rim, where the scales round the eye overlap it
         const rim = sstep(0.84, 1.0, rho) * (1 - sstep(1.06, 1.14, rho)), sk = skinAt(x, th);
+        if (H.lipFull) { const band = H.lipFull > 0.01 && H.lipFull < 1 ? H.lipFull : 0.12, mAn = Math.PI * 0.56 / Math.PI, k = sstep(mAn - band - 0.015, mAn - band + 0.015, Math.abs(th) / Math.PI), lc = hex(H.lipColor || P.colors.belly).map((v) => Math.pow(v / 255, 2.2)); for (let q = 0; q < 3; q++) sk[q] = lerp(sk[q], lc[q], k); } // (v5.78: the pale lip scales reach up to the eye: the scales round it take that colour there too)
         col.push(sk[0], sk[1], sk[2], rim); spa.push(0.05 * (1 - sstep(0.88, 1.02, rho))); // (v5.53: a clear spectacle - a milky one made the eye a pale disc)
       }
     }
