@@ -1319,15 +1319,16 @@ export function create(V) {
       }
       return clamp(sc, 0.45, 1);
     };
+    let levT = null;
     const placeHeld = () => {
       const xc = xp - Lp / 2, xa = Hl * 0.5, f = R.frameAtX(xa); f.c.addScaledVector(f.T, xc - xa); // along the head's own axis
       const m = new THREE.Matrix4().makeBasis(f.S.clone().negate(), f.U, f.T); prey.quaternion.setFromRotationMatrix(m); prey.position.copy(f.c);
       if (perch) { // v5.78: up in a tree the prey is held level, on top of its branch - never pushed down into the wood (out of sight)
         const top = onPerch(f.c).y + (prey.userData.y || prR) * 0.85;
-        if (prey.position.y < top) { const Tf = V3(f.T.x, f.T.y * 0.15, f.T.z).normalize(), Uf = V3(0, 1, 0).addScaledVector(Tf, -Tf.y).normalize(), Sf = Tf.clone().cross(Uf); prey.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(Sf.negate(), Uf, Tf)); prey.position.y = top; }
+        if (prey.position.y < top) { const Tf = V3(f.T.x, f.T.y * 0.15, f.T.z).normalize(), Uf = V3(0, 1, 0).addScaledVector(Tf, -Tf.y).normalize(), Sf = Tf.clone().cross(Uf); prey.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(Sf.negate(), Uf, Tf)); prey.position.y = top; levT = Tf; }
       }
       const sc = fitScale(); prey.scale.set(sc, sc, 1); whisk.forEach((w) => { w.visible = false; });
-      const g = R.frameAtX(xClip); clip.normal.copy(g.T).negate(); clip.constant = -clip.normal.dot(g.c); // keep only what is in front of the throat
+      const g = R.frameAtX(xClip); clip.normal.copy(levT || g.T).negate(); clip.constant = -clip.normal.dot(g.c); levT = null; // keep only what is in front of the throat (held level: cut square across)
     };
     // where the prey will sit when the strike lands: hold it there now (computed with the reaching pose)
     R.setPose(ext); R.apply(); placeHeld(); prey.updateMatrixWorld(true); worldM = prey.matrix.clone();
