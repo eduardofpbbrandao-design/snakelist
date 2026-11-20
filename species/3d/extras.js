@@ -160,10 +160,120 @@ function disposeTree(o) {
 function fadeTree(o, op) { o.traverse((q) => { if (q.material && q.userData.op != null) { q.material.opacity = q.userData.op * op; q.material.transparent = true; q.material.depthWrite = op > 0.98 && q.userData.op >= 1; q.visible = op > 0.005; } }); }
 function markFade(o) { o.traverse((q) => { if (q.material && q.userData.op == null) q.userData.op = q.material.opacity != null ? q.material.opacity : 1; }); }
 
-// ---------------------------------------------------------------- a real-looking person 1.5 m tall (for "Size vs person")
-// Built in metres for h = 1.5 (scaled for other heights), standing on y = 0 and facing +z. Proportions of a
-// slim adult/teenager about 7 heads tall: T-shirt, jeans, trainers, skin with soft sheen, hair, a simple face.
-export function buildPerson(T, h = 1.5) {
+// ---------------------------------------------------------------- the person for "Size vs person" (v5.78)
+// Eduardo: the old one "looks like a 5 year old with clay made a human". This one is SnakeList's own sculpted model
+// (tools/build-person.js: an adult about 7.5 heads tall, built as one smooth surface from anatomical masses - skull,
+// cheekbones, nose, lips, eyelids and ears, neck muscles, collarbones, shoulders, arms and jointed fingers - with a
+// T-shirt with a crew neck and drape folds, jeans that bunch at the ankle, trainers, short combed hair and eyebrows),
+// stored in person.bin (about 0.85 MB, loaded only when Size vs person is used). Here it gets its materials: skin with
+// fine pores and a soft warm sheen, real eyes (white, a brown iris, pupil and a clear cornea that catches the light),
+// strands in the hair, knitted cotton and denim twill. Standing on y = 0, facing +z, exactly h tall.
+let personData = null, personReq = null; const personWait = new Set();
+export function loadPerson() {
+  if (personData) return Promise.resolve(personData);
+  if (!personReq) {
+    personReq = fetch(new URL('person.bin?r=573', import.meta.url).href).then((r) => { if (!r.ok) throw new Error('person ' + r.status); return r.arrayBuffer(); })
+      .then((b) => { personData = parsePerson(b); return personData; })
+      .catch((e) => { personReq = null; throw e; });
+  }
+  return personReq;
+}
+function parsePerson(buf) {
+  const dv = new DataView(buf); if (String.fromCharCode(dv.getUint8(0), dv.getUint8(1), dv.getUint8(2), dv.getUint8(3)) !== 'SLP1') throw new Error('person.bin');
+  const jl = dv.getUint32(4, true), meta = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 8, jl))); let o = 8 + jl;
+  const parts = {};
+  for (const p of meta.parts) {
+    const q = new Uint16Array(buf, o, p.v * 3); o += p.v * 6; o += (4 - (o % 4)) % 4;
+    const nb = new Int8Array(buf, o, p.v * 4); o += p.v * 4; const cb = new Uint8Array(buf, o, p.v * 4); o += p.v * 4;
+    const big = p.v > 65535, ib = big ? new Uint32Array(buf, o, p.t) : new Uint16Array(buf, o, p.t); o += p.t * (big ? 4 : 2); o += (4 - (o % 4)) % 4;
+    const pos = new Float32Array(p.v * 3), nor = new Float32Array(p.v * 3), col = new Float32Array(p.v * 3);
+    for (let v = 0; v < p.v; v++) for (let c = 0; c < 3; c++) { pos[v * 3 + c] = p.lo[c] + (q[v * 3 + c] / 65535) * (p.hi[c] - p.lo[c]); nor[v * 3 + c] = nb[v * 4 + c] / 127; col[v * 3 + c] = (cb[v * 4 + c] / 255) * 1.1; }
+    parts[p.n] = { pos, nor, col, idx: ib.slice(), lo: p.lo, hi: p.hi };
+  }
+  return { meta, parts };
+}
+// textures for the person, drawn once (each build makes new GPU textures from the same canvases: the viewer disposes them)
+const PCAN = {};
+function pCanvas(key, S, draw) { if (!PCAN[key]) { const c = document.createElement('canvas'); c.width = c.height = S; draw(c.getContext('2d'), S); PCAN[key] = c; } return PCAN[key]; }
+function pTex(key, S, draw, rx = 1, ry = 1, srgb = true) { const t = new THREE.CanvasTexture(pCanvas(key, S, draw)); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); t.anisotropy = 8; return t; }
+function personMaterials() {
+  const R = rnd(31);
+  const pores = pTex('pores', 256, (x, s) => { x.fillStyle = '#808080'; x.fillRect(0, 0, s, s); for (let i = 0; i < 9000; i++) { const v = R(); x.fillStyle = v < 0.5 ? 'rgba(40,40,40,' + (0.05 + R() * 0.12) + ')' : 'rgba(220,220,220,' + (0.04 + R() * 0.08) + ')'; x.beginPath(); x.arc(R() * s, R() * s, 0.4 + R() * 1.1, 0, TAU); x.fill(); } }, 22, 30, false);
+  const skin = new THREE.MeshPhysicalMaterial({ color: '#c99377', vertexColors: true, roughness: 0.5, bumpMap: pores, bumpScale: 0.35, sheen: 0.4, sheenRoughness: 0.45, sheenColor: new THREE.Color('#ff9a80'), clearcoat: 0.05, clearcoatRoughness: 0.5, specularIntensity: 0.55 });
+  const strands = (key, base) => pTex(key, 512, (x, s) => {
+    x.fillStyle = base; x.fillRect(0, 0, s, s);
+    for (let i = 0; i < 2600; i++) { const px = R() * s, l = s * (0.15 + R() * 0.5), py = R() * s, w = R(); x.strokeStyle = w < 0.45 ? 'rgba(10,6,3,' + (0.25 + R() * 0.4) + ')' : 'rgba(190,150,110,' + (0.08 + R() * 0.18) + ')'; x.lineWidth = 0.5 + R() * 1.1; x.beginPath(); x.moveTo(px, py); x.bezierCurveTo(px + (R() - 0.5) * 6, py + l * 0.33, px + (R() - 0.5) * 8, py + l * 0.66, px + (R() - 0.5) * 10, py + l); x.stroke(); }
+  }, 7, 2);
+  const hairMap = strands('hair', '#3a281b');
+  const hair = new THREE.MeshPhysicalMaterial({ color: '#ffffff', map: hairMap, bumpMap: hairMap, bumpScale: 1.4, vertexColors: true, roughness: 0.48, sheen: 0.8, sheenRoughness: 0.35, sheenColor: new THREE.Color('#9c7a5c'), specularIntensity: 0.6 });
+  const brow = new THREE.MeshPhysicalMaterial({ color: '#d8d0c8', map: strands('hair', '#3a281b'), vertexColors: true, roughness: 0.6, sheen: 0.4, sheenColor: new THREE.Color('#7a5c44') });
+  // knitted cotton: little loops in rows
+  const knit = pTex('knit', 128, (x, s) => { x.fillStyle = '#7a7a7a'; x.fillRect(0, 0, s, s); for (let yy = 0; yy < s; yy += 4) for (let xx = 0; xx < s; xx += 4) { x.fillStyle = 'rgba(255,255,255,' + (0.18 + R() * 0.1) + ')'; x.beginPath(); x.ellipse(xx + 2, yy + 2, 1.3, 1.9, 0.35 * ((xx / 4) % 2 ? 1 : -1), 0, TAU); x.fill(); } }, 70, 90, false);
+  const shirt = new THREE.MeshPhysicalMaterial({ color: '#3f6f8e', vertexColors: true, roughness: 0.86, bumpMap: knit, bumpScale: 0.6, sheen: 0.7, sheenRoughness: 0.8, sheenColor: new THREE.Color('#9fc4dc') });
+  // denim: a diagonal twill, white weft showing through blue warp, a little fading
+  const twill = pTex('twill', 256, (x, s) => { x.fillStyle = '#3c5a8a'; x.fillRect(0, 0, s, s); for (let i = -s; i < s * 2; i += 3) { x.strokeStyle = 'rgba(225,232,245,' + (0.12 + R() * 0.12) + ')'; x.lineWidth = 1; x.beginPath(); x.moveTo(i, 0); x.lineTo(i + s, s); x.stroke(); } for (let i = 0; i < 1400; i++) { x.fillStyle = 'rgba(' + (R() < 0.5 ? '20,30,60' : '200,210,230') + ',' + R() * 0.12 + ')'; x.fillRect(R() * s, R() * s, 1 + R() * 3, 1); } }, 30, 40);
+  const jeans = new THREE.MeshPhysicalMaterial({ color: '#ffffff', map: twill, bumpMap: twill, bumpScale: 0.5, vertexColors: true, roughness: 0.82, sheen: 0.35, sheenRoughness: 0.9, sheenColor: new THREE.Color('#9fb2d4') });
+  const mesh = pTex('mesh', 128, (x, s) => { x.fillStyle = '#9a9a9a'; x.fillRect(0, 0, s, s); x.fillStyle = 'rgba(30,30,30,.35)'; for (let yy = 0; yy < s; yy += 6) for (let xx = (yy / 6) % 2 ? 3 : 0; xx < s; xx += 6) { x.beginPath(); x.arc(xx, yy, 1.3, 0, TAU); x.fill(); } }, 40, 40, false);
+  const shoe = new THREE.MeshPhysicalMaterial({ color: '#e9e8e3', vertexColors: true, roughness: 0.62, bumpMap: mesh, bumpScale: 0.4, sheen: 0.3, sheenColor: new THREE.Color('#ffffff') });
+  const sole = new THREE.MeshStandardMaterial({ color: '#f1efe8', vertexColors: true, roughness: 0.75 });
+  return { skin, hair, brow, shirt, jeans, shoe, sole };
+}
+// the eyes: a white with faint veins (opening at the front), a flat iris with its fibres and the pupil, and a clear
+// cornea bulging over them that catches the light
+function personEye(r) {
+  const g = new THREE.Group(), th = 0.5, R = rnd(41);
+  const scl = pTex('sclera', 128, (x, s) => { x.fillStyle = '#f2ece6'; x.fillRect(0, 0, s, s); x.strokeStyle = 'rgba(190,80,70,.22)'; for (let i = 0; i < 26; i++) { x.lineWidth = 0.4 + R() * 0.6; x.beginPath(); let px = R() * s, py = s * (0.55 + R() * 0.45); x.moveTo(px, py); for (let k = 0; k < 4; k++) { px += (R() - 0.5) * 18; py -= R() * 14; x.lineTo(px, py); } x.stroke(); } });
+  const white = new THREE.SphereGeometry(r, 32, 20, 0, TAU, th, Math.PI - th); white.rotateX(Math.PI / 2);
+  g.add(new THREE.Mesh(white, new THREE.MeshPhysicalMaterial({ map: scl, roughness: 0.3, clearcoat: 0.6 })));
+  const iris = pTex('iris', 256, (x, s) => {
+    const c = s / 2, gr = x.createRadialGradient(c, c, s * 0.08, c, c, c); gr.addColorStop(0, '#2a170c'); gr.addColorStop(0.3, '#6b4024'); gr.addColorStop(0.75, '#5a351d'); gr.addColorStop(0.93, '#2c1a0e'); gr.addColorStop(1, '#1a0f08');
+    x.fillStyle = gr; x.fillRect(0, 0, s, s);
+    for (let i = 0; i < 420; i++) { const a = R() * TAU, r0 = s * (0.12 + R() * 0.1), r1 = s * (0.3 + R() * 0.18); x.strokeStyle = R() < 0.5 ? 'rgba(160,110,60,' + (0.15 + R() * 0.25) + ')' : 'rgba(30,15,8,' + (0.15 + R() * 0.25) + ')'; x.lineWidth = 0.6 + R(); x.beginPath(); x.moveTo(c + Math.cos(a) * r0, c + Math.sin(a) * r0); x.lineTo(c + Math.cos(a + (R() - 0.5) * 0.1) * r1, c + Math.sin(a) * r1); x.stroke(); }
+    x.fillStyle = '#050403'; x.beginPath(); x.arc(c, c, s * 0.15, 0, TAU); x.fill();
+  }, 1, 1);
+  iris.wrapS = iris.wrapT = THREE.ClampToEdgeWrapping;
+  const ir = new THREE.Mesh(new THREE.CircleGeometry(r * Math.sin(th), 40), new THREE.MeshStandardMaterial({ map: iris, roughness: 0.45 }));
+  ir.position.z = r * Math.cos(th) - r * 0.02; g.add(ir);
+  const cor = new THREE.SphereGeometry(r * 1.015, 32, 12, 0, TAU, 0, th + 0.08); cor.rotateX(Math.PI / 2);
+  g.add(new THREE.Mesh(cor, new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.02, metalness: 0, transparent: true, opacity: 0.12, clearcoat: 1, clearcoatRoughness: 0.02, specularIntensity: 1, depthWrite: false })));
+  return g;
+}
+// texture coordinates for a part: round the body (u) and up it (v) in metres, so the weave and pores keep their size;
+// the hair's strands run out from the crown
+function personUV(name, pos) {
+  const n = pos.length / 3, uv = new Float32Array(n * 2);
+  for (let v = 0; v < n; v++) {
+    const x = pos[v * 3], y = pos[v * 3 + 1], z = pos[v * 3 + 2];
+    if (name === 'hair' || name === 'brow') { const hx = x + 0.012, hz = z + 0.045, hy = y - 1.69, a = Math.atan2(hx, hz); uv[v * 2] = (a / TAU + 0.5); uv[v * 2 + 1] = Math.hypot(hx, hy, hz) * 4; continue; }
+    const ax = Math.abs(x), arm = ax > 0.15 && y > 0.66 && y < 1.4, cx = arm ? Math.sign(x) * 0.2 : 0, a = Math.atan2(x - cx, z), r = arm ? 0.04 : 0.12;
+    uv[v * 2] = (a * r) / 0.06; uv[v * 2 + 1] = y / 0.06;
+  }
+  return uv;
+}
+function personFrom(data, h) {
+  const g = new THREE.Group(), M = personMaterials(), lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9];
+  for (const k of ['sole', 'shoe', 'jeans', 'shirt', 'skin', 'hair', 'brow']) {
+    const p = data.parts[k]; if (!p) continue;
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(p.pos.slice(), 3)); geo.setAttribute('normal', new THREE.BufferAttribute(p.nor.slice(), 3)); geo.setAttribute('color', new THREE.BufferAttribute(p.col.slice(), 3)); geo.setAttribute('uv', new THREE.BufferAttribute(personUV(k, p.pos), 2)); geo.setIndex(new THREE.BufferAttribute(p.idx.slice(), 1));
+    geo.computeBoundingSphere();
+    const m = new THREE.Mesh(geo, M[k]); m.castShadow = true; m.receiveShadow = true; m.name = 'person-' + k; g.add(m);
+    for (let c = 0; c < 3; c++) { lo[c] = Math.min(lo[c], p.lo[c]); hi[c] = Math.max(hi[c], p.hi[c]); }
+  }
+  const e = data.meta.eye; for (const sg of [-1, 1]) { const eye = personEye(e[3]); eye.position.set(sg * e[0], e[1], e[2]); eye.rotation.y = sg * 0.05; eye.name = 'person-eye'; g.add(eye); }
+  const k = h / Math.max(1e-6, hi[1] - lo[1]); g.scale.setScalar(k); g.position.y = -lo[1] * k; // (exactly h from the soles to the top of the hair)
+  const out = new THREE.Group(); out.add(g); out.userData.realPerson = true; return out;
+}
+export function buildPerson(T, h = 1.7) {
+  THREE = THREE || T;
+  if (personData) { try { return personFrom(personData, h); } catch (e) { /* the simple person below */ } }
+  // not loaded yet: an empty group now, filled as soon as person.bin arrives (the simple person if it cannot load)
+  const g = new THREE.Group(); g.userData.realPerson = 'loading';
+  loadPerson().then((d) => { g.add(personFrom(d, h)); g.userData.realPerson = true; }, () => { g.add(buildPersonSimple(T, h)); g.userData.realPerson = false; }).then(() => { personWait.forEach((f) => f()); });
+  return g;
+}
+
+// the older, simple person (used only if person.bin cannot be loaded)
+function buildPersonSimple(T, h = 1.5) {
   THREE = THREE || T;
   const k = h / 1.5, g = new THREE.Group();
   const skin = skinMat('#c58e6c', 11), shirt = fabricMat('#3d6f8e', 5), jeans = fabricMat('#34435f', 9, 0.86);
@@ -382,6 +492,9 @@ export function create(V) {
   // v5.12: Fullscreen is just its icon, in the bottom-right corner of the 3D view
   const bFull = el('button', 'sp3d-fsc'); bFull.type = 'button'; bFull.setAttribute('aria-label', 'Fullscreen'); bFull.setAttribute('aria-pressed', 'false'); bFull.innerHTML = ICON.full; stage.appendChild(bFull);
   const bAnat = V.bAnat;
+  // v5.78: the person for Size vs person is fetched when you reach for that button (and the view redrawn when it arrives)
+  personWait.add(V.kick);
+  { const bSz = [...bar.querySelectorAll('.sp3d-b')].find((b) => /Size vs person/.test(b.textContent)); if (bSz) for (const ev of ['pointerenter', 'pointerdown', 'focus', 'touchstart']) on(bSz, ev, () => { loadPerson().catch(() => {}); }, { passive: true }); }
 
   // ---- header buttons beside the name: Compare photo, See countries
   let hdb = null; const hdbs = {};
@@ -1960,7 +2073,7 @@ export function create(V) {
       if (y1 + h + 4 < H) return [x, y1 + h]; // no room above: just below it
       return [x < (x0 + x1) / 2 ? Math.max(w / 2 + 4, x0 - w / 2 - 4) : Math.min(W - w / 2 - 4, x1 + w / 2 + 4), y];
     },
-    dispose() { alive = false; fx.reset(); if (hdb) hdb.remove(); closeSide(); },
+    dispose() { alive = false; personWait.delete(V.kick); fx.reset(); if (hdb) hdb.remove(); closeSide(); },
     // for tests: freeze a show at s seconds
     test: { get P() { return P; }, freeze(s) { if (show) show.freeze = s; V.kick(); }, get show() { return show && { name: show.name, time: show.time, dur: show.dur, diet: show.diet }; }, get slither() { return !!slither; }, get showInfo() { return show && show.info; }, get anat() { return anat; }, get rig() { return rig; }, get lastTap() { return lastTap; }, dietOf: () => dietOf(P, V.opts.id), side: (k) => toggleSide(k) },
   };
