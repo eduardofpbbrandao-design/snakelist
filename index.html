@@ -4198,6 +4198,8 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
         var cs = [[0, 0, 0, 0, x, y], [nw - b, 0, x + w, 0, W - x - w, y], [0, nh - bv, 0, y + h, x, H - y - h], [nw - b, nh - bv, x + w, y + h, W - x - w, H - y - h]];
         cs.forEach(function (q) { if (q[4] > 0 && q[5] > 0) c.drawImage(soft(q[0], q[1], b, bv, 1, 1), 0, 0, 1, 1, q[2], q[3], q[4] + 1, q[5] + 1); }); // corners
         md.classList.add("fill-drawn"); cv.__key = key;
+        // v5.78: the blurred copy of the photo underneath is no longer seen (the drawn surround replaces it) - let it go from memory
+        var hf = md.querySelector("img.hero-fill"); if (hf && hf.getAttribute("src")) { hf.removeAttribute("srcset"); hf.removeAttribute("src"); }
       } catch (err) {}
     }
     // v5.68: the snake's name stays in its corner when there is room; when it would sit on or right next to
@@ -8967,7 +8969,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     var t = pageStyle.textContent, e = t.indexOf("{display"), ids = [], m, re = /data-id="([^"]+)"/g;
     t = e < 0 ? "" : t.slice(0, e);
     while ((m = re.exec(t))) ids.push(m[1]);
-    show(ids); soon();
+    show(ids); soon(); clearTimeout(farT); farT = setTimeout(sweepFar, 3000); // v5.78: and the far-away ones light again
   }).observe(pageStyle, { childList: true, characterData: true, subtree: true });
   // not while Google Translate is at work on the page (it keeps track of the words it changed)
   function allowed() {
@@ -8997,6 +8999,38 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       if (i < list.length) idle(step); else sweeping = false;
     })();
   }
+  // v5.78: a very long list (Show all: up to 4,247 whole cards, ~130,000 elements, several hundred MB) - the cards that are far
+  // above or below the screen are made light too, and whole again well before they come back into view. Each card keeps
+  // its size while it is light (content-visibility remembers it, and a light card far away is never drawn), so nothing
+  // moves; anything that asks a light card for one of its parts makes it whole first, as always.
+  var FAR_MIN = 400, farIO = null, farT = 0;
+  function farWatch(c) {
+    if (!window.IntersectionObserver) return;
+    if (!farIO) farIO = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { farIO.unobserve(e.target); if (light.has(e.target)) full(e.target); } });
+    }, { rootMargin: "250% 0px 250% 0px" });
+    farIO.observe(c);
+  }
+  function sweepFar() {
+    farT = 0;
+    if (!ready || !allowed() || sweeping || !window.IntersectionObserver || !("contentVisibility" in document.documentElement.style)) return;
+    var shown = window.SL_SHOWN_IDS; if (!shown || shown.length < FAR_MIN) return;
+    var vh = window.innerHeight || 800, lo = -4 * vh, hi = 5 * vh, list = [];
+    for (var i = 0; i < shown.length; i++) {
+      var c = cardById(shown[i]); if (!c || light.has(c)) continue;
+      var r = c.getBoundingClientRect(); if (!r.height || (r.bottom > lo && r.top < hi)) continue;
+      if (getComputedStyle(c).contentVisibility !== "auto") continue;
+      list.push(c);
+    }
+    var k = 0; sweeping = true;
+    (function step(dl) {
+      if (window.SL_SHOWN_IDS !== shown) { sweeping = false; return; }
+      var t0 = Date.now(), ms = Math.min(16, Math.max(8, dl && dl.timeRemaining ? dl.timeRemaining() : 12));
+      while (k < list.length && Date.now() - t0 < ms) { var c = list[k++]; if (lighten(c)) farWatch(c); }
+      if (k < list.length) idle(step); else sweeping = false;
+    })();
+  }
+  window.addEventListener("scroll", function () { clearTimeout(farT); farT = setTimeout(sweepFar, 1500); }, { passive: true });
   // only once the page has loaded and set itself up (the 3D buttons, photos and titles go on whole cards first)
   window.addEventListener("load", function () { setTimeout(function () { ready = true; soon(1); }, 2500); });
   window.SL_LIGHT = {

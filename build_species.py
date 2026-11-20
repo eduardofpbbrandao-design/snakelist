@@ -134,6 +134,8 @@ def danger_of(c):
 # the app's checklist filters (its passes()), one test per chip, so a country's counts and a species
 # page's list say exactly what the app's filter panel would
 HAB_SECS = []  # the Habitats chips: the app's #habitat-data sections, in order
+GEO_HAB_SECS = {"South America", "South & Southeast Asia", "Central America & Caribbean", "Africa", "East & Central Asia", "New Guinea & Australia",
+                "North America", "Borneo", "Middle East", "Europe & Mediterranean", "Madagascar"}  # sections named after places
 TYPE_GROUPS = {"Cobra": "Elapid", "Pit Viper": "Viper", "Sea Snake": "Other", "Watersnake": "Other"}  # its MAIN_TYPE_GROUPS
 TYPE_ORDER = ["Boa", "Colubrid", "Elapid", "Python", "Viper", "Other"]
 COMMON_AT, RARE_UPTO = 75, 2
@@ -182,7 +184,9 @@ def checklist_facts(c, rel="../"):
     rows = [("Type", a(e(tg), "type=" + quote(tg)) if tg else NR),
             ("Family", a(e(c["family"]), "fam=" + quote(c["family"])) if c["family"] else NR),
             ("Continent", e(", ".join(c["continents"])) if c["continents"] else NR)]
-    hs = [HAB_SECS[h] for h in hab_secs(c)]
+    # v5.78: only kinds of habitat - the app's habitat filter also has groups named after regions ("New Guinea & Australia",
+    # "Borneo"...), which are places, not habitats, and read wrongly in a list of habitats
+    hs = [HAB_SECS[h] for h in hab_secs(c) if HAB_SECS[h] not in GEO_HAB_SECS]
     if not c["fossil"]:  # nothing about living snakes applies to a fossil (the same rule as its filter tags)
         hm = harm_of(c); cons = constriction_of(c)
         rows += ([] if hm in ("harmful", "harmless") else [("Dangerous to people", '<span class="sp-unk">Not documented</span> <small>(mildly venomous)</small>')]) + [
@@ -941,7 +945,9 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             else: vt = "Not venomous &ndash; but big enough to injure people" if hm == "harmful" else "Not venomous to people &ndash; it can still bite"
             if gone and not F.get("venom"): vt = "Venomous" if c["venom"] else "Not venomous"  # an extinct snake bites nobody now
             kf.append(("Venom", vt))
-            kf.append(("Adult length", fact("length") or UNK))
+            sz = size_class(c, info)
+            # v5.78: "Not known" next to "Large-sized (about 2 m)" read like a contradiction: the unknown length now says what the size is based on
+            kf.append(("Adult length", fact("length") or (UNK + (' <small>(for this species; adults of its genus are about %s)</small>' % fmt_len(sz[1]) if sz and sz[2] == "genus" else ""))))
             kf.append(("Diet", fact("diet") or UNK))
             kf.append(("Reproduction", fact("reproduction") or UNK))
             # v4.81: no conservation status on SnakeList any more: its size instead (Small / Medium / Large-sized),
