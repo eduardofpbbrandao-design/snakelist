@@ -2691,6 +2691,10 @@ function uiCSSInject() {
 const SPECIES_LOOK = {
   'opheodrys-vernalis': { h: { iris: '#2a2214', irisInner: '#4a3c22', eyeRing: '#d9c27a', pupilW: 0.24, eye: null, eyeL: 0.22, eyeX: 0.37, eyeA: 50, len: 0.04, w: 0.9, h: 0.62, snoutH: 0.6, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.07, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.9, hFixed: 1, groove: 0.22, headRelief: 0.2, snout: 0.5, lipFull: 1 }, body: { hn: 1.3 },
     scales: { cavity: 0.22, gloss: 0.78, relief: 0.55 }, colors: { edgeK: 0.25 } },
+  // the inland taipan against its SnakeList photo (will-hunt) and the Australian Museum account: a deep, rounded "coffin" head
+  // (deeper than the body's own depth, the snout high and rounded), glossy smooth scales, and a warmer olive-brown
+  'oxyuranus-microlepidotus': { h: { h: 0.84, hFixed: 1, snoutH: 0.9, groove: 0.26, headRelief: 0.28, taper: 0.12, bulge: 0.05, brow: 0.05 },
+    scales: { cavity: 0.3 }, colors: { dorsal: '#83622f', lateral: '#8d6b35' } },
 };
 function withLook(p, id) {
   const L = SPECIES_LOOK[id]; if (!L || !p) return p;
@@ -2853,9 +2857,9 @@ export function mount(host, opts) {
     const mat = new THREE.MeshPhysicalMaterial({
       // v4.72: raised 3D scales - stronger relief, deeper gaps between them, and real bumps on good devices
       map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1).multiplyScalar(S.relief != null ? S.relief : (S.keel || 0) > 0.3 ? 1 : 0.85), // (v5.58: smooth scales lie flatter than keeled ones)
-      aoMap: tiles.cavity, aoMapIntensity: 0.4 + 1.65 * (S.cavity != null ? S.cavity : 0.45), roughnessMap: tiles.cavity, // (v5.78: smooth, tightly overlapping scales hide less skin between them)
+      aoMap: tiles.cavity, aoMapIntensity: 0.3 + 1.2 * (S.cavity != null ? S.cavity : 0.45), roughnessMap: tiles.cavity, // (v5.78: smooth, tightly overlapping scales hide less skin between them)
       ...(quality === 'low' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
-      roughness: lerp(0.82, 0.5, gl), metalness: 0, clearcoat: 0.12 + gl * 0.6, clearcoatRoughness: lerp(0.5, 0.12, gl * gl), /* (v5.78: glossy snakes get the crisp, mirror-like highlights of real smooth scales) */ sheen: S.sheen != null ? S.sheen : 0.12, sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
+      roughness: lerp(0.82, 0.5, gl), metalness: 0, clearcoat: 0.12 + gl * 0.6, clearcoatRoughness: lerp(0.5, 0.12, gl * gl), /* (v5.78: glossy snakes get the crisp, mirror-like highlights of real smooth scales) */ sheen: S.sheen != null ? S.sheen : 0.04, /* (v5.78: the default sheen laid a grey haze over every skin at grazing angles) */ sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
       iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.85,
     });
     // the cavity map also darkens the skin between scales in direct light (as in real snakes)
