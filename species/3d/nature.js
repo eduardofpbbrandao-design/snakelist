@@ -921,7 +921,7 @@ export function resetAmbient() { AMB.rip.length = 0; AMB.ripN = 0; AMB.ripU = []
 // opt: { kind: 'branch' | 'drape', P, F, pose, seed, spine(x) -> the snake's centre line }. Returns the tree group with
 // userData.perch (where prey can sit, for See it eat), like viewer.js's own addBranch / addDrapeBranch.
 export function perchTree(THREE, opt) {
-  const { P, F, pose, seed, spine } = opt, L = F.L, V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const { P, F, pose, seed, spine } = opt, L = F.L, V = (x, y, z) => new THREE.Vector3(x, y, z), lowQ = opt.quality === 'low';
   let s0 = (seed + 7919) >>> 0 || 1; const R = () => { s0 = (s0 + 0x6D2B79F5) | 0; let t = Math.imul(s0 ^ (s0 >>> 15), 1 | s0); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v), lerp = (a, b, t) => a + (b - a) * t, sstep = (a, b, v) => { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
   const g = new THREE.Group(); g.name = 'tree'; g.userData.noRig = true;
@@ -940,6 +940,7 @@ export function perchTree(THREE, opt) {
   const bark = new THREE.MeshStandardMaterial({ color: '#ffffff', map: bmap, bumpMap: bmap, bumpScale: 1.2, roughness: 0.93, vertexColors: true });
   // a tube along a smooth curve, radius rad(t); the bark keeps its real size; vertex colours: darker where the snake lies on it
   const tube = (pts, rad, seg, radial, repLen = 0.25, shade) => {
+    if (lowQ) { seg = Math.max(6, Math.round(seg * 0.6)); radial = Math.max(5, Math.round(radial * 0.6)); } // (the Light setting: fewer triangles)
     const c = new THREE.CatmullRomCurve3(pts, false, 'centripetal'), fr = c.computeFrenetFrames(seg, false), n = (seg + 1) * (radial + 1), pos = new Float32Array(n * 3), uv = new Float32Array(n * 2), col = new Float32Array(n * 3).fill(1), idx = [];
     const total = c.getLength(), P0 = new THREE.Vector3(), q = new THREE.Vector3();
     const N0 = fr.normals[0].clone(), T0 = new THREE.Vector3(), B0 = new THREE.Vector3(); // (frames carried along without twisting)
@@ -981,7 +982,7 @@ export function perchTree(THREE, opt) {
     if (depth > 0) {
       for (const sgn of [-1, 1]) { const nd = dd.clone().addScaledVector(side, sgn * (0.5 + R() * 0.4)).add(V(0, 0.15 + R() * 0.2, 0)).normalize(); limb(end, nd, len * (0.5 + R() * 0.2), r0 * 0.55, depth - 1); }
       if (depth > 1) { const mt = c.getPointAt(0.55), nd = dd.clone().addScaledVector(side, (R() < 0.5 ? -1 : 1) * 0.9).add(V(0, 0.3, 0)).normalize(); limb(mt, nd, len * 0.45, r0 * 0.45, depth - 2); }
-    } else twigLeaves(c, 0.25, 1, Math.max(5, Math.round(len * 30)));
+    } else twigLeaves(c, 0.25, 1, Math.max(4, Math.round(len * (lowQ ? 16 : 30))));
     return c;
   };
   let perch = null;
