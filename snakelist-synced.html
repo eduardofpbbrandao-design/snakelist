@@ -14104,7 +14104,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     selected = code;
     searchSelected = code;
     fillPanel(code);
-    setScope([code], null, "country:" + code);
+    // (v5.78: with the map's Filters on, the heatmap for a searched country counts only the snakes that pass them -
+    // it counted every snake, so its numbers jumped from "1,001 species" to "4,247" on a country search)
+    setScope([code], MFSET ? INDEX.filter(function (sp) { return MFSET[sp.id]; }) : null, "country:" + code + (MFSET ? "|f" : ""));
     heatStates(code);
     var n = document.getElementById("cp-sub").textContent;
     document.getElementById("heat-caption").textContent = document.getElementById("cp-title").textContent + " · " + n;
@@ -17380,7 +17382,10 @@ window.SL_GEO_READY = new Promise(function (res) {
       (chips.length ? '<button type="button" class="mf-clearall">Clear all</button>' : "");
     // how many snakes pass, and an honest word when none do
     var res = mfPanel.querySelector(".mf-res"), done = mfPanel.querySelector(".mf-done");
-    if (MFSET) { var k = Object.keys(MFSET).length; res.textContent = k ? k.toLocaleString() + " species match" : "No species match"; done.textContent = k ? "View " + k.toLocaleString() + " matching species" : "Done"; }
+    // (v5.78: living species, the same number the map then shows - it counted fossil and extinct snakes too, 1,023 here
+    // against 1,001 on the map)
+    if (MFSET) { var EXm = (window.SL_FACTS && window.SL_FACTS.EXTINCT) || {}, k = Object.keys(MFSET).filter(function (id) { return !EXm[id]; }).length;
+      res.textContent = k ? k.toLocaleString() + (k === 1 ? " living species matches" : " living species match") : "No living species match"; done.textContent = k ? "View " + k.toLocaleString() + " matching species" : "Done"; }
     else { res.textContent = ""; done.textContent = "Done"; }
     var cn = mfPanel.querySelector(".mf-cnote"); if (cn) cn.textContent = MFSET ? "Numbers: how many species each choice gives with your other filters. Filters apply as you pick them." : "Numbers: species in the whole checklist. Filters apply as you pick them.";
     if (mfPanel.hidden) return;
@@ -20643,9 +20648,13 @@ window.SL_GEO_READY = new Promise(function (res) {
     var SC = window.SL_MAP_SCOPE || null;
     CARDS.forEach(function (c) { c.countries.forEach(function (n) { var cc = geo.iso[n]; if (cc) hasData[cc] = 1; }); });
     var hs = habSet();
+    var EXT = (window.SL_FACTS && window.SL_FACTS.EXTINCT) || {};
     CARDS.forEach(function (c) {
       if (SC && SC.ids && !SC.ids[c.id]) return;
       if (hs && !hs[c.id]) return; // a habitat picked: only its snakes
+      // v5.78: living species only, like every other count on the map (a fossil or extinct snake still maps when it is
+      // the one species searched)
+      if (!wantSci && EXT[c.id]) return;
       if (!habOn && (wantSci ? c.sci.toLowerCase() !== wantSci : st.cat === "Other" ? !!FAM[Object.keys(FAM).filter(function (k) { return FAM[k] === c.fam; })[0]] : (st.cat !== "all" && c.fam !== FAM[st.cat]))) return;
       nsp++;
       c.countries.forEach(function (n) { names[n] = 1; var cc = geo.iso[n]; if (cc) { counts[cc] = (counts[cc] || 0) + 1; if (counts[cc] > mx) mx = counts[cc]; } });
@@ -20702,7 +20711,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     // not the habitat's own outline
     else if (habOn && st.hab) setStatus("Habitats layer · " + st.hab + ": the whole ranges of the " + R.nsp.toLocaleString() + (R.nsp === 1 ? " snake" : " snakes") +
       " associated with it, across " + places + " - not the outline of the " + st.hab.toLowerCase() + " itself. Habitats are estimated from where each snake is recorded and what kind of snake it is, not from field surveys. This choice only changes this layer." + note);
-    else setStatus("Heatmap layer · " + (st.q ? displayName() : st.cat !== "all" && CATS[st.cat] ? CATS[st.cat].label : "all snakes") + ": " + R.nsp.toLocaleString() + " species across " + places + ". This choice only changes the heatmap - the search and Filters above stay as they are." + note);
+    else setStatus("Heatmap layer · " + (st.q ? displayName() : st.cat !== "all" && CATS[st.cat] ? CATS[st.cat].label : (window.SL_MAPF && window.SL_MAPF.on() ? "the snakes your Filters keep" : "all snakes")) + ": " + R.nsp.toLocaleString() + " species across " + places + ". This choice only changes the heatmap - the search and Filters above stay as they are." + note);
   }
   // the two "nothing here" colours: snakes live there but none of these (a light grey), or the place has no snakes on record at all (a plain neutral grey, lighter
   // in the day theme, darker at night)
@@ -21648,6 +21657,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   new MutationObserver(function () { if (!pop.hidden) layerThumb(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-sl-theme"] });
   btnLayers.addEventListener("click", function (e) { e.stopPropagation(); pop.hidden = !pop.hidden; btnLayers.setAttribute("aria-expanded", String(!pop.hidden)); if (!pop.hidden) layerThumb(); });
   document.addEventListener("click", function (e) { if (!e.target.closest(".layers-wrap")) pop.hidden = true; });
+  // v5.78: Escape closes the Map style menu too (it didn't), back to its button
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !pop.hidden) { e.stopPropagation(); pop.hidden = true; try { btnLayers.focus({ preventScroll: true }); } catch (x) {} } }, true);
   // the Map layers button always tells assistive tech the truth about its menu - however the
   // menu was closed (a style picked, a tap elsewhere, Escape)
   if (window.MutationObserver) new MutationObserver(function () { btnLayers.setAttribute("aria-expanded", String(!pop.hidden)); }).observe(pop, { attributes: true, attributeFilter: ["hidden"] });
@@ -21658,15 +21669,21 @@ window.SL_GEO_READY = new Promise(function (res) {
     var sty = b.getAttribute("data-style");
     // "Heatmap": the SnakeList map with only the species heatmap on it (v4.50)
     if (sty === "heatonly") {
-      var go = function () { if (!st.heat) btnHeat.click(); document.getElementById("globe-stage").classList.add("heat-only"); };
+      var go = function () { if (!st.heat) { btnHeat.click(); heatByStyle = true; } document.getElementById("globe-stage").classList.add("heat-only"); };
       if (st.style !== "classic") setStyle("classic").then(go); else go();
       return;
     }
     document.getElementById("globe-stage").classList.remove("heat-only");
+    // v5.78: leaving the "Heatmap" style for another map: a heatmap that style switched on goes off with it
+    // (picking "SnakeList map" left the heatmap's colours and panel on, which read as the wrong map)
+    if (heatByStyle && st.heat) btnHeat.click();
+    heatByStyle = false;
     setStyle(sty).then(function () { if (heatOn()) applyHeat(); if (SG.on) { sgClose(); sgRender(); sgLoad(true); } });
   });
+  var heatByStyle = false;
   btnHeat.addEventListener("click", function () {
     st.heat = !st.heat;
+    if (!st.heat) heatByStyle = false;
     if (!st.heat) document.getElementById("globe-stage").classList.remove("heat-only");
     if (st.heat) { habOn = false; window.SL_MAP_CLEAN && window.SL_MAP_CLEAN(); } // one view at a time, from a clean map
     save(); syncUI();
