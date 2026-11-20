@@ -1587,7 +1587,12 @@
   .globe-stage.full .globe-btns .heat-caption { flex: 1 0 100%; box-sizing: border-box; margin: 0; padding: 5px 11px; border-radius: 9px; text-align: center;
     background: rgba(255,255,255,0.92); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
   [data-sl-theme="dark"] .globe-stage.full .globe-btns .heat-caption { background: rgba(10,20,32,0.84); border-color: rgba(255,255,255,0.18); }
-  .globe-stage.full .globe-btns .heat-caption:empty { display: none; }
+  .globe-stage.full .globe-btns .heat-caption:empty, .globe-stage.full .globe-btns .heat-caption.hc-plain { display: none; }
+  /* a phone on its side (short screen), full screen: the species panel stops before the map's own button column on the
+     right, so zoom, Reset view, Leave full screen and 3D stay reachable (they were under the panel) */
+  @media (max-height: 520px) { .globe-stage.full .country-panel:not(.cp-small) { right: 64px; } }
+  /* (the 3D button stays on top of the search's row of buttons, whose box reaches under it on a phone) */
+  .globe-stage.full .td-toggle { z-index: 7; }
   /* a phone: two lines at most (the rest is in the list below) */
   @media (max-width: 640px) { .globe-stage.full .globe-btns .heat-caption { text-align: left; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
     padding-top: 0; padding-bottom: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; } }
@@ -3324,6 +3329,13 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
 /* v4.50: count badges centred; v4.62: Sightings on = deep teal with a light ring and a tick (was bright red) */
 .tab-n { display: inline-flex; align-items: center; justify-content: center; line-height: 1; font-variant-numeric: tabular-nums; text-align: center; }
 .hm-toggle.sg-toggle.on, .hm-toggle.sg-toggle.on:hover { background: #58b351; border-color: #2f6f2b; color: #fff; filter: none; box-shadow: 0 2px 8px rgba(0,0,0,.2); text-shadow: 0 1px 1px rgba(10,40,14,.45); } /* v5.68: the dots' own green */
+/* v5.78: one "switched on" look for the map's layer buttons - Species Heatmap (was a rust-orange gradient), Sightings (was
+   #58b351 with white text, 2.6:1), Habitats and Filters: SnakeList's deep green #2c7a57 -> #256846 with white text (5.2:1)
+   and a light green #7fc266 edge that stands out on the pale map, the dark map and satellite photos alike */
+.map-tools .hm-toggle.on, .map-tools .hm-toggle.on:hover, .map-tools .hm-toggle.sg-toggle.on, .map-tools .hm-toggle.sg-toggle.on:hover,
+.map-tools .hm-toggle.hab-toggle.on, .map-tools .hm-toggle.hab-toggle.on:hover, .map-tools .hm-toggle.mf-toggle.on, .map-tools .hm-toggle.mf-toggle.on:hover {
+  background: linear-gradient(135deg, #2c7a57 0%, #256846 100%); border-color: #7fc266; color: #fff; filter: none; text-shadow: none;
+  box-shadow: 0 0 0 1px rgba(127,194,102,.45), 0 2px 8px rgba(0,0,0,.22); }
 .layers-pop .lp-txt { display: inline-flex; flex-direction: column; align-items: flex-start; line-height: 1.2; text-align: left; }
 .layers-pop .lp-rec { display: block; margin-top: 2px; font-style: normal; font-size: 10.5px; font-weight: 600; color: var(--gold, #58b351); letter-spacing: .02em; }
 .layers-pop .lp-rec.lp-sub { color: var(--text-muted); font-weight: 500; }
@@ -15638,7 +15650,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     document.getElementById("heat-caption").textContent = (fzHit ? "Closest match to \u201c" + mapFuzzyFrom.from + "\u201d: " : "") + ((worldCityMatch && !cityReveal)
       ? "Found " + worldCityMatch.name + ", " + worldCityMatch.country + " - tap “See species” below for its checklist."
       : !matched.length
-        ? (MFSET ? "No snakes match these filters. Try removing one or more filters." : "Nothing matches that search.")
+        ? (MFSET ? (q ? "No snakes match \u201c" + q + "\u201d with your filters. Try removing a filter or changing the search." : "No snakes match these filters. Try removing one or more filters.") : "Nothing matches \u201c" + q + "\u201d. Check the spelling, or try a shorter name.")
         : cityMatch || worldCityMatch
           ? subject.charAt(0).toUpperCase() + subject.slice(1)
           : subject.charAt(0).toUpperCase() + subject.slice(1) + " · found across " + countPlaces(names));
@@ -16020,14 +16032,26 @@ window.SL_GEO_READY = new Promise(function (res) {
     var cp = document.getElementById("country-panel"), sr = stage.getBoundingClientRect();
     var on = cp && !cp.hidden && stage.classList.contains("full") && getComputedStyle(cp).position === "absolute";
     var q = on ? cp.getBoundingClientRect() : null;
+    var hits = function (a, b) { return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom); };
+    var zoomCol = stage.querySelector(".globe-zoom"), btnRowEl = document.getElementById("globe-btns");
     ["td-toggle", "map-legend"].forEach(function (id) {
       var el = document.getElementById(id); if (!el) return;
       if (el.style.bottom) el.style.bottom = "";
+      if (el.style.top) el.style.top = "";
       if (!q || el.hidden || !el.offsetParent) return;
       var k = el.getBoundingClientRect();
       if (k.right <= q.left || k.left >= q.right || k.bottom <= q.top) return;
       el.style.bottom = Math.max(8, sr.bottom - q.top + 8) + (id === "map-legend" ? 46 : 0) + "px";
+      // the 3D button lifted onto the search's row of buttons (a phone): it goes under the zoom buttons instead
+      if (id === "td-toggle") {
+        k = el.getBoundingClientRect();
+        var clash = [btnRowEl, zoomCol, stage.querySelector(".map-tools")].some(function (o) { return o && o.offsetParent && o.getBoundingClientRect().height && hits(k, o.getBoundingClientRect()); });
+        if (clash && zoomCol) { el.style.bottom = "auto"; el.style.top = Math.round(zoomCol.getBoundingClientRect().bottom - sr.top + 8) + "px"; }
+      }
     });
+    // only a plain "All N living species" line (no search, no filters): not repeated over the full screen map
+    var capEl = document.getElementById("heat-caption");
+    if (capEl) capEl.classList.toggle("hc-plain", /^All [\d,]+ living species/.test(capEl.textContent));
     // a narrow full screen map: the Heatmap/Sightings/Habitats buttons sit below the search's row of buttons
     // (and the line saying what it found), never under them
     var mt = stage.querySelector(".map-tools"), br = document.getElementById("globe-btns");
@@ -23082,7 +23106,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   function habOpen() {
     if (!habOn) { window.SL_MAP_CLEAN && window.SL_MAP_CLEAN(); } // a clean map: no "See states" left over
     habOn = true; st.heat = false;
-    habPanel.classList.remove("collapsed");
+    habPanel.classList.remove("collapsed"); (function (hb) { if (hb) { hb.setAttribute("aria-expanded", "true"); hb.setAttribute("aria-label", "Hide habitats"); } })(document.getElementById("hab-collapse"));
     document.getElementById("hab-collapse").setAttribute("aria-expanded", "true");
   }
   function showHabitat(name) {
@@ -23104,7 +23128,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   habList.addEventListener("click", function (e) {
     var b = e.target.closest("[data-h]"); if (!b) return;
     if (showHabitat(b.getAttribute("data-h"))) fitHabitat();
-    if (window.innerWidth <= 640) setTimeout(function () { habPanel.classList.add("collapsed"); }, 500);
+    if (window.innerWidth <= 640) setTimeout(function () { habPanel.classList.add("collapsed"); var hb = document.getElementById("hab-collapse"); hb.setAttribute("aria-expanded", "false"); hb.setAttribute("aria-label", "Show habitats"); }, 500);
   });
   document.getElementById("hab-collapse").addEventListener("click", function () {
     var c = habPanel.classList.toggle("collapsed"); this.setAttribute("aria-expanded", String(!c)); this.setAttribute("aria-label", c ? "Show habitats" : "Hide habitats");
@@ -23122,7 +23146,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   });
   // on a phone the filters fold away after a choice so the map stays visible
   panel.addEventListener("change", foldOnPhone); ["hm-time", "hm-measure"].forEach(function (id) { document.getElementById(id).addEventListener("click", foldOnPhone); });
-  function foldOnPhone(e) { if (window.innerWidth <= 640 && e.target.closest && e.target.closest("button,select,input")) setTimeout(function () { panel.classList.add("collapsed"); }, 500); }
+  // (v5.78: the fold button says so too - it kept saying "Hide filters" and aria-expanded="true" after folding)
+  function foldOnPhone(e) { if (window.innerWidth <= 640 && e.target.closest && e.target.closest("button,select,input")) setTimeout(function () { panel.classList.add("collapsed"); var hb = document.getElementById("hm-collapse"); hb.setAttribute("aria-expanded", "false"); hb.setAttribute("aria-label", "Show filters"); }, 500); }
   // a clear button inside the search box
   qIn.setAttribute("type", "search");
   syncUI();
