@@ -117,7 +117,7 @@ async function run(theme, phone) {
   ok(/Pennsylvania/.test(await p.evaluate(() => document.getElementById('cp-title').textContent)), 'Pennsylvania picked');
   await clickArea('crotalus-horridus');
   a = await info();
-  ok(a && a.states['us:PA'] >= 2 && Object.keys(a.states).length === 33, 'Timber Rattlesnake: 33 states lit (PA step ' + (a && a.states['us:PA']) + ')');
+  ok(a && a.states['us:PA'] >= 2 && Object.keys(a.states).length === 31, 'Timber Rattlesnake: 31 states lit (extirpated in Maine and Rhode Island) (PA step ' + (a && a.states['us:PA']) + ')');
   ok(a && Object.values(a.states).some(s => s < 2), 'some states lighter (edge of its range)');
   await shotMap('2-pennsylvania-timber-rattlesnake');
   await p.click('#ak-close'); await p.waitForTimeout(400);
