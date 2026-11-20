@@ -15671,7 +15671,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // v5.68: the part of the map that is really in view - the panels over it (the species strip along the bottom
   // of the full screen map, a list or filters panel down one side...) left out. For each panel the side it
   // is cut from is the one that leaves the most map. Canvas pixels: [left, top, right, bottom].
-  var COVER_SEL = "#country-panel, .hm-panel, .hab-panel, .mf-panel, .nm-how-wrap:not([hidden]) .nm-how-box";
+  var COVER_SEL = "#country-panel, .hm-panel, .hab-panel, .mf-panel, .nm-how-wrap:not([hidden]) .nm-how-box, #area-key"; // (v5.78: and the Show colours key - the range was fitted under it on a phone)
   function visibleArea(cw, ch) {
     var a = [0, 0, cw, ch], cr = cv.getBoundingClientRect();
     if (!cr.width || !cr.height) return a;
@@ -26698,6 +26698,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   .area-key .ak-bar i { display: block; width: 20px; height: 10px; }
   .area-key .ak-note { margin: 0; font: 400 10.5px/1.35 'Inter', sans-serif; opacity: .92; white-space: normal; }
   .area-key .ak-note [hidden] { display: none; }
+  @media (max-width: 640px) { .area-key .ak-note .ak-scale-note { display: none; } } /* (a phone: the key stays short) */
   .globe-stage.area-on #map-legend { display: none !important; }
   .map-legend.area-key.ak-small { right: 54px; padding: 5px 8px; flex-direction: row; align-items: center; gap: 8px; }
   .area-key.ak-small .ak-t, .area-key.ak-small .legend-row, .area-key.ak-small .ak-note { display: none; }
