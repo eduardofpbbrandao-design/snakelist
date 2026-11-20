@@ -1060,7 +1060,7 @@ export function create(V) {
       if (!show.cLast) { show.cLast = { pos: cam.position.clone(), tgt: curTarget(), t }; const o = cam.position.clone().sub(show.cLast.tgt), dd = o.length() || 1; show.az = Math.atan2(o.x, o.z); show.el = Math.asin(clamp(o.y / dd, -1, 1)); show.d = dd; }
       const c = show.cLast, inst = show.freeze != null && !show.paused, k = inst ? 1 : 1 - Math.exp(-Math.min(0.1, (t - c.t) / 1000) / 0.45); c.t = t;
       const off = want.pos.clone().sub(want.tgt), d0 = off.length() || 1, az0 = Math.atan2(off.x, off.z), el0 = Math.asin(clamp(off.y / d0, -1, 1));
-      if (show.set) { show.uAz += angDiff(show.set.az, st.az); show.uEl += st.el - show.set.el; if (st.goal) { if (st.goal.d) show.uKg *= st.goal.d / Math.max(1e-9, show.set.d); st.goal = null; } }
+      if (show.set) { show.uAz += angDiff(show.set.az, st.az); show.uEl += st.el - show.set.el; if (st.goal) { if (st.goal.d) show.uKg *= st.goal.d / Math.max(1e-9, show.set.d); if (st.goal.az != null) show.uAz += angDiff(st.az, st.goal.az); if (st.goal.el != null) show.uEl += st.goal.el - st.el; st.goal = null; } /* (wheel, pinch and the arrow keys) */ }
       show.uKg = clamp(show.uKg, 0.3, 3.5); show.uEl = clamp(show.uEl, -0.7, 0.9);
       show.uK += (show.uKg - show.uK) * (inst ? 1 : 1 - Math.exp(-Math.min(0.1, 0.016) / 0.12));
       show.az += angDiff(show.az, az0) * k; show.el += (el0 - show.el) * k; show.d += (d0 - show.d) * k;
