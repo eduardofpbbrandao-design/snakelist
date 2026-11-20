@@ -1014,6 +1014,10 @@
     cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; padding: 5px 10px; }
   .cp-close:hover { border-color: var(--gold-soft); }
   .cp-sub { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--gold-soft); margin: 4px 0 12px; }
+  /* v5.78: the panel's line under its title ("10 living species recorded here") was #8fbf8f on the pale panel (2.1:1) and
+     #6fbf8a on the dark green one (about 2.5:1): now #4b7650 by day (5:1) and #b5dcb0 at night (5:1) */
+  .country-panel .cp-sub { color: #4b7650; }
+  [data-sl-theme="dark"] .country-panel .cp-sub { color: #b5dcb0; }
   .cp-page { display: inline-block; margin: -6px 0 12px; font: 600 13px 'Inter', sans-serif; color: var(--map-on, #58b351); text-decoration: none; }
   .cp-page:hover { text-decoration: underline; text-underline-offset: 3px; }
   .cp-page[hidden] { display: none; }
@@ -19894,11 +19898,11 @@ window.SL_GEO_READY = new Promise(function (res) {
   .sp-info-main { grid-area: mn; min-width: 0; }
   .sp-info h3 { margin: 0 34px 2px 0; font-size: 17px; font-weight: 600; line-height: 1.25; color: #fff; }
   .sp-info h3.is-sci { font-style: italic; }
-  .sp-info-sci { margin: 0 0 9px; font-family: 'JetBrains Mono', monospace; font-style: italic; font-size: 11px; color: #58b351; }
+  .sp-info-sci { margin: 0 0 9px; font-family: 'JetBrains Mono', monospace; font-style: italic; font-size: 11px; color: #a8e29a; } /* v5.78: was #58b351 (green on green) */
   .sp-info-facts { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 0 0 9px; padding: 8px 9px; border-radius: 10px; background: rgba(0,0,0,0.18); }
   .sp-info-facts dt { font: 600 10px 'JetBrains Mono', monospace; letter-spacing: .06em; text-transform: uppercase; opacity: .7; padding-top: 2px; }
   .sp-info-facts dd { margin: 0; }
-  .sp-info-h { margin: 8px 0 4px; font: 600 10px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #58b351; }
+  .sp-info-h { margin: 8px 0 4px; font: 600 10px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #a8e29a; } /* v5.78: was #58b351 - green on the green panel, about 3:1 */
   .sp-info-txt { margin: 0; line-height: 1.45; max-height: 84px; overflow-y: auto; scrollbar-width: thin; }
   .sp-info-habs { display: flex; flex-wrap: wrap; gap: 4px; max-height: 86px; overflow-y: auto; scrollbar-width: thin; }
   .sp-info-habs span { padding: 2px 8px; border-radius: 999px; font-size: 11.5px; background: rgba(88,179,81,0.16); border: 1px solid rgba(88,179,81,0.3); }
@@ -26706,6 +26710,10 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   .nm-how-box h3 { margin: 0 34px 2px 0; }
   .nm-how-box .nm-how-where { margin: 0 0 10px; font-size: 12px; opacity: .85; }
   .nm-how-box .nm-sec { margin: 0 0 9px; padding: 8px 10px; border-radius: 10px; background: rgba(0,0,0,0.18); }
+  /* v5.78: the guide is solid (the map's hint, 3D button and the list showed through it on a phone), and its section
+     headings are a light green (#a8e29a, 5.7:1 on the panel) instead of #58b351 (about 3:1, green on green) */
+  .nm-how-wrap .sp-info.nm-how-box { background: linear-gradient(160deg, #256846, #22623f); }
+  .nm-how-box .sp-info-h { color: #a8e29a; }
   .nm-how-box .nm-sec .sp-info-h { margin: 0 0 3px; }
   .nm-how-box .nm-sec p { margin: 0; line-height: 1.5; }
   .nm-how-box .nm-sec ul { margin: 2px 0 0; padding-left: 18px; line-height: 1.5; }
@@ -26774,7 +26782,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     if (!navigator.geolocation) { save({ ans: "denied" }); cb(false, "This browser can't share its location, so See near me can't work here."); return; }
     navigator.geolocation.getCurrentPosition(function (p) {
       save({ ans: "yes", lat: r1(p.coords.latitude), lon: r1(p.coords.longitude) });
-      cb(true, "Done! Open the Map and tap See near me.");
+      cb(true, "Done! On the Map, tap See near me - the round button just above Full screen.");
     }, function (e) {
       save({ ans: "denied" });
       cb(false, e && e.code === 1 ? "Location is blocked for SnakeList. You can allow it in your browser's settings, then turn it on again from your account."
@@ -26982,7 +26990,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     secs.push(["Where to look: microhabitats", "<ul>" + spots2.map(function (t) { return "<li>" + esc(t.charAt(0).toUpperCase() + t.slice(1)) + "</li>"; }).join("") + "</ul>"]);
     // 5. how it behaves
     var tips = [], n = spots(c);
-    if (n >= (F.COMMON_AT || 75)) tips.push("Often spotted: confirmed sightings in " + n + " places on iNaturalist.");
+    if (n >= (F.COMMON_AT || 75)) tips.push("Often spotted: confirmed sightings in " + n.toLocaleString("en") + " places on iNaturalist.");
     else if (n > 0 && n <= (F.RARE_UPTO || 2)) tips.push("Rarely spotted: confirmed sightings in only " + n + (n === 1 ? " place" : " places") + " on iNaturalist, so you may need patience and luck.");
     else if (!n) tips.push("No confirmed sightings on iNaturalist yet - a real find if you see one.");
     var cons = window.SL_CONSTRICTION ? window.SL_CONSTRICTION(sp.id) : "unknown";
