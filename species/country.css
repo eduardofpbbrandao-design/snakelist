@@ -56,7 +56,7 @@ a.cy-dbtn{text-decoration:none}
 .cy-b.x{color:var(--muted)}.cy-b.i{background:#fdf1df;border-color:#ecc995;color:#7a4a0c}
 .cy-fam{font-size:12.5px;color:var(--muted)}
 .cy-empty,.cy-none{background:var(--card);border:1px dashed var(--tagline);border-radius:14px;padding:18px 20px;margin:4px 0 0}
-.cy-none p{margin:4px 0}.cy-link{font:inherit;background:none;border:0;color:var(--link);text-decoration:underline;cursor:pointer;padding:0}
+.cy-none p{margin:4px 0}.cy-link{font:inherit;font-weight:600;background:none;border:0;color:var(--link);cursor:pointer;padding:0}.cy-link:hover{color:var(--link-hover)}
 .cy-more-wrap{text-align:center;margin:16px 0 0}.cy-more{font:600 14px Inter,system-ui,sans-serif;min-height:42px;padding:8px 22px;border-radius:12px;border:1px solid var(--tagline);background:var(--card);color:var(--text);cursor:pointer}
 .cy-sec{margin-top:26px}.cy-sec h2{font:700 21px Georgia,serif;margin:0 0 6px}.cy-note{margin:0 0 12px;color:var(--muted);font-size:14px}
 .cy-facts{margin:0;padding-left:18px}.cy-facts li{margin:4px 0}

@@ -6,6 +6,7 @@ import json, re, html as H, os, base64, unicodedata
 import sys as _sys_e; _sys_e.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools")); import etymology as ETY  # where the names come from
 
 SITE = "https://snakelist.com/"
+FX_CSS = FX_JS = ""  # v5.78: filled in by build() from the app (the site-wide button hover)
 OUT = "species"
 AUTHOR = "Eduardo Brandao"
 
@@ -294,8 +295,18 @@ def build(app):
     paths, boxes, region = world_map(OUT + "/world.svg")
 
     import build_regions
-    open(OUT + "/sp.css", "w").write(CSS + build_regions.REAL_CSS)
-    open(OUT + "/sp.js", "w").write(APP_BACK_JS + JS + build_regions.REAL_JS)
+    # v5.78: the site-wide button hover (3D viewer colours + the travelling mint line) and "nothing underlined", copied from the
+    # app's sl-fx blocks so every page behaves the same; sl-fx.css/js on their own for the pages that load nothing else
+    global FX_CSS, FX_JS
+    _fx = re.findall(r"/\* ---- sl-fx shared start ----.*?\*/(.*?)/\* ---- sl-fx shared end ---- \*/", app, re.S)
+    FX_CSS, FX_JS = (_fx[0].strip() + "\n", _fx[1].strip() + "\n") if len(_fx) >= 2 else ("", "")
+    open(OUT + "/sl-fx.css", "w", encoding="utf-8").write(FX_CSS)
+    open(OUT + "/sl-fx.js", "w", encoding="utf-8").write(FX_JS)
+    # every plain text link (in a sentence, a list, a table, the breadcrumbs, the footer) changes colour when pointed at
+    LINK_HOVER = (":where(p,li,dd,td,th,nav,small,figcaption,h2,h3,.sl-flinks,.sp-crumbs,.cy-crumbs) a:not([class]):not(.sp-tags *):not(.sp-pills *):not(.sx-chips *):hover"
+                  "{color:var(--link-hover)}\n")
+    open(OUT + "/sp.css", "w").write(CSS + build_regions.REAL_CSS + "\n" + LINK_HOVER + FX_CSS)
+    open(OUT + "/sp.js", "w").write(APP_BACK_JS + JS + build_regions.REAL_JS + "\n" + FX_JS)
     # "Explore in 3D": the reviewed model profiles, next to the viewer (species/3d/viewer.js)
     os.makedirs(OUT + "/3d", exist_ok=True)
     # v4.63: every other species (living, extinct and fossil) gets a generated profile (tools/auto_models.py)
@@ -1326,6 +1337,18 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if page_name(c) != c["id"]:  # the old address (and the app's ?sp ids) still lead here
             open("%s/%s.html" % (OUT, c["id"]), "w", encoding="utf-8").write(REDIRECT.format(name=esc(c["name"]), url=url, page=page_name(c)))
         links.append(c)
+    # v5.78: a page whose snake's name was corrected ("Mangrove Snak" -> "Mangrove Snake") keeps working at its old address:
+    # it becomes a small page that sends you on to the new one (and is never listed in the sitemap)
+    _by_id = {c["id"]: c for c in links}
+    for _f in os.listdir(OUT):
+        if not _f.endswith(".html"): continue
+        _stem = _f[:-5]
+        for _cid in (_stem[_i + 1:] for _i in range(len(_stem)) if _stem[_i] == "-"):
+            _c = _by_id.get(_cid)
+            if not _c: continue
+            if page_name(_c) != _stem:
+                open("%s/%s" % (OUT, _f), "w", encoding="utf-8").write(REDIRECT.format(name=esc(_c["name"]), url=SITE + "species/" + page_name(_c), page=page_name(_c)))
+            break
     dates.save()
     # the "See states" shapes: one small file per country, fetched only when the button is pressed
     os.makedirs(OUT + "/prov", exist_ok=True)
@@ -1388,7 +1411,7 @@ def credits_page(cards, esc):
     html = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Photo credits | SnakeList</title><meta name="description" content="Who took every snake photo on SnakeList, and the Creative Commons licence each one is used under.">
-<link rel="canonical" href="%sspecies/photo-credits.html"><meta name="robots" content="index,follow"><link rel="icon" href="../favicon.ico" sizes="any"><link rel="stylesheet" href="sp.css">
+<link rel="canonical" href="%sspecies/photo-credits.html"><meta name="robots" content="index,follow"><link rel="icon" href="../favicon.ico" sizes="any"><link rel="stylesheet" href="sp.css"><script src="sl-fx.js" defer></script>
 <style>.pc-wrap{overflow-x:auto}.pc{border-collapse:collapse;width:100%%;font-size:14px}.pc th,.pc td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 .pc th{font-weight:600;position:sticky;top:0;background:var(--bg)}.pc tr:target{background:var(--tag)}.pc-q{width:100%%;max-width:420px;font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text)}</style>
 </head><body>
@@ -1491,7 +1514,7 @@ def hubs(cards, esc, img_of, invasive=None):
         os.makedirs(OUT + "/" + kind, exist_ok=True)
         if kind == "country":  # the redesigned country pages (country_page below) and the country picker's list
             open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS + build_regions.REGION_CSS)
-            open(OUT + "/country.js", "w", encoding="utf-8").write(APP_BACK_JS + COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS + "\n" + SUGG_JS)
+            open(OUT + "/country.js", "w", encoding="utf-8").write(APP_BACK_JS + COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS + "\n" + SUGG_JS + "\n" + FX_JS)
             with open(OUT + "/countries.json", "w", encoding="utf-8") as fh:
                 json.dump({n: slugify(n) for n in sorted(G) if slugify(n)}, fh, ensure_ascii=False, separators=(",", ":"))
             for name, L in G.items():
@@ -1511,7 +1534,7 @@ def hubs(cards, esc, img_of, invasive=None):
                     country_page(H.unescape(m.group(1).strip()), [], {"_cards": cards}, invasive or {}, esc, f[:-5]))
             continue
         open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS + build_regions.REGION_CSS)
-        open(OUT + "/country.js", "w", encoding="utf-8").write(APP_BACK_JS + COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS + "\n" + SUGG_JS)
+        open(OUT + "/country.js", "w", encoding="utf-8").write(APP_BACK_JS + COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS + "\n" + SUGG_JS + "\n" + FX_JS)
         for name, L in G.items():
             slug = slugify(name)
             if not slug: continue
@@ -1568,7 +1591,7 @@ INDEX = """<!doctype html>
 <meta name="description" content="Every one of the {n} snake species in SnakeList, by family and by country - each with its photo, range map and facts.">
 <link rel="canonical" href="{url}"><meta name="author" content="{author}"><meta name="robots" content="index,follow">
 <meta property="og:title" content="All {n} snake species | SnakeList"><meta property="og:url" content="{url}"><meta property="og:type" content="website">
-<link rel="icon" href="../favicon.ico" sizes="any"><link rel="stylesheet" href="sp.css">
+<link rel="icon" href="../favicon.ico" sizes="any"><link rel="stylesheet" href="sp.css"><script src="sl-fx.js" defer></script>
 </head><body>
 {site_head}
 <main class="sp-main"><nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../">SnakeList</a> &rsaquo; <span aria-current="page">All species</span></nav>
@@ -1607,10 +1630,14 @@ CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:center;widt
 .sx-chips a{display:inline-block;padding:4px 11px;border-radius:999px;border:1px solid var(--tagline);background:var(--tag);color:var(--text);text-decoration:none;font-size:13px}.sx-chips small{color:var(--muted)}
 .sx-searching #by-country,.sx-searching #by-family,.sx-searching .sx-chips{display:none}.sx-fam{scroll-margin-top:12px}.sx-fam h2 a{color:inherit}
 .sp-hubs{columns:3 200px;column-gap:24px;padding:0;list-style:none}.sp-hubs li{break-inside:avoid;margin:2px 0}
-:root{--bg:#f1f6ee;--card:#fbfdf9;--text:#1d6b33;--muted:#4b7a55;--line:#d5e4cf;--g:#58b351;--land:#d7dccb;--on:#58b351;--in:#e07a1f;--sea:#e3ecef;--tag:#e3f0dc;--tagline:#a9cf9c;--link:#2a7a2f}
-@media (prefers-color-scheme:dark){:root{--bg:#22623f;--card:#256846;--text:#dff5d6;--muted:#bfe3c6;--line:#37855f;--g:#58b351;--land:#3a7c5a;--on:#58b351;--in:#f0a04b;--sea:#1b5034;--tag:#2c7a57;--tagline:#4a9a6c;--link:#dcf7d0}}
+:root{--bg:#f1f6ee;--card:#fbfdf9;--text:#1d6b33;--muted:#4b7a55;--line:#d5e4cf;--g:#58b351;--land:#d7dccb;--on:#58b351;--in:#e07a1f;--sea:#e3ecef;--tag:#e3f0dc;--tagline:#a9cf9c;--link:#2a7a2f;--link-hover:#24321f}
+@media (prefers-color-scheme:dark){:root{--bg:#22623f;--card:#256846;--text:#dff5d6;--muted:#bfe3c6;--line:#37855f;--g:#58b351;--land:#3a7c5a;--on:#58b351;--in:#f0a04b;--sea:#1b5034;--tag:#2c7a57;--tagline:#4a9a6c;--link:#dcf7d0;--link-hover:#9be07c}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
-a{color:var(--link)}.sp-top{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:980px;margin:0 auto;padding:14px 16px}
+a{color:var(--link)}a:where(:hover){color:var(--link-hover)}
+/* v5.78: nothing is ever underlined, on hover or not - a link changes colour instead (like About creator in the app);
+   links inside running text are a little bolder so they still stand out from the words around them */
+*,*::before,*::after{text-decoration-line:none!important}:where(p,figcaption,.sp-crumbs,.cy-crumbs,dd,td,small,.sp-note) a:where(:not([class])){font-weight:600}
+.sp-top{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:980px;margin:0 auto;padding:14px 16px}
 .sp-logo{font:700 26px Georgia,'Times New Roman',serif;color:var(--g);text-decoration:none}.sp-top nav{display:flex;gap:16px;font-size:14px}
 .sp-main{max-width:980px;margin:0 auto;padding:0 16px 30px}.sp-crumbs{font-size:13px;color:var(--muted);margin:4px 0 14px}
 .sp-head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:start}
@@ -1637,7 +1664,7 @@ section{background:var(--card);border:1px solid var(--line);border-radius:18px;p
 .sp-tags{list-style:none;padding:0;margin:4px 0 10px;display:flex;flex-wrap:wrap;gap:6px}
 .sp-tags a{display:inline-block;background:var(--tag);border:1px solid var(--tagline);color:var(--link);text-decoration:none;font-size:13px;font-weight:600;padding:3px 12px;border-radius:999px}
 .sp-tags a:hover,.sp-pills a:hover{background:var(--g);border-color:var(--g);color:#fff}
-.sp-where a{color:inherit;text-decoration:underline;text-decoration-color:var(--tagline);text-underline-offset:2px}.sp-where a:hover{color:var(--link)}
+.sp-where a{color:var(--link)}.sp-where a:hover{color:var(--link-hover)}
 .sp-where{columns:2 260px;padding-left:18px;font-size:14px}.sp-where li{break-inside:avoid;margin-bottom:4px}
 .sp-pills{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px}.sp-pills li{border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:13.5px}.sp-pills li:has(a){border:0;padding:0}
 .sp-pills a{display:inline-block;border:1px solid var(--tagline);background:var(--tag);color:var(--link);text-decoration:none;border-radius:999px;padding:3px 11px;font-size:13.5px}
@@ -1701,7 +1728,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .sp-unk{color:var(--muted);font-weight:400}
 .sp-ftop{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:12px 0 4px}
 .sp-ftag{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:999px;background:var(--tag,#e3f0dc);border:1px solid var(--line);font-size:13.5px;font-weight:600;line-height:1.3}
-.sp-keybox .sp-ftag a{color:var(--text,inherit);text-decoration:none}.sp-keybox .sp-ftag a:hover{text-decoration:underline}.sp-ftag small{font-weight:400;color:var(--muted)}
+.sp-keybox .sp-ftag a{color:var(--text,inherit);text-decoration:none}.sp-keybox .sp-ftag a:hover{color:var(--link-hover)}.sp-ftag small{font-weight:400;color:var(--muted)}
 .sp-fmore{display:inline-flex;align-items:center;gap:6px;min-height:0;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);font:500 11.5px/1.35 Inter,system-ui,sans-serif;cursor:pointer}
 .sp-fmore:hover{border-color:var(--g);color:var(--text,inherit)}
 .sp-fmore::after{content:"";width:6px;height:6px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-2px) rotate(45deg);transition:transform .15s ease}
@@ -1712,8 +1739,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .sp-actions .sp-btn2{border-color:var(--tagline)}.sp-actions .sp-btn span{margin-right:6px}.sp-keybox a.sp-btn{color:#fff;text-decoration:none}.sp-keybox a.sp-btn2{color:var(--link)}
 .sp-keybox a.sp-btn:hover{filter:brightness(1.06)}
 @media (max-width:560px){.sp-actions{display:grid;grid-template-columns:1fr 1fr}.sp-actions .sp-btn:only-child{grid-column:1/-1}.sp-keybox{padding:4px 14px 14px}}
-.sp-sec a,.sp-keybox a,.sp-intro a{color:var(--link);text-decoration:underline;text-decoration-color:var(--tagline);text-underline-offset:2px}
-.sp-sec a:hover,.sp-keybox a:hover{text-decoration-color:currentColor}.sp-sec .sp-tags a,.sp-sec .sp-pills a,.sp-ref a{text-decoration:none}
+.sp-sec a,.sp-keybox a,.sp-intro a{color:var(--link)}
+.sp-sec a:not(.sp-btn):hover,.sp-keybox a:not(.sp-btn):hover,.sp-intro a:hover{color:var(--link-hover)}.sp-sec .sp-tags a,.sp-sec .sp-pills a,.sp-ref a{text-decoration:none}
 .sp-ext{display:inline-block;margin-left:4px;padding:0 7px;border-radius:999px;font-size:11.5px;font-weight:600;background:#5b4a3a;color:#fff;line-height:1.6}
 .sp-terr{color:var(--muted);font-weight:400}
 .sp-fossilfig div{display:flex!important;flex-direction:column;gap:6px;padding:20px;text-align:center;background:repeating-linear-gradient(135deg,var(--line) 0 12px,var(--tag) 12px 24px)!important;color:var(--text)!important}
@@ -2331,7 +2358,7 @@ a.cy-dbtn{text-decoration:none}
 .cy-b.x{color:var(--muted)}.cy-b.i{background:#fdf1df;border-color:#ecc995;color:#7a4a0c}
 .cy-fam{font-size:12.5px;color:var(--muted)}
 .cy-empty,.cy-none{background:var(--card);border:1px dashed var(--tagline);border-radius:14px;padding:18px 20px;margin:4px 0 0}
-.cy-none p{margin:4px 0}.cy-link{font:inherit;background:none;border:0;color:var(--link);text-decoration:underline;cursor:pointer;padding:0}
+.cy-none p{margin:4px 0}.cy-link{font:inherit;font-weight:600;background:none;border:0;color:var(--link);cursor:pointer;padding:0}.cy-link:hover{color:var(--link-hover)}
 .cy-more-wrap{text-align:center;margin:16px 0 0}.cy-more{font:600 14px Inter,system-ui,sans-serif;min-height:42px;padding:8px 22px;border-radius:12px;border:1px solid var(--tagline);background:var(--card);color:var(--text);cursor:pointer}
 .cy-sec{margin-top:26px}.cy-sec h2{font:700 21px Georgia,serif;margin:0 0 6px}.cy-note{margin:0 0 12px;color:var(--muted);font-size:14px}
 .cy-facts{margin:0;padding-left:18px}.cy-facts li{margin:4px 0}
