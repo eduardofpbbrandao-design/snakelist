@@ -2693,7 +2693,7 @@ function uiCSSInject() {
 // v5.78: species rebuilt against photos in this version, ahead of the next models.json build (the same values are in
 // tools/auto_models.py CURATED, so a rebuild gives the same result): they override the profile's head
 const SPECIES_LOOK = {
-  'opheodrys-vernalis': { h: { iris: '#2a2214', irisInner: '#4a3c22', eyeRing: '#d9c27a', pupilW: 0.24, eye: null, eyeL: 0.25, eyeX: 0.36, eyeA: 50, len: 0.031, w: 0.9, h: 0.78, snoutH: 0.64, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.07, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.65, hFixed: 1, groove: 0.16, headRelief: 0.14, snout: 0.52, lipFull: 0.12 }, body: { hn: 1.3 },
+  'opheodrys-vernalis': { h: { iris: '#3d321c', irisInner: '#5c4a26', eyeRing: '#d9c27a', pupilW: 0.22, eye: null, eyeL: 0.22, eyeX: 0.36, eyeA: 50, len: 0.031, w: 0.9, h: 0.78, snoutH: 0.64, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.045, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.65, hFixed: 1, groove: 0.16, headRelief: 0.14, snout: 0.52, lipFull: 0.12 }, body: { hn: 1.3 },
     scales: { cavity: 0.22, gloss: 0.78, relief: 0.55 }, colors: { edgeK: 0.25 } },
   // the inland taipan against its SnakeList photo (will-hunt) and the Australian Museum account: a deep, rounded "coffin" head
   // (deeper than the body's own depth, the snout high and rounded), glossy smooth scales, and a warmer olive-brown
@@ -2836,7 +2836,7 @@ export function mount(host, opts) {
   const basePR = () => Math.min(window.devicePixelRatio || 1, { high: 2, medium: 1.5, low: 1 }[quality] || 1.5);
   let dynK = 1; renderer.setPixelRatio(basePR());
   renderer.localClippingEnabled = true; // v5.68: See it eat cuts the prey off at the throat (only the part in the open mouth shows)
-  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.86;
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.94; // (v5.78: a touch brighter - ACES darkened and dulled the greens and browns of the skin)
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = quality === 'low' ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   const ctx = { renderer, scene: null, track };
   let skinGPU = null, snakeGroup, cam, controls, info, extras, raf = 0, dirty = true, lost = false, alive = true, scaleObj = null, markers = [];
