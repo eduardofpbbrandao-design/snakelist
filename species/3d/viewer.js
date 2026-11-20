@@ -3012,12 +3012,13 @@ float slScale(vec2 m) {
     const PH = 1.7, gap = Math.max(0.3, L.m * 0.1), px = s1 + gap + 0.22;
     const pp = piv.clone().addScaledVector(R, px), gy = fx.groundY ? fx.groundY([[pp.x, pp.z]])[0] : 0; pp.y = gy || 0;
     sizeSt.person = pp; sizeSt.headTop = pp.clone().add(new THREE.Vector3(0, PH + 0.04, 0));
-    sizeSt.box = { s0: s0 - Math.max(0.05, L.m * 0.04), s1: px + 0.3, f0: Math.min(f0, -0.2), f1: Math.max(f1, 0.2), h: PH + 0.08, R };
+    sizeSt.box = { s0: s0 - Math.max(0.05, L.m * 0.04), s1: px + 0.3, sm: (s0 + s1) / 2, pm: px, f0: Math.min(f0, -0.2), f1: Math.max(f1, 0.2), h: PH + 0.08, R };
     // the person: natural proportions (extras.js buildPerson), 1.70 m, turned towards the camera
     sizeDropPerson();
     scaleObj = new THREE.Group(); scaleObj.name = 'sizePerson';
     const man = EXTRA.buildPerson ? EXTRA.buildPerson(THREE, PH) : new THREE.Mesh(personShape(PH), new THREE.MeshStandardMaterial({ color: '#7d8a80' }));
-    man.position.copy(pp); man.rotation.y = az + 0.3; scaleObj.add(man); ctx.scene.add(scaleObj); personFade(0);
+    { const bb = new THREE.Box3().setFromObject(man), hgt = bb.max.y - bb.min.y; if (hgt > 0) man.scale.setScalar(PH / hgt); } // (exactly 1.70 m from the soles to the top of the hair)
+    man.position.copy(pp); man.rotation.y = az + 0.25; scaleObj.add(man); ctx.scene.add(scaleObj); personFade(0);
     scaleObj.userData.labels = [
       { p: sizeSt.headTop.clone(), t: 'Person 1.70 m' },
       { p: sizeSt.mid.clone().add(new THREE.Vector3(0, info.F.w0 * 2 * k, 0)), t: 'Snake ' + fmtAdult(L.m) + ' (along its body)', snake: true },
@@ -3029,12 +3030,13 @@ float slScale(vec2 m) {
   function sizeGoal() {
     const B = sizeSt.box, sr = stage.getBoundingClientRect(), br = bar.getBoundingClientRect(), H = Math.max(1, sr.height);
     const cr = sizeCap.getBoundingClientRect(), top = clamp((br.bottom - sr.top + 10) / H, 0.06, 0.5), bot = clamp((cr.height ? sr.bottom - cr.top + 12 : 70) / H, 0.06, 0.32);
-    const YAW = 0.12, azF = Math.atan2(B.R.x, B.R.z) - Math.PI / 2 + YAW, elF = (12 * Math.PI) / 180; // (nearly side-on, a little raised: both seen at their true size, neither nearer than the other)
-    const W = B.s1 - B.s0, D = B.f1 - B.f0, hh = B.h;
-    const dW = ((W * Math.cos(YAW) + D * Math.sin(YAW)) * 0.5 * 1.12) / Math.tan(info.hf) + D * 0.5;
+    const YAW = 0, azF = Math.atan2(B.R.x, B.R.z) - Math.PI / 2 + YAW, elF = (12 * Math.PI) / 180; // (side-on, a little raised, looking at the point halfway between the snake and the person: both the same distance away, so both are seen at the same scale)
+    const D = B.f1 - B.f0, hh = B.h;
+    const cS = (B.sm + B.pm) / 2, half = Math.max(cS - B.s0, B.s1 - cS); // (centred halfway between the snake's middle and the person)
+    const dW = (half * 1.12) / Math.tan(info.hf) + D * 0.5;
     const dH = (hh * 1.08) / ((1 - top - bot) * 2 * Math.tan(info.vf)) + D * 0.5;
     const d = Math.max(dW, dH, info.dMin * 2);
-    const visH = 2 * d * Math.tan(info.vf), c = sizeSt.piv.clone().addScaledVector(B.R, (B.s0 + B.s1) / 2);
+    const visH = 2 * d * Math.tan(info.vf), c = sizeSt.piv.clone().addScaledVector(B.R, cS);
     sizeSt.tgt.set(c.x, hh * 0.5 + ((top - bot) / 2) * visH, c.z);
     info.scaleK = Math.max(1, (d * 1.35) / info.dMax);
     return { az: azF, el: elF, d, px: 0, pz: 0 };
@@ -3266,6 +3268,8 @@ const SPECIES_LEN_SRC = { // tools/auto_models.py SPECIES_LEN: where those lengt
   'gyalopion-canum': ['Arizona Game and Fish Department, after Degenhardt et al. 1996', 'https://www.azgfd.com/'],
   'gyalopion-quadrangulare': ['Arizona Game and Fish Department', 'https://www.azgfd.com/'],
 };
+// the usual range from the account's own words ("About 1.8-2.5 m" -> "usually 1.8-2.5 m"); nothing when it gives no range
+function rangeNote(t) { t = String(t || '').replace(/;.*$/, '').replace(/^((about|usually|commonly|typically|average|averages|adults?|mostly|around|up to)\s+)+/i, '').trim(); return /\d\s*(-|\u2013|to)\s*\d/.test(t) ? 'usually ' + t.replace(/(\d)\s*-\s*(\d)/g, '$1\u2013$2') : ''; }
 export function adultLength(p, page, id) {
   p = p || {}; const a = p.auto, x = (a && a.x) || '';
   const out = (m, how, note, src) => {
@@ -3274,7 +3278,7 @@ export function adultLength(p, page, id) {
     const line = lead + L + (how === 'genus' ? ', estimated from its genus (no measurements of this species yet)' : how === 'fossil' ? ', estimated from its fossil bones' : '') + (note ? ' · ' + note : '') + (s ? ' (source: ' + s[0] + ')' : how === 'genus' || how === 'fossil' ? '' : ' (source: SnakeList species data)');
     return { m, how, note: note || '', src: s, text: L, line };
   };
-  if (page && +page.hi > 0) { const lo = +page.lo || +page.hi, hi = +page.hi, sp = String(page.src || '').split('|'); return out((lo + hi) / 2, 'account', page.txt ? 'usually ' + String(page.txt).replace(/^(about|usually|commonly|typically)\s+/i, '').replace(/;.*$/, '') : '', sp[0] ? [sp[0], sp[1] || ''] : null); }
+  if (page && +page.hi > 0) { const lo = +page.lo || +page.hi, hi = +page.hi, sp = String(page.src || '').split('|'); return out((lo + hi) / 2, 'account', rangeNote(page.txt), sp[0] ? [sp[0], sp[1] || ''] : null); }
   if (!a && +p.length > 0) { const r = (p.refs || []).find((q) => /\b(size|length|long|cm\b|m\b)/i.test(q.t || '')) || null; return out(+p.length, 'model', p.lengthNote || '', r ? [String(r.t).replace(/^[^:]*:\s*/, '') || r.t, r.u || ''] : null); }
   if (a && +a.L > 0) {
     if (x.indexOf('f') >= 0) return out(+a.L, 'fossil', '', null);

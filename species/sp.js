@@ -124,14 +124,14 @@ document.addEventListener('click',function(e){var a=e.target.closest&&e.target.c
 var sci=m.dataset.sci,sid=m.dataset.id,name=(document.querySelector('h1')||{}).textContent||sci,dlg=null,me=document.currentScript&&document.currentScript.src||location.href;
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
 function lic(c){c=String(c||'').toLowerCase();return c==='cc0'?'CC0':c.replace(/^cc-/,'CC ').toUpperCase()}
-function size(){var lo=+m.dataset.lenlo,hi=+m.dataset.lenhi;if(!hi)return null;var W=340,P=1.5,s=Math.min((W-40)/(hi+0.55),74),NS='http://www.w3.org/2000/svg',ph=P*s,H=Math.max(ph+46,128),g=H-26;
+function size(){var lo=+m.dataset.lenlo,hi=+m.dataset.lenhi;if(!hi)return null;var W=340,P=1.7,s=Math.min((W-40)/(hi+0.55),74),NS='http://www.w3.org/2000/svg',ph=P*s,H=Math.max(ph+46,128),g=H-26;
 var svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.setAttribute('role','img');
-svg.setAttribute('aria-label',name+': about '+rng(lo,hi)+' long, next to a person 1.5 m tall');
+svg.setAttribute('aria-label',name+': about '+rng(lo,hi)+' long, next to a person 1.70 m tall');
 function a(t,o,p){var e=document.createElementNS(NS,t);for(var k in o)e.setAttribute(k,o[k]);(p||svg).appendChild(e);return e}
 var px=14+0.2*s,hr=Math.max(3,0.11*s),x0=px+0.2*s+18,th=Math.max(5,Math.min(12,0.06*s)),y=g-th/2-1;
 a('line',{x1:6,y1:g,x2:W-6,y2:g,'class':'gr'});
 a('circle',{cx:px,cy:g-ph+hr,r:hr,'class':'pp'});a('path',{d:'M'+(px-0.2*s)+' '+g+'L'+(px-0.13*s)+' '+(g-ph*0.52)+'L'+(px-0.2*s)+' '+(g-ph*0.82)+'Q'+px+' '+(g-ph*0.9)+' '+(px+0.2*s)+' '+(g-ph*0.82)+'L'+(px+0.13*s)+' '+(g-ph*0.52)+'L'+(px+0.2*s)+' '+g+'Z','class':'pp'});
-var t=a('text',{x:px,y:g+16,'text-anchor':'middle'});t.textContent='1.5 m';
+var t=a('text',{x:px,y:g+16,'text-anchor':'middle'});t.textContent='1.70 m';
 var st=[0.1,0.25,0.5,1,2].filter(function(v){return v*s>=34})[0]||2;
 for(var v=0;v<=hi+1e-9;v+=st){a('line',{x1:x0+v*s,y1:g,x2:x0+v*s,y2:g+4,'class':'gr'});var tk=a('text',{x:x0+v*s,y:g+16,'text-anchor':'middle','class':'tk'});tk.textContent=v?fmt(v):'0'}
 function body(L,c){var hl=Math.min(th*1.7,L/3),tl=Math.min(L*0.35,th*6),h=th/2;if(L<th*2)return a('rect',{x:x0,y:y-h,width:Math.max(L,1),height:th,rx:h,'class':c});
@@ -198,7 +198,7 @@ function info(w,top,box,D){if(D.desc)w.appendChild(el('p','sp-rl-desc',D.desc));
 if(D.limited)w.appendChild(el('p','sp-note','Little is known about this species: only a few published studies describe it.'));
 if(D.quick&&D.quick.length){var dl=el('dl','sp-rl-q');D.quick.forEach(function(q){var d=el('div','sp-rl-q-'+q[0]),dd=el('dd','',q[2]);d.appendChild(el('dt','',q[1]));
 // the size picture right beside the length it shows (only for a length from a reviewed account)
-var sv=q[0]==='len'&&size();if(sv){var f=el('figure','sp-rl-size');f.appendChild(sv);var cap=el('figcaption','sp-note','Drawn stretched out, next to a person 1.5 m tall.'),src=m.dataset.lensrc;
+var sv=q[0]==='len'&&size();if(sv){var f=el('figure','sp-rl-size');f.appendChild(sv);var cap=el('figcaption','sp-note','Drawn stretched out, next to a person 1.70 m tall.'),src=m.dataset.lensrc;
 if(src){var s2=src.split('|');cap.appendChild(document.createTextNode(' Length: '));if(s2[1]){var aa=el('a','',s2[0]);aa.href=s2[1];aa.rel='noopener';aa.target='_blank';cap.appendChild(aa)}else cap.appendChild(document.createTextNode(s2[0]));cap.appendChild(document.createTextNode('.'))}
 f.appendChild(cap);dd.appendChild(f)}
 d.appendChild(dd);dl.appendChild(d)});w.appendChild(dl)}
