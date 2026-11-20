@@ -25570,6 +25570,14 @@ html { scrollbar-gutter: stable; } /* the page doesn't jump sideways when its sc
   #cp-list .cpc-card .cpc-extra { padding: 4px 3px; margin: -4px -3px; }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) { .cp-state-pill[data-prov]:hover { transform: none; } }
+/* v5.78: the small things on the map's cards (tags, state pills) pop out like the cards themselves - the same lift and
+   1.035 grow - with a shadow in proportion to their size. They had the card's own 10px/24px shadow (and the pills a
+   1.06 grow), which spread many times further round a 20px tag than round a card */
+@media (hover: hover) and (pointer: fine) {
+  #cp-list .cpc-card .card-tags .tag:hover, #cp-list .cpc-card .cp-state-pill[data-prov]:hover {
+    transform: translateY(-1px) scale(1.035); box-shadow: 0 2px 5px rgba(20,50,25,0.2), 0 1px 2px rgba(20,50,25,0.12); }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) { #cp-list .cpc-card .card-tags .tag:hover, #cp-list .cpc-card .cp-state-pill[data-prov]:hover { transform: none; } }
 .card-tags .tag:hover, .sl-tag:hover { text-decoration: none; filter: none; background-color: var(--surface-hover, rgba(127,199,106,.18)); }
 .cam-meta button:hover, #signin-page .signin-link:hover { text-decoration: none; color: var(--gold); }
 #signin-page .signin-link, .signin-link { text-decoration: none; }
