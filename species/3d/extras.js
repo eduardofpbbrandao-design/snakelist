@@ -641,11 +641,11 @@ export function create(V) {
       yw[N - 1] = yw[N - 2]; pt[N - 1] = pt[N - 2]; for (let i = 1; i < N; i++) yw[i] = yw[i - 1] + angDiff(yw[i - 1], yw[i]);
       return { yw, pt };
     }
-    function blend3(P0, A0, P1, A1, e, a) {
+    function blend3(P0, A0, P1, A1, e, a, ep = e) { // (ep: how far the climbing angles have got - the body can curl first and rise after)
       if (e <= 0) return P0.slice(); if (e >= 1) return P1.slice();
       let sm = 0; for (let i = 0; i < N; i++) sm += A0.yw[i] - A1.yw[i]; const off = Math.round(sm / N / TAU) * TAU;
       const out = new Float32Array(N * 3); for (let c = 0; c < 3; c++) out[a * 3 + c] = lerp(P0[a * 3 + c], P1[a * 3 + c], e);
-      const st = (i, sg, j) => { const yw = lerp(A0.yw[i], A1.yw[i] + off, e), pt = lerp(A0.pt[i], A1.pt[i], e), cp = Math.cos(pt) * s3[i]; out[j * 3] = out[(j - sg) * 3] + sg * Math.cos(yw) * cp; out[j * 3 + 1] = out[(j - sg) * 3 + 1] + sg * Math.sin(pt) * s3[i]; out[j * 3 + 2] = out[(j - sg) * 3 + 2] + sg * Math.sin(yw) * cp; };
+      const st = (i, sg, j) => { const yw = lerp(A0.yw[i], A1.yw[i] + off, e), pt = lerp(A0.pt[i], A1.pt[i], ep), cp = Math.cos(pt) * s3[i]; out[j * 3] = out[(j - sg) * 3] + sg * Math.cos(yw) * cp; out[j * 3 + 1] = out[(j - sg) * 3 + 1] + sg * Math.sin(pt) * s3[i]; out[j * 3 + 2] = out[(j - sg) * 3 + 2] + sg * Math.sin(yw) * cp; };
       for (let i = a + 1; i < N; i++) st(i - 1, 1, i);
       for (let i = a - 1; i >= 0; i--) st(i, -1, i);
       return out;
@@ -1062,10 +1062,10 @@ export function create(V) {
       if (constrict) {
         const camC = () => camSide(preyPt(), fitD(Math.max(prR * 9, Wc * 18, Lp * 2.2)), 0.62, 0.15);
         // 5. coils: the body bends round the prey (lifted a little), two or three turns, without stretching
-        phases.push([1.7, (u, s) => { held = true; const e = ease(u); R.setPose(R.blend3(ext, Aext, wrapP, Awrap, e, R.ih)); R.apply(); setMouth(tHold); say(T.coil); camKey = camC(); if (inWater) wake(s); }]);
+        phases.push([1.7, (u, s) => { held = true; const e = ease(u); R.setPose(R.blend3(ext, Aext, wrapP, Awrap, e, R.ih, e * e * e)); R.apply(); setMouth(tHold); say(T.coil); camKey = camC(); if (inWater) wake(s); }]);
         phases.push([1.9, (u, s) => { R.setPose(wrapP); sq(0.5 + 0.5 * Math.sin(s * 4.2)); R.apply(); camKey = camC(); }]); // squeeze...
         phases.push([0.8, (u, s) => { R.setPose(wrapP); sq(0.35); R.apply(); flick(0); void s; }]); // ...and hold still
-        phases.push([1.4, (u, s) => { R.bul.fill(1); R.setPose(R.blend3(wrapP, Awrap, ext, Aext, ease(u), R.ih)); R.apply(); setMouth(tHold * (1 - 0.3 * ease(u))); say(T.loosen); if (inWater) wake(s); }]);
+        phases.push([1.4, (u, s) => { R.bul.fill(1); R.setPose(R.blend3(wrapP, Awrap, ext, Aext, ease(u), R.ih, 1 - Math.pow(1 - ease(u), 3))); R.apply(); setMouth(tHold * (1 - 0.3 * ease(u))); say(T.loosen); if (inWater) wake(s); }]);
         // let go, check along the prey with the tongue for its head, and take it head first
         phases.push([0.5, (u) => { held = false; R.setPose(R.blend(ext, coil, ease(u) * 0.55)); R.apply(); setMouth(tHold * 0.7 * (1 - ease(u))); rolled(ease(u) * 0.6); camKey = camSide(preyPt().lerp(headPt(), 0.5), fitD(Math.max(Lp * 2.6, st.len))); }]);
         phases.push([1.5, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift, coil: 0.55 * (1 - ease(u)), base: B, yaw: 0.28 * Math.sin(u * TAU * 1.5) * (1 - sstep(0.7, 1, u)) })); R.apply(); rolled(0.6 * (1 - sstep(0.55, 0.95, u))); flick(flicks(s, 0.7, 1)); setMouth(tHold * sstep(0.6, 0.95, u)); if (u > 0.96) held = true; }]);
@@ -1436,7 +1436,16 @@ export function create(V) {
       out.set(0, 0, 0); for (let i = a; i < a + span; i++) out.add(av.fromBufferAttribute(pa, i)); out.multiplyScalar(1 / span);
       return out.applyMatrix4(m.matrixWorld);
     }
+    // v5.73: anchors are cached - the parts only move when the body is posed or the jaw moves (never when the view turns)
+    let ancKey = '', ancMap = new Map();
     function partAnchor(p) {
+      if (rig && rig.active) return partAnchor0(p);
+      const mo = V.extras.mouth, key = String(mo ? (mo.ver != null ? mo.ver : mo.t) : 0);
+      if (key !== ancKey) { ancKey = key; ancMap = new Map(); }
+      let a = ancMap.get(p); if (a === undefined) { a = partAnchor0(p); ancMap.set(p, a ? a.clone() : null); return a; }
+      return a ? a.clone() : null;
+    }
+    function partAnchor0(p) {
       const F = V.info.F;
       if (p.key === 'pits') return rig.point(F.Hl * 0.15, F.W(F.Hl * 0.15) * 0.9, 0);
       if (p.skin) return rig.point(F.L * 0.42, F.W(F.L * 0.42), 0);
