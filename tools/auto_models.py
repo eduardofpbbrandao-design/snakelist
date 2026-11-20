@@ -247,9 +247,13 @@ CURATED = {
     # long as the neck is deep) only a little wider than the neck, a big eye - about half the head's depth - set high, halfway along
     # the mouth line, black with a round pupil and a thin pale rim; glossy smooth scales with no flecks; adults 36-51 cm, record ~66 cm;
     # the tail about 31% of the total length (Virginia Herpetological Society: 25-37%, average 31.5%)
+    # v5.78: rebuilt against several photos (SnakeList kha 10109512 and iNaturalist research-grade photos of the head in side, top
+    # and front view): the head is narrow and long (about 1.9 times as long as wide), flat-topped and low (depth about 0.6 of its
+    # width), the snout lower than the crown, a slight brow over the eye; the eye a fifth of the head long, NOT bulging; the lip and
+    # chin scales yellowish white; the tongue red with black tips (Ernst and Ernst 2003, Snakes of the United States and Canada)
     "opheodrys-vernalis": {"d": "#79bd45", "lat": "#86c650", "b": "#eef0c8", "t": "uniform", "s": "grass", "L": 0.45, "mx": "about 66 cm", "k": 0, "sp": {"grassA": "#55803a", "grassB": "#9ab860"},
-                           "h": dict(DARK_EYE, iris="#1c140c", irisInner="#4a3a22", eyeRing="#d2c99c", pupilW=0.26, eye=0.43, eyeL=0.25, eyeX=0.4, eyeA=56, len=0.036, w=0.95, h=0.8, snoutH=0.74, jaw=0.8,
-                                     lips="pale", lipColor="#c8d968", bulge=0.16, brow=0.01, headRelief=0.3, groove=0.5), "bx": {"ld": 62, "neck": 0.78, "tail": 0.31},
+                           "h": dict(DARK_EYE, iris="#2a2214", irisInner="#4a3c22", eyeRing="#d9c27a", pupilW=0.24, eyeL=0.22, eyeX=0.37, eyeA=50, len=0.04, w=0.9, h=0.62, snoutH=0.6, jaw=0.82,
+                                     lips="pale", lipColor="#e6ebb6", bulge=0.07, brow=0.07, taper=0.3, headRelief=0.3, groove=0.5, tongue="#c42a38", tongueTip="#141012", lw=1.9, hFixed=1), "bx": {"ld": 62, "neck": 0.78, "tail": 0.31},
                            "sx": {"gloss": 0.68, "rows": 15, "keel": 0, "relief": 0.7}, "cx": {"bellyA": 0.7, "bellySharp": 0.045, "mottle": 0.02, "var": 0.02, "flecks": 0, "edgeK": 0.55}},
     "opheodrys-aestivus": {"d": "#76b13a", "lat": "#86bd45", "b": "#ecebb0", "t": "plain", "s": "forest", "L": 0.8, "k": 1, "lip": "#e2e6a8",
                            "h": dict(DARK_EYE, iris="#1d1d14", irisInner="#34341f", eyeRing="#cfd09a", pupilW=0.25, eye=0.18), "bx": {"ld": 70, "neck": 0.9}, "sx": {"gloss": 0.4, "rows": 17}, "cx": {"bellyA": 0.7, "mottle": 0.04}},

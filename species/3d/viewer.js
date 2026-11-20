@@ -1482,9 +1482,9 @@ function eyeTexture(P) {
       else if (H.pupil === 'round') x.arc(C, C, S * (H.pupilW || 0.2) + grow, 0, TAU);
       x.fill(); };
     if (H.pupil && H.pupil !== 'none') { pupil(S * 0.018, 'rgba(0,0,0,.35)'); pupil(0, '#020202'); }
-    // a faint painted catch-light (the real reflections come from the glossy spectacle over the eye)
-    const sh = x.createRadialGradient(S * 0.38, S * 0.34, 0, S * 0.38, S * 0.34, S * 0.1); sh.addColorStop(0, 'rgba(255,255,255,.35)'); sh.addColorStop(1, 'rgba(255,255,255,0)');
-    x.fillStyle = sh; x.beginPath(); x.arc(S * 0.38, S * 0.34, S * 0.1, 0, TAU); x.fill();
+    // v5.78: no painted catch-light any more - the clear spectacle over the eye reflects the real sky and sun (buildEyes), so
+    // the highlight moves as you go round the head; a soft shadow inside the rim instead, where the socket's edge overhangs
+    { const rs = x.createRadialGradient(C, C, RI * 0.7, C, C, RI); rs.addColorStop(0, 'rgba(0,0,0,0)'); rs.addColorStop(1, 'rgba(0,0,0,.45)'); x.fillStyle = rs; x.beginPath(); x.arc(C, C, RI, 0, TAU); x.fill(); }
     EYE_TEX.set(key, cv);
   }
   const t = new THREE.CanvasTexture(EYE_TEX.get(key)); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
@@ -1500,8 +1500,12 @@ function buildEyes(P, F, body, pat) {
   const et = eyeTexture(P); et.wrapS = et.wrapT = THREE.ClampToEdgeWrapping;
   // v5.53: the eye under it is not shiny itself (a broad sheen over the iris made it look like a pale painted disc); the
   // spectacle on top gives the small sharp highlight
-  const em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.62, metalness: 0, envMapIntensity: 0.4, clearcoat: 0.8, clearcoatRoughness: 0.06 }); // (v5.58: the wet, glassy shine of the spectacle, with its small sharp highlight - the see-through spectacle on top lost its reflections to its own transparency)
-  const sm = new THREE.MeshPhysicalMaterial({ vertexColors: true, transparent: true, roughness: 0.03, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.0, depthWrite: false, specularIntensity: 1 });
+  // v5.78: a real cornea. The iris lies deep in the socket (a little cupped, matt); over it the spectacle is a clear curved dome
+  // that only REFLECTS - black, glossy and added on top of what is under it (additive), so it is fully see-through yet keeps all
+  // its reflections of the sky and the sun, strongest at grazing angles (Fresnel). The gap between them gives the eye depth:
+  // the iris shifts under the dome as you go round the head.
+  const em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.5, metalness: 0, envMapIntensity: 0.3, specularIntensity: 0.35 });
+  const sm = new THREE.MeshPhysicalMaterial({ color: '#000000', transparent: true, blending: THREE.AdditiveBlending, roughness: 0.035, metalness: 0, ior: 1.38, specularIntensity: 1, envMapIntensity: 1.5, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
   const lm = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, roughness: 0.6, metalness: 0, depthWrite: false, envMapIntensity: 0.8 });
   // the skin colour right round the eye, read from the body's own pattern texture
   const img = pat && pat.image, skinAt = (x, th) => {
@@ -1520,9 +1524,11 @@ function buildEyes(P, F, body, pat) {
         const x = xe + a * R0, th = th0 - sg * b * (R0 / rl);
         const p = body.surf(x, th, true).p, n = body.surfNormal(x, th);
         if (n.dot(p.clone().sub(body.spine(x))) < 0) n.negate();
-        // dome over the eye, then a steep tuck under the skin past the rim
-        const h = rho <= 1 ? R0 * (bulge * (1 - rho * rho) - 0.035) : R0 * (-0.035 - 1.6 * (rho - 1));
-        const pe = p.clone().addScaledVector(n, h - R0 * 0.02).sub(c), ps = p.clone().addScaledVector(n, h + R0 * 0.025).sub(c);
+        // the spectacle: a dome over the eye, meeting the skin at its rim, then a steep tuck under the skin past it; the iris
+        // under it: a shallow cup about a sixth of the eye's radius deeper (v5.78)
+        const h = rho <= 1 ? R0 * (bulge * (1 - rho * rho) - 0.01) : R0 * (-0.01 - 1.6 * (rho - 1));
+        const hi = rho <= 1 ? R0 * (bulge * 0.3 * (1 - rho * rho) - 0.15 - 0.03 * rho * rho) : R0 * (-0.18 - 1.6 * (rho - 1));
+        const pe = p.clone().addScaledVector(n, hi).sub(c), ps = p.clone().addScaledVector(n, h).sub(c);
         eye.push(pe.x, pe.y, pe.z); spec.push(ps.x, ps.y, ps.z);
         uv.push(0.5 + a * 0.47 * sg, 0.5 + b * 0.47);
         // the spectacle: clear in the middle, taking on the skin's colour at its rim, where the scales round the eye overlap it
@@ -1541,7 +1547,7 @@ function buildEyes(P, F, body, pat) {
     fixFacing(eg); fixFacing(sgeo);
     const m = new THREE.Mesh(eg, em); m.position.copy(c); m.receiveShadow = true; m.castShadow = false;
     // the clear glossy spectacle, and round its edge the skin of the scales that ring the eye, overlapping it
-    const sg2 = sgeo.clone(), ca = sg2.attributes.color; for (let i = 0; i < ca.count; i++) ca.setXYZW(i, 1, 1, 1, spa[i]);
+    const sg2 = sgeo.clone(); sg2.deleteAttribute('color');
     const sp = new THREE.Mesh(sg2, sm); sp.renderOrder = 3; sp.receiveShadow = false; m.add(sp);
     const lid = new THREE.Mesh(sgeo, lm); lid.renderOrder = 2; lid.receiveShadow = true; m.add(lid);
     const n0 = body.surfNormal(xe, th0); if (n0.dot(c.clone().sub(body.spine(xe))) < 0) n0.negate();
@@ -1713,7 +1719,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
     const softM = new THREE.MeshPhysicalMaterial({ color: pink.clone().multiplyScalar(0.95), roughness: 0.38, clearcoat: 0.6, clearcoatRoughness: 0.25 });
     const fAt = (x) => body.frameAt(x), fl = (x) => { const xc = Math.min(x, xs[xs.length - 1]); return floorJ.row(xc, 0.5).addScaledVector(fAt(xc).T, x - xc); }; // (past the hinge: straight on back)
     // the tongue sheath: a low soft ridge along the floor of the mouth, open at its front end just behind the chin
-    const r0 = Math.max(Hl * 0.014, F.W(Hl * 0.2) * 0.06); // the tongue's thickness
+    const r0 = Math.max(Hl * 0.019, F.W(Hl * 0.2) * 0.07); // the tongue's thickness (v5.78: a little fuller - it read as a black thread)
     const shx0 = Hl * 0.075, shx1 = Hl * 0.42, shW = Math.max(F.W(Hl * 0.2) * 0.12, r0 * 2.4), shH = Math.max(F.Hh(Hl * 0.2) * 0.05, r0 * 1.5), fS0 = fAt((shx0 + shx1) / 2);
     const sheath = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12), softM); sheath.scale.set(shW, shH, (shx1 - shx0) / 2); sheath.position.copy(fl((shx0 + shx1) / 2));
     sheath.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fS0.S.clone().normalize().negate(), fS0.U, fS0.T)); // (a right-handed basis: S, U, T is left-handed)
@@ -2673,8 +2679,20 @@ function uiCSSInject() {
 }
 
 // ---------- the viewer ----------
+// v5.78: species rebuilt against photos in this version, ahead of the next models.json build (the same values are in
+// tools/auto_models.py CURATED, so a rebuild gives the same result): they override the profile's head
+const SPECIES_LOOK = {
+  'opheodrys-vernalis': { h: { iris: '#2a2214', irisInner: '#4a3c22', eyeRing: '#d9c27a', pupilW: 0.24, eye: null, eyeL: 0.22, eyeX: 0.37, eyeA: 50, len: 0.04, w: 0.9, h: 0.62, snoutH: 0.6, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.07, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.9, hFixed: 1 } },
+};
+function withLook(p, id) {
+  const L = SPECIES_LOOK[id]; if (!L || !p) return p;
+  const q = JSON.parse(JSON.stringify(p)), tgt = q.auto ? (q.auto.h = q.auto.h || {}) : (q.head = q.head || {});
+  for (const k in L.h) { if (L.h[k] == null) delete tgt[k]; else tgt[k] = L.h[k]; }
+  if (L.body) Object.assign(q.auto ? (q.auto.bx = q.auto.bx || {}) : (q.body = q.body || {}), L.body);
+  return q;
+}
 export function mount(host, opts) {
-  const P = normProfile(autoProfile(opts.profile), opts.id), seed = strSeed(opts.id || P.name || 'snake');
+  const P = normProfile(autoProfile(withLook(opts.profile, opts.id)), opts.id), seed = strSeed(opts.id || P.name || 'snake');
   { const gH = HEAD_GENUS[String(opts.id || '').split('-')[0]]; if (gH) P.head = Object.assign({}, gH, P.head); } // v5.53
   const reduceMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const reduce = () => reduceMQ.matches;
