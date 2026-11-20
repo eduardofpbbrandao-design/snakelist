@@ -2838,7 +2838,7 @@ float slScale(vec2 m) {
       controls = Controls(canvas, cam, {
         reduce, maxEl: (80 * Math.PI) / 180,
         minEl: (d) => { const near = sstep(info.dFit * 0.6, Math.max(info.dMin * 2, info.F.Hl * 4), d); return Math.max(lerp(8, 2, near) * Math.PI / 180, Math.asin(clamp((lerp(info.hMax * 1.3, info.F.w0 * 0.6, near) - targetFor(d).y) / d, 0, 0.95))); }, // v5.05: close up you can look from the side (at the eyes, the mouth, the organs)
-        dMin: () => info.dMin, dMax: () => info.dMax * Math.max(sizeBusy() ? info.scaleK : 1, fx.zoomOut), kick: () => kick(), reset: () => resetView(),
+        dMin: () => info.dMin, dMax: () => info.dMax * Math.max(sizeBusy() ? info.scaleK : 1, fx.zoomOut), kick: () => kick(), reset: () => { setCamBtn(null); if (sizeSt.on) sizeFrame(); else resetView(); }, // (R: like Reset)
         panMax: () => Math.max(info.Rb * 1.4, (fx.reach || 0) * 1.1), // you can fly around the snake, never away from it
         locked: () => fx.locked,
         user: () => { if (camBtn) setCamBtn(null); }, // v5.74: you moved the camera yourself: no camera button is lit any more

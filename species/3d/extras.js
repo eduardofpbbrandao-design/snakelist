@@ -1490,6 +1490,7 @@ export function create(V) {
     const r = V.canvas.getBoundingClientRect(), ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), V.cam);
     const objs = []; if (V.group) V.group.traverse((o) => { if (o.isMesh && o.visible !== false) { if (o.geometry && !o.geometry.boundingSphere) o.geometry.computeBoundingSphere(); objs.push(o); } });
     if (show) for (const o of show.objs) o.traverse((q) => { if (q.isMesh) objs.push(q); });
+    { const pe = V.scene.getObjectByName('sizePerson'); if (pe) pe.traverse((q) => { if (q.isMesh) objs.push(q); }); } // (v5.74: tapping the person in Size vs person is not empty space)
     V.scene.updateMatrixWorld(); return ray.intersectObjects(objs, false).length > 0;
   }
   function leaveModes() {
