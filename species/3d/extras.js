@@ -1485,7 +1485,7 @@ export function create(V) {
     phases.push([4.6, (u, s) => {
       // jaw walking: the prey goes in in small pulls, one side of the jaw then the other (the head turns a little each way)
       const e = ease(u), pull = e - Math.sin(e * TAU * 6) / (TAU * 6);
-      held = true; xp = lerp(xp0, xIn, Math.pow(clamp(pull, 0, 1), 1.45)); // (v5.78: slower at first, so you see the prey going in between the jaws) const yaw = 0.05 * Math.sin(e * TAU * 3) * (1 - sstep(0.85, 1, u));
+      held = true; xp = lerp(xp0, xIn, Math.pow(clamp(pull, 0, 1), 1.45)); /* (v5.78: slower at first, so you see the prey going in between the jaws) */ const yaw = 0.05 * Math.sin(e * TAU * 3) * (1 - sstep(0.85, 1, u));
       R.setPose(R.fore({ len: st.len, phi, lift, coil: 0, yaw, base: B })); bulgeAt(xp, 1); R.apply();
       const inside = sstep(0, 0.15, u) * (1 - sstep(0.82, 1, u)); // the jaws spread round the prey and walk over it, one side then the other (the "pterygoid walk")
       setMouth(lerp(tHold, tNeed, Math.sin(Math.min(1, u * 1.2) * Math.PI)), { spread: spreadNeed * inside, walk: Math.sin(e * TAU * 3) * inside * (spreadNeed > 0.05 ? 1 : 0.6) }); say(T.swallow);
