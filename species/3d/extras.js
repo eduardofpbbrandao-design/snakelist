@@ -1571,7 +1571,7 @@ export function create(V) {
         const [n0, n1] = zoneOf(p), dist = camDist(p), a = partAnchor(p), near = a ? 1 - sstep(dC * 0.55, dC * 1.15, a.distanceTo(lookAt)) : 0;
         p.rev = st.sel === p || (st.sel && st.sel.key === 'region-' + p.region) ? 1 : 1 - sstep(n0, n1, dist);
         // labels: detail parts with their parts; the big organs from a bit further away; head parts only near the head
-        p.lr = (p.detail || p.region === 'head' ? p.rev : 1 - sstep(n0 * 2.2, n1 * 2.2, dist)) * lerp(near, 1, sstep(st.data.svl * 0.2, st.data.svl * 0.4, dC)); // (close in: only what you are looking at)
+        p.lr = (p.detail || p.region === 'head' ? p.rev : 1 - sstep(n0 * 2.2, n1 * 2.2, dist)) * lerp(near, 1, sstep(Math.max(st.data.svl * 0.2, V.info.F.Hl * 4), Math.max(st.data.svl * 0.4, V.info.F.Hl * 8), dC)); // (close in: only what you are looking at)
         if (!p.detail) continue;
         for (const m of p.meshes) {
           if (!m.material || !m.userData.detail) continue;
@@ -1618,7 +1618,7 @@ export function create(V) {
       cand.slice(most).forEach((r) => { r.want = false; });
       const list = cand.slice(0, most);
       const boxes = obstacles().slice(), gap = 6;
-      const overOk = d < st.data.svl * 0.2; // (right up close the see-through body fills the view: labels may lie over it, just not over the other labels' dots)
+      const overOk = d < Math.max(st.data.svl * 0.2, F.Hl * 4.2); // (right up close the see-through body fills the view: labels may lie over it, just not over the other labels' dots)
       const dots = overOk ? list.map((r) => [r.sx, r.sy]) : [];
       const free = (box) => box.y >= 4 && box.y + box.h <= h - 4 && box.x >= 4 && box.x + box.w <= w - 4 && !boxes.some((q) => box.x < q.x + q.w + gap && box.x + box.w + gap > q.x && box.y < q.y + q.h + gap && box.y + box.h + gap > q.y) && (overOk ? !dots.some(([x, y]) => x > box.x - 8 && x < box.x + box.w + 8 && y > box.y - 8 && y < box.y + box.h + 8) : !hitsSnake(box));
       list.forEach((r, n) => {
