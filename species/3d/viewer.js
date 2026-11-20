@@ -2535,7 +2535,7 @@ function Controls(dom, cam, opt) {
       const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; if (mid0) { const m = pan(mid[0] - mid0[0], mid[1] - mid0[1]); last = now; st.vpx = m[0] / dt * 16; st.vpz = m[1] / dt * 16; } mid0 = mid; opt.kick(); }
   };
   const onUp = (e) => { ptrs.delete(e.pointerId); if (ptrs.size < 2) { pinch0 = 0; mid0 = null; } if (!ptrs.size) { st.dragging = false; panBtn = false; if (reduce() || performance.now() - last > 80) { st.vaz = st.vel = st.vpx = st.vpz = 0; } opt.kick(); } };
-  const onWheel = (e) => { e.preventDefault(); if (locked()) return; user(); const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1), f = Math.exp(clamp(dy, -120, 120) * 0.0016); // (v5.78: line and page scrolling (Firefox) zoom as much as pixel scrolling) if (!(opt.pointZoom && opt.pointZoom(e.clientX, e.clientY, f))) zoom(f); }; // v5.12: towards the point under the pointer
+  const onWheel = (e) => { e.preventDefault(); if (locked()) return; user(); const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1), f = Math.exp(clamp(dy, -120, 120) * 0.0016); /* (v5.78: line and page scrolling (Firefox) zoom as much as pixel scrolling) */ if (!(opt.pointZoom && opt.pointZoom(e.clientX, e.clientY, f))) zoom(f); }; // v5.12: towards the point under the pointer
   const onKey = (e) => {
     const k = e.key, s = 0.17;
     if (locked()) return;
@@ -2582,7 +2582,7 @@ function Controls(dom, cam, opt) {
       if (u >= 1) tw = null; else moving = true;
     }
     if (st.goal) {
-      const k = 1 - Math.exp(-dt * 12); st.az += (st.goal.az - st.az) * k; st.d *= Math.pow(st.goal.d / st.d, k); // (v5.78: zoom glides in proportion - the same feel close up and far away) st.el = limitEl(st.el + (st.goal.el - st.el) * k, st.d); st.px += (st.goal.px - st.px) * k; st.pz += (st.goal.pz - st.pz) * k;
+      const k = 1 - Math.exp(-dt * 12); st.az += (st.goal.az - st.az) * k; st.d *= Math.pow(st.goal.d / st.d, k); /* (v5.78: zoom glides in proportion - the same feel close up and far away) */ st.el = limitEl(st.el + (st.goal.el - st.el) * k, st.d); st.px += (st.goal.px - st.px) * k; st.pz += (st.goal.pz - st.pz) * k;
       if (Math.abs(st.goal.az - st.az) < 1e-4 && Math.abs(st.goal.d - st.d) / st.d < 1e-4 && Math.abs(st.goal.el - st.el) < 1e-4 && Math.hypot(st.goal.px - st.px, st.goal.pz - st.pz) < st.d * 1e-4) { st.az = st.goal.az; st.d = st.goal.d; st.px = st.goal.px; st.pz = st.goal.pz; st.goal = null; } else moving = true;
     }
     st.el = limitEl(st.el, st.d);
@@ -2855,7 +2855,7 @@ export function mount(host, opts) {
       map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1).multiplyScalar(S.relief != null ? S.relief : (S.keel || 0) > 0.3 ? 1 : 0.85), // (v5.58: smooth scales lie flatter than keeled ones)
       aoMap: tiles.cavity, aoMapIntensity: 0.4 + 1.65 * (S.cavity != null ? S.cavity : 0.45), roughnessMap: tiles.cavity, // (v5.78: smooth, tightly overlapping scales hide less skin between them)
       ...(quality === 'low' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
-      roughness: lerp(0.82, 0.5, gl), metalness: 0, clearcoat: 0.12 + gl * 0.6, clearcoatRoughness: lerp(0.5, 0.12, gl * gl), // (v5.78: glossy snakes get the crisp, mirror-like highlights of real smooth scales) sheen: S.sheen != null ? S.sheen : 0.12, sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
+      roughness: lerp(0.82, 0.5, gl), metalness: 0, clearcoat: 0.12 + gl * 0.6, clearcoatRoughness: lerp(0.5, 0.12, gl * gl), /* (v5.78: glossy snakes get the crisp, mirror-like highlights of real smooth scales) */ sheen: S.sheen != null ? S.sheen : 0.12, sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
       iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.85,
     });
     // the cavity map also darkens the skin between scales in direct light (as in real snakes)
