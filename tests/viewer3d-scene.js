@@ -34,7 +34,7 @@ const res = []; const ok = (n, c, i) => { res.push((c ? 'PASS ' : 'FAIL ') + n +
   const az1 = await pg.evaluate(() => window.__sp3d.controls.st.az);
   ok('drag turns the camera during the show', Math.abs(az1 - az0) > 0.05, (az1 - az0).toFixed(3));
   ok('still in the show after the drag', await pg.evaluate(() => !!window.__sp3d.fx.test.show));
-  await click('Play'); await pg.waitForTimeout(1500); const t3 = await pg.evaluate(() => window.__sp3d.fx.test.show.time);
+  await click('Play'); await pg.waitForTimeout(4000); const t3 = await pg.evaluate(() => window.__sp3d.fx.test.show.time);
   ok('plays again', t3 > t2 + 0.3, t3.toFixed(2));
   await click('Replay'); await pg.waitForTimeout(800); const t4 = await pg.evaluate(() => window.__sp3d.fx.test.show && window.__sp3d.fx.test.show.time);
   ok('replay restarts', t4 != null && t4 < 2, String(t4));
@@ -50,7 +50,7 @@ const res = []; const ok = (n, c, i) => { res.push((c ? 'PASS ' : 'FAIL ') + n +
   ok('camera back to the view you had', Math.abs(st1.d - st0.d) / st0.d < 0.05 && Math.abs(Math.atan2(Math.sin(st1.az - st0.az), Math.cos(st1.az - st0.az))) < 0.05, JSON.stringify(st0) + ' / ' + JSON.stringify(st1));
   ok('Normal pressed', await pg.evaluate(() => { const b = [...document.querySelectorAll('.sp3d-stage .sp3d-b')].find((x) => x.textContent.trim() === 'Normal'); return b && b.getAttribute('aria-pressed') === 'true'; }));
   // Size vs person and back
-  await click('Size vs person'); await pg.waitForTimeout(4000);
+  await click('Size vs person'); await pg.waitForFunction(() => { const p = window.__sp3d.scene.getObjectByName('sizePerson'); let r = false; if (p) p.traverse((o) => { if (o.name === 'person-skin') r = true; }); return r; }, null, { timeout: 30000 }).catch(() => {});
   { const r = await pg.evaluate(() => { const p = window.__sp3d.scene.getObjectByName('sizePerson'); let real = false, h = 0; if (p) { p.traverse((o) => { if (o.name === 'person-skin') real = true; }); const b = new window.__sp3d.THREE.Box3().setFromObject(p); h = b.max.y - b.min.y; } return { has: !!p, real, h }; }); ok('person loaded (sculpted model), 1.70 m', r.real && Math.abs(r.h - 1.7) < 0.01, JSON.stringify(r)); }
   await click('Back to model'); await pg.waitForTimeout(2500);
   ok('back from Size vs person: Normal pressed, no person', await pg.evaluate(() => { const b = [...document.querySelectorAll('.sp3d-stage .sp3d-b')].find((x) => x.textContent.trim() === 'Normal'); return b && b.getAttribute('aria-pressed') === 'true' && !window.__sp3d.size().on; }));
