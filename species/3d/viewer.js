@@ -1072,7 +1072,7 @@ const HEAD_X = 1.3; // the head textures run from the snout tip to 1.3 head leng
 // suture is a fine line)
 const GW = 0.0075;
 function headData(P, F, quality) {
-  const Hl = F.Hl, Xh = Hl * HEAD_X, low = quality !== 'high', Wh = low ? 256 : 512, Hh = low ? 128 : 256;
+  const Hl = F.Hl, Xh = Hl * HEAD_X, low = quality === 'low', Wh = low ? 256 : quality === 'high' ? 1024 : 512, Hh = Wh / 2; // (v5.78: twice as sharp at High - the head scales stay crisp at the closest zoom)
   const Lo = headLayout(P, F, eyeOf(P, F)), { seeds, hc, mA, J, wrapA } = Lo, H = P.head, plan = P.plan || 'colubrid';
   const n = Wh * Hh, fd = new Float32Array(n), id1 = new Int32Array(n), id2 = new Int32Array(n), d1a = new Float32Array(n);
   const hcR = new Float32Array(Hh); for (let r = 0; r < Hh; r++) hcR[r] = hc(((r + 0.5) / Hh) * Xh); // (the girth per row, worked out once)
@@ -2682,13 +2682,16 @@ function uiCSSInject() {
 // v5.78: species rebuilt against photos in this version, ahead of the next models.json build (the same values are in
 // tools/auto_models.py CURATED, so a rebuild gives the same result): they override the profile's head
 const SPECIES_LOOK = {
-  'opheodrys-vernalis': { h: { iris: '#2a2214', irisInner: '#4a3c22', eyeRing: '#d9c27a', pupilW: 0.24, eye: null, eyeL: 0.22, eyeX: 0.37, eyeA: 50, len: 0.04, w: 0.9, h: 0.62, snoutH: 0.6, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.07, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.9, hFixed: 1 } },
+  'opheodrys-vernalis': { h: { iris: '#2a2214', irisInner: '#4a3c22', eyeRing: '#d9c27a', pupilW: 0.24, eye: null, eyeL: 0.22, eyeX: 0.37, eyeA: 50, len: 0.04, w: 0.9, h: 0.62, snoutH: 0.6, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.07, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.9, hFixed: 1, groove: 0.22, headRelief: 0.2, snout: 0.5 }, body: { hn: 1.3 },
+    scales: { cavity: 0.22, gloss: 0.78, relief: 0.55 }, colors: { edgeK: 0.25 } },
 };
 function withLook(p, id) {
   const L = SPECIES_LOOK[id]; if (!L || !p) return p;
   const q = JSON.parse(JSON.stringify(p)), tgt = q.auto ? (q.auto.h = q.auto.h || {}) : (q.head = q.head || {});
   for (const k in L.h) { if (L.h[k] == null) delete tgt[k]; else tgt[k] = L.h[k]; }
   if (L.body) Object.assign(q.auto ? (q.auto.bx = q.auto.bx || {}) : (q.body = q.body || {}), L.body);
+  if (L.scales) Object.assign(q.auto ? (q.auto.sx = q.auto.sx || {}) : (q.scales = q.scales || {}), L.scales);
+  if (L.colors) Object.assign(q.auto ? (q.auto.cx = q.auto.cx || {}) : (q.colors = q.colors || {}), L.colors);
   return q;
 }
 export function mount(host, opts) {
@@ -2845,7 +2848,7 @@ export function mount(host, opts) {
       map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1).multiplyScalar(S.relief != null ? S.relief : (S.keel || 0) > 0.3 ? 1 : 0.85), // (v5.58: smooth scales lie flatter than keeled ones)
       aoMap: tiles.cavity, aoMapIntensity: 1.15, roughnessMap: tiles.cavity,
       ...(quality === 'low' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
-      roughness: lerp(0.82, 0.58, gl), metalness: 0, clearcoat: 0.12 + gl * 0.5, clearcoatRoughness: lerp(0.5, 0.22, gl), sheen: S.sheen != null ? S.sheen : 0.12, sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
+      roughness: lerp(0.82, 0.5, gl), metalness: 0, clearcoat: 0.12 + gl * 0.6, clearcoatRoughness: lerp(0.5, 0.12, gl * gl), // (v5.78: glossy snakes get the crisp, mirror-like highlights of real smooth scales) sheen: S.sheen != null ? S.sheen : 0.12, sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
       iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.85,
     });
     // the cavity map also darkens the skin between scales in direct light (as in real snakes)
