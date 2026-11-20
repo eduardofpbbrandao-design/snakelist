@@ -1170,6 +1170,8 @@ function headData(P, F, quality) {
       // (pale along the lips, fading out higher up the lip scales; v5.73: a soft wash from the mouth line, not filling each
       // lip scale to its top edge - a row of pale blocks with hard tops read as bared teeth)
       if (lipK && (lab || (x < J * Hl * 1.02 && Math.abs(Math.abs(a) - mA) < 0.1))) { const dm = Math.abs(Math.abs(a) - mA); col = lipC; al = lipK * (s.k === 'rost' && Math.abs(a) > mA - 0.16 ? 1 - sstep(0.06, 0.16, dm) * 0.6 : 1 - sstep(0.015, Math.abs(a) > mA ? 0.07 : bars ? 0.11 : 0.075, dm)) * (1 - sstep(J * 0.9, J * 1.02, x / Hl)); }
+      // v5.78: head.lipFull - the whole upper and lower lip scales and the chin pale, with the sharp edge real green snakes have
+      if (H.lipFull && (lab || s.k === 'chin' || s.k === 'gul' || Math.abs(a) > mA) && x < J * Hl * 1.08) { col = lipC; al = 0.95 * (1 - sstep(J * 0.98, J * 1.08, x / Hl)) * (Math.abs(a) > mA ? 1 : 1 - 0.25 * sstep(mA - 0.2, mA - 0.32, Math.abs(a))); }
       if (bars && x < J * Hl * 1.05) { // dark bars along the sutures between lip scales, widest at the lip
         let bd = 1e9, bk = 1, aa = Math.abs(a); for (const b of barSegs) { if (Math.abs(x - b[0]) > b[3] * 3) continue; const t = clamp((aa - b[1]) / (b[2] - b[1]), 0, 1), w = lerp(b[3], b[3] * 0.45, t), e = Math.hypot(x - lerp(b[0], b[4], t), (aa - lerp(b[1], b[2], t)) * hcR[r]) / w; if (e < bd) { bd = e; bk = b[5]; } }
         if (bd < 1.4) { const w2 = 0.6 * bk * (1 - sstep(0.6, 1.3, bd)); col = col ? mixc(col, barC, w2 / Math.max(w2, al || w2)) : barC; al = Math.max(al, w2); } // (v5.73: bk - fainter and shorter on the lower lip; seen from below they read as teeth)
@@ -1516,12 +1518,15 @@ function buildEyes(P, F, body, pat) {
   const bulge = H.bulge != null ? H.bulge : 0.06; // how far the spectacle rises above the head's outline (in eye radii; v5.73: flush with the head, not a bulging ball)
   for (const sg of [1, -1]) {
     const th0 = sg * body.eyeA, c = body.surf(xe, th0, true).p;
+    // v5.78: the eye is round on the skin itself - the grid's steps round the head and along it are measured on the surface
+    // there (the head's average radius made it an oval or a teardrop on a flat-sided head)
+    const eA0 = 0.01, arcA = body.surf(xe, th0 + eA0, true).p.distanceTo(body.surf(xe, th0 - eA0, true).p) / (2 * eA0), arcX = body.surf(xe + R0 * 0.05, th0, true).p.distanceTo(body.surf(xe - R0 * 0.05, th0, true).p) / (R0 * 0.1);
     const eye = [], spec = [], uv = [], col = [], spa = [];
     for (let i = 0; i <= NR; i++) {
       const rho = (i / NR) * 1.18;
       for (let j = 0; j <= NA; j++) {
         const ph = (j / NA) * TAU, a = rho * Math.cos(ph), b = rho * Math.sin(ph);
-        const x = xe + a * R0, th = th0 - sg * b * (R0 / rl);
+        const x = xe + a * R0 / Math.max(0.5, arcX), th = th0 - sg * b * (R0 / Math.max(1e-9, arcA));
         const p = body.surf(x, th, true).p, n = body.surfNormal(x, th);
         if (n.dot(p.clone().sub(body.spine(x))) < 0) n.negate();
         // the spectacle: a dome over the eye, meeting the skin at its rim, then a steep tuck under the skin past it; the iris
@@ -1581,7 +1586,9 @@ function buildMouth(P, F, body, group, eyes, pat) {
   const lower = [], upper = [];
   for (let i = 0; i < body.nR; i++) { const x = body.ringX[i]; if (x > xEnd) break;
     for (let j = 0; j <= M; j++) { const th = TAU * (j / M) - Math.PI; (Math.abs(th) > mA ? lower : upper).push(i * (M + 1) + j, skinW(x, th)); } }
-  const UP = 0.72, DN = 0.28; // share of the gape: top of the head up, lower jaw down
+  // share of the gape: top of the head up, lower jaw down (v5.78: the lower jaw drops only as far as the ground under the chin
+  // allows - it used to swing down through the ground; the skull lifts the rest, as a real snake's does)
+  const chinH = Math.max(0, body.surf(Hl * 0.06, Math.PI).p.y), DN = clamp(Math.asin(clamp((chinH + F.Hh(Hl * 0.3) * 0.25) / Math.max(1e-6, xh * 0.95), 0, 1)) / Math.max(0.1, gape), 0.05, 0.28), UP = 1 - DN;
   // the skin along the mouth line is cut while the mouth is open (otherwise it stretches across and hides the inside)
   const ix = geo.index, cut = [];
   const isLow = (j) => Math.abs(TAU * (j / M) - Math.PI) > mA;
@@ -1649,9 +1656,9 @@ function buildMouth(P, F, body, group, eyes, pat) {
     g.setIndex(idx); g.computeVertexNormals();
     return { g, o: g.attributes.position.array.slice(), xv, per, row: (x, s) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = NL + Math.round(s * NS); return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); }, gum: (x, side) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = side > 0 ? NL - 1 : per - NL; return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); } };
   }
-  const lining = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.4, metalness: 0, clearcoat: 0.4, clearcoatRoughness: 0.28, emissive: P.head.mouthColor ? new THREE.Color(P.head.mouthColor).multiplyScalar(0.25) : new THREE.Color('#6a3036'), emissiveIntensity: 0.5, /* (v5.62: the glow takes the species' mouth colour) */ side: THREE.DoubleSide, envMapIntensity: 0.45 }); // (a faint glow stands in for light passing through the soft tissue)
+  const lining = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.45, metalness: 0, clearcoat: 0.85, clearcoatRoughness: 0.12, sheen: 0.3, sheenRoughness: 0.5, sheenColor: new THREE.Color('#ffd6d6'), /* (v5.78: a wet, restrained sheen) */ emissive: P.head.mouthColor ? new THREE.Color(P.head.mouthColor).multiplyScalar(0.25) : new THREE.Color('#6a3036'), emissiveIntensity: 0.3, /* (v5.62: the glow takes the species' mouth colour; v5.78: fainter - the soft shadows inside give the depth) */ side: THREE.DoubleSide, envMapIntensity: 0.45 }); // (a faint glow stands in for light passing through the soft tissue)
   const roof = jawLining(true), floorJ = jawLining(false);
-  const roofM = lining.clone(); roofM.emissive.set('#b06a6e'); roofM.emissiveIntensity = 0.55; // (v5.53: the roof faces down, away from the light: a little more glow keeps it pink, not maroon)
+  const roofM = lining.clone(); roofM.emissive.set('#b06a6e'); roofM.emissiveIntensity = 0.35; // (v5.53: the roof faces down, away from the light: a little more glow keeps it pink, not maroon)
   const palate = new THREE.Mesh(roof.g, roofM), floor = new THREE.Mesh(floorJ.g, lining);
   palate.receiveShadow = floor.receiveShadow = true;
   palate.castShadow = floor.castShadow = true; // v5.09: with the mouth open the head is an open shell; the lining closes it in the shadow too (no thin loop on the ground)
@@ -2682,7 +2689,7 @@ function uiCSSInject() {
 // v5.78: species rebuilt against photos in this version, ahead of the next models.json build (the same values are in
 // tools/auto_models.py CURATED, so a rebuild gives the same result): they override the profile's head
 const SPECIES_LOOK = {
-  'opheodrys-vernalis': { h: { iris: '#2a2214', irisInner: '#4a3c22', eyeRing: '#d9c27a', pupilW: 0.24, eye: null, eyeL: 0.22, eyeX: 0.37, eyeA: 50, len: 0.04, w: 0.9, h: 0.62, snoutH: 0.6, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.07, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.9, hFixed: 1, groove: 0.22, headRelief: 0.2, snout: 0.5 }, body: { hn: 1.3 },
+  'opheodrys-vernalis': { h: { iris: '#2a2214', irisInner: '#4a3c22', eyeRing: '#d9c27a', pupilW: 0.24, eye: null, eyeL: 0.22, eyeX: 0.37, eyeA: 50, len: 0.04, w: 0.9, h: 0.62, snoutH: 0.6, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.07, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.9, hFixed: 1, groove: 0.22, headRelief: 0.2, snout: 0.5, lipFull: 1 }, body: { hn: 1.3 },
     scales: { cavity: 0.22, gloss: 0.78, relief: 0.55 }, colors: { edgeK: 0.25 } },
 };
 function withLook(p, id) {
@@ -2846,7 +2853,7 @@ export function mount(host, opts) {
     const mat = new THREE.MeshPhysicalMaterial({
       // v4.72: raised 3D scales - stronger relief, deeper gaps between them, and real bumps on good devices
       map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1).multiplyScalar(S.relief != null ? S.relief : (S.keel || 0) > 0.3 ? 1 : 0.85), // (v5.58: smooth scales lie flatter than keeled ones)
-      aoMap: tiles.cavity, aoMapIntensity: 1.15, roughnessMap: tiles.cavity,
+      aoMap: tiles.cavity, aoMapIntensity: 0.4 + 1.65 * (S.cavity != null ? S.cavity : 0.45), roughnessMap: tiles.cavity, // (v5.78: smooth, tightly overlapping scales hide less skin between them)
       ...(quality === 'low' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
       roughness: lerp(0.82, 0.5, gl), metalness: 0, clearcoat: 0.12 + gl * 0.6, clearcoatRoughness: lerp(0.5, 0.12, gl * gl), // (v5.78: glossy snakes get the crisp, mirror-like highlights of real smooth scales) sheen: S.sheen != null ? S.sheen : 0.12, sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
       iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.85,
@@ -3015,7 +3022,15 @@ float slScale(vec2 m) {
       if (!alive || ctx.scene !== myScene) return false;
       const tE = performance.now(); env.name = envName; applyEnv(ctx, P, F, poseInfo, env); perfT('applyEnv', tE); if (!cScene.checked) setSceneVisible(false); dirty = true; shadowDirty = true; kick(); return true;
     }).catch(() => false) : Promise.resolve(false);
-    ctx.envReady = Promise.all([ctx.envReady, ctx.natureReady, ctx.patternReady]).then((r) => r[0]); // (tests wait for everything)
+    // v5.78: nothing is drawn behind the loading cover (each hidden frame used to cost a full render with shadows while the
+    // pattern, the plants and the sky were still being made); once all is ready the shaders are compiled in the background
+    // (compileAsync: the browser compiles them off the main thread where it can), then the first picture is drawn
+    holdRender = true; const sceneB = scene;
+    ctx.envReady = Promise.all([ctx.envReady, ctx.natureReady, ctx.patternReady]).then((r) => {
+      const go = () => { if (ctx.scene === sceneB) { holdRender = false; kick(); } return r[0]; };
+      if (!renderer.compileAsync || !cam || ctx.scene !== sceneB) return go();
+      return Promise.race([renderer.compileAsync(ctx.scene, cam).catch(() => {}), new Promise((res) => setTimeout(res, 5000))]).then(go);
+    }).catch(() => { if (ctx.scene === sceneB) { holdRender = false; kick(); } return false; }); // (tests wait for everything)
     { const pr = ctx.envReady; busyFor = pr; busyShow(); pr.finally(() => busyHide(pr)); }
 
     const headPos = body.surf(F.Hl * 0.45, 0).p;
@@ -3134,6 +3149,7 @@ float slScale(vec2 m) {
   function frame() {
     raf = 0; if (!alive || lost || !cam) return;
     if (document.hidden || !host.isConnected || host.offsetParent === null && !document.fullscreenElement) { dirty = true; return; } // paused while hidden
+    if (holdRender) return; // (still loading: see build)
     const tF0 = performance.now(); colList = null;
     const camMoving = controls.update(); let moving = false;
     // v5.73: wind, water and the snake's idle life run on a clock of their own (no motion at all with reduced motion)
@@ -3164,7 +3180,7 @@ float slScale(vec2 m) {
       clearTimeout(ambT); ambT = setTimeout(() => { ambOnly = true; kick(); }, performance.now() - lastUser > 45000 ? 125 : quality === 'low' ? 50 : quality === 'medium' ? 42 : 30); // (left alone for a while: slower still, to save the battery)
     }
   }
-  let ambT = 0, shadowAge = 0, ambOnly = false, lastUser = performance.now(), lastF = 0, colList = null, shadowDirty = true;
+  let holdRender = false, ambT = 0, shadowAge = 0, ambOnly = false, lastUser = performance.now(), lastF = 0, colList = null, shadowDirty = true;
   // v5.78: dynamic resolution - while the view moves, if frames take too long (under ~40 per second) the picture is drawn with
   // fewer pixels (down to 60% of the full pixel ratio), and as soon as it is still again it is drawn once more at full
   // sharpness. The change is gradual and has a dead band, so the resolution never flickers up and down.
