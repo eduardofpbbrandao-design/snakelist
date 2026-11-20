@@ -3042,7 +3042,7 @@ float slScale(vec2 m) {
     holdRender = true; const sceneB = scene;
     ctx.envReady = Promise.all([ctx.envReady, ctx.natureReady, ctx.patternReady]).then((r) => {
       const go = () => { if (ctx.scene === sceneB) { holdRender = false; kick(); } return r[0]; };
-      if (!renderer.compileAsync || !cam || ctx.scene !== sceneB) return go();
+      if (!renderer.compileAsync || !cam || ctx.scene !== sceneB || !renderer.extensions.has('KHR_parallel_shader_compile')) return go();
       return Promise.race([renderer.compileAsync(ctx.scene, cam).catch(() => {}), new Promise((res) => setTimeout(res, 5000))]).then(go);
     }).catch(() => { if (ctx.scene === sceneB) { holdRender = false; kick(); } return false; }); // (tests wait for everything)
     { const pr = ctx.envReady; busyFor = pr; busyShow(); pr.finally(() => busyHide(pr)); }
