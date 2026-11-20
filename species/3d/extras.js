@@ -1700,10 +1700,10 @@ export function create(V) {
     // v5.78: the heart with its shape: a ventricle tapering to a point towards the tail, two atria in front of it, the
     // aortic arches leaving forwards
     const heartGeo = (hx0) => { const hl = (heart1 - heart0) * 0.5, rr = rB(hx0), parts = [];
-      const v = new THREE.SphereGeometry(1, 28, 20), pa = v.attributes.position; for (let i = 0; i < pa.count; i++) { const zz = pa.getZ(i), k = zz > 0 ? 1 - 0.55 * zz * zz : 1; pa.setX(i, pa.getX(i) * k); pa.setY(i, pa.getY(i) * k); } // (pointed towards the tail: +z is along the body, towards the tail)
+      const v = new THREE.SphereGeometry(1, 28, 20), pa = v.attributes.position; for (let i = 0; i < pa.count; i++) { const zz = pa.getZ(i), k = zz > 0 ? 1 - 0.32 * zz * zz : 1; pa.setX(i, pa.getX(i) * k); pa.setY(i, pa.getY(i) * k); } // (pointed towards the tail: +z is along the body, towards the tail)
       const fv = B.frameAt(hx0 + hl * 0.15), cv = B.spine(hx0 + hl * 0.15).addScaledVector(fv.U, -0.34 * F.Hh(hx0)); v.scale(rr * 0.33, rr * 0.34, hl * 0.95); v.computeVertexNormals(); v.applyMatrix4(new THREE.Matrix4().makeBasis(fv.S.clone().negate(), fv.U, fv.T).setPosition(cv)); v.userData.x = hx0; parts.push(v);
       for (const sg of [1, -1]) parts.push(blob(hx0 - hl * 0.7, sg * 0.16, -0.26, hl * 0.32, rr * 0.22, F.W(hx0) * 0.2, 18));
-      for (const sg of [1, -1]) { const g2 = sweep(hx0 - hl * 1.6, hx0 - hl * 0.5, sg * 0.09, -0.12, () => rr * 0.055, 12, 8); parts.push(g2); }
+      for (const sg of [1, -1]) { const g2 = sweep(hx0 - hl * 1.15, hx0 - hl * 0.55, sg * 0.09, -0.16, () => rr * 0.06, 12, 8); parts.push(g2); }
       return mergeG(parts); };
     add('heart', 'Heart', (climber ? 'Close to the head in climbing snakes, so blood still reaches the brain when they hold the head up. ' : marine ? 'Nearer the middle of the body in sea snakes. ' : 'About a quarter of the way along the body. ') + 'It has three chambers and can slide a little, so big prey can squeeze past.', 'body', heartGeo(hx), om(C.heart, { roughness: 0.38, clearcoat: 0.6 }));
     add('lung', 'Right lung', 'Snakes have one long working lung on the right (the left one is tiny or missing), because their body is so narrow.', 'body', sweep(heart1 * 1.0, lungEnd, -0.2, 0.22, (x, t) => rB(x) * 0.36 * (1 - t * 0.2), 90, 12), om(C.lung, { roughness: 0.75, map: speckle('#e2a19d', 1600, 0.25, 4) }));
