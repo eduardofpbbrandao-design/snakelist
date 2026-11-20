@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=573'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=573'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=574'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=574'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -1072,7 +1072,7 @@ const HEAD_X = 1.3; // the head textures run from the snout tip to 1.3 head leng
 // suture is a fine line)
 const GW = 0.0075;
 function headData(P, F, quality) {
-  const Hl = F.Hl, Xh = Hl * HEAD_X, low = quality !== 'high', Wh = low ? 256 : 512, Hh = low ? 128 : 256;
+  const Hl = F.Hl, Xh = Hl * HEAD_X, low = quality === 'low', Wh = low ? 256 : quality === 'high' ? 1024 : 512, Hh = Wh / 2; // (v5.78: twice as sharp at High - the head scales stay crisp at the closest zoom)
   const Lo = headLayout(P, F, eyeOf(P, F)), { seeds, hc, mA, J, wrapA } = Lo, H = P.head, plan = P.plan || 'colubrid';
   const n = Wh * Hh, fd = new Float32Array(n), id1 = new Int32Array(n), id2 = new Int32Array(n), d1a = new Float32Array(n);
   const hcR = new Float32Array(Hh); for (let r = 0; r < Hh; r++) hcR[r] = hc(((r + 0.5) / Hh) * Xh); // (the girth per row, worked out once)
@@ -1170,6 +1170,9 @@ function headData(P, F, quality) {
       // (pale along the lips, fading out higher up the lip scales; v5.73: a soft wash from the mouth line, not filling each
       // lip scale to its top edge - a row of pale blocks with hard tops read as bared teeth)
       if (lipK && (lab || (x < J * Hl * 1.02 && Math.abs(Math.abs(a) - mA) < 0.1))) { const dm = Math.abs(Math.abs(a) - mA); col = lipC; al = lipK * (s.k === 'rost' && Math.abs(a) > mA - 0.16 ? 1 - sstep(0.06, 0.16, dm) * 0.6 : 1 - sstep(0.015, Math.abs(a) > mA ? 0.07 : bars ? 0.11 : 0.075, dm)) * (1 - sstep(J * 0.9, J * 1.02, x / Hl)); }
+      // v5.78: head.lipFull - the whole upper and lower lip scales and the chin pale, with the sharp edge real green snakes have
+      if (H.lipFull && x < J * Hl * 1.05) { const band = H.lipFull > 0.01 && H.lipFull < 1 ? H.lipFull : 0.12, aa2 = Math.abs(a); // (band: how far above the mouth line the upper lip scales are pale)
+        const bnd = band * (1 - 0.6 * sstep(J * 0.6, J * 1.0, x / Hl)), k2 = aa2 >= mA ? 1 : sstep(mA - bnd - 0.012, mA - bnd + 0.012, aa2); if (k2 > 0.001) { col = lipC; al = 0.95 * k2 * (1 - sstep(J * 0.92, J * 1.05, x / Hl)); } }
       if (bars && x < J * Hl * 1.05) { // dark bars along the sutures between lip scales, widest at the lip
         let bd = 1e9, bk = 1, aa = Math.abs(a); for (const b of barSegs) { if (Math.abs(x - b[0]) > b[3] * 3) continue; const t = clamp((aa - b[1]) / (b[2] - b[1]), 0, 1), w = lerp(b[3], b[3] * 0.45, t), e = Math.hypot(x - lerp(b[0], b[4], t), (aa - lerp(b[1], b[2], t)) * hcR[r]) / w; if (e < bd) { bd = e; bk = b[5]; } }
         if (bd < 1.4) { const w2 = 0.6 * bk * (1 - sstep(0.6, 1.3, bd)); col = col ? mixc(col, barC, w2 / Math.max(w2, al || w2)) : barC; al = Math.max(al, w2); } // (v5.73: bk - fainter and shorter on the lower lip; seen from below they read as teeth)
@@ -1474,7 +1477,7 @@ function eyeTexture(P) {
     for (let i = 0; i < 520; i++) { const a = R() * TAU, r0 = RI * (0.18 + R() * 0.4), r1 = r0 + RI * (0.12 + R() * 0.38); x.strokeStyle = R() < 0.55 ? 'rgba(0,0,0,.16)' : 'rgba(255,244,210,.13)'; x.lineWidth = 0.6 + R() * 1.6; x.beginPath(); x.moveTo(C + Math.cos(a) * r0, C + Math.sin(a) * r0); x.quadraticCurveTo(C + Math.cos(a + 0.05) * (r0 + r1) / 2, C + Math.sin(a + 0.05) * (r0 + r1) / 2, C + Math.cos(a) * r1, C + Math.sin(a) * r1); x.stroke(); }
     for (let i = 0; i < 90; i++) { const a = R() * TAU, r = RI * (0.25 + R() * 0.62); x.fillStyle = R() < 0.6 ? 'rgba(10,6,2,.22)' : 'rgba(255,236,170,.18)'; x.beginPath(); x.arc(C + Math.cos(a) * r, C + Math.sin(a) * r, 1 + R() * 3.5, 0, TAU); x.fill(); }
     if (H.eyeStripe) { x.save(); x.beginPath(); x.arc(C, C, RI, 0, TAU); x.clip(); x.fillStyle = H.eyeStripe; x.globalAlpha = 0.78; x.fillRect(0, S * 0.37, S, S * 0.26); x.restore(); }
-    if (H.eyeRing) { x.strokeStyle = H.eyeRing; x.lineWidth = S * 0.03; x.beginPath(); x.arc(C, C, RI * 0.86, 0, TAU); x.stroke(); } // (v5.58: inside the rim the spectacle's edge tints, so it shows)
+    if (H.eyeRing) { x.strokeStyle = H.eyeRing; x.lineWidth = S * 0.016; x.globalAlpha = 0.85; x.beginPath(); x.arc(C, C, RI * 0.84, 0, TAU); x.stroke(); x.globalAlpha = 1; } // (v5.58: inside the rim the spectacle's edge tints, so it shows)
     // the pupil, with a soft dark halo so its edge is not a hard cut-out
     const pupil = (grow, col) => { x.fillStyle = col; x.beginPath();
       if (H.pupil === 'slit') x.ellipse(C, C, S * (H.pupilW || 0.045) + grow, S * 0.36 + grow, 0, 0, TAU);
@@ -1482,9 +1485,9 @@ function eyeTexture(P) {
       else if (H.pupil === 'round') x.arc(C, C, S * (H.pupilW || 0.2) + grow, 0, TAU);
       x.fill(); };
     if (H.pupil && H.pupil !== 'none') { pupil(S * 0.018, 'rgba(0,0,0,.35)'); pupil(0, '#020202'); }
-    // a faint painted catch-light (the real reflections come from the glossy spectacle over the eye)
-    const sh = x.createRadialGradient(S * 0.38, S * 0.34, 0, S * 0.38, S * 0.34, S * 0.1); sh.addColorStop(0, 'rgba(255,255,255,.35)'); sh.addColorStop(1, 'rgba(255,255,255,0)');
-    x.fillStyle = sh; x.beginPath(); x.arc(S * 0.38, S * 0.34, S * 0.1, 0, TAU); x.fill();
+    // v5.78: no painted catch-light any more - the clear spectacle over the eye reflects the real sky and sun (buildEyes), so
+    // the highlight moves as you go round the head; a soft shadow inside the rim instead, where the socket's edge overhangs
+    { const rs = x.createRadialGradient(C, C, RI * 0.7, C, C, RI); rs.addColorStop(0, 'rgba(0,0,0,0)'); rs.addColorStop(1, 'rgba(0,0,0,.45)'); x.fillStyle = rs; x.beginPath(); x.arc(C, C, RI, 0, TAU); x.fill(); }
     EYE_TEX.set(key, cv);
   }
   const t = new THREE.CanvasTexture(EYE_TEX.get(key)); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
@@ -1496,12 +1499,18 @@ function eyeTexture(P) {
 // so it can never stand out from any side. Over it lies the spectacle (brille), the clear scale snakes have
 // instead of eyelids: a glossy cap that blends into the skin colour of the scales round the eye.
 function buildEyes(P, F, body, pat) {
-  const H = P.head, xe = H.eyeX * F.Hl, R0 = body.eyeRad, rl = body.eyeRl, NR = 14, NA = 40, out = [];
+  const H = P.head, xe = H.eyeX * F.Hl, R0 = body.eyeRad, NR = 22, NA = 56, out = [];
   const et = eyeTexture(P); et.wrapS = et.wrapT = THREE.ClampToEdgeWrapping;
   // v5.53: the eye under it is not shiny itself (a broad sheen over the iris made it look like a pale painted disc); the
   // spectacle on top gives the small sharp highlight
-  const em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.62, metalness: 0, envMapIntensity: 0.4, clearcoat: 0.8, clearcoatRoughness: 0.06 }); // (v5.58: the wet, glassy shine of the spectacle, with its small sharp highlight - the see-through spectacle on top lost its reflections to its own transparency)
-  const sm = new THREE.MeshPhysicalMaterial({ vertexColors: true, transparent: true, roughness: 0.03, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.0, depthWrite: false, specularIntensity: 1 });
+  // v5.78: a real cornea. The iris lies deep in the socket (a little cupped, matt); over it the spectacle is a clear curved dome
+  // that only REFLECTS - black, glossy and added on top of what is under it (additive), so it is fully see-through yet keeps all
+  // its reflections of the sky and the sun, strongest at grazing angles (Fresnel). The gap between them gives the eye depth:
+  // the iris shifts under the dome as you go round the head.
+  // (the iris lies in the socket's shade: a faint glow of its own colours stands in for the light that reaches it through the
+  // clear spectacle from every side, so its fibres and the pupil's edge still read - it was a black hole)
+  const em = new THREE.MeshPhysicalMaterial({ map: et, emissiveMap: et, emissive: new THREE.Color(0.3, 0.3, 0.3), roughness: 0.5, metalness: 0, envMapIntensity: 0.3, specularIntensity: 0.35 });
+  const sm = new THREE.MeshPhysicalMaterial({ color: '#000000', vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, roughness: 0.035, metalness: 0, ior: 1.4, specularIntensity: 1, envMapIntensity: 2.2, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
   const lm = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, roughness: 0.6, metalness: 0, depthWrite: false, envMapIntensity: 0.8 });
   // the skin colour right round the eye, read from the body's own pattern texture
   const img = pat && pat.image, skinAt = (x, th) => {
@@ -1512,38 +1521,47 @@ function buildEyes(P, F, body, pat) {
   const bulge = H.bulge != null ? H.bulge : 0.06; // how far the spectacle rises above the head's outline (in eye radii; v5.73: flush with the head, not a bulging ball)
   for (const sg of [1, -1]) {
     const th0 = sg * body.eyeA, c = body.surf(xe, th0, true).p;
-    const eye = [], spec = [], uv = [], col = [], spa = [];
+    // v5.78: the eye is round on the skin itself - the grid's steps round the head and along it are measured on the surface
+    // there (the head's average radius made it an oval or a teardrop on a flat-sided head)
+    const eA0 = 0.01, arcA = body.surf(xe, th0 + eA0, true).p.distanceTo(body.surf(xe, th0 - eA0, true).p) / (2 * eA0), arcX = body.surf(xe + R0 * 0.05, th0, true).p.distanceTo(body.surf(xe - R0 * 0.05, th0, true).p) / (R0 * 0.1);
+    const eye = [], spec = [], uv = [], col = [], spa = [], lidP = [];
     for (let i = 0; i <= NR; i++) {
       const rho = (i / NR) * 1.18;
       for (let j = 0; j <= NA; j++) {
         const ph = (j / NA) * TAU, a = rho * Math.cos(ph), b = rho * Math.sin(ph);
-        const x = xe + a * R0, th = th0 - sg * b * (R0 / rl);
+        const x = xe + a * R0 / Math.max(0.5, arcX), th = th0 - sg * b * (R0 / Math.max(1e-9, arcA));
         const p = body.surf(x, th, true).p, n = body.surfNormal(x, th);
         if (n.dot(p.clone().sub(body.spine(x))) < 0) n.negate();
-        // dome over the eye, then a steep tuck under the skin past the rim
-        const h = rho <= 1 ? R0 * (bulge * (1 - rho * rho) - 0.035) : R0 * (-0.035 - 1.6 * (rho - 1));
-        const pe = p.clone().addScaledVector(n, h - R0 * 0.02).sub(c), ps = p.clone().addScaledVector(n, h + R0 * 0.025).sub(c);
-        eye.push(pe.x, pe.y, pe.z); spec.push(ps.x, ps.y, ps.z);
+        // v5.78: the spectacle is a dome that rises from the socket's own rim (where the skin dips round the eye) to a little
+        // above the head's outline, then tucks steeply under the skin past it; the iris is a shallow cup a sixth of the eye's
+        // radius under the dome, its rim hidden under the skin; the scales round the eye (the lid) lie on the socket's skin
+        const dep = p.distanceTo(body.surf(x, th).p), r2 = Math.min(1, rho * rho);
+        const h = rho <= 1 ? R0 * bulge * (1 - r2) - dep * r2 * r2 : -dep - R0 * 1.6 * (rho - 1);
+        const hi = rho <= 1 ? h - R0 * (0.16 * (1 - r2) + 0.035) : h - R0 * 0.035;
+        const pe = p.clone().addScaledVector(n, hi).sub(c), ps = p.clone().addScaledVector(n, h).sub(c);
+        const pl = p.clone().addScaledVector(n, rho < 0.9 ? h + R0 * 0.004 : lerp(h, -dep, sstep(0.9, 1.0, rho)) + R0 * 0.006).sub(c);
+        eye.push(pe.x, pe.y, pe.z); spec.push(ps.x, ps.y, ps.z); lidP.push(pl.x, pl.y, pl.z);
         uv.push(0.5 + a * 0.47 * sg, 0.5 + b * 0.47);
         // the spectacle: clear in the middle, taking on the skin's colour at its rim, where the scales round the eye overlap it
-        const rim = sstep(0.82, 1.06, rho), sk = skinAt(x, th);
-        col.push(sk[0], sk[1], sk[2], rim); spa.push(0.05 * (1 - sstep(0.88, 1.02, rho))); // (v5.53: a clear spectacle - a milky one made the eye a pale disc)
+        const rim = sstep(0.84, 1.0, rho) * (1 - sstep(1.06, 1.14, rho)), sk = skinAt(x, th);
+        if (H.lipFull) { const band = H.lipFull > 0.01 && H.lipFull < 1 ? H.lipFull : 0.12, mAn = Math.PI * 0.56 / Math.PI, k = sstep(mAn - band - 0.015, mAn - band + 0.015, Math.abs(th) / Math.PI), lc = hex(H.lipColor || P.colors.belly).map((v) => Math.pow(v / 255, 2.2)); for (let q = 0; q < 3; q++) sk[q] = lerp(sk[q], lc[q], k); } // (v5.78: the pale lip scales reach up to the eye: the scales round it take that colour there too)
+        col.push(sk[0], sk[1], sk[2], rim); spa.push(1 - sstep(0.76, 0.97, rho)); // (v5.78: the spectacle's reflections fade out at its rim, where its steep edge flared into a bright ring) // (v5.53: a clear spectacle - a milky one made the eye a pale disc)
       }
     }
     const idx = [];
     for (let i = 0; i < NR; i++) for (let j = 0; j < NA; j++) { const a = i * (NA + 1) + j, b = a + NA + 1; idx.push(a, b, a + 1, a + 1, b, b + 1); }
     const mk = (arr, withUv, withCol) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3)); if (withUv) g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); if (withCol) g.setAttribute('color', new THREE.Float32BufferAttribute(col, 4)); g.setIndex(idx); g.computeVertexNormals(); return g; };
-    const eg = mk(eye, true, false), sgeo = mk(spec, false, true);
+    const eg = mk(eye, true, false), sgeo = mk(spec, false, true), lgeo = mk(lidP, false, true);
     // wind the triangles so they face out of the head on both sides
     const fixFacing = (g) => { const nr = g.attributes.normal, mid = Math.round(NR * 0.3) * (NA + 1), q = new THREE.Vector3(nr.getX(mid), nr.getY(mid), nr.getZ(mid)), want = body.surfNormal(xe, th0);
       if (want.dot(c.clone().sub(body.spine(xe))) < 0) want.negate();
       if (q.dot(want) < 0) { const ia = g.index.array; for (let k = 0; k < ia.length; k += 3) { const t = ia[k + 1]; ia[k + 1] = ia[k + 2]; ia[k + 2] = t; } g.index.needsUpdate = true; g.computeVertexNormals(); } };
-    fixFacing(eg); fixFacing(sgeo);
+    fixFacing(eg); fixFacing(sgeo); fixFacing(lgeo);
     const m = new THREE.Mesh(eg, em); m.position.copy(c); m.receiveShadow = true; m.castShadow = false;
     // the clear glossy spectacle, and round its edge the skin of the scales that ring the eye, overlapping it
-    const sg2 = sgeo.clone(), ca = sg2.attributes.color; for (let i = 0; i < ca.count; i++) ca.setXYZW(i, 1, 1, 1, spa[i]);
+    const sg2 = sgeo, ca = sg2.attributes.color; for (let i = 0; i < ca.count; i++) ca.setXYZW(i, 1, 1, 1, spa[i]);
     const sp = new THREE.Mesh(sg2, sm); sp.renderOrder = 3; sp.receiveShadow = false; m.add(sp);
-    const lid = new THREE.Mesh(sgeo, lm); lid.renderOrder = 2; lid.receiveShadow = true; m.add(lid);
+    const lid = new THREE.Mesh(lgeo, lm); lid.renderOrder = 2; lid.receiveShadow = true; m.add(lid);
     const n0 = body.surfNormal(xe, th0); if (n0.dot(c.clone().sub(body.spine(xe))) < 0) n0.negate();
     m.userData.spectacle = sp; m.userData.n = n0; m.userData.r = R0; out.push(m); // n: the way the eye looks out (v5.05: See eye shield frames it from there)
   }
@@ -1575,7 +1593,9 @@ function buildMouth(P, F, body, group, eyes, pat) {
   const lower = [], upper = [];
   for (let i = 0; i < body.nR; i++) { const x = body.ringX[i]; if (x > xEnd) break;
     for (let j = 0; j <= M; j++) { const th = TAU * (j / M) - Math.PI; (Math.abs(th) > mA ? lower : upper).push(i * (M + 1) + j, skinW(x, th)); } }
-  const UP = 0.72, DN = 0.28; // share of the gape: top of the head up, lower jaw down
+  // share of the gape: top of the head up, lower jaw down (v5.78: the lower jaw drops only as far as the ground under the chin
+  // allows - it used to swing down through the ground; the skull lifts the rest, as a real snake's does)
+  const chinH = Math.max(0, body.surf(Hl * 0.06, Math.PI).p.y), DN = clamp(Math.asin(clamp((chinH + F.Hh(Hl * 0.3) * 0.25) / Math.max(1e-6, xh * 0.95), 0, 1)) / Math.max(0.1, gape), 0.05, 0.28), UP = 1 - DN;
   // the skin along the mouth line is cut while the mouth is open (otherwise it stretches across and hides the inside)
   const ix = geo.index, cut = [];
   const isLow = (j) => Math.abs(TAU * (j / M) - Math.PI) > mA;
@@ -1643,9 +1663,9 @@ function buildMouth(P, F, body, group, eyes, pat) {
     g.setIndex(idx); g.computeVertexNormals();
     return { g, o: g.attributes.position.array.slice(), xv, per, row: (x, s) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = NL + Math.round(s * NS); return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); }, gum: (x, side) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = side > 0 ? NL - 1 : per - NL; return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); } };
   }
-  const lining = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.4, metalness: 0, clearcoat: 0.4, clearcoatRoughness: 0.28, emissive: P.head.mouthColor ? new THREE.Color(P.head.mouthColor).multiplyScalar(0.25) : new THREE.Color('#6a3036'), emissiveIntensity: 0.5, /* (v5.62: the glow takes the species' mouth colour) */ side: THREE.DoubleSide, envMapIntensity: 0.45 }); // (a faint glow stands in for light passing through the soft tissue)
+  const lining = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.5, metalness: 0, clearcoat: 0.45, clearcoatRoughness: 0.2, sheen: 0.3, sheenRoughness: 0.5, sheenColor: new THREE.Color('#ffd6d6'), /* (v5.78: a wet, restrained sheen) */ emissive: P.head.mouthColor ? new THREE.Color(P.head.mouthColor).multiplyScalar(0.25) : new THREE.Color('#6a3036'), emissiveIntensity: 0.3, /* (v5.62: the glow takes the species' mouth colour; v5.78: fainter - the soft shadows inside give the depth) */ side: THREE.DoubleSide, envMapIntensity: 0.22 }); // (a faint glow stands in for light passing through the soft tissue)
   const roof = jawLining(true), floorJ = jawLining(false);
-  const roofM = lining.clone(); roofM.emissive.set('#b06a6e'); roofM.emissiveIntensity = 0.55; // (v5.53: the roof faces down, away from the light: a little more glow keeps it pink, not maroon)
+  const roofM = lining.clone(); roofM.emissive.set('#b06a6e'); roofM.emissiveIntensity = 0.35; // (v5.53: the roof faces down, away from the light: a little more glow keeps it pink, not maroon)
   const palate = new THREE.Mesh(roof.g, roofM), floor = new THREE.Mesh(floorJ.g, lining);
   palate.receiveShadow = floor.receiveShadow = true;
   palate.castShadow = floor.castShadow = true; // v5.09: with the mouth open the head is an open shell; the lining closes it in the shadow too (no thin loop on the ground)
@@ -1713,7 +1733,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
     const softM = new THREE.MeshPhysicalMaterial({ color: pink.clone().multiplyScalar(0.95), roughness: 0.38, clearcoat: 0.6, clearcoatRoughness: 0.25 });
     const fAt = (x) => body.frameAt(x), fl = (x) => { const xc = Math.min(x, xs[xs.length - 1]); return floorJ.row(xc, 0.5).addScaledVector(fAt(xc).T, x - xc); }; // (past the hinge: straight on back)
     // the tongue sheath: a low soft ridge along the floor of the mouth, open at its front end just behind the chin
-    const r0 = Math.max(Hl * 0.014, F.W(Hl * 0.2) * 0.06); // the tongue's thickness
+    const r0 = Math.max(Hl * 0.019, F.W(Hl * 0.2) * 0.07); // the tongue's thickness (v5.78: a little fuller - it read as a black thread)
     const shx0 = Hl * 0.075, shx1 = Hl * 0.42, shW = Math.max(F.W(Hl * 0.2) * 0.12, r0 * 2.4), shH = Math.max(F.Hh(Hl * 0.2) * 0.05, r0 * 1.5), fS0 = fAt((shx0 + shx1) / 2);
     const sheath = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12), softM); sheath.scale.set(shW, shH, (shx1 - shx0) / 2); sheath.position.copy(fl((shx0 + shx1) / 2));
     sheath.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fS0.S.clone().normalize().negate(), fS0.U, fS0.T)); // (a right-handed basis: S, U, T is left-handed)
@@ -1821,7 +1841,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
       if (w > 0 && an) { qq.setFromAxisAngle(axis, an * w); v3.sub(hinge).applyQuaternion(qq).add(hinge); }
       a[vi * 3] = v3.x; a[vi * 3 + 1] = v3.y; a[vi * 3 + 2] = v3.z; } };
     turn(lower, aD); turn(upper, aU);
-    pos.needsUpdate = true;
+    pos.clearUpdateRanges(); pos.addUpdateRange(0, Math.min(body.nR, headRings + 1) * (M + 1) * 3); pos.needsUpdate = true; // (v5.78: only the head's part of the buffer goes to the graphics card)
     // the mouth lining and the teeth go with their jaws
     const strip2 = (J, an) => { const fp = J.g.attributes.position.array, o = J.o;
       for (let k = 0, i = 0; k < fp.length; k += 3, i++) { v3.set(o[k], o[k + 1], o[k + 2]); if (J === floorJ) jawWarp(v3, weight(J.xv[i])); qq.setFromAxisAngle(axis, an * weight(J.xv[i])); v3.sub(hinge).applyQuaternion(qq).add(hinge); fp[k] = v3.x; fp[k + 1] = v3.y; fp[k + 2] = v3.z; }
@@ -1839,10 +1859,23 @@ function buildMouth(P, F, body, group, eyes, pat) {
     // fangs swing forward as the mouth opens (vipers fold them flat when it is shut)
     for (const fg of fangs) fg.visible = t > 0.25;
   }
-  function settle() { // normals once the jaw stops (the seam along the belly kept smooth, like buildBody does)
-    geo.computeVertexNormals(); const nrm = geo.attributes.normal.array;
-    for (let i = 0; i < body.nR; i++) { const a = i * (M + 1), b = a + M; for (let q2 = 0; q2 < 3; q2++) { const m = (nrm[a * 3 + q2] + nrm[b * 3 + q2]) / 2; nrm[a * 3 + q2] = nrm[b * 3 + q2] = m; } }
-    geo.attributes.normal.needsUpdate = true;
+  // normals once the jaw stops (the seam along the belly kept smooth, like buildBody does). v5.78: only the head's rings - the
+  // whole body's 200 000 vertices took 50-100 ms, a visible hitch at the end of every Open mouth / Close mouth
+  const nRh = Math.min(body.nR - 1, headRings + 1), acc = new Float32Array((nRh + 1) * (M + 1) * 3);
+  const va = new THREE.Vector3(), vb = new THREE.Vector3(), vc = new THREE.Vector3();
+  function settle() {
+    const ia = geo.index.array, pa = pos.array, nrm = geo.attributes.normal.array, nT = Math.min(body.nR - 1, nRh + 1) * M * 6; acc.fill(0);
+    const lim = (nRh + 1) * (M + 1);
+    for (let k = 0; k < nT; k += 3) {
+      const a = ia[k], b = ia[k + 1], c = ia[k + 2]; if (a === b || b === c) continue;
+      va.fromArray(pa, a * 3); vb.fromArray(pa, b * 3).sub(va); vc.fromArray(pa, c * 3).sub(va); vb.cross(vc);
+      for (const v of [a, b, c]) if (v < lim) { acc[v * 3] += vb.x; acc[v * 3 + 1] += vb.y; acc[v * 3 + 2] += vb.z; }
+    }
+    const nV = nRh * (M + 1);
+    for (let v = 0; v < nV; v++) { const x = acc[v * 3], y = acc[v * 3 + 1], z = acc[v * 3 + 2], l = Math.hypot(x, y, z) || 1; nrm[v * 3] = x / l; nrm[v * 3 + 1] = y / l; nrm[v * 3 + 2] = z / l; }
+    for (let i = 0; i < nRh; i++) { const a = i * (M + 1), b = a + M; for (let q2 = 0; q2 < 3; q2++) { const m = (nrm[a * 3 + q2] + nrm[b * 3 + q2]) / 2; nrm[a * 3 + q2] = nrm[b * 3 + q2] = m; } }
+    { const T = body.frameAt(0).T; for (let j = 0; j <= M; j++) { nrm[j * 3] = -T.x; nrm[j * 3 + 1] = -T.y; nrm[j * 3 + 2] = -T.z; } } // (the snout tip's cap, as buildBody makes it)
+    const nn = geo.attributes.normal; nn.clearUpdateRanges(); nn.addUpdateRange(0, nV * 3); nn.needsUpdate = true;
   }
   // v5.53: a tongue flick, s from 0 to 1 (out, the tips wave up and down, back in); 0 or 1 leaves it in its sheath. With the
   // mouth shut only the tongue of everything inside is shown: it comes out through the notch at the front of the lips.
@@ -2138,10 +2171,10 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   const sun = new THREE.DirectionalLight('#fff4e2', S.sun);
   const el = (S.sunEl * Math.PI) / 180, az = 0.9;
   // v5.50: the shadows reach the real-size grass, stones and logs round a small snake too (not only its own few cm)
-  const sunD = Math.max(Rb * 6, 3), shExt = Math.max(Rb * 1.5, quality === 'low' ? 0.5 : 0.75);
+  const sunD = Math.max(Rb * 6, 3), shExt = Math.max(Rb * 1.5, quality === 'low' ? 0.45 : 0.55); // (v5.78: a little tighter round a small snake, so the 2048 map stays as sharp as the old 4096 one)
   sun.position.set(Math.cos(az) * Math.cos(el), Math.sin(el), Math.sin(az) * Math.cos(el)).multiplyScalar(sunD);
   sun.castShadow = true;
-  const sm = quality === 'low' ? 1024 : 4096; sun.shadow.mapSize.set(sm, sm); // v4.72: crisper shadows
+  const sm = quality === 'high' ? 2048 : 1024; sun.shadow.mapSize.set(sm, sm); // v5.78: 2048 (4096 took 128 MB of graphics memory for no visible gain over the snake's small area)
   const sc = sun.shadow.camera; sc.left = sc.bottom = -shExt; sc.right = sc.top = shExt; sc.near = Math.max(0.01, sunD - Math.max(Rb * 5.5, 2.5)); sc.far = sunD + Math.max(Rb * 8, 3);
   sun.shadow.bias = -0.0004; sun.shadow.normalBias = F.w0 * 0.04; sun.shadow.radius = 3;
   scene.add(sun); scene.add(sun.target);
@@ -2509,7 +2542,7 @@ function Controls(dom, cam, opt) {
       const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; if (mid0) { const m = pan(mid[0] - mid0[0], mid[1] - mid0[1]); last = now; st.vpx = m[0] / dt * 16; st.vpz = m[1] / dt * 16; } mid0 = mid; opt.kick(); }
   };
   const onUp = (e) => { ptrs.delete(e.pointerId); if (ptrs.size < 2) { pinch0 = 0; mid0 = null; } if (!ptrs.size) { st.dragging = false; panBtn = false; if (reduce() || performance.now() - last > 80) { st.vaz = st.vel = st.vpx = st.vpz = 0; } opt.kick(); } };
-  const onWheel = (e) => { e.preventDefault(); if (locked()) return; user(); const f = Math.exp(clamp(e.deltaY, -120, 120) * 0.0016); if (!(opt.pointZoom && opt.pointZoom(e.clientX, e.clientY, f))) zoom(f); }; // v5.12: towards the point under the pointer
+  const onWheel = (e) => { e.preventDefault(); if (locked()) return; user(); const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1), f = Math.exp(clamp(dy, -120, 120) * 0.0016); /* (v5.78: line and page scrolling (Firefox) zoom as much as pixel scrolling) */ if (!(opt.pointZoom && opt.pointZoom(e.clientX, e.clientY, f))) zoom(f); }; // v5.12: towards the point under the pointer
   const onKey = (e) => {
     const k = e.key, s = 0.17;
     if (locked()) return;
@@ -2535,7 +2568,7 @@ function Controls(dom, cam, opt) {
   // returns true while still moving
   function update() {
     let moving = false;
-    const tnow = performance.now(), dt = lastU ? clamp((tnow - lastU) / 1000, 0, 0.2) : 1 / 60; lastU = tnow;
+    const tnow = performance.now(), dt = lastU && tnow - lastU < 120 ? clamp((tnow - lastU) / 1000, 1 / 250, 0.12) : 1 / 60; lastU = tnow; // (after a pause the first step is a normal one, not a jump)
     if (held.size && locked()) held.clear();
     if (held.size || kv[0] || kv[1]) {
       const f = (held.has('w') ? 1 : 0) - (held.has('s') ? 1 : 0), r = (held.has('d') ? 1 : 0) - (held.has('a') ? 1 : 0), n = Math.hypot(f, r) || 1;
@@ -2546,15 +2579,17 @@ function Controls(dom, cam, opt) {
       if (!held.size && Math.hypot(kv[0], kv[1]) < st.d * 0.01) kv = [0, 0]; else moving = true;
     }
     // a fling keeps gliding a little longer (smoother than it was)
-    if (!st.dragging && (st.vaz || st.vel)) { st.az += st.vaz; st.el = limitEl(st.el + st.vel, st.d); st.vaz *= 0.92; st.vel *= 0.92; if (Math.abs(st.vaz) < 1e-4 && Math.abs(st.vel) < 1e-4) st.vaz = st.vel = 0; else moving = true; }
-    if (!st.dragging && (st.vpx || st.vpz)) { st.px += st.vpx; st.pz += st.vpz; clampPan(); st.vpx *= 0.9; st.vpz *= 0.9; if (Math.hypot(st.vpx, st.vpz) < st.d * 1e-5) st.vpx = st.vpz = 0; else moving = true; }
+    // (v5.78: every glide below is timed by the clock, not by frames: the same smooth motion at 30, 60 or 120 frames a second)
+    const f60 = dt * 60;
+    if (!st.dragging && (st.vaz || st.vel)) { st.az += st.vaz * f60; st.el = limitEl(st.el + st.vel * f60, st.d); const dk = Math.pow(0.92, f60); st.vaz *= dk; st.vel *= dk; if (Math.abs(st.vaz) < 1e-4 && Math.abs(st.vel) < 1e-4) st.vaz = st.vel = 0; else moving = true; }
+    if (!st.dragging && (st.vpx || st.vpz)) { st.px += st.vpx * f60; st.pz += st.vpz * f60; clampPan(); const dk = Math.pow(0.9, f60); st.vpx *= dk; st.vpz *= dk; if (Math.hypot(st.vpx, st.vpz) < st.d * 1e-5) st.vpx = st.vpz = 0; else moving = true; }
     if (tw) { // the eased glide: every channel together, the short way round
       const u = clamp((tnow - tw.t0) / tw.dur, 0, 1), e = u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
       for (const q of ['az', 'el', 'd', 'px', 'pz']) st[q] = tw.from[q] + (tw.to[q] - tw.from[q]) * e;
       if (u >= 1) tw = null; else moving = true;
     }
     if (st.goal) {
-      const k = 0.2; st.az += (st.goal.az - st.az) * k; st.d += (st.goal.d - st.d) * k; st.el = limitEl(st.el + (st.goal.el - st.el) * k, st.d); st.px += (st.goal.px - st.px) * k; st.pz += (st.goal.pz - st.pz) * k;
+      const k = 1 - Math.exp(-dt * 12); st.az += (st.goal.az - st.az) * k; st.d *= Math.pow(st.goal.d / st.d, k); /* (v5.78: zoom glides in proportion - the same feel close up and far away) */ st.el = limitEl(st.el + (st.goal.el - st.el) * k, st.d); st.px += (st.goal.px - st.px) * k; st.pz += (st.goal.pz - st.pz) * k;
       if (Math.abs(st.goal.az - st.az) < 1e-4 && Math.abs(st.goal.d - st.d) / st.d < 1e-4 && Math.abs(st.goal.el - st.el) < 1e-4 && Math.hypot(st.goal.px - st.px, st.goal.pz - st.pz) < st.d * 1e-4) { st.az = st.goal.az; st.d = st.goal.d; st.px = st.goal.px; st.pz = st.goal.pz; st.goal = null; } else moving = true;
     }
     st.el = limitEl(st.el, st.d);
@@ -2582,6 +2617,41 @@ function personShape(h) {
 
 // ---------- v5.74: the buttons over the 3D view, in groups, and the Size vs person overlays ----------
 // (injected after extras.js's styles, so these win; the look stays SnakeList's: dark see-through pills, green when on)
+// v5.78: the body bends on the graphics card. extras.js's rig (Slither, See it eat, the idle head turns, Size vs person)
+// hands over its centre line and frames (720 samples) as a small float texture; the vertex shader moves every vertex of
+// the skin from its rest frame onto the new one (and turns its normal with it). Before, all ~200 000 vertices were moved
+// and their normals recomputed on the main thread every frame - the cause of the stutter in every animation.
+// Texture rows: 0-3 rest centre (w: belly height), T, U, S; 4-7 the new centre (w: swelling), T, U, S.
+const RIG_GLSL = `
+uniform sampler2D uRigTex; uniform float uRigOn; uniform float uRigN; uniform float uRigDx;
+vec4 slRT(float i, float r) { return texture2D(uRigTex, vec2((i + 0.5) / uRigN, (r + 0.5) / 8.0)); }
+vec3 slRigP(vec3 p, float x, inout vec3 n) {
+  float f = clamp(x / uRigDx, 0.0, uRigN - 1.0001), i = floor(f), w = f - i;
+  vec4 r0 = mix(slRT(i, 0.0), slRT(i + 1.0, 0.0), w); vec3 rT = mix(slRT(i, 1.0).xyz, slRT(i + 1.0, 1.0).xyz, w), rU = mix(slRT(i, 2.0).xyz, slRT(i + 1.0, 2.0).xyz, w), rS = mix(slRT(i, 3.0).xyz, slRT(i + 1.0, 3.0).xyz, w);
+  vec4 c4 = mix(slRT(i, 4.0), slRT(i + 1.0, 4.0), w); vec3 nT = mix(slRT(i, 5.0).xyz, slRT(i + 1.0, 5.0).xyz, w), nU = mix(slRT(i, 6.0).xyz, slRT(i + 1.0, 6.0).xyz, w), nS = mix(slRT(i, 7.0).xyz, slRT(i + 1.0, 7.0).xyz, w);
+  vec3 d = p - r0.xyz; float l0 = dot(d, rT), l1 = dot(d, rU), l2 = dot(d, rS);
+  if (abs(c4.w - 1.0) > 1e-4) { l1 = (l1 + r0.w) * c4.w - r0.w; l2 *= c4.w; }
+  n = nT * dot(n, rT) + nU * dot(n, rU) + nS * dot(n, rS);
+  return c4.xyz + nT * l0 + nU * l1 + nS * l2;
+}`;
+const RIG_V = `if (uRigOn > 0.5) {
+#ifdef SL_RIG_N
+  vec3 slN = objectNormal;
+#else
+  vec3 slN = vec3(0.0, 1.0, 0.0);
+#endif
+  transformed = slRigP(transformed, aMet.y, slN);
+#ifdef SL_RIG_N
+  transformedNormal = normalMatrix * normalize(slN);
+  #ifdef FLIP_SIDED
+  transformedNormal = - transformedNormal;
+  #endif
+  #ifndef FLAT_SHADED
+  vNormal = normalize(transformedNormal);
+  #endif
+#endif
+}
+`;
 const UI_CSS = `
 .sp3d-stage>.sp3d-bar{gap:8px 14px}
 .sp3d-stage>.sp3d-bar>.sp3d-grp{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;pointer-events:auto}
@@ -2623,15 +2693,40 @@ function uiCSSInject() {
 }
 
 // ---------- the viewer ----------
+// v5.78: species rebuilt against photos in this version, ahead of the next models.json build (the same values are in
+// tools/auto_models.py CURATED, so a rebuild gives the same result): they override the profile's head
+const SPECIES_LOOK = {
+  'opheodrys-vernalis': { h: { iris: '#3d321c', irisInner: '#5c4a26', eyeRing: '#d9c27a', pupilW: 0.22, eye: null, eyeL: 0.22, eyeX: 0.36, eyeA: 50, len: 0.031, w: 0.9, h: 0.78, snoutH: 0.64, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.045, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.65, hFixed: 1, groove: 0.16, headRelief: 0.14, snout: 0.52, lipFull: 0.12 }, body: { hn: 1.3 },
+    scales: { cavity: 0.22, gloss: 0.78, relief: 0.55 }, colors: { edgeK: 0.25 } },
+  // the inland taipan against its SnakeList photo (will-hunt) and the Australian Museum account: a deep, rounded "coffin" head
+  // (deeper than the body's own depth, the snout high and rounded), glossy smooth scales, and a warmer olive-brown
+  'oxyuranus-microlepidotus': { h: { h: 0.84, hFixed: 1, snoutH: 0.9, groove: 0.26, headRelief: 0.28, taper: 0.12, bulge: 0.05, brow: 0.05 },
+    scales: { cavity: 0.3 }, colors: { dorsal: '#83622f', lateral: '#8d6b35' } },
+};
+function withLook(p, id) {
+  const L = SPECIES_LOOK[id]; if (!L || !p) return p;
+  const q = JSON.parse(JSON.stringify(p)), tgt = q.auto ? (q.auto.h = q.auto.h || {}) : (q.head = q.head || {});
+  for (const k in L.h) { if (L.h[k] == null) delete tgt[k]; else tgt[k] = L.h[k]; }
+  if (L.body) Object.assign(q.auto ? (q.auto.bx = q.auto.bx || {}) : (q.body = q.body || {}), L.body);
+  if (L.scales) Object.assign(q.auto ? (q.auto.sx = q.auto.sx || {}) : (q.scales = q.scales || {}), L.scales);
+  if (L.colors) Object.assign(q.auto ? (q.auto.cx = q.auto.cx || {}) : (q.colors = q.colors || {}), L.colors);
+  return q;
+}
 export function mount(host, opts) {
-  const P = normProfile(autoProfile(opts.profile), opts.id), seed = strSeed(opts.id || P.name || 'snake');
+  const P = normProfile(autoProfile(withLook(opts.profile, opts.id)), opts.id), seed = strSeed(opts.id || P.name || 'snake');
   { const gH = HEAD_GENUS[String(opts.id || '').split('-')[0]]; if (gH) P.head = Object.assign({}, gH, P.head); } // v5.53
   const reduceMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const reduce = () => reduceMQ.matches;
-  const lowDevice = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4 || Math.min(screen.width, screen.height) < 500;
+  // v5.78: three quality tiers, chosen by the device (or by hand: the Detail button behind Show more, remembered):
+  // High (computers with a graphics card), Medium (phones and tablets), Light (weak devices, software rendering)
+  const lowDevice = (navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2;
+  const phoneLike = Math.min(screen.width, screen.height) < 820 && !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || Math.min(screen.width, screen.height) < 500;
   // software rendering (no GPU: SwiftShader, llvmpipe) is treated as a low-end device
   const softGL = (() => { try { const c = document.createElement('canvas'), g = c.getContext('webgl2') || c.getContext('webgl'), e = g && g.getExtension('WEBGL_debug_renderer_info'), r = e ? String(g.getParameter(e.UNMASKED_RENDERER_WEBGL)) : ''; if (g && g.getExtension('WEBGL_lose_context')) g.getExtension('WEBGL_lose_context').loseContext(); return /swiftshader|llvmpipe|software/i.test(r); } catch (err) { return false; } })();
-  let quality = opts.quality || window.SL_3D_QUALITY || (lowDevice || softGL ? 'low' : 'high');
+  const autoQ = softGL || lowDevice || (phoneLike && ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3)) ? 'low' : phoneLike ? 'medium' : 'high';
+  let qPref = 'auto'; try { qPref = localStorage.getItem('sl-3d-quality') || 'auto'; } catch (e) { /* private mode */ }
+  if (!/^(auto|high|medium|low)$/.test(qPref)) qPref = 'auto';
+  let quality = opts.quality || window.SL_3D_QUALITY || (qPref !== 'auto' ? qPref : autoQ);
   const disposables = new Set(), cleanups = [];
   const track = (o) => { disposables.add(o); return o; };
   const on = (t, ev, fn, o) => { t.addEventListener(ev, fn, o); cleanups.push(() => t.removeEventListener(ev, fn, o)); };
@@ -2684,7 +2779,7 @@ export function mount(host, opts) {
   const V = { THREE, P, opts, el, on, wrap, stage, labels, bar, canvas, btn, bAnat, reduce,
     get cam() { return cam; }, get controls() { return controls; }, get info() { return info; }, get extras() { return extras; }, get group() { return snakeGroup; }, get scene() { return ctx.scene; },
     kick: () => kick(), toggleFull: () => toggleFull(), scaleOn: () => sizeSt.on,
-    get occ() { return ctx.occ; }, get ctx() { return ctx; }, get quality() { return quality; }, get sceneOn() { return cScene.checked; }, NATURE, scaleOff: () => { if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(false, { instant: true }); }, // (at once: something else takes over the snake and the camera)
+    get occ() { return ctx.occ; }, get ctx() { return ctx; }, get quality() { return quality; }, get skinGPU() { return skinGPU; }, get sceneOn() { return cScene.checked; }, NATURE, scaleOff: () => { if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(false, { instant: true }); }, // (at once: something else takes over the snake and the camera)
     scaleBack: (keepCam) => { if (bScale.getAttribute('aria-pressed') === 'true') { toggleScale(false, { keepCam }); return true; } return false; }, /* (gliding back to the view you had) */ closeMouth: () => { if (mouthGoal) toggleMouth(false); }, get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
     resetView: () => resetView(),     focus: (p, d, elv) => focusOn(p, d, elv), view: (g) => controls.setGoal(Object.assign({ az: controls.st.az, d: info.dFit, px: 0, pz: 0 }, g)) };
   const fx = EXTRA.create(V);
@@ -2697,10 +2792,16 @@ export function mount(host, opts) {
   [bMouth, fb.eat, fb.slither].forEach((b) => b && !b.hasAttribute('aria-pressed') && b.setAttribute('aria-pressed', 'false'));
   const gView = grp('View', 'sp3d-seg', [bNormal, bAnat, bScale]), gAct = grp('Actions', '', [bMouth, fb.eat, fb.slither]), gReset = grp('Reset', '', [bReset]);
   vg2.className = 'sp3d-grp sp3d-cam'; vg2.setAttribute('aria-label', 'Camera'); bar.appendChild(vg2);
+  // v5.78: Detail - Auto (the device's own tier), High, Medium or Light, remembered on this device; behind Show more
+  const qName = { high: 'High', medium: 'Medium', low: 'Light' }, qOrder = ['auto', 'high', 'medium', 'low'];
+  const bQual = el('button', 'sp3d-b sp3d-qual'); bQual.type = 'button';
+  const qLabel = () => { bQual.textContent = 'Detail: ' + (qPref === 'auto' ? 'Auto (' + qName[quality] + ')' : qName[quality]); bQual.setAttribute('aria-label', bQual.textContent + '. Press to change the level of detail'); };
+  const gQual = el('span', 'sp3d-grp sp3d-cam sp3d-qgrp'); gQual.setAttribute('role', 'group'); gQual.setAttribute('aria-label', 'Detail'); gQual.appendChild(bQual); bar.appendChild(gQual); qLabel();
+  on(bQual, 'click', () => { const i = qOrder.indexOf(qPref); setQuality(qOrder[(i + 1) % qOrder.length]); });
   [...bar.children].forEach((c) => { if (c.classList.contains('sp3d-b') && c !== bReset) gAct.appendChild(c); }); // (any other action button extras.js adds)
   // v5.05: the main buttons stay in view; the camera buttons are behind Show more / Show less
   const bMore = el('button', 'sp3d-b sp3d-morebtn', 'Show more'); bMore.type = 'button'; bMore.setAttribute('aria-expanded', 'false');
-  [vg2].concat(fx.moreButtons || []).forEach((b) => b.classList.add('sp3d-more'));
+  [vg2, gQual].concat(fx.moreButtons || []).forEach((b) => b.classList.add('sp3d-more'));
   bar.classList.add('sp3d-few');
   // v5.50: Show more sits on its own line under the main buttons (like See all families), and the extra buttons open below it
   const br1 = el('span', 'sp3d-br'), br2 = el('span', 'sp3d-br'); br1.setAttribute('aria-hidden', 'true'); br2.setAttribute('aria-hidden', 'true');
@@ -2729,22 +2830,28 @@ export function mount(host, opts) {
   // renderer
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'default', preserveDrawingBuffer: !!opts.testing });
+    // v5.78: multisampling only where pixels are big (at a pixel ratio of 1.75 or more the 4x samples cost about 100 MB of
+    // graphics memory and much fill rate for little gain)
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: Math.min(window.devicePixelRatio || 1, { high: 2, medium: 1.5, low: 1 }[quality] || 1.5) < 1.75, powerPreference: quality === 'high' ? 'high-performance' : 'default', preserveDrawingBuffer: !!opts.testing });
   } catch (err) { host.innerHTML = ''; throw new Error('webgl'); }
-  const maxPR = quality === 'low' ? 1.25 : 2;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxPR));
+  // v5.78: the pixel ratio has a cap per tier, and drops a little by itself while the view moves if frames come too slowly
+  // (dynamic resolution, see frame()); it goes back to full sharpness as soon as the view is still
+  const basePR = () => Math.min(window.devicePixelRatio || 1, { high: 2, medium: 1.5, low: 1 }[quality] || 1.5);
+  let dynK = 1; renderer.setPixelRatio(basePR());
   renderer.localClippingEnabled = true; // v5.68: See it eat cuts the prey off at the throat (only the part in the open mouth shows)
-  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.86;
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.94; // (v5.78: a touch brighter - ACES darkened and dulled the greens and browns of the skin)
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = quality === 'low' ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   const ctx = { renderer, scene: null, track };
-  let snakeGroup, cam, controls, info, extras, raf = 0, dirty = true, lost = false, alive = true, scaleObj = null, markers = [];
+  let skinGPU = null, snakeGroup, cam, controls, info, extras, raf = 0, dirty = true, lost = false, alive = true, scaleObj = null, markers = [];
 
   function build() {
     const scene = new THREE.Scene(); ctx.scene = scene;
     { const en = !opts.noEnv && (P.scene.env || ENV_FOR[P.scene.kind]); if (en) loadEnv(en).catch(() => {}); } // v4.81: start downloading the panorama now
     let t0 = performance.now();
-    const F = makeBodyFns(P, quality), pose = makePose(P, F, seed); perfT('pose', t0); t0 = performance.now();
-    const body = buildBody(P, F, pose, quality); perfT('body', t0); t0 = performance.now();
+    // (v5.78: Medium - phones - builds the body and the surroundings as Light does, and keeps High's sharper textures and soft shadows)
+    const gq = quality === 'high' ? 'high' : 'low';
+    const F = makeBodyFns(P, gq), pose = makePose(P, F, seed); perfT('pose', t0); t0 = performance.now();
+    const body = buildBody(P, F, pose, gq); perfT('body', t0); t0 = performance.now();
     const lat = scaleLattice(P, body.gTotal), tiles = scaleTextures(P, lat); perfT('scaleTex', t0); t0 = performance.now();
     // v4.81: on good devices a quick pattern first, the full-detail one painted in a worker and swapped in when ready
     const hiPat = quality !== 'low', pat = patternTexture(P, F, body, lat, hiPat ? 'preview' : 'low', seed); perfT('patternTex', t0);
@@ -2759,9 +2866,9 @@ export function mount(host, opts) {
     const mat = new THREE.MeshPhysicalMaterial({
       // v4.72: raised 3D scales - stronger relief, deeper gaps between them, and real bumps on good devices
       map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1).multiplyScalar(S.relief != null ? S.relief : (S.keel || 0) > 0.3 ? 1 : 0.85), // (v5.58: smooth scales lie flatter than keeled ones)
-      aoMap: tiles.cavity, aoMapIntensity: 1.15, roughnessMap: tiles.cavity,
-      ...(quality === 'low' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
-      roughness: lerp(0.82, 0.58, gl), metalness: 0, clearcoat: 0.12 + gl * 0.5, clearcoatRoughness: lerp(0.5, 0.22, gl), sheen: S.sheen != null ? S.sheen : 0.12, sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
+      aoMap: tiles.cavity, aoMapIntensity: 0.3 + 1.2 * (S.cavity != null ? S.cavity : 0.45), roughnessMap: tiles.cavity, // (v5.78: smooth, tightly overlapping scales hide less skin between them)
+      ...(quality !== 'high' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
+      roughness: lerp(0.82, 0.5, gl), metalness: 0, clearcoat: 0.08 + gl * 0.42, clearcoatRoughness: lerp(0.45, 0.14, gl * gl), /* (v5.78: glossy snakes get the crisp, mirror-like highlights of real smooth scales) */ sheen: S.sheen != null ? S.sheen : 0.04, /* (v5.78: the default sheen laid a grey haze over every skin at grazing angles) */ sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
       iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.85,
     });
     // the cavity map also darkens the skin between scales in direct light (as in real snakes)
@@ -2771,10 +2878,10 @@ export function mount(host, opts) {
     const qS = (TAU * F.w0 * 0.92) / Math.max(12, S.rows) * (P.head.scaleK || (P.plan === 'python' ? 0.9 : 0.62));
     // v5.30: the scale rows' edges around the body (for the per-scale variation in the shader)
     const rbArr = new Float32Array(96); lat.RB.forEach((v, i) => { if (i < 96) rbArr[i] = v; });
-    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 }, uEdgeC: { value: new THREE.Color(S.edge && S.edge.color || '#000000') }, uEdgeK: { value: S.edge ? (S.edge.k != null ? S.edge.k : 0.8) : 0 }, uHeadN: { value: headT.relief }, uHeadC: { value: headT.color }, uHX: { value: headT.Xh } };
+    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 }, uEdgeC: { value: new THREE.Color(S.edge && S.edge.color || '#000000') }, uEdgeK: { value: S.edge ? (S.edge.k != null ? S.edge.k : 0.8) : 0 }, uHeadN: { value: headT.relief }, uHeadC: { value: headT.color }, uHX: { value: headT.Xh }, uRigTex: { value: null }, uRigOn: { value: 0 }, uRigN: { value: 2 }, uRigDx: { value: 1 } };
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, hsU);
-      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;\nattribute vec3 aMet;\nvarying vec3 vMet;').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead; vMet = aMet;')
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;\nattribute vec3 aMet;\nvarying vec3 vMet;' + RIG_GLSL).replace('#include <project_vertex>', '#define SL_RIG_N\n' + RIG_V + '#include <project_vertex>').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead; vMet = aMet;')
         .replace('#include <common>\nattribute float aHead;', '#include <common>\nuniform float uTip;\nattribute float aHead;').replace('#include <displacementmap_vertex>', THREE.ShaderChunk.displacementmap_vertex.replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z) * (1.0 - aHead) * smoothstep(uTip * 0.45, uTip, aMet.y)'));
       sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
 varying float vHead; varying vec3 vMet; uniform vec2 uHS; uniform float uKeel; uniform float uCavH; uniform float uTip; uniform vec3 uEdgeC; uniform float uEdgeK;
@@ -2832,6 +2939,37 @@ float slScale(vec2 m) {
     };
     mat.customProgramCacheKey = () => 'sl-skin-v558';
     const mesh = new THREE.Mesh(body.geo, mat); mesh.castShadow = mesh.receiveShadow = true;
+    // v5.78: the bending on the graphics card (RIG_GLSL): the shadow pass bends the same way, and while posed the body is
+    // never culled by its rest-pose bounds, and clicks and zooming meet it where it is now (its chain of spheres)
+    // (the shadow pass also takes the skin's scale displacement, exactly as the skin does - without it the displaced skin lay
+    // a little inside its own shadow caster: a dark band round the neck and speckled self-shadowing)
+    { const depthM = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, displacementMap: mat.displacementMap || null, displacementScale: mat.displacementScale, displacementBias: mat.displacementBias });
+      depthM.onBeforeCompile = (sh) => { Object.assign(sh.uniforms, { uRigTex: hsU.uRigTex, uRigOn: hsU.uRigOn, uRigN: hsU.uRigN, uRigDx: hsU.uRigDx, uTip: hsU.uTip });
+        sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute vec3 aMet;\nattribute float aHead;\nuniform float uTip;' + RIG_GLSL).replace('#include <project_vertex>', RIG_V + '#include <project_vertex>')
+          .replace('#include <displacementmap_vertex>', THREE.ShaderChunk.displacementmap_vertex.replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z) * (1.0 - aHead) * smoothstep(uTip * 0.45, uTip, aMet.y)')); };
+      depthM.customProgramCacheKey = () => 'sl-skin-depth-v578'; mesh.customDepthMaterial = depthM;
+      let tex = null, data = null, live = null, N = 0;
+      const invM = new THREE.Matrix4(), lRay = new THREE.Ray();
+      mesh.raycast = (rc, hits) => { invM.copy(mesh.matrixWorld).invert(); lRay.copy(rc.ray).applyMatrix4(invM); const p = raySnake(lRay); if (p) { p.applyMatrix4(mesh.matrixWorld); const d = p.distanceTo(rc.ray.origin); if (d >= rc.near && d <= rc.far) hits.push({ distance: d, point: p, object: mesh }); } };
+      skinGPU = {
+        init(n, dx, rc, rT, rU, rS, hb) {
+          if (!renderer.capabilities.isWebGL2 && !renderer.extensions.get('OES_texture_float')) return false;
+          N = n; data = new Float32Array(N * 8 * 4);
+          const row = (r, arr, wArr) => { for (let i = 0; i < N; i++) { const o = (r * N + i) * 4; data[o] = arr[i * 3]; data[o + 1] = arr[i * 3 + 1]; data[o + 2] = arr[i * 3 + 2]; data[o + 3] = wArr ? wArr[i] : 1; } };
+          row(0, rc, hb); row(1, rT); row(2, rU); row(3, rS); row(4, rc); row(5, rT); row(6, rU); row(7, rS);
+          if (tex) tex.dispose();
+          tex = track(new THREE.DataTexture(data, N, 8, THREE.RGBAFormat, THREE.FloatType)); tex.magFilter = tex.minFilter = THREE.NearestFilter; tex.generateMipmaps = false; tex.needsUpdate = true;
+          hsU.uRigTex.value = tex; hsU.uRigN.value = N; hsU.uRigDx.value = dx; return true;
+        },
+        upload(nc, nT, nU, nS, bul) {
+          if (!data) return;
+          for (let i = 0; i < N; i++) { const i3 = i * 3; for (const [r, a] of [[4, nc], [5, nT], [6, nU], [7, nS]]) { const o = (r * N + i) * 4; data[o] = a[i3]; data[o + 1] = a[i3 + 1]; data[o + 2] = a[i3 + 2]; } data[(4 * N + i) * 4 + 3] = bul ? bul[i] : 1; }
+          tex.needsUpdate = true; hsU.uRigOn.value = 1; mesh.frustumCulled = false; live = nc;
+        },
+        off() { hsU.uRigOn.value = 0; mesh.frustumCulled = true; live = null; },
+        get on() { return !!live; },
+      };
+    }
     if (hiPat) {
       const sceneNow = ctx.scene, swap = (d) => { if (!alive || ctx.scene !== sceneNow) return; const t = patternTex(d); t.anisotropy = pat.anisotropy; mat.map = t; pat.dispose(); track(t);
         if (d.head) { const h = headTex(d.head); headAniso(h); hsU.uHeadN.value = h.relief; hsU.uHeadC.value = h.color; headT.relief.dispose(); headT.color.dispose(); headT = h; }
@@ -2892,16 +3030,24 @@ float slScale(vec2 m) {
     if ((SCENES[P.scene.kind] || {}).water === 'river') { let best = 0, bd = -1; for (let i = 0; i < 16; i++) { const a = (i / 16) * TAU; let m = -1e9; for (const p of pose.pts) m = Math.max(m, p[0] * Math.cos(a) + p[1] * Math.sin(a)); if (bd < 0 || m < bd) { bd = m; best = a; } } poseInfo.waterDir = best; poseInfo.waterDist = bd + F.w0 * 2.5 + Rb * 0.12; }
     scene.add(snakeGroup);
     if (P.scene.kind !== 'sea') scene.add(contactShadow(poseInfo, F, Rb));
-    ctx.natureReady = null; ctx.afterNature = () => { if (!cScene.checked) setSceneVisible(false); dirty = true; kick(); };
-    t0 = performance.now(); buildScene(ctx, P, F, body, poseInfo, seed, quality); perfT('scene', t0);
+    ctx.natureReady = null; ctx.afterNature = () => { if (!cScene.checked) setSceneVisible(false); dirty = true; shadowDirty = true; kick(); };
+    t0 = performance.now(); buildScene(ctx, P, F, body, poseInfo, seed, gq); perfT('scene', t0);
     if (!cScene.checked) setSceneVisible(false);
     // the photographic surroundings arrive a moment later (cached after the first time)
     const envName = P.scene.env || ENV_FOR[P.scene.kind], myScene = scene;
     ctx.envReady = envName && !opts.noEnv ? loadEnv(envName).then((env) => {
       if (!alive || ctx.scene !== myScene) return false;
-      const tE = performance.now(); env.name = envName; applyEnv(ctx, P, F, poseInfo, env); perfT('applyEnv', tE); if (!cScene.checked) setSceneVisible(false); dirty = true; kick(); return true;
+      const tE = performance.now(); env.name = envName; applyEnv(ctx, P, F, poseInfo, env); perfT('applyEnv', tE); if (!cScene.checked) setSceneVisible(false); dirty = true; shadowDirty = true; kick(); return true;
     }).catch(() => false) : Promise.resolve(false);
-    ctx.envReady = Promise.all([ctx.envReady, ctx.natureReady, ctx.patternReady]).then((r) => r[0]); // (tests wait for everything)
+    // v5.78: nothing is drawn behind the loading cover (each hidden frame used to cost a full render with shadows while the
+    // pattern, the plants and the sky were still being made); once all is ready the shaders are compiled in the background
+    // (compileAsync: the browser compiles them off the main thread where it can), then the first picture is drawn
+    holdRender = true; const sceneB = scene;
+    ctx.envReady = Promise.all([ctx.envReady, ctx.natureReady, ctx.patternReady]).then((r) => {
+      const go = () => { if (ctx.scene === sceneB) { holdRender = false; kick(); } return r[0]; };
+      if (!renderer.compileAsync || !cam || ctx.scene !== sceneB || !renderer.extensions.has('KHR_parallel_shader_compile')) return go();
+      return Promise.race([renderer.compileAsync(ctx.scene, cam).catch(() => {}), new Promise((res) => setTimeout(res, 5000))]).then(go);
+    }).catch(() => { if (ctx.scene === sceneB) { holdRender = false; kick(); } return false; }); // (tests wait for everything)
     { const pr = ctx.envReady; busyFor = pr; busyShow(); pr.finally(() => busyHide(pr)); }
 
     const headPos = body.surf(F.Hl * 0.45, 0).p;
@@ -2933,8 +3079,9 @@ float slScale(vec2 m) {
           const st = controls.st, d0 = st.goal ? st.goal.d : st.d, d = clamp(d0 * f, info.dMin, info.dMax * Math.max(sizeBusy() ? info.scaleK : 1, fx.zoomOut));
           if (Math.abs(d - d0) < 1e-9) return true;
           const r = canvas.getBoundingClientRect(), ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1), cam);
-          const body = snakeGroup.children.find((o) => o.isMesh && o.geometry === info.body.geo); let p = null;
-          if (body) { body.geometry.computeBoundingSphere(); const h = ray.intersectObject(body, false)[0]; if (h) p = h.point; }
+          // (v5.78: the ray meets the body's chain of spheres, not its 200 000 triangles - that raycast took tens of
+          // milliseconds on every turn of the wheel and made zooming stutter)
+          let p = raySnake(ray.ray, snakeGroup.scale.x);
           if (!p) { const t = -ray.ray.origin.y / (ray.ray.direction.y || -1e-6); if (t > 0) p = ray.ray.origin.clone().addScaledVector(ray.ray.direction, t); }
           if (!p) return false;
           // the nearest point of the snake to it (zooming in on bare ground homes in on the snake instead)
@@ -2954,9 +3101,9 @@ float slScale(vec2 m) {
     fitLimits();
     resetView(true);
     if (bDet.getAttribute('aria-pressed') === 'true') buildMarkers();
-    kick();
+    shadowDirty = true; kick();
   }
-  function setSceneVisible(v) { if (!ctx.scene) return; (ctx.occ || []).forEach((o) => { if (o.hid) { o.hid = false; if (o.im) { o.im.setMatrixAt(o.i, o.m); o.im.instanceMatrix.needsUpdate = true; } } }); ctx.scene.traverse((o) => { if (o !== ctx.scene && o.parent === ctx.scene && o !== snakeGroup && !o.isLight && o !== scaleObj) o.visible = v; }); kick(); }
+  function setSceneVisible(v) { if (!ctx.scene) return; (ctx.occ || []).forEach((o) => { if (o.hid) { o.hid = false; if (o.im) { o.im.setMatrixAt(o.i, o.m); o.im.instanceMatrix.needsUpdate = true; } } }); ctx.scene.traverse((o) => { if (o !== ctx.scene && o.parent === ctx.scene && o !== snakeGroup && !o.isLight && o !== scaleObj) o.visible = v; }); shadowDirty = true; kick(); }
 
   function fitLimits() {
     const r = Math.max(info.Rb, info.hMax * (P.pose && P.pose.kind === 'drape' ? 1.3 : 0.8)), asp = Math.max(0.4, (stage.clientWidth || 1) / (stage.clientHeight || 1)); // (v5.62: a raised cobra or a snake up on a branch is taller than it is wide)
@@ -2991,8 +3138,15 @@ float slScale(vec2 m) {
   // the camera never enters the body: its distance to the body's centre line must exceed the body's
   // half-thickness there plus a margin for the near plane; if not, it backs away along its line of sight
   function bodyClearance(p) {
-    const list = (fx.collide && fx.collide()) || info.collide;
+    const list = colList || (colList = (fx.collide && fx.collide()) || info.collide); // (v5.78: once per frame, not up to 40 times)
     let m = 1e9; for (const c of list) { const d = p.distanceTo(c.p) - c.r; if (d < m) m = d; } return m;
+  }
+  // the nearest point where a ray meets the snake's body, as a chain of spheres along its centre line (posed or at rest)
+  const rsV = new THREE.Vector3();
+  function raySnake(r, k = 1) {
+    const list = colList || (colList = (fx.collide && fx.collide()) || info.collide); let best = Infinity;
+    for (const c of list) { rsV.subVectors(c.p, r.origin); const tc = rsV.dot(r.direction), d2 = rsV.lengthSq() - tc * tc, rr = c.r * k * 0.95; if (d2 > rr * rr) continue; const t = tc - Math.sqrt(rr * rr - d2); if (t > 0 && t < best) best = t; }
+    return best < Infinity ? r.origin.clone().addScaledVector(r.direction, best) : null;
   }
   function placeCamera() {
     const st = controls.st;
@@ -3012,29 +3166,54 @@ float slScale(vec2 m) {
   function frame() {
     raf = 0; if (!alive || lost || !cam) return;
     if (document.hidden || !host.isConnected || host.offsetParent === null && !document.fullscreenElement) { dirty = true; return; } // paused while hidden
-    let moving = controls.update();
+    if (holdRender) return; // (still loading: see build)
+    const tF0 = performance.now(); colList = null;
+    const camMoving = controls.update(); let moving = false;
     // v5.73: wind, water and the snake's idle life run on a clock of their own (no motion at all with reduced motion)
     const amb = !reduce(); if (NATURE.tick) { NATURE.tick(performance.now() / 1000); NATURE.AMB.uWind.value = amb && cScene.checked ? (quality === 'low' ? 0.6 : 1) : 0; }
     // the jaw opens and shuts smoothly
     const mo = extras && extras.mouth;
-    if (mo && Math.abs(mo.t - mouthGoal) > 1e-3) { const nt = reduce() ? mouthGoal : mo.t + clamp(mouthGoal - mo.t, -0.07, 0.07); mo.set(nt); if (Math.abs(nt - mouthGoal) <= 1e-3) mo.settle(); moving = true; }
+    // (v5.78: eased, and timed by the clock - not a fixed step per frame - so it opens at the same smooth pace at any frame rate)
+    if (mo && Math.abs(mo.t - mouthGoal) > 1e-3) { const dtm = clamp((tF0 - (lastF || tF0)) / 1000, 1 / 240, 0.1), nt = reduce() ? mouthGoal : mo.t + clamp(mouthGoal - mo.t, -dtm * 2.2, dtm * 2.2) * (0.35 + 0.65 * sstep(0, 0.35, Math.abs(mouthGoal - mo.t))); mo.set(Math.abs(nt - mouthGoal) < 2e-3 ? mouthGoal : nt); if (Math.abs(mo.t - mouthGoal) <= 1e-3) mo.settle(); moving = true; }
     if (fx.step()) moving = true; // v4.81: slithering, the shows (they may move the jaw and bend the body)
     if (sizeStep()) moving = true; // v5.74: Size vs person: the snake's scale, the person fading in or out
+    const sceneMoving = moving; moving = moving || camMoving; // (anything but the camera moved: the shadows must follow)
     placeCamera();
     if (fx.camera()) moving = true; // a show moves the camera by itself
     if (opts.testing && window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } // (tests: a fixed camera)
     updateOccluders();
-    { const viaAmb = ambOnly; ambOnly = false; const shUp = !viaAmb || moving || shadowAge++ > (quality === 'low' ? 12 : 4); if (shUp) shadowAge = 0; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; } // (v5.73: frames that only move leaves and water reuse the shadows)
+    // (v5.73: frames that only move leaves and water reuse the shadows; v5.78: so do frames where only the camera moves - turning
+    // or zooming used to redraw the whole shadow map every frame)
+    { const viaAmb = ambOnly; ambOnly = false; const shUp = shadowDirty || sceneMoving || (!viaAmb && !camMoving) || shadowAge++ > (quality === 'high' ? 4 : 12); if (shUp) shadowAge = 0; shadowDirty = false; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; }
+    dynRes(tF0, moving);
     renderer.render(ctx.scene, cam);
     sizeAfter(); // v5.74: the magnified inset of a small snake
     updateMarkers();
     fx.after();
+    if (window.SL_3D_TEST) (window.__slFrames || (window.__slFrames = [])).push(performance.now() - tF0);
+    lastF = tF0;
     if (moving) kick();
     else if (amb && alive) { // v5.73: the scenery keeps moving gently, at a calmer frame rate (lower still at the Light setting)
-      clearTimeout(ambT); ambT = setTimeout(() => { ambOnly = true; kick(); }, performance.now() - lastUser > 45000 ? 125 : quality === 'low' ? 42 : 30); // (left alone for a while: slower still, to save the battery)
+      clearTimeout(ambT); ambT = setTimeout(() => { ambOnly = true; kick(); }, performance.now() - lastUser > 45000 ? 125 : quality === 'low' ? 50 : quality === 'medium' ? 42 : 30); // (left alone for a while: slower still, to save the battery)
     }
   }
-  let ambT = 0, shadowAge = 0, ambOnly = false, lastUser = performance.now();
+  let holdRender = false, ambT = 0, shadowAge = 0, ambOnly = false, lastUser = performance.now(), lastF = 0, colList = null, shadowDirty = true;
+  // v5.78: dynamic resolution - while the view moves, if frames take too long (under ~40 per second) the picture is drawn with
+  // fewer pixels (down to 60% of the full pixel ratio), and as soon as it is still again it is drawn once more at full
+  // sharpness. The change is gradual and has a dead band, so the resolution never flickers up and down.
+  const dyn = { ema: 16, n: 0, still: 0, lastT: 0, frames: 0 };
+  function dynRes(t, moving) {
+    const dt = dyn.lastT ? t - dyn.lastT : 16; dyn.lastT = t;
+    if (moving && dt < 250) { dyn.ema += (dt - dyn.ema) * 0.15; dyn.frames++; dyn.still = 0; }
+    else if (!moving) dyn.still++;
+    let k = dynK;
+    if (moving && dyn.frames > 8) {
+      if (dyn.ema > 26 && k > 0.6) { k = Math.max(0.6, k * 0.85); dyn.frames = 0; }
+      else if (dyn.ema < 15 && k < 1) { k = Math.min(1, k / 0.9); dyn.frames = 0; }
+    }
+    if (!moving && dyn.still >= 1 && k < 1) { k = 1; dyn.frames = 0; dyn.ema = 16; } // still: full sharpness
+    if (k !== dynK) { dynK = k; const w = stage.clientWidth || 300, h = stage.clientHeight || 200; renderer.setPixelRatio(basePR() * dynK); renderer.setSize(w, h, false); }
+  }
   for (const ev of ['pointerdown', 'wheel', 'keydown', 'touchstart']) on(stage, ev, () => { lastUser = performance.now(); }, { passive: true });
   const zeroM = new THREE.Matrix4().makeScale(0, 0, 0), ov = new THREE.Vector3(), od = new THREE.Vector3();
   function updateOccluders() {
@@ -3306,7 +3485,7 @@ float slScale(vec2 m) {
   on(bScale, 'click', () => { if (bScale.getAttribute('aria-pressed') !== 'true') { fx.exclusive('scale'); toggleScale(true); } else toggleScale(false); });
   on(bSet, 'click', () => { panel.hidden = !panel.hidden; bSet.setAttribute('aria-expanded', String(!panel.hidden)); });
   on(cScene, 'change', () => setSceneVisible(cScene.checked));
-  on(qs, 'change', () => { quality = qs.value; renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality === 'low' ? 1.25 : 2)); rebuild(); });
+  on(qs, 'change', () => setQuality(qs.value));
   on(document, 'fullscreenchange', syncFull); on(document, 'webkitfullscreenchange', syncFull);
   on(document, 'visibilitychange', () => { if (!document.hidden) kick(); });
   on(canvas, 'keydown', (e) => { if (e.key === 'Escape' && wrap.classList.contains('sp3d-max')) { e.stopPropagation(); e.preventDefault(); toggleFull(); } });
@@ -3322,6 +3501,7 @@ float slScale(vec2 m) {
       if (o.geometry && !seen.has(o.geometry)) { seen.add(o.geometry); o.geometry.dispose(); }
       const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
       for (const m of ms) { if (seen.has(m)) continue; seen.add(m); for (const k in m) { const v = m[k]; if (v && v.isTexture && !seen.has(v)) { seen.add(v); v.dispose(); } } m.dispose(); }
+      if (o.customDepthMaterial && !seen.has(o.customDepthMaterial)) { seen.add(o.customDepthMaterial); o.customDepthMaterial.dispose(); }
       if (o.dispose && o.isInstancedMesh) o.dispose();
       if (o.shadow && o.shadow.map) o.shadow.map.dispose();
     });
@@ -3329,6 +3509,13 @@ float slScale(vec2 m) {
     ctx.scene.clear(); ctx.scene = null; scaleObj = null; sizeSt.on = sizeSt.leaving = false; sizeSt.lay = sizeSt.pts = null; sizeSt.undo = null; sizeSt.k = 1; sizeSt.sk.v = sizeSt.sk.from = sizeSt.sk.to = 0; sizeSt.sk.dur = 0;
     bScale.setAttribute('aria-pressed', 'false'); bScale.textContent = 'Size vs person'; sizeOverlays(false);
     markers.forEach((m) => m.el.remove()); markers = [];
+  }
+  function setQuality(q) {
+    qPref = q === 'auto' || qName[q] ? q : 'auto'; try { localStorage.setItem('sl-3d-quality', qPref); } catch (e) { /* private mode */ }
+    const nq = qPref === 'auto' ? autoQ : qPref; qLabel();
+    if (nq === quality) return;
+    quality = nq; qs.value = quality === 'medium' ? 'high' : quality; dynK = 1; renderer.setPixelRatio(basePR());
+    renderer.shadowMap.type = quality === 'low' ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap; qLabel(); rebuild();
   }
   function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; if (sizeBusy()) toggleScale(false, { instant: true }); fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
 
@@ -3382,4 +3569,4 @@ export function adultLength(p, page, id) {
   return out(+p.length || 1, 'genus', '', null);
 }
 export function webglAvailable() { try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { return false; } }
-export const _internals = { normProfile, makeBodyFns, makePose, loadEnv }; // for offline checks
+export const _internals = { normProfile, makeBodyFns, makePose, loadEnv, autoProfile, withLook, buildBody, buildEyes, buildMouth, headData, scaleLattice, patternData }; // for offline checks

@@ -861,10 +861,9 @@ export function create(V) {
     // skins: geometries whose vertices follow the centre line
     const skins = [];
     function addSkin(geo, xs, opt = {}) {
-      const pa = geo.attributes.position, n = pa.count, src = pa.array.slice(), loc = new Float32Array(n * 3), fi = new Float32Array(n);
-      const s = { geo, pa, src, loc, fi, n, bulge: !!opt.bulge, body: !!opt.body, rigid: opt.rigid || null };
-      for (let v = 0; v < n; v++) fi[v] = clamp(xs[v] / dx, 0, N - 1.0001);
-      localize(s, 0, n, src); skins.push(s); return s;
+      const pa = geo.attributes.position, n = pa.count, src = opt.gpu ? null : pa.array.slice(), loc = opt.gpu ? null : new Float32Array(n * 3), fi = opt.gpu ? null : new Float32Array(n);
+      const s = { geo, pa, src, loc, fi, n, bulge: !!opt.bulge, body: !!opt.body, rigid: opt.rigid || null, gpu: !!opt.gpu };
+      if (!s.gpu) { for (let v = 0; v < n; v++) fi[v] = clamp(xs[v] / dx, 0, N - 1.0001); localize(s, 0, n, src); } skins.push(s); return s; // (v5.78: the body skin is bent on the graphics card - viewer.js skinGPU)
     }
     function localize(s, a, b, arr) {
       for (let v = a; v < b; v++) {
@@ -880,7 +879,8 @@ export function create(V) {
     const M = body.M, bx = new Float32Array(body.nR * (M + 1));
     let jawVerts = 0;
     for (let i = 0; i < body.nR; i++) { bx.fill(body.ringX[i], i * (M + 1), (i + 1) * (M + 1)); if (body.ringX[i] <= xEnd) jawVerts = (i + 1) * (M + 1); }
-    const bodySkin = addSkin(body.geo, bx, { bulge: true, body: true });
+    const gpuSkin = !!(V.skinGPU && V.skinGPU.init(N, dx, rc, rT, rU, rS, hb));
+    const bodySkin = addSkin(body.geo, bx, { bulge: true, body: true, gpu: gpuSkin });
     const mver = () => (mo ? (mo.ver != null ? mo.ver : mo.t) : 0); let lastT = mver(), active = false;
     const contact = V.scene && V.scene.children.find((o) => o.isMesh && o.renderOrder === 1 && o.material && o.material.map && o.material.transparent && o.geometry && o.geometry.type === 'PlaneGeometry');
     // v5.73: while the body is posed (slithering, hunting) a soft contact shadow follows it on the ground - darkest where
@@ -947,19 +947,18 @@ export function create(V) {
     }
     function seam(geo) { const nr = geo.attributes.normal.array; for (let i = 0; i < body.nR; i++) { const a = i * (M + 1), b = a + M; for (let q = 0; q < 3; q++) { const m = (nr[a * 3 + q] + nr[b * 3 + q]) / 2; nr[a * 3 + q] = nr[b * 3 + q] = m; } } geo.attributes.normal.needsUpdate = true; }
     function apply(keepContact) {
-      if (mo && mver() !== lastT) { localize(bodySkin, 0, jawVerts, bodySkin.pa.array); lastT = mver(); } // the jaw moved: take its new shape
+      if (mo && mver() !== lastT) { if (!bodySkin.gpu) localize(bodySkin, 0, jawVerts, bodySkin.pa.array); lastT = mver(); } // the jaw moved: take its new shape
       frames();
       headRig.matrix.copy(hM); headRig.matrixWorldNeedsUpdate = true; tailRig.matrix.copy(tM); tailRig.matrixWorldNeedsUpdate = true;
-      for (const s of skins) deform(s);
+      for (const s of skins) { if (s.gpu) V.skinGPU.upload(nc, nT, nU, nS, bul); else deform(s); }
       if (!active) { active = true; if (contact && !keepContact) contact.visible = false; }
       if (rib) { rib.m.visible = !keepContact && V.sceneOn !== false && !(P.scene && P.scene.kind === 'sea'); if (rib.m.visible) rib.update(); }
     }
     function release() {
       if (!active) return; active = false;
       nc.set(rc); nT.set(rT); nU.set(rU); nS.set(rS); bul.fill(1);
-      for (const s of skins) { s.pa.array.set(s.src); s.pa.needsUpdate = true; if (!s.body) { s.geo.computeVertexNormals(); s.geo.computeBoundingSphere(); } }
-      if (mo) { mo.set(mo.t); mo.settle(); lastT = mver(); } else { body.geo.computeVertexNormals(); seam(body.geo); }
-      body.geo.computeBoundingSphere();
+      for (const s of skins) { if (s.gpu) { V.skinGPU.off(); continue; } s.pa.array.set(s.src); s.pa.needsUpdate = true; if (!s.body) { s.geo.computeVertexNormals(); s.geo.computeBoundingSphere(); } }
+      if (bodySkin.gpu) lastT = mver(); else { if (mo) { mo.set(mo.t); mo.settle(); lastT = mver(); } else { body.geo.computeVertexNormals(); seam(body.geo); } body.geo.computeBoundingSphere(); }
       headRig.matrix.identity(); tailRig.matrix.identity(); headRig.matrixWorldNeedsUpdate = tailRig.matrixWorldNeedsUpdate = true;
       if (contact) contact.visible = true; if (rib) rib.m.visible = false;
     }

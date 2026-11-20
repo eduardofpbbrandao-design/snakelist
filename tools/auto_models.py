@@ -247,10 +247,14 @@ CURATED = {
     # long as the neck is deep) only a little wider than the neck, a big eye - about half the head's depth - set high, halfway along
     # the mouth line, black with a round pupil and a thin pale rim; glossy smooth scales with no flecks; adults 36-51 cm, record ~66 cm;
     # the tail about 31% of the total length (Virginia Herpetological Society: 25-37%, average 31.5%)
+    # v5.78: rebuilt against several photos (SnakeList kha 10109512 and iNaturalist research-grade photos of the head in side, top
+    # and front view): the head is narrow and long (about 1.9 times as long as wide), flat-topped and low (depth about 0.6 of its
+    # width), the snout lower than the crown, a slight brow over the eye; the eye a fifth of the head long, NOT bulging; the lip and
+    # chin scales yellowish white; the tongue red with black tips (Ernst and Ernst 2003, Snakes of the United States and Canada)
     "opheodrys-vernalis": {"d": "#79bd45", "lat": "#86c650", "b": "#eef0c8", "t": "uniform", "s": "grass", "L": 0.45, "mx": "about 66 cm", "k": 0, "sp": {"grassA": "#55803a", "grassB": "#9ab860"},
-                           "h": dict(DARK_EYE, iris="#1c140c", irisInner="#4a3a22", eyeRing="#d2c99c", pupilW=0.26, eye=0.43, eyeL=0.25, eyeX=0.4, eyeA=56, len=0.036, w=0.95, h=0.8, snoutH=0.74, jaw=0.8,
-                                     lips="pale", lipColor="#c8d968", bulge=0.16, brow=0.01, headRelief=0.3, groove=0.5), "bx": {"ld": 62, "neck": 0.78, "tail": 0.31},
-                           "sx": {"gloss": 0.68, "rows": 15, "keel": 0, "relief": 0.7}, "cx": {"bellyA": 0.7, "bellySharp": 0.045, "mottle": 0.02, "var": 0.02, "flecks": 0, "edgeK": 0.55}},
+                           "h": dict(DARK_EYE, iris="#3d321c", irisInner="#5c4a26", eyeRing="#d9c27a", pupilW=0.22, eyeL=0.22, eyeX=0.36, eyeA=50, len=0.031, w=0.9, h=0.78, snoutH=0.64, jaw=0.82,
+                                     lips="pale", lipColor="#e6ebb6", lipFull=0.12, bulge=0.045, brow=0.07, taper=0.3, headRelief=0.14, groove=0.16, snout=0.52, tongue="#c42a38", tongueTip="#141012", lw=1.65, hFixed=1), "bx": {"ld": 62, "neck": 0.78, "tail": 0.31, "hn": 1.3},
+                           "sx": {"gloss": 0.78, "rows": 15, "keel": 0, "relief": 0.55, "cavity": 0.22}, "cx": {"bellyA": 0.7, "bellySharp": 0.045, "mottle": 0.02, "var": 0.02, "flecks": 0, "edgeK": 0.25}},
     "opheodrys-aestivus": {"d": "#76b13a", "lat": "#86bd45", "b": "#ecebb0", "t": "plain", "s": "forest", "L": 0.8, "k": 1, "lip": "#e2e6a8",
                            "h": dict(DARK_EYE, iris="#1d1d14", irisInner="#34341f", eyeRing="#cfd09a", pupilW=0.25, eye=0.18), "bx": {"ld": 70, "neck": 0.9}, "sx": {"gloss": 0.4, "rows": 17}, "cx": {"bellyA": 0.7, "mottle": 0.04}},
     "morelia-viridis": {"d": "#4fa82c", "lat": "#5ab232", "b": "#e4e46a", "c": "#f3f6dc", "t": "vert", "n": 40, "s": "rainforest",
@@ -842,8 +846,9 @@ HAND_FIXES_562 = {
     # scale rows; (4) the darker head (it darkens further in winter) was only faint; (5) a grey sheen from too much gloss;
     # (6) too slender a body for this fairly stout snake
     "oxyuranus-microlepidotus": [(("head", "irisDark"), 1), (("head", "iris"), "#2c1d12"), (("head", "irisInner"), "#4e3420"), (("head", "eyeRing"), "#7a5a34"), (("body", "ld"), 38),
-                                 (("head", "eyeL"), 0.17), (("head", "eyeX"), 0.35), (("head", "eyeA"), 60), (("head", "snoutH"), 0.86), (("head", "bulge"), 0.06),
-                                 (("colors", "dorsal"), "#7c5e30"), (("colors", "lateral"), "#866634"), (("colors", "belly"), "#dcb048"), (("colors", "bellyA"), 0.61),
+                                 (("head", "eyeL"), 0.17), (("head", "eyeX"), 0.35), (("head", "eyeA"), 60), (("head", "snoutH"), 0.9), (("head", "bulge"), 0.05),
+                                 (("head", "h"), 0.84), (("head", "hFixed"), 1), (("head", "groove"), 0.26), (("head", "headRelief"), 0.28), (("head", "taper"), 0.12), (("head", "brow"), 0.05), (("scales", "cavity"), 0.3),  # v5.78: the deep "coffin" head, glossier, warmer
+                                 (("colors", "dorsal"), "#83622f"), (("colors", "lateral"), "#8d6b35"), (("colors", "belly"), "#dcb048"), (("colors", "bellyA"), 0.61),
                                  (("scales", "gloss"), 0.6), (("pattern", 1, "alpha"), 0.38), (("pattern", 1, "x1"), 0.95)],
 }
 SKIP_562 = {"opheodrys-vernalis", "oxyuranus-microlepidotus"}  # (being rebuilt separately)
