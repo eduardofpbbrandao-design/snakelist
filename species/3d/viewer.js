@@ -1821,7 +1821,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
       if (w > 0 && an) { qq.setFromAxisAngle(axis, an * w); v3.sub(hinge).applyQuaternion(qq).add(hinge); }
       a[vi * 3] = v3.x; a[vi * 3 + 1] = v3.y; a[vi * 3 + 2] = v3.z; } };
     turn(lower, aD); turn(upper, aU);
-    pos.needsUpdate = true;
+    pos.clearUpdateRanges(); pos.addUpdateRange(0, Math.min(body.nR, headRings + 1) * (M + 1) * 3); pos.needsUpdate = true; // (v5.78: only the head's part of the buffer goes to the graphics card)
     // the mouth lining and the teeth go with their jaws
     const strip2 = (J, an) => { const fp = J.g.attributes.position.array, o = J.o;
       for (let k = 0, i = 0; k < fp.length; k += 3, i++) { v3.set(o[k], o[k + 1], o[k + 2]); if (J === floorJ) jawWarp(v3, weight(J.xv[i])); qq.setFromAxisAngle(axis, an * weight(J.xv[i])); v3.sub(hinge).applyQuaternion(qq).add(hinge); fp[k] = v3.x; fp[k + 1] = v3.y; fp[k + 2] = v3.z; }
@@ -1839,10 +1839,23 @@ function buildMouth(P, F, body, group, eyes, pat) {
     // fangs swing forward as the mouth opens (vipers fold them flat when it is shut)
     for (const fg of fangs) fg.visible = t > 0.25;
   }
-  function settle() { // normals once the jaw stops (the seam along the belly kept smooth, like buildBody does)
-    geo.computeVertexNormals(); const nrm = geo.attributes.normal.array;
-    for (let i = 0; i < body.nR; i++) { const a = i * (M + 1), b = a + M; for (let q2 = 0; q2 < 3; q2++) { const m = (nrm[a * 3 + q2] + nrm[b * 3 + q2]) / 2; nrm[a * 3 + q2] = nrm[b * 3 + q2] = m; } }
-    geo.attributes.normal.needsUpdate = true;
+  // normals once the jaw stops (the seam along the belly kept smooth, like buildBody does). v5.78: only the head's rings - the
+  // whole body's 200 000 vertices took 50-100 ms, a visible hitch at the end of every Open mouth / Close mouth
+  const nRh = Math.min(body.nR - 1, headRings + 1), acc = new Float32Array((nRh + 1) * (M + 1) * 3);
+  const va = new THREE.Vector3(), vb = new THREE.Vector3(), vc = new THREE.Vector3();
+  function settle() {
+    const ia = geo.index.array, pa = pos.array, nrm = geo.attributes.normal.array, nT = Math.min(body.nR - 1, nRh + 1) * M * 6; acc.fill(0);
+    const lim = (nRh + 1) * (M + 1);
+    for (let k = 0; k < nT; k += 3) {
+      const a = ia[k], b = ia[k + 1], c = ia[k + 2]; if (a === b || b === c) continue;
+      va.fromArray(pa, a * 3); vb.fromArray(pa, b * 3).sub(va); vc.fromArray(pa, c * 3).sub(va); vb.cross(vc);
+      for (const v of [a, b, c]) if (v < lim) { acc[v * 3] += vb.x; acc[v * 3 + 1] += vb.y; acc[v * 3 + 2] += vb.z; }
+    }
+    const nV = nRh * (M + 1);
+    for (let v = 0; v < nV; v++) { const x = acc[v * 3], y = acc[v * 3 + 1], z = acc[v * 3 + 2], l = Math.hypot(x, y, z) || 1; nrm[v * 3] = x / l; nrm[v * 3 + 1] = y / l; nrm[v * 3 + 2] = z / l; }
+    for (let i = 0; i < nRh; i++) { const a = i * (M + 1), b = a + M; for (let q2 = 0; q2 < 3; q2++) { const m = (nrm[a * 3 + q2] + nrm[b * 3 + q2]) / 2; nrm[a * 3 + q2] = nrm[b * 3 + q2] = m; } }
+    { const T = body.frameAt(0).T; for (let j = 0; j <= M; j++) { nrm[j * 3] = -T.x; nrm[j * 3 + 1] = -T.y; nrm[j * 3 + 2] = -T.z; } } // (the snout tip's cap, as buildBody makes it)
+    const nn = geo.attributes.normal; nn.clearUpdateRanges(); nn.addUpdateRange(0, nV * 3); nn.needsUpdate = true;
   }
   // v5.53: a tongue flick, s from 0 to 1 (out, the tips wave up and down, back in); 0 or 1 leaves it in its sheath. With the
   // mouth shut only the tongue of everything inside is shown: it comes out through the notch at the front of the lips.
@@ -2141,7 +2154,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   const sunD = Math.max(Rb * 6, 3), shExt = Math.max(Rb * 1.5, quality === 'low' ? 0.5 : 0.75);
   sun.position.set(Math.cos(az) * Math.cos(el), Math.sin(el), Math.sin(az) * Math.cos(el)).multiplyScalar(sunD);
   sun.castShadow = true;
-  const sm = quality === 'low' ? 1024 : 4096; sun.shadow.mapSize.set(sm, sm); // v4.72: crisper shadows
+  const sm = quality === 'high' ? 2048 : 1024; sun.shadow.mapSize.set(sm, sm); // v5.78: 2048 (4096 took 128 MB of graphics memory for no visible gain over the snake's small area)
   const sc = sun.shadow.camera; sc.left = sc.bottom = -shExt; sc.right = sc.top = shExt; sc.near = Math.max(0.01, sunD - Math.max(Rb * 5.5, 2.5)); sc.far = sunD + Math.max(Rb * 8, 3);
   sun.shadow.bias = -0.0004; sun.shadow.normalBias = F.w0 * 0.04; sun.shadow.radius = 3;
   scene.add(sun); scene.add(sun.target);
@@ -2509,7 +2522,7 @@ function Controls(dom, cam, opt) {
       const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; if (mid0) { const m = pan(mid[0] - mid0[0], mid[1] - mid0[1]); last = now; st.vpx = m[0] / dt * 16; st.vpz = m[1] / dt * 16; } mid0 = mid; opt.kick(); }
   };
   const onUp = (e) => { ptrs.delete(e.pointerId); if (ptrs.size < 2) { pinch0 = 0; mid0 = null; } if (!ptrs.size) { st.dragging = false; panBtn = false; if (reduce() || performance.now() - last > 80) { st.vaz = st.vel = st.vpx = st.vpz = 0; } opt.kick(); } };
-  const onWheel = (e) => { e.preventDefault(); if (locked()) return; user(); const f = Math.exp(clamp(e.deltaY, -120, 120) * 0.0016); if (!(opt.pointZoom && opt.pointZoom(e.clientX, e.clientY, f))) zoom(f); }; // v5.12: towards the point under the pointer
+  const onWheel = (e) => { e.preventDefault(); if (locked()) return; user(); const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1), f = Math.exp(clamp(dy, -120, 120) * 0.0016); // (v5.78: line and page scrolling (Firefox) zoom as much as pixel scrolling) if (!(opt.pointZoom && opt.pointZoom(e.clientX, e.clientY, f))) zoom(f); }; // v5.12: towards the point under the pointer
   const onKey = (e) => {
     const k = e.key, s = 0.17;
     if (locked()) return;
@@ -2535,7 +2548,7 @@ function Controls(dom, cam, opt) {
   // returns true while still moving
   function update() {
     let moving = false;
-    const tnow = performance.now(), dt = lastU ? clamp((tnow - lastU) / 1000, 0, 0.2) : 1 / 60; lastU = tnow;
+    const tnow = performance.now(), dt = lastU && tnow - lastU < 120 ? clamp((tnow - lastU) / 1000, 1 / 250, 0.12) : 1 / 60; lastU = tnow; // (after a pause the first step is a normal one, not a jump)
     if (held.size && locked()) held.clear();
     if (held.size || kv[0] || kv[1]) {
       const f = (held.has('w') ? 1 : 0) - (held.has('s') ? 1 : 0), r = (held.has('d') ? 1 : 0) - (held.has('a') ? 1 : 0), n = Math.hypot(f, r) || 1;
@@ -2546,15 +2559,17 @@ function Controls(dom, cam, opt) {
       if (!held.size && Math.hypot(kv[0], kv[1]) < st.d * 0.01) kv = [0, 0]; else moving = true;
     }
     // a fling keeps gliding a little longer (smoother than it was)
-    if (!st.dragging && (st.vaz || st.vel)) { st.az += st.vaz; st.el = limitEl(st.el + st.vel, st.d); st.vaz *= 0.92; st.vel *= 0.92; if (Math.abs(st.vaz) < 1e-4 && Math.abs(st.vel) < 1e-4) st.vaz = st.vel = 0; else moving = true; }
-    if (!st.dragging && (st.vpx || st.vpz)) { st.px += st.vpx; st.pz += st.vpz; clampPan(); st.vpx *= 0.9; st.vpz *= 0.9; if (Math.hypot(st.vpx, st.vpz) < st.d * 1e-5) st.vpx = st.vpz = 0; else moving = true; }
+    // (v5.78: every glide below is timed by the clock, not by frames: the same smooth motion at 30, 60 or 120 frames a second)
+    const f60 = dt * 60;
+    if (!st.dragging && (st.vaz || st.vel)) { st.az += st.vaz * f60; st.el = limitEl(st.el + st.vel * f60, st.d); const dk = Math.pow(0.92, f60); st.vaz *= dk; st.vel *= dk; if (Math.abs(st.vaz) < 1e-4 && Math.abs(st.vel) < 1e-4) st.vaz = st.vel = 0; else moving = true; }
+    if (!st.dragging && (st.vpx || st.vpz)) { st.px += st.vpx * f60; st.pz += st.vpz * f60; clampPan(); const dk = Math.pow(0.9, f60); st.vpx *= dk; st.vpz *= dk; if (Math.hypot(st.vpx, st.vpz) < st.d * 1e-5) st.vpx = st.vpz = 0; else moving = true; }
     if (tw) { // the eased glide: every channel together, the short way round
       const u = clamp((tnow - tw.t0) / tw.dur, 0, 1), e = u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
       for (const q of ['az', 'el', 'd', 'px', 'pz']) st[q] = tw.from[q] + (tw.to[q] - tw.from[q]) * e;
       if (u >= 1) tw = null; else moving = true;
     }
     if (st.goal) {
-      const k = 0.2; st.az += (st.goal.az - st.az) * k; st.d += (st.goal.d - st.d) * k; st.el = limitEl(st.el + (st.goal.el - st.el) * k, st.d); st.px += (st.goal.px - st.px) * k; st.pz += (st.goal.pz - st.pz) * k;
+      const k = 1 - Math.exp(-dt * 12); st.az += (st.goal.az - st.az) * k; st.d *= Math.pow(st.goal.d / st.d, k); // (v5.78: zoom glides in proportion - the same feel close up and far away) st.el = limitEl(st.el + (st.goal.el - st.el) * k, st.d); st.px += (st.goal.px - st.px) * k; st.pz += (st.goal.pz - st.pz) * k;
       if (Math.abs(st.goal.az - st.az) < 1e-4 && Math.abs(st.goal.d - st.d) / st.d < 1e-4 && Math.abs(st.goal.el - st.el) < 1e-4 && Math.hypot(st.goal.px - st.px, st.goal.pz - st.pz) < st.d * 1e-4) { st.az = st.goal.az; st.d = st.goal.d; st.px = st.goal.px; st.pz = st.goal.pz; st.goal = null; } else moving = true;
     }
     st.el = limitEl(st.el, st.d);
@@ -2582,6 +2597,41 @@ function personShape(h) {
 
 // ---------- v5.74: the buttons over the 3D view, in groups, and the Size vs person overlays ----------
 // (injected after extras.js's styles, so these win; the look stays SnakeList's: dark see-through pills, green when on)
+// v5.78: the body bends on the graphics card. extras.js's rig (Slither, See it eat, the idle head turns, Size vs person)
+// hands over its centre line and frames (720 samples) as a small float texture; the vertex shader moves every vertex of
+// the skin from its rest frame onto the new one (and turns its normal with it). Before, all ~200 000 vertices were moved
+// and their normals recomputed on the main thread every frame - the cause of the stutter in every animation.
+// Texture rows: 0-3 rest centre (w: belly height), T, U, S; 4-7 the new centre (w: swelling), T, U, S.
+const RIG_GLSL = `
+uniform sampler2D uRigTex; uniform float uRigOn; uniform float uRigN; uniform float uRigDx;
+vec4 slRT(float i, float r) { return texture2D(uRigTex, vec2((i + 0.5) / uRigN, (r + 0.5) / 8.0)); }
+vec3 slRigP(vec3 p, float x, inout vec3 n) {
+  float f = clamp(x / uRigDx, 0.0, uRigN - 1.0001), i = floor(f), w = f - i;
+  vec4 r0 = mix(slRT(i, 0.0), slRT(i + 1.0, 0.0), w); vec3 rT = mix(slRT(i, 1.0).xyz, slRT(i + 1.0, 1.0).xyz, w), rU = mix(slRT(i, 2.0).xyz, slRT(i + 1.0, 2.0).xyz, w), rS = mix(slRT(i, 3.0).xyz, slRT(i + 1.0, 3.0).xyz, w);
+  vec4 c4 = mix(slRT(i, 4.0), slRT(i + 1.0, 4.0), w); vec3 nT = mix(slRT(i, 5.0).xyz, slRT(i + 1.0, 5.0).xyz, w), nU = mix(slRT(i, 6.0).xyz, slRT(i + 1.0, 6.0).xyz, w), nS = mix(slRT(i, 7.0).xyz, slRT(i + 1.0, 7.0).xyz, w);
+  vec3 d = p - r0.xyz; float l0 = dot(d, rT), l1 = dot(d, rU), l2 = dot(d, rS);
+  if (abs(c4.w - 1.0) > 1e-4) { l1 = (l1 + r0.w) * c4.w - r0.w; l2 *= c4.w; }
+  n = nT * dot(n, rT) + nU * dot(n, rU) + nS * dot(n, rS);
+  return c4.xyz + nT * l0 + nU * l1 + nS * l2;
+}`;
+const RIG_V = `if (uRigOn > 0.5) {
+#ifdef SL_RIG_N
+  vec3 slN = objectNormal;
+#else
+  vec3 slN = vec3(0.0, 1.0, 0.0);
+#endif
+  transformed = slRigP(transformed, aMet.y, slN);
+#ifdef SL_RIG_N
+  transformedNormal = normalMatrix * normalize(slN);
+  #ifdef FLIP_SIDED
+  transformedNormal = - transformedNormal;
+  #endif
+  #ifndef FLAT_SHADED
+  vNormal = normalize(transformedNormal);
+  #endif
+#endif
+}
+`;
 const UI_CSS = `
 .sp3d-stage>.sp3d-bar{gap:8px 14px}
 .sp3d-stage>.sp3d-bar>.sp3d-grp{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;pointer-events:auto}
@@ -2628,10 +2678,16 @@ export function mount(host, opts) {
   { const gH = HEAD_GENUS[String(opts.id || '').split('-')[0]]; if (gH) P.head = Object.assign({}, gH, P.head); } // v5.53
   const reduceMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const reduce = () => reduceMQ.matches;
-  const lowDevice = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4 || Math.min(screen.width, screen.height) < 500;
+  // v5.78: three quality tiers, chosen by the device (or by hand: the Detail button behind Show more, remembered):
+  // High (computers with a graphics card), Medium (phones and tablets), Light (weak devices, software rendering)
+  const lowDevice = (navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2;
+  const phoneLike = Math.min(screen.width, screen.height) < 820 && !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || Math.min(screen.width, screen.height) < 500;
   // software rendering (no GPU: SwiftShader, llvmpipe) is treated as a low-end device
   const softGL = (() => { try { const c = document.createElement('canvas'), g = c.getContext('webgl2') || c.getContext('webgl'), e = g && g.getExtension('WEBGL_debug_renderer_info'), r = e ? String(g.getParameter(e.UNMASKED_RENDERER_WEBGL)) : ''; if (g && g.getExtension('WEBGL_lose_context')) g.getExtension('WEBGL_lose_context').loseContext(); return /swiftshader|llvmpipe|software/i.test(r); } catch (err) { return false; } })();
-  let quality = opts.quality || window.SL_3D_QUALITY || (lowDevice || softGL ? 'low' : 'high');
+  const autoQ = softGL || lowDevice || (phoneLike && ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3)) ? 'low' : phoneLike ? 'medium' : 'high';
+  let qPref = 'auto'; try { qPref = localStorage.getItem('sl-3d-quality') || 'auto'; } catch (e) { /* private mode */ }
+  if (!/^(auto|high|medium|low)$/.test(qPref)) qPref = 'auto';
+  let quality = opts.quality || window.SL_3D_QUALITY || (qPref !== 'auto' ? qPref : autoQ);
   const disposables = new Set(), cleanups = [];
   const track = (o) => { disposables.add(o); return o; };
   const on = (t, ev, fn, o) => { t.addEventListener(ev, fn, o); cleanups.push(() => t.removeEventListener(ev, fn, o)); };
@@ -2684,7 +2740,7 @@ export function mount(host, opts) {
   const V = { THREE, P, opts, el, on, wrap, stage, labels, bar, canvas, btn, bAnat, reduce,
     get cam() { return cam; }, get controls() { return controls; }, get info() { return info; }, get extras() { return extras; }, get group() { return snakeGroup; }, get scene() { return ctx.scene; },
     kick: () => kick(), toggleFull: () => toggleFull(), scaleOn: () => sizeSt.on,
-    get occ() { return ctx.occ; }, get ctx() { return ctx; }, get quality() { return quality; }, get sceneOn() { return cScene.checked; }, NATURE, scaleOff: () => { if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(false, { instant: true }); }, // (at once: something else takes over the snake and the camera)
+    get occ() { return ctx.occ; }, get ctx() { return ctx; }, get quality() { return quality; }, get skinGPU() { return skinGPU; }, get sceneOn() { return cScene.checked; }, NATURE, scaleOff: () => { if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(false, { instant: true }); }, // (at once: something else takes over the snake and the camera)
     scaleBack: (keepCam) => { if (bScale.getAttribute('aria-pressed') === 'true') { toggleScale(false, { keepCam }); return true; } return false; }, /* (gliding back to the view you had) */ closeMouth: () => { if (mouthGoal) toggleMouth(false); }, get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
     resetView: () => resetView(),     focus: (p, d, elv) => focusOn(p, d, elv), view: (g) => controls.setGoal(Object.assign({ az: controls.st.az, d: info.dFit, px: 0, pz: 0 }, g)) };
   const fx = EXTRA.create(V);
@@ -2697,10 +2753,16 @@ export function mount(host, opts) {
   [bMouth, fb.eat, fb.slither].forEach((b) => b && !b.hasAttribute('aria-pressed') && b.setAttribute('aria-pressed', 'false'));
   const gView = grp('View', 'sp3d-seg', [bNormal, bAnat, bScale]), gAct = grp('Actions', '', [bMouth, fb.eat, fb.slither]), gReset = grp('Reset', '', [bReset]);
   vg2.className = 'sp3d-grp sp3d-cam'; vg2.setAttribute('aria-label', 'Camera'); bar.appendChild(vg2);
+  // v5.78: Detail - Auto (the device's own tier), High, Medium or Light, remembered on this device; behind Show more
+  const qName = { high: 'High', medium: 'Medium', low: 'Light' }, qOrder = ['auto', 'high', 'medium', 'low'];
+  const bQual = el('button', 'sp3d-b sp3d-qual'); bQual.type = 'button';
+  const qLabel = () => { bQual.textContent = 'Detail: ' + (qPref === 'auto' ? 'Auto (' + qName[quality] + ')' : qName[quality]); bQual.setAttribute('aria-label', bQual.textContent + '. Press to change the level of detail'); };
+  const gQual = el('span', 'sp3d-grp sp3d-cam sp3d-qgrp'); gQual.setAttribute('role', 'group'); gQual.setAttribute('aria-label', 'Detail'); gQual.appendChild(bQual); bar.appendChild(gQual); qLabel();
+  on(bQual, 'click', () => { const i = qOrder.indexOf(qPref); setQuality(qOrder[(i + 1) % qOrder.length]); });
   [...bar.children].forEach((c) => { if (c.classList.contains('sp3d-b') && c !== bReset) gAct.appendChild(c); }); // (any other action button extras.js adds)
   // v5.05: the main buttons stay in view; the camera buttons are behind Show more / Show less
   const bMore = el('button', 'sp3d-b sp3d-morebtn', 'Show more'); bMore.type = 'button'; bMore.setAttribute('aria-expanded', 'false');
-  [vg2].concat(fx.moreButtons || []).forEach((b) => b.classList.add('sp3d-more'));
+  [vg2, gQual].concat(fx.moreButtons || []).forEach((b) => b.classList.add('sp3d-more'));
   bar.classList.add('sp3d-few');
   // v5.50: Show more sits on its own line under the main buttons (like See all families), and the extra buttons open below it
   const br1 = el('span', 'sp3d-br'), br2 = el('span', 'sp3d-br'); br1.setAttribute('aria-hidden', 'true'); br2.setAttribute('aria-hidden', 'true');
@@ -2729,15 +2791,19 @@ export function mount(host, opts) {
   // renderer
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'default', preserveDrawingBuffer: !!opts.testing });
+    // v5.78: multisampling only where pixels are big (at a pixel ratio of 1.75 or more the 4x samples cost about 100 MB of
+    // graphics memory and much fill rate for little gain)
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: Math.min(window.devicePixelRatio || 1, { high: 2, medium: 1.5, low: 1 }[quality] || 1.5) < 1.75, powerPreference: quality === 'high' ? 'high-performance' : 'default', preserveDrawingBuffer: !!opts.testing });
   } catch (err) { host.innerHTML = ''; throw new Error('webgl'); }
-  const maxPR = quality === 'low' ? 1.25 : 2;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxPR));
+  // v5.78: the pixel ratio has a cap per tier, and drops a little by itself while the view moves if frames come too slowly
+  // (dynamic resolution, see frame()); it goes back to full sharpness as soon as the view is still
+  const basePR = () => Math.min(window.devicePixelRatio || 1, { high: 2, medium: 1.5, low: 1 }[quality] || 1.5);
+  let dynK = 1; renderer.setPixelRatio(basePR());
   renderer.localClippingEnabled = true; // v5.68: See it eat cuts the prey off at the throat (only the part in the open mouth shows)
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.86;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = quality === 'low' ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   const ctx = { renderer, scene: null, track };
-  let snakeGroup, cam, controls, info, extras, raf = 0, dirty = true, lost = false, alive = true, scaleObj = null, markers = [];
+  let skinGPU = null, snakeGroup, cam, controls, info, extras, raf = 0, dirty = true, lost = false, alive = true, scaleObj = null, markers = [];
 
   function build() {
     const scene = new THREE.Scene(); ctx.scene = scene;
@@ -2771,10 +2837,10 @@ export function mount(host, opts) {
     const qS = (TAU * F.w0 * 0.92) / Math.max(12, S.rows) * (P.head.scaleK || (P.plan === 'python' ? 0.9 : 0.62));
     // v5.30: the scale rows' edges around the body (for the per-scale variation in the shader)
     const rbArr = new Float32Array(96); lat.RB.forEach((v, i) => { if (i < 96) rbArr[i] = v; });
-    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 }, uEdgeC: { value: new THREE.Color(S.edge && S.edge.color || '#000000') }, uEdgeK: { value: S.edge ? (S.edge.k != null ? S.edge.k : 0.8) : 0 }, uHeadN: { value: headT.relief }, uHeadC: { value: headT.color }, uHX: { value: headT.Xh } };
+    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 }, uEdgeC: { value: new THREE.Color(S.edge && S.edge.color || '#000000') }, uEdgeK: { value: S.edge ? (S.edge.k != null ? S.edge.k : 0.8) : 0 }, uHeadN: { value: headT.relief }, uHeadC: { value: headT.color }, uHX: { value: headT.Xh }, uRigTex: { value: null }, uRigOn: { value: 0 }, uRigN: { value: 2 }, uRigDx: { value: 1 } };
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, hsU);
-      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;\nattribute vec3 aMet;\nvarying vec3 vMet;').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead; vMet = aMet;')
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;\nattribute vec3 aMet;\nvarying vec3 vMet;' + RIG_GLSL).replace('#include <project_vertex>', '#define SL_RIG_N\n' + RIG_V + '#include <project_vertex>').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead; vMet = aMet;')
         .replace('#include <common>\nattribute float aHead;', '#include <common>\nuniform float uTip;\nattribute float aHead;').replace('#include <displacementmap_vertex>', THREE.ShaderChunk.displacementmap_vertex.replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z) * (1.0 - aHead) * smoothstep(uTip * 0.45, uTip, aMet.y)'));
       sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
 varying float vHead; varying vec3 vMet; uniform vec2 uHS; uniform float uKeel; uniform float uCavH; uniform float uTip; uniform vec3 uEdgeC; uniform float uEdgeK;
@@ -2832,6 +2898,34 @@ float slScale(vec2 m) {
     };
     mat.customProgramCacheKey = () => 'sl-skin-v558';
     const mesh = new THREE.Mesh(body.geo, mat); mesh.castShadow = mesh.receiveShadow = true;
+    // v5.78: the bending on the graphics card (RIG_GLSL): the shadow pass bends the same way, and while posed the body is
+    // never culled by its rest-pose bounds, and clicks and zooming meet it where it is now (its chain of spheres)
+    { const depthM = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
+      depthM.onBeforeCompile = (sh) => { Object.assign(sh.uniforms, { uRigTex: hsU.uRigTex, uRigOn: hsU.uRigOn, uRigN: hsU.uRigN, uRigDx: hsU.uRigDx });
+        sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute vec3 aMet;' + RIG_GLSL).replace('#include <project_vertex>', RIG_V + '#include <project_vertex>'); };
+      depthM.customProgramCacheKey = () => 'sl-skin-depth-v578'; mesh.customDepthMaterial = depthM;
+      let tex = null, data = null, live = null, N = 0;
+      const invM = new THREE.Matrix4(), lRay = new THREE.Ray();
+      mesh.raycast = (rc, hits) => { invM.copy(mesh.matrixWorld).invert(); lRay.copy(rc.ray).applyMatrix4(invM); const p = raySnake(lRay); if (p) { p.applyMatrix4(mesh.matrixWorld); const d = p.distanceTo(rc.ray.origin); if (d >= rc.near && d <= rc.far) hits.push({ distance: d, point: p, object: mesh }); } };
+      skinGPU = {
+        init(n, dx, rc, rT, rU, rS, hb) {
+          if (!renderer.capabilities.isWebGL2 && !renderer.extensions.get('OES_texture_float')) return false;
+          N = n; data = new Float32Array(N * 8 * 4);
+          const row = (r, arr, wArr) => { for (let i = 0; i < N; i++) { const o = (r * N + i) * 4; data[o] = arr[i * 3]; data[o + 1] = arr[i * 3 + 1]; data[o + 2] = arr[i * 3 + 2]; data[o + 3] = wArr ? wArr[i] : 1; } };
+          row(0, rc, hb); row(1, rT); row(2, rU); row(3, rS); row(4, rc); row(5, rT); row(6, rU); row(7, rS);
+          if (tex) tex.dispose();
+          tex = track(new THREE.DataTexture(data, N, 8, THREE.RGBAFormat, THREE.FloatType)); tex.magFilter = tex.minFilter = THREE.NearestFilter; tex.generateMipmaps = false; tex.needsUpdate = true;
+          hsU.uRigTex.value = tex; hsU.uRigN.value = N; hsU.uRigDx.value = dx; return true;
+        },
+        upload(nc, nT, nU, nS, bul) {
+          if (!data) return;
+          for (let i = 0; i < N; i++) { const i3 = i * 3; for (const [r, a] of [[4, nc], [5, nT], [6, nU], [7, nS]]) { const o = (r * N + i) * 4; data[o] = a[i3]; data[o + 1] = a[i3 + 1]; data[o + 2] = a[i3 + 2]; } data[(4 * N + i) * 4 + 3] = bul ? bul[i] : 1; }
+          tex.needsUpdate = true; hsU.uRigOn.value = 1; mesh.frustumCulled = false; live = nc;
+        },
+        off() { hsU.uRigOn.value = 0; mesh.frustumCulled = true; live = null; },
+        get on() { return !!live; },
+      };
+    }
     if (hiPat) {
       const sceneNow = ctx.scene, swap = (d) => { if (!alive || ctx.scene !== sceneNow) return; const t = patternTex(d); t.anisotropy = pat.anisotropy; mat.map = t; pat.dispose(); track(t);
         if (d.head) { const h = headTex(d.head); headAniso(h); hsU.uHeadN.value = h.relief; hsU.uHeadC.value = h.color; headT.relief.dispose(); headT.color.dispose(); headT = h; }
@@ -2891,14 +2985,14 @@ float slScale(vec2 m) {
     if ((SCENES[P.scene.kind] || {}).water === 'river') { let best = 0, bd = -1; for (let i = 0; i < 16; i++) { const a = (i / 16) * TAU; let m = -1e9; for (const p of pose.pts) m = Math.max(m, p[0] * Math.cos(a) + p[1] * Math.sin(a)); if (bd < 0 || m < bd) { bd = m; best = a; } } poseInfo.waterDir = best; poseInfo.waterDist = bd + F.w0 * 2.5 + Rb * 0.12; }
     scene.add(snakeGroup);
     if (P.scene.kind !== 'sea') scene.add(contactShadow(poseInfo, F, Rb));
-    ctx.natureReady = null; ctx.afterNature = () => { if (!cScene.checked) setSceneVisible(false); dirty = true; kick(); };
+    ctx.natureReady = null; ctx.afterNature = () => { if (!cScene.checked) setSceneVisible(false); dirty = true; shadowDirty = true; kick(); };
     t0 = performance.now(); buildScene(ctx, P, F, body, poseInfo, seed, quality); perfT('scene', t0);
     if (!cScene.checked) setSceneVisible(false);
     // the photographic surroundings arrive a moment later (cached after the first time)
     const envName = P.scene.env || ENV_FOR[P.scene.kind], myScene = scene;
     ctx.envReady = envName && !opts.noEnv ? loadEnv(envName).then((env) => {
       if (!alive || ctx.scene !== myScene) return false;
-      const tE = performance.now(); env.name = envName; applyEnv(ctx, P, F, poseInfo, env); perfT('applyEnv', tE); if (!cScene.checked) setSceneVisible(false); dirty = true; kick(); return true;
+      const tE = performance.now(); env.name = envName; applyEnv(ctx, P, F, poseInfo, env); perfT('applyEnv', tE); if (!cScene.checked) setSceneVisible(false); dirty = true; shadowDirty = true; kick(); return true;
     }).catch(() => false) : Promise.resolve(false);
     ctx.envReady = Promise.all([ctx.envReady, ctx.natureReady, ctx.patternReady]).then((r) => r[0]); // (tests wait for everything)
     { const pr = ctx.envReady; busyFor = pr; busyShow(); pr.finally(() => busyHide(pr)); }
@@ -2932,8 +3026,9 @@ float slScale(vec2 m) {
           const st = controls.st, d0 = st.goal ? st.goal.d : st.d, d = clamp(d0 * f, info.dMin, info.dMax * Math.max(sizeBusy() ? info.scaleK : 1, fx.zoomOut));
           if (Math.abs(d - d0) < 1e-9) return true;
           const r = canvas.getBoundingClientRect(), ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1), cam);
-          const body = snakeGroup.children.find((o) => o.isMesh && o.geometry === info.body.geo); let p = null;
-          if (body) { body.geometry.computeBoundingSphere(); const h = ray.intersectObject(body, false)[0]; if (h) p = h.point; }
+          // (v5.78: the ray meets the body's chain of spheres, not its 200 000 triangles - that raycast took tens of
+          // milliseconds on every turn of the wheel and made zooming stutter)
+          let p = raySnake(ray.ray, snakeGroup.scale.x);
           if (!p) { const t = -ray.ray.origin.y / (ray.ray.direction.y || -1e-6); if (t > 0) p = ray.ray.origin.clone().addScaledVector(ray.ray.direction, t); }
           if (!p) return false;
           // the nearest point of the snake to it (zooming in on bare ground homes in on the snake instead)
@@ -2953,9 +3048,9 @@ float slScale(vec2 m) {
     fitLimits();
     resetView(true);
     if (bDet.getAttribute('aria-pressed') === 'true') buildMarkers();
-    kick();
+    shadowDirty = true; kick();
   }
-  function setSceneVisible(v) { if (!ctx.scene) return; (ctx.occ || []).forEach((o) => { if (o.hid) { o.hid = false; if (o.im) { o.im.setMatrixAt(o.i, o.m); o.im.instanceMatrix.needsUpdate = true; } } }); ctx.scene.traverse((o) => { if (o !== ctx.scene && o.parent === ctx.scene && o !== snakeGroup && !o.isLight && o !== scaleObj) o.visible = v; }); kick(); }
+  function setSceneVisible(v) { if (!ctx.scene) return; (ctx.occ || []).forEach((o) => { if (o.hid) { o.hid = false; if (o.im) { o.im.setMatrixAt(o.i, o.m); o.im.instanceMatrix.needsUpdate = true; } } }); ctx.scene.traverse((o) => { if (o !== ctx.scene && o.parent === ctx.scene && o !== snakeGroup && !o.isLight && o !== scaleObj) o.visible = v; }); shadowDirty = true; kick(); }
 
   function fitLimits() {
     const r = Math.max(info.Rb, info.hMax * (P.pose && P.pose.kind === 'drape' ? 1.3 : 0.8)), asp = Math.max(0.4, (stage.clientWidth || 1) / (stage.clientHeight || 1)); // (v5.62: a raised cobra or a snake up on a branch is taller than it is wide)
@@ -2990,8 +3085,15 @@ float slScale(vec2 m) {
   // the camera never enters the body: its distance to the body's centre line must exceed the body's
   // half-thickness there plus a margin for the near plane; if not, it backs away along its line of sight
   function bodyClearance(p) {
-    const list = (fx.collide && fx.collide()) || info.collide;
+    const list = colList || (colList = (fx.collide && fx.collide()) || info.collide); // (v5.78: once per frame, not up to 40 times)
     let m = 1e9; for (const c of list) { const d = p.distanceTo(c.p) - c.r; if (d < m) m = d; } return m;
+  }
+  // the nearest point where a ray meets the snake's body, as a chain of spheres along its centre line (posed or at rest)
+  const rsV = new THREE.Vector3();
+  function raySnake(r, k = 1) {
+    const list = colList || (colList = (fx.collide && fx.collide()) || info.collide); let best = Infinity;
+    for (const c of list) { rsV.subVectors(c.p, r.origin); const tc = rsV.dot(r.direction), d2 = rsV.lengthSq() - tc * tc, rr = c.r * k * 0.95; if (d2 > rr * rr) continue; const t = tc - Math.sqrt(rr * rr - d2); if (t > 0 && t < best) best = t; }
+    return best < Infinity ? r.origin.clone().addScaledVector(r.direction, best) : null;
   }
   function placeCamera() {
     const st = controls.st;
@@ -3011,29 +3113,53 @@ float slScale(vec2 m) {
   function frame() {
     raf = 0; if (!alive || lost || !cam) return;
     if (document.hidden || !host.isConnected || host.offsetParent === null && !document.fullscreenElement) { dirty = true; return; } // paused while hidden
-    let moving = controls.update();
+    const tF0 = performance.now(); colList = null;
+    const camMoving = controls.update(); let moving = false;
     // v5.73: wind, water and the snake's idle life run on a clock of their own (no motion at all with reduced motion)
     const amb = !reduce(); if (NATURE.tick) { NATURE.tick(performance.now() / 1000); NATURE.AMB.uWind.value = amb && cScene.checked ? (quality === 'low' ? 0.6 : 1) : 0; }
     // the jaw opens and shuts smoothly
     const mo = extras && extras.mouth;
-    if (mo && Math.abs(mo.t - mouthGoal) > 1e-3) { const nt = reduce() ? mouthGoal : mo.t + clamp(mouthGoal - mo.t, -0.07, 0.07); mo.set(nt); if (Math.abs(nt - mouthGoal) <= 1e-3) mo.settle(); moving = true; }
+    // (v5.78: eased, and timed by the clock - not a fixed step per frame - so it opens at the same smooth pace at any frame rate)
+    if (mo && Math.abs(mo.t - mouthGoal) > 1e-3) { const dtm = clamp((tF0 - (lastF || tF0)) / 1000, 1 / 240, 0.1), nt = reduce() ? mouthGoal : mo.t + clamp(mouthGoal - mo.t, -dtm * 2.2, dtm * 2.2) * (0.35 + 0.65 * sstep(0, 0.35, Math.abs(mouthGoal - mo.t))); mo.set(Math.abs(nt - mouthGoal) < 2e-3 ? mouthGoal : nt); if (Math.abs(mo.t - mouthGoal) <= 1e-3) mo.settle(); moving = true; }
     if (fx.step()) moving = true; // v4.81: slithering, the shows (they may move the jaw and bend the body)
     if (sizeStep()) moving = true; // v5.74: Size vs person: the snake's scale, the person fading in or out
+    const sceneMoving = moving; moving = moving || camMoving; // (anything but the camera moved: the shadows must follow)
     placeCamera();
     if (fx.camera()) moving = true; // a show moves the camera by itself
     if (opts.testing && window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } // (tests: a fixed camera)
     updateOccluders();
-    { const viaAmb = ambOnly; ambOnly = false; const shUp = !viaAmb || moving || shadowAge++ > (quality === 'low' ? 12 : 4); if (shUp) shadowAge = 0; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; } // (v5.73: frames that only move leaves and water reuse the shadows)
+    // (v5.73: frames that only move leaves and water reuse the shadows; v5.78: so do frames where only the camera moves - turning
+    // or zooming used to redraw the whole shadow map every frame)
+    { const viaAmb = ambOnly; ambOnly = false; const shUp = shadowDirty || sceneMoving || (!viaAmb && !camMoving) || shadowAge++ > (quality === 'high' ? 4 : 12); if (shUp) shadowAge = 0; shadowDirty = false; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; }
+    dynRes(tF0, moving);
     renderer.render(ctx.scene, cam);
     sizeAfter(); // v5.74: the magnified inset of a small snake
     updateMarkers();
     fx.after();
+    if (window.SL_3D_TEST) (window.__slFrames || (window.__slFrames = [])).push(performance.now() - tF0);
+    lastF = tF0;
     if (moving) kick();
     else if (amb && alive) { // v5.73: the scenery keeps moving gently, at a calmer frame rate (lower still at the Light setting)
-      clearTimeout(ambT); ambT = setTimeout(() => { ambOnly = true; kick(); }, performance.now() - lastUser > 45000 ? 125 : quality === 'low' ? 42 : 30); // (left alone for a while: slower still, to save the battery)
+      clearTimeout(ambT); ambT = setTimeout(() => { ambOnly = true; kick(); }, performance.now() - lastUser > 45000 ? 125 : quality === 'low' ? 50 : quality === 'medium' ? 42 : 30); // (left alone for a while: slower still, to save the battery)
     }
   }
-  let ambT = 0, shadowAge = 0, ambOnly = false, lastUser = performance.now();
+  let ambT = 0, shadowAge = 0, ambOnly = false, lastUser = performance.now(), lastF = 0, colList = null, shadowDirty = true;
+  // v5.78: dynamic resolution - while the view moves, if frames take too long (under ~40 per second) the picture is drawn with
+  // fewer pixels (down to 60% of the full pixel ratio), and as soon as it is still again it is drawn once more at full
+  // sharpness. The change is gradual and has a dead band, so the resolution never flickers up and down.
+  const dyn = { ema: 16, n: 0, still: 0, lastT: 0, frames: 0 };
+  function dynRes(t, moving) {
+    const dt = dyn.lastT ? t - dyn.lastT : 16; dyn.lastT = t;
+    if (moving && dt < 250) { dyn.ema += (dt - dyn.ema) * 0.15; dyn.frames++; dyn.still = 0; }
+    else if (!moving) dyn.still++;
+    let k = dynK;
+    if (moving && dyn.frames > 8) {
+      if (dyn.ema > 26 && k > 0.6) { k = Math.max(0.6, k * 0.85); dyn.frames = 0; }
+      else if (dyn.ema < 15 && k < 1) { k = Math.min(1, k / 0.9); dyn.frames = 0; }
+    }
+    if (!moving && dyn.still >= 1 && k < 1) { k = 1; dyn.frames = 0; dyn.ema = 16; } // still: full sharpness
+    if (k !== dynK) { dynK = k; const w = stage.clientWidth || 300, h = stage.clientHeight || 200; renderer.setPixelRatio(basePR() * dynK); renderer.setSize(w, h, false); }
+  }
   for (const ev of ['pointerdown', 'wheel', 'keydown', 'touchstart']) on(stage, ev, () => { lastUser = performance.now(); }, { passive: true });
   const zeroM = new THREE.Matrix4().makeScale(0, 0, 0), ov = new THREE.Vector3(), od = new THREE.Vector3();
   function updateOccluders() {
@@ -3305,7 +3431,7 @@ float slScale(vec2 m) {
   on(bScale, 'click', () => { if (bScale.getAttribute('aria-pressed') !== 'true') { fx.exclusive('scale'); toggleScale(true); } else toggleScale(false); });
   on(bSet, 'click', () => { panel.hidden = !panel.hidden; bSet.setAttribute('aria-expanded', String(!panel.hidden)); });
   on(cScene, 'change', () => setSceneVisible(cScene.checked));
-  on(qs, 'change', () => { quality = qs.value; renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality === 'low' ? 1.25 : 2)); rebuild(); });
+  on(qs, 'change', () => setQuality(qs.value));
   on(document, 'fullscreenchange', syncFull); on(document, 'webkitfullscreenchange', syncFull);
   on(document, 'visibilitychange', () => { if (!document.hidden) kick(); });
   on(canvas, 'keydown', (e) => { if (e.key === 'Escape' && wrap.classList.contains('sp3d-max')) { e.stopPropagation(); e.preventDefault(); toggleFull(); } });
@@ -3321,6 +3447,7 @@ float slScale(vec2 m) {
       if (o.geometry && !seen.has(o.geometry)) { seen.add(o.geometry); o.geometry.dispose(); }
       const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
       for (const m of ms) { if (seen.has(m)) continue; seen.add(m); for (const k in m) { const v = m[k]; if (v && v.isTexture && !seen.has(v)) { seen.add(v); v.dispose(); } } m.dispose(); }
+      if (o.customDepthMaterial && !seen.has(o.customDepthMaterial)) { seen.add(o.customDepthMaterial); o.customDepthMaterial.dispose(); }
       if (o.dispose && o.isInstancedMesh) o.dispose();
       if (o.shadow && o.shadow.map) o.shadow.map.dispose();
     });
@@ -3328,6 +3455,13 @@ float slScale(vec2 m) {
     ctx.scene.clear(); ctx.scene = null; scaleObj = null; sizeSt.on = sizeSt.leaving = false; sizeSt.lay = sizeSt.pts = null; sizeSt.undo = null; sizeSt.k = 1; sizeSt.sk.v = sizeSt.sk.from = sizeSt.sk.to = 0; sizeSt.sk.dur = 0;
     bScale.setAttribute('aria-pressed', 'false'); bScale.textContent = 'Size vs person'; sizeOverlays(false);
     markers.forEach((m) => m.el.remove()); markers = [];
+  }
+  function setQuality(q) {
+    qPref = q === 'auto' || qName[q] ? q : 'auto'; try { localStorage.setItem('sl-3d-quality', qPref); } catch (e) { /* private mode */ }
+    const nq = qPref === 'auto' ? autoQ : qPref; qLabel();
+    if (nq === quality) return;
+    quality = nq; qs.value = quality === 'medium' ? 'high' : quality; dynK = 1; renderer.setPixelRatio(basePR());
+    renderer.shadowMap.type = quality === 'low' ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap; qLabel(); rebuild();
   }
   function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; if (sizeBusy()) toggleScale(false, { instant: true }); fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
 
