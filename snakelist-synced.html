@@ -15809,6 +15809,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // those countries and their coasts drawn once more on top - as "See states" for a search draws them
   function drawAreaStates() {
     if (!areaShow) return;
+    placeAreaKey();
     var A = areaShow, sh = areaShades(), M = viewMatrix(), v = viewLL(), lvl = detailLevel(), clipNow = needClip(), fb = flatBox(), kx = fb[2] / 360, ky = fb[3] / 180;
     var fills = {}, lines = new Path2D(), clipP = lvl >= 1 ? new Path2D() : null, any = false, coastOf = {};
     var ccs = {}; Object.keys(A.states).concat(Object.keys(A.intro)).forEach(function (cc) { ccs[cc] = 1; });
@@ -15858,7 +15859,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     areaKey.hidden = !areaShow;
     if (!areaShow) return;
     var sp = areaShow.sp, sh = areaShades();
-    var nm = sp.name && sp.name !== sp.sci ? "the " + sp.name : sp.sci;
+    var nm = sp.name && sp.name !== sp.sci ? (/^[^ ]+'s /.test(sp.name) ? "" : "the ") + sp.name : sp.sci; // ("Where Lataste's Viper lives", no "the")
     document.getElementById("ak-title").textContent = "Where " + nm + " lives";
     var sw = areaKey.querySelectorAll(".ak-sw i");
     [3, 2, 1, 0].forEach(function (s, j) { if (sw[j]) sw[j].style.background = sh[s]; });
@@ -15867,6 +15868,18 @@ window.SL_GEO_READY = new Promise(function (res) {
     fl.querySelector(".legend-dot").style.background = sh[2];
     var ir = document.getElementById("ak-intro"); ir.hidden = !areaShow.hasIntro;
     ir.querySelector(".legend-dot").style.background = AREA_INTRO;
+    placeAreaKey();
+  }
+  // the key sits where the colour key does - lifted above the species panel when the panel is over the map
+  // there (the full screen map's panel across the bottom, a phone's bottom sheet)
+  function placeAreaKey() {
+    if (!areaKey || areaKey.hidden) return;
+    var cp = document.getElementById("country-panel");
+    areaKey.style.bottom = "";
+    if (!cp || cp.hidden || getComputedStyle(cp).position !== "absolute") return;
+    var k = areaKey.getBoundingClientRect(), q = cp.getBoundingClientRect(), sr = stage.getBoundingClientRect();
+    if (k.right <= q.left || k.left >= q.right || k.bottom <= q.top || k.top >= q.bottom) return;
+    areaKey.style.bottom = Math.max(8, sr.bottom - q.top + 8) + "px";
   }
   function areaClear() {
     if (!areaShow) return false;
@@ -15899,7 +15912,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     Object.keys(A.states).forEach(function (cc) { var o = provPaths(cc); Object.keys(A.states[cc]).forEach(function (i) { var it = o.items[+i]; st[cc + ":" + (cc === "us" ? it.st.code : it.st.name)] = A.states[cc][i]; }); });
     var intro = Object.keys(A.wholeIntro).slice();
     Object.keys(A.intro).forEach(function (cc) { var o = provPaths(cc); Object.keys(A.intro[cc]).forEach(function (i) { var it = o.items[+i]; intro.push(cc + ":" + (cc === "us" ? it.st.code : it.st.name)); }); });
-    return { id: A.id, whole: A.whole, states: st, intro: intro, flat: A.flat };
+    return { id: A.id, whole: A.whole, states: st, intro: intro, flat: A.flat, box: areaBox(A) };
   };
   window.SL_MAP_BOX = function () { return flatBox(); }; // (for the tests: the map's place on the canvas)
   if (areaKey) document.getElementById("ak-close").addEventListener("click", function (e) { e.stopPropagation(); areaClear(); });
