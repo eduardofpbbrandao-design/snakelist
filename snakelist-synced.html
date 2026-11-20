@@ -15751,13 +15751,18 @@ window.SL_GEO_READY = new Promise(function (res) {
     });
     var steps = {};
     dens.forEach(function (x) {
-      var t = best ? x[1] / best : 1, s = t >= 0.86 ? 3 : t >= 0.6 ? 2 : t >= 0.36 ? 1 : 0;
+      var t = best ? x[1] / best : 1, s = t >= 0.85 ? 3 : t >= 0.55 ? 2 : t >= 0.3 ? 1 : 0;
       (A.states[x[0].cc] = A.states[x[0].cc] || {})[x[0].i] = s; steps[s] = 1;
     });
     // a country with no finer records: lit whole - the lightest step beside states that have them,
     // one even shade when no place it lives in has finer records
     Object.keys(A.whole).forEach(function (cc) { A.whole[cc] = anyStates ? 0 : 2; steps[A.whole[cc]] = 1; });
+    // one shade only (all its places alike): the picked country's own green, and the key just says "Lives here"
     A.flat = Object.keys(steps).length < 2;
+    if (A.flat) {
+      Object.keys(A.states).forEach(function (cc) { Object.keys(A.states[cc]).forEach(function (i) { A.states[cc][i] = 2; }); });
+      Object.keys(A.whole).forEach(function (cc) { A.whole[cc] = 2; });
+    }
     A.hasIntro = Object.keys(A.wholeIntro).length > 0 || Object.keys(A.intro).length > 0;
     return A;
   }
@@ -15765,7 +15770,6 @@ window.SL_GEO_READY = new Promise(function (res) {
   function areaBox(A) {
     var w = 999, e = -999, s = 999, n = -999;
     var add = function (b) { if (!b || b[1] - b[0] > 180) return; w = Math.min(w, b[0]); e = Math.max(e, b[1]); s = Math.min(s, b[2]); n = Math.max(n, b[3]); };
-    Object.keys(A.whole).concat(Object.keys(A.wholeIntro)).forEach(function (cc) { add(countryBox(cc)); });
     [A.states, A.intro].forEach(function (S) {
       Object.keys(S).forEach(function (cc) {
         var o = provPaths(cc); if (!o) return;
@@ -15774,6 +15778,13 @@ window.SL_GEO_READY = new Promise(function (res) {
           if (it && !(cc === "us" && FLY_TO_EXCLUDE[it.st.code] && Object.keys(S[cc]).length > 1)) add([it.w, it.e, it.s, it.n]);
         });
       });
+    });
+    // a whole country (no finer records) beside the states it has: in the view unless it is much bigger than
+    // they are - Canada lit whole for the Timber Rattlesnake would leave its 33 states small in the middle
+    var sa = w > e ? 0 : (e - w) * (n - s);
+    Object.keys(A.whole).concat(Object.keys(A.wholeIntro)).forEach(function (cc) {
+      var b = countryBox(cc); if (!b) return;
+      if (!sa || A.wholeIntro[cc] || (b[1] - b[0]) * (b[3] - b[2]) <= sa * 1.5) add(b);
     });
     if (w > e) return null;
     var pw = Math.max(0.6, (e - w) * 0.1), ph = Math.max(0.4, (n - s) * 0.1);
@@ -16838,14 +16849,24 @@ window.SL_GEO_READY = new Promise(function (res) {
   function fillProvince(cc, s) {
     panelKind = "prov";
     stopCityFactObserver();
-    var rows = speciesInProvince(cc, s).slice().sort(function (a, b) { return a[0].name.localeCompare(b[0].name); });
+    var rows = speciesInProvince(cc, s).slice();
+    // v5.74: the country's snakes that people brought to this very state (the Burmese python to Florida) are
+    // listed here too, marked as brought by people - their range records hold only where they come from
+    var inv = window.SL_INVASIVE || {}, have = {}, nIntro = 0, keys = cc === "us" ? [s.code] : [s.name].concat(s.also || []);
+    rows.forEach(function (r) { have[r[0].id] = 1; });
+    lastCountryRows.forEach(function (r) {
+      var id = r[0].id;
+      if (have[id] || !(inv[id] || []).some(function (pl) { return pl.code === cc && (pl.states || pl.areas || []).some(function (k) { return keys.indexOf(k) >= 0; }); })) return;
+      have[id] = 1; rows.push([r[0], true]); nIntro++;
+    });
+    rows.sort(function (a, b) { return a[0].name.localeCompare(b[0].name); });
     var place = (cc === "us" && window.STATE_NAME && window.STATE_NAME[s.code]) || s.name;
     pageFor = { kind: "region", key: cc.toUpperCase() + ":" + (cc === "us" ? s.code : s.name), name: place };
     var cpTitle = document.getElementById("cp-title");
     cpTitle.textContent = place;
     cpTitle.classList.add("cp-title-place");
     document.getElementById("cp-sub").textContent = rows.length
-      ? rows.length + (rows.length === 1 ? " living species recorded here" : " living species recorded here")
+      ? rows.length + (rows.length === 1 ? " living species recorded here" : " living species recorded here") + (nIntro ? " (including " + nIntro + " introduced by people)" : "")
       : "No sourced species data for here yet.";
     document.getElementById("cp-list").innerHTML = rows.map(function (r) {
       return '<div class="cp-row cp-sp' + (r[1] ? " cp-intro" : "") + '" data-sp="' + attrEsc(r[0].id) + '">' + photoBtn(r[0]) + "<b>" + r[0].name + "</b><i>" + r[0].sci + "</i></div>";
