@@ -2877,13 +2877,14 @@ float slScale(vec2 m) {
     }
 
     let tree = null; // v5.68: tree snakes are up in a tree
-    if (pose.perch) snakeGroup.add(tree = addBranch(P, F, pose, seed));
+    const perchTree = (kind, old) => { if (NATURE.perchTree) { try { return NATURE.perchTree(THREE, { kind, P, F, pose, seed, spine: (x) => body.spine(x) }); } catch (e) { console.warn('perchTree', e); } } return old(); }; // v5.78: a real tree (nature.js)
+    if (pose.perch) snakeGroup.add(tree = perchTree('branch', () => addBranch(P, F, pose, seed)));
     if (P.tail.spine) { const f = body.frameAt(F.L), c = body.spine(F.L), r = F.w0 * 0.14, g = new THREE.ConeGeometry(r, r * 3, 8); const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: '#6a5246', roughness: 0.5 })); m.position.copy(c).addScaledVector(f.T, r * 1.2); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), f.T); snakeGroup.add(m); }
     // bounds
     if (tree) snakeGroup.remove(tree); // (the view frames the snake, not the whole tree)
     const bb = new THREE.Box3().setFromObject(snakeGroup), bb0 = bb.clone(), size = bb.getSize(new THREE.Vector3()), center = bb.getCenter(new THREE.Vector3());
     if (tree) snakeGroup.add(tree);
-    if (pose.drape) snakeGroup.add(tree = addDrapeBranch(P, F, pose, seed)); // v5.62 (after the bounds: the view frames the snake, not the whole branch)
+    if (pose.drape) snakeGroup.add(tree = perchTree('drape', () => addDrapeBranch(P, F, pose, seed))); // v5.62 (after the bounds: the view frames the snake, not the whole branch)
     const Rb = Math.max(size.x, size.z) / 2 * 1.05 + F.w0;
     const hMax = bb.max.y;
     const poseInfo = { pts: pose.pts, ds: pose.ds, Ly: pose.Ly, radius: Rb, envR: P.length >= 0.4 ? Rb + 1.0 : Rb * 1.3, seaLevel: F.Hh(F.L * 0.5) * F.bf * (P.scene.float || 1.1) };
