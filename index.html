@@ -356,7 +356,7 @@
 
   @media (max-width: 640px) {
     .photo-wall { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); }
-    .intro-line { gap: 12px; font-size: min(108px, 16.5vw); } /* v4.92: fits inside a phone screen with a margin */
+    .intro-line, .hero-line { gap: 0.18em; } .intro-line { font-size: min(108px, 16.5vw); } /* v4.92: fits inside a phone screen with a margin. v5.78: the gap is in em (was 12px), so the photo's copy of this logo, matched by width, gets exactly the same letter size */
   }
   @media (prefers-reduced-motion: reduce) {
     .photo-zoom, .photo-wall, .photo-wall .ph, .intro-box, .box-tick, .intro-title { animation: none; }
@@ -2104,6 +2104,12 @@
   .sl-hero.hero-wait .hero-copy > .hero-sub { transform: translateY(8px); }
   .sl-hero.hero-go .hero-copy > *, .sl-hero.hero-go .hero-cue { transition: opacity 0.9s ease, transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1); }
   .sl-hero.hero-go .hero-title { transition: opacity 0.2s ease; } /* takes over from the gliding logo in the same spot */
+  /* v5.78: the photo's logo is an exact copy of the opening logo (same letters, gradient, shadow and tick, already finished drawing),
+     shown at full strength under the gliding logo the moment it lands, so the hand-over can't be seen: nothing grows, nothing changes colour */
+  .hero-title.hero-op { display: inline-flex; filter: none; line-height: normal; }
+  .hero-line { display: flex; align-items: baseline; white-space: nowrap; }
+  .hero-line, .hero-line * { animation-delay: -60s !important; animation-play-state: running !important; }
+  .sl-hero.hero-landed .hero-copy > .hero-title { opacity: 1 !important; transition: none !important; }
   .sl-hero.hero-go .hero-sub { transition-delay: 0.25s; }
   .sl-hero.hero-go .hero-cue { transition-delay: 0.8s; }
   @media (prefers-reduced-motion: reduce) {
@@ -3950,15 +3956,19 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
           var line = intro.querySelector(".intro-line");
           // v5.12: the photo's logo (still hidden) takes the opening logo's exact size, so nothing grows or shrinks on screen
           try { if (line && window.__matchHeroLogo) window.__matchHeroLogo(line.offsetWidth); } catch (e) {}
-          var ht = document.querySelector("#sl-hero:not([hidden]) .hero-title");
+          var ht = document.querySelector("#sl-hero:not([hidden]) .hero-line") || document.querySelector("#sl-hero:not([hidden]) .hero-title");
           var calm = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
           var a = line && line.getBoundingClientRect(), b = ht && ht.getBoundingClientRect();
           if (calm || !a || !b || !a.width || !b.width || b.bottom > window.innerHeight + 2) { finish(820); return; }
-          var k = b.width / a.width, dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+          var k = b.width / a.width, dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + k * a.height / 2) - (a.top + a.height / 2); /* v5.78: tops (and so the letters) line up exactly, not just the middles */
           intro.classList.add("intro-glide");
           line.style.transition = "transform 1.1s cubic-bezier(.45,0,.2,1)";
           line.style.transform = "translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px) scale(" + k.toFixed(4) + ")";
-          setTimeout(function () { finish(420); }, 1100);
+          // v5.78: once it has landed (exactly over the photo's identical logo), the photo's logo is shown at full strength
+          // under it and only then does the opening fade - no crossfade between two different logos, no dip, no jump
+          var landed = false, land = function () { if (landed) return; landed = true; if (heroEl) heroEl.classList.add("hero-landed"); requestAnimationFrame(function () { finish(220); }); };
+          line.addEventListener("transitionend", function (e) { if (e.target === line && e.propertyName === "transform") land(); });
+          setTimeout(land, 1250);
         };
         requestAnimationFrame(function () { requestAnimationFrame(function () {
           // v5.73: the move to the photo starts once the page has arrived and SnakeList's own start-up work has died down
@@ -4145,7 +4155,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       tt.style.fontSize = "100px"; var lw = tt.offsetWidth, lh = tt.offsetHeight; if (!lw) return;
       // v5.73: while the page is still arriving the photo's logo is only the word (its tick is added once SnakeList's header
       // is there): the tick is counted in already, so the opening logo gets the same size it always had
-      if (!tt.classList.contains("hero-wm")) try { var ib = document.querySelector("#intro .intro-box"), ibs = ib && getComputedStyle(ib), f2 = ib && parseFloat(getComputedStyle(ib.parentNode).fontSize); if (f2 && parseFloat(ibs.width)) lw += (parseFloat(ibs.width) + (parseFloat(ibs.marginLeft) || 0)) * 100 / f2; } catch (e) {}
+      if (!tt.classList.contains("hero-wm") && !tt.classList.contains("hero-op")) try { var ib = document.querySelector("#intro .intro-box"), ibs = ib && getComputedStyle(ib), f2 = ib && parseFloat(getComputedStyle(ib.parentNode).fontSize); if (f2 && parseFloat(ibs.width)) lw += (parseFloat(ibs.width) + (parseFloat(ibs.marginLeft) || 0)) * 100 / f2; } catch (e) {}
       var cx = (visL + visR) / 2, y0 = oy + 0.6 * dh, y1 = Math.min(oy + 0.9 * dh, visB); // v5.06: a little bigger, its top still under the chin
       var fs = Math.max(30, Math.min(100 * (visR - visL) * (cover ? 0.88 : 0.66) / lw, 100 * (hr.width - 24) / lw, 100 * (y1 - y0) / lh, 150));
       if (hero.__forceW) fs = 100 * hero.__forceW / lw; // v5.12: the same size as the opening logo
@@ -4228,7 +4238,11 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       sync();
       if (window.MutationObserver) new MutationObserver(sync).observe(tg, { attributes: true, attributeFilter: ["class"] });
     }
-    function wordmark() { var src = document.querySelector(".sl-header .sl-title"), dst = hero.querySelector(".hero-title");
+    function wordmark() { var dst = hero.querySelector(".hero-title"), op = document.querySelector("#intro .intro-line");
+      // v5.78: the photo's logo is the opening's own logo, copied - so they match exactly when one hands over to the other
+      if (dst && op) { if (dst.classList.contains("hero-op")) return; var ln = document.createElement("span"); ln.className = "hero-line"; ln.setAttribute("aria-hidden", "true");
+        ln.innerHTML = op.innerHTML.replace(/tick-clip-intro/g, "tick-clip-hero").replace(/ aria-label="SnakeList"/, ""); dst.innerHTML = '<span class="sr-only">SnakeList</span>'; dst.appendChild(ln); dst.classList.add("hero-op"); return; }
+      var src = document.querySelector(".sl-header .sl-title");
       if (src && dst) { dst.innerHTML = '<span class="sr-only">SnakeList</span>' + src.innerHTML.replace(/tick-clip-head/g, "tick-clip-hero"); dst.classList.add("hero-wm"); /* v5.25: its own tick shape - sharing the header's made the header tick lose its tapered start (too chubby) once the photo was hidden */
         // v4.84: every letter (and the snake S and the tick) is its own piece, so they can appear one after another
         var k = 0, w = dst.querySelector(".sl-titletext");
@@ -4240,6 +4254,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
         var tk = dst.querySelector(".sl-tick"); if (tk) { tk.classList.add("hl"); tk.style.setProperty("--i", k++); } } }
     // coming back from a SnakeList page (or a link that opens a place in the app): straight back to where you were, no photo
     if (window.SL_CAME_BACK || /[?&](sp|map|f|hab|type|fam|q)=/.test(location.search)) { entered = true; window.__heroEntered = true; listen(false); }
+    try { wordmark(); } catch (e) {} // v5.78: the opening logo is already in the page - copied at once, so it is measured as it will be shown
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { wordmark(); wire(); placeLogo(); }); else { wordmark(); wire(); placeLogo(); }
   })();
 </script>
