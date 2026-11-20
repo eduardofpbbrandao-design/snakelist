@@ -1171,7 +1171,8 @@ function headData(P, F, quality) {
       // lip scale to its top edge - a row of pale blocks with hard tops read as bared teeth)
       if (lipK && (lab || (x < J * Hl * 1.02 && Math.abs(Math.abs(a) - mA) < 0.1))) { const dm = Math.abs(Math.abs(a) - mA); col = lipC; al = lipK * (s.k === 'rost' && Math.abs(a) > mA - 0.16 ? 1 - sstep(0.06, 0.16, dm) * 0.6 : 1 - sstep(0.015, Math.abs(a) > mA ? 0.07 : bars ? 0.11 : 0.075, dm)) * (1 - sstep(J * 0.9, J * 1.02, x / Hl)); }
       // v5.78: head.lipFull - the whole upper and lower lip scales and the chin pale, with the sharp edge real green snakes have
-      if (H.lipFull && (lab || s.k === 'chin' || s.k === 'gul' || Math.abs(a) > mA) && x < J * Hl * 1.08) { col = lipC; al = 0.95 * (1 - sstep(J * 0.98, J * 1.08, x / Hl)) * (Math.abs(a) > mA ? 1 : 1 - 0.25 * sstep(mA - 0.2, mA - 0.32, Math.abs(a))); }
+      if (H.lipFull && x < J * Hl * 1.05) { const band = H.lipFull > 0.01 && H.lipFull < 1 ? H.lipFull : 0.12, aa2 = Math.abs(a); // (band: how far above the mouth line the upper lip scales are pale)
+        const k2 = aa2 >= mA ? 1 : sstep(mA - band - 0.012, mA - band + 0.012, aa2); if (k2 > 0.001) { col = lipC; al = 0.95 * k2 * (1 - sstep(J * 0.92, J * 1.05, x / Hl)); } }
       if (bars && x < J * Hl * 1.05) { // dark bars along the sutures between lip scales, widest at the lip
         let bd = 1e9, bk = 1, aa = Math.abs(a); for (const b of barSegs) { if (Math.abs(x - b[0]) > b[3] * 3) continue; const t = clamp((aa - b[1]) / (b[2] - b[1]), 0, 1), w = lerp(b[3], b[3] * 0.45, t), e = Math.hypot(x - lerp(b[0], b[4], t), (aa - lerp(b[1], b[2], t)) * hcR[r]) / w; if (e < bd) { bd = e; bk = b[5]; } }
         if (bd < 1.4) { const w2 = 0.6 * bk * (1 - sstep(0.6, 1.3, bd)); col = col ? mixc(col, barC, w2 / Math.max(w2, al || w2)) : barC; al = Math.max(al, w2); } // (v5.73: bk - fainter and shorter on the lower lip; seen from below they read as teeth)
@@ -1476,7 +1477,7 @@ function eyeTexture(P) {
     for (let i = 0; i < 520; i++) { const a = R() * TAU, r0 = RI * (0.18 + R() * 0.4), r1 = r0 + RI * (0.12 + R() * 0.38); x.strokeStyle = R() < 0.55 ? 'rgba(0,0,0,.16)' : 'rgba(255,244,210,.13)'; x.lineWidth = 0.6 + R() * 1.6; x.beginPath(); x.moveTo(C + Math.cos(a) * r0, C + Math.sin(a) * r0); x.quadraticCurveTo(C + Math.cos(a + 0.05) * (r0 + r1) / 2, C + Math.sin(a + 0.05) * (r0 + r1) / 2, C + Math.cos(a) * r1, C + Math.sin(a) * r1); x.stroke(); }
     for (let i = 0; i < 90; i++) { const a = R() * TAU, r = RI * (0.25 + R() * 0.62); x.fillStyle = R() < 0.6 ? 'rgba(10,6,2,.22)' : 'rgba(255,236,170,.18)'; x.beginPath(); x.arc(C + Math.cos(a) * r, C + Math.sin(a) * r, 1 + R() * 3.5, 0, TAU); x.fill(); }
     if (H.eyeStripe) { x.save(); x.beginPath(); x.arc(C, C, RI, 0, TAU); x.clip(); x.fillStyle = H.eyeStripe; x.globalAlpha = 0.78; x.fillRect(0, S * 0.37, S, S * 0.26); x.restore(); }
-    if (H.eyeRing) { x.strokeStyle = H.eyeRing; x.lineWidth = S * 0.03; x.beginPath(); x.arc(C, C, RI * 0.86, 0, TAU); x.stroke(); } // (v5.58: inside the rim the spectacle's edge tints, so it shows)
+    if (H.eyeRing) { x.strokeStyle = H.eyeRing; x.lineWidth = S * 0.016; x.globalAlpha = 0.85; x.beginPath(); x.arc(C, C, RI * 0.84, 0, TAU); x.stroke(); x.globalAlpha = 1; } // (v5.58: inside the rim the spectacle's edge tints, so it shows)
     // the pupil, with a soft dark halo so its edge is not a hard cut-out
     const pupil = (grow, col) => { x.fillStyle = col; x.beginPath();
       if (H.pupil === 'slit') x.ellipse(C, C, S * (H.pupilW || 0.045) + grow, S * 0.36 + grow, 0, 0, TAU);
@@ -2689,7 +2690,7 @@ function uiCSSInject() {
 // v5.78: species rebuilt against photos in this version, ahead of the next models.json build (the same values are in
 // tools/auto_models.py CURATED, so a rebuild gives the same result): they override the profile's head
 const SPECIES_LOOK = {
-  'opheodrys-vernalis': { h: { iris: '#2a2214', irisInner: '#4a3c22', eyeRing: '#d9c27a', pupilW: 0.24, eye: null, eyeL: 0.22, eyeX: 0.37, eyeA: 50, len: 0.04, w: 0.9, h: 0.62, snoutH: 0.6, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.07, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.9, hFixed: 1, groove: 0.22, headRelief: 0.2, snout: 0.5, lipFull: 1 }, body: { hn: 1.3 },
+  'opheodrys-vernalis': { h: { iris: '#2a2214', irisInner: '#4a3c22', eyeRing: '#d9c27a', pupilW: 0.24, eye: null, eyeL: 0.24, eyeX: 0.36, eyeA: 50, len: 0.036, w: 0.9, h: 0.7, snoutH: 0.62, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.07, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.9, hFixed: 1, groove: 0.16, headRelief: 0.14, snout: 0.52, lipFull: 0.12 }, body: { hn: 1.3 },
     scales: { cavity: 0.22, gloss: 0.78, relief: 0.55 }, colors: { edgeK: 0.25 } },
   // the inland taipan against its SnakeList photo (will-hunt) and the Australian Museum account: a deep, rounded "coffin" head
   // (deeper than the body's own depth, the snout high and rounded), glossy smooth scales, and a warmer olive-brown
@@ -2932,9 +2933,12 @@ float slScale(vec2 m) {
     const mesh = new THREE.Mesh(body.geo, mat); mesh.castShadow = mesh.receiveShadow = true;
     // v5.78: the bending on the graphics card (RIG_GLSL): the shadow pass bends the same way, and while posed the body is
     // never culled by its rest-pose bounds, and clicks and zooming meet it where it is now (its chain of spheres)
-    { const depthM = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
-      depthM.onBeforeCompile = (sh) => { Object.assign(sh.uniforms, { uRigTex: hsU.uRigTex, uRigOn: hsU.uRigOn, uRigN: hsU.uRigN, uRigDx: hsU.uRigDx });
-        sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute vec3 aMet;' + RIG_GLSL).replace('#include <project_vertex>', RIG_V + '#include <project_vertex>'); };
+    // (the shadow pass also takes the skin's scale displacement, exactly as the skin does - without it the displaced skin lay
+    // a little inside its own shadow caster: a dark band round the neck and speckled self-shadowing)
+    { const depthM = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, displacementMap: mat.displacementMap || null, displacementScale: mat.displacementScale, displacementBias: mat.displacementBias });
+      depthM.onBeforeCompile = (sh) => { Object.assign(sh.uniforms, { uRigTex: hsU.uRigTex, uRigOn: hsU.uRigOn, uRigN: hsU.uRigN, uRigDx: hsU.uRigDx, uTip: hsU.uTip });
+        sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute vec3 aMet;\nattribute float aHead;\nuniform float uTip;' + RIG_GLSL).replace('#include <project_vertex>', RIG_V + '#include <project_vertex>')
+          .replace('#include <displacementmap_vertex>', THREE.ShaderChunk.displacementmap_vertex.replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z) * (1.0 - aHead) * smoothstep(uTip * 0.45, uTip, aMet.y)')); };
       depthM.customProgramCacheKey = () => 'sl-skin-depth-v578'; mesh.customDepthMaterial = depthM;
       let tex = null, data = null, live = null, N = 0;
       const invM = new THREE.Matrix4(), lRay = new THREE.Ray();
@@ -3556,4 +3560,4 @@ export function adultLength(p, page, id) {
   return out(+p.length || 1, 'genus', '', null);
 }
 export function webglAvailable() { try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { return false; } }
-export const _internals = { normProfile, makeBodyFns, makePose, loadEnv }; // for offline checks
+export const _internals = { normProfile, makeBodyFns, makePose, loadEnv, autoProfile, withLook, buildBody, buildEyes, buildMouth, headData, scaleLattice, patternData }; // for offline checks
