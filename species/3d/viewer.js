@@ -1507,7 +1507,9 @@ function buildEyes(P, F, body, pat) {
   // that only REFLECTS - black, glossy and added on top of what is under it (additive), so it is fully see-through yet keeps all
   // its reflections of the sky and the sun, strongest at grazing angles (Fresnel). The gap between them gives the eye depth:
   // the iris shifts under the dome as you go round the head.
-  const em = new THREE.MeshPhysicalMaterial({ map: et, roughness: 0.5, metalness: 0, envMapIntensity: 0.3, specularIntensity: 0.35 });
+  // (the iris lies in the socket's shade: a faint glow of its own colours stands in for the light that reaches it through the
+  // clear spectacle from every side, so its fibres and the pupil's edge still read - it was a black hole)
+  const em = new THREE.MeshPhysicalMaterial({ map: et, emissiveMap: et, emissive: new THREE.Color(0.3, 0.3, 0.3), roughness: 0.5, metalness: 0, envMapIntensity: 0.3, specularIntensity: 0.35 });
   const sm = new THREE.MeshPhysicalMaterial({ color: '#000000', transparent: true, blending: THREE.AdditiveBlending, roughness: 0.035, metalness: 0, ior: 1.4, specularIntensity: 1, envMapIntensity: 2.2, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
   const lm = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, roughness: 0.6, metalness: 0, depthWrite: false, envMapIntensity: 0.8 });
   // the skin colour right round the eye, read from the body's own pattern texture
