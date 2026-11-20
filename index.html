@@ -9000,10 +9000,35 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   EP.querySelector = function (s) { if (light.has(this) && !answers(s)) wake(this, s); return qs.apply(this, arguments); };
   EP.querySelectorAll = function (s) { if (light.has(this) && !answers(s)) wake(this, s); return qsa.apply(this, arguments); };
   // the cards about to be shown: whole again (refresh() calls this as it shows them; #page-style too, just in case)
+  // v5.83: a long list (Show all, or many pages of Show more) - only the cards on or near the screen are made whole as it
+  // is shown; the others stay light (far off they are never drawn, and content-visibility gives each its place, so nothing
+  // moves) and are made whole a couple of screens before they come into view: while scrolling, in the scroll event itself
+  // (before the next frame is drawn), and also whenever one comes within a few screens (farWatch). Show all used to make
+  // all 4,247 cards whole at once first (~800 MB on a computer) and only lighten the far ones afterwards.
+  var LAZY_MIN = 150, lazyIds = null;
+  function lazyOK() { return !!window.IntersectionObserver && "contentVisibility" in document.documentElement.style && allowed(); }
+  function nearFull(ids) {
+    if (!ids || !stats.light) return;
+    var vh = window.innerHeight || 800, lo = -1.5 * vh, hi = 2.5 * vh, n = ids.length, a = 0, z = n, m, c, r, i, todo = [];
+    // the first card (in the order shown, which is the order on screen) that ends below lo
+    while (a < z) { m = (a + z) >> 1; c = cardById(ids[m]); r = c && c.getBoundingClientRect(); if (r && r.bottom < lo) a = m + 1; else z = m; }
+    for (i = Math.max(0, a - 4); i < n; i++) {
+      c = cardById(ids[i]); if (!c) continue;
+      r = c.getBoundingClientRect(); if (r.top > hi) break;
+      if (light.has(c)) todo.push(c);
+    }
+    for (i = 0; i < todo.length; i++) full(todo[i]);
+  }
   function show(ids) {
     if (!stats.light || !ids) return;
-    for (var i = 0; i < ids.length; i++) { var c = cardById(ids[i]); if (c && light.has(c)) full(c); }
+    var i, c;
+    if (ids.length < LAZY_MIN || !lazyOK()) { lazyIds = null; for (i = 0; i < ids.length; i++) { c = cardById(ids[i]); if (c && light.has(c)) full(c); } return; }
+    lazyIds = ids;
+    nearFull(ids);
+    for (i = 0; i < ids.length; i++) { c = cardById(ids[i]); if (c && light.has(c)) farWatch(c); }
   }
+  window.addEventListener("scroll", function () { if (lazyIds && lazyIds === window.SL_SHOWN_IDS) nearFull(lazyIds); }, { passive: true });
+  window.addEventListener("resize", function () { if (lazyIds && lazyIds === window.SL_SHOWN_IDS) nearFull(lazyIds); });
   // the website (index.html) comes with its cards already light: build-site.py takes their parts out
   // and lists them once here, so the page is half the size and a phone never builds them all
   var pre = document.getElementById("sl-card-parts");
