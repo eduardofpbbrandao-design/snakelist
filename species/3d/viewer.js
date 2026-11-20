@@ -2848,8 +2848,10 @@ export function mount(host, opts) {
     const scene = new THREE.Scene(); ctx.scene = scene;
     { const en = !opts.noEnv && (P.scene.env || ENV_FOR[P.scene.kind]); if (en) loadEnv(en).catch(() => {}); } // v4.81: start downloading the panorama now
     let t0 = performance.now();
-    const F = makeBodyFns(P, quality), pose = makePose(P, F, seed); perfT('pose', t0); t0 = performance.now();
-    const body = buildBody(P, F, pose, quality); perfT('body', t0); t0 = performance.now();
+    // (v5.78: Medium - phones - builds the body and the surroundings as Light does, and keeps High's sharper textures and soft shadows)
+    const gq = quality === 'high' ? 'high' : 'low';
+    const F = makeBodyFns(P, gq), pose = makePose(P, F, seed); perfT('pose', t0); t0 = performance.now();
+    const body = buildBody(P, F, pose, gq); perfT('body', t0); t0 = performance.now();
     const lat = scaleLattice(P, body.gTotal), tiles = scaleTextures(P, lat); perfT('scaleTex', t0); t0 = performance.now();
     // v4.81: on good devices a quick pattern first, the full-detail one painted in a worker and swapped in when ready
     const hiPat = quality !== 'low', pat = patternTexture(P, F, body, lat, hiPat ? 'preview' : 'low', seed); perfT('patternTex', t0);
@@ -2865,7 +2867,7 @@ export function mount(host, opts) {
       // v4.72: raised 3D scales - stronger relief, deeper gaps between them, and real bumps on good devices
       map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1).multiplyScalar(S.relief != null ? S.relief : (S.keel || 0) > 0.3 ? 1 : 0.85), // (v5.58: smooth scales lie flatter than keeled ones)
       aoMap: tiles.cavity, aoMapIntensity: 0.3 + 1.2 * (S.cavity != null ? S.cavity : 0.45), roughnessMap: tiles.cavity, // (v5.78: smooth, tightly overlapping scales hide less skin between them)
-      ...(quality === 'low' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
+      ...(quality !== 'high' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
       roughness: lerp(0.82, 0.5, gl), metalness: 0, clearcoat: 0.08 + gl * 0.42, clearcoatRoughness: lerp(0.45, 0.14, gl * gl), /* (v5.78: glossy snakes get the crisp, mirror-like highlights of real smooth scales) */ sheen: S.sheen != null ? S.sheen : 0.04, /* (v5.78: the default sheen laid a grey haze over every skin at grazing angles) */ sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
       iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.85,
     });
@@ -3028,7 +3030,7 @@ float slScale(vec2 m) {
     scene.add(snakeGroup);
     if (P.scene.kind !== 'sea') scene.add(contactShadow(poseInfo, F, Rb));
     ctx.natureReady = null; ctx.afterNature = () => { if (!cScene.checked) setSceneVisible(false); dirty = true; shadowDirty = true; kick(); };
-    t0 = performance.now(); buildScene(ctx, P, F, body, poseInfo, seed, quality); perfT('scene', t0);
+    t0 = performance.now(); buildScene(ctx, P, F, body, poseInfo, seed, gq); perfT('scene', t0);
     if (!cScene.checked) setSceneVisible(false);
     // the photographic surroundings arrive a moment later (cached after the first time)
     const envName = P.scene.env || ENV_FOR[P.scene.kind], myScene = scene;
