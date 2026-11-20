@@ -15965,7 +15965,9 @@ window.SL_GEO_READY = new Promise(function (res) {
       ctx.drawImage(BASE, 0, 0, TW, TH, b[0], b[1], b[2], b[3]);
     }
     // the Species heatmap paints onto this map too, under the borders and labels
-    if (window.SL_HEAT_DRAW) window.SL_HEAT_DRAW(ctx, b, w, h, heatFill);
+    // (not while a snake's area shows: its own greens alone, so the two never mix)
+    if (areaShow) window.SL_HEAT_LINE = null;
+    else if (window.SL_HEAT_DRAW) window.SL_HEAT_DRAW(ctx, b, w, h, heatFill);
     borders(toFlat);
     if (!areaShow) drawMultiStates();
     drawIslands(toFlat);
