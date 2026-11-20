@@ -7646,7 +7646,7 @@
             <div class="legend-row"><span class="legend-dot" id="legend-dot-off"></span>No species recorded</div>
           </div>
           <div class="map-legend area-key" id="area-key" hidden>
-            <div class="ak-head"><span class="ak-t" id="ak-title"></span><button type="button" class="ak-x" id="ak-close" aria-label="Hide this snake's area">&times; Close</button></div>
+            <div class="ak-head"><span class="ak-t" id="ak-title"></span><button type="button" class="ak-x" id="ak-close" aria-label="Hide this snake's area">&times;<span class="ak-xt"> Close</span></button></div>
             <div class="ak-sw" id="ak-scale"><span>more</span><span class="ak-bar"><i></i><i></i><i></i><i></i></span><span>less</span></div>
             <div class="legend-row" id="ak-flat" hidden><span class="legend-dot"></span>Lives here</div>
             <div class="legend-row" id="ak-intro" hidden><span class="legend-dot"></span>Brought here by people</div>
@@ -15875,11 +15875,20 @@ window.SL_GEO_READY = new Promise(function (res) {
   function placeAreaKey() {
     if (!areaKey || areaKey.hidden) return;
     var cp = document.getElementById("country-panel");
-    areaKey.style.bottom = "";
+    areaKey.style.bottom = ""; areaKey.classList.remove("ak-small");
     if (!cp || cp.hidden || getComputedStyle(cp).position !== "absolute") return;
-    var k = areaKey.getBoundingClientRect(), q = cp.getBoundingClientRect(), sr = stage.getBoundingClientRect();
-    if (k.right <= q.left || k.left >= q.right || k.bottom <= q.top || k.top >= q.bottom) return;
-    areaKey.style.bottom = Math.max(8, sr.bottom - q.top + 8) + "px";
+    var sr = stage.getBoundingClientRect(), q = cp.getBoundingClientRect();
+    // only a short strip of map left above the panel (a phone's full screen map): the key in one short line
+    // (no title), clear of the map's buttons down the right
+    if (q.top - sr.top < 330) areaKey.classList.add("ak-small");
+    // lifted above the panel, and above the buttons sitting on it (Undo, See species...)
+    var obst = [cp].concat([].slice.call(stage.querySelectorAll(".globe-btns"))).filter(function (el) { return !el.hidden && el.offsetParent !== null; });
+    for (var n = 0; n < 3; n++) {
+      var k = areaKey.getBoundingClientRect(), hit = null;
+      obst.forEach(function (el) { var r = el.getBoundingClientRect(); if (r.width && !(k.right <= r.left || k.left >= r.right || k.bottom <= r.top || k.top >= r.bottom) && (!hit || r.top < hit.top)) hit = r; });
+      if (!hit) break;
+      areaKey.style.bottom = Math.max(8, sr.bottom - hit.top + 6) + "px";
+    }
   }
   function areaClear() {
     if (!areaShow) return false;
@@ -26479,6 +26488,12 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   .area-key .ak-bar { display: inline-flex; border: 1px solid rgba(255,255,255,0.5); border-radius: 3px; overflow: hidden; }
   .area-key .ak-bar i { display: block; width: 20px; height: 10px; }
   .globe-stage.area-on #map-legend { display: none !important; }
+  .map-legend.area-key.ak-small { right: 54px; padding: 5px 8px; flex-direction: row; align-items: center; gap: 8px; }
+  .area-key.ak-small .ak-t, .area-key.ak-small .legend-row { display: none; }
+  .area-key.ak-small .ak-head { order: 2; }
+  .area-key.ak-small .ak-x { margin: 0; padding: 2px 8px; }
+  .area-key.ak-small .ak-xt { display: none; }
+  .area-key.ak-small .ak-bar i { width: 14px; }
   /* "How to find it": the snake's own panel over the map, in the map's colours */
   .nm-how-box .nm-how-body { padding: 16px 16px 14px; }
   .nm-how-box h3 { margin: 0 34px 2px 0; }
