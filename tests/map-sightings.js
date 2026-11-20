@@ -137,7 +137,7 @@ async function route(r) {
     'one button, one set of dots: no Sightings bar, options, Load more, key or Cameras button');
   ok(await p.evaluate(() => !/Sightings/.test(document.getElementById('hm-measure').textContent)), 'the heatmap has no second "Sightings" switch');
   ok(await p.evaluate(() => document.getElementById('sg-toggle').innerText.trim()) === 'Sightings', 'the button label is just "Sightings"');
-  ok(await p.evaluate(() => getComputedStyle(document.getElementById('sg-toggle')).backgroundColor) === 'rgb(88, 179, 81)', 'Sightings on: the dots\' SnakeList green');
+  ok(await p.evaluate(() => { const c = getComputedStyle(document.getElementById('sg-toggle')); return /linear-gradient/.test(c.backgroundImage) && c.color === 'rgb(255, 255, 255)' && c.borderTopColor === 'rgb(127, 194, 102)'; }), 'Sightings on: the map buttons\' one green "on" look (v5.78)');
   ok(await p.evaluate(() => document.querySelectorAll('#sg-toggle').length === 1), 'one Sightings toggle only');
   await shot(p, 'desktop-light-sightings-on', '#globe-stage');
   // the right record per marker: tap single dots, compare the panel with the marker's own id
