@@ -65,8 +65,8 @@ function pchip(pts) {
 
 // ---------- body plans: defaults that each species profile overrides ----------
 const PLANS = {
-  viper:    { body: { ld: 15, neck: 0.42, peak: 0.45, vent: 0.62, tail: 0.10, xs: 1.32, bf: 0.72 }, head: { shape: 'tri', len: 0.074, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.05, h: 0.58, snout: 0.5, jaw: 0.78, eyeX: 0.27, eyeA: 70, taper: 0.3, eye: 0.13, pupil: 'slit', brow: 0.10, canthus: 3.0 }, scales: { rows: 31, keel: 0.85, gloss: 0.08, aV: 0.73 }, pose: { kind: 'stack', pitch: 1.0, lead: 0.3, lift: 0.25, tight: 0.58 } }, // (v5.62: an ambush pile, not a flat spiral)
-  pitviper: { body: { ld: 22, neck: 0.48, peak: 0.45, vent: 0.62, tail: 0.085, xs: 1.25, bf: 0.74 }, head: { shape: 'tri', len: 0.06, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.0, h: 0.6, snout: 0.5, jaw: 0.8, eyeX: 0.3, eyeA: 70, taper: 0.3, eye: 0.12, pupil: 'slit', brow: 0.10, canthus: 3.0, pits: 'loreal' }, scales: { rows: 27, keel: 0.85, gloss: 0.08, aV: 0.73 }, pose: { kind: 'stack', pitch: 1.0, lead: 0.32, lift: 0.25, tight: 0.6 } },
+  viper:    { body: { ld: 15, neck: 0.42, peak: 0.45, vent: 0.62, tail: 0.10, xs: 1.32, bf: 0.72 }, head: { shape: 'tri', len: 0.074, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.05, h: 0.58, snout: 0.5, jaw: 0.78, eyeX: 0.27, eyeA: 70, taper: 0.3, eye: 0.13, pupil: 'slit', brow: 0.13, canthus: 3.0 }, scales: { rows: 31, keel: 0.85, gloss: 0.08, aV: 0.73 }, pose: { kind: 'stack', pitch: 1.0, lead: 0.3, lift: 0.25, tight: 0.58 } }, // (v5.62: an ambush pile, not a flat spiral)
+  pitviper: { body: { ld: 22, neck: 0.48, peak: 0.45, vent: 0.62, tail: 0.085, xs: 1.25, bf: 0.74 }, head: { shape: 'tri', len: 0.06, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.0, h: 0.6, snout: 0.5, jaw: 0.8, eyeX: 0.3, eyeA: 70, taper: 0.3, eye: 0.12, pupil: 'slit', brow: 0.13, canthus: 3.0, pits: 'loreal' }, scales: { rows: 27, keel: 0.85, gloss: 0.08, aV: 0.73 }, pose: { kind: 'stack', pitch: 1.0, lead: 0.32, lift: 0.25, tight: 0.6 } },
   python:   { body: { ld: 30, neck: 0.55, peak: 0.5, vent: 0.62, tail: 0.12, xs: 1.18, bf: 0.76, ridge: 0.025 }, head: { len: 0.04, chin: 0.62, tipR: 0.13, snoutH: 0.7, w: 0.68, h: 0.6, snout: 0.62, jaw: 0.78, eyeX: 0.3, eyeA: 62, eye: 0.13, pupil: 'slit', brow: 0.03, canthus: 3.0, pits: 'labial' }, scales: { rows: 71, keel: 0, gloss: 0.5, aV: 0.77 }, pose: { kind: 'stack', pitch: 1.05, lead: 0.3, lift: 0.2, tight: 0.62 } }, // (v5.62: a heavy resting pile)
   colubrid: { body: { ld: 36, neck: 0.78, peak: 0.42, vent: 0.62, tail: 0.24, xs: 1.08, bf: 0.8, ridge: 0.02 }, head: { len: 0.035, w: 1.05, h: 0.64, snout: 0.57, chin: 0.66, jaw: 0.72, eyeX: 0.3, eyeA: 60, eye: 0.16, pupil: 'round', brow: 0.04, canthus: 3.1 }, scales: { rows: 19, keel: 0, gloss: 0.5, aV: 0.73 }, pose: { kind: 'wave' } },
   elapid:   { body: { ld: 45, neck: 0.85, peak: 0.45, vent: 0.62, tail: 0.18, xs: 1.05, bf: 0.8, ridge: 0.015 }, head: { len: 0.032, w: 0.95, h: 0.6, snout: 0.56, chin: 0.66, jaw: 0.75, eyeX: 0.3, eyeA: 60, eye: 0.15, pupil: 'round', brow: 0.035, canthus: 3.1 }, scales: { rows: 17, keel: 0, gloss: 0.55, aV: 0.73 }, pose: { kind: 'wave' } },
@@ -74,12 +74,79 @@ const PLANS = {
   sea:      { body: { ld: 30, neck: 0.62, peak: 0.55, vent: 0.75, tail: 0.11, xs: 0.72, bf: 0.85, paddle: true }, head: { len: 0.045, w: 0.75, h: 0.72, snout: 0.6, jaw: 0.75, eyeX: 0.3, eyeA: 52, eye: 0.13, pupil: 'round', brow: 0, canthus: 2.2, nostrilA: 32 }, scales: { rows: 47, keel: 0, gloss: 0.35, aV: 0.95, kind: 'juxta' }, pose: { kind: 'wave' } },
 };
 function merge(a, b) { const o = Object.assign({}, a); for (const k in b) o[k] = b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) && a && typeof a[k] === 'object' ? merge(a[k], b[k]) : b[k]; return o; }
-function normProfile(p) {
+// v5.73: head proportions by group (field-guide measurements and photos): lw head length over head width, hb the head's
+// width against the thickest part of the body [min, max], hn head width over neck width, len head length over total length
+// [min, max]. Colubrid heads were as wide as long and wider than the body (lw 1.1, hb 1.1): a bulbous, cobra-like blob.
+// Natricines and racers have a long, narrow head barely wider than the neck; vipers a broad triangle on a thin neck;
+// cobras a head about as wide as the neck, mambas a long coffin-shaped one; blind snakes no distinct head at all.
+const HEAD_FORM = {
+  natricine: { lw: 1.75, hb: [0.62, 0.85], hn: 1.25, len: [0.028, 0.044], h: 0.76 },
+  colubrine: { lw: 1.7, hb: [0.6, 0.86], hn: 1.2, len: [0.026, 0.044], h: 0.74 },
+  broad: { lw: 1.42, hb: [0.68, 1.15], hn: 1.5, len: [0.026, 0.05] }, // cat-eyed and tree snakes, snail-eaters, hognoses: a broad head on a thin neck
+  vine: { lw: 2.0, hb: [0.6, 1.7], hn: 1.5, len: [0.03, 0.055] }, // (a long head on a thin neck)
+  burrow: { lw: 1.35, hb: [0.6, 0.9], hn: 1.0, len: [0.02, 0.04] },
+  elapid: { lw: 1.65, hb: [0.6, 0.9], hn: 1.1, len: [0.025, 0.04], h: 0.7 },
+  cobra: { lw: 1.55, hb: [0.65, 0.95], hn: 1.05, len: [0.025, 0.04], h: 0.68 },
+  mamba: { lw: 2.05, hb: [0.6, 0.88], hn: 1.15, len: [0.025, 0.04], h: 0.72 },
+  deathadder: { lw: 1.2, hb: [0.85, 1.25], hn: 1.75, len: [0.04, 0.07] },
+  sea: { lw: 1.7, hb: [0.5, 0.8], hn: 1.05, len: [0.025, 0.05] },
+  viper: { lw: 1.3, hb: [0.62, 1.2], hn: 2.0, len: [0.04, 0.06] },
+  bitis: { lw: 1.15, hb: [0.6, 1.25], hn: 2.1, len: [0.045, 0.075] },
+  pitviper: { lw: 1.3, hb: [0.7, 1.2], hn: 1.9, len: [0.04, 0.062] },
+  python: { lw: 1.55, hb: [0.5, 0.8], hn: 1.45, len: [0.03, 0.055] },
+  boa: { lw: 1.65, hb: [0.5, 0.8], hn: 1.4, len: [0.03, 0.055] },
+  sandboa: { lw: 1.25, hb: [0.6, 0.95], hn: 1.05, len: [0.025, 0.04] },
+};
+const HF_GENUS = {};
+for (const [k, l] of Object.entries({
+  natricine: 'natrix nerodia thamnophis regina storeria virginia clonophis tropidoclonion liodytes seminatrix hebius rhabdophis fowlea xenochrophis amphiesma sinonatrix trimerodytes tropidonophis atretium herpetoreas opisthotropis afronatrix limnophis natriciteres hydraethiops lycognathophis anoplohydrus parahelicops',
+  broad: 'boiga toxicodryas dipsadoboa telescopus crotaphopeltis leptodeira dipsas sibon tropidodipsas sibynomorphus pareas aplopeltura asthenodipsas heterodon paleoheterodon xenodon lystrophis waglerophis hypsiglena trimorphodon',
+  vine: 'ahaetulla thelotornis oxybelis langaha uromacer imantodes dryophiops xenoxybelis',
+  burrow: 'atractaspis amblyodipsas aparallactus polemon xenocalamus macrelaps micrelaps homoroselaps chilorhinophis brachyophis hypoptophis poecilopholis uropeltis rhinophis plectrurus melanophidium platyplectrurus teretrurus pseudoplectrurus plecturus cylindrophis anilius calamaria carphophis',
+  cobra: 'naja ophiophagus hemachatus pseudohaje walterinnesia aspidelaps',
+  mamba: 'dendroaspis', deathadder: 'acanthophis',
+  bitis: 'bitis cerastes pseudocerastes eristicophis',
+  colubrine: 'causus azemiops', // (narrow, colubrid-like viper heads)
+  boa: 'boa acrantophis sanzinia candoia epicrates chilabothrus eunectes corallus',
+  sandboa: 'eryx gongylophis charina lichanura calabaria',
+})) for (const g of l.split(' ')) HF_GENUS[g] = k;
+function headForm(plan, id) {
+  const k = HF_GENUS[String(id || '').split('-')[0]];
+  if (k) return HEAD_FORM[k];
+  return HEAD_FORM[{ colubrid: 'colubrine', elapid: 'elapid', sea: 'sea', viper: 'viper', pitviper: 'pitviper', python: 'python' }[plan] || ''] || null;
+}
+// v5.73: pupils by genus where they differ from the family's: vertical slits in the night-hunting colubrids (cat, lyre,
+// egg-eating, snail-eating, house and wolf snakes) and some Australian elapids; a horizontal keyhole in the vine snakes;
+// round in the night adders (Causus), the one viper genus with them
+const PUPIL_GENUS = {};
+for (const [k, l] of Object.entries({
+  slit: 'boiga toxicodryas dipsadoboa telescopus crotaphopeltis leptodeira imantodes dipsas sibon sibynomorphus tropidodipsas hypsiglena trimorphodon pareas aplopeltura asthenodipsas dasypeltis lycodon lycophidion boaedon lamprophis psammodynastes leioheterodon madagascarophis ithycyphus acanthophis suta denisonia hoplocephalus cryptophis paroplocephalus azemiops',
+  hslit: 'ahaetulla oxybelis thelotornis dryophiops xenoxybelis',
+  round: 'causus',
+})) for (const g of l.split(' ')) PUPIL_GENUS[g] = k;
+function normProfile(p, id) {
   const base = PLANS[p.plan] || PLANS.colubrid;
   const q = merge(merge(base, { colors: { dorsal: '#776655', lateral: null, belly: '#d8cfb8', mottle: 0.08, var: 0.05 }, pattern: [], tail: {}, scene: { kind: 'litter' } }), p);
   q.colors.lateral = q.colors.lateral || q.colors.dorsal;
   // v5.27: viper heads are broad triangles behind a narrow neck (they were barely wider than the neck from above)
   if ((q.head.shape || 'oval') === 'tri' && !q.head.wFixed) q.head = Object.assign({}, q.head, { w: q.head.w * 1.1 });
+  // v5.73: the head's length, width and neck from its group (HEAD_FORM): the length kept within the group's range, the
+  // width set by the length-to-width ratio (never broader: a slender colubrid's head is long and narrow, not bulbous) and
+  // kept within its range against the body; then the neck from the head-to-neck ratio (body.hn when the profile has one)
+  { const pu = PUPIL_GENUS[String(id || p.id || '').split('-')[0]]; if (pu && q.plan !== 'blind' && !(p.head && p.head.pupil)) q.head = Object.assign({}, q.head, { pupil: pu }); }
+  const form = q.plan === 'blind' ? null : headForm(q.plan, id || p.id);
+  if (form && !q.head.wFixed) {
+    const sx = Math.sqrt(q.body.xs), lwT = q.head.lw != null ? q.head.lw : q.head.minR != null ? Math.max(q.head.minR, 1.2) : form.lw;
+    let len = clamp(q.head.len, form.len[0], form.len[1]), w = q.head.w;
+    if ((len * q.body.ld) / (w * sx) < lwT) w = (len * q.body.ld) / (lwT * sx); // (too broad for its length: narrower)
+    w = Math.min(w, form.hb[1]);
+    if (w < form.hb[0]) { w = form.hb[0]; len = Math.min(Math.max(len, (lwT * w * sx) / q.body.ld), form.len[1]); }
+    // (a width-based eye was sized for the old head: a much narrower head takes its family's eye size instead)
+    const eyeL = q.head.eyeL == null && w < q.head.w * 0.92 && EYE_L[q.plan] ? EYE_L[q.plan] : q.head.eyeL;
+    q.head = Object.assign({}, q.head, { len, w, eyeL, h: form.h && q.head.h < form.h && !q.head.hFixed ? form.h : q.head.h }); // (h: a narrow head is about three quarters as deep as wide)
+    const hn = q.body.hn || form.hn;
+    if (hn) q.body = Object.assign({}, q.body, { neck: clamp(w / hn, 0.25, 1.05) });
+  }
   // v5.31: heads at least as long as they are wide (vipers), longer still in pythons: a short broad head reads as a blob
   // from every side. Too short a head is made a little longer and narrower, keeping its area
   { const minR = q.head.minR != null ? q.head.minR : (q.head.shape || 'oval') === 'tri' ? 1.05 : q.plan === 'python' ? 1.3 : q.plan === 'blind' ? 0 : 1.1;
@@ -91,14 +158,15 @@ function normProfile(p) {
   if ((q.plan === 'colubrid' || q.plan === 'elapid' || q.plan === 'sea' || !PLANS[q.plan]) && q.head.plates == null) q.head = Object.assign({}, q.head, { plates: true });
   // ---- v5.62 (model accuracy) ----
   // body.hn: the documented ratio of head width to neck width sets the neck (vipers ~2-3, colubrids ~1.3, pipe snakes 1)
-  if (q.body.hn) q.body = Object.assign({}, q.body, { neck: clamp(q.head.w / q.body.hn, 0.25, 1.05) });
+  if (q.body.hn && !form) q.body = Object.assign({}, q.body, { neck: clamp(q.head.w / q.body.hn, 0.25, 1.05) });
   // eye size against head LENGTH (head.eyeL = eye diameter / head length), the family's usual size unless the profile
   // gives one; a profile that sets the old width-based 'eye' keeps exactly the size it had (see eyeRadOf)
   if (q.head.eyeL == null && !(p.head && p.head.eye != null) && EYE_L[q.plan]) q.head = Object.assign({}, q.head, { eyeL: EYE_L[q.plan] });
   return q;
 }
 // v5.62: eye diameter / head length by family (field-guide norms): diurnal colubrids have big eyes, burrowers tiny ones
-const EYE_L = { colubrid: 0.15, elapid: 0.11, viper: 0.09, pitviper: 0.09, python: 0.085, sea: 0.065 };
+// (v5.73: colubrids 0.2 - a natricine's or racer's eye is a fifth to a quarter of its head's length)
+const EYE_L = { colubrid: 0.18, elapid: 0.13, viper: 0.11, pitviper: 0.1, python: 0.09, sea: 0.07 };
 function eyeRadOf(P, F) {
   const Hd = P.head, x = Hd.eyeX * F.Hl;
   if (Hd.eyeL == null) return (Hd.eye || 0.15) * F.W(x) * 1.04;
@@ -239,7 +307,7 @@ export function autoProfile(p) {
   // throat or neck [[colour, x0, x1, aMin], ...]; lb: dark bars between the lip scales [colour]
   { const hd = Object.assign({}, (PLANS[a.p] || PLANS.colubrid).head, a.h || {}), eX = hd.eyeX, eA = hd.eyeA / 180;
     if (a.es) { pat.push({ type: 'line', p0: [eX + 0.04, eA + 0.02], p1: [a.es[3] || 1.05, 0.6], wid: a.es[1] || 0.05, color: a.es[0], mirror: true, aa: 0.35, warp: 0.2 }); if (a.es[2]) pat.push({ type: 'line', p0: [0.06, eA + 0.04], p1: [eX - 0.03, eA], wid: (a.es[1] || 0.05) * 0.8, color: a.es[0], mirror: true, aa: 0.35, warp: 0.2 }); }
-    if (a.sp) pat.push({ type: 'poly', mirror: true, warp: 0.3, color: a.sp[0], pts: [[eX - 0.02, 0], [eX + 0.15, 0.09], [0.85, 0.15], [1.25, 0.13], [a.sp[1] || 2.1, 0.11], [a.sp[1] || 2.1, 0.04], [1.25, 0.05], [0.9, 0.06], [eX + 0.15, 0.035], [eX + 0.08, 0]] });
+    if (Array.isArray(a.sp)) pat.push({ type: 'poly', mirror: true, warp: 0.3, color: a.sp[0], pts: [[eX - 0.02, 0], [eX + 0.15, 0.09], [0.85, 0.15], [1.25, 0.13], [a.sp[1] || 2.1, 0.11], [a.sp[1] || 2.1, 0.04], [1.25, 0.05], [0.9, 0.06], [eX + 0.15, 0.035], [eX + 0.08, 0]] });
     if (a.ub) pat.push({ type: 'poly', mirror: true, warp: 0.15, color: a.ub[0], pts: [[eX - 0.08, eA + 0.06], [eX + 0.08, eA + 0.06], [eX + (a.ub[1] || 0.12), 0.6], [eX - 0.06, 0.6]] });
     if (a.tb) for (const b of a.tb) pat.push({ type: 'hband', x0: b[1], x1: b[2], aMin: b[3] != null ? b[3] : 0.5, belly: true, color: b[0], xMax: b[2] + 0.5, warp: 0.25, alpha: b[4] || 1 });
   }
@@ -262,7 +330,7 @@ export function autoProfile(p) {
   if (a.sx) o.scales = Object.assign(o.scales || {}, a.sx);
   if (a.bx) o.body = Object.assign(o.body || {}, a.bx);
   if (a.ps) o.pose = a.ps;
-  if (a.sp) Object.assign(o.scene, a.sp);
+  if (a.sp && !Array.isArray(a.sp)) Object.assign(o.scene, a.sp); // (v5.73: sp is the scene's extras when an object, a crown spearhead when a list - the smooth green snake's grass colours drew a garbage-coloured spearhead down its neck)
   if (a.lat) colors.lateral = a.lat;
   if (a.tl) o.tail = a.tl;
   if (a.mx) o.max = a.mx; // v5.58: the longest recorded (said under the model, not shown)
@@ -915,7 +983,7 @@ function scaleTextures(P, lat) {
 // pythons with small ones everywhere else, the big rostral and ocular scales of blind snakes - and small scales where the
 // head meets the neck. The grooves between cells are the same width everywhere on the skin.
 const HEAD_GENUS = { // v5.53: head colours some snakes are known by
-  thamnophis: { lips: 'barred', napeSpots: true, tongue: '#c0262e', tongueTip: '#141012' }, // garter snakes: pale lip scales with black bars between them, two pale spots on the parietals, a red tongue with black tips
+  thamnophis: { lips: 'barred', lipColor: '#c4bf8c', napeSpots: true, tongue: '#c0262e', tongueTip: '#141012' }, // garter snakes: pale lip scales with black bars between them, two pale spots on the parietals, a red tongue with black tips
   nerodia: { lips: 'barred' }, regina: { lips: 'barred' }, natrix: { lips: 'barred' }, storeria: { lips: 'pale' },
   pantherophis: { lips: 'barred' }, lampropeltis: { lips: 'barred' }, pituophis: { lips: 'barred' }, coronella: { lips: 'pale' },
 };
@@ -932,7 +1000,7 @@ function headLayout(P, F, body) {
   const plates = plan === 'colubrid' || plan === 'elapid' || plan === 'sea' || (H.plates && plan !== 'blind');
   const seeds = [], big = [];
   // one scale: centre (x in head lengths, a round the head: 0 top, 1 belly), half-sizes (rx in head lengths, ra in a)
-  const S = (x, a, rx, ra, k, o) => { for (const sg of a > 0.004 && a < 0.996 ? [1, -1] : [1]) { const s = Object.assign({ x: x * Hl, a: a * sg, rx: rx * Hl, ra, k, low: a > mA, id: seeds.length, gw: 0.011 * Hl }, o); seeds.push(s); big.push(s); } };
+  const S = (x, a, rx, ra, k, o) => { for (const sg of a > 0.004 && a < 0.996 ? [1, -1] : [1]) { const s = Object.assign({ x: x * Hl, a: a * sg, rx: rx * Hl, ra, k, low: a > mA, id: seeds.length, gw: GW * Hl }, o); seeds.push(s); big.push(s); } };
   const wrapA = (d) => d - 2 * Math.round(d / 2);
   const dist = (s, x, a) => Math.hypot((x - s.x) / s.rx, wrapA(a - s.a) / s.ra);
   const nLab = H.labials || (plan === 'python' ? 13 : tri ? 12 : plan === 'blind' ? 4 : plan === 'elapid' || plan === 'sea' ? 7 : 8);
@@ -969,6 +1037,8 @@ function headLayout(P, F, body) {
         const sa = Math.max(0.12, eA - era - 0.045);
         S(E + 0.01, sa, pit ? 0.11 : plan === 'python' ? 0.085 : 0.065, pit ? 0.07 : 0.05, 'sup');
         S(E - erx * 1.3, eA - era * 0.4, 0.02, Math.max(0.03, era * 0.5), 'pre'); S(E - erx * 1.3, eA + era * 0.45, 0.02, Math.max(0.03, era * 0.5), 'pre');
+        // v5.73: the ring of small circumorbital scales (post- and suboculars) that frame a viper's or python's eye
+        for (let k = 0; k < 9; k++) { const t = -0.35 * Math.PI + (k / 8) * 1.3 * Math.PI, cx = E + Math.cos(t) * erx * 1.32, ca = eA + Math.sin(t) * era * 1.32; if (ca < mA - 0.03) S(cx, ca, Math.max(0.016, erx * 0.38), Math.max(0.022, era * 0.4), 'post'); }
       }
       S(0.15, 0.87, 0.06, 0.08, 'chin');
     }
@@ -981,7 +1051,7 @@ function headLayout(P, F, body) {
     for (let xn = xa; xn <= xb; xn += s * 0.87, row++) {
       const h = hc(xn * Hl), sa = (s * Hl) / h; if (sa > 0.5) continue;
       for (let a = aLo + sa * ((row & 1) * 0.5); a <= aHi + 1e-6; a += sa) {
-        const q = { x: (xn + (R() - 0.5) * 0.3 * s) * Hl, a: clamp(a + (R() - 0.5) * 0.3 * sa, 0, 1), rx: s * Hl * 0.6, ra: sa * 0.6, k, small: true, keel, gw: Math.min(0.011 * Hl, s * Hl * 0.14) };
+        const q = { x: (xn + (R() - 0.5) * 0.3 * s) * Hl, a: clamp(a + (R() - 0.5) * 0.3 * sa, 0, 1), rx: s * Hl * 0.6, ra: sa * 0.6, k, small: true, keel, gw: Math.min(GW * Hl, s * Hl * 0.14) };
         q.low = q.a > mA;
         let inside = false; for (const b of big) if (b.low === q.low && dist(b, q.x, q.a) < 1.08) { inside = true; break; }
         if (inside) continue;
@@ -998,6 +1068,9 @@ function headLayout(P, F, body) {
 // v5.62 (model accuracy): nostril radius in head lengths (large in pythons and boas, small valved ones in sea snakes)
 function nostrilR(P) { return P.head.nostrilR || { python: 0.019, sea: 0.011 }[P.plan] || 0.014; }
 const HEAD_X = 1.3; // the head textures run from the snout tip to 1.3 head lengths
+// v5.73: the grooves between head scales, in head lengths (0.011 drew thick cartoon outlines round every shield; a real
+// suture is a fine line)
+const GW = 0.0075;
 function headData(P, F, quality) {
   const Hl = F.Hl, Xh = Hl * HEAD_X, low = quality !== 'high', Wh = low ? 256 : 512, Hh = low ? 128 : 256;
   const Lo = headLayout(P, F, eyeOf(P, F)), { seeds, hc, mA, J, wrapA } = Lo, H = P.head, plan = P.plan || 'colubrid';
@@ -1039,11 +1112,11 @@ function headData(P, F, quality) {
       let g = fd[k] / Math.max(1e-9, Math.hypot(gx, gy));
       const a = ((c + 0.5) / Wh) * 2 - 1, aa = Math.abs(a);
       if (x < J * Hl) g = Math.min(g, Math.abs(aa - mA) * hx0 * 0.8); // the edge of the mouth
-      const s = seeds[id1[k]] || {}, gw = s.gw || 0.011 * Hl;
+      const s = seeds[id1[k]] || {}, gw = s.gw || GW * Hl;
       gdist[k] = g / gw;
-      let h = sstep(0, 1.5, g / gw) * 0.75 + 0.25 * (1 - Math.min(1, d1a[k]) ** 2);
+      let h = sstep(0, 1.5, g / gw) * 0.75 + (s.small ? 0.25 : 0.12) * (1 - Math.min(1, d1a[k]) ** 2); // (v5.73: the big shields flatter)
       if (s.small) { const lx = (x - s.x) / s.rx; h += 0.25 * clamp(lx, -1, 1); if (s.keel) h += s.keel * 0.45 * Math.exp(-((wrapA(a - s.a) * hx0 / (s.rx * 0.22)) ** 2)) * sstep(-0.9, 0.1, lx); } // (small scales overlap backwards, some are keeled)
-      hgt[k] = h * gw * 0.9 * (H.headRelief != null ? H.headRelief : 1); // (v5.58: headRelief - flatter, smoother shields in some snakes)
+      hgt[k] = h * gw * 0.9 * (H.headRelief != null ? H.headRelief : 1) * (s.k === 'lab' || s.k === 'ilab' ? 0.6 : 1); // (v5.58: headRelief - flatter, smoother shields in some snakes; v5.73: lip scales flatter still)
     }
   }
   // the nostrils and heat pits: dark, sunk into the skin
@@ -1073,11 +1146,13 @@ function headData(P, F, quality) {
   const lum = (c) => (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255, paler = lum(bel) - lum(lat);
   // v5.62 (model accuracy): viper lips toned down - a band of pale tall lip scales split by dark grooves read as bared teeth
   const triL = (H.shape || 'oval') === 'tri' && !H.lips;
-  const lipK = H.lips === 'none' ? 0 : H.lips ? 0.8 : paler > 0.12 ? (triL ? 0.12 : { colubrid: 0.55, elapid: 0.5, viper: 0.3, pitviper: 0.3, python: 0.35 }[plan] || 0) : 0;
-  const lipC = H.lipColor ? hex(H.lipColor) : mixc(lat, bel, bars ? 0.95 : triL ? 0.4 : 0.8), barC = H.barColor ? hex(H.barColor) : mixc(dor, [8, 8, 8], 0.55);
+  // v5.73: subtler still everywhere - pale lip scales a little lighter than the flanks, thin dark sutures between them, no
+  // white blocks split by black bars (they read as teeth on ribbon, corn, pipe and water snakes)
+  const lipK = H.lips === 'none' ? 0 : H.lips ? (H.lipColor ? 0.75 : 0.62) : paler > 0.12 ? (triL ? 0.12 : { colubrid: 0.45, elapid: 0.4, viper: 0.25, pitviper: 0.25, python: 0.3 }[plan] || 0) : 0;
+  const lipC = H.lipColor ? hex(H.lipColor) : mixc(lat, bel, bars ? 0.62 : triL ? 0.4 : 0.6), barC = H.barColor ? hex(H.barColor) : mixc(dor, [8, 8, 8], 0.45);
   const barSegs = []; // [x at the lip, a at the lip, a at the top, half-width, x at the top]
   if (bars) for (const k of ['lab', 'ilab']) { const row = seeds.filter((q) => q.k === k && q.a > 0).sort((p, q) => p.x - q.x);
-    for (let i = 0; i + 1 < row.length; i++) { const p = row[i], q = row[i + 1], xm = (p.x + q.x) / 2, up = k === 'lab', aTop = up ? Math.max(mA - 0.12, Math.min(p.a - p.ra * 0.9, q.a - q.ra * 0.9)) : Math.max(p.a + p.ra * 0.8, q.a + q.ra * 0.8); barSegs.push([xm, mA, aTop, Hl * 0.016, xm + (up ? 0.25 : 0.15) * (q.x - p.x) * 0.3]); } }
+    for (let i = 0; i + 1 < row.length; i++) { const p = row[i], q = row[i + 1], xm = (p.x + q.x) / 2, up = k === 'lab', aTop = up ? Math.max(mA - 0.12, Math.min(p.a - p.ra * 0.9, q.a - q.ra * 0.9)) : mA + (Math.max(p.a + p.ra * 0.8, q.a + q.ra * 0.8) - mA) * 0.5; barSegs.push([xm, mA, aTop, Hl * (up ? 0.009 : 0.007), xm + (up ? 0.25 : 0.15) * (q.x - p.x) * 0.3, up ? 1 : 0.35]); } } // (v5.73: thin - a dark suture, not a black bar)
   const nData = new Uint8Array(n * 4), cData = new Uint8Array(n * 4);
   for (let r = 0; r < Hh; r++) {
     const x = ((r + 0.5) / Hh) * Xh, dY = (2 / Wh) * hcR[r], rp = Math.min(Hh - 1, r + 1), rm = Math.max(0, r - 1);
@@ -1087,15 +1162,17 @@ function headData(P, F, quality) {
       let nx = -hy, ny = -hx; const hl = holeAt(r + 1, c) - holeAt(r - 1, c), hh2 = holeAt(r, c + 1) - holeAt(r, c - 1); nx += hh2 * 0.35; ny += hl * 0.35; // (the rim of a pit)
       const l = Math.hypot(nx, ny, 1); nData[k * 4] = (nx / l * 0.5 + 0.5) * 255; nData[k * 4 + 1] = (ny / l * 0.5 + 0.5) * 255;
       const s = seeds[id1[k]] || {}, groove = 1 - sstep(0.15, 1.25, gdist[k]), hs = hash1(id1[k] + 1, 913);
-      nData[k * 4 + 2] = clamp((1 - (H.groove != null ? H.groove : 0.6) * (triL && (s.k === 'lab' || s.k === 'ilab') ? 0.5 : 1) * groove) * (0.93 + 0.12 * hs) * (1 - hole * 0.6), 0, 1) * 255; // cavity: the grooves dark (v5.62: shallower between viper lip scales)
+      nData[k * 4 + 2] = clamp((1 - (H.groove != null ? H.groove : 0.45) * (s.k === 'lab' || s.k === 'ilab' ? (triL ? 0.4 : 0.5) : 1) * groove) * (0.93 + 0.12 * hs) * (1 - hole * 0.6), 0, 1) * 255; // cavity: the grooves dark (v5.62: shallower between viper lip scales)
       nData[k * 4 + 3] = clamp((s.small ? 0.62 : 0.5) + 0.12 * hs + 0.3 * groove, 0, 1) * 255; // roughness
       // the colour layer
       let col = null, al = 0;
       const lab = s.k === 'lab' || s.k === 'ilab' || (s.k === 'rost' && Math.abs(a) > mA - 0.16) || s.k === 'ment';
-      if (lipK && lab) { col = lipC; al = lipK * (1 - sstep(0.075, 0.13, Math.abs(Math.abs(a) - mA)) * (s.k === 'rost' ? 0 : 0.85)); } // (pale along the lips, fading out higher up the lip scales)
+      // (pale along the lips, fading out higher up the lip scales; v5.73: a soft wash from the mouth line, not filling each
+      // lip scale to its top edge - a row of pale blocks with hard tops read as bared teeth)
+      if (lipK && (lab || (x < J * Hl * 1.02 && Math.abs(Math.abs(a) - mA) < 0.1))) { const dm = Math.abs(Math.abs(a) - mA); col = lipC; al = lipK * (s.k === 'rost' && Math.abs(a) > mA - 0.16 ? 1 - sstep(0.06, 0.16, dm) * 0.6 : 1 - sstep(0.015, Math.abs(a) > mA ? 0.07 : bars ? 0.11 : 0.075, dm)) * (1 - sstep(J * 0.9, J * 1.02, x / Hl)); }
       if (bars && x < J * Hl * 1.05) { // dark bars along the sutures between lip scales, widest at the lip
-        let bd = 1e9, aa = Math.abs(a); for (const b of barSegs) { if (Math.abs(x - b[0]) > b[3] * 3) continue; const t = clamp((aa - b[1]) / (b[2] - b[1]), 0, 1), w = lerp(b[3], b[3] * 0.45, t), e = Math.hypot(x - lerp(b[0], b[4], t), (aa - lerp(b[1], b[2], t)) * hcR[r]) / w; if (e < bd) bd = e; }
-        if (bd < 1.4) { const w2 = 0.75 * (1 - sstep(0.6, 1.3, bd)); col = col ? mixc(col, barC, w2 / Math.max(w2, al || w2)) : barC; al = Math.max(al, w2); }
+        let bd = 1e9, bk = 1, aa = Math.abs(a); for (const b of barSegs) { if (Math.abs(x - b[0]) > b[3] * 3) continue; const t = clamp((aa - b[1]) / (b[2] - b[1]), 0, 1), w = lerp(b[3], b[3] * 0.45, t), e = Math.hypot(x - lerp(b[0], b[4], t), (aa - lerp(b[1], b[2], t)) * hcR[r]) / w; if (e < bd) { bd = e; bk = b[5]; } }
+        if (bd < 1.4) { const w2 = 0.6 * bk * (1 - sstep(0.6, 1.3, bd)); col = col ? mixc(col, barC, w2 / Math.max(w2, al || w2)) : barC; al = Math.max(al, w2); } // (v5.73: bk - fainter and shorter on the lower lip; seen from below they read as teeth)
       }
       if (H.napeSpots) { const d = Math.hypot((x - Hl * 0.86) / (Hl * 0.035), (Math.abs(a) - 0.045) * hcR[r] / (Hl * 0.028)); if (d < 1.2) { col = lipC; al = 0.95 * (1 - sstep(0.7, 1.1, d)); } }
       if (hole > 0.01) { const hc2 = [18, 12, 10]; col = col ? mixc(col, hc2, hole) : hc2; al = Math.max(al, hole); }
@@ -1170,8 +1247,12 @@ function patternData(P, F, body, lat, quality, seed) {
       let col = mixc(dors, latc, sstep(0.18, 0.62, aa));
       // v5.58: under the head the pale belly colour reaches up to the lower lip (the chin and throat), as in most snakes with a
       // paler belly; it eases back down to the belly's own edge along the neck
-      const bA = chinUp ? lerp(0.6, bellyA, sstep(Hl * 0.85, Hl * 1.7, x)) : bellyA;
-      col = mixc(col, bel, sstep(bA - bs, bA + bs, aa + warp * (C.bellyWarp || 0.04)));
+      // (v5.73: to the lower lip only, with a soft edge - reaching higher, it drew a hard-edged pale band over the upper lip
+      // scales, which read as a row of teeth; the pale upper lip is the head texture's own soft wash)
+      // (and a belly colour that reaches high on the flanks stops at a narrow strip along the lip on the head - except in sea
+      // snakes, whose pale lower half runs over the lips and the side of the head, as in the yellow-bellied sea snake)
+      const hk = P.plan === 'sea' ? 0 : 1 - sstep(Hl * 0.85, Hl * 1.7, x), bA = Math.max(chinUp ? lerp(0.66, bellyA, 1 - hk) : bellyA, lerp(bellyA, 0.53, hk)), bs2 = bs + 0.03 * hk;
+      col = mixc(col, bel, sstep(bA - bs2, bA + bs2, aa + warp * (C.bellyWarp || 0.04)));
       const m = 1 + mott * (fbm(nx * 3, ny * 3, gq * 5.5, seed + 3, 3) - 0.5) * 2.4;
       col = [col[0] * m, col[1] * m, col[2] * m];
       for (const Ly of layers) {
@@ -1428,7 +1509,7 @@ function buildEyes(P, F, body, pat) {
     const u = clamp((th + Math.PI) / TAU, 0, 0.999), v = clamp(body.gOf(x) / body.gTotal, 0, 0.999), k = (Math.floor(v * img.height) * img.width + Math.floor(u * img.width)) * 4;
     const lin = (c) => Math.pow(c / 255, 2.2); return [lin(img.data[k]), lin(img.data[k + 1]), lin(img.data[k + 2])];
   };
-  const bulge = H.bulge != null ? H.bulge : 0.1; // how far the spectacle rises above the head's outline (in eye radii)
+  const bulge = H.bulge != null ? H.bulge : 0.06; // how far the spectacle rises above the head's outline (in eye radii; v5.73: flush with the head, not a bulging ball)
   for (const sg of [1, -1]) {
     const th0 = sg * body.eyeA, c = body.surf(xe, th0, true).p;
     const eye = [], spec = [], uv = [], col = [], spa = [];
@@ -2480,7 +2561,7 @@ function personShape(h) {
 
 // ---------- the viewer ----------
 export function mount(host, opts) {
-  const P = normProfile(autoProfile(opts.profile)), seed = strSeed(opts.id || P.name || 'snake');
+  const P = normProfile(autoProfile(opts.profile), opts.id), seed = strSeed(opts.id || P.name || 'snake');
   { const gH = HEAD_GENUS[String(opts.id || '').split('-')[0]]; if (gH) P.head = Object.assign({}, gH, P.head); } // v5.53
   const reduceMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const reduce = () => reduceMQ.matches;
