@@ -1072,12 +1072,12 @@ export function create(V) {
     const ray = new THREE.Raycaster(), down = V3(0, -1, 0);
     return list.map(([x, z]) => { ray.set(V3(x, 50, z), down); const h = ray.intersectObjects(grounds, false); return h.length ? Math.max(0, ...h.map((q) => q.point.y)) : 0; });
   }
-  function clearProps(pts, rad) { // hide scenery standing on a path ([x, z] points); returns the undo
+  function clearProps(pts, rad, opt) { // hide scenery standing on a path ([x, z] points); returns the undo
     const undo = [], m4 = new THREE.Matrix4(), p = new THREE.Vector3(), sc = new THREE.Vector3(), q = new THREE.Quaternion();
-    const near = (x, z, r) => pts.some((c) => (c[0] - x) ** 2 + (c[1] - z) ** 2 < (rad + r) ** 2);
+    const near = opt && opt.test ? opt.test : (x, z, r) => pts.some((c) => (c[0] - x) ** 2 + (c[1] - z) ** 2 < (rad + r) ** 2); // (v5.74: or any area, e.g. in front of Size vs person)
     // v5.09: only solid things (rocks, logs, twigs) move out of the way; grass, ferns and heather stay - a snake lies
     // among them, and taking them away left a bare, oddly lit patch in the meadow
-    const soft = (m) => !!m && (m.side === THREE.DoubleSide || m.alphaTest > 0 || m.transparent);
+    const soft = (m) => !(opt && opt.all) && !!m && (m.side === THREE.DoubleSide || m.alphaTest > 0 || m.transparent);
     const occ = V.occ || [];
     for (const o of occ) if (!soft(o.im && o.im.material) && near(o.c.x, o.c.z, o.r * 0.6)) { o.force = true; undo.push(() => { o.force = false; }); }
     V.scene.children.forEach((o) => {
@@ -1557,7 +1557,7 @@ export function create(V) {
     buttons: { eat: bEat, slither: bSlither }, // v5.74: grouped with Open mouth by viewer.js
     get sizeLay() { return sizeLay; },
     groundY: (list) => groundYAt(list),
-    clearProps: (pts, rad) => clearProps(pts, rad),
+    clearProps: (pts, rad, opt) => clearProps(pts, rad, opt),
     exclusive: (k) => exclusive(k),
     after() { if (anat) anat.after(); },
     get locked() { return !!show; },

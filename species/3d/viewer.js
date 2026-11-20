@@ -2519,6 +2519,8 @@ const UI_CSS = `
 .sp3d-sizecap[hidden]{display:none}.sp3d-sizecap a{color:#b8f0a0;text-decoration:underline;text-underline-offset:2px}
 .sp3d-szring{position:absolute;left:0;top:0;z-index:2;border:3px solid #ffd66b;border-radius:50%;box-shadow:0 0 0 2px rgba(12,26,18,.55),inset 0 0 0 2px rgba(12,26,18,.35);pointer-events:none}
 .sp3d-szring[hidden],.sp3d-szinset[hidden]{display:none}
+.sp3d-szlab{position:absolute;left:50%;bottom:100%;transform:translate(-50%,-6px);padding:2px 9px;border-radius:999px;background:rgba(12,26,18,.88);color:#fff;font:600 12.5px/1.4 Inter,system-ui,sans-serif;white-space:nowrap}
+.sp3d-labels .sp3d-mk.sp3d-off{visibility:hidden}
 .sp3d-szinset{position:absolute;left:0;top:0;z-index:3;border:3px solid #ffd66b;border-radius:6px;box-shadow:0 0 0 2px rgba(12,26,18,.6),0 4px 14px rgba(0,0,0,.35);pointer-events:none;box-sizing:border-box}
 .sp3d-szzoom{position:absolute;left:6px;top:6px;padding:2px 8px;border-radius:999px;background:rgba(12,26,18,.86);color:#ffd66b;font:700 12px/1.4 Inter,system-ui,sans-serif}
 @media (max-width:820px){.sp3d-sizecap{left:10px;right:10px;bottom:62px;transform:none;width:auto;max-width:none;font-size:12.5px;padding:6px 10px}}
@@ -2599,7 +2601,7 @@ export function mount(host, opts) {
     get cam() { return cam; }, get controls() { return controls; }, get info() { return info; }, get extras() { return extras; }, get group() { return snakeGroup; }, get scene() { return ctx.scene; },
     kick: () => kick(), toggleFull: () => toggleFull(), scaleOn: () => sizeSt.on,
     get occ() { return ctx.occ; }, scaleOff: () => { if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(false, { instant: true }); }, // (at once: something else takes over the snake and the camera)
-    scaleBack: (keepCam) => { if (bScale.getAttribute('aria-pressed') === 'true') { toggleScale(false, { keepCam }); return true; } return false; }, // (gliding back to the view you had) closeMouth: () => { if (mouthGoal) toggleMouth(false); }, get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
+    scaleBack: (keepCam) => { if (bScale.getAttribute('aria-pressed') === 'true') { toggleScale(false, { keepCam }); return true; } return false; }, /* (gliding back to the view you had) */ closeMouth: () => { if (mouthGoal) toggleMouth(false); }, get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
     resetView: () => resetView(),     focus: (p, d, elv) => focusOn(p, d, elv), view: (g) => controls.setGoal(Object.assign({ az: controls.st.az, d: info.dFit, px: 0, pz: 0 }, g)) };
   const fx = EXTRA.create(V);
   uiCSSInject();
@@ -2976,7 +2978,7 @@ float slScale(vec2 m) {
   // the overlays: a caption with the length and its source, the Back chip, a ring round a small snake and the magnified inset
   const sizeCap = el('div', 'sp3d-sizecap'); sizeCap.hidden = true; sizeCap.setAttribute('aria-live', 'polite');
   const sizeChip = el('button', 'sp3d-b sp3d-backchip'); sizeChip.type = 'button'; sizeChip.innerHTML = '<span aria-hidden="true">←</span> Back'; sizeChip.setAttribute('aria-label', 'Back to the model'); sizeChip.hidden = true;
-  const sizeRing = el('div', 'sp3d-szring'); sizeRing.hidden = true; sizeRing.setAttribute('aria-hidden', 'true');
+  const sizeRing = el('div', 'sp3d-szring'); sizeRing.hidden = true; const ringLab = el('span', 'sp3d-szlab'); sizeRing.appendChild(ringLab); // (a small snake's label sits on its ring)
   const sizeInset = el('div', 'sp3d-szinset'); sizeInset.hidden = true; sizeInset.setAttribute('aria-hidden', 'true'); const insetTag = el('span', 'sp3d-szzoom'); sizeInset.appendChild(insetTag);
   stage.append(sizeRing, sizeInset, sizeCap, sizeChip);
   on(sizeChip, 'click', () => V.scaleBack());
@@ -3015,11 +3017,10 @@ float slScale(vec2 m) {
     sizeDropPerson();
     scaleObj = new THREE.Group(); scaleObj.name = 'sizePerson';
     const man = EXTRA.buildPerson ? EXTRA.buildPerson(THREE, PH) : new THREE.Mesh(personShape(PH), new THREE.MeshStandardMaterial({ color: '#7d8a80' }));
-    man.position.copy(pp); man.rotation.y = az + 0.35; scaleObj.add(man); ctx.scene.add(scaleObj); personFade(0);
-    if (sizeSt.undo) sizeSt.undo(); sizeSt.undo = fx.clearProps ? fx.clearProps([[pp.x, pp.z]], 0.35) : null;
+    man.position.copy(pp); man.rotation.y = az + 0.3; scaleObj.add(man); ctx.scene.add(scaleObj); personFade(0);
     scaleObj.userData.labels = [
       { p: sizeSt.headTop.clone(), t: 'Person 1.70 m' },
-      { p: sizeSt.mid.clone().add(new THREE.Vector3(0, info.F.w0 * 2 * k, 0)), t: 'Snake ' + fmtAdult(L.m) + ' (along its body)' },
+      { p: sizeSt.mid.clone().add(new THREE.Vector3(0, info.F.w0 * 2 * k, 0)), t: 'Snake ' + fmtAdult(L.m) + ' (along its body)', snake: true },
     ];
     scaleObj.userData.ends = pts.filter((_, i) => i % 6 === 0);
     sizeCaption(L);
@@ -3027,10 +3028,10 @@ float slScale(vec2 m) {
   // the view that shows both whole: slightly raised, three-quarter, clear of the buttons on top and the caption below
   function sizeGoal() {
     const B = sizeSt.box, sr = stage.getBoundingClientRect(), br = bar.getBoundingClientRect(), H = Math.max(1, sr.height);
-    const top = clamp((br.bottom - sr.top + 10) / H, 0.06, 0.5), bot = clamp(((sizeCap.offsetHeight || 40) + 30) / H, 0.06, 0.3);
-    const azF = Math.atan2(B.R.x, B.R.z) - Math.PI / 2 + 0.35, elF = (11 * Math.PI) / 180; // (the snake's line seen about 20 degrees off square)
+    const cr = sizeCap.getBoundingClientRect(), top = clamp((br.bottom - sr.top + 10) / H, 0.06, 0.5), bot = clamp((cr.height ? sr.bottom - cr.top + 12 : 70) / H, 0.06, 0.32);
+    const YAW = 0.12, azF = Math.atan2(B.R.x, B.R.z) - Math.PI / 2 + YAW, elF = (12 * Math.PI) / 180; // (nearly side-on, a little raised: both seen at their true size, neither nearer than the other)
     const W = B.s1 - B.s0, D = B.f1 - B.f0, hh = B.h;
-    const dW = ((W * Math.cos(0.35) + D * Math.sin(0.35)) * 0.5 * 1.12) / Math.tan(info.hf) + D * 0.5;
+    const dW = ((W * Math.cos(YAW) + D * Math.sin(YAW)) * 0.5 * 1.12) / Math.tan(info.hf) + D * 0.5;
     const dH = (hh * 1.08) / ((1 - top - bot) * 2 * Math.tan(info.vf)) + D * 0.5;
     const d = Math.max(dW, dH, info.dMin * 2);
     const visH = 2 * d * Math.tan(info.vf), c = sizeSt.piv.clone().addScaledVector(B.R, (B.s0 + B.s1) / 2);
@@ -3049,7 +3050,11 @@ float slScale(vec2 m) {
       sizeSt.on = true; sizeSt.ready = false; bScale.setAttribute('aria-pressed', 'true'); bScale.textContent = 'Back to model'; setCamBtn(null);
       sizeLayout(); sizeOverlays(true);
       if (fx.sizeLay && sizeSt.lay) fx.sizeLay.go(1, 1000);
-      skGo(1, 1000); controls.tween(sizeGoal(), 1000);
+      const g = sizeGoal(); skGo(1, 1000); controls.tween(g, 1000);
+      // nothing stands between you and them: scenery in front of the snake and the person steps aside (put back after)
+      if (sizeSt.undo) sizeSt.undo(); sizeSt.undo = null;
+      if (fx.clearProps) { const B = sizeSt.box, C = new THREE.Vector3(Math.sin(g.az), 0, Math.cos(g.az)), pv = sizeSt.piv;
+        sizeSt.undo = fx.clearProps(null, 0, { all: true, test: (x, z, r) => { const dx = x - pv.x, dz = z - pv.z, sR = dx * B.R.x + dz * B.R.z, tC = dx * C.x + dz * C.z; return sR > B.s0 - 0.25 - r && sR < B.s1 + 0.25 + r && tC > B.f0 - 0.3 - r && tC < g.d; } }); }
     } else {
       sizeSt.on = false; bScale.setAttribute('aria-pressed', 'false'); bScale.textContent = 'Size vs person'; sizeOverlays(false); sizeSt.ready = false;
       markers.filter((m) => m.scale).forEach((m) => m.el.remove()); markers = markers.filter((m) => !m.scale);
@@ -3090,13 +3095,16 @@ float slScale(vec2 m) {
     for (const p of sizeSt.pts) { v3s.copy(p).project(cam); if (v3s.z > 1) continue; const x = (v3s.x * 0.5 + 0.5) * w, y = (-v3s.y * 0.5 + 0.5) * h; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
     const span = Math.hypot(x1 - x0, y1 - y0), small = x1 > x0 && span < Math.max(90, w * 0.16);
     sizeSt.small = small; sizeRing.hidden = !small; sizeInset.hidden = !small;
+    for (const m of markers) if (m.sizeSnake) m.el.classList.toggle('sp3d-off', small);
     if (!small) return;
+    ringLab.textContent = 'Snake ' + fmtAdult(sizeSt.len.m);
     const r = Math.max(30, span / 2 + 16); sizeRing.style.width = sizeRing.style.height = r * 2 + 'px';
     sizeRing.style.transform = 'translate(' + ((x0 + x1) / 2 - r).toFixed(1) + 'px,' + ((y0 + y1) / 2 - r).toFixed(1) + 'px)';
     // the inset: the same snake close up, in a box on the right, saying how much it is magnified
-    const iw = Math.round(clamp(w * 0.34, 130, 260)), ih = Math.round(iw * 0.62), ix = w - iw - 12, iy = Math.max(8, h - ih - (sizeCap.offsetHeight || 40) - 34);
+    // (top-left, under the buttons: the snake is on the left and the person on the right, so the sky above the snake is free)
+    const sr = stage.getBoundingClientRect(), br = bar.getBoundingClientRect(), iw = Math.round(clamp(w * 0.42, 150, 280)), ih = Math.round(iw * 0.62), ix = 12, iy = Math.round(clamp(br.bottom - sr.top + 14, 8, h - ih - 8));
     sizeInset.style.width = iw + 'px'; sizeInset.style.height = ih + 'px'; sizeInset.style.transform = 'translate(' + ix + 'px,' + iy + 'px)';
-    const L = sizeSt.arc || sizeSt.len.m, dirC = cam.position.clone().sub(sizeSt.mid); dirC.y = Math.max(dirC.y, dirC.length() * 0.35); dirC.normalize();
+    const L = (sizeSt.arc || sizeSt.len.m) * 0.82, dirC = cam.position.clone().sub(sizeSt.mid); dirC.y = Math.max(dirC.y, dirC.length() * 0.35); dirC.normalize();
     insetCam.aspect = iw / ih; const di = (L * 0.6) / Math.tan((insetCam.fov * Math.PI) / 360) / Math.min(1, insetCam.aspect) * 0.62;
     insetCam.near = Math.max(1e-4, di * 0.02); insetCam.far = di * 60; insetCam.position.copy(sizeSt.mid).addScaledVector(dirC, di); insetCam.lookAt(sizeSt.mid); insetCam.updateProjectionMatrix();
     // magnification: the inset's pixels per metre at the snake over the main view's
@@ -3136,7 +3144,7 @@ float slScale(vec2 m) {
   }
   function rebuildMarkers() {
     labels.querySelectorAll('.sp3d-sl').forEach((e) => e.remove());
-    if (scaleObj && sizeSt.on && sizeSt.ready) for (const l of scaleObj.userData.labels) { const e = el('div', 'sp3d-mk sp3d-sl'); e.appendChild(el('span', 'sp3d-mt', l.t)); labels.appendChild(e); markers.push({ el: e, p: l.p, n: null, scale: true }); }
+    if (scaleObj && sizeSt.on && sizeSt.ready) for (const l of scaleObj.userData.labels) { const e = el('div', 'sp3d-mk sp3d-sl'); e.appendChild(el('span', 'sp3d-mt', l.t)); labels.appendChild(e); markers.push({ el: e, p: l.p, n: null, scale: true, sizeSnake: !!l.snake }); }
     markers = markers.filter((m) => m.el.isConnected);
   }
   const v3 = new THREE.Vector3();
@@ -3229,7 +3237,7 @@ float slScale(vec2 m) {
   function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; if (sizeBusy()) toggleScale(false, { instant: true }); fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
 
   build(); fx.onBuild(); resize();
-  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), fx, get show() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); if (window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
+  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), fx, size: () => ({ on: sizeSt.on, leaving: sizeSt.leaving, k: sizeSt.k, arc: sizeSt.arc, len: sizeSt.len, small: sizeSt.small, N: sizeSt.N, person: !!scaleObj, saved: sizeSt.saved }), get group() { return snakeGroup; }, get show() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); if (window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
 
   return {
     canvas,
