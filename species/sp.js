@@ -124,14 +124,14 @@ document.addEventListener('click',function(e){var a=e.target.closest&&e.target.c
 var sci=m.dataset.sci,sid=m.dataset.id,name=(document.querySelector('h1')||{}).textContent||sci,dlg=null,me=document.currentScript&&document.currentScript.src||location.href;
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
 function lic(c){c=String(c||'').toLowerCase();return c==='cc0'?'CC0':c.replace(/^cc-/,'CC ').toUpperCase()}
-function size(){var lo=+m.dataset.lenlo,hi=+m.dataset.lenhi;if(!hi)return null;var W=340,P=1.5,s=Math.min((W-40)/(hi+0.55),74),NS='http://www.w3.org/2000/svg',ph=P*s,H=Math.max(ph+46,128),g=H-26;
+function size(){var lo=+m.dataset.lenlo,hi=+m.dataset.lenhi;if(!hi)return null;var W=340,P=1.7,s=Math.min((W-40)/(hi+0.55),74),NS='http://www.w3.org/2000/svg',ph=P*s,H=Math.max(ph+46,128),g=H-26;
 var svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.setAttribute('role','img');
-svg.setAttribute('aria-label',name+': about '+rng(lo,hi)+' long, next to a person 1.5 m tall');
+svg.setAttribute('aria-label',name+': about '+rng(lo,hi)+' long, next to a person 1.70 m tall');
 function a(t,o,p){var e=document.createElementNS(NS,t);for(var k in o)e.setAttribute(k,o[k]);(p||svg).appendChild(e);return e}
 var px=14+0.2*s,hr=Math.max(3,0.11*s),x0=px+0.2*s+18,th=Math.max(5,Math.min(12,0.06*s)),y=g-th/2-1;
 a('line',{x1:6,y1:g,x2:W-6,y2:g,'class':'gr'});
 a('circle',{cx:px,cy:g-ph+hr,r:hr,'class':'pp'});a('path',{d:'M'+(px-0.2*s)+' '+g+'L'+(px-0.13*s)+' '+(g-ph*0.52)+'L'+(px-0.2*s)+' '+(g-ph*0.82)+'Q'+px+' '+(g-ph*0.9)+' '+(px+0.2*s)+' '+(g-ph*0.82)+'L'+(px+0.13*s)+' '+(g-ph*0.52)+'L'+(px+0.2*s)+' '+g+'Z','class':'pp'});
-var t=a('text',{x:px,y:g+16,'text-anchor':'middle'});t.textContent='1.5 m';
+var t=a('text',{x:px,y:g+16,'text-anchor':'middle'});t.textContent='1.70 m';
 var st=[0.1,0.25,0.5,1,2].filter(function(v){return v*s>=34})[0]||2;
 for(var v=0;v<=hi+1e-9;v+=st){a('line',{x1:x0+v*s,y1:g,x2:x0+v*s,y2:g+4,'class':'gr'});var tk=a('text',{x:x0+v*s,y:g+16,'text-anchor':'middle','class':'tk'});tk.textContent=v?fmt(v):'0'}
 function body(L,c){var hl=Math.min(th*1.7,L/3),tl=Math.min(L*0.35,th*6),h=th/2;if(L<th*2)return a('rect',{x:x0,y:y-h,width:Math.max(L,1),height:th,rx:h,'class':c});
@@ -164,7 +164,7 @@ if(!p){busy=0;nomodel();return}
 fillAbout(p);
 if(!gl()){busy=0;msg('This browser or device cannot show 3D graphics (WebGL is turned off or not supported), so the 3D model cannot be shown. The information about it is still there.',false,true);return}
 return getViewer().then(function(mod){if(!dlg.open&&!dlg.hasAttribute('open')){busy=0;return}host.innerHTML='';
-try{viewer=mod.mount(host,{profile:p,id:sid,name:name,testing:!!window.SL_3D_TEST,head:document.getElementById('sp-rl-h'),photo:photo3d,mapUrl:location.pathname+'?embed=map'});anat()}catch(e){viewer=null;busy=0;msg(e&&e.message==='webgl'?'The 3D view could not start on this device (WebGL is not available). The information about it is still there.':'The 3D view could not start.',true,true);return}busy=0})})
+try{viewer=mod.mount(host,{profile:p,id:sid,name:name,testing:!!window.SL_3D_TEST,head:document.getElementById('sp-rl-h'),photo:photo3d,mapUrl:location.pathname+'?embed=map',len:{lo:+m.dataset.lenlo||0,hi:+m.dataset.lenhi||0,txt:m.dataset.lentxt||'',src:m.dataset.lensrc||''}});anat()}catch(e){viewer=null;busy=0;msg(e&&e.message==='webgl'?'The 3D view could not start on this device (WebGL is not available). The information about it is still there.':'The 3D view could not start.',true,true);return}busy=0})})
 .catch(function(){busy=0;msg(navigator.onLine===false?'You seem to be offline, and the 3D viewer has not been downloaded yet.':'The 3D viewer could not be loaded just now.',true,true)})}
 function nomodel(){tabs[0].parentNode.hidden=true;p3d.hidden=true;pph.hidden=false;note.hidden=false;load()}
 function fillAbout(p){if(about.dataset.done)return;about.dataset.done=1;var s=el('summary','','About this model and its sources');about.appendChild(s);
@@ -198,7 +198,7 @@ function info(w,top,box,D){if(D.desc)w.appendChild(el('p','sp-rl-desc',D.desc));
 if(D.limited)w.appendChild(el('p','sp-note','Little is known about this species: only a few published studies describe it.'));
 if(D.quick&&D.quick.length){var dl=el('dl','sp-rl-q');D.quick.forEach(function(q){var d=el('div','sp-rl-q-'+q[0]),dd=el('dd','',q[2]);d.appendChild(el('dt','',q[1]));
 // the size picture right beside the length it shows (only for a length from a reviewed account)
-var sv=q[0]==='len'&&size();if(sv){var f=el('figure','sp-rl-size');f.appendChild(sv);var cap=el('figcaption','sp-note','Drawn stretched out, next to a person 1.5 m tall.'),src=m.dataset.lensrc;
+var sv=q[0]==='len'&&size();if(sv){var f=el('figure','sp-rl-size');f.appendChild(sv);var cap=el('figcaption','sp-note','Drawn stretched out, next to a person 1.70 m tall.'),src=m.dataset.lensrc;
 if(src){var s2=src.split('|');cap.appendChild(document.createTextNode(' Length: '));if(s2[1]){var aa=el('a','',s2[0]);aa.href=s2[1];aa.rel='noopener';aa.target='_blank';cap.appendChild(aa)}else cap.appendChild(document.createTextNode(s2[0]));cap.appendChild(document.createTextNode('.'))}
 f.appendChild(cap);dd.appendChild(f)}
 d.appendChild(dd);dl.appendChild(d)});w.appendChild(dl)}
@@ -213,6 +213,6 @@ body.id='sp-rl-m'+i;body.hidden=true;body.setAttribute('role','region');body.set
 bt.addEventListener('click',function(){var o=bt.getAttribute('aria-expanded')!=='true';bt.setAttribute('aria-expanded',String(o));body.hidden=!o});mw.appendChild(sec)});box.appendChild(mw)}}
 b.addEventListener('click',open);var ab=document.querySelector('.sp-anatbtn'),wantA=0;function anat(){if(!wantA)return;var x=document.querySelector('.sp3d-wrap .sp3d-b[title^="Show the parts"]');if(x){wantA=0;if(x.getAttribute('aria-pressed')!=='true')setTimeout(function(){x.click()},300)}}if(ab)ab.addEventListener('click',function(){wantA=1;open();anat()});if(location.hash==='#real')open();window.addEventListener('hashchange',function(){if(location.hash==='#real')open()})})();
 
-(function(){var T={'3d':{v:480,sel:'.sp-realbtn,.sp-anatbtn,.sp-rl'}},V=576,d=document.documentElement;try{var a=+localStorage.getItem('sl-ver-n');if(a>V)V=a}catch(e){}
+(function(){var T={'3d':{v:480,sel:'.sp-realbtn,.sp-anatbtn,.sp-rl'}},V=577,d=document.documentElement;try{var a=+localStorage.getItem('sl-ver-n');if(a>V)V=a}catch(e){}
 Object.keys(T).forEach(function(k){var seen=0;try{seen=localStorage.getItem('sl-new-seen-'+k)}catch(e){}if(V&&V<T[k].v+20&&!seen)d.classList.add('sl-new-'+k);
 document.addEventListener('click',function(e){if(!d.classList.contains('sl-new-'+k)||!e.target.closest||!e.target.closest(T[k].sel))return;try{localStorage.setItem('sl-new-seen-'+k,'1')}catch(x){}d.classList.remove('sl-new-'+k)},true)})})();
