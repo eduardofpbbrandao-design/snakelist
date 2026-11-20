@@ -13223,7 +13223,10 @@ window.SL_GEO_READY = new Promise(function (res) {
   document.getElementById("legend-dot-off").style.background = NO_SPECIES_COLOR;
   // the country's own "See provinces" / "Hide prefectures" wording (see SUBDIV)
   function setProvBtn(on, cc) {
-    document.getElementById("see-provinces").textContent = (on ? "Hide " : "See ") + subdivWord(cc || statesMode || lastCountryCode || "us", false, true);
+    // (v5.78: a country divided into islands - Indonesia - had two "See islands" buttons side by side: this one
+    // is its main islands, the other every island on the map)
+    var w = subdivWord(cc || statesMode || lastCountryCode || "us", false, true);
+    document.getElementById("see-provinces").textContent = (on ? "Hide " : "See ") + (w === "islands" ? "main islands" : w);
   }
   function updateLegend() {
     var citiesShown = document.getElementById("see-cities").textContent === "Hide cities";
@@ -13245,7 +13248,9 @@ window.SL_GEO_READY = new Promise(function (res) {
       : "More recorded species" + (mx ? " (" + mx + ")" : "");
     document.getElementById("legend-dot-off").parentNode.lastChild.textContent = "No living species recorded (not the same as absent)";
     document.getElementById("legend-dot-off").parentNode.hidden = false;
-    document.getElementById("map-legend").hidden = !(statesMode || citiesShown || (typeof multiOn === "function" && multiOn()));
+    // (v5.78: not with one state tapped - only that state is coloured then, so there is no scale to explain)
+    var onePicked = statesMode && pickedProvince && !(window.SL_HEAT_IS_ON && window.SL_HEAT_IS_ON()) && !(typeof multiOn === "function" && multiOn());
+    document.getElementById("map-legend").hidden = (onePicked && !citiesShown) || !(statesMode || citiesShown || (typeof multiOn === "function" && multiOn()));
     var hint = document.querySelector(".globe-hint");
     var touchy = window.matchMedia && matchMedia("(pointer: coarse)").matches;
     if (hint) hint.innerHTML = (touchy ? "Drag to explore &middot; pinch to zoom &middot; " : "Drag to explore &middot; scroll to zoom &middot; ") +
@@ -14591,7 +14596,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     // country fill on top of (or under) them; the borders and the picked country's line stay
     var heatNow = heatIsOn();
     if (areaShow) drawAreaWhole(to, stride);
-    if (HI && !searchMuted() && !heatNow && !areaShow) {
+    if (HI && !searchMuted() && !heatNow && !areaShow && !(onlyPicked && onlyPicked === selected)) {
       // Kosovo has no species of its own recorded (every source lists it under Serbia),
       // so it never ends up in HI on its own - without this it stays the plain unhighlighted
       // land color while Serbia around it lights up, reading as a mistake rather than a gap.
@@ -15189,6 +15194,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // islScope: the country whose islands are shown (the country clicked when See islands was
   // pressed), or null for every island in the world
   var islandsOn = false, ISL = null, islScope = null, islShown = [], islProv = null;
+  var onlyPicked = null; // v5.78: a country picked by a tap or from a list - the search's other lit countries step aside
   // is this island ring part of the picked state/island? Inside it, or (a small island the
   // state shapes leave out) within about a degree of it
   function ringInProv(r) {
@@ -15407,11 +15413,14 @@ window.SL_GEO_READY = new Promise(function (res) {
       // no sourced species for this state yet - reads as plain unhighlighted land rather than
       // stretching the gradient down to a misleadingly "some, but very few" light green
       ctx.fillStyle = n > 0 ? (heatOn ? window.SL_HEAT_COLOR(0.06 + 0.94 * Math.log(1 + n) / Math.log(1 + Math.max(1, maxN))) : stateShadeColor(maxN ? n / maxN : 0)) : NO_SPECIES_COLOR; // "No species recorded": one solid grey, never white or see-through
+      // v5.78: one state tapped - only it is coloured (the picked green); the others are plain land with their
+      // lines, still there to tap (Undo brings the shading by number of species back)
+      if (fade && !heatOn) ctx.fillStyle = s === pickedProvince ? mapOnColor() : offColor;
       if (path) ctx.fill(path); else ctx.fill();
       // with a state tapped, every other state steps back under a wash of the map's own sea
       // colour (pale in day mode, deep green at night) so the tapped one is easy to find -
       // plain transparency would let the selected country's solid green show through instead
-      if (fade && s !== pickedProvince) {
+      if (fade && heatOn && s !== pickedProvince) {
         ctx.globalAlpha = 0.6;
         ctx.fillStyle = seaColor;
         if (path) ctx.fill(path); else ctx.fill();
@@ -16401,7 +16410,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       var cn = crow.getAttribute("data-country"), code = ISO[cn] || countryByName(foldName(cn));
       if (!code) return;
       statesMode = false; pickedProvince = null; updateLegend();
-      selected = code;
+      selected = code; onlyPicked = code; // (v5.78: only that country is coloured)
       fillPanel(code);
       var bx = countryBox(code);
       if (bx) flyToLonLatBox(bx[0], bx[1], bx[2], bx[3], true);
@@ -16416,18 +16425,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (irow) {
       var ie = islShown[+irow.getAttribute("data-island")];
       if (!ie) return;
-      if (ie.sub) {
-        lastCountryCode = ie.cc;
-        lastCountryRows = ((BYCODE && BYCODE[ie.cc]) || []).map(function (sp) { return [sp, false]; });
-        showProvinceByKey(ie.cc, ie.key);
-      } else {
-        statesMode = false; pickedProvince = null; updateLegend();
-        selected = ie.cc;
-        fillPanel(ie.cc);
-        var ib = countryBox(ie.cc);
-        if (ib) flyToLonLatBox(ib[0], ib[1], ib[2], ib[3], true);
-      }
-      invalidate();
+      showIslandEntry(ie);
       return;
     }
     var pill = e.target.closest("[data-prov]");
@@ -16440,6 +16438,38 @@ window.SL_GEO_READY = new Promise(function (res) {
     }
     if (lastCountryCode) showProvinceByKey(lastCountryCode, pill.getAttribute("data-prov"));
   });
+  // v5.78: one island (from the islands list, or tapped on the map with "See islands" on): "See islands" goes
+  // off and only that island (an island state/region) or island country is coloured, with its snakes listed
+  function showIslandEntry(ie) {
+    if (islandsOn) { setIslands(false); islScope = null; islProv = null; }
+    if (ie.sub) {
+      lastCountryCode = ie.cc;
+      lastCountryRows = ((BYCODE && BYCODE[ie.cc]) || []).map(function (sp) { return [sp, false]; });
+      showProvinceByKey(ie.cc, ie.key);
+    } else {
+      statesMode = false; pickedProvince = null; updateLegend();
+      selected = ie.cc; onlyPicked = ie.cc;
+      fillPanel(ie.cc);
+      var ib = countryBox(ie.cc);
+      if (ib) flyToLonLatBox(ib[0], ib[1], ib[2], ib[3], true);
+    }
+    invalidate();
+  }
+  // the named island under a tap with "See islands" on (false: none - the tap goes on as usual)
+  function islandAtPick(mx, my) {
+    var bx = flatBox(), lon = (mx - bx[0]) / bx[2] * 360 - 180, lat = 90 - (my - bx[1]) / bx[3] * 180;
+    var cc = atSeen(mx, my) || pick(lon, lat); if (!cc) return false;
+    var I = islandEntries(), ie = null;
+    // a named island of the country first (Java, not all of Indonesia), else the island country itself
+    if (I.sset[cc]) {
+      var st = provinceAt(cc, lon, lat), list = cc === "us" ? US_STATES : (getCountryProvinces()[cc] || []), i = st ? list.indexOf(st) : -1;
+      if (i >= 0 && I.sset[cc][i]) { var key = cc === "us" ? st.code : st.name; ie = I.list.filter(function (x) { return x.sub && x.cc === cc && x.key === key; })[0]; }
+    }
+    if (!ie && I.cset[cc]) ie = I.list.filter(function (x) { return !x.sub && x.cc === cc; })[0];
+    if (!ie) return false;
+    showIslandEntry(ie);
+    return true;
+  }
 
   // ---- species info: tapping a species' name in the map's list opens its details over the
   // map (inside the stage, so full screen too). It's only an overlay - the map, its search,
@@ -16916,6 +16946,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   // one clicked state/province: how many of the country's listed species live there, and which
   function fillProvince(cc, s) {
+    setTimeout(updateLegend, 0); // (v5.78: the key goes while one state is tapped)
     panelKind = "prov";
     stopCityFactObserver();
     var rows = speciesInProvince(cc, s).slice();
@@ -17609,12 +17640,15 @@ window.SL_GEO_READY = new Promise(function (res) {
         fillArea(pin);
       } else if (cityOn && (function (c) { return c && PINS.some(function (p) { return (p.cityPick || p.cityDot) && p.cc === c; }); })(at(mx, my))) {
         labelPin = null; // a miss between the dots, inside the cities' own country: just hides the name
+      } else if (islandsOn && islandAtPick(mx, my)) {
+        // v5.78: "See islands" on - a tap on a named island (or island country) shows just that island
       } else {
         // the open sea or another country: the cities go, and that country shows as usual
         if (cityOn) clearCities();
         statesMode = false;
         pickedProvince = null;
         var tapped = atSeen(mx, my);
+        onlyPicked = tapped || null; // v5.78: only the tapped country is coloured (a search's other countries step aside)
         // v5.68: a click on nothing (the sea, or no country under it) while a species or country search is
         // showing cancels that search, just as a click on another country does (a drag or zoom is never a click)
         if (!tapped && cancelSearch()) { drag = null; invalidate(); return; }
@@ -18595,6 +18629,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (el) el.addEventListener("click", function (e) { if (!e.target.closest("#map-undo")) beforeChange(); }, true);
   });
   if (hsearch) hsearch.addEventListener("input", function () {
+    onlyPicked = null;
     clearTimeout(typing);
     typing = setTimeout(function () { if (ready && hsearch.value !== shownQ) { beforeChange(); paint(); } }, 180);
   });
@@ -24503,6 +24538,12 @@ window.SL_welcome = function (u, back) {
   #cp-list .cpc-card .card-name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
   #cp-list .cpc-card .cpc-extra { display: flex; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, #000 82%, transparent); mask-image: linear-gradient(90deg, #000 82%, transparent); }
   #cp-list .cpc-card .cpc-extra > * { display: flex; flex-wrap: nowrap; gap: 4px; margin: 0; padding: 0; white-space: nowrap; }
+  /* v5.78: the line of states never gets squeezed (it was crushed to a thin green line under the tags on every
+     card that had one): it and the Show colours row keep their height, and the card is that much taller */
+  #cp-list .cpc-card .cpc-extra, #cp-list .cpc-card .cpc-area, #cp-list .cpc-card .nm-acts, #cp-list .cpc-card .card-tags { flex-shrink: 0; }
+  #cp-list .cpc-card .cpc-extra .cp-state-pill { flex: none; }
+  #cp-list.cpc-on > .cp-row.cp-sp:has(> .cp-states, > .cp-city-fact) { height: calc(var(--cpc-h) + 28px); }
+  #cp-list.cpc-on > .cp-row.cp-sp:has(> .nm-acts):has(> .cp-states, > .cp-city-fact) { height: calc(var(--cpc-h) + 64px); }
   #cp-list .cpc-card .card-bottom { flex-wrap: nowrap; }
   #cp-list .cpc-card .card-bottom .td-card-btn { position: relative; order: 2; flex: none; width: 34px; height: auto; align-self: stretch; min-height: 31px; margin-left: auto; }
   #cp-list .cpc-card .seen-btn { margin-left: 0; min-width: 0; padding-left: 9px; padding-right: 9px; white-space: nowrap; }
@@ -24559,6 +24600,9 @@ window.SL_welcome = function (u, back) {
     [].forEach.call(c.querySelectorAll("button, [tabindex]"), function (el) { el.tabIndex = -1; });
     var tags = c.querySelector(".card-tags");
     var add = function (txt, cls) { if (!tags || !txt) return; var t = document.createElement("span"); t.className = "tag " + cls; t.textContent = txt; tags.insertBefore(t, tags.firstChild); };
+    // v5.78: the card's own "Invasive" tag (brought by people somewhere in the world) read as "invasive here" in a
+    // place where the snake is native (the Horseshoe Whip Snake in Portugal) - in a place's list it shows only there
+    if (tags) [].forEach.call(tags.querySelectorAll(".tag-inv"), function (t) { t.remove(); });
     if (row.classList.contains("cp-intro")) add("Invasive here", "tag-inv");
     var gone = row.querySelector(".cp-gone-tag"); if (gone) add(gone.textContent, "cpc-gone");
     // what the row said about this place (its states, or a city's note): one line under the tags
@@ -24646,7 +24690,13 @@ window.SL_welcome = function (u, back) {
     }
     // the photo across the top: the bigger photo, like the row's "See photo"
     var cr = c.getBoundingClientRect(), ph = row.querySelector(".cp-photo:not(.cp-seesp)");
-    if (!b && ph && e.clientY - cr.top < cr.width / 2.2) { ph.click(); return; }
+    // (v5.78: always the photo viewer over the map - a snake with no built-in photo shows one found online, or
+    // nothing happens: a tap on its "No photos found" band no longer leaves the map for its page)
+    if (!b && e.clientY - cr.top < cr.width / (window.SL_PHOTO_AR || 2.2)) {
+      if (ph) ph.click();
+      else if (window.SL_openPhoto && window.SL_EXTRA_PHOTOS && window.SL_EXTRA_PHOTOS[id]) { var bn = row.querySelector(":scope > b"), bi = row.querySelector(":scope > i"); window.SL_openPhoto(id, bn ? bn.textContent : "", bi ? bi.textContent : ""); }
+      return;
+    }
     var t = row.querySelector(":scope > b") || row;
     t.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
   }, true);
