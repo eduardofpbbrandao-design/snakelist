@@ -569,10 +569,13 @@ function makePose(P, F, seed) {
   const eAt = (x) => { const f = clamp(x / ds, 0, N - 1.0001), i = Math.floor(f), t = f - i; return lerp(E[i], E[i + 1], t); };
   // v5.35: tree snakes lie along a branch above the ground (see addBranch)
   const perch = pose.kind === 'branch' ? (pose.perch != null ? pose.perch : clamp(L * 0.55, 0.45, 1.1)) : 0; // (v5.68: up in a shrub or tree)
-  const Ly = special ? eAt : (x) => lift * (1 - sstep(F.Hl * 0.7, liftLen, x)) + eAt(x) + perch;
+  // v5.83: a real branch is not level: it droops towards its thin end (past the head) and rises gently into the tree,
+  // with a slight bow along the way - and the snake lying on it follows it
+  const bY = perch ? (x) => { const f = clamp(x / L, 0, 1); return -Math.min(0.1, L * 0.06) * (1 - f) * (1 - f) + Math.min(0.025, L * 0.014) * Math.sin(f * 5.1 + 0.6); } : null;
+  const Ly = special ? eAt : (x) => lift * (1 - sstep(F.Hl * 0.7, liftLen, x)) + eAt(x) + perch + (bY ? bY(x) : 0);
   // (v5.62: a draped snake's 'up' at each point is away from the branch, so the belly lies on it)
   const upAt = special && special.N ? (x) => { const f = clamp(x / ds, 0, N - 1.0001), i = Math.floor(f), t = f - i, a = special.N[i], b = special.N[i + 1]; return new THREE.Vector3(lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)).normalize(); } : null;
-  return { pts, at, Ly, ds, N, stacked, perch, upAt, raised: !!(special && special.raised), drape: special && special.drape };
+  return { pts, at, Ly, bY, ds, N, stacked, perch, upAt, raised: !!(special && special.raised), drape: special && special.drape };
 }
 
 // ---------- v5.62 (model accuracy): special resting poses ----------

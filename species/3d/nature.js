@@ -1001,7 +1001,7 @@ export function perchTree(THREE, opt) {
   }
   if (opt.kind === 'branch') {
     const h = pose.perch, rB = clamp(F.w0 * 1.5, 0.011, 0.03);
-    const pt = (xx) => { const a = pose.at(clamp(xx, 0, L)); return V(a[0], h - rB * 0.92, a[1]); };
+    const bY = pose.bY || (() => 0), pt = (xx) => { const a = pose.at(clamp(xx, 0, L)); return V(a[0], h + bY(clamp(xx, 0, L)) - rB * 0.92, a[1]); }; // (v5.83: its rise and fall too)
     const dirAt = (x0, x1) => pt(x1).sub(pt(x0)).setY(0).normalize();
     const d0 = dirAt(F.Hl * 0.5, 0), d1 = dirAt(L * 0.9, L);
     // past the head: a long reach (more than an arm's length), drooping a little, ending in a fork
@@ -1026,7 +1026,7 @@ export function perchTree(THREE, opt) {
       limb(c, nd, 0.18 + R() * 0.25, rB * 0.35, k < 3 ? 0 : 1);
     }
     trunkAndLimbs(base, hJoin, trunkTop, rT, trunkAt, d1.clone().negate());
-    perch = { a: pt(0).setY(h), dir: d0.clone(), len: reach * 0.7, rB };
+    perch = { a: pt(0).setY(h + bY(0)), dir: d0.clone(), len: reach * 0.7, rB };
   } else {
     const d = pose.drape; let A = V(d.a[0], d.hB, d.a[1]), B = V(d.b[0], d.hB, d.b[1]);
     { const az = Math.atan2(-(d.b[1] - d.a[1]), d.b[0] - d.a[0]) + 0.45, cd = V(Math.sin(az), 0, Math.cos(az)); if (B.clone().sub(A).dot(cd) > 0) { const t = A; A = B; B = t; } }
