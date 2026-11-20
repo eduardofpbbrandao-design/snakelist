@@ -17297,7 +17297,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   function zoomCap() {
     var cap = MAXZOOM;
     // (and on Satellite: real imagery tiles hold detail much further in than the plain map)
-    if (statesMode || islandsOn || multiOn() || window.SL_MAP_SAT || (window.SL_SG_ON && window.SL_SG_ON()) || PINS.some(function (p) { return p.cityPick || p.cityDot; })) cap = CLOSEZOOM;
+    if (statesMode || islandsOn || multiOn() || areaShow || window.SL_MAP_SAT || (window.SL_SG_ON && window.SL_SG_ON()) || PINS.some(function (p) { return p.cityPick || p.cityDot; })) cap = CLOSEZOOM;
     if (selected && POLY) cap = Math.max(cap, tinyZoom(selected));
     // Sightings on: right down to street level - about tile zoom 19 (the real-map tiles are
     // overzoomed past what they hold), so a single observation's spot can be seen up close
