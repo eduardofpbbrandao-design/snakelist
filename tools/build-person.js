@@ -86,10 +86,10 @@ const headParts = [
   cranium,
   EL(V(0, 1.622, 0.03), V(0.064, 0.05, 0.052)),          // forehead
   EL(V(0, 1.57, 0.03), V(0.057, 0.064, 0.058)),           // face
-  MIR(EL(V(0.042, 1.556, 0.05), V(0.024, 0.024, 0.028))), // cheeks
+  MIR(EL(V(0.04, 1.558, 0.05), V(0.021, 0.022, 0.026))), // cheeks
   MIR(EL(V(0.048, 1.574, 0.054), V(0.02, 0.011, 0.02))), // cheekbones
-  MIR(RC(V(0.047, 1.528, -0.014), V(0.019, 1.486, 0.055), 0.009, 0.0095)), // the jaw line
-  MIR(EL(V(0.038, 1.518, 0.026), V(0.022, 0.03, 0.04))),   // between the cheek and the jaw
+  EL(V(0, 1.517, 0.03), V(0.05, 0.042, 0.052)),          // the lower face over the jaw (narrowing to the chin)
+  MIR(EL(V(0.044, 1.522, -0.006), V(0.012, 0.03, 0.026))), // the angle of the jaw
   EL(V(0, 1.487, 0.068), V(0.02, 0.016, 0.015)),         // chin
   EL(V(0, 1.524, 0.073), V(0.03, 0.027, 0.024)),         // round the mouth
   MIR(EL(V(0.031, 1.6135, 0.08), V(0.026, 0.009, 0.012))), // brow ridge

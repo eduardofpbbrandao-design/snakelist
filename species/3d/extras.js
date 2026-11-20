@@ -510,8 +510,8 @@ function buildPrey2(kind, r, seed) {
     const finM = new THREE.MeshPhysicalMaterial({ color: '#ffffff', map: finTex, roughness: 0.35, transparent: true, opacity: 0.78, side: THREE.DoubleSide, clearcoat: 0.6 });
     const fin = (pts, at, ry, rx = 0, parent = g) => { const sh = new THREE.Shape(); sh.moveTo(pts[0][0], pts[0][1]); for (const p of pts.slice(1)) sh.quadraticCurveTo(p[0], p[1], p[2], p[3]); const m = mesh(new THREE.ShapeGeometry(sh, 6), finM, parent); m.position.copy(at); m.rotation.set(rx, ry, 0); m.castShadow = false; return m; };
     const tailG = new THREE.Group(); tailG.position.set(0, r, z0 + r * 0.1); g.add(tailG);
-    fin([[0, 0], [-r * 0.6, r * 0.5, -r * 1.5, r * 1.15], [-r * 0.9, 0, -r * 1.5, -r * 1.15], [-r * 0.6, -r * 0.5, 0, 0]], V3(0, 0, 0), Math.PI / 2, 0, tailG);
-    fin([[0, 0], [r * 0.3, r * 0.9, r * 1.6, r * 0.75], [r * 1.4, r * 0.3, r * 1.9, 0]], V3(0, r * 1.85, -r * 1.2), -Math.PI / 2);
+    fin([[0, 0], [-r * 0.6, r * 0.5, -r * 1.5, r * 1.15], [-r * 0.9, 0, -r * 1.5, -r * 1.15], [-r * 0.6, -r * 0.5, 0, 0]], V3(0, 0, 0), -Math.PI / 2, 0, tailG);
+    fin([[0, 0], [r * 0.3, r * 0.9, r * 1.6, r * 0.75], [r * 1.4, r * 0.3, r * 1.9, 0]], V3(0, r * 1.93, -r * 1.2), -Math.PI / 2);
     fin([[0, 0], [r * 0.3, -r * 0.6, r * 1.1, -r * 0.45], [r * 1.0, -r * 0.1, r * 1.2, 0]], V3(0, r * 0.2, -r * 1.9), -Math.PI / 2);
     for (const sg of [-1, 1]) {
       fin([[0, 0], [r * 0.2, -r * 0.5, r * 0.9, -r * 0.35], [r * 0.6, 0, 0, 0]], V3(sg * r * 0.42, r * 0.75, r * 1.2), -Math.PI / 2 - sg * 0.5, 0.3);
@@ -551,9 +551,9 @@ function buildPrey2(kind, r, seed) {
     const lo = new THREE.ConeGeometry(r * 0.14, r * 0.5, 12); lo.rotateX(Math.PI / 2); lo.scale(1, 0.45, 1); lo.translate(0, -r * 0.05, r * 0.66); mesh(lo, bk, head);
     for (const sg of [-1, 1]) { const e = mesh(S(r * 0.1, 12, 10), glossEye(), head); e.position.set(sg * r * 0.34, r * 0.12, r * 0.2); const ring = mesh(new THREE.TorusGeometry(r * 0.11, r * 0.018, 6, 16), new THREE.MeshStandardMaterial({ color: '#e8dcc0' }), head); ring.position.copy(e.position); ring.rotation.y = sg * Math.PI / 2; }
     const tailG = new THREE.Group(); tailG.position.set(0, r * 1.15, z0 + r * 0.1); g.add(tailG);
-    for (let k = -2; k <= 2; k++) { const fg = new THREE.PlaneGeometry(r * 0.32, r * 1.4); fg.translate(0, -r * 0.7, 0); const f = mesh(fg, wingM, tailG); f.rotation.set(-Math.PI / 2 + 0.25, 0, k * 0.16); f.position.x = k * r * 0.05; }
+    for (let k = -2; k <= 2; k++) { const fg = new THREE.PlaneGeometry(r * 0.32, r * 1.4); fg.translate(0, -r * 0.7, 0); const f = mesh(fg, wingM, tailG); f.rotation.set(Math.PI / 2 + 0.25, 0, k * 0.16); f.position.x = k * r * 0.05; }
     g.userData = { len: Lb * 1.1, r, name: 'a small bird', y: r * 1.02,
-      anim(t, live) { head.rotation.set(0, live * (0.5 * Math.sin(t * 1.3) + 0.2 * Math.sin(t * 4.1)), live * 0.1 * Math.sin(t * 2.7)); tailG.rotation.x = live * 0.15 * Math.max(0, Math.sin(t * 3.3)); g.children[0].scale.y = 1 + 0.03 * live * Math.sin(t * 7); } };
+      anim(t, live) { head.rotation.set(0, live * (0.5 * Math.sin(t * 1.3) + 0.2 * Math.sin(t * 4.1)), live * 0.1 * Math.sin(t * 2.7)); tailG.rotation.x = -live * 0.15 * Math.max(0, Math.sin(t * 3.3)); g.children[0].scale.y = 1 + 0.03 * live * Math.sin(t * 7); } };
     return g;
   }
   if (kind === 'lizard') {
@@ -1109,7 +1109,7 @@ export function create(V) {
     V.kick();
   }
   function setPaused(v, quiet) {
-    if (show && !quiet) { if (v && !show.paused) { show.paused = true; show.pauseAt = now(); } else if (!v && show.paused) { show.paused = false; show.t0 += now() - (show.pauseAt || now()); show.lastF = now(); } }
+    if (show && !quiet) { if (v && !show.paused) { show.paused = true; show.pauseAt = now(); show.t0 = show.pauseAt - show.time * 1000; } /* (it stops on the frame you see) */ else if (!v && show.paused) { show.paused = false; show.t0 += now() - (show.pauseAt || now()); show.lastF = now(); } }
     bPause.textContent = v ? 'Play' : 'Pause'; bPause.setAttribute('aria-pressed', String(!!v)); bPause.setAttribute('aria-label', v ? 'Play' : 'Pause');
     if (!quiet) V.kick();
   }
@@ -1480,7 +1480,7 @@ export function create(V) {
     phases.push([4.6, (u, s) => {
       // jaw walking: the prey goes in in small pulls, one side of the jaw then the other (the head turns a little each way)
       const e = ease(u), pull = e - Math.sin(e * TAU * 6) / (TAU * 6);
-      held = true; xp = lerp(xp0, xIn, pull); const yaw = 0.05 * Math.sin(e * TAU * 3) * (1 - sstep(0.85, 1, u));
+      held = true; xp = lerp(xp0, xIn, Math.pow(clamp(pull, 0, 1), 1.45)); // (v5.78: slower at first, so you see the prey going in between the jaws) const yaw = 0.05 * Math.sin(e * TAU * 3) * (1 - sstep(0.85, 1, u));
       R.setPose(R.fore({ len: st.len, phi, lift, coil: 0, yaw, base: B })); bulgeAt(xp, 1); R.apply();
       const inside = sstep(0, 0.15, u) * (1 - sstep(0.82, 1, u)); // the jaws spread round the prey and walk over it, one side then the other (the "pterygoid walk")
       setMouth(lerp(tHold, tNeed, Math.sin(Math.min(1, u * 1.2) * Math.PI)), { spread: spreadNeed * inside, walk: Math.sin(e * TAU * 3) * inside * (spreadNeed > 0.05 ? 1 : 0.6) }); say(T.swallow);

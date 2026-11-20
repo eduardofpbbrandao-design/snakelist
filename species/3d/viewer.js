@@ -2877,7 +2877,7 @@ float slScale(vec2 m) {
     }
 
     let tree = null; // v5.68: tree snakes are up in a tree
-    const perchTree = (kind, old) => { if (NATURE.perchTree) { try { return NATURE.perchTree(THREE, { kind, P, F, pose, seed, spine: (x) => body.spine(x) }); } catch (e) { console.warn('perchTree', e); } } return old(); }; // v5.78: a real tree (nature.js)
+    const perchTree = (kind, old) => { if (NATURE.perchTree) { try { return NATURE.perchTree(THREE, { kind, P, F, pose, seed, quality, spine: (x) => body.spine(x) }); } catch (e) { console.warn('perchTree', e); } } return old(); }; // v5.78: a real tree (nature.js)
     if (pose.perch) snakeGroup.add(tree = perchTree('branch', () => addBranch(P, F, pose, seed)));
     if (P.tail.spine) { const f = body.frameAt(F.L), c = body.spine(F.L), r = F.w0 * 0.14, g = new THREE.ConeGeometry(r, r * 3, 8); const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: '#6a5246', roughness: 0.5 })); m.position.copy(c).addScaledVector(f.T, r * 1.2); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), f.T); snakeGroup.add(m); }
     // bounds
