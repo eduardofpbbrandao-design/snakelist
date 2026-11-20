@@ -484,10 +484,9 @@ export function create(V) {
     // skins: geometries whose vertices follow the centre line
     const skins = [];
     function addSkin(geo, xs, opt = {}) {
-      const pa = geo.attributes.position, n = pa.count, src = pa.array.slice(), loc = new Float32Array(n * 3), fi = new Float32Array(n);
+      const pa = geo.attributes.position, n = pa.count, src = opt.gpu ? null : pa.array.slice(), loc = opt.gpu ? null : new Float32Array(n * 3), fi = opt.gpu ? null : new Float32Array(n);
       const s = { geo, pa, src, loc, fi, n, bulge: !!opt.bulge, body: !!opt.body, rigid: opt.rigid || null, gpu: !!opt.gpu };
-      for (let v = 0; v < n; v++) fi[v] = clamp(xs[v] / dx, 0, N - 1.0001);
-      if (!s.gpu) localize(s, 0, n, src); skins.push(s); return s; // (v5.78: the body skin is bent on the graphics card - viewer.js skinGPU)
+      if (!s.gpu) { for (let v = 0; v < n; v++) fi[v] = clamp(xs[v] / dx, 0, N - 1.0001); localize(s, 0, n, src); } skins.push(s); return s; // (v5.78: the body skin is bent on the graphics card - viewer.js skinGPU)
     }
     function localize(s, a, b, arr) {
       for (let v = a; v < b; v++) {
