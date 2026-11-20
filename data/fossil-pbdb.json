@@ -81,7 +81,12 @@
    "early Miocene",
    17
   ],
-  "age_basis": "Hemingfordian (18.5 to 16.3 million years ago), PBDB occurrence 393405",
+  "age_from": {
+   "interval": "Hemingfordian",
+   "max": 18.5,
+   "min": 16.3,
+   "occurrence": "393405"
+  },
   "countries": [
    "United States"
   ],
@@ -260,7 +265,12 @@
    "middle Eocene",
    39
   ],
-  "age_basis": "Bartonian (41.03 to 37.71 million years ago), PBDB occurrence 457788",
+  "age_from": {
+   "interval": "Bartonian",
+   "max": 41.03,
+   "min": 37.71,
+   "occurrence": "457788"
+  },
   "countries": [
    "France"
   ],
@@ -317,7 +327,12 @@
    "early Miocene",
    23
   ],
-  "age_basis": "MN 1 (23.04 to 22.4 million years ago), PBDB occurrence 1100277",
+  "age_from": {
+   "interval": "MN 1",
+   "max": 23.04,
+   "min": 22.4,
+   "occurrence": "1100277"
+  },
   "sites": [
    "Baden-Württemberg, Germany - MP 22 (33.9 to 27.3 million years ago)",
    "Baden-Württemberg, Germany - MP 27 (27.3 to 23.04 million years ago)",
@@ -340,7 +355,12 @@
    "middle Miocene",
    14
   ],
-  "age_basis": "Barstovian (16.3 to 12.5 million years ago), PBDB occurrence 286975",
+  "age_from": {
+   "interval": "Barstovian",
+   "max": 16.3,
+   "min": 12.5,
+   "occurrence": "286975"
+  },
   "countries": [
    "United States"
   ],
@@ -365,7 +385,12 @@
    "early Miocene",
    20
   ],
-  "age_basis": "Early Miocene (23.04 to 15.98 million years ago), PBDB occurrence 288093",
+  "age_from": {
+   "interval": "Early Miocene",
+   "max": 23.04,
+   "min": 15.98,
+   "occurrence": "288093"
+  },
   "countries": [
    "United States"
   ],
@@ -387,7 +412,12 @@
    "early Oligocene",
    33
   ],
-  "age_basis": "Orellan (33.9 to 31.8 million years ago), PBDB occurrence 1107992",
+  "age_from": {
+   "interval": "Orellan",
+   "max": 33.9,
+   "min": 31.8,
+   "occurrence": "1107992"
+  },
   "countries": [
    "United States"
   ],
@@ -410,7 +440,12 @@
    "late Miocene",
    11
   ],
-  "age_basis": "Clarendonian (12.5 to 9.4 million years ago), PBDB occurrence 288803",
+  "age_from": {
+   "interval": "Clarendonian",
+   "max": 12.5,
+   "min": 9.4,
+   "occurrence": "288803"
+  },
   "countries": [
    "United States"
   ],
@@ -467,7 +502,12 @@
    "early Oligocene",
    33
   ],
-  "age_basis": "Orellan (33.9 to 31.8 million years ago), PBDB occurrence 1336961",
+  "age_from": {
+   "interval": "Orellan",
+   "max": 33.9,
+   "min": 31.8,
+   "occurrence": "1336961"
+  },
   "countries": [
    "United States"
   ],
@@ -509,7 +549,12 @@
    "middle Miocene",
    15
   ],
-  "age_basis": "Langhian (15.98 to 13.82 million years ago), PBDB occurrence 1079024",
+  "age_from": {
+   "interval": "Langhian",
+   "max": 15.98,
+   "min": 13.82,
+   "occurrence": "1079024"
+  },
   "countries": [
    "Czechia",
    "Germany"
@@ -570,7 +615,12 @@
    "late Oligocene",
    25
   ],
-  "age_basis": "MP 26 (27.3 to 23.04 million years ago), PBDB occurrence 573061",
+  "age_from": {
+   "interval": "MP 26",
+   "max": 27.3,
+   "min": 23.04,
+   "occurrence": "573061"
+  },
   "countries": [
    "France"
   ],
@@ -592,7 +642,12 @@
    "late Oligocene",
    25
   ],
-  "age_basis": "MP 28 to MP 30 (27.3 to 23.04 million years ago), PBDB occurrence 565571",
+  "age_from": {
+   "interval": "MP 28 to MP 30",
+   "max": 27.3,
+   "min": 23.04,
+   "occurrence": "565571"
+  },
   "sites": [
    "Baden-Württemberg, Germany - MP 28 to MP 30 (27.3 to 23.04 million years ago)"
   ]
@@ -608,7 +663,12 @@
    "late Oligocene",
    25
   ],
-  "age_basis": "Chattian (27.3 to 23.04 million years ago), PBDB occurrence 573066",
+  "age_from": {
+   "interval": "Chattian",
+   "max": 27.3,
+   "min": 23.04,
+   "occurrence": "573066"
+  },
   "countries": [
    "France"
   ],
@@ -647,7 +707,12 @@
    "early Eocene",
    48
   ],
-  "age_basis": "Bridgerian (51.1 to 45.9 million years ago), PBDB occurrence 1336959",
+  "age_from": {
+   "interval": "Bridgerian",
+   "max": 51.1,
+   "min": 45.9,
+   "occurrence": "1336959"
+  },
   "countries": [
    "United States"
   ],
@@ -669,7 +734,12 @@
    "middle Miocene",
    15
   ],
-  "age_basis": "Colloncuran (15.5 to 13.8 million years ago), PBDB occurrence 297822",
+  "age_from": {
+   "interval": "Colloncuran",
+   "max": 15.5,
+   "min": 13.8,
+   "occurrence": "297822"
+  },
   "countries": [
    "Argentina"
   ],
@@ -758,7 +828,12 @@
    "late Miocene",
    7
   ],
-  "age_basis": "Turolian (8.725 to 5.09 million years ago), PBDB occurrence 484703",
+  "age_from": {
+   "interval": "Turolian",
+   "max": 8.725,
+   "min": 5.09,
+   "occurrence": "484703"
+  },
   "countries": [
    "Poland"
   ],
@@ -851,7 +926,12 @@
    "late Miocene",
    7
   ],
-  "age_basis": "Hemphillian (9.4 to 4.7 million years ago), PBDB occurrence 289855",
+  "age_from": {
+   "interval": "Hemphillian",
+   "max": 9.4,
+   "min": 4.7,
+   "occurrence": "289855"
+  },
   "sites": [
    "Valentine Formation, Nebraska, United States - Barstovian (16.3 to 12.5 million years ago)",
    "Nebraska, United States - Barstovian (16.3 to 12.5 million years ago)",
@@ -889,7 +969,12 @@
    "late Miocene",
    7
   ],
-  "age_basis": "Hemphillian (9.4 to 4.7 million years ago), PBDB occurrence 289850",
+  "age_from": {
+   "interval": "Hemphillian",
+   "max": 9.4,
+   "min": 4.7,
+   "occurrence": "289850"
+  },
   "countries": [
    "Canada",
    "United States"
@@ -915,7 +1000,12 @@
    "late Miocene",
    5.5
   ],
-  "age_basis": "Late Hemphillian to Blancan (9.4 to 1.4 million years ago), PBDB occurrence 287672",
+  "age_from": {
+   "interval": "Late Hemphillian to Blancan",
+   "max": 9.4,
+   "min": 1.4,
+   "occurrence": "287672"
+  },
   "sites": [
    "Valentine Formation, Nebraska, United States - Barstovian (16.3 to 12.5 million years ago)",
    "Nebraska, United States - Barstovian (16.3 to 12.5 million years ago)",
@@ -938,7 +1028,12 @@
    "late Miocene",
    8.5
   ],
-  "age_basis": "Clarendonian to Hemphillian (12.5 to 4.7 million years ago), PBDB occurrence 1195616",
+  "age_from": {
+   "interval": "Clarendonian to Hemphillian",
+   "max": 12.5,
+   "min": 4.7,
+   "occurrence": "1195616"
+  },
   "sites": [
    "Florida, United States - Clarendonian to Hemphillian (12.5 to 4.7 million years ago)"
   ]
@@ -954,7 +1049,12 @@
    "middle Miocene",
    14
   ],
-  "age_basis": "Barstovian (16.3 to 12.5 million years ago), PBDB occurrence 148355",
+  "age_from": {
+   "interval": "Barstovian",
+   "max": 16.3,
+   "min": 12.5,
+   "occurrence": "148355"
+  },
   "countries": [
    "United States"
   ],
@@ -1033,7 +1133,12 @@
    "late Pliocene",
    3
   ],
-  "age_basis": "Late Pliocene (3.6 to 2.58 million years ago), PBDB occurrence 488645",
+  "age_from": {
+   "interval": "Late Pliocene",
+   "max": 3.6,
+   "min": 2.58,
+   "occurrence": "488645"
+  },
   "countries": [
    "France"
   ],
@@ -1133,7 +1238,12 @@
    "early Pleistocene",
    1.7
   ],
-  "age_basis": "Early Pleistocene (2.58 to 0.774 million years ago), PBDB occurrence 542191",
+  "age_from": {
+   "interval": "Early Pleistocene",
+   "max": 2.58,
+   "min": 0.774,
+   "occurrence": "542191"
+  },
   "countries": [
    "Georgia"
   ],
@@ -1155,7 +1265,12 @@
    "late Miocene",
    7
   ],
-  "age_basis": "Turolian (8.725 to 5.09 million years ago), PBDB occurrence 484705",
+  "age_from": {
+   "interval": "Turolian",
+   "max": 8.725,
+   "min": 5.09,
+   "occurrence": "484705"
+  },
   "countries": [
    "Poland"
   ],
@@ -1356,7 +1471,12 @@
    "early Miocene",
    16
   ],
-  "age_basis": "MN 4 (16.9 to 15.98 million years ago), PBDB occurrence 297943",
+  "age_from": {
+   "interval": "MN 4",
+   "max": 16.9,
+   "min": 15.98,
+   "occurrence": "297943"
+  },
   "sites": [
    "Bavaria, Germany - MN 4 (16.9 to 15.98 million years ago)",
    "Karlovy Vary, Czechia - MN 4 (16.9 to 15.98 million years ago)"
@@ -1424,7 +1544,12 @@
    "late Miocene",
    9
   ],
-  "age_basis": "MN 10 (9.67 to 8.725 million years ago), PBDB occurrence 1263365",
+  "age_from": {
+   "interval": "MN 10",
+   "max": 9.67,
+   "min": 8.725,
+   "occurrence": "1263365"
+  },
   "countries": [
    "Moldova"
   ],
@@ -1518,7 +1643,12 @@
    "early Miocene",
    21
   ],
-  "age_basis": "Harrisonian (23.1 to 18.5 million years ago), PBDB occurrence 520376",
+  "age_from": {
+   "interval": "Harrisonian",
+   "max": 23.1,
+   "min": 18.5,
+   "occurrence": "520376"
+  },
   "sites": [
    "Gering Formation, Nebraska, United States - Geringian (29.5 to 24.7 million years ago)",
    "Monroe Creek Formation, Wyoming, United States - Monroecreekian (24.7 to 23.1 million years ago)",
@@ -1643,7 +1773,12 @@
    "early Pliocene",
    4.5
   ],
-  "age_basis": "Early Pliocene (5.333 to 3.6 million years ago), PBDB occurrence 1083520",
+  "age_from": {
+   "interval": "Early Pliocene",
+   "max": 5.333,
+   "min": 3.6,
+   "occurrence": "1083520"
+  },
   "countries": [
    "Hungary"
   ],
@@ -1702,7 +1837,12 @@
    "late Miocene",
    6.5
   ],
-  "age_basis": "Messinian (7.246 to 5.333 million years ago), PBDB occurrence 1563658",
+  "age_from": {
+   "interval": "Messinian",
+   "max": 7.246,
+   "min": 5.333,
+   "occurrence": "1563658"
+  },
   "countries": [
    "France",
    "Italy"
@@ -1727,7 +1867,12 @@
    "early Oligocene",
    33
   ],
-  "age_basis": "Orellan (33.9 to 31.8 million years ago), PBDB occurrence 1336958",
+  "age_from": {
+   "interval": "Orellan",
+   "max": 33.9,
+   "min": 31.8,
+   "occurrence": "1336958"
+  },
   "countries": [
    "United States"
   ],
@@ -1800,7 +1945,12 @@
    "late Miocene",
    7
   ],
-  "age_basis": "Hemphillian (9.4 to 4.7 million years ago), PBDB occurrence 829566",
+  "age_from": {
+   "interval": "Hemphillian",
+   "max": 9.4,
+   "min": 4.7,
+   "occurrence": "829566"
+  },
   "countries": [
    "United States"
   ],
@@ -1842,7 +1992,12 @@
    "late Eocene",
    36
   ],
-  "age_basis": "Late Eocene (37.71 to 33.9 million years ago), PBDB occurrence 408691",
+  "age_from": {
+   "interval": "Late Eocene",
+   "max": 37.71,
+   "min": 33.9,
+   "occurrence": "408691"
+  },
   "sites": [
    "Lower Headon Beds, England, United Kingdom - Late Eocene (37.71 to 33.9 million years ago)",
    "Headon Hill, England, United Kingdom - Late Eocene (37.71 to 33.9 million years ago)",
@@ -1878,7 +2033,12 @@
    "late Eocene",
    36
   ],
-  "age_basis": "Priabonian (37.71 to 33.9 million years ago), PBDB occurrence 474171",
+  "age_from": {
+   "interval": "Priabonian",
+   "max": 37.71,
+   "min": 33.9,
+   "occurrence": "474171"
+  },
   "sites": [
    "Quercy, Midi-Pyrenees Region, France - Bartonian (41.03 to 37.71 million years ago)",
    "Perriere Formation, Quercy, Midi-Pyrenees Region, France - Priabonian (37.71 to 33.9 million years ago)",
@@ -1915,7 +2075,12 @@
    "middle Miocene",
    14
   ],
-  "age_basis": "Barstovian (16.3 to 12.5 million years ago), PBDB occurrence 898051",
+  "age_from": {
+   "interval": "Barstovian",
+   "max": 16.3,
+   "min": 12.5,
+   "occurrence": "898051"
+  },
   "countries": [
    "United States"
   ],
@@ -1937,7 +2102,12 @@
    "middle Miocene",
    12
   ],
-  "age_basis": "MN 7 + 8 (12.75 to 11.1 million years ago), PBDB occurrence 1087119",
+  "age_from": {
+   "interval": "MN 7 + 8",
+   "max": 12.75,
+   "min": 11.1,
+   "occurrence": "1087119"
+  },
   "countries": [
    "Czechia",
    "Germany"
@@ -1961,7 +2131,12 @@
    "early Oligocene",
    31
   ],
-  "age_basis": "MP 22 (33.9 to 27.3 million years ago), PBDB occurrence 1340628",
+  "age_from": {
+   "interval": "MP 22",
+   "max": 33.9,
+   "min": 27.3,
+   "occurrence": "1340628"
+  },
   "countries": [
    "France"
   ],
@@ -2041,7 +2216,12 @@
    "early Miocene",
    18
   ],
-  "age_basis": "Orleanian (20 to 15.98 million years ago), PBDB occurrence 1086574",
+  "age_from": {
+   "interval": "Orleanian",
+   "max": 20,
+   "min": 15.98,
+   "occurrence": "1086574"
+  },
   "sites": [
    "Midi-Pyrenées, France - MP 22 (33.9 to 27.3 million years ago)",
    "Quercy, France - MP 22 (33.9 to 27.3 million years ago)",
@@ -2098,7 +2278,12 @@
    "early Oligocene",
    33
   ],
-  "age_basis": "Orellan (33.9 to 31.8 million years ago), PBDB occurrence 1336404",
+  "age_from": {
+   "interval": "Orellan",
+   "max": 33.9,
+   "min": 31.8,
+   "occurrence": "1336404"
+  },
   "countries": [
    "United States"
   ],
@@ -2154,7 +2339,11 @@
    "late Miocene",
    6.35
   ],
-  "age_basis": "youngest listed locality DP-13, 6.35 million years ago (Head 2005)",
+  "age_from": {
+   "interval": "locality DP-13",
+   "max": 6.35,
+   "min": 6.35
+  },
   "countries": [
    "Pakistan"
   ],

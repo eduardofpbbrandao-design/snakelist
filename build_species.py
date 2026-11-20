@@ -229,6 +229,9 @@ def build(app):
     iso = json.loads(re.search(r"var ISO = (\{.*?\});", app).group(1))
     extinct = dict(re.findall(r'"([a-z0-9-]+)": "((?:Extinct|Possibly extinct)[^"]*)"', app.split("const EXTINCT = ", 1)[1].split("};", 1)[0]))
     fossil_age = json.loads(app.split("const FOSSIL_AGE = ", 1)[1].split(";\n", 1)[0])
+    FOSSIL_AGE_RAW.clear(); FOSSIL_AGE_RAW.update(fossil_age)
+    # old names that are now part of another species (the app's ALIAS): their old pages send you on (pages())
+    ALIAS_MAP.clear(); ALIAS_MAP.update(json.loads(app.split("var ALIAS = window.SL_ALIAS = ", 1)[1].split("};", 1)[0] + "}"))
     def ago(m):
         return "about %s million years ago" % (round(m) if m >= 10 else (round(m * 10) / 10 if m % 1 else int(m))) if m >= 1 else "about {:,} years ago".format(int(round(m * 1000000, -3)))
     fossils = set(re.findall(r'"([a-z0-9-]+)"', app.split("// prehistoric snakes known only from fossil bones", 1)[1].split("]", 1)[0]))
@@ -534,9 +537,13 @@ GENUS_FILE = "data/genus-info.json"
 FAMILY_FILE = "data/family-info.json"
 GENUS_INFO, FAMILY_INFO = {}, {}
 GEN_MARK = "@@PAGE-GENERATED@@"
+FOSSIL_AGE_RAW = {}  # the app's FOSSIL_AGE, as read by the build
+ALIAS_MAP = {}  # the app's ALIAS: old name id -> the species it is now part of
+REMOVED_NO_TARGET = ["dinodon-horridus"]  # cards taken off the list that are no snake at all (Dinodon horridus Leidy 1856 is a dinosaur tooth)
 INTRO_FILE = "data/introduced-status.json"   # introduced vs invasive, with sources
 FOSSIL_FILE = "data/fossil-additions.json"   # fossil snakes: age, find site, size estimate, debate, sources
 AUTH_FILE = "data/authorities.json"          # verified "Author, year" for species without an account
+FOSSIL_PBDB_FILE = "data/fossil-pbdb.json"   # fossil ages and find places from the Paleobiology Database (tools/fossil_pbdb.py)
 MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 
@@ -738,6 +745,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     dates = PageDates()
     links = []
     ISTAT = load_json(INTRO_FILE); FOSSIL = {x["id"]: x for x in (load_json(FOSSIL_FILE) or [])}
+    FPB = {k: v for k, v in load_json(FOSSIL_PBDB_FILE).items() if not k.startswith("_")}
     AUTH = {k: v for k, v in load_json(AUTH_FILE).items() if not k.startswith("_")}
     def intro_status(c):
         """its introduced populations: [{area, status ('introduced' or 'invasive'), when, text, src}], from
@@ -911,6 +919,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         S = (info or {}).get("sections", {})
         F = (info or {}).get("facts", {})
         FI = FOSSIL.get(c["id"], {}) if c["fossil"] else {}
+        PB = FPB.get(c["id"]) if c["fossil"] else None
+        if PB: R.add("pbdb", PB["src"])
         G = GENUS_INFO.get(c["genus"]) if c["genus"] else None
         if G: R.add("genus", {"title": "Meaning of the name %s" % c["genus"], **G["source"]})
         for x in IST:
@@ -997,10 +1007,20 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             # what the fossils are, where and when - and how sure anyone can be
             fos = paras("fossils", "What has been found") + paras("geology", "Geological age and setting")
             if not S.get("geology") and c["died"]:
-                fos += '<h3>Geological age</h3><p>It lived in the %s, %s%s.</p>' % (esc(c["died"][0]), esc(c["died"][1]),
-                        (" (dated from the rocks its fossils were found in)") if FI else "")
+                af = (PB or {}).get("age_from") if PB and PB.get("age") == list(FOSSIL_AGE_RAW.get(c["id"], [])) else None
+                if af:  # the age came from the Paleobiology Database: say what it is based on
+                    rng = ("%s million years ago" % af["max"]) if af["max"] == af["min"] else ("%s to %s million years ago" % (af["max"], af["min"]))
+                    fos += ('<h3>Geological age</h3><p>Its youngest well-dated fossils come from rocks of the %s, %s (%s), so it lived until at least '
+                            'then. Fossils can only show when a snake was alive &ndash; not exactly when the last one died.%s</p>') % (
+                        esc(c["died"][0]), esc(rng), esc(af["interval"]), R.cite(["pbdb"]))
+                else:
+                    fos += '<h3>Geological age</h3><p>It lived in the %s, %s%s.</p>' % (esc(c["died"][0]), esc(c["died"][1]),
+                            (" (dated from the rocks its fossils were found in)") if FI else "")
             if not S.get("fossils") and FI.get("discovered"):
                 fos += '<h3>Where it was found</h3><p>%s.</p>' % esc(FI["discovered"])
+            elif not S.get("fossils") and PB and PB.get("sites"):
+                fos += '<h3>Where its fossils were found</h3><ul>%s</ul><p class="sp-note">Rock layer (formation), region and country, with the age of the rocks.%s</p>' % (
+                    "".join("<li>%s</li>" % esc(x) for x in PB["sites"]), R.cite(["pbdb"]))
             fos += paras("size", "Size estimate")
             if not S.get("size") and FI.get("length_note"):
                 fos += '<h3>Size estimate</h3><p>%s</p>' % esc(FI["length_note"])
@@ -1355,6 +1375,14 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             if page_name(_c) != _stem:
                 open("%s/%s" % (OUT, _f), "w", encoding="utf-8").write(REDIRECT.format(name=esc(_c["name"]), url=SITE + "species/" + page_name(_c), page=page_name(_c)))
             break
+    # an old name taken off the list (tools/remove_cards.py): its page becomes a redirect to the species it is a name of,
+    # and a page for a card that is gone with nothing to send you to is removed
+    for _old, _to in ALIAS_MAP.items():
+        _c = _by_id.get(_to)
+        if _c and _old not in _by_id and os.path.exists("%s/%s.html" % (OUT, _old)):
+            open("%s/%s.html" % (OUT, _old), "w", encoding="utf-8").write(REDIRECT.format(name=esc(_c["name"]), url=SITE + "species/" + page_name(_c), page=page_name(_c)))
+    for _gone in REMOVED_NO_TARGET:
+        if _gone not in _by_id and os.path.exists("%s/%s.html" % (OUT, _gone)): os.remove("%s/%s.html" % (OUT, _gone))
     dates.save()
     # the "See states" shapes: one small file per country, fetched only when the button is pressed
     os.makedirs(OUT + "/prov", exist_ok=True)
