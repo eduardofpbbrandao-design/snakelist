@@ -21998,10 +21998,57 @@ window.SL_GEO_READY = new Promise(function (res) {
   var SPECIES = [], PER_COUNTRY = {};
   [].slice.call(document.querySelectorAll("#grid .card")).forEach(function (c) {
     var nm = c.querySelector(".card-name").textContent.trim(), sci = c.querySelector(".card-sci").textContent.trim();
-    SPECIES.push({ name: nm, sci: sci, k: fold(nm), ks: fold(sci) });
+    SPECIES.push({ name: nm, sci: sci, k: fold(nm), ks: fold(sci), pop: c.hasAttribute("data-popular") });
     (c.getAttribute("data-countries") || "").split("|").forEach(function (n) { if (n) PER_COUNTRY[n] = (PER_COUNTRY[n] || 0) + 1; });
   });
   var COUNTRIES = Object.keys(PER_COUNTRY).sort();
+  // v5.83: snakes suggested as you type - part of a common or scientific name ("cobra", "naja", "crotalus hor"),
+  // any word of it, in any order, and close spellings too ("timbre rattlesnake", "kingsnak", "pyhton").
+  // Best first: the whole name starting with what was typed, then each word typed starting a word of the name,
+  // then anywhere in the name, then near-misses; the well-known snakes first within each.
+  var NAME_N = {}; SPECIES.forEach(function (s) { NAME_N[s.k] = (NAME_N[s.k] || 0) + 1; });
+  function nearPrefix(t, w, max) { // fewest letter changes to make t the start of w (no more than max)
+    var n = t.length, m = Math.min(w.length, n + max), pp = null, prev = [], cur, i, j, best;
+    for (j = 0; j <= m; j++) prev[j] = j;
+    for (i = 1; i <= n; i++) {
+      cur = [i]; best = i;
+      for (j = 1; j <= m; j++) {
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (t.charCodeAt(i - 1) === w.charCodeAt(j - 1) ? 0 : 1));
+        if (pp && j > 1 && t.charCodeAt(i - 1) === w.charCodeAt(j - 2) && t.charCodeAt(i - 2) === w.charCodeAt(j - 1)) cur[j] = Math.min(cur[j], pp[j - 2] + 1); // two letters swapped
+        if (cur[j] < best) best = cur[j];
+      }
+      if (best > max) return max + 1; pp = prev; prev = cur;
+    }
+    best = max + 1; for (j = Math.max(0, n - max); j <= m; j++) if (prev[j] < best) best = prev[j];
+    return best;
+  }
+  function wordsOf(s) { return s.w || (s.w = (s.k + " " + s.ks).split(/[\s'’().,]+/).filter(Boolean)); }
+  function speciesMatches(q, n) {
+    var f = fold(q).replace(/\s+/g, " ").trim(); if (!f) return [];
+    var toks = f.split(" "), out = [];
+    SPECIES.forEach(function (s) {
+      var r;
+      if (s.k.lastIndexOf(f, 0) === 0 || s.ks.lastIndexOf(f, 0) === 0) r = 0;
+      else {
+        var ws = wordsOf(s);
+        if (toks.every(function (t) { return ws.some(function (w) { return w.lastIndexOf(t, 0) === 0; }); })) r = 1;
+        else if (s.k.indexOf(f) >= 0 || s.ks.indexOf(f) >= 0) r = 2;
+        else if (f.length >= 4) {
+          var miss = 0;
+          if (toks.every(function (t) {
+            if (t.length < 3) return ws.some(function (w) { return w.lastIndexOf(t, 0) === 0; });
+            var max = t.length >= 8 ? 2 : t.length >= 4 ? 1 : 0, d = max + 1;
+            for (var i = 0; i < ws.length && d > 0; i++) d = Math.min(d, ws[i].indexOf(t) >= 0 ? 0 : nearPrefix(t, ws[i], max));
+            miss += d; return d <= max;
+          })) r = 3 + miss;
+        }
+      }
+      if (r !== undefined) out.push([r, s]);
+    });
+    out.sort(function (a, b) { return a[0] - b[0] || (b[1].pop ? 1 : 0) - (a[1].pop ? 1 : 0) || a[1].name.length - b[1].name.length || (a[1].name < b[1].name ? -1 : 1); });
+    return out.slice(0, n).map(function (x) { return x[1]; });
+  }
+  window.SL_SPECIES_SUGGEST = speciesMatches;
   var KIND = { island: "Island", islands: "Islands", peninsula: "Peninsula", cape: "Cape", mountains: "Mountains", desert: "Desert", plateau: "Plateau",
     plain: "Plain", basin: "Basin", delta: "Delta", valley: "Valley", region: "Region", coast: "Coast", lowland: "Lowland", wetlands: "Wetlands" };
   var hs = document.getElementById("heat-search");
@@ -22017,13 +22064,13 @@ window.SL_GEO_READY = new Promise(function (res) {
         var c = countryOf(p), st = p.cc === "US" && p.adm && window.STATE_NAME ? window.STATE_NAME[p.adm] : "";
         return { type: "place", label: p.name, sub: (KIND[p.kind] ? KIND[p.kind] + (c ? " · " : "") : "") + (st ? st + ", " : "") + c, p: p };
       });
-      var ss = SPECIES.filter(function (s) { return s.k.lastIndexOf(f, 0) === 0 || s.ks.lastIndexOf(f, 0) === 0; }).slice(0, 5)
-        .map(function (s) { return { type: "species", label: s.name, sub: s.sci }; });
-      return [{ title: "Countries", items: cs }];
+      var ss = speciesMatches(q, cs.length ? 6 : 8)
+        .map(function (s) { return { type: "species", label: s.name, sub: s.name === s.sci ? "" : s.sci, val: NAME_N[s.k] > 1 ? s.sci : s.name }; });
+      return [{ title: "Countries", items: cs }, { title: "Snakes", items: ss }];
     }, function (it) {
       if (it.type === "place") { window.SL_PLACE_PICKED = it.p; window.SL_PLACE_FORCE = it.p.k; }
       else { window.SL_PLACE_PICKED = null; window.SL_PLACE_FORCE = null; }
-      hs.value = it.label;
+      hs.value = it.val || it.label;
       hs.dispatchEvent(new Event("input"));
     });
   }
@@ -22032,10 +22079,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   if (hq) {
     hq.removeAttribute("list");
     gMenu(hq, function (q) {
-      var f = fold(q); if (!f) return [];
-      var a = SPECIES.filter(function (s) { return s.k.lastIndexOf(f, 0) === 0 || s.ks.lastIndexOf(f, 0) === 0; });
-      var b = SPECIES.filter(function (s) { return a.indexOf(s) < 0 && (s.k.indexOf(f) > 0 || s.ks.indexOf(f) > 0); });
-      return [{ items: a.concat(b).slice(0, 8).map(function (s) { return { label: s.name === s.sci ? s.name : s.name + " (" + s.sci + ")", sub: "" }; }) }];
+      return [{ items: speciesMatches(q, 8).map(function (s) { return { label: s.name === s.sci ? s.name : s.name + " (" + s.sci + ")", sub: "" }; }) }];
     }, function (it) { hq.value = it.label; hq.dispatchEvent(new Event("input")); });
   }
   if (cat) {
