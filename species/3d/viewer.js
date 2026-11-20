@@ -3104,7 +3104,8 @@ float slScale(vec2 m) {
     sizeRing.style.transform = 'translate(' + ((x0 + x1) / 2 - r).toFixed(1) + 'px,' + ((y0 + y1) / 2 - r).toFixed(1) + 'px)';
     // the inset: the same snake close up, in a box on the right, saying how much it is magnified
     // (top-left, under the buttons: the snake is on the left and the person on the right, so the sky above the snake is free)
-    const sr = stage.getBoundingClientRect(), br = bar.getBoundingClientRect(), iw = Math.round(clamp(w * 0.42, 150, 280)), ih = Math.round(iw * 0.62), ix = 12, iy = Math.round(clamp(br.bottom - sr.top + 14, 8, h - ih - 8));
+    const sr = stage.getBoundingClientRect(), br = bar.getBoundingClientRect(); let iw = Math.round(clamp(w * 0.42, 150, 280)), ih = Math.round(iw * 0.62); const ix = 12, iy = Math.round(br.bottom - sr.top + 14);
+    { const cr = sizeCap.getBoundingClientRect(), room = (cr.height ? cr.top - sr.top : h) - 10 - iy; if (room < ih) { if (room < 80) { sizeInset.hidden = true; return; } ih = Math.round(room); iw = Math.round(ih / 0.62); } } // (a short view: a smaller inset, or none - the ring still marks it)
     sizeInset.style.width = iw + 'px'; sizeInset.style.height = ih + 'px'; sizeInset.style.transform = 'translate(' + ix + 'px,' + iy + 'px)';
     const L = (sizeSt.arc || sizeSt.len.m) * 0.82, dirC = cam.position.clone().sub(sizeSt.mid); dirC.y = Math.max(dirC.y, dirC.length() * 0.35); dirC.normalize();
     insetCam.aspect = iw / ih; const di = (L * 0.6) / Math.tan((insetCam.fov * Math.PI) / 360) / Math.min(1, insetCam.aspect) * 0.62;
