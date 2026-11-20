@@ -15,4 +15,9 @@ CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/
 No attribution is required; it is given here as a courtesy and so the sources can be checked.
 
 three.js (three.module.min.js) is MIT licensed; see three-LICENSE.txt.
-All other textures (snake skin, ground, rocks, plants) are generated in the browser by viewer.js.
+All other textures (snake skin, ground, rocks, plants, bark, leaves, the prey's fur, scales and feathers, the person's
+skin, hair and clothes) are generated in the browser by viewer.js, nature.js and extras.js.
+
+person.bin (the 1.70 m person in "Size vs person") is SnakeList's own model, made from scratch by tools/build-person.js
+(a sculpted signed-distance body meshed and simplified with meshoptimizer, MIT licence - used only to build the file,
+not shipped). No outside models or game assets are used.

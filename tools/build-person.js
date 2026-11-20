@@ -79,7 +79,7 @@ function noise(x, y, z) {
 const fbm = (x, y, z) => noise(x, y, z) * 0.6 + noise(x * 2.03 + 7, y * 2.03 + 3, z * 2.03 + 1) * 0.3 + noise(x * 4.1 + 2, y * 4.1 + 9, z * 4.1 + 5) * 0.1;
 
 // ---------------------------------------------------------------- the body (metres; feet on y = 0, facing +z, x to its left)
-const EYE = V(0.0315, 1.586, 0.0705), EYE_R = 0.0121;
+const EYE = V(0.0315, 1.586, 0.069), EYE_R = 0.0121;
 // --- head
 const cranium = EL(V(0, 1.603, -0.014), V(0.073, 0.086, 0.097));
 const headParts = [
@@ -88,7 +88,8 @@ const headParts = [
   EL(V(0, 1.57, 0.03), V(0.057, 0.064, 0.058)),           // face
   MIR(EL(V(0.042, 1.556, 0.05), V(0.024, 0.024, 0.028))), // cheeks
   MIR(EL(V(0.048, 1.574, 0.054), V(0.02, 0.011, 0.02))), // cheekbones
-  MIR(RC(V(0.051, 1.53, -0.016), V(0.02, 1.484, 0.056), 0.011, 0.011)), // the jaw line
+  MIR(RC(V(0.047, 1.528, -0.014), V(0.019, 1.486, 0.055), 0.009, 0.0095)), // the jaw line
+  MIR(EL(V(0.038, 1.518, 0.026), V(0.022, 0.03, 0.04))),   // between the cheek and the jaw
   EL(V(0, 1.487, 0.068), V(0.02, 0.016, 0.015)),         // chin
   EL(V(0, 1.524, 0.073), V(0.03, 0.027, 0.024)),         // round the mouth
   MIR(EL(V(0.031, 1.6135, 0.08), V(0.026, 0.009, 0.012))), // brow ridge
@@ -104,7 +105,7 @@ const ear = MIR((() => {
   const f = (x, y, z) => smax(smin(shell(x, y, z), lobe(x, y, z), 0.004), -bowl(x, y, z), 0.002); f.lo = [0.06, 1.53, -0.04]; f.hi = [0.095, 1.615, 0.015]; return f;
 })());
 const socket = MIR(EL(V(0.0315, 1.586, 0.087), V(0.0205, 0.0122, 0.0125)));
-const lid = MIR((() => { const s = SPH(EYE, EYE_R + 0.0012), op = EL(V(0.0315, 1.5862, 0.083), V(0.0145, 0.0049, 0.0112)); const f = (x, y, z) => smax(s(x, y, z), -op(x, y, z), 0.0012); f.lo = s.lo; f.hi = s.hi; return f; })());
+const lid = MIR((() => { const s = SPH(EYE, EYE_R + 0.0012), op = EL(V(0.0315, 1.5856, 0.082), V(0.0144, 0.0043, 0.0112)); const f = (x, y, z) => smax(s(x, y, z), -op(x, y, z), 0.0012); f.lo = s.lo; f.hi = s.hi; return f; })());
 const nostril = MIR(EL(V(0.0068, 1.5425, 0.1045), V(0.0038, 0.0025, 0.0048)));
 const mouthLine = EL(V(0, 1.5163, 0.0985), V(0.0238, 0.0011, 0.0085));
 const neck = RC(V(0, 1.392, -0.02), V(0, 1.53, -0.028), 0.058, 0.05);
@@ -195,7 +196,7 @@ function bodySD(x, y, z) { // everything but the head: torso, neck, arms, legs
 }
 function skinSD(x, y, z) {
   let d = bodySD(x, y, z);
-  if (y > 1.43) d = smin(d, headSD(x, y, z), 0.014);
+  if (y > 1.43) d = smin(d, headSD(x, y, z), 0.018);
   return d;
 }
 // --- clothes

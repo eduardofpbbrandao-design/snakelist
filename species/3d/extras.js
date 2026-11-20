@@ -1109,7 +1109,7 @@ export function create(V) {
     V.kick();
   }
   function setPaused(v, quiet) {
-    if (show && !quiet) { if (v && !show.paused) show.paused = true; else if (!v && show.paused) { show.paused = false; show.lastF = now(); } }
+    if (show && !quiet) { if (v && !show.paused) { show.paused = true; show.pauseAt = now(); } else if (!v && show.paused) { show.paused = false; show.t0 += now() - (show.pauseAt || now()); show.lastF = now(); } }
     bPause.textContent = v ? 'Play' : 'Pause'; bPause.setAttribute('aria-pressed', String(!!v)); bPause.setAttribute('aria-label', v ? 'Play' : 'Pause');
     if (!quiet) V.kick();
   }
@@ -2008,7 +2008,7 @@ export function create(V) {
         p.lr = (p.detail || p.region === 'head' ? p.rev : 1 - sstep(n0 * 2.2, n1 * 2.2, dist)) * lerp(near, 1, sstep(Math.max(st.data.svl * 0.2, V.info.F.Hl * 4), Math.max(st.data.svl * 0.4, V.info.F.Hl * 8), dC)); // (close in: only what you are looking at)
         // v5.78: a part you pick stands out: the other organs and bones fade back (to about a fifth) while it is picked
         const picked = !st.sel || st.sel === p || (st.sel.key === 'region-' + p.region) || p.skin;
-        p.dimK = lerp(p.dimK == null ? 1 : p.dimK, picked ? 1 : 0.2, 0.25); if (Math.abs(p.dimK - (picked ? 1 : 0.2)) > 0.01) V.kick();
+        const dimT = now(), dimDt = clamp((dimT - (p.dimT || dimT)) / 1000, 0, 0.25); p.dimT = dimT; p.dimK = lerp(p.dimK == null ? 1 : p.dimK, picked ? 1 : 0.2, 1 - Math.exp(-dimDt / 0.12)); if (Math.abs(p.dimK - (picked ? 1 : 0.2)) > 0.01) V.kick();
         if (!p.detail && p.dimK > 0.995 && !p.dimmed) continue;
         p.dimmed = p.dimK < 0.995;
         for (const m of p.meshes) {
@@ -2348,8 +2348,8 @@ export function create(V) {
       if (!alive) return false;
       let moving = false;
       if (show) {
-        if (show.freeze == null) { const tn = now(); if (show.paused) show.t0 += tn - show.lastF; else if (show.lastF && tn - show.lastF > 250) show.t0 += tn - show.lastF - 50; show.lastF = tn; } // (v5.73: a long hitch - a shader compiling - never skips part of the show; v5.78: paused, time stands still)
-        const tPrev = show.time; show.time = show.freeze != null ? show.freeze : (now() - show.t0) / 1000;
+        if (show.freeze == null && !show.paused) { const tn = now(); if (show.lastF && tn - show.lastF > 250) show.t0 += tn - show.lastF - 50; show.lastF = tn; } // (v5.73: a long hitch - a shader compiling - never skips part of the show; v5.78: paused, time stands still)
+        const tPrev = show.time; show.time = show.freeze != null ? show.freeze : show.paused ? show.time : (now() - show.t0) / 1000;
         if (!show.paused || show.time !== tPrev || !show.stepped) { show.step(show.time); show.stepped = true; } moving = !show.paused;
         if (show.freeze == null && show.time >= show.dur) stopShow();
       } else if (slither) moving = stepSlither() || !!slither;
