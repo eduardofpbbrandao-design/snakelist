@@ -15,9 +15,19 @@ CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/
 No attribution is required; it is given here as a courtesy and so the sources can be checked.
 
 three.js (three.module.min.js) is MIT licensed; see three-LICENSE.txt.
-All other textures (snake skin, ground, rocks, plants, bark, leaves, the prey's fur, scales and feathers, the person's
-skin, hair and clothes) are generated in the browser by viewer.js, nature.js and extras.js.
+The person in "Size vs person" (species/3d/person.bin and species/3d/person/*.webp) is the avatar "Male_Adult_05"
+from the Microsoft Rocketbox Avatar Library (https://github.com/microsoft/Microsoft-Rocketbox), released under the
+MIT License (Copyright (c) Microsoft Corporation; https://opensource.org/licenses/MIT). tools/build-person.js poses it
+(arms at the sides) and bakes it to a still mesh with an eyelid blend shape; tools/person_textures.py reduces its
+textures to 1024 px WebP. MIT License text: Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-person.bin (the 1.70 m person in "Size vs person") is SnakeList's own model, made from scratch by tools/build-person.js
-(a sculpted signed-distance body meshed and simplified with meshoptimizer, MIT licence - used only to build the file,
-not shipped). No outside models or game assets are used.
+All other textures (snake skin, the painted ground, rocks, plants, bark, leaves, the prey's fur, scales and feathers)
+are generated in the browser by viewer.js, nature.js and extras.js, apart from the ground detail listed below.

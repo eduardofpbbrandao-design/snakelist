@@ -160,107 +160,80 @@ function disposeTree(o) {
 function fadeTree(o, op) { o.traverse((q) => { if (q.material && q.userData.op != null) { q.material.opacity = q.userData.op * op; q.material.transparent = true; q.material.depthWrite = op > 0.98 && q.userData.op >= 1; q.visible = op > 0.005; } }); }
 function markFade(o) { o.traverse((q) => { if (q.material && q.userData.op == null) q.userData.op = q.material.opacity != null ? q.material.opacity : 1; }); }
 
-// ---------------------------------------------------------------- the person for "Size vs person" (v5.78)
-// Eduardo: the old one "looks like a 5 year old with clay made a human". This one is SnakeList's own sculpted model
-// (tools/build-person.js: an adult about 7.5 heads tall, built as one smooth surface from anatomical masses - skull,
-// cheekbones, nose, lips, eyelids and ears, neck muscles, collarbones, shoulders, arms and jointed fingers - with a
-// T-shirt with a crew neck and drape folds, jeans that bunch at the ankle, trainers, short combed hair and eyebrows),
-// stored in person.bin (about 0.85 MB, loaded only when Size vs person is used). Here it gets its materials: skin with
-// fine pores and a soft warm sheen, real eyes (white, a brown iris, pupil and a clear cornea that catches the light),
-// strands in the hair, knitted cotton and denim twill. Standing on y = 0, facing +z, exactly h tall.
+// ---------------------------------------------------------------- the person for "Size vs person"
+// v5.83: Eduardo said the old one "looks like a 5 year old with clay made a human" (and the sculpted one after it still
+// had a cap of hair and a heavy jaw). Now it is a real person: the Microsoft Rocketbox avatar "Male_Adult_05" (MIT
+// licence; see CREDITS.txt) - a photo-scanned face and skin, eyes in their sockets, hair and beard made of strand cards,
+// a field shirt, vest, trousers and boots - posed with the arms relaxed at the sides by tools/build-person.js and stored
+// in person.bin (about 120 kB) with its textures in person/ (WebP, about 0.7 MB; loaded only when Size vs person is
+// used). It stands exactly h tall (1.70 m from the soles to the top of the hair) on y = 0, facing +z, and lives a
+// little: it breathes (the chest and belly rise and fall), sways very slightly over its feet as people do standing
+// still, and blinks now and then (none of it with reduced motion).
 let personData = null, personReq = null; const personWait = new Set();
+const PERSON_TEX = { head: 'head.webp', headN: 'head_n.webp', headR: 'head_r.webp', body: 'body.webp', bodyN: 'body_n.webp', hair: 'hair.webp' };
 export function loadPerson() {
   if (personData) return Promise.resolve(personData);
   if (!personReq) {
-    personReq = fetch(new URL('person.bin?r=573', import.meta.url).href).then((r) => { if (!r.ok) throw new Error('person ' + r.status); return r.arrayBuffer(); })
-      .then((b) => { personData = parsePerson(b); return personData; })
+    const url = (f) => new URL(f + '?r=576', import.meta.url).href;
+    const img = (f) => new Promise((res, rej) => { const im = new Image(); im.decoding = 'async'; im.onload = () => res(im); im.onerror = () => rej(new Error('person ' + f)); im.src = url('person/' + f); });
+    personReq = Promise.all([fetch(url('person.bin')).then((r) => { if (!r.ok) throw new Error('person ' + r.status); return r.arrayBuffer(); }), ...Object.values(PERSON_TEX).map(img)])
+      .then(([b, ...ims]) => { const d = parsePerson(b); d.img = {}; Object.keys(PERSON_TEX).forEach((k, i) => { d.img[k] = ims[i]; }); personData = d; return d; })
       .catch((e) => { personReq = null; throw e; });
   }
   return personReq;
 }
 function parsePerson(buf) {
-  const dv = new DataView(buf); if (String.fromCharCode(dv.getUint8(0), dv.getUint8(1), dv.getUint8(2), dv.getUint8(3)) !== 'SLP1') throw new Error('person.bin');
-  const jl = dv.getUint32(4, true), meta = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 8, jl))); let o = 8 + jl;
-  const parts = {};
-  for (const p of meta.parts) {
-    const q = new Uint16Array(buf, o, p.v * 3); o += p.v * 6;
-    const nb = new Int8Array(buf, o, p.v * 4); o += p.v * 4; const cb = new Uint8Array(buf, o, p.v * 4); o += p.v * 4;
-    const big = p.v > 65535, ib = big ? new Uint32Array(buf.slice(o, o + p.t * 4)) : new Uint16Array(buf, o, p.t); const ibl = p.t * (big ? 4 : 2); o += ibl + (4 - (ibl % 4)) % 4;
-    const pos = new Float32Array(p.v * 3), nor = new Float32Array(p.v * 3), col = new Float32Array(p.v * 3);
-    for (let v = 0; v < p.v; v++) for (let c = 0; c < 3; c++) { pos[v * 3 + c] = p.lo[c] + (q[v * 3 + c] / 65535) * (p.hi[c] - p.lo[c]); nor[v * 3 + c] = nb[v * 4 + c] / 127; col[v * 3 + c] = (cb[v * 4 + c] / 255) * 1.1; }
-    parts[p.n] = { pos, nor, col, idx: ib.slice(), lo: p.lo, hi: p.hi };
-  }
-  return { meta, parts };
-}
-// textures for the person, drawn once (each build makes new GPU textures from the same canvases: the viewer disposes them)
-const PCAN = {};
-function pCanvas(key, S, draw) { if (!PCAN[key]) { const c = document.createElement('canvas'); c.width = c.height = S; draw(c.getContext('2d'), S); PCAN[key] = c; } return PCAN[key]; }
-function pTex(key, S, draw, rx = 1, ry = 1, srgb = true) { const t = new THREE.CanvasTexture(pCanvas(key, S, draw)); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); t.anisotropy = 8; return t; }
-function personMaterials() {
-  const R = rnd(31);
-  const pores = pTex('pores', 256, (x, s) => { x.fillStyle = '#808080'; x.fillRect(0, 0, s, s); for (let i = 0; i < 9000; i++) { const v = R(); x.fillStyle = v < 0.5 ? 'rgba(40,40,40,' + (0.05 + R() * 0.12) + ')' : 'rgba(220,220,220,' + (0.04 + R() * 0.08) + ')'; x.beginPath(); x.arc(R() * s, R() * s, 0.4 + R() * 1.1, 0, TAU); x.fill(); } }, 22, 30, false);
-  const skin = new THREE.MeshPhysicalMaterial({ color: '#c99377', vertexColors: true, roughness: 0.5, bumpMap: pores, bumpScale: 0.35, sheen: 0.4, sheenRoughness: 0.45, sheenColor: new THREE.Color('#ff9a80'), clearcoat: 0.05, clearcoatRoughness: 0.5, specularIntensity: 0.55 });
-  const strands = (key, base) => pTex(key, 512, (x, s) => {
-    x.fillStyle = base; x.fillRect(0, 0, s, s);
-    for (let i = 0; i < 2600; i++) { const px = R() * s, l = s * (0.15 + R() * 0.5), py = R() * s, w = R(); x.strokeStyle = w < 0.45 ? 'rgba(10,6,3,' + (0.25 + R() * 0.4) + ')' : 'rgba(190,150,110,' + (0.08 + R() * 0.18) + ')'; x.lineWidth = 0.5 + R() * 1.1; x.beginPath(); x.moveTo(px, py); x.bezierCurveTo(px + (R() - 0.5) * 6, py + l * 0.33, px + (R() - 0.5) * 8, py + l * 0.66, px + (R() - 0.5) * 10, py + l); x.stroke(); }
-  }, 7, 2);
-  const hairMap = strands('hair', '#3a281b');
-  const hair = new THREE.MeshPhysicalMaterial({ color: '#ffffff', map: hairMap, bumpMap: hairMap, bumpScale: 1.4, vertexColors: true, roughness: 0.48, sheen: 0.8, sheenRoughness: 0.35, sheenColor: new THREE.Color('#9c7a5c'), specularIntensity: 0.6 });
-  const brow = new THREE.MeshPhysicalMaterial({ color: '#d8d0c8', map: strands('hair', '#3a281b'), vertexColors: true, roughness: 0.6, sheen: 0.4, sheenColor: new THREE.Color('#7a5c44') });
-  // knitted cotton: little loops in rows
-  const knit = pTex('knit', 128, (x, s) => { x.fillStyle = '#7a7a7a'; x.fillRect(0, 0, s, s); for (let yy = 0; yy < s; yy += 4) for (let xx = 0; xx < s; xx += 4) { x.fillStyle = 'rgba(255,255,255,' + (0.18 + R() * 0.1) + ')'; x.beginPath(); x.ellipse(xx + 2, yy + 2, 1.3, 1.9, 0.35 * ((xx / 4) % 2 ? 1 : -1), 0, TAU); x.fill(); } }, 70, 90, false);
-  const shirt = new THREE.MeshPhysicalMaterial({ color: '#33607f', vertexColors: true, roughness: 0.86, bumpMap: knit, bumpScale: 0.6, sheen: 0.7, sheenRoughness: 0.8, sheenColor: new THREE.Color('#9fc4dc') });
-  // denim: a diagonal twill, white weft showing through blue warp, a little fading
-  const twill = pTex('twill', 256, (x, s) => { x.fillStyle = '#2d4673'; x.fillRect(0, 0, s, s); for (let i = -s; i < s * 2; i += 3) { x.strokeStyle = 'rgba(225,232,245,' + (0.12 + R() * 0.12) + ')'; x.lineWidth = 1; x.beginPath(); x.moveTo(i, 0); x.lineTo(i + s, s); x.stroke(); } for (let i = 0; i < 1400; i++) { x.fillStyle = 'rgba(' + (R() < 0.5 ? '20,30,60' : '200,210,230') + ',' + R() * 0.12 + ')'; x.fillRect(R() * s, R() * s, 1 + R() * 3, 1); } }, 30, 40);
-  const jeans = new THREE.MeshPhysicalMaterial({ color: '#ffffff', map: twill, bumpMap: twill, bumpScale: 0.5, vertexColors: true, roughness: 0.82, sheen: 0.35, sheenRoughness: 0.9, sheenColor: new THREE.Color('#9fb2d4') });
-  const mesh = pTex('mesh', 128, (x, s) => { x.fillStyle = '#9a9a9a'; x.fillRect(0, 0, s, s); x.fillStyle = 'rgba(30,30,30,.35)'; for (let yy = 0; yy < s; yy += 6) for (let xx = (yy / 6) % 2 ? 3 : 0; xx < s; xx += 6) { x.beginPath(); x.arc(xx, yy, 1.3, 0, TAU); x.fill(); } }, 40, 40, false);
-  const shoe = new THREE.MeshPhysicalMaterial({ color: '#e9e8e3', vertexColors: true, roughness: 0.62, bumpMap: mesh, bumpScale: 0.4, sheen: 0.3, sheenColor: new THREE.Color('#ffffff') });
-  const sole = new THREE.MeshStandardMaterial({ color: '#f1efe8', vertexColors: true, roughness: 0.75 });
-  return { skin, hair, brow, shirt, jeans, shoe, sole };
-}
-// the eyes: a white with faint veins (opening at the front), a flat iris with its fibres and the pupil, and a clear
-// cornea bulging over them that catches the light
-function personEye(r) {
-  const g = new THREE.Group(), th = 0.5, R = rnd(41);
-  const scl = pTex('sclera', 128, (x, s) => { x.fillStyle = '#f2ece6'; x.fillRect(0, 0, s, s); x.strokeStyle = 'rgba(190,80,70,.22)'; for (let i = 0; i < 26; i++) { x.lineWidth = 0.4 + R() * 0.6; x.beginPath(); let px = R() * s, py = s * (0.55 + R() * 0.45); x.moveTo(px, py); for (let k = 0; k < 4; k++) { px += (R() - 0.5) * 18; py -= R() * 14; x.lineTo(px, py); } x.stroke(); } });
-  const white = new THREE.SphereGeometry(r, 32, 20, 0, TAU, th, Math.PI - th); white.rotateX(Math.PI / 2);
-  g.add(new THREE.Mesh(white, new THREE.MeshPhysicalMaterial({ map: scl, roughness: 0.3, clearcoat: 0.6 })));
-  const iris = pTex('iris', 256, (x, s) => {
-    const c = s / 2, gr = x.createRadialGradient(c, c, s * 0.08, c, c, c); gr.addColorStop(0, '#2a170c'); gr.addColorStop(0.3, '#6b4024'); gr.addColorStop(0.75, '#5a351d'); gr.addColorStop(0.93, '#2c1a0e'); gr.addColorStop(1, '#1a0f08');
-    x.fillStyle = gr; x.fillRect(0, 0, s, s);
-    for (let i = 0; i < 420; i++) { const a = R() * TAU, r0 = s * (0.12 + R() * 0.1), r1 = s * (0.3 + R() * 0.18); x.strokeStyle = R() < 0.5 ? 'rgba(160,110,60,' + (0.15 + R() * 0.25) + ')' : 'rgba(30,15,8,' + (0.15 + R() * 0.25) + ')'; x.lineWidth = 0.6 + R(); x.beginPath(); x.moveTo(c + Math.cos(a) * r0, c + Math.sin(a) * r0); x.lineTo(c + Math.cos(a + (R() - 0.5) * 0.1) * r1, c + Math.sin(a) * r1); x.stroke(); }
-    x.fillStyle = '#050403'; x.beginPath(); x.arc(c, c, s * 0.15, 0, TAU); x.fill();
-  }, 1, 1);
-  iris.wrapS = iris.wrapT = THREE.ClampToEdgeWrapping;
-  // the iris is a shallow dome (the clear cornea over it is its glossy coat: no see-through layer to fade)
-  const ig = new THREE.SphereGeometry(r * 1.02, 40, 10, 0, TAU, 0, th + 0.03); ig.rotateX(Math.PI / 2); { const pa = ig.attributes.position, uv = ig.attributes.uv, k = r * Math.sin(th + 0.03); for (let i = 0; i < pa.count; i++) uv.setXY(i, 0.5 + pa.getX(i) / k * 0.5, 0.5 + pa.getY(i) / k * 0.5); ig.translate(0, 0, -r * 0.035); }
-  g.add(new THREE.Mesh(ig, new THREE.MeshPhysicalMaterial({ map: iris, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.02, specularIntensity: 1 })));
-  return g;
-}
-// texture coordinates for a part: round the body (u) and up it (v) in metres, so the weave and pores keep their size;
-// the hair's strands run out from the crown
-function personUV(name, pos) {
-  const n = pos.length / 3, uv = new Float32Array(n * 2);
-  for (let v = 0; v < n; v++) {
-    const x = pos[v * 3], y = pos[v * 3 + 1], z = pos[v * 3 + 2];
-    if (name === 'hair' || name === 'brow') { const hx = x + 0.012, hz = z + 0.045, hy = y - 1.69, a = Math.atan2(hx, hz); uv[v * 2] = (a / TAU + 0.5); uv[v * 2 + 1] = Math.hypot(hx, hy, hz) * 4; continue; }
-    const ax = Math.abs(x), arm = ax > 0.15 && y > 0.66 && y < 1.4, cx = arm ? Math.sign(x) * 0.2 : 0, a = Math.atan2(x - cx, z), r = arm ? 0.04 : 0.12;
-    uv[v * 2] = (a * r) / 0.06; uv[v * 2 + 1] = y / 0.06;
-  }
-  return uv;
+  const dv = new DataView(buf); if (String.fromCharCode(dv.getUint8(0), dv.getUint8(1), dv.getUint8(2), dv.getUint8(3)) !== 'SLP2') throw new Error('person.bin');
+  const jl = dv.getUint32(4, true), m = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 8, jl))); let o = 8 + jl;
+  const al = (n) => n + ((4 - (n % 4)) % 4);
+  const q = new Uint16Array(buf, o, m.nv * 3); o += al(m.nv * 6); const nb = new Int8Array(buf, o, m.nv * 4); o += m.nv * 4;
+  const ub = new Uint16Array(buf, o, m.nv * 2); o += al(m.nv * 4); const idx = new Uint16Array(buf.slice(o, o + m.nt * 6)); o += al(m.nt * 6);
+  const bi = new Uint16Array(buf, o, m.blink.n); o += al(m.blink.n * 2); const bd = new Int16Array(buf, o, m.blink.n * 3);
+  const pos = new Float32Array(m.nv * 3), nor = new Float32Array(m.nv * 3), uv = new Float32Array(m.nv * 2), blink = new Float32Array(m.nv * 3);
+  for (let v = 0; v < m.nv; v++) { for (let c = 0; c < 3; c++) { pos[v * 3 + c] = m.lo[c] + (q[v * 3 + c] / 65535) * (m.hi[c] - m.lo[c]); nor[v * 3 + c] = nb[v * 4 + c] / 127; } for (let c = 0; c < 2; c++) uv[v * 2 + c] = m.uvlo[c] + (ub[v * 2 + c] / 65535) * (m.uvhi[c] - m.uvlo[c]); }
+  for (let k = 0; k < m.blink.n; k++) for (let c = 0; c < 3; c++) blink[bi[k] * 3 + c] = bd[k * 3 + c] * m.blink.k;
+  return { meta: m, pos, nor, uv, idx, blink };
 }
 function personFrom(data, h) {
-  const g = new THREE.Group(), M = personMaterials(), lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9];
-  for (const k of ['sole', 'shoe', 'jeans', 'shirt', 'skin', 'hair', 'brow']) {
-    const p = data.parts[k]; if (!p) continue;
-    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(p.pos.slice(), 3)); geo.setAttribute('normal', new THREE.BufferAttribute(p.nor.slice(), 3)); geo.setAttribute('color', new THREE.BufferAttribute(p.col.slice(), 3)); geo.setAttribute('uv', new THREE.BufferAttribute(personUV(k, p.pos), 2)); geo.setIndex(new THREE.BufferAttribute(p.idx.slice(), 1));
-    geo.computeBoundingSphere();
-    const m = new THREE.Mesh(geo, M[k]); m.castShadow = true; m.receiveShadow = true; m.name = 'person-' + k; g.add(m);
-    for (let c = 0; c < 3; c++) { lo[c] = Math.min(lo[c], p.lo[c]); hi[c] = Math.max(hi[c], p.hi[c]); }
+  const m = data.meta, geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(data.pos.slice(), 3)); geo.setAttribute('normal', new THREE.BufferAttribute(data.nor.slice(), 3)); geo.setAttribute('uv', new THREE.BufferAttribute(data.uv.slice(), 2)); geo.setIndex(new THREE.BufferAttribute(data.idx.slice(), 1));
+  for (const [st, n, mi] of m.groups) geo.addGroup(st, n, mi);
+  // breathing: the chest and belly move out along their normals (most at the breastbone, less at the belly, none on
+  // the back or the arms)
+  const br = new Float32Array(m.nv * 3), ch = m.chest;
+  for (let v = 0; v < m.nv; v++) {
+    const x = data.pos[v * 3], y = data.pos[v * 3 + 1], nz = data.nor[v * 3 + 2], ny = data.nor[v * 3 + 1];
+    const k = sstep(ch[1] - 0.42, ch[1] - 0.2, y) * (1 - sstep(ch[1] + 0.12, ch[1] + 0.22, y)) * sstep(-0.2, 0.5, nz) * sstep(0.16, 0.1, Math.abs(x)) * (1 - Math.abs(ny) * 0.5);
+    const amt = 0.0042 * k * lerp(0.6, 1, sstep(ch[1] - 0.3, ch[1], y));
+    br[v * 3] = data.nor[v * 3] * amt * 0.5; br[v * 3 + 1] = amt * 0.35 * sstep(ch[1] - 0.1, ch[1] + 0.1, y); br[v * 3 + 2] = nz * amt;
   }
-  const e = data.meta.eye; for (const sg of [-1, 1]) { const eye = personEye(e[3]); eye.position.set(sg * e[0], e[1], e[2]); eye.rotation.y = sg * 0.05; eye.name = 'person-eye'; g.add(eye); }
-  const k = h / Math.max(1e-6, hi[1] - lo[1]); g.scale.setScalar(k); g.position.y = -lo[1] * k; // (exactly h from the soles to the top of the hair)
-  const out = new THREE.Group(); out.add(g); out.userData.realPerson = true; return out;
+  geo.morphAttributes.position = [new THREE.BufferAttribute(data.blink.slice(), 3), new THREE.BufferAttribute(br, 3)]; geo.morphTargetsRelative = true;
+  geo.computeBoundingSphere();
+  const tex = (k, srgb) => { const t = new THREE.Texture(data.img[k]); t.flipY = true; if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.needsUpdate = true; return t; };
+  const body = new THREE.MeshPhysicalMaterial({ map: tex('body', true), normalMap: tex('bodyN'), roughness: 0.82, sheen: 0.35, sheenRoughness: 0.8, sheenColor: new THREE.Color('#5d5446'), specularIntensity: 0.35 });
+  // skin: the scanned colour, its pores in the normal map, glossy eyes and lips from the roughness map, and a warm
+  // sheen at grazing angles (light scattered under the skin)
+  const head = new THREE.MeshPhysicalMaterial({ map: tex('head', true), normalMap: tex('headN'), roughnessMap: tex('headR'), roughness: 1, sheen: 0.3, sheenRoughness: 0.55, sheenColor: new THREE.Color('#d9776a'), specularIntensity: 0.55, clearcoat: 0.04, clearcoatRoughness: 0.4 });
+  const hair = new THREE.MeshPhysicalMaterial({ map: tex('hair', true), alphaTest: 0.38, side: THREE.DoubleSide, roughness: 0.5, sheen: 0.22, sheenRoughness: 0.4, sheenColor: new THREE.Color('#6b5c50'), specularIntensity: 0.35 });
+  // (the skin's light wraps a little round into the shade, as it does through real skin)
+  head.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <lights_fragment_end>', '#include <lights_fragment_end>\n reflectedLight.directDiffuse += reflectedLight.indirectDiffuse * vec3(0.06, 0.018, 0.012);'); };
+  const mats = m.mats.map((k) => (k === 'head' ? head : k === 'hair' ? hair : body));
+  const mesh = new THREE.Mesh(geo, mats); mesh.name = 'person-skin'; mesh.castShadow = mesh.receiveShadow = true; mesh.morphTargetInfluences = [0, 0];
+  const g = new THREE.Group(); g.add(mesh);
+  const k = h / Math.max(1e-6, m.hi[1] - m.lo[1]); g.scale.setScalar(k); g.position.y = -m.lo[1] * k; // (exactly h from the soles to the top of the hair)
+  const out = new THREE.Group(); out.add(g); out.userData.realPerson = true;
+  // idle life, on its own clock (drawn with the scenery's gentle frames)
+  const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let nextBlink = 1.5 + Math.random() * 2, blinkAt = -10;
+  mesh.onBeforeRender = () => {
+    if (calm) return;
+    const t = performance.now() / 1000, inf = mesh.morphTargetInfluences;
+    inf[1] = 0.5 - 0.5 * Math.cos((t * TAU) / 4.6); // about 13 breaths a minute
+    if (t > nextBlink) { blinkAt = t; nextBlink = t + 2.5 + Math.random() * 4.5; }
+    const b = (t - blinkAt) / 0.16; inf[0] = b < 0 || b > 2 ? 0 : b < 1 ? sstep(0, 1, b) : 1 - sstep(1, 2, b); // shut fast, open a little slower
+    g.rotation.z = 0.0045 * Math.sin((t * TAU) / 7.3) + 0.002 * Math.sin((t * TAU) / 3.1); g.rotation.x = 0.003 * Math.sin((t * TAU) / 9.7 + 1); // (swaying over the ankles)
+  };
+  return out;
 }
 export function buildPerson(T, h = 1.7) {
   THREE = THREE || T;
