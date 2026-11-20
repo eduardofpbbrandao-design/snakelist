@@ -13920,7 +13920,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     let html = "<b>" + head + "</b>" + (ok ? "" : "Answer: <strong>" + impEsc(q.right) + "</strong>. ") + impEsc(q.why);
     if (over) {
       html += '<div class="imp-final"><span>Game over</span>' + imp.right + " right out of " + imp.total +
-        " &middot; best streak ever: <b>" + imp.best + "</b></div>" +
+        " &middot; best streak ever: <strong>" + imp.best + "</strong></div>" /* v5.78: strong, not b - a b here is shown as the heading, on a line of its own */ +
         '<div class="quiz-result-actions"><button class="quiz-next" id="quiz-next" type="button">Play again</button>' +
         '<button class="quiz-see-map" id="quiz-imp-levels" type="button">Change difficulty</button></div>';
     } else html += '<div class="quiz-result-actions"><button class="quiz-next" id="quiz-next" type="button">Next question</button></div>';
@@ -24713,6 +24713,10 @@ window.SL_GEO_READY = new Promise(function (res) {
   function onFile(inp) {
     var f = inp.files && inp.files[0]; inp.value = "";
     if (!f) return;
+    // v5.78: a file that isn't a photo (or one the browser can't open, like some RAW or HEIC files) used to leave
+    // "Looking at your photo…" on screen for ever - now it says so, and what to do instead
+    var notPhoto = function () { status("That file isn't a photo SnakeList can open. Choose a JPG, PNG or WebP photo (or take a new one)."); };
+    if (f.type && !/^image\//.test(f.type)) { $("cam-work").hidden = false; $("cam-results").innerHTML = ""; notPhoto(); return; }
     var url = URL.createObjectURL(f), img = $("cam-preview");
     $("cam-work").hidden = false; $("cam-results").innerHTML = "";
     status("Looking at your photo…");
@@ -24723,6 +24727,7 @@ window.SL_GEO_READY = new Promise(function (res) {
         if (!here) { pendingImg = img; status("This photo doesn't say where it was taken - tell SnakeList where you are above (your location or the map) and it will carry on."); locStep.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
         identify(img);
       };
+      img.onerror = notPhoto;
       img.src = url;
     });
   }
