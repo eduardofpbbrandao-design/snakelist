@@ -846,8 +846,9 @@ HAND_FIXES_562 = {
     # scale rows; (4) the darker head (it darkens further in winter) was only faint; (5) a grey sheen from too much gloss;
     # (6) too slender a body for this fairly stout snake
     "oxyuranus-microlepidotus": [(("head", "irisDark"), 1), (("head", "iris"), "#2c1d12"), (("head", "irisInner"), "#4e3420"), (("head", "eyeRing"), "#7a5a34"), (("body", "ld"), 38),
-                                 (("head", "eyeL"), 0.17), (("head", "eyeX"), 0.35), (("head", "eyeA"), 60), (("head", "snoutH"), 0.86), (("head", "bulge"), 0.06),
-                                 (("colors", "dorsal"), "#7c5e30"), (("colors", "lateral"), "#866634"), (("colors", "belly"), "#dcb048"), (("colors", "bellyA"), 0.61),
+                                 (("head", "eyeL"), 0.17), (("head", "eyeX"), 0.35), (("head", "eyeA"), 60), (("head", "snoutH"), 0.9), (("head", "bulge"), 0.05),
+                                 (("head", "h"), 0.84), (("head", "hFixed"), 1), (("head", "groove"), 0.26), (("head", "headRelief"), 0.28), (("head", "taper"), 0.12), (("head", "brow"), 0.05), (("scales", "cavity"), 0.3),  # v5.78: the deep "coffin" head, glossier, warmer
+                                 (("colors", "dorsal"), "#83622f"), (("colors", "lateral"), "#8d6b35"), (("colors", "belly"), "#dcb048"), (("colors", "bellyA"), 0.61),
                                  (("scales", "gloss"), 0.6), (("pattern", 1, "alpha"), 0.38), (("pattern", 1, "x1"), 0.95)],
 }
 SKIP_562 = {"opheodrys-vernalis", "oxyuranus-microlepidotus"}  # (being rebuilt separately)
