@@ -1,6 +1,6 @@
 // Run: python3 build-site.py, serve the repo (python3 -m http.server $PORT), then
 //   PORT=<port> node tests/map-see-area.js [screenshot-dir]
-// v5.74 "See area" on a species' card in the map's list: that snake's whole range lit on the map in the picked
+// v5.74 "See area" (v5.78: "Show colours") on a species' card in the map's list: that snake's whole range lit on the map in the picked
 // country's green, darker where it lives more, lighter where less, places people brought it to in orange, with
 // a key (Close chip) - and how it goes away again (the button, Close, the empty map, a place, closing the list).
 // Portugal -> Montpellier snake, Pennsylvania -> Timber Rattlesnake, Florida -> Burmese python (brought by
@@ -64,15 +64,16 @@ async function run(theme, phone) {
   await p.evaluate(() => window.SL_FLY_BOX(-12, 2, 35, 45)); await p.waitForTimeout(1500);
   await llClick(p, -8, 39.5);
   ok(await p.evaluate(() => document.getElementById('cp-title').textContent) === 'Portugal', 'Portugal picked');
-  ok(await p.evaluate(() => [...document.querySelectorAll('#cp-list .cpc-card')].every(c => c.querySelector('.area-btn'))), 'every built card has See area');
+  ok(await p.evaluate(() => [...document.querySelectorAll('#cp-list .cpc-card')].every(c => c.querySelector('.area-btn'))), 'every built card has Show colours');
   ok(await p.evaluate(() => [...document.querySelectorAll('#cp-list .cpc-card')].every(c => c.scrollHeight <= c.clientHeight + 1)), 'no card overflows with the new line');
+  ok(await p.evaluate(() => [...document.querySelectorAll('#cp-list .cpc-card .cpc-extra')].every(x => x.getBoundingClientRect().height >= 16)), 'the line of states is full height on every card (not crushed to a thin green line)');
   ok(await p.evaluate(() => !document.querySelector('#cp-list .area-btn[title], #area-key [title]')), 'no title tooltips');
   await clickArea('malpolon-monspessulanus');
   let a = await info();
   ok(a && a.id === 'malpolon-monspessulanus', 'Montpellier snake area on');
   ok(a && a.states['pt:Lisbon'] === 3 && a.states['it:Liguria'] < a.states['es:Madrid' in a.states ? 'es:Madrid' : 'es:Toledo'], 'darker in its heartland (Lisbon ' + (a && a.states['pt:Lisbon']) + '), lighter at its edge (Liguria ' + (a && a.states['it:Liguria']) + ')');
-  ok(a && a.whole.ma === 0, 'Morocco (no finer records) lit whole, lightest');
-  ok(await p.evaluate(() => { const b = document.querySelector('#cp-list .cp-row[data-sp="malpolon-monspessulanus"] .area-btn'); return b.textContent === 'Hide area' && b.classList.contains('on') && b.getAttribute('aria-pressed') === 'true'; }), 'button turns into Hide area');
+  ok(a && a.whole.ma >= 0 && a.near.indexOf('ma') >= 0 && a.near.indexOf('dz') >= 0, 'Morocco and Algeria (no finer records): shaded only near its Iberian records, not out to the Sahara');
+  ok(await p.evaluate(() => { const b = document.querySelector('#cp-list .cp-row[data-sp="malpolon-monspessulanus"] .area-btn'); return b.textContent === 'Hide colours' && b.classList.contains('on') && b.getAttribute('aria-pressed') === 'true'; }), 'button turns into Hide area');
   ok(await p.evaluate(() => !document.getElementById('area-key').hidden && /Where the Montpellier Snake lives/.test(document.getElementById('area-key').textContent) && /more/.test(document.getElementById('ak-scale').textContent)), 'key: Where the Montpellier Snake lives, more / less');
   const vw = await p.evaluate(() => window.SL_MAP_VIEW());
   ok(vw.w < -9 && vw.e > 7 && vw.s < 36 && vw.n > 44, 'map fitted to the range (' + [vw.w, vw.e, vw.s, vw.n].map(x => x.toFixed(1)).join(', ') + ')');
@@ -84,8 +85,8 @@ async function run(theme, phone) {
   ok((await info()) !== null, 'a drag keeps the area');
   // button again: off
   await clickArea('malpolon-monspessulanus');
-  ok((await info()) === null && await p.evaluate(() => document.getElementById('area-key').hidden), 'Hide area puts it away');
-  ok(await p.evaluate(() => document.querySelector('#cp-list .cp-row[data-sp="malpolon-monspessulanus"] .area-btn').textContent === 'See area'), 'button back to See area');
+  ok((await info()) === null && await p.evaluate(() => document.getElementById('area-key').hidden), 'Hide colours puts it away');
+  ok(await p.evaluate(() => document.querySelector('#cp-list .cp-row[data-sp="malpolon-monspessulanus"] .area-btn').textContent === 'Show colours'), 'button back to Show colours');
   // the close chip
   await clickArea('malpolon-monspessulanus');
   await p.click('#ak-close'); await p.waitForTimeout(300);
@@ -120,7 +121,7 @@ async function run(theme, phone) {
   ok(a && Object.values(a.states).some(s => s < 2), 'some states lighter (edge of its range)');
   await shotMap('2-pennsylvania-timber-rattlesnake');
   await p.click('#ak-close'); await p.waitForTimeout(400);
-  ok(await p.evaluate(() => !document.getElementById('map-legend').hidden), 'after Close, the states key is back');
+  ok(await p.evaluate(() => document.getElementById('map-legend').hidden && /Pennsylvania/.test(document.getElementById('cp-title').textContent)), 'after Close, Pennsylvania is still picked (one state: no fewer/more key - v5.78)');
   await shotMap('2b-after-close-states-back');
 
   // ---- 3. Florida -> Burmese python (brought by people)
@@ -128,9 +129,10 @@ async function run(theme, phone) {
   ok(/Florida/.test(await p.evaluate(() => document.getElementById('cp-title').textContent)), 'Florida picked');
   if (await clickArea('python-bivittatus')) {
     a = await info();
-    ok(a && a.intro.indexOf('us:FL') >= 0, 'Florida shown as brought by people');
-    ok(a && a.states['th:Kanchanaburi'] != null, 'native range in Asia');
-    ok(await p.evaluate(() => !document.getElementById('ak-intro').hidden), 'key: Brought here by people');
+    ok(a && a.states['us:FL'] != null && a.parts.indexOf('us:FL') >= 0, 'Florida shaded like any other place, only its south (where it breeds)');
+    ok(a && a.states['cn:Yunnan'] != null && a.states['id:Sumbawa'] != null, 'native range in Asia (Yunnan, Sumbawa)');
+    ok(await p.evaluate(() => !document.getElementById('ak-intro') && !document.getElementById('ak-note').hidden), 'no separate brought-by-people colour; the key explains the shading');
+    ok(a && a.states['in:Assam'] != null && a.whole.in == null && a.whole.th != null, 'Burmese python: north-east India only (not all of India), Thailand whole');
     await shotMap('3-florida-burmese-python');
     await p.click('#ak-close'); await p.waitForTimeout(300);
   }

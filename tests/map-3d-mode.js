@@ -51,9 +51,9 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) { fails
 
     // ---- a species with a model: its model, straight away ----
     const view0 = await p.evaluate(() => JSON.stringify(window.SL_MAP_VIEW()));
-    const row = await p.$('#cp-list .cp-row.cp-sp:has(i:text-is("Natrix maura")) > b');
+    const row = await p.$('#cp-list .cp-row.cp-sp[data-sp="natrix-maura"]');
     ok(!!row, `${label}: Natrix maura is in Spain's list`);
-    await row.scrollIntoViewIfNeeded(); await row.click(); await p.waitForTimeout(900);
+    await row.scrollIntoViewIfNeeded(); await p.waitForTimeout(500); await p.click('#cp-list .cp-row.cp-sp[data-sp="natrix-maura"] .cpc-card .card-name'); await p.waitForTimeout(900);
     ok(await p.evaluate(() => !!document.querySelector('#globe-stage .sl3d-ov') && !/species\//.test(location.pathname) && document.querySelector('.sp-info-wrap').hidden),
       `${label}: with 3D on, choosing the species opens its 3D model right away (no species box or page first)`);
     const t0 = Date.now();
@@ -90,7 +90,7 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) { fails
     await p.click('.sp-info-x'); await p.waitForTimeout(300);
 
     // ---- 3D off: a species row still opens its page ----
-    const r3 = await p.$('#cp-list .cp-row.cp-sp:has(i:text-is("Natrix maura")) > b'); await r3.scrollIntoViewIfNeeded(); await r3.click();
+    const r3 = await p.$('#cp-list .cp-row.cp-sp[data-sp="natrix-maura"]'); await r3.scrollIntoViewIfNeeded(); await p.waitForTimeout(500); await p.click('#cp-list .cp-row.cp-sp[data-sp="natrix-maura"] .cpc-card .card-name');
     ok(await p.waitForURL(/species\//, { timeout: 15000 }).then(() => true, () => false), `${label}: with 3D off, a species row opens the species page as before`);
     ok(errs.length === 0, `${label}: no page errors` + (errs.length ? ' - ' + errs.join(' | ') : ''));
     await ctx.close();
