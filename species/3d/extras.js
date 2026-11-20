@@ -1007,7 +1007,7 @@ export function create(V) {
     const nm = prey.userData.name;
     const T = {
       intro: { egg: 'Egg-eaters find <b>birds\' eggs</b> by smell.', fish: 'It hunts <b>' + nm + '</b>.', frog: 'It hunts <b>' + nm + '</b>, found by smell with its tongue.', snake: 'It hunts <b>' + nm + '</b> - some snakes eat other snakes!', lizard: 'It hunts <b>' + nm + '</b>.', bird: 'It hunts <b>' + nm + '</b>.', centipede: 'It hunts <b>' + nm + '</b> - small snakes like this one eat centipedes, scorpions and spiders.', worm: 'It finds <b>' + nm + '</b> by smell in damp soil.', slug: 'It finds <b>' + nm + '</b> by following its slime trail.', caterpillar: 'It hunts <b>' + nm + '</b> and other insects in the leaves.', mouse: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.', rat: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.' }[kind],
-      stalk: inWater ? 'It slides into the water and <b>swims</b> towards it: waves run down its body and push against the water.' : 'It <b>creeps up</b> slowly, flicking its tongue to keep track of the scent.',
+      stalk: inWater ? (sea ? 'It <b>swims</b> up to it:' : 'It slides into the water and <b>swims</b> towards it:') + ' waves run down its body and push against the water.' : 'It <b>creeps up</b> slowly, flicking its tongue to keep track of the scent.',
       aim: 'The <b>strike pose</b>: the neck pulled back into an S, the head level and aimed.',
       strike: 'Strike! Faster than you can blink, the mouth opening wide as it lands.',
       inject: '<b>Venom</b> flows through the fangs into the prey.',
@@ -1048,7 +1048,7 @@ export function create(V) {
       // 4. strike: ~0.16 s, the mouth opening as it lands
       phases.push([0.16, (u) => { const e = u * u * (3 - 2 * u); R.setPose(R.blend(coil, ext, e)); R.apply(); setMouth(Math.max(0.75, tHold) * sstep(0.25, 0.85, u)); say(T.strike); if (u >= 0.98) held = true; }]);
       phases.push([0.45, (u, s) => {
-        held = true; R.setPose(ext); R.apply(); setMouth(tHold);
+        held = true; R.setPose(ext); R.apply(); setMouth(tHold); say(T.strike);
         if (u < 0.05 && inWater && NAT.ripple && !phases.splashed) { phases.splashed = true; NAT.ripple(prey.position.x, prey.position.z, 1.6, Math.max(prR * 1.5, 0.012)); NAT.ripple(R.point(Hl).x, R.point(Hl).z, 1.2, Math.max(prR, 0.01)); }
         camKey = camSide(headPt().lerp(preyPt(), 0.35), fitD(Hl * 2.4 + Lp * 1.3)); void s;
       }]);
