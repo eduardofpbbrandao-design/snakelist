@@ -2492,17 +2492,27 @@
     // v5.68: the snake's name stays in its corner when there is room; when it would sit on or right next to
     // Scroll to continue it goes in the middle, just above it (the cue is fixed to the screen, the name scrolls with the
     // photo, so both are compared as they are with the photo at the top)
+    // v5.83: decided by the sides alone - whenever any part of the name would sit over, under or right next to the words
+    // Scroll to continue (any screen, any zoom, any name), it goes centred on Scroll to continue, just above it.
+    // When the opening is taller than the screen (short sideways phones), the name is lifted onto the screen.
+    // Checked again on every resize and whenever the name or Scroll to continue change size (late fonts, a new name).
     function placeCredit() {
       var sp = document.getElementById("hero-sp"), cue = document.getElementById("hero-cue"); if (!sp || !cue || hero.hidden) return;
-      sp.classList.remove("hero-sp-mid"); sp.style.bottom = "14px";
-      var a = sp.getBoundingClientRect(), b = cue.getBoundingClientRect(), hr = hero.getBoundingClientRect(), y = window.scrollY, g = 12;
-      if (!a.width || !b.width) { sp.style.bottom = ""; return; }
-      var aT = a.top + y, aB = a.bottom + y, aL = a.left, aR = a.right;
-      var hit = aR + g > b.left && aL - g < b.right && aB + g > b.top && aT - g < b.bottom;
-      if (!hit) { sp.style.bottom = ""; return; }
+      sp.classList.remove("hero-sp-mid"); sp.style.left = ""; sp.style.bottom = "";
+      var hr = hero.getBoundingClientRect(), vh = window.innerHeight || hr.height, g = 16;
+      var lift = Math.max(0, Math.round(hr.height - vh));
+      if (lift) sp.style.bottom = Math.round((parseFloat(getComputedStyle(sp).bottom) || 14) + lift) + "px";
+      var a = sp.getBoundingClientRect(), b = cue.getBoundingClientRect();
+      if (!a.width || !b.width) return;
+      if (!(a.right + g > b.left && a.left - g < b.right)) return;
       sp.classList.add("hero-sp-mid");
-      sp.style.bottom = Math.max(14, Math.round(hr.bottom + y - b.top + 6)) + "px";
+      sp.style.left = Math.round(b.left + b.width / 2 - hr.left) + "px";
+      sp.style.bottom = Math.max(14, Math.round(hr.height - b.top + 6)) + "px"; // b.top: from the top of the screen, as with the photo at the top
     }
+    if (window.ResizeObserver) { var crRO = null; try { crRO = new ResizeObserver(function () { placeCredit(); });
+      ["hero-sp", "hero-cue"].forEach(function (id) { var el = document.getElementById(id); if (el) crRO.observe(el); }); } catch (e) {} }
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener("loadingdone", function () { placeCredit(); });
+    window.addEventListener("load", function () { placeCredit(); });
     hero.__placeCredit = placeCredit;
     hero.__placeLogo = placeLogo;
     window.__matchHeroLogo = function (w) { if (!w) return; hero.__forceW = w; placeLogo(); };
