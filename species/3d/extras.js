@@ -465,6 +465,11 @@ export function create(V) {
     for (let i = 0; i < N - 1; i++) { const ax = rc[i * 3 + 3] - rc[i * 3], az = rc[i * 3 + 5] - rc[i * 3 + 2]; rth[i] = Math.atan2(az, ax); rh[i] = Math.max(1e-9, Math.hypot(ax, az)); }
     rth[N - 1] = rth[N - 2]; rh[N - 1] = rh[N - 2];
     for (let i = 1; i < N; i++) rth[i] = rth[i - 1] + angDiff(rth[i - 1], rth[i]); // unwrapped
+    // v5.73: the real (3D) length of every step along the body, and the distance of each sample from the snout: every
+    // pose keeps these, so the body never stretches or shrinks, however it bends, rises or coils
+    const s3 = new Float32Array(N), S3 = new Float32Array(N);
+    for (let i = 0; i < N - 1; i++) s3[i] = Math.max(1e-9, Math.hypot(rc[i * 3 + 3] - rc[i * 3], rc[i * 3 + 4] - rc[i * 3 + 1], rc[i * 3 + 5] - rc[i * 3 + 2]));
+    s3[N - 1] = s3[N - 2]; for (let i = 1; i < N; i++) S3[i] = S3[i - 1] + s3[i - 1];
     // the rigid parts: everything on the snake except its body mesh
     const headRig = new THREE.Group(), tailRig = new THREE.Group(); headRig.name = 'headRig'; tailRig.name = 'tailRig';
     headRig.matrixAutoUpdate = tailRig.matrixAutoUpdate = false; headRig.userData.noRig = tailRig.userData.noRig = true;
@@ -502,6 +507,35 @@ export function create(V) {
     const bodySkin = addSkin(body.geo, bx, { bulge: true, body: true });
     const mver = () => (mo ? (mo.ver != null ? mo.ver : mo.t) : 0); let lastT = mver(), active = false;
     const contact = V.scene && V.scene.children.find((o) => o.isMesh && o.renderOrder === 1 && o.material && o.material.map && o.material.transparent && o.geometry && o.geometry.type === 'PlaneGeometry');
+    // v5.73: while the body is posed (slithering, hunting) a soft contact shadow follows it on the ground - darkest where
+    // the belly touches, fading where the body lifts off (a coil, the raised head), and none on water - instead of the
+    // painted one for the resting pose, which used to just disappear
+    const rib = (() => {
+      if (!contact || !V.scene) return null;
+      const nS = 120, pos = new Float32Array((nS + 1) * 2 * 3), col = new Float32Array((nS + 1) * 2 * 4), uv = new Float32Array((nS + 1) * 2 * 2), idx = [];
+      for (let k = 0; k <= nS; k++) { uv.set([0, k / nS, 1, k / nS], k * 4); col.fill(0, k * 8, k * 8 + 8); if (k < nS) { const a = k * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); } }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 4)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); g.setIndex(idx);
+      const tex = canvasTex(64, (x, S) => { const gr = x.createLinearGradient(0, 0, S, 0); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(0.3, 'rgba(0,0,0,.55)'); gr.addColorStop(0.5, 'rgba(0,0,0,.8)'); gr.addColorStop(0.7, 'rgba(0,0,0,.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); x.clearRect(0, 0, S, S); x.fillStyle = gr; x.fillRect(0, 0, S, S); });
+      tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+      const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: tex, vertexColors: true, transparent: true, depthWrite: false, color: '#ffffff', polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+      m.renderOrder = 1; m.frustumCulled = false; m.visible = false; m.userData.noRig = true; m.raycast = () => {}; V.scene.add(m);
+      const wMesh = V.scene.children.find((o) => o.isMesh && o.renderOrder === 2 && o.material && o.material.transparent), wY = wMesh ? wMesh.position.y : -1e9, sea = !!(P.scene && P.scene.kind === 'sea');
+      const fl = new Float32Array(nS + 1);
+      function update() {
+        if (sea) return;
+        const step = (N - 1) / nS, win = Math.max(2, Math.round(nS * 0.06));
+        for (let k = 0; k <= nS; k++) { const i = Math.round(k * step); fl[k] = nc[i * 3 + 1] - F.Hh(i * dx) * F.bf; }
+        for (let k = 0; k <= nS; k++) {
+          const i = Math.round(k * step), x = i * dx; let lo = 1e9; for (let q = Math.max(0, k - win); q <= Math.min(nS, k + win); q++) lo = Math.min(lo, fl[q]);
+          const up = fl[k] - lo, a = (1 - sstep(F.Hh(x) * 0.15, F.Hh(x) * 1.6, up)) * (lo < wY + F.Hh(x) * 0.2 ? 0 : 1) * sstep(0, L * 0.02, x) * (1 - sstep(L * 0.9, L, x)) * 0.8;
+          const cx = nc[i * 3], cz = nc[i * 3 + 2], j = Math.min(N - 1, i + 1), j0 = Math.max(0, i - 1); let tx = nc[j * 3] - nc[j0 * 3], tz = nc[j * 3 + 2] - nc[j0 * 3 + 2]; const tl = Math.hypot(tx, tz) || 1; tx /= tl; tz /= tl;
+          const w = F.W(x) * 1.35 * (1 + up / Math.max(1e-6, F.Hh(x)) * 0.4), y = lo + Math.max(1e-4, L * 0.0006);
+          pos.set([cx - tz * w, y, cz + tx * w, cx + tz * w, y, cz - tx * w], k * 6); col[k * 8 + 3] = col[k * 8 + 7] = a;
+        }
+        g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true;
+      }
+      return { m, update };
+    })();
     const mA = new THREE.Matrix4(), mB = new THREE.Matrix4(), tv = new THREE.Vector3();
     const basis = (arr1, arr2, arr3, i, m) => m.set(arr1[i * 3], arr2[i * 3], arr3[i * 3], 0, arr1[i * 3 + 1], arr2[i * 3 + 1], arr3[i * 3 + 1], 0, arr1[i * 3 + 2], arr2[i * 3 + 2], arr3[i * 3 + 2], 0, 0, 0, 0, 1);
     function rigidAt(i, out) { // the move that carries rest frame i onto the new frame i
@@ -536,12 +570,13 @@ export function create(V) {
       s.geo.computeBoundingSphere();
     }
     function seam(geo) { const nr = geo.attributes.normal.array; for (let i = 0; i < body.nR; i++) { const a = i * (M + 1), b = a + M; for (let q = 0; q < 3; q++) { const m = (nr[a * 3 + q] + nr[b * 3 + q]) / 2; nr[a * 3 + q] = nr[b * 3 + q] = m; } } geo.attributes.normal.needsUpdate = true; }
-    function apply() {
+    function apply(keepContact) {
       if (mo && mver() !== lastT) { localize(bodySkin, 0, jawVerts, bodySkin.pa.array); lastT = mver(); } // the jaw moved: take its new shape
       frames();
       headRig.matrix.copy(hM); headRig.matrixWorldNeedsUpdate = true; tailRig.matrix.copy(tM); tailRig.matrixWorldNeedsUpdate = true;
       for (const s of skins) deform(s);
-      if (!active) { active = true; if (contact) contact.visible = false; }
+      if (!active) { active = true; if (contact && !keepContact) contact.visible = false; }
+      if (rib) { rib.m.visible = !keepContact && V.sceneOn !== false && !(P.scene && P.scene.kind === 'sea'); if (rib.m.visible) rib.update(); }
     }
     function release() {
       if (!active) return; active = false;
@@ -550,37 +585,70 @@ export function create(V) {
       if (mo) { mo.set(mo.t); mo.settle(); lastT = mver(); } else { body.geo.computeVertexNormals(); seam(body.geo); }
       body.geo.computeBoundingSphere();
       headRig.matrix.identity(); tailRig.matrix.identity(); headRig.matrixWorldNeedsUpdate = tailRig.matrixWorldNeedsUpdate = true;
-      if (contact) contact.visible = true;
+      if (contact) contact.visible = true; if (rib) rib.m.visible = false;
     }
     // poses ------------------------------------------------------------
     // a centre line from turning angles th[i] (segment i -> i+1), anchored at sample a, heights ys
+    // v5.73: each step keeps its real 3D length (where the body rises or drops, the step over the ground is shorter)
     function integrate(th, a, ax, az, ys) {
       const out = new Float32Array(N * 3); out[a * 3] = ax; out[a * 3 + 2] = az;
-      for (let i = a + 1; i < N; i++) { out[i * 3] = out[i * 3 - 3] + Math.cos(th[i - 1]) * rh[i - 1]; out[i * 3 + 2] = out[i * 3 - 1] + Math.sin(th[i - 1]) * rh[i - 1]; }
-      for (let i = a - 1; i >= 0; i--) { out[i * 3] = out[i * 3 + 3] - Math.cos(th[i]) * rh[i]; out[i * 3 + 2] = out[i * 3 + 5] - Math.sin(th[i]) * rh[i]; }
+      const hz = (i) => { const dy = ys[i + 1] - ys[i], q = s3[i] * s3[i]; return Math.sqrt(Math.max(q * 0.04, q - dy * dy)); };
+      for (let i = a + 1; i < N; i++) { const h = hz(i - 1); out[i * 3] = out[i * 3 - 3] + Math.cos(th[i - 1]) * h; out[i * 3 + 2] = out[i * 3 - 1] + Math.sin(th[i - 1]) * h; }
+      for (let i = a - 1; i >= 0; i--) { const h = hz(i); out[i * 3] = out[i * 3 + 3] - Math.cos(th[i]) * h; out[i * 3 + 2] = out[i * 3 + 5] - Math.sin(th[i]) * h; }
       for (let i = 0; i < N; i++) out[i * 3 + 1] = ys[i];
       return out;
     }
     const restY = new Float32Array(N); for (let i = 0; i < N; i++) restY[i] = rc[i * 3 + 1];
     // v5.68: a snake up in a tree reaches out at the height of its branch, not down to the ground
     const perchY = V.info.tree && V.info.tree.userData.perch ? V.info.tree.userData.perch.a.y : 0; // (the top of its branch)
-    const baseY = (i) => F.Hh(i * dx) * F.bf + perchY;
+    const baseY = (i, fl = perchY) => F.Hh(i * dx) * F.bf + fl;
+    // v5.73: a pose to build on (the rest pose, or wherever the snake has crawled or swum to): its headings, centre
+    // line, heights and the level of the ground (or water) under its head
+    function baseOf(pose, fl) {
+      const th = new Float32Array(N), y = new Float32Array(N);
+      for (let i = 0; i < N - 1; i++) th[i] = Math.atan2(pose[i * 3 + 5] - pose[i * 3 + 2], pose[i * 3 + 3] - pose[i * 3]);
+      th[N - 1] = th[N - 2]; for (let i = 1; i < N; i++) th[i] = th[i - 1] + angDiff(th[i - 1], th[i]);
+      for (let i = 0; i < N; i++) y[i] = pose[i * 3 + 1];
+      return { th, c: pose, y, fl: fl != null ? fl : perchY };
+    }
+    const REST = { th: rth, c: rc, y: restY, fl: perchY };
     // the head-and-neck posture: forebody up to sample is pointed along heading phi (the direction T, from head to
     // tail, is phi + PI), curled into an S by amount 'coil'; lifted by 'lift' at the head; head turned by 'yaw'
+    // (v5.73: built on o.base - by default the rest pose; the head itself is held level, aimed straight ahead)
     function fore(o) {
-      const is = Math.round(o.len / dx), th = rth.slice(), ys = restY.slice(), phiT = o.phi + Math.PI, tr = Math.max(4, Math.round(is * 0.3));
-      const base = rth[is] + angDiff(rth[is], phiT); // the reaching direction, unwrapped next to the body's own heading
+      const B = o.base || REST, bth = B.th, by = B.y, bc = B.c;
+      const is = Math.min(N - 2, Math.round(o.len / dx)), th = bth.slice(), ys = by.slice(), phiT = o.phi + Math.PI, tr = Math.max(4, Math.round(is * 0.3)), hl0 = Math.min(is - 2, ih * 1.3);
+      const base = bth[is] + angDiff(bth[is], phiT); // the reaching direction, unwrapped next to the body's own heading
       for (let i = is - 1; i >= 0; i--) {
-        const k = sstep(is, is - tr, i); let a = base + angDiff(base, rth[is]) * (1 - k);
+        const k = sstep(is, is - tr, i); let a = base + angDiff(base, bth[is]) * (1 - k);
         const u = (is - i) / is, w = sstep(0, ih * 1.6, i) * (1 - sstep(is * 0.82, is, i));
         a += (o.coil || 0) * 1.25 * Math.sin(TAU * 1.5 * u) * w;
         if (o.yaw) a += o.yaw * (1 - sstep(ih * 0.9, ih * 2.4, i));
         th[i] = a;
-        const ly = (o.lift || 0) * Math.pow(1 - i / is, 1.6) * (1 - (o.coil || 0) * 0.25);
-        ys[i] = lerp(restY[i], baseY(i) + clamp(restY[i] - baseY(i), 0, F.Hh(F.Hl) * 0.6), sstep(is, is * 0.7, i)) + ly;
+        const ly = (o.lift || 0) * Math.pow(clamp((is - i) / Math.max(1, is - hl0), 0, 1), 1.6) * (1 - (o.coil || 0) * 0.25); // (level over the head and the neck just behind it)
+        const bY = baseY(i, B.fl);
+        ys[i] = lerp(by[i], bY + clamp(by[i] - bY, 0, F.Hh(F.Hl) * 0.6), sstep(is, is * 0.7, i)) + ly;
       }
-      for (let i = is; i < N - 1; i++) th[i] = rth[i];
-      return integrate(th, is, rc[is * 3], rc[is * 3 + 2], ys);
+      const out = integrate(th, is, bc[is * 3], bc[is * 3 + 2], ys);
+      if (B !== REST) out.set(bc.subarray(is * 3), is * 3); // (behind the reach the body stays exactly where it is)
+      return out;
+    }
+    // v5.73: blend two poses by their turning and climbing angles, from sample a (which moves straight between them):
+    // the body bends from one shape into the other without ever changing length
+    function ang3(pose) {
+      const yw = new Float32Array(N), pt = new Float32Array(N);
+      for (let i = 0; i < N - 1; i++) { const ax = pose[i * 3 + 3] - pose[i * 3], ay = pose[i * 3 + 4] - pose[i * 3 + 1], az = pose[i * 3 + 5] - pose[i * 3 + 2]; yw[i] = Math.atan2(az, ax); pt[i] = Math.atan2(ay, Math.hypot(ax, az)); }
+      yw[N - 1] = yw[N - 2]; pt[N - 1] = pt[N - 2]; for (let i = 1; i < N; i++) yw[i] = yw[i - 1] + angDiff(yw[i - 1], yw[i]);
+      return { yw, pt };
+    }
+    function blend3(P0, A0, P1, A1, e, a, ep = e) { // (ep: how far the climbing angles have got - the body can curl first and rise after)
+      if (e <= 0) return P0.slice(); if (e >= 1) return P1.slice();
+      let sm = 0; for (let i = 0; i < N; i++) sm += A0.yw[i] - A1.yw[i]; const off = Math.round(sm / N / TAU) * TAU;
+      const out = new Float32Array(N * 3); for (let c = 0; c < 3; c++) out[a * 3 + c] = lerp(P0[a * 3 + c], P1[a * 3 + c], e);
+      const st = (i, sg, j) => { const yw = lerp(A0.yw[i], A1.yw[i] + off, e), pt = lerp(A0.pt[i], A1.pt[i], ep), cp = Math.cos(pt) * s3[i]; out[j * 3] = out[(j - sg) * 3] + sg * Math.cos(yw) * cp; out[j * 3 + 1] = out[(j - sg) * 3 + 1] + sg * Math.sin(pt) * s3[i]; out[j * 3 + 2] = out[(j - sg) * 3 + 2] + sg * Math.sin(yw) * cp; };
+      for (let i = a + 1; i < N; i++) st(i - 1, 1, i);
+      for (let i = a - 1; i >= 0; i--) st(i, -1, i);
+      return out;
     }
     // the move of the head for a pose (to place things where the head will be)
     function headMatrixFor(pose) {
@@ -598,7 +666,7 @@ export function create(V) {
     }
     function point(x, s = 0, u = 0) { const f = frameAtX(x); return f.c.addScaledVector(f.S, s).addScaledVector(f.U, u); }
     function sync() { if (active && mo && mver() !== lastT) apply(); } // the mouth opened or shut while the body is posed
-    return { N, dx, ih, L, rc, rth, rh, restY, bul, headRig, tailRig, addSkin, apply, release, sync, integrate, fore, headMatrixFor, setPose, blend, frameAtX, point, get active() { return active; }, rest: () => rc.slice() };
+    return { N, dx, ih, L, rc, rth, rh, restY, bul, s3, S3, REST, baseOf, ang3, blend3, perchY, headRig, tailRig, addSkin, apply, release, sync, integrate, fore, headMatrixFor, setPose, blend, frameAtX, point, get active() { return active; }, rest: () => rc.slice() };
   }
   function ensureRig() { if (!rig && V.info && V.group) rig = makeRig(); return rig; }
 
@@ -627,9 +695,9 @@ export function create(V) {
   // ================================================================= shows (automatic: the camera moves by itself)
   function startShow(def) {
     if (!V.info || !V.extras) return;
-    stopShow(true); stopSlither(); if (anat && anat.on) anat.set(false, true); V.scaleOff();
+    idleStop(); stopShow(true); stopSlither(); if (anat && anat.on) anat.set(false, true); V.scaleOff();
     ensureRig();
-    show = Object.assign({ t0: now(), time: 0, freeze: null, objs: [] }, def);
+    show = Object.assign({ t0: now(), lastF: now(), time: 0, freeze: null, objs: [] }, def);
     show.mouth0 = V.mouthGoal;
     V.controls.st.goal = null; V.controls.st.vaz = V.controls.st.vel = V.controls.st.vpx = V.controls.st.vpz = 0;
     bEat.disabled = true;
@@ -666,23 +734,35 @@ export function create(V) {
   }
 
   // the neck's heading that makes the head itself (not just the neck) point along D
-  function aim(st, lift) {
+  function aim(st, lift, base) {
     let phi = st.phi;
-    for (let k = 0; k < 3; k++) { const hm = rig.headMatrixFor(rig.fore({ len: st.len, phi, lift, coil: 0 })), d = V.info.headDir.clone().transformDirection(hm); phi -= angDiff(st.phi, Math.atan2(d.z, d.x)); }
+    for (let k = 0; k < 3; k++) { const hm = rig.headMatrixFor(rig.fore({ len: st.len, phi, lift, coil: 0, base })), d = V.info.headDir.clone().transformDirection(hm); phi -= angDiff(st.phi, Math.atan2(d.z, d.x)); }
     st.aim = phi; return phi;
   }
 
   // ---------------------------------------------------------------- See it eat
+  // v5.73: the whole hunt, the way real snakes do it (Eduardo: "it does a attacking pose then launches itself and curls
+  // around to start eating"):
+  //  1. it notices the prey: tongue flicks, the head turns to follow it;
+  //  2. it creeps up on it - or, beside water, slides in and swims out to it, waves running down its body (lateral
+  //     undulation), leaving ripples;
+  //  3. it draws its neck back into an S, the head level and aimed;
+  //  4. strike: about a sixth of a second, the mouth opening wide just as it lands;
+  //  5. constrictors (boas, pythons, rat snakes, kingsnakes...) throw two or three coils round the prey and squeeze,
+  //     wait, loosen the coils, find the prey's head and swallow it head-first (jaw walking);
+  //     vipers and elapids let go at once and wait for the venom, then follow the scent trail and swallow;
+  //     the others (water snakes, garter snakes, sea snakes...) just swallow what they grabbed;
+  //  6. afterwards it crawls on, round and back into its resting place (so the model ends where it began).
+  // The prey only ever shows inside the open mouth and throat (cut off across the throat), never through the body.
   function eat() {
     const mo = V.extras.mouth; if (!mo) return;
-    const R = rig, F = V.info.F, Hl = F.Hl, L = F.L, st = strikeSetup(0);
+    const R = rig, F = V.info.F, Hl = F.Hl, L = F.L, st = strikeSetup(0), N = R.N, NAT = V.NATURE || {};
     // v5.68: up in a tree the prey sits on the branch beyond the snake, and the snake reaches along the branch for it
     const perch = V.info.tree && V.info.tree.userData.perch;
     if (perch) {
       const tg = perch.a.clone().addScaledVector(perch.dir, Math.min(perch.len, st.len * 0.6)), d = tg.sub(V.info.headPos).setY(0);
       if (d.lengthSq() > 1e-8) { st.D = d.normalize(); st.phi = Math.atan2(st.D.z, st.D.x); st.perp = V3(-st.D.z, 0, st.D.x); if (st.perp.dot(V.info.center.clone().sub(V.info.headPos).setY(0)) > 0) st.perp.negate(); }
     }
-    const D = st.D;
     const onPerch = (p) => { const q = p.clone().sub(perch.a), u = clamp(q.dot(perch.dir), 0, perch.len * 1.6); return perch.a.clone().addScaledVector(perch.dir, u); }; // the nearest point on top of the branch
     const diet = dietOf(P, V.opts.id);
     const rB = (x) => Math.min(F.W(x), F.Hh(x));
@@ -711,17 +791,110 @@ export function create(V) {
     const tNeed = mo.tFor ? mo.tFor(prR * 2 * 0.9) : 0.9, tHold = clamp(tNeed * 0.8, 0.3, 1.1), spreadNeed = clamp((prR * 0.95 - headR * 0.8) / headR, 0, 0.6);
     const restSnout = R.rest().subarray(0, 3);
     const lift = Math.max(0, prR * 0.95 - restSnout[1]) + Hl * 0.05;
-    let phi = aim(st, lift);
+    const constrict = !perch && (plan === 'python' || (plan === 'colubrid' && (kind === 'mouse' || kind === 'rat' || kind === 'bird' || (kind === 'snake' && !venomous)))) && kind !== 'egg';
+    const envenom = venomous && kind !== 'egg';
+    // vipers, cobras, mambas and kraits let go of prey that could bite back (mammals, birds) and follow it when the venom
+    // has worked; frogs, lizards and fish are held until they stop moving (a cottonmouth holds its fish), as in sea snakes
+    const letGo = envenom && plan !== 'sea' && (kind === 'mouse' || kind === 'rat' || kind === 'bird');
+    const strikes = kind !== 'egg' && kind !== 'worm' && kind !== 'slug' && kind !== 'caterpillar'; // (slow prey is just seized)
+    const xp0 = Hl * 0.22;
+
+    // ---- where it hunts: on the ground it creeps up on prey a little way ahead; beside water the prey is in the water
+    // (a fish just under the surface, a frog floating, a rat at the water's edge) and it swims out to it
+    const info = V.info, ctx = V.ctx || {}, wi = ctx.waterInfo;
+    const wMesh = V.scene.children.find((o) => o.isMesh && o.renderOrder === 2 && o.material && o.material.transparent);
+    const sea = !!(P.scene && P.scene.kind === 'sea'), waterY = wMesh ? wMesh.position.y : null;
+    const travel = !V.info.tree; // (up in a tree, or draped on a branch, it reaches from where it lies)
+    const wet = travel && waterY != null && (sea || !!wi);
+    const yAt = (pts) => groundYAt(pts, true);
+    const by0 = (i) => F.Hh(i * R.dx) * F.bf; // the centre line's height above what it lies on
+    const W0 = F.W(L * 0.4), Hm = F.Hh(L * 0.4) * F.bf;
+    // what the body rests on at a point: the ground, or (floating) the water surface
+    const support = (g) => (!wet || sea ? g : Math.max(g, waterY - Hm * 0.45)); // (a swimming snake floats with its back out of the water)
+    const head0 = V3(R.rc[0], 0, R.rc[2]), hd = V3(info.headDir.x, 0, info.headDir.z).normalize();
+    let Q = null, gQ = 0, inWater = false;
+    if (travel) {
+      const out = head0.clone().sub(V3(info.center.x, 0, info.center.z)); if (out.lengthSq() > 1e-10) out.normalize();
+      let u = hd.clone().addScaledVector(out, 0.6).normalize(), dist = clamp(L * 0.3, Hl * 4, 1.4);
+      if (wet && !sea) { // towards the water, and out into it far enough for the prey
+        const wd = V3(wi.dir.x, 0, wi.dir.y); u = wd.clone().addScaledVector(hd, 0.45).normalize(); if (u.dot(wd) < 0.4) u = wd.clone();
+        const steps = 48, far = clamp(L * 1.1, 0.4, 3), list = []; for (let k = 1; k <= steps; k++) { const p = head0.clone().addScaledVector(u, (far * k) / steps); list.push([p.x, p.z]); }
+        const gy = yAt(list), need = kind === 'fish' ? waterY - prR * 2.6 : kind === 'frog' ? waterY - prR * 1.2 : waterY + prR * 0.1;
+        let k0 = gy.findIndex((y) => y < need); if (k0 < 0) k0 = steps - 1;
+        dist = Math.max(Hl * 4, (far * (k0 + 1)) / steps + (kind === 'fish' || kind === 'frog' ? Math.max(prR * 4, L * 0.08) : 0));
+      } else if (sea) { u = hd.clone().addScaledVector(out, 0.3).normalize(); dist = clamp(L * 0.45, Hl * 5, 2); }
+      Q = head0.clone().addScaledVector(u, dist);
+      gQ = yAt([[Q.x, Q.z]])[0];
+      inWater = wet && (sea || gQ < waterY - prR * 0.3);
+    }
+
+    // ---- 1. it notices: the head turns towards the prey (tongue flicking)
+    const aimAt = (base, from, to, liftK, len) => { const d = to.clone().sub(from).setY(0); if (d.lengthSq() < 1e-12) d.copy(hd); d.normalize(); const s2 = { phi: Math.atan2(d.z, d.x), len }; return aim(s2, liftK, base); };
+    let N1 = R.rest(), B = R.REST, path = null, sh0 = 0, sh1 = 0, shEnd = 0, Lt = R.S3[N - 1], fol = null;
+    if (travel) {
+      const lenN = clamp(L * 0.2, Hl * 3.5, L * 0.35);
+      N1 = R.fore({ len: lenN, phi: aimAt(R.REST, head0, Q, Hl * 0.12, lenN), lift: Hl * 0.12, coil: 0.12 });
+      // ---- 2. the path it takes: its own body now (tail to head), then a curve from its head to the prey with waves
+      // drawn into it, then (afterwards) round and back into its resting place. Every point of the body follows the
+      // path of the head, as in real lateral undulation.
+      const H0 = V3(N1[0], 0, N1[2]), t0 = V3(N1[0] - N1[6], 0, N1[2] - N1[8]).normalize();
+      let D = Q.clone().sub(H0).setY(0); const dQ = D.length(); D.normalize();
+      const E = Q.clone().addScaledVector(D, -(Lp / 2 - xp0) - Hl * 0.05); // the snout's goal: the prey's front just in its mouth
+      const pts = [], gs = [];
+      for (let i = N - 1; i >= 0; i--) { pts.push([N1[i * 3], N1[i * 3 + 2]]); gs.push(N1[i * 3 + 1] - by0(i)); }
+      const hermite = (A, tA, Bp, tB, m, n, wave) => { // a smooth curve (plus optional waves across it), sampled finely
+        const out = []; let s = 0, prev = null;
+        for (let k = 1; k <= n; k++) {
+          const t = k / n, h00 = 2 * t * t * t - 3 * t * t + 1, h10 = t * t * t - 2 * t * t + t, h01 = -2 * t * t * t + 3 * t * t, h11 = t * t * t - t * t;
+          const p = A.clone().multiplyScalar(h00).addScaledVector(tA, h10 * m).addScaledVector(Bp, h01).addScaledVector(tB, h11 * m);
+          if (prev) s += p.distanceTo(prev); prev = p.clone(); out.push([p, s]);
+        }
+        if (wave) { // waves across the path, growing in after the start and gone before the end (it ends straight at the prey)
+          const tot = s, base = out.map((q) => q[0].clone()); // (directions from the smooth curve itself)
+          for (let k = 0; k < out.length; k++) {
+            const [p, s1] = out[k], q = base[Math.min(out.length - 1, k + 1)], q0 = base[Math.max(0, k - 1)], tg = q.clone().sub(q0).setY(0).normalize(), nx = V3(-tg.z, 0, tg.x);
+            const env = sstep(0, wave.lam * 0.6, s1) * (1 - sstep(tot - wave.lam * 1.1, tot - wave.lam * 0.35, s1));
+            p.addScaledVector(nx, wave.A * env * Math.sin((TAU * s1) / wave.lam));
+          }
+        }
+        return out.map((q) => q[0]);
+      };
+      const lam = wet ? L * 0.5 : L * 0.62, A = Math.min(wet ? L * 0.055 : L * 0.03, lam * 0.12);
+      const ext = hermite(H0, t0, E, D, Math.max(dQ * 0.7, Hl * 2), Math.max(60, Math.round(dQ / (R.dx * 0.5))), { lam, A });
+      const T0 = V3(R.rc[(N - 1) * 3], 0, R.rc[(N - 1) * 3 + 2]), tT = V3(R.rc[(N - 2) * 3] - R.rc[(N - 1) * 3], 0, R.rc[(N - 2) * 3 + 2] - R.rc[(N - 1) * 3 + 2]).normalize();
+      const dR = E.distanceTo(T0), ret = hermite(E, D, T0, tT, Math.max(dR * 1.1, L * 0.35), Math.max(80, Math.round((dR * 1.6) / (R.dx * 0.5))), dR > L * 0.4 ? { lam: L * 0.62, A: L * 0.025 } : null);
+      const ge = yAt(ext.map((p) => [p.x, p.z])), gr = yAt(ret.map((p) => [p.x, p.z]));
+      ext.forEach((p, k) => { pts.push([p.x, p.z]); gs.push(support(ge[k])); });
+      ret.forEach((p, k) => { pts.push([p.x, p.z]); gs.push(support(gr[k])); });
+      const nRest = pts.length;
+      for (let i = N - 2; i >= 0; i--) { pts.push([R.rc[i * 3], R.rc[i * 3 + 2]]); gs.push(R.restY[i] - by0(i)); } // (back into its resting place, head last)
+      // arc length along the path (the body's own parts keep their exact step lengths, so it ends exactly at rest)
+      const n = pts.length, cum = new Float32Array(n);
+      for (let k = 1; k < n; k++) cum[k] = cum[k - 1] + (k < N ? R.s3[N - 1 - k] : k >= nRest ? R.s3[N - 2 - (k - nRest)] : Math.max(1e-9, Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1], gs[k] - gs[k - 1])));
+      sh0 = cum[N - 1]; sh1 = cum[N - 1 + ext.length]; shEnd = cum[n - 1];
+      path = { pts, gs, cum, n };
+      const at = (s, o) => { // [x, ground, z] at arc length s (straight on beyond the ends)
+        let lo = 0, hi = n - 1; if (s <= 0) lo = 0, hi = 1; else if (s >= cum[n - 1]) lo = n - 2, hi = n - 1; else while (hi - lo > 1) { const m = (lo + hi) >> 1; if (cum[m] < s) lo = m; else hi = m; }
+        const w = (s - cum[lo]) / Math.max(1e-9, cum[hi] - cum[lo]); o[0] = lerp(pts[lo][0], pts[hi][0], w); o[1] = lerp(gs[lo], gs[hi], w); o[2] = lerp(pts[lo][1], pts[hi][1], w); return o;
+      };
+      const tmp = [0, 0, 0];
+      fol = (sh) => { // the pose with the head at arc length sh along the path; the head is held up a little while it travels
+        const out = new Float32Array(N * 3), kl = sstep(sh0, sh0 + L * 0.08, sh) * (1 - sstep(shEnd - L * 0.25, shEnd, sh)), up = F.Hh(Hl * 0.6) * (wet ? 0.9 : 0.45) * kl;
+        for (let i = 0; i < N; i++) { at(sh - R.S3[i], tmp); const x = i * R.dx; out[i * 3] = tmp[0]; out[i * 3 + 1] = tmp[1] + by0(i) + up * (1 - sstep(Hl * 1.2, Hl * 3.5, x)); out[i * 3 + 2] = tmp[2]; }
+        return out;
+      };
+      const Bp = fol(sh1); at(sh1, tmp); B = R.baseOf(Bp, tmp[1]);
+      st.D = D; st.phi = Math.atan2(D.z, D.x); st.perp = V3(-D.z, 0, D.x); if (st.perp.dot(V3(info.center.x - E.x, 0, info.center.z - E.z)) > 0) st.perp.negate();
+      const cl = []; for (let k = 0; k < n; k += 3) cl.push(pts[k]); const undo = clearProps(cl, Math.max(W0 * 2.5, prR * 2)); show.undo = (show.undo || []).concat([undo]);
+    }
+    let phi = aim(st, lift, B);
     if (perch) { // up in a tree: turn the reach until the head comes down right over the branch (Newton steps on its distance from it)
-      const n = V3(-perch.dir.z, 0, perch.dir.x), off = (ph) => V.info.headPos.clone().applyMatrix4(R.headMatrixFor(R.fore({ len: st.len, phi: ph, lift, coil: 0 }))).sub(perch.a).dot(n);
+      const nn = V3(-perch.dir.z, 0, perch.dir.x), off = (ph) => V.info.headPos.clone().applyMatrix4(R.headMatrixFor(R.fore({ len: st.len, phi: ph, lift, coil: 0 }))).sub(perch.a).dot(nn);
       for (let k = 0; k < 5; k++) { const e = off(phi); if (Math.abs(e) < F.w0 * 0.2) break; const de = (off(phi + 0.02) - e) / 0.02; if (Math.abs(de) < 1e-6) break; phi -= clamp(e / de, -0.5, 0.5); }
     }
-    const ext = R.fore({ len: st.len, phi, lift, coil: 0 }), coil = R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 }), rest = R.rest();
-    const constrict = !perch && (plan === 'python' || (plan === 'colubrid' && (kind === 'mouse' || kind === 'rat' || kind === 'bird' || (kind === 'snake' && !venomous)))) && kind !== 'egg';
-    const envenom = venomous && kind !== 'egg', viperWait = envenom && (plan === 'viper' || plan === 'pitviper') && (kind === 'mouse' || kind === 'rat' || kind === 'bird');
-    const strikes = kind !== 'egg' && kind !== 'worm' && kind !== 'slug' && kind !== 'caterpillar'; // (slow prey is just seized)
+    const ext = R.fore({ len: st.len, phi, lift, coil: 0, base: B }), coil = R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1, base: B }), rest = R.rest();
+    const Bc = B.c;
     // the prey, held: its front at body position xp (x > 0 inside the mouth), its head pointing down the throat
-    const xp0 = Hl * 0.22;
     let held = false, xp = xp0, worldM = null, preyHide = false;
     // v5.05: while it is held and swallowed, the prey's girth is squeezed to fit inside the open mouth and the stretched
     // neck (nothing pokes out through the skin), and its whiskers are tucked away
@@ -749,41 +922,69 @@ export function create(V) {
       const g = R.frameAtX(xClip); clip.normal.copy(g.T).negate(); clip.constant = -clip.normal.dot(g.c); // keep only what is in front of the throat
     };
     // where the prey will sit when the strike lands: hold it there now (computed with the reaching pose)
-    R.setPose(ext); R.apply(); placeHeld(); prey.updateMatrixWorld(true); worldM = prey.matrix.clone(); R.setPose(rest); R.apply();
-    // lay it on the ground (its belly on y = 0)
-    const lay = () => { unclip(); prey.matrix.copy(worldM); prey.matrix.decompose(prey.position, prey.quaternion, prey.scale); prey.scale.set(1, 1, 1); if (perch) { const q = onPerch(prey.position); prey.position.set(q.x, q.y + prR * 0.95, q.z); } else prey.position.y = Math.max(prey.position.y, prR * (kind === 'egg' ? 1.0 : 0.95)); whisk.forEach((w) => { w.visible = true; }); };
-    const worldY = new THREE.Vector3().setFromMatrixPosition(worldM).y;
-    const rolled = (a) => { // let go: the prey rolls onto its side on the ground (a = 1), or is picked up again (a = 0)
-      unclip(); prey.matrix.copy(worldM); prey.matrix.decompose(prey.position, prey.quaternion, prey.scale); prey.scale.set(1, 1, 1);
-      prey.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(R.frameAtX(0).T, 1.3 * a)); prey.position.y = lerp(worldY, (perch ? onPerch(prey.position).y : 0) + prR * 0.7, a); whisk.forEach((w) => { w.visible = a > 0.5; });
-    };
-    lay(); markFade(prey); fadeTree(prey, 0);
-    { const zone = [[prey.position.x, prey.position.z]]; for (let i = 0; i < R.ih * 6 && i < R.N; i += 6) zone.push([ext[i * 3], ext[i * 3 + 2]]); const undo = clearProps(zone, Math.max(prR * 2.5, F.w0 * 3)); show.undo = (show.undo || []).concat([undo]); } // (v5.05: no rock or grass in the way)
-    // a spiral round the prey for constricting
-    let spiral = null;
+    R.setPose(ext); R.apply(); placeHeld(); prey.updateMatrixWorld(true); worldM = prey.matrix.clone();
+    // constrictors lift the prey a little in their coils: the helix of coils goes round the prey's own long axis
+    const Wc = Math.max(F.W(L * 0.3), F.Hh(L * 0.3)) * 1.0;
+    const liftC = constrict ? Math.max(0, prR * 0.9 + Wc * 2.15 - prR * 0.95) : 0;
+    let extHi = null, wrapP = null, coilI1 = 0;
     if (constrict) {
-      const C = prey.position.clone(), ih = R.ih, N = R.N, th = new Float32Array(N), base = ext, W = F.W(L * 0.35);
-      // the coil's centre line, from the neck (sample ih) outwards round the prey
-      const p0 = V3(base[ih * 3], 0, base[ih * 3 + 2]), r0 = Math.hypot(p0.x - C.x, p0.z - C.z), ph0 = Math.atan2(p0.z - C.z, p0.x - C.x);
-      const r1 = Math.max(prR + W * 1.6, r0 + W * 0.7), b = W * 2.3 / TAU, turnSign = st.perp.dot(V3(-Math.sin(ph0), 0, Math.cos(ph0))) > 0 ? 1 : -1;
-      const pts = []; for (let k = 0; k <= 900; k++) { const u = (k / 900) * TAU * 1.35, r = r0 + (r1 - r0) * (1 - Math.exp(-u * 5)) + b * u; pts.push([C.x + Math.cos(ph0 + turnSign * u) * r, C.z + Math.sin(ph0 + turnSign * u) * r]); }
-      const cum = [0]; for (let k = 1; k < pts.length; k++) cum.push(cum[k - 1] + Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]));
-      const angAt = (s) => { let k = 1; while (k < cum.length - 1 && cum[k] < s) k++; return Math.atan2(pts[k][1] - pts[k - 1][1], pts[k][0] - pts[k - 1][0]); };
-      const extTh = new Float32Array(N); for (let i = 0; i < N - 1; i++) extTh[i] = Math.atan2(base[i * 3 + 5] - base[i * 3 + 2], base[i * 3 + 3] - base[i * 3]);
-      for (let i = 1; i < N - 1; i++) extTh[i] = extTh[i - 1] + angDiff(extTh[i - 1], extTh[i]);
-      const sLen = cum[cum.length - 1]; let endA = 0;
-      for (let i = 0; i < N - 1; i++) {
-        if (i < ih) { th[i] = extTh[i]; continue; }
-        const s = (i - ih) * R.dx;
-        if (s < sLen) { const a = angAt(s); th[i] = th[i - 1] + angDiff(th[i - 1], lerp(extTh[i], a, sstep(0, Hl * 1.2, s))); endA = th[i]; }
-        else th[i] = R.rth[i] + (endA - R.rth[Math.min(N - 1, ih + Math.round(sLen / R.dx))]);
+      extHi = R.fore({ len: st.len, phi, lift: lift + liftC, coil: 0, base: B });
+      R.setPose(extHi); R.apply(); placeHeld(); prey.updateMatrixWorld(true);
+      const C = prey.position.clone(), ax = R.frameAtX(Hl * 0.5).T.clone().negate(); // (from the mouth out along the prey)
+      ax.y = 0; ax.normalize();
+      const up = V3(0, 1, 0), sd = st.perp.clone().sub(ax.clone().multiplyScalar(st.perp.dot(ax))).normalize();
+      const rr = prR * 0.92 + Wc * 1.02, span = Math.max(Lp * 0.55, Wc * 4.4), turns = clamp(span / (2.1 * Wc), 2, 2.6), pitch = Math.max(2.1 * Wc, span / turns);
+      const z0 = -span * 0.42 + Lp * 0.04;
+      const hel = (th) => C.clone().addScaledVector(ax, z0 + (pitch * th) / TAU).addScaledVector(sd, rr * Math.cos(th)).addScaledVector(up, rr * Math.sin(th));
+      const hTan = (th) => ax.clone().multiplyScalar(pitch / TAU).addScaledVector(sd, -rr * Math.sin(th)).addScaledVector(up, rr * Math.cos(th)).normalize();
+      const P0 = V3(extHi[R.ih * 3], extHi[R.ih * 3 + 1], extHi[R.ih * 3 + 2]), T0w = V3(extHi[R.ih * 3 + 3] - P0.x, extHi[R.ih * 3 + 4] - P0.y, extHi[R.ih * 3 + 5] - P0.z).normalize();
+      const poly = [P0.clone()];
+      const herm3 = (A, tA, Bq, tB, m, n) => { for (let k = 1; k <= n; k++) { const t = k / n, h00 = 2 * t * t * t - 3 * t * t + 1, h10 = t * t * t - 2 * t * t + t, h01 = -2 * t * t * t + 3 * t * t, h11 = t * t * t - t * t; poly.push(A.clone().multiplyScalar(h00).addScaledVector(tA, h10 * m).addScaledVector(Bq, h01).addScaledVector(tB, h11 * m)); } };
+      const Hs = hel(0); herm3(P0, T0w, Hs, hTan(0), P0.distanceTo(Hs) * 1.6 + Wc * 2, 60); // a U-turn behind the head, past its side, to the prey
+      const nT = Math.round(turns * 160), th1 = TAU * turns; for (let k = 1; k <= nT; k++) poly.push(hel((th1 * k) / nT)); // the coils
+      const He = hel(th1), gC = support(gQ != null ? gQ : 0), G = C.clone().addScaledVector(ax, z0 + pitch * turns + Wc * 5).addScaledVector(sd, rr + Wc * 4); G.y = gC + Hm;
+      const tG = ax.clone().addScaledVector(sd, 0.6).normalize(); herm3(He, hTan(th1), G, tG, He.distanceTo(G) * 1.3, 60); // down to the ground
+      { let p = G.clone(), d = tG.clone(); const k0 = 1 / Math.max(L * 0.3, Wc * 20), step = R.dx; for (let k = 0; k < N * 2; k++) { d.applyAxisAngle(up, k0 * step * (k < N * 0.6 ? 1 : -0.6)); p = p.clone().addScaledVector(d, step); p.y = gC + Hm; poly.push(p); } } // the rest of the body trails away on the ground
+      // sample it by arc length (no stretching): the head and neck stay as in the lifted reach
+      wrapP = extHi.slice(); let k = 0, acc = 0;
+      for (let i = R.ih + 1; i < N; i++) {
+        const want = R.S3[i] - R.S3[R.ih];
+        while (k < poly.length - 2 && acc + poly[k].distanceTo(poly[k + 1]) < want) { acc += poly[k].distanceTo(poly[k + 1]); k++; }
+        const seg = Math.max(1e-9, poly[k].distanceTo(poly[k + 1])), w = clamp((want - acc) / seg, 0, 1), q = poly[k].clone().lerp(poly[k + 1], w);
+        wrapP[i * 3] = q.x; wrapP[i * 3 + 1] = q.y; wrapP[i * 3 + 2] = q.z;
       }
-      th[N - 1] = th[N - 2];
-      const ys = new Float32Array(N); for (let i = 0; i < N; i++) { const s = (i - ih) * R.dx; ys[i] = i < ih ? base[i * 3 + 1] : lerp(base[i * 3 + 1], F.Hh(i * R.dx) * F.bf + prR * 0.35 * (1 - sstep(sLen * 0.6, sLen, s)), sstep(0, Hl * 2, s)); }
-      spiral = R.integrate(th, 0, base[0], base[2], ys);
-      spiral.sLen = sLen;
+      { let acc2 = 0; for (let q = 0; q < 61 + nT && q < poly.length - 1; q++) acc2 += poly[q].distanceTo(poly[q + 1]); coilI1 = Math.min(N - 1, R.ih + Math.round(acc2 / R.dx)); }
+      R.setPose(ext); R.apply(); // (back to where the prey lies before the strike)
     }
-    const sq = (k) => { if (!spiral) return; const i0 = R.ih, i1 = Math.min(R.N - 1, R.ih + Math.round(spiral.sLen / R.dx)); for (let i = 0; i < R.N; i++) R.bul[i] = i >= i0 && i <= i1 ? 1 + k * 0.07 * sstep(i0, i0 + 12, i) * (1 - sstep(i1 - 12, i1, i)) : R.bul[i]; };
+    R.setPose(B === R.REST ? rest : Bc); R.apply();
+    const Aext = R.ang3(ext), Awrap = wrapP ? R.ang3(wrapP) : null, AextHi = extHi ? R.ang3(extHi) : null;
+    // lay it on the ground (its belly on the ground or the branch), or in the water
+    const preyGround = () => (perch ? null : inWater ? (kind === 'fish' ? waterY - prR * 0.45 : waterY - prR * 0.55) : gQ);
+    const lay = () => {
+      unclip(); prey.matrix.copy(worldM); prey.matrix.decompose(prey.position, prey.quaternion, prey.scale); prey.scale.set(1, 1, 1);
+      if (perch) { const q = onPerch(prey.position); prey.position.set(q.x, q.y + prR * 0.95, q.z); }
+      else { const gy = preyGround(); prey.position.y = inWater ? gy : Math.max(prey.position.y, gy + prR * (kind === 'egg' ? 1.0 : 0.95)); }
+      whisk.forEach((w) => { w.visible = true; });
+    };
+    lay(); const layPos = prey.position.clone(), layQ = prey.quaternion.clone();
+    const worldY = new THREE.Vector3().setFromMatrixPosition(worldM).y;
+    const rolled = (a) => { // let go: the prey rolls onto its side (a = 1) - a dead fish floats - or is picked up again (a = 0)
+      unclip(); prey.matrix.copy(worldM); prey.matrix.decompose(prey.position, prey.quaternion, prey.scale); prey.scale.set(1, 1, 1);
+      const gy = perch ? onPerch(prey.position).y : preyGround();
+      prey.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(R.frameAtX(0).T, 1.3 * a)); prey.position.y = lerp(worldY, gy + prR * (inWater ? 0.15 : 0.7), a); whisk.forEach((w) => { w.visible = a > 0.5; });
+    };
+    // before it is caught the prey is alive: a fish circles slowly and wags its tail, a frog bobs, a mouse sniffs
+    const alivePrey = (s, k) => { // k: 1 = free, 0 = exactly where the strike will land
+      prey.position.copy(layPos); prey.quaternion.copy(layQ);
+      if (kind === 'fish' && inWater) { const a = s * 0.9; prey.position.x += Math.cos(a) * prR * 5 * k - prR * 5 * k; prey.position.z += Math.sin(a) * prR * 5 * k; prey.position.y += Math.sin(s * 1.7) * prR * 0.2 * k; prey.rotateY(Math.sin(s * 9) * 0.18 + k * 0.25 * Math.sin(a)); }
+      else if (kind === 'frog') { prey.position.y += (inWater ? Math.sin(s * 2.2) * prR * 0.12 : 0) * k; prey.rotateY(Math.sin(s * 0.7) * 0.15 * k); }
+      else if (kind === 'mouse' || kind === 'rat' || kind === 'bird') prey.rotateY(Math.sin(s * 3.1) * 0.12 * k + Math.sin(s * 11) * 0.03 * k);
+      else if (kind === 'lizard') prey.rotateY(Math.sin(s * 0.9) * 0.1 * k);
+      if (inWater && s - (alivePrey.lt || 0) > 1.1 * (0.5 + k)) { alivePrey.lt = s; if (NAT.ripple) NAT.ripple(prey.position.x, prey.position.z, 0.5, prR * 1.2); }
+    };
+    markFade(prey); fadeTree(prey, 0);
+    if (!travel) { const zone = [[prey.position.x, prey.position.z]]; for (let i = 0; i < R.ih * 6 && i < R.N; i += 6) zone.push([ext[i * 3], ext[i * 3 + 2]]); const undo = clearProps(zone, Math.max(prR * 2.5, F.w0 * 3)); show.undo = (show.undo || []).concat([undo]); } // (v5.05: no rock or grass in the way)
+    const sq = (k) => { if (!wrapP) return; const i0 = R.ih + 20, i1 = coilI1; for (let i = 0; i < R.N; i++) R.bul[i] = i >= i0 && i <= i1 ? 1 + k * 0.06 * sstep(i0, i0 + 14, i) * (1 - sstep(i1 - 14, i1, i)) : 1; };
     // v5.68: a modest, realistic lump - never a balloon: at most about 1.3-1.5 times the body's width (by prey), easing
     // into that limit (a big rat in a ball python shows as a firm swelling, the skin stretched between the scales)
     const CAP = { rat: 1.45, mouse: 1.4, bird: 1.42, egg: 1.5, frog: 1.36, fish: 1.3, lizard: 1.25, snake: 1.1, centipede: 1.08, worm: 1.08, caterpillar: 1.1, slug: 1.15 }[kind] || 1.35, cap1 = CAP - 1;
@@ -797,57 +998,109 @@ export function create(V) {
       }
     };
     const xIn = Hl * 1.15 + Lp, xEnd = Math.max(xIn + Lp * 0.2, L * 0.45);
-    const camSide = (tg, d, el = 0.38, back = 0.25) => { const dir = st.perp.clone().addScaledVector(D, -back).normalize(); return { tgt: tg, pos: tg.clone().addScaledVector(dir, d * Math.cos(el)).add(V3(0, d * Math.sin(el), 0)) }; };
+    // the camera: from the side away from the body, a little behind the head, looking at what matters in each step
+    const camSide = (tg, d, el = 0.38, back = 0.25) => { const dir = st.perp.clone().addScaledVector(st.D, -back).normalize(); return { tgt: tg, pos: tg.clone().addScaledVector(dir, d * Math.cos(el)).add(V3(0, d * Math.sin(el), 0)) }; };
     const fitD = (sz) => sz / Math.tan(V.info.vf) * 0.62, wideD = fitD(Math.max(st.len * 1.25, Lp * 2.4));
-    let camKey = camSide(prey.position.clone().lerp(V.info.headPos, 0.5), wideD);
     const headPt = () => R.point(Hl * 0.5);
+    const preyPt = () => prey.position.clone();
+    let camKey = camSide(prey.position.clone().lerp(V.info.headPos, 0.5), Math.max(wideD, fitD(prey.position.distanceTo(V.info.headPos) * 2.4)), 0.55, 0.05);
     const nm = prey.userData.name;
     const T = {
       intro: { egg: 'Egg-eaters find <b>birds\' eggs</b> by smell.', fish: 'It hunts <b>' + nm + '</b>.', frog: 'It hunts <b>' + nm + '</b>, found by smell with its tongue.', snake: 'It hunts <b>' + nm + '</b> - some snakes eat other snakes!', lizard: 'It hunts <b>' + nm + '</b>.', bird: 'It hunts <b>' + nm + '</b>.', centipede: 'It hunts <b>' + nm + '</b> - small snakes like this one eat centipedes, scorpions and spiders.', worm: 'It finds <b>' + nm + '</b> by smell in damp soil.', slug: 'It finds <b>' + nm + '</b> by following its slime trail.', caterpillar: 'It hunts <b>' + nm + '</b> and other insects in the leaves.', mouse: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.', rat: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.' }[kind],
-      strike: 'Strike! It grabs the prey with its backward-curved teeth.',
+      stalk: inWater ? (sea ? 'It <b>swims</b> up to it:' : 'It slides into the water and <b>swims</b> towards it:') + ' waves run down its body and push against the water.' : 'It <b>creeps up</b> slowly, flicking its tongue to keep track of the scent.',
+      aim: 'The <b>strike pose</b>: the neck pulled back into an S, the head level and aimed.',
+      strike: 'Strike! Faster than you can blink, the mouth opening wide as it lands.',
       inject: '<b>Venom</b> flows through the fangs into the prey.',
-      release: 'Vipers <b>let go</b> straight away, so the prey cannot bite back, and wait for the venom to work.',
+      release: (plan === 'viper' || plan === 'pitviper' ? 'Vipers' : 'It') + ' <b>let' + (plan === 'viper' || plan === 'pitviper' ? '' : 's') + ' go</b> straight away, so the prey cannot bite back, and wait' + (plan === 'viper' || plan === 'pitviper' ? '' : 's') + ' for the venom to work.',
       track: 'Then it follows the scent trail with its tongue and finds the prey.',
-      coil: '<b>Constricting:</b> it wraps its body round the prey and squeezes until the heart stops.',
+      coil: '<b>Constricting:</b> it throws coils round the prey and squeezes a little tighter each time the prey breathes out, until its heart stops.',
+      loosen: 'It loosens its coils and checks with its tongue for the prey\'s <b>head</b>, to swallow it head first.',
       swallow: kind === 'egg' ? 'Its jaws stretch round an egg much wider than its head - it has almost no teeth.' : '<b>Jaw walking:</b> the left and right jaws move forward in turn, pulling the prey in head-first. The windpipe pokes out so it can still breathe.',
       down: kind === 'egg' ? 'Spikes on its backbone crack the shell inside its throat; it swallows the egg and spits out the shell.' : 'Muscles push the meal down to the <b>stomach</b>. The skin between the scales stretches - you can see the bulge.',
       digest: 'Digesting a big meal can take days to weeks. Then it is hungry again.',
     };
+    // tongue flicks: two or three quick ones, now and then
+    const flicks = (s, every = 1.6, n = 2) => { const ph = (s % every) / 0.42; return ph < n ? ph % 1 : 0; };
+    let ripT = 0, ripI = 0;
+    const wake = (s) => { // ripples where the head and the body move through the water
+      if (!wet || !NAT.ripple || s - ripT < 0.22) return; ripT = s; ripI++;
+      const x = ripI % 3 === 0 ? L * (0.25 + 0.2 * ((ripI / 3) % 3)) : Hl * 0.6, p = R.point(x), g = yAt([[p.x, p.z]])[0];
+      if (sea || g < waterY - F.Hh(x) * 0.3) NAT.ripple(p.x, p.z, ripI % 3 === 0 ? 0.7 : 1, Math.max(F.w0 * 1.6, 0.01));
+    };
     const phases = [];
-    phases.push([1.3, (u) => { fadeTree(prey, ease(u * 1.5)); R.setPose(R.blend(rest, strikes ? coil : ext, ease(u) * (strikes ? 1 : 0.3))); R.apply(); say(T.intro); flick(clamp(u * 1.15, 0, 1)); }]); // (it tastes the air)
+    // 1. notice
+    phases.push([1.6, (u, s) => { fadeTree(prey, ease(u * 1.6)); alivePrey(s, 1); R.setPose(R.blend(rest, N1, ease(u))); R.apply(); say(T.intro); flick(flicks(s, 0.8, 2)); }]);
+    // 2. approach (stalk, or swim)
+    if (travel) {
+      const dist = sh1 - sh0, spd = (inWater ? 0.24 : 0.13) * L, dA = clamp(dist / spd, 1.6, inWater ? 5 : 4.2);
+      phases.push([dA, (u, s) => {
+        const e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2, sh = lerp(sh0, sh1, lerp(u, e, 0.6)); // (a smooth start, then a steady glide)
+        const fp = fol(sh), c = strikes ? sstep(0.62, 1, u) : 0; let pose = fp;
+        if (c > 0) { const Bt = R.baseOf(fp, B.fl), cp = R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1, base: Bt }); pose = R.blend(fp, cp, ease(c)); }
+        R.setPose(pose); R.apply(); alivePrey(s, 1 - sstep(0.5, 1, u)); say(T.stalk); flick(flicks(s, 1.3, 2)); wake(s);
+        const h = R.point(Hl * 0.5); camKey = camSide(h.clone().lerp(preyPt(), 0.5), fitD(Math.max(h.distanceTo(preyPt()) * 2.6, st.len * 1.7)), 0.58, 0.05);
+      }]);
+    }
+    if (!travel) { N1 = R.blend(rest, strikes ? coil : ext, 0.35); if (strikes) phases.push([0.9, (u, s) => { R.setPose(R.blend(N1, coil, ease(u))); R.apply(); flick(flicks(s, 0.9, 1)); }]); }
     if (strikes) {
-      phases.push([0.9, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 + 0.05 * Math.sin(s * 9) })); R.apply(); }]);
-      phases.push([0.3, (u) => { R.setPose(R.blend(coil, ext, ease(u * 1.15))); R.apply(); setMouth(Math.max(0.75, tHold) * ease(u * 3)); say(T.strike); if (u >= 0.98) held = true; }]);
-      phases.push([0.5, () => { held = true; R.setPose(ext); R.apply(); setMouth(tHold); camKey = camSide(headPt().lerp(prey.position, 0.35), fitD(Hl * 2.4 + Lp * 1.3)); }]);
-      if (envenom) phases.push([1.2, (u, s) => { R.setPose(ext); R.apply(); setMouth(tHold + 0.04 * Math.sin(s * 14)); say(T.inject); }]);
-      if (viperWait) {
-        phases.push([0.6, (u) => { held = false; R.setPose(R.blend(ext, coil, ease(u))); R.apply(); setMouth(tHold * (1 - ease(u))); say(T.release); if (u > 0.5) camKey = camSide(prey.position.clone().lerp(V.info.headPos, 0.5), wideD); }]);
-        phases.push([1.6, (u) => { R.setPose(coil); R.apply(); rolled(ease(u)); }]);
-        phases.push([1.5, (u) => { R.setPose(R.blend(coil, ext, ease(u))); R.apply(); setMouth(tHold * ease(u)); say(T.track); rolled(1 - sstep(0.5, 0.97, u)); if (u > 0.97) held = true; const f2 = u / 0.7; flick(f2 < 1 ? (f2 * 2) % 1 : 0); }]); // (picked up smoothly, no jump; flicking its tongue along the trail)
+      // 3. the S-coil strike pose (a slight tremor of tension)
+      phases.push([0.75, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 + 0.04 * Math.sin(s * 11), base: B })); R.apply(); alivePrey(s, 0); say(T.aim); flick(u < 0.55 ? flicks(u * 0.55, 0.55, 1) : 0); camKey = camSide(headPt().lerp(preyPt(), 0.5), fitD(Math.max(st.len * 1.5, Lp * 3.2)), 0.42, 0.05); }]);
+      // 4. strike: ~0.16 s, the mouth opening as it lands
+      phases.push([0.16, (u) => { const e = u * u * (3 - 2 * u); R.setPose(R.blend(coil, ext, e)); R.apply(); setMouth(Math.max(0.75, tHold) * sstep(0.25, 0.85, u)); say(T.strike); if (u >= 0.98) held = true; }]);
+      phases.push([0.45, (u, s) => {
+        held = true; R.setPose(ext); R.apply(); setMouth(tHold); say(T.strike);
+        if (u < 0.05 && inWater && NAT.ripple && !phases.splashed) { phases.splashed = true; NAT.ripple(prey.position.x, prey.position.z, 1.6, Math.max(prR * 1.5, 0.012)); NAT.ripple(R.point(Hl).x, R.point(Hl).z, 1.2, Math.max(prR, 0.01)); }
+        camKey = camSide(headPt().lerp(preyPt(), 0.35), fitD(Hl * 2.4 + Lp * 1.3)); void s;
+      }]);
+      if (envenom && !letGo) phases.push([1.0, (u, s) => { R.setPose(ext); R.apply(); setMouth(tHold + 0.04 * Math.sin(s * 14)); say(T.inject); }]);
+      if (letGo) {
+        phases.push([0.5, (u, s) => { R.setPose(ext); R.apply(); setMouth(tHold + 0.04 * Math.sin(s * 14)); say(T.inject); }]);
+        phases.push([0.6, (u) => { held = false; R.setPose(R.blend(ext, coil, ease(u))); R.apply(); setMouth(tHold * (1 - ease(u))); say(T.release); if (u > 0.5) camKey = camSide(preyPt().lerp(headPt(), 0.5), wideD); }]);
+        phases.push([1.6, (u, s) => { R.setPose(coil); R.apply(); rolled(ease(u)); flick(flicks(s, 1.2, 1)); }]);
+        phases.push([1.5, (u, s) => { R.setPose(R.blend(coil, ext, ease(u))); R.apply(); setMouth(tHold * ease(u)); say(T.track); rolled(1 - sstep(0.5, 0.97, u)); if (u > 0.97) held = true; const f2 = u / 0.7; flick(f2 < 1 ? (f2 * 2) % 1 : 0); }]); // (picked up smoothly, no jump; flicking its tongue along the trail)
       }
       if (constrict) {
-        phases.push([1.5, (u) => { held = true; R.setPose(R.blend(ext, spiral, ease(u))); R.apply(); setMouth(tHold); say(T.coil); camKey = camSide(prey.position.clone(), fitD(Math.max(prR * 7, F.W(L * 0.3) * 14)), 0.85, 0.1); }]);
-        phases.push([1.8, (u, s) => { R.setPose(spiral); sq(0.5 + 0.5 * Math.sin(s * 5)); R.apply(); }]);
-        phases.push([1.2, (u) => { R.bul.fill(1); R.setPose(R.blend(spiral, ext, ease(u))); R.apply(); }]);
+        const camC = () => camSide(preyPt(), fitD(Math.max(prR * 9, Wc * 18, Lp * 2.2)), 0.62, 0.15);
+        // 5. coils: the body bends round the prey (lifted a little), two or three turns, without stretching
+        phases.push([1.7, (u, s) => { held = true; const e = ease(u); R.setPose(R.blend3(ext, Aext, wrapP, Awrap, e, R.ih, e * e * e)); R.apply(); setMouth(tHold); say(T.coil); camKey = camC(); if (inWater) wake(s); }]);
+        phases.push([1.9, (u, s) => { R.setPose(wrapP); sq(0.5 + 0.5 * Math.sin(s * 4.2)); R.apply(); camKey = camC(); }]); // squeeze...
+        phases.push([0.8, (u, s) => { R.setPose(wrapP); sq(0.35); R.apply(); flick(0); void s; }]); // ...and hold still
+        phases.push([1.4, (u, s) => { R.bul.fill(1); R.setPose(R.blend3(wrapP, Awrap, ext, Aext, ease(u), R.ih, 1 - Math.pow(1 - ease(u), 3))); R.apply(); setMouth(tHold * (1 - 0.3 * ease(u))); say(T.loosen); if (inWater) wake(s); }]);
+        // let go, check along the prey with the tongue for its head, and take it head first
+        phases.push([0.5, (u) => { held = false; R.setPose(R.blend(ext, coil, ease(u) * 0.55)); R.apply(); setMouth(tHold * 0.7 * (1 - ease(u))); rolled(ease(u) * 0.6); camKey = camSide(preyPt().lerp(headPt(), 0.5), fitD(Math.max(Lp * 2.6, st.len))); }]);
+        phases.push([1.5, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift, coil: 0.55 * (1 - ease(u)), base: B, yaw: 0.28 * Math.sin(u * TAU * 1.5) * (1 - sstep(0.7, 1, u)) })); R.apply(); rolled(0.6 * (1 - sstep(0.55, 0.95, u))); flick(flicks(s, 0.7, 1)); setMouth(tHold * sstep(0.6, 0.95, u)); if (u > 0.96) held = true; }]);
       }
-    } else phases.push([1.2, (u) => { R.setPose(R.blend(R.blend(rest, ext, 0.3), ext, ease(u))); R.apply(); setMouth(ease(u) * tNeed, { spread: spreadNeed * ease(u) }); if (u > 0.95) held = true; }]);
+    } else phases.push([1.2, (u) => { R.setPose(R.blend(travel ? Bc : R.blend(rest, ext, 0.3), ext, ease(u))); R.apply(); setMouth(ease(u) * tNeed, { spread: spreadNeed * ease(u) }); if (u > 0.95) held = true; }]);
     phases.push([4.6, (u, s) => {
       // jaw walking: the prey goes in in small pulls, one side of the jaw then the other (the head turns a little each way)
       const e = ease(u), pull = e - Math.sin(e * TAU * 6) / (TAU * 6);
       held = true; xp = lerp(xp0, xIn, pull); const yaw = 0.05 * Math.sin(e * TAU * 3) * (1 - sstep(0.85, 1, u));
-      R.setPose(R.fore({ len: st.len, phi, lift, coil: 0, yaw })); bulgeAt(xp, 1); R.apply();
+      R.setPose(R.fore({ len: st.len, phi, lift, coil: 0, yaw, base: B })); bulgeAt(xp, 1); R.apply();
       const inside = sstep(0, 0.15, u) * (1 - sstep(0.82, 1, u)); // the jaws spread round the prey and walk over it, one side then the other (the "pterygoid walk")
       setMouth(lerp(tHold, tNeed, Math.sin(Math.min(1, u * 1.2) * Math.PI)), { spread: spreadNeed * inside, walk: Math.sin(e * TAU * 3) * inside * (spreadNeed > 0.05 ? 1 : 0.6) }); say(T.swallow);
       camKey = camSide(headPt().lerp(R.point(xp - Lp * 0.5), 0.3), fitD(Hl * 1.8 + Lp * 1.0), 0.36);
       preyHide = xp - Lp > xClip; // (all of it past the cut)
+      if (inWater && s % 1.3 < 0.05) wake(s);
     }]);
-    phases.push([3.4, (u) => {
-      xp = lerp(xIn, xEnd, ease(u)); R.setPose(R.blend(ext, rest, ease(u) * 0.6)); bulgeAt(xp, 1); R.apply(); setMouth(lerp(tHold, 0, ease(u * 2))); say(T.down);
-      preyHide = true;
+    const settled = travel ? Bc : rest;
+    phases.push([3.0, (u) => {
+      xp = lerp(xIn, xEnd, ease(u)); R.setPose(R.blend(ext, settled, ease(u) * (travel ? 1 : 0.6))); bulgeAt(xp, 1); R.apply(); setMouth(lerp(tHold, 0, ease(u * 2))); say(T.down);
+      preyHide = true; flick(u > 0.7 ? flicks(u * 3, 0.9, 1) : 0);
       camKey = camSide(R.point(xp - Lp / 2), fitD(Math.max(L * 0.22, Lp * 3.2)), 0.55);
     }]);
-    phases.push([1.8, (u) => { const b = R.blend(ext, rest, 0.6 + 0.4 * ease(u)); R.setPose(b); bulgeAt(xp, 1 - ease(u) * 0.5); R.apply(); setMouth(0); say(T.digest); camKey = camSide(V.info.center.clone(), fitD(V.info.Rb * 2.2), 0.6); }]);
-    phases.push([0.8, (u) => { R.setPose(rest); bulgeAt(xp, 0.5 * (1 - ease(u))); R.apply(); }]);
+    if (travel) { // 6. it crawls (or swims) on, round and back into its resting place, the meal a lump in its body
+      const dR = shEnd - sh1, dRet = clamp(dR / (0.38 * L), 3, 6.5);
+      phases.push([dRet, (u, s) => {
+        const e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2, sh = lerp(sh1, shEnd, lerp(u, e, 0.7));
+        R.setPose(fol(sh)); bulgeAt(xp, 1 - 0.4 * ease(u)); R.apply(); setMouth(0); say(T.digest); flick(flicks(s, 1.8, 2)); wake(s);
+        let cx = 0, cz = 0; for (let i = 0; i < N; i += 24) { const p = R.point(i * R.dx); cx += p.x; cz += p.z; } const nn = Math.ceil(N / 24), c = V3(cx / nn, info.center.y, cz / nn);
+        camKey = camSide(c.lerp(info.center, ease(u)), fitD(Math.max(L * 0.5, V.info.Rb * 1.5)), lerp(0.55, 0.6, u));
+      }]);
+      phases.push([0.8, (u) => { R.setPose(rest); bulgeAt(xp, 0.6 * (1 - ease(u))); R.apply(); }]);
+    } else {
+      phases.push([1.8, (u) => { const b = R.blend(ext, rest, 0.6 + 0.4 * ease(u)); R.setPose(b); bulgeAt(xp, 1 - ease(u) * 0.5); R.apply(); setMouth(0); say(T.digest); camKey = camSide(V.info.center.clone(), fitD(V.info.Rb * 2.2), 0.6); }]);
+      phases.push([0.8, (u) => { R.setPose(rest); bulgeAt(xp, 0.5 * (1 - ease(u))); R.apply(); }]);
+    }
     const stepPrey = () => {
       if (held) { placeHeld(); prey.visible = !preyHide; }
       if (!held && prey.matrixAutoUpdate === false) prey.matrixAutoUpdate = true;
@@ -858,6 +1111,7 @@ export function create(V) {
     show.step = (s) => { const i0 = lastI; const i = runPhases(phases, s); if (i !== i0) { if (i0 >= 0) flick(0); lastI = i; } /* (a slow frame may skip the end of a flick) */ if (i > 0 && !shown) { shown = true; fadeTree(prey, 1); } stepPrey(); /* fully faded in even if a slow frame skipped the end of the first step */ stepTag.hidden = false; stepTag.textContent = (i + 1) + ' / ' + phases.length; return i; };
     show.cam = () => camKey;
     show.diet = kind;
+    show.info = { kind, constrict, letGo, envenom, travel, wet, inWater, phases: phases.length, waterY, gQ, Q: Q && [Q.x, Q.z], head: [head0.x, head0.z], prR };
   }
 
   // ---------------------------------------------------------------- Slither (loops until pressed again)
@@ -866,7 +1120,7 @@ export function create(V) {
   // the head (lateral undulation), round a long oval with the waves drawn into it, so it stays in view. Pressing Stop
   // coils it back up where it started.
   function startSlither() {
-    if (show) stopShow(); if (anat && anat.on) anat.set(false, true); ensureRig(); if (!rig) return;
+    idleStop(); if (show) stopShow(); if (anat && anat.on) anat.set(false, true); ensureRig(); if (!rig) return;
     const R = rig, info = V.info, F = info.F, L = F.L, N = R.N, Hl = F.Hl;
     const stout = !!(P.body && P.body.ld && P.body.ld < 11.5); // only the heaviest (Gaboon viper, puff adders) creep in a straight line
     const Pm = Math.max(L * 2.35, info.Rb * 4.2), eb = Pm / 9.69, ea = eb * 2, waves = Math.max(3, Math.round(Pm / (L / 1.6))), A = stout ? 0 : Math.min(L * 0.085, eb * 0.4);
@@ -906,6 +1160,16 @@ export function create(V) {
     V.kick();
   }
   const reduceK = () => (V.reduce() ? 0.5 : 1);
+  function steadyHead(pose, R) {
+    const N = R.N, k0 = Math.min(N - 2, Math.round(R.ih * 2.6)), m = Math.min(N - 1 - k0, Math.round(N * 0.12));
+    let ax = pose[k0 * 3] - pose[(k0 + m) * 3], az = pose[k0 * 3 + 2] - pose[(k0 + m) * 3 + 2]; const l = Math.hypot(ax, az) || 1; ax /= l; az /= l;
+    for (let i = k0 - 1; i >= 0; i--) {
+      const w = 0.55 * (1 - i / k0), dx0 = pose[i * 3] - pose[i * 3 + 3], dz0 = pose[i * 3 + 2] - pose[i * 3 + 5], h = Math.hypot(dx0, dz0) || 1e-9;
+      let dx = lerp(dx0 / h, ax, w), dz = lerp(dz0 / h, az, w); const l2 = Math.hypot(dx, dz) || 1; dx /= l2; dz /= l2;
+      pose[i * 3] = pose[i * 3 + 3] + dx * h; pose[i * 3 + 2] = pose[i * 3 + 5] + dz * h;
+    }
+    return pose;
+  }
   function stepSlither() {
     const S = slither, R = rig, t = (now() - S.t0) / 1000, N = R.N;
     let pose;
@@ -913,13 +1177,19 @@ export function create(V) {
       const k = ease((now() - S.stopping) / 1800); pose = S.between(S.stopA, S.restA, S.stopPose, S.rest, k, N >> 1);
       if (k >= 1) { slither = null; flick(0); R.release(); tip.hidden = true; unzoom(); if (S.undo) S.undo(); return false; }
     } else { // v5.12: it slithers off at once - the head leads along the track from the first moment, the body unwinding behind it
-      const tp = S.trackPose(S.s0 + S.speed * t);
+      // v5.73: each wave gives a gentle surge (the speed rises and falls a little), and the head is held steadier
+      // than the body: it keeps closer to the mean direction of travel instead of swinging with every wave
+      const sp = S.speed * t + (S.stout ? 0 : S.speed * 0.07 * Math.sin(t * 2.3) / 2.3);
+      const tp = steadyHead(S.trackPose(S.s0 + sp), R);
       pose = t < S.T0 ? S.between(S.restA, S.angles(tp), S.rest, tp, ease(t / S.T0), 0) : tp;
     }
     S.lastPose = pose;
     { const ph = S.stopping || V.reduce() ? 1 : ((t + 0.8) % 2.8) / 0.75; flick(ph < 1 ? ph : 0); } // v5.53: it flicks its tongue now and then as it goes
     if (S.stout) { for (let i = 0; i < N; i++) R.bul[i] = 1 + 0.03 * Math.sin(TAU * (i * R.dx / (R.L * 0.1) - t * 1.4)) * sstep(R.ih, R.ih + 30, i); }
-    R.setPose(pose); R.apply(); return true;
+    R.setPose(pose); R.apply();
+    // v5.73: at sea it swims, leaving rings on the water behind its head
+    if (P.scene && P.scene.kind === 'sea' && V.NATURE && V.NATURE.ripple && t - (S.ripT || 0) > 0.3) { S.ripT = t; const h = R.point(R.ih * R.dx * 0.6); V.NATURE.ripple(h.x, h.z, 0.9, Math.max(V.info.F.w0 * 1.6, 0.01)); }
+    return true;
   }
   function stopSlither(soft) {
     if (!slither) return;
@@ -962,9 +1232,10 @@ export function create(V) {
     };
     const add = (key, name, text, region, geo, mat, opt = {}) => {
       const mesh = new THREE.Mesh(geo, mat); mesh.castShadow = false; mesh.userData.part = key; mesh.userData.anat = true; grp.add(mesh); own.push(mesh);
+      if (opt.detail) mesh.userData.detail = true; // v5.73: shown only when the camera comes close to it
       const xs = geo.userData.xs || new Float32Array(geo.attributes.position.count).fill(geo.userData.x || 0);
       if (opt.jaw) { R.headRig.add(mesh); toJaw.push([mesh, opt.jaw]); } else R.addSkin(geo, xs);
-      let p = parts.find((q) => q.key === key); if (!p) { p = { key, name, text, region, meshes: [], x: opt.x != null ? opt.x : xs[xs.length >> 1] }; parts.push(p); } p.meshes.push(mesh);
+      let p = parts.find((q) => q.key === key); if (!p) { p = { key, name, text, region, meshes: [], x: opt.x != null ? opt.x : xs[xs.length >> 1] }; parts.push(p); } p.meshes.push(mesh); if (opt.detail) p.detail = true;
       return mesh;
     };
     const ringTex = (base, line, rep) => canvasTex(64, (x, s) => { x.fillStyle = base; x.fillRect(0, 0, s, s); x.fillStyle = line; for (let i = 0; i < s; i += 8) x.fillRect(0, i, s, 3); }, 1, rep);
@@ -974,13 +1245,19 @@ export function create(V) {
     const bc = blob(Hl * 0.66, 0, 0.25, Hl * 0.2, F.Hh(Hl * 0.66) * 0.42, F.W(Hl * 0.66) * 0.42);
     add('skull', 'Skull', 'Light, strong bones protect the brain. Many skull bones are only loosely joined, so the mouth can open very wide.', 'head', bc, new THREE.MeshPhysicalMaterial({ color: C.bone, roughness: 0.6, transparent: true, opacity: 0.45, depthWrite: false }), { jaw: 'upper', x: Hl * 0.6 });
     for (const sg of [1, -1]) {
-      add('skull', 'Skull', '', 'head', sweep(Hl * 0.06, Hl * 0.72, sg * 0.42, 0.62, (x) => rB(x) * 0.07, 24, 6), bone, { jaw: 'upper' });                    // nasal and frontal bones
-      add('skull', 'Skull', '', 'head', sweep(Hl * 0.08, Hl * 0.8, sg * 0.78, -0.06, (x) => rB(x) * 0.07, 24, 6), bone, { jaw: 'upper' });                    // upper jaw bones (maxilla)
-      add('jaw', 'Lower jaw', 'Two separate halves joined at the chin by stretchy tissue, so each side can move forward on its own ("jaw walking").', 'head', sweep(Hl * 0.05, Hl * 0.8, sg * 0.66, -0.55, (x) => rB(x) * 0.075, 24, 6), bone, { jaw: 'lower', x: Hl * 0.5 });
+      add('skull', 'Skull', '', 'head', sweep(Hl * 0.06, Hl * 0.72, sg * 0.42, 0.62, (x) => rB(x) * 0.07, 24, 6), bone, { jaw: 'upper', detail: true });                    // nasal and frontal bones
+      add('skull', 'Skull', '', 'head', sweep(Hl * 0.08, Hl * 0.8, sg * 0.78, -0.06, (x) => rB(x) * 0.07, 24, 6), bone, { jaw: 'upper', detail: true });                    // upper jaw bones (maxilla)
+      add('jaw', 'Lower jaw', 'Two separate halves joined at the chin by stretchy tissue, so each side can move forward on its own ("jaw walking").', 'head', sweep(Hl * 0.05, Hl * 0.8, sg * 0.66, -0.55, (x) => rB(x) * 0.075, 24, 6), bone, { jaw: 'lower', x: Hl * 0.5, detail: true });
+      // v5.73: the palate bones (pterygoids), which carry the palate teeth and walk the prey in, and the quadrate, the
+      // hinge bone that hangs from the back of the skull and lets the jaw swing down and out round big prey
+      add('ptery', 'Palate bones (pterygoids)', 'Two long bones in the roof of the mouth. They carry rows of teeth and move forward and back in turn, "walking" the prey into the throat.', 'head', sweep(Hl * 0.3, (mo ? mo.headX : Hl) * 0.92, sg * 0.3, -0.22, (x) => rB(x) * 0.055, 20, 6), bone, { jaw: 'upper', x: Hl * 0.6, detail: true });
+      { const xq = (mo ? mo.headX : Hl) * 0.93, q = []; for (let k = 0; k <= 6; k++) { const t = k / 6, x = xq - Hl * 0.06 + t * Hl * 0.1, f = B.frameAt(x); q.push(B.spine(x).addScaledVector(f.S, sg * F.W(x) * lerp(0.5, 0.74, t)).addScaledVector(f.U, F.Hh(x) * lerp(0.38, -0.5, t))); }
+        const g = varTube(q, (t) => rB(xq) * lerp(0.085, 0.06, t), 6, 12); g.userData.x = xq;
+        add('quadrate', 'Quadrate bone', 'A loose hinge bone between the skull and the lower jaw. It swings outwards, so the mouth can open far wider than the head.', 'head', g, bone, { jaw: 'upper', x: xq, detail: true }); }
     }
-    add('brain', 'Brain', 'Small and long. The parts for smell and for sight are big; snakes rely mostly on smell, taste and feeling vibrations.', 'head', blob(Hl * 0.7, 0, 0.28, Hl * 0.14, F.Hh(Hl * 0.7) * 0.26, F.W(Hl * 0.7) * 0.24), om(C.brain), { jaw: 'upper' });
-    add('jacobson', 'Jacobson\'s organ', 'Two small pits in the roof of the mouth. The forked tongue brings smell particles here, so the snake "tastes" the air.', 'head', mergeG([blob(Hl * 0.14, 0.18, -0.05, Hl * 0.05, F.Hh(Hl * 0.14) * 0.14, F.W(Hl * 0.14) * 0.1), blob(Hl * 0.14, -0.18, -0.05, Hl * 0.05, F.Hh(Hl * 0.14) * 0.14, F.W(Hl * 0.14) * 0.1)]), om(C.jacob), { jaw: 'upper' });
-    if (venomous) add('venom', 'Venom glands', 'Changed saliva glands behind the eyes. Muscles squeeze the venom through a tube into the fangs.', 'head', mergeG([1, -1].map((sg) => blob(Hl * 0.62, sg * 0.6, -0.12, Hl * 0.17, F.Hh(Hl * 0.62) * 0.24, F.W(Hl * 0.62) * 0.2))), om(C.venom), { jaw: 'upper' });
+    add('brain', 'Brain', 'Small and long. The parts for smell and for sight are big; snakes rely mostly on smell, taste and feeling vibrations.', 'head', blob(Hl * 0.7, 0, 0.28, Hl * 0.14, F.Hh(Hl * 0.7) * 0.26, F.W(Hl * 0.7) * 0.24), om(C.brain), { jaw: 'upper', detail: true });
+    add('jacobson', 'Jacobson\'s organ', 'Two small pits in the roof of the mouth. The forked tongue brings smell particles here, so the snake "tastes" the air.', 'head', mergeG([blob(Hl * 0.14, 0.18, -0.05, Hl * 0.05, F.Hh(Hl * 0.14) * 0.14, F.W(Hl * 0.14) * 0.1), blob(Hl * 0.14, -0.18, -0.05, Hl * 0.05, F.Hh(Hl * 0.14) * 0.14, F.W(Hl * 0.14) * 0.1)]), om(C.jacob), { jaw: 'upper', detail: true });
+    if (venomous) add('venom', 'Venom glands', 'Changed saliva glands behind the eyes. Muscles squeeze the venom through a tube into the fangs.', 'head', mergeG([1, -1].map((sg) => blob(Hl * 0.62, sg * 0.6, -0.12, Hl * 0.17, F.Hh(Hl * 0.62) * 0.24, F.W(Hl * 0.62) * 0.2))), om(C.venom), { jaw: 'upper', detail: true });
     // ---- airways, gut and the rest (bend with the body). Behind the jaw hinge, so nothing is left behind when the mouth opens
     const x0 = Math.max(Hl * 1.08, mo ? mo.headX * 1.32 : 0), at = (f) => Math.max(x0, svl * f);
     // v5.57: where the organs lie depends on how the snake lives (as fractions of the snout-vent length, SVL):
@@ -998,24 +1275,24 @@ export function create(V) {
     const lungEnd = svl * (marine ? 0.62 : plan === 'python' ? 0.55 : 0.5), sacEnd = svl * (marine ? 0.92 : plan === 'python' ? 0.7 : 0.72);
     const liverEnd = svl * Math.max(heartC + 0.2, 0.48), stom0 = liverEnd - svl * 0.005, stom1 = stom0 + svl * 0.105;
     add('trachea', 'Windpipe (trachea)', 'Stiff rings keep it open. Its opening, the glottis, can be pushed out of the side of the mouth so the snake breathes while swallowing big prey.', 'body', sweep(x0, heart0 + svl * 0.01, -0.06, -0.12, (x) => rB(x) * 0.11, 140, 10), om(C.trachea, { map: ringTex('#e9dcc6', 'rgba(150,120,100,.45)', 70) }));
-    if (plan !== 'python' && plan !== 'blind') add('tlung', 'Tracheal lung', 'Extra breathing tissue along the windpipe in front of the heart, which many snakes have.', 'body', sweep(Math.max(x0 * 1.3, heart0 * 0.45), heart0 * 0.99, -0.08, -0.08, (x) => rB(x) * 0.2, 40, 12), om(C.lung, { transparent: true, opacity: 0.8, roughness: 0.75 }));
+    if (plan !== 'python' && plan !== 'blind') add('tlung', 'Tracheal lung', 'Extra breathing tissue along the windpipe in front of the heart, which many snakes have.', 'body', sweep(Math.max(x0 * 1.3, heart0 * 0.45), heart0 * 0.99, -0.08, -0.08, (x) => rB(x) * 0.2, 40, 12), om(C.lung, { transparent: true, opacity: 0.8, roughness: 0.75 }), { detail: true });
     add('oesophagus', 'Gullet (oesophagus)', 'A long, very stretchy tube from the mouth to the stomach. Food is pushed along it by muscles.', 'body', sweep(x0, stom0 + svl * 0.01, 0.1, 0.24, (x) => rB(x) * 0.15, 170, 10), om(C.gullet));
     const hx = (heart0 + heart1) / 2;
     add('heart', 'Heart', (climber ? 'Close to the head in climbing snakes, so blood still reaches the brain when they hold the head up. ' : marine ? 'Nearer the middle of the body in sea snakes. ' : 'About a quarter of the way along the body. ') + 'It has three chambers and can slide a little, so big prey can squeeze past.', 'body', blob(hx, 0, -0.34, (heart1 - heart0) * 0.5, rB(hx) * 0.36, F.W(hx) * 0.34, 28), om(C.heart, { roughness: 0.38, clearcoat: 0.6 }));
     add('lung', 'Right lung', 'Snakes have one long working lung on the right (the left one is tiny or missing), because their body is so narrow.', 'body', sweep(heart1 * 1.0, lungEnd, -0.2, 0.22, (x, t) => rB(x) * 0.36 * (1 - t * 0.2), 90, 12), om(C.lung, { roughness: 0.75, map: speckle('#e2a19d', 1600, 0.25, 4) }));
     if (plan === 'python') add('lungL', 'Left lung', 'Boas and pythons still have a good left lung, more than half as long as the right one.', 'body', sweep(heart1 * 1.01, heart1 + (lungEnd - heart1) * 0.62, 0.24, 0.2, (x, t) => rB(x) * 0.26 * (1 - t * 0.25), 60, 12), om(C.lung, { roughness: 0.75, map: speckle('#e2a19d', 1200, 0.25, 5) }));
-    else add('lungL', 'Left lung', 'Tiny in most snakes (and missing in many): there is only room for one big lung.', 'body', sweep(heart1 * 1.01, heart1 + svl * 0.035, 0.26, 0.18, (x) => rB(x) * 0.12, 16, 10), om(C.lung, { roughness: 0.75 }));
+    else add('lungL', 'Left lung', 'Tiny in most snakes (and missing in many): there is only room for one big lung.', 'body', sweep(heart1 * 1.01, heart1 + svl * 0.035, 0.26, 0.18, (x) => rB(x) * 0.12, 16, 10), om(C.lung, { roughness: 0.75 }), { detail: true });
     add('airsac', 'Air sac', 'The back part of the lung has no blood vessels: it is a thin bag that stores air, like a balloon.', 'body', sweep(lungEnd - svl * 0.01, sacEnd, -0.12, 0.3, (x, t) => rB(x) * 0.25 * (1 - t * 0.6), 70, 12), new THREE.MeshPhysicalMaterial({ color: C.sac, roughness: 0.25, transparent: true, opacity: 0.42, depthWrite: false, clearcoat: 1 }));
     add('liver', 'Liver', 'Long and thin to fit the body. It cleans the blood and stores energy.', 'body', sweep(heart1 + svl * 0.008, liverEnd, -0.06, -0.3, (x, t) => rB(x) * 0.34 * Math.min(1, 0.55 + t * 1.4) * (1 - 0.3 * t), 80, 12, 1.15), om(C.liver, { roughness: 0.35, clearcoat: 0.6 }));
     add('stomach', 'Stomach', 'Very stretchy. Strong acid digests the whole prey - even bones.', 'body', sweep(stom0, stom1, 0.04, -0.12, (x, t) => rB(x) * 0.38 * (1 - Math.abs(t - 0.4) * 0.6), 40, 14), om(C.stomach, { map: canvasTex(64, (x, s) => { x.fillStyle = '#d6998d'; x.fillRect(0, 0, s, s); x.strokeStyle = 'rgba(140,60,50,.3)'; x.lineWidth = 2; for (let i = 0; i < s; i += 7) { x.beginPath(); x.moveTo(0, i); x.bezierCurveTo(s * 0.3, i + 4, s * 0.6, i - 4, s, i); x.stroke(); } }, 2, 3) }));
     const g0 = Math.max(svl * 0.605, stom1 + svl * 0.006);
-    add('gall', 'Gall bladder', 'A small green bag just behind the stomach. It keeps bile, which helps to digest fat.', 'body', blob(g0, -0.18, -0.22, rB(g0) * 0.2, rB(g0) * 0.17, F.W(g0) * 0.15), om(C.gall, { roughness: 0.3, clearcoat: 0.8 }));
-    add('pancreas', 'Pancreas', 'Makes juices that digest food and a hormone (insulin) that controls sugar in the blood.', 'body', blob(g0 + rB(g0) * 0.5, 0.05, -0.12, rB(g0) * 0.24, rB(g0) * 0.15, F.W(g0) * 0.17), om(C.pancreas));
-    add('spleen', 'Spleen', 'A small dark red organ that helps to fight germs and cleans old blood cells.', 'body', blob(g0 - rB(g0) * 0.2, 0.22, 0.02, rB(g0) * 0.16, rB(g0) * 0.14, F.W(g0) * 0.13), om(C.spleen, { roughness: 0.4 }));
+    add('gall', 'Gall bladder', 'A small green bag just behind the stomach. It keeps bile, which helps to digest fat.', 'body', blob(g0, -0.18, -0.22, rB(g0) * 0.2, rB(g0) * 0.17, F.W(g0) * 0.15), om(C.gall, { roughness: 0.3, clearcoat: 0.8 }), { detail: true });
+    add('pancreas', 'Pancreas', 'Makes juices that digest food and a hormone (insulin) that controls sugar in the blood.', 'body', blob(g0 + rB(g0) * 0.5, 0.05, -0.12, rB(g0) * 0.24, rB(g0) * 0.15, F.W(g0) * 0.17), om(C.pancreas), { detail: true });
+    add('spleen', 'Spleen', 'A small dark red organ that helps to fight germs and cleans old blood cells.', 'body', blob(g0 - rB(g0) * 0.2, 0.22, 0.02, rB(g0) * 0.16, rB(g0) * 0.14, F.W(g0) * 0.13), om(C.spleen, { roughness: 0.4 }), { detail: true });
     add('intestine', 'Small intestine', 'Takes the goodness out of the digested food. In snakes it is fairly short and loops gently along the body.', 'body', sweep(Math.max(svl * 0.625, g0 + svl * 0.02), svl * 0.86, (x) => 0.16 * Math.sin((x / svl) * 150), (x) => -0.18 + 0.12 * Math.cos((x / svl) * 150), (x) => rB(x) * 0.17, 200, 8), om(C.small));
     add('colon', 'Large intestine', 'The last part of the gut. It takes water back out of what is left, then it goes out through the cloaca.', 'body', sweep(svl * 0.855, svl * 0.99, 0, -0.18, (x, t) => rB(x) * 0.19 * (1 - 0.3 * t), 40, 10), om(C.large));
-    for (const [sg, a] of [[-1, 0.63], [1, 0.67]]) add('gonads', 'Ovaries or testes', 'The organs that make eggs (females) or sperm (males). One sits a little in front of the other, to fit the long body.', 'body', sweep(svl * a, svl * (a + 0.06), sg * 0.3, 0.3, (x) => rB(x) * 0.13, 24, 10), om(C.gonad));
-    for (const [sg, a] of [[-1, 0.78], [1, 0.83]]) add('kidneys', 'Kidneys', 'Long and lobed, one in front of the other. They clean the blood; snakes save water by making a white paste (urates) instead of runny urine.', 'body', sweep(svl * a, svl * (a + 0.085), sg * 0.3, 0.3, (x, t) => rB(x) * 0.15 * (0.8 + 0.2 * Math.cos(t * 44)), 48, 10), om(C.kidney, { roughness: 0.45 }));
+    for (const [sg, a] of [[-1, 0.63], [1, 0.67]]) add('gonads', 'Ovaries or testes', 'The organs that make eggs (females) or sperm (males). One sits a little in front of the other, to fit the long body.', 'body', sweep(svl * a, svl * (a + 0.06), sg * 0.3, 0.3, (x) => rB(x) * 0.13, 24, 10), om(C.gonad), { detail: true });
+    for (const [sg, a] of [[-1, 0.78], [1, 0.83]]) add('kidneys', 'Kidneys', 'Long and lobed, one in front of the other. They clean the blood; snakes save water by making a white paste (urates) instead of runny urine.', 'body', sweep(svl * a, svl * (a + 0.085), sg * 0.3, 0.3, (x, t) => rB(x) * 0.15 * (0.8 + 0.2 * Math.cos(t * 44)), 48, 10), om(C.kidney, { roughness: 0.45 }), { detail: true });
     // ---- backbone and ribs: one pair of ribs on every vertebra from the neck to the vent (none in the tail)
     const ribs = []; const xr0 = Math.max(Hl * 1.3, x0 * 1.08), nRib = Math.round(clamp((svl - xr0) / (F.w0 * 0.2), 110, 220));
     for (let k = 0; k < nRib; k++) {
@@ -1025,7 +1302,7 @@ export function create(V) {
     add('ribs', 'Ribs', 'Snakes can have 100 to more than 400 pairs of ribs - one pair on every bone of the backbone! They are not joined underneath, so the body can stretch round a big meal, and they help the snake to crawl and climb.', 'ribs', mergeG(ribs), om(C.bone, { roughness: 0.55, clearcoat: 0.15 }), { x: svl * 0.4 });
     add('spine', 'Backbone (vertebrae)', 'A chain of 100 to more than 400 small bones (vertebrae) from the head to the tip of the tail, joined so the body can bend in every direction.', 'ribs', sweep(Hl * 1.0, L * 0.995, 0, 0.58, (x) => rB(x) * 0.1, 300, 8), om(C.bone, { roughness: 0.55, clearcoat: 0.15, map: ringTex('#eee5cf', 'rgba(150,130,100,.5)', 220) }), { x: svl * 0.45 });
     // ---- tail
-    add('cloaca', 'Cloaca (vent)', 'One opening for droppings, urates, eggs and mating. The tail starts here.', 'tail', blob(svl, 0, -0.5, rB(svl) * 0.45, rB(svl) * 0.2, F.W(svl) * 0.3), om(C.cloaca));
+    add('cloaca', 'Cloaca (vent)', 'One opening for droppings, urates, eggs and mating. The tail starts here.', 'tail', blob(svl, 0, -0.5, rB(svl) * 0.45, rB(svl) * 0.2, F.W(svl) * 0.3), om(C.cloaca), { detail: true });
     add('tailp', 'Tail', 'From the vent to the tip. It has backbone but no ribs and no big organs (in males, the mating organs sit inside its base).' + (P.tail && P.tail.rattle ? ' Rattlesnakes add a new rattle segment each time they shed.' : ''), 'tail', sweep(svl * 1.01, L * 0.97, 0, 0.05, (x) => rB(x) * 0.42, 60, 10), om(C.tailM, { transparent: true, opacity: 0.35, depthWrite: false, roughness: 0.6 }));
     // the head parts go with their jaw (their shapes are made with the mouth shut: the jaw group carries them from there,
     // whether the mouth is open or shut right now)
@@ -1068,10 +1345,10 @@ export function create(V) {
   }
 
   // the long, gently curved pose Anatomy shows the snake in (organs in a row along it), and props cleared from under it
-  function groundYAt(list) { // ground heights under points [x, z] (the 3D ground has ripples and lumps)
+  function groundYAt(list, below) { // ground heights under points [x, z] (the 3D ground has ripples and lumps; below: also under water)
     const grounds = []; V.scene.traverse((o) => { if (o.isMesh && !o.isInstancedMesh && o.receiveShadow && o.geometry && (o.geometry.type === 'RingGeometry' || o.geometry.type === 'PlaneGeometry') && o.material && !o.material.transparent) grounds.push(o); });
     const ray = new THREE.Raycaster(), down = V3(0, -1, 0);
-    return list.map(([x, z]) => { ray.set(V3(x, 50, z), down); const h = ray.intersectObjects(grounds, false); return h.length ? Math.max(0, ...h.map((q) => q.point.y)) : 0; });
+    return list.map(([x, z]) => { ray.set(V3(x, 50, z), down); const h = ray.intersectObjects(grounds, false); return h.length ? Math.max(below ? -1e9 : 0, ...h.map((q) => q.point.y)) : 0; });
   }
   function clearProps(pts, rad) { // hide scenery standing on a path ([x, z] points); returns the undo
     const undo = [], m4 = new THREE.Matrix4(), p = new THREE.Vector3(), sc = new THREE.Vector3(), q = new THREE.Quaternion();
@@ -1159,7 +1436,16 @@ export function create(V) {
       out.set(0, 0, 0); for (let i = a; i < a + span; i++) out.add(av.fromBufferAttribute(pa, i)); out.multiplyScalar(1 / span);
       return out.applyMatrix4(m.matrixWorld);
     }
+    // v5.73: anchors are cached - the parts only move when the body is posed or the jaw moves (never when the view turns)
+    let ancKey = '', ancMap = new Map();
     function partAnchor(p) {
+      if (rig && rig.active) return partAnchor0(p);
+      const mo = V.extras.mouth, key = String(mo ? (mo.ver != null ? mo.ver : mo.t) : 0);
+      if (key !== ancKey) { ancKey = key; ancMap = new Map(); }
+      let a = ancMap.get(p); if (a === undefined) { a = partAnchor0(p); ancMap.set(p, a ? a.clone() : null); return a; }
+      return a ? a.clone() : null;
+    }
+    function partAnchor0(p) {
       const F = V.info.F;
       if (p.key === 'pits') return rig.point(F.Hl * 0.15, F.W(F.Hl * 0.15) * 0.9, 0);
       if (p.skin) return rig.point(F.L * 0.42, F.W(F.L * 0.42), 0);
@@ -1263,10 +1549,47 @@ export function create(V) {
       const c = [[r.x, r.y], [r.x + r.w, r.y], [r.x + r.w, r.y + r.h], [r.x, r.y + r.h]];
       for (let i = 0; i < 4; i++) if (segX(a, b, c[i], c[(i + 1) % 4])) return true; return false;
     };
+    // v5.73: zoom decides how much you see (Eduardo: "you zoom in at a certain point in the head it should show all parts
+    // of head but when you going around it shouldnt start flying everywhere"). Each region (head, body, tail) has
+    // small detail parts - skull and jaw bones, quadrate, palate bones, brain, smell organ, venom glands; the little
+    // lung, gall bladder, pancreas, spleen, gonads and kidneys; the vent - that fade in as the camera comes close to
+    // them, and their labels with them; far away only the big organs and the region names show. Nothing in the snake
+    // ever moves when you turn the view: the parts stay where they are in the body, and each label keeps its place
+    // beside its part (sliding there smoothly when it has to move to keep clear), fading in and out instead of jumping.
+    const camDist = (p) => { const a = partAnchor(p); return a ? V.cam.position.distanceTo(a) : 1e9; };
+    function zoneOf(p) {
+      const F = V.info.F, L = F.L, svl = st.data.svl, Hl = F.Hl;
+      if (p.region === 'head') return [Hl * 4.5, Hl * 9.5];
+      if (p.region === 'tail') return [Math.max(Hl * 3, (L - svl) * 1.4), Math.max(Hl * 6, (L - svl) * 2.8)];
+      return [Math.max(Hl * 4, svl * 0.16), Math.max(Hl * 8, svl * 0.3)];
+    }
+    const lookAt = new THREE.Vector3(), lookDir = new THREE.Vector3();
+    function detailFade() {
+      if (!st.data) return;
+      const dC = V.controls.st.d; lookAt.copy(V.cam.position).addScaledVector(V.cam.getWorldDirection(lookDir), dC); // (what the view is centred on)
+      for (const p of st.data.parts) {
+        const [n0, n1] = zoneOf(p), dist = camDist(p), a = partAnchor(p), near = a ? 1 - sstep(dC * 0.55, dC * 1.15, a.distanceTo(lookAt)) : 0;
+        p.rev = st.sel === p || (st.sel && st.sel.key === 'region-' + p.region) ? 1 : 1 - sstep(n0, n1, dist);
+        // labels: detail parts with their parts; the big organs from a bit further away; head parts only near the head
+        p.lr = (p.detail || p.region === 'head' ? p.rev : 1 - sstep(n0 * 2.2, n1 * 2.2, dist)) * lerp(near, 1, sstep(Math.max(st.data.svl * 0.2, V.info.F.Hl * 4), Math.max(st.data.svl * 0.4, V.info.F.Hl * 8), dC)); // (close in: only what you are looking at)
+        if (!p.detail) continue;
+        for (const m of p.meshes) {
+          if (!m.material || !m.userData.detail) continue;
+          const mt = m.material; if (mt.userData.op0 == null) mt.userData.op0 = { op: mt.opacity, tr: mt.transparent, dw: mt.depthWrite };
+          const o = mt.userData.op0, v = p.rev, tr = o.tr || v < 0.99;
+          if (mt.transparent !== tr) { mt.transparent = tr; mt.needsUpdate = true; }
+          mt.opacity = o.op * v; mt.depthWrite = o.dw && v > 0.99; m.visible = v > 0.01;
+        }
+      }
+    }
+    function restoreDetail() { if (st.data) for (const p of st.data.parts) for (const m of p.meshes) { const mt = m.material, o = mt && mt.userData.op0; if (!o) continue; mt.opacity = o.op; mt.transparent = o.tr; mt.depthWrite = o.dw; mt.needsUpdate = true; delete mt.userData.op0; } }
     function layoutLabels(busy, w, h) {
-      const F = V.info.F, hide = (r) => { r.el.hidden = true; r.dot.hidden = true; };
+      const F = V.info.F, tn = now(), dt = clamp((tn - (st.lt || tn)) / 1000, 0, 0.1), kS = 1 - Math.exp(-dt * 10), kO = 1 - Math.exp(-dt * 7);
+      st.lt = tn;
+      const hide = (r) => { r.el.hidden = true; r.dot.hidden = true; r.opc = 0; r.off = r.offC = null; r.shown = false; };
       while (lines.firstChild) lines.removeChild(lines.firstChild);
       if (busy) { st.regs.forEach(hide); return; }
+      detailFade();
       // the snake on screen: points along it with their half-thickness in pixels
       const snk = []; let any = false;
       for (let i = 0; i <= 100; i++) {
@@ -1277,59 +1600,66 @@ export function create(V) {
       if (!any) { st.regs.forEach(hide); return; }
       const hitsSnake = (r) => snk.some(([sx, sy, rr]) => sx > r.x - rr && sx < r.x + r.w + rr && sy > r.y - rr && sy < r.y + r.h + rr);
       const localSpan = (x0, x1) => { let t = 1e9, b = -1e9; for (const [sx, sy, rr] of snk) if (sx > x0 && sx < x1) { t = Math.min(t, sy - rr); b = Math.max(b, sy + rr); } return [t, b]; };
-      // zoomed in (the body much wider than the view): the parts in view; else the four regions
-      const zoomed = V.controls.st.d < st.data.svl * 0.42;
+      // how much each label matters now: the region names far out, the parts as you come close to them
+      const d = V.controls.st.d, regK = sstep(st.data.svl * 0.26, st.data.svl * 0.46, d);
       const cand = [];
       for (const r of st.regs) {
-        if (!!r.region === zoomed) { hide(r); continue; }
-        const a = r.anchor(); if (!a) { hide(r); continue; } ndc.copy(a).project(V.cam);
-        const sx = (ndc.x * 0.5 + 0.5) * w, sy = (-ndc.y * 0.5 + 0.5) * h;
-        if (ndc.z > 1 || sx < 4 || sx > w - 4 || sy < 4 || sy > h - 4) { hide(r); continue; }
-        cand.push({ r, sx, sy, dc: Math.abs(sx - w / 2) + Math.abs(sy - h / 2) });
+        const lr = r.region ? regK : r.part.lr || 0;
+        r.lr = lr;
+        const a = r.anchor(); if (!a) { r.want = false; continue; } ndc.copy(a).project(V.cam);
+        r.sx = (ndc.x * 0.5 + 0.5) * w; r.sy = (-ndc.y * 0.5 + 0.5) * h;
+        const onS = ndc.z <= 1 && r.sx > 4 && r.sx < w - 4 && r.sy > 4 && r.sy < h - 4;
+        r.want = onS && lr > (r.shown ? 0.15 : 0.4);
+        if (r.want) cand.push(r);
       }
-      // the nearest to the middle of the view first (fewer on a phone), then placed from left to right
+      // the most relevant (then the nearest the middle of the view) first, fewer on a phone; labels already showing first
       const most = w < 520 ? 7 : 12;
-      cand.sort((p, q) => p.dc - q.dc); cand.slice(most).forEach((c) => hide(c.r));
-      const list = cand.slice(0, most).sort((p, q) => p.sx - q.sx);
-      const boxes = obstacles().slice(), segs = [], gap = 6, done = [];
-      list.forEach((c, n) => {
-        const e = c.r.el; e.hidden = false; if (!c.r.sz || !c.r.sz[0]) c.r.sz = [e.offsetWidth || 120, e.offsetHeight || 26];
-        const [lw, lh] = c.r.sz, pref = n % 2 ? 1 : -1; // alternate above / below along the body
+      cand.sort((p, q) => (q.shown - p.shown) || (q.lr - p.lr) || (Math.abs(p.sx - w / 2) + Math.abs(p.sy - h / 2)) - (Math.abs(q.sx - w / 2) + Math.abs(q.sy - h / 2)));
+      cand.slice(most).forEach((r) => { r.want = false; });
+      const list = cand.slice(0, most);
+      const boxes = obstacles().slice(), gap = 6;
+      const overOk = d < Math.max(st.data.svl * 0.2, F.Hl * 4.2); // (right up close the see-through body fills the view: labels may lie over it, just not over the other labels' dots)
+      const dots = overOk ? list.map((r) => [r.sx, r.sy]) : [];
+      const free = (box) => box.y >= 4 && box.y + box.h <= h - 4 && box.x >= 4 && box.x + box.w <= w - 4 && !boxes.some((q) => box.x < q.x + q.w + gap && box.x + box.w + gap > q.x && box.y < q.y + q.h + gap && box.y + box.h + gap > q.y) && (overOk ? !dots.some(([x, y]) => x > box.x - 8 && x < box.x + box.w + 8 && y > box.y - 8 && y < box.y + box.h + 8) : !hitsSnake(box));
+      list.forEach((r, n) => {
+        const e = r.el; e.hidden = false; if (!r.sz || !r.sz[0]) r.sz = [e.offsetWidth || 120, e.offsetHeight || 26];
+        const [lw, lh] = r.sz;
+        // keep its place beside its part while that place is still clear
+        if (r.off) { const box = { x: r.sx + r.off[0], y: r.sy + r.off[1], w: lw, h: lh }; if (free(box)) { boxes.push(box); r.shown = true; return; } }
+        const pref = r.off ? (r.off[1] < 0 ? -1 : 1) : (n % 2 ? 1 : -1); // (the side it was on, or alternate above / below along the body)
         let best = null;
-        const tryBox = (x, y, lx, ly, extra) => { // score a place for the label (lx, ly: where its line leaves it)
-          if (y < 4 || y + lh > h - 4 || x < 4 || x + lw > w - 4) return;
-          const box = { x, y, w: lw, h: lh };
-          if (boxes.some((q) => x < q.x + q.w + gap && x + lw + gap > q.x && y < q.y + q.h + gap && y + lh + gap > q.y)) return;
-          if (hitsSnake(box)) return;
-          const seg = [[lx, ly], [c.sx, c.sy]];
-          let cost = Math.hypot(lx - c.sx, ly - c.sy) + extra;
-          for (const s2 of segs) if (segX(seg[0], seg[1], s2[0], s2[1])) cost += 120;
-          for (const q of boxes) if (segRect(seg[0], seg[1], q)) cost += 160;
-          for (const d2 of done) if (segRect(d2.seg[0], d2.seg[1], box)) cost += 160; // (nor over an earlier line)
-          if (!best || cost < best.cost) best = { box, seg, cost };
+        const tryBox = (x, y, extra) => {
+          const box = { x, y, w: lw, h: lh }; if (!free(box)) return;
+          let cost = Math.hypot(x + lw / 2 - r.sx, y + lh / 2 - r.sy) + extra;
+          if (r.off) cost += Math.hypot(x - r.sx - r.off[0], y - r.sy - r.off[1]) * 0.6; // (move as little as it can)
+          if (!best || cost < best.cost) best = { box, cost };
         };
-        search: for (let k = 0; k < 7; k++) {
-          // just above or below the snake there (alternating along the body), sliding sideways a little
-          for (const dir of [pref, -pref]) for (const sh of [0, 0.35, -0.35, 0.7, -0.7, 1.1, -1.1, 1.6, -1.6]) {
-            if (best && best.cost < 26 + lh) break search;
-            const x = clamp(c.sx - lw / 2 + sh * lw, 4, w - lw - 4);
-            const [t0, b0] = localSpan(x - 6, x + lw + 6), top = Math.min(t0, c.sy - 6), bot = Math.max(b0, c.sy + 6);
-            const y = dir < 0 ? top - 12 - lh - k * (lh + gap) : bot + 12 + k * (lh + gap);
-            tryBox(x, y, clamp(c.sx, x + 10, x + lw - 10), dir < 0 ? y + lh : y, (dir !== pref ? 18 : 0) + Math.abs(sh) * 8);
+        search: for (let k = 0; k < 6; k++) {
+          for (const dir of [pref, -pref]) for (const sh of [0, 0.35, -0.35, 0.7, -0.7, 1.1, -1.1]) {
+            if (best && best.cost < 40 + lh) break search;
+            const x = clamp(r.sx - lw / 2 + sh * lw, 4, w - lw - 4);
+            const [t0, b0] = localSpan(x - 6, x + lw + 6), top = Math.min(t0, r.sy - 6), bot = Math.max(b0, r.sy + 6);
+            tryBox(x, dir < 0 ? top - 12 - lh - k * (lh + gap) : bot + 12 + k * (lh + gap), (dir !== pref ? 18 : 0) + Math.abs(sh) * 8);
           }
-          // or beside its point, left or right (where the snake runs up and down the view, or parts crowd together)
-          for (const side of [1, -1]) for (const v of [0, -1, 1, -2, 2]) {
-            const x = side > 0 ? c.sx + 18 + k * 40 : c.sx - 18 - lw - k * 40, y = c.sy - lh / 2 + v * (lh + gap);
-            tryBox(x, y, side > 0 ? x : x + lw, clamp(c.sy, y + 6, y + lh - 6), 14 + Math.abs(v) * 6);
-          }
+          for (const side of [1, -1]) for (const v of [0, -1, 1, -2, 2]) tryBox(side > 0 ? r.sx + 18 + k * 40 : r.sx - 18 - lw - k * 40, r.sy - lh / 2 + v * (lh + gap), 14 + Math.abs(v) * 6);
         }
-        if (!best) { hide(c.r); return; }
-        boxes.push(best.box); segs.push(best.seg); done.push(best);
-        e.style.transform = 'translate(' + best.box.x.toFixed(1) + 'px,' + best.box.y.toFixed(1) + 'px)';
-        const d = c.r.dot; d.hidden = false; d.style.transform = 'translate(' + c.sx.toFixed(1) + 'px,' + c.sy.toFixed(1) + 'px)';
-        const [[lx, ly]] = best.seg;
-        for (const [col, wid] of [['rgba(12,26,18,.75)', 3.5], ['#9be07c', 1.6]]) { const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line'); ln.setAttribute('x1', lx); ln.setAttribute('y1', ly); ln.setAttribute('x2', c.sx); ln.setAttribute('y2', c.sy); ln.setAttribute('stroke', col); ln.setAttribute('stroke-width', wid); ln.setAttribute('stroke-linecap', 'round'); lines.appendChild(ln); }
+        if (!best) { r.want = false; return; }
+        boxes.push(best.box); r.off = [best.box.x - r.sx, best.box.y - r.sy]; if (!r.offC) r.offC = r.off.slice(); r.shown = true;
       });
+      // draw: each label slides smoothly to its place beside its part and fades in or out (never jumps)
+      for (const r of st.regs) {
+        const goal = r.want ? Math.min(1, 0.35 + r.lr) : 0;
+        r.opc = (r.opc || 0) + (goal - (r.opc || 0)) * kO;
+        if (!r.off || r.sx == null || (r.opc < 0.03 && !r.want)) { if (!r.want) hide(r); continue; }
+        if (!r.offC) r.offC = r.off.slice(); r.offC[0] += (r.off[0] - r.offC[0]) * kS; r.offC[1] += (r.off[1] - r.offC[1]) * kS;
+        const [lw, lh] = r.sz || [120, 26], x = r.sx + r.offC[0], y = r.sy + r.offC[1];
+        const e = r.el; e.hidden = false; e.style.opacity = r.opc.toFixed(3); e.style.pointerEvents = r.opc > 0.5 ? '' : 'none';
+        e.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
+        const dt2 = r.dot; dt2.hidden = false; dt2.style.opacity = r.opc.toFixed(3); dt2.style.transform = 'translate(' + r.sx.toFixed(1) + 'px,' + r.sy.toFixed(1) + 'px)';
+        const lx = x + lw < r.sx ? x + lw : x > r.sx ? x : clamp(r.sx, x + 10, x + lw - 10), ly = y + lh < r.sy ? y + lh : y > r.sy ? y : clamp(r.sy, y + 6, y + lh - 6);
+        for (const [col, wid] of [['rgba(12,26,18,.75)', 3.5], ['#9be07c', 1.6]]) { const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line'); ln.setAttribute('x1', lx); ln.setAttribute('y1', ly); ln.setAttribute('x2', r.sx); ln.setAttribute('y2', r.sy); ln.setAttribute('stroke', col); ln.setAttribute('stroke-width', wid); ln.setAttribute('stroke-linecap', 'round'); ln.setAttribute('stroke-opacity', r.opc.toFixed(3)); lines.appendChild(ln); }
+      }
+      if (st.regs.some((r) => r.opc > 0.03 && Math.abs((r.want ? Math.min(1, 0.35 + r.lr) : 0) - r.opc) > 0.02 || (r.offC && r.off && Math.abs(r.offC[0] - r.off[0]) + Math.abs(r.offC[1] - r.off[1]) > 0.5))) V.kick(); // (keep animating until settled)
     }
     const ray = new THREE.Raycaster();
     function pick(e) {
@@ -1382,7 +1712,7 @@ export function create(V) {
     function set(v, instant) {
       if (v === st.on) return; st.on = v; V.bAnat.setAttribute('aria-pressed', String(v));
       if (v) {
-        if (show) stopShow(true); if (slither) stopSlither();
+        idleStop(); if (show) stopShow(true); if (slither) stopSlither();
         if (!st.data) st.data = buildAnatomy();
         skinSeeThrough(true); setOrganVis(true); regions();
         const hint = stage.querySelector('.sp3d-hint'); if (hint) hint.classList.add('sp3d-hint-off');
@@ -1391,7 +1721,7 @@ export function create(V) {
         st.k = 1;
         if (!V.scaleOn()) { st.view = { az: V.controls.st.az, el: 0.72, d: V.info.dFit * 1.1 }; V.view(st.view); }
       } else {
-        clearSel(); skinSeeThrough(false); liningSeeThrough(false); setOrganVis(false); st.regs.forEach((r) => { r.el.remove(); r.dot.remove(); }); st.regs = []; while (lines.firstChild) lines.removeChild(lines.firstChild); if (st.list) { st.list.remove(); st.list = null; }
+        clearSel(); skinSeeThrough(false); liningSeeThrough(false); restoreDetail(); setOrganVis(false); st.regs.forEach((r) => { r.el.remove(); r.dot.remove(); }); st.regs = []; while (lines.firstChild) lines.removeChild(lines.firstChild); if (st.list) { st.list.remove(); st.list = null; }
         const mo = V.extras.mouth; if (mo && mo.anchors && mo.anchors.teeth && mo.anchors.teeth.parent) { const ins = mo.anchors.teeth.parent.parent; ins.visible = mo.t > 0.01; ins.children.forEach((c) => { c.visible = true; }); }
         if (!slither) tip.hidden = true;
         fx.reach = 0; if (fx.zoomOut > 1) { fx.zoomOut = 1; if (!instant) V.controls.setGoal({ d: V.info.dFit, px: 0, pz: 0, el: (V.info.portrait ? 40 : 30) * Math.PI / 180 }); }
@@ -1401,7 +1731,7 @@ export function create(V) {
     }
     function setOrganVis(v) { if (st.data) st.data.own.forEach((m) => { m.visible = v; }); }
     function refresh() { if (st.on) { skinSeeThrough(true); insideVisible(); } }
-    function reset() { liningSeeThrough(false); clearSel(); st.regs.forEach((r) => { r.el.remove(); r.dot.remove(); }); st.regs = []; lines.remove(); if (st.list) st.list.remove(); st.list = null; if (st.undoProps) st.undoProps(); st.undoProps = null; st.on = false; st.data = null; st.mat0 = null; st.pose = null; st.k = 0; card.remove(); ring.remove(); }
+    function reset() { liningSeeThrough(false); restoreDetail(); clearSel(); st.regs.forEach((r) => { r.el.remove(); r.dot.remove(); }); st.regs = []; lines.remove(); if (st.list) st.list.remove(); st.list = null; if (st.undoProps) st.undoProps(); st.undoProps = null; st.on = false; st.data = null; st.mat0 = null; st.pose = null; st.k = 0; card.remove(); ring.remove(); }
     function resetView() { if (!st.on || !st.view) return false; clearSel(); V.view(st.view); return true; } // Reset shows the whole stretched-out snake again
     return { get on() { return st.on; }, get k() { return st.k; }, set, resetView, toggle: () => set(!st.on), after, pick, select, clearSel, refresh, reset, seeMore, stepPose, get parts() { return st.data && st.data.parts; }, get selCenter() { return st.sel ? st.selC : null; } };
   }
@@ -1464,6 +1794,44 @@ export function create(V) {
     if (p && p.distanceTo(info.center) < info.Rb * 1.5) V.focus(p, d); else V.controls.setGoal({ d });
   });
 
+  // ================================================================= v5.73: idle life
+  // A resting snake is never quite still: it breathes (the trunk swells a little and settles every few seconds - done in
+  // the skin's vertex shader, no work on the CPU), flicks its tongue now and then, and every so often lifts and turns
+  // its head a touch (that bends the body on the CPU, so only at the High detail setting).
+  const idle = { next: 0, flickAt: 0, head: null, uB: { value: 0 }, mat: null };
+  function idleSetup() {
+    idle.next = now() + 2500; idle.flickAt = now() + 1500 + Math.random() * 2000; idle.head = null; idle.uB.value = 0;
+    const m = V.extras && V.extras.mat, F = V.info && V.info.F; if (!m || !F || m.userData.slBreath) return;
+    const prev = m.onBeforeCompile, L = F.L, amp = F.w0 * 0.03;
+    m.onBeforeCompile = function (sh, r) {
+      if (prev) prev.call(this, sh, r);
+      if (!/attribute vec3 aMet;/.test(sh.vertexShader)) return; // (the skin's own measures along the body)
+      sh.uniforms.uSlBreath = idle.uB;
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uSlBreath;').replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed += objectNormal * uSlBreath * ' + amp.toExponential(4) + ' * smoothstep(' + (L * 0.12).toExponential(4) + ', ' + (L * 0.24).toExponential(4) + ', aMet.y) * (1.0 - smoothstep(' + (L * 0.45).toExponential(4) + ', ' + (L * 0.62).toExponential(4) + ', aMet.y));');
+    };
+    m.userData.slBreath = true; m.needsUpdate = true; idle.mat = m;
+  }
+  function idleStep() {
+    const t = now(), busy = !!show || !!slither || !!(anat && anat.on) || V.mouthGoal > 0.01 || V.reduce();
+    // breathing: in for about 1.6 s, out for 2.2 s, then a pause (a snake at rest breathes only a few times a minute)
+    { const c = ((t / 1000) % 6.5); idle.uB.value = V.reduce() ? 0 : c < 1.6 ? sstep(0, 1.6, c) : c < 3.8 ? 1 - sstep(1.6, 3.8, c) : 0; }
+    if (busy) { idleStop(); idle.next = Math.max(idle.next, t + 3000); idle.flickAt = Math.max(idle.flickAt, t + 2500); return; }
+    // tongue flicks: two quick ones every 4-9 s
+    const ft = (t - idle.flickAt) / 1000;
+    if (ft >= 0) { if (ft < 0.84) { flick((ft / 0.42) % 1); idle.flicking = true; } else { flick(0); idle.flicking = false; idle.flickAt = t + 4000 + Math.random() * 5000; } }
+    // a slight lift and turn of the head, now and then (High detail only)
+    if (V.quality === 'low' || !V.info || V.info.tree) return;
+    if (!idle.head && t > idle.next) { ensureRig(); if (rig) idle.head = { t0: t, yaw: (Math.random() < 0.5 ? -1 : 1) * (0.08 + Math.random() * 0.1), dur: 2600 }; }
+    if (idle.head) {
+      const R = rig, u = (t - idle.head.t0) / idle.head.dur;
+      if (u >= 1) { idle.head = null; R.release(); idle.next = t + 7000 + Math.random() * 7000; return; }
+      const F = V.info.F, is = Math.min(R.N - 2, Math.round((F.Hl * 4.5) / R.dx)), th = R.rth.slice(), ys = R.restY.slice(), e = Math.sin(Math.PI * sstep(0, 1, u));
+      for (let i = 0; i < is; i++) { const k = Math.pow(1 - i / is, 1.5); th[i] += idle.head.yaw * e * k; ys[i] += F.Hl * 0.07 * e * k; }
+      R.setPose(R.integrate(th, is, R.rc[is * 3], R.rc[is * 3 + 2], ys)); R.apply(true);
+    }
+  }
+  function idleStop() { if (idle.flicking) { idle.flicking = false; flick(0); } if (idle.head) { idle.head = null; if (rig) rig.release(); } }
+
   // ================================================================= frame hooks
   const fx = {
     onBuild() {
@@ -1475,17 +1843,20 @@ export function create(V) {
       for (const b of [bEat]) { b.disabled = false; b.removeAttribute('aria-pressed'); if (b.dataset.lbl) { b.textContent = b.dataset.lbl; delete b.dataset.lbl; } }
       bSlither.setAttribute('aria-pressed', 'false'); bSlither.textContent = 'Slither';
       say(''); stepTag.hidden = true; tip.hidden = true;
+      idleSetup();
     },
     reset() { if (show) { const s = show; show = null; for (const o of s.objs) disposeTree(o); (s.undo || []).forEach((f) => f()); } slither = null; if (anat) anat.reset(); anat = null; rig = null; camBlend = null; say(''); },
     step() {
       if (!alive) return false;
       let moving = false;
       if (show) {
+        if (show.freeze == null) { const tn = now(); if (show.lastF && tn - show.lastF > 250) show.t0 += tn - show.lastF - 50; show.lastF = tn; } // (v5.73: a long hitch - a shader compiling - never skips part of the show)
         show.time = show.freeze != null ? show.freeze : (now() - show.t0) / 1000;
         show.step(show.time); moving = true;
         if (show.freeze == null && show.time >= show.dur) stopShow();
       } else if (slither) moving = stepSlither() || !!slither;
       if (camBlend) moving = true;
+      idleStep();
       if (anat && anat.stepPose()) moving = true;
       if (rig) rig.sync();
       if (anat && anat.on) { anat.refresh(); }
@@ -1527,7 +1898,7 @@ export function create(V) {
     },
     dispose() { alive = false; fx.reset(); if (hdb) hdb.remove(); closeSide(); },
     // for tests: freeze a show at s seconds
-    test: { freeze(s) { if (show) show.freeze = s; V.kick(); }, get show() { return show && { name: show.name, time: show.time, dur: show.dur, diet: show.diet }; }, get slither() { return !!slither; }, get anat() { return anat; }, get rig() { return rig; }, get lastTap() { return lastTap; }, dietOf: () => dietOf(P, V.opts.id), side: (k) => toggleSide(k) },
+    test: { get P() { return P; }, freeze(s) { if (show) show.freeze = s; V.kick(); }, get show() { return show && { name: show.name, time: show.time, dur: show.dur, diet: show.diet }; }, get slither() { return !!slither; }, get showInfo() { return show && show.info; }, get anat() { return anat; }, get rig() { return rig; }, get lastTap() { return lastTap; }, dietOf: () => dietOf(P, V.opts.id), side: (k) => toggleSide(k) },
   };
   return fx;
 }

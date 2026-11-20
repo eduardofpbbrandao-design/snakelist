@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=567'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=567'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=569'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=569'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -2091,6 +2091,7 @@ function leafGeometry() {
 }
 
 function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
+  if (NATURE.resetAmbient) NATURE.resetAmbient(); // v5.73: the wind and water clocks start afresh with each scene
   const { scene } = ctx, S = SCENES[P.scene.kind] || SCENES.litter, R = rng(seed + 77);
   const Rb = poseInfo.radius, L = F.L;
   const envR = poseInfo.envR || Rb, groundR = Math.max(Rb * 16, envR * 9);
@@ -2181,8 +2182,9 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
       const g2 = new THREE.Mesh(geo, gm); g2.receiveShadow = true; scene.add(g2); ctx.fadeMats.push(gm);
       const wm = new THREE.MeshPhysicalMaterial({ color: '#2f4d48', roughness: 0.16, metalness: 0, transparent: true, opacity: 0.72, envMapIntensity: 0.45, normalMap: waterNormal(seed), normalScale: new THREE.Vector2(0.35, 0.35) }); // v4.72: clear dark river water (not a pale sheet)
       wm.normalMap.repeat.set(groundR * 2 / 1.6, groundR * 2 / 1.6); // ripples at their real size (the pattern repeats every 1.6 m)
-      const wg = new THREE.PlaneGeometry(groundR * 2, groundR * 2); wg.rotateX(-Math.PI / 2);
+      const wSeg = quality === 'low' ? 40 : 80, wg = new THREE.PlaneGeometry(groundR * 2, groundR * 2, wSeg, wSeg); wg.rotateX(-Math.PI / 2);
       const water = new THREE.Mesh(wg, wm); water.position.y = -depth * 0.35; water.renderOrder = 2; scene.add(water); ctx.fadeMats.push(wm);
+      if (NATURE.water) NATURE.water(THREE, water, { swell: 0.003, calmR: Math.max(Rb * 0.6, 0.15), drift: 0.025 }); // v5.73: gentle moving ripples on the river
       ctx.waterInfo = { dir, edge, wob, depth };
       groundH = (x, z) => -depth * sstep(edge - 0.06, edge + 0.55, x * dir.x + z * dir.y + wob(-x * dir.y + z * dir.x));
     } else {
@@ -2245,8 +2247,9 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   if (S.water === 'sea') {
     const wm = new THREE.MeshPhysicalMaterial({ color: '#1f4e63', roughness: 0.12, metalness: 0, transparent: true, opacity: 0.82, normalMap: waterNormal(seed), normalScale: new THREE.Vector2(0.35, 0.35) });
     wm.normalMap.repeat.set(groundR * 2 / 2.4, groundR * 2 / 2.4); // v5.50: ripples at their real size (repeating every 2.4 m)
-    const wg = new THREE.CircleGeometry(groundR, 96); wg.rotateX(-Math.PI / 2);
+    const wg = new THREE.RingGeometry(0, groundR, 96, quality === 'low' ? 18 : 40); wg.rotateX(-Math.PI / 2);
     const water = new THREE.Mesh(wg, wm); water.position.y = poseInfo.seaLevel; water.receiveShadow = true; water.renderOrder = 2; scene.add(water);
+    if (NATURE.water) NATURE.water(THREE, water, { swell: 0.006, calmR: Rb * 1.1, drift: 0.035 }); // v5.73: a gentle swell and moving ripples on the sea
     const deep = new THREE.Mesh(new THREE.CircleGeometry(groundR, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#0f2f3d' }));
     deep.position.y = -1.5; scene.add(deep);
   }
@@ -2618,7 +2621,7 @@ export function mount(host, opts) {
   const V = { THREE, P, opts, el, on, wrap, stage, labels, bar, canvas, btn, bAnat, reduce,
     get cam() { return cam; }, get controls() { return controls; }, get info() { return info; }, get extras() { return extras; }, get group() { return snakeGroup; }, get scene() { return ctx.scene; },
     kick: () => kick(), toggleFull: () => toggleFull(), scaleOn: () => !!(scaleObj && scaleObj.visible),
-    get occ() { return ctx.occ; }, scaleOff: () => { if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(false); }, closeMouth: () => { if (mouthGoal) toggleMouth(false); }, get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
+    get occ() { return ctx.occ; }, get ctx() { return ctx; }, get quality() { return quality; }, get sceneOn() { return cScene.checked; }, NATURE, scaleOff: () => { if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(false); }, closeMouth: () => { if (mouthGoal) toggleMouth(false); }, get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
     resetView: () => resetView(),     focus: (p, d, elv) => focusOn(p, d, elv), view: (g) => controls.setGoal(Object.assign({ az: controls.st.az, d: info.dFit, px: 0, pz: 0 }, g)) };
   const fx = EXTRA.create(V);
   // v5.05: the main buttons stay in view; the rest (eye shield, camera views, size, fullscreen) are behind Show more / Show less
@@ -2926,6 +2929,8 @@ float slScale(vec2 m) {
     raf = 0; if (!alive || lost || !cam) return;
     if (document.hidden || !host.isConnected || host.offsetParent === null && !document.fullscreenElement) { dirty = true; return; } // paused while hidden
     let moving = controls.update();
+    // v5.73: wind, water and the snake's idle life run on a clock of their own (no motion at all with reduced motion)
+    const amb = !reduce(); if (NATURE.tick) { NATURE.tick(performance.now() / 1000); NATURE.AMB.uWind.value = amb && cScene.checked ? (quality === 'low' ? 0.6 : 1) : 0; }
     // the jaw opens and shuts smoothly
     const mo = extras && extras.mouth;
     if (mo && Math.abs(mo.t - mouthGoal) > 1e-3) { const nt = reduce() ? mouthGoal : mo.t + clamp(mouthGoal - mo.t, -0.07, 0.07); mo.set(nt); if (Math.abs(nt - mouthGoal) <= 1e-3) mo.settle(); moving = true; }
@@ -2934,11 +2939,17 @@ float slScale(vec2 m) {
     if (fx.camera()) moving = true; // a show moves the camera by itself
     if (opts.testing && window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } // (tests: a fixed camera)
     updateOccluders();
+    { const viaAmb = ambOnly; ambOnly = false; const shUp = !viaAmb || moving || shadowAge++ > (quality === 'low' ? 12 : 4); if (shUp) shadowAge = 0; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; } // (v5.73: frames that only move leaves and water reuse the shadows)
     renderer.render(ctx.scene, cam);
     updateMarkers();
     fx.after();
     if (moving) kick();
+    else if (amb && alive) { // v5.73: the scenery keeps moving gently, at a calmer frame rate (lower still at the Light setting)
+      clearTimeout(ambT); ambT = setTimeout(() => { ambOnly = true; kick(); }, performance.now() - lastUser > 45000 ? 125 : quality === 'low' ? 42 : 30); // (left alone for a while: slower still, to save the battery)
+    }
   }
+  let ambT = 0, shadowAge = 0, ambOnly = false, lastUser = performance.now();
+  for (const ev of ['pointerdown', 'wheel', 'keydown', 'touchstart']) on(stage, ev, () => { lastUser = performance.now(); }, { passive: true });
   const zeroM = new THREE.Matrix4().makeScale(0, 0, 0), ov = new THREE.Vector3(), od = new THREE.Vector3();
   function updateOccluders() {
     const list = ctx.occ; if (!list || !list.length) return;
@@ -3106,13 +3117,13 @@ float slScale(vec2 m) {
   function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
 
   build(); fx.onBuild(); resize();
-  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), fx, get show() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); if (window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } updateOccluders(); renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
+  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), fx, get show() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); if (window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } updateOccluders(); renderer.shadowMap.needsUpdate = true; renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
 
   return {
     canvas,
     leaveModes: () => fx.leaveModes(), // v5.68: a click on the panel's empty background leaves Anatomy, See it eat and the rest
     dispose() {
-      alive = false; if (raf) cancelAnimationFrame(raf); raf = 0;
+      alive = false; if (raf) cancelAnimationFrame(raf); raf = 0; clearTimeout(ambT);
       if (document.fullscreenElement === wrap) { try { document.exitFullscreen(); } catch (e) {} }
       controls && controls.dispose(); fx.dispose(); cleanups.forEach((f) => f()); cleanups.length = 0;
       disposeScene(); renderer.dispose(); renderer.forceContextLoss && renderer.forceContextLoss();

@@ -636,8 +636,37 @@ function buildAll(A) {
 //   sky when you looked towards the sun, and the grass went white
 // - a little light through the leaves when the sun is behind them, so backlit trees and grass glow softly instead
 //   of standing as black cut-outs
+// v5.73: wind - grass, leaves, shrubs and tree crowns sway gently all the time, in gusts that roll across the land.
+// Done in the vertex shader (no work on the CPU): each plant bends from its base (the instance's origin), the more the
+// higher above it; tall things (trees) bend much less per metre than grass. AMB.uT is the clock, AMB.uWind the strength
+// (lower at the Light quality setting, 0 with reduced motion).
+export const AMB = { uT: { value: 0 }, uWind: { value: 1 }, rip: [], ripN: 0 };
+const WIND_VS = `
+vec4 mvPosition = vec4( transformed, 1.0 );
+#ifdef USE_INSTANCING
+mvPosition = instanceMatrix * mvPosition;
+vec3 slO = ( modelMatrix * instanceMatrix * vec4( 0.0, 0.0, 0.0, 1.0 ) ).xyz;
+#else
+vec3 slO = ( modelMatrix * vec4( 0.0, 0.0, 0.0, 1.0 ) ).xyz;
+#endif
+vec4 slW = modelMatrix * mvPosition;
+if ( uSlWind > 0.0 ) {
+  float slH = max( 0.0, slW.y - slO.y ), slK = min( slH, 1.2 );
+  float slB = ( slK * slK * 0.06 + max( slH - 1.2, 0.0 ) * 0.011 ) * uSlWind; // how far this point can bend (m)
+  vec2 slD = vec2( 0.8, 0.6 ); float slP = dot( slO.xz, slD );
+  float slG = 0.55 + 0.45 * sin( uSlT * 0.47 - slP * 0.11 ) * ( 0.6 + 0.4 * sin( uSlT * 0.19 + slP * 0.04 + 1.3 ) ); // gusts rolling across
+  float slS = sin( uSlT * 1.7 - slP * 0.8 + slO.x * 2.3 + slO.z * 1.1 ) * 0.55 + sin( uSlT * 2.9 + slO.z * 3.7 - slO.x ) * 0.25; // each plant its own sway
+  float slF = sin( uSlT * 6.5 + dot( slW.xyz, vec3( 13.1, 7.3, 11.7 ) ) ) * min( slH, 0.6 ) * 0.012 * uSlWind; // leaves flutter
+  vec2 slOff = slD * slB * ( slG * 0.8 + slS * 0.45 * ( 0.5 + slG ) ) + vec2( -slD.y, slD.x ) * slB * slS * 0.25;
+  slW.xz += slOff; slW.y -= dot( slOff, slOff ) / max( 0.05, slH ) * 0.5 + slF * 0.3; slW.x += slF; slW.z -= slF * 0.6;
+}
+mvPosition = viewMatrix * slW;
+gl_Position = projectionMatrix * mvPosition;`;
+export function tick(t) { AMB.uT.value = t; }
 export function vegetation(THREE, m) {
   m.onBeforeCompile = (sh) => {
+    sh.uniforms.uSlT = AMB.uT; sh.uniforms.uSlWind = AMB.uWind;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uSlT; uniform float uSlWind;').replace('#include <project_vertex>', WIND_VS);
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <normal_fragment_begin>', THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', ''))
       .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
@@ -647,7 +676,7 @@ export function vegetation(THREE, m) {
         reflectedLight.directDiffuse += diffuseColor.rgb * directionalLights[ 0 ].color * sl_t * 0.22; }
       #endif`);
   };
-  m.customProgramCacheKey = () => 'sl-veg';
+  m.customProgramCacheKey = () => 'sl-veg2';
   return m;
 }
 
@@ -832,3 +861,51 @@ function makeTextures(THREE, rng, fbm, seed, track) {
     litter: () => once('litter', () => alphaTex(litterCanvas())),
   };
 }
+
+// v5.73: living water - two layers of small waves drifting different ways (normals), a gentle swell in the surface
+// itself (fading out next to the snake, so it never cuts through a body lying in it), and rings spreading out where
+// something moves in it (ripple(x, z, strength, size)). All in the shaders; the CPU only sets the clock.
+const RIPN = 8;
+export function ripple(x, z, k = 1, size = 0.02) {
+  const r = AMB.rip; if (!r.length) for (let i = 0; i < RIPN; i++) r.push({ x: 0, z: 0, t: -99, k: 0, s: 0.02 });
+  const q = r[AMB.ripN++ % RIPN]; q.x = x; q.z = z; q.t = AMB.uT.value; q.k = k; q.s = size;
+  if (AMB.ripU) AMB.ripU.forEach((u) => { u.uRip.value[(AMB.ripN - 1) % RIPN].set(x, z, q.t, k); u.uRipS.value[(AMB.ripN - 1) % RIPN] = size; });
+}
+export function ripplesAlive() { const t = AMB.uT.value; return AMB.rip.some((q) => t - q.t < 3.5); }
+export function water(THREE, mesh, o = {}) {
+  const m = mesh.material, calm = o.calm || new THREE.Vector3(0, 0, 0);
+  const U = { uRip: { value: Array.from({ length: RIPN }, () => new THREE.Vector4(0, 0, -99, 0)) }, uRipS: { value: new Array(RIPN).fill(0.02) }, uSwell: { value: o.swell || 0.004 }, uCalm: { value: new THREE.Vector4(calm.x, calm.z, o.calmR || 1, 0) }, uDrift: { value: o.drift || 0.03 } };
+  (AMB.ripU || (AMB.ripU = [])).push(U);
+  AMB.rip.forEach((q, i) => { U.uRip.value[i].set(q.x, q.z, q.t, q.k); U.uRipS.value[i] = q.s; });
+  m.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, U); sh.uniforms.uSlT = AMB.uT; sh.uniforms.uSlWind = AMB.uWind;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uSlT; uniform float uSlWind; uniform float uSwell; uniform vec4 uCalm; varying vec3 vSlW;')
+      .replace('#include <begin_vertex>', `#include <begin_vertex>
+      { vec4 slW0 = modelMatrix * vec4( transformed, 1.0 );
+        float slC = smoothstep( uCalm.z, uCalm.z * 2.5, distance( slW0.xz, uCalm.xy ) );
+        float slA = uSwell * uSlWind * slC;
+        transformed.y += slA * ( sin( dot( slW0.xz, vec2( 2.1, 1.3 ) ) - uSlT * 1.3 ) + 0.6 * sin( dot( slW0.xz, vec2( -1.2, 2.7 ) ) - uSlT * 1.9 ) ); }`)
+      .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvSlW = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
+uniform float uSlT; uniform float uSlWind; uniform vec4 uRip[${RIPN}]; uniform float uRipS[${RIPN}]; uniform float uDrift; varying vec3 vSlW;`).replace('#include <normalmap_pars_fragment>', `#include <normalmap_pars_fragment>
+vec3 slWaterN( vec2 uv ) {
+  float d = uDrift * ( 0.4 + 0.6 * uSlWind );
+  vec3 a = texture2D( normalMap, uv + vec2( uSlT * d, uSlT * d * 0.55 ) ).xyz * 2.0 - 1.0;
+  vec3 b = texture2D( normalMap, uv * 1.43 + vec2( 0.37 - uSlT * d * 0.8, 0.71 + uSlT * d * 0.9 ) ).xyz * 2.0 - 1.0;
+  vec3 n = normalize( vec3( a.xy + b.xy, a.z * b.z ) );
+  for ( int i = 0; i < ${RIPN}; i ++ ) { // rings spreading from where something moved
+    float age = uSlT - uRip[ i ].z; if ( age < 0.0 || age > 3.5 ) continue;
+    vec2 dv = vSlW.xz - uRip[ i ].xy; float r = length( dv ), s = uRipS[ i ], front = age * max( 0.12, s * 9.0 );
+    float w = s * ( 1.0 + age * 1.5 ), x = ( r - front ) / w;
+    float env = exp( - x * x ) * ( 1.0 - age / 3.5 ) * uRip[ i ].w / ( 1.0 + r / ( s * 6.0 ) );
+    float slope = sin( x * 3.2 ) * env * 1.6;
+    n.xy += ( r > 1e-5 ? dv / r : vec2( 0.0 ) ) * slope * vec2( 1.0, -1.0 ); // (the map's v runs against world z)
+  }
+  return n;
+}`).replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', 'vec3 mapN = slWaterN( vNormalMapUv );');
+  };
+  m.customProgramCacheKey = () => 'sl-water';
+  m.needsUpdate = true;
+  return U;
+}
+export function resetAmbient() { AMB.rip.length = 0; AMB.ripN = 0; AMB.ripU = []; }
