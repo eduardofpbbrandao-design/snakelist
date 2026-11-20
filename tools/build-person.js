@@ -261,7 +261,8 @@ const earCut = MIR(EL(V(0.076, 1.572, -0.012), V(0.03, 0.034, 0.032)));
 const CROWN = V(-0.012, 1.69, -0.045);
 function hairSD(x, y, z) {
   let d = hairCap(x, y, z);
-  d = smax(d, -faceCut(x, y, z), 0.008);
+  d = smax(d, -(faceCut(x, y, z) + 0.0045 * noise(x * 140, y * 140, z * 140)), 0.006); // (an irregular hairline)
+  d -= 0.0035 * sstep(1.64, 1.7, y) * fbm(x * 30 + 3, y * 30, z * 30); // (tousled on top)
   d = smax(d, -earCut(x, y, z), 0.006);
   d = smax(d, 1.505 + 0.02 * sstep(-0.02, 0.06, z) - y, 0.01); // the nape
   const hx = x - CROWN[0], hz = z - CROWN[2], ph = Math.atan2(hx, hz), n = fbm(x * 40, y * 40, z * 40), clump = 0.6 + 0.4 * noise(ph * 6, y * 30, 3);

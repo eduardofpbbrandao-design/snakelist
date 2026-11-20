@@ -533,7 +533,7 @@ function buildPrey2(kind, r, seed) {
     const Lb = r * 3.6, z0 = -Lb / 2, z1 = Lb / 2;
     const prof = keyed([[0, { w: 0.3, h: 0.35, c: 1.05 }], [0.15, { w: 0.8, h: 0.85, c: 1.0 }], [0.45, { w: 1.0, h: 1.0, c: 1.0 }], [0.7, { w: 0.8, h: 0.85, c: 1.08 }], [0.8, { w: 0.55, h: 0.6, c: 1.25 }], [0.85, { w: 0.58, h: 0.62, c: 1.38 }], [0.95, { w: 0.5, h: 0.52, c: 1.42 }], [1, { w: 0.08, h: 0.1, c: 1.4 }]]);
     const pr = (t) => { const p = prof(t); return { w: p.w * r, h: p.h * r, c: p.c * r, bf: 1 }; };
-    const brown = hexRGB('#7a6045'), breast = hexRGB('#d9c4a2'), cap = hexRGB('#4a3a2a');
+    const brown = hexRGB('#8f6c4a'), breast = hexRGB('#ece0c6'), cap = hexRGB('#5a3a22');
     const bodyG = loft(pr, z0, z1, 36, 24, (t, a, s, c) => mixRGB(mixRGB(brown, breast, sstep(0.0, -0.6, c) * sstep(0.2, 0.5, t)), cap, sstep(0.82, 0.88, t) * sstep(0.2, 0.7, c)));
     const fe = new THREE.MeshPhysicalMaterial({ color: '#ffffff', vertexColors: true, map: furTex(seed + 2, '40,30,20', '235,220,195', 4, 5), roughness: 0.88, sheen: 0.9, sheenRoughness: 0.6, sheenColor: new THREE.Color('#e6d5b8') });
     mesh(bodyG, fe);
@@ -1322,6 +1322,10 @@ export function create(V) {
     const placeHeld = () => {
       const xc = xp - Lp / 2, xa = Hl * 0.5, f = R.frameAtX(xa); f.c.addScaledVector(f.T, xc - xa); // along the head's own axis
       const m = new THREE.Matrix4().makeBasis(f.S.clone().negate(), f.U, f.T); prey.quaternion.setFromRotationMatrix(m); prey.position.copy(f.c);
+      if (perch) { // v5.78: up in a tree the prey is held level, on top of its branch - never pushed down into the wood (out of sight)
+        const top = onPerch(f.c).y + (prey.userData.y || prR) * 0.85;
+        if (prey.position.y < top) { const Tf = V3(f.T.x, f.T.y * 0.15, f.T.z).normalize(), Uf = V3(0, 1, 0).addScaledVector(Tf, -Tf.y).normalize(), Sf = Tf.clone().cross(Uf); prey.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(Sf.negate(), Uf, Tf)); prey.position.y = top; }
+      }
       const sc = fitScale(); prey.scale.set(sc, sc, 1); whisk.forEach((w) => { w.visible = false; });
       const g = R.frameAtX(xClip); clip.normal.copy(g.T).negate(); clip.constant = -clip.normal.dot(g.c); // keep only what is in front of the throat
     };
