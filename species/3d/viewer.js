@@ -1510,7 +1510,7 @@ function buildEyes(P, F, body, pat) {
   // (the iris lies in the socket's shade: a faint glow of its own colours stands in for the light that reaches it through the
   // clear spectacle from every side, so its fibres and the pupil's edge still read - it was a black hole)
   const em = new THREE.MeshPhysicalMaterial({ map: et, emissiveMap: et, emissive: new THREE.Color(0.3, 0.3, 0.3), roughness: 0.5, metalness: 0, envMapIntensity: 0.3, specularIntensity: 0.35 });
-  const sm = new THREE.MeshPhysicalMaterial({ color: '#000000', transparent: true, blending: THREE.AdditiveBlending, roughness: 0.035, metalness: 0, ior: 1.4, specularIntensity: 1, envMapIntensity: 2.2, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  const sm = new THREE.MeshPhysicalMaterial({ color: '#000000', vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, roughness: 0.035, metalness: 0, ior: 1.4, specularIntensity: 1, envMapIntensity: 2.2, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
   const lm = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, roughness: 0.6, metalness: 0, depthWrite: false, envMapIntensity: 0.8 });
   // the skin colour right round the eye, read from the body's own pattern texture
   const img = pat && pat.image, skinAt = (x, th) => {
@@ -1545,7 +1545,7 @@ function buildEyes(P, F, body, pat) {
         // the spectacle: clear in the middle, taking on the skin's colour at its rim, where the scales round the eye overlap it
         const rim = sstep(0.84, 1.0, rho) * (1 - sstep(1.06, 1.14, rho)), sk = skinAt(x, th);
         if (H.lipFull) { const band = H.lipFull > 0.01 && H.lipFull < 1 ? H.lipFull : 0.12, mAn = Math.PI * 0.56 / Math.PI, k = sstep(mAn - band - 0.015, mAn - band + 0.015, Math.abs(th) / Math.PI), lc = hex(H.lipColor || P.colors.belly).map((v) => Math.pow(v / 255, 2.2)); for (let q = 0; q < 3; q++) sk[q] = lerp(sk[q], lc[q], k); } // (v5.78: the pale lip scales reach up to the eye: the scales round it take that colour there too)
-        col.push(sk[0], sk[1], sk[2], rim); spa.push(0.05 * (1 - sstep(0.88, 1.02, rho))); // (v5.53: a clear spectacle - a milky one made the eye a pale disc)
+        col.push(sk[0], sk[1], sk[2], rim); spa.push(1 - sstep(0.76, 0.97, rho)); // (v5.78: the spectacle's reflections fade out at its rim, where its steep edge flared into a bright ring) // (v5.53: a clear spectacle - a milky one made the eye a pale disc)
       }
     }
     const idx = [];
@@ -1559,7 +1559,7 @@ function buildEyes(P, F, body, pat) {
     fixFacing(eg); fixFacing(sgeo); fixFacing(lgeo);
     const m = new THREE.Mesh(eg, em); m.position.copy(c); m.receiveShadow = true; m.castShadow = false;
     // the clear glossy spectacle, and round its edge the skin of the scales that ring the eye, overlapping it
-    const sg2 = sgeo; sg2.deleteAttribute('color');
+    const sg2 = sgeo, ca = sg2.attributes.color; for (let i = 0; i < ca.count; i++) ca.setXYZW(i, 1, 1, 1, spa[i]);
     const sp = new THREE.Mesh(sg2, sm); sp.renderOrder = 3; sp.receiveShadow = false; m.add(sp);
     const lid = new THREE.Mesh(lgeo, lm); lid.renderOrder = 2; lid.receiveShadow = true; m.add(lid);
     const n0 = body.surfNormal(xe, th0); if (n0.dot(c.clone().sub(body.spine(xe))) < 0) n0.negate();
