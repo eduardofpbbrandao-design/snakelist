@@ -80,7 +80,7 @@
     --surface-hover: #e3ecd8;
     --border: #c8d6bc;
     --text: #24321f;
-    --text-muted: #667261;
+    --text-muted: #55614f; /* v5.78: a little darker (was #667261) - readable on the deeper green at the bottom of the page (4.5:1) */
     --gold: #3f7d43; --gold-fill: #58b351; --on-fill: #fff;
     --gold-soft: #8fbf8f;
     --moss: #4c7a4f;
@@ -14289,6 +14289,8 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     if (e.target.closest('[data-auth="open"]')) open();
     if (e.target.closest("#signin-back")) close();
   });
+  // v5.78: Escape goes back to the list, like Back to the list (and every other pop-up)
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && !page.hidden && !document.querySelector(".lang-menu:not([hidden]), .ins-sheet.open")) { e.preventDefault(); close(); } });
   var mode = "signin";
   var sub = document.getElementById("signin-sub");
   var submit = document.getElementById("signin-submit");
@@ -25292,8 +25294,12 @@ window.SL_welcome = function (u, back) {
       "<ol><li>Open your browser's menu (<b>&#8942;</b> or <b>&#8943;</b>)</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b></li><li>Confirm with <b>Install</b></li></ol>" +
       "<p>No install option? Open snakelist.com in Chrome, Edge or Samsung Internet.</p>");
   });
-  document.getElementById("ins-ok").addEventListener("click", function () { sheet.classList.remove("open"); });
-  sheet.addEventListener("click", function (e) { if (e.target === sheet) sheet.classList.remove("open"); });
+  // v5.78: Escape closes it too, like every other pop-up, and the keyboard goes back to the Install button
+  function hide() { if (!sheet.classList.contains("open")) return; sheet.classList.remove("open"); try { btn.focus({ preventScroll: true }); } catch (e) {} }
+  document.getElementById("ins-ok").addEventListener("click", hide);
+  sheet.addEventListener("click", function (e) { if (e.target === sheet) hide(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && sheet.classList.contains("open")) { e.preventDefault(); hide(); } });
+  new MutationObserver(function () { if (sheet.classList.contains("open")) { var ok = document.getElementById("ins-ok"); if (ok) try { ok.focus({ preventScroll: true }); } catch (e) {} } }).observe(sheet, { attributes: true, attributeFilter: ["class"] });
 })();
 </script>
 
@@ -27467,6 +27473,10 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
 .sl-browse a { color: var(--text); } .sl-browse a:hover { color: var(--gold); }
 /* See more info: the green of the 3D viewer's pressed Normal button */
 .map-btn, .sl3d-more { background: #4fa64a; border-color: #4fa64a; color: #fff; }
+/* Following: "See countries" had white words on pale green in dark mode (1.6:1) - the same green button as See more info */
+.fp-countries { background: #4fa64a; border-color: #4fa64a; color: #fff; }
+/* Camera: the safety note sits on a lighter panel in dark mode - the muted grey was 2.9:1 there */
+[data-sl-theme="dark"] .cam-card .cam-safe { color: var(--text); }
 /* the pop: everything that pops grows by about as many pixels as a checklist card does (~10 px), never more - a wide
    filter box no longer swells twice as much, and the small pills lift a little with a small shadow, not a big halo */
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
