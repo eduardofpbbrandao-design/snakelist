@@ -884,8 +884,8 @@ export function water(THREE, mesh, o = {}) {
     uDep: { value: null }, uDepK: { value: 0 }, uDepBox: { value: new THREE.Vector4(0, 0, 1, 1) } };
   const refract = !!o.refract;
   if (refract) { // (still flagged transparent: the rest of the viewer finds the water by that)
-    m.transmission = 1; m.ior = 1.333; m.thickness = o.thick || 0.15; m.attenuationColor = m.color.clone().lerp(new THREE.Color('#1d3b2c'), 0.3); m.attenuationDistance = o.clarity || 0.28;
-    m.color.lerp(new THREE.Color('#ffffff'), 0.55); m.roughness = Math.min(m.roughness, 0.06); m.opacity = 1; m.specularIntensity = 1;
+    m.transmission = 1; m.ior = 1.333; m.thickness = o.thick || 0.05; m.attenuationColor = m.color.clone().lerp(new THREE.Color('#c4dccd'), 0.72); m.attenuationDistance = o.clarity || 0.45;
+    m.color.lerp(new THREE.Color('#ffffff'), 0.78); m.roughness = Math.min(m.roughness, 0.06); m.opacity = 1; m.specularIntensity = 1;
   }
   if (o.bed && o.size) { // the water's depth over the bank, 128 x 128 over the water plane (metres, 0.25 m = full)
     const n = 128, d = new Uint8Array(n * n * 4), y0 = mesh.position.y, h = o.size / 2;
@@ -1105,7 +1105,7 @@ export function perchTree(THREE, opt) {
 // shading (its brightness, around 1), while the colours stay the habitat's own. It is sampled twice at different sizes
 // and angles (so no repeating tile shows), fades out with distance (none of it far away, where it would only shimmer),
 // and loads after the scene is up (until then the ground looks as before). One 1024 px image per kind of ground.
-const DETAIL = { litter: 1.26, soil: 1.3, gravel: 2.0, heath: 2.0, pebbles: 2.16, dry: 1.3, sand: 1.8, gibber: 1.5, rock: 1.5 }; // its real width in metres
+const DETAIL = { litter: 1.26, soil: 1.3, gravel: 2.0, heath: 2.0, pebbles: 2.04, dry: 1.3, sand: 1.8, gibber: 1.5, rock: 1.5 }; // its real width in metres
 const detailImg = {};
 export function groundDetail(THREE, mat, kind, ctx, o = {}) {
   const size = DETAIL[kind]; if (!size || typeof Image === 'undefined') return;

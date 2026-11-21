@@ -2314,7 +2314,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     wm.normalMap.repeat.set(groundR * 2 / 2.4, groundR * 2 / 2.4); // v5.50: ripples at their real size (repeating every 2.4 m)
     const wg = new THREE.RingGeometry(0, groundR, 96, quality === 'low' ? 18 : 40); wg.rotateX(-Math.PI / 2);
     const water = new THREE.Mesh(wg, wm); water.position.y = poseInfo.seaLevel; water.receiveShadow = true; water.renderOrder = 2; scene.add(water);
-    if (NATURE.water) NATURE.water(THREE, water, { swell: 0.006, calmR: Rb * 1.1, drift: 0.035, refract: quality !== 'low', clarity: 0.6 }); // v5.73: a gentle swell and moving ripples on the sea (v5.83: refraction)
+    if (NATURE.water) NATURE.water(THREE, water, { swell: 0.006, calmR: Rb * 1.1, drift: 0.035, refract: quality !== 'low', clarity: 0.9 }); // v5.73: a gentle swell and moving ripples on the sea (v5.83: refraction)
     const deep = new THREE.Mesh(new THREE.CircleGeometry(groundR, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#0f2f3d' }));
     deep.position.y = -1.5; scene.add(deep);
   }

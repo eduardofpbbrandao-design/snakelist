@@ -31,3 +31,16 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 All other textures (snake skin, the painted ground, rocks, plants, bark, leaves, the prey's fur, scales and feathers)
 are generated in the browser by viewer.js, nature.js and extras.js, apart from the ground detail listed below.
+
+Close-up ground and rock detail (species/3d/env/detail-*.webp, made by tools/ground_detail.py) comes from Poly Haven
+textures (https://polyhaven.com), CC0 1.0 (public domain); only their fine relief (normal map) and a high-passed
+brightness are used, the habitat's colours stay SnakeList's own. Real widths in brackets:
+  detail-litter.webp   Poly Haven "Leaves Forest Ground"     https://polyhaven.com/a/leaves_forest_ground (1.26 m)
+  detail-soil.webp     Poly Haven "Brown Mud Leaves 01"      https://polyhaven.com/a/brown_mud_leaves_01 (1.30 m)
+  detail-gravel.webp   Poly Haven "Red Laterite Soil Stones" https://polyhaven.com/a/red_laterite_soil_stones (2.00 m)
+  detail-heath.webp    Poly Haven "Forrest Ground 01"        https://polyhaven.com/a/forrest_ground_01 (2.00 m)
+  detail-pebbles.webp  Poly Haven "Damp Sand"                https://polyhaven.com/a/damp_sand (2.04 m)
+  detail-dry.webp      Poly Haven "Brown Mud Dry"            https://polyhaven.com/a/brown_mud_dry (1.30 m)
+  detail-sand.webp     Poly Haven "Dense Sand"               https://polyhaven.com/a/dense_sand (1.80 m)
+  detail-gibber.webp   Poly Haven "Red Mud Stones"           https://polyhaven.com/a/red_mud_stones (1.50 m)
+  detail-rock.webp     Poly Haven "Rock 04"                  https://polyhaven.com/a/rock_04 (1.50 m)
