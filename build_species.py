@@ -62,6 +62,10 @@ PAGE_REPORT_CSS = (
     ".sl-rep-card textarea{box-sizing:border-box;width:100%;min-height:110px;padding:10px 12px;border-radius:10px;border:1px solid var(--line,#d5e4cf);background:var(--bg,#f1f6ee);color:var(--text,#1d6b33);font:inherit;resize:vertical}"
     ".sl-rep-acts{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.sl-rep-acts button{border-radius:10px}.sl-rep-acts .go{background:#3f8f3a;border-color:#3f8f3a;color:#fff}"
     ".sl-rep-note{min-height:1em;margin:8px 0 0!important;font-size:13px}.sl-rep-note a{color:var(--link,#2a7a2f)}\n")
+# the Christmas preview switch, shared with build-site.py (the source, with its notes, is tools/xmas_loader.js)
+XMAS_LOADER_JS = (open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "xmas_loader.js"), encoding="utf-8").read().split("*/", 1)[1].strip()
+                  .replace("__ROOT__", 'new URL("../",document.currentScript&&document.currentScript.src||L.href).href')
+                  .replace("__KIND__", '(L.href.indexOf(root+"species/")===0?"xm-sp":"xm-site")') + "\n")
 PAGE_REPORT_JS = r"""
 // v5.93: the Report button (the same as the app's): a short form that opens a pre-filled email to the creator
 (function(){if(!document.querySelector||document.querySelector('.sl-report,#report-btn'))return;
@@ -364,6 +368,9 @@ def build(app):
     _inbox = re.search(r'var INBOX = "([^"]+)";', app)
     FX_CSS += SEEMORE_CSS + PAGE_REPORT_CSS
     FX_JS += PAGE_REPORT_JS.replace("__INBOX__", _inbox.group(1) if _inbox else "")
+    # the Christmas preview switch (tools/xmas_loader.js), on every page that loads sp.js, country.js or sl-fx.js
+    # (all of them live in species/, so the site root is one folder up from the script)
+    FX_JS += XMAS_LOADER_JS
     open(OUT + "/sl-fx.css", "w", encoding="utf-8").write(FX_CSS)
     open(OUT + "/sl-fx.js", "w", encoding="utf-8").write(FX_JS)
     # every plain text link (in a sentence, a list, a table, the breadcrumbs, the footer) changes colour when pointed at

@@ -77,6 +77,10 @@ head = f"""<!doctype html>
   gtag('config', 'G-PY2LJV389K');
 </script>
 """
+# the Christmas preview switch (tools/xmas_loader.js): does nothing unless the visitor opens ?christmas
+_xm = open("tools/xmas_loader.js", encoding="utf-8").read().split("*/", 1)[1].strip()
+head = head.replace("<style>html,body{margin:0;padding:0}</style>", "<style>html,body{margin:0;padding:0}</style>\n<script>"
+                    + _xm.replace("__ROOT__", 'new URL("./",L.href).href').replace("__KIND__", '"xm-app"') + "</script>", 1)
 app = re.sub(r"^<title>[^<]*</title>", f"<title>{title}</title>", app, count=1)
 # for search engines and AI browsers that only read the first megabytes of a page: the pictures
 # built into the app's styles become small separate files (same look, the page's text comes much

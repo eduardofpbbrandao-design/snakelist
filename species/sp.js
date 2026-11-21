@@ -371,3 +371,8 @@ var subj='SnakeList '+(kind==='Bug'?'bug report':kind==='Idea'?'idea':'message')
 var body=m+'\n\n---\nType: '+kind+'\nPage: '+location.href+'\nScreen: '+innerWidth+'x'+innerHeight+'\nBrowser: '+navigator.userAgent;
 var mail='mailto:'+INBOX+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);try{window.open(mail,'_blank')}catch(e){}
 n.innerHTML='Your email app should open with it ready to send. If it didn’t, <a href="'+mail+'" target="_blank" rel="noopener">tap here to send it</a>.'})})();
+(function(){try{var K="sl-xmas-preview",S=window.sessionStorage,L=location,m=/[?&](?:christmas(?:=([^&#]*))?|theme=christmas)(?=[&#]|$)/.exec(L.search);
+if(m){if(m[1]==="off"||m[1]==="0")S.removeItem(K);else S.setItem(K,"1");var u=new URL(L.href);u.searchParams.delete("christmas");if(u.searchParams.get("theme")==="christmas")u.searchParams.delete("theme");history.replaceState(history.state,"",u.pathname+u.search+u.hash)}
+if(S.getItem(K)!=="1"||window.XM)return;var d=document,h=d.documentElement,root=new URL("../",document.currentScript&&document.currentScript.src||L.href).href,kind=(L.href.indexOf(root+"species/")===0?"xm-sp":"xm-site");
+window.XM={root:root+"christmas/",kind:kind};h.classList.add("xm",kind);var p=d.head||h,l=d.createElement("link");l.rel="stylesheet";l.href=root+"christmas/xmas.css";p.appendChild(l);
+var s=d.createElement("script");s.src=root+"christmas/xmas.js";p.appendChild(s)}catch(e){}})();

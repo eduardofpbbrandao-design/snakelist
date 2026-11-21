@@ -371,6 +371,75 @@ html.xm.xm-sp .sp-toc a { color: var(--xm-text); }
 html.xm.xm-sp .sp-toc a:hover { color: var(--xm-link); }
 html.xm :is(.site-foot, footer) { border-top: 1px solid var(--xm-line); position: relative; }
 
+/* ============ 11. the Christmas hover (xmas.js adds xm-hv / xm-on): colour rising from the bottom with a soft-gold edge ============ */
+html.xm {
+  --xm-fill-g: linear-gradient(0deg, #123D2A 0%, #216B45 calc(100% - 3px), #E4C57A calc(100% - 1.5px), #E4C57A 100%);
+  --xm-fill-r: linear-gradient(0deg, #A92E3E 0%, #C74745 calc(100% - 3px), #E4C57A calc(100% - 1.5px), #E4C57A 100%);
+}
+html.xm .xm-hv:not(#xm-n) {
+  background-color: var(--xm-bgc) !important;
+  background-image: var(--xm-fill-g), var(--xm-base) !important;
+  background-size: 100% 0%, 100% 100% !important; background-position: 50% 100%, 50% 50% !important;
+  background-repeat: no-repeat !important; background-origin: border-box !important;
+  transition: background-size .25s cubic-bezier(.4,0,.6,1), color .09s ease .03s, border-color .25s ease, box-shadow .25s ease, translate .25s cubic-bezier(.4,0,.6,1) !important;
+}
+html.xm .xm-hv.xm-red:not(#xm-n) { background-image: var(--xm-fill-r), var(--xm-base) !important; }
+html.xm .xm-hv.xm-on:not(#xm-n) {
+  background-size: 100% 100%, 100% 100% !important;
+  color: #FFF8ED !important; border-color: rgba(228,197,122,.9) !important; translate: 0 -2px !important;
+  box-shadow: 0 0 0 1px rgba(228,197,122,.38), 0 0 14px rgba(228,197,122,.42), 0 6px 16px rgba(18,61,42,.22) !important;
+  transition: background-size .35s cubic-bezier(.16,.84,.3,1), color .12s ease, border-color .3s ease, box-shadow .35s ease, translate .35s cubic-bezier(.16,.84,.3,1) !important;
+}
+html.xm .xm-hv.xm-red.xm-on:not(#xm-n) { text-shadow: 0 1px 1px rgba(80,15,25,.35); }
+html.xm .xm-hv.xm-on:not(#xm-n) :is(span, b, strong, em, i, small, svg, label) { color: inherit !important; -webkit-text-fill-color: currentColor; }
+html.xm .xm-hv.xm-on:not(#xm-n):active { translate: 0 0 !important; transition-duration: .18s !important; }
+/* selected tabs: a gold underline that grows from the middle on hover and stays on the chosen tab */
+html.xm .tab-btn { position: relative; }
+html.xm .tab-btn::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 3px; border-radius: 3px; transform: scaleX(0); opacity: .7;
+  background: linear-gradient(90deg, #C9A355, #E9CF8C 50%, #C9A355); transition: transform .35s cubic-bezier(.16,.84,.3,1), opacity .25s; }
+html.xm .tab-btn:hover::after { transform: scaleX(1); }
+html.xm .tab-btn.active::after { transform: scaleX(1); opacity: 1; box-shadow: 0 0 6px rgba(216,183,106,.45); }
+/* dropdown options and list menus */
+html.xm :is(.lang-menu li, [role="listbox"] [role="option"], .sl-menu li, .layers-pop button) { transition: background-color .25s ease, color .2s ease; }
+html.xm :is(.lang-menu li, [role="listbox"] [role="option"], .sl-menu li):hover { background-color: #216B45 !important; color: #FFF8ED !important; box-shadow: inset 0 -1.5px 0 #E4C57A; }
+/* clickable cards: a fine gold border and a soft shadow */
+html.xm #grid .card { transition: border-color .3s ease, box-shadow .3s ease; }
+html.xm #grid .card:hover { border-color: rgba(201,163,85,.85); box-shadow: 0 0 0 1px rgba(228,197,122,.35), 0 10px 26px rgba(18,61,42,.16); }
+@media (prefers-reduced-motion: reduce) {
+  html.xm .xm-hv:not(#xm-n) { background-image: var(--xm-base) !important; background-size: 100% 100% !important; transition: background-color .25s ease, color .25s ease, border-color .25s ease !important; }
+  html.xm .xm-hv.xm-on:not(#xm-n) { background-color: #216B45 !important; background-image: none !important; translate: none !important; box-shadow: 0 0 0 1px rgba(228,197,122,.5) !important; }
+  html.xm .xm-hv.xm-red.xm-on:not(#xm-n) { background-color: #A92E3E !important; }
+  html.xm .tab-btn::after { transition: opacity .25s; }
+}
+
+/* ============ 12. "Merry Christmas from SnakeList!" (once per person; xmas.js) ============ */
+.xm-wl { position: fixed; inset: 0; z-index: 9400; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;
+  background: rgba(6,20,13,.55); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); animation: xm-fade .22s ease both; }
+.xm-wl.xm-wl-out { opacity: 0; transition: opacity .2s ease; }
+@keyframes xm-fade { from { opacity: 0; } to { opacity: 1; } }
+.xm-wl-card { position: relative; width: min(480px, 100%); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow: auto; box-sizing: border-box;
+  background: #FFF8ED; color: #123D2A; border: 1px solid rgba(216,183,106,.8); border-radius: 20px; padding: 34px 28px 24px;
+  box-shadow: 0 0 0 5px rgba(255,248,237,.14), 0 24px 60px rgba(0,0,0,.42); font: 15px/1.55 Inter, system-ui, sans-serif; text-align: left; }
+.xm-wl-card::before { content: ""; position: absolute; left: 22px; right: 22px; top: 0; height: 3px; border-radius: 0 0 3px 3px;
+  background: repeating-linear-gradient(90deg, #A92E3E 0 22px, #D8B76A 22px 30px, #216B45 30px 52px, #D8B76A 52px 60px); }
+.xm-wl-pine { position: absolute; top: 4px; width: 74px; height: 52px; background: url("xmas-sprig.svg") no-repeat center / contain; pointer-events: none; opacity: .95; }
+.xm-wl-pine.l { left: 6px; transform: rotate(-8deg); }
+.xm-wl-pine.r { right: 6px; transform: scaleX(-1) rotate(-8deg); }
+.xm-wl-kicker { margin: 0 0 6px; font: 600 11px/1.3 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: #7E5F1A; text-align: center; }
+.xm-wl-card h2 { margin: 0 0 10px; font: 700 26px/1.2 'Fraunces', Georgia, serif; color: #123D2A; text-align: center; }
+.xm-wl-msg { margin: 0 0 18px; color: #2E4A3B; text-align: center; }
+.xm-wl-sub { margin: 0 0 8px; font-weight: 600; color: #123D2A; }
+.xm-wl-list { list-style: none; margin: 0 0 22px; padding: 12px 14px; display: grid; gap: 9px; border-radius: 14px; background: #FBF1E1; border: 1px solid rgba(216,183,106,.45); }
+.xm-wl-list li { position: relative; padding-left: 26px; color: #3A4F42; font-size: 14.5px; }
+.xm-wl-list li::before { content: ""; position: absolute; left: 0; top: .2em; width: 17px; height: 17px; background: var(--xm-flake-url) no-repeat center / contain; }
+.xm-wl-list b { color: #123D2A; }
+.xm-wl-go { display: block; width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid #3D805A; cursor: pointer; font: 600 15.5px Inter, system-ui, sans-serif;
+  color: #FFF8ED; background: linear-gradient(135deg, #216B45 0%, #123D2A 100%); box-shadow: 0 1px 2px rgba(18,61,42,.25), 0 4px 12px rgba(33,107,69,.22); }
+.xm-wl-go:focus-visible { outline: 2.5px solid #93701F; outline-offset: 3px; }
+html.xm-welcome-open .tour-layer, html.xm-welcome-open .ck-bar { visibility: hidden !important; }
+@media (max-width: 480px) { .xm-wl-card { padding: 30px 18px 18px; border-radius: 18px; } .xm-wl-card h2 { font-size: 22px; } .xm-wl-pine { width: 58px; height: 40px; } }
+@media (prefers-reduced-motion: reduce) { .xm-wl, .xm-wl-card { animation: none !important; } }
+
 /* ============ 9. the preview pill ============ */
 .xm-pill { position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 2147482000; display: flex; align-items: center; gap: 6px;
   padding: 5px 6px 5px 11px; border-radius: 999px; background: #123D2A; color: #FFF8ED; border: 1px solid rgba(216,183,106,.7);
@@ -385,7 +454,7 @@ html.xm :is(.site-foot, footer) { border-top: 1px solid var(--xm-line); position
 .xm-pill button:hover { background: rgba(255,248,237,.12); }
 .xm-pill :focus-visible { outline: 2px solid #D8B76A; outline-offset: 2px; }
 @media (max-width: 640px) { .xm-pill { bottom: calc(78px + env(safe-area-inset-bottom)); right: 8px; padding: 4px 4px 4px 9px; font-size: 10.5px; } .xm-pill a { display: none; } }
-html.sl3d-lock .xm-pill, html.sl-modal-on .xm-pill { opacity: 0; pointer-events: none; }
+html.sl3d-lock .xm-pill, html.sl-modal-on .xm-pill, html.xm-welcome-open .xm-pill { opacity: 0 !important; pointer-events: none !important; }
 @media print { .xm-pill, .xm-deco { display: none !important; } }
 
 /* ============ 10. still versions for reduced motion ============ */

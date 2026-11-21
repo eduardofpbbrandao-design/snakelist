@@ -1,18 +1,41 @@
 /* SnakeList - Christmas preview: the moving and added parts of the theme (styles are in xmas.css).
-   Loaded only by the pages under christmas/. XM_ART (the bulb positions and the sprig) is put in front of this
-   file by tools/build-christmas.py. Everything here is decoration: it never takes clicks, never covers words,
+   Loaded only while the preview switch is on (?christmas - see tools/xmas_loader.js). XM_ART (bulb positions,
+   sprig, hat) is put in front of this file by tools/build-christmas.py. Everything here is decoration: it never takes clicks, never covers words,
    stops when it is off screen or the tab is hidden, and holds still for "reduce motion". */
 (function () {
   "use strict";
   var XM = window.XM || (window.XM = {});
   var ART = window.XM_ART || {};
-  var D = document, ROOT = XM.root || new URL("./", location.href).href;
+  var D = document, ROOT = XM.root || new URL("christmas/", location.href).href;   // the christmas/ folder
   var RM = window.matchMedia ? matchMedia("(prefers-reduced-motion: reduce)") : { matches: false, addEventListener: function () {} };
   var store = { get: function (k) { try { return sessionStorage.getItem("sl-xmas-" + k); } catch (e) { return null; } },
                 set: function (k, v) { try { sessionStorage.setItem("sl-xmas-" + k, v); } catch (e) {} } };
 
-  /* ---------- the hat (normally put on by the inline call right after the logo's drawing) ---------- */
-  if (XM.hat) XM.hat();
+  /* ---------- the Santa hat on the logo snake: found by its eye, sized to its head, never over the eye ---------- */
+  XM.hat = function () {
+    var g = D.getElementById("mark-snake"); if (!g || !ART.hat || g.querySelector(".xm-hat")) return !!g;
+    var e = null, cs = g.getElementsByTagName("circle");
+    for (var i = 0; i < cs.length; i++) if (/sl-eye/.test(cs[i].getAttribute("fill") || "")) { e = cs[i]; break; }
+    if (!e) return false;
+    var h = e.parentNode, hp = h.getElementsByTagName("path")[0], k = 1, y0 = -16.5, d = hp && hp.getAttribute("d") || "", n = d.match(/-?\d*\.?\d+(?:e-?\d+)?/g) || [];
+    if (n.length > 5 && n.length % 2 === 0 && !/[AaHhVv]/.test(d)) { var ys = []; for (i = 1; i < n.length; i += 2) ys.push(+n[i]); y0 = Math.min.apply(0, ys); k = (Math.max.apply(0, ys) - y0) / 33 || 1; }
+    var ex = +e.getAttribute("cx") || 9, t = D.createElementNS("http://www.w3.org/2000/svg", "g");
+    t.setAttribute("transform", "translate(" + (ex - 9 * k).toFixed(2) + " " + (y0 + 16.5 * k).toFixed(2) + ") scale(" + k.toFixed(3) + ")");
+    t.setAttribute("style", "opacity:var(--xm-hat-o,1)"); t.innerHTML = ART.hat; h.appendChild(t);
+    return true;
+  };
+
+  /* ---------- the Christmas icon: browser tab, home screen and the icon pictures on the pages ---------- */
+  function icons() {
+    var head = D.head; if (!head) return;
+    if (!D.querySelector("link[data-xm-icon]")) {
+      [].slice.call(D.querySelectorAll('link[rel~="icon"], link[rel="apple-touch-icon"]')).forEach(function (l) { l.remove(); });
+      [["icon", "xmas-icon.svg", "image/svg+xml"], ["icon", "xmas-icon-48.png", "image/png"], ["apple-touch-icon", "xmas-icon-180.png"]].forEach(function (a) {
+        var l = D.createElement("link"); l.rel = a[0]; l.href = ROOT + a[1]; if (a[2]) l.type = a[2]; l.setAttribute("data-xm-icon", ""); head.appendChild(l);
+      });
+    }
+    [].slice.call(D.querySelectorAll(".sl-brand img, .site-logo img, .ins-card > img")).forEach(function (im) { if (!im.dataset.xm) { im.dataset.xm = "1"; im.src = ROOT + "xmas-icon.svg"; } });
+  }
 
   /* ---------- a pine sprig at the end of each SnakeList wordmark ---------- */
   function sprigs() {
@@ -106,11 +129,12 @@
   }
 
   /* ---------- the "Christmas preview" pill ---------- */
+  function exitUrl() { var u = new URL(location.href); u.searchParams.set("christmas", "off"); return u.pathname + u.search + u.hash; }
   function pill() {
     if (D.querySelector(".xm-pill") || store.get("pill") === "off" || window.self !== window.top) return;
     var p = D.createElement("div"); p.className = "xm-pill"; p.setAttribute("role", "note"); p.setAttribute("aria-label", "Christmas preview of SnakeList");
     p.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7" stroke="#D8B76A" stroke-width="2" stroke-linecap="round"/></svg>' +
-      '<span>Christmas preview</span><a href="' + new URL("../", ROOT).href + '" title="Open the live SnakeList">Live site</a>' +
+      '<span>Christmas preview</span><a href="' + exitUrl() + '" title="Back to the normal SnakeList">Exit preview</a>' +
       '<button type="button" aria-label="Hide the Christmas preview label">&times;</button>';
     p.tabIndex = 0;
     p.querySelector("button").onclick = function () { p.remove(); store.set("pill", "off"); };
@@ -153,6 +177,7 @@
       a2.onfinish = function () { if (cur === el) cur = null; };
       if (!rf) rf = requestAnimationFrame(follow);
     }
+    XM.trace = run;
     D.addEventListener("pointerover", function (e) { var b = e.target.closest && e.target.closest(TRACE_SEL); if (b && b !== cur && (!e.relatedTarget || !b.contains(e.relatedTarget))) run(b); }, true);
     D.addEventListener("pointerdown", function (e) { if (e.pointerType === "mouse") return; var b = e.target.closest && e.target.closest(TRACE_SEL); if (b) run(b); }, true);
     D.addEventListener("focusin", function (e) { var t = e.target; try { if (!t.matches(":focus-visible")) return; } catch (x) { return; } var b = t.closest && t.closest(TRACE_SEL); if (b) run(b); }, true);
@@ -169,28 +194,157 @@
       .observe(D.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden", "open"] });
   }
 
-  /* ---------- links a script builds to a live page are kept inside the preview ---------- */
-  function keepInside() {
-    var R = new URL(ROOT), live = new URL("../", R).pathname;
-    D.addEventListener("click", function (e) {
-      var a = e.target.closest && e.target.closest("a[href]"); if (!a || a.target === "_blank" || a.hasAttribute("download")) return;
-      var u; try { u = new URL(a.href); } catch (x) { return; }
-      if (u.origin !== R.origin || u.pathname.indexOf(R.pathname) === 0 || u.pathname.indexOf(live) !== 0) return;
-      var rest = u.pathname.slice(live.length);
-      if (/\.(?!html?$)[a-z0-9]{1,8}$/i.test(rest)) return;          // a file, not a page
-      if (a.closest(".xm-pill")) return;
-      a.href = R.pathname + rest + u.search + u.hash;
+  /* ---------- the Christmas hover: colour rises from the bottom of the button with a soft-gold edge ----------
+     Red (cranberry -> warm red) on the seasonal highlight buttons, green (evergreen -> pine) on every other button.
+     The fill is a background layer whose height is transitioned (CSS), so leaving half-way runs it back from where
+     it is. The gold line round the border (the site's own, or ours) starts at the same moment. Touch: a short tap
+     version that finishes by itself. Reduced motion: a plain colour fade (xmas.css). */
+  var HOV_SEL = 'button, [role="button"], a[class*="btn"], a.chip, .chip, .sp-tags a, .sp-pills a, .sx-chips a, .sp-ftag a, .hero-cue, .hero-sp';
+  var HOV_SKIP = ".card, .tab-btn, .photo-btn-clear, .note-btn, .chip-pic-btn, .xm-pill *, .sl3d-x.xm-skip, [data-xm-nohover]";
+  var RED_SEL = ".install-btn, .sp-realbtn, .xm-cranberry, .quiz-level-btn.impossible, [data-level='impossible'], .venom";
+  function hoverable(el) {
+    if (!el || el.disabled || el.getAttribute("aria-disabled") === "true" || el.matches(HOV_SKIP)) return false;
+    var r = el.getBoundingClientRect(); if (r.width < 14 || r.height < 14 || r.width > 640 || r.height > 140) return false;
+    var cs = getComputedStyle(el);
+    if (/url\(/.test(cs.backgroundImage)) return false;               // a photo you can tap, not a button
+    return true;
+  }
+  function hovTarget(t) { if (!t || !t.closest) return null; var b = t.closest(HOV_SEL); return b && hoverable(b) ? b : null; }
+  var hovEl = null, offT = new WeakMap();
+  function prime(el) {
+    // remember the button's own look before anything changes it, then lay the (empty) fill over it
+    if (!el.classList.contains("xm-hv")) {
+      var cs = getComputedStyle(el);
+      el.style.setProperty("--xm-base", cs.backgroundImage === "none" ? "linear-gradient(transparent,transparent)" : cs.backgroundImage);
+      el.style.setProperty("--xm-bgc", cs.backgroundColor);
+      el.classList.toggle("xm-red", el.matches(RED_SEL));
+      el.classList.add("xm-hv");
+    }
+    clearTimeout(offT.get(el));
+  }
+  function on(el) {
+    prime(el);
+    void el.offsetWidth;                                                // the empty fill is drawn first, so it rises
+    el.classList.add("xm-on");
+    if (!window.__slFx && XM.trace) XM.trace(el);
+    // the site's own every-button hover (sl-fx) would paint it near-black: its class is taken off again at once
+    Promise.resolve().then(function () { el.classList.remove("sl-hov", "sl-hov-nb"); });
+  }
+  function off(el) {
+    el.classList.remove("xm-on");
+    offT.set(el, setTimeout(function () { if (!el.classList.contains("xm-on")) { el.classList.remove("xm-hv", "xm-red"); el.style.removeProperty("--xm-base"); el.style.removeProperty("--xm-bgc"); } }, 320));
+  }
+  function hoverFx() {
+    window.addEventListener("pointerover", function (e) {
+      if (e.pointerType && e.pointerType !== "mouse" && e.pointerType !== "pen") return;
+      var b = hovTarget(e.target); if (b === hovEl) return;
+      if (hovEl) off(hovEl);
+      hovEl = b; if (b) on(b);
     }, true);
+    window.addEventListener("pointerout", function (e) {
+      if (!hovEl) return; var to = e.relatedTarget;
+      if (!to || !hovEl.contains(to)) { off(hovEl); hovEl = null; }
+    }, true);
+    // a tap: the colour rises, holds a moment and goes back by itself
+    window.addEventListener("pointerdown", function (e) {
+      if (e.pointerType === "mouse") return; var b = hovTarget(e.target); if (!b) return;
+      on(b); setTimeout(function () { if (b !== hovEl) off(b); }, 420);
+    }, true);
+    window.addEventListener("blur", function () { if (hovEl) { off(hovEl); hovEl = null; } });
+    // the site's hover class is never left on a button in the preview
+    new MutationObserver(function (ms) { ms.forEach(function (m) { var t = m.target; if (t.classList && t.classList.contains("sl-hov") && (t.classList.contains("xm-hv") || XM.kind)) t.classList.remove("sl-hov", "sl-hov-nb"); }); })
+      .observe(D.documentElement, { attributes: true, attributeFilter: ["class"], subtree: true });
   }
 
-  function start() {
-    sprigs();
-    if (XM.kind === "xm-app") {
-      decorate(D.getElementById("intro"), true);
-      decorate(D.getElementById("sl-hero"), true);
-      kick();
+  /* ---------- "Merry Christmas from SnakeList!" - once per person, the first time they open SnakeList in the preview ----------
+     It waits its turn like the app's own pop-ups (never over the opening, the photo, the "How well do you know snakes?"
+     choice, the tutorial, What's new or the cookie bar), and the automatic What's new is left out for that visit. */
+  var WKEY = "sl-xmas-welcome-seen", wOpen = false;
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function visible(el) { if (!el || el.hidden || el.closest("[hidden]")) return false; var cs = getComputedStyle(el); if (cs.display === "none" || cs.visibility === "hidden" || +cs.opacity < .05) return false; var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; }
+  function othersOpen() {
+    if (visible(D.querySelector(".tour-callout")) || visible(D.querySelector("#sl-level.open")) || visible(D.querySelector("#wn-sheet.open"))) return true;
+    var ds = D.querySelectorAll('[role="dialog"][aria-modal="true"]');
+    for (var i = 0; i < ds.length; i++) if (ds[i].id !== "xm-welcome" && visible(ds[i])) return true;
+    return D.documentElement.classList.contains("sl3d-lock");
+  }
+  function welcome() {
+    if (XM.kind !== "xm-app" || lsGet(WKEY)) return;
+    var html = D.documentElement; html.classList.add("xm-welcome-visit");
+    // the automatic What's new is left out this visit (the update history stays on its usual button)
+    var wn = D.getElementById("wn-sheet");
+    if (wn) {
+      var auto = function () { return wn.classList.contains("open") && !wn.classList.contains("wn-v") && (D.getElementById("wn-x") || {}).hidden && /What's new/.test((D.getElementById("wn-h") || {}).textContent || ""); };
+      var userAsked = false;
+      D.addEventListener("click", function (e) { if (e.target.closest && e.target.closest(".sl-ver, #updates-btn, #wn-all")) userAsked = true; }, true);
+      new MutationObserver(function () { if (!userAsked && auto()) wn.classList.remove("open"); }).observe(wn, { attributes: true, attributeFilter: ["class"] });
+      if (auto()) wn.classList.remove("open");
     }
-    accents(); pill(); traceFallback(); pops(); keepInside();
+    // while it is open, the other pop-ups wait (the app asks SL_canPrompt before showing one)
+    var orig = window.SL_canPrompt;
+    if (orig && !orig.__xm) { window.SL_canPrompt = function (ex) { return !wOpen && orig(ex); }; window.SL_canPrompt.__xm = 1; }
+    var tries = 0;
+    (function wait() {
+      var ready = orig ? (window.SL_promptsReady ? window.SL_promptsReady() : true) && orig() : !!window.__introDone;
+      if (ready && !othersOpen()) { if (++tries >= 3) return show(); } else tries = 0;   // calm for a moment first
+      setTimeout(wait, 400);
+    })();
+  }
+  function show() {
+    if (D.getElementById("xm-welcome")) return;
+    var w = D.createElement("div"); w.id = "xm-welcome"; w.className = "xm-wl"; w.setAttribute("role", "dialog"); w.setAttribute("aria-modal", "true"); w.setAttribute("aria-labelledby", "xm-wl-h");
+    w.innerHTML = '<div class="xm-wl-card xm-pop">' +
+      '<span class="xm-wl-pine l" aria-hidden="true"></span><span class="xm-wl-pine r" aria-hidden="true"></span>' +
+      '<p class="xm-wl-kicker">Christmas on SnakeList</p>' +
+      '<h2 id="xm-wl-h">Merry Christmas from SnakeList!</h2>' +
+      '<p class="xm-wl-msg">SnakeList is dressed for the holidays. Every snake, map and list is right where you left it &ndash; just a little more festive.</p>' +
+      '<p class="xm-wl-sub">New in the Christmas theme</p>' +
+      '<ul class="xm-wl-list">' +
+      '<li><b>A festive cover</b> &ndash; pine branches, fairy lights and gentle snow around the opening photo</li>' +
+      '<li><b>A Christmas logo</b> &ndash; the snake S in a Santa hat, with a sprig of pine</li>' +
+      '<li><b>Seasonal colours</b> &ndash; evergreen, cranberry, warm ivory and soft gold, by day and by night</li>' +
+      '<li><b>Decorations</b> &ndash; small touches on buttons, cards, the map and the 3D viewer</li>' +
+      '</ul>' +
+      '<button type="button" class="xm-wl-go">Explore SnakeList</button></div>';
+    var prev = D.activeElement;
+    function close() {
+      lsSet(WKEY, "1"); wOpen = false; D.documentElement.classList.remove("xm-welcome-open");
+      w.classList.add("xm-wl-out"); setTimeout(function () { w.remove(); }, 220);
+      D.removeEventListener("keydown", key, true);
+      try { if (prev && prev.focus && D.contains(prev)) prev.focus({ preventScroll: true }); } catch (e) {}
+    }
+    function key(e) {
+      if (e.key === "Escape") { e.preventDefault(); close(); }
+      else if (e.key === "Tab") { e.preventDefault(); w.querySelector(".xm-wl-go").focus(); }   // one button: focus stays on it
+    }
+    w.querySelector(".xm-wl-go").onclick = close;
+    w.addEventListener("click", function (e) { if (e.target === w) close(); });
+    D.addEventListener("keydown", key, true);
+    D.body.appendChild(w); wOpen = true; D.documentElement.classList.add("xm-welcome-open");
+    if (window.SL_promptShown) window.SL_promptShown();
+    try { w.querySelector(".xm-wl-go").focus({ preventScroll: true }); } catch (e) {}
+  }
+  XM.welcome = show;
+
+  // the cover and the logo are dressed the moment they arrive, while the (large) page is still loading
+  var early = false;
+  function dressCover() {
+    var hat = XM.hat();
+    if (XM.kind === "xm-app") { decorate(D.getElementById("intro"), true); decorate(D.getElementById("sl-hero"), true); kick(); }
+    sprigs(); icons();
+    return hat && (XM.kind !== "xm-app" || D.getElementById("sl-hero"));
+  }
+  if (D.readyState === "loading" && "MutationObserver" in window) {
+    var mo = new MutationObserver(function () { if (dressCover()) { mo.disconnect(); early = true; } });
+    mo.observe(D.documentElement, { childList: true, subtree: true });
+    D.addEventListener("DOMContentLoaded", function () { mo.disconnect(); });
+  }
+  if (D.title && D.title.indexOf("Christmas preview") < 0) D.title += " \u00b7 Christmas preview";
+
+  function start() {
+    dressCover();
+    accents(); pill(); traceFallback(); pops(); hoverFx(); welcome();
     // the app builds parts of its header later: catch a wordmark drawn after this ran
     setTimeout(sprigs, 1500); setTimeout(sprigs, 5000);
   }
