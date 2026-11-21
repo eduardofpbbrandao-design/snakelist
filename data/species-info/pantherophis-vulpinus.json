@@ -1,0 +1,107 @@
+{
+  "id": "pantherophis-vulpinus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Baird & Girard, 1853)",
+  "facts": {
+    "length": {
+      "text": "About 0.9 to 1.8 m (3 to 6 ft)",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Eastern Fox Snake is a harmless rat snake of the upper Midwest of the United States and southern Ontario.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Light golden brown with dark brown spots, a yellow checkerboard belly and a short, flattened snout.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 3 to 6 ft (0.9 to 1.8 m) long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "East of the Mississippi River: Wisconsin, Illinois, eastern Missouri, Indiana, Michigan and Ohio, and southern Ontario. Its close relative, the Western Fox Snake, lives west of the river.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Open woodland, prairie, farmland, pasture and marshes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "A strong climber, but usually on the ground. Active by day, sometimes hunting at night in hot summers.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Golden brown with dark brown spots.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Yellow checkerboard belly.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Pantherophis vulpinus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Pantherophis_vulpinus"
+    },
+    "rdb": {
+      "title": "Pantherophis vulpinus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Pantherophis&species=vulpinus"
+    }
+  }
+}

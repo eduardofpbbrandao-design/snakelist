@@ -1,0 +1,107 @@
+{
+  "id": "boiga-irregularis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Bechstein, 1802)",
+  "facts": {
+    "length": {
+      "text": "Up to about 2 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 4 to 12",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Birds, lizards, bats and rodents",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Brown Tree Snake is a slender, mildly venomous, rear-fanged tree snake from northern Australia, New Guinea and nearby islands. Accidentally taken to Guam, it became a famous invasive species there.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Slender, with big eyes with vertical pupils like a cat's. Colour varies: brown, greenish or with bands.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Coastal northern and eastern Australia, eastern Indonesia, Papua New Guinea, the Solomon Islands and other islands of Melanesia.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      },
+      {
+        "label": "Introduced",
+        "text": "Guam and some Caroline Islands.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active at night and lives mainly in trees, hunting by sight and smell.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Birds, lizards, bats, mice and other rodents; small ones eat frogs and lizards.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 4 to 12 long eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Long, thin body with a large head and cat-like eyes.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Brown tree snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Brown_tree_snake"
+    },
+    "rdb": {
+      "title": "Boiga irregularis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Boiga&species=irregularis"
+    }
+  }
+}

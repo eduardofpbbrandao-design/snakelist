@@ -1,0 +1,85 @@
+{
+  "id": "bothrops-jararaca",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Wied-Neuwied, 1824)",
+  "facts": {
+    "length": {
+      "text": "Up to about 1.6 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Jararaca is a highly venomous pit viper of south-eastern South America and a major cause of snakebites there. A blood-pressure medicine was developed from a substance found in its venom.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Slender; up to 160 cm, but usually much shorter.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The Atlantic Forest of southern and south-eastern Brazil, north-eastern Paraguay and Misiones in Argentina.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Mainly dense coastal tropical forest, also thickets, savanna, highland forest and farmland.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Hunts mostly at night as a well-camouflaged ambush predator and hides in leaves by day; less active in cold months.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Bothrops jararaca",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Bothrops_jararaca"
+    },
+    "rdb": {
+      "title": "Bothrops jararaca",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Bothrops&species=jararaca"
+    }
+  }
+}

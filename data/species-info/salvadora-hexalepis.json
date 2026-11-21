@@ -1,0 +1,114 @@
+{
+  "id": "salvadora-hexalepis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Cope, 1867)",
+  "facts": {
+    "length": {
+      "text": "About 51 to 117 cm; record about 147 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 4 to 10",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Lizards, snakes, reptile eggs and small rodents",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Western Patch-nosed Snake is a harmless snake of the deserts of the south-western United States and northern Mexico, with a big curved scale over its nose.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A thick scale curves back over the top of the snout like a patch. Yellowish with blackish stripes along the sides.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 51 to 117 cm (20 to 46 in); the record is 58 in.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Arizona, southern California, Nevada, Utah, southern New Mexico and south-western Texas, and northern Mexico including Baja California.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Dry deserts.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Lizards, snakes, reptile eggs and small rodents.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 4 to 10 eggs in spring or early summer; they hatch in August or September.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Patch-like curved scale on the tip of the nose.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Yellowish with dark side stripes.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Salvadora hexalepis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Salvadora_hexalepis"
+    },
+    "rdb": {
+      "title": "Salvadora hexalepis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Salvadora&species=hexalepis"
+    }
+  }
+}

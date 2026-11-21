@@ -1,0 +1,54 @@
+{
+  "id": "erythrolamprus-poecilogyrus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Wied-Neuwied, 1824)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs, 6 to 15",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "*Erythrolamprus poecilogyrus* is a South American colubrid snake.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Argentina, Uruguay, Paraguay, Brazil, Bolivia, Peru, Venezuela and Guyana.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 6 to 15 eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Erythrolamprus poecilogyrus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Erythrolamprus_poecilogyrus"
+    },
+    "rdb": {
+      "title": "Erythrolamprus poecilogyrus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Erythrolamprus&species=poecilogyrus"
+    }
+  }
+}

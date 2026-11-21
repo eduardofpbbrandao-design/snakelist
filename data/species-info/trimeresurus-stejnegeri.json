@@ -1,0 +1,78 @@
+{
+  "id": "trimeresurus-stejnegeri",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Schmidt, 1925",
+  "facts": {
+    "length": {
+      "text": "Up to 75 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Chinese Green Tree Viper (Bamboo Pit Viper) is a venomous green pit viper of southern China, Taiwan and nearby countries.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Up to 75 cm, including a 14.5 cm tail.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern and central China, Taiwan, Vietnam and Laos, and parts of India and Nepal.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Forest, from sea level to about 2,000 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Trimeresurus stejnegeri",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Trimeresurus_stejnegeri"
+    },
+    "rdb": {
+      "title": "Trimeresurus stejnegeri",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Trimeresurus&species=stejnegeri"
+    }
+  }
+}

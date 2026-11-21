@@ -1,0 +1,101 @@
+{
+  "id": "rena-dulcis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Baird & Girard, 1853",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Ant and termite larvae",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Texas Blind Snake is a tiny burrowing snake of the south-western United States and northern Mexico that looks like a shiny earthworm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Pinkish-brown and shiny, not segmented like a worm; the eyes are just two dark dots under the head scales.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Kansas, Oklahoma, Texas and southern New Mexico, and northern Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Desert, grassland, shrubland, savanna and forest.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Spends almost all its time in loose soil, coming up to feed or when rain floods its burrows; often seen after spring rains.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly ant and termite larvae.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Looks like a shiny pinkish earthworm with scales.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Rena dulcis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Rena_dulcis"
+    },
+    "rdb": {
+      "title": "Rena dulcis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Rena&species=dulcis"
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "id": "lampropeltis-gentilis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Baird & Girard, 1853)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Western (Central Plains) Milksnake is a non-venomous milksnake of the central and western United States.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Kansas, Nebraska, eastern Colorado, western Oklahoma and the Texas panhandle.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Lampropeltis gentilis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Lampropeltis_gentilis"
+    },
+    "rdb": {
+      "title": "Lampropeltis gentilis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Lampropeltis&species=gentilis"
+    }
+  }
+}

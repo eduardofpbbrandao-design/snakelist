@@ -1,0 +1,114 @@
+{
+  "id": "crotalus-durissus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Linnaeus, 1758",
+  "facts": {
+    "length": {
+      "text": "About 1.5 m; rarely 1.9 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly rodents",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The South American Rattlesnake is a highly venomous pit viper and the most widespread rattlesnake of all.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Two stripes run back from the base of the head; the body pattern varies, usually with a row of dark diamonds. A rattle on the tail.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 1.5 m long, rarely up to 1.9 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Much of South America: Colombia, Venezuela, the Guianas, Brazil, Bolivia, Paraguay, Uruguay and northern Argentina, and Aruba.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Most active at dusk and early morning. It gives little warning before striking, but like other rattlesnakes it is seldom aggressive to people.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly rodents.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Males compete for females at the end of summer, mating happens in autumn and the live young are born the next spring or summer.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Rattle on the tail.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Two stripes on the neck.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Crotalus durissus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Crotalus_durissus"
+    },
+    "rdb": {
+      "title": "Crotalus durissus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Crotalus&species=durissus"
+    }
+  }
+}

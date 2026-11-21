@@ -1,0 +1,107 @@
+{
+  "id": "lycodon-rufozonatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Cantor, 1842)",
+  "facts": {
+    "length": {
+      "text": "Usually about 70 cm; up to 130 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp"
+      ]
+    },
+    "diet": {
+      "text": "Fish, frogs, lizards, snakes and young birds",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Red-banded Snake is a medium-sized, non-venomous, night-active snake of East Asia. The Reptile Database now places it in the genus *Dinodon*.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A long, fairly flat head, slightly bulging eyes with vertical pupils, and red bands along the body.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually about 70 cm long, rarely up to 130 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Much of East Asia, from Korea (and just into Russia) through eastern China to northern Laos and Vietnam, plus Taiwan and the Ryukyu Islands.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Many habitats from near sea level to about 2,000 m, most common on river plains. Usually on the ground, but it sometimes swims in streams.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Hunts at night for fish, frogs, lizards, other snakes and young birds.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Red bands on a dark body.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Vertical pupils.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Lycodon rufozonatus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Lycodon_rufozonatus"
+    }
+  }
+}

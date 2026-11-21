@@ -1,0 +1,85 @@
+{
+  "id": "nerodia-taxispilota",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Holbrook, 1838)",
+  "facts": {
+    "reproduction": {
+      "text": "Live young, 14 to 58",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Brown Water Snake is a large, heavy, harmless water snake of the south-eastern United States. It is often one of the commonest snakes on rivers there, and is often mistaken for a cottonmouth.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Very heavy-bodied with a neck much narrower than the head. Brown or rusty brown with about 25 square dark blotches down the back and smaller ones on the sides; yellow belly with dark marks.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Coastal lowlands from south-eastern Virginia through the Carolinas and Georgia to Florida and west along the Gulf coast.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Rivers, canals, cypress creeks, swamps and streams.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Mates in spring on land or on branches. The young are born alive, usually in August, 14 to 58 at a time.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Square dark blotches down a brown back.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Heavy body, head wider than neck.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Brown water snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Brown_water_snake"
+    },
+    "rdb": {
+      "title": "Nerodia taxispilota",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Nerodia&species=taxispilota"
+    }
+  }
+}

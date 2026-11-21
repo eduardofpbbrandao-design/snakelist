@@ -1,0 +1,77 @@
+{
+  "id": "psammodynastes-pulverulentus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Boie, 1827)",
+  "facts": {
+    "length": {
+      "text": "Small: up to 65 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Common Mock Viper is a small Asian snake that coils and strikes like a viper when threatened, although it is harmless to people.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Up to 65 cm; males are smaller.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "North-eastern India, Bhutan and Bangladesh through Myanmar, Indochina and southern China to the Philippines and Indonesia.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Small snake that coils and strikes like a viper.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Psammodynastes pulverulentus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Psammodynastes_pulverulentus"
+    },
+    "rdb": {
+      "title": "Psammodynastes pulverulentus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Psammodynastes&species=pulverulentus"
+    }
+  }
+}

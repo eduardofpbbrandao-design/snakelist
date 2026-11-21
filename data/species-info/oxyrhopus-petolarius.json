@@ -1,0 +1,108 @@
+{
+  "id": "oxyrhopus-petolarius",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "Up to about 91 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Lizards, frogs, small mammals, birds and eggs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Forest Flame Snake is a mildly venomous snake of Central and South America, usually ringed with red and black.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Usually red (sometimes white towards the front) and black rings or crossbands; the colouring varies.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Up to about 91 cm, including a 22 cm tail.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South-eastern Mexico through Central America to much of South America, and Trinidad and Tobago.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Forest and savanna, up to about 2,000 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Lizards, frogs and tadpoles, small rodents and other mammals, birds and their eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Red and black rings or bands.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Oxyrhopus petolarius",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Oxyrhopus_petolarius"
+    },
+    "rdb": {
+      "title": "Oxyrhopus petolarius",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Oxyrhopus&species=petolarius"
+    }
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "id": "drymarchon-melanurus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Duméril, Bibron & Duméril, 1854)",
+  "facts": {
+    "length": {
+      "text": "About 1.8 m to over 2.4 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Middle American Indigo Snake (Blacktail Cribo) is a big, harmless snake from southern Texas through Mexico and Central America to northern South America.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Glossy olive-brown that turns black towards the tail, with a lighter olive-yellow belly and dark marks around the head.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "From about 1.8 m to over 2.4 m long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern Texas, Mexico, Central America, and Colombia, Venezuela, Ecuador and Peru.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Large, glossy olive-brown snake with a black tail.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Drymarchon melanurus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Drymarchon_melanurus"
+    },
+    "rdb": {
+      "title": "Drymarchon melanurus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Drymarchon&species=melanurus"
+    }
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "id": "philodryas-patagoniensis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Girard, 1858)",
+  "facts": {
+    "length": {
+      "text": "Up to about 1.5 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "diet": {
+      "text": "Young: cold-blooded prey; adults: warm-blooded prey and snakes",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Patagonia Green Racer is a rear-fanged, mildly venomous snake of South America east of the Andes. Despite its name, most of its range is outside Patagonia.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Medium-sized and fairly sturdy, brownish, with a rounded snout, round pupils and smooth scales.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Up to about 150 cm; females are bulkier, males have longer tails.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Argentina, Bolivia, Brazil, Paraguay and Uruguay.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Open country: Patagonian steppe, Cerrado, Chaco, Caatinga and open parts of the Atlantic forest.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day; it lives on the ground but climbs when foraging.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Eats other snakes, even its own species. Young ones eat cold-blooded animals, adults warm-blooded ones.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Philodryas patagoniensis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Philodryas_patagoniensis"
+    }
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "id": "crotalus-oreganus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Holbrook, 1840",
+  "facts": {
+    "length": {
+      "text": "Often about 1 m; record 162.6 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Small mammals, birds and eggs, reptiles and amphibians",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Western (Northern Pacific) Rattlesnake is a venomous pit viper of western North America, from southern British Columbia to Baja California.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Size varies a lot between populations; mainland snakes often reach about 100 cm, and the record is 162.6 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern interior British Columbia in Canada, much of the western USA, and the Baja California Peninsula of Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Finds prey with the heat-sensing pits on its face: birds, eggs, small mammals from mice to rabbits, and small reptiles and amphibians; young ones eat insects. Prey that runs off after the bite is tracked down once the venom works.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Rattle on the tail tip.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Heat-sensing pit between eye and nostril.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Crotalus oreganus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Crotalus_oreganus"
+    },
+    "rdb": {
+      "title": "Crotalus oreganus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Crotalus&species=oreganus"
+    }
+  }
+}

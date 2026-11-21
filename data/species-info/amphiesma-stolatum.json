@@ -1,0 +1,107 @@
+{
+  "id": "amphiesma-stolatum",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "About 50 to 80 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Frogs and toads; also earthworms, lizards, rodents",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Buff Striped Keelback is a common, gentle, non-venomous snake of South and South-east Asia. It looks like an Asian garter snake, but is rarely seen.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 50 to 80 cm; females are longer than males.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "From Pakistan, India and Sri Lanka through Nepal, Bangladesh, Myanmar and Indochina to southern China and Taiwan.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Well-watered lowland plains and hills.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day and mostly on land, but it readily goes into water.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly frogs and toads, plus earthworms, small lizards and rodents.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Two light stripes along the body, like a garter snake.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Amphiesma stolatum",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Amphiesma_stolatum"
+    },
+    "rdb": {
+      "title": "Amphiesma stolatum",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Amphiesma&species=stolatum"
+    }
+  }
+}

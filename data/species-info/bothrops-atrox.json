@@ -1,0 +1,99 @@
+{
+  "id": "bothrops-atrox",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "Usually 75 to 125 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mostly small mammals and birds; also frogs, lizards, fish and more",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Common Lancehead (Fer-de-lance) is a highly venomous pit viper of the tropical lowlands of South America east of the Andes and of Trinidad. It causes many snakebites in its range.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 75 to 125 cm long and fairly heavy-bodied.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Colombia, Venezuela, the Guianas, Brazil, eastern Ecuador, Peru, northern Bolivia and Trinidad.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Mostly lives on the ground and is active at night, but swims well and climbs trees when it needs to. It is easily agitated.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly small mammals such as rodents and opossums, and birds, plus frogs, lizards, snakes, fish, crayfish, centipedes and tarantulas. It bites large prey, lets go and follows its scent.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young; females can sometimes reproduce without a male.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Heavy pit viper with a lance-shaped head.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Bothrops atrox",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Bothrops_atrox"
+    },
+    "rdb": {
+      "title": "Bothrops atrox",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Bothrops&species=atrox"
+    }
+  }
+}

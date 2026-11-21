@@ -1,0 +1,108 @@
+{
+  "id": "crotaphopeltis-hotamboeia",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Laurenti, 1768)",
+  "facts": {
+    "length": {
+      "text": "About 70 cm; up to 1 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 6 to 19",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Frogs (including rain frogs) and lizards",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Red-lipped (Herald) Snake is a common, mildly venomous snake of Africa south of the Sahara. It is harmless to people.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Olive-green or grey body with white speckles, a black head, and a red, yellow, white or black upper lip.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 70 cm long on average, up to 1 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Widespread in Africa south of the Sahara, from Senegal and Ethiopia to South Africa.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Marshy areas in lowland forest, moist savanna, grassland and fynbos.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Amphibians, including rain frogs, and lizards.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 6 to 19 eggs in early summer.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Red (or yellow) upper lip and a dark head.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Crotaphopeltis hotamboeia",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Crotaphopeltis_hotamboeia"
+    },
+    "rdb": {
+      "title": "Crotaphopeltis hotamboeia",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Crotaphopeltis&species=hotamboeia"
+    }
+  }
+}

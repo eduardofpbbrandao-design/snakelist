@@ -1,0 +1,86 @@
+{
+  "id": "agkistrodon-laticinctus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Gloyd & Conant, 1934",
+  "facts": {
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Broad-banded Copperhead is a venomous pit viper of the south-central United States. It used to be counted as a subspecies of the Eastern Copperhead.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Light tan with wide dark brown crossbands (the 'broad bands'); the colour varies from red-brown to grey-brown.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Kansas, Oklahoma and central Texas, and the edges of Chihuahua and Coahuila in Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Light woodland with plenty of ground debris, near permanent water; it avoids crowded areas.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Secretive and active at night.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young. Females can sometimes reproduce without a male.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Wide dark crossbands on a tan body.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Agkistrodon laticinctus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Agkistrodon_laticinctus"
+    },
+    "rdb": {
+      "title": "Agkistrodon laticinctus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Agkistrodon&species=laticinctus"
+    }
+  }
+}

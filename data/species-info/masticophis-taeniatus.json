@@ -1,0 +1,79 @@
+{
+  "id": "masticophis-taeniatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Hallowell, 1852)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs, 3 to 12",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Striped Whipsnake is a fast, alert, non-venomous snake of the western United States and northern Mexico.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "From south-central Washington through the Great Basin to Arizona, New Mexico and western Texas, and northern Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Shrubland, grassland, sagebrush flats, canyons, piñon-juniper woodland and open pine-oak forest, often near rocky streams.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day and very quick. It shelters in rock outcrops, burrows, trees and shrubs, and hunts lizards and other animals.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 3 to 12 eggs in June or July.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Slender and fast with long stripes.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Striped whipsnake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Striped_whipsnake"
+    },
+    "rdb": {
+      "title": "Masticophis taeniatus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Masticophis&species=taeniatus"
+    }
+  }
+}

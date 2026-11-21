@@ -1,0 +1,121 @@
+{
+  "id": "crotalus-pyrrhus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Cope, 1866)",
+  "facts": {
+    "length": {
+      "text": "About 90 cm; sometimes over 1.2 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mostly small mammals; also birds and lizards",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Southwestern Speckled Rattlesnake is a medium-sized venomous rattlesnake of rocky country in the south-western USA and north-western Mexico. Its colours match the local rocks.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Pink, brown, grey, yellow or nearly white, speckled with black and white - matching the rocks and soil where it lives.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 3 ft (90 cm) on average, sometimes over 4 ft.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern California, southern Nevada, south-western Utah and western Arizona, and north-western Sonora and northern Baja California.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Rocky hillsides, canyons, slopes and ledges.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Mostly active at night, sheltering in crevices and burrows by day; more active by day in cooler months.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly small mammals, plus birds and lizards.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Speckled colours matching the rocks.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Rattle on the tail.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Crotalus pyrrhus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Crotalus_pyrrhus"
+    },
+    "rdb": {
+      "title": "Crotalus pyrrhus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Crotalus&species=pyrrhus"
+    }
+  }
+}

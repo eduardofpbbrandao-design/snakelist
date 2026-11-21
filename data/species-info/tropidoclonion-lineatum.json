@@ -1,0 +1,107 @@
+{
+  "id": "tropidoclonion-lineatum",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Hallowell, 1856)",
+  "facts": {
+    "reproduction": {
+      "text": "Live young, about 7 or 8",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mostly earthworms",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Lined Snake is a small, harmless snake of the central United States. It is the only species in its genus.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Olive-green to brown with a tan or yellow stripe down the back and one along each side; the belly has two rows of neat black half-moon spots.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The central United States from Illinois to Colorado and Texas.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Savanna, shrubland and grassland with soft, moist soil - also backyards, vacant lots and dumps.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Spends most of its time hidden under rocks, leaves and logs or in the soil.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly earthworms.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to about seven or eight live young in August, each 10 to 12 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Two rows of black half-moons down the belly.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Light stripe down the middle of the back.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Tropidoclonion",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Tropidoclonion"
+    },
+    "rdb": {
+      "title": "Tropidoclonion lineatum",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Tropidoclonion&species=lineatum"
+    }
+  }
+}

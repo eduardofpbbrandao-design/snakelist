@@ -1,0 +1,93 @@
+{
+  "id": "chrysopelea-ornata",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Shaw, 1802)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Golden Tree Snake (Ornate Flying Snake) is a mildly venomous, rear-fanged tree snake of South and South-east Asia that can glide from tree to tree. It is harmless to people.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Usually green with black cross-hatching and yellow or gold accents; flat head, narrow neck, blunt nose and big eyes with round pupils.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "India, Sri Lanka, Nepal, Bhutan, Bangladesh, Myanmar, Thailand, Malaysia, Laos, Cambodia, Vietnam, southern China and the Philippines.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      },
+      {
+        "label": "Introduced",
+        "text": "Singapore.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day in trees and an excellent climber. It launches itself and flattens its body to glide between trees.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "It can 'fly': it flattens its body and glides from one tree to another.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Green and black with gold or yellow markings.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Chrysopelea ornata",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Chrysopelea_ornata"
+    },
+    "rdb": {
+      "title": "Chrysopelea ornata",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Chrysopelea&species=ornata"
+    }
+  }
+}

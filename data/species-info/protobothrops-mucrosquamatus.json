@@ -1,0 +1,69 @@
+{
+  "id": "protobothrops-mucrosquamatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Cantor, 1839)",
+  "facts": {
+    "length": {
+      "text": "Up to about 1.1 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Brown-spotted Pit Viper (Taiwanese Habu) is a venomous pit viper of north-eastern India, South-east Asia, southern China and Taiwan.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Males up to 112 cm and females up to 116 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "North-eastern India and Bangladesh to Myanmar, northern Thailand, Laos, Vietnam, southern and central China and Taiwan.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Protobothrops mucrosquamatus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Protobothrops_mucrosquamatus"
+    },
+    "rdb": {
+      "title": "Protobothrops mucrosquamatus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Protobothrops&species=mucrosquamatus"
+    }
+  }
+}

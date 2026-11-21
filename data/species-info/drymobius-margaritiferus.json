@@ -1,0 +1,93 @@
+{
+  "id": "drymobius-margaritiferus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Schlegel, 1837)",
+  "facts": {
+    "length": {
+      "text": "About 76 to 102 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Speckled Racer is a fast, non-venomous snake of Mexico, Central America and the very south of Texas. Its name *margaritiferus* means 'pearl-bearing', for its pearl-like spots.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Black, with a yellow or blue spot on each scale that gives it an overall greenish look; yellow lips with black lines, and a yellow-green belly.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 76 to 102 cm (30 to 40 in) long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern Texas, Mexico and Central America to Panama and north-western Colombia, from sea level to about 1,450 m.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Fast, agile and active by day. It is nervous and bites if handled; some have been seen to play dead.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Black with a pale spot on every scale, looking greenish.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Drymobius margaritiferus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Drymobius_margaritiferus"
+    },
+    "rdb": {
+      "title": "Drymobius margaritiferus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Drymobius&species=margaritiferus"
+    }
+  }
+}

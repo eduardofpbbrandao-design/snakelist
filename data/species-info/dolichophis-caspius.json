@@ -1,0 +1,93 @@
+{
+  "id": "dolichophis-caspius",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Gmelin, 1789)",
+  "facts": {
+    "length": {
+      "text": "About 1.4 to 1.6 m; record about 2.5 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Caspian Whipsnake is a fast, non-venomous snake of the Balkans and eastern Europe - perhaps the longest snake in Europe.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 140 to 160 cm long; a few exceed 2 m, and the record was about 2.5 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The Balkans (Albania, Greece, Bulgaria, North Macedonia, Serbia, Croatia, Montenegro, Romania, southern Hungary), Turkey, Moldova, southern Ukraine and Russia, Kazakhstan, Georgia and Iran.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Grassy, open areas with scattered bushes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "A generalist predator of many kinds of vertebrates.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Very long, slender and fast.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Caspian whipsnake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Caspian_whipsnake"
+    },
+    "rdb": {
+      "title": "Dolichophis caspius",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Dolichophis&species=caspius"
+    }
+  }
+}

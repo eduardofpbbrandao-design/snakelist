@@ -1,0 +1,84 @@
+{
+  "id": "boaedon-capensis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Duméril, Bibron & Duméril, 1854",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly rodents",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Brown (Cape) House Snake is a harmless snake of southern Africa that often lives around people's homes, where it hunts rats and mice.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South Africa, Lesotho, Eswatini, Botswana, Mozambique, Zimbabwe, Zambia and Malawi.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active at night.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly rodents that gather around houses, swallowed whole.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Often found near houses at night.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Boaedon capensis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Boaedon_capensis"
+    },
+    "rdb": {
+      "title": "Boaedon capensis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Boaedon&species=capensis"
+    }
+  }
+}

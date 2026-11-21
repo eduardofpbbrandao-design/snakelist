@@ -1,0 +1,94 @@
+{
+  "id": "bungarus-multicinctus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Blyth, 1861",
+  "facts": {
+    "length": {
+      "text": "About 1 to 1.5 m; up to 1.85 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 3 to 15",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Many-banded Krait is an extremely venomous snake of southern China, Taiwan and South-east Asia. It is shy and calm, but a bite is a medical emergency.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Black or bluish-black with many white bands; smooth, glossy scales and a ridge along the back.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 1 to 1.5 m long, up to 1.85 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Taiwan, southern China (including Hong Kong and Hainan), Myanmar, Laos, northern Vietnam and probably Thailand.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active at night and more defensive then; by day it hides under stones or in holes. It hibernates from November to April.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Mates in August-September; females lay 3 to 15 eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Black with many narrow white bands.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Many-banded krait",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Many-banded_krait"
+    },
+    "rdb": {
+      "title": "Bungarus multicinctus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Bungarus&species=multicinctus"
+    }
+  }
+}

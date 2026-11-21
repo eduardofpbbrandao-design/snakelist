@@ -1,0 +1,85 @@
+{
+  "id": "dendrelaphis-pictus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Gmelin, 1789)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Painted Bronzeback is a slender, harmless tree snake of South-east Asian forests.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Olive or brown above with a yellow stripe along each side, edged below by a dark line; a black stripe through the eye.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Malaysia, Singapore, Indonesia, Brunei, southern China, Cambodia, Laos, Vietnam and Thailand. Populations from India, Bangladesh and Myanmar are now a separate species.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day and lives in trees. Special belly scales let it climb steep, smooth surfaces, and it can even 'jump' across gaps between branches.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Yellow side stripe on a bronze-brown body.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Black stripe through the eye.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Dendrelaphis pictus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Dendrelaphis_pictus"
+    },
+    "rdb": {
+      "title": "Dendrelaphis pictus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Dendrelaphis&species=pictus"
+    }
+  }
+}
