@@ -251,9 +251,9 @@ CURATED = {
     # and front view): the head is narrow and long (about 1.9 times as long as wide), flat-topped and low (depth about 0.6 of its
     # width), the snout lower than the crown, a slight brow over the eye; the eye a fifth of the head long, NOT bulging; the lip and
     # chin scales yellowish white; the tongue red with black tips (Ernst and Ernst 2003, Snakes of the United States and Canada)
-    "opheodrys-vernalis": {"d": "#79bd45", "lat": "#86c650", "b": "#eef0c8", "t": "uniform", "s": "grass", "L": 0.45, "mx": "about 66 cm", "k": 0, "sp": {"grassA": "#55803a", "grassB": "#9ab860"},
-                           "h": dict(DARK_EYE, iris="#3d321c", irisInner="#5c4a26", eyeRing="#d9c27a", pupilW=0.22, eyeL=0.22, eyeX=0.36, eyeA=50, len=0.031, w=0.9, h=0.78, snoutH=0.64, jaw=0.82,
-                                     lips="pale", lipColor="#e6ebb6", lipFull=0.12, bulge=0.045, brow=0.07, taper=0.3, headRelief=0.14, groove=0.16, snout=0.52, tongue="#c42a38", tongueTip="#141012", lw=1.65, hFixed=1), "bx": {"ld": 62, "neck": 0.78, "tail": 0.31, "hn": 1.3},
+    "opheodrys-vernalis": {"d": "#6fb23e", "lat": "#7bbb47", "b": "#eef0c8", "t": "uniform", "s": "grass", "L": 0.45, "mx": "about 66 cm", "k": 0, "sp": {"grassA": "#55803a", "grassB": "#9ab860"},
+                           "h": dict(DARK_EYE, iris="#3d321c", irisInner="#5c4a26", eyeRing="#d9c27a", pupilW=0.22, eyeL=0.19, eyeX=0.36, eyeA=50, len=0.031, w=0.9, h=0.78, snoutH=0.64, jaw=0.82,
+                                     lips="pale", lipColor="#dbe6a2", lipFull=0.07, bulge=0.045, brow=0.07, taper=0.3, headRelief=0.14, groove=0.16, snout=0.52, tongue="#c42a38", tongueTip="#141012", lw=1.65, hFixed=1), "bx": {"ld": 62, "neck": 0.78, "tail": 0.31, "hn": 1.3},
                            "sx": {"gloss": 0.78, "rows": 15, "keel": 0, "relief": 0.55, "cavity": 0.22, "edge": {"color": "#d3e59c", "k": 0.42, "dir": [0.35, 0], "from": 0.62, "pow": 1.4}}, "cx": {"bellyA": 0.7, "bellySharp": 0.045, "mottle": 0.02, "var": 0.02, "flecks": 0, "edgeK": 0.25}},
     "opheodrys-aestivus": {"d": "#76b13a", "lat": "#86bd45", "b": "#ecebb0", "t": "plain", "s": "forest", "L": 0.8, "k": 1, "lip": "#e2e6a8",
                            "h": dict(DARK_EYE, iris="#1d1d14", irisInner="#34341f", eyeRing="#cfd09a", pupilW=0.25, eye=0.18), "bx": {"ld": 70, "neck": 0.9}, "sx": {"gloss": 0.4, "rows": 17}, "cx": {"bellyA": 0.7, "mottle": 0.04}},
@@ -953,6 +953,9 @@ def apply_562(a, c, g):
     if sid in AUDIT_FIX: _merge_562(a, AUDIT_FIX[sid])
     if sid in AUTO_FIX_590: _merge_562(a, AUTO_FIX_590[sid])
     if sid in AUTO_FN_590: AUTO_FN_590[sid](a)
+    if g in GENUS_EYE_593 and sid not in SPECIES_EYE: a["h"] = dict(a.get("h") or {}, eyeL=GENUS_EYE_593[g])  # v5.93
+    if sid in AUTO_FIX_593: _merge_562(a, AUTO_FIX_593[sid])
+    if sid in AUTO_FN_593: AUTO_FN_593[sid](a)
 
 
 # v5.88: hand-made profiles matched again against iNaturalist research-grade photos of adults (the patterns were rough)
@@ -1047,8 +1050,101 @@ AUTO_FIX_590 = {
 }
 AUTO_FN_590 = {"heterodon-nasicus": _hognose_590}
 
+# v5.93: matched again against research-grade iNaturalist photos of adults (Eduardo: "fix the puff adder and everything else")
+_PA_DARK, _PA_PALE = "#2e2318", "#dcc785"
+HAND_FIXES_593 = {
+    # puff adder: a mottled yellowish to grey-brown ground; down the back about 20 broad dark U-shaped chevrons pointing back,
+    # each closed at its rear by a thin pale-yellow U with a fine dark edge, the ground between them speckled; pale-edged dark
+    # blotches low on the flanks between the arms; a banded tail; a dark band across the crown between pale lines, dark bars
+    # under the eye and a pale line from the eye to the jaw angle (v5.90's long thin chevrons read as regular stripes)
+    "bitis-arietans": [(("colors", "dorsal"), "#7d6a4b"), (("colors", "lateral"), "#82704f"), (("colors", "belly"), "#e0d4b0"), (("colors", "mottle"), 0.2),
+                       (("colors", "var"), 0.08), (("colors", "speckle"), {"p": 0.2, "color": "#3a2c1e", "k": 0.55}),
+                       (("pattern",), [
+                           {"type": "blotch", "t": [0.07, 0.9], "count": 20, "a": 0, "wid": 0.5, "len": 0.28, "shape": "chevron", "vk": 3.2, "color": "#3a2b1e", "warp": 0.55, "jit": 0.1, "sj": 0.18, "aj": 0},
+                           {"type": "blotch", "t": [0.07, 0.9], "count": 20, "phase": 0.13, "a": 0, "wid": 0.52, "len": 0.1, "shape": "chevron", "vk": 9.0, "color": _PA_PALE,
+                            "edgeColor": "#20170f", "edge": 0.5, "edgeOut": True, "warp": 0.55, "jit": 0.1, "sj": 0.18, "aj": 0},
+                           {"type": "blotch", "t": [0.07, 0.9], "count": 20, "phase": 0.62, "a": 0.74, "mirror": True, "wid": 0.13, "len": 0.34, "shape": "round", "color": "#33271b",
+                            "edgeColor": "#d2bd84", "edge": 0.28, "edgeOut": True, "warp": 0.4, "jit": 0.1},
+                           {"type": "blotch", "t": [0.07, 0.9], "count": 60, "phase": 0.7, "a": 0.28, "mirror": True, "alt": True, "wid": 0.08, "len": 0.3, "shape": "round", "color": "#3a2c1e",
+                            "alpha": 0.75, "jit": 0.4, "sj": 0.45, "aj": 0.12, "skip": 0.25, "warp": 0.6},
+                           {"type": "band", "t": [0.905, 0.995], "count": 5, "len": 0.42, "color": "#2a1f15", "warp": 0.2, "jit": 0.03, "aMax": 0.78},
+                           {"type": "cap", "x0": 0.46, "x1": 0.8, "wid": 0.4, "color": _PA_DARK},
+                           {"type": "line", "p0": [0.43, -0.38], "p1": [0.43, 0.38], "wid": 0.032, "color": _PA_PALE},
+                           {"type": "line", "p0": [0.83, -0.4], "p1": [0.83, 0.4], "wid": 0.03, "color": _PA_PALE},
+                           {"type": "spot", "p": [1.08, 0], "r": [0.16, 0.22], "color": _PA_DARK},
+                           {"type": "line", "p0": [0.33, 0.42], "p1": [0.86, 0.56], "wid": 0.028, "color": _PA_PALE, "mirror": True},
+                           {"type": "line", "p0": [0.22, 0.46], "p1": [0.18, 0.6], "wid": 0.045, "color": "#3a2a1c", "mirror": True},
+                           {"type": "line", "p0": [0.35, 0.47], "p1": [0.42, 0.6], "wid": 0.045, "color": "#3a2a1c", "mirror": True}]),
+                       (("details",), [["back", "Dark U-shaped chevrons closed by pale yellow ones"], ["crown", "Broad, flat head: a dark band between pale lines"], ["side", "Very stout body"], ["tail", "Banded tail"]])],
+    # Gaboon viper: a dark purplish-brown ground; on each flank fawn rhombs with a pale bar in the middle and, between them, dark
+    # brown triangles pointing up from the belly (the flanks were an even pinkish brown); darker hourglasses between the pale blocks
+    "bitis-gabonica": [(("colors", "dorsal"), "#5a4134"), (("colors", "lateral"), "#5c4235"),
+                       (("pattern", 1), {"type": "blotch", "t": [0.1, 0.95], "count": 17, "phase": 0.5, "a": 0.0, "wid": 0.32, "len": 0.34, "shape": "hourglass", "color": "#24180f",
+                                         "edgeColor": "#c9ae6a", "edge": 0.12, "edgeOut": True, "warp": 0.3}),
+                       (("pattern", 2), {"type": "blotch", "t": [0.1, 0.95], "count": 17, "a": 0.52, "mirror": True, "wid": 0.2, "len": 0.95, "shape": "diamond", "color": "#a3845c",
+                                         "edgeColor": "#2a1c13", "edge": 0.14, "edgeOut": True, "inner": {"r": 0.3, "color": "#dccb9e"}, "warp": 0.3, "jit": 0.04}),
+                       (("pattern", 3), {"type": "blotch", "t": [0.1, 0.95], "count": 17, "phase": 0.5, "a": 0.84, "mirror": True, "wid": 0.36, "len": 0.95, "shape": "diamond", "color": "#2c1d14",
+                                         "edgeColor": "#b89c6c", "edge": 0.1, "edgeOut": True, "warp": 0.3, "jit": 0.04, "belly": True, "alpha": 0.95}),
+                       (("pattern", 4), {"type": "blotch", "t": [0.1, 0.95], "count": 34, "phase": 0.25, "a": 0.3, "mirror": True, "wid": 0.05, "len": 0.3, "shape": "round", "color": "#2c1d14",
+                                         "alpha": 0.6, "jit": 0.3, "skip": 0.4, "warp": 0.4})],
+    # corn snake: the red-orange saddles have a clear black border all round (it fell inside the saddle and barely showed)
+    "pantherophis-guttatus": [(("pattern", 0, "edge"), 0.3), (("pattern", 0, "edgeOut"), True), (("pattern", 0, "edgeColor"), "#120c0a"), (("pattern", 0, "color"), "#c0381c"),
+                              (("pattern", 1, "edge"), 0.34), (("pattern", 1, "edgeOut"), True), (("pattern", 1, "edgeColor"), "#120c0a")],
+    # boa constrictor: a tan to grey-brown ground (it was nearly white), darker brown saddles with paler oval centres, reddish
+    # toward the tail
+    "boa-constrictor": [(("colors", "dorsal"), "#8e7f66"), (("colors", "lateral"), "#8a7b63"), (("colors", "belly"), "#d2c8b2"), (("colors", "mottle"), 0.1),
+                        (("pattern", 0, "color"), "#3e2b1f"), (("pattern", 0, "edgeColor"), "#c8bb9c"), (("pattern", 0, "inner", "color"), "#76604a"),
+                        (("pattern", 1, "color"), "#7a3020"), (("pattern", 2, "color"), "#3e2d22"), (("pattern", 2, "inner", "color"), "#8e7f66")],
+}
+HAND_FIXES_593.update({
+    # inland taipan: an olive grey-brown (it was golden), the head and neck a darker glossy brown (viewer.js SPECIES_LOOK has the head)
+    "oxyuranus-microlepidotus": [(("colors", "dorsal"), "#6b5a3c"), (("colors", "lateral"), "#73603f"), (("pattern", 0, "alpha"), 0.5), (("pattern", 1, "alpha"), 0.55)],
+})
+AUTO_FIX_593 = {
+    # carpet python (the common coastal form, not a black-and-yellow jungle carpet): an olive to grey-brown ground with
+    # dark-edged, paler-centred blotches and bands (it was a pale yellowish ground)
+    "morelia-spilota": {"d": "#6f6446", "lat": "#6a6044", "c": "#221d15", "ic": "#857a58", "b": "#d8d0b4"},
+    # yellow-lipped sea krait: a pale blue-grey (a little brighter and bluer), the black rings about as wide as the grey between
+    # them; the head black with a yellow snout and upper lip
+    "laticauda-colubrina": {"d": "#6a92b4", "lat": "#759bba", "bl": 0.42, "hc": "#141416", "hcx": 1.15, "pat": [{"type": "cap", "x0": 0, "x1": 0.3, "wid": 0.75, "color": "#e3cf5e"}]},
+}
+def _hognose_593(a):  # western hognose: a buff-olive ground (it read pinkish in the scene light), dark olive-brown blotches
+    a["d"], a["lat"], a["c"] = "#8e8a66", "#8a8562", "#463723"
+    for i in range(3):
+        if len(a.get("pat") or []) > i: a["pat"][i] = dict(a["pat"][i], color="#463723")
+# Opisthotropis (mountain stream keelbacks): small, glossy, keeled stream snakes with small eyes; checked against
+# research-grade iNaturalist photos (their colours had been read from wet rock and leaves)
+_OPI_DOT = {"p": 1.0, "color": "#cdbd30", "k": 0.95, "dot": 0.55}
+AUTO_FIX_593.update({
+    # Hung-tai's mountain stream snake: glossy olive-black, every scale with a bright yellow centre (rows of yellow dots), a
+    # yellow-green head with dark seams between the shields, a yellow belly (it was plain brown)
+    "opisthotropis-hungtai": {"d": "#21261a", "lat": "#232a1b", "c": "#d6c83a", "b": "#d9c848", "t": "uniform", "hc": "#6c7428", "hcx": 1.02,
+                              "cx": {"speckle": _OPI_DOT, "bellyA": 0.8, "mottle": 0.03, "var": 0.04, "flecks": 0, "edgeK": 1.4}, "sx": {"gloss": 0.78}, "h": {"eyeL": 0.13, "iris": "#2a2614", "irisInner": "#4a4220", "irisDark": 1, "eyeRing": "#7a7030"}},
+    # Tonkin mountain keelback: black-olive above, sharply yellow on the lowest scale rows and belly (it was all pale yellow)
+    "opisthotropis-lateralis": {"d": "#2f3127", "lat": "#33352a", "b": "#e2cf6e", "c": "#e2cf6e", "t": "uniform", "cx": {"bellyA": 0.66, "bellySharp": 0.03}, "sx": {"gloss": 0.75}},
+    # La Touche's mountain keelback: olive-yellow with fine dark lines along the scale rows (it was a reddish brown)
+    "opisthotropis-latouchii": {"d": "#76703e", "lat": "#7c7542", "c": "#2a2716", "b": "#d6c870", "t": "uniform", "cx": {"scaleEdge": {"color": "#2a2716", "k": 0.55}}},
+    # Lau's mountain stream snake: dark brown with pale yellowish crossbands
+    "opisthotropis-laui": {"d": "#3e3324", "lat": "#433827", "c": "#d2b968", "b": "#e0d4a2", "t": "band", "n": 30},
+    # Maxwell's mountain keelback: grey-brown, each scale dark edged, the lower flanks and belly yellow
+    "opisthotropis-maxwelli": {"d": "#5a5244", "lat": "#5e5545", "b": "#d8c460", "t": "uniform", "cx": {"bellyA": 0.68, "scaleEdge": {"color": "#221d16", "k": 0.5}}},
+    # Shenzhen mountain stream snake: dark olive-grey above, a yellow belly
+    "opisthotropis-shenzhenensis": {"d": "#3c3d33", "lat": "#404136", "b": "#dcc85a", "t": "uniform", "cx": {"bellyA": 0.7}},
+    # Zhao's mountain stream snake: olive-black with yellow stripes along the body
+    "opisthotropis-zhaoermii": {"d": "#2c2b20", "lat": "#2f2e22", "c": "#c9b54a", "b": "#d8c868", "t": "stripe"},
+    # Chen's mountain keelback: yellowish olive-brown with dark lines along the scale rows
+    "opisthotropis-cheni": {"d": "#87763e", "lat": "#8a7a42", "b": "#dccb72", "t": "uniform", "cx": {"scaleEdge": {"color": "#2e2814", "k": 0.5}}},
+    # olive mountain keelback: dark olive-brown, a yellowish belly
+    "opisthotropis-typica": {"d": "#4d4636", "lat": "#524a39", "b": "#d6c47a", "t": "uniform"},
+    # Guangxi mountain keelback: olive, the scales finely dark edged
+    "opisthotropis-guangxiensis": {"d": "#5d5a3c", "lat": "#615d3f", "t": "uniform", "cx": {"scaleEdge": {"color": "#24221a", "k": 0.45}}},
+})
+AUTO_FN_593 = {"heterodon-nasicus": _hognose_593}
+# Opisthotropis: small eyes high on a slightly flattened head (stream snakes)
+GENUS_EYE_593 = {"opisthotropis": 0.13}
+
 def apply_hand_562(existing):
-    for sid, fix in list(HAND_FIXES_562.items()) + list(HAND_FIXES_588.items()) + list(HAND_FIXES_590.items()):
+    for sid, fix in list(HAND_FIXES_562.items()) + list(HAND_FIXES_588.items()) + list(HAND_FIXES_590.items()) + list(HAND_FIXES_593.items()):
         prof = existing.get(sid)
         if not prof: continue
         for f in fix:
