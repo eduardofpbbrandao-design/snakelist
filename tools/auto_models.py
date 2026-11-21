@@ -622,6 +622,66 @@ SPECIES_BODY = {
     "candoia-aspera": {"ld": 14, "tail": 0.08, "hn": 1.6, "ts": "abrupt"}, "morelia-viridis": {"tail": 0.17, "ts": "prehensile", "hn": 1.9, "ld": 34}, "morelia-azurea": {"tail": 0.17, "ts": "prehensile", "hn": 1.9},
     "python-sebae": {"tail": 0.13}, "bitis-arietans": {"tail": 0.1}, "dendroaspis-angusticeps": {"tail": 0.23},
 }
+# v5.90: genus defaults for the many colubrid, elapid, viper and boa genera that still fell back to their family's build
+# (every colubrid was ld 36 with a 24% tail): girth, tail and eye from field-guide descriptions and measured specimens -
+# burrowers (Atractus, Calamaria, Geophis, Apostolepis...) are short-tailed with tiny eyes; snail-eaters, cat snakes and
+# vine-living racers slender, laterally compressed and big-eyed; whipsnakes and sand snakes long whip tails. Only fills
+# what a genus or species entry above does not already set
+GENUS_BODY_590 = {
+    # burrowing and leaf-litter colubrids: short (often blunt) tails, small eyes
+    "atractus": {"ld": 34, "tail": 0.12}, "calamaria": {"ld": 40, "tail": 0.08, "ts": "blunt"}, "geophis": {"ld": 40, "tail": 0.15}, "apostolepis": {"ld": 50, "tail": 0.08, "ts": "blunt"},
+    "tantilla": {"ld": 50, "tail": 0.25}, "oligodon": {"ld": 30, "tail": 0.15}, "pseudorabdion": {"ld": 38, "tail": 0.1, "ts": "blunt"}, "phalotris": {"ld": 42, "tail": 0.1},
+    "prosymna": {"ld": 30, "tail": 0.1, "ts": "blunt"}, "atractaspis": {"ld": 40, "tail": 0.07, "ts": "blunt"}, "polemon": {"ld": 45, "tail": 0.08, "ts": "blunt"},
+    "aparallactus": {"ld": 45, "tail": 0.16}, "amblyodipsas": {"ld": 38, "tail": 0.08, "ts": "blunt"}, "adelphicos": {"ld": 36, "tail": 0.12}, "macrocalamus": {"ld": 34, "tail": 0.1},
+    "aspidura": {"ld": 34, "tail": 0.12}, "achalinus": {"ld": 40, "tail": 0.22}, "lycophidion": {"ld": 34, "tail": 0.12}, "ninia": {"ld": 30, "tail": 0.2},
+    "carphophis": {"ld": 40, "tail": 0.15}, "virginia": {"ld": 34, "tail": 0.15}, "storeria": {"ld": 30, "tail": 0.2}, "sonora": {"ld": 40, "tail": 0.2},
+    "chilomeniscus": {"ld": 25, "tail": 0.12}, "elapomorphus": {"ld": 45, "tail": 0.1}, "liophis": {"ld": 36, "tail": 0.22},
+    # slender, laterally compressed, big-eyed tree and night snakes
+    "dipsas": {"ld": 55, "tail": 0.3, "xs": 0.85}, "sibon": {"ld": 60, "tail": 0.3, "xs": 0.85}, "pareas": {"ld": 45, "tail": 0.25, "xs": 0.85}, "aplopeltura": {"ld": 55, "tail": 0.3, "xs": 0.85},
+    "asthenodipsas": {"ld": 42, "tail": 0.22, "xs": 0.88}, "tropidodipsas": {"ld": 45, "tail": 0.25}, "boiga": {"ld": 50, "xs": 0.85}, "dipsadoboa": {"ld": 45, "tail": 0.25, "xs": 0.9},
+    "toxicodryas": {"ld": 50, "tail": 0.25, "xs": 0.85}, "leptodeira": {"ld": 45, "tail": 0.25, "xs": 0.9}, "imantodes": {"tail": 0.3, "xs": 0.8}, "telescopus": {"ld": 40, "tail": 0.15},
+    "lycodon": {"ld": 45, "tail": 0.22}, "lycodryas": {"ld": 45, "tail": 0.25}, "stegonotus": {"ld": 40, "tail": 0.22}, "hypsiglena": {"ld": 35, "tail": 0.17},
+    # racers, whipsnakes, sand and keelback snakes: slender, long (whip) tails
+    "dendrelaphis": {"ld": 62, "tail": 0.33, "ts": "whip"}, "psammophis": {"ld": 60, "tail": 0.33, "ts": "whip"}, "platyceps": {"ld": 50, "tail": 0.28, "ts": "whip"},
+    "philothamnus": {"ld": 60, "tail": 0.33, "ts": "whip"}, "chironius": {"ld": 55, "tail": 0.36, "ts": "whip"}, "dendrophidion": {"ld": 50, "tail": 0.4, "ts": "whip"},
+    "leptophis": {"ld": 70, "tail": 0.38, "ts": "whip"}, "mastigodryas": {"ld": 50, "tail": 0.33, "ts": "whip"}, "ptyas": {"ld": 45, "tail": 0.3, "ts": "whip"},
+    "masticophis": {"ld": 50}, "coluber": {"ld": 45}, "diadophis": {"ld": 45}, "hierophis": {"ld": 45, "tail": 0.27, "ts": "whip"}, "demansia": {"ld": 60, "tail": 0.3, "ts": "whip"},
+    "drymobius": {"ld": 45, "tail": 0.33, "ts": "whip"}, "salvadora": {"ld": 45, "tail": 0.25}, "philodryas": {"ld": 45, "tail": 0.3}, "alsophis": {"ld": 45, "tail": 0.3},
+    "pseudalsophis": {"ld": 40, "tail": 0.27}, "arrhyton": {"ld": 40, "tail": 0.3}, "liopeltis": {"ld": 50, "tail": 0.3}, "sibynophis": {"ld": 45, "tail": 0.35},
+    "lygophis": {"ld": 50, "tail": 0.3}, "liopholidophis": {"ld": 50, "tail": 0.35}, "liophidium": {"ld": 40, "tail": 0.3}, "rhadinaea": {"ld": 45, "tail": 0.3},
+    "rhadinella": {"ld": 45, "tail": 0.3}, "taeniophallus": {"ld": 40, "tail": 0.3}, "synophis": {"ld": 45, "tail": 0.35}, "coniophanes": {"ld": 40, "tail": 0.3},
+    "opheodrys": {"ld": 62, "ts": "whip"}, "dispholidus": {"ld": 50}, "thelotornis": {"tail": 0.36}, "gonyosoma": {"ld": 45, "tail": 0.25}, "eirenis": {"ld": 40, "tail": 0.2},
+    "hebius": {"ld": 38, "tail": 0.3}, "rhabdophis": {"ld": 30, "tail": 0.25}, "amphiesma": {"ld": 38, "tail": 0.3}, "tropidonophis": {"ld": 35, "tail": 0.25},
+    "fowlea": {"ld": 32, "tail": 0.25}, "xenochrophis": {"ld": 32, "tail": 0.25}, "natrix": {"ld": 32}, "thamnophis": {"ld": 38}, "thamnodynastes": {"ld": 35, "tail": 0.25},
+    "opisthotropis": {"ld": 35, "tail": 0.18}, "sinonatrix": {"ld": 30, "tail": 0.22}, "helicops": {"ld": 28, "tail": 0.25}, "hydrops": {"ld": 40, "tail": 0.12},
+    "erythrolamprus": {"tail": 0.22}, "oxyrhopus": {"ld": 40, "tail": 0.22}, "pseudoboa": {"ld": 35, "tail": 0.2}, "clelia": {"ld": 30, "tail": 0.2},
+    "boaedon": {"ld": 33, "tail": 0.15}, "lamprophis": {"ld": 33, "tail": 0.15}, "lycodonomorphus": {"ld": 33, "tail": 0.2}, "pseudoxyrhopus": {"ld": 38, "tail": 0.2},
+    "xenodon": {"ld": 22, "tail": 0.15}, "heterodon": {"ld": 20}, "elaphe": {"ld": 35, "tail": 0.18}, "pantherophis": {"ld": 40}, "senticolis": {"ld": 40, "tail": 0.2},
+    "enhydris": {"ld": 25, "tail": 0.18}, "homalopsis": {"ld": 22, "tail": 0.18}, "cerberus": {"ld": 25, "tail": 0.22}, "hypsiscopus": {"ld": 28, "tail": 0.15},
+    "spilotes": {"ld": 40, "tail": 0.28}, "drymarchon": {"ld": 32}, "malpolon": {"ld": 40}, "rhamphiophis": {"ld": 40, "tail": 0.3}, "psammophylax": {"ld": 40, "tail": 0.25},
+    # elapids
+    "suta": {"ld": 25, "tail": 0.15}, "toxicocalamus": {"ld": 45, "tail": 0.1, "ts": "blunt"}, "calliophis": {"ld": 55, "tail": 0.1, "ts": "blunt"}, "sinomicrurus": {"ld": 50, "tail": 0.1, "ts": "blunt"},
+    "elapsoidea": {"ld": 35, "tail": 0.1, "ts": "blunt"}, "brachyurophis": {"ld": 30, "tail": 0.08, "ts": "blunt"}, "simoselaps": {"ld": 30, "tail": 0.1, "ts": "blunt"},
+    "furina": {"ld": 40, "tail": 0.13}, "cacophis": {"ld": 35, "tail": 0.15}, "denisonia": {"ld": 22, "tail": 0.12}, "cryptophis": {"ld": 30, "tail": 0.12},
+    "hoplocephalus": {"ld": 35, "tail": 0.17}, "pseudechis": {"ld": 32},
+    # vipers and pit vipers
+    "vipera": {"ld": 18}, "echis": {"ld": 18}, "montivipera": {"ld": 16, "tail": 0.1, "ts": "abrupt"}, "macrovipera": {"ld": 16, "tail": 0.1, "ts": "abrupt"},
+    "atheris": {"ld": 22}, "gloydius": {"ld": 18, "tail": 0.13, "ts": "abrupt"}, "protobothrops": {"ld": 28, "tail": 0.17}, "craspedocephalus": {"ld": 22, "tail": 0.16, "ts": "prehensile"},
+    "porthidium": {"ld": 18, "tail": 0.12, "ts": "abrupt"}, "bothrocophias": {"ld": 20, "tail": 0.12, "ts": "abrupt"}, "bothriechis": {"ld": 25}, "sistrurus": {"ld": 18, "tail": 0.1},
+    "atropoides": {"ld": 14, "tail": 0.1, "ts": "abrupt"}, "metlapilcoatlus": {"ld": 14, "tail": 0.1, "ts": "abrupt"}, "cerrophidion": {"ld": 18, "tail": 0.12, "ts": "abrupt"},
+    "ovophis": {"ld": 18, "tail": 0.15}, "hypnale": {"ld": 18, "tail": 0.13, "ts": "abrupt"}, "deinagkistrodon": {"ld": 15, "tail": 0.1, "ts": "abrupt"},
+    "pseudocerastes": {"ld": 15, "tail": 0.1, "ts": "abrupt"}, "causus": {"ld": 28, "tail": 0.1},
+    # boas and pythons
+    "tropidophis": {"ld": 25, "tail": 0.12}, "eryx": {"ld": 18, "tail": 0.08}, "python": {"ld": 22, "tail": 0.12}, "chilabothrus": {"ld": 35, "tail": 0.13},
+    "epicrates": {"ld": 34, "tail": 0.12}, "liasis": {"ld": 30, "tail": 0.13}, "antaresia": {"ld": 30, "tail": 0.14}, "simalia": {"ld": 30, "tail": 0.15, "ts": "prehensile"},
+}
+GENUS_EYE_590 = {"atractus": 0.1, "calamaria": 0.09, "geophis": 0.1, "apostolepis": 0.08, "tantilla": 0.13, "oligodon": 0.14, "pseudorabdion": 0.09, "phalotris": 0.08,
+                 "prosymna": 0.1, "atractaspis": 0.08, "polemon": 0.07, "aparallactus": 0.1, "amblyodipsas": 0.07, "adelphicos": 0.08, "macrocalamus": 0.1, "aspidura": 0.1,
+                 "achalinus": 0.1, "lycophidion": 0.1, "ninia": 0.13, "carphophis": 0.1, "virginia": 0.12, "dipsas": 0.22, "sibon": 0.22, "pareas": 0.24, "aplopeltura": 0.24,
+                 "asthenodipsas": 0.22, "leptodeira": 0.2, "dipsadoboa": 0.2, "toxicodryas": 0.2, "lycodon": 0.14, "psammophis": 0.22, "chironius": 0.2, "dendrophidion": 0.22,
+                 "mastigodryas": 0.21, "ptyas": 0.21, "demansia": 0.2, "drymobius": 0.21, "helicops": 0.12, "hydrops": 0.1, "toxicocalamus": 0.08, "calliophis": 0.08,
+                 "sinomicrurus": 0.09, "elapsoidea": 0.1, "brachyurophis": 0.08, "simoselaps": 0.09, "furina": 0.1, "hebius": 0.18, "amphiesma": 0.18}
+
 # Eye diameter over head length (Z3): the family defaults are in viewer.js (EYE_L); these are genera that differ
 # v5.73: natricines and racers 0.2-0.25 (the eye a fifth to a quarter of the head's length: it looked tiny), vipers ~0.1-0.12
 GENUS_EYE = {"ahaetulla": 0.19, "thelotornis": 0.18, "oxybelis": 0.16, "langaha": 0.15, "imantodes": 0.22, "dispholidus": 0.22, "boiga": 0.19, "chrysopelea": 0.2,
@@ -872,18 +932,27 @@ def apply_562(a, c, g):
         bx = {("tailShape" if k == "ts" else k): v for k, v in bt.items() if k != "len"}
         a["bx"] = dict(a.get("bx") or {}, **bx)
         if "len" in bt: a["h"] = dict(a.get("h") or {}, len=bt["len"])
+    for k, v in GENUS_BODY_590.get(g, {}).items():  # v5.90: fills only what nothing above set
+        k = "tailShape" if k == "ts" else k
+        if k not in (a.get("bx") or {}): a["bx"] = dict(a.get("bx") or {}, **{k: v})
     e = SPECIES_EYE.get(sid, GENUS_EYE.get(g))
     if e: a["h"] = dict(a.get("h") or {}, eyeL=e)
+    elif g in GENUS_EYE_590 and "eye" not in (a.get("h") or {}) and "eyeL" not in (a.get("h") or {}): a["h"] = dict(a.get("h") or {}, eyeL=GENUS_EYE_590[g])
     if a["p"] in ("viper", "pitviper", "elapid", "sea"):
         fm = SPECIES_FANG.get(sid, GENUS_FANG.get(g))
         if fm: a["h"] = dict(a.get("h") or {}, fangMm=fm)
     if g in REAR_FANG: a["h"] = dict(a.get("h") or {}, rearFang=REAR_FANG[g])
     if g in DRAPE or sid in DRAPE_SP: a["ps"] = {"kind": "drape"}
+    # v5.90: a short, thick tree pit viper (Trimeresurus) has too little length for many saddles: its few loops spread wider
+    # over a thicker branch (on the thin one the coil stacked into a single tall loop standing over the branch)
+    if sid in DRAPE_SP and g == "trimeresurus": a["ps"] = {"kind": "drape", "pitch": 1.6, "branchK": 1.6}
     if g in HOODED: a["bx"] = dict(a.get("bx") or {}, hood=HOODED[g]); a["ps"] = {"kind": "raised"}
     if g in RINGED: a["rg"] = 1
     for k, v in GENUS_HEADMARK.get(g, {}).items(): a.setdefault(k, v)
     if GENUS_H.get(g): a["h"] = dict(a.get("h") or {}, **GENUS_H[g])
     if sid in AUDIT_FIX: _merge_562(a, AUDIT_FIX[sid])
+    if sid in AUTO_FIX_590: _merge_562(a, AUTO_FIX_590[sid])
+    if sid in AUTO_FN_590: AUTO_FN_590[sid](a)
 
 
 # v5.88: hand-made profiles matched again against iNaturalist research-grade photos of adults (the patterns were rough)
@@ -922,8 +991,64 @@ HAND_FIXES_588 = {
 }
 
 
+# v5.90: matched once more against research-grade iNaturalist photos of adults (proportions and the leftovers of v5.88)
+HAND_FIXES_590 = {
+    # puff adder: true V-shaped chevrons pointing back, their arms running well forward down the flanks (they read as slanted
+    # bars: the arms barely moved forward over their width), thinly edged pale yellow; about 20 on the body
+    # (in photos it reads as pale chevrons on a dark ground - the ground between them is dark grey-brown, each chevron pale
+    # yellow-buff with a dark edge; it was dark bars on yellow, like a zebra-striped toy)
+    "bitis-arietans": [(("colors", "dorsal"), "#54493b"), (("colors", "lateral"), "#584c3d"), (("colors", "mottle"), 0.14),
+                       (("pattern", 0), {"type": "blotch", "t": [0.07, 0.95], "count": 21, "a": 0, "wid": 0.52, "len": 0.3, "shape": "chevron", "vk": 6.5, "color": "#cdb47c",
+                                         "edgeColor": "#241a12", "edge": 0.45, "edgeOut": True, "warp": 0.2, "jit": 0.05, "sj": 0.1}),
+                       (("pattern", 1, "a"), 0.7), (("pattern", 1, "count"), 21), (("pattern", 1, "wid"), 0.14), (("pattern", 1, "len"), 0.42)],
+    # timber rattlesnake: the crossbands are jagged V's (arms swept forward), on a tan to grey-brown ground (it was cream-yellow)
+    "crotalus-horridus": [(("colors", "dorsal"), "#8f7c5c"), (("colors", "lateral"), "#8a7758"), (("pattern", 1, "vk"), 4.5), (("pattern", 1, "len"), 0.42),
+                          (("pattern", 1, "wid"), 0.6), (("pattern", 0, "color"), "#7a5232")],
+    # eastern milksnake: big chestnut saddles over the back and upper flanks (not rings), a black edge round them (the black edge was
+    # inside the saddle and ate it, so they read as small red spots), smaller alternating blotches low on the flanks
+    "lampropeltis-triangulum": [(("pattern", 0, "wid"), 0.5), (("pattern", 0, "len"), 0.62), (("pattern", 0, "edge"), 0.26), (("pattern", 0, "edgeOut"), True),
+                                (("pattern", 0, "color"), "#74382a"), (("pattern", 0, "shape"), "saddle"), (("pattern", 0, "warp"), 0.25),
+                                (("pattern", 1, "a"), 0.68), (("pattern", 1, "wid"), 0.13), (("pattern", 1, "len"), 0.45), (("pattern", 1, "edge"), 0.3), (("pattern", 1, "edgeOut"), True), (("pattern", 1, "color"), "#74382a")],
+    # eastern rat snake: a rat snake's tail is under a fifth of its length (it had a racer's 24%)
+    "pantherophis-obsoletus": [(("body", "tail"), 0.18)],
+    # adder: a little less squat (adults about 55-65 cm long and 2.5-3.5 cm thick)
+    "vipera-berus": [(("body", "ld"), 18)],
+    # corn snake: an orange-tan ground between the saddles (the pale cream made the red saddles look painted on)
+    "pantherophis-guttatus": [(("colors", "dorsal"), "#c47d48"), (("colors", "lateral"), "#c8844e")],
+    # eastern hognose: a warm grey-brown ground (the light grey came out nearly white) with dark brown-black blotches
+    "heterodon-platirhinos": [(("colors", "dorsal"), "#8e7f64"), (("colors", "lateral"), "#887a60")],
+    # brahminy blind snake: glossy dark brown-black (it was a reddish brown)
+    "indotyphlops-braminus": [(("colors", "dorsal"), "#3a2822"), (("colors", "lateral"), "#3e2c25")],
+}
+
+# v5.90: generated profiles checked against research-grade iNaturalist photos of adults
+def _hognose_590(a):  # western hognose: buff-tan, with broad dark-brown blotches down the back (they were thin bars) and smaller ones on the flanks
+    a["d"], a["lat"], a["c"] = "#a88f68", "#a48c66", "#5c3f26"
+    for i, w in ((0, 0.26), (1, 0.13), (2, 0.09)):
+        if len(a.get("pat") or []) > i: a["pat"][i] = dict(a["pat"][i], wid=w, color="#5c3f26", **({"edgeColor": "#3a2616"} if i < 2 else {}))
+AUTO_FIX_590 = {
+    # ringneck snake: a narrow orange-yellow ring right behind the head (it was a long band starting well down the neck)
+    "diadophis-punctatus": {"t": "plain", "pat": [{"type": "band", "t": [0.036, 0.05], "count": 1, "len": 0.95, "color": "#e8a030", "warp": 0.1, "jit": 0}]},
+    # yellow-lipped sea krait: a bluish-grey ground (it came out nearly white)
+    "laticauda-colubrina": {"d": "#6a879e", "lat": "#7590a6"},
+    # Indian cobra: a medium brown (photos run from brown to black; the pale tan read as a cape cobra)
+    "naja-naja": {"d": "#7e6142", "lat": "#866847"},
+    # cape cobra: golden-tan, less saturated than the lemon yellow it had
+    "naja-nivea": {"d": "#bd8f42", "lat": "#c29646"},
+    # common garter snake: three bold yellow stripes on a dark olive ground (they were about one scale row wide and hard to see);
+    # the side stripes on scale rows 2-3 low on the flank, the back stripe about two rows wide
+    "thamnophis-sirtalis": {"d": "#3c3a2c", "lat": "#45422f", "vs": ["#e2cf66", 0.1], "ls": ["#e6d67a", 0.74, 0.1]},
+    # North American racer: adults are plain black to slate grey above with a grey belly and a white chin (the tan was read
+    # from a juvenile's or the background's colour)
+    "coluber-constrictor": {"d": "#24262a", "lat": "#2a2c31", "b": "#5a5e66", "c": "#24262a", "t": "plain", "lip": "#d8d6cc", "sx": {"gloss": 0.6}},
+    # bullsnake: a straw-tan ground (it came out cream) with a row of dark spots low on each flank between the saddles
+    "pituophis-catenifer": {"d": "#b5995f", "lat": "#ad925c", "pat": [{"type": "line", "p0": [0.3, 0.0], "p1": [0.32, 0.36], "wid": 0.045, "color": "#3a2a1a", "mirror": True},
+                                                                       {"type": "blotch", "t": [0.06, 0.95], "count": 50, "phase": 0.5, "a": 0.6, "mirror": True, "alt": True, "wid": 0.1, "len": 0.45, "shape": "round", "color": "#5a3e26", "warp": 0.3}]},
+}
+AUTO_FN_590 = {"heterodon-nasicus": _hognose_590}
+
 def apply_hand_562(existing):
-    for sid, fix in list(HAND_FIXES_562.items()) + list(HAND_FIXES_588.items()):
+    for sid, fix in list(HAND_FIXES_562.items()) + list(HAND_FIXES_588.items()) + list(HAND_FIXES_590.items()):
         prof = existing.get(sid)
         if not prof: continue
         for f in fix:
