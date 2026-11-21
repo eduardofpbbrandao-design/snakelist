@@ -1,0 +1,107 @@
+{
+  "id": "imantodes-cenchoa",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "About 80 cm on average; up to about 1.5 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Blunthead Tree Snake is an extremely thin tree snake of Mexico, Central and South America, with a big head and huge eyes. It has a very mild venom and is harmless to people.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A long, very slender body - like a fiddle string - with a large, blunt head and big eyes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 80 cm long on average, up to about 1.5 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Eastern Mexico through Central America to South America as far as Bolivia, Paraguay and northern Argentina, and Trinidad and Tobago.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Cool, moist forests and rainforests, from sea level to about 1,700 m; often in low plants such as coffee bushes and bromeliads.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active at night, searching through thick vegetation; by day it rests coiled in deep shade.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Extremely thin body with a big head.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Very large eyes.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Imantodes cenchoa",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Imantodes_cenchoa"
+    },
+    "rdb": {
+      "title": "Imantodes cenchoa",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Imantodes&species=cenchoa"
+    }
+  }
+}

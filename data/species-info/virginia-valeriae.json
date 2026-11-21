@@ -1,0 +1,93 @@
+{
+  "id": "virginia-valeriae",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Baird & Girard, 1853",
+  "facts": {
+    "reproduction": {
+      "text": "Live young, usually fewer than 10",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Earthworms and soft-bodied insects",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Smooth Earth Snake is a small, harmless burrowing snake of the eastern half of the United States.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "From Texas and Iowa east to New Jersey and Florida.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Spends most of its time buried in loose soil or leaf litter.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Gentle and harmless: its mouth is too small to hurt a person. Its only real defence is to make a smelly mess to put predators off.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly earthworms and soft-bodied insects and other small invertebrates.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young in August, usually fewer than 10. Newborns are only about 6 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Small, plain burrowing snake.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Smooth earth snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Smooth_earth_snake"
+    },
+    "rdb": {
+      "title": "Virginia valeriae",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Virginia&species=valeriae"
+    }
+  }
+}

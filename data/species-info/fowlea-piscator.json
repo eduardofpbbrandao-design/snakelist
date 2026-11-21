@@ -1,0 +1,99 @@
+{
+  "id": "fowlea-piscator",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Schneider, 1799)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs, usually 30 to 70",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly fish and frogs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Checkered Keelback, or Asiatic Water Snake, is a very common non-venomous water snake of South and South-east Asia.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "From Afghanistan and Pakistan through India, Sri Lanka, Nepal and Bangladesh to Myanmar, Thailand, Indochina, southern China and Malaysia.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "In or near fresh water and rice paddies; active by day and by night.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "If cornered it rears up and spreads its neck skin like a cobra's hood. It is not venomous, but its bite is painful. It can even lose part of its tail to escape.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly fish, frogs and arthropods; sometimes rodents and frog eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Usually lays 30 to 70 eggs (from 4 to 100). The female guards them until they hatch after 60 to 70 days; hatchlings are about 11 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Usually in or near water or rice paddies.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "May spread its neck like a cobra when cornered.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Checkered keelback",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Checkered_keelback"
+    },
+    "rdb": {
+      "title": "Fowlea piscator",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Fowlea&species=piscator"
+    }
+  }
+}

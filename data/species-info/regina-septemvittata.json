@@ -1,0 +1,93 @@
+{
+  "id": "regina-septemvittata",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Say, 1825)",
+  "facts": {
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Almost only crayfish - mostly freshly moulted ones",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Queen Snake is a harmless water snake of eastern North America that eats almost nothing but crayfish. It needs clean, rocky streams, so it disappears where streams become polluted.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "East of the Mississippi from western New York and south-western Ontario to Wisconsin and south to Alabama and northern Florida, with an isolated population in Arkansas.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Only clean running streams with stony or rocky bottoms, where the water stays at least about 10 °C while it is active.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "A real specialist: it hunts by day and eats crayfish, mostly ones that have just shed their hard shell. It finds them by smelling a chemical they give off while moulting.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Mates in spring or autumn and gives birth to live young. After autumn mating, the female can wait until spring to give birth.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "It eats almost only soft, freshly moulted crayfish - it can smell when they are moulting.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Lives in clean, rocky streams.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Queen snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Queen_snake"
+    },
+    "rdb": {
+      "title": "Regina septemvittata",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Regina&species=septemvittata"
+    }
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "id": "ahaetulla-prasina",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Boie, 1827)",
+  "facts": {
+    "length": {
+      "text": "Up to about 1.8 m (tail about 0.6 m)",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young (Reptile Database)",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Lizards and tree frogs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Asian Vine Snake is a very slender, often bright green tree snake of South and South-east Asia with a long, pointed snout. It is mildly venomous, with fangs at the back of its mouth.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Extremely slender with a long, pointed snout more than twice as long as the eye. Light brown to yellow-green, often a startling bright green.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Up to about 1.8 m long, of which about 0.6 m is tail.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "From north-eastern India and Bangladesh through Myanmar, Thailand and Indochina to southern China, Malaysia, Singapore, Indonesia and the Philippines.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Small reptiles and amphibians, especially lizards and tree frogs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "The Reptile Database lists it as giving birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "It looks almost exactly like the vine snakes of South America, but they are not close relatives - they evolved the same shape for the same tree-top life.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Very thin, bright green body.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Long, pointed snout.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Ahaetulla prasina",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Ahaetulla_prasina"
+    },
+    "rdb": {
+      "title": "Ahaetulla prasina",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Ahaetulla&species=prasina"
+    }
+  }
+}
