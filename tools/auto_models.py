@@ -619,7 +619,7 @@ SPECIES_BODY = {
     "opheodrys-aestivus": {"tail": 0.375, "ld": 70, "ts": "whip", "hn": 1.2}, "thamnophis-saurita": {"tail": 0.325, "ts": "whip"}, "thamnophis-proximus": {"tail": 0.32, "ts": "whip"},
     "thamnophis-sirtalis": {"tail": 0.22}, "pantherophis-guttatus": {"tail": 0.15}, "lampropeltis-getula": {"tail": 0.12}, "zamenis-situla": {"tail": 0.17},
     "python-brongersmai": {"ld": 14, "tail": 0.09, "hn": 1.35}, "python-curtus": {"ld": 14, "tail": 0.09}, "python-breitensteini": {"ld": 14, "tail": 0.09},
-    "candoia-aspera": {"ld": 14, "tail": 0.08, "hn": 1.6, "ts": "abrupt"}, "morelia-viridis": {"tail": 0.17, "ts": "prehensile", "hn": 1.9}, "morelia-azurea": {"tail": 0.17, "ts": "prehensile", "hn": 1.9},
+    "candoia-aspera": {"ld": 14, "tail": 0.08, "hn": 1.6, "ts": "abrupt"}, "morelia-viridis": {"tail": 0.17, "ts": "prehensile", "hn": 1.9, "ld": 34}, "morelia-azurea": {"tail": 0.17, "ts": "prehensile", "hn": 1.9},
     "python-sebae": {"tail": 0.13}, "bitis-arietans": {"tail": 0.1}, "dendroaspis-angusticeps": {"tail": 0.23},
 }
 # Eye diameter over head length (Z3): the family defaults are in viewer.js (EYE_L); these are genera that differ
@@ -755,7 +755,7 @@ AUDIT_FIX = {
     # 39 woma: broad, irregular bands, darker on the flanks
     "aspidites-ramsayi": {"t": "none", "pat": [{"type": "band", "count": 34, "len": 0.5, "color": "#8a5428", "warp": 0.8, "jit": 0.3, "sj": 0.35, "aMax": 0.75}]},
     # 40 emerald tree boa: draped over a branch, a big head on a thin neck, pale lips
-    "corallus-caninus": {"sx": {"rows": 70}, "lip": "#f4f0c0"},
+    "corallus-caninus": {"sx": {"rows": 70}, "lip": "#f4f0c0", "bx": {"ld": 36}},  # (v5.88: a slimmer, plausibly thick body over its branch)
     # 43 coastal taipan: longer fangs (in GENUS_FANG); 44 eastern brown snake: orange spots on the belly
     "pseudonaja-textilis": {"pat": [{"type": "blotch", "count": 60, "a": 0.9, "mirror": True, "alt": True, "belly": True, "wid": 0.06, "len": 0.4, "shape": "round", "color": "#d88a4a", "alpha": 0.6, "jit": 0.4, "skip": 0.3}]},
     # 46 paradise tree snake: red spots in clusters, not a line
@@ -889,19 +889,19 @@ def apply_562(a, c, g):
 # v5.88: hand-made profiles matched again against iNaturalist research-grade photos of adults (the patterns were rough)
 HAND_FIXES_588 = {
     # puff adder: a yellowish-brown ground with dark, backward-pointing chevrons edged pale yellow (they were black rings)
-    "bitis-arietans": [(("colors", "dorsal"), "#a08a58"), (("colors", "lateral"), "#98845a"), (("colors", "belly"), "#e2d6b2"), (("colors", "mottle"), 0.08),
-                       (("pattern", 0), {"type": "blotch", "t": [0.08, 0.95], "count": 24, "a": 0, "wid": 0.44, "len": 0.3, "shape": "chevron", "vk": 3.0, "color": "#2c2218",
-                                         "edgeColor": "#e6cf8a", "edge": 0.32, "edgeOut": True, "warp": 0.25, "jit": 0.06, "sj": 0.12}),
+    "bitis-arietans": [(("colors", "dorsal"), "#a2843f"), (("colors", "lateral"), "#9a7f44"), (("colors", "belly"), "#e2d6b2"), (("colors", "mottle"), 0.08),
+                       (("pattern", 0), {"type": "blotch", "t": [0.08, 0.95], "count": 28, "a": 0, "wid": 0.42, "len": 0.24, "shape": "chevron", "vk": 3.6, "color": "#3a2816",
+                                         "edgeColor": "#ecd27a", "edge": 0.55, "edgeOut": True, "warp": 0.25, "jit": 0.06, "sj": 0.12}),
                        (("pattern", 1), {"type": "blotch", "t": [0.08, 0.95], "count": 24, "phase": 0.5, "a": 0.64, "mirror": True, "wid": 0.12, "len": 0.36, "shape": "rect",
                                          "color": "#3a2e22", "edgeColor": "#d8c48c", "edge": 0.22, "edgeOut": True, "warp": 0.3})],
     # Gaboon viper: a row of pale oblong blocks down the spine (they were round), a warmer, lighter brown ground
-    "bitis-gabonica": [(("colors", "dorsal"), "#5a3e32"), (("colors", "lateral"), "#684838"),
-                       (("pattern", 0), {"type": "blotch", "t": [0.1, 0.95], "count": 17, "a": 0, "wid": 0.12, "len": 0.58, "shape": "rect", "color": "#d6c6a0",
+    "bitis-gabonica": [(("colors", "dorsal"), "#74543f"), (("colors", "lateral"), "#7e5c46"),
+                       (("pattern", 0), {"type": "blotch", "t": [0.1, 0.95], "count": 17, "a": 0, "wid": 0.15, "len": 0.68, "shape": "rect", "color": "#dccca4",
                                          "inner": {"r": 0.32, "color": "#c2ab82"}, "warp": 0.3, "jit": 0.06})],
     # copperhead: pale pinkish-tan with chestnut hourglass crossbands - narrow over the spine, wide on the flanks, darker edged
-    "agkistrodon-contortrix": [(("colors", "dorsal"), "#c4a184"), (("colors", "lateral"), "#bf9c7f"), (("colors", "belly"), "#e2d2ba"),
+    "agkistrodon-contortrix": [(("colors", "dorsal"), "#bd9575"), (("colors", "lateral"), "#b89072"), (("colors", "belly"), "#e2d2ba"),
                                (("pattern", 0), {"type": "blotch", "t": [0.06, 0.94], "count": 15, "a": 0, "wid": 0.95, "len": 0.9, "shape": "hourglass2", "h0": 0.22, "h1": 1.4,
-                                                 "color": "#8c4e30", "edgeColor": "#5a301e", "edge": 0.14, "warp": 0.35, "jit": 0.08, "sj": 0.15}),
+                                                 "color": "#84442a", "edgeColor": "#562c1a", "edge": 0.14, "warp": 0.35, "jit": 0.08, "sj": 0.15}),
                                (("pattern", 1, "color"), "#b07a4e")],
     # reticulated python: a golden-brown ground (it was too pale), grey-brown saddles inside the black net, a golden head
     "malayopython-reticulatus": [(("colors", "dorsal"), "#8a6c36"), (("colors", "lateral"), "#a07e3e"), (("pattern", 0, "edgeColor"), "#d8b050"),

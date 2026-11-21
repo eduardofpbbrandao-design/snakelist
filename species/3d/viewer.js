@@ -635,32 +635,71 @@ function raisedPose(P, F, pose, R, N, ds, wMax) {
 // unrolling (over a cylinder, then straight down), so the body keeps its length. pts: x along the branch, z across it
 function drapePose(P, F, pose, R, N, ds, wMax) {
   const L = F.L, rB = clamp(F.w0 * (pose.branchK || 1.3), 0.008, 0.035), cOff = F.Hh(L * 0.45) * F.bf, Rr = rB + cOff;
-  const pitch = wMax * 2 * (pose.pitch || 1.15);
+  const pitch = wMax * 2 * (pose.pitch || 1.02);
   // the coil: head at its centre, walking outward; a rounder centre, loops longer across the branch
   // v5.83: the tail is tucked in the middle of the coil and the body spirals outward; the neck leaves the outer loop and
   // comes back across the top of the coil, the head resting level on the loops in the middle - the way a real emerald
   // tree boa or green tree python sits (the head used to curl into the middle, rolled onto its side by the fold)
   const r0 = pitch * (pose.inner || 0.75), sqx = pose.sqx || 1.0, sqz = pose.sqz || 1.5, Lh = Math.min(L * 0.17, F.Hl * 2.8), m = Math.max(F.W(L * 0.2) * 2.2, pitch * 0.9);
-  const Ls = L - Lh - (Math.PI / 2) * m, wSeed = Math.floor(R() * 4294967295); let th0 = 0, sp0 = null; // (one draw from the species' own numbers, as before)
-  for (let it = 0; it < 4; it++) { // (the coil's outer end on the far side of the branch's middle line, heading across it)
-    sp0 = resample(spiralLine(Ls, ds, pitch, r0, sqx, sqz, rng(wSeed), 0.12, th0), Math.round(Ls / ds), ds);
-    const e = sp0[sp0.length - 1], ang = Math.atan2(e[1] / sqz, e[0] / sqx); th0 -= Math.atan2(Math.sin(ang), Math.cos(ang));
+  const aMax = 1.95, q1 = aMax * Rr; // (how far round the branch each hanging side hugs it - see the fold below)
+  let tailFirst, nLead = Math.round((Lh + m * 1.6) / ds);
+  if (pose.spiral) { // (the v5.83 flat spiral, kept for poses that ask for it)
+    const Ls = L - Lh - (Math.PI / 2) * m, wSeed = Math.floor(R() * 4294967295); let th0 = 0, sp0 = null; // (one draw from the species' own numbers, as before)
+    for (let it = 0; it < 4; it++) { // (the coil's outer end on the far side of the branch's middle line, heading across it)
+      sp0 = resample(spiralLine(Ls, ds, pitch, r0, sqx, sqz, rng(wSeed), 0.12, th0), Math.round(Ls / ds), ds);
+      const e = sp0[sp0.length - 1], ang = Math.atan2(e[1] / sqz, e[0] / sqx); th0 -= Math.atan2(Math.sin(ang), Math.cos(ang));
+    }
+    tailFirst = sp0.slice(); { const e = sp0[sp0.length - 1], f = sp0[sp0.length - 2], tl = Math.hypot(e[0] - f[0], e[1] - f[1]) || 1, t0 = [(e[0] - f[0]) / tl, (e[1] - f[1]) / tl];
+      const sg = t0[1] >= 0 ? 1 : -1, E2 = [e[0] - m, e[1] + sg * m], mm = m * 1.6;
+      for (let k = 1; k <= 24; k++) { const t = k / 24, h00 = 2 * t * t * t - 3 * t * t + 1, h10 = t * t * t - 2 * t * t + t, h01 = -2 * t * t * t + 3 * t * t, h11 = t * t * t - t * t; tailFirst.push([e[0] * h00 + t0[0] * mm * h10 + E2[0] * h01 - mm * h11, e[1] * h00 + t0[1] * mm * h10 + E2[1] * h01]); }
+      for (let k = 1; k <= 40; k++) tailFirst.push([E2[0] - (Lh * 1.2 * k) / 40, E2[1]]); }
+  } else {
+    // v5.88: the saddle real green tree pythons and emerald tree boas sit in. Laid flat, the body runs back and forth across the
+    // branch (x along it, z across), each crossing next to the last and joined to it by a U-turn; folded over the branch every
+    // crossing becomes a loop draped evenly over it, the U-turns hanging side by side at the same depth on both sides. The tail
+    // starts low on one side; the last crossing stops on top, and the neck turns along the top of the loops so the head rests
+    // in the middle of the coil (a flat spiral folded over the branch gave a few deep, round, nested loops hanging low)
+    const eX = pitch * 0.32, rU = pitch / 2 + eX, hangMax = Math.max(L * 0.045, wMax * 2 * 1.6); // (each loop hangs only a little below the branch; eX: each crossing runs a little slantwise, so the U-turns below are rounder than the gap between crossings on top)
+    let n = 2, Z = 0, Lead = Lh, Lc = 0;
+    for (let it = 0; it < 3; it++) {
+      Lc = L - Lead - (Math.PI / 2) * m;
+      for (n = 2; n < 12; n++) { Z = (Lc - n * Math.PI * rU + m) / (2 * n + 1); if (Z <= q1 + hangMax) break; }
+      Lead = clamp((n * pitch) / 2 + F.Hl * 0.6, F.Hl * 2, Lh * 1.15); // (the head ends over the middle of the coil)
+    }
+    nLead = Math.round((Lead + m * 1.6) / ds);
+    const pts0 = [], st = ds * 0.5, line = (x0, z0, x1, z1) => { const l = Math.hypot(x1 - x0, z1 - z0), k = Math.max(1, Math.ceil(l / st)); for (let i = 1; i <= k; i++) pts0.push([lerp(x0, x1, i / k), lerp(z0, z1, i / k)]); };
+    const Rz = rng(strSeed(P.name || 'drape') + 3), Zk = []; for (let k = 0; k <= n; k++) Zk.push(Z * (0.88 + 0.24 * Rz())); // (no two loops hang exactly alike)
+    let x = 0, sgn = 1; pts0.push([eX, -Zk[0]]);
+    for (let k = 0; k < n; k++) {
+      line(x + eX, -sgn * Zk[k], x - eX, sgn * Zk[k + 1]); // a crossing, slantwise over the branch
+      const cx = x + pitch / 2, k2 = Math.max(6, Math.ceil((Math.PI * rU) / st)); // the U-turn, hanging on the far side
+      for (let i = 1; i <= k2; i++) { const a = Math.PI - (i / k2) * Math.PI; pts0.push([cx + Math.cos(a) * rU, sgn * (Zk[k + 1] + Math.sin(a) * rU * 0.8)]); }
+      x += pitch; sgn = -sgn;
+    }
+    line(x + eX, -sgn * Zk[n], x, -sgn * m); // the last crossing, up onto the top
+    // the neck turns along the top of the loops, back over the middle of the coil
+    const e = pts0[pts0.length - 1], t0 = [0, sgn], E2 = [e[0] - m, 0], mm = m * 1.6;
+    for (let k = 1; k <= 24; k++) { const t = k / 24, h00 = 2 * t * t * t - 3 * t * t + 1, h10 = t * t * t - 2 * t * t + t, h01 = -2 * t * t * t + 3 * t * t, h11 = t * t * t - t * t; pts0.push([e[0] * h00 + t0[0] * mm * h10 + E2[0] * h01 - mm * h11, e[1] * h00 + t0[1] * mm * h10 + E2[1] * h01]); }
+    for (let k = 1; k <= 40; k++) pts0.push([E2[0] - (Lead * 1.3 * k) / 40, 0]);
+    const xc = (n * pitch) / 2; tailFirst = pts0.map((q) => [q[0] - xc, q[1]]); // (the coil centred on the branch's middle)
   }
-  const tailFirst = sp0.slice(); { const e = sp0[sp0.length - 1], f = sp0[sp0.length - 2], tl = Math.hypot(e[0] - f[0], e[1] - f[1]) || 1, t0 = [(e[0] - f[0]) / tl, (e[1] - f[1]) / tl];
-    const sg = t0[1] >= 0 ? 1 : -1, E2 = [e[0] - m, e[1] + sg * m], mm = m * 1.6;
-    for (let k = 1; k <= 24; k++) { const t = k / 24, h00 = 2 * t * t * t - 3 * t * t + 1, h10 = t * t * t - 2 * t * t + t, h01 = -2 * t * t * t + 3 * t * t, h11 = t * t * t - t * t; tailFirst.push([e[0] * h00 + t0[0] * mm * h10 + E2[0] * h01 - mm * h11, e[1] * h00 + t0[1] * mm * h10 + E2[1] * h01]); }
-    for (let k = 1; k <= 40; k++) tailFirst.push([E2[0] - (Lh * 1.2 * k) / 40, E2[1]]); }
   const flat = resample(tailFirst.reverse(), N, ds);
-  const nLead = Math.round((Lh + m * 1.6) / ds);
-  let hang = 0; for (const p of flat) hang = Math.max(hang, Math.abs(p[1]) - (Math.PI / 2) * Rr);
+  // v5.88: the loops saddle the branch the way real ones do - the coil is longer along the branch than across it (more, shallower
+  // saddles side by side, not a few deep round loops), and each hanging side keeps hugging the branch round past its widest
+  // point before it falls, tucked in under it (they used to drop straight down from the branch's sides, low and round)
+  const bl = Rr * 1.6, fall = (d) => { // the hanging part, d past the end of the wrap: [hz, y, beta]
+    let hz = Rr * Math.sin(aMax), y = Rr * Math.cos(aMax), b = aMax; const n = Math.max(2, Math.ceil(Math.min(d, bl) / (bl / 16)));
+    const dd = Math.min(d, bl) / n; for (let k = 0; k < n; k++) { const tm = (k + 0.5) * dd; b = aMax + (Math.PI / 2 - aMax) * sstep(0, bl, tm); hz += Math.cos(b) * dd; y -= Math.sin(b) * dd; }
+    if (d > bl) { b = Math.PI / 2; y -= d - bl; } return [hz, y, b]; };
+  let hang = 0; for (const p of flat) { const sv = Math.abs(p[1]); if (sv > q1) hang = Math.max(hang, -fall(sv - q1)[1] - Rr); }
   // v5.68: up in a tree - the branch at a real perching height (about 0.5-1.3 m), never just off the ground
   const hB = Math.max(hang + Rr + F.Hh(L * 0.5) * 2 + L * 0.03, clamp(L * 0.65, 0.5, 1.3));
   const pts = new Array(N), E = new Float32Array(N), Nn = new Array(N);
   for (let i = 0; i < N; i++) {
     const u = flat[i][0], v = flat[i][1], sg = v < 0 ? -1 : 1, s = Math.abs(v), q = (Math.PI / 2) * Rr;
     let hz, y, n;
-    if (s <= q) { const al = s / Rr; hz = Rr * Math.sin(al); y = hB + Rr * Math.cos(al); n = [0, Math.cos(al), sg * Math.sin(al)]; }
-    else { hz = Rr; y = hB - (s - q); n = [0, 0, sg]; }
+    if (s <= q1) { const al = s / Rr; hz = Rr * Math.sin(al); y = hB + Rr * Math.cos(al); n = [0, Math.cos(al), sg * Math.sin(al)]; }
+    else { const f2 = fall(s - q1); hz = f2[0]; y = hB + f2[1]; n = [0, Math.cos(f2[2]), sg * Math.sin(f2[2])]; }
     const x = i * ds; pts[i] = [u, sg * hz]; E[i] = y - F.Hh(x) * F.BF(x); Nn[i] = n;
   }
   { // the head and neck rest on top of the loops that cross under them (and ease down onto the branch where none do)
@@ -1799,6 +1838,31 @@ function buildEyes(P, F, body, pat) {
 // teeth on both jaws, and the fangs each group really has: long folding fangs at the very front
 // in vipers and pit vipers, short fixed front fangs in elapids and sea snakes, none in pythons,
 // colubrids and blind snakes (pythons have many more and bigger teeth instead).
+// v5.88: the mouth lining's wet detail, made once: a normal map and a roughness map over a jaw's lining (u across it, lip to
+// lip; v from the snout to the hinge). up: the roof (transverse palatal folds), false: the floor (soft lengthwise wrinkles),
+// null: the tongue sheath (fine folds round it). Fine bumps everywhere, stippled gums, wetter in the hollows.
+const MOUTH_MAPS = new Map();
+function mouthMaps(up) {
+  const key = String(up); if (MOUTH_MAPS.has(key)) return MOUTH_MAPS.get(key);
+  const N = 256, h = new Float32Array(N * N), nd = new Uint8Array(N * N * 4), rd = new Uint8Array(N * N * 4);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const u = x / N, v = y / N, inner = sstep(0.1, 0.17, u) * (1 - sstep(0.83, 0.9, u)), gum = Math.exp(-(((u - 0.156) / 0.02) ** 2)) + Math.exp(-(((u - 0.844) / 0.02) ** 2));
+    let hv = 0.22 * vnoise(u * 64, v * 64, 1, 11) + 0.12 * vnoise(u * 150, v * 150, 2, 13) + gum * 0.45 * vnoise(u * 220, v * 160, 3, 17);
+    if (up === true) { const ph = v * 13 + 1.6 * Math.abs(u - 0.5) + 0.25 * vnoise(u * 5, v * 5, 4, 19), w = Math.pow(0.5 + 0.5 * Math.sin(TAU * ph), 3); hv += inner * w * (1 - sstep(0.55, 0.9, v)) * (0.4 + 0.6 * sstep(0.03, 0.09, Math.abs(u - 0.5))) * 0.9; }
+    else if (up === false) { const ph = u * 18 + 0.4 * vnoise(u * 4, v * 6, 5, 23); hv += inner * Math.pow(0.5 + 0.5 * Math.sin(TAU * ph), 2) * 0.35 * (0.5 + 0.5 * vnoise(u * 3, v * 8, 6, 29)); }
+    else { hv += 0.5 * Math.pow(0.5 + 0.5 * Math.sin(TAU * (u * 14 + 0.3 * vnoise(u * 4, v * 4, 7, 31))), 2); }
+    h[y * N + x] = hv;
+  }
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const k = y * N + x, hx = h[y * N + ((x + 1) % N)] - h[y * N + ((x - 1 + N) % N)], hy = h[((y + 1) % N) * N + x] - h[((y - 1 + N) % N) * N + x];
+    const nx = -hx * 3, ny = -hy * 3, l = Math.hypot(nx, ny, 1); nd[k * 4] = (nx / l * 0.5 + 0.5) * 255; nd[k * 4 + 1] = (ny / l * 0.5 + 0.5) * 255; nd[k * 4 + 2] = 255 / l; nd[k * 4 + 3] = 255;
+    const lap = h[k] - (h[y * N + ((x + 1) % N)] + h[y * N + ((x - 1 + N) % N)] + h[((y + 1) % N) * N + x] + h[((y - 1 + N) % N) * N + x]) / 4; // (hollows: wetter)
+    const wet = 0.5 + 0.5 * vnoise(x / N * 7, y / N * 7, 8, 37), r = clamp(0.16 + 0.3 * wet * wet + lap * 2.5, 0.08, 0.7);
+    rd[k * 4] = rd[k * 4 + 1] = rd[k * 4 + 2] = r * 255; rd[k * 4 + 3] = 255;
+  }
+  const mk = (a) => { const t = new THREE.DataTexture(a, N, N, THREE.RGBAFormat); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter; t.needsUpdate = true; return t; };
+  const out = { normal: mk(nd), rough: mk(rd) }; MOUTH_MAPS.set(key, out); return out;
+}
 function buildMouth(P, F, body, group, eyes, pat) {
   const geo = body.geo, pos = geo.attributes.position, orig = pos.array.slice(), M = body.M, Hl = F.Hl;
   const xh = Hl * (P.head.jaw || 0.75) * 1.02, xEnd = xh * 1.3, mA = body.mouthA;
@@ -1850,7 +1914,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
   const labN = P.head.labials || (plan === 'python' ? 13 : plan === 'viper' || plan === 'pitviper' ? 11 : 8), labLen = (xh * 0.95) / labN;
   // one jaw's lining: lip (outer edge -> rolled under -> gum), then the roof or floor across, then the other lip
   function jawLining(upper) {
-    const NS = 40, NL = 5, rows = [], cols = [], xv = [];
+    const NS = 40, NL = 5, rows = [], cols = [], xv = [], uvs = [];
     const sgU = upper ? -1 : 1; // the lips roll towards the opening: down for the upper jaw, up for the lower
     for (const x of xs) {
       const f = body.frameAt(x), Hh = F.Hh(x), W = F.W(x), back = sstep(xh * 0.5, xh * 1.0, x);
@@ -1879,7 +1943,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
       // colours: the lip scales take the skin colour with dark sutures between them; the lining is pink, darker
       // in the grooves beside the gums, on the ridges a little lighter, and fading to deep red and black in the throat
       const suture = 1 - 0.45 * Math.pow(Math.abs(Math.cos(Math.PI * x / labLen)), 14) * sstep(Hl * 0.05, Hl * 0.12, x);
-      for (const [p, kind, s, side] of row) {
+      for (let ri = 0; ri < row.length; ri++) { const [p, kind, s, side] = row[ri]; uvs.push(ri / (row.length - 1), x / xh);
         let c;
         if (kind === 'lip') { const sk = skinAt(x, side * (upper ? mA - 0.06 : mA + 0.08)), lipC = sk.clone().lerp(new THREE.Color(P.colors.belly), upper ? 0.25 : 0.5); c = lipC.multiplyScalar(suture * lerp(1, 0.7, sstep(0.55, 1, s))).lerp(pink, sstep(0.8, 1, s) * 0.6); }
         else {
@@ -1893,7 +1957,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
       }
     }
     const per = 2 * NL + NS + 1, g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(rows, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+    g.setAttribute('position', new THREE.Float32BufferAttribute(rows, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
     const idx = []; for (let i = 0; i < xs.length - 1; i++) for (let k = 0; k < per - 1; k++) { const a = i * per + k, b = a + per; idx.push(a, a + 1, b, a + 1, b + 1, b); }
     g.setIndex(idx); g.computeVertexNormals();
     return { g, o: g.attributes.position.array.slice(), xv, per, row: (x, s) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = NL + Math.round(s * NS); return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); }, gum: (x, side) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = side > 0 ? NL - 1 : per - NL; return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); } };
@@ -1902,7 +1966,11 @@ function buildMouth(P, F, body, group, eyes, pat) {
   const gumC = new THREE.Color(P.head.mouthColor && /^#[0-3]/.test(P.head.mouthColor) ? '#2a2224' : '#f7dcd6');
   const roof = jawLining(true), floorJ = jawLining(false);
   const roofM = lining.clone(); roofM.emissive.set(P.head.mouthColor && /^#[0-3]/.test(P.head.mouthColor) ? '#1a1214' : '#c27e80'); roofM.emissiveIntensity = 0.7; // (v5.53: the roof faces down, away from the light: a little more glow keeps it pink, not maroon)
-  const palate = new THREE.Mesh(roof.g, roofM), floor = new THREE.Mesh(floorJ.g, lining);
+  // v5.88: wet detail - the roof's transverse palatal folds, the floor's soft lengthwise wrinkles, the stippled gums and fine
+  // bumps of the lining, and a sheen that is wetter in the folds and drier on their crests (it was smooth, evenly shiny pink)
+  const floorM = lining.clone();
+  for (const [m, up] of [[roofM, true], [floorM, false]]) { const mm = mouthMaps(up); m.normalMap = mm.normal; m.normalScale = new THREE.Vector2(0.9, 0.9); m.roughnessMap = mm.rough; m.roughness = 1; m.clearcoatRoughnessMap = mm.rough; m.clearcoatRoughness = 0.6; m.clearcoat = 0.6; }
+  const palate = new THREE.Mesh(roof.g, roofM), floor = new THREE.Mesh(floorJ.g, floorM);
   palate.receiveShadow = floor.receiveShadow = true;
   palate.castShadow = floor.castShadow = true; // v5.09: with the mouth open the head is an open shell; the lining closes it in the shadow too (no thin loop on the ground)
   // the corners of the mouth: a short fold of skin between the two jaws, just in front of the hinge
@@ -1966,7 +2034,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
   if (plan !== 'blind') {
     anchors.palate.position.copy(roof.row(xh * 0.45, 0.5)); upperT.add(anchors.palate);
     anchors.teeth.position.copy(roof.gum(Hl * 0.3, 1)); upperT.add(anchors.teeth);
-    const softM = new THREE.MeshPhysicalMaterial({ color: pink.clone().multiplyScalar(0.95), roughness: 0.38, clearcoat: 0.6, clearcoatRoughness: 0.25 });
+    const softM = new THREE.MeshPhysicalMaterial({ color: pink.clone().multiplyScalar(0.95), roughness: 1, roughnessMap: mouthMaps(null).rough, normalMap: mouthMaps(null).normal, normalScale: new THREE.Vector2(0.7, 0.7), clearcoat: 0.6, clearcoatRoughness: 0.25 }); // (v5.88: the tongue sheath's soft folds)
     const fAt = (x) => body.frameAt(x), fl = (x) => { const xc = Math.min(x, xs[xs.length - 1]); return floorJ.row(xc, 0.5).addScaledVector(fAt(xc).T, x - xc); }; // (past the hinge: straight on back)
     // the tongue sheath: a low soft ridge along the floor of the mouth, open at its front end just behind the chin
     const r0 = Math.max(Hl * 0.019, F.W(Hl * 0.2) * 0.07); // the tongue's thickness (v5.78: a little fuller - it read as a black thread)
@@ -2052,6 +2120,32 @@ function buildMouth(P, F, body, group, eyes, pat) {
     const x = xh * 0.72, f = body.frameAt(x), len = clamp(P.head.rearFang / 1000, tl * 1.3, Hl * 0.2), fg2 = curvedTooth(0.3);
     for (const sg of [1, -1]) { const m = tooth(upperT, roof.gum(x, sg), f.U.clone().negate().addScaledVector(f.T, 0.45), len, len * 0.12, f.T, fg2); m.userData.mpart = 'teeth'; }
   }
+  // v5.88: a few thin strands of saliva between the jaws near the corners of the mouth: they stretch as it opens, thinning in
+  // the middle and sagging a little, and are gone by a wide gape (as they break in a real mouth)
+  const saliva = (() => {
+    const R2 = rng(strSeed(P.name || 'mouth') + 91), list = [], NSg = 10, NRd = 5;
+    for (let k = 0; k < 5; k++) { const side = k % 2 ? 1 : -1; list.push({ x: xh * (0.55 + 0.33 * R2()), s: side > 0 ? 0.1 + 0.12 * R2() : 0.9 - 0.12 * R2(), r: Hl * (0.0035 + 0.003 * R2()), sag: 0.15 + 0.25 * R2(), brk: 0.55 + 0.4 * R2() }); }
+    const nV = list.length * (NSg + 1) * NRd, g = new THREE.BufferGeometry(), pa = new Float32Array(nV * 3), idx = [];
+    for (let q = 0; q < list.length; q++) for (let i = 0; i < NSg; i++) for (let j = 0; j < NRd; j++) { const a = (q * (NSg + 1) + i) * NRd + j, b = a + NRd, j1 = (j + 1) % NRd, a1 = (q * (NSg + 1) + i) * NRd + j1, b1 = a1 + NRd; idx.push(a, b, a1, a1, b, b1); }
+    g.setAttribute('position', new THREE.BufferAttribute(pa, 3)); g.setIndex(idx);
+    const m = new THREE.Mesh(g, new THREE.MeshPhysicalMaterial({ color: '#f4e6e4', roughness: 0.08, metalness: 0, transparent: true, opacity: 0.55, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.4, depthWrite: false }));
+    m.frustumCulled = false; m.castShadow = false; m.renderOrder = 3; m.userData.mpart = 'saliva';
+    const vA = new THREE.Vector3(), vB = new THREE.Vector3(), d = new THREE.Vector3(), e1 = new THREE.Vector3(), e2 = new THREE.Vector3(), c = new THREE.Vector3();
+    const at = (J, x, sv, out) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, kk = 5 + Math.round(sv * 40), per = 2 * 5 + 40 + 1; return out.fromArray(J.g.attributes.position.array, (i * per + kk) * 3); };
+    return { m, update(tt) {
+      m.visible = tt > 0.06 && tt < 1.05;
+      if (!m.visible) return;
+      for (let q = 0; q < list.length; q++) { const S2 = list[q]; at(roof, S2.x, S2.s, vA); at(floorJ, S2.x, S2.s, vB); d.subVectors(vB, vA); const L2 = d.length(); d.normalize();
+        e1.set(0, 1, 0).cross(d); if (e1.lengthSq() < 1e-8) e1.set(1, 0, 0); e1.normalize(); e2.crossVectors(d, e1).normalize();
+        const alive = 1 - sstep(S2.brk, S2.brk + 0.12, tt); // (the strand thins and snaps as the gape grows)
+        for (let i = 0; i <= NSg; i++) { const u = i / NSg, thin = alive * lerp(1, 0.28, Math.sin(Math.PI * u) ** 0.7);
+          c.copy(vA).addScaledVector(d, L2 * u).addScaledVector(e2, -L2 * S2.sag * 0.25 * Math.sin(Math.PI * u)).addScaledVector(e1, L2 * 0.05 * Math.sin(Math.PI * u) * (S2.s < 0.5 ? 1 : -1));
+          for (let j = 0; j < NRd; j++) { const an = (j / NRd) * TAU, o = ((q * (NSg + 1) + i) * NRd + j) * 3, r = S2.r * Math.max(0.02, thin);
+            pa[o] = c.x + (e1.x * Math.cos(an) + e2.x * Math.sin(an)) * r; pa[o + 1] = c.y + (e1.y * Math.cos(an) + e2.y * Math.sin(an)) * r; pa[o + 2] = c.z + (e1.z * Math.cos(an) + e2.z * Math.sin(an)) * r; } } }
+      g.attributes.position.needsUpdate = true; g.computeVertexNormals();
+    } };
+  })();
+  if (plan !== 'blind') inside.add(saliva.m);
   let t = 0, ver = 0, spread = 0, walk = 0;
   // v5.57: swallowing a big meal the two halves of the lower jaw spread apart (the stretchy chin and the swinging quadrate
   // bones) and walk forward in turn: warp a point of the lower jaw (rest shape) by its side of the head, w = its jaw weight
@@ -2090,7 +2184,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
     const strip2 = (J, an) => { const fp = J.g.attributes.position.array, o = J.o;
       for (let k = 0, i = 0; k < fp.length; k += 3, i++) { v3.set(o[k], o[k + 1], o[k + 2]); if (J === floorJ) jawWarp(v3, weight(J.xv[i])); qq.setFromAxisAngle(axis, an * weight(J.xv[i])); v3.sub(hinge).applyQuaternion(qq).add(hinge); fp[k] = v3.x; fp[k + 1] = v3.y; fp[k + 2] = v3.z; }
       J.g.attributes.position.needsUpdate = true; J.g.computeVertexNormals(); };
-    strip2(floorJ, aD); strip2(roof, aU);
+    strip2(floorJ, aD); strip2(roof, aU); saliva.update(t);
     // the folds at the corners of the mouth stretch between the two jaws
     { const fp = cheekG.attributes.position.array;
       for (let k = 0, i = 0; k < fp.length; k += 3, i++) { const s = cheekInfo[i * 3], reach = cheekInfo[i * 3 + 1], x = cheekInfo[i * 3 + 2], an = lerp(aU, aD, sstep(0.5 - 0.5 * reach - 1e-3, 0.5 + 0.5 * reach + 1e-3, s)) * weight(x);
