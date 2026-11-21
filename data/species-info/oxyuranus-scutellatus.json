@@ -1,0 +1,116 @@
+{
+  "id": "oxyuranus-scutellatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Peters, 1867)",
+  "facts": {
+    "length": {
+      "text": "About 2 m on average; up to 2.9 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 7 to 20 at a time",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly rats, mice and bandicoots",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Coastal Taipan is an extremely venomous snake of northern and eastern Australia and New Guinea. It is the second-longest venomous snake in Australia, after the King Brown Snake.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Light olive or reddish-brown above and paler below.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Averages about 2 m and 3 kg; the longest reach about 2.9 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Coastal northern and eastern Australia - from north-western Western Australia across the Northern Territory and Queensland into northern New South Wales - and southern New Guinea.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Mostly active by day, especially in the early to mid morning, but may hunt at night in hot weather. It usually avoids people, but becomes very defensive if provoked.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly rats, mice and bandicoots, and sometimes birds.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Breeds between August and December and lays 7 to 20 eggs, which hatch after 60 to 80 days. The babies are 30 to 34 cm long and grow fast - about 1 m in their first year.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Baby taipans grow about 6.7 cm a month - reaching about 1 m in their first year.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Long, slender, plain olive or reddish-brown snake.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Coastal taipan",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Coastal_taipan"
+    },
+    "rdb": {
+      "title": "Oxyuranus scutellatus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Oxyuranus&species=scutellatus"
+    }
+  }
+}

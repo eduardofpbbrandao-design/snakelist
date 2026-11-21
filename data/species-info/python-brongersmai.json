@@ -1,0 +1,102 @@
+{
+  "id": "python-brongersmai",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Stull, 1938",
+  "facts": {
+    "length": {
+      "text": "Males about 0.9-1.5 m, females about 1.2-1.8 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, up to about 30",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Blood Python is a short, very thick-bodied, non-venomous python of South-east Asia. Many are a deep red colour. It was once thought to be a kind of Short-tailed Python, but since about 2000 it has been treated as a species of its own.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Males are usually about 0.9 to 1.5 m long and females about 1.2 to 1.8 m; a few have reached about 2.4 m. They look heavy for their length.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Peninsular Malaysia, eastern Sumatra and nearby islands, Thailand and Vietnam.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Marshes and swamps in tropical forest, from sea level up to about 650 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Mostly active around dawn and dusk.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays up to about 30 eggs. The mother coils around them and shivers her muscles to keep them warm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "A mother Blood Python can warm her eggs by shivering - a bit like how you shiver when you are cold.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Very thick, heavy body with a short tail.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Python brongersmai",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Python_brongersmai"
+    },
+    "rdb": {
+      "title": "Python brongersmai",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Python&species=brongersmai"
+    }
+  }
+}

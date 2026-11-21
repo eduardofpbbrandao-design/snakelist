@@ -1,0 +1,122 @@
+{
+  "id": "naja-nigricollis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Reinhardt, 1843",
+  "facts": {
+    "length": {
+      "text": "About 1.2 to 2.2 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly small rodents; also birds, fish, lizards, eggs and snakes",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Black-necked Spitting Cobra is a common venomous cobra of Africa south of the Sahara. When threatened it can spray venom from its fangs towards an attacker's eyes. Its bite needs medical care, although few untreated bites are fatal.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Colour varies with region. Many are black or grey with a broad black band under the neck, often with a pink or orange bar; others are yellowish-brown or coppery without the neck band.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually about 1.2 to 2.2 m long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Widespread in western, central and eastern Africa and parts of southern Africa, from Senegal and Mauritania east to Ethiopia and Somalia and south to Angola and Zambia; absent from the Congo Basin rainforest.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Can be active by day or by night, depending on the season, place and temperature. Snake eagles and other birds of prey hunt it.",
+        "src": [
+          "wp"
+        ]
+      },
+      {
+        "label": "Spitting",
+        "text": "When threatened it can squirt venom from its fangs. Venom in the eyes is very painful and needs to be washed out quickly.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly small rats and mice, but also birds, fish, lizards, eggs and other snakes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "A broad black band under the neck (in many areas).",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Spreads a hood when threatened.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Black-necked spitting cobra",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Black-necked_spitting_cobra"
+    },
+    "rdb": {
+      "title": "Naja nigricollis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Naja&species=nigricollis"
+    }
+  }
+}

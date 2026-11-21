@@ -1,0 +1,100 @@
+{
+  "id": "thelotornis-capensis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Smith, 1849",
+  "facts": {
+    "length": {
+      "text": "Long and slender; the longest museum specimen was 168 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 4 to 13 at a time",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Savanna Vine Snake, or Twig Snake, is a very thin, long-tailed tree snake of southern Africa. It is dangerously venomous even though its fangs are at the back of the mouth.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Slender with a long tail. The longest museum specimen, a male, measured 168 cm, of which 62 cm was tail.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South-eastern Africa: north-eastern South Africa, Eswatini, southern Mozambique and Malawi.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Forest, savanna and shrubland.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day and spends much of its time climbing in bushes and trees.",
+        "src": [
+          "wp"
+        ]
+      },
+      {
+        "label": "Bites",
+        "text": "Its venom is delivered by large grooved teeth at the back of the upper jaw. The German snake scientist Robert Mertens died after being bitten by one.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 4 to 13 small, long eggs, each about 36 mm long and 16 mm wide.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Its thin body and twig-like colours let it vanish among branches.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Thelotornis capensis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Thelotornis_capensis"
+    },
+    "rdb": {
+      "title": "Thelotornis capensis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Thelotornis&species=capensis"
+    }
+  }
+}

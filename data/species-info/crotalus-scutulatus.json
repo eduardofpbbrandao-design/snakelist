@@ -1,0 +1,144 @@
+{
+  "id": "crotalus-scutulatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Kennicott, 1861)",
+  "facts": {
+    "length": {
+      "text": "Usually under 1 m; the longest males about 1.2 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young, about 2 to 17 at a time",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mostly small rodents and lizards",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Mojave (or Mohave) Rattlesnake is a venomous pit viper of the deserts of the south-western United States and Mexico. Many populations have a venom that attacks the nerves, which gave it a reputation as one of the most dangerous rattlesnakes - but people bitten by it do no worse, on average, than people bitten by other rattlesnakes of the same size.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "It looks very like the Western Diamond-backed Rattlesnake, which lives in the same areas. There is no single sure sign: its colour ranges from green to brown, grey or yellowish, with a row of diamond-shaped blotches down the back.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Most are under 1 m long. The largest recorded male was 123.6 cm and the largest female 92.2 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South-western USA (southern California, southern Nevada, south-west Utah, Arizona, southern New Mexico and west Texas) and much of northern and central Mexico, south to Puebla.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Broad desert valleys and lower mountain slopes with sparse plants such as creosote bush, mesquite, cacti and Joshua trees; it tends to avoid thick vegetation and very rocky ground.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Most active from April to September. It does not gather in shared winter dens: each snake keeps its own home range all year and shelters in burrows in winter and in the hottest weather.",
+        "src": [
+          "wp"
+        ]
+      },
+      {
+        "label": "Bites",
+        "text": "Its bite can be life-threatening and needs hospital care; the antivenoms used in the United States are made to work against it.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "An ambush hunter that waits for prey - mostly small rodents and lizards.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Courtship starts in late summer, pauses over winter and carries on in spring. Females give birth to live young - 2 to 17, about 8 on average - between July and September.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Experts still argue about how to spell its name: Mojave or Mohave - both are used.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "A row of diamond-shaped blotches down the back.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "A rattle on the tail tip.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "label": "Colour",
+      "text": "Greenish, brown, grey or yellowish - the reason for its nickname 'Mojave green'.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Crotalus scutulatus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Crotalus_scutulatus"
+    },
+    "rdb": {
+      "title": "Crotalus scutulatus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Crotalus&species=scutulatus"
+    }
+  }
+}

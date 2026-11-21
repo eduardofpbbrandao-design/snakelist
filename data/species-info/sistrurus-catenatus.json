@@ -1,0 +1,113 @@
+{
+  "id": "sistrurus-catenatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Rafinesque, 1818)",
+  "facts": {
+    "length": {
+      "text": "Small: about 60 to 75 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young, about 5 to 14",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly rodents; young ones eat lizards and snakes",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Eastern Massasauga is a small rattlesnake of eastern North America, around the Great Lakes. It is the only venomous snake in Ontario, Canada.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Grey or tan with a row of big, rounded dark blotches down the back and smaller spots along the sides. Some are completely black.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 60 to 75 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern Ontario in Canada and the Great Lakes region and eastern Midwest of the United States.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Wetlands - swamps, marshes, bogs, fens, wet meadows and floodplains - often using crayfish burrows. In summer some move to drier ground.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Small animals: mostly voles, mice and shrews for adults, while young ones often eat lizards or snakes; frogs, birds and even centipedes are also taken.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young, usually in August or September - about 5 to 14 at a time. Females usually breed only every second year.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Small rattlesnake with a rattle on the tail.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Large dark blotches down a grey or tan back.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Eastern massasauga",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Eastern_massasauga"
+    },
+    "rdb": {
+      "title": "Sistrurus catenatus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Sistrurus&species=catenatus"
+    }
+  }
+}

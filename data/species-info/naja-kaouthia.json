@@ -1,0 +1,107 @@
+{
+  "id": "naja-kaouthia",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Lesson, 1831",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs, 16 to 33 at a time",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Young: frogs and toads; adults: small mammals, snakes and fish",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Monocled Cobra is a dangerously venomous cobra of South and South-east Asia. It is named after the single ring - like a monocle, a one-eyed pair of glasses - on the back of its hood. It often lives near people and causes many snakebites in its range.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Usually an O-shaped ring on the back of the hood (the Indian Cobra has a 'spectacles' mark instead), though the mark can vary or be missing. The body may be yellow, brown, grey or blackish, with or without cross-bands.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "From north-eastern India, Nepal, Bhutan and Bangladesh east through Myanmar, Thailand, Laos, Cambodia and Vietnam to southern China and the north of the Malay Peninsula.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Prefers places near water - rice paddies, swamps and mangroves - but also grassland, scrub, forest, farmland and even cities, up to about 1,000 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Lives on the ground and is most active at dusk. In rice fields it hides in rat burrows in the banks. When disturbed it would rather escape; if cornered it rears up, spreads its hood, hisses loudly and strikes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Young cobras eat mostly frogs and toads; adults eat small mammals, other snakes and fish.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 16 to 33 eggs, usually between January and March. The eggs hatch after about 55 to 73 days, and the female usually stays with them.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "A single ring ('monocle') on the back of the hood.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Spreads a wide hood when threatened.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Monocled cobra",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Monocled_cobra"
+    },
+    "rdb": {
+      "title": "Naja kaouthia",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Naja&species=kaouthia"
+    }
+  }
+}

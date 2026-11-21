@@ -1,0 +1,114 @@
+{
+  "id": "crotalus-viridis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Rafinesque, 1818)",
+  "facts": {
+    "length": {
+      "text": "Often over 1 m; record 151.5 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young, usually 4 to 12",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Ground squirrels, mice, rats, prairie dogs and ground-nesting birds",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Prairie Rattlesnake is a venomous pit viper of the Great Plains of North America, from south-western Canada to northern Mexico.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Usually light brown with dark brown blotches down the back. It normally has three or more (usually four) scales between the nostrils on top of the snout.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Commonly over 100 cm long; the largest recorded was 151.5 cm. The biggest ones are found in Montana.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The Great Plains and Rocky Mountain foothills: southern Alberta and Saskatchewan in Canada, much of the western USA from Montana and the Dakotas to Texas and New Mexico, and northern Mexico.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Lives mostly on the ground but sometimes climbs into bushes or rests in crevices and caves. Active by day in cool weather and at night in hot weather. Like other rattlesnakes it buzzes its rattle to warn intruders.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly small mammals - ground squirrels, mice, rats, small rabbits and prairie dogs - and ground-nesting birds; young ones also eat lizards, frogs and snakes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young in late summer or early autumn - usually 4 to 12, but from 1 to 25. Females often do not breed every year.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Rattle on the tail tip.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Dark blotches on a light brown back.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Crotalus viridis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Crotalus_viridis"
+    },
+    "rdb": {
+      "title": "Crotalus viridis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Crotalus&species=viridis"
+    }
+  }
+}

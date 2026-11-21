@@ -1,0 +1,113 @@
+{
+  "id": "opheodrys-vernalis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Harlan, 1827)",
+  "facts": {
+    "length": {
+      "text": "Small and slender; the longest measured was 66 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs (kept inside the body for a long time before laying)",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Smooth Green Snake is a small, gentle, non-venomous snake of Canada and the northern United States. It is bright green on top, which hides it perfectly in grass.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Plain light green on the back with a yellow or white belly. Its back scales are smooth - the Rough Green Snake looks similar but has ridged (keeled) scales.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "A slender snake; the longest one measured was 66 cm. The tail is a quarter to half of its length, longer in males.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern Canada and scattered parts of the northern and central United States, with small isolated populations further south and west, and in Chihuahua, Mexico.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Marshes, meadows, open woods and the edges of streams.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Hawks, herons, bears, raccoons, foxes and pet cats all hunt it. People sometimes collect it as a pet, but it does not survive well in captivity.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Usually lays eggs, but females keep them inside their bodies for a long time first - up to about a month - so the young are already well grown when the eggs are laid.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Bright, plain green back.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Smooth, shiny scales (not ridged).",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Yellow or white belly.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Smooth green snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Smooth_green_snake"
+    },
+    "rdb": {
+      "title": "Opheodrys vernalis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Opheodrys&species=vernalis"
+    }
+  }
+}

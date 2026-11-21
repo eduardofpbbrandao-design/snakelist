@@ -1,0 +1,115 @@
+{
+  "id": "naja-haje",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "About 1.4 m on average; the longest recorded 2.59 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Egyptian Cobra is one of the most venomous snakes of northern Africa. Its venom can kill a person. Unlike many African cobras, it does not spit its venom.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A large, stout cobra with a big, broad head and a hood it can spread. Its colour varies a lot, but most are some shade of brown.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 1.4 m long on average; the longest one recorded was 2.59 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "North Africa and the savannas of West Africa south of the Sahara, south to the Congo Basin and east to Kenya and Tanzania. Older records from southern Africa and Arabia belong to other cobra species.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Steppes, dry and moist savannas and semi-deserts with some water and plants, often near water. It also visits farms and villages, where rats and chickens attract it.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "Its species name 'haje' comes from the Arabic word for snake. The Snouted Cobra and Anchieta's Cobra used to be counted as kinds of Egyptian Cobra but are now separate species.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "It does not spit venom - many other African cobras do.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "A broad hood spread when threatened.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Large, flat head and a thick body.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Egyptian cobra",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Egyptian_cobra"
+    },
+    "rdb": {
+      "title": "Naja haje",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Naja&species=haje"
+    }
+  }
+}
