@@ -296,7 +296,7 @@ CURATED = {
     "pseudechis-porphyriacus": {"d": "#131315", "lat": "#1a1718", "b": "#d4544a", "t": "plain", "s": "riverbank", "sx": {"gloss": 0.85},
                                 "h": dict(DARK_EYE, iris="#1a1412", irisInner="#2e2420"), "cx": {"bellyA": 0.62, "bellySharp": 0.08},
                                 "pat": [{"type": "tint", "t": [0.04, 1], "ramp": 0.02, "aRange": [0.56, 1], "color": "#cf4a3e", "alpha": 0.9}]},
-    "pseudonaja-textilis": {"d": "#8a6a45", "lat": "#91724c", "b": "#e7cf8a", "t": "plain", "h": dict(DARK_EYE, iris="#3a2618", irisInner="#5a3c22", eyeRing="#c8762e")},
+    "pseudonaja-textilis": {"d": "#7c6650", "lat": "#82694f", "b": "#e7cf8a", "t": "plain", "h": dict(DARK_EYE, iris="#3a2618", irisInner="#5a3c22", eyeRing="#c8762e")},
     "oxyuranus-scutellatus": {"d": "#7a5a3a", "lat": "#86663f", "b": "#e9dcae", "t": "plain", "hc": "#c9b48c", "hcx": 0.45, "h": dict(DARK_EYE, iris="#5a4430", irisInner="#7a5c40")},
     "laticauda-colubrina": {"d": "#7d93a8", "lat": "#8aa0b2", "b": "#e6dc96", "c": "#121214", "t": "band", "n": 40, "lip": "#e6d36a", "h": dict(DARK_EYE, iris="#1a1a1c", irisInner="#2a2a30")},
     "drymarchon-couperi": {"d": "#141821", "lat": "#1b2030", "b": "#2a3040", "t": "plain", "sx": {"gloss": 0.9, "iridescence": 0.6}, "lip": "#a8503a", "h": dict(DARK_EYE, iris="#1a1614", irisInner="#2a2220")},
@@ -907,6 +907,18 @@ HAND_FIXES_588 = {
     "malayopython-reticulatus": [(("colors", "dorsal"), "#8a6c36"), (("colors", "lateral"), "#a07e3e"), (("pattern", 0, "edgeColor"), "#d8b050"),
                                  (("pattern",), "<", {"type": "blotch", "t": [0.05, 0.97], "count": 46, "a": 0, "wid": 0.24, "len": 0.6, "shape": "diamond", "color": "#5e4e38", "alpha": 0.75, "warp": 0.5}),
                                  (("pattern", 3, "color"), "#a8843c")],
+    # timber rattlesnake: the dark crossbands are true chevrons (V-shaped, pointing back), on a yellowish-tan ground with a rusty
+    # stripe down the spine (they were straight bands on cream)
+    "crotalus-horridus": [(("colors", "dorsal"), "#a68e5e"), (("colors", "lateral"), "#a28a5c"), (("pattern", 0, "color"), "#8a5a30"), (("pattern", 0, "alpha"), 0.8),
+                          (("pattern", 1, "vk"), 2.4), (("pattern", 1, "len"), 0.34), (("pattern", 1, "wid"), 0.52)],
+    # eastern coral snake: the black rings about as wide as the red ones, with narrow yellow rings between (the black were thin)
+    "micrurus-fulvius": [(("pattern", 2, "len"), 0.46), (("pattern", 2, "edge"), 0.24)],
+    # eastern milksnake: big red-brown saddles with heavy black edges on grey (they were small red spots)
+    "lampropeltis-triangulum": [(("colors", "dorsal"), "#a49e92"), (("pattern", 0, "wid"), 0.6), (("pattern", 0, "len"), 0.74), (("pattern", 0, "color"), "#94402a"),
+                                (("pattern", 0, "edge"), 0.32), (("pattern", 1, "wid"), 0.14), (("pattern", 1, "len"), 0.55), (("pattern", 1, "color"), "#94402a"), (("pattern", 1, "edge"), 0.32)],
+    # Russell's viper and terciopelo: a browner, darker ground, as in their photos
+    "daboia-russelii": [(("colors", "dorsal"), "#9a7e50"), (("colors", "lateral"), "#987c50")],
+    "bothrops-asper": [(("colors", "dorsal"), "#7a583e"), (("colors", "lateral"), "#76563c")],
 }
 
 
