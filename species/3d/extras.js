@@ -550,7 +550,7 @@ function buildPrey2(kind, r, seed) {
   }
   if (kind === 'bird') {
     const Lb = r * 3.6, z0 = -Lb / 2, z1 = Lb / 2;
-    const prof = keyed([[0, { w: 0.3, h: 0.35, c: 1.05 }], [0.15, { w: 0.8, h: 0.85, c: 1.0 }], [0.45, { w: 1.0, h: 1.0, c: 1.0 }], [0.7, { w: 0.8, h: 0.85, c: 1.08 }], [0.8, { w: 0.55, h: 0.6, c: 1.25 }], [0.85, { w: 0.58, h: 0.62, c: 1.38 }], [0.95, { w: 0.5, h: 0.52, c: 1.42 }], [1, { w: 0.08, h: 0.1, c: 1.4 }]]);
+    const prof = keyed([[0, { w: 0.05, h: 0.07, c: 1.12 }], [0.07, { w: 0.42, h: 0.5, c: 1.08 }], [0.2, { w: 0.84, h: 0.9, c: 1.0 }], [0.45, { w: 1.0, h: 1.0, c: 0.98 }], [0.7, { w: 0.8, h: 0.85, c: 1.08 }], [0.8, { w: 0.55, h: 0.6, c: 1.25 }], [0.85, { w: 0.58, h: 0.62, c: 1.38 }], [0.95, { w: 0.5, h: 0.52, c: 1.42 }], [1, { w: 0.08, h: 0.1, c: 1.4 }]]);
     const pr = (t) => { const p = prof(t); return { w: p.w * r, h: p.h * r, c: p.c * r, bf: 1 }; };
     const brown = hexRGB('#8f6c4a'), breast = hexRGB('#ece0c6'), cap = hexRGB('#5a3a22');
     const bodyG = loft(pr, z0, z1, 36, 24, (t, a, s, c) => mixRGB(mixRGB(brown, breast, sstep(0.0, -0.6, c) * sstep(0.2, 0.5, t)), cap, sstep(0.82, 0.88, t) * sstep(0.2, 0.7, c)));
@@ -1744,9 +1744,9 @@ export function create(V) {
       // (v5.83: the ventricle a smooth teardrop - broad and round in front, tapering to a blunt apex towards the tail -
       // slightly flattened top to bottom; the atria two plump lobes over its front; the aortic arches tubes)
       const v = new THREE.SphereGeometry(1, 36, 26), pa = v.attributes.position; for (let i = 0; i < pa.count; i++) { const zz = pa.getZ(i), k = zz > 0 ? 1 - 0.42 * zz * zz : 1 - 0.06 * zz * zz; pa.setX(i, pa.getX(i) * k); pa.setY(i, pa.getY(i) * k * 0.86); }
-      const fv = B.frameAt(hx0 + hl * 0.2), cv = B.spine(hx0 + hl * 0.2).addScaledVector(fv.U, -0.32 * F.Hh(hx0)); v.scale(rr * 0.3, rr * 0.3, hl * 0.85); v.computeVertexNormals(); v.applyMatrix4(new THREE.Matrix4().makeBasis(fv.S.clone().negate(), fv.U, fv.T).setPosition(cv)); v.userData.x = hx0; parts.push(v);
-      for (const sg of [1, -1]) { parts.push(blob(hx0 - hl * 0.6, sg * 0.13, -0.1, hl * 0.32, rr * 0.24, F.W(hx0) * 0.16, 22)); }
-      for (const sg of [1, -1]) { const q = []; for (let k = 0; k <= 8; k++) { const t = k / 8, x = hx0 - hl * (0.75 + t * 0.9), f = B.frameAt(x); q.push(B.spine(x).addScaledVector(f.S, sg * F.W(x) * lerp(0.04, 0.26, t)).addScaledVector(f.U, F.Hh(x) * lerp(-0.2, 0.32, Math.sin(t * Math.PI * 0.5)))); } const g2 = varTube(q, () => rr * 0.055, 8, 16); g2.userData.x = hx0; parts.push(g2); }
+      const fv = B.frameAt(hx0 + hl * 0.2), cv = B.spine(hx0 + hl * 0.2).addScaledVector(fv.U, -0.32 * F.Hh(hx0)); v.scale(rr * 0.31, rr * 0.31, Math.min(hl * 0.7, rr * 0.62)); v.computeVertexNormals(); v.applyMatrix4(new THREE.Matrix4().makeBasis(fv.S.clone().negate(), fv.U, fv.T).setPosition(cv)); v.userData.x = hx0; parts.push(v);
+      for (const sg of [1, -1]) { { const xa = hx0 + hl * 0.2 - Math.min(hl * 0.7, rr * 0.62) * 0.85; parts.push(blob(xa, sg * 0.17, -0.12, rr * 0.19, rr * 0.21, rr * 0.17, 22)); } }
+      for (const sg of [1, -1]) { const q = []; for (let k = 0; k <= 8; k++) { const t = k / 8, x = hx0 + hl * 0.2 - Math.min(hl * 0.7, rr * 0.62) * (0.9 + t * 0.85), f = B.frameAt(x); q.push(B.spine(x).addScaledVector(f.S, sg * F.W(x) * lerp(0.04, 0.26, t)).addScaledVector(f.U, F.Hh(x) * lerp(-0.2, 0.32, Math.sin(t * Math.PI * 0.5)))); } const g2 = varTube(q, (t) => rr * lerp(0.07, 0.045, t), 8, 16); g2.userData.x = hx0; parts.push(g2); }
       return mergeG(parts); };
     add('heart', 'Heart', (climber ? 'Close to the head in climbing snakes, so blood still reaches the brain when they hold the head up. ' : marine ? 'Nearer the middle of the body in sea snakes. ' : 'About a quarter of the way along the body. ') + 'It has three chambers and can slide a little, so big prey can squeeze past.', 'body', heartGeo(hx), om(C.heart, { roughness: 0.38, clearcoat: 0.6 }));
     const lungTex = canvasTex(256, (x, s2) => { const R2 = rnd(71); x.fillStyle = '#e7aaa4'; x.fillRect(0, 0, s2, s2); const cs = 9;

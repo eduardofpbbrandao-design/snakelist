@@ -624,9 +624,9 @@ function drapePose(P, F, pose, R, N, ds, wMax) {
   // comes back across the top of the coil, the head resting level on the loops in the middle - the way a real emerald
   // tree boa or green tree python sits (the head used to curl into the middle, rolled onto its side by the fold)
   const r0 = pitch * (pose.inner || 0.75), sqx = pose.sqx || 1.0, sqz = pose.sqz || 1.5, Lh = Math.min(L * 0.17, F.Hl * 2.8), m = Math.max(F.W(L * 0.2) * 2.2, pitch * 0.9);
-  const Ls = L - Lh - (Math.PI / 2) * m; let th0 = 0, sp0 = null;
+  const Ls = L - Lh - (Math.PI / 2) * m, wSeed = Math.floor(R() * 4294967295); let th0 = 0, sp0 = null; // (one draw from the species' own numbers, as before)
   for (let it = 0; it < 4; it++) { // (the coil's outer end on the far side of the branch's middle line, heading across it)
-    sp0 = resample(spiralLine(Ls, ds, pitch, r0, sqx, sqz, rng(4242), 0.12, th0), Math.round(Ls / ds), ds);
+    sp0 = resample(spiralLine(Ls, ds, pitch, r0, sqx, sqz, rng(wSeed), 0.12, th0), Math.round(Ls / ds), ds);
     const e = sp0[sp0.length - 1], ang = Math.atan2(e[1] / sqz, e[0] / sqx); th0 -= Math.atan2(Math.sin(ang), Math.cos(ang));
   }
   const tailFirst = sp0.slice(); { const e = sp0[sp0.length - 1], f = sp0[sp0.length - 2], tl = Math.hypot(e[0] - f[0], e[1] - f[1]) || 1, t0 = [(e[0] - f[0]) / tl, (e[1] - f[1]) / tl];
