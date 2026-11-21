@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=578'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=578'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=579'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=579'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -65,8 +65,8 @@ function pchip(pts) {
 
 // ---------- body plans: defaults that each species profile overrides ----------
 const PLANS = {
-  viper:    { body: { ld: 15, neck: 0.42, peak: 0.45, vent: 0.62, tail: 0.10, xs: 1.32, bf: 0.72 }, head: { shape: 'tri', len: 0.074, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.05, h: 0.58, snout: 0.5, jaw: 0.78, eyeX: 0.27, eyeA: 70, taper: 0.3, eye: 0.13, pupil: 'slit', brow: 0.13, canthus: 3.0 }, scales: { rows: 31, keel: 0.85, gloss: 0.08, aV: 0.73 }, pose: { kind: 'stack', pitch: 1.0, lead: 0.3, lift: 0.25, tight: 0.58 } }, // (v5.62: an ambush pile, not a flat spiral)
-  pitviper: { body: { ld: 22, neck: 0.48, peak: 0.45, vent: 0.62, tail: 0.085, xs: 1.25, bf: 0.74 }, head: { shape: 'tri', len: 0.06, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.0, h: 0.6, snout: 0.5, jaw: 0.8, eyeX: 0.3, eyeA: 70, taper: 0.3, eye: 0.12, pupil: 'slit', brow: 0.13, canthus: 3.0, pits: 'loreal' }, scales: { rows: 27, keel: 0.85, gloss: 0.08, aV: 0.73 }, pose: { kind: 'stack', pitch: 1.0, lead: 0.32, lift: 0.25, tight: 0.6 } },
+  viper:    { body: { ld: 15, neck: 0.42, peak: 0.45, vent: 0.62, tail: 0.10, xs: 1.32, bf: 0.72 }, head: { shape: 'tri', len: 0.074, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.05, h: 0.58, snout: 0.5, jaw: 0.78, eyeX: 0.27, eyeA: 70, taper: 0.3, eye: 0.13, pupil: 'slit', brow: 0.13, canthus: 3.0 }, scales: { rows: 31, keel: 0.85, gloss: 0.14, aV: 0.73 }, pose: { kind: 'stack', pitch: 1.0, lead: 0.3, lift: 0.25, tight: 0.58 } }, // (v5.62: an ambush pile, not a flat spiral)
+  pitviper: { body: { ld: 22, neck: 0.48, peak: 0.45, vent: 0.62, tail: 0.085, xs: 1.25, bf: 0.74 }, head: { shape: 'tri', len: 0.06, chin: 0.55, tipR: 0.07, snoutH: 0.7, w: 1.0, h: 0.6, snout: 0.5, jaw: 0.8, eyeX: 0.3, eyeA: 70, taper: 0.3, eye: 0.12, pupil: 'slit', brow: 0.13, canthus: 3.0, pits: 'loreal' }, scales: { rows: 27, keel: 0.85, gloss: 0.14, aV: 0.73 }, pose: { kind: 'stack', pitch: 1.0, lead: 0.32, lift: 0.25, tight: 0.6 } },
   python:   { body: { ld: 30, neck: 0.55, peak: 0.5, vent: 0.62, tail: 0.12, xs: 1.18, bf: 0.76, ridge: 0.025 }, head: { len: 0.04, chin: 0.62, tipR: 0.13, snoutH: 0.7, w: 0.68, h: 0.6, snout: 0.62, jaw: 0.78, eyeX: 0.3, eyeA: 62, eye: 0.13, pupil: 'slit', brow: 0.03, canthus: 3.0, pits: 'labial' }, scales: { rows: 71, keel: 0, gloss: 0.5, aV: 0.77 }, pose: { kind: 'stack', pitch: 1.05, lead: 0.3, lift: 0.2, tight: 0.62 } }, // (v5.62: a heavy resting pile)
   colubrid: { body: { ld: 36, neck: 0.78, peak: 0.42, vent: 0.62, tail: 0.24, xs: 1.08, bf: 0.8, ridge: 0.02 }, head: { len: 0.035, w: 1.05, h: 0.64, snout: 0.57, chin: 0.66, jaw: 0.72, eyeX: 0.3, eyeA: 60, eye: 0.16, pupil: 'round', brow: 0.04, canthus: 3.1 }, scales: { rows: 19, keel: 0, gloss: 0.5, aV: 0.73 }, pose: { kind: 'wave' } },
   elapid:   { body: { ld: 45, neck: 0.85, peak: 0.45, vent: 0.62, tail: 0.18, xs: 1.05, bf: 0.8, ridge: 0.015 }, head: { len: 0.032, w: 0.95, h: 0.6, snout: 0.56, chin: 0.66, jaw: 0.75, eyeX: 0.3, eyeA: 60, eye: 0.15, pupil: 'round', brow: 0.035, canthus: 3.1 }, scales: { rows: 17, keel: 0, gloss: 0.55, aV: 0.73 }, pose: { kind: 'wave' } },
@@ -2779,11 +2779,25 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   }
 }
 // swap the stand-in gradient sky for the panorama: image-based light, a grounded photo background,
+// v5.90: where the sun stands round the snake (az: three.js angle in the ground plane, el: height), kept 40-60 degrees up
+const SUN_SIDE = 0.85, SUN_EL = [(40 * Math.PI) / 180, (60 * Math.PI) / 180];
+function placeSun(ctx, az, el) {
+  const sun = ctx.sun; if (!sun) return; const r = sun.position.length(), e = clamp(el, SUN_EL[0], SUN_EL[1]);
+  sun.position.set(Math.cos(e) * Math.cos(az), Math.sin(e), Math.cos(e) * Math.sin(az)).multiplyScalar(r);
+}
+// the panorama turned round the vertical by da radians (whole columns), so its bright sky sits where the sun now is
+function turnEnv(env, da) {
+  const w = env.w, h = env.h, sh = ((Math.round((da / TAU) * w) % w) + w) % w; if (!sh) return env.half;
+  const out = new Uint16Array(env.half.length), row = w * 4;
+  for (let y = 0; y < h; y++) { const o = y * row; out.set(env.half.subarray(o, o + (w - sh) * 4), o + sh * 4); out.set(env.half.subarray(o + (w - sh) * 4, o + row), o); }
+  return out;
+}
 // the sun where the photo has it, and the near ground fading into the photo's ground
 function applyEnv(ctx, P, F, poseInfo, env) {
   const { scene, renderer } = ctx, S = SCENES[P.scene.kind] || SCENES.litter, sea = S.water === 'sea';
   if (!env.half) { env.half = new Uint16Array(env.data.length); for (let i = 0; i < env.data.length; i++) env.half[i] = THREE.DataUtils.toHalfFloat(env.data[i]); }
-  const tex = new THREE.DataTexture(env.half, env.w, env.h, THREE.RGBAFormat, THREE.HalfFloatType);
+  const envAz = Math.atan2(env.sunDir.z, env.sunDir.x), sunAz = ctx.sunAz != null ? ctx.sunAz : envAz;
+  const tex = new THREE.DataTexture(turnEnv(env, sunAz - envAz), env.w, env.h, THREE.RGBAFormat, THREE.HalfFloatType);
   tex.mapping = THREE.EquirectangularReflectionMapping; tex.colorSpace = THREE.LinearSRGBColorSpace;
   tex.magFilter = THREE.LinearFilter; tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false; tex.needsUpdate = true; ctx.track(tex);
   const pm = new THREE.PMREMGenerator(renderer), rt = pm.fromEquirectangular(tex); pm.dispose(); ctx.track(rt);
@@ -2792,14 +2806,13 @@ function applyEnv(ctx, P, F, poseInfo, env) {
   // v4.72: the panorama only lights the scene (reflections, sun direction and colour); what you see all round
   // is the 3D world built in buildScene - sky dome, rolling ground, trees or rocks - not a photo backdrop
   // light: the sun from the photo, sky light from the panorama; the gradient hemisphere light stays only as a faint fill
-  const sun = ctx.sun, el = Math.max(Math.asin(env.sunDir.y), (22 * Math.PI) / 180), az = Math.atan2(env.sunDir.z, env.sunDir.x), r = sun.position.length();
-  sun.position.set(Math.cos(el) * Math.cos(az), Math.sin(el), Math.cos(el) * Math.sin(az)).multiplyScalar(r);
+  const sun = ctx.sun; placeSun(ctx, sunAz, Math.asin(env.sunDir.y)); // (v5.90: high and to the side of the view, see SUN_SIDE)
   sun.color.copy(env.sunCol).lerp(new THREE.Color('#ffffff'), 0.35); sun.intensity = 6.5 * env.sunny; // about three times the sky's light on a sunlit face, as outdoors
   sun.shadow.radius = lerp(8, 3, env.sunny); sun.shadow.blurSamples = 16;
   if (ctx.skinLight) { // v5.88: the snake's own fill and bounce (SKIN_LIGHT_GLSL), from this panorama's light
     const L = ctx.skinLight, w = new THREE.Color('#fbf6ee');
-    L.uFill.value.copy(w).lerp(env.horizon.clone().multiplyScalar(1 / Math.max(0.05, Math.max(env.horizon.r, env.horizon.g, env.horizon.b))), 0.25).multiplyScalar(0.22 + 0.2 * env.sunny);
-    L.uBounce.value.copy(ctx.hemi ? ctx.hemi.groundColor : w).lerp(w, 0.3).multiplyScalar(0.32 * env.sunny);
+    L.uFill.value.copy(w).lerp(env.horizon.clone().multiplyScalar(1 / Math.max(0.05, Math.max(env.horizon.r, env.horizon.g, env.horizon.b))), 0.25).multiplyScalar(0.12 + 0.1 * env.sunny); // (v5.90: about half - with the sun now at the photographer's shoulder the extra fill flattened and paled every skin: a mid-brown boa came out cream)
+    L.uBounce.value.copy(ctx.hemi ? ctx.hemi.groundColor : w).lerp(w, 0.3).multiplyScalar(0.24 * env.sunny);
   }
   if (ctx.hemi) ctx.hemi.intensity *= 0.4; // (v5.58: a little more fill, so the shaded side of a dark snake keeps its scales and colour)
   ctx.envName = env.name;
@@ -3205,7 +3218,7 @@ export function mount(host, opts) {
   const basePR = () => Math.min(window.devicePixelRatio || 1, { high: 2, medium: 1.5, low: 1 }[quality] || 1.5);
   let dynK = 1; renderer.setPixelRatio(basePR());
   renderer.localClippingEnabled = true; // v5.68: See it eat cuts the prey off at the throat (only the part in the open mouth shows)
-  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.94; // (v5.78: a touch brighter - ACES darkened and dulled the greens and browns of the skin)
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.86; // (v5.78: a touch brighter - ACES darkened and dulled the greens and browns of the skin; v5.90: a little lower again (was 0.94) now the sun lights the side we look at - sunlit skins came out washed pale)
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = quality === 'low' ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   const ctx = { renderer, scene: null, track };
   let skinGPU = null, snakeGroup, cam, controls, info, extras, raf = 0, dirty = true, lost = false, alive = true, scaleObj = null, markers = [];
@@ -3235,7 +3248,7 @@ export function mount(host, opts) {
     const S = P.scales, gl = S.gloss;
     const mat = new THREE.MeshPhysicalMaterial({
       // v4.72: raised 3D scales - stronger relief, deeper gaps between them, and real bumps on good devices
-      map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1).multiplyScalar(S.relief != null ? S.relief : (S.keel || 0) > 0.3 ? 1 : 0.85), // (v5.58: smooth scales lie flatter than keeled ones)
+      map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1).multiplyScalar(S.relief != null ? S.relief : (S.keel || 0) > 0.3 ? 1.25 : 0.9), // (v5.58: smooth scales lie flatter than keeled ones; v5.90: both a little deeper - at normal viewing distance the scales and keels were lost)
       aoMap: tiles.cavity, aoMapIntensity: 0.3 + 1.2 * (S.cavity != null ? S.cavity : 0.45), roughnessMap: tiles.cavity, // (v5.78: smooth, tightly overlapping scales hide less skin between them)
       ...(quality !== 'high' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
       roughness: lerp(0.82, 0.5, gl), metalness: 0, clearcoat: 0.08 + gl * 0.42, clearcoatRoughness: lerp(0.45, 0.14, gl * gl), /* (v5.78: glossy snakes get the crisp, mirror-like highlights of real smooth scales) */ sheen: S.sheen != null ? S.sheen : 0.04, /* (v5.78: the default sheen laid a grey haze over every skin at grazing angles) */ sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
@@ -3248,7 +3261,7 @@ export function mount(host, opts) {
     const qS = (TAU * F.w0 * 0.92) / Math.max(12, S.rows) * (P.head.scaleK || (P.plan === 'python' ? 0.9 : 0.62));
     // v5.30: the scale rows' edges around the body (for the per-scale variation in the shader)
     const rbArr = new Float32Array(96); lat.RB.forEach((v, i) => { if (i < 96) rbArr[i] = v; });
-    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 }, uEdgeC: { value: new THREE.Color(S.edge && S.edge.color || '#000000') }, uEdgeK: { value: S.edge ? (S.edge.k != null ? S.edge.k : 0.8) : 0 }, uHeadN: { value: headT.relief }, uHeadC: { value: headT.color }, uHX: { value: headT.Xh }, uRigTex: { value: null }, uRigOn: { value: 0 }, uRigN: { value: 2 }, uRigDx: { value: 1 }, uFill: { value: new THREE.Color(0.3, 0.3, 0.3) }, uBounce: { value: new THREE.Color(0.2, 0.18, 0.15) }, uShLift: { value: 0.4 }, uWrap: { value: 0.35 }, uSSS: { value: new THREE.Color(0.32, 0.12, 0.07) } };
+    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 }, uEdgeC: { value: new THREE.Color(S.edge && S.edge.color || '#000000') }, uEdgeK: { value: S.edge ? (S.edge.k != null ? S.edge.k : 0.8) : 0 }, uHeadN: { value: headT.relief }, uHeadC: { value: headT.color }, uHX: { value: headT.Xh }, uRigTex: { value: null }, uRigOn: { value: 0 }, uRigN: { value: 2 }, uRigDx: { value: 1 }, uFill: { value: new THREE.Color(0.3, 0.3, 0.3) }, uBounce: { value: new THREE.Color(0.2, 0.18, 0.15) }, uShLift: { value: 0.2 } /* (v5.90: was 0.4 - cast shadows on the body were washed out; real ones in sun are deep) */, uWrap: { value: 0.35 }, uSSS: { value: new THREE.Color(0.32, 0.12, 0.07) } };
     ctx.skinLight = hsU;
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, hsU);
@@ -3437,6 +3450,10 @@ float slScale(vec2 m) {
     const axisAng = 0.5 * Math.atan2(2 * sxz, sxx - szz);
     const up = !!(pose.drape || pose.perch);
     info = { F, body, tree, center: new THREE.Vector3(center.x, up ? center.y : Math.min(center.y, hMax * 0.5), center.z), Rb, hMax: up ? hMax - bb0.min.y : hMax, raised: pose.raised, drapeAz: pose.drape ? Math.atan2(-(pose.drape.b[1] - pose.drape.a[1]), pose.drape.b[0] - pose.drape.a[0]) + 0.45 : null, headPos, headDir, axisAng, eyePos, size };
+    // v5.90: the sun stands high (40-60 degrees) and about 50 degrees to one side of the first view, as in a good field
+    // photo: never flat from the front, from behind or from low down, so the body is modelled by light and shade and the
+    // scales glint along the lit side (the panorama is turned to match in applyEnv)
+    { const az = viewAz('default'); ctx.sunAz = Math.atan2(Math.cos(az), Math.sin(az)) + SUN_SIDE; placeSun(ctx, ctx.sunAz, ((SCENES[P.scene.kind] || SCENES.litter).sunEl * Math.PI) / 180); }
     info.collide = []; for (let i = 0, n = 240; i <= n; i++) { const x = (i / n) * F.L; info.collide.push({ p: body.spine(x), r: Math.max(F.W(x), F.Hh(x)) * 1.05 }); }
     t0 = performance.now();
     extras = { mat, eyes: eyeMeshes, mouth: P.plan === 'blind' ? null : buildMouth(P, F, body, snakeGroup, eyeMeshes.concat(headParts), pat) }; perfT('mouth', t0);
