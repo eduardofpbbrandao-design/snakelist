@@ -1,0 +1,91 @@
+{
+  "id": "trimeresurus-albolabris",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Gray, 1842",
+  "facts": {
+    "length": {
+      "text": "Males up to 60 cm, females up to 81 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Birds, small frogs and small mammals",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The White-lipped Pit Viper is a green, venomous tree viper of South-east Asia, from Nepal to southern China and Indonesia.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Males up to 60 cm and females up to 81 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Nepal, Bhutan, Myanmar, Thailand, Cambodia, Laos, Vietnam, southern China (with Hong Kong, Macau and Hainan) and Indonesia (Sumatra, Java and the Lesser Sunda Islands).",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Birds, small frogs and small mammals. Like many tree snakes, it holds on to its prey instead of letting go after biting.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Green pit viper with a pale upper lip.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Trimeresurus albolabris",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Trimeresurus_albolabris"
+    },
+    "rdb": {
+      "title": "Trimeresurus albolabris",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Trimeresurus&species=albolabris"
+    }
+  }
+}

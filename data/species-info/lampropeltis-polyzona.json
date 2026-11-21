@@ -1,0 +1,53 @@
+{
+  "id": "lampropeltis-polyzona",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Cope, 1860",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "*Lampropeltis polyzona* is a non-venomous milksnake of Mexico.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Western and central Mexico, from Sonora and Sinaloa south to Oaxaca and east to Veracruz and Hidalgo.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Lampropeltis polyzona",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Lampropeltis_polyzona"
+    },
+    "rdb": {
+      "title": "Lampropeltis polyzona",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Lampropeltis&species=polyzona"
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "id": "boiga-kraepelini",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Stejneger, 1902",
+  "facts": {
+    "length": {
+      "text": "Up to about 160 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 5 to 14",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Small birds, lizards and bird eggs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Kelung (Square-headed) Cat Snake is a long, thin, mildly venomous tree snake of Taiwan, southern China, Laos and northern Vietnam.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Long and thin with a large head (twice as wide as the neck), big eyes and cat-like pupils; usually amber or brownish.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Up to about 160 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Taiwan (up to 1,000 m), much of central and southern China, Laos and northern Vietnam.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active at night and mostly in trees. When threatened it coils and strikes like a viper, but its venom is mild.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Small birds, lizards and sometimes bird eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 5 to 14 eggs in summer.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Big square head on a thin neck, cat-like eyes.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Boiga kraepelini",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Boiga_kraepelini"
+    },
+    "rdb": {
+      "title": "Boiga kraepelini",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Boiga&species=kraepelini"
+    }
+  }
+}

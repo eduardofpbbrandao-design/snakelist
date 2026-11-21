@@ -1,0 +1,85 @@
+{
+  "id": "vipera-seoanei",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Lataste, 1879",
+  "facts": {
+    "length": {
+      "text": "Up to about 75 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "Seoane's Viper is a venomous viper of northern Spain, northern Portugal and the far south-west of France.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Very variable: some have a brown zigzag down the back like an Adder, others different patterns.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Up to about 75 cm, usually less.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Northern Portugal, northern Spain and extreme south-western France.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Small viper, often with an Adder-like zigzag.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Vipera seoanei",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Vipera_seoanei"
+    },
+    "rdb": {
+      "title": "Vipera seoanei",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Vipera&species=seoanei"
+    }
+  }
+}

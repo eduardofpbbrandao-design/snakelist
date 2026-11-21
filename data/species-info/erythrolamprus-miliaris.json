@@ -1,0 +1,76 @@
+{
+  "id": "erythrolamprus-miliaris",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly amphibians; also fish, lizards and rodents",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Military Ground Snake is a water-loving snake of South America east of the Andes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South America east of the Andes, from the Guianas and Venezuela south to Paraguay, Uruguay and north-eastern Argentina.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Water and riverside habitats in lowland rainforest and Atlantic forest.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly amphibians and their eggs and tadpoles, plus fish, lizards and small rodents.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Erythrolamprus miliaris",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Erythrolamprus_miliaris"
+    },
+    "rdb": {
+      "title": "Erythrolamprus miliaris",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Erythrolamprus&species=miliaris"
+    }
+  }
+}

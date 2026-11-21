@@ -1,0 +1,108 @@
+{
+  "id": "regina-grahamii",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Baird & Girard, 1853",
+  "facts": {
+    "length": {
+      "text": "About 46 to 71 cm; record 119 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young, 10 to 15",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly crayfish, especially freshly moulted ones",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "Graham's Crayfish Snake is a harmless, semi-aquatic snake of the central United States that eats mainly crayfish.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Brown or grey, sometimes with a faint stripe down the middle of the back.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 18 to 28 in (46 to 71 cm); the record is 47 in (119 cm).",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Arkansas, Illinois, Iowa, Kansas, Louisiana, Mississippi, Missouri, Nebraska, Oklahoma and Texas.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Edges of muddy marshes, oxbow lakes, rivers, streams and roadside ditches full of crayfish; it hides under debris and in crayfish burrows.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly crayfish, especially ones that have just moulted; also fish and amphibians.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to 10 to 15 live young, each about 20 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Plain brown or grey snake near muddy water.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Regina grahamii",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Regina_grahamii"
+    },
+    "rdb": {
+      "title": "Regina grahamii",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Regina&species=grahamii"
+    }
+  }
+}

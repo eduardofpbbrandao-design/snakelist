@@ -1,0 +1,93 @@
+{
+  "id": "vermicella-annulata",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Gray, 1841)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Blind snakes",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Bandy-bandy is a venomous but shy Australian snake with bold black and white rings. Its name comes from the Kattang language of New South Wales.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Smooth and glossy, with sharp black and white rings that go all the way round the body.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Eastern Australia: New South Wales, Victoria, Queensland, South Australia and the Northern Territory.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Many habitats, from desert to rainforest.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Other snakes - almost only blind snakes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs in late summer (February-March).",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Black and white rings all round the body.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Bandy-bandy",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Bandy-bandy"
+    },
+    "rdb": {
+      "title": "Vermicella annulata",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Vermicella&species=annulata"
+    }
+  }
+}

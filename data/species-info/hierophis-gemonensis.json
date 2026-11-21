@@ -1,0 +1,116 @@
+{
+  "id": "hierophis-gemonensis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Laurenti, 1768)",
+  "facts": {
+    "length": {
+      "text": "Usually under 1 m; up to 130 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 4 to 10",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Lizards, grasshoppers, nestling birds and small mammals",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Balkan Whip Snake is a fast, slender, harmless snake of the Balkans, Greece and north-eastern Italy.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Slender with smooth scales and big eyes with round pupils; olive-grey or yellowish-brown with dark spots towards the front.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually under 1 m, rarely up to 130 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Extreme north-eastern Italy, coastal Slovenia and Croatia, Bosnia and Herzegovina, Montenegro, Serbia, Albania, mainland Greece and many islands including Crete.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Stony places, scree, scrub, open woodland, roadsides, pasture and plantations.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day, mostly on the ground; fast and agile.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Lizards, big insects such as grasshoppers, nestling birds and small mammals.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 4 to 10 oval eggs, about 30 by 17 mm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Slim, fast snake with dark spots near the head.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Hierophis gemonensis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Hierophis_gemonensis"
+    },
+    "rdb": {
+      "title": "Hierophis gemonensis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Hierophis&species=gemonensis"
+    }
+  }
+}

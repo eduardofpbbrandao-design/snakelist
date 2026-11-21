@@ -1,0 +1,100 @@
+{
+  "id": "rhabdophis-tigrinus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Boie, 1826)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly frogs and toads",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Tiger Keelback (Yamakagashi) is a venomous snake of East Asia. It is also poisonous: glands in its neck store toxins taken from the toads it eats.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Olive-green with black and bright orange bars or spots on the front third of the body; whitish belly.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The Russian Far East, Korea, much of China, Taiwan, Vietnam and Japan.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly frogs and toads, found by smell and sight.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Two rows of glands in its neck hold toad poisons that protect it from predators.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "It recycles the poison of the toads it eats to protect itself.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Olive-green with orange and black bars near the head.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Rhabdophis tigrinus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Rhabdophis_tigrinus"
+    },
+    "rdb": {
+      "title": "Rhabdophis tigrinus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Rhabdophis&species=tigrinus"
+    }
+  }
+}

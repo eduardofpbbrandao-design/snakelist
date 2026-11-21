@@ -1,0 +1,116 @@
+{
+  "id": "nerodia-floridana",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Goff, 1936)",
+  "facts": {
+    "length": {
+      "text": "Usually 76 to 140 cm; record 188 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly fish; also frogs, tadpoles and salamanders",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Florida Green Watersnake is a harmless snake of the south-eastern United States and the largest water snake in North America.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Plain grey or greenish-brown with a white or yellow belly.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 76 to 140 cm long; the record is 188 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Florida, southern Georgia, Alabama and southern South Carolina.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Calm, weedy water such as swamps and marshes; rarely rivers or streams.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active all year in southern Florida; further north it hibernates and basks on sunny winter days.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly fish such as sunfish, crappies and small bass, plus frogs, tadpoles and salamanders.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Big, plain greenish water snake.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Nerodia floridana",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Nerodia_floridana"
+    },
+    "rdb": {
+      "title": "Nerodia floridana",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Nerodia&species=floridana"
+    }
+  }
+}

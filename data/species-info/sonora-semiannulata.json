@@ -1,0 +1,116 @@
+{
+  "id": "sonora-semiannulata",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Baird & Girard, 1853",
+  "facts": {
+    "length": {
+      "text": "About 20 to 48 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Spiders, scorpions, centipedes, crickets and insect larvae",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Western Ground Snake is a small, harmless snake of the south-western United States and northern Mexico that comes in many colours and patterns.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Brown, red or orange, with black bands, stripes, or no pattern at all; white or grey belly; smooth scales.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 8 to 19 in (20 to 48 cm) long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The south-western and south-central USA and northern Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Dry, rocky places with loose soil.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Secretive and active at night, often found on roadsides foraging.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Invertebrates: spiders, scorpions, centipedes, crickets and insect larvae.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Small snake with very variable bands or stripes.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Sonora semiannulata",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Sonora_semiannulata"
+    },
+    "rdb": {
+      "title": "Sonora semiannulata",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Sonora&species=semiannulata"
+    }
+  }
+}

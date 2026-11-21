@@ -1,0 +1,108 @@
+{
+  "id": "philodryas-chamissonis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Wiegmann, 1835)",
+  "facts": {
+    "length": {
+      "text": "Usually about 1.4 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Small rodents, birds, amphibians and lizards",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Chilean Green Racer (Chilean Long-tailed Snake) is a rear-fanged, mildly venomous snake found only in Chile.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Usually grey with black and white stripes along the body.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually about 1.4 m long; the tail is about a quarter of that.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Chile, from Paposo south to Valdivia.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Many habitats from sea level to 2,300 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Small rodents, birds, amphibians and smaller reptiles, especially *Liolaemus* lizards.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Grey with black and white stripes.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Philodryas chamissonis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Philodryas_chamissonis"
+    },
+    "rdb": {
+      "title": "Philodryas chamissonis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Philodryas&species=chamissonis"
+    }
+  }
+}

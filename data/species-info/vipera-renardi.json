@@ -1,0 +1,63 @@
+{
+  "id": "vipera-renardi",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Christoph, 1861)",
+  "facts": {
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Steppe Viper is a venomous viper of the steppes of eastern Europe and Central Asia.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Ukraine, southern Russia, Kazakhstan, Kyrgyzstan, Uzbekistan, Tajikistan, Mongolia and China.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Shrubland, grassland and rocky areas, up to about 2,500 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Vipera renardi",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Vipera_renardi"
+    },
+    "rdb": {
+      "title": "Vipera renardi",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Vipera&species=renardi"
+    }
+  }
+}

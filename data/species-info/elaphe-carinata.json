@@ -1,0 +1,83 @@
+{
+  "id": "elaphe-carinata",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Günther, 1864)",
+  "facts": {
+    "length": {
+      "text": "Up to about 2.4 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mice, birds and eggs, frogs, lizards and snakes",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The King Ratsnake is a large, active, non-venomous rat snake of China and nearby areas.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Up to about 240 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Much of central and southern China, northern Vietnam, Taiwan and the Ryukyu Islands of Japan.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mice, birds and eggs, frogs, and sometimes grasshoppers, beetles, lizards and other snakes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Elaphe carinata",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Elaphe_carinata"
+    },
+    "rdb": {
+      "title": "Elaphe carinata",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Elaphe&species=carinata"
+    }
+  }
+}

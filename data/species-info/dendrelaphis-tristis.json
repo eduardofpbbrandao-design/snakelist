@@ -1,0 +1,101 @@
+{
+  "id": "dendrelaphis-tristis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Daudin, 1803)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs, 6 to 8",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Geckos, garden lizards, frogs and small birds",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Common (Daudin's) Bronzeback is a slender, harmless tree snake of South Asia.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Long and slim with a pointed head, plain ruddy brown, with a bronze line down the back.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Sri Lanka, India, Bangladesh and Nepal, and possibly Pakistan, Bhutan and Myanmar.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Many kinds of forest, and even gardens and parks in towns.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day and lives in trees; special belly scales help it climb steep, smooth surfaces.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Geckos, garden lizards, frogs and small birds.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 6 to 8 eggs in April, in tree hollows and rotting plants.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Slender bronze-brown snake with a pointed head.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Dendrelaphis tristis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Dendrelaphis_tristis"
+    },
+    "rdb": {
+      "title": "Dendrelaphis tristis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Dendrelaphis&species=tristis"
+    }
+  }
+}
