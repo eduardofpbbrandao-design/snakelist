@@ -1155,7 +1155,7 @@ REAL_CSS = """
 .sp-rl-p.sp-rl-off{height:0;overflow:hidden;visibility:hidden;pointer-events:none}
 .sp-rl-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-areas:'ph sum' 'rec sum';grid-template-rows:auto 1fr;gap:0 28px;align-items:start}
 .sp-rl-own{grid-area:ph}.sp-rl-sum{grid-area:sum}.sp-rl-rec{grid-area:rec}.sp-rl-top1{grid-template-columns:minmax(0,1fr);grid-template-areas:'sum' 'rec'}
-.sp-rl-sum{font-size:15.5px;line-height:1.6}.sp-rl-desc{margin:0 0 14px;font-size:16px;line-height:1.6;color:#1d5233}
+.sp-rl-sum{font-size:15.5px;line-height:1.6}.sp-rl-desc{margin:0 0 14px;font-size:16px;line-height:1.6;color:var(--text)}
 .sp-rl-q{margin:0;padding:0}.sp-rl-q>div{padding:9px 0;border-top:1px solid var(--line)}.sp-rl-top1 .sp-rl-q>div:last-child{padding-bottom:0}
 .sp-rl-q dt{font:700 11.5px/1.3 Inter,system-ui,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}.sp-rl-q dd{margin:3px 0 0;overflow-wrap:anywhere}
 .sp-rl-size figcaption{font-size:12.5px;line-height:1.45}.sp-rl-size figcaption a{color:inherit}
@@ -1168,7 +1168,7 @@ REAL_CSS = """
 .sp-rl-mb::after{content:"+";flex:none;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);color:#1f7a3a;font:600 19px/26px Inter,system-ui,sans-serif;text-align:center}
 .sp-rl-mb[aria-expanded=true]::after{content:"\\2212";background:var(--tag);border-color:var(--tagline)}.sp-rl-mb:hover::after{border-color:var(--g)}.sp-rl-mb:focus-visible{outline:3px solid var(--g);outline-offset:2px;border-radius:8px}
 .sp-rl-mbody{padding:0 2px 14px;font-size:15.5px;line-height:1.6;max-width:72ch}.sp-rl-mbody p{margin:0 0 9px}.sp-rl-mbody .sp-rl-src{margin-top:4px}
-@media (prefers-color-scheme:dark){.sp-rl-desc{color:#cdeec4}.sp-rl-fun b,.sp-rl-rec li b,.sp-rl-mbody b,.sp-rl-rec h3,.sp-rl-mb::after{color:#a8ef94}}
+@media (prefers-color-scheme:dark){.sp-rl-fun b,.sp-rl-rec li b,.sp-rl-mbody b,.sp-rl-rec h3,.sp-rl-mb::after{color:#a8ef94}}
 .sp-rl-fullrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:22px 0 0}.sp-rl-fullrow .sp-note{margin:0}
 .sp-rl-full{border:0;font:600 15px Inter,system-ui,sans-serif;cursor:pointer}
 @media (max-width:720px){.sp-rl-top{grid-template-columns:minmax(0,1fr);grid-template-areas:'ph' 'sum' 'rec';grid-template-rows:auto;gap:12px 0}.sp-rl-rec{margin-top:12px}.sp-rl-own img{aspect-ratio:16/9;max-height:24vh;max-width:none}.sp-rl-desc{font-size:15.5px;margin-bottom:10px}}
@@ -1211,8 +1211,8 @@ dialog.sp-rl{overscroll-behavior:contain}
 .sp3d-stage{height:min(46vh,380px);min-height:240px}.sp3d-b{padding:6px 10px;font-size:13px}.sp3d-set{margin-left:0}}
 
 /* v4.80: the scientific name and the text about the snake in green, like the name */
-.sp-sci{color:#2e7d4f}.sp-intro,#sp-wiki p:not(.src){color:#1d5233}
-@media (prefers-color-scheme:dark){.sp-sci{color:#8fd98a}.sp-intro,#sp-wiki p:not(.src){color:#cdeec4}}
+.sp-sci{color:#2e7d4f}.sp-intro,.sp-intro2,#sp-wiki p:not(.src){color:var(--text)}
+@media (prefers-color-scheme:dark){.sp-sci{color:#8fd98a}}
 /* v4.80: fold-out parts (Source, References, States...) open with a See more button, not a triangle */
 details>summary{list-style:none;display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
 details>summary::-webkit-details-marker{display:none}
