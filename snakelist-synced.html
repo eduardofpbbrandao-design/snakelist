@@ -27764,7 +27764,8 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
    rounded green thumb on a see-through track, never the browser's plain white/grey bar with arrows. Chrome/Edge/Firefox use
    scrollbar-color/width (set on everything, so a panel's own setting can't fall back to the default); Safari and older Chrome
    use the ::-webkit-scrollbar parts. Things that hide their scrollbar (scrollbar-width: none) still hide it. */
-:root { --sl-sb: rgba(88,179,81,.62); --sl-sb-hover: #58b351; }
+:root { --sl-sb: rgba(63,143,58,.6); --sl-sb-hover: #3f8f3a; }
+[data-sl-theme="dark"], [data-sl-theme="dark"] * { --sl-sb: rgba(155,224,124,.72); --sl-sb-hover: #b8f09f; }
 *, *::before, *::after { scrollbar-width: thin; scrollbar-color: var(--sl-sb) transparent !important; }
 ::-webkit-scrollbar { width: 10px; height: 10px; background: transparent; }
 ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }

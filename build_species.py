@@ -43,6 +43,7 @@ SEEMORE_CSS = (
     "html .sp-fmore,details>summary::after{margin:0}html .sp-fmore::after{display:none}html:not(.js) .sp-all{display:none}html .sp-all[hidden],html .sl-more-btn[hidden],html .sp-fmore[hidden]{display:none}\n"
     "html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover{border-color:#8fbf8f;color:#24321f}\n"
     "details>summary:hover::after{background:rgba(12,26,18,.9);border-color:rgba(155,224,124,.65);color:#fff}\n"
+    "@media (prefers-color-scheme:dark){:root{--sl-sb:rgba(155,224,124,.72);--sl-sb-hover:#b8f09f}}\n"
     "@media (prefers-color-scheme:dark){html .sp-fmore,html .sp-all,html .sl-more-btn,details>summary::after{border-color:#37855f;background:#24684a;color:#a8c9b4}"
     "html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover{border-color:#6fbf8a;color:#dff5d6}}\n")
 # v5.93: the app's Report button (a bug or an idea for the creator) on every page too, at the end of the header, top right
@@ -50,6 +51,7 @@ PAGE_REPORT_CSS = (
     ".sl-report{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-left:6px;flex:none;align-self:center;"
     "border-radius:10px;border:1px solid var(--line,#d5e4cf);background:var(--card,#fbfdf9);color:var(--text,#1d6b33);cursor:pointer;padding:0}"
     ".sl-report svg{width:16px;height:16px}.sl-report:focus-visible{outline:2px solid #58b351;outline-offset:2px}\n"
+    "@media (max-width:640px){header.sl-top,header.site-top .site-wrap{position:relative}.sl-report{position:absolute;top:12px;right:12px;margin:0}}\n"
     ".sl-rep-sheet{position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(8,20,12,.55)}"
     ".sl-rep-sheet.open{display:flex}.sl-rep-card{width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;border-radius:16px;padding:20px 20px 18px;"
     "background:var(--card,#fbfdf9);color:var(--text,#1d6b33);border:1px solid var(--line,#d5e4cf);box-shadow:0 18px 50px rgba(0,0,0,.35);font:400 14px/1.5 Inter,system-ui,sans-serif;text-align:left}"

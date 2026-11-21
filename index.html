@@ -27623,7 +27623,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
 .sl-level { position: fixed; inset: 0; z-index: 9400; display: none; align-items: center; justify-content: center; overflow-y: auto; overscroll-behavior: contain;
   padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
   background: radial-gradient(120% 90% at 50% 0%, #2a6e46 0%, #10301e 62%, #09190f 100%); color: #eef8ea; }
-.sl-level h2:focus { outline: none; }
+#sl-lv-h:focus, #sl-lv-h:focus-visible { outline: none !important; box-shadow: none !important; }
 .sl-level.open { display: flex; animation: slLvIn .35s ease both; }
 @keyframes slLvIn { from { opacity: 0; } to { opacity: 1; } }
 .sl-level-in { width: min(980px, 100%); margin: auto; text-align: center; }
@@ -27662,6 +27662,8 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
 .sl-lv-btns button:disabled { opacity: .45; cursor: default; }
 .sl-lv-skip { position: absolute; top: max(14px, env(safe-area-inset-top)); right: 16px; font: 500 13.5px 'Inter', sans-serif; color: #cfe8cf; background: none; border: 0; padding: 8px 10px; cursor: pointer; }
 .sl-lv-skip:hover { color: #fff; }
+.sl-level.sl-lv-asked .sl-lv-ck { background: none; border-color: transparent; padding-top: 0; }
+.sl-level.sl-lv-asked .sl-lv-hint:empty { display: none; }
 .sl-lv-hint { margin: 10px 0 0; font: 400 12.5px 'Inter', sans-serif; color: #a9cfa6; min-height: 1.2em; }
 html.sl-level-lock, html.sl-level-lock body { overflow: hidden !important; }
 html.sl-level-lock { scrollbar-gutter: auto !important; }
@@ -27702,7 +27704,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
 }
 .quiz-level-btn:focus-visible::after { transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) { .quiz-level-btn, .quiz-level-btn::after { transition: none; } .quiz-level-btn:hover { transform: none; } }
-@media (max-width: 520px) { .quiz-level-btn { flex-basis: calc(50% - 7px); min-height: 112px; padding: 32px 10px 18px; } .quiz-level-btn b { font-size: 20px; } }
+@media (max-width: 520px) { .quiz-level-btn { flex-basis: calc(50% - 7px); max-width: none; min-height: 112px; padding: 32px 10px 18px; } .quiz-level-btn b { font-size: 20px; } }
 /* the quiz: "Recommended for you" on the difficulty that fits your choice, and a line to change it */
 .quiz-level-btn .quiz-rec { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); z-index: 2; white-space: nowrap; font-style: normal;
   font: 700 10.5px/1 'Inter', sans-serif; letter-spacing: .03em; padding: 5px 10px; border-radius: 999px; background: #3f8f3a; color: #fff; box-shadow: 0 2px 6px rgba(20,60,25,.25); }
@@ -27751,7 +27753,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
   };
   var opts = [].slice.call(box.querySelectorAll(".sl-lv-opt")), go = document.getElementById("sl-lv-go"), no = document.getElementById("sl-lv-no");
   var hint = document.getElementById("sl-lv-hint"), ckTxt = document.getElementById("sl-lv-ck-txt");
-  function consentAsked() { return !web || !!get("sl-consent"); }
+  function consentAsked() { return !web || get("sl-consent") === "yes"; } // (with "Only essentials" before, it asks again here)
   function paint() {
     opts.forEach(function (o) { o.setAttribute("aria-pressed", String(o.dataset.level === pick)); });
     go.disabled = no.disabled = !pick;
@@ -27759,7 +27761,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
     var asked = consentAsked();
     no.hidden = asked;
     go.textContent = asked ? "Continue" : "Accept and continue";
-    ckTxt.hidden = asked;
+    ckTxt.hidden = asked; box.classList.toggle("sl-lv-asked", asked);
   }
   function apply(level, keep) {
     window.__slLevel = level || "";
@@ -27780,7 +27782,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
   });
   go.addEventListener("click", function () {
     if (!pick) return;
-    if (web && !get("sl-consent") && window.SL_CONSENT) window.SL_CONSENT(true);
+    if (web && get("sl-consent") !== "yes" && window.SL_CONSENT) window.SL_CONSENT(true);
     var keep = !web || get("sl-consent") === "yes";
     apply(pick, keep); if (!keep) { /* cookies refused earlier: this visit only */ }
     close();
@@ -27848,7 +27850,8 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
    rounded green thumb on a see-through track, never the browser's plain white/grey bar with arrows. Chrome/Edge/Firefox use
    scrollbar-color/width (set on everything, so a panel's own setting can't fall back to the default); Safari and older Chrome
    use the ::-webkit-scrollbar parts. Things that hide their scrollbar (scrollbar-width: none) still hide it. */
-:root { --sl-sb: rgba(88,179,81,.62); --sl-sb-hover: #58b351; }
+:root { --sl-sb: rgba(63,143,58,.6); --sl-sb-hover: #3f8f3a; }
+[data-sl-theme="dark"], [data-sl-theme="dark"] * { --sl-sb: rgba(155,224,124,.72); --sl-sb-hover: #b8f09f; }
 *, *::before, *::after { scrollbar-width: thin; scrollbar-color: var(--sl-sb) transparent !important; }
 ::-webkit-scrollbar { width: 10px; height: 10px; background: transparent; }
 ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
