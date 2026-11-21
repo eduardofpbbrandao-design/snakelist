@@ -428,6 +428,7 @@ function buildAll(A) {
   const twigMat = () => barkMat(tex.bark('furrow'), '#8a7d6c');
   const rockStyle = { moss: ['#8d8a80', '#6f8a4a'], grey: ['#9a958a', null], red: ['#9a5a3e', null], sandstone: ['#b98e62', null], gibber: ['#6e3422', null] }[K.rock];
   const rockMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), bumpMap: tex.rock(), bumpScale: 2, roughness: 0.9, metalness: 0, vertexColors: true, color: rockStyle[0] }));
+  groundDetail(THREE, rockMat, 'rock', ctx, { tri: true, near: 1.5, far: 9 }); // v5.83: the grain and cracks of real rock, close up
   const rocks = (n, rMin, rMax, size, o = {}) => put('rocks', (Rn, v) => rockGeo(seed + 500 + v * 11 + (o.detail != null ? 50 : 0), o.detail != null ? o.detail : low ? 2 : 3, { moss: rockStyle[1], flat: o.flat || 0.7 }), rockMat, n, rMin, rMax, size, { variants: 3, lift: -0.18, tilt: 0.4, col: () => tint(0.8, 1.1, 0.08), ...o });
   const fernW = (s) => 0.22 * Math.pow(Math.sin(Math.PI * Math.min(1, 0.1 + s)), 0.8);
   if (U === 'forest' || U === 'jungle') {
@@ -872,9 +873,25 @@ export function ripple(x, z, k = 1, size = 0.02) {
   if (AMB.ripU) AMB.ripU.forEach((u) => { u.uRip.value[(AMB.ripN - 1) % RIPN].set(x, z, q.t, k); u.uRipS.value[(AMB.ripN - 1) % RIPN] = size; });
 }
 export function ripplesAlive() { const t = AMB.uT.value; return AMB.rip.some((q) => t - q.t < 3.5); }
+// v5.83 (Eduardo: water "closer to real"): o.refract - the water bends what is under it: the submerged body and the
+// river bed are seen through the surface displaced by its ripples (screen-space refraction: three.js's transmission,
+// which draws the solid scene once more into a texture), tinted and dimmed with depth; o.bed(x, z) - the height of the
+// bed under the water: the shallows are clearer, a line of foam laps at the shore (a small depth map of the bank, so
+// it follows the real shoreline), and the bed under the water gets moving caustics (see groundDetail's uCau).
 export function water(THREE, mesh, o = {}) {
   const m = mesh.material, calm = o.calm || new THREE.Vector3(0, 0, 0);
-  const U = { uRip: { value: Array.from({ length: RIPN }, () => new THREE.Vector4(0, 0, -99, 0)) }, uRipS: { value: new Array(RIPN).fill(0.02) }, uSwell: { value: o.swell || 0.004 }, uCalm: { value: new THREE.Vector4(calm.x, calm.z, o.calmR || 1, 0) }, uDrift: { value: o.drift || 0.03 } };
+  const U = { uRip: { value: Array.from({ length: RIPN }, () => new THREE.Vector4(0, 0, -99, 0)) }, uRipS: { value: new Array(RIPN).fill(0.02) }, uSwell: { value: o.swell || 0.004 }, uCalm: { value: new THREE.Vector4(calm.x, calm.z, o.calmR || 1, 0) }, uDrift: { value: o.drift || 0.03 },
+    uDep: { value: null }, uDepK: { value: 0 }, uDepBox: { value: new THREE.Vector4(0, 0, 1, 1) } };
+  const refract = !!o.refract;
+  if (refract) { // (still flagged transparent: the rest of the viewer finds the water by that)
+    m.transmission = 1; m.ior = 1.333; m.thickness = o.thick || 0.15; m.attenuationColor = m.color.clone().lerp(new THREE.Color('#1d3b2c'), 0.3); m.attenuationDistance = o.clarity || 0.28;
+    m.color.lerp(new THREE.Color('#ffffff'), 0.55); m.roughness = Math.min(m.roughness, 0.06); m.opacity = 1; m.specularIntensity = 1;
+  }
+  if (o.bed && o.size) { // the water's depth over the bank, 128 x 128 over the water plane (metres, 0.25 m = full)
+    const n = 128, d = new Uint8Array(n * n * 4), y0 = mesh.position.y, h = o.size / 2;
+    for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) { const x = -h + (i + 0.5) / n * o.size, z = -h + (j + 0.5) / n * o.size, dep = Math.max(0, Math.min(1, (y0 - o.bed(x, z)) / 0.25)); d[(j * n + i) * 4] = Math.round(dep * 255); d[(j * n + i) * 4 + 3] = 255; }
+    const t = new THREE.DataTexture(d, n, n); t.magFilter = t.minFilter = THREE.LinearFilter; t.needsUpdate = true; U.uDep.value = t; U.uDepK.value = 1; U.uDepBox.value.set(-h, -h, o.size, o.size); m.userData.depthTex = t; if (o.track) o.track(t);
+  }
   (AMB.ripU || (AMB.ripU = [])).push(U);
   AMB.rip.forEach((q, i) => { U.uRip.value[i].set(q.x, q.z, q.t, q.k); U.uRipS.value[i] = q.s; });
   m.onBeforeCompile = (sh) => {
@@ -887,7 +904,9 @@ export function water(THREE, mesh, o = {}) {
         transformed.y += slA * ( sin( dot( slW0.xz, vec2( 2.1, 1.3 ) ) - uSlT * 1.3 ) + 0.6 * sin( dot( slW0.xz, vec2( -1.2, 2.7 ) ) - uSlT * 1.9 ) ); }`)
       .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvSlW = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;');
     sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
-uniform float uSlT; uniform float uSlWind; uniform vec4 uRip[${RIPN}]; uniform float uRipS[${RIPN}]; uniform float uDrift; varying vec3 vSlW;`).replace('#include <normalmap_pars_fragment>', `#include <normalmap_pars_fragment>
+uniform float uSlT; uniform float uSlWind; uniform vec4 uRip[${RIPN}]; uniform float uRipS[${RIPN}]; uniform float uDrift; varying vec3 vSlW;
+uniform sampler2D uDep; uniform float uDepK; uniform vec4 uDepBox;
+float slDepth() { return uDepK > 0.5 ? texture2D( uDep, ( vSlW.xz - uDepBox.xy ) / uDepBox.zw ).r : 1.0; }`).replace('#include <normalmap_pars_fragment>', `#include <normalmap_pars_fragment>
 vec3 slWaterN( vec2 uv ) {
   float d = uDrift * ( 0.4 + 0.6 * uSlWind );
   vec3 a = texture2D( normalMap, uv + vec2( uSlT * d, uSlT * d * 0.55 ) ).xyz * 2.0 - 1.0;
@@ -904,9 +923,18 @@ vec3 slWaterN( vec2 uv ) {
   return n;
 }`).replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', 'vec3 mapN = slWaterN( vNormalMapUv );')
       // v5.78: clearer looking down into it (the body under the surface shows), mirror-like towards the horizon (Fresnel)
-      .replace('#include <dithering_fragment>', '#include <dithering_fragment>\n{ float slFr = pow( 1.0 - clamp( dot( normalize( vViewPosition ), normal ), 0.0, 1.0 ), 4.0 ); gl_FragColor.a = clamp( gl_FragColor.a * mix( 0.6, 1.3, slFr ), 0.0, 1.0 ); }');
+      .replace('#include <dithering_fragment>', '#include <dithering_fragment>\n' + (refract ? '' : '{ float slFr = pow( 1.0 - clamp( dot( normalize( vViewPosition ), normal ), 0.0, 1.0 ), 4.0 ); gl_FragColor.a = clamp( gl_FragColor.a * mix( 0.6, 1.3, slFr ), 0.0, 1.0 ); }\n') + `{ // foam where the water is only a few millimetres deep: a broken, moving line along the shore
+  float sd = slDepth();
+  if ( uDepK > 0.5 && sd < 0.12 ) {
+    vec2 fp = vSlW.xz * 9.0; float fn = sin( fp.x * 1.7 + uSlT * 0.9 + sin( fp.y * 1.3 - uSlT * 0.6 ) * 2.0 ) * sin( fp.y * 2.1 - uSlT * 0.7 + sin( fp.x * 0.9 ) * 1.6 );
+    float band = smoothstep( 0.12, 0.02, sd ) * smoothstep( 0.0, 0.015, sd + 0.004 * sin( uSlT * 1.5 + fp.x * 0.4 ) );
+    float foam = band * smoothstep( -0.2, 0.6, fn + 0.35 * sin( uSlT * 2.0 + fp.y ) );
+    gl_FragColor.rgb = mix( gl_FragColor.rgb, vec3( 0.93, 0.95, 0.94 ), foam * 0.8 ); gl_FragColor.a = max( gl_FragColor.a, foam * 0.9 );
+  }
+  ${refract ? 'gl_FragColor.a = max( gl_FragColor.a, 0.0 );' : 'if ( uDepK > 0.5 ) gl_FragColor.a *= mix( 0.45, 1.0, smoothstep( 0.0, 0.6, sd ) );'}
+}`);
   };
-  m.customProgramCacheKey = () => 'sl-water2';
+  m.customProgramCacheKey = () => 'sl-water3' + (refract ? 'R' : '');
   m.needsUpdate = true;
   return U;
 }
@@ -1068,4 +1096,63 @@ export function perchTree(THREE, opt) {
   }
   g.userData.perch = perch;
   return g;
+}
+
+// ================================================================= v5.83: sharp ground close up
+// Eduardo: the ground was "blurry and low-res up close" - the painted ground texture is about 4 mm a pixel at best. Now,
+// near the camera, a photographed surface of the same kind of ground (Poly Haven, CC0; tools/ground_detail.py) adds
+// its fine detail: every leaf edge, crumb of soil, grain of sand and pebble gets real relief (its normal map) and
+// shading (its brightness, around 1), while the colours stay the habitat's own. It is sampled twice at different sizes
+// and angles (so no repeating tile shows), fades out with distance (none of it far away, where it would only shimmer),
+// and loads after the scene is up (until then the ground looks as before). One 1024 px image per kind of ground.
+const DETAIL = { litter: 1.26, soil: 1.3, gravel: 2.0, heath: 2.0, pebbles: 2.16, dry: 1.3, sand: 1.8, gibber: 1.5, rock: 1.5 }; // its real width in metres
+const detailImg = {};
+export function groundDetail(THREE, mat, kind, ctx, o = {}) {
+  const size = DETAIL[kind]; if (!size || typeof Image === 'undefined') return;
+  const ph = new THREE.DataTexture(new Uint8Array([128, 128, 128, 255]), 1, 1); ph.needsUpdate = true;
+  const U = { uDet: { value: ph }, uDetK: { value: 0 }, uDetS: { value: 1 / size }, uDetN: { value: o.near || 1.2 }, uDetF: { value: o.far || 7 }, uCau: { value: new THREE.Vector2(-1e9, 0) }, uCauT: AMB.uT };
+  mat.userData.detail = U; mat.userData.caustics = (y, k = 1.2) => { U.uCau.value.set(y, k); }; // (the bed under water at height y)
+  const prev = mat.onBeforeCompile;
+  mat.onBeforeCompile = (sh, r) => {
+    if (prev) prev(sh, r);
+    Object.assign(sh.uniforms, U);
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vDetW, vDetNW;').replace('#include <worldpos_vertex>', `#include <worldpos_vertex>
+{ vec4 dw = vec4(transformed, 1.0); vec3 dn = objectNormal;
+#ifdef USE_INSTANCING
+dw = instanceMatrix * dw; dn = mat3(instanceMatrix) * dn;
+#endif
+vDetW = (modelMatrix * dw).xyz; vDetNW = normalize(mat3(modelMatrix) * dn); }`);
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
+varying vec3 vDetW, vDetNW; uniform sampler2D uDet; uniform float uDetK, uDetS, uDetN, uDetF; uniform vec2 uCau; uniform float uCauT;
+vec3 detAt(vec2 p) { return texture2D(uDet, p).rgb; }
+// caustics: light focused by the moving ripples into a bright, wandering net on the bed (three crossing wave trains,
+// warped, kept where they nearly cancel)
+float causAt(vec2 p, float t) {
+  p += 0.25 * vec2(sin(p.y * 1.7 + t * 0.8), sin(p.x * 1.9 - t * 0.7));
+  float h = sin(dot(p, vec2(1.0, 0.2)) * 3.1 + t * 1.1) + sin(dot(p, vec2(-0.5, 0.86)) * 3.3 - t * 0.9) + sin(dot(p, vec2(-0.6, -0.8)) * 2.9 + t * 1.3);
+  return pow(clamp(1.0 - abs(h) * 0.55, 0.0, 1.0), 6.0);
+}`)
+      .replace('#include <map_fragment>', `#include <map_fragment>
+float detF = uDetK * (1.0 - smoothstep(uDetN, uDetF, distance(cameraPosition, vDetW)));
+${o.tri ? `vec3 tw = pow(abs(vDetNW), vec3(4.0)); tw /= (tw.x + tw.y + tw.z);
+vec3 dT = detAt(vDetW.zy * uDetS) * tw.x + detAt(vDetW.xz * uDetS) * tw.y + detAt(vDetW.xy * uDetS) * tw.z; // (triplanar: rocks face every way)` : `vec2 dp = vDetW.xz * uDetS; vec2 dq = mat2(0.8, -0.6, 0.6, 0.8) * vDetW.xz * uDetS * 0.43 + vec2(0.37, 0.71);
+vec3 dA = detAt(dp), dB = detAt(dq);
+float dMix = smoothstep(0.3, 0.7, texture2D(uDet, vDetW.xz * uDetS * 0.11 + 0.5).b);
+vec3 dT = mix(dA, dB, dMix * 0.5);`}
+diffuseColor.rgb *= mix(1.0, clamp(dT.b * 2.0, 0.25, 1.9), detF * 0.75);`)
+      .replace('#include <dithering_fragment>', `#include <dithering_fragment>
+if (vDetW.y < uCau.x) { float dd = uCau.x - vDetW.y, ck = uCau.y * smoothstep(0.0, 0.02, dd) * (1.0 - smoothstep(0.15, 0.6, dd)); gl_FragColor.rgb += gl_FragColor.rgb * ck * (causAt(vDetW.xz * 6.0, uCauT * 1.2) * 1.4 + causAt(vDetW.xz * 9.0 + 3.0, uCauT * 1.6) * 0.6); }`)
+      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+{ vec2 dn = (dT.rg * 2.0 - 1.0) * detF * 1.1; ${o.tri ? 'normal = normalize(normal + (viewMatrix * vec4(dn.x, dn.y, -dn.x * 0.5, 0.0)).xyz * 0.6);' : 'normal = normalize(normal + (viewMatrix * vec4(dn.x, 0.0, -dn.y, 0.0)).xyz);'} }`);
+  };
+  mat.customProgramCacheKey = () => 'gdetail' + (o.tri ? 'T' : '');
+  mat.needsUpdate = true;
+  const sc = ctx.scene, done = (im) => {
+    if (ctx.scene !== sc) return; // (closed or rebuilt meanwhile)
+    const t = new THREE.Texture(im); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = (ctx.renderer && ctx.renderer.capabilities.getMaxAnisotropy()) || 4; t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.needsUpdate = true;
+    if (ctx.track) ctx.track(t); U.uDet.value = t; U.uDetK.value = 1; ph.dispose(); if (o.onLoad) o.onLoad();
+  };
+  const src = new URL('env/detail-' + kind + '.webp?r=576', import.meta.url).href;
+  if (detailImg[kind] && detailImg[kind].complete) done(detailImg[kind]);
+  else { const im = detailImg[kind] || (detailImg[kind] = new Image()); im.decoding = 'async'; im.addEventListener('load', () => done(im), { once: true }); im.addEventListener('error', () => { delete detailImg[kind]; }, { once: true }); if (!im.src) im.src = src; }
 }

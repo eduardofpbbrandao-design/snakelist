@@ -2224,6 +2224,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     // finer rings near the middle so the riverbank slope is smooth
     const tG = performance.now(); const tex = groundTexture(S.ground, seed + 5, quality !== 'low'); perfT('groundTex', tG); tex.anisotropy = ctx.renderer.capabilities.getMaxAnisotropy(); const rep = (groundR * 2) / S.tile; tex.repeat.set(rep, rep); // v5.50: the leaves and stones painted on the ground keep their real size (S.tile metres per tile) for every snake
     const gm = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.96, metalness: 0, bumpMap: tex, bumpScale: Math.min(1, L * 0.5) * 0.6 });
+    if (NATURE.groundDetail) NATURE.groundDetail(THREE, gm, S.ground, ctx, { onLoad: () => ctx.afterNature && ctx.afterNature() }); // v5.83: sharp close up
     if (S.water === 'river') {
       // the bank slopes down into shallow water on one side, away from the snake
       const geo = new THREE.PlaneGeometry(groundR * 2, groundR * 2, 160, 160); geo.rotateX(-Math.PI / 2);
@@ -2247,7 +2248,8 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
       wm.normalMap.repeat.set(groundR * 2 / 1.6, groundR * 2 / 1.6); // ripples at their real size (the pattern repeats every 1.6 m)
       const wSeg = quality === 'low' ? 40 : 80, wg = new THREE.PlaneGeometry(groundR * 2, groundR * 2, wSeg, wSeg); wg.rotateX(-Math.PI / 2);
       const water = new THREE.Mesh(wg, wm); water.position.y = -depth * 0.35; water.renderOrder = 2; scene.add(water); ctx.fadeMats.push(wm);
-      if (NATURE.water) NATURE.water(THREE, water, { swell: 0.003, calmR: Math.max(Rb * 0.6, 0.15), drift: 0.025 }); // v5.73: gentle moving ripples on the river
+      if (NATURE.water) NATURE.water(THREE, water, { swell: 0.003, calmR: Math.max(Rb * 0.6, 0.15), drift: 0.025, refract: quality !== 'low', size: groundR * 2, track: ctx.track, bed: (x, z) => -depth * sstep(edge - 0.06, edge + 0.55, x * dir.x + z * dir.y + wob(-x * dir.y + z * dir.x)) }); // v5.73: gentle moving ripples on the river (v5.83: refraction, foam at the shore)
+      if (gm.userData.caustics) gm.userData.caustics(water.position.y); // v5.83: caustics on the bed
       ctx.waterInfo = { dir, edge, wob, depth };
       groundH = (x, z) => -depth * sstep(edge - 0.06, edge + 0.55, x * dir.x + z * dir.y + wob(-x * dir.y + z * dir.x));
     } else {
@@ -2312,7 +2314,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     wm.normalMap.repeat.set(groundR * 2 / 2.4, groundR * 2 / 2.4); // v5.50: ripples at their real size (repeating every 2.4 m)
     const wg = new THREE.RingGeometry(0, groundR, 96, quality === 'low' ? 18 : 40); wg.rotateX(-Math.PI / 2);
     const water = new THREE.Mesh(wg, wm); water.position.y = poseInfo.seaLevel; water.receiveShadow = true; water.renderOrder = 2; scene.add(water);
-    if (NATURE.water) NATURE.water(THREE, water, { swell: 0.006, calmR: Rb * 1.1, drift: 0.035 }); // v5.73: a gentle swell and moving ripples on the sea
+    if (NATURE.water) NATURE.water(THREE, water, { swell: 0.006, calmR: Rb * 1.1, drift: 0.035, refract: quality !== 'low', clarity: 0.6 }); // v5.73: a gentle swell and moving ripples on the sea (v5.83: refraction)
     const deep = new THREE.Mesh(new THREE.CircleGeometry(groundR, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#0f2f3d' }));
     deep.position.y = -1.5; scene.add(deep);
   }
