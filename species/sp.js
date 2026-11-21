@@ -97,24 +97,30 @@ o.appendChild(big);o.appendChild(x);document.body.appendChild(o);function close(
 o.addEventListener('click',function(e){if(e.target!==big)close()});document.addEventListener('keydown',k)})}
 // no photo built in: find one now - its best sighting marked Alive (never a dead snake), else
 // iNaturalist's photo of the species, else its Wikipedia picture (never a map, range map or drawing)
-var nf=document.querySelector('.sp-nophoto'),sm=document.querySelector('.sp-main[data-sci]');
+var nf=document.querySelector('.sp-nophoto:not(.sp-fossilfig)'),sm=document.querySelector('.sp-main[data-sci]');
 if(nf&&sm){var sci=sm.dataset.sci,API='https://api.inaturalist.org/v1/';
 function bad(u){var f='';try{f=decodeURIComponent(String(u).split('?')[0].split('/').pop())}catch(e){f=String(u)}return !u||/map|range|distrib|locat|verbreit|carte|mapa|karte|areal|zone|world|globe/i.test(f)||(/wiki(pedia|media)/.test(u)&&/\.(svg|png|gif)\b/i.test(f))}
 function J(u){return fetch(u).then(function(r){return r.ok?r.json():null})}
+// only photos their owners licensed for reuse (Creative Commons), never 'all rights reserved'
+var LIC='cc0,cc-by,cc-by-nc,cc-by-sa,cc-by-nc-sa,cc-by-nd,cc-by-nc-nd';
+// the credit in English whatever language the photographer uses iNaturalist in: their name and the licence
+function cred(ph,who){var l=String(ph.license_code||'').toUpperCase().replace(/^CC-/,'CC ');return (ph.attribution_name||who||'iNaturalist user')+(l?', '+l:'')}
 function show(url,credit,via){if(!url||bad(url))return false;var f=document.createElement('figure');f.className='sp-photo';
 var i=new Image();i.src=url;i.alt='Photo of '+sci;i.width=500;i.height=333;var c=document.createElement('figcaption');c.textContent='Photo: '+credit+', via '+via;
 f.appendChild(i);f.appendChild(c);nf.replaceWith(f);return true}
 J(API+'taxa?per_page=10&is_active=true&q='+encodeURIComponent(sci)).then(function(d){
 var t=d&&(d.results||[]).filter(function(x){return (x.name||'').toLowerCase()===sci.toLowerCase()})[0];
-return (t?J(API+'observations?photos=true&quality_grade=research&term_id=17&term_value_id=18&order_by=votes&per_page=3&taxon_id='+t.id):Promise.resolve(null)).then(function(o){
-var r=o&&(o.results||[]).filter(function(x){return x.photos&&x.photos[0]})[0];
-if(r&&show(r.photos[0].url.replace('/square.','/medium.'),(r.photos[0].attribution||'iNaturalist').replace(/^\(c\)\s*/i,''),'iNaturalist'))return true;
-if(t&&t.default_photo&&show((t.default_photo.medium_url||t.default_photo.url),(t.default_photo.attribution||'iNaturalist').replace(/^\(c\)\s*/i,''),'iNaturalist'))return true;
+return (t?J(API+'observations?photos=true&quality_grade=research&term_id=17&term_value_id=18&order_by=votes&per_page=3&photo_license='+LIC+'&taxon_id='+t.id):Promise.resolve(null)).then(function(o){
+var r=o&&(o.results||[]).filter(function(x){return x.photos&&x.photos[0]&&x.photos[0].license_code})[0];
+if(r&&show(r.photos[0].url.replace('/square.','/medium.'),cred(r.photos[0],r.user&&(r.user.name||r.user.login)),'iNaturalist'))return true;
+if(t&&t.default_photo&&t.default_photo.license_code&&show((t.default_photo.medium_url||t.default_photo.url),cred(t.default_photo),'iNaturalist'))return true;
 return J('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(sci.replace(/ /g,'_'))).then(function(w){
 var img=w&&(w.originalimage||w.thumbnail);if(img&&!bad(img.source)&&w.thumbnail)show(w.thumbnail.source,'Wikipedia','Wikipedia')})})}).catch(function(){})}
 var main=document.querySelector('.sp-main[data-sci]'),w=document.getElementById('sp-wiki');
 if(main&&w){fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(main.dataset.sci.replace(/ /g,'_'))).then(function(r){return r.ok?r.json():null}).then(function(d){
-if(!d||!d.extract||d.type==='disambiguation')return;var p=document.createElement('p');p.textContent=d.extract;w.appendChild(p);
+if(!d||!d.extract||d.type==='disambiguation')return;
+// a redirect can lead to another species' article (an old name now part of it): only show text that names this species
+var ep=main.dataset.sci.split(' ')[1];if(ep&&d.extract.toLowerCase().indexOf(ep.toLowerCase())<0)return;var p=document.createElement('p');p.textContent=d.extract;w.appendChild(p);
 var s=document.createElement('p');s.className='src';s.innerHTML='From <a href="'+d.content_urls.desktop.page+'" rel="noopener" target="_blank">Wikipedia</a> (CC BY-SA)';w.appendChild(s)}).catch(function(){})}
 })();// a numbered citation, or a link to a place inside closed details (references, states): open it first
 function opn(h){var t=h&&h.charAt(0)==='#'&&document.getElementById(h.slice(1));if(!t)return;for(var e=t.parentNode;e&&e!==document;e=e.parentNode)if(e.tagName==='DETAILS')e.open=true}
@@ -213,7 +219,7 @@ body.id='sp-rl-m'+i;body.hidden=true;body.setAttribute('role','region');body.set
 bt.addEventListener('click',function(){var o=bt.getAttribute('aria-expanded')!=='true';bt.setAttribute('aria-expanded',String(o));body.hidden=!o});mw.appendChild(sec)});box.appendChild(mw)}}
 b.addEventListener('click',open);var ab=document.querySelector('.sp-anatbtn'),wantA=0;function anat(){if(!wantA)return;var x=document.querySelector('.sp3d-wrap .sp3d-b[title^="Show the parts"]');if(x){wantA=0;if(x.getAttribute('aria-pressed')!=='true')setTimeout(function(){x.click()},300)}}if(ab)ab.addEventListener('click',function(){wantA=1;open();anat()});if(location.hash==='#real')open();window.addEventListener('hashchange',function(){if(location.hash==='#real')open()})})();
 
-(function(){var T={'3d':{v:480,sel:'.sp-realbtn,.sp-anatbtn,.sp-rl'}},V=584,d=document.documentElement;try{var a=+localStorage.getItem('sl-ver-n');if(a>V)V=a}catch(e){}
+(function(){var T={'3d':{v:480,sel:'.sp-realbtn,.sp-anatbtn,.sp-rl'}},V=585,d=document.documentElement;try{var a=+localStorage.getItem('sl-ver-n');if(a>V)V=a}catch(e){}
 Object.keys(T).forEach(function(k){var seen=0;try{seen=localStorage.getItem('sl-new-seen-'+k)}catch(e){}if(V&&V<T[k].v+20&&!seen)d.classList.add('sl-new-'+k);
 document.addEventListener('click',function(e){if(!d.classList.contains('sl-new-'+k)||!e.target.closest||!e.target.closest(T[k].sel))return;try{localStorage.setItem('sl-new-seen-'+k,'1')}catch(x){}d.classList.remove('sl-new-'+k)},true)})})();
 

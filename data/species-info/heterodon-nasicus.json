@@ -1,0 +1,130 @@
+{
+  "id": "heterodon-nasicus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Baird & Girard, 1852",
+  "facts": {
+    "length": {
+      "text": "Small: adults rarely over about 40-50 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 4 to 23 at a time",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mostly frogs and toads, also small lizards",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Western Hognose Snake is a small, stout snake of the North American plains with an upturned, pig-like snout that it uses for digging. It is famous for its acting: when threatened it puffs up and hisses, and may even play dead.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A short, thick body and an upturned nose scale. Its blotched pattern makes it look like a small rattlesnake, which may help keep enemies away.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Males are much smaller than females; adults rarely grow longer than about 40 to 50 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern Canada (Alberta, Saskatchewan, Manitoba) south through the Great Plains of the United States to northern Mexico.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Sandy or gravelly ground: prairies, river floodplains, scrub, grassland and semi-desert, up to about 2,500 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active mostly by day. When threatened it flattens its neck like a cobra, hisses and makes 'bluff' strikes with its mouth closed; it almost never bites in defence. Hognose snakes may also roll over and play dead.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly frogs and toads, plus small lizards and the odd rodent. It is not a constrictor: it holds prey and works its rear teeth in.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 4 to 23 long, thin-shelled eggs in June to August; they hatch after about 60 days.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "When a hognose snake plays dead, it rolls on its back with its tongue hanging out!",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Upturned, shovel-like snout.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Short, thick body with blotches.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Western hognose snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Western_hognose_snake"
+    },
+    "rdb": {
+      "title": "Heterodon nasicus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Heterodon&species=nasicus"
+    }
+  }
+}

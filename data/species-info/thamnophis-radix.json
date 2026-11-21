@@ -1,0 +1,107 @@
+{
+  "id": "thamnophis-radix",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Baird & Girard, 1853)",
+  "facts": {
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Earthworms, slugs and small amphibians",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Plains Garter Snake is a medium-sized, harmless garter snake of the central United States and southern Canada. It is one of the most cold-tolerant snakes and may come out to bask on warm winter days.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A bright orange or yellow stripe from head to tail, greenish-yellow stripes on the sides, black bars on the lips, and usually light yellow spots on top of the head.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The Great Plains and Midwest, from central Alberta, Saskatchewan and Manitoba south to northern Texas and New Mexico, and east to Illinois and Indiana.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Meadows and prairies near water such as marshes, streams and ponds; also vacant lots and abandoned buildings in cities.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active from about April to late October. It mates in April or May near the shared winter den.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly earthworms, slugs and small amphibians.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young between August and October.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Orange or yellow stripe down the middle of the back.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Black bars on the lips.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Plains garter snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Plains_garter_snake"
+    },
+    "rdb": {
+      "title": "Thamnophis radix",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Thamnophis&species=radix"
+    }
+  }
+}

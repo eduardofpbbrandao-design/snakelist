@@ -1,0 +1,115 @@
+{
+  "id": "lampropeltis-holbrooki",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Stejneger, 1902",
+  "facts": {
+    "length": {
+      "text": "Usually up to about 1.2 m; record 1.8 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Rodents, birds, frogs, lizards and other snakes",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Speckled Kingsnake, or 'salt-and-pepper snake', is a non-venomous kingsnake of the central and southern United States. Like other kingsnakes it will eat other snakes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Black with a small yellow or white speck in the middle of almost every scale.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually up to about 1.2 m (48 in); the record is about 1.8 m (72 in).",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Central and southern USA, from southern Iowa south to the Gulf of Mexico (Missouri, Arkansas, Louisiana, Mississippi, Alabama, Oklahoma). In the west it blends with the Desert Kingsnake.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Prefers wetter places than other kingsnakes, such as swamps and rivers, but also uses woodland and grassy fields.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "When threatened it shakes its tail like a rattlesnake, releases a smelly musk and may bite. It usually calms down quickly and is often kept as a pet.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Kills by squeezing (constriction). Eats birds, rodents and other mammals, frogs, lizards and other snakes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Black body with a pale speck on nearly every scale.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Speckled kingsnake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Speckled_kingsnake"
+    },
+    "rdb": {
+      "title": "Lampropeltis holbrooki",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Lampropeltis&species=holbrooki"
+    }
+  }
+}

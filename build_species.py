@@ -229,6 +229,9 @@ def build(app):
     iso = json.loads(re.search(r"var ISO = (\{.*?\});", app).group(1))
     extinct = dict(re.findall(r'"([a-z0-9-]+)": "((?:Extinct|Possibly extinct)[^"]*)"', app.split("const EXTINCT = ", 1)[1].split("};", 1)[0]))
     fossil_age = json.loads(app.split("const FOSSIL_AGE = ", 1)[1].split(";\n", 1)[0])
+    FOSSIL_AGE_RAW.clear(); FOSSIL_AGE_RAW.update(fossil_age)
+    # old names that are now part of another species (the app's ALIAS): their old pages send you on (pages())
+    ALIAS_MAP.clear(); ALIAS_MAP.update(json.loads(app.split("var ALIAS = window.SL_ALIAS = ", 1)[1].split("};", 1)[0] + "}"))
     def ago(m):
         return "about %s million years ago" % (round(m) if m >= 10 else (round(m * 10) / 10 if m % 1 else int(m))) if m >= 1 else "about {:,} years ago".format(int(round(m * 1000000, -3)))
     fossils = set(re.findall(r'"([a-z0-9-]+)"', app.split("// prehistoric snakes known only from fossil bones", 1)[1].split("]", 1)[0]))
@@ -534,9 +537,13 @@ GENUS_FILE = "data/genus-info.json"
 FAMILY_FILE = "data/family-info.json"
 GENUS_INFO, FAMILY_INFO = {}, {}
 GEN_MARK = "@@PAGE-GENERATED@@"
+FOSSIL_AGE_RAW = {}  # the app's FOSSIL_AGE, as read by the build
+ALIAS_MAP = {}  # the app's ALIAS: old name id -> the species it is now part of
+REMOVED_NO_TARGET = ["dinodon-horridus"]  # cards taken off the list that are no snake at all (Dinodon horridus Leidy 1856 is a dinosaur tooth)
 INTRO_FILE = "data/introduced-status.json"   # introduced vs invasive, with sources
 FOSSIL_FILE = "data/fossil-additions.json"   # fossil snakes: age, find site, size estimate, debate, sources
 AUTH_FILE = "data/authorities.json"          # verified "Author, year" for species without an account
+FOSSIL_PBDB_FILE = "data/fossil-pbdb.json"   # fossil ages and find places from the Paleobiology Database (tools/fossil_pbdb.py)
 MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 
@@ -738,6 +745,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     dates = PageDates()
     links = []
     ISTAT = load_json(INTRO_FILE); FOSSIL = {x["id"]: x for x in (load_json(FOSSIL_FILE) or [])}
+    FPB = {k: v for k, v in load_json(FOSSIL_PBDB_FILE).items() if not k.startswith("_")}
     AUTH = {k: v for k, v in load_json(AUTH_FILE).items() if not k.startswith("_")}
     def intro_status(c):
         """its introduced populations: [{area, status ('introduced' or 'invasive'), when, text, src}], from
@@ -911,6 +919,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         S = (info or {}).get("sections", {})
         F = (info or {}).get("facts", {})
         FI = FOSSIL.get(c["id"], {}) if c["fossil"] else {}
+        PB = FPB.get(c["id"]) if c["fossil"] else None
+        if PB: R.add("pbdb", PB["src"])
         G = GENUS_INFO.get(c["genus"]) if c["genus"] else None
         if G: R.add("genus", {"title": "Meaning of the name %s" % c["genus"], **G["source"]})
         for x in IST:
@@ -997,10 +1007,20 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             # what the fossils are, where and when - and how sure anyone can be
             fos = paras("fossils", "What has been found") + paras("geology", "Geological age and setting")
             if not S.get("geology") and c["died"]:
-                fos += '<h3>Geological age</h3><p>It lived in the %s, %s%s.</p>' % (esc(c["died"][0]), esc(c["died"][1]),
-                        (" (dated from the rocks its fossils were found in)") if FI else "")
+                af = (PB or {}).get("age_from") if PB and PB.get("age") == list(FOSSIL_AGE_RAW.get(c["id"], [])) else None
+                if af:  # the age came from the Paleobiology Database: say what it is based on
+                    rng = ("%s million years ago" % af["max"]) if af["max"] == af["min"] else ("%s to %s million years ago" % (af["max"], af["min"]))
+                    fos += ('<h3>Geological age</h3><p>Its youngest well-dated fossils come from rocks of the %s, %s (%s), so it lived until at least '
+                            'then. Fossils can only show when a snake was alive &ndash; not exactly when the last one died.%s</p>') % (
+                        esc(c["died"][0]), esc(rng), esc(af["interval"]), R.cite(["pbdb"]))
+                else:
+                    fos += '<h3>Geological age</h3><p>It lived in the %s, %s%s.</p>' % (esc(c["died"][0]), esc(c["died"][1]),
+                            (" (dated from the rocks its fossils were found in)") if FI else "")
             if not S.get("fossils") and FI.get("discovered"):
                 fos += '<h3>Where it was found</h3><p>%s.</p>' % esc(FI["discovered"])
+            elif not S.get("fossils") and PB and PB.get("sites"):
+                fos += '<h3>Where its fossils were found</h3><ul>%s</ul><p class="sp-note">Rock layer (formation), region and country, with the age of the rocks.%s</p>' % (
+                    "".join("<li>%s</li>" % esc(x) for x in PB["sites"]), R.cite(["pbdb"]))
             fos += paras("size", "Size estimate")
             if not S.get("size") and FI.get("length_note"):
                 fos += '<h3>Size estimate</h3><p>%s</p>' % esc(FI["length_note"])
@@ -1355,6 +1375,14 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             if page_name(_c) != _stem:
                 open("%s/%s" % (OUT, _f), "w", encoding="utf-8").write(REDIRECT.format(name=esc(_c["name"]), url=SITE + "species/" + page_name(_c), page=page_name(_c)))
             break
+    # an old name taken off the list (tools/remove_cards.py): its page becomes a redirect to the species it is a name of,
+    # and a page for a card that is gone with nothing to send you to is removed
+    for _old, _to in ALIAS_MAP.items():
+        _c = _by_id.get(_to)
+        if _c and _old not in _by_id and os.path.exists("%s/%s.html" % (OUT, _old)):
+            open("%s/%s.html" % (OUT, _old), "w", encoding="utf-8").write(REDIRECT.format(name=esc(_c["name"]), url=SITE + "species/" + page_name(_c), page=page_name(_c)))
+    for _gone in REMOVED_NO_TARGET:
+        if _gone not in _by_id and os.path.exists("%s/%s.html" % (OUT, _gone)): os.remove("%s/%s.html" % (OUT, _gone))
     dates.save()
     # the "See states" shapes: one small file per country, fetched only when the button is pressed
     os.makedirs(OUT + "/prov", exist_ok=True)
@@ -1930,24 +1958,30 @@ o.appendChild(big);o.appendChild(x);document.body.appendChild(o);function close(
 o.addEventListener('click',function(e){if(e.target!==big)close()});document.addEventListener('keydown',k)})}
 // no photo built in: find one now - its best sighting marked Alive (never a dead snake), else
 // iNaturalist's photo of the species, else its Wikipedia picture (never a map, range map or drawing)
-var nf=document.querySelector('.sp-nophoto'),sm=document.querySelector('.sp-main[data-sci]');
+var nf=document.querySelector('.sp-nophoto:not(.sp-fossilfig)'),sm=document.querySelector('.sp-main[data-sci]');
 if(nf&&sm){var sci=sm.dataset.sci,API='https://api.inaturalist.org/v1/';
 function bad(u){var f='';try{f=decodeURIComponent(String(u).split('?')[0].split('/').pop())}catch(e){f=String(u)}return !u||/map|range|distrib|locat|verbreit|carte|mapa|karte|areal|zone|world|globe/i.test(f)||(/wiki(pedia|media)/.test(u)&&/\\.(svg|png|gif)\\b/i.test(f))}
 function J(u){return fetch(u).then(function(r){return r.ok?r.json():null})}
+// only photos their owners licensed for reuse (Creative Commons), never 'all rights reserved'
+var LIC='cc0,cc-by,cc-by-nc,cc-by-sa,cc-by-nc-sa,cc-by-nd,cc-by-nc-nd';
+// the credit in English whatever language the photographer uses iNaturalist in: their name and the licence
+function cred(ph,who){var l=String(ph.license_code||'').toUpperCase().replace(/^CC-/,'CC ');return (ph.attribution_name||who||'iNaturalist user')+(l?', '+l:'')}
 function show(url,credit,via){if(!url||bad(url))return false;var f=document.createElement('figure');f.className='sp-photo';
 var i=new Image();i.src=url;i.alt='Photo of '+sci;i.width=500;i.height=333;var c=document.createElement('figcaption');c.textContent='Photo: '+credit+', via '+via;
 f.appendChild(i);f.appendChild(c);nf.replaceWith(f);return true}
 J(API+'taxa?per_page=10&is_active=true&q='+encodeURIComponent(sci)).then(function(d){
 var t=d&&(d.results||[]).filter(function(x){return (x.name||'').toLowerCase()===sci.toLowerCase()})[0];
-return (t?J(API+'observations?photos=true&quality_grade=research&term_id=17&term_value_id=18&order_by=votes&per_page=3&taxon_id='+t.id):Promise.resolve(null)).then(function(o){
-var r=o&&(o.results||[]).filter(function(x){return x.photos&&x.photos[0]})[0];
-if(r&&show(r.photos[0].url.replace('/square.','/medium.'),(r.photos[0].attribution||'iNaturalist').replace(/^\\(c\\)\\s*/i,''),'iNaturalist'))return true;
-if(t&&t.default_photo&&show((t.default_photo.medium_url||t.default_photo.url),(t.default_photo.attribution||'iNaturalist').replace(/^\\(c\\)\\s*/i,''),'iNaturalist'))return true;
+return (t?J(API+'observations?photos=true&quality_grade=research&term_id=17&term_value_id=18&order_by=votes&per_page=3&photo_license='+LIC+'&taxon_id='+t.id):Promise.resolve(null)).then(function(o){
+var r=o&&(o.results||[]).filter(function(x){return x.photos&&x.photos[0]&&x.photos[0].license_code})[0];
+if(r&&show(r.photos[0].url.replace('/square.','/medium.'),cred(r.photos[0],r.user&&(r.user.name||r.user.login)),'iNaturalist'))return true;
+if(t&&t.default_photo&&t.default_photo.license_code&&show((t.default_photo.medium_url||t.default_photo.url),cred(t.default_photo),'iNaturalist'))return true;
 return J('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(sci.replace(/ /g,'_'))).then(function(w){
 var img=w&&(w.originalimage||w.thumbnail);if(img&&!bad(img.source)&&w.thumbnail)show(w.thumbnail.source,'Wikipedia','Wikipedia')})})}).catch(function(){})}
 var main=document.querySelector('.sp-main[data-sci]'),w=document.getElementById('sp-wiki');
 if(main&&w){fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(main.dataset.sci.replace(/ /g,'_'))).then(function(r){return r.ok?r.json():null}).then(function(d){
-if(!d||!d.extract||d.type==='disambiguation')return;var p=document.createElement('p');p.textContent=d.extract;w.appendChild(p);
+if(!d||!d.extract||d.type==='disambiguation')return;
+// a redirect can lead to another species' article (an old name now part of it): only show text that names this species
+var ep=main.dataset.sci.split(' ')[1];if(ep&&d.extract.toLowerCase().indexOf(ep.toLowerCase())<0)return;var p=document.createElement('p');p.textContent=d.extract;w.appendChild(p);
 var s=document.createElement('p');s.className='src';s.innerHTML='From <a href="'+d.content_urls.desktop.page+'" rel="noopener" target="_blank">Wikipedia</a> (CC BY-SA)';w.appendChild(s)}).catch(function(){})}
 })();// a numbered citation, or a link to a place inside closed details (references, states): open it first
 function opn(h){var t=h&&h.charAt(0)==='#'&&document.getElementById(h.slice(1));if(!t)return;for(var e=t.parentNode;e&&e!==document;e=e.parentNode)if(e.tagName==='DETAILS')e.open=true}

@@ -1,0 +1,124 @@
+{
+  "id": "eunectes-notaeus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Cope, 1862",
+  "facts": {
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Water birds, fish, snails and other wetland animals",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Yellow Anaconda is a big, non-venomous water boa of southern South America. It is one of the largest snakes in the world, though smaller than its relative the Green Anaconda. Like all boas, it kills its prey by squeezing.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Yellow, golden-tan or greenish-yellow with black or dark brown saddles, blotches and spots.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually weigh 25 to 35 kg, and some over 55 kg; females are generally bigger than males.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The Paraguay River and its tributaries, from the Pantanal of Bolivia, Paraguay and western Brazil to north-eastern Argentina and northern Uruguay.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Mostly in water: swamps, marshes and the bushy banks of slow rivers and streams.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Lives alone except in the mating season and spends most of its time in the water, coming onto land to mate, move to other water or hunt.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Hunts mainly in shallow water, both by waiting in ambush and by searching. Its prey is almost all water or wetland animals - wading birds are taken most when floods go down, and apple snails and fish are eaten too.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Mates in April and May; several males may wrap around one female in a 'breeding ball'. About 6 months later the female gives birth to live young.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Several male anacondas can wrap around one female at once - a tangle called a breeding ball.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Yellowish body with black blotches.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Usually in or near water.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Yellow anaconda",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Yellow_anaconda"
+    },
+    "rdb": {
+      "title": "Eunectes notaeus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Eunectes&species=notaeus"
+    }
+  }
+}

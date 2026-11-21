@@ -1,0 +1,75 @@
+{
+  "id": "bitis-rhinoceros",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Schlegel, 1855)",
+  "facts": {
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Rhinoceros Viper, or West African Gaboon Viper, is a large, heavy venomous viper of the West African forests. It gets its name from the pair of horn-like scales on the tip of its nose.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Two enlarged scales on the nose stand up like little horns. It is very like the Gaboon Viper, but the dark triangle running back from its eye towards the corner of the mouth is not split in two.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "West Africa: Guinea, Guinea-Bissau, Sierra Leone, Liberia, Ivory Coast, Ghana and Togo.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Two horn-like scales on the tip of the nose.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "The dark triangle behind the eye is a single, undivided mark.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Bitis rhinoceros",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Bitis_rhinoceros"
+    },
+    "rdb": {
+      "title": "Bitis rhinoceros",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Bitis&species=rhinoceros"
+    }
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "id": "pantherophis-emoryi",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Baird & Girard, 1853)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly rodents; also birds",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Great Plains Rat Snake is a harmless rat snake of the central United States and northern Mexico. It often lives on farms, where it hunts rats and mice.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Light grey or tan with dark grey, brown or greenish-grey blotches down the back. Stripes on each side of the head meet in a point between the eyes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The central USA - south-western Illinois, Missouri and Kansas west to south-eastern Colorado and eastern New Mexico and south through Texas, with isolated areas in Utah - and northern Mexico.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Open grassland and light woodland, coastal plains, semi-dry areas and rocky hills; often on farmland where rodents are plentiful.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly rodents; also birds and sometimes snakes, lizards and frogs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Because it turns up on farms it is sometimes wrongly called a 'chicken snake'.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Grey or tan with darker blotches.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Head stripes that meet in a point between the eyes.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Pantherophis emoryi",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Pantherophis_emoryi"
+    },
+    "rdb": {
+      "title": "Pantherophis emoryi",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Pantherophis&species=emoryi"
+    }
+  }
+}

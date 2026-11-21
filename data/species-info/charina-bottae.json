@@ -1,0 +1,116 @@
+{
+  "id": "charina-bottae",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Blainville, 1835)",
+  "facts": {
+    "length": {
+      "text": "Small: 38 to 84 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young, usually 1 to 5",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Rubber Boa is a small, gentle boa of western North America. It is the most northerly boa in the world, and its loose, shiny skin makes it look and feel like rubber.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Small, smooth and shiny with loose, wrinkly skin. Usually plain tan to dark brown with a lighter belly, sometimes olive-green, yellow or orange.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "38 to 84 cm long; newborns are 19 to 23 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Western North America: southern British Columbia south to central California, and east to western Montana, Wyoming and Utah.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Grassland, meadows, chaparral, forests and high mountains, from sea level to over 3,000 m. It cannot stand heat and dryness but copes with surprisingly cold places.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Mainly active at night and at dusk. It is one of the calmest snakes and very rarely bites; if threatened it gives off a smelly musk.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young - usually 1 to 5, at most about 9 - and females do not breed every year.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "It lives farther north than any other boa in the world.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Looks like rubber: smooth, shiny, loose skin.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Plain tan to brown, with a lighter belly.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Rubber boa",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Rubber_boa"
+    },
+    "rdb": {
+      "title": "Charina bottae",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Charina&species=bottae"
+    }
+  }
+}

@@ -14,7 +14,7 @@ function surname(label){return norm(label).replace(/[^a-z\s'-]/g,' ').trim().spl
 function lookup(names){if(!names.length)return Promise.resolve({});if(navigator.onLine===false)return Promise.reject(new Error('offline'));
 var q='SELECT ?name ?item ?st ?rank ?author ?authorLabel ?authorDescription ?year ?born ?died ?natLabel ?img WHERE { VALUES ?name { '+names.map(lit).join(' ')+' } '+
 '?item p:P225 ?st . ?st ps:P225 ?name . OPTIONAL { ?item wdt:P105 ?rank } OPTIONAL { ?st pq:P574 ?year } OPTIONAL { ?st pq:P405 ?author . OPTIONAL { ?author wdt:P569 ?born } OPTIONAL { ?author wdt:P570 ?died } '+
-'OPTIONAL { ?author wdt:P27 ?nat } OPTIONAL { ?author wdt:P18 ?img } } SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } LIMIT 400';
+'OPTIONAL { ?author wdt:P27 ?nat } OPTIONAL { ?author wdt:P18 ?img } } SERVICE wikibase:label { bd:serviceParam wikibase:language "en,mul". } } LIMIT 400';
 return get(EP+encodeURIComponent(q)).then(parse)}
 function parse(j){var out={},by={};((j&&j.results&&j.results.bindings)||[]).forEach(function(b){function v(k){return b[k]&&b[k].value}
 var n=v('name');if(!n)return;var item=(v('item')||'').split('/').pop(),sk=n+'|'+(v('st')||item),o=by[sk];

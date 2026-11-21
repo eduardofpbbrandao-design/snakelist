@@ -1,0 +1,98 @@
+{
+  "id": "thamnophis-proximus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Say, 1823)",
+  "facts": {
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Frogs and tadpoles, fish, lizards, earthworms and crayfish",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Western Ribbon Snake is a slender, harmless garter snake that lives near water, from the central United States through Mexico to Costa Rica.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Very slender with a long tail (about a third of its length). Black, brown or olive with three light stripes; the lips are white and unmarked, standing out against the dark head.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The central and southern United States, eastern Mexico and Central America south to central Costa Rica.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Many habitats, usually not far from water, from sea level to nearly 2,500 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Small animals: earthworms, crayfish, lizards, fish, frogs and tadpoles.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Three light stripes on a dark, very slim body.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Long tail.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Western ribbon snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Western_ribbon_snake"
+    },
+    "rdb": {
+      "title": "Thamnophis proximus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Thamnophis&species=proximus"
+    }
+  }
+}

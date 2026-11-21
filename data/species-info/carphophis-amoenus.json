@@ -1,0 +1,107 @@
+{
+  "id": "carphophis-amoenus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Say, 1825)",
+  "facts": {
+    "length": {
+      "text": "Small: record 34 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Eastern Worm Snake is a small, harmless burrowing snake of the eastern United States. It is common but rarely seen, because it lives under logs, stones and in the soil.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Plain tan to dark brown on top with a bright pink belly; the pink reaches up onto the lowest scale rows of the sides. It has smooth scales, a pointed head and small black eyes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "A small snake; the record is 34 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The eastern United States east of the Mississippi, from southern New England and New York south to Georgia and Alabama, and west to Louisiana and Illinois.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Moist, rocky woodland, under rotting logs and stumps.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "A burrower that is seldom seen above ground, especially in summer.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Plain brown back and pink belly.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Small, smooth and worm-like.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Carphophis amoenus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Carphophis_amoenus"
+    },
+    "rdb": {
+      "title": "Carphophis amoenus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Carphophis&species=amoenus"
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "id": "elaphe-dione",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Pallas, 1773)",
+  "facts": {
+    "length": {
+      "text": "Up to about 90 cm",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Steppe (or Dione's) Rat Snake is a harmless rat snake of eastern Europe and Asia, from Ukraine to Korea.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "A large one from Putyatin Island, Russia, measured about 90 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Eastern Ukraine, southern Russia and the Russian Far East, the Caucasus, Central Asia, northern Iran, Afghanistan, Mongolia, northern China and Korea.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Forest, shrubland, grassland, rocky places, desert, wetlands and disturbed land, from sea level to about 3,580 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Wikipedia describes females laying 3 to 15 eggs (rarely up to 24) in July or August; the Reptile Database lists it as live-bearing, so sources disagree.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Medium-sized rat snake of steppes and open land.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Elaphe dione",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Elaphe_dione"
+    },
+    "rdb": {
+      "title": "Elaphe dione",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Elaphe&species=dione"
+    }
+  }
+}

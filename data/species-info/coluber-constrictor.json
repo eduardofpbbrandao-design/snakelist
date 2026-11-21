@@ -1,0 +1,129 @@
+{
+  "id": "coluber-constrictor",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Linnaeus, 1758",
+  "facts": {
+    "length": {
+      "text": "About 50 to 152 cm; record 185 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Rodents, frogs, lizards, insects, birds and other snakes",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The North American Racer is a fast, slender, non-venomous snake found across much of the United States and into Canada, Mexico, Guatemala and Belize. Despite its scientific name 'constrictor', it does not usually squeeze its prey.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Most are a single plain colour, which gives the subspecies their names: black, brown, tan, blue or green racers.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 50 to 152 cm depending on the subspecies; the record is 185.4 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Much of the United States on both sides of the Rocky Mountains, north into southern Canada and south into Mexico, Guatemala and Belize.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Usually open, grassy places, but also brush, swamps, roadsides and suburbs; in Florida it is the commonest snake in neighbourhoods.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Fast and very active by day. It hunts mostly on the ground but climbs well and may raid birds' nests.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Small rodents and other mammals, frogs, toads, lizards, small turtles, birds and other snakes; young ones eat insects too.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "There are 11 subspecies, and it is the only species in its genus.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Long, slender and fast-moving.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Usually one plain colour (often black, blue or brown).",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Eastern racer",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Eastern_racer"
+    },
+    "rdb": {
+      "title": "Coluber constrictor",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Coluber&species=constrictor"
+    }
+  }
+}

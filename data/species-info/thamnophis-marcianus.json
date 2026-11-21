@@ -1,0 +1,116 @@
+{
+  "id": "thamnophis-marcianus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Baird & Girard, 1853)",
+  "facts": {
+    "length": {
+      "text": "Usually 46 to 61 cm; up to 107 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Small frogs, toads, small fish and earthworms",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Checkered Garter Snake is a garter snake of the south-western United States, Mexico and Central America with a bold black checkerboard pattern. It has a very mild venom that is harmless to people.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Usually greenish with a distinct black checkerboard pattern down the back.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 46 to 61 cm (18 to 24 in), but up to 107 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The south-western USA (Kansas and Oklahoma to Texas, New Mexico, Arizona and California), Mexico, and Central America south to Costa Rica.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Desert, grassland, shrubland and forest, usually close to water, up to about 2,200 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Unlike most garter snakes it is partly active at night. If grabbed it smears a smelly liquid on its attacker rather than biting.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Small frogs, toads, small fish and earthworms.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young; there is evidence that females can sometimes reproduce without males.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Black checkerboard pattern on a greenish body.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Checkered garter snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Checkered_garter_snake"
+    },
+    "rdb": {
+      "title": "Thamnophis marcianus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Thamnophis&species=marcianus"
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "id": "thamnophis-elegans",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Baird & Girard, 1853)",
+  "facts": {
+    "reproduction": {
+      "text": "Live young, 8 to 12",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Varies by area - slugs, fish, frogs and more",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Western Terrestrial Garter Snake is a medium-sized garter snake of western North America. It is so variable in colour that even experts find it hard to identify.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Usually a yellow, light orange or white stripe down the back and a paler stripe on each side; some have red or black spots between the stripes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Western North America: central British Columbia, Alberta and south-western Manitoba in Canada, the western United States east to western Nebraska, and an isolated population in Baja California, Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Grasslands, woodlands and conifer forests from sea level up to about 3,960 m. Mostly a land snake, but some mountain populations live partly in water.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Eats whatever is common where it lives, so its diet changes from place to place - coastal and inland snakes eat quite different prey.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to 8 to 12 live young in August and September.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Three light stripes (back and sides).",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Western terrestrial garter snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Western_terrestrial_garter_snake"
+    },
+    "rdb": {
+      "title": "Thamnophis elegans",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Thamnophis&species=elegans"
+    }
+  }
+}

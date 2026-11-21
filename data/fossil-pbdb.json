@@ -1,0 +1,2391 @@
+{
+ "_about": "Fossil snakes: the age of the youngest well-dated fossil and the countries the fossils come from, from the Paleobiology Database (https://paleobiodb.org, occurrences of the taxon - its own name or a recombination of it) or, where noted, the original description. Only filled in where SnakeList had no age or no countries; ages from other sources are kept. 'age' is [epoch, million years ago]: the middle of the youngest dated occurrence's interval (occurrences dated only to a span of more than 8 million years are not used). Applied to the app by tools/fossil_pbdb.py.",
+ "laophis-crotaloides": {
+  "sci": "Laophis crotaloides",
+  "src": {
+   "title": "Laophis crotaloides: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=399185"
+  },
+  "countries": [
+   "Greece"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Greece - Ruscinian (5.09 to 3.55 million years ago)"
+  ]
+ },
+ "paraxenophis-spanios": {
+  "sci": "Paraxenophis spanios",
+  "src": {
+   "title": "Paraxenophis spanios: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=398707"
+  },
+  "countries": [
+   "Greece"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Lefkon Formation, Central Macedonia, Greece - Turolian (8.725 to 5.09 million years ago)",
+   "Spilia Formation, Greece - Ruscinian (5.09 to 3.55 million years ago)"
+  ]
+ },
+ "periergophis-micros": {
+  "sci": "Periergophis micros",
+  "src": {
+   "title": "Periergophis micros: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=398705"
+  },
+  "countries": [
+   "Greece"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Lefkon Formation, Central Macedonia, Greece - Turolian (8.725 to 5.09 million years ago)",
+   "Spilia Formation, Greece - Ruscinian (5.09 to 3.55 million years ago)"
+  ]
+ },
+ "paleryx-depressus": {
+  "sci": "Paleryx depressus",
+  "src": {
+   "title": "Paleryx depressus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=380958"
+  },
+  "countries": [
+   "United Kingdom"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Headon Beds, England, United Kingdom - Late Eocene (37.71 to 33.9 million years ago)"
+  ]
+ },
+ "anilioides-minuatos": {
+  "sci": "Anilioides minuatus",
+  "src": {
+   "title": "Anilioides minuatus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=68112"
+  },
+  "age": [
+   "early Miocene",
+   17
+  ],
+  "age_from": {
+   "interval": "Hemingfordian",
+   "max": 18.5,
+   "min": 16.3,
+   "occurrence": "393405"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Alachua Formation, Florida, United States - Hemingfordian (18.5 to 16.3 million years ago)"
+  ]
+ },
+ "borealilysia-gunnelli": {
+  "sci": "Borealilysia gunnelli",
+  "src": {
+   "title": "Borealilysia gunnelli: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=429738"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Bridger Formation, Wyoming, United States - Bridgerian (51.1 to 45.9 million years ago)"
+  ]
+ },
+ "psammophis-odysseus": {
+  "sci": "Psammophis odysseus",
+  "src": {
+   "title": "Psammophis odysseus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=484404"
+  },
+  "countries": [
+   "Spain"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Granada, Spain - Late Miocene (11.63 to 5.333 million years ago)"
+  ]
+ },
+ "typhlops-grivensis": {
+  "sci": "Typhlops grivensis",
+  "src": {
+   "title": "Typhlops grivensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no="
+  },
+  "countries": [
+   "Austria",
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Rhône-Alpes, France - MN 7 + 8 (12.75 to 11.1 million years ago)",
+   "Burgenland, Austria - MN 11 (8.725 to 7.9 million years ago)"
+  ]
+ },
+ "macrovipera-gedulyi": {
+  "sci": "Macrovipera gedulyi",
+  "src": {
+   "title": "Macrovipera gedulyi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64917"
+  },
+  "countries": [
+   "Hungary"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Hungary - Turolian (8.725 to 5.09 million years ago)"
+  ]
+ },
+ "rionegrophis-madtsoioides": {
+  "sci": "Rionegrophis madtsoioides",
+  "src": {
+   "title": "Rionegrophis madtsoioides: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=81596"
+  },
+  "countries": [
+   "Argentina"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "sites": [
+   "Los Alamitos Formation, Río Negro, Argentina - Maastrichtian to Early Maastrichtian (72.2 to 66 million years ago)",
+   "Chorrillo Formation, Santa Cruz, Argentina - Early Maastrichtian (72.2 to 66 million years ago)"
+  ]
+ },
+ "patagoniophis-parvus": {
+  "sci": "Patagoniophis parvus",
+  "src": {
+   "title": "Patagoniophis parvus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=81594"
+  },
+  "countries": [
+   "Argentina"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "sites": [
+   "Los Alamitos Formation, Río Negro, Argentina - Maastrichtian to Early Maastrichtian (72.2 to 66 million years ago)",
+   "Allen Formation, Río Negro, Argentina - Maastrichtian to Early Maastrichtian (72.2 to 66 million years ago)"
+  ]
+ },
+ "patagoniophis-australiensis": {
+  "sci": "Patagoniophis australiensis",
+  "src": {
+   "title": "Patagoniophis australiensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=72098"
+  },
+  "countries": [
+   "Australia"
+  ],
+  "continents": [
+   "Oceania"
+  ],
+  "sites": [
+   "Queensland, Australia - Ypresian (56 to 48.07 million years ago)"
+  ]
+ },
+ "messelophis-variatus": {
+  "sci": "Messelophis variatus",
+  "src": {
+   "title": "Messelophis variatus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=135038"
+  },
+  "countries": [
+   "Germany"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Messel Formation, Hessen, Germany - MP 11 (48.07 to 41.03 million years ago)"
+  ]
+ },
+ "messelophis-ermannorum": {
+  "sci": "Messelophis ermannorum",
+  "src": {
+   "title": "Messelophis ermannorum: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=135039"
+  },
+  "countries": [
+   "Germany"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Messel Formation, Hessen, Germany - MP 11 (48.07 to 41.03 million years ago)"
+  ]
+ },
+ "platyspondylia-sudrei": {
+  "sci": "Platyspondylia sudrei",
+  "src": {
+   "title": "Platyspondylia sudrei: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=72127"
+  },
+  "age": [
+   "middle Eocene",
+   39
+  ],
+  "age_from": {
+   "interval": "Bartonian",
+   "max": 41.03,
+   "min": 37.71,
+   "occurrence": "457788"
+  },
+  "countries": [
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Quercy, Midi-Pyrenees Region, France - Bartonian (41.03 to 37.71 million years ago)"
+  ]
+ },
+ "platyspondylia-lepta": {
+  "sci": "Platyspondylia lepta",
+  "src": {
+   "title": "Platyspondylia lepta: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=72128"
+  },
+  "countries": [
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Quercy, France - MP 28 (27.3 to 23.04 million years ago)",
+   "France - MP 30 (27.3 to 23.04 million years ago)"
+  ]
+ },
+ "platyspondylia-germanica": {
+  "sci": "Platyspondylia germanica",
+  "src": {
+   "title": "Platyspondylia germanica: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=72160"
+  },
+  "countries": [
+   "Germany"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Baden-Württemberg, Germany - MP 28 to MP 30 (27.3 to 23.04 million years ago)"
+  ]
+ },
+ "bransateryx-vireti": {
+  "sci": "Bransateryx vireti",
+  "src": {
+   "title": "Bransateryx vireti: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=72156"
+  },
+  "age": [
+   "early Miocene",
+   23
+  ],
+  "age_from": {
+   "interval": "MN 1",
+   "max": 23.04,
+   "min": 22.4,
+   "occurrence": "1100277"
+  },
+  "sites": [
+   "Baden-Württemberg, Germany - MP 22 (33.9 to 27.3 million years ago)",
+   "Baden-Württemberg, Germany - MP 27 (27.3 to 23.04 million years ago)",
+   "Baden-Württemberg, Germany - MP 28 (27.3 to 23.04 million years ago)",
+   "France - MP 30 (27.3 to 23.04 million years ago)",
+   "France - Chattian (27.3 to 23.04 million years ago)",
+   "Lower Freshwater Molasse, Baden-Württemberg, Germany - MP 30 (27.3 to 23.04 million years ago)",
+   "France - MP 25 (27.3 to 23.04 million years ago)",
+   "Quercy, France - MP 28 (27.3 to 23.04 million years ago)"
+  ]
+ },
+ "geringophis-depressus": {
+  "sci": "Geringophis depressus",
+  "src": {
+   "title": "Geringophis depressus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=68116"
+  },
+  "age": [
+   "middle Miocene",
+   14
+  ],
+  "age_from": {
+   "interval": "Barstovian",
+   "max": 16.3,
+   "min": 12.5,
+   "occurrence": "286975"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Monroe Creek Formation, Wyoming, United States - Monroecreekian (24.7 to 23.1 million years ago)",
+   "Harrison Formation, Nebraska, United States - Harrisonian (23.1 to 18.5 million years ago)",
+   "Valentine Formation, Nebraska, United States - Barstovian (16.3 to 12.5 million years ago)",
+   "Nebraska, United States - Barstovian (16.3 to 12.5 million years ago)"
+  ]
+ },
+ "geringophis-yatkolai": {
+  "sci": "Geringophis yatkolae",
+  "src": {
+   "title": "Geringophis yatkolae: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=260474"
+  },
+  "age": [
+   "early Miocene",
+   20
+  ],
+  "age_from": {
+   "interval": "Early Miocene",
+   "max": 23.04,
+   "min": 15.98,
+   "occurrence": "288093"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Nebraska, United States - Early Miocene (23.04 to 15.98 million years ago)"
+  ]
+ },
+ "geringophis-vetus": {
+  "sci": "Geringophis vetus",
+  "src": {
+   "title": "Geringophis vetus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=68118"
+  },
+  "age": [
+   "early Oligocene",
+   33
+  ],
+  "age_from": {
+   "interval": "Orellan",
+   "max": 33.9,
+   "min": 31.8,
+   "occurrence": "1107992"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Brule Formation, Nebraska, United States - Orellan (33.9 to 31.8 million years ago)",
+   "Brule Formation, Colorado, United States - Orellan (33.9 to 31.8 million years ago)"
+  ]
+ },
+ "tregophis-brevirachis": {
+  "sci": "Tregophis brevirachis",
+  "src": {
+   "title": "Tregophis brevirachis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=68099"
+  },
+  "age": [
+   "late Miocene",
+   11
+  ],
+  "age_from": {
+   "interval": "Clarendonian",
+   "max": 12.5,
+   "min": 9.4,
+   "occurrence": "288803"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Ogallala Formation, Kansas, United States - Clarendonian (12.5 to 9.4 million years ago)",
+   "Ash Hollow Formation, Nebraska, United States - Late Clarendonian (12.5 to 9.4 million years ago)"
+  ]
+ },
+ "python-maurus": {
+  "sci": "Python maurus",
+  "src": {
+   "title": "Python maurus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=65063"
+  },
+  "countries": [
+   "Morocco"
+  ],
+  "continents": [
+   "Africa"
+  ],
+  "sites": [
+   "Tadla-Azilal, Morocco - Astaracian (15.98 to 11.63 million years ago)"
+  ]
+ },
+ "hechtophis-austrinus": {
+  "sci": "Hechtophis austrinus",
+  "src": {
+   "title": "Hechtophis austrinus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64873"
+  },
+  "countries": [
+   "Brazil"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "sites": [
+   "Rio de Janeiro, Brazil - Late Paleocene to Early Eocene (59.24 to 48.07 million years ago)"
+  ]
+ },
+ "cheilophis-huerfanoensis": {
+  "sci": "Cheilophis huerfanoensis",
+  "src": {
+   "title": "Cheilophis huerfanoensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=68090"
+  },
+  "age": [
+   "early Oligocene",
+   33
+  ],
+  "age_from": {
+   "interval": "Orellan",
+   "max": 33.9,
+   "min": 31.8,
+   "occurrence": "1336961"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Vincentown Formation, New Jersey, United States - Thanetian (59.24 to 56 million years ago)",
+   "San Jose Formation, New Mexico, United States - Wasatchian (56 to 51.1 million years ago)",
+   "Huerfano Formation, Colorado, United States - Bridgerian (51.1 to 45.9 million years ago)",
+   "Brule Formation, Nebraska, United States - Orellan (33.9 to 31.8 million years ago)"
+  ]
+ },
+ "tallahattaophis-dunni": {
+  "sci": "Tallahattaophis dunni",
+  "src": {
+   "title": "Tallahattaophis dunni: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=68089"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Lisbon Formation, Alabama, United States - Lutetian (48.07 to 41.03 million years ago)"
+  ]
+ },
+ "bavarioboa-hermi": {
+  "sci": "Bavarioboa hermi",
+  "src": {
+   "title": "Bavarioboa hermi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64882"
+  },
+  "age": [
+   "middle Miocene",
+   15
+  ],
+  "age_from": {
+   "interval": "Langhian",
+   "max": 15.98,
+   "min": 13.82,
+   "occurrence": "1079024"
+  },
+  "countries": [
+   "Czechia",
+   "Germany"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Moravia, Czechia - Orleanian (20 to 15.98 million years ago)",
+   "Hesse, Germany - Orleanian (20 to 15.98 million years ago)",
+   "Bavaria, Germany - MN 4 (16.9 to 15.98 million years ago)",
+   "Karlovy Vary, Czechia - MN 4 (16.9 to 15.98 million years ago)",
+   "Upper Freshwater Molasse, Bavaria, Germany - Langhian (15.98 to 13.82 million years ago)"
+  ]
+ },
+ "bavarioboa-minuta": {
+  "sci": "Bavarioboa minuta",
+  "src": {
+   "title": "Bavarioboa minuta: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=72158"
+  },
+  "countries": [
+   "Germany"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Baden-Württemberg, Germany - MP 28 (27.3 to 23.04 million years ago)"
+  ]
+ },
+ "bavarioboa-crocheti": {
+  "sci": "Bavarioboa crocheti",
+  "src": {
+   "title": "Bavarioboa crocheti: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=72125"
+  },
+  "countries": [
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Quercy, France - MP 28 (27.3 to 23.04 million years ago)"
+  ]
+ },
+ "bavarioboa-vaylatsae": {
+  "sci": "Bavarioboa vaylatsae",
+  "src": {
+   "title": "Bavarioboa vaylatsae: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=80920"
+  },
+  "age": [
+   "late Oligocene",
+   25
+  ],
+  "age_from": {
+   "interval": "MP 26",
+   "max": 27.3,
+   "min": 23.04,
+   "occurrence": "573061"
+  },
+  "countries": [
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Quercy, France - MP 26 (27.3 to 23.04 million years ago)"
+  ]
+ },
+ "bavarioboa-herrlingensis": {
+  "sci": "Bavarioboa herrlingensis",
+  "src": {
+   "title": "Bavarioboa herrlingensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=72159"
+  },
+  "age": [
+   "late Oligocene",
+   25
+  ],
+  "age_from": {
+   "interval": "MP 28 to MP 30",
+   "max": 27.3,
+   "min": 23.04,
+   "occurrence": "565571"
+  },
+  "sites": [
+   "Baden-Württemberg, Germany - MP 28 to MP 30 (27.3 to 23.04 million years ago)"
+  ]
+ },
+ "bavarioboa-bachensis": {
+  "sci": "Bavarioboa bachensis",
+  "src": {
+   "title": "Bavarioboa bachensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=80922"
+  },
+  "age": [
+   "late Oligocene",
+   25
+  ],
+  "age_from": {
+   "interval": "Chattian",
+   "max": 27.3,
+   "min": 23.04,
+   "occurrence": "573066"
+  },
+  "countries": [
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "France - Chattian (27.3 to 23.04 million years ago)"
+  ]
+ },
+ "corallus-priscus": {
+  "sci": "Corallus priscus",
+  "src": {
+   "title": "Corallus priscus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=67662"
+  },
+  "countries": [
+   "Brazil"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "sites": [
+   "Rio de Janeiro, Brazil - Late Paleocene to Early Eocene (59.24 to 48.07 million years ago)"
+  ]
+ },
+ "lithophis-sargenti": {
+  "sci": "Lithophis sargenti",
+  "src": {
+   "title": "Lithophis sargenti: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=84423"
+  },
+  "age": [
+   "early Eocene",
+   48
+  ],
+  "age_from": {
+   "interval": "Bridgerian",
+   "max": 51.1,
+   "min": 45.9,
+   "occurrence": "1336959"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Bridger Formation, Wyoming, United States - Bridgerian (51.1 to 45.9 million years ago)"
+  ]
+ },
+ "waincophis-australis": {
+  "sci": "Waincophis australis",
+  "src": {
+   "title": "Waincophis australis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=57749"
+  },
+  "age": [
+   "middle Miocene",
+   15
+  ],
+  "age_from": {
+   "interval": "Colloncuran",
+   "max": 15.5,
+   "min": 13.8,
+   "occurrence": "297822"
+  },
+  "countries": [
+   "Argentina"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "sites": [
+   "Sarmiento Formation, Chubut, Argentina - Casamayoran (56 to 48 million years ago)",
+   "Collón Cura Formation, Neuquen, Argentina - Colloncuran (15.5 to 13.8 million years ago)"
+  ]
+ },
+ "naja-antiqua": {
+  "sci": "Naja antiqua",
+  "src": {
+   "title": "Naja antiqua: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=65062"
+  },
+  "countries": [
+   "Morocco"
+  ],
+  "continents": [
+   "Africa"
+  ],
+  "sites": [
+   "Tadla-Azilal, Morocco - Astaracian (15.98 to 11.63 million years ago)",
+   "Morocco - Vallesian (11.63 to 8.725 million years ago)"
+  ]
+ },
+ "naja-romani": {
+  "sci": "Naja romani",
+  "src": {
+   "title": "Naja romani: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64932"
+  },
+  "countries": [
+   "Austria",
+   "France",
+   "Germany",
+   "Greece",
+   "Hungary",
+   "Romania",
+   "Russia",
+   "Ukraine"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Rhône-Alpes, France - Orleanian to Middle Miocene (20 to 11.63 million years ago)",
+   "Hesse, Germany - Orleanian (20 to 15.98 million years ago)",
+   "Bavaria, Germany - MN 4 (16.9 to 15.98 million years ago)",
+   "Grund Formation, Austria - MN 5 (15.98 to 13.82 million years ago)",
+   "Rhône-Alpes, France - MN 7 + 8 (12.75 to 11.1 million years ago)",
+   "Khmel'nitsk'yi, Ukraine - Vallesian (11.63 to 8.725 million years ago)",
+   "Nea Messimvria Formation, Greece - Vallesian (11.63 to 8.725 million years ago)",
+   "Edelény Formation, Borsod-Abaúj-Zemplén, Hungary - MN 9 (11.1 to 9.67 million years ago)"
+  ]
+ },
+ "naja-iberica": {
+  "sci": "Naja iberica",
+  "src": {
+   "title": "Naja iberica: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64910"
+  },
+  "countries": [
+   "Spain"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Spain - Turolian (8.725 to 5.09 million years ago)"
+  ]
+ },
+ "zelceophis-xenos": {
+  "sci": "Zelceophis xenos",
+  "src": {
+   "title": "Zelceophis xenos: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64953"
+  },
+  "age": [
+   "late Miocene",
+   7
+  ],
+  "age_from": {
+   "interval": "Turolian",
+   "max": 8.725,
+   "min": 5.09,
+   "occurrence": "484703"
+  },
+  "countries": [
+   "Poland"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Siedlce, Poland - Turolian (8.725 to 5.09 million years ago)"
+  ]
+ },
+ "elaphe-algorensis": {
+  "sci": "Elaphe algorensis",
+  "src": {
+   "title": "Elaphe algorensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64919"
+  },
+  "countries": [
+   "Spain"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Spain - Turolian (8.725 to 5.09 million years ago)"
+  ]
+ },
+ "elaphe-szyndlari": {
+  "sci": "Elaphe szyndlari",
+  "src": {
+   "title": "Elaphe szyndlari: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64918"
+  },
+  "countries": [
+   "Hungary"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Hungary - Turolian (8.725 to 5.09 million years ago)"
+  ]
+ },
+ "elaphe-paralongissima": {
+  "sci": "Elaphe paralongissima",
+  "src": {
+   "title": "Elaphe paralongissima: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64951"
+  },
+  "countries": [
+   "Poland"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Siedlce, Poland - MN 15 to MN 16 (4.16 to 2.245 million years ago)"
+  ]
+ },
+ "elaphe-kohfidischi": {
+  "sci": "Elaphe kohfidischi",
+  "src": {
+   "title": "Elaphe kohfidischi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64894"
+  },
+  "countries": [
+   "Austria",
+   "Ukraine"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Grund Formation, Austria - MN 5 (15.98 to 13.82 million years ago)",
+   "Burgenland, Austria - MN 11 (8.725 to 7.9 million years ago)",
+   "Odessa, Ukraine - MN 12 (7.9 to 6.965 million years ago)"
+  ]
+ },
+ "elaphe-nebraskensis": {
+  "sci": "Elaphe nebraskensis",
+  "src": {
+   "title": "Elaphe nebraskensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=111001"
+  },
+  "age": [
+   "late Miocene",
+   7
+  ],
+  "age_from": {
+   "interval": "Hemphillian",
+   "max": 9.4,
+   "min": 4.7,
+   "occurrence": "289855"
+  },
+  "sites": [
+   "Valentine Formation, Nebraska, United States - Barstovian (16.3 to 12.5 million years ago)",
+   "Nebraska, United States - Barstovian (16.3 to 12.5 million years ago)",
+   "Fort Randall Formation, South Dakota, United States - Barstovian (16.3 to 12.5 million years ago)",
+   "Fleming Formation, Texas, United States - Barstovian (16.3 to 12.5 million years ago)",
+   "Wood Mountain Formation, Saskatchewan, Canada - Barstovian (16.3 to 12.5 million years ago)",
+   "Ash Hollow Formation, Nebraska, United States - Hemphillian (9.4 to 4.7 million years ago)"
+  ]
+ },
+ "miocoluber-dalquesti": {
+  "sci": "Miocoluber dalquesti",
+  "src": {
+   "title": "Miocoluber dalquesti: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=68538"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Texas, United States - Hemphillian (9.4 to 4.7 million years ago)"
+  ]
+ },
+ "paracoluber-storeri": {
+  "sci": "Paracoluber storeri",
+  "src": {
+   "title": "Paracoluber storeri: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=68486"
+  },
+  "age": [
+   "late Miocene",
+   7
+  ],
+  "age_from": {
+   "interval": "Hemphillian",
+   "max": 9.4,
+   "min": 4.7,
+   "occurrence": "289850"
+  },
+  "countries": [
+   "Canada",
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Arikaree Formation, Wyoming, United States - Hemingfordian (18.5 to 16.3 million years ago)",
+   "Wood Mountain Formation, Saskatchewan, Canada - Barstovian (16.3 to 12.5 million years ago)",
+   "Ash Hollow Formation, Nebraska, United States - Late Clarendonian (12.5 to 9.4 million years ago)",
+   "Ash Hollow Formation, Nebraska, United States - Hemphillian (9.4 to 4.7 million years ago)"
+  ]
+ },
+ "paleoheterodon-tiheni": {
+  "sci": "Paleoheterodon tiheni",
+  "src": {
+   "title": "Paleoheterodon tiheni: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=111000"
+  },
+  "age": [
+   "late Miocene",
+   5.5
+  ],
+  "age_from": {
+   "interval": "Late Hemphillian to Blancan",
+   "max": 9.4,
+   "min": 1.4,
+   "occurrence": "287672"
+  },
+  "sites": [
+   "Valentine Formation, Nebraska, United States - Barstovian (16.3 to 12.5 million years ago)",
+   "Nebraska, United States - Barstovian (16.3 to 12.5 million years ago)",
+   "Fort Randall Formation, South Dakota, United States - Barstovian (16.3 to 12.5 million years ago)",
+   "Ash Hollow Formation, Nebraska, United States - Clarendonian (12.5 to 9.4 million years ago)",
+   "Indiana, United States - Late Hemphillian to Blancan (9.4 to 1.4 million years ago)",
+   "Texas, United States - Hemphillian (9.4 to 4.7 million years ago)",
+   "Ash Hollow Formation, Nebraska, United States - Hemphillian (9.4 to 4.7 million years ago)",
+   "Nebraska, United States - Late Hemphillian (9.4 to 4.7 million years ago)"
+  ]
+ },
+ "diadophis-elinorae": {
+  "sci": "Diadophis elinorae",
+  "src": {
+   "title": "Diadophis elinorae: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=68128"
+  },
+  "age": [
+   "late Miocene",
+   8.5
+  ],
+  "age_from": {
+   "interval": "Clarendonian to Hemphillian",
+   "max": 12.5,
+   "min": 4.7,
+   "occurrence": "1195616"
+  },
+  "sites": [
+   "Florida, United States - Clarendonian to Hemphillian (12.5 to 4.7 million years ago)"
+  ]
+ },
+ "dryinoides-oxyrhachis": {
+  "sci": "Dryinoides oxyrhachis",
+  "src": {
+   "title": "Dryinoides oxyrhachis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=99703"
+  },
+  "age": [
+   "middle Miocene",
+   14
+  ],
+  "age_from": {
+   "interval": "Barstovian",
+   "max": 16.3,
+   "min": 12.5,
+   "occurrence": "148355"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Madison Valley Formation, Montana, United States - Barstovian (16.3 to 12.5 million years ago)"
+  ]
+ },
+ "acrochordus-dehmi": {
+  "sci": "Acrochordus dehmi",
+  "src": {
+   "title": "Acrochordus dehmi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64908"
+  },
+  "countries": [
+   "India",
+   "Nepal"
+  ],
+  "continents": [
+   "Asia"
+  ],
+  "sites": [
+   "Nepal - Middle Miocene (15.98 to 11.63 million years ago)",
+   "Mansar Formation, Jammu Kashmir, India - Late Miocene (11.63 to 5.333 million years ago)"
+  ]
+ },
+ "australophis-anilioides": {
+  "sci": "Australophis anilioides",
+  "src": {
+   "title": "Australophis anilioides: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=140882"
+  },
+  "countries": [
+   "Argentina"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "sites": [
+   "Allen Formation, Río Negro, Argentina - Maastrichtian to Early Maastrichtian (72.2 to 66 million years ago)"
+  ]
+ },
+ "colombophis-portai": {
+  "sci": "Colombophis portai",
+  "src": {
+   "title": "Colombophis portai: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=84155"
+  },
+  "countries": [
+   "Brazil",
+   "Colombia"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "sites": [
+   "Villavieja Formation, Huila, Colombia - Laventan (13.8 to 11 million years ago)",
+   "Villavieja Formation, Colombia - Laventan to Mayoan (13.8 to 10 million years ago)",
+   "La Victoria Formation, Huila, Colombia - Laventan (13.8 to 11 million years ago)",
+   "Solimoes Formation, Acre, Brazil - Tortonian (11.63 to 7.246 million years ago)"
+  ]
+ },
+ "michauxophis-occitanus": {
+  "sci": "Michauxophis occitanus",
+  "src": {
+   "title": "Michauxophis occitanus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=65252"
+  },
+  "age": [
+   "late Pliocene",
+   3
+  ],
+  "age_from": {
+   "interval": "Late Pliocene",
+   "max": 3.6,
+   "min": 2.58,
+   "occurrence": "488645"
+  },
+  "countries": [
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "France - Late Pliocene (3.6 to 2.58 million years ago)"
+  ]
+ },
+ "lampropeltis-intermedius": {
+  "sci": "Lampropeltis intermedius",
+  "src": {
+   "title": "Lampropeltis intermedius: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=118948"
+  },
+  "countries": [
+   "Mexico"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Goleta Formation, Michoacan, Mexico - Blancan (4.7 to 1.4 million years ago)"
+  ]
+ },
+ "salvadora-paleolineata": {
+  "sci": "Salvadora paleolineata",
+  "src": {
+   "title": "Salvadora paleolineata: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=110880"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Runningwater Formation, Nebraska, United States - Early Hemingfordian (18.5 to 16.3 million years ago)",
+   "Rosebud Formation, South Dakota, United States - Hemingfordian (18.5 to 16.3 million years ago)",
+   "Arikaree Formation, Wyoming, United States - Hemingfordian (18.5 to 16.3 million years ago)",
+   "Valentine Formation, Nebraska, United States - Barstovian (16.3 to 12.5 million years ago)",
+   "Nebraska, United States - Barstovian (16.3 to 12.5 million years ago)",
+   "Fort Randall Formation, South Dakota, United States - Barstovian (16.3 to 12.5 million years ago)",
+   "Fleming Formation, Texas, United States - Early Barstovian (16.3 to 12.5 million years ago)",
+   "Fleming Formation, Texas, United States - Barstovian (16.3 to 12.5 million years ago)"
+  ]
+ },
+ "vipera-maghrebiana": {
+  "sci": "Vipera maghrebiana",
+  "src": {
+   "title": "Vipera maghrebiana: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=65061"
+  },
+  "countries": [
+   "Morocco"
+  ],
+  "continents": [
+   "Africa"
+  ],
+  "sites": [
+   "Tadla-Azilal, Morocco - Astaracian (15.98 to 11.63 million years ago)"
+  ]
+ },
+ "coronella-miocaenica": {
+  "sci": "Coronella miocaenica",
+  "src": {
+   "title": "Coronella miocaenica: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64899"
+  },
+  "countries": [
+   "Hungary",
+   "Romania"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Arad, Romania - Sarmatian (12.8 to 11.63 million years ago)",
+   "Ilfov, Romania - Tortonian (11.63 to 7.246 million years ago)",
+   "Hungary - Turolian (8.725 to 5.09 million years ago)"
+  ]
+ },
+ "coluber-robertmertensi": {
+  "sci": "Coluber robertmertensi",
+  "src": {
+   "title": "Coluber robertmertensi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64961"
+  },
+  "age": [
+   "early Pleistocene",
+   1.7
+  ],
+  "age_from": {
+   "interval": "Early Pleistocene",
+   "max": 2.58,
+   "min": 0.774,
+   "occurrence": "542191"
+  },
+  "countries": [
+   "Georgia"
+  ],
+  "continents": [
+   "Asia"
+  ],
+  "sites": [
+   "Georgia - Early Pleistocene (2.58 to 0.774 million years ago)"
+  ]
+ },
+ "natrix-parva": {
+  "sci": "Natrix parva",
+  "src": {
+   "title": "Natrix parva: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=64954"
+  },
+  "age": [
+   "late Miocene",
+   7
+  ],
+  "age_from": {
+   "interval": "Turolian",
+   "max": 8.725,
+   "min": 5.09,
+   "occurrence": "484705"
+  },
+  "countries": [
+   "Poland"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Siedlce, Poland - Turolian (8.725 to 5.09 million years ago)"
+  ]
+ },
+ "eryx-primitivus": {
+  "sci": "Eryx primitivus",
+  "src": {
+   "title": "Eryx primitivus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=53234"
+  },
+  "countries": [
+   "Spain"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Granada, Spain - Pliocene to Ruscinian (5.333 to 3.55 million years ago)"
+  ]
+ },
+ "liasis-dubudingala": {
+  "sci": "Liasis dubudingala",
+  "src": {
+   "title": "Liasis dubudingala: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=288562"
+  },
+  "countries": [
+   "Australia"
+  ],
+  "continents": [
+   "Oceania"
+  ],
+  "sites": [
+   "Allingham Formation, Queensland, Australia - Zanclean (5.333 to 3.6 million years ago)"
+  ]
+ },
+ "pollackophis-depressus": {
+  "sci": "Pollackophis depressus",
+  "src": {
+   "title": "Pollackophis depressus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=264350"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Calvert Formation, Delaware, United States - Burdigalian (20.45 to 15.98 million years ago)"
+  ]
+ },
+ "micrurus-gallicus": {
+  "sci": "Micrurus gallicus",
+  "src": {
+   "title": "Micrurus gallicus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=250519"
+  },
+  "countries": [
+   "France",
+   "Germany"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Rhône-Alpes, France - Orleanian to Middle Miocene (20 to 11.63 million years ago)",
+   "Bavaria, Germany - MN 4 (16.9 to 15.98 million years ago)",
+   "Midi-Pyrenees, France - MN 4 (16.9 to 15.98 million years ago)",
+   "Upper Freshwater Molasse, Bavaria, Germany - Langhian (15.98 to 13.82 million years ago)",
+   "Midi-Pyrenees, France - Langhian to Serravallian (15.98 to 11.63 million years ago)",
+   "Rhône-Alpes, France - MN 7 + 8 (12.75 to 11.1 million years ago)"
+  ]
+ },
+ "vipera-meotica": {
+  "sci": "Vipera meotica",
+  "src": {
+   "title": "Vipera meotica: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=319679"
+  },
+  "countries": [
+   "Ukraine"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Odessa, Ukraine - MN 12 (7.9 to 6.965 million years ago)",
+   "Odessa, Ukraine - MN 13 (6.965 to 5.09 million years ago)"
+  ]
+ },
+ "geringophis-robustus": {
+  "sci": "Geringophis robustus",
+  "src": {
+   "title": "Geringophis robustus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=262189"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Florida, United States - Whitneyan (31.8 to 29.5 million years ago)"
+  ]
+ },
+ "micronatrix-juliescottae": {
+  "sci": "Micronatrix juliescottae",
+  "src": {
+   "title": "Micronatrix juliescottae: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=178476"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Ash Hollow Formation, Nebraska, United States - Late Clarendonian (12.5 to 9.4 million years ago)"
+  ]
+ },
+ "floridaophis-auffenbergi": {
+  "sci": "Floridaophis auffenbergi",
+  "src": {
+   "title": "Floridaophis auffenbergi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=262218"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Florida, United States - Whitneyan (31.8 to 29.5 million years ago)"
+  ]
+ },
+ "hordleophis-balconae": {
+  "sci": "Hordleophis balconae",
+  "src": {
+   "title": "Hordleophis balconae: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=264174"
+  },
+  "countries": [
+   "United Kingdom"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Headon Beds, England, United Kingdom - Late Eocene (37.71 to 33.9 million years ago)"
+  ]
+ },
+ "natrix-merkurensis": {
+  "sci": "Natrix merkurensis",
+  "src": {
+   "title": "Natrix merkurensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=251199"
+  },
+  "countries": [
+   "Czechia",
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Most Formation, Ústí nad Labem, Czechia - Burdigalian (20.45 to 15.98 million years ago)",
+   "Midi-Pyrenees, France - MN 4 (16.9 to 15.98 million years ago)"
+  ]
+ },
+ "vipera-platyspondyla": {
+  "sci": "Vipera platyspondyla",
+  "src": {
+   "title": "Vipera platyspondyla: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=256069"
+  },
+  "age": [
+   "early Miocene",
+   16
+  ],
+  "age_from": {
+   "interval": "MN 4",
+   "max": 16.9,
+   "min": 15.98,
+   "occurrence": "297943"
+  },
+  "sites": [
+   "Bavaria, Germany - MN 4 (16.9 to 15.98 million years ago)",
+   "Karlovy Vary, Czechia - MN 4 (16.9 to 15.98 million years ago)"
+  ]
+ },
+ "totlandophis-thomasae": {
+  "sci": "Totlandophis thomasae",
+  "src": {
+   "title": "Totlandophis thomasae: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=262192"
+  },
+  "countries": [
+   "United Kingdom"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Headon Beds, England, United Kingdom - Late Eocene (37.71 to 33.9 million years ago)"
+  ]
+ },
+ "waincophis-pressulus": {
+  "sci": "Waincophis pressulus",
+  "src": {
+   "title": "Waincophis pressulus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=253249"
+  },
+  "countries": [
+   "Brazil"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "sites": [
+   "Rio de Janeiro, Brazil - Late Paleocene to Early Eocene (59.24 to 48.07 million years ago)"
+  ]
+ },
+ "malpolon-mlynarskii": {
+  "sci": "Malpolon mlynarskii",
+  "src": {
+   "title": "Malpolon mlynarskii: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=251192"
+  },
+  "countries": [
+   "Spain"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Soria, Spain - Ruscinian (5.09 to 3.55 million years ago)"
+  ]
+ },
+ "vipera-sarmatica": {
+  "sci": "Vipera sarmatica",
+  "src": {
+   "title": "Vipera sarmatica: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=318149"
+  },
+  "age": [
+   "late Miocene",
+   9
+  ],
+  "age_from": {
+   "interval": "MN 10",
+   "max": 9.67,
+   "min": 8.725,
+   "occurrence": "1263365"
+  },
+  "countries": [
+   "Moldova"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Anenii Noi, Moldova - MN 10 (9.67 to 8.725 million years ago)"
+  ]
+ },
+ "hispanophis-coronelloideus": {
+  "sci": "Hispanophis coronelloideus",
+  "src": {
+   "title": "Hispanophis coronelloideus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=318658"
+  },
+  "countries": [
+   "Spain"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Spain - Turolian (8.725 to 5.09 million years ago)"
+  ]
+ },
+ "colombophis-spinosus": {
+  "sci": "Colombophis spinosus",
+  "src": {
+   "title": "Colombophis spinosus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=179147"
+  },
+  "countries": [
+   "Brazil",
+   "Venezuela"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "sites": [
+   "Socorro Formation, Falcón, Venezuela - Middle Miocene (15.98 to 11.63 million years ago)",
+   "Solimões Formation, Amazonas, Brazil - Tortonian (11.63 to 7.246 million years ago)",
+   "Solimoes Formation, Acre, Brazil - Tortonian (11.63 to 7.246 million years ago)"
+  ]
+ },
+ "incongruelaps-iteratus": {
+  "sci": "Incongruelaps iteratus",
+  "src": {
+   "title": "Incongruelaps iteratus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=288525"
+  },
+  "countries": [
+   "Australia"
+  ],
+  "continents": [
+   "Oceania"
+  ],
+  "sites": [
+   "Queensland, Australia - Middle Miocene (15.98 to 11.63 million years ago)",
+   "Queensland, Australia - Tortonian (11.63 to 7.246 million years ago)"
+  ]
+ },
+ "arizona-voorhiesi": {
+  "sci": "Arizona voorhiesi",
+  "src": {
+   "title": "Arizona voorhiesi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=155166"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Ash Hollow Formation, Nebraska, United States - Hemphillian (9.4 to 4.7 million years ago)"
+  ]
+ },
+ "anilioides-nebraskensis": {
+  "sci": "Anilioides nebraskensis",
+  "src": {
+   "title": "Anilioides nebraskensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=260465"
+  },
+  "age": [
+   "early Miocene",
+   21
+  ],
+  "age_from": {
+   "interval": "Harrisonian",
+   "max": 23.1,
+   "min": 18.5,
+   "occurrence": "520376"
+  },
+  "sites": [
+   "Gering Formation, Nebraska, United States - Geringian (29.5 to 24.7 million years ago)",
+   "Monroe Creek Formation, Wyoming, United States - Monroecreekian (24.7 to 23.1 million years ago)",
+   "Harrison Formation, Nebraska, United States - Harrisonian (23.1 to 18.5 million years ago)",
+   "Fleming Formation, Texas, United States - Aquitanian (23.04 to 20.45 million years ago)"
+  ]
+ },
+ "vipera-gedulyi": {
+  "sci": "Vipera gedulyi",
+  "src": {
+   "title": "Vipera gedulyi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=250807"
+  },
+  "countries": [
+   "Hungary"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Central Transdanubia, Hungary - MN 13 (6.965 to 5.09 million years ago)"
+  ]
+ },
+ "morelia-antiqua": {
+  "sci": "Morelia antiqua",
+  "src": {
+   "title": "Morelia antiqua: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=269372"
+  },
+  "countries": [
+   "Australia"
+  ],
+  "continents": [
+   "Oceania"
+  ],
+  "sites": [
+   "Camfield Beds, Northern Territory, Australia - Middle Miocene (15.98 to 11.63 million years ago)"
+  ]
+ },
+ "paraungaliophis-pricei": {
+  "sci": "Paraungaliophis pricei",
+  "src": {
+   "title": "Paraungaliophis pricei: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=315267"
+  },
+  "countries": [
+   "Brazil"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "sites": [
+   "Rio de Janeiro, Brazil - Late Paleocene to Early Eocene (59.24 to 48.07 million years ago)"
+  ]
+ },
+ "coluber-dolnicensis": {
+  "sci": "Coluber dolnicensis",
+  "src": {
+   "title": "Coluber dolnicensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=256068"
+  },
+  "countries": [
+   "Czechia",
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Most Formation, Ústí nad Labem, Czechia - Burdigalian (20.45 to 15.98 million years ago)",
+   "Karlovy Vary, Czechia - MN 4 (16.9 to 15.98 million years ago)",
+   "Rhône-Alpes, France - MN 7 + 8 (12.75 to 11.1 million years ago)"
+  ]
+ },
+ "waincophis-cameratus": {
+  "sci": "Waincophis cameratus",
+  "src": {
+   "title": "Waincophis cameratus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=253250"
+  },
+  "countries": [
+   "Brazil"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "sites": [
+   "Rio de Janeiro, Brazil - Late Paleocene to Early Eocene (59.24 to 48.07 million years ago)"
+  ]
+ },
+ "vipera-natiensis": {
+  "sci": "Vipera natiensis",
+  "src": {
+   "title": "Vipera natiensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=250651"
+  },
+  "countries": [
+   "Spain"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Balearic Islands, Spain - Pliocene (5.333 to 2.58 million years ago)",
+   "Balearic Islands, Spain - Early Pliocene (5.333 to 3.6 million years ago)"
+  ]
+ },
+ "elaphe-praelongissima": {
+  "sci": "Elaphe praelongissima",
+  "src": {
+   "title": "Elaphe praelongissima: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=250806"
+  },
+  "age": [
+   "early Pliocene",
+   4.5
+  ],
+  "age_from": {
+   "interval": "Early Pliocene",
+   "max": 5.333,
+   "min": 3.6,
+   "occurrence": "1083520"
+  },
+  "countries": [
+   "Hungary"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Hungary - Turolian (8.725 to 5.09 million years ago)",
+   "Komárom-Esztergom, Hungary - MN 12 (7.9 to 6.965 million years ago)",
+   "Central Transdanubia, Hungary - MN 13 (6.965 to 5.09 million years ago)",
+   "North Hungary, Hungary - Early Pliocene (5.333 to 3.6 million years ago)"
+  ]
+ },
+ "vipera-ukrainica": {
+  "sci": "Vipera ukrainica",
+  "src": {
+   "title": "Vipera ukrainica: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=318142"
+  },
+  "countries": [
+   "Ukraine"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Khmel'nitsk'yi, Ukraine - Vallesian (11.63 to 8.725 million years ago)"
+  ]
+ },
+ "chubutophis-grandis": {
+  "sci": "Chubutophis grandis",
+  "src": {
+   "title": "Chubutophis grandis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=341251"
+  },
+  "countries": [
+   "Argentina"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "sites": [
+   "Sarmiento Formation, Chubut, Argentina - Casamayoran (56 to 48 million years ago)"
+  ]
+ },
+ "paleoheterodon-arcuatus": {
+  "sci": "Paleoheterodon arcuatus",
+  "src": {
+   "title": "Paleoheterodon arcuatus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=250516"
+  },
+  "age": [
+   "late Miocene",
+   6.5
+  ],
+  "age_from": {
+   "interval": "Messinian",
+   "max": 7.246,
+   "min": 5.333,
+   "occurrence": "1563658"
+  },
+  "countries": [
+   "France",
+   "Italy"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Midi-Pyrenees, France - Langhian to Serravallian (15.98 to 11.63 million years ago)",
+   "Rhône-Alpes, France - MN 7 + 8 (12.75 to 11.1 million years ago)",
+   "Colombacci Formation, Ravenna, Italy - Messinian (7.246 to 5.333 million years ago)"
+  ]
+ },
+ "neurodromicus-dorsalis": {
+  "sci": "Neurodromicus dorsalis",
+  "src": {
+   "title": "Neurodromicus dorsalis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=172899"
+  },
+  "age": [
+   "early Oligocene",
+   33
+  ],
+  "age_from": {
+   "interval": "Orellan",
+   "max": 33.9,
+   "min": 31.8,
+   "occurrence": "1336958"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Brule Formation, Colorado, United States - Orellan (33.9 to 31.8 million years ago)"
+  ]
+ },
+ "rukwanyoka-holmani": {
+  "sci": "Rukwanyoka holmani",
+  "src": {
+   "title": "Rukwanyoka holmani: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=317152"
+  },
+  "countries": [
+   "Tanzania"
+  ],
+  "continents": [
+   "Africa"
+  ],
+  "sites": [
+   "Nsungwe Formation, Mbeya, Tanzania - Late Oligocene (27.3 to 23.04 million years ago)"
+  ]
+ },
+ "vipera-maxima": {
+  "sci": "Vipera maxima",
+  "src": {
+   "title": "Vipera maxima: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=251193"
+  },
+  "countries": [
+   "Spain"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Soria, Spain - Ruscinian (5.09 to 3.55 million years ago)"
+  ]
+ },
+ "crotalus-potterensis": {
+  "sci": "Crotalus potterensis",
+  "src": {
+   "title": "Crotalus potterensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=367196"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "California, United States - Late Pleistocene (0.129 to 0.0117 million years ago)"
+  ]
+ },
+ "palaeoelaphe-kansensis": {
+  "sci": "Palaeoelaphe kansensis",
+  "src": {
+   "title": "Palaeoelaphe kansensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=155150"
+  },
+  "age": [
+   "late Miocene",
+   7
+  ],
+  "age_from": {
+   "interval": "Hemphillian",
+   "max": 9.4,
+   "min": 4.7,
+   "occurrence": "829566"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Ash Hollow Formation, Nebraska, United States - Late Clarendonian (12.5 to 9.4 million years ago)",
+   "Ogallala Formation, Kansas, United States - Hemphillian (9.4 to 4.7 million years ago)"
+  ]
+ },
+ "coluber-kormosi": {
+  "sci": "Coluber kormosi",
+  "src": {
+   "title": "Coluber kormosi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=250730"
+  },
+  "countries": [
+   "Hungary"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Komárom-Esztergom, Hungary - MN 12 (7.9 to 6.965 million years ago)",
+   "Central Transdanubia, Hungary - MN 13 (6.965 to 5.09 million years ago)",
+   "North Hungary, Hungary - Early Pliocene (5.333 to 3.6 million years ago)"
+  ]
+ },
+ "paleryx-rhombifer": {
+  "sci": "Paleryx rhombifer",
+  "src": {
+   "title": "Paleryx rhombifer: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=346432"
+  },
+  "age": [
+   "late Eocene",
+   36
+  ],
+  "age_from": {
+   "interval": "Late Eocene",
+   "max": 37.71,
+   "min": 33.9,
+   "occurrence": "408691"
+  },
+  "sites": [
+   "Lower Headon Beds, England, United Kingdom - Late Eocene (37.71 to 33.9 million years ago)",
+   "Headon Hill, England, United Kingdom - Late Eocene (37.71 to 33.9 million years ago)",
+   "Headon Beds, England, United Kingdom - Late Eocene (37.71 to 33.9 million years ago)",
+   "Headon Hill, England, United Kingdom - MP 17A to MP 17B (37.71 to 33.9 million years ago)"
+  ]
+ },
+ "zilantophis-schuberti": {
+  "sci": "Zilantophis schuberti",
+  "src": {
+   "title": "Zilantophis schuberti: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=452585"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Tennessee, United States - Late Hemphillian to Blancan (9.4 to 1.4 million years ago)"
+  ]
+ },
+ "cadurceryx-filholi": {
+  "sci": "Cadurceryx filholi",
+  "src": {
+   "title": "Cadurceryx filholi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=72132"
+  },
+  "age": [
+   "late Eocene",
+   36
+  ],
+  "age_from": {
+   "interval": "Priabonian",
+   "max": 37.71,
+   "min": 33.9,
+   "occurrence": "474171"
+  },
+  "sites": [
+   "Quercy, Midi-Pyrenees Region, France - Bartonian (41.03 to 37.71 million years ago)",
+   "Perriere Formation, Quercy, Midi-Pyrenees Region, France - Priabonian (37.71 to 33.9 million years ago)",
+   "Perrière Formation, Quercy, Midi-Pyrenees Region, France - Priabonian (37.71 to 33.9 million years ago)",
+   "Quercy, Midi-Pyrenees Region, France - Priabonian (37.71 to 33.9 million years ago)",
+   "Perrière Formation, Quercy, France - Late Eocene (37.71 to 33.9 million years ago)"
+  ]
+ },
+ "szyndlaria-aureomontensis": {
+  "sci": "Szyndlaria aureomontensis",
+  "src": {
+   "title": "Szyndlaria aureomontensis: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=346454"
+  },
+  "countries": [
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Rhone, France - Lutetian (48.07 to 41.03 million years ago)"
+  ]
+ },
+ "ogmophus-arenarum": {
+  "sci": "Ogmophus arenarum",
+  "src": {
+   "title": "Ogmophus arenarum: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=173177"
+  },
+  "age": [
+   "middle Miocene",
+   14
+  ],
+  "age_from": {
+   "interval": "Barstovian",
+   "max": 16.3,
+   "min": 12.5,
+   "occurrence": "898051"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Montana, United States - Barstovian (16.3 to 12.5 million years ago)"
+  ]
+ },
+ "naja-suevica": {
+  "sci": "Naja suevica",
+  "src": {
+   "title": "Naja suevica: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=251344"
+  },
+  "age": [
+   "middle Miocene",
+   12
+  ],
+  "age_from": {
+   "interval": "MN 7 + 8",
+   "max": 12.75,
+   "min": 11.1,
+   "occurrence": "1087119"
+  },
+  "countries": [
+   "Czechia",
+   "Germany"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Most Formation, Ústí nad Labem, Czechia - Burdigalian (20.45 to 15.98 million years ago)",
+   "Baden-Württemberg, Germany - MN 7 + 8 (12.75 to 11.1 million years ago)"
+  ]
+ },
+ "natrix-mlynarskii": {
+  "sci": "Natrix mlynarskii",
+  "src": {
+   "title": "Natrix mlynarskii: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=346184"
+  },
+  "age": [
+   "early Oligocene",
+   31
+  ],
+  "age_from": {
+   "interval": "MP 22",
+   "max": 33.9,
+   "min": 27.3,
+   "occurrence": "1340628"
+  },
+  "countries": [
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Quercy Phosphorites, Languedoc-Roussillon-Midi-Pyrénées, France - Late Eocene to Early Miocene (37.71 to 15.98 million years ago)",
+   "Quercy, France - MP 22 (33.9 to 27.3 million years ago)"
+  ]
+ },
+ "sanjuanophis-froehlichi": {
+  "sci": "Sanjuanophis froehlichi",
+  "src": {
+   "title": "Sanjuanophis froehlichi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=356531"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "San Jose Formation, New Mexico, United States - Wasatchian (56 to 51.1 million years ago)"
+  ]
+ },
+ "dolniceophis-lehmani": {
+  "sci": "Dolniceophis lehmani",
+  "src": {
+   "title": "Dolniceophis lehmani: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=256063"
+  },
+  "countries": [
+   "Czechia",
+   "France",
+   "Germany"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Bavaria, Germany - MN 4 (16.9 to 15.98 million years ago)",
+   "Midi-Pyrenees, France - MN 4 (16.9 to 15.98 million years ago)",
+   "Karlovy Vary, Czechia - MN 4 (16.9 to 15.98 million years ago)",
+   "Midi-Pyrenees, France - Langhian to Serravallian (15.98 to 11.63 million years ago)"
+  ]
+ },
+ "tropidonotus-atavus": {
+  "sci": "Tropidonotus atavus",
+  "src": {
+   "title": "Tropidonotus atavus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=135033"
+  },
+  "countries": [
+   "Germany"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "North Rhine-Westfalia, Germany - MP 30 (27.3 to 23.04 million years ago)",
+   "Baden-Württemberg, Germany - MP 27 (27.3 to 23.04 million years ago)"
+  ]
+ },
+ "coluber-cadurci": {
+  "sci": "Coluber cadurci",
+  "src": {
+   "title": "Coluber cadurci: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=346267"
+  },
+  "age": [
+   "early Miocene",
+   18
+  ],
+  "age_from": {
+   "interval": "Orleanian",
+   "max": 20,
+   "min": 15.98,
+   "occurrence": "1086574"
+  },
+  "sites": [
+   "Midi-Pyrenées, France - MP 22 (33.9 to 27.3 million years ago)",
+   "Quercy, France - MP 22 (33.9 to 27.3 million years ago)",
+   "Quercy, France - MP 23 (33.9 to 27.3 million years ago)",
+   "France - Rupelian (33.9 to 27.3 million years ago)",
+   "France - Chattian (27.3 to 23.04 million years ago)",
+   "France - MP 25 (27.3 to 23.04 million years ago)",
+   "Rhineland-Palatinate, Germany - MN 1 (23.04 to 22.4 million years ago)",
+   "Castile-La Mancha, Spain - Orleanian (20 to 15.98 million years ago)"
+  ]
+ },
+ "cadurceryx-pearchi": {
+  "sci": "Cadurceryx pearchi",
+  "src": {
+   "title": "Cadurceryx pearchi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=346429"
+  },
+  "countries": [
+   "United Kingdom"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Headon Beds, England, United Kingdom - Late Eocene (37.71 to 33.9 million years ago)"
+  ]
+ },
+ "paleryx-cayluxi": {
+  "sci": "Paleryx cayluxi",
+  "src": {
+   "title": "Paleryx cayluxi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=346367"
+  },
+  "countries": [
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Quercy Phosphorites, Languedoc-Roussillon-Midi-Pyrénées, France - Late Eocene to Early Miocene (37.71 to 15.98 million years ago)"
+  ]
+ },
+ "aphelophis-talpivorus": {
+  "sci": "Aphelophis talpivorus",
+  "src": {
+   "title": "Aphelophis talpivorus: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=172897"
+  },
+  "age": [
+   "early Oligocene",
+   33
+  ],
+  "age_from": {
+   "interval": "Orellan",
+   "max": 33.9,
+   "min": 31.8,
+   "occurrence": "1336404"
+  },
+  "countries": [
+   "United States"
+  ],
+  "continents": [
+   "North America"
+  ],
+  "sites": [
+   "Brule Formation, Colorado, United States - Orellan (33.9 to 31.8 million years ago)"
+  ]
+ },
+ "plesiotortrix-edwardsi": {
+  "sci": "Plesiotortrix edwardsi",
+  "src": {
+   "title": "Plesiotortrix edwardsi: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=346366"
+  },
+  "countries": [
+   "France"
+  ],
+  "continents": [
+   "Europe"
+  ],
+  "sites": [
+   "Quercy Phosphorites, Languedoc-Roussillon-Midi-Pyrénées, France - Late Eocene to Early Miocene (37.71 to 15.98 million years ago)"
+  ]
+ },
+ "eunectes-stirtoni": {
+  "sci": "Eunectes stirtoni",
+  "src": {
+   "title": "Eunectes stirtoni: fossil occurrences",
+   "publisher": "Paleobiology Database",
+   "url": "https://paleobiodb.org/classic/checkTaxonInfo?taxon_no=355353"
+  },
+  "countries": [
+   "Colombia"
+  ],
+  "continents": [
+   "South America"
+  ],
+  "sites": [
+   "Villavieja Formation, Huila, Colombia - Laventan (13.8 to 11 million years ago)"
+  ]
+ },
+ "sivaophis-downsi": {
+  "sci": "Sivaophis downsi",
+  "src": {
+   "title": "Snakes of the Siwalik Group (Miocene of Pakistan): systematics and relationship to environmental change (Head 2005)",
+   "publisher": "Palaeontologia Electronica 8(1): 18A",
+   "url": "https://palaeo-electronica.org/2005_1/head18/issue1_05.htm"
+  },
+  "age": [
+   "late Miocene",
+   6.35
+  ],
+  "age_from": {
+   "interval": "locality DP-13",
+   "max": 6.35,
+   "min": 6.35
+  },
+  "countries": [
+   "Pakistan"
+  ],
+  "continents": [
+   "Asia"
+  ],
+  "sites": [
+   "Siwalik Group, Potwar Plateau, Pakistan - localities dated 13.60 to 6.35 million years ago"
+  ]
+ },
+ "chotaophis-padhriensis": {
+  "sci": "Chotaophis padhriensis",
+  "src": {
+   "title": "Snakes of the Siwalik Group (Miocene of Pakistan): systematics and relationship to environmental change (Head 2005)",
+   "publisher": "Palaeontologia Electronica 8(1): 18A",
+   "url": "https://palaeo-electronica.org/2005_1/head18/issue1_05.htm"
+  },
+  "countries": [
+   "Pakistan"
+  ],
+  "continents": [
+   "Asia"
+  ],
+  "sites": [
+   "Siwalik Group, Potwar Plateau, Pakistan - localities Y-367 (8.95 million years ago) and Y-457 (7.30 million years ago)"
+  ]
+ },
+ "gansophis-potwarensis": {
+  "sci": "Gansophis potwarensis",
+  "src": {
+   "title": "Snakes of the Siwalik Group (Miocene of Pakistan): systematics and relationship to environmental change (Head 2005)",
+   "publisher": "Palaeontologia Electronica 8(1): 18A",
+   "url": "https://palaeo-electronica.org/2005_1/head18/issue1_05.htm"
+  },
+  "countries": [
+   "Pakistan"
+  ],
+  "continents": [
+   "Asia"
+  ],
+  "sites": [
+   "Siwalik Group, Potwar Plateau, Pakistan - locality Y-908 (6.78 million years ago)"
+  ]
+ }
+}

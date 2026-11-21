@@ -1,0 +1,107 @@
+{
+  "id": "pituophis-catenifer",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Blainville, 1835)",
+  "facts": {
+    "length": {
+      "text": "About 0.9 to 2.1 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Gopher Snake (its eastern form is the Bullsnake) is a big, non-venomous snake of western and central North America. It is often mistaken for a rattlesnake, which it imitates when it is scared.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Yellowish or sandy brown with a row of large dark brown or black blotches and smaller dark spots on the sides; the belly is yellowish. It has no rattle.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually about 91 to 213 cm (3 to 7 ft) long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Western and central North America, from southern British Columbia, Alberta and Saskatchewan through the western and central United States to northern Mexico and Baja California.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "When threatened it puffs up, hisses, coils like a rattlesnake and shakes its tail; it often strikes with its mouth closed, just bumping with its nose to warn the attacker.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Gopher snakes on islands with no rattlesnakes shake their tails for less time than those living alongside rattlesnakes.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Big blotched snake without a rattle.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Hisses loudly and copies a rattlesnake when scared.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Pituophis catenifer",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Pituophis_catenifer"
+    },
+    "rdb": {
+      "title": "Pituophis catenifer",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Pituophis&species=catenifer"
+    }
+  }
+}

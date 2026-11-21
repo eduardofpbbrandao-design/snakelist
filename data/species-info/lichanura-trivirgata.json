@@ -1,0 +1,102 @@
+{
+  "id": "lichanura-trivirgata",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Cope, 1861",
+  "facts": {
+    "reproduction": {
+      "text": "Live young, about 6 at a time",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Rosy Boa is a small, calm boa of the deserts of the south-western United States and north-western Mexico. It is one of only a few boas native to the mainland United States.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Usually three stripes (orange, tan, brown or pink) run down a pale body - 'trivirgata' means 'three-striped'. Colours vary a lot from place to place; some have a pink, rosy belly.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "A small boa: even a big adult's body is only about as thick as a golf ball.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern California and south-western Arizona in the USA, and Baja California and western Sonora in Mexico.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Rocky deserts - most often granite outcrops. Where there are few rocks it hides in rodent burrows.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Spends most of its life hidden under rocks and in cracks, away from heat and predators.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young, about six at a time; the babies can be up to 30 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Three long stripes down the body.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Small, smooth and fairly thick-bodied.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Lichanura trivirgata",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Lichanura_trivirgata"
+    },
+    "rdb": {
+      "title": "Lichanura trivirgata",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Lichanura&species=trivirgata"
+    }
+  }
+}

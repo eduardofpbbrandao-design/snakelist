@@ -1,0 +1,131 @@
+{
+  "id": "corallus-hortulana",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "Usually about 1.5 to 2 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Frogs, lizards, birds and small mammals",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Amazon Tree Boa is a slim, non-venomous boa of South American forests. It comes in a huge range of colours and spends most of its life in trees, hunting at night.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Colours range from black, brown or grey to red, orange or yellow, plain, speckled or banded. There are usually five dark stripes running back from the eyes, and the eyes shine at night.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually about 1.5 to 2 m long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Amazonia and the Guianas to south-eastern Brazil: Colombia (east of the Andes), Venezuela, Guyana, Suriname, French Guiana, Brazil, Ecuador, Peru and Bolivia.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Most common in humid rainforest, but also found in drier savannas and dry forests. Usually found well above the ground in trees, though it sometimes feeds and breeds on the ground.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Mainly active at night and lives in trees.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Like all boas it kills by squeezing (constriction). It eats a very wide range of animals: tree frogs, lizards, birds, bats, rodents and other small mammals. Its long teeth help it hold on to prey in the trees.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Two snakes of the very same species can look completely different - one bright yellow, another dark brown.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Thin body with a big head and a long tail for gripping branches.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Five dark stripes running back from the eyes (usually).",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Corallus hortulana",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Corallus_hortulana"
+    },
+    "rdb": {
+      "title": "Corallus hortulana",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Corallus&species=hortulana"
+    }
+  }
+}

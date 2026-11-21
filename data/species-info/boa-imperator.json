@@ -1,0 +1,115 @@
+{
+  "id": "boa-imperator",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Daudin, 1803",
+  "facts": {
+    "length": {
+      "text": "About 1.3 to 2.5 m; up to 3.7 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mostly mammals and birds",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Central American Boa (or Northern Boa) is a large, heavy, non-venomous boa from Mexico to north-western South America. It was long counted as part of the Boa Constrictor, and is one of the most popular pet snakes in the world.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Its looks vary a lot from place to place; like other boas it has a patterned body with darker saddles and a strong, heavy build.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually about 1.3 to 2.5 m long and around 6 kg, but up to 3.7 m; females are much larger than males.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Mexico, Central America (Guatemala, Belize, El Salvador, Honduras, Nicaragua, Costa Rica, Panama), and Colombia and Ecuador west of the Andes, plus some small islands.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Prefers rainforest, which gives it humidity, warmth, cover and plenty of prey.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Lives alone and is most active at dawn and dusk. Young boas climb into trees and shrubs, but adults are heavier and spend more time on the ground. It strikes if it feels threatened; a big boa's bite hurts but is not venomous.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Kills by squeezing (constriction). Eats mainly mammals - from rats and squirrels to opossums, agoutis, coatis and even monkeys - and birds.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Large, heavy boa with dark saddles.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Boa imperator",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Boa_imperator"
+    },
+    "rdb": {
+      "title": "Boa imperator",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Boa&species=imperator"
+    }
+  }
+}

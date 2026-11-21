@@ -1,0 +1,122 @@
+{
+  "id": "morelia-spilota",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Lacépède, 1804)",
+  "facts": {
+    "length": {
+      "text": "About 2 m on average; up to about 4 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 10 to 50 at a time",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Small mammals, birds and lizards",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Carpet Python is a large, non-venomous python of Australia and New Guinea. Its patterned skin looks a little like an old carpet. There are several subspecies, including the Diamond Python of south-eastern Australia.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A triangular head with a row of heat-sensing pits along the lips. Colour and pattern vary greatly between areas.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually about 2 m long, but up to about 4 m; females are often bigger and heavier than males.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Most of mainland Australia except the dry centre, and southern New Guinea (Indonesia and Papua New Guinea).",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "A wide range of habitats, from rainforest in north-eastern Queensland to river woodlands and forests elsewhere.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Can be active by day or night and often climbs trees, but also lives on the ground and basks in open spots.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Kills its prey by squeezing (constriction): mainly small mammals, birds and lizards.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 10 to 50 eggs. The mother coils around them and twitches her muscles to warm them until they hatch.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Big python with a triangular head and pits along the lips.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Busy, carpet-like pattern.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Carpet python",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Carpet_python"
+    },
+    "rdb": {
+      "title": "Morelia spilota",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Morelia&species=spilota"
+    }
+  }
+}

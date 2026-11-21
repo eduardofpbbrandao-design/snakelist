@@ -1,0 +1,114 @@
+{
+  "id": "storeria-dekayi",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Holbrook, 1839)",
+  "facts": {
+    "length": {
+      "text": "Small: usually under 30 cm; record about 49 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Slugs, snails and earthworms",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "De Kay's Brown Snake is a small, harmless snake of eastern North America and Central America. It is very common and is often found in towns, gardens and city parks.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Brown to grey with a paler stripe down the middle of the back, edged with small black spots. The belly is pale brown or pinkish with tiny black dots at the edges.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually less than 30 cm (12 in) long; the record is about 49 cm. Newborns are only about 7.7 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern Ontario and Quebec, most of the eastern half of the United States, and south through Mexico to Guatemala and Honduras.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Most kinds of wet and dry habitats east of the Great Plains, from sea level to about 1,400 m. It likes moist places and is most often found near people - in cities more than in the countryside.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly slugs, snails and earthworms.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Mates in spring after its winter rest and gives birth to live young. Females can store sperm, so the babies are born when food is plentiful.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Small brown snake with a pale stripe down the back.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Two rows of small black spots along the stripe.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Storeria dekayi",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Storeria_dekayi"
+    },
+    "rdb": {
+      "title": "Storeria dekayi",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Storeria&species=dekayi"
+    }
+  }
+}
