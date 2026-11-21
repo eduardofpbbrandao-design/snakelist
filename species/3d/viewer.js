@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=574'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=574'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=576'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=576'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -569,10 +569,13 @@ function makePose(P, F, seed) {
   const eAt = (x) => { const f = clamp(x / ds, 0, N - 1.0001), i = Math.floor(f), t = f - i; return lerp(E[i], E[i + 1], t); };
   // v5.35: tree snakes lie along a branch above the ground (see addBranch)
   const perch = pose.kind === 'branch' ? (pose.perch != null ? pose.perch : clamp(L * 0.55, 0.45, 1.1)) : 0; // (v5.68: up in a shrub or tree)
-  const Ly = special ? eAt : (x) => lift * (1 - sstep(F.Hl * 0.7, liftLen, x)) + eAt(x) + perch;
+  // v5.83: a real branch is not level: it droops towards its thin end (past the head) and rises gently into the tree,
+  // with a slight bow along the way - and the snake lying on it follows it
+  const bY = perch ? (x) => { const f = clamp(x / L, 0, 1); return -Math.min(0.1, L * 0.06) * (1 - f) * (1 - f) + Math.min(0.025, L * 0.014) * Math.sin(f * 5.1 + 0.6); } : null;
+  const Ly = special ? eAt : (x) => lift * (1 - sstep(F.Hl * 0.7, liftLen, x)) + eAt(x) + perch + (bY ? bY(x) : 0);
   // (v5.62: a draped snake's 'up' at each point is away from the branch, so the belly lies on it)
   const upAt = special && special.N ? (x) => { const f = clamp(x / ds, 0, N - 1.0001), i = Math.floor(f), t = f - i, a = special.N[i], b = special.N[i + 1]; return new THREE.Vector3(lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)).normalize(); } : null;
-  return { pts, at, Ly, ds, N, stacked, perch, upAt, raised: !!(special && special.raised), drape: special && special.drape };
+  return { pts, at, Ly, bY, ds, N, stacked, perch, upAt, raised: !!(special && special.raised), drape: special && special.drape };
 }
 
 // ---------- v5.62 (model accuracy): special resting poses ----------
@@ -617,8 +620,21 @@ function drapePose(P, F, pose, R, N, ds, wMax) {
   const L = F.L, rB = clamp(F.w0 * (pose.branchK || 1.3), 0.008, 0.035), cOff = F.Hh(L * 0.45) * F.bf, Rr = rB + cOff;
   const pitch = wMax * 2 * (pose.pitch || 1.15);
   // the coil: head at its centre, walking outward; a rounder centre, loops longer across the branch
-  const sp = spiralLine(L, ds, pitch, pitch * (pose.inner || 0.75), pose.sqx || 1.0, pose.sqz || 1.5, R, 0.12, Math.PI / 2);
-  const flat = resample(sp, N, ds);
+  // v5.83: the tail is tucked in the middle of the coil and the body spirals outward; the neck leaves the outer loop and
+  // comes back across the top of the coil, the head resting level on the loops in the middle - the way a real emerald
+  // tree boa or green tree python sits (the head used to curl into the middle, rolled onto its side by the fold)
+  const r0 = pitch * (pose.inner || 0.75), sqx = pose.sqx || 1.0, sqz = pose.sqz || 1.5, Lh = Math.min(L * 0.17, F.Hl * 2.8), m = Math.max(F.W(L * 0.2) * 2.2, pitch * 0.9);
+  const Ls = L - Lh - (Math.PI / 2) * m, wSeed = Math.floor(R() * 4294967295); let th0 = 0, sp0 = null; // (one draw from the species' own numbers, as before)
+  for (let it = 0; it < 4; it++) { // (the coil's outer end on the far side of the branch's middle line, heading across it)
+    sp0 = resample(spiralLine(Ls, ds, pitch, r0, sqx, sqz, rng(wSeed), 0.12, th0), Math.round(Ls / ds), ds);
+    const e = sp0[sp0.length - 1], ang = Math.atan2(e[1] / sqz, e[0] / sqx); th0 -= Math.atan2(Math.sin(ang), Math.cos(ang));
+  }
+  const tailFirst = sp0.slice(); { const e = sp0[sp0.length - 1], f = sp0[sp0.length - 2], tl = Math.hypot(e[0] - f[0], e[1] - f[1]) || 1, t0 = [(e[0] - f[0]) / tl, (e[1] - f[1]) / tl];
+    const sg = t0[1] >= 0 ? 1 : -1, E2 = [e[0] - m, e[1] + sg * m], mm = m * 1.6;
+    for (let k = 1; k <= 24; k++) { const t = k / 24, h00 = 2 * t * t * t - 3 * t * t + 1, h10 = t * t * t - 2 * t * t + t, h01 = -2 * t * t * t + 3 * t * t, h11 = t * t * t - t * t; tailFirst.push([e[0] * h00 + t0[0] * mm * h10 + E2[0] * h01 - mm * h11, e[1] * h00 + t0[1] * mm * h10 + E2[1] * h01]); }
+    for (let k = 1; k <= 40; k++) tailFirst.push([E2[0] - (Lh * 1.2 * k) / 40, E2[1]]); }
+  const flat = resample(tailFirst.reverse(), N, ds);
+  const nLead = Math.round((Lh + m * 1.6) / ds);
   let hang = 0; for (const p of flat) hang = Math.max(hang, Math.abs(p[1]) - (Math.PI / 2) * Rr);
   // v5.68: up in a tree - the branch at a real perching height (about 0.5-1.3 m), never just off the ground
   const hB = Math.max(hang + Rr + F.Hh(L * 0.5) * 2 + L * 0.03, clamp(L * 0.65, 0.5, 1.3));
@@ -629,6 +645,20 @@ function drapePose(P, F, pose, R, N, ds, wMax) {
     if (s <= q) { const al = s / Rr; hz = Rr * Math.sin(al); y = hB + Rr * Math.cos(al); n = [0, Math.cos(al), sg * Math.sin(al)]; }
     else { hz = Rr; y = hB - (s - q); n = [0, 0, sg]; }
     const x = i * ds; pts[i] = [u, sg * hz]; E[i] = y - F.Hh(x) * F.BF(x); Nn[i] = n;
+  }
+  { // the head and neck rest on top of the loops that cross under them (and ease down onto the branch where none do)
+    const need = new Float32Array(N), Y = new Float32Array(N); for (let i = 0; i < N; i++) Y[i] = E[i] + F.Hh(i * ds) * F.BF(i * ds);
+    for (let i = 0; i < Math.min(N, nLead + 20); i++) {
+      let m = Y[i]; const wi = F.W(i * ds);
+      for (let j = i + 20; j < N; j += 2) { const wj = F.W(j * ds), d = Math.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1]), rr = (wi + wj) * 1.05; if (d < rr) m = Math.max(m, Y[j] + (F.Hh(j * ds) + F.Hh(i * ds)) * F.bf * Math.sqrt(1 - (d / rr) ** 2)); }
+      need[i] = m;
+    }
+    const nn = Math.min(N, nLead + 20), Z = need.slice(0, nn);
+    for (let it = 0; it < 3; it++) { for (let i = 1; i < nn; i++) Z[i] = Math.max(Z[i], Z[i - 1] - ds * 0.5); for (let i = nn - 2; i >= 0; i--) Z[i] = Math.max(Z[i], Z[i + 1] - ds * 0.5); }
+    const hd = Math.max(...Z.slice(0, Math.round(Lh * 0.6 / ds))); // (the head itself held level)
+    for (let i = 0; i < nn; i++) { const k = 1 - sstep(Lh * 0.45, Lh * 0.7, i * ds); Z[i] = Math.max(Z[i], lerp(Z[i], hd, k)); }
+    for (let it = 0; it < 20; it++) for (let i = 1; i < nn - 1; i++) Z[i] = Math.max(need[i], (Z[i - 1] + Z[i] * 2 + Z[i + 1]) / 4);
+    for (let i = 0; i < nn; i++) { const w = 1 - sstep(nn - 20, nn, i); E[i] = lerp(E[i], Z[i] - F.Hh(i * ds) * F.BF(i * ds), w); if (i < nLead) Nn[i] = [0, 1, 0]; }
   }
   let u0 = 1e9, u1 = -1e9; for (const p of pts) { u0 = Math.min(u0, p[0]); u1 = Math.max(u1, p[0]); }
   return { pts, E, N: Nn, drape: { hB, rB, u0, u1 } };
@@ -2194,6 +2224,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     // finer rings near the middle so the riverbank slope is smooth
     const tG = performance.now(); const tex = groundTexture(S.ground, seed + 5, quality !== 'low'); perfT('groundTex', tG); tex.anisotropy = ctx.renderer.capabilities.getMaxAnisotropy(); const rep = (groundR * 2) / S.tile; tex.repeat.set(rep, rep); // v5.50: the leaves and stones painted on the ground keep their real size (S.tile metres per tile) for every snake
     const gm = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.96, metalness: 0, bumpMap: tex, bumpScale: Math.min(1, L * 0.5) * 0.6 });
+    if (NATURE.groundDetail) NATURE.groundDetail(THREE, gm, S.ground, ctx, { onLoad: () => ctx.afterNature && ctx.afterNature() }); // v5.83: sharp close up
     if (S.water === 'river') {
       // the bank slopes down into shallow water on one side, away from the snake
       const geo = new THREE.PlaneGeometry(groundR * 2, groundR * 2, 160, 160); geo.rotateX(-Math.PI / 2);
@@ -2217,7 +2248,8 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
       wm.normalMap.repeat.set(groundR * 2 / 1.6, groundR * 2 / 1.6); // ripples at their real size (the pattern repeats every 1.6 m)
       const wSeg = quality === 'low' ? 40 : 80, wg = new THREE.PlaneGeometry(groundR * 2, groundR * 2, wSeg, wSeg); wg.rotateX(-Math.PI / 2);
       const water = new THREE.Mesh(wg, wm); water.position.y = -depth * 0.35; water.renderOrder = 2; scene.add(water); ctx.fadeMats.push(wm);
-      if (NATURE.water) NATURE.water(THREE, water, { swell: 0.003, calmR: Math.max(Rb * 0.6, 0.15), drift: 0.025 }); // v5.73: gentle moving ripples on the river
+      if (NATURE.water) NATURE.water(THREE, water, { swell: 0.003, calmR: Math.max(Rb * 0.6, 0.15), drift: 0.025, refract: quality !== 'low', size: groundR * 2, track: ctx.track, bed: (x, z) => -depth * sstep(edge - 0.06, edge + 0.55, x * dir.x + z * dir.y + wob(-x * dir.y + z * dir.x)) }); // v5.73: gentle moving ripples on the river (v5.83: refraction, foam at the shore)
+      if (gm.userData.caustics) gm.userData.caustics(water.position.y); // v5.83: caustics on the bed
       ctx.waterInfo = { dir, edge, wob, depth };
       groundH = (x, z) => -depth * sstep(edge - 0.06, edge + 0.55, x * dir.x + z * dir.y + wob(-x * dir.y + z * dir.x));
     } else {

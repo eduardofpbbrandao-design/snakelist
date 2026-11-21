@@ -154,120 +154,101 @@ function mergeG(list) { // position + normal (+ optional per-vertex x in userDat
   const m = new THREE.BufferGeometry(); m.setAttribute('position', new THREE.BufferAttribute(pos, 3)); m.setAttribute('normal', new THREE.BufferAttribute(nrm, 3)); m.setIndex(new THREE.BufferAttribute(idx, 1)); m.userData.xs = xs; return m;
 }
 function disposeTree(o) {
-  o.traverse((q) => { if (q.geometry) q.geometry.dispose(); const ms = Array.isArray(q.material) ? q.material : q.material ? [q.material] : []; for (const m of ms) { for (const k in m) { const v = m[k]; if (v && v.isTexture) v.dispose(); } m.dispose(); } });
+  o.traverse((q) => { if (q.geometry) q.geometry.dispose(); const ms = Array.isArray(q.material) ? q.material : q.material ? [q.material] : []; for (const m of ms) { for (const k in m) { const v = m[k]; if (v && v.isTexture) v.dispose(); } if (m.userData.fur) m.userData.fur.uFurD.value.dispose(); m.dispose(); } });
   if (o.parent) o.parent.remove(o);
 }
 function fadeTree(o, op) { o.traverse((q) => { if (q.material && q.userData.op != null) { q.material.opacity = q.userData.op * op; q.material.transparent = true; q.material.depthWrite = op > 0.98 && q.userData.op >= 1; q.visible = op > 0.005; } }); }
 function markFade(o) { o.traverse((q) => { if (q.material && q.userData.op == null) q.userData.op = q.material.opacity != null ? q.material.opacity : 1; }); }
 
-// ---------------------------------------------------------------- the person for "Size vs person" (v5.78)
-// Eduardo: the old one "looks like a 5 year old with clay made a human". This one is SnakeList's own sculpted model
-// (tools/build-person.js: an adult about 7.5 heads tall, built as one smooth surface from anatomical masses - skull,
-// cheekbones, nose, lips, eyelids and ears, neck muscles, collarbones, shoulders, arms and jointed fingers - with a
-// T-shirt with a crew neck and drape folds, jeans that bunch at the ankle, trainers, short combed hair and eyebrows),
-// stored in person.bin (about 0.85 MB, loaded only when Size vs person is used). Here it gets its materials: skin with
-// fine pores and a soft warm sheen, real eyes (white, a brown iris, pupil and a clear cornea that catches the light),
-// strands in the hair, knitted cotton and denim twill. Standing on y = 0, facing +z, exactly h tall.
+// ---------------------------------------------------------------- the person for "Size vs person"
+// v5.83: Eduardo said the old one "looks like a 5 year old with clay made a human" (and the sculpted one after it still
+// had a cap of hair and a heavy jaw). Now it is a real person: the Microsoft Rocketbox avatar "Male_Adult_05" (MIT
+// licence; see CREDITS.txt) - a photo-scanned face and skin, eyes in their sockets, hair and beard made of strand cards,
+// a field shirt, vest, trousers and boots - posed with the arms relaxed at the sides by tools/build-person.js and stored
+// in person.bin (about 120 kB) with its textures in person/ (WebP, about 0.7 MB; loaded only when Size vs person is
+// used). It stands exactly h tall (1.70 m from the soles to the top of the hair) on y = 0, facing +z, and lives a
+// little: it breathes (the chest and belly rise and fall), sways very slightly over its feet as people do standing
+// still, and blinks now and then (none of it with reduced motion).
 let personData = null, personReq = null; const personWait = new Set();
-export function loadPerson() {
+const PERSON_TEX = { head: 'head.webp', headN: 'head_n.webp', headR: 'head_r.webp', body: 'body.webp', bodyN: 'body_n.webp', hair: 'hair.webp' };
+const personURL = (f) => new URL(f + '?r=576', import.meta.url).href;
+export function loadPerson() { // (the mesh is kept once loaded - about 0.3 MB; the pictures are not, see personImages)
   if (personData) return Promise.resolve(personData);
   if (!personReq) {
-    personReq = fetch(new URL('person.bin?r=573', import.meta.url).href).then((r) => { if (!r.ok) throw new Error('person ' + r.status); return r.arrayBuffer(); })
+    personReq = fetch(personURL('person.bin')).then((r) => { if (!r.ok) throw new Error('person ' + r.status); return r.arrayBuffer(); })
       .then((b) => { personData = parsePerson(b); return personData; })
       .catch((e) => { personReq = null; throw e; });
+    personImages().catch(() => {}); // (start them too: the browser keeps the files, and the next request is instant)
   }
   return personReq;
 }
+// the textures' pictures, decoded afresh for each person shown, so nothing big stays in memory once it is gone
+function personImages() {
+  const img = (f) => new Promise((res, rej) => { const im = new Image(); im.decoding = 'async'; im.onload = () => res(im); im.onerror = () => rej(new Error('person ' + f)); im.src = personURL('person/' + f); });
+  return Promise.all(Object.values(PERSON_TEX).map(img)).then((ims) => { const o = {}; Object.keys(PERSON_TEX).forEach((k, i) => { o[k] = ims[i]; }); return o; });
+}
 function parsePerson(buf) {
-  const dv = new DataView(buf); if (String.fromCharCode(dv.getUint8(0), dv.getUint8(1), dv.getUint8(2), dv.getUint8(3)) !== 'SLP1') throw new Error('person.bin');
-  const jl = dv.getUint32(4, true), meta = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 8, jl))); let o = 8 + jl;
-  const parts = {};
-  for (const p of meta.parts) {
-    const q = new Uint16Array(buf, o, p.v * 3); o += p.v * 6;
-    const nb = new Int8Array(buf, o, p.v * 4); o += p.v * 4; const cb = new Uint8Array(buf, o, p.v * 4); o += p.v * 4;
-    const big = p.v > 65535, ib = big ? new Uint32Array(buf.slice(o, o + p.t * 4)) : new Uint16Array(buf, o, p.t); const ibl = p.t * (big ? 4 : 2); o += ibl + (4 - (ibl % 4)) % 4;
-    const pos = new Float32Array(p.v * 3), nor = new Float32Array(p.v * 3), col = new Float32Array(p.v * 3);
-    for (let v = 0; v < p.v; v++) for (let c = 0; c < 3; c++) { pos[v * 3 + c] = p.lo[c] + (q[v * 3 + c] / 65535) * (p.hi[c] - p.lo[c]); nor[v * 3 + c] = nb[v * 4 + c] / 127; col[v * 3 + c] = (cb[v * 4 + c] / 255) * 1.1; }
-    parts[p.n] = { pos, nor, col, idx: ib.slice(), lo: p.lo, hi: p.hi };
+  const dv = new DataView(buf); if (String.fromCharCode(dv.getUint8(0), dv.getUint8(1), dv.getUint8(2), dv.getUint8(3)) !== 'SLP2') throw new Error('person.bin');
+  const jl = dv.getUint32(4, true), m = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 8, jl))); let o = 8 + jl;
+  const al = (n) => n + ((4 - (n % 4)) % 4);
+  const q = new Uint16Array(buf, o, m.nv * 3); o += al(m.nv * 6); const nb = new Int8Array(buf, o, m.nv * 4); o += m.nv * 4;
+  const ub = new Uint16Array(buf, o, m.nv * 2); o += al(m.nv * 4); const idx = new Uint16Array(buf.slice(o, o + m.nt * 6)); o += al(m.nt * 6);
+  const bi = new Uint16Array(buf, o, m.blink.n); o += al(m.blink.n * 2); const bd = new Int16Array(buf, o, m.blink.n * 3);
+  const pos = new Float32Array(m.nv * 3), nor = new Float32Array(m.nv * 3), uv = new Float32Array(m.nv * 2), blink = new Float32Array(m.nv * 3);
+  for (let v = 0; v < m.nv; v++) { for (let c = 0; c < 3; c++) { pos[v * 3 + c] = m.lo[c] + (q[v * 3 + c] / 65535) * (m.hi[c] - m.lo[c]); nor[v * 3 + c] = nb[v * 4 + c] / 127; } for (let c = 0; c < 2; c++) uv[v * 2 + c] = m.uvlo[c] + (ub[v * 2 + c] / 65535) * (m.uvhi[c] - m.uvlo[c]); }
+  for (let k = 0; k < m.blink.n; k++) for (let c = 0; c < 3; c++) blink[bi[k] * 3 + c] = bd[k * 3 + c] * m.blink.k;
+  return { meta: m, pos, nor, uv, idx, blink };
+}
+function personFrom(data, img, h) {
+  const m = data.meta, geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(data.pos.slice(), 3)); geo.setAttribute('normal', new THREE.BufferAttribute(data.nor.slice(), 3)); geo.setAttribute('uv', new THREE.BufferAttribute(data.uv.slice(), 2)); geo.setIndex(new THREE.BufferAttribute(data.idx.slice(), 1));
+  for (const [st, n, mi] of m.groups) geo.addGroup(st, n, mi);
+  // breathing: the chest and belly move out along their normals (most at the breastbone, less at the belly, none on
+  // the back or the arms)
+  const br = new Float32Array(m.nv * 3), ch = m.chest;
+  for (let v = 0; v < m.nv; v++) {
+    const x = data.pos[v * 3], y = data.pos[v * 3 + 1], nz = data.nor[v * 3 + 2], ny = data.nor[v * 3 + 1];
+    const k = sstep(ch[1] - 0.42, ch[1] - 0.2, y) * (1 - sstep(ch[1] + 0.12, ch[1] + 0.22, y)) * sstep(-0.2, 0.5, nz) * sstep(0.16, 0.1, Math.abs(x)) * (1 - Math.abs(ny) * 0.5);
+    const amt = 0.0042 * k * lerp(0.6, 1, sstep(ch[1] - 0.3, ch[1], y));
+    br[v * 3] = data.nor[v * 3] * amt * 0.5; br[v * 3 + 1] = amt * 0.35 * sstep(ch[1] - 0.1, ch[1] + 0.1, y); br[v * 3 + 2] = nz * amt;
   }
-  return { meta, parts };
-}
-// textures for the person, drawn once (each build makes new GPU textures from the same canvases: the viewer disposes them)
-const PCAN = {};
-function pCanvas(key, S, draw) { if (!PCAN[key]) { const c = document.createElement('canvas'); c.width = c.height = S; draw(c.getContext('2d'), S); PCAN[key] = c; } return PCAN[key]; }
-function pTex(key, S, draw, rx = 1, ry = 1, srgb = true) { const t = new THREE.CanvasTexture(pCanvas(key, S, draw)); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); t.anisotropy = 8; return t; }
-function personMaterials() {
-  const R = rnd(31);
-  const pores = pTex('pores', 256, (x, s) => { x.fillStyle = '#808080'; x.fillRect(0, 0, s, s); for (let i = 0; i < 9000; i++) { const v = R(); x.fillStyle = v < 0.5 ? 'rgba(40,40,40,' + (0.05 + R() * 0.12) + ')' : 'rgba(220,220,220,' + (0.04 + R() * 0.08) + ')'; x.beginPath(); x.arc(R() * s, R() * s, 0.4 + R() * 1.1, 0, TAU); x.fill(); } }, 22, 30, false);
-  const skin = new THREE.MeshPhysicalMaterial({ color: '#c99377', vertexColors: true, roughness: 0.5, bumpMap: pores, bumpScale: 0.35, sheen: 0.4, sheenRoughness: 0.45, sheenColor: new THREE.Color('#ff9a80'), clearcoat: 0.05, clearcoatRoughness: 0.5, specularIntensity: 0.55 });
-  const strands = (key, base) => pTex(key, 512, (x, s) => {
-    x.fillStyle = base; x.fillRect(0, 0, s, s);
-    for (let i = 0; i < 2600; i++) { const px = R() * s, l = s * (0.15 + R() * 0.5), py = R() * s, w = R(); x.strokeStyle = w < 0.45 ? 'rgba(10,6,3,' + (0.25 + R() * 0.4) + ')' : 'rgba(190,150,110,' + (0.08 + R() * 0.18) + ')'; x.lineWidth = 0.5 + R() * 1.1; x.beginPath(); x.moveTo(px, py); x.bezierCurveTo(px + (R() - 0.5) * 6, py + l * 0.33, px + (R() - 0.5) * 8, py + l * 0.66, px + (R() - 0.5) * 10, py + l); x.stroke(); }
-  }, 7, 2);
-  const hairMap = strands('hair', '#3a281b');
-  const hair = new THREE.MeshPhysicalMaterial({ color: '#ffffff', map: hairMap, bumpMap: hairMap, bumpScale: 1.4, vertexColors: true, roughness: 0.48, sheen: 0.8, sheenRoughness: 0.35, sheenColor: new THREE.Color('#9c7a5c'), specularIntensity: 0.6 });
-  const brow = new THREE.MeshPhysicalMaterial({ color: '#d8d0c8', map: strands('hair', '#3a281b'), vertexColors: true, roughness: 0.6, sheen: 0.4, sheenColor: new THREE.Color('#7a5c44') });
-  // knitted cotton: little loops in rows
-  const knit = pTex('knit', 128, (x, s) => { x.fillStyle = '#7a7a7a'; x.fillRect(0, 0, s, s); for (let yy = 0; yy < s; yy += 4) for (let xx = 0; xx < s; xx += 4) { x.fillStyle = 'rgba(255,255,255,' + (0.18 + R() * 0.1) + ')'; x.beginPath(); x.ellipse(xx + 2, yy + 2, 1.3, 1.9, 0.35 * ((xx / 4) % 2 ? 1 : -1), 0, TAU); x.fill(); } }, 70, 90, false);
-  const shirt = new THREE.MeshPhysicalMaterial({ color: '#33607f', vertexColors: true, roughness: 0.86, bumpMap: knit, bumpScale: 0.6, sheen: 0.7, sheenRoughness: 0.8, sheenColor: new THREE.Color('#9fc4dc') });
-  // denim: a diagonal twill, white weft showing through blue warp, a little fading
-  const twill = pTex('twill', 256, (x, s) => { x.fillStyle = '#2d4673'; x.fillRect(0, 0, s, s); for (let i = -s; i < s * 2; i += 3) { x.strokeStyle = 'rgba(225,232,245,' + (0.12 + R() * 0.12) + ')'; x.lineWidth = 1; x.beginPath(); x.moveTo(i, 0); x.lineTo(i + s, s); x.stroke(); } for (let i = 0; i < 1400; i++) { x.fillStyle = 'rgba(' + (R() < 0.5 ? '20,30,60' : '200,210,230') + ',' + R() * 0.12 + ')'; x.fillRect(R() * s, R() * s, 1 + R() * 3, 1); } }, 30, 40);
-  const jeans = new THREE.MeshPhysicalMaterial({ color: '#ffffff', map: twill, bumpMap: twill, bumpScale: 0.5, vertexColors: true, roughness: 0.82, sheen: 0.35, sheenRoughness: 0.9, sheenColor: new THREE.Color('#9fb2d4') });
-  const mesh = pTex('mesh', 128, (x, s) => { x.fillStyle = '#9a9a9a'; x.fillRect(0, 0, s, s); x.fillStyle = 'rgba(30,30,30,.35)'; for (let yy = 0; yy < s; yy += 6) for (let xx = (yy / 6) % 2 ? 3 : 0; xx < s; xx += 6) { x.beginPath(); x.arc(xx, yy, 1.3, 0, TAU); x.fill(); } }, 40, 40, false);
-  const shoe = new THREE.MeshPhysicalMaterial({ color: '#e9e8e3', vertexColors: true, roughness: 0.62, bumpMap: mesh, bumpScale: 0.4, sheen: 0.3, sheenColor: new THREE.Color('#ffffff') });
-  const sole = new THREE.MeshStandardMaterial({ color: '#f1efe8', vertexColors: true, roughness: 0.75 });
-  return { skin, hair, brow, shirt, jeans, shoe, sole };
-}
-// the eyes: a white with faint veins (opening at the front), a flat iris with its fibres and the pupil, and a clear
-// cornea bulging over them that catches the light
-function personEye(r) {
-  const g = new THREE.Group(), th = 0.5, R = rnd(41);
-  const scl = pTex('sclera', 128, (x, s) => { x.fillStyle = '#f2ece6'; x.fillRect(0, 0, s, s); x.strokeStyle = 'rgba(190,80,70,.22)'; for (let i = 0; i < 26; i++) { x.lineWidth = 0.4 + R() * 0.6; x.beginPath(); let px = R() * s, py = s * (0.55 + R() * 0.45); x.moveTo(px, py); for (let k = 0; k < 4; k++) { px += (R() - 0.5) * 18; py -= R() * 14; x.lineTo(px, py); } x.stroke(); } });
-  const white = new THREE.SphereGeometry(r, 32, 20, 0, TAU, th, Math.PI - th); white.rotateX(Math.PI / 2);
-  g.add(new THREE.Mesh(white, new THREE.MeshPhysicalMaterial({ map: scl, roughness: 0.3, clearcoat: 0.6 })));
-  const iris = pTex('iris', 256, (x, s) => {
-    const c = s / 2, gr = x.createRadialGradient(c, c, s * 0.08, c, c, c); gr.addColorStop(0, '#2a170c'); gr.addColorStop(0.3, '#6b4024'); gr.addColorStop(0.75, '#5a351d'); gr.addColorStop(0.93, '#2c1a0e'); gr.addColorStop(1, '#1a0f08');
-    x.fillStyle = gr; x.fillRect(0, 0, s, s);
-    for (let i = 0; i < 420; i++) { const a = R() * TAU, r0 = s * (0.12 + R() * 0.1), r1 = s * (0.3 + R() * 0.18); x.strokeStyle = R() < 0.5 ? 'rgba(160,110,60,' + (0.15 + R() * 0.25) + ')' : 'rgba(30,15,8,' + (0.15 + R() * 0.25) + ')'; x.lineWidth = 0.6 + R(); x.beginPath(); x.moveTo(c + Math.cos(a) * r0, c + Math.sin(a) * r0); x.lineTo(c + Math.cos(a + (R() - 0.5) * 0.1) * r1, c + Math.sin(a) * r1); x.stroke(); }
-    x.fillStyle = '#050403'; x.beginPath(); x.arc(c, c, s * 0.15, 0, TAU); x.fill();
-  }, 1, 1);
-  iris.wrapS = iris.wrapT = THREE.ClampToEdgeWrapping;
-  // the iris is a shallow dome (the clear cornea over it is its glossy coat: no see-through layer to fade)
-  const ig = new THREE.SphereGeometry(r * 1.02, 40, 10, 0, TAU, 0, th + 0.03); ig.rotateX(Math.PI / 2); { const pa = ig.attributes.position, uv = ig.attributes.uv, k = r * Math.sin(th + 0.03); for (let i = 0; i < pa.count; i++) uv.setXY(i, 0.5 + pa.getX(i) / k * 0.5, 0.5 + pa.getY(i) / k * 0.5); ig.translate(0, 0, -r * 0.035); }
-  g.add(new THREE.Mesh(ig, new THREE.MeshPhysicalMaterial({ map: iris, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.02, specularIntensity: 1 })));
-  return g;
-}
-// texture coordinates for a part: round the body (u) and up it (v) in metres, so the weave and pores keep their size;
-// the hair's strands run out from the crown
-function personUV(name, pos) {
-  const n = pos.length / 3, uv = new Float32Array(n * 2);
-  for (let v = 0; v < n; v++) {
-    const x = pos[v * 3], y = pos[v * 3 + 1], z = pos[v * 3 + 2];
-    if (name === 'hair' || name === 'brow') { const hx = x + 0.012, hz = z + 0.045, hy = y - 1.69, a = Math.atan2(hx, hz); uv[v * 2] = (a / TAU + 0.5); uv[v * 2 + 1] = Math.hypot(hx, hy, hz) * 4; continue; }
-    const ax = Math.abs(x), arm = ax > 0.15 && y > 0.66 && y < 1.4, cx = arm ? Math.sign(x) * 0.2 : 0, a = Math.atan2(x - cx, z), r = arm ? 0.04 : 0.12;
-    uv[v * 2] = (a * r) / 0.06; uv[v * 2 + 1] = y / 0.06;
-  }
-  return uv;
-}
-function personFrom(data, h) {
-  const g = new THREE.Group(), M = personMaterials(), lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9];
-  for (const k of ['sole', 'shoe', 'jeans', 'shirt', 'skin', 'hair', 'brow']) {
-    const p = data.parts[k]; if (!p) continue;
-    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(p.pos.slice(), 3)); geo.setAttribute('normal', new THREE.BufferAttribute(p.nor.slice(), 3)); geo.setAttribute('color', new THREE.BufferAttribute(p.col.slice(), 3)); geo.setAttribute('uv', new THREE.BufferAttribute(personUV(k, p.pos), 2)); geo.setIndex(new THREE.BufferAttribute(p.idx.slice(), 1));
-    geo.computeBoundingSphere();
-    const m = new THREE.Mesh(geo, M[k]); m.castShadow = true; m.receiveShadow = true; m.name = 'person-' + k; g.add(m);
-    for (let c = 0; c < 3; c++) { lo[c] = Math.min(lo[c], p.lo[c]); hi[c] = Math.max(hi[c], p.hi[c]); }
-  }
-  const e = data.meta.eye; for (const sg of [-1, 1]) { const eye = personEye(e[3]); eye.position.set(sg * e[0], e[1], e[2]); eye.rotation.y = sg * 0.05; eye.name = 'person-eye'; g.add(eye); }
-  const k = h / Math.max(1e-6, hi[1] - lo[1]); g.scale.setScalar(k); g.position.y = -lo[1] * k; // (exactly h from the soles to the top of the hair)
-  const out = new THREE.Group(); out.add(g); out.userData.realPerson = true; return out;
+  geo.morphAttributes.position = [new THREE.BufferAttribute(data.blink.slice(), 3), new THREE.BufferAttribute(br, 3)]; geo.morphTargetsRelative = true;
+  geo.computeBoundingSphere();
+  const tex = (k, srgb) => { const t = new THREE.Texture(img[k]); t.flipY = true; if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.needsUpdate = true; return t; };
+  const body = new THREE.MeshPhysicalMaterial({ map: tex('body', true), normalMap: tex('bodyN'), roughness: 0.82, sheen: 0.35, sheenRoughness: 0.8, sheenColor: new THREE.Color('#5d5446'), specularIntensity: 0.35 });
+  // skin: the scanned colour, its pores in the normal map, glossy eyes and lips from the roughness map, and a warm
+  // sheen at grazing angles (light scattered under the skin)
+  const head = new THREE.MeshPhysicalMaterial({ map: tex('head', true), normalMap: tex('headN'), roughnessMap: tex('headR'), roughness: 1, sheen: 0.3, sheenRoughness: 0.55, sheenColor: new THREE.Color('#d9776a'), specularIntensity: 0.55, clearcoat: 0.04, clearcoatRoughness: 0.4 });
+  const hair = new THREE.MeshPhysicalMaterial({ map: tex('hair', true), alphaTest: 0.38, side: THREE.DoubleSide, roughness: 0.5, sheen: 0.22, sheenRoughness: 0.4, sheenColor: new THREE.Color('#6b5c50'), specularIntensity: 0.35 });
+  // swaying over the ankles: a slight lean of the whole body, done on the graphics card (its outline, and so its measured
+  // height, stays exactly h)
+  const uSway = { value: new THREE.Vector2(0, 0) }, sway = (sh) => { sh.uniforms.uSway = uSway; sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform vec2 uSway;').replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed.xz += uSway * transformed.y;'); };
+  body.onBeforeCompile = sway; hair.onBeforeCompile = sway;
+  // (the skin's light wraps a little round into the shade, as it does through real skin)
+  head.onBeforeCompile = (sh) => { sway(sh); sh.fragmentShader = sh.fragmentShader.replace('#include <lights_fragment_end>', '#include <lights_fragment_end>\n reflectedLight.directDiffuse += reflectedLight.indirectDiffuse * vec3(0.06, 0.018, 0.012);'); };
+  const mats = m.mats.map((k) => (k === 'head' ? head : k === 'hair' ? hair : body));
+  const mesh = new THREE.Mesh(geo, mats); mesh.name = 'person-skin'; mesh.castShadow = mesh.receiveShadow = true; mesh.morphTargetInfluences = [0, 0];
+  const g = new THREE.Group(); g.add(mesh);
+  const k = h / Math.max(1e-6, m.hi[1] - m.lo[1]); g.scale.setScalar(k); g.position.y = -m.lo[1] * k; // (exactly h from the soles to the top of the hair)
+  const out = new THREE.Group(); out.add(g); out.userData.realPerson = true;
+  // idle life, on its own clock (drawn with the scenery's gentle frames)
+  const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let nextBlink = 1.5 + Math.random() * 2, blinkAt = -10;
+  mesh.onBeforeRender = () => {
+    if (calm) return;
+    const t = performance.now() / 1000, inf = mesh.morphTargetInfluences;
+    inf[1] = 0.5 - 0.5 * Math.cos((t * TAU) / 4.6); // about 13 breaths a minute
+    if (t > nextBlink) { blinkAt = t; nextBlink = t + 2.5 + Math.random() * 4.5; }
+    const b = (t - blinkAt) / 0.16; inf[0] = b < 0 || b > 2 ? 0 : b < 1 ? sstep(0, 1, b) : 1 - sstep(1, 2, b); // shut fast, open a little slower
+    uSway.value.set(0.0045 * Math.sin((t * TAU) / 7.3) + 0.002 * Math.sin((t * TAU) / 3.1), 0.003 * Math.sin((t * TAU) / 9.7 + 1)); // (swaying over the ankles)
+  };
+  return out;
 }
 export function buildPerson(T, h = 1.7) {
   THREE = THREE || T;
-  if (personData) { try { return personFrom(personData, h); } catch (e) { /* the simple person below */ } }
-  // not loaded yet: an empty group now, filled as soon as person.bin arrives (the simple person if it cannot load)
+  // an empty group now, filled as soon as person.bin and its pictures are ready (the simple person if they cannot load)
   const g = new THREE.Group(); g.userData.realPerson = 'loading';
-  loadPerson().then((d) => { g.add(personFrom(d, h)); g.userData.realPerson = true; }, () => { g.add(buildPersonSimple(T, h)); g.userData.realPerson = false; }).then(() => { personWait.forEach((f) => f()); });
+  Promise.all([loadPerson(), personImages()]).then(([d, im]) => { g.add(personFrom(d, im, h)); g.userData.realPerson = true; }, () => { g.add(buildPersonSimple(T, h)); g.userData.realPerson = false; }).then(() => { personWait.forEach((f) => f()); });
   return g;
 }
 
@@ -386,6 +367,40 @@ function furTex(seed, dark, light, rx, ry) { // short hairs lying along v (along
   const R = rnd(seed);
   return canvasTex(256, (x, s) => { x.fillStyle = '#9a9a9a'; x.fillRect(0, 0, s, s); for (let i = 0; i < 5200; i++) { const px = R() * s, py = R() * s, l = 3 + R() * 9; x.strokeStyle = R() < 0.5 ? 'rgba(' + dark + ',' + (0.25 + R() * 0.4) + ')' : 'rgba(' + light + ',' + (0.2 + R() * 0.35) + ')'; x.lineWidth = 0.6 + R() * 0.9; x.beginPath(); x.moveTo(px, py); x.quadraticCurveTo(px + (R() - 0.5) * 2, py + l * 0.5, px + (R() - 0.5) * 3, py + l); x.stroke(); } }, rx, ry);
 }
+// v5.83: limbs as one smooth piece each (a thick thigh or upper arm narrowing through the knee or elbow to the ankle
+// and the paw - not capsules stuck together), coloured along their length (fur to bare pink paws, say)
+function limbTube(pts, radii, cols, radial = 10, seg = 26) {
+  const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal'), ls = [0]; for (let i = 1; i < pts.length; i++) ls.push(ls[i - 1] + pts[i].distanceTo(pts[i - 1]));
+  const tot = ls[ls.length - 1] || 1, at = (arr, t) => { const d = t * tot; let i = 0; while (i < ls.length - 2 && ls[i + 1] < d) i++; const u = clamp((d - ls[i]) / Math.max(1e-9, ls[i + 1] - ls[i]), 0, 1), w = u * u * (3 - 2 * u); return Array.isArray(arr[0]) ? mixRGB(arr[i], arr[i + 1], w) : lerp(arr[i], arr[i + 1], w); };
+  const fr = curve.computeFrenetFrames(seg, false), pos = [], col = [], uv = [], idx = [];
+  for (let i = 0; i <= seg; i++) {
+    const t = i / seg, p = curve.getPointAt(t), N = fr.normals[i], B = fr.binormals[i], r = at(radii, t) * (i === 0 || i === seg ? 0.35 : i === seg - 1 ? 0.8 : 1), c = at(cols, t);
+    for (let j = 0; j <= radial; j++) { const a = (j / radial) * TAU; pos.push(p.x + (N.x * Math.cos(a) + B.x * Math.sin(a)) * r, p.y + (N.y * Math.cos(a) + B.y * Math.sin(a)) * r, p.z + (N.z * Math.cos(a) + B.z * Math.sin(a)) * r); col.push(c[0], c[1], c[2]); uv.push(j / radial, t * 3); }
+  }
+  for (let i = 0; i < seg; i++) for (let j = 0; j < radial; j++) { const a = i * (radial + 1) + j, b = a + radial + 1; idx.push(a, a + 1, b, a + 1, b + 1, b); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals(); return g;
+}
+// v5.83: fur that reads as fur: shells - the body drawn again a few times, each a little further out along its normals,
+// keeping only the tips of the hairs (a field of hair dots; fewer survive the further out), darker at the roots. The
+// shells follow the body as it breathes, struggles and is squeezed (they share its geometry).
+let furDots = null;
+function furShells(parent, geo, mat, n, len, rep, mesh) {
+  if (!furDots) furDots = canvasTex(128, (x, s) => { const R = rnd(808); x.fillStyle = '#000'; x.fillRect(0, 0, s, s); for (let i = 0; i < 2600; i++) { const v = 40 + Math.floor(R() * 215); x.fillStyle = 'rgb(' + v + ',' + v + ',' + v + ')'; x.fillRect(Math.floor(R() * s), Math.floor(R() * s), 1, 1); } }, 1, false);
+  const dots = furDots.clone(); dots.wrapS = dots.wrapT = THREE.RepeatWrapping; dots.magFilter = dots.minFilter = THREE.NearestFilter; dots.generateMipmaps = false; dots.needsUpdate = true;
+  const out = [];
+  for (let k = 1; k <= n; k++) {
+    const m = mat.clone(), U = { uFurL: { value: k / n }, uFurLen: { value: len }, uFurD: { value: dots }, uFurRep: { value: new THREE.Vector2(rep[0], rep[1]) } };
+    m.onBeforeCompile = (sh) => {
+      Object.assign(sh.uniforms, U);
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uFurL, uFurLen;\nvarying vec2 vFurUv;').replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed += objectNormal * uFurLen * uFurL;\nvFurUv = uv;');
+      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uFurL; uniform sampler2D uFurD; uniform vec2 uFurRep;\nvarying vec2 vFurUv;')
+        .replace('#include <map_fragment>', '#include <map_fragment>\nfloat fh = texture2D(uFurD, vFurUv * uFurRep).r; if (fh < 0.16 + uFurL * 0.8) discard; diffuseColor.rgb *= mix(0.62, 1.08, uFurL);');
+    };
+    m.customProgramCacheKey = () => 'furshell'; m.userData.fur = U;
+    const sm = mesh(geo, m, parent); sm.castShadow = false; sm.renderOrder = 1; out.push(sm);
+  }
+  return out;
+}
 function buildPrey2(kind, r, seed) {
   const g = new THREE.Group(), R = rnd(seed);
   const mesh = (geo, mat, parent = g) => { const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m; };
@@ -399,7 +414,7 @@ function buildPrey2(kind, r, seed) {
     const NZ = 44, NA = 28;
     const bodyG = loft(prR, z0, z1, NZ, NA, (t, a, s, c) => { const k = sstep(0.1, -0.55, c), sn = sstep(0.86, 0.97, t); return mixRGB(mixRGB(mixRGB(back, side, sstep(0.75, 0.2, c)), belly, k), snoutC, sn * 0.6); });
     const fur = new THREE.MeshPhysicalMaterial({ color: '#ffffff', vertexColors: true, map: furTex(seed, '30,22,15', '240,230,215', 3, 6), roughness: 0.92, sheen: 1, sheenRoughness: 0.55, sheenColor: new THREE.Color(rat ? '#c9b49c' : '#ddc9b2') });
-    const body = mesh(bodyG, fur);
+    const body = mesh(bodyG, fur); furShells(g, bodyG, fur, 6, r * 0.14, [34, 70], mesh);
     const pink = new THREE.MeshPhysicalMaterial({ color: '#e0a49e', roughness: 0.5, sheen: 0.4, sheenColor: new THREE.Color('#ffd0c8') }), dark = new THREE.MeshStandardMaterial({ color: '#2a1d16', roughness: 0.7 });
     // the head: everything that moves with it (eyes, ears, nose, whiskers) turns about the neck
     const zN = lerp(z0, z1, 0.64), head = new THREE.Group(); head.position.set(0, r * 1.15, zN); g.add(head);
@@ -419,10 +434,14 @@ function buildPrey2(kind, r, seed) {
     for (const sg of [-1, 1]) for (const [t, hind] of [[0.6, false], [0.17, true]]) {
       const lg = new THREE.Group(), p = prR(t), top = V3(sg * p.w * 0.55, p.c - p.h * 0.45, lerp(z0, z1, t)); lg.position.copy(top); g.add(lg); legs.push({ g: lg, hind, sg, ph: (t > 0.4 ? 0 : Math.PI) + (sg > 0 ? 0 : Math.PI) });
       const foot = V3(sg * r * 0.12, -top.y + r * 0.06, hind ? -r * 0.15 : r * 0.12);
-      if (hind) { mesh(S(r * 0.42, 14, 10), fur, lg).scale.set(0.8, 1.05, 1.25); }
-      mesh(limbGeo(V3(0, 0, 0), foot, r * (hind ? 0.2 : 0.14), r * 0.08), hind ? fur : fur, lg);
-      const pg = limbGeo(foot.clone().add(V3(0, -r * 0.03, hind ? -r * 0.1 : -r * 0.02)), foot.clone().add(V3(0, -r * 0.04, hind ? r * 0.45 : r * 0.18)), r * 0.07, r * 0.06); mesh(pg, pink, lg);
-      for (let k = 0; k < (hind ? 5 : 4); k++) { const a = (k / ((hind ? 5 : 4) - 1) - 0.5) * 1.1, tp0 = foot.clone().add(V3(0, -r * 0.04, hind ? r * 0.42 : r * 0.16)); mesh(limbGeo(tp0, tp0.clone().add(V3(Math.sin(a) * r * 0.14, -r * 0.02, Math.cos(a) * r * 0.16)), r * 0.028, r * 0.02, 5), pink, lg); }
+      // v5.83: one smooth leg each: a hind leg's big thigh and the knee forward, the heel up and the long flat foot on
+      // the ground; a front leg's slim arm, the elbow back, the wrist and a small hand - furred above, pink below
+      const furC = mixRGB(side, belly, 0.35), pinkC = hexRGB('#d9a29a');
+      const lgPts = hind ? [V3(0, r * 0.25, r * 0.05), V3(sg * r * 0.08, -top.y * 0.45, r * 0.32), V3(sg * r * 0.1, foot.y + r * 0.18, -r * 0.2), V3(sg * r * 0.12, foot.y - r * 0.02, -r * 0.05), V3(sg * r * 0.13, foot.y - r * 0.04, r * 0.42)]
+        : [V3(0, r * 0.15, 0), V3(sg * r * 0.06, -top.y * 0.45, -r * 0.1), V3(sg * r * 0.1, foot.y + r * 0.08, r * 0.08), V3(sg * r * 0.12, foot.y - r * 0.03, r * 0.2)];
+      const lgR = hind ? [r * 0.4, r * 0.24, r * 0.09, r * 0.075, r * 0.06] : [r * 0.17, r * 0.11, r * 0.07, r * 0.06], lgC = hind ? [furC, furC, mixRGB(furC, pinkC, 0.6), pinkC, pinkC] : [furC, furC, mixRGB(furC, pinkC, 0.7), pinkC];
+      const legM = mesh(limbTube(lgPts, lgR, lgC, 12, hind ? 30 : 22), fur, lg); if (hind) furShells(lg, legM.geometry, fur, 3, r * 0.1, [8, 10], mesh);
+      for (let k = 0; k < (hind ? 5 : 4); k++) { const a = (k / ((hind ? 5 : 4) - 1) - 0.5) * 1.1, tp0 = lgPts[lgPts.length - 1].clone().add(V3(0, 0, -r * 0.04)); mesh(limbGeo(tp0, tp0.clone().add(V3(Math.sin(a) * r * 0.14, -r * 0.015, Math.cos(a) * r * 0.16)), r * 0.026, r * 0.016, 5), pink, lg); }
     }
     // the tail: about as long as the body (a little longer in a rat), scaly rings, swaying
     const tailN = 36, tailL = Lb * (rat ? 0.95 : 0.9), tailM = new THREE.MeshPhysicalMaterial({ color: '#ffffff', map: canvasTex(64, (x, s) => { x.fillStyle = rat ? '#b58f86' : '#c79a90'; x.fillRect(0, 0, s, s); x.fillStyle = 'rgba(80,50,45,.35)'; for (let i = 0; i < s; i += 4) x.fillRect(0, i, s, 1); x.fillStyle = 'rgba(255,240,235,.2)'; for (let i = 2; i < s; i += 4) x.fillRect(0, i, s, 1); }, 1, 40), roughness: 0.55, sheen: 0.3, sheenColor: new THREE.Color('#ffe0d8') });
@@ -430,7 +449,7 @@ function buildPrey2(kind, r, seed) {
     const tailAt = (tt) => { const p0 = V3(0, r * 0.75, z0 + r * 0.05); for (let i = 0; i <= tailN; i++) { const u = i / tailN; tpts[i].set(Math.sin(u * 2.6 + tt * 0.9) * r * 0.9 * u + Math.sin(tt * 2.3) * r * 0.25 * u * u, Math.max(r * 0.14 * (1 - u * 0.8), r * 0.75 * (1 - sstep(0, 0.25, u))), z0 + r * 0.05 - u * tailL * (1 - 0.15 * u)); } tpts[0].copy(p0); tg.userData.set(tpts); };
     tailAt(0); void tail;
     const base = bodyG.userData.base, pa = bodyG.attributes.position.array;
-    g.userData = { len: Lb * 1.1, r, name: rat ? 'a rat' : 'a mouse', y: r * 1.06,
+    g.userData = { len: Lb * 1.1, r, name: rat ? 'a rat' : 'a mouse', y: r * 1.06, body, bodyG, NZ, NA,
       anim(t, live) { // sniffing, a breath, the head turning, the tail swaying; caught: struggling less and less
         const br = 1 + 0.03 * Math.sin(t * 5.5) * (0.3 + 0.7 * live), sn = live * (Math.sin(t * 17) * 0.5 + 0.5) * (Math.sin(t * 1.3) > 0 ? 1 : 0.2), yaw = live * (0.28 * Math.sin(t * 0.8) + 0.06 * Math.sin(t * 3.1)), pitch = live * (0.12 * Math.sin(t * 1.1) - 0.04);
         const cy = Math.cos(yaw), sy = Math.sin(yaw);
@@ -476,17 +495,17 @@ function buildPrey2(kind, r, seed) {
       const ty = mesh(new THREE.CircleGeometry(r * 0.17, 20), new THREE.MeshPhysicalMaterial({ color: '#6b5530', roughness: 0.3, clearcoat: 0.7 })); ty.position.set(sg * r * 1.07, r * 0.95, lerp(z0, z1, 0.63)); ty.rotation.y = sg * Math.PI / 2 * 0.9;
       // hind legs folded under: thigh forward, shin back, the long foot forward again with webbed toes
       const hip = V3(sg * r * 0.7, r * 0.6, lerp(z0, z1, 0.12)), knee = V3(sg * r * 1.45, r * 0.42, lerp(z0, z1, 0.42)), ank = V3(sg * r * 1.3, r * 0.22, lerp(z0, z1, 0.05)), toe = V3(sg * r * 1.55, r * 0.05, lerp(z0, z1, 0.5));
-      mesh(limbGeo(hip, knee, r * 0.3, r * 0.2), legM); mesh(limbGeo(knee, ank, r * 0.19, r * 0.12), legM); mesh(limbGeo(ank, toe, r * 0.1, r * 0.07), legM);
+      const fc = hexRGB('#ffffff'); mesh(limbTube([hip, knee, ank, toe], [r * 0.34, r * 0.2, r * 0.11, r * 0.07], [fc, fc, fc, fc], 12, 34), legM).geometry.deleteAttribute('color');
       const web = new THREE.Shape(); const toes = [];
       for (let k = 0; k < 5; k++) { const a = (k / 4 - 0.5) * 1.1 + sg * 0.1, d = V3(Math.sin(a) * sg, -0.05, Math.cos(a)).normalize(), e = toe.clone().addScaledVector(d, r * (0.45 + 0.15 * Math.sin(k))); toes.push(e); mesh(limbGeo(toe, e, r * 0.05, r * 0.03, 5), legM); }
       web.moveTo(0, 0); toes.forEach((e) => web.lineTo((e.x - toe.x), (e.z - toe.z))); web.lineTo(0, 0);
       const wgeo = new THREE.ShapeGeometry(web); wgeo.rotateX(Math.PI / 2); wgeo.translate(toe.x, toe.y + r * 0.005, toe.z); mesh(wgeo, webM);
       // front legs
       const sh = V3(sg * r * 0.75, r * 0.55, lerp(z0, z1, 0.66)), el2 = V3(sg * r * 1.0, r * 0.3, lerp(z0, z1, 0.7)), hd = V3(sg * r * 0.9, r * 0.05, lerp(z0, z1, 0.8));
-      mesh(limbGeo(sh, el2, r * 0.13, r * 0.1), legM); mesh(limbGeo(el2, hd, r * 0.09, r * 0.07), legM);
+      { const fc = hexRGB('#ffffff'); mesh(limbTube([sh, el2, hd], [r * 0.14, r * 0.1, r * 0.07], [fc, fc, fc], 10, 20), legM).geometry.deleteAttribute('color'); }
       for (let k = 0; k < 4; k++) { const a = (k / 3 - 0.5) * 1.4 + sg * 0.3; mesh(limbGeo(hd, hd.clone().add(V3(Math.sin(a) * r * 0.22, -r * 0.02, Math.cos(a) * r * 0.22)), r * 0.035, r * 0.025, 5), legM); }
     }
-    g.userData = { len: Lb, r: r * 1.2, name: 'a frog', y: r * 0.82,
+    g.userData = { len: Lb, r: r * 1.2, name: 'a frog', y: r * 0.82, bodyG, NZ, NA,
       anim(t, live) { throat.scale.set(1.3, 0.55 + 0.12 * live * Math.max(0, Math.sin(t * 7)), 1.1 + 0.05 * live * Math.max(0, Math.sin(t * 7))); g.children[0].scale.y = 1 + 0.025 * live * Math.sin(t * 2.2); } };
     return g;
   }
@@ -531,18 +550,18 @@ function buildPrey2(kind, r, seed) {
   }
   if (kind === 'bird') {
     const Lb = r * 3.6, z0 = -Lb / 2, z1 = Lb / 2;
-    const prof = keyed([[0, { w: 0.3, h: 0.35, c: 1.05 }], [0.15, { w: 0.8, h: 0.85, c: 1.0 }], [0.45, { w: 1.0, h: 1.0, c: 1.0 }], [0.7, { w: 0.8, h: 0.85, c: 1.08 }], [0.8, { w: 0.55, h: 0.6, c: 1.25 }], [0.85, { w: 0.58, h: 0.62, c: 1.38 }], [0.95, { w: 0.5, h: 0.52, c: 1.42 }], [1, { w: 0.08, h: 0.1, c: 1.4 }]]);
+    const prof = keyed([[0, { w: 0.05, h: 0.07, c: 1.12 }], [0.07, { w: 0.42, h: 0.5, c: 1.08 }], [0.2, { w: 0.84, h: 0.9, c: 1.0 }], [0.45, { w: 1.0, h: 1.0, c: 0.98 }], [0.7, { w: 0.8, h: 0.85, c: 1.08 }], [0.8, { w: 0.55, h: 0.6, c: 1.25 }], [0.85, { w: 0.58, h: 0.62, c: 1.38 }], [0.95, { w: 0.5, h: 0.52, c: 1.42 }], [1, { w: 0.08, h: 0.1, c: 1.4 }]]);
     const pr = (t) => { const p = prof(t); return { w: p.w * r, h: p.h * r, c: p.c * r, bf: 1 }; };
     const brown = hexRGB('#8f6c4a'), breast = hexRGB('#ece0c6'), cap = hexRGB('#5a3a22');
     const bodyG = loft(pr, z0, z1, 36, 24, (t, a, s, c) => mixRGB(mixRGB(brown, breast, sstep(0.0, -0.6, c) * sstep(0.2, 0.5, t)), cap, sstep(0.82, 0.88, t) * sstep(0.2, 0.7, c)));
     const fe = new THREE.MeshPhysicalMaterial({ color: '#ffffff', vertexColors: true, map: furTex(seed + 2, '40,30,20', '235,220,195', 4, 5), roughness: 0.88, sheen: 0.9, sheenRoughness: 0.6, sheenColor: new THREE.Color('#e6d5b8') });
-    mesh(bodyG, fe);
+    mesh(bodyG, fe); furShells(g, bodyG, fe, 5, r * 0.08, [26, 34], mesh);
     const featherTex = canvasTex(128, (x, s) => { x.fillStyle = '#6a523a'; x.fillRect(0, 0, s, s); for (let i = 0; i < 9; i++) { const y = (i / 9) * s; x.fillStyle = i % 2 ? '#5a4430' : '#7d6448'; x.beginPath(); x.ellipse(s / 2, y + s / 18, s * 0.48, s / 12, 0, 0, TAU); x.fill(); x.strokeStyle = 'rgba(230,215,190,.55)'; x.lineWidth = 1.2; x.beginPath(); x.ellipse(s / 2, y + s / 18, s * 0.46, s / 13, 0, 0, Math.PI); x.stroke(); } x.strokeStyle = 'rgba(30,20,10,.5)'; x.beginPath(); x.moveTo(s / 2, 0); x.lineTo(s / 2, s); x.stroke(); });
     const wingM = new THREE.MeshPhysicalMaterial({ color: '#ffffff', map: featherTex, roughness: 0.85, sheen: 0.6, sheenColor: new THREE.Color('#cdb894'), side: THREE.DoubleSide });
     for (const sg of [-1, 1]) {
       const wg = loft((t) => ({ w: r * 0.12 * Math.sin(Math.PI * clamp(t, 0.02, 0.98)) ** 0.5, h: r * 0.62 * Math.sin(Math.PI * clamp(t * 0.85 + 0.12, 0, 1)) ** 0.6, c: 0, bf: 1 }), -Lb * 0.62, Lb * 0.22, 16, 12, null);
       const w = mesh(wg, wingM); w.position.set(sg * r * 0.82, r * 1.12, 0); w.rotation.set(0.12, -sg * 0.06, sg * 0.18);
-      const bp = V3(sg * r * 0.3, r * 0.35, z0 * 0.1); const leg = limbGeo(bp, V3(sg * r * 0.32, r * 0.02, z0 * 0.05), r * 0.05, r * 0.04, 5); const lm = new THREE.MeshStandardMaterial({ color: '#b98a5c', roughness: 0.6 }); mesh(leg, lm);
+      const bp = V3(sg * r * 0.3, r * 0.45, z0 * 0.1), lc = hexRGB('#ffffff'); const lm = new THREE.MeshStandardMaterial({ color: '#b98a5c', roughness: 0.6 }); mesh(limbTube([bp, V3(sg * r * 0.33, r * 0.24, z0 * 0.16), V3(sg * r * 0.32, r * 0.02, z0 * 0.05)], [r * 0.09, r * 0.04, r * 0.035], [lc, lc, lc], 8, 14), lm).geometry.deleteAttribute('color');
       for (const a of [-0.5, 0, 0.5, Math.PI]) mesh(limbGeo(V3(sg * r * 0.32, r * 0.02, z0 * 0.05), V3(sg * r * 0.32 + Math.sin(a) * r * 0.3, r * 0.015, z0 * 0.05 + Math.cos(a) * r * 0.3), r * 0.025, r * 0.018, 4), lm);
     }
     const head = new THREE.Group(); head.position.set(0, r * 1.35, z1 - r * 0.55); g.add(head);
@@ -552,7 +571,7 @@ function buildPrey2(kind, r, seed) {
     for (const sg of [-1, 1]) { const e = mesh(S(r * 0.1, 12, 10), glossEye(), head); e.position.set(sg * r * 0.34, r * 0.12, r * 0.2); const ring = mesh(new THREE.TorusGeometry(r * 0.11, r * 0.018, 6, 16), new THREE.MeshStandardMaterial({ color: '#e8dcc0' }), head); ring.position.copy(e.position); ring.rotation.y = sg * Math.PI / 2; }
     const tailG = new THREE.Group(); tailG.position.set(0, r * 1.15, z0 + r * 0.1); g.add(tailG);
     for (let k = -2; k <= 2; k++) { const fg = new THREE.PlaneGeometry(r * 0.32, r * 1.4); fg.translate(0, -r * 0.7, 0); const f = mesh(fg, wingM, tailG); f.rotation.set(Math.PI / 2 + 0.25, 0, k * 0.16); f.position.x = k * r * 0.05; }
-    g.userData = { len: Lb * 1.1, r, name: 'a small bird', y: r * 1.02,
+    g.userData = { len: Lb * 1.1, r, name: 'a small bird', y: r * 1.02, bodyG, NZ: 36, NA: 24,
       anim(t, live) { head.rotation.set(0, live * (0.5 * Math.sin(t * 1.3) + 0.2 * Math.sin(t * 4.1)), live * 0.1 * Math.sin(t * 2.7)); tailG.rotation.x = -live * 0.15 * Math.max(0, Math.sin(t * 3.3)); g.children[0].scale.y = 1 + 0.03 * live * Math.sin(t * 7); } };
     return g;
   }
@@ -569,12 +588,12 @@ function buildPrey2(kind, r, seed) {
     for (const sg of [-1, 1]) for (const [t, hind] of [[0.79, false], [0.56, true]]) {
       const lg = new THREE.Group(), p = pr(t); lg.position.set(sg * p.w * 0.7, p.c - p.h * 0.2, lerp(z0, z1, t)); g.add(lg); legs.push({ g: lg, sg, hind });
       const el2 = V3(sg * r * (hind ? 0.8 : 0.65), r * 0.05, hind ? -r * 0.15 : r * 0.1), ft = V3(sg * r * (hind ? 0.95 : 0.75), -lg.position.y + r * 0.05, hind ? -r * 0.05 : r * 0.25);
-      mesh(limbGeo(V3(0, 0, 0), el2, r * (hind ? 0.17 : 0.13), r * 0.1), legM, lg); mesh(limbGeo(el2, ft, r * 0.1, r * 0.07), legM, lg);
+      { const fc = hexRGB('#ffffff'); mesh(limbTube([V3(-sg * r * 0.15, r * 0.05, 0), el2.clone().add(V3(0, r * 0.08, 0)), ft], [r * (hind ? 0.2 : 0.15), r * 0.1, r * 0.065], [fc, fc, fc], 10, 22), legM, lg).geometry.deleteAttribute('color'); }
       for (let k = 0; k < 5; k++) { const a = (k / 4 - 0.5) * 1.6 + sg * 0.2 + (hind ? -0.3 * sg : 0.2 * sg), l = r * (0.18 + 0.12 * Math.sin((k / 4) * Math.PI)) * (hind && k === 3 ? 1.5 : 1); mesh(limbGeo(ft, ft.clone().add(V3(Math.sin(a) * l, -r * 0.03, Math.cos(a) * l)), r * 0.03, r * 0.018, 4), legM, lg); }
     }
     for (const sg of [-1, 1]) { const e = mesh(S(r * 0.1, 12, 10), glossEye('#2a1a0a')); e.position.set(sg * r * 0.36, r * 1.05, lerp(z0, z1, 0.935)); const lid = mesh(new THREE.TorusGeometry(r * 0.105, r * 0.025, 6, 16), legM); lid.position.copy(e.position); lid.rotation.y = sg * Math.PI / 2; }
     const base = bodyG.userData.base, pa = bodyG.attributes.position.array;
-    g.userData = { len: Lb, r, name: 'a lizard', y: r * 0.74,
+    g.userData = { len: Lb, r, name: 'a lizard', y: r * 0.74, bodyG, NZ, NA,
       anim(t, live) { const A = r * 0.45 * (0.3 + 0.7 * live); for (let v = 0; v < pa.length; v += 3) { const z = base[v + 2], u = clamp((z1 - Lb * 0.45 - z) / (Lb * 0.55), 0, 1); pa[v] = base[v] + A * u * u * Math.sin(u * 4 - t * 1.6); pa[v + 1] = base[v + 1] + (z > z1 - Lb * 0.2 ? r * 0.06 * live * Math.max(0, Math.sin(t * 2.4)) * sstep(z1 - Lb * 0.2, z1, z) : 0); }
         bodyG.attributes.position.needsUpdate = true; renorm(bodyG, NZ, NA); bodyG.computeBoundingSphere(); for (const L of legs) L.g.rotation.y = live * 0.08 * Math.sin(t * 2 + (L.hind ? 1 : 0) + (L.sg > 0 ? 0 : Math.PI)); } };
     // the lizard's centre is its body (tail behind): shift so the snout-vent part is centred
@@ -1191,7 +1210,9 @@ export function create(V) {
     // v5.57: how wide the jaws open, and how far the two halves of the lower jaw spread, for this prey
     const tNeed = mo.tFor ? mo.tFor(prR * 2 * 0.9) : 0.9, tHold = clamp(tNeed * 0.8, 0.3, 1.1), spreadNeed = clamp((prR * 0.95 - headR * 0.8) / headR, 0, 0.6);
     const restSnout = R.rest().subarray(0, 3);
-    const lift = Math.max(0, prR * 0.95 - restSnout[1]) + Hl * 0.05;
+    // v5.83: up in a tree the head is held high enough that the prey, lying along the head's own axis, sits on top of
+    // the branch (it used to be pushed up out of the jaws, above and behind the head, cut off at the throat)
+    const lift = perch ? Math.max(0, (prey.userData.y || prR) * 0.92 - F.Hh(Hl * 0.5) * F.bf) + Hl * 0.08 : Math.max(0, prR * 0.95 - restSnout[1]) + Hl * 0.05;
     const constrict = !perch && (plan === 'python' || (plan === 'colubrid' && (kind === 'mouse' || kind === 'rat' || kind === 'bird' || (kind === 'snake' && !venomous)))) && kind !== 'egg';
     const envenom = venomous && kind !== 'egg';
     // vipers, cobras, mambas and kraits let go of prey that could bite back (mammals, birds) and follow it when the venom
@@ -1324,7 +1345,7 @@ export function create(V) {
       const m = new THREE.Matrix4().makeBasis(f.S.clone().negate(), f.U, f.T); prey.quaternion.setFromRotationMatrix(m); prey.position.copy(f.c);
       if (perch) { // v5.78: up in a tree the prey is held level, on top of its branch - never pushed down into the wood (out of sight)
         const top = onPerch(f.c).y + (prey.userData.y || prR) * 0.85;
-        if (prey.position.y < top) { const Tf = V3(f.T.x, f.T.y * 0.15, f.T.z).normalize(), Uf = V3(0, 1, 0).addScaledVector(Tf, -Tf.y).normalize(), Sf = Tf.clone().cross(Uf); prey.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(Sf.negate(), Uf, Tf)); prey.position.copy(R.point(0)).addScaledVector(Tf, xc); prey.position.y = Math.max(top, R.point(0).y); levT = Tf; } // (straight out in front of the snout)
+        if (prey.position.y < top - prR * 0.6) { const Tf = V3(f.T.x, f.T.y * 0.15, f.T.z).normalize(), Uf = V3(0, 1, 0).addScaledVector(Tf, -Tf.y).normalize(), Sf = Tf.clone().cross(Uf); prey.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(Sf.negate(), Uf, Tf)); prey.position.copy(R.point(0)).addScaledVector(Tf, xc); prey.position.y = Math.max(top, R.point(0).y); levT = Tf; } // (straight out in front of the snout)
       }
       const sc = fitScale(); prey.scale.set(sc, sc, 1); whisk.forEach((w) => { w.visible = false; });
       const g = R.frameAtX(xClip); clip.normal.copy(levT || g.T).negate(); clip.constant = -clip.normal.dot(g.c); levT = null; // keep only what is in front of the throat (held level: cut square across)
@@ -1394,6 +1415,26 @@ export function create(V) {
     markFade(prey); fadeTree(prey, 0);
     if (perch && V.occ) { const pp = prey.position.clone(), hp0 = V.info.headPos.clone(), rr = Math.max(prR * 9, 0.16); for (const o of V.occ) if (o.leaf && !o.force) { const dd = Math.min(o.c.distanceTo(pp), o.c.distanceTo(hp0), o.c.distanceTo(pp.clone().lerp(hp0, 0.5))); if (dd < rr + o.r) { o.force = true; show.undo = (show.undo || []).concat([() => { o.force = false; }]); } } } // (no leaf near the prey or the head while it hunts)
     if (!travel) { const zone = [[prey.position.x, prey.position.z]]; for (let i = 0; i < R.ih * 6 && i < R.N; i += 6) zone.push([ext[i * 3], ext[i * 3 + 2]]); const undo = clearProps(zone, Math.max(prR * 2.5, F.w0 * 3)); show.undo = (show.undo || []).concat([undo, clearProps(zone, Math.max(prR * 4, F.w0 * 4), { flat: true })]); } // (v5.05: no rock or grass in the way)
+    // v5.83: where the coils squeeze, the prey's body gives: every point of it inside a coil is pushed back to the coil's
+    // surface (a dent round its chest and belly that deepens with each squeeze and springs back when the coils let go)
+    let squeezeK = 0, dented = false; const pBG = prey.userData.bodyG; let pBM = null; if (pBG) prey.traverse((o) => { if (o.isMesh && o.geometry === pBG && !pBM) pBM = o; });
+    const pBase = pBG && pBG.userData.base, rewrites = kind === 'mouse' || kind === 'rat' || kind === 'lizard', wv = new THREE.Vector3(), cs = [];
+    const dentPrey = () => {
+      if (!pBM || !wrapP) return;
+      const pa = pBG.attributes.position.array;
+      if (!rewrites && pBase) pa.set(pBase);
+      if (squeezeK <= 0.001) { if (dented) { dented = false; if (!rewrites && pBase) pa.set(pBase); pBG.attributes.position.needsUpdate = true; pBG.computeVertexNormals(); } return; }
+      prey.updateMatrixWorld(true); const M = pBM.matrixWorld, Mi = M.clone().invert();
+      cs.length = 0; for (let i = R.ih + 10; i <= coilI1; i += 4) { const x = i * R.dx, c = R.frameAtX(x).c; cs.push(c.x, c.y, c.z, rB(x) * Math.max(1, R.bul[i]) * (0.96 + 0.08 * squeezeK)); }
+      let any = false;
+      for (let v = 0; v < pa.length; v += 3) {
+        wv.set(pa[v], pa[v + 1], pa[v + 2]).applyMatrix4(M); let best = 0, bx = 0, by = 0, bz = 0;
+        for (let q = 0; q < cs.length; q += 4) { const dx = wv.x - cs[q], dy = wv.y - cs[q + 1], dz = wv.z - cs[q + 2], d2 = dx * dx + dy * dy + dz * dz, rr = cs[q + 3]; if (d2 < rr * rr) { const d = Math.sqrt(d2) || 1e-6, pen = rr - d; if (pen > best) { best = pen; bx = dx / d; by = dy / d; bz = dz / d; } } }
+        if (best > 0) { const k = Math.min(best, prR * 0.35) * squeezeK; wv.x += bx * k; wv.y += by * k; wv.z += bz * k; wv.applyMatrix4(Mi); pa[v] = wv.x; pa[v + 1] = wv.y; pa[v + 2] = wv.z; any = true; }
+      }
+      if (any || dented) { pBG.attributes.position.needsUpdate = true; pBG.computeVertexNormals(); }
+      dented = any;
+    };
     const sq = (k) => { if (!wrapP) return; const i0 = R.ih + 20, i1 = coilI1; for (let i = 0; i < R.N; i++) R.bul[i] = i >= i0 && i <= i1 ? 1 + k * 0.06 * sstep(i0, i0 + 14, i) * (1 - sstep(i1 - 14, i1, i)) : 1; };
     // v5.68: a modest, realistic lump - never a balloon: at most about 1.3-1.5 times the body's width (by prey), easing
     // into that limit (a big rat in a ball python shows as a firm swelling, the skin stretched between the scales)
@@ -1473,10 +1514,10 @@ export function create(V) {
       if (constrict) {
         const camC = () => camSide(preyPt().lerp(headPt(), 0.35), fitD(Math.max(prR * 6.5, Wc * 12, Lp * 1.7)), 0.82, 0.1);
         // 5. coils: the body bends round the prey (lifted a little), two or three turns, without stretching
-        phases.push([1.7, (u, s) => { held = true; const e = ease(u); R.setPose(R.blend3(ext, Aext, wrapP, Awrap, e, R.ih, e * e * e)); R.apply(); setMouth(tHold); say(T.coil); camKey = camC(); if (inWater) wake(s); }]);
-        phases.push([1.9, (u, s) => { R.setPose(wrapP); sq(0.5 + 0.5 * Math.sin(s * 4.2)); R.apply(); camKey = camC(); say(T.coil); }]); // squeeze...
-        phases.push([0.8, (u, s) => { R.setPose(wrapP); sq(0.35); R.apply(); flick(0); say(T.coil); void s; }]); // ...and hold still
-        phases.push([1.4, (u, s) => { R.bul.fill(1); R.setPose(R.blend3(wrapP, Awrap, ext, Aext, ease(u), R.ih, 1 - Math.pow(1 - ease(u), 3))); R.apply(); setMouth(tHold * (1 - 0.3 * ease(u))); say(T.loosen); if (inWater) wake(s); }]);
+        phases.push([1.7, (u, s) => { held = true; const e = ease(u); R.setPose(R.blend3(ext, Aext, wrapP, Awrap, e, R.ih, e * e * e)); R.apply(); setMouth(tHold); say(T.coil); camKey = camC(); if (inWater) wake(s); squeezeK = sstep(0.75, 1, u) * 0.5; }]);
+        phases.push([1.9, (u, s) => { R.setPose(wrapP); const k = 0.5 + 0.5 * Math.sin(s * 4.2); sq(k); R.apply(); camKey = camC(); say(T.coil); squeezeK = 0.5 + 0.5 * k; }]); // squeeze...
+        phases.push([0.8, (u, s) => { R.setPose(wrapP); sq(0.35); R.apply(); flick(0); say(T.coil); void s; squeezeK = 0.75; }]); // ...and hold still
+        phases.push([1.4, (u, s) => { squeezeK = 0.75 * (1 - sstep(0, 0.35, u)); R.bul.fill(1); R.setPose(R.blend3(wrapP, Awrap, ext, Aext, ease(u), R.ih, 1 - Math.pow(1 - ease(u), 3))); R.apply(); setMouth(tHold * (1 - 0.3 * ease(u))); say(T.loosen); if (inWater) wake(s); }]);
         // let go, check along the prey with the tongue for its head, and take it head first
         phases.push([0.5, (u) => { held = false; R.setPose(R.blend(ext, coil, ease(u) * 0.55)); R.apply(); say(T.loosen); setMouth(tHold * 0.7 * (1 - ease(u))); rolled(ease(u) * 0.6); camKey = camSide(preyPt().lerp(headPt(), 0.5), fitD(Math.max(Lp * 2.6, st.len))); }]);
         phases.push([1.5, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift, coil: 0.55 * (1 - ease(u)), base: B, yaw: 0.28 * Math.sin(u * TAU * 1.5) * (1 - sstep(0.7, 1, u)) })); R.apply(); say(T.loosen); rolled(0.6 * (1 - sstep(0.55, 0.95, u))); flick(flicks(s, 0.7, 1)); setMouth(tHold * sstep(0.6, 0.95, u)); if (u > 0.96) held = true; }]);
@@ -1519,6 +1560,7 @@ export function create(V) {
       if (heldAt >= 0) { lifeK = Math.min(lifeK, 1 - sstep(0, struggle, s - heldAt)); if (pAnim && !preyHide) pAnim(s, lifeK); }
       lastS = s;
       if (held) { placeHeld(); prey.visible = !preyHide; }
+      if (constrict && (squeezeK > 0 || dented)) { if (!held || preyHide) squeezeK = 0; dentPrey(); }
       if (!held && prey.matrixAutoUpdate === false) prey.matrixAutoUpdate = true;
     };
     show.dur = total(phases);
@@ -1630,12 +1672,12 @@ export function create(V) {
     const parts = [], own = [], toJaw = [];
     const om = (col, o = {}) => new THREE.MeshPhysicalMaterial(Object.assign({ color: col, roughness: 0.5, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.4, envMapIntensity: 0.7 }, o));
     // a tube along the body from x0 to x1: centre offset (s across, u up, both as fractions of the body's half-size), radius r(x)
-    const sweep = (x0, x1, fs, fu, fr, n = 64, m = 14, aspect = 1) => {
+    const sweep = (x0, x1, fs, fu, fr, n = 64, m = 14, aspect = 1, fa = null) => {
       const pos = [], xs = [], idx = [];
       for (let k = 0; k <= n; k++) {
         const t = k / n, x = lerp(x0, x1, t), c = B.spine(x), f = B.frameAt(x), w = F.W(x), h = F.Hh(x), env = Math.pow(Math.sin(Math.PI * clamp(t, 0.0005, 0.9995)), 0.3);
         const cc = c.clone().addScaledVector(f.S, (typeof fs === 'function' ? fs(x, t) : fs) * w).addScaledVector(f.U, (typeof fu === 'function' ? fu(x, t) : fu) * h), r = fr(x, t) * env;
-        for (let j = 0; j <= m; j++) { const a = (j / m) * TAU, p = cc.clone().addScaledVector(f.S, Math.cos(a) * r * aspect).addScaledVector(f.U, Math.sin(a) * r); pos.push(p.x, p.y, p.z); xs.push(x); }
+        for (let j = 0; j <= m; j++) { const a = (j / m) * TAU, ra = fa ? r * fa(a, t, x) : r, p = cc.clone().addScaledVector(f.S, Math.cos(a) * ra * aspect).addScaledVector(f.U, Math.sin(a) * ra); pos.push(p.x, p.y, p.z); xs.push(x); }
       }
       for (let k = 0; k < n; k++) for (let j = 0; j < m; j++) { const a = k * (m + 1) + j, b = a + m + 1; idx.push(a, b, a + 1, a + 1, b, b + 1); } // wound outwards
       const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.BufferAttribute(new Float32Array((pos.length / 3) * 2), 2));
@@ -1692,33 +1734,39 @@ export function create(V) {
     const heart0 = svl * (heartC - 0.024), heart1 = svl * (heartC + 0.024);
     const lungEnd = svl * (marine ? 0.62 : plan === 'python' ? 0.55 : 0.5), sacEnd = svl * (marine ? 0.92 : plan === 'python' ? 0.7 : 0.72);
     const liverEnd = svl * Math.max(heartC + 0.2, 0.48), stom0 = liverEnd - svl * 0.005, stom1 = stom0 + svl * 0.105;
-    add('trachea', 'Windpipe (trachea)', 'Stiff rings keep it open. Its opening, the glottis, can be pushed out of the side of the mouth so the snake breathes while swallowing big prey.', 'body', sweep(x0, heart0 + svl * 0.01, -0.06, -0.12, (x) => rB(x) * 0.11, 140, 10), om(C.trachea, { map: ringTex('#e9dcc6', 'rgba(150,120,100,.45)', 70) }));
+    add('trachea', 'Windpipe (trachea)', 'Stiff rings keep it open. Its opening, the glottis, can be pushed out of the side of the mouth so the snake breathes while swallowing big prey.', 'body', sweep(x0, heart0 + svl * 0.01, -0.06, -0.12, (x) => rB(x) * 0.11 * (1 + 0.16 * Math.pow(Math.max(0, Math.cos((x / Math.max(1e-4, rB(x) * 0.22)) * TAU)), 3)), Math.round(clamp((heart0 - x0) / (F.w0 * 0.025), 140, 900)), 10), om(C.trachea, { map: ringTex('#e9dcc6', 'rgba(150,120,100,.3)', 70), roughness: 0.45 }));
     if (plan !== 'python' && plan !== 'blind') add('tlung', 'Tracheal lung', 'Extra breathing tissue along the windpipe in front of the heart, which many snakes have.', 'body', sweep(Math.max(x0 * 1.3, heart0 * 0.45), heart0 * 0.99, -0.08, -0.08, (x) => rB(x) * 0.2, 40, 12), om(C.lung, { transparent: true, opacity: 0.8, roughness: 0.75 }), { detail: true });
     add('oesophagus', 'Gullet (oesophagus)', 'A long, very stretchy tube from the mouth to the stomach. Food is pushed along it by muscles.', 'body', sweep(x0, stom0 + svl * 0.01, 0.1, 0.24, (x) => rB(x) * 0.15, 170, 10), om(C.gullet));
     const hx = (heart0 + heart1) / 2;
     // v5.78: the heart with its shape: a ventricle tapering to a point towards the tail, two atria in front of it, the
     // aortic arches leaving forwards
     const heartGeo = (hx0) => { const hl = (heart1 - heart0) * 0.5, rr = rB(hx0), parts = [];
-      const v = new THREE.SphereGeometry(1, 28, 20), pa = v.attributes.position; for (let i = 0; i < pa.count; i++) { const zz = pa.getZ(i), k = zz > 0 ? 1 - 0.32 * zz * zz : 1; pa.setX(i, pa.getX(i) * k); pa.setY(i, pa.getY(i) * k); } // (pointed towards the tail: +z is along the body, towards the tail)
-      const fv = B.frameAt(hx0 + hl * 0.15), cv = B.spine(hx0 + hl * 0.15).addScaledVector(fv.U, -0.34 * F.Hh(hx0)); v.scale(rr * 0.33, rr * 0.34, hl * 0.95); v.computeVertexNormals(); v.applyMatrix4(new THREE.Matrix4().makeBasis(fv.S.clone().negate(), fv.U, fv.T).setPosition(cv)); v.userData.x = hx0; parts.push(v);
-      for (const sg of [1, -1]) parts.push(blob(hx0 - hl * 0.7, sg * 0.16, -0.26, hl * 0.32, rr * 0.22, F.W(hx0) * 0.2, 18));
-      for (const sg of [1, -1]) { const g2 = sweep(hx0 - hl * 1.15, hx0 - hl * 0.55, sg * 0.09, -0.16, () => rr * 0.06, 12, 8); parts.push(g2); }
+      // (v5.83: the ventricle a smooth teardrop - broad and round in front, tapering to a blunt apex towards the tail -
+      // slightly flattened top to bottom; the atria two plump lobes over its front; the aortic arches tubes)
+      const v = new THREE.SphereGeometry(1, 36, 26), pa = v.attributes.position; for (let i = 0; i < pa.count; i++) { const zz = pa.getZ(i), k = zz > 0 ? 1 - 0.42 * zz * zz : 1 - 0.06 * zz * zz; pa.setX(i, pa.getX(i) * k); pa.setY(i, pa.getY(i) * k * 0.86); }
+      const fv = B.frameAt(hx0 + hl * 0.2), cv = B.spine(hx0 + hl * 0.2).addScaledVector(fv.U, -0.32 * F.Hh(hx0)); v.scale(rr * 0.31, rr * 0.31, Math.min(hl * 0.7, rr * 0.62)); v.computeVertexNormals(); v.applyMatrix4(new THREE.Matrix4().makeBasis(fv.S.clone().negate(), fv.U, fv.T).setPosition(cv)); v.userData.x = hx0; parts.push(v);
+      for (const sg of [1, -1]) { { const xa = hx0 + hl * 0.2 - Math.min(hl * 0.7, rr * 0.62) * 0.85; parts.push(blob(xa, sg * 0.17, -0.12, rr * 0.19, rr * 0.21, rr * 0.17, 22)); } }
+      for (const sg of [1, -1]) { const q = []; for (let k = 0; k <= 8; k++) { const t = k / 8, x = hx0 + hl * 0.2 - Math.min(hl * 0.7, rr * 0.62) * (0.9 + t * 0.85), f = B.frameAt(x); q.push(B.spine(x).addScaledVector(f.S, sg * F.W(x) * lerp(0.04, 0.26, t)).addScaledVector(f.U, F.Hh(x) * lerp(-0.2, 0.32, Math.sin(t * Math.PI * 0.5)))); } const g2 = varTube(q, (t) => rr * lerp(0.07, 0.045, t), 8, 16); g2.userData.x = hx0; parts.push(g2); }
       return mergeG(parts); };
     add('heart', 'Heart', (climber ? 'Close to the head in climbing snakes, so blood still reaches the brain when they hold the head up. ' : marine ? 'Nearer the middle of the body in sea snakes. ' : 'About a quarter of the way along the body. ') + 'It has three chambers and can slide a little, so big prey can squeeze past.', 'body', heartGeo(hx), om(C.heart, { roughness: 0.38, clearcoat: 0.6 }));
-    add('lung', 'Right lung', 'Snakes have one long working lung on the right (the left one is tiny or missing), because their body is so narrow.', 'body', sweep(heart1 * 1.0, lungEnd, -0.2, 0.22, (x, t) => rB(x) * 0.36 * (1 - t * 0.2), 90, 12), om(C.lung, { roughness: 0.75, map: speckle('#e2a19d', 1600, 0.25, 4) }));
-    if (plan === 'python') add('lungL', 'Left lung', 'Boas and pythons still have a good left lung, more than half as long as the right one.', 'body', sweep(heart1 * 1.01, heart1 + (lungEnd - heart1) * 0.62, 0.24, 0.2, (x, t) => rB(x) * 0.26 * (1 - t * 0.25), 60, 12), om(C.lung, { roughness: 0.75, map: speckle('#e2a19d', 1200, 0.25, 5) }));
+    const lungTex = canvasTex(256, (x, s2) => { const R2 = rnd(71); x.fillStyle = '#e7aaa4'; x.fillRect(0, 0, s2, s2); const cs = 9;
+      for (let yy = 0; yy < s2 + cs; yy += cs * 0.87) for (let xx = ((yy / (cs * 0.87)) % 2) * cs * 0.5; xx < s2 + cs; xx += cs) { x.fillStyle = 'rgba(' + (150 + R2() * 40) + ',' + (60 + R2() * 30) + ',' + (60 + R2() * 25) + ',' + (0.25 + R2() * 0.2) + ')'; x.beginPath(); x.arc(xx, yy, cs * 0.36, 0, TAU); x.fill(); }
+      x.strokeStyle = 'rgba(120,30,40,.45)'; for (let i = 0; i < 26; i++) { x.lineWidth = 0.6 + R2() * 1.6; x.beginPath(); let px = R2() * s2, py = R2() * s2; x.moveTo(px, py); for (let k = 0; k < 6; k++) { px += (R2() - 0.5) * 40; py += (R2() - 0.5) * 40; x.lineTo(px, py); } x.stroke(); } }, 2, 12);
+    const lungM = () => om(C.lung, { roughness: 0.62, map: lungTex, bumpMap: lungTex, bumpScale: 0.8, sheen: 0.4, sheenColor: new THREE.Color('#ffd0cc'), clearcoat: 0.5, clearcoatRoughness: 0.3 });
+    add('lung', 'Right lung', 'Snakes have one long working lung on the right (the left one is tiny or missing), because their body is so narrow.', 'body', sweep(heart1 * 1.0, lungEnd, -0.2, 0.22, (x, t) => rB(x) * 0.36 * (1 - t * 0.2) * (1 + 0.035 * Math.sin(x / Math.max(1e-4, rB(x) * 0.5))), 120, 16, 1.1, (a) => 1 - 0.12 * Math.max(0, -Math.sin(a))), lungM());
+    if (plan === 'python') add('lungL', 'Left lung', 'Boas and pythons still have a good left lung, more than half as long as the right one.', 'body', sweep(heart1 * 1.01, heart1 + (lungEnd - heart1) * 0.62, 0.24, 0.2, (x, t) => rB(x) * 0.26 * (1 - t * 0.25), 80, 14, 1.1), lungM());
     else add('lungL', 'Left lung', 'Tiny in most snakes (and missing in many): there is only room for one big lung.', 'body', sweep(heart1 * 1.01, heart1 + svl * 0.035, 0.26, 0.18, (x) => rB(x) * 0.12, 16, 10), om(C.lung, { roughness: 0.75 }), { detail: true });
     add('airsac', 'Air sac', 'The back part of the lung has no blood vessels: it is a thin bag that stores air, like a balloon.', 'body', sweep(lungEnd - svl * 0.01, sacEnd, -0.12, 0.3, (x, t) => rB(x) * 0.25 * (1 - t * 0.6), 70, 12), new THREE.MeshPhysicalMaterial({ color: C.sac, roughness: 0.25, transparent: true, opacity: 0.42, depthWrite: false, clearcoat: 1 }));
-    add('liver', 'Liver', 'Long and thin to fit the body. It cleans the blood and stores energy.', 'body', sweep(heart1 + svl * 0.008, liverEnd, -0.06, -0.3, (x, t) => rB(x) * 0.34 * Math.min(1, 0.55 + t * 1.4) * (1 - 0.3 * t), 80, 12, 1.15), om(C.liver, { roughness: 0.35, clearcoat: 0.6 }));
-    add('stomach', 'Stomach', 'Very stretchy. Strong acid digests the whole prey - even bones.', 'body', sweep(stom0, stom1, 0.04, -0.12, (x, t) => rB(x) * 0.38 * (1 - Math.abs(t - 0.4) * 0.6), 40, 14), om(C.stomach, { map: canvasTex(64, (x, s) => { x.fillStyle = '#d6998d'; x.fillRect(0, 0, s, s); x.strokeStyle = 'rgba(140,60,50,.3)'; x.lineWidth = 2; for (let i = 0; i < s; i += 7) { x.beginPath(); x.moveTo(0, i); x.bezierCurveTo(s * 0.3, i + 4, s * 0.6, i - 4, s, i); x.stroke(); } }, 2, 3) }));
+    add('liver', 'Liver', 'Long and thin to fit the body. It cleans the blood and stores energy.', 'body', sweep(heart1 + svl * 0.008, liverEnd, -0.06, -0.3, (x, t) => rB(x) * 0.34 * Math.min(1, 0.55 + t * 1.4) * (1 - 0.3 * t) * (1 - 0.1 * Math.pow(Math.abs(Math.sin(t * 9.5)), 12)), 140, 16, 1.18, (a) => 1 - 0.22 * Math.max(0, -Math.sin(a)) + 0.04 * Math.cos(2 * a)), om(C.liver, { roughness: 0.38, clearcoat: 0.35, clearcoatRoughness: 0.3, envMapIntensity: 0.4, map: speckle('#6a2a20', 900, 0.18, 12) }));
+    add('stomach', 'Stomach', 'Very stretchy. Strong acid digests the whole prey - even bones.', 'body', sweep(stom0, stom1, 0.04, -0.12, (x, t) => rB(x) * 0.38 * (1 - Math.abs(t - 0.4) * 0.6) * (1 - 0.45 * sstep(0.82, 1, t)), 70, 28, 1, (a, t) => 1 + 0.07 * Math.cos(a * 9 + t * 2) * Math.sin(Math.PI * t)), om(C.stomach, { map: canvasTex(64, (x, s) => { x.fillStyle = '#d6998d'; x.fillRect(0, 0, s, s); x.strokeStyle = 'rgba(140,60,50,.3)'; x.lineWidth = 2; for (let i = 0; i < s; i += 7) { x.beginPath(); x.moveTo(0, i); x.bezierCurveTo(s * 0.3, i + 4, s * 0.6, i - 4, s, i); x.stroke(); } }, 2, 3) }));
     const g0 = Math.max(svl * 0.605, stom1 + svl * 0.006);
     add('gall', 'Gall bladder', 'A small green bag just behind the stomach. It keeps bile, which helps to digest fat.', 'body', blob(g0, -0.18, -0.22, rB(g0) * 0.2, rB(g0) * 0.17, F.W(g0) * 0.15), om(C.gall, { roughness: 0.3, clearcoat: 0.8 }), { detail: true });
     add('pancreas', 'Pancreas', 'Makes juices that digest food and a hormone (insulin) that controls sugar in the blood.', 'body', blob(g0 + rB(g0) * 0.5, 0.05, -0.12, rB(g0) * 0.24, rB(g0) * 0.15, F.W(g0) * 0.17), om(C.pancreas), { detail: true });
     add('spleen', 'Spleen', 'A small dark red organ that helps to fight germs and cleans old blood cells.', 'body', blob(g0 - rB(g0) * 0.2, 0.22, 0.02, rB(g0) * 0.16, rB(g0) * 0.14, F.W(g0) * 0.13), om(C.spleen, { roughness: 0.4 }), { detail: true });
-    add('intestine', 'Small intestine', 'Takes the goodness out of the digested food. In snakes it is fairly short and loops gently along the body.', 'body', sweep(Math.max(svl * 0.625, g0 + svl * 0.02), svl * 0.86, (x) => 0.16 * Math.sin((x / svl) * 150), (x) => -0.18 + 0.12 * Math.cos((x / svl) * 150), (x) => rB(x) * 0.17, 200, 8), om(C.small));
+    add('intestine', 'Small intestine', 'Takes the goodness out of the digested food. In snakes it is fairly short and loops gently along the body.', 'body', sweep(Math.max(svl * 0.625, g0 + svl * 0.02), svl * 0.86, (x) => 0.2 * Math.sin((x / svl) * 210), (x) => -0.2 + 0.14 * Math.cos((x / svl) * 210) + 0.04 * Math.sin((x / svl) * 37), (x, t) => rB(x) * 0.17 * (1.12 - 0.2 * t), 420, 10), om(C.small, { roughness: 0.35, clearcoat: 0.7, clearcoatRoughness: 0.25, map: speckle('#e0b69c', 700, 0.12, 21) }));
     add('colon', 'Large intestine', 'The last part of the gut. It takes water back out of what is left, then it goes out through the cloaca.', 'body', sweep(svl * 0.855, svl * 0.99, 0, -0.18, (x, t) => rB(x) * 0.19 * (1 - 0.3 * t), 40, 10), om(C.large));
     for (const [sg, a] of [[-1, 0.63], [1, 0.67]]) add('gonads', 'Ovaries or testes', 'The organs that make eggs (females) or sperm (males). One sits a little in front of the other, to fit the long body.', 'body', sweep(svl * a, svl * (a + 0.06), sg * 0.3, 0.3, (x) => rB(x) * 0.13, 24, 10), om(C.gonad), { detail: true });
-    for (const [sg, a] of [[-1, 0.78], [1, 0.83]]) add('kidneys', 'Kidneys', 'Long and lobed, one in front of the other. They clean the blood; snakes save water by making a white paste (urates) instead of runny urine.', 'body', sweep(svl * a, svl * (a + 0.085), sg * 0.3, 0.3, (x, t) => rB(x) * 0.15 * (0.8 + 0.2 * Math.cos(t * 44)), 48, 10), om(C.kidney, { roughness: 0.45 }), { detail: true });
+    for (const [sg, a] of [[-1, 0.78], [1, 0.83]]) add('kidneys', 'Kidneys', 'Long and lobed, one in front of the other. They clean the blood; snakes save water by making a white paste (urates) instead of runny urine.', 'body', sweep(svl * a, svl * (a + 0.085), sg * 0.3, 0.3, (x, t) => rB(x) * 0.15 * (0.78 + 0.22 * Math.pow(Math.abs(Math.cos(t * 22)), 0.6)), 90, 14, 1.2, (an) => 1 - 0.18 * Math.max(0, Math.sin(an))), om(C.kidney, { roughness: 0.4, clearcoat: 0.5 }), { detail: true });
     // ---- backbone and ribs: one pair of ribs on every vertebra from the neck to the vent (none in the tail)
     const ribs = []; const xr0 = Math.max(Hl * 1.3, x0 * 1.08), nRib = Math.round(clamp((svl - xr0) / (F.w0 * 0.2), 110, 220));
     for (let k = 0; k < nRib; k++) {
@@ -1726,7 +1774,22 @@ export function create(V) {
       for (const sg of [1, -1]) { const pts = [sp.clone()]; for (let j = 0; j <= 6; j++) { const a = 0.2 + (j / 6) * 2.2; pts.push(c.clone().addScaledVector(f.S, sg * Math.sin(a) * w * 0.82).addScaledVector(f.U, Math.cos(a) * h * 0.76).addScaledVector(f.T, (j / 6) * w * 0.22)); } const g = varTube(pts, (t) => rB(x) * 0.028 * (1 - 0.4 * t), 4, 10, false); g.userData.x = x; ribs.push(g); }
     }
     add('ribs', 'Ribs', 'Snakes can have 100 to more than 400 pairs of ribs - one pair on every bone of the backbone! They are not joined underneath, so the body can stretch round a big meal, and they help the snake to crawl and climb.', 'ribs', mergeG(ribs), om(C.bone, { roughness: 0.55, clearcoat: 0.15 }), { x: svl * 0.4 });
-    add('spine', 'Backbone (vertebrae)', 'A chain of 100 to more than 400 small bones (vertebrae) from the head to the tip of the tail, joined so the body can bend in every direction.', 'ribs', sweep(Hl * 1.0, L * 0.995, 0, 0.58, (x) => rB(x) * 0.1, 300, 8), om(C.bone, { roughness: 0.55, clearcoat: 0.15, map: ringTex('#eee5cf', 'rgba(150,130,100,.5)', 220) }), { x: svl * 0.45 });
+    { // v5.83: one bone per vertebra (a spool-shaped body, a ridge on top and short side wings where the ribs join)
+      const vs = [], nV = Math.round(clamp((L * 0.995 - Hl * 1.05) / (F.w0 * 0.2), 140, 320)), unit = new THREE.CylinderGeometry(1, 1, 1, 8, 1); unit.rotateX(Math.PI / 2);
+      { const pa = unit.attributes.position; for (let i = 0; i < pa.count; i++) { const z = pa.getZ(i), k = 1 - 0.28 * (1 - 4 * z * z); pa.setX(i, pa.getX(i) * k); pa.setY(i, pa.getY(i) * k); } }
+      const spineU = new THREE.SphereGeometry(0.5, 8, 6), wing = new THREE.SphereGeometry(0.5, 10, 6); spineU.scale(0.35, 1.4, 0.8); wing.scale(2.6, 0.4, 0.55);
+      const mm = new THREE.Matrix4(), sm = new THREE.Matrix4(), tm = new THREE.Matrix4();
+      for (let k = 0; k < nV; k++) {
+        const x = lerp(Hl * 1.05, L * 0.995, k / (nV - 1)), f = B.frameAt(x), r0 = rB(x), step = (L * 0.995 - Hl * 1.05) / nV, c = B.spine(x).addScaledVector(f.U, F.Hh(x) * 0.58);
+        mm.makeBasis(f.S.clone().negate(), f.U, f.T).setPosition(c);
+        for (const [geo, sx, sy, sz, oy] of [[unit, r0 * 0.1, r0 * 0.1, step * 0.86, 0], [spineU, r0 * 0.1, r0 * 0.12, step * 0.7, r0 * 0.12], [wing, r0 * 0.1, r0 * 0.1, step * 0.5, r0 * 0.02]]) {
+          if (x > svl && geo === wing) continue; // (no ribs, so no rib joints, in the tail)
+          const g = geo.clone(); sm.makeScale(sx, sy, sz); tm.makeTranslation(0, oy, 0); g.applyMatrix4(sm).applyMatrix4(tm).applyMatrix4(mm); g.userData.x = x; vs.push(g);
+        }
+      }
+      unit.dispose(); spineU.dispose(); wing.dispose();
+      add('spine', 'Backbone (vertebrae)', 'A chain of 100 to more than 400 small bones (vertebrae) from the head to the tip of the tail, joined so the body can bend in every direction.', 'ribs', mergeG(vs), om(C.bone, { roughness: 0.55, clearcoat: 0.15 }), { x: svl * 0.45 });
+    }
     // v5.78: the long back muscles either side of the backbone (they bend the body and pull on the ribs), see-through red
     { const mt = canvasTex(64, (x, s2) => { x.fillStyle = '#b4544c'; x.fillRect(0, 0, s2, s2); x.strokeStyle = 'rgba(255,215,200,.35)'; x.lineWidth = 1; for (let i = 0; i < s2; i += 3) { x.beginPath(); x.moveTo(0, i); x.lineTo(s2, i + 6); x.stroke(); } x.fillStyle = 'rgba(240,225,215,.55)'; for (let i = 0; i < s2; i += 16) x.fillRect(0, i, s2, 2); }, 1, 160);
       for (const sg of [1, -1]) add('muscle', 'Back muscles', 'Long bands of muscle along both sides of the backbone, joined to every vertebra and rib. Tightening one side bends the body - that is how a snake crawls, climbs and squeezes.', 'ribs', sweep(Hl * 1.25, L * 0.96, sg * 0.3, 0.38, (x, t) => rB(x) * 0.27 * (1 - t * 0.3), 220, 10, 1.25), om('#b4544c', { map: mt, transparent: true, opacity: 0.6, depthWrite: false, roughness: 0.55, clearcoat: 0.25 }), { x: svl * 0.35 }); }
