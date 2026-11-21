@@ -680,8 +680,9 @@ AUDIT_FIX = {
     # 5 Madagascar leaf-nosed snake (the long-nosed form in its photo): pale brown, a long flat nasal blade, pale lateral line
     "langaha-madagascariensis": {"d": "#a07c56", "lat": "#a68560", "c": "#5a4028", "b": "#e6dcb0", "t": "none", "ls": ["#e8e0c0", 0.6, 0.03],
         "h": {"horns": "rostral", "hornLen": 0.55, "hornUp": 0.05, "hornFlat": 0.35, "hornColor": "#9a7650", "w": 1.3}},
-    # 6 carpet python (jungle-type, as in its photo): pale-centred blotches with heavy black rims on a dark ground, a dark eye stripe
-    "morelia-spilota": {"d": "#2e2a22", "lat": "#34302a", "c": "#141210", "ic": "#c8c0a0", "b": "#e2dcc6", "t": "carpet", "n": 52,
+    # 6 carpet python: v5.88 against iNaturalist research-grade photos - an olive-tan to cream ground with black-rimmed,
+    # olive-brown-centred blotches linked into bands (it was a black snake with white spots), a dark eye stripe
+    "morelia-spilota": {"d": "#a49868", "lat": "#988c60", "c": "#1a1712", "ic": "#5e5640", "b": "#e2dcc6", "t": "carpet", "n": 52,
         "es": ["#141210", 0.06], "h": {"iris": "#a89878", "irisInner": "#cfc3a0"}},
     # 7 monocled cobra (the common brown form): the O-shaped monocle on the back of the hood, pale throat, a dark band across it
     "naja-kaouthia": {"d": "#5e5242", "lat": "#625646", "c": "#2a221a", "b": "#e2d8bc", "t": "plain",
@@ -764,7 +765,8 @@ AUDIT_FIX = {
     # 55 rosy boa: contrasting stripes
     "lichanura-trivirgata": {"d": "#c8c0b0", "lat": "#c4bcac", "c": "#6a3a20"},
     # 67 common garter snake: the side stripe on scale rows 2-3, dark bars on the lips
-    "thamnophis-sirtalis": {"ls": ["#e8d77a", 0.62, 0.05]},
+    # (v5.88: olive-brown, not near-black, with the three yellow stripes as clear as in its photos)
+    "thamnophis-sirtalis": {"d": "#5e5638", "lat": "#655c3c", "ls": ["#e8d77a", 0.6, 0.068], "vs": ["#e4d06a", 0.062]},
     # 79 indigo snake: 17 rows
     "drymarchon-couperi": {"sx": {"rows": 17}},
     # 88 sea krait: lateral nostrils (it is amphibious)
@@ -884,8 +886,32 @@ def apply_562(a, c, g):
     if sid in AUDIT_FIX: _merge_562(a, AUDIT_FIX[sid])
 
 
+# v5.88: hand-made profiles matched again against iNaturalist research-grade photos of adults (the patterns were rough)
+HAND_FIXES_588 = {
+    # puff adder: a yellowish-brown ground with dark, backward-pointing chevrons edged pale yellow (they were black rings)
+    "bitis-arietans": [(("colors", "dorsal"), "#a08a58"), (("colors", "lateral"), "#98845a"), (("colors", "belly"), "#e2d6b2"), (("colors", "mottle"), 0.08),
+                       (("pattern", 0), {"type": "blotch", "t": [0.08, 0.95], "count": 24, "a": 0, "wid": 0.44, "len": 0.3, "shape": "chevron", "vk": 3.0, "color": "#2c2218",
+                                         "edgeColor": "#e6cf8a", "edge": 0.32, "edgeOut": True, "warp": 0.25, "jit": 0.06, "sj": 0.12}),
+                       (("pattern", 1), {"type": "blotch", "t": [0.08, 0.95], "count": 24, "phase": 0.5, "a": 0.64, "mirror": True, "wid": 0.12, "len": 0.36, "shape": "rect",
+                                         "color": "#3a2e22", "edgeColor": "#d8c48c", "edge": 0.22, "edgeOut": True, "warp": 0.3})],
+    # Gaboon viper: a row of pale oblong blocks down the spine (they were round), a warmer, lighter brown ground
+    "bitis-gabonica": [(("colors", "dorsal"), "#5a3e32"), (("colors", "lateral"), "#684838"),
+                       (("pattern", 0), {"type": "blotch", "t": [0.1, 0.95], "count": 17, "a": 0, "wid": 0.12, "len": 0.58, "shape": "rect", "color": "#d6c6a0",
+                                         "inner": {"r": 0.32, "color": "#c2ab82"}, "warp": 0.3, "jit": 0.06})],
+    # copperhead: pale pinkish-tan with chestnut hourglass crossbands - narrow over the spine, wide on the flanks, darker edged
+    "agkistrodon-contortrix": [(("colors", "dorsal"), "#c4a184"), (("colors", "lateral"), "#bf9c7f"), (("colors", "belly"), "#e2d2ba"),
+                               (("pattern", 0), {"type": "blotch", "t": [0.06, 0.94], "count": 15, "a": 0, "wid": 0.95, "len": 0.9, "shape": "hourglass2", "h0": 0.22, "h1": 1.4,
+                                                 "color": "#8c4e30", "edgeColor": "#5a301e", "edge": 0.14, "warp": 0.35, "jit": 0.08, "sj": 0.15}),
+                               (("pattern", 1, "color"), "#b07a4e")],
+    # reticulated python: a golden-brown ground (it was too pale), grey-brown saddles inside the black net, a golden head
+    "malayopython-reticulatus": [(("colors", "dorsal"), "#8a6c36"), (("colors", "lateral"), "#a07e3e"), (("pattern", 0, "edgeColor"), "#d8b050"),
+                                 (("pattern",), "<", {"type": "blotch", "t": [0.05, 0.97], "count": 46, "a": 0, "wid": 0.24, "len": 0.6, "shape": "diamond", "color": "#5e4e38", "alpha": 0.75, "warp": 0.5}),
+                                 (("pattern", 3, "color"), "#a8843c")],
+}
+
+
 def apply_hand_562(existing):
-    for sid, fix in HAND_FIXES_562.items():
+    for sid, fix in list(HAND_FIXES_562.items()) + list(HAND_FIXES_588.items()):
         prof = existing.get(sid)
         if not prof: continue
         for f in fix:
@@ -893,6 +919,7 @@ def apply_hand_562(existing):
             o = prof
             for k in path[:-1]: o = o.setdefault(k, {}) if isinstance(k, str) else o[k]
             if val == "+": o[path[-1]] = list(o.get(path[-1]) or []) + [f[2]]
+            elif val == "<": o[path[-1]] = [f[2]] + list(o.get(path[-1]) or [])
             else: o[path[-1]] = val
 
 
