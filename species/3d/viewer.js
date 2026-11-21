@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=577'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=577'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=578'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=578'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -171,8 +171,11 @@ function normProfile(p, id) {
 const EYE_L = { colubrid: 0.18, elapid: 0.13, viper: 0.11, pitviper: 0.1, python: 0.09, sea: 0.07 };
 function eyeRadOf(P, F) {
   const Hd = P.head, x = Hd.eyeX * F.Hl;
-  if (Hd.eyeL == null) return (Hd.eye || 0.15) * F.W(x) * 1.04;
-  return Math.min((Hd.eyeL * F.Hl) / 2, 0.64 * F.Hh(x), 0.85 * F.W(x)); // (never wider than the side of the head)
+  // v5.88: about 10% smaller than before - side by side with photos the eyes read a little too big (the dark rim of the
+  // socket round them adds to their apparent size)
+  const k = Hd.eyeK || 0.9;
+  if (Hd.eyeL == null) return (Hd.eye || 0.15) * F.W(x) * 1.04 * k;
+  return Math.min((Hd.eyeL * F.Hl) / 2 * k, 0.64 * F.Hh(x), 0.85 * F.W(x)); // (never wider than the side of the head)
 }
 
 // ---------- generated profiles (v4.63): every species without a hand-made profile ----------
@@ -632,32 +635,71 @@ function raisedPose(P, F, pose, R, N, ds, wMax) {
 // unrolling (over a cylinder, then straight down), so the body keeps its length. pts: x along the branch, z across it
 function drapePose(P, F, pose, R, N, ds, wMax) {
   const L = F.L, rB = clamp(F.w0 * (pose.branchK || 1.3), 0.008, 0.035), cOff = F.Hh(L * 0.45) * F.bf, Rr = rB + cOff;
-  const pitch = wMax * 2 * (pose.pitch || 1.15);
+  const pitch = wMax * 2 * (pose.pitch || 1.02);
   // the coil: head at its centre, walking outward; a rounder centre, loops longer across the branch
   // v5.83: the tail is tucked in the middle of the coil and the body spirals outward; the neck leaves the outer loop and
   // comes back across the top of the coil, the head resting level on the loops in the middle - the way a real emerald
   // tree boa or green tree python sits (the head used to curl into the middle, rolled onto its side by the fold)
   const r0 = pitch * (pose.inner || 0.75), sqx = pose.sqx || 1.0, sqz = pose.sqz || 1.5, Lh = Math.min(L * 0.17, F.Hl * 2.8), m = Math.max(F.W(L * 0.2) * 2.2, pitch * 0.9);
-  const Ls = L - Lh - (Math.PI / 2) * m, wSeed = Math.floor(R() * 4294967295); let th0 = 0, sp0 = null; // (one draw from the species' own numbers, as before)
-  for (let it = 0; it < 4; it++) { // (the coil's outer end on the far side of the branch's middle line, heading across it)
-    sp0 = resample(spiralLine(Ls, ds, pitch, r0, sqx, sqz, rng(wSeed), 0.12, th0), Math.round(Ls / ds), ds);
-    const e = sp0[sp0.length - 1], ang = Math.atan2(e[1] / sqz, e[0] / sqx); th0 -= Math.atan2(Math.sin(ang), Math.cos(ang));
+  const aMax = 1.95, q1 = aMax * Rr; // (how far round the branch each hanging side hugs it - see the fold below)
+  let tailFirst, nLead = Math.round((Lh + m * 1.6) / ds);
+  if (pose.spiral) { // (the v5.83 flat spiral, kept for poses that ask for it)
+    const Ls = L - Lh - (Math.PI / 2) * m, wSeed = Math.floor(R() * 4294967295); let th0 = 0, sp0 = null; // (one draw from the species' own numbers, as before)
+    for (let it = 0; it < 4; it++) { // (the coil's outer end on the far side of the branch's middle line, heading across it)
+      sp0 = resample(spiralLine(Ls, ds, pitch, r0, sqx, sqz, rng(wSeed), 0.12, th0), Math.round(Ls / ds), ds);
+      const e = sp0[sp0.length - 1], ang = Math.atan2(e[1] / sqz, e[0] / sqx); th0 -= Math.atan2(Math.sin(ang), Math.cos(ang));
+    }
+    tailFirst = sp0.slice(); { const e = sp0[sp0.length - 1], f = sp0[sp0.length - 2], tl = Math.hypot(e[0] - f[0], e[1] - f[1]) || 1, t0 = [(e[0] - f[0]) / tl, (e[1] - f[1]) / tl];
+      const sg = t0[1] >= 0 ? 1 : -1, E2 = [e[0] - m, e[1] + sg * m], mm = m * 1.6;
+      for (let k = 1; k <= 24; k++) { const t = k / 24, h00 = 2 * t * t * t - 3 * t * t + 1, h10 = t * t * t - 2 * t * t + t, h01 = -2 * t * t * t + 3 * t * t, h11 = t * t * t - t * t; tailFirst.push([e[0] * h00 + t0[0] * mm * h10 + E2[0] * h01 - mm * h11, e[1] * h00 + t0[1] * mm * h10 + E2[1] * h01]); }
+      for (let k = 1; k <= 40; k++) tailFirst.push([E2[0] - (Lh * 1.2 * k) / 40, E2[1]]); }
+  } else {
+    // v5.88: the saddle real green tree pythons and emerald tree boas sit in. Laid flat, the body runs back and forth across the
+    // branch (x along it, z across), each crossing next to the last and joined to it by a U-turn; folded over the branch every
+    // crossing becomes a loop draped evenly over it, the U-turns hanging side by side at the same depth on both sides. The tail
+    // starts low on one side; the last crossing stops on top, and the neck turns along the top of the loops so the head rests
+    // in the middle of the coil (a flat spiral folded over the branch gave a few deep, round, nested loops hanging low)
+    const eX = pitch * 0.32, rU = pitch / 2 + eX, hangMax = Math.max(L * 0.045, wMax * 2 * 1.6); // (each loop hangs only a little below the branch; eX: each crossing runs a little slantwise, so the U-turns below are rounder than the gap between crossings on top)
+    let n = 2, Z = 0, Lead = Lh, Lc = 0;
+    for (let it = 0; it < 3; it++) {
+      Lc = L - Lead - (Math.PI / 2) * m;
+      for (n = 2; n < 12; n++) { Z = (Lc - n * Math.PI * rU + m) / (2 * n + 1); if (Z <= q1 + hangMax) break; }
+      Lead = clamp((n * pitch) / 2 + F.Hl * 0.6, F.Hl * 2, Lh * 1.15); // (the head ends over the middle of the coil)
+    }
+    nLead = Math.round((Lead + m * 1.6) / ds);
+    const pts0 = [], st = ds * 0.5, line = (x0, z0, x1, z1) => { const l = Math.hypot(x1 - x0, z1 - z0), k = Math.max(1, Math.ceil(l / st)); for (let i = 1; i <= k; i++) pts0.push([lerp(x0, x1, i / k), lerp(z0, z1, i / k)]); };
+    const Rz = rng(strSeed(P.name || 'drape') + 3), Zk = []; for (let k = 0; k <= n; k++) Zk.push(Z * (0.88 + 0.24 * Rz())); // (no two loops hang exactly alike)
+    let x = 0, sgn = 1; pts0.push([eX, -Zk[0]]);
+    for (let k = 0; k < n; k++) {
+      line(x + eX, -sgn * Zk[k], x - eX, sgn * Zk[k + 1]); // a crossing, slantwise over the branch
+      const cx = x + pitch / 2, k2 = Math.max(6, Math.ceil((Math.PI * rU) / st)); // the U-turn, hanging on the far side
+      for (let i = 1; i <= k2; i++) { const a = Math.PI - (i / k2) * Math.PI; pts0.push([cx + Math.cos(a) * rU, sgn * (Zk[k + 1] + Math.sin(a) * rU * 0.8)]); }
+      x += pitch; sgn = -sgn;
+    }
+    line(x + eX, -sgn * Zk[n], x, -sgn * m); // the last crossing, up onto the top
+    // the neck turns along the top of the loops, back over the middle of the coil
+    const e = pts0[pts0.length - 1], t0 = [0, sgn], E2 = [e[0] - m, 0], mm = m * 1.6;
+    for (let k = 1; k <= 24; k++) { const t = k / 24, h00 = 2 * t * t * t - 3 * t * t + 1, h10 = t * t * t - 2 * t * t + t, h01 = -2 * t * t * t + 3 * t * t, h11 = t * t * t - t * t; pts0.push([e[0] * h00 + t0[0] * mm * h10 + E2[0] * h01 - mm * h11, e[1] * h00 + t0[1] * mm * h10 + E2[1] * h01]); }
+    for (let k = 1; k <= 40; k++) pts0.push([E2[0] - (Lead * 1.3 * k) / 40, 0]);
+    const xc = (n * pitch) / 2; tailFirst = pts0.map((q) => [q[0] - xc, q[1]]); // (the coil centred on the branch's middle)
   }
-  const tailFirst = sp0.slice(); { const e = sp0[sp0.length - 1], f = sp0[sp0.length - 2], tl = Math.hypot(e[0] - f[0], e[1] - f[1]) || 1, t0 = [(e[0] - f[0]) / tl, (e[1] - f[1]) / tl];
-    const sg = t0[1] >= 0 ? 1 : -1, E2 = [e[0] - m, e[1] + sg * m], mm = m * 1.6;
-    for (let k = 1; k <= 24; k++) { const t = k / 24, h00 = 2 * t * t * t - 3 * t * t + 1, h10 = t * t * t - 2 * t * t + t, h01 = -2 * t * t * t + 3 * t * t, h11 = t * t * t - t * t; tailFirst.push([e[0] * h00 + t0[0] * mm * h10 + E2[0] * h01 - mm * h11, e[1] * h00 + t0[1] * mm * h10 + E2[1] * h01]); }
-    for (let k = 1; k <= 40; k++) tailFirst.push([E2[0] - (Lh * 1.2 * k) / 40, E2[1]]); }
   const flat = resample(tailFirst.reverse(), N, ds);
-  const nLead = Math.round((Lh + m * 1.6) / ds);
-  let hang = 0; for (const p of flat) hang = Math.max(hang, Math.abs(p[1]) - (Math.PI / 2) * Rr);
+  // v5.88: the loops saddle the branch the way real ones do - the coil is longer along the branch than across it (more, shallower
+  // saddles side by side, not a few deep round loops), and each hanging side keeps hugging the branch round past its widest
+  // point before it falls, tucked in under it (they used to drop straight down from the branch's sides, low and round)
+  const bl = Rr * 1.6, fall = (d) => { // the hanging part, d past the end of the wrap: [hz, y, beta]
+    let hz = Rr * Math.sin(aMax), y = Rr * Math.cos(aMax), b = aMax; const n = Math.max(2, Math.ceil(Math.min(d, bl) / (bl / 16)));
+    const dd = Math.min(d, bl) / n; for (let k = 0; k < n; k++) { const tm = (k + 0.5) * dd; b = aMax + (Math.PI / 2 - aMax) * sstep(0, bl, tm); hz += Math.cos(b) * dd; y -= Math.sin(b) * dd; }
+    if (d > bl) { b = Math.PI / 2; y -= d - bl; } return [hz, y, b]; };
+  let hang = 0; for (const p of flat) { const sv = Math.abs(p[1]); if (sv > q1) hang = Math.max(hang, -fall(sv - q1)[1] - Rr); }
   // v5.68: up in a tree - the branch at a real perching height (about 0.5-1.3 m), never just off the ground
   const hB = Math.max(hang + Rr + F.Hh(L * 0.5) * 2 + L * 0.03, clamp(L * 0.65, 0.5, 1.3));
   const pts = new Array(N), E = new Float32Array(N), Nn = new Array(N);
   for (let i = 0; i < N; i++) {
     const u = flat[i][0], v = flat[i][1], sg = v < 0 ? -1 : 1, s = Math.abs(v), q = (Math.PI / 2) * Rr;
     let hz, y, n;
-    if (s <= q) { const al = s / Rr; hz = Rr * Math.sin(al); y = hB + Rr * Math.cos(al); n = [0, Math.cos(al), sg * Math.sin(al)]; }
-    else { hz = Rr; y = hB - (s - q); n = [0, 0, sg]; }
+    if (s <= q1) { const al = s / Rr; hz = Rr * Math.sin(al); y = hB + Rr * Math.cos(al); n = [0, Math.cos(al), sg * Math.sin(al)]; }
+    else { const f2 = fall(s - q1); hz = f2[0]; y = hB + f2[1]; n = [0, Math.cos(f2[2]), sg * Math.sin(f2[2])]; }
     const x = i * ds; pts[i] = [u, sg * hz]; E[i] = y - F.Hh(x) * F.BF(x); Nn[i] = n;
   }
   { // the head and neck rest on top of the loops that cross under them (and ease down onto the branch where none do)
@@ -974,7 +1016,7 @@ function headSkinHeights(P, F, G) {
   // heights: plates raised and gently domed, with a soft groove round each; small scales overlapping backwards, some keeled
   // (head.headGeo: how strong; by default from head.headRelief - smooth, glossy shields in green snakes, crisp ones in vipers)
   const rel = H.headGeo != null ? H.headGeo : P.plan === 'blind' ? 0.3 /* (blind snakes: smooth, glassy shields - earthworm-like, not tiled) */ : H.headRelief != null ? clamp(0.4 + 1.5 * H.headRelief, 0.45, 1) : 1, step = xCut / NX, plates = Lo.plates;
-  const Ap = Hl * 0.0065 * rel, gwP = Math.max(GW * Hl * 1.3, step * 1.5), xh = Hl * (H.jaw || 0.75) * 1.02;
+  const Ap = Hl * 0.0065 * rel, gwP = Math.max(GW * Hl * 1.45, step * 1.6), xh = Hl * (H.jaw || 0.75) * 1.02;
   const eX = H.eyeX * Hl, eA = Lo.eA, eR = eyeRadOf(P, F), noEye = H.pupil === 'none', browK = H.browGeo != null ? H.browGeo : (H.shape || 'oval') === 'tri' ? 0.16 : 0.09;
   const holes = [];
   { const nr = Hl * nostrilR(P) * 1.05; holes.push({ x: Lo.nX * Hl, a: Lo.nA, r: nr, dep: nr * 0.9, rim: nr * 0.16 }); }
@@ -992,9 +1034,13 @@ function headSkinHeights(P, F, G) {
       const g = fd[o] / Math.max(1e-9, Math.hypot(gx, gy)), s = seeds[id1[o]];
       let h = 0;
       if (s) {
-        if (!s.small) { const e = sstep(0, 1, g / gwP); h = Ap * (Math.sqrt(e) + 0.4 * (1 - Math.min(1, d1[o]) ** 2)) * (s.k === 'lab' || s.k === 'ilab' ? 0.75 : 1); }
-        else { const As = Math.min(s.rx, s.ra * hx) * (plates ? 0.1 : 0.2) * rel, gw = Math.max(s.gw * 1.2, step * 1.3), e = sstep(0, 1, g / gw), lx = clamp((x - s.x) / s.rx, -1, 1);
-          h = As * (0.55 * Math.sqrt(e) + 0.45 * e * (lx + 1) / 2) + (plates ? Ap * 0.5 : 0); // (each scale rises towards its free rear edge, which overlaps the next)
+        // v5.88: no two scales alike - each its own height, a slight tilt, and a little wear on its surface (they were all
+        // the same even, CG-looking plates up close)
+        const hv = hash1(s.id + 1, 311), tilt = 1 + 0.4 * ((hash1(s.id + 1, 517) - 0.5) * clamp((x - s.x) / s.rx, -1, 1) + (hash1(s.id + 1, 733) - 0.5) * clamp(wrapA(a - s.a) / s.ra, -1, 1));
+        const wear = 1 + 0.16 * (vnoise(x / Hl * 70, a * 34, 3.7, 977) - 0.5) + 0.08 * (vnoise(x / Hl * 160, a * 80, 1.3, 983) - 0.5);
+        if (!s.small) { const e = sstep(0, 1.25, g / gwP); h = Ap * (Math.sqrt(e) + 0.4 * (1 - Math.min(1, d1[o]) ** 2)) * (s.k === 'lab' || s.k === 'ilab' ? 0.75 : 1) * (0.8 + 0.4 * hv) * tilt * wear; }
+        else { const As = Math.min(s.rx, s.ra * hx) * (plates ? 0.1 : 0.2) * rel * (0.78 + 0.44 * hv), gw = Math.max(s.gw * 1.35, step * 1.4), e = sstep(0, 1.15, g / gw), lx = clamp((x - s.x) / s.rx, -1, 1);
+          h = As * (0.55 * Math.sqrt(e) + 0.45 * e * (lx + 1) / 2) * tilt * wear + (plates ? Ap * 0.5 : 0); // (each scale rises towards its free rear edge, which overlaps the next)
           if (s.keel) h += As * 0.7 * s.keel * e * Math.exp(-((wrapA(a - s.a) * hx / (s.rx * 0.2)) ** 2)) * sstep(-0.9, 0.2, lx); }
       }
       if (!noEye) { const rho = Math.hypot(x - eX, (aa - eA) * hx) / eR; h *= sstep(1.08, 1.5, rho); // (flat under the scales that ring the eye: it sits in its socket as before)
@@ -1128,13 +1174,14 @@ function scaleTextures(P, lat) {
   // v5.58: edge (scales.edge = { k, dir: [towards the head, towards the belly], from, pow }): how dark each scale's own visible
   // edge is, on one side (the inland taipan's blackish lower front edges that line up into a herringbone) - kept in the cavity
   // map's blue channel, so the dark edge follows the scale's real outline (the colour texture's square cells did not)
-  const SE = S.edge, ed = SE ? new Float32Array(Wt * Ht) : null;
+  const SE = S.edge, ed = SE ? new Float32Array(Wt * Ht) : null, tb = new Float32Array(Wt * Ht).fill(1); // tb: where in its scale each point lies, base (0) to free tip (1)
   for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) {
     const a = ((x + 0.5) / Wt) * 2 - 1, g = ((y + 0.5) / Ht) * Pt;
-    let best = 0, bE = 0;
+    let best = 0, bE = 0, bT = 1;
     if (Math.abs(a) > aV) { // ventral scutes: wide plates
       const yy = g / Pt; best = 0.55 + 0.24 * yy - 0.32 * Math.exp(-(((yy) / 0.075) ** 2)) - 0.32 * Math.exp(-(((1 - yy) / 0.055) ** 2)); // (v5.58: a gentler step at each scute's edge - it shone as a row of white ticks along the belly)
       best -= 0.4 * Math.exp(-(((Math.abs(a) - aV) / 0.01) ** 2));
+      bT = 0.35 + 0.65 * yy; // (v5.88: each ventral plate's front edge lies under the free edge of the one in front)
     } else {
       const i0 = rowOf(a);
       for (let di = -1; di <= 1; di++) {
@@ -1151,15 +1198,15 @@ function scaleTextures(P, lat) {
             const wy = 0.92, t = clamp((ly / wy + 1) / 2, 0, 1), wx = 0.64 * (1 - 0.55 * t * t);
             const d = (lx / wx) ** 2 + (ly / wy) ** 2; if (d >= 1) continue;
             hv = Math.sqrt(1 - d) * 0.45 + 0.55 * t; // rises toward the free (rear) tip that overlaps the next scale
-            if (keel) hv += keel * 0.38 * Math.exp(-((lx / 0.075) ** 2)) * sstep(-0.9, -0.2, ly / wy);
+            if (keel) hv += keel * 0.46 * Math.exp(-((lx / 0.065) ** 2)) * sstep(-0.9, -0.2, ly / wy) * (1 - 0.35 * sstep(0.6, 0.95, t)); // (v5.88: a crisper keel, fading at the very tip as on real scales)
             if (SE && hv > best) { const dir = SE.dir || [1, 1], sd = clamp(0.5 + dir[0] * -ly * 1.3 + dir[1] * Math.sign(a || 1) * lx * 2.2, 0, 1);
               bE = Math.pow(sstep(SE.from != null ? SE.from : 0.3, 0.97, Math.sqrt(d)), SE.pow || 1) * sstep(0.2, 0.85, sd); }
           }
-          if (hv > best) best = hv;
+          if (hv > best) { best = hv; bT = kind === 'juxta' || kind === 'cycloid' ? 1 : clamp((ly / 0.92 + 1) / 2, 0, 1); }
         }
       }
     }
-    h[y * Wt + x] = best; if (ed) ed[y * Wt + x] = bE;
+    h[y * Wt + x] = best; tb[y * Wt + x] = bT; if (ed) ed[y * Wt + x] = bE;
   }
   // v5.58: a light blur (one pixel each way) so the overlapping edges are soft steps, not one-pixel cliffs that flicker
   { const t = new Float32Array(Wt * Ht);
@@ -1176,7 +1223,7 @@ function scaleTextures(P, lat) {
     const l = Math.hypot(dx, dy, 1), k = (y * Wt + x) * 4;
     nData[k] = (-dx / l * 0.5 + 0.5) * 255; nData[k + 1] = (-dy / l * 0.5 + 0.5) * 255; nData[k + 2] = (1 / l * 0.5 + 0.5) * 255; nData[k + 3] = 255;
     const hv = H(x, y), cav = sstep(0.0, 0.3, hv);
-    cData[k] = (0.35 + 0.65 * cav) * 255;                    // cavity (darkens the skin between scales)
+    cData[k] = (0.35 + 0.65 * cav) * lerp(0.74, 1, sstep(0.0, 0.55, tb[y * Wt + x])) * 255; // cavity (darkens the skin between scales; v5.88: and the base of each scale, tucked under the free edge of the one in front - the overlap reads up close)
     cData[k + 1] = (lerp(1.0, 0.82, cav) + keel * 0.08) * 230; // roughness
     cData[k + 2] = ed ? ed[y * Wt + x] * 255 : 0; cData[k + 3] = 255; // (blue: the dark scale edge, see S.edge)
   }
@@ -1372,9 +1419,9 @@ function headData(P, F, quality) {
       const hx = (hgt[rp * Wh + c] - hgt[rm * Wh + c]) / ((rp - rm) * dX), hy = (hgt[r * Wh + ((c + 1) % Wh)] - hgt[r * Wh + ((c - 1 + Wh) % Wh)]) / (2 * dY);
       let nx = -hy, ny = -hx; const hl = holeAt(r + 1, c) - holeAt(r - 1, c), hh2 = holeAt(r, c + 1) - holeAt(r, c - 1); nx += hh2 * 0.35; ny += hl * 0.35; // (the rim of a pit)
       const l = Math.hypot(nx, ny, 1); nData[k * 4] = (nx / l * 0.5 + 0.5) * 255; nData[k * 4 + 1] = (ny / l * 0.5 + 0.5) * 255;
-      const s = seeds[id1[k]] || {}, groove = 1 - sstep(0.15, 1.25, gdist[k]), hs = hash1(id1[k] + 1, 913);
-      nData[k * 4 + 2] = clamp((1 - (H.groove != null ? H.groove : 0.45) * (s.k === 'lab' || s.k === 'ilab' ? (triL ? 0.4 : 0.5) : 1) * groove) * (0.93 + 0.12 * hs) * (1 - hole * 0.6), 0, 1) * 255; // cavity: the grooves dark (v5.62: shallower between viper lip scales)
-      nData[k * 4 + 3] = clamp((s.small ? 0.62 : 0.5) + 0.12 * hs + 0.3 * groove, 0, 1) * 255; // roughness
+      const s = seeds[id1[k]] || {}, groove = 1 - sstep(0.12, 1.45, gdist[k]), hs = hash1(id1[k] + 1, 913), mn = vnoise(x / Hl * 120, a * 60, 2.1, 641), mn2 = vnoise(x / Hl * 300, a * 150, 5.3, 643); // (v5.88: softer grooves, wear)
+      nData[k * 4 + 2] = clamp((1 - (H.groove != null ? H.groove : 0.45) * (s.k === 'lab' || s.k === 'ilab' ? (triL ? 0.4 : 0.5) : 1) * groove) * (0.89 + 0.18 * hs) * (0.95 + 0.08 * mn) * (1 - hole * 0.6), 0, 1) * 255; // cavity: the grooves dark (v5.62: shallower between viper lip scales)
+      nData[k * 4 + 3] = clamp((s.small ? 0.62 : 0.5) + 0.12 * hs + 0.3 * groove + 0.22 * (mn - 0.5) + 0.16 * (mn2 - 0.5) + 0.1 * hash1(id1[k] + 1, 919), 0, 1) * 255; // roughness (v5.88: broken up - worn and dusty in patches, as real shields shine unevenly)
       // the colour layer
       let col = null, al = 0;
       const lab = s.k === 'lab' || s.k === 'ilab' || (s.k === 'rost' && Math.abs(a) > mA - 0.16) || s.k === 'ment';
@@ -1383,7 +1430,11 @@ function headData(P, F, quality) {
       if (lipK && (lab || (x < J * Hl * 1.02 && Math.abs(Math.abs(a) - mA) < 0.1))) { const dm = Math.abs(Math.abs(a) - mA); col = lipC; al = lipK * (s.k === 'rost' && Math.abs(a) > mA - 0.16 ? 1 - sstep(0.06, 0.16, dm) * 0.6 : 1 - sstep(0.015, Math.abs(a) > mA ? 0.07 : bars ? 0.11 : 0.075, dm)) * (1 - sstep(J * 0.9, J * 1.02, x / Hl)); }
       // v5.78: head.lipFull - the whole upper and lower lip scales and the chin pale, with the sharp edge real green snakes have
       if (H.lipFull && x < J * Hl * 1.05) { const band = H.lipFull > 0.01 && H.lipFull < 1 ? H.lipFull : 0.12, aa2 = Math.abs(a); // (band: how far above the mouth line the upper lip scales are pale)
-        const bnd = band * (1 - 0.6 * sstep(J * 0.6, J * 1.0, x / Hl)), k2 = aa2 >= mA ? 1 : sstep(mA - bnd - 0.012, mA - bnd + 0.012, aa2); if (k2 > 0.001) { col = lipC; al = 0.95 * k2 * (1 - sstep(J * 0.92, J * 1.05, x / Hl)); } }
+        // v5.88: the pale edge follows the real scales - the whole of each upper lip scale (and the lower part of the rostral)
+        // is pale, and the green starts at the groove above it, not at a painted line across the scales
+        let k2 = aa2 >= mA ? 1 : s.k === 'lab' ? 1 : s.k === 'rost' ? sstep(mA - band - 0.03, mA - band + 0.01, aa2) : 0;
+        if (k2 > 0 && aa2 < mA && s.k === 'lab') { const s2 = seeds[id2[k]]; if (s2 && s2.k !== 'lab' && s2.k !== 'ilab' && s2.k !== 'rost') k2 *= 0.55 + 0.45 * sstep(0.2, 0.9, gdist[k]); } // (soft right at the suture)
+        if (k2 > 0.001) { col = lipC; al = 0.95 * k2 * (1 - sstep(J * 0.92, J * 1.05, x / Hl)); } }
       if (bars && x < J * Hl * 1.05) { // dark bars along the sutures between lip scales, widest at the lip
         let bd = 1e9, bk = 1, aa = Math.abs(a); for (const b of barSegs) { if (Math.abs(x - b[0]) > b[3] * 3) continue; const t = clamp((aa - b[1]) / (b[2] - b[1]), 0, 1), w = lerp(b[3], b[3] * 0.45, t), e = Math.hypot(x - lerp(b[0], b[4], t), (aa - lerp(b[1], b[2], t)) * hcR[r]) / w; if (e < bd) { bd = e; bk = b[5]; } }
         if (bd < 1.4) { const w2 = 0.6 * bk * (1 - sstep(0.6, 1.3, bd)); col = col ? mixc(col, barC, w2 / Math.max(w2, al || w2)) : barC; al = Math.max(al, w2); } // (v5.73: bk - fainter and shorter on the lower lip; seen from below they read as teeth)
@@ -1545,15 +1596,15 @@ function refGirth(F) { // v5.62: the girth round the thickest part of the body (
   for (let i = 0; i <= 48; i++) { const x = F.L * (0.2 + 0.6 * i / 48), a = F.W(x), b = F.Hh(x); c = Math.max(c, Math.PI * (3 * (a + b) - Math.sqrt((3 * a + b) * (a + 3 * b)))); }
   return (F._cref = c);
 }
-function shapeD(shape, dv, da) {
-  const v = Math.abs(dv), u = Math.abs(da);
+function shapeD(shape, dv, da, L) {
+  const v = Math.abs(dv), u = Math.abs(da), vk = (L && L.vk) || 1.1; // (v5.88: L.vk - how far a chevron's arms run forward; L.h0/h1 - an hourglass's waist and flare)
   switch (shape) {
     case 'diamond': return v + u;
     case 'rect': return Math.pow(v ** 4 + u ** 4, 0.25);
     case 'hourglass': return Math.max(v / (0.35 + 0.65 * u), u);
-    case 'hourglass2': return Math.max(v / (0.18 + 0.82 * u * u), u); // v5.19: copperhead crossbands - narrow over the spine, wide on the flanks
-    case 'chevron': return Math.max(Math.abs(dv + 1.1 * u), u); // a V whose arms run forward down the flanks (apex toward the tail)
-    case 'chevronF': return Math.max(Math.abs(dv - 1.1 * u), u); // v5.62: a V pointing forward, its arms running back down the flanks (king cobra)
+    case 'hourglass2': return Math.max(v / ((L && L.h0 != null ? L.h0 : 0.18) + (L && L.h1 != null ? L.h1 : 0.82) * u * u), u); // v5.19: copperhead crossbands - narrow over the spine, wide on the flanks
+    case 'chevron': return Math.max(Math.abs(dv + vk * u), u); // a V whose arms run forward down the flanks (apex toward the tail)
+    case 'chevronF': return Math.max(Math.abs(dv - vk * u), u); // v5.62: a V pointing forward, its arms running back down the flanks (king cobra)
     case 'saddle': return Math.max(Math.pow(v ** 3 + u ** 3, 1 / 3), u);
     case 'round': return Math.pow(v ** 2.6 + u ** 2.6, 1 / 2.6);
     default: return Math.sqrt(v * v + u * u);
@@ -1642,10 +1693,10 @@ function evalLayer(Ly, a, g0, t, xn, warp, cl, seed, xC) {
       const halfLen = (Ly.len * per) / 2 * sz;
       const ac = Ly.type === 'band' ? 0 : (Ly.a + (r1 - 0.5) * Ly.aj * 2) * sg;
       const dv = (g - gc) / halfLen;
-      if (Math.abs(dv) > 2.2) continue;
+      if (Math.abs(dv) > 2.2 + (Ly.vk || 0) + (Ly.h1 || 0) * 0.6) continue;
       let d;
       if (Ly.type === 'band') d = Math.abs(dv) + warp * Ly.warp * 0.5 + (Ly.dorsalWide ? -Ly.dorsalWide * (1 - Math.abs(a)) : 0);
-      else d = shapeD(Ly.shape, dv, (a - ac) / (Ly.wid * sz)) + warp * Ly.warp;
+      else d = shapeD(Ly.shape, dv, (a - ac) / (Ly.wid * sz), Ly) + warp * Ly.warp;
       let col = null, c = 0;
       if (Ly.icol && d < Ly.inner.r) { col = Ly.icol; c = cover(d / Ly.inner.r, Ly.aa * 2); col = mixc(Ly.col, Ly.icol, c); c = 1; }
       else if (d < 1 + Ly.aa) { col = Ly.col; c = cover(d, Ly.aa); if (Ly.scol && d < 1 - Ly.aa && hash1(cl.id, seed + 61 + k) < Ly.speck.p) col = Ly.scol; } // (v5.62: speck - pale flecks on some scales inside a mark, as in longnose snakes)
@@ -1669,8 +1720,10 @@ function brightIris(P) {
   const def = IRIS[P.plan] || IRIS.colubrid, H = P.head || {};
   let c = new THREE.Color(H.iris || def[0]), inner = new THREE.Color(H.irisInner || def[1]);
   if (H.irisDark) return ['#' + c.getHexString(), '#' + inner.getHexString()]; // v4.81: some snakes really have a near-black iris (green snakes)
-  const hsl = {}; c.getHSL(hsl); if (hsl.l < 0.38) c.setHSL(hsl.h, Math.max(hsl.s, 0.45), 0.42); // a dark iris read as a black dot
-  inner.getHSL(hsl); if (hsl.l < 0.55) inner.setHSL(hsl.h, Math.max(hsl.s, 0.5), 0.62);
+  const hsl = {}; c.getHSL(hsl); if (hsl.l < 0.4) c.setHSL(hsl.h, Math.max(hsl.s, 0.45), 0.44); // a dark iris read as a black dot
+  // v5.88: vipers' and pit vipers' irises are gold to copper in photos (a grey-brown one read as a dull disc)
+  if (P.plan === 'viper' || P.plan === 'pitviper') { c.getHSL(hsl); if (hsl.s < 0.38) c.setHSL(hsl.h > 0.02 && hsl.h < 0.16 ? hsl.h : 0.1, 0.38, Math.max(0.46, hsl.l)); }
+  inner.getHSL(hsl); if (hsl.l < 0.58) inner.setHSL(hsl.h, Math.max(hsl.s, 0.5), 0.64);
   return ['#' + c.getHexString(), '#' + inner.getHexString()];
 }
 // v4.81: the iris drawn like a real snake's - fine radial fibres and flecks, a darker rim, the pupil the species has
@@ -1683,7 +1736,7 @@ function eyeTexture(P) {
     const C = S / 2, RI = S * 0.47;
     x.fillStyle = '#070605'; x.fillRect(0, 0, S, S);
     const g = x.createRadialGradient(C, C, S * 0.04, C, C, RI);
-    g.addColorStop(0, irisIn); g.addColorStop(0.55, iris); g.addColorStop(0.86, shade(iris, 0.62)); g.addColorStop(0.97, '#1a130b'); g.addColorStop(1, '#070605');
+    g.addColorStop(0, irisIn); g.addColorStop(0.6, iris); g.addColorStop(0.9, shade(iris, 0.74)); g.addColorStop(0.985, shade(iris, 0.4)); g.addColorStop(1, '#070605'); // (v5.88: a thinner, less black rim)
     x.fillStyle = g; x.beginPath(); x.arc(C, C, RI, 0, TAU); x.fill();
     // radial fibres, then small dark and gold flecks
     for (let i = 0; i < 520; i++) { const a = R() * TAU, r0 = RI * (0.18 + R() * 0.4), r1 = r0 + RI * (0.12 + R() * 0.38); x.strokeStyle = R() < 0.55 ? 'rgba(0,0,0,.16)' : 'rgba(255,244,210,.13)'; x.lineWidth = 0.6 + R() * 1.6; x.beginPath(); x.moveTo(C + Math.cos(a) * r0, C + Math.sin(a) * r0); x.quadraticCurveTo(C + Math.cos(a + 0.05) * (r0 + r1) / 2, C + Math.sin(a + 0.05) * (r0 + r1) / 2, C + Math.cos(a) * r1, C + Math.sin(a) * r1); x.stroke(); }
@@ -1699,7 +1752,7 @@ function eyeTexture(P) {
     if (H.pupil && H.pupil !== 'none') { pupil(S * 0.018, 'rgba(0,0,0,.35)'); pupil(0, '#020202'); }
     // v5.78: no painted catch-light any more - the clear spectacle over the eye reflects the real sky and sun (buildEyes), so
     // the highlight moves as you go round the head; a soft shadow inside the rim instead, where the socket's edge overhangs
-    { const rs = x.createRadialGradient(C, C, RI * 0.7, C, C, RI); rs.addColorStop(0, 'rgba(0,0,0,0)'); rs.addColorStop(1, 'rgba(0,0,0,.45)'); x.fillStyle = rs; x.beginPath(); x.arc(C, C, RI, 0, TAU); x.fill(); }
+    { const rs = x.createRadialGradient(C, C, RI * 0.7, C, C, RI); rs.addColorStop(0, 'rgba(0,0,0,0)'); rs.addColorStop(1, 'rgba(0,0,0,.28)'); x.fillStyle = rs; x.beginPath(); x.arc(C, C, RI, 0, TAU); x.fill(); }
     EYE_TEX.set(key, cv);
   }
   const t = new THREE.CanvasTexture(EYE_TEX.get(key)); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
@@ -1721,7 +1774,7 @@ function buildEyes(P, F, body, pat) {
   // the iris shifts under the dome as you go round the head.
   // (the iris lies in the socket's shade: a faint glow of its own colours stands in for the light that reaches it through the
   // clear spectacle from every side, so its fibres and the pupil's edge still read - it was a black hole)
-  const em = new THREE.MeshPhysicalMaterial({ map: et, emissiveMap: et, emissive: new THREE.Color(0.3, 0.3, 0.3), roughness: 0.5, metalness: 0, envMapIntensity: 0.3, specularIntensity: 0.35 });
+  const em = new THREE.MeshPhysicalMaterial({ map: et, emissiveMap: et, emissive: new THREE.Color(0.38, 0.38, 0.38), roughness: 0.5, metalness: 0, envMapIntensity: 0.3, specularIntensity: 0.35 });
   const sm = new THREE.MeshPhysicalMaterial({ color: '#000000', vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, roughness: 0.035, metalness: 0, ior: 1.4, specularIntensity: 1, envMapIntensity: 2.2, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
   const lm = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, roughness: 0.6, metalness: 0, depthWrite: false, envMapIntensity: 0.8 });
   // the skin colour right round the eye, read from the body's own pattern texture
@@ -1786,6 +1839,31 @@ function buildEyes(P, F, body, pat) {
 // teeth on both jaws, and the fangs each group really has: long folding fangs at the very front
 // in vipers and pit vipers, short fixed front fangs in elapids and sea snakes, none in pythons,
 // colubrids and blind snakes (pythons have many more and bigger teeth instead).
+// v5.88: the mouth lining's wet detail, made once: a normal map and a roughness map over a jaw's lining (u across it, lip to
+// lip; v from the snout to the hinge). up: the roof (transverse palatal folds), false: the floor (soft lengthwise wrinkles),
+// null: the tongue sheath (fine folds round it). Fine bumps everywhere, stippled gums, wetter in the hollows.
+const MOUTH_MAPS = new Map();
+function mouthMaps(up) {
+  const key = String(up); if (MOUTH_MAPS.has(key)) return MOUTH_MAPS.get(key);
+  const N = 192, h = new Float32Array(N * N), nd = new Uint8Array(N * N * 4), rd = new Uint8Array(N * N * 4);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const u = x / N, v = y / N, inner = sstep(0.1, 0.17, u) * (1 - sstep(0.83, 0.9, u)), gum = Math.exp(-(((u - 0.156) / 0.02) ** 2)) + Math.exp(-(((u - 0.844) / 0.02) ** 2));
+    let hv = 0.22 * vnoise(u * 64, v * 64, 1, 11) + 0.12 * vnoise(u * 150, v * 150, 2, 13) + gum * 0.45 * vnoise(u * 220, v * 160, 3, 17);
+    if (up === true) { const ph = v * 13 + 1.6 * Math.abs(u - 0.5) + 0.25 * vnoise(u * 5, v * 5, 4, 19), w = Math.pow(0.5 + 0.5 * Math.sin(TAU * ph), 3); hv += inner * w * (1 - sstep(0.55, 0.9, v)) * (0.4 + 0.6 * sstep(0.03, 0.09, Math.abs(u - 0.5))) * 0.9; }
+    else if (up === false) { const ph = u * 18 + 0.4 * vnoise(u * 4, v * 6, 5, 23); hv += inner * Math.pow(0.5 + 0.5 * Math.sin(TAU * ph), 2) * 0.35 * (0.5 + 0.5 * vnoise(u * 3, v * 8, 6, 29)); }
+    else { hv += 0.5 * Math.pow(0.5 + 0.5 * Math.sin(TAU * (u * 14 + 0.3 * vnoise(u * 4, v * 4, 7, 31))), 2); }
+    h[y * N + x] = hv;
+  }
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const k = y * N + x, hx = h[y * N + ((x + 1) % N)] - h[y * N + ((x - 1 + N) % N)], hy = h[((y + 1) % N) * N + x] - h[((y - 1 + N) % N) * N + x];
+    const nx = -hx * 3, ny = -hy * 3, l = Math.hypot(nx, ny, 1); nd[k * 4] = (nx / l * 0.5 + 0.5) * 255; nd[k * 4 + 1] = (ny / l * 0.5 + 0.5) * 255; nd[k * 4 + 2] = 255 / l; nd[k * 4 + 3] = 255;
+    const lap = h[k] - (h[y * N + ((x + 1) % N)] + h[y * N + ((x - 1 + N) % N)] + h[((y + 1) % N) * N + x] + h[((y - 1 + N) % N) * N + x]) / 4; // (hollows: wetter)
+    const wet = 0.5 + 0.5 * vnoise(x / N * 7, y / N * 7, 8, 37), r = clamp(0.16 + 0.3 * wet * wet + lap * 2.5, 0.08, 0.7);
+    rd[k * 4] = rd[k * 4 + 1] = rd[k * 4 + 2] = r * 255; rd[k * 4 + 3] = 255;
+  }
+  const mk = (a) => { const t = new THREE.DataTexture(a, N, N, THREE.RGBAFormat); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter; t.needsUpdate = true; return t; };
+  const out = { normal: mk(nd), rough: mk(rd) }; MOUTH_MAPS.set(key, out); return out;
+}
 function buildMouth(P, F, body, group, eyes, pat) {
   const geo = body.geo, pos = geo.attributes.position, orig = pos.array.slice(), M = body.M, Hl = F.Hl;
   const xh = Hl * (P.head.jaw || 0.75) * 1.02, xEnd = xh * 1.3, mA = body.mouthA;
@@ -1837,7 +1915,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
   const labN = P.head.labials || (plan === 'python' ? 13 : plan === 'viper' || plan === 'pitviper' ? 11 : 8), labLen = (xh * 0.95) / labN;
   // one jaw's lining: lip (outer edge -> rolled under -> gum), then the roof or floor across, then the other lip
   function jawLining(upper) {
-    const NS = 40, NL = 5, rows = [], cols = [], xv = [];
+    const NS = 40, NL = 5, rows = [], cols = [], xv = [], uvs = [];
     const sgU = upper ? -1 : 1; // the lips roll towards the opening: down for the upper jaw, up for the lower
     for (const x of xs) {
       const f = body.frameAt(x), Hh = F.Hh(x), W = F.W(x), back = sstep(xh * 0.5, xh * 1.0, x);
@@ -1866,7 +1944,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
       // colours: the lip scales take the skin colour with dark sutures between them; the lining is pink, darker
       // in the grooves beside the gums, on the ridges a little lighter, and fading to deep red and black in the throat
       const suture = 1 - 0.45 * Math.pow(Math.abs(Math.cos(Math.PI * x / labLen)), 14) * sstep(Hl * 0.05, Hl * 0.12, x);
-      for (const [p, kind, s, side] of row) {
+      for (let ri = 0; ri < row.length; ri++) { const [p, kind, s, side] = row[ri]; uvs.push(ri / (row.length - 1), x / xh);
         let c;
         if (kind === 'lip') { const sk = skinAt(x, side * (upper ? mA - 0.06 : mA + 0.08)), lipC = sk.clone().lerp(new THREE.Color(P.colors.belly), upper ? 0.25 : 0.5); c = lipC.multiplyScalar(suture * lerp(1, 0.7, sstep(0.55, 1, s))).lerp(pink, sstep(0.8, 1, s) * 0.6); }
         else {
@@ -1880,7 +1958,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
       }
     }
     const per = 2 * NL + NS + 1, g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(rows, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+    g.setAttribute('position', new THREE.Float32BufferAttribute(rows, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
     const idx = []; for (let i = 0; i < xs.length - 1; i++) for (let k = 0; k < per - 1; k++) { const a = i * per + k, b = a + per; idx.push(a, a + 1, b, a + 1, b + 1, b); }
     g.setIndex(idx); g.computeVertexNormals();
     return { g, o: g.attributes.position.array.slice(), xv, per, row: (x, s) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = NL + Math.round(s * NS); return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); }, gum: (x, side) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = side > 0 ? NL - 1 : per - NL; return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); } };
@@ -1889,7 +1967,11 @@ function buildMouth(P, F, body, group, eyes, pat) {
   const gumC = new THREE.Color(P.head.mouthColor && /^#[0-3]/.test(P.head.mouthColor) ? '#2a2224' : '#f7dcd6');
   const roof = jawLining(true), floorJ = jawLining(false);
   const roofM = lining.clone(); roofM.emissive.set(P.head.mouthColor && /^#[0-3]/.test(P.head.mouthColor) ? '#1a1214' : '#c27e80'); roofM.emissiveIntensity = 0.7; // (v5.53: the roof faces down, away from the light: a little more glow keeps it pink, not maroon)
-  const palate = new THREE.Mesh(roof.g, roofM), floor = new THREE.Mesh(floorJ.g, lining);
+  // v5.88: wet detail - the roof's transverse palatal folds, the floor's soft lengthwise wrinkles, the stippled gums and fine
+  // bumps of the lining, and a sheen that is wetter in the folds and drier on their crests (it was smooth, evenly shiny pink)
+  const floorM = lining.clone();
+  for (const [m, up] of [[roofM, true], [floorM, false]]) { const mm = mouthMaps(up); m.normalMap = mm.normal; m.normalScale = new THREE.Vector2(0.9, 0.9); m.roughnessMap = mm.rough; m.roughness = 1; m.clearcoatRoughnessMap = mm.rough; m.clearcoatRoughness = 0.6; m.clearcoat = 0.6; }
+  const palate = new THREE.Mesh(roof.g, roofM), floor = new THREE.Mesh(floorJ.g, floorM);
   palate.receiveShadow = floor.receiveShadow = true;
   palate.castShadow = floor.castShadow = true; // v5.09: with the mouth open the head is an open shell; the lining closes it in the shadow too (no thin loop on the ground)
   // the corners of the mouth: a short fold of skin between the two jaws, just in front of the hinge
@@ -1953,7 +2035,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
   if (plan !== 'blind') {
     anchors.palate.position.copy(roof.row(xh * 0.45, 0.5)); upperT.add(anchors.palate);
     anchors.teeth.position.copy(roof.gum(Hl * 0.3, 1)); upperT.add(anchors.teeth);
-    const softM = new THREE.MeshPhysicalMaterial({ color: pink.clone().multiplyScalar(0.95), roughness: 0.38, clearcoat: 0.6, clearcoatRoughness: 0.25 });
+    const softM = new THREE.MeshPhysicalMaterial({ color: pink.clone().multiplyScalar(0.95), roughness: 1, roughnessMap: mouthMaps(null).rough, normalMap: mouthMaps(null).normal, normalScale: new THREE.Vector2(0.7, 0.7), clearcoat: 0.6, clearcoatRoughness: 0.25 }); // (v5.88: the tongue sheath's soft folds)
     const fAt = (x) => body.frameAt(x), fl = (x) => { const xc = Math.min(x, xs[xs.length - 1]); return floorJ.row(xc, 0.5).addScaledVector(fAt(xc).T, x - xc); }; // (past the hinge: straight on back)
     // the tongue sheath: a low soft ridge along the floor of the mouth, open at its front end just behind the chin
     const r0 = Math.max(Hl * 0.019, F.W(Hl * 0.2) * 0.07); // the tongue's thickness (v5.78: a little fuller - it read as a black thread)
@@ -2039,6 +2121,32 @@ function buildMouth(P, F, body, group, eyes, pat) {
     const x = xh * 0.72, f = body.frameAt(x), len = clamp(P.head.rearFang / 1000, tl * 1.3, Hl * 0.2), fg2 = curvedTooth(0.3);
     for (const sg of [1, -1]) { const m = tooth(upperT, roof.gum(x, sg), f.U.clone().negate().addScaledVector(f.T, 0.45), len, len * 0.12, f.T, fg2); m.userData.mpart = 'teeth'; }
   }
+  // v5.88: a few thin strands of saliva between the jaws near the corners of the mouth: they stretch as it opens, thinning in
+  // the middle and sagging a little, and are gone by a wide gape (as they break in a real mouth)
+  const saliva = (() => {
+    const R2 = rng(strSeed(P.name || 'mouth') + 91), list = [], NSg = 10, NRd = 5;
+    for (let k = 0; k < 5; k++) { const side = k % 2 ? 1 : -1; list.push({ x: xh * (0.55 + 0.33 * R2()), s: side > 0 ? 0.1 + 0.12 * R2() : 0.9 - 0.12 * R2(), r: Hl * (0.0035 + 0.003 * R2()), sag: 0.15 + 0.25 * R2(), brk: 0.55 + 0.4 * R2() }); }
+    const nV = list.length * (NSg + 1) * NRd, g = new THREE.BufferGeometry(), pa = new Float32Array(nV * 3), idx = [];
+    for (let q = 0; q < list.length; q++) for (let i = 0; i < NSg; i++) for (let j = 0; j < NRd; j++) { const a = (q * (NSg + 1) + i) * NRd + j, b = a + NRd, j1 = (j + 1) % NRd, a1 = (q * (NSg + 1) + i) * NRd + j1, b1 = a1 + NRd; idx.push(a, b, a1, a1, b, b1); }
+    g.setAttribute('position', new THREE.BufferAttribute(pa, 3)); g.setIndex(idx);
+    const m = new THREE.Mesh(g, new THREE.MeshPhysicalMaterial({ color: '#f4e6e4', roughness: 0.08, metalness: 0, transparent: true, opacity: 0.55, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.4, depthWrite: false }));
+    m.frustumCulled = false; m.castShadow = false; m.renderOrder = 3; m.userData.mpart = 'saliva';
+    const vA = new THREE.Vector3(), vB = new THREE.Vector3(), d = new THREE.Vector3(), e1 = new THREE.Vector3(), e2 = new THREE.Vector3(), c = new THREE.Vector3();
+    const at = (J, x, sv, out) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, kk = 5 + Math.round(sv * 40), per = 2 * 5 + 40 + 1; return out.fromArray(J.g.attributes.position.array, (i * per + kk) * 3); };
+    return { m, update(tt) {
+      m.visible = tt > 0.06 && tt < 1.05;
+      if (!m.visible) return;
+      for (let q = 0; q < list.length; q++) { const S2 = list[q]; at(roof, S2.x, S2.s, vA); at(floorJ, S2.x, S2.s, vB); d.subVectors(vB, vA); const L2 = d.length(); d.normalize();
+        e1.set(0, 1, 0).cross(d); if (e1.lengthSq() < 1e-8) e1.set(1, 0, 0); e1.normalize(); e2.crossVectors(d, e1).normalize();
+        const alive = 1 - sstep(S2.brk, S2.brk + 0.12, tt); // (the strand thins and snaps as the gape grows)
+        for (let i = 0; i <= NSg; i++) { const u = i / NSg, thin = alive * lerp(1, 0.28, Math.sin(Math.PI * u) ** 0.7);
+          c.copy(vA).addScaledVector(d, L2 * u).addScaledVector(e2, -L2 * S2.sag * 0.25 * Math.sin(Math.PI * u)).addScaledVector(e1, L2 * 0.05 * Math.sin(Math.PI * u) * (S2.s < 0.5 ? 1 : -1));
+          for (let j = 0; j < NRd; j++) { const an = (j / NRd) * TAU, o = ((q * (NSg + 1) + i) * NRd + j) * 3, r = S2.r * Math.max(0.02, thin);
+            pa[o] = c.x + (e1.x * Math.cos(an) + e2.x * Math.sin(an)) * r; pa[o + 1] = c.y + (e1.y * Math.cos(an) + e2.y * Math.sin(an)) * r; pa[o + 2] = c.z + (e1.z * Math.cos(an) + e2.z * Math.sin(an)) * r; } } }
+      g.attributes.position.needsUpdate = true; g.computeVertexNormals();
+    } };
+  })();
+  if (plan !== 'blind') inside.add(saliva.m);
   let t = 0, ver = 0, spread = 0, walk = 0;
   // v5.57: swallowing a big meal the two halves of the lower jaw spread apart (the stretchy chin and the swinging quadrate
   // bones) and walk forward in turn: warp a point of the lower jaw (rest shape) by its side of the head, w = its jaw weight
@@ -2077,7 +2185,7 @@ function buildMouth(P, F, body, group, eyes, pat) {
     const strip2 = (J, an) => { const fp = J.g.attributes.position.array, o = J.o;
       for (let k = 0, i = 0; k < fp.length; k += 3, i++) { v3.set(o[k], o[k + 1], o[k + 2]); if (J === floorJ) jawWarp(v3, weight(J.xv[i])); qq.setFromAxisAngle(axis, an * weight(J.xv[i])); v3.sub(hinge).applyQuaternion(qq).add(hinge); fp[k] = v3.x; fp[k + 1] = v3.y; fp[k + 2] = v3.z; }
       J.g.attributes.position.needsUpdate = true; J.g.computeVertexNormals(); };
-    strip2(floorJ, aD); strip2(roof, aU);
+    strip2(floorJ, aD); strip2(roof, aU); saliva.update(t);
     // the folds at the corners of the mouth stretch between the two jaws
     { const fp = cheekG.attributes.position.array;
       for (let k = 0, i = 0; k < fp.length; k += 3, i++) { const s = cheekInfo[i * 3], reach = cheekInfo[i * 3 + 1], x = cheekInfo[i * 3 + 2], an = lerp(aU, aD, sstep(0.5 - 0.5 * reach - 1e-3, 0.5 + 0.5 * reach + 1e-3, s)) * weight(x);
@@ -2132,6 +2240,24 @@ function buildMouth(P, F, body, group, eyes, pat) {
 }
 
 // ---------- ground and props ----------
+// v5.88: light the snake as a photographer would (it used to sit in deep shade in a sunny scene: a black mamba, a garter
+// snake or a milk snake came out nearly black). Only the snake's skin gets these, the scene keeps its own light:
+// - shadows cast on the snake (grass blades, its own coils) are lifted part way, as open sky and nearby ground do outdoors;
+// - a soft fill from the viewer's side (a reflector), and light bounced up from the ground onto the belly and lips;
+// - light wraps a little past the shadow line, tinted warm, as it does in thin living skin (the belly, the lips)
+const SKIN_LIGHT_GLSL = `#include <lights_fragment_end>
+{
+ vec3 slAlb = BRDF_Lambert(material.diffuseColor);
+#if NUM_DIR_LIGHTS > 0
+ vec3 slSunC = directionalLights[0].color; float slNL = dot(normal, directionalLights[0].direction);
+ float slSh = clamp(dot(directLight.color, vec3(1.0)) / max(1e-4, dot(slSunC, vec3(1.0))), 0.0, 1.0);
+ reflectedLight.directDiffuse += (1.0 - slSh) * uShLift * slSunC * max(slNL, 0.0) * slAlb;
+ float slW = clamp((slNL + uWrap) / (1.0 + uWrap), 0.0, 1.0) * (1.0 - clamp(slNL * 2.0, 0.0, 1.0));
+ reflectedLight.directDiffuse += slW * mix(1.0, slSh, 0.5) * slSunC * slAlb * uSSS * (0.6 + 0.4 * slAlb * 3.14159);
+#endif
+ vec3 slUpV = normalize((viewMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
+ reflectedLight.indirectDiffuse += material.diffuseColor * (uFill * (0.55 + 0.45 * max(dot(normal, geometryViewDir), 0.0)) + uBounce * max(0.0, -dot(normal, slUpV)));
+}`;
 const SCENES = {
   litter:   { sky: ['#b9c7b0', '#d7ddcc'], fog: '#c3cbb9', sun: 1.6, hemi: 0.75, sunEl: 55, tile: 1.1, ground: 'litter', props: { leaves: 1, twigs: 1, rocks: 0.15, grass: 0.1 } },
   forest:   { sky: ['#a9bca6', '#ccd6c3'], fog: '#b9c6b2', sun: 1.7, hemi: 0.75, sunEl: 52, tile: 1.2, ground: 'litter', props: { leaves: 1, twigs: 1, log: 1, rocks: 0.2, grass: 0.15 } },
@@ -2670,6 +2796,11 @@ function applyEnv(ctx, P, F, poseInfo, env) {
   sun.position.set(Math.cos(el) * Math.cos(az), Math.sin(el), Math.cos(el) * Math.sin(az)).multiplyScalar(r);
   sun.color.copy(env.sunCol).lerp(new THREE.Color('#ffffff'), 0.35); sun.intensity = 6.5 * env.sunny; // about three times the sky's light on a sunlit face, as outdoors
   sun.shadow.radius = lerp(8, 3, env.sunny); sun.shadow.blurSamples = 16;
+  if (ctx.skinLight) { // v5.88: the snake's own fill and bounce (SKIN_LIGHT_GLSL), from this panorama's light
+    const L = ctx.skinLight, w = new THREE.Color('#fbf6ee');
+    L.uFill.value.copy(w).lerp(env.horizon.clone().multiplyScalar(1 / Math.max(0.05, Math.max(env.horizon.r, env.horizon.g, env.horizon.b))), 0.25).multiplyScalar(0.22 + 0.2 * env.sunny);
+    L.uBounce.value.copy(ctx.hemi ? ctx.hemi.groundColor : w).lerp(w, 0.3).multiplyScalar(0.32 * env.sunny);
+  }
   if (ctx.hemi) ctx.hemi.intensity *= 0.4; // (v5.58: a little more fill, so the shaded side of a dark snake keeps its scales and colour)
   ctx.envName = env.name;
   if (ctx.paintSky) ctx.paintSky(); // (the glow follows the sun)
@@ -3117,13 +3248,15 @@ export function mount(host, opts) {
     const qS = (TAU * F.w0 * 0.92) / Math.max(12, S.rows) * (P.head.scaleK || (P.plan === 'python' ? 0.9 : 0.62));
     // v5.30: the scale rows' edges around the body (for the per-scale variation in the shader)
     const rbArr = new Float32Array(96); lat.RB.forEach((v, i) => { if (i < 96) rbArr[i] = v; });
-    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 }, uEdgeC: { value: new THREE.Color(S.edge && S.edge.color || '#000000') }, uEdgeK: { value: S.edge ? (S.edge.k != null ? S.edge.k : 0.8) : 0 }, uHeadN: { value: headT.relief }, uHeadC: { value: headT.color }, uHX: { value: headT.Xh }, uRigTex: { value: null }, uRigOn: { value: 0 }, uRigN: { value: 2 }, uRigDx: { value: 1 } };
+    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 }, uEdgeC: { value: new THREE.Color(S.edge && S.edge.color || '#000000') }, uEdgeK: { value: S.edge ? (S.edge.k != null ? S.edge.k : 0.8) : 0 }, uHeadN: { value: headT.relief }, uHeadC: { value: headT.color }, uHX: { value: headT.Xh }, uRigTex: { value: null }, uRigOn: { value: 0 }, uRigN: { value: 2 }, uRigDx: { value: 1 }, uFill: { value: new THREE.Color(0.3, 0.3, 0.3) }, uBounce: { value: new THREE.Color(0.2, 0.18, 0.15) }, uShLift: { value: 0.4 }, uWrap: { value: 0.35 }, uSSS: { value: new THREE.Color(0.32, 0.12, 0.07) } };
+    ctx.skinLight = hsU;
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, hsU);
       sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;\nattribute vec3 aMet;\nvarying vec3 vMet;' + RIG_GLSL).replace('#include <project_vertex>', '#define SL_RIG_N\n' + RIG_V + '#include <project_vertex>').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead; vMet = aMet;')
         .replace('#include <common>\nattribute float aHead;', '#include <common>\nuniform float uTip;\nattribute float aHead;').replace('#include <displacementmap_vertex>', THREE.ShaderChunk.displacementmap_vertex.replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z) * (1.0 - aHead) * smoothstep(uTip * 0.45, uTip, aMet.y)'));
       sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
 varying float vHead; varying vec3 vMet; uniform vec2 uHS; uniform float uKeel; uniform float uCavH; uniform float uTip; uniform vec3 uEdgeC; uniform float uEdgeK;
+uniform vec3 uFill; uniform vec3 uBounce; uniform float uShLift; uniform float uWrap; uniform vec3 uSSS;
 uniform float uRB[96]; uniform int uRows; uniform float uAV; uniform sampler2D uHeadN; uniform sampler2D uHeadC; uniform float uHX;
 float slHash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 float slScale(vec2 m) {
@@ -3174,9 +3307,9 @@ float slScale(vec2 m) {
         .replace('#include <roughnessmap_fragment>', THREE.ShaderChunk.roughnessmap_fragment.replace('vRoughnessMapUv', 'slUv') + '\n roughnessFactor *= mix(1.0, slRough, (1.0 - vMet.z) * slTip);\n roughnessFactor = mix(roughnessFactor, roughness * (0.9 + 0.25 * slH), vMet.z); roughnessFactor = mix(roughness, roughnessFactor, slTip);\n roughnessFactor = mix(roughnessFactor, max(roughness, 0.42) * (0.6 + 0.8 * slHN.a), slHW);')
         .replace('#include <normal_fragment_maps>', THREE.ShaderChunk.normal_fragment_maps.replace(/vNormalMapUv/g, 'slUv').replace('mapN.xy *= normalScale;', 'mapN.xy = mapN.xy * mix(1.0, slStr, 1.0 - vMet.z) + slTilt * (1.0 - vMet.z) * slTip;\n mapN.xy *= normalScale * (1.0 - vHead * 0.88) * slTip;\n mapN = normalize(mix(mapN, normalize(vec3(-slDa * 0.55, -slDx * 0.55, 1.0)), vMet.z));\n mapN = normalize(mix(vec3(0.0, 0.0, 1.0), mapN, smoothstep(uTip * 0.5, uTip * 1.6, vMet.y))); /* v5.17: the scale relief fans out into a star on the rounded nose: none there */').replace('normal = normalize( tbn * mapN );', 'normal = normalize( tbn * mapN );\n if (slHW > 0.0) { vec2 hn = slHN.xy * 2.0 - 1.0; vec3 hT = tbn[0], hB = tbn[1]; float lT = length(hT), lB = length(hB);\n   if (lT > 1e-6 && lB > 1e-6) { vec3 nH = normalize(hT / lT * hn.x + hB / lB * hn.y + nonPerturbedNormal * sqrt(max(0.0, 1.0 - dot(hn, hn)))); normal = normalize(mix(normal, nH, slHW)); } }'))
         .replace('#include <clearcoat_normal_fragment_begin>', '#ifdef USE_CLEARCOAT\n vec3 clearcoatNormal = normalize(mix(nonPerturbedNormal, normal, 0.75 * slHW));\n#endif')
-        .replace('#include <lights_physical_fragment>', '#include <lights_physical_fragment>\n#ifdef USE_CLEARCOAT\n material.clearcoat *= 1.0 - 0.55 * slHW; material.clearcoatRoughness = mix(material.clearcoatRoughness, max(material.clearcoatRoughness, 0.3), slHW);\n#endif');
+        .replace('#include <lights_fragment_end>', SKIN_LIGHT_GLSL).replace('#include <lights_physical_fragment>', '#include <lights_physical_fragment>\n#ifdef USE_CLEARCOAT\n material.clearcoat *= 1.0 - 0.55 * slHW; material.clearcoatRoughness = mix(material.clearcoatRoughness, max(material.clearcoatRoughness, 0.3), slHW);\n#endif');
     };
-    mat.customProgramCacheKey = () => 'sl-skin-v558';
+    mat.customProgramCacheKey = () => 'sl-skin-v588';
     const mesh = new THREE.Mesh(body.geo, mat); mesh.castShadow = mesh.receiveShadow = true;
     // v5.78: the bending on the graphics card (RIG_GLSL): the shadow pass bends the same way, and while posed the body is
     // never culled by its rest-pose bounds, and clicks and zooming meet it where it is now (its chain of spheres)

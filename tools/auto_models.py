@@ -296,7 +296,7 @@ CURATED = {
     "pseudechis-porphyriacus": {"d": "#131315", "lat": "#1a1718", "b": "#d4544a", "t": "plain", "s": "riverbank", "sx": {"gloss": 0.85},
                                 "h": dict(DARK_EYE, iris="#1a1412", irisInner="#2e2420"), "cx": {"bellyA": 0.62, "bellySharp": 0.08},
                                 "pat": [{"type": "tint", "t": [0.04, 1], "ramp": 0.02, "aRange": [0.56, 1], "color": "#cf4a3e", "alpha": 0.9}]},
-    "pseudonaja-textilis": {"d": "#8a6a45", "lat": "#91724c", "b": "#e7cf8a", "t": "plain", "h": dict(DARK_EYE, iris="#3a2618", irisInner="#5a3c22", eyeRing="#c8762e")},
+    "pseudonaja-textilis": {"d": "#7c6650", "lat": "#82694f", "b": "#e7cf8a", "t": "plain", "h": dict(DARK_EYE, iris="#3a2618", irisInner="#5a3c22", eyeRing="#c8762e")},
     "oxyuranus-scutellatus": {"d": "#7a5a3a", "lat": "#86663f", "b": "#e9dcae", "t": "plain", "hc": "#c9b48c", "hcx": 0.45, "h": dict(DARK_EYE, iris="#5a4430", irisInner="#7a5c40")},
     "laticauda-colubrina": {"d": "#7d93a8", "lat": "#8aa0b2", "b": "#e6dc96", "c": "#121214", "t": "band", "n": 40, "lip": "#e6d36a", "h": dict(DARK_EYE, iris="#1a1a1c", irisInner="#2a2a30")},
     "drymarchon-couperi": {"d": "#141821", "lat": "#1b2030", "b": "#2a3040", "t": "plain", "sx": {"gloss": 0.9, "iridescence": 0.6}, "lip": "#a8503a", "h": dict(DARK_EYE, iris="#1a1614", irisInner="#2a2220")},
@@ -619,7 +619,7 @@ SPECIES_BODY = {
     "opheodrys-aestivus": {"tail": 0.375, "ld": 70, "ts": "whip", "hn": 1.2}, "thamnophis-saurita": {"tail": 0.325, "ts": "whip"}, "thamnophis-proximus": {"tail": 0.32, "ts": "whip"},
     "thamnophis-sirtalis": {"tail": 0.22}, "pantherophis-guttatus": {"tail": 0.15}, "lampropeltis-getula": {"tail": 0.12}, "zamenis-situla": {"tail": 0.17},
     "python-brongersmai": {"ld": 14, "tail": 0.09, "hn": 1.35}, "python-curtus": {"ld": 14, "tail": 0.09}, "python-breitensteini": {"ld": 14, "tail": 0.09},
-    "candoia-aspera": {"ld": 14, "tail": 0.08, "hn": 1.6, "ts": "abrupt"}, "morelia-viridis": {"tail": 0.17, "ts": "prehensile", "hn": 1.9}, "morelia-azurea": {"tail": 0.17, "ts": "prehensile", "hn": 1.9},
+    "candoia-aspera": {"ld": 14, "tail": 0.08, "hn": 1.6, "ts": "abrupt"}, "morelia-viridis": {"tail": 0.17, "ts": "prehensile", "hn": 1.9, "ld": 34}, "morelia-azurea": {"tail": 0.17, "ts": "prehensile", "hn": 1.9},
     "python-sebae": {"tail": 0.13}, "bitis-arietans": {"tail": 0.1}, "dendroaspis-angusticeps": {"tail": 0.23},
 }
 # Eye diameter over head length (Z3): the family defaults are in viewer.js (EYE_L); these are genera that differ
@@ -680,8 +680,9 @@ AUDIT_FIX = {
     # 5 Madagascar leaf-nosed snake (the long-nosed form in its photo): pale brown, a long flat nasal blade, pale lateral line
     "langaha-madagascariensis": {"d": "#a07c56", "lat": "#a68560", "c": "#5a4028", "b": "#e6dcb0", "t": "none", "ls": ["#e8e0c0", 0.6, 0.03],
         "h": {"horns": "rostral", "hornLen": 0.55, "hornUp": 0.05, "hornFlat": 0.35, "hornColor": "#9a7650", "w": 1.3}},
-    # 6 carpet python (jungle-type, as in its photo): pale-centred blotches with heavy black rims on a dark ground, a dark eye stripe
-    "morelia-spilota": {"d": "#2e2a22", "lat": "#34302a", "c": "#141210", "ic": "#c8c0a0", "b": "#e2dcc6", "t": "carpet", "n": 52,
+    # 6 carpet python: v5.88 against iNaturalist research-grade photos - an olive-tan to cream ground with black-rimmed,
+    # olive-brown-centred blotches linked into bands (it was a black snake with white spots), a dark eye stripe
+    "morelia-spilota": {"d": "#a49868", "lat": "#988c60", "c": "#1a1712", "ic": "#5e5640", "b": "#e2dcc6", "t": "carpet", "n": 52,
         "es": ["#141210", 0.06], "h": {"iris": "#a89878", "irisInner": "#cfc3a0"}},
     # 7 monocled cobra (the common brown form): the O-shaped monocle on the back of the hood, pale throat, a dark band across it
     "naja-kaouthia": {"d": "#5e5242", "lat": "#625646", "c": "#2a221a", "b": "#e2d8bc", "t": "plain",
@@ -754,7 +755,7 @@ AUDIT_FIX = {
     # 39 woma: broad, irregular bands, darker on the flanks
     "aspidites-ramsayi": {"t": "none", "pat": [{"type": "band", "count": 34, "len": 0.5, "color": "#8a5428", "warp": 0.8, "jit": 0.3, "sj": 0.35, "aMax": 0.75}]},
     # 40 emerald tree boa: draped over a branch, a big head on a thin neck, pale lips
-    "corallus-caninus": {"sx": {"rows": 70}, "lip": "#f4f0c0"},
+    "corallus-caninus": {"sx": {"rows": 70}, "lip": "#f4f0c0", "bx": {"ld": 36}},  # (v5.88: a slimmer, plausibly thick body over its branch)
     # 43 coastal taipan: longer fangs (in GENUS_FANG); 44 eastern brown snake: orange spots on the belly
     "pseudonaja-textilis": {"pat": [{"type": "blotch", "count": 60, "a": 0.9, "mirror": True, "alt": True, "belly": True, "wid": 0.06, "len": 0.4, "shape": "round", "color": "#d88a4a", "alpha": 0.6, "jit": 0.4, "skip": 0.3}]},
     # 46 paradise tree snake: red spots in clusters, not a line
@@ -764,7 +765,8 @@ AUDIT_FIX = {
     # 55 rosy boa: contrasting stripes
     "lichanura-trivirgata": {"d": "#c8c0b0", "lat": "#c4bcac", "c": "#6a3a20"},
     # 67 common garter snake: the side stripe on scale rows 2-3, dark bars on the lips
-    "thamnophis-sirtalis": {"ls": ["#e8d77a", 0.62, 0.05]},
+    # (v5.88: olive-brown, not near-black, with the three yellow stripes as clear as in its photos)
+    "thamnophis-sirtalis": {"d": "#5e5638", "lat": "#655c3c", "ls": ["#e8d77a", 0.6, 0.068], "vs": ["#e4d06a", 0.062]},
     # 79 indigo snake: 17 rows
     "drymarchon-couperi": {"sx": {"rows": 17}},
     # 88 sea krait: lateral nostrils (it is amphibious)
@@ -884,8 +886,44 @@ def apply_562(a, c, g):
     if sid in AUDIT_FIX: _merge_562(a, AUDIT_FIX[sid])
 
 
+# v5.88: hand-made profiles matched again against iNaturalist research-grade photos of adults (the patterns were rough)
+HAND_FIXES_588 = {
+    # puff adder: a yellowish-brown ground with dark, backward-pointing chevrons edged pale yellow (they were black rings)
+    "bitis-arietans": [(("colors", "dorsal"), "#a2843f"), (("colors", "lateral"), "#9a7f44"), (("colors", "belly"), "#e2d6b2"), (("colors", "mottle"), 0.08),
+                       (("pattern", 0), {"type": "blotch", "t": [0.08, 0.95], "count": 26, "a": 0, "wid": 0.42, "len": 0.32, "shape": "chevron", "vk": 2.8, "color": "#33241a",
+                                         "edgeColor": "#ecd27a", "edge": 0.55, "edgeOut": True, "warp": 0.25, "jit": 0.06, "sj": 0.12}),
+                       (("pattern", 1), {"type": "blotch", "t": [0.08, 0.95], "count": 24, "phase": 0.5, "a": 0.64, "mirror": True, "wid": 0.12, "len": 0.36, "shape": "rect",
+                                         "color": "#3a2e22", "edgeColor": "#d8c48c", "edge": 0.22, "edgeOut": True, "warp": 0.3})],
+    # Gaboon viper: a row of pale oblong blocks down the spine (they were round), a warmer, lighter brown ground
+    "bitis-gabonica": [(("colors", "dorsal"), "#74543f"), (("colors", "lateral"), "#7e5c46"),
+                       (("pattern", 0), {"type": "blotch", "t": [0.1, 0.95], "count": 17, "a": 0, "wid": 0.15, "len": 0.68, "shape": "rect", "color": "#dccca4",
+                                         "inner": {"r": 0.32, "color": "#c2ab82"}, "warp": 0.3, "jit": 0.06})],
+    # copperhead: pale pinkish-tan with chestnut hourglass crossbands - narrow over the spine, wide on the flanks, darker edged
+    "agkistrodon-contortrix": [(("colors", "dorsal"), "#bd9575"), (("colors", "lateral"), "#b89072"), (("colors", "belly"), "#e2d2ba"),
+                               (("pattern", 0), {"type": "blotch", "t": [0.06, 0.94], "count": 15, "a": 0, "wid": 0.95, "len": 0.9, "shape": "hourglass2", "h0": 0.22, "h1": 1.4,
+                                                 "color": "#84442a", "edgeColor": "#562c1a", "edge": 0.14, "warp": 0.35, "jit": 0.08, "sj": 0.15}),
+                               (("pattern", 1, "color"), "#b07a4e")],
+    # reticulated python: a golden-brown ground (it was too pale), grey-brown saddles inside the black net, a golden head
+    "malayopython-reticulatus": [(("colors", "dorsal"), "#8a6c36"), (("colors", "lateral"), "#a07e3e"), (("pattern", 0, "edgeColor"), "#d8b050"),
+                                 (("pattern",), "<", {"type": "blotch", "t": [0.05, 0.97], "count": 46, "a": 0, "wid": 0.24, "len": 0.6, "shape": "diamond", "color": "#5e4e38", "alpha": 0.75, "warp": 0.5}),
+                                 (("pattern", 3, "color"), "#a8843c")],
+    # timber rattlesnake: the dark crossbands are true chevrons (V-shaped, pointing back), on a yellowish-tan ground with a rusty
+    # stripe down the spine (they were straight bands on cream)
+    "crotalus-horridus": [(("colors", "dorsal"), "#a68e5e"), (("colors", "lateral"), "#a28a5c"), (("pattern", 0, "color"), "#8a5a30"), (("pattern", 0, "alpha"), 0.8),
+                          (("pattern", 1, "vk"), 2.4), (("pattern", 1, "len"), 0.34), (("pattern", 1, "wid"), 0.52)],
+    # eastern coral snake: the black rings about as wide as the red ones, with narrow yellow rings between (the black were thin)
+    "micrurus-fulvius": [(("pattern", 2, "len"), 0.46), (("pattern", 2, "edge"), 0.24)],
+    # eastern milksnake: big red-brown saddles with heavy black edges on grey (they were small red spots)
+    "lampropeltis-triangulum": [(("colors", "dorsal"), "#a49e92"), (("pattern", 0, "wid"), 0.6), (("pattern", 0, "len"), 0.74), (("pattern", 0, "color"), "#94402a"),
+                                (("pattern", 0, "edge"), 0.32), (("pattern", 1, "wid"), 0.14), (("pattern", 1, "len"), 0.55), (("pattern", 1, "color"), "#94402a"), (("pattern", 1, "edge"), 0.32)],
+    # Russell's viper and terciopelo: a browner, darker ground, as in their photos
+    "daboia-russelii": [(("colors", "dorsal"), "#9a7e50"), (("colors", "lateral"), "#987c50")],
+    "bothrops-asper": [(("colors", "dorsal"), "#7a583e"), (("colors", "lateral"), "#76563c")],
+}
+
+
 def apply_hand_562(existing):
-    for sid, fix in HAND_FIXES_562.items():
+    for sid, fix in list(HAND_FIXES_562.items()) + list(HAND_FIXES_588.items()):
         prof = existing.get(sid)
         if not prof: continue
         for f in fix:
@@ -893,6 +931,7 @@ def apply_hand_562(existing):
             o = prof
             for k in path[:-1]: o = o.setdefault(k, {}) if isinstance(k, str) else o[k]
             if val == "+": o[path[-1]] = list(o.get(path[-1]) or []) + [f[2]]
+            elif val == "<": o[path[-1]] = [f[2]] + list(o.get(path[-1]) or [])
             else: o[path[-1]] = val
 
 
