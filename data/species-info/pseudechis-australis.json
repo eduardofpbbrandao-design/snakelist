@@ -1,0 +1,93 @@
+{
+  "id": "pseudechis-australis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Gray, 1842)",
+  "facts": {
+    "length": {
+      "text": "About 2 to 2.5 m; record 3.3 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The King Brown (Mulga) Snake is Australia's largest venomous land snake. Despite its name it belongs to the black snakes and is only distantly related to true brown snakes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Robust, with a head slightly wider than the body and prominent cheeks.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Can reach 2 to 2.5 m and 3 to 6 kg; the longest confirmed was 3.3 m. Males are bigger.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "All Australian states except Victoria and Tasmania - most of northern, western and central Australia.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Mostly active at dusk, resting in soil cracks, burrows or under rocks and logs; in warm months it is active later into the night. Males wrestle in the breeding season.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Large, heavy brown snake with a broad head.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "King brown snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/King_brown_snake"
+    },
+    "rdb": {
+      "title": "Pseudechis australis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Pseudechis&species=australis"
+    }
+  }
+}

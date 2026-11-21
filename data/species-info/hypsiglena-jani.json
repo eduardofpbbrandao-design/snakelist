@@ -1,0 +1,108 @@
+{
+  "id": "hypsiglena-jani",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Dugès, 1865)",
+  "facts": {
+    "length": {
+      "text": "About 25 to 40 cm; record 51 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 4 to 6",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly lizards",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Chihuahuan (Texas) Night Snake is a small, night-active snake with a very mild venom, harmless to people.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Light grey or tan with dark blotches down the back, a plain belly, smooth scales and vertical pupils.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 10 to 16 in (25 to 40 cm); the record is 20 in.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "From southern Kansas and Colorado through New Mexico and western Texas to central Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Semi-dry places with rocky soil.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly lizards, also small snakes and soft insects.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Breeds in the spring rainy season and lays 4 to 6 eggs, which hatch after about 8 weeks.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Small, pale and blotched, with vertical pupils.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Hypsiglena jani",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Hypsiglena_jani"
+    },
+    "rdb": {
+      "title": "Hypsiglena jani",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Hypsiglena&species=jani"
+    }
+  }
+}

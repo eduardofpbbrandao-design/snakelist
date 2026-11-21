@@ -1,0 +1,54 @@
+{
+  "id": "leptophis-mexicanus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Duméril, Bibron & Duméril, 1854",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Mexican Parrot Snake is a medium-sized, slender snake of southern Mexico and Central America.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern Mexico, Guatemala, Belize, Honduras, El Salvador, Nicaragua and Costa Rica; in Honduras from about 60 to 940 m.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Leptophis mexicanus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Leptophis_mexicanus"
+    },
+    "rdb": {
+      "title": "Leptophis mexicanus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Leptophis&species=mexicanus"
+    }
+  }
+}

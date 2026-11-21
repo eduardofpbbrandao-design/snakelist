@@ -1,0 +1,108 @@
+{
+  "id": "aspidites-melanocephalus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Krefft, 1864)",
+  "facts": {
+    "length": {
+      "text": "Usually 1.5 to 2 m; up to 3.5 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 5 to 10",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly reptiles - skinks, geckos, dragons, even snakes",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Black-headed Python is a non-venomous python of northern Australia, easily known by its shiny black head and neck.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Glossy black head and neck; muscular, slightly flattened body; a tail that tapers to a thin point.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 1.5 to 2 m long, up to 3.5 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The northern half of Australia (Western Australia, Northern Territory, Queensland), away from the driest areas.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Lives on the ground among rocks and debris. If disturbed it hisses loudly but rarely bites; it swims well but is almost never found in water.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly reptiles, especially skinks, but also geckos, bearded dragons, legless lizards, snakes and even large monitor lizards; sometimes mammals and birds.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 5 to 10 eggs and coils around them to keep them warm until they hatch.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Shiny black head and neck on a banded brown body.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Black-headed python",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Black-headed_python"
+    },
+    "rdb": {
+      "title": "Aspidites melanocephalus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Aspidites&species=melanocephalus"
+    }
+  }
+}

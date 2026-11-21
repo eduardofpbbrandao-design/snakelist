@@ -1,0 +1,108 @@
+{
+  "id": "ptyas-major",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Günther, 1858)",
+  "facts": {
+    "length": {
+      "text": "About 75 to 90 cm; up to 120 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 2 to 16",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Earthworms, insect larvae and other soft invertebrates",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Chinese Green Snake is a slender, bright green, gentle snake of China and nearby countries. It rarely bites.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Bright green above and greenish-yellow below, with smooth scales.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 75 to 90 cm, sometimes up to 120 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Central and southern China, Taiwan, northern Vietnam and Laos.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day and partly lives in trees and bushes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Earthworms, insect larvae and other soft-bodied invertebrates.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 2 to 16 eggs, which hatch after about two months.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Plain bright green, slim snake.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Chinese green snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Chinese_green_snake"
+    },
+    "rdb": {
+      "title": "Ptyas major",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Ptyas&species=major"
+    }
+  }
+}

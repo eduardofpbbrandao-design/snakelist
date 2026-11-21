@@ -1,0 +1,99 @@
+{
+  "id": "sistrurus-tergeminus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Say, 1823)",
+  "facts": {
+    "length": {
+      "text": "About 46 to 66 cm; up to about 88 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly rodents; also lizards and frogs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Western Massasauga is a small venomous rattlesnake of the south-western plains of the United States and northern Mexico.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 46 to 66 cm, up to 88.3 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "From south-eastern Colorado, Nebraska and Missouri through Kansas and Oklahoma into Texas, and northern Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Grassland, open woodland edges and rocky hillsides; it often shelters in other animals' burrows.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly rodents, plus lizards and frogs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Small rattlesnake with a rattle and dark blotches.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Sistrurus tergeminus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Sistrurus_tergeminus"
+    },
+    "rdb": {
+      "title": "Sistrurus tergeminus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Sistrurus&species=tergeminus"
+    }
+  }
+}

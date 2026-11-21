@@ -1,0 +1,80 @@
+{
+  "id": "philothamnus-semivariegatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Smith, 1840)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs, 3 to 12",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Spotted Bush Snake is a slender, bright green, harmless snake found across much of Africa.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Bright green with black speckles.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "The body (without the tail) is usually 60 to 90 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "From South Africa north to Sudan and Ethiopia, and west to Guinea and Senegal.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 3 to 12 long eggs each summer; hatchlings are about 25 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Bright green body with black speckles.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Philothamnus semivariegatus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Philothamnus_semivariegatus"
+    },
+    "rdb": {
+      "title": "Philothamnus semivariegatus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Philothamnus&species=semivariegatus"
+    }
+  }
+}

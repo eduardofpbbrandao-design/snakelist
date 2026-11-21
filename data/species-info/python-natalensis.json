@@ -1,0 +1,108 @@
+{
+  "id": "python-natalensis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Smith, 1840",
+  "facts": {
+    "length": {
+      "text": "Usually 2.8 to 4 m; rarely over 4.6 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 30 to 60 (up to 100+)",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Small antelopes, hares, monkeys, jackals and more",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Southern African Rock Python is one of the largest snakes in the world. It is non-venomous and kills prey by squeezing.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 2.8 to 4 m; over 4.6 m is rare. Females are much bigger than males.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern Africa: from Angola, Zambia, Tanzania and Kenya south to South Africa.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Savanna and woodland.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly small antelopes, jackals, hares and monkeys, occasionally fish and even crocodiles.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 30 to 60 eggs, sometimes over 100. The mother guards and warms them and may stay with the young for two weeks or more after hatching.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Mother rock pythons may stay with their babies for weeks after they hatch - unusual for a snake.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Huge, heavy python with a blotched pattern.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Southern African rock python",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Southern_African_rock_python"
+    },
+    "rdb": {
+      "title": "Python natalensis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Python&species=natalensis"
+    }
+  }
+}

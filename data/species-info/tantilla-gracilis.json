@@ -1,0 +1,83 @@
+{
+  "id": "tantilla-gracilis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Baird & Girard, 1853",
+  "facts": {
+    "length": {
+      "text": "Tiny: about 18 to 20 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Centipedes and other arthropods",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Flathead Snake is a tiny, harmless snake of the south-central United States and north-eastern Mexico.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Only about 18 to 20 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Texas, Oklahoma, Kansas, Missouri, Illinois, Arkansas and Louisiana, and Coahuila in Mexico.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Arthropods such as centipedes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Tantilla gracilis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Tantilla_gracilis"
+    },
+    "rdb": {
+      "title": "Tantilla gracilis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Tantilla&species=gracilis"
+    }
+  }
+}

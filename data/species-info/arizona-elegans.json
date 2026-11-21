@@ -1,0 +1,93 @@
+{
+  "id": "arizona-elegans",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Kennicott, 1859",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs, 10 to 20",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Small lizards",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Glossy (or Faded) Snake is a harmless, night-active snake of the south-western United States and northern Mexico. It looks like a pale, washed-out gopher snake.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Like a small, pale gopher snake with a narrow, pointed head.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South-western USA (from Arizona and Utah east to Kansas, Oklahoma and Texas) and northern Mexico.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Semi-dry grassland.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Hunts small lizards at night.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Breeds in late spring and early summer and lays 10 to 20 eggs; hatchlings are about 25 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Pale, 'faded' look with a narrow pointed head.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Arizona elegans",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Arizona_elegans"
+    },
+    "rdb": {
+      "title": "Arizona elegans",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Arizona&species=elegans"
+    }
+  }
+}

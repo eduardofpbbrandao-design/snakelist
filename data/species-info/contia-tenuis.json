@@ -1,0 +1,116 @@
+{
+  "id": "contia-tenuis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Baird & Girard, 1852)",
+  "facts": {
+    "length": {
+      "text": "About 30 to 46 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 4 to 16",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly slugs and slug eggs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Sharp-tailed Snake is a small, shy, harmless snake of the Pacific coast of the United States and southern British Columbia.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A sharp spine at the tip of the tail - the end of the last tail bone. It is harmless and is used to hold slugs still.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 12 to 18 in (30 to 46 cm) long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "California, Oregon and Washington, and southern Vancouver Island and nearby parts of British Columbia.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Secretive; usually found under rocks and logs or burrowing in soft soil, even in towns.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly slugs and their eggs; sometimes insects and earthworms.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 4 to 16 eggs underground in summer; hatchlings are only 3 to 4 in long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Its tail ends in a tiny spike that helps it hold slippery slugs.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Sharp little spine on the tail tip.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Sharp-tailed snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Sharp-tailed_snake"
+    },
+    "rdb": {
+      "title": "Contia tenuis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Contia&species=tenuis"
+    }
+  }
+}

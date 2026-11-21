@@ -1,0 +1,99 @@
+{
+  "id": "austrelaps-superbus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Günther, 1858)",
+  "facts": {
+    "length": {
+      "text": "About 1 to 1.5 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Frogs, lizards and snakes",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Lowland Copperhead is a venomous snake of south-eastern Australia and Tasmania. It is not closely related to the American copperhead. Its bite can kill, so it must be left alone.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Coppery brown, yellowish, reddish, grey or black; the copper-coloured head is not always present.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 1 to 1.5 m long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South-eastern Australia, including Tasmania.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Low vegetation near water.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Frogs, lizards and snakes, including smaller copperheads.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Austrelaps superbus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Austrelaps_superbus"
+    },
+    "rdb": {
+      "title": "Austrelaps superbus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Austrelaps&species=superbus"
+    }
+  }
+}

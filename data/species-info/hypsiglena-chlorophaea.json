@@ -1,0 +1,108 @@
+{
+  "id": "hypsiglena-chlorophaea",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Cope, 1860",
+  "facts": {
+    "length": {
+      "text": "About 30 to 66 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 2 to 9",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly small lizards and their eggs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Desert Nightsnake is a small, secretive, night-active snake of western North America. Its mild venom is no danger to people.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Small and slender; beige, yellowish or grey with paired dark blotches down the back.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 30 to 66 cm long; females are bigger.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The western and south-western USA, north-western Mexico, and a small isolated population in south-central British Columbia, Canada.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active at night and dusk; an ambush hunter that uses its venom to subdue prey.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly small lizards and lizard eggs, plus small snakes, frogs and salamanders.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Mates in spring and lays 2 to 9 eggs (usually about 4) between April and July.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Small, pale and blotched, out at night.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Hypsiglena chlorophaea",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Hypsiglena_chlorophaea"
+    },
+    "rdb": {
+      "title": "Hypsiglena chlorophaea",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Hypsiglena&species=chlorophaea"
+    }
+  }
+}

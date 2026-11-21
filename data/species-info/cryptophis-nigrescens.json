@@ -1,0 +1,55 @@
+{
+  "id": "cryptophis-nigrescens",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Günther, 1862)",
+  "facts": {
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Eastern Small-eyed Snake is a venomous snake of eastern Australia.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "New South Wales, Queensland and Victoria.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Cryptophis nigrescens",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Cryptophis_nigrescens"
+    },
+    "rdb": {
+      "title": "Cryptophis nigrescens",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Cryptophis&species=nigrescens"
+    }
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "id": "lampropeltis-splendida",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Baird & Girard, 1853)",
+  "facts": {
+    "length": {
+      "text": "Usually 3 to 4 ft; up to about 6.8 ft",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 5 to 12",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Rodents, lizards, eggs and snakes, even rattlesnakes",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Desert Kingsnake is a yellow-and-black, non-venomous kingsnake of Texas, New Mexico, Arizona and northern Mexico. It is resistant to pit viper venom and can eat young rattlesnakes.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 3 to 4 ft (0.9 to 1.2 m), but up to about 6.8 ft.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Central Texas to south-eastern Arizona, and north-central Mexico.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Any rural habitat in its range, but most often in moister places such as near water tanks and along streams.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "A powerful constrictor that eats rodents, lizards, reptile eggs it smells under the ground, and smaller snakes including young rattlesnakes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Mates from March to June and lays 5 to 12 sticky eggs in late June or July, sometimes buried up to a foot deep; they hatch after about 60 days.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Black with yellow speckles.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Desert kingsnake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Desert_kingsnake"
+    },
+    "rdb": {
+      "title": "Lampropeltis splendida",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Lampropeltis&species=splendida"
+    }
+  }
+}

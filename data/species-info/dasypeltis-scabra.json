@@ -1,0 +1,106 @@
+{
+  "id": "dasypeltis-scabra",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "About 1 to 1.2 m (40 to 46 in)",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Only birds' eggs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Common (Rhombic) Egg Eater is a harmless African snake that eats nothing but eggs. It has almost no teeth.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Diamond-shaped dark brown spots down a lighter back, brown spots on the sides and a V-shaped mark on the neck.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Africa south of the Sahara.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Most habitats from sea level to 2,600 m, except closed forest and true desert.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active at night. Mostly on the ground, but it climbs rocks and trees to raid birds' nests.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Only eggs. Ridges inside its mouth, like fingerprints, help it grip the shell.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Diamond-shaped spots and a V on the neck.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Dasypeltis scabra",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Dasypeltis_scabra"
+    },
+    "rdb": {
+      "title": "Dasypeltis scabra",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Dasypeltis&species=scabra"
+    }
+  }
+}

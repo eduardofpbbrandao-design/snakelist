@@ -1,0 +1,62 @@
+{
+  "id": "malpolon-insignitus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Geoffroy Saint-Hilaire, 1827)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Eastern Montpellier Snake is a large, mildly venomous, rear-fanged snake of the eastern Mediterranean, the Middle East and North Africa.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Often has narrow pale stripes along the body; unlike the western Montpellier Snake, males have no dark 'saddle'.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "From the eastern Adriatic coast through the Balkans, Greece, Turkey and Cyprus to the Caucasus, Iraq, Iran and Arabia, and across North Africa from Morocco to Egypt.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Malpolon insignitus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Malpolon_insignitus"
+    },
+    "rdb": {
+      "title": "Malpolon insignitus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Malpolon&species=insignitus"
+    }
+  }
+}

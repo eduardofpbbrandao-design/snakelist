@@ -1,0 +1,94 @@
+{
+  "id": "pituophis-deppei",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Duméril, 1853)",
+  "facts": {
+    "length": {
+      "text": "Up to about 1.7 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Mexican Bullsnake (Mexican Pine Snake) is a large, harmless snake found only in Mexico.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Yellowish tan with large, squarish dark brown to black blotches and smaller dark side spots; yellowish belly with square brown spots.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Up to 1.69 m long, including an 18 cm tail.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Central and northern Mexico, from Sonora and Coahuila south to Oaxaca and Puebla.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Forest, shrubland and grassland, and also farms, suburbs and towns.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Big square dark blotches on a yellowish-tan body.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Pituophis deppei",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Pituophis_deppei"
+    },
+    "rdb": {
+      "title": "Pituophis deppei",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Pituophis&species=deppei"
+    }
+  }
+}

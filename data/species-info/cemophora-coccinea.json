@@ -1,0 +1,94 @@
+{
+  "id": "cemophora-coccinea",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Blumenbach, 1788)",
+  "facts": {
+    "length": {
+      "text": "About 36 to 66 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 2 to 9",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Scarlet Snake is a small, harmless burrowing snake of the south-eastern United States, banded red, black and white or yellow.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Light grey with black-bordered red blotches separated by white or yellow.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 36 to 66 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The south-eastern USA, from Florida north to New Jersey and west to eastern Texas and Oklahoma.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active at night and only in summer; by day it hides under logs and pine litter or underground. It is often seen crossing roads at night.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 2 to 9 eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Red, black and white or yellow bands on a grey body.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Scarlet snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Scarlet_snake"
+    },
+    "rdb": {
+      "title": "Cemophora coccinea",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Cemophora&species=coccinea"
+    }
+  }
+}

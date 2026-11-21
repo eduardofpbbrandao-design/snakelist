@@ -1,0 +1,116 @@
+{
+  "id": "demansia-psammophis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Schlegel, 1837)",
+  "facts": {
+    "length": {
+      "text": "About 80 cm; up to 1 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Small lizards and lizard eggs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Yellow-faced Whip Snake is a thin, fast, venomous snake found across much of Australia.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Thin with a narrow yellowish head, a pale ring around each eye and a dark curved mark along the upper lip.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 80 cm on average, up to 1 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Every Australian state except Tasmania, from coastal forest to dry inland scrub.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day, fast and nervous - it flees quickly when disturbed. It slows down in winter.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly small lizards that are active by day, and lizard eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs; many females may use the same nest, and some nests have held 500 to 600 eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Lots of females can lay their eggs in the same nest - up to hundreds of eggs together.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Pale ring around the eye and dark mark on the lip.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Demansia psammophis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Demansia_psammophis"
+    },
+    "rdb": {
+      "title": "Demansia psammophis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Demansia&species=psammophis"
+    }
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "id": "masticophis-lateralis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Hallowell, 1853)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs, 6 to 11",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mostly lizards",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The California Whipsnake (Striped Racer) is a fast, slender, non-venomous snake of California and Baja California.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Slender, dark brown or black on top with a yellowish stripe along each side.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "California west of the Sierra Nevada, from Trinity County south, and north-western Baja California.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Coast, foothills and chaparral.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Fast and active by day, moving through brush and up into bushes to bask in the morning sun.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Insects, lizards, snakes, birds and small mammals, but especially lizards, which it grabs and swallows alive.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Hibernates from November to February, mates in spring and lays 6 to 11 eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Yellow side stripe on a dark, slender body.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Masticophis lateralis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Masticophis_lateralis"
+    },
+    "rdb": {
+      "title": "Masticophis lateralis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Masticophis&species=lateralis"
+    }
+  }
+}

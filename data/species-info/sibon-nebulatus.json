@@ -1,0 +1,70 @@
+{
+  "id": "sibon-nebulatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Cloudy Snail-eating Snake is a small, slender, harmless tree snake of southern Mexico, Central America and northern South America that eats snails.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Grey to brown with irregular dark ring-like bands edged with small beige spots; white to beige belly with tiny dark dots.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern Mexico through Central America to Colombia, Venezuela, the Guianas, Ecuador and north-eastern Brazil, plus Trinidad and Tobago.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Slender with cloudy dark bands.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Sibon nebulatus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Sibon_nebulatus"
+    },
+    "rdb": {
+      "title": "Sibon nebulatus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Sibon&species=nebulatus"
+    }
+  }
+}

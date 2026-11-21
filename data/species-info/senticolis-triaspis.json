@@ -1,0 +1,117 @@
+{
+  "id": "senticolis-triaspis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Cope, 1866)",
+  "facts": {
+    "length": {
+      "text": "Up to about 1.6 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, up to 9",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Lizards, birds and bats",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Green Rat Snake is a slender, non-venomous snake from southern Arizona and New Mexico through Mexico to Costa Rica. It is the only species in its genus.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Green or olive-green above and light yellow below, with a long head and smooth scales.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Up to about 160 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South-eastern Arizona and south-western New Mexico, Mexico, and Central America to Costa Rica.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Evergreen forest and grassland.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Mainly active by day.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Lizards, birds and bats, killed by squeezing.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays up to nine eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Slim, plain green rat snake.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Senticolis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Senticolis"
+    },
+    "rdb": {
+      "title": "Senticolis triaspis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Senticolis&species=triaspis"
+    }
+  }
+}
