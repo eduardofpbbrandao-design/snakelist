@@ -995,9 +995,11 @@ HAND_FIXES_588 = {
 HAND_FIXES_590 = {
     # puff adder: true V-shaped chevrons pointing back, their arms running well forward down the flanks (they read as slanted
     # bars: the arms barely moved forward over their width), thinly edged pale yellow; about 20 on the body
-    "bitis-arietans": [(("colors", "dorsal"), "#8c7446"), (("colors", "lateral"), "#857048"),  # (a duller, browner ground: the yellow one read as a zebra-striped toy)
-                       (("pattern", 0), {"type": "blotch", "t": [0.07, 0.95], "count": 21, "a": 0, "wid": 0.5, "len": 0.36, "shape": "chevron", "vk": 6.5, "color": "#2e2118",
-                                         "edgeColor": "#e8cf7a", "edge": 0.3, "edgeOut": True, "warp": 0.2, "jit": 0.05, "sj": 0.1}),
+    # (in photos it reads as pale chevrons on a dark ground - the ground between them is dark grey-brown, each chevron pale
+    # yellow-buff with a dark edge; it was dark bars on yellow, like a zebra-striped toy)
+    "bitis-arietans": [(("colors", "dorsal"), "#54493b"), (("colors", "lateral"), "#584c3d"), (("colors", "mottle"), 0.14),
+                       (("pattern", 0), {"type": "blotch", "t": [0.07, 0.95], "count": 21, "a": 0, "wid": 0.52, "len": 0.3, "shape": "chevron", "vk": 6.5, "color": "#cdb47c",
+                                         "edgeColor": "#241a12", "edge": 0.45, "edgeOut": True, "warp": 0.2, "jit": 0.05, "sj": 0.1}),
                        (("pattern", 1, "a"), 0.7), (("pattern", 1, "count"), 21), (("pattern", 1, "wid"), 0.14), (("pattern", 1, "len"), 0.42)],
     # timber rattlesnake: the crossbands are jagged V's (arms swept forward), on a tan to grey-brown ground (it was cream-yellow)
     "crotalus-horridus": [(("colors", "dorsal"), "#8f7c5c"), (("colors", "lateral"), "#8a7758"), (("pattern", 1, "vk"), 4.5), (("pattern", 1, "len"), 0.42),
