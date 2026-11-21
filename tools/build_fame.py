@@ -42,6 +42,8 @@ for cid, attrs in cards:
 order = sorted(raw, key=lambda c: raw[c])
 n = len(order)
 score = {c: int(999 * i / max(1, n - 1)) for i, c in enumerate(order)}
+for c in fossils:  # v5.93: fossil-only snakes are marked -1 so "know a lot" puts them after the living rare ones
+    if c in score: score[c] = -1
 blob = json.dumps(score, separators=(",", ":"), sort_keys=True)
 tag = '<script type="application/json" id="fame-data">%s</script>' % blob
 if 'id="fame-data"' in app:
