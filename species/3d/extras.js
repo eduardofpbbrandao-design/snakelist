@@ -1899,7 +1899,10 @@ export function create(V) {
       const mo = V.extras.mouth; if (!st.on || !mo || !mo.anchors || !mo.anchors.teeth || !mo.anchors.teeth.parent) return;
       const ins = mo.anchors.teeth.parent.parent; ins.visible = true;
       if (!st.lin0) liningSeeThrough(true);
-      const op = st.skinOpaque ? 1 : lerp(0.3, 0.88, sstep(0.05, 0.7, mo.t)); for (const [m] of st.lin0) m.opacity = op;
+      // (v5.93: an open mouth is solid inside - at 88% the lining let the ground and the organs show through the roof and floor
+      // as see-through holes; it is see-through only while nearly shut, where it would hide the skull in the see-through head)
+      const op = st.skinOpaque ? 1 : lerp(0.3, 1, sstep(0.05, 0.55, mo.t)), solid = op > 0.995;
+      for (const [m] of st.lin0) { m.opacity = solid ? 1 : op; if (m.transparent === solid) { m.transparent = !solid; m.depthWrite = solid; m.needsUpdate = true; } }
     }
     // the Head / Ribs / Body / Tail pills sit on their part of the body (v5.05: and hide while a part is picked)
     // v5.09: every label is just a short name and a green Show more pill (the explanation shows only when tapped).

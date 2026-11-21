@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=579'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=579'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=580'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=580'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -90,9 +90,9 @@ const HEAD_FORM = {
   mamba: { lw: 2.05, hb: [0.6, 0.88], hn: 1.15, len: [0.025, 0.04], h: 0.72 },
   deathadder: { lw: 1.2, hb: [0.85, 1.25], hn: 1.75, len: [0.04, 0.07] },
   sea: { lw: 1.7, hb: [0.5, 0.8], hn: 1.05, len: [0.025, 0.05] },
-  viper: { lw: 1.3, hb: [0.62, 1.2], hn: 2.0, len: [0.04, 0.06] },
-  bitis: { lw: 1.15, hb: [0.6, 1.25], hn: 2.1, len: [0.045, 0.075] },
-  pitviper: { lw: 1.3, hb: [0.7, 1.2], hn: 1.9, len: [0.04, 0.062] },
+  viper: { lw: 1.18, hb: [0.62, 1.2], hn: 2.0, len: [0.04, 0.06] }, // (v5.93: broader - from above the heads read as long narrow shields)
+  bitis: { lw: 1.05, hb: [0.6, 1.25], hn: 2.1, len: [0.045, 0.075] },
+  pitviper: { lw: 1.18, hb: [0.7, 1.2], hn: 1.9, len: [0.04, 0.062] },
   python: { lw: 1.55, hb: [0.5, 0.8], hn: 1.45, len: [0.03, 0.055] },
   boa: { lw: 1.65, hb: [0.5, 0.8], hn: 1.4, len: [0.03, 0.055] },
   sandboa: { lw: 1.25, hb: [0.6, 0.95], hn: 1.05, len: [0.025, 0.04] },
@@ -364,9 +364,9 @@ function makeBodyFns(P, quality) {
   // step down to a thin neck), 'oval' (most other snakes: sides curve out quickly), 'blunt' (blind snakes)
   const shape = Hd.shape || 'oval', jaw = Hd.jaw, sn = Hd.snout;
   const mid = Hd.mid != null ? Hd.mid : shape === 'tri' ? lerp(sn, 1, (0.45 - 0.13) / (jaw - 0.13)) : shape === 'blunt' ? 1 : lerp(sn, 1, 0.72);
-  const back = Hd.back != null ? Hd.back : shape === 'blunt' ? 1 : lerp(0.92, 0.8, (hw - B.neck) / Math.max(0.01, hw)) * (shape === 'tri' ? 0.78 : 1); // v5.28: viper heads end in a sharp step to the neck
-  const neckLen = Hd.neckLen != null ? Hd.neckLen : shape === 'tri' ? 0.15 : 0.5;
-  const tip = Hd.tip != null ? Hd.tip : shape === 'blunt' ? 0.75 : 0.55;
+  const back = Hd.back != null ? Hd.back : shape === 'blunt' ? 1 : lerp(0.92, 0.8, (hw - B.neck) / Math.max(0.01, hw)) * (shape === 'tri' ? 0.9 : 1); // v5.28: viper heads end in a sharp step to the neck (v5.93: with rounded rear corners - the bulge of the temporal muscles and venom glands - easing into the neck: it was a hard step that read as a box on a stick)
+  const neckLen = Hd.neckLen != null ? Hd.neckLen : shape === 'tri' ? 0.3 : 0.5;
+  const tip = Hd.tip != null ? Hd.tip : shape === 'blunt' ? 0.75 : shape === 'tri' ? 0.66 : 0.55; // (v5.93: a viper's snout ends blunt and broad, not in a point)
   const pts = [
     [0, 0], [Hl * 0.012, hw * sn * tip], [Hl * 0.045, hw * sn * lerp(tip, 1, 0.6)], [Hl * 0.13, hw * sn],
     [Hl * 0.45, hw * mid], [Hl * jaw, hw], [Hl * 1.0, hw * back],
@@ -406,7 +406,7 @@ function makeBodyFns(P, quality) {
   // height/width ratio: head (flattened), body, and a paddle-shaped tail for sea snakes
   const xsHead = 1 / Hd.h, xsBody = B.xs;
   const XS = (x) => {
-    let k = lerp(xsHead, xsBody, sstep(Hl * 0.75, Hl * 1.6, x));
+    let k = lerp(xsHead, xsBody, shape === 'tri' ? sstep(Hl * 0.7, Hl * 1.3, x) : sstep(Hl * 0.75, Hl * 1.6, x)); // (v5.93: a viper's neck is round, not still flattened like the head - that pinched it into a waist under a hump)
     if (B.paddle) k = lerp(k, 0.2, sstep(L * (1 - B.tail * 1.4), L * (1 - B.tail * 0.6), x));
     if (B.tailFlat) k = lerp(k, k * (1 + B.tailFlat), sstep(L * (1 - B.tail * 1.6), L * (1 - B.tail * 0.5), x)); // v5.62: pipe snakes' flattened tail
     if (hoodK) k *= hoodXS(x);
@@ -871,8 +871,11 @@ function buildBody(P, F, pose, quality) {
   if ((Hd.shape || 'oval') === 'tri') {
     const eX = Hd.eyeX * F.Hl;
     bumps.push({ x: eX, xs: F.Hl * 0.1, th: eyeA - 0.3, ts: 0.12, amp: 0.05, mirror: true });
+    // v5.93: the jowls - the cheeks swell low on each side towards the back of the head, over the venom glands and the jaw
+    // muscles, so the head is wider at the lips than at the crown there (a trapezoid from behind, a broad triangle from above)
+    bumps.push({ x: F.Hl * 0.8, xs: F.Hl * 0.2, th: Math.PI * 0.43, ts: 0.42, amp: Hd.jowl != null ? Hd.jowl : 0.07, mirror: true });
   }
-  const nTop = (x) => lerp(Hd.canthus * ((Hd.shape || 'oval') === 'tri' ? 1.7 : 1), 2.15, sstep(F.Hl * 0.8, F.Hl * 1.6, x)); // (v5.30: vipers' crowns flat)
+  const nTop = (x) => lerp(Hd.canthus * ((Hd.shape || 'oval') === 'tri' ? 1.35 : 1), 2.15, sstep(F.Hl * 0.8, F.Hl * 1.6, x)); // (v5.30: vipers' crowns flat; v5.93: the crown's edges rounder - at 1.7 the head was a box)
   // v4.81: an eye socket - the skin dips gently where the eye sits, so the domed eye under its clear
   // spectacle scale lies flush with the head (never standing out of its outline)
   const eyeX0 = Hd.eyeX * F.Hl, eyeRad = eyeRadOf(P, F), eyeRl = (F.W(eyeX0) + F.Hh(eyeX0)) / 2;
@@ -1489,6 +1492,7 @@ function patternData(P, F, body, lat, quality, seed) {
   const Hp = clamp(Math.round(body.gTotal * Wp * 0.62), 256, quality === 'high' ? 8192 : 2048);
   const C = P.colors, dors = hex(C.dorsal), latc = hex(C.lateral), bel = hex(C.belly);
   const bellyA = C.bellyA || 0.74, bs = C.bellySharp || 0.06, mott = C.mottle, vari = C.var;
+  const deepK = C.deepen != null ? C.deepen : 0.95, satK = C.sat != null ? C.sat : 1.07;
   const Cref = refGirth(F); // v5.62: one mid-body girth, for marks spaced by length
   const lumc = (c) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2], chinUp = C.chin !== false && bellyA > 0.6 && lumc(bel) - lumc(latc) > 30;
   const layers = (P.pattern || []).filter((l) => l.type !== 'shields').map((l) => prepLayer(l, F, body)); // (v5.53: head plates are in the head textures)
@@ -1553,7 +1557,10 @@ function patternData(P, F, body, lat, quality, seed) {
         }
       }
       if (C.speckle && !cl.v && x > Hl) { const hs = hash1(cl.id, seed + 11); if (hs < C.speckle.p) col = mixc(col, hex(C.speckle.color), (C.speckle.k || 0.6) * (0.6 + hs / C.speckle.p * 0.4) * (C.speckle.dot ? sstep(C.speckle.dot, C.speckle.dot + 0.2, cl.w) : Math.sqrt(cl.w))); } // (v5.35: dot - one small spot centred on each scale, as in speckled kingsnakes)
-      const k = (r * Wp + c) * 4; data[k] = col[0]; data[k + 1] = col[1]; data[k + 2] = col[2]; data[k + 3] = 255;
+      // v5.93: side by side with photos the models read a little pale and washed out under the scene's light: the skin's colour a
+      // touch deeper and richer (colors.deepen / colors.sat per species)
+      const lm = 0.2126 * col[0] + 0.7152 * col[1] + 0.0722 * col[2];
+      const k = (r * Wp + c) * 4; data[k] = (lm + (col[0] - lm) * satK) * deepK; data[k + 1] = (lm + (col[1] - lm) * satK) * deepK; data[k + 2] = (lm + (col[2] - lm) * satK) * deepK; data[k + 3] = 255;
     }
   }
   // v5.12: the texture wraps round the body, so towards the snout tip (where the girth shrinks to nothing) every
@@ -1567,7 +1574,7 @@ function patternData(P, F, body, lat, quality, seed) {
     const w = x <= xN0 ? 1 : 1 - sstep(xN0, xN1, x);
     for (let c = 0; c < Wp; c++) {
       const aa = Math.abs(((c + 0.5) / Wp) * 2 - 1), base = mixc(mixc(dors, latc, sstep(0.18, 0.5, aa)), lipC, sstep(0.52, 0.62, aa)), k = (r * Wp + c) * 4;
-      for (let q = 0; q < 3; q++) data[k + q] = data[k + q] + (base[q] - data[k + q]) * w;
+      const lb = 0.2126 * base[0] + 0.7152 * base[1] + 0.0722 * base[2]; for (let q = 0; q < 3; q++) data[k + q] = data[k + q] + ((lb + (base[q] - lb) * satK) * deepK - data[k + q]) * w;
     }
   }
   // (v5.53: the lip line, lip scales, nostrils and heat pits are drawn by headData)
@@ -1605,6 +1612,7 @@ function shapeD(shape, dv, da, L) {
     case 'hourglass2': return Math.max(v / ((L && L.h0 != null ? L.h0 : 0.18) + (L && L.h1 != null ? L.h1 : 0.82) * u * u), u); // v5.19: copperhead crossbands - narrow over the spine, wide on the flanks
     case 'chevron': return Math.max(Math.abs(dv + vk * u), u); // a V whose arms run forward down the flanks (apex toward the tail)
     case 'chevronF': return Math.max(Math.abs(dv - vk * u), u); // v5.62: a V pointing forward, its arms running back down the flanks (king cobra)
+    case 'chevronU': return Math.max(Math.abs(dv + vk * u * u), u); // v5.93: a rounded U (apex toward the tail), flat over the spine, the arms curving forward (puff adder)
     case 'saddle': return Math.max(Math.pow(v ** 3 + u ** 3, 1 / 3), u);
     case 'round': return Math.pow(v ** 2.6 + u ** 2.6, 1 / 2.6);
     default: return Math.sqrt(v * v + u * u);
@@ -3075,12 +3083,14 @@ function uiCSSInject() {
 // v5.78: species rebuilt against photos in this version, ahead of the next models.json build (the same values are in
 // tools/auto_models.py CURATED, so a rebuild gives the same result): they override the profile's head
 const SPECIES_LOOK = {
-  'opheodrys-vernalis': { h: { iris: '#3d321c', irisInner: '#5c4a26', eyeRing: '#d9c27a', pupilW: 0.22, eye: null, eyeL: 0.22, eyeX: 0.36, eyeA: 50, len: 0.031, w: 0.9, h: 0.78, snoutH: 0.64, jaw: 0.82, lips: 'pale', lipColor: '#e6ebb6', bulge: 0.045, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.65, hFixed: 1, groove: 0.16, headRelief: 0.14, snout: 0.52, lipFull: 0.12 }, body: { hn: 1.3 },
+  'opheodrys-vernalis': { h: { iris: '#3d321c', irisInner: '#5c4a26', eyeRing: '#d9c27a', pupilW: 0.22, eye: null, eyeL: 0.19, eyeX: 0.36, eyeA: 50, len: 0.031, w: 0.9, h: 0.78, snoutH: 0.64, jaw: 0.82, lips: 'pale', lipColor: '#dbe6a2', bulge: 0.045, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.65, hFixed: 1, groove: 0.16, headRelief: 0.14, snout: 0.52, lipFull: 0.07 }, body: { hn: 1.3 },
     scales: { cavity: 0.22, gloss: 0.78, relief: 0.55 }, colors: { edgeK: 0.25 } },
   // the inland taipan against its SnakeList photo (will-hunt) and the Australian Museum account: a deep, rounded "coffin" head
   // (deeper than the body's own depth, the snout high and rounded), glossy smooth scales, and a warmer olive-brown
-  'oxyuranus-microlepidotus': { h: { h: 0.84, hFixed: 1, snoutH: 0.9, groove: 0.26, headRelief: 0.28, taper: 0.12, bulge: 0.05, brow: 0.05 },
-    scales: { cavity: 0.3 }, colors: { dorsal: '#83622f', lateral: '#8d6b35' } },
+  // (v5.93: against research-grade iNaturalist photos of adults: a longer, less bulbous head - deep, but the snout tapering to a
+  // rounded point, not a high round dome - and an olive grey-brown body, not golden; the head and neck darker and glossy)
+  'oxyuranus-microlepidotus': { h: { h: 0.74, hFixed: 1, snoutH: 0.74, snout: 0.5, len: 0.04, groove: 0.22, headRelief: 0.24, taper: 0.16, bulge: 0.04, brow: 0.05, eyeL: 0.18 },
+    scales: { cavity: 0.3 }, colors: { dorsal: '#6b5a3c', lateral: '#73603f' } },
 };
 function withLook(p, id) {
   const L = SPECIES_LOOK[id]; if (!L || !p) return p;
