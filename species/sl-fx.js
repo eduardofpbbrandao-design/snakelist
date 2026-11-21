@@ -1,4 +1,4 @@
-// v5.78: every button, the same hover: the 3D viewer's Open mouth / See it eat colours (CSS above, class sl-hov). v5.93: the thin
+// v5.78: the button under the mouse gets the class sl-hov (no look of its own any more - each button keeps its own hover). v5.93: the thin
 // light mint line that travels once round the border over 1.5 s, then fades (on hover, a tap and keyboard focus) is only on .sl-trace-on.
 // One SVG over the whole page, moved with the button - nothing is added inside the buttons, so their own layout, ::before/::after
 // and positions stay exactly as they were. Reduced motion: the line just fades in and out where it is, without travelling.

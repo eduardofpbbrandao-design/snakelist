@@ -219,6 +219,14 @@ var s=d.createElement("script");s.src=root+"christmas/xmas.js";p.appendChild(s)}
   /* while the opening plays, the browser skips laying out and drawing the (huge) page behind it,
      so every frame goes to the opening; the page is drawn just before the fade reveals it */
   .sl-root.intro-on > :not(#intro):not(script):not(style):not(#sl-hero) { content-visibility: hidden; } /* v4.93: the photo screen is drawn early, the rest of SnakeList after the opening */
+  /* ...and when it is drawn, its buttons get their colours at once, without their hover fades: parts of the page were first given
+     their look before the end of the page (where some colours are set) had arrived, and kept that old look while hidden - so
+     when they came on screen, during the scroll down from the photo, See more info, the 3D and bell buttons faded from the old
+     colour to the new one, as if SnakeList was being built again. The cards are drawn once too (not skipped), so each keeps its
+     real size from then on. (see __introUnhide) */
+  html.sl-restyle .sl-root > :not(#intro):not(#sl-hero), html.sl-restyle .sl-root > :not(#intro):not(#sl-hero) *,
+  html.sl-restyle .sl-root > :not(#intro):not(#sl-hero) *::before, html.sl-restyle .sl-root > :not(#intro):not(#sl-hero) *::after { transition: none !important; }
+  html.sl-restyle .sl-root .card { content-visibility: visible !important; }
   html.sl-intro-lock, html.sl-intro-lock body { overflow: hidden !important; overscroll-behavior: none; } /* v4.80: the page can't move behind the opening */
   /* the tick: a GPU layer of its own and a softer, longer draw */
   .intro-box { transform: translateZ(0); backface-visibility: hidden; }
@@ -2763,7 +2771,8 @@ var s=d.createElement("script");s.src=root+"christmas/xmas.js";p.appendChild(s)}
      in its own layer over the cards (nothing inside the synced list changes); the card's
      bottom row only keeps a gap for it, styled from out here */
   #td-layer { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 5; }
-  body:has(#sl-hero:not([hidden])) #td-layer { visibility: hidden; }
+  /* (the "hidden while the opening photo shows" rule here was a body:has(#sl-hero...) - the 3D buttons have been inside the
+     cards since v4.94, so this layer is always empty, and that rule made the browser re-check the page when the photo went) */
   body.tab-map #td-layer, body.tab-quiz #td-layer, body.tab-ach #td-layer, body.tab-cam #td-layer { display: none; }
   #grid .card { container-type: inline-size; }
   /* v4.94: the 3D button is part of each card (just before Mark Seen), so it appears together with the other buttons */
@@ -3963,7 +3972,11 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       // v5.73: the rest of SnakeList (thousands of cards) is drawn under the photo only once the photo has come to rest:
       // drawing it took the browser a long moment, and doing that while the photo was still moving made it stop and start
       // again. Going on into SnakeList (or the photo going away) draws it at once.
-      var slRoot = intro.closest(".sl-root"), unhidden = false, unhide = window.__introUnhide = function () { if (unhidden) return; unhidden = true; if (slRoot) slRoot.classList.remove("intro-on"); };
+      var slRoot = intro.closest(".sl-root"), unhidden = false, unhide = window.__introUnhide = function () { if (unhidden) return; unhidden = true; if (!slRoot) return;
+        // drawn with every colour already final (html.sl-restyle: no transitions, every card styled once) - see the CSS above
+        var de = document.documentElement; de.classList.add("sl-restyle"); slRoot.classList.remove("intro-on"); void de.offsetHeight;
+        // (kept for one whole frame, so each card's real size is remembered - contain-intrinsic-size: auto - instead of the 150 px guess)
+        requestAnimationFrame(function () { requestAnimationFrame(function () { de.classList.remove("sl-restyle"); }); }); };
       var unhideLater = function () {
         if (!document.querySelector("#sl-hero:not([hidden])")) { unhide(); return; }
         var rest = (window.__heroRevealT || 0) + 3300 - performance.now(); // the photo's slow settle (3.2 s) is over
@@ -4145,8 +4158,12 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     var entered = false;
     function enter() {
       if (entered || hero.hidden) return; entered = true; gliding = true;
-      if (window.__introUnhide) window.__introUnhide(); // v5.73: SnakeList under the photo is drawn now, if it wasn't yet
-      var calm = calmQ && calmQ.matches, done = function () { hero.hidden = true; window.scrollTo(0, 0); gliding = false; window.__heroEntered = true; document.dispatchEvent(new Event("sl-hero-entered")); window.dispatchEvent(new Event("resize")); }; // resize: the 3D buttons on the cards are placed again at once
+      // v5.73: SnakeList under the photo is drawn now, if it wasn't yet - and all of it before the glide starts (laid out here,
+      // at once), so the glide's frames never have to wait for it (half-way through the glide it looked as if SnakeList reloaded)
+      if (window.__introUnhide && document.querySelector(".sl-root.intro-on")) { window.__introUnhide(); void document.documentElement.offsetHeight; }
+      // (no made-up "resize" any more when the photo goes: it re-measured the tabs, the filter rows and every pop-up while the
+      // list was coming on screen; the few things placed in page coordinates follow sl-hero-entered instead)
+      var calm = calmQ && calmQ.matches, done = function () { hero.hidden = true; window.scrollTo(0, 0); gliding = false; window.__heroEntered = true; document.dispatchEvent(new Event("sl-hero-entered")); };
       if (calm) { done(); return; }
       var y0 = window.scrollY, y1 = heroH(), t0 = performance.now(), D = 450;
       (function step(now) { var k = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - k, 3); window.scrollTo(0, y0 + (y1 - y0) * e); if (k < 1) requestAnimationFrame(step); else done(); })(t0);
@@ -4161,7 +4178,9 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     var ty = null;
     var onWheel = function (e) { if (Math.abs(e.deltaY) < 2 || e.ctrlKey) return; if (e.target.closest && e.target.closest(".sl-dd-list, .lang-menu, [role=dialog]")) return; want(e.deltaY > 0 ? 1 : -1, e); };
     var onTs = function (e) { ty = e.touches.length === 1 ? e.touches[0].clientY : null; };
-    var onTm = function (e) { if (ty == null) return; var dy = ty - e.touches[0].clientY; if (Math.abs(dy) < 12) return; want(dy > 0 ? 1 : -1, e); ty = null; };
+    // (the rest of a swipe that started the glide is held too: the finger still moving used to scroll the page against the
+    // glide, so the list shook up and down for a moment as it arrived)
+    var onTm = function (e) { if (ty == null) { if (gliding && e.cancelable) e.preventDefault(); return; } var dy = ty - e.touches[0].clientY; if (Math.abs(dy) < 12) return; want(dy > 0 ? 1 : -1, e); ty = null; };
     var onKey = function (e) {
       var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
       var k = e.key; if (k === "ArrowDown" || k === "PageDown" || (k === " " && !e.shiftKey)) want(1, e); else if (k === "ArrowUp" || k === "PageUp" || (k === " " && e.shiftKey)) want(-1, e);
@@ -4379,8 +4398,12 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       return false;
     }
     // may a pop-up show now? (ready, nothing else showing, and the one before has had a moment to appear)
-    window.SL_canPrompt = function (except) { return ready() && Date.now() - lastRun > 900 && !showing(except); };
-    window.SL_promptsReady = ready;
+    // ...and not in the middle of a scroll: one sliding in while you scroll down from the photo into SnakeList looked as if
+    // the page was being built again. It waits until the page has been still for a moment.
+    var lastScrollT = 0;
+    window.addEventListener("scroll", function () { lastScrollT = Date.now(); }, { passive: true });
+    window.SL_canPrompt = function (except) { return ready() && Date.now() - lastRun > 900 && Date.now() - lastScrollT > 900 && !showing(except); };
+    window.SL_promptsReady = function () { return ready() && Date.now() - lastScrollT > 900; };
     // run fn as soon as a pop-up may show (queued, one at a time, in the order asked)
     window.SL_whenPrompt = function (fn) { q.push(fn); pump(); };
     window.SL_promptShown = function () { lastRun = Date.now(); }; // one that decides by itself tells us it just showed
@@ -9064,10 +9087,17 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   var sweepT = 0, sweeping = false, ready = false;
   function soon(ms) { if (!ready) return; clearTimeout(sweepT); sweepT = setTimeout(sweep, ms || 2500); }
   // every card that is not on screen is made light, a few at a time when the page is idle
+  // never while the page is being scrolled (taking cards apart then held the scroll's frames up - the scroll down from the
+  // opening photo comes just as this starts): it waits until the page has been still for a second
+  var scrolledT = 0;
+  // (a wheel or a swipe counts too: on the opening photo they start the glide into SnakeList without scrolling the page yet)
+  ["scroll", "wheel", "touchmove"].forEach(function (t) { window.addEventListener(t, function () { scrolledT = Date.now(); }, { passive: true }); });
+  function scrolling() { return Date.now() - scrolledT < 1000; }
   function sweep() {
     sweepT = 0;
     if (sweeping) { soon(); return; }
     if (!allowed()) return;
+    if (scrolling()) { soon(1000); return; }
     var shownList = window.SL_SHOWN_IDS, on = new Set(shownList || []);
     var list = [].filter.call(qsa.call(grid, ".card"), function (c) { return !light.has(c) && !on.has(c.getAttribute("data-id")); });
     if (!list.length) return;
@@ -9076,6 +9106,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     (function step(dl) {
       // the list changed while this ran: start again from what is on screen now
       if (window.SL_SHOWN_IDS !== shownList) { sweeping = false; soon(300); return; }
+      if (scrolling()) { sweeping = false; soon(1000); return; } // (the rest once the scrolling stops)
       var t0 = Date.now(), ms = Math.min(16, Math.max(8, dl && dl.timeRemaining ? dl.timeRemaining() : 12));
       while (i < list.length && Date.now() - t0 < ms) lighten(list[i++]);
       stats.ms += Date.now() - t0; stats.steps++;
@@ -9109,6 +9140,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     var k = 0; sweeping = true;
     (function step(dl) {
       if (window.SL_SHOWN_IDS !== shown) { sweeping = false; clearTimeout(farT); farT = setTimeout(sweepFar, 1500); return; }
+      if (scrolling()) { sweeping = false; clearTimeout(farT); farT = setTimeout(sweepFar, 1500); return; }
       var t0 = Date.now(), ms = Math.min(16, Math.max(8, dl && dl.timeRemaining ? dl.timeRemaining() : 12));
       while (k < list.length && Date.now() - t0 < ms) { var c = list[k++]; if (lighten(c)) farWatch(c); }
       if (k < list.length) idle(step); else sweeping = false;
@@ -11309,7 +11341,9 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     }
 
     // v4.83: the welcome (and the tutorial) waits until you've scrolled past the opening photo
-    const whenIn = () => { const h = document.getElementById("sl-hero"); if (window.__heroEntered || !h || h.hidden) start(); else document.addEventListener("sl-hero-entered", start, { once: true }); };
+    // ...and until the page has stopped scrolling for a moment (it used to open in the middle of the scroll down into SnakeList)
+    let t0Quiet = 0; const startQuiet = () => { if (window.SL_promptsReady && !window.SL_promptsReady() && Date.now() - t0Quiet < 20000) { setTimeout(startQuiet, 250); return; } start(); };
+    const whenIn = () => { const h = document.getElementById("sl-hero"); if (window.__heroEntered || !h || h.hidden) start(); else document.addEventListener("sl-hero-entered", () => { t0Quiet = Date.now(); setTimeout(startQuiet, 0); }, { once: true }); };
     if (window.__introDone) whenIn(); else document.addEventListener("sl-intro-done", whenIn, { once: true });
     document.getElementById("tour-skip").addEventListener("click", finish);
     document.getElementById("tour-next").addEventListener("click", advance);
@@ -20841,12 +20875,18 @@ window.SL_GEO_READY = new Promise(function (res) {
     secs.forEach(function (d) {
       var a = d.dataset.sec === "mine" ? [] : actives(d), n = d.querySelector(".fsec-n");
       if (d.dataset.sec === "mine") a = [].slice.call(d.querySelectorAll(".chip.active")).map(function (c) { return { el: c, label: c.textContent.replace(/\s*[\d,]+\s*$/, "").trim() }; });
-      n.hidden = !a.length; n.textContent = a.length + " selected";
+      // only what changed is written - writing the same words again counted as a change for the watcher below,
+      // which painted again 30 ms later, for ever (the page was re-styled ~30 times a second and scrolling stuttered)
+      var nt = a.length + " selected";
+      if (n.hidden !== !a.length) n.hidden = !a.length;
+      if (n.textContent !== nt) n.textContent = nt;
       all = all.concat(a);
     });
-    bar.classList.toggle("on", all.length > 0);
-    pills.innerHTML = all.map(function (x, i) { return '<button type="button" class="fbar-pill" data-i="' + i + '" aria-label="Remove ' + x.label.replace(/"/g, "") + '">' + x.label.replace(/</g, "&lt;") + " <i>&times;</i></button>"; }).join("");
+    if (bar.classList.contains("on") !== all.length > 0) bar.classList.toggle("on", all.length > 0);
+    var ph = all.map(function (x, i) { return '<button type="button" class="fbar-pill" data-i="' + i + '" aria-label="Remove ' + x.label.replace(/"/g, "") + '">' + x.label.replace(/</g, "&lt;") + " <i>&times;</i></button>"; }).join("");
+    if (ph !== pillsHtml) { pillsHtml = ph; pills.innerHTML = ph; }
   }
+  var pillsHtml = null;
   // remove one: the same tap as on the filter itself (a picked place's chip removes it when tapped)
   function off(x) { x.el.click(); } // the chip itself, never the little photo button inside it
   pills.addEventListener("click", function (e) { var b = e.target.closest(".fbar-pill"); if (b && all[+b.dataset.i]) off(all[+b.dataset.i]); });
@@ -25219,7 +25259,7 @@ window.SL_welcome = function (u, back) {
         }).join("") + "</div>";
       }
     });
-    layer.innerHTML = html;
+    keep(html);
     // flow the extra tags like the card's own: same line if they fit, else the next one
     var extra = [];
     // v5.17: measure every tag first, then place them all - measuring and moving one at a time made the
@@ -25229,7 +25269,9 @@ window.SL_welcome = function (u, back) {
       var g = o.g, L = +g.dataset.l, R = +g.dataset.r, x = +g.dataset.x, y = +g.dataset.y, h = +g.dataset.h, y0 = y;
       o.ts.forEach(function (q) {
         if (x + q.w > R + 1) { x = L; y += h + 6; }
-        q.t.style.left = x + "px"; q.t.style.top = y + "px"; x += q.w + 6;
+        if (q.t.style.left !== x + "px") q.t.style.left = x + "px";
+        if (q.t.style.top !== y + "px") q.t.style.top = y + "px";
+        x += q.w + 6;
       });
       if (y > y0) extra.push(g.dataset.id);
     });
@@ -25245,6 +25287,33 @@ window.SL_welcome = function (u, back) {
     shrink.id = "";
     popApply(true);
   }
+  // The extra tags, badges and favourite / keep-at-top buttons already on the page are kept: only the ones that are new
+  // (a card that came on screen) or whose words changed are made, the rest are only moved. Making them all again on every
+  // repaint (while scrolling down from the opening photo, among others) made the tags vanish and come back - they looked
+  // as if SnakeList was reloading. Keyed by kind + card; positions (style, data-l/r/x/y/h) are copied over.
+  var keepTpl = document.createElement("template");
+  function keyOf(el) { return (el.className || "").split(" ")[0] + "|" + (el.getAttribute("data-id") || el.getAttribute("data-pin") || ""); }
+  function bare(h) { return h.replace(/ (style|data-pop)="[^"]*"/g, ""); }
+  function keep(html) {
+    keepTpl.innerHTML = html;
+    var neu = [].slice.call(keepTpl.content.children), old = {}, prev = null;
+    [].forEach.call(layer.children, function (el) { old[keyOf(el)] = el; });
+    neu.forEach(function (n) {
+      var k = keyOf(n), o = old[k], use = n;
+      if (o && bare(o.innerHTML) === bare(n.innerHTML)) {
+        delete old[k]; use = o;
+        [].forEach.call(n.attributes, function (a) { if (o.getAttribute(a.name) !== a.value) o.setAttribute(a.name, a.value); });
+        [].slice.call(o.attributes).forEach(function (a) { if (a.name !== "data-pop" && !n.hasAttribute(a.name)) o.removeAttribute(a.name); });
+      }
+      var at = prev ? prev.nextSibling : layer.firstChild;
+      if (use !== at) layer.insertBefore(use, at);
+      prev = use;
+    });
+    Object.keys(old).forEach(function (k) { if (old[k].parentNode === layer) layer.removeChild(old[k]); });
+  }
+  // the opening photo going away moves every card up by its height: the layer follows in that same frame (it is placed
+  // in page coordinates, so until the next repaint its tags sat a screen too low, on the wrong cards)
+  document.addEventListener("sl-hero-entered", function () { if (raf) { cancelAnimationFrame(raf); raf = 0; } paint(); });
   // v5.17: never while you are scrolling - re-measuring the whole list then is what made scrolling stutter.
   // The tags and badges stay put on the page; any new cards get theirs the moment the scrolling pauses.
   var lastScroll = 0, laterT = 0;
@@ -27596,6 +27665,9 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     // v5.73: nothing floats over the opening or its photo while SnakeList under them isn't drawn yet - and measuring here
     // then made the page's thread do its start-up drawing in the middle of the opening's move to the photo
     if (document.querySelector(".sl-root.intro-on")) return;
+    // ...nor over the photo or while it glides away into SnakeList (the bars that wait are held there anyway): measuring
+    // every 200 ms then made the glide's frames wait
+    var hero = document.getElementById("sl-hero"); if (hero && !hero.hidden && !window.__heroEntered) return;
     document.documentElement.classList.toggle("sl-modal-on", modalOpen());
     var els = [].slice.call(document.querySelectorAll(FLOAT));
     var live = [];
@@ -27855,12 +27927,10 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
 /* ---- sl-fx shared start ---- (v5.78: the same on the app, the species/country pages and the About pages; build_species.py copies this part) */
 /* nothing is ever underlined, on hover or not - a link or a word changes colour instead (like About creator) */
 *, *::before, *::after { text-decoration-line: none !important; }
-/* every button, when pointed at: the 3D viewer's Open mouth / See it eat hover look - deep green-black, mint border, white words
-   (a pressed or selected button keeps its green). The class is set by the script below, only on things that look like buttons. */
-.sl-hov:not([aria-pressed="true"]):not([aria-selected="true"]):not([aria-current]):not(.active):not(.on):not(.is-on):not(.sel) {
-  background-color: rgba(12,26,18,.9) !important; background-image: none !important; border-color: rgba(155,224,124,.65) !important; color: #fff !important; }
-.sl-hov:not([aria-pressed="true"]):not([aria-selected="true"]):not([aria-current]):not(.active):not(.on):not(.is-on):not(.sel) :where(span, b, strong, em, i, small, u, label) { color: inherit !important; -webkit-text-fill-color: currentColor; }
-.sl-hov.sl-hov-nb:not([aria-pressed="true"]):not([aria-selected="true"]):not([aria-current]):not(.active):not(.on):not(.is-on):not(.sel) { box-shadow: inset 0 0 0 1px rgba(155,224,124,.65) !important; }
+/* (Eduardo: "dont make it when you hover something turn black instead make it like it was before") - the v5.78/v5.81 rule that
+   turned every button deep green-black with white words when pointed at is gone: each button has its own hover again, as before
+   v5.78 (the light green / colour changes each one always had). The class sl-hov is still put on the button under the mouse
+   (the Christmas preview styles it), but it changes nothing here. */
 /* the thin light mint line that travels once round a button (an SVG drawn over it, moved with it) - v5.93: only on the
    first-visit "How well do you know snakes?" choices (class sl-trace-on); every other button just changes colour */
 .sl-trace { position: fixed; left: 0; top: 0; z-index: 2147483000; pointer-events: none; overflow: visible; opacity: 0; }
@@ -27881,7 +27951,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
 </style>
 <script id="sl-fx-js">
 /* ---- sl-fx shared start ---- */
-// v5.78: every button, the same hover: the 3D viewer's Open mouth / See it eat colours (CSS above, class sl-hov). v5.93: the thin
+// v5.78: the button under the mouse gets the class sl-hov (no look of its own any more - each button keeps its own hover). v5.93: the thin
 // light mint line that travels once round the border over 1.5 s, then fades (on hover, a tap and keyboard focus) is only on .sl-trace-on.
 // One SVG over the whole page, moved with the button - nothing is added inside the buttons, so their own layout, ::before/::after
 // and positions stay exactly as they were. Reduced motion: the line just fades in and out where it is, without travelling.
