@@ -219,7 +219,7 @@ body.id='sp-rl-m'+i;body.hidden=true;body.setAttribute('role','region');body.set
 bt.addEventListener('click',function(){var o=bt.getAttribute('aria-expanded')!=='true';bt.setAttribute('aria-expanded',String(o));body.hidden=!o});mw.appendChild(sec)});box.appendChild(mw)}}
 b.addEventListener('click',open);var ab=document.querySelector('.sp-anatbtn'),wantA=0;function anat(){if(!wantA)return;var x=document.querySelector('.sp3d-wrap .sp3d-b[title^="Show the parts"]');if(x){wantA=0;if(x.getAttribute('aria-pressed')!=='true')setTimeout(function(){x.click()},300)}}if(ab)ab.addEventListener('click',function(){wantA=1;open();anat()});if(location.hash==='#real')open();window.addEventListener('hashchange',function(){if(location.hash==='#real')open()})})();
 
-(function(){var T={'3d':{v:480,sel:'.sp-realbtn,.sp-anatbtn,.sp-rl'}},V=596,d=document.documentElement;try{var a=+localStorage.getItem('sl-ver-n');if(a>V)V=a}catch(e){}
+(function(){var T={'3d':{v:480,sel:'.sp-realbtn,.sp-anatbtn,.sp-rl'}},V=597,d=document.documentElement;try{var a=+localStorage.getItem('sl-ver-n');if(a>V)V=a}catch(e){}
 Object.keys(T).forEach(function(k){var seen=0;try{seen=localStorage.getItem('sl-new-seen-'+k)}catch(e){}if(V&&V<T[k].v+20&&!seen)d.classList.add('sl-new-'+k);
 document.addEventListener('click',function(e){if(!d.classList.contains('sl-new-'+k)||!e.target.closest||!e.target.closest(T[k].sel))return;try{localStorage.setItem('sl-new-seen-'+k,'1')}catch(x){}d.classList.remove('sl-new-'+k)},true)})})();
 
@@ -371,3 +371,8 @@ var subj='SnakeList '+(kind==='Bug'?'bug report':kind==='Idea'?'idea':'message')
 var body=m+'\n\n---\nType: '+kind+'\nPage: '+location.href+'\nScreen: '+innerWidth+'x'+innerHeight+'\nBrowser: '+navigator.userAgent;
 var mail='mailto:'+INBOX+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);try{window.open(mail,'_blank')}catch(e){}
 n.innerHTML='Your email app should open with it ready to send. If it didn’t, <a href="'+mail+'" target="_blank" rel="noopener">tap here to send it</a>.'})})();
+(function(){try{var K="sl-xmas-preview",S=window.sessionStorage,L=location,m=/[?&](?:christmas(?:=([^&#]*))?|theme=christmas)(?=[&#]|$)/.exec(L.search);
+if(m){if(m[1]==="off"||m[1]==="0")S.removeItem(K);else S.setItem(K,"1");var u=new URL(L.href);u.searchParams.delete("christmas");if(u.searchParams.get("theme")==="christmas")u.searchParams.delete("theme");history.replaceState(history.state,"",u.pathname+u.search+u.hash)}
+if(S.getItem(K)!=="1"||window.XM)return;var d=document,h=d.documentElement,root=new URL("../",document.currentScript&&document.currentScript.src||L.href).href,kind=(L.href.indexOf(root+"species/")===0?"xm-sp":"xm-site");
+window.XM={root:root+"christmas/",kind:kind};h.classList.add("xm",kind);var p=d.head||h,l=d.createElement("link");l.rel="stylesheet";l.href=root+"christmas/xmas.css";p.appendChild(l);
+var s=d.createElement("script");s.src=root+"christmas/xmas.js";p.appendChild(s)}catch(e){}})();

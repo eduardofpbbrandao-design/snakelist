@@ -1,0 +1,468 @@
+/* SnakeList - Christmas preview theme.
+   Loaded only by the pages under christmas/ (tools/build-christmas.py adds it); the live site never sees it.
+   Palette: evergreen #123D2A, pine #216B45, cranberry #A92E3E, warm ivory #FFF8ED, soft gold #D8B76A.
+   Every rule starts with html.xm so it wins over the page's own rule for the same thing.
+   Species photos, scientific names, map range / sightings / habitat colours and the 3D snakes keep their own colours. */
+
+/* ============ 1. tokens ============ */
+html.xm {
+  --xm-evergreen: #123D2A; --xm-pine: #216B45; --xm-pine-line: #3D805A; --xm-cranberry: #A92E3E; --xm-ivory: #FFF8ED; --xm-gold: #D8B76A;
+  --xm-bg: #FFF8ED; --xm-bg2: #F7EDDB; --xm-panel: #FFFCF6; --xm-panel2: #F5EBDA; --xm-panel3: #EFE3CC;
+  --xm-line: #D3D5C6; --xm-line2: #B9C4B0; --xm-text: #123D2A; --xm-muted: #4A5C4F; --xm-link: #216B45; --xm-accent: #216B45;
+  --xm-gold-ink: #7E5F1A; --xm-red-ink: #A92E3E; --xm-success: #216B45; --xm-error: #A92E3E;
+  --xm-shadow: 0 1px 2px rgba(18,61,42,.07), 0 6px 18px rgba(18,61,42,.08);
+  --xm-shadow-lift: 0 2px 4px rgba(18,61,42,.10), 0 12px 28px rgba(18,61,42,.14);
+  --xm-btn-shadow: 0 1px 2px rgba(18,61,42,.25), 0 4px 12px rgba(33,107,69,.22);
+  --xm-btn-shadow-hover: 0 2px 4px rgba(18,61,42,.28), 0 8px 20px rgba(33,107,69,.30);
+  --xm-ease: cubic-bezier(.2,.7,.2,1);
+  --xm-focus: 0 0 0 2px var(--xm-bg), 0 0 0 4px #93701F;
+  color-scheme: light;
+}
+/* dark: the app's own switch, the about/install pages' switch, the species pages follow the device */
+html.xm[data-sl-theme="dark"], html.xm.xm-site[data-theme="dark"] {
+  --xm-bg: #0B1913; --xm-bg2: #0F2119; --xm-panel: #132A1F; --xm-panel2: #1A3628; --xm-panel3: #21412F;
+  --xm-line: #2A4838; --xm-line2: #3A5E4A; --xm-text: #FFF8ED; --xm-muted: #CDC5B1; --xm-link: #E6CB86; --xm-accent: #E2C47C;
+  --xm-gold-ink: #E2C47C; --xm-red-ink: #F0919D; --xm-success: #8FD0A2; --xm-error: #F0919D;
+  --xm-shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 22px rgba(0,0,0,.30);
+  --xm-shadow-lift: 0 2px 4px rgba(0,0,0,.4), 0 14px 30px rgba(0,0,0,.38);
+  --xm-btn-shadow: 0 1px 2px rgba(0,0,0,.45), 0 4px 14px rgba(20,90,55,.35);
+  --xm-btn-shadow-hover: 0 2px 4px rgba(0,0,0,.5), 0 8px 22px rgba(30,120,72,.42);
+  --xm-focus: 0 0 0 2px var(--xm-bg), 0 0 0 4px #D8B76A;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  html.xm.xm-sp, html.xm.xm-site:not([data-theme="light"]) {
+    --xm-bg: #0B1913; --xm-bg2: #0F2119; --xm-panel: #132A1F; --xm-panel2: #1A3628; --xm-panel3: #21412F;
+    --xm-line: #2A4838; --xm-line2: #3A5E4A; --xm-text: #FFF8ED; --xm-muted: #CDC5B1; --xm-link: #E6CB86; --xm-accent: #E2C47C;
+    --xm-gold-ink: #E2C47C; --xm-red-ink: #F0919D; --xm-success: #8FD0A2; --xm-error: #F0919D;
+    --xm-shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 22px rgba(0,0,0,.30);
+    --xm-shadow-lift: 0 2px 4px rgba(0,0,0,.4), 0 14px 30px rgba(0,0,0,.38);
+    --xm-btn-shadow: 0 1px 2px rgba(0,0,0,.45), 0 4px 14px rgba(20,90,55,.35);
+    --xm-btn-shadow-hover: 0 2px 4px rgba(0,0,0,.5), 0 8px 22px rgba(30,120,72,.42);
+    --xm-focus: 0 0 0 2px var(--xm-bg), 0 0 0 4px #D8B76A;
+    color-scheme: dark;
+  }
+}
+
+/* ============ 2. the app's own colour names, in the Christmas palette ============ */
+html.xm.xm-app, html.xm.xm-app .sl-root {
+  --bg: var(--xm-bg);
+  --bg-grad: linear-gradient(180deg, #FFF8ED 0%, #FCF3E4 45%, #F6EAD5 100%);
+  --page-under: #F6EAD5;
+  --surface: var(--xm-panel); --surface-hover: var(--xm-panel2); --border: var(--xm-line);
+  --text: var(--xm-text); --text-muted: var(--xm-muted);
+  --gold: var(--xm-accent); --gold-fill: #216B45; --on-fill: #FFF8ED; --gold-soft: #7FA48C; --moss: #2E6346;
+  --rust: #A92E3E; --rust-soft: #F7E0E2; --on-accent: #FFF8ED;
+  --ver-bg: rgba(216,183,106,.22);
+  --menu-shadow: 0 12px 28px rgba(18,61,42,.16);
+  --mark-grad: linear-gradient(160deg, #2B7A50 0%, #216B45 38%, #123D2A 100%);
+  --mark-shadow: drop-shadow(0 1px 0 rgba(255,248,237,.6)) drop-shadow(0 2px 6px rgba(18,61,42,.18));
+  --sl-tpat: #8E6B22;
+}
+html.xm.xm-app[data-sl-theme="dark"], html.xm.xm-app [data-sl-theme="dark"] {
+  --bg: var(--xm-bg);
+  --bg-grad: linear-gradient(180deg, #10261C 0%, #0B1913 42%, #08130E 100%);
+  --page-under: #08130E;
+  --surface: var(--xm-panel); --surface-hover: var(--xm-panel2); --border: var(--xm-line);
+  --text: var(--xm-text); --text-muted: var(--xm-muted);
+  --gold: var(--xm-accent); --gold-fill: #216B45; --on-fill: #FFF8ED; --gold-soft: #8C7A4C; --moss: #BFD0BE;
+  --rust: #F0919D; --rust-soft: #3B1A21; --on-accent: #0B1913;
+  --ver-bg: rgba(216,183,106,.18);
+  --menu-shadow: 0 14px 30px rgba(0,0,0,.5);
+  --mark-grad: linear-gradient(160deg, #FFFDF8 0%, #FFF8ED 45%, #EADFC8 100%);
+  --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,.5)) drop-shadow(0 4px 12px rgba(0,0,0,.35));
+  --sl-tpat: #D8B76A;
+}
+/* at night the venomous tags keep a deep cranberry fill (the light cranberry is for words) */
+html.xm[data-sl-theme="dark"] :is(#grid .card-tags .tag.venom, .card-tags .tag.venom, .chip.active.venom, .tag.venom, .sl-tag.venom) {
+  background: linear-gradient(135deg, #B63848 0%, #8D2233 100%) !important; border-color: #C25563 !important; color: #FFF8ED !important; }
+/* about / install / privacy / terms */
+html.xm.xm-site {
+  --bg: var(--xm-bg); --bg2: var(--xm-bg2); --card: var(--xm-panel); --text: var(--xm-text); --link-hover: var(--xm-text); --muted: var(--xm-muted);
+  --line: var(--xm-line); --accent: #216B45; --accent-ink: var(--xm-link); --link: var(--xm-link); --chip: var(--xm-panel2); --gold: var(--xm-gold-ink);
+  --shadow: var(--xm-shadow); --sl-h: var(--xm-text); --sl-sub: var(--xm-pine);
+  --mark-grad: linear-gradient(160deg, #2B7A50 0%, #216B45 38%, #123D2A 100%);
+  --sl-tpat: #8E6B22;
+}
+html.xm.xm-site[data-theme="dark"] { --sl-sub: var(--xm-link); --mark-grad: linear-gradient(160deg, #FFFDF8 0%, #FFF8ED 45%, #EADFC8 100%); --sl-tpat: #D8B76A; }
+@media (prefers-color-scheme: dark) { html.xm.xm-site:not([data-theme="light"]) { --sl-sub: var(--xm-link); --mark-grad: linear-gradient(160deg, #FFFDF8 0%, #FFF8ED 45%, #EADFC8 100%); --sl-tpat: #D8B76A; } }
+/* species, country, family, genus, city and region pages (map colours --land --on --in --sea are left alone) */
+html.xm.xm-sp {
+  --bg: var(--xm-bg); --card: var(--xm-panel); --text: var(--xm-text); --muted: var(--xm-muted); --line: var(--xm-line);
+  --g: #216B45; --tag: var(--xm-panel2); --tagline: var(--xm-line2); --link: var(--xm-link); --link-hover: var(--xm-text);
+}
+
+html.xm body { background-color: var(--xm-bg); }
+html.xm ::selection { background: rgba(216,183,106,.45); color: inherit; }
+html.xm { scrollbar-color: var(--xm-line2) transparent; }
+html.xm ::-webkit-scrollbar-thumb { background: var(--xm-line2); background-clip: padding-box; border: 2px solid transparent; border-radius: 999px; }
+html.xm ::-webkit-scrollbar-thumb:hover { background: #B8913F; background-clip: padding-box; }
+
+/* ============ 3. buttons ============ */
+/* main buttons: pine to evergreen, ivory words, a fine green border, a soft green shadow; lift 2 px on hover */
+html.xm :is(.install-btn, .signin-primary, .pic-save, .quiz-submit, .map-btn, .note-actions .primary, .tour-actions .primary, .tour-try-ok,
+  .mf-foot .mf-done, .wn-ok, .keep-go, .ck-yes, .sl-data-btns button.primary, .cam-btn:not(.ghost), .ml-picks, .ed-stay, .ed-bar-btns .edb-done, .ins-ok, .qp-open,
+  .sl-nudge .nd-go, .cam-card button.primary, .sgv-back, .sgv-3d, .sgv-onmap, .nm-how, .all-countries:not(.map-undo), .card.done .seen-btn,
+  .sp-btn:not(.sp-btn2), .btn-primary, .cta, a.button, .sx-box button) {
+  background-color: #216B45 !important; background-image: linear-gradient(135deg, #216B45 0%, #123D2A 100%) !important;
+  color: #FFF8ED !important; border: 1px solid #3D805A !important; box-shadow: var(--xm-btn-shadow) !important;
+  transition: transform .2s var(--xm-ease), box-shadow .2s var(--xm-ease), background-image .2s, filter .2s !important;
+}
+html.xm :is(.install-btn, .signin-primary, .pic-save, .quiz-submit, .map-btn, .note-actions .primary, .tour-actions .primary, .tour-try-ok, .mf-foot .mf-done, .wn-ok, .keep-go,
+  .ck-yes, .sl-data-btns button.primary, .cam-btn:not(.ghost), .ml-picks, .ed-stay, .ed-bar-btns .edb-done, .ins-ok, .qp-open, .sl-nudge .nd-go, .cam-card button.primary,
+  .sgv-back, .sgv-3d, .sgv-onmap, .nm-how, .all-countries:not(.map-undo), .card.done .seen-btn, .sp-btn:not(.sp-btn2), .btn-primary, .cta, a.button, .sx-box button) :is(svg, span, b, i) { color: inherit !important; }
+@media (hover: hover) {
+  html.xm :is(.install-btn, .signin-primary, .pic-save, .quiz-submit, .map-btn, .note-actions .primary, .tour-actions .primary, .tour-try-ok, .mf-foot .mf-done, .wn-ok, .keep-go,
+    .ck-yes, .sl-data-btns button.primary, .cam-btn:not(.ghost), .ml-picks, .ed-stay, .ed-bar-btns .edb-done, .ins-ok, .qp-open, .sl-nudge .nd-go, .cam-card button.primary,
+    .sgv-back, .sgv-3d, .sgv-onmap, .nm-how, .all-countries:not(.map-undo), .card.done .seen-btn, .sp-btn:not(.sp-btn2), .btn-primary, .cta, a.button, .sx-box button):hover {
+    background-image: linear-gradient(135deg, #2B7A50 0%, #185237 100%) !important; transform: translateY(-2px); box-shadow: var(--xm-btn-shadow-hover) !important; filter: none !important;
+  }
+}
+html.xm :is(.install-btn, .signin-primary, .pic-save, .quiz-submit, .map-btn, .note-actions .primary, .tour-actions .primary, .tour-try-ok, .mf-foot .mf-done, .wn-ok, .keep-go,
+  .ck-yes, .sl-data-btns button.primary, .cam-btn:not(.ghost), .ml-picks, .ed-stay, .ed-bar-btns .edb-done, .ins-ok, .qp-open, .sl-nudge .nd-go, .cam-card button.primary,
+  .sgv-back, .sgv-3d, .sgv-onmap, .nm-how, .all-countries:not(.map-undo), .card.done .seen-btn, .sp-btn:not(.sp-btn2), .btn-primary, .cta, a.button, .sx-box button):active {
+  transform: translateY(0) !important; box-shadow: var(--xm-btn-shadow) !important; transition-duration: .18s !important;
+}
+/* a few seasonal highlights in cranberry: installing the app and the snake's own "Explore in 3D" */
+html.xm :is(.install-btn, .sp-realbtn, .xm-cranberry):not(#xm-n) {
+  background-color: #A92E3E !important; background-image: linear-gradient(135deg, #B63848 0%, #8D2233 100%) !important; border-color: #C25563 !important;
+  color: #FFF8ED !important; box-shadow: 0 1px 2px rgba(80,15,25,.3), 0 4px 12px rgba(169,46,62,.28) !important;
+}
+@media (hover: hover) {
+  html.xm :is(.install-btn, .sp-realbtn, .xm-cranberry):not(#xm-n):hover { background-image: linear-gradient(135deg, #C24555 0%, #9A2838 100%) !important; box-shadow: 0 2px 4px rgba(80,15,25,.32), 0 8px 20px rgba(169,46,62,.34) !important; transform: translateY(-2px); }
+}
+html.xm :is(.install-btn, .sp-realbtn, .xm-cranberry):not(#xm-n):active { transform: none !important; }
+
+/* secondary buttons: ivory surface, evergreen words, a thin green border (dark green surface at night) */
+html.xm :is(.auth-btn, .theme-btn, .sheet-btn, .more-btn, .see-all-btn, .clear-btn, .fbar-reset, .tour-actions button:not(.primary), .sl-ach-btn, .cam-btn.ghost,
+  .sp-btn2, .sp-all, .sp-fmore, .quiz-quit, .map-undo, .city-lookup-btn, .area-btn, .sl-sort, .td-card-btn, .ml-edit, .wish-btn, .follow-btn, .seen-btn, .map-close, .note-cond-b, .report-kind) {
+  background-color: var(--xm-panel) !important; color: var(--xm-text) !important; border-color: var(--xm-line2) !important;
+  transition: transform .2s var(--xm-ease), box-shadow .2s var(--xm-ease), background-color .2s, border-color .2s, color .2s !important;
+}
+html.xm :is(.sp-btn2, .sp-realbtn) { border-width: 1px; border-style: solid; }
+html.xm.xm-sp .sp-btn2 { color: var(--xm-text) !important; }
+@media (hover: hover) {
+  html.xm :is(.auth-btn, .theme-btn, .sheet-btn, .more-btn, .see-all-btn, .clear-btn, .fbar-reset, .tour-actions button:not(.primary), .sl-ach-btn, .cam-btn.ghost,
+    .sp-btn2, .sp-all, .sp-fmore, .quiz-quit, .map-undo, .city-lookup-btn, .area-btn, .td-card-btn, .ml-edit, .wish-btn, .follow-btn, .seen-btn, .map-close, .note-cond-b, .report-kind):hover {
+    background-color: var(--xm-panel2) !important; border-color: var(--xm-pine-line) !important; transform: translateY(-1px); box-shadow: var(--xm-shadow) !important;
+  }
+}
+/* selected filters, toggles and pressed buttons: clearly filled */
+html.xm :is(.chip.active:not(.venom):not(.safe):not(.fam-photo):not([data-type]):not([data-continent]):not(.hab-chip), .sheet-btn[aria-pressed="true"], .hm-seg button.on, .hab-opt.on,
+  .sp-info-acts button.on, .qp-acts button.on, .area-btn.on, .pin-btn.on, .hm-toggle.sg-toggle.on, .note-enc.on, .note-cond-b[aria-checked="true"], .lang-menu li[aria-selected="true"]) {
+  background-color: #216B45 !important; background-image: linear-gradient(135deg, #216B45 0%, #123D2A 100%) !important; color: #FFF8ED !important; border-color: #D8B76A !important;
+}
+html.xm :is(button, [role="button"], input, select, .chip):disabled, html.xm [aria-disabled="true"] { opacity: .5 !important; filter: saturate(.4); cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+/* keyboard focus: a soft gold ring, easy to see on ivory and on evergreen */
+html.xm :is(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible { outline: 2.5px solid #93701F !important; outline-offset: 2px !important; }
+html.xm[data-sl-theme="dark"] :is(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible { outline-color: #D8B76A !important; }
+@media (prefers-color-scheme: dark) { html.xm:is(.xm-sp, .xm-site:not([data-theme="light"])) :is(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible { outline-color: #D8B76A !important; } }
+
+/* the every-button hover of the live site (sl-fx): the Christmas evergreen with a fine gold border instead of near-black,
+   and its travelling line in soft gold (once round over 1.5 s, then it fades) */
+html.xm .sl-hov:not(#xm-n):not(.install-btn):not(.sp-realbtn):not(.xm-cranberry):not([aria-pressed="true"]):not([aria-selected="true"]):not([aria-current]):not(.active):not(.on):not(.is-on):not(.sel) {
+  background-color: #1B5A3A !important; background-image: linear-gradient(135deg, #2B7A50 0%, #185237 100%) !important; border-color: rgba(216,183,106,.75) !important; color: #FFF8ED !important;
+}
+html.xm .sl-hov.sl-hov-nb:not(#xm-n):not(.install-btn):not(.sp-realbtn):not(.xm-cranberry):not([aria-pressed="true"]):not([aria-selected="true"]):not([aria-current]):not(.active):not(.on):not(.is-on):not(.sel) { box-shadow: inset 0 0 0 1px rgba(216,183,106,.75) !important; }
+html.xm .sl-trace rect, html.xm .xm-trace rect { stroke: #E9CF8C; stroke-width: 1.7; filter: drop-shadow(0 0 2px rgba(216,183,106,.9)) drop-shadow(0 0 5px rgba(216,183,106,.45)); }
+html.xm .xm-trace { position: fixed; left: 0; top: 0; z-index: 2147483000; pointer-events: none; overflow: visible; opacity: 0; }
+
+/* ============ 4. the logo: evergreen letters (ivory on dark), green snake S in a Santa hat, gold on the tick, a pine sprig ============ */
+html.xm svg.snake-s, html.xm .sl-titletext svg, html.xm .hero-mark svg { overflow: visible; }
+html.xm .xm-hat { pointer-events: none; }
+html.xm :is(.tab-btn, .tab-n, .chip, button, .sl-mtoast, .xm-nohat) svg.snake-s { --xm-hat-o: 0; }
+html.xm .sl-tick, html.xm .intro-box svg, html.xm .hero-title .sl-tick { overflow: visible; }
+html.xm .xm-sprig { display: inline-block; width: .5em; height: .35em; margin-left: -.1em; align-self: center; vertical-align: middle; transform: translateY(.16em) rotate(-14deg); flex: none; pointer-events: none; }
+html.xm .xm-sprig svg { display: block; width: 100%; height: 100%; overflow: visible; }
+html.xm :is(.sl-hero, .intro) .xm-sprig { filter: drop-shadow(0 0 1.5px rgba(255,248,237,.55)) drop-shadow(0 2px 4px rgba(0,0,0,.5)); }
+/* the light pages' header wordmark: evergreen letters */
+html.xm.xm-app:not([data-sl-theme="dark"]) .sl-titletext { color: #123D2A; }
+
+/* ============ 5. the opening cover ============ */
+html.xm .intro {
+  background: radial-gradient(85% 70% at 50% 46%, #1b4d33 0%, #123D2A 42%, #0b2618 75%, #06140d 100%);
+}
+html.xm .photo-scrim {
+  background:
+    radial-gradient(46% 30% at 50% 50%, rgba(8,22,15,.62) 0%, rgba(8,22,15,.42) 55%, rgba(8,22,15,0) 100%),
+    radial-gradient(120% 90% at 50% 50%, rgba(18,61,42,.18) 40%, rgba(11,32,22,.6) 100%),
+    linear-gradient(180deg, rgba(18,61,42,.2), rgba(8,22,15,.34));
+}
+html.xm .intro-loading { color: #FFF8ED; }
+html.xm .intro-loading i { border-color: rgba(216,183,106,.28); border-top-color: #D8B76A; }
+/* the snake photograph stays the main thing: an evergreen tint only at the edges */
+html.xm .hero-edges .he-t { background: linear-gradient(180deg, rgba(14,46,32,1) 0%, rgba(14,46,32,.6) 25%, rgba(14,46,32,.22) 55%, rgba(14,46,32,.06) 80%, rgba(14,46,32,0) 100%); }
+html.xm .hero-edges .he-l { background: linear-gradient(90deg, rgba(14,46,32,1) 0%, rgba(14,46,32,.6) 25%, rgba(14,46,32,.22) 55%, rgba(14,46,32,.06) 80%, rgba(14,46,32,0) 100%); }
+html.xm .hero-edges .he-r { background: linear-gradient(270deg, rgba(14,46,32,1) 0%, rgba(14,46,32,.6) 25%, rgba(14,46,32,.22) 55%, rgba(14,46,32,.06) 80%, rgba(14,46,32,0) 100%); }
+html.xm .sl-hero { background: #0e2a1d; }
+html.xm .hero-media { background-color: #123D2A; }
+/* the bottom melts into the Christmas page (ivory by day, deep green at night) */
+html.xm .hero-media::after { height: 16%;
+  background: linear-gradient(180deg, rgba(255,248,237,0) 0%, rgba(255,248,237,.10) 30%, rgba(255,248,237,.38) 58%, rgba(255,248,237,.78) 82%, #FFF8ED 100%); }
+html.xm[data-sl-theme="dark"] .hero-media::after {
+  background: linear-gradient(180deg, rgba(11,25,19,0) 0%, rgba(11,25,19,.12) 30%, rgba(11,25,19,.42) 58%, rgba(11,25,19,.8) 82%, #0B1913 100%); }
+/* a soft dark pool behind the logo and words */
+html.xm .hero-copy::before { background: radial-gradient(closest-side, rgba(6,20,13,.55), rgba(6,20,13,.3) 55%, rgba(6,20,13,0)); }
+/* the logo on the photograph: ivory letters (the S stays green, the tick keeps its green with gold markings) */
+html.xm .hero-mark, html.xm .hero-title .sl-titletext .hl, html.xm .intro-title {
+  background-image: linear-gradient(170deg, #FFFFFF 0%, #FFF8ED 40%, #F1E3C4 100%) !important;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #FFF8ED;
+}
+html.xm .hero-title.hero-wm, html.xm .hero-title { --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,.65)) drop-shadow(0 5px 20px rgba(0,0,0,.5)); }
+html.xm .intro, html.xm .sl-hero { --sl-tpat: #E2C47C; }
+html.xm .hero-mark { filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)) drop-shadow(0 4px 18px rgba(0,0,0,.45)); }
+/* Explore · Identify · Discover: warm ivory, small gold separators */
+html.xm .hero-below .hero-sub.hero-words {
+  color: #FFF8ED !important; background-image: none !important; -webkit-text-fill-color: #FFF8ED !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,.85), 0 0 18px rgba(0,0,0,.55); filter: none !important; letter-spacing: .08em;
+}
+html.xm .hero-words .hw-dot { color: #D8B76A; -webkit-text-fill-color: #D8B76A; font-size: .7em; vertical-align: .14em; text-shadow: 0 0 6px rgba(216,183,106,.55); }
+/* Scroll to continue: a fine gold outline and a gentle downward movement */
+html.xm .hero-cue {
+  color: #FFF8ED; border: 1px solid rgba(216,183,106,.85); background: rgba(9,26,18,.42); padding: 8px 16px 6px; gap: 3px;
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.25);
+  animation: xm-cue 2.8s ease-in-out 2s infinite;
+}
+html.xm .hero-cue svg { color: #E2C47C; animation: none; }
+html.xm .hero-cue:hover { background: rgba(9,26,18,.6); }
+@keyframes xm-cue { 0%, 100% { translate: -0% 0; } 50% { translate: 0 4px; } }
+html.xm .hero-sp { background: rgba(9,26,18,.55); color: #FFF8ED; border: 1px solid rgba(216,183,106,.35); }
+html.xm .hero-sp:hover, html.xm .hero-sp:focus-visible, html.xm .hero-sp:hover i, html.xm .hero-sp:focus-visible i { color: #F1DDA4; }
+
+/* decorations on the cover: pine corners, fairy lights and snow (added by xmas.js; never take clicks) */
+html.xm .xm-deco { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
+html.xm .intro > .xm-deco { z-index: 1; }
+html.xm .intro > .intro-content { z-index: 2; }
+html.xm .xm-corner { position: absolute; top: 0; width: clamp(150px, 31vw, 470px); aspect-ratio: 520 / 380; }
+html.xm .xm-corner.l { left: 0; }
+html.xm .xm-corner.r { right: 0; transform: scaleX(-1); }
+html.xm .xm-corner img { display: block; width: 100%; height: 100%; }
+html.xm .xm-bulb { position: absolute; width: 2.9%; aspect-ratio: 1; margin: -1.45% 0 0 -1.45%; border-radius: 50%;
+  background: radial-gradient(circle, #FFF8E4 0 18%, rgba(255,226,160,.75) 30%, rgba(255,214,130,.25) 55%, rgba(255,214,130,0) 72%);
+  opacity: .85; will-change: opacity; animation: xm-glow 4.2s ease-in-out infinite; }
+html.xm .xm-bulb:nth-child(3n+1) { animation-delay: -1.4s; animation-duration: 5s; }
+html.xm .xm-bulb:nth-child(3n+2) { animation-delay: -2.9s; animation-duration: 3.8s; }
+@keyframes xm-glow { 0%, 100% { opacity: .62; } 50% { opacity: 1; } }
+html.xm .xm-snow { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+html.xm .sl-hero > .xm-deco { z-index: 0; }
+html.xm .sl-hero .hero-copy, html.xm .sl-hero .hero-below { z-index: 2; }
+
+/* ============ 6. header, tabs, page ============ */
+html.xm .eyebrow { color: var(--xm-muted); }
+html.xm .sl-ver, html.xm .wn-ver { background: rgba(216,183,106,.22) !important; color: var(--xm-gold-ink) !important; border-color: rgba(216,183,106,.5) !important; }
+html.xm .tab-btn { color: var(--xm-muted); }
+html.xm .tab-btn.active { color: var(--xm-text); border-bottom-color: transparent; position: relative; font-weight: 600; }
+html.xm .tab-btn.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 3px; border-radius: 3px;
+  background: linear-gradient(90deg, #C9A355, #E9CF8C 50%, #C9A355); box-shadow: 0 0 6px rgba(216,183,106,.45); }
+html.xm[data-sl-theme="dark"] .tab-btn.active { color: #FFF8ED; }
+html.xm .tab-btn .tab-n { background: rgba(216,183,106,.2); color: var(--xm-text); }
+
+/* cards: warm ivory, a subtle evergreen border, soft shadows (layered dark greens at night) */
+html.xm .card { background: var(--xm-panel); border-color: var(--xm-line); box-shadow: var(--xm-shadow); }
+html.xm .card.done { border-color: #B8913F; background: linear-gradient(180deg, rgba(216,183,106,.18), transparent 62%), var(--xm-panel); }
+html.xm .card.done .card-name { color: var(--xm-text); }
+html.xm[data-sl-theme="dark"] .card { background: linear-gradient(180deg, #16301F 0%, #132A1F 100%); }
+html.xm :is(.fsec), html.xm:not([data-sl-theme="dark"]) .fsec { background: var(--xm-panel); border-color: var(--xm-line); box-shadow: var(--xm-shadow); }
+html.xm .fsec > summary:hover { background: rgba(216,183,106,.10); }
+html.xm .fsec-n { background: #A92E3E; color: #FFF8ED; }
+html.xm .search-box { background: var(--xm-panel); border-color: var(--xm-line2); box-shadow: inset 0 1px 2px rgba(18,61,42,.05); }
+html.xm .search-box:focus-within { border-color: #B8913F; box-shadow: 0 0 0 3px rgba(216,183,106,.28); }
+html.xm :is(input[type="text"], input[type="search"], input[type="email"], input[type="number"], input:not([type]), textarea, select):not(.xm-keep) { accent-color: #216B45; }
+html.xm select, html.xm .sl-sort { background-color: var(--xm-panel); color: var(--xm-text); border-color: var(--xm-line2); }
+html.xm input[type="checkbox"], html.xm input[type="radio"], html.xm input[type="range"], html.xm progress { accent-color: #216B45; }
+html.xm[data-sl-theme="dark"] :is(input[type="checkbox"], input[type="radio"], input[type="range"], progress) { accent-color: #D8B76A; }
+html.xm .chip { background-color: var(--xm-panel); border-color: var(--xm-line2); color: var(--xm-text); }
+html.xm .chip:hover { border-color: #B8913F; }
+
+/* empty states and the quiz question: a small snowflake / pine sprig above, with room around the words */
+html.xm .empty-state { padding-top: 8px; }
+html.xm .empty-state::before { content: ""; display: block; width: 26px; height: 26px; margin: 0 auto 12px; background: var(--xm-flake-url) no-repeat center / contain; opacity: .9; }
+html.xm .quiz-intro::before { content: ""; display: inline-block; width: 1.3em; height: .95em; margin-right: .45em; vertical-align: -.15em; background: var(--xm-sprig-url) no-repeat center / contain; }
+html.xm .ach-panel h2:first-child::after, html.xm .xa-hero-main h2::after { content: ""; display: inline-block; width: .9em; height: .9em; margin-left: .35em; vertical-align: -.05em; background: var(--xm-flake-url) no-repeat center / contain; }
+/* pop-ups and sheets: rounded, a soft shadow, a quick fade with a small movement as they open */
+html.xm :is(.tour-callout, .map-card, .note-card, .sheet-card, .wn-card, .ck-card, .ach-panel, .lang-menu, .sl-menu, [role="dialog"] > div:first-child) { border-radius: 16px; }
+html.xm :is(.tour-callout) { background: var(--xm-panel); border-color: var(--xm-line); box-shadow: 0 18px 50px rgba(18,61,42,.22), 0 2px 6px rgba(18,61,42,.12); border-top: 3px solid #D8B76A; }
+html.xm .tour-arrow.pos-left { border-right-color: var(--xm-panel); } html.xm .tour-arrow.pos-right { border-left-color: var(--xm-panel); }
+html.xm .tour-arrow.pos-top { border-bottom-color: #D8B76A; } html.xm .tour-arrow.pos-bottom { border-top-color: var(--xm-panel); }
+html.xm .tour-spotlight { box-shadow: 0 0 0 2px #D8B76A, 0 0 18px rgba(216,183,106,.45); }
+html.xm .tour-dim { background: rgba(6,20,13,.5); }
+html.xm .tour-callout h3 { color: var(--xm-text); }
+html.xm .xm-pop { animation: xm-pop .22s var(--xm-ease) both; }
+@keyframes xm-pop { from { opacity: 0; transform: translateY(6px) scale(.985); } to { opacity: 1; transform: none; } }
+
+/* the install sheet and similar green cards: evergreen with a fine gold edge */
+html.xm .ins-card { background: linear-gradient(160deg, #1D5A3B 0%, #123D2A 100%); color: #FFF8ED; border: 1px solid rgba(216,183,106,.6); }
+html.xm .ins-card p { color: rgba(255,248,237,.86); }
+html.xm .ins-card b, html.xm .ins-card h2 { color: #FFF8ED; }
+html.xm .ins-card .ins-more { color: #F1DDA4; }
+html.xm .ins-sheet { background: rgba(6,20,13,.55); }
+/* messages: success green, errors cranberry, information neutral with a small gold accent */
+html.xm :is(.sl-undo, #sl-sync-toast, .ff-toast, .sl-mtoast, #sl-newver) { background: #123D2A !important; color: #FFF8ED !important; border: 1px solid rgba(216,183,106,.55); box-shadow: 0 12px 30px rgba(6,20,13,.35) !important; }
+html.xm :is(.sl-undo, #sl-newver) button { color: #123D2A !important; background: #FFF8ED !important; }
+html.xm :is(.error, .err, .sl-err, .form-error, [role="alert"].bad) { color: var(--xm-error) !important; }
+
+/* the map: evergreen controls with ivory labels and a restrained gold border; range, sightings and habitat colours unchanged */
+html.xm :is(.leaflet-bar a, .leaflet-control-zoom a, .leaflet-control-layers, .map-tools button, .sg-tools button) {
+  background-color: #123D2A !important; color: #FFF8ED !important; border-color: rgba(216,183,106,.55) !important;
+}
+html.xm :is(.globe-zoom button, .hm-toggle:not(.on), .layers-btn, .globe-stage .map-tools button:not(.on)) {
+  background-color: rgba(14,46,32,.88) !important; background-image: none !important; color: #FFF8ED !important; border: 1px solid rgba(216,183,106,.6) !important; box-shadow: 0 3px 10px rgba(6,20,13,.25); }
+@media (hover: hover) { html.xm :is(.globe-zoom button, .hm-toggle:not(.on), .layers-btn):hover { background-color: rgba(33,107,69,.95) !important; color: #FFF8ED !important; } }
+html.xm .hm-toggle.on { border-color: #E2C47C !important; box-shadow: 0 0 0 1px rgba(216,183,106,.5), 0 3px 10px rgba(0,0,0,.25) !important; }
+html.xm .globe-stage, html.xm .map-wrap { border-color: rgba(216,183,106,.55) !important; }
+html.xm .leaflet-bar { border: 1px solid rgba(216,183,106,.6) !important; box-shadow: 0 4px 14px rgba(6,20,13,.28) !important; border-radius: 10px !important; overflow: hidden; }
+html.xm .leaflet-bar a:hover { background-color: #216B45 !important; }
+html.xm .leaflet-popup-content-wrapper { background: var(--xm-panel); color: var(--xm-text); border-radius: 14px; border: 1px solid rgba(216,183,106,.55); box-shadow: 0 14px 36px rgba(6,20,13,.3); animation: xm-pop .2s var(--xm-ease) both; }
+html.xm .leaflet-popup-tip { background: var(--xm-panel); border: 1px solid rgba(216,183,106,.55); }
+html.xm .leaflet-container a.leaflet-popup-close-button { color: var(--xm-muted); }
+html.xm .map-card { background: var(--xm-panel); border: 1px solid var(--xm-line); box-shadow: 0 24px 60px rgba(6,20,13,.35); }
+html.xm .map-head { border-bottom: 1px solid rgba(216,183,106,.45); }
+html.xm .map-title { color: var(--xm-text); }
+html.xm .map-legend { color: var(--xm-text); }
+
+/* ============ 7. the 3D viewer: the Christmas frame around it, the model itself untouched ============ */
+html.xm .sl3d-ov { --bg: #FFF8ED; --card: #FFFCF6; --text: #123D2A; --muted: #4A5C4F; --line: #D3D5C6; --g: #216B45; --tag: #F5EBDA; --tagline: #B9C4B0; }
+html.xm[data-sl-theme="dark"] .sl3d-ov { --bg: #132A1F; --card: #1A3628; --text: #FFF8ED; --muted: #CDC5B1; --line: #2A4838; --g: #216B45; --tag: #1A3628; --tagline: #3A5E4A; }
+html.xm .sl3d-ov.sl3d-modal { background: var(--bg); border: 1px solid rgba(216,183,106,.75); box-shadow: 0 0 0 5px rgba(18,61,42,.55), 0 0 0 6px rgba(216,183,106,.45), 0 22px 64px rgba(0,0,0,.5); }
+/* a thin festive ribbon along the top of the frame, and a pine sprig by the snake's name - nothing over the model */
+html.xm .sl3d-ov.sl3d-modal::before { content: ""; position: absolute; left: 18px; right: 18px; top: 0; height: 3px; border-radius: 0 0 3px 3px; pointer-events: none;
+  background: repeating-linear-gradient(90deg, #A92E3E 0 22px, #D8B76A 22px 30px, #216B45 30px 52px, #D8B76A 52px 60px); opacity: .9; }
+html.xm .sl3d-hd h2, html.xm .sl3d-hd .sl3d-name { color: var(--xm-text) !important; }
+html.xm .sl3d-hd .sl3d-name::before { content: ""; display: inline-block; width: 1.25em; height: .9em; margin-right: .35em; vertical-align: -.1em; background: var(--xm-sprig-url) no-repeat center / contain; }
+html.xm .sl3d-more:not(#xm-n) { background-color: #216B45 !important; background-image: linear-gradient(135deg, #216B45 0%, #123D2A 100%) !important; color: #FFF8ED !important; border: 1px solid #3D805A !important; box-shadow: var(--xm-btn-shadow) !important; }
+html.xm .sl3d-act:not(.sl3d-more), html.xm .sl3d-x { background: var(--xm-panel) !important; color: var(--xm-text) !important; border-color: var(--xm-line2) !important; }
+html.xm .sl3d-act:hover, html.xm .sl3d-x:hover { border-color: #B8913F !important; }
+html.xm .sp3d-stage { box-shadow: inset 0 0 0 1px rgba(216,183,106,.55); }
+/* the viewer's own buttons over the scene: evergreen glass with ivory words; the chosen mode filled pine with a gold edge */
+html.xm .sp3d-b { background: rgba(14,46,32,.82) !important; color: #FFF8ED !important; border: 1px solid rgba(216,183,106,.45) !important; transition: transform .2s var(--xm-ease), background-color .2s, border-color .2s !important; }
+@media (hover: hover) { html.xm .sp3d-b:hover { background: rgba(33,107,69,.92) !important; border-color: rgba(216,183,106,.85) !important; transform: translateY(-1px); } }
+html.xm .sp3d-b:is([aria-pressed="true"], [aria-expanded="true"]) { background: linear-gradient(135deg, #216B45 0%, #123D2A 100%) !important; border-color: #D8B76A !important; color: #FFF8ED !important; box-shadow: 0 0 0 1px rgba(216,183,106,.35), 0 3px 10px rgba(0,0,0,.3); }
+html.xm :is(.sp3d-hint, .sp3d-status, .sp3d-mt) { background: rgba(11,32,22,.8) !important; color: #FFF8ED !important; }
+html.xm .sp3d-panel { background: var(--xm-panel); border-color: var(--xm-line); }
+
+/* ============ 8. the species, place and info pages ============ */
+html.xm .sl-top { border-bottom: 1px solid var(--xm-line); position: relative; }
+html.xm.xm-sp .sl-top { max-width: none; padding-left: max(16px, calc(50% - 544px)); padding-right: max(16px, calc(50% - 544px)); }
+html.xm .sl-top::after, html.xm .site-top::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+  background: linear-gradient(90deg, rgba(216,183,106,0), rgba(216,183,106,.8) 30%, rgba(216,183,106,.8) 70%, rgba(216,183,106,0)); }
+html.xm .site-top { position: relative; background: var(--xm-bg); }
+html.xm .sl-brand { color: var(--xm-text) !important; }
+html.xm .sl-brand img, html.xm .site-logo img { border-radius: 8px; }
+html.xm .site-logo { color: var(--xm-text) !important; }
+html.xm :is(.sl-top nav a, .site-top nav a)[aria-current] { color: var(--xm-text) !important; position: relative; }
+html.xm :is(.sl-top nav a, .site-top nav a)[aria-current]::after { content: ""; position: absolute; left: 2px; right: 2px; bottom: 0; height: 2px; border-radius: 2px; background: #D8B76A; }
+html.xm.xm-sp .sp-sec > h2, html.xm.xm-site .card > h2:first-child { position: relative; }
+html.xm .xm-acc::before { content: ""; display: inline-block; width: .95em; height: .75em; margin-right: .35em; vertical-align: -.02em;
+  background: no-repeat center / contain; background-image: var(--xm-sprig-url); }
+html.xm .xm-flake::before { content: ""; display: inline-block; width: .8em; height: .8em; margin-right: .35em; vertical-align: -.05em;
+  background: no-repeat center / contain; background-image: var(--xm-flake-url); }
+html.xm.xm-sp :is(.sp-title h1, .cy-head h1) { color: var(--xm-text) !important; }
+html.xm.xm-sp :is(.sp-sci, .cy-htext .cy-lead, .cy-htext .rg-sub, h1 + .sp-muted, h1 + p) { color: var(--xm-pine-ink, #216B45) !important; }
+html.xm.xm-sp { --xm-pine-ink: #216B45; }
+@media (prefers-color-scheme: dark) { html.xm.xm-sp { --xm-pine-ink: #E6CB86; } }
+html.xm.xm-sp :is(.sp-crumbs, .sp-crumbs a) { color: var(--xm-muted); }
+html.xm.xm-sp :is(.sp-keybox, .sx-box, .sp-safe, .cy-card, .cy-box) { box-shadow: var(--xm-shadow); }
+html.xm.xm-sp .sp-photo img { border-radius: 14px; }
+html.xm.xm-sp .sp-photo { position: relative; }
+html.xm.xm-sp :is(.sp-pills a, .sp-tags a, .sx-chips a, .sp-ftag a) { border-color: var(--xm-line2); }
+html.xm.xm-sp .sp-toc { border-color: var(--xm-line); }
+html.xm.xm-sp .sp-toc a { color: var(--xm-text); }
+html.xm.xm-sp .sp-toc a:hover { color: var(--xm-link); }
+html.xm :is(.site-foot, footer) { border-top: 1px solid var(--xm-line); position: relative; }
+
+/* ============ 11. the Christmas hover (xmas.js adds xm-hv / xm-on): colour rising from the bottom with a soft-gold edge ============ */
+html.xm {
+  --xm-fill-g: linear-gradient(0deg, #123D2A 0%, #216B45 calc(100% - 3px), #E4C57A calc(100% - 1.5px), #E4C57A 100%);
+  --xm-fill-r: linear-gradient(0deg, #A92E3E 0%, #C74745 calc(100% - 3px), #E4C57A calc(100% - 1.5px), #E4C57A 100%);
+}
+html.xm .xm-hv:not(#xm-n) {
+  background-color: var(--xm-bgc) !important;
+  background-image: var(--xm-fill-g), var(--xm-base) !important;
+  background-size: 100% 0%, 100% 100% !important; background-position: 50% 100%, 50% 50% !important;
+  background-repeat: no-repeat !important; background-origin: border-box !important;
+  transition: background-size .25s cubic-bezier(.4,0,.6,1), color .09s ease .03s, border-color .25s ease, box-shadow .25s ease, translate .25s cubic-bezier(.4,0,.6,1) !important;
+}
+html.xm .xm-hv.xm-red:not(#xm-n) { background-image: var(--xm-fill-r), var(--xm-base) !important; }
+html.xm .xm-hv.xm-on:not(#xm-n) {
+  background-size: 100% 100%, 100% 100% !important;
+  color: #FFF8ED !important; border-color: rgba(228,197,122,.9) !important; translate: 0 -2px !important;
+  box-shadow: 0 0 0 1px rgba(228,197,122,.38), 0 0 14px rgba(228,197,122,.42), 0 6px 16px rgba(18,61,42,.22) !important;
+  transition: background-size .35s cubic-bezier(.16,.84,.3,1), color .12s ease, border-color .3s ease, box-shadow .35s ease, translate .35s cubic-bezier(.16,.84,.3,1) !important;
+}
+html.xm .xm-hv.xm-red.xm-on:not(#xm-n) { text-shadow: 0 1px 1px rgba(80,15,25,.35); }
+html.xm .xm-hv.xm-on:not(#xm-n) :is(span, b, strong, em, i, small, svg, label) { color: inherit !important; -webkit-text-fill-color: currentColor; }
+html.xm .xm-hv.xm-on:not(#xm-n):active { translate: 0 0 !important; transition-duration: .18s !important; }
+/* selected tabs: a gold underline that grows from the middle on hover and stays on the chosen tab */
+html.xm .tab-btn { position: relative; }
+html.xm .tab-btn::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 3px; border-radius: 3px; transform: scaleX(0); opacity: .7;
+  background: linear-gradient(90deg, #C9A355, #E9CF8C 50%, #C9A355); transition: transform .35s cubic-bezier(.16,.84,.3,1), opacity .25s; }
+html.xm .tab-btn:hover::after { transform: scaleX(1); }
+html.xm .tab-btn.active::after { transform: scaleX(1); opacity: 1; box-shadow: 0 0 6px rgba(216,183,106,.45); }
+/* dropdown options and list menus */
+html.xm :is(.lang-menu li, [role="listbox"] [role="option"], .sl-menu li, .layers-pop button) { transition: background-color .25s ease, color .2s ease; }
+html.xm :is(.lang-menu li, [role="listbox"] [role="option"], .sl-menu li):hover { background-color: #216B45 !important; color: #FFF8ED !important; box-shadow: inset 0 -1.5px 0 #E4C57A; }
+/* clickable cards: a fine gold border and a soft shadow */
+html.xm #grid .card { transition: border-color .3s ease, box-shadow .3s ease; }
+html.xm #grid .card:hover { border-color: rgba(201,163,85,.85); box-shadow: 0 0 0 1px rgba(228,197,122,.35), 0 10px 26px rgba(18,61,42,.16); }
+@media (prefers-reduced-motion: reduce) {
+  html.xm .xm-hv:not(#xm-n) { background-image: var(--xm-base) !important; background-size: 100% 100% !important; transition: background-color .25s ease, color .25s ease, border-color .25s ease !important; }
+  html.xm .xm-hv.xm-on:not(#xm-n) { background-color: #216B45 !important; background-image: none !important; translate: none !important; box-shadow: 0 0 0 1px rgba(228,197,122,.5) !important; }
+  html.xm .xm-hv.xm-red.xm-on:not(#xm-n) { background-color: #A92E3E !important; }
+  html.xm .tab-btn::after { transition: opacity .25s; }
+}
+
+/* ============ 12. "Merry Christmas from SnakeList!" (once per person; xmas.js) ============ */
+.xm-wl { position: fixed; inset: 0; z-index: 9400; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;
+  background: rgba(6,20,13,.55); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); animation: xm-fade .22s ease both; }
+.xm-wl.xm-wl-out { opacity: 0; transition: opacity .2s ease; }
+@keyframes xm-fade { from { opacity: 0; } to { opacity: 1; } }
+.xm-wl-card { position: relative; width: min(480px, 100%); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow: auto; box-sizing: border-box;
+  background: #FFF8ED; color: #123D2A; border: 1px solid rgba(216,183,106,.8); border-radius: 20px; padding: 34px 28px 24px;
+  box-shadow: 0 0 0 5px rgba(255,248,237,.14), 0 24px 60px rgba(0,0,0,.42); font: 15px/1.55 Inter, system-ui, sans-serif; text-align: left; }
+.xm-wl-card::before { content: ""; position: absolute; left: 22px; right: 22px; top: 0; height: 3px; border-radius: 0 0 3px 3px;
+  background: repeating-linear-gradient(90deg, #A92E3E 0 22px, #D8B76A 22px 30px, #216B45 30px 52px, #D8B76A 52px 60px); }
+.xm-wl-pine { position: absolute; top: 4px; width: 74px; height: 52px; background: url("xmas-sprig.svg") no-repeat center / contain; pointer-events: none; opacity: .95; }
+.xm-wl-pine.l { left: 6px; transform: rotate(-8deg); }
+.xm-wl-pine.r { right: 6px; transform: scaleX(-1) rotate(-8deg); }
+.xm-wl-kicker { margin: 0 0 6px; font: 600 11px/1.3 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: #7E5F1A; text-align: center; }
+.xm-wl-card h2 { margin: 0 0 10px; font: 700 26px/1.2 'Fraunces', Georgia, serif; color: #123D2A; text-align: center; }
+.xm-wl-msg { margin: 0 0 18px; color: #2E4A3B; text-align: center; }
+.xm-wl-sub { margin: 0 0 8px; font-weight: 600; color: #123D2A; }
+.xm-wl-list { list-style: none; margin: 0 0 22px; padding: 12px 14px; display: grid; gap: 9px; border-radius: 14px; background: #FBF1E1; border: 1px solid rgba(216,183,106,.45); }
+.xm-wl-list li { position: relative; padding-left: 26px; color: #3A4F42; font-size: 14.5px; }
+.xm-wl-list li::before { content: ""; position: absolute; left: 0; top: .2em; width: 17px; height: 17px; background: var(--xm-flake-url) no-repeat center / contain; }
+.xm-wl-list b { color: #123D2A; }
+.xm-wl-go { display: block; width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid #3D805A; cursor: pointer; font: 600 15.5px Inter, system-ui, sans-serif;
+  color: #FFF8ED; background: linear-gradient(135deg, #216B45 0%, #123D2A 100%); box-shadow: 0 1px 2px rgba(18,61,42,.25), 0 4px 12px rgba(33,107,69,.22); }
+.xm-wl-go:focus-visible { outline: 2.5px solid #93701F; outline-offset: 3px; }
+html.xm-welcome-open .tour-layer, html.xm-welcome-open .ck-bar { visibility: hidden !important; }
+@media (max-width: 480px) { .xm-wl-card { padding: 30px 18px 18px; border-radius: 18px; } .xm-wl-card h2 { font-size: 22px; } .xm-wl-pine { width: 58px; height: 40px; } }
+@media (prefers-reduced-motion: reduce) { .xm-wl, .xm-wl-card { animation: none !important; } }
+
+/* ============ 9. the preview pill ============ */
+.xm-pill { position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 2147482000; display: flex; align-items: center; gap: 6px;
+  padding: 5px 6px 5px 11px; border-radius: 999px; background: #123D2A; color: #FFF8ED; border: 1px solid rgba(216,183,106,.7);
+  font: 600 11.5px/1.2 Inter, system-ui, sans-serif; letter-spacing: .02em; box-shadow: 0 6px 18px rgba(6,20,13,.3); opacity: .94; }
+.xm-pill a { color: #F1DDA4; text-decoration: none; font-weight: 600; }
+.xm-pill a:hover { color: #FFF8ED; }
+.xm-pill svg { width: 13px; height: 13px; flex: none; }
+.xm-pill button { border: 0; background: transparent; color: #FFF8ED; font: 600 15px/1 Inter, sans-serif; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; padding: 0; }
+.xm-pill.xm-pill-min:not(:hover):not(:focus-within) { padding: 0; width: 30px; height: 30px; justify-content: center; opacity: .85; }
+.xm-pill.xm-pill-min:not(:hover):not(:focus-within) > :not(svg) { display: none; }
+.xm-pill.xm-pill-min { cursor: default; }
+.xm-pill button:hover { background: rgba(255,248,237,.12); }
+.xm-pill :focus-visible { outline: 2px solid #D8B76A; outline-offset: 2px; }
+@media (max-width: 640px) { .xm-pill { bottom: calc(78px + env(safe-area-inset-bottom)); right: 8px; padding: 4px 4px 4px 9px; font-size: 10.5px; } .xm-pill a { display: none; } }
+html.sl3d-lock .xm-pill, html.sl-modal-on .xm-pill, html.xm-welcome-open .xm-pill { opacity: 0 !important; pointer-events: none !important; }
+@media print { .xm-pill, .xm-deco { display: none !important; } }
+
+/* ============ 10. still versions for reduced motion ============ */
+@media (prefers-reduced-motion: reduce) {
+  html.xm .xm-bulb, html.xm .hero-cue, html.xm .xm-pop { animation: none !important; }
+  html.xm .xm-bulb { opacity: .85; }
+  html.xm :is(button, a, [role="button"]) { transition-duration: .01s !important; }
+}
+
+/* generated by tools/build-christmas.py: the sprig and snowflake used as heading accents */
+html.xm { --xm-sprig-url: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 26 18%22%3E%3Cpath d=%22M2 14Q12 10 23 3%22 stroke=%22%235b3d24%22 stroke-width=%221.3%22 fill=%22none%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M4 13l-1.8 -4.7M4 13l3.9 2.9M7 11.5l-1.7 -4.4M7 11.5l3.7 2.7M10 10l-1.6 -4.2M10 10l3.5 2.6M13 8.5l-1.5 -4M13 8.5l3.3 2.4M16 7l-1.4 -3.7M16 7l3.1 2.3M19 5.5l-1.4 -3.5M19 5.5l2.9 2.1M22 4l-1.3 -3.2M22 4l2.7 2%22 stroke=%22%232B7A50%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 fill=%22none%22/%3E%3Ccircle cx=%225.5%22 cy=%2215%22 r=%222.3%22 fill=%22%23B63848%22/%3E%3Ccircle cx=%229.2%22 cy=%2215.6%22 r=%222%22 fill=%22%23A92E3E%22/%3E%3Ccircle cx=%224.9%22 cy=%2214.3%22 r=%22.7%22 fill=%22%23fff%22 opacity=%22.7%22/%3E%3C/svg%3E"); --xm-flake-url: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-12 -12 24 24%22%3E%3Cg stroke=%22%23B8913F%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 fill=%22none%22%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%280%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%2860%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%28120%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%28180%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%28240%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%28300%29%22/%3E%3C/g%3E%3C/svg%3E"); }
