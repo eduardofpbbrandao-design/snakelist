@@ -1088,8 +1088,8 @@ HAND_FIXES_593 = {
                        (("pattern", 4), {"type": "blotch", "t": [0.1, 0.95], "count": 34, "phase": 0.25, "a": 0.3, "mirror": True, "wid": 0.05, "len": 0.3, "shape": "round", "color": "#2c1d14",
                                          "alpha": 0.6, "jit": 0.3, "skip": 0.4, "warp": 0.4})],
     # corn snake: the red-orange saddles have a clear black border all round (it fell inside the saddle and barely showed)
-    "pantherophis-guttatus": [(("pattern", 0, "edge"), 0.2), (("pattern", 0, "edgeOut"), True), (("pattern", 0, "edgeColor"), "#120c0a"), (("pattern", 0, "color"), "#c0381c"),
-                              (("pattern", 1, "edge"), 0.26), (("pattern", 1, "edgeOut"), True), (("pattern", 1, "edgeColor"), "#120c0a")],
+    "pantherophis-guttatus": [(("pattern", 0, "edge"), 0.3), (("pattern", 0, "edgeOut"), True), (("pattern", 0, "edgeColor"), "#120c0a"), (("pattern", 0, "color"), "#c0381c"),
+                              (("pattern", 1, "edge"), 0.34), (("pattern", 1, "edgeOut"), True), (("pattern", 1, "edgeColor"), "#120c0a")],
     # boa constrictor: a tan to grey-brown ground (it was nearly white), darker brown saddles with paler oval centres, reddish
     # toward the tail
     "boa-constrictor": [(("colors", "dorsal"), "#8e7f66"), (("colors", "lateral"), "#8a7b63"), (("colors", "belly"), "#d2c8b2"), (("colors", "mottle"), 0.1),
@@ -1109,9 +1109,9 @@ AUTO_FIX_593 = {
     "laticauda-colubrina": {"d": "#6a92b4", "lat": "#759bba", "bl": 0.42, "hc": "#141416", "hcx": 1.15, "pat": [{"type": "cap", "x0": 0, "x1": 0.3, "wid": 0.75, "color": "#e3cf5e"}]},
 }
 def _hognose_593(a):  # western hognose: a buff-olive ground (it read pinkish in the scene light), dark olive-brown blotches
-    a["d"], a["lat"], a["c"] = "#9d906a", "#988b66", "#4e3b25"
+    a["d"], a["lat"], a["c"] = "#8e8a66", "#8a8562", "#463723"
     for i in range(3):
-        if len(a.get("pat") or []) > i: a["pat"][i] = dict(a["pat"][i], color="#4e3b25")
+        if len(a.get("pat") or []) > i: a["pat"][i] = dict(a["pat"][i], color="#463723")
 # Opisthotropis (mountain stream keelbacks): small, glossy, keeled stream snakes with small eyes; checked against
 # research-grade iNaturalist photos (their colours had been read from wet rock and leaves)
 _OPI_DOT = {"p": 1.0, "color": "#cdbd30", "k": 0.95, "dot": 0.55}
