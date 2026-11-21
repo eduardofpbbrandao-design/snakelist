@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en" class="xm xm-site">
+<head><meta name="robots" content="noindex,nofollow"><script>(function(){var d=document.documentElement;d.classList.add('xm','xm-site');window.XM={root:new URL('./',location.href).href,kind:'xm-site'};
+var R=new URL(XM.root),P=R.pathname;function page(p){return /\/xmas[^\/]*$/.test(p)||/\/$/.test(p)||/\.html?$/i.test(p)||!/\.[A-Za-z0-9]{1,12}$/.test(p.split('/').pop())}
+function map(u){try{var x=new URL(String(u),document.baseURI);if(x.origin!==R.origin||x.pathname.indexOf(P)!==0||page(x.pathname))return u;x.pathname=P.replace(/[^\/]+\/$/,'')+x.pathname.slice(P.length);return x.href}catch(e){return u}}
+function mapSet(s){return String(s).split(/,\s*/).map(function(c){var p=c.trim().split(/\s+/);p[0]=map(p[0]);return p.join(' ')}).join(', ')}XM.map=map;
+var f=window.fetch;if(f)window.fetch=function(i,o){if(typeof i==='string'||i instanceof URL)i=map(i);return f.call(this,i,o)};
+var xo=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){arguments[1]=map(u);return xo.apply(this,arguments)};
+[['HTMLImageElement','src'],['HTMLImageElement','srcset',1],['HTMLScriptElement','src'],['HTMLSourceElement','src'],['HTMLSourceElement','srcset',1],['HTMLVideoElement','src'],['HTMLVideoElement','poster'],['HTMLLinkElement','href']].forEach(function(a){var C=window[a[0]];if(!C)return;var ds=Object.getOwnPropertyDescriptor(C.prototype,a[1]);if(!ds||!ds.set)return;Object.defineProperty(C.prototype,a[1],{configurable:true,enumerable:ds.enumerable,get:ds.get,set:function(v){ds.set.call(this,a[2]?mapSet(v):map(v))}})});
+var sa=Element.prototype.setAttribute;Element.prototype.setAttribute=function(n,v){var l=String(n).toLowerCase();if((l==='src'||l==='poster'||(l==='href'&&this.tagName==='LINK'))&&/^(IMG|SCRIPT|SOURCE|VIDEO|LINK|AUDIO)$/.test(this.tagName))v=map(v);else if((l==='srcset'||l==='imagesrcset')&&/^(IMG|SOURCE|LINK)$/.test(this.tagName))v=mapSet(v);return sa.call(this,n,v)};
+XM.hat=function(){var g=document.getElementById('mark-snake');if(!g||g.querySelector('.xm-hat'))return;var e=null,cs=g.getElementsByTagName('circle');for(var i=0;i<cs.length;i++)if(/sl-eye/.test(cs[i].getAttribute('fill')||'')){e=cs[i];break}if(!e)return;
+var h=e.parentNode,hp=h.getElementsByTagName('path')[0],k=1,y0=-16.5,n=hp&&(hp.getAttribute('d')||'').match(/-?\d*\.?\d+(?:e-?\d+)?/g)||[];if(n.length>5&&n.length%2===0&&!/[AaHhVv]/.test(hp.getAttribute('d'))){var ys=[];for(i=1;i<n.length;i+=2)ys.push(+n[i]);y0=Math.min.apply(0,ys);k=(Math.max.apply(0,ys)-y0)/33||1}
+var ex=+e.getAttribute('cx')||9,t=document.createElementNS('http://www.w3.org/2000/svg','g');t.setAttribute('transform','translate('+(ex-9*k).toFixed(2)+' '+(y0+16.5*k).toFixed(2)+') scale('+k.toFixed(3)+')');t.setAttribute('style','opacity:var(--xm-hat-o,1)');t.innerHTML="<defs><linearGradient id=\"xm-hat-red\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#c94657\"/><stop offset=\".55\" stop-color=\"#a92e3e\"/><stop offset=\"1\" stop-color=\"#7c1d2b\"/></linearGradient></defs><g class=\"xm-hat\" transform=\"translate(2.6 -16) scale(1.32) translate(-2.6 16)\"><path d=\"M0.5 -18.4C0.8 -27.6 -3.6 -35.4 -11.6 -38.8C-18.8 -41.6 -26.4 -39.4 -29.8 -33.2L-25.6 -31.2C-22.6 -34.4 -18.8 -34.2 -16.2 -31C-18.2 -27.2 -20.6 -22.4 -22.2 -17.4Z\" fill=\"#A92E3E\"/><path d=\"M-6 -20C-5.4 -27 -8.8 -33.6 -15 -36.6C-19.6 -38.4 -24.4 -37.6 -27.4 -34.8C-24 -38.6 -18.6 -39.6 -13.6 -37.6C-7.6 -35 -4.4 -28.2 -4.2 -20.4Z\" fill=\"#C94657\" opacity=\".8\"/><path d=\"M-25.6 -31.2C-22.6 -34.4 -18.8 -34.2 -16.2 -31C-17 -29.4 -17.8 -27.8 -18.5 -26.2C-19.6 -29.4 -22.4 -31.4 -25.6 -31.2Z\" fill=\"#6e1a27\" opacity=\".55\"/><path d=\"M-4.4 -21.4C-4.6 -28.2 -7.6 -33.4 -12.8 -36\" stroke=\"#e0707e\" stroke-width=\"1.4\" fill=\"none\" stroke-linecap=\"round\" opacity=\".7\"/><path d=\"M-24.6 -15.6Q-11 -22.4 2.6 -18\" stroke=\"#fff8ed\" stroke-width=\"6.6\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M-24 -13.6Q-11 -20 2.2 -15.8\" stroke=\"#d9cdb8\" stroke-width=\"1.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".9\"/><circle cx=\"-29.6\" cy=\"-31.8\" r=\"4.9\" fill=\"#fff8ed\"/><circle cx=\"-28.6\" cy=\"-30.4\" r=\"3.4\" fill=\"#e6dccb\" opacity=\".6\"/><circle cx=\"-31\" cy=\"-33.4\" r=\"1.6\" fill=\"#fff\"/></g>";h.appendChild(t)};
+if(navigator.serviceWorker&&navigator.serviceWorker.register){try{navigator.serviceWorker.register=function(){return Promise.reject(new Error('The Christmas preview does not install the offline helper'))}}catch(e){}}
+})();</script><link rel="stylesheet" href="xmas.css"><script src="xmas.js" defer></script><link rel="icon" type="image/svg+xml" href="xmas-icon.svg"><link rel="icon" type="image/png" sizes="48x48" href="xmas-icon-48.png"><link rel="apple-touch-icon" href="xmas-icon-180.png">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>About Eduardo Brandao, creator of SnakeList · Christmas preview</title>
+<meta name="description" content="Meet Eduardo Brandao, a new herpetologist and the creator of SnakeList - the snake life list, map and quiz with every snake species in the world.">
+<link rel="canonical" href="https://snakelist.com/about.html"><meta name="author" content="Eduardo Brandao">
+<meta property="og:type" content="profile"><meta property="og:title" content="About Eduardo Brandao, creator of SnakeList">
+<meta property="og:url" content="https://snakelist.com/about.html"><meta property="og:image" content="https://snakelist.com/snakelist-logo.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"AboutPage","url":"https://snakelist.com/about.html","mainEntity":{"@type":"Person","name":"Eduardo Brandao","url":"https://snakelist.com/about.html"},"about":{"@type":"WebApplication","name":"SnakeList","url":"https://snakelist.com/"}}</script>
+<meta name="theme-color" content="#1F5A3A">
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem('sl-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+:root { --bg:#f1f7ee; --bg2:#e6f1e1; --card:#ffffff; --text:#1d6b33; --link-hover:#24321f; --muted:#4b7a55; --line:#d3e6cc; --accent:#58b351; --link:#2f7a37; --chip:#eef7ea; --gold:#a8700f;
+  --shadow:0 10px 30px rgba(23,48,31,0.08);
+  --sl-snake:#58b351; --sl-pat:rgba(26,65,43,0.51); --sl-eye:#1b412b; --sl-check:#5fb246; --sl-tpat:#1e3a24;
+  --mark-grad: radial-gradient(circle at 30% 40%, #96dd78 0%, #6fc255 0%, #57ab45 32%, #38802a 100%);
+  --mark-shadow: drop-shadow(0 1px 1px rgba(0,0,0,0.22)) drop-shadow(0 3px 8px rgba(0,0,0,0.16)); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#12281a; --bg2:#173322; --card:#1b3a27; --text:#dff5d6; --link-hover:#eef6ee; --muted:#b4d9bb; --line:#2c5338; --link:#9be07c; --chip:#21452f; --gold:#e8b44a; --shadow:0 10px 30px rgba(0,0,0,0.3);
+  --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.45)) drop-shadow(0 4px 12px rgba(0,0,0,0.30)); } }
+:root[data-theme="dark"] { --bg:#12281a; --bg2:#173322; --card:#1b3a27; --text:#dff5d6; --link-hover:#eef6ee; --muted:#b4d9bb; --line:#2c5338; --link:#9be07c; --chip:#21452f; --gold:#e8b44a; --shadow:0 10px 30px rgba(0,0,0,0.3);
+  --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.45)) drop-shadow(0 4px 12px rgba(0,0,0,0.30)); }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.65 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow-x: hidden;
+  min-height: 100vh; display: flex; flex-direction: column; }
+a { color: var(--link); }
+a:where(:hover) { color: var(--link-hover); }
+/* v5.78: nothing is ever underlined, on hover or not - links change colour instead (like About creator in the app);
+   links inside running text are a little bolder so they still stand out */
+*, *::before, *::after { text-decoration-line: none !important; }
+:where(p, li, td, small, .crumbs, .toc) a:where(:not([class])) { font-weight: 600; }
+:where(p, li, dd, td, nav, small, figcaption, .crumbs, .toc, .links) a:not([class]):hover { color: var(--link-hover) !important; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 10; padding: 8px 14px; border-radius: 8px; background: var(--card); color: var(--text); }
+.skip:focus { left: 12px; }
+/* shared SnakeList header and footer (the same on every page) */
+.site-top { border-bottom: 1px solid var(--line); background: var(--bg); }
+.site-wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+.site-top .site-wrap { display: flex; align-items: center; justify-content: space-between; gap: 8px 18px; flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
+.site-logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: #58b351; font: 700 22px/1 "Fraunces", Georgia, serif; }
+.site-logo img { width: 32px; height: 32px; border-radius: 8px; display: block; }
+.site-top nav { display: flex; flex-wrap: wrap; gap: 2px 4px; font-size: 15px; }
+.site-top nav a { color: var(--muted); text-decoration: none; padding: 7px 9px; border-radius: 8px; }
+.site-top nav a:hover { color: var(--text); background: var(--chip); }
+.site-top nav a[aria-current="page"] { color: var(--link); font-weight: 600; }
+.crumbs { font-size: 14px; color: var(--muted); margin: 18px 0 0; }
+.crumbs a { color: var(--muted); }
+.crumbs span[aria-hidden] { margin: 0 6px; }
+main { flex: 1; width: 100%; }
+.site-foot { margin-top: 40px; padding: 26px 20px 34px; border-top: 1px solid var(--line); text-align: center; color: var(--muted); font-size: 14.5px; }
+.site-foot p { margin: 4px 0; }
+.site-foot a { color: var(--muted); }
+.site-foot .brand { color: #58b351; font: 700 18px "Fraunces", Georgia, serif; text-decoration: none; }
+.site-foot .links a { display: inline-block; padding: 4px 4px; }
+/* the app's own wordmark */
+.mark-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.logo-mark { display: inline-block; text-decoration: none; border-radius: 12px; }
+.sl-title { display: inline-flex; align-items: baseline; white-space: nowrap; line-height: 1; font-size: clamp(40px, 9vw, 64px); }
+.sl-titletext { font-family: 'EB Garamond', Georgia, serif; font-weight: 600; letter-spacing: 0.010em; color: #9fe08a; }
+.sl-titletext em { font-style: normal; font-weight: 500; }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .sl-titletext { background-image: var(--mark-grad); filter: var(--mark-shadow); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; } }
+.sl-titletext .snake-s { height: 0.71em; }
+.sl-tick { flex-shrink: 0; height: 0.70em; width: auto; margin-left: 0.071em; transform: translateY(0.02em); }
+/* page body */
+.page { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); padding: clamp(22px, 4vw, 44px); margin-top: 18px; }
+h1 { font-family: "Fraunces", Georgia, serif; font-size: clamp(32px, 5vw, 46px); line-height: 1.12; margin: 0 0 6px; }
+h2 { font-family: "Fraunces", Georgia, serif; font-size: clamp(21px, 2.6vw, 25px); line-height: 1.25; margin: 34px 0 8px; }
+p, li { color: var(--text); overflow-wrap: break-word; }
+.card a { overflow-wrap: anywhere; }
+.muted { color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border-radius: 13px; background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; }
+.btn:hover { filter: brightness(1.06); }
+@media (max-width: 640px) { body { font-size: 16.5px; } .site-wrap, .page { padding-left: 16px; padding-right: 16px; } .site-top nav { font-size: 14.5px; } .site-top nav a { padding: 6px 7px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+.hero { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; margin-bottom: 4px; }
+.photo { width: 120px; height: 120px; border-radius: 50%; flex: none; border: 3px solid var(--gold); background: #1f5a2e url(../app/icon-512-s.png) center/cover; }
+.role { margin: 2px 0 0; color: var(--gold); font-weight: 700; letter-spacing: .02em; }
+.me-photo { margin: 18px auto 6px; max-width: 320px; }
+.me-photo img { display: block; width: 100%; height: auto; border-radius: 16px; border: 1px solid var(--line); }
+.me-photo figcaption { margin-top: 8px; font-size: 14px; color: var(--muted); text-align: center; }
+body { padding-bottom: 0; }
+/* headings in the species pages' green, and the line under the main heading in the lighter green */
+:root { --sl-h:#1f7a3a; --sl-sub:#2e7d4f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sl-h:#a8ef94; --sl-sub:#8fd98a; } }
+:root[data-theme="dark"] { --sl-h:#a8ef94; --sl-sub:#8fd98a; }
+h1 { color: var(--sl-h); }
+h1 + p { color: var(--sl-sub) !important; }
+</style>
+<link rel="stylesheet" href="../species/sl-fx.css"><script src="../species/sl-fx.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a><header class="site-top"><div class="site-wrap"><a class="site-logo" href="./" aria-label="SnakeList - go to the app"><img src="xmas-icon.svg" alt="" width="32" height="32"><span>SnakeList</span></a><nav aria-label="Site"><a href="./">Open the app</a><a href="species/">Species</a><a href="install.html">Install</a><a href="about-snakelist.html">About</a></nav></div></header>
+<main id="main"><div class="page"><nav class="crumbs" aria-label="Breadcrumb"><a href="./">SnakeList</a><span aria-hidden="true">/</span><span aria-current="page">About creator</span></nav>
+<div class="card">
+<div class="hero">
+  <div class="photo" role="img" aria-label="The SnakeList app icon"></div>
+  <div><h1>Eduardo Brandao</h1><p class="role">Creator of SnakeList</p></div>
+</div>
+<h2>About me</h2>
+<p>Hi, I'm Eduardo Brandao - a new herpetologist, and someone who really loves snakes. I'm <span id="my-age">11</span> years old and I live in Portugal. I've always liked snakes, and my dad and I started going on herping trips together &ndash; looking for snakes on Turner River Road in Florida.</p>
+<p>Snakes are my favourite animal. I love their patterns (even if not every snake has an elegant one), the feeling of watching something so truly alive, and the way they show off the beauty of nature I've always loved.</p>
+<figure class="me-photo">
+<img src="../about/eduardo-herping.jpg" width="659" height="1428" alt="Eduardo crouching on a road at night with a camera and two lights, photographing a snake" loading="lazy">
+<figcaption>Out herping at night &ndash; lighting up a snake on the road to photograph it.</figcaption>
+</figure>
+<h2>Why I made SnakeList</h2>
+<p>Later, we went to Orlando on a trip to Disney. While we were eating, I had an idea: an app with a checklist of snakes, where I could tick off every snake I've ever seen.</p>
+<p>When I finally got my laptop as a present, I discovered Claude and made SnakeList with Claude Code &ndash; creating the very first version of snakelist.com. The name SnakeList is my own idea.</p>
+<h2>My favourite snakes</h2>
+<p>My favourite snake is the <a href="species/inland-taipan-oxyuranus-microlepidotus">Inland Taipan</a> &ndash; for its rarity, its venom, its colour and the remote places it lives. It's at the top of my Want to see list, marked as my favourite.</p>
+<p>I also love the <a href="species/parrot-snake-leptophis-ahaetulla">Parrot Snake</a>. It's an elegant, fascinating snake &ndash; its colours, its size, its eyes, basically everything except the shape of its head.</p>
+<h2>Snakes I've seen</h2>
+<p>Honestly, not that many yet &ndash; and I don't know the exact number, because I'm still ticking them all off in SnakeList.</p>
+<h2>What you can do on SnakeList</h2>
+<ul>
+<li>Browse <a href="species/">all 4,243 snake species</a>, each with its own page and range map, and a photo for most of them</li>
+<li>Mark the snakes you've seen, and add your photos, dates and places</li>
+<li>See where every snake lives on the map and test yourself in the quiz</li>
+<li>Take a photo with the Camera and get suggestions of which snakes it might be</li>
+</ul>
+<h2>Get in touch</h2>
+<p>Have an idea, or spotted something wrong? Use the <b>Report</b> button at the top of <a href="./">SnakeList</a> &ndash; I read every message.</p>
+<p class="muted" style="margin-top:24px">Every snake photo belongs to the person who took it and is used under the Creative Commons licence they chose &ndash; see the <a href="species/photo-credits.html">photo credits</a>. Read more <a href="about-snakelist.html">about SnakeList</a>.</p>
+</div>
+</div></main>
+<footer class="site-foot"><p><a class="brand" href="about-snakelist.html">SnakeList</a> &middot; made by <a href="about.html">Eduardo Brandao</a></p><p class="links"><a href="./">Open the app</a> &middot; <a href="species/">All species</a> &middot; <a href="install.html">Install app</a> &middot; <a href="about-snakelist.html">About SnakeList</a> &middot; <a href="about.html">About creator</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></p></footer>
+<script>
+// my age, worked out from today's date in Portugal (Europe/Lisbon): it goes up by one every 30 October
+(function () {
+  var BY = 2015, BM = 10, BD = 30, el = document.getElementById("my-age");
+  if (!el) return;
+  var y, m, d;
+  try {
+    var parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Lisbon", year: "numeric", month: "numeric", day: "numeric" }).formatToParts(new Date());
+    parts.forEach(function (p) { if (p.type === "year") y = +p.value; if (p.type === "month") m = +p.value; if (p.type === "day") d = +p.value; });
+  } catch (e) {}
+  if (!y) { var t = new Date(); y = t.getFullYear(); m = t.getMonth() + 1; d = t.getDate(); }
+  el.textContent = y - BY - (m < BM || (m === BM && d < BD) ? 1 : 0);
+})();
+</script>
+<div class="ed-bar" id="ed-bar" hidden><button type="button" id="ed-go">Edit this page</button></div>
+<style>
+.ed-bar { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 8px; z-index: 5; white-space: nowrap; }
+body { padding-bottom: 80px; }
+.ed-bar[hidden] { display: none; }
+.ed-bar button { font: 600 15px Inter, system-ui, sans-serif; padding: 12px 20px; border-radius: 999px; border: 0; cursor: pointer; background: linear-gradient(90deg,#c98d14,#d9a93a); color: #2a1a00; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+.ed-bar button.sec { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+.ed-box { width: 100%; min-height: 110px; box-sizing: border-box; border: 2px solid var(--gold); border-radius: 12px; padding: 10px 12px; font: 16px/1.5 Inter, system-ui, sans-serif; background: var(--bg); color: var(--text); }
+.ed-note { font-size: 13px; color: var(--muted); margin: 4px 0 0; }
+</style>
+<script>
+// the creator writes the page himself: each section becomes a box, then one tap copies it all to send
+(function () {
+  var u = null; try { u = JSON.parse(localStorage.getItem("sl-google") || "null"); } catch (e) {}
+  var wantEdit = /[?&]edit\b/.test(location.search);
+  if (!wantEdit && (!u || String(u.email || "").toLowerCase() !== "eduardo.fpb.brandao@gmail.com")) return;
+  var bar = document.getElementById("ed-bar"); bar.hidden = false;
+  var KEY = "sl-about-draft", draft = {}; try { draft = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+  var SECTIONS = [["about", "About me", "A few sentences about you"], ["why", "Why I made SnakeList", "Why you started SnakeList and what you want it to be"],
+    ["fav", "My favourite snake", "Your favourite snake and why (or leave empty)"], ["seen", "Snakes I've seen", "How many, or which ones (or leave empty)"],
+    ["want", "Snake I most want to see", "(or leave empty)"], ["contact", "Get in touch", "How people can reach you (or leave empty)"], ["more", "Anything else", "Anything else you want on the page"]];
+  document.getElementById("ed-go").addEventListener("click", function () {
+    var card = document.querySelector(".card");
+    card.innerHTML = '<h1 style="font-size:28px">Write your About me</h1><p class="ed-note">Write it however you like - spelling and wording don\u2019t matter. When you\u2019re done, tap <b>Copy my text</b> and paste it to Claude to polish.</p>' +
+      SECTIONS.map(function (x) { return '<h2>' + x[1] + '</h2><textarea class="ed-box" data-k="' + x[0] + '" placeholder="' + x[2] + '"></textarea>'; }).join("");
+    [].slice.call(card.querySelectorAll(".ed-box")).forEach(function (t) {
+      t.value = draft[t.dataset.k] || "";
+      t.addEventListener("input", function () { draft[t.dataset.k] = t.value; try { localStorage.setItem(KEY, JSON.stringify(draft)); } catch (e) {} });
+    });
+    bar.innerHTML = '<button type="button" id="ed-copy">Copy my text</button><button type="button" class="sec" id="ed-done">Back</button>';
+    document.getElementById("ed-done").onclick = function () { location.reload(); };
+    document.getElementById("ed-copy").onclick = function () {
+      var txt = "Please polish my About me page:\n\n" + SECTIONS.map(function (x) { return x[1] + ": " + (draft[x[0]] || "").trim(); }).filter(function (l) { return !/:\s*$/.test(l); }).join("\n\n");
+      var b = this, ok = function () { b.textContent = "Copied! Paste it to Claude"; };
+      if (navigator.clipboard) navigator.clipboard.writeText(txt).then(ok, function () { prompt("Copy this:", txt); });
+      else prompt("Copy this:", txt);
+    };
+    window.scrollTo(0, 0);
+  });
+  if (wantEdit) document.getElementById("ed-go").click(); // snakelist.com/about.html?edit opens straight to the boxes
+})();
+</script>
+
+
+</body>
+</html>
