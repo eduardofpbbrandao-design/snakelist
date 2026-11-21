@@ -171,16 +171,21 @@ function markFade(o) { o.traverse((q) => { if (q.material && q.userData.op == nu
 // still, and blinks now and then (none of it with reduced motion).
 let personData = null, personReq = null; const personWait = new Set();
 const PERSON_TEX = { head: 'head.webp', headN: 'head_n.webp', headR: 'head_r.webp', body: 'body.webp', bodyN: 'body_n.webp', hair: 'hair.webp' };
-export function loadPerson() {
+const personURL = (f) => new URL(f + '?r=576', import.meta.url).href;
+export function loadPerson() { // (the mesh is kept once loaded - about 0.3 MB; the pictures are not, see personImages)
   if (personData) return Promise.resolve(personData);
   if (!personReq) {
-    const url = (f) => new URL(f + '?r=576', import.meta.url).href;
-    const img = (f) => new Promise((res, rej) => { const im = new Image(); im.decoding = 'async'; im.onload = () => res(im); im.onerror = () => rej(new Error('person ' + f)); im.src = url('person/' + f); });
-    personReq = Promise.all([fetch(url('person.bin')).then((r) => { if (!r.ok) throw new Error('person ' + r.status); return r.arrayBuffer(); }), ...Object.values(PERSON_TEX).map(img)])
-      .then(([b, ...ims]) => { const d = parsePerson(b); d.img = {}; Object.keys(PERSON_TEX).forEach((k, i) => { d.img[k] = ims[i]; }); personData = d; return d; })
+    personReq = fetch(personURL('person.bin')).then((r) => { if (!r.ok) throw new Error('person ' + r.status); return r.arrayBuffer(); })
+      .then((b) => { personData = parsePerson(b); return personData; })
       .catch((e) => { personReq = null; throw e; });
+    personImages().catch(() => {}); // (start them too: the browser keeps the files, and the next request is instant)
   }
   return personReq;
+}
+// the textures' pictures, decoded afresh for each person shown, so nothing big stays in memory once it is gone
+function personImages() {
+  const img = (f) => new Promise((res, rej) => { const im = new Image(); im.decoding = 'async'; im.onload = () => res(im); im.onerror = () => rej(new Error('person ' + f)); im.src = personURL('person/' + f); });
+  return Promise.all(Object.values(PERSON_TEX).map(img)).then((ims) => { const o = {}; Object.keys(PERSON_TEX).forEach((k, i) => { o[k] = ims[i]; }); return o; });
 }
 function parsePerson(buf) {
   const dv = new DataView(buf); if (String.fromCharCode(dv.getUint8(0), dv.getUint8(1), dv.getUint8(2), dv.getUint8(3)) !== 'SLP2') throw new Error('person.bin');
@@ -194,7 +199,7 @@ function parsePerson(buf) {
   for (let k = 0; k < m.blink.n; k++) for (let c = 0; c < 3; c++) blink[bi[k] * 3 + c] = bd[k * 3 + c] * m.blink.k;
   return { meta: m, pos, nor, uv, idx, blink };
 }
-function personFrom(data, h) {
+function personFrom(data, img, h) {
   const m = data.meta, geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(data.pos.slice(), 3)); geo.setAttribute('normal', new THREE.BufferAttribute(data.nor.slice(), 3)); geo.setAttribute('uv', new THREE.BufferAttribute(data.uv.slice(), 2)); geo.setIndex(new THREE.BufferAttribute(data.idx.slice(), 1));
   for (const [st, n, mi] of m.groups) geo.addGroup(st, n, mi);
@@ -209,14 +214,18 @@ function personFrom(data, h) {
   }
   geo.morphAttributes.position = [new THREE.BufferAttribute(data.blink.slice(), 3), new THREE.BufferAttribute(br, 3)]; geo.morphTargetsRelative = true;
   geo.computeBoundingSphere();
-  const tex = (k, srgb) => { const t = new THREE.Texture(data.img[k]); t.flipY = true; if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.needsUpdate = true; return t; };
+  const tex = (k, srgb) => { const t = new THREE.Texture(img[k]); t.flipY = true; if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.needsUpdate = true; return t; };
   const body = new THREE.MeshPhysicalMaterial({ map: tex('body', true), normalMap: tex('bodyN'), roughness: 0.82, sheen: 0.35, sheenRoughness: 0.8, sheenColor: new THREE.Color('#5d5446'), specularIntensity: 0.35 });
   // skin: the scanned colour, its pores in the normal map, glossy eyes and lips from the roughness map, and a warm
   // sheen at grazing angles (light scattered under the skin)
   const head = new THREE.MeshPhysicalMaterial({ map: tex('head', true), normalMap: tex('headN'), roughnessMap: tex('headR'), roughness: 1, sheen: 0.3, sheenRoughness: 0.55, sheenColor: new THREE.Color('#d9776a'), specularIntensity: 0.55, clearcoat: 0.04, clearcoatRoughness: 0.4 });
   const hair = new THREE.MeshPhysicalMaterial({ map: tex('hair', true), alphaTest: 0.38, side: THREE.DoubleSide, roughness: 0.5, sheen: 0.22, sheenRoughness: 0.4, sheenColor: new THREE.Color('#6b5c50'), specularIntensity: 0.35 });
+  // swaying over the ankles: a slight lean of the whole body, done on the graphics card (its outline, and so its measured
+  // height, stays exactly h)
+  const uSway = { value: new THREE.Vector2(0, 0) }, sway = (sh) => { sh.uniforms.uSway = uSway; sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform vec2 uSway;').replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed.xz += uSway * transformed.y;'); };
+  body.onBeforeCompile = sway; hair.onBeforeCompile = sway;
   // (the skin's light wraps a little round into the shade, as it does through real skin)
-  head.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <lights_fragment_end>', '#include <lights_fragment_end>\n reflectedLight.directDiffuse += reflectedLight.indirectDiffuse * vec3(0.06, 0.018, 0.012);'); };
+  head.onBeforeCompile = (sh) => { sway(sh); sh.fragmentShader = sh.fragmentShader.replace('#include <lights_fragment_end>', '#include <lights_fragment_end>\n reflectedLight.directDiffuse += reflectedLight.indirectDiffuse * vec3(0.06, 0.018, 0.012);'); };
   const mats = m.mats.map((k) => (k === 'head' ? head : k === 'hair' ? hair : body));
   const mesh = new THREE.Mesh(geo, mats); mesh.name = 'person-skin'; mesh.castShadow = mesh.receiveShadow = true; mesh.morphTargetInfluences = [0, 0];
   const g = new THREE.Group(); g.add(mesh);
@@ -231,16 +240,15 @@ function personFrom(data, h) {
     inf[1] = 0.5 - 0.5 * Math.cos((t * TAU) / 4.6); // about 13 breaths a minute
     if (t > nextBlink) { blinkAt = t; nextBlink = t + 2.5 + Math.random() * 4.5; }
     const b = (t - blinkAt) / 0.16; inf[0] = b < 0 || b > 2 ? 0 : b < 1 ? sstep(0, 1, b) : 1 - sstep(1, 2, b); // shut fast, open a little slower
-    g.rotation.z = 0.0045 * Math.sin((t * TAU) / 7.3) + 0.002 * Math.sin((t * TAU) / 3.1); g.rotation.x = 0.003 * Math.sin((t * TAU) / 9.7 + 1); // (swaying over the ankles)
+    uSway.value.set(0.0045 * Math.sin((t * TAU) / 7.3) + 0.002 * Math.sin((t * TAU) / 3.1), 0.003 * Math.sin((t * TAU) / 9.7 + 1)); // (swaying over the ankles)
   };
   return out;
 }
 export function buildPerson(T, h = 1.7) {
   THREE = THREE || T;
-  if (personData) { try { return personFrom(personData, h); } catch (e) { /* the simple person below */ } }
-  // not loaded yet: an empty group now, filled as soon as person.bin arrives (the simple person if it cannot load)
+  // an empty group now, filled as soon as person.bin and its pictures are ready (the simple person if they cannot load)
   const g = new THREE.Group(); g.userData.realPerson = 'loading';
-  loadPerson().then((d) => { g.add(personFrom(d, h)); g.userData.realPerson = true; }, () => { g.add(buildPersonSimple(T, h)); g.userData.realPerson = false; }).then(() => { personWait.forEach((f) => f()); });
+  Promise.all([loadPerson(), personImages()]).then(([d, im]) => { g.add(personFrom(d, im, h)); g.userData.realPerson = true; }, () => { g.add(buildPersonSimple(T, h)); g.userData.realPerson = false; }).then(() => { personWait.forEach((f) => f()); });
   return g;
 }
 
@@ -406,7 +414,7 @@ function buildPrey2(kind, r, seed) {
     const NZ = 44, NA = 28;
     const bodyG = loft(prR, z0, z1, NZ, NA, (t, a, s, c) => { const k = sstep(0.1, -0.55, c), sn = sstep(0.86, 0.97, t); return mixRGB(mixRGB(mixRGB(back, side, sstep(0.75, 0.2, c)), belly, k), snoutC, sn * 0.6); });
     const fur = new THREE.MeshPhysicalMaterial({ color: '#ffffff', vertexColors: true, map: furTex(seed, '30,22,15', '240,230,215', 3, 6), roughness: 0.92, sheen: 1, sheenRoughness: 0.55, sheenColor: new THREE.Color(rat ? '#c9b49c' : '#ddc9b2') });
-    const body = mesh(bodyG, fur); furShells(g, bodyG, fur, 7, r * 0.14, [34, 70], mesh);
+    const body = mesh(bodyG, fur); furShells(g, bodyG, fur, 6, r * 0.14, [34, 70], mesh);
     const pink = new THREE.MeshPhysicalMaterial({ color: '#e0a49e', roughness: 0.5, sheen: 0.4, sheenColor: new THREE.Color('#ffd0c8') }), dark = new THREE.MeshStandardMaterial({ color: '#2a1d16', roughness: 0.7 });
     // the head: everything that moves with it (eyes, ears, nose, whiskers) turns about the neck
     const zN = lerp(z0, z1, 0.64), head = new THREE.Group(); head.position.set(0, r * 1.15, zN); g.add(head);
@@ -432,7 +440,7 @@ function buildPrey2(kind, r, seed) {
       const lgPts = hind ? [V3(0, r * 0.25, r * 0.05), V3(sg * r * 0.08, -top.y * 0.45, r * 0.32), V3(sg * r * 0.1, foot.y + r * 0.18, -r * 0.2), V3(sg * r * 0.12, foot.y - r * 0.02, -r * 0.05), V3(sg * r * 0.13, foot.y - r * 0.04, r * 0.42)]
         : [V3(0, r * 0.15, 0), V3(sg * r * 0.06, -top.y * 0.45, -r * 0.1), V3(sg * r * 0.1, foot.y + r * 0.08, r * 0.08), V3(sg * r * 0.12, foot.y - r * 0.03, r * 0.2)];
       const lgR = hind ? [r * 0.4, r * 0.24, r * 0.09, r * 0.075, r * 0.06] : [r * 0.17, r * 0.11, r * 0.07, r * 0.06], lgC = hind ? [furC, furC, mixRGB(furC, pinkC, 0.6), pinkC, pinkC] : [furC, furC, mixRGB(furC, pinkC, 0.7), pinkC];
-      const legM = mesh(limbTube(lgPts, lgR, lgC, 12, hind ? 30 : 22), fur, lg); if (hind) furShells(lg, legM.geometry, fur, 4, r * 0.1, [8, 10], mesh);
+      const legM = mesh(limbTube(lgPts, lgR, lgC, 12, hind ? 30 : 22), fur, lg); if (hind) furShells(lg, legM.geometry, fur, 3, r * 0.1, [8, 10], mesh);
       for (let k = 0; k < (hind ? 5 : 4); k++) { const a = (k / ((hind ? 5 : 4) - 1) - 0.5) * 1.1, tp0 = lgPts[lgPts.length - 1].clone().add(V3(0, 0, -r * 0.04)); mesh(limbGeo(tp0, tp0.clone().add(V3(Math.sin(a) * r * 0.14, -r * 0.015, Math.cos(a) * r * 0.16)), r * 0.026, r * 0.016, 5), pink, lg); }
     }
     // the tail: about as long as the body (a little longer in a rat), scaly rings, swaying
