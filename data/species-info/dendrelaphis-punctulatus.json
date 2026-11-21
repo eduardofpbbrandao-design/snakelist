@@ -1,0 +1,114 @@
+{
+  "id": "dendrelaphis-punctulatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Gray, 1826)",
+  "facts": {
+    "length": {
+      "text": "Body about 1 m; up to about 1.6-2 m in total",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 5 to 12",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Frogs, skinks and other small reptiles, fish",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Common (Green) Tree Snake is a slender, large-eyed, harmless snake of northern and eastern Australia and New Guinea. It is agile, climbs well and is a strong swimmer.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "In a Queensland study, the body (without the tail) averaged about 1 m in females and 0.93 m in males. The total length can reach about 1.6 m, and some sources say up to 2 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Northern and eastern Australia - from the Kimberley across to Cape York and the Torres Strait and down the east coast into New South Wales - and Papua New Guinea.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Bushland, well-vegetated banks of rivers and creeks, rainforest edges and gardens with ponds.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day; it rests at night in hollow trees, logs, leaves or rock cracks. It is harmless to people but may bite or give off a smell if handled.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Frogs, water skinks and other small reptiles and their eggs, small fish, small mammals and turtle hatchlings.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 5 to 12 long eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Very slender body with big eyes.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Active by day, often in trees.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Dendrelaphis punctulatus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Dendrelaphis_punctulatus"
+    },
+    "rdb": {
+      "title": "Dendrelaphis punctulatus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Dendrelaphis&species=punctulatus"
+    }
+  }
+}

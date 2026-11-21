@@ -1,0 +1,116 @@
+{
+  "id": "micrurus-tener",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Baird & Girard, 1853)",
+  "facts": {
+    "length": {
+      "text": "Usually about 60 cm; up to 122 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly other snakes, sometimes lizards",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Texas Coral Snake is a brightly ringed, venomous coral snake of the southern United States and Mexico. It is shy and secretive, but its bite is dangerous.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Rings of black, yellow and red that go right around the body, onto the belly. Smooth scales, a rounded head and round pupils.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Most are around 60 cm (24 in); the largest reach 122 cm. Males are usually smaller.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Arkansas, Louisiana and Texas in the USA, and north-eastern and central Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Shy and mostly active at night, hiding in leaf litter and under logs; sometimes seen moving about after heavy rain. If grabbed it may thrash and bite.",
+        "src": [
+          "wp"
+        ]
+      },
+      {
+        "label": "Bites",
+        "text": "Its fixed front fangs can deliver a lot of venom in a quick bite, so it must never be handled.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly other snakes, especially small burrowing ones, but even copperheads and other coral snakes; sometimes small lizards.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Red, yellow and black rings all the way round the body.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Micrurus tener",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Micrurus_tener"
+    },
+    "rdb": {
+      "title": "Micrurus tener",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Micrurus&species=tener"
+    }
+  }
+}

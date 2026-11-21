@@ -1,0 +1,101 @@
+{
+  "id": "ptyas-korros",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Schlegel, 1837)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs, 4 to 12",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Rodents, birds, lizards and frogs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Indo-Chinese (or Chinese) Rat Snake is a non-venomous rat snake of South-east Asia and southern China, with very large eyes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Head broader than the neck, a blunt projecting snout and very large eyes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "North-eastern India, Nepal, Bhutan and Bangladesh through Myanmar, Thailand, Indochina, southern China and Taiwan to Malaysia, Singapore and Indonesia (Sumatra, Borneo, Java, Bali).",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Forests and also near people's homes, up to about 3,000 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day, both on the ground and in trees; it sleeps in bushes and trees.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Rodents, birds, lizards and frogs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Females lay 4 to 12 eggs in June or July.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Very large eyes.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Ptyas korros",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Ptyas_korros"
+    },
+    "rdb": {
+      "title": "Ptyas korros",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Ptyas&species=korros"
+    }
+  }
+}

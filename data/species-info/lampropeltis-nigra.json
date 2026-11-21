@@ -1,0 +1,93 @@
+{
+  "id": "lampropeltis-nigra",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Yarrow, 1882)",
+  "facts": {
+    "length": {
+      "text": "About 90 to 122 cm; up to about 1.5-1.8 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Black Kingsnake is a non-venomous kingsnake of the south-eastern United States. Like other kingsnakes it is a strong constrictor.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Black, with widely spaced small yellow or cream speckles that are bigger and more numerous along the sides.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually about 90 to 122 cm long; some reach 147 to 183 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The south-eastern USA from southern Illinois and Ohio south along the Appalachian foothills to Alabama and Mississippi.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Many habitats - old farms, debris piles, floodplain edges and thick brush by streams and swamps. In some states it is one of the snakes people meet most often.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Shiny black with small pale speckles.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Lampropeltis nigra",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Lampropeltis_nigra"
+    },
+    "rdb": {
+      "title": "Lampropeltis nigra",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Lampropeltis&species=nigra"
+    }
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "id": "hemorrhois-hippocrepis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "About 1.5 to 1.8 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, about 7 on average",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Horseshoe Whip Snake is a long, slender, harmless snake of south-western Europe and north-western Africa, named after the horseshoe-shaped mark on its head.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Slender with a head wider than the neck, large eyes with round pupils and a row of small scales under each eye; a series of large dark spots runs down the back.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Up to about 1.5 to 1.8 m; males and females are the same size.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Portugal, southern, central and eastern Spain, Gibraltar, southern Sardinia and Pantelleria, and Morocco, Algeria and Tunisia.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      },
+      {
+        "label": "Introduced",
+        "text": "Since the early 2000s on Mallorca, Ibiza and Formentera (Balearic Islands), probably arriving with olive trees imported from mainland Spain.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Mediterranean scrub, rocky places and shores, farmland, pasture, plantations, gardens and towns.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs in early summer, which hatch in late summer; one study found about 6.8 eggs per clutch on average.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Large dark spots down a slender body.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Row of small scales under the eye.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Horseshoe whip snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Horseshoe_whip_snake"
+    },
+    "rdb": {
+      "title": "Hemorrhois hippocrepis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Hemorrhois&species=hippocrepis"
+    }
+  }
+}
