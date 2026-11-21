@@ -1,0 +1,113 @@
+{
+  "id": "thamnophis-saurita",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1766)",
+  "facts": {
+    "length": {
+      "text": "About 40 to 90 cm (16 to 35 in)",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young, 4 to 27",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Frogs, tadpoles, salamanders, small fish and earthworms",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Eastern Ribbon Snake is a slender, harmless garter snake of eastern North America that is rarely found far from water.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Dark brown with bright yellow stripes and a very slim body.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 40 to 90 cm (16 to 35 in) long; females are usually thicker than males.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South-eastern Canada (Nova Scotia, Quebec, Ontario) and the eastern United States from Maine to Florida and west to Louisiana and Michigan.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Along ponds, streams, swamps and wet woods or grassland. It uses shallow water to hunt and to escape. In winter it shelters underground, for example under rock piles.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Hunts by sight: newts, salamanders, frogs, toads, tadpoles, small fish, spiders and earthworms - but never warm-blooded animals.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Mates in spring and gives birth to 4 to 27 live young in summer. Young become adults after two or three years.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Very slim, dark brown with bright yellow stripes.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Usually near water.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Thamnophis saurita",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Thamnophis_saurita"
+    },
+    "rdb": {
+      "title": "Thamnophis saurita",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Thamnophis&species=saurita"
+    }
+  }
+}

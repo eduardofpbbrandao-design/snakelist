@@ -1,0 +1,90 @@
+{
+  "id": "coronella-girondica",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Daudin, 1803)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Southern Smooth Snake is a small, harmless snake of south-western Europe and north-western Africa.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Brown, greyish or reddish with dark bars or spots. A dark U-shaped mark (or two long spots) on the back of the head, a dark streak from the eye to the corner of the mouth, and a dark band across the head between the eyes. The belly is yellowish or red with black marks. Its scales are smooth.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Portugal, Spain, Gibraltar, southern France, Monaco and Italy, and Morocco, Algeria and Tunisia.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Forests, Mediterranean scrub, rocky places, pasture and plantations.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Dark streak from the eye to the corner of the mouth.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Dark band across the head between the eyes.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Smooth scales.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Coronella girondica",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Coronella_girondica"
+    },
+    "rdb": {
+      "title": "Coronella girondica",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Coronella&species=girondica"
+    }
+  }
+}

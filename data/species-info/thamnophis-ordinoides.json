@@ -1,0 +1,92 @@
+{
+  "id": "thamnophis-ordinoides",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Baird & Girard, 1852)",
+  "facts": {
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Slugs, salamanders and frogs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Northwestern Garter Snake is a small, harmless garter snake of the Pacific Northwest of North America. Its stripe can be almost any colour - white, yellow, orange, red, green, turquoise or even blue.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Small, with a stripe down the middle of the back that may be white, yellow, orange, red, green, turquoise or blue; some have small dark spots.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South-western British Columbia in Canada, and western Washington, western Oregon and north-western California in the USA.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Sunny meadow edges surrounded by forest; in British Columbia also near fresh and salt water. On hot days it hides under stumps and rocks.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Slugs, salamanders and frogs; near water also small fish.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Small garter snake with a stripe that can be red, orange, yellow, blue or green.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Northwestern garter snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Northwestern_garter_snake"
+    },
+    "rdb": {
+      "title": "Thamnophis ordinoides",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Thamnophis&species=ordinoides"
+    }
+  }
+}

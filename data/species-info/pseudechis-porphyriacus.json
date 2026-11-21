@@ -1,0 +1,123 @@
+{
+  "id": "pseudechis-porphyriacus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Shaw, 1794)",
+  "facts": {
+    "length": {
+      "text": "About 1.25 m on average",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly frogs; also reptiles and other animals",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Red-bellied Black Snake is a venomous snake of eastern Australia and one of the snakes people there meet most often. It is not aggressive and usually moves away from people.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Glossy black on top with bright red or orange sides fading to a pink or dull red belly; light grey snout and a black tail.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 1.25 m long on average.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Eastern Australia: Queensland, New South Wales, Victoria and South Australia - including the areas around Brisbane, Sydney, Canberra, Melbourne and Adelaide.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Woodland, bushland, plains and urban forest, often near water.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Hides in logs, old burrows and grass tussocks, and can escape into water - one stayed under for 23 minutes. In spring males wrestle each other, trying to push the other's head down.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly frogs, but also reptiles and other prey.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "It can float still on the water so that it looks just like a stick.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Shiny black back with red or orange sides.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Red-bellied black snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Red-bellied_black_snake"
+    },
+    "rdb": {
+      "title": "Pseudechis porphyriacus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Pseudechis&species=porphyriacus"
+    }
+  }
+}

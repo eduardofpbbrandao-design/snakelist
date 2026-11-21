@@ -1,0 +1,121 @@
+{
+  "id": "spilotes-pullatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "About 1.5 to 2 m; up to 2.7 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Rodents, bats, birds and eggs, lizards and frogs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Tiger Rat Snake, or Chicken Snake, is a big, non-venomous snake of the American tropics, from southern Mexico to Argentina. It is bold black and yellow.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Black with yellow spots that may form bands; a yellow snout tip; yellow belly with black bands.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 1.5 to 2 m long, up to about 2.7 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern Mexico, Central America, Trinidad and Tobago, and much of South America to northern Argentina.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Forests, often near water.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day, hunting actively both in trees and on the ground.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "A wide range of prey: rodents, bats, birds and their eggs, lizards and amphibians.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Black and yellow, with a yellow snout tip.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Large and long.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Spilotes pullatus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Spilotes_pullatus"
+    },
+    "rdb": {
+      "title": "Spilotes pullatus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Spilotes&species=pullatus"
+    }
+  }
+}

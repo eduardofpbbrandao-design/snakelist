@@ -1,0 +1,108 @@
+{
+  "id": "vipera-aspis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "About 60-65 cm on average; males up to 85 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Asp Viper is a venomous viper of south-western Europe. Its bite is very painful and can be more serious than an Adder's, so it needs hospital care. In Italy it causes most snakebites.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A broad, triangular head clearly wider than the neck, and a snout tip that turns up slightly. The tail is very short.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 60 to 65 cm on average; males reach up to 85 cm, females rarely more than 75 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "France, Andorra, north-eastern Spain, the far south-west of Germany (southern Black Forest), Switzerland, Italy and north-western Slovenia.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Warm, sunny places with some plant cover and fairly dry soil - sunny slopes and scrub in hills and low mountains, often on limestone.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "label": "Bites",
+        "text": "Its bite is very painful; in old studies about 4% of untreated bites were fatal. Anyone bitten needs medical help quickly.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Snout tip turned up slightly.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Wide triangular head and a short tail.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Vipera aspis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Vipera_aspis"
+    },
+    "rdb": {
+      "title": "Vipera aspis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Vipera&species=aspis"
+    }
+  }
+}

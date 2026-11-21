@@ -1,0 +1,122 @@
+{
+  "id": "lampropeltis-calligaster",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Harlan, 1827)",
+  "facts": {
+    "length": {
+      "text": "About 76 to 110 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, about 10 on average",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mostly voles and other small mammals",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Prairie Kingsnake is a calm, non-venomous kingsnake of the midwestern and southern United States.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Light brown or grey-brown with dark reddish-brown blotches down the back and a pale or yellowish belly. It can be mistaken for a rat snake; the markings may fade with age.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 76 to 110 cm; males are longer and heavier on average.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The midwestern and southern USA, from Iowa, Illinois and Indiana south to Texas, Louisiana and Alabama.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Prairie, pasture and shrubland, and the edges of grassland, roads and woods; seldom forest, and never cropland.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Usually gentle and slow to bite; if bothered it shakes its tail (which can sound like a rattle in dry leaves) and gives off a smelly musk. In Illinois it hibernates from mid-October to late March.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Kills by squeezing (constriction). Prairie voles are its most common prey, with other small mammals, reptiles and quail eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays about 10 eggs in June or July, which hatch in late August or September. Young often double their length in the first year.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Reddish-brown blotches on a light brown back.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Yellowish belly.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Lampropeltis calligaster",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Lampropeltis_calligaster"
+    },
+    "rdb": {
+      "title": "Lampropeltis calligaster",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Lampropeltis&species=calligaster"
+    }
+  }
+}

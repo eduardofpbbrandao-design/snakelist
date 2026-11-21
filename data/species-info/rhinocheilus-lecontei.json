@@ -1,0 +1,107 @@
+{
+  "id": "rhinocheilus-lecontei",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Baird & Girard, 1853",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs, 4 to 9",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Lizards, amphibians and sometimes small snakes",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Long-nosed Snake is a shy, harmless burrowing snake of the south-western United States and northern Mexico, named for its long, slightly upturned snout.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Black and red saddles on a yellow or cream background - a little like a coral snake - with cream spots inside the black saddles. It has a long, slightly upturned snout.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South-western USA (California and Idaho east to Kansas, Oklahoma and Texas) and northern Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Desert, grassland, shrubland and savanna.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active at night and spends most of its time buried underground.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Lizards, amphibians and sometimes smaller snakes; rarely rodents.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 4 to 9 eggs in early summer, which hatch in late summer or early autumn.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Long, slightly upturned snout.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Black saddles with cream speckles, between red patches.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Long-nosed snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Long-nosed_snake"
+    },
+    "rdb": {
+      "title": "Rhinocheilus lecontei",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Rhinocheilus&species=lecontei"
+    }
+  }
+}
