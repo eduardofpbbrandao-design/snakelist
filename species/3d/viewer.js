@@ -7,9 +7,17 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=579'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=579'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=581'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=581'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
+// v5.93: the habitats each snake can be shown in (tools/habitat_looks.py: the first is shown first; snakes with only one are
+// not listed). Loaded with this module - it waits for it up to 3 s, so the first scene is already the right one (if it comes
+// later, the Habitats button is added then)
+const HAB_P = typeof fetch === 'function' ? fetch(new URL('habitats.json?r=581', import.meta.url).href).then((r) => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null);
+let HAB_LOOKS = await Promise.race([HAB_P, new Promise((res) => setTimeout(() => res(null), 3000))]);
+HAB_P.then((d) => { HAB_LOOKS = d; });
+const habPick = (d, id) => { const l = d && d.sp && d.sp[id]; return Array.isArray(l) && l.length > 1 ? l : null; };
+export function habitatsOf(id) { return habPick(HAB_LOOKS, id); }
 
 const TAU = Math.PI * 2;
 // load-time profiling (tests only): window.__slPerf = { step: ms }
@@ -2229,8 +2237,10 @@ function buildMouth(P, F, body, group, eyes, pat) {
   }
   function flick(s) {
     if (!tongueUpd) return;
-    const on = s > 0 && s < 1, ext = on ? sstep(0, 0.28, s) * (1 - sstep(0.72, 1, s)) : 0;
-    tongueUpd(ext, s * TAU * 3.2);
+    // (v5.93: out quickly and smoothly, held while the tips wave three or four times, then drawn back in - one flick per call
+    // from 0 to 1, as extras.js now times them; the wave keeps going smoothly while it is out)
+    const on = s > 0 && s < 1, ext = on ? (1 - Math.pow(1 - sstep(0, 0.16, s), 2)) * (1 - sstep(0.8, 1, s)) : 0;
+    tongueUpd(ext, s * TAU * 3.6);
     showOnlyTongue(on && t <= 0.01);
   }
   // v5.57: how far the mouth must open (t) for the jaws to part by 'sep' near their front, for prey of that width
@@ -2271,12 +2281,20 @@ const SCENES = {
   grass:    { sky: ['#a3c1da', '#e6ead9'], fog: '#dde2d2', sun: 2.0, hemi: 0.6, sunEl: 48, tile: 0.9, ground: 'dry', props: { grass: 2.6, rocks: 0.2, twigs: 0.3 } },
   sand:     { sky: ['#9cc0de', '#f2e6cf'], fog: '#efe2cb', sun: 2.2, hemi: 0.5, sunEl: 50, tile: 1.0, ground: 'sand', props: { rocks: 0.3, grass: 0.3, twigs: 0.3 } },
   rainforest:{ sky: ['#9fb39b', '#c3cfbb'], fog: '#aebba7', sun: 1.3, hemi: 0.85, sunEl: 60, tile: 1.1, ground: 'litter', props: { leaves: 1.3, twigs: 1, rocks: 0.1, ferns: 1 } },
+  // v5.93: more habitats (the Habitats button): the cracking-clay floodplains of the Channel Country (grey-brown clay
+  // split into a net of deep cracks, a few gibber stones, sparse saltbush, lignum and Mitchell grass, coolibahs far off)
+  clay:     { sky: ['#8db4dc', '#f0dcc8'], fog: '#e4d2c0', sun: 2.4, hemi: 0.5, sunEl: 46, tile: 1.6, ground: 'clay', props: { rocks: 0.08, twigs: 0.25 } },
+  // a swamp: still dark (tea-coloured) water among buttressed trees - bald cypress with Spanish moss and knees in North
+  // America, palms and broadleaf trees in the tropics - wet mud with fallen needles and leaves at the edge, sawgrass and reeds
+  swamp:    { sky: ['#a7b8a4', '#d2d8c6'], fog: '#b6bfab', sun: 1.7, hemi: 0.8, sunEl: 54, tile: 1.0, ground: 'mud', water: 'river', waterCol: '#2e2a17', waterOp: 0.86, depth: 0.35, rough: 0.68, props: { twigs: 0.6, reeds: 1 } },
+  // a rocky shore by a warm sea (sea kraits come ashore on rocks): dark wave-worn boulders and pebbles, clear blue-green water
+  shore:    { sky: ['#7fb0d6', '#e3eef2'], fog: '#cfdfe6', sun: 2.5, hemi: 0.7, sunEl: 50, tile: 0.9, ground: 'pebbles', water: 'river', waterCol: '#1d6470', waterOp: 0.62, depth: 0.45, rock: '#5d5954', props: { rocks: 1.6, pebbles: 1.2 } },
 };
 
 // ---------- photographic surroundings: CC0 Polyhaven panoramas (via @pmndrs/assets), see CREDITS.txt ----------
 // each habitat gets the panorama that fits it best; the snake's own ground is drawn up close and fades
 // into the photo's ground, which is projected onto a flat floor so it meets the horizon without a seam
-const ENV_FOR = { gibber: 'dawn', riverbank: 'park', forest: 'forest', rainforest: 'forest', litter: 'forest', soil: 'forest', grass: 'sunrise', heath: 'sunrise', arid: 'dawn', sand: 'dawn', sea: 'sky' };
+const ENV_FOR = { clay: 'dawn', swamp: 'forest', shore: 'sky', gibber: 'dawn', riverbank: 'park', forest: 'forest', rainforest: 'forest', litter: 'forest', soil: 'forest', grass: 'sunrise', heath: 'sunrise', arid: 'dawn', sand: 'dawn', sea: 'sky' };
 const ENV_CACHE = new Map();
 function parseHDR(buf) {
   const b = new Uint8Array(buf); let p = 0, line = '';
@@ -2358,7 +2376,7 @@ function groundTexture(kind, seed0, hi) {
     const S = 1024; x.scale(SS / S, SS / S);
     // draw fn at the position and at its wrapped copies, so the texture tiles without seams
     const wrapAt = (cx, cy, r, fn) => { for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) { const X = cx + ox, Y = cy + oy; if (X + r < 0 || X - r > S || Y + r < 0 || Y - r > S) continue; x.save(); x.translate(X, Y); fn(); x.restore(); } };
-    const base = { gibber: '#a8613a', litter: '#3b2e22', gravel: '#b7a58c', heath: '#6f5f4a', pebbles: '#6f675a', soil: '#3f3024', dry: '#6f6a44', sand: '#d8c39a' }[kind] || '#777';
+    const base = { clay: '#8b7160', mud: '#3b3226', gibber: '#a8613a', litter: '#3b2e22', gravel: '#b7a58c', heath: '#6f5f4a', pebbles: '#6f675a', soil: '#3f3024', dry: '#6f6a44', sand: '#d8c39a' }[kind] || '#777';
     // v4.81: light and dark patches from a small tileable noise image drawn scaled up (no per-pixel work and no
     // read-back), and leaves and stones stamped from a few pre-drawn sprites: about 10x faster to make
     const NG = 128, noiseCanvas = (fn) => {
@@ -2429,6 +2447,44 @@ function groundTexture(kind, seed0, hi) {
       const cols = [['#8f877a', '#6a6357'], ['#857b6b', '#5f564a'], ['#959087', '#716c63'], ['#7f7262', '#5a4d3f'], ['#7d807a', '#5b5e58'], ['#8e7c66', '#665441']];
       for (let i = 0; i < 2600; i++) { const cx = R() * S, cy = R() * S, r = 3 + R() ** 2.5 * 16, c = cols[(R() * cols.length) | 0]; wrapAt(cx, cy, r * 2, () => { x.rotate(R() * 3); stone(r, r * (0.6 + R() * 0.35), c[0], c[1], R() < 0.12); }); }
       tone(0.15);
+    } else if (kind === 'clay') {
+      // v5.93: cracking clay (the Channel Country's floodplains as they dry): grey-brown plates 15-40 cm across, split by
+      // wandering cracks 1-3 cm wide (wider where they meet), each plate broken again by fine shallow cracks, its edges a
+      // little paler where they curl up; a few small gibber stones and wisps of dry grass. The crack nets are two wobbly
+      // Voronoi patterns (big plates, then small ones) worked out on a small tileable grid.
+      const G = 512, img = x.createImageData(G, G);
+      const net = (cellN, sd) => { const R2 = rng(seed + sd), pts = []; for (let j = 0; j < cellN; j++) for (let i = 0; i < cellN; i++) pts.push([(i + 0.1 + R2() * 0.8) / cellN, (j + 0.1 + R2() * 0.8) / cellN, R2()]); return { cellN, pts }; };
+      const N1 = net(6, 21), N2 = net(15, 23);
+      const vor = (N, u, v) => {
+        const cN = N.cellN, ci = Math.floor(u * cN), cj = Math.floor(v * cN); let d1 = 9, d2 = 9, id = 0;
+        for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+          const a = ci + di, b = cj + dj, p = N.pts[((b % cN) + cN) % cN * cN + ((a % cN) + cN) % cN];
+          const d = Math.hypot(u - (p[0] + Math.floor(a / cN)), v - (p[1] + Math.floor(b / cN)));
+          if (d < d1) { d2 = d1; d1 = d; id = p[2]; } else if (d < d2) d2 = d;
+        }
+        return [(d2 - d1) * cN, id, d1 * cN];
+      };
+      for (let j = 0; j < G; j++) for (let i = 0; i < G; i++) {
+        const u0 = i / G, v0 = j / G, wx = (tfbm(u0 * 6, v0 * 6, 6, seed + 11, 3) - 0.5) * 0.09, wy = (tfbm(u0 * 6 + 3.1, v0 * 6, 6, seed + 13, 3) - 0.5) * 0.09;
+        const [e1, id1] = vor(N1, u0 + wx, v0 + wy), [e2] = vor(N2, u0 + wx * 1.6 + 0.013, v0 + wy * 1.6);
+        const wN = tfbm(u0 * 14, v0 * 14, 14, seed + 19, 2), w1 = 0.025 + 0.05 * wN;
+        const crack = 1 - sstep(w1 * 0.6, w1 * 1.6, e1), fine = (1 - sstep(0.015, 0.05, e2)) * (0.5 + 0.5 * wN) * (1 - crack), rim = sstep(w1 * 1.6, w1 * 3, e1) * (1 - sstep(w1 * 3, w1 * 7, e1));
+        const n = (tfbm(u0 * 32, v0 * 32, 32, seed + 17, 3) - 0.5) * 0.2, tn = 0.86 + id1 * 0.22;
+        const b = (tn + n + rim * 0.1) * (1 - crack * 0.62) * (1 - fine * 0.28), k = (j * G + i) * 4;
+        img.data[k] = clamp(128 * b, 0, 255); img.data[k + 1] = clamp(110 * b, 0, 255); img.data[k + 2] = clamp(95 * b, 0, 255); img.data[k + 3] = 255;
+      }
+      const cc = document.createElement('canvas'); cc.width = cc.height = G; cc.getContext('2d').putImageData(img, 0, 0);
+      x.save(); x.imageSmoothingEnabled = true; x.drawImage(cc, 0, 0, S, S); x.restore();
+      const cols = [['#6e4a38', '#3a2418'], ['#5a4a42', '#2e2620'], ['#7a5a44', '#44301e']];
+      for (let i = 0; i < 28; i++) { const cx = R() * S, cy = R() * S, r = 3 + R() ** 2 * 8, c = cols[(R() * cols.length) | 0]; wrapAt(cx, cy, r * 2, () => { x.rotate(R() * 3); stone(r, r * (0.6 + R() * 0.35), c[0], c[1], R() < 0.4); }); }
+      for (let i = 0; i < 120; i++) { const cx = R() * S, cy = R() * S, l = 10 + R() * 40, a = R() * TAU; wrapAt(cx, cy, l, () => { x.rotate(a); x.strokeStyle = ['#b9a679', '#a08d62', '#c8b88e'][(R() * 3) | 0]; x.globalAlpha = 0.6; x.lineWidth = 0.8 + R(); x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(l * 0.5, (R() - 0.5) * 6, l, (R() - 0.5) * 8); x.stroke(); x.globalAlpha = 1; }); }
+      tone(0.12);
+      // v5.93: swamp mud at the water's edge: dark and wet, with fallen leaves, thin cypress needles and bits of twig pressed in
+      for (let i = 0; i < 1400; i++) { const cx = R() * S, cy = R() * S, l = 8 + R() * 16, a = R() * TAU, col = ['#7a4a26', '#8c5a2e', '#5e3a20', '#a0703c'][(R() * 4) | 0]; wrapAt(cx, cy, l, () => { x.rotate(a); x.strokeStyle = col; x.globalAlpha = 0.55 + R() * 0.35; x.lineWidth = 1.2 + R() * 0.8; x.beginPath(); x.moveTo(0, 0); x.lineTo(l, (R() - 0.5) * 2); x.stroke(); x.globalAlpha = 1; }); }
+      const pal = ['#4a3622', '#5c4428', '#3c2c1c', '#6a5030', '#55452a'];
+      for (let i = 0; i < 260; i++) { const cx = R() * S, cy = R() * S, l = 22 + R() * 46, w = l * (0.22 + R() * 0.15), a = R() * TAU, col = pal[(R() * pal.length) | 0], curl = R(); wrapAt(cx, cy, l, () => { x.rotate(a); x.globalAlpha = 0.85; leaf(l, w, col, curl); x.globalAlpha = 1; }); }
+      for (let i = 0; i < 40; i++) { const cx = R() * S, cy = R() * S, r = 30 + R() * 90; wrapAt(cx, cy, r, () => { const g = x.createRadialGradient(0, 0, 0, 0, 0, r); g.addColorStop(0, 'rgba(20,16,10,.35)'); g.addColorStop(1, 'rgba(20,16,10,0)'); x.fillStyle = g; x.beginPath(); x.ellipse(0, 0, r, r * 0.7, R() * 3, 0, TAU); x.fill(); }); }
+      tone(0.22);
     } else if (kind === 'heath' || kind === 'dry') {
       const strokes = kind === 'heath' ? ['#3a2f25', '#5a4a38', '#8a7a5c', '#b4a27c', '#4a3f30', '#6b4f5a'] : ['#a89a66', '#7d7a46', '#b8aa78', '#5d6634', '#8c8a52', '#4f5a2c'];
       for (let i = 0; i < 5200; i++) { const cx = R() * S, cy = R() * S, l = 6 + R() * 30, a = R() * TAU, col = strokes[(R() * strokes.length) | 0], w = 0.6 + R() * 1.4; wrapAt(cx, cy, l, () => { x.rotate(a); x.strokeStyle = col; x.lineWidth = w; x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(l * 0.5, (R() - 0.5) * 6, l, (R() - 0.5) * 4); x.stroke(); }); }
@@ -2518,7 +2574,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
 
   // environment light from a simple sky/ground gradient (soft reflections; no image is fetched)
   const envScene = new THREE.Scene();
-  const eg = new THREE.SphereGeometry(10, 32, 16), ec = [], ep = eg.attributes.position, gcol = new THREE.Color(S.ground ? ({ gibber: '#9a5a38', litter: '#4a3a29', gravel: '#b49f86', heath: '#7d6b52', pebbles: '#8f8677', soil: '#4a3828', dry: '#9b8a62', sand: '#d8c39a' }[S.ground]) : '#2c5d7a');
+  const eg = new THREE.SphereGeometry(10, 32, 16), ec = [], ep = eg.attributes.position, gcol = new THREE.Color(S.ground ? ({ clay: '#7d6553', mud: '#3a3125', gibber: '#9a5a38', litter: '#4a3a29', gravel: '#b49f86', heath: '#7d6b52', pebbles: '#8f8677', soil: '#4a3828', dry: '#9b8a62', sand: '#d8c39a' }[S.ground]) : '#2c5d7a');
   for (let i = 0; i < ep.count; i++) { const y = ep.getY(i) / 10, c = y > 0 ? hor.clone().lerp(sky, sstep(0, 0.6, y)).multiplyScalar(1.15) : gcol.clone().multiplyScalar(0.7); ec.push(c.r, c.g, c.b); }
   eg.setAttribute('color', new THREE.Float32BufferAttribute(ec, 3));
   envScene.add(new THREE.Mesh(eg, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
@@ -2552,14 +2608,14 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     const gg = new THREE.CircleGeometry(groundR, 128, 0, TAU); gg.rotateX(-Math.PI / 2);
     // finer rings near the middle so the riverbank slope is smooth
     const tG = performance.now(); const tex = groundTexture(S.ground, seed + 5, quality !== 'low'); perfT('groundTex', tG); tex.anisotropy = ctx.renderer.capabilities.getMaxAnisotropy(); const rep = (groundR * 2) / S.tile; tex.repeat.set(rep, rep); // v5.50: the leaves and stones painted on the ground keep their real size (S.tile metres per tile) for every snake
-    const gm = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.96, metalness: 0, bumpMap: tex, bumpScale: Math.min(1, L * 0.5) * 0.6 });
+    const gm = new THREE.MeshStandardMaterial({ map: tex, roughness: S.rough || 0.96, metalness: 0, bumpMap: tex, bumpScale: Math.min(1, L * 0.5) * 0.6 });
     if (NATURE.groundDetail) NATURE.groundDetail(THREE, gm, S.ground, ctx, { onLoad: () => ctx.afterNature && ctx.afterNature() }); // v5.83: sharp close up
     if (S.water === 'river') {
       // the bank slopes down into shallow water on one side, away from the snake
       const geo = new THREE.PlaneGeometry(groundR * 2, groundR * 2, 160, 160); geo.rotateX(-Math.PI / 2);
       // v5.50: a real bank (the water about 20 cm deep a little way out, the shore wandering by a few tens of cm), the
       // same for every snake; the water's edge is just past the snake, wherever the wavy shoreline puts it
-      const dir = new THREE.Vector2(Math.cos(poseInfo.waterDir), Math.sin(poseInfo.waterDir)), depth = 0.2;
+      const dir = new THREE.Vector2(Math.cos(poseInfo.waterDir), Math.sin(poseInfo.waterDir)), depth = S.depth || 0.2;
       const wob = (al) => (fbm(al / 2.4, 3.1, 0.7, seed + 19, 3) - 0.5) * 1.1;
       let edge = -1e9; for (let i = 0; i < poseInfo.pts.length; i += 3) { const q = poseInfo.pts[i]; edge = Math.max(edge, q[0] * dir.x + q[1] * dir.y + wob(-q[0] * dir.y + q[1] * dir.x)); }
       edge += F.w0 * 2.5 + 0.06;
@@ -2573,7 +2629,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
       }
       geo.computeVertexNormals();
       const g2 = new THREE.Mesh(geo, gm); g2.receiveShadow = true; scene.add(g2); ctx.fadeMats.push(gm);
-      const wm = new THREE.MeshPhysicalMaterial({ color: '#2f4d48', roughness: 0.16, metalness: 0, transparent: true, opacity: 0.72, envMapIntensity: 0.45, normalMap: waterNormal(seed), normalScale: new THREE.Vector2(0.35, 0.35) }); // v4.72: clear dark river water (not a pale sheet)
+      const wm = new THREE.MeshPhysicalMaterial({ color: S.waterCol || '#2f4d48', roughness: 0.16, metalness: 0, transparent: true, opacity: S.waterOp || 0.72, envMapIntensity: 0.45, normalMap: waterNormal(seed), normalScale: new THREE.Vector2(0.35, 0.35) }); // v4.72: clear dark river water (not a pale sheet)
       wm.normalMap.repeat.set(groundR * 2 / 1.6, groundR * 2 / 1.6); // ripples at their real size (the pattern repeats every 1.6 m)
       const wSeg = quality === 'low' ? 40 : 80, wg = new THREE.PlaneGeometry(groundR * 2, groundR * 2, wSeg, wSeg); wg.rotateX(-Math.PI / 2);
       const water = new THREE.Mesh(wg, wm); water.position.y = -depth * 0.35; water.renderOrder = 2; scene.add(water); ctx.fadeMats.push(wm);
@@ -2644,8 +2700,19 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     const wg = new THREE.RingGeometry(0, groundR, 96, quality === 'low' ? 18 : 40); wg.rotateX(-Math.PI / 2);
     const water = new THREE.Mesh(wg, wm); water.position.y = poseInfo.seaLevel; water.receiveShadow = true; water.renderOrder = 2; scene.add(water);
     if (NATURE.water) NATURE.water(THREE, water, { swell: 0.006, calmR: Rb * 1.1, drift: 0.035 }); // v5.73: a gentle swell and moving ripples on the sea
-    const deep = new THREE.Mesh(new THREE.CircleGeometry(groundR, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#0f2f3d' }));
-    deep.position.y = -1.5; scene.add(deep);
+    // v5.93: the sea floor shows through the clear water: pale sand about 1.3 m down with heads of coral and rock, blue-green
+    // with depth (it used to be one flat dark disc)
+    const bedT = groundTexture('sand', seed + 5, quality !== 'low'); bedT.repeat.set((groundR * 2) / 1.0, (groundR * 2) / 1.0);
+    const bedM = new THREE.MeshStandardMaterial({ map: bedT, color: '#5d8a8c', roughness: 1, metalness: 0 }); // (tinted blue-green: the water over it takes the red out of the light)
+    const bedG = new THREE.CircleGeometry(groundR, 64); bedG.rotateX(-Math.PI / 2);
+    { const pp = bedG.attributes.position; for (let i = 0; i < pp.count; i++) pp.setY(i, (fbm(pp.getX(i) / 3, pp.getZ(i) / 3, 2, seed + 31, 3) - 0.5) * 0.5 - sstep(groundR * 0.3, groundR, Math.hypot(pp.getX(i), pp.getZ(i))) * 1.5); bedG.computeVertexNormals(); }
+    const deep = new THREE.Mesh(bedG, bedM); deep.position.y = -1.7; deep.receiveShadow = true; scene.add(deep);
+    const corals = ['#7d6a4e', '#6a5a66', '#8a7a58', '#5a6e5e', '#7a5a4e', '#8e8668'], blue = new THREE.Color('#3f7f8a'), cg = [rockGeometry(seed + 41, 3), rockGeometry(seed + 42, 3)], cm = new THREE.MeshStandardMaterial({ roughness: 0.9, metalness: 0, color: '#ffffff' });
+    const cM = new THREE.Matrix4(), cQ = new THREE.Quaternion(), cE = new THREE.Euler(), cS = new THREE.Vector3(), cP = new THREE.Vector3();
+    cg.forEach((g) => { const n = quality === 'low' ? 18 : 40, im = new THREE.InstancedMesh(g, cm, n), cc = new THREE.Color();
+      for (let i = 0; i < n; i++) { const a = R() * TAU, r = Math.max(Rb * 1.5, 1) + R() * groundR * 0.4, s = 0.08 + R() ** 2 * 0.3; cE.set(R() * 0.3, R() * TAU, R() * 0.3); cQ.setFromEuler(cE); cS.set(s * (1 + R() * 0.6), s * (0.5 + R() * 0.6), s * (1 + R() * 0.6)); cP.set(Math.cos(a) * r, -1.7 - 0.05 + s * 0.3, Math.sin(a) * r); cM.compose(cP, cQ, cS); im.setMatrixAt(i, cM); im.setColorAt(i, cc.set(corals[(R() * corals.length) | 0]).lerp(blue, 0.4)); }
+      im.receiveShadow = true; scene.add(im); });
+    wm.opacity = 0.74;
   }
 
   // props: placed around the snake, never touching it, denser near it and fading out with distance
@@ -2693,7 +2760,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     }
     const geos = [rockGeometry(seed + 1, 3), rockGeometry(seed + 2, 3), rockGeometry(seed + 3, 2)];
     const rt = canvasTex(256, (x, s) => { const img = x.createImageData(s, s); for (let j = 0; j < s; j++) for (let i = 0; i < s; i++) { const n = tfbm(i / s * 6, j / s * 6, 6, seed + 9, 4), k = (j * s + i) * 4, v = 120 + n * 110; img.data[k] = v; img.data[k + 1] = v * 0.96; img.data[k + 2] = v * 0.9; img.data[k + 3] = 255; } x.putImageData(img, 0, 0); }, 2);
-    const rm = new THREE.MeshStandardMaterial({ map: rt, roughness: 0.92, color: P.scene.rock || (S.ground === 'pebbles' ? '#7a7368' : '#b4aa9c') });
+    const rm = new THREE.MeshStandardMaterial({ map: rt, roughness: 0.92, color: P.scene.rock || S.rock || (S.ground === 'pebbles' ? '#7a7368' : '#b4aa9c') });
     geos.forEach((g, gi) => {
       const mine = spots.filter((_, i) => i % 3 === gi); if (!mine.length) return;
       const im = new THREE.InstancedMesh(g, rm, mine.length); im.castShadow = im.receiveShadow = true;
@@ -3045,6 +3112,11 @@ const UI_CSS = `
 .sp3d-stage>.sp3d-bar>.sp3d-grp .sp3d-b[aria-pressed=true],.sp3d-stage>.sp3d-bar>.sp3d-seg>.sp3d-b[aria-pressed=true],.sp3d-stage .sp3d-b.sp3d-backchip:active{background:#4fa64a;border-color:#4fa64a;color:#fff}
 .sp3d-stage>.sp3d-bar>.sp3d-seg>.sp3d-b[aria-pressed=true]{box-shadow:0 1px 4px rgba(0,0,0,.25)}
 .sp3d-bar.sp3d-few .sp3d-more{display:none}
+.sp3d-stage .sp3d-habgrp .sp3d-b[hidden]{display:none}
+.sp3d-stage .sp3d-b.sp3d-habbtn{display:inline-flex;align-items:center;gap:7px}
+.sp3d-stage .sp3d-b.sp3d-habbtn::after{content:"";width:6px;height:6px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:rotate(-45deg);transition:transform .15s ease}
+.sp3d-stage .sp3d-b.sp3d-habbtn[aria-expanded=true]::after{transform:rotate(135deg)}
+.sp3d-stage .sp3d-b.sp3d-habbtn[aria-expanded=true]{border-color:rgba(155,224,124,.65)}
 .sp3d-stage .sp3d-backchip{position:absolute;left:10px;bottom:10px;z-index:5;display:inline-flex;align-items:center;gap:6px}
 .sp3d-stage .sp3d-backchip[hidden]{display:none}
 .sp3d-stage.sp3d-sizing .sp3d-hint{opacity:0}
@@ -3096,16 +3168,24 @@ export function mount(host, opts) {
   { const gH = HEAD_GENUS[String(opts.id || '').split('-')[0]]; if (gH) P.head = Object.assign({}, gH, P.head); } // v5.53
   const reduceMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const reduce = () => reduceMQ.matches;
-  // v5.78: three quality tiers, chosen by the device (or by hand: the Detail button behind Show more, remembered):
-  // High (computers with a graphics card), Medium (phones and tablets), Light (weak devices, software rendering)
+  // v5.78: three quality tiers, chosen by the device: High (computers with a graphics card), Medium (phones and tablets),
+  // Light (weak devices, software rendering). v5.93: no Detail button any more - the tier is always the device's own, and
+  // while the view runs it adapts by itself (adaptive(): the sharpness, the plants' density and the frame pacing step
+  // smoothly up or down from the measured frame time, so it stays smooth without visible jumps)
   const lowDevice = (navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2;
   const phoneLike = Math.min(screen.width, screen.height) < 820 && !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || Math.min(screen.width, screen.height) < 500;
   // software rendering (no GPU: SwiftShader, llvmpipe) is treated as a low-end device
   const softGL = (() => { try { const c = document.createElement('canvas'), g = c.getContext('webgl2') || c.getContext('webgl'), e = g && g.getExtension('WEBGL_debug_renderer_info'), r = e ? String(g.getParameter(e.UNMASKED_RENDERER_WEBGL)) : ''; if (g && g.getExtension('WEBGL_lose_context')) g.getExtension('WEBGL_lose_context').loseContext(); return /swiftshader|llvmpipe|software/i.test(r); } catch (err) { return false; } })();
   const autoQ = softGL || lowDevice || (phoneLike && ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3)) ? 'low' : phoneLike ? 'medium' : 'high';
-  let qPref = 'auto'; try { qPref = localStorage.getItem('sl-3d-quality') || 'auto'; } catch (e) { /* private mode */ }
-  if (!/^(auto|high|medium|low)$/.test(qPref)) qPref = 'auto';
-  let quality = opts.quality || window.SL_3D_QUALITY || (qPref !== 'auto' ? qPref : autoQ);
+  try { localStorage.removeItem('sl-3d-quality'); } catch (e) { /* private mode */ } // (the old Detail button's choice)
+  const quality = opts.quality || window.SL_3D_QUALITY || autoQ;
+  // v5.93: the snake's habitats (Habitats, behind Show more, when it has more than one); the last one you chose for this
+  // snake is remembered on this device
+  let habList = habitatsOf(opts.id); const scene0 = P.scene;
+  const lookOf = (o) => (o.k === scene0.kind ? Object.assign({}, scene0, o.f ? { flavor: o.f } : {}) : Object.assign({ kind: o.k }, o.f ? { flavor: o.f } : {}, scene0.barkColor ? { barkColor: scene0.barkColor } : {}, scene0.leafSize ? { leafSize: scene0.leafSize } : {}));
+  let habI = 0;
+  const habChoose = () => { habI = 0; try { const k = localStorage.getItem('sl-3d-hab:' + opts.id); const i = habList.findIndex((o) => o.k === k); if (i >= 0) habI = i; } catch (e) { /* private mode */ } P.scene = lookOf(habList[habI]); };
+  if (habList) habChoose();
   const disposables = new Set(), cleanups = [];
   const track = (o) => { disposables.add(o); return o; };
   const on = (t, ev, fn, o) => { t.addEventListener(ev, fn, o); cleanups.push(() => t.removeEventListener(ev, fn, o)); };
@@ -3171,16 +3251,23 @@ export function mount(host, opts) {
   [bMouth, fb.eat, fb.slither].forEach((b) => b && !b.hasAttribute('aria-pressed') && b.setAttribute('aria-pressed', 'false'));
   const gView = grp('View', 'sp3d-seg', [bNormal, bAnat, bScale]), gAct = grp('Actions', '', [bMouth, fb.eat, fb.slither]), gReset = grp('Reset', '', [bReset]);
   vg2.className = 'sp3d-grp sp3d-cam'; vg2.setAttribute('aria-label', 'Camera'); bar.appendChild(vg2);
-  // v5.78: Detail - Auto (the device's own tier), High, Medium or Light, remembered on this device; behind Show more
-  const qName = { high: 'High', medium: 'Medium', low: 'Light' }, qOrder = ['auto', 'high', 'medium', 'low'];
-  const bQual = el('button', 'sp3d-b sp3d-qual'); bQual.type = 'button';
-  const qLabel = () => { bQual.textContent = 'Detail: ' + (qPref === 'auto' ? 'Auto (' + qName[quality] + ')' : qName[quality]); bQual.setAttribute('aria-label', bQual.textContent + '. Press to change the level of detail'); };
-  const gQual = el('span', 'sp3d-grp sp3d-cam sp3d-qgrp'); gQual.setAttribute('role', 'group'); gQual.setAttribute('aria-label', 'Detail'); gQual.appendChild(bQual); bar.appendChild(gQual); qLabel();
-  on(bQual, 'click', () => { const i = qOrder.indexOf(qPref); setQuality(qOrder[(i + 1) % qOrder.length]); });
+  // v5.93: Habitats (behind Show more, only for a snake that lives in more than one): Habitats opens the list of its
+  // habitats beside it, the one shown is green; choosing another rebuilds the surroundings round the same snake and view
+  const gHab = el('span', 'sp3d-grp sp3d-cam sp3d-habgrp'); gHab.setAttribute('role', 'group'); gHab.setAttribute('aria-label', 'Habitats');
+  const habBtns = [];
+  bar.appendChild(gHab);
+  const habUI = () => {
+    const bHab = el('button', 'sp3d-b sp3d-habbtn', 'Habitats'); bHab.type = 'button'; bHab.setAttribute('aria-expanded', 'false'); gHab.appendChild(bHab);
+    habList.forEach((o, i) => { const b = el('button', 'sp3d-b sp3d-habopt', o.l); b.type = 'button'; b.hidden = true; b.setAttribute('aria-pressed', String(i === habI)); gHab.appendChild(b); habBtns.push(b);
+      on(b, 'click', () => { if (i === habI) return; habI = i; habBtns.forEach((q, j) => q.setAttribute('aria-pressed', String(j === i))); try { localStorage.setItem('sl-3d-hab:' + opts.id, o.k); } catch (e) { /* private mode */ } P.scene = lookOf(o); rebuild(); }); });
+    on(bHab, 'click', () => { const open = bHab.getAttribute('aria-expanded') !== 'true'; bHab.setAttribute('aria-expanded', String(open)); habBtns.forEach((b) => { b.hidden = !open; }); });
+  };
+  if (habList) habUI();
+  else HAB_P.then((d) => { const l = habPick(d, opts.id); if (!alive || !l || habList) return; habList = l; const k0 = P.scene.kind; habChoose(); habUI(); if (P.scene.kind !== k0 && ctx.scene) rebuild(); }); // (arrived late)
   [...bar.children].forEach((c) => { if (c.classList.contains('sp3d-b') && c !== bReset) gAct.appendChild(c); }); // (any other action button extras.js adds)
   // v5.05: the main buttons stay in view; the camera buttons are behind Show more / Show less
   const bMore = el('button', 'sp3d-b sp3d-morebtn', 'Show more'); bMore.type = 'button'; bMore.setAttribute('aria-expanded', 'false');
-  [vg2, gQual].concat(fx.moreButtons || []).forEach((b) => b.classList.add('sp3d-more'));
+  [vg2, gHab].concat(fx.moreButtons || []).forEach((b) => b.classList.add('sp3d-more'));
   bar.classList.add('sp3d-few');
   // v5.50: Show more sits on its own line under the main buttons (like See all families), and the extra buttons open below it
   const br1 = el('span', 'sp3d-br'), br2 = el('span', 'sp3d-br'); br1.setAttribute('aria-hidden', 'true'); br2.setAttribute('aria-hidden', 'true');
@@ -3196,10 +3283,6 @@ export function mount(host, opts) {
   const panel = el('div', 'sp3d-panel'); panel.hidden = true; panel.id = 'sp3d-panel-' + seed; bSet.setAttribute('aria-controls', panel.id);
   const mkCheck = (label, checked) => { const l = el('label', 'sp3d-opt'), c = document.createElement('input'); c.type = 'checkbox'; c.checked = checked; l.append(c, document.createTextNode(' ' + label)); panel.appendChild(l); return c; };
   const cScene = mkCheck('Show surroundings', true);
-  const ql = el('label', 'sp3d-opt'), qs = document.createElement('select');
-  qs.dataset.slDd = '1'; // v4.81: the (hidden) settings list keeps the plain browser dropdown, so the page's dropdown script leaves no listeners behind
-  [['high', 'High detail'], ['low', 'Light (faster)']].forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; if (v === quality) o.selected = true; qs.appendChild(o); });
-  ql.append(document.createTextNode('Quality '), qs); panel.appendChild(ql);
   // v5.68: no caption under the 3D view (the length and the reconstruction note were a line of text below the snake)
   // v5.50: the buttons live INSIDE the 3D view, like the map's buttons in fullscreen
   stage.appendChild(bar);
@@ -3578,13 +3661,13 @@ float slScale(vec2 m) {
     kick();
   }
   function frame() {
-    raf = 0; if (!alive || lost || !cam) return;
+    raf = 0; kicked = false; if (!alive || lost || !cam) return;
     if (document.hidden || !host.isConnected || host.offsetParent === null && !document.fullscreenElement) { dirty = true; return; } // paused while hidden
     if (holdRender) return; // (still loading: see build)
     const tF0 = performance.now(); colList = null;
     const camMoving = controls.update(); let moving = false;
     // v5.73: wind, water and the snake's idle life run on a clock of their own (no motion at all with reduced motion)
-    const amb = !reduce(); if (NATURE.tick) { NATURE.tick(performance.now() / 1000); NATURE.AMB.uWind.value = amb && cScene.checked ? (quality === 'low' ? 0.6 : 1) : 0; }
+    const amb = !reduce(); if (NATURE.tick) { NATURE.tick(performance.now() / 1000); NATURE.AMB.uWind.value = amb && cScene.checked ? (quality === 'low' ? 0.6 : 1) : 0; if (NATURE.AMB.uDens) NATURE.AMB.uDens.value = pace.dens; }
     // the jaw opens and shuts smoothly
     const mo = extras && extras.mouth;
     // (v5.78: eased, and timed by the clock - not a fixed step per frame - so it opens at the same smooth pace at any frame rate)
@@ -3598,8 +3681,9 @@ float slScale(vec2 m) {
     updateOccluders();
     // (v5.73: frames that only move leaves and water reuse the shadows; v5.78: so do frames where only the camera moves - turning
     // or zooming used to redraw the whole shadow map every frame)
-    { const viaAmb = ambOnly; ambOnly = false; const shUp = shadowDirty || sceneMoving || (!viaAmb && !camMoving) || shadowAge++ > (quality === 'high' ? 4 : 12); if (shUp) shadowAge = 0; shadowDirty = false; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; }
-    dynRes(tF0, moving);
+    const viaAmb = ambOnly; if (viaAmb) paceMeasure(tF0);
+    { ambOnly = false; const shUp = shadowDirty || sceneMoving || (!viaAmb && !camMoving) || shadowAge++ > (quality === 'high' ? 4 : 12); if (shUp) shadowAge = 0; shadowDirty = false; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; }
+    dynRes(tF0, moving, amb);
     renderer.render(ctx.scene, cam);
     sizeAfter(); // v5.74: the magnified inset of a small snake
     updateMarkers();
@@ -3607,16 +3691,38 @@ float slScale(vec2 m) {
     if (window.SL_3D_TEST) (window.__slFrames || (window.__slFrames = [])).push(performance.now() - tF0);
     lastF = tF0;
     if (moving) kick();
-    else if (amb && alive) { // v5.73: the scenery keeps moving gently, at a calmer frame rate (lower still at the Light setting)
-      clearTimeout(ambT); ambT = setTimeout(() => { ambOnly = true; kick(); }, performance.now() - lastUser > 45000 ? 125 : quality === 'low' ? 50 : quality === 'medium' ? 42 : 30); // (left alone for a while: slower still, to save the battery)
-    }
+    else if (amb && alive && !raf) raf = requestAnimationFrame(ambTick); // v5.73: the scenery keeps moving gently (v5.93: paced, below)
   }
+  // v5.93: the wind in the grass and the water are drawn on the screen's own beat - every frame, or every 2nd, 3rd or 4th
+  // frame - never on a timer (the old 30-50 ms timer drifted against the screen's refresh, so the grass moved in uneven
+  // steps: it looked laggy even when the device had time to spare). How many frames apart adapts to the device (pace):
+  // when the scenery frames come late it draws them further apart, then thins the far plants a little (fading them out
+  // from 20 m, never near the snake), then the sharpness (only while nothing else moves, at most to 75%); when there is
+  // time to spare it steps back up the same way. Each step is small and slow, so nothing visibly jumps.
+  function ambTick(ts) {
+    raf = 0; if (!alive) return;
+    if (pace.lastTs) { const d = ts - pace.lastTs; if (d > 4 && d < 60) pace.vs += (d - pace.vs) * 0.1; } pace.lastTs = ts;
+    const per = Math.max(1, Math.round(16.7 / pace.vs)), need = per * Math.max(pace.skip, performance.now() - lastUser > 45000 ? 4 : 1); // (left alone for a while: slower, to save the battery)
+    if (kicked || ++pace.cnt >= need) { pace.cnt = 0; ambOnly = !kicked; frame(); }
+    else raf = requestAnimationFrame(ambTick);
+  }
+  function paceMeasure(t) {
+    const d = pace.lastR ? t - pace.lastR : 0; pace.lastR = t; if (!d || d > 400) return;
+    const want = pace.vs * Math.max(1, Math.round(16.7 / pace.vs)) * pace.skip; pace.n++;
+    if (d > want * 1.45) pace.slow++; else if (d < want * 1.15) pace.fast++;
+    if (pace.n < 24) return;
+    const slow = pace.slow > 9, fast = pace.slow < 2 && pace.fast > 19; pace.n = pace.slow = pace.fast = 0;
+    if (slow) { if (pace.skip < 3) pace.skip++; else if (pace.dens > 0.45) pace.dens = Math.max(0.45, pace.dens - 0.15); else if (pace.kIdle > 0.75) pace.kIdle = Math.max(0.75, pace.kIdle - 0.08); }
+    else if (fast) { if (pace.kIdle < 1) pace.kIdle = Math.min(1, pace.kIdle + 0.08); else if (pace.dens < 1) pace.dens = Math.min(1, pace.dens + 0.15); else if (pace.skip > pace.skip0) pace.skip--; }
+  }
+  const pace = { skip0: quality === 'low' ? 2 : 1, skip: quality === 'low' ? 2 : 1, cnt: 0, vs: 16.7, lastTs: 0, lastR: 0, n: 0, slow: 0, fast: 0, dens: 1, kIdle: 1 };
+  let kicked = false;
   let holdRender = false, ambT = 0, shadowAge = 0, ambOnly = false, lastUser = performance.now(), lastF = 0, colList = null, shadowDirty = true;
   // v5.78: dynamic resolution - while the view moves, if frames take too long (under ~40 per second) the picture is drawn with
   // fewer pixels (down to 60% of the full pixel ratio), and as soon as it is still again it is drawn once more at full
   // sharpness. The change is gradual and has a dead band, so the resolution never flickers up and down.
   const dyn = { ema: 16, n: 0, still: 0, lastT: 0, frames: 0 };
-  function dynRes(t, moving) {
+  function dynRes(t, moving, amb) {
     const dt = dyn.lastT ? t - dyn.lastT : 16; dyn.lastT = t;
     if (moving && dt < 250) { dyn.ema += (dt - dyn.ema) * 0.15; dyn.frames++; dyn.still = 0; }
     else if (!moving) dyn.still++;
@@ -3625,12 +3731,26 @@ float slScale(vec2 m) {
       if (dyn.ema > 26 && k > 0.6) { k = Math.max(0.6, k * 0.85); dyn.frames = 0; }
       else if (dyn.ema < 15 && k < 1) { k = Math.min(1, k / 0.9); dyn.frames = 0; }
     }
-    if (!moving && dyn.still >= 1 && k < 1) { k = 1; dyn.frames = 0; dyn.ema = 16; } // still: full sharpness
+    if (!moving && dyn.still >= 1 && k !== pace.kIdle) { k = amb ? (k < pace.kIdle ? Math.min(pace.kIdle, k + 0.1) : pace.kIdle) : pace.kIdle; dyn.frames = 0; dyn.ema = 16; } // still: full sharpness (v5.93: in a few small steps, not one jump)
     if (k !== dynK) { dynK = k; const w = stage.clientWidth || 300, h = stage.clientHeight || 200; renderer.setPixelRatio(basePR() * dynK); renderer.setSize(w, h, false); }
   }
   for (const ev of ['pointerdown', 'wheel', 'keydown', 'touchstart']) on(stage, ev, () => { lastUser = performance.now(); }, { passive: true });
   const zeroM = new THREE.Matrix4().makeScale(0, 0, 0), ov = new THREE.Vector3(), od = new THREE.Vector3();
+  // v5.93: during See it eat a tree snake's own tree fades (to a quarter) while any of it stands between the camera and the
+  // head and prey, and comes back when it no longer does (it is one mesh: tested against its triangles every 6th frame)
+  const treeOcc = { n: 0, hit: false, k: 1, ray: null };
+  function fadeTree() {
+    const tr = info && info.tree, tgt = fx.camTarget && fx.camTarget();
+    if (tr && tr.visible && tgt) {
+      if (treeOcc.n++ % 6 === 0) { const r = treeOcc.ray || (treeOcc.ray = new THREE.Raycaster()), d = tgt.clone().sub(cam.position), l = d.length(); r.set(cam.position, d.divideScalar(l || 1)); r.near = 0; r.far = l * 0.88; treeOcc.hit = r.intersectObject(tr, true).length > 0; }
+    } else treeOcc.hit = false;
+    const want = treeOcc.hit ? 0.25 : 1; if (!tr || Math.abs(treeOcc.k - want) < 0.005) return;
+    treeOcc.k = Math.abs(want - treeOcc.k) < 0.02 ? want : treeOcc.k + (want - treeOcc.k) * 0.18; const k = treeOcc.k;
+    tr.traverse((o) => { const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; for (const m of ms) { const tp = k < 0.995; if (m.transparent !== tp) { m.transparent = tp; m.needsUpdate = true; } m.opacity = k; m.depthWrite = !tp; } });
+    kick();
+  }
   function updateOccluders() {
+    fadeTree();
     const list = ctx.occ; if (!list || !list.length) return;
     const t = (fx.camTarget && fx.camTarget()) || targetFor(controls.st.d), cp = cam.position; od.subVectors(t, cp); const len2 = od.lengthSq(), sr = Math.min(info.Rb, Math.sqrt(len2) * 0.3); // (what the camera is really looking at, also during a show)
     const dirty = new Set();
@@ -3642,7 +3762,7 @@ float slScale(vec2 m) {
     }
     dirty.forEach((im) => { im.instanceMatrix.needsUpdate = true; });
   }
-  function kick() { if (!raf && alive) raf = requestAnimationFrame(frame); }
+  function kick() { kicked = true; if (!raf && alive) raf = requestAnimationFrame(frame); }
 
   // ---------------------------------------------------------------- Size vs person (v5.74)
   // The snake and a person 1.70 m tall at the SAME scale, side by side on the same ground: the snake laid out loosely
@@ -3899,7 +4019,6 @@ float slScale(vec2 m) {
   on(bScale, 'click', () => { if (bScale.getAttribute('aria-pressed') !== 'true') { fx.exclusive('scale'); toggleScale(true); } else toggleScale(false); });
   on(bSet, 'click', () => { panel.hidden = !panel.hidden; bSet.setAttribute('aria-expanded', String(!panel.hidden)); });
   on(cScene, 'change', () => setSceneVisible(cScene.checked));
-  on(qs, 'change', () => setQuality(qs.value));
   on(document, 'fullscreenchange', syncFull); on(document, 'webkitfullscreenchange', syncFull);
   on(document, 'visibilitychange', () => { if (!document.hidden) kick(); });
   on(canvas, 'keydown', (e) => { if (e.key === 'Escape' && wrap.classList.contains('sp3d-max')) { e.stopPropagation(); e.preventDefault(); toggleFull(); } });
@@ -3923,13 +4042,6 @@ float slScale(vec2 m) {
     ctx.scene.clear(); ctx.scene = null; scaleObj = null; sizeSt.on = sizeSt.leaving = false; sizeSt.lay = sizeSt.pts = null; sizeSt.undo = null; sizeSt.k = 1; sizeSt.sk.v = sizeSt.sk.from = sizeSt.sk.to = 0; sizeSt.sk.dur = 0;
     bScale.setAttribute('aria-pressed', 'false'); bScale.textContent = 'Size vs person'; sizeOverlays(false);
     markers.forEach((m) => m.el.remove()); markers = [];
-  }
-  function setQuality(q) {
-    qPref = q === 'auto' || qName[q] ? q : 'auto'; try { localStorage.setItem('sl-3d-quality', qPref); } catch (e) { /* private mode */ }
-    const nq = qPref === 'auto' ? autoQ : qPref; qLabel();
-    if (nq === quality) return;
-    quality = nq; qs.value = quality === 'medium' ? 'high' : quality; dynK = 1; renderer.setPixelRatio(basePR());
-    renderer.shadowMap.type = quality === 'low' ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap; qLabel(); rebuild();
   }
   function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; if (sizeBusy()) toggleScale(false, { instant: true }); fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
 

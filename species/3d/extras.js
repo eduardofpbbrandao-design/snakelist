@@ -1474,7 +1474,7 @@ export function create(V) {
       seize: 'It <b>seizes</b> it - slow prey like this needs no strike.',
     };
     // tongue flicks: two or three quick ones, now and then
-    const flicks = (s, every = 1.6, n = 2) => { const ph = (s % every) / 0.42; return ph < n ? ph % 1 : 0; };
+    const flicks = (s, every = 1.6, n = 2) => { const d = Math.min(0.5 + 0.3 * n, every * 0.8), ph = (s % every) / d; return ph < 1 ? ph : 0; }; // (v5.93: one smooth flick, longer for n > 1)
     let ripT = 0, ripI = 0;
     const wake = (s) => { // ripples where the head and the body move through the water
       if (!wet || !NAT.ripple || s - ripT < 0.22) return; ripT = s; ripI++;
@@ -1511,7 +1511,7 @@ export function create(V) {
         phases.push([0.5, (u, s) => { R.setPose(ext); R.apply(); setMouth(tHold + 0.04 * Math.sin(s * 14)); say(T.inject); }]);
         phases.push([0.6, (u) => { held = false; R.setPose(R.blend(ext, coil, ease(u))); R.apply(); setMouth(tHold * (1 - ease(u))); say(T.release); if (u > 0.5) camKey = camSide(preyPt().lerp(headPt(), 0.5), wideD); }]);
         phases.push([1.6, (u, s) => { R.setPose(coil); R.apply(); rolled(ease(u)); flick(flicks(s, 1.2, 1)); say(T.release); }]);
-        phases.push([1.5, (u, s) => { R.setPose(R.blend(coil, ext, ease(u))); R.apply(); setMouth(tHold * ease(u)); say(T.track); rolled(1 - sstep(0.5, 0.97, u)); if (u > 0.97) held = true; const f2 = u / 0.7; flick(f2 < 1 ? (f2 * 2) % 1 : 0); }]); // (picked up smoothly, no jump; flicking its tongue along the trail)
+        phases.push([1.5, (u, s) => { R.setPose(R.blend(coil, ext, ease(u))); R.apply(); setMouth(tHold * ease(u)); say(T.track); rolled(1 - sstep(0.5, 0.97, u)); if (u > 0.97) held = true; const f2 = u / 0.7; flick(f2 < 1 ? f2 : 0); }]); // (picked up smoothly, no jump; flicking its tongue along the trail)
       }
       if (constrict) {
         const camC = () => camSide(preyPt().lerp(headPt(), 0.35), fitD(Math.max(prR * 6.5, Wc * 12, Lp * 1.7)), 0.82, 0.1);
@@ -1644,7 +1644,7 @@ export function create(V) {
       pose = t < S.T0 ? S.between(S.restA, S.angles(tp), S.rest, tp, ease(t / S.T0), 0) : tp;
     }
     S.lastPose = pose;
-    { const ph = S.stopping || V.reduce() ? 1 : ((t + 0.8) % 2.8) / 0.75; flick(ph < 1 ? ph : 0); } // v5.53: it flicks its tongue now and then as it goes
+    { const ph = S.stopping || V.reduce() ? 1 : ((t + 0.8) % 2.8) / 0.9; flick(ph < 1 ? ph : 0); } // v5.53: it flicks its tongue now and then as it goes
     if (S.stout) { for (let i = 0; i < N; i++) R.bul[i] = 1 + 0.03 * Math.sin(TAU * (i * R.dx / (R.L * 0.1) - t * 1.4)) * sstep(R.ih, R.ih + 30, i); }
     R.setPose(pose); R.apply();
     // v5.73: at sea it swims, leaving rings on the water behind its head
@@ -1964,7 +1964,7 @@ export function create(V) {
       ls.appendChild(el('h4', '', { head: 'Head', ribs: 'Ribs and backbone', body: 'Body', tail: 'Tail' }[k] + ': its parts'));
       const x2 = el('button', 'sp3d-ix', '×'); x2.type = 'button'; x2.setAttribute('aria-label', 'Close'); on(x2, 'click', () => { ls.remove(); st.list = null; }); ls.appendChild(x2);
       for (const p2 of st.data.parts.filter((q) => q.region === k)) { const b = el('button', 'sp3d-li', p2.name); b.type = 'button'; on(b, 'click', () => select(p2)); ls.appendChild(b); p2.li = b; }
-      labels.appendChild(ls); st.list = ls;
+      labels.appendChild(ls); st.list = ls; st.listK = k;
       if (k === 'ribs') { const rp = st.data.parts.find((q) => q.key === 'ribs'); if (rp) select(rp, true); }
       else { const ps = st.data.parts.filter((q) => q.region === k && !q.skin); select({ key: 'region-' + k, name: REG[k][0], text: REG[k][1], region: k, meshes: [].concat(...ps.map((q) => q.meshes)), x }, true); }
       V.kick();
@@ -1985,6 +1985,8 @@ export function create(V) {
       return n ? { c: bx.getCenter(new THREE.Vector3()), r: bx.getSize(new THREE.Vector3()).length() / 2 } : null;
     }
     function select(p, noZoom) {
+      // v5.93: picking something that is not part of the region whose Show more list is open closes that list (and its text)
+      if (st.list && p && p.region !== st.listK) { st.list.remove(); st.list = null; st.listK = null; }
       clearSel(); st.sel = p;
       if (p.li) p.li.setAttribute('aria-current', 'true');
       const thin = /^(ribs|spine|teeth|palate|fang|tongue|jaw|skull)$/.test(p.key), px = (thin ? 1.6 : 3) * pxScale();
@@ -2383,9 +2385,14 @@ export function create(V) {
     // breathing: in for about 1.6 s, out for 2.2 s, then a pause (a snake at rest breathes only a few times a minute)
     { const c = ((t / 1000) % 6.5); idle.uB.value = V.reduce() ? 0 : c < 1.6 ? sstep(0, 1.6, c) : c < 3.8 ? 1 - sstep(1.6, 3.8, c) : 0; }
     if (busy) { idleStop(); idle.next = Math.max(idle.next, t + 3000); idle.flickAt = Math.max(idle.flickAt, t + 2500); return; }
-    // tongue flicks: two quick ones every 4-9 s
-    const ft = (t - idle.flickAt) / 1000;
-    if (ft >= 0) { if (ft < 0.84) { flick((ft / 0.42) % 1); idle.flicking = true; } else { flick(0); idle.flicking = false; idle.flickAt = t + 4000 + Math.random() * 5000; } }
+    // tongue flicks (v5.93): one smooth flick of about 0.9 s - out, the tips waving up and down, back in - and now and then a
+    // second one after a short pause, every 4-9 s. (It used to be two quick flicks back to back, each snapping back into the
+    // mouth and straight out again, at the scenery's slower frame rate: the tongue seemed to 'reload' every half second.)
+    const ft = (t - idle.flickAt) / 1000, fd = idle.flickD || 0.9;
+    if (ft >= 0) {
+      if (ft < fd) { flick(ft / fd); idle.flicking = true; }
+      else { flick(0); idle.flicking = false; const again = !idle.second && Math.random() < 0.4; idle.second = again; idle.flickD = 0.75 + Math.random() * 0.35; idle.flickAt = t + (again ? 350 + Math.random() * 250 : 4000 + Math.random() * 5000); }
+    }
     // a slight lift and turn of the head, now and then (High detail only)
     if (V.quality === 'low' || !V.info || V.info.tree) return;
     if (!idle.head && t > idle.next) { ensureRig(); if (rig) idle.head = { t0: t, yaw: (Math.random() < 0.5 ? -1 : 1) * (0.08 + Math.random() * 0.1), dur: 2600 }; }
@@ -2428,7 +2435,7 @@ export function create(V) {
         if (show.freeze == null && show.time >= show.dur) stopShow();
       } else if (slither) moving = stepSlither() || !!slither;
       if (camBlend) moving = true;
-      idleStep();
+      idleStep(); if (idle.flicking || idle.head) moving = true; // (v5.93: a flick or a turn of the head is drawn at the full frame rate)
       if (anat && anat.stepPose()) moving = true;
       if (sizeLay && sizeLay.step()) moving = true; // v5.74: Size vs person lays the snake out (and coils it back)
       if (rig) rig.sync();

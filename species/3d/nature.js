@@ -17,7 +17,14 @@ const HAB = {
   arid:       { trees: null, hills: 0.07, ridge: 0.2, under: 'arid', rock: 'red' },
   sand:       { trees: null, dunes: 1, under: 'sand', rock: 'sandstone' },
   gibber:     { trees: null, hills: 0.012, mesas: 1, under: 'gibber', rock: 'gibber' },
+  // v5.93: the Channel Country's cracking-clay floodplains (open plain, coolibahs in far-off lines along the channels),
+  // swamps (trees standing in the water) and a rocky sea shore
+  clay:       { trees: [['coolibah', 1]], spacing: 16, clump: 0.64, hills: 0.006, under: 'clay', rock: 'gibber', haze: '#c9b49a' },
+  swamp:      { trees: [['cypress', 1]], spacing: 6.5, wetTrees: 1, hills: 0.012, under: 'swamp', rock: 'moss', haze: '#5c6450' },
+  shore:      { trees: [['palm', 1]], spacing: 12, clump: 0.6, hills: 0.03, under: 'shore', rock: 'basalt' },
 };
+// a swamp's trees by its flavour (tools/habitat_looks.py)
+const SWAMP_TREES = { cypress: [['cypress', 1]], tropic: [['tropic', 0.55], ['palm', 0.45]], reed: [['savanna', 1]], mangrove: [['tropic', 0.7], ['palm', 0.3]] };
 const BY_GROUND = { litter: 'litter', soil: 'soil', gravel: 'arid', heath: 'heath', pebbles: 'riverbank', dry: 'grass', sand: 'sand', gibber: 'gibber' };
 
 export function build(A) {
@@ -34,7 +41,9 @@ export function build(A) {
 function buildAll(A) {
   const { THREE, ctx, scene, S, kind, groundR, farR, Rb, F, L, seed, quality, rng, fbm, sstep, clamp, dist2snake, poseInfo } = A;
   const low = quality === 'low';
-  const K = HAB[kind] || HAB[BY_GROUND[S.ground]] || HAB.litter;
+  let K = HAB[kind] || HAB[BY_GROUND[S.ground]] || HAB.litter;
+  const flavor = (A.sceneP && A.sceneP.flavor) || 'cypress';
+  if (kind === 'swamp') K = Object.assign({}, K, { trees: SWAMP_TREES[flavor] || SWAMP_TREES.cypress, spacing: flavor === 'reed' ? 22 : K.spacing, clump: flavor === 'reed' ? 0.6 : 0 });
   const R = rng(seed + 4421);
   const lerp = (a, b, t) => a + (b - a) * t;
   const track = (o) => { if (o && ctx.track) ctx.track(o); return o; };
@@ -108,7 +117,8 @@ function buildAll(A) {
     // v5.50: the real-size grass carpet too (round a small snake it is taller than the camera is high)
     if (ctx.occ && o.tag && o.tag !== 'reeds') {
       if (!geo.boundingSphere) geo.computeBoundingSphere(); const gr = geo.boundingSphere.radius, lim = Rb * 5;
-      list.forEach((t, i) => { if (Math.hypot(t.x, t.z) > lim) return; const r = gr * t.s * Math.max(t.sx || 1, t.sy || 1, t.sz || 1); if (r < F.w0 * 1.5) return; const m = new THREE.Matrix4(); im.getMatrixAt(i, m); ctx.occ.push({ im, i, m, c: new THREE.Vector3(t.x, t.y + r * 0.5, t.z), r, hid: false }); });
+      if (o.occR) { list.forEach((t, i) => { const m = new THREE.Matrix4(); im.getMatrixAt(i, m); ctx.occ.push({ im, i, m, c: new THREE.Vector3(t.x, t.y + o.occR * t.s * 0.5, t.z), r: o.occR * t.s, hid: false }); }); } // (v5.93: big trees near the snake: by their trunk's size, at any distance)
+      else list.forEach((t, i) => { if (Math.hypot(t.x, t.z) > lim) return; const r = gr * t.s * Math.max(t.sx || 1, t.sy || 1, t.sz || 1); if (r < F.w0 * 1.5) return; const m = new THREE.Matrix4(); im.getMatrixAt(i, m); ctx.occ.push({ im, i, m, c: new THREE.Vector3(t.x, t.y + r * 0.5, t.z), r, hid: false }); });
     }
     addTris(o.tag || 'misc', ((geo.index ? geo.index.count : geo.attributes.position.count) / 3) * list.length);
     return im;
@@ -207,7 +217,64 @@ function buildAll(A) {
     pine:    { H: [10, 18], o: { trunkFrac: 0.6, leader: 0.9, spread: 0.24, el0: 48, elR: 34, up: 0.45, card: 0.075, perM: 3.8, nMain: 6, rK: 0.02, moss: 0.15 }, bark: 'plates', barkTint: '#d7a07a', spray: 'needle' },
     spruce:  { H: [14, 25], spruce: 1, bark: 'plates', barkTint: '#8f8074', spray: 'needle' },
     palm:    { H: [9, 16], palm: 1, bark: 'rings', barkTint: '#a09484', spray: 'palm' },
+    // v5.93: coolibah (the eucalypt of the Channel Country's channels: a short crooked trunk, pale bark, a wide open crown of
+    // grey-green leaves) and the bald cypress of the swamps of the south-eastern USA
+    coolibah: { H: [8, 13], o: { trunkFrac: 0.22, leader: 0.55, spread: 0.5, el0: 38, elR: 32, up: 0.1, card: 0.13, perM: 2.8, nMain: 5, rK: 0.032, moss: 0 }, bark: 'smooth', barkTint: '#cfc6b6', spray: 'saltbush' },
+    cypress: { H: [16, 26], cypress: 1, knees: 1, bark: 'furrow', barkTint: '#b3a08a', spray: 'cypress' },
   };
+  const treeMats = {};
+  function treeGeo(ty, Rn, Ht, lod) { const T = TREE[ty]; return T.palm ? palmTree(Rn, Ht, lod) : T.spruce ? spruceTree(Rn, Ht, lod) : T.cypress ? cypressTree(Rn, Ht, lod) : broadTree(Rn, Ht, lod, T.o); }
+  function placeTree(ty, geo, items, occR) {
+    const T = TREE[ty];
+    if (!treeMats[ty]) treeMats[ty] = { bark: barkMat(tex.bark(T.bark), T.barkTint), fol: foliageMat(tex.spray(T.spray)), moss: null };
+    const m = treeMats[ty];
+    const oo = occR ? { occR } : {};
+    inst(geo.wood, m.bark, items.map((t) => ({ ...t, col: tint(0.85, 1.1, 0.06) })), { tag: 'trees', cast: !!occR, ...oo });
+    inst(geo.fol, m.fol, items.map((t) => ({ ...t, col: tint(0.78, 1.12, ty === 'savanna' || ty === 'coolibah' ? 0.2 : 0.14) })), { tag: 'trees', ...oo });
+    if (geo.moss) { if (!m.moss) m.moss = foliageMat(tex.spray('smoss'), { alphaTest: 0.3 }); inst(geo.moss, m.moss, items.map((t) => ({ ...t, col: tint(0.85, 1.1, 0.08) })), { tag: 'trees', ...oo }); }
+  }
+  // cypress knees: woody cones 10-60 cm high that rise from the roots round a bald cypress, out of the water and mud
+  let kneeGeo = null, kneeMat = null;
+  function knees(trees, k) {
+    if (!kneeGeo) {
+      const pts = []; for (let i = 0; i <= 8; i++) { const t = i / 8; pts.push(new THREE.Vector2(0.11 * Math.pow(1 - t, 0.7) * (1 + 0.5 * Math.exp(-t * 6)) + 0.004, t)); }
+      kneeGeo = new THREE.LatheGeometry(pts, low ? 6 : 9); const pp = kneeGeo.attributes.position;
+      for (let i = 0; i < pp.count; i++) { const y = pp.getY(i), a = Math.atan2(pp.getZ(i), pp.getX(i)), w = 1 + 0.18 * Math.sin(a * 3 + y * 4); pp.setX(i, pp.getX(i) * w); pp.setZ(i, pp.getZ(i) * w); }
+      kneeGeo.computeVertexNormals(); const cl = []; for (let i = 0; i < pp.count; i++) { const k2 = 0.6 + 0.4 * Math.min(1, pp.getY(i) * 2); cl.push(k2, k2, k2); } kneeGeo.setAttribute('color', new THREE.Float32BufferAttribute(cl, 3));
+      kneeMat = barkMat(tex.bark('furrow'), '#8b7a66');
+    }
+    const list = [];
+    for (const t of trees) { const n = Math.round((4 + R() * 7) * k); for (let i = 0; i < n; i++) { const a = R() * TAU, r = (1.0 + R() * 2.4) * t.s, x = t.x + Math.cos(a) * r, z = t.z + Math.sin(a) * r; if (dist2snake(x, z) < F.w0 * 4 + 0.25) continue; const h = 0.12 + R() * 0.45; list.push({ x, y: groundAt(x, z) - 0.03, z, ry: R() * TAU, rx: (R() - 0.5) * 0.25, rz: (R() - 0.5) * 0.25, s: h, sx: 0.8 + R() * 0.5, sz: 0.8 + R() * 0.5 }); } }
+    if (list.length) inst(kneeGeo.clone(), kneeMat, list, { tag: 'knees', cast: true, recv: true });
+  }
+  // v5.93: a bald cypress: a tall straight trunk swelling into a fluted buttress at the water line, a flat open crown of
+  // horizontal limbs with feathery light-green sprays, and grey-green Spanish moss hanging from the limbs
+  function cypressTree(Rn, Ht, lod) {
+    const wood = new GB(), fol = new GB(), moss = new GB(), rT = Ht * 0.02 * (0.85 + Rn() * 0.3), wc = woodCol(0.25), nT = [12, 7, 4][lod], ph = Rn() * TAU;
+    const tp = spine(V(0, -0.6, 0), V((Rn() - 0.5) * 0.05, 1, (Rn() - 0.5) * 0.05), Ht * 0.92 + 0.6, nT, Rn, 0, 0.04);
+    const flare = (th, y) => 1 + Math.exp(-Math.max(0, y + 0.2) / (Ht * 0.06)) * (1.3 + (lod < 2 ? 0.9 * Math.pow(Math.abs(Math.cos(th * 3.5 + ph)), 6) : 0.3));
+    tube(wood, tp, tp.map((p, i) => rT * (1 - 0.7 * (i / nT))), [14, 8, 5][lod], { flare, uRep: Math.max(2, Math.round((TAU * rT) / 0.45)), vLen: 1.1, col: wc });
+    const nMain = [9, 6, 4][lod], cs = Ht * 0.07 * [1, 1.5, 2.4][lod], nrm = V(0, 0, 0), upv = V(0, 0, 0), ctr = V(0, Ht * 0.8, 0);
+    for (let b = 0; b < nMain; b++) {
+      const y0 = Ht * lerp(0.5, 0.9, (b + Rn() * 0.7) / nMain), org = along(tp, (y0 + 0.6) / (Ht * 0.92 + 0.6)), az = b * 2.4 + Rn() * 0.6, el = (lerp(65, 95, Rn()) * Math.PI) / 180;
+      const len = Ht * lerp(0.16, 0.3, Rn()) * (1.1 - (y0 / Ht - 0.5)), dir = V(Math.sin(el) * Math.cos(az), Math.cos(el), Math.sin(el) * Math.sin(az));
+      const bp = spine(org, dir, len, [5, 3, 2][lod], Rn, -0.05, 0.35);
+      tube(wood, bp, bp.map((_, i) => rT * 0.38 * (1 - (0.85 * i) / (bp.length - 1)) + 0.01), [5, 4, 3][lod], { uRep: 2, vLen: 1.1, col: wc });
+      const nC = Math.max(2, Math.round((len / cs) * [2.4, 1.2, 0.6][lod]));
+      for (let k = 0; k < nC; k++) {
+        const t = 0.25 + 0.75 * Rn(), p = along(bp, t).add(V(Rn() - 0.5, (Rn() - 0.3) * 0.6, Rn() - 0.5).multiplyScalar(cs * 0.8));
+        nrm.set(Rn() - 0.5, 0.6 + Rn() * 0.4, Rn() - 0.5).normalize(); upv.copy(dirAt(bp, t)).addScaledVector(UP, 0.3);
+        const sz = cs * (0.8 + Rn() * 0.5); card(fol, p, sz * 1.3, sz, nrm, upv, ctr, Ht * 0.3, { upN: 0.35 });
+      }
+      // Spanish moss: strands 0.4-1.6 m long hanging straight down from the limb
+      const nM = lod === 2 ? 1 : Math.round(lerp(2, 5, Rn()) * (lod ? 0.6 : 1));
+      for (let k = 0; k < nM; k++) {
+        const t = 0.15 + 0.8 * Rn(), p = along(bp, t), h = lerp(0.5, 1.7, Rn()) * (Ht / 20), w = h * lerp(0.35, 0.6, Rn()), a = Rn() * Math.PI;
+        for (const da of [0, Math.PI / 2]) card(moss, V(p.x, p.y - h * 0.5, p.z), w, h, V(Math.cos(a + da), 0, Math.sin(a + da)), UP, V(p.x, p.y + h, p.z), h * 2, { upN: 0.2 });
+      }
+    }
+    return { wood: wood.geo(), fol: fol.geo(), moss: moss.p.length ? moss.geo() : null };
+  }
   function broadTree(Rn, Ht, lod, o) {
     const wood = new GB(), fol = new GB(), rT = Ht * o.rK * (0.85 + Rn() * 0.3), wc = woodCol(o.moss || 0);
     const segT = [12, 7, 5][lod], segB = [6, 4, 3][lod], segS = [4, 3, 3][lod], top = Ht * o.leader, nT = [10, 6, 3][lod];
@@ -391,26 +458,33 @@ function buildAll(A) {
     const rT = farR * (K.forest ? (low ? 1.25 : 1.5) : (low ? 1.6 : 2.1)), sp = K.spacing * (low ? 1.3 : 1), lod0 = low ? 16 : 22, lod1 = low ? 42 : 58;
     const grove = (x, z) => !K.clump || sstep(K.clump - 0.04, K.clump + 0.04, fbm(x / 34, z / 34, 0, seed + 200, 3)) > R() || R() < 0.025;
     const nTry = Math.round((Math.PI * (rT * rT - groundR * groundR)) / (sp * sp) * (K.clump ? 0.6 : 1.05));
-    const spots = scatter(nTry, groundR * 1.05 + 0.5, rT, sp * 0.72, (x, z) => notWet(x, z) && grove(x, z), 'area', 6);
+    const spots = scatter(nTry, groundR * 1.05 + 0.5, rT, sp * 0.72, (x, z) => (K.wetTrees || notWet(x, z)) && grove(x, z), 'area', 6);
     const types = K.trees, pick = () => { let u = R() * types.reduce((s, t) => s + t[1], 0); for (const t of types) { u -= t[1]; if (u <= 0) return t[0]; } return types[0][0]; };
     const nVar = low ? [2, 2, 1] : [3, 2, 2], groups = new Map();
     for (const p of spots) { const ty = pick(), lod = p.r < lod0 ? 0 : p.r < lod1 ? 1 : 2, v = (R() * nVar[lod]) | 0, key = ty + '|' + lod + '|' + v; if (!groups.has(key)) groups.set(key, []); groups.get(key).push(p); }
     const mats = {};
     for (const [key, list] of groups) {
       const [ty, lodS, vS] = key.split('|'), lod = +lodS, T = TREE[ty], Rn = rng(seed + 3000 + ty.length * 97 + lod * 13 + +vS * 7), Ht = lerp(T.H[0], T.H[1], (+vS + 0.5) / nVar[lod] * 0.7 + Rn() * 0.3);
-      const geo = T.palm ? palmTree(Rn, Ht, lod) : T.spruce ? spruceTree(Rn, Ht, lod) : broadTree(Rn, Ht, lod, T.o);
-      if (!mats[ty]) mats[ty] = { bark: barkMat(tex.bark(T.bark), T.barkTint), fol: foliageMat(tex.spray(T.spray)) };
+      const geo = treeGeo(ty, Rn, Ht, lod);
       const items = list.map((p) => ({ x: p.x, y: Hgt(p.x, p.z) - 0.05, z: p.z, ry: R() * TAU, rx: (R() - 0.5) * 0.05, rz: (R() - 0.5) * 0.05, s: 0.78 + R() * 0.4, col: null }));
-      inst(geo.wood, mats[ty].bark, items.map((t) => ({ ...t, col: tint(0.85, 1.1, 0.06) })), { tag: 'trees' });
-      inst(geo.fol, mats[ty].fol, items.map((t) => ({ ...t, col: tint(0.78, 1.12, ty === 'savanna' ? 0.2 : 0.14) })), { tag: 'trees' });
+      placeTree(ty, geo, items);
+      if (T.knees && lod === 0) knees(items, 1);
     }
     stats.treeCount = spots.length;
+  }
+  // v5.93: a swamp's own trees stand close round the snake too (in the water and on the mud, never on the snake), with
+  // their knees and Spanish moss, so the snake is seen in the swamp and not only in front of a far-off one
+  if (kind === 'swamp') {
+    const ty = K.trees[0][0], near = scatter(low ? 3 : 5, Math.max(Rb * 2.4, 2.2), groundR * 0.95, 4.5, (x, z) => dist2snake(x, z) > 1.4, 'area', 30);
+    const groups = [[], []];
+    near.forEach((p, i) => groups[i % 2].push({ x: p.x, y: groundAt(p.x, p.z) - 0.08, z: p.z, ry: R() * TAU, rx: (R() - 0.5) * 0.04, rz: (R() - 0.5) * 0.04, s: 0.75 + R() * 0.35, col: null }));
+    groups.forEach((items, v) => { if (!items.length) return; const T = TREE[ty], Rn = rng(seed + 3900 + v * 7); const Ht = lerp(T.H[0], T.H[1], 0.3 + v * 0.4); placeTree(ty, treeGeo(ty, Rn, Ht, 0), items, Ht * 0.07); if (T.knees) knees(items, 1.6); });
   }
 
   // ---------- 3. undergrowth, shrubs, grass, rocks, logs ----------
   const U = K.under, q = low ? 0.3 : 1, near0 = groundR * 0.9;
   const put = (name, makeGeo, mat, n, rMin, rMax, size, o = {}) => {
-    const spots = scatter(Math.round(n * q), rMin, rMax, o.minD || 0, (x, z, r) => notWet(x, z) && (!o.ok || o.ok(x, z, r)), o.distr || 'lin', 8);
+    const spots = scatter(Math.round(n * q), rMin, rMax, o.minD || 0, (x, z, r) => (notWet(x, z) || (kind === 'swamp' && name === 'reeds' && !inRiver(x, z, -2.5))) && (!o.ok || o.ok(x, z, r)), o.distr || 'lin', 8);
     if (!spots.length) return;
     const nv = o.variants || 2, lists = Array.from({ length: nv }, () => []);
     for (const p of spots) {
@@ -426,7 +500,7 @@ function buildAll(A) {
   };
   const grassMat = () => track(vegetation(THREE, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.92, metalness: 0 })));
   const twigMat = () => barkMat(tex.bark('furrow'), '#8a7d6c');
-  const rockStyle = { moss: ['#8d8a80', '#6f8a4a'], grey: ['#9a958a', null], red: ['#9a5a3e', null], sandstone: ['#b98e62', null], gibber: ['#6e3422', null] }[K.rock];
+  const rockStyle = { moss: ['#8d8a80', '#6f8a4a'], grey: ['#9a958a', null], red: ['#9a5a3e', null], sandstone: ['#b98e62', null], gibber: ['#6e3422', null], basalt: ['#57534e', null] }[K.rock || 'grey'];
   const rockMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), bumpMap: tex.rock(), bumpScale: 2, roughness: 0.9, metalness: 0, vertexColors: true, color: rockStyle[0] }));
   groundDetail(THREE, rockMat, 'rock', ctx, { tri: true, near: 1.5, far: 9 }); // v5.83: the grain and cracks of real rock, close up
   const rocks = (n, rMin, rMax, size, o = {}) => put('rocks', (Rn, v) => rockGeo(seed + 500 + v * 11 + (o.detail != null ? 50 : 0), o.detail != null ? o.detail : low ? 2 : 3, { moss: rockStyle[1], flat: o.flat || 0.7 }), rockMat, n, rMin, rMax, size, { variants: 3, lift: -0.18, tilt: 0.4, col: () => tint(0.8, 1.1, 0.08), ...o });
@@ -478,6 +552,34 @@ function buildAll(A) {
     put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 220, near0, 45, [0.25, 0.5], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     rocks(6, groundR * 1.3, 60, [0.3, 1.0], { minD: 2.5 });
   }
+  else if (U === 'clay') {
+    // sparse: low saltbush and bluebush, tangled grey lignum, Mitchell grass tussocks, a few gibber stones on the clay
+    put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 26, wide: 1.4, stems: 0, bright: 1.3 }), foliageMat(tex.spray('saltbush')), 70, near0, 70, [0.3, 0.75], { variants: 2, wmat: twigMat(), lift: -0.08, col: () => tint(0.85, 1.1, 0.08) });
+    put('lignum', (Rn) => tuftGeo(Rn, low ? 24 : 46, 1.2, '#5f6448', '#8f9472', 0.5, { lean: 0.8, w: 0.006, outward: 1, seg: 4 }), grassMat(), 55, near0, 60, [0.6, 1.3], { variants: 2, sy: [0.5, 0.8], col: () => tint(0.85, 1.1, 0.08) });
+    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3, { w: 0.9 }), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 260, near0, 50, [0.22, 0.45], { variants: 3, tilt: 0.12, col: () => tint(0.85, 1.12, 0.1) });
+    rocks(160, near0, 30, [0.03, 0.1], { variants: 2, lift: -0.25, flat: 0.5, recv: false, detail: 0 });
+  } else if (U === 'swamp') {
+    // sawgrass and rushes in clumps on the mud and in the shallows, ferns at the foot of the trees, lily pads on the water
+    put('reeds', (Rn) => tuftGeo(Rn, low ? 16 : 30, 1.4, '#4f6234', '#9a9a5c', 0.3, { w: 0.01, lean: 0.35, outward: 1 }), grassMat(), 160, near0, 45, [0.7, 1.3], { variants: 3, col: () => tint(0.85, 1.1, 0.1) });
+    if (flavor !== 'reed') put('ferns', (Rn) => rosetteGeo(Rn, 1, low ? 1 : 0, { n: 10, el0: 0.5, el1: 1.2, wK: fernW, droop: 0.45 }), foliageMat(tex.spray('fern')), 60, near0, 30, [0.5, 1.0], { variants: 2, tilt: 0.15, col: () => tint(0.8, 1.1, 0.1) });
+    if (wi && water) {
+      const padG = new THREE.CircleGeometry(1, 14, 0.25, TAU - 0.25); padG.rotateX(-Math.PI / 2);
+      const padM = track(new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.45, metalness: 0, side: THREE.DoubleSide }));
+      const wy = water.position.y + 0.004, list = [], padC = new THREE.Color('#5f7d34');
+      for (let c = 0; c < (low ? 14 : 30); c++) {
+        let cx = 0, cz = 0, ok = false; for (let t = 0; t < 30 && !ok; t++) { const a = R() * TAU, r = lerp(Math.max(Rb * 1.5, 1), groundR * 1.6, Math.sqrt(R())); cx = Math.cos(a) * r; cz = Math.sin(a) * r; ok = inRiver(cx, cz, -0.4) && dist2snake(cx, cz) > F.w0 * 4 + 0.3; }
+        if (!ok) continue;
+        for (let i = 0, n = 4 + ((R() * 10) | 0); i < n; i++) { const x = cx + (R() - 0.5) * 1.6, z = cz + (R() - 0.5) * 1.6; if (!inRiver(x, z, -0.2) || dist2snake(x, z) < F.w0 * 3 + 0.25) continue; list.push({ x, y: wy, z, ry: R() * TAU, s: 0.06 + R() * 0.12, sy: 1, col: tint(0.75, 1.05, 0.12).multiply(padC) }); }
+      }
+      inst(padG, padM, list, { tag: 'pads', recv: true });
+    }
+  } else if (U === 'shore') {
+    // dark wave-worn boulders on the shore and a few in the water, beach grass between, palms further back
+    rocks(40, groundR * 1.0, 50, [0.5, 2.4], { minD: 2.5, flat: 0.62 });
+    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 140, near0, 45, [0.3, 0.7], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    if (wi) { const list = []; for (let i = 0; i < (low ? 8 : 16); i++) { const a = R() * TAU, r = lerp(groundR * 0.4, groundR * 1.8, R()), x = Math.cos(a) * r, z = Math.sin(a) * r; if (!inRiver(x, z, 0) || dist2snake(x, z) < 1.5) continue; list.push({ x, y: Hgt(x, z) - 0.1, z, ry: R() * TAU, rx: (R() - 0.5) * 0.4, rz: (R() - 0.5) * 0.4, s: 0.3 + R() * 0.9 }); }
+      inst(rockGeo(seed + 777, low ? 2 : 3, { flat: 0.6 }), rockMat, list, { tag: 'rocks', cast: true, recv: true }); }
+  }
   if (wi) { // reeds along both banks of the river beyond the near ground
     const tng = V(-wi.dir.y, 0, wi.dir.x), list = [];
     for (let k = 0; k < (low ? 120 : 420); k++) {
@@ -513,10 +615,10 @@ function buildAll(A) {
         grassMat(), dens(Math.round(nTuft * 0.9), 120, rOut * 0.85, rFar), rOut * 0.85, rFar, [0.6, 1.25], { variants: 2, distr: 'area', ok: (x, z, r) => Rf() < 1 - sstep(rOut, rFar, r) * 0.92 && clearS(x, z), sizeAt: bowl(h), tilt: 0.15, recv: true, col: () => tint(0.85, 1.12, 0.08) });
       if (heath) put('heather', (Rn) => grassGeo(Rn, low ? 20 : 40, h * 0.9, '#4a5530', '#6a6442', h * 0.5, { lean: 0.8, w: 0.018, tip: '#9a6f8c', heads: 0 }), grassMat(), dens(700, 60, rIn, rOut), rIn, rOut, [0.6, 1.2], { variants: 2, distr: 'lin', ok: clearS, sizeAt: bowl(h * 0.9), col: () => tint(0.85, 1.1, 0.1) });
     }
-    if (U === 'arid' || U === 'gibber' || U === 'sand') {
+    if (U === 'arid' || U === 'gibber' || U === 'sand' || U === 'clay') {
       // v5.50: loose stones their real size (gibber 2-8 cm across, gravel and grit 1-4 cm), not the snake's
-      const sz = U === 'gibber' ? 0.01 : 0.006, r0 = Math.max(F.w0 * 2, Rb * 0.05), r1 = Math.min(near0, Math.max(Rb * 4.5, 2.5));
-      const n = dens(U === 'gibber' ? 1500 : U === 'arid' ? 500 : 200, U === 'gibber' ? 110 : U === 'arid' ? 70 : 30, r0, r1); // v5.05: fewer small stones
+      const sz = U === 'gibber' || U === 'clay' ? 0.01 : 0.006, r0 = Math.max(F.w0 * 2, Rb * 0.05), r1 = Math.min(near0, Math.max(Rb * 4.5, 2.5));
+      const n = dens(U === 'gibber' ? 1500 : U === 'arid' ? 500 : U === 'clay' ? 60 : 200, U === 'gibber' ? 110 : U === 'arid' ? 70 : U === 'clay' ? 4 : 30, r0, r1); // v5.05: fewer small stones
       rocks(n, r0, r1, [sz, sz * 3], { variants: 3, detail: low ? 0 : 1, flat: U === 'gibber' ? 0.5 : 0.65, lift: -0.15, recv: true, distr: 'lin', ok: (x, z) => dist2snake(x, z) > F.w0 * 1.3 + 0.005, clr: (s) => F.w0 * 1.3 + s * 1.6 });
     }
   }
@@ -641,7 +743,7 @@ function buildAll(A) {
 // Done in the vertex shader (no work on the CPU): each plant bends from its base (the instance's origin), the more the
 // higher above it; tall things (trees) bend much less per metre than grass. AMB.uT is the clock, AMB.uWind the strength
 // (lower at the Light quality setting, 0 with reduced motion).
-export const AMB = { uT: { value: 0 }, uWind: { value: 1 }, rip: [], ripN: 0 };
+export const AMB = { uT: { value: 0 }, uWind: { value: 1 }, uDens: { value: 1 }, rip: [], ripN: 0 }; // (v5.93: uDens - viewer.js thins far plants on a slow device)
 const WIND_VS = `
 vec4 mvPosition = vec4( transformed, 1.0 );
 #ifdef USE_INSTANCING
@@ -656,18 +758,23 @@ if ( uSlWind > 0.0 ) {
   float slB = ( slK * slK * 0.06 + max( slH - 1.2, 0.0 ) * 0.011 ) * uSlWind; // how far this point can bend (m)
   vec2 slD = vec2( 0.8, 0.6 ); float slP = dot( slO.xz, slD );
   float slG = 0.55 + 0.45 * sin( uSlT * 0.47 - slP * 0.11 ) * ( 0.6 + 0.4 * sin( uSlT * 0.19 + slP * 0.04 + 1.3 ) ); // gusts rolling across
-  float slS = sin( uSlT * 1.7 - slP * 0.8 + slO.x * 2.3 + slO.z * 1.1 ) * 0.55 + sin( uSlT * 2.9 + slO.z * 3.7 - slO.x ) * 0.25; // each plant its own sway
-  float slF = sin( uSlT * 6.5 + dot( slW.xyz, vec3( 13.1, 7.3, 11.7 ) ) ) * min( slH, 0.6 ) * 0.012 * uSlWind; // leaves flutter
+  float slS = sin( uSlT * 1.5 - slP * 0.8 + slO.x * 2.3 + slO.z * 1.1 ) * 0.55 + sin( uSlT * 2.3 + slO.z * 3.7 - slO.x ) * 0.25; // each plant its own sway
+  float slF = sin( uSlT * 4.2 + dot( slW.xyz, vec3( 13.1, 7.3, 11.7 ) ) ) * min( slH, 0.6 ) * 0.009 * uSlWind; // leaves flutter (v5.93: calmer - a fast flutter only looked like jitter between frames)
   vec2 slOff = slD * slB * ( slG * 0.8 + slS * 0.45 * ( 0.5 + slG ) ) + vec2( -slD.y, slD.x ) * slB * slS * 0.25;
   slW.xz += slOff; slW.y -= dot( slOff, slOff ) / max( 0.05, slH ) * 0.5 + slF * 0.3; slW.x += slF; slW.z -= slF * 0.6;
 }
 mvPosition = viewMatrix * slW;
-gl_Position = projectionMatrix * mvPosition;`;
+gl_Position = projectionMatrix * mvPosition;
+#ifdef USE_INSTANCING
+// v5.93: on a slow device some of the far plants are left out (from 20 m on, by a fixed random number per plant, so the
+// same ones go and come back; within 6 m of the camera every plant stays): their triangles are moved off screen
+if ( uSlDens < 0.999 ) { float slR = fract( sin( dot( slO.xz, vec2( 12.9898, 78.233 ) ) ) * 43758.5453 ); if ( slR > mix( 1.0, uSlDens, smoothstep( 6.0, 20.0, -mvPosition.z ) ) ) gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 ); }
+#endif`;
 export function tick(t) { AMB.uT.value = t; }
 export function vegetation(THREE, m) {
   m.onBeforeCompile = (sh) => {
-    sh.uniforms.uSlT = AMB.uT; sh.uniforms.uSlWind = AMB.uWind;
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uSlT; uniform float uSlWind;').replace('#include <project_vertex>', WIND_VS);
+    sh.uniforms.uSlT = AMB.uT; sh.uniforms.uSlWind = AMB.uWind; sh.uniforms.uSlDens = AMB.uDens;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uSlT; uniform float uSlWind; uniform float uSlDens;').replace('#include <project_vertex>', WIND_VS);
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <normal_fragment_begin>', THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', ''))
       .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
@@ -677,7 +784,7 @@ export function vegetation(THREE, m) {
         reflectedLight.directDiffuse += diffuseColor.rgb * directionalLights[ 0 ].color * sl_t * 0.22; }
       #endif`);
   };
-  m.customProgramCacheKey = () => 'sl-veg2';
+  m.customProgramCacheKey = () => 'sl-veg3';
   return m;
 }
 
@@ -725,6 +832,7 @@ function makeTextures(THREE, rng, fbm, seed, track) {
     heather: { pal: ['#3c4426', '#4a5230', '#5a4048', '#6e4a62', '#34401f', '#7a5272'], l: [12, 20], w: 0.5, tw: 9 },
     saltbush: { pal: ['#7f8a6c', '#8f9a7e', '#6f7a60', '#9aa38a', '#76806a'], l: [26, 38], w: 0.62, tw: 9, twig: '#7a7262' },
     needle: { pal: ['#263f22', '#2f4a28', '#3a5530', '#22381e', '#34502c'], needle: 1, tw: 7 },
+    cypress: { pal: ['#4f6e30', '#5d7d38', '#46632a', '#6a8a40', '#557434'], needle: 1, tw: 9 }, // (v5.93: the soft feathery sprays of a bald cypress)
   };
   function sprayCanvas(style) {
     const P = SPR[style], Rn = rng(seed + 900 + style.length * 31), S = 512, [c, x] = mk(S, S);
@@ -789,6 +897,16 @@ function makeTextures(THREE, rng, fbm, seed, track) {
       }
     }
     return c;
+  }
+  function mossCanvas() { // v5.93: Spanish moss - a curtain of thin, wavy, grey-green strands, thickest at the top
+    const Rn = rng(seed + 1450), W = 256, H = 512, [c, x] = mk(W, H); x.lineCap = 'round';
+    for (let k = 0; k < 150; k++) {
+      let u = W * (0.15 + 0.7 * Rn()), v = Rn() * 30; const len = H * (0.35 + 0.6 * Math.pow(Rn(), 0.7)), col = ['#8e9a86', '#a3ad98', '#7a8672', '#b4bcaa', '#6c7864'][(Rn() * 5) | 0];
+      x.strokeStyle = col; x.lineWidth = 1.2 + Rn() * 1.6; x.globalAlpha = 0.75 + Rn() * 0.25; x.beginPath(); x.moveTo(u, v);
+      const ph = Rn() * 6, amp = 3 + Rn() * 6; for (let s = 0; s < len; s += 8) { v += 8; u += Math.sin(ph + s * 0.05) * amp * 0.25 + (Rn() - 0.5) * 2; x.lineTo(u, v); }
+      x.stroke();
+    }
+    x.globalAlpha = 1; return c;
   }
   function barkCanvas(style) {
     const Rn = rng(seed + 1500 + style.length * 13), W = 256, H = 512, [c, x] = mk(W, H);
@@ -856,7 +974,7 @@ function makeTextures(THREE, rng, fbm, seed, track) {
     return c;
   }
   return {
-    spray: (style) => once('spray-' + style, () => alphaTex(style === 'grassG' || style === 'grassD' ? grassCanvas(style === 'grassD') : style === 'palm' || style === 'fern' || style === 'bigleaf' ? frondCanvas(style) : sprayCanvas(style))),
+    spray: (style) => once('spray-' + style, () => alphaTex(style === 'grassG' || style === 'grassD' ? grassCanvas(style === 'grassD') : style === 'smoss' ? mossCanvas() : style === 'palm' || style === 'fern' || style === 'bigleaf' ? frondCanvas(style) : sprayCanvas(style))),
     bark: (style) => once('bark-' + style, () => canvasTex(barkCanvas(style))),
     rock: () => once('rock', () => canvasTex(rockCanvas())),
     litter: () => once('litter', () => alphaTex(litterCanvas())),
@@ -1106,8 +1224,10 @@ export function perchTree(THREE, opt) {
 // and angles (so no repeating tile shows), fades out with distance (none of it far away, where it would only shimmer),
 // and loads after the scene is up (until then the ground looks as before). One 1024 px image per kind of ground.
 const DETAIL = { litter: 1.26, soil: 1.3, gravel: 2.0, heath: 2.0, pebbles: 2.04, dry: 1.3, sand: 1.8, gibber: 1.5, rock: 1.5 }; // its real width in metres
+const DETAIL_AS = { clay: 'soil', mud: 'soil' }; // (v5.93: grounds that borrow another's close-up photo)
 const detailImg = {};
 export function groundDetail(THREE, mat, kind, ctx, o = {}) {
+  kind = DETAIL_AS[kind] || kind;
   const size = DETAIL[kind]; if (!size || typeof Image === 'undefined') return;
   const ph = new THREE.DataTexture(new Uint8Array([128, 128, 128, 255]), 1, 1); ph.needsUpdate = true;
   const U = { uDet: { value: ph }, uDetK: { value: 0 }, uDetS: { value: 1 / size }, uDetN: { value: o.near || 1.2 }, uDetF: { value: o.far || 7 }, uCau: { value: new THREE.Vector2(-1e9, 0) }, uCauT: AMB.uT };
