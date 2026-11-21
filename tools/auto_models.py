@@ -890,7 +890,7 @@ def apply_562(a, c, g):
 HAND_FIXES_588 = {
     # puff adder: a yellowish-brown ground with dark, backward-pointing chevrons edged pale yellow (they were black rings)
     "bitis-arietans": [(("colors", "dorsal"), "#a2843f"), (("colors", "lateral"), "#9a7f44"), (("colors", "belly"), "#e2d6b2"), (("colors", "mottle"), 0.08),
-                       (("pattern", 0), {"type": "blotch", "t": [0.08, 0.95], "count": 28, "a": 0, "wid": 0.42, "len": 0.24, "shape": "chevron", "vk": 3.6, "color": "#3a2816",
+                       (("pattern", 0), {"type": "blotch", "t": [0.08, 0.95], "count": 26, "a": 0, "wid": 0.42, "len": 0.32, "shape": "chevron", "vk": 2.8, "color": "#33241a",
                                          "edgeColor": "#ecd27a", "edge": 0.55, "edgeOut": True, "warp": 0.25, "jit": 0.06, "sj": 0.12}),
                        (("pattern", 1), {"type": "blotch", "t": [0.08, 0.95], "count": 24, "phase": 0.5, "a": 0.64, "mirror": True, "wid": 0.12, "len": 0.36, "shape": "rect",
                                          "color": "#3a2e22", "edgeColor": "#d8c48c", "edge": 0.22, "edgeOut": True, "warp": 0.3})],

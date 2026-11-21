@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=577'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=577'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=578'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=578'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -1174,13 +1174,14 @@ function scaleTextures(P, lat) {
   // v5.58: edge (scales.edge = { k, dir: [towards the head, towards the belly], from, pow }): how dark each scale's own visible
   // edge is, on one side (the inland taipan's blackish lower front edges that line up into a herringbone) - kept in the cavity
   // map's blue channel, so the dark edge follows the scale's real outline (the colour texture's square cells did not)
-  const SE = S.edge, ed = SE ? new Float32Array(Wt * Ht) : null;
+  const SE = S.edge, ed = SE ? new Float32Array(Wt * Ht) : null, tb = new Float32Array(Wt * Ht).fill(1); // tb: where in its scale each point lies, base (0) to free tip (1)
   for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) {
     const a = ((x + 0.5) / Wt) * 2 - 1, g = ((y + 0.5) / Ht) * Pt;
-    let best = 0, bE = 0;
+    let best = 0, bE = 0, bT = 1;
     if (Math.abs(a) > aV) { // ventral scutes: wide plates
       const yy = g / Pt; best = 0.55 + 0.24 * yy - 0.32 * Math.exp(-(((yy) / 0.075) ** 2)) - 0.32 * Math.exp(-(((1 - yy) / 0.055) ** 2)); // (v5.58: a gentler step at each scute's edge - it shone as a row of white ticks along the belly)
       best -= 0.4 * Math.exp(-(((Math.abs(a) - aV) / 0.01) ** 2));
+      bT = 0.35 + 0.65 * yy; // (v5.88: each ventral plate's front edge lies under the free edge of the one in front)
     } else {
       const i0 = rowOf(a);
       for (let di = -1; di <= 1; di++) {
@@ -1197,15 +1198,15 @@ function scaleTextures(P, lat) {
             const wy = 0.92, t = clamp((ly / wy + 1) / 2, 0, 1), wx = 0.64 * (1 - 0.55 * t * t);
             const d = (lx / wx) ** 2 + (ly / wy) ** 2; if (d >= 1) continue;
             hv = Math.sqrt(1 - d) * 0.45 + 0.55 * t; // rises toward the free (rear) tip that overlaps the next scale
-            if (keel) hv += keel * 0.38 * Math.exp(-((lx / 0.075) ** 2)) * sstep(-0.9, -0.2, ly / wy);
+            if (keel) hv += keel * 0.46 * Math.exp(-((lx / 0.065) ** 2)) * sstep(-0.9, -0.2, ly / wy) * (1 - 0.35 * sstep(0.6, 0.95, t)); // (v5.88: a crisper keel, fading at the very tip as on real scales)
             if (SE && hv > best) { const dir = SE.dir || [1, 1], sd = clamp(0.5 + dir[0] * -ly * 1.3 + dir[1] * Math.sign(a || 1) * lx * 2.2, 0, 1);
               bE = Math.pow(sstep(SE.from != null ? SE.from : 0.3, 0.97, Math.sqrt(d)), SE.pow || 1) * sstep(0.2, 0.85, sd); }
           }
-          if (hv > best) best = hv;
+          if (hv > best) { best = hv; bT = kind === 'juxta' || kind === 'cycloid' ? 1 : clamp((ly / 0.92 + 1) / 2, 0, 1); }
         }
       }
     }
-    h[y * Wt + x] = best; if (ed) ed[y * Wt + x] = bE;
+    h[y * Wt + x] = best; tb[y * Wt + x] = bT; if (ed) ed[y * Wt + x] = bE;
   }
   // v5.58: a light blur (one pixel each way) so the overlapping edges are soft steps, not one-pixel cliffs that flicker
   { const t = new Float32Array(Wt * Ht);
@@ -1222,7 +1223,7 @@ function scaleTextures(P, lat) {
     const l = Math.hypot(dx, dy, 1), k = (y * Wt + x) * 4;
     nData[k] = (-dx / l * 0.5 + 0.5) * 255; nData[k + 1] = (-dy / l * 0.5 + 0.5) * 255; nData[k + 2] = (1 / l * 0.5 + 0.5) * 255; nData[k + 3] = 255;
     const hv = H(x, y), cav = sstep(0.0, 0.3, hv);
-    cData[k] = (0.35 + 0.65 * cav) * 255;                    // cavity (darkens the skin between scales)
+    cData[k] = (0.35 + 0.65 * cav) * lerp(0.74, 1, sstep(0.0, 0.55, tb[y * Wt + x])) * 255; // cavity (darkens the skin between scales; v5.88: and the base of each scale, tucked under the free edge of the one in front - the overlap reads up close)
     cData[k + 1] = (lerp(1.0, 0.82, cav) + keel * 0.08) * 230; // roughness
     cData[k + 2] = ed ? ed[y * Wt + x] * 255 : 0; cData[k + 3] = 255; // (blue: the dark scale edge, see S.edge)
   }
