@@ -1,0 +1,54 @@
+{
+  "id": "salvadora-lineata",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Schmidt, 1940",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Texas Patch-nosed Snake is a harmless snake of Texas and northern and central Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Texas in the USA, and Mexico from Chihuahua, Coahuila and Tamaulipas south to Hidalgo, Michoacán and Puebla.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Salvadora lineata",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Salvadora_lineata"
+    },
+    "rdb": {
+      "title": "Salvadora lineata",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Salvadora&species=lineata"
+    }
+  }
+}

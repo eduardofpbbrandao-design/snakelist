@@ -1,0 +1,116 @@
+{
+  "id": "philodryas-olfersii",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Lichtenstein, 1823)",
+  "facts": {
+    "length": {
+      "text": "About 1 to 1.5 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 4 to 11",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Rodents, lizards, frogs, birds and snakes",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "Lichtenstein's Green Racer is a mildly venomous, bright green snake of South America.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Green above and yellowish below with smooth scales.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Up to 1 to 1.5 m long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Much of South America: Brazil, Peru, Bolivia, Paraguay, Uruguay, northern Argentina, Colombia, Venezuela and the Guianas.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Cerrado, Caatinga, forest and restinga, from sea level to 1,700 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day, often climbing but also hunting on the ground.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Small rodents, lizards, amphibians and birds (especially nestlings), and other snakes almost as big as itself.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 4 to 11 eggs, each about 5 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Slim, bright green snake.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Philodryas olfersii",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Philodryas_olfersii"
+    },
+    "rdb": {
+      "title": "Philodryas olfersii",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Philodryas&species=olfersii"
+    }
+  }
+}

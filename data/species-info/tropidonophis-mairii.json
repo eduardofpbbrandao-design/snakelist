@@ -1,0 +1,93 @@
+{
+  "id": "tropidonophis-mairii",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Gray, 1841)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs, 3 to 18",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly frogs; also fish, lizards and mammals",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "Mair's (Common) Keelback is a harmless water snake of northern and eastern Australia and New Guinea. It is one of the few Australian snakes that can eat small cane toads without being poisoned.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Olive, brown or blackish with small black spots or crossbars; strongly ridged (keeled) scales. It looks like the venomous Rough-scaled Snake.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Northern and eastern Australia (Western Australia to New South Wales), southern Papua New Guinea and Indonesian New Guinea.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Forest, grassland and freshwater wetlands.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly frogs, plus small fish, lizards and mammals.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 3 to 18 eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Keeled scales and dark spots, near fresh water.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Tropidonophis mairii",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Tropidonophis_mairii"
+    },
+    "rdb": {
+      "title": "Tropidonophis mairii",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Tropidonophis&species=mairii"
+    }
+  }
+}

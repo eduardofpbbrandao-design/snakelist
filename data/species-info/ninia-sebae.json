@@ -1,0 +1,85 @@
+{
+  "id": "ninia-sebae",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Duméril, Bibron & Duméril, 1854)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Earthworms, slugs, small snails and caecilians",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Redback Coffee Snake is a small ground snake of south-eastern Mexico and Central America. It looks a bit like a coral snake but is not venomous and rarely bites.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South-eastern Mexico, Belize, Guatemala, Honduras, El Salvador, Nicaragua, Costa Rica and Panama.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Forest and savanna from sea level to about 2,200 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Relies on hiding, escaping and bluffing: when alarmed it may flatten its whole body or freeze.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Earthworms, slugs, small land snails and caecilians.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Ninia sebae",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Ninia_sebae"
+    },
+    "rdb": {
+      "title": "Ninia sebae",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Ninia&species=sebae"
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "id": "lycodon-capucinus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Boie, 1827",
+  "facts": {
+    "length": {
+      "text": "Usually under 1 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Common Wolf Snake is a small, non-venomous snake of South-east Asia and the islands as far as Timor. Its big front teeth, like a wolf's, give it its name.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Slender; black, reddish-brown or dark grey with white or yellowish speckles and spots. A squarish snout.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually less than 1 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Myanmar, Thailand, Indochina, south-eastern China, Malaysia, Singapore, Indonesia, Timor-Leste and the Philippines; also Christmas Island.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Nervous when handled and quick to bite, but the bite only causes pain and swelling.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Dark body with pale speckles and a squarish snout.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Lycodon capucinus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Lycodon_capucinus"
+    },
+    "rdb": {
+      "title": "Lycodon capucinus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Lycodon&species=capucinus"
+    }
+  }
+}

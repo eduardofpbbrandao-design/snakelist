@@ -1,0 +1,80 @@
+{
+  "id": "laticauda-colubrina",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Schneider, 1799)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs (on land)",
+      "src": [
+        "rdb",
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Yellow-lipped Sea Krait is a highly venomous sea snake of the tropical Indian and Pacific Oceans. It hunts underwater but comes back onto land to rest, digest and lay eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Black bands, a black head with a yellow upper lip and snout, and a paddle-shaped tail for swimming.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Coasts of the eastern Indian Ocean and western Pacific, from eastern India and Sri Lanka through South-east Asia to New Guinea, Melanesia, Micronesia and Polynesia, and north to Taiwan and the Ryukyu Islands.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Spends about half its time in the sea and half on land; young ones stay near the water.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs on land.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Black-and-blue bands, yellow lip, paddle tail.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Yellow-lipped sea krait",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Yellow-lipped_sea_krait"
+    },
+    "rdb": {
+      "title": "Laticauda colubrina",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Laticauda&species=colubrina"
+    }
+  }
+}

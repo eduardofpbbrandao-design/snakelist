@@ -1,0 +1,78 @@
+{
+  "id": "psammophylax-rhombeatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays partly developed eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Rhombic Skaapsteker is a mildly venomous grass snake of southern Africa.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Grey to brown with a pattern of rhombus (diamond) shapes on the back; yellow to white below.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South Africa, Lesotho, Eswatini, southern Namibia and south-western Angola.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Moist savanna and grassland, where it hunts actively on the ground by day.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs that are already partly developed - halfway between laying eggs and giving birth.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Rows of diamond-shaped marks on a grey or brown back.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Psammophylax rhombeatus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Psammophylax_rhombeatus"
+    },
+    "rdb": {
+      "title": "Psammophylax rhombeatus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Psammophylax&species=rhombeatus"
+    }
+  }
+}

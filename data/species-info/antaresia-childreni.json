@@ -1,0 +1,124 @@
+{
+  "id": "antaresia-childreni",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Gray, 1842)",
+  "facts": {
+    "length": {
+      "text": "About 1 to 1.5 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Reptiles, birds and small mammals, especially bats",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "Children's Python is a small, non-venomous python of northern Australia, named after the zoologist John George Children.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Usually reddish-brown; its small smooth scales show a rainbow sheen in sunlight.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 1 to 1.5 m long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Northern Western Australia, the northern Northern Territory, northern Queensland and the Torres Strait islands.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Forest, savanna, shrubland, desert, grassland and wetlands; often in caves.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active at night; mostly on the ground but often climbs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Reptiles, birds and small mammals - especially small bats, which it catches by hanging from cave ceilings and grabbing them as they fly past.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "It hangs from the ceiling of a cave to snatch bats out of the air.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Small reddish-brown python with a rainbow sheen.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Children's python",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Children's_python"
+    },
+    "rdb": {
+      "title": "Antaresia childreni",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Antaresia&species=childreni"
+    }
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "id": "elaphe-quadrivirgata",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Boie, 1826)",
+  "facts": {
+    "length": {
+      "text": "About 1 to 1.5 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Frogs, lizards, insects, rodents, birds and eggs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Japanese Four-lined Ratsnake ('shimahebi', the striped snake) is a non-venomous snake found all over Japan except the Ryukyu Islands.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Yellow or light brown with four black stripes along the body. All-black ones also exist - in Japan they are called 'crow snakes'.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 1 to 1.5 m long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Japan from Hokkaido to Kyushu and nearby islands, and Kunashir Island.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Frogs, lizards, insects, rodents, birds and their eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Four black stripes on a yellowish body.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Elaphe quadrivirgata",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Elaphe_quadrivirgata"
+    },
+    "rdb": {
+      "title": "Elaphe quadrivirgata",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Elaphe&species=quadrivirgata"
+    }
+  }
+}

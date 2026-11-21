@@ -1,0 +1,32 @@
+{
+  "id": "crotalus-ornatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Hallowell, 1854",
+  "sections": {
+    "overview": [
+      {
+        "text": "The Eastern Black-tailed Rattlesnake is a venomous rattlesnake of Texas, New Mexico and northern Mexico. It was long included in the Black-tailed Rattlesnake (*Crotalus molossus*) until it was recognised again as a separate species in 2012.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Texas and New Mexico in the USA, and Chihuahua, Coahuila, Nuevo León and Zacatecas in Mexico.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "rdb": {
+      "title": "Crotalus ornatus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Crotalus&species=ornatus"
+    }
+  }
+}

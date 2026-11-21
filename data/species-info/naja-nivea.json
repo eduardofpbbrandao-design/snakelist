@@ -1,0 +1,91 @@
+{
+  "id": "naja-nivea",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "About 1.2 to 1.4 m; record 1.88 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Snakes, rodents, lizards, birds and carrion",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Cape Cobra is a highly venomous cobra of southern Africa, living in dry savanna, fynbos, bushveld and desert.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually about 1.2 to 1.4 m, up to 1.6 m; the record is 1.88 m. Males are slightly bigger.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Western and central South Africa, southern Namibia, south-western Botswana and western Lesotho.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day, rarely at night. It lives on the ground but climbs trees and bushes well, for example to raid nests. Birds of prey and honey badgers hunt it.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Eats almost anything it can catch: other snakes, rodents, lizards, birds - and even carrion.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Cape cobra",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Cape_cobra"
+    },
+    "rdb": {
+      "title": "Naja nivea",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Naja&species=nivea"
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "id": "python-molurus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "sections": {
+    "overview": [
+      {
+        "text": "The Indian Rock Python is a large, non-venomous python of the Indian subcontinent - smaller and lighter-coloured than its relative the Burmese Python, but still one of the world's biggest snakes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Whitish or yellowish with tan to dark brown blotches; darker in hill forests, lighter on the Deccan Plateau.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Nearly all of the Indian subcontinent south of the Himalayas, including southern Nepal, Bhutan, Sri Lanka, south-eastern Pakistan and Bangladesh, and probably northern Myanmar.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Grassland, swamps, marshes, rocky foothills, woodland and forest.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Slow and timid, and rarely tries to attack.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Huge python with brown blotches on a pale body.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Indian python",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Indian_python"
+    },
+    "rdb": {
+      "title": "Python molurus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Python&species=molurus"
+    }
+  }
+}

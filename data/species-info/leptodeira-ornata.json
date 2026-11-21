@@ -1,0 +1,53 @@
+{
+  "id": "leptodeira-ornata",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Bocourt, 1884)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Ornate (Northern) Cat-eyed Snake is a snake of Panama, Colombia and Ecuador.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern Panama, western Colombia and western Ecuador.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Leptodeira ornata",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Leptodeira_ornata"
+    },
+    "rdb": {
+      "title": "Leptodeira ornata",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Leptodeira&species=ornata"
+    }
+  }
+}
