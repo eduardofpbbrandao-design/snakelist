@@ -103,6 +103,8 @@ function bad(u){var f='';try{f=decodeURIComponent(String(u).split('?')[0].split(
 function J(u){return fetch(u).then(function(r){return r.ok?r.json():null})}
 // only photos their owners licensed for reuse (Creative Commons), never 'all rights reserved'
 var LIC='cc0,cc-by,cc-by-nc,cc-by-sa,cc-by-nc-sa,cc-by-nd,cc-by-nc-nd';
+// the credit in English whatever language the photographer uses iNaturalist in: their name and the licence
+function cred(ph,who){var l=String(ph.license_code||'').toUpperCase().replace(/^CC-/,'CC ');return (ph.attribution_name||who||'iNaturalist user')+(l?', '+l:'')}
 function show(url,credit,via){if(!url||bad(url))return false;var f=document.createElement('figure');f.className='sp-photo';
 var i=new Image();i.src=url;i.alt='Photo of '+sci;i.width=500;i.height=333;var c=document.createElement('figcaption');c.textContent='Photo: '+credit+', via '+via;
 f.appendChild(i);f.appendChild(c);nf.replaceWith(f);return true}
@@ -110,8 +112,8 @@ J(API+'taxa?per_page=10&is_active=true&q='+encodeURIComponent(sci)).then(functio
 var t=d&&(d.results||[]).filter(function(x){return (x.name||'').toLowerCase()===sci.toLowerCase()})[0];
 return (t?J(API+'observations?photos=true&quality_grade=research&term_id=17&term_value_id=18&order_by=votes&per_page=3&photo_license='+LIC+'&taxon_id='+t.id):Promise.resolve(null)).then(function(o){
 var r=o&&(o.results||[]).filter(function(x){return x.photos&&x.photos[0]&&x.photos[0].license_code})[0];
-if(r&&show(r.photos[0].url.replace('/square.','/medium.'),(r.photos[0].attribution||'iNaturalist').replace(/^\(c\)\s*/i,''),'iNaturalist'))return true;
-if(t&&t.default_photo&&t.default_photo.license_code&&show((t.default_photo.medium_url||t.default_photo.url),(t.default_photo.attribution||'iNaturalist').replace(/^\(c\)\s*/i,''),'iNaturalist'))return true;
+if(r&&show(r.photos[0].url.replace('/square.','/medium.'),cred(r.photos[0],r.user&&(r.user.name||r.user.login)),'iNaturalist'))return true;
+if(t&&t.default_photo&&t.default_photo.license_code&&show((t.default_photo.medium_url||t.default_photo.url),cred(t.default_photo),'iNaturalist'))return true;
 return J('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(sci.replace(/ /g,'_'))).then(function(w){
 var img=w&&(w.originalimage||w.thumbnail);if(img&&!bad(img.source)&&w.thumbnail)show(w.thumbnail.source,'Wikipedia','Wikipedia')})})}).catch(function(){})}
 var main=document.querySelector('.sp-main[data-sci]'),w=document.getElementById('sp-wiki');
