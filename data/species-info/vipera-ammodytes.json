@@ -1,0 +1,85 @@
+{
+  "id": "vipera-ammodytes",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "Usually under 75 cm; about 85 cm on average",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Nose-horned Viper is a venomous viper of south-eastern Europe and western Asia, with a soft 'horn' on the tip of its nose. It is thought to be the most dangerous European viper, with long fangs (up to 13 mm) and strong venom.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 85 cm on average, though most are under 75 cm; northern snakes are bigger than southern ones.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "North-eastern Italy, southern Austria, the Balkans, Romania, Bulgaria, Greece, Turkey, Georgia, Azerbaijan and Syria.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Dry, rocky hillsides with few plants; sometimes the edges and clearings of woods. Despite its other name, 'sand viper', it does not live in sandy places.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Soft horn on the tip of the snout.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Vipera ammodytes",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Vipera_ammodytes"
+    },
+    "rdb": {
+      "title": "Vipera ammodytes",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Vipera&species=ammodytes"
+    }
+  }
+}

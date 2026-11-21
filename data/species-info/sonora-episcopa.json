@@ -1,0 +1,53 @@
+{
+  "id": "sonora-episcopa",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Kennicott, 1859)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "*Sonora episcopa* is a small ground snake of the south-central United States and northern Mexico.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Missouri, Arkansas, Kansas, Oklahoma, Texas, south-eastern Colorado and New Mexico, and Coahuila in Mexico.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Sonora episcopa",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Sonora_episcopa"
+    },
+    "rdb": {
+      "title": "Sonora episcopa",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Sonora&species=episcopa"
+    }
+  }
+}

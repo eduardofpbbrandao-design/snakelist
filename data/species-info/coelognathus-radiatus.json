@@ -1,0 +1,54 @@
+{
+  "id": "coelognathus-radiatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Boie, 1827)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Radiated (Copperhead) Ratsnake is a non-venomous rat snake of South and South-east Asia.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "From India, Nepal and Bangladesh through Myanmar, Thailand and Indochina to southern China, Malaysia, Singapore and Indonesia.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Coelognathus radiatus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Coelognathus_radiatus"
+    },
+    "rdb": {
+      "title": "Coelognathus radiatus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Coelognathus&species=radiatus"
+    }
+  }
+}

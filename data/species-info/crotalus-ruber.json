@@ -1,0 +1,114 @@
+{
+  "id": "crotalus-ruber",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Cope, 1892",
+  "facts": {
+    "length": {
+      "text": "Often over 1 m; record 162 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young, 3 to 20",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Rabbits, ground squirrels, birds, lizards and snakes",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Red Diamond Rattlesnake is a venomous rattlesnake of south-western California and Baja California, named for its reddish colour.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Looks like the Western Diamond-backed Rattlesnake, but reddish in colour, with a pattern of diamonds down the back and a rattle on the tail.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Commonly over 100 cm on the mainland; large males over 140 cm. The record is 162 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South-western California and the Baja California peninsula, plus islands in the Gulf of California.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Dense chaparral in the foothills, cactus patches and brushy boulders, from sea level to about 1,500 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Rabbits, ground squirrels, birds, lizards and other snakes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Mates from February to April and gives birth to 3 to 20 live young in August, each 30 to 34 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Reddish diamonds down the back.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Rattle on the tail.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Crotalus ruber",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Crotalus_ruber"
+    },
+    "rdb": {
+      "title": "Crotalus ruber",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Crotalus&species=ruber"
+    }
+  }
+}

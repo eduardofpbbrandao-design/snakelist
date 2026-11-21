@@ -1,0 +1,107 @@
+{
+  "id": "xenodon-merremii",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Wagler, 1824)",
+  "facts": {
+    "length": {
+      "text": "Usually up to about 1 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly toads; also frogs, lizards, insects",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "Wagler's Snake is a toad-eating, rear-fanged snake of eastern South America.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Very variable: some are plain reddish-tan, others pale brown with broad black-edged dark crossbands.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 1 m or less.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Venezuela, the Guianas, Brazil, Bolivia, Paraguay, Uruguay and northern Argentina.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Open savanna and shrubland up to 2,000 m, and disturbed places.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Insects, frogs, toads, lizards and sometimes snakes. Its enlarged back teeth puncture toads that puff themselves up, making them easier to swallow.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Toads puff themselves up to be hard to swallow - this snake's long back teeth let the air out!",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Xenodon merremii",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Xenodon_merremii"
+    },
+    "rdb": {
+      "title": "Xenodon merremii",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Xenodon&species=merremii"
+    }
+  }
+}

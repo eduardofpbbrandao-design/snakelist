@@ -1,0 +1,100 @@
+{
+  "id": "crotalus-molossus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Baird & Girard, 1853",
+  "facts": {
+    "length": {
+      "text": "About 76 to 107 cm; up to about 130 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Rodents and other small mammals, birds, lizards",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Black-tailed Rattlesnake is a venomous rattlesnake of the south-western United States and Mexico, named for its all-black tail.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 76 to 107 cm; the largest recorded about 125 to 130 cm. Females tend to be larger.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Arizona, New Mexico and western and central Texas, and Mexico south to Oaxaca, up to about 2,930 m.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day in spring and autumn, and more at night in summer.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Rodents and other small mammals, birds and small lizards.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Mates in spring and gives birth to live young.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Black tail ending in a rattle.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Crotalus molossus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Crotalus_molossus"
+    },
+    "rdb": {
+      "title": "Crotalus molossus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Crotalus&species=molossus"
+    }
+  }
+}

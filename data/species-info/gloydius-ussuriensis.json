@@ -1,0 +1,69 @@
+{
+  "id": "gloydius-ussuriensis",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Emelianov, 1929)",
+  "facts": {
+    "length": {
+      "text": "About 40 to 65 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Ussuri Mamushi is a small venomous pit viper of the Russian Far East, north-eastern China and Korea.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 41 to 65 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Primorsky Krai in the Russian Far East, north-eastern China, North and South Korea and Jeju Island.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Gloydius ussuriensis",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Gloydius_ussuriensis"
+    },
+    "rdb": {
+      "title": "Gloydius ussuriensis",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Gloydius&species=ussuriensis"
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "naja-atra",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Cantor, 1842",
+  "facts": {
+    "length": {
+      "text": "Usually 1.2 to 1.5 m; rarely 2 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 6 to 23",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Chinese (Taiwan) Cobra is one of the commonest venomous snakes in southern China and causes many snakebites there.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A hood mark that can look like spectacles, a mask, a horseshoe or an O, and a clearly pale throat.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 1.2 to 1.5 m, rarely up to 2 m.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South-eastern China south of the Yangtze (including Hong Kong and Hainan), Taiwan, northern Laos and northern Vietnam.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day and at dusk. It usually escapes from people but can be very defensive if cornered.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays 6 to 23 eggs between May and July.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Spreads a hood with a variable pale mark.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Chinese cobra",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Chinese_cobra"
+    },
+    "rdb": {
+      "title": "Naja atra",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Naja&species=atra"
+    }
+  }
+}

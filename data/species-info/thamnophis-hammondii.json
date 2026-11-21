@@ -1,0 +1,100 @@
+{
+  "id": "thamnophis-hammondii",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Kennicott, 1860)",
+  "facts": {
+    "length": {
+      "text": "About 46 to 76 cm (18 to 30 in)",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly fish and amphibians",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Two-striped Garter Snake is a harmless, very aquatic garter snake of California and Baja California.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Two forms: one with a yellowish stripe on each side and a fairly plain back, and a checkered form.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 18 to 30 in (46 to 76 cm) long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Central and southern California and Baja California, Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Next to permanent or seasonal water.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly fish and amphibians.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Two-striped garter snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Two-striped_garter_snake"
+    },
+    "rdb": {
+      "title": "Thamnophis hammondii",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Thamnophis&species=hammondii"
+    }
+  }
+}

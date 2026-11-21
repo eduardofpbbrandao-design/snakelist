@@ -1,0 +1,99 @@
+{
+  "id": "elaphe-taeniura",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Cope, 1861",
+  "facts": {
+    "length": {
+      "text": "About 1.2 to 1.8 m (4 to 6 ft)",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Rodents and bats",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Beauty Rat Snake (Cave Racer) is a long, slim, non-venomous rat snake of East and South-east Asia. Some live in caves.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 4 to 6 ft (1.2 to 1.8 m) long; it can live 15 to 25 years.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Much of China (not the north-east or west), Taiwan, Korea, the Ryukyu Islands, north-eastern India and Bhutan through Myanmar and Indochina to Malaysia, Sumatra and Borneo.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Rainforest and caves.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "A good climber that can move along cave walls; active at any time of day or night.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Rodents - and in caves, roosting bats. It kills by squeezing.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Elaphe taeniura",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Elaphe_taeniura"
+    },
+    "rdb": {
+      "title": "Elaphe taeniura",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Elaphe&species=taeniura"
+    }
+  }
+}

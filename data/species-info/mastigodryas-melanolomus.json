@@ -1,0 +1,54 @@
+{
+  "id": "mastigodryas-melanolomus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Cope, 1868)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Salmon-bellied Racer is a snake of Mexico and Central America.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Mexico, Guatemala, Belize, Honduras, El Salvador, Nicaragua and Costa Rica.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "wp": {
+      "title": "Mastigodryas melanolomus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Mastigodryas_melanolomus"
+    },
+    "rdb": {
+      "title": "Mastigodryas melanolomus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Mastigodryas&species=melanolomus"
+    }
+  }
+}

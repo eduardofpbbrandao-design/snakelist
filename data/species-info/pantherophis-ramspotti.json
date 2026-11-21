@@ -1,0 +1,94 @@
+{
+  "id": "pantherophis-ramspotti",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Crother, White, Savage, Eckstut, Graham & Gardner, 2011",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly mice and other small rodents",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Western Fox Snake is a harmless rat snake of the upper Midwest of the United States, west of the Mississippi River. It was named as a separate species in 2011.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "West of the Mississippi in south-eastern Minnesota, Iowa, south-eastern South Dakota, eastern Nebraska and northern Missouri.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Forest, shrubland, grassland and wetlands, and also pasture, old fields and farmland.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Fairly bold. When confronted it shakes its tail like a rattlesnake, takes an S-shaped pose and snaps.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "A constrictor that eats mainly mice and other small rodents, plus young rabbits, frogs and eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs in rotting stumps and under logs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Shakes its tail like a rattlesnake but has no rattle.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Pantherophis ramspotti",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Pantherophis_ramspotti"
+    },
+    "rdb": {
+      "title": "Pantherophis ramspotti",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Pantherophis&species=ramspotti"
+    }
+  }
+}

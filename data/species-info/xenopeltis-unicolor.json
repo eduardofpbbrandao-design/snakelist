@@ -1,0 +1,94 @@
+{
+  "id": "xenopeltis-unicolor",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "Reinwardt, 1827",
+  "facts": {
+    "length": {
+      "text": "About 1 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, up to 10",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Sunbeam Snake is a harmless burrowing snake of South-east Asia whose scales shine with rainbow colours in the sun.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Reddish-brown, brown or blackish above, whitish-grey below, with highly iridescent scales; a narrow, wedge-shaped head for digging.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "About 1 m long on average.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern China, Myanmar, the Andaman and Nicobar Islands, Thailand, Indochina, Malaysia, Singapore, Indonesia and the Philippines.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Open places such as forest clearings, gardens, parks and rice paddies.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays up to 10 eggs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Rainbow shine on dark, smooth scales.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Xenopeltis unicolor",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Xenopeltis_unicolor"
+    },
+    "rdb": {
+      "title": "Xenopeltis unicolor",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Xenopeltis&species=unicolor"
+    }
+  }
+}
