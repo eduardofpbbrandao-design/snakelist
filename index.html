@@ -9503,7 +9503,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
             <div class="ak-head"><span class="ak-t" id="ak-title"></span><button type="button" class="ak-x" id="ak-close" aria-label="Hide this snake's area">&times;<span class="ak-xt"> Close</span></button></div>
             <div class="ak-sw" id="ak-scale"><span>more</span><span class="ak-bar"><i></i><i></i><i></i><i></i></span><span>less</span></div>
             <div class="legend-row" id="ak-flat" hidden><span class="legend-dot"></span>Lives here</div>
-            <p class="ak-note" id="ak-note"><span class="ak-scale-note">Darker: the middle of its range. Lighter: its edges.</span> Shaded by state or country, so it may not live everywhere that is shaded.</p>
+            <p class="ak-note" id="ak-note"><span class="ak-scale-note">Darker: deep inside its range. Lighter: near where its range ends.</span> <span id="ak-src"></span></p>
           </div>
         </div>
         <div class="country-panel" id="country-panel" hidden>
@@ -16105,7 +16105,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (!areaShow) drawMultiStates();
     drawIslands(toFlat);
     if (statesMode && !areaShow) drawCountryProvinces(toFlat, statesMode);
-    drawAreaStates();
+    if (areaShow) placeAreaKey();
     drawContinentShow(toFlat);
     drawPlaceLabels(toFlat);
     ctx.restore();
@@ -16491,7 +16491,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     // with the Species heatmap on, only the heatmap's own colours show - no lit-up or picked
     // country fill on top of (or under) them; the borders and the picked country's line stay
     var heatNow = heatIsOn();
-    if (areaShow) drawAreaWhole(to, stride);
+    if (areaShow) drawAreaRange();
     if (HI && !searchMuted() && !heatNow && !areaShow && !(onlyPicked && onlyPicked === selected)) {
       // Kosovo has no species of its own recorded (every source lists it under Serbia),
       // so it never ends up in HI on its own - without this it stays the plain unhighlighted
@@ -17592,211 +17592,103 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
 
   // ---- v5.74: "Show colours" (was "See area") on a species' card in the map's list ------------------
-  // Shows where that one snake lives: every country/state/region it is recorded in is lit in the picked
-  // country's own green, darker where it lives more and lighter where it lives less. SnakeList has no
-  // sightings counts per snake per place, so "more" is how much of the land round each place also has
-  // it (of its 7 nearest states/regions/countries, how many hold it - deep in its range all of them, at
-  // the edge of its range or on an outlying spot only a few), scaled to the snake's own best.
-  // v5.78: every place is shaded the same way - places people brought it to (SL_INVASIVE) too, no orange
-  // of their own; no green outline round the picked country; and where the range is known to be smaller
-  // than a whole state, only that part is shaded (AREA_PART). A big country it is recorded in with no
-  // finer records (Algeria for the Montpellier snake) is shaded only within AREA_NEAR_KM of its finer
-  // records next door, not out to the far desert; the key says the shading follows whole states/countries.
+  // Shows where that one snake lives. v5.90: its real range, as a natural shape that follows the coasts
+  // and the range's own edges - not the whole states or countries it is recorded in, and no state lines
+  // inside it ("See states" and "See cities" stay the way to see those). The ranges are expert range maps,
+  // GARD 1.7 (Global Assessment of Reptile Distributions: Roll et al. 2017, Nature Ecology & Evolution;
+  // Caetano et al. 2022, PLoS Biology; CC0), cut to the map's own coastline; a snake GARD doesn't have
+  // is drawn from the places SnakeList records it in, joined into one rounded shape (no state lines, no
+  // straight cuts). Places people brought it to (SL_INVASIVE) are in it too - the documented smaller-
+  // than-a-state ones (Burmese python in South Florida) by their real outline. tools/build_ranges.py
+  // makes one small file per snake, data/ranges/<id>.json, fetched only when the button is pressed.
+  // Shading: the picked country's own green, darkest deep inside the range and lighter towards where
+  // it ends (bands along its inland edges - the coast is not an edge of where it lives); a range that
+  // is all coast (an island) is one shade.
   // Until the button is pressed again, the key's Close, a click on the empty map or a click on a place.
-  var areaShow = null;
-  // the documented smaller-than-a-state ranges: species -> "cc:state" -> a [lon, lat] outline that the state
-  // is cut to (drawn inside the state's own shape, so the coast stays the coast)
-  var AREA_PART = {
-    // Burmese python: breeding across South Florida, from around Lake Okeechobee south through the Everglades,
-    // Big Cypress and the mainland of Monroe and Miami-Dade to Key Largo (USGS NAS Python bivittatus fact
-    // sheet; Florida FWC) - not the north of the state or the Panhandle
-    "python-bivittatus": { "us:FL": [[-82.25, 26.1], [-81.95, 26.75], [-81.45, 27.15], [-80.8, 27.35], [-80.2, 27.15], [-79.9, 26.5], [-79.95, 25.2], [-80.3, 24.95], [-80.95, 24.95], [-81.55, 25.2], [-81.95, 25.75]] },
-    // Northern African python: one breeding population, in the Bird Drive Basin west of Miami (USGS NAS)
-    "python-sebae": { "us:FL": [[-80.72, 25.56], [-80.72, 25.88], [-80.34, 25.88], [-80.34, 25.56]] }
-  };
-  var AREA_NEAR_KM = 450, AREA_BIG = 200; // (a country bigger than AREA_BIG square degrees is cut to its records' surroundings)
+  var areaShow = null, areaWant = null, AREA_FILES = {};
+  var AREA_BANDS = [[0.55, 2], [0.32, 1], [0.15, 0]]; // (how far in from the edge each lighter shade reaches, of the range's half-thickness)
   function areaMix(hex, to, k) {
     var c = [1, 3, 5].map(function (i) { return parseInt(hex.slice(i, i + 2), 16); });
     return "rgb(" + c.map(function (v, j) { var t = typeof to === "number" ? to : to[j]; return Math.round(v + (t - v) * k); }).join(",") + ")";
   }
-  // 4 steps of the picked country's colour: lightest (lives here less) to darkest (more); the picked
+  // 4 steps of the picked country's colour: lightest (its edges) to darkest (deep inside); the picked
   // country's own colour is the third. At night the darkest stays a clear green on the dark land.
   function areaShades() {
     var on = mapOnColor(), dark = document.documentElement.getAttribute("data-sl-theme") === "dark";
     return dark ? [areaMix(on, 255, 0.6), areaMix(on, 255, 0.3), on, areaMix(on, [58, 143, 53], 0.6)]
                 : [areaMix(on, 255, 0.55), areaMix(on, 255, 0.27), on, areaMix(on, 0, 0.3)];
   }
-  function ringBox(R) { var b = [999, -999, 999, -999]; R.forEach(function (p) { b[0] = Math.min(b[0], p[0]); b[1] = Math.max(b[1], p[0]); b[2] = Math.min(b[2], p[1]); b[3] = Math.max(b[3], p[1]); }); return b; }
-  function kmGap(a, b) { // the gap in km between two [w, e, s, n] boxes (0 when they touch)
-    var dLon = Math.max(0, a[0] - b[1], b[0] - a[1]), dLat = Math.max(0, a[2] - b[3], b[2] - a[3]);
-    var c = Math.cos(((a[2] + a[3]) / 2 + (b[2] + b[3]) / 2) / 2 * RAD);
-    return Math.sqrt(Math.pow(dLon * 111.2 * c, 2) + Math.pow(dLat * 111.2, 2));
+  // a range file -> its rings and edge lines in degrees, and the same as ready-made paths in the map's
+  // own units (lon + 180, 90 - lat), painted at any zoom with one scale + shift like the countries
+  function areaLines(list, k) {
+    return list.map(function (f) {
+      var n = f.length / 2, lon = new Float32Array(n), lat = new Float32Array(n), x = 0, y = 0;
+      for (var i = 0; i < n; i++) { x += f[2 * i]; y += f[2 * i + 1]; lon[i] = x / k; lat[i] = y / k; }
+      return { n: n, lon: lon, lat: lat };
+    });
   }
-  function areaFor(id) {
-    var sp = INDEX && INDEX.find(function (x) { return x.id === id; });
-    if (!sp || sp.gone || !POLY) return null;
-    var A = { id: id, sp: sp, whole: {}, states: {}, parts: {}, near: {}, flat: false, box: null };
-    var PART = AREA_PART[id] || {};
-    // where it lives: its recorded states/regions by country, its countries - and the places people brought
-    // it to, which count just the same (whole countries, or some of their states)
-    var rec = {}, ccs = {}, wholeOK = {};
-    var addRec = function (cc, k) { (rec[cc] = rec[cc] || {})[k] = 1; ccs[cc] = 1; };
-    (sp.states || []).forEach(function (k) { addRec("us", k); });
-    (sp.provinces || []).forEach(function (k) { addRec(k.slice(0, 2).toLowerCase(), k.slice(3)); });
-    (sp.countries || []).forEach(function (n) { var c = ISO[n]; if (c) { ccs[c] = 1; wholeOK[c] = 1; } });
-    ((window.SL_INVASIVE || {})[id] || []).forEach(function (pl) {
-      var cc = pl.code; if (!cc) return;
-      var ks = pl.states && pl.states.length ? pl.states : pl.areas || [];
-      if (ks.length) ks.forEach(function (k) { addRec(cc, k); }); else { ccs[cc] = 1; wholeOK[cc] = 1; }
+  function areaPath(lines, close) {
+    var P = new Path2D();
+    lines.forEach(function (L) {
+      for (var i = 0; i < L.n; i++) { if (i) P.lineTo(L.lon[i] + 180, 90 - L.lat[i]); else P.moveTo(L.lon[i] + 180, 90 - L.lat[i]); }
+      if (close) P.closePath();
     });
-    var keysOf = function (cc, st) { return cc === "us" ? [st.code] : [st.name].concat(st.also || []); };
-    var hit = function (set, cc, st) { return !!set && keysOf(cc, st).some(function (k) { return set[k]; }); };
-    var pool = [], anyStates = false;
-    Object.keys(ccs).forEach(function (cc) {
-      var o = rec[cc] ? provPaths(cc) : null, items = [], found = false;
-      if (o) o.items.forEach(function (it, i) {
-        var r = hit(rec[cc], cc, it.st), part = r ? PART[cc + ":" + keysOf(cc, it.st)[0]] : null;
-        if (r) found = true;
-        var bx = part ? ringBox(part) : [it.w, it.e, it.s, it.n];
-        if (part) (A.parts[cc] = A.parts[cc] || {})[i] = part;
-        items.push({ cc: cc, i: i, rec: r, lon: (bx[0] + bx[1]) / 2, lat: (bx[2] + bx[3]) / 2, b: bx });
-      });
-      if (found) { pool = pool.concat(items); anyStates = true; }
-      else if (wholeOK[cc]) {
-        var b = countryBox(cc); A.whole[cc] = -1;
-        if (b) pool.push({ cc: cc, whole: true, rec: true, lon: (b[0] + b[1]) / 2, lat: (b[2] + b[3]) / 2, b: b });
-      }
-    });
-    // a big country with no finer records, next to finer records: shaded only near them
-    if (anyStates) pool.forEach(function (u) {
-      if (!u.whole || (u.b[1] - u.b[0]) * (u.b[3] - u.b[2]) < AREA_BIG) return;
-      var circles = [];
-      pool.forEach(function (v) {
-        if (!v.rec || v.whole || kmGap(u.b, v.b) > AREA_NEAR_KM) return;
-        var half = Math.min(300, 0.5 * kmGap([v.b[0], v.b[0], v.b[2], v.b[2]], [v.b[1], v.b[1], v.b[3], v.b[3]]));
-        circles.push([v.lon, v.lat, AREA_NEAR_KM + half]);
-      });
-      if (circles.length) {
-        A.near[u.cc] = circles;
-        // its middle for the shading: the middle of the part that is shaded
-        var nb = [999, -999, 999, -999];
-        circles.forEach(function (c) { var dl = c[2] / 111.2, dw = dl / Math.max(0.2, Math.cos(c[1] * RAD)); nb[0] = Math.min(nb[0], c[0] - dw); nb[1] = Math.max(nb[1], c[0] + dw); nb[2] = Math.min(nb[2], c[1] - dl); nb[3] = Math.max(nb[3], c[1] + dl); });
-        nb = [Math.max(nb[0], u.b[0]), Math.min(nb[1], u.b[1]), Math.max(nb[2], u.b[2]), Math.min(nb[3], u.b[3])];
-        if (nb[0] < nb[1] && nb[2] < nb[3]) { u.b = nb; u.lon = (nb[0] + nb[1]) / 2; u.lat = (nb[2] + nb[3]) / 2; }
-      }
-    });
-    // how much of the land round each place also has it
-    var K = 7, dens = [], best = 0;
-    pool.forEach(function (a) {
-      if (!a.rec) return;
-      var ca = Math.cos(a.lat * RAD), d = pool.map(function (b) { var dx = (b.lon - a.lon) * ca, dy = b.lat - a.lat; return [dx * dx + dy * dy, b.rec]; });
-      d.sort(function (x, y) { return x[0] - y[0]; });
-      var k = Math.min(K, d.length), n = 0;
-      for (var j = 0; j < k; j++) if (d[j][1]) n++;
-      var v = n / k; dens.push([a, v]); if (v > best) best = v;
-    });
-    var steps = {};
-    dens.forEach(function (x) {
-      var t = best ? x[1] / best : 1, s = t >= 0.85 ? 3 : t >= 0.55 ? 2 : t >= 0.3 ? 1 : 0, u = x[0];
-      if (u.whole) A.whole[u.cc] = s; else (A.states[u.cc] = A.states[u.cc] || {})[u.i] = s;
-      steps[s] = 1;
-    });
-    Object.keys(A.whole).forEach(function (cc) { if (A.whole[cc] < 0) { A.whole[cc] = 2; steps[2] = 1; } }); // (no outline to place it by)
-    // one shade only (all its places alike): the picked country's own green, and the key just says "Lives here"
-    A.flat = Object.keys(steps).length < 2;
-    if (A.flat) {
-      Object.keys(A.states).forEach(function (cc) { Object.keys(A.states[cc]).forEach(function (i) { A.states[cc][i] = 2; }); });
-      Object.keys(A.whole).forEach(function (cc) { A.whole[cc] = 2; });
-    }
-    A.pool = pool;
-    return A;
-  }
-  // the box round everything shown: each country by its main landmass (no overseas pieces), each state by its own
-  function areaBox(A) {
-    var w = 999, e = -999, s = 999, n = -999;
-    var add = function (b) { if (!b || b[1] - b[0] > 180) return; w = Math.min(w, b[0]); e = Math.max(e, b[1]); s = Math.min(s, b[2]); n = Math.max(n, b[3]); };
-    Object.keys(A.states).forEach(function (cc) {
-      var o = provPaths(cc); if (!o) return;
-      Object.keys(A.states[cc]).forEach(function (i) {
-        var it = o.items[+i], part = A.parts[cc] && A.parts[cc][i];
-        if (part) add(ringBox(part));
-        else if (it && !(cc === "us" && FLY_TO_EXCLUDE[it.st.code] && Object.keys(A.states[cc]).length > 1)) add([it.w, it.e, it.s, it.n]);
-      });
-    });
-    // a whole country (no finer records) beside the states it has: in the view unless it is much bigger than
-    // they are; a country cut to the part near its records, by that part
-    var sa = w > e ? 0 : (e - w) * (n - s);
-    Object.keys(A.whole).forEach(function (cc) {
-      var u = (A.pool || []).filter(function (x) { return x.whole && x.cc === cc; })[0];
-      var b = A.near[cc] && u ? u.b : countryBox(cc); if (!b) return;
-      if (!sa || A.near[cc] || (b[1] - b[0]) * (b[3] - b[2]) <= sa * 1.5) add(b);
-    });
-    if (w > e) return null;
-    var pw = Math.max(0.6, (e - w) * 0.1), ph = Math.max(0.4, (n - s) * 0.1);
-    return [Math.max(-180, w - pw), Math.min(180, e + pw), Math.max(-85, s - ph), Math.min(85, n + ph)];
-  }
-  // the screen outline of the part of a big country near its records (circles round them)
-  function areaNearPath(cc, to) {
-    var fb = flatBox(), kx = fb[2] / 360, ky = fb[3] / 180, P = new Path2D();
-    for (var j = 0; j < areaShow.near[cc].length; j++) {
-      var c = areaShow.near[cc][j], xy = to(c[0], c[1]); if (!xy) continue;
-      var dl = c[2] / 111.2, rx = dl / Math.max(0.2, Math.cos(c[1] * RAD)) * kx, ry = dl * ky;
-      P.moveTo(xy[0] + rx, xy[1]); P.ellipse(xy[0], xy[1], rx, ry, 0, 0, TAU);
-    }
     return P;
   }
-  function ringPath(R, to) { var P = new Path2D(); R.forEach(function (p, k) { var xy = to(p[0], p[1]); if (k) P.lineTo(xy[0], xy[1]); else P.moveTo(xy[0], xy[1]); }); P.closePath(); return P; }
-  // the whole countries, filled under the borders - called from borders()
-  function drawAreaWhole(to, stride) {
-    if (!areaShow) return;
-    var A = areaShow, sh = areaShades();
-    var paint = function (want, color) {
-      shapePath(to, want, stride); ctx.fillStyle = color; FILL();
-      fillDots(to, want, 2.6);
-    };
-    var cOf = function (r) { return ENCLAVE[r.code] && A.whole[r.code] == null && !A.states[r.code] ? ENCLAVE[r.code] : r.code; };
-    [0, 1, 2, 3].forEach(function (s) {
-      var want = function (r) { var c = cOf(r); return A.whole[c] === s && !A.near[c]; };
-      if (Object.keys(A.whole).some(function (cc) { return A.whole[cc] === s && !A.near[cc]; })) paint(want, sh[s]);
-    });
-    Object.keys(A.near).forEach(function (cc) {
-      ctx.save(); ctx.clip(areaNearPath(cc, to));
-      paint(function (r) { return cOf(r) === cc; }, sh[A.whole[cc]]);
-      ctx.restore();
-    });
+  function areaFor(id, D) {
+    var sp = INDEX && INDEX.find(function (x) { return x.id === id; });
+    if (!sp || sp.gone || !D || !D.p || !D.p.length) return null;
+    var k = D.k || 100, rings = areaLines([].concat.apply([], D.p), k), edges = areaLines(D.e || [], k), all = [999, -999, 999, -999];
+    rings.forEach(function (L) { for (var i = 0; i < L.n; i++) { var x = L.lon[i], y = L.lat[i]; if (x < all[0]) all[0] = x; if (x > all[1]) all[1] = x; if (y < all[2]) all[2] = y; if (y > all[3]) all[3] = y; } });
+    // the edges by how deep their piece of the range goes (a small island's shades are as small as it is)
+    var et = D.et || edges.map(function () { return D.t || 0; }), groups = {}, tmax = 0;
+    edges.forEach(function (L, i) { var t = Math.round(et[i] * 20) / 20, g = groups[t] || (groups[t] = { t: t, lines: [] }); g.lines.push(L); if (t > tmax) tmax = t; });
+    groups = Object.keys(groups).map(function (k) { var g = groups[k]; g.P = areaPath(g.lines, false); return g; });
+    return { id: id, sp: sp, src: D.s, box: D.b, all: all, t: D.t || 0, tmax: tmax, rings: rings, edges: edges, groups: groups,
+      fillP: areaPath(rings, true),
+      // one shade only: nowhere it ends inland (an island, a stretch of coast), or too small for shades
+      flat: !edges.length || !(D.t > 0.05) };
   }
-  // the states/regions it is recorded in (and the ones it was brought to), with every state line of
-  // those countries and their coasts drawn once more on top - as "See states" for a search draws them
-  function drawAreaStates() {
+  // the range, under the borders - called from borders()
+  function drawAreaRange() {
     if (!areaShow) return;
-    placeAreaKey();
-    var A = areaShow, sh = areaShades(), M = viewMatrix(), v = viewLL(), lvl = detailLevel(), clipNow = needClip(), fb = flatBox(), kx = fb[2] / 360, ky = fb[3] / 180;
-    var fills = {}, parts = [], lines = new Path2D(), clipP = lvl >= 1 ? new Path2D() : null, any = false, coastOf = {};
-    Object.keys(A.states).forEach(function (cc) {
-      var o = provPaths(cc); if (!o || !boxInView(o, v)) return;
-      if (clipP) { var cp = countryClip(cc, M); if (cp) clipP.addPath(cp); }
-      [cc].concat(CLIP_ALSO[cc] || []).forEach(function (c) { coastOf[c] = 1; });
-      o.items.forEach(function (it, i) {
-        if (!boxInView(it, v)) return;
-        var px = Math.max((it.e - it.w) * kx, (it.n - it.s) * ky);
-        var st = A.states[cc][i];
-        if (st != null && px >= 0.6) {
-          var part = A.parts[cc] && A.parts[cc][i], P = part ? new Path2D() : fills[st] || (fills[st] = new Path2D());
-          if (clipNow) clipState(P, it.st, false, fb, clipRect()); else P.addPath(provLv(it, lvl, false), M);
-          if (part) parts.push([P, ringPath(part, toScreenLL), st]);
-        }
-        if (px >= (lvl ? 6 : 14)) { if (clipNow) clipState(lines, it.st, true, fb, clipRect()); else lines.addPath(provLvBig(it, lvl), M); }
-        any = true;
-      });
-    });
-    if (!any) return;
+    var A = areaShow, sh = areaShades(), v = viewLL(), b = A.box, all = A.all;
+    if (all[1] < v.w || all[0] > v.e || all[3] < v.s || all[2] > v.n) return;
+    var fb = flatBox(), px = fb[2] / 360, fill, edges, widest = A.flat ? 0 : 2 * AREA_BANDS[0][0] * A.tmax * px;
+    if (needClip()) {
+      // close up: cut to the screen first (as the countries are - see needClip)
+      var R = clipRect(), RE = [R[0] - widest, R[1] - widest, R[2] + widest, R[3] + widest];
+      fill = new Path2D();
+      var put = function (P, L, forStroke, box) {
+        var B = clipBuf(L.n);
+        for (var i = 0; i < L.n; i++) { B.x[i] = fb[0] + (L.lon[i] + 180) * px; B.y[i] = fb[1] + (90 - L.lat[i]) * (fb[3] / 180); B.c[i] = 0; }
+        if (forStroke) B.c[0] = 1; // (an open line: not closed back to its start)
+        addClipped(P, B.x, B.y, L.n, B.c, forStroke, box);
+      };
+      A.rings.forEach(function (L) { put(fill, L, false, R); });
+      edges = A.flat ? [] : A.groups.map(function (g) { var P = new Path2D(); g.lines.forEach(function (L) { put(P, L, true, RE); }); return [P, g.t]; });
+    } else {
+      var M = viewMatrix();
+      fill = new Path2D(); fill.addPath(A.fillP, M);
+      edges = A.groups.map(function (g) { var P = new Path2D(); P.addPath(g.P, M); return [P, g.t]; });
+    }
     ctx.save();
-    if (clipP) ctx.clip(clipP);
-    Object.keys(fills).forEach(function (k) { ctx.fillStyle = sh[+k]; ctx.fill(fills[k]); });
-    parts.forEach(function (q) { ctx.save(); ctx.clip(q[1]); ctx.fillStyle = sh[q[2]]; ctx.fill(q[0]); ctx.restore(); });
-    ctx.strokeStyle = BORDER(); ctx.lineWidth = 0.85; ctx.lineJoin = "round"; ctx.stroke(lines);
+    ctx.fillStyle = sh[A.flat ? 2 : 3]; ctx.fill(fill, "evenodd");
+    if (!A.flat) {
+      // lighter bands along where it ends, inside the range only: smooth, round-cornered
+      ctx.clip(fill, "evenodd");
+      ctx.lineJoin = "round"; ctx.lineCap = "round";
+      AREA_BANDS.forEach(function (q) {
+        ctx.strokeStyle = sh[q[1]];
+        edges.forEach(function (e) { ctx.lineWidth = Math.max(0.5, 2 * q[0] * e[1] * px); ctx.stroke(e[0]); });
+      });
+    }
     ctx.restore();
-    strokeBigRings(function (r) { return !!coastOf[r.code]; }, 12, BORDER(), 0.85);
+    // too small to see at this zoom (a quarter of an island): a dot where it is
+    if (b && (b[1] - b[0]) * px < 3 && (b[3] - b[2]) * px < 3) {
+      var c = toScreenLL((b[0] + b[1]) / 2, (b[2] + b[3]) / 2);
+      ctx.fillStyle = sh[A.flat ? 2 : 3]; ctx.beginPath(); ctx.arc(c[0], c[1], 2.6, 0, TAU); ctx.fill();
+    }
   }
   function selLineColor() {
     return window.SL_MAP_SAT ? BORDER() : document.documentElement.getAttribute("data-sl-theme") === "dark" ? "rgba(225,245,215,0.8)" : "#3f7d43";
@@ -17821,6 +17713,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     document.getElementById("ak-scale").hidden = areaShow.flat;
     var fl = document.getElementById("ak-flat"); fl.hidden = !areaShow.flat; areaKey.querySelector(".ak-scale-note").hidden = areaShow.flat;
     fl.querySelector(".legend-dot").style.background = sh[2];
+    // where the outline comes from: an expert range map (GARD), or the places SnakeList records it in
+    document.getElementById("ak-src").textContent = (areaShow.src === "g" ? "Range map: GARD (Roll et al. 2017)." : "Drawn from the places it is recorded in, so it may not live everywhere that is shaded.")
+      + (((window.SL_INVASIVE || {})[areaShow.id] || []).length ? " Places people brought it to are shaded too." : "");
     placeAreaKey();
   }
   // the key sits where the colour key does - lifted above the species panel when the panel is over the map
@@ -17844,35 +17739,62 @@ window.SL_GEO_READY = new Promise(function (res) {
     }
   }
   function areaClear() {
+    areaWant = null;
     if (!areaShow) return false;
     areaShow = null; areaSync(); invalidate();
     return true;
   }
+  // its range file (once per snake per visit)
+  function areaFile(id) {
+    if (!AREA_FILES[id]) AREA_FILES[id] = fetch("data/ranges/" + id + ".json").then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .catch(function (e) { delete AREA_FILES[id]; throw e; });
+    return AREA_FILES[id];
+  }
   function areaOpen(id) {
     if (!ready) return false;
-    if (areaShow && areaShow.id === id) { areaClear(); return false; }
-    var A = areaFor(id);
-    if (!A || (!Object.keys(A.whole).length && !Object.keys(A.states).length)) return false;
-    contShow = null;
-    areaShow = A;
-    areaSync();
-    // the map in view first (below it, the list may be what's on screen), then fitted to the range
-    var r = stage.getBoundingClientRect();
-    if (r.top < -r.height * 0.25 || r.bottom > innerHeight + r.height * 0.25) stage.scrollIntoView({ behavior: "smooth", block: r.height > innerHeight ? "start" : "center" });
-    var b = areaBox(A);
-    if (b) flyToLonLatBox(b[0], b[1], b[2], b[3], true);
-    invalidate();
+    if ((areaShow && areaShow.id === id) || areaWant === id) { areaClear(); areaSync(); return false; }
+    areaWant = id;
+    var btns = document.querySelectorAll('#cp-list .area-btn[data-area="' + id + '"]');
+    [].forEach.call(btns, function (b) { b.classList.add("on"); b.setAttribute("aria-pressed", "true"); b.textContent = "Hide colours"; });
+    areaFile(id).then(function (D) {
+      if (areaWant !== id) return;
+      areaWant = null;
+      var A = areaFor(id, D);
+      if (!A) { areaSync(); return; }
+      contShow = null;
+      areaShow = A;
+      areaSync();
+      // the map in view first (below it, the list may be what's on screen), then fitted to the range
+      var r = stage.getBoundingClientRect();
+      if (r.top < -r.height * 0.25 || r.bottom > innerHeight + r.height * 0.25) stage.scrollIntoView({ behavior: "smooth", block: r.height > innerHeight ? "start" : "center" });
+      var b = A.box;
+      if (b) {
+        var pw = Math.max(0.6, (b[1] - b[0]) * 0.1), ph = Math.max(0.4, (b[3] - b[2]) * 0.1);
+        flyToLonLatBox(Math.max(-180, b[0] - pw), Math.min(180, b[1] + pw), Math.max(-85, b[2] - ph), Math.min(85, b[3] + ph), true);
+      }
+      invalidate();
+    }, function () {
+      // (offline, and never opened before): the button goes back
+      if (areaWant === id) areaWant = null;
+      areaSync();
+    });
     return true;
   }
   window.SL_MAP_AREA = areaOpen;
   window.SL_MAP_AREA_CLEAR = areaClear;
-  window.SL_MAP_AREA_ID = function () { return areaShow ? areaShow.id : null; };
-  // (for the tests) what is lit: whole countries and states by step, the places it was brought to
+  window.SL_MAP_AREA_ID = function () { return areaShow ? areaShow.id : areaWant; };
+  // (for the tests) what is shown: where the range came from, how it is shaded, its box and size
   window.SL_MAP_AREA_INFO = function () {
     if (!areaShow) return null;
-    var A = areaShow, st = {}, parts = [];
-    Object.keys(A.states).forEach(function (cc) { var o = provPaths(cc); Object.keys(A.states[cc]).forEach(function (i) { var it = o.items[+i], k = cc + ":" + (cc === "us" ? it.st.code : it.st.name); st[k] = A.states[cc][i]; if (A.parts[cc] && A.parts[cc][i]) parts.push(k); }); });
-    return { id: A.id, whole: A.whole, states: st, parts: parts, near: Object.keys(A.near), flat: A.flat, box: areaBox(A) };
+    var A = areaShow, pts = 0;
+    A.rings.forEach(function (L) { pts += L.n; });
+    return { id: A.id, src: A.src, flat: A.flat, box: A.box, t: A.t, rings: A.rings.length, points: pts, edges: A.edges.length };
+  };
+  // (for the tests) is this place inside the range shown?
+  window.SL_MAP_AREA_HAS = function (lon, lat) {
+    if (!areaShow) return false;
+    var c = document.createElement("canvas").getContext("2d"); // (a plain one: the map's own is scaled for the screen)
+    return c.isPointInPath(areaShow.fillP, lon + 180, 90 - lat, "evenodd");
   };
   window.SL_MAP_BOX = function () { return flatBox(); }; // (for the tests: the map's place on the canvas)
   if (areaKey) document.getElementById("ak-close").addEventListener("click", function (e) { e.stopPropagation(); areaClear(); });

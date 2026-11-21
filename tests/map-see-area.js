@@ -1,8 +1,9 @@
 // Run: python3 build-site.py, serve the repo (python3 -m http.server $PORT), then
 //   PORT=<port> node tests/map-see-area.js [screenshot-dir]
-// v5.74 "See area" (v5.78: "Show colours") on a species' card in the map's list: that snake's whole range lit on the map in the picked
-// country's green, darker where it lives more, lighter where less, places people brought it to in orange, with
-// a key (Close chip) - and how it goes away again (the button, Close, the empty map, a place, closing the list).
+// v5.74 "See area" (v5.78: "Show colours") on a species' card in the map's list: that snake's range on the map in the picked
+// country's green, with a key (Close chip) - and how it goes away again (the button, Close, the empty map, a place,
+// closing the list). v5.90: the real range (GARD expert range maps, data/ranges/<id>.json, fetched only when pressed),
+// cut to the coast - not whole states/countries - darker deep inside it, lighter where it ends.
 // Portugal -> Montpellier snake, Pennsylvania -> Timber Rattlesnake, Florida -> Burmese python (brought by
 // people), Saint Lucia's racer and threadsnake (a small island). Desktop light, then a phone in dark mode.
 const { chromium, devices } = require('/opt/node22/lib/node_modules/playwright');
@@ -12,7 +13,8 @@ async function open(opts) {
   const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
   const ctx = await browser.newContext(Object.assign(opts.phone ? { ...devices['iPhone 13'] } : { viewport: { width: 1280, height: 900 } }, { permissions: ['geolocation'], geolocation: { latitude: 38.72, longitude: -9.14 } }));
   const p = await ctx.newPage();
-  const errs = [];
+  const errs = [], rangeReqs = [];
+  p.on('request', r => { if (/data\/ranges\//.test(r.url())) rangeReqs.push(r.url()); });
   p.on('pageerror', e => errs.push(String(e)));
   await p.route(/^https?:\/\/(?!127\.0\.0\.1|localhost)/, r => r.abort()); // (iNaturalist and the rest aren't needed)
   await p.addInitScript(([th, extra]) => {
@@ -25,7 +27,7 @@ async function open(opts) {
   await p.waitForFunction(() => window.SL_MAP_GEO_DONE, null, { timeout: 90000 });
   if (opts.theme) await p.evaluate(th => document.documentElement.setAttribute('data-sl-theme', th), opts.theme);
   await p.waitForTimeout(1000);
-  return { browser, p, errs };
+  return { browser, p, errs, rangeReqs };
 }
 // the screen point of a lon/lat on the map canvas (the flat map is equirectangular)
 async function llXY(p, lon, lat) {
@@ -44,7 +46,7 @@ let fails = 0;
 const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++; };
 async function run(theme, phone) {
   const tag = theme + (phone ? '-phone' : '-desktop');
-  const { browser, p, errs } = await open({ theme, phone });
+  const { browser, p, errs, rangeReqs } = await open({ theme, phone });
   const stage = async () => p.evaluate(() => document.getElementById('globe-stage').scrollIntoView());
   const shotMap = async (name) => { if (!SHOTS) return; await p.waitForTimeout(700); await p.locator('#globe-stage').screenshot({ path: SHOTS + '/' + name + '-' + tag + '.png' }); };
   const clickArea = async (id) => {
@@ -58,6 +60,7 @@ async function run(theme, phone) {
     return true;
   };
   const info = () => p.evaluate(() => window.SL_MAP_AREA_INFO());
+  const has = (lon, lat) => p.evaluate(([a, b]) => window.SL_MAP_AREA_HAS(a, b), [lon, lat]);
 
   // ---- 1. Portugal -> Montpellier snake
   await stage();
@@ -68,13 +71,17 @@ async function run(theme, phone) {
   ok(await p.evaluate(() => [...document.querySelectorAll('#cp-list .cpc-card')].every(c => c.scrollHeight <= c.clientHeight + 1)), 'no card overflows with the new line');
   ok(await p.evaluate(() => [...document.querySelectorAll('#cp-list .cpc-card .cpc-extra')].every(x => x.getBoundingClientRect().height >= 16)), 'the line of states is full height on every card (not crushed to a thin green line)');
   ok(await p.evaluate(() => !document.querySelector('#cp-list .area-btn[title], #area-key [title]')), 'no title tooltips');
+  ok(rangeReqs.length === 0, 'no range file is downloaded before Show colours is pressed');
   await clickArea('malpolon-monspessulanus');
   let a = await info();
   ok(a && a.id === 'malpolon-monspessulanus', 'Montpellier snake area on');
-  ok(a && a.states['pt:Lisbon'] === 3 && a.states['it:Liguria'] < a.states['es:Madrid' in a.states ? 'es:Madrid' : 'es:Toledo'], 'darker in its heartland (Lisbon ' + (a && a.states['pt:Lisbon']) + '), lighter at its edge (Liguria ' + (a && a.states['it:Liguria']) + ')');
-  ok(a && a.whole.ma >= 0 && a.near.indexOf('ma') >= 0 && a.near.indexOf('dz') >= 0, 'Morocco and Algeria (no finer records): shaded only near its Iberian records, not out to the Sahara');
+  ok(rangeReqs.length === 1 && /malpolon-monspessulanus\.json$/.test(rangeReqs[0]), 'its own range file fetched when pressed');
+  ok(a && a.src === 'g' && !a.flat && a.edges > 0 && a.points > 300, 'a real range map (GARD), shaded darker inside / lighter at its edges (' + (a && a.points) + ' points)');
+  ok(await has(-9.1, 38.75) && await has(-3.7, 40.4) && await has(-5.8, 35.0), 'lives round Lisbon, Madrid and in northern Morocco');
+  ok(!(await has(2, 27)) && !(await has(-20, 40)) && !(await has(-12, 39)), 'not out in the Sahara, not in the sea');
+  ok(await p.evaluate(() => /GARD/.test(document.getElementById('ak-src').textContent)), 'the key names the range map (GARD)');
   ok(await p.evaluate(() => { const b = document.querySelector('#cp-list .cp-row[data-sp="malpolon-monspessulanus"] .area-btn'); return b.textContent === 'Hide colours' && b.classList.contains('on') && b.getAttribute('aria-pressed') === 'true'; }), 'button turns into Hide area');
-  ok(await p.evaluate(() => !document.getElementById('area-key').hidden && /Where the Montpellier Snake lives/.test(document.getElementById('area-key').textContent) && /more/.test(document.getElementById('ak-scale').textContent)), 'key: Where the Montpellier Snake lives, more / less');
+  ok(await p.evaluate(() => !document.getElementById('area-key').hidden && /Where the Montpellier Snake lives/.test(document.getElementById('area-key').textContent) && /more/.test(document.getElementById('ak-scale').textContent) && !/state or country/.test(document.getElementById('area-key').textContent)), 'key: Where the Montpellier Snake lives, more / less (no "shaded by state or country")');
   const vw = await p.evaluate(() => window.SL_MAP_VIEW());
   ok(vw.w < -9 && vw.e > 7 && vw.s < 36 && vw.n > 44, 'map fitted to the range (' + [vw.w, vw.e, vw.s, vw.n].map(x => x.toFixed(1)).join(', ') + ')');
   await shotMap('1-portugal-montpellier');
@@ -93,7 +100,7 @@ async function run(theme, phone) {
   ok((await info()) === null && await p.evaluate(() => !document.getElementById('country-panel').hidden), 'Close on the key puts it away (the list stays)');
   // empty map: only the area goes
   await clickArea('malpolon-monspessulanus');
-  await llClick(p, -20, 40); // the Atlantic
+  await llClick(p, -12, 36.5); // the Atlantic
   ok((await info()) === null && await p.evaluate(() => !document.getElementById('country-panel').hidden && document.getElementById('cp-title').textContent === 'Portugal'), 'a click on the empty sea puts the area away, the list stays');
   await llClick(p, -20, 40);
   ok(await p.evaluate(() => document.getElementById('country-panel').hidden), 'the next click on the sea closes the list as before');
@@ -117,8 +124,8 @@ async function run(theme, phone) {
   ok(/Pennsylvania/.test(await p.evaluate(() => document.getElementById('cp-title').textContent)), 'Pennsylvania picked');
   await clickArea('crotalus-horridus');
   a = await info();
-  ok(a && a.states['us:PA'] >= 2 && Object.keys(a.states).length === 31, 'Timber Rattlesnake: 31 states lit (extirpated in Maine and Rhode Island) (PA step ' + (a && a.states['us:PA']) + ')');
-  ok(a && Object.values(a.states).some(s => s < 2), 'some states lighter (edge of its range)');
+  ok(a && a.src === 'g' && await has(-77.6, 40.9) && await has(-86, 35.5), 'Timber Rattlesnake: in Pennsylvania and Tennessee');
+  ok(!(await has(-69.2, 45.3)) && !(await has(-81.2, 27.5)) && !(await has(-100, 40)), 'not in Maine, the Florida peninsula or the Great Plains (the range, not whole states)');
   await shotMap('2-pennsylvania-timber-rattlesnake');
   await p.click('#ak-close'); await p.waitForTimeout(400);
   ok(await p.evaluate(() => document.getElementById('map-legend').hidden && /Pennsylvania/.test(document.getElementById('cp-title').textContent)), 'after Close, Pennsylvania is still picked (one state: no fewer/more key - v5.78)');
@@ -129,10 +136,11 @@ async function run(theme, phone) {
   ok(/Florida/.test(await p.evaluate(() => document.getElementById('cp-title').textContent)), 'Florida picked');
   if (await clickArea('python-bivittatus')) {
     a = await info();
-    ok(a && a.states['us:FL'] != null && a.parts.indexOf('us:FL') >= 0, 'Florida shaded like any other place, only its south (where it breeds)');
-    ok(a && a.states['cn:Yunnan'] != null && a.states['id:Sumbawa'] != null, 'native range in Asia (Yunnan, Sumbawa)');
+    ok(await has(-80.9, 25.6) && await has(-81.2, 26.2), 'South Florida shaded (the Everglades, Big Cypress - where it breeds)');
+    ok(!(await has(-84.3, 30.4)) && !(await has(-81.4, 28.5)) && !(await has(-80.2, 26.7 + 3)), 'not north Florida, Orlando or the Panhandle');
+    ok(await has(101, 23) && await has(100.5, 15) && await has(110.5, -7.3), 'native range in Asia (Yunnan, Thailand, Java)');
+    ok(!(await has(77.2, 28.6)) && !(await has(80.5, 7.5)), 'not Delhi or Sri Lanka');
     ok(await p.evaluate(() => !document.getElementById('ak-intro') && !document.getElementById('ak-note').hidden), 'no separate brought-by-people colour; the key explains the shading');
-    ok(a && a.states['in:Assam'] != null && a.whole.in == null && a.whole.th != null, 'Burmese python: north-east India only (not all of India), Thailand whole');
     await shotMap('3-florida-burmese-python');
     await p.click('#ak-close'); await p.waitForTimeout(300);
   }
@@ -143,12 +151,12 @@ async function run(theme, phone) {
   ok(/Saint Lucia/.test(await p.evaluate(() => document.getElementById('cp-title').textContent)), 'Saint Lucia picked');
   if (await clickArea('erythrolamprus-ornatus')) {
     a = await info();
-    ok(a && Object.keys(a.states).join() === 'lc:Micoud Quarter', 'Saint Lucia Racer: only its one quarter');
+    ok(a && a.rings >= 1 && a.box[1] - a.box[0] < 0.5, 'Saint Lucia Racer: its tiny range on Saint Lucia (' + (a && a.box) + ')');
     await shotMap('4-saint-lucia-racer');
   }
   if (await clickArea('tetracheilostoma-breuili')) {
     a = await info();
-    ok(a && a.flat && a.whole.lc === 2, 'St. Lucia Threadsnake: the island lit whole, one shade');
+    ok(a && a.flat && await has(-60.97, 13.9), 'St. Lucia Threadsnake: the island lit, one shade');
     ok(await p.evaluate(() => !document.getElementById('ak-flat').hidden && document.getElementById('ak-scale').hidden), 'key: one shade, Lives here');
     await shotMap('4b-saint-lucia-threadsnake');
   }
