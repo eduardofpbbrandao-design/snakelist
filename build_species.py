@@ -33,6 +33,57 @@ REDIRECT = """<!doctype html><html lang="en"><head><meta charset="utf-8"><title>
 # the header and footer every SnakeList page shares (the static pages use the same markup):
 # the app icon and the SnakeList wordmark going home, then the app, the species directory,
 # the install guide and the About page. rel = the way back to the site root ("../", "../../")
+# v5.93: every See more / See all / Show less button on the pages looks exactly like "See all families" on the app's home page: a
+# small plain pill (Inter 500 12px, 4px 11px, the app's border, surface and muted-text colours); pointed at, it gets the same
+# dark hover as every SnakeList button (sl-fx). "html" in front: wd.js adds its own .sl-more-btn style later in the page.
+SEEMORE_CSS = (
+    "html .sp-fmore,html .sp-all,html .sl-more-btn,details>summary::after{display:inline-flex;align-items:center;gap:0;min-height:0;margin:8px 0 0;"
+    "font:500 12px/1.35 Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:4px 11px;border-radius:999px;border:1px solid #c8d6bc;"
+    "background:#f6faf1;color:#55614f;box-shadow:none;cursor:pointer;transition:border-color .15s ease,color .15s ease}\n"
+    "html .sp-fmore,details>summary::after{margin:0}html .sp-fmore::after{display:none}html:not(.js) .sp-all{display:none}html .sp-all[hidden],html .sl-more-btn[hidden],html .sp-fmore[hidden]{display:none}\n"
+    "html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover{border-color:#8fbf8f;color:#24321f}\n"
+    "details>summary:hover::after{background:rgba(12,26,18,.9);border-color:rgba(155,224,124,.65);color:#fff}\n"
+    "@media (prefers-color-scheme:dark){html .sp-fmore,html .sp-all,html .sl-more-btn,details>summary::after{border-color:#37855f;background:#24684a;color:#a8c9b4}"
+    "html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover{border-color:#6fbf8a;color:#dff5d6}}\n")
+# v5.93: the app's Report button (a bug or an idea for the creator) on every page too, at the end of the header, top right
+PAGE_REPORT_CSS = (
+    ".sl-report{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-left:6px;flex:none;align-self:center;"
+    "border-radius:10px;border:1px solid var(--line,#d5e4cf);background:var(--card,#fbfdf9);color:var(--text,#1d6b33);cursor:pointer;padding:0}"
+    ".sl-report svg{width:16px;height:16px}.sl-report:focus-visible{outline:2px solid #58b351;outline-offset:2px}\n"
+    ".sl-rep-sheet{position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(8,20,12,.55)}"
+    ".sl-rep-sheet.open{display:flex}.sl-rep-card{width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;border-radius:16px;padding:20px 20px 18px;"
+    "background:var(--card,#fbfdf9);color:var(--text,#1d6b33);border:1px solid var(--line,#d5e4cf);box-shadow:0 18px 50px rgba(0,0,0,.35);font:400 14px/1.5 Inter,system-ui,sans-serif;text-align:left}"
+    ".sl-rep-card h2{margin:0 0 6px;font-size:20px;line-height:1.25}.sl-rep-card p{margin:0 0 12px;color:var(--muted,#4b7a55)}"
+    ".sl-rep-kinds{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}.sl-rep-kinds button,.sl-rep-acts button{font:600 13px Inter,system-ui,sans-serif;"
+    "padding:7px 12px;border-radius:999px;border:1px solid var(--line,#d5e4cf);background:transparent;color:var(--text,#1d6b33);cursor:pointer}"
+    ".sl-rep-kinds button.on{background:#3f8f3a;border-color:#3f8f3a;color:#fff}"
+    ".sl-rep-card textarea{box-sizing:border-box;width:100%;min-height:110px;padding:10px 12px;border-radius:10px;border:1px solid var(--line,#d5e4cf);background:var(--bg,#f1f6ee);color:var(--text,#1d6b33);font:inherit;resize:vertical}"
+    ".sl-rep-acts{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.sl-rep-acts button{border-radius:10px}.sl-rep-acts .go{background:#3f8f3a;border-color:#3f8f3a;color:#fff}"
+    ".sl-rep-note{min-height:1em;margin:8px 0 0!important;font-size:13px}.sl-rep-note a{color:var(--link,#2a7a2f)}\n")
+PAGE_REPORT_JS = r"""
+// v5.93: the Report button (the same as the app's): a short form that opens a pre-filled email to the creator
+(function(){if(!document.querySelector||document.querySelector('.sl-report,#report-btn'))return;
+var nav=document.querySelector('header.sl-top nav, header.site-top nav');if(!nav)return;
+var INBOX='__INBOX__',kind='Bug';
+var b=document.createElement('button');b.type='button';b.className='sl-report';b.setAttribute('aria-label','Report a bug or suggest an idea');b.title='Report a bug or suggest an idea';
+b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v4"/><path d="M12 14h.01"/></svg>';
+nav.appendChild(b);
+var s=document.createElement('div');s.className='sl-rep-sheet';s.setAttribute('role','dialog');s.setAttribute('aria-modal','true');s.setAttribute('aria-label','Report a bug or suggest an idea');
+s.innerHTML='<div class="sl-rep-card"><h2>Help make SnakeList better</h2><p>Found a bug, have an idea, or anything else? It goes straight to the SnakeList creator.</p>'+
+'<div class="sl-rep-kinds"><button type="button" class="on" data-kind="Bug">&#128027; Something’s broken</button><button type="button" data-kind="Idea">&#128161; An idea to make it better</button><button type="button" data-kind="Other">&#128172; Other</button></div>'+
+'<textarea rows="5" placeholder="What happened, or what would you change?" aria-label="Your message"></textarea><p class="sl-rep-note" aria-live="polite"></p>'+
+'<div class="sl-rep-acts"><button type="button" class="no">Cancel</button><button type="button" class="go">Send</button></div></div>';
+document.body.appendChild(s);var t=s.querySelector('textarea'),n=s.querySelector('.sl-rep-note');
+function open(){s.classList.add('open');n.textContent='';setTimeout(function(){t.focus()},30)}function close(){s.classList.remove('open');try{b.focus()}catch(e){}}
+b.addEventListener('click',open);s.querySelector('.no').addEventListener('click',close);s.addEventListener('click',function(e){if(e.target===s)close()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&s.classList.contains('open'))close()});
+[].forEach.call(s.querySelectorAll('.sl-rep-kinds button'),function(x){x.addEventListener('click',function(){kind=x.getAttribute('data-kind');[].forEach.call(s.querySelectorAll('.sl-rep-kinds button'),function(y){y.classList.toggle('on',y===x)})})});
+s.querySelector('.go').addEventListener('click',function(){var m=t.value.trim();if(!m){n.textContent='Write a few words first.';t.focus();return}
+var subj='SnakeList '+(kind==='Bug'?'bug report':kind==='Idea'?'idea':'message')+': '+m.split('\n')[0].slice(0,60);
+var body=m+'\n\n---\nType: '+kind+'\nPage: '+location.href+'\nScreen: '+innerWidth+'x'+innerHeight+'\nBrowser: '+navigator.userAgent;
+var mail='mailto:'+INBOX+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);try{window.open(mail,'_blank')}catch(e){}
+n.innerHTML='Your email app should open with it ready to send. If it didn’t, <a href="'+mail+'" target="_blank" rel="noopener">tap here to send it</a>.'})})();
+"""
 def site_header(rel, here=""):
     def a(href, label, key):
         return '<a href="%s"%s>%s</a>' % (href, ' aria-current="page"' if key == here else "", label)
@@ -307,6 +358,10 @@ def build(app):
     global FX_CSS, FX_JS
     _fx = re.findall(r"/\* ---- sl-fx shared start ----.*?\*/(.*?)/\* ---- sl-fx shared end ---- \*/", app, re.S)
     FX_CSS, FX_JS = (_fx[0].strip() + "\n", _fx[1].strip() + "\n") if len(_fx) >= 2 else ("", "")
+    # v5.93: the Report button on every page (sp.js, country.js and sl-fx.js all carry FX_JS), sending to the app's own inbox
+    _inbox = re.search(r'var INBOX = "([^"]+)";', app)
+    FX_CSS += SEEMORE_CSS + PAGE_REPORT_CSS
+    FX_JS += PAGE_REPORT_JS.replace("__INBOX__", _inbox.group(1) if _inbox else "")
     open(OUT + "/sl-fx.css", "w", encoding="utf-8").write(FX_CSS)
     open(OUT + "/sl-fx.js", "w", encoding="utf-8").write(FX_JS)
     # every plain text link (in a sentence, a list, a table, the breadcrumbs, the footer) changes colour when pointed at
@@ -1383,6 +1438,9 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             open("%s/%s.html" % (OUT, _old), "w", encoding="utf-8").write(REDIRECT.format(name=esc(_c["name"]), url=SITE + "species/" + page_name(_c), page=page_name(_c)))
     for _gone in REMOVED_NO_TARGET:
         if _gone not in _by_id and os.path.exists("%s/%s.html" % (OUT, _gone)): os.remove("%s/%s.html" % (OUT, _gone))
+        # v5.93: ...and its genus page, when no snake of that genus is left (genus/dinodon.html linked to the removed page)
+        _g = _gone.split("-")[0]
+        if _gone not in _by_id and not any(k.split("-")[0] == _g for k in _by_id) and os.path.exists("%s/genus/%s.html" % (OUT, _g)): os.remove("%s/genus/%s.html" % (OUT, _g))
     dates.save()
     # the "See states" shapes: one small file per country, fetched only when the button is pressed
     os.makedirs(OUT + "/prov", exist_ok=True)
