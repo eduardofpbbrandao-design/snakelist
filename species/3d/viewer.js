@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=576'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=576'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=577'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=577'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 
 const TAU = Math.PI * 2;
@@ -156,6 +156,8 @@ function normProfile(p, id) {
   // small-scale relief is left off it
   // v5.53: the plates are now real scales in the head's own textures (headData), not painted lines
   if ((q.plan === 'colubrid' || q.plan === 'elapid' || q.plan === 'sea' || !PLANS[q.plan]) && q.head.plates == null) q.head = Object.assign({}, q.head, { plates: true });
+  // v5.83: blind snakes' head shields are smooth and glassy, the sutures between them faint (they read as tiles)
+  if (q.plan === 'blind') q.head = Object.assign({ groove: 0.14, headRelief: 0.3 }, q.head);
   // ---- v5.62 (model accuracy) ----
   // body.hn: the documented ratio of head width to neck width sets the neck (vipers ~2-3, colubrids ~1.3, pipe snakes 1)
   if (q.body.hn && !form) q.body = Object.assign({}, q.body, { neck: clamp(q.head.w / q.body.hn, 0.25, 1.05) });
@@ -564,6 +566,18 @@ function makePose(P, F, seed) {
       for (let i = N - 2; i >= 0; i--) E[i] = Math.max(E[i], E[i + 1] - sl);
       for (let it = 0; it < 30; it++) for (let i = 1; i < N - 1; i++) E[i] = Math.max(need[i], (E[i - 1] + E[i] * 2 + E[i + 1]) / 4);
     }
+    // v5.83: the head rests on top of the coil, not down in the hole in its middle (where it lay hidden behind the turns, so
+    // the first view of a coiled rattlesnake or viper often missed its head): when the head ends up over the coil, the head
+    // and neck are raised to the top of the turns under it, the neck sloping down to where the forebody lies
+    const iT = Math.round(N * (pose.lead != null ? pose.lead : 0.32)), hN = Math.max(2, Math.round(F.Hl * 0.6 / ds));
+    let ccx = 0, ccz = 0, nc = 0; for (let i = iT; i < N; i++) { ccx += pts[i][0]; ccz += pts[i][1]; nc++; } ccx /= nc; ccz /= nc;
+    let rOut = 0, top = 0; for (let i = iT; i < N; i++) { rOut = Math.max(rOut, Math.hypot(pts[i][0] - ccx, pts[i][1] - ccz) + Wd[i]); top = Math.max(top, E[i] + H[i] * (1 + F.bf)); }
+    const hx = pts[hN][0], hz = pts[hN][1];
+    if (Math.hypot(hx - ccx, hz - ccz) < rOut * 0.92) {
+      const want = top - H[hN] * F.bf + H[hN] * 0.15, k1 = Math.round(F.Hl * 1.1 / ds), k2 = Math.round(F.Hl * 4.5 / ds);
+      for (let i = 0; i < Math.min(N, k2); i++) E[i] = Math.max(E[i], want * (1 - sstep(k1, k2, i)));
+      const sl = (pose.slope || 0.55) * ds; for (let i = 1; i < N; i++) E[i] = Math.max(E[i], E[i - 1] - sl);
+    }
   }
   if (special) E.set(special.E);
   const eAt = (x) => { const f = clamp(x / ds, 0, N - 1.0001), i = Math.floor(f), t = f - i; return lerp(E[i], E[i + 1], t); };
@@ -835,42 +849,53 @@ function buildBody(P, F, pose, quality) {
   };
   const upK = Hd.upturn || 0, upL = F.Hl * (Hd.upLen || 0.4), upH = F.Hh(F.Hl * 0.5);
   // the cross-section point at x and angle th (0 = top of the back, +/-pi = belly midline)
-  const section = (x, th, noSock) => {
-    const W = F.W(x), H = F.Hh(x), st = Math.sin(th), ct = Math.cos(th), head = x < F.Hl * 1.05;
+  // v5.83: as a function of th for one x (ringAt), so everything that depends only on x - the outline's splines, the bumps
+  // near that x - is worked out once per ring, not once per vertex (it was most of the time spent building the body)
+  const triH = Hd.shape === 'tri', blunt = P.body.blunt ? 0 : 1, ridge = P.body.ridge || 0, btri = P.body.tri || 0, taper = Hd.taper || 0.2;
+  const ringAt = (x, noSock) => {
+    const W = F.W(x), H = F.Hh(x), BFx = F.BF(x);
     const bodyF = sstep(F.Hl * 1.3, F.Hl * 2.6, x) * (1 - sstep(L * 0.86, L * 0.99, x)); // (v5.34: body shape away from head and tail tip)
-    const n = lerp(Hd.shape === 'tri' ? 2.7 : 2.3, ct >= 0 ? nTop(x) : 3.0 + 0.7 * bodyF * (P.body.blunt ? 0 : 1), sstep(0, F.Hl * (Hd.shape === 'tri' ? 0.12 : 0.2), x)); // v5.28: a squarer snout from the front in vipers // v5.17: the nose is a smooth round dome (no box edges meeting in a crease at the chin)
-    let sx = Math.sign(st) * Math.abs(st) ** (2 / n), sy = Math.sign(ct) * Math.abs(ct) ** (2 / n);
-    // v5.09: the lower jaw narrows smoothly from the side of the head towards the chin (it used to step in by 14% right at
-    // the side line, which left a notch - a little triangle - at the front of the jaw under the snout)
-    if (ct < 0) { sy *= F.BF(x); if (head) sx *= lerp(1, lerp(0.9, 1, sstep(F.Hl * 0.75, F.Hl * 1.1, x)), sstep(0, 0.7, -ct)); } // (v5.27: the lower jaw tucked in under the upper one)
-    if (head && ct > 0) sx *= 1 - (Hd.taper || 0.2) * sy * (1 - sstep(F.Hl * 0.85, F.Hl * 1.25, x));
-    // v5.34: snakes are flat underneath (above), most have a low ridge along the spine, and tree snakes and kraits a
-    // slightly triangular body - sides sloping in to the ridge
-    if (ct > 0 && P.body.tri) sx *= 1 - P.body.tri * 0.45 * sy * sy * bodyF;
-    let k = 1 + (P.body.ridge || 0) * bodyF * Math.exp(-((th / 0.2) ** 2));
-    for (const b of bumps) {
-      const dx = (x - b.x) / b.xs; if (Math.abs(dx) > 3 || (noSock && b.sock)) continue;
-      const dth1 = Math.atan2(Math.sin(th - b.th), Math.cos(th - b.th)), dth2 = Math.atan2(Math.sin(th + b.th), Math.cos(th + b.th));
-      k += b.amp * Math.exp(-dx * dx) * (Math.exp(-((dth1 / b.ts) ** 2)) + (b.mirror ? Math.exp(-((dth2 / b.ts) ** 2)) : 0));
-    }
-    if (x < F.Hl * Hd.jaw * 1.1 && x > F.Hl * 0.02) { // the mouth line
-      const dm = Math.min(Math.abs(Math.abs(th) - mouthA), 1);
-      k -= 0.03 * Math.exp(-((dm / 0.07) ** 2)) /* v5.53: a fine crease (a deep one read as a separate shell) */ * sstep(F.Hl * 0.1, F.Hl * 0.26, x) /* v5.12: the lip line fades out over the rounded snout tip */ * (1 - sstep(F.Hl * Hd.jaw * 0.85, F.Hl * Hd.jaw * 1.1, x));
-    }
-    // v5.43: an upturned rostral (hognose snakes): the front of the snout is lifted, its top more than its underside, so
-    // the narrow snout tip points forward and up like a shovel, with the chin left low beneath it
-    if (upK && x < upL) { const f = 1 - sstep(0, upL, x); return [W * sx * k, H * sy * k + upK * upH * f * (ct >= 0 ? 1 : lerp(1, 0.3, -ct))]; }
-    return [W * sx * k, H * sy * k];
+    const n0 = triH ? 2.7 : 2.3, nUp = nTop(x), nDn = 3.0 + 0.7 * bodyF * blunt, nk = sstep(0, F.Hl * (triH ? 0.12 : 0.2), x); // v5.28: a squarer snout from the front in vipers // v5.17: the nose is a smooth round dome (no box edges meeting in a crease at the chin)
+    const pUp = 2 / lerp(n0, nUp, nk), pDn = 2 / lerp(n0, nDn, nk);
+    const jawK = lerp(0.9, 1, sstep(F.Hl * 0.75, F.Hl * 1.1, x)), tapK = taper * (1 - sstep(F.Hl * 0.85, F.Hl * 1.25, x)), triK = btri * 0.45 * bodyF, ridK = ridge * bodyF;
+    const bl = []; for (const b of bumps) { const dx = (x - b.x) / b.xs; if (Math.abs(dx) > 3 || (noSock && b.sock)) continue; bl.push(b, b.amp * Math.exp(-dx * dx)); }
+    const mouthK = x < F.Hl * Hd.jaw * 1.1 && x > F.Hl * 0.02 ? 0.03 /* v5.53: a fine crease (a deep one read as a separate shell) */ * sstep(F.Hl * 0.1, F.Hl * 0.26, x) /* v5.12: the lip line fades out over the rounded snout tip */ * (1 - sstep(F.Hl * Hd.jaw * 0.85, F.Hl * Hd.jaw * 1.1, x)) : 0;
+    const upF = upK && x < upL ? upK * upH * (1 - sstep(0, upL, x)) : 0;
+    return (th) => {
+      const st = Math.sin(th), ct = Math.cos(th), pw = ct >= 0 ? pUp : pDn;
+      let sx = Math.sign(st) * Math.abs(st) ** pw, sy = Math.sign(ct) * Math.abs(ct) ** pw;
+      // v5.09: the lower jaw narrows smoothly from the side of the head towards the chin (it used to step in by 14% right at
+      // the side line, which left a notch - a little triangle - at the front of the jaw under the snout)
+      // (v5.83: both fade out smoothly behind the head - they used to stop at 1.05 head lengths, a step all round the neck that
+      // showed as a dark ring behind the head)
+      if (ct < 0) { sy *= BFx; if (jawK < 1) sx *= lerp(1, jawK, sstep(0, 0.7, -ct)); } // (v5.27: the lower jaw tucked in under the upper one)
+      if (ct > 0 && tapK) sx *= 1 - tapK * sy;
+      // v5.34: snakes are flat underneath (above), most have a low ridge along the spine, and tree snakes and kraits a
+      // slightly triangular body - sides sloping in to the ridge
+      if (ct > 0 && triK) sx *= 1 - triK * sy * sy;
+      let k = 1 + (ridK ? ridK * Math.exp(-((th / 0.2) ** 2)) : 0);
+      for (let i = 0; i < bl.length; i += 2) {
+        const b = bl[i], dth1 = Math.atan2(Math.sin(th - b.th), Math.cos(th - b.th));
+        let e = Math.exp(-((dth1 / b.ts) ** 2)); if (b.mirror) { const dth2 = Math.atan2(Math.sin(th + b.th), Math.cos(th + b.th)); e += Math.exp(-((dth2 / b.ts) ** 2)); }
+        k += bl[i + 1] * e;
+      }
+      if (mouthK) { const dm = Math.min(Math.abs(Math.abs(th) - mouthA), 1); k -= mouthK * Math.exp(-((dm / 0.07) ** 2)); } // the mouth line
+      // v5.43: an upturned rostral (hognose snakes): the front of the snout is lifted, its top more than its underside, so
+      // the narrow snout tip points forward and up like a shovel, with the chin left low beneath it
+      if (upF) return [W * sx * k, H * sy * k + upF * (ct >= 0 ? 1 : lerp(1, 0.3, -ct))];
+      return [W * sx * k, H * sy * k];
+    };
   };
+  const section = (x, th, noSock) => ringAt(x, noSock)(th);
 
   const nV = nR * (M + 1), pos = new Float32Array(nV * 3), uv = new Float32Array(nV * 2), hd = new Float32Array(nV), met = new Float32Array(nV * 3);
   const plates = 1; // v5.53: every head has its own scales (headData): the body's scale relief fades out on it
   const frames = [];
   for (let i = 0; i < nR; i++) {
-    const x = ringX[i], c = spine(x), f = frameAt(x); frames.push({ x, c, f });
+    const x = ringX[i], c = spine(x), f = frameAt(x), ring = ringAt(x); frames.push({ x, c, f });
     const v = gOf(x) / gTotal, cx = circ(x), headW = (1 - plates) * (1 - sstep(F.Hl * 0.82, F.Hl * 1.18, x));
     for (let j = 0; j <= M; j++) {
-      const u = j / M, th = TAU * u - Math.PI, s = section(x, th), k = (i * (M + 1) + j);
+      const u = j / M, th = TAU * u - Math.PI, s = ring(th), k = (i * (M + 1) + j);
       pos[k * 3] = c.x + f.S.x * s[0] + f.U.x * s[1]; pos[k * 3 + 1] = c.y + f.S.y * s[0] + f.U.y * s[1]; pos[k * 3 + 2] = c.z + f.S.z * s[0] + f.U.z * s[1];
       uv[k * 2] = u; uv[k * 2 + 1] = v; hd[k] = plates * (1 - sstep(F.Hl * 0.92, F.Hl * 1.12, x)) * (Math.abs(th) < Math.PI * 0.62 ? 1 : 0.85);
       // v4.81: true distances on the skin (around, along) for the small head scales drawn in the shader
@@ -898,7 +923,163 @@ function buildBody(P, F, pose, quality) {
     const e = 0.02, a = surf(x, th - e).p, b = surf(x, th + e).p, dx = F.Hl * 0.02, c = surf(Math.max(0, x - dx), th).p, d = surf(x + dx, th).p;
     return new THREE.Vector3().crossVectors(b.sub(a), d.sub(c)).normalize();
   };
-  return { geo, gTotal, gOf, xOf, nR, M, ringX, spine, frameAt, section, surf, surfNormal, eyeA, mouthA, eyeRad, eyeRl };
+  return { geo, gTotal, gOf, xOf, nR, M, ringX, spine, frameAt, section, ringAt, surf, surfNormal, eyeA, mouthA, eyeRad, eyeRl };
+}
+
+// ---------- v5.83: the sculpted head ----------
+// The front of the snake (snout tip to just behind the jaws) is its own, much finer mesh, sculpted instead of painted:
+// every head scale of the species' layout (headLayout: rostral, internasals, prefrontals, frontal, supraoculars,
+// parietals, nasal, loreal, pre- and postoculars, temporals, the upper and lower lip scales, mental and chin shields - or
+// the small, overlapping and keeled scales of vipers and pythons) is a raised plate with a real groove round it; the
+// nostrils and heat pits are real hollows with a rim; the brow (supraocular) stands out over the eye; and the upper and
+// lower jaws are separate surfaces that meet along the lip line - the upper lip scales swell a little and roll in over the
+// lower ones, as in a real snake - so the mouth opens with no cut and a fine shadowed lip line shows when it is shut. It
+// uses the body's own material and attributes, so it bends, shades and takes the pattern exactly as the body does; the
+// body's own coarser rings there are simply not drawn (drawRange). The sculpting (headSkinHeights) does not depend on the
+// pose, so it is done in the pattern worker, while the loading cover is up.
+function headSkinGrid(F, xCut, M, hi) {
+  const NX = hi ? 220 : 140, Mh = M * (hi ? 4 : 5), mA = Math.PI * 0.56, uA = (Math.PI - mA) / TAU, uB = (Math.PI + mA) / TAU, cols = [];
+  // columns round the head: an even grid, plus the mouth line on each side twice (the upper and the lower jaw's edge)
+  for (let j = 0; j <= Mh; j++) { const u = j / Mh; if (Math.abs(u - uA) < 0.4 / Mh || Math.abs(u - uB) < 0.4 / Mh) continue; cols.push({ u, s: Math.abs(TAU * u - Math.PI) > mA ? -1 : 1 }); }
+  cols.push({ u: uA, s: -1 }, { u: uA, s: 1 }, { u: uB, s: 1 }, { u: uB, s: -1 });
+  cols.sort((p, q) => p.u - q.u); // (stable: each mouth-line pair keeps its order - lower jaw, then upper, on the left; upper, then lower, on the right)
+  const xs = []; for (let k = 0; k <= NX; k++) xs.push(xCut * Math.pow(k / NX, 1.3)); // (rings bunched towards the snout tip)
+  return { NX, nC: cols.length, cols, xs, xCut };
+}
+// the height of the sculpted skin over the smooth head at every vertex of the grid (in metres, along the normal)
+function headSkinHeights(P, F, G) {
+  const Hl = F.Hl, H = P.head, { NX, nC, cols, xs, xCut } = G, nV = (NX + 1) * nC;
+  const Lo = headLayout(P, F, eyeOf(P, F)), { seeds, hc, J, wrapA } = Lo, mAa = Lo.mA, fd = new Float32Array(nV), d1 = new Float32Array(nV), id1 = new Int32Array(nV).fill(-1);
+  // the scales: a weighted Voronoi tiling of the layout's scales (as headData does for the textures); the small scales are
+  // diamonds (|dx| + |da|), as the real overlapping ones lie - round cells in staggered rows left straight rings of groove
+  let cMid = 0; while (cMid < nC && cols[cMid].u < 0.5 - 1e-9) cMid++;
+  let b1 = 0, b2 = 0, i1 = -1, xT = 0, aT = 0, lowT = false, jawT = false;
+  const test = (s) => { if (jawT && s.low !== lowT) return; const da = wrapA(aT - s.a) / s.ra; if (da > 2.6 || da < -2.6) return; const dx = (xT - s.x) / s.rx; let d;
+    if (s.small) { const l1 = (Math.abs(dx) + Math.abs(da)) * 0.8; d = l1 * l1; } else d = dx * dx + da * da;
+    if (d < b1) { b2 = b1; b1 = d; i1 = s.id; } else if (d < b2) b2 = d; };
+  for (let k = 1; k <= NX; k++) {
+    const x = xs[k], bigC = [], sm = []; xT = x; jawT = x < J * Hl * 1.02;
+    for (const s of seeds) { if (Math.abs(x - s.x) > s.rx * 2.6) continue; if (!s.small) bigC.push(s); else { sm.push([s.a, s]); if (s.a < -0.5) sm.push([s.a + 2, s]); if (s.a > 0.5) sm.push([s.a - 2, s]); } }
+    sm.sort((p, q) => p[0] - q[0]); let wR = 0; for (const e of sm) wR = Math.max(wR, e[1].ra * 2.6);
+    let lo = 0;
+    for (let ci = cMid; ci < nC; ci++) {
+      aT = 2 * cols[ci].u - 1; lowT = cols[ci].s < 0; b1 = b2 = 1e9; i1 = -1;
+      for (let q = 0; q < bigC.length; q++) test(bigC[q]);
+      while (lo < sm.length && sm[lo][0] < aT - wR) lo++;
+      for (let q = lo; q < sm.length && sm[q][0] <= aT + wR; q++) test(sm[q][1]);
+      const o1 = k * nC + ci, o2 = k * nC + (nC - 1 - ci), f0 = b2 > 1e8 ? 9 : Math.sqrt(b2) - Math.sqrt(b1);
+      fd[o1] = fd[o2] = f0; d1[o1] = d1[o2] = Math.sqrt(b1); id1[o1] = id1[o2] = i1;
+    }
+  }
+  // heights: plates raised and gently domed, with a soft groove round each; small scales overlapping backwards, some keeled
+  // (head.headGeo: how strong; by default from head.headRelief - smooth, glossy shields in green snakes, crisp ones in vipers)
+  const rel = H.headGeo != null ? H.headGeo : P.plan === 'blind' ? 0.3 /* (blind snakes: smooth, glassy shields - earthworm-like, not tiled) */ : H.headRelief != null ? clamp(0.4 + 1.5 * H.headRelief, 0.45, 1) : 1, step = xCut / NX, plates = Lo.plates;
+  const Ap = Hl * 0.0065 * rel, gwP = Math.max(GW * Hl * 1.3, step * 1.5), xh = Hl * (H.jaw || 0.75) * 1.02;
+  const eX = H.eyeX * Hl, eA = Lo.eA, eR = eyeRadOf(P, F), noEye = H.pupil === 'none', browK = H.browGeo != null ? H.browGeo : (H.shape || 'oval') === 'tri' ? 0.16 : 0.09;
+  const holes = [];
+  { const nr = Hl * nostrilR(P) * 1.05; holes.push({ x: Lo.nX * Hl, a: Lo.nA, r: nr, dep: nr * 0.9, rim: nr * 0.16 }); }
+  if (H.pits === 'loreal') holes.push({ x: Hl * ((Lo.nX + Lo.E - Lo.erx) / 2 + 0.01), a: Math.min(mAa - 0.09, (Lo.nA + Lo.eA) / 2 + 0.06), r: Hl * 0.026, dep: Hl * 0.04, rim: Hl * 0.004 });
+  if (H.pits === 'labial') { for (const s of seeds) if ((s.k === 'lab' && (s.n < 4 || s.n > Lo.nLab - 5)) || (s.k === 'ilab' && s.n > Lo.nLab - 6)) { if (s.a < 0) continue; holes.push({ x: s.x, a: s.low ? s.a - 0.012 : s.a + 0.012, r: Math.min(s.rx * 0.45, Hl * 0.016), dep: Hl * 0.018, rim: Hl * 0.002 }); } holes.push({ x: Hl * 0.02, a: 0.3, r: Hl * 0.014, dep: Hl * 0.016, rim: Hl * 0.002 }); }
+  const hgt = new Float32Array(nV);
+  for (let k = 1; k < NX; k++) {
+    const x = xs[k], hx = hc(x), rl = (F.W(x) + F.Hh(x)) / 2, kp = k + 1, km = k - 1, dX = xs[kp] - xs[km];
+    const fade = (1 - sstep(xCut * 0.78, xCut * 0.96, x)) * sstep(0, Hl * 0.03, x), lipF = sstep(Hl * 0.015, Hl * 0.07, x) * (1 - sstep(xh * 0.86, xh * 1.06, x)) * (P.plan === 'blind' ? 0.3 : 1);
+    for (let ci = 0; ci < nC; ci++) {
+      const o = k * nC + ci, u = cols[ci].u, a = 2 * u - 1, aa = Math.abs(a);
+      let cp = ci + 1; if (cp < nC && cols[cp].u - u < 1e-9) cp++; let cm = ci - 1; if (cm >= 0 && u - cols[cm].u < 1e-9) cm--;
+      const up = cp >= nC ? cols[1].u + 1 : cols[cp].u, um = cm < 0 ? cols[nC - 2].u - 1 : cols[cm].u; if (cp >= nC) cp = 1; if (cm < 0) cm = nC - 2;
+      const gx = (fd[kp * nC + ci] - fd[km * nC + ci]) / dX, gy = (fd[k * nC + cp] - fd[k * nC + cm]) / (2 * (up - um) * hx);
+      const g = fd[o] / Math.max(1e-9, Math.hypot(gx, gy)), s = seeds[id1[o]];
+      let h = 0;
+      if (s) {
+        if (!s.small) { const e = sstep(0, 1, g / gwP); h = Ap * (Math.sqrt(e) + 0.4 * (1 - Math.min(1, d1[o]) ** 2)) * (s.k === 'lab' || s.k === 'ilab' ? 0.75 : 1); }
+        else { const As = Math.min(s.rx, s.ra * hx) * (plates ? 0.1 : 0.2) * rel, gw = Math.max(s.gw * 1.2, step * 1.3), e = sstep(0, 1, g / gw), lx = clamp((x - s.x) / s.rx, -1, 1);
+          h = As * (0.55 * Math.sqrt(e) + 0.45 * e * (lx + 1) / 2) + (plates ? Ap * 0.5 : 0); // (each scale rises towards its free rear edge, which overlaps the next)
+          if (s.keel) h += As * 0.7 * s.keel * e * Math.exp(-((wrapA(a - s.a) * hx / (s.rx * 0.2)) ** 2)) * sstep(-0.9, 0.2, lx); }
+      }
+      if (!noEye) { const rho = Math.hypot(x - eX, (aa - eA) * hx) / eR; h *= sstep(1.08, 1.5, rho); // (flat under the scales that ring the eye: it sits in its socket as before)
+        // the brow: the supraocular stands out over the top of the eye (a ledge in vipers and pit vipers)
+        if (rho > 1.0 && rho < 2.4 && aa < eA) h += eR * browK * Math.exp(-(((rho - 1.32) / 0.32) ** 2)) * sstep(0.1, 0.9, (eA - aa) * hx / eR + 0.4); }
+      for (const q of holes) { const d = Math.hypot(x - q.x, (aa - q.a) * hx) / q.r; if (d < 2) h += -q.dep * (1 - sstep(0.45, 1.0, d)) + q.rim * Math.exp(-(((d - 1.15) / 0.3) ** 2)); }
+      // the lip line: the upper lip scales swell a little, then roll in to the edge; the lower jaw's edge slopes in under them
+      if (lipF > 0) { if (cols[ci].s > 0) { const dm = Math.max(0, mAa - aa); h += rl * lipF * (0.012 * Math.exp(-(((dm - 0.045) / 0.03) ** 2)) - 0.045 * (1 - sstep(0, 0.022, dm))); }
+        else { const dm = Math.max(0, aa - mAa); h += rl * lipF * (-0.045 * (1 - sstep(0, 0.03, dm))); } }
+      hgt[o] = h * fade;
+    }
+  }
+  return hgt;
+}
+// vertex normals of an indexed geometry, area-weighted (as computeVertexNormals, without its per-vertex object calls)
+function fastNormals(geo) {
+  const pa = geo.attributes.position.array, ia = geo.index.array; let na = geo.attributes.normal && geo.attributes.normal.array;
+  if (!na || na.length !== pa.length) { na = new Float32Array(pa.length); geo.setAttribute('normal', new THREE.BufferAttribute(na, 3)); } else na.fill(0);
+  for (let k = 0; k < ia.length; k += 3) {
+    const a = ia[k] * 3, b = ia[k + 1] * 3, c = ia[k + 2] * 3;
+    const ux = pa[b] - pa[a], uy = pa[b + 1] - pa[a + 1], uz = pa[b + 2] - pa[a + 2], vx = pa[c] - pa[a], vy = pa[c + 1] - pa[a + 1], vz = pa[c + 2] - pa[a + 2];
+    const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    na[a] += nx; na[a + 1] += ny; na[a + 2] += nz; na[b] += nx; na[b + 1] += ny; na[b + 2] += nz; na[c] += nx; na[c + 1] += ny; na[c + 2] += nz;
+  }
+  for (let i = 0; i < na.length; i += 3) { const l = Math.hypot(na[i], na[i + 1], na[i + 2]) || 1; na[i] /= l; na[i + 1] /= l; na[i + 2] /= l; }
+  geo.attributes.normal.needsUpdate = true; return na;
+}
+function buildHeadSkin(P, F, body, quality) {
+  const Hl = F.Hl, H = P.head, M = body.M, bpos = body.geo.attributes.position.array, bnrm = body.geo.attributes.normal.array;
+  let iCut = 0; while (iCut < body.nR - 2 && body.ringX[iCut] < Hl * 1.2) iCut++;
+  const G = headSkinGrid(F, body.ringX[iCut], M, quality === 'high'), { NX, nC, cols, xs } = G;
+  const nV = (NX + 1) * nC, pos = new Float32Array(nV * 3), uv = new Float32Array(nV * 2), hd = new Float32Array(nV), met = new Float32Array(nV * 3), xv = new Float32Array(nV), thv = new Float32Array(nV), side = new Int8Array(nV);
+  const circ = (x) => { const a = F.W(x), b = F.Hh(x); return Math.PI * (3 * (a + b) - Math.sqrt((3 * a + b) * (a + 3 * b))); };
+  const Mc = M * 2, cs = new Float64Array((Mc + 1) * 2);
+  for (let k = 0; k <= NX; k++) {
+    const x = xs[k], c = body.spine(x), f = body.frameAt(x), v = body.gOf(x) / body.gTotal, cx = circ(x), ring = body.ringAt(x);
+    if (k < NX) for (let j = 0; j <= Mc; j++) { const sc = ring(TAU * (j / Mc) - Math.PI); cs[j * 2] = sc[0]; cs[j * 2 + 1] = sc[1]; }
+    for (let ci = 0; ci < nC; ci++) {
+      const o = k * nC + ci, u = cols[ci].u, th = TAU * u - Math.PI;
+      if (k === NX) { const fj = u * M, j0 = Math.min(M - 1, Math.floor(fj)), t = fj - j0, a = (iCut * (M + 1) + j0) * 3; for (let q = 0; q < 3; q++) pos[o * 3 + q] = lerp(bpos[a + q], bpos[a + 3 + q], t); } // (the last ring lies exactly on the body's: no crack)
+      else { let s; const fj = u * Mc, j0 = Math.min(Mc - 1, Math.floor(fj)), t = fj - j0; // (the smooth head sampled at half the columns, in between on the chord: well under a micron)
+        if (t < 1e-6) s = [cs[j0 * 2], cs[j0 * 2 + 1]]; else if (cols[ci].u === cols[ci + (ci + 1 < nC ? 1 : 0)].u || (ci && cols[ci].u === cols[ci - 1].u)) s = ring(th); else s = [lerp(cs[j0 * 2], cs[j0 * 2 + 2], t), lerp(cs[j0 * 2 + 1], cs[j0 * 2 + 3], t)];
+        pos[o * 3] = c.x + f.S.x * s[0] + f.U.x * s[1]; pos[o * 3 + 1] = c.y + f.S.y * s[0] + f.U.y * s[1]; pos[o * 3 + 2] = c.z + f.S.z * s[0] + f.U.z * s[1]; }
+      uv[o * 2] = u; uv[o * 2 + 1] = v; xv[o] = x; thv[o] = th; side[o] = cols[ci].s;
+      hd[o] = (1 - sstep(Hl * 0.92, Hl * 1.12, x)) * (Math.abs(th) < Math.PI * 0.62 ? 1 : 0.85); met[o * 3] = (u - 0.5) * cx; met[o * 3 + 1] = x; met[o * 3 + 2] = 0;
+    }
+  }
+  // the last ring lies on the body's coarse ring (on its flat facets, a hair inside the true round surface): the rings just
+  // before it ease onto those facets, so there is no little step - it caught the light as a pale ring round the neck
+  { const ring = body.ringAt(G.xCut), c = body.spine(G.xCut), f = body.frameAt(G.xCut), kB = xs.findIndex((x) => x > G.xCut * 0.85);
+    for (let ci = 0; ci < nC; ci++) { const sc = ring(TAU * cols[ci].u - Math.PI), o = (NX * nC + ci) * 3;
+      const dx = pos[o] - (c.x + f.S.x * sc[0] + f.U.x * sc[1]), dy = pos[o + 1] - (c.y + f.S.y * sc[0] + f.U.y * sc[1]), dz = pos[o + 2] - (c.z + f.S.z * sc[0] + f.U.z * sc[1]);
+      for (let k = kB; k < NX; k++) { const w = sstep(G.xCut * 0.85, G.xCut, xs[k]), q = (k * nC + ci) * 3; pos[q] += dx * w; pos[q + 1] += dy * w; pos[q + 2] += dz * w; } } }
+  const idx = new Uint32Array(NX * (nC - 1) * 6); let ni = 0;
+  for (let k = 0; k < NX; k++) for (let ci = 0; ci < nC - 1; ci++) { if (cols[ci + 1].u - cols[ci].u < 1e-9) continue; const a = k * nC + ci, b = a + nC; idx[ni++] = a; idx[ni++] = a + 1; idx[ni++] = b; idx[ni++] = a + 1; idx[ni++] = b + 1; idx[ni++] = b; }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setIndex(new THREE.BufferAttribute(idx.subarray(0, ni), 1));
+  fastNormals(geo);
+  const pairs = []; for (let ci = 0; ci < nC - 1; ci++) if (cols[ci + 1].u - cols[ci].u < 1e-9) pairs.push(ci);
+  const avg = (n, a, b) => { for (let q = 0; q < 3; q++) { const m = (n[a * 3 + q] + n[b * 3 + q]) / 2; n[a * 3 + q] = n[b * 3 + q] = m; } };
+  const bn = geo.attributes.normal.array.slice(), base = pos.slice(), rest = pos.slice();
+  for (let k = 0; k <= NX; k++) { avg(bn, k * nC, k * nC + nC - 1); for (const ci of pairs) avg(bn, k * nC + ci, k * nC + ci + 1); } // (both copies of the lip line move the same way: no crack)
+  geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setAttribute('aHead', new THREE.BufferAttribute(hd, 1)); geo.setAttribute('aMet', new THREE.BufferAttribute(met, 3));
+  // normals: from the sculpted surface; the lip line stays a crease in front of the corners of the mouth, the belly seam and
+  // the snout tip are smooth, and the last ring takes the body's own normals (no seam in the shading)
+  const T0 = body.frameAt(0).T, lastB = iCut * (M + 1), xh = Hl * (H.jaw || 0.75) * 1.02;
+  function fixNormals() {
+    const n = fastNormals(geo); // (on the arrays themselves: three's general version took ~20x longer on this many vertices)
+    for (let k = 0; k <= NX; k++) { const b = k * nC; avg(n, b, b + nC - 1); if (xs[k] > xh * 0.9) for (const ci of pairs) avg(n, b + ci, b + ci + 1); }
+    // (the body's own normals at the seam come from its coarse rings, a few degrees off the fine head's: over the last tenth
+    // of the head mesh its normals blend into them, or the seam showed as a pale ring round the neck)
+    const kB = xs.findIndex((x) => x > G.xCut * 0.9);
+    for (let ci = 0; ci < nC; ci++) { n[ci * 3] = -T0.x; n[ci * 3 + 1] = -T0.y; n[ci * 3 + 2] = -T0.z;
+      const fj = cols[ci].u * M, j0 = Math.min(M - 1, Math.floor(fj)), t = fj - j0, a = (lastB + j0) * 3;
+      let X = lerp(bnrm[a], bnrm[a + 3], t), Y = lerp(bnrm[a + 1], bnrm[a + 4], t), Z = lerp(bnrm[a + 2], bnrm[a + 5], t); const l = Math.hypot(X, Y, Z) || 1; X /= l; Y /= l; Z /= l;
+      for (let k = kB; k <= NX; k++) { const o = (k * nC + ci) * 3, w = sstep(G.xCut * 0.9, G.xCut, xs[k]), x2 = lerp(n[o], X, w), y2 = lerp(n[o + 1], Y, w), z2 = lerp(n[o + 2], Z, w), l2 = Math.hypot(x2, y2, z2) || 1; n[o] = x2 / l2; n[o + 1] = y2 / l2; n[o + 2] = z2 / l2; } }
+    geo.attributes.normal.needsUpdate = true;
+  }
+  const hs = { geo, xv, thv, side, nC, NX, iCut, grid: G, rest, fixNormals, drawFrom: iCut * M * 6, onRest: null,
+    // the sculpted heights (from the worker, or worked out here): the rest shape moves out along the smooth head's normals
+    setHeights(hgt) { for (let o = 0; o < nV; o++) { const h = hgt[o]; for (let q = 0; q < 3; q++) rest[o * 3 + q] = base[o * 3 + q] + bn[o * 3 + q] * h; }
+      if (hs.onRest) hs.onRest(); else { pos.set(rest); geo.attributes.position.needsUpdate = true; fixNormals(); } geo.computeBoundingSphere(); },
+  };
+  geo.computeBoundingBox(); geo.computeBoundingSphere(); // (the normals are made when the sculpted heights arrive: setHeights)
+  return hs;
 }
 
 // ---------- textures generated per species ----------
@@ -1232,13 +1413,13 @@ function patternTex(d) {
 }
 // v4.81: the full-detail pattern is painted in a background worker (this same module) while the model is already
 // on screen with a quick, coarser one; on its own the full one took 1-2 s before anything could be shown
-function patternInWorker(P, quality, seed) {
+function patternInWorker(P, quality, seed, hsq) {
   return new Promise((res, rej) => {
     let w; try { w = new Worker(import.meta.url, { type: 'module' }); } catch (e) { rej(e); return; }
     const t = setTimeout(() => { w.terminate(); rej(new Error('timeout')); }, 30000);
     w.onmessage = (e) => { clearTimeout(t); w.terminate(); if (e.data && e.data.data) res(e.data); else rej(new Error('worker')); };
     w.onerror = (e) => { clearTimeout(t); w.terminate(); rej(e); };
-    w.postMessage({ slPattern: 1, P, quality, seed });
+    w.postMessage({ slPattern: 1, P, quality, seed, hsq });
   });
 }
 if (typeof window === 'undefined' && typeof self !== 'undefined' && typeof self.postMessage === 'function') {
@@ -1247,7 +1428,8 @@ if (typeof window === 'undefined' && typeof self !== 'undefined' && typeof self.
     try {
       const F = makeBodyFns(m.P, m.quality), g = girthOf(F), lat = scaleLattice(m.P, g.gTotal), d = patternData(m.P, F, g, lat, m.quality, m.seed);
       d.head = headData(m.P, F, m.quality); // v5.53: and the sharp head scales
-      self.postMessage(d, [d.data.buffer, d.head.relief.buffer, d.head.color.buffer]);
+      if (m.hsq) d.headH = headSkinHeights(m.P, F, headSkinGrid(F, m.hsq.xCut, m.hsq.M, m.hsq.hi)); // v5.83: and the sculpted head
+      self.postMessage(d, [d.data.buffer, d.head.relief.buffer, d.head.color.buffer].concat(d.headH ? [d.headH.buffer] : []));
     } catch (err) { self.postMessage({ error: String(err) }); }
   };
 }
@@ -1623,6 +1805,9 @@ function buildMouth(P, F, body, group, eyes, pat) {
   const lower = [], upper = [];
   for (let i = 0; i < body.nR; i++) { const x = body.ringX[i]; if (x > xEnd) break;
     for (let j = 0; j <= M; j++) { const th = TAU * (j / M) - Math.PI; (Math.abs(th) > mA ? lower : upper).push(i * (M + 1) + j, skinW(x, th)); } }
+  // v5.83: the sculpted head (buildHeadSkin): its two jaws are separate surfaces, each vertex knows which jaw it is on
+  const hs = body.headSkin, hsPos = hs ? hs.geo.attributes.position : null, hsOrig = hs ? hs.rest : null, hLow = [], hUp = [];
+  if (hs) for (let v = 0; v < hs.xv.length; v++) { const x = hs.xv[v]; if (x > xEnd) continue; (hs.side[v] < 0 ? hLow : hUp).push(v, skinW(x, hs.thv[v])); }
   // share of the gape: top of the head up, lower jaw down (v5.78: the lower jaw drops only as far as the ground under the chin
   // allows - it used to swing down through the ground; the skull lifts the rest, as a real snake's does)
   const chinH = Math.max(0, body.surf(Hl * 0.06, Math.PI).p.y), DN = clamp(Math.asin(clamp((chinH + F.Hh(Hl * 0.3) * 0.25) / Math.max(1e-6, xh * 0.95), 0, 1)) / Math.max(0.1, gape), 0.05, 0.28), UP = 1 - DN;
@@ -1652,19 +1837,25 @@ function buildMouth(P, F, body, group, eyes, pat) {
   const labN = P.head.labials || (plan === 'python' ? 13 : plan === 'viper' || plan === 'pitviper' ? 11 : 8), labLen = (xh * 0.95) / labN;
   // one jaw's lining: lip (outer edge -> rolled under -> gum), then the roof or floor across, then the other lip
   function jawLining(upper) {
-    const NS = 18, NL = 5, rows = [], cols = [], xv = [];
+    const NS = 40, NL = 5, rows = [], cols = [], xv = [];
     const sgU = upper ? -1 : 1; // the lips roll towards the opening: down for the upper jaw, up for the lower
     for (const x of xs) {
       const f = body.frameAt(x), Hh = F.Hh(x), W = F.W(x), back = sstep(xh * 0.5, xh * 1.0, x);
       const thE = upper ? mA - 0.015 : mA + 0.015, thI = upper ? mA - 0.07 : mA + 0.09;
       const across = (s) => { // the roof (vaulted, two ridges for the palate teeth) or the floor (a raised soft midline)
         const p = chord(x, thI, s, upper ? 0.2 : 0.22);
-        if (upper) p.addScaledVector(f.U, Hh * (0.16 * Math.sin(Math.PI * s) * (1 - 0.4 * back) - 0.045 * (bump(s, 0.3, 0.07) + bump(s, 0.7, 0.07))));
-        else p.addScaledVector(f.U, Hh * (0.07 * bump(s, 0.5, 0.14) - 0.13 * Math.sin(Math.PI * s) * (1 - 0.5 * back)));
+        // v5.83: the gums - a soft ridge just inside each lip that the outer row of teeth stands in - and on the roof the two
+        // tooth-bearing ridges of the palate with the groove of the inner nostrils (choanae) between them; the floor sags
+        // between the two halves of the lower jaw, each with its gum, round the raised tongue sheath on the midline
+        const gum = bump(s, 0.07, 0.045) + bump(s, 0.93, 0.045);
+        if (upper) p.addScaledVector(f.U, Hh * (0.2 * Math.sin(Math.PI * s) * (1 - 0.4 * back) - 0.06 * (bump(s, 0.27, 0.05) + bump(s, 0.73, 0.05)) + 0.035 * bump(s, 0.5, 0.06) - 0.07 * gum));
+        else p.addScaledVector(f.U, Hh * (0.07 * bump(s, 0.5, 0.12) - 0.17 * Math.sin(Math.PI * s) * (1 - 0.5 * back) + 0.07 * gum));
         return p;
       };
       const lip = (side, k) => { // k = 0 at the skin's cut edge, 1 at the gum
-        const A = body.surf(x, side * thE).p, B = across(side > 0 ? 0 : 1), lr = Hh * (upper ? 0.16 : 0.12) * (1 - 0.5 * back) * (1 - sstep(xh * 0.62, xh * 0.97, x)); // v5.05: the rolled lip flattens out towards the corner (it used to hang there like a flap)
+        const A = body.surf(x, side * thE).p, B = across(side > 0 ? 0 : 1);
+        if (hs) { const tk = (F.W(x) + F.Hh(x)) / 2 * 0.05 * sstep(Hl * 0.015, Hl * 0.07, x) * (1 - sstep(xh * 0.86, xh * 1.06, x)), sp = body.spine(x); A.addScaledVector(sp.sub(A).normalize(), tk); } // (v5.83: from the sculpted head's lip edge, which rolls in a little)
+        const lr = Hh * (upper ? 0.16 : 0.12) * (1 - 0.5 * back) * (1 - sstep(xh * 0.62, xh * 0.97, x)); // v5.05: the rolled lip flattens out towards the corner (it used to hang there like a flap)
         const C = A.clone().addScaledVector(f.U, sgU * lr).lerp(B, 0.25), t2 = k;
         return A.clone().multiplyScalar((1 - t2) ** 2).addScaledVector(C, 2 * (1 - t2) * t2).addScaledVector(B, t2 * t2);
       };
@@ -1679,10 +1870,11 @@ function buildMouth(P, F, body, group, eyes, pat) {
         let c;
         if (kind === 'lip') { const sk = skinAt(x, side * (upper ? mA - 0.06 : mA + 0.08)), lipC = sk.clone().lerp(new THREE.Color(P.colors.belly), upper ? 0.25 : 0.5); c = lipC.multiplyScalar(suture * lerp(1, 0.7, sstep(0.55, 1, s))).lerp(pink, sstep(0.8, 1, s) * 0.6); }
         else {
-          c = pink.clone().lerp(new THREE.Color(upper ? '#f6d4d0' : '#f0c0bc'), P.head.mouthColor ? 0.04 : 0.3); // (v5.62: a species' own mouth colour - black mamba, cottonmouth - is not paled) // (v5.53: paler, as the roof of a real snake's mouth)
-          const groove = Math.max(bump(s, 0, 0.12), bump(s, 1, 0.12)), ridge = upper ? bump(s, 0.3, 0.06) + bump(s, 0.7, 0.06) : bump(s, 0.5, 0.1);
+          c = pink.clone().lerp(new THREE.Color(upper ? '#f8dcd8' : '#f4cdc8'), P.head.mouthColor ? 0.04 : 0.5); // (v5.62: a species' own mouth colour - black mamba, cottonmouth - is not paled) // (v5.53: paler, as the roof of a real snake's mouth)
+          const groove = Math.max(bump(s, 0, 0.05), bump(s, 1, 0.05)), ridge = upper ? bump(s, 0.27, 0.05) + bump(s, 0.73, 0.05) : bump(s, 0.5, 0.1), gum = bump(s, 0.07, 0.045) + bump(s, 0.93, 0.045);
           c.multiplyScalar((1 - 0.35 * groove) * (1 + 0.12 * ridge) * (0.94 + 0.12 * hash1((x / Hl * 300) | 0, (s * 97) | 0)));
-          c.lerp(deep, sstep(0.55, 1.0, x / xh) * 0.5).lerp(black, sstep(0.9, 1.02, x / xh) * 0.25 * (1 - 0.5 * ridge));
+          c.lerp(gumC, 0.55 * gum); // (v5.83: the gums paler, almost white round the teeth)
+          c.lerp(deep, sstep(0.6, 1.0, x / xh) * 0.38).lerp(black, sstep(0.92, 1.02, x / xh) * 0.2 * (1 - 0.5 * ridge)); // (v5.83: paler, as a real snake's mouth, darkening only deep in the throat)
         }
         rows.push(p.x, p.y, p.z); cols.push(c.r, c.g, c.b); xv.push(x);
       }
@@ -1693,9 +1885,10 @@ function buildMouth(P, F, body, group, eyes, pat) {
     g.setIndex(idx); g.computeVertexNormals();
     return { g, o: g.attributes.position.array.slice(), xv, per, row: (x, s) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = NL + Math.round(s * NS); return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); }, gum: (x, side) => { const f0 = xs.findIndex((q) => q >= x), i = f0 < 0 ? xs.length - 1 : f0, k = side > 0 ? NL - 1 : per - NL; return new THREE.Vector3().fromArray(rows, (i * per + k) * 3); } };
   }
-  const lining = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.5, metalness: 0, clearcoat: 0.45, clearcoatRoughness: 0.2, sheen: 0.3, sheenRoughness: 0.5, sheenColor: new THREE.Color('#ffd6d6'), /* (v5.78: a wet, restrained sheen) */ emissive: P.head.mouthColor ? new THREE.Color(P.head.mouthColor).multiplyScalar(0.25) : new THREE.Color('#6a3036'), emissiveIntensity: 0.3, /* (v5.62: the glow takes the species' mouth colour; v5.78: fainter - the soft shadows inside give the depth) */ side: THREE.DoubleSide, envMapIntensity: 0.22 }); // (a faint glow stands in for light passing through the soft tissue)
+  const lining = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.5, metalness: 0, clearcoat: 0.45, clearcoatRoughness: 0.2, sheen: 0.3, sheenRoughness: 0.5, sheenColor: new THREE.Color('#ffd6d6'), /* (v5.78: a wet, restrained sheen) */ emissive: P.head.mouthColor ? new THREE.Color(P.head.mouthColor).multiplyScalar(0.25) : new THREE.Color('#8a4448'), emissiveIntensity: 0.38, /* (v5.62: the glow takes the species' mouth colour; v5.78: fainter - the soft shadows inside give the depth) */ side: THREE.DoubleSide, envMapIntensity: 0.22 }); // (a faint glow stands in for light passing through the soft tissue)
+  const gumC = new THREE.Color(P.head.mouthColor && /^#[0-3]/.test(P.head.mouthColor) ? '#2a2224' : '#f7dcd6');
   const roof = jawLining(true), floorJ = jawLining(false);
-  const roofM = lining.clone(); roofM.emissive.set('#b06a6e'); roofM.emissiveIntensity = 0.35; // (v5.53: the roof faces down, away from the light: a little more glow keeps it pink, not maroon)
+  const roofM = lining.clone(); roofM.emissive.set(P.head.mouthColor && /^#[0-3]/.test(P.head.mouthColor) ? '#1a1214' : '#c27e80'); roofM.emissiveIntensity = 0.7; // (v5.53: the roof faces down, away from the light: a little more glow keeps it pink, not maroon)
   const palate = new THREE.Mesh(roof.g, roofM), floor = new THREE.Mesh(floorJ.g, lining);
   palate.receiveShadow = floor.receiveShadow = true;
   palate.castShadow = floor.castShadow = true; // v5.09: with the mouth open the head is an open shell; the lining closes it in the shadow too (no thin loop on the ground)
@@ -1711,10 +1904,10 @@ function buildMouth(P, F, body, group, eyes, pat) {
   const inside = new THREE.Group(); inside.add(palate, floor, cheeks); inside.visible = false; group.add(inside); // (v5.53: the soft back wall below closes the mouth; the dark tunnel and plug that stood in front of it are gone)
   // v5.53: the back of the mouth is closed by soft pink tissue stretched between the jaws, with the gullet a dark slit in
   // its middle (it was a big black hole). It is part of the folds' mesh, so it stretches with them as the mouth opens.
-  { const xb = xs[xs.length - 1], CW = 14, MW = 10, base = cheekPts.length / 3, fT = body.frameAt(xb).T, depth = F.Hh(xb) * 0.35;
+  { const xb = xs[xs.length - 1], CW = 28, MW = 18, base = cheekPts.length / 3, fT = body.frameAt(xb).T, depth = F.Hh(xb) * 0.35;
     for (let m = 0; m <= MW; m++) for (let c = 0; c <= CW; c++) {
       const u = c / CW, w = m / MW, A2 = roof.row(xb, u), B2 = floorJ.row(xb, u), pp = A2.clone().lerp(B2, w).addScaledVector(fT, depth * Math.sin(Math.PI * w) * (0.35 + 0.65 * Math.sin(Math.PI * u)));
-      cheekPts.push(pp.x, pp.y, pp.z); const g = Math.hypot((u - 0.5) / 0.15, (w - 0.5) / 0.075), cc = pink.clone().lerp(deep, 0.4 + 0.25 * Math.sin(Math.PI * w)).lerp(black, 0.9 * (1 - sstep(0.55, 1.15, g))); // (v5.58: the gullet a narrow closed slit, as in real snakes, not a big dark hole)
+      cheekPts.push(pp.x, pp.y, pp.z); const g = Math.hypot((u - 0.5) / 0.14, (w - 0.5) / 0.09), cc = pink.clone().lerp(deep, 0.4 + 0.25 * Math.sin(Math.PI * w)).lerp(black, 0.6 * (1 - sstep(0.2, 1.5, g))); // (v5.58: the gullet a narrow closed slit, as in real snakes, not a big dark hole)
       cheekCols.push(cc.r, cc.g, cc.b); cheekInfo.push(w, 1, xb); }
     const idx = Array.from(cheekG.index.array);
     for (let m = 0; m < MW; m++) for (let c = 0; c < CW; c++) { const a = base + m * (CW + 1) + c, b = a + CW + 1; idx.push(a, a + 1, b, a + 1, b + 1, b); }
@@ -1750,9 +1943,9 @@ function buildMouth(P, F, body, group, eyes, pat) {
     return out; };
   const many = (py ? 1.3 : 1) * (tK.n || 1), nMax = Math.round((vip ? 0 : el ? 7 : 18) * many), nPal = Math.round((vip ? 12 : el ? 12 : 16) * many), nDen = Math.round((vip ? 14 : el ? 14 : 18) * many);
   if (plan !== 'blind') {
-    toothRow(upperT, rowTeeth(roof, el ? Hl * 0.24 : Hl * 0.1, xh * 0.8, nMax, 0.035, tl, true, 0.55), 'teeth');
+    toothRow(upperT, rowTeeth(roof, el ? Hl * 0.24 : Hl * 0.1, xh * 0.8, nMax, 0.07, tl, true, 0.55), 'teeth'); // (v5.83: set in the gums)
     toothRow(upperT, rowTeeth(roof, Hl * 0.17, xh * 0.86, nPal, 0.27, tl * 0.72, true, 0.65), 'palate');
-    toothRow(lowerT, rowTeeth(floorJ, Hl * 0.07, xh * 0.8, nDen, 0.045, tl * 0.9, false, 0.55), 'teeth');
+    toothRow(lowerT, rowTeeth(floorJ, Hl * 0.07, xh * 0.8, nDen, 0.07, tl * 0.9, false, 0.55), 'teeth');
   }
   // the glottis, the tongue sheath and the tongue
   const anchors = { teeth: new THREE.Object3D(), palate: new THREE.Object3D(), glottis: new THREE.Object3D(), sheath: new THREE.Object3D(), fang: null, hinge: new THREE.Object3D(), tongue: null };
@@ -1866,11 +2059,19 @@ function buildMouth(P, F, body, group, eyes, pat) {
     t = clamp(v, 0, 1.45); inside.visible = t > 0.01 || flickShut; setCut(t > 0.01); if (flickShut && t > 0.01) showOnlyTongue(false);
     const ang = sign * gape * (t <= 1 ? 1 - Math.pow(1 - t, 2) : 1 + (t - 1) * 1.1), /* past 1: the extra-wide gape of a strike */ a = pos.array, aD = ang * DN, aU = -ang * UP;
     const qq = new THREE.Quaternion(), v3 = new THREE.Vector3();
-    const turn = (list, an) => { for (let k = 0; k < list.length; k += 2) { const vi = list[k], w = list[k + 1];
-      v3.set(orig[vi * 3], orig[vi * 3 + 1], orig[vi * 3 + 2]); if (list === lower) jawWarp(v3, w);
-      if (w > 0 && an) { qq.setFromAxisAngle(axis, an * w); v3.sub(hinge).applyQuaternion(qq).add(hinge); }
-      a[vi * 3] = v3.x; a[vi * 3 + 1] = v3.y; a[vi * 3 + 2] = v3.z; } };
+    // (v5.83: the turn about the hinge worked out on the numbers - one rotation per distinct weight, most of the jaw has weight 1)
+    const ax = axis.x, ay = axis.y, az = axis.z, hx = hinge.x, hy = hinge.y, hz = hinge.z, warp = spread || walk;
+    const turn = (list, an, o = orig, out = a, low = list === lower) => { let lw = -1, m0 = 1, m1 = 0, m2 = 0, m3 = 0, m4 = 1, m5 = 0, m6 = 0, m7 = 0, m8 = 1;
+      for (let k = 0; k < list.length; k += 2) { const vi = list[k] * 3, w = list[k + 1];
+        let x = o[vi], y = o[vi + 1], z = o[vi + 2];
+        if (low && warp) { v3.set(x, y, z); jawWarp(v3, w); x = v3.x; y = v3.y; z = v3.z; }
+        if (w > 0 && an) {
+          if (w !== lw) { lw = w; const g = an * w, c = Math.cos(g), sn = Math.sin(g), t1 = 1 - c; m0 = t1 * ax * ax + c; m1 = t1 * ax * ay - sn * az; m2 = t1 * ax * az + sn * ay; m3 = t1 * ax * ay + sn * az; m4 = t1 * ay * ay + c; m5 = t1 * ay * az - sn * ax; m6 = t1 * ax * az - sn * ay; m7 = t1 * ay * az + sn * ax; m8 = t1 * az * az + c; }
+          const dx = x - hx, dy = y - hy, dz = z - hz; x = hx + m0 * dx + m1 * dy + m2 * dz; y = hy + m3 * dx + m4 * dy + m5 * dz; z = hz + m6 * dx + m7 * dy + m8 * dz;
+        }
+        out[vi] = x; out[vi + 1] = y; out[vi + 2] = z; } };
     turn(lower, aD); turn(upper, aU);
+    if (hs) { turn(hLow, aD, hsOrig, hsPos.array, true); turn(hUp, aU, hsOrig, hsPos.array, false); hsPos.needsUpdate = true; }
     pos.clearUpdateRanges(); pos.addUpdateRange(0, Math.min(body.nR, headRings + 1) * (M + 1) * 3); pos.needsUpdate = true; // (v5.78: only the head's part of the buffer goes to the graphics card)
     // the mouth lining and the teeth go with their jaws
     const strip2 = (J, an) => { const fp = J.g.attributes.position.array, o = J.o;
@@ -1906,9 +2107,11 @@ function buildMouth(P, F, body, group, eyes, pat) {
     for (let i = 0; i < nRh; i++) { const a = i * (M + 1), b = a + M; for (let q2 = 0; q2 < 3; q2++) { const m = (nrm[a * 3 + q2] + nrm[b * 3 + q2]) / 2; nrm[a * 3 + q2] = nrm[b * 3 + q2] = m; } }
     { const T = body.frameAt(0).T; for (let j = 0; j <= M; j++) { nrm[j * 3] = -T.x; nrm[j * 3 + 1] = -T.y; nrm[j * 3 + 2] = -T.z; } } // (the snout tip's cap, as buildBody makes it)
     const nn = geo.attributes.normal; nn.clearUpdateRanges(); nn.addUpdateRange(0, nV * 3); nn.needsUpdate = true;
+    if (hs) hs.fixNormals();
   }
   // v5.53: a tongue flick, s from 0 to 1 (out, the tips wave up and down, back in); 0 or 1 leaves it in its sheath. With the
   // mouth shut only the tongue of everything inside is shown: it comes out through the notch at the front of the lips.
+  if (hs) hs.onRest = () => { set(t, { spread, walk }); settle(); }; // (the sculpted head's shape arrives from the worker: the jaws take it up)
   let flickShut = false; const hidden = [];
   function showOnlyTongue(on) { // v5.57: puts back only what it hid (Anatomy's jaw bones live in the jaw groups too, and stay hidden outside Anatomy)
     if (on === flickShut || !anchors.tongue) return; flickShut = on;
@@ -2884,6 +3087,10 @@ export function mount(host, opts) {
     const gq = quality === 'high' ? 'high' : 'low';
     const F = makeBodyFns(P, gq), pose = makePose(P, F, seed); perfT('pose', t0); t0 = performance.now();
     const body = buildBody(P, F, pose, gq); perfT('body', t0); t0 = performance.now();
+    // v5.83: the sculpted head (buildHeadSkin: real raised head scales, grooves, nostrils, pits, brow and two jaws) in place
+    // of the body's own coarser rings there (not drawn: drawRange); Light keeps the plain head. Its sculpting comes from the
+    // pattern worker with the pattern.
+    const headSkin = quality !== 'low' ? buildHeadSkin(P, F, body, gq) : null; if (headSkin) { body.headSkin = headSkin; body.geo.setDrawRange(headSkin.drawFrom, Infinity); } perfT('headSkin', t0); t0 = performance.now();
     const lat = scaleLattice(P, body.gTotal), tiles = scaleTextures(P, lat); perfT('scaleTex', t0); t0 = performance.now();
     // v4.81: on good devices a quick pattern first, the full-detail one painted in a worker and swapped in when ready
     const hiPat = quality !== 'low', pat = patternTexture(P, F, body, lat, hiPat ? 'preview' : 'low', seed); perfT('patternTex', t0);
@@ -3005,10 +3212,18 @@ float slScale(vec2 m) {
     if (hiPat) {
       const sceneNow = ctx.scene, swap = (d) => { if (!alive || ctx.scene !== sceneNow) return; const t = patternTex(d); t.anisotropy = pat.anisotropy; mat.map = t; pat.dispose(); track(t);
         if (d.head) { const h = headTex(d.head); headAniso(h); hsU.uHeadN.value = h.relief; hsU.uHeadC.value = h.color; headT.relief.dispose(); headT.color.dispose(); headT = h; }
+        if (d.headH && headSkin) headSkin.setHeights(d.headH);
         dirty = true; kick(); };
-      ctx.patternReady = patternInWorker(P, quality, seed).then(swap).catch(() => new Promise((r) => setTimeout(() => { if (alive && ctx.scene === sceneNow) { const d = patternData(P, F, body, lat, quality, seed); d.head = headData(P, F, quality); swap(d); } r(); }, 60)));
+      const hsq = headSkin ? { xCut: headSkin.grid.xCut, M: body.M, hi: gq === 'high' } : null;
+      ctx.patternReady = patternInWorker(P, quality, seed, hsq).then(swap).catch(() => new Promise((r) => setTimeout(() => { if (alive && ctx.scene === sceneNow) { const d = patternData(P, F, body, lat, quality, seed); d.head = headData(P, F, quality); if (headSkin) d.headH = headSkinHeights(P, F, headSkin.grid); swap(d); } r(); }, 60)));
     } else ctx.patternReady = Promise.resolve();
     snakeGroup = new THREE.Group(); snakeGroup.add(mesh);
+    // v5.83: the sculpted head (buildHeadSkin: real raised head scales, grooves, nostrils, pits, brow and two jaws) in place
+    // of the body's own coarser rings there (not drawn: drawRange); Light keeps the plain head
+    if (headSkin) {
+      const hm = new THREE.Mesh(headSkin.geo, mat); hm.name = 'headSkin'; hm.castShadow = hm.receiveShadow = true; hm.customDepthMaterial = mesh.customDepthMaterial;
+      hm.frustumCulled = false; hm.userData.noRig = true; hm.userData.headSkin = true; hm.raycast = () => {}; snakeGroup.add(hm);
+    }
 
     // eyes (v4.81: domed eyes sunk flush into sockets, under a clear spectacle scale; see buildEyes)
     const H = P.head, eyePos = [], eyeMeshes = H.pupil !== 'none' ? buildEyes(P, F, body, pat) : [];
@@ -3159,7 +3374,24 @@ float slScale(vec2 m) {
     const hd = info.headDir; const a = Math.atan2(hd.x, hd.z);
     if (kind === 'front') return a; if (kind === 'side') return -info.axisAng + Math.PI / 2; if (info.drapeAz != null) return info.drapeAz; /* (v5.62: a draped snake is seen across its branch, the loops hanging on both sides) */ return a + (info.raised ? 0.5 : 0.9); // (v5.62: a raised cobra is seen nearly from the front, its hood spread toward you)
   }
-  function resetGoal() { return { az: viewAz('default'), el: ((info.tree ? (info.portrait ? 20 : 12) : info.portrait ? 40 : 30) * Math.PI) / 180, d: info.dFit * (P.pose && P.pose.kind === 'branch' ? 1.05 : 1), px: 0, pz: 0 }; }
+  function resetGoal() { const g = { az: viewAz('default'), el: ((info.tree ? (info.portrait ? 20 : 12) : info.portrait ? 40 : 30) * Math.PI) / 180, d: info.dFit * (P.pose && P.pose.kind === 'branch' ? 1.05 : 1), px: 0, pz: 0 }; return headInView(g); }
+  // v5.83: the first view always shows the head. A coiled snake (rattlesnakes, vipers resting in a pile) often lay with its
+  // head down inside the coil on the far side, hidden behind the near turns: try other directions round it (and a little
+  // higher) until the line from the camera to the head is clear of the body
+  function headInView(g) {
+    const F = info.F, B = info.body, list = info.collide, n = list.length - 1, d0 = new THREE.Vector3(), hd = info.headDir;
+    const pts = [B.surf(F.Hl * 0.03, 0).p, B.surf(F.Hl * P.head.eyeX, B.eyeA).p, B.surf(F.Hl * P.head.eyeX, -B.eyeA).p]; // (the snout and the two eyes)
+    const seen = (c, hp, skip) => { const dir = d0.subVectors(hp, c), len = dir.length(); dir.divideScalar(len);
+      for (let i = 0; i <= n; i++) { if ((i / n) * F.L < F.Hl * skip) continue; const q = list[i], v = q.p.clone().sub(c), tc = v.dot(dir); if (tc <= 0 || tc >= len) continue; if (v.lengthSq() - tc * tc < q.r * q.r) return false; } return true; };
+    const clear = (az, el) => {
+      const t = info.center.clone(), c = new THREE.Vector3(t.x + g.d * Math.cos(el) * Math.sin(az), t.y + g.d * Math.sin(el), t.z + g.d * Math.cos(el) * Math.cos(az));
+      if (c.clone().sub(pts[0]).normalize().dot(hd) < -0.2) return false; // (seen from in front or the side, not from behind)
+      return seen(c, pts[0], 1.6) && (seen(c, pts[1], 1.6) || seen(c, pts[2], 1.6));
+    };
+    if (clear(g.az, g.el)) return g;
+    for (const del of [0, 10, 22]) for (const da of [0.45, -0.45, 0.9, -0.9, 1.4, -1.4, 1.9, -1.9, 2.5, -2.5, Math.PI]) { const el = g.el + (del * Math.PI) / 180; if (del === 0 && !da) continue; if (clear(g.az + da, el)) return Object.assign(g, { az: g.az + da, el }); }
+    return Object.assign(g, { el: g.el + (22 * Math.PI) / 180 });
+  }
   function resetView(instant) { if (!instant && fx.resetView && fx.resetView()) return; if (instant) controls.setGoal(resetGoal(), true); else controls.tween(resetGoal(), 1000); } // (v5.74: an eased glide) // (v5.68: a snake up in a tree is seen from nearly level, so the trunk and the drop below show) // (v5.35: thread-thin tree snakes start closer, head in view)
   function setView(kind) {
     if (kind === 'front') controls.setGoal({ az: viewAz('front'), el: (14 * Math.PI) / 180, d: Math.max(info.dMin * 1.6, info.dFit * 0.42) });
@@ -3601,4 +3833,4 @@ export function adultLength(p, page, id) {
   return out(+p.length || 1, 'genus', '', null);
 }
 export function webglAvailable() { try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { return false; } }
-export const _internals = { normProfile, makeBodyFns, makePose, loadEnv, autoProfile, withLook, buildBody, buildEyes, buildMouth, headData, scaleLattice, patternData }; // for offline checks
+export const _internals = { buildHeadSkin, headSkinHeights, normProfile, makeBodyFns, makePose, loadEnv, autoProfile, withLook, buildBody, buildEyes, buildMouth, headData, scaleLattice, patternData }; // for offline checks

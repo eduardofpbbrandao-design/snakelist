@@ -2134,7 +2134,14 @@
    "colors": {
     "dorsal": "#b39b6b",
     "lateral": "#ae976b",
-    "belly": "#d8cba8"
+    "belly": "#d8cba8",
+    "mottle": 0.09,
+    "var": 0.07,
+    "speckle": {
+     "p": 0.2,
+     "color": "#3b2f24",
+     "k": 0.45
+    }
    },
    "pattern": [
     {
@@ -2159,8 +2166,11 @@
      "wid": 0.8,
      "len": 0.34,
      "shape": "chevron",
-     "color": "#2a2018",
-     "warp": 0.5
+     "color": "#2c2219",
+     "warp": 0.5,
+     "edgeColor": "#c9b48a",
+     "edge": 0.12,
+     "edgeOut": true
     },
     {
      "type": "tint",
@@ -2882,8 +2892,8 @@
     "gloss": 0.55
    },
    "colors": {
-    "dorsal": "#6e6a58",
-    "lateral": "#76705c",
+    "dorsal": "#7b7665",
+    "lateral": "#827c6a",
     "belly": "#c4c0a8",
     "bellyA": 0.74
    },
@@ -3730,8 +3740,8 @@
     "gloss": 0.55
    },
    "colors": {
-    "dorsal": "#c8693a",
-    "lateral": "#c4733e",
+    "dorsal": "#d68f55",
+    "lateral": "#d9965c",
     "belly": "#e8dccb"
    },
    "pattern": [

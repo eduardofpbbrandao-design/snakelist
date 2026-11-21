@@ -900,6 +900,8 @@ export function create(V) {
     for (let i = 0; i < body.nR; i++) { bx.fill(body.ringX[i], i * (M + 1), (i + 1) * (M + 1)); if (body.ringX[i] <= xEnd) jawVerts = (i + 1) * (M + 1); }
     const gpuSkin = !!(V.skinGPU && V.skinGPU.init(N, dx, rc, rT, rU, rS, hb));
     const bodySkin = addSkin(body.geo, bx, { bulge: true, body: true, gpu: gpuSkin });
+    // v5.83: the sculpted head (viewer.js buildHeadSkin) bends with the body on the graphics card; here only when that is not possible
+    const hMesh = !gpuSkin && group.children.find((o) => o.userData && o.userData.headSkin), headSkin = hMesh ? addSkin(hMesh.geometry, hMesh.geometry.attributes.aMet.array.filter((_, i) => i % 3 === 1)) : null;
     const mver = () => (mo ? (mo.ver != null ? mo.ver : mo.t) : 0); let lastT = mver(), active = false;
     const contact = V.scene && V.scene.children.find((o) => o.isMesh && o.renderOrder === 1 && o.material && o.material.map && o.material.transparent && o.geometry && o.geometry.type === 'PlaneGeometry');
     // v5.73: while the body is posed (slithering, hunting) a soft contact shadow follows it on the ground - darkest where
@@ -966,7 +968,7 @@ export function create(V) {
     }
     function seam(geo) { const nr = geo.attributes.normal.array; for (let i = 0; i < body.nR; i++) { const a = i * (M + 1), b = a + M; for (let q = 0; q < 3; q++) { const m = (nr[a * 3 + q] + nr[b * 3 + q]) / 2; nr[a * 3 + q] = nr[b * 3 + q] = m; } } geo.attributes.normal.needsUpdate = true; }
     function apply(keepContact) {
-      if (mo && mver() !== lastT) { if (!bodySkin.gpu) localize(bodySkin, 0, jawVerts, bodySkin.pa.array); lastT = mver(); } // the jaw moved: take its new shape
+      if (mo && mver() !== lastT) { if (!bodySkin.gpu) localize(bodySkin, 0, jawVerts, bodySkin.pa.array); if (headSkin) localize(headSkin, 0, headSkin.n, headSkin.pa.array); lastT = mver(); } // the jaw moved: take its new shape
       frames();
       headRig.matrix.copy(hM); headRig.matrixWorldNeedsUpdate = true; tailRig.matrix.copy(tM); tailRig.matrixWorldNeedsUpdate = true;
       for (const s of skins) { if (s.gpu) V.skinGPU.upload(nc, nT, nU, nS, bul); else deform(s); }
@@ -1818,7 +1820,7 @@ export function create(V) {
     (V.extras.eyes || []).forEach((e) => { let p = parts.find((q) => q.key === 'eye'); if (!p) { p = { key: 'eye', name: 'Eye', text: 'No eyelids: a clear scale, the spectacle, covers and protects it. ' + (P.head && P.head.pupil === 'slit' ? 'Slit pupils open wide at night - most snakes with them hunt in the dark.' : 'Round pupils are common in snakes that hunt by day.'), region: 'head', meshes: [], x: Hl * 0.3 }; parts.push(p); } p.meshes.push(e); e.userData.part = 'eye'; });
     if (P.head && P.head.pits) parts.push({ key: 'pits', name: 'Heat pits', text: 'Pits that "see" the warmth of animals, even in total darkness - like a heat camera.', region: 'head', meshes: [], x: Hl * 0.15 });
     const mesh = V.group.children.find((o) => o.isMesh && o.geometry === info.body.geo);
-    parts.push({ key: 'skin', name: 'Skin and scales', text: (P.scales && P.scales.keel > 0.3 ? 'Keeled scales (each has a ridge). ' : 'Smooth scales. ') + 'Scales are made of keratin, like your fingernails. The wide belly scales grip the ground. The whole skin is shed in one piece as the snake grows.', region: 'body', meshes: mesh ? [mesh] : [], x: L * 0.4, skin: true });
+    parts.push({ key: 'skin', name: 'Skin and scales', text: (P.scales && P.scales.keel > 0.3 ? 'Keeled scales (each has a ridge). ' : 'Smooth scales. ') + 'Scales are made of keratin, like your fingernails. The wide belly scales grip the ground. The whole skin is shed in one piece as the snake grows.', region: 'body', meshes: mesh ? [mesh].concat(V.group.children.filter((o) => o.userData && o.userData.headSkin)) : [], x: L * 0.4, skin: true });
     if (P.tail && P.tail.rattle) parts.push({ key: 'rattle', name: 'Rattle', text: 'Hollow, loosely linked segments of keratin. Shaking them makes a buzz that warns animals to keep away.', region: 'tail', meshes: R.tailRig.children.filter((o) => o.isMesh), x: L });
     if (R.active) R.apply();
     return { grp, parts, svl, own };
