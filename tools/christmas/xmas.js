@@ -4,9 +4,20 @@
    stops when it is off screen or the tab is hidden, and holds still for "reduce motion". */
 (function () {
   "use strict";
-  var XM = window.XM || (window.XM = {});
+  // normally the switch (tools/xmas_loader.js) sets XM up; a build that includes these files directly (with
+  // window.SL_XMAS_FORCE = true) gets the same from here: the folder this script came from, the app, the classes
+  var XM = window.XM || (window.XM = { forced: !!window.SL_XMAS_FORCE });
   var ART = window.XM_ART || {};
-  var D = document, ROOT = XM.root || new URL("christmas/", location.href).href;   // the christmas/ folder
+  var D = document, me = D.currentScript && D.currentScript.src;
+  if (!XM.root) XM.root = me ? new URL("./", me).href : new URL("christmas/", location.href).href;
+  if (!XM.kind) XM.kind = D.querySelector(".sp-main, .sl-top") ? "xm-sp" : "xm-app";
+  D.documentElement.classList.add("xm", XM.kind);
+  var ROOT = XM.root;   // the christmas/ folder
+  // its styles, if nothing has loaded them yet
+  if (!D.querySelector('link[href*="xmas.css"], style[data-xmas]')) { var css = D.createElement("link"); css.rel = "stylesheet"; css.href = ROOT + "xmas.css"; (D.head || D.documentElement).appendChild(css); }
+  // a file of the theme (a build may hand them over as data: URLs in XM_ART.files)
+  function asset(n) { return (ART.files && ART.files[n]) || ROOT + n; }
+  XM.asset = asset;
   var RM = window.matchMedia ? matchMedia("(prefers-reduced-motion: reduce)") : { matches: false, addEventListener: function () {} };
   var store = { get: function (k) { try { return sessionStorage.getItem("sl-xmas-" + k); } catch (e) { return null; } },
                 set: function (k, v) { try { sessionStorage.setItem("sl-xmas-" + k, v); } catch (e) {} } };
@@ -31,10 +42,10 @@
     if (!D.querySelector("link[data-xm-icon]")) {
       [].slice.call(D.querySelectorAll('link[rel~="icon"], link[rel="apple-touch-icon"]')).forEach(function (l) { l.remove(); });
       [["icon", "xmas-icon.svg", "image/svg+xml"], ["icon", "xmas-icon-48.png", "image/png"], ["apple-touch-icon", "xmas-icon-180.png"]].forEach(function (a) {
-        var l = D.createElement("link"); l.rel = a[0]; l.href = ROOT + a[1]; if (a[2]) l.type = a[2]; l.setAttribute("data-xm-icon", ""); head.appendChild(l);
+        var l = D.createElement("link"); l.rel = a[0]; l.href = asset(a[1]); if (a[2]) l.type = a[2]; l.setAttribute("data-xm-icon", ""); head.appendChild(l);
       });
     }
-    [].slice.call(D.querySelectorAll(".sl-brand img, .site-logo img, .ins-card > img")).forEach(function (im) { if (!im.dataset.xm) { im.dataset.xm = "1"; im.src = ROOT + "xmas-icon.svg"; } });
+    [].slice.call(D.querySelectorAll(".sl-brand img, .site-logo img, .ins-card > img")).forEach(function (im) { if (!im.dataset.xm) { im.dataset.xm = "1"; im.src = asset("xmas-icon.svg"); } });
   }
 
   /* ---------- a pine sprig at the end of each SnakeList wordmark ---------- */
@@ -113,7 +124,7 @@
   /* ---------- the cover's pine corners, fairy lights and snow ---------- */
   function corner(side) {
     var c = D.createElement("div"); c.className = "xm-corner " + side;
-    var im = D.createElement("img"); im.src = ROOT + "xmas-corner-" + side + ".svg"; im.alt = ""; im.decoding = "async"; im.draggable = false;
+    var im = D.createElement("img"); im.src = asset("xmas-corner-" + side + ".svg"); im.alt = ""; im.decoding = "async"; im.draggable = false;
     c.appendChild(im);
     (ART.bulbs && ART.bulbs[side] || []).forEach(function (p) {
       var b = D.createElement("i"); b.className = "xm-bulb"; b.style.left = (p[0] * 100) + "%"; b.style.top = (p[1] * 100) + "%"; c.appendChild(b);
@@ -134,7 +145,7 @@
     if (D.querySelector(".xm-pill") || store.get("pill") === "off" || window.self !== window.top) return;
     var p = D.createElement("div"); p.className = "xm-pill"; p.setAttribute("role", "note"); p.setAttribute("aria-label", "Christmas preview of SnakeList");
     p.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7" stroke="#D8B76A" stroke-width="2" stroke-linecap="round"/></svg>' +
-      '<span>Christmas preview</span><a href="' + exitUrl() + '" title="Back to the normal SnakeList">Exit preview</a>' +
+      '<span>Christmas preview</span>' + (XM.forced ? "" : '<a href="' + exitUrl() + '" title="Back to the normal SnakeList">Exit preview</a>') +
       '<button type="button" aria-label="Hide the Christmas preview label">&times;</button>';
     p.tabIndex = 0;
     p.querySelector("button").onclick = function () { p.remove(); store.set("pill", "off"); };
@@ -305,6 +316,7 @@
       '<li><b>A Christmas logo</b> &ndash; the snake S in a Santa hat, with a sprig of pine</li>' +
       '<li><b>Seasonal colours</b> &ndash; evergreen, cranberry, warm ivory and soft gold, by day and by night</li>' +
       '<li><b>Decorations</b> &ndash; small touches on buttons, cards, the map and the 3D viewer</li>' +
+      '<li><b>The Christmas Cabin</b> &ndash; a new tab where SnakeList activities earn presents to decorate your tree</li>' +
       '</ul>' +
       '<button type="button" class="xm-wl-go">Explore SnakeList</button></div>';
     var prev = D.activeElement;
