@@ -1845,7 +1845,7 @@ function buildEyes(P, F, body, pat) {
 const MOUTH_MAPS = new Map();
 function mouthMaps(up) {
   const key = String(up); if (MOUTH_MAPS.has(key)) return MOUTH_MAPS.get(key);
-  const N = 256, h = new Float32Array(N * N), nd = new Uint8Array(N * N * 4), rd = new Uint8Array(N * N * 4);
+  const N = 192, h = new Float32Array(N * N), nd = new Uint8Array(N * N * 4), rd = new Uint8Array(N * N * 4);
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
     const u = x / N, v = y / N, inner = sstep(0.1, 0.17, u) * (1 - sstep(0.83, 0.9, u)), gum = Math.exp(-(((u - 0.156) / 0.02) ** 2)) + Math.exp(-(((u - 0.844) / 0.02) ** 2));
     let hv = 0.22 * vnoise(u * 64, v * 64, 1, 11) + 0.12 * vnoise(u * 150, v * 150, 2, 13) + gum * 0.45 * vnoise(u * 220, v * 160, 3, 17);
