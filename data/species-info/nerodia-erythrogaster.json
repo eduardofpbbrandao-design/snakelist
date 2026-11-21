@@ -1,0 +1,86 @@
+{
+  "id": "nerodia-erythrogaster",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Forster, 1771)",
+  "facts": {
+    "reproduction": {
+      "text": "Live young, about 18 on average",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Plain-bellied Water Snake is a common, harmless water snake of the south-eastern and central United States and northern Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "A large, thick-bodied snake, plain dark brown, grey, olive or blackish on top with an unmarked, pale (beige, yellow or orange-red) belly - the 'plain belly' that gives it its name.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "The south-eastern USA (not the high Appalachians), west to Oklahoma, Texas and New Mexico and north into the Midwest, and northern Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active in the warm months, by day and in hot summers also at night. It basks on logs near water and in hot, humid weather may travel far from water over land.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Breeds from April to mid-June and gives birth in August or September - usually about 18 young, but one female had 55. A captive female once had young without a male.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Plain, unpatterned belly.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Thick, dark, mostly patternless back.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Nerodia erythrogaster",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Nerodia_erythrogaster"
+    },
+    "rdb": {
+      "title": "Nerodia erythrogaster",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Nerodia&species=erythrogaster"
+    }
+  }
+}

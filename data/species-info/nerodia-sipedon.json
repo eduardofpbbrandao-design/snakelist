@@ -1,0 +1,121 @@
+{
+  "id": "nerodia-sipedon",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1758)",
+  "facts": {
+    "length": {
+      "text": "Females about 81 cm, males about 70 cm on average; up to 135 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young, about 8 on average (up to 30)",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Fish, frogs and tadpoles, plus many other small animals",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Common Watersnake (Northern Water Snake) is a large, non-venomous snake of eastern and central North America. It is often mistaken for the venomous Cottonmouth.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Brown, grey, reddish or brownish-black with dark crossbands near the head and blotches further back; the pattern can fade as it gets older.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Up to 135 cm. In one study females averaged 81.4 cm and males 69.6 cm; females are heavier too.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Eastern and central North America, from southern Ontario and Quebec south to the Gulf states, and west to Colorado.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      },
+      {
+        "label": "Introduced",
+        "text": "An introduced population was found in California in 2007.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day and by night and often seen basking on rocks, stumps or branches near water.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "By day it hunts among water plants for small fish, tadpoles, frogs, crayfish, insects, salamanders and more; at night it catches minnows resting in shallow water.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Mates from April to June and gives birth to live young between August and October - about eight on average, but up to 30. The babies are 19 to 23 cm long and look after themselves from birth.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Dark crossbands and blotches on a brown or grey body.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Usually in or near water.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Common watersnake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Common_watersnake"
+    },
+    "rdb": {
+      "title": "Nerodia sipedon",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Nerodia&species=sipedon"
+    }
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "id": "natrix-helvetica",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Lacépède, 1789)",
+  "facts": {
+    "length": {
+      "text": "Can grow to over 1 m",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs, 8 to 40 at a time",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly toads and frogs; also fish",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Barred Grass Snake is a harmless snake of western Europe that usually lives in or near water. It was counted as part of the Grass Snake until 2017, when DNA studies showed it is a separate species. It is the grass snake of Great Britain.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Grey-green with black bars along the sides, a pale belly and a yellow-and-black collar behind the head.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Can grow to more than a metre long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Great Britain (north to southern Scotland), the Netherlands, Belgium, Luxembourg, western Germany, France, Switzerland, Austria, Italy and northern Spain.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "A strong swimmer often found near fresh water, especially pond edges, but also open woodland and the edges of fields and woods where it can bask.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly amphibians, especially common toads and common frogs, plus fish, small mammals and nestling birds. It searches actively for food, often at the water's edge.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Mates in spring soon after coming out of hibernation. Females lay 8 to 40 leathery eggs in June or July, which hatch after about 10 weeks.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Yellow-and-black collar behind the head.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Black bars along the sides of a grey-green body.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Barred grass snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Barred_grass_snake"
+    },
+    "rdb": {
+      "title": "Natrix helvetica",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Natrix&species=helvetica"
+    }
+  }
+}

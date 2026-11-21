@@ -1,0 +1,92 @@
+{
+  "id": "hierophis-viridiflavus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Lacépède, 1789)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Western (or Green) Whip Snake is a fast, slender snake of south-western Europe. It is usually counted as harmless, although it has small grooved teeth at the back of the mouth.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Slender with a small head, big eyes with round pupils and smooth scales. Greenish-yellow with heavy dark green or black bands, especially towards the front; the tail has thin stripes. In parts of Italy and further east many are almost completely black. Young ones are greyish.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "North-eastern Spain, Andorra, France (with Corsica), southern Switzerland, Italy (with Sardinia and Elba), Malta, Slovenia and coastal Croatia.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Forests, shrubland, Mediterranean scrub, farmland, pastures, rural gardens and even towns.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "label": "Bites",
+        "text": "A man who was bitten for several minutes had some effects on his nerves and muscles, and the snake has been found to have small rear fangs linked to a gland - so it should not be handled.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Yellow-green with heavy dark bands, or all black.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Thin tail with narrow stripes.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Green whip snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Green_whip_snake"
+    },
+    "rdb": {
+      "title": "Hierophis viridiflavus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Hierophis&species=viridiflavus"
+    }
+  }
+}

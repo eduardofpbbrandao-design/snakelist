@@ -1,0 +1,129 @@
+{
+  "id": "storeria-occipitomaculata",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Storer, 1839)",
+  "facts": {
+    "length": {
+      "text": "Small: about 10 to 25 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young, about 7 to 9",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly slugs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Redbelly Snake is a tiny, harmless woodland snake of Canada and the eastern United States, named for its bright red or orange belly.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Orange, grey, black or brown on the back with a bright red or orange belly. Many have a light ring behind the head.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually only 10 to 25 cm long.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Southern Canada from Saskatchewan to Nova Scotia, and the eastern half of the United States.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Woodlands; it hides under logs and leaves. In the north it uses old ant mounds, which stay warm in the sun.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "A secretive snake. It may curl its lips, play dead, or puff itself up like a venomous snake to put off predators.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mostly slugs - its thin, curved teeth help it hold slimy prey.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to live young every year, about 7 to 9 at a time.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "It sometimes curls its upper lip when threatened - scientists are still working out why.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Bright red or orange belly.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Very small woodland snake.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Redbelly snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Redbelly_snake"
+    },
+    "rdb": {
+      "title": "Storeria occipitomaculata",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Storeria&species=occipitomaculata"
+    }
+  }
+}

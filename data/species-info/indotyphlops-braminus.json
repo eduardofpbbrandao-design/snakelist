@@ -1,0 +1,116 @@
+{
+  "id": "indotyphlops-braminus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Daudin, 1803)",
+  "facts": {
+    "length": {
+      "text": "Tiny: about 5 to 10 cm, rarely 15 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Lays eggs; all are females (no males needed)",
+      "src": [
+        "rdb",
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Brahminy Blind Snake is a tiny, harmless burrowing snake that looks just like an earthworm. It has spread around the world in the soil of potted plants, so it is sometimes called the 'flowerpot snake'.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Shiny, very thin and worm-like, charcoal-grey to silver-grey or beige. The head and tail look almost the same; the eyes are tiny dots under the scales, and the tail ends in a small spine. Unlike an earthworm it has scales, not rings.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually about 5 to 10 cm (2 to 4 in) long, rarely up to about 15 cm.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Probably originally from Africa and Asia.",
+        "src": [
+          "wp"
+        ]
+      },
+      {
+        "label": "Introduced",
+        "text": "Carried by people to many other parts of the world, including Australia, the Americas and the Pacific islands.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Spends nearly its whole life underground, burrowing in soil and leaf litter.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs. Every known individual is female: the females produce young without males (parthenogenesis). It may be the only snake that always reproduces this way.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "No male Brahminy Blind Snake has ever been found - mothers have daughters all on their own.",
+      "src": [
+        "rdb",
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Looks like a shiny earthworm with scales.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Head and tail look almost the same.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Indotyphlops braminus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Indotyphlops_braminus"
+    },
+    "rdb": {
+      "title": "Indotyphlops braminus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Indotyphlops&species=braminus"
+    }
+  }
+}

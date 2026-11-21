@@ -1,0 +1,114 @@
+{
+  "id": "masticophis-flagellum",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Shaw, 1802)",
+  "facts": {
+    "reproduction": {
+      "text": "Lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Lizards, snakes, rodents, birds, frogs and insects",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Coachwhip is a long, very fast, non-venomous snake of the southern United States and northern Mexico. Its tail scales look like the braids of a leather whip.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Thin body, small head and big eyes with round pupils. Colour varies with the soil it lives on - tan with darker flecks, dark brown to black, or even pink in parts of west Texas.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "Across the southern United States from coast to coast, and the northern half of Mexico.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Open, sandy places: pine woods, old fields, prairies, sandhill scrub and coastal dunes.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day, alert and quick to flee - it can move at up to about 6 km/h. It sometimes lifts its head above the grass to look around. If cornered it strikes; the bite hurts but is harmless. Coachwhips roam over some of the largest home ranges known for any snake.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "A fast hunter that eats almost anything it can catch: other snakes, lizards, frogs, rodents, birds and their eggs, and insects such as cicadas.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Lays eggs.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "funfacts": [
+    {
+      "text": "Coachwhips sometimes 'periscope' - lifting their heads high above the grass to look around.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "recognise": [
+    {
+      "text": "Very long, thin and fast.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Big eyes and a small head.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Coachwhip (snake)",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Coachwhip_(snake)"
+    },
+    "rdb": {
+      "title": "Masticophis flagellum",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Masticophis&species=flagellum"
+    }
+  }
+}

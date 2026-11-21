@@ -1,0 +1,114 @@
+{
+  "id": "diadophis-punctatus",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1766)",
+  "facts": {
+    "reproduction": {
+      "text": "Usually lays eggs",
+      "src": [
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Small salamanders, earthworms and slugs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Ring-necked Snake is a small, harmless snake found across much of the United States and into Canada and Mexico. It is secretive, often hiding under logs and stones, and has a bright ring around its neck.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Plain olive, brown, bluish-grey or nearly black on the back, with a bright yellow, red or orange ring around the neck. A few populations have no ring, and in some areas the ring is broken.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "South-eastern Canada, most of the United States and south into central Mexico.",
+        "src": [
+          "rdb",
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Many habitats, wherever there is plenty of cover: open woodland near rocky hillsides, forests, damp places with fallen wood, and streamside areas in dry regions.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Spends much of its time under cover or underground and is mostly active at night, so it is rarely seen by day.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly small salamanders, earthworms and slugs.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Usually lays eggs; occasionally gives birth to live young.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ],
+    "taxonomy": [
+      {
+        "text": "The Reptile Database lists 14 subspecies.",
+        "src": [
+          "rdb"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Bright yellow, orange or red ring around the neck.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Plain dark back.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Ring-necked snake",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Ring-necked_snake"
+    },
+    "rdb": {
+      "title": "Diadophis punctatus",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Diadophis&species=punctatus"
+    }
+  }
+}

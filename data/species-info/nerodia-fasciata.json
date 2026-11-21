@@ -1,0 +1,129 @@
+{
+  "id": "nerodia-fasciata",
+  "reviewed": "2026-11-21",
+  "status": "rich",
+  "authority": "(Linnaeus, 1766)",
+  "facts": {
+    "length": {
+      "text": "About 56 to 107 cm; record about 159 cm",
+      "src": [
+        "wp"
+      ]
+    },
+    "reproduction": {
+      "text": "Live young, about 15 to 20",
+      "src": [
+        "wp",
+        "rdb"
+      ]
+    },
+    "diet": {
+      "text": "Mainly fish and frogs",
+      "src": [
+        "wp"
+      ]
+    }
+  },
+  "sections": {
+    "overview": [
+      {
+        "text": "The Banded (or Southern) Water Snake is a harmless, mostly aquatic snake of the south-eastern United States.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "identification": [
+      {
+        "text": "Grey, greenish-grey or brown with dark crossbands, a flat head and a fairly heavy body; many are so dark the pattern hardly shows. The belly is off-white.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "size": [
+      {
+        "label": "Adults",
+        "text": "Usually 56 to 107 cm long; the record, a Florida snake, was about 159 cm (62.5 in).",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "distribution": [
+      {
+        "label": "Native",
+        "text": "From southern Illinois south to Louisiana and east to North Carolina and Florida.",
+        "src": [
+          "wp",
+          "rdb"
+        ]
+      },
+      {
+        "label": "Introduced",
+        "text": "Introduced populations live in California (over 300 were caught around Los Angeles in 2009) and other places.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "habitat": [
+      {
+        "text": "Almost any fresh water - lakes, marshes, ponds and streams - staying among plants along the shore.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "behaviour": [
+      {
+        "text": "Active by day and by night; it basks on logs and branches over the water or forages in the shallows.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "diet": [
+      {
+        "text": "Mainly fish and frogs; young ones eat mostly fish and switch to frogs as they grow.",
+        "src": [
+          "wp"
+        ]
+      }
+    ],
+    "reproduction": [
+      {
+        "text": "Gives birth to about 15 to 20 live young in summer.",
+        "src": [
+          "wp"
+        ]
+      }
+    ]
+  },
+  "recognise": [
+    {
+      "text": "Dark crossbands on a grey or brown body.",
+      "src": [
+        "wp"
+      ]
+    },
+    {
+      "text": "Usually in or near fresh water.",
+      "src": [
+        "wp"
+      ]
+    }
+  ],
+  "sources": {
+    "wp": {
+      "title": "Nerodia fasciata",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Nerodia_fasciata"
+    },
+    "rdb": {
+      "title": "Nerodia fasciata",
+      "publisher": "The Reptile Database",
+      "url": "https://reptile-database.reptarium.cz/species?genus=Nerodia&species=fasciata"
+    }
+  }
+}
