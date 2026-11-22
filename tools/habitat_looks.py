@@ -140,6 +140,72 @@ CURATED = {
     "malayopython-reticulatus": [("rainforest", "Rainforest", None), ("riverbank", "River bank", None), ("swamp", "Flooded forest", "tropic")],
     "ophiophagus-hannah": [("rainforest", "Rainforest", None), ("forest", "Woodland", None), ("swamp", "Flooded forest", "tropic")],
 }
+# v6.09: every habitat on the map's Habitats list gets a matching 3D scene ("See snakes here in 3D" from the 3D map opens a
+# snake in its look). MAP_EXTRA first, then REGIONAL and GENERIC above, then words in the habitat's name (map_look).
+MAP_EXTRA = {
+    "Tropical Montane Forest": ("rainforest", None), "Temperate Rainforest": ("forest", None),
+    "Tropical Dry Forest": ("forest", "savanna"), "Tropical Seasonal Forest": ("rainforest", None), "Subtropical Forest": ("rainforest", None),
+    "Subtropical Dry Forest": ("forest", "savanna"), "Evergreen Forest": ("forest", None), "Bamboo Forest": ("rainforest", None),
+    "Eucalyptus Forest": ("forest", "eucalypt"), "Coastal Forest": ("rainforest", None), "Flooded Forest": ("swamp", "tropic"),
+    "Peat Swamp Forest": ("swamp", "tropic"), "Mangrove Forest": ("swamp", "mangrove"), "Scrub Forest": ("heath", None),
+    "Thorn Forest": ("forest", "savanna"), "Montane Woodland": ("forest", None), "Mountain Forest": ("forest", None),
+    "Subalpine Forest": ("forest", None), "Secondary Forest": ("forest", None), "Regenerating Forest": ("forest", None),
+    "Forest Edges": ("forest", None), "Forest Clearings": ("grass", None), "Alpine Meadow": ("grass", None), "Alpine Grassland": ("grass", None),
+    "Alpine Shrubland": ("heath", None), "Desert": ("sand", None), "Hot Desert": ("sand", None), "Cold Desert": ("arid", None),
+    "Coastal Desert": ("sand", None), "Mountain Slopes": ("arid", None), "Highlands": ("grass", None), "Plateaus": ("arid", None),
+    "Valleys": ("grass", None), "Caves": ("arid", None), "Rock Crevices": ("arid", None), "Termite Mounds": ("grass", None),
+    "Salt Marshes": ("swamp", "reed"), "Bogs": ("swamp", "reed"), "Fens": ("swamp", "reed"), "Peatlands": ("swamp", "reed"),
+    "Seasonal Wetlands": ("swamp", "reed"), "Reservoirs": ("riverbank", None), "Estuaries": ("riverbank", None),
+    "Brackish Wetlands": ("swamp", "mangrove"), "Mangrove Swamps": ("swamp", "mangrove"), "Coastal Lagoons": ("shore", None),
+    "Beaches": ("sand", None), "Sandy Shores": ("sand", None), "Coastal Scrub": ("heath", None),
+    "Agricultural Land": ("grass", None), "Farmland": ("grass", None), "Plantations": ("forest", None), "Orchards": ("forest", None),
+    "Gardens": ("grass", None), "Parks": ("grass", None), "Urban Areas": ("grass", None), "Suburban Areas": ("grass", None),
+    "Rural Settlements": ("grass", None), "Abandoned Buildings": ("litter", None), "Roadsides": ("grass", None), "Disturbed Habitats": ("grass", None),
+    "Freshwater Swamps": ("swamp", "tropic"), "Forested Swamps": ("swamp", "cypress"), "Swamps": ("swamp", "reed"),
+    "Madagascar Limestone Karst Forest": ("forest", "savanna"), "Borneo Heath Forest": ("rainforest", None), "Borneo Limestone Forest": ("rainforest", None),
+    "Rocky Mountain Foothills": ("arid", None), "Ethiopian Highlands": ("grass", None), "Sahel Shrubland": ("grass", None),
+    "Coastal Restinga": ("heath", None), "Himalayan Montane Forest": ("forest", None), "Himalayan Foothill Forest": ("forest", None),
+    "Chinese Subtropical Forest": ("rainforest", None), "Balkan Rocky Grassland": ("grass", None), "Arabian Mountain Shrubland": ("heath", None),
+    "Mediterranean Levant Woodland": ("heath", None), "Zagros Mountain Woodland": ("forest", None), "Iranian Plateau Steppe": ("grass", None),
+    "Australian Monsoon Forest": ("rainforest", None), "Florida Everglades": ("swamp", "cypress"), "Okavango Delta": ("swamp", "reed"),
+    "Gran Chaco Woodland": ("forest", "savanna"), "Caatinga Dry Forest": ("forest", "savanna"), "Madagascar Spiny Forest": ("arid", None),
+    "Madagascar Spiny Thicket": ("arid", None), "Madagascar Succulent Woodland": ("arid", None), "Madagascar Montane Shrubland": ("heath", None),
+    "Australian Mulga Woodland": ("forest", "eucalypt"), "Australian Brigalow Woodland": ("forest", "eucalypt"),
+    "Australian Eucalyptus Woodland": ("forest", "eucalypt"), "Miombo Woodland": ("forest", "savanna"), "Mopane Woodland": ("forest", "savanna"),
+}
+MAP_WORDS = [  # (regex on the name, kind, flavour) - the first that matches
+    (r"mangrove", "swamp", "mangrove"), (r"peat swamp|swamp forest|flooded|v.rzea|igap", "swamp", "tropic"),
+    (r"marsh|wetland|delta|everglades", "swamp", "reed"),
+    (r"rain ?forest|cloud forest|wet tropics|yungas|terra firme|dipterocarp|humid|moist|tropical forest|montane forest", "rainforest", None),
+    (r"\bdry\b|spiny|succulent|thicket", "forest", "savanna"),
+    (r"desert", "arid", None), (r"steppe|grassland|savanna|llanos|pampas|meadow|highlands", "grass", None),
+    (r"shrubland|fynbos|chaparral|heath|scrub", "heath", None), (r"dunes", "sand", None), (r"forest|woodland", "forest", None),
+]
+
+
+def map_look(name):
+    """the 3D scene {k, f?, l} for one habitat on the map's Habitats list"""
+    gen = {n: k for k, ns in GENERIC for n in ns}
+    k = f = None
+    if name in MAP_EXTRA:
+        k, f = MAP_EXTRA[name]
+    elif name in REGIONAL:
+        k, f = REGIONAL[name]
+    elif name in gen:
+        k = gen[name]
+    else:
+        for rx, kk, ff in MAP_WORDS:
+            if re.search(rx, name.lower()):
+                k, f = kk, ff
+                break
+    if not k:
+        k = "forest"
+    if k == "swamp" and not f:
+        f = "tropic"
+    o = {"k": k, "l": name}
+    if f:
+        o["f"] = f
+    return o
 KIND_SECTIONS = 11  # the first 11 sections of #habitat-data are kinds of habitat; the rest are named regions
 
 
@@ -214,7 +280,9 @@ def main():
         out[sid] = opts
     dst = os.path.join(ROOT, "species/3d/habitats.json")
     with open(dst, "w", encoding="utf-8") as fh:
-        json.dump({"v": 1, "sp": out}, fh, ensure_ascii=False, separators=(",", ":"))
+        # v6.09: "map": the 3D scene for each habitat on the map's Habitats list (the 3D map's "See snakes here in 3D")
+        hmap = {h[0]: map_look(h[0]) for sec in H["sections"] for h in sec[1]}
+        json.dump({"v": 1, "sp": out, "map": hmap}, fh, ensure_ascii=False, separators=(",", ":"))
     from collections import Counter
     print("%d snakes with a choice of habitats -> %s (%d bytes)" % (len(out), dst, os.path.getsize(dst)))
     print(Counter(len(v) for v in out.values()), Counter(o["k"] for v in out.values() for o in v[1:]).most_common())

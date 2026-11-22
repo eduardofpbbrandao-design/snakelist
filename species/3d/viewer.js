@@ -7,13 +7,13 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=586'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=586'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=587'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=587'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 // v5.93: the habitats each snake can be shown in (tools/habitat_looks.py: the first is shown first; snakes with only one are
 // not listed). Loaded with this module - it waits for it up to 3 s, so the first scene is already the right one (if it comes
 // later, the Habitats button is added then)
-const HAB_P = typeof fetch === 'function' ? fetch(new URL('habitats.json?r=586', import.meta.url).href).then((r) => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null);
+const HAB_P = typeof fetch === 'function' ? fetch(new URL('habitats.json?r=587', import.meta.url).href).then((r) => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null);
 let HAB_LOOKS = await Promise.race([HAB_P, new Promise((res) => setTimeout(() => res(null), 3000))]);
 HAB_P.then((d) => { HAB_LOOKS = d; });
 const habPick = (d, id) => { const l = d && d.sp && d.sp[id]; return Array.isArray(l) && l.length > 1 ? l : null; };
@@ -3268,8 +3268,12 @@ export function mount(host, opts) {
   let habList = habitatsOf(opts.id); const scene0 = P.scene;
   const lookOf = (o) => (o.k === scene0.kind ? Object.assign({}, scene0, o.f ? { flavor: o.f } : {}) : Object.assign({ kind: o.k }, o.f ? { flavor: o.f } : {}, scene0.barkColor ? { barkColor: scene0.barkColor } : {}, scene0.leafSize ? { leafSize: scene0.leafSize } : {}));
   let habI = 0;
-  const habChoose = () => { habI = 0; try { const k = localStorage.getItem('sl-3d-hab:' + opts.id); const i = habList.findIndex((o) => o.k === k); if (i >= 0) habI = i; } catch (e) { /* private mode */ } P.scene = lookOf(habList[habI]); };
+  // v6.09: opened from the map's 3D Habitats ("See snakes here in 3D"): that habitat's look first (it joins the snake's own list when it isn't in it)
+  const want = opts.habitat && opts.habitat.k ? opts.habitat : null;
+  if (want && habList) { const i = habList.findIndex((o) => o.k === want.k && (o.f || '') === (want.f || '')); if (i < 0) habList = [want].concat(habList); }
+  const habChoose = () => { habI = 0; if (want) { habI = Math.max(0, habList.findIndex((o) => o.k === want.k && (o.f || '') === (want.f || ''))); P.scene = lookOf(habList[habI]); return; } try { const k = localStorage.getItem('sl-3d-hab:' + opts.id); const i = habList.findIndex((o) => o.k === k); if (i >= 0) habI = i; } catch (e) { /* private mode */ } P.scene = lookOf(habList[habI]); };
   if (habList) habChoose();
+  else if (want) P.scene = lookOf(want);
   else { const one = HAB_LOOKS && HAB_LOOKS.sp && HAB_LOOKS.sp[opts.id]; if (Array.isArray(one) && one.length === 1) P.scene = lookOf(one[0]); } // (v6.02: one habitat, but its own look - e.g. eucalypt woodland)
   const disposables = new Set(), cleanups = [];
   const track = (o) => { disposables.add(o); return o; };
@@ -3350,7 +3354,7 @@ export function mount(host, opts) {
     on(bHab, 'click', () => { const open = bHab.getAttribute('aria-expanded') !== 'true'; bHab.setAttribute('aria-expanded', String(open)); gHab.hidden = !open; habBtns.forEach((b) => { b.hidden = !open; }); });
   };
   if (habList) habUI();
-  else HAB_P.then((d) => { const l = habPick(d, opts.id); if (!alive || !l || habList) return; habList = l; const k0 = P.scene.kind; habChoose(); habUI(); if (P.scene.kind !== k0 && ctx.scene) rebuild(); }); // (arrived late)
+  else HAB_P.then((d) => { let l = habPick(d, opts.id); if (!alive || !l || habList) return; if (want && l.findIndex((o) => o.k === want.k && (o.f || '') === (want.f || '')) < 0) l = [want].concat(l); habList = l; const k0 = P.scene.kind; habChoose(); habUI(); if (P.scene.kind !== k0 && ctx.scene) rebuild(); }); // (arrived late)
   [...bar.children].forEach((c) => { if (c.classList.contains('sp3d-b') && c !== bReset) gAct.appendChild(c); }); // (any other action button extras.js adds)
   // v5.05: the main buttons stay in view; the camera buttons are behind Show more / Show less
   const bMore = el('button', 'sp3d-b sp3d-morebtn', 'Show more'); bMore.type = 'button'; bMore.setAttribute('aria-expanded', 'false');

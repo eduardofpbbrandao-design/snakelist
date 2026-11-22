@@ -3729,6 +3729,83 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   html.sl3d-lock body { position: fixed; left: 0; right: 0; width: 100%; }
 </style>
 <style>
+  /* ---- v6.09: the 3D map (Eduardo: "make the 3d button in the map make the map 3d") - the map's own 3D button turns
+     the map into a real landscape: satellite pictures on real heights, tilted and turned like Google Earth ---- */
+  .globe-stage .map3d, .globe-stage .map3d.maplibregl-map { position: absolute; inset: 0; z-index: 2; overflow: hidden; border-radius: inherit; background: #0d2131; }
+  .map3d .maplibregl-canvas { outline: none; }
+  .map3d .maplibregl-ctrl-bottom-left { bottom: calc(env(safe-area-inset-bottom, 0px)); }
+  .map3d .maplibregl-ctrl-attrib { font: 500 10.5px/1.35 Inter, system-ui, sans-serif; background: rgba(255,255,255,.86); color: #24342a; max-width: calc(100% - 240px); }
+  @media (max-width: 640px) { .map3d .maplibregl-ctrl-attrib.maplibregl-compact-show { max-width: calc(100% - 24px); position: relative; z-index: 6; } }
+  .map3d .maplibregl-ctrl-attrib a { color: #1e5f3a; }
+  [data-sl-theme="dark"] .map3d .maplibregl-ctrl-attrib { background: rgba(14,30,22,.82); color: #d5e6d2; }
+  [data-sl-theme="dark"] .map3d .maplibregl-ctrl-attrib a { color: #9be07c; }
+  .map3d-load { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 12px; color: #e8f3e6;
+    font: 600 15px/1.3 Inter, system-ui, sans-serif; background: radial-gradient(circle at 50% 45%, #1d4a3a 0%, #0d2131 70%); z-index: 1; }
+  .map3d-load i { width: 30px; height: 30px; border-radius: 50%; border: 4px solid rgba(155,224,124,.25); border-top-color: #9be07c; animation: sl-spin .8s linear infinite; box-sizing: border-box; }
+  .globe-stage.m3d-on .globe-hint, .globe-stage.m3d-on .layers-wrap, .globe-stage.m3d-on #globe-full + .m3d-none { display: none !important; }
+  /* the flat map's own buttons stay over the 3D map */
+  .globe-stage.m3d-on .globe-zoom { z-index: 3; }
+  .m3d-btn { position: absolute; z-index: 5; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 0 12px;
+    box-sizing: border-box; border-radius: 10px; border: 1px solid rgba(255,255,255,.28); background: rgba(22,34,28,.86); color: #fff;
+    font: 700 13px/1 Inter, system-ui, sans-serif; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+  .m3d-btn:hover { background: rgba(32,48,40,.94); }
+  .m3d-btn:focus-visible { outline: 3px solid #9be07c; outline-offset: 2px; }
+  .m3d-flat { right: 70px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+  @media (min-width: 641px) { .m3d-flat { bottom: calc(3px + env(safe-area-inset-bottom, 0px)); } }
+  .globe-zoom .m3d-compass { padding: 0; }
+  .globe-zoom .m3d-compass svg { transition: transform .08s linear; }
+  .m3d-tip { position: absolute; z-index: 4; left: 50%; bottom: calc(54px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); max-width: calc(100% - 28px);
+    padding: 7px 12px; border-radius: 10px; background: rgba(16,28,22,.82); color: #f0f7ee; font: 600 12.5px/1.35 Inter, system-ui, sans-serif; text-align: center;
+    pointer-events: none; box-shadow: 0 2px 10px rgba(0,0,0,.25); transition: opacity .4s; }
+  .m3d-tip[hidden] { display: none; }
+  .m3d-note { position: absolute; z-index: 30; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(340px, calc(100% - 32px)); box-sizing: border-box;
+    padding: 14px 16px; border-radius: 14px; background: #fbfdf9; color: #183020; font: 500 14px/1.4 Inter, system-ui, sans-serif; text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+  [data-sl-theme="dark"] .m3d-note { background: #1f5338; color: #e3eedf; }
+  /* "What it looks like": real photos of the habitat the camera flew down to */
+  .m3d-panel { position: absolute; z-index: 30; top: 54px; right: 50px; bottom: 54px; width: min(360px, calc(100% - 70px)); box-sizing: border-box;
+    display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px; overflow-y: auto; overscroll-behavior: contain;
+    --card:#fbfdf9; --text:#183020; --muted:#55705b; --line:#d5e4cf; --chip:#e3f0dc;
+    background: var(--card); color: var(--text); font: 500 13.5px/1.4 Inter, system-ui, sans-serif; box-shadow: 0 12px 36px rgba(0,0,0,.35); }
+  [data-sl-theme="dark"] .m3d-panel { --card:#1f5338; --text:#e3eedf; --muted:#a9c4ab; --line:#2f6a48; --chip:#1a4630; }
+  .m3d-panel[hidden] { display: none; }
+  .m3d-ph { display: flex; align-items: flex-start; gap: 8px; }
+  .m3d-ph div { flex: 1; min-width: 0; }
+  .m3d-kick { margin: 0; font: 700 11px/1.2 Inter, system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #2f8a3a; }
+  [data-sl-theme="dark"] .m3d-kick { color: #9be07c; }
+  .m3d-ph h3 { margin: 2px 0 0; font: 700 17px/1.25 Inter, system-ui, sans-serif; color: #1f7a3a; }
+  [data-sl-theme="dark"] .m3d-ph h3 { color: #a8ef94; }
+  .m3d-ph h3 span { display: block; font-weight: 500; font-size: 13px; color: var(--muted); }
+  .m3d-x { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--text); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+  .m3d-x:focus-visible, .m3d-panel button:focus-visible { outline: 3px solid #9be07c; outline-offset: 2px; }
+  .m3d-fig { position: relative; margin: 0; border-radius: 10px; overflow: hidden; background: #2a3a30; aspect-ratio: 3 / 2; flex: none; }
+  .m3d-fig img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .m3d-fig .m3d-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 50%; border: 0; background: rgba(0,0,0,.5); color: #fff; font: 700 18px/1 Inter, sans-serif; cursor: pointer; }
+  .m3d-fig .m3d-prev { left: 6px; } .m3d-fig .m3d-next { right: 6px; }
+  .m3d-fig .m3d-n { position: absolute; right: 8px; bottom: 8px; padding: 2px 7px; border-radius: 999px; background: rgba(0,0,0,.55); color: #fff; font: 600 11px/1.5 Inter, sans-serif; }
+  .m3d-cap { margin: 0; font-size: 12.5px; color: var(--muted); }
+  .m3d-cap b { color: var(--text); font-weight: 650; }
+  .m3d-cap a { color: inherit; }
+  .m3d-thumbs { display: flex; gap: 6px; overflow-x: auto; flex: none; padding-bottom: 2px; }
+  .m3d-thumbs button { flex: none; width: 62px; height: 42px; padding: 0; border-radius: 7px; border: 2px solid transparent; overflow: hidden; cursor: pointer; background: #2a3a30; }
+  .m3d-thumbs button[aria-pressed="true"] { border-color: #57ab45; }
+  .m3d-thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .m3d-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .m3d-go { flex: 1 1 auto; min-height: 40px; padding: 0 14px; border-radius: 10px; border: 0; background: #2c7a57; color: #fff; font: 700 14px/1.2 Inter, system-ui, sans-serif; cursor: pointer; }
+  .m3d-go:hover { background: #256846; }
+  .m3d-fly { min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--text); font: 600 13px/1.2 Inter, system-ui, sans-serif; cursor: pointer; }
+  .m3d-sn { margin: 0; font-size: 12.5px; color: var(--muted); }
+  .m3d-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .m3d-chips button { min-height: 32px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--chip); color: var(--text); font: 600 12.5px/1.2 Inter, system-ui, sans-serif; cursor: pointer; }
+  .m3d-chips button[aria-pressed="true"] { border-color: #57ab45; box-shadow: 0 0 0 1px #57ab45 inset; }
+  .m3d-empty { margin: 0; padding: 18px 10px; text-align: center; color: var(--muted); }
+  @media (max-width: 640px) {
+    .m3d-panel { top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 64%; border-radius: 16px 16px 0 0; padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
+    .m3d-fig { aspect-ratio: 16 / 9; }
+    .globe-stage.m3d-panel-on .td-toggle, .globe-stage.m3d-panel-on .m3d-flat, .globe-stage.m3d-panel-on .m3d-tip { display: none; }
+  }
+</style>
+<style>
   /* the location question looks just like the cookie bar (it IS a .ck-bar, so it stacks and waits like one) */
   .nm-bar .ck-btns button[hidden] { display: none; }
   /* v5.68: See near me is a round icon button in the map's own control column, just above Full screen */
@@ -11223,7 +11300,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       { sel: "#mf-toggle", title: "Filters", text: "The same filters as the checklist, but for the map." },
       { sel: ".layers-btn", title: "Map style", text: "Change how the map looks, like the satellite view." },
       { sel: ".globe-zoom", act: "hover", tryIt: "Try it: point at these buttons.", title: "Zoom, reset and full screen", text: "Zoom in and out, go back to the whole world, or make the map fill the screen." },
-      { sel: "#td-toggle", title: "3D mode", text: "Turn this on, then pick a snake on the map to see its 3D model right there." },
+      { sel: "#td-toggle", title: "3D map", text: "See the map in 3D - real mountains, forests and deserts. With Habitats on, tap a place to fly down and see what it looks like." },
       { sel: "#tab-quiz", title: "Quiz", text: "Guess where snakes live and test what you've learned." },
       { sel: "#tab-cam", title: "Camera", text: "Take or upload a photo of a snake and SnakeList helps you work out which one it is." },
       { sel: ".brand, h1, .eyebrow-row", center: true, go: goTab("guide"), wait: 500, title: "You're ready!", text: "That's everything. Start by searching for a snake you know, or open the map and see what lives near you.", last: true },
@@ -16130,6 +16207,7 @@ window.SL_GEO_READY = new Promise(function (res) {
 
   function render() {
     if (!ready || !texReady) return;
+    if (window.SL_MAP3D && window.SL_MAP3D.on()) { syncPanelBtns(); window.SL_MAP3D.redraw(); return; } // v6.09: the 3D map is showing
     if (dirty) { if (!resize()) return; dirty = false; }
     renderFlat();
     drawPins();
@@ -16162,6 +16240,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     fy = Math.max(-my, Math.min(my, fy));
   }
   function flatBox() {
+    if (OVB) return OVB; // (v6.09: the 3D map's own box - see SL_MAP_OVERLAY)
     // read the canvas, so a click before the first flat frame still maps correctly
     var w = cv.clientWidth || sizeW, h = cv.clientHeight || sizeH;
     clampPan(); // every zoom, fly-to and drag ends up here, so none of them can push it off
@@ -16230,6 +16309,51 @@ window.SL_GEO_READY = new Promise(function (res) {
     ctx.restore();
     liftOverPanel();
   }
+  // ---- v6.09: the 3D map (its own script, "3D map - BEGIN") shows SnakeList's own colours on the real landscape:
+  // everything this map paints over the land - borders, the picked place, a search's countries, the Habitats and
+  // heatmap colours, a snake's range (Show colours), states, islands, city dots, sightings and the rest of the
+  // overlays - drawn the same way into a picture of a lon/lat box (g: its 2D context, W x H pixels, plate carree),
+  // with no land, sea or names of its own. Nothing else changes: the flat map's own view stays where it was.
+  var OVB = null;
+  function withBox(W, H, w, e, s, n, fn) {
+    var bw = W * 360 / Math.max(1e-6, e - w), bh = H * 180 / Math.max(1e-6, n - s);
+    var keep = [ctx, sizeW, sizeH, fz, dragging], bs = baseSize(cv.clientWidth || sizeW || 800, cv.clientHeight || sizeH || 400);
+    OVB = [-(w + 180) / 360 * bw, -(90 - n) / 180 * bh, bw, bh];
+    sizeW = W; sizeH = H; dragging = false;
+    fz = Math.max(1, Math.min(4000, bw / Math.max(200, bs[0]))); // (line detail and dot sizes go by how far in this box is)
+    try { return fn(OVB); } finally { ctx = keep[0]; sizeW = keep[1]; sizeH = keep[2]; fz = keep[3]; dragging = keep[4]; OVB = null; }
+  }
+  window.SL_MAP_OVERLAY = function (g, W, H, w, e, s, n) {
+    if (!ready || !POLY || !POLY.length) return false;
+    return withBox(W, H, w, e, s, n, function (b) {
+      ctx = g; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H);
+      var to = function (lon, lat) { return [b[0] + (lon + 180) / 360 * b[2], b[1] + (90 - lat) / 180 * b[3]]; };
+      window.SL_DETAIL_COVER = 0;
+      ctx.save();
+      if (areaShow) window.SL_HEAT_LINE = null;
+      else if (window.SL_HEAT_DRAW) window.SL_HEAT_DRAW(ctx, b, W, H, heatFill);
+      borders(to);
+      if (!areaShow) drawMultiStates();
+      drawIslands(to);
+      if (statesMode && !areaShow) drawCountryProvinces(to, statesMode);
+      drawContinentShow(to);
+      ctx.restore();
+      drawPins();
+      if (window.SL_OVERLAY_DRAW) window.SL_OVERLAY_DRAW(ctx, b, W, H);
+      return true;
+    });
+  };
+  // a tap on the 3D map at lon/lat, with the box of its last overlay picture: the same as a tap on this map there
+  window.SL_MAP_TAP_LL = function (lon, lat, W, H, w, e, s, n) {
+    if (!ready || !POLY) return;
+    withBox(W, H, w, e, s, n, function (b) { tapAt(b[0] + (lon + 180) / 360 * b[2], b[1] + (90 - lat) / 180 * b[3]); });
+    invalidate();
+  };
+  // what is under a point (the country's code and, with its states shown, the state)
+  window.SL_MAP_PLACE_AT = function (lon, lat) {
+    var cc = POLY ? pick(lon, lat) : null, st = cc ? provinceAt(cc, lon, lat) : null;
+    return cc ? { cc: cc, name: NAME[cc] || TITLE[cc] || cc.toUpperCase(), ids: ((BYCODE && BYCODE[cc]) || []).map(function (sp) { return sp.id; }), st: st ? (cc === "us" && window.STATE_NAME && window.STATE_NAME[st.code]) || st.name : null, stKey: st ? st.code || st.name : null } : null;
+  };
   // v5.78: in the full screen map the species panel across the bottom covered the 3D button and the colour key
   // in the corner: while the panel is over that corner they sit just above it (back down once it closes)
   function liftOverPanel() {
@@ -16580,7 +16704,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // white, and nothing gets two different lines along the same edge
   function BORDER() {
     if (window.SL_HEAT_LINE) return window.SL_HEAT_LINE;
-    if (window.SL_MAP_SAT) return "rgba(255,255,255,0.55)";
+    if (window.SL_MAP_SAT || OVB) return "rgba(255,255,255,0.55)";
     return document.documentElement.getAttribute("data-sl-theme") === "dark" ? "rgba(190,224,200,0.34)" : "#7f8c74";
   }
   window.SL_BORDER = BORDER;
@@ -16662,7 +16786,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       shapePath(to, function (r) { return (r.code === selected || ENCLAVE[r.code] === selected) && (r.e - r.w) / 360 * vb[2] > 8; }, stride, true);
       // a green of its own, not the grey of the other borders - grey on the green fill read as a pale halo
       // (light mode: the map's own SnakeList green, #3f7d43 - the old #1f4a26 read as an almost black line)
-      ctx.strokeStyle = window.SL_MAP_SAT ? lineColor : document.documentElement.getAttribute("data-sl-theme") === "dark" ? "rgba(225,245,215,0.8)" : "#3f7d43"; ctx.lineWidth = 1.4; ctx.lineJoin = "round";
+      ctx.strokeStyle = window.SL_MAP_SAT || OVB ? lineColor : document.documentElement.getAttribute("data-sl-theme") === "dark" ? "rgba(225,245,215,0.8)" : "#3f7d43"; ctx.lineWidth = 1.4; ctx.lineJoin = "round";
       STROKE();
     }
   }
@@ -17685,6 +17809,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   cv.addEventListener("pointerdown", function () { if (contShow) { contShow = null; invalidate(); } });
   function flyToLonLatBox(w, e, s, n, animate) {
     contShow = null;
+    if (window.SL_MAP3D && window.SL_MAP3D.on()) window.SL_MAP3D.fit(w, e, s, n); // v6.09
     var cw = cv.clientWidth || sizeW, ch = cv.clientHeight || sizeH;
     if (!cw || !ch) return;
     var bsz = baseSize(cw, ch), baseDw = bsz[0], baseDh = bsz[1];
@@ -18508,12 +18633,10 @@ window.SL_GEO_READY = new Promise(function (res) {
     spScroll = null;
   }
   var spScroll = null;
-  // 3D mode on: a species opens its model right away (the box is only used to read its name, then hidden
-  // again); one with no model yet keeps its box, which says so
+  // v6.09: the 3D button now makes the map 3D - a species picked from the list opens its box over the 3D map, and
+  // the box's 3D action opens the snake's model
   function sp3d(id, from) {
-    if (!(window.SL_3D_ON && window.SL_3D_ON()) || !spOpen(id)) return false;
-    if (window.SL_3D_SHOW && window.SL_3D_SHOW(from)) { spWrap.hidden = true; spCur = null; spScroll = null; }
-    return true;
+    return !!(window.SL_3D_ON && window.SL_3D_ON()) && spOpen(id);
   }
   window.SL_MAP_SPECIES_INFO = spOpen;
   // ==== See near me (map side) - BEGIN ==========================================================
@@ -19537,13 +19660,17 @@ window.SL_GEO_READY = new Promise(function (res) {
     cv.classList.remove("dragging");
     var wasDrag = dragging;
     dragging = false;
-    if (drag && moved < 5) {
-      var r = cv.getBoundingClientRect();
-      var mx = e.clientX - r.left, my = e.clientY - r.top;
-      if (window.SL_MAP_TAP && window.SL_MAP_TAP(mx, my)) { drag = null; invalidate(); return; } // a sighting marker
+    if (drag && moved < 5) { var r = cv.getBoundingClientRect(); tapAt(e.clientX - r.left, e.clientY - r.top); }
+    drag = null;
+    invalidate();
+  });
+  // a tap (or click) on the map at mx, my (v6.09: a function of its own - the 3D map taps through it too)
+  function tapAt(mx, my) {
+    {
+      if (window.SL_MAP_TAP && window.SL_MAP_TAP(mx, my)) return; // a sighting marker
       var pin = pinAt(mx, my);                       // a marker wins over the country under it
       // v5.74: a snake's area showing: a click on the empty map only puts it away; on a place, the place shows as usual
-      if (areaShow) { var onPlace = pin || atSeen(mx, my); areaClear(); if (!onPlace) { drag = null; invalidate(); return; } }
+      if (areaShow) { var onPlace = pin || atSeen(mx, my); areaClear(); if (!onPlace) return; }
       var bx = flatBox();
       var picked = statesMode && !pin
         ? provinceAt(statesMode, (mx - bx[0]) / bx[2] * 360 - 180, 90 - (my - bx[1]) / bx[3] * 180)
@@ -19594,7 +19721,7 @@ window.SL_GEO_READY = new Promise(function (res) {
         onlyPicked = tapped || null; // v5.78: only the tapped country is coloured (a search's other countries step aside)
         // v5.68: a click on nothing (the sea, or no country under it) while a species or country search is
         // showing cancels that search, just as a click on another country does (a drag or zoom is never a click)
-        if (!tapped && cancelSearch()) { drag = null; invalidate(); return; }
+        if (!tapped && cancelSearch()) return;
         // a country outside what was searched (or opened from a country link) clears that search
         // for good: the search box empties and everything it showed - its pins, highlights, place
         // name, panel and lists - goes, so only the newly clicked country is on the map
@@ -19623,9 +19750,7 @@ window.SL_GEO_READY = new Promise(function (res) {
         }
       }
     }
-    drag = null;
-    invalidate();
-  });
+  }
   cv.addEventListener("wheel", function (e) {
     e.preventDefault();
     flyToken++;
@@ -23581,6 +23706,12 @@ window.SL_GEO_READY = new Promise(function (res) {
   });
   // ?hab=<habitat> links (and anything else that wants one habitat shown on the map)
   window.SL_MAP_HABITAT = showHabitat;
+  // v6.09: the 3D map asks which habitat is showing (null: Habitats is off), and whether a country is coloured for it
+  window.SL_HAB_NOW = function () {
+    if (!habOn) return null;
+    var h = st.hab && HAB_IDX[st.hab.toLowerCase()], R = CH.on ? rangeReady() : null;
+    return { hab: h ? h.name : "", sec: h ? h.sec : "", n: h ? h.n : -1, has: function (code) { return !!(R && R.counts && R.counts[code]); } };
+  };
   ["hm-time", "hm-measure"].forEach(function (id) {
     document.getElementById(id).addEventListener("click", function (e) {
       var b = e.target.closest("[data-v]"); if (!b) return;
@@ -27070,9 +27201,10 @@ window.SL_welcome = function (u, back) {
 </script>
 
 <script>
-/* 3D mode on the map. The bottom-right "3D" button only switches the mode on and off. With it on, a species
-   box (open now or opened later) shows a "3D" action when that snake has a model; the model opens over the
-   map itself, and "Back to map" leaves the map, its zoom and the species box exactly as they were.
+/* 3D on the map. The bottom-right "3D" button switches the 3D map on and off (v6.09: the map itself goes 3D - the
+   "3D map" script below). With it on, a species box (open now or opened later) shows a "3D" action when that snake
+   has a model; the model opens over the map itself, and "Back to map" leaves the map, its zoom and the species box
+   exactly as they were.
    The viewer (species/3d/) is only downloaded when a model is opened. */
 (function () {
   "use strict";
@@ -27110,8 +27242,11 @@ window.SL_welcome = function (u, back) {
   stage.appendChild(btn);
   function setOn(v) {
     on = !!v; btn.classList.toggle("on", on); btn.setAttribute("aria-pressed", String(on));
-    btn.setAttribute("aria-label", on ? "3D mode on - press to turn it off" : "Turn on 3D mode");
+    btn.setAttribute("aria-label", on ? "3D map on - press to go back to the flat map" : "See the map in 3D");
     if (on) getModels().then(decorate, function () {}); else decorate();
+    // v6.09 (Eduardo: "make the map 3d instead of the snakes"): the button turns the map itself into a 3D landscape
+    // (the "3D map" script below); a species box still has its 3D action for the snake's model while it is on
+    if (window.SL_MAP3D && window.SL_MAP3D.on() !== on) window.SL_MAP3D.set(on);
   }
   btn.addEventListener("click", function (e) { e.stopPropagation(); setOn(!on); });
   ["pointerdown", "pointerup", "dblclick", "wheel", "touchstart"].forEach(function (t) { btn.addEventListener(t, function (e) { e.stopPropagation(); }, { passive: true }); });
@@ -27220,6 +27355,7 @@ window.SL_welcome = function (u, back) {
     ov.querySelector(".sl3d-back").focus({ preventScroll: true });
     start(id);
   }
+  var nextHab = null; // v6.09: the habitat look to open the next model in (the 3D map's "See snakes here in 3D")
   // v4.81: the snake's photo (the same tile its card shows) and its species page's map, for the panel beside the model
   function photoOf(id) {
     var P = window.SL_PHOTOS, it = P && P.items && P.items[id];
@@ -27269,7 +27405,8 @@ window.SL_welcome = function (u, back) {
         if (ov !== my) return;
         var h = ov.querySelector(".sl3d-host"); h.innerHTML = "";
         // v4.81: the name's header gets Compare photo (the card's own photo) and See countries (the species page's map)
-        try { viewer = mod.mount(h, { profile: p, id: id, name: p.name, testing: !!window.SL_3D_TEST, head: ov.querySelector(".sl3d-hd h2"), photo: function () { return photoOf(id); }, mapUrl: function () { return mapOf(id, p); }, pageLen: function () { return pageLenOf(id, p); } }); }
+        var hab = nextHab; nextHab = null;
+        try { viewer = mod.mount(h, { profile: p, id: id, name: p.name, habitat: hab, testing: !!window.SL_3D_TEST, head: ov.querySelector(".sl3d-hd h2"), photo: function () { return photoOf(id); }, mapUrl: function () { return mapOf(id, p); }, pageLen: function () { return pageLenOf(id, p); } }); }
         catch (e) { viewer = null; say("The 3D view couldn't start on this device.", function () { start(id); }); }
         cardActs(id);
       });
@@ -27280,7 +27417,438 @@ window.SL_welcome = function (u, back) {
   }
   window.SL_3D = { open: function (id) { return getModels().then(function () { open(id); }); }, close: close, setOn: setOn,
     // a panel over the whole app (the photo viewer's Explore in 3D); id = the scientific name as a slug
-    panel: function (id, from, name) { open(id, from, name || true); return true; } };
+    panel: function (id, from, name, hab) { nextHab = hab || null; open(id, from, name || true); return true; } };
+})();
+</script>
+
+<script>
+/* ==== 3D map - BEGIN (v6.09) ====================================================================================
+   The map's "3D" button turns the map itself into a 3D landscape: real satellite pictures (Esri World Imagery, the
+   Satellite map's own pictures) laid over the real height of the land (AWS Terrain Tiles - open elevation data),
+   with sky and haze, tilted and turned with two fingers (phones) or a right-drag / Ctrl-drag (computers), on a
+   globe when zoomed out. MapLibre GL JS (BSD-3-Clause, vendor/maplibre, 5.24.0) draws it; it is only downloaded
+   when the button is pressed, and the map, its pictures and its memory are let go when you leave.
+   SnakeList's own colours stay on it: the map script paints its borders, the picked place, Habitats and heatmap
+   colours, a snake's range, sightings and the rest into a picture of the area in view (SL_MAP_OVERLAY), and that
+   picture is laid over the landscape, see-through, so the real forests and deserts show under it.
+   With Habitats on, clicking a coloured place flies the camera down low over a real spot of that habitat there,
+   and a panel shows real photos of what it looks like (data/habitat-photos.json, tools/habitat_photos.py) with
+   "See snakes here in 3D": a snake that lives there, in that habitat's 3D scene. */
+(function () {
+  "use strict";
+  var stage = document.getElementById("globe-stage");
+  if (!stage || window.SL_MAP3D) return;
+  var ML = "vendor/maplibre/", ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/";
+  var DEM = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
+  var libP = null, map = null, host = null, on = false, ui = null, ovEq = null, ovCv = null, ovBox = null, ovT = 0, drawing = false;
+  var photosP = null, looksP = null, panel = null, orbitOn = false, tipT = 0, failT = 0, tilesOK = 0, tileErr = 0, ro = null;
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function dark() { return document.documentElement.getAttribute("data-sl-theme") === "dark"; }
+  function phone() { return Math.min(screen.width, screen.height) < 700 || !!(window.matchMedia && matchMedia("(pointer: coarse)").matches); }
+  function webgl() { try { var c = document.createElement("canvas"), g = c.getContext("webgl2") || c.getContext("webgl"); if (g && g.getExtension("WEBGL_lose_context")) g.getExtension("WEBGL_lose_context").loseContext(); return !!g; } catch (e) { return false; } }
+  function lib() {
+    if (window.maplibregl) return Promise.resolve(window.maplibregl);
+    if (libP) return libP;
+    libP = new Promise(function (res, rej) {
+      if (!document.getElementById("ml-css")) { var css = document.createElement("link"); css.id = "ml-css"; css.rel = "stylesheet"; css.href = ML + "maplibre-gl.css"; document.head.appendChild(css); }
+      var sc = document.createElement("script"); sc.src = ML + "maplibre-gl.js"; sc.async = true;
+      sc.onload = function () { if (window.maplibregl) res(window.maplibregl); else { libP = null; rej(new Error("MapLibre missing")); } };
+      sc.onerror = function () { libP = null; sc.remove(); rej(new Error("MapLibre didn't load")); };
+      document.head.appendChild(sc);
+    });
+    return libP;
+  }
+  // ---- the regions the habitat photos are kept by (the same boxes as region_of() in tools/habitat_photos.py) ----
+  function regionOf(lat, lon) {
+    if (lon >= 92 && lon <= 141 && lat >= -11 && lat <= 23 && !(lon >= 130.5 && lat < -1)) return "sea";
+    if ((lon >= 110 && lon <= 180 && lat >= -50 && lat <= 0) || lon < -140 || (lon > 150 && lat < 25)) return "au";
+    if (lon >= -18 && lon <= 63 && lat >= 12 && lat <= 37.5 && !(lon < -5 && lat > 36)) return "me";
+    if (lon >= -25 && lon <= 50 && lat > 35) return "eu";
+    if (lon >= -20 && lon <= 60 && lat < 15) return "af";
+    if (lon >= 60 && lon <= 92 && lat >= 5 && lat <= 37) return "sas";
+    if (lon >= 40) return "eas";
+    if (lon < -30) return lat >= 24 ? "na" : lat >= 13.5 || (lat >= 7 && lon < -77.3) ? "ca" : "sa";
+    return "eu";
+  }
+  function km(a, b, c, d) { var p = Math.PI / 180, x = (d - b) * p * Math.cos((a + c) / 2 * p); return 6371 * Math.hypot(x, (c - a) * p); }
+
+  // ---- a short message over the map ----
+  function note(t, ms) {
+    var old = stage.querySelector(".m3d-note"); if (old) old.remove();
+    var d = document.createElement("div"); d.className = "m3d-note"; d.setAttribute("role", "status"); d.textContent = t;
+    stage.appendChild(d); setTimeout(function () { d.remove(); }, ms || 5000);
+  }
+  function backToFlat() { if (window.SL_3D && window.SL_3D.setOn) window.SL_3D.setOn(false); else leave(); }
+  function fail(t) { if (!on) return; leave(); backToFlat(); note(t, 6500); }
+
+  // ---- the landscape ----
+  function style(ph) {
+    var dk = dark();
+    return {
+      version: 8, projection: { type: "globe" },
+      sources: {
+        sat: { type: "raster", tiles: [ESRI + "World_Imagery/MapServer/tile/{z}/{y}/{x}"], tileSize: 256, maxzoom: 19,
+          attribution: 'Imagery &copy; <a href="https://www.esri.com/" target="_blank" rel="noopener">Esri</a>, Maxar, Earthstar Geographics, and the GIS User Community' },
+        names: { type: "raster", tiles: [ESRI + "Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"], tileSize: 256, maxzoom: 19 },
+        dem: { type: "raster-dem", tiles: [DEM], encoding: "terrarium", tileSize: 256, maxzoom: ph ? 11 : 12,
+          attribution: '<a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">Terrain: AWS Terrain Tiles</a> (<a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" target="_blank" rel="noopener">USGS SRTM, 3DEP &amp; GMTED2010, NOAA ETOPO1, Copernicus EU-DEM, Geoscience Australia, NRCan, INEGI, LINZ, Kartverket and others</a>)' },
+        shade: { type: "raster-dem", tiles: [DEM], encoding: "terrarium", tileSize: 256, maxzoom: ph ? 11 : 12 }
+      },
+      layers: [
+        { id: "bg", type: "background", paint: { "background-color": dk ? "#08141d" : "#0d2131" } },
+        { id: "sat", type: "raster", source: "sat", paint: { "raster-fade-duration": 150, "raster-brightness-max": dk ? 0.8 : 1 } },
+        { id: "shade", type: "hillshade", source: "shade", paint: { "hillshade-exaggeration": 0.22, "hillshade-shadow-color": "rgba(0,0,0,0.55)", "hillshade-highlight-color": "rgba(255,255,255,0.12)" } },
+        { id: "names", type: "raster", source: "names", paint: { "raster-opacity": 0.9, "raster-fade-duration": 150 } }
+      ],
+      terrain: { source: "dem", exaggeration: ph ? 1.2 : 1.35 },
+      sky: dk ? { "sky-color": "#0c2338", "sky-horizon-blend": 0.7, "horizon-color": "#2a4b66", "horizon-fog-blend": 0.6, "fog-color": "#18303f", "fog-ground-blend": 0.3,
+                  "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.8, 5, 0.8, 7, 0] }
+                : { "sky-color": "#78b4ea", "sky-horizon-blend": 0.6, "horizon-color": "#dcefff", "horizon-fog-blend": 0.55, "fog-color": "#d2e6f5", "fog-ground-blend": 0.22,
+                  "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 7, 0] }
+    };
+  }
+  function enter() {
+    // (claude.ai's copy can't reach the picture and height servers)
+    if (window.claude && window.claude.use) { note("The 3D map works on snakelist.com - this claude.ai copy can't load the satellite pictures and land heights it needs.", 6500); backToFlat(); return; }
+    if (navigator.onLine === false) { note("The 3D map needs the internet - you seem to be offline, so here is the flat map.", 6000); backToFlat(); return; }
+    if (!webgl()) { note("This device can't show 3D maps (WebGL is off or not supported), so here is the flat map.", 6000); backToFlat(); return; }
+    on = true; tilesOK = 0; tileErr = 0;
+    var v = window.SL_MAP_VIEW ? window.SL_MAP_VIEW() : { w: -170, e: 170, s: -60, n: 75 };
+    host = document.createElement("div"); host.className = "map3d"; host.id = "map3d";
+    host.innerHTML = '<div class="map3d-load" role="status"><i></i><span>Loading the 3D map&hellip;</span></div>';
+    var cv = document.getElementById("globe");
+    stage.insertBefore(host, cv && cv.nextSibling);
+    stage.classList.add("m3d-on");
+    addUI();
+    lib().then(function (ml) { if (on) build(ml, v); }, function () { fail("The 3D map couldn't be loaded just now - here is the flat map."); });
+  }
+  function build(ml, v) {
+    var ph = phone();
+    try {
+      map = new ml.Map({
+        container: host, style: style(ph), bounds: [[Math.max(-180, v.w), Math.max(-85, v.s)], [Math.min(180, v.e), Math.min(85, v.n)]], fitBoundsOptions: { padding: 0 },
+        maxPitch: 80, pixelRatio: Math.min(window.devicePixelRatio || 1, ph ? 1.5 : 2), attributionControl: false, fadeDuration: 150,
+        maxTileCacheSize: ph ? 80 : 220, renderWorldCopies: false, canvasContextAttributes: { antialias: false, powerPreference: "default" },
+        dragRotate: true, touchPitch: true, pitchWithRotate: true, keyboard: true, locale: { "AttributionControl.ToggleAttribution": "Map credits" }
+      });
+    } catch (e) { fail("This device couldn't start the 3D map - here is the flat map."); return; }
+    map.addControl(new ml.AttributionControl({ compact: true, customAttribution: '<a href="https://maplibre.org/" target="_blank" rel="noopener">MapLibre</a>' }), "bottom-left");
+    map.on("error", function (e) {
+      if (!on || !e || !e.sourceId || e.sourceId === "ov") return;
+      tileErr++;
+      if (!tilesOK && tileErr >= 6) fail(navigator.onLine === false ? "The 3D map needs the internet - here is the flat map." : "The 3D map's pictures couldn't be loaded just now - here is the flat map.");
+    });
+    map.on("data", function (e) { if (e.dataType === "source" && e.tile && e.sourceId === "sat") tilesOK++; });
+    map.on("load", function () {
+      if (!map) return;
+      var ld = host.querySelector(".map3d-load"); if (ld) ld.remove();
+      overlaySetup();
+      map.easeTo({ pitch: ph ? 50 : 58, bearing: -12, zoom: map.getZoom() + 0.35, duration: 1600 });
+      // the credits start folded (the (i) button opens them), so they never sit over the buttons
+      var at = host.querySelector(".maplibregl-ctrl-attrib"); if (at) at.classList.remove("maplibregl-compact-show");
+      showTip();
+      clearTimeout(failT);
+      failT = setTimeout(function () { if (on && map && !tilesOK) fail("The 3D map's pictures didn't arrive - here is the flat map."); }, 20000);
+    });
+    map.getCanvas().addEventListener("webglcontextlost", function () { fail("The 3D map stopped (the device ran short of graphics memory) - here is the flat map."); });
+    map.on("moveend", function () { if (!drawing) overlaySoon(180); });
+    map.on("rotate", compass); map.on("pitch", compass);
+    map.on("click", onTap);
+    ["mousedown", "touchstart", "wheel"].forEach(function (t) { map.on(t, function () { stopOrbit(); hideTip(); }); });
+    if (window.ResizeObserver) { ro = new ResizeObserver(function () { if (map) map.resize(); }); ro.observe(host); }
+  }
+  function leave() {
+    if (!on) return;
+    on = false; stopOrbit(); closePanel(); clearTimeout(failT); clearTimeout(ovT); clearTimeout(tipT);
+    var c = null, z = 0;
+    if (map) { try { c = map.getCenter(); z = map.getZoom(); } catch (e) {} try { map.remove(); } catch (e) {} map = null; }
+    if (ro) { ro.disconnect(); ro = null; }
+    if (host) { host.remove(); host = null; }
+    [ovEq, ovCv].forEach(function (k) { if (k) { k.width = 0; k.height = 0; } }); ovEq = ovCv = null; ovBox = null;
+    removeUI(); stage.classList.remove("m3d-on", "m3d-panel-on");
+    // the flat map shows the same place
+    if (c && window.SL_MAP_FIT) {
+      var W = stage.clientWidth || 800, H = stage.clientHeight || 400, span = 360 * W / (512 * Math.pow(2, z)) * 0.82;
+      var lat = Math.max(-80, Math.min(80, c.lat)), hs = span * H / W * Math.cos(lat * Math.PI / 180);
+      if (span < 300) window.SL_MAP_FIT(c.lng - span / 2, c.lng + span / 2, Math.max(-85, lat - hs / 2), Math.min(85, lat + hs / 2), false);
+      else window.SL_MAP_FIT(-180, 180, -85, 85, false);
+    }
+    if (window.SL_MAP_REDRAW) window.SL_MAP_REDRAW();
+  }
+
+  // ---- SnakeList's colours over the landscape ----
+  function overlaySetup() {
+    ovEq = document.createElement("canvas"); ovCv = document.createElement("canvas"); ovCv.width = ovCv.height = 2;
+    map.addSource("ov", { type: "canvas", canvas: ovCv, coordinates: [[-180, 85], [180, 85], [180, -85], [-180, -85]], animate: false });
+    map.addLayer({ id: "ov", type: "raster", source: "ov", paint: { "raster-opacity": ["interpolate", ["linear"], ["zoom"], 6, 0.72, 9, 0.45, 11.5, 0.12], "raster-fade-duration": 0 } }, "names"); // (close to the ground the real land shows through)
+    overlayNow();
+  }
+  function overlaySoon(ms) { clearTimeout(ovT); ovT = setTimeout(overlayNow, ms); }
+  var mercY = function (lat) { var r = lat * Math.PI / 180; return Math.log(Math.tan(Math.PI / 4 + r / 2)); };
+  function overlayNow() {
+    if (!on || !map || !ovCv || !window.SL_MAP_OVERLAY || !map.getSource("ov")) return;
+    var b = map.getBounds(), w = b.getWest(), e = b.getEast(), s = b.getSouth(), n = b.getNorth();
+    if (e - w > 300 || map.getZoom() < 2.2) { w = -180; e = 180; s = -85; n = 85; }
+    else {
+      var dw = (e - w) * 0.12, dh = (n - s) * 0.12;
+      w = Math.max(-180, w - dw); e = Math.min(180, e + dw); s = Math.max(-85, s - dh); n = Math.min(85, n + dh);
+      if (e - w < 0.02 || n - s < 0.02) return;
+    }
+    var big = phone() ? 1600 : 2600, cw = Math.max(320, host.clientWidth), W = Math.round(Math.min(big, cw * 1.7));
+    var my = mercY(n) - mercY(s), mx = (e - w) * Math.PI / 180;
+    var H = Math.round(Math.max(128, Math.min(big, W * my / mx)));
+    var He = Math.round(Math.max(128, Math.min(big, W * (n - s) / (e - w)))); // the plate carree picture
+    ovEq.width = W; ovEq.height = He;
+    drawing = true;
+    var ok = false;
+    try { ok = window.SL_MAP_OVERLAY(ovEq.getContext("2d"), W, He, w, e, s, n); } catch (err) { ok = false; }
+    drawing = false;
+    if (!ok) return;
+    ovBox = [W, He, w, e, s, n];
+    // plate carree -> Web Mercator, a few rows at a time
+    ovCv.width = W; ovCv.height = H;
+    var g = ovCv.getContext("2d"), y0 = mercY(n), step = 2;
+    g.clearRect(0, 0, W, H);
+    for (var j = 0; j < H; j += step) {
+      var lat = Math.atan(Math.sinh(y0 - (j + step / 2) / H * my)) * 180 / Math.PI;
+      var sy = (n - lat) / (n - s) * He;
+      g.drawImage(ovEq, 0, Math.max(0, Math.min(He - 1, sy - step / 2)), W, step, 0, j, W, step);
+    }
+    var src = map.getSource("ov");
+    try { src.setCoordinates([[w, n], [e, n], [e, s], [w, s]]); src.play(); map.once("render", function () { if (map && map.getSource("ov")) map.getSource("ov").pause(); }); map.triggerRepaint(); } catch (err) {}
+  }
+  // the flat map asks for a redraw (something changed: a picked country, a habitat, sightings arriving...)
+  var redrawT = 0;
+  function redraw() { if (drawing || !map) return; if (!redrawT) redrawT = setTimeout(function () { redrawT = 0; overlayNow(); }, 90); }
+  function fit(w, e, s, n) {
+    if (!map || panel) return;
+    try { map.fitBounds([[w, s], [e, n]], { padding: 40, pitch: map.getPitch(), bearing: map.getBearing(), duration: 1400, maxZoom: 9 }); } catch (err) {}
+  }
+
+  // ---- controls: back to the flat map, a compass, the zoom buttons ----
+  function addUI() {
+    ui = {};
+    var flat = document.createElement("button"); flat.type = "button"; flat.className = "m3d-btn m3d-flat"; flat.id = "m3d-flat";
+    flat.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20Z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span>Flat map</span>';
+    flat.setAttribute("aria-label", "Back to the flat map");
+    flat.addEventListener("click", function (e) { e.stopPropagation(); backToFlat(); });
+    stage.appendChild(flat); ui.flat = flat;
+    var zc = stage.querySelector(".globe-zoom");
+    var cp = document.createElement("button"); cp.type = "button"; cp.className = "m3d-compass"; cp.id = "m3d-compass"; cp.setAttribute("aria-label", "Point north");
+    cp.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3 15.2 12H8.8Z" fill="#e0493b"/><path d="M12 21 8.8 12h6.4Z" fill="currentColor" opacity=".75"/></svg>';
+    cp.addEventListener("click", function (e) {
+      e.stopPropagation(); if (!map) return; stopOrbit();
+      if (Math.abs(map.getBearing()) > 0.5) map.easeTo({ bearing: 0, duration: 700 }); else map.easeTo({ pitch: map.getPitch() > 5 ? 0 : 58, duration: 900 });
+    });
+    if (zc) { var rs = document.getElementById("globe-reset"); zc.insertBefore(cp, rs ? rs.nextSibling : null); } else stage.appendChild(cp);
+    ui.compass = cp;
+    var tip = document.createElement("p"); tip.className = "m3d-tip"; tip.hidden = true; tip.setAttribute("aria-live", "polite"); stage.appendChild(tip); ui.tip = tip;
+    // the map's own zoom buttons work the 3D map while it shows
+    ui.zoom = function (e) {
+      if (!on || !map) return;
+      var id = e.currentTarget.id; e.stopImmediatePropagation(); e.preventDefault(); stopOrbit();
+      if (id === "globe-in") map.zoomIn({ duration: 400 }); else if (id === "globe-out") map.zoomOut({ duration: 400 });
+      else { closePanel(); map.flyTo({ center: [10, 18], zoom: 1.3, pitch: 30, bearing: 0, duration: 1600 }); }
+    };
+    ["globe-in", "globe-out", "globe-reset"].forEach(function (id) { var b = document.getElementById(id); if (b) b.addEventListener("click", ui.zoom, true); });
+    ["pointerdown", "pointerup", "dblclick", "wheel", "touchstart", "click"].forEach(function (t) { [flat, cp].forEach(function (b) { b.addEventListener(t, function (e) { e.stopPropagation(); }, { passive: true }); }); });
+    compass();
+  }
+  function removeUI() {
+    if (!ui) return;
+    if (ui.flat) ui.flat.remove(); if (ui.compass) ui.compass.remove(); if (ui.tip) ui.tip.remove();
+    ["globe-in", "globe-out", "globe-reset"].forEach(function (id) { var b = document.getElementById(id); if (b) b.removeEventListener("click", ui.zoom, true); });
+    var nt = stage.querySelector(".m3d-note"); if (nt && !on) { /* (a message about leaving stays a moment) */ }
+    ui = null;
+  }
+  function compass() {
+    if (!ui || !ui.compass) return;
+    var bz = map ? map.getBearing() : 0, pt = map ? map.getPitch() : 0, sv = ui.compass.querySelector("svg");
+    if (sv) sv.style.transform = "rotateX(" + (pt * 0.6).toFixed(1) + "deg) rotate(" + (-bz).toFixed(1) + "deg)";
+  }
+  function tipText() {
+    var H = window.SL_HAB_NOW && window.SL_HAB_NOW(), touch = phone();
+    if (H && H.hab) return (touch ? "Tap" : "Click") + " a green place to fly down and see what " + H.hab + " looks like there";
+    if (H) return "Pick a habitat in the list, then " + (touch ? "tap" : "click") + " a green place to fly down to it";
+    return touch ? "Two fingers: tilt and turn the land" : "Right-drag (or Ctrl + drag) to tilt and turn the land";
+  }
+  function showTip(t, ms) {
+    if (!ui || !ui.tip) return;
+    ui.tip.textContent = t || tipText(); ui.tip.hidden = false; ui.tip.style.opacity = "1";
+    clearTimeout(tipT); tipT = setTimeout(hideTip, ms || 6000);
+  }
+  function hideTip() { if (ui && ui.tip && !ui.tip.hidden) { ui.tip.style.opacity = "0"; clearTimeout(tipT); tipT = setTimeout(function () { if (ui && ui.tip) ui.tip.hidden = true; }, 400); } }
+
+  // ---- taps on the 3D map ----
+  function onTap(e) {
+    if (!map || !e || !e.lngLat) return;
+    stopOrbit();
+    var lon = e.lngLat.lng, lat = e.lngLat.lat, H = window.SL_HAB_NOW && window.SL_HAB_NOW();
+    var pl = window.SL_MAP_PLACE_AT ? window.SL_MAP_PLACE_AT(lon, lat) : null;
+    if (H && H.hab && pl && H.has(pl.cc)) { habitatHere(H, pl, lon, lat); return; }
+    if (H && !H.hab && pl) showTip("Pick a habitat in the Habitats list first", 4000);
+    closePanel();
+    if (ovBox && window.SL_MAP_TAP_LL) window.SL_MAP_TAP_LL(lon, lat, ovBox[0], ovBox[1], ovBox[2], ovBox[3], ovBox[4], ovBox[5]);
+  }
+
+  // ---- Habitats in 3D: fly down to the real place, and what it looks like ----
+  function photos() {
+    if (!photosP) photosP = fetch("data/habitat-photos.json").then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).catch(function (e) { photosP = null; throw e; });
+    return photosP;
+  }
+  function looks() {
+    if (!looksP) looksP = fetch("species/3d/habitats.json?r=587").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { looksP = null; return null; });
+    return looksP;
+  }
+  // the 3D scene for a habitat (species/3d/habitats.json "map", tools/habitat_looks.py), suited to the region
+  function lookFor(L, hab, reg) {
+    var o = L && L.map && L.map[hab]; o = o ? { k: o.k, l: o.l, f: o.f } : { k: "forest", l: hab };
+    if (!o.f) delete o.f;
+    if ((o.k === "clay" || o.k === "gibber") && reg !== "au") o.k = o.k === "clay" ? "riverbank" : "arid";
+    if (o.k === "forest" && !o.f && reg === "au") o.f = "eucalypt";
+    if (o.k === "forest" && !o.f && reg === "af" && /dry|wood|savanna|thorn/i.test(hab)) o.f = "savanna";
+    if (o.k === "swamp" && o.f === "cypress" && reg !== "na") o.f = "tropic";
+    return o;
+  }
+  function photoList(P, hab, reg, lon, lat) {
+    var all = P.photos, ids = (P.sets["n:" + hab] || []).slice(), g = P.group[hab] || (P.named && P.named[hab] && P.named[hab][2]);
+    if (!ids.length && g) ids = (P.sets["g:" + g + ":" + reg] || []).slice();
+    if (ids.length < 4 && g) { // too few here: the nearest of the same kind of place elsewhere
+      var more = [];
+      Object.keys(P.sets).forEach(function (k) { if (k.indexOf("g:" + g + ":") === 0) P.sets[k].forEach(function (i) { if (ids.indexOf(i) < 0 && more.indexOf(i) < 0) more.push(i); }); });
+      more.sort(function (a, b) { return km(lat, lon, all[a][2], all[a][3]) - km(lat, lon, all[b][2], all[b][3]); });
+      ids = ids.concat(more.slice(0, 6 - ids.length));
+    }
+    return ids.map(function (i) { var p = all[i]; return { file: p[0], src: p[1], lat: p[2], lon: p[3], by: p[4], lic: p[5], eco: p[6] }; });
+  }
+  function habitatHere(H, pl, lon, lat) {
+    var reg = regionOf(lat, lon);
+    var place = pl.st ? pl.st + ", " + pl.name : pl.name;
+    openPanel(H.hab, place, null);
+    flyLow(lon, lat);
+    Promise.all([photos(), looks()]).then(function (r) {
+      if (!panel || panel.hab !== H.hab) return;
+      var P = r[0], L = r[1], list = photoList(P, H.hab, reg, lon, lat);
+      // the real spot to fly to: the named place (Sonoran Desert...) or the nearest photo's spot, when it is in the place tapped
+      var to = null, nm = P.named && P.named[H.hab];
+      var inPlace = function (la, lo) { var q = window.SL_MAP_PLACE_AT && window.SL_MAP_PLACE_AT(lo, la); return !!(q && q.cc === pl.cc); };
+      if (nm && inPlace(nm[0], nm[1])) to = [nm[1], nm[0]];
+      var near = list.filter(function (p) { return km(lat, lon, p.lat, p.lon) < 1800 && inPlace(p.lat, p.lon); })
+        .sort(function (a, b) { return km(lat, lon, a.lat, a.lon) - km(lat, lon, b.lat, b.lon); });
+      if (near.length) { list = near.concat(list.filter(function (p) { return near.indexOf(p) < 0; })); if (!to) to = [near[0].lon, near[0].lat]; }
+      if (to) flyLow(to[0], to[1]);
+      var look = lookFor(L, H.hab, reg);
+      fillPanel(list, near.length ? near[0] : null, snakesHere(H, pl, L, look), look);
+    }).catch(function () {
+      if (!panel) return;
+      fillPanel([], null, snakesHere(H, pl), null, navigator.onLine === false ? "The photos need the internet." : "The photos couldn't be loaded just now.");
+    });
+  }
+  function flyLow(lon, lat) {
+    if (!map) return;
+    stopOrbit();
+    var ph = phone();
+    map.flyTo({ center: [lon, lat], zoom: ph ? 12.6 : 13.2, pitch: ph ? 70 : 74, bearing: map.getBearing() + 35, duration: 4200, curve: 1.5, essential: true,
+      padding: !ph && panel ? { right: Math.min(380, host.clientWidth * 0.4), left: 0, top: 0, bottom: 0 } : ph && panel ? { bottom: host.clientHeight * 0.45, top: 0, left: 0, right: 0 } : undefined });
+    map.once("moveend", function () { if (panel && map) startOrbit(); });
+  }
+  // a slow turn round the spot, until you touch the map
+  function startOrbit() {
+    if (!map || orbitOn || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+    orbitOn = true;
+    var spin = function () { if (!orbitOn || !map) return; map.easeTo({ bearing: map.getBearing() + 40, duration: 16000, easing: function (t) { return t; } }); map.once("moveend", function () { if (orbitOn) spin(); }); };
+    spin();
+  }
+  function stopOrbit() { if (orbitOn) { orbitOn = false; if (map) map.stop(); } }
+  // snakes of this habitat recorded in this place (best known first)
+  function snakesHere(H, pl, L, look) {
+    var HB = window.SL_HABITATS, ids = HB && H.n >= 0 ? HB.ids(H.n) : [], here = {}, out = [], grid = document.getElementById("grid");
+    (pl.ids || []).forEach(function (id) { here[id] = 1; });
+    ids.forEach(function (id) {
+      if (!here[id]) return;
+      var c = grid && grid.querySelector('.card[data-id="' + id + '"]'); if (!c) return;
+      // in the state or province tapped, when the snake's own states/provinces there are known
+      if (pl.st) {
+        var CC = pl.cc.toUpperCase(), sts = pl.cc === "us" ? (c.getAttribute("data-states") || "").split("|") : null;
+        if (sts && sts[0] && sts.indexOf(String(pl.stKey)) < 0) return;
+        if (!sts) { var pv = (c.getAttribute("data-provinces") || "").split("|").filter(function (k) { return k.indexOf(CC + ":") === 0; }); if (pv.length && pv.indexOf(CC + ":" + pl.st) < 0) return; }
+      }
+      var nmEl = c.querySelector(".card-name"), sciEl = c.querySelector(".card-sci");
+      var sci = (nmEl && nmEl.classList.contains("is-sci") ? nmEl.textContent : sciEl && sciEl.textContent || "").trim();
+      var spots = window.SL_FACTS && window.SL_FACTS.spotsOf ? window.SL_FACTS.spotsOf(c) : 0;
+      var sid = sci.toLowerCase().split(/\s+/).slice(0, 2).join("-").replace(/[^a-z-]/g, ""), own = L && L.sp && L.sp[sid];
+      // snakes whose own 3D habitats include this kind of place first (a cottonmouth for the Everglades' cypress swamp)
+      var fits = look && Array.isArray(own) && own.some(function (o) { return o.k === look.k; }) ? 1e7 : 0;
+      out.push({ id: id, sid: sid, name: (nmEl && nmEl.textContent || sci).trim(), spots: fits + spots + (window.SL_PHOTOS && window.SL_PHOTOS.items && window.SL_PHOTOS.items[id] ? 1e6 : 0) });
+    });
+    out.sort(function (a, b) { return b.spots - a.spots; });
+    return out.slice(0, 5);
+  }
+  function openPanel(hab, place) {
+    closePanel(true);
+    var d = document.createElement("div"); d.className = "m3d-panel"; d.id = "m3d-panel"; d.setAttribute("role", "dialog"); d.setAttribute("aria-label", "What " + hab + " looks like");
+    d.innerHTML = '<div class="m3d-ph"><div><p class="m3d-kick">What it looks like</p><h3>' + esc(hab) + '<span>in ' + esc(place) + '</span></h3></div>' +
+      '<button type="button" class="m3d-x" aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>' +
+      '<div class="m3d-body"><p class="m3d-empty">Flying down&hellip;</p></div>';
+    ["pointerdown", "pointerup", "wheel", "touchstart", "dblclick", "click", "mousedown"].forEach(function (t) { d.addEventListener(t, function (e) { e.stopPropagation(); }, { passive: true }); });
+    d.querySelector(".m3d-x").addEventListener("click", function () { closePanel(); });
+    stage.appendChild(d); stage.classList.add("m3d-panel-on");
+    panel = { el: d, hab: hab, place: place };
+    hideTip();
+  }
+  function closePanel(quiet) {
+    if (!panel) return;
+    panel.el.remove(); panel = null; stage.classList.remove("m3d-panel-on");
+    if (!quiet) stopOrbit();
+  }
+  function thumb(src, w) { return String(src).replace(/\/\d+px-/, "/" + w + "px-"); }
+  function fillPanel(list, here, snakes, look, err) {
+    if (!panel) return;
+    var b = panel.el.querySelector(".m3d-body"), i = 0, ph = phone(), pick = 0;
+    var html = "";
+    if (list.length) {
+      html += '<figure class="m3d-fig"><img alt="" decoding="async"><button type="button" class="m3d-nav m3d-prev" aria-label="Previous photo">&#8249;</button><button type="button" class="m3d-nav m3d-next" aria-label="Next photo">&#8250;</button><span class="m3d-n"></span></figure>' +
+        '<p class="m3d-cap"></p><div class="m3d-thumbs">' + list.map(function (p, k) { return '<button type="button" aria-label="Photo ' + (k + 1) + '" aria-pressed="false"><img alt="" loading="lazy" src="' + esc(thumb(p.src, 250)) + '"></button>'; }).join("") + "</div>";
+    } else html += '<p class="m3d-empty">' + esc(err || "No photos of this habitat here yet.") + "</p>";
+    html += '<div class="m3d-acts">' + (snakes.length ? '<button type="button" class="m3d-go">See snakes here in 3D</button>' : "") + (list.length ? '<button type="button" class="m3d-fly">Fly to this photo</button>' : "") + "</div>";
+    if (snakes.length) html += '<p class="m3d-sn">Snakes of this habitat here:</p><div class="m3d-chips">' + snakes.map(function (s, k) { return '<button type="button" data-k="' + k + '" aria-pressed="' + (k === 0) + '">' + esc(s.name) + "</button>"; }).join("") + "</div>";
+    b.innerHTML = html;
+    var img = b.querySelector(".m3d-fig img"), cap = b.querySelector(".m3d-cap"), n = b.querySelector(".m3d-n");
+    function show(k) {
+      if (!list.length) return;
+      i = (k + list.length) % list.length; var p = list[i];
+      img.src = thumb(p.src, ph ? 960 : 1280); img.alt = "Photo: " + (p.eco || panel.hab);
+      n.textContent = (i + 1) + " / " + list.length;
+      var page = "https://commons.wikimedia.org/wiki/File:" + encodeURIComponent(p.file.replace(/ /g, "_"));
+      cap.innerHTML = "<b>" + esc(p.eco || "") + "</b>" + (p === here ? " &middot; near here" : "") + '<br>Photo: <a href="' + esc(page) + '" target="_blank" rel="noopener">' + esc(p.by) + "</a>, " + esc(p.lic) + " &middot; Wikimedia Commons";
+      [].forEach.call(b.querySelectorAll(".m3d-thumbs button"), function (t, k2) { t.setAttribute("aria-pressed", String(k2 === i)); });
+    }
+    show(0);
+    if (list.length) {
+      b.querySelector(".m3d-prev").addEventListener("click", function () { show(i - 1); });
+      b.querySelector(".m3d-next").addEventListener("click", function () { show(i + 1); });
+      [].forEach.call(b.querySelectorAll(".m3d-thumbs button"), function (t, k) { t.addEventListener("click", function () { show(k); }); });
+      b.querySelector(".m3d-fly").addEventListener("click", function () { var p = list[i]; flyLow(p.lon, p.lat); });
+    }
+    if (snakes.length) {
+      [].forEach.call(b.querySelectorAll(".m3d-chips button"), function (c) {
+        c.addEventListener("click", function () { pick = +c.getAttribute("data-k"); [].forEach.call(b.querySelectorAll(".m3d-chips button"), function (x) { x.setAttribute("aria-pressed", String(x === c)); }); });
+      });
+      b.querySelector(".m3d-go").addEventListener("click", function () {
+        var s = snakes[pick]; stopOrbit();
+        if (window.SL_3D && window.SL_3D.panel) window.SL_3D.panel(s.sid || s.id, this, s.name, look);
+      });
+    }
+  }
+
+  window.SL_MAP3D = {
+    on: function () { return on; },
+    set: function (v) { v = !!v; if (v === on) return; if (v) enter(); else leave(); },
+    redraw: redraw, fit: fit,
+    map: function () { return map; } // (for tests)
+  };
+  // a habitat picked while the 3D map shows: say what a click does now
+  document.addEventListener("click", function (e) { if (on && e.target.closest && e.target.closest("#hab-list [data-h], #hab-toggle")) setTimeout(function () { showTip(); }, 300); }, true);
 })();
 </script>
 <script>
