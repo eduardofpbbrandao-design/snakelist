@@ -45,6 +45,9 @@ function buildAll(A) {
   let K = HAB[kind] || HAB[BY_GROUND[S.ground]] || HAB.litter;
   const flavor = (A.sceneP && A.sceneP.flavor) || 'cypress';
   if (kind === 'swamp') K = Object.assign({}, K, { trees: SWAMP_TREES[flavor] || SWAMP_TREES.cypress, spacing: flavor === 'reed' ? 22 : K.spacing, clump: flavor === 'reed' ? 0.6 : 0 });
+  // v6.02: savanna woodland (twig snakes, boomslangs): scattered flat-topped acacia-like trees standing in dry grass
+  if (kind === 'forest' && flavor === 'savanna') K = Object.assign({}, HAB.grass, { trees: [['savanna', 1]], spacing: 9, clump: 0.3, litter: 0.25, haze: '#b9b8a0' });
+  if (kind === 'forest' && flavor === 'eucalypt') K = Object.assign({}, HAB.forest, { trees: [['coolibah', 1]], spacing: 8, forest: 0, clump: 0.2, under: 'grass', litter: 0.7, haze: '#a9b39c' });
   const R = rng(seed + 4421);
   const lerp = (a, b, t) => a + (b - a) * t;
   const track = (o) => { if (o && ctx.track) ctx.track(o); return o; };
@@ -1094,13 +1097,24 @@ export function perchTree(THREE, opt) {
   const snk = []; for (let i = 0; i <= 80; i++) { const x = (i / 80) * L; snk.push([spine(x), Math.max(F.W(x), F.Hh(x))]); }
   const nearSnake = (p, extra) => { let m = 1e9; for (const [q, r] of snk) m = Math.min(m, p.distanceTo(q) - r - extra); return m; };
   const headP = spine(F.Hl * 0.5);
+  // v6.02: the tree suits the habitat (Eduardo: "make the tree look real and the habitats"): a thorny acacia-like tree with
+  // grey, rough bark and tiny feathery leaflets in savanna and dry woodland (twig snake, boomslang), a rainforest tree with
+  // pale mossy bark and big glossy leaves (green tree python, emerald tree boa), a broadleaf tree elsewhere
+  const sk = (P.scene && P.scene.kind) || 'forest', sfl = P.scene && P.scene.flavor;
+  const style = sfl === 'savanna' || ['grass', 'heath', 'arid', 'sand', 'gibber', 'clay'].includes(sk) ? 'savanna' : sk === 'rainforest' || sk === 'shore' || (sk === 'swamp' && (sfl === 'tropic' || sfl === 'mangrove')) ? 'tropic' : 'temperate';
+  const ST = {
+    savanna: { bark: '#5f574e', moss: 0.2, leaf: 0.03, narrow: 0.55, hue: [0.17, 0.24], sat: [0.22, 0.36], lit: [0.33, 0.45], per: 3.2, rough: 0.72, top: 1.7, el: [0.18, 0.3], len: [1.0, 1.6] },
+    tropic: { bark: '#80806e', moss: 2.2, leaf: 0.13, narrow: 0.62, hue: [0.25, 0.31], sat: [0.42, 0.58], lit: [0.3, 0.42], per: 0.55, rough: 0.42, top: 3.2, el: [0.55, 0.95], len: [0.8, 1.5] },
+    temperate: { bark: '#6b5a47', moss: 1, leaf: 0.075, narrow: 0.8, hue: [0.24, 0.29], sat: [0.45, 0.6], lit: [0.42, 0.54], per: 1, rough: 0.62, top: 3.2, el: [0.55, 0.95], len: [0.8, 1.5] },
+  }[style];
+  g.userData.style = style;
   // ---- bark: furrowed plates, lichen; colour and bump drawn once per tree (512 px)
-  const barkCol = (P.scene && P.scene.barkColor) || '#6b5a47';
+  const barkCol = (P.scene && P.scene.barkColor) || ST.bark;
   const cv = document.createElement('canvas'); cv.width = cv.height = 512; const x = cv.getContext('2d');
   x.fillStyle = barkCol; x.fillRect(0, 0, 512, 512);
   for (let i = 0; i < 70; i++) { const px = R() * 512; let py = -20; x.strokeStyle = 'rgba(18,12,7,' + (0.35 + R() * 0.35) + ')'; x.lineWidth = 2 + R() * 5; x.beginPath(); x.moveTo(px, py); while (py < 532) { py += 14 + R() * 30; x.lineTo(px + (R() - 0.5) * 18, py); } x.stroke(); } // fissures along the wood
   for (let i = 0; i < 900; i++) { const px = R() * 512, py = R() * 512, w = 6 + R() * 22, h = 18 + R() * 50; x.fillStyle = R() < 0.5 ? 'rgba(255,240,220,' + (0.03 + R() * 0.07) + ')' : 'rgba(25,16,8,' + (0.04 + R() * 0.08) + ')'; x.fillRect(px, py, w * 0.3, h); } // plates
-  for (let i = 0; i < 60; i++) { x.fillStyle = 'rgba(' + (R() < 0.5 ? '96,118,62' : '150,150,118') + ',' + (0.08 + R() * 0.16) + ')'; x.beginPath(); x.ellipse(R() * 512, R() * 512, 6 + R() * 26, 4 + R() * 14, R() * 3, 0, Math.PI * 2); x.fill(); } // moss and lichen
+  for (let i = 0; i < 60 * ST.moss; i++) { x.fillStyle = 'rgba(' + (R() < 0.5 ? '96,118,62' : '150,150,118') + ',' + (0.08 + R() * 0.16) + ')'; x.beginPath(); x.ellipse(R() * 512, R() * 512, 6 + R() * 26, 4 + R() * 14, R() * 3, 0, Math.PI * 2); x.fill(); } // moss and lichen
   const bmap = new THREE.CanvasTexture(cv); bmap.colorSpace = THREE.SRGBColorSpace; bmap.wrapS = bmap.wrapT = THREE.RepeatWrapping; bmap.anisotropy = 8;
   const bark = new THREE.MeshStandardMaterial({ color: '#ffffff', map: bmap, bumpMap: bmap, bumpScale: 1.2, roughness: 0.93, vertexColors: true });
   // a tube along a smooth curve, radius rad(t); the bark keeps its real size; vertex colours: darker where the snake lies on it
@@ -1134,9 +1148,9 @@ export function perchTree(THREE, opt) {
   const ltex = new THREE.CanvasTexture(lc); ltex.colorSpace = THREE.SRGBColorSpace; ltex.anisotropy = 4;
   const ls = new THREE.Shape(); ls.moveTo(0, 0); ls.bezierCurveTo(0.42, 0.18, 0.4, 0.72, 0, 1); ls.bezierCurveTo(-0.4, 0.72, -0.42, 0.18, 0, 0);
   const leafG = new THREE.ShapeGeometry(ls, 6); { const p = leafG.attributes.position, uv = leafG.attributes.uv; for (let i = 0; i < p.count; i++) { const xx = p.getX(i), yy = p.getY(i); uv.setXY(i, xx + 0.5, yy); p.setZ(i, -0.36 * xx * xx + 0.08 * Math.sin(yy * Math.PI)); } leafG.rotateX(-Math.PI / 2); leafG.computeVertexNormals(); }
-  const leafMat = new THREE.MeshStandardMaterial({ color: '#ffffff', map: ltex, side: THREE.DoubleSide, roughness: 0.62, metalness: 0 });
+  const leafMat = new THREE.MeshStandardMaterial({ color: '#ffffff', map: ltex, side: THREE.DoubleSide, roughness: ST.rough, metalness: 0 });
   const leaves = []; // [position, direction of the twig, size]
-  const leafSize = 0.075 * ((P.scene && P.scene.leafSize) || 1), keepOff = Math.max(0.12, F.Hl * 3, L * 0.06);
+  const leafSize = ST.leaf * ((P.scene && P.scene.leafSize) || 1), keepOff = Math.max(0.12, F.Hl * 3, L * 0.06);
   const twigLeaves = (c, t0, t1, n) => { for (let k = 0; k < n; k++) { const t = lerp(t0, t1, (k + R() * 0.6) / n), p = c.getPointAt(Math.min(1, t)), d = c.getTangentAt(Math.min(1, t)); leaves.push([p, d, leafSize * (0.75 + R() * 0.5) * (0.7 + 0.3 * t)]); } };
   // a limb that forks: from p0 along dir for len, radius r0, then two thinner branches, twigs and leaves at the ends
   const limb = (p0, dir, len, r0, depth) => {
@@ -1147,7 +1161,13 @@ export function perchTree(THREE, opt) {
     if (depth > 0) {
       for (const sgn of [-1, 1]) { const nd = dd.clone().addScaledVector(side, sgn * (0.5 + R() * 0.4)).add(V(0, 0.15 + R() * 0.2, 0)).normalize(); limb(end, nd, len * (0.5 + R() * 0.2), r0 * 0.55, depth - 1); }
       if (depth > 1) { const mt = c.getPointAt(0.55), nd = dd.clone().addScaledVector(side, (R() < 0.5 ? -1 : 1) * 0.9).add(V(0, 0.3, 0)).normalize(); limb(mt, nd, len * 0.45, r0 * 0.45, depth - 2); }
-    } else twigLeaves(c, 0.25, 1, Math.max(4, Math.round(len * (lowQ ? 16 : 30))));
+    } else {
+      twigLeaves(c, 0.25, 1, Math.max(4, Math.round(len * (lowQ ? 16 : 30) * ST.per)));
+      if (style === 'savanna') for (let k = 0; k < Math.round(len * 22); k++) { // (paired thorns along acacia twigs)
+        const t = 0.1 + R() * 0.85, q = c.getPointAt(t), T = c.getTangentAt(t), sd = V(-T.z, 0, T.x).normalize(), tl = 0.012 + R() * 0.014, rr = r0 * lerp(1, 0.55, t);
+        for (const sg of [-1, 1]) { const dd = sd.clone().multiplyScalar(sg).addScaledVector(T, 0.35).add(V(0, 0.15, 0)).normalize(); tube([q.clone().addScaledVector(dd, rr * 0.6), q.clone().addScaledVector(dd, rr + tl)], (u) => rr * 0.3 * (1 - u * 0.92), 1, 4, 0.05); }
+      }
+    }
     return c;
   };
   let perch = null;
@@ -1159,36 +1179,53 @@ export function perchTree(THREE, opt) {
     const aw = Math.atan2(away.z, away.x);
     for (let k = 0; k < 5; k++) {
       const y0 = hJoin + 0.35 + (top - hJoin - 0.6) * (k / 4) * 0.9, o = trunkAt(y0), a = aw + Math.PI + (k - 2) * 0.95 + (R() - 0.5) * 0.4;
-      const nd = V(Math.cos(a), 0.55 + R() * 0.4, Math.sin(a)).normalize(), len = 0.8 + R() * 0.7;
+      const nd = V(Math.cos(a), lerp(ST.el[0], ST.el[1], R()), Math.sin(a)).normalize(), len = lerp(ST.len[0], ST.len[1], R());
       limb(o, nd, len, rT * (0.38 - k * 0.03), 2);
     }
     const so = trunkAt(hJoin * 0.55), sa = aw + 2.2; tube([so, so.clone().add(V(Math.cos(sa) * 0.12, 0.06, Math.sin(sa) * 0.12))], (t) => rT * 0.3 * (1 - t * 0.4), 6, 8, 0.25); // (a broken-off stub)
   }
+  // v6.02 (Eduardo: "you make the twig of the tree big as hell"): wood of a believable size. The snake lies on a twig or
+  // branch about as thick as a real one it would use (a twig snake or vine snake on twigs about 1 cm thick, a boomslang
+  // on 1-2 cm, a green tree python or emerald tree boa on a branch 4-5 cm thick), which tapers to a thin tip past its head
+  // and thickens gradually back towards the trunk - like a real branch, not a pipe the size of the snake.
+  // v6.02: and the way along the branch for Slither (userData.circuit.line): the top of the wood from the snake's head
+  // on towards the tip, as far as the branch is thick enough to carry it (it crawls along it and backs into its place again)
+  const nearestU = (c, p) => { let bu = 0, bd = 1e9; for (let k = 0; k <= 800; k++) { const u = k / 800, d = c.getPointAt(u).distanceTo(p); if (d < bd) { bd = d; bu = u; } } return bu; };
+  let circuit = null; const routePts = [];
+  function makeCircuit(c, rad, uQ, uK) {
+    const total = c.getLength(), n = Math.max(30, Math.ceil((Math.abs(uK - uQ) * total) / (L / 260))), line = [];
+    for (let k = 0; k <= n; k++) { const u = lerp(uQ, uK, k / n); line.push(c.getPointAt(u).add(V(0, rad(u), 0))); }
+    for (const p of line) routePts.push(p);
+    circuit = { line: line.map((p) => [p.x, p.y, p.z]) };
+  }
   if (opt.kind === 'branch') {
-    const h = pose.perch, rB = clamp(F.w0 * 1.5, 0.011, 0.03);
+    const h = pose.perch, rB = clamp(F.w0 * (style === 'tropic' ? 0.95 : 0.75), 0.0035, 0.024);
     const bY = pose.bY || (() => 0), pt = (xx) => { const a = pose.at(clamp(xx, 0, L)); return V(a[0], h + bY(clamp(xx, 0, L)) - rB * 0.92, a[1]); }; // (v5.83: its rise and fall too)
     const dirAt = (x0, x1) => pt(x1).sub(pt(x0)).setY(0).normalize();
     const d0 = dirAt(F.Hl * 0.5, 0), d1 = dirAt(L * 0.9, L);
-    // past the head: a long reach (more than an arm's length), drooping a little, ending in a fork
-    const reach = Math.max(L * 0.75, 0.9), gap = Math.max(0.3, L * 0.15), rT = clamp(rB * 5.5, 0.09, 0.2);
+    // past the head: a long thin reach, drooping a little, ending in a fork; behind the tail it thickens on to the trunk
+    const reach = Math.max(L * 0.5, 0.55), gap = Math.max(0.6, L * 0.4);
+    const rT = style === 'savanna' ? clamp(rB * 9, 0.055, 0.1) : style === 'tropic' ? clamp(rB * 12, 0.11, 0.2) : clamp(rB * 10, 0.075, 0.15);
     const pts = [];
-    for (let k = 6; k >= 1; k--) { const f = k / 6; pts.push(pt(0).addScaledVector(d0, reach * f).add(V((R() - 0.5) * 0.03 * f, -reach * 0.07 * f * f, (R() - 0.5) * 0.03 * f))); }
+    for (let k = 6; k >= 1; k--) { const f = k / 6; pts.push(pt(0).addScaledVector(d0, reach * f).add(V((R() - 0.5) * 0.03 * f, -reach * 0.08 * f * f, (R() - 0.5) * 0.03 * f))); }
     for (let k = 0; k <= 40; k++) pts.push(pt((k / 40) * L));
-    // behind the tail: on to the trunk, rising a little into it
-    const base = pt(L).addScaledVector(d1, gap + rT).setY(0), hJoin = h - rB - Math.min(0.12, h * 0.1);
-    const trunkTop = hJoin + 3.2, lean = V((R() - 0.5) * 0.1, 0, (R() - 0.5) * 0.1);
+    const base = pt(L).addScaledVector(d1, gap + rT).setY(0), hJoin = h - rB - Math.min(0.16, h * 0.14);
+    const trunkTop = hJoin + ST.top, lean = V((R() - 0.5) * 0.1, 0, (R() - 0.5) * 0.1);
     const trunkAt = (y) => { const f = clamp((y + 0.1) / (trunkTop + 0.1), 0, 1); return V(base.x + lean.x * f * trunkTop + Math.sin(f * 4 + seed) * rT * 0.4, y, base.z + lean.z * f * trunkTop + Math.cos(f * 3 + seed) * rT * 0.4); };
-    pts.push(pt(L).addScaledVector(d1, gap * 0.5).add(V(0, -(h - rB - hJoin) * 0.35, 0)), trunkAt(hJoin));
-    const total = new THREE.CatmullRomCurve3(pts).getLength(), uH = reach / total;
-    // thick by the trunk, the snake's part as thick as before (so it rests on it), tapering past the head to a thin tip
-    const mainC = tube(pts, (t) => rB * (t < uH ? lerp(0.32, 1, Math.pow(t / uH, 0.8)) : lerp(1, 1.7, sstep(1 - (gap * 1.5) / total, 1, t))) * (1 + 0.04 * Math.sin(t * 61)), 220, 12, 0.22, contact);
+    for (const f of [0.3, 0.6]) pts.push(pt(L).addScaledVector(d1, gap * f).add(V(0, -(h - rB - hJoin) * f * f * 0.8, 0)));
+    pts.push(trunkAt(hJoin));
+    const mc0 = new THREE.CatmullRomCurve3(pts, false, 'centripetal'), uH = nearestU(mc0, pts[6]), uT = nearestU(mc0, pts[46]);
+    // the radius along it: thin at the tip, the twig's own size under the snake, then growing (faster and faster) into the trunk
+    const rad = (t) => (t < uH ? rB * lerp(0.28, 1, Math.pow(t / uH, 0.8)) : t < uT ? rB : lerp(rB, rT * 0.5, Math.pow((t - uT) / (1 - uT), 1.7))) * (1 + 0.04 * Math.sin(t * 61));
+    const mainC = tube(pts, rad, 240, 12, 0.22, contact);
     const tipD = pts[0].clone().sub(pts[1]).normalize();
     for (const sg of [-1, 1]) limb(pts[0], tipD.clone().add(V(-tipD.z * sg * 0.7, 0.25, tipD.x * sg * 0.7)), reach * 0.35, rB * 0.3, 0);
-    for (let k = 0; k < 6; k++) { // side twigs past the head and near the trunk (none under or over the snake)
-      const t = clamp(k < 3 ? uH * (0.25 + k * 0.22) : 1 - (gap * (0.6 + (k - 3) * 0.5)) / total, 0, 1), c = mainC.getPointAt(t), T = mainC.getTangentAt(t), sd = V(-T.z, 0, T.x).multiplyScalar(R() < 0.5 ? 1 : -1);
+    makeCircuit(mainC, rad, uH, uH * 0.3);
+    for (let k = 0; k < 7; k++) { // side branches: thin twigs past the head, bigger leafy ones off the thick part near the trunk
+      const t = k < 3 ? uH * (0.25 + k * 0.22) : uT + (1 - uT) * (0.35 + (k - 3) * 0.16), c = mainC.getPointAt(t), T = mainC.getTangentAt(t), sd = V(-T.z, 0, T.x).multiplyScalar(R() < 0.5 ? 1 : -1);
       const nd = sd.addScaledVector(T, k < 3 ? -0.6 : 0.4).add(V(0, 0.35 + R() * 0.4, 0)).normalize();
       if (nearSnake(c.clone().addScaledVector(nd, 0.12), 0) < keepOff * 0.5) continue;
-      limb(c, nd, 0.18 + R() * 0.25, rB * 0.35, k < 3 ? 0 : 1);
+      limb(c, nd, k < 3 ? 0.16 + R() * 0.2 : 0.35 + R() * 0.3, rad(t) * (k < 3 ? 0.6 : 0.55), k < 3 ? 0 : 1);
     }
     trunkAndLimbs(base, hJoin, trunkTop, rT, trunkAt, d1.clone().negate());
     perch = { a: pt(0).setY(h + bY(0)), dir: d0.clone(), len: reach * 0.7, rB };
@@ -1196,31 +1233,38 @@ export function perchTree(THREE, opt) {
     const d = pose.drape; let A = V(d.a[0], d.hB, d.a[1]), B = V(d.b[0], d.hB, d.b[1]);
     { const az = Math.atan2(-(d.b[1] - d.a[1]), d.b[0] - d.a[0]) + 0.45, cd = V(Math.sin(az), 0, Math.cos(az)); if (B.clone().sub(A).dot(cd) > 0) { const t = A; A = B; B = t; } }
     const dir = B.clone().sub(A).normalize(), span = A.distanceTo(B), rB = d.rB;
-    const tipL = Math.max(span * 1.1, 0.9), gap = Math.max(span * 0.4, 0.3), rT = clamp(rB * 4.5, 0.09, 0.2);
-    const base = B.clone().addScaledVector(dir, gap + rT).setY(0), hJoin = d.hB - Math.min(0.12, d.hB * 0.12), trunkTop = hJoin + 3.2, lean = V((R() - 0.5) * 0.1, 0, (R() - 0.5) * 0.1);
+    const tipL = Math.max(span * 1.1, 0.9), gap = Math.max(span * 0.6, 0.45), rT = style === 'savanna' ? clamp(rB * 4, 0.08, 0.14) : clamp(rB * 5, 0.12, 0.22);
+    const base = B.clone().addScaledVector(dir, gap + rT).setY(0), hJoin = d.hB - Math.min(0.14, d.hB * 0.12), trunkTop = hJoin + ST.top, lean = V((R() - 0.5) * 0.1, 0, (R() - 0.5) * 0.1);
     const trunkAt = (y) => { const f = clamp((y + 0.1) / (trunkTop + 0.1), 0, 1); return V(base.x + lean.x * f * trunkTop + Math.sin(f * 4 + seed) * rT * 0.4, y, base.z + lean.z * f * trunkTop + Math.cos(f * 3 + seed) * rT * 0.4); };
     const J = trunkAt(hJoin), tipE = A.clone().addScaledVector(dir, -tipL).add(V(0, -tipL * 0.1, 0));
-    const pts = [tipE, A.clone().addScaledVector(dir, -tipL * 0.66).add(V(0, -tipL * 0.035, 0)), A.clone().addScaledVector(dir, -tipL * 0.3), A, B, B.clone().addScaledVector(dir, gap * 0.55).add(V(0, -(d.hB - hJoin) * 0.35, 0)), J];
-    const total = new THREE.CatmullRomCurve3(pts).getLength(), uTip = (tipL * 0.98) / total, uB = (tipL + span) / total;
-    const mainC = tube(pts, (t) => rB * (t < uTip ? lerp(0.3, 1, Math.pow(t / uTip, 0.8)) : t > uB ? lerp(1, 1.6, (t - uB) / (1 - uB)) : 1) * (1 + 0.03 * Math.sin(t * 53)), 220, 12, 0.22, contact);
+    const pts = [tipE, A.clone().addScaledVector(dir, -tipL * 0.66).add(V(0, -tipL * 0.035, 0)), A.clone().addScaledVector(dir, -tipL * 0.3), A, B, B.clone().addScaledVector(dir, gap * 0.4), B.clone().addScaledVector(dir, gap * 0.75).add(V(0, -(d.hB - hJoin) * 0.35, 0)), J];
+    const mc0 = new THREE.CatmullRomCurve3(pts, false, 'centripetal'), uTip = nearestU(mc0, A), uB = nearestU(mc0, B);
+    // full thickness under the coils (so they rest on it with no gap), a long taper to the tip, thickening gradually into the trunk
+    const rad = (t) => rB * (t < uTip ? lerp(0.25, 1, Math.pow(t / uTip, 0.8)) : t > uB ? lerp(1, (rT * 0.5) / rB, Math.pow((t - uB) / (1 - uB), 1.7)) : 1) * (1 + 0.03 * Math.sin(t * 53));
+    const mainC = tube(pts, rad, 240, 14, 0.22, contact);
     const tipD = pts[0].clone().sub(pts[1]).normalize();
     for (const sg of [-1, 1]) limb(pts[0], tipD.clone().add(V(-tipD.z * sg * 0.7, 0.25, tipD.x * sg * 0.7)), tipL * 0.3, rB * 0.3, 0);
+    // which way the head faces along the branch: the circuit leads on that way
+    const hv = spine(0).sub(spine(F.Hl * 1.5)), toTip = hv.dot(dir) < 0, total = mainC.getLength();
+    const uh = nearestU(mainC, spine(0)), uK = toTip ? Math.max(0.03, uTip * 0.3) : Math.min(0.97, uB + (gap * 0.8) / total);
+    makeCircuit(mainC, rad, uh, uK);
     for (let k = 0; k < 5; k++) {
       const t = k < 3 ? uTip * (0.2 + k * 0.25) : uB + (1 - uB) * (0.3 + (k - 3) * 0.35), c = mainC.getPointAt(t), T = mainC.getTangentAt(t), sd = V(-T.z, 0, T.x).multiplyScalar(k % 2 ? 1 : -1);
       const nd = sd.addScaledVector(T, -0.4).add(V(0, 0.4 + R() * 0.3, 0)).normalize(); if (nearSnake(c.clone().addScaledVector(nd, 0.12), 0) < keepOff * 0.5) continue;
-      limb(c, nd, 0.2 + R() * 0.25, rB * 0.35, k < 3 ? 0 : 1);
+      limb(c, nd, k < 3 ? 0.2 + R() * 0.25 : 0.4 + R() * 0.3, rad(t) * 0.55, k < 3 ? 0 : 1);
     }
     trunkAndLimbs(base, hJoin, trunkTop, rT, trunkAt, dir.clone().negate());
     perch = { a: A.clone().setY(d.hB + rB), dir: dir.clone().negate(), len: tipL * 0.6, rB };
   }
   // the leaves: instanced, each turned along its twig and tilted to the light; none near the snake
-  const keep = leaves.filter(([p]) => nearSnake(p, 0) > keepOff && p.distanceTo(headP) > keepOff * 2.2);
+  const nearRoute = (p) => { let m = 1e9; for (const q of routePts) m = Math.min(m, p.distanceTo(q)); return m; };
+  const keep = leaves.filter(([p]) => nearSnake(p, 0) > keepOff && p.distanceTo(headP) > keepOff * 2.2 && nearRoute(p) > keepOff * 0.55);
   if (keep.length) {
     const im = new THREE.InstancedMesh(leafG, leafMat, keep.length), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), c = new THREE.Color();
     keep.forEach(([p, d, s], i) => {
       const yaw = Math.atan2(d.x, d.z) + (i % 2 ? 1 : -1) * (0.7 + R() * 0.5);
-      q.setFromEuler(new THREE.Euler(0.35 + R() * 0.5, yaw, (R() - 0.5) * 0.6, 'YXZ')); sc.set(s * 0.8, s, s); m4.compose(p, q, sc); im.setMatrixAt(i, m4);
-      c.setHSL(0.24 + R() * 0.05, 0.45 + R() * 0.15, 0.42 + R() * 0.12); im.setColorAt(i, c);
+      q.setFromEuler(new THREE.Euler(0.35 + R() * 0.5, yaw, (R() - 0.5) * 0.6, 'YXZ')); sc.set(s * ST.narrow, s, s); m4.compose(p, q, sc); im.setMatrixAt(i, m4);
+      c.setHSL(lerp(ST.hue[0], ST.hue[1], R()), lerp(ST.sat[0], ST.sat[1], R()), lerp(ST.lit[0], ST.lit[1], R())); im.setColorAt(i, c);
     });
     im.castShadow = true; im.receiveShadow = true; g.add(im);
   } else { leafG.dispose(); leafMat.dispose(); ltex.dispose(); }
@@ -1231,7 +1275,7 @@ export function perchTree(THREE, opt) {
     const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.setIndex(new THREE.BufferAttribute(idx, 1)); geo.computeBoundingSphere();
     const m = new THREE.Mesh(geo, bark); m.castShadow = m.receiveShadow = true; g.add(m);
   }
-  g.userData.perch = perch;
+  g.userData.perch = perch; g.userData.circuit = circuit;
   return g;
 }
 

@@ -33,6 +33,9 @@ LABEL = {
     "sea": "Warm shallow sea", "shore": "Rocky shore",
 }
 SWAMP = {"cypress": "Cypress swamp", "reed": "Reed swamp", "tropic": "Flooded forest", "mangrove": "Mangroves"}
+# v6.02: kinds of woodland (the plain "forest" look is a northern broadleaf-and-spruce wood): open savanna woodland of
+# Africa (flat-topped acacia-like trees in dry grass) and Australia's eucalypt woodland
+WOOD = {"savanna": "Savanna woodland", "eucalypt": "Eucalypt woodland"}
 # which other habitats suit a snake whose main one is the key
 FITS = {
     "gibber": {"clay", "arid", "sand", "grass"},
@@ -112,6 +115,30 @@ CURATED = {
     # green anaconda: the flooded forests and swamps of the Amazon and the Llanos, and river banks
     "eunectes-murinus": [("swamp", "Amazon flooded forest", "tropic"), ("riverbank", "River bank", None)],
     "eunectes-notaeus": [("swamp", "Pantanal Wetlands", "reed"), ("riverbank", "River bank", None)],
+    # v6.02 (Eduardo: "for each snake to have its own habitat depending on where it lives"), checked against the species
+    # accounts and field guides:
+    # twig snakes: savanna woodland and bush of eastern and southern Africa (Kirtland's twig snake: the forests of the Congo basin)
+    "thelotornis-capensis": [("forest", "Savanna woodland", "savanna"), ("grass", "Savanna grassland", None)],
+    "thelotornis-mossambicanus": [("forest", "Savanna woodland", "savanna"), ("grass", "Savanna grassland", None)],
+    "thelotornis-usambaricus": [("forest", "Coastal bush and woodland", "savanna"), ("rainforest", "Coastal forest", None)],
+    "thelotornis-kirtlandii": [("rainforest", "Congo rainforest", None), ("forest", "Forest edge woodland", "savanna")],
+    # boomslang: savanna, bushveld and fynbos of sub-Saharan Africa
+    "dispholidus-typus": [("forest", "Savanna woodland (bushveld)", "savanna"), ("grass", "Savanna grassland", None), ("heath", "Fynbos and karoo scrub", None)],
+    # tree pythons and boas of the rainforest
+    "morelia-viridis": [("rainforest", "New Guinea rainforest", None)],
+    "corallus-caninus": [("rainforest", "Amazon rainforest", None)],
+    "corallus-batesii": [("rainforest", "Amazon rainforest", None)],
+    "tropidolaemus-wagleri": [("rainforest", "Rainforest", None), ("swamp", "Mangroves", "mangrove")],
+    "trimeresurus-albolabris": [("rainforest", "Tropical forest", None), ("forest", "Woodland", None)],
+    # African savanna snakes
+    "dendroaspis-polylepis": [("grass", "Savanna", None), ("forest", "Savanna woodland", "savanna"), ("arid", "Rocky hills", None)],
+    "dendroaspis-angusticeps": [("rainforest", "Coastal forest", None), ("forest", "Coastal bush", "savanna")],
+    "python-sebae": [("forest", "Savanna woodland", "savanna"), ("grass", "Savanna grassland", None), ("riverbank", "River bank", None)],
+    "naja-nigricollis": [("forest", "Savanna woodland", "savanna"), ("grass", "Savanna grassland", None)],
+    "naja-haje": [("grass", "Dry savanna", None), ("arid", "Semi-desert", None), ("forest", "Savanna woodland", "savanna")],
+    # big snakes of the Asian tropics: rainforest first
+    "malayopython-reticulatus": [("rainforest", "Rainforest", None), ("riverbank", "River bank", None), ("swamp", "Flooded forest", "tropic")],
+    "ophiophagus-hannah": [("rainforest", "Rainforest", None), ("forest", "Woodland", None), ("swamp", "Flooded forest", "tropic")],
 }
 KIND_SECTIONS = 11  # the first 11 sections of #habitat-data are kinds of habitat; the rest are named regions
 
@@ -139,7 +166,9 @@ def main():
         sc = mdl.get("scene")
         primary = sc.get("kind") if isinstance(sc, dict) else a.get("s") or "litter"
         plan = mdl.get("plan") or a.get("p") or "colubrid"
-        if sid in CURATED:
+        cs = set((countries.get(sid) or "").split("|"))
+        aus = cs == {"Australia"}
+        if sid in CURATED:  # (v6.02: a single hand-checked habitat is listed too: it sets the look, no Habitats button)
             out[sid] = [dict(k=k, l=l, **({"f": f} if f else {})) for k, l, f in CURATED[sid]]
             continue
         if plan == "blind" or primary == "soil":
@@ -163,9 +192,9 @@ def main():
             for k, rx in WORDS:
                 if re.search(rx, txt):
                     score[k] = score.get(k, 0) + 5
-        cs = set((countries.get(sid) or "").split("|"))
-        aus = cs == {"Australia"}
         flav.setdefault("swamp", "cypress" if "United States" in cs else "tropic")
+        if aus:
+            flav["forest"] = "eucalypt"  # (v6.02: Australia's woods are eucalypt woodland, not spruce and oak)
         if "clay" in score and not aus:
             del score["clay"]  # (cracking-clay floodplains are drawn as inland Australia's)
         if "gibber" in score and not aus:
@@ -174,9 +203,11 @@ def main():
         cands = sorted(((s, k) for k, s in score.items() if k != primary and k in fits), reverse=True)
         top = max(score.values()) if score else 0
         alts = [k for s, k in cands if s >= 4 and s >= top * 0.3][:2]
+        lab = lambda k: SWAMP.get(flav.get(k), "Swamp") if k == "swamp" else WOOD.get(flav.get(k), LABEL.get(k, k)) if k == "forest" else LABEL.get(k, k)
         if not alts:
+            if primary == "forest" and aus:  # (one habitat, but its own kind of woodland)
+                out[sid] = [dict(k=primary, l=lab(primary), f=flav[primary])]
             continue
-        lab = lambda k: SWAMP.get(flav.get(k), "Swamp") if k == "swamp" else LABEL.get(k, k)
         opts = [dict(k=primary, l=lab(primary), **({"f": flav[primary]} if primary in flav else {}))]
         for k in alts:
             opts.append(dict(k=k, l=lab(k), **({"f": flav[k]} if k in flav else {})))
@@ -187,6 +218,7 @@ def main():
     from collections import Counter
     print("%d snakes with a choice of habitats -> %s (%d bytes)" % (len(out), dst, os.path.getsize(dst)))
     print(Counter(len(v) for v in out.values()), Counter(o["k"] for v in out.values() for o in v[1:]).most_common())
+    print(Counter(o.get("f") for v in out.values() for o in v if o["k"] == "forest").most_common())
 
 
 if __name__ == "__main__":

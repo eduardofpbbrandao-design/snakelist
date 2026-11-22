@@ -939,12 +939,21 @@ export function create(V) {
       basis(nT, nU, nS, i, mA); basis(rT, rU, rS, i, mB); mB.transpose(); out.multiplyMatrices(mA, mB);
       tv.set(rc[i * 3], rc[i * 3 + 1], rc[i * 3 + 2]).applyMatrix4(out); out.setPosition(nc[i * 3] - tv.x, nc[i * 3 + 1] - tv.y, nc[i * 3 + 2] - tv.z); return out;
     }
-    const hM = new THREE.Matrix4(), tM = new THREE.Matrix4(), q3 = new THREE.Vector3();
+    const hM = new THREE.Matrix4(), tM = new THREE.Matrix4(), q3 = new THREE.Vector3(), fTol = Math.max(F.w0 * 1.5, L * 0.004);
     function frames() {
       for (let i = ih - 1; i < N; i++) {
         const a = Math.max(0, i - 1), b = Math.min(N - 1, i + 1);
         let Tx = nc[b * 3] - nc[a * 3], Ty = nc[b * 3 + 1] - nc[a * 3 + 1], Tz = nc[b * 3 + 2] - nc[a * 3 + 2]; const l = Math.hypot(Tx, Ty, Tz) || 1; Tx /= l; Ty /= l; Tz /= l;
-        let Ux = -Tx * Ty, Uy = 1 - Ty * Ty, Uz = -Tz * Ty; const lu = Math.hypot(Ux, Uy, Uz) || 1; Ux /= lu; Uy /= lu; Uz /= lu;
+        let Ux = -Tx * Ty, Uy = 1 - Ty * Ty, Uz = -Tz * Ty; let lu = Math.hypot(Ux, Uy, Uz) || 1; Ux /= lu; Uy /= lu; Uz /= lu;
+        // v6.02: where the body is (nearly) back in its resting place it takes its resting frame again, so leaving and
+        // coming back to the rest pose never makes the body twist or jump (a draped python's loops are rolled round the branch)
+        const dd = Math.hypot(nc[i * 3] - rc[i * 3], nc[i * 3 + 1] - rc[i * 3 + 1], nc[i * 3 + 2] - rc[i * 3 + 2]);
+        if (dd < fTol) {
+          const w = 1 - sstep(0, fTol, dd);
+          Tx = lerp(Tx, rT[i * 3], w); Ty = lerp(Ty, rT[i * 3 + 1], w); Tz = lerp(Tz, rT[i * 3 + 2], w); const lt = Math.hypot(Tx, Ty, Tz) || 1; Tx /= lt; Ty /= lt; Tz /= lt;
+          Ux = lerp(Ux, rU[i * 3], w); Uy = lerp(Uy, rU[i * 3 + 1], w); Uz = lerp(Uz, rU[i * 3 + 2], w); const dt = Ux * Tx + Uy * Ty + Uz * Tz; Ux -= Tx * dt; Uy -= Ty * dt; Uz -= Tz * dt;
+          lu = Math.hypot(Ux, Uy, Uz) || 1; Ux /= lu; Uy /= lu; Uz /= lu;
+        }
         nT[i * 3] = Tx; nT[i * 3 + 1] = Ty; nT[i * 3 + 2] = Tz; nU[i * 3] = Ux; nU[i * 3 + 1] = Uy; nU[i * 3 + 2] = Uz;
         nS[i * 3] = Ty * Uz - Tz * Uy; nS[i * 3 + 1] = Tz * Ux - Tx * Uz; nS[i * 3 + 2] = Tx * Uy - Ty * Ux;
       }
@@ -1062,7 +1071,7 @@ export function create(V) {
     }
     function point(x, s = 0, u = 0) { const f = frameAtX(x); return f.c.addScaledVector(f.S, s).addScaledVector(f.U, u); }
     function sync() { if (active && mo && mver() !== lastT) apply(); } // the mouth opened or shut while the body is posed
-    return { N, dx, ih, L, rc, rth, rh, restY, bul, s3, S3, REST, baseOf, ang3, blend3, perchY, headRig, tailRig, addSkin, apply, release, sync, integrate, fore, headMatrixFor, setPose, blend, frameAtX, point, get active() { return active; }, rest: () => rc.slice() };
+    return { N, dx, ih, L, rc, rU, rth, cur: () => nc.slice(), rh, restY, bul, s3, S3, REST, baseOf, ang3, blend3, perchY, headRig, tailRig, addSkin, apply, release, sync, integrate, fore, headMatrixFor, setPose, blend, frameAtX, point, get active() { return active; }, rest: () => rc.slice() };
   }
   function ensureRig() { if (!rig && V.info && V.group) rig = makeRig(); return rig; }
 
@@ -1575,88 +1584,206 @@ export function create(V) {
   }
 
   // ---------------------------------------------------------------- Slither (loops until pressed again)
-  // v5.05: Slither starts from the coil: the body uncoils smoothly into the first wave of its track (turning angles
-  // blended, so it never shrinks or stretches), then slithers along it - every part of the body following the path of
-  // the head (lateral undulation), round a long oval with the waves drawn into it, so it stays in view. Pressing Stop
-  // coils it back up where it started.
-  function startSlither() {
-    idleStop(); if (show) stopShow(); if (anat && anat.on) anat.set(false, true); ensureRig(); if (!rig) return;
-    const R = rig, info = V.info, F = info.F, L = F.L, N = R.N, Hl = F.Hl;
-    const stout = !!(P.body && P.body.ld && P.body.ld < 11.5); // only the heaviest (Gaboon viper, puff adders) creep in a straight line
-    const Pm = Math.max(L * 2.35, info.Rb * 4.2), eb = Pm / 9.69, ea = eb * 2, waves = Math.max(3, Math.round(Pm / (L / 1.6))), A = stout ? 0 : Math.min(L * 0.085, eb * 0.4);
-    const az = V.controls.st.az, rx = Math.cos(az), rz = -Math.sin(az), fx0 = Math.sin(az), fz0 = Math.cos(az);
-    const cx = info.center.x, cz = info.center.z, M = 4000, pts = [], cum = [0];
-    for (let k = 0; k <= M; k++) { const a = (k / M) * TAU, w = A * Math.sin(a * waves), u = (ea + w) * Math.cos(a), v = (eb + w) * Math.sin(a); pts.push([cx + rx * u + fx0 * v, cz + rz * u + fz0 * v]); if (k) cum.push(cum[k - 1] + Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1])); }
-    // the ground under the track (it has ripples and lumps): the body rides on it, never through it
-    const gStep = 25, gIdx = []; for (let k = 0; k <= M; k += gStep) gIdx.push(k);
-    const gy = groundYAt(gIdx.map((k) => pts[k]));
-    const need = Math.max((ea + A + F.w0 * 2) * 1.12 / Math.tan(info.hf), (eb + A + F.w0 * 2) * 1.5 / Math.tan(info.vf)) + info.hMax;
-    fx.zoomOut = Math.max(1, need * 1.08 / info.dMax);
-    V.controls.setGoal({ el: 0.8, d: need, px: 0, pz: 0 }, true); // v5.50: the camera is there at once - no flying round before it slithers
-    const tot = cum[M], at = (s) => { s = ((s % tot) + tot) % tot; let lo = 0, hi = M; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (cum[m] < s) lo = m; else hi = m; } const w = (s - cum[lo]) / Math.max(1e-9, cum[hi] - cum[lo]), kf = (lo + w) / gStep, g0 = Math.min(gy.length - 1, kf | 0), g1 = Math.min(gy.length - 1, g0 + 1); return [lerp(pts[lo][0], pts[hi][0], w), lerp(pts[lo][1], pts[hi][1], w), lerp(gy[g0], gy[g1], kf - g0)]; };
-    // start where the track passes closest to the head
-    const hx = R.rc[0], hz = R.rc[2]; let s0 = 0, bd = 1e18; for (let k = 0; k < M; k += 4) { const d = (pts[k][0] - hx) ** 2 + (pts[k][1] - hz) ** 2; if (d < bd) { bd = d; s0 = cum[k]; } }
-    const ys = new Float32Array(N); for (let i = 0; i < N; i++) { const x = i * R.dx, b = F.Hh(x) * F.bf; ys[i] = b + clamp(R.restY[i] - b, 0, F.Hh(Hl * 0.6) * 0.9) * (1 - sstep(Hl * 1.5, Hl * 4, x)); }
-    const speed = (stout ? 0.07 : 0.22) * L * (reduceK());
-    const trackPose = (sh) => { const out = new Float32Array(N * 3); for (let i = 0; i < N; i++) { const p = at(sh - i * R.dx); out[i * 3] = p[0]; out[i * 3 + 1] = ys[i] + p[2]; out[i * 3 + 2] = p[1]; } return out; };
-    // turning angles and step lengths along a pose (to blend two poses without the body changing length)
-    const angles = (pose) => { const th = new Float32Array(N), h = new Float32Array(N); for (let i = 0; i < N - 1; i++) { const ax = pose[i * 3 + 3] - pose[i * 3], az2 = pose[i * 3 + 5] - pose[i * 3 + 2]; th[i] = Math.atan2(az2, ax); h[i] = Math.hypot(ax, az2); } th[N - 1] = th[N - 2]; h[N - 1] = h[N - 2]; for (let i = 1; i < N; i++) th[i] = th[i - 1] + angDiff(th[i - 1], th[i]); return { th, h }; };
-    const restA = { th: R.rth, h: R.rh };
-    const between = (A0, A1, P0, P1, e, a) => { // pose between P0 (angles A0) and P1 (angles A1), anchored at sample a
-      let off = 0; { let sm = 0; for (let i = 0; i < N; i++) sm += A0.th[i] - A1.th[i]; off = Math.round(sm / N / TAU) * TAU; }
-      const out = new Float32Array(N * 3); out[a * 3] = lerp(P0[a * 3], P1[a * 3], e); out[a * 3 + 2] = lerp(P0[a * 3 + 2], P1[a * 3 + 2], e);
-      const th = (i) => lerp(A0.th[i], A1.th[i] + off, e), h = (i) => lerp(A0.h[i], A1.h[i], e);
-      for (let i = a + 1; i < N; i++) { out[i * 3] = out[i * 3 - 3] + Math.cos(th(i - 1)) * h(i - 1); out[i * 3 + 2] = out[i * 3 - 1] + Math.sin(th(i - 1)) * h(i - 1); }
-      for (let i = a - 1; i >= 0; i--) { out[i * 3] = out[i * 3 + 3] - Math.cos(th(i)) * h(i); out[i * 3 + 2] = out[i * 3 + 5] - Math.sin(th(i)) * h(i); }
-      for (let i = 0; i < N; i++) out[i * 3 + 1] = lerp(P0[i * 3 + 1], P1[i * 3 + 1], e);
-      return out;
+  // v6.02 (Eduardo: "when you click slither it should start slithering from where it is not spawn in somewhere else and
+  // when going back it should slither back to where it was"): the snake follows a trail. The trail starts as the line its
+  // body lies along at rest (tail to head), so the first frame is exactly the resting snake; then the head leads off from
+  // where it lies and every part of the body follows the path of the head (lateral undulation: the waves are in the
+  // path). On the ground it heads out onto a long oval round its resting place (so it stays in view); up in a tree it
+  // crawls along its branch and round a side twig that leads back (it never leaves the wood); at sea it swims. Pressed
+  // again (or Reset, or another button), it slithers back: it leaves the track where the way home is smoothest, comes
+  // up to where its tail lay, heading the way its tail pointed, and crawls on along its own resting line, so it settles
+  // into exactly its resting pose - no jump, no snap.
+  function slitherTrail() {
+    const S = [], X = [], Y = [], Z = [], UX = [], UY = [], UZ = [], all = [S, X, Y, Z, UX, UY, UZ];
+    let lo = 0;
+    const tr = {
+      push(s, x, y, z, ux = 0, uy = 1, uz = 0) { S.push(s); X.push(x); Y.push(y); Z.push(z); UX.push(ux); UY.push(uy); UZ.push(uz); },
+      add(x, y, z) { const n = S.length - 1, d = Math.hypot(x - X[n], y - Y[n], z - Z[n]); if (d > 1e-7) tr.push(S[n] + d, x, y, z); },
+      get end() { return S[S.length - 1]; },
+      idx(s) { let a = lo, b = S.length - 1; if (s <= S[a]) return a; if (s >= S[b]) return Math.max(lo, b - 1); while (b - a > 1) { const m = (a + b) >> 1; if (S[m] <= s) a = m; else b = m; } return a; },
+      at(s, o) {
+        const i = tr.idx(s), j = Math.min(S.length - 1, i + 1), w = j > i ? clamp((s - S[i]) / Math.max(1e-12, S[j] - S[i]), 0, 1) : 0;
+        o[0] = lerp(X[i], X[j], w); o[1] = lerp(Y[i], Y[j], w); o[2] = lerp(Z[i], Z[j], w); o[3] = lerp(UX[i], UX[j], w); o[4] = lerp(UY[i], UY[j], w); o[5] = lerp(UZ[i], UZ[j], w);
+        return o;
+      },
+      dir(s, h, flat) { const a = tr.at(s, [0, 0, 0, 0, 0, 0]), b = tr.at(s - h, [0, 0, 0, 0, 0, 0]), d = V3(a[0] - b[0], flat ? 0 : a[1] - b[1], a[2] - b[2]); return d.lengthSq() > 1e-14 ? d.normalize() : V3(1, 0, 0); },
+      trim(s) { while (lo < S.length - 2 && S[lo + 1] < s) lo++; if (lo > 6000) { for (const a of all) a.splice(0, lo); lo = 0; } },
+      cut(s) { const o = tr.at(s, [0, 0, 0, 0, 0, 0]), i = tr.idx(s); for (const a of all) a.length = i + 1; if (s - S[i] > 1e-9) tr.push(s, ...o); },
     };
-    const rest = R.rest(), first = trackPose(s0), firstA = angles(first);
-    const undo = clearProps(gIdx.filter((_, j) => j % 2 === 0).map((k) => pts[k]).concat([[cx, cz]]), F.w0 * 2.5 + A * 0.2);
-    const T0 = 0; // v5.50: it slithers from the very first frame (Eduardo: no moving around first, then slithering)
-    slither = { t0: now(), stout, T0, s0, speed, rest, restA, first, firstA, trackPose, angles, between, stopping: 0, undo };
+    return tr;
+  }
+  const hermite = (p0, t0, p1, t1, n) => { const out = []; for (let k = 0; k <= n; k++) { const t = k / n, h00 = 2 * t * t * t - 3 * t * t + 1, h10 = t * t * t - 2 * t * t + t, h01 = -2 * t * t * t + 3 * t * t, h11 = t * t * t - t * t; out.push(p0.clone().multiplyScalar(h00).addScaledVector(t0, h10).addScaledVector(p1, h01).addScaledVector(t1, h11)); } return out; };
+  const polyLen = (pts) => { let s = 0; for (let k = 1; k < pts.length; k++) s += pts[k].distanceTo(pts[k - 1]); return s; };
+  const angBetween = (a, b) => Math.acos(clamp(a.dot(b) / Math.max(1e-12, a.length() * b.length()), -1, 1));
+  function startSlither() {
+    const p0 = rig && rig.active && !show && !(anat && anat.on) ? rig.cur() : null; // (whatever it was doing - a turn of the head - it eases out of)
+    idleStop(); if (show) stopShow(); if (anat && anat.on) anat.set(false, true); ensureRig(); if (!rig) return;
+    const R = rig, info = V.info, F = info.F, L = F.L, N = R.N, Hl = F.Hl, dx = R.dx, S3 = R.S3, Lr = S3[N - 1];
+    const stout = !!(P.body && P.body.ld && P.body.ld < 11.5); // only the heaviest (Gaboon viper, puff adders) creep in a straight line
+    const circ = info.tree && info.tree.userData.circuit, sea = !!(P.scene && P.scene.kind === 'sea');
+    // how far the centre line is above what the belly rests on, and the head held up a little as it goes
+    const off = new Float32Array(N), lift = new Float32Array(N);
+    for (let i = 0; i < N; i++) { const x = i * dx; off[i] = F.Hh(x) * F.bf; lift[i] = circ ? 0 : F.Hh(Hl * 0.6) * 0.55 * (1 - sstep(Hl * 1.5, Hl * 4, x)); }
+    // the resting line (what the belly lies on), tail to head, at the body's own spacing: the trail starts as this
+    const rf = new Float32Array(N * 3); for (let i = 0; i < N; i++) for (let c = 0; c < 3; c++) rf[i * 3 + c] = R.rc[i * 3 + c] - R.rU[i * 3 + c] * off[i];
+    const tr = slitherTrail();
+    for (let i = N - 1; i >= 0; i--) tr.push(Lr - S3[i], rf[i * 3], rf[i * 3 + 1], rf[i * 3 + 2], R.rU[i * 3], R.rU[i * 3 + 1], R.rU[i * 3 + 2]);
+    const H = V3(rf[0], rf[1], rf[2]), kh = Math.min(N - 1, Math.round(R.ih * 1.5)), hd = V3(R.rc[0] - R.rc[kh * 3], circ ? R.rc[1] - R.rc[kh * 3 + 1] : 0, R.rc[2] - R.rc[kh * 3 + 2]).normalize();
+    const wMesh = V.scene.children.find((o) => o.isMesh && o.renderOrder === 2 && o.material && o.material.transparent), wY = wMesh ? wMesh.position.y : null;
+    const floorAt = (list) => groundYAt(list).map((y) => (wY != null ? Math.max(y, wY) : y)); // (in water it swims at the surface)
+    const S = { tr, off, lift, rf, circ, stout, sea, wY, span: 0, h: Lr, h0: Lr, vel: 0, v: (stout ? 0.07 : 0.22) * L * reduceK(), ret: false, t0: now(), tl: now(), pose: new Float32Array(N * 3), o: [0, 0, 0, 0, 0, 0] };
+    S.vr = S.v * 2; S.amp = stout || circ ? 0 : L * (sea ? 0.08 : 0.065); S.lam = L * (sea ? 0.6 : 0.52); S.bArc = 0; S.bPrev = null;
+    let span = 0; const cpts = [];
+    if (circ) {
+      // up in its tree: from its head onto the branch just ahead and on along the top of it towards the tip, as far as the
+      // branch will carry it; then it backs along the same branch into exactly the place it came from (a snake on a branch
+      // has no room to turn round) - and out again, until Slither is pressed again. It never leaves the wood.
+      const line = circ.line.map((p) => V3(p[0], p[1], p[2]));
+      let e = 0, bd = 1e9; const want = H.clone().addScaledVector(hd, Math.max(L * 0.08, Hl * 2));
+      for (let k = 0; k < line.length; k++) { const d = line[k].distanceTo(want); if (d < bd) { bd = d; e = k; } }
+      e = Math.min(line.length - 2, e);
+      const ld = line[e + 1].clone().sub(line[e]).normalize(), dist = H.distanceTo(line[e]), m = Math.max(dist, L * 0.04) * 1.1;
+      const lead = hermite(H, hd.clone().multiplyScalar(m), line[e], ld.multiplyScalar(m), Math.max(6, Math.ceil(dist / (L / 400))));
+      S.leadLen = polyLen(lead);
+      S.gen = (function* () { for (let k = 1; k < lead.length; k++) yield [lead[k].x, lead[k].y, lead[k].z, 0, 0]; for (let k = e + 1; k < line.length; k++) yield [line[k].x, line[k].y, line[k].z, 0, 0]; })();
+      slFeed(S, 1e18, 100000); S.hK = tr.end - L * 0.01; S.ph = 'out'; S.wait = 0; // (the whole way along the branch, from the start)
+      for (const p of line) cpts.push(p);
+    } else {
+      // on the ground (or in water): a long oval round its resting place, turned to face the camera
+      const Pm = Math.max(L * 2.35, info.Rb * 4.2), eb = Pm / 9.69, ea = eb * 2;
+      const az = V.controls.st.az, rx = Math.cos(az), rz = -Math.sin(az), fx0 = Math.sin(az), fz0 = Math.cos(az), cx = info.center.x, cz = info.center.z, M = 1200;
+      const ov = []; for (let k = 0; k < M; k++) { const a = (k / M) * TAU, u = ea * Math.cos(a), v = eb * Math.sin(a); ov.push([cx + rx * u + fx0 * v, cz + rz * u + fz0 * v]); }
+      const gy = floorAt(ov.filter((_, k) => k % 3 === 0)), track = ov.map((p, k) => { const g = k / 3, g0 = Math.floor(g) % gy.length, g1 = (g0 + 1) % gy.length; return V3(p[0], lerp(gy[g0], gy[g1], g - Math.floor(g)), p[1]); });
+      // where to join it: ahead of the head, the way it is facing, turning as little as possible
+      let best = null;
+      for (let k = 0; k < M; k += 6) for (const sg of [1, -1]) {
+        const E = track[k], tE = track[(k + sg + M) % M].clone().sub(E).setY(0).normalize(), dE = E.clone().sub(H).setY(0), dist = dE.length(); if (dist < L * 0.12) continue;
+        const cost = dist / L * 0.5 + angBetween(hd, dE) * 0.9 + angBetween(dE, tE) * 0.7; if (!best || cost < best.cost) best = { cost, k, sg, dist, tE };
+      }
+      const { k: kE, sg, dist, tE } = best, m = Math.max(dist, L * 0.35) * 1.1;
+      const lead = hermite(H, hd.clone().multiplyScalar(m), track[kE], tE.clone().multiplyScalar(m), Math.max(12, Math.ceil(dist * 1.6 / (L / 300))));
+      const lg = floorAt(lead.map((p) => [p.x, p.z])), nl = lead.length - 1;
+      lead.forEach((p, k) => { p.y = lerp(H.y, lg[k], sstep(0, 0.45, k / nl)); });
+      S.leadLen = polyLen(lead); S.lap = polyLen(track.concat([track[0]])); span = Math.max(ea, eb);
+      S.gen = (function* () { for (let k = 1; k <= nl; k++) yield [lead[k].x, lead[k].y, lead[k].z, sstep(0.05, 0.7, k / nl), 0]; for (let k = kE + sg; ; k += sg) { const q = track[((k % M) + M) % M]; yield [q.x, q.y, q.z, 1, 0]; } })();
+      const pts = ov.filter((_, k) => k % 6 === 0).concat(lead.filter((_, k) => k % 3 === 0).map((p) => [p.x, p.z]));
+      S.undo = clearProps(pts, F.w0 * 2.5 + S.amp * 1.2);
+    }
+    // the camera: far enough back to see the whole snake stretched out, gliding along after it as it goes (stepSlither),
+    // and afterwards back to the view you had
+    { const st = V.controls.st, g = st.goal || st; S.cam0 = { az: g.az, el: g.el, d: g.d, px: g.px, pz: g.pz };
+      if (circ) { const c = info.center; for (const p of cpts) span = Math.max(span, Math.hypot(p.x - c.x, p.z - c.z)); }
+      fx.reach = span + F.w0 * 4; // (the camera may follow it that far)
+      const need = (L * 0.36 + F.w0 * 4) / Math.tan(Math.min(info.hf, info.vf)) + info.hMax;
+      if (need > g.d && !circ) { fx.zoomOut = Math.max(1, need * 1.05 / info.dMax); V.controls.setGoal({ el: Math.max(g.el, 0.62), d: need }); } } // (up in a tree it only goes a little way: the camera stays as it is, following it)
+    S.p0 = p0; S.t0 = S.tl = now(); // (the clock starts once the way is worked out: it starts off from exactly where it lies)
+    slither = S;
     bSlither.setAttribute('aria-pressed', 'true'); bSlither.textContent = 'Stop slithering';
-    tip.hidden = false; tip.textContent = stout ? 'Heavy snakes often creep in a straight line ("caterpillar" crawling): belly scales grip and push in waves.' : 'It slithers: waves run down the body and push against the ground, so every part follows the path of the head (lateral undulation).';
+    tip.hidden = false; tip.textContent = circ ? 'Tree snakes crawl along branches, gripping with their belly scales and bridging the gaps between twigs.' : sea ? 'Sea snakes swim by sending waves down the body; the flat, paddle-shaped tail pushes against the water.' : stout ? 'Heavy snakes often creep in a straight line ("caterpillar" crawling): belly scales grip and push in waves.' : 'It slithers: waves run down the body and push against the ground, so every part follows the path of the head (lateral undulation).';
     V.kick();
   }
   const reduceK = () => (V.reduce() ? 0.5 : 1);
-  function steadyHead(pose, R) {
+  function steadyHead(pose, R, w = 1) {
     const N = R.N, k0 = Math.min(N - 2, Math.round(R.ih * 2.6)), m = Math.min(N - 1 - k0, Math.round(N * 0.12));
     let ax = pose[k0 * 3] - pose[(k0 + m) * 3], az = pose[k0 * 3 + 2] - pose[(k0 + m) * 3 + 2]; const l = Math.hypot(ax, az) || 1; ax /= l; az /= l;
     for (let i = k0 - 1; i >= 0; i--) {
-      const w = 0.55 * (1 - i / k0), dx0 = pose[i * 3] - pose[i * 3 + 3], dz0 = pose[i * 3 + 2] - pose[i * 3 + 5], h = Math.hypot(dx0, dz0) || 1e-9;
-      let dx = lerp(dx0 / h, ax, w), dz = lerp(dz0 / h, az, w); const l2 = Math.hypot(dx, dz) || 1; dx /= l2; dz /= l2;
+      const wi = 0.55 * w * (1 - i / k0), dx0 = pose[i * 3] - pose[i * 3 + 3], dz0 = pose[i * 3 + 2] - pose[i * 3 + 5], h = Math.hypot(dx0, dz0) || 1e-9;
+      let dx = lerp(dx0 / h, ax, wi), dz = lerp(dz0 / h, az, wi); const l2 = Math.hypot(dx, dz) || 1; dx /= l2; dz /= l2;
       pose[i * 3] = pose[i * 3 + 3] + dx * h; pose[i * 3 + 2] = pose[i * 3 + 5] + dz * h;
     }
     return pose;
   }
-  function stepSlither() {
-    const S = slither, R = rig, t = (now() - S.t0) / 1000, N = R.N;
-    let pose;
-    if (S.stopping) { // coil back up where it started
-      const k = ease((now() - S.stopping) / 1800); pose = S.between(S.stopA, S.restA, S.stopPose, S.rest, k, N >> 1);
-      if (k >= 1) { slither = null; flick(0); R.release(); tip.hidden = true; unzoom(); if (S.undo) S.undo(); return false; }
-    } else { // v5.12: it slithers off at once - the head leads along the track from the first moment, the body unwinding behind it
-      // v5.73: each wave gives a gentle surge (the speed rises and falls a little), and the head is held steadier
-      // than the body: it keeps closer to the mean direction of travel instead of swinging with every wave
-      const sp = S.speed * t + (S.stout ? 0 : S.speed * 0.07 * Math.sin(t * 2.3) / 2.3);
-      const tp = steadyHead(S.trackPose(S.s0 + sp), R);
-      pose = t < S.T0 ? S.between(S.restA, S.angles(tp), S.rest, tp, ease(t / S.T0), 0) : tp;
+  function slFeed(S, upTo, maxN = 6000) { // add the path ahead (base points [x, y, z, waves 0..1]) until the trail reaches upTo
+    let n = 0;
+    while (S.gen && S.tr.end < upTo && n++ < maxN) {
+      const r = S.gen.next(); if (r.done) { S.gen = null; break; }
+      const p = r.value; let tx = 1, tz = 0;
+      if (S.bPrev) { const d = Math.hypot(p[0] - S.bPrev[0], p[2] - S.bPrev[2]); if (d < 1e-7) continue; S.bArc += d; tx = (p[0] - S.bPrev[0]) / d; tz = (p[2] - S.bPrev[2]) / d; }
+      S.bPrev = p; const o = S.amp * p[3] * Math.sin((TAU * S.bArc) / S.lam);
+      S.tr.add(p[0] - tz * o, p[1], p[2] + tx * o);
     }
-    S.lastPose = pose;
-    { const ph = S.stopping || V.reduce() ? 1 : ((t + 0.8) % 2.8) / 0.9; flick(ph < 1 ? ph : 0); } // v5.53: it flicks its tongue now and then as it goes
-    if (S.stout) { for (let i = 0; i < N; i++) R.bul[i] = 1 + 0.03 * Math.sin(TAU * (i * R.dx / (R.L * 0.1) - t * 1.4)) * sstep(R.ih, R.ih + 30, i); }
+  }
+  // the way home (on the ground or in water): from the track, where the way is smoothest, to where its tail lay, then along its resting line
+  function slitherHomeRoute(S) {
+    const R = rig, F = V.info.F, L = F.L, N = R.N, S3 = R.S3, Lr = S3[N - 1], tr = S.tr, rf = S.rf;
+    const Pt = V3(rf[(N - 1) * 3], rf[(N - 1) * 3 + 1], rf[(N - 1) * 3 + 2]), j = Math.max(0, N - 1 - Math.round(N * 0.04));
+    const tt = V3(rf[j * 3] - Pt.x, 0, rf[j * 3 + 2] - Pt.z).normalize(); // (the way its tail pointed)
+    slFeed(S, S.h + S.lap * 1.05 + L, 40000);
+    let best = null;
+    for (let s = S.h + L * 0.08; s < S.h + S.lap; s += L * 0.025) {
+      const q = tr.at(s, [0, 0, 0, 0, 0, 0]), Q = V3(q[0], 0, q[2]), tq = tr.dir(s, L * 0.02, true), dv = V3(Pt.x - Q.x, 0, Pt.z - Q.z), dist = dv.length();
+      if (s + dist * 1.15 < S.h0 + Lr + S.leadLen * 0.6) continue; // (its own tail must have left the resting place first)
+      const cost = angBetween(tq, dv) * 0.9 + angBetween(dv, tt) * 0.9 + (s - S.h) / L * 0.55 + Math.max(0, L * 0.35 - dist) / L * 4; // (the sooner the better)
+      if (!best || cost < best.cost) best = { cost, s };
+    }
+    const sQ = best ? best.s : S.h + L * 0.1;
+    tr.cut(sQ); S.gen = null;
+    const q = tr.at(sQ, [0, 0, 0, 0, 0, 0]), Q = V3(q[0], q[1], q[2]), tq = tr.dir(sQ, L * 0.01, true), dist = Q.distanceTo(Pt), m = Math.max(dist, L * 0.3) * 1.05;
+    const con = hermite(Q, tq.clone().multiplyScalar(m), Pt, tt.clone().multiplyScalar(m), Math.max(10, Math.ceil(dist * 1.5 / (L / 300)))), nc = con.length - 1;
+    { const g = groundYAt(con.map((p) => [p.x, p.z])); con.forEach((p, k) => { const gk = S.wY != null ? Math.max(g[k], S.wY) : g[k]; p.y = lerp(lerp(Q.y, gk, sstep(0, 0.25, k / nc)), Pt.y, sstep(0.7, 1, k / nc)); }); }
+    S.bPrev = null; S.bArc = 0;
+    S.gen = (function* () { for (let k = 1; k <= nc; k++) yield [con[k].x, con[k].y, con[k].z, sstep(0, 0.3, k / nc) * (1 - sstep(0.6, 0.92, k / nc)), 0]; })();
+    slFeed(S, 1e18, 100000);
+    { const u = clearProps(con.filter((_, k) => k % 3 === 0).map((p) => [p.x, p.z]), F.w0 * 2.5 + S.amp * 1.2), u0 = S.undo; S.undo = () => { u(); if (u0) u0(); }; }
+    // its resting line again, at exactly its own spacing: arriving, it lies exactly as it lay
+    const Se = tr.end; for (let i = N - 2; i >= 0; i--) tr.push(Se + (Lr - S3[i]), rf[i * 3], rf[i * 3 + 1], rf[i * 3 + 2], R.rU[i * 3], R.rU[i * 3 + 1], R.rU[i * 3 + 2]);
+    S.target = Se + Lr; S.ret = true; S.retT = now();
+  }
+  function stepSlither() {
+    const S = slither, R = rig, N = R.N, L = R.L, S3 = R.S3, tn = now(), t = (tn - S.t0) / 1000, dt = clamp((tn - S.tl) / 1000, 0, 0.5); S.tl = tn; // (a long hitch moves it on along its path, never off it)
+    if (S.circ) { // along the branch and back again (eased at both ends), a pause with a flick of the tongue at the far end
+      if (S.ph === 'wait') { S.wait -= dt; S.vel = 0; if (S.wait <= 0) S.ph = S.ret ? 'back' : S.h > S.h0 + 1e-6 ? 'back' : 'out'; }
+      else {
+        const goal = S.ph === 'out' ? S.hK : S.h0, rem = Math.abs(goal - S.h), vmax = S.ret ? S.vr : S.v, dec = (vmax * vmax) / (2 * Math.max(L * 0.15, Math.min(L * 0.3, Math.abs(S.hK - S.h0) * 0.3)));
+        S.vel = Math.min(S.vel + vmax * dt / 0.6, vmax, Math.sqrt(2 * dec * rem) + vmax * 0.04);
+        const stepH = Math.min(rem, S.vel * dt); S.h += S.ph === 'out' ? stepH : -stepH;
+        if (rem - stepH < 1e-7) { S.h = goal; S.vel = 0; if (S.ph === 'back' && S.ret) { S.h = S.h0; } else { S.wait = S.ret ? 0.25 : S.ph === 'out' ? 1.0 : 0.6; S.ph = 'wait'; } }
+      }
+    } else if (S.ret) {
+      const rem = S.target - S.h, dec = (S.vr * S.vr) / (2 * L * 0.32);
+      S.vel = Math.min(S.vel + S.vr * dt / 0.6, S.vr, Math.sqrt(2 * dec * Math.max(0, rem)) + S.vr * 0.04);
+      S.h = Math.min(S.target, S.h + S.vel * dt);
+    } else {
+      const vT = S.v * (S.stout ? 1 : 1 + 0.12 * Math.sin(t * 2.3)); // (each wave gives a gentle surge)
+      S.vel = Math.min(vT, S.vel + S.v * dt / 0.8); S.h += S.vel * dt; slFeed(S, S.h + L * 0.6);
+    }
+    if (!S.circ) S.tr.trim(S.h - S3[N - 1] - L * 0.05); // (up in a tree it backs along the same trail: all of it is kept)
+    // the head held up a little and steadier than the body while it travels - none at all as it leaves and arrives
+    const kW = S.circ ? sstep(0, L * 0.2, S.h - S.h0) : Math.min(sstep(0, L * 0.3, S.h - S.h0), S.ret ? sstep(0, L * 0.4, S.target - S.h) : 1);
+    const pose = S.pose, o = S.o;
+    for (let j = 0; j < N; j++) { S.tr.at(S.h - S3[j], o); const k = S.off[j] + S.lift[j] * kW; pose[j * 3] = o[0] + o[3] * k; pose[j * 3 + 1] = o[1] + o[4] * k; pose[j * 3 + 2] = o[2] + o[5] * k; }
+    if (kW > 0 && !S.circ) steadyHead(pose, R, kW);
+    if (S.p0) { const e = ease(t / 0.6); if (e >= 1) S.p0 = null; else for (let i = 0; i < pose.length; i++) pose[i] = lerp(S.p0[i], pose[i], e); }
+    { // the camera glides along after the middle of the body (until you move it yourself)
+      let mx = 0, mz = 0, n = 0; for (let j = 0; j < N; j += 24) { mx += pose[j * 3]; mz += pose[j * 3 + 2]; n++; }
+      const st = V.controls.st, c = V.info.center, k = 1 - Math.exp(-dt * 1.6), tx = (mx / n - c.x) * kW, tz = (mz / n - c.z) * kW;
+      if (!st.dragging) { st.px += (tx - st.px) * k; st.pz += (tz - st.pz) * k; if (st.goal) { st.goal.px = st.px; st.goal.pz = st.pz; } }
+    }
+    { const ph = S.ret || V.reduce() ? 1 : S.circ ? (S.ph === 'wait' && S.h > S.h0 ? clamp(1 - S.wait / 0.9, 0, 0.999) : 1) : ((t + 0.8) % 2.8) / 0.9; flick(ph < 1 ? ph : 0); } // v5.53: it flicks its tongue now and then as it goes
+    if (S.stout) { for (let i = 0; i < N; i++) R.bul[i] = 1 + 0.03 * kW * Math.sin(TAU * (i * R.dx / (R.L * 0.1) - t * 1.4)) * sstep(R.ih, R.ih + 30, i); }
+    if (S.ret && (S.circ ? S.ph === 'back' && Math.abs(S.h - S.h0) < 1e-7 : S.target - S.h < 1e-7)) { endSlither(S); return false; } // home: exactly its resting pose
     R.setPose(pose); R.apply();
-    // v5.73: at sea it swims, leaving rings on the water behind its head
-    if (P.scene && P.scene.kind === 'sea' && V.NATURE && V.NATURE.ripple && t - (S.ripT || 0) > 0.3) { S.ripT = t; const h = R.point(R.ih * R.dx * 0.6); V.NATURE.ripple(h.x, h.z, 0.9, Math.max(V.info.F.w0 * 1.6, 0.01)); }
+    // swimming leaves rings on the water behind its head
+    if (S.wY != null && V.NATURE && V.NATURE.ripple && t - (S.ripT || 0) > 0.3 && kW > 0.2) { const h = R.point(R.ih * R.dx * 0.6); if (h.y < S.wY + V.info.F.w0 * 3) { S.ripT = t; V.NATURE.ripple(h.x, h.z, 0.9, Math.max(V.info.F.w0 * 1.6, 0.01)); } }
     return true;
   }
-  function stopSlither(soft) {
-    if (!slither) return;
+  function endSlither(S) {
+    slither = null; flick(0); if (rig) { rig.bul.fill(1); rig.release(); } tip.hidden = true; if (S.undo) S.undo();
     bSlither.setAttribute('aria-pressed', 'false'); bSlither.textContent = 'Slither';
-    if (soft && !V.reduce()) { if (!slither.stopping && slither.lastPose) { slither.stopping = now(); slither.stopPose = slither.lastPose; slither.stopA = slither.angles(slither.lastPose); rig.bul.fill(1); } V.kick(); return; }
-    const S = slither; slither = null; flick(0); if (rig) rig.release(); tip.hidden = true; unzoom(); if (S.undo) S.undo();
+    if (fx.zoomOut > 1) fx.zoomOut = 1; fx.reach = 0;
+    if (S.cam0 && !S.keepCam) V.controls.setGoal(S.cam0);
+    V.kick(); if (S.then) { const f = S.then; S.then = null; f(); }
   }
+  // soft: it slithers home (then: what to do once it is back); otherwise it is back at once
+  function stopSlither(soft, then) {
+    if (!slither) return;
+    const S = slither; bSlither.setAttribute('aria-pressed', 'false'); bSlither.textContent = 'Slither';
+    if (soft && !V.reduce()) { if (!S.ret) { if (S.circ) { S.ret = true; if (S.ph === 'out') S.hK = Math.min(S.hK, S.h + S.vel * 0.45); else if (S.ph === 'wait') S.wait = Math.min(S.wait, 0.25); } else slitherHomeRoute(S); } if (then) { S.then = then; S.vr = Math.max(S.vr, S.v * 3.2); } V.kick(); return; }
+    slither = null; flick(0); if (rig) { rig.bul.fill(1); rig.release(); } tip.hidden = true; if (fx.zoomOut > 1) fx.zoomOut = 1; fx.reach = 0; if (S.undo) S.undo(); if (S.cam0 && !S.keepCam) V.controls.setGoal(S.cam0);
+  }
+  // something else wants the body while it slithers: it slithers home first (quickly), then that happens
+  function deferSlither(fn) { if (!slither || V.reduce()) return false; stopSlither(true, fn); return true; }
+  function slitherHome(keepCam) { if (!slither) return false; if (keepCam) slither.keepCam = true; stopSlither(true); return true; }
   function unzoom() { if (fx.zoomOut > 1) { fx.zoomOut = 1; V.controls.setGoal({ d: Math.min(V.controls.st.goal ? V.controls.st.goal.d : V.controls.st.d, V.info.dMax), el: (V.info.portrait ? 40 : 30) * Math.PI / 180 }); } }
 
   // ================================================================= Anatomy: see-through skin, organs inside, tap to learn
@@ -2311,13 +2438,14 @@ export function create(V) {
   }
 
   // ================================================================= events
-  on(bEat, 'click', () => { if (show && show.name === 'eat') { stopShow(); return; } startShow({ name: 'eat', btn: bEat }); eat(); });
-  on(bSlither, 'click', () => { if (slither && !slither.stopping) stopSlither(true); else { exclusive('slither'); startSlither(); } });
-  on(bAnat, 'click', () => { if (!anat) return; if (!anat.on) exclusive('anatomy'); anat.toggle(); });
+  on(bEat, 'click', () => { if (deferSlither(() => bEat.click())) return; if (show && show.name === 'eat') { stopShow(); return; } startShow({ name: 'eat', btn: bEat }); eat(); });
+  // v6.02: pressed while it slithers home, it sets off again as soon as it is back
+  on(bSlither, 'click', () => { if (slither && !slither.ret) stopSlither(true); else if (slither) { slither.then = () => { exclusive('slither'); startSlither(); }; bSlither.setAttribute('aria-pressed', 'true'); } else { exclusive('slither'); startSlither(); } });
+  on(bAnat, 'click', () => { if (deferSlither(() => bAnat.click())) return; if (!anat) return; if (!anat.on) exclusive('anatomy'); anat.toggle(); });
   // v5.09: starting one thing turns off whatever else is on - except the ones that go together (Anatomy and Open mouth)
   function exclusive(kind) {
     if (show) stopShow(true);
-    if (slither && kind !== 'slither') stopSlither();
+    if (slither && kind !== 'slither') { if (kind === 'view') slitherHome(true); else stopSlither(); } // (v6.02: callers that take over the body slither it home first: deferSlither)
     if (kind === 'view') { if (V.scaleBack) V.scaleBack(true); } else if (kind !== 'scale') V.scaleOff(); // (v5.74: a camera button lets Size vs person glide back)
     if (anat && anat.on && kind !== 'mouth' && kind !== 'view' && kind !== 'anatomy') anat.set(false, true);
     if (kind === 'slither' || kind === 'scale') V.closeMouth();
@@ -2342,7 +2470,7 @@ export function create(V) {
   }
   function leaveModes() {
     if (!anyMode()) return false;
-    if (show) stopShow(); if (slither) stopSlither(); if (anat && anat.on) anat.set(false, true);
+    if (show) stopShow(); if (slither) slitherHome(true); if (anat && anat.on) anat.set(false, true); // (v6.02: it slithers back home)
     V.closeMouth(); if (V.scaleBack && V.scaleBack()) { V.kick(); return true; } // (v5.74: from Size vs person, back to exactly the view you had)
     V.scaleOff(); if (V.resetView) V.resetView(); V.kick(); return true;
   }
@@ -2447,7 +2575,7 @@ export function create(V) {
       if (sizeLay && sizeLay.step()) moving = true; // v5.74: Size vs person lays the snake out (and coils it back)
       if (rig) rig.sync();
       if (anat && anat.on) { anat.refresh(); }
-      { const tr = V.info && V.info.tree, down = !!slither || !!(anat && anat.on) || !!(sizeLay && sizeLay.on); if (tr && tr.visible === down) { tr.visible = !down; moving = true; } } // v5.68: the tree goes while it is down on the ground
+      { const tr = V.info && V.info.tree, down = !!(slither && !slither.circ) || !!(anat && anat.on) || !!(sizeLay && sizeLay.on); if (tr && tr.visible === down) { tr.visible = !down; moving = true; } } // v5.68: the tree goes while it is down on the ground
       return moving;
     },
     camera() { return camera(); },
@@ -2458,6 +2586,7 @@ export function create(V) {
     groundY: (list, below) => groundYAt(list, below),
     clearProps: (pts, rad, opt) => clearProps(pts, rad, opt),
     exclusive: (k) => exclusive(k),
+    defer: (f) => deferSlither(f), slitherHome: (keepCam) => slitherHome(keepCam), // v6.02: other buttons let it slither home first
     after() { if (anat) anat.after(); },
     get locked() { return false; }, // (v5.78: you can turn and zoom during See it eat too)
     // v5.05: zooming in goes towards the part picked in Anatomy (or the head where it now is), and the camera keeps
@@ -2489,7 +2618,7 @@ export function create(V) {
     },
     dispose() { alive = false; personWait.delete(V.kick); fx.reset(); if (hdb) hdb.remove(); closeSide(); },
     // for tests: freeze a show at s seconds
-    test: { get P() { return P; }, freeze(s) { if (show) show.freeze = s; V.kick(); }, get show() { return show && { name: show.name, time: show.time, dur: show.dur, diet: show.diet }; }, get slither() { return !!slither; }, get showInfo() { return show && show.info; }, get anat() { return anat; }, get rig() { return rig; }, get lastTap() { return lastTap; }, dietOf: () => dietOf(P, V.opts.id), side: (k) => toggleSide(k) },
+    test: { get P() { return P; }, freeze(s) { if (show) show.freeze = s; V.kick(); }, get show() { return show && { name: show.name, time: show.time, dur: show.dur, diet: show.diet }; }, get slither() { return !!slither; }, get slitherState() { return slither && { h: slither.h, h0: slither.h0, ret: slither.ret, target: slither.target, tree: !!slither.circ, hK: slither.hK, ph: slither.ph }; }, get showInfo() { return show && show.info; }, get anat() { return anat; }, get rig() { return rig; }, get lastTap() { return lastTap; }, dietOf: () => dietOf(P, V.opts.id), side: (k) => toggleSide(k) },
   };
   return fx;
 }

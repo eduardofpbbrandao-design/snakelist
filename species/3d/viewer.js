@@ -7,13 +7,13 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=585'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=585'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=586'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=586'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 // v5.93: the habitats each snake can be shown in (tools/habitat_looks.py: the first is shown first; snakes with only one are
 // not listed). Loaded with this module - it waits for it up to 3 s, so the first scene is already the right one (if it comes
 // later, the Habitats button is added then)
-const HAB_P = typeof fetch === 'function' ? fetch(new URL('habitats.json?r=585', import.meta.url).href).then((r) => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null);
+const HAB_P = typeof fetch === 'function' ? fetch(new URL('habitats.json?r=586', import.meta.url).href).then((r) => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null);
 let HAB_LOOKS = await Promise.race([HAB_P, new Promise((res) => setTimeout(() => res(null), 3000))]);
 HAB_P.then((d) => { HAB_LOOKS = d; });
 const habPick = (d, id) => { const l = d && d.sp && d.sp[id]; return Array.isArray(l) && l.length > 1 ? l : null; };
@@ -644,7 +644,7 @@ function raisedPose(P, F, pose, R, N, ds, wMax) {
 // the branch so its loops hang down on both sides in saddles, the head resting on top in the middle. The fold is a true
 // unrolling (over a cylinder, then straight down), so the body keeps its length. pts: x along the branch, z across it
 function drapePose(P, F, pose, R, N, ds, wMax) {
-  const L = F.L, rB = clamp(F.w0 * (pose.branchK || 1.3), 0.008, 0.035), cOff = F.Hh(L * 0.45) * F.bf, Rr = rB + cOff;
+  const L = F.L, rB = clamp(F.w0 * (pose.branchK || 1.1), 0.008, 0.03), cOff = F.Hh(L * 0.45) * F.bf, Rr = rB + cOff;
   const pitch = wMax * 2 * (pose.pitch || 1.02);
   // the coil: head at its centre, walking outward; a rounder centre, loops longer across the branch
   // v5.83: the tail is tucked in the middle of the coil and the body spirals outward; the neck leaves the outer loop and
@@ -2363,6 +2363,16 @@ const SCENES = {
   shore:    { sky: ['#7fb0d6', '#e3eef2'], fog: '#cfdfe6', sun: 2.5, hemi: 0.7, sunEl: 50, tile: 0.9, ground: 'pebbles', water: 'river', waterCol: '#1d6470', waterOp: 0.62, depth: 0.45, rock: '#5d5954', props: { rocks: 1.6, pebbles: 1.2 } },
 };
 
+// v6.02: a habitat's flavour can change how it looks: 'forest:savanna' is the open savanna woodland of Africa (dry grass
+// under scattered flat-topped acacia-like trees, a few fallen leaves) where twig snakes and boomslangs live; 'forest:eucalypt'
+// is Australia's open eucalypt woodland (gum trees over leaf litter and tussock grass)
+const SCENE_FLAVOR = {
+  'forest:eucalypt': { sky: ['#9fc0dc', '#e6e6d6'], fog: '#d6dbcc', sun: 2.0, hemi: 0.65, sunEl: 50, tile: 1.1, ground: 'litter', props: { leaves: 0.8, twigs: 1, log: 1, rocks: 0.25, grass: 0.9 } },
+  'forest:savanna': { sky: ['#a3c1da', '#e8e9d6'], fog: '#dfe0cc', sun: 2.1, hemi: 0.6, sunEl: 50, tile: 0.9, ground: 'dry', props: { grass: 1.5, leaves: 0.3, twigs: 0.8, rocks: 0.25 } },
+};
+const sceneOf = (sc) => { const b = SCENES[sc && sc.kind] || SCENES.litter, f = sc && sc.flavor && SCENE_FLAVOR[sc.kind + ':' + sc.flavor]; return f ? Object.assign({}, b, f) : b; };
+const envOf = (sc) => (sc.kind === 'forest' && (sc.flavor === 'savanna' || sc.flavor === 'eucalypt') ? 'sunrise' : ENV_FOR[sc.kind]);
+
 // ---------- photographic surroundings: CC0 Polyhaven panoramas (via @pmndrs/assets), see CREDITS.txt ----------
 // each habitat gets the panorama that fits it best; the snake's own ground is drawn up close and fades
 // into the photo's ground, which is projected onto a flat floor so it meets the horizon without a seam
@@ -2612,7 +2622,7 @@ function leafGeometry() {
 
 function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   if (NATURE.resetAmbient) NATURE.resetAmbient(); // v5.73: the wind and water clocks start afresh with each scene
-  const { scene } = ctx, S = SCENES[P.scene.kind] || SCENES.litter, R = rng(seed + 77);
+  const { scene } = ctx, S = sceneOf(P.scene), R = rng(seed + 77);
   const Rb = poseInfo.radius, L = F.L;
   const envR = poseInfo.envR || Rb, groundR = Math.max(Rb * 16, envR * 9);
   const sky = new THREE.Color(S.sky[0]), hor = new THREE.Color(S.fog);
@@ -2933,7 +2943,7 @@ function turnEnv(env, da) {
 }
 // the sun where the photo has it, and the near ground fading into the photo's ground
 function applyEnv(ctx, P, F, poseInfo, env) {
-  const { scene, renderer } = ctx, S = SCENES[P.scene.kind] || SCENES.litter, sea = S.water === 'sea';
+  const { scene, renderer } = ctx, S = sceneOf(P.scene), sea = S.water === 'sea';
   if (!env.half) { env.half = new Uint16Array(env.data.length); for (let i = 0; i < env.data.length; i++) env.half[i] = THREE.DataUtils.toHalfFloat(env.data[i]); }
   const envAz = Math.atan2(env.sunDir.z, env.sunDir.x), sunAz = ctx.sunAz != null ? ctx.sunAz : envAz;
   const tex = new THREE.DataTexture(turnEnv(env, sunAz - envAz), env.w, env.h, THREE.RGBAFormat, THREE.HalfFloatType);
@@ -3173,7 +3183,7 @@ const RIG_V = `if (uRigOn > 0.5) {
 const UI_CSS = `
 .sp3d-stage>.sp3d-bar{gap:8px 14px}
 .sp3d-stage>.sp3d-bar>.sp3d-grp{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;pointer-events:auto}
-.sp3d-stage>.sp3d-bar>.sp3d-grp:empty{display:none}
+.sp3d-stage>.sp3d-bar>.sp3d-grp:empty,.sp3d-stage>.sp3d-bar>.sp3d-grp[hidden]{display:none}
 .sp3d-stage>.sp3d-bar>.sp3d-seg{gap:0;padding:2px;border-radius:12px;background:rgba(12,26,18,.74);border:1px solid rgba(255,255,255,.16);box-shadow:0 2px 8px rgba(0,0,0,.18);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 .sp3d-stage>.sp3d-bar>.sp3d-seg>.sp3d-b{background:transparent;border-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;border-radius:10px}
 .sp3d-stage>.sp3d-bar>.sp3d-seg>.sp3d-b:hover{background:rgba(255,255,255,.1);border-color:transparent}
@@ -3260,6 +3270,7 @@ export function mount(host, opts) {
   let habI = 0;
   const habChoose = () => { habI = 0; try { const k = localStorage.getItem('sl-3d-hab:' + opts.id); const i = habList.findIndex((o) => o.k === k); if (i >= 0) habI = i; } catch (e) { /* private mode */ } P.scene = lookOf(habList[habI]); };
   if (habList) habChoose();
+  else { const one = HAB_LOOKS && HAB_LOOKS.sp && HAB_LOOKS.sp[opts.id]; if (Array.isArray(one) && one.length === 1) P.scene = lookOf(one[0]); } // (v6.02: one habitat, but its own look - e.g. eucalypt woodland)
   const disposables = new Set(), cleanups = [];
   const track = (o) => { disposables.add(o); return o; };
   const on = (t, ev, fn, o) => { t.addEventListener(ev, fn, o); cleanups.push(() => t.removeEventListener(ev, fn, o)); };
@@ -3325,23 +3336,25 @@ export function mount(host, opts) {
   [bMouth, fb.eat, fb.slither].forEach((b) => b && !b.hasAttribute('aria-pressed') && b.setAttribute('aria-pressed', 'false'));
   const gView = grp('View', 'sp3d-seg', [bNormal, bAnat, bScale]), gAct = grp('Actions', '', [bMouth, fb.eat, fb.slither]), gReset = grp('Reset', '', [bReset]);
   vg2.className = 'sp3d-grp sp3d-cam'; vg2.setAttribute('aria-label', 'Camera'); bar.appendChild(vg2);
-  // v5.93: Habitats (behind Show more, only for a snake that lives in more than one): Habitats opens the list of its
-  // habitats beside it, the one shown is green; choosing another rebuilds the surroundings round the same snake and view
-  const gHab = el('span', 'sp3d-grp sp3d-cam sp3d-habgrp'); gHab.setAttribute('role', 'group'); gHab.setAttribute('aria-label', 'Habitats');
+  // v5.93: Habitats (only for a snake that lives in more than one): Habitats opens the list of its habitats beside it, the
+  // one shown is green; choosing another rebuilds the surroundings round the same snake and view
+  // v6.02 (Eduardo: "make the habitats button next to reset but to the left of reset"): on the main line, just left of
+  // Reset, in the same style (it used to be behind Show more); the list opens right after Reset
+  const gHab = el('span', 'sp3d-grp sp3d-habgrp'); gHab.setAttribute('role', 'group'); gHab.setAttribute('aria-label', 'Habitats'); gHab.hidden = true;
   const habBtns = [];
-  bar.appendChild(gHab);
+  gReset.after(gHab);
   const habUI = () => {
-    const bHab = el('button', 'sp3d-b sp3d-habbtn', 'Habitats'); bHab.type = 'button'; bHab.setAttribute('aria-expanded', 'false'); gHab.appendChild(bHab);
+    const bHab = el('button', 'sp3d-b sp3d-habbtn', 'Habitats'); bHab.type = 'button'; bHab.setAttribute('aria-expanded', 'false'); gReset.insertBefore(bHab, bReset); gReset.setAttribute('aria-label', 'Habitats and Reset');
     habList.forEach((o, i) => { const b = el('button', 'sp3d-b sp3d-habopt', o.l); b.type = 'button'; b.hidden = true; b.setAttribute('aria-pressed', String(i === habI)); gHab.appendChild(b); habBtns.push(b);
       on(b, 'click', () => { if (i === habI) return; habI = i; habBtns.forEach((q, j) => q.setAttribute('aria-pressed', String(j === i))); try { localStorage.setItem('sl-3d-hab:' + opts.id, o.k); } catch (e) { /* private mode */ } P.scene = lookOf(o); rebuild(); }); });
-    on(bHab, 'click', () => { const open = bHab.getAttribute('aria-expanded') !== 'true'; bHab.setAttribute('aria-expanded', String(open)); habBtns.forEach((b) => { b.hidden = !open; }); });
+    on(bHab, 'click', () => { const open = bHab.getAttribute('aria-expanded') !== 'true'; bHab.setAttribute('aria-expanded', String(open)); gHab.hidden = !open; habBtns.forEach((b) => { b.hidden = !open; }); });
   };
   if (habList) habUI();
   else HAB_P.then((d) => { const l = habPick(d, opts.id); if (!alive || !l || habList) return; habList = l; const k0 = P.scene.kind; habChoose(); habUI(); if (P.scene.kind !== k0 && ctx.scene) rebuild(); }); // (arrived late)
   [...bar.children].forEach((c) => { if (c.classList.contains('sp3d-b') && c !== bReset) gAct.appendChild(c); }); // (any other action button extras.js adds)
   // v5.05: the main buttons stay in view; the camera buttons are behind Show more / Show less
   const bMore = el('button', 'sp3d-b sp3d-morebtn', 'Show more'); bMore.type = 'button'; bMore.setAttribute('aria-expanded', 'false');
-  [vg2, gHab].concat(fx.moreButtons || []).forEach((b) => b.classList.add('sp3d-more'));
+  [vg2].concat(fx.moreButtons || []).forEach((b) => b.classList.add('sp3d-more'));
   bar.classList.add('sp3d-few');
   // v5.50: Show more sits on its own line under the main buttons (like See all families), and the extra buttons open below it
   const br1 = el('span', 'sp3d-br'), br2 = el('span', 'sp3d-br'); br1.setAttribute('aria-hidden', 'true'); br2.setAttribute('aria-hidden', 'true');
@@ -3382,7 +3395,7 @@ export function mount(host, opts) {
 
   function build() {
     const scene = new THREE.Scene(); ctx.scene = scene;
-    { const en = !opts.noEnv && (P.scene.env || ENV_FOR[P.scene.kind]); if (en) loadEnv(en).catch(() => {}); } // v4.81: start downloading the panorama now
+    { const en = !opts.noEnv && (P.scene.env || envOf(P.scene)); if (en) loadEnv(en).catch(() => {}); } // v4.81: start downloading the panorama now
     let t0 = performance.now();
     // (v5.78: Medium - phones - builds the body and the surroundings as Light does, and keeps High's sharper textures and soft shadows)
     const gq = quality === 'high' ? 'high' : 'low';
@@ -3577,14 +3590,14 @@ float slScale(vec2 m) {
     const hMax = bb.max.y;
     const poseInfo = { pts: pose.pts, ds: pose.ds, Ly: pose.Ly, radius: Rb, envR: P.length >= 0.4 ? Rb + 1.0 : Rb * 1.3, seaLevel: F.Hh(F.L * 0.5) * F.bf * (P.scene.float || 1.1) };
     // water side for riverbank: the side of the snake with most open space
-    if ((SCENES[P.scene.kind] || {}).water === 'river') { let best = 0, bd = -1; for (let i = 0; i < 16; i++) { const a = (i / 16) * TAU; let m = -1e9; for (const p of pose.pts) m = Math.max(m, p[0] * Math.cos(a) + p[1] * Math.sin(a)); if (bd < 0 || m < bd) { bd = m; best = a; } } poseInfo.waterDir = best; poseInfo.waterDist = bd + F.w0 * 2.5 + Rb * 0.12; }
+    if (sceneOf(P.scene).water === 'river') { let best = 0, bd = -1; for (let i = 0; i < 16; i++) { const a = (i / 16) * TAU; let m = -1e9; for (const p of pose.pts) m = Math.max(m, p[0] * Math.cos(a) + p[1] * Math.sin(a)); if (bd < 0 || m < bd) { bd = m; best = a; } } poseInfo.waterDir = best; poseInfo.waterDist = bd + F.w0 * 2.5 + Rb * 0.12; }
     scene.add(snakeGroup);
     if (P.scene.kind !== 'sea') scene.add(contactShadow(poseInfo, F, Rb));
     ctx.natureReady = null; ctx.afterNature = () => { if (!cScene.checked) setSceneVisible(false); dirty = true; shadowDirty = true; kick(); };
     t0 = performance.now(); buildScene(ctx, P, F, body, poseInfo, seed, gq); perfT('scene', t0);
     if (!cScene.checked) setSceneVisible(false);
     // the photographic surroundings arrive a moment later (cached after the first time)
-    const envName = P.scene.env || ENV_FOR[P.scene.kind], myScene = scene;
+    const envName = P.scene.env || envOf(P.scene), myScene = scene;
     ctx.envReady = envName && !opts.noEnv ? loadEnv(envName).then((env) => {
       if (!alive || ctx.scene !== myScene) return false;
       const tE = performance.now(); env.name = envName; applyEnv(ctx, P, F, poseInfo, env); perfT('applyEnv', tE); if (!cScene.checked) setSceneVisible(false); dirty = true; shadowDirty = true; kick(); return true;
@@ -3610,7 +3623,7 @@ float slScale(vec2 m) {
     // v5.90: the sun stands high (40-60 degrees) and about 50 degrees to one side of the first view, as in a good field
     // photo: never flat from the front, from behind or from low down, so the body is modelled by light and shade and the
     // scales glint along the lit side (the panorama is turned to match in applyEnv)
-    { const az = viewAz('default'); ctx.sunAz = Math.atan2(Math.cos(az), Math.sin(az)) + SUN_SIDE; placeSun(ctx, ctx.sunAz, ((SCENES[P.scene.kind] || SCENES.litter).sunEl * Math.PI) / 180); }
+    { const az = viewAz('default'); ctx.sunAz = Math.atan2(Math.cos(az), Math.sin(az)) + SUN_SIDE; placeSun(ctx, ctx.sunAz, (sceneOf(P.scene).sunEl * Math.PI) / 180); }
     info.collide = []; for (let i = 0, n = 240; i <= n; i++) { const x = (i / n) * F.L; info.collide.push({ p: body.spine(x), r: Math.max(F.W(x), F.Hh(x)) * 1.05 }); }
     t0 = performance.now();
     extras = { mat, eyes: eyeMeshes, mouth: P.plan === 'blind' ? null : buildMouth(P, F, body, snakeGroup, eyeMeshes.concat(headParts), pat) }; perfT('mouth', t0);
@@ -3623,7 +3636,7 @@ float slScale(vec2 m) {
       controls = Controls(canvas, cam, {
         reduce, maxEl: (80 * Math.PI) / 180,
         minEl: (d) => { const near = sstep(info.dFit * 0.6, Math.max(info.dMin * 2, info.F.Hl * 4), d); return Math.max(lerp(8, 2, near) * Math.PI / 180, Math.asin(clamp((lerp(info.hMax * 1.3, info.F.w0 * 0.6, near) - targetFor(d).y) / d, 0, 0.95))); }, // v5.05: close up you can look from the side (at the eyes, the mouth, the organs)
-        dMin: () => info.dMin, dMax: () => info.dMax * Math.max(sizeBusy() ? info.scaleK : 1, fx.zoomOut), kick: () => kick(), reset: () => { setCamBtn(null); if (sizeSt.on) sizeFrame(); else resetView(); }, // (R: like Reset)
+        dMin: () => info.dMin, dMax: () => info.dMax * Math.max(sizeBusy() ? info.scaleK : 1, fx.zoomOut), kick: () => kick(), reset: () => { if (fx.slitherHome) fx.slitherHome(true); setCamBtn(null); if (sizeSt.on) sizeFrame(); else resetView(); }, // (R: like Reset)
         panMax: () => Math.max(info.Rb * 1.4, (fx.reach || 0) * 1.1), // you can fly around the snake, never away from it
         locked: () => fx.locked,
         user: () => { if (camBtn) setCamBtn(null); }, // v5.74: you moved the camera yourself: no camera button is lit any more
@@ -4137,7 +4150,7 @@ float slScale(vec2 m) {
   // events
   on(bFront, 'click', () => setView('front')); on(bSide, 'click', () => setView('side')); on(bTop, 'click', () => setView('top'));
   // v4.81: Reset only resets the view (the mouth, size and anatomy stay as they are; in Size vs person it frames the snake and the person again)
-  on(bReset, 'click', () => { setCamBtn(null); if (sizeSt.on) sizeFrame(); else resetView(); });
+  on(bReset, 'click', () => { if (fx.slitherHome) fx.slitherHome(true); setCamBtn(null); if (sizeSt.on) sizeFrame(); else resetView(); });
   // v5.74: Normal - back to the plain model: Anatomy off, Size vs person glides back to the view you had
   on(bNormal, 'click', () => { if (fx.anatOn()) bAnat.click(); V.scaleBack(); syncViews(); });
   function toggleMouth(force) {
@@ -4149,7 +4162,7 @@ float slScale(vec2 m) {
     }
     kick();
   }
-  on(bMouth, 'click', () => { if (!mouthGoal) fx.exclusive('mouth'); toggleMouth(); }); // v5.09: one thing at a time (Open mouth goes with Anatomy)
+  on(bMouth, 'click', () => { if (fx.defer && fx.defer(() => bMouth.click())) return; if (!mouthGoal) fx.exclusive('mouth'); toggleMouth(); }); // v5.09: one thing at a time (Open mouth goes with Anatomy)
   // v4.81: Anatomy moved to extras.js (see-through anatomy you can tap)
   // v5.74: the camera buttons glide there (eased, about a second); leaving Size vs person first if it is on
   const camGo = (b, g) => { fx.exclusive('view'); V.scaleBack(true); setCamBtn(b); controls.tween(g, 1000); };
@@ -4157,7 +4170,7 @@ float slScale(vec2 m) {
   on(bVHead, 'click', () => camGo(bVHead, { az: viewAz('front') + 0.9, el: (20 * Math.PI) / 180, d: Math.max(info.dMin * 1.3, info.F.Hl * 4.5), px: 0, pz: 0 }));
   on(bVTop, 'click', () => camGo(bVTop, { az: controls.st.az, el: (80 * Math.PI) / 180, d: (info.Rb * 1.12) / Math.tan(Math.min(info.vf, info.hf)) + info.hMax, px: 0, pz: 0 }));
   on(bFull, 'click', toggleFull); on(bDet, 'click', toggleDetails);
-  on(bScale, 'click', () => { if (bScale.getAttribute('aria-pressed') !== 'true') { fx.exclusive('scale'); toggleScale(true); } else toggleScale(false); });
+  on(bScale, 'click', () => { if (fx.defer && fx.defer(() => bScale.click())) return; if (bScale.getAttribute('aria-pressed') !== 'true') { fx.exclusive('scale'); toggleScale(true); } else toggleScale(false); });
   on(bSet, 'click', () => { panel.hidden = !panel.hidden; bSet.setAttribute('aria-expanded', String(!panel.hidden)); });
   on(cScene, 'change', () => setSceneVisible(cScene.checked));
   on(document, 'fullscreenchange', syncFull); on(document, 'webkitfullscreenchange', syncFull);
