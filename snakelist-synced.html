@@ -14383,6 +14383,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     var toFlat = function (lon, lat) {
       return [b[0] + (lon + 180) / 360 * b[2], b[1] + (90 - lat) / 180 * b[3]];
     };
+    window.SL_DETAIL_COVER = 0; // (set by the close-up detail below when it covers the whole view)
     ctx.save();
     ctx.beginPath(); ctx.rect(b[0], b[1], b[2], b[3]); ctx.clip();
     // the land is drawn as real shapes every frame (not a stretched picture), so coastlines
@@ -14404,8 +14405,8 @@ window.SL_GEO_READY = new Promise(function (res) {
       var hA = 90 - (0 - vb0[1]) / vb0[3] * 180, hB = 90 - (h - vb0[1]) / vb0[3] * 180;
       shapePath(toFlat, function (r) { return r.e >= vA && r.w <= vB && r.no >= hB && r.s <= hA; }, 1);
       ctx.fillStyle = cs.getPropertyValue("--map-off").trim() || "#c9ccbb"; FILL();
-      // Sightings on and zoomed in to towns and streets: real street-map tiles (Map Layers script)
-      if (window.SL_MAP_STREET_TILES) window.SL_MAP_STREET_TILES(ctx, b, w, h);
+      // Sightings on and zoomed in to towns and streets: OpenStreetMap's detail, drawn in the map's own colours (Map Layers script)
+      if (window.SL_MAP_DETAIL) window.SL_MAP_DETAIL(ctx, b, w, h);
     } else {
       ctx.imageSmoothingEnabled = true;
       ctx.drawImage(BASE, 0, 0, TW, TH, b[0], b[1], b[2], b[3]);
@@ -14420,6 +14421,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (statesMode && !areaShow) drawCountryProvinces(toFlat, statesMode);
     if (areaShow) placeAreaKey();
     drawContinentShow(toFlat);
+    // the close-up's town names and its credit - and with land coloured in (heatmap, habitats, a range, a picked
+    // country: 1:10m shapes) its water again on top, so the colours stop at the real coast
+    if (window.SL_MAP_DETAIL_LABELS) window.SL_MAP_DETAIL_LABELS(ctx, heatIsOn() || !!HI || !!selected || !!areaShow || islandsOn || multiOn() || !!statesMode);
     drawPlaceLabels(toFlat);
     ctx.restore();
     liftOverPanel();
@@ -14842,11 +14846,14 @@ window.SL_GEO_READY = new Promise(function (res) {
       fillDots(to, wantSel, 2.6);
     }
     // every border, once, on top of the colours - one colour, one line per edge
+    // (close up with Sightings on, OpenStreetMap's own coasts and borders are drawn in this same
+    // line instead - these 1:10m ones are a few hundred metres out at that scale: Map Layers script)
+    var dCover = window.SL_DETAIL_COVER || 0;
     shapePath(to, inView, stride, true);
     ctx.strokeStyle = lineColor;
     ctx.lineWidth = 0.85;
     ctx.lineJoin = "round";
-    STROKE();
+    if (dCover < 1) { ctx.globalAlpha = 1 - dCover; STROKE(); ctx.globalAlpha = 1; }
     // the picked country: the same line, just thicker, along exactly the same outline
     // (not while a snake's colours show: only its range is marked then - v5.78)
     if (selected && !areaShow) {
@@ -20299,54 +20306,354 @@ window.SL_GEO_READY = new Promise(function (res) {
       ctx.restore();
     }
   };
-  // ---- Street map, with Sightings on: the plain SnakeList map has countries and coastlines but
-  // no towns or roads, so once Sightings is on and the map is zoomed in to town level, real
-  // street-map tiles (CARTO's OpenStreetMap maps, light or dark with the theme) fade in over the
-  // land, drawn the same way as the satellite tiles above (Web Mercator strips on this lon/lat map).
-  // They hold detail to zoom 18 and are stretched past that, right down to a single garden.
-  var STREET = { light: "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png", dark: "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png" };
-  var STREET_MAX = 18, STREET_ATTR = "© OpenStreetMap contributors © CARTO";
-  window.SL_MAP_STREET_TILES = function (ctx, b, w, h) {
-    if (!(window.SL_SG_ON && window.SL_SG_ON()) || st.style !== "classic" || (window.claude && window.claude.use)) { window.SL_STREET_TILE_Z = 0; return; }
-    var dpr = ctx.getTransform ? ctx.getTransform().a : Math.min(2, window.devicePixelRatio || 1);
-    var lz = Math.log(b[2] * dpr / 256) / Math.LN2; // the tile zoom this view would need
-    var alpha = Math.max(0, Math.min(1, (lz - 7.2) / 1.6)); // fades in from about a region to a town
-    if (alpha <= 0) { window.SL_STREET_TILE_Z = 0; return; }
-    var dark = document.documentElement.getAttribute("data-sl-theme") === "dark", tpl = dark ? STREET.dark : STREET.light;
-    var z = Math.min(STREET_MAX, Math.max(1, Math.ceil(lz - 0.1))), n = 1 << z, zFloor = Math.max(3, z - 5);
+  // ---- Close-up detail, with Sightings on: zoomed in to a town or a garden, the plain SnakeList
+  // map (Natural Earth 1:10m outlines) has nothing more to show, so the detail is drawn by
+  // SnakeList itself, in its own colours: OpenStreetMap's coastlines, lakes, rivers, woods, roads,
+  // borders and town names, from OpenFreeMap's free vector tiles (OpenMapTiles layers - no key,
+  // no watermark). Before, CARTO's street-map pictures were laid over the map instead; they
+  // began to need an API key and covered the map in "API KEY REQUIRED" stamps, and even when
+  // they worked they looked like someone else's map. The tiles are Web Mercator and this map is
+  // plain lon/lat: every point is turned into lon/lat once, as a tile is decoded, and each tile
+  // is kept as ready-made shapes (Path2D) in its own small coordinates - a frame only places
+  // and paints them, so panning and zooming stay smooth. Where tiles can't load (offline,
+  // claude.ai's copy) the plain SnakeList map stays as it was.
+  var VT_INDEX = "https://tiles.openfreemap.org/planet", VT_MAX = 14, VT_EXT = 4096, VT_VIEW = 40;
+  var VT_ATTR = "OpenFreeMap © OpenMapTiles © OpenStreetMap contributors";
+  var VT_CAP = 90, VT_KEEP = 60, VT_FLIGHT = 6;
+  var vtTpl = null, vtAsking = false, vtDown = 0, VTS = {}, vtCount = 0, vtUse = 0, vtFlight = 0, vtFails = 0, vtFailAt = 0, vtWaiters = [], vtLab = null;
+  var VT_TD = window.TextDecoder ? new TextDecoder() : null;
+  function vtOff() { return !VT_TD || !window.Path2D || !!(window.claude && window.claude.use); }
+  // the tile address changes with each OpenFreeMap release: read it from their index once
+  function vtIndex() {
+    if (vtTpl || vtAsking || vtOff() || Date.now() - vtDown < 60000) return;
+    vtAsking = true;
+    fetch(VT_INDEX).then(function (r) { if (!r.ok) throw new Error("index"); return r.json(); }).then(function (j) {
+      vtAsking = false;
+      var u = j && j.tiles && j.tiles[0];
+      if (typeof u === "string" && /^https:\/\/tiles\.openfreemap\.org\/.*\{z\}.*\{x\}.*\{y\}/.test(u)) { vtTpl = u; vtPing(); } else vtDown = Date.now();
+    }, function () { vtAsking = false; vtDown = Date.now(); });
+  }
+  function vtPing() {
+    if (VR) VR.dirty = true;
+    window.SL_MAP_REDRAW && window.SL_MAP_REDRAW();
+    vtWaiters = vtWaiters.filter(function (f) { return f(); }); // (the observation's small map; false once it's gone)
+  }
+  function vtTile(z, x, y, fetchIt) {
+    var k = z + "/" + x + "/" + y, t = VTS[k];
+    if (t && t.bad && Date.now() - t.badAt > 60000) { delete VTS[k]; vtCount--; t = null; } // try a failed one again later
+    if (t) { t.use = ++vtUse; return t; }
+    if (!fetchIt || !vtTpl) return null;
+    if (vtFails >= 8) { if (Date.now() - vtFailAt < 60000) return null; vtFails = 0; } // offline: rest a minute
+    if (vtFlight >= VT_FLIGHT) return null; // asked for again on a later redraw
+    t = VTS[k] = vtNew(z, x, y); t.use = ++vtUse; vtCount++; vtFlight++;
+    fetch(vtTpl.replace("{z}", z).replace("{x}", x).replace("{y}", y)).then(function (r) { if (!r.ok) throw new Error("tile"); return r.arrayBuffer(); }).then(function (buf) {
+      vtFlight--;
+      if (VTS[k] !== t) return; // dropped from the cache meanwhile
+      try { vtBuild(t, new Uint8Array(buf)); t.ok = true; vtFails = 0; } catch (e) { t.bad = true; t.badAt = Date.now(); }
+      vtPing();
+    }, function () { vtFlight--; t.bad = true; t.badAt = vtFailAt = Date.now(); vtFails++; });
+    if (vtCount > VT_CAP) { // keep only the most recently used ones
+      Object.keys(VTS).sort(function (a, c) { return VTS[a].use - VTS[c].use; }).slice(0, vtCount - VT_KEEP).forEach(function (kk) { delete VTS[kk]; });
+      vtCount = Object.keys(VTS).length;
+    }
+    return t;
+  }
+  function vtNew(z, x, y) {
+    var n = 1 << z, lat0 = merc2lat(y / n), lat1 = merc2lat((y + 1) / n), u = 360 / n / VT_EXT;
+    // local units: VT_EXT across the tile; y measured in the same degrees as x, down from its top edge
+    return { z: z, x: x, y: y, n: n, lon0: x / n * 360 - 180, lat0: lat0, u: u, h: (lat0 - lat1) / u, p: {}, places: [], any: false };
+  }
+  // ---- a small reader for the tiles' Protocol Buffers (the Mapbox Vector Tile format)
+  function pv(P) { var b = P.b, v = 0, m = 1, c; do { c = b[P.p++]; v += (c & 127) * m; m *= 128; } while (c >= 128); return v; }
+  function pskip(P, wt) {
+    if (wt === 0) pv(P); else if (wt === 1) P.p += 8; else if (wt === 2) P.p += pv(P); else if (wt === 5) P.p += 4; else throw new Error("pbf");
+  }
+  function pstr(P) { var n = pv(P), s = VT_TD.decode(P.b.subarray(P.p, P.p + n)); P.p += n; return s; }
+  function pval(P, e) {
+    var v = null;
+    while (P.p < e) {
+      var tg = pv(P), f = tg >> 3;
+      if (f === 1) v = pstr(P);
+      else if (f === 2) { v = new DataView(P.b.buffer, P.b.byteOffset + P.p, 4).getFloat32(0, true); P.p += 4; }
+      else if (f === 3) { v = new DataView(P.b.buffer, P.b.byteOffset + P.p, 8).getFloat64(0, true); P.p += 8; }
+      else if (f === 4 || f === 5) v = pv(P);
+      else if (f === 6) { var s = pv(P); v = s % 2 ? -(s + 1) / 2 : s / 2; }
+      else if (f === 7) v = !!pv(P);
+      else pskip(P, tg & 7);
+    }
+    return v;
+  }
+  var VT_WANT = { water: 1, waterway: 1, landcover: 1, park: 1, transportation: 1, boundary: 1, place: 1, building: 1 };
+  function vtBuild(t, u8) {
+    var P = { b: u8, p: 0 };
+    while (P.p < u8.length) {
+      var tg = pv(P);
+      if (tg === 26) { var ln = pv(P), e = P.p + ln; vtLayer(t, P, e); P.p = e; } // field 3: a layer
+      else pskip(P, tg & 7);
+    }
+  }
+  function vtLayer(t, P, end) {
+    var name = "", feats = [], keys = [], vals = [], ext = 4096;
+    while (P.p < end) {
+      var tg = pv(P), f = tg >> 3, wt = tg & 7;
+      if (f === 1 && wt === 2) { name = pstr(P); if (!VT_WANT[name]) return; }
+      else if (f === 2 && wt === 2) { var n = pv(P); feats.push(P.p, P.p + n); P.p += n; }
+      else if (f === 3 && wt === 2) keys.push(pstr(P));
+      else if (f === 4 && wt === 2) { var n4 = pv(P), e4 = P.p + n4; vals.push(pval(P, e4)); P.p = e4; }
+      else if (f === 5 && wt === 0) ext = pv(P);
+      else pskip(P, wt);
+    }
+    if (!VT_WANT[name]) return;
+    for (var i = 0; i < feats.length; i += 2) {
+      P.p = feats[i]; var fe = feats[i + 1], tags = {}, type = 0, gs = 0, ge = 0;
+      while (P.p < fe) {
+        var tg2 = pv(P), f2 = tg2 >> 3, wt2 = tg2 & 7;
+        if (f2 === 2 && wt2 === 2) { var te = pv(P) + P.p; while (P.p < te) { var ki = pv(P), vi = pv(P); tags[keys[ki]] = vals[vi]; } }
+        else if (f2 === 3 && wt2 === 0) type = pv(P);
+        else if (f2 === 4 && wt2 === 2) { var gn = pv(P); gs = P.p; ge = P.p + gn; P.p = ge; }
+        else pskip(P, wt2);
+      }
+      var bk = vtBucket(name, tags, type);
+      if (!bk) continue;
+      t.any = true;
+      if (bk === "place") { vtPlace(t, P, gs, ge, ext, tags); continue; }
+      vtGeom(t, P, gs, ge, ext, t.p[bk] || (t.p[bk] = new Path2D()), type === 3);
+    }
+    if (name === "water" || name === "transportation" || name === "landcover") t.any = t.any || feats.length > 0;
+  }
+  function vtBucket(layer, g, type) {
+    var c = g["class"];
+    if (layer === "water") return type === 3 && !(g.brunnel === "tunnel") ? (c === "ocean" || c === "lake" ? "sea" : "pond") : null;
+    if (layer === "landcover") return type !== 3 ? null : c === "wood" || c === "forest" ? "wood" : c === "wetland" ? "wet" : c === "sand" || c === "beach" ? "sand" : null;
+    if (layer === "park") return type === 3 ? "park" : null;
+    if (layer === "waterway") return type !== 2 || g.brunnel === "tunnel" ? null : c === "river" || c === "canal" ? "river" : "stream";
+    if (layer === "building") return type === 3 ? "bld" : null;
+    if (layer === "boundary") return type !== 2 || g.maritime == 1 ? null : g.admin_level <= 2 ? "b2" : g.admin_level <= 4 ? "b4" : null;
+    if (layer === "place") return type === 1 && g.name && VT_PLACE[c] ? "place" : null;
+    if (layer === "transportation") {
+      if (type !== 2 || g.brunnel === "tunnel") return null;
+      return c === "motorway" || c === "trunk" ? "r1" : c === "primary" ? "r2" : c === "secondary" || c === "tertiary" ? "r3" :
+        c === "minor" ? "r4" : c === "service" || c === "track" ? "r5" : c === "path" ? "r6" : null;
+    }
+    return null;
+  }
+  // tile units -> the tile's own little lon/lat grid (x is linear in longitude already; y becomes latitude)
+  function vtGeom(t, P, gs, ge, ext, path, poly) {
+    P.p = gs; var x = 0, y = 0, cmd = 0, cnt = 0, sc = VT_EXT / ext, open = false;
+    while (P.p < ge) {
+      if (!cnt) {
+        var ci = pv(P); cmd = ci & 7; cnt = ci >> 3;
+        if (cmd === 7) { if (poly && open) path.closePath(); open = false; cnt = 0; continue; }
+        if (!cnt) continue;
+      }
+      var dx = pv(P), dy = pv(P); cnt--;
+      x += (dx >>> 1) ^ -(dx & 1); y += (dy >>> 1) ^ -(dy & 1);
+      var ly = (t.lat0 - merc2lat((t.y + y / ext) / t.n)) / t.u;
+      if (cmd === 1) { path.moveTo(x * sc, ly); open = true; } else path.lineTo(x * sc, ly);
+    }
+  }
+  var VT_PLACE = { city: 1, town: 2, village: 3, suburb: 3, hamlet: 4, neighbourhood: 4, quarter: 4, island: 3 };
+  function vtPlace(t, P, gs, ge, ext, g) {
+    P.p = gs; var ci = pv(P); if ((ci & 7) !== 1) return;
+    var dx = pv(P), dy = pv(P), x = (dx >>> 1) ^ -(dx & 1), y = (dy >>> 1) ^ -(dy & 1);
+    if (x < 0 || y < 0 || x >= ext || y >= ext) return; // (one tile's buffer repeats its neighbour's names)
+    t.places.push({ lon: t.lon0 + x / ext * 360 / t.n, lat: merc2lat((t.y + y / ext) / t.n), name: String(g["name:en"] || g.name_en || g["name:latin"] || g.name),
+      lv: VT_PLACE[g["class"]], rank: +g.rank || 99 });
+  }
+  // ---- painting: the colours are the map's own (land, sea, border line), so the detail reads as SnakeList
+  function vtPalette() {
+    var cs = getComputedStyle(document.documentElement), dark = document.documentElement.getAttribute("data-sl-theme") === "dark";
+    var land = cs.getPropertyValue("--map-off").trim() || (dark ? "#2b6a4b" : "#c9ccbb"), sea = cs.getPropertyValue("--map-sea").trim() || (dark ? "#0c2519" : "#dbe4ea");
+    var line = window.SL_BORDER ? window.SL_BORDER() : dark ? "rgba(190,224,200,0.34)" : "#7f8c74";
+    return dark ? { land: land, sea: sea, line: line, wood: "rgba(8,46,26,0.30)", wet: "rgba(12,37,25,0.30)", sand: "rgba(240,235,200,0.08)",
+      bld: "rgba(200,236,210,0.14)", road: "#4b8064", road1: "#62957a", ink: cs.getPropertyValue("--text").trim() || "#eef6ee", halo: sea }
+      : { land: land, sea: sea, line: line, wood: "rgba(63,125,67,0.14)", wet: "rgba(110,150,150,0.16)", sand: "rgba(255,252,235,0.35)",
+      bld: "rgba(110,122,100,0.24)", road: "#e7e8de", road1: "#f4f2e6", ink: cs.getPropertyValue("--text").trim() || "#24321f", halo: land };
+  }
+  // one tile's shapes, clipped to the square sq ([z, x, y] - itself, or a missing child it stands in for)
+  function vtDraw(ctx, b, t, sq, Zc, pal, water) {
+    var k = b[2] / 360 * t.u; // screen pixels per local unit
+    var ox = b[0] + (t.lon0 + 180) / 360 * b[2], oy = b[1] + (90 - t.lat0) / 180 * b[3];
+    var rx = 0, ry = 0, rw = VT_EXT, rh = t.h;
+    if (sq[0] !== t.z) {
+      var nn = 1 << sq[0], la = merc2lat(sq[2] / nn), lb = merc2lat((sq[2] + 1) / nn);
+      rx = ((sq[1] / nn * 360 - 180) - t.lon0) / t.u; rw = 360 / nn / t.u; ry = (t.lat0 - la) / t.u; rh = (la - lb) / t.u;
+    }
+    var P = t.p, px = 1 / k;
+    ctx.save();
+    ctx.translate(ox, oy); ctx.scale(k, k);
+    ctx.beginPath(); ctx.rect(rx, ry, rw + px * 0.6, rh + px * 0.6); ctx.clip();
+    if (water) { vtWater(ctx, P, Zc, pal, px); ctx.restore(); return; } // (water only: the overlay above coloured land)
+    ctx.fillStyle = pal.land; ctx.fillRect(rx, ry, rw + px, rh + px);
+    if (P.wood) { ctx.fillStyle = pal.wood; ctx.fill(P.wood); }
+    if (P.park) { ctx.fillStyle = pal.wood; ctx.fill(P.park); }
+    if (P.wet) { ctx.fillStyle = pal.wet; ctx.fill(P.wet); }
+    if (P.sand) { ctx.fillStyle = pal.sand; ctx.fill(P.sand); }
+    vtWater(ctx, P, Zc, pal, px, true);
+    var grow = vtGrow(Zc, px);
+    if (P.bld && Zc >= 14.3) { ctx.fillStyle = pal.bld; ctx.fill(P.bld); }
+    // roads: plain light lines, the big ones a little wider and brighter
+    var R = [["r6", 0.6, 16, 15.5], ["r5", 0.8, 15, 14], ["r4", 1.1, 14, 12.6], ["r3", 1.5, 13, 10.5], ["r2", 1.9, 12, 8.5], ["r1", 2.4, 11, 0]];
+    R.forEach(function (r) {
+      if (!P[r[0]] || Zc < r[3]) return;
+      ctx.strokeStyle = r[0] === "r1" || r[0] === "r2" ? pal.road1 : pal.road; ctx.lineWidth = grow(r[1], r[2]);
+      if (r[0] === "r6") ctx.setLineDash([2 * px, 2.5 * px]);
+      ctx.stroke(P[r[0]]);
+      if (r[0] === "r6") ctx.setLineDash([]);
+    });
+    // coasts, lake shores and borders: the map's one border line, the same width as everywhere else
+    ctx.strokeStyle = pal.line;
+    if (P.sea) { ctx.lineWidth = 0.85 * px; ctx.stroke(P.sea); }
+    if (P.b4) { ctx.lineWidth = 0.7 * px; ctx.setLineDash([4 * px, 3 * px]); ctx.stroke(P.b4); ctx.setLineDash([]); }
+    if (P.b2) { ctx.lineWidth = 1.1 * px; ctx.stroke(P.b2); }
+    ctx.restore();
+  }
+  function vtGrow(Zc, px) { return function (w0, z0) { return Math.max(0.5, Math.min(w0 * 4, w0 * Math.pow(1.45, Zc - z0))) * px; }; }
+  function vtWater(ctx, P, Zc, pal, px, under) {
+    var grow = vtGrow(Zc, px);
+    ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = pal.sea;
+    if (P.stream && Zc >= 12.5) { ctx.lineWidth = grow(0.8, 14); ctx.stroke(P.stream); }
+    if (P.river) { ctx.lineWidth = grow(1.4, 12); ctx.stroke(P.river); }
+    ctx.fillStyle = pal.sea;
+    if (P.pond) ctx.fill(P.pond);
+    if (P.sea) ctx.fill(P.sea);
+    if (!under && P.sea) { ctx.strokeStyle = pal.line; ctx.lineWidth = 0.85 * px; ctx.stroke(P.sea); }
+  }
+  // the detail for one view: draws what's loaded, asks for what isn't. Returns how much it covered.
+  function vtPaint(ctx, b, w, h, Zc, alpha, water) {
+    vtIndex();
+    if (!vtTpl) return { cover: false, drawn: 0, places: [] };
+    var z = Math.min(VT_MAX, Math.max(0, Math.round(Zc))), n = 1 << z;
     var lonA = Math.max(-180, -b[0] / b[2] * 360 - 180), lonB = Math.min(180, (w - b[0]) / b[2] * 360 - 180);
     var latA = Math.min(85.05, 90 + b[1] / b[3] * 180), latB = Math.max(-85.05, 90 - (h - b[1]) / b[3] * 180);
-    if (lonA >= lonB || latA <= latB) return;
+    if (lonA >= lonB || latA <= latB) return { cover: false, drawn: 0, places: [] };
     var x0, x1, y0, y1;
-    for (;;) {
+    for (;;) { // a very big screen: one level coarser rather than more tiles than the cache holds
       x0 = Math.max(0, Math.floor((lonA + 180) / 360 * n)); x1 = Math.min(n - 1, Math.floor((lonB + 180) / 360 * n));
       y0 = Math.max(0, Math.floor(mercY(latA) * n)); y1 = Math.min(n - 1, Math.floor(mercY(latB) * n));
-      if ((x1 - x0 + 1) * (y1 - y0 + 1) <= TILE_VIEW || z <= zFloor) break;
+      if ((x1 - x0 + 1) * (y1 - y0 + 1) <= VT_VIEW || z <= 3) break;
       z--; n = 1 << z;
     }
-    window.SL_STREET_TILE_Z = z;
-    var gap = 0.6 / dpr, drawn = 0, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, list = [];
+    window.SL_DETAIL_Z = z; // (for checking: the tile zoom in use)
+    var cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, list = [], pal = vtPalette(), drawn = 0, all = true, places = [], seen = {};
     for (var ty = y0; ty <= y1; ty++) for (var tx = x0; tx <= x1; tx++) list.push([tx, ty]);
     list.sort(function (p, q) { return Math.abs(p[0] - cx) + Math.abs(p[1] - cy) - Math.abs(q[0] - cx) - Math.abs(q[1] - cy); });
     ctx.save();
-    ctx.globalAlpha = alpha; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+    ctx.globalAlpha = alpha;
     list.forEach(function (p) {
-      var t = satTile(z, p[0], p[1], true, tpl);
-      if (t && t.ok) { drawSatTile(ctx, b, t.img, z, p[0], p[1], z, gap); drawn++; return; }
-      for (var za = z - 1; za >= zFloor; za--) { // a parent tile, scaled up, until this one arrives
-        var d = z - za, pt = satTile(za, p[0] >> d, p[1] >> d, false, tpl);
-        if (pt && pt.ok) { drawSatTile(ctx, b, pt.img, z, p[0], p[1], za, gap); drawn++; return; }
-      }
+      var t = vtTile(z, p[0], p[1], true), use = t && t.ok ? t : null;
+      // until it arrives, its nearest loaded parent stands in (a little blurrier, never blank)
+      for (var za = z - 1; !use && za >= Math.max(0, z - 6); za--) { var d = z - za, pt = vtTile(za, p[0] >> d, p[1] >> d, za === z - 3); if (pt && pt.ok) use = pt; }
+      if (!use || !use.any) { all = false; return; }
+      vtDraw(ctx, b, use, [z, p[0], p[1]], Zc, pal, water); drawn++;
+      var key = use.z + "/" + use.x + "/" + use.y;
+      if (!seen[key]) { seen[key] = 1; places.push.apply(places, use.places); }
     });
-    if (drawn && dark) { ctx.globalAlpha = alpha * 0.22; ctx.fillStyle = "#0f3a24"; ctx.fillRect(b[0], b[1], b[2], b[3]); } // a touch of the app's night green
     ctx.restore();
-    if (drawn) {
-      ctx.save();
-      ctx.font = "9.5px Inter, sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
-      ctx.fillStyle = dark ? "rgba(255,255,255,0.8)" : "rgba(30,40,30,0.8)"; ctx.shadowColor = dark ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.8)"; ctx.shadowBlur = 2;
-      ctx.fillText(STREET_ATTR, w - 62, h - 6); // (left of the 3D button)
+    return { cover: all && drawn > 0, drawn: drawn, places: places };
+  }
+  // town names: SnakeList's label lettering (Inter, a halo in the map's own colour), bigger places first, never overlapping
+  function vtLabels(ctx, b, w, h, Zc, alpha, places, pal, keepOut) {
+    var maxLv = Zc < 8 ? 1 : Zc < 10.3 ? 2 : Zc < 12.8 ? 3 : 4;
+    var boxes = (keepOut || []).slice(), drawnN = 0, named = {};
+    places = places.filter(function (p) { return p.lv <= maxLv; }).sort(function (p, q) { return p.lv - q.lv || p.rank - q.rank; });
+    ctx.save();
+    ctx.globalAlpha = alpha; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineJoin = "round";
+    for (var i = 0; i < places.length && drawnN < 60; i++) {
+      var p = places[i], x = b[0] + (p.lon + 180) / 360 * b[2], y = b[1] + (90 - p.lat) / 180 * b[3];
+      if (x < 0 || y < 0 || x > w || y > h) continue;
+      var big = p.lv === 1 || (p.lv === 2 && Zc >= 10.3), fs = big ? 13 : p.lv <= 3 ? 12 : 11;
+      ctx.font = (big ? 700 : 600) + " " + fs + "px Inter, sans-serif";
+      var tw = ctx.measureText(p.name).width, bx = [x - tw / 2 - 4, y - fs / 2 - 3, x + tw / 2 + 4, y + fs / 2 + 3];
+      if (bx[0] < 2 || bx[1] < 2 || bx[2] > w - 2 || bx[3] > h - 2) continue; // whole names only
+      // (the same name twice close together - an island and its district - shows once)
+      if ((named[p.name] || []).some(function (q) { return Math.abs(q[0] - x) + Math.abs(q[1] - y) < 260; })) continue;
+      if (boxes.some(function (o) { return !(bx[2] < o[0] || bx[0] > o[2] || bx[3] < o[1] || bx[1] > o[3]); })) continue;
+      boxes.push(bx); drawnN++; (named[p.name] = named[p.name] || []).push([x, y]);
+      ctx.lineWidth = 3.5; ctx.strokeStyle = pal.halo; ctx.strokeText(p.name, x, y);
+      ctx.fillStyle = pal.ink; ctx.fillText(p.name, x, y);
+    }
+    ctx.restore();
+  }
+  function vtCredit(ctx, x, y, align, pal) {
+    ctx.save();
+    ctx.font = "9.5px Inter, sans-serif"; ctx.textAlign = align; ctx.textBaseline = "bottom";
+    ctx.fillStyle = pal.ink; ctx.globalAlpha = 0.75; ctx.shadowColor = pal.halo; ctx.shadowBlur = 2;
+    ctx.fillText(VT_ATTR, x, y);
+    ctx.restore();
+  }
+  // the main map's hooks (renderFlat): the detail goes on just after the land, its names and credit near the end
+  // Painted once into a picture a little bigger than the screen (VR), which each frame just
+  // places: a drag only moves that picture, and a zoom stretches it until it settles - the
+  // shapes are only painted again when the view leaves it, the zoom has moved on, a tile
+  // arrives or the theme changes. (Painting every shape every frame halved the frame rate.)
+  var VR = null, vrTimer = 0;
+  function vrRender(b, w, h, Zc, dpr) {
+    var mw = Math.round(w * 0.25), mh = Math.round(h * 0.25), W = w + 2 * mw, H = h + 2 * mh;
+    var q = Math.min(dpr, Math.sqrt(16e6 / (W * H))); // (a giant screen: a softer picture, never a huge one)
+    var cv = VR && VR.cv && VR.cv.width === Math.round(W * q) && VR.cv.height === Math.round(H * q) ? VR.cv : document.createElement("canvas");
+    cv.width = Math.round(W * q); cv.height = Math.round(H * q);
+    var g = cv.getContext("2d"); g.setTransform(q, 0, 0, q, 0, 0);
+    var bb = [b[0] + mw, b[1] + mh, b[2], b[3]], r = vtPaint(g, bb, W, H, Zc, 1);
+    VR = { cv: cv, b: bb, W: W, H: H, Zc: Zc, q: q, dpr: dpr, theme: document.documentElement.getAttribute("data-sl-theme"), r: r, dirty: false, wcv: VR && VR.wcv, wok: false };
+  }
+  function vrWater() { // the same view's water alone, on a clear picture (made only when something colours the land)
+    if (VR.wok) return VR.wcv;
+    var cv = VR.wcv && VR.wcv.width === VR.cv.width && VR.wcv.height === VR.cv.height ? VR.wcv : document.createElement("canvas");
+    cv.width = VR.cv.width; cv.height = VR.cv.height;
+    var g = cv.getContext("2d"); g.setTransform(VR.q, 0, 0, VR.q, 0, 0);
+    vtPaint(g, VR.b, VR.W, VR.H, VR.Zc, 1, true);
+    VR.wcv = cv; VR.wok = true;
+    return cv;
+  }
+  window.SL_MAP_DETAIL = function (ctx, b, w, h) {
+    vtLab = null;
+    var off = function () { window.SL_DETAIL_Z = 0; VR = null; };
+    if (!(window.SL_SG_ON && window.SL_SG_ON()) || st.style !== "classic" || vtOff()) return off();
+    var Zc = Math.log(b[2] / 512) / Math.LN2; // the zoom this view is at (512px tiles' terms)
+    var alpha = Math.max(0, Math.min(1, (Zc - 6.2) / 1.6)); // fades in from about a region to a town
+    if (alpha <= 0) return off();
+    vtIndex(); if (!vtTpl) return;
+    var dpr = ctx.getTransform ? ctx.getTransform().a : Math.min(2, window.devicePixelRatio || 1);
+    var s = VR ? b[2] / VR.b[2] : 1, inside = VR && (0 - b[0]) / s + VR.b[0] >= -0.5 && (0 - b[1]) / s + VR.b[1] >= -0.5 &&
+      (w - b[0]) / s + VR.b[0] <= VR.W + 0.5 && (h - b[1]) / s + VR.b[1] <= VR.H + 0.5;
+    var hard = !VR || VR.dpr !== dpr || VR.theme !== document.documentElement.getAttribute("data-sl-theme"), now = Date.now();
+    if (hard || VR.dirty || !inside || Math.abs(Zc - VR.Zc) > 0.25) {
+      // while a drag or zoom goes on, painted again at most every 120 ms (the stretched or
+      // shifted picture stands in, the plain map showing at an edge for a moment)
+      if (hard || now - VR.at >= 120) { vrRender(b, w, h, Zc, dpr); VR.at = now; s = 1; }
+      else { clearTimeout(vrTimer); vrTimer = setTimeout(function () { window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); }, 125 - (now - VR.at)); }
+    } else if (Math.abs(Zc - VR.Zc) > 0.01) { // stretched for now: sharp again once the zoom rests
+      clearTimeout(vrTimer); vrTimer = setTimeout(function () { if (VR) { VR.dirty = true; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); } }, 180);
+    }
+    var r = VR.r;
+    ctx.save();
+    ctx.globalAlpha = alpha; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(VR.cv, b[0] - VR.b[0] * s, b[1] - VR.b[1] * s, VR.W * s, VR.H * s);
+    ctx.restore();
+    // all of the view covered: the map's own 1:10m coast and border lines step aside (they're
+    // a few hundred metres out at this scale), OpenStreetMap's are drawn in the same style
+    window.SL_DETAIL_COVER = r.cover ? alpha : 0;
+    if (r.drawn) vtLab = { b: b, w: w, h: h, Zc: Zc, alpha: alpha, places: r.places, at: [b[0] - VR.b[0] * s, b[1] - VR.b[1] * s, VR.W * s, VR.H * s] };
+  };
+  window.SL_MAP_DETAIL_LABELS = function (ctx, coloured) {
+    var L = vtLab; vtLab = null;
+    if (!L) return;
+    if (coloured && VR) {
+      ctx.save(); ctx.globalAlpha = L.alpha; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(vrWater(), L.at[0], L.at[1], L.at[2], L.at[3]);
       ctx.restore();
     }
+    var pal = vtPalette(), keep = [], cr = ctx.canvas.getBoundingClientRect(), stg = document.getElementById("globe-stage");
+    // names stay clear of the buttons over the map and of the credit line
+    if (stg) [].forEach.call(stg.querySelectorAll(".map-tools, .layers-wrap, .globe-zoom, #globe-btns, #td-toggle, #map-legend, .globe-hint, #sg-note"), function (el) {
+      var r = el.offsetParent && el.getBoundingClientRect();
+      if (r && r.width) keep.push([r.left - cr.left - 4, r.top - cr.top - 4, r.right - cr.left + 4, r.bottom - cr.top + 4]);
+    });
+    ctx.save(); ctx.font = "9.5px Inter, sans-serif"; var cw = ctx.measureText(VT_ATTR).width; ctx.restore();
+    keep.push([L.w - 62 - cw - 4, L.h - 20, L.w, L.h]);
+    vtLabels(ctx, L.b, L.w, L.h, L.Zc, L.alpha, L.places, pal, keep);
+    vtCredit(ctx, L.w - 62, L.h - 6, "right", pal); // (left of the 3D button)
   };
   function setStyle(style) {
     var prev = st.style;
@@ -21455,34 +21762,41 @@ window.SL_GEO_READY = new Promise(function (res) {
       '<div class="sgv-acts">' + (has3d ? '<button type="button" class="sgv-3d"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 9 5v10l-9 5-9-5V7z"></path><path d="m3 7 9 5 9-5M12 12v10"></path></svg> Explore in 3D</button>' : "") +
       (window.SL_SP_PAGE_URL && window.SL_SP_PAGE_URL(sp.id) ? '<a class="sgv-page" href="' + esc(window.SL_SP_PAGE_URL(sp.id)) + '" target="_blank" rel="noopener">Species page</a>' : "") + "</div></section>";
   }
-  // the exact spot: a small street map with a pin (and the accuracy circle), from the same tiles
+  // the exact spot: a small map with a pin (and the accuracy circle), drawn in SnakeList's own
+  // colours from the same close-up detail as the big map (OpenStreetMap data via OpenFreeMap)
   function sgMiniMap(el, lat, lon, acc, fuzzy) {
     var W = el.clientWidth || 320, H = el.clientHeight || 170, dpr = Math.min(2, window.devicePixelRatio || 1);
     var c = document.createElement("canvas"); c.width = W * dpr; c.height = H * dpr; c.style.width = "100%"; c.style.height = H + "px";
     el.insertBefore(c, el.firstChild);
     var g = c.getContext("2d"); g.scale(dpr, dpr);
-    var z = fuzzy ? 10 : acc > 5000 ? 11 : acc > 1000 ? 13 : 15, n = 1 << z, world = 256 * n;
-    var px = (lon + 180) / 360 * world, py = mercY(lat) * world, left = px - W / 2, top = py - H / 2;
-    var dark = document.documentElement.getAttribute("data-sl-theme") === "dark", tpl = dark ? STREET.dark : STREET.light, pending = 0, ok = 0;
-    var mpp = 156543.03 * Math.cos(lat * Math.PI / 180) / n;
+    var Zc = fuzzy ? 9 : acc > 5000 ? 10 : acc > 1000 ? 12 : 14, bw = 512 * Math.pow(2, Zc);
+    var bb = [W / 2 - (lon + 180) / 360 * bw, H / 2 - (90 - lat) / 180 * bw / 2, bw, bw / 2];
+    var mx = 111320 * Math.cos(lat * Math.PI / 180) * 360 / bw, my = 111320 * 360 / bw; // metres per pixel, across and up
+    var useDetail = liveOK && !vtOff(), first = true, drewAny = false;
+    var miniKeep = function () { // its names stay clear of the "Show on the map" button and the credit
+      var keep = [[0, H - 16, 290, H]], cr = c.getBoundingClientRect(), bt = el.querySelector(".sgv-onmap"), r = bt && bt.getBoundingClientRect();
+      if (r && r.width) keep.push([r.left - cr.left - 4, r.top - cr.top - 4, r.right - cr.left + 4, r.bottom - cr.top + 4]);
+      return keep;
+    };
     var draw = function () {
-      g.fillStyle = dark ? "#16261d" : "#e8ece4"; g.fillRect(0, 0, W, H);
-      tiles.forEach(function (t) { if (t.ok) g.drawImage(t.img, t.x * 256 - left, t.y * 256 - top, 256, 256); });
-      var x = W / 2, y = H / 2, ar = acc > 0 ? acc / mpp : 0;
-      if (ar > 6 && ar < W * 2) { g.beginPath(); g.arc(x, y, ar, 0, Math.PI * 2); g.fillStyle = "rgba(88,179,81,0.16)"; g.fill(); g.lineWidth = 1.5; g.strokeStyle = "rgba(46,133,55,0.8)"; g.stroke(); }
+      if (!c.isConnected && !first) return false;
+      first = false;
+      var pal = vtPalette();
+      g.fillStyle = pal.land; g.fillRect(0, 0, W, H);
+      var r = useDetail ? vtPaint(g, bb, W, H, Zc, 1) : { cover: false, drawn: 0, places: [] };
+      if (r.drawn) { drewAny = true; vtLabels(g, bb, W, H, Zc, 1, r.places, pal, miniKeep()); vtCredit(g, 6, H - 4, "left", pal); el.classList.remove("sgv-nomap"); }
+      var x = W / 2, y = H / 2, rx = acc > 0 ? acc / mx : 0, ry = acc > 0 ? acc / my : 0;
+      if (rx > 6 && rx < W * 2) { g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); g.fillStyle = "rgba(88,179,81,0.16)"; g.fill(); g.lineWidth = 1.5; g.strokeStyle = "rgba(46,133,55,0.8)"; g.stroke(); }
       g.beginPath(); g.arc(x, y, 9, 0, Math.PI * 2); g.fillStyle = SG_GREEN; g.fill(); g.lineWidth = 3; g.strokeStyle = "#fff"; g.stroke();
       g.beginPath(); g.arc(x, y, 10.6, 0, Math.PI * 2); g.lineWidth = 1; g.strokeStyle = SG_EDGE; g.stroke();
+      return !r.cover; // keep redrawing as its tiles arrive, until the whole little map is there
     };
-    var tiles = [];
-    if (liveOK && !(window.claude && window.claude.use)) {
-      for (var ty = Math.floor(top / 256); ty <= Math.floor((top + H) / 256); ty++) for (var tx = Math.floor(left / 256); tx <= Math.floor((left + W) / 256); tx++) {
-        if (ty < 0 || ty >= n) continue;
-        var t = { x: tx, y: ty, img: new Image(), ok: false }; tiles.push(t); pending++;
-        t.img.onload = (function (t) { return function () { t.ok = true; ok++; draw(); }; })(t);
-        t.img.onerror = function () { if (--pending <= 0 && !ok) el.classList.add("sgv-nomap"); };
-        t.img.src = tpl.replace("{z}", z).replace("{x}", ((tx % n) + n) % n).replace("{y}", ty);
-      }
-    } else el.classList.add("sgv-nomap");
+    if (!useDetail) el.classList.add("sgv-nomap");
+    else {
+      // nothing after a while (offline, blocked): the coordinates are shown instead, as before
+      setTimeout(function () { if (c.isConnected && !drewAny) el.classList.add("sgv-nomap"); }, 6000);
+      vtWaiters.push(draw);
+    }
     draw();
   }
   function sgPhotos(o) { return (o && o.photos || []).filter(function (p) { return p && p.url; }); }
