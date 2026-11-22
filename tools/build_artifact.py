@@ -594,6 +594,7 @@ CLAUDE_CHECKS = [
     ("a", ') setStatus("The heatmap only loads on snakelist.com', True),
     ("a", ' ? " - open snakelist.com for them." : ".")', True),          # heatmap's "sightings" measure: live only
     ("b", "if (liveOK && !(", True),                                     # sightings map tiles
+    ("b", "function vtOff() { return !VT_TD || !window.Path2D || !!(", True),  # OpenFreeMap street detail: blocked in claude.ai
     ("b", "var web = !(", True),                                         # no cookie banner / consent (no analytics here)
     ("b", "load: function () { return FIREBASE_CONFIG && !(", True),    # accounts, sign-in: snakelist.com
     ("a", ') { formSay("Email accounts work on snakelist.com', True),
