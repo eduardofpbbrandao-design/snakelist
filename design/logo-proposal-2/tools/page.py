@@ -32,7 +32,7 @@ OPT = {
         'The head is about 10% bigger, with a thin dark edge where it lies on the coil and a bigger eye with a tiny shine. '
         'The S is a little taller. The tick is about 12% smaller with more room before it, so the snake S leads. In light mode the name is a shade deeper green; on dark grounds (dark mode, opening photo) "List" is brighter so it stands out.')),
     'B': dict(title='Option B: bolder', tag='Stronger at small sizes', note=(
-        'Everything in A, pushed further. The head is about 18% bigger with a clearer eye, and the forked tongue sticks out a bit further. The spots are a little darker, '
+        'Everything in A, pushed further. The head is about 7% bigger (a touch smaller than A) with a clear eye, and the forked tongue sticks out a bit further. The spots are a little darker, '
         'and the S is taller again. The tick is about 12% smaller, so the snake S leads. The name is a deeper forest green in light mode, "List" is brighter on dark grounds, and the app icon sits on SnakeList\'s own dark green.')),
 }
 

@@ -19,19 +19,19 @@ VARIANTS = {
               hscale=1.10, hpivot=-24, eye_r=5.0, eye_xy=(9.6, -6.6), hl=1.2, rim=1.6, rim_op=0.55, tongue=True,
               vb=(-23.5, 2.0, 153.0, 145.5)),
     'B': dict(snake='#5fbf56', eye='#123320', pat='#173d27', pat_op=0.68, group=True, bscale=0.93,
-              hscale=1.18, hpivot=-24, eye_r=5.8, eye_xy=(9.8, -6.4), hl=1.45, rim=2.2, rim_op=0.7, tongue=True, long_tongue=True,
-              vb=(-23.5, 2.0, 162.5, 145.5)),
+              hscale=1.07, hpivot=-24, eye_r=5.4, eye_xy=(9.8, -6.4), hl=1.35, rim=2.2, rim_op=0.7, tongue=True, long_tongue=True,
+              vb=(-23.5, 2.0, 156.0, 145.5)),
 }
 # small-size versions (favicon / <=48px): same art, fewer + bolder details
 SMALL = {
     'A': dict(VARIANTS['A'], bscale=0.98, pat_op=0.66, eye_r=6.4, hl=0, rim=2.6, rim_op=0.6, tongue=False, hscale=1.16, drop=3),
-    'B': dict(VARIANTS['B'], bscale=1.02, pat_op=0.74, eye_r=7.2, hl=0, rim=3.0, rim_op=0.75, tongue=False, hscale=1.26, drop=3),
+    'B': dict(VARIANTS['B'], bscale=1.02, pat_op=0.74, eye_r=7.2, hl=0, rim=3.0, rim_op=0.75, tongue=False, hscale=1.16, drop=3),
 }
 
 # 16-32px browser-tab sizes: fewer, softer spots and an oversized eye so the snake + eye still read
 TINY = {
     'A': dict(SMALL['A'], bscale=1.0, pat_op=0.5, eye_r=8.6, rim=3.2, rim_op=0.7, hscale=1.28, drop=4),
-    'B': dict(SMALL['B'], bscale=1.0, pat_op=0.55, eye_r=9.2, rim=3.4, rim_op=0.8, hscale=1.34, drop=4),
+    'B': dict(SMALL['B'], bscale=1.0, pat_op=0.55, eye_r=9.0, rim=3.4, rim_op=0.8, hscale=1.26, drop=4),
 }
 
 
