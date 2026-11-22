@@ -12,7 +12,7 @@ STYLE = {
     'A': dict(grad='radial-gradient(circle at 30% 40%, #8fd672 0%, #66b94e 0%, #4f9f3f 32%, #2f7426 100%)',
               sh=0.75, smr=-0.012, tml=0.12, tty=0.02, th=0.62),
     'B': dict(grad='radial-gradient(circle at 30% 40%, #84cc69 0%, #5bab46 0%, #45923a 32%, #276522 100%)',
-              sh=0.79, smr=-0.013, tml=0.135, tty=0.02, th=0.63),
+              sh=0.79, smr=-0.0374, tml=0.135, tty=0.02, th=0.63),
 }
 DARK_GRAD = {  # dark theme keeps today's brighter sweep so the name never sinks into the green page
     'cur': STYLE['cur']['grad'],

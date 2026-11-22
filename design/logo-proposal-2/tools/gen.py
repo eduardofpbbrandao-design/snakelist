@@ -19,8 +19,8 @@ VARIANTS = {
               hscale=1.10, hpivot=-24, eye_r=5.0, eye_xy=(9.6, -6.6), hl=1.2, rim=1.6, rim_op=0.55, tongue=True,
               vb=(-23.5, 2.0, 153.0, 145.5)),
     'B': dict(snake='#5fbf56', eye='#123320', pat='#173d27', pat_op=0.68, group=True, bscale=0.93,
-              hscale=1.18, hpivot=-24, eye_r=5.8, eye_xy=(9.8, -6.4), hl=1.45, rim=2.2, rim_op=0.7, tongue=True,
-              vb=(-23.5, 2.0, 158.0, 145.5)),
+              hscale=1.18, hpivot=-24, eye_r=5.8, eye_xy=(9.8, -6.4), hl=1.45, rim=2.2, rim_op=0.7, tongue=True, long_tongue=True,
+              vb=(-23.5, 2.0, 162.5, 145.5)),
 }
 # small-size versions (favicon / <=48px): same art, fewer + bolder details
 SMALL = {
@@ -66,9 +66,14 @@ def snake_inner(v, uid, colors_as_vars=True):
         er = v['eye_r'] / hs
         h.append(f'<circle cx="{ex + er * 0.38:.2f}" cy="{eyy - er * 0.38:.2f}" r="{v["hl"] / hs:.2f}" fill="#fff" fill-opacity="0.9"/>')
     if v['tongue']:
-        h.append(f'<path d="M24.6 2.2 L30.8 3.6" fill="none" stroke="{sn}" stroke-width="2.2" stroke-linecap="round"/>'
-                 f'<path d="M30.8 3.6 L34.8 2.2" fill="none" stroke="{sn}" stroke-width="1.8" stroke-linecap="round"/>'
-                 f'<path d="M30.8 3.6 L34.8 6.2" fill="none" stroke="{sn}" stroke-width="1.8" stroke-linecap="round"/>')
+        if v.get('long_tongue'):  # B (round 2c): ~35% longer, fork a touch wider
+            h.append(f'<path d="M24.6 2.2 L33.2 3.9" fill="none" stroke="{sn}" stroke-width="2.2" stroke-linecap="round"/>'
+                     f'<path d="M33.2 3.9 L38.4 1.3" fill="none" stroke="{sn}" stroke-width="1.8" stroke-linecap="round"/>'
+                     f'<path d="M33.2 3.9 L38.4 7.3" fill="none" stroke="{sn}" stroke-width="1.8" stroke-linecap="round"/>')
+        else:
+            h.append(f'<path d="M24.6 2.2 L30.8 3.6" fill="none" stroke="{sn}" stroke-width="2.2" stroke-linecap="round"/>'
+                     f'<path d="M30.8 3.6 L34.8 2.2" fill="none" stroke="{sn}" stroke-width="1.8" stroke-linecap="round"/>'
+                     f'<path d="M30.8 3.6 L34.8 6.2" fill="none" stroke="{sn}" stroke-width="1.8" stroke-linecap="round"/>')
     h.append('</g>')
     out.append(''.join(h))
     return ''.join(out)

@@ -15,7 +15,7 @@ SNAKE_ON = {'A': None, 'B': '#66c75c'}
 
 
 def tight_vb(v, small):
-    tip = {('A', False): 130.5, ('B', False): 135.5, ('A', True): 123, ('B', True): 128, ('A', 'tiny'): 126, ('B', 'tiny'): 129}[(v, small)]
+    tip = {('A', False): 130.5, ('B', False): 140, ('A', True): 123, ('B', True): 128, ('A', 'tiny'): 126, ('B', 'tiny'): 129}[(v, small)]
     x0, y0, y1 = -14.5, 1.0, 148.5
     return x0, y0, tip - x0, y1 - y0
 
