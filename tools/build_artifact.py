@@ -523,6 +523,12 @@ PREVIEWS_UI_JS = r"""
       var v = window.SL_PREVIEW_ON(p.key);
       return '<div class="sl-art-prev-row"><div><b>' + p.label + '</b><small>' + (p.about || "") + '</small></div>' +
         '<button type="button" class="sl-art-prev-sw' + (v ? " on" : "") + '" data-k="' + p.key + '" aria-pressed="' + v + '">' + (v ? "On" : "Off") + "</button></div>";
+    }).join("") + '<div class="sl-art-prev-h" style="margin-top:12px">See again <small>pop-ups that only come once</small></div>' + [
+      ["level", "First visit: How well do you know snakes?", "The screen new visitors see first"],
+      ["news", "What&rsquo;s new", "The updates panel"],
+      ["xwel", "Christmas welcome", "Merry Christmas from SnakeList! (turns the Christmas preview on)"]
+    ].map(function (a) {
+      return '<div class="sl-art-prev-row"><div><b>' + a[1] + '</b><small>' + a[2] + '</small></div><button type="button" class="sl-art-prev-sw sl-art-prev-show" data-show="' + a[0] + '">Show</button></div>';
     }).join("") + '<p class="sl-art-prev-n">Switching reloads SnakeList. Your list stays as it is.</p>';
     document.body.appendChild(pop);
     function place() {
@@ -535,6 +541,14 @@ PREVIEWS_UI_JS = r"""
     document.addEventListener("click", function (e) { if (!pop.hidden && !pop.contains(e.target)) shut(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !pop.hidden) { shut(); b.focus(); } });
     pop.addEventListener("click", function (e) {
+      var sh = e.target.closest(".sl-art-prev-show");
+      if (sh) {
+        var w = sh.getAttribute("data-show"); shut();
+        if (w === "level" && window.SL_LEVEL_OPEN) window.SL_LEVEL_OPEN({});
+        else if (w === "news") { var v = document.querySelector(".sl-ver"); if (v) v.click(); }
+        else if (w === "xwel") { try { localStorage.removeItem("sl-xmas-welcome-seen"); localStorage.setItem("sl-art-preview-xmas", "1"); } catch (er) {} setTimeout(function () { location.reload(); }, 150); }
+        return;
+      }
       var s = e.target.closest(".sl-art-prev-sw"); if (!s) return;
       var k = s.getAttribute("data-k"), v = !window.SL_PREVIEW_ON(k);
       try { localStorage.setItem("sl-art-preview-" + k, v ? "1" : "0"); } catch (er) {}
