@@ -76,6 +76,9 @@ head = f"""<!doctype html>
   gtag('js', new Date());
   gtag('config', 'G-PY2LJV389K');
 </script>
+<!-- Google AdSense (site verification + ads) - tools/add_adsense.py adds the same tag to every other page -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0736553562389933"
+     crossorigin="anonymous"></script>
 """
 # the Christmas preview switch (tools/xmas_loader.js): does nothing unless the visitor opens ?christmas
 _xm = open("tools/xmas_loader.js", encoding="utf-8").read().split("*/", 1)[1].strip()
@@ -342,3 +345,7 @@ self.addEventListener('fetch', (e) => {
 });
 """)
 print("built index.html")
+
+# Google AdSense on every other public page too (species, country, about, install, privacy, terms...)
+import subprocess, sys
+subprocess.run([sys.executable, "tools/add_adsense.py"], check=True)
