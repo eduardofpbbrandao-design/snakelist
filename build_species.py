@@ -94,11 +94,11 @@ def site_header(rel, here=""):
     def a(href, label, key):
         return '<a href="%s"%s>%s</a>' % (href, ' aria-current="page"' if key == here else "", label)
     return ('<header class="sl-top"><a class="sl-brand" href="%s"><img src="%sapp/icon-192-s.png" width="32" height="32" alt="">SnakeList</a>'
-            '<nav aria-label="Site">%s%s%s%s</nav></header>') % (rel, rel, a(rel, "Open the app", "app"), a(rel + "species/", "Species", "species"),
+            '<nav aria-label="Site">%s%s%s%s</nav></header>') % (rel, rel, a(rel, "Open SnakeList", "app"), a(rel + "species/", "Species", "species"),
                                                                  a(rel + "install.html", "Install", "install"), a(rel + "about-snakelist.html", "About", "about"))
 def site_footer(rel, note=""):
     return ('<footer class="sl-foot"><p><a class="sl-flogo" href="%s">SnakeList</a> &middot; made by <a href="%sabout.html">Eduardo Brandao</a></p>'
-            '<p class="sl-flinks"><a href="%s">Open the app</a><a href="%sspecies/">All species</a><a href="%sinstall.html">Install app</a>'
+            '<p class="sl-flinks"><a href="%s">Open SnakeList</a><a href="%sspecies/">All species</a><a href="%sinstall.html">Install app</a>'
             '<a href="%sabout-snakelist.html">About SnakeList</a><a href="%sabout.html">About creator</a><a href="%sprivacy.html">Privacy</a><a href="%sterms.html">Terms</a><a href="%sspecies/photo-credits.html">Photo credits</a></p>%s</footer>') % (
         rel, rel, rel, rel, rel, rel, rel, rel, rel, rel, ('<p class="sl-fnote">%s</p>' % note) if note else "")
 # Creative Commons licences, each linked to its official deed (the attribution the licences ask for)
@@ -257,7 +257,7 @@ def checklist_facts(c, rel="../"):
                   " <small>(%s on iNaturalist)</small>" % ("no confirmed records" if not c["spots"] else "recorded in %s place%s" % ("{:,}".format(c["spots"]), "" if c["spots"] == 1 else "s")))]
     rows.append(("Photos", "Yes" if c["photo"] else a("No photos yet", "f=chip-nophoto")))
     if not (c["fossil"] and FLAG["z"][2](c)): rows.append(("Extinct", a("Yes", "f=chip-extinct") if FLAG["z"][2](c) else "No"))  # (a fossil says it in its tag)
-    rows.append(("Habitats", (e(", ".join(hs)) + ' <small>(estimated, as in the app)</small>') if hs else NR))  # long: last, full width
+    rows.append(("Habitats", (e(", ".join(hs)) + ' <small>(estimated, as in SnakeList)</small>') if hs else NR))  # long: last, full width
     return ('<div class="sp-ftop">%s<button type="button" class="sp-fmore" aria-expanded="false" aria-controls="sp-fmore-list">See more</button></div>'
             '<dl class="sp-key sp-fkey" id="sp-fmore-list">%s</dl>' %
             ("".join('<span class="sp-ftag">%s</span>' % t for t in tags),
@@ -1132,7 +1132,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
                                                                          R.rich(x["text"]), R.cite(x.get("src"))))
             relx += '<h3>Similar species and how to tell them apart</h3><ul class="sp-sim">%s</ul>' % "".join(items)
         relx += rel_html(c, rel_g, rel_f)
-        relx += '<h3>Find snakes like it in the app</h3><ul class="sp-tags" aria-label="SnakeList filters">%s</ul>' % "".join(
+        relx += '<h3>Find snakes like it in SnakeList</h3><ul class="sp-tags" aria-label="SnakeList filters">%s</ul>' % "".join(
             '<li><a href="../?%s">%s</a></li>' % (esc(q), esc(t)) for t, q in tags)
         secs.append(("related", "Similar and related snakes", relx))
         # taxonomy: the classification, who described it, what the genus name means, names it has had
@@ -1378,13 +1378,13 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         nterr = sum(1 for n in c["countries"] if n in NONSOV)
         if c["fossil"]:
             actions = '<a class="sp-btn sp-btn2" href="../?sp=%s">Open in the SnakeList app</a>' % c["id"]
-            actnote = "Fossil snakes are in the app&rsquo;s checklist too, but there is nothing alive to see."
+            actnote = "Fossil snakes are in SnakeList&rsquo;s checklist too, but there is nothing alive to see."
         else:
             actions = ('<a class="sp-btn" href="../?sp=%s&amp;do=seen"><span aria-hidden="true">&#10003; </span>Mark seen</a>'
                        '<a class="sp-btn sp-btn2" href="../?sp=%s&amp;do=want"><span aria-hidden="true">&#9734; </span>Want to see</a>') % (c["id"], c["id"])
             if c["countries"]: actions += '<a class="sp-btn sp-btn2" href="../?map=%s">View on map</a>' % esc(quote(sci))
             actnote = ("&ldquo;Mark seen&rdquo; and &ldquo;Want to see&rdquo; open this snake in the SnakeList app, where your lists are kept on your device &ndash; "
-                       "tap the highlighted button on its card. &ldquo;View on map&rdquo; opens the app&rsquo;s map on it.")
+                       "tap the highlighted button on its card. &ldquo;View on map&rdquo; opens SnakeList&rsquo;s map on it.")
         page = PAGE.format(
             title=esc(title), desc=esc(mdesc), url=url, img=esc(img), img_alt=esc(img_alt), info_json=info_json, ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"),
             h1=esc(nm), sub=('<i>%s</i>%s' % (esc(sci), (' <span class="sp-auth">%s</span>' % esc(auth_short)) if auth else "")) if not c["is_sci"] else (esc(auth_short) if auth else ""),
@@ -2215,7 +2215,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
                  "".join(dchip("", "ff", f, k, f, "Family %s" % f) for k, f in famrows) + (dchip("", "ff", "-", fams[""], "family not recorded", "No family recorded") if fams.get("") else ""))),
             ("Habitats", nplural(len(hcount), "habitat group", "habitat groups"),
              '<ul class="cy-stats">%s</ul><p class="cy-dnote">Habitats are estimated from where each snake is recorded and what kind of snake it is, '
-             'as in the app; a snake can count in several.</p>' % "".join(
+             'as in SnakeList; a snake can count in several.</p>' % "".join(
                  dchip("", "xf", "hb:%d" % h, hcount[h], HAB_SECS[h], "The app's %s habitat filter" % HAB_SECS[h]) for h in range(len(HAB_SECS)) if hcount.get(h))),
             ("Characteristics", "%s venomous, %s constrictors" % ("{:,}".format(fl["V"]), "{:,}".format(fl["c"])),
              '<ul class="cy-stats">%s</ul><p class="cy-dnote">Constrictor and Non-constrictor count only snakes whose family or genus is documented '
