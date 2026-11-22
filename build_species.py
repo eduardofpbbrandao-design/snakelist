@@ -34,18 +34,18 @@ REDIRECT = """<!doctype html><html lang="en"><head><meta charset="utf-8"><title>
 # the app icon and the SnakeList wordmark going home, then the app, the species directory,
 # the install guide and the About page. rel = the way back to the site root ("../", "../../")
 # v5.93: every See more / See all / Show less button on the pages looks exactly like "See all families" on the app's home page: a
-# small plain pill (Inter 500 12px, 4px 11px, the app's border, surface and muted-text colours); pointed at, it gets the same
-# dark hover as every SnakeList button (sl-fx). "html" in front: wd.js adds its own .sl-more-btn style later in the page.
+# small plain pill (Inter 500 12px, 4px 11px, the app's border, surface and muted-text colours); pointed at, its border turns
+# green and its words darker, like See all families (no dark hover any more - Eduardo wanted the hover as it was before).
+# "html" in front: wd.js adds its own .sl-more-btn style later in the page.
 SEEMORE_CSS = (
     "html .sp-fmore,html .sp-all,html .sl-more-btn,details>summary::after{display:inline-flex;align-items:center;gap:0;min-height:0;margin:8px 0 0;"
     "font:500 12px/1.35 Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:4px 11px;border-radius:999px;border:1px solid #c8d6bc;"
     "background:#f6faf1;color:#55614f;box-shadow:none;cursor:pointer;transition:border-color .15s ease,color .15s ease}\n"
     "html .sp-fmore,details>summary::after{margin:0}html .sp-fmore::after{display:none}html:not(.js) .sp-all{display:none}html .sp-all[hidden],html .sl-more-btn[hidden],html .sp-fmore[hidden]{display:none}\n"
-    "html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover{border-color:#8fbf8f;color:#24321f}\n"
-    "details>summary:hover::after{background:rgba(12,26,18,.9);border-color:rgba(155,224,124,.65);color:#fff}\n"
+    "html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover,details>summary:hover::after{border-color:#8fbf8f;color:#24321f}\n"
     "@media (prefers-color-scheme:dark){:root{--sl-sb:rgba(155,224,124,.72);--sl-sb-hover:#b8f09f}}\n"
     "@media (prefers-color-scheme:dark){html .sp-fmore,html .sp-all,html .sl-more-btn,details>summary::after{border-color:#37855f;background:#24684a;color:#a8c9b4}"
-    "html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover{border-color:#6fbf8a;color:#dff5d6}}\n")
+    "html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover,details>summary:hover::after{border-color:#6fbf8a;color:#dff5d6}}\n")
 # v5.93: the app's Report button (a bug or an idea for the creator) on every page too, at the end of the header, top right
 PAGE_REPORT_CSS = (
     ".sl-report{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-left:6px;flex:none;align-self:center;"
