@@ -10,9 +10,9 @@ STYLE = {
     'cur': dict(grad='radial-gradient(circle at 30% 40%, #96dd78 0%, #6fc255 0%, #57ab45 32%, #38802a 100%)',
                 sh=0.71, smr=-0.003, tml=0.071, tty=0.02, th=0.70),
     'A': dict(grad='radial-gradient(circle at 30% 40%, #8fd672 0%, #66b94e 0%, #4f9f3f 32%, #2f7426 100%)',
-              sh=0.75, smr=-0.012, tml=0.135, tty=0.02, th=0.70),
+              sh=0.75, smr=-0.012, tml=0.12, tty=0.02, th=0.62),
     'B': dict(grad='radial-gradient(circle at 30% 40%, #84cc69 0%, #5bab46 0%, #45923a 32%, #276522 100%)',
-              sh=0.79, smr=-0.013, tml=0.16, tty=0.02, th=0.72),
+              sh=0.79, smr=-0.013, tml=0.135, tty=0.02, th=0.63),
 }
 DARK_GRAD = {  # dark theme keeps today's brighter sweep so the name never sinks into the green page
     'cur': STYLE['cur']['grad'],
@@ -23,6 +23,14 @@ HERO_GRAD = {  # the hero uses a brighter sweep on the dark photo
     'cur': 'radial-gradient(circle at 30% 40%, #b4ec98 0%, #8fd873 30%, #6cc052 62%, #4f9e3d 100%)',
     'A': 'radial-gradient(circle at 30% 40%, #b0ea93 0%, #8ad56e 30%, #66bb4d 62%, #489638 100%)',
     'B': 'radial-gradient(circle at 30% 40%, #aae68d 0%, #84d068 30%, #5fb447 62%, #418d33 100%)',
+}
+
+# round 2b: on dark grounds (dark theme, opening photo) "List" gets its own brighter sweep so it no longer
+# fades into the dark end of the word's gradient. Light mode keeps the deep forest green.
+LIST_GRAD = {
+    'cur': None,
+    'A': 'radial-gradient(circle at 30% 40%, #74c85a 0%, #62b84d 45%, #53a744 100%)',
+    'B': 'radial-gradient(circle at 30% 40%, #7acb5f 0%, #68bd51 45%, #58ad46 100%)',
 }
 
 uid_n = [0]
@@ -58,6 +66,8 @@ body{font-family:system-ui,sans-serif}
         c.append(f".m-{n} .tt{{background-image:{st['grad']}}} .dark .m-{n} .tt{{background-image:{DARK_GRAD[n]}}} .m-{n}.hero .tt{{background-image:{HERO_GRAD[n]}}}"
                  f".m-{n} .snake-s{{height:{st['sh']}em;margin-right:{st['smr']}em}}"
                  f".m-{n} .sl-tick{{height:{st['th']}em;margin-left:{st['tml']}em;transform:translateY({st['tty']}em)}}")
+        if LIST_GRAD[n]:
+            c.append(f".dark .m-{n} .tt em,.herobg .m-{n} .tt em{{background-image:{LIST_GRAD[n]};-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}}")
     return '\n'.join(c)
 
 

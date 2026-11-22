@@ -22,7 +22,7 @@ The "current" renders are screenshots of the running site. The A and B renders a
 1. **Spots:** the `#mark-snake` spots are painted as one group at a single opacity, using `fill: var(--sl-pat-solid)` with group opacity in place of one semi-transparent fill per spot. Overlapping spots no longer form darker smudges. The spots shrink a little (A ×0.87, B ×0.93), so each one stays separate at small sizes.
 2. **Head:** the head is scaled up from its back edge (A ×1.10, B ×1.18). A thin dark edge, clipped to the body, is drawn where the head lies over the coil, so the head reads as a head. The eye is bigger (r 4.26 → A 5.0, B 5.8) and has a small white highlight.
 3. **S size:** `.snake-s` gets a wider viewBox (`-23.5 2 153 145.5` for A, `-23.5 2 158 145.5` for B) so the tongue is no longer clipped. Its height goes from 0.71em to 0.75em (A) or 0.79em (B), on `.sl-titletext`, `.hero-mark`, `.hero-title.hero-wm` and `.intro-title`. `margin-right` is adjusted to -0.012em / -0.013em.
-4. **Space before the tick:** `.sl-tick` `margin-left` goes from 0.071em to 0.135em (A) or 0.16em (B), with the same change on `.hero-title.hero-wm .sl-tick` and `.intro-box`. For B the tick is 0.72em tall in place of 0.70em, so the `.intro-box` width and height calc needs the same 0.72em.
+4. **Smaller tick, more space before it (round 2b, Eduardo's request):** the tick is about 12% smaller, so the snake S gets the most attention. Its height goes from 0.70em to 0.62em (A) or 0.63em (B), on `.sl-tick` and `.hero-title.hero-wm .sl-tick`. `.intro-box` gets the same height, with width `calc(<h> * 36.9 / 36)`. The shape, diamonds, rattle and colours do not change, and it stays on the baseline (`translateY(0.02em)` is kept). `margin-left` goes from 0.071em to 0.12em (A) or 0.135em (B).
 5. **Snake colour:** `--sl-snake` goes from #58b351 to #5bb853 (A) or #5fbf56 (B), a touch brighter. `--sl-eye` goes from #1b412b to #163a24 (A) or #123320 (B). A new variable is added: `--sl-pat-solid` (#1a412b for A, #173d27 for B).
 6. **Lettering gradient, light mode:** `--mark-grad` gets slightly deeper toward forest green.
    - A: `#8fd672 / #66b94e / #4f9f3f 32% / #2f7426`
@@ -30,6 +30,23 @@ The "current" renders are screenshots of the running site. The A and B renders a
 
    Dark mode keeps today's gradient for A and uses a slightly brighter one for B, so the name never sinks into the dark page.
 7. **Opening screen:** `.sl-hero` keeps the brighter gradient over the photo.
+   - **Brighter "List" on dark grounds (round 2b, Eduardo's request):** "List" gets its own sweep in dark mode, on the opening photo and in the opening animation, so it no longer fades into the dark end of the word's gradient. The rule is:
+
+     ```css
+     [data-sl-theme="dark"] .sl-titletext em,
+     .sl-hero .sl-titletext em,
+     .sl-hero .hero-title.hero-wm .sl-titletext em .hl,
+     .intro-title em {
+       background-image: <list-grad>;
+       background-clip: text;
+       -webkit-text-fill-color: transparent;
+     }
+     ```
+
+     - A: `radial-gradient(circle at 30% 40%, #74c85a, #62b84d 45%, #53a744)`
+     - B: `radial-gradient(circle at 30% 40%, #7acb5f, #68bd51 45%, #58ad46)`
+
+     It stays in the same green family, and the weights are unchanged ("nake" 600, "List" 500). Light mode keeps the deeper "List" so it stays readable on pale paper.
 8. **My Sightings tab icon:** `#tab-sightings .snake-s` gets `--sl-pat-solid: rgba(0,0,0,0.45)`, so the one-colour tab icon keeps its spots.
 9. **Icons:** these files are replaced:
    - `favicon.svg` and `favicon.ico` (16/32/48)

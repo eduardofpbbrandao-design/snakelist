@@ -30,10 +30,10 @@ OPT = {
     'A': dict(title='Option A: light touch', tag='Closest to today', note=(
         'Same snake, same spots, same rattlesnake tick. The spots are cleaner and no longer blur into each other. '
         'The head is about 10% bigger, with a thin dark edge where it lies on the coil and a bigger eye with a tiny shine. '
-        'The S is a little taller, and the tick has more room. In light mode the name is a shade deeper green.')),
+        'The S is a little taller. The tick is about 12% smaller with more room before it, so the snake S leads. In light mode the name is a shade deeper green; on dark grounds (dark mode, opening photo) "List" is brighter so it stands out.')),
     'B': dict(title='Option B: bolder', tag='Stronger at small sizes', note=(
         'Everything in A, pushed further. The head is about 18% bigger with a clearer eye. The spots are a little darker, '
-        'and the S is taller again. The name is a deeper forest green, and the app icon sits on SnakeList\'s own dark green.')),
+        'and the S is taller again. The tick is about 12% smaller, so the snake S leads. The name is a deeper forest green in light mode, "List" is brighter on dark grounds, and the app icon sits on SnakeList\'s own dark green.')),
 }
 
 
@@ -128,7 +128,7 @@ def build():
     p = ['<title>SnakeList Logo Choice</title>', f'<style>{CSS}</style>', '<div class="wrap">',
          '<h1>SnakeList logo: pick one</h1>',
          '<p class="lede">Two updates to the logo SnakeList has now. Both keep the snake S with its spots, the same greens and the rattlesnake tick. '
-         'They make the snake a little bigger, give it a clearer head and eye, clean up the spots and give the tick more room. '
+         'They make the snake a little bigger, give it a clearer head and eye, and clean up the spots. The tick is about 12% smaller with more room before it, and "List" is brighter on dark grounds. '
          'Everything below is a screenshot of the real site, the first row as it is today and then with each option.</p>',
          '<ul class="same"><li>Same snake S and spot pattern</li><li>Same green colours</li><li>Same rattlesnake tick (diamonds + rattle)</li><li>Same lettering</li></ul>',
          '<div class="quick">']

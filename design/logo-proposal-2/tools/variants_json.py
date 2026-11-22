@@ -2,7 +2,7 @@
 import os, sys, json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from gen import VARIANTS, snake_inner, vbstr, W
-from harness import STYLE, DARK_GRAD
+from harness import STYLE, DARK_GRAD, LIST_GRAD
 
 
 def site_css(n):
@@ -14,7 +14,9 @@ def site_css(n):
             f".snake-s{{margin-right:{st['smr']}em}}\n"
             f".sl-titletext .snake-s,.hero-mark .snake-s,.hero-title.hero-wm .sl-titletext .snake-s,.intro-title .snake-s{{height:{st['sh']}em}}\n"
             f".sl-tick,.hero-title.hero-wm .sl-tick{{height:{st['th']}em;margin-left:{st['tml']}em}}\n"
-            f".intro-box{{margin-left:{st['tml']}em}}\n"
+            f".intro-box{{margin-left:{st['tml']}em;height:{st['th']}em;width:calc({st['th']}em * 36.9 / 36)}}\n"
+            f"[data-sl-theme=\"dark\"] .sl-titletext em,.sl-hero .sl-titletext em,.sl-hero .hero-title.hero-wm .sl-titletext em .hl,.intro-title em,.sl-hero .intro-title em"
+            f"{{background-image:{LIST_GRAD[n]};-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}}\n"
             f"#tab-sightings .snake-s{{margin:0;--sl-pat-solid:rgba(0,0,0,0.45)}}\n")
 
 
