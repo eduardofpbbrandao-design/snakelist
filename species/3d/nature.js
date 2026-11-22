@@ -4,6 +4,7 @@
 // Return true to replace viewer.js's own far scenery (hills + simple trees/boulders), false to keep it.
 
 const TAU = Math.PI * 2;
+const GROUND_COVER = { reeds: 1, carpet: 1, grass: 1, heather: 1, spinifex: 1, lignum: 1 }; // (v6.00: never hidden by the camera)
 
 // what grows where. trees: [type, share]; spacing: metres between trees; clump: trees only in groves (open land)
 const HAB = {
@@ -115,7 +116,10 @@ function buildAll(A) {
     // v5.12: plants, rocks and logs near the snake step aside (are hidden) while they stand between the camera and what
     // it is looking at (the open mouth, a part in Anatomy, a show), so nothing blocks the view
     // v5.50: the real-size grass carpet too (round a small snake it is taller than the camera is high)
-    if (ctx.occ && o.tag && o.tag !== 'reeds') {
+    // v6.00: but never grass and other low ground cover (carpet, grass, heather, spinifex, lignum): hidden and shown again
+    // by where the camera stood, tufts kept popping in and out as you went round the snake. Grass now stays put, the same
+    // blades in the same places from every side (only right in front of the lens does it bow down out of the way, smoothly: vegetation(), uSlNear)
+    if (ctx.occ && o.tag && !GROUND_COVER[o.tag]) {
       if (!geo.boundingSphere) geo.computeBoundingSphere(); const gr = geo.boundingSphere.radius, lim = Rb * 5;
       if (o.occR) { list.forEach((t, i) => { const m = new THREE.Matrix4(); im.getMatrixAt(i, m); ctx.occ.push({ im, i, m, c: new THREE.Vector3(t.x, t.y + o.occR * t.s * 0.5, t.z), r: o.occR * t.s, hid: false }); }); } // (v5.93: big trees near the snake: by their trunk's size, at any distance)
       else list.forEach((t, i) => { if (Math.hypot(t.x, t.z) > lim) return; const r = gr * t.s * Math.max(t.sx || 1, t.sy || 1, t.sz || 1); if (r < F.w0 * 1.5) return; const m = new THREE.Matrix4(); im.getMatrixAt(i, m); ctx.occ.push({ im, i, m, c: new THREE.Vector3(t.x, t.y + r * 0.5, t.z), r, hid: false }); });
@@ -419,7 +423,7 @@ function buildAll(A) {
   // foliage keeps its crown-shaped normals on both faces (no dark backs), so a crown reads as one soft mass
   const foliageMat = (map, o = {}) => {
     const m = new THREE.MeshStandardMaterial({ map, alphaTest: o.alphaTest || 0.42, side: THREE.DoubleSide, vertexColors: true, roughness: 0.8, metalness: 0, color: o.color || '#ffffff' });
-    return track(vegetation(THREE, m));
+    return track(vegetation(THREE, m, { near: !!o.near }));
   };
   const barkMat = (map, tint) => track(new THREE.MeshStandardMaterial({ map, bumpMap: map, bumpScale: 1.5, roughness: 0.95, metalness: 0, vertexColors: true, color: tint }));
 
@@ -498,7 +502,7 @@ function buildAll(A) {
       lists[(R() * nv) | 0].push({ x: p.x, y: groundAt(p.x, p.z) + (o.lift || 0) * s, z: p.z, ry: R() * TAU, rx: (R() - 0.5) * (o.tilt || 0.1), rz: (R() - 0.5) * (o.tilt || 0.1), s, sy: o.sy ? lerp(o.sy[0], o.sy[1], R()) : 1, col: o.col ? o.col() : null }); }
     lists.forEach((lst, v) => { if (!lst.length) return; const g = makeGeo(rng(seed + name.length * 131 + v * 17), v); if (g.wood) { inst(g.wood, o.wmat, lst, { tag: name }); inst(g.fol, mat, lst, { tag: name }); } else inst(g, mat, lst, { tag: name, cast: o.cast, recv: o.recv }); });
   };
-  const grassMat = () => track(vegetation(THREE, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.92, metalness: 0 })));
+  const grassMat = () => track(vegetation(THREE, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.92, metalness: 0 }), { near: true }));
   const twigMat = () => barkMat(tex.bark('furrow'), '#8a7d6c');
   const rockStyle = { moss: ['#8d8a80', '#6f8a4a'], grey: ['#9a958a', null], red: ['#9a5a3e', null], sandstone: ['#b98e62', null], gibber: ['#6e3422', null], basalt: ['#57534e', null] }[K.rock || 'grey'];
   const rockMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), bumpMap: tex.rock(), bumpScale: 2, roughness: 0.9, metalness: 0, vertexColors: true, color: rockStyle[0] }));
@@ -521,17 +525,17 @@ function buildAll(A) {
     put('moss', (Rn, v) => rockGeo(seed + 900 + v * 7, low ? 1 : 2, { flat: 0.28 }), mossMat, Math.round(Math.min(jungle ? 90 : 70, (jungle ? 1.6 : 1.2) * Math.PI * (near0 * near0 - Math.max(Rb * 1.2, F.w0 * 8) ** 2))), Math.max(Rb * 1.2, F.w0 * 8), near0, [0.06, 0.32], /* v5.50: cushions their real size, 12-60 cm across, and kept clear of the snake by their own size */ { variants: 3, lift: -0.08, tilt: 0.08, ok: (x, z) => dist2snake(x, z) > F.w0 * 3 + 0.05, clr: (s) => F.w0 * 3 + s * 1.15, col: () => tint(0.75, 1.15, 0.12) });
     rocks(10, groundR * 1.05, 45, [0.3, 1.6], { minD: 2.5 });
   } else if (U === 'meadow') {
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassG'), { alphaTest: 0.35 }), 1700, near0, 36, [0.5, 1.1], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassG'), { alphaTest: 0.35, near: true }), 1700, near0, 36, [0.5, 1.1], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 30 }), foliageMat(tex.spray('broad')), 60, groundR * 1.1, 45, [0.8, 2.2], { variants: 2, wmat: twigMat(), col: () => tint(0.8, 1.1, 0.12) });
     rocks(13, groundR * 1.0, 30, [0.2, 0.8], { minD: 2.5 });
   } else if (U === 'grass') {
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 3200, near0, 45, [0.6, 1.2], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 1600, 45, 90, [0.8, 1.4], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35, near: true }), 3200, near0, 45, [0.6, 1.2], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35, near: true }), 1600, 45, 90, [0.8, 1.4], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 28 }), foliageMat(tex.spray('olive')), 70, groundR * 1.1, 60, [0.8, 2.0], { variants: 2, wmat: twigMat(), col: () => tint(0.8, 1.1, 0.12) });
     rocks(6, groundR * 1.0, 45, [0.3, 1.2], { minD: 2.5 });
   } else if (U === 'heath') {
-    put('heather', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 24, wide: 1.25, stems: 0, card: 0.55 }), foliageMat(tex.spray('heather')), 1100, near0, 45, [0.35, 0.8], { variants: 3, sy: [0.55, 0.85], lift: -0.12, col: () => tint(0.8, 1.15, 0.12) });
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassG'), { alphaTest: 0.35 }), 800, near0, 40, [0.35, 0.7], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    put('heather', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 24, wide: 1.25, stems: 0, card: 0.55 }), foliageMat(tex.spray('heather'), { near: true }), 1100, near0, 45, [0.35, 0.8], { variants: 3, sy: [0.55, 0.85], lift: -0.12, col: () => tint(0.8, 1.15, 0.12) });
+    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassG'), { alphaTest: 0.35, near: true }), 800, near0, 40, [0.35, 0.7], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 26, card: 0.45 }), foliageMat(tex.spray('needle')), 90, groundR * 1.1, 55, [0.7, 1.8], { variants: 2, wmat: twigMat(), col: () => tint(0.75, 1.0, 0.1) });
     rocks(10, groundR * 1.0, 50, [0.3, 1.5], { minD: 2.5 });
   } else if (U === 'arid') {
@@ -543,20 +547,20 @@ function buildAll(A) {
     rocks(45, groundR * 1.3, farR * 1.15, [0.6, 3.8], { ok: okNear, minD: 2 });
     rocks(36, groundR * 1.2, 45, [0.08, 0.5], { variants: 2, detail: 1, minD: 3 }); // v5.05: far fewer loose rocks
   } else if (U === 'sand') {
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 260, near0, 50, [0.35, 0.8], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35, near: true }), 260, near0, 50, [0.35, 0.8], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 30, wide: 1.3, bright: 1.35 }), foliageMat(tex.spray('saltbush')), 40, groundR * 1.1, 60, [0.4, 1.0], { variants: 2, wmat: twigMat(), col: () => tint(0.85, 1.1, 0.08) });
     rocks(6, groundR * 1.2, 60, [0.3, 1.4], { minD: 2.5 });
   } else if (U === 'gibber') {
     rocks(2200, near0, 32, [0.04, 0.22], { variants: 3, lift: -0.2, flat: 0.55, recv: false, detail: 0 });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 30, wide: 1.3, stems: 0, bright: 1.35 }), foliageMat(tex.spray('saltbush')), 140, groundR * 1.0, 60, [0.3, 0.8], { variants: 2, wmat: twigMat(), col: () => tint(0.85, 1.1, 0.08) });
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 220, near0, 45, [0.25, 0.5], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35, near: true }), 220, near0, 45, [0.25, 0.5], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     rocks(6, groundR * 1.3, 60, [0.3, 1.0], { minD: 2.5 });
   }
   else if (U === 'clay') {
     // sparse: low saltbush and bluebush, tangled grey lignum, Mitchell grass tussocks, a few gibber stones on the clay
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 26, wide: 1.4, stems: 0, bright: 1.3 }), foliageMat(tex.spray('saltbush')), 70, near0, 70, [0.3, 0.75], { variants: 2, wmat: twigMat(), lift: -0.08, col: () => tint(0.85, 1.1, 0.08) });
     put('lignum', (Rn) => tuftGeo(Rn, low ? 24 : 46, 1.2, '#5f6448', '#8f9472', 0.5, { lean: 0.8, w: 0.006, outward: 1, seg: 4 }), grassMat(), 55, near0, 60, [0.6, 1.3], { variants: 2, sy: [0.5, 0.8], col: () => tint(0.85, 1.1, 0.08) });
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3, { w: 0.9 }), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 260, near0, 50, [0.22, 0.45], { variants: 3, tilt: 0.12, col: () => tint(0.85, 1.12, 0.1) });
+    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3, { w: 0.9 }), foliageMat(tex.spray('grassD'), { alphaTest: 0.35, near: true }), 260, near0, 50, [0.22, 0.45], { variants: 3, tilt: 0.12, col: () => tint(0.85, 1.12, 0.1) });
     rocks(160, near0, 30, [0.03, 0.1], { variants: 2, lift: -0.25, flat: 0.5, recv: false, detail: 0 });
   } else if (U === 'swamp') {
     // sawgrass and rushes in clumps on the mud and in the shallows, ferns at the foot of the trees, lily pads on the water
@@ -576,7 +580,7 @@ function buildAll(A) {
   } else if (U === 'shore') {
     // dark wave-worn boulders on the shore and a few in the water, beach grass between, palms further back
     rocks(40, groundR * 1.0, 50, [0.5, 2.4], { minD: 2.5, flat: 0.62 });
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35 }), 140, near0, 45, [0.3, 0.7], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35, near: true }), 140, near0, 45, [0.3, 0.7], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     if (wi) { const list = []; for (let i = 0; i < (low ? 8 : 16); i++) { const a = R() * TAU, r = lerp(groundR * 0.4, groundR * 1.8, R()), x = Math.cos(a) * r, z = Math.sin(a) * r; if (!inRiver(x, z, 0) || dist2snake(x, z) < 1.5) continue; list.push({ x, y: Hgt(x, z) - 0.1, z, ry: R() * TAU, rx: (R() - 0.5) * 0.4, rz: (R() - 0.5) * 0.4, s: 0.3 + R() * 0.9 }); }
       inst(rockGeo(seed + 777, low ? 2 : 3, { flat: 0.6 }), rockMat, list, { tag: 'rocks', cast: true, recv: true }); }
   }
@@ -743,7 +747,7 @@ function buildAll(A) {
 // Done in the vertex shader (no work on the CPU): each plant bends from its base (the instance's origin), the more the
 // higher above it; tall things (trees) bend much less per metre than grass. AMB.uT is the clock, AMB.uWind the strength
 // (lower at the Light quality setting, 0 with reduced motion).
-export const AMB = { uT: { value: 0 }, uWind: { value: 1 }, uDens: { value: 1 }, rip: [], ripN: 0 }; // (v5.93: uDens - viewer.js thins far plants on a slow device)
+export const AMB = { uT: { value: 0 }, uWind: { value: 1 }, uDens: { value: 1 }, uNear: { value: 0.05 }, rip: [], ripN: 0 }; // (v5.93: uDens - viewer.js thins far plants on a slow device)
 const WIND_VS = `
 vec4 mvPosition = vec4( transformed, 1.0 );
 #ifdef USE_INSTANCING
@@ -753,6 +757,22 @@ vec3 slO = ( modelMatrix * instanceMatrix * vec4( 0.0, 0.0, 0.0, 1.0 ) ).xyz;
 vec3 slO = ( modelMatrix * vec4( 0.0, 0.0, 0.0, 1.0 ) ).xyz;
 #endif
 vec4 slW = modelMatrix * mvPosition;
+#ifdef USE_INSTANCING
+// v5.93/v6.00: on a slow device some of the far plants are left out, by a fixed random number per plant - and (v6.00) by
+// how far the plant stands from the middle of the scene, where the snake lies, not from the camera: it used to be the
+// distance in front of the camera, so going round the snake the same plants came and went. A plant on the edge shrinks
+// into the ground rather than vanishing in one frame, and viewer.js eases uDens, so nothing jumps
+float slKeep = 1.0;
+if ( uSlDens < 0.999 ) { float slR = fract( sin( dot( slO.xz, vec2( 12.9898, 78.233 ) ) ) * 43758.5453 ); slKeep = clamp( ( mix( 1.0, uSlDens, smoothstep( 14.0, 28.0, length( slO.xz ) ) ) - slR ) / 0.12 + 1.0, 0.0, 1.0 ); }
+vec3 slSc = vec3( slKeep );
+#ifdef SL_NEAR
+// v6.00: grass right in front of the lens bows down out of the way, smoothly with its distance from the camera (uSlNear:
+// about half the way to the snake, 4 cm to 1.4 m), instead of filling the view - the only way the camera changes the grass
+float slC = smoothstep( uSlNear * 0.35, uSlNear, distance( slO, cameraPosition ) );
+slSc *= vec3( mix( 0.35, 1.0, slC ), slC, mix( 0.35, 1.0, slC ) ); slKeep *= slC;
+#endif
+if ( slKeep < 0.999 ) slW.xyz = slO + ( slW.xyz - slO ) * slSc;
+#endif
 if ( uSlWind > 0.0 ) {
   float slH = max( 0.0, slW.y - slO.y ), slK = min( slH, 1.2 );
   float slB = ( slK * slK * 0.06 + max( slH - 1.2, 0.0 ) * 0.011 ) * uSlWind; // how far this point can bend (m)
@@ -766,15 +786,14 @@ if ( uSlWind > 0.0 ) {
 mvPosition = viewMatrix * slW;
 gl_Position = projectionMatrix * mvPosition;
 #ifdef USE_INSTANCING
-// v5.93: on a slow device some of the far plants are left out (from 20 m on, by a fixed random number per plant, so the
-// same ones go and come back; within 6 m of the camera every plant stays): their triangles are moved off screen
-if ( uSlDens < 0.999 ) { float slR = fract( sin( dot( slO.xz, vec2( 12.9898, 78.233 ) ) ) * 43758.5453 ); if ( slR > mix( 1.0, uSlDens, smoothstep( 6.0, 20.0, -mvPosition.z ) ) ) gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 ); }
+if ( slKeep <= 0.0 ) gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 ); // (left out: off screen)
 #endif`;
 export function tick(t) { AMB.uT.value = t; }
-export function vegetation(THREE, m) {
+export function vegetation(THREE, m, o = {}) {
+  if (o.near) m.defines = Object.assign({}, m.defines, { SL_NEAR: '' }); // (v6.00: grass and other low ground cover bow out of the lens's way)
   m.onBeforeCompile = (sh) => {
-    sh.uniforms.uSlT = AMB.uT; sh.uniforms.uSlWind = AMB.uWind; sh.uniforms.uSlDens = AMB.uDens;
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uSlT; uniform float uSlWind; uniform float uSlDens;').replace('#include <project_vertex>', WIND_VS);
+    sh.uniforms.uSlT = AMB.uT; sh.uniforms.uSlWind = AMB.uWind; sh.uniforms.uSlDens = AMB.uDens; sh.uniforms.uSlNear = AMB.uNear;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uSlT; uniform float uSlWind; uniform float uSlDens; uniform float uSlNear;').replace('#include <project_vertex>', WIND_VS);
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <normal_fragment_begin>', THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', ''))
       .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
@@ -784,7 +803,7 @@ export function vegetation(THREE, m) {
         reflectedLight.directDiffuse += diffuseColor.rgb * directionalLights[ 0 ].color * sl_t * 0.22; }
       #endif`);
   };
-  m.customProgramCacheKey = () => 'sl-veg3';
+  m.customProgramCacheKey = () => (o.near ? 'sl-veg4n' : 'sl-veg4');
   return m;
 }
 
