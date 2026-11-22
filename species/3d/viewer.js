@@ -7,13 +7,13 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=582'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=582'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=584'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=584'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 // v5.93: the habitats each snake can be shown in (tools/habitat_looks.py: the first is shown first; snakes with only one are
 // not listed). Loaded with this module - it waits for it up to 3 s, so the first scene is already the right one (if it comes
 // later, the Habitats button is added then)
-const HAB_P = typeof fetch === 'function' ? fetch(new URL('habitats.json?r=582', import.meta.url).href).then((r) => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null);
+const HAB_P = typeof fetch === 'function' ? fetch(new URL('habitats.json?r=584', import.meta.url).href).then((r) => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null);
 let HAB_LOOKS = await Promise.race([HAB_P, new Promise((res) => setTimeout(() => res(null), 3000))]);
 HAB_P.then((d) => { HAB_LOOKS = d; });
 const habPick = (d, id) => { const l = d && d.sp && d.sp[id]; return Array.isArray(l) && l.length > 1 ? l : null; };
@@ -2744,7 +2744,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   // pebbles 1-5 cm, rocks 10-60 cm, twigs 12-45 cm, a log 16-34 cm thick, reeds over a metre. Only how far round the
   // snake they are spread follows the snake (the camera sees more ground round a big one), and how many there are
   // follows that area (a real density per square metre), capped so a big snake's wide view stays fast
-  const veg = (m) => (NATURE.vegetation ? NATURE.vegetation(THREE, m) : m); // (v5.50: matt, lit the same from every side)
+  const veg = (m, near) => (NATURE.vegetation ? NATURE.vegetation(THREE, m, { near }) : m); // (v5.50: matt, lit the same from every side)
   const lowQ = quality === 'low', perM2 = (dens, rMin, rMax, cap) => { const r1 = rMin + (rMax - rMin) * 2; return Math.round(Math.min(cap * (lowQ ? 0.45 : 1), dens * Math.PI * (r1 * r1 - rMin * rMin) * (lowQ ? 0.6 : 1))); };
   const wiP = ctx.waterInfo, wet = (x, z) => !!wiP && x * wiP.dir.x + z * wiP.dir.y + wiP.wob(-x * wiP.dir.y + z * wiP.dir.x) > wiP.edge - 0.02;
   const placeN = (n, rMin, rMax, clear, o = {}) => { // n real spots (place() above multiplies its count)
@@ -2790,9 +2790,9 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   // are shorter (trodden, grazed), so a small snake lies in a little clearing in grass that towers over it, in view
   const grassTuft = (n, h, cA, cB, rMin, rMax, clear, spread, o = {}) => {
     const spots = placeN(n, rMin, rMax, clear, { dry: true }); if (!spots.length) return;
-    const g = bladeTuft(seed + n, o.blades || 14, h, cA, cB, spread || h * 0.12, o), im = new THREE.InstancedMesh(g, veg(new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: o.rough || 0.9 })), spots.length);
+    const g = bladeTuft(seed + n, o.blades || 14, h, cA, cB, spread || h * 0.12, o), im = new THREE.InstancedMesh(g, veg(new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: o.rough || 0.9 }), true), spots.length);
     im.castShadow = true; im.receiveShadow = true;
-    spots.forEach(([x, z], i) => { const k = 0.4 + 0.6 * sstep(clear, clear + h * 2.5, dist2snake(x, z)), s = (0.7 + R() * 0.6) * k; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s, s * (o.sy ? o.sy[0] + R() * (o.sy[1] - o.sy[0]) : 1), s); pv.set(x, groundH(x, z), z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); addOcc(im, i, m4, h * s * 0.8); });
+    spots.forEach(([x, z], i) => { const k = 0.4 + 0.6 * sstep(clear, clear + h * 2.5, dist2snake(x, z)), s = (0.7 + R() * 0.6) * k; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s, s * (o.sy ? o.sy[0] + R() * (o.sy[1] - o.sy[0]) : 1), s); pv.set(x, groundH(x, z), z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); }); // (v6.00: grass is never hidden by where the camera stands - it popped in and out as you went round)
     scene.add(im);
   };
   if (PR.grass) { const h = 0.3 * (P.scene.grassH || 1); grassTuft(perM2(5 * PR.grass, Rb * 0.8, Rb * 4.5, 700), h, P.scene.grassA || '#6f7a3a', P.scene.grassB || '#c2b47a', Rb * 0.8, Rb * 4.5, F.w0 * 3 + h * 0.7); }
@@ -3661,6 +3661,7 @@ float slScale(vec2 m) {
     const put = () => cam.position.set(t.x + st.d * Math.cos(st.el) * Math.sin(st.az), t.y + st.d * Math.sin(st.el), t.z + st.d * Math.cos(st.el) * Math.cos(st.az));
     put();
     for (let k = 0; k < 40 && bodyClearance(cam.position) < Math.min(st.d * 0.06, info.F.w0 * 0.25); k++) { st.d = Math.min(st.d * 1.05, info.dMax); if (st.goal && st.goal.d < st.d) st.goal.d = st.d; t = targetFor(st.d); put(); if (st.d >= info.dMax) break; }
+    if (NATURE.AMB && NATURE.AMB.uNear) NATURE.AMB.uNear.value = clamp(st.d * 0.55, 0.04, 1.4); // (v6.00: grass in the first half of the way to the snake bows down out of the lens's way, smoothly by its distance from it: no blade fills the view, none pops)
     cam.near = Math.max(Math.min(st.d * 0.02, Math.max(1e-4, bodyClearance(cam.position) * 0.5)), 1e-4); cam.far = Math.max(info.Rb * 40, 300); cam.updateProjectionMatrix(); cam.lookAt(t);
     // v4.72: the haze begins beyond the snake from wherever you look, never on it
     const fog = ctx.scene && ctx.scene.fog; if (fog && ctx.fogNear0 != null) { fog.near = Math.max(ctx.fogNear0, st.d * 1.6); fog.far = Math.max((ctx.farR || 60) * 0.95, fog.near * 3); }
@@ -3677,7 +3678,7 @@ float slScale(vec2 m) {
     const tF0 = performance.now(); colList = null;
     const camMoving = controls.update(); let moving = false;
     // v5.73: wind, water and the snake's idle life run on a clock of their own (no motion at all with reduced motion)
-    const amb = !reduce(); if (NATURE.tick) { NATURE.tick(performance.now() / 1000); NATURE.AMB.uWind.value = amb && cScene.checked ? (quality === 'low' ? 0.6 : 1) : 0; if (NATURE.AMB.uDens) NATURE.AMB.uDens.value = pace.dens; }
+    const amb = !reduce(); if (NATURE.tick) { NATURE.tick(performance.now() / 1000); NATURE.AMB.uWind.value = amb && cScene.checked ? (quality === 'low' ? 0.6 : 1) : 0; if (NATURE.AMB.uDens) { const u = NATURE.AMB.uDens, dd = pace.dens - u.value; u.value = Math.abs(dd) < 0.004 ? pace.dens : u.value + dd * 0.05; } } // (v6.00: the far plants thin out and come back gradually, never in one step)
     // the jaw opens and shuts smoothly
     const mo = extras && extras.mouth;
     // (v5.78: eased, and timed by the clock - not a fixed step per frame - so it opens at the same smooth pace at any frame rate)
@@ -3808,7 +3809,7 @@ float slScale(vec2 m) {
     if (L.src) { sizeCap.appendChild(document.createTextNode(' (source: ')); if (L.src[1]) { const a = el('a', '', L.src[0]); a.href = L.src[1]; a.target = '_blank'; a.rel = 'noopener'; sizeCap.appendChild(a); } else sizeCap.appendChild(document.createTextNode(L.src[0])); sizeCap.appendChild(document.createTextNode(')')); }
     else { const m = L.line.match(/ \(source: .*\)$/); if (m) sizeCap.appendChild(document.createTextNode(m[0])); }
   }
-  function personFade(op) { if (!scaleObj) return; scaleObj.traverse((o) => { const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; for (const m of ms) { m.transparent = op < 0.999; m.opacity = op; m.depthWrite = op >= 0.999; } if (o !== scaleObj) o.visible = op > 0.004; }); }
+  function personFade(op) { if (!scaleObj) return; scaleObj.traverse((o) => { const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [], blob = !!o.userData.blob; for (const m of ms) { m.transparent = blob || op < 0.999; m.opacity = op * (m.userData.blobA != null ? m.userData.blobA : 1); m.depthWrite = !blob && op >= 0.999; } if (o !== scaleObj) o.visible = op > 0.004; }); }
   function sizeDropPerson() { if (!scaleObj) return; const g = scaleObj; scaleObj = null; if (g.parent) g.parent.remove(g); g.traverse((o) => { if (o.geometry) o.geometry.dispose(); const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; ms.forEach((m) => { for (const k in m) { const v = m[k]; if (v && v.isTexture) v.dispose(); } m.dispose(); }); }); }
   // where everything goes: the snake laid out across the view (head on the left), the person a step beyond its tail
   function sizeLayout() {
@@ -3825,22 +3826,81 @@ float slScale(vec2 m) {
     for (const p of pts) { const d = p.clone().sub(piv); s0 = Math.min(s0, d.dot(R)); s1 = Math.max(s1, d.dot(R)); f0 = Math.min(f0, d.dot(Fw)); f1 = Math.max(f1, d.dot(Fw)); }
     sizeSt.pts = pts; sizeSt.arc = arc * k;
     sizeSt.mid = piv.clone().addScaledVector(R, (s0 + s1) / 2).addScaledVector(Fw, (f0 + f1) / 2); sizeSt.mid.y = info.F.w0 * k * 0.5;
-    const PH = 1.7, gap = Math.max(0.3, L.m * 0.1), px = s1 + gap + 0.22;
-    const pp = piv.clone().addScaledVector(R, px), gy = fx.groundY ? fx.groundY([[pp.x, pp.z]])[0] : 0; pp.y = gy || 0;
+    const PH = 1.7, gap = Math.max(0.3, L.m * 0.1); let px = s1 + gap + 0.22, pf = 0;
+    // v6.00: by a river or the sea the person stands on the dry bank, not in (or on) the water: the nearest dry spot a
+    // little further along or a step forward or back
+    const wiP = ctx.waterInfo, at = (a, f) => piv.clone().addScaledVector(R, a).addScaledVector(Fw, f);
+    const wetAt = (q) => !!wiP && q.x * wiP.dir.x + q.z * wiP.dir.y + (wiP.wob ? wiP.wob(-q.x * wiP.dir.y + q.z * wiP.dir.x) : 0) > wiP.edge - 0.3;
+    if (wetAt(at(px, 0))) { find: for (const da of [0, 0.3, 0.6, 1]) for (const f of [-0.4, 0.4, -0.8, 0.8, -1.2, 1.2]) if (!wetAt(at(px + da, f))) { px += da; pf = f; break find; } }
+    const pp = at(px, pf), gy = fx.groundY ? fx.groundY([[pp.x, pp.z]], true)[0] : 0; pp.y = gy || 0;
     sizeSt.person = pp; sizeSt.headTop = pp.clone().add(new THREE.Vector3(0, PH + 0.04, 0));
-    sizeSt.box = { s0: s0 - Math.max(0.05, L.m * 0.04), s1: px + 0.3, sm: (s0 + s1) / 2, pm: px, f0: Math.min(f0, -0.2), f1: Math.max(f1, 0.2), h: PH + 0.08, R };
+    sizeSt.box = { s0: s0 - Math.max(0.05, L.m * 0.04), s1: px + 0.3, ss1: s1, sm: (s0 + s1) / 2, pm: px, f0: Math.min(f0, pf - 0.2, -0.2), f1: Math.max(f1, pf + 0.2, 0.2), h: PH + 0.08, R };
     // the person: natural proportions (extras.js buildPerson), 1.70 m, turned towards the camera
     sizeDropPerson();
     scaleObj = new THREE.Group(); scaleObj.name = 'sizePerson';
     const man = EXTRA.buildPerson ? EXTRA.buildPerson(THREE, PH) : new THREE.Mesh(personShape(PH), new THREE.MeshStandardMaterial({ color: '#7d8a80' }));
     { const bb = new THREE.Box3().setFromObject(man), hgt = bb.max.y - bb.min.y; if (hgt > 0) man.scale.setScalar(PH / hgt); } // (exactly 1.70 m from the soles to the top of the hair)
-    man.position.copy(pp); man.rotation.y = az + 0.25; scaleObj.add(man); ctx.scene.add(scaleObj); personFade(0);
+    man.position.copy(pp); man.rotation.y = az + 0.25; scaleObj.add(man); scaleObj.userData.man = man; ctx.scene.add(scaleObj); personFade(0);
     scaleObj.userData.labels = [
       { p: sizeSt.headTop.clone(), t: 'Person 1.70 m' },
       { p: sizeSt.mid.clone().add(new THREE.Vector3(0, info.F.w0 * 2 * k, 0)), t: 'Snake ' + fmtAdult(L.m) + ' (along its body)', snake: true },
     ];
     scaleObj.userData.ends = pts.filter((_, i) => i % 6 === 0);
     sizeCaption(L);
+  }
+  // v6.00: the person stands in the scene like a real person - both soles on the actual ground under them (sampled at the
+  // heel to toe of each foot, also on dunes and on the bed at the water's edge: never floating, never sunk), the
+  // grass flattened under the shoes, trodden lower round them and untouched a little further out (so blades stand round
+  // and partly over the shoes), stones right under a foot moved aside, and a soft contact shadow under each foot. Done
+  // once the person's model is there (it loads on its own): its feet are found in its own mesh
+  const PERSON_R = 0.8;
+  function sizePlant() {
+    const man = scaleObj.userData.man; if (!man || man.userData.realPerson === 'loading' || !man.children.length) return;
+    scaleObj.userData.planted = true;
+    man.updateMatrixWorld(true);
+    const inv = man.matrixWorld.clone().invert(), v = new THREE.Vector3(), lv = new THREE.Vector3(), feet = [[], []];
+    man.traverse((o) => { if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return; const pa = o.geometry.attributes.position; for (let i = 0; i < pa.count; i++) { v.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld); lv.copy(v).applyMatrix4(inv); if (lv.y < 0.035) feet[lv.x < 0 ? 0 : 1].push([v.x, v.z, lv.z, lv.x]); } });
+    const ry = man.rotation.y, fw = [Math.sin(ry), Math.cos(ry)], sd = [Math.cos(ry), -Math.sin(ry)], soles = [];
+    for (const f of feet) {
+      if (!f.length) continue; let cx = 0, cz = 0, a0 = 1e9, a1 = -1e9, b0 = 1e9, b1 = -1e9; for (const q of f) { cx += q[0]; cz += q[1]; a0 = Math.min(a0, q[2]); a1 = Math.max(a1, q[2]); b0 = Math.min(b0, q[3]); b1 = Math.max(b1, q[3]); }
+      cx /= f.length; cz /= f.length; soles.push({ x: cx, z: cz, len: Math.max(0.2, a1 - a0), w: Math.max(0.08, b1 - b0) });
+    }
+    if (!soles.length) soles.push({ x: man.position.x, z: man.position.z, len: 0.27, w: 0.1 });
+    const smp = []; for (const s of soles) for (const a of [-0.42, 0, 0.42]) for (const b of [-0.35, 0, 0.35]) smp.push([s.x + fw[0] * a * s.len + sd[0] * b * s.w, s.z + fw[1] * a * s.len + sd[1] * b * s.w]); // (heel to toe, side to side: 9 points a foot)
+    const gy = fx.groundY ? fx.groundY(smp, true) : smp.map(() => 0), avg = (a) => a.reduce((p, q) => p + q, 0) / a.length;
+    // the soles on the ground's average height under them, half a centimetre into the soil or sand (a person's weight):
+    // in rippled sand the crests press into the soles and the hollows show a sliver of shadow, as under a real shoe
+    const y = avg(gy) - 0.005, dy = y - man.position.y; man.position.y = y; sizeSt.person.y = y;
+    sizeSt.headTop.y += dy; const lab = scaleObj.userData.labels && scaleObj.userData.labels[0]; if (lab) lab.p.y += dy;
+    // grass: gone under the soles (the shoe stands on it), bent down to about 40% right round them, rising to its full height about
+    // 45 cm out (so blades stand round and partly over the shoes); stones under the feet aside
+    if (fx.clearProps) {
+      const dFoot = (x, z) => Math.min(...soles.map((s) => { const dx = x - s.x, dz = z - s.z, a = Math.abs(dx * fw[0] + dz * fw[1]) - s.len * 0.5, b = Math.abs(dx * sd[0] + dz * sd[1]) - s.w * 0.5; return Math.hypot(Math.max(a, 0), Math.max(b, 0)); }));
+      const P = sizeSt.person, un = fx.clearProps(null, 0, { flat: true, test: (x, z) => Math.hypot(x - P.x, z - P.z) < PERSON_R, press: (x, z) => { const d = dFoot(x, z); return d < 0.02 ? 0 : 0.4 + 0.6 * sstep(0.02, 0.45, d); }, solid: (x, z, r) => dFoot(x, z) < r + 0.03 });
+      const u0 = sizeSt.undo; sizeSt.undo = () => { un(); if (u0) u0(); };
+    }
+    // contact shadows: soft and dark right under each shoe, a fainter one round where the person stands
+    const cv = document.createElement('canvas'); cv.width = cv.height = 64; const c2 = cv.getContext('2d'), gr = c2.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(0,0,0,1)'); gr.addColorStop(0.45, 'rgba(0,0,0,.72)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); c2.fillStyle = gr; c2.fillRect(0, 0, 64, 64);
+    // (each a small grid laid on the ground itself, a few millimetres above it, so it follows a dune or a lump exactly)
+    const tex = new THREE.CanvasTexture(cv), cr = Math.cos(ry), sr = Math.sin(ry), blob = (x, z, sx, sz, a) => {
+      const g = new THREE.PlaneGeometry(1, 1, 8, 8); g.rotateX(-Math.PI / 2); const pa = g.attributes.position, pts = [];
+      for (let i = 0; i < pa.count; i++) { const lx = pa.getX(i) * sx, lz = pa.getZ(i) * sz; pts.push([x + lx * cr + lz * sr, z - lx * sr + lz * cr]); }
+      const hs = fx.groundY ? fx.groundY(pts, true) : pts.map(() => y); pts.forEach((q, i) => pa.setXYZ(i, q[0], hs[i] + 0.004, q[1])); g.computeBoundingSphere();
+      const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: tex, color: '#000000', transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+      m.material.userData.blobA = a; m.userData.blob = true; m.renderOrder = 1; m.raycast = () => {};
+      scaleObj.add(m);
+    };
+    const P = sizeSt.person; blob(P.x, P.z, 0.8, 0.62, 0.42);
+    for (const s of soles) blob(s.x, s.z, s.w * 2.2, s.len * 1.5, 0.8);
+    // the same sunlight as the snake: the sun's shadow reaches far enough for the person's own shadow too (it covered only
+    // the snake's few metres, and the person's shadow was cut off at its edge) - put back as it was afterwards
+    const sun = ctx.sun; if (sun && sun.castShadow && !sizeSt.shSave) {
+      const sc = sun.shadow.camera; let rr = Math.hypot(P.x - sun.target.position.x, P.z - sun.target.position.z) + 1.9;
+      for (const q of sizeSt.pts || []) rr = Math.max(rr, Math.hypot(q.x - sun.target.position.x, q.z - sun.target.position.z) + 0.3);
+      if (rr > sc.right) { sizeSt.shSave = [sc.left, sc.right, sc.top, sc.bottom, sc.near, sc.far]; sc.left = sc.bottom = -rr; sc.right = sc.top = rr; sc.near = Math.max(0.01, sc.near - 2); sc.far += 2; sc.updateProjectionMatrix(); }
+    }
+    shadowDirty = true; kick();
   }
   // the view that shows both whole: slightly raised, three-quarter, clear of the buttons on top and the caption below
   function sizeGoal() {
@@ -3871,8 +3931,13 @@ float slScale(vec2 m) {
       const g = sizeGoal(); skGo(1, 1000); controls.tween(g, 1000);
       // nothing stands between you and them: scenery in front of the snake and the person steps aside (put back after)
       if (sizeSt.undo) sizeSt.undo(); sizeSt.undo = null;
-      if (fx.clearProps) { const B = sizeSt.box, C = new THREE.Vector3(Math.sin(g.az), 0, Math.cos(g.az)), pv = sizeSt.piv;
-        sizeSt.undo = fx.clearProps(null, 0, { all: true, test: (x, z, r) => { const dx = x - pv.x, dz = z - pv.z, sR = dx * B.R.x + dz * B.R.z, tC = dx * C.x + dz * C.z; return sR > B.s0 - 0.25 - r && sR < B.s1 + 0.25 + r && tC > B.f0 - 0.3 - r && tC < g.d; } }); }
+      // (v6.00: only in front of the snake now - the person stands in the grass, see sizePlant)
+      if (fx.clearProps) { const B = sizeSt.box, C = new THREE.Vector3(Math.sin(g.az), 0, Math.cos(g.az)), pv = sizeSt.piv, P = sizeSt.person;
+        const pR = Math.min(PERSON_R, Math.max(0.3, B.pm - B.ss1 - 0.15)); // (the grass round the person stays - but never over the snake's tail)
+        sizeSt.undo = fx.clearProps(null, 0, { all: true, test: (x, z, r) => { if (Math.hypot(x - P.x, z - P.z) < pR) return false; const dx = x - pv.x, dz = z - pv.z, sR = dx * B.R.x + dz * B.R.z, tC = dx * C.x + dz * C.z; return sR > B.s0 - 0.25 - r && sR < B.ss1 + 0.25 + r && tC > B.f0 - 0.3 - r && tC < g.d; } });
+        // (and rocks and logs between the person and the camera, as before: only grass and plants stay round the person)
+        const u1 = sizeSt.undo, u2 = fx.clearProps(null, 0, { test: (x, z, r) => { const dx = x - pv.x, dz = z - pv.z, sR = dx * B.R.x + dz * B.R.z, tC = dx * C.x + dz * C.z; return sR > B.s0 - 0.25 - r && sR < B.s1 + 0.25 + r && tC > B.f0 - 0.3 - r && tC < g.d; } });
+        sizeSt.undo = () => { u2(); u1(); }; }
     } else {
       sizeSt.on = false; bScale.setAttribute('aria-pressed', 'false'); bScale.textContent = 'Size vs person'; sizeOverlays(false); sizeSt.ready = false;
       markers.filter((m) => m.scale).forEach((m) => m.el.remove()); markers = markers.filter((m) => !m.scale);
@@ -3890,6 +3955,7 @@ float slScale(vec2 m) {
     sizeSt.k = 1; if (snakeGroup) { snakeGroup.scale.setScalar(1); snakeGroup.position.set(0, 0, 0); }
     const a = sizeSt.sk; a.v = a.from = a.to = 0; a.dur = 0;
     sizeDropPerson(); if (sizeSt.undo) { sizeSt.undo(); sizeSt.undo = null; }
+    if (sizeSt.shSave && ctx.sun) { const sc = ctx.sun.shadow.camera, v = sizeSt.shSave; [sc.left, sc.right, sc.top, sc.bottom, sc.near, sc.far] = v; sc.updateProjectionMatrix(); shadowDirty = true; } sizeSt.shSave = null;
     if (info) info.scaleK = 1; sizeSt.lay = null; sizeSt.pts = null; sizeOverlays(false);
     markers.filter((m) => m.scale).forEach((m) => m.el.remove()); markers = markers.filter((m) => !m.scale);
     kick();
@@ -3900,6 +3966,7 @@ float slScale(vec2 m) {
     if (!sizeBusy() || !snakeGroup) return false;
     const e = fx.sizeLay && sizeSt.lay ? fx.sizeLay.e : skNow(), kk = 1 + (sizeSt.k - 1) * e, pv = sizeSt.piv;
     snakeGroup.scale.setScalar(kk); snakeGroup.position.set(pv.x * (1 - kk), 0, pv.z * (1 - kk));
+    if (scaleObj && sizeSt.on && !scaleObj.userData.planted) sizePlant();
     personFade(clamp(skNow() * 1.4 - 0.2, 0, 1));
     const moving = skMoving() || !!(fx.sizeLay && sizeSt.lay && fx.sizeLay.moving);
     if (sizeSt.leaving && !moving) { sizeFinish(); return true; }
@@ -4049,14 +4116,14 @@ float slScale(vec2 m) {
       if (o.shadow && o.shadow.map) o.shadow.map.dispose();
     });
     for (const d of disposables) d.dispose && d.dispose(); disposables.clear();
-    ctx.scene.clear(); ctx.scene = null; scaleObj = null; sizeSt.on = sizeSt.leaving = false; sizeSt.lay = sizeSt.pts = null; sizeSt.undo = null; sizeSt.k = 1; sizeSt.sk.v = sizeSt.sk.from = sizeSt.sk.to = 0; sizeSt.sk.dur = 0;
+    ctx.scene.clear(); ctx.scene = null; scaleObj = null; sizeSt.shSave = null; sizeSt.on = sizeSt.leaving = false; sizeSt.lay = sizeSt.pts = null; sizeSt.undo = null; sizeSt.k = 1; sizeSt.sk.v = sizeSt.sk.from = sizeSt.sk.to = 0; sizeSt.sk.dur = 0;
     bScale.setAttribute('aria-pressed', 'false'); bScale.textContent = 'Size vs person'; sizeOverlays(false);
     markers.forEach((m) => m.el.remove()); markers = [];
   }
   function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; if (sizeBusy()) toggleScale(false, { instant: true }); fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
 
   build(); fx.onBuild(); resize();
-  if (opts.testing) window.__sp3d = { THREE, renderer, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), fx, size: () => ({ on: sizeSt.on, leaving: sizeSt.leaving, k: sizeSt.k, arc: sizeSt.arc, len: sizeSt.len, small: sizeSt.small, N: sizeSt.N, person: !!scaleObj, saved: sizeSt.saved }), get group() { return snakeGroup; }, get show() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); if (window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } updateOccluders(); renderer.shadowMap.needsUpdate = true; renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
+  if (opts.testing) window.__sp3d = { THREE, renderer, get ctx() { return ctx; }, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), fx, size: () => ({ on: sizeSt.on, leaving: sizeSt.leaving, k: sizeSt.k, arc: sizeSt.arc, len: sizeSt.len, small: sizeSt.small, N: sizeSt.N, person: !!scaleObj, saved: sizeSt.saved }), get group() { return snakeGroup; }, get show() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); if (window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } updateOccluders(); renderer.shadowMap.needsUpdate = true; renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
 
   return {
     canvas,

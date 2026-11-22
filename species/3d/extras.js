@@ -1851,7 +1851,8 @@ export function create(V) {
     // among them, and taking them away left a bare, oddly lit patch in the meadow
     const soft = (m) => !(opt && opt.all) && !!m && (m.side === THREE.DoubleSide || m.alphaTest > 0 || m.transparent);
     const occ = V.occ || [];
-    for (const o of occ) if (!soft(o.im && o.im.material) && near(o.c.x, o.c.z, o.r * 0.6)) { o.force = true; undo.push(() => { o.force = false; }); }
+    const solidNear = opt && opt.solid ? opt.solid : near; // (v6.00: solid things may have an area of their own, e.g. only right under a person's feet)
+    for (const o of occ) if (!soft(o.im && o.im.material) && solidNear(o.c.x, o.c.z, o.r * 0.6)) { o.force = true; undo.push(() => { o.force = false; }); }
     V.scene.children.forEach((o) => {
       if (o === V.group || o.isLight || !o.visible) return;
       if (o.isInstancedMesh) {
@@ -1862,9 +1863,12 @@ export function create(V) {
         for (let i = 0; i < o.count; i++) {
           if (!flat && occ.some((c) => c.im === o && c.i === i)) continue;
           o.getMatrixAt(i, m4); m4.decompose(p, q, sc); const r = gr * Math.max(sc.x, sc.z) * 0.7;
-          if (sc.x === 0 || sc.y === 0 || !near(p.x, p.z, flat ? 0 : r)) continue;
+          if (sc.x === 0 || sc.y === 0 || !(flat || !opt || !opt.solid ? near : solidNear)(p.x, p.z, flat ? 0 : r)) continue;
+          // (v6.00, opt.press: how far down each plant is pressed, 0-1 of its height, by where it stands - e.g. flat under
+          // a person's shoes, trodden round them, untouched a little further out)
+          const fy = flat && opt.press ? opt.press(p.x, p.z) : 0.16; if (fy >= 0.999) continue;
           const keep = m4.clone();
-          if (flat) { sc.y *= 0.16; sc.x *= 1.1; sc.z *= 1.1; o.setMatrixAt(i, m4.compose(p, q, sc)); for (const c of occ) if (c.im === o && c.i === i) { const m0 = c.m.clone(); c.m.copy(m4); undo.push(() => { c.m.copy(m0); }); } }
+          if (flat) { sc.y *= fy; if (fy < 0.5) { sc.x *= 1.1; sc.z *= 1.1; } o.setMatrixAt(i, m4.compose(p, q, sc)); for (const c of occ) if (c.im === o && c.i === i) { const m0 = c.m.clone(); c.m.copy(m4); undo.push(() => { c.m.copy(m0); }); } }
           else o.setMatrixAt(i, m4.makeScale(0, 0, 0));
           changed = true; undo.push(() => { o.setMatrixAt(i, keep); o.instanceMatrix.needsUpdate = true; });
         }
@@ -2451,7 +2455,7 @@ export function create(V) {
     moreButtons: [],
     buttons: { eat: bEat, slither: bSlither }, // v5.74: grouped with Open mouth by viewer.js
     get sizeLay() { return sizeLay; },
-    groundY: (list) => groundYAt(list),
+    groundY: (list, below) => groundYAt(list, below),
     clearProps: (pts, rad, opt) => clearProps(pts, rad, opt),
     exclusive: (k) => exclusive(k),
     after() { if (anat) anat.after(); },
