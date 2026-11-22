@@ -25205,6 +25205,8 @@ window.SL_welcome = function (u, back) {
     // place where the snake is native (the Horseshoe Whip Snake in Portugal) - in a place's list it shows only there
     if (tags) [].forEach.call(tags.querySelectorAll(".tag-inv"), function (t) { t.remove(); });
     if (row.classList.contains("cp-intro")) add("Invasive here", "tag-inv");
+    var tch = row.querySelector(".nm-tchip"); if (tch) add(tch.textContent, "tag-nmt nmt-" + (tch.getAttribute("data-nmk") || "unk")); // See near me's Time chip, first
+
     var gone = row.querySelector(".cp-gone-tag"); if (gone) add(gone.textContent, "cpc-gone");
     // what the row said about this place (its states, or a city's note): one line under the tags
     var ex = row.querySelector(":scope > .cp-states, :scope > .cp-city-fact");
@@ -27276,6 +27278,25 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   .nm-acct button { padding: 7px 12px; border-radius: 10px; border: 1px solid #58b351; background: transparent; color: var(--text); font: 600 12.5px 'Inter', sans-serif; cursor: pointer; }
   .nm-acct small { flex-basis: 100%; color: var(--text-muted); }
   .nm-acct small:empty { display: none; }
+  /* Time: which snakes are likely out right now, where you are (a line over the list, and a chip on each snake) */
+  .nm-tbar { margin: -4px 0 12px; padding: 9px 10px 9px 12px; border-radius: 12px; border: 1px solid var(--border); background: rgba(63,125,67,0.07); font: 12.5px/1.45 'Inter', sans-serif; color: var(--text); }
+  [data-sl-theme="dark"] .nm-tbar { background: rgba(155,224,124,0.07); }
+  .nm-tbar[hidden] { display: none; }
+  .nm-thead { display: flex; align-items: flex-start; gap: 10px; }
+  .nm-tline { flex: 1; min-width: 0; margin: 0; }
+  .nm-tline b { font-weight: 600; }
+  .nm-tnote { margin: 5px 0 0; font-size: 11.5px; line-height: 1.4; color: var(--text-muted); }
+  .nm-tbtn { flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text);
+    font: 600 12px/1.2 'Inter', sans-serif; cursor: pointer; white-space: nowrap; transition: background-color .15s ease, border-color .15s ease, color .15s ease; }
+  .nm-tbtn:hover { border-color: var(--map-on); }
+  .nm-tbtn.on, .nm-tbtn.on:hover { background: #3f7d43; border-color: #3f7d43; color: #fff; }
+  .nm-tbtn:focus-visible { outline: 2px solid #9be07c; outline-offset: 2px; }
+  .nm-tchip { flex: none; }
+  #cp-list .cpc-card .nm-acts .nm-tchip { display: none; } /* (on a card it is the first of its tags instead) */
+  .tag.nmt-yes, .tag.nmt-yes:hover { background: #3f7d43; border-color: #3f7d43; color: #fff !important; font-weight: 600; }
+  .tag.nmt-maybe { border-color: #c9962b; color: #8a6414 !important; }
+  [data-sl-theme="dark"] .tag.nmt-maybe { border-color: #b98d2c; color: #f0c766 !important; }
+  .tag.nmt-unk { border-style: dashed; }
 </style>
 <div class="ck-bar nm-bar" id="nm-bar" hidden role="dialog" aria-label="Your location">
   <p id="nm-txt"><b>See snakes near you?</b> Let SnakeList use your location to show the snakes that live near you on the map. It stays on this device, rounded to about 10 km. Only when you tap How to find it is a rough area round it (about 100 km) sent to iNaturalist, to look up sightings.</p>
@@ -27403,8 +27424,9 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   function card(id) { var g = document.getElementById("grid"); return g && g.querySelector('.card[data-id="' + id + '"]'); }
   function spots(c) { try { return (window.SL_FACTS && window.SL_FACTS.spotsOf && c) ? window.SL_FACTS.spotsOf(c) : 0; } catch (e) { return 0; } }
   var PIN_SVG = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.2-4.2"></path></svg>';
-  function howTo(sp, intro) {
+  function howTo(sp, intro, st) {
     var c = card(sp.id), out = "";
+    if (st) out += '<span class="tag nm-tchip nmt-' + st.k + '" data-nmk="' + st.k + '">' + esc(st.t) + "</span>";
     if (intro) out += '<div class="nm-intro">Not native here - brought by people.</div>';
     var harm = window.SL_HARM ? window.SL_HARM(sp.id) : null;
     if (c && c.dataset.venomous === "1") out += '<div class="nm-warn">Venomous - watch from a distance, never touch.</div>';
@@ -27728,6 +27750,99 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     var b = e.target.closest && e.target.closest(".nm-how"); if (!b || e.target.closest(".cpc-card")) return;
     e.stopPropagation(); e.preventDefault(); howOpen(b.getAttribute("data-how"));
   }, true);
+  // ---- Time: which of the snakes near you are likely out right now ----
+  // Your device's clock and date, and the sun where you are (worked out from your rough position, so day,
+  // dawn, dusk and night are real for that place). The season comes from the date and your hemisphere, with
+  // the same latitude bands the How to find it guide uses (tropics: no real winter; up to ~35 degrees: winter
+  // on warm days only; further out: hidden for the cold months). The time of day comes only from the same
+  // sourced activity (ACTIVE) and family notes (FAM_HABIT) the guide uses - a snake with none says
+  // "Activity not known" and stays in the list. Off (the Time button, kept in "sl-nearme-time"): the plain list.
+  var TKEY = "sl-nearme-time";
+  function timeOn() { return lsGet(TKEY) !== "off"; }
+  // the sun's height above the horizon in degrees (the usual low-precision formulas: well under a degree)
+  function sunAlt(ms, lat, lon) {
+    var rad = Math.PI / 180, d = ms / 86400000 - 10957.5; // days from 2000-01-01 12:00 UTC
+    var g = (357.529 + 0.98560028 * d) * rad, q = 280.459 + 0.98564736 * d;
+    var L = (q + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) * rad, e = (23.439 - 0.00000036 * d) * rad;
+    var ra = Math.atan2(Math.cos(e) * Math.sin(L), Math.cos(L)), dec = Math.asin(Math.sin(e) * Math.sin(L));
+    var ha = ((280.46061837 + 360.98564736629 * d) % 360 + lon) * rad - ra;
+    return Math.asin(Math.sin(lat * rad) * Math.sin(dec) + Math.cos(lat * rad) * Math.cos(dec) * Math.cos(ha)) / rad;
+  }
+  function clockTxt(t) { try { return t.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).toLowerCase(); } catch (e) { return t.getHours() + ":" + ("0" + t.getMinutes()).slice(-2); } }
+  function timeCtx(lat, lon, now) {
+    var ms = now.getTime(), alt = sunAlt(ms, lat, lon), up = sunAlt(ms + 600000, lat, lon) > alt;
+    var phase = alt > 6 ? "day" : alt > -6 ? (up ? "dawn" : "dusk") : "night";
+    var a = Math.abs(lat), m = now.getMonth(), mh = lat >= 0 ? m : (m + 6) % 12; // (the month as it would be in the north)
+    var zone = a < 23.5 ? "tropic" : a < 35 ? "warm" : "cold", s = (mh + 1) % 12;
+    var off = zone === "warm" ? s < 3 : zone === "cold" ? (mh >= 10 || mh <= 2) : false; // (warm: Dec-Feb; cold: Nov-Mar, or the south's same months)
+    var solar = ((now.getUTCHours() + now.getUTCMinutes() / 60 + lon / 15) % 24 + 24) % 24;
+    var heat = phase === "day" && solar >= 11 && solar < 16 && (zone === "tropic" || (zone === "warm" && mh >= 5 && mh <= 7));
+    // the next sunrise or sunset (none in a polar day or night)
+    var ev = null, prev = alt, h0 = -0.833;
+    for (var t = 5; t <= 26 * 60 && !ev; t += 5) { var b = sunAlt(ms + t * 60000, lat, lon); if ((prev < h0) !== (b < h0)) ev = { rise: b >= h0, at: new Date(ms + t * 60000) }; prev = b; }
+    var day = ""; try { day = now.toLocaleDateString("en-US", { weekday: "long" }); } catch (e) {}
+    return { phase: phase, zone: zone, off: off ? zone : "", heat: heat, ev: ev,
+      clock: (day ? day + " " : "") + clockTxt(now),
+      phaseTxt: heat ? "hot middle of the day" : phase,
+      season: zone === "tropic" ? "tropics, no real winter" : ["early ", "mid-", "late "][s % 3] + ["winter", "spring", "summer", "autumn"][Math.floor(s / 3)] };
+  }
+  // when a snake is out, from the guide's own data: [kind, from its species page ("sp") or its family ("fam")]
+  function dielOf(id) {
+    var c = card(id), FH = FAM_HABIT[c ? c.dataset.family || "" : ""] || {}, act = ACTIVE[id] || "";
+    if (act) return [/hidden under/i.test(act) ? "under" : /night/i.test(act) ? "night" : /by day/i.test(act) ? "day" : "", "sp"];
+    if (FH.under) return ["under", "fam"];
+    if (FH.night) return ["night", "fam"];
+    return ["", ""];
+  }
+  // r: its place in the list (0 first); k: the chip's look
+  function timeStatus(sp, T) {
+    var c = card(sp.id), sea = !!(c && c.dataset.type === "Sea Snake"), D = dielOf(sp.id);
+    if (!sea && T.off === "cold") return { r: 4, k: "off", t: "Likely hiding for winter" };
+    if (!sea && T.off === "warm") return { r: 2, k: "maybe", t: "Winter: out only on warm days" };
+    if (D[0] === "under") return { r: 3, k: "no", t: "Mostly underground" };
+    if (D[0] === "day" || D[0] === "night") {
+      if (T.phase === "dawn" || T.phase === "dusk") return { r: 1, k: "maybe", t: "May be out now" };
+      if ((D[0] === "day") === (T.phase === "day")) {
+        if (D[0] === "day" && T.heat) return { r: 1, k: "maybe", t: "May hide in the midday heat" };
+        return D[1] === "fam" ? { r: 1, k: "maybe", t: "Probably out now" } : { r: 0, k: "yes", t: "Active now" };
+      }
+      return { r: 3, k: "no", t: D[0] === "night" ? "Usually out at night" : "Usually out by day" };
+    }
+    return { r: 2, k: "unk", t: "Activity not known" };
+  }
+  var CLOCK_SVG = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>';
+  var tbar = null, lastTime = null;
+  function timeBar(T, info) {
+    if (!tbar && cpList && cpList.parentNode) {
+      tbar = document.createElement("div"); tbar.className = "nm-tbar"; tbar.id = "nm-tbar"; tbar.hidden = true;
+      cpList.parentNode.insertBefore(tbar, cpList);
+      tbar.addEventListener("click", function (e) {
+        if (!e.target.closest("#nm-tbtn")) return;
+        try { localStorage.setItem(TKEY, timeOn() ? "off" : "on"); } catch (er) {}
+        relist(); var b = document.getElementById("nm-tbtn"); if (b) b.focus({ preventScroll: true });
+      });
+      // it goes with the near me list (another place's list in the panel: hidden)
+      new MutationObserver(function () { tbar.hidden = !cpList.querySelector(":scope > #nm-off"); }).observe(cpList, { childList: true });
+    }
+    if (!tbar) return;
+    var btnH = '<button type="button" class="nm-tbtn' + (T ? " on" : "") + '" id="nm-tbtn" aria-pressed="' + !!T + '">' + CLOCK_SVG + (T ? "Time on" : "Time off") + "</button>", line, note = "";
+    if (!T) line = "Time is off: every snake recorded near you, not sorted by the time of day or year.";
+    else {
+      line = "<b>" + esc(T.clock) + "</b> · " + esc(T.phaseTxt) + " · " + esc(T.season);
+      if (info.n) line += " — <b>" + info.yes + " of " + info.n + "</b> " + (info.n === 1 ? "snake" : "snakes") + " likely active now";
+      if (T.ev) note += (T.ev.rise ? "Sunrise" : "Sunset") + " at " + clockTxt(T.ev.at) + ". ";
+      if (info.n) note += "Seasons are worked out from where you are, the same for every snake. Time of day is known for " + info.known + " of these " + info.n + " snakes" + (info.fam ? " (" + info.fam + (info.fam === 1 ? " of them only from its family" : " of them only from their family") + ")" : "") + (info.known < info.n ? "; the others say Activity not known." : ".");
+    }
+    tbar.innerHTML = '<div class="nm-thead"><p class="nm-tline">' + line + "</p>" + btnH + "</div>" + (note ? '<p class="nm-tnote">' + esc(note) + "</p>" : "");
+  }
+  function relist() { var r = rec(), M = window.SL_NEARME_MAP; if (dotOn && r && M && M.ready()) render(M, r.lat, r.lon, true); }
+  // the clock moves on: the line's time each minute, the list when a snake's chip changes
+  setInterval(function () {
+    if (!dotOn || !tbar || tbar.hidden || !timeOn() || !lastTime) return;
+    var r = rec(); if (!r) return;
+    var T = timeCtx(r.lat, r.lon, new Date()), key = lastList.map(function (sp) { return timeStatus(sp, T).t; }).join("|");
+    if (key !== lastTime.key) relist(); else { lastTime.T = T; timeBar(T, lastTime.info); }
+  }, 60000);
   // ---- See near me ----
   function seeNear() {
     var r = rec(), M = window.SL_NEARME_MAP; if (!r || !M || !on()) return;
@@ -27740,10 +27855,17 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
       render(M, r.lat, r.lon);
     })();
   }
-  function render(M, lat, lon) {
+  function render(M, lat, lon, keep) {
     var f = M.find(lat, lon) || { cc: null }, html = "", sub;
-    var row = function (o) { return M.row(o.sp, howTo(o.sp, o.intro)); };
+    var T = timeOn() ? timeCtx(lat, lon, new Date()) : null, info = { n: 0, yes: 0, known: 0, fam: 0 }, sts = {};
+    var row = function (o) { return M.row(o.sp, howTo(o.sp, o.intro, sts[o.sp.id])); };
     lastFind = f; lastList = []; introOf = {};
+    if (T && f.cc && f.list && f.list.length) { // Time on: the snakes likely out now first (otherwise the list's own order)
+      var L0 = f.list.map(function (o, i) { var st = sts[o.sp.id] = timeStatus(o.sp, T), D = dielOf(o.sp.id); info.n++; if (st.k === "yes") info.yes++; if (D[0]) { info.known++; if (D[1] === "fam") info.fam++; } return [o, st.r, i]; });
+      L0.sort(function (a, b) { return a[1] - b[1] || a[2] - b[2]; });
+      f = Object.assign({}, f, { list: L0.map(function (x) { return x[0]; }) });
+    }
+    lastTime = T ? { T: T, info: info, key: (f.list || []).map(function (o) { return sts[o.sp.id].t; }).join("|") } : null;
     var off = '<p class="cp-note">From SnakeList\'s range records, not from sightings. Not listed is not the same as absent. Your location stays on this device.</p>' +
       '<button type="button" class="nm-off" id="nm-off">Turn off location</button>';
     if (!f.cc) {
@@ -27763,8 +27885,11 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
       // no state/province records here: say plainly that the list is the whole country's
       if (n && f.bigCountry) off = '<p class="cp-note">SnakeList doesn\'t yet know which parts of ' + esc(f.country) + ' each snake lives in, so this is every snake recorded in the country.</p>' + off;
     }
-    M.show("Near you", sub, html + off);
-    M.fly(lat, lon);
+    if (keep && cpList) { // (the Time button or the clock: the same panel, its list redone in place)
+      document.getElementById("cp-sub").textContent = sub; cpList.innerHTML = html + off; cpList.scrollLeft = 0; cpList.scrollTop = 0;
+    } else { M.show("Near you", sub, html + off); M.fly(lat, lon); }
+    timeBar(T, info);
+    if (tbar) tbar.hidden = false;
     var o = document.getElementById("nm-off");
     if (o) o.addEventListener("click", function (e) { e.stopPropagation(); turnOff(); });
   }
@@ -27825,7 +27950,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   window.addEventListener("storage", function (e) { if (e.key === KEY || e.key === "sl-google") { last = ""; paint(); } });
   setInterval(check, 1500);
   setTimeout(check, 800);
-  window.SL_NEARME = { rec: rec, check: check, see: seeNear, how: howOpen, spot: function () { return spotOn; }, guide: function (id) { var sp = lastList.filter(function (x) { return x.id === id; })[0]; var r = rec(); return sp ? guide(sp, lastFind || {}, r ? r.lat : 0) : null; } }; // (for the tests)
+  window.SL_NEARME = { rec: rec, check: check, see: seeNear, how: howOpen, time: function () { return lastTime; }, spot: function () { return spotOn; }, guide: function (id) { var sp = lastList.filter(function (x) { return x.id === id; })[0]; var r = rec(); return sp ? guide(sp, lastFind || {}, r ? r.lat : 0) : null; } }; // (for the tests)
 })();
 </script>
 <!-- ==== See near me - END ========================================================================== -->
