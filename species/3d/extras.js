@@ -2545,7 +2545,7 @@ export function create(V) {
   const fx = {
     onBuild() {
       layout();
-      if (anat) anat.reset(); if (sizeLay) sizeLay.end(true); rig = null; anat = anatomyCtl(); sizeLay = sizeLayCtl(); show = null; slither = null; camBlend = null; fx.zoomOut = 1;
+      if (anat) anat.reset(); if (sizeLay) sizeLay.end(true); rig = null; anat = anatomyCtl(); sizeLay = sizeLayCtl(); show = null; slither = null; camBlend = null; fx.zoomOut = 1; fx.reach = 0;
       const has = !!(V.extras && V.extras.mouth);
       bEat.hidden = !has;
       bAnat.hidden = !has; bAnat.setAttribute('aria-pressed', 'false');
