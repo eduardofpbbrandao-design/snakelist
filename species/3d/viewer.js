@@ -7,13 +7,13 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=582'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=582'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=583'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=583'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 // v5.93: the habitats each snake can be shown in (tools/habitat_looks.py: the first is shown first; snakes with only one are
 // not listed). Loaded with this module - it waits for it up to 3 s, so the first scene is already the right one (if it comes
 // later, the Habitats button is added then)
-const HAB_P = typeof fetch === 'function' ? fetch(new URL('habitats.json?r=582', import.meta.url).href).then((r) => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null);
+const HAB_P = typeof fetch === 'function' ? fetch(new URL('habitats.json?r=583', import.meta.url).href).then((r) => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null);
 let HAB_LOOKS = await Promise.race([HAB_P, new Promise((res) => setTimeout(() => res(null), 3000))]);
 HAB_P.then((d) => { HAB_LOOKS = d; });
 const habPick = (d, id) => { const l = d && d.sp && d.sp[id]; return Array.isArray(l) && l.length > 1 ? l : null; };
@@ -228,9 +228,11 @@ export function autoProfile(p) {
       T({ type: 'zigzag', count: Math.round(n * 1.2), a: 0.55, mirror: true, amp: 0.07, wid: 0.03, color: pale, warp: 0.3 }); break;
     // v5.20: garter snakes - a pale stripe down the spine, one low on each flank (scale rows 2-3), dark checks between
     case 'garter': { const gs = lumOf(pale) < 0.4 ? '#d9c26a' : pale; // (a dark garter snake still has bright stripes)
-      T({ type: 'stripe', t: [0.04, 1], a: 0, wid: 0.05, color: gs, aa: 0.3 });
-      T({ type: 'stripe', t: [0.04, 1], a: 0.6, mirror: true, wid: 0.055, color: gs, aa: 0.3, alpha: 0.9 }); }
-      T({ type: 'blotch', count: Math.round(n * 2), a: 0.3, mirror: true, alt: true, wid: 0.06, len: 0.32, shape: 'rect', color: shade(d, 0.45), alpha: 0.7 }); break;
+      // (v5.99: the stripes a scale row wider and the checks between them darker - side by side with photos the generated
+      // garter snakes read as plain brown snakes from a normal distance, their stripes and checks lost)
+      T({ type: 'stripe', t: [0.04, 1], a: 0, wid: 0.068, color: gs, aa: 0.3 });
+      T({ type: 'stripe', t: [0.04, 1], a: 0.6, mirror: true, wid: 0.07, color: gs, aa: 0.3, alpha: 0.92 }); }
+      T({ type: 'blotch', count: Math.round(n * 2), a: 0.3, mirror: true, alt: true, wid: 0.07, len: 0.34, shape: 'rect', color: shade(d, 0.32), alpha: 0.82 }); break;
     // v5.21: saddles with a black border (rat snakes, corn and fox snakes), rings with paler centres (rainbow boas),
     // boa saddles (dark on the back, oval on the flanks), and narrow crossbands (snail-eaters, death adders)
     // v5.22: lanceheads (Bothrops) - dark triangles/trapezoids on each flank, pale-edged, their tips meeting over the back
@@ -1190,7 +1192,9 @@ function scaleTextures(P, lat) {
     const a = ((x + 0.5) / Wt) * 2 - 1, g = ((y + 0.5) / Ht) * Pt;
     let best = 0, bE = 0, bT = 1;
     if (Math.abs(a) > aV) { // ventral scutes: wide plates
-      const yy = g / Pt; best = 0.55 + 0.24 * yy - 0.32 * Math.exp(-(((yy) / 0.075) ** 2)) - 0.32 * Math.exp(-(((1 - yy) / 0.055) ** 2)); // (v5.58: a gentler step at each scute's edge - it shone as a row of white ticks along the belly)
+      // v5.99 (overlapping scales): each ventral scute is a plate tilted up towards its rear edge, which lies over the front
+      // of the next one - a small step with a rounded lip (the seam pass below shades the step), not a groove
+      const yy = g / Pt; best = 0.4 + 0.36 * Math.pow(yy, 1.3) - 0.1 * Math.exp(-(((1 - yy) / 0.04) ** 2)) - 0.08 * Math.exp(-((yy / 0.05) ** 2));
       best -= 0.4 * Math.exp(-(((Math.abs(a) - aV) / 0.01) ** 2));
       bT = 0.35 + 0.65 * yy; // (v5.88: each ventral plate's front edge lies under the free edge of the one in front)
     } else {
@@ -1208,8 +1212,13 @@ function scaleTextures(P, lat) {
           } else {
             const wy = 0.92, t = clamp((ly / wy + 1) / 2, 0, 1), wx = 0.64 * (1 - 0.55 * t * t);
             const d = (lx / wx) ** 2 + (ly / wy) ** 2; if (d >= 1) continue;
-            hv = Math.sqrt(1 - d) * 0.45 + 0.55 * t; // rises toward the free (rear) tip that overlaps the next scale
-            if (keel) hv += keel * 0.46 * Math.exp(-((lx / 0.065) ** 2)) * sstep(-0.9, -0.2, ly / wy) * (1 - 0.35 * sstep(0.6, 0.95, t)); // (v5.88: a crisper keel, fading at the very tip as on real scales)
+            // v5.99 (overlapping scales, Eduardo): real dorsal scales are imbricate - each a thin plate tucked in under the one in
+            // front and tilted up to a free rear edge that lies over the next. So the height climbs steadily from the scale's base
+            // to its rear edge and keeps most of it right up to the outline (only a narrow rounded lip), and the scale behind -
+            // and those of the next rows, offset by half a scale - start low under it: a real step at every free edge, in
+            // diagonal rows (the old profile was a dome that ran down to nothing at the edge, so the skin read as a flat mosaic)
+            hv = (0.14 + 0.86 * Math.pow(t, 1.25)) * (0.8 + 0.2 * Math.sqrt(1 - d)) * (1 - 0.2 * sstep(0.86, 1, d));
+            if (keel) hv += keel * 0.4 * Math.exp(-((lx / 0.065) ** 2)) * sstep(-0.9, -0.2, ly / wy) * (1 - 0.35 * sstep(0.6, 0.95, t)); // (v5.88: a crisper keel, fading at the very tip as on real scales)
             if (SE && hv > best) { const dir = SE.dir || [1, 1], sd = clamp(0.5 + dir[0] * -ly * 1.3 + dir[1] * Math.sign(a || 1) * lx * 2.2, 0, 1);
               bE = Math.pow(sstep(SE.from != null ? SE.from : 0.3, 0.97, Math.sqrt(d)), SE.pow || 1) * sstep(0.2, 0.85, sd); }
           }
@@ -1226,6 +1235,26 @@ function scaleTextures(P, lat) {
     if (ed) for (let pass = 0; pass < 2; pass++) { // (the dark edges too, twice: they were saw-toothed)
       for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) t[y * Wt + x] = (ed[y * Wt + ((x + Wt - 1) % Wt)] + 2 * ed[y * Wt + x] + ed[y * Wt + ((x + 1) % Wt)]) / 4;
       for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) ed[y * Wt + x] = (t[((y + Ht - 1) % Ht) * Wt + x] + 2 * t[y * Wt + x] + t[((y + 1) % Ht) * Wt + x]) / 4; } }
+  // v5.99 (overlapping scales): the seam - the skin just behind every free edge lies in the shadow of the edge over it. A
+  // texel is shaded by any higher point a little way towards the head (straight forward and along the two diagonals, as the
+  // scale rows run), more the higher that point stands above the slope of the light: a dark line that follows each scale's
+  // free edge, which still reads when the scales are only a few pixels across (the relief itself fades out there)
+  const seam = new Float32Array(Wt * Ht);
+  if (kind === 'imbricate') {
+    const K = Math.max(4, Math.round(Ht * 0.16)), slope = 0.3 / Math.max(3, Ht * 0.12), dirs = [[0, 1], [0.6, 0.8], [-0.6, 0.8]];
+    const ox = new Int32Array(3 * K), oy = new Int32Array(3 * K);
+    for (let di = 0; di < 3; di++) for (let k = 1; k <= K; k++) { ox[di * K + k - 1] = Math.round(-dirs[di][0] * k * 0.8); oy[di * K + k - 1] = -Math.round(dirs[di][1] * k); }
+    const xb0 = Math.floor((1 - aV) / 2 * Wt), xb1 = Wt - xb0;
+    for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) {
+      const h0 = h[y * Wt + x], nd = x < xb0 || x >= xb1 ? K : 3 * K; let occ = 0;
+      for (let q = 0; q < nd; q++) {
+        let xx = x + ox[q], yy = y + oy[q]; if (xx < 0) xx += Wt; else if (xx >= Wt) xx -= Wt; if (yy < 0) yy += Ht;
+        const o = h[yy * Wt + xx] - h0 - ((q % K) + 1) * slope; if (o > occ) occ = o;
+      }
+      seam[y * Wt + x] = occ > 0 ? sstep(0.0, 0.2, occ) : 0;
+    }
+  }
+  const seamK = S.seam != null ? S.seam : keel > 0.3 ? 0.55 : 0.42; // (smooth scales lie flatter and tighter: a finer seam)
   const nData = new Uint8Array(Wt * Ht * 4), cData = new Uint8Array(Wt * Ht * 4);
   const str = (S.normal || 1) * (kind === 'imbricate' ? 2.2 : 1.6);
   const H = (x, y) => h[((y + Ht) % Ht) * Wt + ((x + Wt) % Wt)];
@@ -1234,7 +1263,7 @@ function scaleTextures(P, lat) {
     const l = Math.hypot(dx, dy, 1), k = (y * Wt + x) * 4;
     nData[k] = (-dx / l * 0.5 + 0.5) * 255; nData[k + 1] = (-dy / l * 0.5 + 0.5) * 255; nData[k + 2] = (1 / l * 0.5 + 0.5) * 255; nData[k + 3] = 255;
     const hv = H(x, y), cav = sstep(0.0, 0.3, hv);
-    cData[k] = (0.35 + 0.65 * cav) * lerp(0.74, 1, sstep(0.0, 0.55, tb[y * Wt + x])) * 255; // cavity (darkens the skin between scales; v5.88: and the base of each scale, tucked under the free edge of the one in front - the overlap reads up close)
+    cData[k] = (0.35 + 0.65 * cav) * lerp(0.8, 1, sstep(0.0, 0.55, tb[y * Wt + x])) * (1 - seamK * seam[y * Wt + x]) * 255; // cavity (darkens the skin between scales; v5.88: and the base of each scale, tucked under the free edge of the one in front - the overlap reads up close)
     cData[k + 1] = (lerp(1.0, 0.82, cav) + keel * 0.08) * 230; // roughness
     cData[k + 2] = ed ? ed[y * Wt + x] * 255 : 0; cData[k + 3] = 255; // (blue: the dark scale edge, see S.edge)
   }
@@ -1564,7 +1593,30 @@ function patternData(P, F, body, lat, quality, seed) {
           if (x > L * (1 - (P.body.tail || 0.12)) && !P.body.blunt) { const am = 1 - aa; col = mixc(col, [col[0] * 0.5, col[1] * 0.5, col[2] * 0.5], kE * 1.6 * Math.exp(-((am / 0.012) ** 2))); }
         }
       }
-      if (C.speckle && !cl.v && x > Hl) { const hs = hash1(cl.id, seed + 11); if (hs < C.speckle.p) col = mixc(col, hex(C.speckle.color), (C.speckle.k || 0.6) * (0.6 + hs / C.speckle.p * 0.4) * (C.speckle.dot ? sstep(C.speckle.dot, C.speckle.dot + 0.2, cl.w) : Math.sqrt(cl.w))); } // (v5.35: dot - one small spot centred on each scale, as in speckled kingsnakes)
+      // v5.35: dot - one small spot centred on each scale, as in speckled kingsnakes
+      // v5.99 (Eduardo: "not the same pattern over and over"): no two spots alike and no repeat along the body - in photos of
+      // speckled kingsnakes each scale's spot has its own size (a pin-prick to most of the scale), brightness and place, a few
+      // scales have none, and the spots come in patches that are denser and bolder or sparser and fainter. So each scale's
+      // spot takes its own size, brightness, tint and offset from the scale's own hash, a slow noise along and round the body
+      // sets how many and how big, and a fine noise roughens each spot's outline (all seeded by position: nothing repeats)
+      if (C.speckle && !cl.v && x > Hl) {
+        const Sp = C.speckle, hs = hash1(cl.id, seed + 11), h2 = hash1(cl.id, seed + 12), h3 = hash1(cl.id, seed + 13);
+        const nf = vnoise(nx * 1.7, ny * 1.7, gq * 1.6, seed + 71), nf2 = vnoise(nx * 3.3, ny * 3.3, gq * 3.4, seed + 73);
+        const pE = Sp.vary === 0 ? Sp.p : Math.min(Sp.p >= 0.999 ? 0.96 : 1, Sp.p * (0.64 + 0.62 * nf));
+        if (hs < pE) {
+          let cov;
+          if (Sp.dot) {
+            // the spot sits a little off the scale's centre (its own way on each scale), with a ragged edge
+            const ox = (h3 - 0.5) * 0.35 * lat.rw, oy = (h2 - 0.5) * 0.3 * lat.Pt, c2 = lat.cell(a - ox, g - oy);
+            const w2 = (c2.id === cl.id ? c2.w : cl.w * 0.5) + (vnoise(a / lat.rw * 3.1, g / lat.Pt * 3.1, h2 * 7, seed + 77) - 0.5) * 0.26;
+            const thr = clamp(Sp.dot + (Sp.vary === 0 ? 0 : (h2 - 0.5) * 0.9 + (0.5 - nf2) * 0.5 - 0.16 * sstep(0.3, 0.68, aa) + 0.08 * (1 - sstep(0.1, 0.3, aa))), 0.12, 0.95); // (bigger on the flanks, as in photos)
+            cov = sstep(thr, thr + 0.16, w2);
+          } else cov = Math.sqrt(cl.w) * (Sp.vary === 0 ? 1 : sstep(0.15, 0.4, cl.w + (h3 - 0.5) * 0.3));
+          const sc = hex(Sp.color), b = Sp.vary === 0 ? 1 : 0.86 + 0.24 * h3;
+          const k = Math.min(1, (Sp.k || 0.6) * (Sp.vary === 0 ? 0.6 + hs / Sp.p * 0.4 : 0.62 + 0.3 * h2 + 0.2 * nf));
+          col = mixc(col, [Math.min(255, sc[0] * b), Math.min(255, sc[1] * b), Math.min(255, sc[2] * (b + (h3 - 0.5) * 0.12))], k * cov);
+        }
+      }
       // v5.93: side by side with photos the models read a little pale and washed out under the scene's light: the skin's colour a
       // touch deeper and richer (colors.deepen / colors.sat per species)
       const lm = 0.2126 * col[0] + 0.7152 * col[1] + 0.0722 * col[2];
@@ -1652,8 +1704,9 @@ function evalLayer(Ly, a, g0, t, xn, warp, cl, seed, xC) {
   }
   if (Ly.type === 'zigzag') {
     for (const sg of sides) {
-      const ph = (g - Ly.s0) / Ly.period + Ly.phase + (sg < 0 && Ly.alt ? 0.5 : 0), tri = 2 * Math.abs(2 * (ph - Math.floor(ph + 0.5))) - 1;
-      const ac = (Ly.a + Ly.amp * tri) * sg + warp * Ly.warp * 0.06, w = Ly.wid * (1 + warp * 0.3);
+      // v5.99 (no repeats): the zigzag's turns drift along the body and each has its own reach (an adder's zigzag is irregular)
+      const p0 = (g - Ly.s0) / Ly.period, dr = Ly.drift != null ? Ly.drift : 0.25, ph = p0 + Ly.phase + (sg < 0 && Ly.alt ? 0.5 : 0) + dr * (vnoise(p0 * 0.41, sg, 2.5, seed + 95) - 0.5) * 2, tri = 2 * Math.abs(2 * (ph - Math.floor(ph + 0.5))) - 1;
+      const ac = (Ly.a + Ly.amp * tri * (1 + dr * (vnoise(ph * 2, sg, 4.5, seed + 97) - 0.5))) * sg + warp * Ly.warp * 0.06, w = Ly.wid * (1 + warp * 0.3);
       const d = Math.abs(a - ac) / w;
       let r = null;
       if (Ly.ecol && d < 1 + Ly.edge + Ly.aa && d >= 1 - Ly.aa) r = [Ly.ecol, (1 - sstep(1 + Ly.edge - Ly.aa, 1 + Ly.edge + Ly.aa, d)) * fadeT];
@@ -1686,11 +1739,15 @@ function evalLayer(Ly, a, g0, t, xn, warp, cl, seed, xC) {
   // on the flanks and join their neighbours (a chain-link pattern). per: length of one link; na: links around the body
   if (Ly.type === 'net' || Ly.type === 'chain') {
     const per = Ly.period; if (!per) return null;
-    const u = (g - Ly.s0) / per + Ly.phase + warp * Ly.warp * 0.25, aa = Math.abs(a), na = Ly.na || 2.2;
+    // v5.99 (no repeats): the links are not evenly spaced - a slow drift along the body stretches and squeezes them - and
+    // each link's line has its own width (real chains and nets are irregular: bands fork, thicken and thin)
+    const u0 = (g - Ly.s0) / per, dr = Ly.drift != null ? Ly.drift : 0.3;
+    const u = u0 + Ly.phase + warp * Ly.warp * 0.25 + dr * (vnoise(u0 * 0.43, 0.5, 1.5, seed + 91) - 0.5) * 2, aa = Math.abs(a), na = Ly.na || 2.2;
     const fr = (z) => Math.abs(z - Math.floor(z + 0.5)); // distance to the nearest whole number
+    const wv = Ly.wid * (dr ? 0.8 + 0.4 * vnoise(u * 1.0 + 0.5, aa * 2.5, 3.5, seed + 93) : 1);
     let d;
-    if (Ly.type === 'net') { const v = aa * na; d = Math.min(fr(u + v), fr(u - v)) / Ly.wid; }
-    else { const a0 = Ly.a0 != null ? Ly.a0 : 0.32; d = aa < a0 ? fr(u) / Ly.wid : Math.min(fr(u + (aa - a0) * na), fr(u - (aa - a0) * na)) / Ly.wid; if (aa > (Ly.a1 || 0.8)) d = 9; }
+    if (Ly.type === 'net') { const v = aa * na; d = Math.min(fr(u + v), fr(u - v)) / wv; }
+    else { const a0 = Ly.a0 != null ? Ly.a0 : 0.32; d = aa < a0 ? fr(u) / wv : Math.min(fr(u + (aa - a0) * na), fr(u - (aa - a0) * na)) / wv; if (aa > (Ly.a1 || 0.8)) d = 9; }
     let c = cover(d, Ly.aa || 0.25), col = Ly.col;
     if (Ly.ecol && d >= 1 - Ly.aa && d < 1 + Ly.edge + Ly.aa) { const ce = 1 - sstep(1 + Ly.edge - Ly.aa, 1 + Ly.edge + Ly.aa, d); if (ce > c) { col = Ly.ecol; c = ce; } }
     c *= fadeT * (Ly.alpha || 1);
@@ -1704,15 +1761,22 @@ function evalLayer(Ly, a, g0, t, xn, warp, cl, seed, xC) {
     for (let k = k0 - 1; k <= k0 + 1; k++) {
       const r1 = hash1(k * 3 + (sg < 0 ? 101 : 0), seed + 21), r2 = hash1(k * 5 + 7 + (sg < 0 ? 211 : 0), seed + 22), r3 = hash1(k * 11 + 3, seed + 23);
       if (Ly.skip && r3 < Ly.skip) continue;
-      const gc = Ly.s0 + (k + ph + 0.5 + (r1 - 0.5) * Ly.jit * 2) * per;
-      const sz = 1 + (r2 - 0.5) * Ly.sj * 2;
+      // v5.99 (no repeats): besides each mark's own jitter, a slow drift shifts runs of neighbouring marks closer together or
+      // further apart (real spacing waxes and wanes along the body), each mark gets its own width as well as its own size,
+      // and a band runs a little askew or bulges on one side - less in snakes whose rings are regular (kraits, coral snakes:
+      // drift / tilt per layer)
+      const r4 = hash1(k * 13 + 5 + (sg < 0 ? 307 : 0), seed + 24), r5 = hash1(k * 17 + 11 + (sg < 0 ? 401 : 0), seed + 25);
+      if (Ly.count === 1 && k !== 0) continue; // (v5.99: a single mark - a collar - is just that one, not its neighbours just outside its range)
+      const dr = Ly.count <= 2 ? 0 : Ly.drift != null ? Ly.drift : Ly.type === 'band' ? 0.1 : 0.22;
+      const gc = Ly.s0 + (k + ph + 0.5 + (r1 - 0.5) * Ly.jit * 2 + dr * (vnoise(k * 0.37 + 0.5, sg, 0.5, seed + 26) - 0.5) * 2) * per;
+      const sz = 1 + (r2 - 0.5) * Ly.sj * 2, szw = sz * (1 + (r5 - 0.5) * (Ly.wj != null ? Ly.wj : 0.24));
       const halfLen = (Ly.len * per) / 2 * sz;
       const ac = Ly.type === 'band' ? 0 : (Ly.a + (r1 - 0.5) * Ly.aj * 2) * sg;
       const dv = (g - gc) / halfLen;
       if (Math.abs(dv) > 2.2 + (Ly.vk || 0) + (Ly.h1 || 0) * 0.6) continue;
       let d;
-      if (Ly.type === 'band') d = Math.abs(dv) + warp * Ly.warp * 0.5 + (Ly.dorsalWide ? -Ly.dorsalWide * (1 - Math.abs(a)) : 0);
-      else d = shapeD(Ly.shape, dv, (a - ac) / (Ly.wid * sz), Ly) + warp * Ly.warp;
+      if (Ly.type === 'band') { const tl = (Ly.tilt != null ? Ly.tilt : 0.35) * (r4 - 0.5); d = Math.abs(dv + tl * a + tl * 0.6 * (r5 - 0.5) * Math.abs(a)) + warp * Ly.warp * 0.5 + (Ly.dorsalWide ? -Ly.dorsalWide * (1 - Math.abs(a)) : 0); }
+      else d = shapeD(Ly.shape, dv, (a - ac) / (Ly.wid * szw), Ly) + warp * Ly.warp;
       let col = null, c = 0;
       if (Ly.icol && d < Ly.inner.r) { col = Ly.icol; c = cover(d / Ly.inner.r, Ly.aa * 2); col = mixc(Ly.col, Ly.icol, c); c = 1; }
       else if (d < 1 + Ly.aa) { col = Ly.col; c = cover(d, Ly.aa); if (Ly.scol && d < 1 - Ly.aa && hash1(cl.id, seed + 61 + k) < Ly.speck.p) col = Ly.scol; } // (v5.62: speck - pale flecks on some scales inside a mark, as in longnose snakes)
@@ -3412,10 +3476,10 @@ float slScale(vec2 m) {
         .replace('#include <aomap_fragment>', THREE.ShaderChunk.aomap_fragment.replace('aoMapIntensity + 1.0', 'aoMapIntensity * slTip * (1.0 - slHW) + 1.0'))
         .replace('#include <roughnessmap_fragment>', THREE.ShaderChunk.roughnessmap_fragment.replace('vRoughnessMapUv', 'slUv') + '\n roughnessFactor *= mix(1.0, slRough, (1.0 - vMet.z) * slTip);\n roughnessFactor = mix(roughnessFactor, roughness * (0.9 + 0.25 * slH), vMet.z); roughnessFactor = mix(roughness, roughnessFactor, slTip);\n roughnessFactor = mix(roughnessFactor, max(roughness, 0.42) * (0.6 + 0.8 * slHN.a), slHW);')
         .replace('#include <normal_fragment_maps>', THREE.ShaderChunk.normal_fragment_maps.replace(/vNormalMapUv/g, 'slUv').replace('mapN.xy *= normalScale;', 'mapN.xy = mapN.xy * mix(1.0, slStr, 1.0 - vMet.z) + slTilt * (1.0 - vMet.z) * slTip;\n mapN.xy *= normalScale * (1.0 - vHead * 0.88) * slTip;\n mapN = normalize(mix(mapN, normalize(vec3(-slDa * 0.55, -slDx * 0.55, 1.0)), vMet.z));\n mapN = normalize(mix(vec3(0.0, 0.0, 1.0), mapN, smoothstep(uTip * 0.5, uTip * 1.6, vMet.y))); /* v5.17: the scale relief fans out into a star on the rounded nose: none there */').replace('normal = normalize( tbn * mapN );', 'normal = normalize( tbn * mapN );\n if (slHW > 0.0) { vec2 hn = slHN.xy * 2.0 - 1.0; vec3 hT = tbn[0], hB = tbn[1]; float lT = length(hT), lB = length(hB);\n   if (lT > 1e-6 && lB > 1e-6) { vec3 nH = normalize(hT / lT * hn.x + hB / lB * hn.y + nonPerturbedNormal * sqrt(max(0.0, 1.0 - dot(hn, hn)))); normal = normalize(mix(normal, nH, slHW)); } }'))
-        .replace('#include <clearcoat_normal_fragment_begin>', '#ifdef USE_CLEARCOAT\n vec3 clearcoatNormal = normalize(mix(nonPerturbedNormal, normal, 0.75 * slHW));\n#endif')
+        .replace('#include <clearcoat_normal_fragment_begin>', '#ifdef USE_CLEARCOAT\n vec3 clearcoatNormal = normalize(mix(nonPerturbedNormal, normal, max(0.75 * slHW, 0.5 * slTip * (1.0 - vHead) * (1.0 - vMet.z)))); /* v5.99: the gloss breaks up scale by scale (each overlapping scale its own little mirror), not one smooth streak down the body */\n#endif')
         .replace('#include <lights_fragment_end>', SKIN_LIGHT_GLSL).replace('#include <lights_physical_fragment>', '#include <lights_physical_fragment>\n#ifdef USE_CLEARCOAT\n material.clearcoat *= 1.0 - 0.55 * slHW; material.clearcoatRoughness = mix(material.clearcoatRoughness, max(material.clearcoatRoughness, 0.3), slHW);\n#endif');
     };
-    mat.customProgramCacheKey = () => 'sl-skin-v588';
+    mat.customProgramCacheKey = () => 'sl-skin-v599';
     const mesh = new THREE.Mesh(body.geo, mat); mesh.castShadow = mesh.receiveShadow = true;
     // v5.78: the bending on the graphics card (RIG_GLSL): the shadow pass bends the same way, and while posed the body is
     // never culled by its rest-pose bounds, and clicks and zooming meet it where it is now (its chain of spheres)

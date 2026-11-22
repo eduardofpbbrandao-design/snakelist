@@ -956,6 +956,7 @@ def apply_562(a, c, g):
     if g in GENUS_EYE_593 and sid not in SPECIES_EYE: a["h"] = dict(a.get("h") or {}, eyeL=GENUS_EYE_593[g])  # v5.93
     if sid in AUTO_FIX_593: _merge_562(a, AUTO_FIX_593[sid])
     if sid in AUTO_FN_593: AUTO_FN_593[sid](a)
+    if sid in AUTO_FIX_599: _merge_562(a, AUTO_FIX_599[sid])  # v5.99
 
 
 # v5.88: hand-made profiles matched again against iNaturalist research-grade photos of adults (the patterns were rough)
@@ -1143,8 +1144,98 @@ AUTO_FN_593 = {"heterodon-nasicus": _hognose_593}
 # Opisthotropis: small eyes high on a slightly flattened head (stream snakes)
 GENUS_EYE_593 = {"opisthotropis": 0.13}
 
+# v5.99 (Eduardo: "some 3D models still look completely different"): the ~150 best-known species side by side with
+# research-grade iNaturalist photos once more; the ones still clearly off
+HAND_FIXES_599 = {
+    # corn snake: the red saddles sit on the back with orange ground between and below them, and the flank blotches are small
+    # and low (the saddles and flank blotches with their black rims joined into rings round the body: it read as a milk snake)
+    "pantherophis-guttatus": [(("colors", "dorsal"), "#cc8550"), (("colors", "lateral"), "#cf8c58"), (("pattern", 0, "wid"), 0.33), (("pattern", 0, "len"), 0.62), (("pattern", 0, "edge"), 0.22),
+                              (("pattern", 1, "a"), 0.66), (("pattern", 1, "wid"), 0.075), (("pattern", 1, "len"), 0.32), (("pattern", 1, "edge"), 0.26)],
+    # eastern milk snake: grey-tan with red-brown, black-edged saddles on the back and small blotches low on the flanks (the
+    # saddles reached so far down the sides that, with their black rims, the snake read as a red-ringed coral mimic)
+    "lampropeltis-triangulum": [(("pattern", 0, "wid"), 0.36), (("pattern", 0, "color"), "#7a3a28"), (("pattern", 0, "edge"), 0.22), (("pattern", 1, "a"), 0.7), (("pattern", 1, "wid"), 0.09)],
+    # Russell's viper: the three rows of oval spots are dark brown inside a black ring and a white rim (their centres were a
+    # light reddish brown, so the spots read as rust-coloured rings on the tan)
+    "daboia-russelii": [(("pattern", 0, "inner", "color"), "#4a3020"), (("pattern", 0, "inner", "r"), 0.66), (("pattern", 1, "inner", "color"), "#4a3020"), (("pattern", 1, "inner", "r"), 0.64)],
+}
+AUTO_FIX_599 = {
+    # (genus spot-check) long-beaked blind snake: a brown to reddish-brown worm-like snake, paler below (its colour had been
+    # read from a pale background - it was a white snake); Japanese keelback: brown, darker along the back (it was cream)
+    "anilios-grypus": {"d": "#7a5440", "lat": "#7e5944", "b": "#a8806a"},
+    # golden lancehead: a pale golden-tan snake whose blotches are only a little darker than the ground (it was a dark
+    # grey-brown with bold pale-edged trapezoids, like the mainland lanceheads)
+    "bothrops-insularis": {"d": "#b38c4c", "lat": "#ae884a", "c": "#8d6a36", "b": "#e2d4a8"},
+    "hebius-vibakari": {"d": "#7d6550", "lat": "#816954", "b": "#d6cfbd"},
+    # sunbeam snake: a very dark, cool brown-black under its rainbow sheen (the warm brown read reddish in the scene's light)
+    "xenopeltis-unicolor": {"d": "#2a2527", "lat": "#2d282a"},
+    # South American rattlesnake: an olive-tan to brown ground with dark brown, pale-edged diamonds and two dark stripes down
+    # the neck (it was a pale cream snake with faint bands)
+    "crotalus-durissus": {"d": "#7f6d44", "lat": "#7b6a43", "c": "#2e2516", "b": "#ddd5bc",
+                          "pat": [{"type": "stripe", "t": [0.03, 0.2], "a": 0.1, "mirror": True, "wid": 0.045, "color": "#2a2216", "aa": 0.3}]},
+    # garter and ribbon snakes (the generated ones read as plain brown snakes): western ribbon snake - black-brown with a
+    # bright orange-yellow stripe down the spine and yellow ones low on the flanks; plains garter - dark olive with an orange
+    # spine stripe, yellow side stripes and black checks; checkered garter - olive-tan with a bold black checkerboard
+    "thamnophis-proximus": {"d": "#2a2721", "lat": "#2e2b24", "c": "#e6c24a", "b": "#d6d0a8"},
+    "thamnophis-radix": {"d": "#3d3b2f", "lat": "#423f32", "c": "#e2b24c", "b": "#cfc9a8"},
+    "thamnophis-marcianus": {"d": "#6f6a52", "lat": "#736d55", "c": "#e2d69c", "b": "#d4cfb6"},
+    # blood python: a brick to rust-red ground with tan and dark brown blotches (the red and the cream were too bright: a
+    # candy-striped snake)
+    "python-brongersmai": {"d": "#8c4a30", "lat": "#8e4c32", "c": "#bf9a70"},
+    # rhinoceros viper: one of the most brightly patterned snakes - down the back blue, yellow-edged oblong blotches between
+    # black hourglasses; on each flank green, black-edged rhombs with a pale centre over dark purplish-black triangles; the
+    # head blue-green with a black arrow mark (it was an almost white snake with faint brown chevrons)
+    "bitis-rhinoceros": {"d": "#2a2e2a", "lat": "#2c302c", "c": "#141210", "b": "#c9c0a0", "t": "plain", "hc": "#4b6e6a", "hcx": 1.02,
+                         "cx": {"mottle": 0.08, "bellyA": 0.8},
+                         "pat": [{"type": "blotch", "t": [0.1, 0.95], "count": 16, "a": 0, "wid": 0.16, "len": 0.66, "shape": "rect", "color": "#5a86a8", "edgeColor": "#d8c84a", "edge": 0.16, "edgeOut": True, "warp": 0.3, "jit": 0.06},
+                                 {"type": "blotch", "t": [0.1, 0.95], "count": 16, "phase": 0.5, "a": 0, "wid": 0.3, "len": 0.34, "shape": "hourglass", "color": "#121010", "edgeColor": "#b9a84a", "edge": 0.1, "edgeOut": True, "warp": 0.3},
+                                 {"type": "blotch", "t": [0.1, 0.95], "count": 16, "a": 0.52, "mirror": True, "wid": 0.2, "len": 0.95, "shape": "diamond", "color": "#4e8a52", "edgeColor": "#121010", "edge": 0.14, "edgeOut": True, "inner": {"r": 0.3, "color": "#c8c060"}, "warp": 0.3, "jit": 0.04},
+                                 {"type": "blotch", "t": [0.1, 0.95], "count": 16, "phase": 0.5, "a": 0.84, "mirror": True, "wid": 0.36, "len": 0.95, "shape": "diamond", "color": "#231c26", "edgeColor": "#6a5a86", "edge": 0.1, "edgeOut": True, "warp": 0.3, "jit": 0.04, "belly": True, "alpha": 0.95},
+                                 {"type": "line", "p0": [0.1, 0], "p1": [0.95, 0], "wid": 0.05, "color": "#141210"}]},
+    # rosy boa: three broad reddish-brown stripes along a pale grey-cream body (they had faded to almost nothing)
+    "lichanura-trivirgata": {"d": "#c6c0b2", "lat": "#c2bcae", "c": "#8a4a2e", "t": "plain",
+                             "pat": [{"type": "stripe", "a": 0, "wid": 0.13, "color": "#8a4a2e", "aa": 0.3, "warp": 0.6},
+                                     {"type": "stripe", "a": 0.44, "mirror": True, "wid": 0.11, "color": "#8a4a2e", "aa": 0.3, "warp": 0.6}]},
+    # southern African python: an olive to grey-brown ground with dark brown, black-edged blotches that run together (the
+    # colours had been read from a blue background - it was a pale sky-blue snake)
+    "python-natalensis": {"d": "#7d6e4c", "lat": "#78694a", "c": "#3a2c1e", "b": "#ddd4bc", "t": "irregular", "ec": "#1c150f"},
+    # black-necked garter snake: olive-grey with black checks, an orange-yellow stripe down the spine and a pale one low on
+    # each flank, two big black patches on the neck (it was a plain reddish brown)
+    "thamnophis-cyrtopsis": {"d": "#5d5f48", "lat": "#62644c", "c": "#e0b452", "b": "#cfcab0",
+                             "pat": [{"type": "blotch", "t": [0.035, 0.085], "count": 1, "a": 0.3, "mirror": True, "wid": 0.24, "len": 0.95, "shape": "round", "color": "#141210", "warp": 0.2, "jit": 0}]},
+    # horseshoe whip snake: a pale yellowish ground crowded with dark, black-edged blotches that join into a net (it was a
+    # plain light brown with faint specks)
+    "hemorrhois-hippocrepis": {"d": "#c4b37a", "lat": "#bfae78", "c": "#1f1b14", "b": "#e2cc94", "t": "blotch", "n": 62},
+    # coachwhip: tan to light brown, darkening to blackish-brown over the head and neck (it was an orange-red all over)
+    "masticophis-flagellum": {"d": "#9a7c5e", "lat": "#9c7e60", "b": "#e4d4c0", "hc": "#2c2620", "hcx": 1.1,
+                              "pat": [{"type": "tint", "t": [0.0, 0.33], "ramp": 0.001, "fade": 0.18, "color": "#2e2722", "alpha": 0.85}]},
+    # barred grass snake: grey-olive with black bars down the flanks and a pale collar with a black one behind (it was a
+    # plain brown with a few spots - the colours were guessed)
+    "natrix-helvetica": {"d": "#6c7262", "lat": "#717768", "c": "#e6d488", "b": "#d6d2c2", "t": "collar2", "n": 34},
+    # plain-bellied water snake: a plain dark brown to olive-grey back, the belly plain orange-red (it was a grey with dark bands)
+    "nerodia-erythrogaster": {"d": "#4b4234", "lat": "#544a3a", "c": "#2a241c", "b": "#d4844a", "t": "plain"},
+    # Colombian boa: a tan to grey-brown ground with dark brown saddles (the ground was a pale cream, so the red tail saddles
+    # were all the eye saw)
+    "boa-imperator": {"d": "#a09274", "lat": "#9a8c70", "c": "#4a3a28", "b": "#dcd4c0"},
+    # yellow anaconda: a yellow-ochre ground with black spots and blotches (the colours were the wrong way round: dark brown
+    # with ochre spots)
+    "eunectes-notaeus": {"d": "#b39a4c", "lat": "#ab9248", "c": "#1b1710", "b": "#d8cc8a", "oc": "#1b1710"},
+    # common (Australian) tree snake: olive-green above, a bright yellow throat and belly (it was a plain grey-brown)
+    "dendrelaphis-punctulatus": {"d": "#4e5a2e", "lat": "#566233", "b": "#e2cf58"},
+    # tiger rat snake / chicken snake: glossy black with yellow crossbars (narrow, uneven, broken on the flanks) and yellow
+    # flecks, the front of the body and the head more yellow, a yellow belly with black edges (it was a plain olive-brown)
+    "spilotes-pullatus": {"d": "#17160f", "lat": "#1a180f", "c": "#e2c42c", "b": "#dcc23a", "t": "plain", "n": 34, "ck": 1,
+                          "pat": [{"type": "band", "count": 30, "len": 0.2, "color": "#e2c42c", "warp": 0.6, "jit": 0.15, "sj": 0.3, "dorsalWide": 0.15, "aMax": 0.7, "drift": 0.3, "tilt": 0.6}], "hc": "#3a3214", "hcx": 1.0,
+                          "cx": {"speckle": {"p": 0.3, "color": "#e2c42c", "k": 0.85}, "mottle": 0.05, "bellyA": 0.8}, "sx": {"gloss": 0.65},
+                          "tb": [["#d8b828", 1.05, 2.6, 0.45]]},
+    # tiger keelback (yamakagashi): olive-green with black squarish blotches down the back, the flanks of the front third
+    # bright red-orange between them, a yellow nape band behind the head (it was a tan snake with brown bands)
+    "rhabdophis-tigrinus": {"d": "#4e5a35", "lat": "#56603a", "c": "#17150f", "b": "#d6d2b0", "t": "blotch", "n": 34,
+                            "pat": [{"type": "blotch", "t": [0.04, 0.38], "count": 13, "phase": 0.5, "a": 0.46, "mirror": True, "wid": 0.2, "len": 0.55, "shape": "round", "color": "#c8421e", "warp": 0.4, "jit": 0.15},
+                                    {"type": "hband", "x0": 1.05, "x1": 1.45, "aMin": 0.0, "belly": True, "color": "#e0c040", "xMax": 2.0, "warp": 0.25}]},
+}
+
 def apply_hand_562(existing):
-    for sid, fix in list(HAND_FIXES_562.items()) + list(HAND_FIXES_588.items()) + list(HAND_FIXES_590.items()) + list(HAND_FIXES_593.items()):
+    for sid, fix in list(HAND_FIXES_562.items()) + list(HAND_FIXES_588.items()) + list(HAND_FIXES_590.items()) + list(HAND_FIXES_593.items()) + list(HAND_FIXES_599.items()):
         prof = existing.get(sid)
         if not prof: continue
         for f in fix:
