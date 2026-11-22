@@ -259,6 +259,17 @@ SHIM_JS = r"""
       identifications_count: a[17], num_identification_agreements: a[18], num_identification_disagreements: a[19],
       comments_count: a[20], faves_count: a[21], cached_votes_total: a[21], sl_snapshot: true };
   }
+  // small answers (the Following feed, one sighting): their photos as ready-made pictures, since the app
+  // may also use them as CSS backgrounds, which can't be cropped on the fly; big map pages keep the
+  // ap/o/... addresses, which only ever go into <img> (cropped when they're shown)
+  function blobPhotos(list) {
+    if (list.length > 40) return Promise.resolve(list);
+    return Promise.all(list.map(function (o) {
+      var ph = o.photos && o.photos[0], m = ph && /ap\/o\/(\d+)-(\d+)-(\d+)-(\d+)\//.exec(ph.url);
+      if (!m) return o;
+      return obsCell(+m[1], +m[2], +m[3], +m[4]).then(function (b) { ph.url = b; return o; }, function () { o.photos = []; return o; });
+    }));
+  }
   function hav(la1, lo1, la2, lo2) {
     var R = 6371, d1 = (la2 - la1) * Math.PI / 180, d2 = (lo2 - lo1) * Math.PI / 180;
     var x = Math.sin(d1 / 2) * Math.sin(d1 / 2) + Math.cos(la1 * Math.PI / 180) * Math.cos(la2 * Math.PI / 180) * Math.sin(d2 / 2) * Math.sin(d2 / 2);
@@ -330,11 +341,12 @@ SHIM_JS = r"""
       }
       if (p === "/observations") {
         var L = sortObs(filterObs(S, q), q), pg = page(q, 30, 200);
-        return json({ total_results: L.length, page: pg.page, per_page: pg.per, results: L.slice((pg.page - 1) * pg.per, pg.page * pg.per).map(function (a) { return hyd(S, a); }) });
+        var res0 = L.slice((pg.page - 1) * pg.per, pg.page * pg.per).map(function (a) { return hyd(S, a); });
+        return blobPhotos(res0).then(function (res) { return json({ total_results: L.length, page: pg.page, per_page: pg.per, results: res }); });
       }
       if ((m = /^\/observations\/([\d,]+)$/.exec(p))) {
         var os = m[1].split(",").map(function (i) { return S.byObs[+i]; }).filter(Boolean).map(function (a) { return hyd(S, a); });
-        return json({ total_results: os.length, page: 1, per_page: os.length, results: os });
+        return blobPhotos(os).then(function (os) { return json({ total_results: os.length, page: 1, per_page: os.length, results: os }); });
       }
       if (p === "/observations/species_counts") {
         var cnt = {};
@@ -855,6 +867,14 @@ def build(out, christmas_default=True, cache=DEFAULT_CACHE, offline=False, log=p
     html = sub_once(html, 'return u + (u.indexOf("?") < 0 ? "?" : "&") + "embed=map";', 'return ""; // (artifact copy: no framed pages)', "3D map url")
     i = html.index("function pageLenOf(id, p) {")
     html = html[:i] + sub_once(html[i:], 'var u = window.SL_SP_PAGE_URL ? window.SL_SP_PAGE_URL(id) : "";', 'var u = ""; // (artifact copy: the local length table)', "3D length url")
+
+    # pages that aren't in this copy (species pages, photo credits, privacy): snakelist.com, in a new tab
+    site = r'\(location\.protocol === "https:" && location\.hostname\.indexOf\("snakelist\.com"\) >= 0 \? "" : "\.html"\)'
+    html, k1 = re.subn(r'location\.href = "species/" \+ (\w+) \+ ' + site, r'window.open("https://snakelist.com/species/" + \1, "_blank", "noopener")', html)
+    html, k2 = re.subn(r'"species/" \+ (\w+) \+ ' + site, r'"https://snakelist.com/species/" + \1', html)
+    html = sub_once(html, 'pc.href = "species/photo-credits.html#" + id;', 'pc.href = "https://snakelist.com/species/photo-credits.html#" + id;', "photo credits link")
+    html, k3 = re.subn(r'href="(privacy|terms|about|install)\.html"', r'href="https://snakelist.com/\1.html"', html)
+    log("  links to pages on snakelist.com: %d" % (k1 + k2 + k3))
 
     # ---- 3. sightings + Wikipedia snapshot ----
     species = app_species(html)
