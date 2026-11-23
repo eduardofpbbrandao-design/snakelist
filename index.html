@@ -33,6 +33,12 @@ on=on||S.getItem(K)==="1"}catch(e){}
 try{if(!on||window.XM)return;var d=document,h=d.documentElement,root=new URL("./",L.href).href,kind="xm-app";
 window.XM={root:root+"christmas/",kind:kind,forced:!!window.SL_XMAS_FORCE};h.classList.add("xm",kind);var p=d.head||h,l=d.createElement("link");l.rel="stylesheet";l.href=root+"christmas/xmas.css";p.appendChild(l);
 var s=d.createElement("script");s.src=root+"christmas/xmas.js";p.appendChild(s)}catch(e){}})();</script>
+<script>(function(){try{var K="sl-art-preview-events",L=location,S=window.localStorage,m=/[?&]preview=([^&#]*)/.exec(L.search),on;
+if(m){var v=decodeURIComponent(m[1]);if(v==="events")S.setItem(K,"1");else if(v==="events-off"||v==="off"||v==="none")S.setItem(K,"0");var u=new URL(L.href);u.searchParams.delete("preview");history.replaceState(history.state,"",u.pathname+u.search+u.hash)}
+on=window.SL_PREVIEW_ON?window.SL_PREVIEW_ON("events"):S.getItem(K)==="1";
+if(!on||window.SL_EV)return;var d=document,h=d.documentElement,root=new URL("./",L.href).href+"events/",q="?v="+"94aec9cc76";window.SL_EV={on:true,root:root};h.classList.add("sl-ev-on");
+var p=d.head||h,l=d.createElement("link");l.rel="stylesheet";l.href=root+"events.css"+q;p.appendChild(l);
+["config","advent-logic","core","art","countdown","advent","achievements","subscribe","cursor"].forEach(function(n){var s=d.createElement("script");s.src=root+n+".js"+q;s.async=false;p.appendChild(s)})}catch(e){}})();</script>
 <script>
   // installable app: the offline helper, and the browser's install prompt kept for the Install button
   window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.SL_INSTALL_EVT = e; });

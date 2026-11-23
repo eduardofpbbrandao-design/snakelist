@@ -1,0 +1,138 @@
+rules_version = '2';
+
+// SnakeList - Firestore security rules (the whole file: deploying it REPLACES the rules in the console).
+// Deploy:  cd firebase && firebase deploy --only firestore:rules      (see firebase/DEPLOY.md)
+//
+//   lists/{uid}, users/{uid}   each account's saved SnakeList (unchanged from the old firestore.rules)
+//   cams/{id}                  trail cameras on the map (owner adds, admins approve)
+//   admins/{uid}               who may approve cameras - created by hand in the console, never by the app
+//   eventProgress/{uid}/...    Advent Calendar claims and seasonal achievements (events preview)
+//   promoClaims/{uid}/...      once-per-account promotions (the Anniversary free period)
+//   prefs/{uid}                small settings saved to the account (cursor customization)
+//   customers/..., products/.. written ONLY by the Stripe "Run Payments with Stripe" extension (server side)
+//
+// The Advent dates below must match events/config.js (xmas2026: door N opens 2026-12-01T00:00Z + N-1 days,
+// is "on time" for 24 hours, missed doors can be recovered with a skip until 2027-01-01T00:00Z).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isUser(uid) { return signedIn() && request.auth.uid == uid; }
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    // set on the ID token by the Stripe extension from the product's metadata (firebaseRole: "subscriber")
+    function isSubscriber() { return signedIn() && request.auth.token.get('stripeRole', '') == 'subscriber'; }
+
+    // ---------------------------------------------------------------- saved lists (as before)
+    match /lists/{uid} { allow read, write: if isUser(uid); }
+    match /users/{uid} { allow read, write: if isUser(uid); }
+
+    // ---------------------------------------------------------------- trail cameras
+    match /cams/{id} {
+      allow read: if resource.data.status == 'ok' || isUser(resource.data.uid) || isAdmin();
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.status == 'pending';
+      allow update: if isAdmin()
+                    || (isUser(resource.data.uid) && request.resource.data.uid == resource.data.uid && request.resource.data.status == 'pending');
+      allow delete: if isAdmin() || isUser(resource.data.uid);
+    }
+    match /admins/{uid} { allow read: if isUser(uid); allow write: if false; }
+
+    // ---------------------------------------------------------------- Advent Calendar
+    function adventFirst() { return timestamp.date(2026, 12, 1); }
+    function adventUnlock(d) { return adventFirst() + duration.value(d - 1, 'd'); }
+    function adventEnd() { return timestamp.date(2027, 1, 1); }
+    function zeroSummary() { return { 'earned': 0, 'earnedUsed': 0, 'subUsed': 0, 'claimed': 0 }; }
+    function sumPath(uid, ev) { return /databases/$(database)/documents/eventProgress/$(uid)/events/$(ev); }
+    function doorPath(uid, ev, d) { return /databases/$(database)/documents/eventProgress/$(uid)/events/$(ev)/doors/$(string(d)); }
+
+    // one door: create-only, stamped with the SERVER time, never a future door, written together with the summary
+    function validDoor(uid, ev, day) {
+      let d = int(day);
+      let x = request.resource.data;
+      let before = exists(sumPath(uid, ev)) ? get(sumPath(uid, ev)).data : zeroSummary();
+      let after = getAfter(sumPath(uid, ev)).data;
+      return x.keys().hasOnly(['day', 'at', 'via', 'run']) && x.keys().hasAll(['day', 'at', 'via', 'run'])
+        && day == string(d) && d >= 1 && d <= 24 && x.day == d
+        && x.at == request.time
+        && request.time >= adventUnlock(d)
+        && request.time < adventEnd()
+        && x.via in ['day', 'skip', 'sub']
+        && (x.via == 'day' ? request.time < adventUnlock(d + 1) : request.time >= adventUnlock(d + 1))
+        && x.run == (exists(doorPath(uid, ev, d - 1)) ? get(doorPath(uid, ev, d - 1)).data.run + 1 : 1)
+        && after.last == d && after.claimed == before.claimed + 1;
+    }
+    // the per-event summary: its counters can only move together with exactly one new door
+    function validSummary(uid, ev) {
+      let n = request.resource.data;
+      let o = resource == null ? zeroSummary() : resource.data;
+      let dp = doorPath(uid, ev, n.last);
+      let door = getAfter(dp).data;
+      return n.keys().hasOnly(['earned', 'earnedUsed', 'subUsed', 'claimed', 'last', 'at'])
+        && n.last is int && n.last >= 1 && n.last <= 24
+        && !exists(dp) && existsAfter(dp)
+        && n.at == request.time
+        && n.claimed == o.claimed + 1
+        && n.earned == o.earned + (door.run % 3 == 0 ? 1 : 0)
+        && n.earnedUsed == o.earnedUsed + (door.via == 'skip' ? 1 : 0)
+        && n.subUsed == o.subUsed + (door.via == 'sub' ? 1 : 0)
+        && (door.via != 'skip' || n.earnedUsed <= o.earned)
+        && (door.via != 'sub' || (isSubscriber() && n.subUsed <= 10));
+    }
+
+    match /eventProgress/{uid} {
+      allow read: if isUser(uid);
+      allow write: if false;
+      match /events/{ev} {
+        allow read: if isUser(uid);
+        allow create, update: if isUser(uid) && ev == 'xmas2026' && validSummary(uid, ev);
+        allow delete: if false;
+        match /doors/{day} {
+          allow read: if isUser(uid);
+          allow create: if isUser(uid) && ev == 'xmas2026' && validDoor(uid, ev, day);
+          allow update, delete: if false;
+        }
+      }
+      // seasonal achievements: kept for good (create-only, server time)
+      match /achievements/{id} {
+        allow read: if isUser(uid);
+        allow create: if isUser(uid) && request.resource.data.keys().hasOnly(['id', 'event', 'at'])
+                      && request.resource.data.id == id && request.resource.data.event is string
+                      && request.resource.data.at == request.time;
+        allow update, delete: if false;
+      }
+    }
+
+    // ---------------------------------------------------------------- once-per-account promotions
+    match /promoClaims/{uid}/promos/{promo} {
+      allow read: if isUser(uid);
+      allow create: if isUser(uid) && promo == 'anniv2027-free'
+                    && request.time >= timestamp.date(2027, 8, 21) && request.time < timestamp.date(2027, 8, 28)
+                    && request.resource.data.keys().hasOnly(['promo', 'at', 'paidAfter'])
+                    && request.resource.data.promo == promo && request.resource.data.at == request.time
+                    && request.resource.data.paidAfter == false;
+      allow update, delete: if false;
+    }
+
+    // ---------------------------------------------------------------- small account settings
+    match /prefs/{uid} {
+      allow read: if isUser(uid);
+      allow write: if isUser(uid) && request.resource.data.keys().hasOnly(['cursor', 'updated'])
+                   && (!('cursor' in request.resource.data) || (request.resource.data.cursor is map && request.resource.data.cursor.size() <= 4));
+    }
+
+    // ---------------------------------------------------------------- payments (Stripe extension)
+    // Only the extension (Admin SDK, which ignores these rules) writes subscriptions and payments.
+    match /customers/{uid} {
+      allow read: if isUser(uid);
+      allow write: if false;
+      match /checkout_sessions/{id} { allow read, create: if isUser(uid); allow update, delete: if false; }
+      match /subscriptions/{id} { allow read: if isUser(uid); allow write: if false; }
+      match /payments/{id} { allow read: if isUser(uid); allow write: if false; }
+    }
+    match /products/{id} {
+      allow read: if true;
+      match /prices/{p} { allow read: if true; }
+      match /tax_rates/{t} { allow read: if true; }
+    }
+  }
+}
