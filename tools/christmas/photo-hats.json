@@ -1,0 +1,4 @@
+{
+  "_about": "Where the Santa hat sits on each cover photo's snake (Christmas preview). Key: the photo's name (species-photos/hero/<name>-<width>.webp) or its data-photo-id. x, y: the middle of the hat's fur brim, as parts of the photo's width and height; w: the brim's width as a part of the photo's width; a: its turn in degrees (+ = clockwise); flip: true when the snake looks left (the hat's tip then falls to the right, behind its head). A photo with no entry gets no hat.",
+  "rough-green-hq": { "x": 0.555, "y": 0.192, "w": 0.165, "a": 16, "flip": true }
+}

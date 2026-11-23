@@ -14,16 +14,20 @@ Only while the switch is on does a page load christmas/xmas.css and christmas/xm
 the site looks and behaves exactly as before and fetches nothing from christmas/.
 
 This script writes christmas/:
-  xmas.css            the theme (tools/christmas/xmas.css + the heading accents as data URLs)
-  xmas.js             the decorations, hat, icons and pill (tools/christmas/xmas.js + the artwork data)
-  xmas-corner-l/r.svg the cover's pine corners with baubles (tools/christmas_art.py)
-  xmas-sprig.svg      the sprig at the end of the wordmark
-  xmas-icon.svg       the app icon: the live logo's snake S in a Santa hat, on evergreen
+  xmas.css            the decorations' styles (tools/christmas/xmas.css + cabin.css + the accents as data URLs)
+  xmas.js             the decorations, Christmas logo, audio and the Cabin (tools/christmas/xmas.js + cabin.js),
+                      with XM_ART in front: the Santa hat, the stocking, the snow on the logo's S, the photo
+                      hats (tools/christmas/photo-hats.json), the cover's light positions and the cabin's layout
+  xmas-corner-l/r.svg the cover's pine corners, baubles hung on their branches (tools/christmas_art.py)
+  xmas-cabin.webp     the Christmas Cabin's room (christmas_art.cabin_svg, rendered by tools/christmas-icons.js)
+  xmas-sp.json        each species' colours and pattern for its little Santa-hat snake (from species/3d/models.json)
+  xmas-logo-*.svg     the pages' header logo (species/logo-light/dark.svg) with the hat, snow and stocking
+  xmas-icon.svg       the app icon: SnakeList's own icon (favicon.svg) with the Santa hat and a little snow
   xmas-icon-*.png     the same as PNG (redrawn by tools/christmas-icons.js when Node + Playwright are here)
   index.html          sets the switch and opens the app
   CREDITS.txt
 """
-import os, re, sys, json, shutil, posixpath, time
+import os, re, sys, json, shutil, posixpath, time, tempfile, subprocess
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import christmas_art as art
 
@@ -43,71 +47,141 @@ INDEX = """<!doctype html>
 <p><a href="../?christmas" style="color:#E6CB86">Open the SnakeList Christmas preview</a></p></body></html>
 """
 
-def mark_inner(html):
-    """the inside of the live logo's <g id="mark-snake">"""
-    i = html.find('<g id="mark-snake">')
-    if i < 0: return None
-    depth, j = 0, i
-    for m in re.finditer(r"<(/?)g\b[^>]*?(/?)>", html[i:]):
-        if m.group(2): continue
-        depth += -1 if m.group(1) else 1
-        if depth == 0: j = i + m.end(); break
-    return html[i + len('<g id="mark-snake">'):j - 4]
+def body_path(svg):
+    m = re.search(r'class="snake-body"[^>]*\bd="([^"]+)"', svg)
+    return m.group(1) if m else None
 
-def hat_on(inner):
-    """the Santa hat on the head group (the one holding the eye), placed as XM.hat() in xmas.js does on the page"""
-    m = re.search(r'(<g transform="[^"]*">)(<path d="([^"]+)"[^>]*>(?:</path>)?)(<circle cx="([-\d.]+)" cy="[-\d.]+" r="[-\d.]+" fill="var\(--sl-eye)', inner)
-    if not m: return inner
-    nums = [float(v) for v in re.findall(r"-?\d*\.?\d+", m.group(3))]
-    ys = nums[1::2]; y0 = min(ys); k = (max(ys) - y0) / 33 or 1; ex = float(m.group(5))
-    end = inner.find("</g>", m.end())
-    hat = '<g transform="translate(%.2f %.2f) scale(%.3f)">%s</g>' % (ex - 9 * k, y0 + 16.5 * k, k, art.HAT)
-    return inner[:end] + hat + inner[end:]
+# ---- the little Santa-hat snakes: per species dorsal / pattern / belly colours (12-bit) and a pattern kind ----
+PAT_KIND = {"plain": "p", "none": "p", "uniform": "p", "speckle": "k", "band": "b", "xband": "b", "rings": "b", "crossbar": "b", "ring": "b",
+            "coral": "c", "tricolor": "c", "stripe": "s", "garter": "s", "vert": "s", "nerodia": "o", "line": "s", "zigzag": "z", "diamond": "z", "net": "z",
+            "collar": "l", "collar2": "l", "cap": "l", "hband": "l", "spot": "o", "checker": "o", "chain": "z", "poly": "o", "shields": "o", "tint": "p"}
+def c12(h, fb="#5b9a4a"):
+    h = (h or fb).lstrip("#")
+    if len(h) == 3: h = "".join(ch * 2 for ch in h)
+    try: return "".join("%x" % min(15, round(int(h[i:i + 2], 16) / 17)) for i in (0, 2, 4))
+    except ValueError: return c12(fb)
+def species_colours():
+    src = os.path.join("species", "3d", "models.json")
+    if not os.path.isfile(src): return {}
+    sp = json.load(open(src, encoding="utf-8")).get("species", {})
+    out = {}
+    for k, v in sp.items():
+        a = v.get("auto")
+        if a:
+            d, c, b, t = a.get("d"), a.get("c"), a.get("b"), a.get("t") or "plain"
+        else:
+            col = v.get("colors") or {}; pats = v.get("pattern") or []
+            d, b = col.get("dorsal"), col.get("belly")
+            p0 = next((p for p in pats if p.get("type") not in ("tint",)), pats[0] if pats else {})
+            c = p0.get("color") or (col.get("speckle") or {}).get("color") or col.get("lateral")
+            t = p0.get("type", "plain")
+            if t == "blotch": t = "blotch"
+        out[k] = c12(d) + c12(c, d or "#333333") + c12(b, "#e0d8b8") + PAT_KIND.get(t, "o")
+    return out
 
 def write_art():
     bulbs = {}
     for side in "lr":
         svg, bulbs[side] = art.corner(side)
         open(posixpath.join(OUT, "xmas-corner-%s.svg" % side), "w").write(svg)
-    sprig = art.sprig()
-    open(posixpath.join(OUT, "xmas-sprig.svg"), "w").write(sprig)
-    data = {"bulbs": bulbs, "sprig": sprig, "hat": "<defs>" + art.HAT_DEFS + "</defs>" + art.HAT}
-    js = "window.XM_ART=" + json.dumps(data, separators=(",", ":")) + ";\n" + open(os.path.join(SRC_THEME, "xmas.js"), encoding="utf-8").read() + "\n" + open(os.path.join(SRC_THEME, "cabin.js"), encoding="utf-8").read()
+    index = open("index.html", encoding="utf-8").read()
+    mark_body = body_path(index[index.find('<g id="mark-snake">'):]) or body_path(open("favicon.svg").read())
+    h = art.LOGO_HAT
+    data = {
+        "bulbs": bulbs,
+        "hat": art.hat_at(h["cx"], h["cy"], h["width"], h["angle"]),
+        "hatSvg": art.hat_at(0, 0, 100, 0),
+        "ssnow": art.logo_snow(mark_body) if mark_body else "",
+        "stocking": art.STOCKING,
+        "photoHats": {k: v for k, v in json.load(open(os.path.join(SRC_THEME, "photo-hats.json"), encoding="utf-8")).items() if not k.startswith("_")},
+        "cabin": art.cabin_data(),
+    }
+    js = ("window.XM_ART=" + json.dumps(data, separators=(",", ":")) + ";\n" + open(os.path.join(SRC_THEME, "xmas.js"), encoding="utf-8").read() + "\n"
+          + open(os.path.join(SRC_THEME, "cabin.js"), encoding="utf-8").read())
     open(posixpath.join(OUT, "xmas.js"), "w", encoding="utf-8").write(js)
     from urllib.parse import quote
     flake = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 24 24"><g stroke="#B8913F" stroke-width="1.6" stroke-linecap="round" fill="none">'
              + "".join('<path d="M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9" transform="rotate(%d)"/>' % a for a in range(0, 360, 60)) + "</g></svg>")
     css = open(os.path.join(SRC_THEME, "xmas.css"), encoding="utf-8").read() + "\n" + open(os.path.join(SRC_THEME, "cabin.css"), encoding="utf-8").read()
-    css += ("\n/* generated by tools/build-christmas.py: the sprig and snowflake used as heading accents */\nhtml.xm { --xm-sprig-url: url(\"data:image/svg+xml,%s\"); --xm-flake-url: url(\"data:image/svg+xml,%s\"); }\n"
+    css += ("\n/* generated by tools/build-christmas.py: the sprig and snowflake used as small accents */\nhtml.xm, .xm-panel { --xm-sprig-url: url(\"data:image/svg+xml,%s\"); --xm-flake-url: url(\"data:image/svg+xml,%s\"); }\n"
             % (quote(art.mini_sprig(), safe=" =:/'.-"), quote(flake, safe=" =:/'.-")))
     open(posixpath.join(OUT, "xmas.css"), "w", encoding="utf-8").write(css)
-    # the app icon: the live logo's snake S, in the hat, on evergreen
-    inner = mark_inner(open("index.html", encoding="utf-8").read())
-    if inner:
-        inner = hat_on(inner)
-        inner = re.sub(r"var\(--sl-snake, ?[^)]*\)", "#6cc85f", inner)
-        inner = re.sub(r"var\(--sl-pat, ?(rgba\([^)]*\)|[^)]*)\)", "rgba(13,51,34,.55)", inner)
-        inner = re.sub(r"var\(--sl-eye, ?[^)]*\)", "#0d3322", inner)
-        inner = inner.replace('id="py-clip"', 'id="xm-py-clip"').replace("url(#py-clip)", "url(#xm-py-clip)")
-        open(posixpath.join(OUT, "xmas-icon.svg"), "w").write(art.icon(inner))
+    # the app icon: SnakeList's own icon with the hat and a little snow
+    fav = open("favicon.svg", encoding="utf-8").read()
+    fb = body_path(fav)
+    open(posixpath.join(OUT, "xmas-icon.svg"), "w").write(art.icon(fav, art.hat_at(h["cx"], h["cy"], h["width"], h["angle"]), art.logo_snow(fb) if fb else ""))
+    # the little snakes' colours
+    open(posixpath.join(OUT, "xmas-sp.json"), "w").write(json.dumps(species_colours(), separators=(",", ":"), sort_keys=True))
+
+def page_logo(variant, hat, ssnow):
+    """the SnakeList pages' header logo (species/logo-light.svg, logo-dark.svg) dressed the same way: the hat on the
+    snake's head, snow on the S and on the letters, the stocking with presents in place of the tick. The letters'
+    tops are measured by drawing them (the logo's own font) with Chromium; the saved file is kept without it."""
+    src = os.path.join("species", "logo-%s.svg" % variant)
+    out_saved = os.path.join(SRC_THEME, "xmas-logo-%s.svg" % variant)
+    try:
+        s = open(src, encoding="utf-8").read()
+        from PIL import Image
+        m = re.search(r'<svg[^>]*viewBox="0 0 ([\d.]+) ([\d.]+)"', s); W, H = float(m.group(1)), float(m.group(2))
+        t0, t1 = s.find("<text"), s.find("</text>") + 7
+        txt = re.sub(r'\sfill="[^"]*"', "", s[t0:t1]).replace("<text", '<text fill="#000"', 1)
+        only = s[:s.find("</defs>") + 7] + txt + "</svg>"
+        with tempfile.TemporaryDirectory() as td:
+            sv, png = os.path.join(td, "t.svg"), os.path.join(td, "t.png")
+            open(sv, "w", encoding="utf-8").write(only)
+            subprocess.run(["node", os.path.join("tools", "christmas-icons.js"), "--render", sv, png, "4", str(int(round(W))), str(int(round(H)))], check=True, timeout=120, capture_output=True)
+            im = Image.open(png).split()[-1]; px = im.load(); tops = []
+            for cx in range(0, im.width, 2):
+                t = None
+                for cy in range(im.height):
+                    if px[cx, cy] > 140: t = cy / 4.0; break
+                tops.append(t)
+        snow = art.snow_cap(tops, 0, 0.5, 6.5, seed=3)
+        s = s[:t1] + '<path d="%s" fill="#fff"/>' % snow + s[t1:]
+        i = s.find('<g class="snake-head"'); j = s.find("</g>", i)
+        s = s[:j] + hat + s[j:]
+        k = s.find("</svg>", s.find('viewBox="-23.5'))
+        s = s[:k] + '<path d="%s" fill="#fff"/>' % ssnow + s[k:]
+        a = s.find('viewBox="5.6 0.3 36.9 36.0"'); a = s.find(">", a) + 1; b = s.find("</svg>", a)
+        s = s[:a] + art.STOCKING.replace("xms-", "xms%s-" % variant[0]) + s[b:]
+        open(out_saved, "w", encoding="utf-8").write(s)
+    except Exception as e:
+        print("note: the pages' %s logo was not redrawn (%s); the saved one is used" % (variant, e.__class__.__name__))
+    if os.path.isfile(out_saved): shutil.copy2(out_saved, posixpath.join(OUT, "xmas-logo-%s.svg" % variant))
+
+def render_cabin():
+    """the cabin's room: drawn by christmas_art.cabin_svg, rendered with Chromium, saved as WebP (the saved one is
+    used when Node + Playwright are not here - the drawing is deterministic, so it matches the layout data)"""
+    saved = os.path.join(SRC_THEME, "xmas-cabin.webp")
+    try:
+        from PIL import Image
+        with tempfile.TemporaryDirectory() as td:
+            sv, png = os.path.join(td, "cabin.svg"), os.path.join(td, "cabin.png")
+            open(sv, "w").write(art.cabin_svg())
+            subprocess.run(["node", os.path.join("tools", "christmas-icons.js"), "--cabin", sv, png], check=True, timeout=240, capture_output=True)
+            Image.open(png).convert("RGB").save(saved, "WEBP", quality=80, method=6)
+    except Exception as e:
+        print("note: the cabin picture was not redrawn (%s); the saved one is used" % e.__class__.__name__)
+    if os.path.isfile(saved): shutil.copy2(saved, posixpath.join(OUT, "xmas-cabin.webp"))
 
 def main():
     t0 = time.time()
     if os.path.isdir(OUT): shutil.rmtree(OUT)
     os.makedirs(OUT)
     for f in sorted(os.listdir(SRC_THEME)):
-        if f in ("xmas.js", "xmas.css", "cabin.js", "cabin.css"): continue
+        if f in ("xmas.js", "xmas.css", "cabin.js", "cabin.css", "photo-hats.json", "xmas-cabin.webp") or f.endswith(".png") or f.startswith("xmas-logo-"): continue
         shutil.copy2(os.path.join(SRC_THEME, f), os.path.join(OUT, f))
     write_art()
+    render_cabin()
+    h = art.LOGO_HAT; fav = open("favicon.svg", encoding="utf-8").read()
+    for v in ("light", "dark"): page_logo(v, art.hat_at(h["cx"], h["cy"], h["width"], h["angle"]).replace("xmh-", "xmh%s-" % v[0]), art.logo_snow(body_path(fav)))
     open(posixpath.join(OUT, "index.html"), "w", encoding="utf-8").write(INDEX)
-    # the PNG icons (Safari's home-screen icon, small favicons) follow the SVG icon when Node + Playwright are here
     try:
-        import subprocess
         subprocess.run(["node", os.path.join("tools", "christmas-icons.js")], check=True, timeout=180, capture_output=True)
-        for f in os.listdir(SRC_THEME):
-            if f.endswith(".png"): shutil.copy2(os.path.join(SRC_THEME, f), os.path.join(OUT, f))
     except Exception:
         print("note: the PNG icons were not redrawn (needs node + playwright); the saved ones are used")
+    for f in os.listdir(SRC_THEME):
+        if f.endswith(".png"): shutil.copy2(os.path.join(SRC_THEME, f), os.path.join(OUT, f))
     size = sum(os.path.getsize(os.path.join(OUT, f)) for f in os.listdir(OUT))
     print("christmas/: %d files, %.0f KB, %.1fs" % (len(os.listdir(OUT)), size / 1024, time.time() - t0))
 
