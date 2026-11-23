@@ -63,6 +63,15 @@
         description: "The first ever SnakeList event: a 24-door Advent Calendar in the Christmas Cabin, festive decorations, streak skips and the Legendary Christmas Serpent for everyone who opens all 24 doors.",
         start: "2026-12-01T00:00:00Z", end: "2027-01-01T00:00:00Z", earlyAccess: "2026-11-29T00:00:00Z",
         countdownFrom: "2026-11-01T00:00:00Z",
+        // the countdown's wording and what it counts to once the event is open (each counts to its "at", in turn)
+        countdown: {
+          comes: "Comes December 1",                   // shown above the numbers before the event opens
+          openButton: "Explore the Christmas event",   // takes the timer's place once the event is open for this viewer
+          after: [
+            { at: "2026-12-25T00:00:00Z", label: "Time until Christmas" },
+            { at: "2027-01-01T00:00:00Z", label: "Time until New Year" }
+          ]
+        },
         advent: {
           days: 24, firstDoor: "2026-12-01T00:00:00Z",   // door N opens at firstDoor + (N-1) days and is "on time" for 24 hours
           recoverUntil: "2027-01-01T00:00:00Z",          // skips can recover missed doors until the event ends

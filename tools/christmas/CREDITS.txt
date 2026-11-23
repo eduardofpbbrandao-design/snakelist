@@ -5,12 +5,30 @@ All Christmas artwork in this folder is original and drawn by code for SnakeList
 branches, fairy lights, baubles, snowflakes, snowfall, the Santa hats, the stocking, the
 snow on the logo, the little Santa-hat snakes, the ornaments and the Christmas Cabin room
 (painted by code and rendered to xmas-cabin.webp when the preview is built). No outside
-images, fonts or libraries were added, so there is nothing to license or credit.
+images, fonts or libraries were added for the artwork. The music is credited below.
 
-Music: "Jingle Bells" by James Lord Pierpont (1857), public domain. It is not a
-recording - the tune is played in the browser by code (Web Audio: bells, a soft pad,
-a bass line and sleigh bells, arranged for SnakeList). The fireplace sound is made the
-same way. Nothing is downloaded.
+Music (christmas/music/, played by the music button; loaded only when it is first pressed).
+Real recorded performances by Kevin MacLeod (incompetech.com), licensed under
+Creative Commons: By Attribution 4.0 - https://creativecommons.org/licenses/by/4.0/
+Re-encoded for the web (Opus .webm and AAC .m4a, loudness evened out); not otherwise changed.
+  1. "Jingle Bells" (ISRC USUAN1100889)
+     https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100889
+     https://incompetech.com/music/royalty-free/mp3-royaltyfree/Jingle%20Bells.mp3
+  2. "We Wish you a Merry Christmas" (ISRC USUAN1100369)
+     https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100369
+     https://incompetech.com/music/royalty-free/mp3-royaltyfree/We%20Wish%20You.mp3
+  3. "Deck the Halls B" (ISRC USUAN1100368)
+     https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100368
+     https://incompetech.com/music/royalty-free/mp3-royaltyfree/Deck%20the%20Halls%20B.mp3
+  4. "Oh, Christmas Tree" (ISRC USUAN1100366)
+     https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100366
+     https://incompetech.com/music/royalty-free/mp3-royaltyfree/Oh%20Xmas.mp3
+  5. "Silent Night" (ISRC USUAN1100075)
+     https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100075
+     https://incompetech.com/music/royalty-free/mp3-royaltyfree/Silent%20Night.mp3
+  Credit line: Music by Kevin MacLeod (incompetech.com), licensed under Creative Commons:
+  By Attribution 4.0 License. The songs themselves are traditional and in the public domain.
+The fireplace sound is made in the browser by code (Web Audio); nothing is downloaded for it.
 
 The snake S in the Christmas icon and logo is SnakeList's own logo, taken from the live
 site each time the preview is built. The little snakes' colours come from SnakeList's own
