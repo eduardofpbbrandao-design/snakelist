@@ -3211,6 +3211,27 @@ const UI_CSS = `
 .sp3d-szinset{position:absolute;left:0;top:0;z-index:3;border:3px solid #ffd66b;border-radius:6px;box-shadow:0 0 0 2px rgba(12,26,18,.6),0 4px 14px rgba(0,0,0,.35);pointer-events:none;box-sizing:border-box}
 .sp3d-szzoom{position:absolute;left:6px;top:6px;padding:2px 8px;border-radius:999px;background:rgba(12,26,18,.86);color:#ffd66b;font:700 12px/1.4 Inter,system-ui,sans-serif}
 @media (max-width:820px){.sp3d-sizecap{left:10px;right:10px;bottom:62px;transform:none;width:auto;max-width:none;font-size:12.5px;padding:6px 10px}}
+/* the buttons follow the 3D view's own width (Compare photo narrows it, the window stays the same): a narrow view puts
+   Compare photo and See countries on the first line of the buttons, at the same left edge and spacing as the rest; a
+   very narrow one swaps Normal / Anatomy / Size vs person for one "See more" button with a small menu */
+.sp3d-stage.sp3d-lay>.sp3d-bar{top:10px;right:var(--sp3d-barR,10px)}
+.sp3d-stage>.sp3d-bar>.sp3d-hdb{order:-1;flex:0 0 100%;display:flex;flex-wrap:wrap;gap:6px;margin:0;pointer-events:none}
+.sp3d-stage>.sp3d-bar>.sp3d-hdb>*{pointer-events:auto}
+.sp3d-stage>.sp3d-bar>.sp3d-vgrp{display:none;position:relative}
+.sp3d-stage.sp3d-narrow>.sp3d-bar>.sp3d-vgrp{display:inline-flex}
+.sp3d-stage.sp3d-narrow>.sp3d-bar>.sp3d-seg{display:none}
+.sp3d-stage .sp3d-b.sp3d-vmore{display:inline-flex;align-items:center;gap:8px}
+.sp3d-stage .sp3d-b.sp3d-vmore::after{content:"";width:6px;height:6px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-2px) rotate(45deg);transition:transform .15s ease}
+.sp3d-stage .sp3d-b.sp3d-vmore[aria-expanded=true]{background:rgba(12,26,18,.9);border-color:rgba(155,224,124,.65);color:#fff}
+.sp3d-stage .sp3d-b.sp3d-vmore[aria-expanded=true]::after{transform:translateY(1px) rotate(-135deg)}
+.sp3d-vmenu{position:absolute;left:0;top:calc(100% + 6px);z-index:6;display:flex;flex-direction:column;gap:2px;min-width:176px;padding:4px;border-radius:12px;background:rgba(12,26,18,.94);border:1px solid rgba(255,255,255,.16);box-shadow:0 6px 18px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.sp3d-vmenu[hidden],.sp3d-vmi[hidden]{display:none}
+.sp3d-vmi{display:flex;align-items:center;gap:8px;width:100%;min-height:36px;margin:0;padding:6px 14px 6px 8px;border:0;border-radius:9px;background:transparent;color:#fff;font:600 13px/1.2 Inter,system-ui,sans-serif;text-align:left;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sp3d-vmi:hover{background:rgba(255,255,255,.1)}
+.sp3d-vmi[aria-checked=true]{background:#4fa64a}
+.sp3d-vmi:focus-visible{outline:3px solid #9be07c;outline-offset:-2px}
+.sp3d-vmk{flex:none;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center}
+.sp3d-vmi[aria-checked=true] .sp3d-vmk::before{content:"";width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
 /* phones and tablets: every button at least 44 px tall, with room between them */
 @media (max-width:820px),(pointer:coarse){
 .sp3d-stage .sp3d-b,.sp3d-stage .sp3d-hb,.sp3d-stage .sp3d-b.sp3d-morebtn,.sp3d-stage .sp3d-b.sp3d-morebtn[aria-expanded=true]{min-height:44px;padding:0 13px;font-size:13px}
@@ -3218,6 +3239,7 @@ const UI_CSS = `
 .sp3d-stage>.sp3d-bar>.sp3d-seg{padding:0}
 .sp3d-stage>.sp3d-bar{gap:8px 10px}
 .sp3d-stage .sp3d-fsc{width:44px;height:44px}
+.sp3d-vmi{min-height:44px}
 }
 `;
 function uiCSSInject() {
@@ -3367,6 +3389,47 @@ export function mount(host, opts) {
   // the View group always agrees with what is on: Normal is pressed when neither Anatomy nor Size vs person is
   const syncViews = () => { const v = bAnat.getAttribute('aria-pressed') !== 'true' && bScale.getAttribute('aria-pressed') !== 'true'; if (bNormal.getAttribute('aria-pressed') !== String(v)) bNormal.setAttribute('aria-pressed', String(v)); };
   if (window.MutationObserver) { const mo = new MutationObserver(syncViews); mo.observe(bAnat, { attributes: true, attributeFilter: ['aria-pressed', 'hidden'] }); mo.observe(bScale, { attributes: true, attributeFilter: ['aria-pressed'] }); cleanups.push(() => mo.disconnect()); }
+  // v6.13 (Eduardo: Compare photo and See countries the wrong size and place when the photo is open beside the model; "say
+  // see more where it says anatomy normal and size vs person but only appears when the screen is very small"): the buttons
+  // follow the 3D view's OWN width (the photo beside it narrows it while the window stays the same). Narrow: Compare photo
+  // and See countries become the first line of the buttons, at the same left edge and spacing. Very narrow: one "See more"
+  // in place of Normal / Anatomy / Size vs person, opening a small menu of the three (the one on is green, with a tick).
+  const gVM = el('span', 'sp3d-grp sp3d-vgrp'); gVM.setAttribute('role', 'group'); gVM.setAttribute('aria-label', 'View');
+  const bVMore = el('button', 'sp3d-b sp3d-vmore', 'See more'); bVMore.type = 'button'; bVMore.setAttribute('aria-haspopup', 'menu'); bVMore.setAttribute('aria-expanded', 'false');
+  const vMenu = el('div', 'sp3d-vmenu'); vMenu.hidden = true; vMenu.id = 'sp3d-vmenu-' + seed; vMenu.setAttribute('role', 'menu'); vMenu.setAttribute('aria-label', 'View');
+  bVMore.setAttribute('aria-controls', vMenu.id); gVM.append(bVMore, vMenu); gView.after(gVM);
+  const vClose = (refocus) => { if (vMenu.hidden) return; vMenu.hidden = true; bVMore.setAttribute('aria-expanded', 'false'); if (refocus) bVMore.focus({ preventScroll: true }); };
+  const vItems = [[bNormal, 'Normal'], [bAnat, 'Anatomy'], [bScale, 'Size vs person']].map(([b, t]) => {
+    const m = el('button', 'sp3d-vmi'); m.type = 'button'; m.setAttribute('role', 'menuitemradio'); m.append(el('span', 'sp3d-vmk'), el('span', '', t)); vMenu.appendChild(m);
+    on(m, 'click', () => { vClose(true); if (b.getAttribute('aria-pressed') !== 'true') b.click(); });
+    return [m, b];
+  });
+  const vShown = () => vItems.map((x) => x[0]).filter((m) => !m.hidden);
+  on(bVMore, 'click', () => {
+    if (!vMenu.hidden) { vClose(); return; }
+    for (const [m, b] of vItems) { m.hidden = b.hidden; m.setAttribute('aria-checked', String(b.getAttribute('aria-pressed') === 'true')); }
+    vMenu.hidden = false; bVMore.setAttribute('aria-expanded', 'true');
+    const sh = vShown(); (sh.find((m) => m.getAttribute('aria-checked') === 'true') || sh[0]).focus({ preventScroll: true });
+  });
+  on(vMenu, 'keydown', (e) => {
+    const sh = vShown(), i = sh.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); sh[(i + (e.key === 'ArrowDown' ? 1 : sh.length - 1)) % sh.length].focus(); }
+    else if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); sh[e.key === 'Home' ? 0 : sh.length - 1].focus(); }
+    else if (e.key === 'Tab') vClose();
+  });
+  on(document, 'pointerdown', (e) => { if (!vMenu.hidden && !gVM.contains(e.target)) vClose(); }, true);
+  // Escape closes only the menu (caught on the window first, before the app's panel or the page's dialog closes on it)
+  on(window, 'keydown', (e) => { if (e.key === 'Escape' && !vMenu.hidden) { e.preventDefault(); e.stopImmediatePropagation(); vClose(gVM.contains(document.activeElement)); } }, true);
+  const hdbEl = stage.querySelector(':scope>.sp3d-hdb');
+  const barFit = () => {
+    const w = stage.clientWidth; if (!w) return;
+    const tight = w < 760, narrow = w <= 560; // (tight: Compare photo / See countries no longer fit beside the first line)
+    stage.classList.add('sp3d-lay'); stage.classList.toggle('sp3d-tight', tight); stage.classList.toggle('sp3d-narrow', narrow);
+    if (hdbEl) { if (tight && hdbEl.parentNode !== bar) bar.prepend(hdbEl); else if (!tight && hdbEl.parentNode !== stage) stage.appendChild(hdbEl); }
+    stage.style.setProperty('--sp3d-barR', (!tight && hdbEl ? hdbEl.offsetWidth + 20 : 10) + 'px');
+    if (!narrow) vClose();
+  };
+  if (window.ResizeObserver) { const roBar = new ResizeObserver(barFit); roBar.observe(stage); cleanups.push(() => roBar.disconnect()); } else { on(window, 'resize', barFit); setTimeout(barFit, 0); }
   // a camera button stays green while the camera is where it put it; turning or zooming yourself clears it
   let camBtn = null;
   const setCamBtn = (b) => { camBtn = b; for (const q of [bVBody, bVHead, bVTop]) q.setAttribute('aria-pressed', String(q === b)); };
