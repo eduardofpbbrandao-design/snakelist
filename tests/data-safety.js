@@ -44,6 +44,8 @@ async function run(b, label, ctxOpts) {
   const ctx = await b.newContext(ctxOpts);
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', (e) => errs.push(e.message));
   p.on('dialog', (d) => d.dismiss());
+  // the Christmas preview is a switch: a normal visit must not fetch anything from christmas/ (nor the events preview's files)
+  const previewFetches = []; p.on('request', (r) => { const u = new URL(r.url()); if (/^\/(christmas|events)\//.test(u.pathname)) previewFetches.push(u.pathname); });
   await p.route(/^https?:\/\/(?!localhost)/, (r) => r.abort());
   await p.addInitScript((seed) => {
     localStorage.setItem('sl-consent', 'essential'); localStorage.setItem('sl-tour-seen', '1'); localStorage.setItem('sl-news-off', '1');
@@ -195,6 +197,8 @@ async function run(b, label, ctxOpts) {
   await search('Zhao');
   ok(await card('opisthotropis-zhaoermii').evaluate((c) => c.querySelector('.photo-btn').classList.contains('has-photo') && c.classList.contains('done')), label + ': the Zhao snake still shows your photo');
   if (SHOTS) await p.screenshot({ path: SHOTS + '/' + label + '-after-reload.png' });
+  ok(!previewFetches.length, label + ': nothing from christmas/ or events/ was fetched without the preview switch (' + previewFetches.slice(0, 3).join(', ') + ')');
+  ok(await p.evaluate(() => !window.XM && !document.documentElement.classList.contains('xm')), label + ': no Christmas decoration on the page');
   ok(!errs.length, label + ': no page errors ' + errs.slice(0, 3).join(' | '));
   await ctx.close();
 }

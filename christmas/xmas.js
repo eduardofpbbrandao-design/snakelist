@@ -1,4 +1,4 @@
-window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4379,0.3639],[0.5642,0.2821],[0.6548,0.2221],[0.149,0.3397],[0.2265,0.4005],[0.3602,0.3621],[0.5158,0.2937],[0.6129,0.1995]],"r":[[0.0563,0.3061],[0.1712,0.3613],[0.3142,0.3911],[0.4496,0.3721],[0.5681,0.3192],[0.6696,0.3529],[0.0958,0.315],[0.2465,0.3518],[0.3819,0.3818],[0.5175,0.2755],[0.6187,0.3171]]},"hat":"<g transform=\"translate(-5 -15.4) rotate(-10) scale(0.4000 0.4000)\"><defs><linearGradient id=\"xmh-r\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\".25\"><stop offset=\"0\" stop-color=\"#e0505f\"/><stop offset=\".5\" stop-color=\"#bf2c3e\"/><stop offset=\"1\" stop-color=\"#7f1424\"/></linearGradient><linearGradient id=\"xmh-d\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#9c1d2e\"/><stop offset=\"1\" stop-color=\"#6a0f1c\"/></linearGradient><radialGradient id=\"xmh-f\" cx=\".42\" cy=\".3\" r=\".75\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\".65\" stop-color=\"#f6f2ea\"/><stop offset=\"1\" stop-color=\"#d8d1c3\"/></radialGradient></defs><g class=\"xm-hat\"><path d=\"M-41 -4C-38 -30-26-54-4-63C10-69 27-66 36-48C42-35 44-18 44-4Z\" fill=\"url(#xmh-r)\"/><path d=\"M-2-64C-18-66-36-60-49-46C-52-42-55-38-56-34L-47-31C-41-43-28-53-11-56Z\" fill=\"url(#xmh-d)\"/><path d=\"M-6-63C-22-63-37-55-48-43\" stroke=\"#e46a77\" stroke-width=\"2.4\" fill=\"none\" stroke-linecap=\"round\" opacity=\".55\"/><path d=\"M30-50C35-38 38-22 38-6\" stroke=\"#6e0f1d\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\" opacity=\".35\"/><path d=\"M-24-12C-20-30-12-44 2-54\" stroke=\"#ef8a95\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" opacity=\".35\"/><g fill=\"url(#xmh-f)\"><circle cx=\"-48.5\" cy=\"-32\" r=\"3.5\"/><circle cx=\"-49.7\" cy=\"-28.2\" r=\"4\"/><circle cx=\"-53\" cy=\"-25.8\" r=\"3.7\"/><circle cx=\"-57\" cy=\"-25.8\" r=\"4\"/><circle cx=\"-60.3\" cy=\"-28.2\" r=\"4.1\"/><circle cx=\"-61.5\" cy=\"-32\" r=\"3.3\"/><circle cx=\"-60.3\" cy=\"-35.8\" r=\"3.2\"/><circle cx=\"-57\" cy=\"-38.2\" r=\"4.4\"/><circle cx=\"-53\" cy=\"-38.2\" r=\"3.6\"/><circle cx=\"-49.7\" cy=\"-35.8\" r=\"3.5\"/><circle cx=\"-55\" cy=\"-32\" r=\"8.6\"/></g><circle cx=\"-57.5\" cy=\"-35\" r=\"3\" fill=\"#fff\" opacity=\".9\"/><g fill=\"url(#xmh-f)\"><path d=\"M-50-4Q-51-14-40-14Q0-20 40-14Q51-14 50-4Q51 7 40 7Q0 3-40 7Q-51 7-50-4Z\"/><circle cx=\"47\" cy=\"-3.5\" r=\"4.1\"/><circle cx=\"45.6\" cy=\"-1.2\" r=\"4.2\"/><circle cx=\"41.6\" cy=\"0.9\" r=\"4.3\"/><circle cx=\"35.2\" cy=\"2.8\" r=\"4.5\"/><circle cx=\"26.7\" cy=\"4.3\" r=\"4.2\"/><circle cx=\"16.7\" cy=\"5.4\" r=\"4.5\"/><circle cx=\"5.7\" cy=\"5.9\" r=\"3.2\"/><circle cx=\"-5.7\" cy=\"5.9\" r=\"3.9\"/><circle cx=\"-16.7\" cy=\"5.4\" r=\"4.5\"/><circle cx=\"-26.7\" cy=\"4.3\" r=\"4.1\"/><circle cx=\"-35.2\" cy=\"2.8\" r=\"4.5\"/><circle cx=\"-41.6\" cy=\"0.9\" r=\"3.4\"/><circle cx=\"-45.6\" cy=\"-1.2\" r=\"3.9\"/><circle cx=\"-47\" cy=\"-3.5\" r=\"3.5\"/><circle cx=\"-45.6\" cy=\"-5.8\" r=\"4\"/><circle cx=\"-41.6\" cy=\"-7.9\" r=\"4\"/><circle cx=\"-35.2\" cy=\"-9.8\" r=\"3.2\"/><circle cx=\"-26.7\" cy=\"-11.3\" r=\"3.5\"/><circle cx=\"-16.7\" cy=\"-12.4\" r=\"3.6\"/><circle cx=\"-5.7\" cy=\"-12.9\" r=\"4.5\"/><circle cx=\"5.7\" cy=\"-12.9\" r=\"4.3\"/><circle cx=\"16.7\" cy=\"-12.4\" r=\"3.4\"/><circle cx=\"26.7\" cy=\"-11.3\" r=\"4.3\"/><circle cx=\"35.2\" cy=\"-9.8\" r=\"3.4\"/><circle cx=\"41.6\" cy=\"-7.9\" r=\"4.1\"/><circle cx=\"45.6\" cy=\"-5.8\" r=\"3.4\"/></g><path d=\"M-44 3Q0-1 44 3\" stroke=\"#cfc6b6\" stroke-width=\"2.2\" fill=\"none\" stroke-linecap=\"round\" opacity=\".8\"/><path d=\"M-38-11Q0-16 38-11\" stroke=\"#fff\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\" opacity=\".9\"/></g></g>","hatSvg":"<g transform=\"translate(0 0) rotate(0) scale(1.0000 1.0000)\"><defs><linearGradient id=\"xmh-r\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\".25\"><stop offset=\"0\" stop-color=\"#e0505f\"/><stop offset=\".5\" stop-color=\"#bf2c3e\"/><stop offset=\"1\" stop-color=\"#7f1424\"/></linearGradient><linearGradient id=\"xmh-d\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#9c1d2e\"/><stop offset=\"1\" stop-color=\"#6a0f1c\"/></linearGradient><radialGradient id=\"xmh-f\" cx=\".42\" cy=\".3\" r=\".75\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\".65\" stop-color=\"#f6f2ea\"/><stop offset=\"1\" stop-color=\"#d8d1c3\"/></radialGradient></defs><g class=\"xm-hat\"><path d=\"M-41 -4C-38 -30-26-54-4-63C10-69 27-66 36-48C42-35 44-18 44-4Z\" fill=\"url(#xmh-r)\"/><path d=\"M-2-64C-18-66-36-60-49-46C-52-42-55-38-56-34L-47-31C-41-43-28-53-11-56Z\" fill=\"url(#xmh-d)\"/><path d=\"M-6-63C-22-63-37-55-48-43\" stroke=\"#e46a77\" stroke-width=\"2.4\" fill=\"none\" stroke-linecap=\"round\" opacity=\".55\"/><path d=\"M30-50C35-38 38-22 38-6\" stroke=\"#6e0f1d\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\" opacity=\".35\"/><path d=\"M-24-12C-20-30-12-44 2-54\" stroke=\"#ef8a95\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" opacity=\".35\"/><g fill=\"url(#xmh-f)\"><circle cx=\"-48.5\" cy=\"-32\" r=\"3.5\"/><circle cx=\"-49.7\" cy=\"-28.2\" r=\"4\"/><circle cx=\"-53\" cy=\"-25.8\" r=\"3.7\"/><circle cx=\"-57\" cy=\"-25.8\" r=\"4\"/><circle cx=\"-60.3\" cy=\"-28.2\" r=\"4.1\"/><circle cx=\"-61.5\" cy=\"-32\" r=\"3.3\"/><circle cx=\"-60.3\" cy=\"-35.8\" r=\"3.2\"/><circle cx=\"-57\" cy=\"-38.2\" r=\"4.4\"/><circle cx=\"-53\" cy=\"-38.2\" r=\"3.6\"/><circle cx=\"-49.7\" cy=\"-35.8\" r=\"3.5\"/><circle cx=\"-55\" cy=\"-32\" r=\"8.6\"/></g><circle cx=\"-57.5\" cy=\"-35\" r=\"3\" fill=\"#fff\" opacity=\".9\"/><g fill=\"url(#xmh-f)\"><path d=\"M-50-4Q-51-14-40-14Q0-20 40-14Q51-14 50-4Q51 7 40 7Q0 3-40 7Q-51 7-50-4Z\"/><circle cx=\"47\" cy=\"-3.5\" r=\"4.1\"/><circle cx=\"45.6\" cy=\"-1.2\" r=\"4.2\"/><circle cx=\"41.6\" cy=\"0.9\" r=\"4.3\"/><circle cx=\"35.2\" cy=\"2.8\" r=\"4.5\"/><circle cx=\"26.7\" cy=\"4.3\" r=\"4.2\"/><circle cx=\"16.7\" cy=\"5.4\" r=\"4.5\"/><circle cx=\"5.7\" cy=\"5.9\" r=\"3.2\"/><circle cx=\"-5.7\" cy=\"5.9\" r=\"3.9\"/><circle cx=\"-16.7\" cy=\"5.4\" r=\"4.5\"/><circle cx=\"-26.7\" cy=\"4.3\" r=\"4.1\"/><circle cx=\"-35.2\" cy=\"2.8\" r=\"4.5\"/><circle cx=\"-41.6\" cy=\"0.9\" r=\"3.4\"/><circle cx=\"-45.6\" cy=\"-1.2\" r=\"3.9\"/><circle cx=\"-47\" cy=\"-3.5\" r=\"3.5\"/><circle cx=\"-45.6\" cy=\"-5.8\" r=\"4\"/><circle cx=\"-41.6\" cy=\"-7.9\" r=\"4\"/><circle cx=\"-35.2\" cy=\"-9.8\" r=\"3.2\"/><circle cx=\"-26.7\" cy=\"-11.3\" r=\"3.5\"/><circle cx=\"-16.7\" cy=\"-12.4\" r=\"3.6\"/><circle cx=\"-5.7\" cy=\"-12.9\" r=\"4.5\"/><circle cx=\"5.7\" cy=\"-12.9\" r=\"4.3\"/><circle cx=\"16.7\" cy=\"-12.4\" r=\"3.4\"/><circle cx=\"26.7\" cy=\"-11.3\" r=\"4.3\"/><circle cx=\"35.2\" cy=\"-9.8\" r=\"3.4\"/><circle cx=\"41.6\" cy=\"-7.9\" r=\"4.1\"/><circle cx=\"45.6\" cy=\"-5.8\" r=\"3.4\"/></g><path d=\"M-44 3Q0-1 44 3\" stroke=\"#cfc6b6\" stroke-width=\"2.2\" fill=\"none\" stroke-linecap=\"round\" opacity=\".8\"/><path d=\"M-38-11Q0-16 38-11\" stroke=\"#fff\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\" opacity=\".9\"/></g></g>","ssnow":"M-13.27 104.25L-12.77 103.71L-12.27 103.31L-11.77 103.05L-11.27 102.54L-10.77 102.14L-10.27 101.86L-9.77 101.76L-9.27 101.41L-8.77 100.84L-8.27 100.74L-7.77 100.67L-7.27 100.69L-6.77 100.72L-6.27 100.46L-5.77 100.49L-5.27 100.62L-4.77 101.13L-4.27 101.23L-3.77 101.24L-3.27 101.04L-2.77 101.05L-2.27 101.11L-1.77 101.38L-1.27 101.9L-0.77 102.33L-0.27 102.72L0.23 102.75L0.73 102.67L1.23 102.58L1.73 102.79L2.23 103.29L2.73 103.73L3.23 104.2L3.73 104.74L4.23 105.07L4.73 105.46L5.23 105.8L5.73 106.16L6.23 106.36L6.73 106.59L7.23 106.93L7.73 107.34L8.23 107.82L8.23 108.35L7.73 108.2L7.23 108.03L6.73 107.84L6.23 107.64L5.73 107.43L5.23 107.09L4.73 106.88L4.23 106.66L3.73 106.44L3.23 106.21L2.73 105.99L2.23 105.88L1.73 105.65L1.23 105.54L0.73 105.55L0.23 105.31L-0.27 105.2L-0.77 104.95L-1.27 104.84L-1.77 104.71L-2.27 104.59L-2.77 104.59L-3.27 104.46L-3.77 104.46L-4.27 104.33L-4.77 104.19L-5.27 104.06L-5.77 104.05L-6.27 104.03L-6.77 104.14L-7.27 104.12L-7.77 104.1L-8.27 104.08L-8.77 103.92L-9.27 104.02L-9.77 104.11L-10.27 104.2L-10.77 104.16L-11.27 104.24L-11.77 104.43L-12.27 104.49L-12.77 104.53L-13.27 104.64ZM30.73 5.5L31.23 5.05L31.73 4.83L32.23 4.51L32.73 4.19L33.23 4.05L33.73 3.75L34.23 3.43L34.73 3.13L35.23 2.76L35.73 2.57L36.23 2.42L36.73 2.23L37.23 2.05L37.73 1.86L38.23 1.73L38.73 1.56L39.23 1.38L39.73 1.16L40.23 0.98L40.73 0.94L41.23 0.76L41.73 0.81L42.23 0.68L42.73 0.61L43.23 0.49L43.73 0.18L44.23 -0.02L44.73 -0.17L45.23 -0.22L45.73 -0.28L46.23 -0.34L46.73 -0.41L47.23 -0.5L47.73 -0.58L48.23 -0.68L48.73 -0.78L49.23 -0.89L49.73 -0.99L50.23 -0.93L50.73 -0.86L51.23 -0.57L51.73 -0.57L52.23 -0.44L52.73 -0.52L53.23 -0.56L53.73 -0.52L54.23 -0.36L54.73 -0.08L55.23 0.01L55.73 0.08L56.23 0.28L56.73 0.4L57.23 0.53L57.73 0.66L58.23 1.08L58.73 1.41L59.23 1.78L59.73 1.93L60.23 2.1L60.73 2.39L61.23 2.56L61.73 2.74L62.23 3.05L62.73 3.23L63.23 3.42L63.73 3.86L64.23 4.22L64.73 4.58L65.23 4.88L65.73 5.02L66.23 5.37L66.73 5.68L67.23 5.95L67.73 6.18L68.23 6.5L68.73 6.84L69.23 7.08L69.73 7.52L69.73 7.92L69.23 7.75L68.73 7.69L68.23 7.48L67.73 7.27L67.23 7.18L66.73 6.96L66.23 6.74L65.73 6.52L65.23 6.42L64.73 6.19L64.23 5.96L63.73 5.86L63.23 5.63L62.73 5.52L62.23 5.41L61.73 5.18L61.23 5.07L60.73 4.96L60.23 4.72L59.73 4.61L59.23 4.49L58.73 4.25L58.23 4.14L57.73 4.02L57.23 3.91L56.73 3.79L56.23 3.67L55.73 3.56L55.23 3.56L54.73 3.44L54.23 3.32L53.73 3.2L53.23 3.21L52.73 3.08L52.23 3.09L51.73 2.96L51.23 2.96L50.73 2.84L50.23 2.84L49.73 2.84L49.23 2.84L48.73 2.84L48.23 2.83L47.73 2.83L47.23 2.83L46.73 2.82L46.23 2.82L45.73 2.81L45.23 2.81L44.73 2.8L44.23 2.79L43.73 2.79L43.23 2.9L42.73 2.89L42.23 3.01L41.73 3.12L41.23 3.11L40.73 3.23L40.23 3.21L39.73 3.32L39.23 3.43L38.73 3.54L38.23 3.65L37.73 3.76L37.23 3.87L36.73 3.97L36.23 4.08L35.73 4.18L35.23 4.28L34.73 4.5L34.23 4.6L33.73 4.82L33.23 5.04L32.73 5.13L32.23 5.33L31.73 5.53L31.23 5.59L30.73 5.73ZM70.73 8.1L71.23 7.98L71.73 7.99L72.23 8.1L72.73 8.25L73.23 8.44L73.73 8.65L74.23 8.9L74.73 9.18L75.23 9.5L75.73 9.86L76.23 10.32L76.73 10.88L76.73 11.76L76.23 11.69L75.73 11.55L75.23 11.38L74.73 11.18L74.23 10.96L73.73 10.71L73.23 10.45L72.73 10.16L72.23 9.84L71.73 9.5L71.23 9.11L70.73 8.61Z","stocking":"<g class=\"xm-stk\"><defs><linearGradient id=\"xms-r\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#d9475a\"/><stop offset=\".6\" stop-color=\"#b52637\"/><stop offset=\"1\" stop-color=\"#861828\"/></linearGradient><linearGradient id=\"xms-g\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#7fd36a\"/><stop offset=\"1\" stop-color=\"#4c9f3c\"/></linearGradient><linearGradient id=\"xms-y\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#f6d77c\"/><stop offset=\"1\" stop-color=\"#d1a23f\"/></linearGradient></defs><path d=\"M27.6 13.5V5.2a2.6 2.6 0 0 1 5.2 0\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><path d=\"M27.6 13.5V5.2a2.6 2.6 0 0 1 5.2 0\" fill=\"none\" stroke=\"#d23a4b\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-dasharray=\"1.2 1.3\"/><g transform=\"rotate(-11 16.5 9)\"><rect x=\"12\" y=\"4.6\" width=\"9.2\" height=\"8.6\" rx=\"1\" fill=\"url(#xms-g)\"/><rect x=\"15.9\" y=\"4.6\" width=\"1.5\" height=\"8.6\" fill=\"#f3d27a\"/><path d=\"M16.6 4.6c-1.6-2.4-4-1.6-2.6.1M16.6 4.6c1.6-2.4 4-1.6 2.6.1\" fill=\"none\" stroke=\"#f3d27a\" stroke-width=\"1.1\"/><path d=\"M11.8 4.9q4.8-1.6 9.6 0\" stroke=\"#fff\" stroke-width=\"1.5\" stroke-linecap=\"round\"/></g><g transform=\"rotate(9 25 10)\"><rect x=\"20.6\" y=\"7\" width=\"8\" height=\"6.6\" rx=\".9\" fill=\"url(#xms-y)\"/><rect x=\"24\" y=\"7\" width=\"1.3\" height=\"6.6\" fill=\"#c43345\"/><path d=\"M20.4 7.2q4.2-1.4 8.4 0\" stroke=\"#fff\" stroke-width=\"1.4\" stroke-linecap=\"round\"/></g><path d=\"M11.4 14.6V26.4C11.4 32.4 15 35.8 20.6 35.8H32.6C37.2 35.8 39.8 33.2 39.6 30.2C39.4 27.4 36.6 25.4 33.2 25.4H29.8V14.6Z\" fill=\"url(#xms-r)\" stroke=\"#6e1220\" stroke-width=\".6\"/><path d=\"M11.6 21.4H29.6M11.6 24.6H29.6\" stroke=\"#fff3e6\" stroke-width=\"1.1\" stroke-dasharray=\"1.6 1.2\" opacity=\".85\"/><path d=\"M33.4 25.6C37 25.6 39.6 27.6 39.6 30.4C39.6 33.2 37 35.8 32.8 35.8H31.2C33.6 33.6 33.8 28.2 31.6 25.6Z\" fill=\"#fff3e6\" opacity=\".92\"/><path d=\"M11.4 29.6C12 33.2 14.8 35.6 18.8 35.8C16.4 34 15.6 31.6 15.8 29.4Z\" fill=\"#fff3e6\" opacity=\".92\"/><rect x=\"9.8\" y=\"11.8\" width=\"21.6\" height=\"5.4\" rx=\"2.7\" fill=\"#fbf8f1\" stroke=\"#d8d0c0\" stroke-width=\".5\"/><path d=\"M10.6 13.2q2-.9 3.6 0t3.6 0 3.6 0 3.6 0 3.6 0\" stroke=\"#e6dfd1\" stroke-width=\".7\" fill=\"none\"/><path d=\"M10.2 12.1Q11.4 10.6 14 11.1Q16 10.2 18.4 10.9Q20.6 10.4 22.8 11Q25.6 10.3 28.4 11Q30.8 10.7 31.4 12.2Q20.6 12.9 10.2 12.1Z\" fill=\"#fff\"/><path d=\"M12 4.2q4.6-1.8 9.4-.3M21 6.3q3.8-1.4 7.7.2\" stroke=\"#fff\" stroke-width=\"1.2\" stroke-linecap=\"round\" fill=\"none\"/></g>","photoHats":{"rough-green-hq":{"x":0.555,"y":0.192,"w":0.165,"a":16,"flip":true}},"cabin":{"lights":[[459.1,104.1],[442.3,128.9],[462.2,145.1],[429.9,152.1],[420.9,190.7],[463.2,220.7],[424.4,232.5],[394.0,241.8],[522.7,251.1],[475.8,252.3],[496.4,268.2],[359.0,279.9],[412.0,280.7],[532.4,292.4],[482.1,292.9],[407.3,328.9],[493.8,330.8],[372.7,340.0],[422.1,348.5],[470.0,348.9],[347.2,357.1],[396.8,365.1],[317.0,370.7],[422.0,375.4],[374.2,379.2],[498.9,381.6],[591.4,401.3],[396.6,412.2],[342.5,418.2],[509.4,420.7],[367.6,424.6],[557.3,432.0],[338.3,443.0],[401.5,444.9],[590.7,446.2],[432.0,446.4],[516.1,450.8],[370.8,451.4],[310.9,456.7],[554.0,457.8],[493.2,459.7],[422.5,471.9],[609.1,476.4],[289.6,480.3],[564.4,480.8],[368.6,487.2]],"baubles":[[478.8,135.5],[433.8,161.4],[474.7,184.6],[393.8,261.0],[499.6,278.9],[407.8,322.4],[497.2,362.3],[566.7,370.0],[340.7,373.9],[392.9,411.1],[312.6,426.1],[568.8,439.1],[516.1,450.8],[297.1,482.9],[351.2,483.3]],"orns":[[459.9,109.8],[403.5,191.6],[489.0,235.4],[426.4,275.9],[488.9,319.0],[354.8,329.3],[420.6,350.2],[506.6,409.1],[348.8,415.2],[397.8,449.7],[495.0,483.2],[591.8,487.3]],"garland":["M409 150Q452 208 514 178","M373 238Q452 296 550 266","M337 326Q452 384 586 354","M301 414Q452 472 622 442"],"beam":[[20,40.0],[89,54.0],[158,40.0],[227,54.0],[296,40.0],[365,54.0],[434,40.0],[503,54.0],[572,40.0],[641,54.0],[710,40.0],[779,54.0],[848,40.0],[917,54.0],[986,40.0]],"top":[452.0,62.0],"win":[112.0,96.0,322.0,306.0],"fire":[780.0,446.0],"mantel":300.0,"stockings":[684,742,818,876],"basket":[902,470]}};
+window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4379,0.3639],[0.5642,0.2821],[0.6548,0.2221],[0.149,0.3397],[0.2265,0.4005],[0.3602,0.3621],[0.5158,0.2937],[0.6129,0.1995]],"r":[[0.0563,0.3061],[0.1712,0.3613],[0.3142,0.3911],[0.4496,0.3721],[0.5681,0.3192],[0.6696,0.3529],[0.0958,0.315],[0.2465,0.3518],[0.3819,0.3818],[0.5175,0.2755],[0.6187,0.3171]]},"hat":"<g transform=\"translate(-5 -15.4) rotate(-10) scale(0.4000 0.4000)\"><defs><linearGradient id=\"xmh-r\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\".18\"><stop offset=\"0\" stop-color=\"#e24a5a\"/><stop offset=\".38\" stop-color=\"#c62c40\"/><stop offset=\".78\" stop-color=\"#8f1627\"/><stop offset=\"1\" stop-color=\"#6c0e1c\"/></linearGradient><linearGradient id=\"xmh-d\" x1=\"0\" y1=\"0\" x2=\".25\" y2=\"1\"><stop offset=\"0\" stop-color=\"#d23a4c\"/><stop offset=\".5\" stop-color=\"#a51d31\"/><stop offset=\"1\" stop-color=\"#6a0d1b\"/></linearGradient><radialGradient id=\"xmh-s\" cx=\".3\" cy=\".3\" r=\".55\"><stop offset=\"0\" stop-color=\"#ff9aa4\" stop-opacity=\".5\"/><stop offset=\"1\" stop-color=\"#ff9aa4\" stop-opacity=\"0\"/></radialGradient><linearGradient id=\"xmh-f\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\".45\" stop-color=\"#f8f4ee\"/><stop offset=\"1\" stop-color=\"#d2c9ba\"/></linearGradient><linearGradient id=\"xmh-e\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#8a7c68\" stop-opacity=\".5\"/><stop offset=\".22\" stop-color=\"#8a7c68\" stop-opacity=\"0\"/><stop offset=\".72\" stop-color=\"#8a7c68\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#6e604e\" stop-opacity=\".55\"/></linearGradient><radialGradient id=\"xmh-p\" cx=\".38\" cy=\".32\" r=\".72\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\".5\" stop-color=\"#f4efe6\"/><stop offset=\"1\" stop-color=\"#bfb4a2\"/></radialGradient><filter id=\"xmh-z\" x=\"-15%\" y=\"-40%\" width=\"130%\" height=\"180%\" color-interpolation-filters=\"sRGB\"><feTurbulence type=\"fractalNoise\" baseFrequency=\".23\" numOctaves=\"3\" seed=\"4\" result=\"n\"/><feDisplacementMap in=\"SourceGraphic\" in2=\"n\" scale=\"6.5\" xChannelSelector=\"R\" yChannelSelector=\"G\" result=\"g\"/><feTurbulence type=\"fractalNoise\" baseFrequency=\".55\" numOctaves=\"2\" seed=\"9\"/><feGaussianBlur stdDeviation=\".45\" result=\"t\"/><feColorMatrix in=\"t\" type=\"matrix\" values=\"0 0 0 0 .55  0 0 0 0 .5  0 0 0 0 .45  1.9 0 0 0 -.9\" result=\"k\"/><feComposite in=\"k\" in2=\"g\" operator=\"in\" result=\"k2\"/><feMerge><feMergeNode in=\"g\"/><feMergeNode in=\"k2\"/></feMerge></filter><filter id=\"xmh-b\" x=\"-30%\" y=\"-60%\" width=\"160%\" height=\"220%\"><feGaussianBlur stdDeviation=\"2.6\"/></filter><filter id=\"xmh-v\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"><feGaussianBlur stdDeviation=\"1.7\"/></filter></defs><g class=\"xm-hat\"><path d=\"M-47 5C-30 18 30 18 47 5L46 13C30 27-30 27-46 13Z\" fill=\"#06140c\" opacity=\".45\" filter=\"url(#xmh-b)\"/><path d=\"M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z\" fill=\"url(#xmh-r)\"/><path d=\"M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z\" fill=\"url(#xmh-s)\"/><path d=\"M31-50C37-36 40-20 41-3\" stroke=\"#4d0812\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\" opacity=\".42\" filter=\"url(#xmh-v)\"/><path d=\"M-27-9C-24-24-16-36-5-44\" stroke=\"#ffa3ac\" stroke-width=\"3.4\" fill=\"none\" stroke-linecap=\"round\" opacity=\".3\" filter=\"url(#xmh-v)\"/><path d=\"M-34-40C-22-54-4-61 14-58\" stroke=\"#3e0610\" stroke-width=\"6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".5\" filter=\"url(#xmh-v)\"/><path d=\"M29-57C21-74-5-79-26-69C-42-61-54-46-61-30L-51-26C-46-39-36-51-22-57C-9-63 5-62 16-57Z\" fill=\"url(#xmh-d)\"/><path d=\"M24-63C14-73-6-75-24-67C-38-60-49-48-56-34\" stroke=\"#f47c88\" stroke-width=\"2.8\" fill=\"none\" stroke-linecap=\"round\" opacity=\".55\" filter=\"url(#xmh-v)\"/><path d=\"M-50-28C-45-40-35-51-22-57C-10-62 3-61 13-57\" stroke=\"#3a0510\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".55\" filter=\"url(#xmh-v)\"/><path d=\"M-41-4C-20 0 20 0 43-4L43-12C20-7-20-7-41-12Z\" fill=\"#3e0610\" opacity=\".38\" filter=\"url(#xmh-v)\"/><g filter=\"url(#xmh-z)\"><circle cx=\"-57\" cy=\"-26\" r=\"10.2\" fill=\"url(#xmh-p)\"/></g><circle cx=\"-59.5\" cy=\"-29.5\" r=\"3.6\" fill=\"#fff\" opacity=\".8\" filter=\"url(#xmh-v)\"/><g filter=\"url(#xmh-z)\"><path d=\"M-50-8C-31 1 31 1 50-8C56-9 57 3 50 6C31 16-31 16-50 6C-57 3-56-9-50-8Z\" fill=\"url(#xmh-f)\"/><path d=\"M-50-8C-31 1 31 1 50-8C56-9 57 3 50 6C31 16-31 16-50 6C-57 3-56-9-50-8Z\" fill=\"url(#xmh-e)\"/></g><path d=\"M-44-3C-25 5 25 5 44-3\" stroke=\"#fff\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".8\" filter=\"url(#xmh-v)\"/><path d=\"M-46 7C-26 15 26 15 46 7\" stroke=\"#9d907c\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".5\" filter=\"url(#xmh-v)\"/></g></g>","hatSvg":"<g transform=\"translate(0 0) rotate(0) scale(1.0000 1.0000)\"><defs><linearGradient id=\"xmh-r\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\".18\"><stop offset=\"0\" stop-color=\"#e24a5a\"/><stop offset=\".38\" stop-color=\"#c62c40\"/><stop offset=\".78\" stop-color=\"#8f1627\"/><stop offset=\"1\" stop-color=\"#6c0e1c\"/></linearGradient><linearGradient id=\"xmh-d\" x1=\"0\" y1=\"0\" x2=\".25\" y2=\"1\"><stop offset=\"0\" stop-color=\"#d23a4c\"/><stop offset=\".5\" stop-color=\"#a51d31\"/><stop offset=\"1\" stop-color=\"#6a0d1b\"/></linearGradient><radialGradient id=\"xmh-s\" cx=\".3\" cy=\".3\" r=\".55\"><stop offset=\"0\" stop-color=\"#ff9aa4\" stop-opacity=\".5\"/><stop offset=\"1\" stop-color=\"#ff9aa4\" stop-opacity=\"0\"/></radialGradient><linearGradient id=\"xmh-f\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\".45\" stop-color=\"#f8f4ee\"/><stop offset=\"1\" stop-color=\"#d2c9ba\"/></linearGradient><linearGradient id=\"xmh-e\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#8a7c68\" stop-opacity=\".5\"/><stop offset=\".22\" stop-color=\"#8a7c68\" stop-opacity=\"0\"/><stop offset=\".72\" stop-color=\"#8a7c68\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#6e604e\" stop-opacity=\".55\"/></linearGradient><radialGradient id=\"xmh-p\" cx=\".38\" cy=\".32\" r=\".72\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\".5\" stop-color=\"#f4efe6\"/><stop offset=\"1\" stop-color=\"#bfb4a2\"/></radialGradient><filter id=\"xmh-z\" x=\"-15%\" y=\"-40%\" width=\"130%\" height=\"180%\" color-interpolation-filters=\"sRGB\"><feTurbulence type=\"fractalNoise\" baseFrequency=\".23\" numOctaves=\"3\" seed=\"4\" result=\"n\"/><feDisplacementMap in=\"SourceGraphic\" in2=\"n\" scale=\"6.5\" xChannelSelector=\"R\" yChannelSelector=\"G\" result=\"g\"/><feTurbulence type=\"fractalNoise\" baseFrequency=\".55\" numOctaves=\"2\" seed=\"9\"/><feGaussianBlur stdDeviation=\".45\" result=\"t\"/><feColorMatrix in=\"t\" type=\"matrix\" values=\"0 0 0 0 .55  0 0 0 0 .5  0 0 0 0 .45  1.9 0 0 0 -.9\" result=\"k\"/><feComposite in=\"k\" in2=\"g\" operator=\"in\" result=\"k2\"/><feMerge><feMergeNode in=\"g\"/><feMergeNode in=\"k2\"/></feMerge></filter><filter id=\"xmh-b\" x=\"-30%\" y=\"-60%\" width=\"160%\" height=\"220%\"><feGaussianBlur stdDeviation=\"2.6\"/></filter><filter id=\"xmh-v\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"><feGaussianBlur stdDeviation=\"1.7\"/></filter></defs><g class=\"xm-hat\"><path d=\"M-47 5C-30 18 30 18 47 5L46 13C30 27-30 27-46 13Z\" fill=\"#06140c\" opacity=\".45\" filter=\"url(#xmh-b)\"/><path d=\"M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z\" fill=\"url(#xmh-r)\"/><path d=\"M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z\" fill=\"url(#xmh-s)\"/><path d=\"M31-50C37-36 40-20 41-3\" stroke=\"#4d0812\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\" opacity=\".42\" filter=\"url(#xmh-v)\"/><path d=\"M-27-9C-24-24-16-36-5-44\" stroke=\"#ffa3ac\" stroke-width=\"3.4\" fill=\"none\" stroke-linecap=\"round\" opacity=\".3\" filter=\"url(#xmh-v)\"/><path d=\"M-34-40C-22-54-4-61 14-58\" stroke=\"#3e0610\" stroke-width=\"6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".5\" filter=\"url(#xmh-v)\"/><path d=\"M29-57C21-74-5-79-26-69C-42-61-54-46-61-30L-51-26C-46-39-36-51-22-57C-9-63 5-62 16-57Z\" fill=\"url(#xmh-d)\"/><path d=\"M24-63C14-73-6-75-24-67C-38-60-49-48-56-34\" stroke=\"#f47c88\" stroke-width=\"2.8\" fill=\"none\" stroke-linecap=\"round\" opacity=\".55\" filter=\"url(#xmh-v)\"/><path d=\"M-50-28C-45-40-35-51-22-57C-10-62 3-61 13-57\" stroke=\"#3a0510\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".55\" filter=\"url(#xmh-v)\"/><path d=\"M-41-4C-20 0 20 0 43-4L43-12C20-7-20-7-41-12Z\" fill=\"#3e0610\" opacity=\".38\" filter=\"url(#xmh-v)\"/><g filter=\"url(#xmh-z)\"><circle cx=\"-57\" cy=\"-26\" r=\"10.2\" fill=\"url(#xmh-p)\"/></g><circle cx=\"-59.5\" cy=\"-29.5\" r=\"3.6\" fill=\"#fff\" opacity=\".8\" filter=\"url(#xmh-v)\"/><g filter=\"url(#xmh-z)\"><path d=\"M-50-8C-31 1 31 1 50-8C56-9 57 3 50 6C31 16-31 16-50 6C-57 3-56-9-50-8Z\" fill=\"url(#xmh-f)\"/><path d=\"M-50-8C-31 1 31 1 50-8C56-9 57 3 50 6C31 16-31 16-50 6C-57 3-56-9-50-8Z\" fill=\"url(#xmh-e)\"/></g><path d=\"M-44-3C-25 5 25 5 44-3\" stroke=\"#fff\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".8\" filter=\"url(#xmh-v)\"/><path d=\"M-46 7C-26 15 26 15 46 7\" stroke=\"#9d907c\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".5\" filter=\"url(#xmh-v)\"/></g></g>","ssnow":"M-13.27 104.41L-12.77 103.95L-12.27 103.58L-11.77 103.32L-11.27 102.81L-10.77 102.41L-10.27 102.11L-9.77 101.96L-9.27 101.59L-8.77 101L-8.27 100.88L-7.77 100.78L-7.27 100.79L-6.77 100.81L-6.27 100.56L-5.77 100.61L-5.27 100.77L-4.77 101.31L-4.27 101.44L-3.77 101.51L-3.27 101.39L-2.77 101.48L-2.27 101.61L-1.77 101.95L-1.27 102.49L-0.77 102.93L-0.27 103.36L0.23 103.51L0.73 103.67L1.23 103.75L1.73 104.07L2.23 104.57L2.73 104.94L3.23 105.42L3.23 105.55L2.73 105.4L2.23 105.35L1.73 105.16L1.23 105.1L0.73 105.15L0.23 104.94L-0.27 104.86L-0.77 104.65L-1.27 104.56L-1.77 104.46L-2.27 104.36L-2.77 104.38L-3.27 104.27L-3.77 104.28L-4.27 104.17L-4.77 104.05L-5.27 103.92L-5.77 103.92L-6.27 103.91L-6.77 104.02L-7.27 104.01L-7.77 103.98L-8.27 103.96L-8.77 103.81L-9.27 103.9L-9.77 103.99L-10.27 104.07L-10.77 104.02L-11.27 104.1L-11.77 104.29L-12.27 104.35L-12.77 104.4L-13.27 104.55ZM34.48 3.94L34.98 3.66L35.48 3.4L35.98 3.18L36.48 2.82L36.98 2.59L37.48 2.35L37.98 2.16L38.48 1.97L38.98 1.74L39.48 1.48L39.98 1.37L40.48 1.09L40.98 0.91L41.48 0.81L41.98 0.69L42.48 0.7L42.98 0.46L43.48 0.17L43.98 -0.15L44.48 -0.35L44.98 -0.49L45.48 -0.56L45.98 -0.64L46.48 -0.72L46.98 -0.8L47.48 -0.89L47.98 -0.97L48.48 -1.06L48.98 -1.15L49.48 -1.24L49.98 -1.23L50.48 -1.12L50.98 -0.9L51.48 -0.74L51.98 -0.61L52.48 -0.63L52.98 -0.45L53.48 -0.59L53.98 -0.29L54.48 -0.21L54.98 -0L55.48 0.12L55.98 0.35L56.48 0.58L56.98 0.73L57.48 0.88L57.98 1.1L58.48 1.57L58.98 1.91L59.48 2.07L59.98 2.37L60.48 2.55L60.98 2.73L61.48 3.05L61.98 3.24L62.48 3.43L62.98 3.75L63.48 4L63.98 4.3L64.48 4.76L64.98 5.07L65.48 5.34L65.98 5.57L66.48 5.88L66.98 6.2L67.48 6.38L67.98 6.73L68.48 7.07L68.98 7.44L68.98 7.53L68.48 7.34L67.98 7.14L67.48 6.93L66.98 6.84L66.48 6.64L65.98 6.47L65.48 6.48L64.98 6.51L64.48 6.74L63.98 7.2L63.48 7.97L62.98 8.73L62.48 9.07L61.98 9.05L61.48 8.5L60.98 7.47L60.48 6.47L59.98 5.6L59.48 4.85L58.98 4.43L58.48 4.18L57.98 3.88L57.48 3.87L56.98 3.75L56.48 3.63L55.98 3.51L55.48 3.4L54.98 3.28L54.48 3.16L53.98 3.16L53.48 3.04L52.98 3.04L52.48 2.92L51.98 2.8L51.48 2.8L50.98 2.67L50.48 2.67L49.98 2.67L49.48 2.66L48.98 2.66L48.48 2.65L47.98 2.64L47.48 2.64L46.98 2.63L46.48 2.62L45.98 2.61L45.48 2.6L44.98 2.58L44.48 2.57L43.98 2.56L43.48 2.54L42.98 2.65L42.48 2.76L41.98 2.74L41.48 2.85L40.98 2.82L40.48 2.93L39.98 3.03L39.48 3.01L38.98 3.11L38.48 3.21L37.98 3.3L37.48 3.4L36.98 3.49L36.48 3.59L35.98 3.8L35.48 3.89L34.98 3.96L34.48 4.03Z","stocking":"<g class=\"xm-stk\"><defs><linearGradient id=\"xms-r\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#e2475a\"/><stop offset=\".55\" stop-color=\"#bd2738\"/><stop offset=\"1\" stop-color=\"#8a1526\"/></linearGradient><linearGradient id=\"xms-w\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\"1\" stop-color=\"#e4ddd0\"/></linearGradient><clipPath id=\"xms-c\"><path d=\"M6.1 26.0L10.6 30.5L13.2 32.8L15.6 34.4L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.5 30.9L27.4 29.5L28.1 28.0L28.8 26.6L29.6 25.2L30.3 23.8L31.0 22.4L31.8 21.0L32.5 19.6L33.2 18.1L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L28.9 15.8L28.1 17.2L27.3 18.6L26.6 19.9L25.8 21.3L25.0 22.7L24.2 24.0L23.4 25.4L22.6 26.7L21.8 28.0L21.0 29.0L20.3 29.7L19.9 30.0L19.5 29.8L18.6 29.3L17.6 28.6L16.5 27.7L15.5 26.7L14.4 25.6L13.4 24.5L12.3 23.4L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z\"/><path d=\"M29.7 14.5L33.3 7.9L37.5 10.1L33.9 16.7Z\"/></clipPath></defs><g fill=\"#6e1220\" stroke=\"#6e1220\" stroke-width=\"1.1\" stroke-linejoin=\"round\"><path d=\"M6.1 26.0L10.6 30.5L13.2 32.8L15.6 34.4L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.5 30.9L27.4 29.5L28.1 28.0L28.8 26.6L29.6 25.2L30.3 23.8L31.0 22.4L31.8 21.0L32.5 19.6L33.2 18.1L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L28.9 15.8L28.1 17.2L27.3 18.6L26.6 19.9L25.8 21.3L25.0 22.7L24.2 24.0L23.4 25.4L22.6 26.7L21.8 28.0L21.0 29.0L20.3 29.7L19.9 30.0L19.5 29.8L18.6 29.3L17.6 28.6L16.5 27.7L15.5 26.7L14.4 25.6L13.4 24.5L12.3 23.4L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z\"/><path d=\"M29.7 14.5L33.3 7.9L37.5 10.1L33.9 16.7Z\"/></g><g fill=\"url(#xms-r)\"><path d=\"M6.1 26.0L10.6 30.5L13.2 32.8L15.6 34.4L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.5 30.9L27.4 29.5L28.1 28.0L28.8 26.6L29.6 25.2L30.3 23.8L31.0 22.4L31.8 21.0L32.5 19.6L33.2 18.1L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L28.9 15.8L28.1 17.2L27.3 18.6L26.6 19.9L25.8 21.3L25.0 22.7L24.2 24.0L23.4 25.4L22.6 26.7L21.8 28.0L21.0 29.0L20.3 29.7L19.9 30.0L19.5 29.8L18.6 29.3L17.6 28.6L16.5 27.7L15.5 26.7L14.4 25.6L13.4 24.5L12.3 23.4L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z\"/><path d=\"M29.7 14.5L33.3 7.9L37.5 10.1L33.9 16.7Z\"/></g><g clip-path=\"url(#xms-c)\"><g stroke=\"#fff6ec\" stroke-width=\"1.15\" opacity=\".92\"><path d=\"M26.4 17.2L32.2 20.3M24.3 21.0L30.1 24.1\"/><path d=\"M12.6 22.6L8.6 26.9M15.0 25.0L11.0 29.3\"/></g><g stroke=\"#fff6ec\" stroke-width=\".5\" stroke-dasharray=\".7 .7\" opacity=\".7\"><path d=\"M25.4 19.1L31.2 22.2M13.8 23.8L9.8 28.1\"/></g><circle cx=\"19.9\" cy=\"36.4\" r=\"3.9\" fill=\"url(#xms-w)\"/><circle cx=\"6.6\" cy=\"24.2\" r=\"3.3\" fill=\"url(#xms-w)\"/><path d=\"M10.9 21.8L19.9 30.0L29.7 14.5\" fill=\"none\" stroke=\"#5e0b18\" stroke-width=\"1.6\" opacity=\".35\"/></g><g transform=\"translate(35.4 9) rotate(28)\"><path d=\"M1.1-1L1.1-6.4C1.1-8.4 3.9-8.4 3.9-6.5\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.6\" stroke-linecap=\"round\"/><path d=\"M1.1-1L1.1-6.4C1.1-8.4 3.9-8.4 3.9-6.5\" fill=\"none\" stroke=\"#d23a4b\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-dasharray=\"1 1\"/><rect x=\"-4.6\" y=\"-2.4\" width=\"9.2\" height=\"4.8\" rx=\"2.3\" fill=\"url(#xms-w)\" stroke=\"#c9bca8\" stroke-width=\".45\"/><g fill=\"#fff\"><circle cx=\"-3.6\" cy=\"-1.9\" r=\".8\"/><circle cx=\"-2.6\" cy=\"-1.6\" r=\".9\"/><circle cx=\"-1.5\" cy=\"-1.9\" r=\".75\"/><circle cx=\"-0.5\" cy=\"-1.6\" r=\".95\"/><circle cx=\"0.5\" cy=\"-1.9\" r=\".8\"/><circle cx=\"1.6\" cy=\"-1.6\" r=\".9\"/><circle cx=\"2.6\" cy=\"-1.9\" r=\".75\"/><circle cx=\"3.6\" cy=\"-1.6\" r=\".85\"/></g><path d=\"M-3.6 1.2Q0 2 3.6 1.2\" stroke=\"#d4c9b7\" stroke-width=\".7\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M-4-1.7C-3.4-3.3-1.4-3.4 0-3.2C1.6-3.5 3.5-3.2 4.1-1.6C1.4-2.2-1.4-2.2-4-1.7Z\" fill=\"#fff\"/></g></g>","hatMini":"<g transform=\"translate(0 0) rotate(0) scale(1.0000 1.0000)\"><defs><linearGradient id=\"xmi-r\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\".18\"><stop offset=\"0\" stop-color=\"#e24a5a\"/><stop offset=\".38\" stop-color=\"#c62c40\"/><stop offset=\".78\" stop-color=\"#8f1627\"/><stop offset=\"1\" stop-color=\"#6c0e1c\"/></linearGradient><linearGradient id=\"xmi-d\" x1=\"0\" y1=\"0\" x2=\".25\" y2=\"1\"><stop offset=\"0\" stop-color=\"#d23a4c\"/><stop offset=\".5\" stop-color=\"#a51d31\"/><stop offset=\"1\" stop-color=\"#6a0d1b\"/></linearGradient><radialGradient id=\"xmi-s\" cx=\".3\" cy=\".3\" r=\".55\"><stop offset=\"0\" stop-color=\"#ff9aa4\" stop-opacity=\".5\"/><stop offset=\"1\" stop-color=\"#ff9aa4\" stop-opacity=\"0\"/></radialGradient><linearGradient id=\"xmi-f\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\".45\" stop-color=\"#f8f4ee\"/><stop offset=\"1\" stop-color=\"#d2c9ba\"/></linearGradient><linearGradient id=\"xmi-e\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#8a7c68\" stop-opacity=\".5\"/><stop offset=\".22\" stop-color=\"#8a7c68\" stop-opacity=\"0\"/><stop offset=\".72\" stop-color=\"#8a7c68\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#6e604e\" stop-opacity=\".55\"/></linearGradient><radialGradient id=\"xmi-p\" cx=\".38\" cy=\".32\" r=\".72\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\".5\" stop-color=\"#f4efe6\"/><stop offset=\"1\" stop-color=\"#bfb4a2\"/></radialGradient></defs><g class=\"xm-hat\"><path d=\"M-47 5C-30 18 30 18 47 5L46 13C30 27-30 27-46 13Z\" fill=\"#06140c\" opacity=\".22\"/><path d=\"M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z\" fill=\"url(#xmi-r)\"/><path d=\"M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z\" fill=\"url(#xmi-s)\"/><path d=\"M31-50C37-36 40-20 41-3\" stroke=\"#4d0812\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\" opacity=\".42\"/><path d=\"M-27-9C-24-24-16-36-5-44\" stroke=\"#ffa3ac\" stroke-width=\"3.4\" fill=\"none\" stroke-linecap=\"round\" opacity=\".3\"/><path d=\"M-34-40C-22-54-4-61 14-58\" stroke=\"#3e0610\" stroke-width=\"6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".5\"/><path d=\"M29-57C21-74-5-79-26-69C-42-61-54-46-61-30L-51-26C-46-39-36-51-22-57C-9-63 5-62 16-57Z\" fill=\"url(#xmi-d)\"/><path d=\"M24-63C14-73-6-75-24-67C-38-60-49-48-56-34\" stroke=\"#f47c88\" stroke-width=\"2.8\" fill=\"none\" stroke-linecap=\"round\" opacity=\".55\"/><path d=\"M-50-28C-45-40-35-51-22-57C-10-62 3-61 13-57\" stroke=\"#3a0510\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".55\"/><path d=\"M-41-4C-20 0 20 0 43-4L43-12C20-7-20-7-41-12Z\" fill=\"#3e0610\" opacity=\".38\"/><g><circle cx=\"-57\" cy=\"-26\" r=\"10.2\" fill=\"url(#xmi-p)\"/></g><circle cx=\"-59.5\" cy=\"-29.5\" r=\"3.6\" fill=\"#fff\" opacity=\".8\"/><g><path d=\"M-50-8C-31 1 31 1 50-8C56-9 57 3 50 6C31 16-31 16-50 6C-57 3-56-9-50-8Z\" fill=\"url(#xmi-f)\"/><path d=\"M-50-8C-31 1 31 1 50-8C56-9 57 3 50 6C31 16-31 16-50 6C-57 3-56-9-50-8Z\" fill=\"url(#xmi-e)\"/></g><path d=\"M-44-3C-25 5 25 5 44-3\" stroke=\"#fff\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".8\"/><path d=\"M-46 7C-26 15 26 15 46 7\" stroke=\"#9d907c\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".5\"/></g></g>","photoHats":{"rough-green-hq":{"x":0.555,"y":0.2,"w":0.18,"a":10,"flip":true}},"cabin":{"lights":[[459.1,104.1],[442.3,128.9],[462.2,145.1],[429.9,152.1],[420.9,190.7],[463.2,220.7],[424.4,232.5],[394.0,241.8],[522.7,251.1],[475.8,252.3],[496.4,268.2],[359.0,279.9],[412.0,280.7],[532.4,292.4],[482.1,292.9],[407.3,328.9],[493.8,330.8],[372.7,340.0],[422.1,348.5],[470.0,348.9],[347.2,357.1],[396.8,365.1],[317.0,370.7],[422.0,375.4],[374.2,379.2],[498.9,381.6],[591.4,401.3],[396.6,412.2],[342.5,418.2],[509.4,420.7],[367.6,424.6],[557.3,432.0],[338.3,443.0],[401.5,444.9],[590.7,446.2],[432.0,446.4],[516.1,450.8],[370.8,451.4],[310.9,456.7],[554.0,457.8],[493.2,459.7],[422.5,471.9],[609.1,476.4],[289.6,480.3],[564.4,480.8],[368.6,487.2]],"baubles":[[478.8,135.5],[433.8,161.4],[474.7,184.6],[393.8,261.0],[499.6,278.9],[407.8,322.4],[497.2,362.3],[566.7,370.0],[340.7,373.9],[392.9,411.1],[312.6,426.1],[568.8,439.1],[516.1,450.8],[297.1,482.9],[351.2,483.3]],"orns":[[459.9,109.8],[403.5,191.6],[489.0,235.4],[426.4,275.9],[488.9,319.0],[354.8,329.3],[420.6,350.2],[506.6,409.1],[348.8,415.2],[397.8,449.7],[495.0,483.2],[591.8,487.3]],"garland":["M409 150Q452 208 514 178","M373 238Q452 296 550 266","M337 326Q452 384 586 354","M301 414Q452 472 622 442"],"beam":[[20,40.0],[89,54.0],[158,40.0],[227,54.0],[296,40.0],[365,54.0],[434,40.0],[503,54.0],[572,40.0],[641,54.0],[710,40.0],[779,54.0],[848,40.0],[917,54.0],[986,40.0]],"top":[452.0,62.0],"win":[112.0,96.0,322.0,306.0],"fire":[780.0,446.0],"mantel":300.0,"stockings":[684,742,818,876],"basket":[902,470]}};
 /* SnakeList - Christmas preview: the decorations (styles are in xmas.css, the Christmas Cabin in cabin.js).
    Loaded only while the preview switch is on (?christmas - see tools/xmas_loader.js). XM_ART (the hat, the stocking,
    the snow on the logo's S, the photo hats, the cover's lights, the cabin's layout) is put in front of this file by
@@ -41,11 +41,12 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     if (ART.ssnow) { var s = D.createElementNS(NS, "path"); s.setAttribute("d", ART.ssnow); s.setAttribute("class", "xm-ssnow"); s.setAttribute("fill", "#fff"); s.setAttribute("style", "opacity:var(--xm-hat-o,1)"); g.appendChild(s); }
     return true;
   };
-  /* the tick becomes a Christmas stocking with presents (the tick's own drawing is hidden by xmas.css, not removed) */
+  /* the tick, dressed as a Christmas stocking: still the tick's own shape, in red knit with a fur cuff and a candy cane
+     (the tick's own drawing is only hidden by xmas.css while the stocking is there, never removed) */
   var stkN = 0;
   function stockings() {
     if (!ART.stocking) return;
-    [].forEach.call(D.querySelectorAll("svg.sl-tick, .intro-box svg"), function (sv) {
+    [].forEach.call(D.querySelectorAll("svg.sl-tick, .intro-box svg:not(.tick-detail)"), function (sv) {
       if (sv.querySelector(".xm-stk")) return;
       sv.classList.add("xm-has-stk"); sv.style.overflow = "visible";
       // its own gradient names in each copy (a copy inside a hidden logo could not lend them to the others)
@@ -53,11 +54,14 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     });
   }
 
-  /* snow on top of the letters: each letter's top edge is measured from the font itself (drawn once on a canvas),
-     then a soft cap of snow is laid where the edge is flat enough to hold it - the same rule as the S's snow */
+  /* snow on top of the letters: each letter's real outline is measured from the font itself (drawn once on a
+     canvas, upper-case where the page shows it upper-case), then snow is laid only where that outline faces up and
+     is flat enough to hold it - thickest in the middle of a flat top, thinning out towards its ends, none on the
+     curves and slopes, with now and then a small drip over the edge. The same rule as the logo S's snow
+     (christmas_art.snow_cap). Also on the cover's other words and on the top of the snake's name button. */
   var gCache = {}, cv = null;
-  function glyph(ch, font) {
-    var k = font + "|" + ch; if (gCache[k]) return gCache[k];
+  function glyph(ch, font, T) {
+    var k = font + "|" + ch + "|" + T; if (gCache[k]) return gCache[k];
     var R = 120, W = R * 2, H = R * 2;
     if (!cv) { cv = D.createElement("canvas"); cv.width = W; cv.height = H; }
     var g = cv.getContext("2d", { willReadFrequently: true });
@@ -66,60 +70,93 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     var m = g.measureText(ch), asc = (m.fontBoundingBoxAscent || R * .9) / R;
     var d = g.getImageData(0, 0, W, H).data, tops = [], step = 2;
     for (var x = 0; x < W; x += step) { var t = null; for (var y = 0; y < H; y++) if (d[(y * W + x) * 4 + 3] > 140) { t = (y - oy) / R; break; } tops.push(t); }
-    var path = snowCap(tops, -ox / R, step / R, .06, ch.charCodeAt(0));
-    return (gCache[k] = { asc: asc, p: path });
+    return (gCache[k] = { asc: asc, p: snowCap(tops, -ox / R, step / R, T, ch.charCodeAt(0)) });
   }
-  /* tops: the top edge's y per column (null where empty) -> polygons [[x, y]...] (port of christmas_art.snow_cap) */
+  /* tops: the top edge's y per column (null where empty) -> polygons [[x, y]...] (a port of christmas_art.snow_cap) */
   function snowCap(tops, x0, step, T, seed) {
     var n = tops.length, th = new Array(n).fill(0), sm = new Array(n).fill(0), out = [], c, k;
-    var ph0 = (seed * 1.7) % 6.28, ph1 = (seed * 2.9) % 6.28;
+    var ph0 = (seed * 1.7) % 6.28, ph1 = (seed * 2.9) % 6.28, rnd = (seed * 9301 + 49297) % 233280 / 233280;
     for (c = 0; c < n; c++) {
       if (tops[c] == null) continue;
       var a = Math.max(0, c - 3), b = Math.min(n - 1, c + 3);
       while (tops[a] == null) a++; while (tops[b] == null) b--;
-      var slope = (tops[b] - tops[a]) / Math.max(1e-6, (b - a) * step), f = Math.pow(Math.max(0, 1 - Math.abs(slope) / .95), 1.6), x = x0 + c * step;
-      th[c] = T * f * (.82 + .22 * Math.sin(x / (T * 2.3) + ph0) + .12 * Math.sin(x / (T * .9) + ph1));
+      // snow only holds where the edge is nearly level: none past a slope of about 30 degrees
+      var slope = (tops[b] - tops[a]) / Math.max(1e-6, (b - a) * step), f = Math.pow(Math.max(0, 1 - Math.abs(slope) / .85), 1.5), x = x0 + c * step;
+      th[c] = T * f * (.86 + .14 * Math.sin(x / (T * 2.3) + ph0) + .08 * Math.sin(x / (T * .9) + ph1));
     }
     for (c = 0; c < n; c++) { if (tops[c] == null) continue; var s = 0, q = 0; for (k = Math.max(0, c - 2); k < Math.min(n, c + 3); k++) if (tops[k] != null) { s += th[k]; q++; } sm[c] = s / q; }
     c = 0;
     while (c < n) {
-      if (tops[c] == null || sm[c] < T * .22) { c++; continue; }
+      if (tops[c] == null || sm[c] < T * .3) { c++; continue; }
       var e = c;
-      while (e + 1 < n && tops[e + 1] != null && sm[e + 1] >= T * .22 && Math.abs(tops[e + 1] - tops[e]) < T) e++;
-      if ((e - c) * step >= T * 1.2) {
-        var L = e - c + 1, up = [], dn = [];
-        for (var j = 0; j < L; j++) { var kk = c + j, tp = Math.pow(Math.sin(Math.PI * (j + .5) / L), .45), xx = x0 + kk * step; up.push([xx, tops[kk] - sm[kk] * tp]); dn.push([xx, tops[kk] + T * .2 * tp]); }
+      while (e + 1 < n && tops[e + 1] != null && sm[e + 1] >= T * .3 && Math.abs(tops[e + 1] - tops[e]) < T * .6) e++;
+      var L = e - c + 1, len = L * step;
+      if (len >= T * 1.5) {
+        // a long flat top holds more snow in its middle; a short one only a thin cap
+        var full = Math.min(1, len / (T * 7)), up = [], dn = [];
+        var drip = len > T * 5 && ((rnd * 7 + c) % 1) < .55 ? (((rnd * 13 + e) % 1) < .5 ? .18 + .1 * rnd : .72 + .1 * rnd) : -1;
+        for (var j = 0; j < L; j++) {
+          var kk = c + j, u = (j + .5) / L, tp = Math.pow(Math.sin(Math.PI * u), .7), xx = x0 + kk * step;
+          var dr = drip < 0 ? 0 : T * .95 * Math.exp(-Math.pow((u - drip) * len / (T * .45), 2));
+          up.push([xx, tops[kk] - sm[kk] * tp * (.7 + .3 * full)]); dn.push([xx, tops[kk] + T * .16 * tp + dr]);
+        }
         out.push(up.concat(dn.reverse()));
       }
       c = e + 1;
     }
     return out;
   }
-  var SNOW_HOSTS = ".sl-header .sl-titletext, .intro-title, .hero-title .intro-title, .hero-mark, .signin-title .sl-titletext, .sl-brand, .site-logo";
-  function snowText(host) {
+  function polyD(poly, fx, fy) { return "M" + poly.map(function (p) { return fx(p[0]).toFixed(1) + " " + fy(p[1]).toFixed(1); }).join("L") + "Z"; }
+  /* where snow lies: [selector, depth of the snow as a part of the font size, the least depth in px] - the logos get a
+     proper layer, the small words of the cover a light dusting */
+  var SNOW_SPOTS = [
+    [".sl-header .sl-titletext, .intro-title, .hero-title .intro-title, .hero-mark, .signin-title .sl-titletext, .sl-brand, .site-logo", .07, 1.6],
+    ["#sl-hero .hero-sub, #intro .hero-sub", .17, 2.4],
+    ["#sl-hero .hero-cue > span, #intro .hero-cue > span", .2, 2]
+  ];
+  var PILLS = "#sl-hero .hero-sp";           // a button: the snow lies along its rounded top
+  var SNOW_HOSTS = SNOW_SPOTS.map(function (s) { return s[0]; }).join(", ") + ", " + PILLS;
+  function capHost(host) {
+    var o = host.querySelector(":scope > .xm-snowcap");
+    if (!o) { o = D.createElementNS(NS, "svg"); o.setAttribute("class", "xm-snowcap"); o.setAttribute("aria-hidden", "true"); o.innerHTML = "<path/>"; host.appendChild(o); }
+    return o;
+  }
+  function snowText(host, Tem, Tpx) {
     if (!host || !host.isConnected) return;
     var hr = host.getBoundingClientRect(); if (!hr.width || !host.offsetWidth) return;
     var sc = hr.width / host.offsetWidth || 1, parts = [];
-    var w = D.createTreeWalker(host, NodeFilter.SHOW_TEXT, { acceptNode: function (n) { return n.parentNode.closest("svg, .sr-only, .xm-snowcap") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } });
+    var w = D.createTreeWalker(host, NodeFilter.SHOW_TEXT, { acceptNode: function (n) { return n.parentNode.closest("svg, .sr-only, .xm-snowcap, .hw-dot") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } });
     var rg = D.createRange(), n;
     while ((n = w.nextNode())) {
       var el = n.parentNode, cs = getComputedStyle(el), fs = parseFloat(cs.fontSize);
       if (!fs || cs.visibility === "hidden") continue;
-      var font = cs.fontStyle + " " + cs.fontWeight + " @ " + cs.fontFamily;
+      var font = cs.fontStyle + " " + cs.fontWeight + " @ " + cs.fontFamily, T = Math.max(Tem, Tpx / fs);
+      T = Math.round(T * 200) / 200;
       for (var i = 0; i < n.length; i++) {
-        var ch = n.data[i]; if (!/\S/.test(ch)) continue;
+        var ch = n.data[i]; if (!/[A-Za-z0-9]/.test(ch)) continue;
+        if (cs.textTransform === "uppercase") ch = ch.toUpperCase();
         rg.setStart(n, i); rg.setEnd(n, i + 1);
         var r = rg.getBoundingClientRect(); if (!r.width) continue;
-        var G = glyph(ch, font), ox = (r.left - hr.left) / sc, base = (r.top - hr.top) / sc + G.asc * fs;
-        G.p.forEach(function (poly) { parts.push("M" + poly.map(function (p) { return (ox + p[0] * fs).toFixed(1) + " " + (base + p[1] * fs).toFixed(1); }).join("L") + "Z"); });
+        var G = glyph(ch, font, T), ox = (r.left - hr.left) / sc, base = (r.top - hr.top) / sc + G.asc * fs;
+        G.p.forEach(function (poly) { parts.push(polyD(poly, function (x) { return ox + x * fs; }, function (y) { return base + y * fs; })); });
       }
     }
-    var o = host.querySelector(":scope > .xm-snowcap");
-    if (!o) { o = D.createElementNS(NS, "svg"); o.setAttribute("class", "xm-snowcap"); o.setAttribute("aria-hidden", "true"); o.innerHTML = "<path/>"; host.appendChild(o); }
-    o.firstChild.setAttribute("d", parts.join(""));
+    capHost(host).firstChild.setAttribute("d", parts.join(""));
+  }
+  function snowPill(host) {
+    if (!host || !host.isConnected || !host.offsetWidth) return;
+    var W = host.offsetWidth, H = host.offsetHeight, r = Math.min(H / 2, parseFloat(getComputedStyle(host).borderTopLeftRadius) || 0), tops = [], st = 1;
+    for (var x = 0; x <= W; x += st) { var dx = x < r ? r - x : x > W - r ? x - (W - r) : 0; tops.push(r - Math.sqrt(Math.max(0, r * r - dx * dx))); }
+    capHost(host).firstChild.setAttribute("d", snowCap(tops, 0, st, 3.2, 7).map(function (p) { return polyD(p, function (x) { return x; }, function (y) { return y + 2.6; }); }).join(""));
   }
   var snowT = 0;
-  function snowAll() { clearTimeout(snowT); snowT = setTimeout(function () { [].forEach.call(D.querySelectorAll(SNOW_HOSTS), snowText); }, 60); }
+  function snowAll() {
+    clearTimeout(snowT);
+    snowT = setTimeout(function () {
+      SNOW_SPOTS.forEach(function (s) { [].forEach.call(D.querySelectorAll(s[0]), function (h) { snowText(h, s[1], s[2]); }); });
+      [].forEach.call(D.querySelectorAll(PILLS), snowPill);
+    }, 60);
+  }
   XM.snowLetters = snowAll;
   function logo() {
     XM.hat(); stockings(); snowAll();
@@ -165,7 +202,7 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     var L = hero.querySelector(".xm-phat");
     var P = (ART.photoHats || {})[photoId(im)];
     if (!P || !im.naturalWidth) { if (L) L.hidden = true; return; }
-    if (!L) { L = D.createElement("div"); L.className = "xm-phat"; L.setAttribute("aria-hidden", "true"); L.innerHTML = '<svg viewBox="-70 -80 140 100" preserveAspectRatio="xMidYMid meet">' + ART.hatSvg + "</svg>"; im.parentNode.insertBefore(L, im.nextSibling); }
+    if (!L) { L = D.createElement("div"); L.className = "xm-phat"; L.setAttribute("aria-hidden", "true"); L.innerHTML = '<svg viewBox="-72 -84 144 116" preserveAspectRatio="xMidYMid meet">' + ART.hatSvg + "</svg>"; im.parentNode.insertBefore(L, im.nextSibling); }
     L.hidden = false;
     var bw = im.offsetWidth, bh = im.offsetHeight, nw = im.naturalWidth, nh = im.naturalHeight, cs = getComputedStyle(im);
     var k = cs.objectFit === "cover" ? Math.max(bw / nw, bh / nh) : Math.min(bw / nw, bh / nh), cw = nw * k, ch = nh * k;
@@ -174,9 +211,9 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     var ox = (bw - cw) * px, oy = (bh - ch) * py;
     L.style.left = im.offsetLeft + "px"; L.style.top = im.offsetTop + "px"; L.style.width = bw + "px"; L.style.height = bh + "px";
     var w = P.w * cw, sv = L.firstChild;
-    sv.style.width = (w * 1.4) + "px"; sv.style.height = w + "px";
-    sv.style.left = (ox + P.x * cw - w * .7) + "px"; sv.style.top = (oy + P.y * ch - w * .8) + "px";
-    sv.style.transformOrigin = (w * .7) + "px " + (w * .8) + "px";
+    sv.style.width = (w * 1.44) + "px"; sv.style.height = (w * 1.16) + "px";
+    sv.style.left = (ox + P.x * cw - w * .72) + "px"; sv.style.top = (oy + P.y * ch - w * .84) + "px";
+    sv.style.transformOrigin = (w * .72) + "px " + (w * .84) + "px";
     sv.style.transform = "rotate(" + (P.a || 0) + "deg)" + (P.flip ? " scaleX(-1)" : "");
   }
   function photoHat() {
@@ -293,8 +330,8 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
   }
 
   /* ================= a tiny Santa-hat snake by each snake's name =================
-     A flat little snake in the style of SnakeList's S, in that species' own colours and pattern (from the 3D
-     models' colours: christmas/xmas-sp.json, about 4 numbers per species, fetched once), wearing a Santa hat.
+     A small portrait of that species: its own colours, pattern and head shape (from the 3D models: christmas/
+     xmas-sp.json, 11 characters per species, fetched once), wearing a Santa hat.
      Each look is drawn once as an SVG symbol and reused (<use>), so even long lists stay light. */
   var SP = null, spP = null, symDone = {}, sprite = null;
   function spData() {
@@ -302,32 +339,89 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     if (!spP) spP = fetch(asset("xmas-sp.json")).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }).then(function (d) { SP = d || {}; return SP; });
     return spP;
   }
-  var S_PATH = "M17.2 6.6C15.4 3.9 10 3.4 8.3 6.2 6.4 9.5 16.8 10.4 16.9 15.2 17 19.8 10.4 21.3 5.6 18.7";
+  /* the little snake: a round, shaded body rising in an S from a loop on the ground, thick through the middle and
+     thin to the tail, with its species' pattern and belly colour, a head of the right shape (a viper's wide
+     triangle, a python's long broad head, a colubrid's slender one...), an eye, and the Santa hat worn on its head.
+     The body's outline is worked out once (a tube round its middle line); each species' look is one <symbol>. */
+  var MID = [[2.6, 20.6], [6.2, 22.4], [13.8, 22.6], [16.2, 19.6], [18.2, 17.0], [15.2, 15.3], [11.6, 14.6], [8.6, 14.0], [7.6, 11.4], [9.4, 9.6], [10.8, 8.2], [12.8, 7.9], [14.2, 8.4]];
+  var TUBE = null;
+  function tube() {
+    if (TUBE) return TUBE;
+    var pts = [], i, t;
+    for (i = 0; i + 3 < MID.length; i += 3) for (t = i ? .05 : 0; t <= 1.0001; t += .05) {
+      var u = 1 - t, p0 = MID[i], p1 = MID[i + 1], p2 = MID[i + 2], p3 = MID[i + 3];
+      pts.push([u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0], u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1]]);
+    }
+    var n = pts.length, L = [], R = [], B = [], H = [];
+    for (i = 0; i < n; i++) {
+      var a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1;
+      var nx = -dy / l, ny = dx / l, f = i / (n - 1);
+      // thickness: a thin tail, full through the coil and the body, a little narrower at the neck
+      var w = 2.15 * Math.min(1, .18 + f * 3.2) * (f > .86 ? 1 - (f - .86) * 1.4 : 1);
+      L.push([pts[i][0] + nx * w, pts[i][1] + ny * w]); R.push([pts[i][0] - nx * w, pts[i][1] - ny * w]);
+      // the belly side and the lit side (light from above: whichever side faces down is the belly)
+      var s = ny > 0 ? 1 : -1;
+      B.push([pts[i][0] + nx * w * .62 * s, pts[i][1] + ny * w * .62 * s]); H.push([pts[i][0] - nx * w * .45 * s, pts[i][1] - ny * w * .45 * s]);
+    }
+    function d(a) { return "M" + a.map(function (p) { return p[0].toFixed(2) + " " + p[1].toFixed(2); }).join("L"); }
+    var mid = d(pts);
+    TUBE = { body: d(L) + "L" + R.slice().reverse().map(function (p) { return p[0].toFixed(2) + " " + p[1].toFixed(2); }).join("L") + "Z", mid: mid, belly: d(B), lit: d(H) };
+    return TUBE;
+  }
+  // the pattern along the body (C = pattern colour, B = belly colour), clipped to the body
   var PAT = {
-    p: "", b: '<path d="' + S_PATH + '" stroke="#C" stroke-width="4.2" stroke-dasharray="1.5 2.3" fill="none"/>',
-    c: '<path d="' + S_PATH + '" stroke="#C" stroke-width="4.2" stroke-dasharray="1.5 4.4" fill="none"/><path d="' + S_PATH + '" stroke="#B" stroke-width="4.2" stroke-dasharray=".8 5.1" stroke-dashoffset="-1.9" fill="none"/>',
-    s: '<path d="' + S_PATH + '" stroke="#C" stroke-width="1.2" fill="none" stroke-linecap="round"/>',
-    k: '<path d="' + S_PATH + '" stroke="#C" stroke-width="1.1" stroke-dasharray=".01 1.6" stroke-linecap="round" fill="none"/>',
-    o: '<path d="' + S_PATH + '" stroke="#C" stroke-width="2.6" stroke-dasharray="1.7 2" stroke-linecap="round" fill="none"/>',
-    z: '<path d="' + S_PATH + '" stroke="#C" stroke-width="2" stroke-dasharray="1 1.2" fill="none"/>',
-    l: '<path d="' + S_PATH + '" stroke="#C" stroke-width="4.2" stroke-dasharray="0 1.4 1.3 60" fill="none"/>'
+    p: "", b: '<path d="#M" stroke="#C" stroke-width="5" stroke-dasharray="1.1 1.9" fill="none"/>',
+    c: '<path d="#M" stroke="#C" stroke-width="5" stroke-dasharray="1.2 4.2" fill="none"/><path d="#M" stroke="#B" stroke-width="5" stroke-dasharray=".7 4.7" stroke-dashoffset="-1.6" fill="none"/>',
+    s: '<path d="#M" stroke="#C" stroke-width=".9" fill="none"/><path d="#L" stroke="#C" stroke-width=".55" fill="none" opacity=".8"/>',
+    k: '<path d="#M" stroke="#C" stroke-width="3.4" stroke-dasharray=".01 1.25" stroke-linecap="round" fill="none" opacity=".9"/>',
+    o: '<path d="#M" stroke="#C" stroke-width="2.6" stroke-dasharray="1.5 1.5" stroke-linecap="round" fill="none"/>',
+    z: '<path d="#M" stroke="#C" stroke-width="2.4" stroke-dasharray="1 .9" stroke-linejoin="round" fill="none"/>',
+    l: '<path d="#M" stroke="#C" stroke-width="5" stroke-dasharray="0 31 1.4 60" fill="none"/>'
   };
-  var MINI_HAT = '<g transform="translate(17.4 4.1) rotate(-10)"><path d="M-3.1 .2C-2.9-2.5-1.5-4.4.5-4.6 2.1-4.7 3.2-3.4 3.2.2Z" fill="#c62f40"/><path d="M.2-4.5C-1.4-4.6-2.9-3.9-3.8-2.6" stroke="#9c1d2e" stroke-width="1.3" fill="none" stroke-linecap="round"/>' +
-    '<circle cx="-3.9" cy="-2.3" r=".95" fill="#fff"/><rect x="-3.6" y="-.5" width="7.3" height="1.7" rx=".85" fill="#fff"/></g>';
+  // head shapes, facing right from the neck at (0, 0): [outline, eye x, eye y, eye r, slit pupil]
+  var HEADS = {
+    c: ["M-.6-1.7C1.2-2.5 3.6-2.4 5.1-1.4 5.9-.8 6.1.2 5.5.8 4.3 1.9 1.4 2.2-.6 1.7Z", 3.2, -.75, .78, 0],
+    e: ["M-.6-1.8C1.3-2.6 3.5-2.5 4.8-1.5 5.7-.8 5.8.4 5.1 1 3.9 2 1.3 2.2-.6 1.8Z", 3, -.8, .72, 0],
+    v: ["M-.5-1.3C.2-3.3 2.6-3.6 4.6-2.3 5.8-1.5 6.4-.5 6.2.3 5.9 1.2 4.4 2.3 2.6 3 1.2 3.5-.2 3-.5 1.6Z", 3.3, -1.15, .8, 1],
+    b: ["M-.6-1.8C1.4-2.7 4.4-2.6 6-1.6 6.8-1 6.9.3 6.2.9 4.8 2.1 1.4 2.4-.6 1.8Z", 3.9, -.9, .74, 1],
+    n: ["M-.4-1.5C1-1.9 2.8-1.8 3.8-1.1 4.5-.5 4.5.6 3.8 1.1 2.7 1.8 .9 1.9-.4 1.5Z", 2.6, -.5, .34, 0],
+    s: ["M-.6-1.7C1.2-2.4 3.4-2.3 4.8-1.4 5.6-.8 5.8.3 5.2.9 4 1.9 1.4 2.1-.6 1.7Z", 3, -.75, .74, 0]
+  };
   function spSym(code) {
     var id = "xsi-" + code.replace(/[^a-z0-9]/gi, "");
     if (symDone[id]) return id;
     if (!sprite) { sprite = D.createElementNS(NS, "svg"); sprite.setAttribute("aria-hidden", "true"); sprite.setAttribute("class", "xm-sprite"); D.body.appendChild(sprite); }
-    var d = "#" + code.slice(0, 3), c = "#" + code.slice(3, 6), b = "#" + code.slice(6, 9), t = code.charAt(9) || "p";
-    sprite.insertAdjacentHTML("beforeend", '<symbol id="' + id + '" viewBox="0 0 24 24">' +
-      '<path d="' + S_PATH + '" stroke="rgba(0,0,0,.38)" stroke-width="5.4" fill="none" stroke-linecap="round"/>' +
-      '<path d="' + S_PATH + '" stroke="' + d + '" stroke-width="4.2" fill="none" stroke-linecap="round"/>' +
-      (PAT[t] || "").replace(/#C/g, c).replace(/#B/g, b) +
-      '<ellipse cx="18.3" cy="7.1" rx="3.2" ry="2.3" transform="rotate(22 18.3 7.1)" fill="' + d + '" stroke="rgba(0,0,0,.38)" stroke-width=".6"/>' +
-      '<circle cx="19.2" cy="6.6" r=".62" fill="#111"/>' + MINI_HAT + "</symbol>");
+    var T = tube(), d = "#" + code.slice(0, 3), c = "#" + code.slice(3, 6), b = "#" + code.slice(6, 9), t = code.charAt(9) || "p", h = HEADS[code.charAt(10)] || HEADS.c;
+    var pat = (PAT[t] || "").replace(/#M/g, T.mid).replace(/#L/g, T.lit).replace(/#C/g, c).replace(/#B/g, b);
+    var defs = "";
+    if (!symDone.base) {
+      // shared once: the body's clip, its round shading and the small Santa hat (a light version, no filters)
+      defs = '<defs><clipPath id="xsi-clip"><path d="' + T.body + '"/></clipPath>' +
+        '<linearGradient id="xsi-sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset=".75" stop-color="#000" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></linearGradient>' +
+        '<radialGradient id="xsi-hd" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></radialGradient>' +
+        '<g id="xsi-hat">' + (ART.hatMini || "") + "</g></defs>";
+      symDone.base = 1;
+    }
+    sprite.insertAdjacentHTML("beforeend", defs + '<symbol id="' + id + '" viewBox="0 0 24 24">' +
+      '<ellipse cx="10.6" cy="22.9" rx="8.6" ry="1.1" fill="#000" opacity=".22"/>' +
+      '<path d="' + T.body + '" fill="' + d + '" stroke="rgba(0,0,0,.45)" stroke-width=".45" stroke-linejoin="round"/>' +
+      '<g clip-path="url(#xsi-clip)">' + pat +
+        // round, like a real body: darker towards both edges, a soft sheen along the back
+        '<path d="' + T.body + '" stroke="#000" stroke-width="1.7" fill="none" opacity=".26"/>' +
+        '<path d="' + T.mid + '" stroke="#fff" stroke-width="1.1" fill="none" opacity=".16" stroke-linecap="round"/></g>' +
+      // the head, turned a little up, with its eye; the hat sits on it (its brim over the crown, the tip behind)
+      '<g transform="translate(13.7 8.3) rotate(-14) scale(1.22)"><path d="' + h[0] + '" fill="' + d + '" stroke="rgba(0,0,0,.5)" stroke-width=".4"/>' +
+        (t === "s" || t === "l" ? '<path d="' + h[0] + '" fill="' + c + '" opacity=".35"/>' : "") +
+        '<path d="' + h[0] + '" fill="url(#xsi-hd)"/>' +
+        '<path d="M.4 1.3C2 1.9 4 1.7 5.2.9" stroke="' + b + '" stroke-width=".55" fill="none" opacity=".75"/>' +
+        '<circle cx="' + h[1] + '" cy="' + h[2] + '" r="' + h[3] + '" fill="' + (h[4] ? "#c9a24a" : "#111") + '"/>' +
+        (h[4] ? '<ellipse cx="' + h[1] + '" cy="' + h[2] + '" rx="' + (h[3] * .28).toFixed(2) + '" ry="' + (h[3] * .85).toFixed(2) + '" fill="#111"/>' : "") +
+        '<circle cx="' + (h[1] + h[3] * .35).toFixed(2) + '" cy="' + (h[2] - h[3] * .4).toFixed(2) + '" r="' + (h[3] * .3).toFixed(2) + '" fill="#fff" opacity=".85"/>' +
+        '<use href="#xsi-hat" transform="translate(1.6 -1.55) rotate(-6) scale(.058)"/></g>' +
+      "</symbol>");
     symDone[id] = 1; return id;
   }
-  var DEF_CODE = "5b56b5173d27e4dcb8p";   // SnakeList's own green S when a species has no colours yet
+  var DEF_CODE = "6b5142edboc";   // SnakeList's own green S when a species has no colours yet
   function slug(s) { return String(s || "").trim().toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-+|-+$/g, ""); }
   function addIcon(el, id) {
     if (!el || el.querySelector(":scope > .xm-spi")) return;
@@ -408,9 +502,11 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
   };
 
   /* ================= Christmas audio: the fireplace and the Christmas music, mixed together =================
-     Both are made on the spot with Web Audio - nothing is downloaded. The music is "Jingle Bells" (James Lord
-     Pierpont, 1857 - public domain), arranged here for bells, a soft pad, a bass line and sleigh bells, playing on
-     repeat. The fire sits in the background and the music on top; each has its own volume. Volumes are kept in
+     The music is real recorded performances of Christmas songs (Kevin MacLeod, incompetech.com, CC BY 4.0 - see
+     CREDITS.txt): a playlist that plays in order and repeats, streamed from christmas/music/ and loaded only when
+     the music button is first pressed (nothing is preloaded). It goes through Web Audio, so its volume works on
+     iPad / iPhone too (Safari ignores an audio element's own volume). The fire is made on the spot with Web Audio.
+     The fire sits in the background and the music on top; each has its own volume. Volumes are kept in
      this browser (sl-xmas-audio); nothing ever starts playing by itself. window.SL_XMAS_AUDIO is for SnakeList's
      Settings: SL_XMAS_AUDIO.panel(el) puts the two volume controls into any element. */
   var AU = (function () {
@@ -442,65 +538,36 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     }
     function crackle() { if (!st.fire) return; pop(.3 + Math.random() * .45); crT = setTimeout(crackle, 180 + Math.random() * 900); }
     function fireLevel() { return st.fire ? st.fv * .32 * (st.away ? .45 : 1) : 0; }
-    function musicLevel() { return st.music ? st.mv * .5 : 0; }
+    function musicLevel() { return st.music ? st.mv * .85 : 0; }
     function apply() { if (!ctx) return; fireG.gain.setTargetAtTime(fireLevel(), ctx.currentTime, .25); musicG.gain.setTargetAtTime(musicLevel(), ctx.currentTime, .15); }
     function emit() { ls.forEach(function (f) { try { f(st); } catch (e) {} }); }
 
-    /* ---- Jingle Bells (public domain), 4/4 at 112 beats a minute: [midi note, beats] (0 = rest) ---- */
-    var E = 76, F = 77, G = 79, C = 72, Dn = 74, A = 81;
-    var verse = [[E, 1], [E, 1], [E, 2], [E, 1], [E, 1], [E, 2], [E, 1], [G, 1], [C, 1.5], [Dn, .5], [E, 4],
-                 [F, 1], [F, 1], [F, 1.5], [F, .5], [F, 1], [E, 1], [E, 1], [E, .5], [E, .5]];
-    var MEL = verse.concat([[E, 1], [Dn, 1], [Dn, 1], [E, 1], [Dn, 2], [G, 2]], verse, [[G, 1], [G, 1], [F, 1], [Dn, 1], [C, 4]]);
-    // chords per bar (root midi, major/minor/dom7)
-    var CH = [[48, "M"], [48, "M"], [48, "M"], [48, "M"], [53, "M"], [48, "M"], [50, "7"], [55, "7"], [48, "M"], [48, "M"], [48, "M"], [48, "M"], [53, "M"], [48, "M"], [55, "7"], [48, "M"]];
-    var BPM = 112, beat = 60 / BPM, songBeats = MEL.reduce(function (a, n) { return a + n[1]; }, 0);
-    var t0 = 0, idx = 0, nextT = 0, barN = 0, nextBar = 0, schedT = 0;
-    function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
-    function bell(m, t, dur, vol) {
-      // a bright bell: two partials, a quick strike and a ring that fades
-      [[1, 1], [2.01, .32], [3.98, .12]].forEach(function (p) {
-        var o = ctx.createOscillator(), g = ctx.createGain(); o.type = "sine"; o.frequency.value = hz(m) * p[0];
-        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * p[1], t + .008); g.gain.exponentialRampToValueAtTime(.0005, t + Math.max(.35, dur * 1.6));
-        o.connect(g); g.connect(musicG); o.start(t); o.stop(t + Math.max(.4, dur * 1.7));
-      });
-    }
-    function pad(root, kind, t, dur) {
-      var ns = kind === "7" ? [0, 4, 7, 10] : [0, 4, 7];
-      ns.forEach(function (n) {
-        var o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter(); o.type = "triangle"; o.frequency.value = hz(root + 12 + n);
-        f.type = "lowpass"; f.frequency.value = 1400;
-        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.035, t + .12); g.gain.setValueAtTime(.035, t + dur - .15); g.gain.linearRampToValueAtTime(0, t + dur);
-        o.connect(f); f.connect(g); g.connect(musicG); o.start(t); o.stop(t + dur + .05);
-      });
-      // the bass: root and fifth on the beats
-      [0, 7, 0, 7].forEach(function (iv, k) {
-        var o = ctx.createOscillator(), g = ctx.createGain(), tt = t + k * beat; o.type = "sine"; o.frequency.value = hz(root - 12 + iv);
-        g.gain.setValueAtTime(0, tt); g.gain.linearRampToValueAtTime(.16, tt + .02); g.gain.exponentialRampToValueAtTime(.001, tt + beat * .9);
-        o.connect(g); g.connect(musicG); o.start(tt); o.stop(tt + beat);
-      });
-    }
-    var jb = null;
-    function jingle(t, vol) {
-      if (!jb) { var n = Math.floor(ctx.sampleRate * .09); jb = ctx.createBuffer(1, n, ctx.sampleRate); var d = jb.getChannelData(0); for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3); }
-      var s = ctx.createBufferSource(); s.buffer = jb; var hp = ctx.createBiquadFilter(); hp.type = "bandpass"; hp.frequency.value = 7000; hp.Q.value = 1.2;
-      var g = ctx.createGain(); g.gain.value = vol; s.connect(hp); hp.connect(g); g.connect(musicG); s.start(t);
-    }
-    function schedule() {
-      if (!st.music || !ctx) return;
-      var until = ctx.currentTime + .4;
-      while (nextT < until) {
-        var n = MEL[idx]; if (n[0]) bell(n[0], nextT, n[1] * beat, .16);
-        nextT += n[1] * beat; idx++;
-        if (idx >= MEL.length) { idx = 0; }
+    /* ---- the songs: recordings, one after another, then round again ---- */
+    var SONGS = ["jingle-bells", "we-wish-you", "deck-the-halls", "o-christmas-tree", "silent-night"];
+    var el = null, song = 0, ext = null;
+    function songUrl(i) {
+      if (!ext) {
+        var t = D.createElement("audio"), ua = navigator.userAgent, apple = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && /Safari/.test(ua) && !/Chrome|Chromium|Firefox/.test(ua));
+        ext = !apple && t.canPlayType && t.canPlayType('audio/webm; codecs="opus"') === "probably" ? "webm" : "m4a";
       }
-      while (nextBar < until) {
-        var c = CH[barN % CH.length]; pad(c[0], c[1], nextBar, beat * 4);
-        for (var k = 0; k < 4; k++) { jingle(nextBar + k * beat, .07); jingle(nextBar + k * beat + beat / 2, .04); }
-        nextBar += beat * 4; barN++;
-      }
-      schedT = setTimeout(schedule, 120);
+      return asset("music/" + SONGS[i % SONGS.length] + "." + ext);
     }
-    function startMusic() { t0 = ctx.currentTime + .15; nextT = nextBar = t0; idx = 0; barN = 0; clearTimeout(schedT); schedule(); }
+    function player() {
+      if (el) return el;
+      el = new Audio(); el.preload = "none"; el.setAttribute("playsinline", "");
+      function next() { song = (song + 1) % SONGS.length; el.src = songUrl(song); if (st.music) el.play().catch(function () {}); }
+      el.addEventListener("ended", next);
+      // a song that cannot be fetched: on to the next one (and stop after a whole round of failures)
+      var fails = 0;
+      el.addEventListener("error", function () { if (++fails >= SONGS.length) { fails = 0; api.setMusic(false); return; } next(); });
+      el.addEventListener("playing", function () { fails = 0; });
+      try { ctx.createMediaElementSource(el).connect(musicG); } catch (e) { el.volume = st.mv; }
+      el.src = songUrl(song);
+      return el;
+    }
+    function startMusic() { var pr = player().play(); if (pr && pr.catch) pr.catch(function (e) { if (e && e.name === "NotAllowedError") api.setMusic(false); }); }
+    function stopMusic() { if (el) el.pause(); }
+    XM.songs = function () { return { list: SONGS.slice(), now: song, src: el && el.currentSrc, paused: !el || el.paused }; };
 
     var api = {
       state: function () { return { fire: st.fire, music: st.music, fireVolume: st.fv, musicVolume: st.mv }; },
@@ -510,7 +577,7 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
       },
       setMusic: function (on) {
         on = !!on; if (on === st.music) return; if (on && !ac()) return;
-        st.music = on; clearTimeout(schedT); if (on) startMusic(); apply(); emit();
+        st.music = on; if (on) startMusic(); else stopMusic(); apply(); emit();
       },
       toggleFire: function () { api.setFire(!st.fire); }, toggleMusic: function () { api.setMusic(!st.music); },
       setVolume: function (which, v) { v = Math.max(0, Math.min(1, +v)); if (which === "fire") st.fv = v; else st.mv = v; save(); apply(); emit(); },
@@ -635,7 +702,7 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
       var l = D.querySelector(".sl-header .sl-titletext") || D.querySelector(".sl-header .sl-title"); XM.point(l, "SnakeList's own logo, with a Santa hat, a little snow and a stocking full of presents.", { ms: 9000 }); }],
     ["icons", "Little Santa snakes", "a tiny snake in each species' own colours, in a Santa hat, by every name", function () {
       goTab("tab-guide"); setTimeout(function () { var c = firstCard(), i = c && c.querySelector(".xm-spi"); XM.point(i || (c && c.querySelector(".card-name")), "Every snake has a tiny Santa-hat snake in its own colours by its name.", { ms: 9000 }); }, 400); }],
-    ["music", "Christmas music", "Jingle Bells by the fire - the music button is up by the other buttons", function () {
+    ["music", "Christmas music", "real recordings of Christmas songs by the fire - the music button is up by the other buttons", function () {
       var b = D.getElementById("xm-music-btn"); XM.point(b, "Tap here for Christmas music. It plays along with the cabin's fireplace - each has its own volume.", { ms: 9000 }); }],
     ["cabin", "The Christmas Cabin", "a new tab: do Christmas tasks, open presents and decorate your tree", function () {
       if (XM.cabin) XM.cabin.open(true); setTimeout(function () { XM.point(D.querySelector("#xm-cabin .xc-stage"), "Your Christmas Cabin. Do Christmas tasks to earn presents for your tree.", { ms: 9000 }); }, 500); }],

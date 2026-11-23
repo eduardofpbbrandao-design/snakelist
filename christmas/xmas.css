@@ -10,14 +10,18 @@ html.xm { --xm-gold: #D8B76A; --xm-red: #A92E3E; --xm-ease: cubic-bezier(.2,.7,.
 
 /* ============ the Christmas logo ============ */
 html.xm svg.snake-s, html.xm .hero-mark svg, html.xm svg.xm-has-stk { overflow: visible; }
+/* the opening's tick is drawn in two layers; the stocking goes in the first, the second (its pattern) waits */
+html.xm .intro-box svg.tick-detail > * { display: none; }
 html.xm .xm-hat, html.xm .xm-ssnow { pointer-events: none; }
 /* the small S used as an icon inside buttons and tabs stays plain */
 html.xm :is(.tab-btn, .tab-n, .chip, button, .sl-mtoast, .xm-nohat) svg.snake-s { --xm-hat-o: 0; }
 /* the tick's own drawing is hidden while the stocking is there (the drawing itself is untouched) */
 html.xm svg.xm-has-stk > :not(.xm-stk) { display: none; }
 html.xm svg.xm-has-stk { overflow: visible; }
+/* the opening's tick is drawn in two layers; the stocking goes in the first, the second (its pattern) waits */
+html.xm .intro-box svg.tick-detail > * { display: none; }
 /* snow on the letters (xmas.js measures each letter's top) */
-html.xm :is(.sl-header .sl-titletext, .intro-title, .hero-mark, .signin-title .sl-titletext, .sl-brand, .site-logo) { position: relative; }
+html.xm :is(.sl-header .sl-titletext, .intro-title, .hero-mark, .signin-title .sl-titletext, .sl-brand, .site-logo, .hero-sub, .hero-cue > span) { position: relative; }
 html.xm .xm-snowcap { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; z-index: 1;
   animation: xm-fade .8s ease both; }
 html.xm .xm-snowcap path { fill: #fff; filter: drop-shadow(0 .5px .6px rgba(20,50,35,.35)); -webkit-text-fill-color: initial; }
@@ -46,7 +50,8 @@ html.xm .sl-hero .hero-copy, html.xm .sl-hero .hero-below { z-index: 2; }
 html.xm .xm-phat { position: absolute; pointer-events: none; z-index: 0; transition: scale 3.2s cubic-bezier(.16,.6,.2,1); }
 html.xm .sl-hero.hero-wait:not(.hero-reveal) .xm-phat { scale: 1.07; }
 html.xm .xm-phat[hidden] { display: none; }
-html.xm .xm-phat svg { position: absolute; overflow: visible; filter: drop-shadow(0 3px 5px rgba(0,0,0,.45)); }
+/* toned a touch to the photo's soft light, so it looks worn in the picture rather than pasted on it */
+html.xm .xm-phat svg { position: absolute; overflow: visible; filter: brightness(.94) saturate(.92) drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
 
 /* ============ a tiny Santa-hat snake by each snake's name ============ */
 html.xm .xm-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }

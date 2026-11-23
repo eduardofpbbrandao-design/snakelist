@@ -4,7 +4,7 @@
                  warm-white fairy lights and a few red and gold baubles
   sprig()        the small pine sprig with two berries that sits at the end of the wordmark
   HAT, hat_at()  the Santa hat (logo snake, the cover photo's snake, the species icons)
-  STOCKING       the Christmas stocking with presents that takes the tick's place in the logo
+  STOCKING       the logo's tick dressed as a Christmas stocking (still the tick's own shape)
   logo_snow()    the snow lying on top of the logo's S (the letters' snow is measured on the page by xmas.js)
   icon()         the Christmas app icon: SnakeList's own icon with the hat and a little snow
 
@@ -204,73 +204,123 @@ def mini_sprig():
 # The Santa hat, drawn once in its own coordinates: the fur brim is 100 wide, centred on (0, 0), and the tip
 # flops over to the LEFT (behind a head that looks right). hat_at() puts it anywhere: the logo's snake (head
 # looking right, so the tip falls back over its neck), the photo's snake (looking left: flipped) and the icons.
-HAT_DEFS = ('<linearGradient id="xmh-r" x1="0" y1="0" x2="1" y2=".25"><stop offset="0" stop-color="#e0505f"/><stop offset=".5" stop-color="#bf2c3e"/><stop offset="1" stop-color="#7f1424"/></linearGradient>'
-            '<linearGradient id="xmh-d" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9c1d2e"/><stop offset="1" stop-color="#6a0f1c"/></linearGradient>'
-            '<radialGradient id="xmh-f" cx=".42" cy=".3" r=".75"><stop offset="0" stop-color="#ffffff"/><stop offset=".65" stop-color="#f6f2ea"/><stop offset="1" stop-color="#d8d1c3"/></radialGradient>')
+# It is drawn as it would be WORN: only the front half of the fur brim shows, curving down round the front of the
+# head (the back half is hidden behind the head and the hat's own body), the red body sits down inside the brim,
+# and a soft shadow lies on the head just under the brim. Red velvet: a lit side, a shadow side, a sheen and the
+# folds where the tip droops over; white fur: fluffy edges and a soft texture (SVG filters), shaded underneath.
+def _hat_defs(p, detail=True):
+    d = ('<linearGradient id="%s-r" x1="0" y1="0" x2="1" y2=".18"><stop offset="0" stop-color="#e24a5a"/><stop offset=".38" stop-color="#c62c40"/><stop offset=".78" stop-color="#8f1627"/><stop offset="1" stop-color="#6c0e1c"/></linearGradient>'
+         '<linearGradient id="%s-d" x1="0" y1="0" x2=".25" y2="1"><stop offset="0" stop-color="#d23a4c"/><stop offset=".5" stop-color="#a51d31"/><stop offset="1" stop-color="#6a0d1b"/></linearGradient>'
+         '<radialGradient id="%s-s" cx=".3" cy=".3" r=".55"><stop offset="0" stop-color="#ff9aa4" stop-opacity=".5"/><stop offset="1" stop-color="#ff9aa4" stop-opacity="0"/></radialGradient>'
+         '<linearGradient id="%s-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#f8f4ee"/><stop offset="1" stop-color="#d2c9ba"/></linearGradient>'
+         '<linearGradient id="%s-e" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a7c68" stop-opacity=".5"/><stop offset=".22" stop-color="#8a7c68" stop-opacity="0"/><stop offset=".72" stop-color="#8a7c68" stop-opacity="0"/><stop offset="1" stop-color="#6e604e" stop-opacity=".55"/></linearGradient>'
+         '<radialGradient id="%s-p" cx=".38" cy=".32" r=".72"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#f4efe6"/><stop offset="1" stop-color="#bfb4a2"/></radialGradient>') % ((p,) * 6)
+    if detail:
+        # fluffy edges (a soft displacement by noise) and a soft fur texture (blurred noise inside the shape)
+        d += ('<filter id="%s-z" x="-15%%" y="-40%%" width="130%%" height="180%%" color-interpolation-filters="sRGB">'
+              '<feTurbulence type="fractalNoise" baseFrequency=".23" numOctaves="3" seed="4" result="n"/>'
+              '<feDisplacementMap in="SourceGraphic" in2="n" scale="6.5" xChannelSelector="R" yChannelSelector="G" result="g"/>'
+              '<feTurbulence type="fractalNoise" baseFrequency=".55" numOctaves="2" seed="9"/><feGaussianBlur stdDeviation=".45" result="t"/>'
+              '<feColorMatrix in="t" type="matrix" values="0 0 0 0 .55  0 0 0 0 .5  0 0 0 0 .45  1.9 0 0 0 -.9" result="k"/>'
+              '<feComposite in="k" in2="g" operator="in" result="k2"/>'
+              '<feMerge><feMergeNode in="g"/><feMergeNode in="k2"/></feMerge></filter>'
+              '<filter id="%s-b" x="-30%%" y="-60%%" width="160%%" height="220%%"><feGaussianBlur stdDeviation="2.6"/></filter>'
+              '<filter id="%s-v" x="-30%%" y="-30%%" width="160%%" height="160%%"><feGaussianBlur stdDeviation="1.7"/></filter>') % ((p,) * 3)
+    return d
 
-def _fur(cx, cy, rx, ry, n, seed):
-    """a soft fur edge: overlapping little puffs round an ellipse-ish band"""
-    r = random.Random(seed); out = []
-    for i in range(n):
-        a = i / n * math.tau
-        x, y = cx + math.cos(a) * rx, cy + math.sin(a) * ry
-        out.append('<circle cx="%s" cy="%s" r="%s"/>' % (_f1(x), _f1(y), _f1(r.uniform(3.2, 4.6))))
-    return "".join(out)
+BRIM = "M-50-8C-31 1 31 1 50-8C56-9 57 3 50 6C31 16-31 16-50 6C-57 3-56-9-50-8Z"
+def _hat(p, detail=True, shadow=True):
+    z = ' filter="url(#%s-z)"' % p if detail else ""
+    b = ' filter="url(#%s-b)"' % p if detail else ""
+    v = ' filter="url(#%s-v)"' % p if detail else ""
+    s = ['<g class="xm-hat">']
+    if shadow:
+        # the brim's soft shadow on the head, just under the fur
+        s.append('<path d="M-47 5C-30 18 30 18 47 5L46 13C30 27-30 27-46 13Z" fill="#06140c" opacity="%s"%s/>' % (".45" if detail else ".22", b))
+    s += [
+        # the red body: it rises out of the brim to a soft crown...
+        '<path d="M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z" fill="url(#%s-r)"/>' % p,
+        '<path d="M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z" fill="url(#%s-s)"/>' % p,
+        # ...with its shadow side and a lit fold
+        '<path d="M31-50C37-36 40-20 41-3" stroke="#4d0812" stroke-width="7" fill="none" stroke-linecap="round" opacity=".42"%s/>' % v,
+        '<path d="M-27-9C-24-24-16-36-5-44" stroke="#ffa3ac" stroke-width="3.4" fill="none" stroke-linecap="round" opacity=".3"%s/>' % v,
+        # where the tip folds over, the body is in its shade
+        '<path d="M-34-40C-22-54-4-61 14-58" stroke="#3e0610" stroke-width="6" fill="none" stroke-linecap="round" opacity=".5"%s/>' % v,
+        # the tip, drooping over to the back: its top side (lit along the crest)
+        '<path d="M29-57C21-74-5-79-26-69C-42-61-54-46-61-30L-51-26C-46-39-36-51-22-57C-9-63 5-62 16-57Z" fill="url(#%s-d)"/>' % p,
+        '<path d="M24-63C14-73-6-75-24-67C-38-60-49-48-56-34" stroke="#f47c88" stroke-width="2.8" fill="none" stroke-linecap="round" opacity=".55"%s/>' % v,
+        '<path d="M-50-28C-45-40-35-51-22-57C-10-62 3-61 13-57" stroke="#3a0510" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".55"%s/>' % v,
+        # the body's shade just above the brim (it sits down inside the fur)
+        '<path d="M-41-4C-20 0 20 0 43-4L43-12C20-7-20-7-41-12Z" fill="#3e0610" opacity=".38"%s/>' % v,
+        # the pompom
+        '<g%s><circle cx="-57" cy="-26" r="10.2" fill="url(#%s-p)"/></g>' % (z, p),
+        '<circle cx="-59.5" cy="-29.5" r="3.6" fill="#fff" opacity=".8"%s/>' % v,
+        # the front half of the fur brim: it curves down round the front of the head (the back half is hidden)
+        '<g%s><path d="%s" fill="url(#%s-f)"/><path d="%s" fill="url(#%s-e)"/></g>' % (z, BRIM, p, BRIM, p),
+        '<path d="M-44-3C-25 5 25 5 44-3" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".8"%s/>' % v,
+        '<path d="M-46 7C-26 15 26 15 46 7" stroke="#9d907c" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".5"%s/>' % v,
+        '</g>']
+    return "".join(s)
 
-HAT = ('<g class="xm-hat">'
-       # the body: a soft cone, its crest bending over into a tail that falls to the left
-       '<path d="M-41 -4C-38 -30-26-54-4-63C10-69 27-66 36-48C42-35 44-18 44-4Z" fill="url(#xmh-r)"/>'
-       '<path d="M-2-64C-18-66-36-60-49-46C-52-42-55-38-56-34L-47-31C-41-43-28-53-11-56Z" fill="url(#xmh-d)"/>'
-       '<path d="M-6-63C-22-63-37-55-48-43" stroke="#e46a77" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".55"/>'
-       '<path d="M30-50C35-38 38-22 38-6" stroke="#6e0f1d" stroke-width="5" fill="none" stroke-linecap="round" opacity=".35"/>'
-       '<path d="M-24-12C-20-30-12-44 2-54" stroke="#ef8a95" stroke-width="3" fill="none" stroke-linecap="round" opacity=".35"/>'
-       # the pompom
-       '<g fill="url(#xmh-f)">' + _fur(-55, -32, 6.5, 6.5, 10, 3) + '<circle cx="-55" cy="-32" r="8.6"/></g>'
-       '<circle cx="-57.5" cy="-35" r="3" fill="#fff" opacity=".9"/>'
-       # the fur brim (slightly curved, thicker in the middle), with puffs along its edges
-       '<g fill="url(#xmh-f)"><path d="M-50-4Q-51-14-40-14Q0-20 40-14Q51-14 50-4Q51 7 40 7Q0 3-40 7Q-51 7-50-4Z"/>'
-       + _fur(0, -3.5, 47, 9.5, 26, 5) + '</g>'
-       '<path d="M-44 3Q0-1 44 3" stroke="#cfc6b6" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".8"/>'
-       '<path d="M-38-11Q0-16 38-11" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" opacity=".9"/>'
-       '</g>')
+HAT = _hat("xmh")
+HAT_DEFS = _hat_defs("xmh")
 
-def hat_at(cx, cy, width, angle=0.0, flip=False, defs=True):
-    """the hat with its brim centred on (cx, cy), `width` wide, turned by `angle` degrees; flip: the tip falls right"""
+def hat_at(cx, cy, width, angle=0.0, flip=False, defs=True, prefix="xmh", detail=True, shadow=True):
+    """the hat with its brim centred on (cx, cy), `width` wide, turned by `angle` degrees; flip: the tip falls right.
+    detail=False leaves out the fur and velvet filters (for very small copies)."""
     k = width / 100.0
     return ('<g transform="translate(%s %s) rotate(%s) scale(%s %s)">%s%s</g>'
-            % (_f1(cx), _f1(cy), _f1(angle), "%.4f" % (-k if flip else k), "%.4f" % k, ("<defs>" + HAT_DEFS + "</defs>") if defs else "", HAT))
+            % (_f1(cx), _f1(cy), _f1(angle), "%.4f" % (-k if flip else k), "%.4f" % k,
+               ("<defs>" + _hat_defs(prefix, detail) + "</defs>") if defs else "", _hat(prefix, detail, shadow)))
 
 # on the logo snake: its head group's own coordinates (head looking right, eye at (9.8, -6.4) r 5, top of the
 # head at y -16.5): the brim sits on the crown behind the eye, tipped back along the head, the eye left clear
 LOGO_HAT = dict(cx=-5, cy=-15.4, width=40, angle=-10)
 
 # ---------------------------------------------------------------------------------------------------------------
-# The Christmas stocking that takes the tick's place, drawn in the tick's own viewBox (5.6 0.3 36.9 36.0):
-# a red knitted stocking with a fur cuff, two little presents and a candy cane peeking out, snow on top.
-STOCKING = ('<g class="xm-stk">'
-            '<defs><linearGradient id="xms-r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9475a"/><stop offset=".6" stop-color="#b52637"/><stop offset="1" stop-color="#861828"/></linearGradient>'
-            '<linearGradient id="xms-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fd36a"/><stop offset="1" stop-color="#4c9f3c"/></linearGradient>'
-            '<linearGradient id="xms-y" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d77c"/><stop offset="1" stop-color="#d1a23f"/></linearGradient></defs>'
-            # candy cane
-            '<path d="M27.6 13.5V5.2a2.6 2.6 0 0 1 5.2 0" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>'
-            '<path d="M27.6 13.5V5.2a2.6 2.6 0 0 1 5.2 0" fill="none" stroke="#d23a4b" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1.2 1.3"/>'
-            # a green present, tipped left, and a gold one
-            '<g transform="rotate(-11 16.5 9)"><rect x="12" y="4.6" width="9.2" height="8.6" rx="1" fill="url(#xms-g)"/><rect x="15.9" y="4.6" width="1.5" height="8.6" fill="#f3d27a"/>'
-            '<path d="M16.6 4.6c-1.6-2.4-4-1.6-2.6.1M16.6 4.6c1.6-2.4 4-1.6 2.6.1" fill="none" stroke="#f3d27a" stroke-width="1.1"/>'
-            '<path d="M11.8 4.9q4.8-1.6 9.6 0" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></g>'
-            '<g transform="rotate(9 25 10)"><rect x="20.6" y="7" width="8" height="6.6" rx=".9" fill="url(#xms-y)"/><rect x="24" y="7" width="1.3" height="6.6" fill="#c43345"/>'
-            '<path d="M20.4 7.2q4.2-1.4 8.4 0" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></g>'
-            # the stocking (leg, heel, foot pointing right) and its knit stripes
-            '<path d="M11.4 14.6V26.4C11.4 32.4 15 35.8 20.6 35.8H32.6C37.2 35.8 39.8 33.2 39.6 30.2C39.4 27.4 36.6 25.4 33.2 25.4H29.8V14.6Z" fill="url(#xms-r)" stroke="#6e1220" stroke-width=".6"/>'
-            '<path d="M11.6 21.4H29.6M11.6 24.6H29.6" stroke="#fff3e6" stroke-width="1.1" stroke-dasharray="1.6 1.2" opacity=".85"/>'
-            '<path d="M33.4 25.6C37 25.6 39.6 27.6 39.6 30.4C39.6 33.2 37 35.8 32.8 35.8H31.2C33.6 33.6 33.8 28.2 31.6 25.6Z" fill="#fff3e6" opacity=".92"/>'
-            '<path d="M11.4 29.6C12 33.2 14.8 35.6 18.8 35.8C16.4 34 15.6 31.6 15.8 29.4Z" fill="#fff3e6" opacity=".92"/>'
-            # the fur cuff, with snow sitting on it
-            '<rect x="9.8" y="11.8" width="21.6" height="5.4" rx="2.7" fill="#fbf8f1" stroke="#d8d0c0" stroke-width=".5"/>'
-            '<path d="M10.6 13.2q2-.9 3.6 0t3.6 0 3.6 0 3.6 0 3.6 0" stroke="#e6dfd1" stroke-width=".7" fill="none"/>'
-            '<path d="M10.2 12.1Q11.4 10.6 14 11.1Q16 10.2 18.4 10.9Q20.6 10.4 22.8 11Q25.6 10.3 28.4 11Q30.8 10.7 31.4 12.2Q20.6 12.9 10.2 12.1Z" fill="#fff"/>'
-            '<path d="M12 4.2q4.6-1.8 9.4-.3M21 6.3q3.8-1.4 7.7.2" stroke="#fff" stroke-width="1.2" stroke-linecap="round" fill="none"/>'
-            '</g>')
+# The tick, dressed as a Christmas stocking. It is still SnakeList's tick - the very same shape, drawn from the
+# tick's own outline in its own viewBox (5.6 0.3 36.9 36.0) - only coloured as a stocking: red knit with white
+# stripes, a white heel at the tick's bottom corner and a white toe at the short arm's end, the long arm ending in
+# a fluffy white cuff with a candy cane peeking out and a little snow on the cuff.
+TICK_OUTLINE = ("M6.1 26.0L10.6 30.5L13.2 32.8L15.6 34.4L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3"
+                "L25.5 32.5L26.5 30.9L27.4 29.5L28.1 28.0L28.8 26.6L29.6 25.2L30.3 23.8L31.0 22.4L31.8 21.0L32.5 19.6L33.2 18.1"
+                "L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L28.9 15.8L28.1 17.2L27.3 18.6L26.6 19.9L25.8 21.3L25.0 22.7L24.2 24.0L23.4 25.4"
+                "L22.6 26.7L21.8 28.0L21.0 29.0L20.3 29.7L19.9 30.0L19.5 29.8L18.6 29.3L17.6 28.6L16.5 27.7L15.5 26.7L14.4 25.6"
+                "L13.4 24.5L12.3 23.4L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z")
+
+def stocking_tick(outline=None, p="xms"):
+    o = outline or TICK_OUTLINE
+    # the long arm runs on up (as the rattle did) to the cuff: direction -62 degrees
+    leg = "M29.7 14.5L33.3 7.9L37.5 10.1L33.9 16.7Z"
+    body = '<path d="%s"/><path d="%s"/>' % (o, leg)
+    return ('<g class="xm-stk">'
+            '<defs><linearGradient id="%(p)s-r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e2475a"/><stop offset=".55" stop-color="#bd2738"/><stop offset="1" stop-color="#8a1526"/></linearGradient>'
+            '<linearGradient id="%(p)s-w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e4ddd0"/></linearGradient>'
+            '<clipPath id="%(p)s-c">%(body)s</clipPath></defs>'
+            # the stocking: the tick's own shape in red knit
+            '<g fill="#6e1220" stroke="#6e1220" stroke-width="1.1" stroke-linejoin="round">%(body)s</g><g fill="url(#%(p)s-r)">%(body)s</g>'
+            '<g clip-path="url(#%(p)s-c)">'
+            # knit stripes across both arms
+            '<g stroke="#fff6ec" stroke-width="1.15" opacity=".92"><path d="M26.4 17.2L32.2 20.3M24.3 21.0L30.1 24.1"/><path d="M12.6 22.6L8.6 26.9M15.0 25.0L11.0 29.3"/></g>'
+            '<g stroke="#fff6ec" stroke-width=".5" stroke-dasharray=".7 .7" opacity=".7"><path d="M25.4 19.1L31.2 22.2M13.8 23.8L9.8 28.1"/></g>'
+            # the white heel (the tick's corner) and toe (the short arm's end)
+            '<circle cx="19.9" cy="36.4" r="3.9" fill="url(#%(p)s-w)"/><circle cx="6.6" cy="24.2" r="3.3" fill="url(#%(p)s-w)"/>'
+            # soft shading along the inside of the V
+            '<path d="M10.9 21.8L19.9 30.0L29.7 14.5" fill="none" stroke="#5e0b18" stroke-width="1.6" opacity=".35"/>'
+            '</g>'
+            # the fluffy fur cuff (across the end of the long arm) with a candy cane peeking out and snow on top
+            '<g transform="translate(35.4 9) rotate(28)">'
+            '<path d="M1.1-1L1.1-6.4C1.1-8.4 3.9-8.4 3.9-6.5" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>'
+            '<path d="M1.1-1L1.1-6.4C1.1-8.4 3.9-8.4 3.9-6.5" fill="none" stroke="#d23a4b" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="1 1"/>'
+            '<rect x="-4.6" y="-2.4" width="9.2" height="4.8" rx="2.3" fill="url(#%(p)s-w)" stroke="#c9bca8" stroke-width=".45"/>'
+            '<g fill="#fff">' + "".join('<circle cx="%s" cy="%s" r="%s"/>' % (_f1(-3.6 + i * 1.03), _f1(-1.9 + (i % 2) * .25), r) for i, r in enumerate((".8", ".9", ".75", ".95", ".8", ".9", ".75", ".85")))
+            + '</g>'
+            '<path d="M-3.6 1.2Q0 2 3.6 1.2" stroke="#d4c9b7" stroke-width=".7" fill="none" stroke-linecap="round"/>'
+            '<path d="M-4-1.7C-3.4-3.3-1.4-3.4 0-3.2C1.6-3.5 3.5-3.2 4.1-1.6C1.4-2.2-1.4-2.2-4-1.7Z" fill="#fff"/>'
+            '</g>'
+            '</g>') % {"p": p, "body": body}
+
+STOCKING = stocking_tick()
 
 # ---------------------------------------------------------------------------------------------------------------
 # Snow lying on top of a shape: wherever the shape's top edge is flat enough to hold it, a soft white cap,
@@ -292,7 +342,9 @@ def _n(v): return ("%.2f" % v).rstrip("0").rstrip(".")
 
 def snow_cap(tops, x0, step, T, seed=1):
     """tops: the top edge's y for each column (None where empty), columns `step` apart from x0;
-    T: the deepest snow. Returns an SVG path (to fill white)."""
+    T: the deepest snow. Snow holds only where the edge faces up and is nearly level (none past about 30 degrees):
+    thickest in the middle of a flat top, thinning to its ends, now and then a small drip over the edge.
+    Returns an SVG path (to fill white). xmas.js has the same rule for the letters (snowCap)."""
     r = random.Random(seed); ph = [r.uniform(0, 6.28) for _ in range(3)]
     n = len(tops); th = [0.0] * n
     for c in range(n):
@@ -301,9 +353,9 @@ def snow_cap(tops, x0, step, T, seed=1):
         while tops[a] is None: a += 1
         while tops[b] is None: b -= 1
         slope = (tops[b] - tops[a]) / max(1e-6, (b - a) * step)
-        f = max(0.0, 1 - abs(slope) / 0.95) ** 1.6
+        f = max(0.0, 1 - abs(slope) / 0.85) ** 1.5
         x = x0 + c * step
-        lump = 0.82 + 0.22 * math.sin(x / (T * 2.3) + ph[0]) + 0.12 * math.sin(x / (T * 0.9) + ph[1])
+        lump = 0.86 + 0.14 * math.sin(x / (T * 2.3) + ph[0]) + 0.08 * math.sin(x / (T * 0.9) + ph[1])
         th[c] = T * f * lump
     sm = [0.0] * n
     for c in range(n):
@@ -312,15 +364,20 @@ def snow_cap(tops, x0, step, T, seed=1):
         sm[c] = sum(vals) / len(vals)
     paths, c = [], 0
     while c < n:
-        if tops[c] is None or sm[c] < T * 0.22: c += 1; continue
+        if tops[c] is None or sm[c] < T * 0.3: c += 1; continue
         e = c
-        while e + 1 < n and tops[e + 1] is not None and sm[e + 1] >= T * 0.22 and abs(tops[e + 1] - tops[e]) < T: e += 1
-        if (e - c) * step >= T * 1.2:
-            idx = list(range(c, e + 1)); L = len(idx); up, dn = [], []
-            for j, k in enumerate(idx):
-                taper = math.sin(math.pi * (j + 0.5) / L) ** 0.45
+        while e + 1 < n and tops[e + 1] is not None and sm[e + 1] >= T * 0.3 and abs(tops[e + 1] - tops[e]) < T * 0.6: e += 1
+        L = e - c + 1; ln = L * step
+        if ln >= T * 1.5:
+            full = min(1.0, ln / (T * 7))
+            drip = (r.choice((0.2, 0.25, 0.75, 0.8)) if ln > T * 5 and r.random() < 0.55 else -1)
+            up, dn = [], []
+            for j in range(L):
+                k = c + j; u = (j + 0.5) / L
+                taper = math.sin(math.pi * u) ** 0.7
+                dr = 0 if drip < 0 else T * 0.95 * math.exp(-((u - drip) * ln / (T * 0.45)) ** 2)
                 x = x0 + k * step; y = tops[k]
-                up.append((x, y - sm[k] * taper)); dn.append((x, y + T * 0.2 * taper))
+                up.append((x, y - sm[k] * taper * (0.7 + 0.3 * full))); dn.append((x, y + T * 0.16 * taper + dr))
             if L > 24: up, dn = up[::2], dn[::2]
             pts = up + dn[::-1]
             paths.append("M" + "L".join("%s %s" % (_n(px), _n(py)) for px, py in pts) + "Z")
