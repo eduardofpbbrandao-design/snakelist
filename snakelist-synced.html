@@ -10784,43 +10784,47 @@
       (n === undefined ? "" : ' <b class="chip-n">' + n.toLocaleString() + '</b>') + "</span>";
   }
 
+  // v6.13 (iPad: "buttons feel slow"): every tap that redrew the list (a tab, a filter, Mark Seen's neighbours...) also rebuilt
+  // every chip row - ~100 family chips with their photos, every count - and then measured the page. A row is now only
+  // rebuilt when what it shows has changed (the same markup as before otherwise), and only then is the families button re-placed.
+  const chipHTML = (id, html) => { const el = document.getElementById(id); if (el.__slHTML === html && el.firstChild) return false; el.innerHTML = html; el.__slHTML = html; return true; };
   function renderChips() {
-    document.getElementById("type-chips").innerHTML =
-      TYPES.map((t) => chip(t, typeFilter === t, 'data-type="' + t + '"', countTotal({ type: t }), { kind: "type", value: t })).join("");
-    document.getElementById("continent-chips").innerHTML =
-      CONTINENTS.map((c) => chip(c, continentFilters.includes(c), 'data-continent="' + c + '"', countTotal({ continents: [c] }), { kind: "continent", value: c })).join("");
-    applyCustomChipImages();
-    document.getElementById("country-chips").innerHTML = countryFilters.length
+    const typeNew = chipHTML("type-chips",
+      TYPES.map((t) => chip(t, typeFilter === t, 'data-type="' + t + '"', countTotal({ type: t }), { kind: "type", value: t })).join(""));
+    const contNew = chipHTML("continent-chips",
+      CONTINENTS.map((c) => chip(c, continentFilters.includes(c), 'data-continent="' + c + '"', countTotal({ continents: [c] }), { kind: "continent", value: c })).join(""));
+    if (typeNew || contNew) applyCustomChipImages();
+    chipHTML("country-chips", countryFilters.length
       ? countryFilters
           .map((n) => '<span class="chip active country-chip" role="button" tabindex="0" data-country="' + n + '">' + (window.SL_DISPLAY_NAME ? window.SL_DISPLAY_NAME(n) : n) + " <b>&times;</b></span>")
           .join("")
-      : '<span class="country-empty">Any country</span>';
-    document.getElementById("family-chips").innerHTML = FAMILIES.map((f) => {
+      : '<span class="country-empty">Any country</span>');
+    chipHTML("family-chips", FAMILIES.map((f) => {
       const ph = FAMILY_PHOTOS[f];
       return '<span class="chip' + (ph ? " fam-photo" : "") + (familyFilters.includes(f) ? " active" : "") +
         '" role="button" tabindex="0" data-family="' + f + '"' +
         (ph ? ' style="background-image:url(' + ph.url + ')"' : "") +
         ' aria-description="' + f + (ph ? " &middot; photo: " + ph.by.replace(/"/g, "&quot;") : "") + '">' +
         familyName(f) + ' <b class="chip-n">' + countTotal({ families: [f] }).toLocaleString() + "</b></span>";
-    }).join("");
+    }).join(""));
     const famOpen = !document.getElementById("family-chips").hidden;
-    placeFamilyToggle();
+    if (typeNew || !renderChips.placed) { renderChips.placed = true; placeFamilyToggle(); }
     // the one pick shared by the Type row and the families row stands out wherever it is:
     // a picked family fades the whole Type row back, a picked Type the whole families row
     document.getElementById("type-chips").classList.toggle("row-dim", familyFilters.length > 0);
     document.getElementById("family-chips").classList.toggle("row-dim", typeFilter !== "All");
     document.getElementById("family-toggle").textContent = (famOpen ? "Hide families" : "See all families") +
       (familyFilters.length && !famOpen ? ": " + familyName(familyFilters[0]) : "");
-    document.getElementById("place-chips").innerHTML = placeFilters.length
+    chipHTML("place-chips", placeFilters.length
       ? placeFilters
           .map((k) => '<span class="chip active country-chip" role="button" tabindex="0" data-place="' + k + '">' + placeName(k) + " <b>&times;</b></span>")
           .join("")
-      : '<span class="country-empty">Any state or province</span>';
-    document.getElementById("city-chips").innerHTML = cityFilters.length
+      : '<span class="country-empty">Any state or province</span>');
+    chipHTML("city-chips", cityFilters.length
       ? cityFilters
           .map((c) => '<span class="chip active country-chip" role="button" tabindex="0" data-city="' + c.key + '">' + c.name + " <b>&times;</b></span>")
           .join("")
-      : '<span class="country-empty">Any city</span>';
+      : '<span class="country-empty">Any city</span>');
     document.getElementById("chip-popular").innerHTML = 'Popular <b class="chip-n">' + countTotal({ popular: true }).toLocaleString() + '</b>';
     document.getElementById("chip-uncommon").innerHTML = 'Uncommon <b class="chip-n">' + countTotal({ uncommon: true, popular: false }).toLocaleString() + '</b>';
     document.getElementById("chip-exotic").innerHTML = 'Exotic <b class="chip-n">' + countTotal({ exotic: true }).toLocaleString() + '</b>';
@@ -11544,7 +11548,9 @@
     remove: (k) => { cityFilters = cityFilters.filter((c) => c.key !== k); },
   });
 
-  document.getElementById("more-btn").addEventListener("click", () => { renderLimit += PAGE; refresh(); });
+  // (v6.13: only how many cards show changes - the filter chips and their counts can't, so they aren't redrawn: that redraw
+  // and the full measure of the page after it were most of the wait after tapping "Show 60 more" on an iPad)
+  document.getElementById("more-btn").addEventListener("click", () => { renderLimit += PAGE; refresh(true); });
   // "Show all" draws the rest a chunk at a time (in idle moments) so the page never freezes,
   // and holds the scroll where it was - the new cards only ever appear below
   document.getElementById("more-all-btn").addEventListener("click", () => {
@@ -28611,8 +28617,26 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     var r = el.getBoundingClientRect();
     return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight;
   }
+  // v6.13 (iPad: "buttons feel slow"): the two lists below were looked up in the whole page (~30,000 elements, ~10 ms each
+  // on a computer, several times that on an iPad) five times a second, all the time - so a tap often had to wait for one.
+  // They are kept now and looked up again only when something is added to or taken from <body> or SnakeList's main box
+  // (where these bars and panels are put), and anyway every 2 s (so one put anywhere else is still found).
+  var lists = null, listsT = 0;
+  function both() {
+    var now = Date.now();
+    if (!lists || now - listsT > 2000) {
+      lists = { f: [].slice.call(document.querySelectorAll(FLOAT)), m: [].slice.call(document.querySelectorAll(MODAL)) }; listsT = now;
+    }
+    return lists;
+  }
+  function watchLists() {
+    if (!window.MutationObserver) { listsT = 0; return; }
+    var mo = new MutationObserver(function () { lists = null; });
+    mo.observe(document.body, { childList: true });
+    var root = document.querySelector(".sl-root"); if (root) mo.observe(root, { childList: true });
+  }
   function modalOpen() {
-    var ms = document.querySelectorAll(MODAL);
+    var ms = both().m;
     for (var i = 0; i < ms.length; i++) if (shown(ms[i])) return true;
     return false;
   }
@@ -28632,7 +28656,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     // every 200 ms then made the glide's frames wait
     var hero = document.getElementById("sl-hero"); if (hero && !hero.hidden && !window.__heroEntered) return;
     document.documentElement.classList.toggle("sl-modal-on", modalOpen());
-    var els = [].slice.call(document.querySelectorAll(FLOAT));
+    var els = both().f.filter(function (el) { return el.isConnected !== false && document.documentElement.contains(el); });
     var live = [];
     els.forEach(function (el) {
       if (!shown(el)) { if (el.style.translate) el.style.translate = ""; seen.delete(el); return; }
@@ -28665,7 +28689,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     });
   }
   var timer = null;
-  function start() { tick(); if (!timer) timer = setInterval(tick, 200); }
+  function start() { try { watchLists(); } catch (e) { lists = null; } tick(); if (!timer) timer = setInterval(tick, 200); }
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
   window.addEventListener("resize", tick);
   window.SL_restack = tick;
