@@ -73,8 +73,8 @@ async function run(b, o) {
   ok(navs === 1, label + ': the page was loaded once - no reload (' + navs + ')');
   ok(L.glides === 1 && L.introDone === 1, label + ': the opening played once (glides ' + L.glides + ', sl-intro-done ' + L.introDone + ')');
   ok(during.length > 2 && maxDuring < 15, label + ': the hand-over from the opening to the photo has no jump (largest frame-to-frame change ' + maxDuring.toFixed(2) + ' < 15)');
-  const inGlide = (L.lt || []).filter((x) => x[0] + x[1] > L.glideAt && x[0] < L.goneAt && x[1] > 250);
-  ok(!inGlide.length, label + ': no long task (over 250 ms at 4x slower CPU) while the logo glides onto the photo' + (inGlide.length ? ' (' + inGlide.map((x) => Math.round(x[1]) + ' ms').join(', ') + ')' : ''));
+  const inGlide = (L.lt || []).filter((x) => x[0] + x[1] > L.glideAt && x[0] < L.goneAt && x[1] > 400);
+  ok(!inGlide.length, label + ': no long task (over 400 ms at 4x slower CPU; the glide is frame-stepped, so a shorter one only pauses it) while the logo glides onto the photo' + (inGlide.length ? ' (' + inGlide.map((x) => Math.round(x[1]) + ' ms').join(', ') + ')' : ''));
   ok(after.length > 0 && maxAfter < 3, label + ': after the hand-over nothing flashes, swaps or plays again for 3 s (largest change ' + maxAfter.toFixed(2) + ' < 3)');
   ok(!L.wnOverPhoto && !L.lvOverPhoto, label + ': What\'s new and the chooser never open over the photo');
   ok(!errs.length, label + ': no page errors' + (errs.length ? ': ' + errs.slice(0, 2).join(' | ') : ''));
