@@ -471,7 +471,28 @@ CURATED = {
     "brachyurophis-semifasciatus": {"d": "#c8834e", "c": "#3a2a22", "b": "#efe2cc", "t": "band", "n": 40, "L": 0.4, "s": "gibber"},
     # v5.12: kingsnakes and milksnakes - smooth glossy scales, real sizes; speckled kingsnake black with a yellow speck on every scale
     # v5.35: glossy black, one small yellow-white spot in the middle of every scale, yellow lips and chin, yellow belly chequered black
-    'lampropeltis-holbrooki': {'d': '#111210', 'lat': '#121310', 'b': '#e2d47a', 't': 'plain', 'L': 1.1, 's': 'grass', 'lip': '#e2d47a', 'cx': {'speckle': {'p': 1.0, 'dot': 0.72, 'color': '#efe39a', 'k': 0.95}, 'mottle': 0.02, 'bellyA': 0.8, 'noEdge': 0}, 'k': 0, 'sx': {'gloss': 0.75}},
+    # v6.13 (Eduardo: "ITS WHITE PATTERNS AND COLORS NOT GREY OR BROWN"): glossy jet-black scales, each with one big pure-white
+    # oval spot (dense over the whole body, every scale); white lip scales with bold black bars on the sutures, a white throat;
+    # a dark eye. (The spots had been small cream-yellow dots and the iris orange)
+    'lampropeltis-holbrooki': {'d': '#0b0b0b', 'lat': '#0b0b0b', 'b': '#f4f4f0', 't': 'plain', 'L': 1.1, 's': 'grass', 'ck': '#0b0b0b',
+                               'cx': {'speckle': {'p': 1.0, 'dot': 0.56, 'vary': 0, 'color': '#f6f6f2', 'k': 1.0}, 'mottle': 0.0, 'var': 0.0, 'bellyA': 0.8, 'noEdge': 0, 'deepen': 1.0, 'sat': 1.0},
+                               'lb': ['#0b0b0b'], 'h': {'lips': 'barred', 'lipColor': '#f6f6f2', 'lipFull': 0.1, 'barColor': '#0b0b0b', 'iris': '#16110d', 'irisInner': '#241a12', 'irisDark': 1, 'pupil': 'round'},
+                               'pat': [  # white spots on the head shields too
+                                       {'type': 'line', 'p0': [0.42, 0.10], 'p1': [0.47, 0.11], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
+                                       {'type': 'line', 'p0': [0.55, 0.22], 'p1': [0.60, 0.23], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
+                                       {'type': 'line', 'p0': [0.66, 0.08], 'p1': [0.71, 0.09], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
+                                       {'type': 'line', 'p0': [0.72, 0.33], 'p1': [0.77, 0.34], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
+                                       {'type': 'line', 'p0': [0.80, 0.18], 'p1': [0.85, 0.19], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
+                                       {'type': 'line', 'p0': [0.90, 0.05], 'p1': [0.95, 0.06], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
+                                       {'type': 'line', 'p0': [0.95, 0.28], 'p1': [1.00, 0.29], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
+                                       {'type': 'line', 'p0': [1.02, 0.42], 'p1': [1.07, 0.43], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
+                                       {'type': 'line', 'p0': [1.08, 0.14], 'p1': [1.13, 0.15], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
+                                       {'type': 'line', 'p0': [1.15, 0.30], 'p1': [1.20, 0.31], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
+                                       {'type': 'line', 'p0': [1.22, 0.06], 'p1': [1.27, 0.07], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
+                                       {'type': 'line', 'p0': [1.28, 0.44], 'p1': [1.33, 0.45], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
+                                       {'type': 'line', 'p0': [0.30, 0.20], 'p1': [0.35, 0.21], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
+                                       {'type': 'line', 'p0': [0.60, 0.40], 'p1': [0.65, 0.41], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3}],
+                               'k': 0, 'sx': {'gloss': 0.8, 'rows': 15}},  # (big scales: each spot reads at a normal viewing distance)
     'lampropeltis-nigra': {'d': '#121211', 'lat': '#151514', 'b': '#2a2a24', 't': 'plain', 'L': 1.0, 's': 'forest', 'cx': {'speckle': {'p': 0.14, 'color': '#d9d7a8', 'k': 0.6}, 'mottle': 0.03, 'bellyA': 0.82}, 'k': 0, 'sx': {'gloss': 0.7}},
     'lampropeltis-splendida': {'d': '#151410', 'lat': '#2a2718', 'b': '#d9cc78', 't': 'plain', 'L': 1.0, 's': 'arid', 'cx': {'speckle': {'p': 0.45, 'color': '#e8d880', 'k': 0.85}, 'mottle': 0.03, 'bellyA': 0.76}, 'k': 0, 'sx': {'gloss': 0.7}},
     'lampropeltis-catalinensis': {'d': '#e6e0cc', 'c': '#141210', 'b': '#e6e0cc', 't': 'band', 'n': 40, 'L': 0.9, 's': 'arid', 'k': 0, 'sx': {'gloss': 0.7}},
