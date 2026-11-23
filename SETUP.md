@@ -47,8 +47,8 @@ will report `auth/operation-not-allowed` when used.
 ## 4. Create the database and lock it down
 
 1. **Firestore Database** → **Create database** → **Production mode** → choose a region near you.
-2. Open the **Rules** tab, replace what's there with the contents of `firestore.rules`
-   (in this folder) → **Publish**.
+2. Open the **Rules** tab, replace what's there with the contents of `firebase/firestore.rules`
+   → **Publish** (or deploy it with the Firebase CLI - see `firebase/DEPLOY.md`).
 
    Those rules mean each account can read and write only its own document. Without them,
    production mode denies everything and sync will fail with `permission-denied`.

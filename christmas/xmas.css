@@ -1,236 +1,30 @@
-/* SnakeList - Christmas preview theme.
-   Loaded only by the pages under christmas/ (tools/build-christmas.py adds it); the live site never sees it.
-   Palette: evergreen #123D2A, pine #216B45, cranberry #A92E3E, warm ivory #FFF8ED, soft gold #D8B76A.
-   Every rule starts with html.xm so it wins over the page's own rule for the same thing.
-   Species photos, scientific names, map range / sightings / habitat colours and the 3D snakes keep their own colours. */
+/* SnakeList - Christmas preview: decoration only.
+   Loaded only while the preview switch is on (tools/xmas_loader.js). SnakeList keeps its own colours, buttons, hovers,
+   panels and layout: nothing here re-colours or moves anything of SnakeList's. These rules only style what the
+   preview adds - the Christmas logo's hat, snow and stocking, the cover's pine corners and snow, the Santa hat on the
+   cover photo's snake, the little Santa-hat snakes by the names, the music button and volume controls, the pointer of
+   "Show me", the welcome panel and the preview's label. (The Christmas Cabin's styles follow, from cabin.css.)
+   Colours of the added things: pine #216B45, cranberry #A92E3E, ivory #FFF8ED, gold #D8B76A. */
 
-/* ============ 1. tokens ============ */
-html.xm {
-  --xm-evergreen: #123D2A; --xm-pine: #216B45; --xm-pine-line: #3D805A; --xm-cranberry: #A92E3E; --xm-ivory: #FFF8ED; --xm-gold: #D8B76A;
-  --xm-bg: #FFF8ED; --xm-bg2: #F7EDDB; --xm-panel: #FFFCF6; --xm-panel2: #F5EBDA; --xm-panel3: #EFE3CC;
-  --xm-line: #D3D5C6; --xm-line2: #B9C4B0; --xm-text: #123D2A; --xm-muted: #4A5C4F; --xm-link: #216B45; --xm-accent: #216B45;
-  --xm-gold-ink: #7E5F1A; --xm-red-ink: #A92E3E; --xm-success: #216B45; --xm-error: #A92E3E;
-  --xm-shadow: 0 1px 2px rgba(18,61,42,.07), 0 6px 18px rgba(18,61,42,.08);
-  --xm-shadow-lift: 0 2px 4px rgba(18,61,42,.10), 0 12px 28px rgba(18,61,42,.14);
-  --xm-btn-shadow: 0 1px 2px rgba(18,61,42,.25), 0 4px 12px rgba(33,107,69,.22);
-  --xm-btn-shadow-hover: 0 2px 4px rgba(18,61,42,.28), 0 8px 20px rgba(33,107,69,.30);
-  --xm-ease: cubic-bezier(.2,.7,.2,1);
-  --xm-focus: 0 0 0 2px var(--xm-bg), 0 0 0 4px #93701F;
-  color-scheme: light;
-}
-/* dark: the app's own switch, the about/install pages' switch, the species pages follow the device */
-html.xm[data-sl-theme="dark"], html.xm.xm-site[data-theme="dark"] {
-  --xm-bg: #0B1913; --xm-bg2: #0F2119; --xm-panel: #132A1F; --xm-panel2: #1A3628; --xm-panel3: #21412F;
-  --xm-line: #2A4838; --xm-line2: #3A5E4A; --xm-text: #FFF8ED; --xm-muted: #CDC5B1; --xm-link: #E6CB86; --xm-accent: #E2C47C;
-  --xm-gold-ink: #E2C47C; --xm-red-ink: #F0919D; --xm-success: #8FD0A2; --xm-error: #F0919D;
-  --xm-shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 22px rgba(0,0,0,.30);
-  --xm-shadow-lift: 0 2px 4px rgba(0,0,0,.4), 0 14px 30px rgba(0,0,0,.38);
-  --xm-btn-shadow: 0 1px 2px rgba(0,0,0,.45), 0 4px 14px rgba(20,90,55,.35);
-  --xm-btn-shadow-hover: 0 2px 4px rgba(0,0,0,.5), 0 8px 22px rgba(30,120,72,.42);
-  --xm-focus: 0 0 0 2px var(--xm-bg), 0 0 0 4px #D8B76A;
-  color-scheme: dark;
-}
-@media (prefers-color-scheme: dark) {
-  html.xm.xm-sp, html.xm.xm-site:not([data-theme="light"]) {
-    --xm-bg: #0B1913; --xm-bg2: #0F2119; --xm-panel: #132A1F; --xm-panel2: #1A3628; --xm-panel3: #21412F;
-    --xm-line: #2A4838; --xm-line2: #3A5E4A; --xm-text: #FFF8ED; --xm-muted: #CDC5B1; --xm-link: #E6CB86; --xm-accent: #E2C47C;
-    --xm-gold-ink: #E2C47C; --xm-red-ink: #F0919D; --xm-success: #8FD0A2; --xm-error: #F0919D;
-    --xm-shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 22px rgba(0,0,0,.30);
-    --xm-shadow-lift: 0 2px 4px rgba(0,0,0,.4), 0 14px 30px rgba(0,0,0,.38);
-    --xm-btn-shadow: 0 1px 2px rgba(0,0,0,.45), 0 4px 14px rgba(20,90,55,.35);
-    --xm-btn-shadow-hover: 0 2px 4px rgba(0,0,0,.5), 0 8px 22px rgba(30,120,72,.42);
-    --xm-focus: 0 0 0 2px var(--xm-bg), 0 0 0 4px #D8B76A;
-    color-scheme: dark;
-  }
-}
+html.xm { --xm-gold: #D8B76A; --xm-red: #A92E3E; --xm-ease: cubic-bezier(.2,.7,.2,1); }
 
-/* ============ 2. the app's own colour names, in the Christmas palette ============ */
-html.xm.xm-app, html.xm.xm-app .sl-root {
-  --bg: var(--xm-bg);
-  --bg-grad: linear-gradient(180deg, #FFF8ED 0%, #FCF3E4 45%, #F6EAD5 100%);
-  --page-under: #F6EAD5;
-  --surface: var(--xm-panel); --surface-hover: var(--xm-panel2); --border: var(--xm-line);
-  --text: var(--xm-text); --text-muted: var(--xm-muted);
-  --gold: var(--xm-accent); --gold-fill: #216B45; --on-fill: #FFF8ED; --gold-soft: #7FA48C; --moss: #2E6346;
-  --rust: #A92E3E; --rust-soft: #F7E0E2; --on-accent: #FFF8ED;
-  --ver-bg: rgba(216,183,106,.22);
-  --menu-shadow: 0 12px 28px rgba(18,61,42,.16);
-  --mark-grad: linear-gradient(160deg, #2B7A50 0%, #216B45 38%, #123D2A 100%);
-  --mark-shadow: drop-shadow(0 1px 0 rgba(255,248,237,.6)) drop-shadow(0 2px 6px rgba(18,61,42,.18));
-  --sl-tpat: #8E6B22;
-}
-html.xm.xm-app[data-sl-theme="dark"], html.xm.xm-app [data-sl-theme="dark"] {
-  --bg: var(--xm-bg);
-  --bg-grad: linear-gradient(180deg, #10261C 0%, #0B1913 42%, #08130E 100%);
-  --page-under: #08130E;
-  --surface: var(--xm-panel); --surface-hover: var(--xm-panel2); --border: var(--xm-line);
-  --text: var(--xm-text); --text-muted: var(--xm-muted);
-  --gold: var(--xm-accent); --gold-fill: #216B45; --on-fill: #FFF8ED; --gold-soft: #8C7A4C; --moss: #BFD0BE;
-  --rust: #F0919D; --rust-soft: #3B1A21; --on-accent: #0B1913;
-  --ver-bg: rgba(216,183,106,.18);
-  --menu-shadow: 0 14px 30px rgba(0,0,0,.5);
-  --mark-grad: linear-gradient(160deg, #FFFDF8 0%, #FFF8ED 45%, #EADFC8 100%);
-  --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,.5)) drop-shadow(0 4px 12px rgba(0,0,0,.35));
-  --sl-tpat: #D8B76A;
-}
-/* at night the venomous tags keep a deep cranberry fill (the light cranberry is for words) */
-html.xm[data-sl-theme="dark"] :is(#grid .card-tags .tag.venom, .card-tags .tag.venom, .chip.active.venom, .tag.venom, .sl-tag.venom) {
-  background: linear-gradient(135deg, #B63848 0%, #8D2233 100%) !important; border-color: #C25563 !important; color: #FFF8ED !important; }
-/* about / install / privacy / terms */
-html.xm.xm-site {
-  --bg: var(--xm-bg); --bg2: var(--xm-bg2); --card: var(--xm-panel); --text: var(--xm-text); --link-hover: var(--xm-text); --muted: var(--xm-muted);
-  --line: var(--xm-line); --accent: #216B45; --accent-ink: var(--xm-link); --link: var(--xm-link); --chip: var(--xm-panel2); --gold: var(--xm-gold-ink);
-  --shadow: var(--xm-shadow); --sl-h: var(--xm-text); --sl-sub: var(--xm-pine);
-  --mark-grad: linear-gradient(160deg, #2B7A50 0%, #216B45 38%, #123D2A 100%);
-  --sl-tpat: #8E6B22;
-}
-html.xm.xm-site[data-theme="dark"] { --sl-sub: var(--xm-link); --mark-grad: linear-gradient(160deg, #FFFDF8 0%, #FFF8ED 45%, #EADFC8 100%); --sl-tpat: #D8B76A; }
-@media (prefers-color-scheme: dark) { html.xm.xm-site:not([data-theme="light"]) { --sl-sub: var(--xm-link); --mark-grad: linear-gradient(160deg, #FFFDF8 0%, #FFF8ED 45%, #EADFC8 100%); --sl-tpat: #D8B76A; } }
-/* species, country, family, genus, city and region pages (map colours --land --on --in --sea are left alone) */
-html.xm.xm-sp {
-  --bg: var(--xm-bg); --card: var(--xm-panel); --text: var(--xm-text); --muted: var(--xm-muted); --line: var(--xm-line);
-  --g: #216B45; --tag: var(--xm-panel2); --tagline: var(--xm-line2); --link: var(--xm-link); --link-hover: var(--xm-text);
-}
-
-html.xm body { background-color: var(--xm-bg); }
-html.xm ::selection { background: rgba(216,183,106,.45); color: inherit; }
-html.xm { scrollbar-color: var(--xm-line2) transparent; }
-html.xm ::-webkit-scrollbar-thumb { background: var(--xm-line2); background-clip: padding-box; border: 2px solid transparent; border-radius: 999px; }
-html.xm ::-webkit-scrollbar-thumb:hover { background: #B8913F; background-clip: padding-box; }
-
-/* ============ 3. buttons ============ */
-/* main buttons: pine to evergreen, ivory words, a fine green border, a soft green shadow; lift 2 px on hover */
-html.xm :is(.install-btn, .signin-primary, .pic-save, .quiz-submit, .map-btn, .note-actions .primary, .tour-actions .primary, .tour-try-ok,
-  .mf-foot .mf-done, .wn-ok, .keep-go, .ck-yes, .sl-data-btns button.primary, .cam-btn:not(.ghost), .ml-picks, .ed-stay, .ed-bar-btns .edb-done, .ins-ok, .qp-open,
-  .sl-nudge .nd-go, .cam-card button.primary, .sgv-back, .sgv-3d, .sgv-onmap, .nm-how, .all-countries:not(.map-undo), .card.done .seen-btn,
-  .sp-btn:not(.sp-btn2), .btn-primary, .cta, a.button, .sx-box button) {
-  background-color: #216B45 !important; background-image: linear-gradient(135deg, #216B45 0%, #123D2A 100%) !important;
-  color: #FFF8ED !important; border: 1px solid #3D805A !important; box-shadow: var(--xm-btn-shadow) !important;
-  transition: transform .2s var(--xm-ease), box-shadow .2s var(--xm-ease), background-image .2s, filter .2s !important;
-}
-html.xm :is(.install-btn, .signin-primary, .pic-save, .quiz-submit, .map-btn, .note-actions .primary, .tour-actions .primary, .tour-try-ok, .mf-foot .mf-done, .wn-ok, .keep-go,
-  .ck-yes, .sl-data-btns button.primary, .cam-btn:not(.ghost), .ml-picks, .ed-stay, .ed-bar-btns .edb-done, .ins-ok, .qp-open, .sl-nudge .nd-go, .cam-card button.primary,
-  .sgv-back, .sgv-3d, .sgv-onmap, .nm-how, .all-countries:not(.map-undo), .card.done .seen-btn, .sp-btn:not(.sp-btn2), .btn-primary, .cta, a.button, .sx-box button) :is(svg, span, b, i) { color: inherit !important; }
-@media (hover: hover) {
-  html.xm :is(.install-btn, .signin-primary, .pic-save, .quiz-submit, .map-btn, .note-actions .primary, .tour-actions .primary, .tour-try-ok, .mf-foot .mf-done, .wn-ok, .keep-go,
-    .ck-yes, .sl-data-btns button.primary, .cam-btn:not(.ghost), .ml-picks, .ed-stay, .ed-bar-btns .edb-done, .ins-ok, .qp-open, .sl-nudge .nd-go, .cam-card button.primary,
-    .sgv-back, .sgv-3d, .sgv-onmap, .nm-how, .all-countries:not(.map-undo), .card.done .seen-btn, .sp-btn:not(.sp-btn2), .btn-primary, .cta, a.button, .sx-box button):hover {
-    background-image: linear-gradient(135deg, #2B7A50 0%, #185237 100%) !important; transform: translateY(-2px); box-shadow: var(--xm-btn-shadow-hover) !important; filter: none !important;
-  }
-}
-html.xm :is(.install-btn, .signin-primary, .pic-save, .quiz-submit, .map-btn, .note-actions .primary, .tour-actions .primary, .tour-try-ok, .mf-foot .mf-done, .wn-ok, .keep-go,
-  .ck-yes, .sl-data-btns button.primary, .cam-btn:not(.ghost), .ml-picks, .ed-stay, .ed-bar-btns .edb-done, .ins-ok, .qp-open, .sl-nudge .nd-go, .cam-card button.primary,
-  .sgv-back, .sgv-3d, .sgv-onmap, .nm-how, .all-countries:not(.map-undo), .card.done .seen-btn, .sp-btn:not(.sp-btn2), .btn-primary, .cta, a.button, .sx-box button):active {
-  transform: translateY(0) !important; box-shadow: var(--xm-btn-shadow) !important; transition-duration: .18s !important;
-}
-/* a few seasonal highlights in cranberry: installing the app and the snake's own "Explore in 3D" */
-html.xm :is(.install-btn, .sp-realbtn, .xm-cranberry):not(#xm-n) {
-  background-color: #A92E3E !important; background-image: linear-gradient(135deg, #B63848 0%, #8D2233 100%) !important; border-color: #C25563 !important;
-  color: #FFF8ED !important; box-shadow: 0 1px 2px rgba(80,15,25,.3), 0 4px 12px rgba(169,46,62,.28) !important;
-}
-@media (hover: hover) {
-  html.xm :is(.install-btn, .sp-realbtn, .xm-cranberry):not(#xm-n):hover { background-image: linear-gradient(135deg, #C24555 0%, #9A2838 100%) !important; box-shadow: 0 2px 4px rgba(80,15,25,.32), 0 8px 20px rgba(169,46,62,.34) !important; transform: translateY(-2px); }
-}
-html.xm :is(.install-btn, .sp-realbtn, .xm-cranberry):not(#xm-n):active { transform: none !important; }
-
-/* secondary buttons: ivory surface, evergreen words, a thin green border (dark green surface at night) */
-html.xm :is(.auth-btn, .theme-btn, .sheet-btn, .more-btn, .see-all-btn, .clear-btn, .fbar-reset, .tour-actions button:not(.primary), .sl-ach-btn, .cam-btn.ghost,
-  .sp-btn2, .sp-all, .sp-fmore, .quiz-quit, .map-undo, .city-lookup-btn, .area-btn, .sl-sort, .td-card-btn, .ml-edit, .wish-btn, .follow-btn, .seen-btn, .map-close, .note-cond-b, .report-kind) {
-  background-color: var(--xm-panel) !important; color: var(--xm-text) !important; border-color: var(--xm-line2) !important;
-  transition: transform .2s var(--xm-ease), box-shadow .2s var(--xm-ease), background-color .2s, border-color .2s, color .2s !important;
-}
-html.xm :is(.sp-btn2, .sp-realbtn) { border-width: 1px; border-style: solid; }
-html.xm.xm-sp .sp-btn2 { color: var(--xm-text) !important; }
-@media (hover: hover) {
-  html.xm :is(.auth-btn, .theme-btn, .sheet-btn, .more-btn, .see-all-btn, .clear-btn, .fbar-reset, .tour-actions button:not(.primary), .sl-ach-btn, .cam-btn.ghost,
-    .sp-btn2, .sp-all, .sp-fmore, .quiz-quit, .map-undo, .city-lookup-btn, .area-btn, .td-card-btn, .ml-edit, .wish-btn, .follow-btn, .seen-btn, .map-close, .note-cond-b, .report-kind):hover {
-    background-color: var(--xm-panel2) !important; border-color: var(--xm-pine-line) !important; transform: translateY(-1px); box-shadow: var(--xm-shadow) !important;
-  }
-}
-/* selected filters, toggles and pressed buttons: clearly filled */
-html.xm :is(.chip.active:not(.venom):not(.safe):not(.fam-photo):not([data-type]):not([data-continent]):not(.hab-chip), .sheet-btn[aria-pressed="true"], .hm-seg button.on, .hab-opt.on,
-  .sp-info-acts button.on, .qp-acts button.on, .area-btn.on, .pin-btn.on, .hm-toggle.sg-toggle.on, .note-enc.on, .note-cond-b[aria-checked="true"], .lang-menu li[aria-selected="true"]) {
-  background-color: #216B45 !important; background-image: linear-gradient(135deg, #216B45 0%, #123D2A 100%) !important; color: #FFF8ED !important; border-color: #D8B76A !important;
-}
-html.xm :is(button, [role="button"], input, select, .chip):disabled, html.xm [aria-disabled="true"] { opacity: .5 !important; filter: saturate(.4); cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-
-/* keyboard focus: a soft gold ring, easy to see on ivory and on evergreen */
-html.xm :is(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible { outline: 2.5px solid #93701F !important; outline-offset: 2px !important; }
-html.xm[data-sl-theme="dark"] :is(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible { outline-color: #D8B76A !important; }
-@media (prefers-color-scheme: dark) { html.xm:is(.xm-sp, .xm-site:not([data-theme="light"])) :is(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible { outline-color: #D8B76A !important; } }
-
-/* the every-button hover of the live site (sl-fx): the Christmas evergreen with a fine gold border instead of near-black,
-   and its travelling line in soft gold (once round over 1.5 s, then it fades) */
-html.xm .sl-hov:not(#xm-n):not(.install-btn):not(.sp-realbtn):not(.xm-cranberry):not([aria-pressed="true"]):not([aria-selected="true"]):not([aria-current]):not(.active):not(.on):not(.is-on):not(.sel) {
-  background-color: #1B5A3A !important; background-image: linear-gradient(135deg, #2B7A50 0%, #185237 100%) !important; border-color: rgba(216,183,106,.75) !important; color: #FFF8ED !important;
-}
-html.xm .sl-hov.sl-hov-nb:not(#xm-n):not(.install-btn):not(.sp-realbtn):not(.xm-cranberry):not([aria-pressed="true"]):not([aria-selected="true"]):not([aria-current]):not(.active):not(.on):not(.is-on):not(.sel) { box-shadow: inset 0 0 0 1px rgba(216,183,106,.75) !important; }
-html.xm .sl-trace rect, html.xm .xm-trace rect { stroke: #E9CF8C; stroke-width: 1.7; filter: drop-shadow(0 0 2px rgba(216,183,106,.9)) drop-shadow(0 0 5px rgba(216,183,106,.45)); }
-html.xm .xm-trace { position: fixed; left: 0; top: 0; z-index: 2147483000; pointer-events: none; overflow: visible; opacity: 0; }
-
-/* ============ 4. the logo: evergreen letters (ivory on dark), green snake S in a Santa hat, gold on the tick, a pine sprig ============ */
-html.xm svg.snake-s, html.xm .sl-titletext svg, html.xm .hero-mark svg { overflow: visible; }
-html.xm .xm-hat { pointer-events: none; }
+/* ============ the Christmas logo ============ */
+html.xm svg.snake-s, html.xm .hero-mark svg, html.xm svg.xm-has-stk { overflow: visible; }
+html.xm .xm-hat, html.xm .xm-ssnow { pointer-events: none; }
+/* the small S used as an icon inside buttons and tabs stays plain */
 html.xm :is(.tab-btn, .tab-n, .chip, button, .sl-mtoast, .xm-nohat) svg.snake-s { --xm-hat-o: 0; }
-html.xm .sl-tick, html.xm .intro-box svg, html.xm .hero-title .sl-tick { overflow: visible; }
-html.xm .xm-sprig { display: inline-block; width: .5em; height: .35em; margin-left: -.1em; align-self: center; vertical-align: middle; transform: translateY(.16em) rotate(-14deg); flex: none; pointer-events: none; }
-html.xm .xm-sprig svg { display: block; width: 100%; height: 100%; overflow: visible; }
-html.xm :is(.sl-hero, .intro) .xm-sprig { filter: drop-shadow(0 0 1.5px rgba(255,248,237,.55)) drop-shadow(0 2px 4px rgba(0,0,0,.5)); }
-/* the light pages' header wordmark: evergreen letters */
-html.xm.xm-app:not([data-sl-theme="dark"]) .sl-titletext { color: #123D2A; }
+/* the tick's own drawing is hidden while the stocking is there (the drawing itself is untouched) */
+html.xm svg.xm-has-stk > :not(.xm-stk) { display: none; }
+html.xm svg.xm-has-stk { overflow: visible; }
+/* snow on the letters (xmas.js measures each letter's top) */
+html.xm :is(.sl-header .sl-titletext, .intro-title, .hero-mark, .signin-title .sl-titletext, .sl-brand, .site-logo) { position: relative; }
+html.xm .xm-snowcap { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; z-index: 1;
+  animation: xm-fade .8s ease both; }
+html.xm .xm-snowcap path { fill: #fff; filter: drop-shadow(0 .5px .6px rgba(20,50,35,.35)); -webkit-text-fill-color: initial; }
+html.xm .xm-ssnow { filter: drop-shadow(0 .6px .6px rgba(20,50,35,.3)); }
+@keyframes xm-fade { from { opacity: 0; } to { opacity: 1; } }
 
-/* ============ 5. the opening cover ============ */
-html.xm .intro {
-  background: radial-gradient(85% 70% at 50% 46%, #1b4d33 0%, #123D2A 42%, #0b2618 75%, #06140d 100%);
-}
-html.xm .photo-scrim {
-  background:
-    radial-gradient(46% 30% at 50% 50%, rgba(8,22,15,.62) 0%, rgba(8,22,15,.42) 55%, rgba(8,22,15,0) 100%),
-    radial-gradient(120% 90% at 50% 50%, rgba(18,61,42,.18) 40%, rgba(11,32,22,.6) 100%),
-    linear-gradient(180deg, rgba(18,61,42,.2), rgba(8,22,15,.34));
-}
-html.xm .intro-loading { color: #FFF8ED; }
-html.xm .intro-loading i { border-color: rgba(216,183,106,.28); border-top-color: #D8B76A; }
-/* the snake photograph stays the main thing: an evergreen tint only at the edges */
-html.xm .hero-edges .he-t { background: linear-gradient(180deg, rgba(14,46,32,1) 0%, rgba(14,46,32,.6) 25%, rgba(14,46,32,.22) 55%, rgba(14,46,32,.06) 80%, rgba(14,46,32,0) 100%); }
-html.xm .hero-edges .he-l { background: linear-gradient(90deg, rgba(14,46,32,1) 0%, rgba(14,46,32,.6) 25%, rgba(14,46,32,.22) 55%, rgba(14,46,32,.06) 80%, rgba(14,46,32,0) 100%); }
-html.xm .hero-edges .he-r { background: linear-gradient(270deg, rgba(14,46,32,1) 0%, rgba(14,46,32,.6) 25%, rgba(14,46,32,.22) 55%, rgba(14,46,32,.06) 80%, rgba(14,46,32,0) 100%); }
-html.xm .sl-hero { background: #0e2a1d; }
-html.xm .hero-media { background-color: #123D2A; }
-/* the bottom melts into the Christmas page (ivory by day, deep green at night) */
-html.xm .hero-media::after { height: 16%;
-  background: linear-gradient(180deg, rgba(255,248,237,0) 0%, rgba(255,248,237,.10) 30%, rgba(255,248,237,.38) 58%, rgba(255,248,237,.78) 82%, #FFF8ED 100%); }
-html.xm[data-sl-theme="dark"] .hero-media::after {
-  background: linear-gradient(180deg, rgba(11,25,19,0) 0%, rgba(11,25,19,.12) 30%, rgba(11,25,19,.42) 58%, rgba(11,25,19,.8) 82%, #0B1913 100%); }
-/* a soft dark pool behind the logo and words */
-html.xm .hero-copy::before { background: radial-gradient(closest-side, rgba(6,20,13,.55), rgba(6,20,13,.3) 55%, rgba(6,20,13,0)); }
-/* the logo on the photograph: ivory letters (the S stays green, the tick keeps its green with gold markings) */
-html.xm .hero-mark, html.xm .hero-title .sl-titletext .hl, html.xm .intro-title {
-  background-image: linear-gradient(170deg, #FFFFFF 0%, #FFF8ED 40%, #F1E3C4 100%) !important;
-  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #FFF8ED;
-}
-html.xm .hero-title.hero-wm, html.xm .hero-title { --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,.65)) drop-shadow(0 5px 20px rgba(0,0,0,.5)); }
-html.xm .intro, html.xm .sl-hero { --sl-tpat: #E2C47C; }
-html.xm .hero-mark { filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)) drop-shadow(0 4px 18px rgba(0,0,0,.45)); }
-/* Explore · Identify · Discover: warm ivory, small gold separators */
-html.xm .hero-below .hero-sub.hero-words {
-  color: #FFF8ED !important; background-image: none !important; -webkit-text-fill-color: #FFF8ED !important;
-  text-shadow: 0 1px 2px rgba(0,0,0,.85), 0 0 18px rgba(0,0,0,.55); filter: none !important; letter-spacing: .08em;
-}
-html.xm .hero-words .hw-dot { color: #D8B76A; -webkit-text-fill-color: #D8B76A; font-size: .7em; vertical-align: .14em; text-shadow: 0 0 6px rgba(216,183,106,.55); }
-/* Scroll to continue: a fine gold outline and a gentle downward movement */
-html.xm .hero-cue {
-  color: #FFF8ED; border: 1px solid rgba(216,183,106,.85); background: rgba(9,26,18,.42); padding: 8px 16px 6px; gap: 3px;
-  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.25);
-  animation: xm-cue 2.8s ease-in-out 2s infinite;
-}
-html.xm .hero-cue svg { color: #E2C47C; animation: none; }
-html.xm .hero-cue:hover { background: rgba(9,26,18,.6); }
-@keyframes xm-cue { 0%, 100% { translate: -0% 0; } 50% { translate: 0 4px; } }
-html.xm .hero-sp { background: rgba(9,26,18,.55); color: #FFF8ED; border: 1px solid rgba(216,183,106,.35); }
-html.xm .hero-sp:hover, html.xm .hero-sp:focus-visible, html.xm .hero-sp:hover i, html.xm .hero-sp:focus-visible i { color: #F1DDA4; }
-
-/* decorations on the cover: pine corners, fairy lights and snow (added by xmas.js; never take clicks) */
+/* ============ the opening cover: pine corners, fairy lights and snow (never take clicks) ============ */
 html.xm .xm-deco { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
 html.xm .intro > .xm-deco { z-index: 1; }
 html.xm .intro > .intro-content { z-index: 2; }
@@ -248,324 +42,275 @@ html.xm .xm-snow { position: absolute; inset: 0; width: 100%; height: 100%; poin
 html.xm .sl-hero > .xm-deco { z-index: 0; }
 html.xm .sl-hero .hero-copy, html.xm .sl-hero .hero-below { z-index: 2; }
 
-/* ============ 6. header, tabs, page ============ */
-html.xm .eyebrow { color: var(--xm-muted); }
-html.xm .sl-ver, html.xm .wn-ver { background: rgba(216,183,106,.22) !important; color: var(--xm-gold-ink) !important; border-color: rgba(216,183,106,.5) !important; }
-html.xm .tab-btn { color: var(--xm-muted); }
-html.xm .tab-btn.active { color: var(--xm-text); border-bottom-color: transparent; position: relative; font-weight: 600; }
-html.xm .tab-btn.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 3px; border-radius: 3px;
-  background: linear-gradient(90deg, #C9A355, #E9CF8C 50%, #C9A355); box-shadow: 0 0 6px rgba(216,183,106,.45); }
-html.xm[data-sl-theme="dark"] .tab-btn.active { color: #FFF8ED; }
-html.xm .tab-btn .tab-n { background: rgba(216,183,106,.2); color: var(--xm-text); }
+/* the Santa hat on the cover photo's snake: the same box as the photo, moving with it */
+html.xm .xm-phat { position: absolute; pointer-events: none; z-index: 0; transition: scale 3.2s cubic-bezier(.16,.6,.2,1); }
+html.xm .sl-hero.hero-wait:not(.hero-reveal) .xm-phat { scale: 1.07; }
+html.xm .xm-phat[hidden] { display: none; }
+html.xm .xm-phat svg { position: absolute; overflow: visible; filter: drop-shadow(0 3px 5px rgba(0,0,0,.45)); }
 
-/* cards: warm ivory, a subtle evergreen border, soft shadows (layered dark greens at night) */
-html.xm .card { background: var(--xm-panel); border-color: var(--xm-line); box-shadow: var(--xm-shadow); }
-html.xm .card.done { border-color: #B8913F; background: linear-gradient(180deg, rgba(216,183,106,.18), transparent 62%), var(--xm-panel); }
-html.xm .card.done .card-name { color: var(--xm-text); }
-html.xm[data-sl-theme="dark"] .card { background: linear-gradient(180deg, #16301F 0%, #132A1F 100%); }
-html.xm :is(.fsec), html.xm:not([data-sl-theme="dark"]) .fsec { background: var(--xm-panel); border-color: var(--xm-line); box-shadow: var(--xm-shadow); }
-html.xm .fsec > summary:hover { background: rgba(216,183,106,.10); }
-html.xm .fsec-n { background: #A92E3E; color: #FFF8ED; }
-html.xm .search-box { background: var(--xm-panel); border-color: var(--xm-line2); box-shadow: inset 0 1px 2px rgba(18,61,42,.05); }
-html.xm .search-box:focus-within { border-color: #B8913F; box-shadow: 0 0 0 3px rgba(216,183,106,.28); }
-html.xm :is(input[type="text"], input[type="search"], input[type="email"], input[type="number"], input:not([type]), textarea, select):not(.xm-keep) { accent-color: #216B45; }
-html.xm select, html.xm .sl-sort { background-color: var(--xm-panel); color: var(--xm-text); border-color: var(--xm-line2); }
-html.xm input[type="checkbox"], html.xm input[type="radio"], html.xm input[type="range"], html.xm progress { accent-color: #216B45; }
-html.xm[data-sl-theme="dark"] :is(input[type="checkbox"], input[type="radio"], input[type="range"], progress) { accent-color: #D8B76A; }
-html.xm .chip { background-color: var(--xm-panel); border-color: var(--xm-line2); color: var(--xm-text); }
-html.xm .chip:hover { border-color: #B8913F; }
+/* ============ a tiny Santa-hat snake by each snake's name ============ */
+html.xm .xm-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+html.xm .xm-spi { display: inline-block; width: 1.2em; height: 1.2em; margin: 0 .28em 0 -.04em; vertical-align: -.24em; overflow: visible; flex: none; }
+html.xm .cp-row .xm-spi { width: 1.25em; height: 1.25em; }
+html.xm.xm-sp .sp-main h1 .xm-spi { width: .9em; height: .9em; vertical-align: -.1em; }
 
-/* empty states and the quiz question: a small snowflake / pine sprig above, with room around the words */
-html.xm .empty-state { padding-top: 8px; }
+/* ============ the music button and the Christmas audio controls ============ */
+html.xm .xm-music-btn svg { width: 16px; height: 16px; }
+html.xm .xm-music-btn .xm-mb-off { display: none; }
+html.xm .xm-music-btn.on { color: var(--gold, #3f7d43); border-color: var(--gold-soft, #8fbf7c); position: relative; }
+html.xm .xm-music-btn.on::after { content: ""; position: absolute; inset: -3px; border-radius: inherit; border: 1.5px solid currentColor; opacity: 0; animation: xm-ping 2.2s ease-out infinite; pointer-events: none; }
+@keyframes xm-ping { 0% { opacity: .55; transform: scale(.92); } 100% { opacity: 0; transform: scale(1.25); } }
+.xm-aupop { position: absolute; z-index: 2300; width: 270px; padding: 12px 14px; box-sizing: border-box; border-radius: 14px;
+  background: var(--surface, #fbfdf8); color: var(--text, #24321f); border: 1px solid var(--border, #c8d6bc); box-shadow: var(--menu-shadow, 0 12px 28px rgba(36,50,31,.16));
+  font: 500 13.5px/1.3 Inter, system-ui, sans-serif; animation: xm-fade .18s ease both; }
+.xm-aupop[hidden] { display: none; }
+.xm-audio { display: grid; gap: 10px; }
+.xm-au-row { display: flex; align-items: center; gap: 10px; }
+.xm-au-row label { flex: 1; display: grid; gap: 5px; min-width: 0; }
+.xm-au-row label span { font-size: 12.5px; font-weight: 600; }
+.xm-au-on { flex: none; width: 34px; height: 34px; border-radius: 50%; display: inline-grid; place-items: center; cursor: pointer; padding: 0;
+  border: 1px solid var(--border, #c8d6bc); background: transparent; color: var(--text-muted, #5b6b55); }
+.xm-au-on svg { width: 16px; height: 16px; }
+.xm-au-on[aria-pressed="true"] { color: var(--on-fill, #fff); background: var(--gold-fill, #58b351); border-color: transparent; }
+/* the volume: a plain rounded bar, the part that is on filled in */
+.xm-vol { -webkit-appearance: none; appearance: none; width: 100%; height: 22px; margin: 0; background: transparent; cursor: pointer; --v: 50%; --on: var(--text, #24321f); --off: rgba(127,127,127,.28); }
+.xm-vol::-webkit-slider-runnable-track { height: 7px; border-radius: 99px; background: linear-gradient(90deg, var(--on) 0 var(--v), var(--off) var(--v) 100%); }
+.xm-vol::-moz-range-track { height: 7px; border-radius: 99px; background: var(--off); }
+.xm-vol::-moz-range-progress { height: 7px; border-radius: 99px; background: var(--on); }
+.xm-vol::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; margin-top: -4px; border-radius: 50%; background: var(--on); border: 0; box-shadow: 0 1px 3px rgba(0,0,0,.35); }
+.xm-vol::-moz-range-thumb { width: 15px; height: 15px; border-radius: 50%; background: var(--on); border: 0; box-shadow: 0 1px 3px rgba(0,0,0,.35); }
+.xm-vol:focus-visible { outline: 2px solid var(--focus-ring, #58b351); outline-offset: 3px; border-radius: 6px; }
+.xm-audio-dark .xm-vol { --on: #fff; --off: rgba(255,255,255,.26); }
+.xm-audio-dark .xm-au-row label span { color: #fff; }
+.xm-audio-dark .xm-au-on { color: #fff; border-color: rgba(255,255,255,.45); }
+.xm-audio-dark .xm-au-on[aria-pressed="true"] { background: #fff; color: #1d120a; }
+.xm-set-audio h3 { margin: 14px 0 8px; font: 700 13px Inter, sans-serif; }
+
+/* ============ "Show me": the ring round the thing and the note beside it ============ */
+.xm-pt-ring { position: fixed; z-index: 2400; pointer-events: none; border-radius: 12px; border: 2.5px solid #58b351;
+  box-shadow: 0 0 0 4px rgba(88,179,81,.25), 0 0 22px rgba(88,179,81,.45); animation: xm-ring 1.6s ease-in-out infinite; }
+@keyframes xm-ring { 50% { box-shadow: 0 0 0 7px rgba(88,179,81,.12), 0 0 28px rgba(88,179,81,.55); } }
+.xm-pt { position: fixed; z-index: 2401; width: min(300px, calc(100vw - 24px)); box-sizing: border-box; padding: 12px 14px 12px; border-radius: 14px;
+  background: var(--surface, #fbfdf8); color: var(--text, #24321f); border: 1px solid var(--border, #c8d6bc); box-shadow: 0 14px 36px rgba(20,35,20,.28);
+  font: 14px/1.45 Inter, system-ui, sans-serif; animation: xm-fade .2s ease both; }
+.xm-pt b { display: block; margin-bottom: 3px; font-size: 14.5px; }
+.xm-pt p { margin: 0 0 10px; }
+.xm-pt-ok { min-height: 36px; padding: 0 14px; border-radius: 10px; border: 0; cursor: pointer; font: 600 13.5px Inter, sans-serif; background: var(--gold-fill, #58b351); color: var(--on-fill, #fff); }
+.xm-pt-arrow { position: absolute; top: -7px; width: 12px; height: 12px; margin-left: -6px; transform: rotate(45deg); background: inherit; border-left: 1px solid var(--border, #c8d6bc); border-top: 1px solid var(--border, #c8d6bc); }
+.xm-pt.up .xm-pt-arrow { top: auto; bottom: -7px; border: 0; border-right: 1px solid var(--border, #c8d6bc); border-bottom: 1px solid var(--border, #c8d6bc); }
+/* short messages ("Congrats! You finished ...") */
+#xm-toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 2450; display: flex; align-items: center; gap: 10px;
+  width: max-content; max-width: calc(100vw - 24px); box-sizing: border-box; padding: 8px 8px 8px 14px; border-radius: 14px;
+  background: var(--surface, #fbfdf8); color: var(--text, #24321f); border: 1px solid var(--border, #c8d6bc); box-shadow: 0 14px 36px rgba(20,35,20,.28);
+  font: 600 14px/1.35 Inter, system-ui, sans-serif; animation: xm-fade .25s ease both; transition: opacity .35s; }
+#xm-toast.xm-t-out { opacity: 0; }
+#xm-toast .xm-t-msg { display: inline-flex; align-items: center; gap: 8px; }
+#xm-toast .xm-t-msg svg { width: 24px; height: 24px; flex: none; }
+#xm-toast .xm-t-go { min-height: 38px; padding: 0 12px; border-radius: 10px; border: 0; cursor: pointer; font: 600 13.5px Inter, sans-serif; background: var(--gold-fill, #58b351); color: var(--on-fill, #fff); white-space: nowrap; }
+#xm-toast .xm-t-x { border: 0; background: transparent; color: inherit; font-size: 22px; cursor: pointer; padding: 0 6px; }
+
+/* ============ panels the size of the Achievements panel (welcome, Christmas tasks, decorations, presents) ============ */
+.xm-panel-wrap { position: fixed; inset: 0; z-index: 2200; display: flex; align-items: center; justify-content: center; }
+.xm-panel-wrap[hidden] { display: none; }
+.xm-panel-wrap.xm-out { opacity: 0; transition: opacity .18s ease; }
+.xm-panel-bg { position: absolute; inset: 0; background: rgba(12,28,18,.45); animation: xm-fade .2s ease-out; }
+.xm-panel { position: relative; box-sizing: border-box; width: min(780px, calc(100vw - 48px)); height: min(90vh, 960px); overflow: auto; overscroll-behavior: contain;
+  background: var(--surface, #fbfdf8); color: var(--text, #24321f); border: 1px solid var(--border, #c8d6bc); border-radius: 16px; box-shadow: var(--menu-shadow, 0 12px 28px rgba(36,50,31,.16));
+  padding: 20px 26px 26px; font: 15px/1.5 Inter, system-ui, sans-serif; animation: xm-panel-in .22s cubic-bezier(.2,.9,.3,1); }
+@keyframes xm-panel-in { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
+/* a thin festive ribbon along the top edge */
+.xm-panel::before { content: ""; position: sticky; display: block; top: -20px; height: 3px; margin: -20px -26px 17px; border-radius: 16px 16px 0 0;
+  background: repeating-linear-gradient(90deg, #A92E3E 0 22px, #D8B76A 22px 30px, #216B45 30px 52px, #D8B76A 52px 60px); z-index: 2; }
+.xm-ph { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 12px; }
+.xm-ph h2, .xm-ph h3 { margin: 0; font: 600 25px/1.2 Fraunces, Georgia, serif; color: var(--text, #24321f); }
+.xm-px { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border, #c8d6bc); background: transparent; color: var(--text-muted, #5b6b55);
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.xm-px:hover { background: var(--surface-hover, #eef3e8); color: var(--text, #24321f); }
+@media (max-width: 640px) {
+  .xm-panel-wrap { align-items: flex-end; }
+  .xm-panel { width: 100%; height: 92vh; height: 92dvh; border-radius: 18px 18px 0 0; border-bottom: 0; padding: 10px 16px calc(20px + env(safe-area-inset-bottom)); animation-name: xm-panel-up; }
+  .xm-panel::before { top: -10px; margin: -10px -16px 10px; border-radius: 18px 18px 0 0; }
+  .xm-ph h2, .xm-ph h3 { font-size: 21px; }
+}
+@keyframes xm-panel-up { from { transform: translateY(40px); opacity: .6; } to { transform: none; opacity: 1; } }
+
+/* ============ "Merry Christmas from SnakeList!" ============ */
+.xm-wl-card { display: flex; flex-direction: column; }
+.xm-wl-msg { margin: 0 0 16px; color: var(--text-muted, #5b6b55); }
+.xm-wl-sub { margin: 0 0 8px; font: 600 11px/1.3 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted, #5b6b55); }
+.xm-wl-list { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 8px; }
+@media (min-width: 900px) { .xm-wl-list { grid-template-columns: 1fr 1fr; } }
+.xm-wl-list button { all: unset; box-sizing: border-box; width: 100%; height: 100%; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; column-gap: 10px; align-items: center;
+  padding: 12px 14px 12px 46px; border-radius: 12px; border: 1px solid var(--border, #c8d6bc); background: var(--bg, #f4f8ef); cursor: pointer; position: relative; }
+.xm-wl-list button::before { content: ""; position: absolute; left: 14px; top: 13px; width: 20px; height: 20px; background: var(--xm-flake-url) no-repeat center / contain; }
+.xm-wl-list button:hover { background: var(--surface-hover, #eef3e8); }
+.xm-wl-list button:focus-visible { outline: 2px solid var(--focus-ring, #58b351); outline-offset: 2px; }
+.xm-wl-list b { font-size: 15px; color: var(--text, #24321f); }
+.xm-wl-list span { grid-column: 1; font-size: 13.5px; color: var(--text-muted, #5b6b55); }
+.xm-wl-list svg { grid-column: 2; grid-row: 1 / 3; color: var(--text-muted, #5b6b55); }
+.xm-wl-go { margin-top: auto; align-self: stretch; min-height: 48px; border-radius: 12px; border: 0; cursor: pointer; font: 600 15.5px Inter, system-ui, sans-serif;
+  color: var(--on-fill, #fff); background: var(--gold-fill, #58b351); }
+html.xm-welcome-open .tour-layer, html.xm-welcome-open .ck-bar { visibility: hidden !important; }
+
+/* ============ small accents on the SnakeList pages' headings, empty lists and the quiz ============ */
+html.xm .xm-acc::before { content: ""; display: inline-block; width: .95em; height: .75em; margin-right: .35em; vertical-align: -.02em; background: no-repeat center / contain; background-image: var(--xm-sprig-url); }
+html.xm .xm-flake::before { content: ""; display: inline-block; width: .8em; height: .8em; margin-right: .35em; vertical-align: -.05em; background: no-repeat center / contain; background-image: var(--xm-flake-url); }
 html.xm .empty-state::before { content: ""; display: block; width: 26px; height: 26px; margin: 0 auto 12px; background: var(--xm-flake-url) no-repeat center / contain; opacity: .9; }
 html.xm .quiz-intro::before { content: ""; display: inline-block; width: 1.3em; height: .95em; margin-right: .45em; vertical-align: -.15em; background: var(--xm-sprig-url) no-repeat center / contain; }
-html.xm .ach-panel h2:first-child::after, html.xm .xa-hero-main h2::after { content: ""; display: inline-block; width: .9em; height: .9em; margin-left: .35em; vertical-align: -.05em; background: var(--xm-flake-url) no-repeat center / contain; }
-/* pop-ups and sheets: rounded, a soft shadow, a quick fade with a small movement as they open */
-html.xm :is(.tour-callout, .map-card, .note-card, .sheet-card, .wn-card, .ck-card, .ach-panel, .lang-menu, .sl-menu, [role="dialog"] > div:first-child) { border-radius: 16px; }
-html.xm :is(.tour-callout) { background: var(--xm-panel); border-color: var(--xm-line); box-shadow: 0 18px 50px rgba(18,61,42,.22), 0 2px 6px rgba(18,61,42,.12); border-top: 3px solid #D8B76A; }
-html.xm .tour-arrow.pos-left { border-right-color: var(--xm-panel); } html.xm .tour-arrow.pos-right { border-left-color: var(--xm-panel); }
-html.xm .tour-arrow.pos-top { border-bottom-color: #D8B76A; } html.xm .tour-arrow.pos-bottom { border-top-color: var(--xm-panel); }
-html.xm .tour-spotlight { box-shadow: 0 0 0 2px #D8B76A, 0 0 18px rgba(216,183,106,.45); }
-html.xm .tour-dim { background: rgba(6,20,13,.5); }
-html.xm .tour-callout h3 { color: var(--xm-text); }
-html.xm .xm-pop { animation: xm-pop .22s var(--xm-ease) both; }
-@keyframes xm-pop { from { opacity: 0; transform: translateY(6px) scale(.985); } to { opacity: 1; transform: none; } }
 
-/* the install sheet and similar green cards: evergreen with a fine gold edge */
-html.xm .ins-card { background: linear-gradient(160deg, #1D5A3B 0%, #123D2A 100%); color: #FFF8ED; border: 1px solid rgba(216,183,106,.6); }
-html.xm .ins-card p { color: rgba(255,248,237,.86); }
-html.xm .ins-card b, html.xm .ins-card h2 { color: #FFF8ED; }
-html.xm .ins-card .ins-more { color: #F1DDA4; }
-html.xm .ins-sheet { background: rgba(6,20,13,.55); }
-/* messages: success green, errors cranberry, information neutral with a small gold accent */
-html.xm :is(.sl-undo, #sl-sync-toast, .ff-toast, .sl-mtoast, #sl-newver) { background: #123D2A !important; color: #FFF8ED !important; border: 1px solid rgba(216,183,106,.55); box-shadow: 0 12px 30px rgba(6,20,13,.35) !important; }
-html.xm :is(.sl-undo, #sl-newver) button { color: #123D2A !important; background: #FFF8ED !important; }
-html.xm :is(.error, .err, .sl-err, .form-error, [role="alert"].bad) { color: var(--xm-error) !important; }
-
-/* the map: evergreen controls with ivory labels and a restrained gold border; range, sightings and habitat colours unchanged */
-html.xm :is(.leaflet-bar a, .leaflet-control-zoom a, .leaflet-control-layers, .map-tools button, .sg-tools button) {
-  background-color: #123D2A !important; color: #FFF8ED !important; border-color: rgba(216,183,106,.55) !important;
-}
-html.xm :is(.globe-zoom button, .hm-toggle:not(.on), .layers-btn, .globe-stage .map-tools button:not(.on)) {
-  background-color: rgba(14,46,32,.88) !important; background-image: none !important; color: #FFF8ED !important; border: 1px solid rgba(216,183,106,.6) !important; box-shadow: 0 3px 10px rgba(6,20,13,.25); }
-@media (hover: hover) { html.xm :is(.globe-zoom button, .hm-toggle:not(.on), .layers-btn):hover { background-color: rgba(33,107,69,.95) !important; color: #FFF8ED !important; } }
-html.xm .hm-toggle.on { border-color: #E2C47C !important; box-shadow: 0 0 0 1px rgba(216,183,106,.5), 0 3px 10px rgba(0,0,0,.25) !important; }
-html.xm .globe-stage, html.xm .map-wrap { border-color: rgba(216,183,106,.55) !important; }
-html.xm .leaflet-bar { border: 1px solid rgba(216,183,106,.6) !important; box-shadow: 0 4px 14px rgba(6,20,13,.28) !important; border-radius: 10px !important; overflow: hidden; }
-html.xm .leaflet-bar a:hover { background-color: #216B45 !important; }
-html.xm .leaflet-popup-content-wrapper { background: var(--xm-panel); color: var(--xm-text); border-radius: 14px; border: 1px solid rgba(216,183,106,.55); box-shadow: 0 14px 36px rgba(6,20,13,.3); animation: xm-pop .2s var(--xm-ease) both; }
-html.xm .leaflet-popup-tip { background: var(--xm-panel); border: 1px solid rgba(216,183,106,.55); }
-html.xm .leaflet-container a.leaflet-popup-close-button { color: var(--xm-muted); }
-html.xm .map-card { background: var(--xm-panel); border: 1px solid var(--xm-line); box-shadow: 0 24px 60px rgba(6,20,13,.35); }
-html.xm .map-head { border-bottom: 1px solid rgba(216,183,106,.45); }
-html.xm .map-title { color: var(--xm-text); }
-html.xm .map-legend { color: var(--xm-text); }
-
-/* ============ 7. the 3D viewer: the Christmas frame around it, the model itself untouched ============ */
-html.xm .sl3d-ov { --bg: #FFF8ED; --card: #FFFCF6; --text: #123D2A; --muted: #4A5C4F; --line: #D3D5C6; --g: #216B45; --tag: #F5EBDA; --tagline: #B9C4B0; }
-html.xm[data-sl-theme="dark"] .sl3d-ov { --bg: #132A1F; --card: #1A3628; --text: #FFF8ED; --muted: #CDC5B1; --line: #2A4838; --g: #216B45; --tag: #1A3628; --tagline: #3A5E4A; }
-html.xm .sl3d-ov.sl3d-modal { background: var(--bg); border: 1px solid rgba(216,183,106,.75); box-shadow: 0 0 0 5px rgba(18,61,42,.55), 0 0 0 6px rgba(216,183,106,.45), 0 22px 64px rgba(0,0,0,.5); }
-/* a thin festive ribbon along the top of the frame, and a pine sprig by the snake's name - nothing over the model */
-html.xm .sl3d-ov.sl3d-modal::before { content: ""; position: absolute; left: 18px; right: 18px; top: 0; height: 3px; border-radius: 0 0 3px 3px; pointer-events: none;
-  background: repeating-linear-gradient(90deg, #A92E3E 0 22px, #D8B76A 22px 30px, #216B45 30px 52px, #D8B76A 52px 60px); opacity: .9; }
-html.xm .sl3d-hd h2, html.xm .sl3d-hd .sl3d-name { color: var(--xm-text) !important; }
-html.xm .sl3d-hd .sl3d-name::before { content: ""; display: inline-block; width: 1.25em; height: .9em; margin-right: .35em; vertical-align: -.1em; background: var(--xm-sprig-url) no-repeat center / contain; }
-html.xm .sl3d-more:not(#xm-n) { background-color: #216B45 !important; background-image: linear-gradient(135deg, #216B45 0%, #123D2A 100%) !important; color: #FFF8ED !important; border: 1px solid #3D805A !important; box-shadow: var(--xm-btn-shadow) !important; }
-html.xm .sl3d-act:not(.sl3d-more), html.xm .sl3d-x { background: var(--xm-panel) !important; color: var(--xm-text) !important; border-color: var(--xm-line2) !important; }
-html.xm .sl3d-act:hover, html.xm .sl3d-x:hover { border-color: #B8913F !important; }
-html.xm .sp3d-stage { box-shadow: inset 0 0 0 1px rgba(216,183,106,.55); }
-/* the viewer's own buttons over the scene: evergreen glass with ivory words; the chosen mode filled pine with a gold edge */
-html.xm .sp3d-b { background: rgba(14,46,32,.82) !important; color: #FFF8ED !important; border: 1px solid rgba(216,183,106,.45) !important; transition: transform .2s var(--xm-ease), background-color .2s, border-color .2s !important; }
-@media (hover: hover) { html.xm .sp3d-b:hover { background: rgba(33,107,69,.92) !important; border-color: rgba(216,183,106,.85) !important; transform: translateY(-1px); } }
-html.xm .sp3d-b:is([aria-pressed="true"], [aria-expanded="true"]) { background: linear-gradient(135deg, #216B45 0%, #123D2A 100%) !important; border-color: #D8B76A !important; color: #FFF8ED !important; box-shadow: 0 0 0 1px rgba(216,183,106,.35), 0 3px 10px rgba(0,0,0,.3); }
-html.xm :is(.sp3d-hint, .sp3d-status, .sp3d-mt) { background: rgba(11,32,22,.8) !important; color: #FFF8ED !important; }
-html.xm .sp3d-panel { background: var(--xm-panel); border-color: var(--xm-line); }
-
-/* ============ 8. the species, place and info pages ============ */
-html.xm .sl-top { border-bottom: 1px solid var(--xm-line); position: relative; }
-html.xm.xm-sp .sl-top { max-width: none; padding-left: max(16px, calc(50% - 544px)); padding-right: max(16px, calc(50% - 544px)); }
-html.xm .sl-top::after, html.xm .site-top::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
-  background: linear-gradient(90deg, rgba(216,183,106,0), rgba(216,183,106,.8) 30%, rgba(216,183,106,.8) 70%, rgba(216,183,106,0)); }
-html.xm .site-top { position: relative; background: var(--xm-bg); }
-html.xm .sl-brand { color: var(--xm-text) !important; }
-html.xm .sl-brand img, html.xm .site-logo img { border-radius: 8px; }
-html.xm .site-logo { color: var(--xm-text) !important; }
-html.xm :is(.sl-top nav a, .site-top nav a)[aria-current] { color: var(--xm-text) !important; position: relative; }
-html.xm :is(.sl-top nav a, .site-top nav a)[aria-current]::after { content: ""; position: absolute; left: 2px; right: 2px; bottom: 0; height: 2px; border-radius: 2px; background: #D8B76A; }
-html.xm.xm-sp .sp-sec > h2, html.xm.xm-site .card > h2:first-child { position: relative; }
-html.xm .xm-acc::before { content: ""; display: inline-block; width: .95em; height: .75em; margin-right: .35em; vertical-align: -.02em;
-  background: no-repeat center / contain; background-image: var(--xm-sprig-url); }
-html.xm .xm-flake::before { content: ""; display: inline-block; width: .8em; height: .8em; margin-right: .35em; vertical-align: -.05em;
-  background: no-repeat center / contain; background-image: var(--xm-flake-url); }
-html.xm.xm-sp :is(.sp-title h1, .cy-head h1) { color: var(--xm-text) !important; }
-html.xm.xm-sp :is(.sp-sci, .cy-htext .cy-lead, .cy-htext .rg-sub, h1 + .sp-muted, h1 + p) { color: var(--xm-pine-ink, #216B45) !important; }
-html.xm.xm-sp { --xm-pine-ink: #216B45; }
-@media (prefers-color-scheme: dark) { html.xm.xm-sp { --xm-pine-ink: #E6CB86; } }
-html.xm.xm-sp :is(.sp-crumbs, .sp-crumbs a) { color: var(--xm-muted); }
-html.xm.xm-sp :is(.sp-keybox, .sx-box, .sp-safe, .cy-card, .cy-box) { box-shadow: var(--xm-shadow); }
-html.xm.xm-sp .sp-photo img { border-radius: 14px; }
-html.xm.xm-sp .sp-photo { position: relative; }
-html.xm.xm-sp :is(.sp-pills a, .sp-tags a, .sx-chips a, .sp-ftag a) { border-color: var(--xm-line2); }
-html.xm.xm-sp .sp-toc { border-color: var(--xm-line); }
-html.xm.xm-sp .sp-toc a { color: var(--xm-text); }
-html.xm.xm-sp .sp-toc a:hover { color: var(--xm-link); }
-html.xm :is(.site-foot, footer) { border-top: 1px solid var(--xm-line); position: relative; }
-
-/* ============ 11. the Christmas hover (xmas.js adds xm-hv / xm-on): colour rising from the bottom with a soft-gold edge ============ */
-html.xm {
-  --xm-fill-g: linear-gradient(0deg, #123D2A 0%, #216B45 calc(100% - 3px), #E4C57A calc(100% - 1.5px), #E4C57A 100%);
-  --xm-fill-r: linear-gradient(0deg, #A92E3E 0%, #C74745 calc(100% - 3px), #E4C57A calc(100% - 1.5px), #E4C57A 100%);
-}
-html.xm .xm-hv:not(#xm-n) {
-  background-color: var(--xm-bgc) !important;
-  background-image: var(--xm-fill-g), var(--xm-base) !important;
-  background-size: 100% 0%, 100% 100% !important; background-position: 50% 100%, 50% 50% !important;
-  background-repeat: no-repeat !important; background-origin: border-box !important;
-  transition: background-size .25s cubic-bezier(.4,0,.6,1), color .09s ease .03s, border-color .25s ease, box-shadow .25s ease, translate .25s cubic-bezier(.4,0,.6,1) !important;
-}
-html.xm .xm-hv.xm-red:not(#xm-n) { background-image: var(--xm-fill-r), var(--xm-base) !important; }
-html.xm .xm-hv.xm-on:not(#xm-n) {
-  background-size: 100% 100%, 100% 100% !important;
-  color: #FFF8ED !important; border-color: rgba(228,197,122,.9) !important; translate: 0 -2px !important;
-  box-shadow: 0 0 0 1px rgba(228,197,122,.38), 0 0 14px rgba(228,197,122,.42), 0 6px 16px rgba(18,61,42,.22) !important;
-  transition: background-size .35s cubic-bezier(.16,.84,.3,1), color .12s ease, border-color .3s ease, box-shadow .35s ease, translate .35s cubic-bezier(.16,.84,.3,1) !important;
-}
-html.xm .xm-hv.xm-red.xm-on:not(#xm-n) { text-shadow: 0 1px 1px rgba(80,15,25,.35); }
-html.xm .xm-hv.xm-on:not(#xm-n) :is(span, b, strong, em, i, small, svg, label) { color: inherit !important; -webkit-text-fill-color: currentColor; }
-html.xm .xm-hv.xm-on:not(#xm-n):active { translate: 0 0 !important; transition-duration: .18s !important; }
-/* selected tabs: a gold underline that grows from the middle on hover and stays on the chosen tab */
-html.xm .tab-btn { position: relative; }
-html.xm .tab-btn::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 3px; border-radius: 3px; transform: scaleX(0); opacity: .7;
-  background: linear-gradient(90deg, #C9A355, #E9CF8C 50%, #C9A355); transition: transform .35s cubic-bezier(.16,.84,.3,1), opacity .25s; }
-html.xm .tab-btn:hover::after { transform: scaleX(1); }
-html.xm .tab-btn.active::after { transform: scaleX(1); opacity: 1; box-shadow: 0 0 6px rgba(216,183,106,.45); }
-/* dropdown options and list menus */
-html.xm :is(.lang-menu li, [role="listbox"] [role="option"], .sl-menu li, .layers-pop button) { transition: background-color .25s ease, color .2s ease; }
-html.xm :is(.lang-menu li, [role="listbox"] [role="option"], .sl-menu li):hover { background-color: #216B45 !important; color: #FFF8ED !important; box-shadow: inset 0 -1.5px 0 #E4C57A; }
-/* clickable cards: a fine gold border and a soft shadow */
-html.xm #grid .card { transition: border-color .3s ease, box-shadow .3s ease; }
-html.xm #grid .card:hover { border-color: rgba(201,163,85,.85); box-shadow: 0 0 0 1px rgba(228,197,122,.35), 0 10px 26px rgba(18,61,42,.16); }
-@media (prefers-reduced-motion: reduce) {
-  html.xm .xm-hv:not(#xm-n) { background-image: var(--xm-base) !important; background-size: 100% 100% !important; transition: background-color .25s ease, color .25s ease, border-color .25s ease !important; }
-  html.xm .xm-hv.xm-on:not(#xm-n) { background-color: #216B45 !important; background-image: none !important; translate: none !important; box-shadow: 0 0 0 1px rgba(228,197,122,.5) !important; }
-  html.xm .xm-hv.xm-red.xm-on:not(#xm-n) { background-color: #A92E3E !important; }
-  html.xm .tab-btn::after { transition: opacity .25s; }
-}
-
-/* ============ 12. "Merry Christmas from SnakeList!" (once per person; xmas.js) ============ */
-.xm-wl { position: fixed; inset: 0; z-index: 9400; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;
-  background: rgba(6,20,13,.55); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); animation: xm-fade .22s ease both; }
-.xm-wl.xm-wl-out { opacity: 0; transition: opacity .2s ease; }
-@keyframes xm-fade { from { opacity: 0; } to { opacity: 1; } }
-.xm-wl-card { position: relative; width: min(480px, 100%); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow: auto; box-sizing: border-box;
-  background: #FFF8ED; color: #123D2A; border: 1px solid rgba(216,183,106,.8); border-radius: 20px; padding: 34px 28px 24px;
-  box-shadow: 0 0 0 5px rgba(255,248,237,.14), 0 24px 60px rgba(0,0,0,.42); font: 15px/1.55 Inter, system-ui, sans-serif; text-align: left; }
-.xm-wl-card::before { content: ""; position: absolute; left: 22px; right: 22px; top: 0; height: 3px; border-radius: 0 0 3px 3px;
-  background: repeating-linear-gradient(90deg, #A92E3E 0 22px, #D8B76A 22px 30px, #216B45 30px 52px, #D8B76A 52px 60px); }
-.xm-wl-pine { position: absolute; top: 4px; width: 74px; height: 52px; background: url("xmas-sprig.svg") no-repeat center / contain; pointer-events: none; opacity: .95; }
-.xm-wl-pine.l { left: 6px; transform: rotate(-8deg); }
-.xm-wl-pine.r { right: 6px; transform: scaleX(-1) rotate(-8deg); }
-.xm-wl-kicker { margin: 0 0 6px; font: 600 11px/1.3 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: #7E5F1A; text-align: center; }
-.xm-wl-card h2 { margin: 0 0 10px; font: 700 26px/1.2 'Fraunces', Georgia, serif; color: #123D2A; text-align: center; }
-.xm-wl-msg { margin: 0 0 18px; color: #2E4A3B; text-align: center; }
-.xm-wl-sub { margin: 0 0 8px; font-weight: 600; color: #123D2A; }
-.xm-wl-list { list-style: none; margin: 0 0 22px; padding: 12px 14px; display: grid; gap: 9px; border-radius: 14px; background: #FBF1E1; border: 1px solid rgba(216,183,106,.45); }
-.xm-wl-list li { position: relative; padding-left: 26px; color: #3A4F42; font-size: 14.5px; }
-.xm-wl-list li::before { content: ""; position: absolute; left: 0; top: .2em; width: 17px; height: 17px; background: var(--xm-flake-url) no-repeat center / contain; }
-.xm-wl-list b { color: #123D2A; }
-.xm-wl-go { display: block; width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid #3D805A; cursor: pointer; font: 600 15.5px Inter, system-ui, sans-serif;
-  color: #FFF8ED; background: linear-gradient(135deg, #216B45 0%, #123D2A 100%); box-shadow: 0 1px 2px rgba(18,61,42,.25), 0 4px 12px rgba(33,107,69,.22); }
-.xm-wl-go:focus-visible { outline: 2.5px solid #93701F; outline-offset: 3px; }
-html.xm-welcome-open .tour-layer, html.xm-welcome-open .ck-bar { visibility: hidden !important; }
-@media (max-width: 480px) { .xm-wl-card { padding: 30px 18px 18px; border-radius: 18px; } .xm-wl-card h2 { font-size: 22px; } .xm-wl-pine { width: 58px; height: 40px; } }
-@media (prefers-reduced-motion: reduce) { .xm-wl, .xm-wl-card { animation: none !important; } }
-
-/* ============ 9. the preview pill ============ */
+/* ============ the preview pill ============ */
 .xm-pill { position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 2147482000; display: flex; align-items: center; gap: 6px;
   padding: 5px 6px 5px 11px; border-radius: 999px; background: #123D2A; color: #FFF8ED; border: 1px solid rgba(216,183,106,.7);
   font: 600 11.5px/1.2 Inter, system-ui, sans-serif; letter-spacing: .02em; box-shadow: 0 6px 18px rgba(6,20,13,.3); opacity: .94; }
 .xm-pill a { color: #F1DDA4; text-decoration: none; font-weight: 600; }
-.xm-pill a:hover { color: #FFF8ED; }
 .xm-pill svg { width: 13px; height: 13px; flex: none; }
 .xm-pill button { border: 0; background: transparent; color: #FFF8ED; font: 600 15px/1 Inter, sans-serif; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; padding: 0; }
 .xm-pill.xm-pill-min:not(:hover):not(:focus-within) { padding: 0; width: 30px; height: 30px; justify-content: center; opacity: .85; }
 .xm-pill.xm-pill-min:not(:hover):not(:focus-within) > :not(svg) { display: none; }
-.xm-pill.xm-pill-min { cursor: default; }
-.xm-pill button:hover { background: rgba(255,248,237,.12); }
 .xm-pill :focus-visible { outline: 2px solid #D8B76A; outline-offset: 2px; }
 @media (max-width: 640px) { .xm-pill { bottom: calc(78px + env(safe-area-inset-bottom)); right: 8px; padding: 4px 4px 4px 9px; font-size: 10.5px; } .xm-pill a { display: none; } }
-html.sl3d-lock .xm-pill, html.sl-modal-on .xm-pill, html.xm-welcome-open .xm-pill { opacity: 0 !important; pointer-events: none !important; }
-@media print { .xm-pill, .xm-deco { display: none !important; } }
+html.sl3d-lock .xm-pill, html.sl-modal-on .xm-pill, html.xm-welcome-open .xm-pill, body:has(.xm-panel-wrap:not([hidden])) .xm-pill { opacity: 0 !important; pointer-events: none !important; }
+@media print { .xm-pill, .xm-deco, .xm-phat { display: none !important; } }
 
-/* ============ 10. still versions for reduced motion ============ */
+/* ============ still versions for reduced motion ============ */
 @media (prefers-reduced-motion: reduce) {
-  html.xm .xm-bulb, html.xm .hero-cue, html.xm .xm-pop { animation: none !important; }
+  html.xm .xm-bulb, .xm-pt-ring, .xm-music-btn.on::after, .xm-panel, .xm-panel-bg, .xm-snowcap { animation: none !important; }
   html.xm .xm-bulb { opacity: .85; }
-  html.xm :is(button, a, [role="button"]) { transition-duration: .01s !important; }
 }
 
-/* ============ 13. the Christmas Cabin (cabin.js) ============ */
+/* ============ the Christmas Cabin (cabin.js) ============ */
 body.xm-cabin-on .sl-body > .tabs ~ :not(#xm-cabin):not(script):not(style) { display: none !important; }
-/* like the other tabs, the cabin opens without the opening photo above it */
 body.xm-cabin-on #sl-hero, body.xm-cabin-on .hero-cue { display: none !important; }
+/* the tab: SnakeList's own tab look; while the cabin is open it is the chosen one */
 html.xm .tab-btn.xm-tab-cabin { display: inline-flex; align-items: center; gap: 6px; }
-html.xm .tab-btn.xm-tab-cabin .xm-tree-ic { color: #216B45; }
-html.xm[data-sl-theme="dark"] .tab-btn.xm-tab-cabin .xm-tree-ic { color: #8FD0A2; }
-html.xm .tab-btn.xm-tab-cabin.xm-has-gift::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #A92E3E; box-shadow: 0 0 0 2px var(--xm-bg), 0 0 6px rgba(169,46,62,.6); order: 3; }
-/* while the cabin is open it is the chosen tab (the app's own tab keeps its place, just not marked) */
-body.xm-cabin-on .tab-btn.active:not(.xm-tab-cabin) { color: var(--xm-muted) !important; font-weight: inherit; }
-body.xm-cabin-on .tab-btn.active:not(.xm-tab-cabin)::after { transform: scaleX(0) !important; }
-html.xm .tab-btn.xm-tab-cabin.xm-active { color: var(--xm-text) !important; font-weight: 600; }
-html.xm .tab-btn.xm-tab-cabin.xm-active::after { transform: scaleX(1) !important; opacity: 1 !important; box-shadow: 0 0 6px rgba(216,183,106,.45); }
+html.xm .tab-btn.xm-tab-cabin .xm-tree-ic { color: currentColor; }
+html.xm .tab-btn.xm-tab-cabin.xm-has-gift::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #A92E3E; box-shadow: 0 0 6px rgba(169,46,62,.6); }
+body.xm-cabin-on .tabs .tab-btn.active:not(.xm-tab-cabin) { color: var(--text-muted) !important; font-weight: 500 !important; border-bottom-color: transparent !important; }
+body.xm-cabin-on .tabs .tab-btn.active:not(.xm-tab-cabin) .tab-n { color: inherit !important; }
+html.xm .tabs .tab-btn.xm-tab-cabin.xm-active { color: var(--gold); font-weight: 600; border-bottom-color: var(--gold); }
 
-.xc { margin: 16px 0 28px; color: var(--xm-text); font-family: Inter, system-ui, sans-serif; }
-.xc-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin: 0 0 10px; }
-.xc-head h2 { margin: 0; display: inline-flex; align-items: center; gap: 8px; font: 700 clamp(22px, 3vw, 28px)/1.2 'Fraunces', Georgia, serif; color: var(--xm-text); }
-.xc-head h2 .xm-tree-ic { width: 1em; height: 1em; color: #216B45; }
-html.xm[data-sl-theme="dark"] .xc-head h2 .xm-tree-ic { color: #8FD0A2; }
-.xc-prog { margin: 0; font: 600 15px/1.3 Inter, sans-serif; color: var(--xm-gold-ink); }
-.xc-goal { margin: 8px 2px 0; font-size: 14px; color: var(--xm-muted); }
-.xc-stage { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid rgba(216,183,106,.7); box-shadow: 0 0 0 4px rgba(18,61,42,.12), 0 18px 40px rgba(18,61,42,.22); background: #3b2414; }
-.xc-svg { display: block; width: 100%; height: auto; max-height: min(72vh, 640px); user-select: none; -webkit-user-select: none; }
-.xc-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
-.xc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 14px; cursor: pointer;
-  font: 600 15px Inter, system-ui, sans-serif; color: var(--xm-text); background: var(--xm-panel); border: 1px solid var(--xm-line2); position: relative; }
+.xc { margin: 16px 0 28px; color: var(--text); font-family: Inter, system-ui, sans-serif; --xc-gold: #9a7424; }
+[data-sl-theme="dark"] .xc { --xc-gold: #E2C47C; }
+.xc-head { margin: 0 0 10px; }
+.xc-head h2 { margin: 0; display: inline-flex; align-items: center; gap: 8px; font: 600 clamp(22px, 3vw, 28px)/1.2 Fraunces, Georgia, serif; color: var(--text); }
+.xc-head h2 .xm-tree-ic { width: 1em; height: 1em; color: var(--gold); }
+.xc-stage { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 18px 40px rgba(20,12,6,.28); background: #1c1008; }
+.xc-svg { display: block; width: 100%; height: auto; user-select: none; -webkit-user-select: none; }
+.xc-ctrl { position: relative; }
+/* the progress, in gold, under the cabin */
+.xc-prog { margin: 10px 2px 0; font: 600 15px/1.35 Inter, sans-serif; color: var(--xc-gold); }
+.xc-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; }
+.xc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 16px; border-radius: 12px; cursor: pointer;
+  font: 600 14.5px Inter, system-ui, sans-serif; color: var(--text); background: var(--surface); border: 1px solid var(--border); position: relative; }
+.xc-btn:hover { background: var(--surface-hover); }
 .xc-btn svg { width: 22px; height: 22px; flex: none; }
 .xc-btn:disabled { opacity: .5; cursor: not-allowed; }
-.xc-btn.xc-tasks { color: #FFF8ED; background: linear-gradient(135deg, #B63848, #8D2233); border-color: #C25563; }
-.xc-btn b { font: 700 13px Inter, sans-serif; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; display: inline-grid; place-items: center; background: rgba(216,183,106,.3); color: inherit; }
-.xc-badge { position: absolute; top: -7px; right: -7px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: #E4C57A; color: #123D2A; font: 700 12.5px/22px Inter, sans-serif; font-style: normal; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
-.xc-sound[aria-pressed="false"] .xc-snd-on, .xc-sound[aria-pressed="true"] .xc-snd-off { display: none; }
-@media (max-width: 640px) { .xc-bar { display: grid; grid-template-columns: 1fr 1fr; } .xc-btn { min-height: 52px; padding: 0 10px; font-size: 14.5px; } .xc-stage { border-radius: 14px; margin: 0 -4px; } }
+.xc-btn b { font: 700 13px Inter, sans-serif; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; display: inline-grid; place-items: center; background: var(--surface-hover); color: inherit; }
+.xc-chip[aria-pressed="false"] { opacity: .62; }
+.xc-chip[aria-pressed="false"] svg { filter: grayscale(1); }
+.xc-badge { position: absolute; top: -7px; right: -7px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: #A92E3E; color: #fff; font: 700 12.5px/22px Inter, sans-serif; font-style: normal; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+/* the sound: icons and volume bars only */
+.xc-audio { flex: 1 1 260px; min-width: 240px; }
+.xc-audio .xm-audio { display: flex; gap: 14px; }
+.xc-audio .xm-au-row { flex: 1; min-width: 0; }
+.xm-audio-compact .xm-au-row label span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.xc-fs { position: absolute; top: 10px; right: 10px; z-index: 3; width: 38px; height: 38px; border-radius: 10px; display: inline-grid; place-items: center; cursor: pointer; padding: 0;
+  color: #fff; background: rgba(20,12,6,.55); border: 1px solid rgba(255,255,255,.35); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.xc-fs:hover { background: rgba(20,12,6,.75); }
+@media (max-width: 640px) { .xc-bar { display: grid; grid-template-columns: 1fr 1fr; } .xc-btn { min-height: 50px; padding: 0 10px; font-size: 14px; } .xc-audio { grid-column: 1 / -1; } .xc-stage { border-radius: 14px; margin: 0 -4px; } }
+
+/* full screen, like the map's: the scene fills the screen, the progress and buttons sit over its bottom */
+.xc.xc-full { position: fixed; inset: 0; z-index: 2100; margin: 0; background: #120a05; display: flex; flex-direction: column; }
+.xc.xc-full .xc-head { display: none; }
+.xc.xc-full .xc-stage { flex: 1; border: 0; border-radius: 0; box-shadow: none; display: flex; align-items: center; justify-content: center; }
+.xc.xc-full .xc-svg { width: 100%; height: 100%; max-height: none; }
+.xc.xc-full .xc-ctrl { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 26px 16px calc(14px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(12,7,3,0), rgba(12,7,3,.72) 38%, rgba(12,7,3,.85)); }
+.xc.xc-full .xc-prog { color: #E9CF8C; margin-top: 0; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+.xc.xc-full .xc-btn { background: rgba(255,248,237,.12); color: #fff; border-color: rgba(255,255,255,.3); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.xc.xc-full .xc-btn b { background: rgba(255,255,255,.18); }
+.xc.xc-full .xc-fs { top: calc(10px + env(safe-area-inset-top)); }
+html.xm-cabin-full, body.xm-cabin-full { overflow: hidden; }
+body.xm-cabin-full .xm-pill { display: none; }
 
 /* the scene's life: fire, lights, snow, presents */
 .xc-fire path { transform-box: fill-box; transform-origin: 50% 100%; }
 .xc-f1 { animation: xc-flick 1.9s ease-in-out infinite; }
+.xc-f4 { animation: xc-flick 1.5s ease-in-out -.7s infinite; }
 .xc-f2 { animation: xc-flick 1.3s ease-in-out -.4s infinite; }
 .xc-f3 { animation: xc-flick 1.1s ease-in-out -.8s infinite; }
-@keyframes xc-flick { 0%, 100% { transform: scale(1, 1) skewX(0); } 30% { transform: scale(1.04, 1.08) skewX(-2deg); } 60% { transform: scale(.97, .94) skewX(2deg); } }
-.xc-firelight, .xc-warmth { animation: xc-warm 3.2s ease-in-out infinite; }
-@keyframes xc-warm { 0%, 100% { opacity: .9; } 50% { opacity: 1; } }
+@keyframes xc-flick { 0%, 100% { transform: scale(1, 1) skewX(0); } 30% { transform: scale(1.05, 1.1) skewX(-3deg); } 60% { transform: scale(.96, .93) skewX(2.5deg); } }
+.xc-firelight { mix-blend-mode: screen; animation: xc-warm 2.3s ease-in-out infinite; }
+.xc-embers { animation: xc-warm 1.7s ease-in-out infinite; }
+@keyframes xc-warm { 0%, 100% { opacity: .78; } 35% { opacity: 1; } 70% { opacity: .86; } }
 .xc-roar .xc-fire { animation: xc-roar 2.4s ease-out; transform-box: fill-box; transform-origin: 50% 100%; }
 .xc-roar .xc-firelight { animation: xc-roarl 2.4s ease-out; }
 @keyframes xc-roar { 0% { transform: scale(1); filter: none; } 20% { transform: scale(1.22, 1.38); filter: brightness(1.35) saturate(1.2); } 100% { transform: scale(1); filter: none; } }
-@keyframes xc-roarl { 20% { opacity: 1; transform: scale(1.4); } }
-.xc-firelight { transform-box: fill-box; transform-origin: 50% 50%; }
+@keyframes xc-roarl { 20% { opacity: 1; filter: brightness(1.6); } }
 .xc-spk { fill: #ffd27a; animation: xc-spark 2.2s ease-out var(--dl, 0s) both; }
 @keyframes xc-spark { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--dx, 0), -330px); opacity: 0; } }
-.xc-gl { fill: #fff3cf; } .xc-gl0 { animation: xc-tw 3.6s ease-in-out infinite; } .xc-gl1 { animation: xc-tw 4.4s ease-in-out -1.2s infinite; } .xc-gl2 { animation: xc-tw 3s ease-in-out -2s infinite; }
+/* fairy lights: on, twinkling softly; with Festive lights off they hang there unlit */
+.xc-bulb { fill: #fff3cf; } .xc-bglow { fill: #ffe7a8; opacity: .45; }
+.xc-gl0 { animation: xc-tw 3.6s ease-in-out infinite; } .xc-gl1 { animation: xc-tw 4.4s ease-in-out -1.2s infinite; } .xc-gl2 { animation: xc-tw 3s ease-in-out -2s infinite; }
 .xc-tl0 { animation: xc-tw 4s ease-in-out infinite; } .xc-tl1 { animation: xc-tw 3.2s ease-in-out -1s infinite; } .xc-tl2 { animation: xc-tw 4.6s ease-in-out -2.2s infinite; }
+.xc-lglow { opacity: .3; }
 .xc-tw { animation-duration: 1.6s !important; }
-@keyframes xc-tw { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
-.xc-sn { fill: #fff; animation: xc-snow var(--d, 5s) linear var(--o, 0s) infinite; }
-@keyframes xc-snow { from { transform: translateY(-200px); } to { transform: translateY(210px); } }
+@keyframes xc-tw { 0%, 100% { opacity: .7; } 50% { opacity: 1; } }
+.xc-lights-off :is(.xc-gl0, .xc-gl1, .xc-gl2, .xc-tl0, .xc-tl1, .xc-tl2) { animation: none; opacity: 1; }
+.xc-lights-off :is(.xc-bglow, .xc-lglow, .xc-tglow) { display: none; }
+.xc-lights-off :is(.xc-bulb, .xc-lb) { fill: #6d6a5e; }
+.xc-sn { fill: #fff; opacity: .9; animation: xc-snow var(--d, 5s) linear var(--o, 0s) infinite; }
+@keyframes xc-snow { from { transform: translate(0, 0); } to { transform: translate(var(--dx, 0), 230px); } }
+.xc-snow-off .xc-wsnow { display: none; }
 .xc-halo { animation: xc-tw 2.4s ease-in-out infinite; }
-.xc-glow { filter: drop-shadow(0 0 6px #b8ff9a); }
+.xc-glow { filter: drop-shadow(0 0 5px #b8ff9a); }
 .xc-present { cursor: pointer; outline: none; }
 .xc-present .xc-pglow { animation: xc-tw 2s ease-in-out infinite; }
-.xc-present:hover > rect, .xc-present:focus-visible > rect { filter: brightness(1.12); }
+.xc-present:hover, .xc-present:focus-visible { filter: brightness(1.12); }
 .xc-present:focus-visible .xc-pglow { opacity: 1; fill: #E4C57A; }
 .xc-present { animation: xc-bob 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes xc-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 
-/* task list and decorations: panels over the cabin */
-.xc-dlg { position: fixed; inset: 0; z-index: 9350; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(6,20,13,.55); }
-.xc-dlg[hidden] { display: none; }
-.xc-card { position: relative; width: min(560px, 100%); max-height: calc(100dvh - 32px); overflow: auto; box-sizing: border-box; padding: 26px 22px 20px; border-radius: 18px;
-  background: #FFF8ED; color: #123D2A; border: 1px solid rgba(216,183,106,.8); box-shadow: 0 24px 60px rgba(0,0,0,.4); animation: xm-pop .22s var(--xm-ease) both; }
-.xc-card h3 { margin: 0 44px 4px 0; font: 700 22px/1.2 'Fraunces', Georgia, serif; }
-.xc-sub { margin: 0 0 14px; color: #3A4F42; font-size: 14px; }
-.xc-x { position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #B9C4B0; background: #FFFCF6; color: #123D2A; font: 400 26px/1 Inter, sans-serif; cursor: pointer; }
-.xc-tlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.xc-tlist li { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; background: #FBF1E1; border: 1px solid rgba(216,183,106,.45); }
+/* the panels (the size of the Achievements panel: .xm-panel in xmas.css) */
+.xc-sub { margin: 0 0 14px; color: var(--text-muted); font-size: 14px; }
+.xc-hint { margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; background: rgba(216,183,106,.18); border: 1px solid rgba(184,145,63,.45); font-size: 14px; }
+.xc-tlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.xc-tlist li { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); }
 .xc-tlist li.ready { border-color: #A92E3E; box-shadow: 0 0 0 2px rgba(169,46,62,.15); }
-.xc-tlist li.op { background: #EEF3EA; border-color: #B9C4B0; }
-.xc-tlist li.xc-ms { background: #FFF3D6; }
-.xc-tt { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.xc-tlist li.op { opacity: .75; }
+.xc-tlist li.xc-hi { border-color: #B8913F; box-shadow: 0 0 0 3px rgba(216,183,106,.45); animation: xc-hi 1.2s ease-in-out 2; }
+@keyframes xc-hi { 50% { box-shadow: 0 0 0 6px rgba(216,183,106,.25); } }
+.xc-tt { flex: 1; min-width: 0; display: grid; gap: 4px; }
 .xc-tt b { font-size: 15px; }
-.xc-tt small { color: #4A5C4F; font-size: 12.5px; }
-.xc-rw { color: #7E5F1A; font-size: 13px; font-weight: 600; }
-.xc-pbar { display: block; height: 7px; border-radius: 999px; background: #E6DCC8; overflow: hidden; margin-top: 3px; }
-.xc-pbar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #216B45, #2B7A50); transition: width .4s ease; }
-.xc-pn { font-size: 12px; color: #4A5C4F; }
-.xc-st { flex: none; min-height: 44px; padding: 0 14px; border-radius: 12px; font: 600 13.5px Inter, sans-serif; display: inline-grid; place-items: center; border: 1px solid #B9C4B0; background: #FFFCF6; color: #123D2A; cursor: pointer; }
-.xc-st-go { background: linear-gradient(135deg, #B63848, #8D2233); color: #FFF8ED; border-color: #C25563; }
-.xc-st-op { cursor: default; background: transparent; border-color: transparent; color: #216B45; }
+.xc-tt small { color: var(--text-muted); font-size: 12.5px; }
+.xc-rw { display: flex; flex-wrap: wrap; gap: 4px 10px; color: var(--text-muted); font-size: 12.5px; font-weight: 600; }
+.xc-rwi { display: inline-flex; align-items: center; gap: 3px; font-style: normal; }
+.xc-rwi .xc-th { width: 22px; height: 22px; }
+.xc-pbar { display: block; height: 6px; border-radius: 999px; background: rgba(63,125,67,.16); overflow: hidden; margin-top: 2px; }
+.xc-pbar i { display: block; height: 100%; border-radius: inherit; background: var(--gold-fill); transition: width .4s ease; }
+.xc-pn { font-size: 12px; color: var(--text-muted); }
+.xc-st { flex: none; min-height: 42px; padding: 0 14px; border-radius: 10px; font: 600 13.5px Inter, sans-serif; display: inline-grid; place-items: center; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+.xc-st-how { background: var(--gold-fill); color: var(--on-fill, #fff); border-color: transparent; }
+.xc-st-go { background: #A92E3E; color: #fff; border-color: transparent; }
+.xc-st-op { cursor: default; background: transparent; border-color: transparent; color: var(--gold); }
 span.xc-st { cursor: default; }
-.xc-dlist fieldset { border: 0; margin: 0 0 14px; padding: 0; }
-.xc-dlist legend { font: 700 14px Inter, sans-serif; margin-bottom: 6px; padding: 0; }
-.xc-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
-.xc-opt { display: flex; align-items: center; gap: 9px; min-height: 52px; padding: 6px 10px; border-radius: 12px; border: 1px solid #B9C4B0; background: #FFFCF6; color: #123D2A; text-align: left; font: 500 13.5px/1.25 Inter, sans-serif; cursor: pointer; }
-.xc-opt small { display: block; color: #7E5F1A; font-size: 11.5px; }
-.xc-opt.on { border-color: #216B45; box-shadow: 0 0 0 2px #216B45 inset; background: #EEF5EE; font-weight: 600; }
-.xc-opt:disabled { opacity: .55; cursor: not-allowed; }
-.xc-sw { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(18,61,42,.25); box-shadow: inset 0 -3px 6px rgba(0,0,0,.12); }
+.xc-cat { border: 0; margin: 0 0 16px; padding: 0; min-width: 0; }
+.xc-cat legend { font: 700 14.5px Inter, sans-serif; margin-bottom: 8px; padding: 0; }
+.xc-cat legend small { font-weight: 500; color: var(--text-muted); margin-left: 6px; }
+.xc-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.xc-opt { display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 6px 10px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); text-align: left; font: 500 13.5px/1.25 Inter, sans-serif; cursor: pointer; }
+.xc-opt b { display: block; font-weight: 600; }
+.xc-opt small { display: inline-flex; align-items: center; gap: 3px; color: var(--text-muted); font-size: 11.5px; margin-top: 2px; }
+.xc-opt:hover { background: var(--surface-hover); }
+.xc-opt.on { border-color: var(--gold-fill); box-shadow: 0 0 0 2px var(--gold-fill) inset; }
+.xc-opt.locked .xc-th { filter: grayscale(.85) opacity(.55); }
+.xc-opt.locked b { color: var(--text-muted); }
+.xc-th { flex: none; width: 44px; height: 44px; border-radius: 10px; background: radial-gradient(circle at 50% 40%, #3a2412, #1e120a); color: #e9dcc8; overflow: visible; }
+.xc-cat-ornament .xc-opts { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 
 /* opening a present */
-.xc-open { position: fixed; inset: 0; z-index: 9360; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(6,20,13,.62); }
-.xc-open[hidden] { display: none; }
-.xc-ob { position: relative; width: min(440px, 100%); min-height: 380px; display: grid; place-items: center; padding: 20px; box-sizing: border-box; border-radius: 22px; background: radial-gradient(circle at 50% 45%, #2a5a3e, #123D2A 70%); border: 1px solid rgba(216,183,106,.75); box-shadow: 0 24px 60px rgba(0,0,0,.45); }
-.xc-ob .xc-x { background: rgba(255,248,237,.92); }
+.xc-ob { display: flex; flex-direction: column; }
+.xc-ostage { position: relative; flex: 1; display: grid; place-items: center; min-height: 320px; border-radius: 14px; background: radial-gradient(circle at 50% 45%, #3a2a18, #1a0f07 75%); color: #FFF8ED; padding: 20px 16px 70px; }
 .xc-gift { position: relative; width: 150px; height: 140px; transform: translateY(60px) scale(.5); opacity: 0; transition: transform .6s cubic-bezier(.2,.9,.3,1.2), opacity .3s; }
 .xc-o1 .xc-gift { transform: none; opacity: 1; animation: xc-wobble .5s ease-in-out .5s 1; }
 @keyframes xc-wobble { 25% { transform: rotate(-5deg); } 75% { transform: rotate(5deg); } }
@@ -577,10 +322,10 @@ span.xc-st { cursor: default; }
 .xc-bow::before, .xc-bow::after { content: ""; position: absolute; top: 2px; width: 30px; height: 20px; border-radius: 50%; border: 6px solid #E4C57A; box-sizing: border-box; }
 .xc-bow::before { left: -2px; transform: rotate(-22deg); } .xc-bow::after { right: -2px; transform: rotate(22deg); }
 .xc-gift-wrap-gold .xc-bow::before, .xc-gift-wrap-gold .xc-bow::after { border-color: #A92E3E; }
-.xc-paper { top: 40px; bottom: 0; width: 50%; z-index: 1; background: inherit; transition: transform .7s cubic-bezier(.3,.7,.3,1) .15s, opacity .5s .4s; }
+.xc-paper { top: 40px; bottom: 0; width: 50%; z-index: 1; transition: transform .7s cubic-bezier(.3,.7,.3,1) .15s, opacity .5s .4s; }
 .xc-paper.l { left: 10px; width: 65px; background: #A92E3E; border-radius: 6px 0 0 6px; } .xc-paper.r { right: 10px; width: 65px; background: #A92E3E; border-radius: 0 6px 6px 0; }
 .xc-gift-wrap-gold .xc-box, .xc-gift-wrap-gold .xc-paper, .xc-gift-wrap-gold .xc-lid { background: repeating-linear-gradient(35deg, #D8B76A 0 10px, #FFF8ED 0 20px); }
-.xc-gift-wrap-gold .xc-rib, .xc-gift-wrap-gold .xc-bow { background-color: transparent; } .xc-gift-wrap-gold .xc-rib { background: #A92E3E; } .xc-gift-wrap-gold .xc-bow { border-color: #A92E3E; }
+.xc-gift-wrap-gold .xc-rib { background: #A92E3E; }
 .xc-gift-wrap-tartan .xc-box, .xc-gift-wrap-tartan .xc-paper, .xc-gift-wrap-tartan .xc-lid { background: linear-gradient(90deg, transparent 45%, rgba(169,46,62,.9) 45% 50%, transparent 50%), linear-gradient(0deg, transparent 45%, rgba(228,197,122,.9) 45% 50%, transparent 50%), #216B45; background-size: 22px 22px; }
 .xc-o2 .xc-bow { transform: translateY(-60px) rotate(-30deg); opacity: 0; }
 .xc-o2 .xc-rib { transform: scaleY(0); opacity: 0; }
@@ -588,44 +333,37 @@ span.xc-st { cursor: default; }
 .xc-o2 .xc-paper.l { transform: translateX(-70px) rotate(-18deg); opacity: 0; } .xc-o2 .xc-paper.r { transform: translateX(70px) rotate(18deg); opacity: 0; }
 .xc-o2 .xc-box { box-shadow: 0 -30px 60px 10px rgba(255,231,168,.6); }
 .xc-o3 .xc-gift { display: none; }
-.xc-reveal { text-align: center; color: #FFF8ED; animation: xm-pop .3s var(--xm-ease) both; }
+.xc-reveal { text-align: center; animation: xm-fade .3s ease both; }
 .xc-reveal[hidden] { display: none; }
-.xc-rk { margin: 0 0 10px; font: 600 12px/1.2 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #E4C57A; }
-.xc-ritem { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 6px 0; font: 700 19px/1.3 'Fraunces', Georgia, serif; }
-.xc-ritem .xc-sw { width: 34px; height: 34px; }
-.xc-rsub { margin: 8px 0 16px; color: rgba(255,248,237,.85); font-size: 14px; }
+.xc-rk { margin: 0 0 12px; font: 600 12px/1.2 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #E4C57A; }
+.xc-ritems { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.xc-ritem { display: grid; justify-items: center; gap: 4px; width: 130px; font: 600 15px/1.25 Inter, sans-serif; }
+.xc-ritem small { color: rgba(255,248,237,.7); font-size: 12px; font-weight: 500; }
+.xc-ritem .xc-th { width: 74px; height: 74px; background: rgba(255,248,237,.08); }
+.xc-rsub { margin: 12px 0 16px; color: rgba(255,248,237,.85); font-size: 14px; }
 .xc-racts { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-.xc-racts .xc-use { background: linear-gradient(135deg, #B63848, #8D2233); color: #FFF8ED; border-color: #C25563; }
+.xc-racts .xc-use { background: #A92E3E; color: #fff; border-color: transparent; }
 .xc-skip { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(216,183,106,.8); background: rgba(9,26,18,.5); color: #FFF8ED; font: 600 14px Inter, sans-serif; cursor: pointer; }
 .xc-skip[hidden] { display: none; }
 
 /* the completion celebration */
-.xc-celebrate { position: absolute; inset: 0; overflow: hidden; display: grid; place-items: center; background: radial-gradient(circle at 50% 40%, rgba(255,231,168,.35), rgba(18,61,42,.35)); }
+.xc-celebrate { position: absolute; inset: 0; z-index: 4; overflow: hidden; display: grid; place-items: center; background: radial-gradient(circle at 50% 40%, rgba(255,231,168,.35), rgba(18,61,42,.35)); }
 .xc-celebrate[hidden] { display: none; }
 .xc-celebrate i { position: absolute; top: -10px; left: var(--x); width: 7px; height: 12px; border-radius: 2px; background: #E4C57A; animation: xc-conf var(--d) linear var(--w) infinite; }
 .xc-celebrate i:nth-child(3n) { background: #A92E3E; } .xc-celebrate i:nth-child(3n+1) { background: #FFF8ED; width: 6px; height: 6px; border-radius: 50%; }
 @keyframes xc-conf { to { transform: translateY(700px) rotate(540deg); } }
-.xc-cmsg { position: relative; display: grid; gap: 8px; justify-items: center; max-width: 360px; margin: 16px; padding: 18px 20px; border-radius: 16px; text-align: center; background: #FFF8ED; color: #123D2A; border: 1px solid #D8B76A; box-shadow: 0 16px 40px rgba(0,0,0,.35); }
-.xc-cmsg b { font: 700 20px/1.2 'Fraunces', Georgia, serif; }
-
-/* nothing of the preview's own label over the cabin's panels */
-body:has(.xc-dlg:not([hidden])) .xm-pill, body:has(.xc-open:not([hidden])) .xm-pill { opacity: 0 !important; pointer-events: none !important; }
-
-/* the toast */
-#xm-cabin-toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 9380; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 24px); box-sizing: border-box;
-  padding: 8px 8px 8px 12px; border-radius: 16px; background: #123D2A; color: #FFF8ED; border: 1px solid rgba(216,183,106,.75); box-shadow: 0 12px 30px rgba(6,20,13,.4); font: 600 14px/1.3 Inter, sans-serif; animation: xm-pop .25s var(--xm-ease) both; transition: opacity .35s; }
-#xm-cabin-toast.xc-ct-out, #xm-cabin-toast.xm-ct-out { opacity: 0; }
-#xm-cabin-toast svg { width: 26px; height: 26px; display: block; }
-#xm-cabin-toast button, #xm-cabin-toast a { min-height: 40px; padding: 0 12px; border-radius: 10px; border: 0; background: #FFF8ED; color: #123D2A; font: 600 13.5px Inter, sans-serif; cursor: pointer; text-decoration: none; display: inline-grid; place-items: center; white-space: nowrap; }
-#xm-cabin-toast .xm-ct-x { background: transparent; color: #FFF8ED; font-size: 22px; padding: 0 8px; }
-@media (max-width: 480px) { #xm-cabin-toast { font-size: 13px; } }
+.xc-cmsg { position: relative; display: grid; gap: 8px; justify-items: center; max-width: 360px; margin: 16px; padding: 18px 20px; border-radius: 16px; text-align: center; background: var(--surface); color: var(--text); border: 1px solid var(--border); box-shadow: 0 16px 40px rgba(0,0,0,.35); }
+.xc-cmsg b { font: 600 20px/1.2 Fraunces, Georgia, serif; }
 
 @media (prefers-reduced-motion: reduce) {
-  .xc-f1, .xc-f2, .xc-f3, .xc-firelight, .xc-warmth, .xc-gl0, .xc-gl1, .xc-gl2, .xc-tl0, .xc-tl1, .xc-tl2, .xc-sn, .xc-halo, .xc-present, .xc-present .xc-pglow, .xc-celebrate i { animation: none !important; }
+  .xc-f1, .xc-f2, .xc-f3, .xc-f4, .xc-firelight, .xc-embers, .xc-gl0, .xc-gl1, .xc-gl2, .xc-tl0, .xc-tl1, .xc-tl2, .xc-sn, .xc-halo, .xc-present, .xc-present .xc-pglow, .xc-celebrate i, .xc-tlist li.xc-hi { animation: none !important; }
   .xc-sn { display: none; }
   .xc-roar .xc-fire, .xc-roar .xc-firelight { animation: none !important; filter: brightness(1.25); }
-  .xc-card, .xc-reveal, #xm-cabin-toast { animation: none !important; }
+}
+/* on a tall screen (phone held upright) the buttons sit under the scene in full screen, not over it */
+@media (max-aspect-ratio: 1/1) {
+  .xc.xc-full .xc-ctrl { position: static; background: #120a05; padding-top: 12px; }
 }
 
-/* generated by tools/build-christmas.py: the sprig and snowflake used as heading accents */
-html.xm { --xm-sprig-url: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 26 18%22%3E%3Cpath d=%22M2 14Q12 10 23 3%22 stroke=%22%235b3d24%22 stroke-width=%221.3%22 fill=%22none%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M4 13l-1.8 -4.7M4 13l3.9 2.9M7 11.5l-1.7 -4.4M7 11.5l3.7 2.7M10 10l-1.6 -4.2M10 10l3.5 2.6M13 8.5l-1.5 -4M13 8.5l3.3 2.4M16 7l-1.4 -3.7M16 7l3.1 2.3M19 5.5l-1.4 -3.5M19 5.5l2.9 2.1M22 4l-1.3 -3.2M22 4l2.7 2%22 stroke=%22%232B7A50%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 fill=%22none%22/%3E%3Ccircle cx=%225.5%22 cy=%2215%22 r=%222.3%22 fill=%22%23B63848%22/%3E%3Ccircle cx=%229.2%22 cy=%2215.6%22 r=%222%22 fill=%22%23A92E3E%22/%3E%3Ccircle cx=%224.9%22 cy=%2214.3%22 r=%22.7%22 fill=%22%23fff%22 opacity=%22.7%22/%3E%3C/svg%3E"); --xm-flake-url: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-12 -12 24 24%22%3E%3Cg stroke=%22%23B8913F%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 fill=%22none%22%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%280%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%2860%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%28120%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%28180%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%28240%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%28300%29%22/%3E%3C/g%3E%3C/svg%3E"); }
+/* generated by tools/build-christmas.py: the sprig and snowflake used as small accents */
+html.xm, .xm-panel { --xm-sprig-url: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 26 18%22%3E%3Cpath d=%22M2 14Q12 10 23 3%22 stroke=%22%235b3d24%22 stroke-width=%221.3%22 fill=%22none%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M4 13l-1.8 -4.7M4 13l3.9 2.9M7 11.5l-1.7 -4.4M7 11.5l3.7 2.7M10 10l-1.6 -4.2M10 10l3.5 2.6M13 8.5l-1.5 -4M13 8.5l3.3 2.4M16 7l-1.4 -3.7M16 7l3.1 2.3M19 5.5l-1.4 -3.5M19 5.5l2.9 2.1M22 4l-1.3 -3.2M22 4l2.7 2%22 stroke=%22%232B7A50%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 fill=%22none%22/%3E%3Ccircle cx=%225.5%22 cy=%2215%22 r=%222.3%22 fill=%22%23B63848%22/%3E%3Ccircle cx=%229.2%22 cy=%2215.6%22 r=%222%22 fill=%22%23A92E3E%22/%3E%3Ccircle cx=%224.9%22 cy=%2214.3%22 r=%22.7%22 fill=%22%23fff%22 opacity=%22.7%22/%3E%3C/svg%3E"); --xm-flake-url: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-12 -12 24 24%22%3E%3Cg stroke=%22%23B8913F%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 fill=%22none%22%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%280%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%2860%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%28120%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%28180%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%28240%29%22/%3E%3Cpath d=%22M0 0V-10M0 -6.5L-2.6 -9M0 -6.5L2.6 -9%22 transform=%22rotate%28300%29%22/%3E%3C/g%3E%3C/svg%3E"); }

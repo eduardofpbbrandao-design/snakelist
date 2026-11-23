@@ -30,7 +30,9 @@ Artifact tool's `files` maps ({published path: source path}), at most 250 files 
     an On / Off switch ("Previews" button in the header, remembered in this browser). First one: the
     Christmas preview (christmas/ - the theme and the Christmas Cabin), on unless --christmas off; it is
     switched on through window.SL_XMAS_FORCE before tools/xmas_loader.js runs. A future preview is one
-    more entry in `previews` (plus whatever its own files and head script need).
+    more entry in `previews` (plus whatever its own files and head script need). Second: the events preview
+    (events/ - countdown, Advent Calendar, seasonal achievements, subscription page, cursor), on unless --events off;
+    tools/events_loader.js reads its switch through window.SL_PREVIEW_ON("events").
 """
 import io, json, os, re, shutil, sys, time, urllib.request
 from concurrent.futures import ProcessPoolExecutor
@@ -791,7 +793,7 @@ def pack_obs_photos(cache, out, obs, rows_, put, log):
 
 
 
-def build(out, christmas_default=True, cache=DEFAULT_CACHE, offline=False, log=print):
+def build(out, christmas_default=True, events_default=True, cache=DEFAULT_CACHE, offline=False, log=print):
     t0 = time.time()
     src_path = os.path.join(ROOT, "snakelist-synced.html")
     html = open(src_path, encoding="utf-8").read()
@@ -959,11 +961,22 @@ def build(out, christmas_default=True, cache=DEFAULT_CACHE, offline=False, log=p
                 if rel != "christmas/index.html":  # (the website's redirect page)
                     put(rel, src=p)
         previews.append({"key": "xmas", "label": "Christmas preview", "about": "Christmas look + Christmas Cabin", "on": christmas_default})
+    # the events preview (events/ - countdown, Advent Calendar, seasonal achievements, subscription page, cursor)
+    if os.path.isfile(os.path.join(ROOT, "events", "core.js")):
+        for f in sorted(os.listdir(os.path.join(ROOT, "events"))):
+            if f.endswith((".js", ".css")):
+                put("events/" + f, src=os.path.join(ROOT, "events", f))
+        previews.append({"key": "events", "label": "Events preview", "about": "Event countdown, Advent Calendar, seasonal achievements, subscription page, cursor", "on": events_default})
     inject += "<script>" + PREVIEWS_HEAD_JS.replace("__PREVIEWS__", compact(previews)) + "</script>\n"
     if any(p["key"] == "xmas" for p in previews):
         loader = open(os.path.join(ROOT, "tools", "xmas_loader.js"), encoding="utf-8").read().split("*/", 1)[1].strip()
         loader = loader.replace("__ROOT__", 'new URL("./",location.href).href').replace("__KIND__", '"xm-app"')
         inject += "<script>" + loader + "</script>\n"
+    if any(p["key"] == "events" for p in previews):
+        import hashlib
+        evv = hashlib.sha1(b"".join(open(os.path.join(ROOT, "events", f), "rb").read() for f in sorted(os.listdir(os.path.join(ROOT, "events"))) if f.endswith((".js", ".css")))).hexdigest()[:10]
+        loader = open(os.path.join(ROOT, "tools", "events_loader.js"), encoding="utf-8").read().split("*/", 1)[1].strip()
+        inject += "<script>" + loader.replace("__ROOT__", 'new URL("./",location.href).href').replace("__EVV__", '"%s"' % evv) + "</script>\n"
     if previews:
         inject += "<script>" + PREVIEWS_UI_JS + "</script>\n<style>" + PREVIEWS_CSS + "</style>\n"
     m = re.match(r"\s*<title>[^<]*</title>\n?", html)
@@ -1005,10 +1018,11 @@ if __name__ == "__main__" and "--fetch-only" not in sys.argv:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--out", required=True)
     ap.add_argument("--christmas", choices=("on", "off"), default="on", help="the Christmas preview's starting state (the viewer can switch it)")
+    ap.add_argument("--events", choices=("on", "off"), default="on", help="the events preview's starting state (the viewer can switch it)")
     ap.add_argument("--cache", default=DEFAULT_CACHE)
     ap.add_argument("--offline", action="store_true", help="use only what's in the download cache")
     a = ap.parse_args()
-    build(os.path.abspath(a.out), christmas_default=a.christmas == "on", cache=a.cache, offline=a.offline)
+    build(os.path.abspath(a.out), christmas_default=a.christmas == "on", events_default=a.events == "on", cache=a.cache, offline=a.offline)
 
 
 if __name__ == "__main__" and "--fetch-only" in sys.argv:

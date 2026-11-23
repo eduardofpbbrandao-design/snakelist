@@ -1,12 +1,20 @@
 SnakeList - Christmas preview: credits
 
 All Christmas artwork in this folder is original and drawn by code for SnakeList
-(tools/christmas_art.py and tools/christmas/xmas.js): the pine branches, fairy lights,
-baubles, pine sprigs, snowflakes, snowfall and the Santa hat. No outside images,
-fonts or libraries were added, so there is nothing to license or credit.
+(tools/christmas_art.py, tools/christmas/xmas.js and tools/christmas/cabin.js): the pine
+branches, fairy lights, baubles, snowflakes, snowfall, the Santa hats, the stocking, the
+snow on the logo, the little Santa-hat snakes, the ornaments and the Christmas Cabin room
+(painted by code and rendered to xmas-cabin.webp when the preview is built). No outside
+images, fonts or libraries were added, so there is nothing to license or credit.
 
-The snake S in the Christmas icon is SnakeList's own logo, taken from the live site
-each time the preview is built.
+Music: "Jingle Bells" by James Lord Pierpont (1857), public domain. It is not a
+recording - the tune is played in the browser by code (Web Audio: bells, a soft pad,
+a bass line and sleigh bells, arranged for SnakeList). The fireplace sound is made the
+same way. Nothing is downloaded.
+
+The snake S in the Christmas icon and logo is SnakeList's own logo, taken from the live
+site each time the preview is built. The little snakes' colours come from SnakeList's own
+3D snake models (species/3d/models.json).
 
 Species photographs, maps and 3D models shown in the preview are the live site's own
 files (credited there as usual); the preview links to them and does not copy them.
