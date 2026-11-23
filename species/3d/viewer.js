@@ -8,7 +8,7 @@
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
 import * as NATURE from './nature.js?r=587'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=587'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as EXTRA from './extras.js?r=590'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
 // v5.93: the habitats each snake can be shown in (tools/habitat_looks.py: the first is shown first; snakes with only one are
 // not listed). Loaded with this module - it waits for it up to 3 s, so the first scene is already the right one (if it comes
