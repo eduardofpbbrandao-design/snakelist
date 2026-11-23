@@ -261,6 +261,18 @@ const samePage = (a, b) => {
   if (la && lb) return Promise.resolve(la === lb);
   return Promise.all([a.clone().text(), b.clone().text()]).then(([x, y]) => x === y);
 };
+// the same page by its validators alone (no reading of the text): unknown counts as changed
+const sameTag = (a, b) => {
+  const ea = a.headers.get('etag'), eb = b.headers.get('etag');
+  if (ea && eb) return ea === eb;
+  const la = a.headers.get('last-modified'), lb = b.headers.get('last-modified');
+  return !!(la && lb && la === lb);
+};
+// v6.13: the photo limit is checked once things are quiet, not after every single photo (listing the whole saved
+// collection for each of the dozens of photos on a screen kept the offline helper - which answers every request the page
+// makes - busy on iPads, so the page's own requests waited)
+let trimT = 0;
+const trimSoon = () => { clearTimeout(trimT); trimT = setTimeout(() => { caches.open(CACHE).then((c) => c.keys().then((ks) => { const ph = ks.filter((k) => /\/species-photos\//.test(k.url)); return Promise.all(ph.slice(0, Math.max(0, ph.length - 600)).map((k) => c.delete(k))); })).catch(() => {}); }, 5000); };
 // tell the newly opened page (once it exists) that a newer SnakeList is saved and ready
 const tell = (id, tries) => self.clients.get(id || '').then((cl) => {
   if (cl) return cl.postMessage({ type: 'sl-update' });
@@ -288,7 +300,9 @@ self.addEventListener('fetch', (e) => {
         // v5.05: online, the newest SnakeList always opens (an unchanged page costs only a quick check);
         // only when the network is slow or missing does the saved copy open, and the newer one is saved for next time
         return within(net, 4000).then((r) => {
-          if (r && r.ok) { const copy = r.clone(); e.waitUntil(caches.open(CACHE).then((c) => c.put(key, copy))); return r; }
+          // (v6.13: the saved copy is only written again when the page really changed - writing the whole 7 MB page on every
+          // open kept an iPad busy each time SnakeList started)
+          if (r && r.ok) { if (!sameTag(hit, r)) { const copy = r.clone(); e.waitUntil(caches.open(CACHE).then((c) => c.put(key, copy))); } return r; }
           e.waitUntil(net.then((r2) => {
             if (!r2 || !r2.ok) return;
             return samePage(hit, r2).then((same) => { if (same) return; return caches.open(CACHE).then((c) => c.put(key, r2.clone())).then(() => tell(e.resultingClientId, 15)); });
@@ -335,7 +349,7 @@ self.addEventListener('fetch', (e) => {
         if (r.ok) {
           c.put(req, r.clone());
           // the offline copy keeps at most ~600 snake photos (about 20 MB): the oldest go first
-          if (/\/species-photos\//.test(url.pathname)) c.keys().then((ks) => { const ph = ks.filter((k) => /\/species-photos\//.test(k.url)); ph.slice(0, Math.max(0, ph.length - 600)).forEach((k) => c.delete(k)); });
+          if (/\/species-photos\//.test(url.pathname)) trimSoon();
           // a new version of a data file: drop the older copies of the same file
           if (url.search) c.keys().then((ks) => ks.forEach((k) => { const u = new URL(k.url); if (u.pathname === url.pathname && u.search !== url.search) c.delete(k); }));
         }
