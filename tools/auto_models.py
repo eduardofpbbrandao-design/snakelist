@@ -475,7 +475,7 @@ CURATED = {
     # oval spot (dense over the whole body, every scale); white lip scales with bold black bars on the sutures, a white throat;
     # a dark eye. (The spots had been small cream-yellow dots and the iris orange)
     'lampropeltis-holbrooki': {'d': '#0b0b0b', 'lat': '#0b0b0b', 'b': '#f4f4f0', 't': 'plain', 'L': 1.1, 's': 'grass', 'ck': '#0b0b0b',
-                               'cx': {'speckle': {'p': 1.0, 'dot': 0.5, 'vary': 0, 'color': '#f6f6f2', 'k': 1.0}, 'mottle': 0.0, 'var': 0.0, 'bellyA': 0.8, 'noEdge': 0, 'deepen': 1.0, 'sat': 1.0},
+                               'cx': {'speckle': {'p': 1.0, 'dot': 0.56, 'vary': 0, 'color': '#f6f6f2', 'k': 1.0}, 'mottle': 0.0, 'var': 0.0, 'bellyA': 0.8, 'noEdge': 0, 'deepen': 1.0, 'sat': 1.0},
                                'lb': ['#0b0b0b'], 'h': {'lips': 'barred', 'lipColor': '#f6f6f2', 'lipFull': 0.1, 'barColor': '#0b0b0b', 'iris': '#16110d', 'irisInner': '#241a12', 'irisDark': 1, 'pupil': 'round'},
                                'pat': [  # white spots on the head shields too
                                        {'type': 'line', 'p0': [0.42, 0.10], 'p1': [0.47, 0.11], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
@@ -492,7 +492,7 @@ CURATED = {
                                        {'type': 'line', 'p0': [1.28, 0.44], 'p1': [1.33, 0.45], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
                                        {'type': 'line', 'p0': [0.30, 0.20], 'p1': [0.35, 0.21], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3},
                                        {'type': 'line', 'p0': [0.60, 0.40], 'p1': [0.65, 0.41], 'wid': 0.035, 'color': '#f6f6f2', 'mirror': True, 'aa': 0.3}],
-                               'k': 0, 'sx': {'gloss': 0.8}},
+                               'k': 0, 'sx': {'gloss': 0.8, 'rows': 15}},  # (big scales: each spot reads at a normal viewing distance)
     'lampropeltis-nigra': {'d': '#121211', 'lat': '#151514', 'b': '#2a2a24', 't': 'plain', 'L': 1.0, 's': 'forest', 'cx': {'speckle': {'p': 0.14, 'color': '#d9d7a8', 'k': 0.6}, 'mottle': 0.03, 'bellyA': 0.82}, 'k': 0, 'sx': {'gloss': 0.7}},
     'lampropeltis-splendida': {'d': '#151410', 'lat': '#2a2718', 'b': '#d9cc78', 't': 'plain', 'L': 1.0, 's': 'arid', 'cx': {'speckle': {'p': 0.45, 'color': '#e8d880', 'k': 0.85}, 'mottle': 0.03, 'bellyA': 0.76}, 'k': 0, 'sx': {'gloss': 0.7}},
     'lampropeltis-catalinensis': {'d': '#e6e0cc', 'c': '#141210', 'b': '#e6e0cc', 't': 'band', 'n': 40, 'L': 0.9, 's': 'arid', 'k': 0, 'sx': {'gloss': 0.7}},
