@@ -65,8 +65,7 @@ head = f"""<!doctype html>
     if (location.protocol === 'https:') window.addEventListener('load', function () {{ navigator.serviceWorker.register('sw.js', {{ updateViaCache: 'none' }}).then(function (r) {{ if (navigator.onLine !== false) r.update().catch(function () {{}}); }}).catch(function () {{}}); }});
   }}
 </script>
-<!-- Google tag (gtag.js) - visitor statistics for snakelist.com -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PY2LJV389K"></script>
+<!-- Google tag (gtag.js) - visitor statistics for snakelist.com (v6.11: its script is loaded by SL_3P below, after the opening) -->
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){{dataLayer.push(arguments);}}
@@ -76,9 +75,33 @@ head = f"""<!doctype html>
   gtag('js', new Date());
   gtag('config', 'G-PY2LJV389K');
 </script>
-<!-- Google AdSense (site verification + ads) - tools/add_adsense.py adds the same tag to every other page -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0736553562389933"
-     crossorigin="anonymous"></script>
+<!-- Google AdSense (site verification + ads) - tools/add_adsense.py adds the tag to every other page. On the app (this page) the
+     AdSense account is declared here for verification (and in ads.txt); its script, the same
+     https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0736553562389933 tag, is added by SL_3P below -->
+<meta name="google-adsense-account" content="ca-pub-0736553562389933">
+<script>
+  // v6.11 (Eduardo: the opening "stops", then "jumps"): Google's statistics and ads scripts took over a second and a half of the
+  // page's own time just as the opening played and handed over to the photo, so it froze and then cut. They now load only
+  // once the opening is over and you are in SnakeList (or have looked at the photo for a while), at a moment the page is still.
+  (function () {{
+    var done = false, lastMove = 0;
+    function add(src, more) {{ var sc = document.createElement('script'); sc.async = true; sc.src = src; if (more) sc.crossOrigin = 'anonymous'; document.head.appendChild(sc); }}
+    window.SL_3P = function () {{
+      if (done) return; done = true;
+      add('https://www.googletagmanager.com/gtag/js?id=G-PY2LJV389K');
+      setTimeout(function () {{ add('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0736553562389933', true); }}, 2500);
+    }};
+    ['scroll', 'wheel', 'touchmove', 'pointerdown', 'keydown'].forEach(function (n) {{ window.addEventListener(n, function () {{ lastMove = Date.now(); }}, {{ passive: true, capture: true }}); }});
+    function whenStill(ms) {{ setTimeout(function again() {{ if (Date.now() - lastMove < 1500) {{ setTimeout(again, 700); return; }} window.SL_3P(); }}, ms); }}
+    document.addEventListener('sl-intro-done', function () {{
+      var h = document.getElementById('sl-hero');
+      if (window.__heroEntered || !h || h.hidden) {{ whenStill(3000); return; }}
+      document.addEventListener('sl-hero-entered', function () {{ whenStill(2500); }}, {{ once: true }});
+      setTimeout(function () {{ if (!done) whenStill(0); }}, 15000); // staying on the photo: after a while
+    }}, {{ once: true }});
+    setTimeout(function () {{ if (!done) whenStill(0); }}, 45000); // whatever happens
+  }})();
+</script>
 """
 # the Christmas preview switch (tools/xmas_loader.js): does nothing unless the visitor opens ?christmas
 _xm = open("tools/xmas_loader.js", encoding="utf-8").read().split("*/", 1)[1].strip()
