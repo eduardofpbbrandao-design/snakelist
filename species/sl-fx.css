@@ -7,7 +7,7 @@
 /* the thin light mint line that travels once round a button (an SVG drawn over it, moved with it) - v5.93: only on the
    first-visit "How well do you know snakes?" choices (class sl-trace-on); every other button just changes colour */
 .sl-trace { position: fixed; left: 0; top: 0; z-index: 2147483000; pointer-events: none; overflow: visible; opacity: 0; }
-.sl-trace rect { fill: none; stroke: #c4f7d3; stroke-width: 1.6; stroke-linecap: round; filter: drop-shadow(0 0 2px rgba(170,245,195,.85)); }
+.sl-trace rect { fill: none; stroke: #5fd35a; stroke-width: 1.6; stroke-linecap: round; filter: drop-shadow(0 0 2px rgba(95,211,90,.85)); } /* v6.11: a real green, not a pale gold-ish mint */
 /* v5.93: every scrollbar - the page, panels, lists, dropdowns, the 3D panel, the map's lists - is the same thin SnakeList one: a
    rounded green thumb on a see-through track, never the browser's plain white/grey bar with arrows. Chrome/Edge/Firefox use
    scrollbar-color/width (set on everything, so a panel's own setting can't fall back to the default); Safari and older Chrome
