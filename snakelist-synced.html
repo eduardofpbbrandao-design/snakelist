@@ -27840,10 +27840,11 @@ var st=document.createElement('style');st.textContent=
 '.sl-dd-list li[aria-selected=true]{font-weight:650;color:#2e7d4f}.sl-dd-list li[aria-selected=true]::before{content:"\\2713"}'+
 '.sl-dd-list li.act{background:rgba(88,179,81,.18)}.sl-dd-list li[aria-disabled=true]{opacity:.45;cursor:default}'+
 '[data-sl-theme=dark] .sl-dd-list li[aria-selected=true]{color:#9be07c}@media (prefers-color-scheme:dark){:root:not([data-sl-theme=light]) .sl-dd-list li[aria-selected=true]{color:#9be07c}}';
-document.head.appendChild(st);
+var stIn=0;function addSt(){if(!stIn){stIn=1;document.head.appendChild(st);}}
 var n=0;
 function enhance(sel){
   if(sel.dataset.slDd||sel.multiple||sel.size>1||sel.closest('.sl-dd'))return;
+  addSt();
   if(sel.hidden||sel.getAttribute('aria-hidden')==='true')return;
   sel.dataset.slDd='1';var id='sl-dd-'+(++n);
   var w=document.createElement('span');w.className='sl-dd';sel.parentNode.insertBefore(w,sel);w.appendChild(sel);
@@ -27884,7 +27885,9 @@ function enhance(sel){
   label();
 }
 function scan(root){[].forEach.call((root||document).querySelectorAll('select'),enhance)}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){scan()});else scan();
+/* v6.16: only once SnakeList is drawn - doing it under the opening made the browser restyle the whole hidden page, so the photo wall froze for seconds */
+var later=function(){if(window.SL_WHEN_DRAWN)window.SL_WHEN_DRAWN(function(){scan()});else scan();};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',later);else later();
 if(window.MutationObserver)new MutationObserver(function(ms){ms.forEach(function(m){[].forEach.call(m.addedNodes,function(nd){if(nd.nodeType!==1)return;if(nd.tagName==='SELECT')enhance(nd);else if(nd.querySelector&&nd.querySelector('select'))scan(nd)})})}).observe(document.documentElement,{childList:true,subtree:true});
 })();
 
