@@ -58,7 +58,8 @@ section{background:var(--card);border:1px solid var(--line);border-radius:18px;p
 #sp-wiki p{margin:10px 0 0}#sp-wiki .src{font-size:12px;color:var(--muted)}.sp-foot{text-align:center;color:var(--muted);font-size:13px;padding:20px 16px 34px;border-top:1px solid var(--line)}
 .sl-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;max-width:1120px;margin:0 auto;padding:14px 16px}
 .sl-brand{display:inline-flex;align-items:center;gap:9px;font:700 24px/1 Fraunces,Georgia,'Times New Roman',serif;color:#58b351;text-decoration:none}
-.sl-brand img{width:32px;height:32px;border-radius:8px;display:block}
+.sl-brand img{height:46px;width:auto;display:block}.sl-brand .sl-logo-d{display:none}@media (prefers-color-scheme:dark){.sl-brand .sl-logo-l{display:none}.sl-brand .sl-logo-d{display:block}}
+@media (max-width:560px){.sl-brand img{height:36px}}
 .sl-top nav{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14.5px}.sl-top nav a{color:var(--muted);text-decoration:none;padding:6px 0}
 .sl-top nav a:hover,.sl-top nav a[aria-current]{color:var(--link)}.sl-top nav a[aria-current]{font-weight:600}
 .sl-foot{margin-top:30px;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:13.5px;padding:20px 16px 30px}
