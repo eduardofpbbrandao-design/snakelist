@@ -4005,6 +4005,17 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     <p>SnakeList is made for a wide screen. Rotate your phone to landscape to use it.</p>
   </div>
   <script>
+    // v6.13 (iPad): small stand-ins for what older iPads' Safari doesn't have yet (iPadOS 15.0-15.3: Array/String .at,
+    // findLast, Object.hasOwn), so nothing in SnakeList (the 3D viewer uses .at) stops with an error there
+    (function () {
+      function def(o, k, f) { try { if (o && !o[k]) Object.defineProperty(o, k, { value: f, writable: true, configurable: true, enumerable: false }); } catch (e) {} }
+      function at(i) { var n = this.length >>> 0; i = Math.trunc(i) || 0; if (i < 0) i += n; return i < 0 || i >= n ? undefined : this[i]; }
+      [Array.prototype, String.prototype].forEach(function (p) { def(p, "at", at); });
+      try { [Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array, Int32Array, Uint32Array, Float32Array, Float64Array].forEach(function (T) { def(T.prototype, "at", at); }); } catch (e) {}
+      def(Array.prototype, "findLast", function (f, t) { for (var i = this.length - 1; i >= 0; i--) if (f.call(t, this[i], i, this)) return this[i]; });
+      def(Array.prototype, "findLastIndex", function (f, t) { for (var i = this.length - 1; i >= 0; i--) if (f.call(t, this[i], i, this)) return i; return -1; });
+      def(Object, "hasOwn", function (o, k) { return Object.prototype.hasOwnProperty.call(o, k); });
+    })();
     // once someone has touched anything (opened a filter, typed, scrolled, tapped), SnakeList
     // never reloads itself under them - a sync or an app update just takes full effect next open
     // decided before the header is drawn, so the Install button never pops in late or flashes:
@@ -4186,6 +4197,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
           var finish = function (ms) {
             intro.classList.add("intro-wipe");
             setTimeout(function () {
+              if (window.__introDone) return; // (the watchdog below already ended it)
               intro.classList.add("intro-gone");
               window.__introDone = true;
               try { sessionStorage.setItem("sl-opening-at", String(Date.now())); } catch (e) {}
@@ -4249,6 +4261,18 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
         }); });
         setTimeout(fade, window.__introSkipped ? 2500 : 4500); // never hold the opening longer than this
       };
+      // v6.13 (iPad: "it did not open or respond"): a watchdog. However the opening goes - a photo that never decodes, a
+      // timer the browser held back, an error somewhere on the page - after 15 s it is over: the opening is taken away, the
+      // page can scroll again and SnakeList is drawn. (A normal opening is long finished by then, so nothing changes for it.)
+      setTimeout(function () {
+        if (window.__introDone) return;
+        done = true; window.__introDone = true;
+        try { intro.classList.add("intro-gone"); } catch (e) {}
+        try { var hw = document.getElementById("sl-hero"); if (hw) { hw.classList.add("hero-reveal"); hw.classList.add("hero-landed"); if (!window.__heroRevealT) window.__heroRevealT = performance.now(); } } catch (e) {}
+        try { unhide(); } catch (e) {}
+        document.documentElement.classList.remove("sl-intro-lock");
+        try { document.dispatchEvent(new Event("sl-intro-done")); } catch (e) {}
+      }, 15000);
       // opened from a species page link (?sp= ?map= ?f= ?hab= ?type= ?fam=): no opening, straight there
       if (/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search) || window.SL_CAME_BACK || window.SL_QUICK_REOPEN) {
         intro.classList.add("intro-gone"); done = true; window.__introDone = true; var rt = intro.closest(".sl-root"); if (rt) rt.classList.remove("intro-on");
@@ -12824,43 +12848,47 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       (n === undefined ? "" : ' <b class="chip-n">' + n.toLocaleString() + '</b>') + "</span>";
   }
 
+  // v6.13 (iPad: "buttons feel slow"): every tap that redrew the list (a tab, a filter, Mark Seen's neighbours...) also rebuilt
+  // every chip row - ~100 family chips with their photos, every count - and then measured the page. A row is now only
+  // rebuilt when what it shows has changed (the same markup as before otherwise), and only then is the families button re-placed.
+  const chipHTML = (id, html) => { const el = document.getElementById(id); if (el.__slHTML === html && el.firstChild) return false; el.innerHTML = html; el.__slHTML = html; return true; };
   function renderChips() {
-    document.getElementById("type-chips").innerHTML =
-      TYPES.map((t) => chip(t, typeFilter === t, 'data-type="' + t + '"', countTotal({ type: t }), { kind: "type", value: t })).join("");
-    document.getElementById("continent-chips").innerHTML =
-      CONTINENTS.map((c) => chip(c, continentFilters.includes(c), 'data-continent="' + c + '"', countTotal({ continents: [c] }), { kind: "continent", value: c })).join("");
-    applyCustomChipImages();
-    document.getElementById("country-chips").innerHTML = countryFilters.length
+    const typeNew = chipHTML("type-chips",
+      TYPES.map((t) => chip(t, typeFilter === t, 'data-type="' + t + '"', countTotal({ type: t }), { kind: "type", value: t })).join(""));
+    const contNew = chipHTML("continent-chips",
+      CONTINENTS.map((c) => chip(c, continentFilters.includes(c), 'data-continent="' + c + '"', countTotal({ continents: [c] }), { kind: "continent", value: c })).join(""));
+    if (typeNew || contNew) applyCustomChipImages();
+    chipHTML("country-chips", countryFilters.length
       ? countryFilters
           .map((n) => '<span class="chip active country-chip" role="button" tabindex="0" data-country="' + n + '">' + (window.SL_DISPLAY_NAME ? window.SL_DISPLAY_NAME(n) : n) + " <b>&times;</b></span>")
           .join("")
-      : '<span class="country-empty">Any country</span>';
-    document.getElementById("family-chips").innerHTML = FAMILIES.map((f) => {
+      : '<span class="country-empty">Any country</span>');
+    chipHTML("family-chips", FAMILIES.map((f) => {
       const ph = FAMILY_PHOTOS[f];
       return '<span class="chip' + (ph ? " fam-photo" : "") + (familyFilters.includes(f) ? " active" : "") +
         '" role="button" tabindex="0" data-family="' + f + '"' +
         (ph ? ' style="background-image:url(' + ph.url + ')"' : "") +
         ' aria-description="' + f + (ph ? " &middot; photo: " + ph.by.replace(/"/g, "&quot;") : "") + '">' +
         familyName(f) + ' <b class="chip-n">' + countTotal({ families: [f] }).toLocaleString() + "</b></span>";
-    }).join("");
+    }).join(""));
     const famOpen = !document.getElementById("family-chips").hidden;
-    placeFamilyToggle();
+    if (typeNew || !renderChips.placed) { renderChips.placed = true; placeFamilyToggle(); }
     // the one pick shared by the Type row and the families row stands out wherever it is:
     // a picked family fades the whole Type row back, a picked Type the whole families row
     document.getElementById("type-chips").classList.toggle("row-dim", familyFilters.length > 0);
     document.getElementById("family-chips").classList.toggle("row-dim", typeFilter !== "All");
     document.getElementById("family-toggle").textContent = (famOpen ? "Hide families" : "See all families") +
       (familyFilters.length && !famOpen ? ": " + familyName(familyFilters[0]) : "");
-    document.getElementById("place-chips").innerHTML = placeFilters.length
+    chipHTML("place-chips", placeFilters.length
       ? placeFilters
           .map((k) => '<span class="chip active country-chip" role="button" tabindex="0" data-place="' + k + '">' + placeName(k) + " <b>&times;</b></span>")
           .join("")
-      : '<span class="country-empty">Any state or province</span>';
-    document.getElementById("city-chips").innerHTML = cityFilters.length
+      : '<span class="country-empty">Any state or province</span>');
+    chipHTML("city-chips", cityFilters.length
       ? cityFilters
           .map((c) => '<span class="chip active country-chip" role="button" tabindex="0" data-city="' + c.key + '">' + c.name + " <b>&times;</b></span>")
           .join("")
-      : '<span class="country-empty">Any city</span>';
+      : '<span class="country-empty">Any city</span>');
     document.getElementById("chip-popular").innerHTML = 'Popular <b class="chip-n">' + countTotal({ popular: true }).toLocaleString() + '</b>';
     document.getElementById("chip-uncommon").innerHTML = 'Uncommon <b class="chip-n">' + countTotal({ uncommon: true, popular: false }).toLocaleString() + '</b>';
     document.getElementById("chip-exotic").innerHTML = 'Exotic <b class="chip-n">' + countTotal({ exotic: true }).toLocaleString() + '</b>';
@@ -13585,7 +13613,9 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     remove: (k) => { cityFilters = cityFilters.filter((c) => c.key !== k); },
   });
 
-  document.getElementById("more-btn").addEventListener("click", () => { renderLimit += PAGE; refresh(); });
+  // (v6.13: only how many cards show changes - the filter chips and their counts can't, so they aren't redrawn: that redraw
+  // and the full measure of the page after it were most of the wait after tapping "Show 60 more" on an iPad)
+  document.getElementById("more-btn").addEventListener("click", () => { renderLimit += PAGE; refresh(true); });
   // "Show all" draws the rest a chunk at a time (in idle moments) so the page never freezes,
   // and holds the scroll where it was - the new cards only ever appear below
   document.getElementById("more-all-btn").addEventListener("click", () => {
@@ -14830,6 +14860,11 @@ window.SL_GEO_READY = new Promise(function (res) {
 (function () {
   var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
   var slow = c && (c.saveData || /(^|-)2g|3g/.test(c.effectiveType || "") || (c.downlink && c.downlink < 1.5));
+  // v6.13 (iPad: "it did not open or respond"): never on an iPad or iPhone. There the 7 MB file was read in one piece a few
+  // seconds after opening - just as you start tapping - and Safari froze for seconds while it did (and it added ~30-50 MB
+  // to a page iOS already watches closely). On iPads and iPhones it comes only when something needs it, as on slow connections.
+  var ua = navigator.userAgent || "", ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && (navigator.maxTouchPoints || 0) > 1);
+  if (ios) slow = true;
   function later() { if (window.requestIdleCallback) requestIdleCallback(function () { window.SL_LOAD_GEO(); }, { timeout: 2500 }); else window.SL_LOAD_GEO(); }
   // v6.11: ...and never while the opening plays or hands over to the photo (running it then held the motion up): only once you
   // are in SnakeList, or after a good while on the photo
@@ -21018,7 +21053,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // picked for a 2.5:1 band, so a taller band is centred on that same strip
   var AR = window.SL_PHOTO_AR || (window.SL_PHOTO_AR = 2.2), OLD_BAND = 1 / 2.5;
   var tileH = D.h / D.w, band = 1 / AR, denom = R * tileH - band;
-  var css = [];
+  var css = [], PH = {};
   Object.keys(D.items).forEach(function (id) {
     var it = D.items[id], col = it[1] % C, row = Math.floor(it[1] / C);
     // it[3]: where the band sits inside the tile (picked so it lands on the snake's head/body)
@@ -21026,11 +21061,26 @@ window.SL_GEO_READY = new Promise(function (res) {
     var py = (row * tileH + by * tileH) / denom * 100;
     // each card loads only its own photo (species-photos/t/<sheet>-<n>.webp, ~35 KB) - not a
     // whole 25-photo sheet (~1.3 MB), which made opening SnakeList download tens of megabytes
-    css.push('.card[data-id="' + id + '"]::before{content:"";cursor:zoom-in;background-image:url(species-photos/t/' + it[0] + "-" + it[1] +
-      ".webp);background-size:100% auto;background-position:50% " + (by / Math.max(0.0001, 1 - band / tileH) * 100).toFixed(3) + "%}");
+    var img = "url(species-photos/t/" + it[0] + "-" + it[1] + ".webp)", y = (by / Math.max(0.0001, 1 - band / tileH) * 100).toFixed(3) + "%";
+    PH[id] = [img, y];
+    css.push('.card[data-id="' + id + '"]::before{content:"";cursor:zoom-in;background-image:' + img + ";background-size:100% auto;background-position:50% " + y + "}");
   });
   var st = document.createElement("style");
-  st.textContent = css.join("");
+  // v6.13 (iPad: "it did not open or respond"): on the website each card carries its own photo (two CSS variables on the card
+  // itself) and ONE rule draws it. The ~3,300 rules, one per snake, made every card be checked against every rule each time
+  // the page's styles were worked out - 4,000 cards x 3,300 rules, over 13 million checks, several times while SnakeList opens
+  // and again on every tab or theme change: seconds of a frozen page on an iPad. Same photos, same place, same look.
+  // (Inside claude.ai the synced cards are never touched, so the rules stay there.)
+  var web = !(window.claude && window.claude.use), grid0 = document.getElementById("grid");
+  function cardPhoto(c, id) {
+    var p = PH[id || c.getAttribute("data-id")]; if (!p) return;
+    c.style.setProperty("--slp", p[0]); c.style.setProperty("--slp-y", p[1]);
+  }
+  if (web && grid0) {
+    window.SL_CARD_PHOTO = cardPhoto; // (for copies of a card made elsewhere, e.g. the map's species boxes)
+    [].forEach.call(grid0.getElementsByClassName("card"), function (c) { cardPhoto(c); });
+    st.textContent = '.card[style*="--slp:"]::before{content:"";cursor:zoom-in;background-image:var(--slp);background-size:100% auto;background-position:50% var(--slp-y)}';
+  } else st.textContent = css.join("");
   document.head.appendChild(st);
 
   var box = document.createElement("div");
@@ -21529,9 +21579,11 @@ window.SL_GEO_READY = new Promise(function (res) {
       var parts = pg.extract.split(/\n(={2,})\s*([^=\n]+?)\s*\1\n/), sections = [{ title: "intro", text: parts[0] }];
       for (var i = 1; i + 2 < parts.length + 1; i += 3) sections.push({ title: parts[i + 1] || "", text: parts[i + 2] || "" });
       var picked = [];
+      // (sentences split without a look-behind: a look-behind in a regex is a syntax error on iPads before iPadOS 16.4, which
+      // stopped this whole script - the Following tab - from running at all)
       sections.forEach(function (sec, k) {
         if (k > 0 && (SKIP.test(sec.title) || !GOOD.test(sec.title))) return;
-        sec.text.replace(/\s+/g, " ").split(/(?<=[.!?])\s+(?=[A-Z"(])/).forEach(function (t, j) {
+        sec.text.replace(/\s+/g, " ").replace(/([.!?])\s+(?=[A-Z"(])/g, "$1\u0000").split("\u0000").forEach(function (t, j) {
           t = t.trim();
           if (t.length < 45 || t.length > 280) return;
           if (/^(it|the species|this species)? ?(is|was) (a|an) (species|genus)\b/i.test(t) && k > 0) return;
@@ -26403,6 +26455,7 @@ window.SL_welcome = function (u, back) {
       c.querySelector(".card-name").textContent = b ? b.textContent : ""; c.querySelector(".card-sci").textContent = i ? i.textContent : "";
     }
     c.classList.add("cpc-card"); c.removeAttribute("style"); c.removeAttribute("hidden"); c.removeAttribute("id");
+    if (g && window.SL_CARD_PHOTO) window.SL_CARD_PHOTO(c, g.getAttribute("data-id")); // (on the website its photo rides on the card itself)
     c.setAttribute("aria-hidden", "true"); // the row itself is the link (named after the snake), for keyboards and readers
     [].forEach.call(c.querySelectorAll("button, [tabindex]"), function (el) { el.tabIndex = -1; });
     var tags = c.querySelector(".card-tags");
@@ -27477,7 +27530,9 @@ window.SL_welcome = function (u, back) {
     if (document.getElementById("sl3d-css")) return;
     var l = document.createElement("link"); l.id = "sl3d-css"; l.rel = "stylesheet"; l.href = abs("viewer.css"); document.head.appendChild(l);
   }
-  function gl() { try { var c = document.createElement("canvas"); return !!(window.WebGLRenderingContext && (c.getContext("webgl2") || c.getContext("webgl"))); } catch (e) { return false; } }
+  function gl() { try { var c = document.createElement("canvas"), g = window.WebGLRenderingContext && (c.getContext("webgl2") || c.getContext("webgl"));
+    // (the test context is let go at once: Safari keeps only a few WebGL contexts and each holds GPU memory)
+    var x = g && g.getExtension && g.getExtension("WEBGL_lose_context"); if (x) x.loseContext(); return !!g; } catch (e) { return false; } }
 
   // ---- the corner button: on/off, nothing else ----
   var btn = document.createElement("button");
@@ -28936,8 +28991,26 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     var r = el.getBoundingClientRect();
     return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight;
   }
+  // v6.13 (iPad: "buttons feel slow"): the two lists below were looked up in the whole page (~30,000 elements, ~10 ms each
+  // on a computer, several times that on an iPad) five times a second, all the time - so a tap often had to wait for one.
+  // They are kept now and looked up again only when something is added to or taken from <body> or SnakeList's main box
+  // (where these bars and panels are put), and anyway every 2 s (so one put anywhere else is still found).
+  var lists = null, listsT = 0;
+  function both() {
+    var now = Date.now();
+    if (!lists || now - listsT > 2000) {
+      lists = { f: [].slice.call(document.querySelectorAll(FLOAT)), m: [].slice.call(document.querySelectorAll(MODAL)) }; listsT = now;
+    }
+    return lists;
+  }
+  function watchLists() {
+    if (!window.MutationObserver) { listsT = 0; return; }
+    var mo = new MutationObserver(function () { lists = null; });
+    mo.observe(document.body, { childList: true });
+    var root = document.querySelector(".sl-root"); if (root) mo.observe(root, { childList: true });
+  }
   function modalOpen() {
-    var ms = document.querySelectorAll(MODAL);
+    var ms = both().m;
     for (var i = 0; i < ms.length; i++) if (shown(ms[i])) return true;
     return false;
   }
@@ -28957,7 +29030,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     // every 200 ms then made the glide's frames wait
     var hero = document.getElementById("sl-hero"); if (hero && !hero.hidden && !window.__heroEntered) return;
     document.documentElement.classList.toggle("sl-modal-on", modalOpen());
-    var els = [].slice.call(document.querySelectorAll(FLOAT));
+    var els = both().f.filter(function (el) { return el.isConnected !== false && document.documentElement.contains(el); });
     var live = [];
     els.forEach(function (el) {
       if (!shown(el)) { if (el.style.translate) el.style.translate = ""; seen.delete(el); return; }
@@ -28990,7 +29063,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     });
   }
   var timer = null;
-  function start() { tick(); if (!timer) timer = setInterval(tick, 200); }
+  function start() { try { watchLists(); } catch (e) { lists = null; } tick(); if (!timer) timer = setInterval(tick, 200); }
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
   window.addEventListener("resize", tick);
   window.SL_restack = tick;

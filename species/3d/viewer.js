@@ -10,6 +10,8 @@ let THREE = null;
 import * as NATURE from './nature.js?r=587'; // (a new name whenever these change, so no browser keeps an old copy)
 import * as EXTRA from './extras.js?r=587'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
+// v6.13: Array .at() for iPads on iPadOS 15.0-15.3 (it came in 15.4); the species pages load this without SnakeList's own copy
+if (!Array.prototype.at) Object.defineProperty(Array.prototype, 'at', { value(i) { const n = this.length >>> 0; i = Math.trunc(i) || 0; if (i < 0) i += n; return i < 0 || i >= n ? undefined : this[i]; }, writable: true, configurable: true });
 // v5.93: the habitats each snake can be shown in (tools/habitat_looks.py: the first is shown first; snakes with only one are
 // not listed). Loaded with this module - it waits for it up to 3 s, so the first scene is already the right one (if it comes
 // later, the Habitats button is added then)
