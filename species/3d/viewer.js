@@ -11,6 +11,8 @@ import * as NATURE from './nature.js?r=587'; // (a new name whenever these chang
 import * as EXTRA from './extras.js?r=587';
 import * as DAYNIGHT from './daynight.js?r=614'; // v6.14: Day / Night (and the hooks "See the spot", spot.js, uses: plugins below) // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 export function useThree(t) { THREE = t; }
+// v6.13: Array .at() for iPads on iPadOS 15.0-15.3 (it came in 15.4); the species pages load this without SnakeList's own copy
+if (!Array.prototype.at) Object.defineProperty(Array.prototype, 'at', { value(i) { const n = this.length >>> 0; i = Math.trunc(i) || 0; if (i < 0) i += n; return i < 0 || i >= n ? undefined : this[i]; }, writable: true, configurable: true });
 // v5.93: the habitats each snake can be shown in (tools/habitat_looks.py: the first is shown first; snakes with only one are
 // not listed). Loaded with this module - it waits for it up to 3 s, so the first scene is already the right one (if it comes
 // later, the Habitats button is added then)
@@ -3231,7 +3233,7 @@ function uiCSSInject() {
 // v5.78: species rebuilt against photos in this version, ahead of the next models.json build (the same values are in
 // tools/auto_models.py CURATED, so a rebuild gives the same result): they override the profile's head
 const SPECIES_LOOK = {
-  'opheodrys-vernalis': { h: { iris: '#3d321c', irisInner: '#5c4a26', eyeRing: '#d9c27a', pupilW: 0.22, eye: null, eyeL: 0.19, eyeX: 0.36, eyeA: 50, len: 0.031, w: 0.9, h: 0.78, snoutH: 0.64, jaw: 0.82, lips: 'pale', lipColor: '#dbe6a2', bulge: 0.045, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.65, hFixed: 1, groove: 0.16, headRelief: 0.14, snout: 0.52, lipFull: 0.07 }, body: { hn: 1.3 },
+  'opheodrys-vernalis': { h: { iris: '#16150d', irisInner: '#232110', eyeRing: null, pupilW: 0.22, eye: null, eyeL: 0.19, eyeX: 0.36, eyeA: 50, len: 0.031, w: 0.9, h: 0.78, snoutH: 0.64, jaw: 0.82, lips: 'pale', lipColor: '#bcd672', bulge: 0.045, brow: 0.07, taper: 0.3, tongue: '#c42a38', tongueTip: '#141012', lw: 1.65, hFixed: 1, groove: 0.16, headRelief: 0.14, snout: 0.52, lipFull: null }, body: { hn: 1.3 },
     scales: { cavity: 0.22, gloss: 0.78, relief: 0.55 }, colors: { edgeK: 0.25 } },
   // the inland taipan against its SnakeList photo (will-hunt) and the Australian Museum account: a deep, rounded "coffin" head
   // (deeper than the body's own depth, the snout high and rounded), glossy smooth scales, and a warmer olive-brown

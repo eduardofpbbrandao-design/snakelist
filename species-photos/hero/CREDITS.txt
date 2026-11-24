@@ -7,3 +7,101 @@ Source:   supplied by Eduardo (SnakeList's owner) on 2026-11-13, 1024 x 663 px.
           Photographer and licence not yet recorded - add them here and as a credit on the hero.
 Changes:  cleaned of compression blocks (non-local means), enlarged to 2560 px with Lanczos, edge-aware detail boost and
           saved as 2048/1600/1200/800 px WebP copies.
+
+
+Randomized opening photographs (v6.11)
+======================================
+SnakeList shows one of these (or the Smooth Green Snake above) at random each time it opens, never the same one twice in a row.
+Each was cropped to the 2560:1658 shape of the opening (so the logo sits under the snake's head) and saved as WebP at the widths
+listed. They keep the licence of the original; CC BY-SA photos remain under CC BY-SA. The credit is shown on the opening itself.
+
+corallus-hortulana-{900,1400,1920}.webp
+  Amazon Tree Boa (Corallus hortulana)
+  Photo: Geoff Gallice, CC BY 2.0 (Wikimedia Commons)
+  Licence: https://creativecommons.org/licenses/by/2.0
+  Source: https://commons.wikimedia.org/wiki/File:Corallus_hortulanus_head,_Peru.jpg
+
+dipsas-albifrons-{900,1400}.webp
+  Sauvage's Snail-eater (Dipsas albifrons)
+  Photo: RafaelMenegucci, CC BY-SA 4.0 (Wikimedia Commons)
+  Licence: https://creativecommons.org/licenses/by-sa/4.0
+  Source: https://commons.wikimedia.org/wiki/File:Dipsas_albifrons,_Cobra_Papa_Lesmas.jpg
+
+morelia-viridis-{900,1400,1920}.webp
+  Green Tree Python (Morelia viridis)
+  Photo: JJ Harrison, CC BY-SA 3.0 (Wikimedia Commons)
+  Licence: https://creativecommons.org/licenses/by-sa/3.0
+  Source: https://commons.wikimedia.org/wiki/File:Green_Tree_Python_0A2A0428.jpg
+
+malayopython-reticulatus-{900,1400,1920}.webp
+  Reticulated Python (Malayopython reticulatus)
+  Photo: Rushenb, CC BY-SA 2.0 (Wikimedia Commons)
+  Licence: https://creativecommons.org/licenses/by-sa/2.0
+  Source: https://commons.wikimedia.org/wiki/File:Malayopython_reticulatus,_Reticulated_python_-_Kaeng_Krachan_District,_Phetchaburi_Province_(47924282891).jpg
+
+dendroaspis-angusticeps-{900,1400,1920}.webp
+  Green Mamba (Dendroaspis angusticeps)
+  Photo: Holger Krisp, CC BY 3.0 (Wikimedia Commons)
+  Licence: https://creativecommons.org/licenses/by/3.0
+  Source: https://commons.wikimedia.org/wiki/File:Mamba_Dendroaspis_angusticeps.jpg
+
+naja-kaouthia-{900,1400,1920}.webp
+  Monocled Cobra (Naja kaouthia)
+  Photo: Charles J. Sharp, CC BY-SA 4.0 (Wikimedia Commons)
+  Licence: https://creativecommons.org/licenses/by-sa/4.0
+  Source: https://commons.wikimedia.org/wiki/File:Monocled_cobra_(Naja_kaouthia)_Bach_Ma_2.jpg
+
+oxybelis-aeneus-{900,1400,1920}.webp
+  Brown Vinesnake (Oxybelis aeneus)
+  Photo: Brian Gratwicke, CC BY 2.0 (Wikimedia Commons)
+  Licence: https://creativecommons.org/licenses/by/2.0
+  Source: https://commons.wikimedia.org/wiki/File:Oxybelis_aeneus_01.jpg
+
+zamenis-scalaris-{900,1400,1920}.webp
+  Ladder Snake (Zamenis scalaris)
+  Photo: Benny Trapp (crop: Papa Lima Whiskey 2), CC BY 3.0 (Wikimedia Commons)
+  Licence: https://creativecommons.org/licenses/by/3.0
+  Source: https://commons.wikimedia.org/wiki/File:Rhinechis_scalaris_cropped.jpg
+
+atheris-ceratophora-{900,1400,1920}.webp
+  Usambara Eyelash Viper (Atheris ceratophora)
+  Photo: John Lyakurwa, CC BY 4.0 (iNaturalist)
+  Licence: https://creativecommons.org/licenses/by/4.0/
+  Source: https://www.inaturalist.org/observations/111494406
+
+echis-omanensis-{900,1400,1920}.webp
+  Oman Saw-scaled Viper (Echis omanensis)
+  Photo: Arabella Willing, CC BY 4.0 (iNaturalist)
+  Licence: https://creativecommons.org/licenses/by/4.0/
+  Source: https://www.inaturalist.org/observations/285888604
+
+spilotes-sulphureus-{900,1400,1920}.webp
+  Amazon Puffing Snake (Spilotes sulphureus)
+  Photo: Diogo Luiz, CC BY 4.0 (iNaturalist)
+  Licence: https://creativecommons.org/licenses/by/4.0/
+  Source: https://www.inaturalist.org/observations/31154852
+
+farancia-erytrogramma-{900,1400,1920}.webp
+  Rainbow Snake (Farancia erytrogramma)
+  Photo: Joshua Liverman, CC BY 4.0 (iNaturalist)
+  Licence: https://creativecommons.org/licenses/by/4.0/
+  Source: https://www.inaturalist.org/observations/19555285
+
+atheris-barbouri-{900,1400,1920}.webp
+  Uzungwe Mountain Bush Viper (Atheris barbouri)
+  Photo: Ryan van Huyssteen, CC BY 4.0 (iNaturalist)
+  Licence: https://creativecommons.org/licenses/by/4.0/
+  Source: https://www.inaturalist.org/observations/200624271
+
+agkistrodon-contortrix-{900,1400,1920}.webp
+  Copperhead (Agkistrodon contortrix)
+  Photo: Alan Rockefeller, CC BY 4.0 (iNaturalist)
+  Licence: https://creativecommons.org/licenses/by/4.0/
+  Source: https://www.inaturalist.org/observations/141425644
+
+opheodrys-aestivus-{900,1400,1920}.webp
+  Rough Greensnake (Opheodrys aestivus)
+  Photo: John Matthew Erickson, CC BY 4.0 (iNaturalist)
+  Licence: https://creativecommons.org/licenses/by/4.0/
+  Source: https://www.inaturalist.org/observations/218209640
+

@@ -77,6 +77,28 @@ const avg = (a) => a.reduce((x, y) => x + y, 0) / Math.max(1, a.length);
   ok(await p.evaluate(() => document.querySelector('.quiz-level-btn.is-rec').dataset.level === 'medium'), 'quiz: Medium is recommended for "know a bit"');
   await p.context().close();
 
+  // 2b. v6.11: four choices - "I don't know" under the three - no check mark on the chosen one, and "I don't know" is a mix like "know a bit"
+  p = await fresh(b);
+  await pastHero(p);
+  await p.waitForSelector('#sl-level.open', { timeout: 20000 }).catch(() => {});
+  ok(await p.evaluate(() => document.querySelectorAll('.sl-lv-opt').length === 4 && !!document.querySelector('.sl-lv-opt[data-level="unsure"]')), 'four choices, the fourth is "I don\'t know"');
+  ok(await p.evaluate(() => { const o = [...document.querySelectorAll('.sl-lv-opt')].map((x) => x.getBoundingClientRect()); return o[3].top > o[0].bottom; }), '"I don\'t know" sits under the three');
+  ok(await p.evaluate(() => /four above/.test(document.getElementById('sl-lv-hint').textContent)), 'the hint asks to pick one of the four');
+  await p.click('.sl-lv-opt[data-level="unsure"]');
+  ok(await p.evaluate(() => { const o = document.querySelector('.sl-lv-opt[data-level="unsure"]'); return o.getAttribute('aria-pressed') === 'true' && !o.querySelector('.sl-lv-tick') && !/\u2713/.test(o.textContent); }), 'the chosen one has no check mark');
+  ok(await p.evaluate(() => parseFloat(getComputedStyle(document.querySelector('.sl-lv-opt')).borderTopWidth) <= 1), 'the border is thin (1px)');
+  // pointing at another choice: only that one shows the pointed-at colours
+  await p.hover('.sl-lv-opt[data-level="new"]'); await p.waitForTimeout(600);
+  ok(await p.evaluate(() => { const sel = document.querySelector('.sl-lv-opt[data-level="unsure"]'); return getComputedStyle(sel, '::before').transform !== 'none' && getComputedStyle(sel, '::before').transform !== 'matrix(1, 0, 0, 1, 0, 0)'; }), 'pointing at another choice: the chosen one does not show the pointed-at gradient');
+  ok(await p.evaluate(() => { const r = document.querySelector('.sl-trace rect'); return !r || /95, 211, 90|#5fd35a/i.test(getComputedStyle(r).stroke); }), 'the line that runs round the pointed-at choice is green');
+  if (SHOTS) await p.screenshot({ path: SHOTS + '/test-chooser-unsure-hover.png' });
+  await p.click('#sl-lv-go'); await p.waitForTimeout(600);
+  ok(await p.evaluate(() => window.SL_LEVEL() === 'unsure'), '"I don\'t know" is kept as the choice');
+  await p.evaluate(() => { const s = document.getElementById('tour-skip'); if (s) s.click(); document.getElementById('tab-quiz').click(); }); await p.waitForTimeout(400);
+  ok(await p.evaluate(() => document.querySelector('.quiz-level-btn.is-rec').dataset.level === 'medium'), 'quiz: Medium is recommended for "I don\'t know" (a mix, like "know a bit")');
+  ok(!p.errs.length, 'no page errors' + (p.errs.length ? ': ' + p.errs.join(' | ') : ''));
+  await p.context().close();
+
   // 3. the skip keys
   p = await fresh(b, () => { localStorage.setItem('sl-level-seen', '1'); });
   await pastHero(p); await p.waitForTimeout(2500);

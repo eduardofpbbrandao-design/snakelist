@@ -93,8 +93,8 @@ n.innerHTML='Your email app should open with it ready to send. If it didn’t, <
 def site_header(rel, here=""):
     def a(href, label, key):
         return '<a href="%s"%s>%s</a>' % (href, ' aria-current="page"' if key == here else "", label)
-    return ('<header class="sl-top"><a class="sl-brand" href="%s" aria-label="SnakeList"><img class="sl-logo-l" src="%sspecies/logo-light.svg" width="187" height="46" alt="SnakeList"><img class="sl-logo-d" src="%sspecies/logo-dark.svg" width="187" height="46" alt=""></a>'
-            '<nav aria-label="Site">%s%s%s%s</nav></header>') % (rel, rel, rel, a(rel, "Open SnakeList", "app"), a(rel + "species/", "Species", "species"),
+    return ('<header class="sl-top"><a class="sl-brand" href="%s"><img src="%sapp/icon-light-s.svg" width="32" height="32" alt="">SnakeList</a>'
+            '<nav aria-label="Site">%s%s%s%s</nav></header>') % (rel, rel, a(rel, "Open SnakeList", "app"), a(rel + "species/", "Species", "species"),
                                                                  a(rel + "install.html", "Install", "install"), a(rel + "about-snakelist.html", "About", "about"))
 def site_footer(rel, note=""):
     return ('<footer class="sl-foot"><p><a class="sl-flogo" href="%s">SnakeList</a> &middot; made by <a href="%sabout.html">Eduardo Brandao</a></p>'
@@ -1775,8 +1775,7 @@ section{background:var(--card);border:1px solid var(--line);border-radius:18px;p
 #sp-wiki p{margin:10px 0 0}#sp-wiki .src{font-size:12px;color:var(--muted)}.sp-foot{text-align:center;color:var(--muted);font-size:13px;padding:20px 16px 34px;border-top:1px solid var(--line)}
 .sl-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;max-width:1120px;margin:0 auto;padding:14px 16px}
 .sl-brand{display:inline-flex;align-items:center;gap:9px;font:700 24px/1 Fraunces,Georgia,'Times New Roman',serif;color:#58b351;text-decoration:none}
-.sl-brand img{height:46px;width:auto;display:block}.sl-brand .sl-logo-d{display:none}@media (prefers-color-scheme:dark){.sl-brand .sl-logo-l{display:none}.sl-brand .sl-logo-d{display:block}}
-@media (max-width:560px){.sl-brand img{height:36px}}
+.sl-brand img{width:32px;height:32px;border-radius:8px;display:block}
 .sl-top nav{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14.5px}.sl-top nav a{color:var(--muted);text-decoration:none;padding:6px 0}
 .sl-top nav a:hover,.sl-top nav a[aria-current]{color:var(--link)}.sl-top nav a[aria-current]{font-weight:600}
 .sl-foot{margin-top:30px;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:13.5px;padding:20px 16px 30px}

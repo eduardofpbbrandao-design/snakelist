@@ -251,9 +251,12 @@ CURATED = {
     # and front view): the head is narrow and long (about 1.9 times as long as wide), flat-topped and low (depth about 0.6 of its
     # width), the snout lower than the crown, a slight brow over the eye; the eye a fifth of the head long, NOT bulging; the lip and
     # chin scales yellowish white; the tongue red with black tips (Ernst and Ernst 2003, Snakes of the United States and Canada)
-    "opheodrys-vernalis": {"d": "#6fb23e", "lat": "#7bbb47", "b": "#eef0c8", "t": "uniform", "s": "grass", "L": 0.45, "mx": "about 66 cm", "k": 0, "sp": {"grassA": "#55803a", "grassB": "#9ab860"},
-                           "h": dict(DARK_EYE, iris="#3d321c", irisInner="#5c4a26", eyeRing="#d9c27a", pupilW=0.22, eyeL=0.19, eyeX=0.36, eyeA=50, len=0.031, w=0.9, h=0.78, snoutH=0.64, jaw=0.82,
-                                     lips="pale", lipColor="#dbe6a2", lipFull=0.07, bulge=0.045, brow=0.07, taper=0.3, headRelief=0.14, groove=0.16, snout=0.52, tongue="#c42a38", tongueTip="#141012", lw=1.65, hFixed=1), "bx": {"ld": 62, "neck": 0.78, "tail": 0.31, "hn": 1.3},
+    # v6.13 (3D audit against the photo: "lots of snakes are still very incorrect"): the eye is all dark - a near-black iris
+    # with no pale ring in it; the lips, chin and belly pale yellow-green, not white (a white patch on the neck read as a
+    # blotch); the back a clearer, slightly more saturated grass green
+    "opheodrys-vernalis": {"d": "#66b23a", "lat": "#74bb42", "b": "#dbe7a0", "t": "uniform", "s": "grass", "L": 0.45, "mx": "about 66 cm", "k": 0, "sp": {"grassA": "#55803a", "grassB": "#9ab860"},
+                           "h": dict(DARK_EYE, iris="#16150d", irisInner="#232110", pupilW=0.22, eyeL=0.19, eyeX=0.36, eyeA=50, len=0.031, w=0.9, h=0.78, snoutH=0.64, jaw=0.82,
+                                     lips="pale", lipColor="#bcd672", bulge=0.045, brow=0.07, taper=0.3, headRelief=0.14, groove=0.16, snout=0.52, tongue="#c42a38", tongueTip="#141012", lw=1.65, hFixed=1), "bx": {"ld": 62, "neck": 0.78, "tail": 0.31, "hn": 1.3},
                            "sx": {"gloss": 0.78, "rows": 15, "keel": 0, "relief": 0.55, "cavity": 0.22, "edge": {"color": "#d3e59c", "k": 0.42, "dir": [0.35, 0], "from": 0.62, "pow": 1.4}}, "cx": {"bellyA": 0.7, "bellySharp": 0.045, "mottle": 0.02, "var": 0.02, "flecks": 0, "edgeK": 0.25}},
     "opheodrys-aestivus": {"d": "#76b13a", "lat": "#86bd45", "b": "#ecebb0", "t": "plain", "s": "forest", "L": 0.8, "k": 1, "lip": "#e2e6a8",
                            "h": dict(DARK_EYE, iris="#1d1d14", irisInner="#34341f", eyeRing="#cfd09a", pupilW=0.25, eye=0.18), "bx": {"ld": 70, "neck": 0.9}, "sx": {"gloss": 0.4, "rows": 17}, "cx": {"bellyA": 0.7, "mottle": 0.04}},
@@ -1403,6 +1406,64 @@ def fossil_template(c, out, L):
     return None
 
 
+# v6.13 (Eduardo: "in 3d lots of snakes are still very incorrect, wrong patterns, not enough of patterns or colors"): every
+# generated model put beside its SnakeList photo (tools/3d-audit-log.md). data/snake-model-audit.json holds the fixes, one per
+# species: above all the ~430 snakes whose photo colours could not be read, which had been given their group's grey-brown
+# and a pattern guessed from their name - now the colours and pattern seen in the photo
+AUDIT_613 = json.load(open(os.path.join(ROOT, "data/snake-model-audit.json"), encoding="utf-8"))["species"]
+def apply_613(a, fx):
+    for k, v in fx.items():
+        if k == "why": continue
+        if k in ("h", "cx", "sx", "bx") and isinstance(v, dict): a[k] = dict(a.get(k) or {}, **v)
+        elif k == "pat": a["pat"] = (a.get("pat") or []) + v
+        else: a[k] = v
+    if any(k in fx for k in ("d", "c", "b")) and "x" in a:  # the colours are now the photo's, not its group's guess
+        if "g" in a["x"] and "d" in fx and "b" not in fx and a.get("p") != "blind":  # (and so is the belly: paler than the back)
+            a["b"] = mix(tone(a["d"], 1.3, 0.35), "#ece5d0", 0.65) if lum(a["d"]) > 0.08 else "#d8d2c4"
+        a["x"] = a["x"].replace("g", "")
+        if not a["x"]: a.pop("x")
+
+
+# v6.13 (Eduardo, speckled kingsnake: "ITS WHITE PATTERNS AND COLORS NOT GREY OR BROWN"): white markings are WHITE. A marking
+# colour (pattern, speckle, bands, stripes - never the ground or the belly) that is already near-white and near-neutral
+# (light, the channels within 30 of each other: off-white, pale grey, faint cream) becomes clean white, and the skin's
+# default darkening (colors.deepen 0.95, which turned white bands grey-cream under the scene light) is switched off for
+# that snake. Real cream and yellow marks (more colour in them) are left as they are.
+WHITE = "#f4f4f0"
+def _whiteish(h):
+    if not (isinstance(h, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", h)): return False
+    r, g, b = hx(h); return lum(h) >= 0.78 and (max(r, g, b) - min(r, g, b)) * 255 <= 30
+def whiten_marks(o, keys=("color", "edgeColor")):
+    """o: pattern layers (a list or one layer); returns True if anything changed."""
+    hit = False
+    if isinstance(o, list):
+        for x in o: hit = whiten_marks(x, keys) or hit
+    elif isinstance(o, dict):
+        for k, v in list(o.items()):
+            if k in keys and _whiteish(v): o[k] = WHITE; hit = True
+            elif isinstance(v, (dict, list)) and k in ("speck", "inner"): hit = whiten_marks(v, keys) or hit
+    return hit
+def white_613(prof):
+    if "auto" in prof:
+        a = prof["auto"]; hit = False
+        if a.get("t") not in ("plain", "uniform", None) and _whiteish(a.get("c")): a["c"] = WHITE; hit = True
+        hit = whiten_marks(a.get("pat") or []) or hit
+        sp = (a.get("cx") or {}).get("speckle")
+        if sp and _whiteish(sp.get("color")): sp["color"] = WHITE; hit = True
+        for k in ("ls", "vs"):
+            if a.get(k) and _whiteish(a[k][0]): a[k] = [WHITE] + list(a[k][1:]); hit = True
+        for tb in a.get("tb") or []:
+            if _whiteish(tb[0]): tb[0] = WHITE; hit = True
+        if hit: a["cx"] = dict(a.get("cx") or {}, deepen=1.0)
+    else:
+        hit = whiten_marks(prof.get("pattern") or [])
+        sp = (prof.get("colors") or {}).get("speckle")
+        if sp and _whiteish(sp.get("color")): sp["color"] = WHITE; hit = True
+        if hit: prof["colors"] = dict(prof.get("colors") or {}, deepen=1.0)
+    return hit
+WHITENED = []
+
+
 def build(cards, lengths, hab_kind, existing, hab_sec=None):
     """cards: the app's cards (build_species); lengths: id -> (lo, hi) from reviewed accounts;
     existing: the hand-made profiles (kept). Returns id -> generated entry."""
@@ -1417,6 +1478,10 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
                 for k in path[:-1]: o = o[k]
                 o[path[-1]] = val
     apply_hand_562(existing)  # v5.62
+    for sid, prof in existing.items():  # v6.13: white marks are white
+        if white_613(prof): WHITENED.append(sid)
+    for sid in ("lampropeltis-californiae", "lampropeltis-getula"):  # v6.13: kingsnakes' eyes are dark, not gold (their photos)
+        if sid in existing: existing[sid]["head"] = dict(existing[sid].get("head") or {}, iris="#16110d", irisInner="#241a12", irisDark=1, pupil="round")
     out, names = {}, {}
     for c in cards:
         if c["id"] in existing: continue
@@ -1564,7 +1629,9 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         if g == "bungarus": a["bx"] = dict(a.get("bx") or {}, tri=0.5, ridge=0.07)
         elif g in ARBOREAL: a["bx"] = dict(a.get("bx") or {}, tri=0.3, ridge=0.04)
         apply_562(a, c, g)  # v5.62: model accuracy
+        if c["id"] in AUDIT_613 and not c["fossil"]: apply_613(a, AUDIT_613[c["id"]])  # v6.13: checked against its photo
         out[c["id"]] = {"name": c["sci"] if c["is_sci"] else c["name"], "auto": a}
+        if not c["fossil"] and white_613(out[c["id"]]): WHITENED.append(c["id"])
         names[c["id"]] = (nm + " " + c["id"]).lower()
     # v5.34: a pale grey snake whose name says nothing of white, grey or silver was mostly read from the rock, sand or
     # concrete under it (photo checks: dark and brown snakes came out pale grey) - it takes its genus's usual colour
@@ -1575,7 +1642,7 @@ def build(cards, lengths, hab_kind, existing, hab_sec=None):
         if k not in CURATED and not pal(a["d"]) and a["p"] != "blind": by_g.setdefault(k.split("-")[0], []).append(a["d"])
     for k, v in out.items():
         a = v["auto"]
-        if k in CURATED or k in AUDIT_FIX or not pal(a["d"]) or a["p"] == "blind" or re.search(r"white|pale|gr[ae]y|silver|ash|albi|alba|leuc|blanc|cinere|argent|candid|ghost|sand|desert", names.get(k, "")): continue
+        if k in CURATED or k in AUDIT_FIX or k in AUDIT_613 or not pal(a["d"]) or a["p"] == "blind" or re.search(r"white|pale|gr[ae]y|silver|ash|albi|alba|leuc|blanc|cinere|argent|candid|ghost|sand|desert", names.get(k, "")): continue
         cs = by_g.get(k.split("-")[0], [])
         if k.split("-")[0] in GREEN_IN_LIFE: cs = [x for x in cs if is_green(x)] or cs
         if len(cs) < 3: continue

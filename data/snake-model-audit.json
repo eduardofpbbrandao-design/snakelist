@@ -1,0 +1,5830 @@
+{
+"about": "3D audit (v6.13): per-species fixes found by putting each generated 3D model beside its SnakeList photo. Each entry overrides the generated look in tools/auto_models.py (keys as in its CURATED: d back, lat flanks, c pattern colour, b belly, t pattern, n marks, hc head colour, tb throat bands, ls/vs stripes, cx colour extras, pat extra layers, h head). 'why' says what was wrong. The log is tools/3d-audit-log.md.",
+"species": {
+"acanthophis-praelongus": {
+"d": "#c09060",
+"lat": "#c49464",
+"c": "#6a4a30",
+"why": "orange-buff with dark bands"
+},
+"adelophis-copei": {
+"d": "#a8743a",
+"lat": "#ac783e",
+"c": "#4a2e18",
+"t": "stripe",
+"why": "orange-brown with dark lines"
+},
+"adelphicos-quadrivirgatum": {
+"d": "#b07a64",
+"lat": "#b47e68",
+"c": "#4a2a20",
+"why": "pinkish brown, dark stripes"
+},
+"afronatrix-anoscopus": {
+"d": "#6a2a1e",
+"lat": "#6e2e22",
+"t": "plain",
+"why": "plain dark red-brown"
+},
+"afrotyphlops-elegans": {
+"d": "#e0a030",
+"lat": "#e4a434",
+"c": "#1e1a18",
+"t": "spot",
+"why": "yellow-orange with black marks"
+},
+"afrotyphlops-liberiensis": {
+"d": "#1e1e22",
+"lat": "#222226",
+"c": "#e0e0e0",
+"t": "speckle",
+"why": "black with white blotches"
+},
+"afrotyphlops-lineolatus": {
+"d": "#1e3a5a",
+"lat": "#223e5e",
+"why": "iridescent blue-black"
+},
+"afrotyphlops-mucruso": {
+"d": "#4a5050",
+"lat": "#4e5454",
+"c": "#c8c8b8",
+"t": "stripe",
+"why": "dark grey-blue with pale lines"
+},
+"afrotyphlops-punctatus": {
+"d": "#d8d0c0",
+"lat": "#dcd4c4",
+"c": "#2a2a30",
+"t": "spot",
+"why": "pale with dark spots"
+},
+"ahaetulla-oxyrhyncha": {
+"d": "#8ac828",
+"lat": "#8ecc2c",
+"why": "bright green"
+},
+"ahaetulla-rufusoculara": {
+"d": "#6ac028",
+"lat": "#6ec42c",
+"why": "bright green"
+},
+"aipysurus-duboisii": {
+"d": "#2a3438",
+"lat": "#2e383c",
+"t": "plain",
+"why": "bands: plain dark"
+},
+"alsophis-antiguae": {
+"d": "#8a8670",
+"lat": "#8e8a74",
+"c": "#3a3628",
+"t": "stripe",
+"why": "grey-olive with dark stripes"
+},
+"alsophis-antillensis": {
+"d": "#1e1c1c",
+"lat": "#222020",
+"c": "#e0e0c8",
+"t": "xband",
+"n": 40,
+"why": "black with pale zigzag crossbars"
+},
+"alsophis-rijgersmaei": {
+"d": "#5a4e46",
+"lat": "#5e524a",
+"t": "plain",
+"why": "plain dark brown"
+},
+"alsophis-rufiventris": {
+"d": "#2a2826",
+"lat": "#2e2c2a",
+"c": "#7a7068",
+"t": "speckle",
+"why": "black with grey flecks"
+},
+"alsophis-sanctonum": {
+"d": "#b0883a",
+"lat": "#b48c3e",
+"c": "#3a2a18",
+"t": "stripe",
+"why": "plain: golden brown with dark lines"
+},
+"amastridium-veliferum": {
+"d": "#1e2428",
+"lat": "#22282c",
+"t": "plain",
+"why": "black"
+},
+"amblyodipsas-ventrimaculata": {
+"d": "#1e1e1c",
+"lat": "#2a2a1e",
+"c": "#e0c030",
+"t": "plain",
+"ls": [
+"#e0c030",
+0.6,
+0.09
+],
+"why": "spotted: black with a broad yellow flank stripe"
+},
+"anilios-aspina": {
+"d": "#d8a0a8",
+"lat": "#dca4ac",
+"why": "pink"
+},
+"anilios-australis": {
+"d": "#c8909a",
+"lat": "#cc949e",
+"why": "pink"
+},
+"anilios-chamodracaena": {
+"d": "#4a2a2a",
+"lat": "#4e2e2e",
+"why": "dark purple-brown"
+},
+"anilios-kimberleyensis": {
+"d": "#8a5a5a",
+"lat": "#8e5e5e",
+"why": "purplish pink"
+},
+"anilios-margaretae": {
+"d": "#5a3a3a",
+"lat": "#5e3e3e",
+"why": "dark purple-brown"
+},
+"anilios-pilbarensis": {
+"d": "#5a2a24",
+"lat": "#5e2e28",
+"why": "dark red-brown"
+},
+"anomalepis-mexicana": {
+"d": "#d0a0a0",
+"lat": "#d4a4a4",
+"why": "pink"
+},
+"anomochilus-monticola": {
+"d": "#1e2026",
+"lat": "#22242a",
+"c": "#e86a20",
+"t": "plain",
+"tt": "#e86a20",
+"why": "black, orange marks near the tail"
+},
+"antaresia-maculosa": {
+"d": "#c09a70",
+"lat": "#c49e74",
+"c": "#6a4a30",
+"t": "blotch",
+"n": 60,
+"why": "pale brown, many dark brown blotches"
+},
+"antillotyphlops-geotomus": {
+"d": "#8a7a80",
+"lat": "#8e7e84",
+"why": "mauve grey"
+},
+"antillotyphlops-platycephalus": {
+"d": "#5a90c0",
+"lat": "#5e94c4",
+"why": "blue (iridescent)"
+},
+"aparallactus-guentheri": {
+"d": "#2a2a2a",
+"lat": "#2e2e2e",
+"t": "plain",
+"tb": [
+[
+"#e8d8a0",
+1.1,
+1.8,
+0.0
+]
+],
+"why": "plain grey: black with a pale collar"
+},
+"aplopeltura-boa": {
+"d": "#8a5a38",
+"lat": "#8e5e3c",
+"c": "#3a2418",
+"t": "xband",
+"why": "rusty brown, dark bands"
+},
+"apostolepis-albicollaris": {
+"d": "#c8702a",
+"lat": "#cc742e",
+"t": "plain",
+"hc": "#141210",
+"hcx": 1.0,
+"why": "orange with black head"
+},
+"apostolepis-ambiniger": {
+"d": "#d8a8a0",
+"lat": "#dcaca4",
+"t": "plain",
+"hc": "#141210",
+"tt": "#141210",
+"why": "pink, black head and tail tip"
+},
+"apostolepis-assimilis": {
+"d": "#e0602a",
+"lat": "#e4642e",
+"t": "plain",
+"hc": "#141210",
+"hcx": 1.0,
+"tt": "#141210",
+"why": "saddles: plain orange with a black head and tail tip"
+},
+"apostolepis-cearensis": {
+"d": "#d8705a",
+"lat": "#dc745e",
+"t": "plain",
+"hc": "#141210",
+"hcx": 1.0,
+"why": "salmon with a black head"
+},
+"apostolepis-multicincta": {
+"d": "#d8602a",
+"lat": "#dc642e",
+"t": "plain",
+"why": "banded: plain orange"
+},
+"apostolepis-nelsonjorgei": {
+"d": "#b0905a",
+"lat": "#b4945e",
+"c": "#3a2a1a",
+"t": "stripe",
+"why": "tan with dark stripes"
+},
+"apostolepis-nigroterminata": {
+"d": "#8a4a2e",
+"lat": "#8e4e32",
+"t": "plain",
+"why": "plain rusty brown, black tail tip"
+},
+"apostolepis-polylepis": {
+"d": "#c8502e",
+"lat": "#cc5432",
+"c": "#2a1e18",
+"t": "stripe",
+"why": "plain: red with dark lines"
+},
+"apostolepis-quirogai": {
+"d": "#c8302a",
+"lat": "#cc342e",
+"c": "#141210",
+"t": "stripe",
+"hc": "#141210",
+"why": "red with dark lines, black head"
+},
+"apostolepis-sanctaeritae": {
+"d": "#d8502a",
+"lat": "#dc542e",
+"t": "plain",
+"hc": "#141210",
+"why": "orange-red with a black head"
+},
+"apostolepis-thalesdelemai": {
+"d": "#c8602a",
+"lat": "#cc642e",
+"c": "#141210",
+"t": "stripe",
+"hc": "#141210",
+"why": "orange-red with dark lines, black head"
+},
+"archelaphe-bella": {
+"d": "#8a3a30",
+"lat": "#8e3e34",
+"c": "#e8d890",
+"t": "xband",
+"n": 50,
+"why": "dark red with pale crossbars"
+},
+"arrhyton-tanyplectum": {
+"d": "#3a2a1a",
+"lat": "#3e2e1e",
+"b": "#e0d040",
+"why": "dark back, yellow belly"
+},
+"aspidomorphus-muelleri": {
+"d": "#b08460",
+"lat": "#b48864",
+"t": "plain",
+"why": "plain tan, dark head"
+},
+"aspidura-brachyorrhos": {
+"d": "#b8784e",
+"lat": "#bc7c52",
+"t": "plain",
+"why": "plain orange-brown"
+},
+"aspidura-copei": {
+"d": "#c8502a",
+"lat": "#cc542e",
+"t": "plain",
+"why": "orange-red"
+},
+"asthenodipsas-borneensis": {
+"d": "#e0cc90",
+"lat": "#e4d094",
+"c": "#3a2a18",
+"t": "band",
+"why": "cream with dark bands"
+},
+"asthenodipsas-malaccanus": {
+"d": "#1e1e24",
+"lat": "#222228",
+"c": "#a8c0d8",
+"t": "band",
+"why": "plain: black with pale blue bands"
+},
+"asthenodipsas-stuebingi": {
+"d": "#d8802a",
+"lat": "#dc842e",
+"c": "#3a2014",
+"t": "xband",
+"why": "orange with dark bars"
+},
+"asthenodipsas-vertebralis": {
+"d": "#5a5040",
+"lat": "#5e5444",
+"c": "#1e1a14",
+"t": "spot",
+"why": "plain: brown with dark spots"
+},
+"atheris-ceratophora": {
+"d": "#d0b840",
+"lat": "#d4bc44",
+"c": "#1a1a12",
+"t": "irregular",
+"why": "plain: yellow with big black blotches"
+},
+"atheris-desaixi": {
+"d": "#1e1e18",
+"lat": "#22221c",
+"c": "#d8d040",
+"t": "speckle",
+"why": "black with yellow scales"
+},
+"atheris-hetfieldi": {
+"d": "#3a9a2a",
+"lat": "#3e9e2e",
+"why": "green"
+},
+"atheris-matildae": {
+"d": "#1c1c14",
+"lat": "#20201a",
+"c": "#d8d040",
+"t": "speckle",
+"why": "yellow scales on black read as plain"
+},
+"atractaspis-aterrima": {
+"d": "#3a3a3a",
+"lat": "#3e3e3e",
+"t": "plain",
+"why": "saddles: plain dark grey"
+},
+"atractus-badius": {
+"d": "#3a2a24",
+"lat": "#3e2e28",
+"c": "#c8602a",
+"t": "spot",
+"why": "dark brown with orange flank marks"
+},
+"atractus-bocki": {
+"d": "#2a3040",
+"lat": "#2e3444",
+"c": "#c83a2a",
+"t": "blotch",
+"why": "dark with red blotches"
+},
+"atractus-clarki": {
+"d": "#2a2628",
+"lat": "#2e2a2c",
+"c": "#d86a40",
+"t": "plain",
+"tb": [
+[
+"#d86a40",
+1.0,
+2.5,
+0.0
+]
+],
+"why": "black with an orange-red collar"
+},
+"atractus-ecuadorensis": {
+"d": "#5a3a2a",
+"lat": "#5e3e2e",
+"c": "#2a1a14",
+"t": "plain",
+"why": "dark brown"
+},
+"atractus-elaps": {
+"d": "#141210",
+"lat": "#181614",
+"c": "#e05a2a",
+"t": "band",
+"n": 30,
+"why": "coloured but banded wrong way: black with orange-red bands"
+},
+"atractus-iridescens": {
+"t": "plain",
+"why": "crossbands: plain iridescent brown"
+},
+"atractus-lasallei": {
+"d": "#b07058",
+"lat": "#b4745c",
+"t": "plain",
+"why": "plain pinkish brown"
+},
+"atractus-latifrons": {
+"d": "#c8382a",
+"lat": "#cc3c2e",
+"c": "#141210",
+"t": "band",
+"n": 30,
+"why": "dark bands on grey: red with black bands"
+},
+"atractus-maculatus": {
+"d": "#9a4030",
+"lat": "#9e4434",
+"c": "#2a1a16",
+"t": "spot",
+"why": "red-brown with dark spots"
+},
+"atractus-major": {
+"d": "#b8602e",
+"lat": "#bc6432",
+"c": "#3a2018",
+"why": "orange-red with dark crossbars"
+},
+"atractus-meridensis": {
+"d": "#c84a2a",
+"lat": "#cc4e2e",
+"c": "#1e1a20",
+"t": "band",
+"n": 40,
+"why": "plain: red-orange with black bands"
+},
+"atractus-pachacamac": {
+"d": "#1e1a1e",
+"lat": "#221e22",
+"c": "#c8402a",
+"t": "blotch",
+"why": "plain: black with red blotches"
+},
+"atractus-riveroi": {
+"d": "#3a2a24",
+"lat": "#3e2e28",
+"t": "plain",
+"why": "plain dark brown"
+},
+"atractus-schach": {
+"d": "#d86a3a",
+"lat": "#dc6e3e",
+"c": "#2a1a14",
+"t": "saddle",
+"why": "plain grey: orange with dark saddles"
+},
+"atractus-spinalis": {
+"d": "#9a5a3a",
+"lat": "#9e5e3e",
+"c": "#3a2018",
+"t": "xband",
+"why": "rusty brown with dark crossbands (was plain)"
+},
+"atractus-titanicus": {
+"d": "#8a8478",
+"lat": "#8e887c",
+"c": "#2a2826",
+"t": "xband",
+"why": "grey with dark bands"
+},
+"atractus-typhon": {
+"d": "#1e1e24",
+"lat": "#222228",
+"c": "#d84a3a",
+"t": "blotch",
+"why": "plain: black with red blotches"
+},
+"atractus-vittatus": {
+"d": "#4a3e4a",
+"lat": "#4e424e",
+"t": "plain",
+"why": "dark purple-brown"
+},
+"australiasis-amethystinus": {
+"d": "#a88a50",
+"lat": "#ac8e54",
+"c": "#4a3a20",
+"t": "xband",
+"why": "olive-tan with dark bands"
+},
+"austrelaps-labialis": {
+"d": "#6a6448",
+"lat": "#6e684c",
+"t": "plain",
+"why": "plain olive-grey"
+},
+"bitis-armata": {
+"d": "#8a8478",
+"lat": "#8e887c",
+"c": "#3a3632",
+"t": "spot",
+"why": "grey with rows of dark spots"
+},
+"bitis-harenna": {
+"d": "#1e1e1a",
+"lat": "#22221e",
+"c": "#d8c860",
+"t": "zigzag",
+"why": "black with yellow marks"
+},
+"bitis-rubida": {
+"d": "#9a8a74",
+"lat": "#9e8e78",
+"c": "#4a3a2c",
+"why": "sandy-red with dark marks"
+},
+"bitis-schneideri": {
+"d": "#a08a6a",
+"lat": "#a48e6e",
+"c": "#5a4430",
+"why": "sandy, dark marks"
+},
+"boaedon-virgatus": {
+"d": "#7a7a80",
+"lat": "#7e7e84",
+"t": "plain",
+"why": "plain grey"
+},
+"bogertophis-subocularis": {
+"d": "#c8b060",
+"lat": "#ccb464",
+"c": "#1a1612",
+"t": "blotch",
+"ls": [
+"#2a2418",
+0.25,
+0.025
+],
+"why": "plain: yellow with black H-shaped blotches"
+},
+"boiga-cynodon": {
+"d": "#b8925a",
+"lat": "#bc965e",
+"c": "#4a3420",
+"t": "xband",
+"why": "buff, dark crossbands"
+},
+"boiga-drapiezii": {
+"d": "#8a8470",
+"lat": "#8e8874",
+"c": "#4a4436",
+"why": "grey-brown"
+},
+"boiga-flaviviridis": {
+"d": "#b8b840",
+"lat": "#bcbc44",
+"t": "plain",
+"why": "blotched: plain yellow-green"
+},
+"boiga-gocool": {
+"d": "#c8b8a0",
+"lat": "#ccbca4",
+"c": "#2a2018",
+"t": "band",
+"why": "pale with dark bands"
+},
+"boiga-guangxiensis": {
+"d": "#8a4a34",
+"lat": "#8e4e38",
+"c": "#2a1a14",
+"t": "xband",
+"why": "red-brown with dark bands"
+},
+"boiga-hoeseli": {
+"d": "#d8ccc0",
+"lat": "#dcd0c4",
+"c": "#4a3a34",
+"t": "blotch",
+"why": "pale with dark blotches"
+},
+"boiga-melanota": {
+"d": "#1e1e1c",
+"lat": "#22221e",
+"c": "#e0c030",
+"t": "xband",
+"why": "black with yellow bars"
+},
+"boiga-nigriceps": {
+"d": "#c8704a",
+"lat": "#cc744e",
+"t": "plain",
+"hc": "#3a2018",
+"hcx": 1.0,
+"why": "blotched: plain orange-red with a dark head"
+},
+"boiga-ochracea": {
+"d": "#c8923a",
+"lat": "#cc963e",
+"t": "plain",
+"why": "plain ochre-orange"
+},
+"boiga-saengsomi": {
+"d": "#e0c020",
+"lat": "#e4c424",
+"c": "#141210",
+"t": "irregular",
+"why": "yellow with bold black marks"
+},
+"boiga-westermanni": {
+"d": "#1e1a18",
+"lat": "#221e1c",
+"c": "#e8e0c8",
+"t": "saddle",
+"why": "black with pale cream marks"
+},
+"boiga-whitakeri": {
+"d": "#a8704a",
+"lat": "#ac744e",
+"c": "#4a2a18",
+"t": "xband",
+"why": "rusty brown, dark bars"
+},
+"boiruna-maculata": {
+"d": "#1a1616",
+"lat": "#2a1c1a",
+"b": "#c8402a",
+"t": "plain",
+"why": "spotted: glossy black, red belly edge"
+},
+"bothriechis-nubestris": {
+"d": "#3a5a2a",
+"lat": "#3e5e2e",
+"c": "#c8c040",
+"t": "speckle",
+"why": "green-black with yellow flecks"
+},
+"bothrops-insularis": {
+"d": "#c89048",
+"lat": "#cc944c",
+"c": "#a87430",
+"why": "golden, faint marks"
+},
+"bothrops-jonathani": {
+"d": "#6a665a",
+"lat": "#6e6a5e",
+"c": "#2a2620",
+"why": "grey-olive, dark trapezoids"
+},
+"bothrops-lutzi": {
+"d": "#8a7a64",
+"lat": "#8e7e68",
+"c": "#3e3226",
+"why": "grey-brown, dark trapezoids"
+},
+"bothrops-monsignifer": {
+"d": "#3a3a36",
+"lat": "#3e3e3a",
+"c": "#1a1a18",
+"why": "dark grey with black trapezoids"
+},
+"brachyurophis-approximans": {
+"d": "#8a5a40",
+"lat": "#8e5e44",
+"c": "#d8b090",
+"t": "xband",
+"why": "rusty brown with pale bands"
+},
+"brachyurophis-roperi": {
+"d": "#5a4a40",
+"lat": "#5e4e44",
+"c": "#1c1a18",
+"t": "band",
+"why": "brown with dark-edged bands"
+},
+"bungarus-candidus": {
+"d": "#141416",
+"lat": "#161618",
+"c": "#f4f4f0",
+"b": "#f2f2ee",
+"t": "band",
+"why": "Malayan krait: grey-brown with greyish bands; it is jet black with pure white bands"
+},
+"bungarus-magnimaculatus": {
+"d": "#d8d4c8",
+"lat": "#dcd8cc",
+"c": "#2a2a2c",
+"rg": 1,
+"why": "white with broad black bands"
+},
+"bungarus-suzhenae": {
+"d": "#1e1c24",
+"lat": "#222028",
+"c": "#d8d4d8",
+"why": "black with white bands"
+},
+"bungarus-walli": {
+"d": "#2a2a2c",
+"lat": "#2e2e30",
+"c": "#d8d8d8",
+"t": "band",
+"rg": 1,
+"why": "black with thin pale bands"
+},
+"cacophis-harriettae": {
+"d": "#5a6a80",
+"lat": "#5e6e84",
+"t": "plain",
+"tb": [
+[
+"#e8e0c8",
+1.2,
+2.0,
+0.0
+]
+],
+"why": "speckled: blue-grey with a white crown band"
+},
+"calamaria-albiventer": {
+"d": "#3a3434",
+"lat": "#3e3838",
+"c": "#d8502a",
+"t": "stripe",
+"why": "dark with red stripes"
+},
+"calamaria-arcana": {
+"d": "#3a2a2e",
+"lat": "#3e2e32",
+"t": "plain",
+"why": "dark purple-brown"
+},
+"calamaria-bicolor": {
+"d": "#2a2830",
+"lat": "#2e2c34",
+"t": "plain",
+"ls": [
+"#e0c040",
+0.72,
+0.03
+],
+"why": "dark with a yellow line low on the flank"
+},
+"calamaria-butonensis": {
+"d": "#5a4048",
+"lat": "#5e444c",
+"c": "#2a1e22",
+"t": "speckle",
+"why": "purple-brown"
+},
+"calamaria-concolor": {
+"d": "#c84a3a",
+"lat": "#cc4e3e",
+"t": "plain",
+"why": "red"
+},
+"calamaria-dominici": {
+"d": "#1e2418",
+"lat": "#22281c",
+"c": "#d8d030",
+"t": "speckle",
+"why": "black with yellow spots"
+},
+"calamaria-griswoldi": {
+"d": "#2a2a22",
+"lat": "#2e2e26",
+"c": "#d8c870",
+"t": "stripe",
+"why": "black with yellow lines"
+},
+"calamaria-hilleniusi": {
+"d": "#8a7a8a",
+"lat": "#8e7e8e",
+"why": "iridescent grey-purple"
+},
+"calamaria-lateralis": {
+"d": "#3a3a5a",
+"lat": "#3e3e5e",
+"c": "#e0c030",
+"t": "plain",
+"ls": [
+"#e0c030",
+0.6,
+0.07
+],
+"why": "stripe: blue-black with a yellow flank stripe"
+},
+"calamaria-modesta": {
+"d": "#1e3040",
+"lat": "#223444",
+"c": "#e0c030",
+"t": "spot",
+"why": "saddles: blue-black with yellow spots"
+},
+"calamaria-pavimentata": {
+"d": "#7a5a44",
+"lat": "#7e5e48",
+"t": "plain",
+"why": "plain brown"
+},
+"calamaria-schlegeli": {
+"hc": "#d84a2a",
+"hcx": 1.0,
+"why": "the red head"
+},
+"calamaria-yunnanensis": {
+"d": "#1e1e22",
+"lat": "#222226",
+"c": "#e0a030",
+"t": "plain",
+"ls": [
+"#e0a030",
+0.55,
+0.05
+],
+"why": "plain: black with an orange flank stripe"
+},
+"calliophis-bilineatus": {
+"d": "#1e1e1e",
+"lat": "#222222",
+"c": "#e0c040",
+"t": "stripe",
+"why": "coral: black with yellow stripes"
+},
+"calliophis-bivirgatus": {
+"d": "#1c2440",
+"lat": "#202844",
+"c": "#7ab0e0",
+"b": "#d84a3a",
+"t": "plain",
+"ls": [
+"#7ab0e0",
+0.55,
+0.04
+],
+"hc": "#d83a2a",
+"hcx": 1.0,
+"tt": "#d83a2a",
+"tts": 0.82,
+"why": "coral rings: the blue coral snake is dark blue with a pale blue flank stripe and a red head and tail"
+},
+"calliophis-castoe": {
+"d": "#b8b8c0",
+"lat": "#bcbcc4",
+"c": "#d84a3a",
+"t": "plain",
+"ls": [
+"#d84a3a",
+0.3,
+0.025
+],
+"why": "coral: pale grey with thin red lines"
+},
+"calliophis-gracilis": {
+"d": "#1e2030",
+"lat": "#222434",
+"c": "#e8e4e0",
+"t": "band",
+"rg": 1,
+"why": "coral: black with white bands"
+},
+"calliophis-intestinalis": {
+"d": "#3a2e28",
+"lat": "#3e322c",
+"c": "#c8603a",
+"b": "#e0d8c0",
+"t": "stripe",
+"why": "coral rings: this one is brown with stripes, not ringed"
+},
+"calliophis-maculiceps": {
+"d": "#c83a3a",
+"lat": "#cc3e3e",
+"b": "#d84a40",
+"t": "plain",
+"hc": "#141210",
+"hcx": 1.0,
+"cx": {
+"speckle": {
+"p": 0.08,
+"color": "#141210",
+"k": 0.6
+}
+},
+"why": "coral rings: pink-red with tiny black flecks and a black head"
+},
+"calliophis-melanurus": {
+"d": "#6a5040",
+"lat": "#6e5444",
+"b": "#d84a3a",
+"t": "plain",
+"hc": "#141210",
+"hcx": 1.0,
+"tt": "#141210",
+"why": "coral rings: plain brown with a black head and tail, red belly"
+},
+"calliophis-nigrotaeniatus": {
+"d": "#3a3434",
+"lat": "#3e3838",
+"c": "#c8402a",
+"t": "stripe",
+"why": "coral: dark with red-orange lines"
+},
+"calliophis-philippinus": {
+"d": "#3a3a40",
+"lat": "#3e3e44",
+"t": "plain",
+"why": "coral rings: plain dark grey"
+},
+"cantoria-violacea": {
+"d": "#2a2a28",
+"lat": "#2e2e2c",
+"c": "#e0dcd0",
+"t": "band",
+"why": "plain: dark with pale bands"
+},
+"caraiba-andreae": {
+"d": "#1e2428",
+"lat": "#22282c",
+"c": "#7ab0c0",
+"t": "speckle",
+"why": "dark with pale blue flecks"
+},
+"causus-rhombeatus": {
+"t": "rhomb",
+"why": "crossbands: now the dark rhombs (chevrons) down the back"
+},
+"cemophora-coccinea": {
+"d": "#ece4d4",
+"lat": "#f0e8d8",
+"c": "#c8302a",
+"t": "esaddle",
+"why": "faint: red saddles edged dark on a white ground"
+},
+"cemophora-lineri": {
+"d": "#ece4d4",
+"lat": "#f0e8d8",
+"c": "#c8302a",
+"t": "esaddle",
+"why": "white with red black-edged saddles"
+},
+"cerrophidion-petlalcalensis": {
+"d": "#6a5a54",
+"lat": "#6e5e58",
+"c": "#2a2220",
+"why": "grey-brown, dark blotches"
+},
+"chersodromus-australis": {
+"d": "#2e3034",
+"lat": "#323438",
+"t": "plain",
+"why": "plain blue-black"
+},
+"chilabothrus-angulifer": {
+"d": "#a08a64",
+"lat": "#a48e68",
+"c": "#3a2a1a",
+"why": "buff, dark blotches"
+},
+"chilabothrus-chrysogaster": {
+"d": "#b8b8b0",
+"lat": "#bcbcb4",
+"c": "#3a3a34",
+"t": "spot",
+"why": "pale grey with small dark spots"
+},
+"chilabothrus-fordii": {
+"d": "#8a7a6a",
+"lat": "#8e7e6e",
+"c": "#3a3028",
+"t": "blotch",
+"why": "grey-brown, dark blotches"
+},
+"chilabothrus-inornatus": {
+"t": "plain",
+"why": "blotched: the Puerto Rican boa is plain brown"
+},
+"chilabothrus-monensis": {
+"d": "#d8a070",
+"lat": "#dca474",
+"c": "#7a4a2a",
+"t": "irregular",
+"why": "pale with big brown blotches"
+},
+"chilorhinophis-gerardi": {
+"d": "#1e1e1c",
+"lat": "#222220",
+"c": "#e0d070",
+"t": "stripe",
+"why": "black with yellow stripes"
+},
+"chionactis-annulata": {
+"d": "#e8e0b8",
+"lat": "#ece4bc",
+"c": "#d8602a",
+"t": "tricolor",
+"why": "cream, black and orange bands (was brown)"
+},
+"chironius-flavolineatus": {
+"d": "#6a7a8a",
+"lat": "#6e7e8e",
+"c": "#d8d8b8",
+"t": "stripe",
+"why": "blue-grey, pale stripe"
+},
+"chironius-fuscus": {
+"d": "#7a6448",
+"lat": "#7e684c",
+"t": "plain",
+"why": "saddles: plain brown"
+},
+"chironius-spixii": {
+"d": "#b0a040",
+"lat": "#b4a444",
+"c": "#2a2418",
+"t": "stripe",
+"why": "speckled: yellow-olive with dark lines"
+},
+"coelognathus-philippinus": {
+"d": "#7a7a50",
+"lat": "#7e7e54",
+"c": "#2a2a1e",
+"t": "blotch",
+"why": "olive with dark blotches"
+},
+"coelognathus-radiatus": {
+"d": "#b88a40",
+"lat": "#bc8e44",
+"c": "#1a1612",
+"t": "stripe",
+"why": "plain: yellow-brown with black stripes on the forebody"
+},
+"coluber-rubriceps": {
+"d": "#7a8088",
+"lat": "#7e848c",
+"t": "plain",
+"why": "plain grey"
+},
+"coniophanes-alvarezi": {
+"d": "#8a7044",
+"lat": "#8e7448",
+"t": "plain",
+"why": "plain olive-brown"
+},
+"coniophanes-andresensis": {
+"d": "#7a4a34",
+"lat": "#7e4e38",
+"t": "plain",
+"why": "plain reddish-brown"
+},
+"coniophanes-dromiciformis": {
+"d": "#8a6a50",
+"lat": "#8e6e54",
+"c": "#d8c8a8",
+"t": "stripe",
+"why": "brown, pale stripe"
+},
+"coniophanes-fissidens": {
+"d": "#9a6a3e",
+"lat": "#9e6e42",
+"c": "#2a2018",
+"t": "stripe",
+"why": "rusty brown, dark stripes"
+},
+"coniophanes-melanocephalus": {
+"d": "#c04030",
+"lat": "#c44434",
+"t": "plain",
+"hc": "#141210",
+"why": "banded: red with a black head"
+},
+"coniophanes-meridanus": {
+"d": "#6a4a38",
+"lat": "#6e4e3c",
+"c": "#2a1e16",
+"why": "brown"
+},
+"coniophanes-taeniata": {
+"d": "#3a3028",
+"lat": "#3e342c",
+"c": "#e0c060",
+"t": "stripe",
+"why": "dark with pale stripes"
+},
+"conopsis-biserialis": {
+"d": "#8a7a76",
+"lat": "#8e7e7a",
+"c": "#4a3a36",
+"t": "spot",
+"why": "grey-brown with two rows of dark spots (was striped)"
+},
+"corallus-cookii": {
+"d": "#a89a70",
+"lat": "#ac9e74",
+"c": "#4a3e2a",
+"t": "blotch",
+"why": "plain: buff with dark blotches"
+},
+"coronella-brachyura": {
+"d": "#7a6440",
+"lat": "#7e6844",
+"c": "#3a2a1a",
+"why": "olive-brown, faint marks"
+},
+"craspedocephalus-andalasensis": {
+"d": "#d89070",
+"lat": "#dc9474",
+"c": "#6a3a2a",
+"t": "blotch",
+"why": "salmon-pink with dark marks"
+},
+"craspedocephalus-borneensis": {
+"d": "#a08070",
+"lat": "#a48474",
+"c": "#5a4034",
+"t": "blotch",
+"why": "pinkish brown, dark blotches"
+},
+"craspedocephalus-brongersmai": {
+"d": "#c8704a",
+"lat": "#cc744e",
+"t": "plain",
+"why": "plain orange-red"
+},
+"craspedocephalus-rubeus": {
+"d": "#5aa82a",
+"lat": "#5eac2e",
+"t": "plain",
+"h": {
+"iris": "#c8281e",
+"irisInner": "#e85040",
+"irisDark": 1
+},
+"why": "bright green, red eye"
+},
+"craspedocephalus-strigatus": {
+"d": "#6a5a4a",
+"lat": "#6e5e4e",
+"c": "#2a2018",
+"t": "blotch",
+"why": "brown with dark marks"
+},
+"crotalus-caliginis": {
+"d": "#c8c4b8",
+"lat": "#ccc8bc",
+"c": "#2a2622",
+"pe": "#f0ece4",
+"why": "pale grey with dark white-edged blotches"
+},
+"crotalus-cerberus": {
+"d": "#3a3430",
+"lat": "#3e3834",
+"c": "#1a1816",
+"t": "rblotch",
+"why": "plain: dark with black blotches"
+},
+"crotalus-concolor": {
+"d": "#c8b890",
+"lat": "#ccbc94",
+"c": "#8a7454",
+"why": "pale yellowish with faint blotches"
+},
+"crotalus-lannomi": {
+"d": "#d8a888",
+"lat": "#dcac8c",
+"c": "#5a3426",
+"why": "pinkish tan, dark blotches"
+},
+"crotalus-transversus": {
+"d": "#8a8a90",
+"lat": "#8e8e94",
+"c": "#4a4044",
+"why": "grey with dark crossbands"
+},
+"crotalus-tzabcan": {
+"d": "#b8b4a0",
+"lat": "#bcb8a4",
+"c": "#7a3a2e",
+"why": "pale grey, red-brown diamonds"
+},
+"crotaphopeltis-hotamboeia": {
+"d": "#4a4a46",
+"lat": "#4e4e4a",
+"c": "#b0aca0",
+"t": "speckle",
+"why": "slate grey, white flecks"
+},
+"cryophis-hallbergi": {
+"d": "#3a4a6a",
+"lat": "#3e4e6e",
+"c": "#d8c060",
+"t": "blotch",
+"why": "blue-grey with yellow-edged blotches"
+},
+"cryptelytrops-honsonensis": {
+"d": "#5a5a68",
+"lat": "#5e5e6c",
+"t": "plain",
+"why": "grey-blue"
+},
+"cryptophis-incredibilis": {
+"d": "#c8623e",
+"lat": "#cc6642",
+"t": "plain",
+"why": "plain orange-red"
+},
+"cryptophis-nigrostriatus": {
+"d": "#c83a3a",
+"lat": "#cc3e3e",
+"c": "#2a2030",
+"t": "stripe",
+"why": "red with a dark back stripe"
+},
+"cubophis-ruttyi": {
+"d": "#3a3a34",
+"lat": "#3e3e38",
+"c": "#d8d8c8",
+"t": "speckle",
+"why": "dark with pale flecks"
+},
+"cubophis-vudii": {
+"d": "#2e2a26",
+"lat": "#322e2a",
+"c": "#7a3a24",
+"t": "speckle",
+"why": "blackish with rusty flecks"
+},
+"cylindrophis-burmanus": {
+"d": "#2a2a30",
+"lat": "#2e2e34",
+"c": "#d8d8d8",
+"t": "xband",
+"why": "dark with white bars"
+},
+"cylindrophis-jodiae": {
+"d": "#2a2a2e",
+"lat": "#2e2e32",
+"c": "#e0dcd0",
+"t": "xband",
+"why": "plain: black with pale bands"
+},
+"cylindrophis-maculatus": {
+"d": "#3a2a28",
+"lat": "#3e2e2c",
+"c": "#d8a080",
+"t": "spot",
+"why": "dark with pale salmon spots"
+},
+"cylindrophis-melanotus": {
+"d": "#2a2a34",
+"lat": "#2e2e38",
+"b": "#d8503a",
+"t": "plain",
+"why": "black, red belly and tail"
+},
+"cylindrophis-opisthorhodus": {
+"d": "#d8805a",
+"lat": "#dc845e",
+"t": "plain",
+"why": "orange-salmon"
+},
+"daboia-siamensis": {
+"d": "#9a9890",
+"lat": "#9e9c94",
+"c": "#4a4440",
+"why": "grey, dark ovals"
+},
+"demansia-olivacea": {
+"d": "#8a7a5a",
+"lat": "#8e7e5e",
+"t": "plain",
+"why": "olive-brown, dark-edged scales"
+},
+"demansia-papuensis": {
+"d": "#4a4038",
+"lat": "#4e443c",
+"t": "plain",
+"why": "plain dark brown"
+},
+"demansia-reticulata": {
+"d": "#a89a7a",
+"lat": "#ac9e7e",
+"t": "plain",
+"why": "plain olive-buff"
+},
+"dendrelaphis-andamanensis": {
+"d": "#3a6a3a",
+"lat": "#3e6e3e",
+"c": "#141210",
+"why": "green"
+},
+"dendrelaphis-ngansonensis": {
+"d": "#b8743a",
+"lat": "#bc783e",
+"why": "orange-bronze"
+},
+"dendroaspis-jamesoni": {
+"d": "#6aa83a",
+"lat": "#70ae40",
+"why": "dull grey-green: now green"
+},
+"dendrophidion-bivittatus": {
+"d": "#7a7a3a",
+"lat": "#7e7e3e",
+"c": "#d8d070",
+"t": "stripe",
+"why": "olive with yellow stripes"
+},
+"dendrophidion-brunneum": {
+"d": "#3a6a3a",
+"lat": "#3e6e3e",
+"t": "plain",
+"why": "dark green"
+},
+"dendrophidion-clarkii": {
+"d": "#5a6a3a",
+"lat": "#5e6e3e",
+"t": "plain",
+"hc": "#7a3a24",
+"hcx": 1.0,
+"why": "olive-green body, rusty head"
+},
+"dendrophidion-crybelum": {
+"d": "#5a4a40",
+"lat": "#5e4e44",
+"c": "#2a2018",
+"t": "xband",
+"why": "brown with dark bars"
+},
+"dendrophidion-nuchale": {
+"d": "#7a6444",
+"lat": "#7e6848",
+"t": "plain",
+"why": "green: brown"
+},
+"dendrophidion-paucicarinatum": {
+"d": "#3a4a3a",
+"lat": "#3e4e3e",
+"t": "plain",
+"why": "dark olive-grey"
+},
+"dendrophidion-vinitor": {
+"d": "#6a6040",
+"lat": "#6e6444",
+"c": "#1e1c16",
+"t": "xband",
+"why": "olive with dark bars on the forebody"
+},
+"dipsadoboa-unicolor": {
+"d": "#8ab030",
+"lat": "#8eb434",
+"t": "plain",
+"why": "brown: yellow-green"
+},
+"dipsadoboa-viridis": {
+"d": "#5aa84a",
+"lat": "#5eac4e",
+"t": "plain",
+"why": "green"
+},
+"dipsas-alternans": {
+"d": "#a8a8a4",
+"lat": "#acaca8",
+"c": "#2a2826",
+"why": "pale grey, black bands"
+},
+"dipsas-aparatiritos": {
+"d": "#6a4a6a",
+"lat": "#6e4e6e",
+"c": "#e0dcd8",
+"why": "purple with pale bands"
+},
+"dipsas-articulata": {
+"d": "#e8e4dc",
+"lat": "#ece8e0",
+"c": "#1c1a1a",
+"why": "white with black bands"
+},
+"dipsas-bicolor": {
+"d": "#1c1c1c",
+"lat": "#202020",
+"c": "#e8e4dc",
+"t": "band",
+"why": "black with white bands"
+},
+"dipsas-bobridgelyi": {
+"d": "#d8a8b0",
+"lat": "#dcacb4",
+"c": "#1c1a1e",
+"t": "band",
+"why": "pink with black bands"
+},
+"dipsas-copei": {
+"d": "#1e1e1c",
+"lat": "#22221e",
+"c": "#e8dcc0",
+"t": "band",
+"why": "black with cream bands"
+},
+"dipsas-elegans": {
+"d": "#b8a48a",
+"lat": "#bca88e",
+"c": "#3a2a20",
+"why": "buff with dark brown bands"
+},
+"dipsas-gaigeae": {
+"d": "#e08a3a",
+"lat": "#e48e3e",
+"c": "#141210",
+"t": "band",
+"why": "orange with black bands"
+},
+"dipsas-jamespetersi": {
+"d": "#e0d8c8",
+"lat": "#e4dccc",
+"c": "#2a2018",
+"t": "blotch",
+"why": "cream with dark blotches"
+},
+"dipsas-nicholsi": {
+"d": "#b8903a",
+"lat": "#bc943e",
+"c": "#2a1e14",
+"why": "yellow-brown with dark bands"
+},
+"dipsas-oneilli": {
+"d": "#c8a060",
+"lat": "#cca464",
+"c": "#1e1a14",
+"t": "band",
+"why": "buff with black bands"
+},
+"dipsas-oreas": {
+"d": "#8a8a6a",
+"lat": "#8e8e6e",
+"c": "#2a2a1e",
+"why": "grey-olive, dark bands"
+},
+"dipsas-palmeri": {
+"d": "#d8d0c0",
+"lat": "#dcd4c4",
+"c": "#1c1a18",
+"t": "band",
+"why": "cream with black bands"
+},
+"dipsas-pavonina": {
+"d": "#2a2624",
+"lat": "#2e2a28",
+"c": "#e8e4dc",
+"why": "black with white crossbands"
+},
+"dipsas-peruana": {
+"d": "#2a2a2c",
+"lat": "#2e2e30",
+"c": "#c8c0b0",
+"why": "dark with pale bands"
+},
+"dipsas-sanctijoannis": {
+"d": "#5a4a44",
+"lat": "#5e4e48",
+"c": "#2a2220",
+"why": "dark brown, dark bands"
+},
+"dipsas-sazimai": {
+"d": "#d8c8a0",
+"lat": "#dccca4",
+"c": "#3a2a1e",
+"why": "pale buff with dark blotches"
+},
+"dipsas-welborni": {
+"d": "#e0dcd0",
+"lat": "#e4e0d4",
+"c": "#6a3a24",
+"t": "band",
+"why": "white with brown bands"
+},
+"dipsas-williamsi": {
+"d": "#e0d8c8",
+"lat": "#e4dccc",
+"c": "#1e1a18",
+"why": "cream with black bands"
+},
+"ditypophis-vivax": {
+"d": "#c8945e",
+"lat": "#cc9862",
+"t": "plain",
+"why": "plain orange-tan"
+},
+"dolichophis-andreanus": {
+"d": "#b89a78",
+"lat": "#bc9e7c",
+"t": "plain",
+"why": "plain buff"
+},
+"dolichophis-schmidti": {
+"d": "#8a6a4a",
+"lat": "#8e6e4e",
+"t": "plain",
+"why": "plain reddish-brown"
+},
+"drepanoides-anomalus": {
+"d": "#e0502e",
+"lat": "#e45432",
+"c": "#141210",
+"why": "orange-red with a black and pale collar"
+},
+"drymobius-chloroticus": {
+"d": "#3a9a4a",
+"lat": "#3e9e4e",
+"t": "plain",
+"why": "grey-brown: green"
+},
+"drymobius-melanotropis": {
+"d": "#4a8a3a",
+"lat": "#4e8e3e",
+"t": "plain",
+"why": "grey-brown: green"
+},
+"drymobius-rhombifer": {
+"d": "#b8704a",
+"lat": "#bc744e",
+"c": "#3a2018",
+"t": "blotch",
+"why": "speckled: rusty with dark rhomb blotches"
+},
+"drymoluber-brazili": {
+"d": "#6a5034",
+"lat": "#6e5438",
+"t": "plain",
+"why": "plain brown"
+},
+"drymoluber-dichrous": {
+"d": "#2a5a3a",
+"lat": "#2e5e3e",
+"b": "#e0d040",
+"why": "grey-brown: dark green with a yellow belly"
+},
+"drysdalia-coronoides": {
+"d": "#c8a07a",
+"lat": "#cca47e",
+"t": "plain",
+"why": "plain pale orange-brown"
+},
+"echinanthera-amoena": {
+"d": "#5a8a3a",
+"lat": "#5e8e3e",
+"t": "plain",
+"why": "green"
+},
+"eirenis-collaris": {
+"d": "#8a7a64",
+"lat": "#8e7e68",
+"c": "#1e1a16",
+"why": "buff with a black collar"
+},
+"eirenis-coronella": {
+"d": "#c8a890",
+"lat": "#ccac94",
+"c": "#6a4a3a",
+"t": "spot",
+"why": "plain: pale with brown spots"
+},
+"eirenis-lineomaculatus": {
+"d": "#8a7a70",
+"lat": "#8e7e74",
+"c": "#4a3a34",
+"t": "spot",
+"why": "grey-brown with dark dots"
+},
+"eirenis-nigrofasciatus": {
+"d": "#e8e0d0",
+"lat": "#ece4d4",
+"c": "#1e1a18",
+"t": "band",
+"why": "white with black bands"
+},
+"eirenis-occidentalis": {
+"d": "#d8b890",
+"lat": "#dcbc94",
+"t": "plain",
+"why": "plain pale buff"
+},
+"eirenis-punctatolineatus": {
+"d": "#a8987a",
+"lat": "#ac9c7e",
+"c": "#5a4a3a",
+"why": "buff with dark dots"
+},
+"eirenis-rechingeri": {
+"d": "#b8a890",
+"lat": "#bcac94",
+"c": "#3a3028",
+"t": "stripe",
+"why": "pale grey-buff with dark stripes"
+},
+"elaphe-anomala": {
+"d": "#6a5a40",
+"lat": "#6e5e44",
+"c": "#2e2418",
+"t": "xband",
+"why": "olive-brown, faint dark crossbars"
+},
+"elaphe-lineata": {
+"d": "#8a8278",
+"lat": "#8e867c",
+"c": "#4a443c",
+"t": "stripe",
+"why": "grey-brown with faint lines"
+},
+"elaphe-moellendorffi": {
+"d": "#7a8a4a",
+"lat": "#7e8e4e",
+"c": "#3a2a20",
+"t": "esaddle",
+"hc": "#c8402a",
+"why": "olive-green with dark saddles, red head"
+},
+"elaphe-schrenckii": {
+"d": "#1c1c1e",
+"lat": "#202022",
+"c": "#d8cc90",
+"t": "band",
+"n": 46,
+"bl": 0.22,
+"why": "grey with dark saddles: now black with narrow pale-yellow crossbands"
+},
+"elaphe-taeniura": {
+"d": "#c8a050",
+"lat": "#cca454",
+"c": "#2a2014",
+"t": "esaddle",
+"ls": [
+"#2a2014",
+0.4,
+0.05
+],
+"why": "yellow-tan with dark marks and stripes"
+},
+"elapomorphus-quinquelineatus": {
+"d": "#c8903a",
+"lat": "#cc943e",
+"c": "#2a2018",
+"why": "orange-brown with dark lines"
+},
+"elapsoidea-boulengeri": {
+"d": "#3a3c40",
+"lat": "#3e4044",
+"c": "#a8acb0",
+"t": "xband",
+"why": "dark grey with faint pale bands"
+},
+"elapsoidea-sundevallii": {
+"d": "#3a3a44",
+"lat": "#3e3e48",
+"t": "plain",
+"why": "plain blue-black adult"
+},
+"emydocephalus-orarius": {
+"d": "#1e1e22",
+"lat": "#222226",
+"c": "#d8d8d0",
+"why": "black with pale bands"
+},
+"enhydris-longicauda": {
+"d": "#6a5a4a",
+"lat": "#6e5e4e",
+"t": "plain",
+"why": "plain olive-brown"
+},
+"enulius-roatanensis": {
+"d": "#2a2424",
+"lat": "#2e2828",
+"t": "plain",
+"why": "plain black-brown"
+},
+"ephalophis-greyae": {
+"d": "#5a5a40",
+"lat": "#5e5e44",
+"c": "#2a2a1e",
+"why": "olive with dark bands"
+},
+"epicrates-assisi": {
+"d": "#5a4a40",
+"lat": "#5e4e44",
+"c": "#2a221c",
+"why": "dark brown, faint rings"
+},
+"epictia-australis": {
+"d": "#4a3a34",
+"lat": "#4e3e38",
+"why": "dark brown"
+},
+"epictia-goudotii": {
+"d": "#3a3434",
+"lat": "#3e3838",
+"why": "dark grey-brown"
+},
+"epictia-phenops": {
+"d": "#7a6e64",
+"lat": "#7e7268",
+"c": "#c8c0b0",
+"t": "stripe",
+"tt": "#e8d040",
+"why": "grey-brown lines, yellow tail tip"
+},
+"epictia-rufidorsa": {
+"d": "#6a4a34",
+"lat": "#6e4e38",
+"c": "#c8a070",
+"t": "stripe",
+"why": "brown with a pale stripe"
+},
+"epictia-subcrotilla": {
+"d": "#3a3230",
+"lat": "#3e3634",
+"c": "#d8d0c0",
+"t": "stripe",
+"why": "dark with pale lines"
+},
+"epictia-vonmayi": {
+"d": "#3a2e28",
+"lat": "#3e322c",
+"c": "#e0d8c8",
+"t": "stripe",
+"why": "dark with pale lines"
+},
+"erythrolamprus-albertguentheri": {
+"d": "#5aa83a",
+"lat": "#5eac3e",
+"why": "brown: bright green"
+},
+"erythrolamprus-albiventris": {
+"d": "#6a6a2a",
+"lat": "#6e6e2e",
+"t": "plain",
+"why": "plain olive-green"
+},
+"erythrolamprus-dorsocorallinus": {
+"d": "#2a3a1a",
+"lat": "#2e3e1e",
+"c": "#d8c030",
+"t": "plain",
+"vs": [
+"#d84a2a",
+0.12
+],
+"ls": [
+"#d8c030",
+0.55,
+0.06
+],
+"why": "saddles: dark with a red back stripe and yellow flanks"
+},
+"erythrolamprus-epinephelus": {
+"d": "#4a6a3a",
+"lat": "#4e6e3e",
+"c": "#1e2a18",
+"t": "xband",
+"why": "green with dark bars"
+},
+"erythrolamprus-fraseri": {
+"d": "#4a5058",
+"lat": "#4e545c",
+"t": "plain",
+"why": "plain slate grey"
+},
+"erythrolamprus-frenatus": {
+"d": "#2a2a2c",
+"lat": "#2e2e30",
+"c": "#c8402a",
+"t": "xband",
+"why": "speckled: dark with red bars"
+},
+"erythrolamprus-jaegeri": {
+"d": "#3a7a3a",
+"lat": "#3e7e3e",
+"t": "plain",
+"why": "plain grey-brown: green"
+},
+"erythrolamprus-juliae": {
+"d": "#1e1e1e",
+"lat": "#222222",
+"c": "#e8e4d8",
+"t": "speckle",
+"why": "plain: black with white-edged scales"
+},
+"erythrolamprus-melanotus": {
+"d": "#d8b040",
+"lat": "#dcb444",
+"c": "#1e2228",
+"t": "plain",
+"vs": [
+"#1e2228",
+0.16
+],
+"why": "speckled: yellow with a broad black back stripe"
+},
+"erythrolamprus-poecilogyrus": {
+"d": "#6a6a3a",
+"lat": "#6e6e3e",
+"c": "#1a1a14",
+"t": "xband",
+"why": "plain: olive with black crossbars"
+},
+"erythrolamprus-pseudoreginae": {
+"d": "#4a4a40",
+"lat": "#4e4e44",
+"t": "plain",
+"why": "dark olive-grey"
+},
+"erythrolamprus-pyburni": {
+"d": "#2a2626",
+"lat": "#2e2a2a",
+"c": "#d8d0c0",
+"t": "xband",
+"why": "black and white with red"
+},
+"erythrolamprus-sagittifer": {
+"d": "#e8dcc0",
+"lat": "#ece0c4",
+"c": "#2a2018",
+"t": "spot",
+"why": "cream with black spots"
+},
+"erythrolamprus-viridis": {
+"d": "#5a7a3a",
+"lat": "#5e7e3e",
+"t": "plain",
+"why": "plain green"
+},
+"erythrolamprus-vitti": {
+"d": "#d84a2a",
+"lat": "#dc4e2e",
+"c": "#141210",
+"t": "band",
+"n": 60,
+"why": "red with black bands"
+},
+"erythrolamprus-zweifeli": {
+"d": "#c8b828",
+"lat": "#ccbc2c",
+"c": "#2a2814",
+"t": "speckle",
+"why": "yellow with dark edges"
+},
+"eryx-sistanensis": {
+"d": "#c8a050",
+"lat": "#cca454",
+"c": "#5a3a1a",
+"t": "speckle",
+"why": "golden with dark net"
+},
+"euprepiophis-conspicillata": {
+"d": "#c8402a",
+"lat": "#cc442e",
+"c": "#3a1a14",
+"t": "spot",
+"why": "plain: red with small dark marks"
+},
+"euprepiophis-mandarinus": {
+"d": "#8a8a84",
+"lat": "#8e8e88",
+"c": "#141210",
+"t": "saddle",
+"n": 34,
+"pat": [
+{
+"type": "blotch",
+"t": [
+0.06,
+0.97
+],
+"count": 34,
+"a": 0,
+"wid": 0.12,
+"len": 0.3,
+"shape": "round",
+"color": "#e0c040",
+"warp": 0.35,
+"jit": 0.08
+}
+],
+"why": "plain: grey with black yellow-centred saddles"
+},
+"euprepiophis-perlaceus": {
+"d": "#5a5a40",
+"lat": "#5e5e44",
+"c": "#1e1e14",
+"t": "xband",
+"why": "plain: olive-grey with dark bars"
+},
+"eutrachelophis-papilio": {
+"d": "#8a5038",
+"lat": "#8e543c",
+"t": "plain",
+"why": "plain red-brown, pale head marks"
+},
+"exiliboa-placata": {
+"d": "#8a9aa8",
+"lat": "#8e9eac",
+"t": "plain",
+"why": "speckled: plain blue-grey"
+},
+"farancia-erytrogramma": {
+"d": "#1e1e2a",
+"lat": "#22222e",
+"c": "#c83a2a",
+"b": "#d84a2a",
+"t": "stripe",
+"why": "plain grey: the rainbow snake is glossy black with red stripes and a red belly"
+},
+"ferania-sieboldii": {
+"d": "#d8d4c8",
+"lat": "#dcd8cc",
+"c": "#2a2624",
+"t": "blotch",
+"why": "plain: pale with dark blotches"
+},
+"fimbrios-klossi": {
+"d": "#2a3048",
+"lat": "#2e344c",
+"t": "plain",
+"why": "iridescent blue-black"
+},
+"fordonia-leucobalia": {
+"d": "#7a6a60",
+"lat": "#7e6e64",
+"t": "plain",
+"why": "plain grey-brown"
+},
+"fowlea-flavipunctatus": {
+"d": "#b8a060",
+"lat": "#bca464",
+"c": "#2a2418",
+"t": "spot",
+"why": "olive-yellow with dark spots"
+},
+"fowlea-punctulatus": {
+"d": "#2a2420",
+"lat": "#2e2824",
+"c": "#e0d8c0",
+"t": "stripe",
+"why": "dark with a pale line"
+},
+"furina-diadema": {
+"d": "#a85a3a",
+"lat": "#ac5e3e",
+"hc": "#141210",
+"hcx": 1.0,
+"tb": [
+[
+"#d84a2a",
+1.0,
+1.8,
+0.0
+]
+],
+"why": "grey-brown: now red-brown with a black head and a red nape"
+},
+"furina-ornata": {
+"d": "#a8624a",
+"lat": "#ac664e",
+"t": "plain",
+"hc": "#141210",
+"hcx": 1.0,
+"why": "red-brown, black head"
+},
+"garthius-chaseni": {
+"d": "#8a7a70",
+"lat": "#8e7e74",
+"c": "#2a2220",
+"t": "xband",
+"why": "plain: grey-brown with dark bands"
+},
+"geophis-betaniensis": {
+"d": "#2a2830",
+"lat": "#2e2c34",
+"t": "plain",
+"why": "black"
+},
+"geophis-brachycephalus": {
+"d": "#4a4448",
+"lat": "#4e484c",
+"c": "#b8584a",
+"t": "spot",
+"why": "grey with red spots"
+},
+"geophis-cancellatus": {
+"d": "#1e1c1c",
+"lat": "#222020",
+"c": "#e0602a",
+"t": "band",
+"why": "plain: black with orange bands"
+},
+"geophis-duellmani": {
+"d": "#1e2028",
+"lat": "#22242c",
+"c": "#d8503a",
+"t": "band",
+"why": "plain: dark with red bands"
+},
+"geophis-hoffmanni": {
+"d": "#1e1e22",
+"lat": "#222226",
+"t": "plain",
+"why": "black"
+},
+"geophis-immaculatus": {
+"d": "#5a5450",
+"lat": "#5e5854",
+"b": "#e0d8d0",
+"t": "plain",
+"why": "grey-brown, pale belly"
+},
+"geophis-laticinctus": {
+"d": "#1e1c1e",
+"lat": "#222022",
+"c": "#e0602a",
+"t": "spot",
+"why": "black with orange blotches"
+},
+"geophis-lorancai": {
+"d": "#d8502a",
+"lat": "#dc542e",
+"c": "#1e1a18",
+"t": "band",
+"why": "orange-red with black bands"
+},
+"geophis-nasalis": {
+"d": "#3a3a58",
+"lat": "#3e3e5c",
+"t": "plain",
+"why": "iridescent blue-black"
+},
+"geophis-pyburni": {
+"d": "#a8a8a8",
+"lat": "#acacac",
+"t": "plain",
+"why": "plain grey"
+},
+"geophis-tarascae": {
+"d": "#3a3a3e",
+"lat": "#3e3e42",
+"t": "plain",
+"why": "plain black-grey"
+},
+"gloydius-lipipengi": {
+"d": "#b8b090",
+"lat": "#bcb494",
+"c": "#2a2620",
+"why": "pale with black hourglass blotches"
+},
+"gloydius-rubromaculatus": {
+"d": "#d8ccb8",
+"lat": "#dcd0bc",
+"c": "#5a2a20",
+"t": "blotch",
+"why": "pale with red-brown blotches"
+},
+"gongylosoma-longicauda": {
+"d": "#6a4a3a",
+"lat": "#6e4e3e",
+"c": "#d8c8a0",
+"t": "stripe",
+"why": "brown with pale stripes"
+},
+"gonyosoma-boulengeri": {
+"d": "#5ab04a",
+"lat": "#5eb44e",
+"why": "bright green"
+},
+"gonyosoma-coeruleum": {
+"d": "#5aa64a",
+"lat": "#5eaa4e",
+"t": "plain",
+"why": "plain green"
+},
+"gonyosoma-margaritatum": {
+"d": "#3a7a4a",
+"lat": "#3e7e4e",
+"c": "#e0c030",
+"t": "speckle",
+"why": "green with yellow flecks"
+},
+"grayia-ornata": {
+"d": "#5a5a40",
+"lat": "#5e5e44",
+"c": "#1e1e14",
+"t": "band",
+"why": "plain: olive with dark bands"
+},
+"gyalopion-canum": {
+"d": "#c8a880",
+"lat": "#ccac84",
+"c": "#4a3a2a",
+"t": "xband",
+"why": "plain: tan with dark brown crossbands"
+},
+"gyalopion-quadrangulare": {
+"d": "#e4d8c0",
+"lat": "#e8dcc4",
+"c": "#141210",
+"t": "band",
+"n": 40,
+"vs": [
+"#c8502e",
+0.14
+],
+"why": "cream with black bands and red saddles (was plain grey)"
+},
+"habrophallos-collaris": {
+"d": "#2a2224",
+"lat": "#2e2628",
+"c": "#e0c040",
+"why": "black with a yellow collar"
+},
+"hapsidophrys-lineatus": {
+"d": "#3aa03a",
+"lat": "#3ea43e",
+"c": "#141210",
+"why": "green with black lines"
+},
+"hapsidophrys-principis": {
+"d": "#3aa04a",
+"lat": "#3ea44e",
+"why": "green"
+},
+"hapsidophrys-smaragdinus": {
+"d": "#4ab03a",
+"lat": "#4eb43e",
+"why": "bright green"
+},
+"hebius-beddomei": {
+"d": "#8a7a3a",
+"lat": "#8e7e3e",
+"t": "plain",
+"why": "plain olive-yellow"
+},
+"hebius-deschauenseei": {
+"d": "#7a5a40",
+"lat": "#7e5e44",
+"c": "#2a2018",
+"t": "stripe",
+"why": "brown with dark lines"
+},
+"hebius-ishigakiensis": {
+"d": "#5a4a2a",
+"lat": "#5e4e2e",
+"c": "#e0c050",
+"t": "xband",
+"why": "dark olive with yellow bars"
+},
+"hebius-johannis": {
+"d": "#2a2626",
+"lat": "#2e2a2a",
+"t": "plain",
+"why": "black"
+},
+"hebius-miyajimae": {
+"d": "#6a4a36",
+"lat": "#6e4e3a",
+"c": "#d8c8a0",
+"t": "stripe",
+"why": "brown with pale stripes"
+},
+"hebius-monticola": {
+"d": "#e0d060",
+"lat": "#e4d464",
+"c": "#1e1c18",
+"t": "band",
+"why": "yellow with black bands"
+},
+"hebius-sarasinorum": {
+"d": "#7a5a48",
+"lat": "#7e5e4c",
+"c": "#3a2a20",
+"why": "reddish brown"
+},
+"hebius-sarawacensis": {
+"d": "#3a3428",
+"lat": "#3e382c",
+"c": "#d8c890",
+"t": "spot",
+"why": "plain: dark with pale spots"
+},
+"hebius-sauteri": {
+"d": "#6a4a38",
+"lat": "#6e4e3c",
+"t": "plain",
+"why": "plain brown"
+},
+"hebius-weixiensis": {
+"d": "#5a5440",
+"lat": "#5e5844",
+"t": "plain",
+"why": "olive-brown"
+},
+"helicops-carinicaudus": {
+"d": "#2a2a24",
+"lat": "#2e2e28",
+"c": "#d86a30",
+"t": "plain",
+"ls": [
+"#d86a30",
+0.62,
+0.04
+],
+"why": "blotched: dark with an orange line on each flank"
+},
+"helicops-gomesi": {
+"d": "#1e1e20",
+"lat": "#222224",
+"c": "#c8402a",
+"t": "xband",
+"why": "black with red bars"
+},
+"helicops-infrataeniatus": {
+"d": "#6a6a5a",
+"lat": "#6e6e5e",
+"c": "#2a2a22",
+"t": "stripe",
+"why": "olive with dark stripes"
+},
+"helicops-pastazae": {
+"d": "#7a6448",
+"lat": "#7e684c",
+"c": "#3a2e20",
+"t": "stripe",
+"why": "brown with dark stripes"
+},
+"helicops-petersi": {
+"d": "#2a2a2c",
+"lat": "#2e2e30",
+"c": "#c8502a",
+"t": "stripe",
+"why": "dark with orange stripes"
+},
+"helicops-polylepis": {
+"d": "#c88a3a",
+"lat": "#cc8e3e",
+"c": "#7a4a22",
+"t": "spot",
+"why": "orange with darker spots"
+},
+"helminthophis-frontalis": {
+"d": "#2a2224",
+"lat": "#2e2628",
+"hc": "#e86a6a",
+"hcx": 0.6,
+"why": "dark with a pink head"
+},
+"hemerophis-socotrae": {
+"d": "#c8a070",
+"lat": "#cca474",
+"c": "#3a2818",
+"t": "xband",
+"why": "plain: buff with dark bars"
+},
+"hemibungarus-calligaster": {
+"d": "#d84a2a",
+"lat": "#dc4e2e",
+"c": "#141210",
+"t": "band",
+"why": "coral-red with black bands"
+},
+"hemibungarus-mcclungi": {
+"d": "#e05a20",
+"lat": "#e45e24",
+"c": "#141210",
+"t": "band",
+"rg": 1,
+"why": "saddles: orange with black rings"
+},
+"hemirhagerrhis-viperina": {
+"d": "#8a8a8e",
+"lat": "#8e8e92",
+"c": "#2a2a2e",
+"t": "zigzag",
+"why": "plain: grey with a dark zigzag"
+},
+"hemorrhois-nummifer": {
+"d": "#8a8072",
+"lat": "#8e8476",
+"c": "#3a302a",
+"t": "blotch",
+"why": "plain: grey with dark blotches"
+},
+"homalopsis-buccata": {
+"d": "#2a2822",
+"lat": "#2e2c26",
+"c": "#d8d0a0",
+"t": "band",
+"n": 40,
+"why": "dark with pale cream bands (was plain)"
+},
+"homalopsis-nigroventralis": {
+"d": "#b8905a",
+"lat": "#bc945e",
+"c": "#2a1a14",
+"t": "band",
+"why": "plain: tan with dark bands"
+},
+"homoroselaps-lacteus": {
+"d": "#d8cc80",
+"lat": "#dcd084",
+"c": "#141210",
+"t": "band",
+"n": 50,
+"rg": 1,
+"vs": [
+"#d84a20",
+0.08
+],
+"why": "yellow with black rings and an orange-red stripe (was plain grey spots)"
+},
+"hydrodynastes-gigas": {
+"d": "#a08a4a",
+"lat": "#a48e4e",
+"c": "#2a2418",
+"t": "blotch",
+"why": "plain: olive-yellow with dark blotches"
+},
+"hydrophis-coggeri": {
+"d": "#d8c8a0",
+"lat": "#dccca4",
+"c": "#2a2826",
+"t": "band",
+"rg": 1,
+"why": "cream with black rings"
+},
+"hydrophis-gracilis": {
+"d": "#b8b8a8",
+"lat": "#bcbcac",
+"c": "#3a3a36",
+"why": "pale grey with dark bands"
+},
+"hydrophis-kingii": {
+"d": "#d8ccb0",
+"lat": "#dcd0b4",
+"c": "#2a2622",
+"rg": 1,
+"why": "pale with dark bands"
+},
+"hydrophis-macdowelli": {
+"d": "#c8c0a8",
+"lat": "#ccc4ac",
+"c": "#2a2a2e",
+"t": "band",
+"rg": 1,
+"why": "pale with black bands"
+},
+"hydrophis-nigrocinctus": {
+"d": "#c8c060",
+"lat": "#ccc464",
+"c": "#1e1e14",
+"rg": 1,
+"why": "yellow with black rings"
+},
+"hydrophis-pacificus": {
+"d": "#c8c070",
+"lat": "#ccc474",
+"c": "#2a2a1e",
+"why": "yellow-olive with dark bands"
+},
+"hydrophis-spiralis": {
+"d": "#c8b878",
+"lat": "#ccbc7c",
+"c": "#22201c",
+"t": "band",
+"rg": 1,
+"why": "yellow with black rings"
+},
+"hydrophis-viperinus": {
+"d": "#3a3e3a",
+"lat": "#3e423e",
+"b": "#c8ccc0",
+"t": "plain",
+"why": "dark grey back, pale sides"
+},
+"hydrops-martii": {
+"d": "#c8a040",
+"lat": "#cca444",
+"c": "#2a2418",
+"t": "band",
+"n": 50,
+"why": "plain: yellow-olive with dark bands"
+},
+"hypnale-hypnale": {
+"c": "#3a2a20",
+"t": "trap",
+"why": "plain: now dark triangles along the flanks"
+},
+"hypsiglena-affinis": {
+"d": "#a8808a",
+"lat": "#ac848e",
+"c": "#4a2a30",
+"t": "saddle",
+"why": "pinkish with dark blotches"
+},
+"hypsiglena-catalinae": {
+"d": "#c8a080",
+"lat": "#cca484",
+"c": "#7a4a2e",
+"t": "saddle",
+"why": "tan with brown blotches"
+},
+"hypsiglena-tanzeri": {
+"d": "#c8c4bc",
+"lat": "#ccc8c0",
+"c": "#1e1e24",
+"t": "blotch",
+"why": "grey with black blotches (pale)"
+},
+"hypsiglena-torquata": {
+"d": "#8a8478",
+"lat": "#8e887c",
+"c": "#3a3430",
+"t": "saddle",
+"why": "grey, dark blotches"
+},
+"hypsirhynchus-callilaemus": {
+"d": "#b8603e",
+"lat": "#bc6442",
+"t": "plain",
+"why": "plain rusty red"
+},
+"ialtris-agyrtes": {
+"d": "#b08868",
+"lat": "#b48c6c",
+"t": "plain",
+"why": "plain pinkish brown"
+},
+"imantodes-cenchoa": {
+"d": "#c8a874",
+"lat": "#ccac78",
+"c": "#3a2a1a",
+"t": "xband",
+"why": "tan with dark brown blotches"
+},
+"imantodes-chocoensis": {
+"d": "#c8603a",
+"lat": "#cc643e",
+"c": "#6a2a18",
+"t": "blotch",
+"why": "orange with darker blotches"
+},
+"imantodes-lentiferus": {
+"d": "#b88a58",
+"lat": "#bc8e5c",
+"c": "#4a2e1a",
+"t": "xband",
+"why": "buff, dark blotches"
+},
+"indotyphlops-porrectus": {
+"d": "#3a2a26",
+"lat": "#3e2e2a",
+"why": "dark brown"
+},
+"ithycyphus-goudoti": {
+"d": "#8a8a80",
+"lat": "#8e8e84",
+"t": "plain",
+"why": "plain grey"
+},
+"lampropeltis-micropholis": {
+"d": "#1c1a18",
+"lat": "#201e1c",
+"c": "#c8302a",
+"t": "tricolor",
+"why": "plain: a ringed milk snake (black, red, white)"
+},
+"lampropeltis-nigra": {
+"cx": {
+"speckle": {
+"p": 0.3,
+"color": "#f4f4f0",
+"k": 0.8
+},
+"mottle": 0.03,
+"bellyA": 0.82,
+"deepen": 1.0
+},
+"why": "black kingsnake: specks white, eye dark",
+"h": {
+"iris": "#16110d",
+"irisInner": "#241a12",
+"irisDark": 1,
+"pupil": "round"
+}
+},
+"lampropeltis-splendida": {
+"cx": {
+"speckle": {
+"p": 0.85,
+"color": "#e4dc70",
+"k": 0.95
+},
+"mottle": 0.02,
+"bellyA": 0.76
+},
+"why": "desert kingsnake: sparse dull specks and an orange eye; it is black densely flecked yellow, with a dark eye",
+"h": {
+"iris": "#16110d",
+"irisInner": "#241a12",
+"irisDark": 1,
+"pupil": "round"
+}
+},
+"lamprophis-abyssinicus": {
+"d": "#2a2a2a",
+"lat": "#2e2e2e",
+"t": "plain",
+"why": "black"
+},
+"lamprophis-aurora": {
+"d": "#8a7a28",
+"lat": "#8e7e2c",
+"t": "plain",
+"vs": [
+"#e08a30",
+0.05
+],
+"why": "saddles: olive with an orange stripe down the back"
+},
+"lamprophis-erlangeri": {
+"d": "#3a3c40",
+"lat": "#3e4044",
+"t": "plain",
+"why": "dark grey"
+},
+"lamprophis-fiskii": {
+"d": "#d8b878",
+"lat": "#dcbc7c",
+"c": "#5a3a1e",
+"t": "spot",
+"why": "plain: buff with dark spots"
+},
+"lamprophis-geometricus": {
+"d": "#7a5a40",
+"lat": "#7e5e44",
+"t": "plain",
+"why": "plain brown"
+},
+"lamprophis-guttatus": {
+"d": "#a8a8a0",
+"lat": "#acaca4",
+"c": "#7a4a2e",
+"t": "spot",
+"why": "pale grey with rusty spots"
+},
+"langaha-alluaudi": {
+"d": "#a8603a",
+"lat": "#ac643e",
+"t": "plain",
+"why": "rusty brown leaf-nose"
+},
+"laticauda-schistorhyncha": {
+"d": "#3a8ab0",
+"lat": "#3e8eb4",
+"c": "#141416",
+"rg": 1,
+"why": "bright blue with black rings"
+},
+"leioheterodon-geayi": {
+"d": "#c8b0a0",
+"lat": "#ccb4a4",
+"c": "#6a4a3a",
+"t": "spot",
+"why": "pale with small dark spots"
+},
+"leioheterodon-madagascariensis": {
+"d": "#1e1e1a",
+"lat": "#22221e",
+"t": "plain",
+"cx": {
+"speckle": {
+"p": 0.45,
+"color": "#d8c040",
+"k": 0.9
+}
+},
+"why": "plain grey: it is black chequered with yellow"
+},
+"leiopython-albertisii": {
+"hc": "#141210",
+"hcx": 1.0,
+"why": "the black head of the white-lipped python"
+},
+"leptodeira-annulata": {
+"d": "#a89a80",
+"lat": "#ac9e84",
+"c": "#4a3a2a",
+"t": "saddle",
+"why": "buff, dark saddles"
+},
+"leptodeira-ornata": {
+"d": "#e0d0c0",
+"lat": "#e4d4c4",
+"c": "#6a4a3a",
+"t": "saddle",
+"why": "pale with brown saddles"
+},
+"leptodeira-polysticta": {
+"d": "#c8743a",
+"lat": "#cc783e",
+"c": "#3a2018",
+"t": "saddle",
+"why": "orange with dark saddles"
+},
+"leptodeira-uribei": {
+"d": "#2a2220",
+"lat": "#2e2624",
+"c": "#e06a40",
+"t": "blotch",
+"why": "black with orange-red blotches (inverted)"
+},
+"leptodrymus-pulcherrimus": {
+"d": "#3a5a3a",
+"lat": "#3e5e3e",
+"c": "#e0e0d0",
+"why": "olive-green with pale stripes"
+},
+"leptophis-coeruleodorsus": {
+"d": "#7a8a4a",
+"lat": "#7e8e4e",
+"c": "#c89a3a",
+"t": "stripe",
+"why": "olive-green with bronze stripe"
+},
+"leptophis-cupreus": {
+"d": "#3aa0a0",
+"lat": "#3ea4a4",
+"t": "plain",
+"why": "speckled tan: turquoise"
+},
+"leptophis-diplotropis": {
+"d": "#6aa83a",
+"lat": "#6eac3e",
+"t": "plain",
+"why": "pale saddles: plain green"
+},
+"leptophis-modestus": {
+"d": "#3a8a3a",
+"lat": "#3e8e3e",
+"why": "green"
+},
+"leptotyphlops-emini": {
+"d": "#7a6a6a",
+"lat": "#7e6e6e",
+"why": "grey-brown"
+},
+"leptotyphlops-merkeri": {
+"d": "#4a3a34",
+"lat": "#4e3e38",
+"why": "dark brown"
+},
+"liodytes-rigida": {
+"t": "stripe",
+"c": "#2a2016",
+"why": "plain: dark stripes"
+},
+"liopeltis-calamaria": {
+"d": "#8a7a6c",
+"lat": "#8e7e70",
+"t": "plain",
+"why": "plain grey-brown"
+},
+"liophidium-apperti": {
+"d": "#7a7478",
+"lat": "#7e787c",
+"c": "#3a3438",
+"why": "grey with dark lines"
+},
+"liophidium-pattoni": {
+"d": "#1e1e20",
+"lat": "#222224",
+"c": "#e0c030",
+"t": "stripe",
+"why": "black with yellow and pink stripes"
+},
+"liopholidophis-dolicocercus": {
+"d": "#c88030",
+"lat": "#cc8434",
+"c": "#2a2018",
+"t": "stripe",
+"why": "orange with dark stripes"
+},
+"liotyphlops-beui": {
+"d": "#6a5a30",
+"lat": "#6e5e34",
+"why": "olive-brown"
+},
+"loveridgelaps-elapoides": {
+"d": "#1e1e22",
+"lat": "#222226",
+"c": "#e8e4d8",
+"t": "band",
+"n": 24,
+"why": "plain: black with white bands"
+},
+"loxocemus-bicolor": {
+"d": "#4a3a30",
+"lat": "#4e3e34",
+"t": "plain",
+"why": "blotched: plain glossy dark brown"
+},
+"lycodon-albofuscus": {
+"d": "#2a2424",
+"lat": "#2e2828",
+"t": "plain",
+"why": "black"
+},
+"lycodon-anamallensis": {
+"d": "#b8a8a0",
+"lat": "#bcaca4",
+"c": "#5a4a44",
+"t": "xband",
+"why": "pale grey-brown, faint bands"
+},
+"lycodon-butleri": {
+"d": "#1c1c1e",
+"lat": "#202022",
+"c": "#d8d4cc",
+"t": "band",
+"why": "plain: black with pale bands"
+},
+"lycodon-carinatus": {
+"d": "#1c1c1e",
+"lat": "#202022",
+"c": "#e0e0e0",
+"t": "band",
+"why": "plain: black with white bands"
+},
+"lycodon-cavernicolus": {
+"d": "#7a7478",
+"lat": "#7e787c",
+"t": "plain",
+"why": "plain grey"
+},
+"lycodon-davisonii": {
+"d": "#2a2224",
+"lat": "#2e2628",
+"c": "#e8e4e0",
+"t": "band",
+"why": "black with white bands"
+},
+"lycodon-deccanensis": {
+"d": "#2a2a2c",
+"lat": "#2e2e30",
+"c": "#c8c8c8",
+"t": "band",
+"why": "black with white bands"
+},
+"lycodon-dumerilii": {
+"d": "#1c1c20",
+"lat": "#202024",
+"c": "#d8d8d8",
+"t": "band",
+"why": "black with white bands"
+},
+"lycodon-effraenis": {
+"d": "#c86a4a",
+"lat": "#cc6e4e",
+"c": "#e8d8c8",
+"t": "band",
+"n": 20,
+"why": "plain: salmon with pale bands"
+},
+"lycodon-ferroni": {
+"d": "#3a2a24",
+"lat": "#3e2e28",
+"c": "#e0dcd8",
+"why": "dark brown with white bands"
+},
+"lycodon-flavomaculatus": {
+"d": "#2a2a2c",
+"lat": "#2e2e30",
+"c": "#e0c030",
+"t": "spot",
+"why": "spots read pale: dark grey with yellow spots"
+},
+"lycodon-flavozonatus": {
+"d": "#1c1c18",
+"lat": "#20201c",
+"c": "#d8c030",
+"t": "band",
+"why": "black with yellow bands (pale bands on dark, not dark on pale)"
+},
+"lycodon-futsingensis": {
+"d": "#1c1c20",
+"lat": "#202024",
+"c": "#d8d8dc",
+"t": "band",
+"n": 36,
+"why": "plain: black with white bands"
+},
+"lycodon-gammiei": {
+"d": "#1e1e1c",
+"lat": "#22221e",
+"c": "#d8c860",
+"t": "band",
+"why": "black with yellow-white bands"
+},
+"lycodon-gibsonae": {
+"d": "#1e1c1c",
+"lat": "#222020",
+"c": "#e0702a",
+"t": "band",
+"why": "plain: black with orange bands"
+},
+"lycodon-gongshan": {
+"d": "#1c1c1e",
+"lat": "#202022",
+"c": "#d8d4cc",
+"t": "band",
+"why": "plain: black with pale bands"
+},
+"lycodon-hypsirhinoides": {
+"t": "plain",
+"why": "bands: plain dark"
+},
+"lycodon-laoensis": {
+"d": "#1c1a14",
+"lat": "#201e18",
+"c": "#e0c030",
+"t": "band",
+"why": "black with yellow bands"
+},
+"lycodon-liuchengchaoi": {
+"d": "#1c1c1c",
+"lat": "#202020",
+"c": "#d8a060",
+"t": "band",
+"why": "black with tan bands"
+},
+"lycodon-meridionalis": {
+"d": "#3a3a30",
+"lat": "#3e3e34",
+"c": "#d8d070",
+"t": "speckle",
+"why": "plain: dark with yellow speckles"
+},
+"lycodon-multizonatus": {
+"d": "#d88a4a",
+"lat": "#dc8e4e",
+"c": "#2a1a14",
+"t": "band",
+"why": "orange with dark bands"
+},
+"lycodon-obvelatus": {
+"d": "#d8885a",
+"lat": "#dc8c5e",
+"c": "#1c1a1c",
+"t": "band",
+"why": "orange-salmon with black bands"
+},
+"lycodon-orientalis": {
+"d": "#8a8086",
+"lat": "#8e848a",
+"c": "#3a3438",
+"t": "saddle",
+"why": "grey-mauve, dark crossbars"
+},
+"lycodon-paucifasciatus": {
+"d": "#1c1a1a",
+"lat": "#201e1e",
+"c": "#e0a890",
+"t": "band",
+"n": 20,
+"why": "plain: black with pinkish bands"
+},
+"lycodon-philippinus": {
+"d": "#1c1c1e",
+"lat": "#202022",
+"c": "#c8c8c8",
+"t": "stripe",
+"why": "black with pale lines"
+},
+"lycodon-pictus": {
+"d": "#c8c0b0",
+"lat": "#ccc4b4",
+"c": "#3a3430",
+"t": "band",
+"why": "plain: pale with dark bands"
+},
+"lycodon-rosozonatus": {
+"d": "#1c1c1e",
+"lat": "#202022",
+"c": "#d8b8c0",
+"why": "black with pinkish bands"
+},
+"lycodon-ruhstrati": {
+"d": "#1e1c22",
+"lat": "#222026",
+"c": "#c8c8cc",
+"t": "band",
+"why": "white bands narrower, as in the photo",
+"bl": 0.2
+},
+"lycodon-septentrionalis": {
+"d": "#1c1c1e",
+"lat": "#202022",
+"c": "#e0e0e0",
+"t": "band",
+"why": "black with white bands"
+},
+"lycodon-serratus": {
+"d": "#b8b0a0",
+"lat": "#bcb4a4",
+"c": "#2a2624",
+"t": "xband",
+"why": "pale grey with dark bands"
+},
+"lycodon-stormi": {
+"d": "#1c1c1e",
+"lat": "#202022",
+"c": "#e0e0e0",
+"why": "black with white bands"
+},
+"lycodon-synaptor": {
+"d": "#1c1c1e",
+"lat": "#202022",
+"c": "#e0e0e0",
+"t": "band",
+"why": "plain: black with white bands"
+},
+"lycodon-truongi": {
+"d": "#1e1e22",
+"lat": "#222226",
+"c": "#e0e0e0",
+"why": "black with white bands"
+},
+"lycodon-zayuensis": {
+"d": "#1e1e1a",
+"lat": "#22221e",
+"c": "#d8c030",
+"t": "band",
+"n": 50,
+"why": "black with thin yellow bands"
+},
+"lycodon-zoosvictoriae": {
+"d": "#a86a48",
+"lat": "#ac6e4c",
+"c": "#2a1a14",
+"t": "spot",
+"why": "rusty brown with black specks"
+},
+"lycodryas-citrinus": {
+"d": "#e0c820",
+"lat": "#e4cc24",
+"c": "#141210",
+"t": "band",
+"n": 24,
+"why": "blotched grey: yellow with black bands"
+},
+"lycodryas-granuliceps": {
+"d": "#c8c0b0",
+"lat": "#ccc4b4",
+"c": "#3a3028",
+"t": "saddle",
+"why": "pale with dark saddles"
+},
+"lycodryas-inopinae": {
+"d": "#d8a040",
+"lat": "#dca444",
+"t": "plain",
+"why": "blotched: plain golden"
+},
+"lycodryas-pseudogranuliceps": {
+"d": "#e0c890",
+"lat": "#e4cc94",
+"c": "#4a2a1a",
+"t": "saddle",
+"why": "blotch: cream with dark saddles"
+},
+"lycophidion-depressirostre": {
+"d": "#2e2a36",
+"lat": "#322e3a",
+"t": "plain",
+"why": "plain purple-black"
+},
+"lycophidion-laterale": {
+"d": "#6a5a58",
+"lat": "#6e5e5c",
+"c": "#c8c0b8",
+"t": "speckle",
+"why": "grey-brown, pale-tipped scales"
+},
+"lycophidion-multimaculatum": {
+"d": "#1e2428",
+"lat": "#22282c",
+"c": "#b8c0c0",
+"t": "band",
+"why": "dark with pale bands"
+},
+"lycophidion-pembanum": {
+"d": "#3a3440",
+"lat": "#3e3844",
+"t": "plain",
+"why": "dark purple-grey"
+},
+"lycophidion-semicinctum": {
+"d": "#2a2a2c",
+"lat": "#2e2e30",
+"c": "#d8d8d8",
+"t": "band",
+"why": "dark with pale bands"
+},
+"lycophidion-uzungwense": {
+"d": "#1e2830",
+"lat": "#222c34",
+"c": "#d8d8d8",
+"t": "speckle",
+"hc": "#e0a030",
+"why": "dark with white-tipped scales, orange head"
+},
+"lycophidion-variegatum": {
+"d": "#2a2a34",
+"lat": "#2e2e38",
+"c": "#d8d8e0",
+"t": "speckle",
+"why": "plain: dark with white-tipped scales"
+},
+"lytorhynchus-maynardi": {
+"d": "#c89050",
+"lat": "#cc9454",
+"c": "#3a2414",
+"t": "spot",
+"why": "plain: tan with dark spots"
+},
+"lytorhynchus-ridgewayi": {
+"d": "#d8b8a0",
+"lat": "#dcbca4",
+"c": "#8a5a3a",
+"t": "blotch",
+"why": "plain: pale with brown blotches"
+},
+"macroprotodon-mauritanicus": {
+"d": "#a89474",
+"lat": "#ac9878",
+"c": "#4a3a2a",
+"why": "buff, dark specks"
+},
+"macrovipera-schweizeri": {
+"d": "#8a8278",
+"lat": "#8e867c",
+"c": "#5a5048",
+"t": "spot",
+"why": "grey with faint spots"
+},
+"madagascarophis-colubrinus": {
+"d": "#8a8a70",
+"lat": "#8e8e74",
+"c": "#3a3a2a",
+"t": "spot",
+"why": "plain: grey-olive with dark spots"
+},
+"madagascarophis-fuchsi": {
+"d": "#d8602a",
+"lat": "#dc642e",
+"t": "plain",
+"why": "blotched: plain orange"
+},
+"madatyphlops-microcephalus": {
+"d": "#1e1a1a",
+"lat": "#221e1e",
+"why": "glossy black"
+},
+"masticophis-mentovarius": {
+"d": "#7a7a74",
+"lat": "#7e7e78",
+"t": "plain",
+"why": "grey (the photo is grey)"
+},
+"masticophis-schotti": {
+"d": "#5a8a8a",
+"lat": "#5e8e8e",
+"t": "plain",
+"ls": [
+"#e0dcc8",
+0.5,
+0.03
+],
+"why": "blue-green with pale flank lines"
+},
+"mastigodryas-cliftoni": {
+"d": "#c8602a",
+"lat": "#cc642e",
+"t": "plain",
+"why": "orange-red"
+},
+"mastigodryas-dorsalis": {
+"d": "#6aa83a",
+"lat": "#6eac3e",
+"t": "plain",
+"why": "bright green (was brown stripes)"
+},
+"mastigodryas-pulchriceps": {
+"d": "#1e1a1c",
+"lat": "#221e20",
+"c": "#d8a8c0",
+"t": "speckle",
+"why": "black with pinkish flecks"
+},
+"meizodon-coronatus": {
+"d": "#3a3a36",
+"lat": "#3e3e3a",
+"t": "plain",
+"why": "plain dark grey-olive"
+},
+"meizodon-semiornatus": {
+"d": "#4a4a54",
+"lat": "#4e4e58",
+"t": "plain",
+"why": "blue-grey"
+},
+"melanophidium-bilineatum": {
+"d": "#1e2838",
+"lat": "#222c3c",
+"c": "#e0d040",
+"t": "plain",
+"ls": [
+"#e0d040",
+0.55,
+0.05
+],
+"why": "blue-black with a yellow flank stripe"
+},
+"melanophidium-punctatum": {
+"d": "#1e2030",
+"lat": "#222434",
+"c": "#d8d0b0",
+"t": "plain",
+"ls": [
+"#d8d0b0",
+0.6,
+0.03
+],
+"why": "spots: iridescent black with a thin pale line"
+},
+"micrelaps-bicoloratus": {
+"d": "#1e1e1e",
+"lat": "#222222",
+"c": "#e0b860",
+"t": "stripe",
+"why": "black with yellow stripes"
+},
+"micrelaps-muelleri": {
+"d": "#1c1a18",
+"lat": "#201e1c",
+"c": "#d8d0a0",
+"t": "band",
+"why": "black with pale bands"
+},
+"micropechis-ikaheka": {
+"d": "#5a5a54",
+"lat": "#5e5e58",
+"t": "plain",
+"why": "grey-olive"
+},
+"micrurus-albicinctus": {
+"d": "#1e1e1e",
+"lat": "#222222",
+"c": "#e8e4dc",
+"t": "band",
+"rg": 1,
+"n": 50,
+"why": "coral: black with thin white rings"
+},
+"micrurus-boicora": {
+"d": "#2a6a7a",
+"lat": "#2e6e7e",
+"t": "plain",
+"why": "coral: blue-green dark (photo)"
+},
+"micrurus-elegans": {
+"d": "#2a2626",
+"lat": "#2e2a2a",
+"c": "#d8d0c0",
+"t": "band",
+"n": 46,
+"rg": 1,
+"why": "black with pale rings and only faint red (dark morph in its photo)"
+},
+"micrurus-ephippifer": {
+"d": "#3a4a6a",
+"lat": "#3e4e6e",
+"c": "#c8c0a0",
+"t": "band",
+"rg": 1,
+"n": 40,
+"why": "coral: this one is blue-grey with pale rings"
+},
+"micrurus-medemi": {
+"d": "#2a2a30",
+"lat": "#2e2e34",
+"c": "#d8d8d8",
+"t": "band",
+"rg": 1,
+"n": 46,
+"why": "plain: dark with white rings"
+},
+"micrurus-narduccii": {
+"d": "#1e2434",
+"lat": "#222838",
+"b": "#c8402a",
+"t": "plain",
+"why": "coral: dark blue-black, red belly"
+},
+"micrurus-ornatissimus": {
+"d": "#1e1e22",
+"lat": "#222226",
+"c": "#c8c8c0",
+"t": "band",
+"n": 50,
+"rg": 1,
+"why": "coral: dark with thin pale rings in its photo"
+},
+"micrurus-scutiventris": {
+"d": "#1e1e22",
+"lat": "#222226",
+"t": "plain",
+"why": "coral rings: black in its photo"
+},
+"micrurus-serranus": {
+"d": "#1e1e1e",
+"lat": "#222222",
+"c": "#e8e4dc",
+"t": "band",
+"n": 46,
+"why": "black-white with orange (black and white dominant)"
+},
+"micrurus-silviae": {
+"d": "#2a2a2e",
+"lat": "#2e2e32",
+"t": "plain",
+"why": "dark (photo shows a dark snake from above)"
+},
+"montivipera-albizona": {
+"d": "#c08a4a",
+"lat": "#c48e4e",
+"c": "#3a2a20",
+"t": "blotch",
+"why": "orange with dark blotches"
+},
+"montivipera-bulgardaghica": {
+"c": "#2a2a2e",
+"t": "blotch",
+"why": "plain: grey with dark blotches"
+},
+"montivipera-latifii": {
+"t": "plain",
+"why": "speckle: near plain sandy grey"
+},
+"montivipera-raddei": {
+"d": "#8a6a48",
+"lat": "#8e6e4c",
+"c": "#3a2818",
+"t": "spot",
+"why": "plain: brown with rows of dark spots"
+},
+"montivipera-wagneri": {
+"d": "#b8b0a0",
+"lat": "#bcb4a4",
+"c": "#3a2a20",
+"t": "blotch",
+"n": 50,
+"why": "plain: pale grey with rows of dark orange-edged blotches"
+},
+"montivipera-xanthina": {
+"d": "#a89070",
+"lat": "#ac9474",
+"c": "#4a3828",
+"t": "zigzag",
+"why": "plain: pale grey-brown with a dark zigzag"
+},
+"morelia-bredli": {
+"d": "#b8582e",
+"lat": "#bc5c32",
+"c": "#e8cc98",
+"t": "irregular",
+"why": "pale dots: red-brown with big cream blotches"
+},
+"morelia-imbricata": {
+"d": "#6a6440",
+"lat": "#6e6844",
+"c": "#2a2618",
+"t": "carpet",
+"why": "olive with dark-ringed blotches"
+},
+"morelia-kinghorni": {
+"d": "#7a7a58",
+"lat": "#7e7e5c",
+"c": "#3a3a28",
+"t": "blotch",
+"why": "olive with faint blotches"
+},
+"muhtarophis-barani": {
+"d": "#a85a34",
+"lat": "#ac5e38",
+"t": "plain",
+"why": "plain rusty orange"
+},
+"mussurana-bicolor": {
+"d": "#e0602a",
+"lat": "#e4642e",
+"t": "plain",
+"hc": "#141210",
+"hcx": 1.0,
+"vs": [
+"#141210",
+0.25
+],
+"why": "plain brown: orange with a black head and back"
+},
+"mussurana-montana": {
+"d": "#c8402a",
+"lat": "#cc442e",
+"t": "plain",
+"hc": "#141210",
+"why": "red with a black head"
+},
+"myriopholis-ionidesi": {
+"d": "#d88a80",
+"lat": "#dc8e84",
+"why": "pink"
+},
+"myriopholis-narirostris": {
+"d": "#b0808a",
+"lat": "#b4848e",
+"why": "pinkish"
+},
+"naja-annulata": {
+"d": "#3a3228",
+"lat": "#3e362c",
+"c": "#d8c890",
+"t": "band",
+"rg": 1,
+"why": "dark brown with pale rings on the forebody"
+},
+"naja-haje": {
+"d": "#4a3c2e",
+"lat": "#4e4032",
+"why": "dark brown, not the guessed grey-brown"
+},
+"naja-katiensis": {
+"d": "#c0905a",
+"lat": "#c4945e",
+"t": "plain",
+"why": "plain tan"
+},
+"naja-mandalayensis": {
+"d": "#b8945a",
+"lat": "#bc985e",
+"t": "plain",
+"why": "plain tan"
+},
+"naja-mossambica": {
+"d": "#6a5a48",
+"lat": "#6e5e4c",
+"tb": [
+[
+"#2a2018",
+1.6,
+2.6,
+0.45
+]
+],
+"why": "olive-brown, dark throat bars"
+},
+"naja-pallida": {
+"d": "#c07868",
+"lat": "#c47c6c",
+"b": "#ead0c0",
+"t": "plain",
+"tb": [
+[
+"#1e1614",
+1.8,
+3.2,
+0.45
+]
+],
+"why": "salmon-pink, black throat band (was grey-brown)"
+},
+"naja-sagittifera": {
+"d": "#4a4434",
+"lat": "#4e4838",
+"t": "plain",
+"why": "olive-black"
+},
+"naja-samarensis": {
+"d": "#1e1e18",
+"lat": "#2a2a1c",
+"b": "#d8c040",
+"why": "plain grey: black with yellow throat and belly"
+},
+"naja-savannula": {
+"d": "#1e2430",
+"lat": "#222834",
+"c": "#d8c890",
+"t": "band",
+"n": 18,
+"why": "plain: blue-black with pale bands"
+},
+"namibiana-gracilior": {
+"d": "#4a4448",
+"lat": "#4e484c",
+"why": "dark grey"
+},
+"natriciteres-bipostocularis": {
+"d": "#3a3430",
+"lat": "#3e3834",
+"t": "plain",
+"lip": "#e0c040",
+"why": "dark olive-grey, yellow lips"
+},
+"natrix-helvetica": {
+"d": "#7a7a62",
+"lat": "#7e7e66",
+"why": "grey-olive ground"
+},
+"natrix-natrix": {
+"lb": [
+"#141210"
+],
+"pat": [
+{
+"type": "blotch",
+"t": [
+0.1,
+0.95
+],
+"count": 46,
+"a": 0.5,
+"mirror": true,
+"alt": true,
+"wid": 0.12,
+"len": 0.4,
+"shape": "rect",
+"color": "#161410",
+"alpha": 0.9,
+"warp": 0.3,
+"jit": 0.15
+},
+{
+"type": "blotch",
+"t": [
+0.1,
+0.95
+],
+"count": 60,
+"a": 0.16,
+"mirror": true,
+"alt": true,
+"wid": 0.05,
+"len": 0.3,
+"shape": "round",
+"color": "#2a251c",
+"alpha": 0.7,
+"warp": 0.3,
+"jit": 0.2
+}
+],
+"why": "flank marks were tiny dots and the back plain: now bold black bars down the flanks, two rows of small dark spots on the back, dark bars between the white lip scales"
+},
+"neelaps-bimaculatus": {
+"d": "#8a7a64",
+"lat": "#8e7e68",
+"t": "plain",
+"hc": "#141210",
+"hcx": 1.1,
+"why": "grey-brown, black head and nape"
+},
+"neelaps-calonotus": {
+"d": "#c8502a",
+"lat": "#cc542e",
+"b": "#e8e0d0",
+"c": "#141210",
+"t": "plain",
+"hc": "#141210",
+"cx": {
+"speckle": {
+"p": 0.6,
+"color": "#e8dcc8",
+"k": 0.5
+}
+},
+"why": "red-orange with pale-edged scales, black head"
+},
+"nerodia-clarkii": {
+"d": "#8a8a84",
+"lat": "#8e8e88",
+"c": "#3a3a36",
+"t": "stripe",
+"why": "grey with dark stripes"
+},
+"ninia-sebae": {
+"d": "#b83a2a",
+"lat": "#bc3e2e",
+"t": "plain",
+"hc": "#141210",
+"hcx": 1.0,
+"tb": [
+[
+"#e8d8b0",
+1.0,
+1.4,
+0.0
+],
+[
+"#141210",
+1.4,
+2.4,
+0.0
+]
+],
+"why": "plain brown: red with a black head and a pale and black collar"
+},
+"oligodon-ancorus": {
+"d": "#d8b860",
+"lat": "#dcbc64",
+"c": "#141210",
+"t": "band",
+"why": "yellow with black bands"
+},
+"oligodon-annulifer": {
+"d": "#5a3a2a",
+"lat": "#5e3e2e",
+"c": "#d86a3a",
+"t": "xband",
+"why": "brown with orange bars"
+},
+"oligodon-barroni": {
+"d": "#9a4a2a",
+"lat": "#9e4e2e",
+"c": "#3a1a10",
+"why": "rusty brown"
+},
+"oligodon-brevicauda": {
+"d": "#3a2a2a",
+"lat": "#3e2e2e",
+"c": "#7a3a2e",
+"t": "stripe",
+"why": "dark brown with reddish lines"
+},
+"oligodon-cinereus": {
+"d": "#b8502e",
+"lat": "#bc5432",
+"t": "plain",
+"why": "saddles: plain orange-red"
+},
+"oligodon-dorsalis": {
+"d": "#8a7a5a",
+"lat": "#8e7e5e",
+"c": "#3a3020",
+"t": "stripe",
+"why": "brown with dark-edged pale stripe (was saddles)"
+},
+"oligodon-forbesi": {
+"d": "#5a5038",
+"lat": "#5e543c",
+"c": "#d8c890",
+"t": "stripe",
+"why": "olive-brown with pale stripes"
+},
+"oligodon-kheriensis": {
+"d": "#e06a2a",
+"lat": "#e46e2e",
+"t": "plain",
+"why": "saddles: plain bright orange"
+},
+"oligodon-lipipengi": {
+"d": "#8a6a50",
+"lat": "#8e6e54",
+"c": "#3a2a1e",
+"why": "brown, dark saddles"
+},
+"oligodon-notospilus": {
+"d": "#2a2a2c",
+"lat": "#2e2e30",
+"c": "#d87a3a",
+"t": "spot",
+"why": "dark with orange spots"
+},
+"oligodon-perkinsi": {
+"d": "#1e1a1a",
+"lat": "#221e1e",
+"c": "#c8402a",
+"t": "stripe",
+"why": "saddles: black with red stripes"
+},
+"oligodon-purpurascens": {
+"d": "#8a6a5c",
+"lat": "#8e6e60",
+"c": "#3a2420",
+"t": "saddle",
+"why": "purplish brown, dark saddles"
+},
+"oligodon-taeniatus": {
+"d": "#b0a090",
+"lat": "#b4a494",
+"c": "#3a2e26",
+"why": "pale, dark stripes"
+},
+"oligodon-theobaldi": {
+"d": "#9a9070",
+"lat": "#9e9474",
+"c": "#2a2418",
+"t": "stripe",
+"why": "saddles: buff with dark stripes"
+},
+"oligodon-tillacki": {
+"d": "#b8c0c0",
+"lat": "#bcc4c4",
+"c": "#1e2228",
+"t": "saddle",
+"why": "pale grey with black saddles"
+},
+"oligodon-trilineatus": {
+"d": "#1a1416",
+"lat": "#1e181a",
+"c": "#c8302a",
+"t": "stripe",
+"why": "black with red stripes"
+},
+"ophryacus-sphenophrys": {
+"d": "#c8903a",
+"lat": "#cc943e",
+"c": "#6a4a20",
+"t": "blotch",
+"why": "golden-brown"
+},
+"opisthotropis-kikuzatoi": {
+"d": "#3a3a34",
+"lat": "#3e3e38",
+"t": "plain",
+"why": "dark olive-grey"
+},
+"opisthotropis-maxwelli": {
+"d": "#6a6248",
+"lat": "#6e664c",
+"c": "#c8b880",
+"t": "stripe",
+"why": "olive-brown with faint pale stripes"
+},
+"opisthotropis-tamdaoensis": {
+"d": "#8a8460",
+"lat": "#8e8864",
+"c": "#3a3424",
+"t": "stripe",
+"b": "#e0d080",
+"why": "olive with dark lines, yellow belly"
+},
+"oxybelis-aeneus": {
+"d": "#8a7a5e",
+"lat": "#8e7e62",
+"b": "#d8d0b0",
+"why": "yellow-green: the brown vine snake is grey-brown"
+},
+"oxybelis-koehleri": {
+"d": "#8a7a60",
+"lat": "#8e7e64",
+"t": "plain",
+"why": "grey-brown vine snake"
+},
+"oxybelis-wilsoni": {
+"d": "#c8b040",
+"lat": "#ccb444",
+"t": "plain",
+"why": "yellow vine snake"
+},
+"oxyrhopus-clathratus": {
+"d": "#c8382a",
+"lat": "#cc3c2e",
+"c": "#1e1a18",
+"t": "band",
+"n": 46,
+"why": "coral: red with black bands"
+},
+"oxyrhopus-doliatus": {
+"d": "#1a1616",
+"lat": "#1e1a1a",
+"c": "#c8302a",
+"t": "band",
+"why": "black with red bands"
+},
+"oxyrhopus-formosus": {
+"d": "#d8482a",
+"lat": "#dc4c2e",
+"t": "plain",
+"hc": "#d84a2a",
+"why": "saddles: plain red-orange"
+},
+"oxyrhopus-guibei": {
+"d": "#e0602e",
+"lat": "#e46432",
+"c": "#141210",
+"t": "band",
+"n": 40,
+"why": "plain brown: orange-red with black bands"
+},
+"oxyrhopus-marcapatae": {
+"d": "#d8602a",
+"lat": "#dc642e",
+"c": "#1a1614",
+"t": "band",
+"why": "orange with black bands"
+},
+"oxyrhopus-melanogenys": {
+"d": "#d8502a",
+"lat": "#dc542e",
+"b": "#e8d8c0",
+"t": "plain",
+"hc": "#141210",
+"hcx": 1.0,
+"why": "coral rings: plain orange-red with a black head"
+},
+"oxyrhopus-occipitalis": {
+"d": "#c8302a",
+"lat": "#cc342e",
+"t": "plain",
+"hc": "#141210",
+"hcx": 1.0,
+"why": "plain brown: red with a black head"
+},
+"oxyrhopus-petolarius": {
+"d": "#141210",
+"lat": "#181614",
+"c": "#e86a30",
+"t": "band",
+"n": 40,
+"why": "plain: black with orange-red bands"
+},
+"parafimbrios-vietnamensis": {
+"d": "#3a3848",
+"lat": "#3e3c4c",
+"t": "plain",
+"tb": [
+[
+"#d8d0c0",
+1.0,
+1.8,
+0.0
+]
+],
+"why": "iridescent dark purple, white neck patch"
+},
+"pararhadinaea-melanogaster": {
+"d": "#6a5040",
+"lat": "#6e5444",
+"c": "#e0d0b0",
+"t": "stripe",
+"why": "brown with pale stripes"
+},
+"parastenophis-betsileanus": {
+"d": "#e8e4dc",
+"lat": "#ece8e0",
+"c": "#1c1a1c",
+"t": "band",
+"n": 40,
+"why": "white with black bands"
+},
+"paraxenodermus-borneensis": {
+"d": "#1e1e1e",
+"lat": "#222222",
+"c": "#c8c8c0",
+"t": "xband",
+"why": "black with pale bars"
+},
+"pareas-chinensis": {
+"d": "#c8743a",
+"lat": "#cc783e",
+"c": "#5a2a18",
+"why": "orange with dark bars"
+},
+"pareas-formosensis": {
+"d": "#c09a70",
+"lat": "#c49e74",
+"c": "#4a3424",
+"why": "buff with dark crossbars"
+},
+"pareas-geminatus": {
+"d": "#d87a40",
+"lat": "#dc7e44",
+"c": "#5a2a18",
+"why": "orange with dark bars"
+},
+"pareas-iwasakii": {
+"d": "#c87a3a",
+"lat": "#cc7e3e",
+"c": "#6a3a1e",
+"why": "orange-brown, darker bars"
+},
+"pareas-kaduri": {
+"d": "#8a6a48",
+"lat": "#8e6e4c",
+"c": "#3a2818",
+"why": "brown, dark bars"
+},
+"pareas-modestus": {
+"d": "#2a2a2e",
+"lat": "#2e2e32",
+"t": "plain",
+"why": "plain black"
+},
+"pareas-monticola": {
+"d": "#c8603a",
+"lat": "#cc643e",
+"why": "orange-red with dark bars (read grey)"
+},
+"pareas-niger": {
+"d": "#3a4a8a",
+"lat": "#3e4e8e",
+"c": "#c8c8e0",
+"t": "speckle",
+"why": "blue with pale marks"
+},
+"pareas-stanleyi": {
+"d": "#c8502e",
+"lat": "#cc5432",
+"c": "#3a1a10",
+"why": "red-orange with dark bars"
+},
+"pareas-tigerinus": {
+"d": "#c8884a",
+"lat": "#cc8c4e",
+"c": "#2a1a10",
+"t": "spot",
+"why": "orange with dark spots"
+},
+"pareas-xuelinensis": {
+"d": "#c8642a",
+"lat": "#cc682e",
+"c": "#3a1e10",
+"why": "orange with dark bars"
+},
+"phalotris-concolor": {
+"d": "#d08a6a",
+"lat": "#d48e6e",
+"t": "plain",
+"tb": [
+[
+"#141210",
+1.0,
+1.6,
+0.0
+]
+],
+"why": "salmon with a black neck band"
+},
+"phalotris-lemniscatus": {
+"d": "#d8a090",
+"lat": "#dca494",
+"c": "#2a2020",
+"t": "stripe",
+"why": "pinkish with dark lines"
+},
+"phalotris-mertensi": {
+"d": "#e07a40",
+"lat": "#e47e44",
+"t": "plain",
+"why": "orange with a black and white collar"
+},
+"phalotris-multipunctatus": {
+"d": "#d8402a",
+"lat": "#dc442e",
+"t": "plain",
+"why": "bright red"
+},
+"phalotris-nasutus": {
+"d": "#b84a2a",
+"lat": "#bc4e2e",
+"t": "plain",
+"why": "speckle: plain red"
+},
+"phalotris-nigrilatus": {
+"d": "#6a2a2a",
+"lat": "#6e2e2e",
+"t": "plain",
+"why": "dark red"
+},
+"phalotris-sansebastiani": {
+"d": "#c8302a",
+"lat": "#cc342e",
+"t": "plain",
+"tb": [
+[
+"#e8e4dc",
+1.6,
+2.6,
+0.0
+],
+[
+"#141210",
+2.6,
+3.6,
+0.0
+]
+],
+"why": "red with white and black collars"
+},
+"phalotris-shawnella": {
+"d": "#c85a2a",
+"lat": "#cc5e2e",
+"c": "#141210",
+"t": "plain",
+"tb": [
+[
+"#141210",
+1.0,
+1.6,
+0.0
+],
+[
+"#e8c8a0",
+0.9,
+1.0,
+0.0
+]
+],
+"why": "red-orange, black and white collar"
+},
+"philodryas-arnaldoi": {
+"d": "#c8b030",
+"lat": "#ccb434",
+"c": "#3a3018",
+"t": "speckle",
+"why": "yellow"
+},
+"philodryas-chamissonis": {
+"d": "#7a6a4a",
+"lat": "#7e6e4e",
+"c": "#2a2418",
+"t": "stripe",
+"why": "plain: brown with dark stripes"
+},
+"philodryas-livida": {
+"d": "#c8a46a",
+"lat": "#cca86e",
+"t": "plain",
+"why": "plain tan"
+},
+"philodryas-mattogrossensis": {
+"d": "#d8c030",
+"lat": "#dcc434",
+"t": "plain",
+"vs": [
+"#2a2018",
+0.2
+],
+"why": "saddles: yellow with a dark back stripe"
+},
+"philodryas-trilineata": {
+"d": "#6a5a48",
+"lat": "#6e5e4c",
+"c": "#d8c8a8",
+"why": "brown with pale stripes"
+},
+"philothamnus-bequaerti": {
+"d": "#5ab040",
+"lat": "#5eb444",
+"why": "green"
+},
+"philothamnus-semivariegatus": {
+"d": "#5aa63a",
+"lat": "#62ae40",
+"b": "#e0e8a8",
+"t": "plain",
+"pat": [
+{
+"type": "blotch",
+"t": [
+0.06,
+0.4
+],
+"count": 26,
+"a": 0.3,
+"mirror": true,
+"alt": true,
+"wid": 0.08,
+"len": 0.3,
+"shape": "round",
+"color": "#141210",
+"alpha": 0.9,
+"warp": 0.3,
+"jit": 0.2
+}
+],
+"why": "grey-brown with spots all over: now bright green with black spots on the forebody only"
+},
+"phimophis-guianensis": {
+"d": "#8a3a34",
+"lat": "#8e3e38",
+"t": "plain",
+"hc": "#1a1614",
+"hcx": 0.9,
+"why": "dark red with dark-edged scales, black head"
+},
+"phisalixella-arctifasciata": {
+"d": "#d86a2a",
+"lat": "#dc6e2e",
+"t": "plain",
+"why": "bands: plain orange"
+},
+"phisalixella-tulearensis": {
+"d": "#c8603a",
+"lat": "#cc643e",
+"t": "plain",
+"why": "bands: plain orange-red"
+},
+"phisalixella-variabilis": {
+"d": "#e0b060",
+"lat": "#e4b464",
+"t": "plain",
+"why": "plain yellow-tan"
+},
+"phrynonax-poecilonotus": {
+"d": "#8a8a50",
+"lat": "#8e8e54",
+"c": "#2a2a18",
+"t": "blotch",
+"why": "plain: olive with dark mottled blotches"
+},
+"phrynonax-polylepis": {
+"d": "#7a7a2a",
+"lat": "#7e7e2e",
+"t": "plain",
+"why": "plain olive-yellow"
+},
+"phyllorhynchus-browni": {
+"d": "#d8c8b0",
+"lat": "#dcccb4",
+"c": "#5a3e30",
+"t": "saddle",
+"n": 22,
+"why": "speckled: cream with a few big dark-brown saddles"
+},
+"pituophis-lineaticollis": {
+"d": "#a8a890",
+"lat": "#acac94",
+"c": "#2a2a22",
+"why": "grey, black blotches"
+},
+"plagiopholis-nuchalis": {
+"d": "#5a5654",
+"lat": "#5e5a58",
+"c": "#c8c0b0",
+"t": "speckle",
+"why": "grey with pale-edged scales"
+},
+"platyceps-elegantissimus": {
+"d": "#90c0b0",
+"lat": "#94c4b4",
+"c": "#1a2a3a",
+"t": "band",
+"why": "pale blue-green with black bands"
+},
+"platyceps-rogersi": {
+"d": "#d8b090",
+"lat": "#dcb494",
+"c": "#8a5a3a",
+"t": "xband",
+"why": "plain: pale with brown bars"
+},
+"platyceps-sinai": {
+"d": "#d8c8b0",
+"lat": "#dcccb4",
+"c": "#2a2018",
+"t": "band",
+"why": "pale with dark bands"
+},
+"plectrurus-guentheri": {
+"d": "#8a4a34",
+"lat": "#8e4e38",
+"c": "#3a1e14",
+"t": "speckle",
+"why": "red-brown, dark-edged scales"
+},
+"plesiodipsas-perijanensis": {
+"d": "#c89030",
+"lat": "#cc9434",
+"c": "#2a1e10",
+"t": "irregular",
+"why": "plain: golden with dark marks"
+},
+"porthidium-lansbergii": {
+"d": "#8a7a6a",
+"lat": "#8e7e6e",
+"c": "#3a2e26",
+"why": "grey-brown, dark blotches"
+},
+"proatheris-superciliaris": {
+"d": "#8a7a64",
+"lat": "#8e7e68",
+"c": "#2a2018",
+"t": "trap",
+"why": "plain: brown with dark flank triangles"
+},
+"prosymna-greigerti": {
+"d": "#5a4a40",
+"lat": "#5e4e44",
+"c": "#d8d0c0",
+"t": "speckle",
+"why": "brown with pale specks"
+},
+"prosymna-janii": {
+"d": "#2a2a24",
+"lat": "#2e2e28",
+"c": "#d8d0a0",
+"t": "spot",
+"why": "dark with pale spots"
+},
+"protobothrops-dabieshanensis": {
+"d": "#8a6a50",
+"lat": "#8e6e54",
+"c": "#3a2818",
+"why": "brown, dark blotches"
+},
+"protobothrops-mangshanensis": {
+"d": "#a8b84a",
+"lat": "#acbc4e",
+"c": "#2a3018",
+"t": "blotch",
+"n": 60,
+"why": "olive: yellow-green with dark green blotches"
+},
+"protobothrops-tokarensis": {
+"d": "#d0c0b8",
+"lat": "#d4c4bc",
+"c": "#8a7064",
+"why": "pale pinkish grey, faint blotches"
+},
+"psammodynastes-pictus": {
+"d": "#c8903a",
+"lat": "#cc943e",
+"c": "#5a3a20",
+"t": "stripe",
+"why": "plain: orange-tan with dark lines"
+},
+"psammophis-crucifer": {
+"d": "#6a6050",
+"lat": "#6e6454",
+"c": "#d8d0b8",
+"why": "brown with pale stripes"
+},
+"psammophis-elegans": {
+"d": "#6a5034",
+"lat": "#6e5438",
+"c": "#e0c860",
+"why": "brown with yellow stripes"
+},
+"psammophis-mossambicus": {
+"d": "#8a7a5a",
+"lat": "#8e7e5e",
+"t": "plain",
+"why": "plain olive-brown"
+},
+"psammophis-namibensis": {
+"d": "#b8a080",
+"lat": "#bca484",
+"c": "#4a3a28",
+"why": "pale buff with dark-edged stripes"
+},
+"psammophis-praeornatus": {
+"d": "#8a7a6a",
+"lat": "#8e7e6e",
+"t": "plain",
+"why": "plain grey-brown"
+},
+"psammophis-trinasalis": {
+"d": "#8a7a58",
+"lat": "#8e7e5c",
+"c": "#d8c8a0",
+"why": "brown with pale stripes"
+},
+"psammophylax-rhombeatus": {
+"d": "#8a6a48",
+"lat": "#8e6e4c",
+"c": "#3a2a1c",
+"t": "spot",
+"why": "plain: brown with rows of dark rhomb spots"
+},
+"pseudagkistrodon-rudis": {
+"d": "#c8a080",
+"lat": "#cca484",
+"c": "#5a3a28",
+"t": "blotch",
+"why": "plain: pale with dark blotches"
+},
+"pseudalsophis-biserialis": {
+"d": "#9a8a6a",
+"lat": "#9e8e6e",
+"c": "#3a3020",
+"t": "spot",
+"why": "buff with rows of dark spots"
+},
+"pseudalsophis-darwini": {
+"d": "#1e2a3a",
+"lat": "#222e3e",
+"c": "#d8d0b0",
+"t": "speckle",
+"why": "blue-black with pale flecks"
+},
+"pseudalsophis-hoodensis": {
+"d": "#6a5a44",
+"lat": "#6e5e48",
+"c": "#d8c8a0",
+"t": "stripe",
+"why": "brown with pale stripes"
+},
+"pseudalsophis-steindachneri": {
+"d": "#2a2420",
+"lat": "#2e2824",
+"c": "#d8a060",
+"t": "stripe",
+"why": "dark with tan stripes"
+},
+"pseudoboa-coronata": {
+"d": "#d84a2a",
+"lat": "#dc4e2e",
+"t": "plain",
+"hc": "#2a2420",
+"hcx": 1.0,
+"why": "speckled: plain orange-red with a dark head"
+},
+"pseudoboa-haasi": {
+"d": "#b8503a",
+"lat": "#bc543e",
+"t": "plain",
+"why": "saddles: plain red-brown"
+},
+"pseudoboa-martinsi": {
+"d": "#1e1e22",
+"lat": "#e0602a",
+"why": "black back, orange flanks"
+},
+"pseudoboa-neuwiedii": {
+"d": "#d8502e",
+"lat": "#dc5432",
+"t": "plain",
+"hc": "#2a2420",
+"hcx": 1.0,
+"why": "speckled: plain orange-red with a dark head"
+},
+"pseudoboa-nigra": {
+"d": "#1a1a1c",
+"lat": "#1e1e20",
+"t": "plain",
+"why": "black"
+},
+"pseudoboodon-boehmei": {
+"d": "#c8a030",
+"lat": "#cca434",
+"c": "#3a2a14",
+"t": "stripe",
+"why": "yellow with dark stripes"
+},
+"pseudoboodon-lemniscatus": {
+"d": "#3a3a2e",
+"lat": "#3e3e32",
+"c": "#d8c060",
+"t": "stripe",
+"why": "dark with yellow stripes"
+},
+"pseudocerastes-fieldi": {
+"c": "#7a5434",
+"t": "blotch",
+"why": "plain: sandy with dark blotches"
+},
+"pseudoleptodeira-latifasciata": {
+"d": "#b88a6a",
+"lat": "#bc8e6e",
+"c": "#e8e0d0",
+"t": "band",
+"n": 20,
+"why": "blotched: brown with pale bands"
+},
+"pseudonaja-aspidorhyncha": {
+"d": "#8a8a70",
+"lat": "#8e8e74",
+"t": "plain",
+"why": "plain olive-grey"
+},
+"pseudonaja-guttata": {
+"d": "#d0b890",
+"lat": "#d4bc94",
+"c": "#5a4434",
+"t": "speckle",
+"why": "pale buff, dark specks, dark nape"
+},
+"pseudonaja-mengdeni": {
+"d": "#b8803e",
+"lat": "#bc8442",
+"t": "plain",
+"why": "plain orange-brown"
+},
+"pseudonaja-modesta": {
+"d": "#b0906a",
+"lat": "#b4946e",
+"c": "#2a2018",
+"t": "band",
+"n": 22,
+"why": "pale brown with thin dark bands"
+},
+"pseudoplectrurus-canaricus": {
+"d": "#d8a828",
+"lat": "#dcac2c",
+"c": "#2a2418",
+"t": "spot",
+"why": "yellow with dark spots"
+},
+"pseudorabdion-ater": {
+"d": "#2a2626",
+"lat": "#2e2a2a",
+"t": "plain",
+"tb": [
+[
+"#e0c890",
+1.1,
+1.7,
+0.0
+]
+],
+"why": "black with a pale collar"
+},
+"pseudotomodon-trigonatus": {
+"d": "#a8a090",
+"lat": "#aca494",
+"c": "#4a4034",
+"t": "blotch",
+"why": "pale grey with dark marks"
+},
+"pseudoxenodon-macrops": {
+"d": "#a8963a",
+"lat": "#ac9a3e",
+"c": "#2a2418",
+"t": "xband",
+"why": "plain: yellow-olive with dark crossbars"
+},
+"pseudoxyrhopus-microps": {
+"d": "#5a2e24",
+"lat": "#5e3228",
+"t": "plain",
+"why": "plain dark red-brown"
+},
+"pseudoxyrhopus-tritaeniatus": {
+"d": "#2a2a30",
+"lat": "#2e2e34",
+"c": "#c8604a",
+"t": "stripe",
+"why": "dark with red-orange stripes"
+},
+"ptyas-mucosa": {
+"pat": [
+{
+"type": "band",
+"t": [
+0.45,
+0.97
+],
+"count": 24,
+"len": 0.22,
+"color": "#1c1a12",
+"alpha": 0.8,
+"aMax": 0.75,
+"warp": 0.3,
+"jit": 0.08
+}
+],
+"why": "plain olive all over: now black crossbars on the rear half, as in the photo"
+},
+"ptyas-multicincta": {
+"d": "#7aac5a",
+"t": "plain",
+"why": "bands: plain green"
+},
+"ptyas-nigromarginata": {
+"d": "#5a9a3a",
+"why": "the green read olive in the scene"
+},
+"python-breitensteini": {
+"d": "#5a4a3a",
+"lat": "#5e4e3e",
+"c": "#2a2018",
+"t": "irregular",
+"why": "brown, irregular dark blotches"
+},
+"ramphotyphlops-flaviventer": {
+"d": "#4a3a2a",
+"lat": "#4e3e2e",
+"b": "#d8b860",
+"why": "dark brown, yellow belly"
+},
+"rhabdophis-auriculatus": {
+"d": "#5a4a3a",
+"lat": "#5e4e3e",
+"c": "#d8c8a0",
+"why": "brown with pale stripes"
+},
+"rhabdophis-confusus": {
+"d": "#5a8a3a",
+"lat": "#5e8e3e",
+"t": "plain",
+"why": "green"
+},
+"rhabdophis-himalayanus": {
+"d": "#3a4430",
+"lat": "#3e4834",
+"c": "#e86a2a",
+"t": "spot",
+"why": "dark olive with orange flank patches"
+},
+"rhabdophis-spilogaster": {
+"d": "#6a5a40",
+"lat": "#6e5e44",
+"c": "#2a2018",
+"t": "spot",
+"why": "olive-brown with dark spots"
+},
+"rhabdophis-swinhonis": {
+"d": "#4a3e34",
+"lat": "#4e4238",
+"why": "dark brown"
+},
+"rhadinella-kanalchutchan": {
+"d": "#4a3a2a",
+"lat": "#e0a030",
+"b": "#e8b040",
+"why": "dark brown back, yellow-orange flanks and belly"
+},
+"rhamphiophis-oxyrhynchus": {
+"d": "#a88466",
+"lat": "#ac886a",
+"t": "plain",
+"why": "plain buff-brown"
+},
+"rhinocheilus-etheridgei": {
+"d": "#c8402a",
+"lat": "#cc442e",
+"c": "#1a1616",
+"t": "tsaddle",
+"why": "plain: red with black saddles"
+},
+"rhinophis-lineatus": {
+"d": "#c8a030",
+"lat": "#cca434",
+"t": "plain",
+"why": "yellow"
+},
+"rhinophis-zigzag": {
+"d": "#8ab040",
+"lat": "#8eb444",
+"c": "#3a3a6a",
+"t": "zigzag",
+"why": "yellow-green with a dark blue zigzag"
+},
+"rhinotyphlops-unitaeniatus": {
+"d": "#3a5a8a",
+"lat": "#3e5e8e",
+"c": "#e0d040",
+"t": "stripe",
+"why": "blue-black with a yellow stripe"
+},
+"rhynchocalamus-melanocephalus": {
+"d": "#c87a3a",
+"lat": "#cc7e3e",
+"hc": "#141210",
+"hcx": 1.0,
+"why": "dull brown: orange with a black head"
+},
+"rhynchocalamus-satunini": {
+"d": "#d8902a",
+"lat": "#dc942e",
+"t": "plain",
+"hc": "#141210",
+"why": "speckled: plain orange with black head"
+},
+"rodriguesophis-iglesiasi": {
+"d": "#e09a50",
+"lat": "#e49e54",
+"t": "plain",
+"hc": "#e09a50",
+"why": "speckled: plain orange"
+},
+"salvadora-bairdi": {
+"d": "#8a7a5a",
+"lat": "#8e7e5e",
+"c": "#2a2418",
+"t": "stripe",
+"why": "plain: brown with dark stripes"
+},
+"salvadora-deserticola": {
+"d": "#a89878",
+"lat": "#ac9c7c",
+"c": "#3a3228",
+"t": "stripe",
+"why": "plain: pale with dark stripes"
+},
+"salvadora-grahamiae": {
+"d": "#b8a888",
+"lat": "#bcac8c",
+"c": "#3a3228",
+"t": "stripe",
+"why": "plain: pale with dark stripes"
+},
+"salvadora-gymnorhachis": {
+"d": "#8a8478",
+"lat": "#8e887c",
+"c": "#3a3630",
+"t": "stripe",
+"why": "grey-brown with dark stripes"
+},
+"salvadora-hexalepis": {
+"d": "#8a8478",
+"lat": "#8e887c",
+"c": "#3a3630",
+"t": "stripe",
+"why": "plain: grey with dark stripes"
+},
+"salvadora-lemniscata": {
+"d": "#6a6458",
+"lat": "#6e685c",
+"c": "#d8d0b8",
+"t": "stripe",
+"why": "plain: dark with pale stripes"
+},
+"salvadora-lineata": {
+"d": "#6a6048",
+"lat": "#6e644c",
+"c": "#e0d8b0",
+"why": "dark brown with pale stripes"
+},
+"salvadora-mexicana": {
+"d": "#b8a070",
+"lat": "#bca474",
+"c": "#2a2418",
+"t": "stripe",
+"why": "plain: buff with dark stripes"
+},
+"scaphiodontophis-annulatus": {
+"d": "#c8484a",
+"lat": "#cc4c4e",
+"c": "#1e1a24",
+"t": "band",
+"n": 30,
+"why": "red with dark bands at the front (plain brown model)"
+},
+"scaphiophis-albopunctatus": {
+"d": "#5a6a7a",
+"lat": "#5e6e7e",
+"t": "plain",
+"why": "plain blue-grey"
+},
+"scaphiophis-raffreyi": {
+"d": "#c09078",
+"lat": "#c4947c",
+"t": "plain",
+"why": "plain pinkish tan"
+},
+"siagonodon-septemstriatus": {
+"d": "#c8602a",
+"lat": "#cc642e",
+"c": "#6a2a14",
+"t": "stripe",
+"why": "orange with dark stripes"
+},
+"sibon-annulatus": {
+"d": "#c0a888",
+"lat": "#c4ac8c",
+"c": "#4a2e20",
+"t": "xband",
+"why": "buff, dark brown bands"
+},
+"sibon-anthracops": {
+"d": "#e08a30",
+"lat": "#e48e34",
+"c": "#141210",
+"t": "band",
+"why": "banded the wrong way: orange with black bands"
+},
+"sibon-argus": {
+"d": "#b8b070",
+"lat": "#bcb474",
+"c": "#3a3020",
+"t": "spot",
+"why": "yellowish with dark-ringed spots"
+},
+"sibon-ayerbeorum": {
+"d": "#e8d830",
+"lat": "#ecdc34",
+"c": "#1a1614",
+"t": "irregular",
+"why": "yellow with black blotches"
+},
+"sibon-carri": {
+"d": "#d8c8b8",
+"lat": "#dcccbc",
+"c": "#4a2a1e",
+"t": "xband",
+"why": "pale with dark bands"
+},
+"sibon-dimidiatus": {
+"d": "#6a3a24",
+"lat": "#6e3e28",
+"c": "#e8dccc",
+"t": "xband",
+"why": "dark red-brown with pale bands"
+},
+"sibon-irmelindicaprioae": {
+"d": "#d8c040",
+"lat": "#dcc444",
+"c": "#1a1614",
+"t": "irregular",
+"why": "yellow with black blotches"
+},
+"sibon-longifrenis": {
+"d": "#c09858",
+"lat": "#c49c5c",
+"c": "#3a2618",
+"t": "xband",
+"why": "buff, dark bands"
+},
+"sibon-sanniolus": {
+"d": "#6a4a3e",
+"lat": "#6e4e42",
+"c": "#2a1e18",
+"t": "spot",
+"why": "brown with dark spots"
+},
+"sibynophis-chinensis": {
+"t": "plain",
+"why": "saddles: plain brown with a black head"
+},
+"simalia-tracyae": {
+"d": "#c8c0a8",
+"lat": "#ccc4ac",
+"c": "#5a5040",
+"t": "blotch",
+"why": "pale with brown blotches"
+},
+"sinomicrurus-sauteri": {
+"d": "#7a5a48",
+"lat": "#7e5e4c",
+"c": "#2a2018",
+"t": "stripe",
+"why": "coral rings: brown with thin dark lines"
+},
+"sinomicrurus-swinhoei": {
+"d": "#8a4a34",
+"lat": "#8e4e38",
+"c": "#1a1614",
+"why": "red-brown with black bands"
+},
+"siphlophis-ayauma": {
+"d": "#1e1e1e",
+"lat": "#222222",
+"c": "#e0dcd8",
+"t": "band",
+"why": "black with white bands"
+},
+"siphlophis-compressus": {
+"d": "#c8382a",
+"lat": "#cc3c2e",
+"c": "#141210",
+"t": "band",
+"n": 44,
+"why": "plain: red with black bands"
+},
+"siphlophis-leucocephalus": {
+"d": "#5a4a4a",
+"lat": "#5e4e4e",
+"c": "#2a2224",
+"t": "saddle",
+"why": "brown with dark marks, pale head"
+},
+"siphlophis-longicaudatus": {
+"d": "#7a5a50",
+"lat": "#7e5e54",
+"c": "#d8b8a0",
+"t": "saddle",
+"why": "brown with pale saddles"
+},
+"siphlophis-pulcher": {
+"d": "#3a3a34",
+"lat": "#3e3e38",
+"c": "#d86a6a",
+"t": "spot",
+"why": "dark with pink-red spots"
+},
+"siphlophis-worontzowi": {
+"d": "#1c1c18",
+"lat": "#20201c",
+"c": "#e0d8a0",
+"t": "xband",
+"why": "black with pale bars"
+},
+"smithophis-bicolor": {
+"d": "#1e2028",
+"lat": "#e07a2a",
+"b": "#e08a3a",
+"why": "black back, orange flanks and belly"
+},
+"sonora-cincta": {
+"d": "#e0b880",
+"lat": "#e4bc84",
+"c": "#1a1614",
+"t": "band",
+"why": "cream-orange with black bands"
+},
+"sonora-episcopa": {
+"d": "#d8905a",
+"lat": "#dc945e",
+"t": "plain",
+"why": "banded: this one is plain orange-tan"
+},
+"sonora-michoacanensis": {
+"d": "#e8e0d8",
+"lat": "#ece4dc",
+"c": "#c8302a",
+"t": "tricolor",
+"why": "banded: white, black and red rings"
+},
+"sonora-mosaueri": {
+"d": "#9a8064",
+"lat": "#9e8468",
+"t": "plain",
+"why": "plain brown"
+},
+"sonora-occipitalis": {
+"d": "#e0d070",
+"lat": "#e4d474",
+"c": "#1e1a18",
+"t": "band",
+"why": "yellow with black bands"
+},
+"sonora-savagei": {
+"d": "#d8c8a0",
+"lat": "#dccca4",
+"c": "#2a2018",
+"t": "band",
+"why": "cream with dark bands"
+},
+"sonora-taylori": {
+"d": "#a8a8a8",
+"lat": "#acacac",
+"t": "plain",
+"why": "banded: plain grey"
+},
+"spalerosophis-atriceps": {
+"d": "#c8682e",
+"lat": "#cc6c32",
+"c": "#7a3a1a",
+"t": "saddle",
+"why": "orange-brown"
+},
+"spalerosophis-diadema": {
+"d": "#c89060",
+"lat": "#cc9464",
+"c": "#7a4a2a",
+"t": "blotch",
+"n": 60,
+"why": "orange-buff, many small blotches"
+},
+"spalerosophis-dolichospilus": {
+"d": "#b0a090",
+"lat": "#b4a494",
+"c": "#e8e0d0",
+"t": "saddle",
+"why": "pale grey-brown with pale-edged marks"
+},
+"spilotes-sulphureus": {
+"d": "#c8a840",
+"lat": "#ccac44",
+"c": "#3a3018",
+"t": "xband",
+"why": "speckled grey: yellow-olive with dark crossbars on the rear body"
+},
+"stegonotus-modestus": {
+"d": "#c09090",
+"lat": "#c49494",
+"c": "#6a3a3a",
+"t": "speckle",
+"why": "plain grey: pinkish"
+},
+"stichophanes-ningshaanensis": {
+"d": "#d89040",
+"lat": "#dc9444",
+"t": "plain",
+"why": "orange"
+},
+"stoliczkia-vanhnuailianai": {
+"d": "#3a3020",
+"lat": "#3e3424",
+"c": "#e0c030",
+"t": "stripe",
+"why": "dark with yellow stripes"
+},
+"symphimus-mayae": {
+"d": "#e0d8c0",
+"lat": "#e4dcc4",
+"t": "plain",
+"ls": [
+"#3a3228",
+0.4,
+0.03
+],
+"why": "blotched: pale cream with a thin dark line"
+},
+"sympholis-lippiens": {
+"d": "#1c1c1c",
+"lat": "#202020",
+"c": "#e0d8a0",
+"t": "band",
+"n": 24,
+"why": "plain: black with pale yellow bands"
+},
+"synophis-plectovertebralis": {
+"d": "#2a2a44",
+"lat": "#2e2e48",
+"c": "#c8c040",
+"t": "plain",
+"ls": [
+"#c8c040",
+0.65,
+0.03
+],
+"why": "iridescent blue-black, yellow lateral line"
+},
+"synophis-zaheri": {
+"d": "#3a3a3e",
+"lat": "#3e3e42",
+"c": "#e0c890",
+"t": "plain",
+"ls": [
+"#e0c890",
+0.5,
+0.04
+],
+"why": "speckle: dark grey with a cream flank stripe"
+},
+"tachymenis-attenuata": {
+"d": "#8a6a40",
+"lat": "#8e6e44",
+"c": "#3a2a18",
+"t": "blotch",
+"why": "brown with dark blotches"
+},
+"tachymenis-chilensis": {
+"d": "#7a7058",
+"lat": "#7e745c",
+"c": "#3a3428",
+"why": "grey-brown with dark stripes"
+},
+"taeniophallus-affinis": {
+"d": "#7a5a30",
+"lat": "#7e5e34",
+"c": "#c8a060",
+"t": "stripe",
+"why": "brown with pale stripes"
+},
+"taeniophallus-bilineatus": {
+"d": "#7a5434",
+"lat": "#7e5838",
+"c": "#2a1e14",
+"why": "brown with dark stripes"
+},
+"taeniophallus-nicagus": {
+"d": "#b8602e",
+"lat": "#bc6432",
+"t": "plain",
+"why": "orange-brown"
+},
+"taeniophallus-occipitalis": {
+"d": "#6a5a58",
+"lat": "#6e5e5c",
+"t": "plain",
+"why": "grey-brown, dark nape"
+},
+"taeniophallus-persimilis": {
+"d": "#2a2a2c",
+"lat": "#2e2e30",
+"t": "plain",
+"why": "black"
+},
+"taeniophallus-poecilopogon": {
+"d": "#6a3a2a",
+"lat": "#6e3e2e",
+"t": "plain",
+"why": "plain dark red-brown"
+},
+"taeniophallus-quadriocellatus": {
+"d": "#6a5e54",
+"lat": "#6e6258",
+"c": "#2a2420",
+"t": "spot",
+"why": "grey-brown with dark spots"
+},
+"tantilla-armillata": {
+"d": "#8a4a34",
+"lat": "#8e4e38",
+"why": "grey-brown: reddish brown with a black head"
+},
+"tantilla-bocourti": {
+"d": "#a8946a",
+"lat": "#ac986e",
+"why": "olive-tan, dark head"
+},
+"tantilla-boipiranga": {
+"d": "#d8602a",
+"lat": "#dc642e",
+"hc": "#141210",
+"hcx": 1.0,
+"why": "orange with a black head"
+},
+"tantilla-brevicauda": {
+"d": "#7a7a84",
+"lat": "#7e7e88",
+"why": "grey"
+},
+"tantilla-coronata": {
+"d": "#8a6a5a",
+"lat": "#8e6e5e",
+"why": "reddish brown, black head"
+},
+"tantilla-deppei": {
+"t": "plain",
+"tb": [
+[
+"#e8e0c0",
+1.0,
+1.5,
+0.0
+]
+],
+"why": "black head with a pale collar"
+},
+"tantilla-excelsa": {
+"d": "#6a5034",
+"lat": "#6e5438",
+"c": "#d8b070",
+"t": "stripe",
+"why": "brown with pale stripes, black head"
+},
+"tantilla-hobartsmithi": {
+"d": "#c8b49a",
+"lat": "#ccb89e",
+"why": "pale buff, black head"
+},
+"tantilla-impensa": {
+"d": "#5a4a54",
+"lat": "#5e4e58",
+"c": "#e0c080",
+"t": "plain",
+"ls": [
+"#d8b070",
+0.75,
+0.03
+],
+"why": "dark with pale lower flank, pale collar"
+},
+"tantilla-lydia": {
+"d": "#8a5a2a",
+"lat": "#8e5e2e",
+"c": "#e0c070",
+"t": "stripe",
+"why": "rusty brown with yellow stripes"
+},
+"tantilla-melanocephala": {
+"d": "#8a6448",
+"lat": "#8e684c",
+"why": "brown, black head"
+},
+"tantilla-moesta": {
+"d": "#1e1e1e",
+"lat": "#222222",
+"tb": [
+[
+"#e0c040",
+1.0,
+1.6,
+0.0
+]
+],
+"why": "black with a yellow collar"
+},
+"tantilla-nigriceps": {
+"d": "#c0a088",
+"lat": "#c4a48c",
+"why": "pale tan, black head"
+},
+"tantilla-planiceps": {
+"d": "#c08a60",
+"lat": "#c48e64",
+"why": "orange-tan, black head"
+},
+"tantilla-reticulata": {
+"d": "#7a6a58",
+"lat": "#7e6e5c",
+"c": "#d8c8a8",
+"t": "stripe",
+"why": "brown with fine pale lines"
+},
+"tantilla-rubra": {
+"d": "#d06a44",
+"lat": "#d46e48",
+"why": "bright orange-red"
+},
+"tantilla-ruficeps": {
+"d": "#5a5450",
+"lat": "#5e5854",
+"why": "grey-brown"
+},
+"tantilla-schistosa": {
+"d": "#6a4430",
+"lat": "#6e4834",
+"why": "rich brown"
+},
+"tantilla-semicincta": {
+"d": "#e8e4dc",
+"lat": "#ece8e0",
+"c": "#1c1a1a",
+"t": "band",
+"why": "plain: white with black bands"
+},
+"tantilla-supracincta": {
+"d": "#c8382a",
+"lat": "#cc3c2e",
+"c": "#141210",
+"t": "band",
+"why": "red with black bands"
+},
+"tantilla-wilcoxi": {
+"d": "#a8987e",
+"lat": "#ac9c82",
+"why": "pale grey-brown, dark head"
+},
+"tantillita-lintoni": {
+"d": "#5a3e30",
+"lat": "#5e4234",
+"t": "plain",
+"why": "plain dark brown"
+},
+"telescopus-beetzi": {
+"d": "#d8c080",
+"lat": "#dcc484",
+"c": "#1e1a16",
+"t": "saddle",
+"n": 30,
+"why": "buff with dark saddles (pale)"
+},
+"telescopus-fallax": {
+"d": "#b8a490",
+"lat": "#bca894",
+"c": "#4a3428",
+"t": "blotch",
+"why": "pale grey-brown, dark blotches"
+},
+"telescopus-nigriceps": {
+"d": "#d8c8a8",
+"lat": "#dccca4",
+"c": "#2a2018",
+"t": "band",
+"hc": "#141210",
+"why": "blotch: pale with dark bands, black head"
+},
+"telescopus-semiannulatus": {
+"d": "#d8a040",
+"lat": "#dca444",
+"c": "#2a2018",
+"t": "blotch",
+"why": "orange with black blotches (was grey)"
+},
+"tetralepis-fruhstorferi": {
+"d": "#2a2826",
+"lat": "#2e2c2a",
+"t": "plain",
+"why": "black"
+},
+"thamnodynastes-almae": {
+"d": "#7a6448",
+"lat": "#7e684c",
+"c": "#3a2c1e",
+"why": "brown with dark lines"
+},
+"thamnodynastes-chaquensis": {
+"d": "#6a6a6a",
+"lat": "#6e6e6e",
+"c": "#2a2a2a",
+"t": "blotch",
+"why": "grey with dark blotches"
+},
+"thamnodynastes-gambotensis": {
+"d": "#b0946a",
+"lat": "#b4986e",
+"c": "#5a4a34",
+"t": "speckle",
+"why": "tan, dark flecks"
+},
+"thamnodynastes-hypoconia": {
+"d": "#7a6a54",
+"lat": "#7e6e58",
+"c": "#3a2e22",
+"why": "grey-brown with dark lines"
+},
+"thamnodynastes-lanei": {
+"d": "#c8a878",
+"lat": "#ccac7c",
+"c": "#7a5a3a",
+"why": "tan with brown lines"
+},
+"thamnodynastes-nattereri": {
+"d": "#d8902a",
+"lat": "#dc942e",
+"t": "plain",
+"why": "plain orange"
+},
+"thamnodynastes-pallidus": {
+"d": "#b8a070",
+"lat": "#bca474",
+"c": "#6a5434",
+"t": "stripe",
+"why": "pale buff, faint stripes"
+},
+"thamnodynastes-paraguanae": {
+"d": "#6a5e54",
+"lat": "#6e6258",
+"c": "#2e2620",
+"why": "grey-brown, dark lines"
+},
+"thamnodynastes-phoenix": {
+"d": "#d8ccb0",
+"lat": "#dcd0b4",
+"c": "#6a5040",
+"t": "spot",
+"why": "pale cream with dark marks"
+},
+"thamnodynastes-ramonriveroi": {
+"d": "#a8904a",
+"lat": "#ac944e",
+"c": "#4a3a1e",
+"t": "stripe",
+"why": "yellow-brown with dark lines"
+},
+"thamnodynastes-rutilus": {
+"d": "#9a7a58",
+"lat": "#9e7e5c",
+"c": "#4a3828",
+"t": "speckle",
+"why": "tan, dark flecks"
+},
+"thamnodynastes-strigatus": {
+"d": "#7a5e5a",
+"lat": "#7e625e",
+"c": "#3a2a28",
+"why": "mauve-brown with dark lines"
+},
+"thamnophis-atratus": {
+"d": "#2a2a26",
+"lat": "#2e2e2a",
+"c": "#e0c040",
+"t": "garter",
+"why": "plain: black with a yellow back stripe"
+},
+"thamnophis-butleri": {
+"d": "#3a3a2c",
+"lat": "#3e3e30",
+"c": "#d8c060",
+"why": "dark olive, yellow stripes"
+},
+"thamnophis-fulvus": {
+"d": "#4a4230",
+"lat": "#4e4634",
+"c": "#c8b060",
+"why": "olive-brown, yellow stripes"
+},
+"thamnophis-lineri": {
+"d": "#6a6a4a",
+"lat": "#6e6e4e",
+"c": "#d8c880",
+"why": "olive with pale stripes"
+},
+"thamnophis-ordinoides": {
+"d": "#5a4a40",
+"lat": "#5e4e44",
+"c": "#d0704a",
+"why": "brown, orange stripes"
+},
+"thamnophis-radix": {
+"d": "#2a2a26",
+"lat": "#2e2e2a",
+"c": "#e0b860",
+"why": "near-black ground, orange-yellow stripes"
+},
+"thamnosophis-epistibes": {
+"d": "#5a5038",
+"lat": "#5e543c",
+"c": "#e0d070",
+"t": "stripe",
+"why": "olive with yellow stripes"
+},
+"tomodon-dorsatus": {
+"d": "#9a8a6a",
+"lat": "#9e8e6e",
+"c": "#4a3a2a",
+"t": "stripe",
+"why": "buff with dark stripe"
+},
+"tomodon-ocellatus": {
+"d": "#6a6a70",
+"lat": "#6e6e74",
+"c": "#2a2a30",
+"why": "grey with dark spots"
+},
+"tomodon-orestes": {
+"d": "#5a5a64",
+"lat": "#5e5e68",
+"c": "#2a2a30",
+"t": "blotch",
+"why": "grey with dark blotches"
+},
+"toxicocalamus-ernstmayri": {
+"d": "#a89a3a",
+"lat": "#ac9e3e",
+"t": "plain",
+"why": "plain olive-yellow"
+},
+"toxicocalamus-stanleyanus": {
+"d": "#3a3838",
+"lat": "#3e3c3c",
+"t": "plain",
+"why": "dark grey"
+},
+"toxicocalamus-vertebralis": {
+"d": "#4a4a3a",
+"lat": "#4e4e3e",
+"t": "plain",
+"why": "dark olive"
+},
+"toxicodryas-adamanteus": {
+"d": "#c09068",
+"lat": "#c4946c",
+"c": "#6a4a30",
+"t": "speckle",
+"why": "tan, fine marks"
+},
+"toxicodryas-blandingii": {
+"d": "#5a6068",
+"lat": "#5e646c",
+"c": "#1a1c20",
+"t": "xband",
+"why": "plain: grey with dark mottled bands"
+},
+"trachischium-tenuiceps": {
+"d": "#8a8a90",
+"lat": "#8e8e94",
+"t": "plain",
+"why": "plain grey"
+},
+"trachyboa-boulengeri": {
+"d": "#5a3a2a",
+"lat": "#5e3e2e",
+"c": "#2a1a14",
+"t": "spot",
+"tt": "#c8603a",
+"why": "dark brown, orange tail"
+},
+"tretanorhinus-nigroluteus": {
+"t": "plain",
+"why": "saddles: plain dark"
+},
+"trilepida-pastusa": {
+"d": "#a8a0a8",
+"lat": "#aca4ac",
+"why": "silvery grey"
+},
+"trimeresurus-andalasensis": {
+"d": "#c08060",
+"lat": "#c48464",
+"c": "#6a3a28",
+"t": "blotch",
+"why": "pinkish brown, dark blotches"
+},
+"trimeresurus-caudornatus": {
+"d": "#5ad028",
+"lat": "#5ed42c",
+"why": "bright green"
+},
+"trimeresurus-davidi": {
+"d": "#c8d040",
+"lat": "#ccd444",
+"t": "plain",
+"why": "yellow-green"
+},
+"trimeresurus-gunaleni": {
+"d": "#6ab028",
+"lat": "#6eb42c",
+"why": "bright green"
+},
+"trimeresurus-macrolepis": {
+"d": "#9aa060",
+"lat": "#9ea464",
+"t": "plain",
+"why": "olive-yellow green"
+},
+"trimeresurus-mayaae": {
+"d": "#7ac8a0",
+"lat": "#7ecca4",
+"b": "#e0e080",
+"t": "plain",
+"why": "pale blue-green"
+},
+"trimeresurus-mcgregori": {
+"d": "#d8cc90",
+"lat": "#dcd094",
+"c": "#a89860",
+"t": "plain",
+"why": "blotched: plain pale yellow"
+},
+"trimeresurus-mutabilis": {
+"d": "#8a7a68",
+"lat": "#8e7e6c",
+"c": "#4a3a2c",
+"t": "blotch",
+"why": "grey-brown with dark blotches"
+},
+"trimeresurus-strigatus": {
+"d": "#7a6a4a",
+"lat": "#7e6e4e",
+"c": "#3a3020",
+"t": "blotch",
+"why": "brown with dark marks"
+},
+"trimeresurus-truongsonensis": {
+"d": "#4a6a5a",
+"lat": "#4e6e5e",
+"c": "#1e2a24",
+"t": "blotch",
+"why": "green-grey with dark blotches"
+},
+"trimeresurus-wiroti": {
+"d": "#6a4a34",
+"lat": "#6e4e38",
+"c": "#3a2618",
+"t": "blotch",
+"why": "brown with dark blotches"
+},
+"trimetopon-gracile": {
+"d": "#4a4450",
+"lat": "#4e4854",
+"t": "plain",
+"why": "dark grey-purple"
+},
+"trimetopon-pliolepis": {
+"d": "#5a4a44",
+"lat": "#5e4e48",
+"t": "plain",
+"why": "plain dark brown"
+},
+"trimorphodon-lyrophanes": {
+"c": "#3a2418",
+"t": "saddle",
+"why": "plain: pale with dark saddles"
+},
+"tropidodipsas-annulifera": {
+"d": "#1e1e22",
+"lat": "#222226",
+"c": "#e0b830",
+"t": "band",
+"why": "black with yellow bands"
+},
+"tropidodipsas-fasciata": {
+"d": "#1c1a18",
+"lat": "#201e1c",
+"c": "#ece8e0",
+"t": "band",
+"why": "black with white rings"
+},
+"tropidodipsas-fischeri": {
+"d": "#1e2c48",
+"lat": "#22304c",
+"c": "#a8c0d8",
+"t": "band",
+"why": "blue-black with pale blue bands"
+},
+"tropidodipsas-papavericola": {
+"d": "#d8c8b0",
+"lat": "#dcccb4",
+"c": "#4a3428",
+"t": "xband",
+"why": "pale with dark bands"
+},
+"tropidodipsas-philippii": {
+"d": "#1e1e20",
+"lat": "#222224",
+"c": "#e8e4dc",
+"t": "band",
+"why": "black with white bands"
+},
+"tropidodipsas-repleta": {
+"d": "#1e1e1e",
+"lat": "#222222",
+"c": "#d8d8d0",
+"t": "band",
+"why": "black with white bands"
+},
+"tropidodipsas-sartorii": {
+"d": "#e06a20",
+"lat": "#e46e24",
+"c": "#141210",
+"t": "band",
+"n": 36,
+"why": "orange with black bands"
+},
+"tropidodipsas-tricolor": {
+"d": "#1a1614",
+"lat": "#1e1a18",
+"c": "#e07a2a",
+"t": "band",
+"why": "black with orange bands"
+},
+"tropidodipsas-zweifeli": {
+"d": "#1e1e1e",
+"lat": "#222222",
+"c": "#e8e8e8",
+"t": "band",
+"why": "black with white bands"
+},
+"tropidolaemus-subannulatus": {
+"d": "#c8d030",
+"lat": "#ccd434",
+"c": "#141210",
+"why": "yellow-green with black bands (green read dull)"
+},
+"tropidonophis-doriae": {
+"d": "#c85a3a",
+"lat": "#cc5e3e",
+"c": "#2a1a14",
+"t": "xband",
+"why": "orange-red with dark bars"
+},
+"tropidonophis-halmahericus": {
+"d": "#e0c020",
+"lat": "#e4c424",
+"t": "plain",
+"why": "yellow"
+},
+"tropidonophis-mairii": {
+"d": "#8a6a40",
+"lat": "#8e6e44",
+"c": "#3a2818",
+"why": "brown, dark bars"
+},
+"tropidonophis-novaeguineae": {
+"d": "#3a4a34",
+"lat": "#3e4e38",
+"c": "#1e2418",
+"why": "dark olive, faint bars"
+},
+"tropidophis-canus": {
+"d": "#7a6a5a",
+"lat": "#7e6e5e",
+"c": "#2a2018",
+"t": "spot",
+"why": "grey-brown with dark spots"
+},
+"tropidophis-feicki": {
+"d": "#d8ccb0",
+"lat": "#dcd0b4",
+"c": "#3a2a20",
+"t": "band",
+"n": 20,
+"why": "pale with broad dark bands"
+},
+"tropidophis-haetianus": {
+"d": "#4a4a4c",
+"lat": "#4e4e50",
+"c": "#2a2a2c",
+"t": "spot",
+"why": "dark grey, faint spots"
+},
+"tropidophis-melanurus": {
+"d": "#b08a62",
+"lat": "#b48e66",
+"c": "#6a4a30",
+"t": "spot",
+"why": "buff with small dark spots"
+},
+"tropidophis-parkeri": {
+"d": "#5a4a3a",
+"lat": "#5e4e3e",
+"c": "#2a2018",
+"why": "dark brown"
+},
+"tropidophis-schwartzi": {
+"d": "#8a8a7e",
+"lat": "#8e8e82",
+"c": "#3a3a32",
+"t": "spot",
+"why": "grey with dark spots"
+},
+"tropidophis-semicinctus": {
+"d": "#d8c8a8",
+"lat": "#dcccac",
+"c": "#1e1a18",
+"t": "spot",
+"why": "pale with black spots"
+},
+"tropidophis-steinleini": {
+"d": "#c8c8c0",
+"lat": "#ccccc4",
+"c": "#2a2a2c",
+"t": "spot",
+"why": "pale grey with black spots"
+},
+"tropidophis-stejnegeri": {
+"d": "#8a5a5a",
+"lat": "#8e5e5e",
+"c": "#2a1a1a",
+"t": "irregular",
+"why": "reddish with dark blotches"
+},
+"typhlops-pusillus": {
+"d": "#b88078",
+"lat": "#bc847c",
+"why": "pinkish"
+},
+"typhlops-schwartzi": {
+"d": "#3a2a2a",
+"lat": "#3e2e2e",
+"why": "dark brown"
+},
+"ungaliophis-panamensis": {
+"d": "#c8a8a0",
+"lat": "#ccaca4",
+"c": "#5a3a34",
+"t": "trap",
+"why": "speckled: pinkish with dark-edged triangles"
+},
+"uromacer-catesbyi": {
+"d": "#5aa83a",
+"lat": "#5eac3e",
+"t": "plain",
+"why": "blotched: plain green"
+},
+"uromacerina-ricardinii": {
+"d": "#b8a070",
+"lat": "#bca474",
+"t": "plain",
+"why": "tan vine snake"
+},
+"uropeltis-bicatenata": {
+"d": "#2a2a24",
+"lat": "#2e2e28",
+"c": "#e0b830",
+"t": "stripe",
+"why": "black with yellow stripes"
+},
+"uropeltis-jerdoni": {
+"d": "#3a2a24",
+"lat": "#3e2e28",
+"c": "#e0a020",
+"t": "plain",
+"ls": [
+"#e0a020",
+0.68,
+0.04
+],
+"why": "dark brown, yellow flank line"
+},
+"uropeltis-liura": {
+"d": "#8a7a3a",
+"lat": "#8e7e3e",
+"c": "#e0a020",
+"t": "speckle",
+"why": "olive-yellow with yellow-orange specks"
+},
+"uropeltis-macrolepis": {
+"d": "#2a2a30",
+"lat": "#2e2e34",
+"c": "#e8b020",
+"t": "plain",
+"ls": [
+"#e8b020",
+0.62,
+0.08
+],
+"why": "dark with a broad yellow flank stripe"
+},
+"uropeltis-madurensis": {
+"d": "#2a3020",
+"lat": "#2e3424",
+"c": "#d8d040",
+"t": "speckle",
+"why": "plain: dark with yellow-edged scales"
+},
+"uropeltis-nitida": {
+"d": "#3a3430",
+"lat": "#3e3834",
+"c": "#e0a020",
+"t": "band",
+"n": 20,
+"why": "dark with yellow bands"
+},
+"uropeltis-phipsonii": {
+"d": "#2a2826",
+"lat": "#2e2c2a",
+"c": "#d8c890",
+"t": "speckle",
+"why": "plain: dark with pale-edged scales"
+},
+"uropeltis-rubrolineata": {
+"d": "#1e1e1e",
+"lat": "#222222",
+"c": "#e0a020",
+"t": "plain",
+"ls": [
+"#e0a020",
+0.6,
+0.06
+],
+"why": "black with a yellow flank stripe"
+},
+"uropeltis-shorttii": {
+"d": "#1e1e1a",
+"lat": "#22221e",
+"c": "#e0b830",
+"t": "speckle",
+"why": "black with yellow marks"
+},
+"uropeltis-woodmasoni": {
+"d": "#4a4a50",
+"lat": "#4e4e54",
+"c": "#e0b030",
+"t": "plain",
+"ls": [
+"#e0b030",
+0.65,
+0.06
+],
+"why": "dark grey, yellow flank blotches"
+},
+"urotheca-fulviceps": {
+"d": "#2a7aa8",
+"lat": "#2e7eac",
+"t": "plain",
+"why": "plain brown: bright blue"
+},
+"urotheca-pachyura": {
+"d": "#8a9098",
+"lat": "#8e949c",
+"t": "plain",
+"why": "blue-grey"
+},
+"vermicella-multifasciata": {
+"d": "#1e1e24",
+"lat": "#222228",
+"c": "#d8d8e0",
+"rg": 1,
+"n": 60,
+"why": "black with many white rings"
+},
+"vermicella-parscauda": {
+"d": "#1e1e24",
+"lat": "#222228",
+"c": "#7ac0e0",
+"rg": 1,
+"why": "black with pale blue rings"
+},
+"vipera-sakoi": {
+"d": "#a8945a",
+"lat": "#ac985e",
+"c": "#4a3a20",
+"why": "yellow-brown with a dark zigzag"
+},
+"virginia-valeriae": {
+"d": "#8a7a6c",
+"lat": "#8e7e70",
+"t": "plain",
+"why": "plain grey-brown"
+},
+"xenelaphis-ellipsifer": {
+"d": "#8a6a40",
+"lat": "#8e6e44",
+"c": "#2a2018",
+"t": "blotch",
+"why": "brown with dark ovals"
+},
+"xenocalamus-mechowii": {
+"d": "#d8b8a8",
+"lat": "#dcbcac",
+"c": "#5a3a30",
+"t": "spot",
+"why": "plain: pale with dark-ringed spots"
+},
+"xenochrophis-piscator": {
+"d": "#6e6a3c",
+"lat": "#726e40",
+"c": "#3a3620",
+"t": "spot",
+"why": "olive with dark chequer spots"
+},
+"xenochrophis-trianguligerus": {
+"d": "#4a5a2a",
+"lat": "#4e5e2e",
+"c": "#d87a30",
+"t": "trap",
+"why": "olive with orange flank triangles"
+},
+"xenodon-dorbignyi": {
+"d": "#c8a870",
+"lat": "#ccac74",
+"c": "#6a4426",
+"t": "blotch",
+"n": 50,
+"why": "buff with dark-edged brown blotches"
+},
+"xenodon-guentheri": {
+"d": "#b8a090",
+"lat": "#bca494",
+"c": "#4a3028",
+"t": "blotch",
+"why": "pale with dark-edged blotches"
+},
+"xenodon-matogrossensis": {
+"d": "#e86a3a",
+"lat": "#ec6e3e",
+"c": "#ece8dc",
+"t": "tricolor",
+"why": "coral mimic: orange, black and white rings"
+},
+"xenodon-nattereri": {
+"d": "#c8905a",
+"lat": "#cc945e",
+"t": "plain",
+"why": "blotched: plain tan"
+},
+"xenodon-neuwiedii": {
+"d": "#9a7a5a",
+"lat": "#9e7e5e",
+"c": "#4a3020",
+"t": "blotch",
+"why": "brown, dark-edged blotches"
+},
+"xenodon-pulcher": {
+"d": "#c83a2a",
+"lat": "#cc3e2e",
+"t": "tricolor",
+"c": "#efe8d8",
+"why": "red, black and white rings (was brown bands)"
+},
+"xenodon-severus": {
+"d": "#2a3040",
+"lat": "#2e3444",
+"c": "#c8b060",
+"t": "xband",
+"why": "dark blue-grey with pale-edged bands"
+},
+"xenodon-werneri": {
+"d": "#8a9a9a",
+"lat": "#8e9e9e",
+"b": "#e0b830",
+"t": "plain",
+"why": "blue-grey, yellow belly"
+},
+"xenophidion-acanthognathus": {
+"d": "#7a5a4a",
+"lat": "#7e5e4e",
+"c": "#3a2018",
+"t": "blotch",
+"why": "brown with dark blotches"
+},
+"xenopholis-undulatus": {
+"d": "#1e1c1a",
+"lat": "#22201e",
+"c": "#c85a2a",
+"t": "zigzag",
+"why": "plain: dark with an orange wavy line"
+},
+"xenoxybelis-argenteus": {
+"d": "#c8b890",
+"lat": "#ccbc94",
+"c": "#4a3e2a",
+"t": "stripe",
+"why": "saddles: silvery buff with a dark stripe"
+},
+"xerotyphlops-vermicularis": {
+"d": "#b88a84",
+"lat": "#bc8e88",
+"why": "pinkish"
+},
+"zaocys-dhumnades": {
+"d": "#5a6050",
+"lat": "#5e6454",
+"c": "#1e2018",
+"t": "stripe",
+"why": "olive-grey with dark stripes"
+}
+}
+}

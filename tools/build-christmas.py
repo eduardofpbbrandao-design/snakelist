@@ -25,6 +25,8 @@ This script writes christmas/:
   xmas-icon.svg       the app icon: SnakeList's own icon (favicon.svg) with the Santa hat and a little snow
   xmas-icon-*.png     the same as PNG (redrawn by tools/christmas-icons.js when Node + Playwright are here)
   index.html          sets the switch and opens the app
+  music/             the Christmas songs (real recordings, CC BY 4.0 - see CREDITS.txt), loaded only when the
+                      music button is first pressed. They live only here (this script keeps them, it does not make them)
   CREDITS.txt
 """
 import os, re, sys, json, shutil, posixpath, time, tempfile, subprocess
@@ -55,6 +57,9 @@ def body_path(svg):
 PAT_KIND = {"plain": "p", "none": "p", "uniform": "p", "speckle": "k", "band": "b", "xband": "b", "rings": "b", "crossbar": "b", "ring": "b",
             "coral": "c", "tricolor": "c", "stripe": "s", "garter": "s", "vert": "s", "nerodia": "o", "line": "s", "zigzag": "z", "diamond": "z", "net": "z",
             "collar": "l", "collar2": "l", "cap": "l", "hband": "l", "spot": "o", "checker": "o", "chain": "z", "poly": "o", "shields": "o", "tint": "p"}
+# the head's shape for the little snake: v a viper's wide triangle, b a python's or boa's long broad head, e an elapid's
+# rounded one, n a blind snake's tiny blunt one, s a sea snake's, c a colubrid's slender head
+HEAD_KIND = {"viper": "v", "pitviper": "v", "python": "b", "boa": "b", "elapid": "e", "blind": "n", "sea": "s", "colubrid": "c"}
 def c12(h, fb="#5b9a4a"):
     h = (h or fb).lstrip("#")
     if len(h) == 3: h = "".join(ch * 2 for ch in h)
@@ -69,14 +74,20 @@ def species_colours():
         a = v.get("auto")
         if a:
             d, c, b, t = a.get("d"), a.get("c"), a.get("b"), a.get("t") or "plain"
+            if t in ("plain", "uniform"):
+                # a plain base with stripes or blotches on top: show those
+                if a.get("ls") or a.get("vs"): t, c = "stripe", (a.get("vs") or a.get("ls"))[0]
+                elif a.get("pat"): t, c = a["pat"][0].get("type", "blotch"), a["pat"][0].get("color") or c
         else:
             col = v.get("colors") or {}; pats = v.get("pattern") or []
             d, b = col.get("dorsal"), col.get("belly")
-            p0 = next((p for p in pats if p.get("type") not in ("tint",)), pats[0] if pats else {})
+            p0 = next((p for p in pats if p.get("type") not in ("tint", "cap")), pats[0] if pats else {})
             c = p0.get("color") or (col.get("speckle") or {}).get("color") or col.get("lateral")
             t = p0.get("type", "plain")
-            if t == "blotch": t = "blotch"
-        out[k] = c12(d) + c12(c, d or "#333333") + c12(b, "#e0d8b8") + PAT_KIND.get(t, "o")
+            # rings edged in another colour (a coral snake's black rings edged yellow): the two-colour rings
+            if t == "band" and p0.get("edgeColor"): t, b = "coral", p0["edgeColor"]
+        plan = (a or {}).get("p") or v.get("plan") or "colubrid"
+        out[k] = c12(d) + c12(c, d or "#333333") + c12(b, "#e0d8b8") + PAT_KIND.get(t, "o") + HEAD_KIND.get(plan, "c")
     return out
 
 def write_art():
@@ -93,6 +104,7 @@ def write_art():
         "hatSvg": art.hat_at(0, 0, 100, 0),
         "ssnow": art.logo_snow(mark_body) if mark_body else "",
         "stocking": art.STOCKING,
+        "hatMini": art.hat_at(0, 0, 100, 0, prefix="xmi", detail=False),
         "photoHats": {k: v for k, v in json.load(open(os.path.join(SRC_THEME, "photo-hats.json"), encoding="utf-8")).items() if not k.startswith("_")},
         "cabin": art.cabin_data(),
     }
@@ -112,6 +124,17 @@ def write_art():
     open(posixpath.join(OUT, "xmas-icon.svg"), "w").write(art.icon(fav, art.hat_at(h["cx"], h["cy"], h["width"], h["angle"]), art.logo_snow(fb) if fb else ""))
     # the little snakes' colours
     open(posixpath.join(OUT, "xmas-sp.json"), "w").write(json.dumps(species_colours(), separators=(",", ":"), sort_keys=True))
+
+def events_hat():
+    """the events preview's Christmas artwork (events/art.js) is SnakeList's S wearing this same Santa hat: the hat is
+    written into art.js between its /*XM-HAT*/ markers, so both previews always show the same hat"""
+    p = os.path.join("events", "art.js")
+    if not os.path.isfile(p): return
+    s = open(p, encoding="utf-8").read()
+    h = art.LOGO_HAT
+    hat = art.hat_at(h["cx"], h["cy"], h["width"], h["angle"], prefix="evh")
+    s2 = re.sub(r"/\*XM-HAT\*/.*?/\*/XM-HAT\*/", lambda m: "/*XM-HAT*/" + json.dumps(hat) + "/*/XM-HAT*/", s, count=1, flags=re.S)
+    if s2 != s: open(p, "w", encoding="utf-8").write(s2)
 
 def page_logo(variant, hat, ssnow):
     """the SnakeList pages' header logo (species/logo-light.svg, logo-dark.svg) dressed the same way: the hat on the
@@ -166,12 +189,17 @@ def render_cabin():
 
 def main():
     t0 = time.time()
-    if os.path.isdir(OUT): shutil.rmtree(OUT)
-    os.makedirs(OUT)
+    # christmas/music/ (the songs, kept only there - they are not drawn by this script) stays; the rest is rebuilt
+    os.makedirs(OUT, exist_ok=True)
+    for f in os.listdir(OUT):
+        if f == "music": continue
+        q = os.path.join(OUT, f)
+        shutil.rmtree(q) if os.path.isdir(q) else os.remove(q)
     for f in sorted(os.listdir(SRC_THEME)):
         if f in ("xmas.js", "xmas.css", "cabin.js", "cabin.css", "photo-hats.json", "xmas-cabin.webp") or f.endswith(".png") or f.startswith("xmas-logo-"): continue
         shutil.copy2(os.path.join(SRC_THEME, f), os.path.join(OUT, f))
     write_art()
+    events_hat()
     render_cabin()
     h = art.LOGO_HAT; fav = open("favicon.svg", encoding="utf-8").read()
     for v in ("light", "dark"): page_logo(v, art.hat_at(h["cx"], h["cy"], h["width"], h["angle"]).replace("xmh-", "xmh%s-" % v[0]), art.logo_snow(body_path(fav)))
@@ -182,7 +210,7 @@ def main():
         print("note: the PNG icons were not redrawn (needs node + playwright); the saved ones are used")
     for f in os.listdir(SRC_THEME):
         if f.endswith(".png"): shutil.copy2(os.path.join(SRC_THEME, f), os.path.join(OUT, f))
-    size = sum(os.path.getsize(os.path.join(OUT, f)) for f in os.listdir(OUT))
+    size = sum(os.path.getsize(os.path.join(d, f)) for d, _, fs in os.walk(OUT) for f in fs)
     print("christmas/: %d files, %.0f KB, %.1fs" % (len(os.listdir(OUT)), size / 1024, time.time() - t0))
 
 if __name__ == "__main__":
