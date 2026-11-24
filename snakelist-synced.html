@@ -1,5 +1,5 @@
 <title>SnakeList</title>
-<link rel="preload" as="image" href="species-photos/hero/rough-green-hq-2560.webp" imagesrcset="species-photos/hero/rough-green-hq-900.webp 900w, species-photos/hero/rough-green-hq-1400.webp 1400w, species-photos/hero/rough-green-hq-2000.webp 2000w, species-photos/hero/rough-green-hq-2560.webp 2560w" imagesizes="(min-aspect-ratio: 1544/1000) 100vw, 155vh" fetchpriority="high">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -196,11 +196,23 @@
     gap: 3px;
     animation: wall-drift 16s 1.6s ease-in-out infinite alternate;
   }
-  .photo-wall .ph { background-size: cover; background-position: center; opacity: 0; will-change: opacity, transform; animation: ph-in 1.1s cubic-bezier(.25,.6,.3,1) forwards; }
-  .photo-wall .ph-1 { animation-delay: 0.05s } .photo-wall .ph-2 { animation-delay: 0.14s }
-  .photo-wall .ph-3 { animation-delay: 0.23s } .photo-wall .ph-4 { animation-delay: 0.32s }
-  .photo-wall .ph-5 { animation-delay: 0.41s } .photo-wall .ph-6 { animation-delay: 0.50s }
-  .photo-wall .ph-7 { animation-delay: 0.59s } .photo-wall .ph-8 { animation-delay: 0.68s }
+  .photo-wall .ph { background-size: cover; background-position: center; opacity: 0; will-change: opacity, transform; animation: ph-in 0.95s cubic-bezier(.25,.6,.3,1) forwards; }
+  /* v6.20: the wall opens from the middle outwards (round the logo first, then the outer photos), one smooth wave */
+  .photo-wall .ph-2 { animation-delay: 0.02s } .photo-wall .ph-7 { animation-delay: 0.07s }
+  .photo-wall .ph-3 { animation-delay: 0.12s } .photo-wall .ph-6 { animation-delay: 0.17s }
+  .photo-wall .ph-1 { animation-delay: 0.26s } .photo-wall .ph-8 { animation-delay: 0.31s }
+  .photo-wall .ph-4 { animation-delay: 0.36s } .photo-wall .ph-5 { animation-delay: 0.41s }
+  /* v6.20: before and under the photos, a soft light of SnakeList green slowly opens out from the middle - the start is never an empty dark screen */
+  .intro::before { content: ""; position: absolute; inset: -10%; pointer-events: none;
+    background: radial-gradient(38% 34% at 50% 47%, rgba(150,220,120,0.22) 0%, rgba(110,190,95,0.09) 45%, rgba(110,190,95,0) 72%);
+    opacity: 0; transform: scale(0.82); will-change: transform, opacity; animation: intro-light 1.4s cubic-bezier(.22,.61,.36,1) forwards; }
+  @keyframes intro-light { to { opacity: 1; transform: scale(1); } }
+  /* ...and over the wall a faint light drifts slowly across, behind the logo (only light - no extra things on screen) */
+  .photo-scrim::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+    background: radial-gradient(30% 45% at 50% 50%, rgba(214,246,198,0.10), rgba(214,246,198,0) 70%);
+    will-change: transform, opacity; animation: intro-sheen 3.2s 0.3s ease-in-out forwards; }
+  @keyframes intro-sheen { 0% { opacity: 0; transform: translateX(-22%); } 35% { opacity: 1; } 100% { opacity: 0.85; transform: translateX(14%); } }
+  @media (prefers-reduced-motion: reduce) { .intro::before { animation: none; opacity: 1; transform: none; } .photo-scrim::after { animation: none; opacity: 0; } }
   .photo-wall .ph.ph-wait { animation-play-state: paused; } /* v5.73: its photo is still arriving - it fades in the moment it is ready */
   @keyframes ph-in   { from { opacity: 0; transform: scale(1.05); } to { opacity: 1; transform: scale(1); } }
   @keyframes wall-in { from { transform: scale(1.08); } to { transform: scale(1); } }
@@ -314,6 +326,9 @@
 
   @media (max-width: 640px) {
     .photo-wall { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); }
+    /* (two columns, four rows: the middle rows are the ones round the logo) */
+    .photo-wall .ph-4 { animation-delay: 0.02s } .photo-wall .ph-5 { animation-delay: 0.07s } .photo-wall .ph-3 { animation-delay: 0.12s } .photo-wall .ph-6 { animation-delay: 0.17s }
+    .photo-wall .ph-2 { animation-delay: 0.26s } .photo-wall .ph-7 { animation-delay: 0.31s } .photo-wall .ph-1 { animation-delay: 0.36s } .photo-wall .ph-8 { animation-delay: 0.41s }
     .intro-line, .hero-line { gap: 0.18em; } .intro-line { font-size: min(108px, 16.5vw); } /* v4.92: fits inside a phone screen with a margin. v5.78: the gap is in em (was 12px), so the photo's copy of this logo, matched by width, gets exactly the same letter size */
   }
   @media (prefers-reduced-motion: reduce) {
@@ -1988,14 +2003,22 @@
     // Chosen here, at the very top, so its download starts at once (a preload); the photo screen below puts it in place.
     // [file name, common name, scientific name, its SnakeList page, widths made, photo credit] - species-photos/hero/CREDITS.txt
     (function () {
-      var P = window.SL_HERO_PHOTOS = [["rough-green-hq", "Smooth Green Snake", "Opheodrys vernalis", "smooth-green-snake-opheodrys-vernalis", [900, 1400, 2000, 2560], ""], ["corallus-hortulana", "Amazon Tree Boa", "Corallus hortulana", "amazon-tree-boa-corallus-hortulana", [900, 1400, 1920], "Photo: Geoff Gallice, CC BY 2.0 (Wikimedia Commons)"], ["dipsas-albifrons", "Sauvage's Snail-eater", "Dipsas albifrons", "sauvage-s-snail-eater-dipsas-albifrons", [900, 1400], "Photo: RafaelMenegucci, CC BY-SA 4.0 (Wikimedia Commons)"], ["morelia-viridis", "Green Tree Python", "Morelia viridis", "green-tree-python-morelia-viridis", [900, 1400, 1920], "Photo: JJ Harrison, CC BY-SA 3.0 (Wikimedia Commons)"], ["malayopython-reticulatus", "Reticulated Python", "Malayopython reticulatus", "reticulated-python-malayopython-reticulatus", [900, 1400, 1920], "Photo: Rushenb, CC BY-SA 2.0 (Wikimedia Commons)"], ["dendroaspis-angusticeps", "Green Mamba", "Dendroaspis angusticeps", "green-mamba-dendroaspis-angusticeps", [900, 1400, 1920], "Photo: Holger Krisp, CC BY 3.0 (Wikimedia Commons)"], ["naja-kaouthia", "Monocled Cobra", "Naja kaouthia", "monocled-cobra-naja-kaouthia", [900, 1400, 1920], "Photo: Charles J. Sharp, CC BY-SA 4.0 (Wikimedia Commons)"], ["oxybelis-aeneus", "Brown Vinesnake", "Oxybelis aeneus", "brown-vinesnake-oxybelis-aeneus", [900, 1400, 1920], "Photo: Brian Gratwicke, CC BY 2.0 (Wikimedia Commons)"], ["zamenis-scalaris", "Ladder Snake", "Zamenis scalaris", "ladder-snake-zamenis-scalaris", [900, 1400, 1920], "Photo: Benny Trapp (crop: Papa Lima Whiskey 2), CC BY 3.0 (Wikimedia Commons)"], ["atheris-ceratophora", "Usambara Eyelash Viper", "Atheris ceratophora", "usambara-eyelash-viper-atheris-ceratophora", [900, 1400, 1920], "Photo: John Lyakurwa, CC BY 4.0 (iNaturalist)"], ["echis-omanensis", "Oman Saw-scaled Viper", "Echis omanensis", "oman-saw-scaled-viper-echis-omanensis", [900, 1400, 1920], "Photo: Arabella Willing, CC BY 4.0 (iNaturalist)"], ["spilotes-sulphureus", "Amazon Puffing Snake", "Spilotes sulphureus", "amazon-puffing-snake-spilotes-sulphureus", [900, 1400, 1920], "Photo: Diogo Luiz, CC BY 4.0 (iNaturalist)"], ["farancia-erytrogramma", "Rainbow Snake", "Farancia erytrogramma", "rainbow-snake-farancia-erytrogramma", [900, 1400, 1920], "Photo: Joshua Liverman, CC BY 4.0 (iNaturalist)"], ["atheris-barbouri", "Uzungwe Mountain Bush Viper", "Atheris barbouri", "uzungwe-mountain-bush-viper-atheris-barbouri", [900, 1400, 1920], "Photo: Ryan van Huyssteen, CC BY 4.0 (iNaturalist)"], ["agkistrodon-contortrix", "Copperhead", "Agkistrodon contortrix", "copperhead-agkistrodon-contortrix", [900, 1400, 1920], "Photo: Alan Rockefeller, CC BY 4.0 (iNaturalist)"], ["opheodrys-aestivus", "Rough Greensnake", "Opheodrys aestivus", "rough-greensnake-opheodrys-aestivus", [900, 1400, 1920], "Photo: John Matthew Erickson, CC BY 4.0 (iNaturalist)"]];
-      var last = null; try { last = localStorage.getItem("sl-hero-last"); } catch (e) {}
-      var pick = Math.floor(Math.random() * P.length); if (P[pick][0] === last) pick = (pick + 1 + Math.floor(Math.random() * (P.length - 1))) % P.length;
-      try { localStorage.setItem("sl-hero-last", P[pick][0]); } catch (e) {}
+      var P = window.SL_HERO_PHOTOS = [["rough-green-hq", "Smooth Green Snake", "Opheodrys vernalis", "smooth-green-snake-opheodrys-vernalis", [900, 1400, 2000, 2560], "", {"pm": "81% 50%"}], ["corallus-hortulana", "Amazon Tree Boa", "Corallus hortulana", "amazon-tree-boa-corallus-hortulana", [900, 1400, 1920], "Photo: Geoff Gallice, CC BY 2.0 (Wikimedia Commons)", {"pm": "0% 50%"}], ["morelia-viridis", "Green Tree Python", "Morelia viridis", "green-tree-python-morelia-viridis", [900, 1400, 1920], "Photo: JJ Harrison, CC BY-SA 3.0 (Wikimedia Commons)", {"pm": "50% 50%"}], ["dendroaspis-angusticeps", "Green Mamba", "Dendroaspis angusticeps", "green-mamba-dendroaspis-angusticeps", [900, 1400, 1920], "Photo: Holger Krisp, CC BY 3.0 (Wikimedia Commons)", {"pm": "29% 50%"}], ["naja-kaouthia", "Monocled Cobra", "Naja kaouthia", "monocled-cobra-naja-kaouthia", [900, 1400, 1920], "Photo: Charles J. Sharp, CC BY-SA 4.0 (Wikimedia Commons)", {"pm": "24% 50%"}], ["oxybelis-aeneus", "Brown Vinesnake", "Oxybelis aeneus", "brown-vinesnake-oxybelis-aeneus", [900, 1400, 1920], "Photo: Brian Gratwicke, CC BY 2.0 (Wikimedia Commons)", {"pm": "14% 50%"}], ["zamenis-scalaris", "Ladder Snake", "Zamenis scalaris", "ladder-snake-zamenis-scalaris", [900, 1400, 1920], "Photo: Benny Trapp (crop: Papa Lima Whiskey 2), CC BY 3.0 (Wikimedia Commons)", {"pm": "24% 50%"}], ["echis-omanensis", "Oman Saw-scaled Viper", "Echis omanensis", "oman-saw-scaled-viper-echis-omanensis", [900, 1400, 1920], "Photo: Arabella Willing, CC BY 4.0 (iNaturalist)", {"lg": [0.6, 0.9, 0.6], "pm": "11% 50%"}], ["farancia-erytrogramma", "Rainbow Snake", "Farancia erytrogramma", "rainbow-snake-farancia-erytrogramma", [900, 1400, 1920], "Photo: Joshua Liverman, CC BY 4.0 (iNaturalist)", {"pm": "76% 50%"}], ["agkistrodon-contortrix", "Copperhead", "Agkistrodon contortrix", "copperhead-agkistrodon-contortrix", [900, 1400, 1920], "Photo: Alan Rockefeller, CC BY 4.0 (iNaturalist)", {"pm": "76% 50%"}], ["ahaetulla-prasina", "Asian Vine Snake", "Ahaetulla prasina", "asian-vine-snake-ahaetulla-prasina", [900, 1400, 1920], "Photo: Eric Lopes, CC BY-SA 4.0 (iNaturalist)", {"lg": [0.6, 0.9, 0.42], "pm": "100% 50%"}], ["corallus-caninus", "Emerald Tree Boa", "Corallus caninus", "emerald-tree-boa-corallus-caninus", [900, 1400, 1920], "Photo: eloise kerroux, CC BY 4.0 (iNaturalist)", {"pm": "37% 50%"}], ["trimeresurus-insularis", "White-lipped Island Pitviper", "Trimeresurus insularis", "white-lipped-island-pitviper-trimeresurus-insularis", [900, 1400, 1920], "Photo: James Hunt, CC BY 4.0 (iNaturalist)", {"pm": "71% 50%"}], ["lampropeltis-gentilis", "Central Plains Milksnake", "Lampropeltis gentilis", "central-plains-milksnake-lampropeltis-gentilis", [900, 1400, 1920], "Photo: evangrimes, CC BY 4.0 (iNaturalist)", {"lg": [0.6, 0.9, 0.42], "pm": "100% 50%"}], ["micrurus-tener", "Texas Coral Snake", "Micrurus tener", "texas-coral-snake-micrurus-tener", [900, 1400, 1920], "Photo: Brady Reed, CC0 (iNaturalist)", {"lg": [0.6, 0.9, 0.42], "pm": "100% 50%", "lgm": [0.9, 1.12, 0.5]}]];
+      // v6.20: the very first visit always opens on the Smooth Green Snake; after that a different photo each visit (never the one
+      // from last time), and the same photo for the whole visit (a reload keeps it)
+      var last = null, now = null; try { last = localStorage.getItem("sl-hero-last"); now = sessionStorage.getItem("sl-hero-now"); } catch (e) {}
+      var find = function (n) { for (var i = 0; i < P.length; i++) if (P[i][0] === n) return i; return -1; };
+      var pick = find(now);
+      if (pick < 0) {
+        if (last == null) pick = Math.max(0, find("rough-green-hq"));
+        else { pick = Math.floor(Math.random() * P.length); if (P[pick][0] === last && P.length > 1) pick = (pick + 1 + Math.floor(Math.random() * (P.length - 1))) % P.length; }
+        try { localStorage.setItem("sl-hero-last", P[pick][0]); sessionStorage.setItem("sl-hero-now", P[pick][0]); } catch (e) {}
+      }
       var h = window.SL_HERO = P[pick];
       h.srcset = h[4].map(function (w) { return "species-photos/hero/" + h[0] + "-" + w + ".webp " + w + "w"; }).join(", ");
       h.src = "species-photos/hero/" + h[0] + "-" + h[4][h[4].length - 1] + ".webp";
       h.sizes = "(min-aspect-ratio: 1544/1000) 100vw, 155vh";
+      try { if (h[6] && h[6].pm) document.documentElement.style.setProperty("--hero-pm", h[6].pm); } catch (e) {} // (its own crop on upright phones)
       try { if (!/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search)) { var l = document.createElement("link"); l.rel = "preload"; l.as = "image"; l.setAttribute("imagesrcset", h.srcset); l.setAttribute("imagesizes", h.sizes); l.setAttribute("fetchpriority", "high"); document.head.appendChild(l); } } catch (e) {}
     })();
     // came back to SnakeList from one of its own pages (Back, or a link like "Open in SnakeList"
@@ -2175,11 +2198,13 @@
           var ease = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }, el = 0, last = null;
           var step = function (now) {
             if (last == null) last = now; el += Math.min(Math.max(0, now - last), 70); last = now; // (a slow frame moves it on by at most 70 ms)
-            var e = ease(Math.min(1, el / 1100)), f = ease(Math.min(1, el / 1000));
+            // v6.20: skipped by a scroll or a tap - the same motion, quicker (0.65 s), so nothing is cut but no one waits
+            var T = window.__introSkipped ? 0.6 : 1;
+            var e = ease(Math.min(1, el / (1100 * T))), f = ease(Math.min(1, el / (1000 * T)));
             line.style.transform = "translate(" + (dx * e).toFixed(2) + "px," + (dy * e).toFixed(2) + "px) scale(" + (1 + (k - 1) * e).toFixed(5) + ")";
             fades.forEach(function (x) { x.style.opacity = (1 - f).toFixed(4); });
-            if (zoom) zoom.style.scale = (1 + 0.06 * ease(Math.min(1, el / 1300))).toFixed(5);
-            if (el < 1100) requestAnimationFrame(step); else land();
+            if (zoom) zoom.style.scale = (1 + 0.06 * ease(Math.min(1, el / (1300 * T)))).toFixed(5);
+            if (el < 1100 * T) requestAnimationFrame(step); else land();
           };
           requestAnimationFrame(step);
         };
@@ -2191,19 +2216,25 @@
             var c0 = performance.now(), last = c0, quiet = 0;
             (function check() {
               var now = performance.now(); quiet = now - last - 50 < 25 ? quiet + 1 : 0; last = now;
-              if ((document.readyState === "complete" && quiet >= 10) || now - c0 > 3800) fade(); else setTimeout(check, 50);
+              // v6.20: it moves on as soon as the page has been read in and is calm (it used to wait for every last image, up to
+              // 3.8 s); but never while the page is still being read in - the glide stuttered then (measured: 12 s for a 1.1 s glide on
+              // a slow device). A scroll or tap moves on at once.
+              var rs = document.readyState;
+              if (rs !== "loading" && ((rs === "complete" && quiet >= 6) || quiet >= 10 || now - c0 > 3800)) fade(); else setTimeout(check, 50);
             })();
           };
           if (window.__introSkipped) fade(); // v4.93: skipped - no waiting
           else calmly();
         }); });
-        setTimeout(fade, window.__introSkipped ? 2500 : 4500); // never hold the opening longer than this
+        setTimeout(function late() { if (window.__introSkipped || document.readyState !== "loading") fade(); else setTimeout(late, 250); }, window.__introSkipped ? 1800 : 4500); // never hold the opening longer than this once the page is in
       };
       // v6.13 (iPad: "it did not open or respond"): a watchdog. However the opening goes - a photo that never decodes, a
       // timer the browser held back, an error somewhere on the page - after 15 s it is over: the opening is taken away, the
       // page can scroll again and SnakeList is drawn. (A normal opening is long finished by then, so nothing changes for it.)
-      setTimeout(function () {
+      setTimeout(function dog() {
         if (window.__introDone) return;
+        // v6.20: the logo is gliding onto the photo right now - let that finish (it ends itself within a few seconds) rather than cut it
+        if (intro.classList.contains("intro-glide") && !dog.waited) { dog.waited = true; setTimeout(dog, 4000); return; }
         done = true; window.__introDone = true;
         try { intro.classList.add("intro-gone"); } catch (e) {}
         try { var hw = document.getElementById("sl-hero"); if (hw) { hw.classList.add("hero-reveal"); hw.classList.add("hero-landed"); if (!window.__heroRevealT) window.__heroRevealT = performance.now(); } } catch (e) {}
@@ -2240,7 +2271,7 @@
               ro.observe(il0);
             }
           } catch (e) {}
-          setTimeout(window.__dismissIntro, 2600); // time to look at the photographs (the wall takes ~1.3 s to fill)
+          setTimeout(window.__dismissIntro, 2100); // time to look at the photographs (v6.20: the wall fills in ~1.4 s; was 2.6 s)
         };
         // the logo can still be given its final size while it is invisible (it starts fading in after 0.22 s): the photo's
         // own script, just below, sizes it as soon as it runs
@@ -2263,6 +2294,10 @@
         var skipEvs = ["wheel", "touchmove", "pointerdown", "keydown"], skip = function (e) {
           if (e.type === "keydown" && !/^(ArrowDown|PageDown| |Enter|Escape|Spacebar)$/.test(e.key)) return;
           skipEvs.forEach(function (n) { window.removeEventListener(n, skip, true); });
+          // v6.20 (Eduardo: "visitors can scroll immediately, without waiting for the animation"): a scroll down during the opening
+          // is not lost - the opening hands over to the photo at once (quickly) and then carries on down into SnakeList, as the
+          // same scroll on the photo would. The page itself never moves under the opening, so nothing jumps.
+          if ((e.type === "wheel" && e.deltaY > 0 && !e.ctrlKey) || e.type === "touchmove" || (e.type === "keydown" && /^(ArrowDown|PageDown| |Spacebar)$/.test(e.key))) window.__introWantsIn = true;
           window.__introSkipped = true; release(); window.__dismissIntro();
         };
         skipEvs.forEach(function (n) { window.addEventListener(n, skip, { capture: true, passive: true }); });
@@ -2304,8 +2339,8 @@
   .hero-media .hero-fill { object-fit: cover; filter: blur(28px) saturate(1.1) brightness(0.8); transform: scale(1.12); }
   /* a soft shade at the top and bottom so the words read, and a gentle dark edge at the bottom of the screen */
   .hero-shade { position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(180deg, rgba(4,16,8,0.25) 0%, rgba(4,16,8,0.08) 12%, rgba(4,16,8,0) 24%, rgba(4,16,8,0) 46%, rgba(4,16,8,0.08) 56%,
-      rgba(4,16,8,0.24) 66%, rgba(4,16,8,0.44) 77%, rgba(4,16,8,0.62) 88%, rgba(4,16,8,0.74) 100%); }
+    background: linear-gradient(180deg, rgba(4,16,8,0.25) 0%, rgba(4,16,8,0.08) 12%, rgba(4,16,8,0) 24%, rgba(4,16,8,0) 50%, rgba(6,22,12,0.07) 60%,
+      rgba(6,22,12,0.16) 71%, rgba(6,22,12,0.24) 82%, rgba(6,22,12,0.3) 100%); } /* v6.20: much lighter at the bottom (it went near-black there, a muddy band before the green) */
   /* v4.92: the blur grows step by step toward the bottom - four layers, each blurring twice as much, each faded
      in over the one before with an overlapping soft mask, so there is never a visible edge */
   .hero-blur { position: absolute; left: 0; right: 0; bottom: 0; height: 32%; pointer-events: none; } /* v4.97: only the bottom, never over the snake */
@@ -2316,8 +2351,8 @@
   .hero-blur i:nth-child(4) { --b: 18px; -webkit-mask-image: linear-gradient(180deg, transparent 64%, #000 94%); mask-image: linear-gradient(180deg, transparent 64%, #000 94%); }
   @media (prefers-reduced-transparency: reduce) { .hero-blur { display: none; } }
   /* v4.93: ...and the very bottom fades into SnakeList's own background, so scrolling on feels like one page */
-  .hero-media::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 9%; pointer-events: none;
-    background: linear-gradient(180deg, rgba(26,70,48,0) 0%, rgba(26,70,48,0.06) 40%, rgba(26,70,48,0.22) 70%, rgba(26,70,48,0.58) 90%, rgba(26,70,48,1) 100%); } /* v5.40: SnakeList green on every device and in light mode too */
+  .hero-media::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 26%; pointer-events: none; /* v6.20: a long, eased fade (was 9%) - the photo's own light turns into SnakeList green, no band */
+    background: linear-gradient(180deg, rgba(26,70,48,0) 0%, rgba(26,70,48,0.04) 18%, rgba(26,70,48,0.12) 34%, rgba(26,70,48,0.25) 50%, rgba(26,70,48,0.43) 65%, rgba(26,70,48,0.65) 79%, rgba(26,70,48,0.86) 91%, rgba(26,70,48,1) 100%); } /* v5.40: SnakeList green on every device and in light mode too */
   .hero-copy { position: absolute; left: 0; right: 0; bottom: 13%; padding: 0 20px; text-align: center; } /* v4.86: centred, the paragraph right under the logo */
   .hero-copy > p { margin: 0 auto; } .hero-title.hero-wm { display: flex; justify-content: center; width: max-content; }
   @media (max-aspect-ratio: 1/1) { .hero-copy > p, .hero-copy > .hero-sub { margin-left: auto; margin-right: auto; } }
@@ -2329,7 +2364,7 @@
   .hero-mark .snake-s { height: 0.79em; }
   /* v4.81: the hero shows the same SnakeList wordmark as the header (darker green + the tick), not the pale one */
   .hero-title.hero-wm { display: inline-flex; align-items: baseline;
-    --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.6)) drop-shadow(0 5px 20px rgba(0,0,0,0.5)); filter: none; } /* v4.93: stands out from the green photo */
+    --mark-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.7)) drop-shadow(0 0 14px rgba(3,12,6,0.55)) drop-shadow(0 5px 20px rgba(0,0,0,0.45)); filter: none; } /* v4.93: stands out from the green photo. v6.20: a soft dark halo too, for photos of green snakes */
   .hero-title.hero-wm .sl-titletext .snake-s { height: 0.79em; }
   /* v4.84: the letters come in quickly one after another, left to right, once the opening has gone */
   /* v4.92: the logo only animates once (in the opening, which glides it here) - no second letter-by-letter reveal */
@@ -2373,6 +2408,9 @@
     align-items: center; gap: 4px; padding: 8px 14px; border: 0; border-radius: 999px; background: none; cursor: pointer;
     color: #8fe06f; /* v5.01: the earlier cue, in green letters */ white-space: nowrap; font: 700 clamp(11px, 0.9vw, 15px)/1 'JetBrains Mono', monospace; letter-spacing: 0.05em; text-transform: uppercase; opacity: 0.95; /* v6.11: normal width (was spaced far apart) */
     text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+  /* v6.20: a quieter, finer Scroll to continue - light spaced capitals in the page's own type, a thin arrow */
+  .hero-cue { font: 600 clamp(10.5px, 0.78vw, 13px)/1 'Inter', sans-serif; letter-spacing: 0.16em; color: #d9f2cd; opacity: 0.82; gap: 6px; text-shadow: 0 1px 3px rgba(0,0,0,0.75); }
+  .hero-cue svg { stroke-width: 1.6; }
   .hero-cue:hover { opacity: 1; }
   .sl-hero.hero-leaving .hero-cue { visibility: hidden; transition: none !important; pointer-events: none; }
   .hero-cue:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; opacity: 1; }
@@ -2388,7 +2426,7 @@
      the welcome sentence sits under the photo. Their exact spots come from placeLogo() below. */
   .hero-copy { left: 0; top: 0; right: auto; bottom: auto; padding: 0; text-align: left; visibility: hidden; }
   .hero-copy.hero-placed { visibility: visible; }
-  .hero-copy::before { width: 150%; height: 230%; background: radial-gradient(closest-side, rgba(4,16,8,0.38), rgba(4,16,8,0.18) 55%, rgba(4,16,8,0)); }
+  .hero-copy::before { width: 150%; height: 230%; background: radial-gradient(closest-side, rgba(4,16,8,0.46), rgba(4,16,8,0.22) 55%, rgba(4,16,8,0)); } /* v6.20: a touch deeper, so the green logo reads on green photos too */
   .hero-below { position: absolute; left: 0; right: 0; top: 72%; padding: 0 20px; text-align: center; pointer-events: none; }
   .hero-below .hero-sub { margin: 0 auto; max-width: 46ch; font: 500 clamp(15px, min(1.4vw, 2.5vh), 22px)/1.55 'Inter', sans-serif; letter-spacing: 0.008em;
     text-wrap: balance; color: #b4ec9f; text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8); pointer-events: auto; }
@@ -2403,19 +2441,37 @@
   @media (max-height: 460px) and (min-aspect-ratio: 1/1) { .hero-cue { left: auto; right: max(14px, env(safe-area-inset-right)); transform: none; } }
   .hero-words .hw-dot { display: inline-block; margin: 0 0.7em; }
   .hero-below .hero-sub [data-sl-total] { font-weight: 700; color: #d6f6c6; }
+  /* v6.20 (Eduardo: "the subtitle is too small"): one clear sentence saying what SnakeList is, bigger, with room between its
+     lines, light on a soft dark glow so it reads on every photo - and one obvious next step */
+  .hero-below .hero-sub.hero-lede { max-width: 40ch; font: 500 clamp(16px, min(1.55vw, 2.7vh), 23px)/1.5 'Inter', sans-serif; letter-spacing: 0.004em;
+    color: #eef8e9; text-shadow: 0 1px 2px rgba(0,0,0,0.85), 0 0 18px rgba(3,14,7,0.75), 0 0 42px rgba(3,14,7,0.55); pointer-events: none; }
+  .hero-below .hero-lede [data-sl-total] { font-weight: 700; color: #b9f09e; font-variant-numeric: tabular-nums; }
+  .hero-go-btn { pointer-events: auto; display: inline-flex; align-items: center; gap: 8px; margin-top: clamp(14px, 2.2vh, 22px); padding: 11px 20px 11px 22px;
+    border: 1px solid rgba(190,240,165,0.55); border-radius: 999px; background: rgba(44,118,62,0.82); color: #fff; cursor: pointer;
+    font: 600 clamp(14px, min(1.15vw, 2vh), 17px)/1.2 'Inter', sans-serif; letter-spacing: 0.01em; box-shadow: 0 6px 22px rgba(0,0,0,0.35);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); transition: background-color .2s ease, border-color .2s ease, transform .2s ease; }
+  .hero-go-btn svg { width: 17px; height: 17px; flex: none; }
+  .hero-go-btn:hover { background: rgba(58,140,76,0.92); border-color: rgba(210,248,190,0.8); }
+  .hero-go-btn:active { transform: translateY(1px); }
+  .hero-go-btn:focus-visible { outline: 2px solid #d6f6c6; outline-offset: 3px; }
+  @media (max-height: 560px) and (min-aspect-ratio: 1/1) { .hero-go-btn { display: none; } } /* (short sideways phones: no room - Scroll to continue is there) */
   .sl-hero.hero-wait .hero-below { opacity: 0; transform: translateY(8px); }
   .sl-hero.hero-go .hero-below { transition: opacity 0.9s ease 0.25s, transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.25s; }
   @media (prefers-reduced-motion: reduce) { .sl-hero.hero-wait .hero-below { transform: none; } .sl-hero.hero-go .hero-below { transition: opacity 0.4s ease; } }
   
   /* v5.23: phones and upright tablets show the whole photo, the same view as a computer (not a close-up of the head) */
   @media (max-aspect-ratio: 1/1) { .hero-media img:not(.hero-fill) { top: 20%; left: 3%; width: 94%; height: calc(94vw / 1.544); object-position: 50% 50%; } }
+  /* v6.20: upright phones and tablets show the photo a little taller (more snake, less empty screen), cropped at the sides
+     around that snake's head - each photo has its own crop (--hero-pm, set where the photo is chosen) */
+  @media (max-aspect-ratio: 1/1) { .hero-media img:not(.hero-fill) { top: 15%; height: calc(94vw / 1.25); object-position: var(--hero-pm, 50% 50%); } }
   /* v5.05: the soft surround is the photo's own background carried on past its edges and blurred (drawn by
      fillAround()), not a zoomed-in copy of the whole photo; the zoomed copy only shows until it is drawn */
   .hero-media .hero-fillc { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 0.4s ease;
-    filter: blur(34px) saturate(1.08) brightness(0.82); transform: scale(1.1); pointer-events: none; }
+    filter: blur(46px) saturate(1.12) brightness(calc(0.82 * var(--fill-lift, 1))); transform: scale(1.1); pointer-events: none; }
   .hero-media.fill-drawn .hero-fillc { opacity: 1; } .hero-media.fill-drawn .hero-fill { visibility: hidden; }
   /* v5.05: the same soft blur and colour fade as at the bottom, on the top and both sides too (narrower, so the photo stays the main thing) */
   .hero-edges b { position: absolute; pointer-events: none; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .hero-edges { opacity: 0.4; } /* v6.20: only a hint of SnakeList green at the screen's edges - the photo's own light reaches them */
   .hero-edges .he-t { left: 0; right: 0; top: 0; height: 12%; background: linear-gradient(180deg, rgba(26,70,48,1) 0%, rgba(26,70,48,0.58) 25%, rgba(26,70,48,0.22) 55%, rgba(26,70,48,0.06) 80%, rgba(26,70,48,0) 100%); /* v5.38: always SnakeList green (in light mode the page colour is nearly white) */
     -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 35%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, #000 35%, transparent 100%); }
   .hero-edges .he-l, .hero-edges .he-r { top: 0; bottom: 0; width: 8%; }
@@ -2463,7 +2519,8 @@
     <p class="hero-title"><span class="sr-only">SnakeList</span><span class="hero-mark" aria-hidden="true"><svg class="snake-s" viewBox="-23.5 2 156 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span></p>
   </div>
   <div class="hero-below">
-    <p class="hero-sub hero-words">Explore<span class="hw-dot" aria-hidden="true">&bull;</span>Identify<span class="hw-dot" aria-hidden="true">&bull;</span>Discover</p>
+    <p class="hero-sub hero-lede">Explore, identify and discover all <span data-sl-total>4,243</span> snake species of the world, with photos, range maps and your own checklist.</p>
+    <button type="button" class="hero-go-btn" id="hero-go-btn">Explore the species<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="m6 13 6 6 6-6"></path></svg></button>
   </div>
   <a class="hero-sp" id="hero-sp" href="species/smooth-green-snake-opheodrys-vernalis" aria-description="Open its SnakeList page">Smooth Green Snake <i>Opheodrys vernalis</i></a>
   <script>
@@ -2550,6 +2607,10 @@
     if (!entered) listen(true);
     document.addEventListener("sl-hero-entered", function () { listen(false); }, { once: true });
     document.getElementById("hero-cue").addEventListener("click", enter);
+    // v6.20: a scroll made during the opening carries on down into SnakeList once the opening has handed over to the photo
+    var goIn = function () { if (window.__introWantsIn && !entered && !hero.hidden) requestAnimationFrame(function () { requestAnimationFrame(enter); }); };
+    if (window.__introDone) goIn(); else document.addEventListener("sl-intro-done", goIn, { once: true });
+    var cta = document.getElementById("hero-go-btn"); if (cta) cta.addEventListener("click", function (e) { e.stopPropagation(); enter(); });
     hero.addEventListener("click", function (e) { if (e.target.closest("a, button")) return; if (!blocked()) enter(); }); // clicking the photo does the same
     hero.style.cursor = "pointer";
     var sp = document.getElementById("hero-sp"); if (sp && !(location.protocol === "https:" && /snakelist\.com$/.test(location.hostname))) sp.href += ".html";
@@ -2583,10 +2644,15 @@
       // v5.73: while the page is still arriving the photo's logo is only the word (its tick is added once SnakeList's header
       // is there): the tick is counted in already, so the opening logo gets the same size it always had
       if (!tt.classList.contains("hero-wm") && !tt.classList.contains("hero-op")) try { var ib = document.querySelector("#intro .intro-box"), ibs = ib && getComputedStyle(ib), f2 = ib && parseFloat(getComputedStyle(ib.parentNode).fontSize); if (f2 && parseFloat(ibs.width)) lw += (parseFloat(ibs.width) + (parseFloat(ibs.marginLeft) || 0)) * 100 / f2; } catch (e) {}
-      var cx = (visL + visR) / 2, y0 = oy + 0.6 * dh, y1 = Math.min(oy + 0.9 * dh, visB); // v5.06: a little bigger, its top still under the chin
+      // v6.20: each photo can say where its logo goes (fractions of the photo: top and bottom of its band, centre from side to
+      // side), so the logo never sits on that snake's head
+      // (lgm: upright screens, where the logo is as wide as the photo - may sit lower, on the photo's soft lower edge)
+      var o6 = (window.SL_HERO && window.SL_HERO[6]) || {}, upright = hr.width < hr.height, lg = (upright && o6.lgm) || o6.lg || [0.6, 0.9, 0.5];
+      var cx = ox + lg[2] * dw, y0 = oy + lg[0] * dh, y1 = upright && o6.lgm ? oy + lg[1] * dh : Math.min(oy + lg[1] * dh, visB); // v5.06: a little bigger, its top still under the chin
       var fs = Math.max(30, Math.min(100 * (visR - visL) * (cover ? 0.88 : 0.66) / lw, 100 * (hr.width - 24) / lw, 100 * (y1 - y0) / lh, 150));
       if (hero.__forceW) fs = 100 * hero.__forceW / lw; // v5.12: the same size as the opening logo
       var w = lw * fs / 100, h = lh * fs / 100;
+      cx = Math.max(visL + w / 2 + 6, Math.min(visR - w / 2 - 6, cx)); if (!(cx > 0) || visR - visL < w + 12) cx = (visL + visR) / 2;
       tt.style.fontSize = fs.toFixed(1) + "px";
       // v5.07: the opening's SnakeList is drawn at exactly this size from the start, so it glides into place without growing or shrinking
       // v5.12: ...but only while it is still hidden (before the opening plays) - never while you can see it, so it never jumps
@@ -2600,34 +2666,65 @@
       cp.style.left = Math.max(12, cx - w / 2).toFixed(1) + "px";
       var top = Math.max(y0, y0 + (y1 - y0 - h) / 2); cp.style.top = top.toFixed(1) + "px";
       cp.classList.add("hero-placed");
-      if (bl) bl.style.top = Math.round(top + h + Math.max(6, fs * 0.12)) + "px";
+      if (bl) { bl.style.top = Math.round(top + h + Math.max(6, fs * 0.12)) + "px"; var shift = hr.width > 700 ? Math.round(cx - hr.width / 2) : 0; bl.style.translate = shift ? shift + "px 0" : ""; }
       fillAround(im, hr, ox, oy, dw, dh);
     }
-    // v5.05: the blurred surround = the photo at its own place and size, its edges carried outwards
-    // (each side repeats the photo's last strip of background), then blurred by CSS - never a zoomed-in snake
+    // v6.20 (Eduardo: "a very good gradient transition from the snake's photo to the background, not green with black"):
+    // every opening photo gets the soft surround the Smooth Green Snake always had. The surround is the photo itself,
+    // mirrored outwards on every side (so the colours carry on past each edge with no seam) and drawn tiny, then blurred
+    // by CSS - only its light and colour are left, like the photo's light spilling onto the walls. The photo's own edges
+    // fade into it gradually on all four sides (fadePhoto), so there is no box and no hard line.
     function fillAround(im, hr, ox, oy, dw, dh) {
       var cv = hero.querySelector(".hero-fillc"), md = hero.querySelector(".hero-media"); if (!cv || !md || !im.naturalWidth) return;
+      fadePhoto(im);
       // v5.73: drawn again only when something changed (redrawing it just as the opening moves on to the photo held that move up)
       var key = [Math.round(hr.width), Math.round(hr.height), Math.round(ox), Math.round(oy), Math.round(dw), Math.round(dh), im.naturalWidth, im.currentSrc].join();
       if (cv.__key === key && md.classList.contains("fill-drawn")) return;
       try {
-        var k = 0.25, W = Math.max(2, Math.round(hr.width * k)), H = Math.max(2, Math.round(hr.height * k)); cv.width = W; cv.height = H;
-        var c = cv.getContext("2d"), nw = im.naturalWidth, nh = im.naturalHeight, e = Math.max(2, Math.round(nw * 0.004));
-        var x = ox * k, y = oy * k, w = dw * k, h = dh * k;
-        c.drawImage(im, 0, 0, nw, nh, x, y, w, h);
-        // each edge is first squeezed into a few soft steps (so it carries outward as a smooth glow, no streaks)
-        var soft = function (sx, sy, sw, sh, cols, rows) { var t = document.createElement("canvas"); t.width = cols; t.height = rows; t.getContext("2d").drawImage(im, sx, sy, sw, sh, 0, 0, cols, rows); return t; };
-        var b = Math.max(e, Math.round(nw * 0.05)), bv = Math.max(e, Math.round(nh * 0.05));
-        if (x > 0) c.drawImage(soft(0, 0, b, nh, 1, 10), 0, 0, 1, 10, 0, y, x + 1, h);                       // left
-        if (x + w < W) c.drawImage(soft(nw - b, 0, b, nh, 1, 10), 0, 0, 1, 10, x + w - 1, y, W - x - w + 1, h); // right
-        if (y > 0) c.drawImage(soft(0, 0, nw, bv, 14, 1), 0, 0, 14, 1, x, 0, w, y + 1);                       // top
-        if (y + h < H) c.drawImage(soft(0, nh - bv, nw, bv, 14, 1), 0, 0, 14, 1, x, y + h - 1, w, H - y - h + 1); // bottom
-        var cs = [[0, 0, 0, 0, x, y], [nw - b, 0, x + w, 0, W - x - w, y], [0, nh - bv, 0, y + h, x, H - y - h], [nw - b, nh - bv, x + w, y + h, W - x - w, H - y - h]];
-        cs.forEach(function (q) { if (q[4] > 0 && q[5] > 0) c.drawImage(soft(q[0], q[1], b, bv, 1, 1), 0, 0, 1, 1, q[2], q[3], q[4] + 1, q[5] + 1); }); // corners
+        var k = 1 / 20, Z = 1.1, W = Math.max(2, Math.ceil(hr.width * k)), H = Math.max(2, Math.ceil(hr.height * k)); cv.width = W; cv.height = H;
+        // (the canvas is shown 10% larger than the screen, so its blurred edges never show: the photo is placed to match after that)
+        var cx = hr.width / 2, cy = hr.height / 2;
+        var x = (cx + (ox - cx) / Z) * k, y = (cy + (oy - cy) / Z) * k, w = dw / Z * k, h = dh / Z * k;
+        // a tiny, soft copy of the photo (halved step by step, so every pixel is an average - no sparkle)
+        var src = im, sw = im.naturalWidth, sh = im.naturalHeight, tw = Math.max(4, Math.round(w)), th = Math.max(3, Math.round(h));
+        // (always the whole picture - drawImage(src, x, y, w, h) - never a part of it measured by naturalWidth: with srcset that is the
+        // size the photo is *shown* at, not its pixels (a 1920 px file on a 2560 px screen says 2560), and cutting by it left the right
+        // and bottom of the surround empty - the flat green bands seen on wide screens)
+        while (sw / 2 > tw) { var t2 = document.createElement("canvas"); t2.width = Math.round(sw / 2); t2.height = Math.round(sh / 2); var g2 = t2.getContext("2d"); g2.imageSmoothingQuality = "high"; g2.drawImage(src, 0, 0, t2.width, t2.height); src = t2; sw = t2.width; sh = t2.height; }
+        var c = cv.getContext("2d"); c.imageSmoothingQuality = "high"; c.clearRect(0, 0, W, H);
+        // the photo in its place, and mirrored copies of it all around (a mirror carries every edge on without a seam)
+        var i0 = -Math.ceil(x / w), i1 = Math.ceil((W - x) / w), j0 = -Math.ceil(y / h), j1 = Math.ceil((H - y) / h);
+        for (var i = i0; i < i1; i++) for (var j = j0; j < j1; j++) {
+          var fx = i % 2 !== 0, fy = j % 2 !== 0;
+          c.setTransform(fx ? -1 : 1, 0, 0, fy ? -1 : 1, x + (i + (fx ? 1 : 0)) * w, y + (j + (fy ? 1 : 0)) * h);
+          c.drawImage(src, 0, 0, w + 0.5, h + 0.5);
+        }
+        c.setTransform(1, 0, 0, 1, 0, 0);
+        // a dark photo (taken at night, with a flash) still lights the room a little: its surround is lifted gently
+        try { var px = c.getImageData(0, 0, W, H).data, sum = 0, n = 0; for (var q = 0; q < px.length; q += 16) { sum += 0.2126 * px[q] + 0.7152 * px[q + 1] + 0.0722 * px[q + 2]; n++; }
+          var lum = sum / n / 255; md.style.setProperty("--fill-lift", Math.max(0.8, Math.min(1.55, 0.3 / Math.max(lum, 0.05))).toFixed(2)); } catch (e2) {}
         md.classList.add("fill-drawn"); cv.__key = key;
         // v5.78: the blurred copy of the photo underneath is no longer seen (the drawn surround replaces it) - let it go from memory
         var hf = md.querySelector("img.hero-fill"); if (hf && hf.getAttribute("src")) { hf.removeAttribute("srcset"); hf.removeAttribute("src"); }
       } catch (err) {}
+    }
+    // v6.20: the photo's four edges fade softly into the surround (measured where the photo really is inside its box)
+    function fadePhoto(im) {
+      var bw = im.offsetWidth, bh = im.offsetHeight, nw = im.naturalWidth, nh = im.naturalHeight; if (!bw || !bh || !nw) return;
+      var cs = getComputedStyle(im), cover = cs.objectFit === "cover", r = nw / nh;
+      var s = cover ? Math.max(bw / r, bh) : Math.min(bw / r, bh), pw = s * r, ph = s;
+      var pos = (cs.objectPosition || "50% 50%").split(" ").map(function (v) { return parseFloat(v) / 100; });
+      var px = (bw - pw) * pos[0], py = (bh - ph) * pos[1];
+      var L = Math.max(0, px), R = Math.min(bw, px + pw), T = Math.max(0, py), B = Math.min(bh, py + ph);
+      var fx = Math.min((R - L) * 0.16, 260), ft = (B - T) * 0.1, fb = (B - T) * 0.2;
+      var ramp = function (dir, a, f, b2, g) { // eased: starts and ends gently, so the eye never finds where the fade begins
+        var st = function (o, al) { return "rgba(0,0,0," + al + ") " + o.toFixed(1) + "px"; };
+        return "linear-gradient(" + dir + ", " + [st(a, 0), st(a + f * 0.25, 0.1), st(a + f * 0.5, 0.42), st(a + f * 0.75, 0.82), st(a + f, 1),
+          st(b2 - g, 1), st(b2 - g * 0.75, 0.82), st(b2 - g * 0.5, 0.42), st(b2 - g * 0.25, 0.1), st(b2, 0)].join(", ") + ")"; };
+      var m = ramp("90deg", L, fx, R, fx) + ", " + ramp("180deg", T, ft, B, fb);
+      if (im.__mask === m) return; im.__mask = m;
+      im.style.webkitMaskImage = m; im.style.maskImage = m; im.style.webkitMaskComposite = "source-in"; im.style.maskComposite = "intersect";
+      im.style.webkitMaskSize = im.style.maskSize = "100% 100%"; im.style.webkitMaskRepeat = im.style.maskRepeat = "no-repeat";
     }
     // v5.68: the snake's name stays in its corner when there is room; when it would sit on or right next to
     // Scroll to continue it goes in the middle, just above it (the cue is fixed to the screen, the name scrolls with the
@@ -2792,7 +2889,7 @@
 </script>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v6.23</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" aria-description="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="fs-btn" type="button" hidden aria-label="Show SnakeList full screen" aria-pressed="false"><svg class="fs-in" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg><svg class="fs-out" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"></path><path d="M21 8h-3a2 2 0 0 1-2-2V3"></path><path d="M3 16h3a2 2 0 0 1 2 2v3"></path><path d="M16 21v-3a2 2 0 0 1 2-2h3"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v6.25</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" aria-description="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="fs-btn" type="button" hidden aria-label="Show SnakeList full screen" aria-pressed="false"><svg class="fs-in" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg><svg class="fs-out" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"></path><path d="M21 8h-3a2 2 0 0 1-2-2V3"></path><path d="M3 16h3a2 2 0 0 1 2 2v3"></path><path d="M16 21v-3a2 2 0 0 1 2-2h3"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2 156 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-head"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-head)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All <span data-sl-total>4,243</span> snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -7906,7 +8003,7 @@
             <button type="button" id="globe-reset" aria-label="Reset view" title="Reset view: back to the whole world (what you picked, your search and filters stay)">&#8635;</button>
             <button type="button" id="globe-full" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></button>
           </div>
-          <p class="globe-hint">Drag to explore &middot; scroll to zoom &middot; click any country</p>
+          <p class="globe-hint">Drag to explore &middot; scroll to zoom &middot; click any country</p><script>/* v6.20: a touch screen gets touch words from the start (the legend code only reworded it later) */ (function () { var h = document.currentScript.previousElementSibling; if (h && window.matchMedia && matchMedia("(pointer: coarse)").matches) h.innerHTML = "Drag to explore &middot; pinch to zoom &middot; tap a country"; })();</script>
           <div class="map-legend" id="map-legend" hidden>
             <div class="legend-row"><span class="legend-dot" id="legend-dot-low"></span>Fewer recorded species</div>
             <div class="legend-row"><span class="legend-dot" id="legend-dot-high"></span>More recorded species</div>
@@ -7914,9 +8011,10 @@
           </div>
           <div class="map-legend area-key" id="area-key" hidden>
             <div class="ak-head"><span class="ak-t" id="ak-title"></span><button type="button" class="ak-x" id="ak-close" aria-label="Hide this snake's area">&times;<span class="ak-xt"> Close</span></button></div>
-            <div class="ak-sw" id="ak-scale"><span>more</span><span class="ak-bar"><i></i><i></i><i></i><i></i></span><span>less</span></div>
+            <div class="ak-sw" id="ak-scale"><span>Core</span><span class="ak-bar"><i></i><i></i><i></i><i></i></span><span>Edge of range</span></div>
             <div class="legend-row" id="ak-flat" hidden><span class="legend-dot"></span>Lives here</div>
-            <p class="ak-note" id="ak-note"><span class="ak-scale-note">Darker: deep inside its range. Lighter: near where its range ends.</span> <span id="ak-src"></span></p>
+            <p class="ak-note" id="ak-note"><span class="ak-scale-note">Darker: deep inside its range. Lighter: near where its range ends.</span> <span class="ak-what">An estimate of where it lives, from range maps and records - not a count of how many snakes live there.</span> <span id="ak-src"></span></p>
+            <p class="ak-note ak-intro" id="ak-intro" hidden></p>
           </div>
         </div>
         <div class="country-panel" id="country-panel" hidden>
@@ -16212,7 +16310,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // it ends (bands along its inland edges - the coast is not an edge of where it lives); a range that
   // is all coast (an island) is one shade.
   // Until the button is pressed again, the key's Close, a click on the empty map or a click on a place.
-  var areaShow = null, areaWant = null, AREA_FILES = {};
+  var areaShow = null, areaWant = null, AREA_FILES = {}, areaLayer = null;
   var AREA_BANDS = [[0.55, 2], [0.32, 1], [0.15, 0]]; // (how far in from the edge each lighter shade reaches, of the range's half-thickness)
   function areaMix(hex, to, k) {
     var c = [1, 3, 5].map(function (i) { return parseInt(hex.slice(i, i + 2), 16); });
@@ -16279,17 +16377,29 @@ window.SL_GEO_READY = new Promise(function (res) {
       fill = new Path2D(); fill.addPath(A.fillP, M);
       edges = A.groups.map(function (g) { var P = new Path2D(); P.addPath(g.P, M); return [P, g.t]; });
     }
-    ctx.save();
-    ctx.fillStyle = sh[A.flat ? 2 : 3]; ctx.fill(fill, "evenodd");
+    // v6.20: painted on a layer of its own, then laid on the map see-through (the land, the satellite
+    // picture, borders and place names stay readable under it), with a crisp line round the range
+    var cvs = ctx.canvas, g = (areaLayer || (areaLayer = document.createElement("canvas")));
+    if (g.width !== cvs.width || g.height !== cvs.height) { g.width = cvs.width; g.height = cvs.height; }
+    var gc = g.getContext("2d");
+    gc.setTransform(1, 0, 0, 1, 0, 0); gc.clearRect(0, 0, g.width, g.height); gc.setTransform(ctx.getTransform());
+    gc.save();
+    gc.fillStyle = sh[A.flat ? 2 : 3]; gc.fill(fill, "evenodd");
     if (!A.flat) {
       // lighter bands along where it ends, inside the range only: smooth, round-cornered
-      ctx.clip(fill, "evenodd");
-      ctx.lineJoin = "round"; ctx.lineCap = "round";
+      gc.clip(fill, "evenodd");
+      gc.lineJoin = "round"; gc.lineCap = "round";
       AREA_BANDS.forEach(function (q) {
-        ctx.strokeStyle = sh[q[1]];
-        edges.forEach(function (e) { ctx.lineWidth = Math.max(0.5, 2 * q[0] * e[1] * px); ctx.stroke(e[0]); });
+        gc.strokeStyle = sh[q[1]];
+        edges.forEach(function (e) { gc.lineWidth = Math.max(0.5, 2 * q[0] * e[1] * px); gc.stroke(e[0]); });
       });
     }
+    gc.restore();
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = window.SL_MAP_SAT ? 0.6 : 0.74; ctx.drawImage(g, 0, 0);
+    ctx.restore();
+    ctx.save();
+    ctx.lineJoin = "round"; ctx.lineWidth = 1.4; ctx.strokeStyle = window.SL_MAP_SAT ? "rgba(255,255,255,0.85)" : sh[3]; ctx.stroke(fill);
     ctx.restore();
     // too small to see at this zoom (a quarter of an island): a dot where it is
     if (b && (b[1] - b[0]) * px < 3 && (b[3] - b[2]) * px < 3) {
@@ -16321,8 +16431,13 @@ window.SL_GEO_READY = new Promise(function (res) {
     var fl = document.getElementById("ak-flat"); fl.hidden = !areaShow.flat; areaKey.querySelector(".ak-scale-note").hidden = areaShow.flat;
     fl.querySelector(".legend-dot").style.background = sh[2];
     // where the outline comes from: an expert range map (GARD), or the places SnakeList records it in
-    document.getElementById("ak-src").textContent = (areaShow.src === "g" ? "Range map: GARD (Roll et al. 2017)." : "Drawn from the places it is recorded in, so it may not live everywhere that is shaded.")
-      + (((window.SL_INVASIVE || {})[areaShow.id] || []).length ? " Places people brought it to are shaded too." : "");
+    document.getElementById("ak-src").textContent = (areaShow.src === "g" ? "Range map: GARD (Roll et al. 2017)." : "Drawn from the places it is recorded in, so it may not live everywhere that is shaded.");
+    // v6.20: introduced places are named, and what "introduced" means is said
+    var inv = (window.SL_INVASIVE || {})[areaShow.id] || [], akI = document.getElementById("ak-intro");
+    if (akI) {
+      akI.hidden = !inv.length;
+      akI.innerHTML = inv.length ? "<b>Introduced</b> (brought by people, not native here): " + inv.map(function (v) { return String(v.note ? v.note + " (" + v.name + ")" : v.name).replace(/[&<>]/g, ""); }).join("; ") + ". Shaded with the rest of its range." : "";
+    }
     placeAreaKey();
   }
   // the key sits where the colour key does - lifted above the species panel when the panel is over the map
@@ -19174,6 +19289,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     PH[id] = [img, y];
     css.push('.card[data-id="' + id + '"]::before{content:"";cursor:zoom-in;background-image:' + img + ";background-size:100% auto;background-position:50% " + y + "}");
   });
+  // v6.20: the share picture of your sightings draws each snake with its card's own photo and crop
+  window.SL_CARD_PHOTO_OF = function (id) { var q = PH[id]; return q ? { src: q[0].slice(4, -1), y: parseFloat(q[1]) / 100, band: band / tileH } : null; };
   var st = document.createElement("style");
   // v6.13 (iPad: "it did not open or respond"): on the website each card carries its own photo (two CSS variables on the card
   // itself) and ONE rule draws it. The ~3,300 rules, one per snake, made every card be checked against every rule each time
@@ -20050,6 +20167,11 @@ window.SL_GEO_READY = new Promise(function (res) {
   .sg-key { position: absolute; left: 10px; bottom: 10px; z-index: 4; margin: 0; display: flex; align-items: center; gap: 7px; padding: 5px 10px; border-radius: 999px;
     background: rgba(10,20,32,0.78); color: #f2f6fa; font: 11.5px 'Inter', sans-serif; pointer-events: none; }
   .sg-key[hidden] { display: none; }
+  .globe-stage .globe-hint.sg-hint { display: none; align-items: center; gap: 7px; }
+  .globe-stage:where(:has(#sg-toggle[aria-pressed="true"])) .globe-hint:not(.sg-hint) { display: none; }
+  .globe-stage:where(:has(#sg-toggle[aria-pressed="true"])) .globe-hint.sg-hint { display: flex; }
+  .globe-stage.real-map .globe-hint.sg-hint, .globe-stage.full:has(.country-panel:not([hidden])) .globe-hint.sg-hint { display: none; }
+  .sg-hint-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #58b351; border: 1.5px solid rgba(12,46,18,0.92); box-shadow: 0 0 0 1.2px rgba(255,255,255,0.85); }
   .sg-key span { width: 10px; height: 10px; border-radius: 50%; background: #e3261f; border: 1.5px solid #fff; }
   .globe-stage:has(.sg-key:not([hidden])) .globe-hint { display: none; }
   .sg-pop { position: absolute; z-index: 6; width: 250px; border-radius: 14px; overflow: hidden; background: var(--surface, #fff); color: var(--text, #222);
@@ -20239,7 +20361,10 @@ window.SL_GEO_READY = new Promise(function (res) {
   .hm-status { margin: 8px 0 0; font-size: 11.5px; line-height: 1.4; opacity: .9; min-height: 0; }
   .hm-status:empty { display: none; }
   .hm-status.bad { color: #ffb4a8; opacity: 1; }
-  .hm-collapse { width: 24px; height: 22px; border-radius: 6px; border: none; padding: 0;
+  .hm-status .hm-retry { display: inline-block; margin-top: 6px; padding: 6px 12px; min-height: 32px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.12); color: #fff; font: 600 12px 'Inter', sans-serif; cursor: pointer; }
+  .hm-status .hm-retry:hover { background: rgba(255,255,255,0.24); }
+  .hm-keynote { margin: 6px 0 0; font-size: 10.5px; line-height: 1.35; opacity: .85; }
+  .hm-collapse { width: 32px; height: 32px; margin: -5px -5px -5px 0; border-radius: 8px; border: none; padding: 0;
     background: rgba(88,179,81,0.18); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .hm-collapse::after { content: ""; width: 7px; height: 7px; border: solid currentColor; border-width: 0 2px 2px 0;
     transform: translateY(2px) rotate(-135deg); transition: transform .18s; }
@@ -20306,7 +20431,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   .sp-info-acts button.on { background: #58b351; border-color: #58b351; color: #0d2a17; }
   .sp-info-acts button[hidden] { display: none; }
   .sp-info-page { margin-left: auto; color: #58b351; font-weight: 600; font-size: 12.5px; text-decoration: underline; text-underline-offset: 2px; }
-  .sp-info-x { position: absolute; top: 9px; right: 9px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer;
+  .sp-info-x { position: absolute; top: 8px; right: 8px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer;
     background: rgba(0,0,0,0.4); color: #fff; font-size: 18px; line-height: 1; }
   .sp-info-x:hover { background: rgba(0,0,0,0.6); }
   .sp-info button:focus-visible, .sp-info a:focus-visible { outline: 2px solid #58b351; outline-offset: 2px; }
@@ -20368,6 +20493,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     '<button type="button" class="hm-toggle hab-toggle" id="hab-toggle" aria-pressed="false" title="Show where the snakes of one habitat live"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V11"></path><path d="M12 11c0-4 3-7 8-7 0 5-3 8-8 7Z"></path><path d="M12 14c0-3.5-2.6-6-7-6 0 4.4 2.6 6.9 7 6Z"></path></svg> <span>Habitats<span class="sg-what" id="hab-what"></span></span></button>' +
     '</div>' +
     '<p class="sg-note" id="sg-note" hidden></p>' +
+    // v6.20: while Sightings is on, the hint pill becomes its key (what a dot is, and what a tap does)
+    '<p class="globe-hint sg-hint" id="sg-hint"><span class="sg-hint-dot" aria-hidden="true"></span>One iNaturalist sighting &middot; ' + (window.matchMedia && matchMedia("(pointer: coarse)").matches ? "tap" : "click") + ' a dot for its photo and details</p>' +
     '<div class="sg-pop" id="sg-pop" hidden role="dialog" aria-label="Observation"></div>' +
     '<div class="layers-wrap"><button type="button" class="layers-btn" id="layers-btn" aria-haspopup="true" aria-expanded="false" title="Map layers">' +
     '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5Z"></path><path d="m2 13 10 5 10-5"></path><path d="m2 17.5 10 5 10-5" opacity=".55"></path></svg></button>' +
@@ -20391,6 +20518,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     '<p class="hm-status" id="hab-status"></p></div>');
   var lmapEl = document.getElementById("lmap"), btnHeat = document.getElementById("hm-toggle"), panel = document.getElementById("hm-panel");
   var pop = document.getElementById("layers-pop"), btnLayers = document.getElementById("layers-btn"), status = document.getElementById("hm-status");
+  status.addEventListener("click", function (e) { if (e.target.closest(".hm-retry")) { e.target.closest(".hm-retry").disabled = true; CH.fallback = false; syncUI(); applyHeat(); } });
   var qIn = document.getElementById("hm-q"), catSel = document.getElementById("hm-cat");
   // ---- Habitats: the checklist's own habitats (Tropical Rainforest, Desert...), each country
   // and state/province shaded by how many of that habitat's snakes are recorded there ----
@@ -21009,7 +21137,13 @@ window.SL_GEO_READY = new Promise(function (res) {
   // either view paints the map: the Species heatmap, or the Habitats view (always "where they live")
   function heatOn() { return !!(st.heat || habOn); }
   function meas() { return habOn ? "live" : st.measure; }
-  function setStatus(t, bad) { var el = habOn ? habStatus : status; el.textContent = t || ""; el.classList.toggle("bad", !!bad); }
+  function setStatus(t, bad, html) { var el = habOn ? habStatus : status; if (html) el.innerHTML = t || ""; else el.textContent = t || ""; el.classList.toggle("bad", !!bad); }
+  // v6.20: a selection put aside when a layer opens (one view at a time) is named, with the way back
+  var putAside = "";
+  function asideNote() {
+    var hs = document.getElementById("heat-search"), cp = document.getElementById("country-panel");
+    if (putAside && ((hs && hs.value.trim()) || (cp && !cp.hidden))) putAside = ""; // (something new was picked since)
+    return putAside ? " " + putAside + " was put aside so this layer covers the whole map - Undo (above the map) brings it back." : ""; }
   // the Habitats view's own colours: the map's green (--map-on), in three shades by how many
   // of the habitat's snakes live in a country - light for a few, the map's own green, then deep
   var HAB_GREEN = ["#8fc47f", "#3f8a3a", "#1f5a24"];
@@ -21262,7 +21396,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       return gridOf(z, t[0], t[1]).then(function (cells) { return { t: t, cells: cells }; }, function (e) { bad = e; return { t: t, cells: [] }; });
     })).then(function (parts) {
       if (my !== CH.token) return;
-      if (bad && parts.every(function (q) { return !q.cells.length; })) { CH.fallback = true; RC.key = ""; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); return; }
+      if (bad && parts.every(function (q) { return !q.cells.length; })) { CH.fallback = true; RC.key = ""; document.getElementById("hm-legend").innerHTML = legendHTML(); window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); return; }
       var world = 256 * Math.pow(2, z), scale = b[2] / world, all = [], mx = 5;
       parts.forEach(function (q) {
         q.cells.forEach(function (c) {
@@ -21313,7 +21447,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     var go = function () {
       gridCache = {}; maxSeen = {}; loaded = 0;
       setStatus(meas() === "obs" && liveOK ? "Loading sightings from iNaturalist…" : "");
-      if (onCanvas() || !map) { CH.on = true; CH.want = ""; CH.fallback = false; RC.key = ""; window.SL_MAP_HEATSTATES && window.SL_MAP_HEATSTATES(); window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); }
+      if (onCanvas() || !map) { CH.on = true; CH.want = ""; CH.fallback = false; document.getElementById("hm-legend").innerHTML = legendHTML(); RC.key = ""; window.SL_MAP_HEATSTATES && window.SL_MAP_HEATSTATES(); window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); }
       else if (meas() !== "obs" || !liveOK) drawRangeLeaflet();
       else { heat = makeHeat().addTo(map); }
     };
@@ -21416,7 +21550,13 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   function rangeStatus(R) {
     var nc = Object.keys(R.counts).length;
-    var note = meas() === "obs" && !liveOK ? " Sightings can't load in this copy of the app" + (window.claude && window.claude.use ? " - open snakelist.com for them." : ".") : "";
+    var note = (meas() === "obs" && !liveOK ? " Sightings can't load in this copy of the app" + (window.claude && window.claude.use ? " - open snakelist.com for them." : ".") : "") + asideNote();
+    // v6.20: Where seen couldn't reach iNaturalist: the map shows where they live instead - said plainly, with Retry
+    // (it used to show the range colours under a "Fewer sightings / More" key)
+    if (meas() === "obs" && liveOK && CH.fallback) {
+      setStatus("Couldn't load sightings from iNaturalist just now, so this shows where these snakes live instead (from SnakeList's range records). <button type=\"button\" class=\"hm-retry\">Try again</button>", true, true);
+      return;
+    }
     if (!R.nsp) { setStatus("None of the checklist's snakes match this filter."); return; }
     var places = window.SL_countPlaces ? window.SL_countPlaces(R.names) : nc + " countries";
     if (R.single) setStatus(nc ? displayName() + (R.gone ? " lived in " : " lives in ") + places + ". Tap a country for its details." + note : "No range on record for this species yet." + note);
@@ -21425,7 +21565,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     // not the habitat's own outline
     else if (habOn && st.hab) setStatus("Habitats layer · " + st.hab + ": the whole ranges of the " + R.nsp.toLocaleString() + (R.nsp === 1 ? " snake" : " snakes") +
       " associated with it, across " + places + " - not the outline of the " + st.hab.toLowerCase() + " itself. Habitats are estimated from where each snake is recorded and what kind of snake it is, not from field surveys. This choice only changes this layer." + note);
-    else setStatus("Heatmap layer · " + (st.q ? displayName() : st.cat !== "all" && CATS[st.cat] ? CATS[st.cat].label : (window.SL_MAPF && window.SL_MAPF.on() ? "the snakes your Filters keep" : "all snakes")) + ": " + R.nsp.toLocaleString() + " species across " + places + ". This choice only changes the heatmap - the search and Filters above stay as they are." + note);
+    else setStatus("Heatmap layer · " + (st.q ? displayName() : st.cat !== "all" && CATS[st.cat] ? CATS[st.cat].label : (window.SL_MAPF && window.SL_MAPF.on() ? "the snakes your Filters keep" : "all snakes")) + ": " + R.nsp.toLocaleString() + " species across " + places + "." + (putAside ? "" : " This choice only changes the heatmap - the search and Filters above stay as they are.") + note);
   }
   // the two "nothing here" colours: snakes live there but none of these (a light grey), or the place has no snakes on record at all (a plain neutral grey, lighter
   // in the day theme, darker at night)
@@ -21448,8 +21588,9 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   // the legend matches what's on the map
   function legendHTML() {
-    if (st.measure === "obs" && liveOK) return '<div class="hm-bar"></div><div class="hm-ends"><span>Fewer</span><span>sightings</span><span>More</span></div>' +
-      '<div class="hm-key"><span class="hm-hatch"></span>Too few records to tell</div><div class="hm-key"><span class="hm-blank"></span>No records yet - not the same as no snakes</div>';
+    if (st.measure === "obs" && liveOK && !CH.fallback) return '<div class="hm-bar"></div><div class="hm-ends"><span>Fewer</span><span>sightings</span><span>More</span></div>' +
+      '<div class="hm-key"><span class="hm-hatch"></span>Too few records to tell</div><div class="hm-key"><span class="hm-blank"></span>No records yet - not the same as no snakes</div>' +
+      '<p class="hm-keynote">Relative numbers of iNaturalist records - where people looked and posted, not how many snakes live there.</p>';
     var keys = '<div class="hm-key"><span class="hm-sw hm-none"></span>' + (st.q ? "Doesn't live here" : "None of these snakes live here") + '</div>' +
       '<div class="hm-key"><span class="hm-sw hm-nodata"></span>No species recorded</div>';
     if (st.q) return '<div class="hm-bar"></div><div class="hm-ends"><span>In a few parts</span><span>All over the country</span></div>' + keys;
@@ -21857,8 +21998,11 @@ window.SL_GEO_READY = new Promise(function (res) {
   var sgLay = { cv: null, key: "", b0: 0, b1: 0, pad: 0 }, sgSprites = {};
   function sgSprite(R, dpr) {
     var k = R + "|" + dpr; if (sgSprites[k]) return sgSprites[k];
-    var S = Math.ceil((R + 1.5) * dpr) * 2 + 2, c = document.createElement("canvas"); c.width = c.height = S;
-    var g = c.getContext("2d"); g.beginPath(); g.arc(S / 2, S / 2, R * dpr, 0, Math.PI * 2); g.fillStyle = SG_GREEN; g.fill(); g.lineWidth = 1.3 * dpr; g.strokeStyle = SG_EDGE; g.stroke();
+    var S = Math.ceil((R + 2.6) * dpr) * 2 + 2, c = document.createElement("canvas"); c.width = c.height = S;
+    var g = c.getContext("2d");
+    // v6.20: a thin light halo outside the dark edge, so a dot stays clear on the green range shading and heatmap
+    g.beginPath(); g.arc(S / 2, S / 2, (R + 1.4) * dpr, 0, Math.PI * 2); g.lineWidth = 1.2 * dpr; g.strokeStyle = "rgba(255,255,255,0.85)"; g.stroke();
+    g.beginPath(); g.arc(S / 2, S / 2, R * dpr, 0, Math.PI * 2); g.fillStyle = SG_GREEN; g.fill(); g.lineWidth = 1.3 * dpr; g.strokeStyle = SG_EDGE; g.stroke();
     return (sgSprites[k] = c);
   }
   function sgLayerDraw(b, w, h, dpr, R) {
@@ -22425,7 +22569,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     st.heat = !st.heat;
     if (!st.heat) heatByStyle = false;
     if (!st.heat) document.getElementById("globe-stage").classList.remove("heat-only");
-    if (st.heat) { habOn = false; window.SL_MAP_CLEAN && window.SL_MAP_CLEAN(); } // one view at a time, from a clean map
+    if (st.heat) { habOn = false; noteAside(); window.SL_MAP_CLEAN && window.SL_MAP_CLEAN(); } // one view at a time, from a clean map
+    else putAside = "";
     save(); syncUI();
     if (!st.heat) { clearHeat(); return; }
     // the heatmap goes on whichever map is showing - it never swaps the map
@@ -22449,7 +22594,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // a habitat is about where its snakes live, so it always shows the range map, not sightings
   // The Habitats view: its own panel, never at the same time as the heatmap
   function habOpen() {
-    if (!habOn) { window.SL_MAP_CLEAN && window.SL_MAP_CLEAN(); } // a clean map: no "See states" left over
+    if (!habOn) { noteAside(); window.SL_MAP_CLEAN && window.SL_MAP_CLEAN(); } // a clean map: no "See states" left over
     habOn = true; st.heat = false;
     habPanel.classList.remove("collapsed"); (function (hb) { if (hb) { hb.setAttribute("aria-expanded", "true"); hb.setAttribute("aria-label", "Hide habitats"); } })(document.getElementById("hab-collapse"));
     document.getElementById("hab-collapse").setAttribute("aria-expanded", "true");
@@ -22464,8 +22609,14 @@ window.SL_GEO_READY = new Promise(function (res) {
     var on = habList.querySelector(".hab-opt.on"); if (on) on.scrollIntoView({ block: "nearest" });
     return !!h;
   }
+  // what the clean map is about to put aside (a search or a picked place), so the layer can say so
+  function noteAside() {
+    var cp = document.getElementById("country-panel"), t = document.getElementById("cp-title"), hs = document.getElementById("heat-search");
+    var what = cp && !cp.hidden && t && t.textContent ? t.textContent : hs && hs.value.trim() ? hs.value.trim() : "";
+    putAside = what ? "Your pick (" + what.slice(0, 60) + ")" : "";
+  }
   habBtn.addEventListener("click", function () {
-    if (habOn) { habOn = false; save(); syncUI(); clearHeat(); return; }
+    if (habOn) { habOn = false; putAside = ""; save(); syncUI(); clearHeat(); return; }
     habOpen(); save(); syncUI(); applyHeat();
     var on = habList.querySelector(".hab-opt.on"); if (on) on.scrollIntoView({ block: "nearest" });
   });
@@ -22852,6 +23003,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v6.25", d: "2026-11-24", items: ["3D: deeper, sculpted heads for every snake, with cheeks, a domed crown and the hollow between nose and eye, no longer lower than the neck", "3D: the head blends into the neck instead of looking like a helmet", "3D: tree snakes have the tall, narrow body of real tree snakes", "3D: realistic eye colours instead of bright gold targets", "3D: resting coils look natural and never pass through each other"] },
+    { v: "v6.24", d: "2026-11-24", items: ["Map: range colours are see-through with an outline, so you can still see the map, labels and satellite picture underneath", "Map: clearer range key - it shows the core and edge of the range, says it is an estimate and not a count of snakes, and names places where the snake was brought by people", "Map: See near me works for everyone - choose a town if you don't want to share your location", "Map: Sightings has a key and easier-to-see dots; if sightings can't load you get a Try again button", "Map: How to find it on a sideways phone sits at the side instead of covering the map", "Map: bigger buttons and phone wording (pinch, tap)"] },
     { v: "v6.23", d: "2026-11-24", items: ["More behind-the-scenes preparation for the upcoming surprise - nothing changes yet"] },
     { v: "v6.22", d: "2026-11-24", items: ["78 snake photos replaced: no more snakes held in hands, in buckets, eating, gaping or next to coins and tape measures, and clearer photos of famous snakes like the black mamba, king cobra and green tree python"] },
     { v: "v6.21", d: "2026-11-24", items: ["Species pages: one clear length (typical adult, average or maximum) instead of several different ones", "Species pages: \"SnakeList doesn't have a verified source for this yet\" instead of a misleading \"Not known\"", "Species pages: habitats only shown as the snake's own when they come from a source; guesses from the range are labelled", "Clear, matching venom and safety wording everywhere", "Sources always open, and the 3D Information tab shows where each fact comes from", "Better page titles and links for search engines"] },
@@ -28110,7 +28263,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   .map-legend.area-key { pointer-events: auto; gap: 5px; max-width: min(250px, calc(100% - 20px)); }
   .area-key .ak-head { display: flex; align-items: flex-start; gap: 10px; justify-content: space-between; }
   .area-key .ak-t { font: 600 12px/1.3 'Inter', sans-serif; white-space: normal; }
-  .area-key .ak-x { flex: none; margin: -2px -3px 0 0; padding: 3px 9px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.12);
+  .area-key .ak-x { flex: none; margin: -4px -4px 0 0; padding: 0 11px; min-height: 32px; min-width: 32px; display: inline-flex; align-items: center; gap: 3px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.12);
     color: #fff; font: 600 11px/1.2 'Inter', sans-serif; cursor: pointer; text-shadow: none; }
   .area-key .ak-x:hover { background: rgba(255,255,255,0.26); }
   .area-key .ak-x:focus-visible { outline: 2px solid #9be07c; outline-offset: 2px; }
@@ -28121,6 +28274,9 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   .area-key .ak-note { margin: 0; font: 400 10.5px/1.35 'Inter', sans-serif; opacity: .92; white-space: normal; }
   .area-key .ak-note [hidden] { display: none; }
   @media (max-width: 640px) { .area-key .ak-note .ak-scale-note { display: none; } } /* (a phone: the key stays short) */
+  .area-key .ak-intro b { font-weight: 700; color: #ffd98a; }
+  @media (max-width: 640px) { .area-key #ak-src { display: none; } .area-key .ak-note { font-size: 10px; } } /* (a phone: the source stays on the species page) */
+  .area-key.ak-small .ak-intro { display: none; }
   .globe-stage.area-on #map-legend { display: none !important; }
   .map-legend.area-key.ak-small { right: 54px; padding: 5px 8px; flex-direction: row; align-items: center; gap: 8px; }
   .area-key.ak-small .ak-t, .area-key.ak-small .legend-row, .area-key.ak-small .ak-note { display: none; }
@@ -28130,7 +28286,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   .area-key.ak-small .ak-bar i { width: 14px; }
   /* "How to find it": the snake's own panel over the map, in the map's colours */
   .nm-how-box .nm-how-body { padding: 16px 16px 14px; }
-  .nm-how-box h3 { margin: 0 34px 2px 0; }
+  .nm-how-box h3 { margin: 0 40px 2px 0; }
   .nm-how-box .nm-how-where { margin: 0 0 10px; font-size: 12px; opacity: .85; }
   .nm-how-box .nm-sec { margin: 0 0 9px; padding: 8px 10px; border-radius: 10px; background: rgba(0,0,0,0.18); }
   /* v5.78: the guide is solid (the map's hint, 3D button and the list showed through it on a phone), and its section
@@ -28149,6 +28305,27 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     .globe-stage .sp-info-wrap.nm-how-wrap { position: fixed; inset: auto 0 0 0; z-index: 400; padding: 0; align-items: flex-end; }
     .nm-how-wrap .nm-how-box { width: 100%; max-height: min(52vh, 460px); border-radius: 16px 16px 0 0; }
   }
+  /* v6.20: a phone held sideways: the guide down the right side (a bottom sheet left only a thin strip of map, over the spot it marks) */
+  @media (min-width: 641px) and (max-height: 520px) {
+    .globe-stage .sp-info-wrap.nm-how-wrap { inset: 0 0 0 auto; width: min(380px, 45vw); align-items: stretch; }
+    .nm-how-wrap .nm-how-box { max-height: 100%; height: 100%; border-radius: 16px 0 0 16px; }
+  }
+  /* v6.20: the location question, in the map */
+  .globe-stage .sp-info-wrap.nm-ask-wrap { align-items: flex-start; }
+  .nm-ask .nm-ask-why { margin: 4px 0 10px; line-height: 1.5; }
+  .nm-ask .nm-ask-priv { font-size: 12px; opacity: .88; }
+  .nm-ask-go { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; min-height: 36px; padding: 7px 14px; border-radius: 999px; border: 1px solid #ffd23f; background: rgba(0,0,0,0.2); color: #fff; font: 600 13px 'Inter', sans-serif; cursor: pointer; }
+  .nm-ask-go:hover { background: rgba(255,210,63,0.2); }
+  .nm-ask-go:disabled { opacity: .6; cursor: progress; }
+  .nm-ask-msg { margin: 0 0 9px; padding: 8px 10px; border-radius: 10px; background: rgba(140,40,20,0.28); border: 1px solid rgba(255,170,140,0.35); font-size: 12.5px; line-height: 1.45; }
+  .nm-ask-msg[hidden] { display: none; }
+  .nm-ask-q { width: 100%; box-sizing: border-box; margin-top: 7px; min-height: 36px; padding: 7px 11px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.35); background: rgba(0,0,0,0.22); color: #fff; font: 13px 'Inter', sans-serif; }
+  .nm-ask-q::placeholder { color: rgba(255,255,255,0.65); }
+  .nm-ask-res { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+  .nm-ask-pick { text-align: left; min-height: 34px; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: #fff; font: 13px 'Inter', sans-serif; cursor: pointer; }
+  .nm-ask-pick:hover, .nm-ask-pick:focus-visible { background: rgba(255,255,255,0.18); }
+  .nm-ask-pick b { font-weight: 600; }
+  .nm-ask-none { font-size: 12px; opacity: .85; }
   .nm-how-box .nm-spot-sec { background: rgba(255,210,63,0.12); border: 1px solid rgba(255,210,63,0.45); }
   .nm-how-box .nm-spot-sec b { color: #fff; }
   .nm-spot-go { margin-top: 7px; padding: 6px 12px; border-radius: 999px; border: 1px solid #ffd23f; background: rgba(0,0,0,0.2); color: #fff; font: 600 12px 'Inter', sans-serif; cursor: pointer; }
@@ -28216,9 +28393,18 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   function user() { try { return JSON.parse(lsGet("sl-google") || "null"); } catch (e) { return null; } }
   function who(u) { return u ? String(u.email || u.name || "").toLowerCase() : ""; }
   // this account's answer (an answer saved by someone else on this device doesn't count)
-  function rec() { var u = user(), r = null; if (!u) return null; try { r = JSON.parse(lsGet(KEY) || "null"); } catch (e) {} return r && r.who === who(u) ? r : null; }
+  function acctRec() { var u = user(), r = null; if (!u) return null; try { r = JSON.parse(lsGet(KEY) || "null"); } catch (e) {} return r && r.who === who(u) ? r : null; }
+  // v6.20: See near me works without an account too: a position (or a place you chose) kept for this visit
+  // only, in memory - nothing saved. Signed in, the account's own answer is used, as before.
+  var visit = null;
+  function okRec(r) { return !!(r && r.ans === "yes" && isFinite(r.lat) && isFinite(r.lon)); }
+  function rec() { var r = acctRec(); return okRec(r) ? r : visit || r; }
   function save(r) { var u = user(); if (!u) return; r.who = who(u); r.t = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(r)); } catch (e) {} paint(); }
-  function on() { var r = rec(); return !!(r && r.ans === "yes" && isFinite(r.lat) && isFinite(r.lon)); }
+  function on() { return okRec(rec()); }
+  function setPos(lat, lon, src, place) {
+    var r = { ans: "yes", lat: r1(lat), lon: r1(lon), src: src || "gps" }; if (place) r.place = place;
+    if (user()) { visit = null; save(r); } else { visit = r; paint(); }
+  }
   var r1 = function (x) { return Math.round(x * 10) / 10; };
   function locate(cb) {
     if (!navigator.geolocation) { save({ ans: "denied" }); cb(false, "This browser can't share its location, so See near me can't work here."); return; }
@@ -28265,7 +28451,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     locate(function (ok, msg) { tell(msg); });
   });
   function check() {
-    if (bar.hidden) { if (!asked && user() && !rec() && !busy()) showBar(); }
+    if (bar.hidden) { if (!asked && user() && !acctRec() && !busy()) showBar(); }
     else if (!user()) closeBar(); // signed out while it was showing
     paint();
   }
@@ -28276,7 +28462,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     if (btn && btn.parentNode === t && btn.nextElementSibling === fs) return true;
     if (!btn) {
       btn = document.createElement("button"); btn.type = "button"; btn.className = "nm-toggle"; btn.id = "nm-toggle"; btn.hidden = true;
-      btn.setAttribute("aria-label", "See near me"); btn.setAttribute("aria-pressed", "false");
+      btn.setAttribute("aria-label", "See near me"); btn.setAttribute("aria-pressed", "false"); btn.title = "See near me: the snakes recorded around you";
       btn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path><circle cx="12" cy="12" r="7"></circle></svg>';
       btn.addEventListener("click", seeNear);
     }
@@ -28562,7 +28748,12 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   }
   // the spot on the map (drawn by SL_OVERLAY_DRAW below) and the map moved so it is in view
   var spotOn = null, spotEl = null;
-  function spotLabel(o) { return o.kind === "here" ? "Look around here" : "Best spot near you"; }
+  // v6.20: the label names the snake (it stays on the map after the guide is closed)
+  function spotLabel(o) {
+    var sp = lastList.filter(function (x) { return x.id === howId; })[0], nm = sp && sp.name ? sp.name : "";
+    if (nm.length > 28) nm = "";
+    return o.kind === "here" ? "Look around here" + (nm ? " for the " + nm : "") : "Best spot" + (nm ? " for the " + nm : " near you");
+  }
   function showSpot(o) {
     var M = window.SL_NEARME_MAP, r = rec(); if (!M || !r) return;
     spotOn = o;
@@ -28741,9 +28932,69 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     var T = timeCtx(r.lat, r.lon, new Date()), key = lastList.map(function (sp) { return timeStatus(sp, T).t; }).join("|");
     if (key !== lastTime.key) relist(); else { lastTime.T = T; timeBar(T, lastTime.info); }
   }, 60000);
+  // ---- v6.20: asking for your location, in the map: why it's needed, and a place to choose instead ----
+  var askWrap = null, askBack = null;
+  function askMsg(t) { var m = askWrap && askWrap.querySelector(".nm-ask-msg"); if (m) { m.textContent = t || ""; m.hidden = !t; } }
+  function askOpen(msg) {
+    if (!stage) return;
+    if (!askWrap) {
+      askWrap = document.createElement("div"); askWrap.className = "sp-info-wrap nm-how-wrap nm-ask-wrap"; askWrap.hidden = true;
+      askWrap.innerHTML = '<div class="sp-info nm-how-box nm-ask" role="dialog" aria-labelledby="nm-ask-h" tabindex="-1"><button type="button" class="sp-info-x" aria-label="Close">&times;</button><div class="nm-how-body">' +
+        '<h3 id="nm-ask-h">See the snakes near you</h3>' +
+        '<p class="nm-ask-why">SnakeList needs a rough idea of where you are to list the snakes recorded around you, say which are likely out right now and suggest where to look.</p>' +
+        '<div class="nm-sec"><p class="sp-info-h">Use your location</p><p class="nm-ask-priv"></p><button type="button" class="nm-ask-go"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path><circle cx="12" cy="12" r="7"></circle></svg>Use my location</button></div>' +
+        '<p class="nm-ask-msg" role="status" hidden></p>' +
+        '<div class="nm-sec"><p class="sp-info-h">Or choose a place instead</p><p>No location needed: type a town or city.</p>' +
+        '<input type="search" class="nm-ask-q" placeholder="Town or city&hellip;" autocomplete="off" aria-label="Choose a town or city"><div class="nm-ask-res" role="list"></div></div>' +
+        '</div></div>';
+      stage.appendChild(askWrap);
+      askWrap.addEventListener("click", function (e) {
+        if (e.target === askWrap || e.target.closest(".sp-info-x")) { askClose(); return; }
+        if (e.target.closest(".nm-ask-go")) { askLocate(e.target.closest(".nm-ask-go")); return; }
+        var pk = e.target.closest(".nm-ask-pick");
+        if (pk) { setPos(+pk.getAttribute("data-lat"), +pk.getAttribute("data-lon"), "place", pk.getAttribute("data-name")); askClose(); seeNear(); }
+      });
+      askWrap.querySelector(".nm-ask-q").addEventListener("input", function () { askFind(this.value); });
+      ["wheel", "pointerdown", "pointermove", "touchstart", "dblclick"].forEach(function (t) { askWrap.addEventListener(t, function (e) { e.stopPropagation(); }, { passive: true }); });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && askWrap && !askWrap.hidden) { e.stopPropagation(); askClose(); } }, true);
+    }
+    askWrap.querySelector(".nm-ask-priv").textContent = user()
+      ? "It is rounded to about 10 km and kept on this device for your account - you can turn it off any time. It is only sent anywhere (a rough area of about 100 km, to iNaturalist) when you open How to find it."
+      : "It is rounded to about 10 km and used only for this visit - nothing is saved. It is only sent anywhere (a rough area of about 100 km, to iNaturalist) when you open How to find it.";
+    var go = askWrap.querySelector(".nm-ask-go"); go.disabled = false;
+    askMsg(msg || ""); askFind(askWrap.querySelector(".nm-ask-q").value);
+    askBack = document.activeElement; askWrap.hidden = false;
+    go.focus({ preventScroll: true });
+    mapIntoView();
+  }
+  function askClose() { if (!askWrap || askWrap.hidden) return; askWrap.hidden = true; if (askBack && askBack.focus && document.contains(askBack)) askBack.focus({ preventScroll: true }); }
+  function plain(t) { t = String(t || "").toLowerCase(); return t.normalize ? t.normalize("NFD").replace(/[\u0300-\u036f]/g, "") : t; }
+  function askFind(q) {
+    var res = askWrap.querySelector(".nm-ask-res"), v = plain(String(q || "").trim()), C = window.SL_CITIES || [];
+    if (v.length < 2) { res.innerHTML = ""; return; }
+    var hits = [];
+    for (var i = 0; i < C.length && hits.length < 40; i++) { var n = plain(C[i][0]); if (n.indexOf(v) === 0) hits.push([0, i]); else if (n.indexOf(" " + v) > -1) hits.push([1, i]); }
+    hits.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+    setTimeout(function () { if (res.firstChild && res.scrollIntoView) res.scrollIntoView({ block: "nearest" }); }, 0);
+    res.innerHTML = hits.length ? hits.slice(0, 6).map(function (h) { var c = C[h[1]]; return '<button type="button" class="nm-ask-pick" role="listitem" data-lat="' + c[2] + '" data-lon="' + c[3] + '" data-name="' + esc(c[0] + ", " + c[1]) + '"><b>' + esc(c[0]) + "</b> " + esc(c[1]) + "</button>"; }).join("")
+      : '<p class="nm-ask-none">No town or city by that name in SnakeList - try a bigger place nearby.</p>';
+  }
+  function askLocate(b) {
+    if (!navigator.geolocation) { askMsg("This browser can't share its location. Choose a place below instead."); return; }
+    b.disabled = true; askMsg("Finding where you are... (your browser may ask you first)");
+    navigator.geolocation.getCurrentPosition(function (p) {
+      b.disabled = false; setPos(p.coords.latitude, p.coords.longitude, "gps"); askClose(); seeNear();
+    }, function (e) {
+      b.disabled = false;
+      askMsg(e && e.code === 1 ? "Location is blocked for SnakeList in this browser. To use it, allow location for this site in your browser's settings and try again - or choose a place below."
+        : "Your device couldn't find where you are just now (no signal, or it took too long). Try again in a moment, or choose a place below.");
+    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
+  }
   // ---- See near me ----
   function seeNear() {
-    var r = rec(), M = window.SL_NEARME_MAP; if (!r || !M || !on()) return;
+    var r = rec(), M = window.SL_NEARME_MAP;
+    if (!on()) { if (btn && btn.classList.contains("on")) { stopNear(); return; } askOpen(); return; } // v6.20: say why, then ask (or choose a place)
+    if (!M) return;
     // a second tap: near me stops showing (the list, your spot and the guide go; your location setting stays)
     if (btn.classList.contains("on") && dotOn) { stopNear(); return; }
     setOn(true); dotOn = true;
@@ -28792,7 +29043,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     if (o) o.addEventListener("click", function (e) { e.stopPropagation(); turnOff(); });
   }
   function stopNear() { dotOn = false; setOn(false); howClose(); clearSpot(); if (window.SL_NEARME_MAP) window.SL_NEARME_MAP.hide(); if (window.SL_MAP_REDRAW) window.SL_MAP_REDRAW(); }
-  function turnOff() { save({ ans: "no" }); stopNear(); }
+  function turnOff() { if (okRec(acctRec())) save({ ans: "no" }); visit = null; stopNear(); paint(); }
   // the panel closed: near me is off (your spot goes with it; tap the button to see it again)
   var cpClose = document.getElementById("cp-close");
   if (cpClose) cpClose.addEventListener("click", function () { if (btn && btn.classList.contains("on")) { dotOn = false; setOn(false); howClose(); clearSpot(); if (window.SL_MAP_REDRAW) window.SL_MAP_REDRAW(); } });
@@ -28815,6 +29066,9 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
         spotEl.style.left = (cr.left - sr.left - stage.clientLeft + stage.scrollLeft + sx) + "px";
         spotEl.style.top = (cr.top - sr.top - stage.clientTop + stage.scrollTop + sy) + "px";
         spotEl.hidden = sx < -10 || sy < -10 || sx > w + 10 || sy > h + 10;
+        // v6.20: its name tag stays inside the map near an edge (it was cut off at the side)
+        var lb = spotEl.querySelector(".nm-spot-lbl");
+        if (lb && !spotEl.hidden) { var lw = lb.offsetWidth, sw = stage.clientWidth, x0 = parseFloat(spotEl.style.left) || 0, left = Math.max(6, Math.min(sw - lw - 6, x0 - lw / 2)); lb.style.transform = "translateX(" + Math.round(left - x0) + "px)"; }
       }
     } else if (spotEl) spotEl.hidden = true;
     ctx.save();
@@ -28836,7 +29090,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   var last = "";
   function paint() {
     var u = user(), yes = on(), k = (u ? who(u) : "") + "|" + yes;
-    if (btn) { btn.hidden = !(u && yes); if (btn.hidden) { setOn(false); dotOn = false; } }
+    if (btn) { btn.hidden = false; if (!yes && dotOn) { dotOn = false; setOn(false); } } // v6.20: for everyone (it asks first)
     if (!acct) return; // (the map button can be made before the account row below exists)
     acct.hidden = !u;
     if (k === last) return; last = k;
@@ -28849,7 +29103,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   setInterval(check, 1500);
   setTimeout(check, 800);
   window.SL_NEARME = { share: function (want, cb) { cb = cb || function () {}; if (!user()) { cb(false, "Sign in first - your location answer is kept per account."); return; } if (want) locate(cb); else { save({ ans: "no" }); if (typeof stopNear === "function") try { stopNear(); } catch (e) {} cb(false, "Location sharing is off."); } }, // v6.11: Settings
-    sharing: function () { return on(); }, signedIn: function () { return !!user(); }, rec: rec, check: check, see: seeNear, how: howOpen, time: function () { return lastTime; }, spot: function () { return spotOn; }, guide: function (id) { var sp = lastList.filter(function (x) { return x.id === id; })[0]; var r = rec(); return sp ? guide(sp, lastFind || {}, r ? r.lat : 0) : null; } }; // (for the tests)
+    sharing: function () { return on(); }, signedIn: function () { return !!user(); }, rec: rec, ask: askOpen, check: check, see: seeNear, how: howOpen, time: function () { return lastTime; }, spot: function () { return spotOn; }, guide: function (id) { var sp = lastList.filter(function (x) { return x.id === id; })[0]; var r = rec(); return sp ? guide(sp, lastFind || {}, r ? r.lat : 0) : null; } }; // (for the tests)
 })();
 </script>
 <!-- ==== See near me - END ========================================================================== -->
@@ -29476,7 +29730,7 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
 .sl-shr-go a:hover, .sl-shr-go button:hover { border-color: #58b351; }
 .sl-shr-go i { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-style: normal; }
 .sl-shr-go i svg { width: 18px; height: 18px; }
-.sl-shr-card { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--border); margin: 0 0 12px; }
+.sl-shr-card { display: block; width: auto; max-width: 100%; height: auto; max-height: min(62vh, 640px); margin: 0 auto 12px; border-radius: 12px; border: 1px solid var(--border); } /* v6.20: a tall picture (many snakes) fits on the screen */
 .sl-shr-note { margin: 0 0 12px; font: 400 12.5px/1.45 'Inter', sans-serif; color: var(--text-muted); }
 .sl-shr-msg { min-height: 1.2em; margin: 10px 0 0; font: 600 13px 'Inter', sans-serif; color: var(--gold); }
 .sl-shr-sight { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; }
@@ -29719,30 +29973,100 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
   // ---------- Share my sightings ----------
   function seenCards() { return [].filter.call(document.querySelectorAll("#grid .card.done"), function () { return true; }); }
   function whenOf(c) { var b = c.querySelector(".note-btn"), w = b && (b.getAttribute("data-iso") || b.getAttribute("data-when")) || ""; return w; }
-  function drawCard(list, total) {
-    var W = 1080, H = 1080, cv = document.createElement("canvas"); cv.width = W; cv.height = H; var c = cv.getContext("2d");
-    var g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, "#1c5236"); g.addColorStop(1, "#0c2516"); c.fillStyle = g; c.fillRect(0, 0, W, H);
-    c.fillStyle = "rgba(155,224,124,.08)"; for (var i = 0; i < 9; i++) { c.beginPath(); c.arc(W * (0.1 + i * 0.11), H * 0.92, 60 + i * 9, 0, Math.PI * 2); c.fill(); }
-    c.fillStyle = "#7fd36a"; c.font = "600 96px 'SL Mark', 'EB Garamond', Georgia, serif"; c.textAlign = "left"; c.fillText("SnakeList", 80, 160);
-    c.fillStyle = "#cfe8cf"; c.font = "500 34px Inter, system-ui, sans-serif"; c.fillText("My snake sightings", 84, 220);
-    c.fillStyle = "#fff"; c.font = "700 200px Inter, system-ui, sans-serif"; c.fillText(String(list.length), 80, 450);
-    c.fillStyle = "#b4ec9f"; c.font = "600 40px Inter, system-ui, sans-serif"; c.fillText((list.length === 1 ? "species seen" : "species seen") + " of " + total.toLocaleString(), 84, 515);
-    c.fillStyle = "#eaf7e6"; c.font = "500 36px Inter, system-ui, sans-serif";
-    var y = 610; list.slice(0, 7).forEach(function (x) { var t = x.name.length > 40 ? x.name.slice(0, 39) + "…" : x.name; c.fillStyle = "#58b351"; c.beginPath(); c.arc(98, y - 12, 9, 0, Math.PI * 2); c.fill(); c.fillStyle = "#eaf7e6"; c.fillText(t, 124, y); y += 56; });
-    if (list.length > 7) { c.fillStyle = "#a9cfa6"; c.font = "500 30px Inter, system-ui, sans-serif"; c.fillText("+ " + (list.length - 7) + " more", 124, y); }
-    if (!list.length) { c.fillStyle = "#cfe8cf"; c.font = "500 36px Inter, system-ui, sans-serif"; c.fillText("Just getting started - come and find snakes with me!", 84, 620); }
-    c.fillStyle = "#9be07c"; c.font = "600 32px Inter, system-ui, sans-serif"; c.textAlign = "right"; c.fillText("snakelist.com", W - 70, H - 60);
+  // v6.20 (Eduardo: "make it show which snakes with the photos of each snake and their names like the species cards in
+  // homepage but just the name and photo"): the picture is a wall of small cards - each seen snake's own card photo (the
+  // same photo and crop as on its card) and its name - newest first. Up to 25 fit; more than that ends with "+N more".
+  function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  function wrap(c, t, maxW, lines) { // the name on one or two lines, shortened with ... only if it is still too long
+    var words = String(t).split(/\s+/), out = [], cur = "";
+    words.forEach(function (w) { var tr = cur ? cur + " " + w : w; if (c.measureText(tr).width <= maxW || !cur) cur = tr; else { out.push(cur); cur = w; } }); if (cur) out.push(cur);
+    if (out.length > lines) { out = out.slice(0, lines - 1).concat([out.slice(lines - 1).join(" ")]); }
+    return out.map(function (l) { if (c.measureText(l).width <= maxW) return l; while (l.length > 1 && c.measureText(l + "…").width > maxW) l = l.slice(0, -1); return l.replace(/\s+$/, "") + "…"; });
+  }
+  function shareLayout(n) {
+    var cols = n <= 1 ? 1 : n === 2 || n === 4 ? 2 : n <= 9 ? 3 : n <= 16 ? 4 : 5, slots = n <= 25 ? n : 25;
+    return { cols: cols, slots: slots, shown: n <= 25 ? n : 24, more: n > 25 ? n - 24 : 0 };
+  }
+  function drawCard(list, total, pics) {
+    var W = 1080, PADX = 64, TOP = 292, FOOT = 112, n = list.length, L = shareLayout(n);
+    var gap = L.cols >= 4 ? 18 : 24, cw = L.cols === 1 ? 620 : (W - PADX * 2 - gap * (L.cols - 1)) / L.cols, ph = cw / 2.2;
+    var fs = L.cols === 1 ? 40 : L.cols === 2 ? 32 : L.cols === 3 ? 26 : L.cols === 4 ? 22 : 19, nameH = Math.round(fs * 1.22 * 2 + fs * 0.9), ch = ph + nameH;
+    var rows = n ? Math.ceil(L.slots / L.cols) : 0, gridH = n ? rows * ch + (rows - 1) * gap : 300;
+    var H = Math.max(1080, Math.round(TOP + gridH + FOOT + 40)), cv = document.createElement("canvas"); cv.width = W; cv.height = H; var c = cv.getContext("2d");
+    var g = c.createLinearGradient(0, 0, W * 0.6, H); g.addColorStop(0, "#1c5236"); g.addColorStop(1, "#0b2315"); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    var gl = c.createRadialGradient(W * 0.85, 0, 0, W * 0.85, 0, W * 0.7); gl.addColorStop(0, "rgba(155,224,124,.16)"); gl.addColorStop(1, "rgba(155,224,124,0)"); c.fillStyle = gl; c.fillRect(0, 0, W, H);
+    // the heading: SnakeList, My snake sightings - and the count on the right
+    c.textBaseline = "alphabetic"; c.textAlign = "left";
+    c.fillStyle = "#7fd36a"; c.font = "600 92px 'SL Mark', 'EB Garamond', Georgia, serif"; c.fillText("SnakeList", PADX, 150);
+    c.fillStyle = "#cfe8cf"; c.font = "500 34px Inter, system-ui, sans-serif"; c.fillText("My snake sightings", PADX + 4, 206);
+    c.textAlign = "right"; c.fillStyle = "#fff"; c.font = "700 150px Inter, system-ui, sans-serif"; c.fillText(n.toLocaleString(), W - PADX, 168);
+    c.fillStyle = "#b4ec9f"; c.font = "600 32px Inter, system-ui, sans-serif"; c.fillText((n === 1 ? "species" : "species") + " seen of " + total.toLocaleString(), W - PADX, 218);
+    c.fillStyle = "rgba(180,236,159,.22)"; c.fillRect(PADX, 252, W - PADX * 2, 2);
+    var x0 = L.cols === 1 ? (W - cw) / 2 : PADX;
+    if (n) TOP += Math.max(0, Math.round((H - FOOT - 30 - TOP - gridH) / 2)); // (a short wall sits in the middle of the space, not at its top)
+    function placeholder(x, y, w, h) { // a snake with no photo: a soft green panel with a simple snake line
+      var pg = c.createLinearGradient(x, y, x + w, y + h); pg.addColorStop(0, "#2c6a45"); pg.addColorStop(1, "#173f28"); c.fillStyle = pg; c.fillRect(x, y, w, h);
+      c.save(); c.strokeStyle = "rgba(180,236,159,.55)"; c.lineWidth = Math.max(3, w * 0.025); c.lineCap = "round"; c.beginPath();
+      var mx = x + w / 2, my = y + h / 2, sw = Math.min(w * 0.5, h * 1.3), sh = h * 0.18; c.moveTo(mx - sw / 2, my);
+      c.bezierCurveTo(mx - sw / 4, my - sh * 2, mx - sw / 4, my + sh * 2, mx, my); c.bezierCurveTo(mx + sw / 4, my - sh * 2, mx + sw / 4, my + sh * 2, mx + sw / 2 - h * 0.05, my - sh * 0.4); c.stroke();
+      c.fillStyle = "rgba(180,236,159,.55)"; c.beginPath(); c.ellipse(mx + sw / 2, my - sh * 0.55, h * 0.07, h * 0.05, -0.4, 0, Math.PI * 2); c.fill(); c.restore();
+    }
+    if (n) {
+      for (var i = 0; i < L.slots; i++) {
+        var col = i % L.cols, row = Math.floor(i / L.cols), x = x0 + col * (cw + gap), y = TOP + row * (ch + gap);
+        c.save(); c.shadowColor = "rgba(0,0,0,.28)"; c.shadowBlur = 18; c.shadowOffsetY = 6; rr(c, x, y, cw, ch, 14); c.fillStyle = "#f5faf1"; c.fill(); c.restore();
+        if (L.more && i === L.slots - 1) { // the last place: how many more there are
+          rr(c, x, y, cw, ch, 14); c.fillStyle = "#2f7a4a"; c.fill();
+          c.textAlign = "center"; c.fillStyle = "#fff"; c.font = "700 " + Math.round(fs * 1.9) + "px Inter, system-ui, sans-serif"; c.fillText("+" + L.more.toLocaleString(), x + cw / 2, y + ch / 2 + fs * 0.2);
+          c.fillStyle = "#cfe8cf"; c.font = "600 " + fs + "px Inter, system-ui, sans-serif"; c.fillText("more", x + cw / 2, y + ch / 2 + fs * 1.5); continue;
+        }
+        var it = list[i], pic = pics[i];
+        c.save(); rr(c, x, y, cw, ch, 14); c.clip();
+        if (pic && pic.img) { var iw = pic.img.naturalWidth, ih = pic.img.naturalHeight, bh = iw / 2.2, sy = Math.max(0, (ih - bh) * pic.y); c.drawImage(pic.img, 0, sy, iw, Math.min(bh, ih), x, y, cw, ph); }
+        else placeholder(x, y, cw, ph);
+        c.restore();
+        c.textAlign = "left"; c.fillStyle = "#18301f"; c.font = "700 " + fs + "px Inter, system-ui, sans-serif";
+        var lines = wrap(c, it.name, cw - fs * 1.1, 2), ly = y + ph + fs * 0.5 + fs * 0.95;
+        if (lines.length === 1) ly += fs * 0.6;
+        lines.forEach(function (l) { c.fillText(l, x + fs * 0.55, ly); ly += fs * 1.22; });
+      }
+    } else { // nothing seen yet: three empty cards, waiting
+      var ew = 280, eh = ew / 2.2 + 70, eg = 26, ex = (W - ew * 3 - eg * 2) / 2, ey = TOP + 30;
+      for (var k = 0; k < 3; k++) { c.save(); c.setLineDash([10, 8]); c.lineWidth = 2; c.strokeStyle = "rgba(180,236,159,.35)"; rr(c, ex + k * (ew + eg), ey, ew, eh, 14); c.stroke(); c.restore();
+        c.fillStyle = "rgba(180,236,159,.08)"; rr(c, ex + k * (ew + eg), ey, ew, eh, 14); c.fill(); }
+      c.textAlign = "center"; c.fillStyle = "#cfe8cf"; c.font = "500 34px Inter, system-ui, sans-serif"; c.fillText("No snakes marked as seen yet", W / 2, ey + eh + 80);
+    }
+    c.fillStyle = "#9be07c"; c.font = "600 32px Inter, system-ui, sans-serif"; c.textAlign = "right"; c.fillText("snakelist.com", W - PADX, H - 52);
     return cv;
+  }
+  // the photos are loaded first (the card photos, from SnakeList's own site - so the picture can be saved and shared)
+  function loadPics(list, done) {
+    var n = shareLayout(list.length).shown, left = n, pics = [], fin = false, end = function () { if (!fin) { fin = true; done(pics); } };
+    if (!n) return end();
+    setTimeout(end, 6000); // (a slow connection: whatever has arrived by then, the rest get the no-photo panel)
+    list.slice(0, n).forEach(function (it, i) {
+      var info = window.SL_CARD_PHOTO_OF && window.SL_CARD_PHOTO_OF(it.id); if (!info) { if (!--left) end(); return; }
+      var im = new Image(); im.decoding = "async";
+      im.onload = function () { pics[i] = { img: im, y: info.y }; if (!--left) end(); };
+      im.onerror = function () { if (!--left) end(); };
+      im.src = info.src;
+    });
   }
   window.SL_SHARE_SIGHTINGS = function (from) {
     var cs = seenCards(), total = +((document.querySelector("[data-sl-total]") || {}).textContent || "4243").replace(/[^\d]/g, "") || 4243;
-    var list = cs.map(function (c) { return { name: (c.querySelector(".card-name") || {}).textContent || c.dataset.name || "", when: whenOf(c) }; })
-      .sort(function (a, b) { return String(b.when).localeCompare(String(a.when)); });
+    var list = cs.map(function (c, i) { var sci = (c.querySelector(".card-sci") || {}).textContent || "", nm = ((c.querySelector(".card-name") || {}).textContent || c.dataset.name || "").trim();
+      return { id: c.dataset.id, name: nm || sci || c.dataset.id, when: whenOf(c), i: i }; })
+      .sort(function (a, b) { return String(b.when).localeCompare(String(a.when)) || a.i - b.i; });
     var names = list.slice(0, 5).map(function (x) { return x.name; }).join(", ");
-    var text = list.length ? "I've seen " + list.length + " snake species on SnakeList" + (names ? ": " + names + (list.length > 5 ? " and more" : "") : "") + "! Make your own snake life list:" : "I've started my snake life list on SnakeList - come and find snakes with me:";
-    var card = null; try { card = drawCard(list, total); } catch (e) {}
-    openShare({ title: "Share my sightings", sub: list.length + " species seen", text: text, url: SITE, card: card, file: "my-snakelist-sightings.png", alt: "A picture of your SnakeList sightings",
-      note: "SnakeList keeps your list on your device and in your own account, so there's no public page of it to link to. Share this picture or the text instead - the link opens SnakeList." }, from);
+    var text = list.length ? "I've seen " + list.length + " snake species on SnakeList" + (names ? ": " + names + (list.length > 5 ? " and more" : "") : "") + "! Make your own snake life list:" : "I've started my snake life list on SnakeList. Make your own:";
+    var go = function (pics) {
+      var card = null; try { card = drawCard(list, total, pics); card.getContext("2d").getImageData(0, 0, 1, 1); } catch (e) { try { card = drawCard(list, total, []); } catch (e2) { card = null; } }
+      window.__slShareCard = card;
+      openShare({ title: "Share my sightings", sub: list.length + " species seen", text: text, url: SITE, card: card, file: "my-snakelist-sightings.png", alt: "A picture of your SnakeList sightings",
+        note: "SnakeList keeps your list on your device and in your own account, so there's no public page of it to link to. Share this picture or the text instead - the link opens SnakeList." }, from);
+    };
+    var fontsReady = document.fonts && document.fonts.load ? Promise.all([document.fonts.load("600 92px 'SL Mark'"), document.fonts.load("700 40px Inter"), document.fonts.load("500 34px Inter")]).catch(function () {}) : Promise.resolve();
+    fontsReady.then(function () { loadPics(list, go); });
   };
   (function () {
     var rowEl = document.getElementById("sl-achrow"); if (!rowEl) return;

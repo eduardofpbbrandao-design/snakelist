@@ -21,23 +21,11 @@ corallus-hortulana-{900,1400,1920}.webp
   Licence: https://creativecommons.org/licenses/by/2.0
   Source: https://commons.wikimedia.org/wiki/File:Corallus_hortulanus_head,_Peru.jpg
 
-dipsas-albifrons-{900,1400}.webp
-  Sauvage's Snail-eater (Dipsas albifrons)
-  Photo: RafaelMenegucci, CC BY-SA 4.0 (Wikimedia Commons)
-  Licence: https://creativecommons.org/licenses/by-sa/4.0
-  Source: https://commons.wikimedia.org/wiki/File:Dipsas_albifrons,_Cobra_Papa_Lesmas.jpg
-
 morelia-viridis-{900,1400,1920}.webp
   Green Tree Python (Morelia viridis)
   Photo: JJ Harrison, CC BY-SA 3.0 (Wikimedia Commons)
   Licence: https://creativecommons.org/licenses/by-sa/3.0
   Source: https://commons.wikimedia.org/wiki/File:Green_Tree_Python_0A2A0428.jpg
-
-malayopython-reticulatus-{900,1400,1920}.webp
-  Reticulated Python (Malayopython reticulatus)
-  Photo: Rushenb, CC BY-SA 2.0 (Wikimedia Commons)
-  Licence: https://creativecommons.org/licenses/by-sa/2.0
-  Source: https://commons.wikimedia.org/wiki/File:Malayopython_reticulatus,_Reticulated_python_-_Kaeng_Krachan_District,_Phetchaburi_Province_(47924282891).jpg
 
 dendroaspis-angusticeps-{900,1400,1920}.webp
   Green Mamba (Dendroaspis angusticeps)
@@ -63,23 +51,11 @@ zamenis-scalaris-{900,1400,1920}.webp
   Licence: https://creativecommons.org/licenses/by/3.0
   Source: https://commons.wikimedia.org/wiki/File:Rhinechis_scalaris_cropped.jpg
 
-atheris-ceratophora-{900,1400,1920}.webp
-  Usambara Eyelash Viper (Atheris ceratophora)
-  Photo: John Lyakurwa, CC BY 4.0 (iNaturalist)
-  Licence: https://creativecommons.org/licenses/by/4.0/
-  Source: https://www.inaturalist.org/observations/111494406
-
 echis-omanensis-{900,1400,1920}.webp
   Oman Saw-scaled Viper (Echis omanensis)
   Photo: Arabella Willing, CC BY 4.0 (iNaturalist)
   Licence: https://creativecommons.org/licenses/by/4.0/
   Source: https://www.inaturalist.org/observations/285888604
-
-spilotes-sulphureus-{900,1400,1920}.webp
-  Amazon Puffing Snake (Spilotes sulphureus)
-  Photo: Diogo Luiz, CC BY 4.0 (iNaturalist)
-  Licence: https://creativecommons.org/licenses/by/4.0/
-  Source: https://www.inaturalist.org/observations/31154852
 
 farancia-erytrogramma-{900,1400,1920}.webp
   Rainbow Snake (Farancia erytrogramma)
@@ -87,21 +63,43 @@ farancia-erytrogramma-{900,1400,1920}.webp
   Licence: https://creativecommons.org/licenses/by/4.0/
   Source: https://www.inaturalist.org/observations/19555285
 
-atheris-barbouri-{900,1400,1920}.webp
-  Uzungwe Mountain Bush Viper (Atheris barbouri)
-  Photo: Ryan van Huyssteen, CC BY 4.0 (iNaturalist)
-  Licence: https://creativecommons.org/licenses/by/4.0/
-  Source: https://www.inaturalist.org/observations/200624271
-
 agkistrodon-contortrix-{900,1400,1920}.webp
   Copperhead (Agkistrodon contortrix)
   Photo: Alan Rockefeller, CC BY 4.0 (iNaturalist)
   Licence: https://creativecommons.org/licenses/by/4.0/
   Source: https://www.inaturalist.org/observations/141425644
 
-opheodrys-aestivus-{900,1400,1920}.webp
-  Rough Greensnake (Opheodrys aestivus)
-  Photo: John Matthew Erickson, CC BY 4.0 (iNaturalist)
-  Licence: https://creativecommons.org/licenses/by/4.0/
-  Source: https://www.inaturalist.org/observations/218209640
+Replacement set (v6.20): close crops of a thick body, blurry or small photos were taken out (Usambara Eyelash Viper,
+Amazon Puffing Snake, Reticulated Python, Sauvage's Snail-eater, Uzungwe Mountain Bush Viper, Rough Greensnake) and
+these were added - each a sharp photo where the snake's head and a good part of its body read clearly as a snake.
+Names follow the current identification on iNaturalist.
 
+ahaetulla-prasina-{900,1400,1920}.webp
+  Asian Vine Snake (Ahaetulla prasina)
+  Photo: Eric Lopes, CC BY-SA 4.0 (iNaturalist)
+  Licence: https://creativecommons.org/licenses/by-sa/4.0/
+  Source: https://www.inaturalist.org/observations/155876942
+
+corallus-caninus-{900,1400,1920}.webp
+  Emerald Tree Boa (Corallus caninus)
+  Photo: eloise kerroux, CC BY 4.0 (iNaturalist)
+  Licence: https://creativecommons.org/licenses/by/4.0/
+  Source: https://www.inaturalist.org/observations/138380737
+
+trimeresurus-insularis-{900,1400,1920}.webp
+  White-lipped Island Pitviper (Trimeresurus insularis)
+  Photo: James Hunt, CC BY 4.0 (iNaturalist)
+  Licence: https://creativecommons.org/licenses/by/4.0/
+  Source: https://www.inaturalist.org/observations/167155675
+
+lampropeltis-gentilis-{900,1400,1920}.webp
+  Central Plains Milksnake (Lampropeltis gentilis)
+  Photo: evangrimes, CC BY 4.0 (iNaturalist)
+  Licence: https://creativecommons.org/licenses/by/4.0/
+  Source: https://www.inaturalist.org/observations/107651958
+
+micrurus-tener-{900,1400,1920}.webp
+  Texas Coral Snake (Micrurus tener)
+  Photo: Brady Reed, CC0 1.0 - public domain dedication (iNaturalist)
+  Licence: https://creativecommons.org/publicdomain/zero/1.0/
+  Source: https://www.inaturalist.org/observations/11392309
