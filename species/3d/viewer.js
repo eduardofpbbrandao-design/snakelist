@@ -256,6 +256,16 @@ acrochordus-javanicus hl .40 ea 45
 const HEAD_SET = {};
 { const K = { lips: 'lips', hl: 'hl', sn: 'snout', sh: 'snoutH', eye: 'eyeL', ex: 'eyeX', ea: 'eyeA', ck: 'cheek', lor: 'lor', cr: 'crown', sm: 'smile', br: 'brow', up: 'snoutUp' };
   for (const line of HEAD_SET_SRC.split('\n')) { const w = line.trim().split(/\s+/); if (w.length < 3) continue; const o = {}; for (let i = 1; i + 1 < w.length; i += 2) if (K[w[i]]) o[K[w[i]]] = isNaN(+w[i + 1]) ? w[i + 1] : +w[i + 1]; if (o.hl != null) o.hlSet = 1; HEAD_SET[w[0]] = o; } }
+const ROWS_GENUS = { // v6.26: typical dorsal scale rows at mid-body, for genera tools/auto_models.py GENUS_ROWS lacks
+  erythrolamprus: 17, apostolepis: 15, pareas: 15, opisthotropis: 17, stegonotus: 17, achalinus: 23, toxicocalamus: 15, eirenis: 17, lycophidion: 17, thamnodynastes: 19,
+  atractaspis: 23, rhadinaea: 17, rhadinella: 17, helicops: 19, tropidonophis: 15, prosymna: 17, coniophanes: 19, leptodeira: 21, phalotris: 15, philodryas: 19, oxyrhopus: 19,
+  polemon: 15, telescopus: 19, mastigodryas: 17, dipsadoboa: 17, xenodon: 19, suta: 19, pseudoxyrhopus: 19, aparallactus: 15, pseudalsophis: 17, salvadora: 17,
+  liophidium: 17, lycodryas: 19, elapsoidea: 13, aspidura: 15, lycodonomorphus: 19, asthenodipsas: 15, adelphicos: 15, bothrocophias: 25, arrhyton: 17, tropidodipsas: 17,
+  porthidium: 23, taeniophallus: 17, synophis: 19, hypsiglena: 21, alsophis: 19, sibynophis: 17, amblyodipsas: 15, liopeltis: 15, macrocalamus: 15, brachyurophis: 15,
+  lygophis: 17, liopholidophis: 17, urotheca: 17, hypsirhynchus: 17, pseudoboa: 19, trachischium: 13, lamprophis: 21, trimorphodon: 23, ficimia: 17, tropidophis: 25,
+  epictia: 14, myriopholis: 14, leptotyphlops: 14, rena: 14, trilepida: 14, anilios: 22, letheobia: 24, afrotyphlops: 28, gerrhopilus: 20, ramphotyphlops: 22,
+  liotyphlops: 24, amerotyphlops: 20, madatyphlops: 20, argyrophis: 22, malayotyphlops: 22, antillotyphlops: 20, cubatyphlops: 20, indotyphlops: 20, typhlops: 20,
+};
 const HF_GENUS = {};
 for (const [k, l] of Object.entries({
   natricine: 'natrix nerodia thamnophis regina storeria virginia clonophis tropidoclonion liodytes seminatrix hebius rhabdophis fowlea xenochrophis amphiesma sinonatrix trimerodytes tropidonophis atretium herpetoreas opisthotropis afronatrix limnophis natriciteres hydraethiops lycognathophis anoplohydrus parahelicops',
@@ -296,6 +306,9 @@ function normProfile(p, id) {
   const base = PLANS[p.plan] || PLANS.colubrid;
   const q = merge(merge(base, { colors: { dorsal: '#776655', lateral: null, belly: '#d8cfb8', mottle: 0.08, var: 0.05 }, pattern: [], tail: {}, scene: { kind: 'litter' } }), p);
   q.colors.lateral = q.colors.lateral || q.colors.dorsal;
+  // v6.26: the usual mid-body scale rows of genera the generator had no count for (they took their family's, so a dwarf boa
+  // had a python's 71 rows of tiny scales, and thread snakes the 20 of other blind snakes)
+  { const r = ROWS_GENUS[String(id || p.id || '').split('-')[0]]; if (r && !(p.scales && p.scales.rows)) q.scales = Object.assign({}, q.scales, { rows: r }); }
   // v5.27: viper heads are broad triangles behind a narrow neck (they were barely wider than the neck from above)
   if ((q.head.shape || 'oval') === 'tri' && !q.head.wFixed) q.head = Object.assign({}, q.head, { w: q.head.w * 1.1 });
   // v5.73: the head's length, width and neck from its group (HEAD_FORM): the length kept within the group's range, the
