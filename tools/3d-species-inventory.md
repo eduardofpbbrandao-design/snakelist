@@ -1,4 +1,69 @@
-# 3D species inventory (v6.20 model pass)
+# 3D species inventory
+
+## v6.26: skin, contact, heads by species, movement, habitats
+
+What changed in this pass, all in `species/3d/viewer.js` unless marked. Before/after sheets (same species, pose, camera
+and light): session scratchpad `batch103/3d/`.
+
+**Skin (shader, `SKIN_SHINE_GLSL`, the scale-cell block in `map_fragment`).**
+- Every body scale is its own small plate: its own tilt (about twice as much as before, less on keeled scales), its own
+  specular strength (0.55-1.65x) and its own share of the gloss coat (0.3-1.4x). In any light some scales flash and their
+  neighbours do not, instead of one even sheen sliding over the body.
+- No specular and no gloss coat down in the skin between the scales (from the cavity map): the interstitial skin stays dull
+  and dark, so each scale's outline reads in the highlights too.
+- The gloss coat's normal follows each scale (0.85 instead of 0.5), so the coat breaks up scale by scale.
+- Base values: roughness 0.74-0.44 (was 0.82-0.5), coat 0.14 + 0.56 x gloss (was 0.08 + 0.42 x gloss), coat roughness
+  0.38-0.12 (was 0.45-0.14), IOR 1.55 (keratin), environment reflections 1.0 (was 0.85). With the coat broken up per scale
+  the average shine is about what it was, but it is never a uniform wet film.
+- Belly plates: each ventral scute its own sheen and a slight tilt, a little glossier than the back.
+- A fine micro-relief on each scale, faded out with distance (no shimmer far away).
+- Head shields: flatter plates with a steeper edge into a narrower suture (were domed with a wide bevel - "clay"), less
+  surface "wear", and as glossy as the body (the coat was cut by 55% on the head; now 20%).
+
+**Contact and coil shading (`occSpheres`, `bakeOcc`, `SKIN_OCC_GLSL`).**
+- Per vertex, once per pose: how much of the sky each point of the skin sees past the rest of the body (a chain of spheres
+  along the body, the analytic sphere occlusion (r/d)^2 cos). Turns of a coil resting on each other and loops crossing the
+  body darken where they touch. About 233k vertices on High; candidate spheres are found once per ring with a hash grid.
+- The ground's share is worked out in the shader from the skin's height above the ground and which way it faces, so it
+  follows the body when it moves. The baked coil share fades where the body has moved far from the pose it was baked for
+  (See it eat, the idle head turn), so nothing dark is left floating.
+- It cuts the indirect light (and a little of the direct), not the sun's shadows.
+- The ground's contact shadow has two narrow dark passes under the soft wide one: the tight dark line where the belly
+  touches.
+
+**Heads by species (`HEAD_SET_SRC`).** 145 of the best-known species have hand-set heads: depth, snout width and height,
+eye size and place, cheeks, loreal hollow, crown, brow, upturned snout, mouth-line curve. A hand-set depth is met both ways
+(the puff adder's and Gaboon viper's heads are now flatter than their group's; tiger snake, ball python and green tree
+python deeper). The coral snakes (Micrurus fulvius, M. tener, Micruroides) no longer have their red belly colour painted
+on their lip scales: the snout is black, as in the photos.
+
+**Mouth line (`lipBend` in `buildHeadSkin`).** The lips are no longer a straight cut: the line dips a little under the eye
+and rises again to the corner of the mouth (`head.smile`, by group: 0.08 mambas, 0.05-0.06 colubrids and vipers, 0.02 sea
+snakes, 0 sand boas). It is zero at the snout tip and at the jaw hinge, so Open mouth hinges exactly where it did.
+
+**Movement (`extras.js` idle life, `flick` in `buildMouth`).**
+- Breathing: each breath its own length (in 1.3-2 s, out 1.9-2.8 s), depth (0.65-1.1) and pause (1.5-5 s). It starts
+  breathed in, so the body first settles as the view opens. Was a fixed 6.5 s cycle.
+- Tongue: each flick its own length (0.55-1.15 s), reach (70-100%) and number of tip waves (2.4-4.8); one, two or now and
+  then three in a row, 3.5-10.5 s apart.
+- Tree pythons and tree boas (drape pose): each U-turn under the branch is tight, its two sides lying against each other,
+  and hangs less deep. Before, every loop had a gap of more than a body width inside and read as a ring threaded on the
+  branch.
+- Sea snakes lie about two thirds under the surface (at least 1.45 x the half-depth; the yellow-bellied sea snake's
+  profile had 0.3, which floated it on top like a toy), and the water is a little less clear.
+
+**Habitats (`nature.js`, `SCENES` and the props in `buildScene`).**
+- Grass near the snake (out to about 5 m or 1.5 x the near ground) is many narrow cards round each tuft's centre instead of
+  two or three crossed cards over a metre wide that stood in the foreground as big flat cards. Further out the cheap wide
+  clumps stay.
+- The sea floor and reef: real reef colours (pale coral heads, ochre and grey rubble, dark rock) tinted only a little by the
+  water, flatter shapes, the sand's grain and moving caustics. They were mixed 40% with blue: cartoon-blue pebbles.
+- Soil (blind snakes and other burrowers, 452 + species): moist crumbly soil with many small dark leaf fragments (no whole
+  leaves as big as the snake lying flat like stickers), dull crumbs (their highlight read as water drops), fine rootlets
+  painted and in 3D, clods half sunk in the soil, small moss cushions, and the flat stone it was found under lying close by.
+- Rocky desert and dunes are lit by the clear midday sky panorama (they shared the warm dawn light of the gibber plains and
+  grassland); desert stones are a weathered red-tan instead of brick red.
+
 
 How the 4,243 3D models in `species/3d/models.json` get their shape, which shared rules cover each group, and which
 species were looked at one by one. Colours and patterns are unchanged from the v6.13 photo audit

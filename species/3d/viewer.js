@@ -1191,19 +1191,25 @@ function occSpheres(F, spine) {
   return { xs: Float32Array.from(xs), cs: Float32Array.from(cs), rs: Float32Array.from(rs), ds, rMax: Math.max(1e-6, ...rs) };
 }
 function bakeOcc(F, S, pos, nrm, xv) {
+  const T0 = performance.now(), out0 = bakeOcc0(F, S, pos, nrm, xv); if (typeof globalThis !== 'undefined') globalThis.__bakeMs = performance.now() - T0; return out0;
+}
+function bakeOcc0(F, S, pos, nrm, xv) {
   const n = xv.length, out = new Float32Array(n * 2), { xs, cs, rs, ds, rMax } = S, N = xs.length, cell = rMax * 9;
   const grid = new Map(), key = (i, j, k) => (i * 73856093) ^ (j * 19349663) ^ (k * 83492791);
   for (let s = 0; s < N; s++) { const kk = key(Math.floor(cs[s * 3] / cell), Math.floor(cs[s * 3 + 1] / cell), Math.floor(cs[s * 3 + 2] / cell)); let a = grid.get(kk); if (!a) grid.set(kk, (a = [])); a.push(s); }
-  const cand = []; let lastX = -1;
+  const cand = [], skip = []; let lastX = -1;
   for (let v = 0; v < n; v++) {
     const x = xv[v], rv = Math.max(F.W(x), F.Hh(x), 1e-6); out[v * 2 + 1] = (F.W(x) + F.Hh(x)) / 2;
     const px = pos[v * 3], py = pos[v * 3 + 1], pz = pos[v * 3 + 2];
     if (x !== lastX) { // (the candidate spheres are found once per ring: those near the ring's centre, not its own neighbours along the body)
       lastX = x; cand.length = 0;
       const gi = Math.floor(px / cell), gj = Math.floor(py / cell), gk = Math.floor(pz / cell);
-      for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (let c = -1; c <= 1; c++) { const l = grid.get(key(gi + a, gj + b, gk + c)); if (l) for (const s of l) if (Math.abs(xs[s] - x) > (rv + rs[s]) * 2.6) cand.push(s); }
+      for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (let c = -1; c <= 1; c++) { const l = grid.get(key(gi + a, gj + b, gk + c)); if (l) for (const s of l) {
+        if (Math.abs(xs[s] - x) <= (rv + rs[s]) * 2.6) continue;
+        const dx = cs[s * 3] - px, dy = cs[s * 3 + 1] - py, dz = cs[s * 3 + 2] - pz, rr = 2.2 * rv + 4 * rs[s]; if (dx * dx + dy * dy + dz * dz < rr * rr) cand.push(s); } } // (only spheres that can reach some point of this ring)
     }
     if (!cand.length) continue;
+    if (v & 1 && v + 1 < n && xv[v - 1] === x && xv[v + 1] === x) { skip.push(v); continue; } // (every other point round a ring: filled in between its neighbours below)
     const nx = nrm[v * 3], ny = nrm[v * 3 + 1], nz = nrm[v * 3 + 2]; let sum = 0;
     for (const s of cand) {
       const dx = cs[s * 3] - px, dy = cs[s * 3 + 1] - py, dz = cs[s * 3 + 2] - pz, r = rs[s], d2 = dx * dx + dy * dy + dz * dz;
@@ -1213,6 +1219,7 @@ function bakeOcc(F, S, pos, nrm, xv) {
     }
     out[v * 2] = Math.min(0.82, 1 - Math.exp(-1.6 * sum));
   }
+  for (const v of skip) out[v * 2] = (out[v * 2 - 2] + out[v * 2 + 2]) / 2;
   return out;
 }
 
