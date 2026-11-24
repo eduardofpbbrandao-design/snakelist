@@ -79,8 +79,11 @@ async function route(r) {
       return p.evaluate(() => !document.getElementById('sg-pop').hidden);
     };
     ok(await openDot(101), `${label}: a sighting opens its big view`);
-    const btns = await p.evaluate(() => { const a = document.querySelector('#sg-pop .sgv-acts'); return a ? [].map.call(a.querySelectorAll('button, a'), (x) => x.textContent.trim()) : []; });
-    ok(btns.indexOf('See the spot') === btns.indexOf('Explore in 3D') + 1 && btns.indexOf('Explore in 3D') >= 0, `${label}: "See the spot" sits next to "Explore in 3D" (${btns.join(' | ')})`);
+    const btns = await p.evaluate(() => { const a = document.querySelector('#sg-pop .sgc-acts'); return a ? [].map.call(a.querySelectorAll('button, a'), (x) => x.textContent.trim()) : []; });
+    ok(btns.indexOf('See the spot') >= 0 && btns.indexOf('Explore in 3D') < 0, `${label}: the card has "See the spot" (v6.28 L9: in place of Explore in 3D) (${btns.join(' | ')})`);
+    // v6.28: the 3D viewer and See the spot are fetched ahead once the card shows (so pressing it opens sooner) - but no place data
+    await p.waitForTimeout(1500);
+    ok(await p.evaluate(() => !performance.getEntriesByType('resource').some((e) => /arcgisonline|terrarium|overpass/.test(e.name))), `${label}: nothing of the place is fetched before the press`);
     // the press: busy at once, the panel opens at once
     const busy = await p.evaluate(() => { const b2 = document.querySelector('.sgv-spot'); b2.click(); return { busy: b2.getAttribute('aria-busy') === 'true', txt: b2.textContent.trim(), panel: !!document.querySelector('.sl3d-bd .sl3d-ov.sl3d-spot') }; });
     ok(busy.busy && /Opening/.test(busy.txt) && busy.panel, `${label}: the button responds at once (busy, "${busy.txt}") and the 3D panel opens`);
@@ -89,24 +92,17 @@ async function route(r) {
     ok(s1.roads >= 1 && s1.waters >= 1 && s1.onRoad && s1.dem && s1.osm && s1.zNear >= 17 && s1.extent > 200, `${label}: the real place is built (${JSON.stringify(s1)})`);
     ok(M.overpassHits >= 1 && M.tileHits >= 20, `${label}: satellite, land-height and OpenStreetMap data asked for (${M.tileHits} tiles, ${M.overpassHits} Overpass)`);
     const ui = await p.evaluate(() => ({ card: (document.querySelector('.spot-card') || {}).textContent || '', credit: (document.querySelector('.spot-credit') || {}).textContent || '',
-      area: !!document.querySelector('.spot-area'), dn: (document.querySelector('.sp3d-dn') || {}).textContent, dnP: document.querySelector('.sp3d-dn') && document.querySelector('.sp3d-dn').getAttribute('aria-pressed'),
+      dnP: document.querySelector('.sp3d-dn') && document.querySelector('.sp3d-dn').getAttribute('aria-pressed'),
+      shown: [].filter.call(document.querySelectorAll('.sl3d-ov button'), (x) => x.offsetParent !== null && !x.closest('.spot-card') && !x.closest('.sp3d-side') && !x.classList.contains('sl3d-x') && !x.classList.contains('sl3d-back')).map((x) => x.getAttribute('aria-label') || x.textContent.trim()),
+      side: (document.querySelector('.sp3d-side:not([hidden]) img') || {}).src || '', cardPh: !!document.querySelector('.spot-card .spot-ph img'),
       ground: !!(window.__sp3d && window.__sp3d.scene.getObjectByName('spot-ground')), road: !!(window.__sp3d && window.__sp3d.scene.getObjectByName('spot-road')), water: !!(window.__sp3d && window.__sp3d.scene.getObjectByName('spot-water')) }));
     ok(/Place of 101/.test(ui.card) && /Observer 101/.test(ui.card) && /2024/.test(ui.card) && /within about 8 m/.test(ui.card), `${label}: the card: place, date, observer and accuracy`);
     ok(/Esri/.test(ui.credit) && /AWS Terrain Tiles/.test(ui.credit) && /OpenStreetMap/.test(ui.credit), `${label}: imagery, land height and OpenStreetMap are credited`);
     ok(ui.ground && ui.road && ui.water, `${label}: ground, road surface and water are in the scene`);
-    ok(ui.area && /Night/.test(ui.dn) && ui.dnP === 'false', `${label}: "See the area" and Night buttons; a morning sighting opens by day`);
+    ok(ui.dnP === 'false', `${label}: a morning sighting opens by day (lit for its own time)`);
+    ok(ui.shown.length === 1 && /Fullscreen/.test(ui.shown[0]), `${label}: no buttons but Fullscreen in See the spot - no Day/Night, See the area, Compare photo... (${ui.shown.join(' | ')})`);
+    ok(/photos\/101-0\/large\./.test(ui.side) && ui.cardPh, `${label}: the sighting's OWN photo is shown beside the place (Compare photo) and in the card (${ui.side.slice(-40)})`);
     if (SHOTS) await p.screenshot({ path: SHOTS + `/spot-${label}-day.png`, timeout: 120000 });
-    // night and back
-    await p.evaluate(() => document.querySelector('.sp3d-dn').click());
-    await p.waitForFunction(() => window.__sp3d.scene.getObjectByName('sl-torch').intensity > 0, null, { timeout: 60000 }).catch(() => {});
-    const n1 = await p.evaluate(() => ({ p: document.querySelector('.sp3d-dn').getAttribute('aria-pressed'), t: window.__sp3d && window.__sp3d.scene.getObjectByName('sl-torch') && window.__sp3d.scene.getObjectByName('sl-torch').intensity > 0, stars: !!(window.__sp3d && window.__sp3d.scene.getObjectByName('sl-stars')) }));
-    ok(n1.p === 'true' && n1.t && n1.stars, `${label}: Night: stars, moon and the torch on the snake (${JSON.stringify(n1)})`);
-    if (SHOTS) await p.screenshot({ path: SHOTS + `/spot-${label}-night.png`, timeout: 120000 });
-    await p.evaluate(() => document.querySelector('.spot-area').click());
-    ok(await p.waitForFunction(() => window.__sp3d.controls.st.d > 30, null, { timeout: 90000 }).then(() => true, () => false), `${label}: "See the area" rises over the place`);
-    if (SHOTS) await p.screenshot({ path: SHOTS + `/spot-${label}-area-night.png`, timeout: 120000 });
-    await p.evaluate(() => document.querySelector('.sp3d-dn').click());
-    ok(await p.waitForFunction(() => document.querySelector('.sp3d-dn').getAttribute('aria-pressed') === 'false' && !(window.__sp3d.scene.getObjectByName('sl-torch').intensity > 0), null, { timeout: 60000 }).then(() => true, () => false), `${label}: Day again`);
     // close: everything goes, the sighting is still there
     await p.evaluate(() => document.querySelector('.sl3d-ov .sl3d-x').click()); await p.waitForTimeout(500);
     ok(await p.evaluate(() => !document.querySelector('.sl3d-bd') && !document.querySelector('canvas.sp3d-canvas') && !window.__sp3d && !document.getElementById('sg-pop').hidden), `${label}: closing lets the 3D view go and returns to the sighting`);

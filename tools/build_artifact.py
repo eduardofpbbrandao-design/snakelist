@@ -19,10 +19,10 @@ Artifact tool's `files` maps ({published path: source path}), at most 250 files 
     gets that cell cropped from the sheet on the fly.
   * range maps (data/ranges/*.json) and data/species-info/*.json: packed into a few shard files,
     served back to the app's own fetch() calls as if they were the separate files.
-  * sightings: a snapshot of recent research-grade iNaturalist observations (the newest few per
-    species + the newest few thousand anywhere), fetched at build time and answered by a small
-    stand-in for the iNaturalist API calls the app makes; Wikipedia intros the same way. A note on
-    the map and the Following tab says it's a snapshot, with a link to snakelist.com for live data.
+  * sightings: iNaturalist (and Wikipedia) are asked live first (v6.28). Only where the sandbox blocks them are
+    recent research-grade observations saved at build time used (the newest few per species + the newest few
+    thousand anywhere), answered by a small stand-in for the iNaturalist API calls the app makes; then a short note
+    on the map and the Following tab says so (no date, no "snapshot"), with a link to snakelist.com for live data.
   * the app runs in its "website" mode (list kept in this browser, light cards, sightings), but
     keeps its claude.ai behaviour for what can't work here (sign-in, translation, live map tiles,
     species pages - those open snakelist.com in a new tab).
@@ -394,13 +394,24 @@ SHIM_JS = r"""
     });
   }
 
+  var LIVE = null; // null: not known yet; true: the live sites answer here; false: blocked, the saved records are used
+  function live(u, input, init, saved) {
+    if (LIVE === false) { savedNote(); return saved(u); }
+    var t = new Promise(function (res, rej) { setTimeout(function () { rej(new Error("timeout")); }, LIVE ? 20000 : 6000); });
+    return Promise.race([realFetch(input, init), t]).then(function (r) { LIVE = true; return r; }, function (e) {
+      if (LIVE === true) throw e; // (it worked before: a real network error, said as such)
+      LIVE = false; savedNote(); return saved(u);
+    });
+  }
   window.fetch = function (input, init) {
     var raw = typeof input === "string" ? input : input && input.url ? input.url : String(input);
     var u = abs(raw);
     if (!u) return realFetch(input, init);
     try {
-      if (u.hostname === "api.inaturalist.org") return inat(u);
-      if (u.hostname === "en.wikipedia.org") return wiki(u);
+      // v6.28 (Eduardo: "delete the sightings snapshot from 2026"): iNaturalist and Wikipedia are asked LIVE first; only
+      // where this sandbox blocks them are the records saved with this copy used instead (and that is said, with no date)
+      if (u.hostname === "api.inaturalist.org") return live(u, input, init, inat);
+      if (u.hostname === "en.wikipedia.org") return live(u, input, init, wiki);
       if (own(u)) { var v = vfs(u.pathname); if (v) return v; }
       else if (/^https?:$/.test(u.protocol) && !fontHost(u.hostname)) // this sandbox blocks other websites: fail at once, quietly
         return Promise.reject(new TypeError("Failed to fetch (outside websites are blocked here)"));
@@ -461,9 +472,12 @@ SHIM_JS = r"""
   new MutationObserver(function (ms) { ms.forEach(function (m) { for (var i = 0; i < m.addedNodes.length; i++) scan(m.addedNodes[i]); }); })
     .observe(document.documentElement, { childList: true, subtree: true });
 
-  // ---- "this is a snapshot" notes: on the map while Sightings is on, and above the Following feed ----
-  var NOTE = 'Sightings snapshot from ' + esc(CFG.sight.date) + ' &mdash; live sightings on <a href="https://snakelist.com" target="_blank" rel="noopener">snakelist.com</a>';
+  // ---- only when iNaturalist can't be reached from here: a short note that these are records saved with this copy ----
+  var NOTE = 'iNaturalist can\'t be reached from here, so these are sightings saved with this copy &mdash; every sighting, live, on <a href="https://snakelist.com" target="_blank" rel="noopener">snakelist.com</a>';
+  var noteWanted = false;
+  function savedNote() { if (!noteWanted) { noteWanted = true; notes(); } }
   function notes() {
+    if (!noteWanted) return;
     var stage = document.querySelector(".globe-stage"), sg = document.getElementById("sg-toggle");
     if (stage && sg && !document.getElementById("sl-art-sgnote")) {
       var d = document.createElement("div"); d.id = "sl-art-sgnote"; d.className = "sl-art-note"; d.innerHTML = NOTE; d.hidden = true; stage.appendChild(d);
@@ -472,7 +486,7 @@ SHIM_JS = r"""
     }
     var ff = document.getElementById("follow-feed");
     if (ff && !document.getElementById("sl-art-ffnote")) {
-      var p = document.createElement("p"); p.id = "sl-art-ffnote"; p.className = "sl-art-note sl-art-note-inline"; p.innerHTML = NOTE.replace("Sightings snapshot", "Sightings and Wikipedia facts: snapshot");
+      var p = document.createElement("p"); p.id = "sl-art-ffnote"; p.className = "sl-art-note sl-art-note-inline"; p.innerHTML = NOTE;
       ff.parentNode.insertBefore(p, ff.nextSibling); // (just under the feed)
       var sync2 = function () { p.hidden = ff.hidden; };
       new MutationObserver(sync2).observe(ff, { attributes: true, attributeFilter: ["hidden"] }); sync2();
