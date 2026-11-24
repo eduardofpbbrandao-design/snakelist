@@ -1,6 +1,7 @@
 // Events preview (events/*): countdown, early access, Advent Calendar claims/streaks/skips, trusted time vs. device
 // clock, subscriber-skip cap (TEST switch), grand prize, seasonal achievements, cursor customization, reduced
-// motion, phone + desktop layout, cursor-effect performance - and that nothing appears without the preview switch.
+// motion, phone + desktop layout, cursor-effect performance - and, without the preview switch, the PUBLIC countdown
+// only (just its own files, after the opening; no subscription / early access / Advent; minimise; zero; December).
 // Run: python3 build-site.py, then  node tests/events.js [screenshot-dir]
 // No web server needed: the repo's files are served to the browser straight from disk (page.route), and the
 // "server" Date header the app trusts is answered from the fake clock (page.clock) plus a chosen skew.
@@ -18,7 +19,7 @@ async function open(b, o) {
   o = o || {};
   const ctx = await b.newContext(Object.assign({ viewport: { width: 1280, height: 900 } }, o.ctx || {}));
   const p = await ctx.newPage();
-  const errs = [], evFetches = [];
+  const errs = [], evFetches = [], xmFetches = [];
   p.on('pageerror', (e) => errs.push(e.message));
   p.on('dialog', (d) => d.dismiss());
   p.skew = o.skew || 0;            // the "server" clock = the page's (device) clock + skew
@@ -32,6 +33,7 @@ async function open(b, o) {
       return r.fulfill({ status: 200, headers: { Date: new Date(t + p.skew).toUTCString(), 'Cache-Control': 'no-store' }, body: '' });
     }
     if (u.pathname.startsWith('/events/')) evFetches.push(u.pathname);
+    if (u.pathname.startsWith('/christmas/')) xmFetches.push(u.pathname);
     const f = path.join(ROOT, decodeURIComponent(u.pathname === '/' ? '/index.html' : u.pathname));
     if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) return r.fulfill({ status: 404, body: '' });
     return r.fulfill({ status: 200, headers: { 'Content-Type': TYPES[path.extname(f)] || 'application/octet-stream' }, body: fs.readFileSync(f) });
@@ -40,14 +42,16 @@ async function open(b, o) {
     localStorage.setItem('sl-consent', 'essential'); localStorage.setItem('sl-tour-seen', '1'); localStorage.setItem('sl-news-off', '1'); localStorage.setItem('sl-level-seen', '1');
     if (seed && !sessionStorage.getItem('seeded')) { Object.keys(seed).forEach((k) => localStorage.setItem(k, seed[k])); sessionStorage.setItem('seeded', '1'); }
   }, o.seed || null);
+  if (o.returning) await p.addInitScript(() => { ['sl-intro-seen', 'sl-tour-done', 'sl-tour-seen', 'sl-news-off', 'sl-level-seen'].forEach((k) => localStorage.setItem(k, '1')); });
+  if (o.initScript) await p.addInitScript(o.initScript);
   if (o.time) await p.clock.install({ time: o.time });
   await p.goto(HOST + 'index.html' + (o.query == null ? '?preview=events' : o.query), { waitUntil: 'load', timeout: 120000 });
-  if (o.query == null || /events/.test(o.query)) {
+  if (o.query == null || /events(?!-off)/.test(o.query)) {
     await p.waitForFunction(() => window.SL_EVENTS && window.SL_EVENTS.cursor, null, { timeout: 30000 });
     if (!o.noServer) await p.waitForFunction(() => SL_EVENTS.time.trusted(), null, { timeout: 30000 });
     else await p.waitForFunction(() => SL_EVENTS.time.failed(), null, { timeout: 30000 });
   }
-  return { ctx, p, errs, evFetches };
+  return { ctx, p, errs, evFetches, xmFetches };
 }
 // move the device clock to `t` and let the app ask the server again (as it does on its own every 10 minutes)
 async function setTime(p, t) { await p.clock.setSystemTime(t); await p.evaluate(() => SL_EVENTS.time.sync()); await p.evaluate(() => SL_EVENTS.advent.load()); }
@@ -59,15 +63,163 @@ const noOverflow = (p) => p.evaluate(() => document.documentElement.scrollWidth 
   if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
   const b = await chromium.launch();
 
-  console.log('--- a normal visitor (no preview switch)');
+  // ---------------------------------------------------------------- the PUBLIC countdown (every visitor, no preview switch)
+  // Only config.js, core.js, art.js, countdown.js, events.css and the fonts may be fetched, never during the opening,
+  // and nothing about subscriptions, early access, Advent, achievements or cursor is shown.
+  const PUB_OK = /^\/events\/(config\.js|core\.js|art\.js|countdown\.js|events\.css|fonts\/outfit-latin-(500|800)\.woff2)$/;
+  const watchAdds = () => {   // every events/ file the page asks for, and whether the opening had finished by then
+    window.__evAdds = [];
+    new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach((n) => {
+      const u = n.src || n.href || '';
+      if (/\/events\//.test(u)) window.__evAdds.push({ u, introDone: !!window.__introDone, onPhoto: !!(document.getElementById('sl-hero') && !document.getElementById('sl-hero').hidden && !window.__heroEntered) });
+    }))).observe(document, { childList: true, subtree: true });
+  };
+  async function pubOpen(o) {
+    const r = await open(b, Object.assign({ query: '', initScript: watchAdds }, o));
+    await r.p.waitForFunction(() => window.__introDone, null, { timeout: 90000 });
+    // a first visit: SnakeList's opening photo - scroll on past it like a visitor
+    await r.p.evaluate(() => { const h = document.getElementById('sl-hero'); if (h && !h.hidden) window.scrollBy(0, 400); });
+    return r;
+  }
+  const pubText = (p) => p.evaluate(() => (document.getElementById('sl-ev-pub') || { textContent: '' }).textContent + ' ' + ((document.getElementById('sl-ev-cd') || { textContent: '' }).textContent));
+  const NOADS = /subscri|early access|advent calendar|cursor|seasonal achievements|frost edition|premium/i;
+
+  console.log('--- public countdown: a normal first visit, 24 November (desktop)');
   {
-    const { ctx, p, errs, evFetches } = await open(b, { query: '', time: T('2026-12-05T10:00:00Z') });
-    await p.waitForTimeout(1500);
-    ok(await p.evaluate(() => !window.SL_EVENTS && !document.getElementById('sl-ev-banner') && !document.querySelector('link[href*="events/"]')), 'nothing from the events preview is on the page');
-    ok(evFetches.length === 0, 'no events/ file is even downloaded (' + evFetches.length + ')');
+    const { ctx, p, errs, evFetches, xmFetches } = await pubOpen({ time: T('2026-11-24T10:00:00Z') });
+    await p.waitForSelector('#sl-ev-banner', { timeout: 60000 });
+    await p.waitForFunction(() => SL_EVENTS.time.trusted(), null, { timeout: 30000 });
+    ok(await p.evaluate(() => SL_EVENTS.pub === true && !SL_EVENTS.advent && !SL_EVENTS.subscribe && !SL_EVENTS.cursor && !SL_EVENTS.achievements), 'public mode: only the countdown is loaded (no Advent, subscription, cursor or achievements code)');
+    ok(evFetches.length > 0 && evFetches.every((f) => PUB_OK.test(f)), 'only the countdown\'s own files are fetched: ' + evFetches.join(', '));
+    ok(xmFetches.length === 0, 'nothing from christmas/ is fetched');
+    const adds = await p.evaluate(() => window.__evAdds);
+    ok(adds.length > 0 && adds.every((a) => a.introDone && !a.onPhoto), 'every events/ file was requested only after the opening had finished (' + adds.length + ')');
+    ok(await p.evaluate(() => document.getElementById('sl-ev-pub').nextElementSibling === document.querySelector('.tabs')), 'banner sits right above the tabs');
+    const bt = await p.textContent('#sl-ev-pub');
+    ok(/SnakeList Christmas 2026/.test(bt) && /Comes December 1/.test(bt) && /Opens in/i.test(bt), 'banner: "SnakeList Christmas 2026 - Comes December 1 - Opens in"');
+    await shot(p, 'public-desktop-nov24-banner');
+    await p.click('#sl-ev-banner'); await p.waitForSelector('#sl-ev-cd .sl-ev-clock');
+    const t = await pubText(p);
+    ok(!NOADS.test(t), 'no subscription, early-access, Advent, cursor or achievements wording anywhere' + ((t.match(NOADS) || [''])[0] ? ' (found "' + t.match(NOADS)[0] + '")' : ''));
+    ok(await p.evaluate(() => !document.querySelector('#sl-ev-cd .sl-ev-row, #sl-ev-cd [data-go="subscribe"], #sl-ev-cd .sl-ev-early, #sl-ev-cd .sl-ev-cta')), 'panel: no feature buttons, no early-access line, no Explore button');
+    ok(/Tue, 01 Dec 2026 00:00:00 UTC/.test(t), 'panel shows the opening time');
+    await shot(p, 'public-desktop-nov24-panel');
+    await p.keyboard.press('Escape');
+    // minimise: remembered in this browser
+    await p.click('#sl-ev-pub .sl-ev-min');
+    ok(await p.evaluate(() => document.getElementById('sl-ev-banner').hidden && !document.getElementById('sl-ev-pill').hidden), 'the minimise button turns the banner into a slim pill');
+    ok(await p.evaluate(() => localStorage.getItem('sl-ev-cd-min')) === '"xmas2026"', 'remembered for this visitor');
+    await shot(p, 'public-desktop-minimised');
+    await p.reload({ waitUntil: 'load' });
+    await p.waitForFunction(() => window.__introDone, null, { timeout: 90000 });
+    await p.evaluate(() => { const h = document.getElementById('sl-hero'); if (h && !h.hidden) window.scrollBy(0, 400); });
+    await p.waitForSelector('#sl-ev-pill:not([hidden])', { timeout: 60000 });
+    ok(await p.evaluate(() => document.getElementById('sl-ev-banner').hidden), 'a returning visit keeps it minimised');
+    await p.click('#sl-ev-pill');
+    ok(await p.evaluate(() => !document.getElementById('sl-ev-banner').hidden && document.getElementById('sl-ev-pill').hidden && !localStorage.getItem('sl-ev-cd-min')), 'the pill brings the banner back');
     ok(errs.length === 0, 'no page errors ' + errs.join(' | '));
     await ctx.close();
   }
+
+  console.log('--- public countdown: before its countdown window (20 October) - nothing shown');
+  {
+    const { ctx, p, errs, evFetches } = await pubOpen({ time: T('2026-10-20T10:00:00Z') });
+    await p.waitForTimeout(8000);
+    ok(await p.evaluate(() => !window.SL_EVENTS && !document.getElementById('sl-ev-banner') && !document.querySelector('link[href*="events/"]')), 'no countdown, no events code');
+    ok(evFetches.every((f) => f === '/events/config.js'), 'at most config.js is fetched (' + evFetches.join(', ') + ')');
+    ok(errs.length === 0, 'no page errors ' + errs.join(' | '));
+    await ctx.close();
+  }
+
+  console.log('--- public countdown: the preview switched off explicitly still gets only the public countdown');
+  {
+    const { ctx, p, evFetches } = await pubOpen({ query: '?preview=events-off', time: T('2026-11-24T10:00:00Z') , returning: true });
+    await p.waitForSelector('#sl-ev-banner', { timeout: 60000 });
+    ok(evFetches.every((f) => PUB_OK.test(f)) && await p.evaluate(() => SL_EVENTS.pub), 'public mode, countdown files only');
+    await ctx.close();
+  }
+
+  console.log('--- public countdown: reaching zero (Christmas event not switched on for everyone)');
+  {
+    const { ctx, p, errs } = await pubOpen({ time: T('2026-11-30T23:55:00Z') , returning: true });
+    await p.waitForSelector('#sl-ev-banner', { timeout: 60000 });
+    await p.waitForFunction(() => SL_EVENTS.time.trusted(), null, { timeout: 30000 });
+    await p.click('#sl-ev-banner'); await p.waitForSelector('#sl-ev-cd .sl-ev-clock');
+    await p.clock.pauseAt(T('2026-11-30T23:59:55Z'));
+    await p.clock.runFor(300);
+    await shot(p, 'public-zero-last-seconds');
+    await p.clock.runFor(5500);
+    ok(await p.evaluate(() => !!document.querySelector('#sl-ev-cd .sl-ev-burst')), 'reaching zero plays the burst');
+    ok(/December is here/.test(await p.textContent('#sl-ev-cd .sl-ev-burst')), 'the burst doesn\'t claim the event has begun');
+    await p.clock.runFor(4000);
+    let t = await pubText(p);
+    ok(/The Christmas event is coming to SnakeList today/.test(t), 'banner and panel: "The Christmas event is coming to SnakeList today"');
+    ok(!/Explore the Christmas event/.test(t) && await p.evaluate(() => !document.querySelector('#sl-ev-cd .sl-ev-cta')), 'no "Explore the Christmas event" button while it isn\'t switched on');
+    ok(/Time until Christmas/.test(t) && !/Live now/.test(t), 'the clock counts on to Christmas; nothing says "Live now"');
+    ok(!NOADS.test(t), 'still no subscription / Advent wording');
+    await shot(p, 'public-zero-coming-today');
+    await p.keyboard.press('Escape');
+    await p.evaluate(() => window.scrollTo(0, 0));
+    await shot(p, 'public-zero-banner');
+    // the separate Christmas release switches the event on: then (and only then) the button appears and works
+    await p.evaluate(() => { SL_EVENTS.cfg.xmasPublic = true; window.SL_XMAS_OPEN = () => { window.__xmOpened = (window.__xmOpened || 0) + 1; }; });
+    await p.clock.runFor(600);
+    ok(/Explore the Christmas event/.test(await p.textContent('#sl-ev-banner')), 'with xmasPublic on and the event there, the banner offers "Explore the Christmas event"');
+    await p.click('#sl-ev-banner'); await p.waitForSelector('#sl-ev-cd .sl-ev-cta');
+    await p.click('#sl-ev-cd .sl-ev-cta');
+    ok(await p.evaluate(() => window.__xmOpened === 1), 'and its button opens the Christmas event');
+    await p.keyboard.press('Escape');
+    await p.evaluate(() => { SL_EVENTS.cfg.xmasPublic = true; delete window.SL_XMAS_OPEN; });
+    await p.clock.runFor(600);
+    ok(!/Explore/.test(await p.textContent('#sl-ev-banner')), 'xmasPublic on but nothing to open: still no dead button');
+    ok(errs.length === 0, 'no page errors ' + errs.join(' | '));
+    await ctx.close();
+  }
+
+  console.log('--- public countdown: during December (5 December, phone)');
+  {
+    const { ctx, p, errs, evFetches } = await pubOpen({ time: T('2026-12-05T10:00:00Z'), ctx: devices['iPhone 13'] , returning: true });
+    await p.waitForSelector('#sl-ev-banner', { timeout: 60000 });
+    await p.waitForFunction(() => SL_EVENTS.time.trusted(), null, { timeout: 30000 });
+    await p.waitForTimeout(400);
+    const t = await p.textContent('#sl-ev-pub');
+    ok(/coming to SnakeList soon/.test(t) && /Time until Christmas/i.test(t) && /Coming soon/i.test(t), 'banner: coming soon, counting to Christmas');
+    ok(evFetches.every((f) => PUB_OK.test(f)), 'countdown files only');
+    await p.evaluate(() => window.scrollTo(0, document.getElementById('sl-ev-pub').getBoundingClientRect().top + scrollY - 120));
+    await p.waitForTimeout(300);
+    ok(await noOverflow(p), 'no sideways scrolling on a phone');
+    ok(await p.evaluate(() => { const a = document.getElementById('sl-ev-banner').getBoundingClientRect(), m = document.querySelector('#sl-ev-pub .sl-ev-min').getBoundingClientRect(); return a.left >= 0 && a.right <= innerWidth && m.right <= innerWidth && m.width >= 24; }), 'banner and its minimise button fit the phone screen');
+    await shot(p, 'public-phone-dec5-banner');
+    await p.click('#sl-ev-banner'); await p.waitForSelector('#sl-ev-cd .sl-ev-clock');
+    ok(await p.evaluate(() => { const r = document.querySelector('#sl-ev-cd .sl-achbox').getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth; }), 'panel fits the phone');
+    await shot(p, 'public-phone-dec5-panel');
+    await p.keyboard.press('Escape');
+    await p.click('#sl-ev-pub .sl-ev-min');
+    await p.evaluate(() => window.scrollTo(0, document.getElementById('sl-ev-pub').getBoundingClientRect().top + scrollY - 120));
+    ok(await p.evaluate(() => { const r = document.getElementById('sl-ev-pill').getBoundingClientRect(); return r.height <= 40 && r.right <= innerWidth; }), 'minimised on a phone: one slim line');
+    await shot(p, 'public-phone-minimised');
+    ok(errs.length === 0, 'no page errors ' + errs.join(' | '));
+    await ctx.close();
+  }
+
+  console.log('--- public countdown: reduced motion');
+  {
+    const { ctx, p } = await pubOpen({ time: T('2026-11-24T10:00:00Z'), ctx: { reducedMotion: 'reduce' } , returning: true });
+    await p.waitForSelector('#sl-ev-banner', { timeout: 60000 });
+    await p.waitForTimeout(2500);
+    ok(await p.evaluate(() => !document.querySelector('#sl-ev-banner .sl-ev-dg i.in, #sl-ev-banner .sl-ev-dg i.out')), 'digits change without sliding');
+    await ctx.close();
+  }
+
+  console.log('--- public countdown: after New Year (2 January 2027) - gone');
+  {
+    const { ctx, p } = await pubOpen({ time: T('2027-01-02T10:00:00Z') , returning: true });
+    await p.waitForTimeout(9000);
+    ok(await p.evaluate(() => !document.getElementById('sl-ev-banner') && !document.getElementById('sl-ev-pub')), 'no countdown once the event is over');
+    await ctx.close();
+  }
+
+  if (process.env.ONLY_PUBLIC) { await b.close(); console.log(fails ? '\n' + fails + ' FAILED' : '\nall passed'); return; }
 
   console.log('--- countdown to the start of Christmas 2026 (viewer in New York)');
   {

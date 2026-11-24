@@ -1,5 +1,8 @@
 /* SnakeList events preview - shared core: window.SL_EVENTS (trusted time, events and phases, subscription
-   status, account storage, panels). Loaded only by tools/events_loader.js when the "events" preview is on.
+   status, account storage, panels). Loaded by tools/events_loader.js when the "events" preview is on - and, for the
+   PUBLIC countdown (config.js publicCountdown), for every visitor after the opening. In that public mode
+   (SL_EVENTS.pub) only the events in config.js publicEvents exist here, nobody is a subscriber and the
+   subscription is never even looked up.
 
    Trusted time: the device clock is never trusted for anything that unlocks. The time comes from the web
    server's Date header (a HEAD request to this page) and then runs on performance.now(), so changing the
@@ -12,8 +15,11 @@
   if (window.SL_EVENTS) return;
   var CFG = window.SL_EVENTS_CONFIG, L = window.SL_ADVENT_LOGIC, D = document;
   var EV = window.SL_EVENTS = { cfg: CFG, logic: L, version: CFG.version };
+  // public mode: the countdown for everyone, without the preview switch (tools/events_loader.js sets SL_EV.pub)
+  var PUB = EV.pub = !!(window.SL_EV && window.SL_EV.pub && !window.SL_EV.on);
   var RM = window.matchMedia ? matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
-  EV.reducedMotion = function () { return !!RM.matches; };
+  // the device's "reduce motion" or SnakeList's own calm setting (Settings, html.sl-calm)
+  EV.reducedMotion = function () { return !!RM.matches || D.documentElement.classList.contains("sl-calm"); };
 
   /* ---------------- tiny helpers ---------------- */
   var esc = EV.esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
@@ -27,6 +33,15 @@
   EV.emit = function (n, a) { (subs[n] || []).slice().forEach(function (f) { try { f(a); } catch (e) { console.error(e); } }); };
   EV.ms = function (x) { return typeof x === "number" ? x : Date.parse(x); };
   EV.event = function (id) { return CFG.events.filter(function (e) { return e.id === id; })[0] || null; };
+  // the events this page may show: all of them in the preview, only config.js publicEvents in public mode
+  function shown(e) { return !PUB || (CFG.publicEvents || []).indexOf(e.id) >= 0; }
+  // what opens the Christmas event from the countdown's button, or null when nothing can (then no button is shown):
+  // in the preview the Advent Calendar; in public mode only once config.js xmasPublic is true AND the event is there
+  EV.xmasOpener = function () {
+    if (PUB && !CFG.xmasPublic) return null;
+    if (EV.advent && EV.advent.open) return EV.advent.open;
+    return PUB && typeof window.SL_XMAS_OPEN === "function" ? window.SL_XMAS_OPEN : null;
+  };
 
   /* ---------------- trusted time ---------------- */
   var T = { base: null, perf: 0, at: 0, source: null, pending: null, failed: false };
@@ -72,13 +87,13 @@
   // the event the homepage countdown is about: the soonest one (not a meta badge) that hasn't ended and whose countdown has begun
   EV.featured = function (now) {
     if (now == null) now = EV.time.display();
-    var list = CFG.events.filter(function (e) { return !e.meta && now < EV.ms(e.end) && now >= EV.ms(e.countdownFrom || e.start) - 0; });
+    var list = CFG.events.filter(function (e) { return !e.meta && shown(e) && now < EV.ms(e.end) && now >= EV.ms(e.countdownFrom || e.start) - 0; });
     list.sort(function (a, b) { return EV.ms(a.start) - EV.ms(b.start); });
     return list[0] || null;
   };
   EV.upcoming = function (now) {
     if (now == null) now = EV.time.display();
-    return CFG.events.filter(function (e) { return !e.meta && now < EV.ms(e.end); }).sort(function (a, b) { return EV.ms(a.start) - EV.ms(b.start); });
+    return CFG.events.filter(function (e) { return !e.meta && shown(e) && now < EV.ms(e.end); }).sort(function (a, b) { return EV.ms(a.start) - EV.ms(b.start); });
   };
   // the viewer's own time zone, said in words next to a local time ("your local time, Europe/Lisbon")
   EV.tzName = function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) { return ""; } };
@@ -98,7 +113,7 @@
     if (id === A.uid) return;
     A.uid = id; S.real = false; S.realEnd = null;
     if (A.unsubSub) { try { A.unsubSub(); } catch (e) {} A.unsubSub = null; }
-    if (id) watchSubscription(id);
+    if (id && !PUB) watchSubscription(id);   // public mode: subscriptions aren't live, so they're never looked up
     EV.emit("auth", u); EV.emit("sub", EV.isSubscriber());
   }
   setInterval(authTick, 1500); setTimeout(authTick, 0);
@@ -123,7 +138,7 @@
   // the preview-only TEST switch: local to this browser, labelled everywhere, never written to the account
   EV.testMode = function () { return !!(window.SL_EV && window.SL_EV.on) && EV.ls.get("sl-ev-test-sub", 0) === 1; };
   EV.setTestMode = function (on) { if (on) EV.ls.set("sl-ev-test-sub", 1); else EV.ls.del("sl-ev-test-sub"); EV.emit("sub", EV.isSubscriber()); EV.emit("mode"); };
-  EV.isSubscriber = function () { return S.real || EV.testMode(); };
+  EV.isSubscriber = function () { return !PUB && (S.real || EV.testMode()); };
   EV.subscription = function () { return { active: EV.isSubscriber(), real: S.real, test: EV.testMode(), periodEnd: S.realEnd }; };
 
   /* ---------------- panels (the same size and look as the Achievements panel) ---------------- */

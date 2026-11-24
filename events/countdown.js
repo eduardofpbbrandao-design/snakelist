@@ -4,12 +4,16 @@
    digit that changes moves (a short slide, about 200 ms; an instant swap for "reduce motion") - nothing flashes,
    bounces or pulses. Once the event is open for the viewer, the timer gives way to an "Explore the Christmas event"
    button and the clock then counts on to Christmas, then to New Year (events/config.js: countdown.after).
-   Times come from EV.time (the server's clock, see core.js) - the device clock is never trusted. */
+   Times come from EV.time (the server's clock, see core.js) - the device clock is never trusted.
+   PUBLIC mode (EV.pub, every visitor; config.js publicCountdown): the same banner and panel, but nothing about
+   subscriptions, early access, Advent, achievements or cursor, a minimise button (remembered in this browser), and
+   the "Explore" button only when the Christmas event is really switched on for everyone (EV.xmasOpener()); until
+   then it says the event is coming today / soon. */
 (function () {
   "use strict";
   var EV = window.SL_EVENTS; if (!EV) return;
   var D = document, esc = EV.esc, ic = EV.art.icon;
-  var SEC = 1000, MIN = 60 * SEC, HR = 60 * MIN, DAY = 24 * HR;
+  var SEC = 1000, MIN = 60 * SEC, HR = 60 * MIN, DAY = 24 * HR, PUB = !!EV.pub;
 
   function parts(ms) { ms = Math.max(0, ms); return { d: Math.floor(ms / DAY), h: Math.floor(ms % DAY / HR), m: Math.floor(ms % HR / MIN), s: Math.floor(ms % MIN / SEC) }; }
   function two(n) { return n < 10 ? "0" + n : "" + n; }
@@ -27,8 +31,9 @@
       var early = ea != null && sub && now < ea;
       st.kind = early ? "early-access" : "public";
       st.target = early ? ea : EV.ms(ev.start);
-      st.label = early ? "Your subscriber early access opens in" : "Public opening in";
+      st.label = early ? "Your subscriber early access opens in" : PUB ? "Opens in" : "Public opening in";
       st.done = early ? "You're in early!" : ev.short + " has begun!";
+      if (PUB && !EV.xmasOpener()) st.done = cdc(ev).publicZero || st.done;
     } else if (ph === "early") {
       st.kind = "open"; st.target = EV.ms(ev.start); st.label = "Opens for everyone in"; st.done = ev.short + " is open for everyone!";
     } else {
@@ -36,16 +41,18 @@
       var next = (cdc(ev).after || []).filter(function (a) { return EV.ms(a.at) > now; })[0];
       if (next) { st.target = EV.ms(next.at); st.label = next.label; st.done = next.label.replace(/^Time until /, "") + "!"; }
       else { st.target = EV.ms(ev.end); st.label = "Ends in"; st.done = ev.short + " has ended"; }
-      var a = ev.advent, nd = a ? EV.logic.today(ev, now) + 1 : 0;
+      var a = ev.advent && EV.logic && (!PUB || EV.xmasOpener()) ? ev.advent : null, nd = a ? EV.logic.today(ev, now) + 1 : 0;
       if (a && nd >= 2 && nd <= a.days + 1) st.door = nd - 1;     // doors open so far
     }
     st.left = st.target - now;
+    // once open: what the button opens (null = nothing can yet, so no button - see EV.xmasOpener in core.js)
+    st.go = st.open ? EV.xmasOpener() : null;
     return st;
   };
 
   /* the early-access line, worded from the configured dates so it can never promise more than they give */
   function earlyLine(ev) {
-    if (!ev.earlyAccess) return "";
+    if (!ev.earlyAccess || PUB) return "";
     var days = Math.round((EV.ms(ev.start) - EV.ms(ev.earlyAccess)) / DAY);
     var from = EV.localTime(ev.earlyAccess, { day: "numeric", month: "long" });
     return days >= 10 ? "Subscribers get early access 10 or more days before · from " + from
@@ -120,14 +127,17 @@
 
   /* ---------------- the homepage banner ---------------- */
   var B = null, lastKey = "";
+  // public mode, open but the Christmas event isn't switched on for everyone yet: "coming today" (its first day) / "soon"
+  function comingText(st) { var c = cdc(st.ev); return st.now < EV.ms(st.ev.start) + DAY ? (c.publicToday || "Coming today") : (c.publicSoon || "Coming soon"); }
   function tagText(st) {
+    if (PUB) return !st.open ? (cdc(st.ev).publicTag || "Coming soon") : st.go ? "Live now" + (st.door ? " · door " + st.door + " open" : "") : st.now < EV.ms(st.ev.start) + DAY ? "Coming today" : "Coming soon";
     if (st.phase === "early") return "Subscriber early access · open now";
     if (st.phase === "live") return "Live now" + (st.door ? " · door " + st.door + " open" : "");
     return st.kind === "early-access" ? "Subscriber early access" : "Public opening";
   }
   function bannerHtml(st) {
     var ev = st.ev, c = cdc(ev);
-    var sub = st.open ? (c.openButton || "Explore the event") : (c.comes || EV.localTime(ev.start, { day: "numeric", month: "long" }));
+    var sub = st.open ? (PUB && !st.go ? comingText(st) : (c.openButton || "Explore the event")) : (c.comes || EV.localTime(ev.start, { day: "numeric", month: "long" }));
     return '<span class="sl-ev-b-art">' + EV.art.event(ev.theme) + "</span>" +
       '<span class="sl-ev-b-txt"><small>' + esc(tagText(st)) + "</small><b>" + esc(ev.name) + "</b><em>" + esc(sub) + "</em></span>" +
       '<span class="sl-ev-b-right"><span class="sl-ev-b-lab">' + esc(st.label) + "</span>" + clockHtml(st.left, "sl-ev-mini") + "</span>" +
@@ -136,18 +146,55 @@
   function banner() {
     var tabs = D.querySelector(".tabs"); if (!tabs) return;
     var st = EV.countdownState();
-    if (!st) { if (B) { B.remove(); B = null; } return; }
+    if (!st) { if (B) { B.remove(); B = null; } if (W) { W.remove(); W = null; } return; }
     if (!B) {
       B = D.createElement("button"); B.type = "button"; B.id = "sl-ev-banner";
       B.addEventListener("click", function () { EV.openCountdown(); });
     }
-    if (!B.isConnected) tabs.parentNode.insertBefore(B, tabs);
+    if (PUB) { if (pubWrap(tabs, st)) return; }
+    else if (!B.isConnected) tabs.parentNode.insertBefore(B, tabs);
     B.className = "sl-ev-banner sl-ev-t-" + st.ev.theme + (st.open ? " sl-ev-is-open" : "") + heat(st.left);
-    var key = st.ev.id + "|" + st.phase + "|" + st.kind + "|" + st.label + "|" + st.door;
+    var key = st.ev.id + "|" + st.phase + "|" + st.kind + "|" + st.label + "|" + st.door + "|" + !!st.go + "|" + (st.open && PUB && !st.go ? comingText(st) : "");
     if (key !== lastKey) { var keep = B.querySelector(".sl-ev-burst"); B.innerHTML = bannerHtml(st); if (keep) B.appendChild(keep); lastKey = key; }
     else setDigits(B, st.left);
     B.setAttribute("aria-label", st.ev.name + ": " + st.label + " " + spoken(st.left) + ". Open the event countdown.");
     crossing(B, st, B);
+  }
+  /* public mode: the banner sits in a wrapper with a small minimise button; minimised, it is a slim pill instead
+     (remembered in this browser, per event: localStorage sl-ev-cd-min = the event's id) */
+  var W = null, PILL = null, MINK = "sl-ev-cd-min";
+  function isMin(st) { return EV.ls.get(MINK, null) === st.ev.id; }
+  function setMin(st, on) {
+    if (on) EV.ls.set(MINK, st.ev.id); else EV.ls.del(MINK);
+    lastKey = ""; pillTxt = ""; banner();
+    try { (on ? PILL : B).focus({ preventScroll: true }); } catch (e) {}
+  }
+  function compact(ms) { var p = parts(ms); return (p.d ? p.d + "d " : "") + two(p.h) + "h " + two(p.m) + "m"; }
+  var pillTxt = "";
+  // returns true when minimised (the banner itself needn't be drawn)
+  function pubWrap(tabs, st) {
+    if (!W) {
+      W = D.createElement("div"); W.id = "sl-ev-pub"; W.className = "sl-ev-pubwrap";
+      var mn = D.createElement("button"); mn.type = "button"; mn.className = "sl-ev-min";
+      mn.setAttribute("aria-label", "Minimise the countdown"); mn.title = "Minimise";
+      mn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>';
+      mn.addEventListener("click", function () { var s2 = EV.countdownState(); if (s2) setMin(s2, true); });
+      PILL = D.createElement("button"); PILL.type = "button"; PILL.className = "sl-ev-pill"; PILL.id = "sl-ev-pill";
+      PILL.addEventListener("click", function () { var s2 = EV.countdownState(); if (s2) setMin(s2, false); });
+      W.appendChild(B); W.appendChild(mn); W.appendChild(PILL);
+    }
+    if (!W.isConnected || W.nextElementSibling !== tabs) tabs.parentNode.insertBefore(W, tabs);
+    var min = isMin(st);
+    W.className = "sl-ev-pubwrap sl-ev-t-" + st.ev.theme + (min ? " is-min" : "");
+    B.hidden = min; PILL.hidden = !min; W.querySelector(".sl-ev-min").hidden = min;
+    if (!min) return false;
+    var t = st.ev.short + " · " + (st.open && !st.go ? (st.now < EV.ms(st.ev.start) + DAY ? "coming today" : "coming soon") : compact(st.left));
+    if (t !== pillTxt) {
+      pillTxt = t;
+      PILL.innerHTML = '<span class="sl-ev-pill-art">' + EV.art.event(st.ev.theme) + "</span><span>" + esc(t) + "</span>" + ic("arrow", 14);
+      PILL.setAttribute("aria-label", st.ev.name + ": " + (st.open && !st.go ? comingText(st) : st.label + " " + spoken(st.left)) + ". Show the countdown again.");
+    }
+    return true;
   }
   // the moment it reaches zero (the state moves on to its next target): a burst, once
   function crossing(el, st, host) {
@@ -174,9 +221,12 @@
   function heroHtml(st) {
     var ev = st.ev, c = cdc(ev), sub = EV.isSubscriber(), el = earlyLine(ev), tz = tzName();
     var opens = st.kind === "early-access" ? ev.earlyAccess : ev.start;
-    var whenLab = st.kind === "early-access" ? "Your early access opens" : "Opens for everyone";
+    var whenLab = st.kind === "early-access" ? "Your early access opens" : PUB ? "Starts" : "Opens for everyone";
     var tag = '<p class="sl-ev-tag' + (st.open ? " is-live" : "") + '">' + esc(tagText(st)) + "</p>";
-    var body = st.open
+    var body = st.open && PUB && !st.go
+      ? '<p class="sl-ev-comes sl-ev-soon">' + esc(comingText(st)) + "</p>" +
+        '<p class="sl-ev-for">' + esc(st.label) + "</p>" + clockHtml(st.left, "sl-ev-after")
+      : st.open
       ? '<button type="button" class="sl-ev-cta" data-go="advent">' + esc(c.openButton || "Explore the event") + ic("arrow", 18) + "</button>" +
         '<p class="sl-ev-for">' + esc(st.label) + "</p>" + clockHtml(st.left, "sl-ev-after")
       : (c.comes ? '<p class="sl-ev-comes">' + esc(c.comes) + "</p>" : "") +
@@ -189,11 +239,11 @@
       (tz ? '<span class="sl-ev-tz">Your time zone: ' + esc(tz) + "</span>" : "") +
       '<span class="sl-ev-utc">Same moment everywhere: ' + esc(new Date(EV.ms(opens)).toUTCString().replace(" GMT", " UTC")) + "</span></p>" +
       (el && !(sub && st.open) ? '<p class="sl-ev-early">' + ic("crown", 14) + esc(el) + "</p>" : "") +
-      '<p class="sl-ev-desc">' + esc(ev.description) + "</p></div></div>";
+      '<p class="sl-ev-desc">' + esc(PUB && ev.publicDescription && !st.go ? ev.publicDescription : ev.description) + "</p></div></div>";
   }
   function panelHtml(st) {
     var h = st ? heroHtml(st) : '<p class="sl-ev-muted">No event is coming up right now.</p>';
-    h += '<div class="sl-ev-row">' +
+    if (!PUB) h += '<div class="sl-ev-row">' +
       '<button type="button" class="sl-ev-btn pri" data-go="advent">' + ic("door") + "Advent Calendar</button>" +
       '<button type="button" class="sl-ev-btn" data-go="subscribe">' + ic("crown") + "Subscriber benefits</button>" +
       '<button type="button" class="sl-ev-btn" data-go="ach">' + ic("star") + "Seasonal achievements</button>" +
@@ -201,7 +251,7 @@
     var up = EV.upcoming().filter(function (e) { return !st || e.id !== st.ev.id; });
     if (up.length) h += '<h3 class="sl-ev-h3">Coming up</h3><ul class="sl-ev-list">' + up.map(function (e) {
       return '<li class="sl-ev-t-' + e.theme + '"><span>' + EV.art.event(e.theme) + "</span><span><b>" + esc(e.name) + "</b><small>" +
-        esc(EV.localTime(e.start, { day: "numeric", month: "long", year: "numeric" })) + (e.earlyAccess ? " · early access for subscribers" : "") + (e.promo && e.promo.label ? " · " + esc(e.promo.label) : "") + "</small></span></li>";
+        esc(EV.localTime(e.start, { day: "numeric", month: "long", year: "numeric" })) + (!PUB && e.earlyAccess ? " · early access for subscribers" : "") + (!PUB && e.promo && e.promo.label ? " · " + esc(e.promo.label) : "") + "</small></span></li>";
     }).join("") + "</ul>";
     h += '<p class="sl-ev-muted" style="margin-top:10px" data-timecheck>' + timeLine() + "</p>";
     return h;
@@ -211,7 +261,7 @@
     if (EV.time.failed()) return "Couldn't check the time with the server, so nothing can be unlocked until you're back online. (The countdown uses this device's clock.)";
     return "Checking the time with the server…";
   }
-  function pkey(st) { return st ? st.ev.id + st.phase + st.kind + st.label : ""; }
+  function pkey(st) { return st ? st.ev.id + st.phase + st.kind + st.label + !!st.go + (st.open && PUB && !st.go ? comingText(st) : "") : ""; }
   EV.openCountdown = function () {
     var st = EV.countdownState();
     P = EV.panel("sl-ev-cd", "Events", panelHtml(st), { cls: st ? "sl-ev-t-" + st.ev.theme : "", onClose: function () { P = null; } });
@@ -219,7 +269,7 @@
     P.addEventListener("click", function (e) {
       var g = e.target.closest("[data-go]"); if (!g) return;
       var w = g.getAttribute("data-go");
-      if (w === "advent" && EV.advent) EV.advent.open();
+      if (w === "advent") { var go = EV.xmasOpener(); if (go) go(); }
       if (w === "subscribe" && EV.subscribe) EV.subscribe.open();
       if (w === "cursor" && EV.cursor) EV.cursor.open();
       if (w === "ach") { P.close(); if (window.SL_openAch) window.SL_openAch(); setTimeout(function () { var s = D.getElementById("sl-ev-ach"); if (s) s.scrollIntoView({ block: "start" }); }, 80); }
