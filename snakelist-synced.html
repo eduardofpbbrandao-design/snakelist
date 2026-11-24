@@ -21466,7 +21466,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     // not the habitat's own outline
     else if (habOn && st.hab) setStatus("Habitats layer · " + st.hab + ": the whole ranges of the " + R.nsp.toLocaleString() + (R.nsp === 1 ? " snake" : " snakes") +
       " associated with it, across " + places + " - not the outline of the " + st.hab.toLowerCase() + " itself. Habitats are estimated from where each snake is recorded and what kind of snake it is, not from field surveys. This choice only changes this layer." + note);
-    else setStatus("Heatmap layer · " + (st.q ? displayName() : st.cat !== "all" && CATS[st.cat] ? CATS[st.cat].label : (window.SL_MAPF && window.SL_MAPF.on() ? "the snakes your Filters keep" : "all snakes")) + ": " + R.nsp.toLocaleString() + " species across " + places + ". This choice only changes the heatmap - the search and Filters above stay as they are." + note);
+    else setStatus("Heatmap layer · " + (st.q ? displayName() : st.cat !== "all" && CATS[st.cat] ? CATS[st.cat].label : (window.SL_MAPF && window.SL_MAPF.on() ? "the snakes your Filters keep" : "all snakes")) + ": " + R.nsp.toLocaleString() + " species across " + places + "." + (putAside ? "" : " This choice only changes the heatmap - the search and Filters above stay as they are.") + note);
   }
   // the two "nothing here" colours: snakes live there but none of these (a light grey), or the place has no snakes on record at all (a plain neutral grey, lighter
   // in the day theme, darker at night)
@@ -28170,6 +28170,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   .area-key .ak-note [hidden] { display: none; }
   @media (max-width: 640px) { .area-key .ak-note .ak-scale-note { display: none; } } /* (a phone: the key stays short) */
   .area-key .ak-intro b { font-weight: 700; color: #ffd98a; }
+  @media (max-width: 640px) { .area-key #ak-src { display: none; } .area-key .ak-note { font-size: 10px; } } /* (a phone: the source stays on the species page) */
   .area-key.ak-small .ak-intro { display: none; }
   .globe-stage.area-on #map-legend { display: none !important; }
   .map-legend.area-key.ak-small { right: 54px; padding: 5px 8px; flex-direction: row; align-items: center; gap: 8px; }
@@ -28200,6 +28201,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     .nm-how-wrap .nm-how-box { width: 100%; max-height: min(52vh, 460px); border-radius: 16px 16px 0 0; }
   }
   /* v6.20: the location question, in the map */
+  .globe-stage .sp-info-wrap.nm-ask-wrap { align-items: flex-start; }
   .nm-ask .nm-ask-why { margin: 4px 0 10px; line-height: 1.5; }
   .nm-ask .nm-ask-priv { font-size: 12px; opacity: .88; }
   .nm-ask-go { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; min-height: 36px; padding: 7px 14px; border-radius: 999px; border: 1px solid #ffd23f; background: rgba(0,0,0,0.2); color: #fff; font: 600 13px 'Inter', sans-serif; cursor: pointer; }
@@ -28636,7 +28638,12 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   }
   // the spot on the map (drawn by SL_OVERLAY_DRAW below) and the map moved so it is in view
   var spotOn = null, spotEl = null;
-  function spotLabel(o) { return o.kind === "here" ? "Look around here" : "Best spot near you"; }
+  // v6.20: the label names the snake (it stays on the map after the guide is closed)
+  function spotLabel(o) {
+    var sp = lastList.filter(function (x) { return x.id === howId; })[0], nm = sp && sp.name ? sp.name : "";
+    if (nm.length > 28) nm = "";
+    return o.kind === "here" ? "Look around here" + (nm ? " for the " + nm : "") : "Best spot" + (nm ? " for the " + nm : " near you");
+  }
   function showSpot(o) {
     var M = window.SL_NEARME_MAP, r = rec(); if (!M || !r) return;
     spotOn = o;
@@ -28825,7 +28832,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
       askWrap.innerHTML = '<div class="sp-info nm-how-box nm-ask" role="dialog" aria-labelledby="nm-ask-h" tabindex="-1"><button type="button" class="sp-info-x" aria-label="Close">&times;</button><div class="nm-how-body">' +
         '<h3 id="nm-ask-h">See the snakes near you</h3>' +
         '<p class="nm-ask-why">SnakeList needs a rough idea of where you are to list the snakes recorded around you, say which are likely out right now and suggest where to look.</p>' +
-        '<div class="nm-sec"><p class="sp-info-h">Use your location</p><p class="nm-ask-priv"></p><button type="button" class="nm-ask-go">' + PIN_SVG + 'Use my location</button></div>' +
+        '<div class="nm-sec"><p class="sp-info-h">Use your location</p><p class="nm-ask-priv"></p><button type="button" class="nm-ask-go"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path><circle cx="12" cy="12" r="7"></circle></svg>Use my location</button></div>' +
         '<p class="nm-ask-msg" role="status" hidden></p>' +
         '<div class="nm-sec"><p class="sp-info-h">Or choose a place instead</p><p>No location needed: type a town or city.</p>' +
         '<input type="search" class="nm-ask-q" placeholder="Town or city&hellip;" autocomplete="off" aria-label="Choose a town or city"><div class="nm-ask-res" role="list"></div></div>' +
@@ -28858,6 +28865,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     var hits = [];
     for (var i = 0; i < C.length && hits.length < 40; i++) { var n = plain(C[i][0]); if (n.indexOf(v) === 0) hits.push([0, i]); else if (n.indexOf(" " + v) > -1) hits.push([1, i]); }
     hits.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+    setTimeout(function () { if (res.firstChild && res.scrollIntoView) res.scrollIntoView({ block: "nearest" }); }, 0);
     res.innerHTML = hits.length ? hits.slice(0, 6).map(function (h) { var c = C[h[1]]; return '<button type="button" class="nm-ask-pick" role="listitem" data-lat="' + c[2] + '" data-lon="' + c[3] + '" data-name="' + esc(c[0] + ", " + c[1]) + '"><b>' + esc(c[0]) + "</b> " + esc(c[1]) + "</button>"; }).join("")
       : '<p class="nm-ask-none">No town or city by that name in SnakeList - try a bigger place nearby.</p>';
   }
@@ -28948,6 +28956,9 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
         spotEl.style.left = (cr.left - sr.left - stage.clientLeft + stage.scrollLeft + sx) + "px";
         spotEl.style.top = (cr.top - sr.top - stage.clientTop + stage.scrollTop + sy) + "px";
         spotEl.hidden = sx < -10 || sy < -10 || sx > w + 10 || sy > h + 10;
+        // v6.20: its name tag stays inside the map near an edge (it was cut off at the side)
+        var lb = spotEl.querySelector(".nm-spot-lbl");
+        if (lb && !spotEl.hidden) { var lw = lb.offsetWidth, sw = stage.clientWidth, x0 = parseFloat(spotEl.style.left) || 0, left = Math.max(6, Math.min(sw - lw - 6, x0 - lw / 2)); lb.style.transform = "translateX(" + Math.round(left - x0) + "px)"; }
       }
     } else if (spotEl) spotEl.hidden = true;
     ctx.save();
