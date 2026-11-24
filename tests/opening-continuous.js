@@ -89,8 +89,37 @@ async function run(b, o) {
   await ctx.close();
 }
 
+// v6.20 (Eduardo: "visitors can scroll immediately, without waiting for the animation"): a scroll down while the opening is
+// still playing is not lost - the opening hands over to the photo at once and carries straight on down into SnakeList,
+// with no reload, no second opening and no frame where the page jumps.
+async function runScrollEarly(b, phone) {
+  const label = (phone ? 'phone' : 'computer') + ', scrolling during the opening';
+  const ctx = await b.newContext(phone ? { viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true } : { viewport: { width: 1280, height: 800 } });
+  const p = await ctx.newPage(); const errs = []; p.on('pageerror', (e) => errs.push(e.message));
+  await p.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, (r) => r.abort());
+  await p.addInitScript(() => { ['sl-intro-seen', 'sl-tour-done', 'sl-tour-seen', 'sl-level-seen'].forEach((k) => localStorage.setItem(k, '1')); localStorage.setItem('sl-seen-ver', 'v1.00'); });
+  await p.addInitScript(inPage);
+  let navs = 0; p.on('framenavigated', (f) => { if (f === p.mainFrame()) navs++; });
+  await p.goto(BASE, { waitUntil: 'commit', timeout: 120000 });
+  await p.waitForFunction(() => { const i = document.getElementById('intro'); return i && !i.classList.contains('intro-hold'); }, null, { timeout: 60000 });
+  await p.waitForTimeout(500);
+  const t0 = Date.now();
+  if (phone) { const cdp = await ctx.newCDPSession(p); let y = 700; await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 206, y }] }); for (let i = 0; i < 6; i++) { y -= 30; await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 206, y }] }); await p.waitForTimeout(16); } await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); }
+  else { await p.mouse.move(640, 400); await p.mouse.wheel(0, 200); }
+  const inAt = await p.waitForFunction(() => window.__heroEntered, null, { timeout: 15000 }).then(() => Date.now() - t0).catch(() => null);
+  await p.waitForTimeout(800);
+  const r = await p.evaluate(() => ({ glides: window.__OC.glides, done: window.__OC.introDone, y: scrollY, heroHidden: document.getElementById('sl-hero').hidden }));
+  console.log('-- ' + label + ': in SnakeList ' + (inAt == null ? 'never' : inAt + ' ms') + ' after the scroll');
+  ok(inAt != null && inAt < 6000, label + ': the scroll carries on down into SnakeList (in ' + inAt + ' ms)');
+  ok(navs === 1 && r.done === 1 && r.glides <= 1, label + ': no reload and the opening ended once (' + JSON.stringify(r) + ')');
+  ok(r.heroHidden && r.y < 5, label + ': SnakeList is shown from its top (scroll ' + r.y + ')');
+  ok(!errs.length, label + ': no page errors' + (errs.length ? ': ' + errs.slice(0, 2).join(' | ') : ''));
+  await ctx.close();
+}
+
 (async () => {
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  for (const ph of [false, true]) await runScrollEarly(b, ph);
   for (const o of [{ phone: false, first: false }, { phone: true, first: false }, { phone: false, first: true }, { phone: true, first: true }]) await run(b, o);
   await b.close();
   console.log(fails ? fails + ' FAILED' : 'ALL PASSED');
