@@ -254,7 +254,34 @@
   // wired the moment the photo is in the page (from dressCover, while the page is still loading), so the hat is
   // placed as soon as the photo has its size - before the opening dissolves into it, never popping in afterwards
   var phIm = null;
+  /* the opening's photo wall: the same hat on each tile's snake. The tiles are background images (data/ui/<id>.jpg,
+     background-size: cover, centred); their hats are photoHats entries keyed "ui/<id>" with the photo's own size
+     (nw, nh), so each hat is placed the moment its tile exists - inside the tile, so it fades in WITH the photo
+     from the first frame (it was missing before: the wall had no hats at all) */
+  function wallHats() {
+    var wall = D.querySelector("#intro .photo-wall"); if (!wall || !ART.hatSvg) return;
+    [].forEach.call(wall.querySelectorAll(".ph"), function (ph) {
+      var m = /data\/ui\/([^.")]+)\./.exec(ph.style.backgroundImage || ""), P = m && (ART.photoHats || {})["ui/" + m[1]];
+      if (!P) return;
+      var L = ph.querySelector(".xm-what");
+      if (!L) { L = D.createElement("div"); L.className = "xm-what"; L.setAttribute("aria-hidden", "true"); L.innerHTML = '<svg viewBox="-72 -84 144 116" preserveAspectRatio="xMidYMid meet">' + ART.hatSvg.replace(/xmp-/g, "xmw-") + "</svg>"; ph.appendChild(L); }
+      var bw = ph.offsetWidth, bh = ph.offsetHeight; if (!bw || !bh) return;
+      var k = Math.max(bw / P.nw, bh / P.nh), cw = P.nw * k, ch = P.nh * k, ox = (bw - cw) / 2, oy = (bh - ch) / 2;
+      var w = P.w * cw, sv = L.firstChild;
+      sv.style.width = (w * 1.44) + "px"; sv.style.height = (w * 1.16) + "px";
+      sv.style.left = (ox + P.x * cw - w * .72) + "px"; sv.style.top = (oy + P.y * ch - w * .84) + "px";
+      sv.style.transformOrigin = (w * .72) + "px " + (w * .84) + "px";
+      sv.style.transform = "rotate(" + (P.a || 0) + "deg)" + (P.flip ? " scaleX(-1)" : "");
+    });
+  }
+  var wallRO = null;
+  function wallHatsOn() {
+    var wall = D.querySelector("#intro .photo-wall"); if (!wall) return;
+    wallHats();
+    if (!wallRO && "ResizeObserver" in window) { wallRO = new ResizeObserver(wallHats); wallRO.observe(wall); }
+  }
   function photoHat() {
+    wallHatsOn();
     var hero = D.getElementById("sl-hero"); if (!hero) return;
     var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (!im || phIm === im) return;
     phIm = im;

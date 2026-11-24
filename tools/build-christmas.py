@@ -170,12 +170,26 @@ def page_logo(variant, hat, ssnow):
         k = s.find("</svg>", s.find('viewBox="-23.5'))
         s = s[:k] + '<path d="%s" fill="#fff"/>' % ssnow + s[k:]
         a = s.find('viewBox="5.6 0.3 36.9 36.0"'); a = s.find(">", a) + 1; b = s.find("</svg>", a)
-        s = s[:a] + art.STOCKING.replace("xms-", "xms%s-" % variant[0]) + s[b:]
+        s = s[:a] + logo_stocking(variant) + s[b:]
         open(out_saved, "w", encoding="utf-8").write(s)
     except Exception as e:
         print("note: the pages' %s logo was not redrawn (%s); the saved one is used" % (variant, e.__class__.__name__))
-        restock(out_saved, art.STOCKING.replace("xms-", "xms%s-" % variant[0]))
+        restock(out_saved, logo_stocking(variant))
+        rehat(out_saved)
     if os.path.isfile(out_saved): shutil.copy2(out_saved, posixpath.join(OUT, "xmas-logo-%s.svg" % variant))
+
+def rehat(path):
+    """the saved logo keeps the same hat drawing; only where it sits follows art.LOGO_HAT (the hat's own transform)"""
+    if not os.path.isfile(path): return
+    s = open(path, encoding="utf-8").read(); h = art.LOGO_HAT; k = h["width"] / 100.0
+    t = "translate(%s %s) rotate(%s) scale(%.4f %.4f)" % (art._f1(h["cx"]), art._f1(h["cy"]), art._f1(h["angle"]), k, k)
+    s2 = re.sub(r"translate\([-\d. ]+\) rotate\([-\d.]+\) scale\([\d.]+ [\d.]+\)(?=\"><defs><linearGradient id=\"xmh)", t, s, count=1)
+    if s2 != s: open(path, "w", encoding="utf-8").write(s2)
+
+def logo_stocking(variant):
+    """the saved logo files lose their tick drawing to the stocking group, so the group draws the tick too (in the
+    wordmark's green) with the stocking hanging from it"""
+    return art.stocking_tick(p="xms%s" % variant[0], tick="#4c9d3f" if variant == "light" else "#63b84f")
 
 def restock(path, stocking):
     """the saved pages' logo keeps up with the current stocking even when it cannot be redrawn: its <g class="xm-stk">
