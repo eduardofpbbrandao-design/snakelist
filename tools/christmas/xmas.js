@@ -36,6 +36,14 @@
     var e = null, cs = g.getElementsByTagName("circle");
     for (var i = 0; i < cs.length; i++) if (/sl-eye/.test(cs[i].getAttribute("fill") || "")) { e = cs[i]; break; }
     if (!e) return false;
+    // the hat's gradients and filters: in a little drawing of their own, straight in <body>. Inside #mark-snake (or
+    // anywhere in the app's root, which is not drawn during the opening) the <use> copies could not reach them until
+    // the page restyled itself, a few seconds in - the hat showed as a bare outline over the opening.
+    if (ART.hatDefs && !D.getElementById("xmh-r") && D.body) {
+      var ds = D.createElementNS(NS, "svg"); ds.setAttribute("class", "xm-defs"); ds.setAttribute("aria-hidden", "true");
+      ds.setAttribute("style", "position:absolute;left:0;top:0;width:0;height:0;overflow:hidden;pointer-events:none");
+      ds.innerHTML = "<defs>" + ART.hatDefs + "</defs>"; D.body.appendChild(ds);
+    }
     var t = D.createElementNS(NS, "g"); t.setAttribute("style", "opacity:var(--xm-hat-o,1)"); t.innerHTML = ART.hat; e.parentNode.appendChild(t);
     if (ART.ssnow) { var s = D.createElementNS(NS, "path"); s.setAttribute("d", ART.ssnow); s.setAttribute("class", "xm-ssnow"); s.setAttribute("fill", "#fff"); s.setAttribute("style", "opacity:var(--xm-hat-o,1)"); g.appendChild(s); }
     return true;
@@ -46,7 +54,15 @@
   function stockings() {
     if (!ART.stocking) return;
     [].forEach.call(D.querySelectorAll("svg.sl-tick, .intro-box svg:not(.tick-detail)"), function (sv) {
-      if (sv.querySelector(".xm-stk")) return;
+      var old = sv.querySelector(".xm-stk");
+      if (old) {
+        // a copy of a logo that already had its stocking (the cover's wordmark is copied from the opening's) carries
+        // the same gradient names; those would point at the original, which is hidden once the opening has gone
+        // (the stocking then showed as a flat dark shape with no cuff) - such a copy gets its own names
+        var gid = (old.querySelector("[id]") || {}).id;
+        if (!gid || D.querySelectorAll('[id="' + gid + '"]').length < 2 || D.getElementById(gid) && sv.contains(D.getElementById(gid))) return;
+        old.remove();
+      }
       sv.classList.add("xm-has-stk"); sv.style.overflow = "visible";
       // its own gradient names in each copy (a copy inside a hidden logo could not lend them to the others)
       var n = ++stkN; sv.insertAdjacentHTML("beforeend", ART.stocking.replace(/xms-/g, "xms" + n + "-"));
@@ -159,6 +175,9 @@
   XM.snowLetters = snowAll;
   function logo() {
     XM.hat(); stockings(); snowAll();
+    // the cover's wordmark is (re)written as a copy of another logo: dress its tick the moment it arrives
+    var hh = D.getElementById("sl-hero");
+    if (hh && "MutationObserver" in window) new MutationObserver(function () { stockings(); }).observe(hh, { childList: true, subtree: true });
     if (D.fonts && D.fonts.ready) D.fonts.ready.then(snowAll);
     if ("ResizeObserver" in window) { var ro = new ResizeObserver(snowAll); [].forEach.call(D.querySelectorAll(SNOW_HOSTS), function (h) { ro.observe(h); }); }
     window.addEventListener("resize", snowAll);
@@ -195,6 +214,8 @@
     var u = im.currentSrc || im.src || ""; u = u.split(/[?#]/)[0].split("/").pop();
     return u.replace(/\.(webp|jpe?g|png|avif)$/i, "").replace(/-\d+w?$/, "");
   }
+  // the photo's own load, caught however early it comes (load does not bubble: listened for on the way down)
+  D.addEventListener("load", function (e) { var t = e.target; if (t && t.tagName === "IMG" && t.closest && t.closest("#sl-hero .hero-media")) placePhotoHat(); }, true);
   function placePhotoHat() {
     var hero = D.getElementById("sl-hero"); if (!hero || !ART.hatSvg) return;
     var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (!im) return;
@@ -215,9 +236,13 @@
     sv.style.transformOrigin = (w * .72) + "px " + (w * .84) + "px";
     sv.style.transform = "rotate(" + (P.a || 0) + "deg)" + (P.flip ? " scaleX(-1)" : "");
   }
+  // wired the moment the photo is in the page (from dressCover, while the page is still loading), so the hat is
+  // placed as soon as the photo has its size - before the opening dissolves into it, never popping in afterwards
+  var phIm = null;
   function photoHat() {
     var hero = D.getElementById("sl-hero"); if (!hero) return;
-    var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (!im) return;
+    var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (!im || phIm === im) return;
+    phIm = im;
     im.addEventListener("load", placePhotoHat);
     new MutationObserver(placePhotoHat).observe(im, { attributes: true, attributeFilter: ["src", "srcset", "style", "class", "data-photo-id"] });
     if ("ResizeObserver" in window) new ResizeObserver(placePhotoHat).observe(im);
@@ -652,6 +677,10 @@
       var sec = D.createElement("section"); sec.className = "xm-set-audio";
       sec.innerHTML = "<h3>Christmas audio</h3>";
       AU.panel(sec);
+      // the welcome panel's news, still there after it was dismissed (it never pops up again by itself)
+      var nb = D.createElement("button"); nb.type = "button"; nb.className = "xm-set-news"; nb.textContent = "What's new for Christmas";
+      nb.addEventListener("click", function () { var x = D.querySelector("#sl-settings .sl-aclose"); if (x) x.click(); setTimeout(show, 150); });
+      sec.appendChild(nb);
       var audio = panel.querySelector('[data-section="audio"], [data-sl-settings-section="audio"], .sl-set-audio, #sl-settings-audio');
       (audio || panel).appendChild(sec);
     }
@@ -664,7 +693,9 @@
   /* ================= "Merry Christmas from SnakeList!" - once per person =================
      It waits its turn like the app's own pop-ups. Each new thing in the list can be tapped: the panel closes and
      SnakeList shows it (goes there and points at it). */
-  var WKEY = "sl-xmas-welcome-seen", wOpen = false;
+  // once per event announcement (a new event gets a new key); the preview's earlier key counts as this event's
+  var WEV = "xmas2026", WKEY = "sl-xmas-welcome-seen:" + WEV, wOpen = false;
+  function welcomeSeen() { return !!(lsGet(WKEY) || (WEV === "xmas2026" && lsGet("sl-xmas-welcome-seen"))); }
   function visible(el) { if (!el || el.hidden || el.closest("[hidden]")) return false; var cs = getComputedStyle(el); if (cs.display === "none" || cs.visibility === "hidden" || +cs.opacity < .05) return false; var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; }
   function othersOpen() {
     if (visible(D.querySelector(".tour-callout")) || visible(D.querySelector("#sl-level.open")) || visible(D.querySelector("#wn-sheet.open"))) return true;
@@ -673,7 +704,7 @@
     return D.documentElement.classList.contains("sl3d-lock");
   }
   function welcome() {
-    if (XM.kind !== "xm-app" || lsGet(WKEY)) return;
+    if (XM.kind !== "xm-app" || welcomeSeen()) return;
     var html = D.documentElement; html.classList.add("xm-welcome-visit");
     var wn = D.getElementById("wn-sheet");
     if (wn) {
@@ -739,7 +770,7 @@
   /* the cover and the logo are dressed the moment they arrive, while the (large) page is still loading */
   function dressCover() {
     var hat = XM.hat();
-    if (XM.kind === "xm-app") { decorate(D.getElementById("intro"), true); decorate(D.getElementById("sl-hero"), true); kick(); stockings(); }
+    if (XM.kind === "xm-app") { decorate(D.getElementById("intro"), true); decorate(D.getElementById("sl-hero"), true); kick(); stockings(); photoHat(); }
     icons();
     return hat && (XM.kind !== "xm-app" || D.getElementById("sl-hero"));
   }
@@ -750,9 +781,55 @@
   }
   if (D.title && D.title.indexOf("Christmas preview") < 0) D.title += " · Christmas preview";
 
+  /* ================= the festive hover: a colour that rises up a button =================
+     On a computer, the button under the mouse fills from the bottom with a festive colour (a gold edge on top of it),
+     under its label, which keeps its own colour - so a button with a dark label fills with warm cream and gold, one
+     with a light label with Christmas red. It is moved by the mouse, not by a timer: leaving the button sends the
+     colour back down from wherever it got to, and crossing the button again carries on from there - it never jumps
+     back to the start. Only plain-coloured buttons get it (a button with a picture or gradient of its own keeps it,
+     and so do the ones that have their own hover, .sl-own-hov). Reduced motion: no rising, the colour just shows. */
+  function festiveHover() {
+    if (!window.matchMedia || !matchMedia("(hover: hover)").matches || !(window.CSS && CSS.registerProperty) || !Element.prototype.animate) return;
+    try { CSS.registerProperty({ name: "--xm-rise", syntax: "<percentage>", inherits: false, initialValue: "0%" }); } catch (e) {}
+    var SEL = 'button, [role="button"], a.btn, a[class*="btn"], .chip';
+    var EXCL = ".sl-own-hov, .xm-nohov, .sl-ev-door, #xm-welcome .xm-px, .xm-pill, svg, canvas, .sl3d-panel button, .leaflet-container button";
+    function lum(c) { var m = /rgba?\(([^)]+)\)/.exec(c || ""); if (!m) return 1; var v = m[1].split(",").map(parseFloat); return (0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]) / 255; }
+    function eligible(b) {
+      if (!b || b.disabled || b.getAttribute("aria-disabled") === "true" || b.closest(EXCL)) return false;
+      var r = b.getBoundingClientRect(); if (r.width < 24 || r.height < 20 || r.width > 520 || r.height > 120) return false;
+      var cs = getComputedStyle(b); if (cs.backgroundImage !== "none" && !b.classList.contains("xm-rise")) return false;
+      var m = /rgba?\(([^)]+)\)/.exec(cs.backgroundColor), a = m ? (m[1].split(",")[3] === undefined ? 1 : parseFloat(m[1].split(",")[3])) : 0;
+      return a > 0.04 || parseFloat(cs.borderTopWidth) > 0;
+    }
+    function go(b, up) {
+      var cur = parseFloat(getComputedStyle(b).getPropertyValue("--xm-rise")) || 0, to = up ? 100 : 0;
+      if (b.__xmA) { b.__xmA.cancel(); b.__xmA = null; }
+      if (up) { if (!b.classList.contains("xm-rise")) b.classList.toggle("xm-rise-dark", lum(getComputedStyle(b).color) > 0.55); b.classList.add("xm-rise"); }
+      if (RM.matches) { b.style.setProperty("--xm-rise", to + "%"); if (!up) b.classList.remove("xm-rise"); return; }
+      var ms = Math.max(120, Math.abs(to - cur) * (up ? 4.2 : 3.2));
+      var an = b.animate([{ "--xm-rise": cur + "%" }, { "--xm-rise": to + "%" }], { duration: ms, easing: up ? "cubic-bezier(.3,.7,.3,1)" : "cubic-bezier(.5,0,.6,1)", fill: "forwards" });
+      b.__xmA = an;
+      an.onfinish = function () {
+        if (b.__xmA !== an) return;
+        b.style.setProperty("--xm-rise", to + "%"); an.cancel(); b.__xmA = null;
+        if (!up) { b.classList.remove("xm-rise", "xm-rise-dark"); b.style.removeProperty("--xm-rise"); }
+      };
+    }
+    var on = null; XM.hoverEligible = eligible;
+    D.addEventListener("pointerover", function (e) {
+      if (e.pointerType && e.pointerType !== "mouse" && e.pointerType !== "pen") return;
+      var b = e.target.closest && e.target.closest(SEL); if (b && !eligible(b)) b = null;
+      if (b === on) return;
+      if (on) go(on, false);
+      on = b; if (b) go(b, true);
+    }, true);
+    D.addEventListener("pointerleave", function () { if (on) { go(on, false); on = null; } });
+    D.addEventListener("pointerout", function (e) { if (on && !e.relatedTarget) { go(on, false); on = null; } }, true);
+  }
+
   function start() {
     dressCover(); logo(); photoHat();
-    accents(); pill(); spIcons(); welcome();
+    accents(); pill(); spIcons(); welcome(); festiveHover();
     if (XM.kind === "xm-app") { var n = 0; (function m() { if (!musicBtn() && n++ < 40) setTimeout(m, 250); })(); settingsHook(); }
   }
   if (D.readyState === "loading") D.addEventListener("DOMContentLoaded", start); else start();

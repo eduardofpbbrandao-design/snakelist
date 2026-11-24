@@ -22,6 +22,14 @@
 .sl-ev-test { display: inline-block; margin: 0 0 10px; padding: 4px 9px; border-radius: 6px; background: repeating-linear-gradient(-45deg, #ffe27a 0 8px, #ffd23f 8px 16px); color: #3a2a00; font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .04em; }
 .sl-ev-note { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; background: var(--bg); margin: 10px 0; font-size: 12.5px; }
 .sl-ev-note.warn { border-color: #d9a520; background: rgba(217,165,32,.1); }
+/* what a skip will do, said before it is spent */
+.sl-ev-skipwhat { list-style: none; margin: 8px 0 2px; padding: 0; display: grid; gap: 5px; }
+.sl-ev-skipwhat li { display: flex; gap: 7px; align-items: flex-start; line-height: 1.4; }
+.sl-ev-skipwhat li svg { flex: none; margin-top: 2px; }
+/* the streak rule, under the counters */
+.sl-ev-rule { display: flex; gap: 7px; align-items: flex-start; margin: 8px 2px 4px; font-size: 12px; line-height: 1.45; color: var(--text-muted); }
+.sl-ev-rule svg { flex: none; margin-top: 2px; color: #c8762a; }
+.sl-ev-rule b { color: var(--text); }
 .sl-ev-lock { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: rgba(0,0,0,.07); color: var(--text-muted); }
 [data-sl-theme="dark"] .sl-ev-lock { background: rgba(255,255,255,.1); }
 .sl-ev-prem { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px;
@@ -184,7 +192,16 @@ html.xm .sl-ev-xhat { display: none; }   /* with the Christmas preview on, the S
 .sl-ev-door.is-claimed .leaf { transform: rotateY(-108deg); }
 .sl-ev-door.is-claimed .tag { color: #6b5220; text-shadow: none; }
 .sl-ev-door.is-claimed .inside::after { content: ""; position: absolute; right: 4px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: #3f9b4a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/10px no-repeat; }
-.sl-ev-door.via-skip .inside::after, .sl-ev-door.via-sub .inside::after { background-color: #4b78c9; }
+/* a door covered by a skip: its own glyph (a skip arrow, not the tick) as well as its own colour */
+.sl-ev-door.via-skip .inside::after, .sl-ev-door.via-sub .inside::after { background-color: #4b78c9; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 6v12l8-6zM15 6v12' fill='%23fff' stroke='%23fff' stroke-width='2.4' stroke-linejoin='round'/%3E%3C/svg%3E"); background-size: 9px; }
+/* each state also says what it is in words (not by colour alone) */
+.sl-ev-door .st { position: absolute; left: 50%; bottom: 5px; transform: translateX(-50%); padding: 1px 5px; border-radius: 4px; white-space: nowrap; pointer-events: none; z-index: 2;
+  font: 700 8.5px/1.35 'Inter', sans-serif; letter-spacing: .02em; background: rgba(255,250,238,.94); color: #3b2a12; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+.sl-ev-door.is-open .st { background: #ffe58a; color: #4a3200; }
+.sl-ev-door.is-missed .st { background: rgba(255,255,255,.9); color: #24321f; }
+.sl-ev-door.is-missed .leaf::after { display: none; }
+.sl-ev-door.can-early { cursor: pointer; }
+.sl-ev-door.can-early .leaf { filter: saturate(.6) brightness(.82); }
 .sl-ev-door.is-open .leaf { animation: sl-ev-wiggle 2.4s ease-in-out infinite; box-shadow: inset 0 0 0 2px #ffe58a, 0 0 0 3px rgba(255,229,138,.5), 0 0 22px rgba(255,214,90,.75); }
 @keyframes sl-ev-wiggle { 0%, 70%, 100% { transform: rotate(0); } 75% { transform: rotate(-3deg); } 85% { transform: rotate(3deg); } 92% { transform: rotate(-1.5deg); } }
 .sl-ev-door.is-locked { cursor: default; }

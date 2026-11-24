@@ -100,8 +100,12 @@ def write_art():
     h = art.LOGO_HAT
     data = {
         "bulbs": bulbs,
-        "hat": art.hat_at(h["cx"], h["cy"], h["width"], h["angle"]),
-        "hatSvg": art.hat_at(0, 0, 100, 0),
+        # the logo's hat goes into #mark-snake (drawn through <use> copies); its gradients and filters go into the
+        # page's top-level <defs> (hatDefs) - inside the copied group they did not resolve until late in the opening
+        "hat": art.hat_at(h["cx"], h["cy"], h["width"], h["angle"], defs=False),
+        "hatDefs": art._hat_defs("xmh"),
+        # the photo hat: its own ids (never the same as the logo hat's)
+        "hatSvg": art.hat_at(0, 0, 100, 0, prefix="xmp"),
         "ssnow": art.logo_snow(mark_body) if mark_body else "",
         "stocking": art.STOCKING,
         "hatMini": art.hat_at(0, 0, 100, 0, prefix="xmi", detail=False),
@@ -170,7 +174,22 @@ def page_logo(variant, hat, ssnow):
         open(out_saved, "w", encoding="utf-8").write(s)
     except Exception as e:
         print("note: the pages' %s logo was not redrawn (%s); the saved one is used" % (variant, e.__class__.__name__))
+        restock(out_saved, art.STOCKING.replace("xms-", "xms%s-" % variant[0]))
     if os.path.isfile(out_saved): shutil.copy2(out_saved, posixpath.join(OUT, "xmas-logo-%s.svg" % variant))
+
+def restock(path, stocking):
+    """the saved pages' logo keeps up with the current stocking even when it cannot be redrawn: its <g class="xm-stk">
+    (found with its matching </g>) is swapped for the current drawing"""
+    if not os.path.isfile(path): return
+    s = open(path, encoding="utf-8").read()
+    a = s.find('<g class="xm-stk">')
+    if a < 0: return
+    depth, i = 0, a
+    for m in re.finditer(r"<g[\s>]|</g>", s[a:]):
+        depth += -1 if m.group(0) == "</g>" else 1
+        if depth == 0: i = a + m.end(); break
+    else: return
+    if s[a:i] != stocking: open(path, "w", encoding="utf-8").write(s[:a] + stocking + s[i:])
 
 def render_cabin():
     """the cabin's room: drawn by christmas_art.cabin_svg, rendered with Chromium, saved as WebP (the saved one is

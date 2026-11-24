@@ -150,5 +150,6 @@ n.innerHTML='Your email app should open with it ready to send. If it didn’t, <
 if(m){if(m[1]==="off"||m[1]==="0")S.removeItem(K);else S.setItem(K,"1");var u=new URL(L.href);u.searchParams.delete("christmas");if(u.searchParams.get("theme")==="christmas")u.searchParams.delete("theme");history.replaceState(history.state,"",u.pathname+u.search+u.hash)}
 on=on||S.getItem(K)==="1"}catch(e){}
 try{if(!on||window.XM)return;var d=document,h=d.documentElement,root=new URL("../",document.currentScript&&document.currentScript.src||L.href).href,kind=(L.href.indexOf(root+"species/")===0?"xm-sp":"xm-site");
-window.XM={root:root+"christmas/",kind:kind,forced:!!window.SL_XMAS_FORCE};h.classList.add("xm",kind);var p=d.head||h,l=d.createElement("link");l.rel="stylesheet";l.href=root+"christmas/xmas.css";p.appendChild(l);
-var s=d.createElement("script");s.src=root+"christmas/xmas.js";p.appendChild(s)}catch(e){}})();
+window.XM={root:root+"christmas/",kind:kind,forced:!!window.SL_XMAS_FORCE};h.classList.add("xm",kind);var p=d.head||h,c=root+"christmas/xmas.css",j=root+"christmas/xmas.js",cs=d.currentScript;
+if(d.readyState==="loading"&&cs&&!cs.src){d.write('<link rel="stylesheet" href="'+c+'"><script src="'+j+'"><\/script>');return}
+var l=d.createElement("link");l.rel="stylesheet";l.href=c;p.appendChild(l);var s=d.createElement("script");s.src=j;p.appendChild(s)}catch(e){}})();

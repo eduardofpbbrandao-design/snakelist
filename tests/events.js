@@ -137,9 +137,15 @@ const noOverflow = (p) => p.evaluate(() => document.documentElement.scrollWidth 
     await p.click('.sl-ev-reveal [data-close]');
     ok((await claim(p, 1, 'day')).reason === 'already-claimed', 'door 1 cannot be claimed twice');
     ok((await claim(p, 2, 'day')).reason === 'future', 'door 2 (tomorrow) is refused');
-    ok((await claim(p, 2, 'skip')).reason === 'future', 'a skip can never open a future door');
+    ok((await claim(p, 2, 'skip')).reason === 'no-earned-skips', 'no free skip yet: door 2 cannot be opened early either');
+    ok(await p.evaluate(() => SL_EVENTS.logic.check(SL_EVENTS.advent.event, SL_EVENTS.logic.empty(), 1, SL_EVENTS.time.now(), 'skip').reason) === 'open-today', 'today\'s door is never a skip\'s target');
     await p.click('#sl-ev-adv .sl-ev-door[data-day="2"]');
-    ok(await p.$$eval('.sl-ev-toast', (l) => l.some((t) => /No peeking/.test(t.textContent))), 'clicking a future door just says no peeking');
+    await p.waitForSelector('#sl-ev-adv [data-skip]:not([hidden])');
+    const early = await p.innerHTML('#sl-ev-adv [data-skip]');
+    ok(/opens on/.test(early) && /early/.test(early) && /does <b>not<\/b> count as a visit/.test(early), 'clicking an upcoming door explains what a skip would do before spending it');
+    ok(await p.$eval('#sl-ev-adv [data-act="skip"]', (b) => b.disabled), '... and its button is disabled with no free skips');
+    await shot(p, 'advent-early-skip-explained');
+    await p.click('#sl-ev-adv [data-act="noskip"]');
     await setTime(p, T('2026-12-02T15:00:00Z'));
     ok((await claim(p, 2, 'day')).ok, '2 December: door 2');
     await setTime(p, T('2026-12-03T08:00:00Z'));
@@ -155,9 +161,12 @@ const noOverflow = (p) => p.evaluate(() => document.documentElement.scrollWidth 
     await p.click('#sl-ev-adv [data-act="skip"]');
     await p.waitForSelector('.sl-ev-reveal'); await p.click('.sl-ev-reveal [data-close]');
     ok(await p.evaluate(() => SL_EVENTS.advent.state().doors[4].via) === 'skip', 'door 4 recovered with the free skip');
+    ok(await p.evaluate(() => SL_EVENTS.advent.state().doors[4].run) === 0, 'a skip\'s door has run 0 (not a visit)');
     ok((await claim(p, 5, 'day')).ok, 'door 5 on its day');
-    ok(await p.evaluate(() => SL_EVENTS.logic.streak(SL_EVENTS.advent.event, SL_EVENTS.advent.state(), SL_EVENTS.time.now())) === 5, 'the recovered day counts for the streak (5 in a row)');
-    ok((await claim(p, 6, 'skip')).reason === 'future', 'skips never recover future days');
+    ok(await p.evaluate(() => SL_EVENTS.logic.streak(SL_EVENTS.advent.event, SL_EVENTS.advent.state(), SL_EVENTS.time.now())) === 1, 'the recovered day is not a visit: the streak starts again at door 5 (1 day)');
+    ok(await p.evaluate(() => SL_EVENTS.advent.stats().doors) === 5, '... but it counts towards the 24 doors (5 of 24)');
+    ok((await claim(p, 6, 'skip')).reason === 'no-earned-skips', 'the free skip is spent: it cannot be used twice');
+    ok(/doors opened on their own day/.test(await p.textContent('#sl-ev-adv .sl-ev-rule')), 'the streak rule is shown in the calendar');
     await shot(p, 'advent-dec5');
 
     console.log('--- seasonal achievements');
@@ -212,9 +221,10 @@ const noOverflow = (p) => p.evaluate(() => document.documentElement.scrollWidth 
     ok(n === 10, '10 subscriber skips used on doors 1-10');
     ok((await claim(p, 11, 'sub')).reason === 'subscriber-skip-cap', 'the 11th subscriber skip is refused');
     const sk = await p.evaluate(() => SL_EVENTS.logic.skipsLeft(SL_EVENTS.advent.event, SL_EVENTS.advent.state()));
-    ok(sk.sub === 0 && sk.earned === 3, 'earned skips are counted separately (3 earned from the run, 0 subscriber left)');
-    ok((await claim(p, 11, 'skip')).ok, 'an earned skip still works');
+    ok(sk.sub === 0 && sk.earned === 0, 'doors opened with subscriber skips are not visits: they earn no free skips');
+    ok((await claim(p, 11, 'skip')).reason === 'no-earned-skips', '... so no free skip is available');
     ok((await claim(p, 20, 'day')).ok, 'today\'s door 20 on time');
+    ok((await claim(p, 22, 'sub')).reason === 'subscriber-skip-cap', 'an upcoming door needs a skip left too');
     await p.evaluate(() => SL_EVENTS.seasonal.evaluate());
     const e = await p.evaluate(() => SL_EVENTS.seasonal.earned());
     ok(!e['x-explorer'], 'doors from subscriber skips don\'t count for achievements (no unfair advantage)');
