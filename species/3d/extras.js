@@ -2718,7 +2718,8 @@ export function create(V) {
     }
     // a slight lift and turn of the head, now and then (High detail only)
     if (V.quality === 'low' || !V.info || V.info.tree) return;
-    if (!idle.head && t > idle.next) { ensureRig(); if (rig) idle.head = { t0: t, yaw: (Math.random() < 0.5 ? -1 : 1) * (0.08 + Math.random() * 0.1), dur: 2600 }; }
+    // (v6.20: no new turn of the head while you are turning the view)
+    if (!idle.head && t > idle.next && !(V.controls && V.controls.st.dragging)) { ensureRig(); if (rig) idle.head = { t0: t, yaw: (Math.random() < 0.5 ? -1 : 1) * (0.08 + Math.random() * 0.1), dur: 2600 }; }
     if (idle.head) {
       const R = rig, u = (t - idle.head.t0) / idle.head.dur;
       if (u >= 1) { idle.head = null; R.release(); idle.next = t + 7000 + Math.random() * 7000; return; }

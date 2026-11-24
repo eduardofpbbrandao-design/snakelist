@@ -3857,13 +3857,14 @@ float slScale(vec2 m) {
     // (v6.20: while the camera turns, the shadows of the swaying plants are not refreshed every few frames either: those
     // refreshes made every 5th frame of a turn much slower than the others - a regular stutter - for a change nobody sees
     // while the view moves; and a tongue flick alone (fx.lightMove) never redraws them: its shadow is a few pixels)
+    // (while you turn the view, the snake's own small idle movements redraw the shadows every third frame, not every frame)
     // (and a frame in the middle of a turn that happens to get no pointer movement - a 120 Hz screen with a 60 Hz mouse, or
     // a finger held still for a moment - still counts as turning: it used to redraw the shadows, every other frame)
     const scMove = sceneMoving && !(fx.lightMove && fx.lightMove());
     if (camMoving) lastCamT = tF0;
     const camActive = camMoving || controls.st.dragging || tF0 - lastCamT < 250;
     if (camActive && !camMoving) { clearTimeout(camSettleT); camSettleT = setTimeout(() => { shadowDirty = true; kick(); }, 300); } // (once it is still: the shadows catch up)
-    { ambOnly = false; const shUp = shadowDirty || scMove || (!viaAmb && !camActive && !sceneMoving) || (!camActive && shadowAge++ > (quality === 'high' ? 4 : 12)); if (shUp) shadowAge = 0; shadowDirty = false; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; }
+    { ambOnly = false; const shUp = shadowDirty || (scMove && (!camActive || shadowAge++ >= 2)) || (!viaAmb && !camActive && !sceneMoving) || (!camActive && shadowAge++ > (quality === 'high' ? 4 : 12)); if (shUp) shadowAge = 0; shadowDirty = false; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; }
     dynRes(tF0, moving || camActive, amb); // (v6.20: a still frame inside a turn no longer snaps the resolution back up - that reallocated the picture every other frame)
     renderer.render(ctx.scene, cam);
     sizeAfter(); // v5.74: the magnified inset of a small snake
