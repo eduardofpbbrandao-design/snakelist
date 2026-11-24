@@ -1426,8 +1426,8 @@ export function create(V) {
         const Hs = hel(0); herm3(P0, T0w, Hs, hTan(0), P0.distanceTo(Hs) * 1.6 + Wc * 2, 60); // a U-turn behind the head, past its side, to the prey
         const nT = Math.round(cL * cTpl * 160); for (let k = 1; k <= nT; k++) poly.push(hel((cL * k) / nT)); // the coils
         // down to the ground beyond the coils: behind the prey, or (an even number of layers ends at the front) on the side away from the neck
-        const back = cL % 2 === 1, He = hel(cL), gC = support(gQ != null ? gQ : 0), zEnd = cz0 + cSpan * zN(cL), G = C.clone().addScaledVector(ax, zEnd + (back ? Wc * 5 : -Wc * 3)).addScaledVector(sd, back ? rOut + Wc * 4 : -(rOut + Wc * 5)); G.y = gC + Hm;
-        const tG = back ? ax.clone().addScaledVector(sd, 0.6).normalize() : sd.clone().negate().addScaledVector(ax, 0.5).normalize(); herm3(He, hTan(cL), G, tG, He.distanceTo(G) * 1.3, 60); // down to the ground
+        const back = cL % 2 === 1, He = hel(cL), gC = support(gQ != null ? gQ : 0), zEnd = cz0 + cSpan * zN(cL), G = C.clone().addScaledVector(ax, zEnd + (longPrey ? Wc * 1.5 : back ? Wc * 5 : -Wc * 3)).addScaledVector(sd, back ? rOut + Wc * (longPrey ? 7 : 4) : -(rOut + Wc * 5)); G.y = gC + Hm; // (a long prey - a snake - lies on beyond the coils: the body leaves them sideways, clear of it)
+        const tG = back ? ax.clone().addScaledVector(sd, longPrey ? 2.5 : 0.6).normalize() : sd.clone().negate().addScaledVector(ax, 0.5).normalize(); herm3(He, hTan(cL), G, tG, He.distanceTo(G) * 1.3, 60); // down to the ground
         { let p = G.clone(), d = tG.clone(); const k0 = 1 / Math.max(L * 0.3, Wc * 20), step = R.dx; for (let k = 0; k < N * 2; k++) { d.applyAxisAngle(up, k0 * step * (k < N * 0.6 ? 1 : -0.6)); p = p.clone().addScaledVector(d, step); p.y = gC + Hm; poly.push(p); } } // the rest of the body trails away on the ground
         // sample it by arc length (no stretching): the head and neck stay as in the lifted reach
         const pose = extHi.slice(); let k = 0, acc = 0;
