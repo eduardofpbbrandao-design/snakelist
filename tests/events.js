@@ -92,7 +92,8 @@ const noOverflow = (p) => p.evaluate(() => document.documentElement.scrollWidth 
     ok(/has begun/.test(await p.textContent('#sl-ev-cd .sl-ev-burst')), 'burst says the event has begun (was ' + s1 + 's)');
     await shot(p, 'countdown-zero-burst');
     await p.clock.runFor(1000);
-    ok(/Live now/.test(await p.textContent('#sl-ev-cd')) && /Door 2 opens in/.test(await p.textContent('#sl-ev-cd')), 'then the panel turns live and counts to the next door');
+    { const t = await p.textContent('#sl-ev-cd');
+      ok(/Live now/.test(t) && /Explore the Christmas event/.test(t) && /Time until Christmas/.test(t), 'then the panel turns live: the "Explore the Christmas event" button, and the clock counts on to Christmas'); }
     ok(errs.length === 0, 'no page errors ' + errs.join(' | '));
     await ctx.close();
   }
@@ -106,7 +107,7 @@ const noOverflow = (p) => p.evaluate(() => document.documentElement.scrollWidth 
     ok(await p.evaluate(() => SL_EVENTS.countdownState().phase) === 'early', 'with the TEST subscriber switch: early access');
     ok(await p.evaluate(() => SL_EVENTS.isOpen('xmas2026')), 'event open early for the subscriber');
     await p.clock.runFor(600);
-    ok(/Early access/.test(await p.textContent('#sl-ev-banner')), 'banner says early access');
+    ok(/early access/i.test(await p.textContent('#sl-ev-banner')), 'banner says early access');
     ok(await p.evaluate(() => SL_EVENTS.advent.claim(1, 'day').then(() => false, (e) => e.reason === 'future')), 'early access never opens Advent door 1 early');
     await p.evaluate(() => SL_EVENTS.subscribe.open()); await p.waitForSelector('#sl-ev-sub');
     ok(/TEST MODE/.test(await p.textContent('#sl-ev-sub')), 'subscription page shows the TEST MODE label');

@@ -32,75 +32,108 @@
 @keyframes sl-ev-up { from { transform: translate(-50%, 14px); opacity: 0; } }
 
 /* ------------------------------------------------------------- the event themes */
-.sl-ev-t-xmas { --ev-a: #0d3a24; --ev-b: #1f6e40; --ev-c: #e6c35c; --ev-d: #c8323f; }
 .sl-ev-t-newyear { --ev-a: #12183a; --ev-b: #3b2b7a; --ev-c: #f1d27a; --ev-d: #8fd3ff; }
 .sl-ev-t-snakeday { --ev-a: #0d3a2c; --ev-b: #1d7a5a; --ev-c: #b9f27a; --ev-d: #ffd166; }
 .sl-ev-t-anniversary { --ev-a: #133a26; --ev-b: #2f8f55; --ev-c: #ffd56b; --ev-d: #ff8fa3; }
 .sl-ev-t-halloween { --ev-a: #22123a; --ev-b: #4a1f5e; --ev-c: #ff9a3c; --ev-d: #b6ff6b; }
 
+/* ------------------------------------------------------------- the countdown's typeface: Outfit (SIL OFL 1.1, events/fonts/OFL.txt)
+   self-hosted, Latin only; 800 for the numbers and the title, 500 for the labels */
+@font-face { font-family: "SL Outfit"; font-style: normal; font-weight: 800; font-display: swap; src: url("fonts/outfit-latin-800.woff2") format("woff2"); }
+@font-face { font-family: "SL Outfit"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/outfit-latin-500.woff2") format("woff2"); }
+/* the Christmas palette: deep evergreen, warm ivory numbers, restrained gold, cranberry for the small seasonal details */
+.sl-ev-t-xmas { --ev-a: #102B20; --ev-b: #071810; --ev-c: #E4C57A; --ev-d: #B63848; --ev-ink: #FFF8ED; }
+.sl-ev-t-xmas .sl-ev-xmark { overflow: visible; }
+html.xm .sl-ev-xhat { display: none; }   /* with the Christmas preview on, the S already wears its hat */
+
+/* ------------------------------------------------------------- the clock (banner and panel) */
+.sl-ev-clock { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(6px, 2vw, 12px); margin: 0 auto; max-width: 460px; font-family: "SL Outfit", "Inter", sans-serif; }
+.sl-ev-g { position: relative; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px 9px; border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,248,237,.085), rgba(255,248,237,.025) 55%, rgba(0,0,0,.16)); border: 1px solid rgba(228,197,122,.22);
+  box-shadow: inset 0 1px 0 rgba(228,197,122,.55), inset 0 -10px 18px rgba(0,0,0,.18), 0 6px 16px rgba(0,0,0,.28); }
+.sl-ev-num { display: flex; justify-content: center; color: var(--ev-ink, #fff); font-weight: 800; font-size: clamp(30px, 8.4vw, 50px); line-height: 1; font-variant-numeric: tabular-nums; }
+/* every digit in its own fixed cell: nothing shifts sideways as the numbers change */
+.sl-ev-dg { position: relative; display: inline-block; width: .62em; height: 1.06em; overflow: hidden; text-align: center; }
+.sl-ev-dg i { position: absolute; inset: 0; font-style: normal; line-height: 1.06em; }
+.sl-ev-dg i.in { animation: sl-ev-din .2s cubic-bezier(.2,.7,.2,1) both; }
+.sl-ev-dg i.out { animation: sl-ev-dout .2s cubic-bezier(.4,0,.6,1) both; }
+@keyframes sl-ev-din { from { transform: translateY(70%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes sl-ev-dout { from { transform: none; opacity: 1; } to { transform: translateY(-70%); opacity: 0; } }
+.sl-ev-g small { font: 500 clamp(10.5px, 2.7vw, 12.5px)/1 "SL Outfit", "Inter", sans-serif; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,248,237,.72); white-space: nowrap; }
+/* the last seconds: the seconds turn gold - no flashing, shaking or pulsing */
+.sl-ev-hot .sl-ev-g[data-u="s"] .sl-ev-num { color: var(--ev-c); }
+
 /* ------------------------------------------------------------- homepage banner (compact) */
-.sl-ev-banner { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 12px; width: calc(100% - 32px); max-width: 1248px; margin: 10px auto 12px; padding: 9px 12px 9px 10px;
-  border-radius: 14px; cursor: pointer; color: #fff; position: relative; overflow: hidden; isolation: isolate;
-  background: linear-gradient(110deg, var(--ev-a) 0%, var(--ev-b) 70%, var(--ev-a) 100%); box-shadow: 0 6px 18px rgba(10,40,20,.25); font-family: 'Inter', sans-serif; }
-.sl-ev-banner::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: .18;
-  background: repeating-linear-gradient(115deg, transparent 0 14px, rgba(255,255,255,.5) 14px 16px); }
-.sl-ev-banner::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -45%; z-index: -1; background: linear-gradient(100deg, transparent, rgba(255,255,255,.22), transparent); animation: sl-ev-sweep 5.5s ease-in-out infinite; }
-@keyframes sl-ev-sweep { 0%, 55% { left: -45%; } 100% { left: 110%; } }
+.sl-ev-banner { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 14px; width: calc(100% - 32px); max-width: 1248px; margin: 10px auto 12px; padding: 10px 14px 10px 10px;
+  border-radius: 16px; cursor: pointer; color: var(--ev-ink, #fff); position: relative; overflow: hidden; isolation: isolate; font-family: "SL Outfit", "Inter", sans-serif;
+  background: linear-gradient(160deg, var(--ev-a) 0%, var(--ev-b) 100%); border: 1px solid rgba(228,197,122,.28);
+  box-shadow: inset 0 1px 0 rgba(228,197,122,.45), 0 8px 22px rgba(7,24,16,.28); }
 .sl-ev-banner:focus-visible { outline: 3px solid var(--ev-c); outline-offset: 2px; }
-.sl-ev-banner:hover { filter: brightness(1.07); }
-.sl-ev-b-art { flex: none; width: 46px; height: 46px; border-radius: 11px; background: rgba(255,255,255,.1); display: grid; place-items: center; }
-.sl-ev-b-art svg { width: 40px; height: 40px; }
-.sl-ev-b-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.sl-ev-b-txt small { font: 700 10.5px 'JetBrains Mono', monospace; letter-spacing: .07em; text-transform: uppercase; color: var(--ev-c); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sl-ev-b-txt b { font-size: 15.5px; font-weight: 800; letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; font-style: italic; }
-.sl-ev-b-clock { flex: none; display: flex; gap: 4px; font-variant-numeric: tabular-nums; }
-.sl-ev-b-clock span { display: flex; flex-direction: column; align-items: center; min-width: 34px; padding: 3px 4px; border-radius: 7px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.14); }
-.sl-ev-b-clock i { font-style: normal; font-size: 16px; font-weight: 800; line-height: 1.1; }
-.sl-ev-b-clock em { font-style: normal; font-size: 9px; font-weight: 700; opacity: .75; text-transform: uppercase; }
-.sl-ev-b-go { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--ev-c); color: var(--ev-a); display: grid; place-items: center; font-weight: 900; }
-.sl-ev-b-go svg { width: 16px; height: 16px; }
-.sl-ev-b-badge { position: absolute; top: 5px; left: 5px; width: 9px; height: 9px; border-radius: 50%; background: var(--ev-d); box-shadow: 0 0 0 3px rgba(255,255,255,.25); animation: sl-ev-pulse 1.4s infinite; }
-@media (max-width: 560px) {
-  .sl-ev-banner { gap: 9px; padding: 8px 9px; }
-  .sl-ev-b-art { width: 38px; height: 38px; } .sl-ev-b-art svg { width: 32px; height: 32px; }
-  .sl-ev-b-txt b { font-size: 13.5px; }
-  .sl-ev-b-clock span { min-width: 27px; padding: 2px 3px; } .sl-ev-b-clock i { font-size: 13.5px; }
-  .sl-ev-b-go { display: none; }
+.sl-ev-banner:hover { border-color: rgba(228,197,122,.55); }
+.sl-ev-b-art { flex: none; width: 58px; height: 58px; display: grid; place-items: center; }
+.sl-ev-b-art svg { width: 56px; height: 56px; filter: drop-shadow(0 3px 5px rgba(0,0,0,.4)); }
+.sl-ev-b-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sl-ev-b-txt small { align-self: flex-start; font: 500 11px/1.2 "SL Outfit", "Inter", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #fff; background: var(--ev-d); padding: 3px 8px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.sl-ev-b-txt b { font-weight: 800; font-size: 19px; line-height: 1.15; letter-spacing: .005em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sl-ev-b-txt em { font: 500 13.5px/1.2 "SL Outfit", "Inter", sans-serif; font-style: normal; color: var(--ev-c); }
+.sl-ev-b-right { flex: none; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.sl-ev-b-lab { font: 500 11px/1 "SL Outfit", "Inter", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,248,237,.7); }
+.sl-ev-clock.sl-ev-mini { gap: 5px; width: 252px; }
+.sl-ev-mini .sl-ev-g { padding: 6px 2px 5px; gap: 3px; border-radius: 10px; box-shadow: inset 0 1px 0 rgba(228,197,122,.5), 0 3px 8px rgba(0,0,0,.25); }
+.sl-ev-mini .sl-ev-num { font-size: 24px; }
+.sl-ev-mini .sl-ev-g small { font-size: 9.5px; letter-spacing: .08em; }
+.sl-ev-b-go { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--ev-c); color: #13261b; display: grid; place-items: center; }
+.sl-ev-b-go svg { width: 18px; height: 18px; }
+.sl-ev-b-badge { position: absolute; top: 8px; left: 8px; width: 9px; height: 9px; border-radius: 50%; background: var(--ev-d); box-shadow: 0 0 0 3px rgba(255,248,237,.25); }
+@media (max-width: 760px) {
+  .sl-ev-banner { flex-wrap: wrap; gap: 8px 10px; padding: 10px; }
+  .sl-ev-b-art { width: 46px; height: 46px; } .sl-ev-b-art svg { width: 44px; height: 44px; }
+  .sl-ev-b-txt b { font-size: 16.5px; white-space: normal; text-wrap: balance; }
+  .sl-ev-b-right { order: 3; flex: 1 1 100%; flex-direction: row; justify-content: space-between; gap: 8px; }
+  .sl-ev-b-lab { flex: none; max-width: 30%; white-space: normal; line-height: 1.25; font-size: 10px; }
+  .sl-ev-clock.sl-ev-mini { flex: 1; width: auto; max-width: 300px; margin: 0 0 0 auto; }
+  .sl-ev-mini .sl-ev-num { font-size: 21px; }
+  .sl-ev-b-go { width: 30px; height: 30px; }
 }
+@media (max-width: 360px) { .sl-ev-b-lab { display: none; } .sl-ev-clock.sl-ev-mini { max-width: none; margin: 0; } .sl-ev-mini .sl-ev-g small { font-size: 8.5px; letter-spacing: .04em; } }
 
 /* ------------------------------------------------------------- full countdown panel */
-.sl-ev-hero { position: relative; overflow: hidden; border-radius: 14px; color: #fff; padding: 14px 14px 16px; margin: 0 0 12px; isolation: isolate;
-  background: radial-gradient(120% 90% at 80% 0%, var(--ev-b) 0%, var(--ev-a) 65%); }
-.sl-ev-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: .13; background: repeating-linear-gradient(115deg, transparent 0 18px, #fff 18px 20px); }
-.sl-ev-hero-art { position: absolute; right: -6px; top: -4px; width: 140px; height: 140px; z-index: -1; opacity: .95; }
-.sl-ev-hero .sl-ev-kick { color: var(--ev-c); }
-.sl-ev-hero h3 { margin: 2px 0 6px; max-width: 70%; font: italic 900 22px/1.05 'Inter', sans-serif; text-transform: uppercase; letter-spacing: .01em; text-shadow: 0 2px 0 rgba(0,0,0,.25); }
-.sl-ev-hero p { max-width: 74%; font-size: 12.5px; opacity: .92; }
-.sl-ev-early { display: inline-flex; align-items: center; gap: 6px; margin: 2px 0 10px; padding: 4px 10px 4px 7px; border-radius: 999px; font: 800 11px 'Inter', sans-serif; letter-spacing: .04em; text-transform: uppercase;
-  background: linear-gradient(90deg, var(--ev-c), #fff3c4 50%, var(--ev-c)); background-size: 200% 100%; color: #3a2a00; animation: sl-ev-shine 3s linear infinite; }
-.sl-ev-early svg { width: 14px; height: 14px; }
-@keyframes sl-ev-shine { to { background-position: -200% 0; } }
-.sl-ev-clock { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin: 6px 0 8px; }
-.sl-ev-tile { position: relative; border-radius: 11px; padding: 8px 2px 6px; text-align: center; overflow: hidden;
-  background: linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.05) 50%, rgba(0,0,0,.2) 51%, rgba(0,0,0,.08)); border: 1px solid rgba(255,255,255,.22); box-shadow: inset 0 -3px 0 rgba(0,0,0,.25); }
-.sl-ev-tile b { display: block; font: italic 900 30px/1 'Inter', sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
-.sl-ev-tile small { display: block; margin-top: 3px; font: 700 9.5px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; opacity: .8; }
-.sl-ev-tile.tick b { animation: sl-ev-tick .35s cubic-bezier(.2,1.6,.4,1); }
-@keyframes sl-ev-tick { from { transform: translateY(-30%) scale(1.15); opacity: .3; } }
-.sl-ev-when { font-size: 12px; opacity: .9; margin: 0 !important; max-width: none !important; }
-.sl-ev-when b { color: var(--ev-c); }
-/* the last minute: it heats up */
-.sl-ev-hot .sl-ev-tile { border-color: var(--ev-c); box-shadow: inset 0 -3px 0 rgba(0,0,0,.25), 0 0 14px color-mix(in srgb, var(--ev-c) 55%, transparent); }
-.sl-ev-hot .sl-ev-hero, .sl-ev-hot.sl-ev-banner { animation: sl-ev-throb 1s ease-in-out infinite; }
-@keyframes sl-ev-throb { 50% { filter: brightness(1.18) saturate(1.15); } }
-.sl-ev-final .sl-ev-tile:last-child b { color: var(--ev-c); font-size: 34px; }
-.sl-ev-final .sl-ev-tile.tick b { animation: sl-ev-slam .5s cubic-bezier(.2,1.8,.3,1); }
-@keyframes sl-ev-slam { from { transform: scale(2.2); opacity: 0; } }
-.sl-ev-final .sl-ev-hero { animation: sl-ev-shake .5s infinite; }
-@keyframes sl-ev-shake { 10%, 90% { transform: translateX(-1px); } 30%, 70% { transform: translateX(2px); } 50% { transform: translateX(-2px); } }
+.sl-ev-hero { position: relative; overflow: hidden; border-radius: 18px; color: var(--ev-ink, #fff); margin: 0 0 12px; isolation: isolate;
+  background: radial-gradient(120% 80% at 50% 0%, var(--ev-a) 0%, var(--ev-b) 78%); border: 1px solid rgba(228,197,122,.3);
+  box-shadow: inset 0 1px 0 rgba(228,197,122,.5), 0 10px 28px rgba(7,24,16,.3); }
+.sl-ev-hx-in { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 46px 18px 20px; }
+.sl-ev-hero-art { width: 96px; height: 96px; margin: -6px 0 4px; }
+.sl-ev-hero-art svg { width: 100%; height: 100%; filter: drop-shadow(0 5px 8px rgba(0,0,0,.45)); }
+.sl-ev-tag { margin: 0 0 8px !important; font: 500 12px/1 "SL Outfit", "Inter", sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #fff; background: var(--ev-d); padding: 6px 12px; border-radius: 999px; }
+.sl-ev-hero h3 { margin: 0 0 14px; font: 800 clamp(24px, 6.4vw, 34px)/1.08 "SL Outfit", "Inter", sans-serif; letter-spacing: -.005em; color: var(--ev-ink, #fff); text-wrap: balance; }
+.sl-ev-comes { margin: 0 0 4px !important; font: 800 clamp(17px, 4.6vw, 21px)/1.1 "SL Outfit", "Inter", sans-serif; color: var(--ev-c); letter-spacing: .01em; }
+.sl-ev-for { margin: 0 0 12px !important; font: 500 13px/1.2 "SL Outfit", "Inter", sans-serif; letter-spacing: .09em; text-transform: uppercase; color: rgba(255,248,237,.78); }
+.sl-ev-hx .sl-ev-clock { width: 100%; margin-bottom: 16px; }
+.sl-ev-clock.sl-ev-after { max-width: 380px; }
+.sl-ev-after .sl-ev-num { font-size: clamp(24px, 6.4vw, 36px); }
+.sl-ev-cta { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; padding: 0 26px; margin: 2px 0 18px; border-radius: 14px; cursor: pointer;
+  font: 800 18px/1 "SL Outfit", "Inter", sans-serif; color: #17271c; background: linear-gradient(180deg, #F0D99A, var(--ev-c)); box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 8px 20px rgba(0,0,0,.35); }
+.sl-ev-cta:hover { filter: brightness(1.05); }
+.sl-ev-cta:focus-visible { outline: 3px solid #FFF8ED; outline-offset: 3px; }
+.sl-ev-when { margin: 0 0 10px !important; font: 500 13.5px/1.45 "SL Outfit", "Inter", sans-serif; color: rgba(255,248,237,.86); max-width: 46ch; }
+.sl-ev-when b { display: block; font-weight: 800; color: var(--ev-ink, #fff); font-size: 15px; }
+.sl-ev-when .sl-ev-tz, .sl-ev-when .sl-ev-utc { display: block; font-size: 12.5px; color: rgba(255,248,237,.66); }
+.sl-ev-early { display: inline-flex; align-items: center; gap: 7px; margin: 2px 0 12px !important; padding: 7px 13px; border-radius: 999px; font: 500 13px/1.3 "SL Outfit", "Inter", sans-serif;
+  color: var(--ev-c); border: 1px solid rgba(228,197,122,.45); background: rgba(228,197,122,.08); text-align: left; }
+.sl-ev-early svg { flex: none; width: 15px; height: 15px; }
+.sl-ev-desc { margin: 0 !important; font-size: 13px; line-height: 1.5; color: rgba(255,248,237,.74); max-width: 52ch; }
+/* the frame: pine branches with fairy lights along the top, sparse snow behind everything */
+.sl-ev-fx { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.sl-ev-pine { position: absolute; left: -6px; top: -6px; width: clamp(130px, 30%, 230px); height: auto; overflow: visible; }
+.sl-ev-pine.r { left: auto; right: -6px; transform: scaleX(-1); }
+.sl-ev-flakes { position: absolute; inset: 0; }
+.sl-ev-flakes i { position: absolute; top: -8px; width: 4px; height: 4px; border-radius: 50%; background: #FFF8ED; opacity: calc(.18 + var(--z, .5) * .3); transform: scale(var(--z, .5)); animation: sl-ev-flake linear infinite; }
+@keyframes sl-ev-flake { to { transform: translate(14px, 640px) scale(var(--z, .5)); } }
+@media (max-width: 420px) { .sl-ev-hx-in { padding: 40px 12px 18px; } .sl-ev-hero-art { width: 80px; height: 80px; } .sl-ev-g { padding: 10px 2px 8px; border-radius: 12px; } .sl-ev-g small { letter-spacing: .05em; } }
+@media (max-width: 340px) { .sl-ev-g small { font-size: 9.5px; letter-spacing: .02em; } .sl-ev-dg { width: .6em; } }
 /* zero: the completion burst */
 .sl-ev-burst { position: absolute; inset: 0; pointer-events: none; z-index: 3; display: grid; place-items: center; }
-.sl-ev-burst .sl-ev-boom { font: italic 900 26px 'Inter', sans-serif; text-transform: uppercase; color: #fff; text-shadow: 0 0 18px var(--ev-c), 0 3px 0 rgba(0,0,0,.3); animation: sl-ev-boom 1.2s cubic-bezier(.2,1.6,.3,1) both; text-align: center; padding: 0 10px; }
+.sl-ev-burst .sl-ev-boom { font: 800 28px 'SL Outfit', 'Inter', sans-serif; color: #FFF8ED; text-shadow: 0 0 18px var(--ev-c), 0 3px 0 rgba(0,0,0,.3); animation: sl-ev-boom 1.2s cubic-bezier(.2,1.6,.3,1) both; text-align: center; padding: 0 10px; }
 @keyframes sl-ev-boom { 0% { transform: scale(.2) rotate(-8deg); opacity: 0; } 60% { transform: scale(1.12) rotate(2deg); opacity: 1; } 100% { transform: scale(1); } }
 .sl-ev-burst i { position: absolute; left: 50%; top: 50%; width: 8px; height: 14px; border-radius: 2px; background: var(--c, #fff); animation: sl-ev-confetti 1.6s cubic-bezier(.1,.7,.3,1) both; }
 @keyframes sl-ev-confetti { from { transform: translate(-50%, -50%) rotate(0); opacity: 1; } to { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--r)); opacity: 0; } }
@@ -270,8 +303,9 @@ details.sl-ev-more summary { cursor: pointer; font-weight: 600; }
 .sl-ev-curglow { position: fixed; left: 0; top: 0; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; pointer-events: none; z-index: 2147483001; mix-blend-mode: screen; opacity: 0; transition: opacity .3s; will-change: transform; }
 .sl-ev-curglow.on { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
-  .sl-ev-banner::after, .sl-ev-early, .sl-ev-hot .sl-ev-hero, .sl-ev-hot.sl-ev-banner, .sl-ev-final .sl-ev-hero, .sl-ev-tile.tick b, .sl-ev-door.is-open .leaf, .sl-ev-rv-rays, .sl-ev-rv-art,
+  .sl-ev-dg i, .sl-ev-flakes i, .sl-ev-door.is-open .leaf, .sl-ev-rv-rays, .sl-ev-rv-art,
   .sl-ev-serpent .body, .sl-ev-serpent .shimmer, .sl-ev-serpent .sparkle, .sl-ev-serpent .head, .sl-ev-b-badge, .sl-ev-live::before, .sl-ev-snow i, .sl-ev-burst i, .sl-ev-burst .ring { animation: none !important; }
+  .sl-ev-flakes { display: none; }
   .sl-ev-rv-door { display: none; }
   .sl-ev-door .leaf { transition: none; }
 }

@@ -40,11 +40,12 @@
     if (ART.ssnow) { var s = D.createElementNS(NS, "path"); s.setAttribute("d", ART.ssnow); s.setAttribute("class", "xm-ssnow"); s.setAttribute("fill", "#fff"); s.setAttribute("style", "opacity:var(--xm-hat-o,1)"); g.appendChild(s); }
     return true;
   };
-  /* the tick becomes a Christmas stocking with presents (the tick's own drawing is hidden by xmas.css, not removed) */
+  /* the tick, dressed as a Christmas stocking: still the tick's own shape, in red knit with a fur cuff and a candy cane
+     (the tick's own drawing is only hidden by xmas.css while the stocking is there, never removed) */
   var stkN = 0;
   function stockings() {
     if (!ART.stocking) return;
-    [].forEach.call(D.querySelectorAll("svg.sl-tick, .intro-box svg"), function (sv) {
+    [].forEach.call(D.querySelectorAll("svg.sl-tick, .intro-box svg:not(.tick-detail)"), function (sv) {
       if (sv.querySelector(".xm-stk")) return;
       sv.classList.add("xm-has-stk"); sv.style.overflow = "visible";
       // its own gradient names in each copy (a copy inside a hidden logo could not lend them to the others)
@@ -52,11 +53,14 @@
     });
   }
 
-  /* snow on top of the letters: each letter's top edge is measured from the font itself (drawn once on a canvas),
-     then a soft cap of snow is laid where the edge is flat enough to hold it - the same rule as the S's snow */
+  /* snow on top of the letters: each letter's real outline is measured from the font itself (drawn once on a
+     canvas, upper-case where the page shows it upper-case), then snow is laid only where that outline faces up and
+     is flat enough to hold it - thickest in the middle of a flat top, thinning out towards its ends, none on the
+     curves and slopes, with now and then a small drip over the edge. The same rule as the logo S's snow
+     (christmas_art.snow_cap). Also on the cover's other words and on the top of the snake's name button. */
   var gCache = {}, cv = null;
-  function glyph(ch, font) {
-    var k = font + "|" + ch; if (gCache[k]) return gCache[k];
+  function glyph(ch, font, T) {
+    var k = font + "|" + ch + "|" + T; if (gCache[k]) return gCache[k];
     var R = 120, W = R * 2, H = R * 2;
     if (!cv) { cv = D.createElement("canvas"); cv.width = W; cv.height = H; }
     var g = cv.getContext("2d", { willReadFrequently: true });
@@ -65,60 +69,93 @@
     var m = g.measureText(ch), asc = (m.fontBoundingBoxAscent || R * .9) / R;
     var d = g.getImageData(0, 0, W, H).data, tops = [], step = 2;
     for (var x = 0; x < W; x += step) { var t = null; for (var y = 0; y < H; y++) if (d[(y * W + x) * 4 + 3] > 140) { t = (y - oy) / R; break; } tops.push(t); }
-    var path = snowCap(tops, -ox / R, step / R, .06, ch.charCodeAt(0));
-    return (gCache[k] = { asc: asc, p: path });
+    return (gCache[k] = { asc: asc, p: snowCap(tops, -ox / R, step / R, T, ch.charCodeAt(0)) });
   }
-  /* tops: the top edge's y per column (null where empty) -> polygons [[x, y]...] (port of christmas_art.snow_cap) */
+  /* tops: the top edge's y per column (null where empty) -> polygons [[x, y]...] (a port of christmas_art.snow_cap) */
   function snowCap(tops, x0, step, T, seed) {
     var n = tops.length, th = new Array(n).fill(0), sm = new Array(n).fill(0), out = [], c, k;
-    var ph0 = (seed * 1.7) % 6.28, ph1 = (seed * 2.9) % 6.28;
+    var ph0 = (seed * 1.7) % 6.28, ph1 = (seed * 2.9) % 6.28, rnd = (seed * 9301 + 49297) % 233280 / 233280;
     for (c = 0; c < n; c++) {
       if (tops[c] == null) continue;
       var a = Math.max(0, c - 3), b = Math.min(n - 1, c + 3);
       while (tops[a] == null) a++; while (tops[b] == null) b--;
-      var slope = (tops[b] - tops[a]) / Math.max(1e-6, (b - a) * step), f = Math.pow(Math.max(0, 1 - Math.abs(slope) / .95), 1.6), x = x0 + c * step;
-      th[c] = T * f * (.82 + .22 * Math.sin(x / (T * 2.3) + ph0) + .12 * Math.sin(x / (T * .9) + ph1));
+      // snow only holds where the edge is nearly level: none past a slope of about 30 degrees
+      var slope = (tops[b] - tops[a]) / Math.max(1e-6, (b - a) * step), f = Math.pow(Math.max(0, 1 - Math.abs(slope) / .85), 1.5), x = x0 + c * step;
+      th[c] = T * f * (.86 + .14 * Math.sin(x / (T * 2.3) + ph0) + .08 * Math.sin(x / (T * .9) + ph1));
     }
     for (c = 0; c < n; c++) { if (tops[c] == null) continue; var s = 0, q = 0; for (k = Math.max(0, c - 2); k < Math.min(n, c + 3); k++) if (tops[k] != null) { s += th[k]; q++; } sm[c] = s / q; }
     c = 0;
     while (c < n) {
-      if (tops[c] == null || sm[c] < T * .22) { c++; continue; }
+      if (tops[c] == null || sm[c] < T * .3) { c++; continue; }
       var e = c;
-      while (e + 1 < n && tops[e + 1] != null && sm[e + 1] >= T * .22 && Math.abs(tops[e + 1] - tops[e]) < T) e++;
-      if ((e - c) * step >= T * 1.2) {
-        var L = e - c + 1, up = [], dn = [];
-        for (var j = 0; j < L; j++) { var kk = c + j, tp = Math.pow(Math.sin(Math.PI * (j + .5) / L), .45), xx = x0 + kk * step; up.push([xx, tops[kk] - sm[kk] * tp]); dn.push([xx, tops[kk] + T * .2 * tp]); }
+      while (e + 1 < n && tops[e + 1] != null && sm[e + 1] >= T * .3 && Math.abs(tops[e + 1] - tops[e]) < T * .6) e++;
+      var L = e - c + 1, len = L * step;
+      if (len >= T * 1.5) {
+        // a long flat top holds more snow in its middle; a short one only a thin cap
+        var full = Math.min(1, len / (T * 7)), up = [], dn = [];
+        var drip = len > T * 5 && ((rnd * 7 + c) % 1) < .55 ? (((rnd * 13 + e) % 1) < .5 ? .18 + .1 * rnd : .72 + .1 * rnd) : -1;
+        for (var j = 0; j < L; j++) {
+          var kk = c + j, u = (j + .5) / L, tp = Math.pow(Math.sin(Math.PI * u), .7), xx = x0 + kk * step;
+          var dr = drip < 0 ? 0 : T * .95 * Math.exp(-Math.pow((u - drip) * len / (T * .45), 2));
+          up.push([xx, tops[kk] - sm[kk] * tp * (.7 + .3 * full)]); dn.push([xx, tops[kk] + T * .16 * tp + dr]);
+        }
         out.push(up.concat(dn.reverse()));
       }
       c = e + 1;
     }
     return out;
   }
-  var SNOW_HOSTS = ".sl-header .sl-titletext, .intro-title, .hero-title .intro-title, .hero-mark, .signin-title .sl-titletext, .sl-brand, .site-logo";
-  function snowText(host) {
+  function polyD(poly, fx, fy) { return "M" + poly.map(function (p) { return fx(p[0]).toFixed(1) + " " + fy(p[1]).toFixed(1); }).join("L") + "Z"; }
+  /* where snow lies: [selector, depth of the snow as a part of the font size, the least depth in px] - the logos get a
+     proper layer, the small words of the cover a light dusting */
+  var SNOW_SPOTS = [
+    [".sl-header .sl-titletext, .intro-title, .hero-title .intro-title, .hero-mark, .signin-title .sl-titletext, .sl-brand, .site-logo", .07, 1.6],
+    ["#sl-hero .hero-sub, #intro .hero-sub", .17, 2.4],
+    ["#sl-hero .hero-cue > span, #intro .hero-cue > span", .2, 2]
+  ];
+  var PILLS = "#sl-hero .hero-sp";           // a button: the snow lies along its rounded top
+  var SNOW_HOSTS = SNOW_SPOTS.map(function (s) { return s[0]; }).join(", ") + ", " + PILLS;
+  function capHost(host) {
+    var o = host.querySelector(":scope > .xm-snowcap");
+    if (!o) { o = D.createElementNS(NS, "svg"); o.setAttribute("class", "xm-snowcap"); o.setAttribute("aria-hidden", "true"); o.innerHTML = "<path/>"; host.appendChild(o); }
+    return o;
+  }
+  function snowText(host, Tem, Tpx) {
     if (!host || !host.isConnected) return;
     var hr = host.getBoundingClientRect(); if (!hr.width || !host.offsetWidth) return;
     var sc = hr.width / host.offsetWidth || 1, parts = [];
-    var w = D.createTreeWalker(host, NodeFilter.SHOW_TEXT, { acceptNode: function (n) { return n.parentNode.closest("svg, .sr-only, .xm-snowcap") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } });
+    var w = D.createTreeWalker(host, NodeFilter.SHOW_TEXT, { acceptNode: function (n) { return n.parentNode.closest("svg, .sr-only, .xm-snowcap, .hw-dot") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } });
     var rg = D.createRange(), n;
     while ((n = w.nextNode())) {
       var el = n.parentNode, cs = getComputedStyle(el), fs = parseFloat(cs.fontSize);
       if (!fs || cs.visibility === "hidden") continue;
-      var font = cs.fontStyle + " " + cs.fontWeight + " @ " + cs.fontFamily;
+      var font = cs.fontStyle + " " + cs.fontWeight + " @ " + cs.fontFamily, T = Math.max(Tem, Tpx / fs);
+      T = Math.round(T * 200) / 200;
       for (var i = 0; i < n.length; i++) {
-        var ch = n.data[i]; if (!/\S/.test(ch)) continue;
+        var ch = n.data[i]; if (!/[A-Za-z0-9]/.test(ch)) continue;
+        if (cs.textTransform === "uppercase") ch = ch.toUpperCase();
         rg.setStart(n, i); rg.setEnd(n, i + 1);
         var r = rg.getBoundingClientRect(); if (!r.width) continue;
-        var G = glyph(ch, font), ox = (r.left - hr.left) / sc, base = (r.top - hr.top) / sc + G.asc * fs;
-        G.p.forEach(function (poly) { parts.push("M" + poly.map(function (p) { return (ox + p[0] * fs).toFixed(1) + " " + (base + p[1] * fs).toFixed(1); }).join("L") + "Z"); });
+        var G = glyph(ch, font, T), ox = (r.left - hr.left) / sc, base = (r.top - hr.top) / sc + G.asc * fs;
+        G.p.forEach(function (poly) { parts.push(polyD(poly, function (x) { return ox + x * fs; }, function (y) { return base + y * fs; })); });
       }
     }
-    var o = host.querySelector(":scope > .xm-snowcap");
-    if (!o) { o = D.createElementNS(NS, "svg"); o.setAttribute("class", "xm-snowcap"); o.setAttribute("aria-hidden", "true"); o.innerHTML = "<path/>"; host.appendChild(o); }
-    o.firstChild.setAttribute("d", parts.join(""));
+    capHost(host).firstChild.setAttribute("d", parts.join(""));
+  }
+  function snowPill(host) {
+    if (!host || !host.isConnected || !host.offsetWidth) return;
+    var W = host.offsetWidth, H = host.offsetHeight, r = Math.min(H / 2, parseFloat(getComputedStyle(host).borderTopLeftRadius) || 0), tops = [], st = 1;
+    for (var x = 0; x <= W; x += st) { var dx = x < r ? r - x : x > W - r ? x - (W - r) : 0; tops.push(r - Math.sqrt(Math.max(0, r * r - dx * dx))); }
+    capHost(host).firstChild.setAttribute("d", snowCap(tops, 0, st, 3.2, 7).map(function (p) { return polyD(p, function (x) { return x; }, function (y) { return y + 2.6; }); }).join(""));
   }
   var snowT = 0;
-  function snowAll() { clearTimeout(snowT); snowT = setTimeout(function () { [].forEach.call(D.querySelectorAll(SNOW_HOSTS), snowText); }, 60); }
+  function snowAll() {
+    clearTimeout(snowT);
+    snowT = setTimeout(function () {
+      SNOW_SPOTS.forEach(function (s) { [].forEach.call(D.querySelectorAll(s[0]), function (h) { snowText(h, s[1], s[2]); }); });
+      [].forEach.call(D.querySelectorAll(PILLS), snowPill);
+    }, 60);
+  }
   XM.snowLetters = snowAll;
   function logo() {
     XM.hat(); stockings(); snowAll();
@@ -164,7 +201,7 @@
     var L = hero.querySelector(".xm-phat");
     var P = (ART.photoHats || {})[photoId(im)];
     if (!P || !im.naturalWidth) { if (L) L.hidden = true; return; }
-    if (!L) { L = D.createElement("div"); L.className = "xm-phat"; L.setAttribute("aria-hidden", "true"); L.innerHTML = '<svg viewBox="-70 -80 140 100" preserveAspectRatio="xMidYMid meet">' + ART.hatSvg + "</svg>"; im.parentNode.insertBefore(L, im.nextSibling); }
+    if (!L) { L = D.createElement("div"); L.className = "xm-phat"; L.setAttribute("aria-hidden", "true"); L.innerHTML = '<svg viewBox="-72 -84 144 116" preserveAspectRatio="xMidYMid meet">' + ART.hatSvg + "</svg>"; im.parentNode.insertBefore(L, im.nextSibling); }
     L.hidden = false;
     var bw = im.offsetWidth, bh = im.offsetHeight, nw = im.naturalWidth, nh = im.naturalHeight, cs = getComputedStyle(im);
     var k = cs.objectFit === "cover" ? Math.max(bw / nw, bh / nh) : Math.min(bw / nw, bh / nh), cw = nw * k, ch = nh * k;
@@ -173,9 +210,9 @@
     var ox = (bw - cw) * px, oy = (bh - ch) * py;
     L.style.left = im.offsetLeft + "px"; L.style.top = im.offsetTop + "px"; L.style.width = bw + "px"; L.style.height = bh + "px";
     var w = P.w * cw, sv = L.firstChild;
-    sv.style.width = (w * 1.4) + "px"; sv.style.height = w + "px";
-    sv.style.left = (ox + P.x * cw - w * .7) + "px"; sv.style.top = (oy + P.y * ch - w * .8) + "px";
-    sv.style.transformOrigin = (w * .7) + "px " + (w * .8) + "px";
+    sv.style.width = (w * 1.44) + "px"; sv.style.height = (w * 1.16) + "px";
+    sv.style.left = (ox + P.x * cw - w * .72) + "px"; sv.style.top = (oy + P.y * ch - w * .84) + "px";
+    sv.style.transformOrigin = (w * .72) + "px " + (w * .84) + "px";
     sv.style.transform = "rotate(" + (P.a || 0) + "deg)" + (P.flip ? " scaleX(-1)" : "");
   }
   function photoHat() {
@@ -292,8 +329,8 @@
   }
 
   /* ================= a tiny Santa-hat snake by each snake's name =================
-     A flat little snake in the style of SnakeList's S, in that species' own colours and pattern (from the 3D
-     models' colours: christmas/xmas-sp.json, about 4 numbers per species, fetched once), wearing a Santa hat.
+     A small portrait of that species: its own colours, pattern and head shape (from the 3D models: christmas/
+     xmas-sp.json, 11 characters per species, fetched once), wearing a Santa hat.
      Each look is drawn once as an SVG symbol and reused (<use>), so even long lists stay light. */
   var SP = null, spP = null, symDone = {}, sprite = null;
   function spData() {
@@ -301,32 +338,89 @@
     if (!spP) spP = fetch(asset("xmas-sp.json")).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }).then(function (d) { SP = d || {}; return SP; });
     return spP;
   }
-  var S_PATH = "M17.2 6.6C15.4 3.9 10 3.4 8.3 6.2 6.4 9.5 16.8 10.4 16.9 15.2 17 19.8 10.4 21.3 5.6 18.7";
+  /* the little snake: a round, shaded body rising in an S from a loop on the ground, thick through the middle and
+     thin to the tail, with its species' pattern and belly colour, a head of the right shape (a viper's wide
+     triangle, a python's long broad head, a colubrid's slender one...), an eye, and the Santa hat worn on its head.
+     The body's outline is worked out once (a tube round its middle line); each species' look is one <symbol>. */
+  var MID = [[2.6, 20.6], [6.2, 22.4], [13.8, 22.6], [16.2, 19.6], [18.2, 17.0], [15.2, 15.3], [11.6, 14.6], [8.6, 14.0], [7.6, 11.4], [9.4, 9.6], [10.8, 8.2], [12.8, 7.9], [14.2, 8.4]];
+  var TUBE = null;
+  function tube() {
+    if (TUBE) return TUBE;
+    var pts = [], i, t;
+    for (i = 0; i + 3 < MID.length; i += 3) for (t = i ? .05 : 0; t <= 1.0001; t += .05) {
+      var u = 1 - t, p0 = MID[i], p1 = MID[i + 1], p2 = MID[i + 2], p3 = MID[i + 3];
+      pts.push([u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0], u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1]]);
+    }
+    var n = pts.length, L = [], R = [], B = [], H = [];
+    for (i = 0; i < n; i++) {
+      var a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1;
+      var nx = -dy / l, ny = dx / l, f = i / (n - 1);
+      // thickness: a thin tail, full through the coil and the body, a little narrower at the neck
+      var w = 2.15 * Math.min(1, .18 + f * 3.2) * (f > .86 ? 1 - (f - .86) * 1.4 : 1);
+      L.push([pts[i][0] + nx * w, pts[i][1] + ny * w]); R.push([pts[i][0] - nx * w, pts[i][1] - ny * w]);
+      // the belly side and the lit side (light from above: whichever side faces down is the belly)
+      var s = ny > 0 ? 1 : -1;
+      B.push([pts[i][0] + nx * w * .62 * s, pts[i][1] + ny * w * .62 * s]); H.push([pts[i][0] - nx * w * .45 * s, pts[i][1] - ny * w * .45 * s]);
+    }
+    function d(a) { return "M" + a.map(function (p) { return p[0].toFixed(2) + " " + p[1].toFixed(2); }).join("L"); }
+    var mid = d(pts);
+    TUBE = { body: d(L) + "L" + R.slice().reverse().map(function (p) { return p[0].toFixed(2) + " " + p[1].toFixed(2); }).join("L") + "Z", mid: mid, belly: d(B), lit: d(H) };
+    return TUBE;
+  }
+  // the pattern along the body (C = pattern colour, B = belly colour), clipped to the body
   var PAT = {
-    p: "", b: '<path d="' + S_PATH + '" stroke="#C" stroke-width="4.2" stroke-dasharray="1.5 2.3" fill="none"/>',
-    c: '<path d="' + S_PATH + '" stroke="#C" stroke-width="4.2" stroke-dasharray="1.5 4.4" fill="none"/><path d="' + S_PATH + '" stroke="#B" stroke-width="4.2" stroke-dasharray=".8 5.1" stroke-dashoffset="-1.9" fill="none"/>',
-    s: '<path d="' + S_PATH + '" stroke="#C" stroke-width="1.2" fill="none" stroke-linecap="round"/>',
-    k: '<path d="' + S_PATH + '" stroke="#C" stroke-width="1.1" stroke-dasharray=".01 1.6" stroke-linecap="round" fill="none"/>',
-    o: '<path d="' + S_PATH + '" stroke="#C" stroke-width="2.6" stroke-dasharray="1.7 2" stroke-linecap="round" fill="none"/>',
-    z: '<path d="' + S_PATH + '" stroke="#C" stroke-width="2" stroke-dasharray="1 1.2" fill="none"/>',
-    l: '<path d="' + S_PATH + '" stroke="#C" stroke-width="4.2" stroke-dasharray="0 1.4 1.3 60" fill="none"/>'
+    p: "", b: '<path d="#M" stroke="#C" stroke-width="5" stroke-dasharray="1.1 1.9" fill="none"/>',
+    c: '<path d="#M" stroke="#C" stroke-width="5" stroke-dasharray="1.2 4.2" fill="none"/><path d="#M" stroke="#B" stroke-width="5" stroke-dasharray=".7 4.7" stroke-dashoffset="-1.6" fill="none"/>',
+    s: '<path d="#M" stroke="#C" stroke-width=".9" fill="none"/><path d="#L" stroke="#C" stroke-width=".55" fill="none" opacity=".8"/>',
+    k: '<path d="#M" stroke="#C" stroke-width="3.4" stroke-dasharray=".01 1.25" stroke-linecap="round" fill="none" opacity=".9"/>',
+    o: '<path d="#M" stroke="#C" stroke-width="2.6" stroke-dasharray="1.5 1.5" stroke-linecap="round" fill="none"/>',
+    z: '<path d="#M" stroke="#C" stroke-width="2.4" stroke-dasharray="1 .9" stroke-linejoin="round" fill="none"/>',
+    l: '<path d="#M" stroke="#C" stroke-width="5" stroke-dasharray="0 31 1.4 60" fill="none"/>'
   };
-  var MINI_HAT = '<g transform="translate(17.4 4.1) rotate(-10)"><path d="M-3.1 .2C-2.9-2.5-1.5-4.4.5-4.6 2.1-4.7 3.2-3.4 3.2.2Z" fill="#c62f40"/><path d="M.2-4.5C-1.4-4.6-2.9-3.9-3.8-2.6" stroke="#9c1d2e" stroke-width="1.3" fill="none" stroke-linecap="round"/>' +
-    '<circle cx="-3.9" cy="-2.3" r=".95" fill="#fff"/><rect x="-3.6" y="-.5" width="7.3" height="1.7" rx=".85" fill="#fff"/></g>';
+  // head shapes, facing right from the neck at (0, 0): [outline, eye x, eye y, eye r, slit pupil]
+  var HEADS = {
+    c: ["M-.6-1.7C1.2-2.5 3.6-2.4 5.1-1.4 5.9-.8 6.1.2 5.5.8 4.3 1.9 1.4 2.2-.6 1.7Z", 3.2, -.75, .78, 0],
+    e: ["M-.6-1.8C1.3-2.6 3.5-2.5 4.8-1.5 5.7-.8 5.8.4 5.1 1 3.9 2 1.3 2.2-.6 1.8Z", 3, -.8, .72, 0],
+    v: ["M-.5-1.3C.2-3.3 2.6-3.6 4.6-2.3 5.8-1.5 6.4-.5 6.2.3 5.9 1.2 4.4 2.3 2.6 3 1.2 3.5-.2 3-.5 1.6Z", 3.3, -1.15, .8, 1],
+    b: ["M-.6-1.8C1.4-2.7 4.4-2.6 6-1.6 6.8-1 6.9.3 6.2.9 4.8 2.1 1.4 2.4-.6 1.8Z", 3.9, -.9, .74, 1],
+    n: ["M-.4-1.5C1-1.9 2.8-1.8 3.8-1.1 4.5-.5 4.5.6 3.8 1.1 2.7 1.8 .9 1.9-.4 1.5Z", 2.6, -.5, .34, 0],
+    s: ["M-.6-1.7C1.2-2.4 3.4-2.3 4.8-1.4 5.6-.8 5.8.3 5.2.9 4 1.9 1.4 2.1-.6 1.7Z", 3, -.75, .74, 0]
+  };
   function spSym(code) {
     var id = "xsi-" + code.replace(/[^a-z0-9]/gi, "");
     if (symDone[id]) return id;
     if (!sprite) { sprite = D.createElementNS(NS, "svg"); sprite.setAttribute("aria-hidden", "true"); sprite.setAttribute("class", "xm-sprite"); D.body.appendChild(sprite); }
-    var d = "#" + code.slice(0, 3), c = "#" + code.slice(3, 6), b = "#" + code.slice(6, 9), t = code.charAt(9) || "p";
-    sprite.insertAdjacentHTML("beforeend", '<symbol id="' + id + '" viewBox="0 0 24 24">' +
-      '<path d="' + S_PATH + '" stroke="rgba(0,0,0,.38)" stroke-width="5.4" fill="none" stroke-linecap="round"/>' +
-      '<path d="' + S_PATH + '" stroke="' + d + '" stroke-width="4.2" fill="none" stroke-linecap="round"/>' +
-      (PAT[t] || "").replace(/#C/g, c).replace(/#B/g, b) +
-      '<ellipse cx="18.3" cy="7.1" rx="3.2" ry="2.3" transform="rotate(22 18.3 7.1)" fill="' + d + '" stroke="rgba(0,0,0,.38)" stroke-width=".6"/>' +
-      '<circle cx="19.2" cy="6.6" r=".62" fill="#111"/>' + MINI_HAT + "</symbol>");
+    var T = tube(), d = "#" + code.slice(0, 3), c = "#" + code.slice(3, 6), b = "#" + code.slice(6, 9), t = code.charAt(9) || "p", h = HEADS[code.charAt(10)] || HEADS.c;
+    var pat = (PAT[t] || "").replace(/#M/g, T.mid).replace(/#L/g, T.lit).replace(/#C/g, c).replace(/#B/g, b);
+    var defs = "";
+    if (!symDone.base) {
+      // shared once: the body's clip, its round shading and the small Santa hat (a light version, no filters)
+      defs = '<defs><clipPath id="xsi-clip"><path d="' + T.body + '"/></clipPath>' +
+        '<linearGradient id="xsi-sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset=".75" stop-color="#000" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></linearGradient>' +
+        '<radialGradient id="xsi-hd" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></radialGradient>' +
+        '<g id="xsi-hat">' + (ART.hatMini || "") + "</g></defs>";
+      symDone.base = 1;
+    }
+    sprite.insertAdjacentHTML("beforeend", defs + '<symbol id="' + id + '" viewBox="0 0 24 24">' +
+      '<ellipse cx="10.6" cy="22.9" rx="8.6" ry="1.1" fill="#000" opacity=".22"/>' +
+      '<path d="' + T.body + '" fill="' + d + '" stroke="rgba(0,0,0,.45)" stroke-width=".45" stroke-linejoin="round"/>' +
+      '<g clip-path="url(#xsi-clip)">' + pat +
+        // round, like a real body: darker towards both edges, a soft sheen along the back
+        '<path d="' + T.body + '" stroke="#000" stroke-width="1.7" fill="none" opacity=".26"/>' +
+        '<path d="' + T.mid + '" stroke="#fff" stroke-width="1.1" fill="none" opacity=".16" stroke-linecap="round"/></g>' +
+      // the head, turned a little up, with its eye; the hat sits on it (its brim over the crown, the tip behind)
+      '<g transform="translate(13.7 8.3) rotate(-14) scale(1.22)"><path d="' + h[0] + '" fill="' + d + '" stroke="rgba(0,0,0,.5)" stroke-width=".4"/>' +
+        (t === "s" || t === "l" ? '<path d="' + h[0] + '" fill="' + c + '" opacity=".35"/>' : "") +
+        '<path d="' + h[0] + '" fill="url(#xsi-hd)"/>' +
+        '<path d="M.4 1.3C2 1.9 4 1.7 5.2.9" stroke="' + b + '" stroke-width=".55" fill="none" opacity=".75"/>' +
+        '<circle cx="' + h[1] + '" cy="' + h[2] + '" r="' + h[3] + '" fill="' + (h[4] ? "#c9a24a" : "#111") + '"/>' +
+        (h[4] ? '<ellipse cx="' + h[1] + '" cy="' + h[2] + '" rx="' + (h[3] * .28).toFixed(2) + '" ry="' + (h[3] * .85).toFixed(2) + '" fill="#111"/>' : "") +
+        '<circle cx="' + (h[1] + h[3] * .35).toFixed(2) + '" cy="' + (h[2] - h[3] * .4).toFixed(2) + '" r="' + (h[3] * .3).toFixed(2) + '" fill="#fff" opacity=".85"/>' +
+        '<use href="#xsi-hat" transform="translate(1.6 -1.55) rotate(-6) scale(.058)"/></g>' +
+      "</symbol>");
     symDone[id] = 1; return id;
   }
-  var DEF_CODE = "5b56b5173d27e4dcb8p";   // SnakeList's own green S when a species has no colours yet
+  var DEF_CODE = "6b5142edboc";   // SnakeList's own green S when a species has no colours yet
   function slug(s) { return String(s || "").trim().toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-+|-+$/g, ""); }
   function addIcon(el, id) {
     if (!el || el.querySelector(":scope > .xm-spi")) return;
@@ -407,9 +501,11 @@
   };
 
   /* ================= Christmas audio: the fireplace and the Christmas music, mixed together =================
-     Both are made on the spot with Web Audio - nothing is downloaded. The music is "Jingle Bells" (James Lord
-     Pierpont, 1857 - public domain), arranged here for bells, a soft pad, a bass line and sleigh bells, playing on
-     repeat. The fire sits in the background and the music on top; each has its own volume. Volumes are kept in
+     The music is real recorded performances of Christmas songs (Kevin MacLeod, incompetech.com, CC BY 4.0 - see
+     CREDITS.txt): a playlist that plays in order and repeats, streamed from christmas/music/ and loaded only when
+     the music button is first pressed (nothing is preloaded). It goes through Web Audio, so its volume works on
+     iPad / iPhone too (Safari ignores an audio element's own volume). The fire is made on the spot with Web Audio.
+     The fire sits in the background and the music on top; each has its own volume. Volumes are kept in
      this browser (sl-xmas-audio); nothing ever starts playing by itself. window.SL_XMAS_AUDIO is for SnakeList's
      Settings: SL_XMAS_AUDIO.panel(el) puts the two volume controls into any element. */
   var AU = (function () {
@@ -441,65 +537,36 @@
     }
     function crackle() { if (!st.fire) return; pop(.3 + Math.random() * .45); crT = setTimeout(crackle, 180 + Math.random() * 900); }
     function fireLevel() { return st.fire ? st.fv * .32 * (st.away ? .45 : 1) : 0; }
-    function musicLevel() { return st.music ? st.mv * .5 : 0; }
+    function musicLevel() { return st.music ? st.mv * .85 : 0; }
     function apply() { if (!ctx) return; fireG.gain.setTargetAtTime(fireLevel(), ctx.currentTime, .25); musicG.gain.setTargetAtTime(musicLevel(), ctx.currentTime, .15); }
     function emit() { ls.forEach(function (f) { try { f(st); } catch (e) {} }); }
 
-    /* ---- Jingle Bells (public domain), 4/4 at 112 beats a minute: [midi note, beats] (0 = rest) ---- */
-    var E = 76, F = 77, G = 79, C = 72, Dn = 74, A = 81;
-    var verse = [[E, 1], [E, 1], [E, 2], [E, 1], [E, 1], [E, 2], [E, 1], [G, 1], [C, 1.5], [Dn, .5], [E, 4],
-                 [F, 1], [F, 1], [F, 1.5], [F, .5], [F, 1], [E, 1], [E, 1], [E, .5], [E, .5]];
-    var MEL = verse.concat([[E, 1], [Dn, 1], [Dn, 1], [E, 1], [Dn, 2], [G, 2]], verse, [[G, 1], [G, 1], [F, 1], [Dn, 1], [C, 4]]);
-    // chords per bar (root midi, major/minor/dom7)
-    var CH = [[48, "M"], [48, "M"], [48, "M"], [48, "M"], [53, "M"], [48, "M"], [50, "7"], [55, "7"], [48, "M"], [48, "M"], [48, "M"], [48, "M"], [53, "M"], [48, "M"], [55, "7"], [48, "M"]];
-    var BPM = 112, beat = 60 / BPM, songBeats = MEL.reduce(function (a, n) { return a + n[1]; }, 0);
-    var t0 = 0, idx = 0, nextT = 0, barN = 0, nextBar = 0, schedT = 0;
-    function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
-    function bell(m, t, dur, vol) {
-      // a bright bell: two partials, a quick strike and a ring that fades
-      [[1, 1], [2.01, .32], [3.98, .12]].forEach(function (p) {
-        var o = ctx.createOscillator(), g = ctx.createGain(); o.type = "sine"; o.frequency.value = hz(m) * p[0];
-        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * p[1], t + .008); g.gain.exponentialRampToValueAtTime(.0005, t + Math.max(.35, dur * 1.6));
-        o.connect(g); g.connect(musicG); o.start(t); o.stop(t + Math.max(.4, dur * 1.7));
-      });
-    }
-    function pad(root, kind, t, dur) {
-      var ns = kind === "7" ? [0, 4, 7, 10] : [0, 4, 7];
-      ns.forEach(function (n) {
-        var o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter(); o.type = "triangle"; o.frequency.value = hz(root + 12 + n);
-        f.type = "lowpass"; f.frequency.value = 1400;
-        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.035, t + .12); g.gain.setValueAtTime(.035, t + dur - .15); g.gain.linearRampToValueAtTime(0, t + dur);
-        o.connect(f); f.connect(g); g.connect(musicG); o.start(t); o.stop(t + dur + .05);
-      });
-      // the bass: root and fifth on the beats
-      [0, 7, 0, 7].forEach(function (iv, k) {
-        var o = ctx.createOscillator(), g = ctx.createGain(), tt = t + k * beat; o.type = "sine"; o.frequency.value = hz(root - 12 + iv);
-        g.gain.setValueAtTime(0, tt); g.gain.linearRampToValueAtTime(.16, tt + .02); g.gain.exponentialRampToValueAtTime(.001, tt + beat * .9);
-        o.connect(g); g.connect(musicG); o.start(tt); o.stop(tt + beat);
-      });
-    }
-    var jb = null;
-    function jingle(t, vol) {
-      if (!jb) { var n = Math.floor(ctx.sampleRate * .09); jb = ctx.createBuffer(1, n, ctx.sampleRate); var d = jb.getChannelData(0); for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3); }
-      var s = ctx.createBufferSource(); s.buffer = jb; var hp = ctx.createBiquadFilter(); hp.type = "bandpass"; hp.frequency.value = 7000; hp.Q.value = 1.2;
-      var g = ctx.createGain(); g.gain.value = vol; s.connect(hp); hp.connect(g); g.connect(musicG); s.start(t);
-    }
-    function schedule() {
-      if (!st.music || !ctx) return;
-      var until = ctx.currentTime + .4;
-      while (nextT < until) {
-        var n = MEL[idx]; if (n[0]) bell(n[0], nextT, n[1] * beat, .16);
-        nextT += n[1] * beat; idx++;
-        if (idx >= MEL.length) { idx = 0; }
+    /* ---- the songs: recordings, one after another, then round again ---- */
+    var SONGS = ["jingle-bells", "we-wish-you", "deck-the-halls", "o-christmas-tree", "silent-night"];
+    var el = null, song = 0, ext = null;
+    function songUrl(i) {
+      if (!ext) {
+        var t = D.createElement("audio"), ua = navigator.userAgent, apple = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && /Safari/.test(ua) && !/Chrome|Chromium|Firefox/.test(ua));
+        ext = !apple && t.canPlayType && t.canPlayType('audio/webm; codecs="opus"') === "probably" ? "webm" : "m4a";
       }
-      while (nextBar < until) {
-        var c = CH[barN % CH.length]; pad(c[0], c[1], nextBar, beat * 4);
-        for (var k = 0; k < 4; k++) { jingle(nextBar + k * beat, .07); jingle(nextBar + k * beat + beat / 2, .04); }
-        nextBar += beat * 4; barN++;
-      }
-      schedT = setTimeout(schedule, 120);
+      return asset("music/" + SONGS[i % SONGS.length] + "." + ext);
     }
-    function startMusic() { t0 = ctx.currentTime + .15; nextT = nextBar = t0; idx = 0; barN = 0; clearTimeout(schedT); schedule(); }
+    function player() {
+      if (el) return el;
+      el = new Audio(); el.preload = "none"; el.setAttribute("playsinline", "");
+      function next() { song = (song + 1) % SONGS.length; el.src = songUrl(song); if (st.music) el.play().catch(function () {}); }
+      el.addEventListener("ended", next);
+      // a song that cannot be fetched: on to the next one (and stop after a whole round of failures)
+      var fails = 0;
+      el.addEventListener("error", function () { if (++fails >= SONGS.length) { fails = 0; api.setMusic(false); return; } next(); });
+      el.addEventListener("playing", function () { fails = 0; });
+      try { ctx.createMediaElementSource(el).connect(musicG); } catch (e) { el.volume = st.mv; }
+      el.src = songUrl(song);
+      return el;
+    }
+    function startMusic() { var pr = player().play(); if (pr && pr.catch) pr.catch(function (e) { if (e && e.name === "NotAllowedError") api.setMusic(false); }); }
+    function stopMusic() { if (el) el.pause(); }
+    XM.songs = function () { return { list: SONGS.slice(), now: song, src: el && el.currentSrc, paused: !el || el.paused }; };
 
     var api = {
       state: function () { return { fire: st.fire, music: st.music, fireVolume: st.fv, musicVolume: st.mv }; },
@@ -509,7 +576,7 @@
       },
       setMusic: function (on) {
         on = !!on; if (on === st.music) return; if (on && !ac()) return;
-        st.music = on; clearTimeout(schedT); if (on) startMusic(); apply(); emit();
+        st.music = on; if (on) startMusic(); else stopMusic(); apply(); emit();
       },
       toggleFire: function () { api.setFire(!st.fire); }, toggleMusic: function () { api.setMusic(!st.music); },
       setVolume: function (which, v) { v = Math.max(0, Math.min(1, +v)); if (which === "fire") st.fv = v; else st.mv = v; save(); apply(); emit(); },
@@ -634,7 +701,7 @@
       var l = D.querySelector(".sl-header .sl-titletext") || D.querySelector(".sl-header .sl-title"); XM.point(l, "SnakeList's own logo, with a Santa hat, a little snow and a stocking full of presents.", { ms: 9000 }); }],
     ["icons", "Little Santa snakes", "a tiny snake in each species' own colours, in a Santa hat, by every name", function () {
       goTab("tab-guide"); setTimeout(function () { var c = firstCard(), i = c && c.querySelector(".xm-spi"); XM.point(i || (c && c.querySelector(".card-name")), "Every snake has a tiny Santa-hat snake in its own colours by its name.", { ms: 9000 }); }, 400); }],
-    ["music", "Christmas music", "Jingle Bells by the fire - the music button is up by the other buttons", function () {
+    ["music", "Christmas music", "real recordings of Christmas songs by the fire - the music button is up by the other buttons", function () {
       var b = D.getElementById("xm-music-btn"); XM.point(b, "Tap here for Christmas music. It plays along with the cabin's fireplace - each has its own volume.", { ms: 9000 }); }],
     ["cabin", "The Christmas Cabin", "a new tab: do Christmas tasks, open presents and decorate your tree", function () {
       if (XM.cabin) XM.cabin.open(true); setTimeout(function () { XM.point(D.querySelector("#xm-cabin .xc-stage"), "Your Christmas Cabin. Do Christmas tasks to earn presents for your tree.", { ms: 9000 }); }, 500); }],
