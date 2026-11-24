@@ -2619,7 +2619,7 @@ const SCENES = {
   riverbank:{ sky: ['#a6c2d8', '#e2e9e4'], fog: '#d4ddd7', sun: 2.2, hemi: 0.7, sunEl: 46, tile: 0.9, ground: 'pebbles', water: 'river', props: { rocks: 0.6, reeds: 1, grass: 0.4, pebbles: 1 } },
   // v6.26: the blind snakes' and burrowers' ground, as they are found - turned up under a stone on moist, crumbly soil, with
   // decaying leaf fragments, fine roots, grit and a little moss (it was a flat brown floor with a few big painted leaves)
-  soil:     { sky: ['#b3bfae', '#d8dccf'], fog: '#c8cec0', sun: 1.5, hemi: 0.8, sunEl: 58, tile: 0.35, ground: 'soil', leafSize: 0.55, leafCols: ['#4a3624', '#5a4230', '#3a2a1c', '#6b5236', '#433526', '#2f2418', '#5e4a2e'], props: { leaves: 1.1, twigs: 0.8, crumbs: 1, clods: 1, roots: 1, moss: 0.6, stone: 1, pebbles: 0.35 } },
+  soil:     { sky: ['#b3bfae', '#d8dccf'], fog: '#c8cec0', sun: 1.5, hemi: 0.8, sunEl: 58, tile: 0.35, ground: 'soil', leafSize: 0.55, leafCols: ['#4a3624', '#5a4230', '#3a2a1c', '#6b5236', '#433526', '#2f2418', '#5e4a2e'], props: { leaves: 1.1, twigs: 0.8, crumbs: 1, clods: 1, roots: 1, moss: 0.6, stone: 1 } },
   sea:      { sky: ['#7fb0d6', '#e3eef2'], fog: '#cfdfe6', sun: 2.6, hemi: 0.7, sunEl: 50, tile: 1, ground: null, water: 'sea', props: { drift: 1 } },
   grass:    { sky: ['#a3c1da', '#e6ead9'], fog: '#dde2d2', sun: 2.0, hemi: 0.6, sunEl: 48, tile: 0.9, ground: 'dry', props: { grass: 2.6, rocks: 0.2, twigs: 0.3 } },
   sand:     { sky: ['#9cc0de', '#f2e6cf'], fog: '#efe2cb', sun: 2.2, hemi: 0.5, sunEl: 50, tile: 1.0, ground: 'sand', props: { rocks: 0.3, grass: 0.3, twigs: 0.3 } },
@@ -2762,11 +2762,13 @@ function groundTexture(kind, seed0, hi) {
     })); return SS2.get(k); };
     const stone = (r, ry, c0, c1, wet) => { x.drawImage(stoneSprite(c0, c1, wet, (R() * 3) | 0), -r * 64 / 52, -ry * 64 / 52, r * 128 / 52, ry * 128 / 52); };
     if (kind === 'litter' || kind === 'soil') {
-      const pal = kind === 'litter' ? ['#6a4a2e', '#7d5a36', '#8c6a42', '#55402a', '#6b5536', '#3e2e20', '#86663f', '#9a7a4e', '#5e5032', '#4a3a26'] : ['#5a4532', '#6b5236', '#4a3826', '#7a6044'];
-      // (v5.50: the soil tile is only 35 cm across, so its few leaves are drawn big - 4-9 cm, their real size - not as crumbs)
-      const n = kind === 'litter' ? 2600 : 26;
+      const pal = kind === 'litter' ? ['#6a4a2e', '#7d5a36', '#8c6a42', '#55402a', '#6b5536', '#3e2e20', '#86663f', '#9a7a4e', '#5e5032', '#4a3a26'] : ['#4a3826', '#3e2e20', '#5a4532', '#33261a', '#55402c'];
+      // (v5.50: the soil tile is only 35 cm across, so its few leaves are drawn big - 4-9 cm, their real size - not as crumbs;
+      // v6.26: on soil, many small dark decaying fragments, 1-3 cm, instead of a few whole leaves as big as a blind snake
+      // lying flat like stickers)
+      const n = kind === 'litter' ? 2600 : 160;
       for (let i = 0; i < n; i++) {
-        const cx = R() * S, cy = R() * S, big = R() < 0.15, l = kind === 'litter' ? 18 + R() * (big ? 70 : 34) : 115 + R() * 150, w = l * (0.18 + R() * 0.17), a = R() * TAU, col = pal[(R() * pal.length) | 0], curl = R();
+        const cx = R() * S, cy = R() * S, big = R() < 0.15, l = kind === 'litter' ? 18 + R() * (big ? 70 : 34) : 30 + R() * 60, w = l * (0.25 + R() * 0.3), a = R() * TAU, col = pal[(R() * pal.length) | 0], curl = R();
         wrapAt(cx, cy, l, () => { x.rotate(a); leaf(l, w, col, curl); });
       }
       for (let i = 0; i < (kind === 'litter' ? 90 : 40); i++) {
@@ -2784,7 +2786,10 @@ function groundTexture(kind, seed0, hi) {
           }
         }
       }
-      if (kind === 'soil') for (let i = 0; i < 700; i++) { const cx = R() * S, cy = R() * S, r = 2.5 + R() ** 2 * 6; wrapAt(cx, cy, r * 2, () => stone(r, r * (0.6 + R() * 0.4), '#6e5845', '#3a2b20', true)); }
+      if (kind === 'soil') { // (v6.26: crumbs of earth, dull - the glossy highlight on each read as drops of water - and fine pale rootlets)
+        for (let i = 0; i < 1800; i++) { const cx = R() * S, cy = R() * S, r = 1.5 + R() ** 2 * 5, c = R() < 0.5; wrapAt(cx, cy, r * 2, () => stone(r, r * (0.6 + R() * 0.4), c ? '#5e4a38' : '#4a3a2c', c ? '#2e2219' : '#241a12', false)); }
+        for (let i = 0; i < 30; i++) { const cx = R() * S, cy = R() * S, l = 40 + R() * 160, a = R() * TAU; wrapAt(cx, cy, l, () => { x.rotate(a); x.strokeStyle = R() < 0.5 ? 'rgba(150,118,84,.55)' : 'rgba(110,86,60,.6)'; x.lineWidth = 0.8 + R() * 1.4; x.beginPath(); x.moveTo(0, 0); x.bezierCurveTo(l * 0.3, (R() - 0.5) * 30, l * 0.7, (R() - 0.5) * 30, l, (R() - 0.5) * 20); x.stroke(); }); }
+      }
       tone(0.25);
     } else if (kind === 'gravel' || kind === 'sand') {
       const cols = [['#d8cab4', '#9c8b76'], ['#c4b29a', '#7d6d5a'], ['#e0d6c8', '#a39a8b'], ['#b29c85', '#6c5a48'], ['#cdb593', '#8a7254'], ['#a8a39a', '#6a665e']];
@@ -3068,7 +3073,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     cg.forEach((g) => { const n = quality === 'low' ? 18 : 40, im = new THREE.InstancedMesh(g, cm, n), cc = new THREE.Color();
       for (let i = 0; i < n; i++) { const a = R() * TAU, r = Math.max(Rb * 1.5, 1) + R() * groundR * 0.4, s = 0.08 + R() ** 2 * 0.3; cE.set(R() * 0.3, R() * TAU, R() * 0.3); cQ.setFromEuler(cE); cS.set(s * (1 + R() * 0.6), s * (0.35 + R() * 0.45), s * (1 + R() * 0.6)); cP.set(Math.cos(a) * r, -1.7 - 0.05 + s * 0.2, Math.sin(a) * r); cM.compose(cP, cQ, cS); im.setMatrixAt(i, cM); im.setColorAt(i, cc.set(corals[(R() * corals.length) | 0]).lerp(blue, 0.12).multiplyScalar(0.85 + R() * 0.25)); }
       im.receiveShadow = true; scene.add(im); });
-    wm.opacity = 0.74;
+    wm.opacity = 0.8; // (v6.26: a little less clear, so the body under the surface reads as under it)
   }
 
   // props: placed around the snake, never touching it, denser near it and fading out with distance
@@ -3326,12 +3331,14 @@ function contactShadow(poseInfo, F, Rb) {
   const S = 512, cv = document.createElement('canvas'); cv.width = cv.height = S; const x = cv.getContext('2d');
   const ext = Rb * 1.25, toPx = (v) => ((v + ext) / (2 * ext)) * S;
   x.lineCap = 'round'; x.lineJoin = 'round';
-  for (let pass = 0; pass < 5; pass++) {
-    x.strokeStyle = `rgba(0,0,0,${0.13 - pass * 0.02})`;
+  // (v6.26: two narrow, darker passes first - the tight dark line right where the belly touches the ground, which the soft
+  // wide shadow alone lacked, so the body seemed to hover a hair above it)
+  for (let pass = -2; pass < 5; pass++) {
+    x.strokeStyle = `rgba(0,0,0,${pass < 0 ? 0.16 : 0.13 - pass * 0.02})`;
     for (let i = 0; i < poseInfo.pts.length - 4; i += 4) {
-      const xx = i * poseInfo.ds, lift = poseInfo.Ly(xx); if (lift > F.Hh(xx) * 0.8) continue;
+      const xx = i * poseInfo.ds, lift = poseInfo.Ly(xx); if (lift > F.Hh(xx) * (pass < 0 ? 0.25 : 0.8)) continue;
       const a = poseInfo.pts[i], b = poseInfo.pts[i + 4];
-      x.lineWidth = Math.max(1, (F.W(xx) * 2 * (0.9 + pass * 0.16)) / (2 * ext) * S);
+      x.lineWidth = Math.max(1, (F.W(xx) * 2 * (pass < 0 ? 0.55 + (pass + 2) * 0.15 : 0.9 + pass * 0.16)) / (2 * ext) * S);
       // canvas rows run toward -z once the plane is laid flat
       x.beginPath(); x.moveTo(toPx(a[0]), toPx(-a[1])); x.lineTo(toPx(b[0]), toPx(-b[1])); x.stroke();
     }
@@ -3979,7 +3986,7 @@ float slScale(vec2 m) {
     if (pose.drape) snakeGroup.add(tree = perchTree('drape', () => addDrapeBranch(P, F, pose, seed))); // v5.62 (after the bounds: the view frames the snake, not the whole branch)
     const Rb = Math.max(size.x, size.z) / 2 * 1.05 + F.w0;
     const hMax = bb.max.y;
-    const poseInfo = { pts: pose.pts, ds: pose.ds, Ly: pose.Ly, radius: Rb, envR: P.length >= 0.4 ? Rb + 1.0 : Rb * 1.3, seaLevel: F.Hh(F.L * 0.5) * F.bf * (P.scene.float || 1.1) };
+    const poseInfo = { pts: pose.pts, ds: pose.ds, Ly: pose.Ly, radius: Rb, envR: P.length >= 0.4 ? Rb + 1.0 : Rb * 1.3, seaLevel: F.Hh(F.L * 0.5) * F.bf * (P.scene.float || 1.55) }; // (v6.26: 1.55 - about two thirds of the body under the surface, only the back and head breaking it, as a resting sea snake lies; at 1.1 it seemed to lie on the water)
     // water side for riverbank: the side of the snake with most open space
     if (sceneOf(P.scene).water === 'river') { let best = 0, bd = -1; for (let i = 0; i < 16; i++) { const a = (i / 16) * TAU; let m = -1e9; for (const p of pose.pts) m = Math.max(m, p[0] * Math.cos(a) + p[1] * Math.sin(a)); if (bd < 0 || m < bd) { bd = m; best = a; } } poseInfo.waterDir = best; poseInfo.waterDist = bd + F.w0 * 2.5 + Rb * 0.12; }
     scene.add(snakeGroup);

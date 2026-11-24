@@ -516,7 +516,7 @@ function buildAll(A) {
   };
   const grassMat = () => track(vegetation(THREE, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.92, metalness: 0 }), { near: true }));
   const twigMat = () => barkMat(tex.bark('furrow'), '#8a7d6c');
-  const rockStyle = { moss: ['#8d8a80', '#6f8a4a'], grey: ['#9a958a', null], red: ['#9a5a3e', null], sandstone: ['#b98e62', null], gibber: ['#6e3422', null], basalt: ['#57534e', null] }[K.rock || 'grey'];
+  const rockStyle = { moss: ['#8d8a80', '#6f8a4a'], grey: ['#9a958a', null], red: ['#9c7a62', null] /* (v6.26: a weathered red-tan - pure brick red read as a scatter of chocolate drops) */, sandstone: ['#b98e62', null], gibber: ['#6e3422', null], basalt: ['#57534e', null] }[K.rock || 'grey'];
   const rockMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), bumpMap: tex.rock(), bumpScale: 2, roughness: 0.9, metalness: 0, vertexColors: true, color: rockStyle[0] }));
   groundDetail(THREE, rockMat, 'rock', ctx, { tri: true, near: 1.5, far: 9 }); // v5.83: the grain and cracks of real rock, close up
   const rocks = (n, rMin, rMax, size, o = {}) => put('rocks', (Rn, v) => rockGeo(seed + 500 + v * 11 + (o.detail != null ? 50 : 0), o.detail != null ? o.detail : low ? 2 : 3, { moss: rockStyle[1], flat: o.flat || 0.7 }), rockMat, n, rMin, rMax, size, { variants: 3, lift: -0.18, tilt: 0.4, col: () => tint(0.8, 1.1, 0.08), ...o });
