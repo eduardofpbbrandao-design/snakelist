@@ -196,7 +196,7 @@ function normProfile(p, id) {
     if (bu && q.plan !== 'sea' && q.plan !== 'blind') q.body = Object.assign({}, q.body, { tri: pb.tri != null ? pb.tri : bu.tri, xs: pb.xs != null ? pb.xs : Math.min(q.body.xs, bu.xs), ridge: Math.max(q.body.ridge || 0, bu.ridge || 0) }); }
   if (form || q.plan === 'blind') {
     const f = form || { hl: 0.5, cheek: 0, lor: 0, crown: 0.02 }, H = q.head, B = q.body;
-    const w0 = (1 / B.ld) / 2 * Math.sqrt(B.xs), chin = H.chin != null ? H.chin : B.bf, hlT = H.hl != null ? H.hl : f.hl;
+    const w0 = (1 / B.ld) / 2 * Math.sqrt(B.xs), chin = H.chin != null ? H.chin : B.bf, hlT = H.hl != null ? H.hl : f.hl * 0.93; // (the estimate below reads a little shallow: measured on the built head the group targets land ~7% deeper)
     const depth = (h) => H.w * w0 * h * (1 + chin * 0.92) / H.len; // (crown to chin over the head's length; L cancels)
     const hMax = q.plan === 'blind' || f === HEAD_FORM.burrow ? 1.1 : 1.0;
     let h = H.h; if (hlT && depth(h) < hlT) h = Math.min(hMax, Math.max(h, hlT / depth(1)));
@@ -558,7 +558,7 @@ function makePose(P, F, seed) {
     // v6.20: a real pile is not a lathe-turned disc - the turns follow a lumpy, slightly oval outline (the same for every turn, and
     // never pulled inward, so neighbouring turns still touch or leave a small gap, never cut into each other); the line is made
     // finely, then laid out again at the body's even steps
-    const lumpA = pose.lumpy != null ? pose.lumpy : 0.08, lp1 = R() * TAU, lp2 = R() * TAU, lump = (t) => 1 + lumpA * (1 + Math.sin(2 * t + lp1)) + lumpA * 0.5 * (1 + Math.sin(3 * t + lp2));
+    const lumpA = pose.lumpy != null ? pose.lumpy : 0.11, lp1 = R() * TAU, lp2 = R() * TAU, lump = (t) => 1 + lumpA * (1 + Math.sin(2 * t + lp1)) + lumpA * 0.5 * (1 + Math.sin(3 * t + lp2));
     { const fine = []; let sl = 0, lx = null, lz = null;
       while (sl < coilLen) { const g = lump(th), px = Math.cos(th) * r * g, pz = Math.sin(th) * r * sq * g; if (lx != null) sl += Math.hypot(px - lx, pz - lz); fine.push([px, pz]); lx = px; lz = pz; const dth = ds * 0.5 / Math.sqrt(r * r + b * b); th += dth; r += b * dth * (1 + wob * Math.sin(th * 1.3 + ph0)); }
       const n = Math.max(3, Math.round(coilLen / ds)); for (const q of resample(fine, n, ds)) out.push(q); s = coilLen; r *= lump(th); }
