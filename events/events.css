@@ -50,7 +50,7 @@
 @font-face { font-family: "SL Outfit"; font-style: normal; font-weight: 800; font-display: swap; src: url("fonts/outfit-latin-800.woff2") format("woff2"); }
 @font-face { font-family: "SL Outfit"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/outfit-latin-500.woff2") format("woff2"); }
 /* the Christmas palette: deep evergreen, warm ivory numbers, restrained gold, cranberry for the small seasonal details */
-.sl-ev-t-xmas { --ev-a: #102B20; --ev-b: #071810; --ev-c: #E4C57A; --ev-d: #B63848; --ev-ink: #FFF8ED; }
+.sl-ev-t-xmas { --ev-a: #2A7048; --ev-b: #174A31; --ev-c: #E4C57A; --ev-d: #B63848; --ev-ink: #FFF8ED; }
 .sl-ev-t-xmas .sl-ev-xmark { overflow: visible; }
 html.xm .sl-ev-xhat { display: none; }   /* with the Christmas preview on, the S already wears its hat */
 
