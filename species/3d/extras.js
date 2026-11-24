@@ -1574,7 +1574,7 @@ export function create(V) {
         const camC = () => camSide(preyPt().lerp(headPt(), 0.35), fitD(Math.max(rOut * 7, Wc * 12, Lp * 1.7)), 0.82, 0.1);
         // v6.13 (tools/eating-behaviour.md): 5. the coils are thrown round the prey right as the jaws land - one fast movement
         // (about three quarters of a second), not a slow wrap
-        phases.push([0.75, (u, s) => { held = true; const e = sstep(0, 1, u); R.setPose(R.blend3(ext, Aext, wrapP, Awrap, e, R.ih, e * e)); R.apply(); setMouth(tHold); say(T.coil); camKey = camC(); if (inWater) wake(s); squeezeK = sstep(0.7, 1, u) * 0.35; }]);
+        phases.push([0.75, (u, s) => { held = true; const e = sstep(0, 1, u); const pz = R.blend3(ext, Aext, wrapP, Awrap, e, R.ih, e * e); R.setPose(pz); R.apply(); placeHeld(); R.setPose(clearOfPrey(pz)); R.apply(); setMouth(tHold); say(T.coil); camKey = camC(); if (inWater) wake(s); squeezeK = sstep(0.7, 1, u) * 0.35; }]);
         // the squeeze: each time the prey breathes out (about every 0.8 s) the coils take up the slack - a pulse of the muscles,
         // and the grip (the dent in the prey) a step tighter that stays
         phases.push([3.2, (u, s) => { R.setPose(wrapP); const br = u * 4, n = Math.min(3, Math.floor(br)), ph = br - n, pulse = sstep(0, 0.25, ph) * (1 - sstep(0.4, 0.8, ph)); sq(0.35 + 0.65 * pulse); R.apply(); camKey = camC(); say(T.coil); squeezeK = Math.min(1, 0.35 + 0.165 * (n + sstep(0, 0.3, ph))); void s; }]);
@@ -1597,6 +1597,16 @@ export function create(V) {
       preyHide = xp - Lp > xClip; // (all of it past the cut)
       if (inWater && s % 1.3 < 0.05) wake(s);
     }]);
+    // v6.18: while the coils are thrown, no loop may swing through the prey on its way: any part of the body (past the
+    // neck) that would come inside the coils' own radius round the prey's long axis is pushed back out onto it
+    const clearOfPrey = (pose) => {
+      prey.updateMatrixWorld(true); const e = prey.matrixWorld.elements, ax = V3(e[8], e[9], e[10]).normalize(), c = V3(e[12], e[13], e[14]), hz = Lp / 2, rMin = rr0 * 0.97, p = V3(0, 0, 0), q = V3(0, 0, 0);
+      for (let i = R.ih + 8; i < Math.min(N, coilI1 + 40); i++) {
+        p.set(pose[i * 3], pose[i * 3 + 1], pose[i * 3 + 2]).sub(c); const z = clamp(p.dot(ax), -hz, hz); q.copy(p).addScaledVector(ax, -z); const d = q.length();
+        if (d < rMin && d > 1e-6) { q.multiplyScalar(rMin / d).addScaledVector(ax, z).add(c); pose[i * 3] = q.x; pose[i * 3 + 1] = q.y; pose[i * 3 + 2] = q.z; }
+      }
+      return pose;
+    };
     const settled = travel ? Bc : rest;
     phases.push([3.0, (u) => {
       xp = lerp(xIn, xEnd, ease(u)); const e1 = constrict ? sstep(0, 0.5, u) : 1, base = constrict ? R.blend3(wrapL, AwrapL, extHi, AextHi, e1, R.ih, e1) : ext; R.setPose(R.blend(base, settled, ease(constrict ? sstep(0.35, 1, u) : u) * (travel ? 1 : 0.6))); bulgeAt(xp, 1); R.apply(); setMouth(lerp(tHold, 0, ease(u * 2))); say(T.down);
