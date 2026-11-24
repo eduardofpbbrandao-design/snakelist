@@ -2006,20 +2006,50 @@
       var P = window.SL_HERO_PHOTOS = [["rough-green-hq", "Smooth Green Snake", "Opheodrys vernalis", "smooth-green-snake-opheodrys-vernalis", [900, 1400, 2000, 2560], "", {"pm": "81% 50%"}], ["corallus-hortulana", "Amazon Tree Boa", "Corallus hortulana", "amazon-tree-boa-corallus-hortulana", [900, 1400, 1920], "Photo: Geoff Gallice, CC BY 2.0 (Wikimedia Commons)", {"pm": "0% 50%"}], ["morelia-viridis", "Green Tree Python", "Morelia viridis", "green-tree-python-morelia-viridis", [900, 1400, 1920], "Photo: JJ Harrison, CC BY-SA 3.0 (Wikimedia Commons)", {"pm": "50% 50%"}], ["dendroaspis-angusticeps", "Green Mamba", "Dendroaspis angusticeps", "green-mamba-dendroaspis-angusticeps", [900, 1400, 1920], "Photo: Holger Krisp, CC BY 3.0 (Wikimedia Commons)", {"pm": "29% 50%"}], ["naja-kaouthia", "Monocled Cobra", "Naja kaouthia", "monocled-cobra-naja-kaouthia", [900, 1400, 1920], "Photo: Charles J. Sharp, CC BY-SA 4.0 (Wikimedia Commons)", {"pm": "24% 50%"}], ["oxybelis-aeneus", "Brown Vinesnake", "Oxybelis aeneus", "brown-vinesnake-oxybelis-aeneus", [900, 1400, 1920], "Photo: Brian Gratwicke, CC BY 2.0 (Wikimedia Commons)", {"pm": "14% 50%"}], ["zamenis-scalaris", "Ladder Snake", "Zamenis scalaris", "ladder-snake-zamenis-scalaris", [900, 1400, 1920], "Photo: Benny Trapp (crop: Papa Lima Whiskey 2), CC BY 3.0 (Wikimedia Commons)", {"pm": "24% 50%"}], ["echis-omanensis", "Oman Saw-scaled Viper", "Echis omanensis", "oman-saw-scaled-viper-echis-omanensis", [900, 1400, 1920], "Photo: Arabella Willing, CC BY 4.0 (iNaturalist)", {"lg": [0.6, 0.9, 0.6], "pm": "11% 50%"}], ["farancia-erytrogramma", "Rainbow Snake", "Farancia erytrogramma", "rainbow-snake-farancia-erytrogramma", [900, 1400, 1920], "Photo: Joshua Liverman, CC BY 4.0 (iNaturalist)", {"pm": "76% 50%"}], ["agkistrodon-contortrix", "Copperhead", "Agkistrodon contortrix", "copperhead-agkistrodon-contortrix", [900, 1400, 1920], "Photo: Alan Rockefeller, CC BY 4.0 (iNaturalist)", {"pm": "76% 50%"}], ["ahaetulla-prasina", "Asian Vine Snake", "Ahaetulla prasina", "asian-vine-snake-ahaetulla-prasina", [900, 1400, 1920], "Photo: Eric Lopes, CC BY-SA 4.0 (iNaturalist)", {"lg": [0.6, 0.9, 0.42], "pm": "100% 50%"}], ["corallus-caninus", "Emerald Tree Boa", "Corallus caninus", "emerald-tree-boa-corallus-caninus", [900, 1400, 1920], "Photo: eloise kerroux, CC BY 4.0 (iNaturalist)", {"pm": "37% 50%"}], ["trimeresurus-insularis", "White-lipped Island Pitviper", "Trimeresurus insularis", "white-lipped-island-pitviper-trimeresurus-insularis", [900, 1400, 1920], "Photo: James Hunt, CC BY 4.0 (iNaturalist)", {"pm": "71% 50%"}], ["lampropeltis-gentilis", "Central Plains Milksnake", "Lampropeltis gentilis", "central-plains-milksnake-lampropeltis-gentilis", [900, 1400, 1920], "Photo: evangrimes, CC BY 4.0 (iNaturalist)", {"lg": [0.6, 0.9, 0.42], "pm": "100% 50%"}], ["micrurus-tener", "Texas Coral Snake", "Micrurus tener", "texas-coral-snake-micrurus-tener", [900, 1400, 1920], "Photo: Brady Reed, CC0 (iNaturalist)", {"lg": [0.6, 0.9, 0.42], "pm": "100% 50%", "lgm": [0.9, 1.12, 0.5]}]];
       // v6.20: the very first visit always opens on the Smooth Green Snake; after that a different photo each visit (never the one
       // from last time), and the same photo for the whole visit (a reload keeps it)
-      var last = null, now = null; try { last = localStorage.getItem("sl-hero-last"); now = sessionStorage.getItem("sl-hero-now"); } catch (e) {}
+      // v6.28 (Eduardo): Settings can fix the opening photo - one of these (sl-hero-pick = its file name), or your own photo
+      // ("own", kept on this device in IndexedDB), or Random (nothing saved: the rule below). The first-visit rule only applies
+      // when nothing was chosen.
+      var last = null, now = null, want = null; try { last = localStorage.getItem("sl-hero-last"); now = sessionStorage.getItem("sl-hero-now"); want = localStorage.getItem("sl-hero-pick"); } catch (e) {}
       var find = function (n) { for (var i = 0; i < P.length; i++) if (P[i][0] === n) return i; return -1; };
-      var pick = find(now);
+      var pick = want && want !== "own" ? find(want) : -1;
+      if (pick < 0) pick = find(now);
       if (pick < 0) {
         if (last == null) pick = Math.max(0, find("rough-green-hq"));
         else { pick = Math.floor(Math.random() * P.length); if (P[pick][0] === last && P.length > 1) pick = (pick + 1 + Math.floor(Math.random() * (P.length - 1))) % P.length; }
         try { localStorage.setItem("sl-hero-last", P[pick][0]); sessionStorage.setItem("sl-hero-now", P[pick][0]); } catch (e) {}
       }
-      var h = window.SL_HERO = P[pick];
-      h.srcset = h[4].map(function (w) { return "species-photos/hero/" + h[0] + "-" + w + ".webp " + w + "w"; }).join(", ");
-      h.src = "species-photos/hero/" + h[0] + "-" + h[4][h[4].length - 1] + ".webp";
-      h.sizes = "(min-aspect-ratio: 1544/1000) 100vw, 155vh";
+      var prep = function (h) {
+        h.srcset = h[4].map(function (w) { return "species-photos/hero/" + h[0] + "-" + w + ".webp " + w + "w"; }).join(", ");
+        h.src = "species-photos/hero/" + h[0] + "-" + h[4][h[4].length - 1] + ".webp";
+        h.sizes = "(min-aspect-ratio: 1544/1000) 100vw, 155vh"; return h;
+      };
+      var h = window.SL_HERO = prep(P[pick]);
+      // your own photo: read from this device's storage straight away (a few milliseconds); the photo screen waits for it and
+      // falls back to the photo picked above if it is missing
+      window.SL_HERO_DB = function () { return new Promise(function (res, rej) { if (!window.indexedDB) return rej(); var r = indexedDB.open("sl-hero", 1);
+        r.onupgradeneeded = function () { r.result.createObjectStore("photos"); }; r.onsuccess = function () { res(r.result); }; r.onerror = function () { rej(r.error); }; }); };
+      if (want === "own") {
+        var fallback = h;
+        h = window.SL_HERO = ["own", "Your photo", "", "", [], "", { pm: "50% 50%" }]; h.own = 1; h.srcset = ""; h.src = ""; h.sizes = ""; h.fallback = fallback;
+        window.SL_HERO_OWN = window.SL_HERO_DB().then(function (db) { return new Promise(function (res, rej) { var g = db.transaction("photos").objectStore("photos").get("own");
+          g.onsuccess = function () { g.result ? res(URL.createObjectURL(g.result)) : rej(); }; g.onerror = rej; }); });
+        window.SL_HERO_OWN.catch(function () {});
+      }
+      // put a photo in place on the opening right now (Settings, or your own photo once it is read) - both copies, the name in
+      // the corner, its logo place and surround
+      window.SL_HERO_USE = function (name, url) {
+        var hh = name === "own" ? ["own", "Your photo", "", "", [], "", { pm: "50% 50%" }] : P[find(name)]; if (!hh) return;
+        if (name === "own") { hh.own = 1; hh.srcset = ""; hh.src = url; hh.sizes = ""; } else prep(hh);
+        window.SL_HERO = hh;
+        try { document.documentElement.style.setProperty("--hero-pm", (hh[6] && hh[6].pm) || "50% 50%"); } catch (e) {}
+        var hero = document.getElementById("sl-hero"); if (!hero) return;
+        var ims = hero.querySelectorAll(".hero-media img"), main = hero.querySelector(".hero-media img:not(.hero-fill)");
+        if (main) main.addEventListener("load", function () { if (hero.__placeLogo) hero.__placeLogo(); if (hero.__placeCredit) hero.__placeCredit(); }, { once: true });
+        [].forEach.call(ims, function (im) { if (hh.srcset) { im.sizes = hh.sizes; im.srcset = hh.srcset; } else { im.removeAttribute("srcset"); im.removeAttribute("sizes"); } im.src = hh.src; });
+        if (window.SL_HERO_NAME) window.SL_HERO_NAME();
+      };
       try { if (h[6] && h[6].pm) document.documentElement.style.setProperty("--hero-pm", h[6].pm); } catch (e) {} // (its own crop on upright phones)
-      try { if (!/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search)) { var l = document.createElement("link"); l.rel = "preload"; l.as = "image"; l.setAttribute("imagesrcset", h.srcset); l.setAttribute("imagesizes", h.sizes); l.setAttribute("fetchpriority", "high"); document.head.appendChild(l); } } catch (e) {}
+      try { if (!h.own && !/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search)) { var l = document.createElement("link"); l.rel = "preload"; l.as = "image"; l.setAttribute("imagesrcset", h.srcset); l.setAttribute("imagesizes", h.sizes); l.setAttribute("fetchpriority", "high"); document.head.appendChild(l); } } catch (e) {}
     })();
     // came back to SnakeList from one of its own pages (Back, or a link like "Open in SnakeList"
     // or the logo) within half an hour, with no ?link asking for something particular: SnakeList
@@ -2509,7 +2539,10 @@
     <script>
       // v6.11: the opening photo chosen at the top of the page (window.SL_HERO), put in place - both copies, the same file
       (function () { var h = window.SL_HERO; if (!h) h = { srcset: "species-photos/hero/rough-green-hq-900.webp 900w, species-photos/hero/rough-green-hq-1400.webp 1400w, species-photos/hero/rough-green-hq-2000.webp 2000w, species-photos/hero/rough-green-hq-2560.webp 2560w", src: "species-photos/hero/rough-green-hq-2560.webp", sizes: "(min-aspect-ratio: 1544/1000) 100vw, 155vh" };
-        var s = document.currentScript, ims = s.parentNode.querySelectorAll("img"); [].forEach.call(ims, function (im) { im.sizes = h.sizes; im.srcset = h.srcset; im.src = h.src; }); })();
+        var s = document.currentScript, ims = s.parentNode.querySelectorAll("img");
+        // v6.28: your own photo (Settings) is read from this device; if it is gone, the photo picked for this visit instead
+        if (h.own && window.SL_HERO_OWN) { var fb = h.fallback; window.SL_HERO_OWN.then(function (u) { window.SL_HERO_USE("own", u); }, function () { if (fb) window.SL_HERO_USE(fb[0]); }); return; }
+        [].forEach.call(ims, function (im) { im.sizes = h.sizes; im.srcset = h.srcset; im.src = h.src; }); })();
     </script>
     <div class="hero-blur"><i></i><i></i><i></i><i></i></div>
     <div class="hero-edges"><b class="he-t"></b><b class="he-l"></b><b class="he-r"></b></div>
@@ -2525,9 +2558,11 @@
   <a class="hero-sp" id="hero-sp" href="species/smooth-green-snake-opheodrys-vernalis" aria-description="Open its SnakeList page">Smooth Green Snake <i>Opheodrys vernalis</i></a>
   <script>
     // v6.11: the name (and the photographer) of the snake in the photo chosen for this visit
-    (function () { var h = window.SL_HERO, a = document.getElementById("hero-sp"); if (!h || !a) return;
+    (window.SL_HERO_NAME = function () { var h = window.SL_HERO, a = document.getElementById("hero-sp"); if (!h || !a) return;
       var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
-      a.href = "species/" + h[3]; a.innerHTML = esc(h[1]) + " <i>" + esc(h[2]) + "</i>" + (h[5] ? '<small class="hero-ph">' + esc(h[5]) + "</small>" : ""); a.setAttribute("data-hero", h[0]); })();
+      if (h.own) { a.removeAttribute("href"); a.removeAttribute("aria-description"); a.textContent = "Your photo"; } // v6.28: your own photo (Settings)
+      else { a.href = "species/" + h[3]; a.setAttribute("aria-description", "Open its SnakeList page"); a.innerHTML = esc(h[1]) + " <i>" + esc(h[2]) + "</i>" + (h[5] ? '<small class="hero-ph">' + esc(h[5]) + "</small>" : ""); }
+      a.setAttribute("data-hero", h[0]); var hero = document.getElementById("sl-hero"); if (hero && hero.__placeCredit) hero.__placeCredit(); })();
   </script>
   <button class="hero-cue" type="button" id="hero-cue" aria-label="Scroll to continue to SnakeList"><span aria-hidden="true">Scroll to continue</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
 </section>
@@ -25988,6 +26023,18 @@ window.SL_welcome = function (u, back) {
   .sl-top[hidden] { display: none; }
   .sl-top svg { display: block; width: 22px; height: 22px; margin: 0; }
   body.sl-editing .sl-top { bottom: 96px; }
+  /* v6.28 (Eduardo, like modern apps): a round SnakeList-green button in the middle at the bottom, only once you have scrolled down */
+  button.sl-top#sl-top { left: 50%; right: auto; bottom: calc(20px + env(safe-area-inset-bottom)); width: 48px; height: 48px; margin-left: -24px;
+    border: 1px solid rgba(255,255,255,0.4); background: #3a8f3c; color: #fff; box-shadow: 0 4px 14px rgba(20,60,25,0.3), 0 1px 3px rgba(0,0,0,0.18);
+    transition: background-color .15s ease; animation: sl-top-in .22s cubic-bezier(.2,.9,.3,1); -webkit-tap-highlight-color: transparent; }
+  button.sl-top#sl-top:hover { filter: none; background: #2f7d32; }
+  button.sl-top#sl-top:active { background: #296e2c; }
+  button.sl-top#sl-top svg { width: 22px; height: 22px; }
+  button.sl-top#sl-top:focus-visible { outline: 3px solid var(--focus-ring, #58b351) !important; outline-offset: 3px; }
+  body.sl-editing button.sl-top#sl-top { bottom: calc(96px + env(safe-area-inset-bottom)); }
+  @keyframes sl-top-in { from { opacity: 0; transform: translateY(10px) scale(.9); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { button.sl-top#sl-top { animation: none; } }
+  html.sl-calm button.sl-top#sl-top { animation: none; }
   /* 10. one green focus ring for keyboard users */
   :is(button, a, select, summary, [role="button"], [role="link"], [tabindex]):focus-visible { outline: 2px solid var(--focus-ring) !important; outline-offset: 2px; }
   .search-box:focus-within { border-color: var(--gold-soft); box-shadow: 0 0 0 1px var(--gold-soft); }
@@ -26296,7 +26343,8 @@ window.SL_welcome = function (u, back) {
   top.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V4.5"></path><path d="m5 11.5 7-7 7 7"></path></svg>';
   document.body.appendChild(top);
   var B = document.body.classList;
-  function paintTop() { top.hidden = !(window.scrollY > 1600 && !B.contains("tab-map") && !B.contains("tab-quiz") && !B.contains("tab-ach") && !B.contains("tab-cam")); }
+  top.title = "Back to top";
+  function paintTop() { var want = !(window.scrollY > Math.max(900, window.innerHeight * 1.5) && !B.contains("tab-map") && !B.contains("tab-quiz") && !B.contains("tab-ach") && !B.contains("tab-cam")); if (top.hidden !== want) top.hidden = want; } // (only written when it changes: no style work on every scroll event)
   window.addEventListener("scroll", paintTop, { passive: true }); window.addEventListener("sl-refreshed", paintTop);
   top.addEventListener("click", function () {
     var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -26411,6 +26459,20 @@ window.SL_welcome = function (u, back) {
   .lang-menu li[aria-selected="true"] small { color: rgba(255,255,255,0.85); }
   .lang-menu .lang-none { padding: 8px 10px; color: rgba(238,246,238,0.7); }
   .lang-menu .lang-note { margin: 6px 4px 2px; font-size: 11.5px; color: rgba(238,246,238,0.65); }
+  /* v6.28: "Make default" under the search field */
+  .lang-menu .lang-def { display: flex; width: 100%; box-sizing: border-box; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; margin: 0 0 8px; padding: 8px 12px;
+    border-radius: 9px; border: 1px dashed rgba(255,255,255,0.3); background: rgba(255,255,255,0.06); color: #fff; font: 600 15px 'Inter', sans-serif; text-align: left; cursor: pointer; }
+  .lang-menu .lang-def:hover:not(:disabled) { background: #2c7a57; border-color: #58b351; }
+  .lang-menu .lang-def:focus-visible { outline: 2px solid #9be07c; outline-offset: 2px; }
+  .lang-menu .lang-def .lang-def-n { font-weight: 500; color: rgba(238,246,238,0.85); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lang-menu .lang-def.is-def { cursor: default; border-style: solid; border-color: rgba(255,255,255,0.14); }
+  .lang-menu .lang-def.is-def .lang-def-k { color: #9be07c; }
+  html:not([data-sl-theme="dark"]) .lang-menu .lang-def { color: var(--pl-ink, #1c3a22); background: #fff; border-color: var(--pl-line, #b9cbab); }
+  html:not([data-sl-theme="dark"]) .lang-menu .lang-def:hover:not(:disabled) { background: var(--pl-hi, #dce8cd); border-color: #3f7d43; }
+  html:not([data-sl-theme="dark"]) .lang-menu .lang-def .lang-def-n { color: var(--pl-sub, #4a5d45); }
+  html:not([data-sl-theme="dark"]) .lang-menu .lang-def.is-def { background: transparent; }
+  html:not([data-sl-theme="dark"]) .lang-menu .lang-def.is-def .lang-def-k { color: #2f6b33; }
+  html:not([data-sl-theme="dark"]) .lang-menu .lang-def:focus-visible { outline-color: #3f7d43; }
   #lang-btn.on { color: #58b351; border-color: #58b351; }
   /* Google's own bar and pop-ups stay out of the way - the menu above is the only control */
   body > .skiptranslate, iframe.skiptranslate, .goog-te-banner-frame, #goog-gt-tt, .goog-te-balloon-frame, .VIpgJd-ZVi9od-ORHb-OEVmcd, .VIpgJd-ZVi9od-aZ2wEe-wOHMyf { display: none !important; }
@@ -26424,7 +26486,14 @@ window.SL_welcome = function (u, back) {
   var LANGS = [["en", "English (original)", "English"], ["ab", "Аԥсуа", "Abkhaz"], ["ace", "Bahsa Acèh", "Acehnese"], ["ach", "Acholi", "Acholi"], ["aa", "Qafaraf", "Afar"], ["af", "Afrikaans", "Afrikaans"], ["sq", "Shqip", "Albanian"], ["alz", "Alur", "Alur"], ["am", "አማርኛ", "Amharic"], ["ar", "العربية", "Arabic"], ["hy", "Հայերեն", "Armenian"], ["as", "অসমীয়া", "Assamese"], ["av", "Авар мацӀ", "Avar"], ["awa", "अवधी", "Awadhi"], ["ay", "Aymar aru", "Aymara"], ["az", "Azərbaycanca", "Azerbaijani"], ["ban", "Basa Bali", "Balinese"], ["bal", "بلوچی", "Baluchi"], ["bm", "Bamanankan", "Bambara"], ["bci", "Wawle", "Baoulé"], ["ba", "Башҡортса", "Bashkir"], ["eu", "Euskara", "Basque"], ["btx", "Batak Karo", "Batak Karo"], ["bts", "Batak Simalungun", "Batak Simalungun"], ["bbc", "Batak Toba", "Batak Toba"], ["be", "Беларуская", "Belarusian"], ["bem", "Ichibemba", "Bemba"], ["bn", "বাংলা", "Bengali"], ["bew", "Betawi", "Betawi"], ["bho", "भोजपुरी", "Bhojpuri"], ["bik", "Bikol", "Bikol"], ["bs", "Bosanski", "Bosnian"], ["br", "Brezhoneg", "Breton"], ["bg", "Български", "Bulgarian"], ["bua", "Буряад", "Buryat"], ["yue", "粵語", "Cantonese"], ["ca", "Català", "Catalan"], ["ceb", "Cebuano", "Cebuano"], ["ch", "Chamoru", "Chamorro"], ["ce", "Нохчийн", "Chechen"], ["ny", "Chichewa", "Chichewa"], ["zh-CN", "中文 (简体)", "Chinese (Simplified)"], ["zh-TW", "中文 (繁體)", "Chinese (Traditional)"], ["chk", "Chuukese", "Chuukese"], ["cv", "Чӑвашла", "Chuvash"], ["co", "Corsu", "Corsican"], ["crh", "Къырымтатарджа", "Crimean Tatar (Cyrillic)"], ["crh-Latn", "Qırımtatarca", "Crimean Tatar (Latin)"], ["hr", "Hrvatski", "Croatian"], ["cs", "Čeština", "Czech"], ["da", "Dansk", "Danish"], ["fa-AF", "دری", "Dari"], ["dv", "ދިވެހި", "Dhivehi"], ["din", "Thuɔŋjäŋ", "Dinka"], ["doi", "डोगरी", "Dogri"], ["dov", "Dombe", "Dombe"], ["nl", "Nederlands", "Dutch"], ["dyu", "Julakan", "Dyula"], ["dz", "རྫོང་ཁ", "Dzongkha"], ["eo", "Esperanto", "Esperanto"], ["et", "Eesti", "Estonian"], ["ee", "Eʋegbe", "Ewe"], ["fo", "Føroyskt", "Faroese"], ["fj", "Na Vosa Vakaviti", "Fijian"], ["tl", "Filipino", "Filipino"], ["fi", "Suomi", "Finnish"], ["fon", "Fɔ̀ngbè", "Fon"], ["fr", "Français", "French"], ["fr-CA", "Français (Canada)", "French (Canada)"], ["fy", "Frysk", "Frisian"], ["fur", "Furlan", "Friulian"], ["ff", "Fulfulde", "Fulani"], ["gaa", "Ga", "Ga"], ["gl", "Galego", "Galician"], ["ka", "ქართული", "Georgian"], ["de", "Deutsch", "German"], ["el", "Ελληνικά", "Greek"], ["gn", "Avañe'ẽ", "Guarani"], ["gu", "ગુજરાતી", "Gujarati"], ["ht", "Kreyòl ayisyen", "Haitian Creole"], ["cnh", "Hakha Chin", "Hakha Chin"], ["ha", "Hausa", "Hausa"], ["haw", "ʻŌlelo Hawaiʻi", "Hawaiian"], ["iw", "עברית", "Hebrew"], ["hil", "Hiligaynon", "Hiligaynon"], ["hi", "हिन्दी", "Hindi"], ["hmn", "Hmoob", "Hmong"], ["hu", "Magyar", "Hungarian"], ["hrx", "Hunsrik", "Hunsrik"], ["iba", "Jaku Iban", "Iban"], ["is", "Íslenska", "Icelandic"], ["ig", "Igbo", "Igbo"], ["ilo", "Ilokano", "Ilocano"], ["id", "Bahasa Indonesia", "Indonesian"], ["iu-Latn", "Inuktitut", "Inuktut (Latin)"], ["iu", "ᐃᓄᒃᑎᑐᑦ", "Inuktut (Syllabics)"], ["ga", "Gaeilge", "Irish"], ["it", "Italiano", "Italian"], ["jam", "Patwa", "Jamaican Patois"], ["ja", "日本語", "Japanese"], ["jw", "Basa Jawa", "Javanese"], ["kac", "Jinghpaw", "Jingpo"], ["kl", "Kalaallisut", "Kalaallisut"], ["kn", "ಕನ್ನಡ", "Kannada"], ["kr", "Kanuri", "Kanuri"], ["pam", "Kapampangan", "Kapampangan"], ["kk", "Қазақ", "Kazakh"], ["kha", "Ka Ktien Khasi", "Khasi"], ["km", "ខ្មែរ", "Khmer"], ["cgg", "Rukiga", "Kiga"], ["kg", "Kikongo", "Kikongo"], ["rw", "Kinyarwanda", "Kinyarwanda"], ["ktu", "Kituba", "Kituba"], ["trp", "Kokborok", "Kokborok"], ["kv", "Коми", "Komi"], ["gom", "कोंकणी", "Konkani"], ["ko", "한국어", "Korean"], ["kri", "Krio", "Krio"], ["ku", "Kurdî", "Kurdish (Kurmanji)"], ["ckb", "کوردی", "Kurdish (Sorani)"], ["ky", "Кыргызча", "Kyrgyz"], ["lo", "ລາວ", "Lao"], ["ltg", "Latgaļu", "Latgalian"], ["la", "Latina", "Latin"], ["lv", "Latviešu", "Latvian"], ["lij", "Ligure", "Ligurian"], ["li", "Limburgs", "Limburgish"], ["ln", "Lingála", "Lingala"], ["lt", "Lietuvių", "Lithuanian"], ["lmo", "Lombard", "Lombard"], ["lg", "Luganda", "Luganda"], ["luo", "Dholuo", "Luo"], ["lb", "Lëtzebuergesch", "Luxembourgish"], ["mk", "Македонски", "Macedonian"], ["mad", "Basa Madhura", "Madurese"], ["mai", "मैथिली", "Maithili"], ["mak", "Makassar", "Makassar"], ["mg", "Malagasy", "Malagasy"], ["ms", "Bahasa Melayu", "Malay"], ["ms-Arab", "بهاس ملايو", "Malay (Jawi)"], ["ml", "മലയാളം", "Malayalam"], ["mt", "Malti", "Maltese"], ["mam", "Qyol Mam", "Mam"], ["gv", "Gaelg", "Manx"], ["mi", "Māori", "Maori"], ["mr", "मराठी", "Marathi"], ["mh", "Kajin M̧ajeļ", "Marshallese"], ["mwr", "मारवाड़ी", "Marwadi"], ["mfe", "Kreol Morisien", "Mauritian Creole"], ["chm", "Марий", "Meadow Mari"], ["mni-Mtei", "ꯃꯩꯇꯩꯂꯣꯟ", "Meiteilon (Manipuri)"], ["min", "Minang", "Minang"], ["lus", "Mizo", "Mizo"], ["mn", "Монгол", "Mongolian"], ["my", "မြန်မာ", "Myanmar (Burmese)"], ["nhe", "Nāhuatlahtōlli", "Nahuatl (Eastern Huasteca)"], ["ndc-ZW", "Cindau", "Ndau"], ["nr", "isiNdebele", "Ndebele (South)"], ["new", "नेपाल भाषा", "Nepalbhasa (Newari)"], ["ne", "नेपाली", "Nepali"], ["bm-Nkoo", "ߒߞߏ", "NKo"], ["no", "Norsk", "Norwegian"], ["nus", "Thok Naath", "Nuer"], ["oc", "Occitan", "Occitan"], ["or", "ଓଡ଼ିଆ", "Odia (Oriya)"], ["om", "Afaan Oromoo", "Oromo"], ["os", "Ирон", "Ossetian"], ["pag", "Pangasinan", "Pangasinan"], ["pap", "Papiamento", "Papiamento"], ["ps", "پښتو", "Pashto"], ["fa", "فارسی", "Persian"], ["pl", "Polski", "Polish"], ["pt", "Português (Brasil)", "Portuguese (Brazil)"], ["pt-PT", "Português (Portugal)", "Portuguese (Portugal)"], ["pa", "ਪੰਜਾਬੀ", "Punjabi (Gurmukhi)"], ["pa-Arab", "پنجابی", "Punjabi (Shahmukhi)"], ["qu", "Runa Simi", "Quechua"], ["kek", "Qʼeqchiʼ", "Qʼeqchiʼ"], ["rom", "Romani", "Romani"], ["ro", "Română", "Romanian"], ["rn", "Ikirundi", "Rundi"], ["ru", "Русский", "Russian"], ["se", "Davvisámegiella", "Sami (North)"], ["sm", "Gagana Samoa", "Samoan"], ["sg", "Sängö", "Sango"], ["sa", "संस्कृतम्", "Sanskrit"], ["sat-Latn", "Santali", "Santali (Latin)"], ["sat", "ᱥᱟᱱᱛᱟᱲᱤ", "Santali (Ol Chiki)"], ["gd", "Gàidhlig", "Scots Gaelic"], ["nso", "Sesotho sa Leboa", "Sepedi"], ["sr", "Српски", "Serbian"], ["st", "Sesotho", "Sesotho"], ["crs", "Seselwa", "Seychellois Creole"], ["shn", "Shan", "Shan"], ["sn", "chiShona", "Shona"], ["scn", "Sicilianu", "Sicilian"], ["szl", "Ślōnski", "Silesian"], ["sd", "سنڌي", "Sindhi"], ["si", "සිංහල", "Sinhala"], ["sk", "Slovenčina", "Slovak"], ["sl", "Slovenščina", "Slovenian"], ["so", "Soomaali", "Somali"], ["es", "Español", "Spanish"], ["su", "Basa Sunda", "Sundanese"], ["sus", "Sosoxui", "Susu"], ["sw", "Kiswahili", "Swahili"], ["ss", "SiSwati", "Swati"], ["sv", "Svenska", "Swedish"], ["ty", "Reo Tahiti", "Tahitian"], ["tg", "Тоҷикӣ", "Tajik"], ["ber-Latn", "Tamaziɣt", "Tamazight"], ["ber", "ⵜⴰⵎⴰⵣⵉⵖⵜ", "Tamazight (Tifinagh)"], ["ta", "தமிழ்", "Tamil"], ["tt", "Татарча", "Tatar"], ["te", "తెలుగు", "Telugu"], ["tet", "Tetun", "Tetum"], ["th", "ไทย", "Thai"], ["bo", "བོད་སྐད", "Tibetan"], ["ti", "ትግርኛ", "Tigrinya"], ["tiv", "Tiv", "Tiv"], ["tpi", "Tok Pisin", "Tok Pisin"], ["to", "Lea faka-Tonga", "Tongan"], ["lua", "Tshiluba", "Tshiluba"], ["ts", "Xitsonga", "Tsonga"], ["tn", "Setswana", "Tswana"], ["tcy", "ತುಳು", "Tulu"], ["tum", "Chitumbuka", "Tumbuka"], ["tr", "Türkçe", "Turkish"], ["tk", "Türkmençe", "Turkmen"], ["tyv", "Тыва дыл", "Tuvan"], ["ak", "Akan", "Twi"], ["udm", "Удмурт", "Udmurt"], ["uk", "Українська", "Ukrainian"], ["ur", "اردو", "Urdu"], ["ug", "ئۇيغۇرچە", "Uyghur"], ["uz", "Oʻzbek", "Uzbek"], ["ve", "Tshivenḓa", "Venda"], ["vec", "Vèneto", "Venetian"], ["vi", "Tiếng Việt", "Vietnamese"], ["war", "Winaray", "Waray"], ["cy", "Cymraeg", "Welsh"], ["wo", "Wolof", "Wolof"], ["xh", "isiXhosa", "Xhosa"], ["sah", "Саха тыла", "Yakut"], ["yi", "ייִדיש", "Yiddish"], ["yo", "Yorùbá", "Yoruba"], ["yua", "Maaya T'aan", "Yucatec Maya"], ["zap", "Diidxazá", "Zapotec"], ["zu", "isiZulu", "Zulu"]];
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) {} }
-  var cur = lsGet("sl-lang") || "en";
+  // v6.28 (Eduardo): picking a language translates SnakeList at once, in place (no reload - the scroll position, open panels and
+  // everything else stay); "Make default" (under the search field) makes SnakeList open in it every time.
+  //   sl-lang-default: the language SnakeList opens in ("en" or a code) - a language picked before v6.28 becomes the default
+  //   sl-lang-now (this visit, sessionStorage): the language picked during this visit; sl-lang: the language on screen now
+  var DEF = lsGet("sl-lang-default"); if (!DEF) { DEF = lsGet("sl-lang") || "en"; lsSet("sl-lang-default", DEF); }
+  var nowL = null; try { nowL = sessionStorage.getItem("sl-lang-now"); } catch (e) {}
+  var cur = nowL || DEF || "en";
+  lsSet("sl-lang", cur === "en" ? null : cur);
   // never translated: scientific names, the SnakeList name and logo
   function keep() {
     document.querySelectorAll(".card-sci, .sl-title, .sl-titletext, .signin-title, .intro-title, .sp-info-sci, [data-sci], .eyebrow .sl-ver").forEach(function (el) { el.setAttribute("translate", "no"); el.classList.add("notranslate"); });
@@ -26449,24 +26518,47 @@ window.SL_welcome = function (u, back) {
   }
   function apply(code, tries) {
     var sel = document.querySelector("#gt-host select.goog-te-combo, select.goog-te-combo");
-    if (!sel) { if ((tries || 0) < 40) setTimeout(function () { apply(code, (tries || 0) + 1); }, 250); return; }
+    // (Google fills its list a moment after the select appears: a value set before that is lost)
+    if (!sel || sel.options.length < 2) { if ((tries || 0) < 60) setTimeout(function () { apply(code, (tries || 0) + 1); }, 250); return; }
+    if (code !== cur) return; // another language was picked meanwhile
     sel.value = code; sel.dispatchEvent(new Event("change"));
   }
+  // back to the page as written, in place: Google's own "Show original" (in its hidden bar), or its list set back to English
+  function restore() {
+    if (!gtP) return;
+    try {
+      var f = document.querySelector("iframe.VIpgJd-ZVi9od-ORHb-OEVmcd, iframe.goog-te-banner-frame, iframe[id$='.container']"), d = f && f.contentDocument;
+      var b = d && (d.querySelector('[id$=".restore"]') || d.querySelector("button"));
+      if (b) { b.click(); return; }
+    } catch (e) {}
+    var sel = document.querySelector("#gt-host select.goog-te-combo, select.goog-te-combo"); if (sel) { sel.value = "en"; sel.dispatchEvent(new Event("change")); }
+  }
+  function setNow(code) { cur = code; lsSet("sl-lang", code === "en" ? null : code); try { sessionStorage.setItem("sl-lang-now", code); } catch (e) {} paintBtn(); paintDef(); document.dispatchEvent(new CustomEvent("sl-lang-changed", { detail: code })); }
   function translateTo(code) {
-    if (code === "en") { // back to English: the page as written
-      lsSet("sl-lang", null); setCookie(null); cur = "en"; paintBtn(); location.reload(); return;
-    }
+    if (code === cur) return;
+    if (code === "en") { setNow("en"); setCookie(null); restore(); return; } // back to English: the page as written
     if (window.claude && window.claude.use) { note("Translation works on snakelist.com - this copy can't load Google Translate."); return; }
-    lsSet("sl-lang", code); cur = code; paintBtn(); keep();
+    setNow(code); keep();
     setCookie("/en/" + code);
     loadGT().then(function () { apply(code); }, function () { note("Couldn't reach Google Translate - check your connection and try again."); });
   }
   function paintBtn() { btn.classList.toggle("on", cur !== "en"); var n = LANGS.find(function (l) { return l[0] === cur; }); btn.setAttribute("aria-label", "Language: " + (n ? n[1] : "English")); }
   // the menu
   var menu = document.createElement("div"); menu.className = "lang-menu notranslate"; menu.setAttribute("translate", "no"); menu.hidden = true;
-  menu.innerHTML = '<input type="text" placeholder="Find a language…" aria-label="Find a language" autocomplete="off"><ul role="listbox" aria-label="Languages"></ul><p class="lang-note">' + (LANGS.length - 1) + ' languages - scroll or type to find yours. Translated by Google.</p>';
+  menu.setAttribute("role", "dialog"); menu.setAttribute("aria-label", "Language");
+  menu.innerHTML = '<input type="text" placeholder="Find a language…" aria-label="Find a language" autocomplete="off"><button type="button" class="lang-def"></button><ul role="listbox" aria-label="Languages"></ul><p class="lang-note">' + (LANGS.length - 1) + ' languages - scroll or type to find yours. Translated by Google.</p>';
   document.body.appendChild(menu);
-  var q = menu.querySelector("input"), ul = menu.querySelector("ul"), shown = [], hi = 0;
+  var q = menu.querySelector("input"), ul = menu.querySelector("ul"), shown = [], hi = 0, defB = menu.querySelector(".lang-def");
+  function nameOf(c) { var n = LANGS.find(function (l) { return l[0] === c; }); return n ? (n[0] === "en" ? "English" : n[1]) : "English"; }
+  // "Make default": the language on now; once it is the default, the row says so
+  function paintDef() {
+    var d = lsGet("sl-lang-default") || "en", is = d === cur;
+    defB.innerHTML = is ? '<span class="lang-def-k">&#10003; Default language</span><span class="lang-def-n">' + nameOf(cur) + "</span>"
+      : '<span class="lang-def-k">Make default</span><span class="lang-def-n">' + nameOf(cur) + "</span>";
+    defB.setAttribute("aria-label", is ? nameOf(cur) + " is the default language" : "Make " + nameOf(cur) + " the default language");
+    defB.disabled = is; defB.classList.toggle("is-def", is);
+  }
+  defB.addEventListener("click", function () { lsSet("sl-lang-default", cur); paintDef(); var p = menu.querySelector(".lang-note"); p.textContent = "SnakeList will now open in " + nameOf(cur) + "."; q.focus(); });
   function fold(t) { return String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
   function render() {
     var f = fold(q.value.trim());
@@ -26477,31 +26569,39 @@ window.SL_welcome = function (u, back) {
       : '<p class="lang-none">No language matches that.</p>';
   }
   function note(t) { var p = menu.querySelector(".lang-note"); p.textContent = t; menu.hidden = false; }
+  // v6.28 (Eduardo): the list opens in the middle of the screen
+  function place() {
+    if (menu.hidden) return;
+    var vh = window.innerHeight, vw = window.innerWidth;
+    ul.style.maxHeight = Math.max(160, Math.min(640, Math.round(vh * 0.82) - (menu.offsetHeight - ul.offsetHeight))) + "px";
+    menu.style.left = Math.round(Math.max(12, (vw - menu.offsetWidth) / 2)) + "px";
+    menu.style.top = Math.round(Math.max(12, (vh - menu.offsetHeight) / 2)) + "px";
+  }
   function open(anchor) {
-    render(); menu.hidden = false; btn.setAttribute("aria-expanded", "true");
-    var r = (anchor && anchor.getBoundingClientRect ? anchor : btn).getBoundingClientRect(); // v6.11: Settings opens it under its own Language row
-    menu.style.top = Math.round(r.bottom + 8) + "px";
-    // as tall as the screen allows below the button (the panel never runs off the bottom)
-    ul.style.maxHeight = Math.max(180, Math.round(window.innerHeight - r.bottom - 8 - (menu.offsetHeight - ul.offsetHeight) - 14)) + "px";
-    menu.style.left = Math.round(Math.max(12, Math.min(r.right - menu.offsetWidth, window.innerWidth - menu.offsetWidth - 12))) + "px";
-    q.value = ""; render(); q.focus();
+    render(); paintDef(); menu.hidden = false; btn.setAttribute("aria-expanded", "true"); menu.__from = anchor && anchor.focus ? anchor : btn;
+    var p = menu.querySelector(".lang-note"); p.textContent = NOTE;
+    place();
+    q.value = ""; render(); q.focus({ preventScroll: true });
     var s = ul.querySelector('[aria-selected="true"]'); if (s) s.scrollIntoView({ block: "nearest" });
   }
   function close() { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); }
+  var NOTE = menu.querySelector(".lang-note").textContent;
   btn.addEventListener("click", function (e) { e.stopPropagation(); if (menu.hidden) open(); else close(); });
   window.SL_LANG = { open: function (a) { if (menu.hidden) open(a); else close(); }, name: function () { var n = LANGS.find(function (l) { return l[0] === cur; }); return n ? (n[0] === "en" ? "English" : n[1]) : "English"; }, menu: menu };
   q.addEventListener("input", render);
   q.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") { close(); btn.focus(); }
+    if (e.key === "Escape") { close(); try { (menu.__from || btn).focus(); } catch (er) {} }
     else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); hi = (hi + (e.key === "ArrowDown" ? 1 : -1) + shown.length) % shown.length; [].forEach.call(ul.children, function (li, i) { li.classList.toggle("hi", i === hi); if (i === hi) li.scrollIntoView({ block: "nearest" }); }); }
     else if (e.key === "Enter" && shown[hi]) { e.preventDefault(); close(); translateTo(shown[hi][0]); }
   });
   ul.addEventListener("click", function (e) { var li = e.target.closest("[data-c]"); if (!li) return; close(); translateTo(li.dataset.c); });
   document.addEventListener("click", function (e) { if (!menu.hidden && !menu.contains(e.target) && e.target !== btn) close(); });
-  window.addEventListener("resize", close);
+  window.addEventListener("resize", place); // (a phone's keyboard opening is a resize too: the list stays open, re-centred)
+  menu.addEventListener("keydown", function (e) { if (e.key === "Escape" && e.target !== q) { close(); try { (menu.__from || btn).focus(); } catch (er) {} } });
   paintBtn();
   // picked on an earlier visit: SnakeList opens in that language again
   if (cur !== "en" && !(window.claude && window.claude.use)) { keep(); setCookie("/en/" + cur); loadGT().then(function () { apply(cur); }, function () {}); }
+  else if (cur === "en" && /googtrans=/.test(document.cookie)) setCookie(null);
 })();
 </script>
 <script>
@@ -29624,7 +29724,9 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
 /* ---- sl-fx app (v5.78) ---- */
 /* the words that used to be underlined change colour instead, like About creator */
 .photo-lightbox figcaption small a:hover, .send-photo-btn a:hover, .sp-info-page:hover, .cam-meta button:hover, #signin-page .g-legal a:hover,
-.cap-fossil:hover, .cp-rank-more:hover, .cam-pop .cam-live:hover, .cp-page:hover, .hero-sp:hover { color: var(--text) !important; }
+.cap-fossil:hover, .cp-rank-more:hover, .cam-pop .cam-live:hover, .cp-page:hover { color: var(--text) !important; }
+/* v6.28 (Eduardo): the snake's name on the opening photo turns green when pointed at, like the snake names on the homepage */
+.sl-hero a.hero-sp[href]:hover, .sl-hero a.hero-sp[href]:focus-visible, .sl-hero a.hero-sp[href]:hover i, .sl-hero a.hero-sp[href]:focus-visible i { color: #8fe06f !important; opacity: 1; }
 .sp3d-sizecap a:hover { color: #fff !important; }
 .mf-clearall:hover, .signin-link:hover, #signin-page .signin-link:hover { color: var(--gold) !important; }
 .sl-browse a { color: var(--text); } .sl-browse a:hover { color: var(--gold); }
@@ -29673,6 +29775,29 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
 /* Settings and Share use the Achievements panel (.sl-achdlg / .sl-achbox) - the same size and look */
 .sl-set .sl-ahead p { margin: 2px 0 0; font: 400 13px/1.4 'Inter', sans-serif; color: var(--text-muted); }
 .sl-sgrp { margin: 4px 0 16px; }
+/* v6.28: Settings in tabs */
+.sl-stabs { display: flex; gap: 4px; margin: 0 0 14px; padding: 3px; border-radius: 12px; background: rgba(120,130,120,.16); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.sl-stabs::-webkit-scrollbar { display: none; }
+.sl-stabs [role="tab"] { flex: 1 0 auto; min-height: 36px; font: 600 13px 'Inter', sans-serif; padding: 7px 12px; border: 0; border-radius: 9px; background: transparent; color: var(--text-muted); cursor: pointer; white-space: nowrap; }
+.sl-stabs [role="tab"]:hover { color: var(--text); }
+.sl-stabs [role="tab"][aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+[data-sl-theme="dark"] .sl-stabs [role="tab"][aria-selected="true"] { background: #2f6e49; color: #fff; }
+.sl-stabs [role="tab"]:focus-visible, .sl-hpick [role="radio"]:focus-visible { outline: 2px solid #58b351; outline-offset: 2px; }
+.sl-stabp:focus { outline: none; }
+.sl-stabp[hidden] { display: none; }
+.sl-shint { margin: -2px 0 10px; font: 400 13px/1.4 'Inter', sans-serif; color: var(--text-muted); }
+/* the opening photo choice */
+.sl-hpick { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+.sl-hpick [role="radio"] { display: flex; flex-direction: column; gap: 5px; padding: 4px 4px 7px; border: 2px solid transparent; border-radius: 12px; background: var(--bg); color: var(--text); cursor: pointer; font: 600 12px/1.25 'Inter', sans-serif; text-align: center; }
+.sl-hpick [role="radio"]:hover { border-color: var(--border); }
+.sl-hpick [role="radio"][aria-checked="true"] { border-color: #58b351; }
+.sl-hp-im { display: flex; align-items: center; justify-content: center; aspect-ratio: 2560 / 1658; border-radius: 8px; overflow: hidden; background: rgba(120,130,120,.16); color: var(--text-muted); }
+.sl-hp-im img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sl-hp-im svg { width: 26px; height: 26px; }
+.sl-hp-own { border: 1.5px dashed var(--border); box-sizing: border-box; }
+.sl-hp-own-act { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.sl-hp-own-act[hidden] { display: none; }
+.sl-hp-msg { min-height: 1.2em; margin: 8px 0 0; font: 500 12.5px 'Inter', sans-serif; color: var(--text-muted); }
 .sl-sgrp > h3, .sl-set .xm-set-audio > h3 { margin: 0 0 8px; font: 700 11.5px/1 'JetBrains Mono', monospace; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); }
 .sl-sgrid { display: grid; gap: 8px; }
 @media (min-width: 900px) { .sl-set .sl-sgrid { grid-template-columns: 1fr 1fr; } }
@@ -29736,6 +29861,9 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
 .sl-shr-note { margin: 0 0 12px; font: 400 12.5px/1.45 'Inter', sans-serif; color: var(--text-muted); }
 .sl-shr-msg { min-height: 1.2em; margin: 10px 0 0; font: 600 13px 'Inter', sans-serif; color: var(--gold); }
 .sl-shr-sight { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; }
+.sl-resbar .sl-shr-sight-tab { margin: 0 0 0 auto; }
+.sl-resbar .sl-shr-sight-tab[hidden] { display: none; }
+.sl-resbar .sl-shr-sight-tab svg { width: 15px; height: 15px; }
 .sl-achrow .sl-shr-sight svg { width: 15px; height: 15px; }
 /* ---- "Have an idea?" - a small tip pointing at Report, like the ones in Google's apps (nothing else is dimmed) ---- */
 .sl-idea { position: fixed; z-index: 2150; width: min(270px, calc(100vw - 24px)); box-sizing: border-box; padding: 13px 38px 13px 15px; border-radius: 12px;
@@ -29804,6 +29932,7 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
   function applyAll() { applyBright(); applyText(); applyCalm(); }
   applyAll();
   document.addEventListener("sl-theme-changed", function () { paint(); });
+  document.addEventListener("sl-lang-changed", function () { paint(); });
   window.SL_SOUNDS_ON = function () { return lg("sl-sounds") !== "off"; };
 
   // ---------- the header: Share and the Settings gear ----------
@@ -29854,33 +29983,63 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
   document.addEventListener("keydown", function (e) { if (e.key !== "Escape" || !openDlg || openDlg.contains(e.target) || langWas) return; e.preventDefault(); closeDlg(); });
 
   // ---------- Settings ----------
-  var setDlg = panel("sl-settings", "sl-set", "Settings", "Changes work straight away and are remembered on this device.");
+  var setDlg = panel("sl-settings", "sl-set", "Settings", "Changes take effect immediately.");
+  // v6.28: "Follow device" was taken out of "Open SnakeList in" - a saved "device" becomes Last used
+  if (lg("sl-open-theme") === "device") ls("sl-open-theme", null);
   var body = setDlg.querySelector(".sl-pbody");
   function row(ic, title, sub, ctl, extra) { return '<div class="sl-srow' + (extra || "") + '"><span class="sl-sic">' + SVG(IC[ic]) + '</span><span class="sl-stx"><b>' + title + "</b>" + (sub ? "<small" + (sub.id ? ' id="' + sub.id + '"' : "") + ">" + (sub.t || sub) + "</small>" : "") + "</span>" + ctl + "</div>"; }
   function sw(id, label) { return '<button type="button" class="sl-sw" role="switch" id="' + id + '" aria-label="' + esc(label) + '" aria-checked="false"></button>'; }
   function seg(id, label, opts) { return '<div class="sl-seg" role="group" id="' + id + '" aria-label="' + esc(label) + '">' + opts.map(function (o) { return '<button type="button" data-v="' + o[0] + '" aria-pressed="false">' + esc(o[1]) + "</button>"; }).join("") + "</div>"; }
   function range(id, label) { return '<input type="range" class="sl-srange" id="' + id + '" min="50" max="100" step="5" aria-label="' + esc(label) + '"><span class="sl-sval" id="' + id + '-v"></span>'; }
   var canFs = !!((de.requestFullscreen || de.webkitRequestFullscreen) && (document.fullscreenEnabled || document.webkitFullscreenEnabled));
+  // v6.28 (Eduardo): Settings in tabs - one section at a time, more formal wording. Every setting keeps its id and works as before.
+  var TABS = [["display", "Display"], ["lang", "Language & Region"], ["account", "Account"], ["access", "Accessibility"], ["notify", "Notifications"], ["about", "About & Help"]];
+  function tabp(id, html) { return '<div class="sl-stabp" role="tabpanel" id="ssp-' + id + '" aria-labelledby="sst-' + id + '" tabindex="-1"' + (id === "display" ? " data-sl-settings-body" : "") + ' hidden>' + html + "</div>"; }
+  var HP = window.SL_HERO_PHOTOS || [];
   body.innerHTML =
-    '<section class="sl-sgrp"><h3>Look</h3><div class="sl-sgrid">' +
-      row("moon", "Light or dark", "Switch SnakeList's look now", seg("ss-theme", "Light or dark", [["light", "Light"], ["dark", "Dark"]])) +
-      row("open", "Open SnakeList in", "How it looks each time you open it", seg("ss-open", "Open SnakeList in", [["last", "Last used"], ["light", "Light"], ["dark", "Dark"], ["device", "Follow device"]]), " sl-col") +
-      row("bright", "Brightness in light mode", "", range("ss-bl", "Brightness in light mode"), " sl-col") +
-      row("bright", "Brightness in dark mode", "", range("ss-bd", "Brightness in dark mode"), " sl-col") +
-      row("text", "Text size", "How big the words are", seg("ss-text", "Text size", TS.map(function (t) { return [String(t[0]), t[1]]; })), " sl-col") +
-      row("fs", "Full screen", canFs ? "Fill the whole screen with SnakeList" : "This browser can't show SnakeList full screen", sw("ss-fs", "Full screen"), canFs ? "" : " is-off") +
-    '</div></section><section class="sl-sgrp"><h3>Language and place</h3><div class="sl-sgrid">' +
-      row("lang", "Language", "Read SnakeList in your language (Google Translate)", '<button type="button" class="sl-sbtn" id="ss-lang"></button>') +
-      row("pin", "Share my location", { id: "ss-loc-s", t: "" }, sw("ss-loc", "Share my location")) +
-    '</div></section><section class="sl-sgrp"><h3>Account</h3><div class="sl-sgrid">' +
-      row("user", "Account to open with", { id: "ss-acct-s", t: "" }, '<select class="sl-ssel" id="ss-acct" aria-label="Account to open with"></select>', " sl-wide") +
-    '</div></section><section class="sl-sgrp"><h3>More</h3><div class="sl-sgrid">' +
-      row("calm", "Reduce motion", "Fewer moving and sliding effects", sw("ss-calm", "Reduce motion")) +
-      row("news", "What's new pop-ups", "Show what's new after big updates", sw("ss-news", "What's new pop-ups")) +
-      row("tour", "Tutorial", "Watch the tutorial again from the start", '<button type="button" class="sl-sbtn" id="ss-tour">' + SVG(IC.restart) + "Restart</button>") +
+    '<div class="sl-stabs" role="tablist" aria-label="Settings sections">' + TABS.map(function (t) { return '<button type="button" role="tab" id="sst-' + t[0] + '" aria-controls="ssp-' + t[0] + '" aria-selected="false" tabindex="-1">' + esc(t[1]) + "</button>"; }).join("") + "</div>" +
+    tabp("display",
+    '<section class="sl-sgrp"><h3>Appearance</h3><div class="sl-sgrid">' +
+      row("moon", "Colour theme", "Choose a light or dark appearance", seg("ss-theme", "Colour theme", [["light", "Light"], ["dark", "Dark"]])) +
+      row("open", "Open SnakeList in", "The theme used each time SnakeList opens", seg("ss-open", "Open SnakeList in", [["last", "Last used"], ["light", "Light"], ["dark", "Dark"]]), " sl-col") +
+      row("bright", "Brightness (light theme)", "", range("ss-bl", "Brightness (light theme)"), " sl-col") +
+      row("bright", "Brightness (dark theme)", "", range("ss-bd", "Brightness (dark theme)"), " sl-col") +
+      row("fs", "Full-screen mode", canFs ? "Use the entire screen for SnakeList" : "Full-screen mode is not supported by this browser", sw("ss-fs", "Full-screen mode"), canFs ? "" : " is-off") +
+    '</div></section><section class="sl-sgrp sl-hpsec"><h3>Opening photo</h3><p class="sl-shint">The photograph shown when SnakeList opens.</p>' +
+      '<div class="sl-hpick" id="ss-hero" role="radiogroup" aria-label="Opening photo">' +
+        '<button type="button" role="radio" data-h="random" aria-checked="false"><span class="sl-hp-im sl-hp-rand">' + SVG('<path d="M16 3h5v5"></path><path d="M4 20 21 3"></path><path d="M21 16v5h-5"></path><path d="m15 15 6 6"></path><path d="M4 4l5 5"></path>') + '</span><span class="sl-hp-t">Random</span></button>' +
+        HP.map(function (h) { return '<button type="button" role="radio" data-h="' + esc(h[0]) + '" aria-checked="false"><span class="sl-hp-im"><img alt="" loading="lazy" decoding="async" width="360" height="233" data-src="species-photos/hero/thumb/' + esc(h[0]) + '.webp"></span><span class="sl-hp-t">' + esc(h[1]) + "</span></button>"; }).join("") +
+        '<button type="button" role="radio" data-h="own" aria-checked="false"><span class="sl-hp-im sl-hp-own">' + SVG('<path d="M12 5v14M5 12h14"></path>') + '</span><span class="sl-hp-t">Your own photo</span></button>' +
+      '</div><input type="file" accept="image/*" id="ss-hero-file" hidden tabindex="-1" aria-hidden="true">' +
+      '<div class="sl-hp-own-act" id="ss-hero-own" hidden><button type="button" class="sl-sbtn" id="ss-hero-change">Choose another photo</button><button type="button" class="sl-sbtn" id="ss-hero-del">Remove my photo</button></div>' +
+      '<p class="sl-hp-msg" id="ss-hero-msg" role="status" aria-live="polite"></p></section>') +
+    tabp("lang",
+    '<section class="sl-sgrp"><h3>Language & Region</h3><div class="sl-sgrid">' +
+      row("lang", "Language", "Display SnakeList in another language (translated by Google)", '<button type="button" class="sl-sbtn" id="ss-lang"></button>') +
+      row("pin", "Location sharing", { id: "ss-loc-s", t: "" }, sw("ss-loc", "Location sharing")) +
+    "</div></section>") +
+    tabp("account",
+    '<section class="sl-sgrp"><h3>Account</h3><div class="sl-sgrid">' +
+      row("user", "Default account", { id: "ss-acct-s", t: "" }, '<select class="sl-ssel" id="ss-acct" aria-label="Default account"></select>', " sl-wide") +
+    "</div></section>") +
+    tabp("access",
+    '<section class="sl-sgrp"><h3>Accessibility</h3><div class="sl-sgrid">' +
+      row("text", "Text size", "Adjust the size of text throughout SnakeList", seg("ss-text", "Text size", TS.map(function (t) { return [String(t[0]), t[1]]; })), " sl-col") +
+      row("calm", "Reduce motion", "Minimise animations and transitions", sw("ss-calm", "Reduce motion")) +
+    "</div></section>") +
+    tabp("notify",
+    '<section class="sl-sgrp"><h3>Notifications & Pop-ups</h3><div class="sl-sgrid">' +
+      row("news", "Update announcements", "Show a summary of new features after major updates", sw("ss-news", "Update announcements")) +
     '</div></section><section class="sl-sgrp sl-set-audio" id="sl-settings-audio" data-section="audio"><h3>Sound</h3><div class="sl-sgrid">' +
-      row("sound", "Sounds", "Music and sound effects (like event music)", sw("ss-sound", "Sounds")) +
-    '</div></section><div class="sl-sfoot"><span>Saved on this device only.</span><button type="button" class="sl-sbtn" id="ss-reset">Reset to defaults</button></div>';
+      row("sound", "Sounds", "Music and sound effects, such as event music", sw("ss-sound", "Sounds")) +
+    "</div></section>") +
+    tabp("about",
+    '<section class="sl-sgrp"><h3>About & Help</h3><div class="sl-sgrid">' +
+      row("news", "Version", { id: "ss-ver-s", t: "" }, '<button type="button" class="sl-sbtn" id="ss-ver">What\'s new</button>') +
+      row("tour", "Tutorial", "Restart the guided tour from the beginning", '<button type="button" class="sl-sbtn" id="ss-tour">' + SVG(IC.restart) + "Restart</button>") +
+      row("calm", "Report a problem or suggest an idea", "Send a message to SnakeList's developer", '<button type="button" class="sl-sbtn" id="ss-report">Report</button>') +
+    "</div></section>") +
+    '<div class="sl-sfoot"><span>Settings are saved on this device only.</span><button type="button" class="sl-sbtn" id="ss-reset">Reset to defaults</button></div>';
   var $ = function (id) { return document.getElementById(id); };
   function setSeg(id, v) { [].forEach.call($(id).querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === String(v))); }); }
   function setSw(id, on) { $(id).setAttribute("aria-checked", String(!!on)); }
@@ -29900,12 +30059,13 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
     sel.disabled = !many; sel.closest(".sl-srow").classList.toggle("is-off", !many);
     $("ss-acct-s").textContent = many ? "SnakeList opens with this account" : "Sign in with more than one account on this device to choose";
     setSw("ss-calm", lg("sl-calm") === "1"); setSw("ss-sound", lg("sl-sounds") !== "off"); setSw("ss-news", lg("sl-news-off") !== "1");
+    $("ss-ver-s").textContent = "SnakeList " + (((document.querySelector(".sl-ver") || {}).textContent || "").trim());
+    paintHero();
   }
   function changed(k) { document.dispatchEvent(new CustomEvent("sl-settings-changed", { detail: k })); }
   $("ss-theme").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; if (window.SL_SET_THEME) window.SL_SET_THEME(b.dataset.v); paint(); changed("theme"); });
   $("ss-open").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; var v = b.dataset.v; ls("sl-open-theme", v === "last" ? null : v);
     if (v === "light" || v === "dark") { if (window.SL_SET_THEME) window.SL_SET_THEME(v); }
-    else if (v === "device" && window.SL_SET_THEME) window.SL_SET_THEME(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     paint(); changed("open-theme"); });
   ["l", "d"].forEach(function (m) { $("ss-b" + m).addEventListener("input", function (e) { ls("sl-bright-" + (m === "l" ? "light" : "dark"), e.target.value); applyBright(); paint(); changed("brightness"); }); });
   $("ss-text").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; ls("sl-text-size", b.dataset.v === "100" ? null : b.dataset.v); applyText(); paint(); changed("text-size"); });
@@ -29919,9 +30079,85 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
   $("ss-calm").addEventListener("click", function () { ls("sl-calm", lg("sl-calm") === "1" ? null : "1"); applyCalm(); paint(); changed("calm"); });
   $("ss-sound").addEventListener("click", function () { ls("sl-sounds", lg("sl-sounds") === "off" ? null : "off"); paint(); changed("sounds"); });
   $("ss-news").addEventListener("click", function () { ls("sl-news-off", lg("sl-news-off") === "1" ? "0" : "1"); paint(); changed("news"); });
+  $("ss-ver").addEventListener("click", function () { closeDlg(true); var v = document.querySelector(".sl-ver"); if (v) setTimeout(function () { v.click(); }, 120); });
+  $("ss-report").addEventListener("click", function () { closeDlg(true); var r = document.getElementById("report-btn"); if (r) setTimeout(function () { r.click(); }, 120); });
+  // ---------- the tabs (arrow keys, Home and End move between them; the last one used is opened again) ----------
+  var tabEls = [].slice.call(body.querySelectorAll('[role="tab"]'));
+  function selTab(id, focus) {
+    if (!$("sst-" + id)) id = "display";
+    tabEls.forEach(function (t) { var on = t.id === "sst-" + id; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; $(t.getAttribute("aria-controls")).hidden = !on; });
+    try { sessionStorage.setItem("sl-set-tab", id); } catch (e) {}
+    if (id === "display") [].forEach.call(body.querySelectorAll(".sl-hpick img[data-src]"), function (im) { im.src = im.getAttribute("data-src"); im.removeAttribute("data-src"); });
+    if (focus) { var t = $("sst-" + id); t.focus(); try { t.scrollIntoView({ block: "nearest", inline: "nearest" }); } catch (e) {} }
+  }
+  body.querySelector(".sl-stabs").addEventListener("click", function (e) { var t = e.target.closest('[role="tab"]'); if (t) selTab(t.id.slice(4), true); });
+  body.querySelector(".sl-stabs").addEventListener("keydown", function (e) {
+    var i = tabEls.indexOf(document.activeElement); if (i < 0) return;
+    var n = e.key === "ArrowRight" || e.key === "ArrowDown" ? i + 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? tabEls.length - 1 : null;
+    if (n == null) return; e.preventDefault(); selTab(tabEls[(n + tabEls.length) % tabEls.length].id.slice(4), true);
+  });
+  window.SL_SETTINGS_TAB = selTab;
+  // ---------- the opening photo (Random, one of SnakeList's photos, or your own) ----------
+  var hpick = $("ss-hero"), hfile = $("ss-hero-file"), hmsg = $("ss-hero-msg"), ownUrl = null;
+  function heroDb() { return window.SL_HERO_DB ? window.SL_HERO_DB() : Promise.reject(); }
+  function ownGet() { return heroDb().then(function (db) { return new Promise(function (res) { var g = db.transaction("photos").objectStore("photos").get("own"); g.onsuccess = function () { res(g.result || null); }; g.onerror = function () { res(null); }; }); }); }
+  function ownPut(blob) { return heroDb().then(function (db) { return new Promise(function (res, rej) { var tx = db.transaction("photos", "readwrite"); tx.objectStore("photos").put(blob, "own"); tx.oncomplete = res; tx.onerror = function () { rej(tx.error); }; }); }); }
+  function ownDel() { return heroDb().then(function (db) { return new Promise(function (res) { var tx = db.transaction("photos", "readwrite"); tx.objectStore("photos").delete("own"); tx.oncomplete = res; tx.onerror = res; }); }); }
+  function ownThumb(blob) {
+    var b = hpick.querySelector('[data-h="own"] .sl-hp-im'); if (!b) return;
+    if (ownUrl) { try { URL.revokeObjectURL(ownUrl); } catch (e) {} ownUrl = null; }
+    if (!blob) { b.innerHTML = SVG('<path d="M12 5v14M5 12h14"></path>'); b.classList.add("sl-hp-own"); $("ss-hero-own").hidden = true; return; }
+    ownUrl = URL.createObjectURL(blob); b.classList.remove("sl-hp-own"); b.innerHTML = '<img alt="" src="' + ownUrl + '">'; $("ss-hero-own").hidden = false;
+  }
+  function paintHero() {
+    var v = lg("sl-hero-pick") || "random";
+    [].forEach.call(hpick.querySelectorAll('[role="radio"]'), function (b) { var on = b.dataset.h === v; b.setAttribute("aria-checked", String(on)); b.tabIndex = on ? 0 : -1; });
+    if (!paintHero.read) { paintHero.read = 1; ownGet().then(ownThumb, function () {}); }
+  }
+  function choose(v, url) {
+    ls("sl-hero-pick", v === "random" ? null : v);
+    if (v !== "random" && v !== "own") try { sessionStorage.setItem("sl-hero-now", v); localStorage.setItem("sl-hero-last", v); } catch (e) {}
+    if (window.SL_HERO_USE) { if (v === "own" && url) window.SL_HERO_USE("own", url); else if (v !== "random" && v !== "own") window.SL_HERO_USE(v); }
+    hmsg.textContent = v === "random" ? "A different photo will be shown each time SnakeList opens." : v === "own" ? "Your photo will be shown each time SnakeList opens." : "This photo will be shown each time SnakeList opens.";
+    paintHero(); changed("opening-photo");
+  }
+  // your photo, made the opening's shape (2560 x 1658, cropped from the middle) and at most 1920 px wide, so it stays small
+  function shrink(file) {
+    return new Promise(function (res, rej) {
+      var u = URL.createObjectURL(file), im = new Image();
+      im.onload = function () {
+        var W = Math.min(1920, Math.max(640, im.naturalWidth)), H = Math.round(W * 1658 / 2560), r = Math.max(W / im.naturalWidth, H / im.naturalHeight);
+        var sw = W / r, sh = H / r, sx = (im.naturalWidth - sw) / 2, sy = (im.naturalHeight - sh) / 2;
+        var c = document.createElement("canvas"); c.width = W; c.height = H; var g = c.getContext("2d"); g.imageSmoothingQuality = "high"; g.drawImage(im, sx, sy, sw, sh, 0, 0, W, H);
+        URL.revokeObjectURL(u);
+        c.toBlob(function (b) { b ? res(b) : rej(); }, "image/jpeg", 0.86);
+      };
+      im.onerror = function () { URL.revokeObjectURL(u); rej(); };
+      im.src = u;
+    });
+  }
+  hpick.addEventListener("click", function (e) {
+    var b = e.target.closest('[role="radio"]'); if (!b) return; var v = b.dataset.h;
+    if (v === "own") { ownGet().then(function (blob) { if (blob) choose("own", URL.createObjectURL(blob)); else hfile.click(); }, function () { hfile.click(); }); return; }
+    choose(v);
+  });
+  hpick.addEventListener("keydown", function (e) {
+    var bs = [].slice.call(hpick.querySelectorAll('[role="radio"]')), i = bs.indexOf(document.activeElement); if (i < 0) return;
+    var n = e.key === "ArrowRight" || e.key === "ArrowDown" ? i + 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? bs.length - 1 : null;
+    if (n == null) return; e.preventDefault(); n = (n + bs.length) % bs.length; bs[n].focus(); if (bs[n].dataset.h !== "own") bs[n].click();
+  });
+  $("ss-hero-change").addEventListener("click", function () { hfile.click(); });
+  $("ss-hero-del").addEventListener("click", function () { ownDel().then(function () { ownThumb(null); if (lg("sl-hero-pick") === "own") choose("random"); hmsg.textContent = "Your photo was removed from this device."; }); });
+  hfile.addEventListener("change", function () {
+    var f = hfile.files && hfile.files[0]; hfile.value = ""; if (!f) return;
+    hmsg.textContent = "Preparing your photo...";
+    shrink(f).then(function (blob) { return ownPut(blob).then(function () { ownThumb(blob); choose("own", URL.createObjectURL(blob)); }); })
+      .catch(function () { hmsg.textContent = "That photo could not be used. Please choose a JPEG, PNG or HEIC photo."; });
+  });
   $("ss-tour").addEventListener("click", function () { closeDlg(true); try { localStorage.removeItem("sl-tour-seen"); sessionStorage.removeItem("sl-tour-seen"); } catch (e) {} window.__slTourSeen = false; var t = document.getElementById("tour-replay"); if (t) setTimeout(function () { t.click(); }, 120); });
   $("ss-reset").addEventListener("click", function () { ["sl-bright-light", "sl-bright-dark", "sl-text-size", "sl-calm", "sl-sounds", "sl-open-theme"].forEach(function (k) { ls(k, null); }); ls("sl-news-off", "0"); applyAll(); paint(); changed("reset"); });
-  window.SL_OPEN_SETTINGS = function () { paint(); showDlg(setDlg, setBtn); document.dispatchEvent(new CustomEvent("sl-settings-open", { detail: { panel: setDlg } })); };
+  var tab0 = null; try { tab0 = sessionStorage.getItem("sl-set-tab"); } catch (e) {} selTab(tab0 || "display");
+  window.SL_OPEN_SETTINGS = function (tab) { if (typeof tab === "string") selTab(tab); paint(); showDlg(setDlg, setBtn); document.dispatchEvent(new CustomEvent("sl-settings-open", { detail: { panel: setDlg } })); };
   setBtn.addEventListener("click", window.SL_OPEN_SETTINGS);
 
   // ---------- Share ----------
@@ -30074,6 +30310,15 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
     var rowEl = document.getElementById("sl-achrow"); if (!rowEl) return;
     var b = document.createElement("button"); b.type = "button"; b.className = "sl-ach-btn sl-shr-sight"; b.id = "sl-share-sightings"; b.innerHTML = SVG(IC.share) + "Share my sightings";
     var ach = document.getElementById("sl-ach-btn"); rowEl.insertBefore(b, ach ? ach.nextSibling : null);
+    b.addEventListener("click", function () { window.SL_SHARE_SIGHTINGS(b); });
+  })();
+  // v6.28 (Eduardo): Share my sightings in the My Sightings tab too, next to the count (shown only on that tab)
+  (function () {
+    var bar = document.querySelector(".sl-resbar"), tab = document.getElementById("tab-sightings"); if (!bar || !tab) return;
+    var b = document.createElement("button"); b.type = "button"; b.className = "sl-ach-btn sl-shr-sight sl-shr-sight-tab"; b.id = "sl-share-sightings-tab"; b.innerHTML = SVG(IC.share) + "Share my sightings";
+    var sort = bar.querySelector(".sl-sort-wrap"); bar.insertBefore(b, sort || null);
+    var sync = function () { b.hidden = !tab.classList.contains("active"); };
+    sync(); new MutationObserver(sync).observe(tab, { attributes: true, attributeFilter: ["class"] });
     b.addEventListener("click", function () { window.SL_SHARE_SIGHTINGS(b); });
   })();
 
