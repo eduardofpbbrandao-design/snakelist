@@ -91,22 +91,22 @@ function merge(a, b) { const o = Object.assign({}, a); for (const k in b) o[k] =
 // Natricines and racers have a long, narrow head barely wider than the neck; vipers a broad triangle on a thin neck;
 // cobras a head about as wide as the neck, mambas a long coffin-shaped one; blind snakes no distinct head at all.
 const HEAD_FORM = {
-  natricine: { lw: 1.75, hb: [0.62, 0.85], hn: 1.25, len: [0.028, 0.044], h: 0.76 },
-  colubrine: { lw: 1.7, hb: [0.6, 0.86], hn: 1.2, len: [0.026, 0.044], h: 0.74 },
-  broad: { lw: 1.42, hb: [0.68, 1.15], hn: 1.5, len: [0.026, 0.05] }, // cat-eyed and tree snakes, snail-eaters, hognoses: a broad head on a thin neck
-  vine: { lw: 2.0, hb: [0.6, 1.7], hn: 1.5, len: [0.03, 0.055] }, // (a long head on a thin neck)
-  burrow: { lw: 1.35, hb: [0.6, 0.9], hn: 1.0, len: [0.02, 0.04] },
-  elapid: { lw: 1.65, hb: [0.6, 0.9], hn: 1.1, len: [0.025, 0.04], h: 0.7 },
-  cobra: { lw: 1.55, hb: [0.65, 0.95], hn: 1.05, len: [0.025, 0.04], h: 0.68 },
-  mamba: { lw: 2.05, hb: [0.6, 0.88], hn: 1.15, len: [0.025, 0.04], h: 0.72 },
-  deathadder: { lw: 1.2, hb: [0.85, 1.25], hn: 1.75, len: [0.04, 0.07] },
-  sea: { lw: 1.7, hb: [0.5, 0.8], hn: 1.05, len: [0.025, 0.05] },
-  viper: { lw: 1.18, hb: [0.62, 1.2], hn: 2.0, len: [0.04, 0.06] }, // (v5.93: broader - from above the heads read as long narrow shields)
-  bitis: { lw: 1.05, hb: [0.6, 1.25], hn: 2.1, len: [0.045, 0.075] },
-  pitviper: { lw: 1.18, hb: [0.7, 1.2], hn: 1.9, len: [0.04, 0.062] },
-  python: { lw: 1.55, hb: [0.5, 0.8], hn: 1.45, len: [0.03, 0.055] },
-  boa: { lw: 1.65, hb: [0.5, 0.8], hn: 1.4, len: [0.03, 0.055] },
-  sandboa: { lw: 1.25, hb: [0.6, 0.95], hn: 1.05, len: [0.025, 0.04] },
+  natricine: { lw: 1.75, hb: [0.62, 0.85], hn: 1.25, len: [0.028, 0.044], h: 0.76, hl: 0.44, cheek: 0.05, lor: 0.022, crown: 0.05 },
+  colubrine: { lw: 1.7, hb: [0.6, 0.86], hn: 1.2, len: [0.026, 0.044], h: 0.74, hl: 0.43, cheek: 0.045, lor: 0.02, crown: 0.045 },
+  broad: { lw: 1.42, hb: [0.68, 1.15], hn: 1.5, len: [0.026, 0.05], hl: 0.45, cheek: 0.08, lor: 0.018, crown: 0.06 }, // cat-eyed and tree snakes, snail-eaters, hognoses: a broad head on a thin neck
+  vine: { lw: 2.0, hb: [0.6, 1.7], hn: 1.5, len: [0.03, 0.055], hl: 0.34, cheek: 0.05, lor: 0.035, crown: 0.03 }, // (a long head on a thin neck)
+  burrow: { lw: 1.35, hb: [0.6, 0.9], hn: 1.0, len: [0.02, 0.04], hl: 0.5, cheek: 0, lor: 0, crown: 0.02 },
+  elapid: { lw: 1.65, hb: [0.6, 0.9], hn: 1.1, len: [0.025, 0.04], h: 0.7, hl: 0.44, cheek: 0.055, lor: 0.014, crown: 0.05 },
+  cobra: { lw: 1.55, hb: [0.65, 0.95], hn: 1.05, len: [0.025, 0.04], h: 0.68, hl: 0.42, cheek: 0.04, lor: 0.012, crown: 0.04 },
+  mamba: { lw: 2.05, hb: [0.6, 0.88], hn: 1.15, len: [0.025, 0.04], h: 0.72, hl: 0.4, cheek: 0.035, lor: 0.03, crown: 0.035 },
+  deathadder: { lw: 1.2, hb: [0.85, 1.25], hn: 1.75, len: [0.04, 0.07], hl: 0.4, cheek: 0.07, lor: 0.02, crown: 0.03 },
+  sea: { lw: 1.7, hb: [0.5, 0.8], hn: 1.05, len: [0.025, 0.05], hl: 0.42, cheek: 0.02, lor: 0, crown: 0.03 },
+  viper: { lw: 1.18, hb: [0.62, 1.2], hn: 2.0, len: [0.04, 0.06], hl: 0.4, lor: 0.03, crown: 0.02 }, // (v5.93: broader - from above the heads read as long narrow shields)
+  bitis: { lw: 1.05, hb: [0.6, 1.25], hn: 2.1, len: [0.045, 0.075], hl: 0.36, lor: 0.025, crown: 0.015 },
+  pitviper: { lw: 1.18, hb: [0.7, 1.2], hn: 1.9, len: [0.04, 0.062], hl: 0.42, lor: 0.04, crown: 0.02 },
+  python: { lw: 1.55, hb: [0.5, 0.8], hn: 1.45, len: [0.03, 0.055], hl: 0.42, cheek: 0.07, lor: 0.03, crown: 0.05 },
+  boa: { lw: 1.65, hb: [0.5, 0.8], hn: 1.4, len: [0.03, 0.055], hl: 0.44, cheek: 0.07, lor: 0.028, crown: 0.05 },
+  sandboa: { lw: 1.25, hb: [0.6, 0.95], hn: 1.05, len: [0.025, 0.04], hl: 0.48, cheek: 0.02, lor: 0, crown: 0.03 },
 };
 const HF_GENUS = {};
 for (const [k, l] of Object.entries({
@@ -121,6 +121,14 @@ for (const [k, l] of Object.entries({
   boa: 'boa acrantophis sanzinia candoia epicrates chilabothrus eunectes corallus',
   sandboa: 'eryx gongylophis charina lichanura calabaria',
 })) for (const g of l.split(' ')) HF_GENUS[g] = k;
+// v6.20: body builds by genus - arboreal (laterally compressed, sloping sides), krait (a raised vertebral ridge)
+const BUILD_GENUS = {};
+for (const [k, l] of Object.entries({
+  arboreal: 'ahaetulla thelotornis oxybelis langaha uromacer imantodes dryophiops xenoxybelis boiga toxicodryas dipsadoboa dispholidus thrasops philothamnus hapsidophrys rhamnophis dendrelaphis chrysopelea leptophis chironius dendrophidion gonyosoma rhadinophis corallus sanzinia candoia trimeresurus bothriechis atheris tropidolaemus craspedocephalus popeia cryptelytrops parias',
+  arborealHeavy: 'morelia corallus',
+  krait: 'bungarus',
+})) for (const g of l.split(' ')) BUILD_GENUS[g] = { arboreal: { tri: 0.55, xs: 0.88 }, arborealHeavy: { tri: 0.4, xs: 0.95 }, krait: { tri: 0.75, xs: 1.0, ridge: 0.05 } }[k];
+BUILD_GENUS.morelia = { tri: 0.25, xs: 1.05 }; // (only the green tree python is arboreal; carpet pythons a little)
 function headForm(plan, id) {
   const k = HF_GENUS[String(id || '').split('-')[0]];
   if (k) return HEAD_FORM[k];
@@ -175,6 +183,25 @@ function normProfile(p, id) {
   // eye size against head LENGTH (head.eyeL = eye diameter / head length), the family's usual size unless the profile
   // gives one; a profile that sets the old width-based 'eye' keeps exactly the size it had (see eyeRadOf)
   if (q.head.eyeL == null && !(p.head && p.head.eye != null) && EYE_L[q.plan]) q.head = Object.assign({}, q.head, { eyeL: EYE_L[q.plan] });
+  // v6.20 (head silhouettes): side by side with photos nearly every head was a flat spatula - its depth (crown to chin) a
+  // third of its length or less, and lower than the neck behind it, so in profile the neck rose above the head. Real heads
+  // are 0.35-0.5 as deep as long (depth group by group in HEAD_FORM.hl; head.hl per species). The head is made deeper (never
+  // deeper than it is wide, a little more in burrowers), and each group's own sculpting is passed on: cheeks (the jaw
+  // muscles swelling low at the back of the head), the loreal hollow under the canthus between nostril and eye, and the
+  // crown's dome over the parietals (each overridable per species as head.cheek, head.lor, head.crown)
+  // v6.20 (body cross-sections by build): tree snakes are deeper than wide, with the sides sloping in to the spine (a
+  // loaf or a narrow arch, not a round hose - they bridge gaps between branches on it); kraits have their raised, triangular
+  // backbone ridge. Was set for one species only.
+  { const g = String(id || p.id || '').split('-')[0], bu = BUILD_GENUS[g], pb = p.body || {};
+    if (bu && q.plan !== 'sea' && q.plan !== 'blind') q.body = Object.assign({}, q.body, { tri: pb.tri != null ? pb.tri : bu.tri, xs: pb.xs != null ? pb.xs : Math.min(q.body.xs, bu.xs), ridge: Math.max(q.body.ridge || 0, bu.ridge || 0) }); }
+  if (form || q.plan === 'blind') {
+    const f = form || { hl: 0.5, cheek: 0, lor: 0, crown: 0.02 }, H = q.head, B = q.body;
+    const w0 = (1 / B.ld) / 2 * Math.sqrt(B.xs), chin = H.chin != null ? H.chin : B.bf, hlT = H.hl != null ? H.hl : f.hl;
+    const depth = (h) => H.w * w0 * h * (1 + chin * 0.92) / H.len; // (crown to chin over the head's length; L cancels)
+    const hMax = q.plan === 'blind' || f === HEAD_FORM.burrow ? 1.1 : 1.0;
+    let h = H.h; if (hlT && depth(h) < hlT) h = Math.min(hMax, Math.max(h, hlT / depth(1)));
+    q.head = Object.assign({}, H, { h, cheek: H.cheek != null ? H.cheek : f.cheek || 0, lor: H.lor != null ? H.lor : f.lor || 0, crown: H.crown != null ? H.crown : f.crown || 0 });
+  }
   return q;
 }
 // v5.62: eye diameter / head length by family (field-guide norms): diurnal colubrids have big eyes, burrowers tiny ones
@@ -432,7 +459,8 @@ function makeBodyFns(P, quality) {
     let h = W(x) / XS(x);
     if (x < Hl * (1 + neckLen)) {
       const tipF = x < xr ? Math.sqrt(clamp(W(x) / (wr(xr) * w0), 0, 1)) : 1; // (the dome is round from the side too)
-      const hd = headH * lerp(snH, 1, sstep(0, Hl * 0.55, x)) * tipF;
+      const cr = Hd.crown ? 1 + Hd.crown * Math.exp(-(((x / Hl - 0.68) / 0.3) ** 2)) : 1; // v6.20: the crown domed a little over the parietals, not a flat board
+      const hd = headH * lerp(snH, 1, sstep(0, Hl * 0.55, x)) * tipF * cr;
       h = lerp(hd, h, sstep(Hl * 0.85, Hl * (1 + neckLen * 0.9), x));
     }
     if (B.paddle) { const e = L - x, r = w0 * 0.9; if (e < r) h *= Math.sqrt(clamp(e / r, 0, 1)); }
@@ -527,7 +555,13 @@ function makePose(P, F, seed) {
     let r = pitch * (pose.inner || 0.9), th = R() * TAU, s = 0;
     const coilLen = L * (1 - (pose.lead != null ? pose.lead : 0.32)), sq = 1 - (pose.squash != null ? pose.squash : 0.12);
     const wob = pose.wobble != null ? pose.wobble : 0.25, ph0 = R() * TAU;
-    while (s < coilLen) { out.push([Math.cos(th) * r, Math.sin(th) * r * sq]); const dth = ds / Math.sqrt(r * r + b * b); th += dth; r += b * dth * (1 + wob * Math.sin(th * 1.3 + ph0)); s += ds; }
+    // v6.20: a real pile is not a lathe-turned disc - the turns follow a lumpy, slightly oval outline (the same for every turn, and
+    // never pulled inward, so neighbouring turns still touch or leave a small gap, never cut into each other); the line is made
+    // finely, then laid out again at the body's even steps
+    const lumpA = pose.lumpy != null ? pose.lumpy : 0.08, lp1 = R() * TAU, lp2 = R() * TAU, lump = (t) => 1 + lumpA * (1 + Math.sin(2 * t + lp1)) + lumpA * 0.5 * (1 + Math.sin(3 * t + lp2));
+    { const fine = []; let sl = 0, lx = null, lz = null;
+      while (sl < coilLen) { const g = lump(th), px = Math.cos(th) * r * g, pz = Math.sin(th) * r * sq * g; if (lx != null) sl += Math.hypot(px - lx, pz - lz); fine.push([px, pz]); lx = px; lz = pz; const dth = ds * 0.5 / Math.sqrt(r * r + b * b); th += dth; r += b * dth * (1 + wob * Math.sin(th * 1.3 + ph0)); }
+      const n = Math.max(3, Math.round(coilLen / ds)); for (const q of resample(fine, n, ds)) out.push(q); s = coilLen; r *= lump(th); }
     let cx = out[out.length - 1][0], cz = out[out.length - 1][1];
     const a0 = out[out.length - 2]; let heading = Math.atan2(cz - a0[1], cx - a0[0]);
     const nLead = N - out.length, tight = pose.tight || 0.6, bendEnd = (pose.headBend || 0) / (L * 0.1);
@@ -888,6 +922,12 @@ function buildBody(P, F, pose, quality) {
     // muscles, so the head is wider at the lips than at the crown there (a trapezoid from behind, a broad triangle from above)
     bumps.push({ x: F.Hl * 0.8, xs: F.Hl * 0.2, th: Math.PI * 0.43, ts: 0.42, amp: Hd.jowl != null ? Hd.jowl : 0.07, mirror: true });
   }
+  // v6.20 (head silhouettes): the cheeks - the jaw muscles swell low on each side at the back of the head, so from above
+  // the head widens to the angle of the jaw and from behind it is broader at the lips than at the crown (vipers have their
+  // jowls above); and the loreal hollow - the side of the snout dips in between nostril and eye, under the canthus ridge,
+  // so the head is not a smooth bar of soap from the front
+  if (Hd.cheek && (Hd.shape || 'oval') !== 'tri') bumps.push({ x: F.Hl * Math.min(0.86, (Hd.jaw || 0.75) * 1.02), xs: F.Hl * 0.17, th: Math.PI * 0.5, ts: 0.42, amp: Hd.cheek, mirror: true });
+  if (Hd.lor && Hd.pupil !== 'none') bumps.push({ x: F.Hl * (0.1 + Hd.eyeX) * 0.5, xs: F.Hl * Math.max(0.05, (Hd.eyeX - 0.1) * 0.3), th: eyeA + 0.04, ts: 0.2, amp: -Hd.lor, mirror: true });
   const nTop = (x) => lerp(Hd.canthus * ((Hd.shape || 'oval') === 'tri' ? 1.35 : 1), 2.15, sstep(F.Hl * 0.8, F.Hl * 1.6, x)); // (v5.30: vipers' crowns flat; v5.93: the crown's edges rounder - at 1.7 the head was a box)
   // v4.81: an eye socket - the skin dips gently where the eye sits, so the domed eye under its clear
   // spectacle scale lies flush with the head (never standing out of its outline)
@@ -1797,16 +1837,18 @@ function evalLayer(Ly, a, g0, t, xn, warp, cl, seed, xC) {
 
 // v4.72: real coloured eyes, not dark dots - each group's typical iris colour (golden in vipers and
 // pythons, amber in most colubrids, bronze in elapids), kept bright even on a dark snake
-const IRIS = { viper: ['#c79a3e', '#f0d27a'], pitviper: ['#c9a23a', '#f2dc7e'], python: ['#b98a46', '#e9c784'], colubrid: ['#c8862f', '#f1c063'],
-  elapid: ['#8f6a3a', '#d9b06a'], sea: ['#8a7b56', '#cdbb88'], blind: ['#5a4a3a', '#8a7a62'] };
+// v6.20: the family defaults muted - a bright gold iris round a black pupil on every unchecked snake read as a cartoon
+// target; most snakes' irises are bronze to brown, finely flecked, only a little paler round the pupil
+const IRIS = { viper: ['#b08a44', '#d8b872'], pitviper: ['#b49046', '#dcc078'], python: ['#957046', '#c49d64'], colubrid: ['#86602f', '#b88d4c'],
+  elapid: ['#6e5232', '#a17c4a'], sea: ['#7a6c4c', '#ad9c70'], blind: ['#5a4a3a', '#8a7a62'] };
 function brightIris(P) {
   const def = IRIS[P.plan] || IRIS.colubrid, H = P.head || {};
   let c = new THREE.Color(H.iris || def[0]), inner = new THREE.Color(H.irisInner || def[1]);
   if (H.irisDark) return ['#' + c.getHexString(), '#' + inner.getHexString()]; // v4.81: some snakes really have a near-black iris (green snakes)
-  const hsl = {}; c.getHSL(hsl); if (hsl.l < 0.4) c.setHSL(hsl.h, Math.max(hsl.s, 0.45), 0.44); // a dark iris read as a black dot
+  const hsl = {}; c.getHSL(hsl); if (hsl.l < 0.3) c.setHSL(hsl.h, Math.max(hsl.s, 0.4), 0.34); // a dark iris read as a black dot (v6.20: only lifted a little)
   // v5.88: vipers' and pit vipers' irises are gold to copper in photos (a grey-brown one read as a dull disc)
   if (P.plan === 'viper' || P.plan === 'pitviper') { c.getHSL(hsl); if (hsl.s < 0.38) c.setHSL(hsl.h > 0.02 && hsl.h < 0.16 ? hsl.h : 0.1, 0.38, Math.max(0.46, hsl.l)); }
-  inner.getHSL(hsl); if (hsl.l < 0.58) inner.setHSL(hsl.h, Math.max(hsl.s, 0.5), 0.64);
+  inner.getHSL(hsl); { const cl = {}; c.getHSL(cl); const want = Math.min(0.56, cl.l + 0.14); if (hsl.l < want) inner.setHSL(hsl.h, Math.max(hsl.s, 0.4), want); } // (v6.20: a little paler than the iris, not a cream ring)
   return ['#' + c.getHexString(), '#' + inner.getHexString()];
 }
 // v4.81: the iris drawn like a real snake's - fine radial fibres and flecks, a darker rim, the pupil the species has
@@ -1857,8 +1899,8 @@ function buildEyes(P, F, body, pat) {
   // the iris shifts under the dome as you go round the head.
   // (the iris lies in the socket's shade: a faint glow of its own colours stands in for the light that reaches it through the
   // clear spectacle from every side, so its fibres and the pupil's edge still read - it was a black hole)
-  const em = new THREE.MeshPhysicalMaterial({ map: et, emissiveMap: et, emissive: new THREE.Color(0.38, 0.38, 0.38), roughness: 0.5, metalness: 0, envMapIntensity: 0.3, specularIntensity: 0.35 });
-  const sm = new THREE.MeshPhysicalMaterial({ color: '#000000', vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, roughness: 0.035, metalness: 0, ior: 1.4, specularIntensity: 1, envMapIntensity: 2.2, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  const em = new THREE.MeshPhysicalMaterial({ map: et, emissiveMap: et, emissive: new THREE.Color(0.2, 0.2, 0.2), roughness: 0.5, /* v6.20: about half - a self-lit iris glowed as a pale painted disc in the shaded socket */ metalness: 0, envMapIntensity: 0.3, specularIntensity: 0.35 });
+  const sm = new THREE.MeshPhysicalMaterial({ color: '#000000', vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, roughness: 0.05, metalness: 0, ior: 1.4, specularIntensity: 0.85, envMapIntensity: 1.5, /* v6.20: restrained - the whole eye flashed white from most angles */ depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
   const lm = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, roughness: 0.6, metalness: 0, depthWrite: false, envMapIntensity: 0.8 });
   // the skin colour right round the eye, read from the body's own pattern texture
   const img = pat && pat.image, skinAt = (x, th) => {
