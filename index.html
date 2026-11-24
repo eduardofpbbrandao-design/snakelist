@@ -21242,6 +21242,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     var n = 0;
     setTimeout(function down() {   // after the checklist has redrawn for the search
       if (c.offsetParent === null && n++ < 20) { setTimeout(down, 150); return; }
+      // v6.24: Mark seen / Want to see wait until the opening photo has gone, so the confirmation and its Undo are seen
+      if (act && !window.__heroEntered && document.querySelector("#sl-hero:not([hidden])") && (down.w = (down.w || 0) + 1) < 400) { setTimeout(down, 300); return; }
       window.scrollTo({ top: c.getBoundingClientRect().top + scrollY - 90, behavior: "smooth" });
       // &do=seen / &do=want (a species page's "Mark seen" / "Want to see"): v6.24 - it really does it (once: a refresh doesn't
       // flip it back), says so, and offers Undo; the card's own button is then focused and highlighted
@@ -29990,8 +29992,10 @@ body { font-size: 16px; }
 .ml-picks, .ml-edit { font-size: 13px !important; padding: 5px 12px !important; }
 .ml-edit { background: transparent !important; color: var(--gold) !important; border-color: currentColor !important; }
 .ml-edit:hover { background: rgba(46,125,50,0.08) !important; filter: none !important; }
+/* the "Common" status pill: white words on the deeper green (were on #58b351, 2.6:1) */
+.sl-tag.com, .sl-badge.com { background: linear-gradient(135deg, #2e7d32 0%, #2a7330 100%) !important; border-color: #2e7d32 !important; color: #fff !important; }
 /* the sort menu had no keyboard focus ring */
-button.sl-sort:focus-visible { outline: 3px solid var(--ds-focus); outline-offset: 2px; }
+button.sl-sort:focus-visible { outline: 3px solid var(--ds-focus) !important; outline-offset: 2px; }
 /* ---- dark mode: locked achievements and their step pills were 3.2:1 and 2.8:1 ---- */
 [data-sl-theme="dark"] .is-locked .sl-at, [data-sl-theme="dark"] .is-locked .sl-ast { color: #c6dfcf !important; opacity: 1 !important; }
 [data-sl-theme="dark"] .sl-asteprow li:not(.on) { color: #d2e6d8 !important; background: rgba(255,255,255,0.10) !important; opacity: 1 !important; }
@@ -30027,11 +30031,18 @@ button.sl-sort:focus-visible { outline: 3px solid var(--ds-focus); outline-offse
   .sl-ver::after { content: ""; position: absolute; inset: -13px -8px; }
   #family-toggle, .hab-more-btn { align-items: center; }
 }
+/* phones: the header's two word buttons share the first row, the icon buttons (44px) the second; the top line wraps
+   instead of cutting the version number off */
+@media (max-width: 430px) {
+  .eyebrow-row .eyebrow { white-space: normal !important; letter-spacing: .04em !important; line-height: 1.6; }
+  .eyebrow-row .hdr-actions .install-btn, .eyebrow-row .hdr-actions .auth-btn { flex: 1 1 calc(50% - 3px); justify-content: center; min-height: 44px; }
+}
 /* the cookie question sits above the map's own bottom controls instead of covering them */
 html.sl-on-map .ck-bar:not(.nm-bar) { bottom: auto; top: 12px; }
 @media (max-width: 600px) { html.sl-on-map .ck-bar:not(.nm-bar) { top: auto; bottom: 10px; max-height: 40vh; overflow: auto; font-size: 13.5px; } html.sl-on-map .ck-bar:not(.nm-bar) p { font-size: 13.5px; } }
 /* the empty search: what to do next */
-.sl-empty-acts { display: flex !important; width: 100%; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; }
+.sl-empty-acts[hidden] { display: none !important; }
+.sl-empty-acts { display: flex; width: 100%; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; }
 /* reduced motion: decorative loops stop */
 @media (prefers-reduced-motion: reduce) {
   .photo-wall, .quiz-level-btn.quiz-level-imp::before, .rotate-gate svg, .nm-spot-ring { animation: none !important; }
@@ -30219,12 +30230,16 @@ html.sl-on-map .ck-bar:not(.nm-bar) { bottom: auto; top: 12px; }
     ver.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); ver.click(); } });
   }
 
-  // ---- empty search: say what to do next ----
+  // ---- empty search: say what to do next (a row just under "No snakes found.", shown with it) ----
   var empty = document.getElementById("empty");
-  if (empty && !empty.querySelector(".sl-empty-acts")) {
-    var acts = document.createElement("span"); acts.className = "sl-empty-acts";
+  if (empty && !document.getElementById("sl-empty-acts")) {
+    var acts = document.createElement("div"); acts.className = "sl-empty-acts"; acts.id = "sl-empty-acts"; acts.hidden = true;
     acts.innerHTML = '<button type="button" class="sl-btn is-secondary" data-ds="clear-search">Clear search</button>';
-    empty.appendChild(acts);
+    empty.insertAdjacentElement("afterend", acts);
+    var syncEmpty = function () { var sb = document.getElementById("search"); acts.hidden = empty.hidden || !(sb && sb.value.trim()); };
+    new MutationObserver(syncEmpty).observe(empty, { attributes: true, attributeFilter: ["hidden"] });
+    var sbx = document.getElementById("search"); if (sbx) sbx.addEventListener("input", function () { setTimeout(syncEmpty, 0); });
+    syncEmpty();
     acts.addEventListener("click", function () {
       var cl = document.getElementById("clear"), sb = document.getElementById("search");
       if (cl) cl.click(); else if (sb) { sb.value = ""; sb.dispatchEvent(new Event("input", { bubbles: true })); }
