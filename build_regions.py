@@ -674,6 +674,7 @@ def region_page(r, L, G, P, ctx):
     if it: rows.append((nf(len(it)), "introduced"))
     if G: rows.append((nf(len(G)), "fossil" if all(c["fossil"] for c in G) else "fossil or extinct"))
     title = "Snakes of %s, %s: %s with photos | SnakeList" % (T, r["country"], B.nplural(n, "living species", "living species"))
+    if len(title) > 70: title = "Snakes of %s, %s: %s | SnakeList" % (T, r["country"], B.nplural(n, "species", "species"))  # v6.20: under 70 characters
     url = B.SITE + "species/region/" + r["key"]
     crumbs = [("Countries", "../#by-country"), (r["country"], "../country/" + cslug)]
     ld = ld_json("Snakes of %s" % T, url, lead, L, [("Countries", B.SITE + "species/#by-country"), (r["country"], B.SITE + "species/country/" + cslug)])
@@ -728,6 +729,7 @@ def city_page(city, r, L, P, ctx):
         cn, H.unescape(is_a) if is_a else "a city in %s, %s" % (T, city["country"]), B.nplural(n, "living species", "living species"), is_are(n), T)
     lead += (", and %s more %s possible from records for %s as a whole." % (nf(len(P)), is_are(len(P)), B.the_place(r["country"]))) if P else "."
     title = "Snakes around %s, %s: %s recorded in %s | SnakeList" % (cn, city["country"], B.nplural(n, "species", "species"), T)
+    if len(title) > 70: title = "Snakes around %s, %s: %s | SnakeList" % (cn, city["country"], B.nplural(n, "species", "species"))
     url = B.SITE + "species/city/" + city["page"]
     crumbs = [("Countries", "../#by-country"), (r["country"], "../country/" + cslug), (T, "../region/" + r["key"])]
     ld = ld_json("Snakes around %s" % cn, url, lead, L, [("Countries", B.SITE + "species/#by-country"), (r["country"], B.SITE + "species/country/" + cslug),
@@ -1099,7 +1101,7 @@ if(D.quick&&D.quick.length){var dl=el('dl','sp-rl-q');D.quick.forEach(function(q
 var sv=q[0]==='len'&&size();if(sv){var f=el('figure','sp-rl-size');f.appendChild(sv);var cap=el('figcaption','sp-note','Drawn stretched out, next to a person 1.70 m tall.'),src=m.dataset.lensrc;
 if(src){var s2=src.split('|');cap.appendChild(document.createTextNode(' Length: '));if(s2[1]){var aa=el('a','',s2[0]);aa.href=s2[1];aa.rel='noopener';aa.target='_blank';cap.appendChild(aa)}else cap.appendChild(document.createTextNode(s2[0]));cap.appendChild(document.createTextNode('.'))}
 f.appendChild(cap);dd.appendChild(f)}
-d.appendChild(dd);dl.appendChild(d)});w.appendChild(dl)}
+if(q[3]&&q[3].length&&!sv)srcs(dd,q[3]);d.appendChild(dd);dl.appendChild(d)});w.appendChild(dl)}
 if(D.fun&&D.fun.length)w.appendChild(para({l:'Did you know?',t:D.fun[0]},'p')).className='sp-rl-fun';
 // How to recognise it: things to check in the photo, or on the model when it is turned around
 if(D.rec&&D.rec.length){var s=el('div','sp-rl-rec'),hh=el('h3','','How to recognise it');hh.id='sp-rl-rech';s.appendChild(hh);
@@ -1162,7 +1164,7 @@ REAL_CSS = """
 .sp-rl-fun{margin:14px 0 0}.sp-rl-fun b,.sp-rl-rec li b,.sp-rl-mbody b{color:#1f7a3a}
 .sp-rl-rec{margin:22px 0 0}.sp-rl-rec h3{margin:0 0 2px;font:700 19px Georgia,serif;color:#1f7a3a}.sp-rl-hint{margin:0 0 8px;font-size:14px;color:var(--muted)}
 .sp-rl-rec ul{margin:0;padding-left:22px;font-size:15.5px;line-height:1.6}.sp-rl-rec li{margin:0 0 7px;padding-left:2px}.sp-rl-rec li::marker{color:var(--g)}
-.sp-rl-src{margin:6px 0 0;font-size:12.5px;line-height:1.45;color:var(--muted)}.sp-rl-src a{color:inherit}
+.sp-rl-src{margin:6px 0 0;font-size:12.5px;line-height:1.45;color:var(--muted)}.sp-rl-src a{color:inherit}.sp-rl-q .sp-rl-src{margin:2px 0 0;font-size:12px}
 .sp-rl-mores{margin:24px 0 0;border-top:1px solid var(--line)}.sp-rl-more{border-bottom:1px solid var(--line)}.sp-rl-more h3{margin:0;font-size:inherit}
 .sp-rl-mb{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:10px 2px;border:0;background:none;color:var(--text);font:700 17px Georgia,serif;text-align:left;cursor:pointer}
 .sp-rl-mb::after{content:"+";flex:none;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);color:#1f7a3a;font:600 19px/26px Inter,system-ui,sans-serif;text-align:center}
