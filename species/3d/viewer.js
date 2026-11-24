@@ -108,8 +108,8 @@ const HEAD_FORM = {
   boa: { lw: 1.65, hb: [0.5, 0.8], hn: 1.4, len: [0.03, 0.055], hl: 0.44, cheek: 0.07, lor: 0.028, crown: 0.05, smile: 0.025 },
   sandboa: { lw: 1.25, hb: [0.6, 0.95], hn: 1.05, len: [0.025, 0.04], hl: 0.48, cheek: 0.02, lor: 0, crown: 0.03, smile: 0.0 },
 };
-// v6.26 (heads, species by species): hand-set head shapes for the best-known species, each checked against its SnakeList
-// photo from the side, the front and above. Keys: hl head depth (crown to chin) over head length, as measured on the built
+// v6.26 (heads, species by species): hand-set head shapes for the best-known species, from field-guide proportions; about 40
+// of them were rendered from the side, the front and above and checked against their SnakeList photos. Keys: hl head depth (crown to chin) over head length, as measured on the built
 // head; sn snout width at the nostrils over head width; sh snout height over head height; eye eye diameter over head length;
 // ex the eye's place along the head (0 snout tip, 1 back of the head); ea how far round from the top the eye sits (degrees);
 // ck cheeks (jaw muscles); lor the loreal hollow; cr the crown's dome; sm the mouth line's curve; br the brow over the eye;
@@ -167,7 +167,7 @@ lachesis-muta hl .40 sn .55 eye .08
 trimeresurus-albolabris hl .44 eye .13
 tropidolaemus-wagleri hl .40 eye .11
 calloselasma-rhodostoma hl .36 sn .45 up .12
-deinagkistrodon-acutus hl .38 sn .4 up .35
+deinagkistrodon-acutus hl .38 sn .4 up .6
 protobothrops-mucrosquamatus hl .38 sn .45
 gloydius-blomhoffii hl .42
 vipera-berus hl .40 sn .55 eye .12
