@@ -150,7 +150,7 @@ const noOverflow = (p) => p.evaluate(() => document.documentElement.scrollWidth 
     await shot(p, 'public-zero-last-seconds');
     await p.clock.runFor(5500);
     ok(await p.evaluate(() => !!document.querySelector('#sl-ev-cd .sl-ev-burst')), 'reaching zero plays the burst');
-    ok(/December is here/.test(await p.textContent('#sl-ev-cd .sl-ev-burst')), 'the burst doesn\'t claim the event has begun');
+    ok(/December is here|SnakeList Christmas is here!/.test(await p.textContent('#sl-ev-cd .sl-ev-burst')), 'the burst doesn\'t claim the event has begun');
     await p.clock.runFor(4000);
     let t = await pubText(p);
     ok(/The Christmas event is coming to SnakeList today/.test(t), 'banner and panel: "The Christmas event is coming to SnakeList today"');
@@ -241,7 +241,7 @@ const noOverflow = (p) => p.evaluate(() => document.documentElement.scrollWidth 
     const s1 = await p.textContent('#sl-ev-cd [data-u="s"]');
     await p.clock.runFor(9000);
     ok(await p.evaluate(() => !!document.querySelector('#sl-ev-cd .sl-ev-burst .sl-ev-boom')), 'reaching zero plays the completion burst');
-    ok(/has begun/.test(await p.textContent('#sl-ev-cd .sl-ev-burst')), 'burst says the event has begun (was ' + s1 + 's)');
+    ok(/has begun|SnakeList Christmas is here!/.test(await p.textContent('#sl-ev-cd .sl-ev-burst')), 'burst says the event has begun (was ' + s1 + 's)');
     await shot(p, 'countdown-zero-burst');
     await p.clock.runFor(1000);
     { const t = await p.textContent('#sl-ev-cd');

@@ -43,6 +43,20 @@
     return PUB && typeof window.SL_XMAS_OPEN === "function" ? window.SL_XMAS_OPEN : null;
   };
 
+  /* ---------------- the countdown finale preview (for Eduardo to watch the last minute; nobody else) ----------------
+     Only with ?countdown-finale-preview=1 or #cd-finale-preview in the address: the countdown's DISPLAY clock starts
+     70 seconds before the first shown event's start (the public one in public mode). Nothing unlocks from it -
+     EV.time.now() stays the server's time. Without the switch FP is null and nothing changes. */
+  var FP = null;
+  try {
+    // (tools/events_loader.js notes the switch as the page starts, in case the address changes later)
+    if (window.__slCdFinPv || /[?&]countdown-finale-preview=1(&|$)/.test(location.search) || /cd-finale-preview/.test(location.hash)) {
+      var fe = CFG.events.filter(function (e) { return !e.meta && shown(e); })[0];
+      if (fe) FP = { at: Date.parse(fe.start) - 70000, p0: performance.now() };
+    }
+  } catch (e) { FP = null; }
+  EV.finalePreview = !!FP;
+
   /* ---------------- trusted time ---------------- */
   var T = { base: null, perf: 0, at: 0, source: null, pending: null, failed: false };
   function probeUrl() { var u = CFG.timeProbe || location.href.split("#")[0]; return u + (u.indexOf("?") < 0 ? "?" : "&") + "sl-time=" + Math.random().toString(36).slice(2); }
@@ -52,8 +66,13 @@
     trusted: function () { return T.base != null; },
     failed: function () { return T.failed && T.base == null; },
     source: function () { return T.source; },
-    // for countdown digits only (never for unlocking): the trusted time, else the device clock
-    display: function () { var n = EV.time.now(); return n == null ? Date.now() : n; },
+    // for countdown digits only (never for unlocking): the trusted time, else the device clock.
+    // The finale preview (see FP above) pretends here - and only here - that the event starts about 70 seconds
+    // after the page loaded; now() and everything that unlocks are untouched.
+    display: function () {
+      if (FP) return FP.at + (performance.now() - FP.p0);
+      var n = EV.time.now(); return n == null ? Date.now() : n;
+    },
     sync: function () {
       if (T.pending) return T.pending;
       var t0 = performance.now();
@@ -95,13 +114,26 @@
     if (now == null) now = EV.time.display();
     return CFG.events.filter(function (e) { return !e.meta && shown(e) && now < EV.ms(e.end); }).sort(function (a, b) { return EV.ms(a.start) - EV.ms(b.start); });
   };
-  // the viewer's own time zone, said in words next to a local time ("your local time, Europe/Lisbon")
-  EV.tzName = function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) { return ""; } };
-  EV.tzNote = function () { var z = EV.tzName(); return "your local time" + (z ? ", " + z.replace(/_/g, " ") : ""); };
-  EV.localTime = function (t, opts) {
-    try { return new Date(EV.ms(t)).toLocaleString(undefined, opts || { weekday: "short", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZoneName: "short" }); }
-    catch (e) { return new Date(EV.ms(t)).toString(); }
+  // the time zone every event and door time is shown in: the one chosen in Settings (window.SL_TZ in the app,
+  // localStorage sl-tz), else "Automatic" = this device's own. Said in words next to a time ("your local time, Europe/Lisbon")
+  function tzOk(z) { if (!z || typeof z !== "string") return false; try { new Intl.DateTimeFormat("en", { timeZone: z }); return true; } catch (e) { return false; } }
+  EV.tzDevice = function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) { return ""; } };
+  EV.tzChosen = function () {
+    if (window.SL_TZ && window.SL_TZ.chosen) return window.SL_TZ.chosen();
+    var z = ""; try { z = localStorage.getItem("sl-tz") || ""; } catch (e) {}
+    return tzOk(z) ? z : "";
   };
+  EV.tzName = function () { return EV.tzChosen() || EV.tzDevice(); };
+  EV.tzNote = function () { var z = EV.tzName(); return (EV.tzChosen() ? "your chosen time zone" : "your local time") + (z ? ", " + z.replace(/_/g, " ") : ""); };
+  EV.localTime = function (t, opts) {
+    var o = {}, src = opts || { weekday: "short", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZoneName: "short" }, z = EV.tzName();
+    for (var k in src) o[k] = src[k];
+    if (z && !o.timeZone) o.timeZone = z;
+    try { return new Date(EV.ms(t)).toLocaleString(undefined, o); }
+    catch (e) { try { delete o.timeZone; return new Date(EV.ms(t)).toLocaleString(undefined, o); } catch (e2) { return new Date(EV.ms(t)).toString(); } }
+  };
+  // Settings changed the time zone: everything that shows a time redraws (countdown.js listens for "tz")
+  D.addEventListener("sl-tz-changed", function () { EV.emit("tz", EV.tzName()); });
 
   /* ---------------- account (Firebase, through the app's own SL_FB) ---------------- */
   var A = { uid: null, db: null, unsubSub: null };

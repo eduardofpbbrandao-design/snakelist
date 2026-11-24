@@ -9,8 +9,12 @@
    (sl-intro-done, then the opening photo left behind, then a quiet moment) - nothing is fetched or run during the
    opening. It first fetches events/config.js; only if publicCountdown is true and one of its publicEvents is in its
    countdown window does it add events.css, core.js, art.js and countdown.js (SL_EV.pub = true). Nothing else from
-   events/ (and nothing from christmas/) is ever fetched for a normal visitor. */
+   events/ (and nothing from christmas/) is ever fetched for a normal visitor.
+   COUNTDOWN FINALE PREVIEW (for Eduardo): ?countdown-finale-preview=1 or #cd-finale-preview sets window.__slCdFinPv;
+   the countdown then loads without waiting for the opening photo to be scrolled past, and events/core.js pretends
+   (for the countdown's display only) that the start is 70 seconds away. Nobody without the switch is affected. */
 (function(){try{var K="sl-art-preview-events",L=location,S=window.localStorage,m=/[?&]preview=([^&#]*)/.exec(L.search),on;
+if(/[?&]countdown-finale-preview=1(&|$)|cd-finale-preview/.test(L.search+L.hash))window.__slCdFinPv=1;
 if(m){var v=decodeURIComponent(m[1]);if(v==="events")S.setItem(K,"1");else if(v==="events-off"||v==="off"||v==="none")S.setItem(K,"0");var u=new URL(L.href);u.searchParams.delete("preview");history.replaceState(history.state,"",u.pathname+u.search+u.hash)}
 on=window.SL_PREVIEW_ON?window.SL_PREVIEW_ON("events"):S.getItem(K)==="1";
 if(window.SL_EV)return;var d=document,h=d.documentElement,root=__ROOT__+"events/",q="?v="+__EVV__,p=d.head||h;
@@ -23,6 +27,6 @@ setTimeout(function(){idle(function(){if(window.SL_EV)return;js("config",functio
 if(!C||!C.publicCountdown||window.SL_EV)return;
 if(!(C.events||[]).some(function(e){return(C.publicEvents||[]).indexOf(e.id)>=0&&t>=Date.parse(e.countdownFrom||e.start)-M&&t<Date.parse(e.end)+M}))return;
 window.SL_EV={on:false,pub:true,root:root};h.classList.add("sl-ev-pub");css();["core","art","countdown"].forEach(function(n){js(n)})})},{timeout:4000})},1500)}
-function hero(){var x=d.getElementById("sl-hero");if(window.__heroEntered||!x||x.hidden)start();else d.addEventListener("sl-hero-entered",start,{once:true})}
+function hero(){var x=d.getElementById("sl-hero");if(window.__heroEntered||!x||x.hidden||window.__slCdFinPv)start();else d.addEventListener("sl-hero-entered",start,{once:true})}
 if(window.__introDone)hero();else{d.addEventListener("sl-intro-done",hero,{once:true});
 window.addEventListener("load",function(){setTimeout(function(){if(!window.__introDone&&!d.getElementById("intro"))start()},60000)})}}catch(e){}})();
