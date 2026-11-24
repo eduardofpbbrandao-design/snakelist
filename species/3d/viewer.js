@@ -555,10 +555,10 @@ function makePose(P, F, seed) {
     let r = pitch * (pose.inner || 0.9), th = R() * TAU, s = 0;
     const coilLen = L * (1 - (pose.lead != null ? pose.lead : 0.32)), sq = 1 - (pose.squash != null ? pose.squash : 0.12);
     const wob = pose.wobble != null ? pose.wobble : 0.25, ph0 = R() * TAU;
-    // v6.20: a real pile is not a lathe-turned disc - the turns follow a lumpy, slightly oval outline (the same for every turn, and
-    // never pulled inward, so neighbouring turns still touch or leave a small gap, never cut into each other); the line is made
+    // v6.20: a real pile is not a lathe-turned disc - the turns follow a lumpy, slightly oval outline (the same for every turn, so
+    // neighbouring turns are scaled alike and never cut into each other); the line is made
     // finely, then laid out again at the body's even steps
-    const lumpA = pose.lumpy != null ? pose.lumpy : 0.11, lp1 = R() * TAU, lp2 = R() * TAU, lump = (t) => 1 + lumpA * (1 + Math.sin(2 * t + lp1)) + lumpA * 0.5 * (1 + Math.sin(3 * t + lp2));
+    const pK = pose.pitch || 1.08, lumpA = pose.lumpy != null ? pose.lumpy : Math.max(0, Math.min(0.06, (1 - 1 / pK) / 1.5 + 0.005)), lp1 = R() * TAU, lp2 = R() * TAU, lump = (t) => 1 + lumpA * (Math.sin(2 * t + lp1) + 0.5 * Math.sin(3 * t + lp2)); // (about 1 on average - the pile keeps its turns - and never pinched by more than the slack between the turns)
     { const fine = []; let sl = 0, lx = null, lz = null;
       while (sl < coilLen) { const g = lump(th), px = Math.cos(th) * r * g, pz = Math.sin(th) * r * sq * g; if (lx != null) sl += Math.hypot(px - lx, pz - lz); fine.push([px, pz]); lx = px; lz = pz; const dth = ds * 0.5 / Math.sqrt(r * r + b * b); th += dth; r += b * dth * (1 + wob * Math.sin(th * 1.3 + ph0)); }
       const n = Math.max(3, Math.round(coilLen / ds)); for (const q of resample(fine, n, ds)) out.push(q); s = coilLen; r *= lump(th); }

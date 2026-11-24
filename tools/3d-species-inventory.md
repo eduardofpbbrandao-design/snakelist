@@ -59,7 +59,7 @@ Shared changes for every model:
 - **Eyes.** The family default irises are bronze to brown instead of bright gold. 4,129 models have no iris colour
   of their own. The paler zone round the pupil is subtle, not a cream ring. The iris glows about half as much, and
   the spectacle's reflections are restrained.
-- **Resting coils (`stack` pose).** The coil follows a lumpy, slightly oval outline, the same for every turn and never
+- **Resting coils (`stack` pose).** The coil follows a lumpy, slightly oval outline that averages to its old size. The outline is the same for every turn and is never pinched by more than the slack between turns, so the turns cannot cut into each other. Before, it was a perfect lathe-turned disc, a "tyre".
   pulled inward, so the turns cannot cut into each other. Before, it was a perfect lathe-turned disc, a "tyre".
 
 ## Species individually reviewed
