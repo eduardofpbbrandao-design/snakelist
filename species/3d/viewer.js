@@ -3249,16 +3249,16 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     // v6.26: small soft cushions of moss, 2-8 cm, a little way from the snake
     const spots = placeN(perM2(10 * PR.moss, Rb * 1.2, Rb * 3.5, 60), Rb * 1.2, Rb * 3.5, F.w0 * 4 + 0.03, { tries: 10 }), g = rockGeometry(seed + 24, lowQ ? 1 : 2);
     const im = new THREE.InstancedMesh(g, veg(new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1 }), true), spots.length); im.receiveShadow = true; const cc = new THREE.Color();
-    spots.forEach(([x, z], i) => { const s = 0.01 + R() * 0.03; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s * (1 + R() * 0.6), s * 0.3, s); pv.set(x, groundH(x, z) - s * 0.08, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); im.setColorAt(i, cc.setHSL(0.22 + R() * 0.05, 0.45 + R() * 0.15, 0.12 + R() * 0.07)); });
+    spots.forEach(([x, z], i) => { const s = 0.006 + R() * 0.016; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s * (1 + R() * 0.6), s * 0.35, s); pv.set(x, groundH(x, z) - s * 0.08, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); im.setColorAt(i, cc.setHSL(0.21 + R() * 0.05, 0.3 + R() * 0.15, 0.04 + R() * 0.04)); });
     scene.add(im);
   }
   if (PR.stone) {
     // v6.26: the flat stone it was found under, 15-30 cm across, lying close by on the soil, its edge a few body widths off
-    const g = rockGeometry(seed + 33, lowQ ? 2 : 3), m = new THREE.MeshStandardMaterial({ color: '#7d746a', roughness: 0.93 });
+    const g = rockGeometry(seed + 33, lowQ ? 2 : 3), m = new THREE.MeshStandardMaterial({ color: '#5e564d', roughness: 0.93, map: canvasTex(128, (x, S) => { const img = x.createImageData(S, S); for (let j = 0; j < S; j++) for (let i = 0; i < S; i++) { const v = 150 + (tfbm(i / S * 8, j / S * 8, 8, seed + 33, 4) - 0.5) * 160, k = (j * S + i) * 4; img.data[k] = v; img.data[k + 1] = v * 0.97; img.data[k + 2] = v * 0.92; img.data[k + 3] = 255; } x.putImageData(img, 0, 0); }, 2) });
     for (let t = 0; t < 60; t++) {
       const s = clamp(Math.max(Rb * 0.9, 0.08), 0.08, 0.16) * (0.85 + R() * 0.3), a = R() * TAU, r = Rb * 1.1 + s * 1.2 + R() * Rb * 0.6, x = Math.cos(a) * r, z = Math.sin(a) * r;
       if (dist2snake(x, z) < s * 1.15 + F.w0 * 4) continue;
-      const st = new THREE.Mesh(g, m); st.scale.set(s * 1.25, s * 0.32, s); st.rotation.set((R() - 0.5) * 0.12, R() * TAU, (R() - 0.5) * 0.12); st.position.set(x, groundH(x, z) + s * 0.05, z); st.castShadow = st.receiveShadow = true; scene.add(st);
+      const st = new THREE.Mesh(g, m); st.scale.set(s * 1.25, s * 0.26, s); st.rotation.set((R() - 0.5) * 0.12, R() * TAU, (R() - 0.5) * 0.12); st.position.set(x, groundH(x, z) + s * 0.05, z); st.castShadow = st.receiveShadow = true; scene.add(st);
       occ.push({ mesh: st, c: st.position.clone(), r: s * 1.2, hid: false }); break;
     }
   }

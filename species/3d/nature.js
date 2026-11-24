@@ -10,7 +10,7 @@ const GROUND_COVER = { reeds: 1, carpet: 1, grass: 1, heather: 1, spinifex: 1, l
 const HAB = {
   litter:     { forest: 1, trees: [['broad', 0.8], ['spruce', 0.2]], spacing: 6.5, hills: 0.05, under: 'forest', rock: 'moss', litter: 1, haze: '#55654c' },
   forest:     { forest: 1, trees: [['broad', 0.6], ['spruce', 0.4]], spacing: 6, hills: 0.06, under: 'forest', rock: 'moss', litter: 1, haze: '#526249' },
-  soil:       { forest: 1, trees: [['broad', 0.9], ['spruce', 0.1]], spacing: 7, hills: 0.05, under: 'forest', rock: 'moss', litter: 0.6, haze: '#58664f' },
+  soil:       { forest: 1, trees: [['broad', 0.9], ['spruce', 0.1]], spacing: 7, hills: 0.05, under: 'forest', rock: 'soil', litter: 0.6, haze: '#58664f' },
   rainforest: { forest: 1, trees: [['tropic', 0.6], ['palm', 0.25], ['broad', 0.15]], spacing: 5.5, hills: 0.07, under: 'jungle', rock: 'moss', litter: 1.2, haze: '#4b5d45' },
   riverbank:  { trees: [['broad', 0.8], ['spruce', 0.2]], spacing: 8, clump: 0.5, hills: 0.05, under: 'meadow', rock: 'grey' },
   grass:      { trees: [['savanna', 1]], spacing: 15, clump: 0.58, hills: 0.05, under: 'grass', rock: 'grey' },
@@ -516,7 +516,7 @@ function buildAll(A) {
   };
   const grassMat = () => track(vegetation(THREE, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.92, metalness: 0 }), { near: true }));
   const twigMat = () => barkMat(tex.bark('furrow'), '#8a7d6c');
-  const rockStyle = { moss: ['#8d8a80', '#6f8a4a'], grey: ['#9a958a', null], red: ['#9c7a62', null] /* (v6.26: a weathered red-tan - pure brick red read as a scatter of chocolate drops) */, sandstone: ['#b98e62', null], gibber: ['#6e3422', null], basalt: ['#57534e', null] }[K.rock || 'grey'];
+  const rockStyle = { moss: ['#8d8a80', '#6f8a4a'], grey: ['#9a958a', null], red: ['#9c7a62', null] /* (v6.26: a weathered red-tan - pure brick red read as a scatter of chocolate drops) */, sandstone: ['#b98e62', null], gibber: ['#6e3422', null], basalt: ['#57534e', null], soil: ['#6b6157', '#4d6530'] }[K.rock || 'grey'];
   const rockMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), bumpMap: tex.rock(), bumpScale: 2, roughness: 0.9, metalness: 0, vertexColors: true, color: rockStyle[0] }));
   groundDetail(THREE, rockMat, 'rock', ctx, { tri: true, near: 1.5, far: 9 }); // v5.83: the grain and cracks of real rock, close up
   const rocks = (n, rMin, rMax, size, o = {}) => put('rocks', (Rn, v) => rockGeo(seed + 500 + v * 11 + (o.detail != null ? 50 : 0), o.detail != null ? o.detail : low ? 2 : 3, { moss: rockStyle[1], flat: o.flat || 0.7 }), rockMat, n, rMin, rMax, size, { variants: 3, lift: -0.18, tilt: 0.4, col: () => tint(0.8, 1.1, 0.08), ...o });
@@ -533,8 +533,8 @@ function buildAll(A) {
     const logGeo = (Rn) => { const gb = new GB(), len = 2 + Rn() * 2.5, pts = []; for (let k = 0; k <= 6; k++) pts.push(V(-len / 2 + (len * k) / 6, 0, (Rn() - 0.5) * 0.15)); tube(gb, pts, pts.map((_, k) => 0.22 * (1 - k / 14)), low ? 7 : 12, { uRep: 3, vLen: 1, col: (y, t) => { const m = 0.4 + 0.3 * Math.sin(t * 9); return [lerp(1, 0.66, m), lerp(1, 0.86, m), lerp(1, 0.52, m)]; } }); return gb.geo(); };
     put('logs', logGeo, barkMat(tex.bark('furrow'), '#9a8e7c'), 14, groundR * 1.1, 40, [0.7, 1.3], { variants: 2, lift: 0.06, span: 1.5 });
     // v5.12: soft cushions of moss on the forest floor, some close to the snake (never on it)
-    const mossMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), color: '#6f8f3a', roughness: 1, metalness: 0, vertexColors: true }));
-    put('moss', (Rn, v) => rockGeo(seed + 900 + v * 7, low ? 1 : 2, { flat: 0.28 }), mossMat, Math.round(Math.min(jungle ? 90 : 70, (jungle ? 1.6 : 1.2) * Math.PI * (near0 * near0 - Math.max(Rb * 1.2, F.w0 * 8) ** 2))), Math.max(Rb * 1.2, F.w0 * 8), near0, [0.06, 0.32], /* v5.50: cushions their real size, 12-60 cm across, and kept clear of the snake by their own size */ { variants: 3, lift: -0.08, tilt: 0.08, ok: (x, z) => dist2snake(x, z) > F.w0 * 3 + 0.05, clr: (s) => F.w0 * 3 + s * 1.15, col: () => tint(0.75, 1.15, 0.12) });
+    const mossMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), color: kind === 'soil' ? '#4d6530' : '#6f8f3a', roughness: 1, metalness: 0, vertexColors: true }));
+    put('moss', (Rn, v) => rockGeo(seed + 900 + v * 7, low ? 1 : 2, { flat: 0.28 }), mossMat, Math.round(Math.min(jungle ? 90 : 70, (jungle ? 1.6 : 1.2) * Math.PI * (near0 * near0 - Math.max(Rb * 1.2, F.w0 * 8) ** 2))), Math.max(Rb * 1.2, F.w0 * 8), near0, kind === 'soil' ? [0.025, 0.09] : [0.06, 0.32], /* (v6.26: small ones on the soil scene - round a blind snake 12 cm long a 30 cm cushion was a bright green disc) v5.50: cushions their real size, 12-60 cm across, and kept clear of the snake by their own size */ { variants: 3, lift: -0.08, tilt: 0.08, ok: (x, z) => dist2snake(x, z) > F.w0 * 3 + 0.05, clr: (s) => F.w0 * 3 + s * 1.15, col: () => tint(0.75, 1.15, 0.12) });
     rocks(10, groundR * 1.05, 45, [0.3, 1.6], { minD: 2.5 });
   } else if (U === 'meadow') {
     grassPut('grassG', 1700, near0, 36, [0.5, 1.1], { col: () => tint(0.8, 1.12, 0.1) });
