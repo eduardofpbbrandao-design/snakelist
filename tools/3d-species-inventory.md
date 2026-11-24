@@ -78,6 +78,23 @@ snakes, 0 sand boas). It is zero at the snout tip and at the jaw hinge, so Open 
 - Desert stones are a weathered red-tan instead of brick red (they read as a scatter of chocolate drops). (Lighting the
   deserts with the clear-sky panorama was tried and dropped: the sand and the snakes on it came out washed pale.)
 
+**Reviewed one by one in this pass.** Before/after under the same species, pose, camera and light (in-app, side, top,
+below, face, close-up from above), checked against the SnakeList photo: 35 species - inland taipan, smooth green snake,
+western diamond-backed and eastern diamondback rattlesnakes, Indian and king cobras, ball python, boa constrictor,
+yellow-bellied sea snake, yellow-lipped sea krait, Brahminy blind snake, boomslang, California kingsnake, common garter
+snake, black and western green mambas, banded krait, green anaconda, eastern hognose, Gaboon viper, reticulated and green
+tree pythons, emerald tree boa, Asian vine snake, Russell's viper, grass snake, corn snake, eyelash viper, eastern coral
+snake, desert horned viper, European adder, cottonmouth, common watersnake, sunbeam snake and common death adder. Heads
+only (side, face, top, after only) for 19 more of the hand-set species: coastal taipan, tiger snake, Egyptian cobra,
+common krait, sidewinder, fer-de-lance, white-lipped pit viper, Chinese moccasin (its upturned snout then made stronger),
+puff adder, saw-scaled viper, Burmese and black-headed pythons, Amazon tree boa, common kingsnake, bullsnake, eastern
+indigo, and from the main set the king cobra, cottonmouth and sunbeam snake.
+
+**Still to do (seen in the sheets).** The soil scene still shows a few pale stones and one bright moss patch round a very
+small snake; the cottonmouth's pattern is too plain and the Indian cobra's hood a flat board (patterns and hoods were not
+part of this pass); wetland snakes are seen on mud with the water often out of the default view; at thumbnail size the
+skin change is modest - it shows most from the face and close views.
+
 
 How the 4,243 3D models in `species/3d/models.json` get their shape, which shared rules cover each group, and which
 species were looked at one by one. Colours and patterns are unchanged from the v6.13 photo audit
