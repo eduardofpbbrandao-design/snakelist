@@ -131,6 +131,9 @@ def nplural(k, one, many=None):
 # kept to the sea and coasts; a land snake never gets the open ocean or coral reefs) and (2) shown
 # as what they are: habitat types found where the snake is recorded, not habitats proven for it.
 HAB_SEC = {}
+import collections as _co
+HAB_STATS = _co.Counter()  # v6.20 content audit: what the build did, counted (written to data/content-audit.json)
+HAB_BROAD = 4  # v6.20: a range-based estimate with more kinds of habitat than this lists almost everything - not shown as the snake's habitat
 MARINE = re.compile(r"ocean|pelagic|coral|reef|sea\b|seagrass|coastal waters|open water", re.I)
 COASTAL = re.compile(r"mangrove|estuar|lagoon|shore|beach|coast|brackish|tidal|salt marsh|island", re.I)
 def habitat_estimate(hs, typ):
@@ -219,7 +222,7 @@ FLAG = {k: (cid, lab, f) for k, cid, lab, f in APP_FLAGS}
 def flags_of(c): return "".join(k for k, cid, lab, f in APP_FLAGS if f(c))
 
 
-def checklist_facts(c, rel="../"):
+def checklist_facts(c, rel="../", has_hab=False):
     """v5.57: a species page's value for each of the app's checklist filters (the same tests as passes()),
     each a link to that filter in the app; nothing is guessed - a value the data lacks says so"""
     from urllib.parse import quote
@@ -234,9 +237,11 @@ def checklist_facts(c, rel="../"):
     tags = []
     if not c["fossil"]:
         hm0 = harm_of(c)
-        tags.append(a("Venomous", "f=chip-venom") if c["venom"] else a("Non-venomous", "f=chip-nonvenom"))
-        if hm0 == "harmful": tags.append(a("Harmful", "f=chip-harmful"))
-        elif hm0 == "harmless": tags.append(a("Harmless", "f=chip-harmless"))
+        # v6.20: the same words as the "Venom and safety" key fact (venom_text): a venomous snake SnakeList has no serious
+        # bites for is "Mildly venomous", and the app's Harmful / Low risk chips read "Dangerous to people" / "Low risk to people"
+        tags.append((a("Venomous", "f=chip-venom") if hm0 == "harmful" else a("Mildly venomous", "f=chip-venom")) if c["venom"] else a("Non-venomous", "f=chip-nonvenom"))
+        if hm0 == "harmful": tags.append(a("Dangerous to people", "f=chip-harmful"))
+        elif hm0 == "harmless": tags.append(a("Low risk to people", "f=chip-harmless"))
     elif FLAG["z"][2](c): tags.append(a("Extinct", "f=chip-extinct") + " <small>(fossil)</small>")
     rows = [("Type", a(e(tg), "type=" + quote(tg)) if tg else NR),
             ("Family", a(e(c["family"]), "fam=" + quote(c["family"])) if c["family"] else NR),
@@ -246,9 +251,9 @@ def checklist_facts(c, rel="../"):
     hs = [HAB_SECS[h] for h in hab_secs(c) if HAB_SECS[h] not in GEO_HAB_SECS]
     if not c["fossil"]:  # nothing about living snakes applies to a fossil (the same rule as its filter tags)
         hm = harm_of(c); cons = constriction_of(c)
-        rows += ([] if hm in ("harmful", "harmless") else [("Dangerous to people", '<span class="sp-unk">Not documented</span> <small>(mildly venomous)</small>')]) + [
+        rows += ([] if hm in ("harmful", "harmless") else [("Dangerous to people", '<span class="sp-unk">No serious bites in SnakeList&rsquo;s records</span> <small>(mildly venomous)</small>')]) + [
                  ("Constrictor", a("Yes", "f=chip-constrictor") if cons == "yes" else a("No", "f=chip-nonconstrictor") if cons == "no" else
-                  '<span class="sp-unk">Not documented</span>'),
+                  '<span class="sp-unk">%s</span>' % NO_SRC),
                  ("Snake eater", yn("e", "Yes", "No")),
                  ("Popular", a("Yes", "f=chip-popular") if c["popular"] else a("No", "f=chip-uncommon") + " <small>(Uncommon)</small>"),
                  ("Exotic", yn("x", "Yes", "No") + " <small>(%s)</small>" % ("not native to North America" if FLAG["x"][2](c) else "native to North America")),
@@ -257,7 +262,17 @@ def checklist_facts(c, rel="../"):
                   " <small>(%s on iNaturalist)</small>" % ("no confirmed records" if not c["spots"] else "recorded in %s place%s" % ("{:,}".format(c["spots"]), "" if c["spots"] == 1 else "s")))]
     rows.append(("Photos", "Yes" if c["photo"] else a("No photos yet", "f=chip-nophoto")))
     if not (c["fossil"] and FLAG["z"][2](c)): rows.append(("Extinct", a("Yes", "f=chip-extinct") if FLAG["z"][2](c) else "No"))  # (a fossil says it in its tag)
-    rows.append(("Habitats", (e(", ".join(hs)) + ' <small>(estimated, as in SnakeList)</small>') if hs else NR))  # long: last, full width
+    # v6.20: this is the app's habitat filter, worked out from the habitats of the places where the snake is recorded - not a
+    # species-specific source. It is labelled so, and a list covering most kinds of habitat is not shown as the snake's habitat.
+    if has_hab:
+        hv = '<a href="#ecology">See Habitat below</a> <small>(from its sourced account; the app&rsquo;s range-based filter is an estimate)</small>'
+    elif len(hs) > HAB_BROAD:
+        hv = '<span class="sp-unk">No species-specific source yet</span> <small>(its range covers %d kinds of habitat, so a range-based estimate says little)</small>' % len(hs)
+    elif hs:
+        hv = e(", ".join(hs)) + ' <small>(inferred from the places where it is recorded &ndash; not checked for this species)</small>'
+    else:
+        hv = NR
+    rows.append(("Habitats", hv))  # long: last, full width
     return ('<div class="sp-ftop">%s<button type="button" class="sp-fmore" aria-expanded="false" aria-controls="sp-fmore-list">See more</button></div>'
             '<dl class="sp-key sp-fkey" id="sp-fmore-list">%s</dl>' %
             ("".join('<span class="sp-ftag">%s</span>' % t for t in tags),
@@ -778,11 +793,20 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     def hab_html(c, gone):
         if c["fossil"]: return '<p class="sp-muted">Unknown - this snake is known only from fossils.</p>'
         hs = c["habitats"]
-        if not hs: return '<p class="sp-muted">Habitat information unavailable.</p>'
+        if not hs: return '<p class="sp-muted">%s.</p>' % NO_SRC
         kinds = {}
         for h in hs: kinds.setdefault(hab_kind(h), []).append(h)
         order = [k for k in HAB_KIND_ORDER if k in kinds]
-        note = ('<p class="sp-note">Habitat types found in the countries, states and provinces where it %s recorded, narrowed by what kind of snake it is. '
+        if len(order) > HAB_BROAD:
+            # v6.20: its range covers most kinds of habitat, so the range-based estimate would list almost every environment
+            # (a forest snake "in" deserts and grasslands because its countries have them) - it is not shown as its habitat
+            HAB_STATS["broad"] += 1
+            return ('<p>%s for this species&rsquo; habitat.</p><details class="sp-habd"><summary>Kinds of habitat found across the places where it %s recorded</summary>'
+                    '<p class="sp-note">Its recorded range covers %d of SnakeList&rsquo;s %d broad kinds of habitat. This only describes those places; it has not been '
+                    'checked for this snake, which probably lives in just some of them.</p><p>%s.</p></details>') % (
+                NO_SRC.replace(" for this yet", " yet"), "was" if gone else "is", len(order), len(HAB_KIND_ORDER), esc(", ".join(order)))
+        HAB_STATS["narrow"] += 1
+        note = ('<p class="sp-note"><b>Inferred, not sourced:</b> kinds of habitat found in the countries, states and provinces where it %s recorded, narrowed by what kind of snake it is. '
                 'They have not been checked for this species, so some may not apply.</p>') % ("was" if gone else "is")
         pills = '<ul class="sp-pills" aria-label="Kinds of habitat in its range">%s</ul>' % "".join(
             '<li><a href="../?hab=%s">%s</a></li>' % (esc(quote(kinds[k][0])), esc(k)) for k in order)
@@ -844,9 +868,16 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         rt = rarity_txt(c)
         about = lead + " " + " ".join(extra)
         # the title names the snake both ways and the 3D viewer, kept short enough for search results
-        for title in [label + " \u2013 Explore in 3D | SnakeList", label + " \u2013 Explore in 3D", nm + " \u2013 Explore in 3D | SnakeList"]:
+        # v6.20 (SEO hygiene): a common name that ends in its own epithet in brackets ("Middle American Burrowing Snake
+        # (visoninum)") doesn't repeat it before the scientific name, and a long name falls back to shorter forms instead of
+        # a title over 70 characters (1,743 were)
+        nm_t = nm
+        mq = re.search(r" \(([a-z-]+)\)$", nm)
+        label_t = nm if (c["is_sci"] or (mq and mq.group(1) in sci.split(" "))) else label  # (the full name stays: it is the page's h1)
+        for title in [label_t + " \u2013 Explore in 3D | SnakeList", label_t + " \u2013 Explore in 3D", label_t + " | SnakeList",
+                      nm_t + " \u2013 Explore in 3D | SnakeList", label_t, nm_t + " | SnakeList"]:
             if len(title) <= 70: break
-        else: title = label + " \u2013 Explore in 3D"
+        else: title = nm_t
         ov = (info or {}).get("sections", {}).get("overview") or []
         desc = (plain(ov[0]["text"]) if ov else (lead + (" " + extra[0] if extra else "")))
         desc = desc if len(desc) <= 300 else desc[:297].rsplit(" ", 1)[0] + "..."
@@ -960,9 +991,9 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if "North America" not in c["continents"] and c["continents"]: tags.append(("Exotic to North America", "f=chip-exotic"))
         if rt.startswith("Common"): tags.append(("Often recorded on iNaturalist", "f=chip-common"))
         if rt.startswith("Rare"): tags.append(("Rarely recorded on iNaturalist", "f=chip-rare"))
-        tags.append(("Venomous", "f=chip-venom") if c["venom"] else ("Non-venomous", "f=chip-nonvenom"))
         hm = harm(c)
-        if hm: tags.append(("Dangerous to people" if hm == "harmful" else "Not dangerous to people", "f=chip-" + hm))
+        tags.append((("Venomous" if hm == "harmful" else "Mildly venomous"), "f=chip-venom") if c["venom"] else ("Non-venomous", "f=chip-nonvenom"))
+        if hm: tags.append(("Dangerous to people" if hm == "harmful" else "Low risk to people", "f=chip-" + hm))
         cons = constriction(c)  # documented for its family or genus, same list as the app (#constrictor-data)
         if cons == "yes": tags.append(("Constrictor", "f=chip-constrictor"))
         elif cons == "no": tags.append(("Non-constrictor", "f=chip-nonconstrictor"))
@@ -995,11 +1026,12 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             intro_html = '<p class="sp-intro">%s</p>' % esc(" ".join([lead] + extra)).replace("(%s)" % esc(sci), "(<i>%s</i>)" % esc(sci), 1)
         if info and info.get("status") == "limited":
             intro_html += ('<p class="sp-limited"><b>Little is known about this species.</b> Only a few published studies describe it, so this page gives just '
-                           'what they record and says &ldquo;Not known&rdquo; for the rest.</p>')
+                           'what they record; anything they don&rsquo;t cover is marked &ldquo;SnakeList doesn&rsquo;t have a verified source for this yet&rdquo;.</p>')
         if not info and not c["fossil"]: intro_html += '<div id="sp-wiki"></div>'
 
         # ---- key facts: the same six labels on every living species' page (fossils get their own) ----
-        UNK = '<span class="sp-unk">Not known</span>'
+        # v6.20: "Not known" read as if science doesn't know; what it means is that SnakeList has no checked source yet
+        UNK = '<span class="sp-unk">%s</span>' % NO_SRC
         def fact(k):
             f = F.get(k)
             return (R.rich(f["text"]) + R.cite(f.get("src"))) if f and f.get("text") else None
@@ -1015,22 +1047,24 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             kf.append(("First described", esc(("%s et al., %d" % (re.split(r",|&| and ", am[1])[0].strip(), am[2])) if am[1].count(",") >= 2 else "%s, %d" % (am[1], am[2])) if am else UNK))
         else:
             if F.get("venom"): vt = fact("venom")
-            elif c["venom"]: vt = "Venomous &ndash; dangerous to people" if hm == "harmful" else "Mildly venomous &ndash; no serious bites to people documented"
-            else: vt = "Not venomous &ndash; but big enough to injure people" if hm == "harmful" else "Not venomous to people &ndash; it can still bite"
+            else: vt = venom_text(c, hm)
             if gone and not F.get("venom"): vt = "Venomous" if c["venom"] else "Not venomous"  # an extinct snake bites nobody now
-            kf.append(("Venom", vt))
+            kf.append(("Venom and safety", vt))
             sz = size_class(c, info)
-            # v5.78: "Not known" next to "Large-sized (about 2 m)" read like a contradiction: the unknown length now says what the size is based on
-            kf.append(("Adult length", fact("length") or (UNK + (' <small>(for this species; adults of its genus are about %s)</small>' % fmt_len(sz[1]) if sz and sz[2] == "genus" else ""))))
-            kf.append(("Diet", fact("diet") or UNK))
-            kf.append(("Reproduction", fact("reproduction") or UNK))
-            # v4.81: no conservation status on SnakeList any more: its size instead (Small / Medium / Large-sized),
-            # from a typical adult length - and nothing at all when SnakeList has none
+            # v6.20 (content audit): one length statement in the key facts, labelled with what it measures (typical adults,
+            # an average or a maximum - length_label). The old extra "Size: Large-sized (adults about 2.1 m)" row was a
+            # midpoint SnakeList worked out itself, and read as a third, different length; it is gone. Without a sourced
+            # length, a rough size class is shown only as an estimate, with what it is based on and no made-up number.
+            if F.get("length"):
+                kf.append((length_label(F["length"]["text"]), fact("length")))
+            else:
+                kf.append(("Adult length", UNK))
+                if sz:
+                    kf.append(("Rough size class", '%s <small>(%s &ndash; not a measurement of this species)</small>' % (
+                        {"Small": "Probably small", "Medium": "Probably medium-sized", "Large": "Probably large"}[sz[0]],
+                        "SnakeList&rsquo;s estimate for its genus" if sz[2] == "genus" else "SnakeList&rsquo;s estimate from its 3D model profile")))
             if c["extinct"]:
                 kf.append(("Status", esc(c["extinct"].split(" - ")[0])))
-            sz = size_class(c, info)
-            if sz:
-                kf.append(("Size", '%s-sized <small>(%s about %s)</small>' % (sz[0], "a typical adult of its genus is" if sz[2] == "genus" else "adults", fmt_len(sz[1]))))
             if c["countries"]:
                 dist = '<a href="#range">%s</a>' % (("Formerly " if c["extinct"] else "") + places_txt(c["countries"]))
                 if c["continents"]: dist += " <small>&middot; %s</small>" % esc(", ".join(c["continents"]))
@@ -1040,6 +1074,21 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
                 dist += "<small class=\"sp-kintro\">%s</small>" % "; ".join(
                     esc(("Invasive in %s" if x["status"] == "invasive" else "Introduced to %s") % x["area"]) for x in IST)
             kf.append(("Distribution", dist))
+            kf.append(("Diet", fact("diet") or UNK))
+            kf.append(("Reproduction", fact("reproduction") or UNK))
+            # several facts without a source: one line that names them, instead of the same sentence three times
+            miss = [k for k, v in kf if v == UNK]
+            if len(miss) >= 2:
+                kf = [x for x in kf if x[1] != UNK]
+                nm_m = [m.lower() if i else m for i, m in enumerate(miss)]
+                kf.append((", ".join(nm_m[:-1]) + " and " + nm_m[-1], '<span class="sp-unk">%s</span>' % NO_SRC.replace("for this yet", "for these yet")))
+            HAB_STATS["living_pages"] += 1
+            for _k in ("length", "diet", "reproduction"):
+                if not F.get(_k): HAB_STATS["no_verified_" + _k] += 1
+            if F.get("length"): HAB_STATS["length_label: " + length_label(F["length"]["text"])] += 1
+            elif sz: HAB_STATS["size_class_estimate_" + (sz[2] or "model")] += 1
+            HAB_STATS["venom: " + re.sub(r"&ndash;.*", "", vt).strip()] += 1
+            HAB_STATS["with_account" if info else "without_account"] += 1
         keyfacts = "".join('<div><dt>%s</dt><dd>%s</dd></div>' % (esc(f[0]), f[1]) for f in kf)
 
         # ---- photo, with a readable credit linking to the original record ----
@@ -1094,9 +1143,14 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             fos += paras("palaeoenvironment", "Its world") + paras("diet", "Diet")
             if not S and FI.get("sources"):
                 fos += '<p class="sp-note">From: %s</p>' % ", ".join('<a href="%s" rel="noopener">%s</a>' % (esc(u), esc(re.sub(r"^https?://(www\.)?", "", u).split("/")[0])) for u in FI["sources"])
-            secs.append(("fossil", "Fossils and geological context", fos or '<p class="sp-muted">Not known.</p>'))
+            secs.append(("fossil", "Fossils and geological context", fos or '<p class="sp-muted">%s.</p>' % NO_SRC))
         else:
             rcg = (info or {}).get("recognise") or []
+            # v6.20: a "How to recognise it" line that the Appearance text right below says again is left out on the page
+            # (the 3D panel, which has no Appearance text, keeps it)
+            _app = [x["text"] for k in ("identification", "juvenile", "variation") for x in S.get(k) or []]
+            _n = len(rcg); rcg = [x for x in rcg if not said_before(x["text"], _app)]
+            if len(rcg) < _n: HAB_STATS["recognise_dupes_dropped"] += _n - len(rcg); HAB_STATS["species_recognise_dupes"] += 1
             ident = ('<h3>How to recognise it</h3><ul class="sp-rcg">%s</ul>' % "".join(
                 "<li>%s%s%s</li>" % (("<b>%s:</b> " % H.escape(x["label"])) if x.get("label") else "", R.rich(x["text"]), R.cite(x.get("src"))) for x in rcg)) if rcg else ""
             ident += paras("identification", "Appearance") + paras("juvenile", "Adults and young") + paras("variation", "Variation") + paras("size", "Size")
@@ -1110,13 +1164,18 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
                 "<p><b>%s:</b> %s%s%s</p>" % (esc(x["area"]), "Invasive. " if x["status"] == "invasive" else "Introduced by people%s. " % ((" " + x["when"]) if x.get("when") else ""),
                                             esc(x.get("text", "")), R.cite(["intro-%s" % slugify(x["area"])]) if x.get("src") else "") for x in IST)
         if not c["fossil"]:
-            eco = paras("habitat", "Habitat") or ('<h3>Habitat types in its range <small>rough estimate</small></h3>' + hab_html(c, gone))
+            eco = paras("habitat", "Habitat") or ('<h3>Habitat <small>no species-specific source yet</small></h3>' + hab_html(c, gone))
             # the one-line activity fact only where no fuller behaviour text says it again
             eco += paras("activity", "Activity") or (("<h3>Activity</h3><p>%s</p>" % fact("activity")) if F.get("activity") and not S.get("behaviour") else "")
             eco += paras("behaviour", "Behaviour") + paras("diet", "Diet") + paras("teeth", "Teeth") + paras("reproduction", "Reproduction") + paras("longevity", "Lifespan")
-            if info and info.get("funfacts"):
+            # v6.20: a "Did you know?" that only repeats a section of the page (or the intro) is left out
+            _secs = [x["text"] for k in S for x in S[k]] + [x["text"] for x in (info or {}).get("recognise") or []]
+            _fun = [x for x in (info or {}).get("funfacts") or [] if not said_before(x["text"], _secs, 0.6)]
+            if info and len(_fun) < len(info.get("funfacts") or []):
+                HAB_STATS["funfacts_dupes_dropped"] += len(info["funfacts"]) - len(_fun); HAB_STATS["species_funfact_dupes"] += 1
+            if _fun:
                 eco += '<div class="sp-fun"><h3>Did you know?</h3><ul>%s</ul></div>' % "".join(
-                    "<li>%s%s</li>" % (R.rich(x["text"]), R.cite(x.get("src"))) for x in info["funfacts"])
+                    "<li>%s%s</li>" % (R.rich(x["text"]), R.cite(x.get("src"))) for x in _fun)
             secs.append(("ecology", "Behaviour and ecology", eco))
         else:
             eco = paras("behaviour", "Behaviour") + paras("habitat", "Habitat")
@@ -1188,7 +1247,9 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
                 R.add("fos%d" % k, {"title": re.sub(r"^https?://(www\.)?", "", u).split("/")[0], "url": u}); R.cite(["fos%d" % k])
         refs = R.list_html()
         if refs:
-            src += '<details class="sp-det sp-refd"%s><summary>References (%d)</summary>%s</details>' % (" open" if len(R.order) <= 8 else "", len(R.order), refs)
+            # v6.20: the reference list is always open, so a fact's [n] always lands on a visible source
+            src += ('<h3 class="sp-refh">References (%d)</h3><p class="sp-note">Each fact&rsquo;s small number links to its reference here; '
+                    'the titles open the original source.</p>%s') % (len(R.order), refs)
         else:
             src += ('<p>SnakeList has no reviewed species account for this snake yet. The facts on this page come from SnakeList&rsquo;s own checklist '
                     'data (names, family, venom, and the countries, states and provinces where it is recorded).</p>')
@@ -1204,7 +1265,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         src += ('<details class="sp-det sp-prov"><summary>How this page is made</summary><ul>'
                 '<li>Countries, states and provinces, venom and family come from SnakeList&rsquo;s checklist; the map shades whole countries and regions, not exact range.</li>'
                 '%s<li id="sp-wdprov">%s</li></ul></details>') % (
-            "<li>Facts with numbered references come from the reviewed species account; anything the sources do not cover is shown as &ldquo;Not known&rdquo;.</li>" if info else "",
+            "<li>Facts with numbered references come from the reviewed species account; anything they do not cover says &ldquo;SnakeList doesn&rsquo;t have a verified source for this yet&rdquo; (it may well be known to science).</li>" if info else "",
             ("Who described it: from the authority %s%s." % (esc(am[0]), " in the reviewed account" if (info and info.get("authority")) else " (checked by SnakeList)")) if am else
             "Who described it: SnakeList has no checked record yet, so a name from Wikidata is shown only if it passes basic checks.")
         src += '<p class="sp-dates">%s<span>Page generated %s</span></p>' % (
@@ -1276,23 +1337,28 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             fa = c["died"]
             if fa: quick.append(["age", "Lived", "%s, %s" % (fa[0][0].upper() + fa[0][1:], fa[1])])
             if c["countries"]: quick.append(["where", "Fossils found in", plist(c["countries"], 4)])
-            if F.get("length"): quick.append(["len", "Estimated length", txt(fact("length"))])
+            if F.get("length"): quick.append(["len", "Estimated length", txt(fact("length")), srcs(F["length"].get("src"))])
         else:
-            quick.append(["venom", "Venom", txt(vt)])
-            if F.get("length"): quick.append(["len", "Usual adult length", txt(fact("length"))])
-            elif sz: quick.append(["size", "Size", "%s-sized (%s about %s)" % (sz[0], "a typical adult of its genus is" if sz[2] == "genus" else "adults", fmt_len(sz[1]))])
+            quick.append(["venom", "Venom and safety", txt(vt)])
+            # v6.20: the same labelled length as the page (typical / average / maximum), with its source; without one, only
+            # the rough size class, said to be an estimate
+            if F.get("length"): quick.append(["len", length_label(F["length"]["text"]), txt(fact("length")), srcs(F["length"].get("src"))])
+            elif sz: quick.append(["size", "Rough size class", "%s (%s, not a measurement of this species)" % (
+                {"Small": "Probably small", "Medium": "Probably medium-sized", "Large": "Probably large"}[sz[0]],
+                "SnakeList's estimate for its genus" if sz[2] == "genus" else "SnakeList's estimate from its 3D model profile")])
             dn = [x for x in S.get("distribution") or [] if (x.get("label") or "Native") == "Native"]
+            wsrc = srcs(dn[0].get("src")) if dn else []
             if dn: wh = plain(dn[0]["text"]).rstrip(".")
             elif c["countries"]: wh = plist(c["countries"], 4) + (" (%s)" % ", ".join(c["continents"]) if c["continents"] and len(c["countries"]) <= 5 else "")
             else: wh = ""
             for x in IST: wh += ("; " if wh else "") + ("invasive in %s" if x["status"] == "invasive" else "introduced by people to %s") % x["area"]
-            if wh: quick.append(["where", "Where it lived" if gone else "Where it lives", wh[0].upper() + wh[1:]])
+            if wh: quick.append(["where", "Where it lived" if gone else "Where it lives", wh[0].upper() + wh[1:]] + ([wsrc] if wsrc else []))
         diet_ps = list(S.get("diet") or [])
         if F.get("diet"):
             dt = plain(F["diet"]["text"]); d0 = sentences(diet_ps[0]["text"]) if diet_ps else []
             if d0 and d0[0].lower().startswith(dt.lower()[:20]) and len(d0[0]) <= 170:  # the diet text's fuller first sentence
                 dt = d0[0].rstrip("."); diet_ps[0] = dict(diet_ps[0], text=" ".join(d0[1:]))
-            quick.append(["eats", "Ate" if gone else "Eats", dt])
+            quick.append(["eats", "Ate" if gone else "Eats", dt, srcs((F["diet"].get("src") or []) + ((S.get("diet") or [{}])[0].get("src") or []) if dt != plain(F["diet"]["text"]) else F["diet"].get("src"))])
         shown += [q[2] for q in quick]
         rec, rec_k = block((info or {}).get("recognise") or [])
         shown += [x["t"] for x in rec]
@@ -1390,7 +1456,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             h1=esc(nm), sub=('<i>%s</i>%s' % (esc(sci), (' <span class="sp-auth">%s</span>' % esc(auth_short)) if auth else "")) if not c["is_sci"] else (esc(auth_short) if auth else ""),
             fossil_flag=('<p class="sp-fossil-flag">Extinct &middot; fossil snake%s</p>' % (" &middot; " + esc(c["died"][0]) if c["died"] else "")) if c["fossil"] else
                         ('<p class="sp-fossil-flag">%s</p>' % esc(c["extinct"].split(" - ")[0])) if c["extinct"] else "",
-            photo=ph, intro=intro_html, keyfacts=keyfacts, filtfacts=checklist_facts(c), toc=toc, before=before, after=after,
+            photo=ph, intro=intro_html, keyfacts=keyfacts, filtfacts=checklist_facts(c, has_hab=bool(S.get("habitat"))), toc=toc, before=before, after=after,
             actions=actions, actnote=actnote, range_h=dict((k, h) for k, h, _ in secs)["range"],
             pub=pub_html, obs=obs,
             where_h=("Country where the fossils were found" if len(c["countries"]) == 1 else "Countries where the fossils were found") if c["fossil"] else
@@ -1445,6 +1511,14 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         _c = _by_id.get(_to)
         if _c and _old not in _by_id and os.path.exists("%s/%s.html" % (OUT, _old)):
             open("%s/%s.html" % (OUT, _old), "w", encoding="utf-8").write(REDIRECT.format(name=esc(_c["name"]), url=SITE + "species/" + page_name(_c), page=page_name(_c)))
+    # v6.20 (SEO hygiene): the old names with no species to send you to (tools/remove_cards.py) pointed their canonical at
+    # "species/./" - the All species page's real address is "species/"
+    for _f in os.listdir(OUT):
+        _p = "%s/%s" % (OUT, _f)
+        if not _f.endswith(".html") or os.path.getsize(_p) > 3000: continue
+        _t = open(_p, encoding="utf-8").read()
+        if 'href="%sspecies/./"' % SITE in _t:
+            open(_p, "w", encoding="utf-8").write(_t.replace('href="%sspecies/./"' % SITE, 'href="%sspecies/"' % SITE)); HAB_STATS["old_name_canonical_fixed"] += 1
     for _gone in REMOVED_NO_TARGET:
         if _gone not in _by_id and os.path.exists("%s/%s.html" % (OUT, _gone)): os.remove("%s/%s.html" % (OUT, _gone))
         # v5.93: ...and its genus page, when no snake of that genus is left (genus/dinodon.html linked to the removed page)
@@ -1487,7 +1561,10 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         site_head=site_header("../", "species"), site_foot=site_footer("../", "Every photo belongs to its photographer and is used under the Creative Commons licence they chose, credited with it.")))
     credits_page(cards, esc)
     reg_urls = build_regions.build(cards, by_id, INFO, invasive, iso, harm)
-    return [SITE + "species/"] + [SITE + "species/" + page_name(c) for c in links] + hubs(cards, esc, img_of, invasive) + reg_urls
+    out = [SITE + "species/"] + [SITE + "species/" + page_name(c) for c in links] + hubs(cards, esc, img_of, invasive) + reg_urls + [SITE + "species/photo-credits.html"]
+    # v6.20 content audit: what this build changed or found, for tools/species-content-audit.md
+    with open("data/content-audit.json", "w", encoding="utf-8") as fh: json.dump(dict(sorted(HAB_STATS.items())), fh, indent=1)
+    return out
 
 
 def credits_page(cards, esc):
@@ -1568,6 +1645,53 @@ def fmt_len(L):
     return ("%d cm" % round(L * 100)) if L < 1 else ("%s m" % ("%.1f" % L).rstrip("0").rstrip("."))
 
 
+# v6.20 (content audit): what a sourced length statement measures. The accounts' length facts mix typical adults
+# ("Usually 60-90 cm"), averages ("About 1.2 m on average") and maxima ("Up to about 2 m", "record 1.9 m"), so the
+# key fact's label now says which of them it gives, instead of one "Adult length" label for all of them.
+_LEN_MAX = re.compile(r"^(?:up to|record|maximum|verified maximum|rarely|large ones|the longest|longest|occasionally|sometimes|can grow|"
+                      r"large males|the largest|largest)\b|\brecord\b|\bmaximum\b|\blongest\b|\brarely\b|\bup to\b", re.I)
+def _words(t): return set(re.findall(r"[a-z]{4,}", plain(t).lower()))
+def said_before(t, others, k=0.75):
+    """True when most of t's words are already in one of the other texts (a summary saying a paragraph again)"""
+    w = _words(t)
+    return bool(w) and any(len(w & _words(o)) >= k * len(w) for o in others)
+def length_kind(text):
+    """the set of things a length fact gives: 'typ' (typical adults), 'avg' (an average), 'max' (a maximum or record),
+    'est' (an estimate from fossils) and 'claim' (a popular claim the account itself doubts)"""
+    t = re.sub(r"^\s*(small|tiny|slender|long and slender|small and slender)\s*[:;,]\s*", "", text or "", flags=re.I)
+    kinds = set()
+    if re.search(r"estimated|estimate", t, re.I): kinds.add("est")
+    if re.search(r"popular sources|such sizes are rare", t, re.I): kinds.add("claim")
+    for cl in re.split(r";|,\s*(?=(?:rarely|up to|record|maximum|sometimes|occasionally)\b)", t):
+        cl = cl.strip()
+        if not re.search(r"\d", cl): continue
+        if re.match(r"(?:adults\s+)?(?:usually|most|commonly|typically|often)\b", cl, re.I): kinds.add("typ")
+        elif _LEN_MAX.search(cl): kinds.add("max")
+        elif re.search(r"average", cl, re.I): kinds.add("avg")
+        else: kinds.add("typ")
+    return kinds
+def length_label(text, fossil=False):
+    k = length_kind(text)
+    if fossil or "est" in k: return "Estimated length"
+    if "claim" in k: return "Reported length"
+    if k == {"max"}: return "Maximum length"
+    if k == {"avg"}: return "Average adult length"
+    if k == {"avg", "max"}: return "Average and maximum length"
+    if k == {"typ", "max"} or k == {"typ", "avg", "max"}: return "Typical and maximum length"
+    if k == {"typ", "avg"}: return "Typical adult length"
+    return "Typical adult length" if k == {"typ"} else "Adult length"
+NO_SRC = "SnakeList doesn&rsquo;t have a verified source for this yet"
+NO_SRC_TXT = "SnakeList doesn't have a verified source for this yet"
+def venom_text(c, hm):
+    """one wording for venom and safety, used by the key facts, the tags and the 3D panel (v6.20 content audit):
+    'harmful' in SnakeList's data is a whole group (elapids, vipers...) or a listed genus/species - so a venomous one
+    'can be' dangerous rather than 'is'; a mildly venomous one has no serious bites in SnakeList's records (it is not
+    a proven absence)"""
+    if c["venom"]:
+        return "Venomous &ndash; can be dangerous to people" if hm == "harmful" else "Mildly venomous &ndash; SnakeList has no record of serious bites to people"
+    return "Not venomous &ndash; but large enough to injure people" if hm == "harmful" else "Not venomous &ndash; low risk to people, though it can still bite"
+
+
 def len_attr(info):
     """a species page's sourced adult length, for the size picture in "Explore in 3D" (photos tab):
     data-lenlo/-hi in metres, the account's own words and its first source (none without an account)"""
@@ -1641,6 +1765,22 @@ def hubs(cards, esc, img_of, invasive=None):
             if not slug: continue
             open("%s/%s/%s.html" % (OUT, kind, slug), "w", encoding="utf-8").write(country_page(name, L, {"_cards": cards}, invasive or {}, esc, slug, kind))
             urls.append(SITE + "species/%s/%s" % (kind, slug))
+        # v6.20 (SEO hygiene): a genus or family page from an earlier build whose name SnakeList no longer uses (Alecto,
+        # Hurria, Trigonocephalus...) stayed indexable, out of the sitemap, listing species pages that are now redirects.
+        # It becomes a small no-index page that sends you to All species, as the old species names do.
+        done = {slugify(n) for n in G}
+        for f in sorted(os.listdir(OUT + "/" + kind)):
+            if not f.endswith(".html") or f[:-5] in done: continue
+            old = open("%s/%s/%s" % (OUT, kind, f), encoding="utf-8").read()
+            if 'name="robots" content="noindex' in old: continue
+            m = re.search(r"<title>(.*?)(?: snakes)?(?::| \|)", old)
+            nm0 = H.unescape(m.group(1)).strip() if m else f[:-5].capitalize()
+            open("%s/%s/%s" % (OUT, kind, f), "w", encoding="utf-8").write(
+                '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>%s</title><meta name="robots" content="noindex">\n'
+                '<link rel="canonical" href="%sspecies/"><meta http-equiv="refresh" content="0; url=../">\n'
+                '<script>location.replace("../")</script></head><body><p>%s is a %s name SnakeList no longer uses. <a href="../">See all snakes</a></p></body></html>\n' % (
+                    esc(nm0), SITE, esc(nm0), kind))
+            HAB_STATS["stale_%s_pages_redirected" % kind] += 1
     # the lists of every country and family, so each hub is one link from the A-Z page
     return urls
 
@@ -1744,7 +1884,7 @@ a{color:var(--link)}a:where(:hover){color:var(--link-hover)}
 .sp-head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:start}
 @media (max-width:720px){.sp-head{grid-template-columns:1fr}}
 .sp-photo{margin:0}.sp-photo img,.sp-sprite{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:18px;display:block;background:var(--line)}
-.sp-photo figcaption{font-size:12px;color:var(--muted);margin-top:6px}.sp-nophoto div{aspect-ratio:3/2;border-radius:18px;display:grid;place-items:center;background:var(--line);color:var(--muted)}
+.sp-photo figcaption{font-size:12px;color:var(--muted);margin-top:6px}.sp-nophoto div{aspect-ratio:3/2;border-radius:18px;display:grid;place-items:center;background:var(--line);color:var(--muted)}@media (max-width:640px){.sp-nophoto:not(.sp-fossilfig) div{aspect-ratio:auto;min-height:72px;padding:12px}}
 h1{font:700 clamp(30px,5vw,44px)/1.1 Georgia,serif;margin:0}.sp-sci{font-style:italic;color:var(--muted);margin:4px 0 10px;font-size:18px}
 /* every page's main heading in the species pages' green, and the line under it in the lighter green */
 h1,.sp-title h1,.cy-head h1{color:#1f7a3a}.sp-title .sp-sci,.cy-htext .cy-lead,.cy-htext .rg-sub,h1+.sp-muted,h1+p{color:#2e7d4f}
@@ -2113,12 +2253,14 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
         lead = "The family %s%s has %s in SnakeList (%s), in %s%s." % (name, common, plural(n, "living species", "living species"), vsplit(), plural(nfam, "genus", "genera"),
                                                                    (", plus %s listed separately" % gone_txt) if gone_txt else "")
         title = ("%s: all %s, with photos | SnakeList" if n > 1 else "%s: %s | SnakeList") % (name, plural(n, "living snake species", "living snake species"))
+        if len(title) > 70: title = ("%s: all %s with photos | SnakeList" if n > 1 else "%s: %s | SnakeList") % (name, plural(n, "living species", "living species"))
     elif kind == "genus":
         h1 = name
         lead = "The genus %s%s has %s in SnakeList (%s), recorded in %s%s." % (
             name, " (family %s)" % family if family else "", plural(n, "living species", "living species"), vsplit(), places_txt,
             ("; %s %s listed separately" % (gone_txt, "is" if len(G) == 1 else "are")) if gone_txt else "")
         title = ("%s snakes: all %s, with photos | SnakeList" if n > 1 else "%s snakes: %s | SnakeList") % (name, plural(n, "species", "species"))
+        if len(title) > 70: title = "%s snakes: %s | SnakeList" % (name, plural(n, "species", "species"))
     elif n:
         h1 = "Snakes of %s" % dn
         lead = "%s %s recorded in %s in SnakeList: %s venomous and %s non-venomous%s." % (
@@ -2126,6 +2268,8 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
             ", from %s" % plural(nfam, "family", "families") if nfam else "")
         if gone_txt: lead += " %s found here %s listed separately and not counted." % (gone_txt[0].upper() + gone_txt[1:], "is" if len(G) == 1 else "are")
         title = "Snakes of %s: %s with photos, venom status & map | SnakeList" % (dn, plural(n, "species", "species"))
+        if len(title) > 70: title = "Snakes of %s: %s with photos & map | SnakeList" % (dn, plural(n, "species", "species"))  # v6.20: under 70 characters
+        if len(title) > 70: title = "Snakes of %s: %s | SnakeList" % (dn, plural(n, "species", "species"))
     else:
         h1 = "Snakes of %s" % dn
         lead = "No living snake species are currently listed for %s in SnakeList." % the_place(dn)

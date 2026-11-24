@@ -207,7 +207,7 @@ if(D.quick&&D.quick.length){var dl=el('dl','sp-rl-q');D.quick.forEach(function(q
 var sv=q[0]==='len'&&size();if(sv){var f=el('figure','sp-rl-size');f.appendChild(sv);var cap=el('figcaption','sp-note','Drawn stretched out, next to a person 1.70 m tall.'),src=m.dataset.lensrc;
 if(src){var s2=src.split('|');cap.appendChild(document.createTextNode(' Length: '));if(s2[1]){var aa=el('a','',s2[0]);aa.href=s2[1];aa.rel='noopener';aa.target='_blank';cap.appendChild(aa)}else cap.appendChild(document.createTextNode(s2[0]));cap.appendChild(document.createTextNode('.'))}
 f.appendChild(cap);dd.appendChild(f)}
-d.appendChild(dd);dl.appendChild(d)});w.appendChild(dl)}
+if(q[3]&&q[3].length&&!sv)srcs(dd,q[3]);d.appendChild(dd);dl.appendChild(d)});w.appendChild(dl)}
 if(D.fun&&D.fun.length)w.appendChild(para({l:'Did you know?',t:D.fun[0]},'p')).className='sp-rl-fun';
 // How to recognise it: things to check in the photo, or on the model when it is turned around
 if(D.rec&&D.rec.length){var s=el('div','sp-rl-rec'),hh=el('h3','','How to recognise it');hh.id='sp-rl-rech';s.appendChild(hh);
