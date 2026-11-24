@@ -1570,7 +1570,7 @@ export function create(V) {
       phases.push([0.45, (u, s) => {
         held = true; R.setPose(ext); R.apply(); setMouth(tHold); say(T.strike);
         if (u < 0.05 && inWater && NAT.ripple && !phases.splashed) { phases.splashed = true; NAT.ripple(prey.position.x, prey.position.z, 1.6, Math.max(prR * 1.5, 0.012)); NAT.ripple(R.point(Hl).x, R.point(Hl).z, 1.2, Math.max(prR, 0.01)); }
-        camKey = camSide(headPt().lerp(preyPt(), 0.35), fitD(Hl * 2.4 + Lp * 1.3)); void s;
+        camKey = camSide(headPt().lerp(preyPt(), 0.35), fitD(Hl * 2.4 + Lp * 1.3), 0.62); void s; // (v6.20: from higher - low down, fallen leaves near the lens filled half the view)
       }]);
       if (envenom && !letGo) phases.push([1.0, (u, s) => { R.setPose(ext); R.apply(); setMouth(tHold + 0.04 * Math.sin(s * 14)); say(T.inject); }]);
       if (letGo) {
@@ -1648,7 +1648,7 @@ export function create(V) {
       const y1 = sstep(0.02, 0.16, u) * (1 - sstep(0.44, 0.56, u)), y2 = 0.75 * sstep(0.6, 0.7, u) * (1 - sstep(0.8, 0.92, u)), y = Math.max(y1, y2); // (two gapes, each held a moment)
       setMouth(Math.min(1.05, Math.max(tNeed, 0.85)) * y, { spread: 0.25 * y, walk: Math.sin(u * TAU * 2.5) * y * 0.8 });
       flick(u > 0.88 ? (u - 0.88) / 0.12 : 0); void s;
-      { const f = R.frameAtX(Hl * 0.5), side = f.S.clone().setY(0), fw = f.T.clone().setY(0).negate(); if (side.lengthSq() < 1e-10) side.copy(st.perp); side.normalize(); if (fw.lengthSq() > 1e-10) fw.normalize(); if (side.dot(st.perp) < 0) side.negate(); const dir = side.addScaledVector(fw, 0.8).normalize(), d = fitD(Hl * 4.5), tg = headPt(); camKey = { tgt: tg, pos: tg.clone().addScaledVector(dir, d * Math.cos(0.28)).add(V3(0, d * Math.sin(0.28), 0)) }; } // (from the side and a little in front: the gape is seen)
+      { const f = R.frameAtX(Hl * 0.5), side = f.S.clone().setY(0), fw = f.T.clone().setY(0).negate(); if (side.lengthSq() < 1e-10) side.copy(st.perp); side.normalize(); if (fw.lengthSq() > 1e-10) fw.normalize(); if (side.dot(st.perp) < 0) side.negate(); const dir = side.addScaledVector(fw, 0.8).normalize(), d = fitD(Hl * 3.6), tg = headPt(); camKey = { tgt: tg, pos: tg.clone().addScaledVector(dir, d * Math.cos(0.45)).add(V3(0, d * Math.sin(0.45), 0)) }; } // (from the side and a little in front: the gape is seen)
     }]);
     if (travel) { // 6. it crawls (or swims) on, round and back into its resting place, the meal a lump in its body
       const dR = shEnd - sh1, dRet = clamp(dR / (0.38 * L), 3, 6.5);
