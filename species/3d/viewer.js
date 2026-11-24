@@ -108,6 +108,153 @@ const HEAD_FORM = {
   boa: { lw: 1.65, hb: [0.5, 0.8], hn: 1.4, len: [0.03, 0.055], hl: 0.44, cheek: 0.07, lor: 0.028, crown: 0.05, smile: 0.025 },
   sandboa: { lw: 1.25, hb: [0.6, 0.95], hn: 1.05, len: [0.025, 0.04], hl: 0.48, cheek: 0.02, lor: 0, crown: 0.03, smile: 0.0 },
 };
+// v6.26 (heads, species by species): hand-set head shapes for the best-known species, each checked against its SnakeList
+// photo from the side, the front and above. Keys: hl head depth (crown to chin) over head length, as measured on the built
+// head; sn snout width at the nostrils over head width; sh snout height over head height; eye eye diameter over head length;
+// ex the eye's place along the head (0 snout tip, 1 back of the head); ea how far round from the top the eye sits (degrees);
+// ck cheeks (jaw muscles); lor the loreal hollow; cr the crown's dome; sm the mouth line's curve; br the brow over the eye;
+// up an upturned snout tip. Anything not given keeps the group's value.
+const HEAD_SET_SRC = `
+oxyuranus-microlepidotus sm .03 cr .06
+oxyuranus-scutellatus hl .40 sn .52 eye .16 ex .31 lor .025 sm .05
+opheodrys-vernalis eye .2 sm .04
+opheodrys-aestivus hl .36 sn .5 eye .22 ex .32 sm .06
+pseudonaja-textilis hl .42 sn .55 eye .15 ck .035 sm .04
+notechis-scutatus hl .47 sn .66 sh .8 eye .12 ck .07 cr .06
+pseudechis-porphyriacus hl .40 sn .62 eye .12 ck .045 sm .035
+pseudechis-australis hl .45 sn .68 eye .11 ck .08
+acanthophis-antarcticus hl .40 sn .6 eye .1 ex .33 br .1
+dendroaspis-polylepis hl .42 sn .62 sh .75 eye .14 ex .32 lor .035 cr .04 sm .09
+dendroaspis-angusticeps hl .38 sn .6 eye .15 sm .06
+dendroaspis-viridis hl .38 sn .6 eye .15 sm .06
+dendroaspis-jamesoni hl .38 sn .6 eye .15 sm .06
+naja-naja hl .40 sn .62 sh .72 eye .13 ck .05 cr .035 sm .025
+naja-kaouthia hl .40 sn .64 sh .72 eye .13 ck .05 cr .035 sm .025
+naja-haje hl .42 sn .66 eye .12 ck .06
+naja-nivea hl .42 sn .6 eye .14
+naja-nigricollis hl .42 sn .64 eye .13 ck .05
+naja-mossambica hl .42 sn .64 eye .13 ck .05
+naja-atra hl .40 sn .62 sh .72 eye .13 ck .05 sm .025
+naja-oxiana hl .40 sn .62 eye .13 ck .05
+ophiophagus-hannah hl .42 sn .62 eye .12 ck .06 cr .06 sm .035
+hemachatus-haemachatus hl .44 eye .12
+bungarus-fasciatus hl .42 sn .68 eye .09
+bungarus-caeruleus hl .42 sn .62 eye .1
+bungarus-multicinctus hl .42 sn .64 eye .09
+micrurus-fulvius hl .45 eye .1 ck .02 sm .015
+micrurus-tener hl .45 sn .72 eye .1 ck .02 sm .015
+micruroides-euryxanthus hl .45 sn .72 eye .1 ck .02 sm .015
+laticauda-colubrina hl .44 eye .08
+hydrophis-platurus hl .36 sn .5 eye .07 sm .01
+aipysurus-laevis hl .42 eye .08
+crotalus-atrox hl .40 sn .52 br .15
+crotalus-adamanteus hl .40 sn .55 br .15
+crotalus-horridus hl .38 sn .55
+crotalus-cerastes hl .36 sn .6 ex .33 br .22
+crotalus-viridis hl .40 sn .52
+crotalus-oreganus hl .40 sn .52
+crotalus-scutulatus hl .40 sn .52
+crotalus-durissus hl .42 sn .52
+sistrurus-miliarius hl .42 eye .12
+agkistrodon-piscivorus hl .44 sn .58 sh .8 eye .1 br .15
+agkistrodon-contortrix hl .42 eye .11
+bothrops-asper hl .38 sn .42 eye .09
+bothrops-atrox hl .38 sn .44 eye .09
+bothrops-jararaca hl .38 sn .45 eye .09
+bothriechis-schlegelii hl .42 eye .12 br .22
+lachesis-muta hl .40 sn .55 eye .08
+trimeresurus-albolabris hl .44 eye .13
+tropidolaemus-wagleri hl .40 eye .11
+calloselasma-rhodostoma hl .36 sn .45 up .12
+deinagkistrodon-acutus hl .38 sn .4 up .35
+protobothrops-mucrosquamatus hl .38 sn .45
+gloydius-blomhoffii hl .42
+vipera-berus hl .40 sn .55 eye .12
+vipera-aspis hl .40 sn .52 up .12
+vipera-ammodytes hl .40 sn .52
+daboia-russelii hl .38 sn .55 eye .11
+bitis-arietans hl .34 sn .6 eye .1 ex .3
+bitis-gabonica hl .36 sn .62 eye .09
+bitis-nasicornis hl .38 sn .58
+cerastes-cerastes hl .40 sn .62 eye .12 ex .33
+echis-carinatus hl .42 sn .6 eye .14
+echis-ocellatus hl .42 sn .6 eye .13
+atheris-squamigera hl .42 eye .14
+causus-rhombeatus eye .12
+pseudocerastes-urarachnoides hl .38
+python-regius hl .45 sn .62 eye .09 ex .33 ck .08 sm .04
+python-molurus hl .40 sn .6 eye .08
+python-bivittatus hl .40 sn .6 eye .08
+python-sebae hl .38 sn .55 eye .08
+malayopython-reticulatus hl .38 sn .55 eye .09
+morelia-viridis hl .48 sn .68 sh .8 eye .1 ck .09
+morelia-spilota hl .42 sn .6
+aspidites-melanocephalus hl .44 sn .68 ck .03
+antaresia-childreni hl .42 eye .1
+boa-constrictor hl .40 sn .52 eye .09 ex .33
+boa-imperator hl .40 sn .54 eye .09 ex .33
+eunectes-murinus hl .38 sn .62
+eunectes-notaeus hl .38 sn .62 ea 45
+corallus-caninus hl .48 sn .7 eye .1 ck .09
+corallus-hortulana hl .46 eye .12 ck .08
+epicrates-cenchria hl .42 eye .1
+chilabothrus-inornatus hl .42
+sanzinia-madagascariensis hl .45 ck .08
+candoia-carinata hl .40 sn .55
+xenopeltis-unicolor hl .38 sn .75 eye .08 ck .02
+pantherophis-guttatus hl .42 eye .17
+pantherophis-obsoletus hl .42 eye .18
+pantherophis-alleghaniensis hl .42 eye .18
+pantherophis-spiloides hl .42 eye .18
+lampropeltis-getula hl .44 sn .65 eye .15 ck .03
+lampropeltis-californiae hl .44 sn .65 eye .15 ck .03
+lampropeltis-triangulum hl .44 sn .62 eye .15
+lampropeltis-elapsoides hl .44 sn .62 eye .15
+pituophis-catenifer hl .44 sn .52 eye .15
+pituophis-melanoleucus hl .44 sn .52 eye .15
+drymarchon-couperi hl .45 eye .18
+drymarchon-corais hl .45 eye .18
+coluber-constrictor hl .42
+masticophis-flagellum hl .40
+thamnophis-sirtalis hl .44
+thamnophis-elegans hl .44
+thamnophis-proximus hl .42 eye .2
+nerodia-sipedon hl .42 eye .15 ea 55
+nerodia-fasciata hl .42 eye .15 ea 55
+natrix-natrix hl .44
+natrix-helvetica hl .44
+natrix-tessellata hl .42 ea 55
+coronella-austriaca hl .42
+zamenis-longissimus hl .42 sn .55
+elaphe-quatuorlineata hl .42
+hierophis-viridiflavus hl .42 eye .21
+malpolon-monspessulanus hl .40 br .12 lor .04
+dispholidus-typus hl .45 sn .62 eye .26
+ahaetulla-prasina hl .30
+ahaetulla-nasuta hl .30
+chrysopelea-paradisi hl .40 eye .21 ck .06
+chrysopelea-ornata hl .40 eye .21 ck .06
+imantodes-cenchoa hl .42 eye .28
+leptophis-ahaetulla hl .33 eye .22
+boiga-dendrophila eye .21
+boiga-irregularis eye .22
+dasypeltis-scabra hl .45 eye .14
+gonyosoma-oxycephalum hl .38 sn .5 eye .17
+spilotes-pullatus hl .44 eye .19
+ptyas-mucosa hl .42 eye .21
+xenochrophis-piscator hl .42 ea 55
+rhabdophis-tigrinus hl .44
+diadophis-punctatus hl .40 eye .15
+storeria-dekayi hl .44 eye .16
+farancia-abacura hl .42 sn .7 eye .1
+cemophora-coccinea hl .42 sn .5
+boaedon-fuliginosus hl .42 eye .14
+psammophis-sibilans hl .38 eye .22 br .1 lor .035
+acrochordus-javanicus hl .40 ea 45
+`;
+const HEAD_SET = {};
+{ const K = { hl: 'hl', sn: 'snout', sh: 'snoutH', eye: 'eyeL', ex: 'eyeX', ea: 'eyeA', ck: 'cheek', lor: 'lor', cr: 'crown', sm: 'smile', br: 'brow', up: 'snoutUp' };
+  for (const line of HEAD_SET_SRC.split('\n')) { const w = line.trim().split(/\s+/); if (w.length < 3) continue; const o = {}; for (let i = 1; i + 1 < w.length; i += 2) if (K[w[i]]) o[K[w[i]]] = +w[i + 1]; if (o.hl != null) o.hlSet = 1; HEAD_SET[w[0]] = o; } }
 const HF_GENUS = {};
 for (const [k, l] of Object.entries({
   natricine: 'natrix nerodia thamnophis regina storeria virginia clonophis tropidoclonion liodytes seminatrix hebius rhabdophis fowlea xenochrophis amphiesma sinonatrix trimerodytes tropidonophis atretium herpetoreas opisthotropis afronatrix limnophis natriciteres hydraethiops lycognathophis anoplohydrus parahelicops',
@@ -144,6 +291,7 @@ for (const [k, l] of Object.entries({
   round: 'causus',
 })) for (const g of l.split(' ')) PUPIL_GENUS[g] = k;
 function normProfile(p, id) {
+  { const hs = HEAD_SET[id || p.id]; if (hs) p = Object.assign({}, p, { head: Object.assign({}, p.head, hs) }); } // v6.26: the hand-set heads
   const base = PLANS[p.plan] || PLANS.colubrid;
   const q = merge(merge(base, { colors: { dorsal: '#776655', lateral: null, belly: '#d8cfb8', mottle: 0.08, var: 0.05 }, pattern: [], tail: {}, scene: { kind: 'litter' } }), p);
   q.colors.lateral = q.colors.lateral || q.colors.dorsal;
@@ -200,6 +348,7 @@ function normProfile(p, id) {
     const depth = (h) => H.w * w0 * h * (1 + chin * 0.92) / H.len; // (crown to chin over the head's length; L cancels)
     const hMax = q.plan === 'blind' || f === HEAD_FORM.burrow ? 1.1 : 1.0;
     let h = H.h; if (hlT && depth(h) < hlT) h = Math.min(hMax, Math.max(h, hlT / depth(1)));
+    if (H.hlSet) h = clamp((H.hl * 0.93) / depth(1), 0.42, hMax); // (v6.26: a hand-set depth is met both ways - some heads, the puff adder's, are flatter than their group's)
     q.head = Object.assign({}, H, { h, cheek: H.cheek != null ? H.cheek : f.cheek || 0, lor: H.lor != null ? H.lor : f.lor || 0, crown: H.crown != null ? H.crown : f.crown || 0, smile: H.smile != null ? H.smile : f.smile || 0 });
   }
   return q;
@@ -2468,7 +2617,9 @@ const SCENES = {
   arid:     { sky: ['#9fc0dd', '#efe3cf'], fog: '#e6dccb', sun: 2.2, hemi: 0.55, sunEl: 48, tile: 0.8, ground: 'gravel', props: { rocks: 1, grass: 0.5, twigs: 0.4 } },
   heath:    { sky: ['#a8bfd4', '#e4e7e3'], fog: '#d9ddd8', sun: 1.8, hemi: 0.6, sunEl: 40, tile: 0.8, ground: 'heath', props: { heather: 1, grass: 0.7, rocks: 0.1, twigs: 0.3 } },
   riverbank:{ sky: ['#a6c2d8', '#e2e9e4'], fog: '#d4ddd7', sun: 2.2, hemi: 0.7, sunEl: 46, tile: 0.9, ground: 'pebbles', water: 'river', props: { rocks: 0.6, reeds: 1, grass: 0.4, pebbles: 1 } },
-  soil:     { sky: ['#b3bfae', '#d8dccf'], fog: '#c8cec0', sun: 1.5, hemi: 0.8, sunEl: 58, tile: 0.35, ground: 'soil', props: { leaves: 0.5, twigs: 0.6, crumbs: 1 } },
+  // v6.26: the blind snakes' and burrowers' ground, as they are found - turned up under a stone on moist, crumbly soil, with
+  // decaying leaf fragments, fine roots, grit and a little moss (it was a flat brown floor with a few big painted leaves)
+  soil:     { sky: ['#b3bfae', '#d8dccf'], fog: '#c8cec0', sun: 1.5, hemi: 0.8, sunEl: 58, tile: 0.35, ground: 'soil', leafSize: 0.55, leafCols: ['#4a3624', '#5a4230', '#3a2a1c', '#6b5236', '#433526', '#2f2418', '#5e4a2e'], props: { leaves: 1.1, twigs: 0.8, crumbs: 1, clods: 1, roots: 1, moss: 0.6, stone: 1, pebbles: 0.35 } },
   sea:      { sky: ['#7fb0d6', '#e3eef2'], fog: '#cfdfe6', sun: 2.6, hemi: 0.7, sunEl: 50, tile: 1, ground: null, water: 'sea', props: { drift: 1 } },
   grass:    { sky: ['#a3c1da', '#e6ead9'], fog: '#dde2d2', sun: 2.0, hemi: 0.6, sunEl: 48, tile: 0.9, ground: 'dry', props: { grass: 2.6, rocks: 0.2, twigs: 0.3 } },
   sand:     { sky: ['#9cc0de', '#f2e6cf'], fog: '#efe2cb', sun: 2.2, hemi: 0.5, sunEl: 50, tile: 1.0, ground: 'sand', props: { rocks: 0.3, grass: 0.3, twigs: 0.3 } },
@@ -3010,8 +3161,8 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     const lt = canvasTex(128, (x, s) => { x.fillStyle = '#ffffff'; x.fillRect(0, 0, s, s); x.strokeStyle = 'rgba(0,0,0,.35)'; x.lineWidth = 2; x.beginPath(); x.moveTo(0, s / 2); x.lineTo(s, s / 2); x.stroke(); x.lineWidth = 1; for (let i = 1; i < 7; i++) { x.beginPath(); x.moveTo(i * s / 7, s / 2); x.lineTo(i * s / 7 + 12, s / 2 - 22); x.moveTo(i * s / 7, s / 2); x.lineTo(i * s / 7 + 12, s / 2 + 22); x.stroke(); } });
     const lg = leafGeometry(), lm = new THREE.MeshStandardMaterial({ map: lt, side: THREE.DoubleSide, roughness: 0.85 });
     const im = new THREE.InstancedMesh(lg, lm, spots.length); im.castShadow = !drift; im.receiveShadow = true;
-    const lc = new THREE.Color(), lsize = drift ? 0.04 : 0.075 * (P.scene.leafSize || 1); // v5.50: real leaves, 4-11 cm (bits of weed on the sea, about 4 cm)
-    const pal = drift ? ['#5d4a2a', '#6b5a32', '#4a5a2a', '#7a6a3a'] : (P.scene.leafCols || ['#7a5532', '#94683a', '#a8804a', '#5e4128', '#6f4f2c', '#b08850', '#4f3a22']);
+    const lc = new THREE.Color(), lsize = drift ? 0.04 : 0.075 * (P.scene.leafSize || S.leafSize || 1); // v5.50: real leaves, 4-11 cm (bits of weed on the sea, about 4 cm)
+    const pal = drift ? ['#5d4a2a', '#6b5a32', '#4a5a2a', '#7a6a3a'] : (P.scene.leafCols || S.leafCols || ['#7a5532', '#94683a', '#a8804a', '#5e4128', '#6f4f2c', '#b08850', '#4f3a22']);
     spots.forEach(([x, z], i) => { const s = lsize * (0.6 + R() * 0.8); e.set((R() - 0.5) * 0.4, R() * TAU, (R() - 0.5) * 0.4); q.setFromEuler(e); sv.set(s, s * (0.6 + R() * 0.8), s * (0.45 + R() * 0.3)); pv.set(x, drift ? poseInfo.seaLevel + 0.002 : groundH(x, z) + s * 0.02, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); lc.set(pal[(R() * pal.length) | 0]); im.setColorAt(i, lc); });
     scene.add(im);
   }
@@ -3043,11 +3194,46 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   }
   if (PR.ferns) { const hF = 0.45; grassTuft(perM2(2.5, Rb * 1.4, Rb * 4, 120), hF, '#3f6a2c', '#7a9a48', Rb * 1.4, Rb * 4, F.w0 * 3 + hF * 0.6, 0.03); }
   if (PR.crumbs) {
-    // crumbs of soil and grit, 2-10 mm
-    const spots = placeN(perM2(250, Rb * 0.2, Rb * 3, 2000), Rb * 0.2, Rb * 3, F.w0 * 1.2, { tries: 8 }), g = rockGeometry(seed + 4, lowQ ? 0 : 1);
-    const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ color: '#4a382a', roughness: 1 }), spots.length); im.castShadow = im.receiveShadow = true;
-    spots.forEach(([x, z], i) => { const s = 0.001 + R() ** 2 * 0.004; e.set(R() * 0.5, R() * TAU, R() * 0.5); q.setFromEuler(e); sv.set(s, s * 0.7, s); pv.set(x, groundH(x, z) + s * 0.2, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); });
+    // crumbs of soil and grit, 2-10 mm (v6.26: many more, moist and dry, so the soil has a real crumbly surface round the snake)
+    const spots = placeN(perM2(PR.clods ? 1400 : 250, Rb * 0.2, Rb * 3, PR.clods ? 5000 : 2000), Rb * 0.2, Rb * 3, F.w0 * 1.2, { tries: 8 }), g = rockGeometry(seed + 4, lowQ ? 0 : 1);
+    const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1 }), spots.length); im.castShadow = im.receiveShadow = true; const cc = new THREE.Color();
+    spots.forEach(([x, z], i) => { const s = 0.001 + R() ** 2 * (PR.clods ? 0.006 : 0.004); e.set(R() * 0.5, R() * TAU, R() * 0.5); q.setFromEuler(e); sv.set(s, s * 0.7, s); pv.set(x, groundH(x, z) + s * 0.1, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); im.setColorAt(i, cc.setHSL(0.07 + R() * 0.03, 0.22 + R() * 0.15, 0.06 + R() ** 1.5 * 0.13)); });
     scene.add(im);
+  }
+  if (PR.clods) {
+    // v6.26: clods and lumps of earth, 1-3 cm, half sunk in the soil
+    const spots = placeN(perM2(90 * PR.clods, Rb * 0.5, Rb * 3, 400), Rb * 0.5, Rb * 3, F.w0 * 2 + 0.01, { tries: 8 }), g = rockGeometry(seed + 14, lowQ ? 1 : 2);
+    const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1 }), spots.length); im.castShadow = im.receiveShadow = true; const cc = new THREE.Color();
+    spots.forEach(([x, z], i) => { const s = Math.min(0.005 + R() ** 2 * 0.012, Math.max(0.003, (dist2snake(x, z) - F.w0 * 1.5) * 0.5)); e.set(R() * 0.6, R() * TAU, R() * 0.6); q.setFromEuler(e); sv.set(s * (0.9 + R() * 0.5), s * (0.5 + R() * 0.3), s); pv.set(x, groundH(x, z) - s * 0.15, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); im.setColorAt(i, cc.setHSL(0.07 + R() * 0.02, 0.25 + R() * 0.1, 0.05 + R() * 0.07)); });
+    scene.add(im);
+  }
+  if (PR.roots) {
+    // v6.26: fine roots and rootlets, 1-3 mm thick, running along the surface and dipping into it
+    const nV = 4, gs = [];
+    for (let v = 0; v < nV; v++) { const pts = [], len = 1, n = 7; let a = 0, y = -0.01; for (let k = 0; k <= n; k++) { a += (R() - 0.5) * 0.9; y = k === 0 || k === n ? -0.02 : Math.max(-0.02, Math.min(0.012, y + (R() - 0.45) * 0.02)); pts.push(new THREE.Vector3((k / n - 0.5) * len, y, Math.sin(a) * 0.08)); }
+      gs.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.0035, 5, false)); }
+    const g = mergeGeos(gs), spots = placeN(perM2(14 * PR.roots, Rb * 0.4, Rb * 3, 120), Rb * 0.4, Rb * 3, F.w0 * 2.5, { tries: 10 });
+    const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.85 }), spots.length); im.castShadow = im.receiveShadow = true; const cc = new THREE.Color();
+    spots.forEach(([x, z], i) => { const L = 0.05 + R() * 0.14, ry = R() * TAU, cx = Math.cos(ry) * L / 2, cz = -Math.sin(ry) * L / 2; let ok = true; for (let k = -4; k <= 4 && ok; k++) ok = dist2snake(x + cx * k / 4, z + cz * k / 4) > F.w0 * 1.6 + 0.004; const t = 0.4 + R() * 0.8;
+      e.set(0, ry, 0); q.setFromEuler(e); sv.set(ok ? L : 1e-5, t * 0.3 + 0.3, t * 0.5); pv.set(x, groundH(x, z), z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); im.setColorAt(i, cc.setHSL(0.08 + R() * 0.03, 0.25 + R() * 0.15, 0.18 + R() * 0.16)); });
+    scene.add(im);
+  }
+  if (PR.moss) {
+    // v6.26: small soft cushions of moss, 2-8 cm, a little way from the snake
+    const spots = placeN(perM2(10 * PR.moss, Rb * 1.2, Rb * 3.5, 60), Rb * 1.2, Rb * 3.5, F.w0 * 4 + 0.03, { tries: 10 }), g = rockGeometry(seed + 24, lowQ ? 1 : 2);
+    const im = new THREE.InstancedMesh(g, veg(new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1 }), true), spots.length); im.receiveShadow = true; const cc = new THREE.Color();
+    spots.forEach(([x, z], i) => { const s = 0.01 + R() * 0.03; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s * (1 + R() * 0.6), s * 0.3, s); pv.set(x, groundH(x, z) - s * 0.08, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); im.setColorAt(i, cc.setHSL(0.22 + R() * 0.05, 0.45 + R() * 0.15, 0.12 + R() * 0.07)); });
+    scene.add(im);
+  }
+  if (PR.stone) {
+    // v6.26: the flat stone it was found under, 15-30 cm across, lying close by on the soil, its edge a few body widths off
+    const g = rockGeometry(seed + 33, lowQ ? 2 : 3), m = new THREE.MeshStandardMaterial({ color: '#7d746a', roughness: 0.93 });
+    for (let t = 0; t < 60; t++) {
+      const s = clamp(Math.max(Rb * 0.9, 0.08), 0.08, 0.16) * (0.85 + R() * 0.3), a = R() * TAU, r = Rb * 1.1 + s * 1.2 + R() * Rb * 0.6, x = Math.cos(a) * r, z = Math.sin(a) * r;
+      if (dist2snake(x, z) < s * 1.15 + F.w0 * 4) continue;
+      const st = new THREE.Mesh(g, m); st.scale.set(s * 1.25, s * 0.32, s); st.rotation.set((R() - 0.5) * 0.12, R() * TAU, (R() - 0.5) * 0.12); st.position.set(x, groundH(x, z) + s * 0.05, z); st.castShadow = st.receiveShadow = true; scene.add(st);
+      occ.push({ mesh: st, c: st.position.clone(), r: s * 1.2, hid: false }); break;
+    }
   }
 }
 // swap the stand-in gradient sky for the panorama: image-based light, a grounded photo background,
