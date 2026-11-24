@@ -2216,19 +2216,25 @@
             var c0 = performance.now(), last = c0, quiet = 0;
             (function check() {
               var now = performance.now(); quiet = now - last - 50 < 25 ? quiet + 1 : 0; last = now;
-              if ((document.readyState === "complete" && quiet >= 10) || now - c0 > 1800) fade(); /* v6.20: waits at most 1.8 s (was 3.8) - the opening never makes anyone wait */ else setTimeout(check, 50);
+              // v6.20: it moves on as soon as the page has been read in and is calm (it used to wait for every last image, up to
+              // 3.8 s); but never while the page is still being read in - the glide stuttered then (measured: 12 s for a 1.1 s glide on
+              // a slow device). A scroll or tap moves on at once.
+              var rs = document.readyState;
+              if (rs !== "loading" && ((rs === "complete" && quiet >= 6) || quiet >= 10 || now - c0 > 3800)) fade(); else setTimeout(check, 50);
             })();
           };
           if (window.__introSkipped) fade(); // v4.93: skipped - no waiting
           else calmly();
         }); });
-        setTimeout(fade, window.__introSkipped ? 1800 : 3000); // never hold the opening longer than this (v6.20: shorter)
+        setTimeout(function late() { if (window.__introSkipped || document.readyState !== "loading") fade(); else setTimeout(late, 250); }, window.__introSkipped ? 1800 : 4500); // never hold the opening longer than this once the page is in
       };
       // v6.13 (iPad: "it did not open or respond"): a watchdog. However the opening goes - a photo that never decodes, a
       // timer the browser held back, an error somewhere on the page - after 15 s it is over: the opening is taken away, the
       // page can scroll again and SnakeList is drawn. (A normal opening is long finished by then, so nothing changes for it.)
-      setTimeout(function () {
+      setTimeout(function dog() {
         if (window.__introDone) return;
+        // v6.20: the logo is gliding onto the photo right now - let that finish (it ends itself within a few seconds) rather than cut it
+        if (intro.classList.contains("intro-glide") && !dog.waited) { dog.waited = true; setTimeout(dog, 4000); return; }
         done = true; window.__introDone = true;
         try { intro.classList.add("intro-gone"); } catch (e) {}
         try { var hw = document.getElementById("sl-hero"); if (hw) { hw.classList.add("hero-reveal"); hw.classList.add("hero-landed"); if (!window.__heroRevealT) window.__heroRevealT = performance.now(); } } catch (e) {}
