@@ -30070,6 +30070,9 @@ html.sl-on-map .ck-bar:not(.nm-bar) { bottom: auto; top: 12px; }
     return "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html");
   }
   window.SL_PAGE_URL = pageUrl;
+  // a "light" card (SL_LIGHT, off screen) must not be asked for its buttons - that would rebuild it; it gets
+  // decorated by SL_CARD_HOOKS when it is made whole again
+  function isLight(c) { return !!(window.SL_LIGHT && window.SL_LIGHT.isLight && window.SL_LIGHT.isLight(c)); }
 
   // ---- cards: the name is a real link to the species page (keyboard, middle-click, "open in new tab" all work) ----
   function linkName(c) {
@@ -30098,10 +30101,10 @@ html.sl-on-map .ck-bar:not(.nm-bar) { bottom: auto; top: 12px; }
     new MutationObserver(function (ms) {
       ms.forEach(function (m) {
         if (m.type === "childList") [].forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && n.classList.contains("card")) { linkName(n); decorate(n); } });
-        else if (m.type === "attributes" && m.target.classList && m.target.classList.contains("card") && m.target.querySelector(".card-top")) decorate(m.target);
+        else if (m.type === "attributes" && m.target.classList && m.target.classList.contains("card") && !isLight(m.target)) decorate(m.target);
       });
     }).observe(grid, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
-    var dec = function () { [].forEach.call(grid.querySelectorAll(".card"), function (c) { if (c.offsetParent !== null && c.querySelector(".card-top")) decorate(c); }); };
+    var dec = function () { [].forEach.call(grid.querySelectorAll(".card"), function (c) { if (c.offsetParent !== null && !isLight(c)) decorate(c); }); };
     window.addEventListener("sl-refreshed", function () { setTimeout(dec, 0); }); setTimeout(dec, 800); setTimeout(dec, 3000);
     // a plain click on the name: the same tab (like the rest of the card); claude.ai: a new tab
     grid.addEventListener("click", function (e) {
@@ -30253,7 +30256,7 @@ html.sl-on-map .ck-bar:not(.nm-bar) { bottom: auto; top: 12px; }
         if (sight) {
           var d = own(id);
           if (d) css.push('html.sl-tab-sightings #grid .card[data-id="' + id.replace(/"/g, "") + '"]::before{content:""!important;background-image:url("' + blobOf(id, d).replace(/"/g, "%22") + '")!important;background-size:cover!important;background-position:50% 45%!important;cursor:zoom-in}');
-          var nb = c.querySelector(".note-btn"), when = nb && nb.getAttribute("data-when"), box = c.querySelector(".card-top > div");
+          var nb = c.querySelector(".note-btn"), when = nb && nb.getAttribute("data-when"), box = !isLight(c) && c.querySelector(".card-top > div");
           var t = c.querySelector(".sl-taken");
           if (when && box) { if (!t) { t = document.createElement("span"); t.className = "sl-taken"; box.insertBefore(t, box.firstChild); } var txt = "Taken on " + when; if (t.textContent !== txt) t.textContent = txt; }
           else if (t) t.remove();
