@@ -830,10 +830,12 @@ def build(out, christmas_default=True, events_default=True, cache=DEFAULT_CACHE,
     put("species-photos/habitats.jpg", src=os.path.join(ROOT, "species-photos", "habitats.jpg"))
     html = sub_once(html, '"path":"species-photos/p%d.jpg"', '"path":"ap/p%d.webp"', "the photo index's sprite path")
     # the cards: the cell of a small sheet instead of one file per species
+    # v6.19: the app builds one rule per card from `img`/`y` (and, on the website, CSS variables instead - never inside the copy)
     html = sub_once(html,
-                    r"""background-image:url\(species-photos/t/' \+ it\[0\] \+ "-" \+ it\[1\] \+\s*"\.webp\);background-size:100% auto;background-position:50% " \+ \(by / Math\.max\(0\.0001, 1 - band / tileH\) \* 100\)\.toFixed\(3\) \+ "%\}\"""",
-                    """background-image:url(ap/s' + it[0] + ".webp);background-size:" + C * 100 + "% auto;background-position:" + (C > 1 ? col / (C - 1) * 100 : 0) + "% " + py.toFixed(3) + "%}\"""",
-                    "the card photo style", regex=True)
+                    """css.push('.card[data-id="' + id + '"]::before{content:"";cursor:zoom-in;background-image:' + img + ";background-size:100% auto;background-position:50% " + y + "}");""",
+                    """css.push('.card[data-id="' + id + '"]::before{content:"";cursor:zoom-in;background-image:url(ap/s' + it[0] + ".webp);background-size:" + C * 100 + "% auto;background-position:" + (C > 1 ? col / (C - 1) * 100 : 0) + "% " + py.toFixed(3) + "%}");""",
+                    "the card photo style")
+    html = sub_once(html, "var web = !(window.claude && window.claude.use), grid0", "var web = false, grid0", "the card photo mode")
 
     # ---- 2. map data, range shards, species info ----
     for f in ("data/geo.js", "data/cities-more.js", "data/islands.js", "data/places.js", "species/place-counts.js", "species/world.svg",
@@ -966,6 +968,10 @@ def build(out, christmas_default=True, events_default=True, cache=DEFAULT_CACHE,
         for f in sorted(os.listdir(os.path.join(ROOT, "events"))):
             if f.endswith((".js", ".css")):
                 put("events/" + f, src=os.path.join(ROOT, "events", f))
+        fd = os.path.join(ROOT, "events", "fonts")  # v6.19: the countdown's own typeface
+        if os.path.isdir(fd):
+            for f in sorted(os.listdir(fd)):
+                put("events/fonts/" + f, src=os.path.join(fd, f))
         previews.append({"key": "events", "label": "Events preview", "about": "Event countdown, Advent Calendar, seasonal achievements, subscription page, cursor", "on": events_default})
     inject += "<script>" + PREVIEWS_HEAD_JS.replace("__PREVIEWS__", compact(previews)) + "</script>\n"
     if any(p["key"] == "xmas" for p in previews):
