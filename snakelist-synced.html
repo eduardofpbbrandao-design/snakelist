@@ -2412,10 +2412,11 @@
   /* v5.05: the soft surround is the photo's own background carried on past its edges and blurred (drawn by
      fillAround()), not a zoomed-in copy of the whole photo; the zoomed copy only shows until it is drawn */
   .hero-media .hero-fillc { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 0.4s ease;
-    filter: blur(34px) saturate(1.08) brightness(0.82); transform: scale(1.1); pointer-events: none; }
+    filter: blur(46px) saturate(1.12) brightness(calc(0.82 * var(--fill-lift, 1))); transform: scale(1.1); pointer-events: none; }
   .hero-media.fill-drawn .hero-fillc { opacity: 1; } .hero-media.fill-drawn .hero-fill { visibility: hidden; }
   /* v5.05: the same soft blur and colour fade as at the bottom, on the top and both sides too (narrower, so the photo stays the main thing) */
   .hero-edges b { position: absolute; pointer-events: none; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .hero-edges { opacity: 0.4; } /* v6.20: only a hint of SnakeList green at the screen's edges - the photo's own light reaches them */
   .hero-edges .he-t { left: 0; right: 0; top: 0; height: 12%; background: linear-gradient(180deg, rgba(26,70,48,1) 0%, rgba(26,70,48,0.58) 25%, rgba(26,70,48,0.22) 55%, rgba(26,70,48,0.06) 80%, rgba(26,70,48,0) 100%); /* v5.38: always SnakeList green (in light mode the page colour is nearly white) */
     -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 35%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, #000 35%, transparent 100%); }
   .hero-edges .he-l, .hero-edges .he-r { top: 0; bottom: 0; width: 8%; }
@@ -2603,31 +2604,59 @@
       if (bl) bl.style.top = Math.round(top + h + Math.max(6, fs * 0.12)) + "px";
       fillAround(im, hr, ox, oy, dw, dh);
     }
-    // v5.05: the blurred surround = the photo at its own place and size, its edges carried outwards
-    // (each side repeats the photo's last strip of background), then blurred by CSS - never a zoomed-in snake
+    // v6.20 (Eduardo: "a very good gradient transition from the snake's photo to the background, not green with black"):
+    // every opening photo gets the soft surround the Smooth Green Snake always had. The surround is the photo itself,
+    // mirrored outwards on every side (so the colours carry on past each edge with no seam) and drawn tiny, then blurred
+    // by CSS - only its light and colour are left, like the photo's light spilling onto the walls. The photo's own edges
+    // fade into it gradually on all four sides (fadePhoto), so there is no box and no hard line.
     function fillAround(im, hr, ox, oy, dw, dh) {
       var cv = hero.querySelector(".hero-fillc"), md = hero.querySelector(".hero-media"); if (!cv || !md || !im.naturalWidth) return;
+      fadePhoto(im);
       // v5.73: drawn again only when something changed (redrawing it just as the opening moves on to the photo held that move up)
       var key = [Math.round(hr.width), Math.round(hr.height), Math.round(ox), Math.round(oy), Math.round(dw), Math.round(dh), im.naturalWidth, im.currentSrc].join();
       if (cv.__key === key && md.classList.contains("fill-drawn")) return;
       try {
-        var k = 0.25, W = Math.max(2, Math.round(hr.width * k)), H = Math.max(2, Math.round(hr.height * k)); cv.width = W; cv.height = H;
-        var c = cv.getContext("2d"), nw = im.naturalWidth, nh = im.naturalHeight, e = Math.max(2, Math.round(nw * 0.004));
-        var x = ox * k, y = oy * k, w = dw * k, h = dh * k;
-        c.drawImage(im, 0, 0, nw, nh, x, y, w, h);
-        // each edge is first squeezed into a few soft steps (so it carries outward as a smooth glow, no streaks)
-        var soft = function (sx, sy, sw, sh, cols, rows) { var t = document.createElement("canvas"); t.width = cols; t.height = rows; t.getContext("2d").drawImage(im, sx, sy, sw, sh, 0, 0, cols, rows); return t; };
-        var b = Math.max(e, Math.round(nw * 0.05)), bv = Math.max(e, Math.round(nh * 0.05));
-        if (x > 0) c.drawImage(soft(0, 0, b, nh, 1, 10), 0, 0, 1, 10, 0, y, x + 1, h);                       // left
-        if (x + w < W) c.drawImage(soft(nw - b, 0, b, nh, 1, 10), 0, 0, 1, 10, x + w - 1, y, W - x - w + 1, h); // right
-        if (y > 0) c.drawImage(soft(0, 0, nw, bv, 14, 1), 0, 0, 14, 1, x, 0, w, y + 1);                       // top
-        if (y + h < H) c.drawImage(soft(0, nh - bv, nw, bv, 14, 1), 0, 0, 14, 1, x, y + h - 1, w, H - y - h + 1); // bottom
-        var cs = [[0, 0, 0, 0, x, y], [nw - b, 0, x + w, 0, W - x - w, y], [0, nh - bv, 0, y + h, x, H - y - h], [nw - b, nh - bv, x + w, y + h, W - x - w, H - y - h]];
-        cs.forEach(function (q) { if (q[4] > 0 && q[5] > 0) c.drawImage(soft(q[0], q[1], b, bv, 1, 1), 0, 0, 1, 1, q[2], q[3], q[4] + 1, q[5] + 1); }); // corners
+        var k = 1 / 20, Z = 1.1, W = Math.max(2, Math.ceil(hr.width * k)), H = Math.max(2, Math.ceil(hr.height * k)); cv.width = W; cv.height = H;
+        // (the canvas is shown 10% larger than the screen, so its blurred edges never show: the photo is placed to match after that)
+        var cx = hr.width / 2, cy = hr.height / 2;
+        var x = (cx + (ox - cx) / Z) * k, y = (cy + (oy - cy) / Z) * k, w = dw / Z * k, h = dh / Z * k;
+        // a tiny, soft copy of the photo (halved step by step, so every pixel is an average - no sparkle)
+        var src = im, sw = im.naturalWidth, sh = im.naturalHeight, tw = Math.max(4, Math.round(w)), th = Math.max(3, Math.round(h));
+        while (sw / 2 > tw) { var t2 = document.createElement("canvas"); t2.width = Math.round(sw / 2); t2.height = Math.round(sh / 2); var g2 = t2.getContext("2d"); g2.imageSmoothingQuality = "high"; g2.drawImage(src, 0, 0, sw, sh, 0, 0, t2.width, t2.height); src = t2; sw = t2.width; sh = t2.height; }
+        var c = cv.getContext("2d"); c.imageSmoothingQuality = "high"; c.clearRect(0, 0, W, H);
+        // the photo in its place, and mirrored copies of it all around (a mirror carries every edge on without a seam)
+        var i0 = -Math.ceil(x / w), i1 = Math.ceil((W - x) / w), j0 = -Math.ceil(y / h), j1 = Math.ceil((H - y) / h);
+        for (var i = i0; i < i1; i++) for (var j = j0; j < j1; j++) {
+          var fx = i % 2 !== 0, fy = j % 2 !== 0;
+          c.setTransform(fx ? -1 : 1, 0, 0, fy ? -1 : 1, x + (i + (fx ? 1 : 0)) * w, y + (j + (fy ? 1 : 0)) * h);
+          c.drawImage(src, 0, 0, sw, sh, 0, 0, w + 0.5, h + 0.5);
+        }
+        c.setTransform(1, 0, 0, 1, 0, 0);
+        // a dark photo (taken at night, with a flash) still lights the room a little: its surround is lifted gently
+        try { var px = c.getImageData(0, 0, W, H).data, sum = 0, n = 0; for (var q = 0; q < px.length; q += 16) { sum += 0.2126 * px[q] + 0.7152 * px[q + 1] + 0.0722 * px[q + 2]; n++; }
+          var lum = sum / n / 255; md.style.setProperty("--fill-lift", Math.max(0.8, Math.min(1.55, 0.3 / Math.max(lum, 0.05))).toFixed(2)); } catch (e2) {}
         md.classList.add("fill-drawn"); cv.__key = key;
         // v5.78: the blurred copy of the photo underneath is no longer seen (the drawn surround replaces it) - let it go from memory
         var hf = md.querySelector("img.hero-fill"); if (hf && hf.getAttribute("src")) { hf.removeAttribute("srcset"); hf.removeAttribute("src"); }
       } catch (err) {}
+    }
+    // v6.20: the photo's four edges fade softly into the surround (measured where the photo really is inside its box)
+    function fadePhoto(im) {
+      var bw = im.offsetWidth, bh = im.offsetHeight, nw = im.naturalWidth, nh = im.naturalHeight; if (!bw || !bh || !nw) return;
+      var cs = getComputedStyle(im), cover = cs.objectFit === "cover", r = nw / nh;
+      var s = cover ? Math.max(bw / r, bh) : Math.min(bw / r, bh), pw = s * r, ph = s;
+      var pos = (cs.objectPosition || "50% 50%").split(" ").map(function (v) { return parseFloat(v) / 100; });
+      var px = (bw - pw) * pos[0], py = (bh - ph) * pos[1];
+      var L = Math.max(0, px), R = Math.min(bw, px + pw), T = Math.max(0, py), B = Math.min(bh, py + ph);
+      var fx = Math.min((R - L) * 0.16, 260), ft = (B - T) * 0.1, fb = (B - T) * 0.2;
+      var ramp = function (dir, a, f, b2, g) { // eased: starts and ends gently, so the eye never finds where the fade begins
+        var st = function (o, al) { return "rgba(0,0,0," + al + ") " + o.toFixed(1) + "px"; };
+        return "linear-gradient(" + dir + ", " + [st(a, 0), st(a + f * 0.25, 0.1), st(a + f * 0.5, 0.42), st(a + f * 0.75, 0.82), st(a + f, 1),
+          st(b2 - g, 1), st(b2 - g * 0.75, 0.82), st(b2 - g * 0.5, 0.42), st(b2 - g * 0.25, 0.1), st(b2, 0)].join(", ") + ")"; };
+      var m = ramp("90deg", L, fx, R, fx) + ", " + ramp("180deg", T, ft, B, fb);
+      if (im.__mask === m) return; im.__mask = m;
+      im.style.webkitMaskImage = m; im.style.maskImage = m; im.style.webkitMaskComposite = "source-in"; im.style.maskComposite = "intersect";
+      im.style.webkitMaskSize = im.style.maskSize = "100% 100%"; im.style.webkitMaskRepeat = im.style.maskRepeat = "no-repeat";
     }
     // v5.68: the snake's name stays in its corner when there is room; when it would sit on or right next to
     // Scroll to continue it goes in the middle, just above it (the cue is fixed to the screen, the name scrolls with the
