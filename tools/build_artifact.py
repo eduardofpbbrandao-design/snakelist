@@ -839,7 +839,7 @@ def build(out, christmas_default=True, events_default=True, cache=DEFAULT_CACHE,
 
     # ---- 2. map data, range shards, species info ----
     for f in ("data/geo.js", "data/cities-more.js", "data/islands.js", "data/places.js", "species/place-counts.js", "species/world.svg",
-              "vendor/earth/blue-marble.jpg", "vendor/tfjs/tf.min.js", "app/icon-192-s.png"):
+              "vendor/earth/blue-marble.jpg", "vendor/tfjs/tf.min.js", "app/icon-192-b.png"):
         put(f, src=os.path.join(ROOT, f))
     for d in ("vendor/leaflet", "data/camid2", "species/3d"):
         for base, _, fs in os.walk(os.path.join(ROOT, d)):

@@ -38,9 +38,9 @@ head = f"""<!doctype html>
 <link rel="canonical" href="{SITE}">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="icon" type="image/png" sizes="96x96" href="app/favicon-96-s.png">
-<link rel="icon" type="image/png" sizes="48x48" href="app/favicon-48-s.png">
-<link rel="apple-touch-icon" href="app/apple-touch-icon-s.png">
+<link rel="icon" type="image/png" sizes="96x96" href="app/favicon-96-b.png">
+<link rel="icon" type="image/png" sizes="48x48" href="app/favicon-48-b.png">
+<link rel="apple-touch-icon" href="app/apple-touch-icon-b.png">
 <link rel="manifest" href="app/snakelist.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -248,9 +248,9 @@ MANIFEST = json.dumps({
     # lets the website ask the browser "is the SnakeList app installed on this device?"
     "related_applications": [{"platform": "webapp", "url": "https://snakelist.com/app/snakelist.webmanifest"}],
     "background_color": "#1F5A3A", "theme_color": "#1F5A3A",
-    "icons": [{"src": "icon-192-s.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
-              {"src": "icon-512-s.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
-              {"src": "icon-maskable-512-s.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}],
+    "icons": [{"src": "icon-192-b.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+              {"src": "icon-512-b.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+              {"src": "icon-maskable-512-b.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}],
     # real screenshots for the install sheet (wide = desktop / landscape), in this order
     "screenshots": [{"src": "screenshots/" + f, "sizes": "2048x960", "type": "image/jpeg", "form_factor": "wide", "label": l} for f, l in (
         ("1-homepage.jpg", "SnakeList homepage: the snake life list with every snake species in the world"),
