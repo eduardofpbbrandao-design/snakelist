@@ -3857,9 +3857,14 @@ float slScale(vec2 m) {
     // (v6.20: while the camera turns, the shadows of the swaying plants are not refreshed every few frames either: those
     // refreshes made every 5th frame of a turn much slower than the others - a regular stutter - for a change nobody sees
     // while the view moves; and a tongue flick alone (fx.lightMove) never redraws them: its shadow is a few pixels)
+    // (and a frame in the middle of a turn that happens to get no pointer movement - a 120 Hz screen with a 60 Hz mouse, or
+    // a finger held still for a moment - still counts as turning: it used to redraw the shadows, every other frame)
     const scMove = sceneMoving && !(fx.lightMove && fx.lightMove());
-    { ambOnly = false; const shUp = shadowDirty || scMove || (!viaAmb && !camMoving && !sceneMoving) || (!camMoving && shadowAge++ > (quality === 'high' ? 4 : 12)); if (shUp) shadowAge = 0; shadowDirty = false; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; }
-    dynRes(tF0, moving, amb);
+    if (camMoving) lastCamT = tF0;
+    const camActive = camMoving || controls.st.dragging || tF0 - lastCamT < 250;
+    if (camActive && !camMoving) { clearTimeout(camSettleT); camSettleT = setTimeout(() => { shadowDirty = true; kick(); }, 300); } // (once it is still: the shadows catch up)
+    { ambOnly = false; const shUp = shadowDirty || scMove || (!viaAmb && !camActive && !sceneMoving) || (!camActive && shadowAge++ > (quality === 'high' ? 4 : 12)); if (shUp) shadowAge = 0; shadowDirty = false; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; }
+    dynRes(tF0, moving || camActive, amb); // (v6.20: a still frame inside a turn no longer snaps the resolution back up - that reallocated the picture every other frame)
     renderer.render(ctx.scene, cam);
     sizeAfter(); // v5.74: the magnified inset of a small snake
     updateMarkers();
@@ -3893,7 +3898,7 @@ float slScale(vec2 m) {
   }
   const pace = { skip0: quality === 'low' ? 2 : 1, skip: quality === 'low' ? 2 : 1, cnt: 0, vs: 16.7, lastTs: 0, lastR: 0, n: 0, slow: 0, fast: 0, dens: 1, kIdle: 1 };
   let kicked = false;
-  let holdRender = false, ambT = 0, shadowAge = 0, ambOnly = false, lastUser = performance.now(), lastF = 0, colList = null, shadowDirty = true;
+  let lastCamT = -1e9, camSettleT = 0; let holdRender = false, ambT = 0, shadowAge = 0, ambOnly = false, lastUser = performance.now(), lastF = 0, colList = null, shadowDirty = true;
   // v5.78: dynamic resolution - while the view moves, if frames take too long (under ~40 per second) the picture is drawn with
   // fewer pixels (down to 60% of the full pixel ratio), and as soon as it is still again it is drawn once more at full
   // sharpness. The change is gradual and has a dead band, so the resolution never flickers up and down.
