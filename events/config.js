@@ -227,7 +227,7 @@
     ],
     grandPrize: {
       id: "legendary-serpent", name: "The Legendary Christmas Serpent",
-      desc: "An animated golden serpent for your Cabin, plus the Legendary Serpent badge - for opening all 24 doors (recovered doors count)."
+      desc: "An emerald-and-gold serpent for your Cabin, plus the Legendary Serpent badge - for covering all 24 doors (days recovered or reserved with a skip count). Once in a lifetime: only during Christmas 2026."
     },
     // §9 subscriber-only decorations (premium inventory; shown labelled and locked to everyone else)
     premium: [
