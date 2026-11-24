@@ -1893,13 +1893,20 @@ function patternData(P, F, body, lat, quality, seed) {
   // colours the snout has a little further back instead: dorsal colour on top, the lip colour round the sides
   // v5.17: and on the whole rounded nose the skin is one smooth colour field - dorsal colour on top, the lip and chin colour
   // below, meeting in a clean lip line across the front - with no per-scale cells (they fanned out into a star there)
-  const xN0 = Hl * 0.1, xN1 = Hl * 0.26, lipC = mixc(latc, bel, 0.55);
+  const xN0 = Hl * 0.1, xN1 = Hl * 0.26;
+  // (v6.26: the field's colours are those the snout really has just behind it - the average of the top and of the sides of the
+  // first row past the tip - not the body's plain dorsal colour: a coral snake's black snout came out red, a dark-headed
+  // snake's snout pale)
+  let rN = 0; while (rN < Hp - 1 && body.xOf(((rN + 0.5) / Hp) * body.gTotal) < xN1) rN++;
+  const topC = [0, 0, 0], sideC = [0, 0, 0], lipR = [0, 0, 0]; let nT = 0, nS = 0, nL = 0;
+  for (let c = 0; c < Wp; c++) { const aa = Math.abs(((c + 0.5) / Wp) * 2 - 1), k = (rN * Wp + c) * 4, to = aa < 0.35 ? topC : aa > 0.4 && aa < 0.52 ? sideC : aa > 0.57 && aa < 0.7 ? lipR : null; if (!to) continue; for (let q = 0; q < 3; q++) to[q] += data[k + q]; if (to === topC) nT++; else if (to === sideC) nS++; else nL++; }
+  for (let q = 0; q < 3; q++) { topC[q] /= Math.max(1, nT); sideC[q] /= Math.max(1, nS); lipR[q] /= Math.max(1, nL); }
   for (let r = 0; r < Hp; r++) {
     const x = body.xOf(((r + 0.5) / Hp) * body.gTotal); if (x >= xN1) break;
     const w = x <= xN0 ? 1 : 1 - sstep(xN0, xN1, x);
     for (let c = 0; c < Wp; c++) {
-      const aa = Math.abs(((c + 0.5) / Wp) * 2 - 1), base = mixc(mixc(dors, latc, sstep(0.18, 0.5, aa)), lipC, sstep(0.52, 0.62, aa)), k = (r * Wp + c) * 4;
-      const lb = 0.2126 * base[0] + 0.7152 * base[1] + 0.0722 * base[2]; for (let q = 0; q < 3; q++) data[k + q] = data[k + q] + ((lb + (base[q] - lb) * satK) * deepK - data[k + q]) * w;
+      const aa = Math.abs(((c + 0.5) / Wp) * 2 - 1), base = mixc(mixc(topC, sideC, sstep(0.18, 0.5, aa)), lipR, sstep(0.52, 0.62, aa)), k = (r * Wp + c) * 4;
+      for (let q = 0; q < 3; q++) data[k + q] = data[k + q] + (base[q] - data[k + q]) * w; // (they already have the deepening)
     }
   }
   // (v5.53: the lip line, lip scales, nostrils and heat pits are drawn by headData)
