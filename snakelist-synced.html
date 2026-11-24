@@ -2687,14 +2687,17 @@
         var x = (cx + (ox - cx) / Z) * k, y = (cy + (oy - cy) / Z) * k, w = dw / Z * k, h = dh / Z * k;
         // a tiny, soft copy of the photo (halved step by step, so every pixel is an average - no sparkle)
         var src = im, sw = im.naturalWidth, sh = im.naturalHeight, tw = Math.max(4, Math.round(w)), th = Math.max(3, Math.round(h));
-        while (sw / 2 > tw) { var t2 = document.createElement("canvas"); t2.width = Math.round(sw / 2); t2.height = Math.round(sh / 2); var g2 = t2.getContext("2d"); g2.imageSmoothingQuality = "high"; g2.drawImage(src, 0, 0, sw, sh, 0, 0, t2.width, t2.height); src = t2; sw = t2.width; sh = t2.height; }
+        // (always the whole picture - drawImage(src, x, y, w, h) - never a part of it measured by naturalWidth: with srcset that is the
+        // size the photo is *shown* at, not its pixels (a 1920 px file on a 2560 px screen says 2560), and cutting by it left the right
+        // and bottom of the surround empty - the flat green bands seen on wide screens)
+        while (sw / 2 > tw) { var t2 = document.createElement("canvas"); t2.width = Math.round(sw / 2); t2.height = Math.round(sh / 2); var g2 = t2.getContext("2d"); g2.imageSmoothingQuality = "high"; g2.drawImage(src, 0, 0, t2.width, t2.height); src = t2; sw = t2.width; sh = t2.height; }
         var c = cv.getContext("2d"); c.imageSmoothingQuality = "high"; c.clearRect(0, 0, W, H);
         // the photo in its place, and mirrored copies of it all around (a mirror carries every edge on without a seam)
         var i0 = -Math.ceil(x / w), i1 = Math.ceil((W - x) / w), j0 = -Math.ceil(y / h), j1 = Math.ceil((H - y) / h);
         for (var i = i0; i < i1; i++) for (var j = j0; j < j1; j++) {
           var fx = i % 2 !== 0, fy = j % 2 !== 0;
           c.setTransform(fx ? -1 : 1, 0, 0, fy ? -1 : 1, x + (i + (fx ? 1 : 0)) * w, y + (j + (fy ? 1 : 0)) * h);
-          c.drawImage(src, 0, 0, sw, sh, 0, 0, w + 0.5, h + 0.5);
+          c.drawImage(src, 0, 0, w + 0.5, h + 0.5);
         }
         c.setTransform(1, 0, 0, 1, 0, 0);
         // a dark photo (taken at night, with a flash) still lights the room a little: its surround is lifted gently
