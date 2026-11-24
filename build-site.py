@@ -139,10 +139,12 @@ head = head.replace("__SL_UPDATE_CHECK__", UPDATE_CHECK, 1)
 _xm = open("tools/xmas_loader.js", encoding="utf-8").read().split("*/", 1)[1].strip()
 # the events preview switch (tools/events_loader.js): does nothing unless the visitor opens ?preview=events
 import hashlib as _hl, glob as _gl
+# the previews registry (tools/previews.js): which previews are on here / in the account - before the events switch
+_pv = open("tools/previews.js", encoding="utf-8").read().split("*/", 1)[1].strip()
 _ev = open("tools/events_loader.js", encoding="utf-8").read().split("*/", 1)[1].strip()
 _evv = _hl.sha1(b"".join(open(f, "rb").read() for f in sorted(_gl.glob("events/*.js") + _gl.glob("events/*.css")))).hexdigest()[:10]
 head = head.replace("<style>html,body{margin:0;padding:0}</style>", "<style>html,body{margin:0;padding:0}</style>\n<script>"
-                    + _xm.replace("__ROOT__", 'new URL("./",L.href).href').replace("__KIND__", '"xm-app"') + "</script>\n<script>"
+                    + _xm.replace("__ROOT__", 'new URL("./",L.href).href').replace("__KIND__", '"xm-app"') + "</script>\n<script>" + _pv + "</script>\n<script>"
                     + _ev.replace("__ROOT__", 'new URL("./",L.href).href').replace("__EVV__", '"%s"' % _evv) + "</script>", 1)
 app = re.sub(r"^<title>[^<]*</title>", f"<title>{title}</title>", app, count=1)
 # for search engines and AI browsers that only read the first megabytes of a page: the pictures
