@@ -1404,7 +1404,8 @@ export function create(V) {
     }
     const rOut = rr0 + (cL - 1) * layW;
     const liftC = constrict ? Math.max(0, rOut + Wc * 1.8 - prR * 0.95) : 0; // (room for the eased-off coils too)
-    let extHi = null, wrapP = null, wrapL = null, coilI1 = 0;
+    let extHi = null, wrapP = null, wrapL = null, wrapLs = null, coilI1 = 0;
+    const wrapAt = (e) => { const f = clamp(e, 0, 1) * 6, k = Math.min(5, Math.floor(f)); return R.blend(wrapLs[k], wrapLs[k + 1], f - k); }; // (the coils eased off by e, 0..1)
     if (constrict) {
       extHi = R.fore({ len: st.len, phi, lift: lift + liftC, coil: 0, base: B });
       R.setPose(extHi); R.apply(); placeHeld(); prey.updateMatrixWorld(true);
@@ -1439,7 +1440,7 @@ export function create(V) {
         }
         { let acc2 = 0; for (let q = 0; q < 61 + nT && q < poly.length - 1; q++) acc2 += poly[q].distanceTo(poly[q + 1]); return [pose, Math.min(N - 1, R.ih + Math.round(acc2 / R.dx))]; }
       };
-      [wrapP, coilI1] = mk(); loose = Wc * 0.7; wrapL = mk()[0]; // (wrapL: the same coils, eased off)
+      [wrapP, coilI1] = mk(); wrapLs = [wrapP]; for (let k = 1; k <= 6; k++) { loose = (Wc * 0.7 * k) / 6; wrapLs.push(mk()[0]); } wrapL = wrapLs[6]; // (wrapL: the same coils, eased off; in steps, so easing off never cuts a chord across the coils through the prey)
       R.setPose(ext); R.apply(); // (back to where the prey lies before the strike)
     }
     R.setPose(B === R.REST ? rest : Bc); R.apply();
@@ -1588,7 +1589,7 @@ export function create(V) {
       held = true; xp = lerp(xp0, xIn, Math.pow(clamp(pull, 0, 1), 1.45)); /* (v5.78: slower at first, so you see the prey going in between the jaws) */ const yaw = 0.05 * Math.sin(e * TAU * 3) * (1 - sstep(0.85, 1, u));
       // v6.13: a constrictor starts swallowing still in its coils; they let go bit by bit as the jaws walk over the prey
       // (the prey slides forward out of them, so nothing passes through it; they unwind once it is inside)
-      if (constrict) R.setPose(R.blend(wrapP, wrapL, sstep(0, 0.5, u))); else R.setPose(R.fore({ len: st.len, phi, lift, coil: 0, yaw, base: B }));
+      if (constrict) R.setPose(wrapAt(sstep(0, 0.5, u))); else R.setPose(R.fore({ len: st.len, phi, lift, coil: 0, yaw, base: B }));
       bulgeAt(xp, 1); R.apply();
       const inside = sstep(0, 0.15, u) * (1 - sstep(0.82, 1, u)); // the jaws spread round the prey and walk over it, one side then the other (the "pterygoid walk")
       setMouth(lerp(tHold, tNeed, Math.sin(Math.min(1, u * 1.2) * Math.PI)), { spread: spreadNeed * inside, walk: Math.sin(e * TAU * 3) * inside * (spreadNeed > 0.05 ? 1 : 0.6) }); say(T.swallow);
