@@ -68,8 +68,10 @@ the sources above and some new ones. Here is what changed.
 (forest, rainforest, soil), the 3D fallen leaves are now pushed aside in a patch round the prey and the strike and coil
 area. They pile up a little at the edge, and a narrower strip clears along the snake's path. In grass and heath the tufts
 in that patch are bent down flat and lean outwards. During the show, grass standing between the camera and the action
-bows down smoothly, using a view corridor in the plants' vertex shader (`uSlClr` in `nature.js`). Everything springs
-back when the show ends. Before this, the litter was left untouched, because it counted as "soft" cover. Grass was only
+bows down smoothly, using a view corridor in the plants' vertex shader (`uSlClr` in `nature.js`). The camera
+is also closer and higher than before. A 2-3 cm mouse used to be a speck in a wide view of the forest floor. Now
+the notice, stalk and strike-pose shots frame the head and the prey together, and the yawn is filmed from the side and a
+little in front. Everything springs back when the show ends. Before this, the litter was left untouched, because it counted as "soft" cover. Grass was only
 pressed to 16% of its height, which still left 30 cm grass at about 5 cm, taller than a mouse.
 
 New sources:
