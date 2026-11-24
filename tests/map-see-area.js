@@ -100,7 +100,7 @@ async function run(theme, phone) {
   ok((await info()) === null && await p.evaluate(() => !document.getElementById('country-panel').hidden), 'Close on the key puts it away (the list stays)');
   // empty map: only the area goes
   await clickArea('malpolon-monspessulanus');
-  await llClick(p, -12, 36.5); // the Atlantic
+  await llClick(p, -24, 31); // the Atlantic (v6.28: away from the names - a click on a name zooms to it)
   ok((await info()) === null && await p.evaluate(() => !document.getElementById('country-panel').hidden && document.getElementById('cp-title').textContent === 'Portugal'), 'a click on the empty sea puts the area away, the list stays');
   await llClick(p, -20, 40);
   ok(await p.evaluate(() => document.getElementById('country-panel').hidden), 'the next click on the sea closes the list as before');

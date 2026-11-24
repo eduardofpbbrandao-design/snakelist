@@ -18,7 +18,7 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) { fails
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
 
 // ---- the mock iNaturalist ------------------------------------------------------------------
-const M = { listMode: 'ok', listDelay: 0, total: 450, slowIds: {}, failOnce: {}, gone: {}, brokenPhoto: {}, noPhoto: {}, listUrls: [], detailUrls: [], stack: {} };
+const M = { listMode: 'ok', listDelay: 0, total: 450, slowIds: {}, failOnce: {}, gone: {}, brokenPhoto: {}, noPhoto: {}, listUrls: [], detailUrls: [], stack: {}, tiles: false, emptyTiles: false, tileUrls: [], popularUrls: [] };
 function taxonFor(id, sci) {
   const t = sci || (id % 3 ? 'Natrix maura' : 'Vipera latastei');
   return { id: t === 'Natrix maura' ? 26093 : 30715, name: t, rank: 'species', preferred_common_name: t === 'Natrix maura' ? 'Viperine Water Snake' : "Lataste's Viper",
@@ -66,6 +66,25 @@ async function route(r) {
   if (/api\.inaturalist\.org\/v1\/taxa\?/.test(u)) {
     const qq = decodeURIComponent((u.match(/q=([^&]+)/) || [])[1] || '');
     return J({ results: [{ id: /maura/i.test(qq) ? 26093 : /latastei/i.test(qq) ? 30715 : 1000 + qq.length, name: qq }] });
+  }
+  // v6.28: iNaturalist's own map tiles (api/v1/points/z/x/y.grid.json): a few points per tile, each with its id and
+  // exact spot (as the real endpoint's "data" entries). Off unless M.tiles (the list tests above use the fallback).
+  const tm = u.match(/api\.inaturalist\.org\/v1\/points\/(\d+)\/(\d+)\/(\d+)\.grid\.json/);
+  if (tm) {
+    M.tileUrls.push(u);
+    if (!M.tiles) return r.abort();
+    const z = +tm[1], x = +tm[2], y = +tm[3], n = 2 ** z, lon0 = x / n * 360 - 180, lon1 = (x + 1) / n * 360 - 180;
+    const lat = (yy) => Math.atan(Math.sinh(Math.PI * (1 - 2 * yy / n))) * 180 / Math.PI, la0 = lat(y + 1), la1 = lat(y);
+    const data = {};
+    if (!M.emptyTiles) for (let i = 0; i < 12; i++) { const id = 700000 + z * 100000 + ((x * 31 + y * 17 + i * 7) % 99991); const lo = lon0 + (lon1 - lon0) * ((i * 0.618 + 0.1) % 1), la = la0 + (la1 - la0) * ((i * 0.414 + 0.1) % 1);
+      M.where = M.where || {}; M.where[id] = [+lo.toFixed(5), +la.toFixed(5)]; data[id] = { id, latitude: +la.toFixed(5), longitude: +lo.toFixed(5), cellCount: i === 0 ? 5 : 1, quality_grade: 'research', geoprivacy: null, private_location: null }; }
+    return J({ grid: [], keys: [], data });
+  }
+  if (/api\.inaturalist\.org\/v1\/observations\?/.test(u) && /order_by=votes/.test(u)) {
+    M.popularUrls.push(u);
+    const la = 39.6, lo = -8.2; // (inland Portugal)
+    const o = obs(424242, +lo.toFixed(4), +la.toFixed(4)); o.faves_count = 57; M.where = M.where || {}; M.where[424242] = [o.geojson.coordinates[0], o.geojson.coordinates[1]];
+    return J({ total_results: 1, page: 1, per_page: 1, results: [o] });
   }
   const det = u.match(/api\.inaturalist\.org\/v1\/observations\/(\d+)/);
   if (det) {
@@ -155,14 +174,19 @@ async function route(r) {
     if (okRec) good++; else console.log('   wrong panel for', dot.id, t.slice(0, 200), im);
   }
   ok(good === 3, 'each marker opens its own observation (id, observer, its own photo)');
+  // v6.28: the card is small and beside its dot; the rest is behind "More details"
+  await p.evaluate(() => { const d = document.querySelector('#sg-pop details.sgc-more'); if (d) d.open = true; }); await p.waitForTimeout(200);
   const t1 = await panelText(p);
   const card = await p.evaluate(() => { const s = document.getElementById('sg-pop'), det = s.querySelector('details.sg-det');
     return { links: [].map.call(s.querySelectorAll('a'), a => a.textContent.trim()), name: (s.querySelector('.sg-name') || {}).textContent, det: det ? det.textContent : '', open: det ? det.open : null,
       shown: s.innerText, done: [].every.call(s.querySelectorAll('img'), i => i.complete && i.naturalWidth > 0) }; });
   ok(card.name === 'Viperine Water Snake' || card.name === "Lataste's Viper", 'card: the snake\'s name (' + card.name + ')');
-  ok(/2024/.test(t1) && /May/.test(t1) && /FOUND BY|Found by/.test(t1) && /Observer \d+/.test(t1), 'view: the date observed and who found it');
-  ok(card.links.some(l => l === 'View original observation on iNaturalist'), 'view: a link to the original observation (' + card.links.join(', ') + ')');
-  ok(/CC BY-NC/.test(card.shown) && /\(c\) Observer/.test(card.shown) && /Place of/.test(card.shown) && /To species/.test(card.shown) && /Within about \d+ m|approximate/.test(card.shown) && /Research grade|Needs ID/.test(card.shown),
+  ok(/2024/.test(t1) && /May/.test(t1) && /by Observer \d+/.test(t1), 'card: the date observed and who found it, under the name');
+  ok(card.links.some(l => /^See in iNaturalist/.test(l)) && await p.evaluate(() => { const a = document.querySelector('#sg-pop a.sgc-inat'); return a.target === '_blank' && /noopener/.test(a.rel) && /^https:\/\/www\.inaturalist\.org\/observations\/\d+$/.test(a.href); }),
+    'card: "See in iNaturalist" opens the observation on iNaturalist in a new tab (' + card.links.join(', ') + ')');
+  ok(await p.evaluate(() => !document.querySelector('#sg-pop .sgv-3d, #sg-pop .sgv-page, #sg-pop .sgv-back, #sg-undo')), 'card (L9): no Explore in 3D, no Species page, no Back button');
+  ok(/Photo © Observer \d+ · taken/.test(t1), 'card: the photo says who took it and when (A33)');
+  ok(/CC BY-NC/.test(card.shown) && /Observer/.test(card.shown) && /Place of/.test(card.shown) && /To species/.test(card.shown) && /Within about \d+ m|approximate/.test(card.shown) && /Research grade|Needs ID/.test(card.shown),
     'view: photo credit, licence, place, accuracy, quality and identification shown');
   await shot(p, 'desktop-light-observation', '#globe-stage');
   // no stale record: A's full record is slow, B is quick; the view opens at once on A (from what the
@@ -179,9 +203,9 @@ async function route(r) {
   // no substitute photo
   const C = d.dots[5]; M.noPhoto[C.id] = 1;
   await closeView(p); await cvClick(p, C.x, C.y); await p.waitForTimeout(800);
-  ok(/No photo available for this sighting\./.test(await panelText(p)) && (await panelImgs(p)).length === 0 && !M.defaultPhotoAsked, 'no photo: says so, and no species/default photo is used');
+  ok(/No photo was shared with this sighting\./.test(await panelText(p)) && (await panelImgs(p)).length === 0 && !M.defaultPhotoAsked, 'no photo: says so, and no species/default photo is used');
   // a photo that fails to load: message + Retry, no other picture
-  const Dd = d.dots[6]; M.brokenPhoto[Dd.id] = 2; // the shown size and the large one both fail once
+  const Dd = d.dots[6]; M.brokenPhoto[Dd.id] = 3; // the hover-preloaded size, the shown size and the large one all fail once
   await closeView(p); await cvClick(p, Dd.x, Dd.y); await p.waitForTimeout(900);
   ok(/This photo couldn.t load/.test(await panelText(p)), 'a broken photo says so, with Retry');
   await p.click('#sg-pop .sg-ph-retry'); await p.waitForTimeout(700);
@@ -232,12 +256,74 @@ async function route(r) {
   const mid = d.dots.find(o => o.x > cvs[0] * 0.35 && o.x < cvs[0] * 0.65 && o.y > cvs[1] * 0.45 && o.y < cvs[1] * 0.75);
   if (mid) { await cvClick(p, mid.x, mid.y); await p.waitForTimeout(900); }
   ok(mid && (await cardId(p)) === mid.id, 'after full screen + resize, a tap opens the dot under it');
-  const edge = await p.evaluate(() => { const s = document.querySelector('#sg-pop .sgv-card').getBoundingClientRect(); return s.left >= 0 && s.right <= innerWidth && s.top >= 0 && s.bottom <= innerHeight && s.width > innerWidth * 0.9; });
-  ok(edge, 'the observation view covers almost the whole window, inside it');
+  const edge = await p.evaluate(() => { const s = document.getElementById('sg-pop').getBoundingClientRect(), g = document.getElementById('globe-stage').getBoundingClientRect(); return s.left >= g.left && s.right <= g.right && s.top >= g.top && s.bottom <= g.bottom && s.width <= 310; });
+  ok(edge, 'the sighting card is small and inside the map (A17)');
   await p.evaluate(() => { const x = document.querySelector('#sg-pop .sg-x'); if (x) x.click(); }); await p.click('#globe-full'); await p.setViewportSize({ width: 1280, height: 900 }); await p.waitForTimeout(800);
   console.log('  page errors:', errs);
   ok(!errs.length, 'no page errors (desktop)');
   await ctx.close();
+
+  // ================= v6.28 All dots: iNaturalist's map tiles, a place's own sightings, the most popular one =================
+  M.tiles = true;
+  ({ ctx, p, errs } = await run({ width: 1280, height: 900 }, 'light'));
+  await p.evaluate(() => window.SL_FLY_BOX(-10, -6, 37, 42.2)); await p.waitForTimeout(400);
+  const nT0 = M.tileUrls.length;
+  await p.click('#sg-toggle'); await p.waitForTimeout(1800);
+  d = await dbg(p);
+  ok(d.mode === 'tiles' && d.n > 20 && M.tileUrls.length > nT0, 'All dots: the dots come from iNaturalist\'s map tiles (' + d.n + ' dots from ' + d.tiles + ' tiles)');
+  ok(M.tileUrls.every(u => /taxon_id=85553/.test(u) && /verifiable=true/.test(u)), 'tiles ask for snakes only, verifiable');
+  ok(await p.evaluate(() => !document.getElementById('sg-acts').hidden && /Show all dots/.test(document.getElementById('sg-all').textContent) && /Most popular sighting/.test(document.getElementById('sg-popular').textContent)), 'Show all dots and Most popular sighting buttons while Sightings is on');
+  await shot(p, 'tiles-desktop', '#globe-stage');
+  // a tile dot opens: its record is fetched by id, and the card is beside it, inside the map
+  d = await dbg(p);
+  const td = d.dots.find(o => o.x > 300 && o.x < 900 && o.y > 200 && o.y < 600 && o.n === 1) || d.dots[0];
+  await cvClick(p, td.x, td.y); await p.waitForTimeout(1200);
+  ok((await cardId(p)) === td.id && M.detailUrls.includes(td.id), 'a tile dot opens its own observation (record fetched by id)');
+  const near = await p.evaluate((td) => { const s = document.getElementById('sg-pop').getBoundingClientRect(), c = document.getElementById('globe').getBoundingClientRect(); const x = c.left + td.x, y = c.top + td.y;
+    return { dx: Math.min(Math.abs(s.left - x), Math.abs(s.right - x)), inside: y > s.top - 140 && y < s.bottom + 140, covers: x > s.left && x < s.right && y > s.top && y < s.bottom }; }, td);
+  ok(near.dx < 60 && near.inside && !near.covers, 'the card sits right beside the dot, not over it (A17) ' + JSON.stringify(near));
+  await shot(p, 'tiles-card', '#globe-stage');
+  // A26: a searched country: only its own sightings
+  await closeView(p);
+  await p.fill('#heat-search', 'Portugal'); await p.waitForTimeout(500); await p.keyboard.press('Escape'); await p.waitForTimeout(3500);
+  d = await dbg(p); d.note = await p.evaluate(() => document.getElementById('sg-note').innerText);
+  const outside = await p.evaluate((ds) => ds.filter(o => window.SL_MAP_PICKLL(o.lon, o.lat) !== 'pt').length, d.dots);
+  ok(d.area === 'c:pt' && d.n > 0 && outside === 0, 'Portugal searched: only sightings inside Portugal (' + d.n + ' dots, ' + outside + ' outside; ' + JSON.stringify({ mode: d.mode, area: d.area, tiles: d.tiles, note: d.note }) + ')');
+  await shot(p, 'tiles-portugal', '#globe-stage');
+  // A27: the most popular sighting (by favourites), in Portugal
+  const v0 = await p.evaluate(() => window.SL_MAP_VIEW());
+  await p.evaluate(() => document.getElementById('sg-popular').click()); await p.waitForTimeout(2200);
+  const pu = M.popularUrls.filter(u => /order=desc/.test(u)).pop() || ''; // (the app's own photo look-ups use order_by=votes too)
+  ok(/order_by=votes/.test(pu) && /order=desc/.test(pu) && /swlat=/.test(pu), 'most popular: iNaturalist ordered by votes (favourites), within the place searched (' + pu.replace(/^.*\?/, '').slice(0, 160) + ')');
+  ok((await cardId(p)) === 424242 && /Most popular sighting in Portugal/.test(await panelText(p)) && /favourite/.test(await panelText(p)) && /view/.test(await panelText(p)), 'most popular: its card opens, saying it is measured by favourites (iNaturalist has no view counts)');
+  await shot(p, 'tiles-popular', '#globe-stage');
+  // Undo (no Back button) puts the map back where it was
+  await closeView(p);
+  await p.evaluate(() => document.getElementById('map-undo').click()); await p.waitForTimeout(900);
+  const v1 = await p.evaluate(() => window.SL_MAP_VIEW());
+  ok(Math.abs((v1.e - v1.w) - (v0.e - v0.w)) < 0.3, 'Undo goes back to the view from before the jump (A21)');
+  // Show all dots: zooms out to the whole place
+  await p.evaluate(() => window.SL_FLY_BOX(-8.7, -8.5, 41.0, 41.2)); await p.waitForTimeout(900);
+  await p.evaluate(() => document.getElementById('sg-all').click()); await p.waitForTimeout(1500);
+  const v2 = await p.evaluate(() => window.SL_MAP_VIEW());
+  ok(v2.e - v2.w > 4, 'Show all dots: the whole of Portugal and its dots at once (' + (v2.e - v2.w).toFixed(1) + ' degrees wide)');
+  // a place with no sightings: nothing, said so
+  M.emptyTiles = true;
+  await p.fill('#heat-search', ''); await p.waitForTimeout(500);
+  await p.fill('#heat-search', 'Iceland'); await p.waitForTimeout(500); await p.keyboard.press('Escape'); await p.waitForTimeout(2500);
+  d = await dbg(p);
+  ok(d.n === 0 && /No iNaturalist sightings in Iceland/.test(await p.evaluate(() => document.getElementById('sg-note').innerText)), 'a place with no sightings shows none, and says so');
+  M.emptyTiles = false;
+  // names on the map sit over the dots and are buttons: the map centres on the name, closer (A18, A22)
+  await p.fill('#heat-search', ''); await p.waitForTimeout(400);
+  await p.fill('#heat-search', 'Portugal'); await p.waitForTimeout(500); await p.keyboard.press('Escape'); await p.waitForTimeout(1500);
+  const lab = await p.evaluate(() => (window.SL_LBL_HITS || []).find(h => /Portugal/.test(h.name)));
+  if (lab) { const vA = await p.evaluate(() => window.SL_MAP_VIEW()); await cvClick(p, (lab.b[0] + lab.b[2]) / 2, (lab.b[1] + lab.b[3]) / 2); await p.waitForTimeout(1100);
+    const vB = await p.evaluate(() => window.SL_MAP_VIEW()); ok(vB.e - vB.w < (vA.e - vA.w) * 0.7, 'clicking the name "Portugal" on the map zooms closer on it'); }
+  else ok(false, 'the name Portugal is drawn on the map');
+  ok(!errs.length, 'no page errors (tiles) ' + errs.slice(0, 2).join(' | '));
+  await ctx.close();
+  M.tiles = false;
 
   // ================= map lists: fossils, Most/Fewest, Close vs Clear, state on return =================
   ({ ctx, p, errs } = await run({ width: 1280, height: 900 }, 'light'));

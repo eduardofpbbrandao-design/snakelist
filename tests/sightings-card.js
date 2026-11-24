@@ -5,7 +5,7 @@
 // tests/fixtures/inat-sightings.json (a 4 x 3 grid over central Portugal; 7005 has no photo).
 // Checked on desktop (1280 x 900) and phone portrait (390 x 844), at two map zooms: every dot is
 // the top element at its own position (nothing covers it), a tap opens the right record (id,
-// observer, date, its own photo or "No photo available for this sighting."), a quick tap on a second
+// observer, date, its own photo or "No photo was shared with this sighting."), a quick tap on a second
 // dot while the first is still loading ends on the second dot's record and photo, the card opens with
 // its photo already loaded, and pressing Sightings again clears the dots.
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
@@ -66,7 +66,7 @@ async function route(r) {
     const rightRecord = (pn, id) => {
       const o = BY_ID[id], d = new Date(o.observed_on + 'T12:00:00Z');
       const dateOk = pn.t.includes(String(d.getUTCDate())) && pn.t.includes(String(d.getUTCFullYear()));
-      const photoOk = o.photos.length ? pn.im.length === 1 && pn.im[0].includes('/photos/' + id + '-') : /No photo available for this sighting\./.test(pn.t) && pn.im.length === 0;
+      const photoOk = o.photos.length ? pn.im.length === 1 && pn.im[0].includes('/photos/' + id + '-') : /No photo was shared with this sighting\./.test(pn.t) && pn.im.length === 0;
       return pn.id === id && pn.t.includes(o.user.name) && dateOk && photoOk && pn.t.includes(o.taxon.preferred_common_name);
     };
     for (const [zoom, box] of [['whole view', null], ['zoomed in', [-9.4, -8.6, 39.9, 40.4]]]) {
@@ -94,7 +94,7 @@ async function route(r) {
     if (np) {
       const a = await at(np); await p.mouse.click(a.x, a.y); await p.waitForTimeout(600);
       const pn = await panel();
-      ok(/No photo available for this sighting\./.test(pn.t) && pn.im.length === 0 && pn.id === 7005, `${label}: the record with no photo says "No photo available for this sighting." and shows no other picture`);
+      ok(/No photo was shared with this sighting\./.test(pn.t) && pn.im.length === 0 && pn.id === 7005, `${label}: the record with no photo says "No photo was shared with this sighting." and shows no other picture`);
       if (SHOTS) await p.screenshot({ path: `${SHOTS}/sightings-${label}-no-photo.png` });
     } else ok(false, `${label}: the no-photo record 7005 is on the map`);
     const [A, B] = d.dots.filter(x => x.id !== 7005).slice(0, 2);
@@ -110,7 +110,7 @@ async function route(r) {
     };
     SLOW[A.id] = 1500;
     let pn = await quick(A, B);
-    ok(rightRecord(pn, B.id) && pn.im.every(s => !s.includes('/photos/' + A.id + '-')), `${label}: quick switch A(slow) -> B ends on B with B's own photo`);
+    ok(rightRecord(pn, B.id) && pn.im.every(s => !s.includes('/photos/' + A.id + '-')), `${label}: quick switch A(slow) -> B ends on B with B's own photo` + (rightRecord(pn, B.id) ? '' : ' (got ' + pn.id + ': ' + pn.t.slice(0, 90).replace(/\n/g, ' ') + ' ' + pn.im.join(',') + ')'));
     delete SLOW[A.id]; SLOW[B.id] = 1500;
     pn = await quick(B, A);
     ok(rightRecord(pn, A.id) && pn.im.every(s => !s.includes('/photos/' + B.id + '-')), `${label}: quick switch back B(slow) -> A ends on A with A's own photo`);

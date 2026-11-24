@@ -160,12 +160,15 @@ export function prepare(sp) {
   const demUrl = (z, x, y) => DEM + z + '/' + x + '/' + y + '.png';
 
   // --- downloads ---
-  const zNear = phone ? 18 : 19, nNear = phone ? 4 : 6;
+  // v6.28 (Eduardo: "See the spot takes too long to load"): lighter and in parallel - the four candidate zooms at the
+  // spot are asked for at once (not one after another), and the close picture is 4 x 4 tiles (was 6 x 6 on a computer)
+  const zNear = phone ? 18 : 19, nNear = 4;
   const near = (async () => {
     // the sharpest zoom that has real pictures at the spot (19 in most places, less in remote ones)
-    let z = zNear;
-    for (; z > 15; z--) { const n = 2 ** z, im = await loadImg(esriUrl(z, Math.floor(X0 * n), Math.floor(Y0 * n)), live); if (im && !blank(im)) break; if (dead) return null; }
-    const m = await mosaic(esriUrl, z, z === 19 ? nNear : (phone ? 4 : 6), lat, lon, live, phone ? 1024 : 1536, false, true);
+    const zs = []; for (let z = zNear; z > 15; z--) zs.push(z);
+    const probes = zs.map((z) => { const n = 2 ** z; return loadImg(esriUrl(z, Math.floor(X0 * n), Math.floor(Y0 * n)), live).then((im) => !!(im && !blank(im))); });
+    let z = 15; for (let i = 0; i < zs.length; i++) { if (await probes[i]) { z = zs[i]; break; } if (dead) return null; }
+    const m = await mosaic(esriUrl, z, nNear, lat, lon, live, phone ? 1024 : 1280, false, true);
     return m.ok ? m : null;
   })();
   const far = near.then((m) => mosaic(esriUrl, Math.min(zNear, m ? m.z : 18) - 3, 4, lat, lon, live, 1024, true, true)).then((m) => (m.ok ? m : null));
@@ -240,13 +243,16 @@ export function prepare(sp) {
       : 'The observer didn\'t record how exact the spot is.';
     const sunTxt = sun ? (sun.el < -0.1 ? 'Seen after dark' : sun.el < 0.1 ? 'Seen at dusk or dawn' : 'Seen in daylight') : '';
     card.innerHTML = '<button type="button" class="spot-card-t" aria-expanded="true"><b>Where it was seen</b><span class="spot-card-ch" aria-hidden="true"></span></button>' +
-      '<div class="spot-card-b"><p class="spot-pl">' + esc(sp.place || 'No place name given') + '</p>' +
+      '<div class="spot-card-b">' + (sp.photo && sp.photo.src ? '<button type="button" class="spot-ph" title="Show the real photo beside the 3D place"><img alt="' + esc(sp.photo.alt || 'The photo of this sighting') + '" src="' + esc(sp.photo.fb || sp.photo.src) + '" decoding="async"><span>The real photo of this sighting</span></button>' : '') +
+      '<p class="spot-honest">The place is real map data at the exact spot, lit for the time it was seen. The snake is SnakeList\'s 3D model of its species - the real snake and who found it are in the photo.</p>' +
+      '<p class="spot-pl">' + esc(sp.place || 'No place name given') + '</p>' +
       '<p>' + esc(sp.whenTxt || 'Date not recorded') + (sunTxt ? ' <span class="spot-mut">· ' + esc(sunTxt) + '</span>' : '') + '</p>' +
       (sp.observer ? '<p>Found by ' + esc(sp.observer) + '</p>' : '') +
       '<p class="spot-acc' + (obsc ? ' spot-obsc' : '') + '">' + esc(accTxt) + '</p>' +
       '<p class="spot-st" aria-live="polite"></p></div>';
     const cT = card.querySelector('.spot-card-t'), cS = card.querySelector('.spot-st');
     V.on(cT, 'click', () => { const o = card.classList.toggle('spot-shut'); cT.setAttribute('aria-expanded', String(!o)); });
+    { const pb = card.querySelector('.spot-ph'); if (pb) V.on(pb, 'click', () => { const hb = st.querySelector('.sp3d-hb'); if (hb && hb.getAttribute('aria-pressed') !== 'true') hb.click(); }); }
     if (phone || (st.clientWidth || 999) < 560) { card.classList.add('spot-shut'); cT.setAttribute('aria-expanded', 'false'); }
     label = document.createElement('div'); label.className = 'spot-pin'; label.setAttribute('aria-hidden', 'true');
     label.innerHTML = '<b>' + (obsc ? 'Somewhere here' : 'Seen here') + '</b>' + (sp.dayTxt ? '<span>' + esc(sp.dayTxt) + '</span>' : '');
@@ -259,8 +265,9 @@ export function prepare(sp) {
     const busyTxt = (t) => { const s = st.querySelector('.sp3d-busy span'); if (s) s.textContent = t; };
 
     // ---- "The area": the camera rises to see the whole place round the spot, and back ----
-    bArea = document.createElement('button'); bArea.type = 'button'; bArea.className = 'sp3d-b spot-area'; bArea.textContent = 'See the area'; bArea.setAttribute('aria-pressed', 'false');
-    (ui.group || V.bar).appendChild(bArea);
+    // (v6.28: no "See the area" button - Eduardo asked for no buttons in See the spot but fullscreen; dragging and zooming
+    // the view still shows the whole place round the spot)
+    bArea = document.createElement('button'); bArea.type = 'button'; bArea.className = 'sp3d-b spot-area'; bArea.hidden = true;
     V.on(bArea, 'click', () => {
       const c = V.controls; if (!c) return; areaOn = !areaOn; bArea.setAttribute('aria-pressed', String(areaOn)); bArea.textContent = areaOn ? 'Back to the snake' : 'See the area';
       if (areaOn) { const tall = /^(forest|rainforest|swamp)$/.test(kindNow()); c.tween({ az: c.st.az, el: ((tall ? 58 : 38) * Math.PI) / 180, d: clamp(Math.max(tall ? 110 : 60, (sp.acc || 0) * 2.6), 60, extent * 0.4), px: 0, pz: 0 }, 1400); }
@@ -751,7 +758,7 @@ function css() {
 .spot-card-ch{width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-135deg);margin-top:4px;flex:none}
 .spot-card.spot-shut .spot-card-ch{transform:rotate(45deg);margin-top:-4px}
 .spot-card-b{padding:0 12px 10px}.spot-card.spot-shut .spot-card-b{display:none}
-.spot-card p{margin:0 0 4px}.spot-pl{font-weight:650}.spot-mut{opacity:.75}
+.spot-card p{margin:0 0 4px}.spot-ph{display:block;width:100%;margin:0 0 8px;padding:0;border:0;border-radius:10px;overflow:hidden;background:#0b1710;cursor:zoom-in;position:relative;color:#fff}.spot-ph img{display:block;width:100%;height:150px;object-fit:cover}.spot-ph span{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 5px;font:600 11.5px/1.3 Inter,system-ui,sans-serif;text-align:left;background:linear-gradient(transparent,rgba(0,0,0,.7))}.spot-ph:focus-visible{outline:3px solid #9be07c;outline-offset:2px}.spot-honest{font-size:11.5px;opacity:.8;line-height:1.4}.sl3d-ov:has(.sp3d-side:not([hidden]) img) .spot-ph{display:none}.spot-pl{font-weight:650}.spot-mut{opacity:.75}
 .spot-acc{font-size:12.5px;opacity:.9}.spot-obsc{background:#fff2c4;color:#4a3a06;border-radius:8px;padding:6px 8px;opacity:1}
 [data-sl-theme="dark"] .spot-obsc{background:#4a4010;color:#ffeeb0}
 .spot-st{font-size:12px;color:#8a4b12}.spot-st[hidden]{display:none}[data-sl-theme="dark"] .spot-st{color:#ffc98a}
