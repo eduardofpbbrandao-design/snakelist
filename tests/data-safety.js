@@ -158,7 +158,7 @@ async function run(b, label, ctxOpts) {
   await p.click('#tab-guide'); await p.waitForTimeout(600);
 
   // Achievements
-  await p.evaluate(() => window.SL_openAch()); await p.waitForTimeout(700);
+  await p.evaluate(() => window.SL_openAch('disc')); await p.waitForTimeout(700);
   const ach = await p.evaluate(() => { const d = document.getElementById('sl-achdlg'); return d && !d.hidden ? d.textContent : ''; });
   ok(/First Snake/.test(ach) && /Five Species/.test(ach), label + ': Achievements open and list the badges');
   if (SHOTS) await p.screenshot({ path: SHOTS + '/' + label + '-ach.png' });

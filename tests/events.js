@@ -330,16 +330,17 @@ const noOverflow = (p) => p.evaluate(() => document.documentElement.scrollWidth 
     ok(again.length === 0, 'evaluating again unlocks nothing twice');
     ok(e1['x-first'].startsWith('2026-12-0'), 'unlock date comes from the server time (' + e1['x-first'] + ')');
     await p.keyboard.press('Escape');
-    await p.evaluate(() => window.SL_openAch()); await p.waitForSelector('#sl-ev-ach .sl-ev-agrp');
+    await p.evaluate(() => window.SL_openAch()); await p.click('#sl-achdlg [data-atab="seasonal"]'); await p.waitForSelector('#sl-ev-ach .sl-ev-agrp');
     await p.clock.runFor(800);
-    ok(await p.$$eval('#sl-ev-ach .sl-ev-agrp', (l) => l.map((x) => x.dataset.event).join()) === 'xmas2026,newyear2027,firstever,snakeday2027,anniversary2027,halloween2027', 'grouped by event in the Achievements panel');
+    ok(await p.$$eval('#sl-ev-ach .sl-ev-agrp', (l) => l.map((x) => x.dataset.event).join()) === 'xmas2026,newyear2027,halloween2027,snakeday2027', 'Seasonal Events: one sub-group per event and year (Christmas 2026, New Year 2026-2027, Halloween 2027, World Snake Day 2027)');
+    ok(await p.$('#sl-achdlg [data-atab="anniv"]') && await p.$('#sl-achdlg [data-atab="cabin"]'), 'SnakeList Anniversaries and Cabin & Decorations tabs are there');
     ok(/Earned/.test(await p.textContent('#sl-ev-ach [data-ach="x-first"]')), 'First Christmas shows as earned');
     await shot(p, 'achievements-seasonal');
     await p.keyboard.press('Escape');
     await setTime(p, T('2027-01-02T12:00:00Z'));
-    await p.evaluate(() => window.SL_openAch()); await p.waitForSelector('#sl-ev-ach'); await p.clock.runFor(800);
-    ok(/No longer obtainable/.test(await p.textContent('#sl-ev-ach [data-ach="x-perfect"]')), 'after the event: unearned ones are marked "No longer obtainable"');
-    ok(/Earned/.test(await p.textContent('#sl-ev-ach [data-ach="x-first"]')), 'earned ones are kept');
+    await p.evaluate(() => window.SL_openAch()); await p.click('#sl-achdlg [data-atab="legacy"]'); await p.waitForSelector('#sl-achdlg [data-ach="x-perfect"]'); await p.clock.runFor(800);
+    ok(/No longer obtainable/.test(await p.textContent('#sl-achdlg [data-ach="x-perfect"]')), 'after the event: it moves to Legacy & Limited Edition and unearned ones are marked "No longer obtainable"');
+    ok(/Earned/.test(await p.textContent('#sl-achdlg [data-ach="x-first"]')), 'earned ones are kept');
     ok((await claim(p, 6, 'skip')).reason === 'event-over', 'nothing can be claimed after the event');
     await p.keyboard.press('Escape');
     await c2.close();
@@ -418,13 +419,15 @@ const noOverflow = (p) => p.evaluate(() => document.documentElement.scrollWidth 
     ok(await p.evaluate(() => SL_EVENTS.cursor.supported()), 'fine pointer detected');
     await p.evaluate(() => SL_EVENTS.cursor.open()); await p.waitForSelector('#sl-ev-cur');
     ok(/subscriber benefit/i.test(await p.textContent('#sl-ev-cur')), 'without a subscription it is labelled a subscriber benefit');
-    await p.click('#sl-ev-cur [data-effect="sparkle"]');
+    await p.click('#sl-ev-cur [data-ctab="trails"]'); await p.click('#sl-ev-cur [data-effect="sparkle"]');
     ok(await p.evaluate(() => !document.querySelector('canvas.sl-ev-curfx') && !document.documentElement.classList.contains('sl-ev-cur')), 'not applied to the page without a subscription');
     const box = await p.$('#sl-ev-cur [data-prev]'); const bb = await box.boundingBox();
     for (let i = 0; i < 12; i++) await p.mouse.move(bb.x + 20 + i * 15, bb.y + 40 + (i % 3) * 10);
     await shot(p, 'cursor-preview');
     await p.evaluate(() => SL_EVENTS.setTestMode(true));
-    await p.click('#sl-ev-cur [data-colour="gold"]'); await p.click('#sl-ev-cur [data-effect="trail"]');
+    await p.click('#sl-ev-cur [data-ctab="colours"]'); await p.click('#sl-ev-cur [data-colour="gold"]');
+    ok(await p.evaluate(() => getComputedStyle(document.querySelector('#sl-ev-cur [data-colour="gold"]')).borderTopColor) === 'rgb(234, 179, 8)', 'the ring around a colour button is that colour');
+    await p.click('#sl-ev-cur [data-ctab="trails"]'); await p.click('#sl-ev-cur [data-effect="trail"]');
     ok(await p.evaluate(() => document.documentElement.classList.contains('sl-ev-cur') && !!document.querySelector('canvas.sl-ev-curfx')), 'subscriber (TEST): coloured pointer + effect canvas on the page');
     ok(await p.evaluate(() => getComputedStyle(document.querySelector('canvas.sl-ev-curfx')).pointerEvents === 'none'), 'the effect canvas never takes clicks');
     await p.keyboard.press('Escape');
@@ -432,7 +435,7 @@ const noOverflow = (p) => p.evaluate(() => document.documentElement.scrollWidth 
     ok(await p.evaluate(() => SL_EVENTS.cursor._fx().trail.length > 3), 'snake trail follows the pointer');
     await shot(p, 'cursor-trail');
     // performance: no long tasks while moving the mouse with an effect on
-    await p.evaluate(() => { SL_EVENTS.cursor.open(); }); await p.click('#sl-ev-cur [data-effect="sparkle"]'); await p.keyboard.press('Escape');
+    await p.evaluate(() => { SL_EVENTS.cursor.open('trails'); }); await p.click('#sl-ev-cur [data-effect="sparkle"]'); await p.keyboard.press('Escape');
     await p.waitForTimeout(1500);
     await p.evaluate(() => { window.__lt = []; new PerformanceObserver((l) => l.getEntries().forEach((e) => window.__lt.push(e.duration))).observe({ type: 'longtask' }); });
     for (let i = 0; i < 200; i++) await p.mouse.move(200 + (i * 7) % 800, 200 + (i * 13) % 500);
@@ -442,6 +445,15 @@ const noOverflow = (p) => p.evaluate(() => document.documentElement.scrollWidth 
     ok(await p.evaluate(() => SL_EVENTS.cursor._fx().parts.length <= 80), 'particle count stays capped');
     await p.evaluate(() => { SL_EVENTS.cursor.open(); }); await p.click('#sl-ev-cur [data-act="reset"]');
     ok(await p.evaluate(() => !document.querySelector('canvas.sl-ev-curfx') && SL_EVENTS.cursor.pref().effect === 'none'), 'Reset brings the normal pointer back');
+    // My Snake (a species), a saved preset under Reset, a locked item that can only be previewed
+    await p.click('#sl-ev-cur [data-ctab="styles"]'); await p.fill('#sl-ev-cur .sl-ev-snakeq', 'inland taipan'); await p.click('#sl-ev-cur [data-snake="oxyuranus-microlepidotus"]');
+    ok(await p.evaluate(() => SL_EVENTS.cursor.pref().style === 'snake' && SL_EVENTS.cursor.pref().snake === 'oxyuranus-microlepidotus' && /svg/.test(document.getElementById('sl-ev-cur-style').textContent)), 'My Snake: the pointer becomes the chosen species');
+    ok(await p.evaluate(() => { const r = document.querySelector('#sl-ev-cur [data-act="reset"]').getBoundingClientRect(), s = document.querySelector('#sl-ev-cur [data-act="save"]').getBoundingClientRect(); return s.top >= r.bottom; }), 'the Save button sits under "Reset to the normal pointer"');
+    await p.click('#sl-ev-cur [data-act="save"]'); await p.fill('#sl-ev-cur [data-pname]', 'Taipan test'); await p.click('#sl-ev-cur [data-act="psave"]');
+    ok(await p.evaluate(() => SL_EVENTS.cursor.presets()[0].name === 'Taipan test' && SL_EVENTS.cursor.presets()[0].p.snake === 'oxyuranus-microlepidotus'), 'Save keeps the whole look as a named preset');
+    await p.click('#sl-ev-cur [data-style="compass"]');
+    ok(await p.evaluate(() => SL_EVENTS.cursor.pref().style === 'snake' && document.querySelector('#sl-ev-cur [data-act="equip"]').disabled), 'a locked style (Map Master) is only previewed: Equip stays disabled');
+    await p.click('#sl-ev-cur [data-act="reset"]');
     await p.evaluate(() => SL_EVENTS.setTestMode(false));
     ok(errs.length === 0, 'no page errors ' + errs.join(' | '));
     await ctx.close();
