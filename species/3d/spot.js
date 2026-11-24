@@ -138,7 +138,7 @@ function kindFromOsm(areas) {
     if (n === 'sand' || n === 'beach' || n === 'dune') return 'sand';
     if (n === 'bare_rock' || n === 'scree' || n === 'desert' || n === 'shingle' || n === 'rock') return 'arid';
     if (n === 'scrub' || n === 'heath' || lc === 'scrub') return 'heath';
-    if (n === 'grassland' || /^(meadow|grass|farmland|orchard|vineyard|recreation_ground|allotments|village_green|cemetery)$/.test(l || '') || lc === 'grass' || a.leisure === 'park' || a.leisure === 'nature_reserve' && false) return 'grass';
+    if (n === 'grassland' || /^(meadow|grass|farmland|orchard|vineyard|recreation_ground|allotments|village_green|cemetery)$/.test(l || '') || lc === 'grass') return 'grass';
   }
   return null;
 }
@@ -173,19 +173,35 @@ export function prepare(sp) {
   const osmP = osmFetch(lat, lon, phone ? 320 : 450, ctlr && ctlr.signal).catch(() => null);
   const rawP = Promise.all([timeout(osmP, 9000, null), timeout(near, 9000, null)]);
 
+  // the satellite picture round the spot, r metres: mean brightness and excess green, the share of green and of dark
+  // (tree-shadowed) pixels. Measured on real places: forest E ~0.3 with ~40% dark; meadow and oak pasture E ~0.07;
+  // desert scrub (Sonoran) E ~0.03, L ~0.4; dunes L ~0.68; both with almost no dark pixels
+  function satStats(m, r) {
+    if (!m) return null;
+    try {
+      const x = m.cv.getContext('2d', { willReadFrequently: true }), n = 2 ** m.z, cx = (X0 * n - m.tx0) * m.px, cy = (Y0 * n - m.ty0) * m.px, mpp = Wm / (n * m.px), rr = Math.max(2, Math.round(r / mpp));
+      const x0 = clamp(cx - rr | 0, 0, m.cv.width - 2), y0 = clamp(cy - rr | 0, 0, m.cv.height - 2), w = Math.min(rr * 2, m.cv.width - x0), h = Math.min(rr * 2, m.cv.height - y0);
+      const d = x.getImageData(x0, y0, w, h).data; let L = 0, E = 0, R = 0, B = 0, G = 0, D = 0, c = 0;
+      for (let i = 0; i < d.length; i += 4 * 3) { if (d[i + 3] < 200) continue; const l = pixLum(d[i], d[i + 1], d[i + 2]), e = pixExg(d[i], d[i + 1], d[i + 2]); L += l; E += e; R += d[i]; B += d[i + 2]; if (e > 0.05) G++; if (l < 0.2) D++; c++; }
+      if (c < 50) return null;
+      return { L: L / c, E: E / c, R: R / c, B: B / c, green: G / c, dark: D / c };
+    } catch (e) { return null; } // (a picture we may not read)
+  }
+  const dryOf = (q) => !!q && q.E < 0.06 && q.dark < 0.08 && q.L > 0.34 && q.green < 0.42;
   function chooseKind(o, m) {
     let k = o && kindFromOsm(o.areas), why = k ? 'map' : '';
-    if (!k && m) { // the satellite picture's colours within ~25 m
-      const x = m.cv.getContext('2d', { willReadFrequently: true }), n = 2 ** m.z, cx = (X0 * n - m.tx0) * m.px, cy = (Y0 * n - m.ty0) * m.px, mpp = Wm / (n * 256) * (256 / m.px), rr = Math.max(2, Math.round(25 / mpp));
-      try {
-        const d = x.getImageData(Math.max(0, cx - rr | 0), Math.max(0, cy - rr | 0), rr * 2, rr * 2).data; let L = 0, E = 0, R = 0, B = 0, c = 0;
-        for (let i = 0; i < d.length; i += 4) { L += pixLum(d[i], d[i + 1], d[i + 2]); E += pixExg(d[i], d[i + 1], d[i + 2]); R += d[i]; B += d[i + 2]; c++; }
-        L /= c; E /= c; R /= c; B /= c;
-        k = E > 0.05 && L < 0.3 ? 'forest' : E > 0.03 ? 'grass' : L > 0.55 && R > B * 1.15 ? 'sand' : R > B * 1.12 ? 'arid' : null; why = k ? 'satellite' : '';
-      } catch (e) { /* (a picture we may not read) */ }
-    }
-    if (o && o.ways) { // water within ~25 m: a riverbank
-      let wNear = false; for (const w of o.ways) if ((w.t.natural === 'water' || /^(river|stream|canal)$/.test(w.t.waterway || '')) && w.g.some((p) => { const q = toLocal(p[0], p[1]); return Math.hypot(q[0], q[1]) < 25; })) { wNear = true; break; }
+    const q = satStats(m, 25), qw = satStats(m, 120);
+    if (!k && q) { // the satellite picture's colours within ~25 m (and ~120 m for dry land)
+      k = q.E > 0.12 && q.dark > 0.2 ? 'forest' : dryOf(qw || q) ? (q.L > 0.58 && q.green < 0.3 ? 'sand' : 'arid') : q.E > 0.05 && q.L < 0.3 ? 'forest' : q.E > 0.03 ? 'grass' : q.L > 0.55 && q.R > q.B * 1.15 ? 'sand' : q.R > q.B * 1.12 ? 'arid' : null; why = k ? 'satellite' : '';
+    } else if (k && /^(grass|heath)$/.test(k) && dryOf(qw)) { k = 'arid'; why = 'satellite'; } // (a park or "grassland" in a desert is desert scrub)
+    // open land without trees (no tree shadows, little green) where the snake is first of all a desert snake: desert scrub
+    // (the green of a dry wash or of sparse shrubs reads like a meadow in the picture)
+    const h0k = sp.habs && sp.habs[0] && sp.habs[0].k;
+    if ((k === 'grass' || k === 'heath') && why === 'satellite' && /^(arid|sand|gibber|clay)$/.test(h0k || '') && qw && qw.dark < 0.08 && qw.E < 0.1) k = h0k === 'sand' ? 'sand' : 'arid';
+    if (o && o.ways) { // water within ~25 m (a lake's or river's edge, or a stream): a riverbank
+      const near = (g) => { for (let i = 0; i < g.length; i++) { const q = toLocal(g[i][0], g[i][1]); if (Math.hypot(q[0], q[1]) < 25) return true; if (i && segD(0, 0, toLocal(g[i - 1][0], g[i - 1][1]), q) < 25) return true; } return false; };
+      const isW = (t) => t.natural === 'water' || t.landuse === 'reservoir' || t.landuse === 'basin' || /^(river|stream|canal|riverbank)$/.test(t.waterway || '');
+      let wNear = o.ways.some((w) => isW(w.t) && near(w.g)) || (o.rels || []).some((r) => r.m.some((m) => near(m.g)));
       if (wNear && k !== 'swamp') k = 'riverbank';
     }
     const tropic = Math.abs(lat) < 23.5;
@@ -196,11 +212,12 @@ export function prepare(sp) {
     if (!k) k = (habs[0] && habs[0].k) || 'grass';
     const L = { forest: 'Woodland', rainforest: 'Rainforest', grass: 'Grassland', heath: 'Scrub and heath', arid: 'Rocky desert', sand: 'Sand dunes', riverbank: 'Riverbank', swamp: 'Swamp' };
     const own = habs.find((h) => h.k === k);
+    if (window.SL_3D_TEST) window.__slSpotSat = { q, qw };
     return Object.assign({ k, l: L[k] || k, why }, own && own.f ? { f: own.f } : {});
   }
 
   const S = {
-    ready: (ms) => timeout(rawP.then(([o, m]) => chooseKind(o, m)), ms || 4000, null).then((h) => h || { k: (sp.habs && sp.habs[0] && sp.habs[0].k) || 'grass', l: '' }),
+    ready: (ms) => timeout(rawP.then(([o, m]) => chooseKind(o, m)), ms || 4000, null).then((h) => (S.pick = h || { k: (sp.habs && sp.habs[0] && sp.habs[0].k) || 'grass', l: '', why: 'species' })),
     plugin: (V, ui) => makePlugin(V, ui),
     dispose() { dead = true; if (ctlr) try { ctlr.abort(); } catch (e) { /* */ } for (const im of live) { im.onload = im.onerror = null; try { im.src = ''; } catch (e) { /* */ } } live.length = 0; },
   };
@@ -209,7 +226,7 @@ export function prepare(sp) {
   function makePlugin(V, ui) {
     const THREE = V.THREE; TH = THREE; NAT = V.NATURE || null;
     const R = rng(Math.round((lat + 90) * 1e5) ^ Math.round((lon + 180) * 1e5));
-    let wantView = false, built = null, first = true, label = null, card = null, credit = null, bArea = null, extent = 900, terrH = null, areaOn = false, beam = null, ring = null;
+    let wantView = false, firstAz = null, built = null, first = true, label = null, card = null, credit = null, bArea = null, extent = 900, terrH = null, areaOn = false, beam = null, ring = null;
     const obsc = !!sp.obscured;
     const when = sp.when ? new Date(sp.when) : null, sun = when && !isNaN(when) ? sunPos(when, lat, lon) : null;
     css();
@@ -315,9 +332,17 @@ export function prepare(sp) {
       const roadDist = (x, z) => { let m = 1e9; for (const r of roads) { for (let i = 0; i < r.pts.length - 1; i++) { const d = segDist(x, z, r.pts[i], r.pts[i + 1]) - r.w / 2; if (d < m) m = d; } } return m; };
       const inWater = (x, z) => { for (const w of waters) if (inPoly(x, z, w.outer) && !w.holes.some((h) => inPoly(x, z, h))) return true; for (const s of streams) for (let i = 0; i < s.pts.length - 1; i++) if (segDist(x, z, s.pts[i], s.pts[i + 1]) < s.w / 2) return true; return false; };
       const onRoad = roads.some((r) => r.paved && r.pts.some((p, i) => i && segDist(0, 0, r.pts[i - 1], p) < r.w / 2 + 0.4));
+      // the first view: water close by is shown behind the snake; on a road you look along it
+      firstAz = null;
+      { let best = 60, at = null;
+        const edge = (pts) => { for (let i = 1; i < pts.length; i++) { const a = pts[i - 1], b = pts[i], dx = b[0] - a[0], dz = b[1] - a[1], l2 = dx * dx + dz * dz || 1e-9, t = clamp((-a[0] * dx - a[1] * dz) / l2, 0, 1), x = a[0] + dx * t, z = a[1] + dz * t, d = Math.hypot(x, z); if (d < best && d > 0.5) { best = d; at = [x, z]; } } };
+        for (const w of waters) edge(w.outer); for (const st2 of streams) edge(st2.pts);
+        if (at) firstAz = Math.atan2(-at[0], -at[1]);
+        else if (onRoad) { let bd = 1e9; for (const r of roads) for (let i = 1; i < r.pts.length; i++) { const d = segDist(0, 0, r.pts[i - 1], r.pts[i]); if (d < bd) { bd = d; const dx = r.pts[i][0] - r.pts[i - 1][0], dz = r.pts[i][1] - r.pts[i - 1][1]; firstAz = Math.atan2(dx, dz) + 0.35; } } }
+      }
       // the land, relative to the spot: flat right round the snake (it lies on level ground), real everywhere else
-      const flatR = Math.max(Rb * 1.6, 1.2), sink = onRoad ? 0.025 : 0;
-      const Tg = (x, z) => { const r = Math.hypot(x, z); return (H(x, z) - h0) * sstep(flatR, flatR + 7, r) - sink * (1 - sstep(flatR + 4, flatR + 10, r)); };
+      const flatR = Math.max(Rb * 1.6, 1.2) + 2, sink = onRoad ? 0.025 : 0; // (+2 m: the first view's camera stands on the level part too, so it isn't lifted up a slope)
+      const Tg = (x, z) => { const r = Math.hypot(x, z); return (H(x, z) - h0) * sstep(flatR, flatR + 10, r) - sink * (1 - sstep(flatR + 4, flatR + 10, r)); };
       terrH = Tg;
 
       // -- the ground mesh: one grid, fine near the spot and coarser out to the edge --
@@ -367,15 +392,20 @@ export function prepare(sp) {
 
       // -- road surfaces --
       const lift = (x, z) => 0.03 + 0.2 * sstep(20, 400, Math.hypot(x, z));
-      const roadTex = (kind) => {
-        const S2 = 256, cv = document.createElement('canvas'); cv.width = 128; cv.height = S2; const x = cv.getContext('2d'), rr = rng(kind.length * 31 + 7);
+      const roadTex = (kind) => { // (asphalt: a wider picture so its painted lines are a real 10-15 cm, not a third of a metre)
+        const S2 = 256, W = kind === 'asphalt' ? 256 : 128, k = W / 128, cv = document.createElement('canvas'); cv.width = W; cv.height = S2; const x = cv.getContext('2d'), rr = rng(kind.length * 31 + 7);
         const fill = { asphalt: [62, 63, 65], minor: [74, 73, 72], dirt: [146, 120, 92], path: [150, 130, 104] }[kind], soft = kind === 'dirt' || kind === 'path';
-        x.fillStyle = `rgb(${fill})`; x.fillRect(0, 0, 128, S2);
-        for (let i = 0; i < 2600; i++) { const v = (rr() - 0.5) * (kind === 'dirt' || kind === 'path' ? 46 : 26); x.fillStyle = `rgba(${fill.map((c) => clamp(c + v, 0, 255) | 0)},0.9)`; x.fillRect(rr() * 128, rr() * S2, 1 + rr() * 2.5, 1 + rr() * 2.5); }
+        x.fillStyle = `rgb(${fill})`; x.fillRect(0, 0, W, S2);
+        for (let i = 0; i < 2600 * k; i++) { const v = (rr() - 0.5) * (soft ? 46 : 26); x.fillStyle = `rgba(${fill.map((c) => clamp(c + v, 0, 255) | 0)},0.9)`; x.fillRect(rr() * W, rr() * S2, 1 + rr() * 2.5, 1 + rr() * 2.5); }
         if (kind === 'dirt') { x.fillStyle = 'rgba(95,78,60,0.35)'; x.fillRect(26, 0, 16, S2); x.fillRect(86, 0, 16, S2); x.fillStyle = 'rgba(110,130,70,0.35)'; x.fillRect(58, 0, 12, S2); }
-        if (kind === 'asphalt') { x.fillStyle = 'rgba(235,235,225,0.92)'; x.fillRect(5, 0, 3, S2); x.fillRect(120, 0, 3, S2); x.fillStyle = lon < -30 && lat > 0 ? 'rgba(236,190,40,0.95)' : 'rgba(235,235,225,0.92)'; if (lon < -30 && lat > 0) { x.fillRect(60, 0, 3, S2); x.fillRect(65, 0, 3, S2); } else x.fillRect(62, 0, 4, S2 * 0.3); }
-        if (kind === 'asphalt' || kind === 'minor') { x.globalCompositeOperation = 'source-over'; x.fillStyle = 'rgba(0,0,0,0.10)'; x.fillRect(24, 0, 20, S2); x.fillRect(84, 0, 20, S2); }
-        if (soft) { const d = x.getImageData(0, 0, 128, S2); for (let j = 0; j < S2; j++) for (let i = 0; i < 128; i++) { const u = Math.abs(i / 127 - 0.5) * 2; d.data[(j * 128 + i) * 4 + 3] = 255 * (1 - sstep(0.45, 1, u)); } x.putImageData(d, 0, 0); } // (soft edges into the picture)
+        if (kind === 'asphalt' || kind === 'minor') { x.fillStyle = 'rgba(0,0,0,0.10)'; x.fillRect(24 * k, 0, 20 * k, S2); x.fillRect(84 * k, 0, 20 * k, S2); } // (darker wheel tracks)
+        if (kind === 'asphalt') {
+          const yel = lon < -30; // (the Americas: a yellow centre line)
+          x.fillStyle = 'rgba(232,232,222,0.9)'; x.fillRect(6, 0, 3, S2); x.fillRect(W - 9, 0, 3, S2);
+          x.fillStyle = yel ? 'rgba(222,178,46,0.92)' : 'rgba(232,232,222,0.9)';
+          if (yel) { x.fillRect(W / 2 - 4, 0, 3, S2); x.fillRect(W / 2 + 1, 0, 3, S2); } else x.fillRect(W / 2 - 2, 0, 4, S2 * 0.3);
+        }
+        if (soft) { const d = x.getImageData(0, 0, W, S2); for (let j = 0; j < S2; j++) for (let i = 0; i < W; i++) { const u = Math.abs(i / (W - 1) - 0.5) * 2; d.data[(j * W + i) * 4 + 3] = 255 * (1 - sstep(0.45, 1, u)); } x.putImageData(d, 0, 0); } // (soft edges into the picture)
         const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = THREE.ClampToEdgeWrapping; t.wrapT = THREE.RepeatWrapping; t.anisotropy = Math.min(8, maxAniso); track(t); return t;
       };
       const mats = {}, rMat = (kind, off) => mats[kind] || (mats[kind] = (() => {
@@ -483,7 +513,7 @@ export function prepare(sp) {
       if (!mD) notes.push('The land height couldn\'t load, so the land is drawn flat.');
       if (!osm) notes.push('Roads and water from OpenStreetMap couldn\'t load just now.');
       status(notes.join(' '));
-      built = { roads: roads.length, waters: waters.length, streams: streams.length, trees: trees.length, trees40: trees.filter((t) => Math.hypot(t.x, t.z) < 40).length, shrubs: shrubs.length, extent, onRoad, kind, zNear: mN ? mN.z : null, zFar: mF ? mF.z : null, dem: !!mD, osm: !!osm };
+      built = { roads: roads.length, waters: waters.length, streams: streams.length, trees: trees.length, trees40: trees.filter((t) => Math.hypot(t.x, t.z) < 40).length, shrubs: shrubs.length, extent, onRoad, kind, why: S.pick && S.pick.why, zNear: mN ? mN.z : null, zFar: mF ? mF.z : null, dem: !!mD, osm: !!osm };
       if (window.SL_3D_TEST) window.__slSpot = built;
     }
     // plants that stand between the camera and the spot (or right in front of the lens) step aside, so the spot is never
@@ -522,9 +552,9 @@ export function prepare(sp) {
       },
       limits(info) { info.dMax = Math.max(info.dMax, extent * 0.45); },
       camera(cam, t) {
-        if (wantView && built && V.info && V.view) { wantView = false; V.view({ el: (14 * Math.PI) / 180, d: V.info.dFit * 1.35 }); }
+        if (wantView && built && V.info && V.view) { wantView = false; V.view(Object.assign({ el: (14 * Math.PI) / 180, d: V.info.dFit * 1.35 }, firstAz != null ? { az: firstAz } : {})); }
         if (terrH) { // never under the land
-          const g = terrH(cam.position.x, cam.position.z) + Math.max(0.25, cam.position.distanceTo(t) * 0.02);
+          const g = terrH(cam.position.x, cam.position.z) + Math.max(0.03, cam.position.distanceTo(t) * 0.02); // (a few cm: close views of a small snake stay low)
           if (cam.position.y < g) { cam.position.y = g; cam.lookAt(t); }
         }
         cam.far = Math.max(cam.far, extent * 3); cam.updateProjectionMatrix();
@@ -682,6 +712,7 @@ export function prepare(sp) {
     im.receiveShadow = true; im.castShadow = !low; im.name = 'spot-grass'; grassMesh = im; im.instanceMatrix.needsUpdate = true; scene.add(im);
   }
 }
+function segD(x, z, a, b) { const dx = b[0] - a[0], dz = b[1] - a[1], l2 = dx * dx + dz * dz || 1e-9, t = clamp(((x - a[0]) * dx + (z - a[1]) * dz) / l2, 0, 1); return Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t); }
 function inPoly(x, z, poly) { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const a = poly[i], b = poly[j]; if ((a[1] > z) !== (b[1] > z) && x < ((b[0] - a[0]) * (z - a[1])) / (b[1] - a[1] || 1e-12) + a[0]) c = !c; } return c; }
 
 function css() {
