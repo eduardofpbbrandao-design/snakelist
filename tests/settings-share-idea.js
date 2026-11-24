@@ -58,17 +58,30 @@ const vis = (p, sel) => p.evaluate((s) => { const e = document.querySelector(s);
   ok(await p.evaluate(() => localStorage.getItem('sl-bright-dark') === '70' && Math.abs(parseFloat(getComputedStyle(document.documentElement, '::after').opacity) - 0.3) < 0.01), 'brightness in dark mode 70%: the screen dims by 30% at once');
   await p.click('#ss-theme [data-v="light"]'); await p.waitForTimeout(200);
   ok(await p.evaluate(() => parseFloat(getComputedStyle(document.documentElement, '::after').opacity) === 0), 'light mode keeps its own brightness (100%)');
+  // v6.28: Settings in tabs, with keyboard navigation
+  ok(await p.evaluate(() => [...document.querySelectorAll('#sl-settings [role="tab"]')].map((t) => t.textContent).join('|') === 'Display|Language & Region|Account|Accessibility|Notifications|About & Help'), 'Settings has tabs: Display, Language & Region, Account, Accessibility, Notifications, About & Help');
+  ok(await p.evaluate(() => document.getElementById('sst-display').getAttribute('aria-selected') === 'true' && !document.getElementById('ssp-display').hidden && document.getElementById('ssp-access').hidden), 'Display is shown first; the other sections are hidden');
+  await p.focus('#sst-display'); await p.keyboard.press('ArrowRight'); await p.waitForTimeout(100);
+  ok(await p.evaluate(() => document.activeElement.id === 'sst-lang' && !document.getElementById('ssp-lang').hidden && document.getElementById('ssp-display').hidden), 'ArrowRight moves to the next tab and shows its section');
+  await p.keyboard.press('End'); await p.waitForTimeout(100);
+  ok(await p.evaluate(() => document.activeElement.id === 'sst-about' && !document.getElementById('ssp-about').hidden), 'End goes to the last tab');
+  await p.keyboard.press('ArrowRight'); await p.waitForTimeout(100);
+  ok(await p.evaluate(() => document.activeElement.id === 'sst-display'), 'ArrowRight on the last tab wraps to the first');
+  ok(await p.evaluate(() => !document.querySelector('#ss-open [data-v="device"]') && document.querySelectorAll('#ss-open button').length === 3), '"Open SnakeList in" has no "Follow device" (Last used, Light, Dark)');
+  await p.click('#sst-access'); await p.waitForTimeout(100);
   await p.click('#ss-text [data-v="115"]'); await p.waitForTimeout(200);
   ok(await p.evaluate(() => document.documentElement.classList.contains('sl-ts') && Math.abs(parseFloat(getComputedStyle(document.querySelector('#grid .card .card-name')).zoom) - 1.15) < 0.01), 'text size Large: the words grow at once');
   await p.click('#ss-text [data-v="100"]'); await p.waitForTimeout(100);
   ok(await p.evaluate(() => !document.documentElement.classList.contains('sl-ts') && !localStorage.getItem('sl-text-size')), 'Default puts the text size back');
-  await p.click('#ss-open [data-v="dark"]'); await p.click('#ss-calm'); await p.click('#ss-news'); await p.waitForTimeout(100);
+  await p.click('#ss-calm'); await p.click('#sst-display'); await p.click('#ss-open [data-v="dark"]'); await p.click('#sst-notify'); await p.click('#ss-news'); await p.waitForTimeout(100);
   ok(await p.evaluate(() => localStorage.getItem('sl-open-theme') === 'dark' && document.documentElement.classList.contains('sl-calm') && localStorage.getItem('sl-news-off') === '0'), 'Open in Dark, reduce motion and What\'s new pop-ups are remembered');
   ok(await p.evaluate(() => document.getElementById('ss-acct').disabled && document.getElementById('ss-acct').closest('.sl-srow').classList.contains('is-off')), 'Account to open with is greyed out with only one account');
   ok(await p.evaluate(() => document.getElementById('ss-loc').disabled), 'Share my location needs an account (signed out: off)');
   // the language menu opens over the panel
-  await p.click('#ss-lang'); await p.waitForTimeout(300);
+  await p.click('#sst-lang'); await p.click('#ss-lang'); await p.waitForTimeout(300);
   ok(await p.evaluate(() => { const m = document.querySelector('.lang-menu'); if (!m || m.hidden) return false; const r = m.getBoundingClientRect(); const top = document.elementFromPoint(r.left + r.width / 2, r.top + 20); return m.contains(top); }), 'Language opens the language list on top of Settings');
+  ok(await p.evaluate(() => { const r = document.querySelector('.lang-menu').getBoundingClientRect(); return Math.abs((r.left + r.right) / 2 - innerWidth / 2) < 3 && Math.abs((r.top + r.bottom) / 2 - innerHeight / 2) < 3; }), 'the language list opens in the centre of the screen');
+  ok(await p.evaluate(() => { const i = document.querySelector('.lang-menu input'), d = document.querySelector('.lang-menu .lang-def'); return d && i.compareDocumentPosition(d) & 4 && /English/.test(d.textContent) && /Default language/.test(d.textContent); }), 'under the search field: the language now on (English), already the default');
   await p.keyboard.press('Escape'); await p.waitForTimeout(200);
   await p.keyboard.press('Escape'); await p.waitForTimeout(200);
   ok(!(await vis(p, '#sl-settings .sl-achbox')), 'Escape closes Settings');
@@ -109,7 +122,45 @@ const vis = (p, sel) => p.evaluate((s) => { const e = document.querySelector(s);
   ok(sh.img && /\d+ species seen/.test(sh.sub), 'Share my sightings makes a picture of your sightings (' + sh.sub + ')');
   ok(/no public page/.test(sh.note), 'it says plainly that there is no public link to a list (no server for that)');
   if (SHOTS) await p.screenshot({ path: SHOTS + '/test-share-sightings.png' });
+  await p.keyboard.press('Escape'); await p.waitForTimeout(300);
+  // v6.28: Share my sightings in the My Sightings tab as well (only there, not on the other tabs' result bar)
+  ok(!(await vis(p, '#sl-share-sightings-tab')), 'the My Sightings share button is not shown on the Species Checklist');
+  await p.evaluate(() => document.getElementById('tab-sightings').click()); await p.waitForTimeout(500);
+  ok(await vis(p, '#sl-share-sightings-tab'), 'Share my sightings is in the My Sightings tab');
+  await p.click('#sl-share-sightings-tab'); await p.waitForTimeout(800);
+  ok(await vis(p, '#sl-share .sl-achbox') && await p.evaluate(() => /species seen/.test(document.querySelector('#sl-share .sl-ahead p').textContent)), '...and it opens the same Share my sightings sheet');
+  if (SHOTS) await p.screenshot({ path: SHOTS + '/test-share-sightings-tab.png' });
+  await p.keyboard.press('Escape'); await p.waitForTimeout(200);
   ok(!p.errs.length, 'Share: no page errors' + (p.errs.length ? ': ' + p.errs.join(' | ') : ''));
+  await p.context().close();
+
+  // ---------------- v6.28: the opening photo (Settings > Display) ----------------
+  p = await open(b);
+  await p.click('#set-btn'); await p.click('#sst-display'); await p.waitForTimeout(400);
+  const nPh = await p.evaluate(() => (window.SL_HERO_PHOTOS || []).length);
+  ok(await p.evaluate((n) => document.querySelectorAll('#ss-hero [role="radio"]').length === n + 2 && document.querySelector('#ss-hero [data-h="random"]').getAttribute('aria-checked') === 'true', nPh), 'opening photo: Random (chosen), all ' + nPh + ' photos and "Your own photo"');
+  await p.waitForTimeout(600);
+  ok(await p.evaluate(() => [...document.querySelectorAll('#ss-hero img')].every((im) => im.complete && im.naturalWidth > 0)), 'every opening photo has its thumbnail');
+  await p.click('#ss-hero [data-h="naja-kaouthia"]'); await p.waitForTimeout(200);
+  ok(await p.evaluate(() => localStorage.getItem('sl-hero-pick') === 'naja-kaouthia' && /naja-kaouthia/.test(document.querySelector('#sl-hero .hero-media img:not(.hero-fill)').getAttribute('src'))), 'choosing a photo saves it and puts it on the opening');
+  // your own photo: the file picker, downscaled, kept in IndexedDB
+  const png = await p.evaluate(() => { const c = document.createElement('canvas'); c.width = 3000; c.height = 2000; const g = c.getContext('2d'); g.fillStyle = '#3a6'; g.fillRect(0, 0, 3000, 2000); g.fillStyle = '#222'; g.fillRect(800, 500, 1400, 900); return c.toDataURL('image/png').split(',')[1]; });
+  const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('#ss-hero [data-h="own"]')]);
+  await fc.setFiles({ name: 'mine.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') });
+  await p.waitForFunction(() => localStorage.getItem('sl-hero-pick') === 'own', null, { timeout: 8000 }).catch(() => {});
+  const own = await p.evaluate(() => new Promise((res) => { const r = indexedDB.open('sl-hero', 1); r.onsuccess = () => { const g = r.result.transaction('photos').objectStore('photos').get('own'); g.onsuccess = () => { const bl = g.result; if (!bl) return res(null); const im = new Image(); im.onload = () => res({ w: im.naturalWidth, h: im.naturalHeight, size: bl.size, type: bl.type }); im.src = URL.createObjectURL(bl); }; }; }));
+  ok(own && own.w === 1920 && Math.abs(own.h - 1243) <= 1 && own.size < 1500000, 'your own photo is stored on this device, made the opening\'s shape and size (' + JSON.stringify(own) + ')');
+  ok(await p.evaluate(() => /^blob:/.test(document.querySelector('#sl-hero .hero-media img:not(.hero-fill)').src) && document.getElementById('hero-sp').textContent === 'Your photo' && !document.getElementById('hero-sp').hasAttribute('href')), 'your own photo goes on the opening (named "Your photo", not a link)');
+  const ctx3 = p.context(); await p.close();
+  p = await open(b, { ctx: ctx3 });
+  ok(await p.evaluate(() => /^blob:/.test(document.querySelector('#sl-hero .hero-media img:not(.hero-fill)').src) && document.querySelector('#sl-hero .hero-media img:not(.hero-fill)').naturalWidth === 1920), 'next visit: SnakeList opens with your own photo');
+  await p.click('#set-btn'); await p.click('#sst-display'); await p.click('#ss-hero-del'); await p.waitForTimeout(500);
+  ok(await p.evaluate(() => !localStorage.getItem('sl-hero-pick') && document.querySelector('#ss-hero [data-h="random"]').getAttribute('aria-checked') === 'true'), 'removing your photo goes back to Random');
+  ok(!p.errs.length, 'opening photo: no page errors' + (p.errs.length ? ': ' + p.errs.join(' | ') : ''));
+  await ctx3.close();
+  // the first-visit rule (Smooth Green Snake) only when nothing was chosen
+  p = await open(b, { init: () => { localStorage.removeItem('sl-hero-last'); localStorage.setItem('sl-hero-pick', 'micrurus-tener'); } });
+  ok(await p.evaluate(() => window.SL_HERO && window.SL_HERO[0] === 'micrurus-tener'), 'a chosen photo wins over the first-visit Smooth Green Snake');
   await p.context().close();
 
   // ---------------- "Have an idea?" ----------------

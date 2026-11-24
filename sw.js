@@ -34,6 +34,9 @@ const tell = (id, tries) => self.clients.get(id || '').then((cl) => {
   if (tries > 0) return new Promise((r) => setTimeout(r, 1000)).then(() => tell(id, tries - 1));
   return self.clients.matchAll({ type: 'window' }).then((cs) => cs.forEach((c) => c.postMessage({ type: 'sl-update' })));
 });
+// v6.28: the page says "Refresh was pressed" just before it reloads
+let freshAt = 0;
+self.addEventListener('message', (e) => { if (e.data && e.data.type === 'sl-fresh') freshAt = Date.now(); });
 self.addEventListener('fetch', (e) => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== 'GET') return;
@@ -54,6 +57,8 @@ self.addEventListener('fetch', (e) => {
         if (!hit) return net.then(keep(key)).catch(() => caches.match('./'));
         // v5.05: online, the newest SnakeList always opens (an unchanged page costs only a quick check);
         // only when the network is slow or missing does the saved copy open, and the newer one is saved for next time
+        // v6.28: right after Refresh on the "new version" bar the newest page is waited for (the saved copy only if it fails)
+        if (Date.now() - freshAt < 30000) { freshAt = 0; return net.then((r) => { if (r && r.ok) { const copy = r.clone(); e.waitUntil(caches.open(CACHE).then((c) => c.put(key, copy))); return r; } return hit; }, () => hit); }
         return within(net, 4000).then((r) => {
           // (v6.13: the saved copy is only written again when the page really changed - writing the whole 7 MB page on every
           // open kept an iPad busy each time SnakeList started)

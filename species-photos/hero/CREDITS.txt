@@ -103,3 +103,7 @@ micrurus-tener-{900,1400,1920}.webp
   Photo: Brady Reed, CC0 1.0 - public domain dedication (iNaturalist)
   Licence: https://creativecommons.org/publicdomain/zero/1.0/
   Source: https://www.inaturalist.org/observations/11392309
+
+thumb/<name>.webp
+  360 px previews of each opening photograph above (made from the 1400 px copies) for the opening-photo choice in Settings (v6.28).
+  Same photographs, same credits and licences as listed above.

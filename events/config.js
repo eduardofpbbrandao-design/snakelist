@@ -242,33 +242,59 @@
     /* ------------------------------------------------------------------ seasonal achievements ---------- */
     // rule: worked out by events/achievements.js from verified data only (Advent claims, trusted time,
     // the app's own achievement dates). Doors recovered with SUBSCRIBER skips never count towards an
-    // achievement, so every achievement is exactly as reachable for free accounts.
+    // achievement, so every achievement is exactly as reachable for free accounts; days covered by the free
+    // (streak) skips do count (Eduardo, 2026-11-24).
+    // They show in the app's Achievements panel: cat "seasonal" (one sub-group per event and year), "cabin" or "anniv";
+    // once an event has ended its achievements move to "Legacy & Limited Edition" (earned ones are kept for good,
+    // unearned ones say "No longer obtainable"). rar = rarity (common, uncommon, rare, epic, legendary, mythic).
+    // cursor = a cursor reward (events/cursor.js unlocks it: "style:x", "trail:x", "click:x" or "colour:x").
+    // Ids of the earlier list are kept (x-first, x-explorer, x-streak3, x-collector, x-glow, x-perfect, x-legend,
+    // n-explorer, n-midnight, n-begin, f-pioneer, s-day, a-birthday, h-spooky) so nothing earned is ever lost.
     achievements: [
-      { id: "x-first",     event: "xmas2026", icon: "door",   name: "First Christmas",    desc: "Open your first Advent Calendar door.",                 goal: 1,  stat: "doors",   reward: "Holly badge" },
-      { id: "x-explorer",  event: "xmas2026", icon: "compass",name: "Christmas Explorer", desc: "Open 6 Advent doors.",                                  goal: 6,  stat: "doors",   reward: "Explorer's lantern pin" },
-      { id: "x-streak3",   event: "xmas2026", icon: "flame",  name: "Three-Day Streak",   desc: "Open doors on 3 days in a row.",                        goal: 3,  stat: "bestRun", reward: "1 free skip (from the streak itself)" },
-      { id: "x-collector", event: "xmas2026", icon: "gift",   name: "Festive Collector",  desc: "Collect 12 Advent rewards.",                            goal: 12, stat: "doors",   reward: "Collector's shelf in the Cabin" },
-      { id: "x-glow",      event: "xmas2026", icon: "gem",    name: "Glowing Discovery",  desc: "Find the Glowing Emerald Scale behind door 13.",        goal: 1,  stat: "door13",  reward: "Glowing scale badge" },
-      { id: "x-perfect",   event: "xmas2026", icon: "star",   name: "Perfect Christmas",  desc: "Open all 24 doors, each on its own day - no skips.",   goal: 24, stat: "onTime",  reward: "Perfect Christmas star" },
-      { id: "x-legend",    event: "xmas2026", icon: "serpent",name: "Legendary Serpent",  desc: "Cover all 24 doors and earn the Legendary Christmas Serpent (days recovered or reserved with free skips count).", goal: 24, stat: "fairDoors", reward: "The Legendary Serpent badge",
-                           // once in a lifetime: shown with a LIMITED label and the Legendary (gold) reward box
-                           limited: true, legendary: true },
-      { id: "n-explorer",  event: "newyear2027", icon: "compass", name: "New Year Explorer",   desc: "Visit SnakeList during the New Year 2026–27 event.",  goal: 1, stat: "nyVisit",  reward: "Firework badge" },
-      { id: "n-midnight",  event: "newyear2027", icon: "clock",   name: "Midnight Celebration", desc: "Be on SnakeList within 30 minutes of midnight on New Year's Eve, in your own time zone.", goal: 1, stat: "nyMidnight", reward: "Midnight badge" },
-      { id: "n-begin",     event: "newyear2027", icon: "sprout",  name: "New Beginnings",      desc: "Earn any SnakeList achievement during New Year week.", goal: 1, stat: "nyAch", reward: "New leaf badge" },
-      { id: "f-pioneer",   event: "firstever",   icon: "flag",    name: "Event Pioneer",       desc: "Take part in SnakeList's first ever event by opening an Advent door during Christmas 2026.", goal: 1, stat: "doors", reward: "Pioneer badge (can never be earned again)" },
-      { id: "s-day",       event: "snakeday2027",   icon: "globe",  name: "Snake Day Champion", desc: "Visit SnakeList on World Snake Day (16 July 2027).", goal: 1, stat: "visit", reward: "World Snake Day badge" },
-      { id: "a-birthday",  event: "anniversary2027", icon: "cake",  name: "Happy Birthday, SnakeList", desc: "Visit SnakeList during its anniversary week.", goal: 1, stat: "visit", reward: "Birthday badge" },
-      { id: "h-spooky",    event: "halloween2027",   icon: "moon",  name: "Spooky Spotter",     desc: "Visit SnakeList during Halloween 2027.", goal: 1, stat: "visit", reward: "Glowing-eyes badge" }
+      // Christmas 2026
+      { id: "f-pioneer",   event: "xmas2026", icon: "flag",    rar: "rare",      name: "Christmas Pioneer",   desc: "Take part in SnakeList's very first event by opening an Advent door during Christmas 2026.", goal: 1,  stat: "doors",   reward: "Pioneer badge (can never be earned again)", cursor: "style:xstar" },
+      { id: "x-first",     event: "xmas2026", icon: "door",    rar: "common",    name: "First Advent Door",   desc: "Open your first Advent Calendar door.",                     goal: 1,  stat: "doors",   reward: "Holly badge" },
+      { id: "x-streak3",   event: "xmas2026", icon: "flame",   rar: "uncommon",  name: "Christmas Streak",    desc: "Open doors on 3 days in a row.",                            goal: 3,  stat: "bestRun", reward: "1 free skip (from the streak itself)", cursor: "trail:lights" },
+      { id: "x-collector", event: "xmas2026", icon: "gift",    rar: "common",    name: "Holiday Collector",   desc: "Open 5 Advent doors (days covered by free skips count).",  goal: 5,  stat: "doors",   reward: "Holiday Collector badge" },
+      { id: "x-explorer",  event: "xmas2026", icon: "compass", rar: "uncommon",  name: "December Explorer",   desc: "Open 10 Advent doors (days covered by free skips count).", goal: 10, stat: "doors",   reward: "Explorer's lantern pin", cursor: "click:snowburst" },
+      { id: "x-enth15",    event: "xmas2026", icon: "star",    rar: "rare",      name: "Christmas Enthusiast", desc: "Open 15 Advent doors (days covered by free skips count).", goal: 15, stat: "doors",  reward: "Enthusiast's star", cursor: "style:candycane" },
+      { id: "x-almost20",  event: "xmas2026", icon: "bell",    rar: "epic",      name: "Almost Christmas",    desc: "Open 20 Advent doors (days covered by free skips count).", goal: 20, stat: "doors",   reward: "Silver bell badge", cursor: "trail:snowfall" },
+      { id: "x-perfect",   event: "xmas2026", icon: "star",    rar: "epic",      name: "Perfect Advent",      desc: "Open all 24 Advent doors - days covered by your free skips count.", goal: 24, stat: "doors", reward: "Legendary Christmas Serpent cursor", cursor: "style:xserpent" },
+      { id: "x-glow",      event: "xmas2026", icon: "gem",     rar: "rare",      name: "Glowing Ornament",    desc: "Find the Glowing Emerald Scale behind door 13.",           goal: 1,  stat: "door13",  reward: "Glowing scale badge" },
+      { id: "x-legend",    event: "xmas2026", icon: "serpent", rar: "legendary", name: "Legendary Christmas Serpent", desc: "Earn the grand prize: cover all 24 doors (days recovered or reserved with free skips count) and the Legendary Christmas Serpent is yours.", goal: 24, stat: "fairDoors", reward: "The Legendary Serpent badge and Cabin decoration",
+                           limited: true, legendary: true },   // once in a lifetime: LIMITED label + the gold Legendary reward box
+      { id: "x-deco",      event: "xmas2026", icon: "ornament", rar: "uncommon", name: "Christmas Decorator", desc: "Show 3 Christmas rewards in your Cabin.",                  goal: 3,  stat: "shown",   reward: "Decorator's ribbon", cursor: "click:ornament" },
+      { id: "x-complete",  event: "xmas2026", icon: "crown",   rar: "mythic",    name: "Christmas Completionist", desc: "Earn every other Christmas 2026 achievement.",       goal: 11, stat: "xmasAll", reward: "Completionist crown" },
+      // Christmas Cabin (shown under Cabin & Decorations)
+      { id: "c-home",      event: "xmas2026", cat: "cabin", icon: "house",   rar: "common",    name: "Welcome Home",        desc: "Visit your Christmas Cabin.",                      goal: 1,  stat: "cabinVisit", reward: "Cabin key badge" },
+      { id: "c-first",     event: "xmas2026", cat: "cabin", icon: "ornament", rar: "common",   name: "First Decoration",    desc: "Show your first reward in the Cabin.",             goal: 1,  stat: "shown",   reward: "Hook badge" },
+      { id: "c-five",      event: "xmas2026", cat: "cabin", icon: "ornament", rar: "uncommon", name: "Five on the Mantel",  desc: "Show 5 rewards in the Cabin at once.",             goal: 5,  stat: "shown",   reward: "Mantel badge" },
+      { id: "c-10",        event: "xmas2026", cat: "cabin", icon: "gift",    rar: "uncommon",  name: "Ten Treasures",       desc: "Unlock 10 Cabin rewards.",                         goal: 10, stat: "owned",   reward: "Treasure badge" },
+      { id: "c-25",        event: "xmas2026", cat: "cabin", icon: "gift",    rar: "epic",      name: "Full Collection",     desc: "Unlock all 25 free Cabin rewards (24 doors and the grand prize).", goal: 25, stat: "owned", reward: "Collector's cabinet" },
+      { id: "c-glow",      event: "xmas2026", cat: "cabin", icon: "gem",     rar: "rare",      name: "Glowing Discovery",   desc: "Show the Glowing Emerald Scale in your Cabin.",    goal: 1,  stat: "glowShown", reward: "Glowing frame" },
+      { id: "c-gold",      event: "xmas2026", cat: "cabin", icon: "egg",     rar: "rare",      name: "Golden Collector",    desc: "Unlock the three golden rewards: the Golden Snake Egg, the Holly Kingsnake Ornament and the Golden Fang Bell.", goal: 3, stat: "golden", reward: "Golden shelf" },
+      { id: "c-festive",   event: "xmas2026", cat: "cabin", icon: "star",    rar: "epic",      name: "Festive Decorator",   desc: "Fill the mantel: show 8 rewards in the Cabin at once.", goal: 8, stat: "shown", reward: "Festive garland" },
+      { id: "c-legend",    event: "xmas2026", cat: "cabin", icon: "serpent", rar: "legendary", name: "Legendary Collector", desc: "Show the Legendary Christmas Serpent in your Cabin.", goal: 1, stat: "grandShown", reward: "Golden mantel light" },
+      // New Year 2026-2027 (no need to be online at midnight)
+      { id: "n-explorer",  event: "newyear2027", icon: "flag",    rar: "common",   name: "New Year Pioneer",     desc: "Visit SnakeList during the New Year 2026–2027 event.", goal: 1, stat: "nyVisit",  reward: "Firework badge", cursor: "trail:fireworks" },
+      { id: "n-midnight",  event: "newyear2027", icon: "moon",    rar: "uncommon", name: "Midnight Explorer",    desc: "Visit SnakeList on New Year's Eve or New Year's Day (any time - you don't have to stay up until midnight).", goal: 1, stat: "nyEve", reward: "Midnight badge", cursor: "style:midstar" },
+      { id: "n-begin",     event: "newyear2027", icon: "sprout",  rar: "uncommon", name: "Fresh Start",          desc: "Earn any SnakeList achievement during the New Year event.", goal: 1, stat: "nyAch", reward: "New leaf badge", cursor: "click:firework" },
+      { id: "n-collector", event: "newyear2027", icon: "calendar", rar: "rare",    name: "New Year Collector",   desc: "Visit SnakeList on 3 different days of the New Year event.", goal: 3, stat: "nyDays", reward: "Golden 2027 badge", cursor: "style:ny2027" },
+      { id: "n-complete",  event: "newyear2027", icon: "crown",   rar: "epic",     name: "New Year Completionist", desc: "Earn every other New Year achievement.", goal: 4, stat: "nyAll", reward: "Celebration crown", cursor: "colour:silver" },
+      // later events
+      { id: "s-day",       event: "snakeday2027",   icon: "globe", rar: "uncommon", name: "Snake Day Champion", desc: "Visit SnakeList on World Snake Day (16 July 2027).", goal: 1, stat: "visit", reward: "World Snake Day badge" },
+      { id: "h-spooky",    event: "halloween2027",  icon: "moon",  rar: "uncommon", name: "Spooky Spotter",     desc: "Visit SnakeList during Halloween 2027.", goal: 1, stat: "visit", reward: "Glowing-eyes badge", cursor: "trail:ember" },
+      // SnakeList's first anniversary (21 August 2027) - can't be earned before its dates
+      { id: "a-birthday",  event: "anniversary2027", cat: "anniv", icon: "cake",  rar: "rare",      name: "One Year of SnakeList", desc: "Visit SnakeList during its first anniversary week.", goal: 1, stat: "visit", reward: "Anniversary Gold cursor colour", cursor: "colour:anniv" },
+      { id: "a-explorer",  event: "anniversary2027", cat: "anniv", icon: "compass", rar: "rare",    name: "Anniversary Explorer",  desc: "Visit SnakeList on 3 different days of anniversary week.", goal: 3, stat: "annDays", reward: "Party hat badge" },
+      { id: "a-collector", event: "anniversary2027", cat: "anniv", icon: "gift",  rar: "epic",      name: "Anniversary Collector", desc: "Earn 3 SnakeList achievements during anniversary week.", goal: 3, stat: "annAch", reward: "Anniversary ribbon" },
+      { id: "a-legend",    event: "anniversary2027", cat: "anniv", icon: "crown", rar: "legendary", name: "First Anniversary Legend", desc: "Earn the other three anniversary achievements.", goal: 3, stat: "annAll", reward: "First Anniversary crown" }
     ],
 
     /* ------------------------------------------------------------------ cursor ----------------------- */
-    cursor: {
-      colours: [["green", "Green", "#4CAF50"], ["emerald", "Emerald", "#10B981"], ["blue", "Blue", "#3B82F6"], ["red", "Red", "#EF4444"],
-                ["purple", "Purple", "#8B5CF6"], ["gold", "Gold", "#E0B13B"], ["white", "White", "#FFFFFF"], ["rainbow", "Rainbow", "rainbow"]],
-      effects: [["none", "No effect"], ["glow", "Subtle Glow"], ["trail", "Snake Trail"], ["sparkle", "Sparkling Particles"], ["snow", "Snowflake Trail"],
-                ["emerald", "Emerald Glow"], ["rainbow", "Rainbow Trail"], ["golden", "Golden Sparkles"]]
-    }
+    // the cursor catalogue (styles, colours, trails, click and hover effects, seasonal sets, which ones are
+    // earned with achievements or Advent doors) lives in events/cursor.js, next to the code that draws them.
+    cursor: { maxPresets: 12 }
   };
   root.SL_EVENTS_CONFIG = C;
   if (typeof module === "object" && module.exports) module.exports = C;

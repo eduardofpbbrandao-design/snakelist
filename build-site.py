@@ -60,11 +60,12 @@ head = f"""<!doctype html>
   // one in the background; when it is different, this bar offers Refresh. The page never reloads by
   // itself (on poor wifi a reload meant downloading everything again, and offline nothing came).
   if ('serviceWorker' in navigator) {{
-    window.SL_SHOW_NEW = function (now) {{ /* v6.11: never over the opening or the photo - it waits its turn with the other pop-ups */ if (now !== true) {{ if (document.readyState === 'loading') {{ document.addEventListener('DOMContentLoaded', function () {{ window.SL_SHOW_NEW(); }}); return; }} if (window.SL_whenPrompt) {{ if (!window.__slNewQ) {{ window.__slNewQ = 1; window.SL_whenPrompt(function () {{ window.SL_SHOW_NEW(true); }}); }} return; }} }} if (document.getElementById('sl-newver') || !document.body) return; var b = document.createElement('div'); b.id = 'sl-newver'; b.setAttribute('role', 'status'); b.style.cssText = 'position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:9300;display:flex;gap:12px;align-items:center;max-width:calc(100vw - 32px);padding:10px 12px 10px 16px;border-radius:14px;background:#256846;color:#fff;font:500 14px/1.35 Inter,system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28)'; b.innerHTML = '<span>A new version of SnakeList is ready. Your list is already saved.</span><button type="button" style="font:600 14px Inter,sans-serif;color:#256846;background:#fff;border:0;border-radius:9px;padding:7px 14px;cursor:pointer">Refresh</button><button type="button" aria-label="Later" style="background:none;border:0;color:#fff;font-size:20px;cursor:pointer">&times;</button>'; var bs = b.querySelectorAll('button'); bs[0].onclick = function () {{ if (document.querySelector('.note-sheet.open') && !confirm('You have a sighting open that is not saved yet. Refresh anyway?')) return; location.reload(); }}; bs[1].onclick = function () {{ b.remove(); }}; document.body.appendChild(b); }};
+    window.SL_SHOW_NEW = function (now) {{ /* v6.11: never over the opening or the photo - it waits its turn with the other pop-ups */ if (now !== true) {{ if (document.readyState === 'loading') {{ document.addEventListener('DOMContentLoaded', function () {{ window.SL_SHOW_NEW(); }}); return; }} if (window.SL_whenPrompt) {{ if (!window.__slNewQ) {{ window.__slNewQ = 1; window.SL_whenPrompt(function () {{ window.SL_SHOW_NEW(true); }}); }} return; }} }} if (document.getElementById('sl-newver') || !document.body) return; var b = document.createElement('div'); b.id = 'sl-newver'; b.setAttribute('role', 'status'); b.style.cssText = 'position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:9300;display:flex;gap:12px;align-items:center;max-width:calc(100vw - 32px);padding:10px 12px 10px 16px;border-radius:14px;background:#256846;color:#fff;font:500 14px/1.35 Inter,system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28)'; b.innerHTML = '<span>A new version of SnakeList is ready. Your list is already saved.</span><button type="button" style="font:600 14px Inter,sans-serif;color:#256846;background:#fff;border:0;border-radius:9px;padding:7px 14px;cursor:pointer">Refresh</button><button type="button" aria-label="Later" style="background:none;border:0;color:#fff;font-size:20px;cursor:pointer">&times;</button>'; var bs = b.querySelectorAll('button'); bs[0].onclick = function () {{ if (document.querySelector('.note-sheet.open') && !confirm('You have a sighting open that is not saved yet. Refresh anyway?')) return; var c = navigator.serviceWorker.controller; if (c) c.postMessage({{ type: 'sl-fresh' }}); setTimeout(function () {{ location.reload(); }}, c ? 60 : 0); }}; bs[1].onclick = function () {{ b.remove(); }}; document.body.appendChild(b); }};
     navigator.serviceWorker.addEventListener('message', function (e) {{ if (e.data && e.data.type === 'sl-update') {{ window.SL_SHOW_NEW(); }} }});
     if (location.protocol === 'https:') window.addEventListener('load', function () {{ navigator.serviceWorker.register('sw.js', {{ updateViaCache: 'none' }}).then(function (r) {{ if (navigator.onLine !== false) r.update().catch(function () {{}}); }}).catch(function () {{}}); }});
   }}
 </script>
+<script>__SL_UPDATE_CHECK__</script>
 <!-- Google tag (gtag.js) - visitor statistics for snakelist.com (v6.11: its script is loaded by SL_3P below, after the opening) -->
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -103,6 +104,37 @@ head = f"""<!doctype html>
   }})();
 </script>
 """
+# v6.28 (Eduardo's iPad stayed on v6.21 while the site was on v6.27): an installed app on an iPad is rarely opened afresh -
+# it is woken up from the background, so no new page load ever asked for the newer SnakeList. The page now asks a tiny
+# version.json (never from any cache) when it starts, whenever it comes back to the screen (at most once a minute) and every
+# 30 minutes while it is open; a different version wakes the offline helper (it takes the newer page at once) and shows the
+# "new version" bar, which still waits its turn behind the opening and the other pop-ups.
+_vm = re.search(r'<span class="sl-ver">v?([^<]+)</span>', app)
+SL_VER = _vm.group(1).strip() if _vm else ""
+open("version.json", "w").write('{"v": "%s"}\n' % SL_VER)
+UPDATE_CHECK = r"""
+  (function () {
+    var BUILD = '__VER__', last = 0, shown = false;
+    window.SL_BUILD = BUILD;
+    function check(force) {
+      if (shown || !window.fetch || navigator.onLine === false || location.protocol === 'file:') return;
+      var now = Date.now(); if (!force && now - last < 60000) return; last = now;
+      fetch('version.json?t=' + now, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+        if (!j || !j.v || j.v === BUILD) return;
+        shown = true;
+        if (navigator.serviceWorker) navigator.serviceWorker.getRegistration().then(function (reg) { if (reg) reg.update().catch(function () {}); }).catch(function () {});
+        if (window.SL_SHOW_NEW) window.SL_SHOW_NEW();
+      }).catch(function () {});
+    }
+    window.SL_CHECK_UPDATE = check;
+    window.addEventListener('load', function () { setTimeout(function () { check(true); }, 4000); });
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') check(); });
+    window.addEventListener('pageshow', function (e) { if (e.persisted) check(true); });
+    window.addEventListener('online', function () { check(true); });
+    setInterval(function () { if (document.visibilityState === 'visible') check(); }, 30 * 60000);
+  })();
+""".replace("__VER__", SL_VER)
+head = head.replace("__SL_UPDATE_CHECK__", UPDATE_CHECK, 1)
 # the Christmas preview switch (tools/xmas_loader.js): does nothing unless the visitor opens ?christmas
 _xm = open("tools/xmas_loader.js", encoding="utf-8").read().split("*/", 1)[1].strip()
 # the events preview switch (tools/events_loader.js): does nothing unless the visitor opens ?preview=events
@@ -302,6 +334,9 @@ const tell = (id, tries) => self.clients.get(id || '').then((cl) => {
   if (tries > 0) return new Promise((r) => setTimeout(r, 1000)).then(() => tell(id, tries - 1));
   return self.clients.matchAll({ type: 'window' }).then((cs) => cs.forEach((c) => c.postMessage({ type: 'sl-update' })));
 });
+// v6.28: the page says "Refresh was pressed" just before it reloads
+let freshAt = 0;
+self.addEventListener('message', (e) => { if (e.data && e.data.type === 'sl-fresh') freshAt = Date.now(); });
 self.addEventListener('fetch', (e) => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== 'GET') return;
@@ -322,6 +357,8 @@ self.addEventListener('fetch', (e) => {
         if (!hit) return net.then(keep(key)).catch(() => caches.match('./'));
         // v5.05: online, the newest SnakeList always opens (an unchanged page costs only a quick check);
         // only when the network is slow or missing does the saved copy open, and the newer one is saved for next time
+        // v6.28: right after Refresh on the "new version" bar the newest page is waited for (the saved copy only if it fails)
+        if (Date.now() - freshAt < 30000) { freshAt = 0; return net.then((r) => { if (r && r.ok) { const copy = r.clone(); e.waitUntil(caches.open(CACHE).then((c) => c.put(key, copy))); return r; } return hit; }, () => hit); }
         return within(net, 4000).then((r) => {
           // (v6.13: the saved copy is only written again when the page really changed - writing the whole 7 MB page on every
           // open kept an iPad busy each time SnakeList started)

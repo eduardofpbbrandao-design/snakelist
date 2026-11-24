@@ -10,7 +10,7 @@ const GROUND_COVER = { reeds: 1, carpet: 1, grass: 1, heather: 1, spinifex: 1, l
 const HAB = {
   litter:     { forest: 1, trees: [['broad', 0.8], ['spruce', 0.2]], spacing: 6.5, hills: 0.05, under: 'forest', rock: 'moss', litter: 1, haze: '#55654c' },
   forest:     { forest: 1, trees: [['broad', 0.6], ['spruce', 0.4]], spacing: 6, hills: 0.06, under: 'forest', rock: 'moss', litter: 1, haze: '#526249' },
-  soil:       { forest: 1, trees: [['broad', 0.9], ['spruce', 0.1]], spacing: 7, hills: 0.05, under: 'forest', rock: 'moss', litter: 0.6, haze: '#58664f' },
+  soil:       { forest: 1, trees: [['broad', 0.9], ['spruce', 0.1]], spacing: 7, hills: 0.05, under: 'forest', rock: 'soil', litter: 0.6, haze: '#58664f' },
   rainforest: { forest: 1, trees: [['tropic', 0.6], ['palm', 0.25], ['broad', 0.15]], spacing: 5.5, hills: 0.07, under: 'jungle', rock: 'moss', litter: 1.2, haze: '#4b5d45' },
   riverbank:  { trees: [['broad', 0.8], ['spruce', 0.2]], spacing: 8, clump: 0.5, hills: 0.05, under: 'meadow', rock: 'grey' },
   grass:      { trees: [['savanna', 1]], spacing: 15, clump: 0.58, hills: 0.05, under: 'grass', rock: 'grey' },
@@ -400,7 +400,7 @@ function buildAll(A) {
   function clumpGeo(Rn, nC, o = {}) { // a clump of grass: crossed upright cards, each a tuft of many blades
     const gb = new GB(), nrm = V(0, 0, 0);
     for (let k = 0; k < nC; k++) {
-      const a = (k / nC) * Math.PI + Rn() * 0.4, w = (o.w || 1.2) * (0.8 + Rn() * 0.4), h = 0.8 + Rn() * 0.4, off = V((Rn() - 0.5) * 0.25, 0, (Rn() - 0.5) * 0.25);
+      const a = (k / nC) * Math.PI + Rn() * 0.4, w = (o.w || 1.2) * (0.8 + Rn() * 0.4), h = (o.tight ? 0.65 : 0.8) + Rn() * 0.4, sp = o.tight ? 0.12 : 0.25, off = V((Rn() - 0.5) * sp, 0, (Rn() - 0.5) * sp);
       nrm.set(Math.cos(a), 0, Math.sin(a)); const lean = V(Math.cos(a + 1.57), 0, Math.sin(a + 1.57)).multiplyScalar((Rn() - 0.5) * 0.3).add(UP).normalize();
       card(gb, off.clone().addScaledVector(lean, h * 0.5).setY(h * 0.48), w, h, nrm, lean, V(0, -0.6, 0), 1.2, { upN: 0.65 });
     }
@@ -505,9 +505,18 @@ function buildAll(A) {
       lists[(R() * nv) | 0].push({ x: p.x, y: groundAt(p.x, p.z) + (o.lift || 0) * s, z: p.z, ry: R() * TAU, rx: (R() - 0.5) * (o.tilt || 0.1), rz: (R() - 0.5) * (o.tilt || 0.1), s, sy: o.sy ? lerp(o.sy[0], o.sy[1], R()) : 1, col: o.col ? o.col() : null }); }
     lists.forEach((lst, v) => { if (!lst.length) return; const g = makeGeo(rng(seed + name.length * 131 + v * 17), v); if (g.wood) { inst(g.wood, o.wmat, lst, { tag: name }); inst(g.fol, mat, lst, { tag: name }); } else inst(g, mat, lst, { tag: name, cast: o.cast, recv: o.recv }); });
   };
+  // v6.26: grass tufts. Close to the snake a tuft is many narrow upright cards round its centre (a real clump, seen from
+  // any side) instead of two or three crossed cards over a metre wide - next to a small snake those stood up as big flat
+  // cards in the foreground. Further out, where a card is a few pixels, the cheaper wide clumps stay.
+  const grassPut = (spray, n, rMin, rMax, size, o = {}) => {
+    const rN = Math.min(rMax, rMin + Math.max(5, groundR * 1.5)), aAll = rMax * rMax - rMin * rMin, aN = rN * rN - rMin * rMin, nN = Math.round(n * aN / Math.max(1e-6, aAll) * 1.35);
+    const mat = foliageMat(tex.spray(spray), { alphaTest: 0.35, near: true }), opt = { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1), ...o };
+    put('grass', (Rn) => clumpGeo(Rn, low ? 4 : 7, { w: (o.w || 1.2) * 0.38, tight: 1 }), mat, nN, rMin, rN, [size[0] * 0.75, size[1] * 0.8], opt);
+    if (rMax > rN) put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3, o.w ? { w: o.w } : {}), mat, Math.max(0, n - Math.round(n * aN / Math.max(1e-6, aAll))), rN, rMax, size, opt);
+  };
   const grassMat = () => track(vegetation(THREE, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.92, metalness: 0 }), { near: true }));
   const twigMat = () => barkMat(tex.bark('furrow'), '#8a7d6c');
-  const rockStyle = { moss: ['#8d8a80', '#6f8a4a'], grey: ['#9a958a', null], red: ['#9a5a3e', null], sandstone: ['#b98e62', null], gibber: ['#6e3422', null], basalt: ['#57534e', null] }[K.rock || 'grey'];
+  const rockStyle = { moss: ['#8d8a80', '#6f8a4a'], grey: ['#9a958a', null], red: ['#9c7a62', null] /* (v6.26: a weathered red-tan - pure brick red read as a scatter of chocolate drops) */, sandstone: ['#b98e62', null], gibber: ['#6e3422', null], basalt: ['#57534e', null], soil: ['#6b6157', '#4d6530'] }[K.rock || 'grey'];
   const rockMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), bumpMap: tex.rock(), bumpScale: 2, roughness: 0.9, metalness: 0, vertexColors: true, color: rockStyle[0] }));
   groundDetail(THREE, rockMat, 'rock', ctx, { tri: true, near: 1.5, far: 9 }); // v5.83: the grain and cracks of real rock, close up
   const rocks = (n, rMin, rMax, size, o = {}) => put('rocks', (Rn, v) => rockGeo(seed + 500 + v * 11 + (o.detail != null ? 50 : 0), o.detail != null ? o.detail : low ? 2 : 3, { moss: rockStyle[1], flat: o.flat || 0.7 }), rockMat, n, rMin, rMax, size, { variants: 3, lift: -0.18, tilt: 0.4, col: () => tint(0.8, 1.1, 0.08), ...o });
@@ -524,21 +533,21 @@ function buildAll(A) {
     const logGeo = (Rn) => { const gb = new GB(), len = 2 + Rn() * 2.5, pts = []; for (let k = 0; k <= 6; k++) pts.push(V(-len / 2 + (len * k) / 6, 0, (Rn() - 0.5) * 0.15)); tube(gb, pts, pts.map((_, k) => 0.22 * (1 - k / 14)), low ? 7 : 12, { uRep: 3, vLen: 1, col: (y, t) => { const m = 0.4 + 0.3 * Math.sin(t * 9); return [lerp(1, 0.66, m), lerp(1, 0.86, m), lerp(1, 0.52, m)]; } }); return gb.geo(); };
     put('logs', logGeo, barkMat(tex.bark('furrow'), '#9a8e7c'), 14, groundR * 1.1, 40, [0.7, 1.3], { variants: 2, lift: 0.06, span: 1.5 });
     // v5.12: soft cushions of moss on the forest floor, some close to the snake (never on it)
-    const mossMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), color: '#6f8f3a', roughness: 1, metalness: 0, vertexColors: true }));
-    put('moss', (Rn, v) => rockGeo(seed + 900 + v * 7, low ? 1 : 2, { flat: 0.28 }), mossMat, Math.round(Math.min(jungle ? 90 : 70, (jungle ? 1.6 : 1.2) * Math.PI * (near0 * near0 - Math.max(Rb * 1.2, F.w0 * 8) ** 2))), Math.max(Rb * 1.2, F.w0 * 8), near0, [0.06, 0.32], /* v5.50: cushions their real size, 12-60 cm across, and kept clear of the snake by their own size */ { variants: 3, lift: -0.08, tilt: 0.08, ok: (x, z) => dist2snake(x, z) > F.w0 * 3 + 0.05, clr: (s) => F.w0 * 3 + s * 1.15, col: () => tint(0.75, 1.15, 0.12) });
+    const mossMat = track(new THREE.MeshStandardMaterial({ map: tex.rock(), color: kind === 'soil' ? '#4d6530' : '#6f8f3a', roughness: 1, metalness: 0, vertexColors: true }));
+    put('moss', (Rn, v) => rockGeo(seed + 900 + v * 7, low ? 1 : 2, { flat: 0.28 }), mossMat, Math.round(Math.min(jungle ? 90 : 70, (jungle ? 1.6 : 1.2) * Math.PI * (near0 * near0 - Math.max(Rb * 1.2, F.w0 * 8) ** 2))), Math.max(Rb * 1.2, F.w0 * 8), near0, kind === 'soil' ? [0.025, 0.09] : [0.06, 0.32], /* (v6.26: small ones on the soil scene - round a blind snake 12 cm long a 30 cm cushion was a bright green disc) v5.50: cushions their real size, 12-60 cm across, and kept clear of the snake by their own size */ { variants: 3, lift: -0.08, tilt: 0.08, ok: (x, z) => dist2snake(x, z) > F.w0 * 3 + 0.05, clr: (s) => F.w0 * 3 + s * 1.15, col: () => tint(0.75, 1.15, 0.12) });
     rocks(10, groundR * 1.05, 45, [0.3, 1.6], { minD: 2.5 });
   } else if (U === 'meadow') {
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassG'), { alphaTest: 0.35, near: true }), 1700, near0, 36, [0.5, 1.1], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    grassPut('grassG', 1700, near0, 36, [0.5, 1.1], { col: () => tint(0.8, 1.12, 0.1) });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 30 }), foliageMat(tex.spray('broad')), 60, groundR * 1.1, 45, [0.8, 2.2], { variants: 2, wmat: twigMat(), col: () => tint(0.8, 1.1, 0.12) });
     rocks(13, groundR * 1.0, 30, [0.2, 0.8], { minD: 2.5 });
   } else if (U === 'grass') {
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35, near: true }), 3200, near0, 45, [0.6, 1.2], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    grassPut('grassD', 3200, near0, 45, [0.6, 1.2], { col: () => tint(0.8, 1.12, 0.1) });
     put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35, near: true }), 1600, 45, 90, [0.8, 1.4], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 28 }), foliageMat(tex.spray('olive')), 70, groundR * 1.1, 60, [0.8, 2.0], { variants: 2, wmat: twigMat(), col: () => tint(0.8, 1.1, 0.12) });
     rocks(6, groundR * 1.0, 45, [0.3, 1.2], { minD: 2.5 });
   } else if (U === 'heath') {
     put('heather', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 24, wide: 1.25, stems: 0, card: 0.55 }), foliageMat(tex.spray('heather'), { near: true }), 1100, near0, 45, [0.35, 0.8], { variants: 3, sy: [0.55, 0.85], lift: -0.12, col: () => tint(0.8, 1.15, 0.12) });
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassG'), { alphaTest: 0.35, near: true }), 800, near0, 40, [0.35, 0.7], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    grassPut('grassG', 800, near0, 40, [0.35, 0.7], { col: () => tint(0.8, 1.12, 0.1) });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 26, card: 0.45 }), foliageMat(tex.spray('needle')), 90, groundR * 1.1, 55, [0.7, 1.8], { variants: 2, wmat: twigMat(), col: () => tint(0.75, 1.0, 0.1) });
     rocks(10, groundR * 1.0, 50, [0.3, 1.5], { minD: 2.5 });
   } else if (U === 'arid') {
@@ -550,20 +559,20 @@ function buildAll(A) {
     rocks(45, groundR * 1.3, farR * 1.15, [0.6, 3.8], { ok: okNear, minD: 2 });
     rocks(36, groundR * 1.2, 45, [0.08, 0.5], { variants: 2, detail: 1, minD: 3 }); // v5.05: far fewer loose rocks
   } else if (U === 'sand') {
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35, near: true }), 260, near0, 50, [0.35, 0.8], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    grassPut('grassD', 260, near0, 50, [0.35, 0.8], { col: () => tint(0.8, 1.12, 0.1) });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 30, wide: 1.3, bright: 1.35 }), foliageMat(tex.spray('saltbush')), 40, groundR * 1.1, 60, [0.4, 1.0], { variants: 2, wmat: twigMat(), col: () => tint(0.85, 1.1, 0.08) });
     rocks(6, groundR * 1.2, 60, [0.3, 1.4], { minD: 2.5 });
   } else if (U === 'gibber') {
     rocks(2200, near0, 32, [0.04, 0.22], { variants: 3, lift: -0.2, flat: 0.55, recv: false, detail: 0 });
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 30, wide: 1.3, stems: 0, bright: 1.35 }), foliageMat(tex.spray('saltbush')), 140, groundR * 1.0, 60, [0.3, 0.8], { variants: 2, wmat: twigMat(), col: () => tint(0.85, 1.1, 0.08) });
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35, near: true }), 220, near0, 45, [0.25, 0.5], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    grassPut('grassD', 220, near0, 45, [0.25, 0.5], { col: () => tint(0.8, 1.12, 0.1) });
     rocks(6, groundR * 1.3, 60, [0.3, 1.0], { minD: 2.5 });
   }
   else if (U === 'clay') {
     // sparse: low saltbush and bluebush, tangled grey lignum, Mitchell grass tussocks, a few gibber stones on the clay
     put('shrubs', (Rn) => shrubGeo(Rn, 1, low ? 1 : 0, { n: 26, wide: 1.4, stems: 0, bright: 1.3 }), foliageMat(tex.spray('saltbush')), 70, near0, 70, [0.3, 0.75], { variants: 2, wmat: twigMat(), lift: -0.08, col: () => tint(0.85, 1.1, 0.08) });
     put('lignum', (Rn) => tuftGeo(Rn, low ? 24 : 46, 1.2, '#5f6448', '#8f9472', 0.5, { lean: 0.8, w: 0.006, outward: 1, seg: 4 }), grassMat(), 55, near0, 60, [0.6, 1.3], { variants: 2, sy: [0.5, 0.8], col: () => tint(0.85, 1.1, 0.08) });
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3, { w: 0.9 }), foliageMat(tex.spray('grassD'), { alphaTest: 0.35, near: true }), 260, near0, 50, [0.22, 0.45], { variants: 3, tilt: 0.12, col: () => tint(0.85, 1.12, 0.1) });
+    grassPut('grassD', 260, near0, 50, [0.22, 0.45], { col: () => tint(0.85, 1.12, 0.1), w: 0.9 });
     rocks(160, near0, 30, [0.03, 0.1], { variants: 2, lift: -0.25, flat: 0.5, recv: false, detail: 0 });
   } else if (U === 'swamp') {
     // sawgrass and rushes in clumps on the mud and in the shallows, ferns at the foot of the trees, lily pads on the water
@@ -583,7 +592,7 @@ function buildAll(A) {
   } else if (U === 'shore') {
     // dark wave-worn boulders on the shore and a few in the water, beach grass between, palms further back
     rocks(40, groundR * 1.0, 50, [0.5, 2.4], { minD: 2.5, flat: 0.62 });
-    put('grass', (Rn) => clumpGeo(Rn, low ? 2 : 3), foliageMat(tex.spray('grassD'), { alphaTest: 0.35, near: true }), 140, near0, 45, [0.3, 0.7], { variants: 3, tilt: 0.12, col: () => tint(0.8, 1.12, 0.1) });
+    grassPut('grassD', 140, near0, 45, [0.3, 0.7], { col: () => tint(0.8, 1.12, 0.1) });
     if (wi) { const list = []; for (let i = 0; i < (low ? 8 : 16); i++) { const a = R() * TAU, r = lerp(groundR * 0.4, groundR * 1.8, R()), x = Math.cos(a) * r, z = Math.sin(a) * r; if (!inRiver(x, z, 0) || dist2snake(x, z) < 1.5) continue; list.push({ x, y: Hgt(x, z) - 0.1, z, ry: R() * TAU, rx: (R() - 0.5) * 0.4, rz: (R() - 0.5) * 0.4, s: 0.3 + R() * 0.9 }); }
       inst(rockGeo(seed + 777, low ? 2 : 3, { flat: 0.6 }), rockMat, list, { tag: 'rocks', cast: true, recv: true }); }
   }
@@ -697,7 +706,7 @@ function buildAll(A) {
     for (let i = 0; i < nOut; i++) for (let t = 0; t < 4; t++) { const a = R() * TAU, r = lerp(rIn, rOut, R()); if (addLeaf(Math.cos(a) * r, Math.sin(a) * r, r < rIn * 1.6 && !low)) break; }
     const mk = (geos, buckets, cast) => geos.forEach((g, i) => {
       const b = buckets[i]; if (!b.length) { g.dispose(); return; }
-      const im = new THREE.InstancedMesh(g, mat, b.length); b.forEach(([mm, c], k) => { im.setMatrixAt(k, mm); im.setColorAt(k, c); });
+      const im = new THREE.InstancedMesh(g, mat, b.length); b.forEach(([mm, c], k) => { im.setMatrixAt(k, mm); im.setColorAt(k, c); }); im.name = 'litter'; // (v6.20: See it eat pushes these aside round the prey)
       im.instanceMatrix.needsUpdate = true; im.instanceColor.needsUpdate = true; im.castShadow = cast; im.receiveShadow = true; scene.add(im); track(g);
       addTris('leaves', (g.index.count / 3) * b.length);
     });
@@ -750,7 +759,7 @@ function buildAll(A) {
 // Done in the vertex shader (no work on the CPU): each plant bends from its base (the instance's origin), the more the
 // higher above it; tall things (trees) bend much less per metre than grass. AMB.uT is the clock, AMB.uWind the strength
 // (lower at the Light quality setting, 0 with reduced motion).
-export const AMB = { uT: { value: 0 }, uWind: { value: 1 }, uDens: { value: 1 }, uNear: { value: 0.05 }, rip: [], ripN: 0 }; // (v5.93: uDens - viewer.js thins far plants on a slow device)
+export const AMB = { uT: { value: 0 }, uWind: { value: 1 }, uDens: { value: 1 }, uNear: { value: 0.05 }, uClr: { value: null }, rip: [], ripN: 0 }; // (v5.93: uDens - viewer.js thins far plants on a slow device)
 const WIND_VS = `
 vec4 mvPosition = vec4( transformed, 1.0 );
 #ifdef USE_INSTANCING
@@ -772,6 +781,9 @@ vec3 slSc = vec3( slKeep );
 // v6.00: grass right in front of the lens bows down out of the way, smoothly with its distance from the camera (uSlNear:
 // about half the way to the snake, 4 cm to 1.4 m), instead of filling the view - the only way the camera changes the grass
 float slC = smoothstep( uSlNear * 0.35, uSlNear, distance( slO, cameraPosition ) );
+// v6.20: during See it eat, grass standing between the camera and the prey and head (uSlClr: the point looked at, and
+// the half-width of a clear corridor to it) bows down smoothly too, so no tuft hides the action from any side
+if ( uSlClr.w > 0.0 ) { vec3 slA = cameraPosition, slAB = uSlClr.xyz - slA; float slT = clamp( dot( slO - slA, slAB ) / max( 1e-6, dot( slAB, slAB ) ), 0.0, 1.0 ); vec3 slQ = slA + slAB * slT; float slDd = length( ( slO - slQ ).xz ), slRw = uSlClr.w + ( 1.0 - slT ) * length( slAB ) * 0.32; slC = min( slC, mix( 1.0, smoothstep( slRw * 0.55, slRw * 1.25, slDd ), 1.0 - smoothstep( 0.86, 1.0, slT ) ) ); } // (a cone, wider towards the lens: a blade near the camera covers much of the view even off to one side)
 slSc *= vec3( mix( 0.35, 1.0, slC ), slC, mix( 0.35, 1.0, slC ) ); slKeep *= slC;
 #endif
 if ( slKeep < 0.999 ) slW.xyz = slO + ( slW.xyz - slO ) * slSc;
@@ -793,10 +805,11 @@ if ( slKeep <= 0.0 ) gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 ); // (left out: off
 #endif`;
 export function tick(t) { AMB.uT.value = t; }
 export function vegetation(THREE, m, o = {}) {
+  if (!AMB.uClr.value) AMB.uClr.value = new THREE.Vector4(0, 0, 0, 0);
   if (o.near) m.defines = Object.assign({}, m.defines, { SL_NEAR: '' }); // (v6.00: grass and other low ground cover bow out of the lens's way)
   m.onBeforeCompile = (sh) => {
-    sh.uniforms.uSlT = AMB.uT; sh.uniforms.uSlWind = AMB.uWind; sh.uniforms.uSlDens = AMB.uDens; sh.uniforms.uSlNear = AMB.uNear;
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uSlT; uniform float uSlWind; uniform float uSlDens; uniform float uSlNear;').replace('#include <project_vertex>', WIND_VS);
+    sh.uniforms.uSlT = AMB.uT; sh.uniforms.uSlWind = AMB.uWind; sh.uniforms.uSlDens = AMB.uDens; sh.uniforms.uSlNear = AMB.uNear; sh.uniforms.uSlClr = AMB.uClr;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uSlT; uniform float uSlWind; uniform float uSlDens; uniform float uSlNear; uniform vec4 uSlClr;').replace('#include <project_vertex>', WIND_VS);
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <normal_fragment_begin>', THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', ''))
       .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
