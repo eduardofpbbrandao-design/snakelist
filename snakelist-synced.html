@@ -30364,7 +30364,7 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
   }
   function announce(st) {
     var t = typeof st.text === "function" ? st.text() : st.text;
-    live.textContent = ""; setTimeout(function () { live.textContent = elNum.textContent + ". " + words(st.title) + ". " + words(t || ""); }, 60);
+    live.textContent = ""; setTimeout(function () { var ti = words(st.title); live.textContent = elNum.textContent + ". " + ti + (/[.!?]$/.test(ti) ? " " : ". ") + words(t || ""); }, 60);
   }
   function focusBox() {
     var b = !bNext.hidden ? bNext : callout.querySelector(".tour-choices button, .tour-chips button") || bSkip;
