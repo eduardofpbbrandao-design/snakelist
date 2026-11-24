@@ -169,6 +169,13 @@
     D.body.appendChild(t); setTimeout(function () { t.classList.add("out"); setTimeout(function () { t.remove(); }, 400); }, ms || 4200);
     return t;
   };
+  // the subscriber early-access welcome (config.js event.earlyNote) - with an apology that it came so late. Never in
+  // public mode, and only while the event is in its subscribers-only "early" phase for this viewer.
+  EV.earlyNoteHtml = function (ev) {
+    if (typeof ev === "string") ev = EV.event(ev);
+    if (PUB || !ev || !ev.earlyNote || EV.phase(ev, EV.time.now(), EV.isSubscriber()) !== "early") return "";
+    return '<div class="sl-ev-earlynote" role="note"><b>' + esc(ev.earlyNote.title) + "</b><p>" + esc(ev.earlyNote.text) + "</p></div>";
+  };
   EV.testBadge = function () { return EV.testMode() ? '<span class="sl-ev-test">TEST MODE &mdash; not a real subscription</span>' : ""; };
 
   /* ---------------- art shared by the panels ---------------- */

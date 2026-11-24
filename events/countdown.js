@@ -234,7 +234,7 @@
     return '<div class="sl-ev-hero sl-ev-hx sl-ev-t-' + ev.theme + '">' + (ev.theme === "xmas" ? frame() : "") +
       '<div class="sl-ev-hx-in">' +
       '<span class="sl-ev-hero-art">' + EV.art.event(ev.theme) + "</span>" + tag +
-      "<h3>" + esc(ev.name) + "</h3>" + body +
+      "<h3>" + esc(ev.name) + "</h3>" + (!PUB && st.phase === "early" && sub ? EV.earlyNoteHtml(ev) : "") + body +
       '<p class="sl-ev-when">' + esc(whenLab) + " <b>" + esc(EV.localTime(opens, { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZoneName: "short" })) + "</b>" +
       (tz ? '<span class="sl-ev-tz">Your time zone: ' + esc(tz) + "</span>" : "") +
       '<span class="sl-ev-utc">Same moment everywhere: ' + esc(new Date(EV.ms(opens)).toUTCString().replace(" GMT", " UTC")) + "</span></p>" +

@@ -90,7 +90,8 @@
       fresh.forEach(function (a, i) {
         var it = item(a, stats());
         if (window.SL_ACH && window.SL_ACH.celebrate && ["rare", "epic", "legendary", "mythic"].indexOf(it.rar) >= 0) window.SL_ACH.celebrate(it);
-        else setTimeout(function () { EV.toast(ic("star", 15) + " Seasonal achievement unlocked: <b>" + esc(a.name) + "</b>"); }, i * 900);
+        // the others pop in as a toast (a golden pop for the Legendary Christmas Serpent)
+        else setTimeout(function () { var t = EV.toast(ic(a.icon || "star", 15) + " Seasonal achievement unlocked: <b>" + esc(a.name) + "</b>"); t.classList.add("sl-ev-toast-ach"); if (a.legendary) t.classList.add("is-legend"); }, i * 900);
       });
       saveToAccount(fresh);
       EV.emit("seasonal-achievement", fresh.map(function (a) { return a.id; }));
@@ -132,7 +133,32 @@
       dates: (got || ended ? "Could be earned " : "Can be earned ") + dateRange(ev), name: a.name, note: a.desc, rar: a.rar || "common", ic: a.icon,
       goal: a.goal, have: have, got: got ? earned[a.id] : null, limited: true,
       status: got ? "earned" : ended ? "gone" : before ? "coming" : have > 0 ? "progress" : "locked",
-      reward: a.reward ? { text: a.reward + (a.cursor && EV.cursor && EV.cursor.nameOf && !/cursor/i.test(a.reward) ? " + " + EV.cursor.nameOf(a.cursor) : ""), cursor: a.cursor || null } : null };
+      reward: a.reward ? { text: a.reward + (a.cursor && EV.cursor && EV.cursor.nameOf && !/cursor/i.test(a.reward) ? " + " + EV.cursor.nameOf(a.cursor) : ""), cursor: a.cursor || null } : null,
+      // Christmas round 3: Christmas cards get the forest-green reward box, the Legendary Christmas Serpent the gold
+      // Legendary one with a LIMITED label (applied to the app's cards by dress() below)
+      xmas: ev.theme === "xmas", legendary: !!a.legendary, limitedLabel: !!a.limited };
+  }
+  // the app draws the cards (.sla-card[data-ach]); the Christmas ones are dressed afterwards, every time it redraws
+  function dress() {
+    var dlg = D.getElementById("sl-achdlg"); if (!dlg || dlg.hidden) return;
+    defs().forEach(function (a) {
+      var ev = EV.event(a.event); if (!ev || ev.theme !== "xmas") return;
+      [].forEach.call(dlg.querySelectorAll('.sla-card[data-ach="' + a.id + '"]'), function (c) {
+        if (c._xmd) return; c._xmd = 1;
+        var got = earned[a.id] != null;
+        c.classList.add("sl-ev-rbox", got ? "is-done" : c.classList.contains("is-progress") ? "is-progress" : "is-locked");
+        if (a.legendary) c.classList.add("sl-ev-legendary");
+        var nm = c.querySelector(".sla-cname");
+        if (a.limited && nm && !c.querySelector(".sl-ev-limited")) nm.insertAdjacentHTML("afterend", '<span class="sl-ev-limited" title="Once in a lifetime: it can only be earned during ' + esc(ev.short || ev.name) + '">Limited</span>');
+      });
+    });
+  }
+  // (watched only while the Achievements panel is open: its own list, not the whole page)
+  var dressMO = null;
+  function dressWatch() {
+    var dlg = D.getElementById("sl-achdlg"), open = dlg && !dlg.hidden;
+    if (open && !dressMO && "MutationObserver" in window) { dressMO = new MutationObserver(dress); dressMO.observe(dlg, { childList: true, subtree: true }); dress(); }
+    if (!open && dressMO) { dressMO.disconnect(); dressMO = null; }
   }
   function items() {
     var s = stats();
@@ -146,7 +172,7 @@
     if (sig === lastSig) return; lastSig = sig;
     if (window.SL_ACH && window.SL_ACH.refresh) window.SL_ACH.refresh();
   }
-  setInterval(function () { if (!D.hidden) paint(); }, 600);
+  setInterval(function () { if (!D.hidden) { paint(); dressWatch(); } }, 600);
   setInterval(function () { if (!D.hidden) evaluate(); }, 30000);
   EV.on("advent-claim", function () { setTimeout(evaluate, 1600); });
   EV.on("advent", function () { lastSig = ""; paint(); });

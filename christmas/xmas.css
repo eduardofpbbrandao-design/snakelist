@@ -10,21 +10,28 @@ html.xm { --xm-gold: #D8B76A; --xm-red: #A92E3E; --xm-ease: cubic-bezier(.2,.7,.
 
 /* ============ the Christmas logo ============ */
 html.xm svg.snake-s, html.xm .hero-mark svg, html.xm svg.xm-has-stk { overflow: visible; }
-/* the opening's tick is drawn in two layers; the stocking goes in the first, the second (its pattern) waits */
-html.xm .intro-box svg.tick-detail > * { display: none; }
 html.xm .xm-hat, html.xm .xm-ssnow { pointer-events: none; }
 /* the small S used as an icon inside buttons and tabs stays plain */
 html.xm :is(.tab-btn, .tab-n, .chip, button, .sl-mtoast, .xm-nohat) svg.snake-s { --xm-hat-o: 0; }
-/* the tick's own drawing is hidden while the stocking is there (the drawing itself is untouched) */
-html.xm svg.xm-has-stk > :not(.xm-stk) { display: none; }
+/* the tick keeps its own drawing: the stocking hangs from it (round 3 - it used to replace the tick) */
 html.xm svg.xm-has-stk { overflow: visible; }
-/* the opening's tick is drawn in two layers; the stocking goes in the first, the second (its pattern) waits */
-html.xm .intro-box svg.tick-detail > * { display: none; }
-/* snow on the letters (xmas.js measures each letter's top) */
+/* the opening (the photo wall) draws the tick through a sliding window that hides everything outside the tick's own
+   box - which cut off the stocking's cuff and the presents sticking out of it. With the stocking there is no line to
+   draw, so the window is switched off and the stocking is hung in place instead (a small swing in) */
+html.xm .intro-box .tick-wipe, html.xm .intro-box .tick-unwipe { transform: none; animation: none; overflow: visible; -webkit-mask-image: none; mask-image: none; }
+html.xm .intro-box svg.xm-has-stk > :not(.xm-stk) { animation: xm-fade .45s .4s ease both; }
+html.xm .intro-box svg.xm-has-stk .xm-stk { transform-box: view-box; transform-origin: 70% 8%; animation: xm-hang .7s .45s cubic-bezier(.34,1.42,.5,1) both; }
+@keyframes xm-hang { from { transform: rotate(-14deg) translateY(-6%); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { html.xm .intro-box svg.xm-has-stk .xm-stk { animation: none; } }
+/* snow on the letters (xmas.js measures each letter's top): real snow is not flat white - a soft blue-grey body in
+   its own shade, a brighter sunlit top, a few glints, lying a little lumpy, with a soft shadow on the letter below */
 html.xm :is(.sl-header .sl-titletext, .intro-title, .hero-mark, .signin-title .sl-titletext, .sl-brand, .site-logo, .hero-sub, .hero-cue > span) { position: relative; }
 html.xm .xm-snowcap { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; z-index: 1;
-  animation: xm-fade .8s ease both; }
-html.xm .xm-snowcap path { fill: #fff; filter: drop-shadow(0 .5px .6px rgba(20,50,35,.35)); -webkit-text-fill-color: initial; }
+  animation: xm-fade .8s ease both; filter: drop-shadow(0 .8px .7px rgba(16,44,30,.38)); }
+html.xm .xm-snowcap path { fill: #fff; -webkit-text-fill-color: initial; }
+html.xm .xm-snowcap path.s { fill: #d5e3ee; }
+html.xm .xm-snowcap path.h { fill: #fbfdff; }
+html.xm .xm-snowcap path.g { fill: #fff; opacity: .95; }
 html.xm .xm-ssnow { filter: drop-shadow(0 .6px .6px rgba(20,50,35,.3)); }
 @keyframes xm-fade { from { opacity: 0; } to { opacity: 1; } }
 
@@ -52,6 +59,10 @@ html.xm .sl-hero.hero-wait:not(.hero-reveal) .xm-phat { scale: 1.07; }
 html.xm .xm-phat[hidden] { display: none; }
 /* toned a touch to the photo's soft light, so it looks worn in the picture rather than pasted on it */
 html.xm .xm-phat svg { position: absolute; overflow: visible; filter: brightness(.94) saturate(.92) drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+/* the opening's photo wall: a hat on every tile's snake, inside the tile (so it fades in with the photo, above it) */
+html.xm .photo-wall .ph { position: relative; }
+html.xm .xm-what { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+html.xm .xm-what svg { position: absolute; overflow: visible; filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
 
 /* ============ a tiny Santa-hat snake by each snake's name ============ */
 html.xm .xm-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }

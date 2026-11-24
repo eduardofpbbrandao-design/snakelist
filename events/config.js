@@ -50,14 +50,14 @@
       benefits: [
         ["early", "Early access to events", "Seasonal events open for you before everyone else (the Advent doors still follow the calendar)."],
         ["deco", "Exclusive seasonal decorations", "Premium Cabin decorations, like the Diamond Snake Ornament and the Aurora Borealis background."],
-        ["extra", "Extra Advent rewards", "A bonus Frost Edition reward behind every fourth door."],
-        ["skips", "Up to 10 Advent skips", "Recover days you missed - kept separate from the skips everyone earns with streaks."],
+        ["extra", "Extra Advent rewards", "A bonus reward behind every Advent door - and three on special days."],
+        ["skips", "Up to 10 Advent skips", "Recover days you missed or reserve days ahead - kept separate from the skips everyone earns with streaks."],
         ["cursor", "Cursor customization", "Colours and effects for your mouse pointer (computers with a mouse or trackpad)."]
         // only benefits that exist in the app - add profile frames/badges here once SnakeList has a profile to show them
       ],
       alwaysFree: "Every snake, photo, map, sighting, quiz and achievement in SnakeList stays free. A subscription only adds extras.",
       // what happens to subscriber items when a subscription ends (disclosed on the subscription page)
-      afterExpiry: "If your subscription ends, every Advent door you opened and every reward behind it stays yours for good. Subscriber extras - Frost Edition bonuses, premium decorations and cursor effects - are shown only while a subscription is active, and come back if you subscribe again. Your choices are remembered; nothing is deleted.",
+      afterExpiry: "If your subscription ends, every Advent door you opened and every reward behind it stays yours for good - including the subscriber bonus rewards of doors you covered while subscribed. Other subscriber extras - premium decorations and cursor effects - are shown only while a subscription is active, and come back if you subscribe again. Your choices are remembered; nothing is deleted.",
       refund: {
         heading: "Refunds and your right of withdrawal",
         lines: [
@@ -100,17 +100,24 @@
         advent: {
           days: 24, firstDoor: "2026-12-01T00:00:00Z",   // door N opens at firstDoor + (N-1) days and is "on time" for 24 hours
           recoverUntil: "2027-01-01T00:00:00Z",          // skips can recover missed doors until the event ends
-          streakForSkip: 3,                              // every 3 doors in a row opened ON THEIR OWN DAY earn 1 free skip
-          // A skip covers ONE eligible door the person chooses: a missed day (recovered) or, while this is true, an
-          // upcoming day claimed early (once the calendar has started, never before). Eduardo, 2026-11-24 - replaces the
-          // earlier rule "skips never open future days"; false brings that rule back. firebase/firestore.rules repeats
-          // it (skipFuture()) - change both together.
+          // every 3 covered doors in a row - opened on their day OR covered by a skip - earn 1 free skip (worked out
+          // exactly once per door, so no door can earn twice: see events/advent-logic.js). firestore.rules repeats the 3.
+          streakForSkip: 3,
+          // A skip covers ONE eligible door the person chooses: a MISSED day (recovered, its reward given at once) or,
+          // while this is true, an UPCOMING day (RESERVED: it counts at once, but its reward stays hidden until its own
+          // day; only once the calendar has started). Eduardo, 2026-11-24. false brings back "skips never touch future
+          // days". firebase/firestore.rules repeats it (skipFuture()) - change both together.
           skipCanClaimFuture: true,
           subscriberSkips: 10,                           // per event, tracked apart from earned skips
           grandPrize: "legendary-serpent"
         },
-        free: ["24 Advent doors, one a day", "A free skip for every 3-day streak", "The Legendary Christmas Serpent for opening all 24", "All seasonal achievements"],
-        subscriber: ["Early access from 29 November", "Frost Edition bonus behind every 4th door", "Up to 10 extra skips for missed days", "Premium Cabin decorations"]
+        // Subscriber early access (from earlyAccess above) - the note subscribers see in the event while it is early.
+        earlyNote: {
+          title: "Welcome to early access",
+          text: "Sorry this early access came so late! The Christmas update was started later than we wanted, so early access didn't exist yet while it was being made - and it's still being finished now. Thank you for supporting SnakeList: have a look around the Christmas event before everyone else. The Advent doors still open on their own days, starting 1 December."
+        },
+        free: ["24 Advent doors, one a day", "A free skip for every 3 doors in a row", "The Legendary Christmas Serpent for covering all 24", "All seasonal achievements"],
+        subscriber: ["Early access from 29 November", "Bonus subscriber rewards behind every door (3 on special days)", "Up to 10 extra skips", "Premium Cabin decorations"]
       },
       {
         id: "newyear2027", name: "New Year 2026–2027", short: "New Year", theme: "newyear",
@@ -178,18 +185,49 @@
       { day: 23, id: "eve-moon",        name: "Christmas Eve Ouroboros Moon", kind: "Collectible", art: ["moon", "#F1E3A8", "#2A3B6B"], desc: "A snake circling the moon on the night before Christmas." },
       { day: 24, id: "fang-bell",       name: "Golden Fang Bell",             kind: "Decoration",  art: ["bell", "#E9C04A", "#C8323F"], desc: "The last door's bell - ring it for the grand prize." }
     ],
-    // subscribers: an extra Frost Edition reward behind every fourth door (shown, but locked, for everyone else)
+    // Subscriber bonus rewards: at least one behind EVERY door, and three on the special days (6, 12, 18, 24 and 13).
+    // Shown to everyone (locked for free accounts) next to the door's regular reward, which everybody gets. A door's
+    // bonus rewards are kept for good when a subscription was active as the door was covered (the door's "bonus"
+    // flag, checked by the Firestore rules against the account's subscription). Each one can sit in the Cabin.
     adventBonus: [
-      { day: 4,  id: "b-silver-charm",  name: "Frost Edition: Silver Bell Charm",   art: ["bell", "#B9C6D6", "#FFFFFF"] },
-      { day: 8,  id: "b-ice-badge",     name: "Frost Edition: Ice-Blue Scale Badge", art: ["badge", "#8FD3F5", "#FFFFFF"] },
-      { day: 12, id: "b-starlit-frame", name: "Frost Edition: Starlit Card Frame",   art: ["frame", "#3A4C7A", "#F1E3A8"] },
-      { day: 16, id: "b-crystal-egg",   name: "Frost Edition: Crystal Egg",          art: ["egg", "#A9E4F5", "#FFFFFF"] },
-      { day: 20, id: "b-velvet-ribbon", name: "Frost Edition: Midnight Velvet Bow",  art: ["bow", "#3A2E6B", "#C9B6FF"] },
-      { day: 24, id: "b-diamond-shed",  name: "Frost Edition: Diamond-Dust Shed",    art: ["gem", "#DDEBFF", "#FFFFFF"] }
+      { day: 1,  id: "b-frost-sticker",  name: "Frost Edition: Icicle Santa Sticker",     kind: "Sticker",     art: ["sticker", "#5DA9D6", "#EAF6FF"] },
+      { day: 2,  id: "b-mint-cane",      name: "Peppermint Milk Snake Cane",              kind: "Decoration",  art: ["garland", "#D8413A", "#FFFFFF"] },
+      { day: 3,  id: "b-frost-pinecone", name: "Frosted Pine-Cone Ornament",              kind: "Ornament",    art: ["ornament", "#7A5A3A", "#EAF6FF"] },
+      { day: 4,  id: "b-silver-charm",   name: "Frost Edition: Silver Bell Charm",        kind: "Decoration",  art: ["bell", "#B9C6D6", "#FFFFFF"] },
+      { day: 5,  id: "b-rose-egg",       name: "Rose-Gold Snake Egg",                     kind: "Collectible", art: ["egg", "#E3A08A", "#FFF1EA"] },
+      { day: 6,  id: "b-north-lantern",  name: "Northern Lights Lantern",                 kind: "Decoration",  art: ["lantern", "#2A3B6B", "#9FF0D6"] },
+      { day: 6,  id: "b-snow-wreath",    name: "Snow-Dusted Wreath",                      kind: "Decoration",  art: ["wreath", "#3C8A5A", "#FFFFFF"] },
+      { day: 6,  id: "b-gold-pin",       name: "Gold Explorer Pin",                       kind: "Badge",       art: ["badge", "#E0B13B", "#FFF5CF"] },
+      { day: 7,  id: "b-aurora-notebook",name: "Aurora Field-Notebook Cover",             kind: "Cosmetic",    art: ["notebook", "#2E5E7A", "#BFF5E6"] },
+      { day: 8,  id: "b-ice-badge",      name: "Frost Edition: Ice-Blue Scale Badge",     kind: "Badge",       art: ["badge", "#8FD3F5", "#FFFFFF"] },
+      { day: 9,  id: "b-sugar-cookie",   name: "Sugar-Frosted Kingsnake Cookie",          kind: "Collectible", art: ["cookie", "#C98A4A", "#FFFFFF"] },
+      { day: 10, id: "b-sapphire-orn",   name: "Sapphire Viper Ornament",                 kind: "Ornament",    art: ["ornament", "#2F56B0", "#DDE8FF"] },
+      { day: 11, id: "b-tartan-plush",   name: "Tartan Scarf Corn Snake Plush",           kind: "Collectible", art: ["plush", "#D06A3A", "#2E7D4F"] },
+      { day: 12, id: "b-starlit-frame",  name: "Frost Edition: Starlit Card Frame",       kind: "Cosmetic",    art: ["frame", "#3A4C7A", "#F1E3A8"] },
+      { day: 12, id: "b-ember-lantern",  name: "Ember Glow Lantern",                      kind: "Decoration",  art: ["lantern", "#5A2A1A", "#FFB45C"] },
+      { day: 12, id: "b-holly-bow",      name: "Holly-Green Ribbon Bow",                  kind: "Decoration",  art: ["bow", "#1E6B3E", "#D8B24A"] },
+      { day: 13, id: "b-glow-shard",     name: "Glowing Jade Scale",                      kind: "Collectible", art: ["gem", "#2FD38A", "#D2FFE9"], glow: true },
+      { day: 13, id: "b-glow-badge",     name: "Glow-in-the-Dark Badge",                  kind: "Badge",       art: ["badge", "#1FBF6A", "#B8FFD8"] },
+      { day: 13, id: "b-glow-orn",       name: "Moonlit Emerald Ornament",                kind: "Ornament",    art: ["ornament", "#127A4A", "#B8FFD8"] },
+      { day: 14, id: "b-velvet-stocking",name: "Velvet Gold-Cuff Stocking",               kind: "Decoration",  art: ["stocking", "#7A1C2C", "#E9C04A"] },
+      { day: 15, id: "b-aurora-globe",   name: "Aurora Snow Globe",                       kind: "Collectible", art: ["globe", "#5FD3B3", "#2E9E4F"] },
+      { day: 16, id: "b-crystal-egg",    name: "Frost Edition: Crystal Egg",              kind: "Collectible", art: ["egg", "#A9E4F5", "#FFFFFF"] },
+      { day: 17, id: "b-gilded-frame",   name: "Gilded Profile Frame",                    kind: "Cosmetic",    art: ["frame", "#8A6414", "#FFF1B8"] },
+      { day: 18, id: "b-silver-garland", name: "Silver Tinsel Python Garland",            kind: "Decoration",  art: ["garland", "#9FB0C4", "#FFFFFF"] },
+      { day: 18, id: "b-frost-star",     name: "Frost Tree-Topper Star",                  kind: "Decoration",  art: ["star", "#BFE6FF", "#FFFFFF"] },
+      { day: 18, id: "b-cocoa-boa",      name: "Hot-Cocoa Boa Plush",                     kind: "Collectible", art: ["plush", "#6B4A30", "#F4EBDD"] },
+      { day: 19, id: "b-candy-orn",      name: "Candy-Stripe Coral Ornament",             kind: "Ornament",    art: ["ornament", "#E8E8EE", "#D8413A"] },
+      { day: 20, id: "b-velvet-ribbon",  name: "Frost Edition: Midnight Velvet Bow",      kind: "Decoration",  art: ["bow", "#3A2E6B", "#C9B6FF"] },
+      { day: 21, id: "b-hearth-bell",    name: "Hearthside Copper Bell",                  kind: "Decoration",  art: ["bell", "#B8733A", "#FFE1C2"] },
+      { day: 22, id: "b-comet-star",     name: "Comet-Tail Star",                         kind: "Decoration",  art: ["star", "#F1D27A", "#FFFFFF"] },
+      { day: 23, id: "b-silver-moon",    name: "Silver Ouroboros Moon",                   kind: "Collectible", art: ["moon", "#DDE6F0", "#1B2A4A"] },
+      { day: 24, id: "b-diamond-shed",   name: "Frost Edition: Diamond-Dust Shed",        kind: "Collectible", art: ["gem", "#DDEBFF", "#FFFFFF"] },
+      { day: 24, id: "b-gold-tree",      name: "Golden Christmas Eve Tree",               kind: "Decoration",  art: ["tree", "#2E7D4F", "#FFE38A"] },
+      { day: 24, id: "b-eve-globe",      name: "Christmas Eve Snow Globe",                kind: "Collectible", art: ["globe", "#2A3B6B", "#E9C04A"] }
     ],
     grandPrize: {
       id: "legendary-serpent", name: "The Legendary Christmas Serpent",
-      desc: "An animated golden serpent for your Cabin, plus the Legendary Serpent badge - for opening all 24 doors (recovered doors count)."
+      desc: "An emerald-and-gold serpent for your Cabin, plus the Legendary Serpent badge - for covering all 24 doors (days recovered or reserved with a skip count). Once in a lifetime: only during Christmas 2026."
     },
     // §9 subscriber-only decorations (premium inventory; shown labelled and locked to everyone else)
     premium: [
@@ -223,7 +261,8 @@
       { id: "x-almost20",  event: "xmas2026", icon: "bell",    rar: "epic",      name: "Almost Christmas",    desc: "Open 20 Advent doors (days covered by free skips count).", goal: 20, stat: "doors",   reward: "Silver bell badge", cursor: "trail:snowfall" },
       { id: "x-perfect",   event: "xmas2026", icon: "star",    rar: "epic",      name: "Perfect Advent",      desc: "Open all 24 Advent doors - days covered by your free skips count.", goal: 24, stat: "doors", reward: "Legendary Christmas Serpent cursor", cursor: "style:xserpent" },
       { id: "x-glow",      event: "xmas2026", icon: "gem",     rar: "rare",      name: "Glowing Ornament",    desc: "Find the Glowing Emerald Scale behind door 13.",           goal: 1,  stat: "door13",  reward: "Glowing scale badge" },
-      { id: "x-legend",    event: "xmas2026", icon: "serpent", rar: "legendary", name: "Legendary Christmas Serpent", desc: "Earn the grand prize: open all 24 doors (free skips count) and the Legendary Christmas Serpent is yours.", goal: 24, stat: "fairDoors", reward: "The Legendary Serpent badge and Cabin decoration" },
+      { id: "x-legend",    event: "xmas2026", icon: "serpent", rar: "legendary", name: "Legendary Christmas Serpent", desc: "Earn the grand prize: cover all 24 doors (days recovered or reserved with free skips count) and the Legendary Christmas Serpent is yours.", goal: 24, stat: "fairDoors", reward: "The Legendary Serpent badge and Cabin decoration",
+                           limited: true, legendary: true },   // once in a lifetime: LIMITED label + the gold Legendary reward box
       { id: "x-deco",      event: "xmas2026", icon: "ornament", rar: "uncommon", name: "Christmas Decorator", desc: "Show 3 Christmas rewards in your Cabin.",                  goal: 3,  stat: "shown",   reward: "Decorator's ribbon", cursor: "click:ornament" },
       { id: "x-complete",  event: "xmas2026", icon: "crown",   rar: "mythic",    name: "Christmas Completionist", desc: "Earn every other Christmas 2026 achievement.",       goal: 11, stat: "xmasAll", reward: "Completionist crown" },
       // Christmas Cabin (shown under Cabin & Decorations)

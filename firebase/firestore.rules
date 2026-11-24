@@ -12,9 +12,11 @@ rules_version = '2';
 //   customers/..., products/.. written ONLY by the Stripe "Run Payments with Stripe" extension (server side)
 //
 // The Advent dates below must match events/config.js (xmas2026: door N opens 2026-12-01T00:00Z + N-1 days,
-// is "on time" for 24 hours; a skip covers one door the person chooses - a missed one, or (skipFuture()) an
-// upcoming one opened early once door 1 has opened - until 2027-01-01T00:00Z; only doors opened on their own day
-// build the streak: a skip's door has run 0 and earns no free skip).
+// is "on time" for 24 hours; a skip covers one door the person chooses - a missed one (recovered), or (skipFuture())
+// an upcoming one (reserved: its reward stays hidden until its day) once door 1 has opened - until 2027-01-01T00:00Z).
+// Free skips: one per 3 covered doors in a row (opened on their day OR covered by a skip) - see events/advent-logic.js.
+// The summary keeps a 24-character mask of the covered doors; a new door says how many covered doors are right
+// before it (run - 1) and right after it (ahead), both checked against that mask, and the skip it earns follows.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -43,19 +45,21 @@ service cloud.firestore {
     function adventFirst() { return timestamp.date(2026, 12, 1); }
     function adventUnlock(d) { return adventFirst() + duration.value(d - 1, 'd'); }
     function adventEnd() { return timestamp.date(2027, 1, 1); }
-    // events/config.js advent.skipCanClaimFuture (Eduardo 2026-11-24: a skip may also claim an upcoming day early)
+    // events/config.js advent.skipCanClaimFuture (Eduardo 2026-11-24: a skip may also reserve an upcoming day)
     function skipFuture() { return true; }
-    function zeroSummary() { return { 'earned': 0, 'earnedUsed': 0, 'subUsed': 0, 'claimed': 0 }; }
+    function zeroSummary() { return { 'earned': 0, 'earnedUsed': 0, 'subUsed': 0, 'claimed': 0, 'mask': '000000000000000000000000' }; }
     function sumPath(uid, ev) { return /databases/$(database)/documents/eventProgress/$(uid)/events/$(ev); }
     function doorPath(uid, ev, d) { return /databases/$(database)/documents/eventProgress/$(uid)/events/$(ev)/doors/$(string(d)); }
+    // the free skips a door earns when it joins l covered doors before it and r after it (0 or 1; 3 = streakForSkip)
+    function gain(l, r) { return math.floor((l + 1 + r) / 3) - math.floor(l / 3) - math.floor(r / 3); }
 
-    // one door: create-only, stamped with the SERVER time, never a future door, written together with the summary
+    // one door: create-only, stamped with the SERVER time, written together with the summary (which checks run/ahead)
     function validDoor(uid, ev, day) {
       let d = int(day);
       let x = request.resource.data;
       let before = exists(sumPath(uid, ev)) ? get(sumPath(uid, ev)).data : zeroSummary();
       let after = getAfter(sumPath(uid, ev)).data;
-      return x.keys().hasOnly(['day', 'at', 'via', 'run']) && x.keys().hasAll(['day', 'at', 'via', 'run'])
+      return x.keys().hasOnly(['day', 'at', 'via', 'run', 'ahead', 'bonus']) && x.keys().hasAll(['day', 'at', 'via', 'run', 'ahead', 'bonus'])
         && day == string(d) && d >= 1 && d <= 24 && x.day == d
         && x.at == request.time
         && request.time < adventEnd()
@@ -63,23 +67,33 @@ service cloud.firestore {
         // on its day: only during its own 24 hours. A skip: a missed door, or an upcoming one (never today's)
         && (x.via == 'day' ? (request.time >= adventUnlock(d) && request.time < adventUnlock(d + 1))
                            : (request.time >= adventUnlock(d + 1) || (skipFuture() && request.time >= adventFirst() && request.time < adventUnlock(d))))
-        // the streak: only doors opened on their own day count
-        && x.run == (x.via != 'day' ? 0
-                     : (exists(doorPath(uid, ev, d - 1)) && get(doorPath(uid, ev, d - 1)).data.via == 'day' ? get(doorPath(uid, ev, d - 1)).data.run + 1 : 1))
+        && x.run is int && x.run >= 1 && x.run <= d && x.ahead is int && x.ahead >= 0 && x.ahead <= 24 - d
+        // the door's subscriber bonus rewards: only when a subscription is active as it is covered
+        && x.bonus == isSubscriber()
         && after.last == d && after.claimed == before.claimed + 1;
     }
     // the per-event summary: its counters can only move together with exactly one new door
     function validSummary(uid, ev) {
       let n = request.resource.data;
       let o = resource == null ? zeroSummary() : resource.data;
-      let dp = doorPath(uid, ev, n.last);
+      let d = n.last;
+      let dp = doorPath(uid, ev, d);
       let door = getAfter(dp).data;
-      return n.keys().hasOnly(['earned', 'earnedUsed', 'subUsed', 'claimed', 'last', 'at'])
-        && n.last is int && n.last >= 1 && n.last <= 24
+      // the masks with a "0" on each end, so that no slice below is ever empty: door d is at [d]
+      let om = '0' + o.mask + '0';
+      return n.keys().hasOnly(['earned', 'earnedUsed', 'subUsed', 'claimed', 'last', 'at', 'mask'])
+        && d is int && d >= 1 && d <= 24
         && !exists(dp) && existsAfter(dp)
         && n.at == request.time
         && n.claimed == o.claimed + 1
-        && n.earned == o.earned + (door.via == 'day' && door.run % 3 == 0 ? 1 : 0)
+        && n.mask is string && n.mask.size() == 24
+        // the covered doors: this door's place goes from 0 to 1 and nothing else changes
+        && om[d:d + 1] == '0'
+        && '0' + n.mask + '0' == om[0:d] + '1' + om[d + 1:26]
+        // run - 1 covered doors right before it and `ahead` right after it - exactly (the one beyond is not covered)
+        && om[0:d].matches('.*01{' + string(door.run - 1) + '}')
+        && om[d + 1:26].matches('1{' + string(door.ahead) + '}0.*')
+        && n.earned == o.earned + gain(door.run - 1, door.ahead)
         && n.earnedUsed == o.earnedUsed + (door.via == 'skip' ? 1 : 0)
         && n.subUsed == o.subUsed + (door.via == 'sub' ? 1 : 0)
         && (door.via != 'skip' || n.earnedUsed <= o.earned)

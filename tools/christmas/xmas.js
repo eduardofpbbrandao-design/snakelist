@@ -97,10 +97,11 @@
       while (tops[a] == null) a++; while (tops[b] == null) b--;
       // snow only holds where the edge is nearly level: none past a slope of about 30 degrees
       var slope = (tops[b] - tops[a]) / Math.max(1e-6, (b - a) * step), f = Math.pow(Math.max(0, 1 - Math.abs(slope) / .85), 1.5), x = x0 + c * step;
-      th[c] = T * f * (.86 + .14 * Math.sin(x / (T * 2.3) + ph0) + .08 * Math.sin(x / (T * .9) + ph1));
+      // lumpy, like real snow: soft clumps on top of the slow swell
+      th[c] = T * f * (.84 + .14 * Math.sin(x / (T * 2.3) + ph0) + .08 * Math.sin(x / (T * .9) + ph1) + .07 * Math.sin(x / (T * .42) + ph0 * 2.3));
     }
     for (c = 0; c < n; c++) { if (tops[c] == null) continue; var s = 0, q = 0; for (k = Math.max(0, c - 2); k < Math.min(n, c + 3); k++) if (tops[k] != null) { s += th[k]; q++; } sm[c] = s / q; }
-    c = 0;
+    c = 0; out.hi = []; out.gl = [];
     while (c < n) {
       if (tops[c] == null || sm[c] < T * .3) { c++; continue; }
       var e = c;
@@ -115,6 +116,11 @@
           var dr = drip < 0 ? 0 : T * .95 * Math.exp(-Math.pow((u - drip) * len / (T * .45), 2));
           up.push([xx, tops[kk] - sm[kk] * tp * (.7 + .3 * full)]); dn.push([xx, tops[kk] + T * .16 * tp + dr]);
         }
+        // the sunlit upper part (brighter than the shaded body below it) and one or two glints on the top
+        var mid = up.map(function (p, ii) { return [p[0], p[1] + (dn[ii][1] - p[1]) * .42]; });
+        out.hi.push(up.concat(mid.reverse()));
+        var gs = T * .16;
+        [.3, .68].forEach(function (g, gi) { if (len < T * (3 + gi * 3)) return; var q = up[Math.min(L - 1, Math.floor(L * g))]; out.gl.push([[q[0], q[1] + gs * .6], [q[0] + gs, q[1] + gs * 1.6], [q[0], q[1] + gs * 2.6], [q[0] - gs, q[1] + gs * 1.6]]); });
         out.push(up.concat(dn.reverse()));
       }
       c = e + 1;
@@ -125,21 +131,25 @@
   /* where snow lies: [selector, depth of the snow as a part of the font size, the least depth in px] - the logos get a
      proper layer, the small words of the cover a light dusting */
   var SNOW_SPOTS = [
-    [".sl-header .sl-titletext, .intro-title, .hero-title .intro-title, .hero-mark, .signin-title .sl-titletext, .sl-brand, .site-logo", .07, 1.6],
-    ["#sl-hero .hero-sub, #intro .hero-sub", .17, 2.4],
-    ["#sl-hero .hero-cue > span, #intro .hero-cue > span", .2, 2]
+    [".sl-header .sl-titletext, .intro-title, .hero-title .intro-title, .hero-mark, .signin-title .sl-titletext, .sl-brand, .site-logo", .11, 2.2]
+    // (the cover's small words no longer get a dusting: on small letters it read like accent marks)
   ];
   var PILLS = "#sl-hero .hero-sp";           // a button: the snow lies along its rounded top
   var SNOW_HOSTS = SNOW_SPOTS.map(function (s) { return s[0]; }).join(", ") + ", " + PILLS;
   function capHost(host) {
     var o = host.querySelector(":scope > .xm-snowcap");
-    if (!o) { o = D.createElementNS(NS, "svg"); o.setAttribute("class", "xm-snowcap"); o.setAttribute("aria-hidden", "true"); o.innerHTML = "<path/>"; host.appendChild(o); }
+    if (!o) { o = D.createElementNS(NS, "svg"); o.setAttribute("class", "xm-snowcap"); o.setAttribute("aria-hidden", "true"); o.innerHTML = '<path class="s"/><path class="h"/><path class="g"/>'; host.appendChild(o); }
     return o;
+  }
+  // the snow's three layers: the shaded body, its sunlit top, the glints
+  function setCap(host, d) {
+    var ps = capHost(host).querySelectorAll("path");
+    for (var i = 0; i < 3; i++) if (ps[i]) ps[i].setAttribute("d", d[i] || "");
   }
   function snowText(host, Tem, Tpx) {
     if (!host || !host.isConnected) return;
     var hr = host.getBoundingClientRect(); if (!hr.width || !host.offsetWidth) return;
-    var sc = hr.width / host.offsetWidth || 1, parts = [];
+    var sc = hr.width / host.offsetWidth || 1, parts = [], his = [], gls = [];
     var w = D.createTreeWalker(host, NodeFilter.SHOW_TEXT, { acceptNode: function (n) { return n.parentNode.closest("svg, .sr-only, .xm-snowcap, .hw-dot") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } });
     var rg = D.createRange(), n;
     while ((n = w.nextNode())) {
@@ -153,16 +163,21 @@
         rg.setStart(n, i); rg.setEnd(n, i + 1);
         var r = rg.getBoundingClientRect(); if (!r.width) continue;
         var G = glyph(ch, font, T), ox = (r.left - hr.left) / sc, base = (r.top - hr.top) / sc + G.asc * fs;
-        G.p.forEach(function (poly) { parts.push(polyD(poly, function (x) { return ox + x * fs; }, function (y) { return base + y * fs; })); });
+        var fx = function (x) { return ox + x * fs; }, fy = function (y) { return base + y * fs; };
+        G.p.forEach(function (poly) { parts.push(polyD(poly, fx, fy)); });
+        (G.p.hi || []).forEach(function (poly) { his.push(polyD(poly, fx, fy)); });
+        (G.p.gl || []).forEach(function (poly) { gls.push(polyD(poly, fx, fy)); });
       }
     }
-    capHost(host).firstChild.setAttribute("d", parts.join(""));
+    setCap(host, [parts.join(""), his.join(""), gls.join("")]);
   }
   function snowPill(host) {
     if (!host || !host.isConnected || !host.offsetWidth) return;
     var W = host.offsetWidth, H = host.offsetHeight, r = Math.min(H / 2, parseFloat(getComputedStyle(host).borderTopLeftRadius) || 0), tops = [], st = 1;
     for (var x = 0; x <= W; x += st) { var dx = x < r ? r - x : x > W - r ? x - (W - r) : 0; tops.push(r - Math.sqrt(Math.max(0, r * r - dx * dx))); }
-    capHost(host).firstChild.setAttribute("d", snowCap(tops, 0, st, 3.2, 7).map(function (p) { return polyD(p, function (x) { return x; }, function (y) { return y + 2.6; }); }).join(""));
+    var cap = snowCap(tops, 0, st, 3.2, 7), fx = function (x) { return x; }, fy = function (y) { return y + 2.6; };
+    function dd(l) { return (l || []).map(function (p) { return polyD(p, fx, fy); }).join(""); }
+    setCap(host, [dd(cap), dd(cap.hi), dd(cap.gl)]);
   }
   var snowT = 0;
   function snowAll() {
@@ -239,7 +254,34 @@
   // wired the moment the photo is in the page (from dressCover, while the page is still loading), so the hat is
   // placed as soon as the photo has its size - before the opening dissolves into it, never popping in afterwards
   var phIm = null;
+  /* the opening's photo wall: the same hat on each tile's snake. The tiles are background images (data/ui/<id>.jpg,
+     background-size: cover, centred); their hats are photoHats entries keyed "ui/<id>" with the photo's own size
+     (nw, nh), so each hat is placed the moment its tile exists - inside the tile, so it fades in WITH the photo
+     from the first frame (it was missing before: the wall had no hats at all) */
+  function wallHats() {
+    var wall = D.querySelector("#intro .photo-wall"); if (!wall || !ART.hatSvg) return;
+    [].forEach.call(wall.querySelectorAll(".ph"), function (ph) {
+      var m = /data\/ui\/([^.")]+)\./.exec(ph.style.backgroundImage || ""), P = m && (ART.photoHats || {})["ui/" + m[1]];
+      if (!P) return;
+      var L = ph.querySelector(".xm-what");
+      if (!L) { L = D.createElement("div"); L.className = "xm-what"; L.setAttribute("aria-hidden", "true"); L.innerHTML = '<svg viewBox="-72 -84 144 116" preserveAspectRatio="xMidYMid meet">' + ART.hatSvg.replace(/xmp-/g, "xmw-") + "</svg>"; ph.appendChild(L); }
+      var bw = ph.offsetWidth, bh = ph.offsetHeight; if (!bw || !bh) return;
+      var k = Math.max(bw / P.nw, bh / P.nh), cw = P.nw * k, ch = P.nh * k, ox = (bw - cw) / 2, oy = (bh - ch) / 2;
+      var w = P.w * cw, sv = L.firstChild;
+      sv.style.width = (w * 1.44) + "px"; sv.style.height = (w * 1.16) + "px";
+      sv.style.left = (ox + P.x * cw - w * .72) + "px"; sv.style.top = (oy + P.y * ch - w * .84) + "px";
+      sv.style.transformOrigin = (w * .72) + "px " + (w * .84) + "px";
+      sv.style.transform = "rotate(" + (P.a || 0) + "deg)" + (P.flip ? " scaleX(-1)" : "");
+    });
+  }
+  var wallRO = null;
+  function wallHatsOn() {
+    var wall = D.querySelector("#intro .photo-wall"); if (!wall) return;
+    wallHats();
+    if (!wallRO && "ResizeObserver" in window) { wallRO = new ResizeObserver(wallHats); wallRO.observe(wall); }
+  }
   function photoHat() {
+    wallHatsOn();
     var hero = D.getElementById("sl-hero"); if (!hero) return;
     var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (!im || phIm === im) return;
     phIm = im;
