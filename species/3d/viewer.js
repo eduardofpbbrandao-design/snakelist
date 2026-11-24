@@ -1190,9 +1190,7 @@ function occSpheres(F, spine) {
   for (let x = F.Hl * 0.3; x < L; x += ds) { const r = (F.W(x) + F.Hh(x)) / 2; if (r < F.w0 * 0.12) continue; const c = spine(x); xs.push(x); cs.push(c.x, c.y, c.z); rs.push(r); }
   return { xs: Float32Array.from(xs), cs: Float32Array.from(cs), rs: Float32Array.from(rs), ds, rMax: Math.max(1e-6, ...rs) };
 }
-function bakeOcc(F, S, pos, nrm, xv) {
-  const T0 = performance.now(), out0 = bakeOcc0(F, S, pos, nrm, xv); if (typeof globalThis !== 'undefined') globalThis.__bakeMs = performance.now() - T0; return out0;
-}
+function bakeOcc(F, S, pos, nrm, xv) { const t0 = performance.now(), o = bakeOcc0(F, S, pos, nrm, xv); perfT('occ', t0); return o; }
 function bakeOcc0(F, S, pos, nrm, xv) {
   const n = xv.length, out = new Float32Array(n * 2), { xs, cs, rs, ds, rMax } = S, N = xs.length, cell = rMax * 9;
   const grid = new Map(), key = (i, j, k) => (i * 73856093) ^ (j * 19349663) ^ (k * 83492791);
