@@ -115,10 +115,10 @@
     var now = EV.time.now();
     if (now == null) return EV.time.failed() ? '<p class="sl-ev-clockline">' + ic("clock", 14) + " Couldn't check the time with the server - doors stay shut until it can.</p>" : '<p class="sl-ev-clockline">' + ic("clock", 14) + " Checking the time…</p>";
     var t = L.today(E, now);
-    if (t < 1) return '<p class="sl-ev-clockline">' + ic("clock", 14) + " Door 1 opens <b>" + esc(EV.localTime(E.advent.firstDoor)) + "</b> (<b data-cd>" + cd(L.unlockAt(E, 1) - now) + "</b>)</p>";
+    if (t < 1) return '<p class="sl-ev-clockline">' + ic("clock", 14) + " Door 1 opens <b>" + esc(EV.localTime(E.advent.firstDoor)) + "</b> - " + esc(EV.tzNote()) + " (<b data-cd>" + cd(L.unlockAt(E, 1) - now) + "</b>)</p>";
     if (now >= L.closesAt(E)) return '<p class="sl-ev-clockline">The Advent Calendar has closed. Thank you for taking part!</p>';
-    if (t < E.advent.days) return '<p class="sl-ev-clockline">' + ic("clock", 14) + " Door " + (t + 1) + " opens in <b data-cd>" + cd(L.unlockAt(E, t + 1) - now) + "</b></p>";
-    return '<p class="sl-ev-clockline">All 24 doors are open. Missed days can be recovered with skips until <b>' + esc(EV.localTime(E.advent.recoverUntil, { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })) + "</b>.</p>";
+    if (t < E.advent.days) return '<p class="sl-ev-clockline">' + ic("clock", 14) + " Door " + (t + 1) + " opens in <b data-cd>" + cd(L.unlockAt(E, t + 1) - now) + "</b> - at " + esc(EV.localTime(L.unlockAt(E, t + 1), { hour: "2-digit", minute: "2-digit", timeZoneName: "short" })) + ", " + esc(EV.tzNote()) + "</p>";
+    return '<p class="sl-ev-clockline">All 24 doors are open. Missed days can be recovered with skips until <b>' + esc(EV.localTime(E.advent.recoverUntil, { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZoneName: "short" })) + "</b> (" + esc(EV.tzNote()) + ").</p>";
   }
   function cd(ms) { ms = Math.max(0, ms); var h = Math.floor(ms / 36e5), m = Math.floor(ms % 36e5 / 6e4), s = Math.floor(ms % 6e4 / 1e3); return h + "h " + (m < 10 ? "0" : "") + m + "m " + (s < 10 ? "0" : "") + s + "s"; }
   function doorsHtml() {
@@ -127,7 +127,7 @@
       var st = L.status(E, ST.state, d, now), r = REWARD[d], c = ST.state.doors[d], early = st === "locked" && L.skipTarget(E, ST.state, d, now) === "early";
       var lab = "Door " + d + ": " + (st === "claimed" ? r.name + (c.via === "skip" ? " (opened with a free skip)" : c.via === "sub" ? " (opened with a subscriber skip)" : " (opened on its day)") :
         st === "open" ? "open today - open it!" : st === "missed" ? "missed - can be recovered with a skip" : st === "closed" ? "closed" :
-        "opens " + EV.localTime(L.unlockAt(E, d), { day: "numeric", month: "long" }) + (early ? " (or now, with a skip)" : ""));
+        "opens " + EV.localTime(L.unlockAt(E, d), { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZoneName: "short" }) + (early ? " (or now, with a skip)" : ""));
       var word = st === "open" ? "Open today" : st === "missed" ? "Missed" : "";
       return '<button type="button" role="listitem" class="sl-ev-door is-' + st + (c ? " via-" + c.via : "") + (early ? " can-early" : "") + '" data-day="' + d + '" aria-label="' + esc(lab) + '" title="' + esc(lab) + '">' +
         (word ? '<span class="st" aria-hidden="true">' + word + "</span>" : "") +

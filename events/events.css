@@ -278,6 +278,7 @@ html.xm .sl-ev-xhat { display: none; }   /* with the Christmas preview on, the S
 /* ------------------------------------------------------------- subscription */
 .sl-ev-price { display: flex; align-items: baseline; gap: 6px; margin: 4px 0; }
 .sl-ev-price b { font: 800 30px 'Inter', sans-serif; }
+.sl-ev-price.sl-ev-tba b { font-size: 22px; }
 .sl-ev-ben { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .sl-ev-ben li { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--border); border-radius: 11px; padding: 8px 10px; }
 .sl-ev-ben li > span:first-child { flex: none; width: 28px; height: 28px; border-radius: 50%; background: rgba(63,125,67,.14); color: var(--gold); display: grid; place-items: center; }
@@ -325,4 +326,28 @@ details.sl-ev-more summary { cursor: pointer; font-weight: 600; }
   .sl-ev-flakes { display: none; }
   .sl-ev-rv-door { display: none; }
   .sl-ev-door .leaf { transition: none; }
+  .sl-ev-burst .sl-ev-boom { animation: none !important; }
 }
+
+/* ------------------------------------------------------------- public countdown (every visitor): minimise + pill */
+.sl-ev-pubwrap { position: relative; width: calc(100% - 32px); max-width: 1248px; margin: 10px auto 12px; }
+.sl-ev-pubwrap .sl-ev-banner { width: 100%; margin: 0; }
+.sl-ev-pubwrap.is-min { display: flex; justify-content: flex-end; margin: 4px auto 6px; }
+.sl-ev-min { all: unset; box-sizing: border-box; position: absolute; top: -9px; right: -7px; z-index: 2; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  background: var(--surface, #fff); color: var(--text, #1d2a1f); border: 1px solid var(--border, rgba(0,0,0,.15)); box-shadow: 0 2px 6px rgba(0,0,0,.22); }
+.sl-ev-min::before { content: ""; position: absolute; inset: -9px; }   /* a finger-sized target */
+.sl-ev-min:hover { background: var(--surface-hover, #f2f2f2); }
+.sl-ev-min:focus-visible, .sl-ev-pill:focus-visible { outline: 3px solid var(--focus-ring, #58b351); outline-offset: 2px; }
+.sl-ev-min[hidden], .sl-ev-pill[hidden], .sl-ev-banner[hidden] { display: none; }
+.sl-ev-pill { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 7px; max-width: 100%; min-height: 34px; padding: 4px 12px 4px 6px; border-radius: 999px; cursor: pointer;
+  font: 500 13px/1.2 "SL Outfit", "Inter", sans-serif; color: var(--ev-ink, #fff); background: linear-gradient(160deg, var(--ev-a), var(--ev-b)); border: 1px solid rgba(228,197,122,.3);
+  box-shadow: inset 0 1px 0 rgba(228,197,122,.35), 0 3px 10px rgba(7,24,16,.2); font-variant-numeric: tabular-nums; }
+.sl-ev-pill > span:nth-child(2) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sl-ev-pill-art { flex: none; width: 24px; height: 24px; display: grid; place-items: center; }
+.sl-ev-pill-art svg { width: 24px; height: 24px; }
+.sl-ev-pill > svg { flex: none; color: var(--ev-c); }
+.sl-ev-pill:hover { border-color: rgba(228,197,122,.6); }
+.sl-ev-comes.sl-ev-soon { max-width: 30ch; line-height: 1.2; margin-bottom: 10px !important; text-wrap: balance; }
+/* reduce motion: SnakeList's own calm setting (html.sl-calm) as well as the device's */
+html.sl-calm .sl-ev-dg i, html.sl-calm .sl-ev-flakes i, html.sl-calm .sl-ev-burst i, html.sl-calm .sl-ev-burst .ring, html.sl-calm .sl-ev-burst .sl-ev-boom, html.sl-calm .sl-ev-b-badge { animation: none !important; }
+html.sl-calm .sl-ev-flakes { display: none; }

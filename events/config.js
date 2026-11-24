@@ -1,5 +1,7 @@
 /* SnakeList events - the one place to change dates, rewards, achievements, benefits and prices.
-   Everything in events/ only runs with the "events" preview switched on (tools/events_loader.js).
+   Everything in events/ only runs with the "events" preview switched on (tools/events_loader.js) - except the
+   PUBLIC countdown (publicCountdown below), which every visitor sees: it loads only config.js, core.js, art.js,
+   countdown.js and events.css (+ the Outfit fonts), after the opening has finished.
 
    Times are single official instants in UTC (ISO strings ending in Z). Every viewer sees them in their own
    local time, but a door, an event or a promotion opens at the same moment for everybody.
@@ -8,6 +10,18 @@
   "use strict";
   var C = {
     version: 1,
+
+    /* ------------------------------------------------------------------ public release switches ------- */
+    // the countdown banner/panel for everyone (no ?preview=events needed). Only the events listed in publicEvents
+    // are counted down, and nothing about subscriptions, early access, Advent, Cabin or cursor is shown in it.
+    publicCountdown: true,
+    publicEvents: ["xmas2026"],
+    // is the Christmas event itself (Advent Calendar, Cabin...) switched on for everyone? It is released separately
+    // (planned for 1 December). While false, the public countdown never shows an "Explore the Christmas event"
+    // button - at zero it says the event is coming today (countdown.publicToday / publicSoon) instead. When true,
+    // the button shows only if something can open the event: SL_EVENTS.advent, or window.SL_XMAS_OPEN() provided
+    // by that release.
+    xmasPublic: false,
     // where the trusted clock comes from: a HEAD request to this page; the server's Date header is the time
     timeProbe: "",              // "" = this page's own address
     timeResync: 10 * 60 * 1000, // ms between re-checks while the page stays open
@@ -21,6 +35,10 @@
       interval: "month",           // "month" | "year"
       intervalCount: 1,
       priceStatus: "placeholder",  // shown as "price not final"
+      // false until a real Stripe price exists (stripe.priceId filled in): the subscription page then says priceTba
+      // instead of a made-up price, billing period, renewal or cancellation terms. true shows price + billing again.
+      priceAnnounced: false,
+      priceTba: "Price to be announced",
       // December promotion as Eduardo asked: discount % = the day of the month (Dec 1 = 1 % ... Dec 31 = 31 %)
       decemberDayDiscount: true,
       // New Year 2026-27 promotion (configurable; see PRICING.md for why 0.01 can't be charged)
@@ -34,8 +52,8 @@
         ["deco", "Exclusive seasonal decorations", "Premium Cabin decorations, like the Diamond Snake Ornament and the Aurora Borealis background."],
         ["extra", "Extra Advent rewards", "A bonus Frost Edition reward behind every fourth door."],
         ["skips", "Up to 10 Advent skips", "Recover days you missed - kept separate from the skips everyone earns with streaks."],
-        ["cursor", "Cursor customization", "Colours and effects for your mouse pointer (computers with a mouse or trackpad)."],
-        ["cosmetic", "Subscriber cosmetics", "Profile frames and badges that show you support SnakeList."]
+        ["cursor", "Cursor customization", "Colours and effects for your mouse pointer (computers with a mouse or trackpad)."]
+        // only benefits that exist in the app - add profile frames/badges here once SnakeList has a profile to show them
       ],
       alwaysFree: "Every snake, photo, map, sighting, quiz and achievement in SnakeList stays free. A subscription only adds extras.",
       // what happens to subscriber items when a subscription ends (disclosed on the subscription page)
@@ -60,6 +78,8 @@
     events: [
       {
         id: "xmas2026", name: "SnakeList Christmas 2026", short: "Christmas 2026", theme: "xmas", firstEver: true,
+        // the public countdown says only this (what the event holds is announced when it is switched on: xmasPublic)
+        publicDescription: "SnakeList's very first event: Christmas with SnakeList, this December.",
         description: "The first ever SnakeList event: a 24-door Advent Calendar in the Christmas Cabin, festive decorations, streak skips and the Legendary Christmas Serpent for everyone who opens all 24 doors.",
         start: "2026-12-01T00:00:00Z", end: "2027-01-01T00:00:00Z", earlyAccess: "2026-11-29T00:00:00Z",
         countdownFrom: "2026-11-01T00:00:00Z",
@@ -67,6 +87,11 @@
         countdown: {
           comes: "Comes December 1",                   // shown above the numbers before the event opens
           openButton: "Explore the Christmas event",   // takes the timer's place once the event is open for this viewer
+          // public countdown only, while the Christmas event isn't switched on for everyone (xmasPublic: false)
+          publicTag: "Our first ever event",               // the small label before it opens
+          publicToday: "The Christmas event is coming to SnakeList today",
+          publicSoon: "The Christmas event is coming to SnakeList soon",
+          publicZero: "December is here!",                 // the words in the burst at zero
           after: [
             { at: "2026-12-25T00:00:00Z", label: "Time until Christmas" },
             { at: "2027-01-01T00:00:00Z", label: "Time until New Year" }

@@ -44,8 +44,12 @@ async function run(b, label, ctxOpts) {
   const ctx = await b.newContext(ctxOpts);
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', (e) => errs.push(e.message));
   p.on('dialog', (d) => d.dismiss());
-  // the Christmas preview is a switch: a normal visit must not fetch anything from christmas/ (nor the events preview's files)
-  const previewFetches = []; p.on('request', (r) => { const u = new URL(r.url()); if (/^\/(christmas|events)\//.test(u.pathname)) previewFetches.push(u.pathname); });
+  // the Christmas preview is a switch: a normal visit must not fetch anything from christmas/. From events/ it may fetch
+  // ONLY the public countdown's own files (config.js, core.js, art.js, countdown.js, events.css, its two fonts) - never
+  // the Advent Calendar, achievements, subscription or cursor code
+  const PUB_OK = /^\/events\/(config\.js|core\.js|art\.js|countdown\.js|events\.css|fonts\/outfit-latin-(500|800)\.woff2)$/;
+  const previewFetches = [], countdownFetches = [];
+  p.on('request', (r) => { const u = new URL(r.url()); if (/^\/christmas\//.test(u.pathname) || (/^\/events\//.test(u.pathname) && !PUB_OK.test(u.pathname))) previewFetches.push(u.pathname); else if (/^\/events\//.test(u.pathname)) countdownFetches.push(u.pathname); });
   await p.route(/^https?:\/\/(?!localhost)/, (r) => r.abort());
   await p.addInitScript((seed) => {
     localStorage.setItem('sl-consent', 'essential'); localStorage.setItem('sl-tour-seen', '1'); localStorage.setItem('sl-news-off', '1');
@@ -197,7 +201,9 @@ async function run(b, label, ctxOpts) {
   await search('Zhao');
   ok(await card('opisthotropis-zhaoermii').evaluate((c) => c.querySelector('.photo-btn').classList.contains('has-photo') && c.classList.contains('done')), label + ': the Zhao snake still shows your photo');
   if (SHOTS) await p.screenshot({ path: SHOTS + '/' + label + '-after-reload.png' });
-  ok(!previewFetches.length, label + ': nothing from christmas/ or events/ was fetched without the preview switch (' + previewFetches.slice(0, 3).join(', ') + ')');
+  ok(!previewFetches.length, label + ': nothing from christmas/, and from events/ only the public countdown\'s files, without the preview switch (' + previewFetches.slice(0, 3).join(', ') + ')');
+  console.log('  public countdown files fetched: ' + ([...new Set(countdownFetches)].join(', ') || 'none (outside its window)'));
+  ok(await p.evaluate(() => !window.SL_EVENTS || (window.SL_EVENTS.pub && !window.SL_EVENTS.advent && !window.SL_EVENTS.subscribe && !window.SL_EVENTS.cursor)), label + ': only the public countdown runs (no Advent, subscription or cursor)');
   ok(await p.evaluate(() => !window.XM && !document.documentElement.classList.contains('xm')), label + ': no Christmas decoration on the page');
   ok(!errs.length, label + ': no page errors ' + errs.slice(0, 3).join(' | '));
   await ctx.close();
