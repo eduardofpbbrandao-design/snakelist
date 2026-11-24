@@ -205,7 +205,7 @@ async function route(r) {
   await closeView(p); await cvClick(p, C.x, C.y); await p.waitForTimeout(800);
   ok(/No photo was shared with this sighting\./.test(await panelText(p)) && (await panelImgs(p)).length === 0 && !M.defaultPhotoAsked, 'no photo: says so, and no species/default photo is used');
   // a photo that fails to load: message + Retry, no other picture
-  const Dd = d.dots[6]; M.brokenPhoto[Dd.id] = 2; // the shown size and the large one both fail once
+  const Dd = d.dots[6]; M.brokenPhoto[Dd.id] = 3; // the hover-preloaded size, the shown size and the large one all fail once
   await closeView(p); await cvClick(p, Dd.x, Dd.y); await p.waitForTimeout(900);
   ok(/This photo couldn.t load/.test(await panelText(p)), 'a broken photo says so, with Retry');
   await p.click('#sg-pop .sg-ph-retry'); await p.waitForTimeout(700);
@@ -293,8 +293,8 @@ async function route(r) {
   // A27: the most popular sighting (by favourites), in Portugal
   const v0 = await p.evaluate(() => window.SL_MAP_VIEW());
   await p.evaluate(() => document.getElementById('sg-popular').click()); await p.waitForTimeout(2200);
-  const pu = M.popularUrls[M.popularUrls.length - 1] || '';
-  ok(/order_by=votes/.test(pu) && /order=desc/.test(pu) && /swlat=/.test(pu), 'most popular: iNaturalist ordered by votes (favourites), within the place searched');
+  const pu = M.popularUrls.filter(u => /order=desc/.test(u)).pop() || ''; // (the app's own photo look-ups use order_by=votes too)
+  ok(/order_by=votes/.test(pu) && /order=desc/.test(pu) && /swlat=/.test(pu), 'most popular: iNaturalist ordered by votes (favourites), within the place searched (' + pu.replace(/^.*\?/, '').slice(0, 160) + ')');
   ok((await cardId(p)) === 424242 && /Most popular sighting in Portugal/.test(await panelText(p)) && /favourite/.test(await panelText(p)) && /view/.test(await panelText(p)), 'most popular: its card opens, saying it is measured by favourites (iNaturalist has no view counts)');
   await shot(p, 'tiles-popular', '#globe-stage');
   // Undo (no Back button) puts the map back where it was
