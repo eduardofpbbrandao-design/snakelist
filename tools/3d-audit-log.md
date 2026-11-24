@@ -851,3 +851,10 @@ Any marking colour (pattern, speckle, bands, stripes; never the ground or belly)
 | xenoxybelis-argenteus | saddles: silvery buff with a dark stripe |
 | xerotyphlops-vermicularis | pinkish |
 | zaocys-dhumnades | olive-grey with dark stripes |
+
+## v6.26 (skin, heads by species, habitats)
+
+35 species rendered before and after under matching conditions and checked against their photos, plus heads-only checks for
+19 hand-set species; details and the list in `tools/3d-species-inventory.md`. Colour fixes found on the way: the snout tip
+took the body's plain colour (coral snake's black snout red, banded krait's black snout yellow, yellow-lipped sea krait's
+yellow snout blue, inland taipan's dark snout pale) - now the head's own colours.

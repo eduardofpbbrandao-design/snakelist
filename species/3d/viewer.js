@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=592'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=592'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=630'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=630'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 import * as DAYNIGHT from './daynight.js?r=614'; // v6.14: Day / Night (and the plugin hooks "See the spot", spot.js, uses)
 export function useThree(t) { THREE = t; }
 // v6.13: Array .at() for iPads on iPadOS 15.0-15.3 (it came in 15.4); the species pages load this without SnakeList's own copy
@@ -91,22 +91,180 @@ function merge(a, b) { const o = Object.assign({}, a); for (const k in b) o[k] =
 // Natricines and racers have a long, narrow head barely wider than the neck; vipers a broad triangle on a thin neck;
 // cobras a head about as wide as the neck, mambas a long coffin-shaped one; blind snakes no distinct head at all.
 const HEAD_FORM = {
-  natricine: { lw: 1.75, hb: [0.62, 0.85], hn: 1.25, len: [0.028, 0.044], h: 0.76, hl: 0.44, cheek: 0.05, lor: 0.022, crown: 0.05 },
-  colubrine: { lw: 1.7, hb: [0.6, 0.86], hn: 1.2, len: [0.026, 0.044], h: 0.74, hl: 0.43, cheek: 0.045, lor: 0.02, crown: 0.045 },
-  broad: { lw: 1.42, hb: [0.68, 1.15], hn: 1.5, len: [0.026, 0.05], hl: 0.45, cheek: 0.08, lor: 0.018, crown: 0.06 }, // cat-eyed and tree snakes, snail-eaters, hognoses: a broad head on a thin neck
-  vine: { lw: 2.0, hb: [0.6, 1.7], hn: 1.5, len: [0.03, 0.055], hl: 0.34, cheek: 0.05, lor: 0.035, crown: 0.03 }, // (a long head on a thin neck)
-  burrow: { lw: 1.35, hb: [0.6, 0.9], hn: 1.0, len: [0.02, 0.04], hl: 0.5, cheek: 0, lor: 0, crown: 0.02 },
-  elapid: { lw: 1.65, hb: [0.6, 0.9], hn: 1.1, len: [0.025, 0.04], h: 0.7, hl: 0.44, cheek: 0.055, lor: 0.014, crown: 0.05 },
-  cobra: { lw: 1.55, hb: [0.65, 0.95], hn: 1.05, len: [0.025, 0.04], h: 0.68, hl: 0.42, cheek: 0.04, lor: 0.012, crown: 0.04 },
-  mamba: { lw: 2.05, hb: [0.6, 0.88], hn: 1.15, len: [0.025, 0.04], h: 0.72, hl: 0.4, cheek: 0.035, lor: 0.03, crown: 0.035 },
-  deathadder: { lw: 1.2, hb: [0.85, 1.25], hn: 1.75, len: [0.04, 0.07], hl: 0.4, cheek: 0.07, lor: 0.02, crown: 0.03 },
-  sea: { lw: 1.7, hb: [0.5, 0.8], hn: 1.05, len: [0.025, 0.05], hl: 0.42, cheek: 0.02, lor: 0, crown: 0.03 },
-  viper: { lw: 1.18, hb: [0.62, 1.2], hn: 2.0, len: [0.04, 0.06], hl: 0.4, lor: 0.03, crown: 0.02 }, // (v5.93: broader - from above the heads read as long narrow shields)
-  bitis: { lw: 1.05, hb: [0.6, 1.25], hn: 2.1, len: [0.045, 0.075], hl: 0.36, lor: 0.025, crown: 0.015 },
-  pitviper: { lw: 1.18, hb: [0.7, 1.2], hn: 1.9, len: [0.04, 0.062], hl: 0.42, lor: 0.04, crown: 0.02 },
-  python: { lw: 1.55, hb: [0.5, 0.8], hn: 1.45, len: [0.03, 0.055], hl: 0.42, cheek: 0.07, lor: 0.03, crown: 0.05 },
-  boa: { lw: 1.65, hb: [0.5, 0.8], hn: 1.4, len: [0.03, 0.055], hl: 0.44, cheek: 0.07, lor: 0.028, crown: 0.05 },
-  sandboa: { lw: 1.25, hb: [0.6, 0.95], hn: 1.05, len: [0.025, 0.04], hl: 0.48, cheek: 0.02, lor: 0, crown: 0.03 },
+  natricine: { lw: 1.75, hb: [0.62, 0.85], hn: 1.25, len: [0.028, 0.044], h: 0.76, hl: 0.44, cheek: 0.05, lor: 0.022, crown: 0.05, smile: 0.06 },
+  colubrine: { lw: 1.7, hb: [0.6, 0.86], hn: 1.2, len: [0.026, 0.044], h: 0.74, hl: 0.43, cheek: 0.045, lor: 0.02, crown: 0.045, smile: 0.05 },
+  broad: { lw: 1.42, hb: [0.68, 1.15], hn: 1.5, len: [0.026, 0.05], hl: 0.45, cheek: 0.08, lor: 0.018, crown: 0.06, smile: 0.05 }, // cat-eyed and tree snakes, snail-eaters, hognoses: a broad head on a thin neck
+  vine: { lw: 2.0, hb: [0.6, 1.7], hn: 1.5, len: [0.03, 0.055], hl: 0.34, cheek: 0.05, lor: 0.035, crown: 0.03, smile: 0.06 }, // (a long head on a thin neck)
+  burrow: { lw: 1.35, hb: [0.6, 0.9], hn: 1.0, len: [0.02, 0.04], hl: 0.5, cheek: 0, lor: 0, crown: 0.02, smile: 0.015 },
+  elapid: { lw: 1.65, hb: [0.6, 0.9], hn: 1.1, len: [0.025, 0.04], h: 0.7, hl: 0.44, cheek: 0.055, lor: 0.014, crown: 0.05, smile: 0.04 },
+  cobra: { lw: 1.55, hb: [0.65, 0.95], hn: 1.05, len: [0.025, 0.04], h: 0.68, hl: 0.42, cheek: 0.04, lor: 0.012, crown: 0.04, smile: 0.03 },
+  mamba: { lw: 2.05, hb: [0.6, 0.88], hn: 1.15, len: [0.025, 0.04], h: 0.72, hl: 0.4, cheek: 0.035, lor: 0.03, crown: 0.035, smile: 0.08 },
+  deathadder: { lw: 1.2, hb: [0.85, 1.25], hn: 1.75, len: [0.04, 0.07], hl: 0.4, cheek: 0.07, lor: 0.02, crown: 0.03, smile: 0.03 },
+  sea: { lw: 1.7, hb: [0.5, 0.8], hn: 1.05, len: [0.025, 0.05], hl: 0.42, cheek: 0.02, lor: 0, crown: 0.03, smile: 0.02 },
+  viper: { lw: 1.18, hb: [0.62, 1.2], hn: 2.0, len: [0.04, 0.06], hl: 0.4, lor: 0.03, crown: 0.02, smile: 0.05 }, // (v5.93: broader - from above the heads read as long narrow shields)
+  bitis: { lw: 1.05, hb: [0.6, 1.25], hn: 2.1, len: [0.045, 0.075], hl: 0.36, lor: 0.025, crown: 0.015, smile: 0.04 },
+  pitviper: { lw: 1.18, hb: [0.7, 1.2], hn: 1.9, len: [0.04, 0.062], hl: 0.42, lor: 0.04, crown: 0.02, smile: 0.05 },
+  python: { lw: 1.55, hb: [0.5, 0.8], hn: 1.45, len: [0.03, 0.055], hl: 0.42, cheek: 0.07, lor: 0.03, crown: 0.05, smile: 0.035 },
+  boa: { lw: 1.65, hb: [0.5, 0.8], hn: 1.4, len: [0.03, 0.055], hl: 0.44, cheek: 0.07, lor: 0.028, crown: 0.05, smile: 0.025 },
+  sandboa: { lw: 1.25, hb: [0.6, 0.95], hn: 1.05, len: [0.025, 0.04], hl: 0.48, cheek: 0.02, lor: 0, crown: 0.03, smile: 0.0 },
+};
+// v6.26 (heads, species by species): hand-set head shapes for the best-known species, from field-guide proportions; about 40
+// of them were rendered from the side, the front and above and checked against their SnakeList photos. Keys: hl head depth (crown to chin) over head length, as measured on the built
+// head; sn snout width at the nostrils over head width; sh snout height over head height; eye eye diameter over head length;
+// ex the eye's place along the head (0 snout tip, 1 back of the head); ea how far round from the top the eye sits (degrees);
+// ck cheeks (jaw muscles); lor the loreal hollow; cr the crown's dome; sm the mouth line's curve; br the brow over the eye;
+// up an upturned snout tip; lips the lip colouring ('none': the coral snakes' black snout - their red belly colour was
+// painted on the lip scales, so the snout read red). Anything not given keeps the group's value.
+const HEAD_SET_SRC = `
+oxyuranus-microlepidotus sm .03 cr .06
+oxyuranus-scutellatus hl .40 sn .52 eye .16 ex .31 lor .025 sm .05
+opheodrys-vernalis eye .2 sm .04
+opheodrys-aestivus hl .36 sn .5 eye .22 ex .32 sm .06
+pseudonaja-textilis hl .42 sn .55 eye .15 ck .035 sm .04
+notechis-scutatus hl .47 sn .66 sh .8 eye .12 ck .07 cr .06
+pseudechis-porphyriacus hl .40 sn .62 eye .12 ck .045 sm .035
+pseudechis-australis hl .45 sn .68 eye .11 ck .08
+acanthophis-antarcticus hl .40 sn .6 eye .1 ex .33 br .1
+dendroaspis-polylepis hl .42 sn .62 sh .75 eye .14 ex .32 lor .035 cr .04 sm .09
+dendroaspis-angusticeps hl .38 sn .6 eye .15 sm .06
+dendroaspis-viridis hl .38 sn .6 eye .15 sm .06
+dendroaspis-jamesoni hl .38 sn .6 eye .15 sm .06
+naja-naja hl .40 sn .62 sh .72 eye .13 ck .05 cr .035 sm .025
+naja-kaouthia hl .40 sn .64 sh .72 eye .13 ck .05 cr .035 sm .025
+naja-haje hl .42 sn .66 eye .12 ck .06
+naja-nivea hl .42 sn .6 eye .14
+naja-nigricollis hl .42 sn .64 eye .13 ck .05
+naja-mossambica hl .42 sn .64 eye .13 ck .05
+naja-atra hl .40 sn .62 sh .72 eye .13 ck .05 sm .025
+naja-oxiana hl .40 sn .62 eye .13 ck .05
+ophiophagus-hannah hl .42 sn .62 eye .12 ck .06 cr .06 sm .035
+hemachatus-haemachatus hl .44 eye .12
+bungarus-fasciatus hl .42 sn .68 eye .09
+bungarus-caeruleus hl .42 sn .62 eye .1
+bungarus-multicinctus hl .42 sn .64 eye .09
+micrurus-fulvius hl .45 eye .1 ck .02 sm .015 lips none
+micrurus-tener hl .45 sn .72 eye .1 ck .02 sm .015 lips none
+micruroides-euryxanthus hl .45 sn .72 eye .1 ck .02 sm .015 lips none
+laticauda-colubrina hl .44 eye .08
+hydrophis-platurus hl .36 sn .5 eye .07 sm .01
+aipysurus-laevis hl .42 eye .08
+crotalus-atrox hl .40 sn .52 br .15
+crotalus-adamanteus hl .40 sn .55 br .15
+crotalus-horridus hl .38 sn .55
+crotalus-cerastes hl .36 sn .6 ex .33 br .22
+crotalus-viridis hl .40 sn .52
+crotalus-oreganus hl .40 sn .52
+crotalus-scutulatus hl .40 sn .52
+crotalus-durissus hl .42 sn .52
+sistrurus-miliarius hl .42 eye .12
+agkistrodon-piscivorus hl .44 sn .58 sh .8 eye .1 br .15
+agkistrodon-contortrix hl .42 eye .11
+bothrops-asper hl .38 sn .42 eye .09
+bothrops-atrox hl .38 sn .44 eye .09
+bothrops-jararaca hl .38 sn .45 eye .09
+bothriechis-schlegelii hl .42 eye .12 br .22
+lachesis-muta hl .40 sn .55 eye .08
+trimeresurus-albolabris hl .44 eye .13
+tropidolaemus-wagleri hl .40 eye .11
+calloselasma-rhodostoma hl .36 sn .45 up .12
+deinagkistrodon-acutus hl .38 sn .4 up .6
+protobothrops-mucrosquamatus hl .38 sn .45
+gloydius-blomhoffii hl .42
+vipera-berus hl .40 sn .55 eye .12
+vipera-aspis hl .40 sn .52 up .12
+vipera-ammodytes hl .40 sn .52
+daboia-russelii hl .38 sn .55 eye .11
+bitis-arietans hl .34 sn .6 eye .1 ex .3
+bitis-gabonica hl .36 sn .62 eye .09
+bitis-nasicornis hl .38 sn .58
+cerastes-cerastes hl .40 sn .62 eye .12 ex .33
+echis-carinatus hl .42 sn .6 eye .14
+echis-ocellatus hl .42 sn .6 eye .13
+atheris-squamigera hl .42 eye .14
+causus-rhombeatus eye .12
+pseudocerastes-urarachnoides hl .38
+python-regius hl .45 sn .62 eye .09 ex .33 ck .08 sm .04
+python-molurus hl .40 sn .6 eye .08
+python-bivittatus hl .40 sn .6 eye .08
+python-sebae hl .38 sn .55 eye .08
+malayopython-reticulatus hl .38 sn .55 eye .09
+morelia-viridis hl .48 sn .68 sh .8 eye .1 ck .09
+morelia-spilota hl .42 sn .6
+aspidites-melanocephalus hl .44 sn .68 ck .03
+antaresia-childreni hl .42 eye .1
+boa-constrictor hl .40 sn .52 eye .09 ex .33
+boa-imperator hl .40 sn .54 eye .09 ex .33
+eunectes-murinus hl .38 sn .62
+eunectes-notaeus hl .38 sn .62 ea 45
+corallus-caninus hl .48 sn .7 eye .1 ck .09
+corallus-hortulana hl .46 eye .12 ck .08
+epicrates-cenchria hl .42 eye .1
+chilabothrus-inornatus hl .42
+sanzinia-madagascariensis hl .45 ck .08
+candoia-carinata hl .40 sn .55
+xenopeltis-unicolor hl .38 sn .75 eye .08 ck .02
+pantherophis-guttatus hl .42 eye .17
+pantherophis-obsoletus hl .42 eye .18
+pantherophis-alleghaniensis hl .42 eye .18
+pantherophis-spiloides hl .42 eye .18
+lampropeltis-getula hl .44 sn .65 eye .15 ck .03
+lampropeltis-californiae hl .44 sn .65 eye .15 ck .03
+lampropeltis-triangulum hl .44 sn .62 eye .15
+lampropeltis-elapsoides hl .44 sn .62 eye .15
+pituophis-catenifer hl .44 sn .52 eye .15
+pituophis-melanoleucus hl .44 sn .52 eye .15
+drymarchon-couperi hl .45 eye .18
+drymarchon-corais hl .45 eye .18
+coluber-constrictor hl .42
+masticophis-flagellum hl .40
+thamnophis-sirtalis hl .44
+thamnophis-elegans hl .44
+thamnophis-proximus hl .42 eye .2
+nerodia-sipedon hl .42 eye .15 ea 55
+nerodia-fasciata hl .42 eye .15 ea 55
+natrix-natrix hl .44
+natrix-helvetica hl .44
+natrix-tessellata hl .42 ea 55
+coronella-austriaca hl .42
+zamenis-longissimus hl .42 sn .55
+elaphe-quatuorlineata hl .42
+hierophis-viridiflavus hl .42 eye .21
+malpolon-monspessulanus hl .40 br .12 lor .04
+dispholidus-typus hl .45 sn .62 eye .26
+ahaetulla-prasina hl .30
+ahaetulla-nasuta hl .30
+chrysopelea-paradisi hl .40 eye .21 ck .06
+chrysopelea-ornata hl .40 eye .21 ck .06
+imantodes-cenchoa hl .42 eye .28
+leptophis-ahaetulla hl .33 eye .22
+boiga-dendrophila eye .21
+boiga-irregularis eye .22
+dasypeltis-scabra hl .45 eye .14
+gonyosoma-oxycephalum hl .38 sn .5 eye .17
+spilotes-pullatus hl .44 eye .19
+ptyas-mucosa hl .42 eye .21
+xenochrophis-piscator hl .42 ea 55
+rhabdophis-tigrinus hl .44
+diadophis-punctatus hl .40 eye .15
+storeria-dekayi hl .44 eye .16
+farancia-abacura hl .42 sn .7 eye .1
+cemophora-coccinea hl .42 sn .5
+boaedon-fuliginosus hl .42 eye .14
+psammophis-sibilans hl .38 eye .22 br .1 lor .035
+acrochordus-javanicus hl .40 ea 45
+`;
+const HEAD_SET = {};
+{ const K = { lips: 'lips', hl: 'hl', sn: 'snout', sh: 'snoutH', eye: 'eyeL', ex: 'eyeX', ea: 'eyeA', ck: 'cheek', lor: 'lor', cr: 'crown', sm: 'smile', br: 'brow', up: 'snoutUp' };
+  for (const line of HEAD_SET_SRC.split('\n')) { const w = line.trim().split(/\s+/); if (w.length < 3) continue; const o = {}; for (let i = 1; i + 1 < w.length; i += 2) if (K[w[i]]) o[K[w[i]]] = isNaN(+w[i + 1]) ? w[i + 1] : +w[i + 1]; if (o.hl != null) o.hlSet = 1; HEAD_SET[w[0]] = o; } }
+const ROWS_GENUS = { // v6.26: typical dorsal scale rows at mid-body, for genera tools/auto_models.py GENUS_ROWS lacks
+  erythrolamprus: 17, apostolepis: 15, pareas: 15, opisthotropis: 17, stegonotus: 17, achalinus: 23, toxicocalamus: 15, eirenis: 17, lycophidion: 17, thamnodynastes: 19,
+  atractaspis: 23, rhadinaea: 17, rhadinella: 17, helicops: 19, tropidonophis: 15, prosymna: 17, coniophanes: 19, leptodeira: 21, phalotris: 15, philodryas: 19, oxyrhopus: 19,
+  polemon: 15, telescopus: 19, mastigodryas: 17, dipsadoboa: 17, xenodon: 19, suta: 19, pseudoxyrhopus: 19, aparallactus: 15, pseudalsophis: 17, salvadora: 17,
+  liophidium: 17, lycodryas: 19, elapsoidea: 13, aspidura: 15, lycodonomorphus: 19, asthenodipsas: 15, adelphicos: 15, bothrocophias: 25, arrhyton: 17, tropidodipsas: 17,
+  porthidium: 23, taeniophallus: 17, synophis: 19, hypsiglena: 21, alsophis: 19, sibynophis: 17, amblyodipsas: 15, liopeltis: 15, macrocalamus: 15, brachyurophis: 15,
+  lygophis: 17, liopholidophis: 17, urotheca: 17, hypsirhynchus: 17, pseudoboa: 19, trachischium: 13, lamprophis: 21, trimorphodon: 23, ficimia: 17, tropidophis: 25,
+  epictia: 14, myriopholis: 14, leptotyphlops: 14, rena: 14, trilepida: 14, anilios: 22, letheobia: 24, afrotyphlops: 28, gerrhopilus: 20, ramphotyphlops: 22,
+  liotyphlops: 24, amerotyphlops: 20, madatyphlops: 20, argyrophis: 22, malayotyphlops: 22, antillotyphlops: 20, cubatyphlops: 20, indotyphlops: 20, typhlops: 20,
 };
 const HF_GENUS = {};
 for (const [k, l] of Object.entries({
@@ -144,9 +302,13 @@ for (const [k, l] of Object.entries({
   round: 'causus',
 })) for (const g of l.split(' ')) PUPIL_GENUS[g] = k;
 function normProfile(p, id) {
+  { const hs = HEAD_SET[id || p.id]; if (hs) p = Object.assign({}, p, { head: Object.assign({}, p.head, hs) }); } // v6.26: the hand-set heads
   const base = PLANS[p.plan] || PLANS.colubrid;
   const q = merge(merge(base, { colors: { dorsal: '#776655', lateral: null, belly: '#d8cfb8', mottle: 0.08, var: 0.05 }, pattern: [], tail: {}, scene: { kind: 'litter' } }), p);
   q.colors.lateral = q.colors.lateral || q.colors.dorsal;
+  // v6.26: the usual mid-body scale rows of genera the generator had no count for (they took their family's, so a dwarf boa
+  // had a python's 71 rows of tiny scales, and thread snakes the 20 of other blind snakes)
+  { const r = ROWS_GENUS[String(id || p.id || '').split('-')[0]]; if (r && !(p.scales && p.scales.rows)) q.scales = Object.assign({}, q.scales, { rows: r }); }
   // v5.27: viper heads are broad triangles behind a narrow neck (they were barely wider than the neck from above)
   if ((q.head.shape || 'oval') === 'tri' && !q.head.wFixed) q.head = Object.assign({}, q.head, { w: q.head.w * 1.1 });
   // v5.73: the head's length, width and neck from its group (HEAD_FORM): the length kept within the group's range, the
@@ -200,7 +362,8 @@ function normProfile(p, id) {
     const depth = (h) => H.w * w0 * h * (1 + chin * 0.92) / H.len; // (crown to chin over the head's length; L cancels)
     const hMax = q.plan === 'blind' || f === HEAD_FORM.burrow ? 1.1 : 1.0;
     let h = H.h; if (hlT && depth(h) < hlT) h = Math.min(hMax, Math.max(h, hlT / depth(1)));
-    q.head = Object.assign({}, H, { h, cheek: H.cheek != null ? H.cheek : f.cheek || 0, lor: H.lor != null ? H.lor : f.lor || 0, crown: H.crown != null ? H.crown : f.crown || 0 });
+    if (H.hlSet) h = clamp((H.hl * 0.93) / depth(1), 0.42, hMax); // (v6.26: a hand-set depth is met both ways - some heads, the puff adder's, are flatter than their group's)
+    q.head = Object.assign({}, H, { h, cheek: H.cheek != null ? H.cheek : f.cheek || 0, lor: H.lor != null ? H.lor : f.lor || 0, crown: H.crown != null ? H.crown : f.crown || 0, smile: H.smile != null ? H.smile : f.smile || 0 });
   }
   return q;
 }
@@ -706,7 +869,10 @@ function drapePose(P, F, pose, R, N, ds, wMax) {
     // crossing becomes a loop draped evenly over it, the U-turns hanging side by side at the same depth on both sides. The tail
     // starts low on one side; the last crossing stops on top, and the neck turns along the top of the loops so the head rests
     // in the middle of the coil (a flat spiral folded over the branch gave a few deep, round, nested loops hanging low)
-    const eX = pitch * 0.32, rU = pitch / 2 + eX, hangMax = Math.max(L * 0.045, wMax * 2 * 1.6); // (each loop hangs only a little below the branch; eX: each crossing runs a little slantwise, so the U-turns below are rounder than the gap between crossings on top)
+    // (v6.26: each U-turn tight - its two sides lie against each other, as a resting coil's do - and hanging less deep: with
+    // a gap of more than a body width inside every U, the loops read as closed rings threaded on the branch, not a body
+    // resting in saddles over it)
+    const eX = pitch * 0.08, rU = pitch / 2 + eX, hangMax = Math.max(L * 0.032, wMax * 2 * 1.25); // (each loop hangs only a little below the branch; eX: each crossing runs a little slantwise, so the U-turns below are rounder than the gap between crossings on top)
     let n = 2, Z = 0, Lead = Lh, Lc = 0;
     for (let it = 0; it < 3; it++) {
       Lc = L - Lead - (Math.PI / 2) * m;
@@ -720,7 +886,7 @@ function drapePose(P, F, pose, R, N, ds, wMax) {
     for (let k = 0; k < n; k++) {
       line(x + eX, -sgn * Zk[k], x - eX, sgn * Zk[k + 1]); // a crossing, slantwise over the branch
       const cx = x + pitch / 2, k2 = Math.max(6, Math.ceil((Math.PI * rU) / st)); // the U-turn, hanging on the far side
-      for (let i = 1; i <= k2; i++) { const a = Math.PI - (i / k2) * Math.PI; pts0.push([cx + Math.cos(a) * rU, sgn * (Zk[k + 1] + Math.sin(a) * rU * 0.8)]); }
+      for (let i = 1; i <= k2; i++) { const a = Math.PI - (i / k2) * Math.PI; pts0.push([cx + Math.cos(a) * rU, sgn * (Zk[k + 1] + Math.sin(a) * rU * 0.7)]); }
       x += pitch; sgn = -sgn;
     }
     line(x + eX, -sgn * Zk[n], x, -sgn * m); // the last crossing, up onto the top
@@ -1021,7 +1187,51 @@ function buildBody(P, F, pose, quality) {
     const e = 0.02, a = surf(x, th - e).p, b = surf(x, th + e).p, dx = F.Hl * 0.02, c = surf(Math.max(0, x - dx), th).p, d = surf(x + dx, th).p;
     return new THREE.Vector3().crossVectors(b.sub(a), d.sub(c)).normalize();
   };
-  return { geo, gTotal, gOf, xOf, nR, M, ringX, spine, frameAt, section, ringAt, surf, surfNormal, eyeA, mouthA, eyeRad, eyeRl };
+  const occS = occSpheres(F, spine), xr = new Float32Array(nV); for (let i = 0; i < nR; i++) xr.fill(ringX[i], i * (M + 1), (i + 1) * (M + 1));
+  geo.setAttribute('aOcc', new THREE.BufferAttribute(bakeOcc(F, occS, pos, nrm, xr), 2));
+  return { geo, gTotal, gOf, xOf, nR, M, ringX, spine, frameAt, section, ringAt, surf, surfNormal, eyeA, mouthA, eyeRad, eyeRl, occS };
+}
+
+// v6.26 (contact and coil shading): where one part of the body lies against another - turns of a coil resting on each other,
+// a loop crossing the body - the skin there sees little of the sky, so it gets little of the soft light from all round (it
+// lit those gaps as brightly as the open back: coils looked pasted together, not resting one on another). Worked out once
+// per pose on the CPU, per vertex, from a chain of spheres along the body (the occlusion of a sphere seen from a point on a
+// surface is (r/d)^2 x cos). aOcc = (how much is hidden, the body's own radius there); the shader adds the ground's share
+// itself from the height of the skin above it, so that part follows the body when it moves.
+function occSpheres(F, spine) {
+  const L = F.L, ds = Math.max(F.w0 * 0.6, L / 1500), xs = [], cs = [], rs = [];
+  for (let x = F.Hl * 0.3; x < L; x += ds) { const r = (F.W(x) + F.Hh(x)) / 2; if (r < F.w0 * 0.12) continue; const c = spine(x); xs.push(x); cs.push(c.x, c.y, c.z); rs.push(r); }
+  return { xs: Float32Array.from(xs), cs: Float32Array.from(cs), rs: Float32Array.from(rs), ds, rMax: Math.max(1e-6, ...rs) };
+}
+function bakeOcc(F, S, pos, nrm, xv) { const t0 = performance.now(), o = bakeOcc0(F, S, pos, nrm, xv); perfT('occ', t0); return o; }
+function bakeOcc0(F, S, pos, nrm, xv) {
+  const n = xv.length, out = new Float32Array(n * 2), { xs, cs, rs, ds, rMax } = S, N = xs.length, cell = rMax * 9;
+  const grid = new Map(), key = (i, j, k) => (i * 73856093) ^ (j * 19349663) ^ (k * 83492791);
+  for (let s = 0; s < N; s++) { const kk = key(Math.floor(cs[s * 3] / cell), Math.floor(cs[s * 3 + 1] / cell), Math.floor(cs[s * 3 + 2] / cell)); let a = grid.get(kk); if (!a) grid.set(kk, (a = [])); a.push(s); }
+  const cand = [], skip = []; let lastX = -1;
+  for (let v = 0; v < n; v++) {
+    const x = xv[v], rv = Math.max(F.W(x), F.Hh(x), 1e-6); out[v * 2 + 1] = (F.W(x) + F.Hh(x)) / 2;
+    const px = pos[v * 3], py = pos[v * 3 + 1], pz = pos[v * 3 + 2];
+    if (x !== lastX) { // (the candidate spheres are found once per ring: those near the ring's centre, not its own neighbours along the body)
+      lastX = x; cand.length = 0;
+      const gi = Math.floor(px / cell), gj = Math.floor(py / cell), gk = Math.floor(pz / cell);
+      for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (let c = -1; c <= 1; c++) { const l = grid.get(key(gi + a, gj + b, gk + c)); if (l) for (const s of l) {
+        if (Math.abs(xs[s] - x) <= (rv + rs[s]) * 2.6) continue;
+        const dx = cs[s * 3] - px, dy = cs[s * 3 + 1] - py, dz = cs[s * 3 + 2] - pz, rr = 2.2 * rv + 4 * rs[s]; if (dx * dx + dy * dy + dz * dz < rr * rr) cand.push(s); } } // (only spheres that can reach some point of this ring)
+    }
+    if (!cand.length) continue;
+    if (v & 1 && v + 1 < n && xv[v - 1] === x && xv[v + 1] === x) { skip.push(v); continue; } // (every other point round a ring: filled in between its neighbours below)
+    const nx = nrm[v * 3], ny = nrm[v * 3 + 1], nz = nrm[v * 3 + 2]; let sum = 0;
+    for (const s of cand) {
+      const dx = cs[s * 3] - px, dy = cs[s * 3 + 1] - py, dz = cs[s * 3 + 2] - pz, r = rs[s], d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 > 16 * r * r) continue;
+      const d = Math.sqrt(d2) || 1e-6, c = (nx * dx + ny * dy + nz * dz) / d; if (c <= 0) continue;
+      sum += Math.min(1, (r * r) / d2) * c * (1 - sstep(2.6 * r, 4 * r, d)) * Math.min(1, ds / (1.6 * r));
+    }
+    out[v * 2] = Math.min(0.82, 1 - Math.exp(-1.6 * sum));
+  }
+  for (const v of skip) out[v * 2] = (out[v * 2 - 2] + out[v * 2 + 2]) / 2;
+  return out;
 }
 
 // ---------- v5.83: the sculpted head ----------
@@ -1096,8 +1306,10 @@ function headSkinHeights(P, F, G) {
         // v5.88: no two scales alike - each its own height, a slight tilt, and a little wear on its surface (they were all
         // the same even, CG-looking plates up close)
         const hv = hash1(s.id + 1, 311), tilt = 1 + 0.4 * ((hash1(s.id + 1, 517) - 0.5) * clamp((x - s.x) / s.rx, -1, 1) + (hash1(s.id + 1, 733) - 0.5) * clamp(wrapA(a - s.a) / s.ra, -1, 1));
-        const wear = 1 + 0.09 * (vnoise(x / Hl * 70, a * 34, 3.7, 977) - 0.5) + 0.08 * (vnoise(x / Hl * 160, a * 80, 1.3, 983) - 0.5);
-        if (!s.small) { const e = sstep(0, 1.25, g / gwP); h = Ap * (Math.sqrt(e) + 0.4 * (1 - Math.min(1, d1[o]) ** 2)) * (s.k === 'lab' || s.k === 'ilab' ? 0.75 : 1) * (0.8 + 0.4 * hv) * tilt * wear; }
+        const wear = 1 + 0.05 * (vnoise(x / Hl * 70, a * 34, 3.7, 977) - 0.5) + 0.04 * (vnoise(x / Hl * 160, a * 80, 1.3, 983) - 0.5);
+        // (v6.26: flatter plates with a steeper edge into a narrower suture - real head shields are smooth, glossy and nearly
+        // flat; the domed plates with a wide bevel looked modelled in clay)
+        if (!s.small) { const e = sstep(0, 1.0, g / gwP); h = Ap * (Math.pow(e, 0.35) + 0.18 * (1 - Math.min(1, d1[o]) ** 2)) * (s.k === 'lab' || s.k === 'ilab' ? 0.75 : 1) * (0.8 + 0.4 * hv) * tilt * wear; }
         else { const As = Math.min(s.rx, s.ra * hx) * (plates ? 0.1 : s.keel ? 0.2 : 0.14) * rel * (0.78 + 0.44 * hv), gw = Math.max(s.gw * 1.35, step * 1.4), e = sstep(0, 1.15, g / gw), lx = clamp((x - s.x) / s.rx, -1, 1);
           h = As * (0.55 * Math.sqrt(e) + 0.45 * e * (lx + 1) / 2) * tilt * wear + (plates ? Ap * 0.5 : 0); // (each scale rises towards its free rear edge, which overlaps the next)
           if (s.keel) h += As * 0.7 * s.keel * e * Math.exp(-((wrapA(a - s.a) * hx / (s.rx * 0.2)) ** 2)) * sstep(-0.9, 0.2, lx); }
@@ -1134,6 +1346,12 @@ function buildHeadSkin(P, F, body, quality) {
   const nV = (NX + 1) * nC, pos = new Float32Array(nV * 3), uv = new Float32Array(nV * 2), hd = new Float32Array(nV), met = new Float32Array(nV * 3), xv = new Float32Array(nV), thv = new Float32Array(nV), side = new Int8Array(nV);
   const circ = (x) => { const a = F.W(x), b = F.Hh(x); return Math.PI * (3 * (a + b) - Math.sqrt((3 * a + b) * (a + 3 * b))); };
   const Mc = M * 2, cs = new Float64Array((Mc + 1) * 2);
+  // v6.26 (the mouth line): not a straight cut along the head but a gentle curve - it dips a little under the eye and comes
+  // back up towards the corner of the mouth (head.smile, by group: the black mamba's well-known 'smile', the nearly straight
+  // line of sea snakes). The lips are bent up or down by a fraction of the head's depth there, fading out above and below
+  // the line; zero at the snout tip and at the jaw's hinge, so the open mouth hinges exactly where it did.
+  const smile = H.smile || 0, xHinge = Hl * (H.jaw || 0.75) * 1.02, mA0 = body.mouthA;
+  const lipBend = (x, th) => { if (!smile || x <= 0 || x >= xHinge) return 0; const u = x / xHinge, d = (Math.abs(th) - mA0) / 0.42; return -smile * F.Hh(x) * Math.pow(Math.sin(Math.PI * Math.pow(u, 0.8)), 1.3) * Math.exp(-d * d); };
   for (let k = 0; k <= NX; k++) {
     const x = xs[k], c = body.spine(x), f = body.frameAt(x), v = body.gOf(x) / body.gTotal, cx = circ(x), ring = body.ringAt(x);
     if (k < NX) for (let j = 0; j <= Mc; j++) { const sc = ring(TAU * (j / Mc) - Math.PI); cs[j * 2] = sc[0]; cs[j * 2 + 1] = sc[1]; }
@@ -1142,7 +1360,7 @@ function buildHeadSkin(P, F, body, quality) {
       if (k === NX) { const fj = u * M, j0 = Math.min(M - 1, Math.floor(fj)), t = fj - j0, a = (iCut * (M + 1) + j0) * 3; for (let q = 0; q < 3; q++) pos[o * 3 + q] = lerp(bpos[a + q], bpos[a + 3 + q], t); } // (the last ring lies exactly on the body's: no crack)
       else { let s; const fj = u * Mc, j0 = Math.min(Mc - 1, Math.floor(fj)), t = fj - j0; // (the smooth head sampled at half the columns, in between on the chord: well under a micron)
         if (t < 1e-6) s = [cs[j0 * 2], cs[j0 * 2 + 1]]; else if (cols[ci].u === cols[ci + (ci + 1 < nC ? 1 : 0)].u || (ci && cols[ci].u === cols[ci - 1].u)) s = ring(th); else s = [lerp(cs[j0 * 2], cs[j0 * 2 + 2], t), lerp(cs[j0 * 2 + 1], cs[j0 * 2 + 3], t)];
-        pos[o * 3] = c.x + f.S.x * s[0] + f.U.x * s[1]; pos[o * 3 + 1] = c.y + f.S.y * s[0] + f.U.y * s[1]; pos[o * 3 + 2] = c.z + f.S.z * s[0] + f.U.z * s[1]; }
+        const sb = s[1] + lipBend(x, th); pos[o * 3] = c.x + f.S.x * s[0] + f.U.x * sb; pos[o * 3 + 1] = c.y + f.S.y * s[0] + f.U.y * sb; pos[o * 3 + 2] = c.z + f.S.z * s[0] + f.U.z * sb; }
       uv[o * 2] = u; uv[o * 2 + 1] = v; xv[o] = x; thv[o] = th; side[o] = cols[ci].s;
       hd[o] = hdFade(x, th, Hl) * (Math.abs(th) < Math.PI * 0.62 ? 1 : 0.85); met[o * 3] = (u - 0.5) * cx; met[o * 3 + 1] = x; met[o * 3 + 2] = 0;
     }
@@ -1163,6 +1381,7 @@ function buildHeadSkin(P, F, body, quality) {
   const bn = geo.attributes.normal.array.slice(), base = pos.slice(), rest = pos.slice();
   for (let k = 0; k <= NX; k++) { avg(bn, k * nC, k * nC + nC - 1); for (const ci of pairs) avg(bn, k * nC + ci, k * nC + ci + 1); } // (both copies of the lip line move the same way: no crack)
   geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setAttribute('aHead', new THREE.BufferAttribute(hd, 1)); geo.setAttribute('aMet', new THREE.BufferAttribute(met, 3));
+  if (body.occS) geo.setAttribute('aOcc', new THREE.BufferAttribute(bakeOcc(F, body.occS, pos, bn, xv), 2)); // (v6.26: as the body's)
   // normals: from the sculpted surface; the lip line stays a crease in front of the corners of the mouth, the belly seam and
   // the snout tip are smooth, and the last ring takes the body's own normals (no seam in the shading)
   const T0 = body.frameAt(0).T, lastB = iCut * (M + 1), xh = Hl * (H.jaw || 0.75) * 1.02;
@@ -1674,13 +1893,20 @@ function patternData(P, F, body, lat, quality, seed) {
   // colours the snout has a little further back instead: dorsal colour on top, the lip colour round the sides
   // v5.17: and on the whole rounded nose the skin is one smooth colour field - dorsal colour on top, the lip and chin colour
   // below, meeting in a clean lip line across the front - with no per-scale cells (they fanned out into a star there)
-  const xN0 = Hl * 0.1, xN1 = Hl * 0.26, lipC = mixc(latc, bel, 0.55);
+  const xN0 = Hl * 0.1, xN1 = Hl * 0.26;
+  // (v6.26: the field's colours are those the snout really has just behind it - the average of the top and of the sides of the
+  // first row past the tip - not the body's plain dorsal colour: a coral snake's black snout came out red, a dark-headed
+  // snake's snout pale)
+  let rN = 0; while (rN < Hp - 1 && body.xOf(((rN + 0.5) / Hp) * body.gTotal) < xN1) rN++;
+  const topC = [0, 0, 0], sideC = [0, 0, 0], lipR = [0, 0, 0]; let nT = 0, nS = 0, nL = 0;
+  for (let c = 0; c < Wp; c++) { const aa = Math.abs(((c + 0.5) / Wp) * 2 - 1), k = (rN * Wp + c) * 4, to = aa < 0.35 ? topC : aa > 0.4 && aa < 0.52 ? sideC : aa > 0.57 && aa < 0.7 ? lipR : null; if (!to) continue; for (let q = 0; q < 3; q++) to[q] += data[k + q]; if (to === topC) nT++; else if (to === sideC) nS++; else nL++; }
+  for (let q = 0; q < 3; q++) { topC[q] /= Math.max(1, nT); sideC[q] /= Math.max(1, nS); lipR[q] /= Math.max(1, nL); }
   for (let r = 0; r < Hp; r++) {
     const x = body.xOf(((r + 0.5) / Hp) * body.gTotal); if (x >= xN1) break;
     const w = x <= xN0 ? 1 : 1 - sstep(xN0, xN1, x);
     for (let c = 0; c < Wp; c++) {
-      const aa = Math.abs(((c + 0.5) / Wp) * 2 - 1), base = mixc(mixc(dors, latc, sstep(0.18, 0.5, aa)), lipC, sstep(0.52, 0.62, aa)), k = (r * Wp + c) * 4;
-      const lb = 0.2126 * base[0] + 0.7152 * base[1] + 0.0722 * base[2]; for (let q = 0; q < 3; q++) data[k + q] = data[k + q] + ((lb + (base[q] - lb) * satK) * deepK - data[k + q]) * w;
+      const aa = Math.abs(((c + 0.5) / Wp) * 2 - 1), base = mixc(mixc(topC, sideC, sstep(0.18, 0.5, aa)), lipR, sstep(0.52, 0.62, aa)), k = (r * Wp + c) * 4;
+      for (let q = 0; q < 3; q++) data[k + q] = data[k + q] + (base[q] - data[k + q]) * w; // (they already have the deepening)
     }
   }
   // (v5.53: the lip line, lip scales, nostrils and heat pits are drawn by headData)
@@ -2355,12 +2581,12 @@ function buildMouth(P, F, body, group, eyes, pat) {
     else { for (const c of hidden) c.visible = true; hidden.length = 0; }
     inside.visible = t > 0.01 || on;
   }
-  function flick(s) {
+  function flick(s, o) { // (v6.26: o - this flick's own reach and number of waves, so no two flicks are alike)
     if (!tongueUpd) return;
     // (v5.93: out quickly and smoothly, held while the tips wave three or four times, then drawn back in - one flick per call
     // from 0 to 1, as extras.js now times them; the wave keeps going smoothly while it is out)
     const on = s > 0 && s < 1, ext = on ? (1 - Math.pow(1 - sstep(0, 0.16, s), 2)) * (1 - sstep(0.8, 1, s)) : 0;
-    tongueUpd(ext, s * TAU * 3.6);
+    tongueUpd(ext * (o && o.r || 1), s * TAU * (o && o.w || 3.6));
     showOnlyTongue(on && t <= 0.01);
   }
   // v5.57: how far the mouth must open (t) for the jaws to part by 'sep' near their front, for prey of that width
@@ -2388,6 +2614,27 @@ const SKIN_LIGHT_GLSL = `#include <lights_fragment_end>
  vec3 slUpV = normalize((viewMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
  reflectedLight.indirectDiffuse += material.diffuseColor * (uFill * (0.55 + 0.45 * max(dot(normal, geometryViewDir), 0.0)) + uBounce * max(0.0, -dot(normal, slUpV)));
 }`;
+// v6.26 (reptile skin): after the material is set up - every body scale's own shine and gloss coat (slSpecV, slCoatV from
+// the scale's hash), none of either down in the skin between the scales (slCavV: the cavity map), and the belly's wide
+// plates a little glossier than the back (uGloss: the species' base gloss and coat, for the belly's own share)
+const SKIN_SHINE_GLSL = `
+{ float slBody = (1.0 - vHead) * (1.0 - vMet.z) * slTip * (1.0 - slHW), slGap = smoothstep(0.32, 0.8, slCavV);
+  material.specularColor *= mix(1.0, slSpecV * mix(0.3, 1.0, slGap), slBody);
+  material.roughness = mix(material.roughness, min(1.0, material.roughness * mix(1.35, 0.92, slGap)), slBody);
+#ifdef USE_CLEARCOAT
+  material.clearcoat = mix(material.clearcoat, saturate(material.clearcoat * slCoatV * slGap * mix(1.0, 1.25, slBelly) + 0.08 * slBelly * uGloss.y), slBody);
+#endif
+}
+`;
+// v6.26 (contact shading): the soft light from all round is cut where the skin faces another part of the body (aOcc, baked
+// per pose) or lies close above the ground and faces it (worked out here from the skin's height, so it follows any movement)
+const SKIN_OCC_GLSL = `
+{ float slR = max(vSlOcc.y, 1e-5), slNy = dot(nonPerturbedNormal, normalize((viewMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz));
+  float slG = uGroundAO * (0.5 - 0.5 * slNy) * exp(-max(vSlY, 0.0) / (0.75 * slR)) * step(1e-4, vSlOcc.y);
+  float slO = 1.0 - (1.0 - vSlOcc.x) * (1.0 - 0.65 * slG);
+  reflectedLight.indirectDiffuse *= 1.0 - slO; reflectedLight.indirectSpecular *= 1.0 - 0.8 * slO;
+  reflectedLight.directDiffuse *= 1.0 - 0.35 * slO * slO; reflectedLight.directSpecular *= 1.0 - 0.5 * slO;
+}`;
 const SCENES = {
   litter:   { sky: ['#b9c7b0', '#d7ddcc'], fog: '#c3cbb9', sun: 1.6, hemi: 0.75, sunEl: 55, tile: 1.1, ground: 'litter', props: { leaves: 1, twigs: 1, rocks: 0.15, grass: 0.1 } },
   forest:   { sky: ['#a9bca6', '#ccd6c3'], fog: '#b9c6b2', sun: 1.7, hemi: 0.75, sunEl: 52, tile: 1.2, ground: 'litter', props: { leaves: 1, twigs: 1, log: 1, rocks: 0.2, grass: 0.15 } },
@@ -2396,7 +2643,9 @@ const SCENES = {
   arid:     { sky: ['#9fc0dd', '#efe3cf'], fog: '#e6dccb', sun: 2.2, hemi: 0.55, sunEl: 48, tile: 0.8, ground: 'gravel', props: { rocks: 1, grass: 0.5, twigs: 0.4 } },
   heath:    { sky: ['#a8bfd4', '#e4e7e3'], fog: '#d9ddd8', sun: 1.8, hemi: 0.6, sunEl: 40, tile: 0.8, ground: 'heath', props: { heather: 1, grass: 0.7, rocks: 0.1, twigs: 0.3 } },
   riverbank:{ sky: ['#a6c2d8', '#e2e9e4'], fog: '#d4ddd7', sun: 2.2, hemi: 0.7, sunEl: 46, tile: 0.9, ground: 'pebbles', water: 'river', props: { rocks: 0.6, reeds: 1, grass: 0.4, pebbles: 1 } },
-  soil:     { sky: ['#b3bfae', '#d8dccf'], fog: '#c8cec0', sun: 1.5, hemi: 0.8, sunEl: 58, tile: 0.35, ground: 'soil', props: { leaves: 0.5, twigs: 0.6, crumbs: 1 } },
+  // v6.26: the blind snakes' and burrowers' ground, as they are found - turned up under a stone on moist, crumbly soil, with
+  // decaying leaf fragments, fine roots, grit and a little moss (it was a flat brown floor with a few big painted leaves)
+  soil:     { sky: ['#b3bfae', '#d8dccf'], fog: '#c8cec0', sun: 1.5, hemi: 0.8, sunEl: 58, tile: 0.35, ground: 'soil', leafSize: 0.55, leafCols: ['#4a3624', '#5a4230', '#3a2a1c', '#6b5236', '#433526', '#2f2418', '#5e4a2e'], props: { leaves: 1.1, twigs: 0.8, crumbs: 1, clods: 1, roots: 1, moss: 0.6, stone: 1 } },
   sea:      { sky: ['#7fb0d6', '#e3eef2'], fog: '#cfdfe6', sun: 2.6, hemi: 0.7, sunEl: 50, tile: 1, ground: null, water: 'sea', props: { drift: 1 } },
   grass:    { sky: ['#a3c1da', '#e6ead9'], fog: '#dde2d2', sun: 2.0, hemi: 0.6, sunEl: 48, tile: 0.9, ground: 'dry', props: { grass: 2.6, rocks: 0.2, twigs: 0.3 } },
   sand:     { sky: ['#9cc0de', '#f2e6cf'], fog: '#efe2cb', sun: 2.2, hemi: 0.5, sunEl: 50, tile: 1.0, ground: 'sand', props: { rocks: 0.3, grass: 0.3, twigs: 0.3 } },
@@ -2539,11 +2788,13 @@ function groundTexture(kind, seed0, hi) {
     })); return SS2.get(k); };
     const stone = (r, ry, c0, c1, wet) => { x.drawImage(stoneSprite(c0, c1, wet, (R() * 3) | 0), -r * 64 / 52, -ry * 64 / 52, r * 128 / 52, ry * 128 / 52); };
     if (kind === 'litter' || kind === 'soil') {
-      const pal = kind === 'litter' ? ['#6a4a2e', '#7d5a36', '#8c6a42', '#55402a', '#6b5536', '#3e2e20', '#86663f', '#9a7a4e', '#5e5032', '#4a3a26'] : ['#5a4532', '#6b5236', '#4a3826', '#7a6044'];
-      // (v5.50: the soil tile is only 35 cm across, so its few leaves are drawn big - 4-9 cm, their real size - not as crumbs)
-      const n = kind === 'litter' ? 2600 : 26;
+      const pal = kind === 'litter' ? ['#6a4a2e', '#7d5a36', '#8c6a42', '#55402a', '#6b5536', '#3e2e20', '#86663f', '#9a7a4e', '#5e5032', '#4a3a26'] : ['#4a3826', '#3e2e20', '#5a4532', '#33261a', '#55402c'];
+      // (v5.50: the soil tile is only 35 cm across, so its few leaves are drawn big - 4-9 cm, their real size - not as crumbs;
+      // v6.26: on soil, many small dark decaying fragments, 1-3 cm, instead of a few whole leaves as big as a blind snake
+      // lying flat like stickers)
+      const n = kind === 'litter' ? 2600 : 160;
       for (let i = 0; i < n; i++) {
-        const cx = R() * S, cy = R() * S, big = R() < 0.15, l = kind === 'litter' ? 18 + R() * (big ? 70 : 34) : 115 + R() * 150, w = l * (0.18 + R() * 0.17), a = R() * TAU, col = pal[(R() * pal.length) | 0], curl = R();
+        const cx = R() * S, cy = R() * S, big = R() < 0.15, l = kind === 'litter' ? 18 + R() * (big ? 70 : 34) : 30 + R() * 60, w = l * (0.25 + R() * 0.3), a = R() * TAU, col = pal[(R() * pal.length) | 0], curl = R();
         wrapAt(cx, cy, l, () => { x.rotate(a); leaf(l, w, col, curl); });
       }
       for (let i = 0; i < (kind === 'litter' ? 90 : 40); i++) {
@@ -2561,7 +2812,10 @@ function groundTexture(kind, seed0, hi) {
           }
         }
       }
-      if (kind === 'soil') for (let i = 0; i < 700; i++) { const cx = R() * S, cy = R() * S, r = 2.5 + R() ** 2 * 6; wrapAt(cx, cy, r * 2, () => stone(r, r * (0.6 + R() * 0.4), '#6e5845', '#3a2b20', true)); }
+      if (kind === 'soil') { // (v6.26: crumbs of earth, dull - the glossy highlight on each read as drops of water - and fine pale rootlets)
+        for (let i = 0; i < 1800; i++) { const cx = R() * S, cy = R() * S, r = 1.5 + R() ** 2 * 5, c = R() < 0.5; wrapAt(cx, cy, r * 2, () => stone(r, r * (0.6 + R() * 0.4), c ? '#5e4a38' : '#4a3a2c', c ? '#2e2219' : '#241a12', false)); }
+        for (let i = 0; i < 30; i++) { const cx = R() * S, cy = R() * S, l = 40 + R() * 160, a = R() * TAU; wrapAt(cx, cy, l, () => { x.rotate(a); x.strokeStyle = R() < 0.5 ? 'rgba(150,118,84,.55)' : 'rgba(110,86,60,.6)'; x.lineWidth = 0.8 + R() * 1.4; x.beginPath(); x.moveTo(0, 0); x.bezierCurveTo(l * 0.3, (R() - 0.5) * 30, l * 0.7, (R() - 0.5) * 30, l, (R() - 0.5) * 20); x.stroke(); }); }
+      }
       tone(0.25);
     } else if (kind === 'gravel' || kind === 'sand') {
       const cols = [['#d8cab4', '#9c8b76'], ['#c4b29a', '#7d6d5a'], ['#e0d6c8', '#a39a8b'], ['#b29c85', '#6c5a48'], ['#cdb593', '#8a7254'], ['#a8a39a', '#6a665e']];
@@ -2834,16 +3088,21 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     // v5.93: the sea floor shows through the clear water: pale sand about 1.3 m down with heads of coral and rock, blue-green
     // with depth (it used to be one flat dark disc)
     const bedT = groundTexture('sand', seed + 5, quality !== 'low'); bedT.repeat.set((groundR * 2) / 1.0, (groundR * 2) / 1.0);
-    const bedM = new THREE.MeshStandardMaterial({ map: bedT, color: '#5d8a8c', roughness: 1, metalness: 0 }); // (tinted blue-green: the water over it takes the red out of the light)
+    const bedM = new THREE.MeshStandardMaterial({ map: bedT, color: '#8f9c8e', roughness: 1, metalness: 0 }); // (tinted blue-green: the water over it takes the red out of the light; v6.26: less - the water above already tints it, and twice over it came out a flat cartoon blue)
     const bedG = new THREE.CircleGeometry(groundR, 64); bedG.rotateX(-Math.PI / 2);
     { const pp = bedG.attributes.position; for (let i = 0; i < pp.count; i++) pp.setY(i, (fbm(pp.getX(i) / 3, pp.getZ(i) / 3, 2, seed + 31, 3) - 0.5) * 0.5 - sstep(groundR * 0.3, groundR, Math.hypot(pp.getX(i), pp.getZ(i))) * 1.5); bedG.computeVertexNormals(); }
     const deep = new THREE.Mesh(bedG, bedM); deep.position.y = -1.7; deep.receiveShadow = true; scene.add(deep);
-    const corals = ['#7d6a4e', '#6a5a66', '#8a7a58', '#5a6e5e', '#7a5a4e', '#8e8668'], blue = new THREE.Color('#3f7f8a'), cg = [rockGeometry(seed + 41, 3), rockGeometry(seed + 42, 3)], cm = new THREE.MeshStandardMaterial({ roughness: 0.9, metalness: 0, color: '#ffffff' });
+    // v6.26: the sand's own grain, and the moving net of light the ripples focus onto the bed (caustics), as on the river bed
+    if (NATURE.groundDetail) { NATURE.groundDetail(THREE, bedM, 'sand', ctx, { near: 2.5, far: 14 }); if (bedM.userData.caustics) bedM.userData.caustics(water.position.y, 1.3); }
+    // (v6.26: real reef colours - pale coral heads, ochre and grey rubble, dark rock with a little green growth - only slightly
+    // shaded by the water, and lying flatter: they were all mixed 40% with blue, a scatter of cartoon-blue pebbles)
+    const corals = ['#b3a283', '#9c8b6c', '#857659', '#6c6452', '#a89a7c', '#5f5d4c', '#8d8a6a', '#c2b394'], blue = new THREE.Color('#566f68'), cg = [rockGeometry(seed + 41, 3), rockGeometry(seed + 42, 3)], cm = new THREE.MeshStandardMaterial({ roughness: 0.95, metalness: 0, color: '#ffffff' });
     const cM = new THREE.Matrix4(), cQ = new THREE.Quaternion(), cE = new THREE.Euler(), cS = new THREE.Vector3(), cP = new THREE.Vector3();
     cg.forEach((g) => { const n = quality === 'low' ? 18 : 40, im = new THREE.InstancedMesh(g, cm, n), cc = new THREE.Color();
-      for (let i = 0; i < n; i++) { const a = R() * TAU, r = Math.max(Rb * 1.5, 1) + R() * groundR * 0.4, s = 0.08 + R() ** 2 * 0.3; cE.set(R() * 0.3, R() * TAU, R() * 0.3); cQ.setFromEuler(cE); cS.set(s * (1 + R() * 0.6), s * (0.5 + R() * 0.6), s * (1 + R() * 0.6)); cP.set(Math.cos(a) * r, -1.7 - 0.05 + s * 0.3, Math.sin(a) * r); cM.compose(cP, cQ, cS); im.setMatrixAt(i, cM); im.setColorAt(i, cc.set(corals[(R() * corals.length) | 0]).lerp(blue, 0.4)); }
+      for (let i = 0; i < n; i++) { const a = R() * TAU, r = Math.max(Rb * 1.5, 1) + R() * groundR * 0.4, s = 0.08 + R() ** 2 * 0.3; cE.set(R() * 0.3, R() * TAU, R() * 0.3); cQ.setFromEuler(cE); cS.set(s * (1 + R() * 0.6), s * (0.35 + R() * 0.45), s * (1 + R() * 0.6)); cP.set(Math.cos(a) * r, -1.7 - 0.05 + s * 0.2, Math.sin(a) * r); cM.compose(cP, cQ, cS); im.setMatrixAt(i, cM); im.setColorAt(i, cc.set(corals[(R() * corals.length) | 0]).lerp(blue, 0.12).multiplyScalar(0.85 + R() * 0.25)); }
       im.receiveShadow = true; scene.add(im); });
-    wm.opacity = 0.74;
+    if (NATURE.groundDetail) { NATURE.groundDetail(THREE, cm, 'rock', ctx, { tri: true, near: 2.5, far: 14 }); if (cm.userData.caustics) cm.userData.caustics(water.position.y, 1.3); }
+    wm.opacity = 0.8; // (v6.26: a little less clear, so the body under the surface reads as under it)
   }
 
   // props: placed around the snake, never touching it, denser near it and fading out with distance
@@ -2936,8 +3195,8 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     const lt = canvasTex(128, (x, s) => { x.fillStyle = '#ffffff'; x.fillRect(0, 0, s, s); x.strokeStyle = 'rgba(0,0,0,.35)'; x.lineWidth = 2; x.beginPath(); x.moveTo(0, s / 2); x.lineTo(s, s / 2); x.stroke(); x.lineWidth = 1; for (let i = 1; i < 7; i++) { x.beginPath(); x.moveTo(i * s / 7, s / 2); x.lineTo(i * s / 7 + 12, s / 2 - 22); x.moveTo(i * s / 7, s / 2); x.lineTo(i * s / 7 + 12, s / 2 + 22); x.stroke(); } });
     const lg = leafGeometry(), lm = new THREE.MeshStandardMaterial({ map: lt, side: THREE.DoubleSide, roughness: 0.85 });
     const im = new THREE.InstancedMesh(lg, lm, spots.length); im.castShadow = !drift; im.receiveShadow = true;
-    const lc = new THREE.Color(), lsize = drift ? 0.04 : 0.075 * (P.scene.leafSize || 1); // v5.50: real leaves, 4-11 cm (bits of weed on the sea, about 4 cm)
-    const pal = drift ? ['#5d4a2a', '#6b5a32', '#4a5a2a', '#7a6a3a'] : (P.scene.leafCols || ['#7a5532', '#94683a', '#a8804a', '#5e4128', '#6f4f2c', '#b08850', '#4f3a22']);
+    const lc = new THREE.Color(), lsize = drift ? 0.04 : 0.075 * (P.scene.leafSize || S.leafSize || 1); // v5.50: real leaves, 4-11 cm (bits of weed on the sea, about 4 cm)
+    const pal = drift ? ['#5d4a2a', '#6b5a32', '#4a5a2a', '#7a6a3a'] : (P.scene.leafCols || S.leafCols || ['#7a5532', '#94683a', '#a8804a', '#5e4128', '#6f4f2c', '#b08850', '#4f3a22']);
     spots.forEach(([x, z], i) => { const s = lsize * (0.6 + R() * 0.8); e.set((R() - 0.5) * 0.4, R() * TAU, (R() - 0.5) * 0.4); q.setFromEuler(e); sv.set(s, s * (0.6 + R() * 0.8), s * (0.45 + R() * 0.3)); pv.set(x, drift ? poseInfo.seaLevel + 0.002 : groundH(x, z) + s * 0.02, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); lc.set(pal[(R() * pal.length) | 0]); im.setColorAt(i, lc); });
     scene.add(im);
   }
@@ -2969,11 +3228,46 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   }
   if (PR.ferns) { const hF = 0.45; grassTuft(perM2(2.5, Rb * 1.4, Rb * 4, 120), hF, '#3f6a2c', '#7a9a48', Rb * 1.4, Rb * 4, F.w0 * 3 + hF * 0.6, 0.03); }
   if (PR.crumbs) {
-    // crumbs of soil and grit, 2-10 mm
-    const spots = placeN(perM2(250, Rb * 0.2, Rb * 3, 2000), Rb * 0.2, Rb * 3, F.w0 * 1.2, { tries: 8 }), g = rockGeometry(seed + 4, lowQ ? 0 : 1);
-    const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ color: '#4a382a', roughness: 1 }), spots.length); im.castShadow = im.receiveShadow = true;
-    spots.forEach(([x, z], i) => { const s = 0.001 + R() ** 2 * 0.004; e.set(R() * 0.5, R() * TAU, R() * 0.5); q.setFromEuler(e); sv.set(s, s * 0.7, s); pv.set(x, groundH(x, z) + s * 0.2, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); });
+    // crumbs of soil and grit, 2-10 mm (v6.26: many more, moist and dry, so the soil has a real crumbly surface round the snake)
+    const spots = placeN(perM2(PR.clods ? 1400 : 250, Rb * 0.2, Rb * 3, PR.clods ? 5000 : 2000), Rb * 0.2, Rb * 3, F.w0 * 1.2, { tries: 8 }), g = rockGeometry(seed + 4, lowQ ? 0 : 1);
+    const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1 }), spots.length); im.castShadow = im.receiveShadow = true; const cc = new THREE.Color();
+    spots.forEach(([x, z], i) => { const s = 0.001 + R() ** 2 * (PR.clods ? 0.006 : 0.004); e.set(R() * 0.5, R() * TAU, R() * 0.5); q.setFromEuler(e); sv.set(s, s * 0.7, s); pv.set(x, groundH(x, z) + s * 0.1, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); im.setColorAt(i, cc.setHSL(0.07 + R() * 0.03, 0.22 + R() * 0.15, 0.06 + R() ** 1.5 * 0.13)); });
     scene.add(im);
+  }
+  if (PR.clods) {
+    // v6.26: clods and lumps of earth, 1-3 cm, half sunk in the soil
+    const spots = placeN(perM2(90 * PR.clods, Rb * 0.5, Rb * 3, 400), Rb * 0.5, Rb * 3, F.w0 * 2 + 0.01, { tries: 8 }), g = rockGeometry(seed + 14, lowQ ? 1 : 2);
+    const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1 }), spots.length); im.castShadow = im.receiveShadow = true; const cc = new THREE.Color();
+    spots.forEach(([x, z], i) => { const s = Math.min(0.005 + R() ** 2 * 0.012, Math.max(0.003, (dist2snake(x, z) - F.w0 * 1.5) * 0.5)); e.set(R() * 0.6, R() * TAU, R() * 0.6); q.setFromEuler(e); sv.set(s * (0.9 + R() * 0.5), s * (0.5 + R() * 0.3), s); pv.set(x, groundH(x, z) - s * 0.15, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); im.setColorAt(i, cc.setHSL(0.07 + R() * 0.02, 0.25 + R() * 0.1, 0.05 + R() * 0.07)); });
+    scene.add(im);
+  }
+  if (PR.roots) {
+    // v6.26: fine roots and rootlets, 1-3 mm thick, running along the surface and dipping into it
+    const nV = 4, gs = [];
+    for (let v = 0; v < nV; v++) { const pts = [], len = 1, n = 7; let a = 0, y = -0.01; for (let k = 0; k <= n; k++) { a += (R() - 0.5) * 0.9; y = k === 0 || k === n ? -0.02 : Math.max(-0.02, Math.min(0.012, y + (R() - 0.45) * 0.02)); pts.push(new THREE.Vector3((k / n - 0.5) * len, y, Math.sin(a) * 0.08)); }
+      gs.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.0035, 5, false)); }
+    const g = mergeGeos(gs), spots = placeN(perM2(14 * PR.roots, Rb * 0.4, Rb * 3, 120), Rb * 0.4, Rb * 3, F.w0 * 2.5, { tries: 10 });
+    const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.85 }), spots.length); im.castShadow = im.receiveShadow = true; const cc = new THREE.Color();
+    spots.forEach(([x, z], i) => { const L = 0.05 + R() * 0.14, ry = R() * TAU, cx = Math.cos(ry) * L / 2, cz = -Math.sin(ry) * L / 2; let ok = true; for (let k = -4; k <= 4 && ok; k++) ok = dist2snake(x + cx * k / 4, z + cz * k / 4) > F.w0 * 1.6 + 0.004; const t = 0.4 + R() * 0.8;
+      e.set(0, ry, 0); q.setFromEuler(e); sv.set(ok ? L : 1e-5, t * 0.3 + 0.3, t * 0.5); pv.set(x, groundH(x, z), z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); im.setColorAt(i, cc.setHSL(0.08 + R() * 0.03, 0.25 + R() * 0.15, 0.18 + R() * 0.16)); });
+    scene.add(im);
+  }
+  if (PR.moss) {
+    // v6.26: small soft cushions of moss, 2-8 cm, a little way from the snake
+    const spots = placeN(perM2(10 * PR.moss, Rb * 1.2, Rb * 3.5, 60), Rb * 1.2, Rb * 3.5, F.w0 * 4 + 0.03, { tries: 10 }), g = rockGeometry(seed + 24, lowQ ? 1 : 2);
+    const im = new THREE.InstancedMesh(g, veg(new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1 }), true), spots.length); im.receiveShadow = true; const cc = new THREE.Color();
+    spots.forEach(([x, z], i) => { const s = 0.006 + R() * 0.016; e.set(0, R() * TAU, 0); q.setFromEuler(e); sv.set(s * (1 + R() * 0.6), s * 0.35, s); pv.set(x, groundH(x, z) - s * 0.08, z); m4.compose(pv, q, sv); im.setMatrixAt(i, m4); im.setColorAt(i, cc.setHSL(0.21 + R() * 0.05, 0.3 + R() * 0.15, 0.04 + R() * 0.04)); });
+    scene.add(im);
+  }
+  if (PR.stone) {
+    // v6.26: the flat stone it was found under, 15-30 cm across, lying close by on the soil, its edge a few body widths off
+    const g = rockGeometry(seed + 33, lowQ ? 2 : 3), m = new THREE.MeshStandardMaterial({ color: '#5e564d', roughness: 0.93, map: canvasTex(128, (x, S) => { const img = x.createImageData(S, S); for (let j = 0; j < S; j++) for (let i = 0; i < S; i++) { const v = 150 + (tfbm(i / S * 8, j / S * 8, 8, seed + 33, 4) - 0.5) * 160, k = (j * S + i) * 4; img.data[k] = v; img.data[k + 1] = v * 0.97; img.data[k + 2] = v * 0.92; img.data[k + 3] = 255; } x.putImageData(img, 0, 0); }, 2) });
+    for (let t = 0; t < 60; t++) {
+      const s = clamp(Math.max(Rb * 0.9, 0.08), 0.08, 0.16) * (0.85 + R() * 0.3), a = R() * TAU, r = Rb * 1.1 + s * 1.2 + R() * Rb * 0.6, x = Math.cos(a) * r, z = Math.sin(a) * r;
+      if (dist2snake(x, z) < s * 1.15 + F.w0 * 4) continue;
+      const st = new THREE.Mesh(g, m); st.scale.set(s * 1.25, s * 0.26, s); st.rotation.set((R() - 0.5) * 0.12, R() * TAU, (R() - 0.5) * 0.12); st.position.set(x, groundH(x, z) + s * 0.05, z); st.castShadow = st.receiveShadow = true; scene.add(st);
+      occ.push({ mesh: st, c: st.position.clone(), r: s * 1.2, hid: false }); break;
+    }
   }
 }
 // swap the stand-in gradient sky for the panorama: image-based light, a grounded photo background,
@@ -3009,7 +3303,7 @@ function applyEnv(ctx, P, F, poseInfo, env) {
   sun.shadow.radius = lerp(8, 3, env.sunny); sun.shadow.blurSamples = 16;
   if (ctx.skinLight) { // v5.88: the snake's own fill and bounce (SKIN_LIGHT_GLSL), from this panorama's light
     const L = ctx.skinLight, w = new THREE.Color('#fbf6ee');
-    L.uFill.value.copy(w).lerp(env.horizon.clone().multiplyScalar(1 / Math.max(0.05, Math.max(env.horizon.r, env.horizon.g, env.horizon.b))), 0.25).multiplyScalar(0.12 + 0.1 * env.sunny); // (v5.90: about half - with the sun now at the photographer's shoulder the extra fill flattened and paled every skin: a mid-brown boa came out cream)
+    L.uFill.value.copy(w).lerp(env.horizon.clone().multiplyScalar(1 / Math.max(0.05, Math.max(env.horizon.r, env.horizon.g, env.horizon.b))), 0.25).multiplyScalar(0.08 + 0.06 * env.sunny); // (v6.26: lower again - the shading between scales and the contact shading now keep dark snakes readable, and this flat fill washed every colour out to a pastel) (v5.90: about half - with the sun now at the photographer's shoulder the extra fill flattened and paled every skin: a mid-brown boa came out cream)
     L.uBounce.value.copy(ctx.hemi ? ctx.hemi.groundColor : w).lerp(w, 0.3).multiplyScalar(0.24 * env.sunny);
   }
   if (ctx.hemi) ctx.hemi.intensity *= 0.4; // (v5.58: a little more fill, so the shaded side of a dark snake keeps its scales and colour)
@@ -3066,12 +3360,14 @@ function contactShadow(poseInfo, F, Rb) {
   const S = 512, cv = document.createElement('canvas'); cv.width = cv.height = S; const x = cv.getContext('2d');
   const ext = Rb * 1.25, toPx = (v) => ((v + ext) / (2 * ext)) * S;
   x.lineCap = 'round'; x.lineJoin = 'round';
-  for (let pass = 0; pass < 5; pass++) {
-    x.strokeStyle = `rgba(0,0,0,${0.13 - pass * 0.02})`;
+  // (v6.26: two narrow, darker passes first - the tight dark line right where the belly touches the ground, which the soft
+  // wide shadow alone lacked, so the body seemed to hover a hair above it)
+  for (let pass = -2; pass < 5; pass++) {
+    x.strokeStyle = `rgba(0,0,0,${pass < 0 ? 0.16 : 0.13 - pass * 0.02})`;
     for (let i = 0; i < poseInfo.pts.length - 4; i += 4) {
-      const xx = i * poseInfo.ds, lift = poseInfo.Ly(xx); if (lift > F.Hh(xx) * 0.8) continue;
+      const xx = i * poseInfo.ds, lift = poseInfo.Ly(xx); if (lift > F.Hh(xx) * (pass < 0 ? 0.25 : 0.8)) continue;
       const a = poseInfo.pts[i], b = poseInfo.pts[i + 4];
-      x.lineWidth = Math.max(1, (F.W(xx) * 2 * (0.9 + pass * 0.16)) / (2 * ext) * S);
+      x.lineWidth = Math.max(1, (F.W(xx) * 2 * (pass < 0 ? 0.55 + (pass + 2) * 0.15 : 0.9 + pass * 0.16)) / (2 * ext) * S);
       // canvas rows run toward -z once the plane is laid flat
       x.beginPath(); x.moveTo(toPx(a[0]), toPx(-a[1])); x.lineTo(toPx(b[0]), toPx(-b[1])); x.stroke();
     }
@@ -3550,8 +3846,8 @@ export function mount(host, opts) {
       map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1).multiplyScalar(S.relief != null ? S.relief : (S.keel || 0) > 0.3 ? 1.25 : 0.9), // (v5.58: smooth scales lie flatter than keeled ones; v5.90: both a little deeper - at normal viewing distance the scales and keels were lost)
       aoMap: tiles.cavity, aoMapIntensity: 0.3 + 1.2 * (S.cavity != null ? S.cavity : 0.45), roughnessMap: tiles.cavity, // (v5.78: smooth, tightly overlapping scales hide less skin between them)
       ...(quality !== 'high' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
-      roughness: lerp(0.82, 0.5, gl), metalness: 0, clearcoat: 0.08 + gl * 0.42, clearcoatRoughness: lerp(0.45, 0.14, gl * gl), /* (v5.78: glossy snakes get the crisp, mirror-like highlights of real smooth scales) */ sheen: S.sheen != null ? S.sheen : 0.04, /* (v5.78: the default sheen laid a grey haze over every skin at grazing angles) */ sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
-      iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 0.85,
+      roughness: lerp(0.66, 0.32, gl), metalness: 0, clearcoat: 0.18 + gl * 0.7, clearcoatRoughness: lerp(0.32, 0.08, gl), /* (v5.78: glossy snakes get the crisp, mirror-like highlights of real smooth scales; v6.26: a little glossier all round - the coat now breaks up scale by scale (SKIN_SHINE_GLSL), so it never reads as a wet film) */ sheen: S.sheen != null ? S.sheen : 0.04, /* (v5.78: the default sheen laid a grey haze over every skin at grazing angles) */ sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
+      iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 1.0, ior: 1.55, /* (v6.26: keratin) */
     });
     // the cavity map also darkens the skin between scales in direct light (as in real snakes)
     // v4.81: heads without big shields (vipers, pythons, boas) get small scales of their own, drawn in the shader
@@ -3560,14 +3856,14 @@ export function mount(host, opts) {
     const qS = (TAU * F.w0 * 0.92) / Math.max(12, S.rows) * (P.head.scaleK || (P.plan === 'python' ? 0.9 : 0.62));
     // v5.30: the scale rows' edges around the body (for the per-scale variation in the shader)
     const rbArr = new Float32Array(96); lat.RB.forEach((v, i) => { if (i < 96) rbArr[i] = v; });
-    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 }, uEdgeC: { value: new THREE.Color(S.edge && S.edge.color || '#000000') }, uEdgeK: { value: S.edge ? (S.edge.k != null ? S.edge.k : 0.8) : 0 }, uHeadN: { value: headT.relief }, uHeadC: { value: headT.color }, uHX: { value: headT.Xh }, uRigTex: { value: null }, uRigOn: { value: 0 }, uRigN: { value: 2 }, uRigDx: { value: 1 }, uFill: { value: new THREE.Color(0.3, 0.3, 0.3) }, uBounce: { value: new THREE.Color(0.2, 0.18, 0.15) }, uShLift: { value: 0.2 } /* (v5.90: was 0.4 - cast shadows on the body were washed out; real ones in sun are deep) */, uWrap: { value: 0.35 }, uSSS: { value: new THREE.Color(0.32, 0.12, 0.07) } };
+    const hsU = { uRB: { value: rbArr }, uRows: { value: Math.min(95, lat.R) }, uAV: { value: lat.aV }, uTip: { value: F.Hl * 0.32 }, uHS: { value: new THREE.Vector2(1 / qS, 1 / (qS * 0.82)) }, uKeel: { value: Math.min(1, S.keel || 0) }, uCavH: { value: S.cavity != null ? S.cavity : 0.45 }, uEdgeC: { value: new THREE.Color(S.edge && S.edge.color || '#000000') }, uEdgeK: { value: S.edge ? (S.edge.k != null ? S.edge.k : 0.8) : 0 }, uHeadN: { value: headT.relief }, uHeadC: { value: headT.color }, uHX: { value: headT.Xh }, uRigTex: { value: null }, uRigOn: { value: 0 }, uRigN: { value: 2 }, uRigDx: { value: 1 }, uFill: { value: new THREE.Color(0.3, 0.3, 0.3) }, uBounce: { value: new THREE.Color(0.2, 0.18, 0.15) }, uShLift: { value: 0.2 } /* (v5.90: was 0.4 - cast shadows on the body were washed out; real ones in sun are deep) */, uWrap: { value: 0.35 }, uSSS: { value: new THREE.Color(0.32, 0.12, 0.07) }, uGroundAO: { value: P.scene.kind === 'sea' ? 0 : 1 }, uGloss: { value: new THREE.Vector2(gl, mat.clearcoat) } };
     ctx.skinLight = hsU;
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, hsU);
-      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;\nattribute vec3 aMet;\nvarying vec3 vMet;' + RIG_GLSL).replace('#include <project_vertex>', '#define SL_RIG_N\n' + RIG_V + '#include <project_vertex>').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead; vMet = aMet;')
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aHead;\nvarying float vHead;\nattribute vec3 aMet;\nvarying vec3 vMet;\nattribute vec2 aOcc;\nvarying vec2 vSlOcc;\nvarying float vSlY;' + RIG_GLSL).replace('#include <project_vertex>', '#define SL_RIG_N\nvec3 slP0 = transformed;\n' + RIG_V + 'vSlOcc = vec2(aOcc.x * (1.0 - smoothstep(0.3, 1.5, length(transformed - slP0) / max(aOcc.y, 1e-5))), aOcc.y); vSlY = transformed.y; /* v6.26: the coils\' shading fades where the body has moved away from the pose it was worked out for */\n#include <project_vertex>').replace('#include <uv_vertex>', '#include <uv_vertex>\nvHead = aHead; vMet = aMet;')
         .replace('#include <common>\nattribute float aHead;', '#include <common>\nuniform float uTip;\nattribute float aHead;').replace('#include <displacementmap_vertex>', THREE.ShaderChunk.displacementmap_vertex.replace('displacementScale + displacementBias )', 'displacementScale + displacementBias ) * (1.0 - aMet.z) * (1.0 - aHead) * smoothstep(uTip * 0.45, uTip, aMet.y)'));
       sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
-varying float vHead; varying vec3 vMet; uniform vec2 uHS; uniform float uKeel; uniform float uCavH; uniform float uTip; uniform vec3 uEdgeC; uniform float uEdgeK;
+varying float vHead; varying vec3 vMet; varying vec2 vSlOcc; varying float vSlY; uniform float uGroundAO; uniform vec2 uGloss; uniform vec2 uHS; uniform float uKeel; uniform float uCavH; uniform float uTip; uniform vec3 uEdgeC; uniform float uEdgeK;
 uniform vec3 uFill; uniform vec3 uBounce; uniform float uShLift; uniform float uWrap; uniform vec3 uSSS;
 uniform float uRB[96]; uniform int uRows; uniform float uAV; uniform sampler2D uHeadN; uniform sampler2D uHeadC; uniform float uHX;
 float slHash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
@@ -3583,6 +3879,7 @@ float slScale(vec2 m) {
  /* v5.30: no two scales alike - find this point's scale (row around the body, step along it) and give the scale its own
     small shift and size of the relief (an irregular outline), its own relief strength, tilt and shine */
  vec2 slUv = vNormalMapUv; float slStr = 1.0, slRough = 1.0; vec2 slTilt = vec2(0.0);
+ float slSpecV = 1.0, slCoatV = 1.0, slBelly = 0.0, slCavV = 1.0; /* v6.26: each scale's own shine (see lights_physical_fragment) */
  { float sa = vNormalMapUv.x * 2.0 - 1.0;
    if (abs(sa) < uAV) {
      int si = 0; float r0 = -uAV, r1 = -uAV;
@@ -3595,15 +3892,21 @@ float slScale(vec2 m) {
      vec2 l0 = (vNormalMapUv - cen) / wid; float slE = (1.0 - smoothstep(0.24, 0.5, abs(l0.x))) * (1.0 - smoothstep(0.24, 0.5, abs(l0.y)));
      vec2 l = l0 * (1.0 + (h3 - 0.5) * 0.12 * slE) + vec2((h1 - 0.5) * 0.08, (h2 - 0.5) * 0.07) * slE;
      slUv = cen + l * wid;
-     slStr = mix(1.0, 0.78 + 0.44 * h4, slE); slRough = mix(1.0, 0.86 + 0.28 * h1, slE); slTilt = (vec2(h2, h3) - 0.5) * 0.09 * slE;
-   } else { float h = slHash(vec2(sign(sa), floor(vNormalMapUv.y))); slStr = 0.85 + 0.3 * h; slRough = 0.9 + 0.2 * h; }
+     slStr = mix(1.0, 0.78 + 0.44 * h4, slE); slRough = mix(1.0, 0.8 + 0.4 * h1, slE);
+     /* v6.26 (reptile skin): every scale is a small separate plate, tilted its own way - so in any light some scales flash
+        and their neighbours do not (it was one even sheen sliding over the body, like clay or plastic) - with its own
+        shine, and its own thin coat of gloss (stronger on some, almost none on others: never uniformly wet) */
+     slTilt = (vec2(h2, h3) - 0.5) * (0.2 - 0.08 * uKeel) * slE;
+     float h5 = slHash(cid + 91.3); slSpecV = mix(1.0, 0.55 + 0.9 * h4 * h4 + 0.2 * h5, slE); slCoatV = mix(1.0, 0.3 + 1.1 * h5, slE);
+   } else { float h = slHash(vec2(sign(sa), floor(vNormalMapUv.y))); slStr = 0.85 + 0.3 * h; slRough = 0.78 + 0.2 * h; slBelly = 1.0; slSpecV = 0.9 + 0.25 * h; slCoatV = 0.85 + 0.3 * h; /* the belly's wide plates: smoother, each with its own sheen */
+     slTilt = vec2(0.0, (h - 0.5) * 0.12); }
  }
  vec2 slM = vMet.xy * uHS; float slFade = vMet.z * slTip * (1.0 - smoothstep(0.3, 0.75, length(fwidth(slM))));
  float slH = 0.0, slDa = 0.0, slDx = 0.0;
  if (slFade > 0.001) { slH = slScale(slM); slDa = (slScale(slM + vec2(0.03, 0.0)) - slScale(slM - vec2(0.03, 0.0))) / 0.06; slDx = (slScale(slM + vec2(0.0, 0.03)) - slScale(slM - vec2(0.0, 0.03))) / 0.06;
    diffuseColor.rgb *= mix(1.0, 0.55 + 0.45 * smoothstep(0.0, 0.3, slH), uCavH * slFade); }
 #ifdef USE_AOMAP
- { vec4 slCv = texture2D(aoMap, slUv);
+ { vec4 slCv = texture2D(aoMap, slUv); slCavV = slCv.r;
    diffuseColor.rgb *= mix(1.0, slCv.r, uCavH * (1.0 - vHead * 0.9) * (1.0 - vMet.z) * slTip);
    if (uEdgeK > 0.0) diffuseColor.rgb = mix(diffuseColor.rgb, uEdgeC, uEdgeK * slCv.b * (1.0 - vHead) * slTip); } /* v5.58: the scales' own dark edges */
 #endif
@@ -3616,12 +3919,12 @@ float slScale(vec2 m) {
    diffuseColor.rgb *= mix(1.0, slHN.b, slHW);
  }`)
         .replace('#include <aomap_fragment>', THREE.ShaderChunk.aomap_fragment.replace('aoMapIntensity + 1.0', 'aoMapIntensity * slTip * (1.0 - slHW) + 1.0'))
-        .replace('#include <roughnessmap_fragment>', THREE.ShaderChunk.roughnessmap_fragment.replace('vRoughnessMapUv', 'slUv') + '\n roughnessFactor *= mix(1.0, slRough, (1.0 - vMet.z) * slTip);\n roughnessFactor = mix(roughnessFactor, roughness * (0.9 + 0.25 * slH), vMet.z); roughnessFactor = mix(roughness, roughnessFactor, slTip);\n roughnessFactor = mix(roughnessFactor, max(roughness, 0.42) * (0.6 + 0.8 * slHN.a), slHW);')
-        .replace('#include <normal_fragment_maps>', THREE.ShaderChunk.normal_fragment_maps.replace(/vNormalMapUv/g, 'slUv').replace('mapN.xy *= normalScale;', 'mapN.xy = mapN.xy * mix(1.0, slStr, 1.0 - vMet.z) + slTilt * (1.0 - vMet.z) * slTip;\n mapN.xy *= normalScale * (1.0 - vHead * 0.88) * slTip;\n mapN = normalize(mix(mapN, normalize(vec3(-slDa * 0.55, -slDx * 0.55, 1.0)), vMet.z));\n mapN = normalize(mix(vec3(0.0, 0.0, 1.0), mapN, smoothstep(uTip * 0.5, uTip * 1.6, vMet.y))); /* v5.17: the scale relief fans out into a star on the rounded nose: none there */').replace('normal = normalize( tbn * mapN );', 'normal = normalize( tbn * mapN );\n if (slHW > 0.0) { vec2 hn = slHN.xy * 2.0 - 1.0; vec3 hT = tbn[0], hB = tbn[1]; float lT = length(hT), lB = length(hB);\n   if (lT > 1e-6 && lB > 1e-6) { vec3 nH = normalize(hT / lT * hn.x + hB / lB * hn.y + nonPerturbedNormal * sqrt(max(0.0, 1.0 - dot(hn, hn)))); normal = normalize(mix(normal, nH, slHW)); } }'))
-        .replace('#include <clearcoat_normal_fragment_begin>', '#ifdef USE_CLEARCOAT\n vec3 clearcoatNormal = normalize(mix(nonPerturbedNormal, normal, max(0.75 * slHW, 0.5 * slTip * (1.0 - vHead) * (1.0 - vMet.z)))); /* v5.99: the gloss breaks up scale by scale (each overlapping scale its own little mirror), not one smooth streak down the body */\n#endif')
-        .replace('#include <lights_fragment_end>', SKIN_LIGHT_GLSL).replace('#include <lights_physical_fragment>', '#include <lights_physical_fragment>\n#ifdef USE_CLEARCOAT\n material.clearcoat *= 1.0 - 0.55 * slHW; material.clearcoatRoughness = mix(material.clearcoatRoughness, max(material.clearcoatRoughness, 0.3), slHW);\n#endif');
+        .replace('#include <roughnessmap_fragment>', THREE.ShaderChunk.roughnessmap_fragment.replace('vRoughnessMapUv', 'slUv') + '\n roughnessFactor *= mix(1.0, slRough, (1.0 - vMet.z) * slTip);\n roughnessFactor = mix(roughnessFactor, roughness * (0.9 + 0.25 * slH), vMet.z); roughnessFactor = mix(roughness, roughnessFactor, slTip);\n roughnessFactor = mix(roughnessFactor, max(roughness * 0.85, 0.3) * (0.6 + 0.8 * slHN.a), slHW);')
+        .replace('#include <normal_fragment_maps>', THREE.ShaderChunk.normal_fragment_maps.replace(/vNormalMapUv/g, 'slUv').replace('mapN.xy *= normalScale;', 'mapN.xy = mapN.xy * mix(1.0, slStr, 1.0 - vMet.z) + slTilt * (1.0 - vMet.z) * slTip;\n mapN.xy *= normalScale * (1.0 - vHead * 0.88) * slTip;\n { vec2 mp = vec2(vNormalMapUv.x * float(uRows) * 6.0, vNormalMapUv.y * 7.0); float mf = (1.0 - smoothstep(0.2, 0.5, length(fwidth(mp)))) * (1.0 - vHead) * (1.0 - vMet.z) * slTip; /* v6.26: the fine micro-relief on each scale, seen only up close (it breaks a highlight into a glint) */\n   mapN.xy += mf * 0.07 * vec2(sin(mp.x * 6.2832 + 3.0 * sin(mp.y * 2.1)), sin(mp.y * 6.2832 + 2.0 * sin(mp.x * 1.7))); }\n mapN = normalize(mix(mapN, normalize(vec3(-slDa * 0.55, -slDx * 0.55, 1.0)), vMet.z));\n mapN = normalize(mix(vec3(0.0, 0.0, 1.0), mapN, smoothstep(uTip * 0.5, uTip * 1.6, vMet.y))); /* v5.17: the scale relief fans out into a star on the rounded nose: none there */').replace('normal = normalize( tbn * mapN );', 'normal = normalize( tbn * mapN );\n if (slHW > 0.0) { vec2 hn = slHN.xy * 2.0 - 1.0; vec3 hT = tbn[0], hB = tbn[1]; float lT = length(hT), lB = length(hB);\n   if (lT > 1e-6 && lB > 1e-6) { vec3 nH = normalize(hT / lT * hn.x + hB / lB * hn.y + nonPerturbedNormal * sqrt(max(0.0, 1.0 - dot(hn, hn)))); normal = normalize(mix(normal, nH, slHW)); } }'))
+        .replace('#include <clearcoat_normal_fragment_begin>', '#ifdef USE_CLEARCOAT\n vec3 clearcoatNormal = normalize(mix(nonPerturbedNormal, normal, max(0.75 * slHW, 0.85 * slTip * (1.0 - vHead) * (1.0 - vMet.z)))); /* v5.99: the gloss breaks up scale by scale (each overlapping scale its own little mirror), not one smooth streak down the body */\n#endif')
+        .replace('#include <lights_fragment_end>', SKIN_LIGHT_GLSL + SKIN_OCC_GLSL).replace('#include <lights_physical_fragment>', '#include <lights_physical_fragment>\n#ifdef USE_CLEARCOAT\n material.clearcoat *= 1.0 - 0.2 * slHW; material.clearcoatRoughness = mix(material.clearcoatRoughness, max(material.clearcoatRoughness, 0.16), slHW);\n#endif\n' + SKIN_SHINE_GLSL);
     };
-    mat.customProgramCacheKey = () => 'sl-skin-v599';
+    mat.customProgramCacheKey = () => 'sl-skin-v626';
     const mesh = new THREE.Mesh(body.geo, mat); mesh.castShadow = mesh.receiveShadow = true;
     // v5.78: the bending on the graphics card (RIG_GLSL): the shadow pass bends the same way, and while posed the body is
     // never culled by its rest-pose bounds, and clicks and zooming meet it where it is now (its chain of spheres)
@@ -3717,7 +4020,7 @@ float slScale(vec2 m) {
     if (pose.drape) snakeGroup.add(tree = perchTree('drape', () => addDrapeBranch(P, F, pose, seed))); // v5.62 (after the bounds: the view frames the snake, not the whole branch)
     const Rb = Math.max(size.x, size.z) / 2 * 1.05 + F.w0;
     const hMax = bb.max.y;
-    const poseInfo = { pts: pose.pts, ds: pose.ds, Ly: pose.Ly, radius: Rb, envR: P.length >= 0.4 ? Rb + 1.0 : Rb * 1.3, seaLevel: F.Hh(F.L * 0.5) * F.bf * (P.scene.float || 1.1) };
+    const poseInfo = { pts: pose.pts, ds: pose.ds, Ly: pose.Ly, radius: Rb, envR: P.length >= 0.4 ? Rb + 1.0 : Rb * 1.3, seaLevel: F.Hh(F.L * 0.5) * F.bf * Math.max(P.scene.float || 1.55, 1.45) }; // (v6.26: at least 1.45 - about two thirds of the body under the surface, only the back and head breaking it, as a resting sea snake lies; at 1.1, and the 0.3 some profiles had, it lay on the water like a toy)
     // water side for riverbank: the side of the snake with most open space
     if (sceneOf(P.scene).water === 'river') { let best = 0, bd = -1; for (let i = 0; i < 16; i++) { const a = (i / 16) * TAU; let m = -1e9; for (const p of pose.pts) m = Math.max(m, p[0] * Math.cos(a) + p[1] * Math.sin(a)); if (bd < 0 || m < bd) { bd = m; best = a; } } poseInfo.waterDir = best; poseInfo.waterDist = bd + F.w0 * 2.5 + Rb * 0.12; }
     scene.add(snakeGroup);

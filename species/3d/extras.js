@@ -1166,7 +1166,7 @@ export function create(V) {
   });
   function setMouth(t, opt) { const mo = V.extras.mouth; if (!mo) return; const sp = (opt && opt.spread) || 0, wk = (opt && opt.walk) || 0; if (Math.abs(mo.t - t) > 1e-4 || Math.abs((mo.spread || 0) - sp) > 1e-4 || Math.abs((mo.walk || 0) - wk) > 1e-4) mo.set(t, { spread: sp, walk: wk }); V.mouthGoal = t; }
   // v5.53: a tongue flick (s from 0 to 1: out through the notch in the lips, the tips wave, back in; 0 = in its sheath)
-  function flick(s) { const mo = V.extras && V.extras.mouth; if (mo && mo.flick) mo.flick(s); }
+  function flick(s, o) { const mo = V.extras && V.extras.mouth; if (mo && mo.flick) mo.flick(s, o); }
   // a show is a list of [duration, fn(u, s)] phases
   function runPhases(list, s) { let t = 0; for (let i = 0; i < list.length; i++) { const [d, f] = list[i]; if (s < t + d || i === list.length - 1) { f(clamp((s - t) / d, 0, 1), s, i); return i; } t += d; } return -1; }
   const total = (list) => list.reduce((a, p) => a + p[0], 0);
@@ -2692,7 +2692,7 @@ export function create(V) {
   // its head a touch (that bends the body on the CPU, so only at the High detail setting).
   const idle = { next: 0, flickAt: 0, head: null, uB: { value: 0 }, mat: null }; let lightOnly = false;
   function idleSetup() {
-    idle.next = now() + 2500; idle.flickAt = now() + 1500 + Math.random() * 2000; idle.head = null; idle.uB.value = 0;
+    idle.next = now() + 2500; idle.flickAt = now() + 1500 + Math.random() * 2000; idle.head = null; idle.uB.value = 0; idle.br = null; idle.nFl = 0;
     const m = V.extras && V.extras.mat, F = V.info && V.info.F; if (!m || !F || m.userData.slBreath) return;
     const prev = m.onBeforeCompile, L = F.L, amp = F.w0 * 0.03;
     m.onBeforeCompile = function (sh, r) {
@@ -2706,15 +2706,23 @@ export function create(V) {
   function idleStep() {
     const t = now(), busy = !!show || !!slither || !!(anat && anat.on) || V.mouthGoal > 0.01 || V.reduce();
     // breathing: in for about 1.6 s, out for 2.2 s, then a pause (a snake at rest breathes only a few times a minute)
-    { const c = ((t / 1000) % 6.5); idle.uB.value = V.reduce() ? 0 : c < 1.6 ? sstep(0, 1.6, c) : c < 3.8 ? 1 - sstep(1.6, 3.8, c) : 0; }
+    // (v6.26: no two breaths alike - each a little longer or shorter and deeper or shallower, with a pause of 1.5-5 s between;
+    // a fixed 6.5 s cycle read as a machine. It starts breathed in, so the body first settles as the view opens.)
+    { const b = idle.br || (idle.br = { t0: t - 1600, inn: 1600, out: 2600, cyc: 6500, amp: 1 }); let c = t - b.t0;
+      if (c >= b.cyc) { b.t0 = t; c = 0; b.inn = 1300 + Math.random() * 700; b.out = 1900 + Math.random() * 900; b.cyc = b.inn + b.out + 1500 + Math.random() * 3500; b.amp = 0.65 + Math.random() * 0.45; }
+      idle.uB.value = V.reduce() ? 0 : b.amp * (c < b.inn ? sstep(0, b.inn, c) : c < b.inn + b.out ? 1 - sstep(b.inn, b.inn + b.out, c) : 0); }
     if (busy) { idleStop(); idle.next = Math.max(idle.next, t + 3000); idle.flickAt = Math.max(idle.flickAt, t + 2500); return; }
     // tongue flicks (v5.93): one smooth flick of about 0.9 s - out, the tips waving up and down, back in - and now and then a
     // second one after a short pause, every 4-9 s. (It used to be two quick flicks back to back, each snapping back into the
     // mouth and straight out again, at the scenery's slower frame rate: the tongue seemed to 'reload' every half second.)
     const ft = (t - idle.flickAt) / 1000, fd = idle.flickD || 0.9;
     if (ft >= 0) {
-      if (ft < fd) { flick(ft / fd); idle.flicking = true; }
-      else { flick(0); idle.flicking = false; const again = !idle.second && Math.random() < 0.4; idle.second = again; idle.flickD = 0.75 + Math.random() * 0.35; idle.flickAt = t + (again ? 350 + Math.random() * 250 : 4000 + Math.random() * 5000); }
+      if (!idle.fo) idle.fo = { w: 3.6, r: 1 };
+      if (ft < fd) { flick(ft / fd, idle.fo); idle.flicking = true; }
+      else { // (v6.26: each flick its own length, reach and number of waves; one, two or now and then three in a row)
+        flick(0); idle.flicking = false; idle.nFl = (idle.nFl || 0) + 1; const again = idle.nFl < 3 && Math.random() < (idle.nFl === 1 ? 0.45 : 0.25); if (!again) idle.nFl = 0;
+        idle.flickD = 0.55 + Math.random() * 0.6; idle.fo = { w: 2.4 + Math.random() * 2.4, r: 0.7 + Math.random() * 0.3 };
+        idle.flickAt = t + (again ? 250 + Math.random() * 400 : 3500 + Math.random() * 7000); }
     }
     // a slight lift and turn of the head, now and then (High detail only)
     if (V.quality === 'low' || !V.info || V.info.tree) return;
