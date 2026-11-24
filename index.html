@@ -4039,6 +4039,21 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   .tag.nmt-unk { border-style: dashed; }
 </style>
 <style>
+  /* the small "See snakes from: Brazil" panel - SnakeList's own small panel (the install nudge's look), bottom left */
+  .sl-nudge.sl-ipc { padding: 6px 40px 6px 6px; }
+  .sl-ipc .ipc-go { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 6px 8px; margin: 0; border: 0; border-radius: 11px; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  .sl-ipc .ipc-go:hover { background: rgba(255,255,255,0.08); }
+  html:not([data-sl-theme="dark"]) .sl-ipc .ipc-go:hover { background: rgba(88,179,81,0.12); }
+  .sl-ipc .ipc-pin { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: #58b351; color: #fff; }
+  .sl-ipc .nd-t b { font-size: 15.5px; }
+  .sl-ipc .ipc-flag { font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; font-weight: 400; }
+  .sl-ipc .ipc-n { display: block; margin-top: 1px; opacity: .85; }
+  .sl-ipc .ipc-arrow { flex: none; opacity: .8; }
+  @media (max-width: 520px) { .sl-nudge.sl-ipc { left: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); width: calc(100vw - 24px); } }
+  /* in the map's "See the snakes near you" box: your country instead of your exact location */
+  .nm-ask .nm-ask-ipc[hidden] { display: none; }
+</style>
+<style>
   /* ---- light mode: SnakeList's menus and dropdown panels in the page's own light green (v5.73) ----
      the sort menu, the search suggestion lists, the country/family/place pickers, the map's search
      suggestions, the language menu and the tabs' "More" menu. Dark mode keeps its deep green. */
@@ -4826,7 +4841,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
 </script>
 <div class="sl-body">
     <header class="sl-header">
-      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v6.29</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" aria-description="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="fs-btn" type="button" hidden aria-label="Show SnakeList full screen" aria-pressed="false"><svg class="fs-in" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg><svg class="fs-out" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"></path><path d="M21 8h-3a2 2 0 0 1-2-2V3"></path><path d="M3 16h3a2 2 0 0 1 2 2v3"></path><path d="M16 21v-3a2 2 0 0 1 2-2h3"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
+      <div class="eyebrow-row"><p class="eyebrow">Field checklist &middot; est. herpetology<span class="sl-ver">v6.30</span></p><div class="hdr-actions"><button class="install-btn" id="install-btn" type="button" aria-description="Install SnakeList on this device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span class="ib-long">Install the app</span><span class="ib-short">Install</span></button><button class="auth-btn" data-auth="open" type="button">Sign in</button><button class="theme-btn" id="lang-btn" type="button" aria-label="Translate SnakeList into another language" aria-haspopup="listbox" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg></button><button class="theme-btn" id="report-btn" type="button" aria-label="Report a bug or suggest an idea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v4"></path><path d="M12 14h.01"></path></svg></button><button class="theme-btn" id="tour-replay" type="button" aria-label="Replay the tutorial"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 2.5-3 4.5"></path><path d="M12 17.5h.01"></path></svg></button><button class="theme-btn" id="fs-btn" type="button" hidden aria-label="Show SnakeList full screen" aria-pressed="false"><svg class="fs-in" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg><svg class="fs-out" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"></path><path d="M21 8h-3a2 2 0 0 1-2-2V3"></path><path d="M3 16h3a2 2 0 0 1 2 2v3"></path><path d="M16 21v-3a2 2 0 0 1 2-2h3"></path></svg></button><button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between day and night"><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg></button></div></div>
       <h1 class="sl-title" aria-label="SnakeList"><span class="sl-titletext"><svg class="snake-s" viewBox="-23.5 2 156 145.5" aria-hidden="true"><use href="#mark-snake"></use></svg>nake<em>List</em></span><svg class="sl-tick" viewBox="5.6 0.3 36.9 36.0" aria-hidden="true"><defs><clipPath id="tick-clip-head"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath></defs><g clip-path="url(#tick-clip-head)"><path class="box-tick" d="M8.4 23.8 C12.2 27.8, 15.4 31.4, 18.6 32.6 C22.0 33.9, 24.0 29.8, 25.8 26.6 C27.8 23.0, 29.9 19.2, 31.8 15.6" fill="none" stroke="var(--sl-check, #5fb246)" stroke-width="9" stroke-linecap="round"></path></g><g class="tick-dia" fill="var(--sl-tpat, #1e3a24)"><g transform="translate(11.7 27.2) rotate(45.7)"><path d="M0 -1.6 L2.3 0 L0 1.6 L-2.3 0 Z"></path></g><g transform="translate(14.6 30.0) rotate(40.6)"><path d="M0 -1.6 L2.2 0 L0 1.6 L-2.2 0 Z"></path></g><g transform="translate(18.0 32.3) rotate(25.2)"><path d="M0 -1.5 L2.2 0 L0 1.5 L-2.2 0 Z"></path></g><g transform="translate(21.8 32.2) rotate(-35.1)"><path d="M0 -1.5 L2.1 0 L0 1.5 L-2.1 0 Z"></path></g><g transform="translate(24.4 29.1) rotate(-58.8)"><path d="M0 -1.4 L2.1 0 L0 1.4 L-2.1 0 Z"></path></g><g transform="translate(26.4 25.5) rotate(-61.0)"><path d="M0 -1.4 L2.0 0 L0 1.4 L-2.0 0 Z"></path></g></g><g class="tick-rattle" transform="translate(31.80 15.60) rotate(-62.1)" fill="var(--sl-check, #5fb246)" stroke="var(--sl-tpat, #1e3a24)" stroke-width="0.5" stroke-linejoin="round"><g transform="translate(-0.80 0)"><path d="M0 -2.70 C0.96 -3.24, 2.24 -3.72, 3.20 -3.10 L3.20 3.10 C2.24 3.72, 0.96 3.24, 0 2.70 Z"></path></g><g transform="translate(2.14 0)"><path d="M0 -3.10 C0.96 -3.72, 2.24 -3.60, 3.20 -3.00 L3.20 3.00 C2.24 3.60, 0.96 3.72, 0 3.10 Z"></path></g><g transform="translate(5.09 0)"><path d="M0 -3.00 C0.90 -3.60, 2.10 -3.24, 3.00 -2.70 L3.00 2.70 C2.10 3.24, 0.90 3.60, 0 3.00 Z"></path></g><g transform="translate(7.85 0)"><path d="M0 -2.70 C0.84 -3.24, 1.96 -2.76, 2.80 -2.30 L2.80 2.30 C1.96 2.76, 0.84 3.24, 0 2.70 Z"></path></g><g transform="translate(10.42 0)"><path d="M0 -2.30 C0.75 -2.76, 1.75 -2.28, 2.50 -1.90 L2.50 1.90 C1.75 2.28, 0.75 2.76, 0 2.30 Z"></path></g><g transform="translate(12.72 0)"><path d="M0 -1.90 C0.66 -2.28, 1.54 -1.37, 2.20 -1.14 L2.20 1.14 C1.54 1.37, 0.66 2.28, 0 1.90 Z"></path></g></g></svg></h1>
       <p class="sl-sub">Your life list of serpents. Search the checklist and mark what you've seen<span class="sub-sync"> &mdash; on every device you open this on</span><span class="sub-local"> &mdash; it's saved on this device</span>.</p>
       <nav class="sl-browse" aria-label="Browse snake species"><a href="https://snakelist.com/species/"><b>All <span data-sl-total>4,243</span> snake species A&ndash;Z</b></a> &middot; Snakes of <a href="https://snakelist.com/species/country/mexico">Mexico</a> &middot; <a href="https://snakelist.com/species/country/brazil">Brazil</a> &middot; <a href="https://snakelist.com/species/country/india">India</a> &middot; <a href="https://snakelist.com/species/country/indonesia">Indonesia</a> &middot; <a href="https://snakelist.com/species/country/colombia">Colombia</a> &middot; <a href="https://snakelist.com/species/country/china">China</a> &middot; <a href="https://snakelist.com/species/country/ecuador">Ecuador</a> &middot; <a href="https://snakelist.com/species/country/vietnam">Vietnam</a> &middot; <a href="https://snakelist.com/species/#by-family">by family</a></nav>
@@ -15082,6 +15097,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // researched for; everyone else still shows the plain country the data actually has
   var STATE_NAME = {AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming"};
   window.STATE_NAME = STATE_NAME; // the quiz (a separate script block) needs this too
+  window.SL_COUNTRY_ISO = ISO; // (and the "See snakes from" panel: a country code from your internet connection to SnakeList's own country name)
   window.SL_WORLD = { svg: svg, iso: ISO }; // and the quiz's own "tap where it lives" map
   // Established invasive populations - places a snake was brought to and now breeds in the
   // wild, outside its native range (the range data on the cards is native only). Shown in
@@ -21039,6 +21055,17 @@ window.SL_GEO_READY = new Promise(function (res) {
     return true;
   }
   window.SL_MAP_CANCEL_SEARCH = cancelSearch;
+  // pick a country by its code ("br"), exactly as a tap on it on the map does (the "See snakes from" panel). false until the map is ready
+  window.SL_MAP_SELECT_COUNTRY = function (code) {
+    if (!ready || !code || !(NAME[code] || (BYCODE && BYCODE[code]))) return false;
+    cancelSearch(); clearCities();
+    if (islandsOn) { setIslands(false); islScope = null; islProv = null; }
+    statesMode = false; pickedProvince = null; labelPin = null; updateLegend();
+    selected = code; onlyPicked = code;
+    fillPanel(code);
+    var bx = countryBox(code); if (bx) flyToLonLatBox(bx[0], bx[1], bx[2], bx[3], true);
+    invalidate(); return true;
+  };
   // ... and so does a click on an empty part of the map's panel (not on a row, card, button or link; not a drag)
   (function () {
     var cp = document.getElementById("country-panel"), down = null; if (!cp) return;
@@ -24475,6 +24502,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   var VER = ((document.querySelector(".sl-ver") || {}).textContent || "").trim();
   // newest first - keep a few versions so someone who skipped some still sees what changed
   var NEWS = [
+    { v: "v6.30", d: "2026-11-24", items: ["SnakeList no longer asks for your location when you open it - it guesses your country from your internet address", "New: a small See snakes from: (your country) panel - tap it to open the map with your country and its snakes", "See near me: if you say no to location, you can still see your country"] },
     { v: "v6.29", d: "2026-11-24", items: ["3D: turning the snake around is much smoother - no more stutter while you drag", "See it eat: leaves and grass move aside so you can see the prey, and the camera gets closer", "See it eat: real snake feeding moves - neck bending while swallowing, gripping the prey, and a big yawn after the meal", "3D: Open mouth always turns to show the head, and changing habitat keeps your view"] },
     { v: "v6.28", d: "2026-11-24", items: ["New: a countdown to SnakeList Christmas 2026, our first ever event - it opens on December 1. Tap the banner to see it big, or make it small with the - button"] },
     { v: "v6.27", d: "2026-11-24", items: ["Small text fix in What's new"] },
@@ -28561,7 +28589,6 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   var KEY = "sl-nearme";
   var bar = document.getElementById("nm-bar"), txt = document.getElementById("nm-txt");
   var bYes = document.getElementById("nm-yes"), bNo = document.getElementById("nm-no"), bOk = document.getElementById("nm-ok");
-  var ASK = txt.innerHTML;
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function user() { try { return JSON.parse(lsGet("sl-google") || "null"); } catch (e) { return null; } }
   function who(u) { return u ? String(u.email || u.name || "").toLowerCase() : ""; }
@@ -28590,28 +28617,8 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
         : "SnakeList couldn't find where you are right now. You can try again later from your account.");
     }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
   }
-  // ---- the question (once per account, after signing in) ----
-  var hideT = null, asked = false;
-  function vis(el) { // (fixed pop-ups have no offsetParent, so this asks the box itself)
-    if (!el || el.hidden || el.closest("[hidden]")) return false;
-    var cs = getComputedStyle(el), r = el.getBoundingClientRect();
-    return cs.display !== "none" && cs.visibility !== "hidden" && r.width > 0 && r.height > 0;
-  }
-  function busy() {
-    var de = document.documentElement;
-    if (!window.__introDone || de.classList.contains("sl-intro-lock") || document.querySelector(".sl-root.intro-on")) return true; // the opening animation
-    var seen = false; try { seen = !!(localStorage.getItem("sl-tour-seen") || sessionStorage.getItem("sl-tour-seen") || localStorage.getItem("sl-tour-done")); } catch (e) { seen = true; }
-    if (!seen || vis(document.getElementById("tour-layer"))) return true; // the tutorial (still to come, or showing)
-    var wn = document.getElementById("wn-sheet"); if (wn && wn.classList.contains("open")) return true; // What's new
-    if (vis(document.getElementById("ck-bar"))) return true; // the cookie question first
-    if (de.classList.contains("sl-modal-on") || window.SL_SWITCHING) return true; // sign-in page, a photo, 3D...
-    if (window.SL_canPrompt && !window.SL_canPrompt(bar)) return true; // v5.68: after the opening photo, one pop-up at a time
-    return !!document.querySelector("dialog[open], .signin-page.open, .signin-sheet.open");
-  }
-  function showBar() {
-    txt.innerHTML = ASK; bYes.hidden = false; bNo.hidden = false; bOk.hidden = true; bYes.disabled = false;
-    bar.hidden = false; asked = true; if (window.SL_promptShown) window.SL_promptShown();
-  }
+  // ---- the bar's answer to Use my location (the bar is no longer shown by itself: see check() below) ----
+  var hideT = null;
   function closeBar() { clearTimeout(hideT); bar.hidden = true; }
   function tell(msg) {
     txt.textContent = msg; bYes.hidden = true; bNo.hidden = true; bOk.hidden = false;
@@ -28624,8 +28631,9 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     locate(function (ok, msg) { tell(msg); });
   });
   function check() {
-    if (bar.hidden) { if (!asked && user() && !acctRec() && !busy()) showBar(); }
-    else if (!user()) closeBar(); // signed out while it was showing
+    // (Eduardo: SnakeList no longer asks for your location by itself - the "See snakes from" panel uses your country, from your
+    // internet connection, instead. Your exact location is only asked for when you tap See near me on the map, or Use my location.)
+    if (!bar.hidden && !user()) closeBar(); // signed out while it was showing
     paint();
   }
   // ---- the map button ----
@@ -29117,12 +29125,15 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
         '<p class="nm-ask-why">SnakeList needs a rough idea of where you are to list the snakes recorded around you, say which are likely out right now and suggest where to look.</p>' +
         '<div class="nm-sec"><p class="sp-info-h">Use your location</p><p class="nm-ask-priv"></p><button type="button" class="nm-ask-go"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path><circle cx="12" cy="12" r="7"></circle></svg>Use my location</button></div>' +
         '<p class="nm-ask-msg" role="status" hidden></p>' +
+        '<div class="nm-sec nm-ask-ipc" hidden><p class="sp-info-h">Or see your country</p><p>No exact location needed: your approximate country, from your internet connection.</p><button type="button" class="nm-ask-go nm-ask-ipc-go"></button></div>' +
         '<div class="nm-sec"><p class="sp-info-h">Or choose a place instead</p><p>No location needed: type a town or city.</p>' +
         '<input type="search" class="nm-ask-q" placeholder="Town or city&hellip;" autocomplete="off" aria-label="Choose a town or city"><div class="nm-ask-res" role="list"></div></div>' +
         '</div></div>';
       stage.appendChild(askWrap);
       askWrap.addEventListener("click", function (e) {
         if (e.target === askWrap || e.target.closest(".sp-info-x")) { askClose(); return; }
+        var ig = e.target.closest(".nm-ask-ipc-go"); // your country (from your internet connection) on the map
+        if (ig) { askClose(); if (window.SL_IPC) window.SL_IPC.open(ig.getAttribute("data-cc")); return; }
         if (e.target.closest(".nm-ask-go")) { askLocate(e.target.closest(".nm-ask-go")); return; }
         var pk = e.target.closest(".nm-ask-pick");
         if (pk) { setPos(+pk.getAttribute("data-lat"), +pk.getAttribute("data-lon"), "place", pk.getAttribute("data-name")); askClose(); seeNear(); }
@@ -29136,9 +29147,23 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
       : "It is rounded to about 10 km and used only for this visit - nothing is saved. It is only sent anywhere (a rough area of about 100 km, to iNaturalist) when you open How to find it.";
     var go = askWrap.querySelector(".nm-ask-go"); go.disabled = false;
     askMsg(msg || ""); askFind(askWrap.querySelector(".nm-ask-q").value);
+    askCountry();
     askBack = document.activeElement; askWrap.hidden = false;
     go.focus({ preventScroll: true });
     mapIntoView();
+  }
+  // your approximate country, from your internet connection (the "See snakes from" lookup): the fallback when you'd rather not share
+  // your location, or it is blocked
+  function askCountry(focus) {
+    var box = askWrap && askWrap.querySelector(".nm-ask-ipc"), I = window.SL_IPC; if (!box || !I) return;
+    I.get().then(function (r) {
+      var pl = r && I.place(r.cc); if (!pl) { box.hidden = true; return; }
+      var b = box.querySelector("button"), f = I.flag(pl.code);
+      b.setAttribute("data-cc", pl.code);
+      b.innerHTML = 'See snakes from: ' + (f ? '<span translate="no" aria-hidden="true">' + f + "</span> " : "") + esc(pl.name) + " (" + pl.n.toLocaleString() + ")";
+      box.hidden = false;
+      if (focus && !askWrap.hidden) { b.focus({ preventScroll: true }); if (b.scrollIntoView) b.scrollIntoView({ block: "nearest" }); }
+    }, function () {});
   }
   function askClose() { if (!askWrap || askWrap.hidden) return; askWrap.hidden = true; if (askBack && askBack.focus && document.contains(askBack)) askBack.focus({ preventScroll: true }); }
   function plain(t) { t = String(t || "").toLowerCase(); return t.normalize ? t.normalize("NFD").replace(/[\u0300-\u036f]/g, "") : t; }
@@ -29161,6 +29186,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
       b.disabled = false;
       askMsg(e && e.code === 1 ? "Location is blocked for SnakeList in this browser. To use it, allow location for this site in your browser's settings and try again - or choose a place below."
         : "Your device couldn't find where you are just now (no signal, or it took too long). Try again in a moment, or choose a place below.");
+      askCountry(true); // (then your country, from your internet connection, is offered first)
     }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
   }
   // ---- See near me ----
@@ -29280,6 +29306,178 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
 })();
 </script>
 <!-- ==== See near me - END ========================================================================== -->
+<!-- ==== See snakes from: your country, from your internet connection =================================== -->
+
+<script>
+// "See snakes from: <your country>" (Eduardo: "instead of SnakeList asking you for your location it gets the location from your IP
+// address"). SnakeList no longer asks for your location by itself. Once the opening has finished and the page is idle, your
+// approximate COUNTRY is looked up from your internet connection's address - only the country, nothing else is sent (no account,
+// no list; the request goes without cookies or a referrer) - by api.country.is, or get.geojs.io if that one doesn't answer in
+// 2.5 s; if neither does, it is guessed from the browser's time zone or language. The country code is kept on this device
+// for 7 days (a guess for 1 day). A small panel then says "See snakes from: Brazil - 812 species"; tapping it opens the Map
+// on that country, just as if it had been tapped there. Closing it with x keeps it away for 7 days.
+(function () {
+  if (window.SL_IPC) return;
+  var KEY = "sl-ipc", OFF = "sl-ipc-off", DAY = 864e5, TTL = 7 * DAY, WAIT_MS = 2500;
+  var PROVIDERS = [
+    ["https://api.country.is/", function (j) { return j && j.country; }],
+    ["https://get.geojs.io/v1/ip/country.json", function (j) { return j && j.country; }]
+  ];
+  // places with no row of their own in SnakeList's list of countries, shown as the country they belong to
+  var ALIAS = { uk: "gb", hk: "cn", mo: "cn", ax: "fi", sj: "no" };
+  // the time zones of the bigger countries, for the guess when neither service answers
+  var TZ = { "America/Sao_Paulo": "BR", "America/Bahia": "BR", "America/Fortaleza": "BR", "America/Recife": "BR", "America/Manaus": "BR", "America/Belem": "BR",
+    "America/New_York": "US", "America/Chicago": "US", "America/Denver": "US", "America/Phoenix": "US", "America/Los_Angeles": "US", "America/Anchorage": "US", "Pacific/Honolulu": "US",
+    "America/Detroit": "US", "America/Toronto": "CA", "America/Vancouver": "CA", "America/Edmonton": "CA", "America/Winnipeg": "CA", "America/Halifax": "CA",
+    "America/Mexico_City": "MX", "America/Bogota": "CO", "America/Lima": "PE", "America/Santiago": "CL", "America/Argentina/Buenos_Aires": "AR", "America/Caracas": "VE",
+    "America/Guayaquil": "EC", "America/La_Paz": "BO", "America/Asuncion": "PY", "America/Montevideo": "UY", "America/Costa_Rica": "CR", "America/Panama": "PA",
+    "America/Puerto_Rico": "PR", "America/Cayenne": "GF", "Europe/Lisbon": "PT", "Atlantic/Madeira": "PT", "Atlantic/Azores": "PT", "Europe/Madrid": "ES", "Europe/London": "GB",
+    "Europe/Dublin": "IE", "Europe/Paris": "FR", "Europe/Berlin": "DE", "Europe/Rome": "IT", "Europe/Amsterdam": "NL", "Europe/Brussels": "BE", "Europe/Zurich": "CH",
+    "Europe/Vienna": "AT", "Europe/Warsaw": "PL", "Europe/Prague": "CZ", "Europe/Stockholm": "SE", "Europe/Oslo": "NO", "Europe/Copenhagen": "DK", "Europe/Helsinki": "FI",
+    "Europe/Athens": "GR", "Europe/Istanbul": "TR", "Europe/Bucharest": "RO", "Europe/Budapest": "HU", "Europe/Kiev": "UA", "Europe/Kyiv": "UA", "Europe/Moscow": "RU",
+    "Africa/Johannesburg": "ZA", "Africa/Lagos": "NG", "Africa/Nairobi": "KE", "Africa/Cairo": "EG", "Africa/Casablanca": "MA", "Africa/Accra": "GH", "Africa/Addis_Ababa": "ET",
+    "Africa/Dar_es_Salaam": "TZ", "Africa/Kampala": "UG", "Asia/Kolkata": "IN", "Asia/Calcutta": "IN", "Asia/Shanghai": "CN", "Asia/Tokyo": "JP", "Asia/Seoul": "KR",
+    "Asia/Bangkok": "TH", "Asia/Jakarta": "ID", "Asia/Manila": "PH", "Asia/Ho_Chi_Minh": "VN", "Asia/Kuala_Lumpur": "MY", "Asia/Singapore": "SG", "Asia/Karachi": "PK",
+    "Asia/Dhaka": "BD", "Asia/Dubai": "AE", "Asia/Riyadh": "SA", "Asia/Tehran": "IR", "Asia/Jerusalem": "IL", "Asia/Taipei": "TW", "Asia/Colombo": "LK", "Asia/Kathmandu": "NP",
+    "Australia/Sydney": "AU", "Australia/Melbourne": "AU", "Australia/Brisbane": "AU", "Australia/Perth": "AU", "Australia/Adelaide": "AU", "Australia/Darwin": "AU",
+    "Pacific/Auckland": "NZ", "Pacific/Port_Moresby": "PG" };
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function ssGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+  function ssSet(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function okCode(c) { return typeof c === "string" && /^[A-Za-z]{2}$/.test(c) ? c.toUpperCase() : null; }
+  function cached() {
+    var o = null; try { o = JSON.parse(lsGet(KEY) || "null"); } catch (e) {}
+    return o && okCode(o.cc) && Date.now() - (+o.t || 0) < (o.src === "guess" ? DAY : TTL) ? o : null;
+  }
+  function ask(url, pick) {
+    if (!window.fetch) return Promise.reject(new Error("no fetch"));
+    var ac = window.AbortController ? new AbortController() : null, tm;
+    var slow = new Promise(function (res, rej) { tm = setTimeout(function () { if (ac) ac.abort(); rej(new Error("slow")); }, WAIT_MS); });
+    var get = fetch(url, { credentials: "omit", cache: "no-store", referrerPolicy: "no-referrer", signal: ac ? ac.signal : undefined })
+      .then(function (r) { if (!r.ok) throw new Error("status " + r.status); return r.json(); })
+      .then(function (j) { var c = okCode(pick(j)); if (!c) throw new Error("no country"); return c; });
+    return Promise.race([get, slow]).then(function (c) { clearTimeout(tm); return c; }, function (e) { clearTimeout(tm); throw e; });
+  }
+  function guess() {
+    var tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+    if (TZ[tz]) return TZ[tz];
+    var langs = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ""]);
+    for (var i = 0; i < langs.length; i++) { var m = /^[a-z]{2,3}[-_]([A-Za-z]{2})\b/.exec(langs[i] || ""); if (m) return m[1].toUpperCase(); }
+    return null;
+  }
+  var pending = null;
+  function lookup() {
+    if (pending) return pending;
+    var c = cached(); if (c) return (pending = Promise.resolve({ cc: c.cc, src: c.src }));
+    var guessed = function () { var g = guess(); if (g) lsSet(KEY, JSON.stringify({ cc: g, src: "guess", t: Date.now() })); return g ? { cc: g, src: "guess" } : null; };
+    if (navigator.onLine === false) return (pending = Promise.resolve(guessed()));
+    var i = 0;
+    pending = (function next() {
+      if (i >= PROVIDERS.length) return Promise.resolve(guessed());
+      var p = PROVIDERS[i++];
+      return ask(p[0], p[1]).then(function (cc) { lsSet(KEY, JSON.stringify({ cc: cc, src: "ip", t: Date.now() })); return { cc: cc, src: "ip" }; }, next);
+    })();
+    return pending;
+  }
+  // a country code -> SnakeList's own country (its id on the map, its name, how many living snakes it has); null when SnakeList
+  // has no such country or no snakes live there (then there is no panel)
+  var counts = {};
+  function place(cc) {
+    var code = okCode(cc); if (!code) return null; code = code.toLowerCase(); code = ALIAS[code] || code;
+    var ISO = window.SL_COUNTRY_ISO || {}, name = null;
+    for (var k in ISO) if (ISO[k] === code) { name = k; break; }
+    if (!name) return null;
+    if (counts[name] == null) {
+      var EXT = (window.SL_FACTS && window.SL_FACTS.EXTINCT) || {}, n = 0;
+      var cards = document.querySelectorAll("#grid .card[data-countries]");
+      for (var j = 0; j < cards.length; j++) {
+        var cs = cards[j].getAttribute("data-countries");
+        if (cs.indexOf(name) < 0 || EXT[cards[j].getAttribute("data-id")]) continue;
+        if (("|" + cs + "|").indexOf("|" + name + "|") >= 0) n++;
+      }
+      counts[name] = n;
+    }
+    var shown = window.SL_DISPLAY_NAME ? window.SL_DISPLAY_NAME(name) : name;
+    return counts[name] ? { code: code, name: shown, n: counts[name] } : null;
+  }
+  // the flag (as an emoji - Windows shows two letters instead, so there it is left out)
+  function flag(code) {
+    if (/Windows/.test(navigator.userAgent || "") || !String.fromCodePoint) return "";
+    var c = String(code || "").toUpperCase(); if (!/^[A-Z]{2}$/.test(c)) return "";
+    return String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65, 0x1F1E6 + c.charCodeAt(1) - 65);
+  }
+  // the Map, on that country - as if it was tapped there (the map's own SL_MAP_SELECT_COUNTRY, once the map is ready)
+  function openMap(code) {
+    var tb = document.getElementById("tab-map"); if (tb && !tb.classList.contains("active")) tb.click();
+    var tries = 0;
+    (function go() {
+      var f = window.SL_MAP_SELECT_COUNTRY;
+      if (window.SL_MAP_GEO_DONE && f && f(code)) {
+        var mp = document.getElementById("globe-stage"); if (mp && mp.scrollIntoView) mp.scrollIntoView({ block: "nearest" });
+        return;
+      }
+      if (tries++ < 400) setTimeout(go, 200); // (up to 80 s: the map's shapes can take a while on a slow connection)
+    })();
+  }
+  // ---- the panel ----
+  var panel = null;
+  function hide() { if (panel) panel.hidden = true; }
+  function away() { var t = +lsGet(OFF) || 0; return Date.now() - t < TTL; }
+  function canShow() {
+    if (away() || ssGet("sl-ipc-shown")) return false;
+    // not when SnakeList was opened on something particular (a species, a country, a tab...) or you came back to it
+    if (/[?&](sp|map|f|hab|type|fam|q|tab)=/.test(location.search) || window.SL_CAME_BACK || window.SL_QUICK_REOPEN) return false;
+    var tb = document.getElementById("tab-map"); if (tb && tb.classList.contains("active")) return false; // already on the Map
+    return !document.querySelector(".signin-page.open, .signin-sheet.open, dialog[open]");
+  }
+  function show(pl) {
+    if (!canShow()) return;
+    ssSet("sl-ipc-shown", "1");
+    if (!panel) {
+      panel = document.createElement("div"); panel.className = "sl-nudge sl-ipc"; panel.id = "sl-ipc";
+      panel.setAttribute("role", "dialog"); panel.setAttribute("aria-label", "See the snakes of your country");
+      document.body.appendChild(panel);
+      panel.addEventListener("click", function (e) {
+        if (e.target.closest(".nd-x")) { lsSet(OFF, String(Date.now())); hide(); return; }
+        var g = e.target.closest(".ipc-go"); if (!g) return;
+        // after a tap it rests for 4 days (it did its job)
+        lsSet(OFF, String(Date.now() - TTL + 4 * DAY)); hide(); openMap(g.getAttribute("data-cc"));
+      });
+    }
+    var f = flag(pl.code);
+    panel.innerHTML = '<button type="button" class="ipc-go" data-cc="' + esc(pl.code) + '" title="Your approximate country, from your internet connection">' +
+      '<span class="ipc-pin" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3c2.5 2.7 3.8 5.8 3.8 9S14.5 18.3 12 21c-2.5-2.7-3.8-5.8-3.8-9S9.5 5.7 12 3z"></path></svg></span>' +
+      '<span class="nd-t"><b>See snakes from: ' + (f ? '<span class="ipc-flag" translate="no" aria-hidden="true">' + f + "</span> " : "") + esc(pl.name) + "</b>" +
+      '<span class="ipc-n">' + esc(pl.n.toLocaleString()) + " species · on the map</span></span>" +
+      '<svg class="ipc-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>' +
+      '<button type="button" class="nd-x" aria-label="Close">&times;</button>';
+    panel.hidden = false;
+    if (window.SL_promptShown) window.SL_promptShown();
+  }
+  function start() {
+    if (away() || ssGet("sl-ipc-shown")) return;
+    lookup().then(function (r) {
+      if (!r) return;
+      var go = function () { var pl = place(r.cc); if (pl) show(pl); };
+      if (window.SL_whenPrompt) window.SL_whenPrompt(go); else go();
+    }, function () {});
+  }
+  // after the opening has finished and SnakeList is drawn, when the page is idle (nothing here competes with the opening)
+  function whenIdle(fn) { if (window.requestIdleCallback) requestIdleCallback(fn, { timeout: 4000 }); else setTimeout(fn, 1500); }
+  function begin() { whenIdle(start); }
+  function afterOpening() {
+    if (window.__introDone || !document.getElementById("intro")) begin();
+    else document.addEventListener("sl-intro-done", begin, { once: true });
+  }
+  if (window.SL_WHEN_DRAWN) window.SL_WHEN_DRAWN(afterOpening);
+  else if (document.readyState === "complete") afterOpening(); else window.addEventListener("load", afterOpening, { once: true });
+  // for the map's "See the snakes near you" box (your country instead of your exact location) and the tests
+  window.SL_IPC = { get: lookup, place: place, open: openMap, flag: flag, hide: hide, start: start };
+})();
+</script>
+<!-- ==== See snakes from - END ============================================================================ -->
 
 <script>
 // ---- v5.49: pop-ups never sit on top of each other. Every small message and bar that floats over
