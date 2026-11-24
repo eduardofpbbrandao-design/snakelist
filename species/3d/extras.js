@@ -2662,8 +2662,9 @@ export function create(V) {
   function compileAll(root) { // compile the shaders of everything under root, hidden parts too (nothing is drawn)
     const r = V.ctx && V.ctx.renderer; if (!r || !V.cam || !root || !V.scene) return;
     const hid = []; root.traverse((o) => { if (!o.visible) { hid.push(o); o.visible = true; } });
-    // (compileAsync: where the browser can compile shaders in the background, nothing waits for them here)
-    try { if (r.compileAsync) r.compileAsync(root, V.cam, V.scene).catch(() => {}); else r.compile(root, V.cam, V.scene); } finally { for (const o of hid) o.visible = false; }
+    // (compile only starts each shader: where the browser compiles in the background nothing waits for it here, and the
+    // first use comes later, idle - not compileAsync, whose polling throws if a part is thrown away before it is ready)
+    try { r.compile(root, V.cam, V.scene); } finally { for (const o of hid) o.visible = false; }
   }
   function warmPrey() { // a prey like the one See it eat makes, set up as it does (fading, cut off at the throat), kept hidden
     const k0 = dietOf(P, V.opts.id), kinds = k0 === 'mouse' ? ['mouse', 'rat'] : k0 === 'rat' ? ['rat', 'mouse'] : [k0];
@@ -2673,7 +2674,7 @@ export function create(V) {
       V.scene.add(p); compileAll(p); p.visible = false; p.userData.keeper = true; keepers.push(p);
     }
   }
-  // v6.18: what compileAsync leaves for the first click: the shadow pass's own shaders, the prey's shaders with its cut at
+  // v6.18: what compiling leaves for the first click: the shadow pass's own shaders, the prey's shaders with its cut at
   // the throat switched on (compiling outside a frame sees no cut), and each shader's first use (the browser may finish
   // linking it only then, which on a slow graphics driver held See it eat up for seconds). So, idle: one real frame drawn
   // into a tiny hidden target with the hidden parts shown, set up to need exactly the shaders the screen does (same
