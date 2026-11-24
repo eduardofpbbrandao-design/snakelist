@@ -58,11 +58,11 @@ snakes, 0 sand boas). It is zero at the snout tip and at the jaw hinge, so Open 
   clumps stay.
 - The sea floor and reef: real reef colours (pale coral heads, ochre and grey rubble, dark rock) tinted only a little by the
   water, flatter shapes, the sand's grain and moving caustics. They were mixed 40% with blue: cartoon-blue pebbles.
-- Soil (blind snakes and other burrowers, 452 + species): moist crumbly soil with many small dark leaf fragments (no whole
+- Soil (986 species: blind snakes and other burrowers): moist crumbly soil with many small dark leaf fragments (no whole
   leaves as big as the snake lying flat like stickers), dull crumbs (their highlight read as water drops), fine rootlets
   painted and in 3D, clods half sunk in the soil, small moss cushions, and the flat stone it was found under lying close by.
-- Rocky desert and dunes are lit by the clear midday sky panorama (they shared the warm dawn light of the gibber plains and
-  grassland); desert stones are a weathered red-tan instead of brick red.
+- Desert stones are a weathered red-tan instead of brick red (they read as a scatter of chocolate drops). (Lighting the
+  deserts with the clear-sky panorama was tried and dropped: the sand and the snakes on it came out washed pale.)
 
 
 How the 4,243 3D models in `species/3d/models.json` get their shape, which shared rules cover each group, and which

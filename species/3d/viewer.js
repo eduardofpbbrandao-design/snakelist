@@ -2624,7 +2624,7 @@ const SKIN_SHINE_GLSL = `
 const SKIN_OCC_GLSL = `
 { float slR = max(vSlOcc.y, 1e-5), slNy = dot(nonPerturbedNormal, normalize((viewMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz));
   float slG = uGroundAO * (0.5 - 0.5 * slNy) * exp(-max(vSlY, 0.0) / (0.75 * slR)) * step(1e-4, vSlOcc.y);
-  float slO = 1.0 - (1.0 - vSlOcc.x) * (1.0 - 0.85 * slG);
+  float slO = 1.0 - (1.0 - vSlOcc.x) * (1.0 - 0.65 * slG);
   reflectedLight.indirectDiffuse *= 1.0 - slO; reflectedLight.indirectSpecular *= 1.0 - 0.8 * slO;
   reflectedLight.directDiffuse *= 1.0 - 0.35 * slO * slO; reflectedLight.directSpecular *= 1.0 - 0.5 * slO;
 }`;
@@ -2666,7 +2666,7 @@ const envOf = (sc) => (sc.kind === 'forest' && (sc.flavor === 'savanna' || sc.fl
 // ---------- photographic surroundings: CC0 Polyhaven panoramas (via @pmndrs/assets), see CREDITS.txt ----------
 // each habitat gets the panorama that fits it best; the snake's own ground is drawn up close and fades
 // into the photo's ground, which is projected onto a flat floor so it meets the horizon without a seam
-const ENV_FOR = { clay: 'dawn', swamp: 'forest', shore: 'sky', gibber: 'dawn', riverbank: 'park', forest: 'forest', rainforest: 'forest', litter: 'forest', soil: 'forest', grass: 'sunrise', heath: 'sunrise', arid: 'sky', sand: 'sky', sea: 'sky' }; // (v6.26: rocky desert and dunes under a hard, clear midday sky - in the same warm dawn light as the gibber plains and grassland they looked alike)
+const ENV_FOR = { clay: 'dawn', swamp: 'forest', shore: 'sky', gibber: 'dawn', riverbank: 'park', forest: 'forest', rainforest: 'forest', litter: 'forest', soil: 'forest', grass: 'sunrise', heath: 'sunrise', arid: 'dawn', sand: 'dawn', sea: 'sky' };
 const ENV_CACHE = new Map();
 function parseHDR(buf) {
   const b = new Uint8Array(buf); let p = 0, line = '';
