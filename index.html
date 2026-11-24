@@ -2295,6 +2295,11 @@ var p=d.head||h,l=d.createElement("link");l.rel="stylesheet";l.href=root+"events
   .sg-key { position: absolute; left: 10px; bottom: 10px; z-index: 4; margin: 0; display: flex; align-items: center; gap: 7px; padding: 5px 10px; border-radius: 999px;
     background: rgba(10,20,32,0.78); color: #f2f6fa; font: 11.5px 'Inter', sans-serif; pointer-events: none; }
   .sg-key[hidden] { display: none; }
+  .globe-stage .globe-hint.sg-hint { display: none; align-items: center; gap: 7px; }
+  .globe-stage:where(:has(#sg-toggle[aria-pressed="true"])) .globe-hint:not(.sg-hint) { display: none; }
+  .globe-stage:where(:has(#sg-toggle[aria-pressed="true"])) .globe-hint.sg-hint { display: flex; }
+  .globe-stage.real-map .globe-hint.sg-hint, .globe-stage.full:has(.country-panel:not([hidden])) .globe-hint.sg-hint { display: none; }
+  .sg-hint-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #58b351; border: 1.5px solid rgba(12,46,18,0.92); box-shadow: 0 0 0 1.2px rgba(255,255,255,0.85); }
   .sg-key span { width: 10px; height: 10px; border-radius: 50%; background: #e3261f; border: 1.5px solid #fff; }
   .globe-stage:has(.sg-key:not([hidden])) .globe-hint { display: none; }
   .sg-pop { position: absolute; z-index: 6; width: 250px; border-radius: 14px; overflow: hidden; background: var(--surface, #fff); color: var(--text, #222);
@@ -2484,7 +2489,10 @@ var p=d.head||h,l=d.createElement("link");l.rel="stylesheet";l.href=root+"events
   .hm-status { margin: 8px 0 0; font-size: 11.5px; line-height: 1.4; opacity: .9; min-height: 0; }
   .hm-status:empty { display: none; }
   .hm-status.bad { color: #ffb4a8; opacity: 1; }
-  .hm-collapse { width: 24px; height: 22px; border-radius: 6px; border: none; padding: 0;
+  .hm-status .hm-retry { display: inline-block; margin-top: 6px; padding: 6px 12px; min-height: 32px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.12); color: #fff; font: 600 12px 'Inter', sans-serif; cursor: pointer; }
+  .hm-status .hm-retry:hover { background: rgba(255,255,255,0.24); }
+  .hm-keynote { margin: 6px 0 0; font-size: 10.5px; line-height: 1.35; opacity: .85; }
+  .hm-collapse { width: 32px; height: 32px; margin: -5px -5px -5px 0; border-radius: 8px; border: none; padding: 0;
     background: rgba(88,179,81,0.18); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .hm-collapse::after { content: ""; width: 7px; height: 7px; border: solid currentColor; border-width: 0 2px 2px 0;
     transform: translateY(2px) rotate(-135deg); transition: transform .18s; }
@@ -2551,7 +2559,7 @@ var p=d.head||h,l=d.createElement("link");l.rel="stylesheet";l.href=root+"events
   .sp-info-acts button.on { background: #58b351; border-color: #58b351; color: #0d2a17; }
   .sp-info-acts button[hidden] { display: none; }
   .sp-info-page { margin-left: auto; color: #58b351; font-weight: 600; font-size: 12.5px; text-decoration: underline; text-underline-offset: 2px; }
-  .sp-info-x { position: absolute; top: 9px; right: 9px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer;
+  .sp-info-x { position: absolute; top: 8px; right: 8px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer;
     background: rgba(0,0,0,0.4); color: #fff; font-size: 18px; line-height: 1; }
   .sp-info-x:hover { background: rgba(0,0,0,0.6); }
   .sp-info button:focus-visible, .sp-info a:focus-visible { outline: 2px solid #58b351; outline-offset: 2px; }
@@ -3873,7 +3881,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   .map-legend.area-key { pointer-events: auto; gap: 5px; max-width: min(250px, calc(100% - 20px)); }
   .area-key .ak-head { display: flex; align-items: flex-start; gap: 10px; justify-content: space-between; }
   .area-key .ak-t { font: 600 12px/1.3 'Inter', sans-serif; white-space: normal; }
-  .area-key .ak-x { flex: none; margin: -2px -3px 0 0; padding: 3px 9px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.12);
+  .area-key .ak-x { flex: none; margin: -4px -4px 0 0; padding: 0 11px; min-height: 32px; min-width: 32px; display: inline-flex; align-items: center; gap: 3px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.12);
     color: #fff; font: 600 11px/1.2 'Inter', sans-serif; cursor: pointer; text-shadow: none; }
   .area-key .ak-x:hover { background: rgba(255,255,255,0.26); }
   .area-key .ak-x:focus-visible { outline: 2px solid #9be07c; outline-offset: 2px; }
@@ -3884,6 +3892,9 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   .area-key .ak-note { margin: 0; font: 400 10.5px/1.35 'Inter', sans-serif; opacity: .92; white-space: normal; }
   .area-key .ak-note [hidden] { display: none; }
   @media (max-width: 640px) { .area-key .ak-note .ak-scale-note { display: none; } } /* (a phone: the key stays short) */
+  .area-key .ak-intro b { font-weight: 700; color: #ffd98a; }
+  @media (max-width: 640px) { .area-key #ak-src { display: none; } .area-key .ak-note { font-size: 10px; } } /* (a phone: the source stays on the species page) */
+  .area-key.ak-small .ak-intro { display: none; }
   .globe-stage.area-on #map-legend { display: none !important; }
   .map-legend.area-key.ak-small { right: 54px; padding: 5px 8px; flex-direction: row; align-items: center; gap: 8px; }
   .area-key.ak-small .ak-t, .area-key.ak-small .legend-row, .area-key.ak-small .ak-note { display: none; }
@@ -3893,7 +3904,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   .area-key.ak-small .ak-bar i { width: 14px; }
   /* "How to find it": the snake's own panel over the map, in the map's colours */
   .nm-how-box .nm-how-body { padding: 16px 16px 14px; }
-  .nm-how-box h3 { margin: 0 34px 2px 0; }
+  .nm-how-box h3 { margin: 0 40px 2px 0; }
   .nm-how-box .nm-how-where { margin: 0 0 10px; font-size: 12px; opacity: .85; }
   .nm-how-box .nm-sec { margin: 0 0 9px; padding: 8px 10px; border-radius: 10px; background: rgba(0,0,0,0.18); }
   /* v5.78: the guide is solid (the map's hint, 3D button and the list showed through it on a phone), and its section
@@ -3912,6 +3923,27 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     .globe-stage .sp-info-wrap.nm-how-wrap { position: fixed; inset: auto 0 0 0; z-index: 400; padding: 0; align-items: flex-end; }
     .nm-how-wrap .nm-how-box { width: 100%; max-height: min(52vh, 460px); border-radius: 16px 16px 0 0; }
   }
+  /* v6.20: a phone held sideways: the guide down the right side (a bottom sheet left only a thin strip of map, over the spot it marks) */
+  @media (min-width: 641px) and (max-height: 520px) {
+    .globe-stage .sp-info-wrap.nm-how-wrap { inset: 0 0 0 auto; width: min(380px, 45vw); align-items: stretch; }
+    .nm-how-wrap .nm-how-box { max-height: 100%; height: 100%; border-radius: 16px 0 0 16px; }
+  }
+  /* v6.20: the location question, in the map */
+  .globe-stage .sp-info-wrap.nm-ask-wrap { align-items: flex-start; }
+  .nm-ask .nm-ask-why { margin: 4px 0 10px; line-height: 1.5; }
+  .nm-ask .nm-ask-priv { font-size: 12px; opacity: .88; }
+  .nm-ask-go { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; min-height: 36px; padding: 7px 14px; border-radius: 999px; border: 1px solid #ffd23f; background: rgba(0,0,0,0.2); color: #fff; font: 600 13px 'Inter', sans-serif; cursor: pointer; }
+  .nm-ask-go:hover { background: rgba(255,210,63,0.2); }
+  .nm-ask-go:disabled { opacity: .6; cursor: progress; }
+  .nm-ask-msg { margin: 0 0 9px; padding: 8px 10px; border-radius: 10px; background: rgba(140,40,20,0.28); border: 1px solid rgba(255,170,140,0.35); font-size: 12.5px; line-height: 1.45; }
+  .nm-ask-msg[hidden] { display: none; }
+  .nm-ask-q { width: 100%; box-sizing: border-box; margin-top: 7px; min-height: 36px; padding: 7px 11px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.35); background: rgba(0,0,0,0.22); color: #fff; font: 13px 'Inter', sans-serif; }
+  .nm-ask-q::placeholder { color: rgba(255,255,255,0.65); }
+  .nm-ask-res { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+  .nm-ask-pick { text-align: left; min-height: 34px; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: #fff; font: 13px 'Inter', sans-serif; cursor: pointer; }
+  .nm-ask-pick:hover, .nm-ask-pick:focus-visible { background: rgba(255,255,255,0.18); }
+  .nm-ask-pick b { font-weight: 600; }
+  .nm-ask-none { font-size: 12px; opacity: .85; }
   .nm-how-box .nm-spot-sec { background: rgba(255,210,63,0.12); border: 1px solid rgba(255,210,63,0.45); }
   .nm-how-box .nm-spot-sec b { color: #fff; }
   .nm-spot-go { margin-top: 7px; padding: 6px 12px; border-radius: 999px; border: 1px solid #ffd23f; background: rgba(0,0,0,0.2); color: #fff; font: 600 12px 'Inter', sans-serif; cursor: pointer; }
@@ -9801,7 +9833,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
             <button type="button" id="globe-reset" aria-label="Reset view" title="Reset view: back to the whole world (what you picked, your search and filters stay)">&#8635;</button>
             <button type="button" id="globe-full" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></button>
           </div>
-          <p class="globe-hint">Drag to explore &middot; scroll to zoom &middot; click any country</p>
+          <p class="globe-hint">Drag to explore &middot; scroll to zoom &middot; click any country</p><script>/* v6.20: a touch screen gets touch words from the start (the legend code only reworded it later) */ (function () { var h = document.currentScript.previousElementSibling; if (h && window.matchMedia && matchMedia("(pointer: coarse)").matches) h.innerHTML = "Drag to explore &middot; pinch to zoom &middot; tap a country"; })();</script>
           <div class="map-legend" id="map-legend" hidden>
             <div class="legend-row"><span class="legend-dot" id="legend-dot-low"></span>Fewer recorded species</div>
             <div class="legend-row"><span class="legend-dot" id="legend-dot-high"></span>More recorded species</div>
@@ -9809,9 +9841,10 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
           </div>
           <div class="map-legend area-key" id="area-key" hidden>
             <div class="ak-head"><span class="ak-t" id="ak-title"></span><button type="button" class="ak-x" id="ak-close" aria-label="Hide this snake's area">&times;<span class="ak-xt"> Close</span></button></div>
-            <div class="ak-sw" id="ak-scale"><span>more</span><span class="ak-bar"><i></i><i></i><i></i><i></i></span><span>less</span></div>
+            <div class="ak-sw" id="ak-scale"><span>Core</span><span class="ak-bar"><i></i><i></i><i></i><i></i></span><span>Edge of range</span></div>
             <div class="legend-row" id="ak-flat" hidden><span class="legend-dot"></span>Lives here</div>
-            <p class="ak-note" id="ak-note"><span class="ak-scale-note">Darker: deep inside its range. Lighter: near where its range ends.</span> <span id="ak-src"></span></p>
+            <p class="ak-note" id="ak-note"><span class="ak-scale-note">Darker: deep inside its range. Lighter: near where its range ends.</span> <span class="ak-what">An estimate of where it lives, from range maps and records - not a count of how many snakes live there.</span> <span id="ak-src"></span></p>
+            <p class="ak-note ak-intro" id="ak-intro" hidden></p>
           </div>
         </div>
         <div class="country-panel" id="country-panel" hidden>
@@ -18107,7 +18140,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // it ends (bands along its inland edges - the coast is not an edge of where it lives); a range that
   // is all coast (an island) is one shade.
   // Until the button is pressed again, the key's Close, a click on the empty map or a click on a place.
-  var areaShow = null, areaWant = null, AREA_FILES = {};
+  var areaShow = null, areaWant = null, AREA_FILES = {}, areaLayer = null;
   var AREA_BANDS = [[0.55, 2], [0.32, 1], [0.15, 0]]; // (how far in from the edge each lighter shade reaches, of the range's half-thickness)
   function areaMix(hex, to, k) {
     var c = [1, 3, 5].map(function (i) { return parseInt(hex.slice(i, i + 2), 16); });
@@ -18174,17 +18207,29 @@ window.SL_GEO_READY = new Promise(function (res) {
       fill = new Path2D(); fill.addPath(A.fillP, M);
       edges = A.groups.map(function (g) { var P = new Path2D(); P.addPath(g.P, M); return [P, g.t]; });
     }
-    ctx.save();
-    ctx.fillStyle = sh[A.flat ? 2 : 3]; ctx.fill(fill, "evenodd");
+    // v6.20: painted on a layer of its own, then laid on the map see-through (the land, the satellite
+    // picture, borders and place names stay readable under it), with a crisp line round the range
+    var cvs = ctx.canvas, g = (areaLayer || (areaLayer = document.createElement("canvas")));
+    if (g.width !== cvs.width || g.height !== cvs.height) { g.width = cvs.width; g.height = cvs.height; }
+    var gc = g.getContext("2d");
+    gc.setTransform(1, 0, 0, 1, 0, 0); gc.clearRect(0, 0, g.width, g.height); gc.setTransform(ctx.getTransform());
+    gc.save();
+    gc.fillStyle = sh[A.flat ? 2 : 3]; gc.fill(fill, "evenodd");
     if (!A.flat) {
       // lighter bands along where it ends, inside the range only: smooth, round-cornered
-      ctx.clip(fill, "evenodd");
-      ctx.lineJoin = "round"; ctx.lineCap = "round";
+      gc.clip(fill, "evenodd");
+      gc.lineJoin = "round"; gc.lineCap = "round";
       AREA_BANDS.forEach(function (q) {
-        ctx.strokeStyle = sh[q[1]];
-        edges.forEach(function (e) { ctx.lineWidth = Math.max(0.5, 2 * q[0] * e[1] * px); ctx.stroke(e[0]); });
+        gc.strokeStyle = sh[q[1]];
+        edges.forEach(function (e) { gc.lineWidth = Math.max(0.5, 2 * q[0] * e[1] * px); gc.stroke(e[0]); });
       });
     }
+    gc.restore();
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = window.SL_MAP_SAT ? 0.6 : 0.74; ctx.drawImage(g, 0, 0);
+    ctx.restore();
+    ctx.save();
+    ctx.lineJoin = "round"; ctx.lineWidth = 1.4; ctx.strokeStyle = window.SL_MAP_SAT ? "rgba(255,255,255,0.85)" : sh[3]; ctx.stroke(fill);
     ctx.restore();
     // too small to see at this zoom (a quarter of an island): a dot where it is
     if (b && (b[1] - b[0]) * px < 3 && (b[3] - b[2]) * px < 3) {
@@ -18216,8 +18261,13 @@ window.SL_GEO_READY = new Promise(function (res) {
     var fl = document.getElementById("ak-flat"); fl.hidden = !areaShow.flat; areaKey.querySelector(".ak-scale-note").hidden = areaShow.flat;
     fl.querySelector(".legend-dot").style.background = sh[2];
     // where the outline comes from: an expert range map (GARD), or the places SnakeList records it in
-    document.getElementById("ak-src").textContent = (areaShow.src === "g" ? "Range map: GARD (Roll et al. 2017)." : "Drawn from the places it is recorded in, so it may not live everywhere that is shaded.")
-      + (((window.SL_INVASIVE || {})[areaShow.id] || []).length ? " Places people brought it to are shaded too." : "");
+    document.getElementById("ak-src").textContent = (areaShow.src === "g" ? "Range map: GARD (Roll et al. 2017)." : "Drawn from the places it is recorded in, so it may not live everywhere that is shaded.");
+    // v6.20: introduced places are named, and what "introduced" means is said
+    var inv = (window.SL_INVASIVE || {})[areaShow.id] || [], akI = document.getElementById("ak-intro");
+    if (akI) {
+      akI.hidden = !inv.length;
+      akI.innerHTML = inv.length ? "<b>Introduced</b> (brought by people, not native here): " + inv.map(function (v) { return String(v.note ? v.note + " (" + v.name + ")" : v.name).replace(/[&<>]/g, ""); }).join("; ") + ". Shaded with the rest of its range." : "";
+    }
     placeAreaKey();
   }
   // the key sits where the colour key does - lifted above the species panel when the panel is over the map
@@ -21883,6 +21933,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     '<button type="button" class="hm-toggle hab-toggle" id="hab-toggle" aria-pressed="false" title="Show where the snakes of one habitat live"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V11"></path><path d="M12 11c0-4 3-7 8-7 0 5-3 8-8 7Z"></path><path d="M12 14c0-3.5-2.6-6-7-6 0 4.4 2.6 6.9 7 6Z"></path></svg> <span>Habitats<span class="sg-what" id="hab-what"></span></span></button>' +
     '</div>' +
     '<p class="sg-note" id="sg-note" hidden></p>' +
+    // v6.20: while Sightings is on, the hint pill becomes its key (what a dot is, and what a tap does)
+    '<p class="globe-hint sg-hint" id="sg-hint"><span class="sg-hint-dot" aria-hidden="true"></span>One iNaturalist sighting &middot; ' + (window.matchMedia && matchMedia("(pointer: coarse)").matches ? "tap" : "click") + ' a dot for its photo and details</p>' +
     '<div class="sg-pop" id="sg-pop" hidden role="dialog" aria-label="Observation"></div>' +
     '<div class="layers-wrap"><button type="button" class="layers-btn" id="layers-btn" aria-haspopup="true" aria-expanded="false" title="Map layers">' +
     '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5Z"></path><path d="m2 13 10 5 10-5"></path><path d="m2 17.5 10 5 10-5" opacity=".55"></path></svg></button>' +
@@ -21906,6 +21958,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     '<p class="hm-status" id="hab-status"></p></div>');
   var lmapEl = document.getElementById("lmap"), btnHeat = document.getElementById("hm-toggle"), panel = document.getElementById("hm-panel");
   var pop = document.getElementById("layers-pop"), btnLayers = document.getElementById("layers-btn"), status = document.getElementById("hm-status");
+  status.addEventListener("click", function (e) { if (e.target.closest(".hm-retry")) { e.target.closest(".hm-retry").disabled = true; CH.fallback = false; syncUI(); applyHeat(); } });
   var qIn = document.getElementById("hm-q"), catSel = document.getElementById("hm-cat");
   // ---- Habitats: the checklist's own habitats (Tropical Rainforest, Desert...), each country
   // and state/province shaded by how many of that habitat's snakes are recorded there ----
@@ -22524,7 +22577,13 @@ window.SL_GEO_READY = new Promise(function (res) {
   // either view paints the map: the Species heatmap, or the Habitats view (always "where they live")
   function heatOn() { return !!(st.heat || habOn); }
   function meas() { return habOn ? "live" : st.measure; }
-  function setStatus(t, bad) { var el = habOn ? habStatus : status; el.textContent = t || ""; el.classList.toggle("bad", !!bad); }
+  function setStatus(t, bad, html) { var el = habOn ? habStatus : status; if (html) el.innerHTML = t || ""; else el.textContent = t || ""; el.classList.toggle("bad", !!bad); }
+  // v6.20: a selection put aside when a layer opens (one view at a time) is named, with the way back
+  var putAside = "";
+  function asideNote() {
+    var hs = document.getElementById("heat-search"), cp = document.getElementById("country-panel");
+    if (putAside && ((hs && hs.value.trim()) || (cp && !cp.hidden))) putAside = ""; // (something new was picked since)
+    return putAside ? " " + putAside + " was put aside so this layer covers the whole map - Undo (above the map) brings it back." : ""; }
   // the Habitats view's own colours: the map's green (--map-on), in three shades by how many
   // of the habitat's snakes live in a country - light for a few, the map's own green, then deep
   var HAB_GREEN = ["#8fc47f", "#3f8a3a", "#1f5a24"];
@@ -22777,7 +22836,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       return gridOf(z, t[0], t[1]).then(function (cells) { return { t: t, cells: cells }; }, function (e) { bad = e; return { t: t, cells: [] }; });
     })).then(function (parts) {
       if (my !== CH.token) return;
-      if (bad && parts.every(function (q) { return !q.cells.length; })) { CH.fallback = true; RC.key = ""; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); return; }
+      if (bad && parts.every(function (q) { return !q.cells.length; })) { CH.fallback = true; RC.key = ""; document.getElementById("hm-legend").innerHTML = legendHTML(); window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); return; }
       var world = 256 * Math.pow(2, z), scale = b[2] / world, all = [], mx = 5;
       parts.forEach(function (q) {
         q.cells.forEach(function (c) {
@@ -22828,7 +22887,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     var go = function () {
       gridCache = {}; maxSeen = {}; loaded = 0;
       setStatus(meas() === "obs" && liveOK ? "Loading sightings from iNaturalist…" : "");
-      if (onCanvas() || !map) { CH.on = true; CH.want = ""; CH.fallback = false; RC.key = ""; window.SL_MAP_HEATSTATES && window.SL_MAP_HEATSTATES(); window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); }
+      if (onCanvas() || !map) { CH.on = true; CH.want = ""; CH.fallback = false; document.getElementById("hm-legend").innerHTML = legendHTML(); RC.key = ""; window.SL_MAP_HEATSTATES && window.SL_MAP_HEATSTATES(); window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); }
       else if (meas() !== "obs" || !liveOK) drawRangeLeaflet();
       else { heat = makeHeat().addTo(map); }
     };
@@ -22931,7 +22990,13 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   function rangeStatus(R) {
     var nc = Object.keys(R.counts).length;
-    var note = meas() === "obs" && !liveOK ? " Sightings can't load in this copy of the app" + (window.claude && window.claude.use ? " - open snakelist.com for them." : ".") : "";
+    var note = (meas() === "obs" && !liveOK ? " Sightings can't load in this copy of the app" + (window.claude && window.claude.use ? " - open snakelist.com for them." : ".") : "") + asideNote();
+    // v6.20: Where seen couldn't reach iNaturalist: the map shows where they live instead - said plainly, with Retry
+    // (it used to show the range colours under a "Fewer sightings / More" key)
+    if (meas() === "obs" && liveOK && CH.fallback) {
+      setStatus("Couldn't load sightings from iNaturalist just now, so this shows where these snakes live instead (from SnakeList's range records). <button type=\"button\" class=\"hm-retry\">Try again</button>", true, true);
+      return;
+    }
     if (!R.nsp) { setStatus("None of the checklist's snakes match this filter."); return; }
     var places = window.SL_countPlaces ? window.SL_countPlaces(R.names) : nc + " countries";
     if (R.single) setStatus(nc ? displayName() + (R.gone ? " lived in " : " lives in ") + places + ". Tap a country for its details." + note : "No range on record for this species yet." + note);
@@ -22940,7 +23005,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     // not the habitat's own outline
     else if (habOn && st.hab) setStatus("Habitats layer · " + st.hab + ": the whole ranges of the " + R.nsp.toLocaleString() + (R.nsp === 1 ? " snake" : " snakes") +
       " associated with it, across " + places + " - not the outline of the " + st.hab.toLowerCase() + " itself. Habitats are estimated from where each snake is recorded and what kind of snake it is, not from field surveys. This choice only changes this layer." + note);
-    else setStatus("Heatmap layer · " + (st.q ? displayName() : st.cat !== "all" && CATS[st.cat] ? CATS[st.cat].label : (window.SL_MAPF && window.SL_MAPF.on() ? "the snakes your Filters keep" : "all snakes")) + ": " + R.nsp.toLocaleString() + " species across " + places + ". This choice only changes the heatmap - the search and Filters above stay as they are." + note);
+    else setStatus("Heatmap layer · " + (st.q ? displayName() : st.cat !== "all" && CATS[st.cat] ? CATS[st.cat].label : (window.SL_MAPF && window.SL_MAPF.on() ? "the snakes your Filters keep" : "all snakes")) + ": " + R.nsp.toLocaleString() + " species across " + places + "." + (putAside ? "" : " This choice only changes the heatmap - the search and Filters above stay as they are.") + note);
   }
   // the two "nothing here" colours: snakes live there but none of these (a light grey), or the place has no snakes on record at all (a plain neutral grey, lighter
   // in the day theme, darker at night)
@@ -22963,8 +23028,9 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   // the legend matches what's on the map
   function legendHTML() {
-    if (st.measure === "obs" && liveOK) return '<div class="hm-bar"></div><div class="hm-ends"><span>Fewer</span><span>sightings</span><span>More</span></div>' +
-      '<div class="hm-key"><span class="hm-hatch"></span>Too few records to tell</div><div class="hm-key"><span class="hm-blank"></span>No records yet - not the same as no snakes</div>';
+    if (st.measure === "obs" && liveOK && !CH.fallback) return '<div class="hm-bar"></div><div class="hm-ends"><span>Fewer</span><span>sightings</span><span>More</span></div>' +
+      '<div class="hm-key"><span class="hm-hatch"></span>Too few records to tell</div><div class="hm-key"><span class="hm-blank"></span>No records yet - not the same as no snakes</div>' +
+      '<p class="hm-keynote">Relative numbers of iNaturalist records - where people looked and posted, not how many snakes live there.</p>';
     var keys = '<div class="hm-key"><span class="hm-sw hm-none"></span>' + (st.q ? "Doesn't live here" : "None of these snakes live here") + '</div>' +
       '<div class="hm-key"><span class="hm-sw hm-nodata"></span>No species recorded</div>';
     if (st.q) return '<div class="hm-bar"></div><div class="hm-ends"><span>In a few parts</span><span>All over the country</span></div>' + keys;
@@ -23372,8 +23438,11 @@ window.SL_GEO_READY = new Promise(function (res) {
   var sgLay = { cv: null, key: "", b0: 0, b1: 0, pad: 0 }, sgSprites = {};
   function sgSprite(R, dpr) {
     var k = R + "|" + dpr; if (sgSprites[k]) return sgSprites[k];
-    var S = Math.ceil((R + 1.5) * dpr) * 2 + 2, c = document.createElement("canvas"); c.width = c.height = S;
-    var g = c.getContext("2d"); g.beginPath(); g.arc(S / 2, S / 2, R * dpr, 0, Math.PI * 2); g.fillStyle = SG_GREEN; g.fill(); g.lineWidth = 1.3 * dpr; g.strokeStyle = SG_EDGE; g.stroke();
+    var S = Math.ceil((R + 2.6) * dpr) * 2 + 2, c = document.createElement("canvas"); c.width = c.height = S;
+    var g = c.getContext("2d");
+    // v6.20: a thin light halo outside the dark edge, so a dot stays clear on the green range shading and heatmap
+    g.beginPath(); g.arc(S / 2, S / 2, (R + 1.4) * dpr, 0, Math.PI * 2); g.lineWidth = 1.2 * dpr; g.strokeStyle = "rgba(255,255,255,0.85)"; g.stroke();
+    g.beginPath(); g.arc(S / 2, S / 2, R * dpr, 0, Math.PI * 2); g.fillStyle = SG_GREEN; g.fill(); g.lineWidth = 1.3 * dpr; g.strokeStyle = SG_EDGE; g.stroke();
     return (sgSprites[k] = c);
   }
   function sgLayerDraw(b, w, h, dpr, R) {
@@ -23940,7 +24009,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     st.heat = !st.heat;
     if (!st.heat) heatByStyle = false;
     if (!st.heat) document.getElementById("globe-stage").classList.remove("heat-only");
-    if (st.heat) { habOn = false; window.SL_MAP_CLEAN && window.SL_MAP_CLEAN(); } // one view at a time, from a clean map
+    if (st.heat) { habOn = false; noteAside(); window.SL_MAP_CLEAN && window.SL_MAP_CLEAN(); } // one view at a time, from a clean map
+    else putAside = "";
     save(); syncUI();
     if (!st.heat) { clearHeat(); return; }
     // the heatmap goes on whichever map is showing - it never swaps the map
@@ -23964,7 +24034,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // a habitat is about where its snakes live, so it always shows the range map, not sightings
   // The Habitats view: its own panel, never at the same time as the heatmap
   function habOpen() {
-    if (!habOn) { window.SL_MAP_CLEAN && window.SL_MAP_CLEAN(); } // a clean map: no "See states" left over
+    if (!habOn) { noteAside(); window.SL_MAP_CLEAN && window.SL_MAP_CLEAN(); } // a clean map: no "See states" left over
     habOn = true; st.heat = false;
     habPanel.classList.remove("collapsed"); (function (hb) { if (hb) { hb.setAttribute("aria-expanded", "true"); hb.setAttribute("aria-label", "Hide habitats"); } })(document.getElementById("hab-collapse"));
     document.getElementById("hab-collapse").setAttribute("aria-expanded", "true");
@@ -23979,8 +24049,14 @@ window.SL_GEO_READY = new Promise(function (res) {
     var on = habList.querySelector(".hab-opt.on"); if (on) on.scrollIntoView({ block: "nearest" });
     return !!h;
   }
+  // what the clean map is about to put aside (a search or a picked place), so the layer can say so
+  function noteAside() {
+    var cp = document.getElementById("country-panel"), t = document.getElementById("cp-title"), hs = document.getElementById("heat-search");
+    var what = cp && !cp.hidden && t && t.textContent ? t.textContent : hs && hs.value.trim() ? hs.value.trim() : "";
+    putAside = what ? "Your pick (" + what.slice(0, 60) + ")" : "";
+  }
   habBtn.addEventListener("click", function () {
-    if (habOn) { habOn = false; save(); syncUI(); clearHeat(); return; }
+    if (habOn) { habOn = false; putAside = ""; save(); syncUI(); clearHeat(); return; }
     habOpen(); save(); syncUI(); applyHeat();
     var on = habList.querySelector(".hab-opt.on"); if (on) on.scrollIntoView({ block: "nearest" });
   });
@@ -28370,9 +28446,18 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   function user() { try { return JSON.parse(lsGet("sl-google") || "null"); } catch (e) { return null; } }
   function who(u) { return u ? String(u.email || u.name || "").toLowerCase() : ""; }
   // this account's answer (an answer saved by someone else on this device doesn't count)
-  function rec() { var u = user(), r = null; if (!u) return null; try { r = JSON.parse(lsGet(KEY) || "null"); } catch (e) {} return r && r.who === who(u) ? r : null; }
+  function acctRec() { var u = user(), r = null; if (!u) return null; try { r = JSON.parse(lsGet(KEY) || "null"); } catch (e) {} return r && r.who === who(u) ? r : null; }
+  // v6.20: See near me works without an account too: a position (or a place you chose) kept for this visit
+  // only, in memory - nothing saved. Signed in, the account's own answer is used, as before.
+  var visit = null;
+  function okRec(r) { return !!(r && r.ans === "yes" && isFinite(r.lat) && isFinite(r.lon)); }
+  function rec() { var r = acctRec(); return okRec(r) ? r : visit || r; }
   function save(r) { var u = user(); if (!u) return; r.who = who(u); r.t = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(r)); } catch (e) {} paint(); }
-  function on() { var r = rec(); return !!(r && r.ans === "yes" && isFinite(r.lat) && isFinite(r.lon)); }
+  function on() { return okRec(rec()); }
+  function setPos(lat, lon, src, place) {
+    var r = { ans: "yes", lat: r1(lat), lon: r1(lon), src: src || "gps" }; if (place) r.place = place;
+    if (user()) { visit = null; save(r); } else { visit = r; paint(); }
+  }
   var r1 = function (x) { return Math.round(x * 10) / 10; };
   function locate(cb) {
     if (!navigator.geolocation) { save({ ans: "denied" }); cb(false, "This browser can't share its location, so See near me can't work here."); return; }
@@ -28419,7 +28504,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     locate(function (ok, msg) { tell(msg); });
   });
   function check() {
-    if (bar.hidden) { if (!asked && user() && !rec() && !busy()) showBar(); }
+    if (bar.hidden) { if (!asked && user() && !acctRec() && !busy()) showBar(); }
     else if (!user()) closeBar(); // signed out while it was showing
     paint();
   }
@@ -28430,7 +28515,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     if (btn && btn.parentNode === t && btn.nextElementSibling === fs) return true;
     if (!btn) {
       btn = document.createElement("button"); btn.type = "button"; btn.className = "nm-toggle"; btn.id = "nm-toggle"; btn.hidden = true;
-      btn.setAttribute("aria-label", "See near me"); btn.setAttribute("aria-pressed", "false");
+      btn.setAttribute("aria-label", "See near me"); btn.setAttribute("aria-pressed", "false"); btn.title = "See near me: the snakes recorded around you";
       btn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path><circle cx="12" cy="12" r="7"></circle></svg>';
       btn.addEventListener("click", seeNear);
     }
@@ -28716,7 +28801,12 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   }
   // the spot on the map (drawn by SL_OVERLAY_DRAW below) and the map moved so it is in view
   var spotOn = null, spotEl = null;
-  function spotLabel(o) { return o.kind === "here" ? "Look around here" : "Best spot near you"; }
+  // v6.20: the label names the snake (it stays on the map after the guide is closed)
+  function spotLabel(o) {
+    var sp = lastList.filter(function (x) { return x.id === howId; })[0], nm = sp && sp.name ? sp.name : "";
+    if (nm.length > 28) nm = "";
+    return o.kind === "here" ? "Look around here" + (nm ? " for the " + nm : "") : "Best spot" + (nm ? " for the " + nm : " near you");
+  }
   function showSpot(o) {
     var M = window.SL_NEARME_MAP, r = rec(); if (!M || !r) return;
     spotOn = o;
@@ -28895,9 +28985,69 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     var T = timeCtx(r.lat, r.lon, new Date()), key = lastList.map(function (sp) { return timeStatus(sp, T).t; }).join("|");
     if (key !== lastTime.key) relist(); else { lastTime.T = T; timeBar(T, lastTime.info); }
   }, 60000);
+  // ---- v6.20: asking for your location, in the map: why it's needed, and a place to choose instead ----
+  var askWrap = null, askBack = null;
+  function askMsg(t) { var m = askWrap && askWrap.querySelector(".nm-ask-msg"); if (m) { m.textContent = t || ""; m.hidden = !t; } }
+  function askOpen(msg) {
+    if (!stage) return;
+    if (!askWrap) {
+      askWrap = document.createElement("div"); askWrap.className = "sp-info-wrap nm-how-wrap nm-ask-wrap"; askWrap.hidden = true;
+      askWrap.innerHTML = '<div class="sp-info nm-how-box nm-ask" role="dialog" aria-labelledby="nm-ask-h" tabindex="-1"><button type="button" class="sp-info-x" aria-label="Close">&times;</button><div class="nm-how-body">' +
+        '<h3 id="nm-ask-h">See the snakes near you</h3>' +
+        '<p class="nm-ask-why">SnakeList needs a rough idea of where you are to list the snakes recorded around you, say which are likely out right now and suggest where to look.</p>' +
+        '<div class="nm-sec"><p class="sp-info-h">Use your location</p><p class="nm-ask-priv"></p><button type="button" class="nm-ask-go"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path><circle cx="12" cy="12" r="7"></circle></svg>Use my location</button></div>' +
+        '<p class="nm-ask-msg" role="status" hidden></p>' +
+        '<div class="nm-sec"><p class="sp-info-h">Or choose a place instead</p><p>No location needed: type a town or city.</p>' +
+        '<input type="search" class="nm-ask-q" placeholder="Town or city&hellip;" autocomplete="off" aria-label="Choose a town or city"><div class="nm-ask-res" role="list"></div></div>' +
+        '</div></div>';
+      stage.appendChild(askWrap);
+      askWrap.addEventListener("click", function (e) {
+        if (e.target === askWrap || e.target.closest(".sp-info-x")) { askClose(); return; }
+        if (e.target.closest(".nm-ask-go")) { askLocate(e.target.closest(".nm-ask-go")); return; }
+        var pk = e.target.closest(".nm-ask-pick");
+        if (pk) { setPos(+pk.getAttribute("data-lat"), +pk.getAttribute("data-lon"), "place", pk.getAttribute("data-name")); askClose(); seeNear(); }
+      });
+      askWrap.querySelector(".nm-ask-q").addEventListener("input", function () { askFind(this.value); });
+      ["wheel", "pointerdown", "pointermove", "touchstart", "dblclick"].forEach(function (t) { askWrap.addEventListener(t, function (e) { e.stopPropagation(); }, { passive: true }); });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && askWrap && !askWrap.hidden) { e.stopPropagation(); askClose(); } }, true);
+    }
+    askWrap.querySelector(".nm-ask-priv").textContent = user()
+      ? "It is rounded to about 10 km and kept on this device for your account - you can turn it off any time. It is only sent anywhere (a rough area of about 100 km, to iNaturalist) when you open How to find it."
+      : "It is rounded to about 10 km and used only for this visit - nothing is saved. It is only sent anywhere (a rough area of about 100 km, to iNaturalist) when you open How to find it.";
+    var go = askWrap.querySelector(".nm-ask-go"); go.disabled = false;
+    askMsg(msg || ""); askFind(askWrap.querySelector(".nm-ask-q").value);
+    askBack = document.activeElement; askWrap.hidden = false;
+    go.focus({ preventScroll: true });
+    mapIntoView();
+  }
+  function askClose() { if (!askWrap || askWrap.hidden) return; askWrap.hidden = true; if (askBack && askBack.focus && document.contains(askBack)) askBack.focus({ preventScroll: true }); }
+  function plain(t) { t = String(t || "").toLowerCase(); return t.normalize ? t.normalize("NFD").replace(/[\u0300-\u036f]/g, "") : t; }
+  function askFind(q) {
+    var res = askWrap.querySelector(".nm-ask-res"), v = plain(String(q || "").trim()), C = window.SL_CITIES || [];
+    if (v.length < 2) { res.innerHTML = ""; return; }
+    var hits = [];
+    for (var i = 0; i < C.length && hits.length < 40; i++) { var n = plain(C[i][0]); if (n.indexOf(v) === 0) hits.push([0, i]); else if (n.indexOf(" " + v) > -1) hits.push([1, i]); }
+    hits.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+    setTimeout(function () { if (res.firstChild && res.scrollIntoView) res.scrollIntoView({ block: "nearest" }); }, 0);
+    res.innerHTML = hits.length ? hits.slice(0, 6).map(function (h) { var c = C[h[1]]; return '<button type="button" class="nm-ask-pick" role="listitem" data-lat="' + c[2] + '" data-lon="' + c[3] + '" data-name="' + esc(c[0] + ", " + c[1]) + '"><b>' + esc(c[0]) + "</b> " + esc(c[1]) + "</button>"; }).join("")
+      : '<p class="nm-ask-none">No town or city by that name in SnakeList - try a bigger place nearby.</p>';
+  }
+  function askLocate(b) {
+    if (!navigator.geolocation) { askMsg("This browser can't share its location. Choose a place below instead."); return; }
+    b.disabled = true; askMsg("Finding where you are... (your browser may ask you first)");
+    navigator.geolocation.getCurrentPosition(function (p) {
+      b.disabled = false; setPos(p.coords.latitude, p.coords.longitude, "gps"); askClose(); seeNear();
+    }, function (e) {
+      b.disabled = false;
+      askMsg(e && e.code === 1 ? "Location is blocked for SnakeList in this browser. To use it, allow location for this site in your browser's settings and try again - or choose a place below."
+        : "Your device couldn't find where you are just now (no signal, or it took too long). Try again in a moment, or choose a place below.");
+    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
+  }
   // ---- See near me ----
   function seeNear() {
-    var r = rec(), M = window.SL_NEARME_MAP; if (!r || !M || !on()) return;
+    var r = rec(), M = window.SL_NEARME_MAP;
+    if (!on()) { if (btn && btn.classList.contains("on")) { stopNear(); return; } askOpen(); return; } // v6.20: say why, then ask (or choose a place)
+    if (!M) return;
     // a second tap: near me stops showing (the list, your spot and the guide go; your location setting stays)
     if (btn.classList.contains("on") && dotOn) { stopNear(); return; }
     setOn(true); dotOn = true;
@@ -28946,7 +29096,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     if (o) o.addEventListener("click", function (e) { e.stopPropagation(); turnOff(); });
   }
   function stopNear() { dotOn = false; setOn(false); howClose(); clearSpot(); if (window.SL_NEARME_MAP) window.SL_NEARME_MAP.hide(); if (window.SL_MAP_REDRAW) window.SL_MAP_REDRAW(); }
-  function turnOff() { save({ ans: "no" }); stopNear(); }
+  function turnOff() { if (okRec(acctRec())) save({ ans: "no" }); visit = null; stopNear(); paint(); }
   // the panel closed: near me is off (your spot goes with it; tap the button to see it again)
   var cpClose = document.getElementById("cp-close");
   if (cpClose) cpClose.addEventListener("click", function () { if (btn && btn.classList.contains("on")) { dotOn = false; setOn(false); howClose(); clearSpot(); if (window.SL_MAP_REDRAW) window.SL_MAP_REDRAW(); } });
@@ -28969,6 +29119,9 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
         spotEl.style.left = (cr.left - sr.left - stage.clientLeft + stage.scrollLeft + sx) + "px";
         spotEl.style.top = (cr.top - sr.top - stage.clientTop + stage.scrollTop + sy) + "px";
         spotEl.hidden = sx < -10 || sy < -10 || sx > w + 10 || sy > h + 10;
+        // v6.20: its name tag stays inside the map near an edge (it was cut off at the side)
+        var lb = spotEl.querySelector(".nm-spot-lbl");
+        if (lb && !spotEl.hidden) { var lw = lb.offsetWidth, sw = stage.clientWidth, x0 = parseFloat(spotEl.style.left) || 0, left = Math.max(6, Math.min(sw - lw - 6, x0 - lw / 2)); lb.style.transform = "translateX(" + Math.round(left - x0) + "px)"; }
       }
     } else if (spotEl) spotEl.hidden = true;
     ctx.save();
@@ -28990,7 +29143,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   var last = "";
   function paint() {
     var u = user(), yes = on(), k = (u ? who(u) : "") + "|" + yes;
-    if (btn) { btn.hidden = !(u && yes); if (btn.hidden) { setOn(false); dotOn = false; } }
+    if (btn) { btn.hidden = false; if (!yes && dotOn) { dotOn = false; setOn(false); } } // v6.20: for everyone (it asks first)
     if (!acct) return; // (the map button can be made before the account row below exists)
     acct.hidden = !u;
     if (k === last) return; last = k;
@@ -29003,7 +29156,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
   setInterval(check, 1500);
   setTimeout(check, 800);
   window.SL_NEARME = { share: function (want, cb) { cb = cb || function () {}; if (!user()) { cb(false, "Sign in first - your location answer is kept per account."); return; } if (want) locate(cb); else { save({ ans: "no" }); if (typeof stopNear === "function") try { stopNear(); } catch (e) {} cb(false, "Location sharing is off."); } }, // v6.11: Settings
-    sharing: function () { return on(); }, signedIn: function () { return !!user(); }, rec: rec, check: check, see: seeNear, how: howOpen, time: function () { return lastTime; }, spot: function () { return spotOn; }, guide: function (id) { var sp = lastList.filter(function (x) { return x.id === id; })[0]; var r = rec(); return sp ? guide(sp, lastFind || {}, r ? r.lat : 0) : null; } }; // (for the tests)
+    sharing: function () { return on(); }, signedIn: function () { return !!user(); }, rec: rec, ask: askOpen, check: check, see: seeNear, how: howOpen, time: function () { return lastTime; }, spot: function () { return spotOn; }, guide: function (id) { var sp = lastList.filter(function (x) { return x.id === id; })[0]; var r = rec(); return sp ? guide(sp, lastFind || {}, r ? r.lat : 0) : null; } }; // (for the tests)
 })();
 </script>
 <!-- ==== See near me - END ========================================================================== -->

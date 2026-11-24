@@ -140,7 +140,7 @@ async function run(theme, phone) {
     ok(!(await has(-84.3, 30.4)) && !(await has(-81.4, 28.5)) && !(await has(-80.2, 26.7 + 3)), 'not north Florida, Orlando or the Panhandle');
     ok(await has(101, 23) && await has(100.5, 15) && await has(110.5, -7.3), 'native range in Asia (Yunnan, Thailand, Java)');
     ok(!(await has(77.2, 28.6)) && !(await has(80.5, 7.5)), 'not Delhi or Sri Lanka');
-    ok(await p.evaluate(() => !document.getElementById('ak-intro') && !document.getElementById('ak-note').hidden), 'no separate brought-by-people colour; the key explains the shading');
+    ok(await p.evaluate(() => !document.querySelector('#ak-intro .legend-dot, #ak-intro i') && !document.getElementById('ak-intro').hidden && /Introduced/.test(document.getElementById('ak-intro').textContent) && /Florida/.test(document.getElementById('ak-intro').textContent) && !document.getElementById('ak-note').hidden), 'no separate brought-by-people colour; the key names where it was introduced (text, no swatch)');
     await shotMap('3-florida-burmese-python');
     await p.click('#ak-close'); await p.waitForTimeout(300);
   }
