@@ -24809,6 +24809,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   });
   if (sq) sq.addEventListener("input", function () {
     clearTimeout(sqT);
+    if (window.__slTourDemo) return; // (v6.28: the tutorial's "King Cobra" example isn't something you searched for)
     sqT = setTimeout(function () { var v = sq.value.trim().toLowerCase(); if (v.length >= 3 && allowed()) { bump(P.q, v, 1); note(); } }, 1200);
   });
   function top(map) { var t = 0; for (var k in map) t += map[k]; return t || 1; }
@@ -30020,6 +30021,7 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
    Same box, ring and colours as before; a progress bar, Back, a close x, a photo on the welcome,
    choice buttons, and a bottom sheet on phones. */
 .tour-callout { padding: 16px 18px 16px; outline: none; }
+.tour-callout [hidden] { display: none !important; }
 .tour-callout .tour-top { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; min-height: 26px; }
 .tour-callout .tour-top .tour-step { margin: 0; padding-right: 0; flex: 1 1 auto; min-width: 0; }
 .tour-callout .tour-restart { position: static !important; flex: 0 0 auto; }
@@ -30168,7 +30170,8 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
     "quiz-levels": ["#quiz-levels", "#quiz-panel"], "cam-panel": [".cam-card", "#cam-panel"], "cam-loc": ["#cam-loc"], "cam-shot": ["#cam-shot"],
     "cabin-stage": ["#xm-cabin .xc-stage", "#xm-cabin"], "events-banner": ["#sl-ev-banner"]
   };
-  function firstCard() { var cs = D.querySelectorAll("#grid .card"); for (var k = 0; k < cs.length; k++) if (cs[k].offsetParent && getComputedStyle(cs[k]).display !== "none") return cs[k]; return null; }
+  // the card shown first on screen (cards are put in order with CSS, so not always the first in the page)
+  function firstCard() { var cs = D.querySelectorAll("#grid .card"), best = null, bt = 1e9, bl = 1e9; for (var k = 0; k < cs.length; k++) { if (!cs[k].offsetParent) continue; var r = cs[k].getBoundingClientRect(); if (!r.height) continue; if (r.top < bt - 2 || (Math.abs(r.top - bt) <= 2 && r.left < bl)) { best = cs[k]; bt = r.top; bl = r.left; } } return best; }
   var CARD = { card: "", "card-name": ".card-name", "card-seen": ".seen-btn", "card-wish": ".wish-btn, .wish-row", "card-follow": ".follow-btn", "card-3d": ".td-card-btn", "card-info": ".map-btn", "card-tags": ".card-tags" };
   function find(name) {
     if (!name) return null;
@@ -30225,7 +30228,7 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
     follow: { stage: 2, target: "card-follow", route: "guide", title: "Following", text: "The bell follows a snake. Followed snakes are in the Following tab, with news about them - facts and recent sightings - and a note when you open SnakeList." },
     // stage 4
     "map-intro": { stage: 3, target: "map-stage", route: "map", resetSearch: true, fallback: "center", title: "The map",
-      text: "The world map of snakes. Each country is coloured by how many species are recorded there - the key shows fewer to more. {Tap} any country to see the snakes that live there." },
+      text: "The world map of snakes. {Tap} any country to see the snakes recorded there, or search above the map for a snake, a family or a country to see where they live." },
     "map-move": { stage: 3, target: "map-zoom", route: "map", title: "Moving around", text: "Drag to move and {zoom} to zoom in - or use + and −. ↻ goes back to the whole world, and the last button makes the map fill the screen." },
     "map-country": { stage: 3, target: "map-stage", route: "map", title: "A country and Show colours",
       text: "A country's panel lists its snakes and links to its own page. Show colours on a snake colours every place where it lives: darker deep inside its range, lighter near the edge. It's an estimate from range maps and records, so treat the edges as a guide." },
@@ -30311,7 +30314,7 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
 
   // ---------- the King Cobra search, put back afterwards ----------
   function searchEl() { return $("search"); }
-  function setSearch(v) { var s = searchEl(); if (!s || s.value === v) return; s.value = v; s.dispatchEvent(new Event("input")); }
+  function setSearch(v) { var s = searchEl(); if (!s || s.value === v) return; s.value = v; W.__slTourDemo = true; try { s.dispatchEvent(new Event("input")); } finally { W.__slTourDemo = false; } }
   function resetSearch() { if (cur && cur.orig && cur.orig.touched) { setSearch(cur.orig.search); cur.orig.touched = false; var s = searchEl(); if (s && D.activeElement === s) s.blur(); } }
   var opened = []; // filter sections the tour opened
   function closeDetails() { opened.forEach(function (d) { if (d.open) { var s = d.querySelector("summary"); if (s) s.click(); else d.open = false; } }); opened = []; }
@@ -30475,7 +30478,15 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
     if (!target) { placeCenter(st.big || st.place === "center"); if (!follow) focusBox(); return; }
     if (follow) { placeAt(target, st); return; }
     placeAt(target, st); // measure the box at its size first
-    bring(target, function () { if (cur && cur.list[cur.i] === st) { var t2 = find(st.target) || target; placeAt(t2, st); focusBox(); } });
+    bring(target, function () { if (cur && cur.list[cur.i] === st) { var t2 = find(st.target) || target; placeAt(t2, st); watch(t2); focusBox(); } });
+  }
+  // the ring and the box follow the target if it changes size or moves (a tab still settling, a map growing...)
+  var ro = null, roT = [];
+  function watch(t) {
+    if (ro) ro.disconnect(); roT.forEach(clearTimeout); roT = [];
+    var st = cur && cur.list[cur.i], again = function () { if (cur && cur.list[cur.i] === st && running()) show(true); };
+    if (W.ResizeObserver) { ro = new ResizeObserver(function () { requestAnimationFrame(again); }); ro.observe(t); ro.observe(D.body); }
+    roT = [350, 900, 1800].map(function (ms) { return setTimeout(again, ms); });
   }
   function announce(st) {
     var t = typeof st.text === "function" ? st.text() : st.text;
@@ -30558,6 +30569,7 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
     var p = prog();
     if (completed) { p.done[c.g] = 1; if (p.cur && p.cur.g === c.g) delete p.cur; }
     saveProg(p);
+    if (ro) { ro.disconnect(); ro = null; }
     cur = null; layer.hidden = true; de.classList.remove("sl-tour-on"); callout.removeAttribute("data-step");
     autoPending = false; markSeen();
     if (c.auto) setTimeout(function () { if (W.SL_showCookies) W.SL_showCookies(); }, 600); // the cookie question, if it wasn't answered with the level choice
@@ -30686,7 +30698,7 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
         var foot = panel.querySelector(".sl-sfoot"), body = panel.querySelector(".sl-pbody") || panel;
         if (foot && foot.parentNode) foot.parentNode.insertBefore(sec, foot); else body.appendChild(sec);
       }
-      var old = $("ss-tour"); if (old) { var row = old.closest(".sl-srow"); if (row) row.hidden = true; }
+      var old = $("ss-tour"); if (old) { var row = old.closest(".sl-srow"); if (row) row.style.display = "none"; } // (Tutorials & help below replaces the old Restart row)
     }
     sec.innerHTML = (slot ? "" : '<h3>Tutorials &amp; help</h3>') + helpHtml();
     if (!sec.__th) {
