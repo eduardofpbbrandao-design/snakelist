@@ -37,7 +37,19 @@ and light): session scratchpad `batch103/3d/`.
 eye size and place, cheeks, loreal hollow, crown, brow, upturned snout, mouth-line curve. A hand-set depth is met both ways
 (the puff adder's and Gaboon viper's heads are now flatter than their group's; tiger snake, ball python and green tree
 python deeper). The coral snakes (Micrurus fulvius, M. tener, Micruroides) no longer have their red belly colour painted
-on their lip scales: the snout is black, as in the photos.
+on their lip scales.
+
+**Snout tip colour (`patternData`).** The rounded snout tip is painted as one smooth field (to stop markings bunching into
+a star there). It took the body's plain dorsal colour, so every snake whose head is coloured differently had a wrong
+snout: the eastern coral snake's black snout was red, the banded krait's black snout yellow, the inland taipan's dark
+snout pale. It now takes the colours the head has just behind the tip (the average of the top, the sides and the lips of
+that row).
+
+**Scale rows (`ROWS_GENUS`).** 1,299 models of 80 genera had no row count and took their family's: the dwarf boas
+(Tropidophis) a python's 71 rows of tiny scales, thread snakes the 20 of other blind snakes. They now have their genus's
+usual mid-body count (dwarf boas 25, thread snakes 14, Atractaspis 23, Leptodeira 21...). The scales follow the body's
+curve (the scale texture runs along the body's own length and round its girth), and the change from belly plates to
+dorsal scales is at each family's `aV`, as before.
 
 **Mouth line (`lipBend` in `buildHeadSkin`).** The lips are no longer a straight cut: the line dips a little under the eye
 and rises again to the corner of the mouth (`head.smile`, by group: 0.08 mambas, 0.05-0.06 colubrids and vipers, 0.02 sea
