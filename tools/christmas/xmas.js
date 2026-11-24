@@ -36,6 +36,14 @@
     var e = null, cs = g.getElementsByTagName("circle");
     for (var i = 0; i < cs.length; i++) if (/sl-eye/.test(cs[i].getAttribute("fill") || "")) { e = cs[i]; break; }
     if (!e) return false;
+    // the hat's gradients and filters: in a little drawing of their own, straight in <body>. Inside #mark-snake (or
+    // anywhere in the app's root, which is not drawn during the opening) the <use> copies could not reach them until
+    // the page restyled itself, a few seconds in - the hat showed as a bare outline over the opening.
+    if (ART.hatDefs && !D.getElementById("xmh-r") && D.body) {
+      var ds = D.createElementNS(NS, "svg"); ds.setAttribute("class", "xm-defs"); ds.setAttribute("aria-hidden", "true");
+      ds.setAttribute("style", "position:absolute;left:0;top:0;width:0;height:0;overflow:hidden;pointer-events:none");
+      ds.innerHTML = "<defs>" + ART.hatDefs + "</defs>"; D.body.appendChild(ds);
+    }
     var t = D.createElementNS(NS, "g"); t.setAttribute("style", "opacity:var(--xm-hat-o,1)"); t.innerHTML = ART.hat; e.parentNode.appendChild(t);
     if (ART.ssnow) { var s = D.createElementNS(NS, "path"); s.setAttribute("d", ART.ssnow); s.setAttribute("class", "xm-ssnow"); s.setAttribute("fill", "#fff"); s.setAttribute("style", "opacity:var(--xm-hat-o,1)"); g.appendChild(s); }
     return true;
@@ -195,6 +203,8 @@
     var u = im.currentSrc || im.src || ""; u = u.split(/[?#]/)[0].split("/").pop();
     return u.replace(/\.(webp|jpe?g|png|avif)$/i, "").replace(/-\d+w?$/, "");
   }
+  // the photo's own load, caught however early it comes (load does not bubble: listened for on the way down)
+  D.addEventListener("load", function (e) { var t = e.target; if (t && t.tagName === "IMG" && t.closest && t.closest("#sl-hero .hero-media")) placePhotoHat(); }, true);
   function placePhotoHat() {
     var hero = D.getElementById("sl-hero"); if (!hero || !ART.hatSvg) return;
     var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (!im) return;
@@ -215,9 +225,13 @@
     sv.style.transformOrigin = (w * .72) + "px " + (w * .84) + "px";
     sv.style.transform = "rotate(" + (P.a || 0) + "deg)" + (P.flip ? " scaleX(-1)" : "");
   }
+  // wired the moment the photo is in the page (from dressCover, while the page is still loading), so the hat is
+  // placed as soon as the photo has its size - before the opening dissolves into it, never popping in afterwards
+  var phIm = null;
   function photoHat() {
     var hero = D.getElementById("sl-hero"); if (!hero) return;
-    var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (!im) return;
+    var im = hero.querySelector(".hero-media img:not(.hero-fill)"); if (!im || phIm === im) return;
+    phIm = im;
     im.addEventListener("load", placePhotoHat);
     new MutationObserver(placePhotoHat).observe(im, { attributes: true, attributeFilter: ["src", "srcset", "style", "class", "data-photo-id"] });
     if ("ResizeObserver" in window) new ResizeObserver(placePhotoHat).observe(im);
@@ -739,7 +753,7 @@
   /* the cover and the logo are dressed the moment they arrive, while the (large) page is still loading */
   function dressCover() {
     var hat = XM.hat();
-    if (XM.kind === "xm-app") { decorate(D.getElementById("intro"), true); decorate(D.getElementById("sl-hero"), true); kick(); stockings(); }
+    if (XM.kind === "xm-app") { decorate(D.getElementById("intro"), true); decorate(D.getElementById("sl-hero"), true); kick(); stockings(); photoHat(); }
     icons();
     return hat && (XM.kind !== "xm-app" || D.getElementById("sl-hero"));
   }

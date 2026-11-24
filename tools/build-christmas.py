@@ -100,8 +100,12 @@ def write_art():
     h = art.LOGO_HAT
     data = {
         "bulbs": bulbs,
-        "hat": art.hat_at(h["cx"], h["cy"], h["width"], h["angle"]),
-        "hatSvg": art.hat_at(0, 0, 100, 0),
+        # the logo's hat goes into #mark-snake (drawn through <use> copies); its gradients and filters go into the
+        # page's top-level <defs> (hatDefs) - inside the copied group they did not resolve until late in the opening
+        "hat": art.hat_at(h["cx"], h["cy"], h["width"], h["angle"], defs=False),
+        "hatDefs": art._hat_defs("xmh"),
+        # the photo hat: its own ids (never the same as the logo hat's)
+        "hatSvg": art.hat_at(0, 0, 100, 0, prefix="xmp"),
         "ssnow": art.logo_snow(mark_body) if mark_body else "",
         "stocking": art.STOCKING,
         "hatMini": art.hat_at(0, 0, 100, 0, prefix="xmi", detail=False),
