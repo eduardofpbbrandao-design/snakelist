@@ -2231,7 +2231,7 @@ export function create(V) {
       st.regs.forEach((r) => { r.el.remove(); r.dot.remove(); }); st.regs = [];
       const F = V.info.F, L = F.L, svl = st.data.svl;
       for (const [k, name, x] of [['head', 'Head', F.Hl * 0.5], ['ribs', 'Ribs', svl * 0.2], ['body', 'Body', svl * 0.55], ['tail', 'Tail', (svl + L) / 2]]) {
-        const lb = mkLabel(name, () => seeMore(k)); lb.region = k; lb.anchor = () => rig.point(x, 0, F.Hh(clamp(x, 0, L)) * 0.8); st.regs.push(lb);
+        const lb = mkLabel(name, () => seeMore(k)); lb.region = k; lb.rname = name; lb.anchor = () => rig.point(x, 0, F.Hh(clamp(x, 0, L)) * 0.8); st.regs.push(lb);
       }
       for (const p of st.data.parts) { const lb = mkLabel(p.name, () => select(p)); lb.part = p; lb.anchor = () => partAnchor(p); st.regs.push(lb); }
     }
@@ -2428,6 +2428,9 @@ export function create(V) {
         r.want = onS && lr > (r.shown ? 0.15 : 0.4);
         if (r.want) cand.push(r);
       }
+      // (v6.20, S12: never two labels with the same name - the Tail and Ribs regions and the Tail and Ribs parts showed
+      // side by side: the part, the more exact one, wins)
+      { const pn = new Set(cand.filter((r) => r.part).map((r) => r.part.name)); for (let i = cand.length - 1; i >= 0; i--) if (cand[i].region && pn.has(cand[i].rname)) { cand[i].want = false; cand.splice(i, 1); } }
       // the most relevant (then the nearest the middle of the view) first, fewer on a phone; labels already showing first
       const most = w < 520 ? 7 : 12;
       cand.sort((p, q) => (q.shown - p.shown) || (q.lr - p.lr) || (Math.abs(p.sx - w / 2) + Math.abs(p.sy - h / 2)) - (Math.abs(q.sx - w / 2) + Math.abs(q.sy - h / 2)));
