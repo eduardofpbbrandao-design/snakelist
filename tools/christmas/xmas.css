@@ -18,13 +18,22 @@ html.xm :is(.tab-btn, .tab-n, .chip, button, .sl-mtoast, .xm-nohat) svg.snake-s 
 /* the tick's own drawing is hidden while the stocking is there (the drawing itself is untouched) */
 html.xm svg.xm-has-stk > :not(.xm-stk) { display: none; }
 html.xm svg.xm-has-stk { overflow: visible; }
-/* the opening's tick is drawn in two layers; the stocking goes in the first, the second (its pattern) waits */
-html.xm .intro-box svg.tick-detail > * { display: none; }
-/* snow on the letters (xmas.js measures each letter's top) */
+/* the opening (the photo wall) draws the tick through a sliding window that hides everything outside the tick's own
+   box - which cut off the stocking's cuff and the presents sticking out of it. With the stocking there is no line to
+   draw, so the window is switched off and the stocking is hung in place instead (a small swing in) */
+html.xm .intro-box .tick-wipe, html.xm .intro-box .tick-unwipe { transform: none; animation: none; overflow: visible; -webkit-mask-image: none; mask-image: none; }
+html.xm .intro-box svg.xm-has-stk .xm-stk { transform-box: view-box; transform-origin: 70% 8%; animation: xm-hang .7s .45s cubic-bezier(.34,1.42,.5,1) both; }
+@keyframes xm-hang { from { transform: rotate(-14deg) translateY(-6%); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { html.xm .intro-box svg.xm-has-stk .xm-stk { animation: none; } }
+/* snow on the letters (xmas.js measures each letter's top): real snow is not flat white - a soft blue-grey body in
+   its own shade, a brighter sunlit top, a few glints, lying a little lumpy, with a soft shadow on the letter below */
 html.xm :is(.sl-header .sl-titletext, .intro-title, .hero-mark, .signin-title .sl-titletext, .sl-brand, .site-logo, .hero-sub, .hero-cue > span) { position: relative; }
 html.xm .xm-snowcap { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; z-index: 1;
-  animation: xm-fade .8s ease both; }
-html.xm .xm-snowcap path { fill: #fff; filter: drop-shadow(0 .5px .6px rgba(20,50,35,.35)); -webkit-text-fill-color: initial; }
+  animation: xm-fade .8s ease both; filter: drop-shadow(0 .8px .7px rgba(16,44,30,.38)); }
+html.xm .xm-snowcap path { fill: #fff; -webkit-text-fill-color: initial; }
+html.xm .xm-snowcap path.s { fill: #d5e3ee; }
+html.xm .xm-snowcap path.h { fill: #fbfdff; }
+html.xm .xm-snowcap path.g { fill: #fff; opacity: .95; }
 html.xm .xm-ssnow { filter: drop-shadow(0 .6px .6px rgba(20,50,35,.3)); }
 @keyframes xm-fade { from { opacity: 0; } to { opacity: 1; } }
 

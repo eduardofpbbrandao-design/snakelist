@@ -7,7 +7,7 @@
   function id(p) { return p + "-" + (++uid); }
   var M = EV.mark;
   /* the Santa hat on the S's head (written by tools/build-christmas.py from tools/christmas_art.py - edit it there) */
-  var XHAT = /*XM-HAT*/"<g transform=\"translate(-5 -15.4) rotate(-10) scale(0.4000 0.4000)\"><defs><linearGradient id=\"evh-r\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\".18\"><stop offset=\"0\" stop-color=\"#e24a5a\"/><stop offset=\".38\" stop-color=\"#c62c40\"/><stop offset=\".78\" stop-color=\"#8f1627\"/><stop offset=\"1\" stop-color=\"#6c0e1c\"/></linearGradient><linearGradient id=\"evh-d\" x1=\"0\" y1=\"0\" x2=\".25\" y2=\"1\"><stop offset=\"0\" stop-color=\"#d23a4c\"/><stop offset=\".5\" stop-color=\"#a51d31\"/><stop offset=\"1\" stop-color=\"#6a0d1b\"/></linearGradient><radialGradient id=\"evh-s\" cx=\".3\" cy=\".3\" r=\".55\"><stop offset=\"0\" stop-color=\"#ff9aa4\" stop-opacity=\".5\"/><stop offset=\"1\" stop-color=\"#ff9aa4\" stop-opacity=\"0\"/></radialGradient><linearGradient id=\"evh-f\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\".45\" stop-color=\"#f8f4ee\"/><stop offset=\"1\" stop-color=\"#d2c9ba\"/></linearGradient><linearGradient id=\"evh-e\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#8a7c68\" stop-opacity=\".5\"/><stop offset=\".22\" stop-color=\"#8a7c68\" stop-opacity=\"0\"/><stop offset=\".72\" stop-color=\"#8a7c68\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#6e604e\" stop-opacity=\".55\"/></linearGradient><radialGradient id=\"evh-p\" cx=\".38\" cy=\".32\" r=\".72\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\".5\" stop-color=\"#f4efe6\"/><stop offset=\"1\" stop-color=\"#bfb4a2\"/></radialGradient><filter id=\"evh-z\" x=\"-15%\" y=\"-40%\" width=\"130%\" height=\"180%\" color-interpolation-filters=\"sRGB\"><feTurbulence type=\"fractalNoise\" baseFrequency=\".23\" numOctaves=\"3\" seed=\"4\" result=\"n\"/><feDisplacementMap in=\"SourceGraphic\" in2=\"n\" scale=\"6.5\" xChannelSelector=\"R\" yChannelSelector=\"G\" result=\"g\"/><feTurbulence type=\"fractalNoise\" baseFrequency=\".55\" numOctaves=\"2\" seed=\"9\"/><feGaussianBlur stdDeviation=\".45\" result=\"t\"/><feColorMatrix in=\"t\" type=\"matrix\" values=\"0 0 0 0 .55  0 0 0 0 .5  0 0 0 0 .45  1.9 0 0 0 -.9\" result=\"k\"/><feComposite in=\"k\" in2=\"g\" operator=\"in\" result=\"k2\"/><feMerge><feMergeNode in=\"g\"/><feMergeNode in=\"k2\"/></feMerge></filter><filter id=\"evh-b\" x=\"-30%\" y=\"-60%\" width=\"160%\" height=\"220%\"><feGaussianBlur stdDeviation=\"2.6\"/></filter><filter id=\"evh-v\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"><feGaussianBlur stdDeviation=\"1.7\"/></filter></defs><g class=\"xm-hat\"><path d=\"M-47 5C-30 18 30 18 47 5L46 13C30 27-30 27-46 13Z\" fill=\"#06140c\" opacity=\".45\" filter=\"url(#evh-b)\"/><path d=\"M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z\" fill=\"url(#evh-r)\"/><path d=\"M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z\" fill=\"url(#evh-s)\"/><path d=\"M31-50C37-36 40-20 41-3\" stroke=\"#4d0812\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\" opacity=\".42\" filter=\"url(#evh-v)\"/><path d=\"M-27-9C-24-24-16-36-5-44\" stroke=\"#ffa3ac\" stroke-width=\"3.4\" fill=\"none\" stroke-linecap=\"round\" opacity=\".3\" filter=\"url(#evh-v)\"/><path d=\"M-34-40C-22-54-4-61 14-58\" stroke=\"#3e0610\" stroke-width=\"6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".5\" filter=\"url(#evh-v)\"/><path d=\"M29-57C21-74-5-79-26-69C-42-61-54-46-61-30L-51-26C-46-39-36-51-22-57C-9-63 5-62 16-57Z\" fill=\"url(#evh-d)\"/><path d=\"M24-63C14-73-6-75-24-67C-38-60-49-48-56-34\" stroke=\"#f47c88\" stroke-width=\"2.8\" fill=\"none\" stroke-linecap=\"round\" opacity=\".55\" filter=\"url(#evh-v)\"/><path d=\"M-50-28C-45-40-35-51-22-57C-10-62 3-61 13-57\" stroke=\"#3a0510\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".55\" filter=\"url(#evh-v)\"/><path d=\"M-41-4C-20 0 20 0 43-4L43-12C20-7-20-7-41-12Z\" fill=\"#3e0610\" opacity=\".38\" filter=\"url(#evh-v)\"/><g filter=\"url(#evh-z)\"><circle cx=\"-57\" cy=\"-26\" r=\"10.2\" fill=\"url(#evh-p)\"/></g><circle cx=\"-59.5\" cy=\"-29.5\" r=\"3.6\" fill=\"#fff\" opacity=\".8\" filter=\"url(#evh-v)\"/><g filter=\"url(#evh-z)\"><path d=\"M-50-8C-31 1 31 1 50-8C56-9 57 3 50 6C31 16-31 16-50 6C-57 3-56-9-50-8Z\" fill=\"url(#evh-f)\"/><path d=\"M-50-8C-31 1 31 1 50-8C56-9 57 3 50 6C31 16-31 16-50 6C-57 3-56-9-50-8Z\" fill=\"url(#evh-e)\"/></g><path d=\"M-44-3C-25 5 25 5 44-3\" stroke=\"#fff\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".8\" filter=\"url(#evh-v)\"/><path d=\"M-46 7C-26 15 26 15 46 7\" stroke=\"#9d907c\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".5\" filter=\"url(#evh-v)\"/></g></g>"/*/XM-HAT*/;
+  var XHAT = /*XM-HAT*/"<g transform=\"translate(-5 -15.4) rotate(-10) scale(0.4000 0.4000)\"><defs><linearGradient id=\"evh-r\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\".18\"><stop offset=\"0\" stop-color=\"#e24a5a\"/><stop offset=\".38\" stop-color=\"#c62c40\"/><stop offset=\".78\" stop-color=\"#8f1627\"/><stop offset=\"1\" stop-color=\"#6c0e1c\"/></linearGradient><linearGradient id=\"evh-d\" x1=\"0\" y1=\"0\" x2=\".25\" y2=\"1\"><stop offset=\"0\" stop-color=\"#d23a4c\"/><stop offset=\".5\" stop-color=\"#a51d31\"/><stop offset=\"1\" stop-color=\"#6a0d1b\"/></linearGradient><radialGradient id=\"evh-s\" cx=\".3\" cy=\".3\" r=\".55\"><stop offset=\"0\" stop-color=\"#ff9aa4\" stop-opacity=\".5\"/><stop offset=\"1\" stop-color=\"#ff9aa4\" stop-opacity=\"0\"/></radialGradient><linearGradient id=\"evh-f\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\".45\" stop-color=\"#f8f4ee\"/><stop offset=\"1\" stop-color=\"#d2c9ba\"/></linearGradient><linearGradient id=\"evh-e\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#8a7c68\" stop-opacity=\".5\"/><stop offset=\".22\" stop-color=\"#8a7c68\" stop-opacity=\"0\"/><stop offset=\".72\" stop-color=\"#8a7c68\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#6e604e\" stop-opacity=\".55\"/></linearGradient><radialGradient id=\"evh-p\" cx=\".38\" cy=\".32\" r=\".72\"><stop offset=\"0\" stop-color=\"#ffffff\"/><stop offset=\".5\" stop-color=\"#f4efe6\"/><stop offset=\"1\" stop-color=\"#bfb4a2\"/></radialGradient><filter id=\"evh-z\" x=\"-15%\" y=\"-40%\" width=\"130%\" height=\"180%\" color-interpolation-filters=\"sRGB\"><feTurbulence type=\"fractalNoise\" baseFrequency=\".23\" numOctaves=\"3\" seed=\"4\" result=\"n\"/><feDisplacementMap in=\"SourceGraphic\" in2=\"n\" scale=\"6.5\" xChannelSelector=\"R\" yChannelSelector=\"G\" result=\"g\"/><feTurbulence type=\"fractalNoise\" baseFrequency=\".55\" numOctaves=\"2\" seed=\"9\"/><feGaussianBlur stdDeviation=\".45\" result=\"t\"/><feColorMatrix in=\"t\" type=\"matrix\" values=\"0 0 0 0 .55  0 0 0 0 .5  0 0 0 0 .45  1.9 0 0 0 -.9\" result=\"k\"/><feComposite in=\"k\" in2=\"g\" operator=\"in\" result=\"k2\"/><feMerge><feMergeNode in=\"g\"/><feMergeNode in=\"k2\"/></feMerge></filter><filter id=\"evh-b\" x=\"-30%\" y=\"-60%\" width=\"160%\" height=\"220%\"><feGaussianBlur stdDeviation=\"2.6\"/></filter><filter id=\"evh-v\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"><feGaussianBlur stdDeviation=\"1.7\"/></filter><filter id=\"evh-t\" x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" color-interpolation-filters=\"sRGB\"><feTurbulence type=\"fractalNoise\" baseFrequency=\".9 .5\" numOctaves=\"2\" seed=\"3\"/><feColorMatrix type=\"matrix\" values=\"0 0 0 0 .1  0 0 0 0 0  0 0 0 0 .03  0 0 0 -2.2 1.25\"/><feComposite in2=\"SourceGraphic\" operator=\"in\"/></filter></defs><g class=\"xm-hat\"><path d=\"M-47 5C-30 18 30 18 47 5L46 13C30 27-30 27-46 13Z\" fill=\"#06140c\" opacity=\".45\" filter=\"url(#evh-b)\"/><path d=\"M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z\" fill=\"url(#evh-r)\"/><path d=\"M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z\" fill=\"url(#evh-s)\"/><path d=\"M31-50C37-36 40-20 41-3\" stroke=\"#4d0812\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\" opacity=\".42\" filter=\"url(#evh-v)\"/><path d=\"M-27-9C-24-24-16-36-5-44\" stroke=\"#ffa3ac\" stroke-width=\"3.4\" fill=\"none\" stroke-linecap=\"round\" opacity=\".3\" filter=\"url(#evh-v)\"/><path d=\"M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z\" fill=\"#000\" opacity=\".16\" filter=\"url(#evh-t)\"/><path d=\"M-14-6C-12-20-8-34 0-46M12-5C13-18 15-32 20-44\" stroke=\"#5a0a17\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" opacity=\".32\" filter=\"url(#evh-v)\"/><path d=\"M-10-8C-8-21-4-33 3-44\" stroke=\"#ff9aa4\" stroke-width=\"1.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".22\" filter=\"url(#evh-v)\"/><path d=\"M-34-40C-22-54-4-61 14-58\" stroke=\"#3e0610\" stroke-width=\"6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".5\" filter=\"url(#evh-v)\"/><path d=\"M29-57C21-74-5-79-26-69C-42-61-54-46-61-30L-51-26C-46-39-36-51-22-57C-9-63 5-62 16-57Z\" fill=\"url(#evh-d)\"/><path d=\"M24-63C14-73-6-75-24-67C-38-60-49-48-56-34\" stroke=\"#f47c88\" stroke-width=\"2.8\" fill=\"none\" stroke-linecap=\"round\" opacity=\".55\" filter=\"url(#evh-v)\"/><path d=\"M-50-28C-45-40-35-51-22-57C-10-62 3-61 13-57\" stroke=\"#3a0510\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".55\" filter=\"url(#evh-v)\"/><path d=\"M-41-4C-20 0 20 0 43-4L43-12C20-7-20-7-41-12Z\" fill=\"#3e0610\" opacity=\".38\" filter=\"url(#evh-v)\"/><g filter=\"url(#evh-z)\"><circle cx=\"-57\" cy=\"-26\" r=\"10.2\" fill=\"url(#evh-p)\"/></g><circle cx=\"-59.5\" cy=\"-29.5\" r=\"3.6\" fill=\"#fff\" opacity=\".8\" filter=\"url(#evh-v)\"/><g filter=\"url(#evh-z)\"><path d=\"M-50-8C-31 1 31 1 50-8C56-9 57 3 50 6C31 16-31 16-50 6C-57 3-56-9-50-8Z\" fill=\"url(#evh-f)\"/><path d=\"M-50-8C-31 1 31 1 50-8C56-9 57 3 50 6C31 16-31 16-50 6C-57 3-56-9-50-8Z\" fill=\"url(#evh-e)\"/></g><path d=\"M-44-3C-25 5 25 5 44-3\" stroke=\"#fff\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".8\" filter=\"url(#evh-v)\"/><path d=\"M-46 7C-26 15 26 15 46 7\" stroke=\"#9d907c\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" opacity=\".5\" filter=\"url(#evh-v)\"/></g></g>"/*/XM-HAT*/;
 
   /* ---------------- event artwork (banner + countdown panel) ---------------- */
   function eventArt(theme) {
@@ -94,22 +94,218 @@
     return "#" + [r, g, b].map(function (c) { return ("0" + Math.round((t - c) * p + c).toString(16)).slice(-2); }).join("");
   }
 
-  /* ---------------- The Legendary Christmas Serpent (animated) ---------------- */
-  function serpent(cls) {
-    var g = id("sg"), s = id("ss");
-    return '<svg class="sl-ev-serpent ' + (cls || "") + '" viewBox="0 0 200 200" role="img" aria-label="The Legendary Christmas Serpent"><defs>' +
-      '<linearGradient id="' + g + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".35" stop-color="#e9c04a"/><stop offset=".7" stop-color="#b8861f"/><stop offset="1" stop-color="#f7e3a1"/></linearGradient>' +
-      '<linearGradient id="' + s + '" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>' +
-      '<clipPath id="' + s + 'c"><path d="M40 160c-20-30 10-60 50-50s70-10 60-40-50-30-60-10"/></clipPath></defs>' +
-      '<ellipse cx="100" cy="176" rx="70" ry="10" fill="#000" opacity=".25"/>' +
-      '<path class="body" pathLength="100" d="M30 168c-24-34 8-70 56-58s74-12 62-44-52-30-62-8" fill="none" stroke="url(#' + g + ')" stroke-width="22" stroke-linecap="round"/>' +
-      '<path class="body" pathLength="100" d="M30 168c-24-34 8-70 56-58s74-12 62-44-52-30-62-8" fill="none" stroke="#8a6414" stroke-width="22" stroke-linecap="round" stroke-dasharray=".6 2.4" opacity=".3"/>' +
-      '<path pathLength="100" d="M30 168c-24-34 8-70 56-58s74-12 62-44-52-30-62-8" fill="none" stroke="#fff6c8" stroke-width="5" stroke-linecap="round" opacity=".45" transform="translate(-3 -4)"/>' +
-      '<g transform="skewX(-20)" opacity=".55"><rect class="shimmer" x="0" y="0" width="50" height="200" fill="url(#' + s + ')"/></g>' +
-      '<g class="head"><path d="M86 58c-6-18 10-34 28-30 16 4 18 20 6 28-10 6-26 10-34 2z" fill="url(#' + g + ')" stroke="#8a6414" stroke-width="2"/>' +
-      '<circle cx="110" cy="40" r="4" fill="#123320"/><circle cx="111" cy="39" r="1.3" fill="#fff"/><path d="M122 50l10 2-6 3 6 3-10-2" stroke="#c8323f" stroke-width="2" fill="none"/>' +
-      '<path d="M90 34l26-22 14 26z" fill="#c8323f"/><path d="M88 34q22-8 44 2" stroke="#fff" stroke-width="7" stroke-linecap="round" fill="none"/><circle cx="130" cy="12" r="7" fill="#fff"/></g>' +
-      '<path class="sparkle" d="M160 110l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#fff6c8"/><path class="sparkle" d="M40 80l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#fff6c8"/><path class="sparkle" d="M150 160l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#fff6c8"/></svg>';
+  /* ---------------- The Legendary Christmas Serpent ----------------
+     A real 3D model, rendered once per size and kept as an image: a python-shaped snake (built on the anatomy of the
+     green tree python / emerald tree boa - the classic resting coil over itself) in emerald with metallic gold.
+       geometry  a spine in 3D: a two-turn coil resting on the ground (each turn stacked a little higher and further
+                 in, never passing through another), a neck rising out of the middle in a natural S-curve, the head
+                 raised and turned to face the viewer; the tail tip visible on the outside of the coil.
+                 The body is a tube of elliptical rings along that spine (rotation-minimising frames), thickness
+                 tapering from the neck to a fine tail tip; the head is its own shape on the same rings: broad
+                 temples over the jaw muscles, narrowing to a rounded, slightly flattened snout.
+       scales    every quad of the mesh is one scale: staggered rows on the back and flanks (overlapping, each with
+                 its own lit edge and shaded rim, so they read as keeled scales and not paint), wide ventral scutes
+                 underneath, large plates on the crown of the head, lip (labial) scales with the python's heat pits.
+       face      eyes with an iris, a vertical slit pupil, a corneal highlight and the brow ridge above, nostrils at
+                 the snout tip, the mouth line from the snout to the angle of the jaw.
+       lighting  soft key light from the upper left, a cool fill, a golden rim light from behind and per-scale
+                 specular gloss (metallic on the gold), all depth-sorted - so it looks right with every effect off.
+       LOD       "s" (icons), "m" (panels, the Cabin) and "l" (the reveal); each is rendered once and cached.
+     The tongue flick, slow breathing and a restrained glint are tiny CSS effects on top (none with reduce-motion). */
+  var SERP = {};
+  function serpentModel(lod) {
+    if (SERP[lod]) return SERP[lod];
+    var px = lod === "s" ? 200 : lod === "l" ? 760 : 420, M = lod === "s" ? 150 : lod === "l" ? 460 : 300, K = lod === "s" ? 12 : lod === "l" ? 24 : 18;
+    var cv = document.createElement("canvas"); cv.width = cv.height = px;
+    var x = cv.getContext && cv.getContext("2d"); if (!x) return (SERP[lod] = { url: "", tip: [100, 60] });
+    function v(a, b, c) { return [a, b, c]; }
+    function add(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+    function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+    function mul(a, s) { return [a[0] * s, a[1] * s, a[2] * s]; }
+    function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+    function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+    function nrm(a) { var l = Math.sqrt(dot(a, a)) || 1; return mul(a, 1 / l); }
+    // 1. the spine: the coil (tail on the outside, spiralling in and up), then the neck and head
+    var pts = [], i, BR = .135;
+    var turns = 2.35, R0 = .95, R1 = .5, th0 = 2.3;
+    for (i = 0; i <= 400; i++) {
+      var u = i / 400, th = th0 + u * turns * Math.PI * 2, r = R0 + (R1 - R0) * u;
+      var y = BR * .92 + Math.max(0, u * turns - .55) * .14 + (u < .06 ? -.05 * (1 - u / .06) : 0);
+      pts.push(v(Math.cos(th) * r, y, Math.sin(th) * r));
+    }
+    var e0 = pts[pts.length - 1], e1 = pts[pts.length - 2], t0 = nrm(sub(e0, e1));
+    var hd = nrm(v(-.45, -.06, .89)), hStart = v(-.04, 1.12, .3);
+    var c1 = add(e0, mul(add(t0, v(0, .9, 0)), .42)), c2 = sub(hStart, mul(nrm(add(hd, v(0, -.9, -.3))), .5));
+    for (i = 1; i <= 120; i++) {
+      var s = i / 120, a = 1 - s;
+      pts.push(add(add(mul(e0, a * a * a), mul(c1, 3 * a * a * s)), add(mul(c2, 3 * a * s * s), mul(hStart, s * s * s))));
+    }
+    var HL = .64;
+    for (i = 1; i <= 40; i++) pts.push(add(hStart, mul(hd, HL * i / 40)));
+    // resample by arc length
+    var acc = [0]; for (i = 1; i < pts.length; i++) acc.push(acc[i - 1] + Math.sqrt(dot(sub(pts[i], pts[i - 1]), sub(pts[i], pts[i - 1]))));
+    var LEN = acc[acc.length - 1], headFrom = 1 - HL / LEN, sp = [], j = 0;
+    // more rings on the head (where the detail is)
+    function tAt(k) { var q = k / (M - 1), h = .82; return q < h ? q / h * headFrom : headFrom + (q - h) / (1 - h) * (1 - headFrom); }
+    for (var k = 0; k < M; k++) {
+      var want = tAt(k) * LEN; while (j < acc.length - 2 && acc[j + 1] < want) j++;
+      var f = (want - acc[j]) / ((acc[j + 1] - acc[j]) || 1); sp.push({ p: add(pts[j], mul(sub(pts[j + 1], pts[j]), f)), t: tAt(k) });
+    }
+    // 2. frames (rotation-minimising, starting with the back facing up)
+    for (k = 0; k < M; k++) { var pa = sp[Math.max(0, k - 1)].p, pb = sp[Math.min(M - 1, k + 1)].p; sp[k].T = nrm(sub(pb, pa)); }
+    var Nn = nrm(cross(cross(sp[0].T, v(0, 1, 0)), sp[0].T));
+    for (k = 0; k < M; k++) { var T = sp[k].T; Nn = nrm(sub(Nn, mul(T, dot(Nn, T)))); sp[k].N = Nn; sp[k].B = cross(T, Nn); }
+    // the head: keep its crown facing up (a snake holds its head level) - blend the frame towards world-up there
+    for (k = 0; k < M; k++) {
+      var w = Math.min(1, Math.max(0, (sp[k].t - (headFrom - .05)) / .05));
+      if (w > 0) { var up = nrm(sub(v(0, 1, 0), mul(sp[k].T, sp[k].T[1]))); sp[k].N = nrm(add(mul(sp[k].N, 1 - w), mul(up, w))); sp[k].B = nrm(cross(sp[k].T, sp[k].N)); }
+    }
+    // 3. the profile: half-width (sideways) and half-height of each ring
+    function prof(t) {
+      var hw, hh;
+      if (t < .3) hw = BR * Math.pow(t / .3, .62); else if (t < headFrom - .1) hw = BR; else hw = BR * (1 - .3 * Math.min(1, (t - (headFrom - .1)) / .08));
+      hw = Math.max(hw, .006); hh = hw * .92;
+      if (t >= headFrom - .012) {
+        var q = (t - headFrom) / (1 - headFrom);    // 0 at the back of the head .. 1 at the snout
+        var jaw = q < .3 ? .11 + .075 * Math.sin(Math.max(0, q + .04) / .34 * Math.PI / 2) : .185 - .11 * Math.pow((q - .3) / .7, 1.5);
+        var cap = q > .9 ? Math.sqrt(Math.max(0, 1 - Math.pow((q - .9) / .1, 2))) : 1;
+        hw = jaw * (q > .9 ? .35 + .65 * cap : 1); hh = hw * (.62 - .1 * q);
+      }
+      return [hw, hh];
+    }
+    // 4. the camera: three-quarter view, a little from above
+    var az = -.32, el = .4, ca = Math.cos(az), sa = Math.sin(az), ce = Math.cos(el), se = Math.sin(el);
+    function cam(p) { var x1 = p[0] * ca - p[2] * sa, z1 = p[0] * sa + p[2] * ca; return [x1, p[1] * ce - z1 * se, p[1] * se + z1 * ce]; }
+    var VIEW = v(0, 0, 1);
+    function camDir(n) { var c = cam(n); return c; }
+    // rings of vertices (staggered every other ring: overlapping scale rows)
+    var rings = [];
+    for (k = 0; k < M; k++) {
+      var pr = prof(sp[k].t), ring = [], off = (k % 2) * .5;
+      for (var m = 0; m <= K; m++) {
+        var ph = (m + off) / K * Math.PI * 2, cs = Math.cos(ph), sn = Math.sin(ph);
+        var P = add(sp[k].p, add(mul(sp[k].N, cs * pr[1]), mul(sp[k].B, sn * pr[0])));
+        var Nm = nrm(add(mul(sp[k].N, cs / pr[1]), mul(sp[k].B, sn / pr[0])));
+        ring.push({ c: cam(P), n: camDir(Nm), ph: ph });
+      }
+      rings.push(ring);
+    }
+    // 5. fit to the canvas
+    var mnx = 1e9, mny = 1e9, mxx = -1e9, mxy = -1e9;
+    rings.forEach(function (rg) { rg.forEach(function (q) { mnx = Math.min(mnx, q.c[0]); mxx = Math.max(mxx, q.c[0]); mny = Math.min(mny, -q.c[1]); mxy = Math.max(mxy, -q.c[1]); }); });
+    var sc = px * .86 / Math.max(mxx - mnx, mxy - mny), ox = px / 2 - (mnx + mxx) / 2 * sc, oy = px * .54 - (mny + mxy) / 2 * sc;
+    function scr(c) { return [ox + c[0] * sc, oy - c[1] * sc]; }
+    // 6. lights
+    var Lk = nrm(v(-.55, .7, .55)), Lf = nrm(v(.7, .2, .4)), Lr = nrm(v(.2, .5, -.9)), H = nrm(add(Lk, VIEW));
+    function mix(a, b, f) { return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]; }
+    var EM = [14, 122, 74], EMD = [6, 62, 38], GOLD = [233, 192, 74], BELLY = [236, 214, 150], LIP = [244, 226, 168];
+    function hash(a, b) { var s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return s - Math.floor(s); }
+    // base colour of the scale at ring k, around-angle ph (0 = top of the back, pi = belly)
+    function base(k, mi, ph) {
+      var t = sp[k].t, d = Math.abs(((ph + Math.PI) % (Math.PI * 2)) - Math.PI), q = (t - headFrom) / (1 - headFrom);
+      if (t >= headFrom) {
+        if (d > 1.95) return { c: LIP, metal: .2, belly: 1 };
+        if (d < .55 && q > .15 && q < .8) return { c: mix(EM, GOLD, .55), metal: .7 };         // gold crown plates
+        return { c: mix(EM, [24, 150, 92], q), metal: .15 };
+      }
+      if (d > 2.25) return { c: mix(BELLY, [214, 186, 110], (k % 4 < 2) ? 0 : .35), metal: .25, belly: 1 };  // ventral scutes
+      // a dorsal line of gold scales broken into dashes, and gold flecks on the flanks (like a green tree python's)
+      if (d < .34 && (k % 18) < 4) return { c: GOLD, metal: 1 };
+      if (d > 1.1 && d < 1.9 && hash(k, mi) > .9) return { c: GOLD, metal: 1 };
+      var dark = d > 1.75 ? .35 : 0;
+      return { c: mix(mix(EM, [32, 158, 96], hash(mi, k) * .3), EMD, dark), metal: .1 };
+    }
+    function shade(b, n) {
+      var nd = Math.max(0, dot(n, Lk)), fd = Math.max(0, dot(n, Lf)) * .35, rim = Math.pow(1 - Math.max(0, n[2]), 2.6) * Math.max(0, dot(n, Lr) + .35);
+      var spec = Math.pow(Math.max(0, dot(n, H)), b.metal > .5 ? 18 : 40) * (b.metal > .5 ? 1.1 : .45);
+      var amb = .3 + .12 * n[1];
+      var c = [0, 1, 2].map(function (i) {
+        var lit = b.c[i] * (amb + nd * .82 + fd) + (b.metal > .5 ? b.c[i] : 255) * spec * (b.metal > .5 ? .9 : .5) + 230 * rim * .55 * (i === 2 ? .55 : i === 1 ? .82 : 1);
+        return Math.max(0, Math.min(255, Math.round(lit)));
+      });
+      return c;
+    }
+    // 7. the quads (one per scale), back-face culled and painted far to near
+    var quads = [];
+    for (k = 0; k < M - 1; k++) for (m = 0; m < K; m++) {
+      var a0 = rings[k][m], a1 = rings[k][m + 1], b0 = rings[k + 1][m], b1 = rings[k + 1][m + 1];
+      var nn = nrm(add(add(a0.n, a1.n), add(b0.n, b1.n)));
+      if (nn[2] < -.2) continue;
+      quads.push({ z: (a0.c[2] + a1.c[2] + b0.c[2] + b1.c[2]) / 4, p: [scr(a0.c), scr(a1.c), scr(b1.c), scr(b0.c)], n: nn, k: k, m: m, ph: (a0.ph + a1.ph) / 2 });
+    }
+    quads.sort(function (p, q) { return p.z - q.z; });
+    // the shadow on the ground
+    var g0 = scr(cam(v(-.05, 0, .05))), gr = x.createRadialGradient(g0[0], g0[1], 0, g0[0], g0[1], sc * 1.35);
+    gr.addColorStop(0, "rgba(0,0,0,.42)"); gr.addColorStop(1, "rgba(0,0,0,0)");
+    x.save(); x.translate(g0[0], g0[1]); x.scale(1, .42); x.translate(-g0[0], -g0[1]); x.fillStyle = gr; x.beginPath(); x.arc(g0[0], g0[1], sc * 1.35, 0, 7); x.fill(); x.restore();
+    var lw = Math.max(.35, px / 900);
+    x.lineJoin = "round";
+    quads.forEach(function (q) {
+      var b = base(q.k, q.m, q.ph), c = shade(b, q.n), p = q.p;
+      x.beginPath(); x.moveTo(p[0][0], p[0][1]); x.lineTo(p[1][0], p[1][1]); x.lineTo(p[2][0], p[2][1]); x.lineTo(p[3][0], p[3][1]); x.closePath();
+      x.fillStyle = "rgb(" + c[0] + "," + c[1] + "," + c[2] + ")"; x.fill();
+      // the scale's own rim: a darker edge where it overlaps the next one, a lit edge along its keel
+      x.strokeStyle = "rgba(" + Math.round(c[0] * .45) + "," + Math.round(c[1] * .45) + "," + Math.round(c[2] * .45) + "," + (b.belly ? .55 : .7) + ")";
+      x.lineWidth = lw * (b.belly ? 1.2 : 1); x.stroke();
+      if (px > 300 && !b.belly && q.n[2] > .25) {
+        var cx0 = (p[0][0] + p[1][0] + p[2][0] + p[3][0]) / 4, cy0 = (p[0][1] + p[1][1] + p[2][1] + p[3][1]) / 4;
+        x.beginPath(); x.moveTo(cx0 + (p[3][0] - cx0) * .55, cy0 + (p[3][1] - cy0) * .55); x.lineTo(cx0 + (p[2][0] - cx0) * .55, cy0 + (p[2][1] - cy0) * .55);
+        x.strokeStyle = "rgba(255,250,220," + (.1 + .25 * Math.max(0, dot(q.n, H))) + ")"; x.lineWidth = lw * 1.1; x.stroke();
+      }
+    });
+    // 8. the face, on the head's surface (only the parts that face the viewer)
+    function surf(t, ph, lift) {
+      var kk = 0; while (kk < M - 1 && sp[kk].t < t) kk++;
+      var pr = prof(t), cs = Math.cos(ph), sn = Math.sin(ph), l = lift || 1;
+      var P = add(sp[kk].p, add(mul(sp[kk].N, cs * pr[1] * l), mul(sp[kk].B, sn * pr[0] * l)));
+      var Nm = nrm(add(mul(sp[kk].N, cs / pr[1]), mul(sp[kk].B, sn / pr[0])));
+      return { s: scr(cam(P)), n: cam(Nm), w: pr[0] * sc };
+    }
+    function hT(q) { return headFrom + q * (1 - headFrom); }
+    // the mouth line from the snout to the angle of the jaw, and the labial pits below it
+    [-1, 1].forEach(function (side) {
+      var line = [], pits = [];
+      for (var q = .08; q <= .985; q += .02) { var s0 = surf(hT(q), Math.PI / 2 * side + side * .62); line.push(s0); if (q > .55 && q < .93 && Math.round(q * 50) % 4 === 0) pits.push(surf(hT(q), Math.PI / 2 * side + side * .82)); }
+      if (line[Math.floor(line.length / 2)].n[2] < 0) return;
+      x.beginPath(); line.forEach(function (s0, ii) { if (ii) x.lineTo(s0.s[0], s0.s[1]); else x.moveTo(s0.s[0], s0.s[1]); });
+      x.strokeStyle = "rgba(20,30,18,.85)"; x.lineWidth = lw * 2.2; x.lineCap = "round"; x.stroke();
+      pits.forEach(function (s0) { if (s0.n[2] < .05) return; x.fillStyle = "rgba(25,30,20,.8)"; x.beginPath(); x.ellipse(s0.s[0], s0.s[1], s0.w * .05, s0.w * .022, 0, 0, 7); x.fill(); });
+    });
+    // nostrils
+    [-1, 1].forEach(function (side) { var s0 = surf(hT(.95), side * .75); if (s0.n[2] < .05) return; x.fillStyle = "#0b1a10"; x.beginPath(); x.ellipse(s0.s[0], s0.s[1], s0.w * .16, s0.w * .1, -.4 * side, 0, 7); x.fill(); });
+    // the eyes: socket, gold iris, vertical slit pupil, corneal highlight, the brow ridge (supraocular) above
+    [-1, 1].forEach(function (side) {
+      var s0 = surf(hT(.5), side * 1.02, 1.02); if (s0.n[2] < .02) return;
+      var ex = s0.s[0], ey = s0.s[1], er = Math.max(1.2, s0.w * .3), sq = Math.max(.35, s0.n[2]);
+      x.save(); x.translate(ex, ey); x.rotate(-.18 * side); x.scale(Math.max(.5, sq), 1);
+      x.fillStyle = "#08140c"; x.beginPath(); x.arc(0, 0, er * 1.2, 0, 7); x.fill();
+      var ig = x.createRadialGradient(-er * .25, -er * .3, er * .1, 0, 0, er);
+      ig.addColorStop(0, "#fff1b0"); ig.addColorStop(.45, "#e9b23a"); ig.addColorStop(1, "#8a5a10");
+      x.fillStyle = ig; x.beginPath(); x.arc(0, 0, er, 0, 7); x.fill();
+      x.fillStyle = "#050806"; x.beginPath(); x.ellipse(0, 0, er * .2, er * .86, 0, 0, 7); x.fill();
+      x.fillStyle = "rgba(255,255,255,.9)"; x.beginPath(); x.ellipse(-er * .38, -er * .42, er * .22, er * .15, -.5, 0, 7); x.fill();
+      x.strokeStyle = "rgba(255,255,255,.25)"; x.lineWidth = lw; x.beginPath(); x.arc(0, 0, er * .95, 3.6, 5.4); x.stroke();
+      x.restore();
+      x.strokeStyle = "rgba(10,40,24,.8)"; x.lineWidth = lw * 2.4; x.beginPath(); x.arc(ex, ey + er * .25, er * 1.35, Math.PI * 1.12, Math.PI * 1.88); x.stroke();
+    });
+    // where the tongue comes out (for the overlay): the snout tip, in the 200 x 200 picture's units
+    var tipS = scr(cam(add(sp[M - 1].p, mul(sp[M - 1].T, .01)))), dirS = scr(cam(add(sp[M - 1].p, mul(sp[M - 1].T, .3))));
+    var ang = Math.atan2(dirS[1] - tipS[1], dirS[0] - tipS[0]) * 180 / Math.PI;
+    var url = ""; try { url = cv.toDataURL(lod === "s" ? "image/png" : "image/webp", .92); if (url.indexOf("data:image/webp") !== 0 && lod !== "s") url = cv.toDataURL("image/png"); } catch (e) {}
+    return (SERP[lod] = { url: url, tip: [tipS[0] / px * 200, tipS[1] / px * 200], ang: ang });
+  }
+  function serpent(cls, size) {
+    var lod = size === "big" ? "l" : size === "small" ? "s" : "m", md = serpentModel(lod), s = id("ss");
+    var tx = md.tip[0].toFixed(1), ty = md.tip[1].toFixed(1);
+    return '<svg class="sl-ev-serpent ' + (cls || "") + '" viewBox="0 0 200 200" role="img" aria-label="The Legendary Christmas Serpent: a golden-emerald python coiled with its head raised"><defs>' +
+      '<linearGradient id="' + s + '" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff6d8" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>' +
+      '<mask id="' + s + 'm" style="mask-type:alpha"><image href="' + md.url + '" x="0" y="0" width="200" height="200"/></mask></defs>' +
+      '<g class="breath"><image class="snake" href="' + md.url + '" x="0" y="0" width="200" height="200"/>' +
+      // the tongue: a quick double flick now and then, from the snout tip
+      '<g transform="translate(' + tx + " " + ty + ") rotate(" + md.ang.toFixed(0) + ')"><path class="tongue" d="M0 0h9l4-2.4M9 0l4 2.4" stroke="#b3263a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>' +
+      // a restrained glint passing over the scales (only on the snake itself)
+      '<g mask="url(#' + s + 'm)" opacity=".7"><g transform="skewX(-20)"><rect class="shimmer" x="0" y="0" width="40" height="200" fill="url(#' + s + ')"/></g></g></g>' +
+      '<path class="sparkle" d="M168 74l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#fff3c4"/><path class="sparkle" d="M30 66l1.6 4.4 4.4 1.6-4.4 1.6-1.6 4.4-1.6-4.4-4.4-1.6 4.4-1.6z" fill="#fff3c4"/></svg>';
   }
 
   /* ---------------- small line icons ---------------- */

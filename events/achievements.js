@@ -53,7 +53,8 @@
     });
     if (fresh.length) {
       EV.ls.set(KEY(), earned);
-      fresh.forEach(function (a, i) { setTimeout(function () { EV.toast(ic("star", 15) + " Seasonal achievement unlocked: <b>" + esc(a.name) + "</b>"); }, i * 900); });
+      // each unlock pops in (a bigger, golden pop for the Legendary one)
+      fresh.forEach(function (a, i) { setTimeout(function () { var t = EV.toast(ic(a.icon || "star", 15) + " Seasonal achievement unlocked: <b>" + esc(a.name) + "</b>"); t.classList.add("sl-ev-toast-ach"); if (a.legendary) t.classList.add("is-legend"); }, i * 900); });
       saveToAccount(fresh);
       EV.emit("seasonal-achievement", fresh.map(function (a) { return a.id; }));
     }
@@ -90,8 +91,13 @@
     var chip = got ? "Earned" : ended ? "No longer obtainable" : before ? "Coming" : "Locked";
     var when = got ? (earned[a.id] ? "Earned " + new Date(earned[a.id]).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" }) : "Earned")
       : ended ? "Could be earned " + dateRange(ev) : "Can be earned " + dateRange(ev);
-    return '<li class="sl-abadge ' + cls + '" data-ach="' + a.id + '"><div class="sl-abtn" style="cursor:default"><span class="sl-aic sl-ev-aic" aria-hidden="true">' + ic(got ? a.icon : ended ? "lock" : a.icon, 17) + "</span>" +
-      '<span class="sl-at">' + esc(a.name) + '<small class="sl-asub" style="display:block;font-weight:500">' + esc(a.desc) + "</small></span>" +
+    // Christmas rows use the forest-green reward box; only the Legendary Christmas Serpent gets the gold Legendary one
+    var xm = ev.theme === "xmas", box = xm ? " sl-ev-rbox" + (a.legendary ? " sl-ev-legendary" : "") + (got ? " is-done" : have > 0 && !ended ? " is-progress" : " is-locked") : "";
+    var art = a.legendary ? '<span class="sl-aic sl-ev-aic sl-ev-aic-art" aria-hidden="true">' + EV.art.serpent(got ? "" : "dim") + "</span>"
+      : '<span class="sl-aic sl-ev-aic" aria-hidden="true">' + ic(got ? a.icon : ended ? "lock" : a.icon, 17) + (xm && got ? '<i class="sl-ev-done-mark">' + ic("check", 10) + "</i>" : "") + "</span>";
+    return '<li class="sl-abadge ' + cls + box + '" data-ach="' + a.id + '"><div class="sl-abtn" style="cursor:default">' + art +
+      '<span class="sl-at">' + esc(a.name) + (a.limited ? ' <span class="sl-ev-limited" title="Once in a lifetime: it can only be earned during ' + esc(ev.short || ev.name) + '">Limited</span>' : "") +
+      '<small class="sl-asub" style="display:block;font-weight:500">' + esc(a.desc) + "</small></span>" +
       '<span class="sl-ast">' + chip + "</span></div>" +
       '<div class="sl-adet">' + (got || ended ? "" : '<span class="sl-abar" role="progressbar" aria-valuemin="0" aria-valuemax="' + a.goal + '" aria-valuenow="' + have + '"><i style="width:' + Math.round(have / a.goal * 100) + '%"></i></span><p class="sl-aprog">' + have + " / " + a.goal + "</p>") +
       '<p class="sl-ev-areward">Reward: ' + esc(a.reward) + " · " + esc(when) + "</p></div></li>";

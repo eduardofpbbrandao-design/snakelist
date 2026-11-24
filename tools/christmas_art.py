@@ -225,7 +225,12 @@ def _hat_defs(p, detail=True):
               '<feComposite in="k" in2="g" operator="in" result="k2"/>'
               '<feMerge><feMergeNode in="g"/><feMergeNode in="k2"/></feMerge></filter>'
               '<filter id="%s-b" x="-30%%" y="-60%%" width="160%%" height="220%%"><feGaussianBlur stdDeviation="2.6"/></filter>'
-              '<filter id="%s-v" x="-30%%" y="-30%%" width="160%%" height="160%%"><feGaussianBlur stdDeviation="1.7"/></filter>') % ((p,) * 3)
+              '<filter id="%s-v" x="-30%%" y="-30%%" width="160%%" height="160%%"><feGaussianBlur stdDeviation="1.7"/></filter>'
+              # velvet: a fine, soft pile texture (light and dark specks) inside the red cloth, so it reads as fabric
+              '<filter id="%s-t" x="0" y="0" width="100%%" height="100%%" color-interpolation-filters="sRGB">'
+              '<feTurbulence type="fractalNoise" baseFrequency=".9 .5" numOctaves="2" seed="3"/>'
+              '<feColorMatrix type="matrix" values="0 0 0 0 .1  0 0 0 0 0  0 0 0 0 .03  0 0 0 -2.2 1.25"/>'
+              '<feComposite in2="SourceGraphic" operator="in"/></filter>') % ((p,) * 4)
     return d
 
 BRIM = "M-50-8C-31 1 31 1 50-8C56-9 57 3 50 6C31 16-31 16-50 6C-57 3-56-9-50-8Z"
@@ -244,6 +249,10 @@ def _hat(p, detail=True, shadow=True):
         # ...with its shadow side and a lit fold
         '<path d="M31-50C37-36 40-20 41-3" stroke="#4d0812" stroke-width="7" fill="none" stroke-linecap="round" opacity=".42"%s/>' % v,
         '<path d="M-27-9C-24-24-16-36-5-44" stroke="#ffa3ac" stroke-width="3.4" fill="none" stroke-linecap="round" opacity=".3"%s/>' % v,
+        # (detail only) the velvet's pile and two soft creases where the cloth bunches as it is pulled on
+        ('<path d="M-41-2C-39-26-26-50-6-64C6-72 22-70 30-56C37-44 42-24 43-2Z" fill="#000" opacity=".16" filter="url(#%s-t)"/>'
+         '<path d="M-14-6C-12-20-8-34 0-46M12-5C13-18 15-32 20-44" stroke="#5a0a17" stroke-width="3" fill="none" stroke-linecap="round" opacity=".32"%s/>'
+         '<path d="M-10-8C-8-21-4-33 3-44" stroke="#ff9aa4" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".22"%s/>' % (p, v, v) if detail else ""),
         # where the tip folds over, the body is in its shade
         '<path d="M-34-40C-22-54-4-61 14-58" stroke="#3e0610" stroke-width="6" fill="none" stroke-linecap="round" opacity=".5"%s/>' % v,
         # the tip, drooping over to the back: its top side (lit along the crest)
@@ -317,12 +326,23 @@ def stocking_tick(outline=None, p="xms"):
             '<linearGradient id="%(p)s-w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#f6f1e8"/><stop offset="1" stop-color="#d9cfbf"/></linearGradient>'
             '<clipPath id="%(p)s-c"><path d="' + STK_BOOT + '"/></clipPath></defs>'
             '<g transform="translate(20.6 33) rotate(32)">'
-            # what peeks out of the top (behind the cuff): a small green present with a gold ribbon, and a candy cane
-            '<rect x=".2" y="-33.2" width="3.6" height="4" rx=".4" fill="#1f6b45" transform="rotate(8 2 -31)"/>'
-            '<path d="M2-33.2V-29.2M.2-31.2H3.8" stroke="#e3c46f" stroke-width=".7" transform="rotate(8 2 -31)"/>'
-            '<path d="M2.1-33.3C1.2-34.4.4-34.1.9-33.4M2.1-33.3C3-34.4 3.8-34.1 3.3-33.4" stroke="#e3c46f" stroke-width=".55" fill="none" stroke-linecap="round" transform="rotate(8 2 -31)"/>'
-            '<path d="M-1.6-28V-33.6C-1.6-35.8 1-35.8 1-33.9" fill="none" stroke="#fff" stroke-width="1.35" stroke-linecap="round"/>'
-            '<path d="M-1.6-28V-33.6C-1.6-35.8 1-35.8 1-33.9" fill="none" stroke="#cf2f42" stroke-width="1.35" stroke-linecap="butt" stroke-dasharray=".8 .8"/>'
+            # what peeks out of the top (behind the cuff): it is stuffed with presents - a green one with a gold
+            # ribbon tipped to the back, a gold one with a red ribbon tipped forward, a small red one in the middle -
+            # and a candy cane. Each present is a little box with a lit top and a shaded side, so they read as presents.
+            '<g transform="rotate(14 2.6 -31)">'
+            '<rect x=".4" y="-35.4" width="4.6" height="5.6" rx=".45" fill="#1f6b45"/><rect x=".4" y="-35.4" width="4.6" height="1.1" rx=".45" fill="#2f8a5a"/>'
+            '<rect x="3.6" y="-35.4" width="1.4" height="5.6" fill="#154d31" opacity=".8"/>'
+            '<path d="M2.7-35.4V-29.8M.4-32.6H5" stroke="#e3c46f" stroke-width=".8"/>'
+            '<path d="M2.7-35.5C1.7-37 .6-36.6 1.2-35.6M2.7-35.5C3.7-37 4.8-36.6 4.2-35.6" stroke="#f0d17a" stroke-width=".65" fill="none" stroke-linecap="round"/></g>'
+            '<g transform="rotate(-12 -2.4 -31)">'
+            '<rect x="-4.9" y="-34.6" width="4.8" height="4.9" rx=".45" fill="#e0b13b"/><rect x="-4.9" y="-34.6" width="4.8" height="1" rx=".45" fill="#f3d47a"/>'
+            '<rect x="-4.9" y="-34.6" width="1.2" height="4.9" fill="#b88a22" opacity=".7"/>'
+            '<path d="M-2.5-34.6V-29.7M-4.9-32.2H-.1" stroke="#c42537" stroke-width=".8"/>'
+            '<path d="M-2.5-34.7C-3.5-36.1-4.5-35.7-3.9-34.8M-2.5-34.7C-1.5-36.1-.5-35.7-1.1-34.8" stroke="#d8364a" stroke-width=".65" fill="none" stroke-linecap="round"/></g>'
+            '<rect x="-1.2" y="-33.2" width="3.2" height="3.4" rx=".35" fill="#c42537" transform="rotate(4 .4 -31.5)"/>'
+            '<path d="M.4-33.2V-29.8M-1.2-31.5H2" stroke="#fff3d0" stroke-width=".55" transform="rotate(4 .4 -31.5)"/>'
+            '<path d="M-3.6-28V-35.4C-3.6-37.6-1-37.6-1-35.7" fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>'
+            '<path d="M-3.6-28V-35.4C-3.6-37.6-1-37.6-1-35.7" fill="none" stroke="#cf2f42" stroke-width="1.2" stroke-linecap="butt" stroke-dasharray=".8 .8"/>'
             # the hanging loop, at the back corner of the cuff
             '<path d="M3.2-29.2C3.9-32.6 7.2-32.4 6.5-29.4C6.2-28.2 5.2-27.7 4.4-27.9" fill="none" stroke="#8f1424" stroke-width="1" stroke-linecap="round"/>'
             # the stocking: a dark velvet rim, then the velvet itself
