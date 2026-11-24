@@ -39,12 +39,12 @@ REDIRECT = """<!doctype html><html lang="en"><head><meta charset="utf-8"><title>
 # "html" in front: wd.js adds its own .sl-more-btn style later in the page.
 SEEMORE_CSS = (
     "html .sp-fmore,html .sp-all,html .sl-more-btn,details>summary::after{display:inline-flex;align-items:center;gap:0;min-height:0;margin:8px 0 0;"
-    "font:500 12px/1.35 Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:4px 11px;border-radius:999px;border:1px solid #c8d6bc;"
+    "font:600 13.5px/1.35 Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:7px 14px;border-radius:999px;border:1px solid #c8d6bc;"
     "background:#f6faf1;color:#55614f;box-shadow:none;cursor:pointer;transition:border-color .15s ease,color .15s ease}\n"
     "html .sp-fmore,details>summary::after{margin:0}html .sp-fmore::after{display:none}html:not(.js) .sp-all{display:none}html .sp-all[hidden],html .sl-more-btn[hidden],html .sp-fmore[hidden]{display:none}\n"
     "html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover,details>summary:hover::after{border-color:#8fbf8f;color:#24321f}\n"
     "@media (prefers-color-scheme:dark){:root{--sl-sb:rgba(155,224,124,.72);--sl-sb-hover:#b8f09f}}\n"
-    "@media (prefers-color-scheme:dark){html .sp-fmore,html .sp-all,html .sl-more-btn,details>summary::after{border-color:#37855f;background:#24684a;color:#a8c9b4}"
+    "@media (prefers-color-scheme:dark){html .sp-fmore,html .sp-all,html .sl-more-btn,details>summary::after{border-color:#2f6d50;background:#1a4d37;color:#d2e6d8}"
     "html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover,details>summary:hover::after{border-color:#6fbf8a;color:#dff5d6}}\n")
 # v5.93: the app's Report button (a bug or an idea for the creator) on every page too, at the end of the header, top right
 PAGE_REPORT_CSS = (
@@ -386,12 +386,20 @@ def build(app):
     # the Christmas preview switch (tools/xmas_loader.js), on every page that loads sp.js, country.js or sl-fx.js
     # (all of them live in species/, so the site root is one folder up from the script)
     FX_JS += XMAS_LOADER_JS
+    # v6.24: the app's design system (buttons, focus ring, links, filled-green contrast) - the "sl-ds shared" part
+    _ds = re.search(r"/\* ---- sl-ds shared start ---- \*/(.*?)/\* ---- sl-ds shared end ---- \*/", app, re.S)
+    DS_CSS = ("/* sl-ds (copied from the app by build_species.py) */\n" + _ds.group(1).strip() + "\n") if _ds else ""
+    # the pages follow the device's night mode (the app has its own switch): the night version of the filled green
+    DS_CSS += "@media (prefers-color-scheme:dark){:root{--ds-primary:#8fd46c;--ds-primary-hover:#a5e486;--ds-primary-press:#7cc35a;--ds-on-primary:#0e2f1e;--ds-focus:#b8f09f}}\n"
+    FX_CSS += DS_CSS
     open(OUT + "/sl-fx.css", "w", encoding="utf-8").write(FX_CSS)
     open(OUT + "/sl-fx.js", "w", encoding="utf-8").write(FX_JS)
     # every plain text link (in a sentence, a list, a table, the breadcrumbs, the footer) changes colour when pointed at
     LINK_HOVER = (":where(p,li,dd,td,th,nav,small,figcaption,h2,h3,.sl-flinks,.sp-crumbs,.cy-crumbs) a:not([class]):not(.sp-tags *):not(.sp-pills *):not(.sx-chips *):hover"
                   "{color:var(--link-hover)}\n")
-    open(OUT + "/sp.css", "w").write(CSS + build_regions.REAL_CSS + "\n" + LINK_HOVER + FX_CSS)
+    # v6.24: the species and place pages declared Inter and Fraunces but never loaded them (they fell back to system fonts and Georgia)
+    FONTS_CSS = "@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');\n"
+    open(OUT + "/sp.css", "w").write(FONTS_CSS + CSS + build_regions.REAL_CSS + "\n" + LINK_HOVER + FX_CSS)
     open(OUT + "/sp.js", "w").write(APP_BACK_JS + JS + build_regions.REAL_JS + "\n" + FX_JS)
     # "Explore in 3D": the reviewed model profiles, next to the viewer (species/3d/viewer.js)
     os.makedirs(OUT + "/3d", exist_ok=True)
@@ -874,7 +882,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         nm_t = nm
         mq = re.search(r" \(([a-z-]+)\)$", nm)
         label_t = nm if (c["is_sci"] or (mq and mq.group(1) in sci.split(" "))) else label  # (the full name stays: it is the page's h1)
-        for title in [label_t + " \u2013 Explore in 3D | SnakeList", label_t + " \u2013 Explore in 3D", label_t + " | SnakeList",
+        for title in ([label_t + " \u2013 fossil snake, 3D reconstruction | SnakeList", label_t + " \u2013 fossil snake | SnakeList"] if c["fossil"] else []) + [label_t + " \u2013 Explore in 3D | SnakeList", label_t + " \u2013 Explore in 3D", label_t + " | SnakeList",
                       nm_t + " \u2013 Explore in 3D | SnakeList", label_t, nm_t + " | SnakeList"]:
             if len(title) <= 70: break
         else: title = nm_t
@@ -1094,8 +1102,9 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         # ---- photo, with a readable credit linking to the original record ----
         photo = img_of(c); p = c["photo"]
         if c["fossil"]:  # no photo can exist, and its colours are unknown: no painted life reconstruction
-            ph = ('<figure class="sp-photo sp-nophoto sp-fossilfig"><div><b>Known only from fossils</b><span>No photo can exist, and its colours '
-                  'and pattern are unknown, so SnakeList shows no life reconstruction.</span></div></figure>')
+            # v6.24: the page offers "Explore in 3D", so say what that model is instead of "no life reconstruction"
+            ph = ('<figure class="sp-photo sp-nophoto sp-fossilfig"><div><b>Known only from fossils</b><span>No photo can exist, and its real colours '
+                  'and pattern are unknown. Its 3D model (Explore in 3D) is a reconstruction: the size and shape follow the fossils, while the colours and pattern are borrowed from living relatives.</span></div></figure>')
         elif photo:
             who, _, lic = p[2].rpartition(", ")
             if not who: who, lic = p[2], ""
@@ -1449,8 +1458,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             actions = ('<a class="sp-btn" href="../?sp=%s&amp;do=seen"><span aria-hidden="true">&#10003; </span>Mark seen</a>'
                        '<a class="sp-btn sp-btn2" href="../?sp=%s&amp;do=want"><span aria-hidden="true">&#9734; </span>Want to see</a>') % (c["id"], c["id"])
             if c["countries"]: actions += '<a class="sp-btn sp-btn2" href="../?map=%s">View on map</a>' % esc(quote(sci))
-            actnote = ("&ldquo;Mark seen&rdquo; and &ldquo;Want to see&rdquo; open this snake in the SnakeList app, where your lists are kept on your device &ndash; "
-                       "tap the highlighted button on its card. &ldquo;View on map&rdquo; opens SnakeList&rsquo;s map on it.")
+            actnote = ("&ldquo;Mark seen&rdquo; and &ldquo;Want to see&rdquo; open SnakeList and save this snake to that list straight away (on this device, "
+                       "or in your account if you are signed in) &ndash; with Undo if it was a slip. &ldquo;View on map&rdquo; opens SnakeList&rsquo;s map on it.")
         page = PAGE.format(
             title=esc(title), desc=esc(mdesc), url=url, img=esc(img), img_alt=esc(img_alt), info_json=info_json, ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"),
             h1=esc(nm), sub=('<i>%s</i>%s' % (esc(sci), (' <span class="sp-auth">%s</span>' % esc(auth_short)) if auth else "")) if not c["is_sci"] else (esc(auth_short) if auth else ""),
@@ -1861,8 +1870,8 @@ CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:center;widt
 .sp-all{font:500 12px Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:4px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;margin:8px 0 0;display:none}
 .js .sp-all{display:inline-block}.js .sp-clip:not(.sp-open)>.sp-x{display:none}
 .sp-mapbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}.sp-mapbar .sp-legend{margin-right:auto}.sp-mapbar .sp-legend,.sp-mapbar .sp-all{margin-top:8px}
-.sp-states{margin-top:12px}.sp-n{color:var(--muted);font-size:.85em}.sp-shade{display:inline-flex;align-items:center;gap:6px}.sp-ramp{display:inline-block;width:46px!important;height:12px;border-radius:4px;background:linear-gradient(90deg,#b8e2aa,#1f5c28)}.sp-cities{margin-top:12px}.js .sp-cities:not(.sp-open){display:none}.sp-cities h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-cities .sp-where{margin:0}.sp-cities small{color:var(--muted)}
-.sp-map circle.ct{fill:#1b5e30;stroke:#fff;stroke-width:1.2px;vector-effect:non-scaling-stroke;cursor:pointer}.sp-map circle.ct.on{fill:#0f3d1e}.sp-map text.ctl{font-family:Inter,system-ui,sans-serif;font-weight:700;fill:#0f2a17;paint-order:stroke;stroke:#fff;stroke-linejoin:round;pointer-events:none}.sp-states h3{font:700 16px Georgia,serif;margin:0 0 4px}.sp-states .sp-where{margin:0;columns:1}
+.sp-states{margin-top:12px}.sp-n{color:var(--muted);font-size:.85em}.sp-shade{display:inline-flex;align-items:center;gap:6px}.sp-ramp{display:inline-block;width:46px!important;height:12px;border-radius:4px;background:linear-gradient(90deg,#b8e2aa,#1f5c28)}.sp-cities{margin-top:12px}.js .sp-cities:not(.sp-open){display:none}.sp-cities h3{font:700 16px Fraunces,Georgia,serif;margin:0 0 4px}.sp-cities .sp-where{margin:0}.sp-cities small{color:var(--muted)}
+.sp-map circle.ct{fill:#1b5e30;stroke:#fff;stroke-width:1.2px;vector-effect:non-scaling-stroke;cursor:pointer}.sp-map circle.ct.on{fill:#0f3d1e}.sp-map text.ctl{font-family:Inter,system-ui,sans-serif;font-weight:700;fill:#0f2a17;paint-order:stroke;stroke:#fff;stroke-linejoin:round;pointer-events:none}.sp-states h3{font:700 16px Fraunces,Georgia,serif;margin:0 0 4px}.sp-states .sp-where{margin:0;columns:1}
 .sp-az .v{font-size:11px;font-weight:700;color:#b5452a;margin-left:4px}@media (prefers-color-scheme:dark){.sp-az .v{color:#f0a04b}}
 .sx-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0}.sx-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .sx-box label{display:block;font-weight:600;font-size:14px;margin:0 0 6px}.sx-box input{width:100%;min-width:0;font:inherit;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
@@ -1872,27 +1881,27 @@ CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:center;widt
 .sx-searching #by-country,.sx-searching #by-family,.sx-searching .sx-chips{display:none}.sx-fam{scroll-margin-top:12px}.sx-fam h2 a{color:inherit}
 .sp-hubs{columns:3 200px;column-gap:24px;padding:0;list-style:none}.sp-hubs li{break-inside:avoid;margin:2px 0}
 :root{--bg:#f1f6ee;--card:#fbfdf9;--text:#1d6b33;--muted:#4b7a55;--line:#d5e4cf;--g:#58b351;--land:#d7dccb;--on:#58b351;--in:#e07a1f;--sea:#e3ecef;--tag:#e3f0dc;--tagline:#a9cf9c;--link:#2a7a2f;--link-hover:#24321f}
-@media (prefers-color-scheme:dark){:root{--bg:#22623f;--card:#256846;--text:#dff5d6;--muted:#bfe3c6;--line:#37855f;--g:#58b351;--land:#3a7c5a;--on:#58b351;--in:#f0a04b;--sea:#1b5034;--tag:#2c7a57;--tagline:#4a9a6c;--link:#dcf7d0;--link-hover:#9be07c}}
+@media (prefers-color-scheme:dark){:root{--bg:#123526;--card:#1a4d37;--text:#dff5d6;--muted:#c6dfcf;--line:#2f6d50;--g:#58b351;--land:#3a7c5a;--on:#58b351;--in:#f0a04b;--sea:#1b5034;--tag:#215c42;--tagline:#4a9a6c;--link:#dcf7d0;--link-hover:#9be07c}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
 a{color:var(--link)}a:where(:hover){color:var(--link-hover)}
 /* v5.78: nothing is ever underlined, on hover or not - a link changes colour instead (like About creator in the app);
    links inside running text are a little bolder so they still stand out from the words around them */
 *,*::before,*::after{text-decoration-line:none!important}:where(p,figcaption,.sp-crumbs,.cy-crumbs,dd,td,small,.sp-note) a:where(:not([class])){font-weight:600}
 .sp-top{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:980px;margin:0 auto;padding:14px 16px}
-.sp-logo{font:700 26px Georgia,'Times New Roman',serif;color:var(--g);text-decoration:none}.sp-top nav{display:flex;gap:16px;font-size:14px}
+.sp-logo{font:700 26px Fraunces,Georgia,serif;color:var(--g);text-decoration:none}.sp-top nav{display:flex;gap:16px;font-size:14px}
 .sp-main{max-width:980px;margin:0 auto;padding:0 16px 30px}.sp-crumbs{font-size:13px;color:var(--muted);margin:4px 0 14px}
 .sp-head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:start}
 @media (max-width:720px){.sp-head{grid-template-columns:1fr}}
 .sp-photo{margin:0}.sp-photo img,.sp-sprite{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:18px;display:block;background:var(--line)}
 .sp-photo figcaption{font-size:12px;color:var(--muted);margin-top:6px}.sp-nophoto div{aspect-ratio:3/2;border-radius:18px;display:grid;place-items:center;background:var(--line);color:var(--muted)}@media (max-width:640px){.sp-nophoto:not(.sp-fossilfig) div{aspect-ratio:auto;min-height:72px;padding:12px}}
-h1{font:700 clamp(30px,5vw,44px)/1.1 Georgia,serif;margin:0}.sp-sci{font-style:italic;color:var(--muted);margin:4px 0 10px;font-size:18px}
+h1{font:700 clamp(30px,5vw,44px)/1.1 Fraunces,Georgia,serif;margin:0}.sp-sci{font-style:italic;color:var(--muted);margin:4px 0 10px;font-size:18px}
 /* every page's main heading in the species pages' green, and the line under it in the lighter green */
 h1,.sp-title h1,.cy-head h1{color:#1f7a3a}.sp-title .sp-sci,.cy-htext .cy-lead,.cy-htext .rg-sub,h1+.sp-muted,h1+p{color:#2e7d4f}
 @media (prefers-color-scheme:dark){h1,.sp-title h1,.cy-head h1{color:#a8ef94}.sp-title .sp-sci,.cy-htext .cy-lead,.cy-htext .rg-sub,h1+.sp-muted,h1+p{color:#8fd98a}}
 .sp-badge{display:none}.sp-facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(140px,100%),1fr));gap:8px;margin:18px 0 12px}.sp-facts dd{overflow-wrap:anywhere}
 .sp-facts div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px}.sp-facts dt{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.sp-facts dd{margin:0;font-weight:600}
 .sp-btn{display:inline-block;background:var(--g);color:#fff;text-decoration:none;font-weight:600;padding:11px 18px;border-radius:12px}
-section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 20px;margin-top:18px}h2{font:700 22px Georgia,serif;margin:0 0 8px}h2 small{font:500 13px Inter,sans-serif;color:var(--muted)}
+section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 20px;margin-top:18px}h2{font:700 22px Fraunces,Georgia,serif;margin:0 0 8px}h2 small{font:500 13px Inter,sans-serif;color:var(--muted)}
 .sp-map{position:relative;border-radius:12px;overflow:hidden;background:var(--sea);aspect-ratio:2/1;max-height:460px;width:100%}
 .sp-map svg{width:100%;height:100%;display:block;user-select:none;-webkit-user-select:none}
 .sp-map path{fill:var(--land);stroke:var(--sea);stroke-width:.6;vector-effect:non-scaling-stroke;stroke-linejoin:round}.sp-map path.on{fill:var(--on)}.sp-map path.in{fill:var(--in)}
@@ -1922,7 +1931,7 @@ section{background:var(--card);border:1px solid var(--line);border-radius:18px;p
 .sl-foot p{margin:4px 0}.sl-flogo{font:700 18px Fraunces,Georgia,serif;color:#58b351!important;text-decoration:none}
 .sl-flinks{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px}.sl-foot a{color:var(--muted)}.sl-fnote{font-size:12px}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--g);outline-offset:2px;border-radius:4px}
-.sp-relh{font:700 16px Georgia,serif;margin:10px 0 4px}.sp-relh small{font:500 12.5px Inter,sans-serif;color:var(--muted)}
+.sp-relh{font:700 16px Fraunces,Georgia,serif;margin:10px 0 4px}.sp-relh small{font:500 12.5px Inter,sans-serif;color:var(--muted)}
 .sp-habd{margin-top:10px}.sp-habd summary{cursor:pointer;color:var(--link);font-size:14px}.sp-habd .sp-pills{margin-top:8px}
 @media (max-width:560px){.sl-top{padding:12px}.sl-top nav{gap:2px 14px;font-size:14px}.sl-brand{font-size:21px}}
 .sp-head{margin-bottom:6px;grid-template-areas:'photo title' 'key title';grid-template-rows:auto 1fr;row-gap:16px}.sp-head>.sp-photo{grid-area:photo}.sp-head>.sp-title{grid-area:title}.sp-head>.sp-key{grid-area:key;align-self:start;margin:0}@media (max-width:720px){.sp-head{grid-template-areas:'photo' 'title' 'key';row-gap:14px}}.sp-title{min-width:0}.sp-sci{margin:6px 0 12px}.sp-sci i{font-style:italic}.sp-auth{font-style:normal;font-size:14px;color:var(--muted)}
@@ -1937,7 +1946,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .sp-toc{position:sticky;top:0;z-index:5;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:18px -16px 0;padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
 .sp-toc::-webkit-scrollbar{display:none}.sp-toc a{flex:none;padding:5px 12px;border-radius:999px;font-size:14px;font-weight:600;text-decoration:none;color:var(--muted)}
 .sp-toc a:hover,.sp-toc a:focus-visible{background:var(--tag);color:var(--link)}
-.sp-sec{scroll-margin-top:60px}.sp-sec h3{font:700 17px Georgia,serif;margin:16px 0 4px}.sp-sec h2+h3{margin-top:4px}.sp-sec h3 small{font:500 12.5px Inter,sans-serif;color:var(--muted)}
+.sp-sec{scroll-margin-top:60px}.sp-sec h3{font:700 17px Fraunces,Georgia,serif;margin:16px 0 4px}.sp-sec h2+h3{margin-top:4px}.sp-sec h3 small{font:500 12.5px Inter,sans-serif;color:var(--muted)}
 .sp-sec p{margin:0 0 10px}.sp-ref{font-size:11px;line-height:0;margin-left:2px;white-space:nowrap}.sp-ref a{text-decoration:none}
 .sp-limited{background:var(--tag);border:1px solid var(--tagline);border-radius:12px;padding:10px 14px}
 .sp-fun{margin-top:14px;padding:12px 16px;border-radius:14px;background:var(--tag);border:1px solid var(--tagline)}.sp-fun h3{margin:0 0 4px}.sp-fun ul{margin:0;padding-left:20px}.sp-fun li{margin:4px 0}
@@ -1985,7 +1994,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .sp-ext{display:inline-block;margin-left:4px;padding:0 7px;border-radius:999px;font-size:11.5px;font-weight:600;background:#5b4a3a;color:#fff;line-height:1.6}
 .sp-terr{color:var(--muted);font-weight:400}
 .sp-fossilfig div{display:flex!important;flex-direction:column;gap:6px;padding:20px;text-align:center;background:repeating-linear-gradient(135deg,var(--line) 0 12px,var(--tag) 12px 24px)!important;color:var(--text)!important}
-.sp-fossilfig div{justify-content:center;align-items:center}@media (max-width:720px){.sp-fossilfig div{aspect-ratio:auto!important;min-height:130px}}.sp-fossilfig b{font:700 18px Georgia,serif}.sp-fossilfig span{font-size:14px;max-width:34ch}
+.sp-fossilfig div{justify-content:center;align-items:center}@media (max-width:720px){.sp-fossilfig div{aspect-ratio:auto!important;min-height:130px}}.sp-fossilfig b{font:700 18px Fraunces,Georgia,serif}.sp-fossilfig span{font-size:14px;max-width:34ch}
 .sp-iucn{display:flex;gap:14px;align-items:center;margin:0 0 12px}.sp-iucn p{margin:0!important}.sp-iucn .sp-note{margin:2px 0 0!important}
 .sp-ety{color:var(--text)}
 .sp-whereh{margin-top:16px!important}
@@ -2330,7 +2339,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
                  ("cy-d-dv", "fv", "dv", dk["dv"], "dangerously venomous", "Venomous and dangerous to people: elapids (cobras, kraits, mambas, sea snakes...), vipers, stiletto snakes, the boomslang, twig snakes and keelbacks"),
                  ("cy-d-mv", "fv", "mv", dk["mv"], "mildly venomous", "Rear-fanged snakes with mild venom: no serious bites to people are documented"),
                  ("cy-d-gc", "fv", "gc", dk["gc"], "giant constrictor" if dk["gc"] == 1 else "giant constrictors", "Not venomous, but big enough to be dangerous to people"),
-                 ("cy-d-hl", "fv", "hl", dk["hl"], "harmless", "The app's Low risk filter: not venomous and not a giant constrictor - though any snake can bite")]
+                 ("cy-d-hl", "fv", "hl", dk["hl"], "low risk", "The app's Low risk filter: not venomous and not a giant constrictor - though any snake can bite")]
         # the header's own venomous / non-venomous counts become taps too (no second copy of them)
         for r0 in DROWS[:2]:
             stats = stats.replace('<li><b>%s</b><span>%s</span></li>' % ("{:,}".format(r0[3]), r0[4]), dchip(*r0), 1)
@@ -2339,7 +2348,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
                   '<p class="cy-dnote">%s</p></div>') % (
             ' <span>&middot; tap a number to show only those snakes</span>' if vfilter else "",
             "".join(dchip(*r0) for r0 in DROWS[2:]),
-            "Harmful = dangerously venomous + giant constrictors. Harmless = not venomous and not a giant constrictor. "
+            "Harmful = dangerously venomous + giant constrictors. Low risk = not venomous and not a giant constrictor. "
             "Mildly venomous snakes have no serious bites to people documented. Any snake can bite.")
         # the app's checklist filter panel, group by group, counted over this page's living species
         tcount = {}
@@ -2398,7 +2407,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
             (('<label><span class="cy-lab">Venom &amp; danger</span><select id="cy-v"><option value="">All species</option>%s</select></label>' % "".join(
                 '<option value="%s">%s (%s)</option>' % (val, lab, "{:,}".format(k)) for val, lab, k in (
                     ("1", "Venomous", nv), ("0", "Non-venomous", n - nv), ("h", "Harmful to people", dk["dv"] + dk["gc"]), ("dv", "Dangerously venomous", dk["dv"]),
-                    ("mv", "Mildly venomous", dk["mv"]), ("gc", "Giant constrictors", dk["gc"]), ("hl", "Harmless", dk["hl"])) if k))
+                    ("mv", "Mildly venomous", dk["mv"]), ("gc", "Giant constrictors", dk["gc"]), ("hl", "Low risk", dk["hl"])) if k))
              if kind == "country" else
              '<label><span class="cy-lab">Venom</span><select id="cy-v"><option value="">All species</option><option value="1">Venomous (%s)</option><option value="0">Non-venomous (%s)</option></select></label>' % ("{:,}".format(nv), "{:,}".format(n - nv))) if vfilter else "",
             ('<label><span class="cy-lab">%s</span><select id="cy-f"><option value="">All %s</option>%s</select></label>' % (fam_word[0].capitalize(), fam_word[1], fam_opts)) if nfam > 1 else "",
@@ -2462,7 +2471,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
     cta = ("../../?map=%s" % quote_param(name), "View snakes on map") if kind == "country" else (
         ("../../?fam=%s" % quote_param(name), "Open the family in SnakeList") if kind == "family" else ("../../?q=%s" % quote_param(name), "Open the genus in SnakeList"))
     crumbs_html = "".join('<li><a href="%s">%s</a></li>' % (c0[2], esc(c0[0])) for c0 in crumbs)
-    jump = ('<form class="cy-jump" id="cy-jump" role="search" action="../#by-country" onsubmit="return false"><label for="cy-jq" class="cy-sr">Go to another country or territory</label><input id="cy-jq" list="cy-clist" aria-label="Go to another country or territory" enterkeyhint="go" autocomplete="off"><datalist id="cy-clist"></datalist></form>'
+    jump = ('<form class="cy-jump" id="cy-jump" role="search" action="../#by-country" onsubmit="return false"><label for="cy-jq" class="cy-sr">Go to another country or territory</label><input id="cy-jq" type="search" list="cy-clist" placeholder="Go to another country&hellip;" aria-label="Go to another country or territory" enterkeyhint="go" autocomplete="off"><datalist id="cy-clist"></datalist></form>'
             if kind == "country" else "")
     # the introduction: what this family is (its reviewed text), what the genus name means, or
     # for a country, what its totals count
@@ -2558,12 +2567,12 @@ COUNTRY_CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:cen
 .cy-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .cy-page a:focus-visible,.cy-page button:focus-visible,.cy-page input:focus-visible,.cy-page select:focus-visible{outline:3px solid var(--g);outline-offset:2px}
 .cy-crumbs{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin:2px 0 14px;font-size:13.5px;color:var(--muted)}
-.cy-crumbs ol{list-style:none;display:flex;flex-wrap:wrap;margin:0;padding:0}.cy-crumbs li+li:before{content:"/";margin:0 8px;color:var(--tagline)}
+.cy-crumbs ol{list-style:none;display:flex;flex-wrap:wrap;margin:0;padding:0}.cy-crumbs li+li:before{content:"\203A";margin:0 8px;color:var(--tagline)}
 .cy-crumbs a{color:var(--muted)}.cy-crumbs a:hover{color:var(--g)}.cy-crumbs [aria-current]{color:var(--text);font-weight:600}
-.cy-jump{display:flex;gap:6px}.cy-jump input{width:190px;max-width:52vw;font:inherit;font-size:14px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text)}
+.cy-jump{display:flex;gap:6px}.cy-jump input{width:210px;max-width:60vw;font:inherit;font-size:14.5px;padding:8px 10px 8px 34px;min-height:40px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b7a55' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:10px 50%!important;background-size:16px!important;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text)}
 .cy-jump button,.cy-reset{font:600 13px Inter,system-ui,sans-serif;padding:6px 12px;border-radius:10px;border:1px solid var(--tagline);background:var(--tag);color:var(--text);cursor:pointer}
 .cy-head{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;display:grid;grid-template-columns:1fr auto;gap:14px 24px;align-items:center;box-shadow:0 1px 2px rgba(20,60,30,.06)}
-.cy-head h1{font:700 clamp(28px,4.4vw,40px)/1.12 Georgia,serif;margin:0;overflow-wrap:anywhere}
+.cy-head h1{font:700 clamp(28px,4.4vw,40px)/1.12 Fraunces,Georgia,serif;margin:0;overflow-wrap:anywhere}
 .cy-lead{margin:8px 0 0;color:var(--muted);font-size:16px;max-width:62ch}
 .cy-stats{grid-column:1;list-style:none;margin:2px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .cy-stats li{display:flex;align-items:baseline;gap:6px;background:var(--tag);border:1px solid var(--tagline);border-radius:12px;padding:5px 12px;font-size:13.5px;color:var(--muted)}
@@ -2573,7 +2582,7 @@ COUNTRY_CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:cen
 .cy-dhead{margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}.cy-dhead span{text-transform:none;letter-spacing:0;font-weight:400}
 .cy-danger .cy-stats{margin:0}.cy-dnote{margin:0;font-size:12.5px;color:var(--muted);max-width:70ch}
 .cy-stats li:has(.cy-dbtn){padding:0;border:0;background:none}.cy-stats li.cy-d0{opacity:.6}
-.cy-fg{margin-top:16px}.cy-fg h2{font:700 19px Georgia,serif;margin:0 0 4px}.cy-fg .cy-note{margin:0 0 10px}
+.cy-fg{margin-top:16px}.cy-fg h2{font:700 19px Fraunces,Georgia,serif;margin:0 0 4px}.cy-fg .cy-note{margin:0 0 10px}
 .cy-fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
 .cy-fgrp{background:var(--card);border:1px solid var(--line);border-radius:14px}
 .cy-fgrp summary{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;cursor:pointer;padding:11px 14px;min-height:44px;box-sizing:border-box;list-style:none}
@@ -2602,7 +2611,7 @@ a.cy-dbtn{text-decoration:none}
 .cy-img{display:block;aspect-ratio:3/2;background:var(--line);overflow:hidden}.cy-img img{width:100%;height:100%;object-fit:cover;display:block}
 .cy-noimg{display:grid;place-items:center;height:100%;color:var(--muted);font-size:13px}
 .cy-body{display:flex;flex-direction:column;gap:2px;padding:10px 12px 12px;flex:1}
-.cy-name{font:700 16.5px/1.25 Georgia,serif;overflow-wrap:anywhere}.cy-sci{color:var(--muted);font-size:13.5px;overflow-wrap:anywhere}
+.cy-name{font:700 16.5px/1.25 Fraunces,Georgia,serif;overflow-wrap:anywhere}.cy-sci{color:var(--muted);font-size:13.5px;overflow-wrap:anywhere}
 .cy-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:auto;padding-top:8px}
 .cy-b{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--line);line-height:1.4}
 .cy-b.v{background:#fbe9e3;border-color:#e8b9a8;color:#8a2f17}.cy-b.nv{background:var(--tag);border-color:var(--tagline);color:var(--text)}
@@ -2611,10 +2620,10 @@ a.cy-dbtn{text-decoration:none}
 .cy-empty,.cy-none{background:var(--card);border:1px dashed var(--tagline);border-radius:14px;padding:18px 20px;margin:4px 0 0}
 .cy-none p{margin:4px 0}.cy-link{font:inherit;font-weight:600;background:none;border:0;color:var(--link);cursor:pointer;padding:0}.cy-link:hover{color:var(--link-hover)}
 .cy-more-wrap{text-align:center;margin:16px 0 0}.cy-more{font:600 14px Inter,system-ui,sans-serif;min-height:42px;padding:8px 22px;border-radius:12px;border:1px solid var(--tagline);background:var(--card);color:var(--text);cursor:pointer}
-.cy-sec{margin-top:26px}.cy-sec h2{font:700 21px Georgia,serif;margin:0 0 6px}.cy-note{margin:0 0 12px;color:var(--muted);font-size:14px}
+.cy-sec{margin-top:26px}.cy-sec h2{font:700 21px Fraunces,Georgia,serif;margin:0 0 6px}.cy-note{margin:0 0 12px;color:var(--muted);font-size:14px}
 .cy-facts{margin:0;padding-left:18px}.cy-facts li{margin:4px 0}
 .cy-foot{border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:13px;padding:18px 16px 26px}
-.cy-foot p{margin:4px 0}.cy-flogo{font:700 17px Georgia,serif;color:var(--g);text-decoration:none}
+.cy-foot p{margin:4px 0}.cy-flogo{font:700 17px Fraunces,Georgia,serif;color:var(--g);text-decoration:none}
 .cy-flinks{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px}.cy-foot a{color:var(--muted)}.cy-foot .cy-flogo{color:var(--g)}.cy-fnote{font-size:12px}
 @media (prefers-color-scheme:dark){.cy-b.v{background:#5a2a1c;border-color:#a5553a;color:#ffd9cc}.cy-b.i{background:#5a4318;border-color:#a8833d;color:#ffe3b0}
 .cy-head,.cy-card a:hover{box-shadow:none}.cy-tools input,.cy-tools select{background:var(--bg)}}
