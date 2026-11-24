@@ -3067,6 +3067,8 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     const bedG = new THREE.CircleGeometry(groundR, 64); bedG.rotateX(-Math.PI / 2);
     { const pp = bedG.attributes.position; for (let i = 0; i < pp.count; i++) pp.setY(i, (fbm(pp.getX(i) / 3, pp.getZ(i) / 3, 2, seed + 31, 3) - 0.5) * 0.5 - sstep(groundR * 0.3, groundR, Math.hypot(pp.getX(i), pp.getZ(i))) * 1.5); bedG.computeVertexNormals(); }
     const deep = new THREE.Mesh(bedG, bedM); deep.position.y = -1.7; deep.receiveShadow = true; scene.add(deep);
+    // v6.26: the sand's own grain, and the moving net of light the ripples focus onto the bed (caustics), as on the river bed
+    if (NATURE.groundDetail) { NATURE.groundDetail(THREE, bedM, 'sand', ctx, { near: 2.5, far: 14 }); if (bedM.userData.caustics) bedM.userData.caustics(water.position.y, 1.3); }
     // (v6.26: real reef colours - pale coral heads, ochre and grey rubble, dark rock with a little green growth - only slightly
     // shaded by the water, and lying flatter: they were all mixed 40% with blue, a scatter of cartoon-blue pebbles)
     const corals = ['#b3a283', '#9c8b6c', '#857659', '#6c6452', '#a89a7c', '#5f5d4c', '#8d8a6a', '#c2b394'], blue = new THREE.Color('#566f68'), cg = [rockGeometry(seed + 41, 3), rockGeometry(seed + 42, 3)], cm = new THREE.MeshStandardMaterial({ roughness: 0.95, metalness: 0, color: '#ffffff' });
@@ -3074,6 +3076,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
     cg.forEach((g) => { const n = quality === 'low' ? 18 : 40, im = new THREE.InstancedMesh(g, cm, n), cc = new THREE.Color();
       for (let i = 0; i < n; i++) { const a = R() * TAU, r = Math.max(Rb * 1.5, 1) + R() * groundR * 0.4, s = 0.08 + R() ** 2 * 0.3; cE.set(R() * 0.3, R() * TAU, R() * 0.3); cQ.setFromEuler(cE); cS.set(s * (1 + R() * 0.6), s * (0.35 + R() * 0.45), s * (1 + R() * 0.6)); cP.set(Math.cos(a) * r, -1.7 - 0.05 + s * 0.2, Math.sin(a) * r); cM.compose(cP, cQ, cS); im.setMatrixAt(i, cM); im.setColorAt(i, cc.set(corals[(R() * corals.length) | 0]).lerp(blue, 0.12).multiplyScalar(0.85 + R() * 0.25)); }
       im.receiveShadow = true; scene.add(im); });
+    if (NATURE.groundDetail) { NATURE.groundDetail(THREE, cm, 'rock', ctx, { tri: true, near: 2.5, far: 14 }); if (cm.userData.caustics) cm.userData.caustics(water.position.y, 1.3); }
     wm.opacity = 0.8; // (v6.26: a little less clear, so the body under the surface reads as under it)
   }
 
@@ -3987,7 +3990,7 @@ float slScale(vec2 m) {
     if (pose.drape) snakeGroup.add(tree = perchTree('drape', () => addDrapeBranch(P, F, pose, seed))); // v5.62 (after the bounds: the view frames the snake, not the whole branch)
     const Rb = Math.max(size.x, size.z) / 2 * 1.05 + F.w0;
     const hMax = bb.max.y;
-    const poseInfo = { pts: pose.pts, ds: pose.ds, Ly: pose.Ly, radius: Rb, envR: P.length >= 0.4 ? Rb + 1.0 : Rb * 1.3, seaLevel: F.Hh(F.L * 0.5) * F.bf * (P.scene.float || 1.55) }; // (v6.26: 1.55 - about two thirds of the body under the surface, only the back and head breaking it, as a resting sea snake lies; at 1.1 it seemed to lie on the water)
+    const poseInfo = { pts: pose.pts, ds: pose.ds, Ly: pose.Ly, radius: Rb, envR: P.length >= 0.4 ? Rb + 1.0 : Rb * 1.3, seaLevel: F.Hh(F.L * 0.5) * F.bf * Math.max(P.scene.float || 1.55, 1.45) }; // (v6.26: at least 1.45 - about two thirds of the body under the surface, only the back and head breaking it, as a resting sea snake lies; at 1.1, and the 0.3 some profiles had, it lay on the water like a toy)
     // water side for riverbank: the side of the snake with most open space
     if (sceneOf(P.scene).water === 'river') { let best = 0, bd = -1; for (let i = 0; i < 16; i++) { const a = (i / 16) * TAU; let m = -1e9; for (const p of pose.pts) m = Math.max(m, p[0] * Math.cos(a) + p[1] * Math.sin(a)); if (bd < 0 || m < bd) { bd = m; best = a; } } poseInfo.waterDir = best; poseInfo.waterDist = bd + F.w0 * 2.5 + Rb * 0.12; }
     scene.add(snakeGroup);
