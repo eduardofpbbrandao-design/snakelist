@@ -12,9 +12,11 @@ and light): session scratchpad `batch103/3d/`.
 - No specular and no gloss coat down in the skin between the scales (from the cavity map): the interstitial skin stays dull
   and dark, so each scale's outline reads in the highlights too.
 - The gloss coat's normal follows each scale (0.85 instead of 0.5), so the coat breaks up scale by scale.
-- Base values: roughness 0.74-0.44 (was 0.82-0.5), coat 0.14 + 0.56 x gloss (was 0.08 + 0.42 x gloss), coat roughness
-  0.38-0.12 (was 0.45-0.14), IOR 1.55 (keratin), environment reflections 1.0 (was 0.85). With the coat broken up per scale
-  the average shine is about what it was, but it is never a uniform wet film.
+- Base values: roughness 0.66-0.32 (was 0.82-0.5), coat 0.18 + 0.7 x gloss (was 0.08 + 0.42 x gloss), coat roughness
+  0.32-0.08 (was 0.45-0.14), IOR 1.55 (keratin), environment reflections 1.0 (was 0.85). Glossy snakes now have the crisp
+  highlights of real scales; with the coat broken up per scale it is never a uniform wet film.
+- The flat fill light on the skin is about two thirds of what it was (it washed colours to pastel); the contact shading
+  and the darker skin between scales keep dark snakes readable.
 - Belly plates: each ventral scute its own sheen and a slight tilt, a little glossier than the back.
 - A fine micro-relief on each scale, faded out with distance (no shimmer far away).
 - Head shields: flatter plates with a steeper edge into a narrower suture (were domed with a wide bevel - "clay"), less
