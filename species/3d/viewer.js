@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=587'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=591'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=626'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=626'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 import * as DAYNIGHT from './daynight.js?r=614'; // v6.14: Day / Night (and the plugin hooks "See the spot", spot.js, uses)
 export function useThree(t) { THREE = t; }
 // v6.13: Array .at() for iPads on iPadOS 15.0-15.3 (it came in 15.4); the species pages load this without SnakeList's own copy
@@ -3296,7 +3296,7 @@ function applyEnv(ctx, P, F, poseInfo, env) {
   sun.shadow.radius = lerp(8, 3, env.sunny); sun.shadow.blurSamples = 16;
   if (ctx.skinLight) { // v5.88: the snake's own fill and bounce (SKIN_LIGHT_GLSL), from this panorama's light
     const L = ctx.skinLight, w = new THREE.Color('#fbf6ee');
-    L.uFill.value.copy(w).lerp(env.horizon.clone().multiplyScalar(1 / Math.max(0.05, Math.max(env.horizon.r, env.horizon.g, env.horizon.b))), 0.25).multiplyScalar(0.12 + 0.1 * env.sunny); // (v5.90: about half - with the sun now at the photographer's shoulder the extra fill flattened and paled every skin: a mid-brown boa came out cream)
+    L.uFill.value.copy(w).lerp(env.horizon.clone().multiplyScalar(1 / Math.max(0.05, Math.max(env.horizon.r, env.horizon.g, env.horizon.b))), 0.25).multiplyScalar(0.08 + 0.06 * env.sunny); // (v6.26: lower again - the shading between scales and the contact shading now keep dark snakes readable, and this flat fill washed every colour out to a pastel) (v5.90: about half - with the sun now at the photographer's shoulder the extra fill flattened and paled every skin: a mid-brown boa came out cream)
     L.uBounce.value.copy(ctx.hemi ? ctx.hemi.groundColor : w).lerp(w, 0.3).multiplyScalar(0.24 * env.sunny);
   }
   if (ctx.hemi) ctx.hemi.intensity *= 0.4; // (v5.58: a little more fill, so the shaded side of a dark snake keeps its scales and colour)
