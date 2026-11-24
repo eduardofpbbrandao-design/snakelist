@@ -697,7 +697,7 @@ function buildAll(A) {
     for (let i = 0; i < nOut; i++) for (let t = 0; t < 4; t++) { const a = R() * TAU, r = lerp(rIn, rOut, R()); if (addLeaf(Math.cos(a) * r, Math.sin(a) * r, r < rIn * 1.6 && !low)) break; }
     const mk = (geos, buckets, cast) => geos.forEach((g, i) => {
       const b = buckets[i]; if (!b.length) { g.dispose(); return; }
-      const im = new THREE.InstancedMesh(g, mat, b.length); b.forEach(([mm, c], k) => { im.setMatrixAt(k, mm); im.setColorAt(k, c); });
+      const im = new THREE.InstancedMesh(g, mat, b.length); b.forEach(([mm, c], k) => { im.setMatrixAt(k, mm); im.setColorAt(k, c); }); im.name = 'litter'; // (v6.20: See it eat pushes these aside round the prey)
       im.instanceMatrix.needsUpdate = true; im.instanceColor.needsUpdate = true; im.castShadow = cast; im.receiveShadow = true; scene.add(im); track(g);
       addTris('leaves', (g.index.count / 3) * b.length);
     });
@@ -750,7 +750,7 @@ function buildAll(A) {
 // Done in the vertex shader (no work on the CPU): each plant bends from its base (the instance's origin), the more the
 // higher above it; tall things (trees) bend much less per metre than grass. AMB.uT is the clock, AMB.uWind the strength
 // (lower at the Light quality setting, 0 with reduced motion).
-export const AMB = { uT: { value: 0 }, uWind: { value: 1 }, uDens: { value: 1 }, uNear: { value: 0.05 }, rip: [], ripN: 0 }; // (v5.93: uDens - viewer.js thins far plants on a slow device)
+export const AMB = { uT: { value: 0 }, uWind: { value: 1 }, uDens: { value: 1 }, uNear: { value: 0.05 }, uClr: { value: null }, rip: [], ripN: 0 }; // (v5.93: uDens - viewer.js thins far plants on a slow device)
 const WIND_VS = `
 vec4 mvPosition = vec4( transformed, 1.0 );
 #ifdef USE_INSTANCING
@@ -772,6 +772,9 @@ vec3 slSc = vec3( slKeep );
 // v6.00: grass right in front of the lens bows down out of the way, smoothly with its distance from the camera (uSlNear:
 // about half the way to the snake, 4 cm to 1.4 m), instead of filling the view - the only way the camera changes the grass
 float slC = smoothstep( uSlNear * 0.35, uSlNear, distance( slO, cameraPosition ) );
+// v6.20: during See it eat, grass standing between the camera and the prey and head (uSlClr: the point looked at, and
+// the half-width of a clear corridor to it) bows down smoothly too, so no tuft hides the action from any side
+if ( uSlClr.w > 0.0 ) { vec3 slA = cameraPosition, slAB = uSlClr.xyz - slA; float slT = clamp( dot( slO - slA, slAB ) / max( 1e-6, dot( slAB, slAB ) ), 0.0, 1.0 ); vec3 slQ = slA + slAB * slT; float slDd = length( ( slO - slQ ).xz ), slRw = uSlClr.w + ( 1.0 - slT ) * length( slAB ) * 0.32; slC = min( slC, mix( 1.0, smoothstep( slRw * 0.55, slRw * 1.25, slDd ), 1.0 - smoothstep( 0.86, 1.0, slT ) ) ); } // (a cone, wider towards the lens: a blade near the camera covers much of the view even off to one side)
 slSc *= vec3( mix( 0.35, 1.0, slC ), slC, mix( 0.35, 1.0, slC ) ); slKeep *= slC;
 #endif
 if ( slKeep < 0.999 ) slW.xyz = slO + ( slW.xyz - slO ) * slSc;
@@ -793,10 +796,11 @@ if ( slKeep <= 0.0 ) gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 ); // (left out: off
 #endif`;
 export function tick(t) { AMB.uT.value = t; }
 export function vegetation(THREE, m, o = {}) {
+  if (!AMB.uClr.value) AMB.uClr.value = new THREE.Vector4(0, 0, 0, 0);
   if (o.near) m.defines = Object.assign({}, m.defines, { SL_NEAR: '' }); // (v6.00: grass and other low ground cover bow out of the lens's way)
   m.onBeforeCompile = (sh) => {
-    sh.uniforms.uSlT = AMB.uT; sh.uniforms.uSlWind = AMB.uWind; sh.uniforms.uSlDens = AMB.uDens; sh.uniforms.uSlNear = AMB.uNear;
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uSlT; uniform float uSlWind; uniform float uSlDens; uniform float uSlNear;').replace('#include <project_vertex>', WIND_VS);
+    sh.uniforms.uSlT = AMB.uT; sh.uniforms.uSlWind = AMB.uWind; sh.uniforms.uSlDens = AMB.uDens; sh.uniforms.uSlNear = AMB.uNear; sh.uniforms.uSlClr = AMB.uClr;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uSlT; uniform float uSlWind; uniform float uSlDens; uniform float uSlNear; uniform vec4 uSlClr;').replace('#include <project_vertex>', WIND_VS);
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <normal_fragment_begin>', THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', ''))
       .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>

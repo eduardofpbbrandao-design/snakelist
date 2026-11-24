@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=587'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=591'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=592'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=592'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 import * as DAYNIGHT from './daynight.js?r=614'; // v6.14: Day / Night (and the plugin hooks "See the spot", spot.js, uses)
 export function useThree(t) { THREE = t; }
 // v6.13: Array .at() for iPads on iPadOS 15.0-15.3 (it came in 15.4); the species pages load this without SnakeList's own copy
@@ -3170,6 +3170,11 @@ function Controls(dom, cam, opt) {
       if (Math.abs(st.goal.az - st.az) < 1e-4 && Math.abs(st.goal.d - st.d) / st.d < 1e-4 && Math.abs(st.goal.el - st.el) < 1e-4 && Math.hypot(st.goal.px - st.px, st.goal.pz - st.pz) < st.d * 1e-4) { st.az = st.goal.az; st.d = st.goal.d; st.px = st.goal.px; st.pz = st.goal.pz; st.goal = null; } else moving = true;
     }
     st.el = limitEl(st.el, st.d);
+    // v6.20 (Eduardo: "too laggy when going around"): a drag turns the camera in the pointer handler, not here - so this
+    // said "not moving" all through a drag, and every frame of it redrew the whole shadow map (and the dynamic resolution
+    // never stepped in). Any change since the last frame counts as camera movement.
+    const pv = st._pv || (st._pv = [NaN, 0, 0, 0, 0]);
+    if (pv[0] !== st.az || pv[1] !== st.el || pv[2] !== st.d || pv[3] !== st.px || pv[4] !== st.pz) { if (pv[0] === pv[0]) moving = true; pv[0] = st.az; pv[1] = st.el; pv[2] = st.d; pv[3] = st.px; pv[4] = st.pz; }
     return moving;
   }
   function dispose() { dom.removeEventListener('pointerdown', onDown); dom.removeEventListener('pointermove', onMove); dom.removeEventListener('pointerup', onUp); dom.removeEventListener('pointercancel', onUp); dom.removeEventListener('wheel', onWheel); dom.removeEventListener('keydown', onKey); dom.removeEventListener('keyup', onKeyUp); dom.removeEventListener('blur', onBlur); dom.removeEventListener('contextmenu', onCtx); }
@@ -3802,7 +3807,7 @@ float slScale(vec2 m) {
     const vf = (cam.fov * Math.PI) / 360, hf = Math.atan(Math.tan(vf) * asp);
     info.portrait = asp < 0.8; info.vf = vf; info.hf = hf;
     // the snake lies flat: fit its footprint across the view, and its foreshortened depth (seen from above at an angle) up and down
-    info.dFit = Math.max((r * (info.portrait ? 0.98 : 1.1)) / Math.tan(hf), (r * (info.portrait ? 0.8 : 0.62)) / Math.tan(vf)) + r * 0.4;
+    info.dFit = Math.max((r * (info.portrait ? 0.98 : 1.2)) / Math.tan(hf), (r * (info.portrait ? 0.8 : 0.66)) / Math.tan(vf)) + r * 0.4; // (v6.20: a little more room round the snake - its head was often right at the edge of the first view)
     info.dMax = info.dFit * 1.55;
     info.dMin = Math.max(info.F.Hl * 0.9, info.F.w0 * 1.6); // v5.05: zoom right in (organs, eyes and scales up close)
     info.scaleK = 1;
@@ -3898,8 +3903,18 @@ float slScale(vec2 m) {
     // (v5.73: frames that only move leaves and water reuse the shadows; v5.78: so do frames where only the camera moves - turning
     // or zooming used to redraw the whole shadow map every frame)
     const viaAmb = ambOnly; if (viaAmb) paceMeasure(tF0);
-    { ambOnly = false; const shUp = shadowDirty || sceneMoving || (!viaAmb && !camMoving) || shadowAge++ > (quality === 'high' ? 4 : 12); if (shUp) shadowAge = 0; shadowDirty = false; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; }
-    dynRes(tF0, moving, amb);
+    // (v6.20: while the camera turns, the shadows of the swaying plants are not refreshed every few frames either: those
+    // refreshes made every 5th frame of a turn much slower than the others - a regular stutter - for a change nobody sees
+    // while the view moves; and a tongue flick alone (fx.lightMove) never redraws them: its shadow is a few pixels)
+    // (while you turn the view, the snake's own small idle movements redraw the shadows every third frame, not every frame)
+    // (and a frame in the middle of a turn that happens to get no pointer movement - a 120 Hz screen with a 60 Hz mouse, or
+    // a finger held still for a moment - still counts as turning: it used to redraw the shadows, every other frame)
+    const scMove = sceneMoving && !(fx.lightMove && fx.lightMove());
+    if (camMoving) lastCamT = tF0;
+    const camActive = camMoving || controls.st.dragging || tF0 - lastCamT < 250;
+    if (camActive && !camMoving) { clearTimeout(camSettleT); camSettleT = setTimeout(() => { shadowDirty = true; kick(); }, 300); } // (once it is still: the shadows catch up)
+    { ambOnly = false; const shUp = shadowDirty || (scMove && (!camActive || shadowAge++ >= 2)) || (!viaAmb && !camActive && !sceneMoving) || (!camActive && shadowAge++ > (quality === 'high' ? 4 : 12)); if (shUp) shadowAge = 0; shadowDirty = false; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; }
+    dynRes(tF0, moving || camActive, amb); // (v6.20: a still frame inside a turn no longer snaps the resolution back up - that reallocated the picture every other frame)
     renderer.render(ctx.scene, cam);
     sizeAfter(); // v5.74: the magnified inset of a small snake
     updateMarkers();
@@ -3933,7 +3948,7 @@ float slScale(vec2 m) {
   }
   const pace = { skip0: quality === 'low' ? 2 : 1, skip: quality === 'low' ? 2 : 1, cnt: 0, vs: 16.7, lastTs: 0, lastR: 0, n: 0, slow: 0, fast: 0, dens: 1, kIdle: 1 };
   let kicked = false;
-  let holdRender = false, ambT = 0, shadowAge = 0, ambOnly = false, lastUser = performance.now(), lastF = 0, colList = null, shadowDirty = true;
+  let lastCamT = -1e9, camSettleT = 0; let holdRender = false, ambT = 0, shadowAge = 0, ambOnly = false, lastUser = performance.now(), lastF = 0, colList = null, shadowDirty = true;
   // v5.78: dynamic resolution - while the view moves, if frames take too long (under ~40 per second) the picture is drawn with
   // fewer pixels (down to 60% of the full pixel ratio), and as soon as it is still again it is drawn once more at full
   // sharpness. The change is gradual and has a dead band, so the resolution never flickers up and down.
@@ -4285,7 +4300,10 @@ float slScale(vec2 m) {
     if (!extras || !extras.mouth) return;
     const v = force != null ? force : !mouthGoal; mouthGoal = v ? 1 : 0;
     bMouth.setAttribute('aria-pressed', String(v)); bMouth.textContent = v ? 'Close mouth' : 'Open mouth';
-    if (v && !sizeSt.on && !fx.anatOn() && controls.st.d > info.dFit * 0.55) { // turn to face the head, close enough to see inside (v4.81: only from the whole-snake view; Open mouth changes nothing else)
+    // (v6.20: also whenever the head is off to the side or too far to see into the mouth - from the first view the head
+    // could be at the very edge, or out of the picture, and Open mouth then showed nothing)
+    const hp = (fx.focusPoint && fx.focusPoint()) || info.headPos, ndc = hp.clone().project(cam), headOk = ndc.z < 1 && Math.abs(ndc.x) < 0.6 && Math.abs(ndc.y) < 0.6 && cam.position.distanceTo(hp) < info.F.Hl * 9;
+    if (v && !sizeSt.on && !fx.anatOn() && (controls.st.d > info.dFit * 0.55 || !headOk)) { // turn to face the head, close enough to see inside (v4.81: only from the whole-snake view; Open mouth changes nothing else)
       controls.setGoal({ az: viewAz('front') + 0.55, el: (16 * Math.PI) / 180, d: Math.max(info.dMin * 1.5, info.F.Hl * 3.4), px: 0, pz: 0 }); // (close enough to see inside; plants in the way step aside)
     }
     kick();
@@ -4325,7 +4343,8 @@ float slScale(vec2 m) {
     bScale.setAttribute('aria-pressed', 'false'); bScale.textContent = 'Size vs person'; sizeOverlays(false);
     markers.forEach((m) => m.el.remove()); markers = [];
   }
-  function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el } : null; if (sizeBusy()) toggleScale(false, { instant: true }); fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: info.dFit }, true); kick(); }
+  // (v6.20, S12: a new habitat keeps the view you had - the zoom and the point you moved to as well, not only the angle)
+  function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el, d: controls.st.d, px: controls.st.px, pz: controls.st.pz } : null; if (sizeBusy()) toggleScale(false, { instant: true }); fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: clamp(st.d, info.dMin, info.dMax), px: st.px, pz: st.pz }, true); kick(); }
 
   build(); fx.onBuild(); resize();
   if (opts.testing) window.__sp3d = { THREE, renderer, get ctx() { return ctx; }, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), fx, size: () => ({ on: sizeSt.on, leaving: sizeSt.leaving, k: sizeSt.k, arc: sizeSt.arc, len: sizeSt.len, small: sizeSt.small, N: sizeSt.N, person: !!scaleObj, saved: sizeSt.saved }), get group() { return snakeGroup; }, get show() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); if (window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } updateOccluders(); renderer.shadowMap.needsUpdate = true; renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
