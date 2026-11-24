@@ -185,8 +185,9 @@
   var autoSettings = true;
   setInterval(function () {
     if (!autoSettings || D.hidden) return;
-    var s = D.querySelector("#sl-settings, .sl-settings, [data-sl-settings]");
-    if (s) { var inner = s.querySelector(".sl-settings-body, [data-sl-settings-body]") || s; mountSettings(inner); }
+    // only the Settings panel's own content - never the header's gear button (which carries data-sl-settings too)
+    var inner = D.querySelector("#sl-settings .sl-pbody, #sl-settings [data-sl-settings-body]");
+    if (inner && inner.tagName !== "BUTTON" && !inner.closest("button")) mountSettings(inner);
   }, 1500);
   EV.on("sub", repaint);
   if (D.body) apply(); else D.addEventListener("DOMContentLoaded", apply);

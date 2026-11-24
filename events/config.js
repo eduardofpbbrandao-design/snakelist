@@ -21,6 +21,10 @@
       interval: "month",           // "month" | "year"
       intervalCount: 1,
       priceStatus: "placeholder",  // shown as "price not final"
+      // false until a real Stripe price exists (stripe.priceId filled in): the subscription page then says priceTba
+      // instead of a made-up price, billing period, renewal or cancellation terms. true shows price + billing again.
+      priceAnnounced: false,
+      priceTba: "Price to be announced",
       // December promotion as Eduardo asked: discount % = the day of the month (Dec 1 = 1 % ... Dec 31 = 31 %)
       decemberDayDiscount: true,
       // New Year 2026-27 promotion (configurable; see PRICING.md for why 0.01 can't be charged)
@@ -34,8 +38,8 @@
         ["deco", "Exclusive seasonal decorations", "Premium Cabin decorations, like the Diamond Snake Ornament and the Aurora Borealis background."],
         ["extra", "Extra Advent rewards", "A bonus Frost Edition reward behind every fourth door."],
         ["skips", "Up to 10 Advent skips", "Recover days you missed - kept separate from the skips everyone earns with streaks."],
-        ["cursor", "Cursor customization", "Colours and effects for your mouse pointer (computers with a mouse or trackpad)."],
-        ["cosmetic", "Subscriber cosmetics", "Profile frames and badges that show you support SnakeList."]
+        ["cursor", "Cursor customization", "Colours and effects for your mouse pointer (computers with a mouse or trackpad)."]
+        // only benefits that exist in the app - add profile frames/badges here once SnakeList has a profile to show them
       ],
       alwaysFree: "Every snake, photo, map, sighting, quiz and achievement in SnakeList stays free. A subscription only adds extras.",
       // what happens to subscriber items when a subscription ends (disclosed on the subscription page)

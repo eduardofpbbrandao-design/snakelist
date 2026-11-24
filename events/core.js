@@ -80,6 +80,9 @@
     if (now == null) now = EV.time.display();
     return CFG.events.filter(function (e) { return !e.meta && now < EV.ms(e.end); }).sort(function (a, b) { return EV.ms(a.start) - EV.ms(b.start); });
   };
+  // the viewer's own time zone, said in words next to a local time ("your local time, Europe/Lisbon")
+  EV.tzName = function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) { return ""; } };
+  EV.tzNote = function () { var z = EV.tzName(); return "your local time" + (z ? ", " + z.replace(/_/g, " ") : ""); };
   EV.localTime = function (t, opts) {
     try { return new Date(EV.ms(t)).toLocaleString(undefined, opts || { weekday: "short", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZoneName: "short" }); }
     catch (e) { return new Date(EV.ms(t)).toString(); }

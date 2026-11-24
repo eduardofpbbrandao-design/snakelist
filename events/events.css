@@ -278,6 +278,7 @@ html.xm .sl-ev-xhat { display: none; }   /* with the Christmas preview on, the S
 /* ------------------------------------------------------------- subscription */
 .sl-ev-price { display: flex; align-items: baseline; gap: 6px; margin: 4px 0; }
 .sl-ev-price b { font: 800 30px 'Inter', sans-serif; }
+.sl-ev-price.sl-ev-tba b { font-size: 22px; }
 .sl-ev-ben { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .sl-ev-ben li { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--border); border-radius: 11px; padding: 8px 10px; }
 .sl-ev-ben li > span:first-child { flex: none; width: 28px; height: 28px; border-radius: 50%; background: rgba(63,125,67,.14); color: var(--gold); display: grid; place-items: center; }

@@ -1,5 +1,5 @@
-/* SnakeList events preview - the subscription page (a panel): benefits, price (configurable placeholder), billing
-   period, renewal, cancellation, refund + EU/Portuguese withdrawal-right statement with the two express consents,
+/* SnakeList events preview - the subscription page (a panel): benefits, price ("Price to be announced" until
+   config.js priceAnnounced is true and a Stripe priceId exists), billing period, renewal, cancellation, refund + EU/Portuguese withdrawal-right statement with the two express consents,
    the premium decorations (labelled, locked), the Anniversary promotion and - in the preview only - a TEST switch.
    There is NO payment backend yet: the Subscribe button never activates anything. A real subscription can only come
    from Firestore customers/{uid}/subscriptions, which only the Stripe extension can write (firebase/firestore.rules). */
@@ -16,6 +16,8 @@
     return { price: Math.round(p * 100) / 100, note: note };
   };
   var ICONS = { early: "crown", deco: "gift", extra: "door", skips: "skip", cursor: "cursor", cosmetic: "spark" };
+  // a price is only shown once it is real: announced in config.js AND backed by a Stripe price
+  function priced() { return !!(SC.priceAnnounced && SC.stripe && SC.stripe.priceId); }
   function per() { return (SC.intervalCount > 1 ? SC.intervalCount + " " : "") + SC.interval + (SC.intervalCount > 1 ? "s" : ""); }
   function html() {
     var sub = EV.subscription(), now = EV.time.now(), pr = EV.priceOn(now == null ? EV.time.display() : now);
@@ -23,9 +25,12 @@
       : sub.test ? EV.testBadge() : "";
     var h = status +
       '<p class="sl-ev-kick">' + esc(SC.name) + "</p>" +
-      '<div class="sl-ev-price"><b>' + esc(money(pr.price)) + '</b><span class="sl-ev-muted">/ ' + esc(per()) + "</span>" + (SC.priceStatus === "placeholder" ? ' <span class="sl-ev-lock">price not final</span>' : "") + "</div>" +
-      (pr.note ? '<p class="sl-ev-muted">' + esc(pr.note) + " - in December the discount is the day of the month (1 December 1% … 31 December 31%).</p>" : "") +
-      '<p class="sl-ev-muted">Billed every ' + esc(per()) + ". " + esc(SC.renewal) + "</p>" +
+      (priced()
+        ? '<div class="sl-ev-price"><b>' + esc(money(pr.price)) + '</b><span class="sl-ev-muted">/ ' + esc(per()) + "</span>" + (SC.priceStatus === "placeholder" ? ' <span class="sl-ev-lock">price not final</span>' : "") + "</div>" +
+          (pr.note ? '<p class="sl-ev-muted">' + esc(pr.note) + " - in December the discount is the day of the month (1 December 1% … 31 December 31%).</p>" : "") +
+          '<p class="sl-ev-muted">Billed every ' + esc(per()) + ". " + esc(SC.renewal) + "</p>"
+        : '<div class="sl-ev-price sl-ev-tba"><b>' + esc(SC.priceTba || "Price to be announced") + "</b></div>" +
+          '<p class="sl-ev-muted">The price, billing period, renewal and cancellation terms will be shown here before anyone can subscribe.</p>') +
       '<div class="sl-ev-note warn"><b>Subscriptions are coming soon.</b> Payments aren’t switched on yet, so nothing can be bought and nothing is charged.</div>' +
       '<h3 class="sl-ev-h3">What you get</h3><ul class="sl-ev-ben">' + SC.benefits.map(function (b) {
         return "<li><span>" + ic(ICONS[b[0]] || "star") + "</span><span><b>" + esc(b[1]) + "</b><small>" + esc(b[2]) + "</small></span></li>";
@@ -35,7 +40,7 @@
         return '<div class="sl-ev-item prem' + (sub.active ? "" : " locked") + '">' + EV.art.item(p) + "<b>" + esc(p.name) + "</b><small>" + (sub.active ? "Unlocked" : ic("lock", 10) + " Subscribers") + "</small></div>";
       }).join("") + "</div>" +
       '<p class="sl-ev-muted" style="margin-top:8px">' + esc(SC.afterExpiry) + "</p>" +
-      '<h3 class="sl-ev-h3">Cancelling</h3><p>' + esc(SC.cancellation) + "</p>" +
+      (priced() ? '<h3 class="sl-ev-h3">Cancelling</h3><p>' + esc(SC.cancellation) + "</p>" : "") +
       '<h3 class="sl-ev-h3">' + esc(SC.refund.heading) + '</h3><div class="sl-ev-legal"><ul>' + SC.refund.lines.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul>" +
       '<label class="sl-ev-check"><input type="checkbox" data-consent="start"> <span>' + esc(SC.refund.consentStart) + "</span></label>" +
       '<label class="sl-ev-check"><input type="checkbox" data-consent="lose"> <span>' + esc(SC.refund.consentLose) + "</span></label></div>" +
