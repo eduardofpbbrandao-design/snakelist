@@ -26522,6 +26522,8 @@ window.SL_welcome = function (u, back) {
     if (!sel || sel.options.length < 2) { if ((tries || 0) < 60) setTimeout(function () { apply(code, (tries || 0) + 1); }, 250); return; }
     if (code !== cur) return; // another language was picked meanwhile
     sel.value = code; sel.dispatchEvent(new Event("change"));
+    // (right after "Show original" Google sometimes ignores the first change: asked again if nothing happened)
+    if ((tries || 0) < 100) setTimeout(function () { if (code === cur && !/\btranslated-/.test(document.documentElement.className)) apply(code, 100 + (tries || 0)); }, 2500);
   }
   // back to the page as written, in place: Google's own "Show original" (in its hidden bar), or its list set back to English
   function restore() {
@@ -26582,16 +26584,19 @@ window.SL_welcome = function (u, back) {
     var p = menu.querySelector(".lang-note"); p.textContent = NOTE;
     place();
     q.value = ""; render(); q.focus({ preventScroll: true });
-    var s = ul.querySelector('[aria-selected="true"]'); if (s) s.scrollIntoView({ block: "nearest" });
+    var s = ul.querySelector('[aria-selected="true"]'); if (s) inList(s, true);
   }
   function close() { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); }
+  // v6.28: the list itself is scrolled (scrollIntoView also moved a phone's whole screen, so the panel left the middle)
+  function inList(li, mid) { var t = li.offsetTop - ul.offsetTop, b = t + li.offsetHeight;
+    if (mid) ul.scrollTop = Math.max(0, t - (ul.clientHeight - li.offsetHeight) / 2); else if (t < ul.scrollTop) ul.scrollTop = t; else if (b > ul.scrollTop + ul.clientHeight) ul.scrollTop = b - ul.clientHeight; }
   var NOTE = menu.querySelector(".lang-note").textContent;
   btn.addEventListener("click", function (e) { e.stopPropagation(); if (menu.hidden) open(); else close(); });
   window.SL_LANG = { open: function (a) { if (menu.hidden) open(a); else close(); }, name: function () { var n = LANGS.find(function (l) { return l[0] === cur; }); return n ? (n[0] === "en" ? "English" : n[1]) : "English"; }, menu: menu };
   q.addEventListener("input", render);
   q.addEventListener("keydown", function (e) {
     if (e.key === "Escape") { close(); try { (menu.__from || btn).focus(); } catch (er) {} }
-    else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); hi = (hi + (e.key === "ArrowDown" ? 1 : -1) + shown.length) % shown.length; [].forEach.call(ul.children, function (li, i) { li.classList.toggle("hi", i === hi); if (i === hi) li.scrollIntoView({ block: "nearest" }); }); }
+    else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); hi = (hi + (e.key === "ArrowDown" ? 1 : -1) + shown.length) % shown.length; [].forEach.call(ul.children, function (li, i) { li.classList.toggle("hi", i === hi); if (i === hi) inList(li); }); }
     else if (e.key === "Enter" && shown[hi]) { e.preventDefault(); close(); translateTo(shown[hi][0]); }
   });
   ul.addEventListener("click", function (e) { var li = e.target.closest("[data-c]"); if (!li) return; close(); translateTo(li.dataset.c); });
