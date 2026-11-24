@@ -113,7 +113,8 @@ const HEAD_FORM = {
 // head; sn snout width at the nostrils over head width; sh snout height over head height; eye eye diameter over head length;
 // ex the eye's place along the head (0 snout tip, 1 back of the head); ea how far round from the top the eye sits (degrees);
 // ck cheeks (jaw muscles); lor the loreal hollow; cr the crown's dome; sm the mouth line's curve; br the brow over the eye;
-// up an upturned snout tip. Anything not given keeps the group's value.
+// up an upturned snout tip; lips the lip colouring ('none': the coral snakes' black snout - their red belly colour was
+// painted on the lip scales, so the snout read red). Anything not given keeps the group's value.
 const HEAD_SET_SRC = `
 oxyuranus-microlepidotus sm .03 cr .06
 oxyuranus-scutellatus hl .40 sn .52 eye .16 ex .31 lor .025 sm .05
@@ -141,9 +142,9 @@ hemachatus-haemachatus hl .44 eye .12
 bungarus-fasciatus hl .42 sn .68 eye .09
 bungarus-caeruleus hl .42 sn .62 eye .1
 bungarus-multicinctus hl .42 sn .64 eye .09
-micrurus-fulvius hl .45 eye .1 ck .02 sm .015
-micrurus-tener hl .45 sn .72 eye .1 ck .02 sm .015
-micruroides-euryxanthus hl .45 sn .72 eye .1 ck .02 sm .015
+micrurus-fulvius hl .45 eye .1 ck .02 sm .015 lips none
+micrurus-tener hl .45 sn .72 eye .1 ck .02 sm .015 lips none
+micruroides-euryxanthus hl .45 sn .72 eye .1 ck .02 sm .015 lips none
 laticauda-colubrina hl .44 eye .08
 hydrophis-platurus hl .36 sn .5 eye .07 sm .01
 aipysurus-laevis hl .42 eye .08
@@ -253,8 +254,8 @@ psammophis-sibilans hl .38 eye .22 br .1 lor .035
 acrochordus-javanicus hl .40 ea 45
 `;
 const HEAD_SET = {};
-{ const K = { hl: 'hl', sn: 'snout', sh: 'snoutH', eye: 'eyeL', ex: 'eyeX', ea: 'eyeA', ck: 'cheek', lor: 'lor', cr: 'crown', sm: 'smile', br: 'brow', up: 'snoutUp' };
-  for (const line of HEAD_SET_SRC.split('\n')) { const w = line.trim().split(/\s+/); if (w.length < 3) continue; const o = {}; for (let i = 1; i + 1 < w.length; i += 2) if (K[w[i]]) o[K[w[i]]] = +w[i + 1]; if (o.hl != null) o.hlSet = 1; HEAD_SET[w[0]] = o; } }
+{ const K = { lips: 'lips', hl: 'hl', sn: 'snout', sh: 'snoutH', eye: 'eyeL', ex: 'eyeX', ea: 'eyeA', ck: 'cheek', lor: 'lor', cr: 'crown', sm: 'smile', br: 'brow', up: 'snoutUp' };
+  for (const line of HEAD_SET_SRC.split('\n')) { const w = line.trim().split(/\s+/); if (w.length < 3) continue; const o = {}; for (let i = 1; i + 1 < w.length; i += 2) if (K[w[i]]) o[K[w[i]]] = isNaN(+w[i + 1]) ? w[i + 1] : +w[i + 1]; if (o.hl != null) o.hlSet = 1; HEAD_SET[w[0]] = o; } }
 const HF_GENUS = {};
 for (const [k, l] of Object.entries({
   natricine: 'natrix nerodia thamnophis regina storeria virginia clonophis tropidoclonion liodytes seminatrix hebius rhabdophis fowlea xenochrophis amphiesma sinonatrix trimerodytes tropidonophis atretium herpetoreas opisthotropis afronatrix limnophis natriciteres hydraethiops lycognathophis anoplohydrus parahelicops',
@@ -2647,7 +2648,7 @@ const envOf = (sc) => (sc.kind === 'forest' && (sc.flavor === 'savanna' || sc.fl
 // ---------- photographic surroundings: CC0 Polyhaven panoramas (via @pmndrs/assets), see CREDITS.txt ----------
 // each habitat gets the panorama that fits it best; the snake's own ground is drawn up close and fades
 // into the photo's ground, which is projected onto a flat floor so it meets the horizon without a seam
-const ENV_FOR = { clay: 'dawn', swamp: 'forest', shore: 'sky', gibber: 'dawn', riverbank: 'park', forest: 'forest', rainforest: 'forest', litter: 'forest', soil: 'forest', grass: 'sunrise', heath: 'sunrise', arid: 'dawn', sand: 'dawn', sea: 'sky' };
+const ENV_FOR = { clay: 'dawn', swamp: 'forest', shore: 'sky', gibber: 'dawn', riverbank: 'park', forest: 'forest', rainforest: 'forest', litter: 'forest', soil: 'forest', grass: 'sunrise', heath: 'sunrise', arid: 'sky', sand: 'sky', sea: 'sky' }; // (v6.26: rocky desert and dunes under a hard, clear midday sky - in the same warm dawn light as the gibber plains and grassland they looked alike)
 const ENV_CACHE = new Map();
 function parseHDR(buf) {
   const b = new Uint8Array(buf); let p = 0, line = '';
