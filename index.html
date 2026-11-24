@@ -3378,15 +3378,12 @@ var p=d.head||h,l=d.createElement("link");l.rel="stylesheet";l.href=root+"events
   /* v6.28 (Eduardo, like modern apps): a round SnakeList-green button in the middle at the bottom, only once you have scrolled down */
   button.sl-top#sl-top { left: 50%; right: auto; bottom: calc(20px + env(safe-area-inset-bottom)); width: 48px; height: 48px; margin-left: -24px;
     border: 1px solid rgba(255,255,255,0.4); background: #3a8f3c; color: #fff; box-shadow: 0 4px 14px rgba(20,60,25,0.3), 0 1px 3px rgba(0,0,0,0.18);
-    transition: background-color .15s ease; animation: sl-top-in .22s cubic-bezier(.2,.9,.3,1); -webkit-tap-highlight-color: transparent; }
+    -webkit-tap-highlight-color: transparent; } /* (no entrance animation: nothing may start moving while the list is scrolled) */
   button.sl-top#sl-top:hover { filter: none; background: #2f7d32; }
   button.sl-top#sl-top:active { background: #296e2c; }
   button.sl-top#sl-top svg { width: 22px; height: 22px; }
   button.sl-top#sl-top:focus-visible { outline: 3px solid var(--focus-ring, #58b351) !important; outline-offset: 3px; }
   body.sl-editing button.sl-top#sl-top { bottom: calc(96px + env(safe-area-inset-bottom)); }
-  @keyframes sl-top-in { from { opacity: 0; transform: translateY(10px) scale(.9); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { button.sl-top#sl-top { animation: none; } }
-  html.sl-calm button.sl-top#sl-top { animation: none; }
   /* 10. one green focus ring for keyboard users */
   :is(button, a, select, summary, [role="button"], [role="link"], [tabindex]):focus-visible { outline: 2px solid var(--focus-ring) !important; outline-offset: 2px; }
   .search-box:focus-within { border-color: var(--gold-soft); box-shadow: 0 0 0 1px var(--gold-soft); }
@@ -9535,7 +9532,9 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     nearFull(ids);
     for (i = 0; i < ids.length; i++) { c = cardById(ids[i]); if (c && light.has(c)) farWatch(c); }
   }
-  window.addEventListener("scroll", function () { if (lazyIds && lazyIds === window.SL_SHOWN_IDS) nearFull(lazyIds); }, { passive: true });
+  // (v6.28: once per frame at most - a finger scroll on an iPad sends several scroll events per frame, each measuring cards)
+  var nearRaf = 0;
+  window.addEventListener("scroll", function () { if (nearRaf || !(lazyIds && lazyIds === window.SL_SHOWN_IDS)) return; nearRaf = requestAnimationFrame(function () { nearRaf = 0; if (lazyIds && lazyIds === window.SL_SHOWN_IDS) nearFull(lazyIds); }); }, { passive: true });
   window.addEventListener("resize", function () { if (lazyIds && lazyIds === window.SL_SHOWN_IDS) nearFull(lazyIds); });
   // the website (index.html) comes with its cards already light: build-site.py takes their parts out
   // and lists them once here, so the page is half the size and a phone never builds them all
@@ -22058,10 +22057,18 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   if (!("IntersectionObserver" in window)) return;
   var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (en) { if (!en.isIntersecting) return; io.unobserve(en.target); lookUp(en.target); });
+    entries.forEach(function (en) { if (!en.isIntersecting) return; io.unobserve(en.target); done1[en.target.dataset.id] = 1; lookUp(en.target); });
   }, { rootMargin: "300px" });
   var missing = [].slice.call(grid.querySelectorAll(".card")).filter(function (c) { return !D.items[c.dataset.id]; });
-  missing.forEach(function (c) { io.observe(c); });
+  // v6.28 (iPad lag): only the cards of the page being shown are watched - watching all ~1,000 cards without a photo (most of
+  // them not even on the page) cost the browser time on every frame of scrolling
+  var missById = {}, done1 = {}; missing.forEach(function (c) { missById[c.dataset.id] = c; });
+  function watchShown() {
+    io.disconnect();
+    var ids = window.SL_SHOWN_IDS; if (!ids) { missing.forEach(function (c) { if (!done1[c.dataset.id]) io.observe(c); }); return; }
+    ids.forEach(function (id) { var c = missById[id]; if (c && !done1[id]) io.observe(c); });
+  }
+  watchShown(); window.addEventListener("sl-refreshed", watchShown);
   // and the rest quietly in the background (one at a time, gently - iNaturalist asks apps not
   // to rush it), so the cards and the No photos list are right without scrolling to each snake
   (function background() {
@@ -27185,7 +27192,9 @@ window.SL_welcome = function (u, back) {
   document.body.appendChild(top);
   var B = document.body.classList;
   top.title = "Back to top";
-  function paintTop() { var want = !(window.scrollY > Math.max(900, window.innerHeight * 1.5) && !B.contains("tab-map") && !B.contains("tab-quiz") && !B.contains("tab-ach") && !B.contains("tab-cam")); if (top.hidden !== want) top.hidden = want; } // (only written when it changes: no style work on every scroll event)
+  function paintTop() { var want = !(window.scrollY > Math.max(900, window.innerHeight * 1.5) && !B.contains("tab-map") && !B.contains("tab-quiz") && !B.contains("tab-ach") && !B.contains("tab-cam")); var hide = want;
+    // (written only when it changes - no style work on every scroll event; it comes in once the scrolling pauses, never mid-scroll)
+    clearTimeout(paintTop.t); if (hide) { if (!top.hidden) top.hidden = true; } else if (top.hidden) paintTop.t = setTimeout(function () { top.hidden = false; }, 220); }
   window.addEventListener("scroll", paintTop, { passive: true }); window.addEventListener("sl-refreshed", paintTop);
   top.addEventListener("click", function () {
     var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -27389,16 +27398,19 @@ window.SL_welcome = function (u, back) {
     var p = menu.querySelector(".lang-note"); p.textContent = NOTE;
     place();
     q.value = ""; render(); q.focus({ preventScroll: true });
-    var s = ul.querySelector('[aria-selected="true"]'); if (s) s.scrollIntoView({ block: "nearest" });
+    var s = ul.querySelector('[aria-selected="true"]'); if (s) inList(s, true);
   }
   function close() { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); }
+  // v6.28: the list itself is scrolled (scrollIntoView also moved a phone's whole screen, so the panel left the middle)
+  function inList(li, mid) { var t = li.offsetTop - ul.offsetTop, b = t + li.offsetHeight;
+    if (mid) ul.scrollTop = Math.max(0, t - (ul.clientHeight - li.offsetHeight) / 2); else if (t < ul.scrollTop) ul.scrollTop = t; else if (b > ul.scrollTop + ul.clientHeight) ul.scrollTop = b - ul.clientHeight; }
   var NOTE = menu.querySelector(".lang-note").textContent;
   btn.addEventListener("click", function (e) { e.stopPropagation(); if (menu.hidden) open(); else close(); });
   window.SL_LANG = { open: function (a) { if (menu.hidden) open(a); else close(); }, name: function () { var n = LANGS.find(function (l) { return l[0] === cur; }); return n ? (n[0] === "en" ? "English" : n[1]) : "English"; }, menu: menu };
   q.addEventListener("input", render);
   q.addEventListener("keydown", function (e) {
     if (e.key === "Escape") { close(); try { (menu.__from || btn).focus(); } catch (er) {} }
-    else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); hi = (hi + (e.key === "ArrowDown" ? 1 : -1) + shown.length) % shown.length; [].forEach.call(ul.children, function (li, i) { li.classList.toggle("hi", i === hi); if (i === hi) li.scrollIntoView({ block: "nearest" }); }); }
+    else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); hi = (hi + (e.key === "ArrowDown" ? 1 : -1) + shown.length) % shown.length; [].forEach.call(ul.children, function (li, i) { li.classList.toggle("hi", i === hi); if (i === hi) inList(li); }); }
     else if (e.key === "Enter" && shown[hi]) { e.preventDefault(); close(); translateTo(shown[hi][0]); }
   });
   ul.addEventListener("click", function (e) { var li = e.target.closest("[data-c]"); if (!li) return; close(); translateTo(li.dataset.c); });
@@ -29447,7 +29459,11 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     if (!el.__slTr) { el.__slTr = 1; var t = getComputedStyle(el).transitionProperty; if (t && t !== "all" && t.indexOf("translate") < 0) el.style.transitionProperty = t + ", translate"; if (!parseFloat(getComputedStyle(el).transitionDuration)) el.style.transition = "translate .2s ease"; }
     el.style.translate = y ? "0 " + y + "px" : "";
   }
-  function tick() {
+  // v6.28 (iPad lag): not while the page is being scrolled (the bars are fixed to the screen, so scrolling never makes them
+  // overlap; measuring them five times a second made scrolling stutter on iPads) nor while SnakeList is not on screen
+  var scrollAt = 0; window.addEventListener("scroll", function () { scrollAt = Date.now(); }, { passive: true, capture: true });
+  function tick(e) {
+    if (document.hidden || (e !== "now" && Date.now() - scrollAt < 250 && !(e && e.type))) return;
     // v5.73: nothing floats over the opening or its photo while SnakeList under them isn't drawn yet - and measuring here
     // then made the page's thread do its start-up drawing in the middle of the opening's move to the photo
     if (document.querySelector(".sl-root.intro-on")) return;
@@ -29488,10 +29504,14 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     });
   }
   var timer = null;
-  function start() { try { watchLists(); } catch (e) { lists = null; } tick(); if (!timer) timer = setInterval(tick, 200); }
+  function start() { try { watchLists(); } catch (e) { lists = null; } tick(); if (!timer) timer = setInterval(soon, 200); }
+  // (v6.28: measured just after a frame has been drawn, when the page's styles are already worked out - measuring at any
+  // moment made the browser work out the styles of the whole page again just for this, several times a second)
+  var soonOn = false;
+  function soon() { if (soonOn || document.hidden) return; soonOn = true; requestAnimationFrame(function () { setTimeout(function () { soonOn = false; tick(); }, 0); }); }
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
   window.addEventListener("resize", tick);
-  window.SL_restack = tick;
+  window.SL_restack = function () { tick("now"); };
 })();
 </script>
 
@@ -30012,6 +30032,9 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
 .sl-shr-msg { min-height: 1.2em; margin: 10px 0 0; font: 600 13px 'Inter', sans-serif; color: var(--gold); }
 .sl-shr-sight { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; }
 .sl-resbar .sl-shr-sight-tab { margin: 0 0 0 auto; }
+/* v6.28 (iPad lag): on touch screens the "Want to see" pill on every card is not blurred behind (a separate blurred layer per card,
+   redrawn on every frame of scrolling) - it is a little less see-through instead, so it looks the same */
+@media (hover: none) and (pointer: coarse) { #grid .wish-btn { -webkit-backdrop-filter: none; backdrop-filter: none; } #grid .card:not(.wish) .wish-btn { background-color: rgba(10,22,14,0.7); } }
 .sl-resbar .sl-shr-sight-tab[hidden] { display: none; }
 .sl-resbar .sl-shr-sight-tab svg { width: 15px; height: 15px; }
 .sl-achrow .sl-shr-sight svg { width: 15px; height: 15px; }
