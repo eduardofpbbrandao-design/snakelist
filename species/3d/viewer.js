@@ -8,8 +8,8 @@
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
 import * as NATURE from './nature.js?r=587'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=587';
-import * as DAYNIGHT from './daynight.js?r=614'; // v6.14: Day / Night (and the hooks "See the spot", spot.js, uses: plugins below) // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as EXTRA from './extras.js?r=587'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as DAYNIGHT from './daynight.js?r=614'; // v6.14: Day / Night (and the plugin hooks "See the spot", spot.js, uses)
 export function useThree(t) { THREE = t; }
 // v6.13: Array .at() for iPads on iPadOS 15.0-15.3 (it came in 15.4); the species pages load this without SnakeList's own copy
 if (!Array.prototype.at) Object.defineProperty(Array.prototype, 'at', { value(i) { const n = this.length >>> 0; i = Math.trunc(i) || 0; if (i < 0) i += n; return i < 0 || i >= n ? undefined : this[i]; }, writable: true, configurable: true });
