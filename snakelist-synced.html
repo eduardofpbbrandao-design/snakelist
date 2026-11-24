@@ -23749,6 +23749,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   function markAlive() { try { sessionStorage.setItem("sl-g-alive", "1"); } catch (e) {} }
   if (get("sl-remember") === 0 && get("sl-google") && !alive()) { put("sl-google", null); put("sl-gtoken", null); put("sl-sync-base", null); put("sl-sync-photos", null); }
   var user = get("sl-google"), token = null, syncing = false;
+  var outAtLoad = !user; // previews (tools/previews.js): someone signing in on this page may get one quiet reload for theirs
   if (user) markAlive();
   rememberBox.checked = get("sl-remember") !== 0;
   rememberBox.addEventListener("change", function () { put("sl-remember", rememberBox.checked ? null : 0); });
@@ -23977,6 +23978,11 @@ window.SL_GEO_READY = new Promise(function (res) {
   // ---- what follows your account: the lists, notes, favourites, quiz score and your photos ----
   var QK = ["sl-quiz-rounds", "sl-quiz-perfect-easy", "sl-quiz-perfect-medium", "sl-quiz-perfect-hard", "sl-quiz-range-ok", "sl-quiz-fact-ok"]; // v5.45: quiz history for the Achievements
   var KV = ["sl-favs", "sl-pinned", "sl-follow-meta", "sl-quiz-correct", "sl-quiz-wrong", "sl-app-installs"].concat(QK), SETKV = { "sl-favs": 1 }, MAXKV = { "sl-quiz-correct": 1, "sl-quiz-wrong": 1 };
+  // previews follow the account: each preview's switch (sl-art-preview-<name>, tools/previews.js on the website) is synced
+  // with the list like the favourites, so wherever this account signs in the same previews are on. Nobody else has these keys.
+  var PVK = window.SL_PREVIEWS && typeof window.SL_PREVIEWS.keys === "function" ? window.SL_PREVIEWS.keys() : [];
+  KV = KV.concat(PVK);
+  function previewsSynced() { if (PVK.length && window.SL_PREVIEWS.synced) try { window.SL_PREVIEWS.synced({ signedInHere: outAtLoad }); } catch (e) {} }
   QK.forEach(function (k) { MAXKV[k] = 1; });
   // "sl-app-installs" ({ "<account>:<device>": last seen ISO }, the installed app's heartbeat):
   // both sides' devices are kept, each with its latest time; anything not seen for 90 days drops out
@@ -24140,6 +24146,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       return (same ? Promise.resolve() : ref.set({ list: JSON.stringify(M), at: new Date().toISOString() })).then(function () { put(BASE, M); });
     }).then(function () {
       if (first) shout("Synced with your SnakeList account."); else say(""); put("sl-last-sync", Date.now()); paintUser(); if (window.SL_paintData) window.SL_paintData();
+      previewsSynced();
       if (reload) kvSynced(); // v6.11: applied in place - the page is never reloaded (that replayed the whole opening)
       first = false;
     }, function (e) {
@@ -24163,6 +24170,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       });
     }).then(function () {
       if (first) shout("Synced with your Google account."); else say(""); put("sl-last-sync", Date.now()); paintUser(); if (window.SL_paintData) window.SL_paintData();
+      previewsSynced();
       // favourites / pins / quiz come back properly after one quiet reload, the first time only
       if (reload) kvSynced(); // v6.11: applied in place - the page is never reloaded (that replayed the whole opening)
       first = false;
@@ -29667,6 +29675,64 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
 })();
 </script>
 
+<style id="sl-previews-css">
+/* Settings > Previews (only for a browser / account with at least one preview on - see tools/previews.js) */
+.sl-set-prev .sl-pv-note { margin: -2px 0 10px; font: 400 12.5px/1.4 'Inter', sans-serif; color: var(--text-muted); }
+.sl-set-prev .sl-pv-tag { display: inline-block; margin-top: 4px; padding: 1px 7px; border-radius: 99px; font: 600 11px/1.6 'Inter', sans-serif; color: #8a6d1f; background: rgba(217,165,32,.16); }
+[data-sl-theme="dark"] .sl-set-prev .sl-pv-tag { color: #e9c766; background: rgba(233,199,102,.14); }
+.sl-set-prev .sl-pv-act { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.sl-set-prev .sl-pv-act [hidden] { display: none; }
+.sl-set-prev .sl-pv-msg { font: 400 12.5px/1.4 'Inter', sans-serif; color: var(--text-muted); }
+</style>
+<script>
+// ---- Settings > Previews: features still being tried out (tools/previews.js). The section is there only when at least one
+// preview is on in this browser or in the signed-in account; a normal visitor never sees it. One self-contained render
+// function, so wherever Settings keeps its content it can be put: window.SL_PREVIEWS_SETTINGS_RENDER(container).
+(function () {
+  var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6"></path><path d="M10 3v6.5L4.6 18.4A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.4-2.6L14 9.5V3"></path><path d="M7.5 15h9"></path></svg>';
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function reg() { var P = window.SL_PREVIEWS; return P && typeof P.list === "function" && typeof P.set === "function" ? P : null; }
+  function signedIn() { try { return !!localStorage.getItem("sl-google"); } catch (e) { return false; } }
+  var changedHere = false;
+  function render(box) {
+    if (!box) return null;
+    var P = reg(), sec = box.querySelector("#sl-set-previews");
+    // shown when a preview is on - and, once shown, kept while Settings is open (so a switch turned off can go back on)
+    if (!P || !(P.any() || sec)) { if (sec) sec.remove(); return null; }
+    if (!sec) {
+      sec = document.createElement("section"); sec.className = "sl-sgrp sl-set-prev"; sec.id = "sl-set-previews"; sec.setAttribute("data-section", "previews");
+      var foot = box.querySelector(".sl-sfoot"); if (foot && foot.parentNode === box) box.insertBefore(sec, foot); else box.appendChild(sec);
+      sec.addEventListener("click", function (e) {
+        var s = e.target.closest("[data-pv]"), R = reg(); if (!R) return;
+        if (s) { R.set(s.getAttribute("data-pv"), s.getAttribute("aria-checked") !== "true"); changedHere = true; render(box); return; }
+        if (e.target.closest("[data-pv-alloff]")) { R.list().forEach(function (p) { if (p.on) R.set(p.key, false); }); changedHere = true; render(box); return; }
+        if (e.target.closest("[data-pv-reload]")) location.reload();
+      });
+    }
+    var L = P.list(), any = P.any();
+    sec.innerHTML = "<h3>Previews</h3><p class=\"sl-pv-note\">Things still being made, before everyone gets them. " +
+      (signedIn() ? "They follow your account: on every device where you sign in, they&rsquo;re on too." : "They&rsquo;re on in this browser - sign in and they follow your account.") + "</p>" +
+      '<div class="sl-sgrid">' + L.map(function (p) {
+        return '<div class="sl-srow"><span class="sl-sic">' + ICON + '</span><span class="sl-stx"><b>' + esc(p.label) + "</b><small>" + esc(p.about) +
+          '</small><span class="sl-pv-tag">Preview &mdash; not public yet</span></span><button type="button" class="sl-sw" role="switch" data-pv="' + esc(p.key) +
+          '" aria-label="' + esc(p.label) + '" aria-checked="' + (p.on ? "true" : "false") + '"></button></div>';
+      }).join("") + "</div>" +
+      '<div class="sl-pv-act"><button type="button" class="sl-sbtn" data-pv-alloff' + (any ? "" : " disabled") + ">Turn all previews off</button>" +
+      '<button type="button" class="sl-sbtn" data-pv-reload' + (changedHere ? "" : " hidden") + ">Reload SnakeList to see it</button>" +
+      '<span class="sl-pv-msg" role="status" aria-live="polite">' + (changedHere ? (any ? "Saved." : "All previews are off.") + " The change shows after a reload." : "") + "</span></div>";
+    return sec;
+  }
+  window.SL_PREVIEWS_SETTINGS_RENDER = render;
+  function body(panel) { return panel && (panel.querySelector(".sl-pbody") || panel); }
+  var openBody = null;
+  document.addEventListener("sl-settings-open", function (e) {
+    var b = body(e.detail && e.detail.panel); if (!b) return; openBody = b;
+    var old = b.querySelector("#sl-set-previews"); if (old) old.remove(); // each time Settings opens: only if a preview is on
+    changedHere = false; render(b);
+  });
+  document.addEventListener("sl-previews-changed", function () { if (openBody && openBody.querySelector("#sl-set-previews")) render(openBody); });
+})();
+</script>
 <style id="sl-v611-css">
 /* ---- v6.11: Settings (the gear), Share, "Have an idea?" tip ---- */
 /* the light/dark and translate buttons now live inside Settings */

@@ -2,7 +2,10 @@
    tools/build_artifact.py - edit it here).
      https://snakelist.com/?preview=events       turns the events preview on in this browser (remembered)
      https://snakelist.com/?preview=events-off   turns it off again (?preview=off too)
-   In the testing copy the Previews panel's "Events" switch does the same (window.SL_PREVIEW_ON).
+   In the testing copy the Previews panel's "Events" switch does the same (window.SL_PREVIEW_ON). On the website the
+   switch is one of tools/previews.js's previews (it follows the signed-in account; Settings > Previews switches it).
+   window.SL_EV_PREVIEW_LOAD() loads the preview later in the page (it arrived with the account) - false if the public
+   countdown is already running (then the page needs one reload).
    PREVIEW ON: the page loads events/events.css and every events/*.js module (countdown, Advent Calendar, seasonal
    achievements, subscription page, cursor customization) straight away, as before.
    PREVIEW OFF (every normal visitor): only the PUBLIC countdown, and only once the opening has completely finished
@@ -16,8 +19,10 @@ on=window.SL_PREVIEW_ON?window.SL_PREVIEW_ON("events"):S.getItem(K)==="1";
 if(window.SL_EV)return;var d=document,h=d.documentElement,root=__ROOT__+"events/",q="?v="+__EVV__,p=d.head||h;
 function css(){var l=d.createElement("link");l.rel="stylesheet";l.href=root+"events.css"+q;p.appendChild(l)}
 function js(n,f){var s=d.createElement("script");s.src=root+n+".js"+q;s.async=false;if(f)s.onload=f;p.appendChild(s)}
-if(on){window.SL_EV={on:true,root:root};h.classList.add("sl-ev-on");css();
-["config","advent-logic","core","art","countdown","advent","achievements","subscribe","cursor"].forEach(function(n){js(n)});return}
+function full(){window.SL_EV={on:true,root:root};h.classList.add("sl-ev-on");css();
+["config","advent-logic","core","art","countdown","advent","achievements","subscribe","cursor"].forEach(function(n){js(n)})}
+window.SL_EV_PREVIEW_LOAD=function(){if(window.SL_EV)return!!window.SL_EV.on;full();return true};
+if(on){full();return}
 var ran=0;function start(){if(ran)return;ran=1;var idle=window.requestIdleCallback||function(f){setTimeout(f,60)};
 setTimeout(function(){idle(function(){if(window.SL_EV)return;js("config",function(){var C=window.SL_EVENTS_CONFIG,t=Date.now(),M=2*864e5;
 if(!C||!C.publicCountdown||window.SL_EV)return;
