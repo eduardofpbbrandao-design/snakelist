@@ -81,7 +81,7 @@ async function run(theme, phone) {
   ok(!(await has(2, 27)) && !(await has(-20, 40)) && !(await has(-12, 39)), 'not out in the Sahara, not in the sea');
   ok(await p.evaluate(() => /GARD/.test(document.getElementById('ak-src').textContent)), 'the key names the range map (GARD)');
   ok(await p.evaluate(() => { const b = document.querySelector('#cp-list .cp-row[data-sp="malpolon-monspessulanus"] .area-btn'); return b.textContent === 'Hide colours' && b.classList.contains('on') && b.getAttribute('aria-pressed') === 'true'; }), 'button turns into Hide area');
-  ok(await p.evaluate(() => !document.getElementById('area-key').hidden && /Where the Montpellier Snake lives/.test(document.getElementById('area-key').textContent) && /more/.test(document.getElementById('ak-scale').textContent) && !/state or country/.test(document.getElementById('area-key').textContent)), 'key: Where the Montpellier Snake lives, more / less (no "shaded by state or country")');
+  ok(await p.evaluate(() => !document.getElementById('area-key').hidden && /Where the Montpellier Snake lives/.test(document.getElementById('area-key').textContent) && /Core/.test(document.getElementById('ak-scale').textContent) && /Edge of range/.test(document.getElementById('ak-scale').textContent) && /not a count of how many snakes/.test(document.getElementById('area-key').textContent) && !/state or country/.test(document.getElementById('area-key').textContent)), 'key: Where the Montpellier Snake lives, Core / Edge of range, not a count of snakes (no "shaded by state or country")');
   const vw = await p.evaluate(() => window.SL_MAP_VIEW());
   ok(vw.w < -9 && vw.e > 7 && vw.s < 36 && vw.n > 44, 'map fitted to the range (' + [vw.w, vw.e, vw.s, vw.n].map(x => x.toFixed(1)).join(', ') + ')');
   await shotMap('1-portugal-montpellier');
@@ -140,7 +140,7 @@ async function run(theme, phone) {
     ok(!(await has(-84.3, 30.4)) && !(await has(-81.4, 28.5)) && !(await has(-80.2, 26.7 + 3)), 'not north Florida, Orlando or the Panhandle');
     ok(await has(101, 23) && await has(100.5, 15) && await has(110.5, -7.3), 'native range in Asia (Yunnan, Thailand, Java)');
     ok(!(await has(77.2, 28.6)) && !(await has(80.5, 7.5)), 'not Delhi or Sri Lanka');
-    ok(await p.evaluate(() => !document.getElementById('ak-intro') && !document.getElementById('ak-note').hidden), 'no separate brought-by-people colour; the key explains the shading');
+    ok(await p.evaluate(() => !document.querySelector('#ak-intro .legend-dot, #ak-intro i') && !document.getElementById('ak-intro').hidden && /Introduced/.test(document.getElementById('ak-intro').textContent) && /Florida/.test(document.getElementById('ak-intro').textContent) && !document.getElementById('ak-note').hidden), 'no separate brought-by-people colour; the key names where it was introduced (text, no swatch)');
     await shotMap('3-florida-burmese-python');
     await p.click('#ak-close'); await p.waitForTimeout(300);
   }
