@@ -22066,6 +22066,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       "<dt>Range</dt><dd>" + esc((c.dataset.countries || "").split("|").filter(Boolean).slice(0, 8).join(", ") || "Not recorded") + ((c.dataset.countries || "").split("|").filter(Boolean).length > 8 ? " and more" : "") + "</dd>" +
       "</dl>" +
       '<div class="sgv-acts">' + (has3d ? '<button type="button" class="sgv-3d"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 9 5v10l-9 5-9-5V7z"></path><path d="m3 7 9 5 9-5M12 12v10"></path></svg> Explore in 3D</button>' : "") +
+      (has3d && window.SL_3D.spot ? '<button type="button" class="sgv-spot"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg> <span>See the spot</span></button>' : "") +
       (window.SL_SP_PAGE_URL && window.SL_SP_PAGE_URL(sp.id) ? '<a class="sgv-page" href="' + esc(window.SL_SP_PAGE_URL(sp.id)) + '" target="_blank" rel="noopener">Species page</a>' : "") + "</div></section>";
   }
   // the exact spot: a small map with a pin (and the accuracy circle), drawn in SnakeList's own
@@ -22274,6 +22275,20 @@ window.SL_GEO_READY = new Promise(function (res) {
       SG.jumped = true; sgCloseView(false); SG.openM = mo;
       if (window.SL_MAP_CAM) window.SL_MAP_CAM.centre(mo.lon, mo.lat, (mo.fuzzy ? 256 * Math.pow(2, 12) : 256 * Math.pow(2, 16)) / Math.max(200, sgCv ? sgCv.clientWidth : 900), 650);
       window.SL_MAP_REDRAW && window.SL_MAP_REDRAW();
+      return;
+    }
+    var bs = e.target.closest(".sgv-spot"); // v6.14: See the spot - the sighting's own place in 3D (species/3d/spot.js)
+    if (bs && window.SL_3D && window.SL_3D.spot && SG.vo && SG.vo.taxon) {
+      var so = SG.vo, stx = so.taxon, skey = String(stx.name || "").trim().toLowerCase().split(/\s+/).slice(0, 2).join("-").replace(/[^a-z-]+/g, ""), sc = so.geojson && so.geojson.coordinates, su = so.user || null;
+      if (!skey) return;
+      bs.setAttribute("aria-busy", "true"); bs.querySelector("span").textContent = "Opening…";
+      setTimeout(function () { if (bs.isConnected) { bs.removeAttribute("aria-busy"); bs.querySelector("span").textContent = "See the spot"; } }, 900);
+      window.SL_3D.spot(skey, bs, stx.preferred_common_name && stx.preferred_common_name !== stx.name ? stx.preferred_common_name : "", {
+        lat: sc ? +sc[1] : SG.openM && SG.openM.lat, lon: sc ? +sc[0] : SG.openM && SG.openM.lon,
+        acc: +(so.positional_accuracy || so.public_positional_accuracy || 0),
+        obscured: !!(so.obscured || (so.geoprivacy && so.geoprivacy !== "open") || (so.taxon_geoprivacy && so.taxon_geoprivacy !== "open")),
+        when: so.time_observed_at || "", whenTxt: observedTxt(so), dayTxt: fmtDate((so.observed_on_details && so.observed_on_details.date) || so.observed_on || ""),
+        observer: su ? (su.name || (su.login ? "@" + su.login : "")) : "", place: so.place_guess || "" });
       return;
     }
     var b3 = e.target.closest(".sgv-3d");
@@ -26666,9 +26681,13 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
 @keyframes sgvIn { from { opacity: 0; transform: translateY(8px) scale(.99); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .sgv-card { animation: none; } }
 .sgv-top { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--border, #c8d6bc); flex: none; }
-.sgv-back, .sgv-3d, .sgv-onmap, .sg-undo { display: inline-flex; align-items: center; gap: 6px; font: 600 13.5px 'Inter', sans-serif; padding: 8px 15px 8px 10px; border-radius: 999px;
+.sgv-back, .sgv-3d, .sgv-spot, .sgv-onmap, .sg-undo { display: inline-flex; align-items: center; gap: 6px; font: 600 13.5px 'Inter', sans-serif; padding: 8px 15px 8px 10px; border-radius: 999px;
   border: 1px solid #2f6f2b; background: #58b351; color: #fff; cursor: pointer; text-shadow: 0 1px 1px rgba(10,40,14,.4); }
-.sgv-back:hover, .sgv-3d:hover, .sgv-onmap:hover, .sg-undo:hover { filter: brightness(1.07); }
+.sgv-back:hover, .sgv-3d:hover, .sgv-spot:hover, .sgv-onmap:hover, .sg-undo:hover { filter: brightness(1.07); }
+/* v6.14 See the spot: busy at once while the 3D view opens */
+.sgv-spot[aria-busy="true"] { cursor: progress; filter: brightness(.95); }
+.sgv-spot[aria-busy="true"] svg { display: none; }
+.sgv-spot[aria-busy="true"]::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2.4px solid rgba(255,255,255,.4); border-top-color: #fff; animation: sl-spin .8s linear infinite; box-sizing: border-box; }
 .sgv-ttl { flex: 1; margin: 0; font: 600 11px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted, #667261); text-align: center; }
 #sg-pop.sg-view .sg-x { position: static; flex: none; width: 38px; height: 38px; font-size: 24px; line-height: 1; border-radius: 50%; background: var(--surface-hover, rgba(0,0,0,.06));
   color: var(--text, #222); border: 1px solid var(--border, #c8d6bc); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 0 2px; }
@@ -27264,6 +27283,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   function close() {
     if (!ov) return;
     if (viewer) { try { viewer.dispose(); } catch (e) {} viewer = null; }
+    if (curSpot) { curSpot.gone = true; if (curSpot.S) try { curSpot.S.dispose(); } catch (e) {} curSpot = null; } // v6.14 (See the spot's downloads stop)
     ov.remove(); ov = null; stage.classList.remove("sl3d-open"); document.body.classList.remove("sl3d-on");
     if (bd) { bd.remove(); bd = null; lock(false); }
     document.removeEventListener("keydown", onKey, true);
@@ -27295,7 +27315,8 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       ov.querySelector(".sl3d-back").addEventListener("click", close);
       document.addEventListener("keydown", onKey, true);
       ov.querySelector(".sl3d-back").focus({ preventScroll: true });
-      start(id); return;
+      var sp0 = nextSpot; nextSpot = null; if (sp0) ov.classList.add("sl3d-spot");
+      start(id, sp0); return;
     }
     stage.appendChild(ov); stage.classList.add("sl3d-open"); document.body.classList.add("sl3d-on");
     ov.querySelector(".sl3d-back").addEventListener("click", close);
@@ -27345,29 +27366,45 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     more.addEventListener("click", function () { /* the snake's own page, like the card's See more info */ location.href = "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html"); });
     box.append(seen, more); hd.appendChild(box);
   }
-  function start(id) {
-    var my = ov; say("Loading the 3D model…");
+  function start(id, spot) {
+    var my = ov; say(spot ? "Loading the 3D model and the real place…" : "Loading the 3D model…");
+    if (spot) curSpot = spot;
     getModels().then(function (m) {
       var p = m[id];
       if (!p) { say("This snake doesn't have a 3D model yet."); return; }
       if (!gl()) { say("This browser or device can't show 3D graphics (WebGL is off or not supported)."); return; }
-      return getViewer().then(function (mod) {
+      return Promise.all([getViewer(), spot ? getSpot() : null]).then(function (r) {
+        var mod = r[0], sm = r[1];
         if (ov !== my) return;
-        var h = ov.querySelector(".sl3d-host"); h.innerHTML = "";
         // v4.81: the name's header gets Compare photo (the card's own photo) and See countries (the species page's map)
         var hab = nextHab; nextHab = null;
-        try { viewer = mod.mount(h, { profile: p, id: id, name: p.name, habitat: hab, testing: !!window.SL_3D_TEST, head: ov.querySelector(".sl3d-hd h2"), photo: function () { return photoOf(id); }, mapUrl: function () { return mapOf(id, p); }, pageLen: function () { return pageLenOf(id, p); } }); }
-        catch (e) { viewer = null; say("The 3D view couldn't start on this device.", function () { start(id); }); }
-        cardActs(id);
+        var go = function (hb, plugins) {
+          var h = ov.querySelector(".sl3d-host"); h.innerHTML = "";
+          try { viewer = mod.mount(h, { profile: p, id: id, name: p.name, habitat: hb, plugins: plugins, testing: !!window.SL_3D_TEST, head: ov.querySelector(".sl3d-hd h2"), photo: function () { return photoOf(id); }, mapUrl: function () { return mapOf(id, p); }, pageLen: function () { return pageLenOf(id, p); } }); }
+          catch (e) { viewer = null; say("The 3D view couldn't start on this device.", function () { start(id, spot); }); }
+          cardActs(id);
+        };
+        if (!spot) { go(hab); return; }
+        // v6.14 See the spot: the snake's own habitats help pick the look of the place, then the real place is built round it
+        if (!spot.S) spot.S = sm.prepare(spot);
+        try { spot.habs = (mod.habitatsOf && mod.habitatsOf(id)) || [{ k: ((mod.autoProfile ? mod.autoProfile(p) : p).scene || {}).kind || "grass" }]; } catch (e) { spot.habs = []; }
+        return spot.S.ready(4500).then(function (h2) { if (ov !== my) return; go(h2, [spot.S.plugin]); });
       });
     }).catch(function () {
       if (ov !== my) return;
-      say(navigator.onLine === false ? "You seem to be offline, and the 3D viewer hasn't been downloaded yet." : "The 3D viewer couldn't be loaded just now.", function () { start(id); });
+      say(navigator.onLine === false ? "You seem to be offline, and the 3D viewer hasn't been downloaded yet." : "The 3D viewer couldn't be loaded just now.", function () { start(id, spot); });
     });
   }
   window.SL_3D = { open: function (id) { return getModels().then(function () { open(id); }); }, close: close, setOn: setOn,
     // a panel over the whole app (the photo viewer's Explore in 3D); id = the scientific name as a slug
-    panel: function (id, from, name, hab) { nextHab = hab || null; open(id, from, name || true); return true; } };
+    panel: function (id, from, name, hab) { nextHab = hab || null; open(id, from, name || true); return true; },
+    // v6.14: See the spot - a sighting's own place in 3D round the model (spot.js starts its downloads at once)
+    spot: function (id, from, name, sp) { nextSpot = sp; getSpot().then(function (sm) { if (!sp.S && !sp.gone) sp.S = sm.prepare(sp); }, function () {}); open(id, from, name || true); return true; } };
+  var nextSpot = null, curSpot = null, spotP = null;
+  function getSpot() {
+    if (!spotP) { var imp; try { imp = new Function("u", "return import(u)"); } catch (e) { return Promise.reject(e); } spotP = imp(abs("spot.js")).catch(function (e) { spotP = null; throw e; }); }
+    return spotP;
+  }
 })();
 </script>
 <style>

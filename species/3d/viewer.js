@@ -8,7 +8,8 @@
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
 import * as NATURE from './nature.js?r=587'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=590'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as EXTRA from './extras.js?r=591'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as DAYNIGHT from './daynight.js?r=614'; // v6.14: Day / Night (and the plugin hooks "See the spot", spot.js, uses)
 export function useThree(t) { THREE = t; }
 // v6.13: Array .at() for iPads on iPadOS 15.0-15.3 (it came in 15.4); the species pages load this without SnakeList's own copy
 if (!Array.prototype.at) Object.defineProperty(Array.prototype, 'at', { value(i) { const n = this.length >>> 0; i = Math.trunc(i) || 0; if (i < 0) i += n; return i < 0 || i >= n ? undefined : this[i]; }, writable: true, configurable: true });
@@ -2682,6 +2683,7 @@ function buildScene(ctx, P, F, body, poseInfo, seed, quality) {
   // ground
   const waterY = { y: null };
   const dist2snake = (x, z) => { let m = 1e9; for (let i = 0; i < poseInfo.pts.length; i += 6) { const q = poseInfo.pts[i], d = Math.hypot(q[0] - x, q[1] - z) - F.W(i * poseInfo.ds); if (d < m) m = d; } return m; };
+  if (ctx.ground && ctx.ground({ THREE, scene, S, P, F, poseInfo, Rb, seed, quality, sky, hor, gcol, dist2snake, fbm, rng, sstep })) return; // v6.14: "See the spot" (spot.js) makes the real ground itself
   // v5.50: the world round the snake is real-world size, never scaled to the snake (a thread snake used to get tiny
   // leaves, pebbles and hummocks and so looked as big as a python): the land's gentle rise is about a metre over
   // 10-20 m, and it starts beyond the snake (and beyond a few metres round a small one)
@@ -3460,6 +3462,10 @@ export function mount(host, opts) {
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.86; // (v5.78: a touch brighter - ACES darkened and dulled the greens and browns of the skin; v5.90: a little lower again (was 0.94) now the sun lights the side we look at - sunlit skins came out washed pale)
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = quality === 'low' ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   const ctx = { renderer, scene: null, track };
+  // v6.14: plugins - Day / Night (daynight.js) in every 3D view, and "See the spot" (spot.js: the real place of a sighting)
+  const plugs = [DAYNIGHT.plugin].concat(opts.plugins || []).map((f) => { try { return f(V, { group: gReset }) || {}; } catch (e) { console.warn('3D plugin', e); return {}; } });
+  V.dayNight = plugs[0]; V.plugs = plugs;
+  function plugRun(k, a, b) { let r = false; for (const p of plugs) if (p[k]) { try { if (p[k](a, b)) r = true; } catch (e) { console.warn('3D plugin', k, e); } } return r; }
   let skinGPU = null, snakeGroup, cam, controls, info, extras, raf = 0, dirty = true, lost = false, alive = true, scaleObj = null, markers = [];
 
   function build() {
@@ -3737,6 +3743,7 @@ float slScale(vec2 m) {
     fitLimits();
     resetView(true);
     if (bDet.getAttribute('aria-pressed') === 'true') buildMarkers();
+    plugRun('onBuild'); // v6.14
     shadowDirty = true; kick();
   }
   function setSceneVisible(v) { if (!ctx.scene) return; (ctx.occ || []).forEach((o) => { if (o.hid) { o.hid = false; if (o.im) { o.im.setMatrixAt(o.i, o.m); o.im.instanceMatrix.needsUpdate = true; } } }); ctx.scene.traverse((o) => { if (o !== ctx.scene && o.parent === ctx.scene && o !== snakeGroup && !o.isLight && o !== scaleObj) o.visible = v; }); shadowDirty = true; kick(); }
@@ -3750,6 +3757,7 @@ float slScale(vec2 m) {
     info.dMax = info.dFit * 1.55;
     info.dMin = Math.max(info.F.Hl * 0.9, info.F.w0 * 1.6); // v5.05: zoom right in (organs, eyes and scales up close)
     info.scaleK = 1;
+    plugRun('limits', info); // v6.14: See the spot zooms out over the real place
   }
   function targetFor(d) {
     // zooming in moves the point you orbit around from the middle of the snake to its head
@@ -3811,6 +3819,7 @@ float slScale(vec2 m) {
     cam.near = Math.max(Math.min(st.d * 0.02, Math.max(1e-4, bodyClearance(cam.position) * 0.5)), 1e-4); cam.far = Math.max(info.Rb * 40, 300); cam.updateProjectionMatrix(); cam.lookAt(t);
     // v4.72: the haze begins beyond the snake from wherever you look, never on it
     const fog = ctx.scene && ctx.scene.fog; if (fog && ctx.fogNear0 != null) { fog.near = Math.max(ctx.fogNear0, st.d * 1.6); fog.far = Math.max((ctx.farR || 60) * 0.95, fog.near * 3); }
+    plugRun('camera', cam, t); // v6.14
   }
   function resize() {
     const w = stage.clientWidth || 300, h = stage.clientHeight || 200;
@@ -3833,6 +3842,7 @@ float slScale(vec2 m) {
     if (sizeStep()) moving = true; // v5.74: Size vs person: the snake's scale, the person fading in or out
     const sceneMoving = moving; moving = moving || camMoving; // (anything but the camera moved: the shadows must follow)
     placeCamera();
+    if (plugRun('frame')) moving = true; // v6.14: Day / Night's blend, See the spot
     if (fx.camera()) moving = true; // a show moves the camera by itself
     if (opts.testing && window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } // (tests: a fixed camera)
     updateOccluders();
@@ -4278,7 +4288,7 @@ float slScale(vec2 m) {
       alive = false; if (raf) cancelAnimationFrame(raf); raf = 0; clearTimeout(ambT);
       if (document.fullscreenElement === wrap) { try { document.exitFullscreen(); } catch (e) {} }
       controls && controls.dispose(); fx.dispose(); cleanups.forEach((f) => f()); cleanups.length = 0;
-      disposeScene(); renderer.dispose(); renderer.forceContextLoss && renderer.forceContextLoss();
+      plugRun('dispose'); disposeScene(); renderer.dispose(); renderer.forceContextLoss && renderer.forceContextLoss();
       host.innerHTML = '';
       if (window.__sp3d && window.__sp3d.renderer === renderer) delete window.__sp3d;
     },
