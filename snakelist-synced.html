@@ -3014,9 +3014,11 @@
       var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0;
     }
     // is one of them on screen now? (except the one asking)
-    function showing(except) {
+    // (soft: the small corner nudges that stay until closed - "See snakes from", keep your list - do not count; v6.31: the
+    // "new version" bar and the "Have an idea?" tip are not kept waiting behind one of those for ever)
+    function showing(except, soft) {
       var els = document.querySelectorAll(SEL);
-      for (var i = 0; i < els.length; i++) if (els[i] !== except && vis(els[i])) return true;
+      for (var i = 0; i < els.length; i++) if (els[i] !== except && !(soft && els[i].matches(".sl-nudge, .keep-nudge")) && vis(els[i])) return true;
       return false;
     }
     // may a pop-up show now? (ready, nothing else showing, and the one before has had a moment to appear)
@@ -3024,10 +3026,11 @@
     // the page was being built again. It waits until the page has been still for a moment.
     var lastScrollT = 0;
     window.addEventListener("scroll", function () { lastScrollT = Date.now(); }, { passive: true });
-    window.SL_canPrompt = function (except) { return ready() && Date.now() - lastRun > 900 && Date.now() - lastScrollT > 900 && !showing(except); };
+    window.SL_canPrompt = function (except, soft) { return ready() && Date.now() - lastRun > 900 && Date.now() - lastScrollT > 900 && !showing(except, soft); };
     window.SL_promptsReady = function () { return ready() && Date.now() - lastScrollT > 900; };
     // run fn as soon as a pop-up may show (queued, one at a time, in the order asked)
-    window.SL_whenPrompt = function (fn, opt) { if (opt && opt.hero) fn.__hero = 1; q.push(fn); pump(); };
+    // (opt.urgent - the "new version" bar: first in the queue, and only waits for the opening and the photo, never for another pop-up)
+    window.SL_whenPrompt = function (fn, opt) { if (opt && opt.hero) fn.__hero = 1; if (opt && opt.urgent) { fn.__urgent = 1; q.unshift(fn); } else q.push(fn); pump(); };
     // v6.11 (Eduardo): What's new never shows over the opening or the photo - it comes up the moment you have scrolled
     // completely down into SnakeList (no waiting for the page to be still), and Welcome back right after it
     function readyHero() { return ready(); }
@@ -3036,7 +3039,7 @@
     window.SL_promptShown = function () { lastRun = Date.now(); }; // one that decides by itself tells us it just showed
     function pump() {
       clearTimeout(timer); if (!q.length) return;
-      var ok = q[0] && q[0].__hero ? (readyHero() && Date.now() - lastRun > 900 && !showing()) : window.SL_canPrompt();
+      var ok = q[0] && q[0].__urgent ? ready() : q[0] && q[0].__hero ? (readyHero() && Date.now() - lastRun > 900 && !showing()) : window.SL_canPrompt();
       if (ok) { var fn = q.shift(); try { fn(); } catch (e) {} lastRun = Date.now(); }
       if (q.length) timer = setTimeout(pump, 400);
     }
@@ -31088,7 +31091,7 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
       if (vis(document.getElementById("tour-layer"))) return true;
       if (de.classList.contains("sl-achdlg-on") || de.classList.contains("sl-modal-on") || de.classList.contains("sl-level-lock") || de.classList.contains("sl3d-lock")) return true;
       if (document.querySelector("#wn-sheet.open, .report-sheet.open, .note-sheet.open, .map-sheet.open, .ins-sheet.open, .photo-lightbox.open, dialog[open], #sl-newver, .lang-menu:not([hidden])")) return true;
-      if (window.SL_canPrompt && !window.SL_canPrompt()) return true;
+      if (window.SL_canPrompt && !window.SL_canPrompt(tip, true)) return true; // (a corner nudge like "See snakes from" does not hold it back: they never overlap)
       return false;
     }
     function done() { ls("sl-idea-tip", "1"); if (tip) tip.remove(); tip = null; clearInterval(timer); window.removeEventListener("resize", place); window.removeEventListener("scroll", place); }
