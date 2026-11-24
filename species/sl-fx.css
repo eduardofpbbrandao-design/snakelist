@@ -20,11 +20,62 @@
 ::-webkit-scrollbar-thumb { background: var(--sl-sb); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; min-height: 28px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--sl-sb-hover); background-clip: padding-box; }
 ::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
-html .sp-fmore,html .sp-all,html .sl-more-btn,details>summary::after{display:inline-flex;align-items:center;gap:0;min-height:0;margin:8px 0 0;font:500 12px/1.35 Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:4px 11px;border-radius:999px;border:1px solid #c8d6bc;background:#f6faf1;color:#55614f;box-shadow:none;cursor:pointer;transition:border-color .15s ease,color .15s ease}
+html .sp-fmore,html .sp-all,html .sl-more-btn,details>summary::after{display:inline-flex;align-items:center;gap:0;min-height:0;margin:8px 0 0;font:600 13.5px/1.35 Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:7px 14px;border-radius:999px;border:1px solid #c8d6bc;background:#f6faf1;color:#55614f;box-shadow:none;cursor:pointer;transition:border-color .15s ease,color .15s ease}
 html .sp-fmore,details>summary::after{margin:0}html .sp-fmore::after{display:none}html:not(.js) .sp-all{display:none}html .sp-all[hidden],html .sl-more-btn[hidden],html .sp-fmore[hidden]{display:none}
 html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover,details>summary:hover::after{border-color:#8fbf8f;color:#24321f}
 @media (prefers-color-scheme:dark){:root{--sl-sb:rgba(155,224,124,.72);--sl-sb-hover:#b8f09f}}
-@media (prefers-color-scheme:dark){html .sp-fmore,html .sp-all,html .sl-more-btn,details>summary::after{border-color:#37855f;background:#24684a;color:#a8c9b4}html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover,details>summary:hover::after{border-color:#6fbf8a;color:#dff5d6}}
+@media (prefers-color-scheme:dark){html .sp-fmore,html .sp-all,html .sl-more-btn,details>summary::after{border-color:#2f6d50;background:#1a4d37;color:#d2e6d8}html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover,details>summary:hover::after{border-color:#6fbf8a;color:#dff5d6}}
 .sl-report{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-left:6px;flex:none;align-self:center;border-radius:10px;border:1px solid var(--line,#d5e4cf);background:var(--card,#fbfdf9);color:var(--text,#1d6b33);cursor:pointer;padding:0}.sl-report svg{width:16px;height:16px}.sl-report:focus-visible{outline:2px solid #58b351;outline-offset:2px}
 @media (max-width:640px){header.sl-top,header.site-top .site-wrap{position:relative}.sl-report{position:absolute;top:12px;right:12px;margin:0}}
 .sl-rep-sheet{position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(8,20,12,.55)}.sl-rep-sheet.open{display:flex}.sl-rep-card{width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;border-radius:16px;padding:20px 20px 18px;background:var(--card,#fbfdf9);color:var(--text,#1d6b33);border:1px solid var(--line,#d5e4cf);box-shadow:0 18px 50px rgba(0,0,0,.35);font:400 14px/1.5 Inter,system-ui,sans-serif;text-align:left}.sl-rep-card h2{margin:0 0 6px;font-size:20px;line-height:1.25}.sl-rep-card p{margin:0 0 12px;color:var(--muted,#4b7a55)}.sl-rep-kinds{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}.sl-rep-kinds button,.sl-rep-acts button{font:600 13px Inter,system-ui,sans-serif;padding:7px 12px;border-radius:999px;border:1px solid var(--line,#d5e4cf);background:transparent;color:var(--text,#1d6b33);cursor:pointer}.sl-rep-kinds button.on{background:#3f8f3a;border-color:#3f8f3a;color:#fff}.sl-rep-card textarea{box-sizing:border-box;width:100%;min-height:110px;padding:10px 12px;border-radius:10px;border:1px solid var(--line,#d5e4cf);background:var(--bg,#f1f6ee);color:var(--text,#1d6b33);font:inherit;resize:vertical}.sl-rep-acts{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.sl-rep-acts button{border-radius:10px}.sl-rep-acts .go{background:#3f8f3a;border-color:#3f8f3a;color:#fff}.sl-rep-note{min-height:1em;margin:8px 0 0!important;font-size:13px}.sl-rep-note a{color:var(--link,#2a7a2f)}
+/* sl-ds (copied from the app by build_species.py) */
+:root {
+  --ds-primary: #2e7d32; --ds-primary-hover: #276d2c; --ds-primary-press: #1f5c23; --ds-on-primary: #ffffff;
+  --ds-focus: #1f6f2a; --ds-danger: #a33a24; --ds-danger-hover: #8a2f1c; --ds-on-danger: #ffffff;
+  --ds-radius: 10px; --ds-radius-sm: 8px; --ds-pill: 999px;
+  --ds-fs-label: 12.5px; --ds-fs-meta: 13.5px; --ds-fs-ui: 14.5px; --ds-fs-body: 16px; --ds-fs-lead: 18px;
+  --ds-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ds-display: 'Fraunces', Georgia, serif;
+  --ds-tap: 44px;
+}
+[data-sl-theme="dark"] {
+  --ds-primary: #8fd46c; --ds-primary-hover: #a5e486; --ds-primary-press: #7cc35a; --ds-on-primary: #0e2f1e;
+  --ds-focus: #b8f09f; --ds-danger: #f0a58a; --ds-danger-hover: #f6bba5; --ds-on-danger: #2a0e06;
+}
+/* keyboard focus: one visible ring everywhere (mouse clicks don't show it) */
+:where(a, button, [role="button"], [role="tab"], [role="link"], summary, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--ds-focus); outline-offset: 2px; }
+/* links in running text: never colour alone - they are a little bolder than the words around them, and get an
+   underline while they have keyboard focus (Eduardo asked for no underlines on hover; see v5.81) */
+:where(p, li, dd, td, figcaption, .sp-note, .sl-sub) a:not([class]) { font-weight: 600; }
+:where(p, li, dd, td, figcaption, .sp-note, .sl-sub) a:not([class]):focus-visible { text-decoration-line: underline !important; text-underline-offset: 3px; }
+/* the shared button: .sl-btn (+ .is-primary / .is-secondary / .is-ghost / .is-danger) */
+.sl-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-sizing: border-box; min-height: 40px;
+  padding: 8px 16px; border-radius: var(--ds-radius); border: 1px solid transparent; font: 600 var(--ds-fs-ui)/1.2 var(--ds-font);
+  cursor: pointer; text-decoration: none; white-space: nowrap; transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .08s ease; }
+.sl-btn.is-primary { background: var(--ds-primary); border-color: var(--ds-primary); color: var(--ds-on-primary); }
+.sl-btn.is-primary:hover { background: var(--ds-primary-hover); border-color: var(--ds-primary-hover); }
+.sl-btn.is-primary:active { background: var(--ds-primary-press); }
+.sl-btn.is-secondary { background: transparent; border-color: currentColor; color: var(--ds-primary); }
+.sl-btn.is-ghost { background: transparent; color: inherit; }
+.sl-btn.is-danger { background: var(--ds-danger); border-color: var(--ds-danger); color: var(--ds-on-danger); }
+.sl-btn.is-danger:hover { background: var(--ds-danger-hover); }
+.sl-btn:active { transform: translateY(1px); }
+.sl-btn[aria-pressed="true"], .sl-btn.is-selected { box-shadow: inset 0 0 0 2px currentColor; }
+.sl-btn:disabled, .sl-btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; transform: none; }
+.sl-btn.is-loading, .sl-btn[aria-busy="true"] { pointer-events: none; opacity: .8; }
+.sl-btn.is-loading::before, .sl-btn[aria-busy="true"]::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor;
+  border-right-color: transparent; animation: sl-ds-spin .7s linear infinite; }
+@keyframes sl-ds-spin { to { transform: rotate(360deg); } }
+/* badge (status, never colour alone: it always has words), notice */
+.sl-badge-ds { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: var(--ds-pill); font: 600 var(--ds-fs-label)/1.3 var(--ds-font); border: 1px solid currentColor; }
+.sl-notice { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--ds-radius); border: 1px solid; font: 400 var(--ds-fs-meta)/1.5 var(--ds-font); }
+@media (pointer: coarse) { .sl-btn { min-height: var(--ds-tap); } }
+@media (prefers-reduced-motion: reduce) { .sl-btn { transition: none; } .sl-btn.is-loading::before, .sl-btn[aria-busy="true"]::before { animation-duration: 2s; } }
+/* ---- species, place and About pages (classes that only exist there) ---- */
+/* the filled buttons on the pages: deeper green, white words (were white on #58b351, 2.6:1) */
+.sp-actions a.sp-btn:not(.sp-btn2), .cy-cta a.cy-btn, .center a.btn, a.btn.btn-primary, .btn-primary, .sl-ev-btn.pri {
+  background: var(--ds-primary) !important; border-color: var(--ds-primary) !important; color: var(--ds-on-primary) !important; }
+.sp-actions a.sp-btn:not(.sp-btn2):hover, .cy-cta a.cy-btn:hover, .center a.btn:hover, .btn-primary:hover { background: var(--ds-primary-hover) !important; border-color: var(--ds-primary-hover) !important; }
+.sp-actions a.sp-btn:active, .cy-cta a.cy-btn:active, .center a.btn:active { transform: translateY(1px); }
+@media (prefers-color-scheme:dark){:root{--ds-primary:#8fd46c;--ds-primary-hover:#a5e486;--ds-primary-press:#7cc35a;--ds-on-primary:#0e2f1e;--ds-focus:#b8f09f}}

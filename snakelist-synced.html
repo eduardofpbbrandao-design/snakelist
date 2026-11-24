@@ -29009,7 +29009,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
   };
   var opts = [].slice.call(box.querySelectorAll(".sl-lv-opt")), go = document.getElementById("sl-lv-go"), no = document.getElementById("sl-lv-no");
   var hint = document.getElementById("sl-lv-hint"), ckTxt = document.getElementById("sl-lv-ck-txt");
-  function consentAsked() { return !web || get("sl-consent") === "yes"; } // (with "Only essentials" before, it asks again here)
+  function consentAsked() { return !web || !!get("sl-consent"); } // v6.24: asked once only - an earlier "Only essentials" is respected (no second cookie question here)
   function paint() {
     opts.forEach(function (o) { o.setAttribute("aria-pressed", String(o.dataset.level === pick)); });
     go.disabled = no.disabled = !pick;
@@ -29038,7 +29038,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
   });
   go.addEventListener("click", function () {
     if (!pick) return;
-    if (web && get("sl-consent") !== "yes" && window.SL_CONSENT) window.SL_CONSENT(true);
+    if (web && !get("sl-consent") && window.SL_CONSENT) window.SL_CONSENT(true); // (v6.24: "Continue" after an earlier "Only essentials" does not turn cookies on)
     var keep = !web || get("sl-consent") === "yes";
     apply(pick, keep); if (!keep) { /* cookies refused earlier: this visit only */ }
     close();
@@ -29860,6 +29860,10 @@ body { font-size: 16px; }
 .card.follow .follow-btn .sl-fol-lbl { display: inline; }
 [data-sl-theme="dark"] .card.follow .follow-btn { color: #ffd27a; }
 .note-btn, .photo-btn { font-size: 13px !important; }
+/* My lists: Picked for you is the switch (filled when on); Edit and Refresh are plain outlined actions, not three filled greens in a row */
+.ml-picks, .ml-edit { font-size: 13px !important; padding: 5px 12px !important; }
+.ml-edit { background: transparent !important; color: var(--gold) !important; border-color: currentColor !important; }
+.ml-edit:hover { background: rgba(46,125,50,0.08) !important; filter: none !important; }
 /* the sort menu had no keyboard focus ring */
 button.sl-sort:focus-visible { outline: 3px solid var(--ds-focus); outline-offset: 2px; }
 /* ---- dark mode: locked achievements and their step pills were 3.2:1 and 2.8:1 ---- */
@@ -29985,7 +29989,8 @@ html.sl-on-map .ck-bar:not(.nm-bar) { bottom: auto; top: 12px; }
     { el: "#report-sheet", open: function (el) { return el.classList.contains("open"); }, box: ".report-card", close: "#report-cancel", trap: true },
     { el: "#ins-sheet", open: function (el) { return el.classList.contains("open"); }, box: ".ins-card", close: "#ins-ok", trap: true },
     { el: "#signin-page", open: function (el) { return !el.hidden; }, box: ".signin-card", close: "#signin-back", trap: true },
-    { el: "#tour-layer", open: function (el) { return !el.hidden; }, box: "#tour-callout", close: "#tour-skip", trap: true, esc: true },
+    // (the tutorial is a guide over the page, not a modal: Tab can still reach what a step points at)
+    { el: "#tour-layer", open: function (el) { return !el.hidden; }, box: "#tour-callout", close: "#tour-skip", trap: false, esc: true },
     { el: "#country-panel", open: function (el) { return !el.hidden && !!el.closest(".tab-panel, #map-panel, body") && visible(el); }, box: "#country-panel", close: "#cp-close", trap: false, esc: true, noFocus: true }
   ];
   var stack = [];
@@ -30075,6 +30080,12 @@ html.sl-on-map .ck-bar:not(.nm-bar) { bottom: auto; top: 12px; }
   function onMap() { var t = document.getElementById("tab-map"); document.documentElement.classList.toggle("sl-on-map", !!(t && t.classList.contains("active"))); }
   var tabs = document.querySelector(".tabs"); if (tabs) { new MutationObserver(onMap).observe(tabs, { subtree: true, attributes: true, attributeFilter: ["class"] }); onMap(); }
 
+  // ---- Edit (My lists): Escape means Done ----
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape" || !document.body.classList.contains("sl-editing") || stack.length) return;
+    if (document.querySelector(".ed-sheet.open, .photo-lightbox.open, .sl3d-bd")) return;
+    var d = document.querySelector(".ed-bar-btns .edb-done, #edb-done"); if (d) { e.preventDefault(); d.click(); }
+  });
   // ---- the version tag opens What's new: reachable from the keyboard too ----
   var ver = document.querySelector(".sl-ver");
   if (ver && ver.tagName !== "BUTTON") {

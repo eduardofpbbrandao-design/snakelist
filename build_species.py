@@ -2567,7 +2567,7 @@ COUNTRY_CSS = """.sl-nophoto{display:flex;align-items:center;justify-content:cen
 .cy-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .cy-page a:focus-visible,.cy-page button:focus-visible,.cy-page input:focus-visible,.cy-page select:focus-visible{outline:3px solid var(--g);outline-offset:2px}
 .cy-crumbs{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin:2px 0 14px;font-size:13.5px;color:var(--muted)}
-.cy-crumbs ol{list-style:none;display:flex;flex-wrap:wrap;margin:0;padding:0}.cy-crumbs li+li:before{content:"\203A";margin:0 8px;color:var(--tagline)}
+.cy-crumbs ol{list-style:none;display:flex;flex-wrap:wrap;margin:0;padding:0}.cy-crumbs li+li:before{content:"›";margin:0 8px;color:var(--tagline)}
 .cy-crumbs a{color:var(--muted)}.cy-crumbs a:hover{color:var(--g)}.cy-crumbs [aria-current]{color:var(--text);font-weight:600}
 .cy-jump{display:flex;gap:6px}.cy-jump input{width:210px;max-width:60vw;font:inherit;font-size:14.5px;padding:8px 10px 8px 34px;min-height:40px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b7a55' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:10px 50%!important;background-size:16px!important;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text)}
 .cy-jump button,.cy-reset{font:600 13px Inter,system-ui,sans-serif;padding:6px 12px;border-radius:10px;border:1px solid var(--tagline);background:var(--tag);color:var(--text);cursor:pointer}
@@ -2600,7 +2600,7 @@ a.cy-dbtn{text-decoration:none}
 .cy-btn:hover{filter:brightness(.95)}
 .cy-list{margin-top:22px;background:none;border:0;padding:0;border-radius:0}
 .cy-tools{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
-.cy-tools label{display:flex;flex-direction:column;gap:3px;min-width:0}.cy-lab{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.cy-tools label{display:flex;flex-direction:column;gap:3px;min-width:0;max-width:100%}.cy-lab{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .cy-q{flex:1 1 240px}.cy-tools input,.cy-tools select{font:inherit;font-size:15px;min-height:40px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);max-width:100%}
 .cy-tools input{width:100%}.cy-reset{min-height:40px}
 .cy-count{margin:12px 2px 10px;font-size:14px;color:var(--muted)}
