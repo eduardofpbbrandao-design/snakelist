@@ -75,7 +75,12 @@
         advent: {
           days: 24, firstDoor: "2026-12-01T00:00:00Z",   // door N opens at firstDoor + (N-1) days and is "on time" for 24 hours
           recoverUntil: "2027-01-01T00:00:00Z",          // skips can recover missed doors until the event ends
-          streakForSkip: 3,                              // every 3 consecutive claimed days earns 1 free skip
+          streakForSkip: 3,                              // every 3 doors in a row opened ON THEIR OWN DAY earn 1 free skip
+          // A skip covers ONE eligible door the person chooses: a missed day (recovered) or, while this is true, an
+          // upcoming day claimed early (once the calendar has started, never before). Eduardo, 2026-11-24 - replaces the
+          // earlier rule "skips never open future days"; false brings that rule back. firebase/firestore.rules repeats
+          // it (skipFuture()) - change both together.
+          skipCanClaimFuture: true,
           subscriberSkips: 10,                           // per event, tracked apart from earned skips
           grandPrize: "legendary-serpent"
         },

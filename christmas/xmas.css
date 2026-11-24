@@ -90,6 +90,8 @@ html.xm .xm-music-btn.on::after { content: ""; position: absolute; inset: -3px; 
 .xm-audio-dark .xm-au-on { color: #fff; border-color: rgba(255,255,255,.45); }
 .xm-audio-dark .xm-au-on[aria-pressed="true"] { background: #fff; color: #1d120a; }
 .xm-set-audio h3 { margin: 14px 0 8px; font: 700 13px Inter, sans-serif; }
+.xm-set-news { margin-top: 10px; min-height: 36px; padding: 6px 14px; border-radius: 999px; border: 1px solid #D8B76A; background: #123D2A; color: #FFF8ED; font: 600 13px Inter, sans-serif; cursor: pointer; }
+.xm-set-news:hover { background: #216B45; } .xm-set-news:focus-visible { outline: 3px solid #D8B76A; outline-offset: 2px; }
 
 /* ============ "Show me": the ring round the thing and the note beside it ============ */
 .xm-pt-ring { position: fixed; z-index: 2400; pointer-events: none; border-radius: 12px; border: 2.5px solid #58b351;
@@ -182,6 +184,13 @@ html.sl3d-lock .xm-pill, html.sl-modal-on .xm-pill, html.xm-welcome-open .xm-pil
   html.xm .xm-bulb, .xm-pt-ring, .xm-music-btn.on::after, .xm-panel, .xm-panel-bg, .xm-snowcap { animation: none !important; }
   html.xm .xm-bulb { opacity: .85; }
 }
+
+/* the festive hover (xmas.js festiveHover): a colour rising up the button under the mouse, under its label.
+   --xm-rise is moved by the script from wherever it is, so it reverses smoothly and never restarts abruptly.
+   Light buttons (dark label): warm cream rising to gold. Dark buttons (light label): Christmas red with a gold edge.
+   Both keep the label's own colour readable (cream/gold under the dark green labels; #A92E3E under white: 6.3:1). */
+html.xm .xm-rise { background-image: linear-gradient(to top, #FFF3D6 0%, #F6E2AE calc(var(--xm-rise) - 7%), #D8B76A calc(var(--xm-rise) - 2.5%), rgba(216,183,106,0) var(--xm-rise)) !important; }
+html.xm .xm-rise.xm-rise-dark { background-image: linear-gradient(to top, #7E1F2D 0%, #A92E3E calc(var(--xm-rise) - 7%), #D8B76A calc(var(--xm-rise) - 2.5%), rgba(216,183,106,0) var(--xm-rise)) !important; }
 
 /* ============ the Christmas Cabin (cabin.js) ============ */
 body.xm-cabin-on .sl-body > .tabs ~ :not(#xm-cabin):not(script):not(style) { display: none !important; }

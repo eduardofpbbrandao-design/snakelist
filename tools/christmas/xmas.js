@@ -677,6 +677,10 @@
       var sec = D.createElement("section"); sec.className = "xm-set-audio";
       sec.innerHTML = "<h3>Christmas audio</h3>";
       AU.panel(sec);
+      // the welcome panel's news, still there after it was dismissed (it never pops up again by itself)
+      var nb = D.createElement("button"); nb.type = "button"; nb.className = "xm-set-news"; nb.textContent = "What's new for Christmas";
+      nb.addEventListener("click", function () { var x = D.querySelector("#sl-settings .sl-aclose"); if (x) x.click(); setTimeout(show, 150); });
+      sec.appendChild(nb);
       var audio = panel.querySelector('[data-section="audio"], [data-sl-settings-section="audio"], .sl-set-audio, #sl-settings-audio');
       (audio || panel).appendChild(sec);
     }
@@ -689,7 +693,9 @@
   /* ================= "Merry Christmas from SnakeList!" - once per person =================
      It waits its turn like the app's own pop-ups. Each new thing in the list can be tapped: the panel closes and
      SnakeList shows it (goes there and points at it). */
-  var WKEY = "sl-xmas-welcome-seen", wOpen = false;
+  // once per event announcement (a new event gets a new key); the preview's earlier key counts as this event's
+  var WEV = "xmas2026", WKEY = "sl-xmas-welcome-seen:" + WEV, wOpen = false;
+  function welcomeSeen() { return !!(lsGet(WKEY) || (WEV === "xmas2026" && lsGet("sl-xmas-welcome-seen"))); }
   function visible(el) { if (!el || el.hidden || el.closest("[hidden]")) return false; var cs = getComputedStyle(el); if (cs.display === "none" || cs.visibility === "hidden" || +cs.opacity < .05) return false; var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; }
   function othersOpen() {
     if (visible(D.querySelector(".tour-callout")) || visible(D.querySelector("#sl-level.open")) || visible(D.querySelector("#wn-sheet.open"))) return true;
@@ -698,7 +704,7 @@
     return D.documentElement.classList.contains("sl3d-lock");
   }
   function welcome() {
-    if (XM.kind !== "xm-app" || lsGet(WKEY)) return;
+    if (XM.kind !== "xm-app" || welcomeSeen()) return;
     var html = D.documentElement; html.classList.add("xm-welcome-visit");
     var wn = D.getElementById("wn-sheet");
     if (wn) {
@@ -775,9 +781,55 @@
   }
   if (D.title && D.title.indexOf("Christmas preview") < 0) D.title += " · Christmas preview";
 
+  /* ================= the festive hover: a colour that rises up a button =================
+     On a computer, the button under the mouse fills from the bottom with a festive colour (a gold edge on top of it),
+     under its label, which keeps its own colour - so a button with a dark label fills with warm cream and gold, one
+     with a light label with Christmas red. It is moved by the mouse, not by a timer: leaving the button sends the
+     colour back down from wherever it got to, and crossing the button again carries on from there - it never jumps
+     back to the start. Only plain-coloured buttons get it (a button with a picture or gradient of its own keeps it,
+     and so do the ones that have their own hover, .sl-own-hov). Reduced motion: no rising, the colour just shows. */
+  function festiveHover() {
+    if (!window.matchMedia || !matchMedia("(hover: hover)").matches || !(window.CSS && CSS.registerProperty) || !Element.prototype.animate) return;
+    try { CSS.registerProperty({ name: "--xm-rise", syntax: "<percentage>", inherits: false, initialValue: "0%" }); } catch (e) {}
+    var SEL = 'button, [role="button"], a.btn, a[class*="btn"], .chip';
+    var EXCL = ".sl-own-hov, .xm-nohov, .sl-ev-door, #xm-welcome .xm-px, .xm-pill, svg, canvas, .sl3d-panel button, .leaflet-container button";
+    function lum(c) { var m = /rgba?\(([^)]+)\)/.exec(c || ""); if (!m) return 1; var v = m[1].split(",").map(parseFloat); return (0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]) / 255; }
+    function eligible(b) {
+      if (!b || b.disabled || b.getAttribute("aria-disabled") === "true" || b.closest(EXCL)) return false;
+      var r = b.getBoundingClientRect(); if (r.width < 24 || r.height < 20 || r.width > 520 || r.height > 120) return false;
+      var cs = getComputedStyle(b); if (cs.backgroundImage !== "none" && !b.classList.contains("xm-rise")) return false;
+      var m = /rgba?\(([^)]+)\)/.exec(cs.backgroundColor), a = m ? (m[1].split(",")[3] === undefined ? 1 : parseFloat(m[1].split(",")[3])) : 0;
+      return a > 0.04 || parseFloat(cs.borderTopWidth) > 0;
+    }
+    function go(b, up) {
+      var cur = parseFloat(getComputedStyle(b).getPropertyValue("--xm-rise")) || 0, to = up ? 100 : 0;
+      if (b.__xmA) { b.__xmA.cancel(); b.__xmA = null; }
+      if (up) { if (!b.classList.contains("xm-rise")) b.classList.toggle("xm-rise-dark", lum(getComputedStyle(b).color) > 0.55); b.classList.add("xm-rise"); }
+      if (RM.matches) { b.style.setProperty("--xm-rise", to + "%"); if (!up) b.classList.remove("xm-rise"); return; }
+      var ms = Math.max(120, Math.abs(to - cur) * (up ? 4.2 : 3.2));
+      var an = b.animate([{ "--xm-rise": cur + "%" }, { "--xm-rise": to + "%" }], { duration: ms, easing: up ? "cubic-bezier(.3,.7,.3,1)" : "cubic-bezier(.5,0,.6,1)", fill: "forwards" });
+      b.__xmA = an;
+      an.onfinish = function () {
+        if (b.__xmA !== an) return;
+        b.style.setProperty("--xm-rise", to + "%"); an.cancel(); b.__xmA = null;
+        if (!up) { b.classList.remove("xm-rise", "xm-rise-dark"); b.style.removeProperty("--xm-rise"); }
+      };
+    }
+    var on = null; XM.hoverEligible = eligible;
+    D.addEventListener("pointerover", function (e) {
+      if (e.pointerType && e.pointerType !== "mouse" && e.pointerType !== "pen") return;
+      var b = e.target.closest && e.target.closest(SEL); if (b && !eligible(b)) b = null;
+      if (b === on) return;
+      if (on) go(on, false);
+      on = b; if (b) go(b, true);
+    }, true);
+    D.addEventListener("pointerleave", function () { if (on) { go(on, false); on = null; } });
+    D.addEventListener("pointerout", function (e) { if (on && !e.relatedTarget) { go(on, false); on = null; } }, true);
+  }
+
   function start() {
     dressCover(); logo(); photoHat();
-    accents(); pill(); spIcons(); welcome();
+    accents(); pill(); spIcons(); welcome(); festiveHover();
     if (XM.kind === "xm-app") { var n = 0; (function m() { if (!musicBtn() && n++ < 40) setTimeout(m, 250); })(); settingsHook(); }
   }
   if (D.readyState === "loading") D.addEventListener("DOMContentLoaded", start); else start();

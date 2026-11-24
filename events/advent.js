@@ -51,7 +51,7 @@
       "no-trusted-time": "Couldn't check the time with the SnakeList server - doors only open with the server's time. Check your connection and try again.",
       "already-claimed": "This door is already open.", "future": "No peeking! This door opens on its own day.",
       "event-over": "The Advent Calendar has closed.", "missed-needs-skip": "This day has passed - use a skip to recover it.",
-      "not-missed": "Skips can only recover days that have already passed.", "no-earned-skips": "You have no free skips left. Open 3 days in a row to earn one.",
+      "not-missed": "Skips can only recover days that have already passed.", "open-today": "Today's door is open - just open it, no skip needed.", "no-earned-skips": "You have no free skips left. Open 3 days in a row to earn one.",
       "not-subscriber": "Subscriber skips are a subscriber benefit.", "subscriber-skip-cap": "You've used all 10 subscriber skips for this event.",
       "permission-denied": "The server refused this door (it checks the date and your skips).", "no-such-door": "There's no such door."
     }[r] || "Something went wrong - please try again.";
@@ -75,10 +75,11 @@
       // fresh from the server first, so the counters we send are the server's
       return Promise.all([r.sum.get(), r.doors.doc(String(day - 1)).get()]).then(function (res) {
         var s = res[0].exists ? res[0].data() : { earned: 0, earnedUsed: 0, subUsed: 0, claimed: 0 };
-        var run = res[1].exists ? res[1].data().run + 1 : 1, TS = EV.serverTimestamp();
+        // the streak counts only doors opened on their own day: a skip's door has run 0 and earns nothing
+        var pv = res[1].exists ? res[1].data() : null, run = via !== "day" ? 0 : pv && pv.via === "day" ? pv.run + 1 : 1, TS = EV.serverTimestamp();
         var b = db.batch();
         b.set(r.doors.doc(String(day)), { day: day, at: TS, via: via, run: run });
-        b.set(r.sum, { earned: (s.earned || 0) + (run % E.advent.streakForSkip === 0 ? 1 : 0), earnedUsed: (s.earnedUsed || 0) + (via === "skip" ? 1 : 0),
+        b.set(r.sum, { earned: (s.earned || 0) + (via === "day" && run % E.advent.streakForSkip === 0 ? 1 : 0), earnedUsed: (s.earnedUsed || 0) + (via === "skip" ? 1 : 0),
                        subUsed: (s.subUsed || 0) + (via === "sub" ? 1 : 0), claimed: (s.claimed || 0) + 1, last: day, at: TS });
         return b.commit();
       });
@@ -106,7 +107,7 @@
     var dots = ""; for (var i = 0; i < nx.need; i++) dots += '<i class="' + (i < nx.have ? "on" : "") + '"></i>';
     var sub = EV.isSubscriber();
     return '<div class="sl-ev-adv-stats">' +
-      '<div class="sl-ev-stat" title="Days in a row"><small>Streak</small><b data-stat="streak">' + str + " day" + (str === 1 ? "" : "s") + '</b><span class="dots" aria-label="' + nx.have + " of " + nx.need + ' days to the next free skip">' + dots + "</span></div>" +
+      '<div class="sl-ev-stat" title="Doors in a row, each opened on its own day"><small>Streak</small><b data-stat="streak">' + str + " day" + (str === 1 ? "" : "s") + '</b><span class="dots" aria-hidden="true">' + dots + '</span><span class="sl-ev-muted" style="font-size:10.5px">' + (nx.need - nx.have) + " more to a free skip</span></div>" +
       '<div class="sl-ev-stat"><small>Free skips</small><b data-stat="earned">' + sk.earned + '</b><span class="sl-ev-muted" style="font-size:10.5px">earned ' + sk.earnedTotal + "</span></div>" +
       '<div class="sl-ev-stat"><small>Subscriber skips</small>' + (sub ? '<b data-stat="sub">' + sk.sub + " / " + E.advent.subscriberSkips + "</b>" : '<b style="font-size:13px;margin-top:3px"><span class="sl-ev-lock">' + ic("lock", 11) + " Subscribers</span></b>") + "</div></div>";
   }
@@ -123,10 +124,13 @@
   function doorsHtml() {
     var now = EV.time.now();
     return '<div class="sl-ev-cal"><div class="sl-ev-doors" role="list">' + ORDER.map(function (d) {
-      var st = L.status(E, ST.state, d, now), r = REWARD[d], c = ST.state.doors[d];
-      var lab = "Door " + d + ": " + (st === "claimed" ? r.name + (c.via === "skip" ? " (recovered with a free skip)" : c.via === "sub" ? " (recovered with a subscriber skip)" : "") :
-        st === "open" ? "open it!" : st === "missed" ? "missed - use a skip" : st === "closed" ? "closed" : "opens " + EV.localTime(L.unlockAt(E, d), { day: "numeric", month: "long" }));
-      return '<button type="button" role="listitem" class="sl-ev-door is-' + st + (c ? " via-" + c.via : "") + '" data-day="' + d + '" aria-label="' + esc(lab) + '">' +
+      var st = L.status(E, ST.state, d, now), r = REWARD[d], c = ST.state.doors[d], early = st === "locked" && L.skipTarget(E, ST.state, d, now) === "early";
+      var lab = "Door " + d + ": " + (st === "claimed" ? r.name + (c.via === "skip" ? " (opened with a free skip)" : c.via === "sub" ? " (opened with a subscriber skip)" : " (opened on its day)") :
+        st === "open" ? "open today - open it!" : st === "missed" ? "missed - can be recovered with a skip" : st === "closed" ? "closed" :
+        "opens " + EV.localTime(L.unlockAt(E, d), { day: "numeric", month: "long" }) + (early ? " (or now, with a skip)" : ""));
+      var word = st === "open" ? "Open today" : st === "missed" ? "Missed" : "";
+      return '<button type="button" role="listitem" class="sl-ev-door is-' + st + (c ? " via-" + c.via : "") + (early ? " can-early" : "") + '" data-day="' + d + '" aria-label="' + esc(lab) + '" title="' + esc(lab) + '">' +
+        (word ? '<span class="st" aria-hidden="true">' + word + "</span>" : "") +
         (st === "claimed" ? '<span class="inside">' + EV.art.item(r) + "</span>" : "") +
         '<span class="leaf"><b>' + d + "</b>" + (st === "locked" ? '<span class="ic">' + ic("lock", 12) + "</span>" : "") + "</span>" +
         (st === "claimed" ? '<span class="tag">' + d + "</span>" : "") + "</button>";
@@ -140,17 +144,20 @@
   }
   function html() {
     if (!ST.loaded) return '<p class="sl-ev-muted">Loading your Advent Calendar…</p>';
-    return modeNote() + (ST.err ? '<div class="sl-ev-note warn">' + esc(ST.err) + "</div>" : "") + statsHtml() + clockLine() + doorsHtml() +
+    return modeNote() + (ST.err ? '<div class="sl-ev-note warn">' + esc(ST.err) + "</div>" : "") + statsHtml() +
+      '<p class="sl-ev-rule">' + ic("flame", 13) + " <span><b>Streak:</b> doors opened on their own day, in a row. Every " + E.advent.streakForSkip + " in a row earn a free skip. A door opened with a skip counts towards the 24 doors and the grand prize, but not towards the streak.</span></p>" +
+      clockLine() + doorsHtml() +
       '<div class="sl-ev-skip" data-skip hidden></div>' + grandHtml() +
       '<div class="sl-ev-row"><button type="button" class="sl-ev-btn" data-act="inv">' + ic("gift") + 'My collection</button><button type="button" class="sl-ev-btn" data-act="sub">' + ic("crown") + "Subscriber benefits</button></div>" +
-      '<p class="sl-ev-muted">Each door can be opened once, on its own day. Open 3 days in a row to earn a free skip; skips only recover days that have passed - never future ones. Subscribers also get up to ' + E.advent.subscriberSkips + " subscriber skips, counted separately.</p>";
+      '<p class="sl-ev-muted">Each door can be opened once. On its own day it simply opens. A skip covers one door you choose - a day you missed' + (E.advent.skipCanClaimFuture ? ", or an upcoming day opened early" : " (never a future one)") +
+      " - and you'll always see what it does before it is used. Subscribers also get up to " + E.advent.subscriberSkips + " subscriber skips per event, counted separately from the free ones.</p>";
   }
   function render() {
     if (!P || !P.isConnected) return;
     var body = P.querySelector(".sl-ev-body"), sk = body.querySelector("[data-skip]"), openSkip = sk && !sk.hidden ? +sk.getAttribute("data-day") : null, y = body.scrollTop;
     body.innerHTML = html(); body.scrollTop = y;
     // keep the "recover with a skip" box only while that door is still missed
-    if (openSkip && L.status(E, ST.state, openSkip, EV.time.now()) === "missed") showSkip(openSkip);
+    if (openSkip && L.skipTarget(E, ST.state, openSkip, EV.time.now())) showSkip(openSkip);
   }
   function open() {
     if (!ST.loaded || ST.kind !== kind()) load();
@@ -173,18 +180,28 @@
     var d = +dEl.getAttribute("data-day"), st = L.status(E, ST.state, d, EV.time.now());
     if (st === "claimed") reveal(d, { again: true });
     else if (st === "open") doClaim(d, "day");
-    else if (st === "missed") showSkip(d);
+    else if (st === "missed" || L.skipTarget(E, ST.state, d, EV.time.now()) === "early") showSkip(d);
     else if (st === "closed") EV.toast("The Advent Calendar has closed.");
     else EV.toast(EV.time.now() == null ? reasonText("no-trusted-time") : "No peeking! Door " + d + " opens " + esc(EV.localTime(L.unlockAt(E, d))) + ".");
   }
+  // the skip box: says exactly what one skip will do BEFORE it is spent (a missed day, or an upcoming day early)
   function showSkip(d) {
     var s = P && P.querySelector("[data-skip]"); if (!s) return;
-    var sk = L.skipsLeft(E, ST.state), sub = EV.isSubscriber();
+    var now = EV.time.now(), tg = L.skipTarget(E, ST.state, d, now); if (!tg) return;
+    var sk = L.skipsLeft(E, ST.state), sub = EV.isSubscriber(), when = esc(EV.localTime(L.unlockAt(E, d), { weekday: "long", day: "numeric", month: "long" }));
+    var str = L.streak(E, ST.state, now);
     s.hidden = false; s.setAttribute("data-day", d);
-    s.innerHTML = '<div class="sl-ev-note"><b>Door ' + d + " was missed</b> (" + esc(EV.localTime(L.unlockAt(E, d), { weekday: "long", day: "numeric", month: "long" })) + "). Recover it with a skip - it counts for the calendar and the grand prize." +
-      '<div class="sl-ev-row"><button type="button" class="sl-ev-btn pri" data-act="skip" data-day="' + d + '"' + (sk.earned ? "" : " disabled") + ">" + ic("skip") + "Free skip (" + sk.earned + " left)</button>" +
-      '<button type="button" class="sl-ev-btn" data-act="subskip" data-day="' + d + '"' + (sub && sk.sub ? "" : " disabled") + ">" + ic("crown") + (sub ? "Subscriber skip (" + sk.sub + " left)" : "Subscriber skip (subscribers)") + "</button></div>" +
-      (sk.earned ? "" : '<p class="sl-ev-muted" style="margin:0">Open 3 days in a row to earn a free skip.</p>') +
+    var head = tg === "missed"
+      ? "<b>Door " + d + " was missed</b> (" + when + "). One skip recovers it now."
+      : "<b>Door " + d + " opens on " + when + ".</b> One skip opens it now, early.";
+    var what = '<ul class="sl-ev-skipwhat"><li>' + ic("check", 12) + "<span>It counts towards the 24 doors and " + esc(CFG.grandPrize.name) + ".</span></li>" +
+      "<li>" + ic("flame", 12) + "<span>It does <b>not</b> count as a visit for your streak - only doors opened on their own day do." +
+      (tg === "early" && str > 0 ? " On " + when + " there will be no door left to open, so your " + str + "-day streak will end then." : "") + "</span></li>" +
+      "<li>" + ic("skip", 12) + "<span>It uses one skip and can't be undone.</span></li></ul>";
+    s.innerHTML = '<div class="sl-ev-note">' + head + what +
+      '<div class="sl-ev-row"><button type="button" class="sl-ev-btn pri" data-act="skip" data-day="' + d + '"' + (sk.earned ? "" : " disabled") + ">" + ic("skip") + "Use a free skip on door " + d + " (" + sk.earned + " left)</button>" +
+      '<button type="button" class="sl-ev-btn" data-act="subskip" data-day="' + d + '"' + (sub && sk.sub ? "" : " disabled") + ">" + ic("crown") + (sub ? "Use a subscriber skip (" + sk.sub + " left)" : "Subscriber skip (subscribers)") + "</button></div>" +
+      (sk.earned ? "" : '<p class="sl-ev-muted" style="margin:0">No free skips yet: open ' + E.advent.streakForSkip + " doors in a row, each on its own day, to earn one.</p>") +
       '<button type="button" class="sl-ev-btn" data-act="noskip" style="min-height:28px;padding:3px 10px">Not now</button></div>';
     try { s.scrollIntoView({ block: "nearest" }); } catch (e) {}
   }

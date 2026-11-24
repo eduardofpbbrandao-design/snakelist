@@ -12,7 +12,9 @@ rules_version = '2';
 //   customers/..., products/.. written ONLY by the Stripe "Run Payments with Stripe" extension (server side)
 //
 // The Advent dates below must match events/config.js (xmas2026: door N opens 2026-12-01T00:00Z + N-1 days,
-// is "on time" for 24 hours, missed doors can be recovered with a skip until 2027-01-01T00:00Z).
+// is "on time" for 24 hours; a skip covers one door the person chooses - a missed one, or (skipFuture()) an
+// upcoming one opened early once door 1 has opened - until 2027-01-01T00:00Z; only doors opened on their own day
+// build the streak: a skip's door has run 0 and earns no free skip).
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -41,6 +43,8 @@ service cloud.firestore {
     function adventFirst() { return timestamp.date(2026, 12, 1); }
     function adventUnlock(d) { return adventFirst() + duration.value(d - 1, 'd'); }
     function adventEnd() { return timestamp.date(2027, 1, 1); }
+    // events/config.js advent.skipCanClaimFuture (Eduardo 2026-11-24: a skip may also claim an upcoming day early)
+    function skipFuture() { return true; }
     function zeroSummary() { return { 'earned': 0, 'earnedUsed': 0, 'subUsed': 0, 'claimed': 0 }; }
     function sumPath(uid, ev) { return /databases/$(database)/documents/eventProgress/$(uid)/events/$(ev); }
     function doorPath(uid, ev, d) { return /databases/$(database)/documents/eventProgress/$(uid)/events/$(ev)/doors/$(string(d)); }
@@ -54,11 +58,14 @@ service cloud.firestore {
       return x.keys().hasOnly(['day', 'at', 'via', 'run']) && x.keys().hasAll(['day', 'at', 'via', 'run'])
         && day == string(d) && d >= 1 && d <= 24 && x.day == d
         && x.at == request.time
-        && request.time >= adventUnlock(d)
         && request.time < adventEnd()
         && x.via in ['day', 'skip', 'sub']
-        && (x.via == 'day' ? request.time < adventUnlock(d + 1) : request.time >= adventUnlock(d + 1))
-        && x.run == (exists(doorPath(uid, ev, d - 1)) ? get(doorPath(uid, ev, d - 1)).data.run + 1 : 1)
+        // on its day: only during its own 24 hours. A skip: a missed door, or an upcoming one (never today's)
+        && (x.via == 'day' ? (request.time >= adventUnlock(d) && request.time < adventUnlock(d + 1))
+                           : (request.time >= adventUnlock(d + 1) || (skipFuture() && request.time >= adventFirst() && request.time < adventUnlock(d))))
+        // the streak: only doors opened on their own day count
+        && x.run == (x.via != 'day' ? 0
+                     : (exists(doorPath(uid, ev, d - 1)) && get(doorPath(uid, ev, d - 1)).data.via == 'day' ? get(doorPath(uid, ev, d - 1)).data.run + 1 : 1))
         && after.last == d && after.claimed == before.claimed + 1;
     }
     // the per-event summary: its counters can only move together with exactly one new door
@@ -72,7 +79,7 @@ service cloud.firestore {
         && !exists(dp) && existsAfter(dp)
         && n.at == request.time
         && n.claimed == o.claimed + 1
-        && n.earned == o.earned + (door.run % 3 == 0 ? 1 : 0)
+        && n.earned == o.earned + (door.via == 'day' && door.run % 3 == 0 ? 1 : 0)
         && n.earnedUsed == o.earnedUsed + (door.via == 'skip' ? 1 : 0)
         && n.subUsed == o.subUsed + (door.via == 'sub' ? 1 : 0)
         && (door.via != 'skip' || n.earnedUsed <= o.earned)

@@ -38,10 +38,11 @@ async function claim(f, uid, day, via, over) {
   // (the owner may read their own progress, exactly as the app does)
   const s = await f.doc(`eventProgress/${uid}/events/${EV}`).get(); if (s.exists) sum = s.data();
   const p = await f.doc(`eventProgress/${uid}/events/${EV}/doors/${day - 1}`).get();
-  over = Object.assign({ run: p.exists ? p.data().run + 1 : 1 }, over || {});
+  // the streak counts only doors opened on their own day: a skip's door has run 0 and earns nothing
+  over = Object.assign({ run: via !== 'day' ? 0 : p.exists && p.data().via === 'day' ? p.data().run + 1 : 1 }, over || {});
   const run = over.run;
   const door = Object.assign({ day, at: ST(), via, run }, over.door || {});
-  const next = Object.assign({ earned: sum.earned + (run % 3 === 0 ? 1 : 0), earnedUsed: sum.earnedUsed + (via === 'skip' ? 1 : 0), subUsed: sum.subUsed + (via === 'sub' ? 1 : 0), claimed: sum.claimed + 1, last: day, at: ST() }, over.sum || {});
+  const next = Object.assign({ earned: sum.earned + (via === 'day' && run % 3 === 0 ? 1 : 0), earnedUsed: sum.earnedUsed + (via === 'skip' ? 1 : 0), subUsed: sum.subUsed + (via === 'sub' ? 1 : 0), claimed: sum.claimed + 1, last: day, at: ST() }, over.sum || {});
   const b = f.batch();
   if (!over.noDoor) b.set(f.doc(`eventProgress/${uid}/events/${EV}/doors/${over.id || day}`), door);
   if (!over.noSum) b.set(sref, next);
@@ -56,7 +57,7 @@ async function claim(f, uid, day, via, over) {
   await ok(assertSucceeds(claim(A, 'alice', 1, 'day')), 'claim door 1 on its day');
   await ok(assertFails(claim(A, 'alice', 1, 'day', { run: 1 })), 'door 1 cannot be claimed twice');
   await ok(assertFails(claim(A, 'alice', 2, 'day')), 'door 2 (future) is refused');
-  await ok(assertFails(claim(A, 'alice', 2, 'skip')), 'a skip cannot open a future door');
+  await ok(assertFails(claim(A, 'alice', 2, 'skip')), 'no free skip yet -> door 2 cannot be opened early');
   await ok(assertFails(A.doc(`eventProgress/alice/events/${EV}/doors/1`).delete()), 'a door cannot be deleted');
   await ok(assertFails(A.doc(`eventProgress/alice/events/${EV}/doors/1`).update({ via: 'day' })), 'a door cannot be changed');
   await ok(assertFails(A.doc(`eventProgress/alice/events/${EV}`).set({ earned: 9, earnedUsed: 0, subUsed: 0, claimed: 1, last: 1, at: ST() })), 'summary alone (skips out of thin air) is refused');
@@ -81,8 +82,10 @@ async function claim(f, uid, day, via, over) {
   console.log('--- today is door 5 (door 4 was missed)');
   await ok(assertFails(claim(A, 'alice', 4, 'day')), 'a missed door cannot be claimed as on time');
   await ok(assertFails(claim(A, 'alice', 4, 'sub')), 'a subscriber skip without a subscription is refused');
-  await ok(assertSucceeds(claim(A, 'alice', 4, 'skip')), 'missed door 4 recovered with the earned skip');
-  await ok(assertSucceeds(claim(A, 'alice', 5, 'day')), 'door 5 on its day (the recovered door 4 keeps the streak: run 5)');
+  await ok(assertFails(claim(A, 'alice', 4, 'skip', { run: 4 })), 'a skip\'s door cannot carry on the streak (run must be 0)');
+  await ok(assertSucceeds(claim(A, 'alice', 4, 'skip')), 'missed door 4 recovered with the earned skip (run 0)');
+  await ok(assertFails(claim(A, 'alice', 5, 'day', { run: 5 })), 'the recovered door 4 is not a visit: door 5 cannot claim run 5');
+  await ok(assertSucceeds(claim(A, 'alice', 5, 'day')), 'door 5 on its day starts a new streak (run 1)');
   await rulesFor(shifted(7));
   await ok(assertSucceeds(claim(A, 'alice', 7, 'day')), 'door 7 on its day');
   await ok(assertFails(claim(A, 'alice', 6, 'skip')), 'no earned skips left -> refused');
@@ -94,8 +97,18 @@ async function claim(f, uid, day, via, over) {
   for (let d = 1; d <= 10; d++) await ok(assertSucceeds(claim(C, 'carol', d, 'sub')), 'subscriber skip ' + d + ' of 10 (door ' + d + ')');
   await ok(assertFails(claim(C, 'carol', 11, 'sub')), 'an 11th subscriber skip is refused');
   await ok(assertFails(claim(C, 'carol', 11, 'sub', { sum: { subUsed: 10 } })), '... even with the counter left at 10');
-  await ok(assertSucceeds(claim(C, 'carol', 11, 'skip')), 'earned skips (from the streak) are separate and still work');
-  await ok(assertFails(claim(C, 'carol', 16, 'sub')), 'a subscriber skip cannot open a future door either');
+  await ok(assertFails(claim(C, 'carol', 11, 'skip')), 'doors opened with subscriber skips build no streak, so they earn no free skips');
+  await ok(assertFails(claim(C, 'carol', 16, 'sub')), 'no subscriber skips left -> an upcoming door is refused too');
+  console.log('--- a skip on an upcoming door (skipCanClaimFuture)');
+  const Er = db('erin', { stripeRole: 'subscriber' });
+  await ok(assertFails(claim(Er, 'erin', 15, 'sub')), 'today\'s door is never a skip\'s target');
+  await ok(assertSucceeds(claim(Er, 'erin', 18, 'sub')), 'a subscriber skip opens upcoming door 18 early');
+  await ok(assertFails(claim(Er, 'erin', 18, 'sub')), '... once only');
+  await rulesFor(shifted(15).replace('function skipFuture() { return true; }', 'function skipFuture() { return false; }'));
+  await ok(assertFails(claim(Er, 'erin', 19, 'sub')), 'with skipFuture() off, upcoming doors stay shut to skips');
+  await ok(assertSucceeds(claim(Er, 'erin', 3, 'sub')), '... while a missed door can still be recovered');
+  await rulesFor(shifted(0));
+  await ok(assertFails(claim(db('fay', { stripeRole: 'subscriber' }), 'fay', 1, 'sub')), 'before the calendar starts, no door can be opened early');
 
   console.log('--- after the event');
   await rulesFor(shifted(40));
