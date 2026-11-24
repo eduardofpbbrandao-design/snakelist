@@ -2673,13 +2673,35 @@ export function create(V) {
       V.scene.add(p); compileAll(p); p.visible = false; p.userData.keeper = true; keepers.push(p);
     }
   }
+  // v6.18: what compileAsync leaves for the first click: the shadow pass's own shaders, the prey's shaders with its cut at
+  // the throat switched on (compiling outside a frame sees no cut), and each shader's first use (the browser may finish
+  // linking it only then, which on a slow graphics driver held See it eat up for seconds). So, idle: one real frame drawn
+  // into a tiny hidden target with the hidden parts shown, set up to need exactly the shaders the screen does (same
+  // colours and tone mapping: three.js draws a target flagged as XR like the screen), then each shader's first use, one
+  // per idle moment.
+  function shadowWarm() {
+    const r = V.ctx && V.ctx.renderer, sc = V.scene; if (!r || !V.cam || !sc) return;
+    const hid = [], reveal = (root) => root && root.traverse((o) => { if (!o.visible) { hid.push(o); o.visible = true; } });
+    reveal(V.group); keepers.forEach(reveal); for (const o of sc.children) if (!o.visible && o.isMesh && o.userData.noRig) reveal(o);
+    const rt = new THREE.WebGLRenderTarget(4, 4, { colorSpace: r.outputColorSpace }), prev = r.getRenderTarget(), au = r.shadowMap.autoUpdate;
+    rt.texture.colorSpace = r.outputColorSpace; rt.isXRRenderTarget = true;
+    try { r.setRenderTarget(rt); r.shadowMap.autoUpdate = true; r.render(sc, V.cam); }
+    finally { r.setRenderTarget(prev); r.shadowMap.autoUpdate = au; r.shadowMap.needsUpdate = true; for (const o of hid) o.visible = false; rt.dispose(); }
+  }
+  let useQ = null;
+  function firstUse() { // returns 'more' while there are shaders left to use for the first time
+    const r = V.ctx && V.ctx.renderer; if (!r) return '';
+    if (!useQ) useQ = r.info.programs.slice();
+    const t0 = performance.now(); while (useQ.length && performance.now() - t0 < 8) { const p = useQ.shift(); try { if (p.getUniforms) p.getUniforms(); } catch (e) { /* (a broken shader shows its error when drawn) */ } }
+    if (useQ.length) return 'more'; useQ = null; return '';
+  }
   function warmSoon() {
     warmStop(); warmOn = true; fx.warmed = false; const scene0 = V.scene;
     const steps = [() => groundIndex(), () => { ensureRig(); for (const o of V.scene.children) if (!o.visible && o.isMesh && o.userData.noRig) compileAll(o); }, () => compileAll(V.group), () => warmPrey(), () => { if (anat && anat.warm && V.extras && V.extras.mouth) anat.warm(); }, () => { // the person for Size vs person: loaded, built once and its shaders compiled, then kept hidden
       if (!man) { man = buildPerson(THREE, 1.7); man.visible = false; return 'wait'; }
       if (man.userData.realPerson === 'loading') return 'wait';
       V.scene.add(man); compileAll(man); man.visible = false; man.userData.keeper = true; keepers.push(man); man = null; return '';
-    }];
+    }, () => { useQ = null; shadowWarm(); }, () => firstUse()];
     let man = null;
     let i = 0;
     const run = () => {
@@ -2687,6 +2709,7 @@ export function create(V) {
       if (show || slither || (anat && anat.on)) { warmT = setTimeout(() => { warmT = idleCall(run); }, 1000); return; } // (busy: later)
       let r = ''; try { r = steps[i](); } catch (e) { /* a warm-up never breaks the view */ }
       if (r === 'wait') { warmT = setTimeout(() => { warmT = idleCall(run); }, 400); return; } // (still downloading)
+      if (r === 'more') { warmT = idleCall(run); return; } // (the same step again, at the next idle moment)
       i++; warmT = idleCall(run);
     };
     // (only once the surroundings' light, the plants and the skin's pattern are in: they change which shaders are needed)
