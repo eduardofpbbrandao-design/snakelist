@@ -219,7 +219,8 @@ export function prepare(sp) {
   const S = {
     ready: (ms) => timeout(rawP.then(([o, m]) => chooseKind(o, m)), ms || 4000, null).then((h) => (S.pick = h || { k: (sp.habs && sp.habs[0] && sp.habs[0].k) || 'grass', l: '', why: 'species' })),
     plugin: (V, ui) => makePlugin(V, ui),
-    dispose() { dead = true; if (ctlr) try { ctlr.abort(); } catch (e) { /* */ } for (const im of live) { im.onload = im.onerror = null; try { im.src = ''; } catch (e) { /* */ } } live.length = 0; },
+    dispose() { dead = true; if (ctlr) try { ctlr.abort(); } catch (e) { /* */ } for (const im of live) { im.onload = im.onerror = null; try { im.src = ''; } catch (e) { /* */ } } live.length = 0;
+      for (const p of [near, far, dem]) p.then((m) => { if (m && m.cv) m.cv.width = m.cv.height = 0; }, () => {}); }, // (the big pictures' memory goes at once: iPads have little)
   };
 
   // ==================================================================================================================
@@ -363,7 +364,7 @@ export function prepare(sp) {
       const tex = (m) => { if (!m) return null; const t = new THREE.CanvasTexture(m.cv); t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = Math.min(8, maxAniso); t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; track(t); return t; };
       const box = (m) => { if (!m) return new THREE.Vector4(-1e6, -1e6, 1, 1); const n = 2 ** m.z, x0 = (m.tx0 / n - X0) * Wm, z0 = (m.ty0 / n - Y0) * Wm, s = (m.N / n) * Wm; return new THREE.Vector4(x0, z0, s, s); };
       const tN = tex(mN), tF = tex(mF) || tN, base = new THREE.Color(B.S && B.S.fog ? B.S.fog : '#9a9a88');
-      const U = { uSatN: { value: tN || tF }, uSatF: { value: tF }, uBoxN: { value: box(mN || mF) }, uBoxF: { value: box(mF || mN) }, uHasSat: { value: tN || tF ? 1 : 0 }, uBase: { value: base }, uFloor: { value: new THREE.Color(kindNow() === 'swamp' ? '#3f3a2a' : '#5d4c38') }, uFloorR: { value: /^(forest|rainforest|swamp)$/.test(kindNow()) ? 34 : 0 } };
+      const U = { uSatN: { value: tN || tF }, uSatF: { value: tF }, uBoxN: { value: box(mN || mF) }, uBoxF: { value: box(mF || mN) }, uHasSat: { value: tN || tF ? 1 : 0 }, uBase: { value: base }, uFloor: { value: new THREE.Color(kindNow() === 'swamp' ? '#3f3a2a' : '#4a3b2a') }, uFloorR: { value: /^(forest|rainforest|swamp)$/.test(kindNow()) ? 34 : 0 } };
       const gm = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.97, metalness: 0, envMapIntensity: 0.45 });
       gm.onBeforeCompile = (sh) => {
         Object.assign(sh.uniforms, U);
@@ -680,11 +681,33 @@ export function prepare(sp) {
     });
     im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; im.castShadow = true; im.receiveShadow = true; im.name = 'spot-shrubs'; im.computeBoundingSphere(); scene.add(im);
   }
+  // fallen leaves: a drawn leaf (cut out) on flat cards, brown and ochre with a few green ones, densest near the snake
+  function leafLitter(scene, kind, Tg, dist2snake, roadDist, inWater, F, Rb, low, track) {
+    const THREE = TH; if (!THREE) return;
+    const big = kind === 'rainforest', rad = Math.max(7, Rb * 6), want = low ? 1400 : phone ? 2800 : 5600, r = rng(61), pts = [];
+    for (let i = 0; i < want * 2 && pts.length < want; i++) { const a = r() * TAU, d = Math.max(Rb * 0.3, 0.05) + Math.pow(r(), 1.6) * rad, x = Math.cos(a) * d, z = Math.sin(a) * d; if (dist2snake(x, z) < F.w0 * 0.9 + 0.01 || roadDist(x, z) < 0.2 || inWater(x, z)) continue; pts.push([x, z]); }
+    if (!pts.length) return;
+    const cv = document.createElement('canvas'); cv.width = cv.height = 64; const x = cv.getContext('2d');
+    x.fillStyle = '#d8d8d8'; x.beginPath(); x.moveTo(32, 3); x.bezierCurveTo(54, 18, 52, 46, 32, 61); x.bezierCurveTo(12, 46, 10, 18, 32, 3); x.fill();
+    x.strokeStyle = 'rgba(90,90,90,0.55)'; x.lineWidth = 1.6; x.beginPath(); x.moveTo(32, 5); x.lineTo(32, 60); x.stroke();
+    x.lineWidth = 0.8; for (let k = 0; k < 6; k++) { const y = 14 + k * 7.5; x.beginPath(); x.moveTo(32, y + 4); x.lineTo(20 + k * 0.6, y - 2); x.moveTo(32, y + 4); x.lineTo(44 - k * 0.6, y - 2); x.stroke(); }
+    const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; track(t);
+    const g = new THREE.PlaneGeometry(0.62, 1); g.rotateX(-Math.PI / 2); track(g);
+    const m = new THREE.MeshStandardMaterial({ map: t, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.92, metalness: 0 }); track(m);
+    const im = new THREE.InstancedMesh(g, m, pts.length), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), sc = new THREE.Vector3(), col = new THREE.Color();
+    const pal = kind === 'swamp' ? ['#5a4a32', '#6b5a3a', '#4a4030', '#7a6a48'] : ['#7a5532', '#94683a', '#a8804a', '#5e4128', '#6f4f2c', '#b08850', '#4f3a22', '#8a7a3a'];
+    pts.forEach(([px2, pz], i) => {
+      const L = (big ? 0.08 : 0.05) + r() * r() * (big ? 0.18 : 0.09); e.set((r() - 0.5) * 0.35, r() * TAU, (r() - 0.5) * 0.35); q.setFromEuler(e);
+      m4.compose(v.set(px2, Tg(px2, pz) + 0.004 + r() * 0.012, pz), q, sc.set(L, 1, L)); im.setMatrixAt(i, m4);
+      col.set(r() < 0.06 ? '#5f7a34' : pal[(r() * pal.length) | 0]).multiplyScalar(0.8 + r() * 0.35); im.setColorAt(i, col);
+    });
+    im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; im.receiveShadow = true; im.castShadow = false; im.name = 'spot-litter'; scene.add(im);
+  }
   // grass tufts (grassland, woods, scrub, wetland) or stones (desert), only close to the snake
   function groundCover(scene, kind, Tg, dist2snake, roadDist, inWater, F, Rb, low, track, colAt) {
     const THREE = TH; if (!THREE) return;
     const r = rng(53), dry = /^(arid|sand|gibber|clay)$/.test(kind), rad = Math.max(14, Rb * 8), pts = [];
-    const want = dry ? (low ? 160 : 420) : kind === 'forest' || kind === 'rainforest' ? (low ? 300 : 900) : (low ? 700 : 2200);
+    const want = dry ? (low ? 160 : 420) : kind === 'forest' || kind === 'rainforest' ? (low ? 120 : 360) : (low ? 700 : 2200);
     for (let i = 0; i < want * 3 && pts.length < want; i++) { const a = r() * TAU, d = Math.max(Rb * 1.1, 0.4) + Math.sqrt(r()) * rad, x = Math.cos(a) * d, z = Math.sin(a) * d; if (dist2snake(x, z) < F.w0 * 2.5 + 0.06) continue; if (roadDist(x, z) < 0.25 || inWater(x, z)) continue; pts.push([x, z]); }
     if (!pts.length) return;
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), s = new THREE.Vector3(), col = new THREE.Color();
@@ -695,6 +718,8 @@ export function prepare(sp) {
       pts.forEach(([x, z], i) => { const sz = 0.02 + r() ** 3 * 0.25; e.set(r(), r() * TAU, r()); q.setFromEuler(e); m4.compose(v.set(x, Tg(x, z) + sz * 0.15, z), q, s.set(sz, sz, sz)); im.setMatrixAt(i, m4); col.setHSL(0.07 + r() * 0.04, 0.18 + r() * 0.15, 0.38 + r() * 0.2); im.setColorAt(i, col); });
       im.castShadow = im.receiveShadow = true; im.name = 'spot-stones'; im.instanceMatrix.needsUpdate = true; scene.add(im); return;
     }
+    // under trees: fallen leaves lying flat all round the snake (the forest floor, not bare earth)
+    if (/^(forest|rainforest|swamp)$/.test(kind)) leafLitter(scene, kind, Tg, dist2snake, roadDist, inWater, F, Rb, low, track);
     // a tuft: three crossed blades cards with a drawn grass picture (cut out), swaying with the viewer's own wind
     const cv = document.createElement('canvas'); cv.width = 128; cv.height = 128; const x = cv.getContext('2d'), rr = rng(9);
     for (let i = 0; i < 46; i++) { const bx = 10 + rr() * 108, h = 40 + rr() * 86, lean = (rr() - 0.5) * 40, v2 = 140 + rr() * 110 | 0; x.strokeStyle = `rgb(${v2},${v2},${v2})`; x.lineWidth = 0.9 + rr() * 1.4; x.beginPath(); x.moveTo(bx, 128); x.quadraticCurveTo(bx + lean * 0.3, 128 - h * 0.6, bx + lean, 128 - h); x.stroke(); }
@@ -737,7 +762,7 @@ function css() {
 .spot-credit{position:absolute;z-index:4;right:8px;bottom:6px;margin:0;max-width:min(430px,44%);padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.72);color:#2a3a2e;font:500 10px/1.35 Inter,system-ui,sans-serif;text-align:right}
 .spot-credit a{color:inherit}
 [data-sl-theme="dark"] .spot-credit{background:rgba(10,24,16,.7);color:#d5e6d2}
-@media (max-width:560px){.spot-credit{font-size:9px;left:8px;right:8px;text-align:center}.spot-card{left:6px;bottom:52px;font-size:12.5px}}
+@media (max-width:560px){.spot-credit{font-size:9px;left:8px;right:8px;bottom:58px;max-width:none;text-align:center}.spot-card{left:6px;bottom:92px;font-size:12.5px}}
 `;
   document.head.appendChild(s);
 }
