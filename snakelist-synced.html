@@ -2101,6 +2101,162 @@
     </div>
     <!-- Intro photographs: Photographs by Melissa Doherty, Chao Shi, Mark Wilson, Nickson De lira, Paul Hoekman, Rafael Duarte, Rosie, Stephanie Taylor &middot; CC0. Public domain (CC0); attribution not required. -->
   </div>
+  <!-- PREVIEW (Eduardo's L6, waiting for his OK): the opening as a poster collage. Only with ?opening=collage
+       (kept for the rest of the visit; ?opening=wall goes back) - everyone else still gets the wall of photos above.
+       To make it the opening for everyone, change OPENING_DEFAULT below from "wall" to "collage". -->
+  <style id="sl-collage-css">
+    /* the opening's own photos (SnakeList's best opening photos) as a collage of slanted panels with thin dark
+       gutters between them (the gutters are the opening's own dark green), a large photo in the middle - this visit's
+       opening photo, the one the logo then glides onto - and the logo in the centre, over the panels. Only transforms
+       and opacity move (the graphics chip does it all, no filters, no blur): the panels slide in one after another from
+       the outside, then the logo lands. Each panel is only as big as its own photo (no full-screen layers on an iPad). */
+    .intro.intro-collage .photo-zoom { inset: 0; animation: none; }
+    .slc { position: absolute; inset: 0; contain: strict; }
+    .slc-p { position: absolute; overflow: hidden; background: #123d22; opacity: 0;
+      animation: slc-in 0.78s cubic-bezier(.2,.75,.25,1) var(--d, 0s) both; }
+    .slc-p[hidden] { display: none; }
+    @keyframes slc-in { from { opacity: 0; transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(1.07); } 30% { opacity: 1; } to { opacity: 1; transform: none; } }
+    .slc-p img { position: absolute; left: 0; top: 0; max-width: none; display: block; opacity: 0; transition: opacity 0.4s ease; user-select: none; -webkit-user-drag: none; }
+    .slc-p.slc-ok img { opacity: 1; }
+    .slc-hat { position: absolute; left: 0; top: 0; pointer-events: none; }
+    .slc-hat svg { position: absolute; overflow: visible; }
+    /* the logo lands: it settles from a touch bigger onto the collage (its letters and tick appear exactly as before) */
+    .intro.intro-collage .intro-content { animation: slc-land 0.72s 0.16s cubic-bezier(.2,.8,.25,1) both; }
+    @keyframes slc-land { from { transform: scale(1.14); } to { transform: none; } }
+    .intro.intro-collage.intro-glide .intro-content { animation: none; }
+    /* a soft dark pool only behind the logo, so it reads over the photos; the photos stay bright everywhere else */
+    .intro.intro-collage .photo-scrim { background: radial-gradient(34% 20% at 50% 50%, rgba(6,20,12,0.74) 0%, rgba(6,20,12,0.5) 55%, rgba(6,20,12,0) 100%),
+      linear-gradient(180deg, rgba(8,24,15,0.05), rgba(8,24,15,0.22)); }
+    @media (max-aspect-ratio: 1/1) { .intro.intro-collage .photo-scrim { background: radial-gradient(60% 13% at 50% 50%, rgba(6,20,12,0.74) 0%, rgba(6,20,12,0.5) 55%, rgba(6,20,12,0) 100%),
+      linear-gradient(180deg, rgba(8,24,15,0.05), rgba(8,24,15,0.22)); } }
+    /* reduced motion: the collage is simply there, still */
+    @media (prefers-reduced-motion: reduce) { .slc-p, .intro.intro-collage .intro-content { animation: none; opacity: 1; transform: none; } .slc-p img { transition: none; } }
+  </style>
+  <script>
+    (function () {
+      var OPENING_DEFAULT = "wall"; // <- "collage": the collage becomes the opening for everyone
+      var mode = OPENING_DEFAULT;
+      try { var q = /[?&]opening=(collage|wall)(?=[&#]|$)/.exec(location.search); if (q) { mode = q[1]; sessionStorage.setItem("sl-opening-style", mode); } else mode = sessionStorage.getItem("sl-opening-style") || OPENING_DEFAULT; } catch (e) {}
+      var intro = document.getElementById("intro"), P = window.SL_HERO_PHOTOS, H = window.SL_HERO, zoom = intro && intro.querySelector(".photo-zoom");
+      // (no opening at all this time - a link into SnakeList, back from a page, a quick reload: nothing is built or fetched)
+      if (mode !== "collage" || !zoom || !P || !H || /[?&](sp|map|f|hab|type|fam|q)=/.test(location.search) || window.SL_CAME_BACK || window.SL_QUICK_REOPEN) return;
+      intro.classList.add("intro-collage");
+      var wall = zoom.querySelector(".photo-wall"); if (wall) wall.parentNode.removeChild(wall);
+      var box = document.createElement("div"); box.className = "slc"; zoom.appendChild(box);
+      // where each photo's snake is (its head: from the Santa-hat positions, tools/christmas/photo-hats.json), as parts of the photo
+      var FOC = {"agkistrodon-contortrix":[0.66,0.4],"ahaetulla-prasina":[0.655,0.537],"corallus-caninus":[0.418,0.428],"corallus-hortulana":[0.33,0.16],"dendroaspis-angusticeps":[0.355,0.335],"echis-omanensis":[0.4,0.462],"farancia-erytrogramma":[0.74,0.41],"lampropeltis-gentilis":[0.86,0.562],"micrurus-tener":[0.862,0.648],"morelia-viridis":[0.465,0.385],"naja-kaouthia":[0.39,0.38],"oxybelis-aeneus":[0.42,0.33],"rough-green-hq":[0.555,0.2],"trimeresurus-insularis":[0.505,0.25],"zamenis-scalaris":[0.345,0.39]};
+      var R = 900 / 583; // (every opening photo has this shape)
+      // the photos: this visit's opening photo in the big middle panel, the others in a new order each visit
+      var rest = P.filter(function (p) { return p !== H; });
+      for (var i = rest.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = rest[i]; rest[i] = rest[j]; rest[j] = t; }
+      var photos = [H].concat(rest);
+      // the layouts, as parts of the screen: [panel, ...], each panel a list of corners; panel 0 is the big middle one.
+      // Wide screens: three slanted columns (nine panels); upright tablets: rows (seven); phones: taller rows (six).
+      var lerp = function (a, b, t) { return a + (b - a) * t; };
+      var LAY = {
+        wide: function () {
+          var xl = function (y) { return 0.27 - 0.035 * y; }, xr = function (y) { return 0.725 + 0.04 * y; };
+          var fy = function (x) { return lerp(0.57, 0.52, (x - xl(0.57)) / (xr(0.52) - xl(0.57))); }, sx = 0.535;
+          return [
+            [[xl(0), 0], [xr(0), 0], [xr(0.52), 0.52], [xl(0.57), 0.57]],
+            [[0, 0], [xl(0), 0], [xl(0.4), 0.4], [0, 0.34]],
+            [[xr(0), 0], [1, 0], [1, 0.37], [xr(0.31), 0.31]],
+            [[xl(0.57), 0.57], [sx, fy(sx)], [0.47, 1], [xl(1), 1]],
+            [[sx, fy(sx)], [xr(0.52), 0.52], [xr(1), 1], [0.47, 1]],
+            [[0, 0.34], [xl(0.4), 0.4], [xl(0.66), 0.66], [0, 0.72]],
+            [[xr(0.31), 0.31], [1, 0.37], [1, 0.62], [xr(0.67), 0.67]],
+            [[0, 0.72], [xl(0.66), 0.66], [xl(1), 1], [0, 1]],
+            [[xr(0.67), 0.67], [1, 0.62], [1, 1], [xr(1), 1]]
+          ];
+        },
+        tall: function (phone) {
+          var a = function (x) { return lerp(0.215, 0.18, x); }, b = function (x) { return lerp(0.565, 0.505, x); }, c = function (x) { return lerp(0.775, 0.8, x); };
+          var L = [
+            [[0, a(0)], [1, a(1)], [1, b(1)], [0, b(0)]],
+            [[0, 0], [0.57, 0], [0.5, a(0.5)], [0, a(0)]],
+            [[0.57, 0], [1, 0], [1, a(1)], [0.5, a(0.5)]],
+            [[0, b(0)], [0.43, b(0.43)], [0.52, c(0.52)], [0, c(0)]],
+            [[0.43, b(0.43)], [1, b(1)], [1, c(1)], [0.52, c(0.52)]]
+          ];
+          if (phone) L.push([[0, c(0)], [1, c(1)], [1, 1], [0, 1]]);
+          else L.push([[0, c(0)], [0.6, c(0.6)], [0.52, 1], [0, 1]], [[0.6, c(0.6)], [1, c(1)], [1, 1], [0.52, 1]]);
+          return L;
+        }
+      };
+      // a panel's corners moved in by half a gutter on every side it shares (a whole gutter along the screen's edge)
+      var inset = function (pts, W, Hh, g) {
+        var n = pts.length, area = 0, k, out = [];
+        for (k = 0; k < n; k++) { var p = pts[k], q2 = pts[(k + 1) % n]; area += p[0] * q2[1] - q2[0] * p[1]; }
+        var s = area > 0 ? 1 : -1, lines = [];
+        for (k = 0; k < n; k++) {
+          var A = pts[k], B = pts[(k + 1) % n], dx = B[0] - A[0], dy = B[1] - A[1], len = Math.sqrt(dx * dx + dy * dy) || 1;
+          var edge = (Math.abs(A[0]) < 0.5 && Math.abs(B[0]) < 0.5) || (Math.abs(A[1]) < 0.5 && Math.abs(B[1]) < 0.5) || (Math.abs(A[0] - W) < 0.5 && Math.abs(B[0] - W) < 0.5) || (Math.abs(A[1] - Hh) < 0.5 && Math.abs(B[1] - Hh) < 0.5);
+          var d = edge ? g : g / 2, nx = -dy / len * s * d, ny = dx / len * s * d;
+          lines.push([A[0] + nx, A[1] + ny, dx, dy]);
+        }
+        for (k = 0; k < n; k++) {
+          var l1 = lines[(k + n - 1) % n], l2 = lines[k], cr = l1[2] * l2[3] - l1[3] * l2[2];
+          if (Math.abs(cr) < 1e-9) { out.push([l2[0], l2[1]]); continue; }
+          var tt = ((l2[0] - l1[0]) * l2[3] - (l2[1] - l1[1]) * l2[2]) / cr;
+          out.push([l1[0] + l1[2] * tt, l1[1] + l1[3] * tt]);
+        }
+        return out;
+      };
+      var XA = document.documentElement.classList.contains("xm") && window.XM_ART, panels = [];
+      var src900 = function (p) { return "species-photos/hero/" + p[0] + "-900.webp"; };
+      var layout = function () {
+        var W = window.innerWidth, Hh = window.innerHeight; if (!W || !Hh) return;
+        var asp = W / Hh, nk = asp >= 1.05 ? "wide" : asp >= 0.62 ? "tall" : "phone";
+        var L = nk === "wide" ? LAY.wide() : LAY.tall(nk === "phone"), g = Math.max(3, Math.min(8, Math.round(Math.min(W, Hh) * 0.007)));
+        // the order they arrive in: the big middle one first, then outwards
+        var cen = L.map(function (pg) { var x = 0, y = 0; pg.forEach(function (v) { x += v[0]; y += v[1]; }); return [x / pg.length, y / pg.length]; });
+        var order = L.map(function (_, i) { return i; }).sort(function (a, b) { var da = Math.hypot(cen[a][0] - 0.5, cen[a][1] - 0.5), db = Math.hypot(cen[b][0] - 0.5, cen[b][1] - 0.5); return a === 0 ? -1 : b === 0 ? 1 : da - db; });
+        panels.forEach(function (el, i) { el.hidden = i >= L.length; });
+        L.forEach(function (pg, i) {
+          var el = panels[i], ph = photos[i % photos.length];
+          if (!el) {
+            el = panels[i] = document.createElement("div"); el.className = "slc-p"; box.appendChild(el);
+            var im = document.createElement("img"); im.alt = ""; im.decoding = "async"; im.draggable = false;
+            if (i === 0) { im.sizes = H.sizes; im.srcset = H.srcset; im.src = H.src; } // (the very file already on its way for the photo the logo glides onto)
+            else { im.setAttribute("fetchpriority", "low"); im.src = src900(ph); } // (after the logo's own letters and the big photo)
+            var ok = function () { el.classList.add("slc-ok"); }, dec = function () { if (im.decode) im.decode().then(ok, ok); else ok(); };
+            if (im.complete && im.naturalWidth) dec(); else { im.addEventListener("load", dec, { once: true }); im.addEventListener("error", ok, { once: true }); }
+            el.appendChild(im); el.__im = im; el.__ph = ph;
+          }
+          var pts = inset(pg.map(function (v) { return [v[0] * W, v[1] * Hh]; }), W, Hh, g);
+          var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+          pts.forEach(function (v) { x0 = Math.min(x0, v[0]); y0 = Math.min(y0, v[1]); x1 = Math.max(x1, v[0]); y1 = Math.max(y1, v[1]); });
+          var bw = x1 - x0, bh = y1 - y0;
+          el.style.left = x0.toFixed(1) + "px"; el.style.top = y0.toFixed(1) + "px"; el.style.width = bw.toFixed(1) + "px"; el.style.height = bh.toFixed(1) + "px";
+          el.style.clipPath = el.style.webkitClipPath = "polygon(" + pts.map(function (v) { return (v[0] - x0).toFixed(1) + "px " + (v[1] - y0).toFixed(1) + "px"; }).join(", ") + ")";
+          // it slides in from outside (away from the middle of the screen), one after another
+          var r = order.indexOf(i), ux = cen[i][0] - 0.5, uy = cen[i][1] - 0.5, ul = Math.hypot(ux, uy) || 1, m = Math.min(W, Hh) * 0.07;
+          el.style.setProperty("--d", (r * 0.055).toFixed(3) + "s");
+          el.style.setProperty("--dx", (i ? ux / ul * m : 0).toFixed(1) + "px"); el.style.setProperty("--dy", (i ? uy / ul * m : 0).toFixed(1) + "px");
+          // the photo covers its panel, framed on the snake (its head in the upper middle of the big panel)
+          var f = FOC[el.__ph[0]] || [0.5, 0.45], Z = i ? 1.1 : 1, cw = Math.max(bw, bh * R) * Z, ch = cw / R;
+          var tx = 0.5, ty = i ? 0.46 : (nk === "wide" ? 0.36 : 0.4);
+          var ox = Math.max(bw - cw, Math.min(0, bw * tx - f[0] * cw)), oy = Math.max(bh - ch, Math.min(0, bh * ty - (f[1] + 0.05) * ch));
+          var st = el.__im.style; st.width = cw.toFixed(1) + "px"; st.height = ch.toFixed(1) + "px"; st.left = ox.toFixed(1) + "px"; st.top = oy.toFixed(1) + "px";
+          // Christmas preview: the photo's Santa hat, exactly where it sits on that photo (a photo without one gets none)
+          var hp = XA && XA.photoHats && XA.hatSvg && XA.photoHats[el.__ph[0]];
+          if (hp) {
+            var hl = el.__hat; if (!hl) { hl = el.__hat = document.createElement("div"); hl.className = "slc-hat"; hl.setAttribute("aria-hidden", "true"); hl.innerHTML = '<svg viewBox="-72 -84 144 116" preserveAspectRatio="xMidYMid meet">' + XA.hatSvg + "</svg>"; el.appendChild(hl); }
+            var hw = hp.w * cw, sv = hl.firstChild;
+            sv.style.width = (hw * 1.44) + "px"; sv.style.height = (hw * 1.16) + "px";
+            sv.style.left = (ox + hp.x * cw - hw * 0.72) + "px"; sv.style.top = (oy + hp.y * ch - hw * 0.84) + "px";
+            sv.style.transformOrigin = (hw * 0.72) + "px " + (hw * 0.84) + "px";
+            sv.style.transform = "rotate(" + (hp.a || 0) + "deg)" + (hp.flip ? " scaleX(-1)" : "");
+          }
+        });
+      };
+      layout();
+      var raf = 0, onResize = function () { if (!raf) raf = requestAnimationFrame(function () { raf = 0; layout(); }); };
+      window.addEventListener("resize", onResize);
+      // once the opening is over, its photos are let go (they are not needed again)
+      document.addEventListener("sl-intro-done", function () { window.removeEventListener("resize", onResize); setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); panels = []; }, 1500); }, { once: true });
+    })();
+  </script>
 
   <script>
     // Wired here, immediately after the intro markup, rather than at the end of the
