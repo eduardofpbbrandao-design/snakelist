@@ -2115,6 +2115,7 @@
     .slc-p { position: absolute; overflow: hidden; background: #123d22; opacity: 0;
       animation: slc-in 0.78s cubic-bezier(.2,.75,.25,1) var(--d, 0s) both; }
     .slc-p[hidden] { display: none; }
+    .slc-p:not(.slc-ok):not(.slc-go) { animation-play-state: paused; } /* each panel arrives with its photo (never an empty panel), or after 2.5 s anyway */
     @keyframes slc-in { from { opacity: 0; transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(1.07); } 30% { opacity: 1; } to { opacity: 1; transform: none; } }
     .slc-p img { position: absolute; left: 0; top: 0; max-width: none; display: block; opacity: 0; transition: opacity 0.4s ease; user-select: none; -webkit-user-drag: none; }
     .slc-p.slc-ok img { opacity: 1; }
@@ -2251,6 +2252,7 @@
         });
       };
       layout();
+      setTimeout(function () { panels.forEach(function (el) { el.classList.add("slc-go"); }); }, 2500);
       var raf = 0, onResize = function () { if (!raf) raf = requestAnimationFrame(function () { raf = 0; layout(); }); };
       window.addEventListener("resize", onResize);
       // once the opening is over, its photos are let go (they are not needed again)
