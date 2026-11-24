@@ -139,7 +139,7 @@
   function grandHtml() {
     var n = ST.state.claimed, won = n >= E.advent.days;
     return '<div class="sl-ev-grand' + (won ? " won" : "") + '">' + EV.art.serpent(won ? "" : "dim") + '<div style="flex:1;min-width:0"><b>' + esc(CFG.grandPrize.name) + '</b><span class="sl-ev-muted" style="' + (won ? "color:#4a3500" : "") + '">' +
-      (won ? "Unlocked! It's in your collection and can sit in your Cabin." : "Open all 24 doors (recovered days count): " + n + " / 24") + "</span>" +
+      (won ? "Unlocked! It's in your collection and can sit in your Cabin." : "Open all 24 doors - doors opened with a skip count too: " + n + " / 24 · " + (24 - n) + " to go") + "</span>" +
       '<span class="sl-abar" role="progressbar" aria-valuemin="0" aria-valuemax="24" aria-valuenow="' + n + '"><i style="width:' + Math.round(n / 24 * 100) + '%"></i></span></div></div>';
   }
   function html() {

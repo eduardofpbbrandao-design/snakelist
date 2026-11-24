@@ -47,7 +47,7 @@
     "orn-ginger":    { cat: "ornament", name: "Gingerbread snake" },
     "orn-hat":       { cat: "ornament", name: "Little Santa hat" },
     "orn-glow":      { cat: "ornament", name: "Glowing snake", special: 5 },
-    "stock-plain":   { cat: "stocking", name: "Ivory stockings", free: true },
+    "stock-plain":   { cat: "stocking", name: "Classic red stockings", free: true },
     "stock-knit":    { cat: "stocking", name: "Cranberry knit stockings" },
     "stock-flake":   { cat: "stocking", name: "Snowflake stockings" },
     "wrap-classic":  { cat: "wrap",     name: "Classic red wrapping", free: true },
@@ -158,11 +158,20 @@
   };
   function bauble(c, frost) { return '<path d="M0-10V-6" stroke="#D8B76A" stroke-width="1.2"/><rect x="-3.2" y="-7.6" width="6.4" height="4" rx="1.2" fill="#D8B76A"/><circle cx="0" cy="5" r="9" fill="' + c + '"/><circle cx="-3" cy="2" r="2.6" fill="#fff" opacity=".55"/>' + (frost ? '<path d="M-5 5h10M0 0v10" stroke="#c9d8e2" stroke-width="1.3"/>' : ""); }
   function bow(c, dk) { return '<path d="M0 0c-12-9-16 5-3.6 5.2zM0 0c12-9 16 5 3.6 5.2z" fill="' + c + '" stroke="' + dk + '" stroke-width="1"/><path d="M-2 3l-5 10M2 3l5 10" stroke="' + c + '" stroke-width="2.8" stroke-linecap="round"/><circle cx="0" cy="1.6" r="2.6" fill="' + dk + '"/>'; }
+  // a classic Christmas stocking (like the logo's): a velvet boot - straight leg, rounded heel bulging out at the back,
+  // a round toe - under a thick, fluffy white fur cuff, hung from a little loop. The free one is the traditional red.
   function stockingG(kind) {
-    var c = kind === "stock-knit" ? "#A92E3E" : kind === "stock-flake" ? "#216B45" : "#FFF8ED", cuff = kind === "stock-plain" ? "#D8B76A" : "#FFF8ED";
-    var deco = kind === "stock-knit" ? '<path d="M-8 26h20M-8 36h20" stroke="#E4C57A" stroke-width="2" stroke-dasharray="3 3"/>' :
+    var c = kind === "stock-knit" ? "#8E2233" : kind === "stock-flake" ? "#216B45" : "#B8293B", dk = kind === "stock-flake" ? "#123D2A" : "#5C0A16";
+    var deco = kind === "stock-knit" ? '<path d="M-10 26h24M-10 34h24" stroke="#E4C57A" stroke-width="2" stroke-dasharray="3 3"/>' :
       kind === "stock-flake" ? '<g stroke="#FFF8ED" stroke-width="1.6" stroke-linecap="round"><path d="M2 24v14M-5 31h14M-3 26l10 10M7 26l-10 10"/></g>' : "";
-    return '<path d="M-10 4h24v38c0 8 4 10 12 12 8 2 8 14-2 14h-18c-10 0-16-6-16-16z" fill="' + c + '" stroke="#5a3620" stroke-width="1.5"/>' + deco + '<rect x="-13" y="0" width="30" height="11" rx="4" fill="' + cuff + '" stroke="#5a3620" stroke-width="1"/>';
+    var body = "M-10 8H14V40C14 45 17 47 23 48C31 49 36 55 34 61C32 67 27 69 21 69H-1C-11 69-17 63-16 55C-15 49-10 46-10 40Z";
+    var fur = ""; [[-13, 0], [-8, -1.6], [-2, -2], [4, -2], [10, -1.6], [15, 0], [-13, 11], [-7, 12.4], [-1, 12.8], [5, 12.8], [11, 12.4], [16, 11], [-15, 5.5], [18, 5.5]].forEach(function (q) { fur += '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="3.4"/>'; });
+    return '<path d="M14 2C16-6 24-5 22 2" fill="none" stroke="' + dk + '" stroke-width="2" stroke-linecap="round"/>' +
+      '<path d="' + body + '" fill="' + c + '" stroke="' + dk + '" stroke-width="1.6" stroke-linejoin="round"/>' + deco +
+      '<path d="M-5 16V40M-11 58C-9 64-4 66 2 66" stroke="#fff" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".22"/>' +
+      '<path d="M9 18V40C9 46 13 50 22 51" stroke="' + dk + '" stroke-width="2.4" fill="none" opacity=".35"/>' +
+      '<g fill="#FFF8ED"><rect x="-15" y="-1" width="33" height="14" rx="6"/>' + fur + '</g>' +
+      '<path d="M-13 9.5Q2 12.5 17 9.5" stroke="#d9cdb8" stroke-width="1.4" fill="none" stroke-linecap="round"/>';
   }
   var WRAP = { "wrap-classic": ["#A92E3E", "#E4C57A"], "wrap-gold": ["#F3E2B6", "#A92E3E"], "wrap-tartan": ["#216B45", "#E4C57A"] };
   function present(x, y, w, h, wrap) {
