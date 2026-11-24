@@ -138,7 +138,7 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     const bar = await pg.evaluate(() => [].map.call(document.querySelectorAll('.sp3d-bar button'), (b) => b.textContent));
     ok('the buttons under the model (v4.81: Anatomy, See it eat, Slither, See eye shield, Fullscreen)', JSON.stringify(bar) === JSON.stringify(['Reset', 'Open mouth', 'Anatomy', 'See it eat', 'Slither', 'See eye shield', 'Full body', 'Head close-up', 'Pattern from above', 'Size vs person', 'Fullscreen']), JSON.stringify(bar));
     const hdb = await pg.evaluate(() => [].map.call(document.querySelectorAll('.sp-rl-hd .sp3d-hdb button'), (b) => b.textContent));
-    ok('Compare photo and See countries beside the name (v4.81)', JSON.stringify(hdb) === JSON.stringify(['Compare photo', 'See countries']), JSON.stringify(hdb));
+    ok('Compare photo and See more info beside the name (v4.81; v6.24 label)', JSON.stringify(hdb) === JSON.stringify(['Compare photo', 'See more info']), JSON.stringify(hdb));
     // resize to phone width
     await pg.setViewportSize({ width: 390, height: 844 }); await pg.waitForTimeout(800);
     const rs = await pg.evaluate(() => { const c = document.querySelector('.sp3d-canvas'); return { cw: c.clientWidth, ch: c.clientHeight, bw: c.width / (window.devicePixelRatio || 1), aspect: window.__sp3d.cam.aspect, docW: document.documentElement.scrollWidth }; });

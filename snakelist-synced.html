@@ -9546,7 +9546,7 @@
       { sel: in3d(/^Show more/), waitFor: true, act: "click", tryIt: "Try it: click Show more.", title: "More buttons", text: "The camera buttons: the full body, a close-up of the head and its pattern from above. Size vs person, next to Normal and Anatomy, shows how long it is next to a person 1.70 m tall." },
       { sel: ".sl3d-ov .sp3d-fsc", waitFor: true, title: "Full screen", text: "Make the 3D model fill your whole screen." },
       { sel: in3d(/Compare photo/), waitFor: true, title: "Compare photo", text: "Put a real photo of this snake next to the model. You can zoom into the photo too." },
-      { sel: in3d(/See countries/), waitFor: true, title: "See countries", text: "See the countries and states where this snake lives." },
+      { sel: in3d(/See more info/), waitFor: true, title: "See more info", text: "See the countries and states where this snake lives, beside the model." },
       { sel: in3d(/Habitat/), title: "Habitat", text: "See the kind of place where this snake lives, all around it in 3D." },
       { sel: ".sl3d-ov .sl3d-back", waitFor: true, act: "click", tryIt: "Try it: click the X in the top-right corner.", title: "Close", text: "Close the 3D model to go back to your list." },
       { sel: inCard(".map-btn"), title: "See more info", text: "Opens the snake's own page: photos, facts, venom, its range map and sources. Its name opens the same page." },
@@ -12218,7 +12218,7 @@
       "Lives in: " + '<span class="quiz-lives-in">' + quizCurrent.answers.map((a) =>
         (((window.SL_INVASIVE || {})[quizCurrent.card.dataset.id] || []).some((pl) => pl.name === a || (pl.states || []).some((c) => window.STATE_NAME[c] === a))
           && !quizCurrent.card.dataset.countries.split("|").includes(a)) ? a + " (invasive)" : a).join(", ") + "</span>" + roundNote +
-      '<div class="quiz-result-actions"><button class="quiz-see-map" id="quiz-see-map" type="button">See countries</button>' +
+      '<div class="quiz-result-actions"><button class="quiz-see-map" id="quiz-see-map" type="button">See more info</button>' +
       '<button class="quiz-next" id="quiz-next" type="button">Next question</button></div>';
     document.getElementById("quiz-submit").hidden = true;
     revealQuizMap();
@@ -19817,7 +19817,7 @@ window.SL_GEO_READY = new Promise(function (res) {
         '<ul class="fp-facts"><li class="fp-wait">Loading facts&hellip;</li></ul>' +
         '<div class="fp-sight"><h4>Latest sightings</h4><div class="fp-obs"><span class="fp-wait">Checking iNaturalist&hellip;</span></div></div>' +
         '<div class="fp-actions"><button type="button" class="fp-fav' + (fav ? " on" : "") + '">' + STAR + (fav ? "Favourite" : "Mark as favourite") + '</button>' +
-        '<button type="button" class="fp-countries">See countries</button><button type="button" class="fp-unfollow">Unfollow</button></div></div></article>';
+        '<button type="button" class="fp-countries">See more info</button><button type="button" class="fp-unfollow">Unfollow</button></div></div></article>';
     }).join("");
     var cards = feed.querySelectorAll(".fp");
     feed.onclick = function (e) {
@@ -19837,6 +19837,8 @@ window.SL_GEO_READY = new Promise(function (res) {
         if (b) b.click(); // same as tapping its bell - the profile disappears
         return;
       }
+      // v6.24 (Eduardo, A2): "See more info" opens the species page, as on the cards
+      if (e.target.closest(".fp-countries") && window.SL_PAGE_URL) { var u0 = window.SL_PAGE_URL(s.card); if (window.claude && window.claude.use) window.open(u0, "_blank", "noopener"); else location.href = u0; return; }
       if (e.target.closest(".fp-countries") || (e.target.closest(".fp-place") && s.countries.length > 1)) {
         if (window.showMapSheet) window.showMapSheet(s.card);
         return;
@@ -24622,7 +24624,7 @@ window.SL_GEO_READY = new Promise(function (res) {
         '<div class="cam-pct">' + (pct < 1 ? "<1" : pct) + '%</div><div class="cam-acts">' +
         '<button type="button" class="cam-btn" data-keep="' + esc(i.id) + '">Mark seen &amp; keep this photo</button>' +
         '<button type="button" class="cam-btn ghost sl-sb' + (seen ? " seen" : "") + '" data-seen="' + esc(i.id) + '">' + (window.SL_SEEN_UI ? window.SL_SEEN_UI.html() : seen ? "&#10003; Seen" : "Mark Seen") + "</button>" + // (Mark Seen smooth)
-        '<button type="button" class="cam-btn ghost" data-countries="' + esc(i.id) + '">See countries</button>' +
+        '<button type="button" class="cam-btn ghost" data-countries="' + esc(i.id) + '">See more info</button>' +
         '<button type="button" class="cam-btn ghost" data-see="' + esc(i.name) + '">See in checklist</button></div></div>';
     }).join("") + (anyHere || !here ? "" : '<p class="cam-note">No snakes are on record where you are, so these are from anywhere in the world.</p>') +
       '<p class="cam-note">Guesses come from what the snake looks like, where you are' + (near && Object.keys(near.m).length ? " and the snakes recorded within " + near.r + " km of there on iNaturalist" : "") + '. Use them as a starting point, not a final answer.</p>' +
@@ -24651,7 +24653,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       return;
     }
     var mc = e.target.closest("[data-countries]");
-    if (mc) { var c2 = cardInfo(mc.getAttribute("data-countries")), mb = c2 && c2.card.querySelector(".map-btn"); if (mb) mb.click(); }
+    if (mc) { var c2 = cardInfo(mc.getAttribute("data-countries")); if (c2 && window.SL_PAGE_URL) { var u1 = window.SL_PAGE_URL(c2.card); if (window.claude && window.claude.use) window.open(u1, "_blank", "noopener"); else location.href = u1; return; } var mb = c2 && c2.card.querySelector(".map-btn"); if (mb) mb.click(); } // v6.24: the species page, like the cards
   });
 })();
 </script>
@@ -29911,6 +29913,10 @@ button.sl-sort:focus-visible { outline: 3px solid var(--ds-focus) !important; ou
   .eyebrow-row .eyebrow { white-space: normal !important; letter-spacing: .04em !important; line-height: 1.6; }
   .eyebrow-row .hdr-actions .install-btn, .eyebrow-row .hdr-actions .auth-btn { flex: 1 1 calc(50% - 3px); justify-content: center; min-height: 44px; }
 }
+/* My sightings (Eduardo, A31/A32): your own photo takes the place of the card's photo there (only there), with the date
+   you wrote under it - the rules for each card are written by the sl-ds script into #sl-own-photos */
+html.sl-tab-sightings #grid .sl-taken { display: block; margin: 0 0 4px; font: 500 13px/1.35 var(--ds-font); color: var(--text-muted); }
+#grid .sl-taken { display: none; }
 /* the cookie question sits above the map's own bottom controls instead of covering them */
 html.sl-on-map .ck-bar:not(.nm-bar) { bottom: auto; top: 12px; }
 @media (max-width: 600px) { html.sl-on-map .ck-bar:not(.nm-bar) { top: auto; bottom: 10px; max-height: 40vh; overflow: auto; font-size: 13.5px; } html.sl-on-map .ck-bar:not(.nm-bar) p { font-size: 13.5px; } }
@@ -30090,6 +30096,62 @@ html.sl-on-map .ck-bar:not(.nm-bar) { bottom: auto; top: 12px; }
   // the Map tab: the cookie question moves out of the way of the map's controls
   function onMap() { var t = document.getElementById("tab-map"); document.documentElement.classList.toggle("sl-on-map", !!(t && t.classList.contains("active"))); }
   var tabs = document.querySelector(".tabs"); if (tabs) { new MutationObserver(onMap).observe(tabs, { subtree: true, attributes: true, attributeFilter: ["class"] }); onMap(); }
+
+  // ---- My sightings (Eduardo, A31/A32): your own photo replaces the card photo, and "Taken on <your date>" under it ----
+  // Only in that tab (html.sl-tab-sightings), never in the checklist. The photos stay where they are saved
+  // (sl-sighting-photos:<id>); here they are shown through blob: addresses, one CSS rule per card in #sl-own-photos.
+  // (Inside claude.ai the synced cards are left alone.)
+  (function () {
+    if (inClaude || !grid) return;
+    var st = document.createElement("style"); st.id = "sl-own-photos"; document.head.appendChild(st);
+    var urls = {}; // id -> [dataUrl, blobUrl]
+    function own(id) { try { var a = JSON.parse(localStorage.getItem("sl-sighting-photos:" + id) || "null"); if (Array.isArray(a) && a[0]) return a[0]; return localStorage.getItem("sl-sighting-photo:" + id) || ""; } catch (e) { return ""; } }
+    function blobOf(id, d) {
+      if (urls[id] && urls[id][0] === d) return urls[id][1];
+      if (urls[id]) try { URL.revokeObjectURL(urls[id][1]); } catch (e) {}
+      var u = d;
+      try { var m = /^data:([^;,]+);base64,(.*)$/.exec(d); if (m) { var bin = atob(m[2]), n = bin.length, a = new Uint8Array(n); for (var i = 0; i < n; i++) a[i] = bin.charCodeAt(i); u = URL.createObjectURL(new Blob([a], { type: m[1] })); } } catch (e) { u = d; }
+      urls[id] = [d, u]; return u;
+    }
+    function on() { var t = document.getElementById("tab-sightings"); return !!(t && t.classList.contains("active")); }
+    var busy = false;
+    function paint() {
+      if (busy) return; busy = true;
+      try { paint0(); } finally { busy = false; }
+    }
+    function paint0() {
+      var sight = on(); document.documentElement.classList.toggle("sl-tab-sightings", sight);
+      var css = [];
+      [].forEach.call(grid.querySelectorAll(".card.done"), function (c) {
+        var id = c.getAttribute("data-id");
+        if (sight) {
+          var d = own(id);
+          if (d) css.push('html.sl-tab-sightings #grid .card[data-id="' + id.replace(/"/g, "") + '"]::before{content:""!important;background-image:url("' + blobOf(id, d).replace(/"/g, "%22") + '")!important;background-size:cover!important;background-position:50% 45%!important;cursor:zoom-in}');
+          var nb = c.querySelector(".note-btn"), when = nb && nb.getAttribute("data-when"), box = c.querySelector(".card-top > div");
+          var t = c.querySelector(".sl-taken");
+          if (when && box) { if (!t) { t = document.createElement("span"); t.className = "sl-taken"; box.insertBefore(t, box.firstChild); } var txt = "Taken on " + when; if (t.textContent !== txt) t.textContent = txt; }
+          else if (t) t.remove();
+        }
+      });
+      if (!sight) [].forEach.call(grid.querySelectorAll(".sl-taken"), function (t) { t.remove(); }); // (nothing extra left in the checklist)
+      var txt = css.join("\n"); if (st.textContent !== txt) st.textContent = txt;
+    }
+    var T = 0; function soon() { clearTimeout(T); T = setTimeout(paint, 60); }
+    window.addEventListener("sl-refreshed", soon);
+    var tb = document.getElementById("tab-sightings"); if (tb) new MutationObserver(soon).observe(tb, { attributes: true, attributeFilter: ["class"] });
+    new MutationObserver(function (ms) { if (!busy && on()) soon(); }).observe(grid, { subtree: true, attributes: true, attributeFilter: ["data-when", "data-iso"] });
+    new MutationObserver(function (ms) { if (!busy && on() && ms.some(function (m) { return m.target.classList && m.target.classList.contains("photo-btn"); })) soon(); }).observe(grid, { subtree: true, attributes: true, attributeFilter: ["class", "data-n"] });
+    // in My sightings, tapping a card's photo that is YOUR photo opens your photos (not the species photo)
+    grid.addEventListener("click", function (e) {
+      if (!on()) return;
+      var c = e.target === e.currentTarget ? null : (e.target.classList && e.target.classList.contains("card") ? e.target : null);
+      if (!c || !c.classList.contains("done") || !own(c.getAttribute("data-id"))) return;
+      var r = c.getBoundingClientRect(); if (e.clientY - r.top > r.width / 2.2) return;
+      var pb = c.querySelector(".photo-btn"); if (!pb) return;
+      e.preventDefault(); e.stopImmediatePropagation(); pb.click();
+    }, true);
+    soon();
+  })();
 
   // ---- Edit (My lists): Escape means Done ----
   document.addEventListener("keydown", function (e) {

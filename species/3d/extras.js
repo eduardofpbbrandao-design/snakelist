@@ -800,7 +800,7 @@ export function create(V) {
     hdb = el('span', 'sp3d-hdb');
     const mkH = (k, txt, icon, title) => { const b = el('button', 'sp3d-b sp3d-hb'); b.type = 'button'; b.innerHTML = icon + '<span>' + txt + '</span>'; b.setAttribute('aria-pressed', 'false'); hdb.appendChild(b); on(b, 'click', () => toggleSide(k)); hdbs[k] = b; return b; };
     mkH('photo', 'Compare photo', ICON.photo, 'Show its real photo beside the 3D model');
-    mkH('map', 'See countries', ICON.map, 'Show the countries where it lives beside the 3D model');
+    mkH('map', 'See more info', ICON.map, 'Show the countries where it lives beside the 3D model');
     stage.appendChild(hdb); // v5.50: inside the 3D view, in its top-right corner
   }
   let sideKind = null;
