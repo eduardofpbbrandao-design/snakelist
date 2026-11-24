@@ -54,7 +54,15 @@
   function stockings() {
     if (!ART.stocking) return;
     [].forEach.call(D.querySelectorAll("svg.sl-tick, .intro-box svg:not(.tick-detail)"), function (sv) {
-      if (sv.querySelector(".xm-stk")) return;
+      var old = sv.querySelector(".xm-stk");
+      if (old) {
+        // a copy of a logo that already had its stocking (the cover's wordmark is copied from the opening's) carries
+        // the same gradient names; those would point at the original, which is hidden once the opening has gone
+        // (the stocking then showed as a flat dark shape with no cuff) - such a copy gets its own names
+        var gid = (old.querySelector("[id]") || {}).id;
+        if (!gid || D.querySelectorAll('[id="' + gid + '"]').length < 2 || D.getElementById(gid) && sv.contains(D.getElementById(gid))) return;
+        old.remove();
+      }
       sv.classList.add("xm-has-stk"); sv.style.overflow = "visible";
       // its own gradient names in each copy (a copy inside a hidden logo could not lend them to the others)
       var n = ++stkN; sv.insertAdjacentHTML("beforeend", ART.stocking.replace(/xms-/g, "xms" + n + "-"));
@@ -167,6 +175,9 @@
   XM.snowLetters = snowAll;
   function logo() {
     XM.hat(); stockings(); snowAll();
+    // the cover's wordmark is (re)written as a copy of another logo: dress its tick the moment it arrives
+    var hh = D.getElementById("sl-hero");
+    if (hh && "MutationObserver" in window) new MutationObserver(function () { stockings(); }).observe(hh, { childList: true, subtree: true });
     if (D.fonts && D.fonts.ready) D.fonts.ready.then(snowAll);
     if ("ResizeObserver" in window) { var ro = new ResizeObserver(snowAll); [].forEach.call(D.querySelectorAll(SNOW_HOSTS), function (h) { ro.observe(h); }); }
     window.addEventListener("resize", snowAll);
