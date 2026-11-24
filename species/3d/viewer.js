@@ -7,8 +7,8 @@
 // handed in with useThree(), so a failed download can be retried under a fresh URL
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
-import * as NATURE from './nature.js?r=587'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=591'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as NATURE from './nature.js?r=592'; // (a new name whenever these change, so no browser keeps an old copy)
+import * as EXTRA from './extras.js?r=592'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 import * as DAYNIGHT from './daynight.js?r=614'; // v6.14: Day / Night (and the plugin hooks "See the spot", spot.js, uses)
 export function useThree(t) { THREE = t; }
 // v6.13: Array .at() for iPads on iPadOS 15.0-15.3 (it came in 15.4); the species pages load this without SnakeList's own copy
@@ -3125,6 +3125,11 @@ function Controls(dom, cam, opt) {
       if (Math.abs(st.goal.az - st.az) < 1e-4 && Math.abs(st.goal.d - st.d) / st.d < 1e-4 && Math.abs(st.goal.el - st.el) < 1e-4 && Math.hypot(st.goal.px - st.px, st.goal.pz - st.pz) < st.d * 1e-4) { st.az = st.goal.az; st.d = st.goal.d; st.px = st.goal.px; st.pz = st.goal.pz; st.goal = null; } else moving = true;
     }
     st.el = limitEl(st.el, st.d);
+    // v6.20 (Eduardo: "too laggy when going around"): a drag turns the camera in the pointer handler, not here - so this
+    // said "not moving" all through a drag, and every frame of it redrew the whole shadow map (and the dynamic resolution
+    // never stepped in). Any change since the last frame counts as camera movement.
+    const pv = st._pv || (st._pv = [NaN, 0, 0, 0, 0]);
+    if (pv[0] !== st.az || pv[1] !== st.el || pv[2] !== st.d || pv[3] !== st.px || pv[4] !== st.pz) { if (pv[0] === pv[0]) moving = true; pv[0] = st.az; pv[1] = st.el; pv[2] = st.d; pv[3] = st.px; pv[4] = st.pz; }
     return moving;
   }
   function dispose() { dom.removeEventListener('pointerdown', onDown); dom.removeEventListener('pointermove', onMove); dom.removeEventListener('pointerup', onUp); dom.removeEventListener('pointercancel', onUp); dom.removeEventListener('wheel', onWheel); dom.removeEventListener('keydown', onKey); dom.removeEventListener('keyup', onKeyUp); dom.removeEventListener('blur', onBlur); dom.removeEventListener('contextmenu', onCtx); }
@@ -3849,7 +3854,11 @@ float slScale(vec2 m) {
     // (v5.73: frames that only move leaves and water reuse the shadows; v5.78: so do frames where only the camera moves - turning
     // or zooming used to redraw the whole shadow map every frame)
     const viaAmb = ambOnly; if (viaAmb) paceMeasure(tF0);
-    { ambOnly = false; const shUp = shadowDirty || sceneMoving || (!viaAmb && !camMoving) || shadowAge++ > (quality === 'high' ? 4 : 12); if (shUp) shadowAge = 0; shadowDirty = false; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; }
+    // (v6.20: while the camera turns, the shadows of the swaying plants are not refreshed every few frames either: those
+    // refreshes made every 5th frame of a turn much slower than the others - a regular stutter - for a change nobody sees
+    // while the view moves; and a tongue flick alone (fx.lightMove) never redraws them: its shadow is a few pixels)
+    const scMove = sceneMoving && !(fx.lightMove && fx.lightMove());
+    { ambOnly = false; const shUp = shadowDirty || scMove || (!viaAmb && !camMoving && !sceneMoving) || (!camMoving && shadowAge++ > (quality === 'high' ? 4 : 12)); if (shUp) shadowAge = 0; shadowDirty = false; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = shUp; }
     dynRes(tF0, moving, amb);
     renderer.render(ctx.scene, cam);
     sizeAfter(); // v5.74: the magnified inset of a small snake

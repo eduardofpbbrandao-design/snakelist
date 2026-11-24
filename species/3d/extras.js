@@ -1097,6 +1097,7 @@ export function create(V) {
   function camera() {
     const cam = V.cam; let want = null;
     if (show && show.cam) want = show.cam(show.time);
+    { const U = V.NATURE && V.NATURE.AMB && V.NATURE.AMB.uClr && V.NATURE.AMB.uClr.value; if (U) { if (want && show.clrR && show.cLast) U.set(show.cLast.tgt.x, show.cLast.tgt.y, show.cLast.tgt.z, show.clrR); else U.w = 0; } }
     if (want) {
       // v5.78: the show keeps the head, the prey and their contact framed (gliding smoothly), and you can still turn round
       // it and zoom in or out (drag, pinch, wheel, keys): what you do is kept as a turn and a zoom on top of its framing
@@ -1339,6 +1340,9 @@ export function create(V) {
       const cl = []; for (let k = 0; k < n; k += 3) cl.push(pts[k]); const undo = clearProps(cl, Math.max(W0 * 2.5, prR * 2)); show.undo = (show.undo || []).concat([undo]);
       const fz = [[Q.x, Q.z], [E.x, E.z]]; for (let k = N; k < N - 1 + ext.length; k += 4) fz.push(pts[k]);
       show.undo.push(clearProps(fz, Math.max(prR * 5, W0 * 4, Hl * 2.2), { flat: true }));
+      // v6.20: the leaves and grass give way where the prey lies and the snake strikes, coils and swallows (and along the
+      // way it comes, a little), so the prey is in plain view on the ground, not under the litter
+      show.undo.push(clearGround(cl, Math.max(W0 * 2.4, prR * 1.5)), clearGround(fz, Math.max(prR * 6, W0 * 7, Hl * 2.6)));
     }
     let phi = aim(st, lift, B);
     if (perch) { // up in a tree: turn the reach until the head comes down right over the branch (Newton steps on its distance from it)
@@ -1472,7 +1476,7 @@ export function create(V) {
     };
     markFade(prey); fadeTree(prey, 0);
     if (perch && V.occ) { const pp = prey.position.clone(), hp0 = V.info.headPos.clone(), rr = Math.max(prR * 9, 0.16); for (const o of V.occ) if (o.leaf && !o.force) { const dd = Math.min(o.c.distanceTo(pp), o.c.distanceTo(hp0), o.c.distanceTo(pp.clone().lerp(hp0, 0.5))); if (dd < rr + o.r) { o.force = true; show.undo = (show.undo || []).concat([() => { o.force = false; }]); } } } // (no leaf near the prey or the head while it hunts)
-    if (!travel) { const zone = [[prey.position.x, prey.position.z]]; for (let i = 0; i < R.ih * 6 && i < R.N; i += 6) zone.push([ext[i * 3], ext[i * 3 + 2]]); const undo = clearProps(zone, Math.max(prR * 2.5, F.w0 * 3)); show.undo = (show.undo || []).concat([undo, clearProps(zone, Math.max(prR * 4, F.w0 * 4), { flat: true })]); } // (v5.05: no rock or grass in the way)
+    if (!travel) { const zone = [[prey.position.x, prey.position.z]]; for (let i = 0; i < R.ih * 6 && i < R.N; i += 6) zone.push([ext[i * 3], ext[i * 3 + 2]]); const undo = clearProps(zone, Math.max(prR * 2.5, F.w0 * 3)); show.undo = (show.undo || []).concat([undo, clearProps(zone, Math.max(prR * 4, F.w0 * 4), { flat: true }), clearGround(zone, Math.max(prR * 6, F.w0 * 7, Hl * 2.6))]); } // (v5.05: no rock or grass in the way)
     // v5.83: where the coils squeeze, the prey's body gives: every point of it inside a coil is pushed back to the coil's
     // surface (a dent round its chest and belly that deepens with each squeeze and springs back when the coils let go)
     let squeezeK = 0, dented = false; const pBG = prey.userData.bodyG; let pBM = null; if (pBG) prey.traverse((o) => { if (o.isMesh && o.geometry === pBG && !pBM) pBM = o; });
@@ -1512,7 +1516,10 @@ export function create(V) {
     const fitD = (sz) => sz / Math.tan(V.info.vf) * 0.62, wideD = fitD(Math.max(st.len * 1.25, Lp * 2.4));
     const headPt = () => R.point(Hl * 0.5);
     const preyPt = () => prey.position.clone();
-    let camKey = camSide(prey.position.clone().lerp(V.info.headPos, 0.5), Math.max(wideD, fitD(prey.position.distanceTo(V.info.headPos) * 2.4)), 0.55, 0.05);
+    // (v6.20: framed close enough that the prey - a mouse is 2-3 cm - is plainly seen beside the head, not a speck in a
+    // wide view of the whole floor)
+    const near2 = (a, b) => fitD(Math.max(a.distanceTo(b) * 1.35, Lp * 6, Hl * 7));
+    let camKey = camSide(prey.position.clone().lerp(V.info.headPos, 0.45), near2(prey.position, V.info.headPos), 0.5, 0.05);
     const nm = prey.userData.name;
     const T = {
       intro: { egg: 'Egg-eaters find <b>birds\' eggs</b> by smell.', fish: 'It hunts <b>' + nm + '</b>.', frog: 'It hunts <b>' + nm + '</b>, found by smell with its tongue.', snake: 'It hunts <b>' + nm + '</b> - some snakes eat other snakes!', lizard: 'It hunts <b>' + nm + '</b>.', bird: 'It hunts <b>' + nm + '</b>.', centipede: 'It hunts <b>' + nm + '</b> - small snakes like this one eat centipedes, scorpions and spiders.', worm: 'It finds <b>' + nm + '</b> by smell in damp soil.', slug: 'It finds <b>' + nm + '</b> by following its slime trail.', caterpillar: 'It hunts <b>' + nm + '</b> and other insects in the leaves.', mouse: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.', rat: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.' }[kind],
@@ -1528,6 +1535,8 @@ export function create(V) {
       swallow: kind === 'egg' ? 'Its jaws stretch round an egg much wider than its head - it has almost no teeth.' : '<b>Jaw walking:</b> the left and right jaws move forward in turn, pulling the prey in head-first. The windpipe pokes out so it can still breathe.',
       down: kind === 'egg' ? 'Spikes on its backbone crack the shell inside its throat; it swallows the egg and spits out the shell.' : 'Muscles push the meal down to the <b>stomach</b>. The skin between the scales stretches - you can see the bulge.',
       digest: 'Digesting a big meal can take days to weeks. Then it is hungry again.',
+      yawn: 'It <b>"yawns"</b>: a wide gape, the lower jaws shifting side to side, settles its stretched jaws back in place.',
+      grip: 'It works its jaws along until it holds the prey by the <b>head</b>, tongue flicking to check, then starts to swallow.',
       seize: 'It <b>seizes</b> it - slow prey like this needs no strike.',
     };
     // tongue flicks: two or three quick ones, now and then
@@ -1549,13 +1558,13 @@ export function create(V) {
         const fp = fol(sh), c = strikes ? sstep(0.62, 1, u) : 0; let pose = fp;
         if (c > 0) { const Bt = R.baseOf(fp, B.fl), cp = R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1, base: Bt }); pose = R.blend(fp, cp, ease(c)); }
         R.setPose(pose); R.apply(); alivePrey(s, 1 - sstep(0.5, 1, u)); say(T.stalk); flick(flicks(s, 1.3, 2)); wake(s);
-        const h = R.point(Hl * 0.5); camKey = camSide(h.clone().lerp(preyPt(), 0.5), fitD(Math.max(h.distanceTo(preyPt()) * 2.6, st.len * 1.7)), 0.58, 0.05);
+        const h = R.point(Hl * 0.5); camKey = camSide(h.clone().lerp(preyPt(), 0.5), near2(h, preyPt()), 0.5, 0.05);
       }]);
     }
     if (!travel) { N1 = R.blend(rest, strikes ? coil : ext, 0.35); if (strikes) phases.push([0.9, (u, s) => { R.setPose(R.blend(N1, coil, ease(u))); R.apply(); flick(flicks(s, 0.9, 1)); say(T.aim); alivePrey(s, 1 - u); }]); }
     if (strikes) {
       // 3. the S-coil strike pose (a slight tremor of tension)
-      phases.push([0.75, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 + 0.04 * Math.sin(s * 11), base: B })); R.apply(); alivePrey(s, 0); say(T.aim); flick(u < 0.55 ? flicks(u * 0.55, 0.55, 1) : 0); camKey = camSide(headPt().lerp(preyPt(), 0.5), fitD(Math.max(st.len * 1.5, Lp * 3.2)), 0.42, 0.05); }]);
+      phases.push([0.75, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 + 0.04 * Math.sin(s * 11), base: B })); R.apply(); alivePrey(s, 0); say(T.aim); flick(u < 0.55 ? flicks(u * 0.55, 0.55, 1) : 0); camKey = camSide(headPt().lerp(preyPt(), 0.5), fitD(Math.max(headPt().distanceTo(preyPt()) * 1.6, Lp * 4, Hl * 5)), 0.42, 0.05); }]);
       // 4. strike: ~0.16 s, the mouth opening as it lands
       phases.push([0.16, (u) => { const e = u * u * (3 - 2 * u); R.setPose(R.blend(coil, ext, e)); R.apply(); setMouth(Math.max(0.75, tHold) * sstep(0.25, 0.85, u)); say(T.strike); if (u >= 0.98) held = true; }]);
       phases.push([0.45, (u, s) => {
@@ -1582,6 +1591,9 @@ export function create(V) {
         // still in its coils, it eases its bite, finds the prey's head with its tongue and takes it head first
         phases.push([1.3, (u, s) => { R.setPose(wrapP); sq(0.3); R.apply(); setMouth(tHold * (1 - 0.3 * Math.sin(Math.PI * u)) + (tNeed - tHold) * sstep(0.6, 1, u) * 0.4); flick(u < 0.75 ? flicks(s, 0.7, 1) : 0); say(T.findHead); squeezeK = 1 - 0.15 * u; camKey = camSide(headPt().lerp(preyPt(), 0.4), fitD(Math.max(rOut * 6, Hl * 3 + Lp * 1.2)), 0.6, 0.1); }]);
       }
+      // v6.20: a snake that holds its prey (not a constrictor, and not one that let go and tracked it) still has to find
+      // the head before it swallows: it eases its grip and works its jaws along, flicking its tongue
+      if (!constrict && !letGo && kind !== 'egg') phases.push([1.2, (u, s) => { held = true; R.setPose(R.fore({ len: st.len, phi, lift, coil: 0, yaw: 0.06 * Math.sin(u * TAU * 2), base: B })); R.apply(); setMouth(tHold * (1 - 0.35 * Math.sin(Math.PI * u)), { walk: Math.sin(u * TAU * 2) * 0.6 * Math.sin(Math.PI * u) }); flick(flicks(s, 0.6, 1)); say(T.grip); camKey = camSide(headPt().lerp(preyPt(), 0.4), fitD(Hl * 2.6 + Lp * 1.3), 0.45); }]);
     } else phases.push([1.2, (u) => { R.setPose(R.blend(travel ? Bc : R.blend(rest, ext, 0.3), ext, ease(u))); R.apply(); say(T.seize); setMouth(ease(u) * tNeed, { spread: spreadNeed * ease(u) }); if (u > 0.95) held = true; }]);
     phases.push([4.6, (u, s) => {
       // jaw walking: the prey goes in in small pulls, one side of the jaw then the other (the head turns a little each way)
@@ -1608,10 +1620,35 @@ export function create(V) {
       return pose;
     };
     const settled = travel ? Bc : rest;
-    phases.push([3.0, (u) => {
-      xp = lerp(xIn, xEnd, ease(u)); const e1 = constrict ? sstep(0, 0.5, u) : 1, base = constrict ? R.blend3(wrapL, AwrapL, extHi, AextHi, e1, R.ih, e1) : ext; R.setPose(R.blend(base, settled, ease(constrict ? sstep(0.35, 1, u) : u) * (travel ? 1 : 0.6))); bulgeAt(xp, 1); R.apply(); setMouth(lerp(tHold, 0, ease(u * 2))); say(T.down);
-      preyHide = true; flick(u > 0.7 ? flicks(u * 3, 0.9, 1) : 0);
+    // v6.20 ("go see how a snake eats"; tools/eating-behaviour.md): once the jaws are past the prey, the neck bends from
+    // side to side in waves that run back down the body (and bunches up a little, concertina-like) - pushing the meal
+    // down; Jackson et al. 2004 saw this in kingsnakes alongside the jaw walk, Moon 2000 in gopher and king snakes.
+    // The waves follow the lump, so you see it pushed along.
+    const neckWave = (pose, xc, amp) => {
+      if (amp <= 1e-6) return pose; const out = pose.slice(), lam = Math.max(Lp * 1.6, Hl * 4), x0 = Hl * 1.3, x1 = xc + Lp * 0.9;
+      for (let i = 1; i < N - 1; i++) {
+        const x = i * R.dx; if (x < x0 || x > x1) continue;
+        const tx = pose[(i + 1) * 3] - pose[(i - 1) * 3], tz = pose[(i + 1) * 3 + 2] - pose[(i - 1) * 3 + 2], tl = Math.hypot(tx, tz) || 1;
+        const env = sstep(x0, x0 + Hl * 1.5, x) * (1 - sstep(x1 - Lp * 0.6, x1, x)), w = amp * env * Math.sin((TAU * (x - xc)) / lam);
+        out[i * 3] += (-tz / tl) * w; out[i * 3 + 2] += (tx / tl) * w;
+      }
+      return out;
+    };
+    let downPose = null;
+    phases.push([3.4, (u, s) => {
+      xp = lerp(xIn, xEnd, ease(u)); const e1 = constrict ? sstep(0, 0.5, u) : 1, base = constrict ? R.blend3(wrapL, AwrapL, extHi, AextHi, e1, R.ih, e1) : ext; downPose = R.blend(base, settled, ease(constrict ? sstep(0.35, 1, u) : u) * (travel ? 1 : 0.6));
+      R.setPose(neckWave(downPose, xp - Lp / 2, Math.max(F.w0 * 1.6, prR * 1.2) * Math.sin(Math.PI * Math.min(1, u * 1.15)) * (0.7 + 0.3 * Math.sin(s * 5)))); bulgeAt(xp, 1); R.apply(); setMouth(lerp(tHold, 0, ease(u * 2))); say(T.down);
+      preyHide = true; flick(0);
       camKey = camSide(R.point(xp - Lp / 2), fitD(Math.max(L * 0.22, Lp * 3.2)), 0.55);
+    }]);
+    // v6.20: then the "yawn": the mouth opens wide once or twice, the two halves of the lower jaw shifting from side to side,
+    // to settle the jaws and their stretched ligaments back in place (and clear the windpipe) - then a few tongue flicks
+    if (kind !== 'worm' && kind !== 'slug' && kind !== 'centipede' && kind !== 'caterpillar') phases.push([2.4, (u, s) => {
+      if (downPose) R.setPose(downPose); bulgeAt(xEnd, 1); R.apply(); say(T.yawn);
+      const y1 = Math.sin(Math.PI * sstep(0.02, 0.5, u)), y2 = Math.sin(Math.PI * sstep(0.52, 0.86, u)) * 0.75, y = Math.max(y1, y2);
+      setMouth(Math.min(1.05, Math.max(tNeed, 0.85)) * y, { spread: 0.25 * y, walk: Math.sin(u * TAU * 2.5) * y * 0.8 });
+      flick(u > 0.88 ? (u - 0.88) / 0.12 : 0); void s;
+      camKey = camSide(headPt(), fitD(Hl * 5), 0.3, 0.6);
     }]);
     if (travel) { // 6. it crawls (or swims) on, round and back into its resting place, the meal a lump in its body
       const dR = shEnd - sh1, dRet = clamp(dR / (0.38 * L), 3, 6.5);
@@ -1641,8 +1678,9 @@ export function create(V) {
     let lastI = -1;
     show.step = (s) => { const i0 = lastI; const i = runPhases(phases, s); if (i !== i0) { if (i0 >= 0) flick(0); lastI = i; } /* (a slow frame may skip the end of a flick) */ if (i > 0 && !shown) { shown = true; fadeTree(prey, 1); } stepPrey(s); void lastS; /* fully faded in even if a slow frame skipped the end of the first step */ stepTag.hidden = false; stepTag.textContent = (i + 1) + ' / ' + phases.length; return i; };
     show.cam = () => camKey;
+    show.clrR = Math.max(prR * 3, Hl * 1.3, W0 * 3); // (v6.20: the grass between the camera and the action bows down)
     show.diet = kind;
-    show.info = { kind, constrict, coils: constrict ? { layers: cL, turns: +(cL * cTpl).toFixed(2) } : null, style, letGo, envenom, travel, wet, inWater, phases: phases.length, waterY, gQ, Q: Q && [Q.x, Q.z], head: [head0.x, head0.z], prR };
+    show.info = { kind, constrict, coils: constrict ? { layers: cL, turns: +(cL * cTpl).toFixed(2) } : null, style, letGo, envenom, travel, wet, inWater, phases: phases.length, mids: (() => { let t = 0; return phases.map(([d]) => { const m = +(t + d * 0.6).toFixed(2); t += d; return m; }); })(), waterY, gQ, Q: Q && [Q.x, Q.z], head: [head0.x, head0.z], prR };
   }
 
   // ---------------------------------------------------------------- Slither (loops until pressed again)
@@ -2098,6 +2136,44 @@ export function create(V) {
         }
         if (changed) o.instanceMatrix.needsUpdate = true;
       } else if (o.isMesh && o.geometry && o.geometry.type === 'CylinderGeometry' && near(o.position.x, o.position.z, 0.05)) { o.visible = false; undo.push(() => { o.visible = true; }); }
+    });
+    V.kick(); return () => { undo.forEach((f) => f()); V.kick(); };
+  }
+
+  // v6.20 (Eduardo: "in the see it eat animation you can't even see the snake's prey because its under leafs"): the ground
+  // cover where the hunt happens gives way, as it would under a struggling animal and a snake's coils - fallen leaves are
+  // pushed aside to the edge of the patch (a little heaped there), grass and heather are bent down flat, leaning outwards.
+  // pts: [x, z] points; rad: the radius kept clear round each (bare in the middle, the cover rising again just past it).
+  // Returns the undo.
+  function clearGround(pts, rad) {
+    const undo = [], m4 = new THREE.Matrix4(), p = new THREE.Vector3(), sc = new THREE.Vector3(), q = new THREE.Quaternion(), qa = new THREE.Quaternion(), ax = new THREE.Vector3(), occ = V.occ || [];
+    const COVER = { litter: 1, carpet: 1, grass: 1, heather: 1, spinifex: 1, lignum: 1 };
+    let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9; for (const c of pts) { x0 = Math.min(x0, c[0]); x1 = Math.max(x1, c[0]); z0 = Math.min(z0, c[1]); z1 = Math.max(z1, c[1]); }
+    const reach = rad * 1.5;
+    const nearest = (x, z) => { let b = 1e18, bx = 0, bz = 0; for (const c of pts) { const d = (c[0] - x) ** 2 + (c[1] - z) ** 2; if (d < b) { b = d; bx = c[0]; bz = c[1]; } } return [Math.sqrt(b), bx, bz]; };
+    V.scene.children.forEach((o) => {
+      if (!o.isInstancedMesh || !o.visible || !COVER[o.name]) return;
+      const litter = o.name === 'litter'; let changed = false;
+      for (let i = 0; i < o.count; i++) {
+        o.getMatrixAt(i, m4); const e = m4.elements, x = e[12], z = e[14];
+        if (x < x0 - reach || x > x1 + reach || z < z0 - reach || z > z1 + reach) continue;
+        const [d, cx, cz] = nearest(x, z); if (d > reach) continue;
+        const keep = m4.clone(); m4.decompose(p, q, sc); if (sc.x === 0 || sc.y === 0) continue;
+        let dx = x - cx, dz = z - cz; const l = Math.hypot(dx, dz) || 1e-6; dx /= l; dz /= l;
+        if (litter) { // pushed out to the edge of the patch, the nearer the centre the further it goes; a little heaped up
+          if (d >= rad * 1.12) continue;
+          const nd = rad * (1.05 + 0.3 * (1 - d / rad) * ((i * 0.618) % 1)), hx = ((i * 0.37) % 1) - 0.5;
+          p.x = cx + dx * nd + dz * hx * rad * 0.15; p.z = cz + dz * nd - dx * hx * rad * 0.15; p.y += sc.x * 0.04 * (1 - d / rad);
+          ax.set(-dz, 0, dx); qa.setFromAxisAngle(ax, -0.35 * (1 - d / rad)); q.premultiply(qa); // (tipped up against the heap)
+        } else { // bent down flat, away from the action
+          const k = sstep(rad * 0.85, reach, d), fy = lerp(0.05, 1, k); if (fy > 0.98) continue;
+          sc.y *= fy; ax.set(dz, 0, -dx); qa.setFromAxisAngle(ax, -1.25 * (1 - k)); q.premultiply(qa);
+        }
+        o.setMatrixAt(i, m4.compose(p, q, sc)); changed = true;
+        for (const c of occ) if (c.im === o && c.i === i) { const m0 = c.m.clone(); c.m.copy(m4); undo.push(() => { c.m.copy(m0); }); }
+        undo.push(() => { o.setMatrixAt(i, keep); o.instanceMatrix.needsUpdate = true; });
+      }
+      if (changed) { o.instanceMatrix.needsUpdate = true; if (o.boundingSphere) o.computeBoundingSphere(); }
     });
     V.kick(); return () => { undo.forEach((f) => f()); V.kick(); };
   }
@@ -2611,7 +2687,7 @@ export function create(V) {
   // A resting snake is never quite still: it breathes (the trunk swells a little and settles every few seconds - done in
   // the skin's vertex shader, no work on the CPU), flicks its tongue now and then, and every so often lifts and turns
   // its head a touch (that bends the body on the CPU, so only at the High detail setting).
-  const idle = { next: 0, flickAt: 0, head: null, uB: { value: 0 }, mat: null };
+  const idle = { next: 0, flickAt: 0, head: null, uB: { value: 0 }, mat: null }; let lightOnly = false;
   function idleSetup() {
     idle.next = now() + 2500; idle.flickAt = now() + 1500 + Math.random() * 2000; idle.head = null; idle.uB.value = 0;
     const m = V.extras && V.extras.mat, F = V.info && V.info.F; if (!m || !F || m.userData.slBreath) return;
@@ -2750,15 +2826,17 @@ export function create(V) {
         if (show.freeze == null && show.time >= show.dur) stopShow();
       } else if (slither) moving = stepSlither() || !!slither;
       if (camBlend) moving = true;
-      idleStep(); if (idle.flicking || idle.head) moving = true; // (v5.93: a flick or a turn of the head is drawn at the full frame rate)
-      if (anat && anat.stepPose()) moving = true;
-      if (sizeLay && sizeLay.step()) moving = true; // v5.74: Size vs person lays the snake out (and coils it back)
+      const mv0 = moving; idleStep(); if (idle.flicking || idle.head) moving = true; // (v5.93: a flick or a turn of the head is drawn at the full frame rate)
+      lightOnly = !mv0 && idle.flicking && !idle.head; // (v6.20: only the tongue moves - viewer.js keeps the shadows)
+      if (anat && anat.stepPose()) moving = true, lightOnly = false;
+      if (sizeLay && sizeLay.step()) moving = true, lightOnly = false; // v5.74: Size vs person lays the snake out (and coils it back)
       if (rig) rig.sync();
       if (anat && anat.on) { anat.refresh(); }
-      { const tr = V.info && V.info.tree, down = !!(slither && !slither.circ) || !!(anat && anat.on) || !!(sizeLay && sizeLay.on); if (tr && tr.visible === down) { tr.visible = !down; moving = true; } } // v5.68: the tree goes while it is down on the ground
+      { const tr = V.info && V.info.tree, down = !!(slither && !slither.circ) || !!(anat && anat.on) || !!(sizeLay && sizeLay.on); if (tr && tr.visible === down) { tr.visible = !down; moving = true; lightOnly = false; } } // v5.68: the tree goes while it is down on the ground
       return moving;
     },
     camera() { return camera(); },
+    lightMove: () => lightOnly,
     camTarget() { return show && show.cLast ? show.cLast.tgt : null; },
     moreButtons: [],
     buttons: { eat: bEat, slither: bSlither }, // v5.74: grouped with Open mouth by viewer.js

@@ -46,3 +46,34 @@ boas constrict, other colubrids constrict mammals and birds, and venomous snakes
 | **Elapids**: bite and hold | All `plan: elapid` and `plan: sea` (*Naja*, *Dendroaspis*, *Bungarus*, *Micrurus*, *Oxyuranus*, *Pseudechis*, sea snakes...) | Bite and hold until the venom works, then swallow. No coils. |
 | **Egg-eaters** | *Dasypeltis*, *Elachistodon* | The egg is seized and swallowed, then cracked in the throat. |
 | **Slug, worm and centipede eaters** | see `dietOf()` | Seized without a strike and swallowed. |
+
+## 4. Second check, step by step (v6.20)
+
+Eduardo asked (November 2026): "you need to go see how a snake eats". Each step of the animation was checked again against
+the sources above and some new ones. Here is what changed.
+
+| Step | Real behaviour | Before v6.20 | Now |
+|---|---|---|---|
+| Detection | Tongue flicks follow the scent, and they speed up as the snake closes in. | Present. | Unchanged. |
+| Stalk / approach | A slow creep, or a swim. | Present. | Unchanged. The leaves and grass along its path now give way a little. |
+| Strike | Fast, about 0.16 s. | Present. | Unchanged. |
+| Constriction or venom | Depends on the genus (sections 1-3). | Present. | Unchanged. |
+| Finding the head | Constrictors and vipers that track their prey find the head with the tongue. Snakes that **hold** their prey (cobras, garter and water snakes, racers) also shift their grip along the prey to the head before swallowing. | Only constrictors and trackers had this step. | New "grip" step for snakes that hold their prey: the snake eases its bite, works its jaws along with small side-to-side turns and flicks its tongue. |
+| Jaw walking | The left and right jaws advance in turn (the "pterygoid walk"), with the head and neck bending to the side as each side moves forward. | Present: alternating jaw `walk` and a small head yaw. | Unchanged. |
+| Neck bending / pushing the meal down | Once the jaws are past the prey, the neck bends from side to side and bunches up, concertina-like, to push the meal along. X-ray video of kingsnakes found the pterygoid walk plus "concertina-like compression and extension cycles of the predator's vertebral column" in 2 of 3 trials. Moon 2000 describes lateral bending of the head and neck in gopher and king snakes. | Missing: the body only slid back to rest while the lump moved. | New: lateral waves run down the neck and follow the bulge as it travels down the body. |
+| Bulge | A visible lump moves down to the stomach, with the skin stretched between the scales. | Present. | Unchanged; the neck waves now make the push visible. |
+| "Yawn" | After a big meal the snake gapes widely, often more than once, and moves the lower jaws from side to side. This resettles the quadrate and the stretched ligaments, and may clear the windpipe. | Missing. | New 2.4 s step: two wide gapes with the lower-jaw halves shifting side to side, then a tongue flick. It is skipped for worms, slugs, centipedes and caterpillars, which are too small for a yawn. |
+
+**Visibility (Eduardo: "you can't even see the snake's prey because its under leafs").** In the leaf-litter habitats
+(forest, rainforest, soil), the 3D fallen leaves are now pushed aside in a patch round the prey and the strike and coil
+area. They pile up a little at the edge, and a narrower strip clears along the snake's path. In grass and heath the tufts
+in that patch are bent down flat and lean outwards. During the show, grass standing between the camera and the action
+bows down smoothly, using a view corridor in the plants' vertex shader (`uSlClr` in `nature.js`). Everything springs
+back when the show ends. Before this, the litter was left untouched, because it counted as "soft" cover. Grass was only
+pressed to 16% of its height, which still left 30 cm grass at about 5 cm, taller than a mouse.
+
+New sources:
+- Jackson, Kley & Brainerd 2004, "How snakes eat snakes: the biomechanical challenges of ophiophagy for the California kingsnake", Zoology 107:191 ([PDF](https://www.brown.edu/Departments/EEB/brainerd_lab/pdf/Jackson-2004-Zool.pdf), [doi](https://doi.org/10.1016/j.zool.2004.06.001)). Covers the four stages (capture, constriction, ingestion, digestion), the pterygoid walk as the main way prey is moved, and concertina-like cycles of the backbone.
+- Moon 2000, "The mechanics of swallowing and the muscular control of diverse behaviours in gopher snakes", J. Exp. Biol. ([PubMed](https://pubmed.ncbi.nlm.nih.gov/10934002/)). Swallowing begins with lateral bending of the head and neck as the jaws advance one side at a time.
+- Kley 2001, prey transport mechanisms in snakes ([PDF](https://medicine.stonybrookmedicine.edu/sites/default/files/anatomy/kleylab/Kley(2001).pdf)).
+- The post-meal yawn as jaw realignment: [Australian Geographic, "Why do snakes yawn?"](https://australiangeographic.com.au/?p=219421) and [A-Z Animals on anacondas stretching their jaws after eating](https://a-z-animals.com/articles/why-anacondas-stretch-their-jaws-after-eating-massive-prey/). These are popular sources; no peer-reviewed paper on the yawn was found here *(not confirmed)*.
