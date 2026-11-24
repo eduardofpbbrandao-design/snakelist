@@ -30043,7 +30043,8 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
     "quiz-levels": ["#quiz-levels", "#quiz-panel"], "cam-panel": [".cam-card", "#cam-panel"], "cam-loc": ["#cam-loc"], "cam-shot": ["#cam-shot"],
     "cabin-stage": ["#xm-cabin .xc-stage", "#xm-cabin"], "events-banner": ["#sl-ev-banner"]
   };
-  function firstCard() { var cs = D.querySelectorAll("#grid .card"); for (var k = 0; k < cs.length; k++) if (cs[k].offsetParent && getComputedStyle(cs[k]).display !== "none") return cs[k]; return null; }
+  // the card shown first on screen (cards are put in order with CSS, so not always the first in the page)
+  function firstCard() { var cs = D.querySelectorAll("#grid .card"), best = null, bt = 1e9, bl = 1e9; for (var k = 0; k < cs.length; k++) { if (!cs[k].offsetParent) continue; var r = cs[k].getBoundingClientRect(); if (!r.height) continue; if (r.top < bt - 2 || (Math.abs(r.top - bt) <= 2 && r.left < bl)) { best = cs[k]; bt = r.top; bl = r.left; } } return best; }
   var CARD = { card: "", "card-name": ".card-name", "card-seen": ".seen-btn", "card-wish": ".wish-btn, .wish-row", "card-follow": ".follow-btn", "card-3d": ".td-card-btn", "card-info": ".map-btn", "card-tags": ".card-tags" };
   function find(name) {
     if (!name) return null;
@@ -30100,7 +30101,7 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
     follow: { stage: 2, target: "card-follow", route: "guide", title: "Following", text: "The bell follows a snake. Followed snakes are in the Following tab, with news about them - facts and recent sightings - and a note when you open SnakeList." },
     // stage 4
     "map-intro": { stage: 3, target: "map-stage", route: "map", resetSearch: true, fallback: "center", title: "The map",
-      text: "The world map of snakes. Each country is coloured by how many species are recorded there - the key shows fewer to more. {Tap} any country to see the snakes that live there." },
+      text: "The world map of snakes. {Tap} any country to see the snakes recorded there, or search above the map for a snake, a family or a country to see where they live." },
     "map-move": { stage: 3, target: "map-zoom", route: "map", title: "Moving around", text: "Drag to move and {zoom} to zoom in - or use + and −. ↻ goes back to the whole world, and the last button makes the map fill the screen." },
     "map-country": { stage: 3, target: "map-stage", route: "map", title: "A country and Show colours",
       text: "A country's panel lists its snakes and links to its own page. Show colours on a snake colours every place where it lives: darker deep inside its range, lighter near the edge. It's an estimate from range maps and records, so treat the edges as a guide." },

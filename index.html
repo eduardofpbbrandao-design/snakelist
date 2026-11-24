@@ -10075,17 +10075,22 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     <div class="tour-dim" id="tour-dim-left"></div>
     <div class="tour-dim" id="tour-dim-right"></div>
     <div class="tour-spotlight" id="tour-spotlight"></div>
-    <div class="tour-callout" id="tour-callout" role="dialog" aria-label="Tour">
+    <div class="tour-callout" id="tour-callout" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-describedby="tour-text">
       <div class="tour-arrow" id="tour-arrow"></div>
-      <p class="tour-step" id="tour-step-num"></p>
-      <h3 id="tour-title"></h3>
+      <div class="tour-media" id="tour-media"></div>
+      <div class="tour-top"><p class="tour-step" id="tour-step-num"></p><button type="button" class="tour-restart" id="tour-restart" aria-label="Restart the tutorial from the beginning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 3v6h6"></path></svg>Restart</button><button type="button" class="tour-x" id="tour-close" aria-label="Close the tutorial">&times;</button></div>
+      <div class="tour-prog" aria-hidden="true"><i id="tour-prog-bar"></i></div>
+      <h3 id="tour-title" tabindex="-1"></h3>
       <p id="tour-text"></p>
+      <div class="tour-extra" id="tour-extra"></div>
       <div class="tour-actions">
+        <button type="button" id="tour-back">Back</button>
         <button type="button" id="tour-skip">Skip tutorial</button>
         <button type="button" id="tour-next" class="primary">Next</button>
       </div>
     </div>
   </div>
+  <div class="tour-sr" id="tour-live" aria-live="polite" role="status"></div>
   <div class="note-sheet" id="note-sheet" role="dialog" aria-modal="true" aria-label="Log a sighting">
     <div class="note-card">
       <h2 id="note-title"></h2>
@@ -11527,250 +11532,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   noteSheet.addEventListener("click", (e) => { if (e.target === noteSheet) tryClose(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && noteBtn) tryClose(); });
 
-  // A one-time spotlight tour of the tabs, shown right after the opening animation on a
-  // device's first-ever visit - gated by localStorage so returning devices never see it again.
-  // Each step highlights the real tab button and points a callout at it, rather than listing
-  // everything in one static box, so "what this does" always has something concrete to point at.
-  (() => {
-    const TOUR_KEY = "sl-tour-seen";
-    // v4.73: the long tour - what SnakeList is, every button, then it takes you to the map and shows you that too
-    const firstCard = () => [...document.querySelectorAll("#grid .card")].find((c) => c.offsetParent && getComputedStyle(c).display !== "none");
-    const inCard = (q) => () => { const c = firstCard(); return c && c.querySelector(q); };
-    const in3d = (re) => () => [].find.call(document.querySelectorAll(".sl3d-ov button"), (b) => b.offsetParent && re.test((b.textContent || "").trim()));
-    const goTab = (t) => () => { const b = document.getElementById("tab-" + t); if (b && !b.classList.contains("active")) { b.click(); return true; } return false; };
-    const steps = [
-      { sel: ".brand, h1, .eyebrow-row", center: true, title: "Welcome to SnakeList", text: "SnakeList is your life list of the world's snakes - every one of the 4,000+ known species, with photos, maps of where they live and a 3D model of each. Find snakes, learn about them and tick off the ones you've seen. This tour shows you every button." },
-      { sel: ".sl-ver", title: "Version and what's new", text: "The version of SnakeList you're using. Tap it to see what's new in this update." },
-      // the Install button hides once your account has the app: then this step circles your account (or Sign in)
-      { sel: () => { const b = document.getElementById("install-btn"); return b && b.getClientRects().length && b.offsetWidth ? b : document.querySelector(".auth-btn"); }, title: "Install the app",
-        text: "Put SnakeList on your phone or computer like a real app - it opens straight away and works without internet.",
-        textFn: (t) => t && t.id === "install-btn" ? null : /sign in/i.test(t ? t.textContent : "") ? "Put SnakeList on your phone or computer like a real app. Sign in here, and SnakeList offers to install itself on this device." : "You already have the SnakeList app with this account - it's all here under your name, on every device you sign in on." },
-      { sel: ".auth-btn", title: "Sign in", text: "Sign in to keep your list safe and the same on all your devices." },
-      { sel: "#report-btn", title: "Report a bug or an idea", text: "Found something wrong, or have an idea? Send it to the person who makes SnakeList. After you've used SnakeList for a while, a little tip pops up here once to remind you." },
-      { sel: "#share-btn", title: "Share SnakeList", text: "Send SnakeList to a friend: copy the link, or send it with WhatsApp, email and more." },
-      { sel: "#tour-replay", title: "This tutorial", text: "Watch this tour again any time. The Restart button at the top of each box starts it again from the beginning." },
-      { sel: "#set-btn", title: "Settings", text: "The gear has all your settings: light or dark, how bright the screen is, how big the words are, your language, full screen, sharing your location for See near me, and more. They are remembered on this device." },
-      { sel: ".brand, h1, .eyebrow-row", center: true, title: "Snakes picked for you", text: "The first time you opened SnakeList it asked how well you know snakes (or you said \u201cI don't know\u201d). That decides which snakes come first in your list and which quiz level is best for you. You can change it any time in the Quiz." },
-      { sel: "#tab-guide", go: goTab("guide"), title: "Species Checklist", text: "The whole list of snakes. This is where you start." },
-      { sel: "#search", act: "click", tryIt: "Try it: click the search box.", title: "Search", text: "Type a snake's name, a family, a type of snake or a country to find it fast." },
-      { sel: 'details.fsec[data-sec="family"] > summary', act: "click", tryIt: "Try it: click Snake family to open it.", title: "Filters", text: "Open these to narrow the list: snake family, location, habitat, characteristics (like venomous or constrictor), other filters and your own lists." },
-      { sel: 'details.fsec[data-sec="traits"] > summary', title: "Search by what a snake looks like", text: "Open Characteristics and type in its search box - like black, green, rattle, stripes or horns - to find the snakes that look like that." },
-      { sel: ".sl-sort-wrap", title: "Sort", text: "Change the order of the list - by name, venomous first, family and more." },
-      { sel: "#ck-yes", cookie: true, go: () => { if (window.SL_showCookies) window.SL_showCookies(); return false; }, title: "Picked for you",
-        text: "SnakeList can put the snakes you're most likely to love at the top of your list - that's \u201cPicked for you\u201d. Go ahead and click Accept cookies to unlock this feature!" },
-      { sel: firstCard, act: "hover", tryIt: "Try it: point at the card with your mouse.", title: "A snake card", text: "Each card is one species: its photo, name, scientific name, where it lives, its family and tags like Venomous or Rare." },
-      { sel: inCard(".wish-row, .wish-btn"), title: "Want to see", text: "Add a snake to the list of snakes you'd love to find one day." },
-      { sel: inCard(".follow-btn"), title: "Follow", text: "Tap the bell to follow a snake and get news about it." },
-      { sel: inCard(".seen-btn"), title: "Mark Seen", text: "Seen this snake in real life? Tap Mark Seen to tick it off - you can add the date, the place and your own photo." },
-      // v5.16: the 3D tour - it opens a snake in 3D and lets you try the buttons, then closes it again
-      { sel: () => [].find.call(document.querySelectorAll("#grid .card .td-card-btn"), (b) => b.offsetParent), act: "click", tryIt: "Try it: click 3D to open this snake in 3D.", title: "3D", text: "Every snake in SnakeList has its own 3D model. Click 3D and we'll look at it together." },
-      { sel: ".sl3d-ov .sp3d-stage", waitFor: true, title: "Your snake in 3D", text: "This is a 3D model of the real snake - its colours, pattern and size come from photos and measurements of the real species, and it lies in the kind of place where it lives. Drag to go round it, and scroll or pinch to zoom in where you point." },
-      { sel: in3d(/^Open mouth$/), waitFor: true, act: "click", tryIt: "Try it: click Open mouth.", title: "Open mouth", text: "Look inside its mouth: the teeth, the fangs if it has them, the tongue, and the windpipe it breathes through while it swallows." },
-      { sel: in3d(/^Anatomy$/), waitFor: true, act: "click", tryIt: "Try it: click Anatomy.", title: "Anatomy", text: "The skin turns see-through, so you can see its skeleton and organs. Click a label or its Show more to learn about that part - it gets a green outline so you can see where it is." },
-      { sel: in3d(/^See it eat$/), waitFor: true, title: "See it eat", text: "Watch it catch and swallow its food the way this kind of snake really does." },
-      { sel: in3d(/^Slither$/), waitFor: true, act: "click", tryIt: "Try it: click Slither.", title: "Slither", text: "Watch it move along the ground. Click Stop when you've seen enough." },
-      { sel: in3d(/^Show more/), waitFor: true, act: "click", tryIt: "Try it: click Show more.", title: "More buttons", text: "The camera buttons: the full body, a close-up of the head and its pattern from above. Size vs person, next to Normal and Anatomy, shows how long it is next to a person 1.70 m tall." },
-      { sel: ".sl3d-ov .sp3d-fsc", waitFor: true, title: "Full screen", text: "Make the 3D model fill your whole screen." },
-      { sel: in3d(/Compare photo/), waitFor: true, title: "Compare photo", text: "Put a real photo of this snake next to the model. You can zoom into the photo too." },
-      { sel: in3d(/See countries/), waitFor: true, title: "See countries", text: "See the countries and states where this snake lives." },
-      { sel: in3d(/Habitat/), title: "Habitat", text: "See the kind of place where this snake lives, all around it in 3D." },
-      { sel: ".sl3d-ov .sl3d-back", waitFor: true, act: "click", tryIt: "Try it: click the X in the top-right corner.", title: "Close", text: "Close the 3D model to go back to your list." },
-      { sel: inCard(".map-btn"), title: "See more info", text: "Open the snake's own page with everything SnakeList knows about it." },
-      { sel: "#tab-sightings", title: "My Sightings", text: "Every snake you've marked as seen." },
-      { sel: "#tab-wish", title: "Want to see", text: "The snakes you'd love to find one day." },
-      { sel: "#tab-follow", title: "Following", text: "The snakes you follow, with their news." },
-      { sel: "#sl-share-sightings", title: "Share your sightings", text: "Makes a picture of the snakes you've seen, to send to your friends and family." },
-      { sel: "#sl-ach-btn", title: "Achievements", text: "How many snakes you have seen, and the badges you earn for your life list, your own sightings and the quiz. Tap Achievements to see them." },
-      { sel: "#tab-map", center: true, title: "Map", text: "Now let's go to the map - SnakeList will take you there." },
-      { sel: "#globe-stage", center: true, go: goTab("map"), wait: 900, title: "The map", text: "The world map of snakes. Drag to move around, scroll or pinch to zoom, and click any country to see the snakes that live there." },
-      { sel: "#hm-toggle", act: "click", tryIt: "Try it: click Species Heatmap to turn it on.", title: "Species Heatmap", text: "Colours every country by how many kinds of snakes live there - or where one snake you search for lives." },
-      { sel: "#sg-toggle", title: "Sightings", text: "Real photos of snakes people have found, shown as dots on the map." },
-      { sel: "#hab-toggle", title: "Habitats", text: "Pick a habitat - like rainforest or desert - and see where its snakes live." },
-      { sel: "#globe-stage", center: true, title: "See near me and Time", text: "Turn on Share my location in Settings, and the map gets a See near me button: it shows the snakes that live around you. Its Time button shows which of them are likely out right now - by day or night and by season." },
-      { sel: "#globe-stage", center: true, title: "Show colours", text: "Click a country, then Show colours on one of its snakes: the map colours in every place where that snake lives." },
-      { sel: "#mf-toggle", title: "Filters", text: "The same filters as the checklist, but for the map." },
-      { sel: ".layers-btn", title: "Map style", text: "Change how the map looks, like the satellite view." },
-      { sel: ".globe-zoom", act: "hover", tryIt: "Try it: point at these buttons.", title: "Zoom, reset and full screen", text: "Zoom in and out, go back to the whole world, or make the map fill the screen." },
-      { sel: "#td-toggle", title: "3D map", text: "See the map in 3D - real mountains, forests and deserts you can tilt and turn. With Habitats on, tap a place to fly down, see real photos of what it looks like, then see the snakes that live there in 3D." },
-      { sel: "#tab-quiz", title: "Quiz", text: "Guess where snakes live and test what you've learned." },
-      { sel: "#tab-cam", title: "Camera", text: "Take or upload a photo of a snake and SnakeList helps you work out which one it is." },
-      { sel: ".brand, h1, .eyebrow-row", center: true, go: goTab("guide"), wait: 500, title: "You're ready!", text: "That's everything. Start by searching for a snake you know, or open the map and see what lives near you.", last: true },
-    ];
-    const layer = document.getElementById("tour-layer");
-    const callout = document.getElementById("tour-callout");
-    const arrow = document.getElementById("tour-arrow");
-    const spotlight = document.getElementById("tour-spotlight");
-    const dimTop = document.getElementById("tour-dim-top");
-    const dimBottom = document.getElementById("tour-dim-bottom");
-    const dimLeft = document.getElementById("tour-dim-left");
-    const dimRight = document.getElementById("tour-dim-right");
-    if (!layer) return;
-    let i = 0;
-    const GAP = 20; // clear space between the spotlight ring and the callout - the arrow
-                     // lives entirely inside this gap so it never touches either one
-
-    function sizeLayer() {
-      // the layer is positioned in document coordinates (see .tour-layer), not fixed to the
-      // viewport, specifically so a page taller than one screen still gets dimmed all the
-      // way to its real bottom instead of only the first screenful
-      layer.style.height = Math.max(document.documentElement.scrollHeight, document.documentElement.clientHeight) + "px";
-    }
-
-    function place(follow) {
-      const step = steps[i];
-      const target = typeof step.sel === "function" ? step.sel() : document.querySelector(step.sel);
-      // a step whose button isn't there - or is hidden on this device (Install once installed...) - is skipped
-      if (!step.center && (!target || !target.getClientRects().length || target.getBoundingClientRect().width < 2)) { advance(); return; }
-      if (!target) { advance(); return; }
-      // the tab row scrolls horizontally on narrow screens - bring the target fully into view
-      // before measuring it, so the spotlight/callout never land on a half-scrolled button
-      if (!follow && !step.center) target.scrollIntoView({ block: "center", inline: "nearest", behavior: (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) ? "auto" : "smooth" }); // v4.80: glides (no jump); the welcome box opens over the hero photo, not scrolled past it
-      document.getElementById("tour-step-num").textContent = "Step " + (i + 1) + " of " + steps.length;
-      document.getElementById("tour-title").textContent = step.title;
-      document.getElementById("tour-text").textContent = (step.textFn && step.textFn(target)) || step.text;
-      if (!follow) setTry(step, target);
-      document.getElementById("tour-next").textContent = i === 0 ? "Start tutorial" : i === steps.length - 1 ? "Explore SnakeList" : "Next";
-      document.getElementById("tour-skip").textContent = i === 0 ? "Explore SnakeList" : "Skip tutorial";
-      document.body.classList.toggle("tour-ck", !!step.cookie); // the cookie bar sits under the tutorial, its Accept button circled
-      if (step.cookie) setTimeout(() => { const bar = document.getElementById("ck-bar"); if (!bar || bar.hidden || steps[i] !== step) return; const r = bar.getBoundingClientRect();
-        callout.style.top = Math.max(window.scrollY + 8, window.scrollY + r.top - callout.offsetHeight - 14) + "px"; arrow.style.display = "none"; }, 0);
-
-      layer.hidden = false;
-      sizeLayer();
-      callout.classList.toggle("tour-big", !!step.center);
-      if (step.center) { // v4.76: the welcome and the goodbye are a box in the middle - nothing circled
-        const pageW0 = document.documentElement.clientWidth, pageH0 = parseFloat(layer.style.height), vw0 = window.innerWidth, vh0 = window.innerHeight;
-        spotlight.style.width = spotlight.style.height = "0px"; spotlight.style.left = spotlight.style.top = "-10px"; spotlight.style.boxShadow = "none";
-        dimTop.style.left = dimTop.style.top = "0px"; dimTop.style.width = pageW0 + "px"; dimTop.style.height = pageH0 + "px"; dimTop.style.background = "";
-        [dimBottom, dimLeft, dimRight].forEach((d) => { d.style.width = d.style.height = "0px"; });
-        callout.style.left = (window.scrollX + Math.max(8, (vw0 - callout.offsetWidth) / 2)) + "px";
-        callout.style.top = (window.scrollY + Math.max(8, (vh0 - callout.offsetHeight) / 2)) + "px";
-        arrow.className = "tour-arrow pos-none"; arrow.style.display = "none";
-        return;
-      }
-      arrow.style.display = "";
-      const vr = target.getBoundingClientRect();       // viewport coordinates, for fit checks
-      const sx = window.scrollX, sy = window.scrollY;
-      const r = { left: vr.left + sx, right: vr.right + sx, top: vr.top + sy, bottom: vr.bottom + sy, width: vr.width, height: vr.height };
-      const pad = 4;
-      spotlight.style.left = (r.left - pad) + "px";
-      spotlight.style.top = (r.top - pad) + "px";
-      spotlight.style.width = (r.width + pad * 2) + "px";
-      spotlight.style.height = (r.height + pad * 2) + "px";
-      const tr = Math.min(parseFloat(getComputedStyle(target).borderTopLeftRadius) || 0, r.height / 2);
-      spotlight.style.borderRadius = (tr + pad) + "px"; // v4.78: same shape as what it circles - no light corners
-      spotlight.style.boxShadow = "0 0 0 2px var(--gold), 0 0 0 " + Math.ceil(Math.max(document.documentElement.scrollHeight, document.documentElement.scrollWidth) * 1.2) + "px rgba(0,0,0,0.45)";
-      // four rectangles tiling everything around the padded target box: full-width bands
-      // above and below it, and two bands exactly as tall as it is to its left and right -
-      // together they cover the whole page with no gap and no reliance on how long it is
-      const pageW = document.documentElement.clientWidth;
-      const pageH = parseFloat(layer.style.height);
-      dimTop.style.left = "0px"; dimTop.style.top = "0px";
-      dimTop.style.width = pageW + "px"; dimTop.style.height = Math.max(0, r.top - pad) + "px";
-      dimBottom.style.left = "0px"; dimBottom.style.top = (r.bottom + pad) + "px";
-      dimBottom.style.width = pageW + "px"; dimBottom.style.height = Math.max(0, pageH - (r.bottom + pad)) + "px";
-      dimLeft.style.left = "0px"; dimLeft.style.top = (r.top - pad) + "px";
-      dimLeft.style.width = Math.max(0, r.left - pad) + "px"; dimLeft.style.height = (r.height + pad * 2) + "px";
-      dimRight.style.left = (r.right + pad) + "px"; dimRight.style.top = (r.top - pad) + "px";
-      dimRight.style.width = Math.max(0, pageW - (r.right + pad)) + "px"; dimRight.style.height = (r.height + pad * 2) + "px";
-      // v4.78: the ring's own shadow does the darkening (it follows the rounded shape); the four see-through
-      // rectangles only catch clicks - around the thing to try on a try-it step, over everything otherwise
-      [dimTop, dimBottom, dimLeft, dimRight].forEach((d) => { d.style.background = "transparent"; });
-      if (!step.act) { dimTop.style.width = pageW + "px"; dimTop.style.height = pageH + "px"; [dimBottom, dimLeft, dimRight].forEach((d) => { d.style.width = d.style.height = "0px"; }); }
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const cw = callout.offsetWidth, ch = callout.offsetHeight;
-      // prefer placing to the right of the element (in viewport terms); fall back to the
-      // left, then below - fit checks stay in viewport space since that's what's on screen
-      let left, top, dir;
-      if (vr.right + GAP + cw < vw - 8) { left = r.right + GAP; top = r.top; dir = "left"; }
-      else if (vr.left - GAP - cw > 8) { left = r.left - GAP - cw; top = r.top; dir = "right"; }
-      else { left = Math.max(sx + 8, Math.min(sx + vw - cw - 8, r.left)); top = r.bottom + GAP; dir = "top"; }
-      top = Math.max(sy + 8, Math.min(sy + vh - ch - 8, top));
-      callout.style.left = left + "px";
-      callout.style.top = top + "px";
-      arrow.className = "tour-arrow pos-" + dir;
-      if (dir === "left" || dir === "right") {
-        // keeps the arrow pointed at the target's own middle even when the box had to slide
-        // down to stay on screen, instead of always sitting at a fixed spot on the box
-        arrow.style.top = Math.max(14, Math.min(ch - 28, (r.top + r.height / 2) - top - 7)) + "px";
-      }
-    }
-
-    // v4.78: some steps ask you to do it - click or point at the thing - and move on once you have;
-    // everywhere else the page under the tutorial can't be clicked
-    let tryCur = null;
-    function clearTry() { if (tryCur) { tryCur.el.removeEventListener(tryCur.type, tryCur.fn, true); tryCur = null; } const n = document.getElementById("tour-next"); n.disabled = false; const t = document.getElementById("tour-try"); if (t) t.remove(); }
-    function setTry(step, target) {
-      clearTry();
-      if (!step.act || !target) return;
-      const n = document.getElementById("tour-next"); n.disabled = true;
-      const t = document.createElement("p"); t.id = "tour-try"; t.className = "tour-try"; t.textContent = step.tryIt; document.getElementById("tour-text").after(t);
-      const type = step.act === "hover" ? "pointermove" : "click", at = i, el = step.act === "hover" ? document : target;
-      const fn = (e) => { if (i !== at) return;
-        if (step.act === "hover") { const rr = target.getBoundingClientRect(); if (!(e.clientX >= rr.left && e.clientX <= rr.right && e.clientY >= rr.top && e.clientY <= rr.bottom)) return; } // the mouse is over it (whatever lies on top)
-        clearTry(); const t2 = document.createElement("p"); t2.id = "tour-try"; t2.className = "tour-try tour-try-ok"; t2.textContent = "Nice! \u2714"; document.getElementById("tour-text").after(t2); setTimeout(() => { if (i === at && !layer.hidden) advance(); }, step.act === "click" ? 900 : 700); };
-      el.addEventListener(type, fn, true); tryCur = { el, type, fn };
-    }
-    function advance() {
-      clearTry();
-      i++;
-      if (i >= steps.length) { finish(); return; }
-      go();
-    }
-    // a step can first take you somewhere (the map), then wait for it to appear
-    function go() {
-      const st = steps[i];
-      // v5.16: a step inside the 3D window waits until that part has loaded (never more than 10 s)
-      if (st && st.waitFor) {
-        layer.hidden = true; const t0 = Date.now();
-        const poll = () => { const el = typeof st.sel === "function" ? st.sel() : document.querySelector(st.sel); if ((el && el.getClientRects().length) || Date.now() - t0 > 10000) setTimeout(() => { place(); [500, 1300].forEach((ms) => setTimeout(() => { if (steps[i] === st && !layer.hidden) place(true); }, ms)); }, 750); else setTimeout(poll, 200); }; /* ...and checks again just after, as the 3D buttons can shift */
-        poll(); return;
-      }
-      if (st && st.go && st.go()) { layer.hidden = true; setTimeout(place, st.wait || 600); } else place();
-    }
-
-    function finish() {
-      clearTry();
-      layer.hidden = true;
-      document.body.classList.remove("tour-ck");
-      setTimeout(() => { if (window.SL_showCookies) window.SL_showCookies(); }, 400); // not answered in the tutorial: asked now, on its own
-      try { localStorage.setItem(TOUR_KEY, "1"); } catch (err) {} try { sessionStorage.setItem(TOUR_KEY, "1"); } catch (err) {} window.__slTourSeen = true;
-    }
-
-    function start() {
-      let seen = false;
-      try { seen = !!localStorage.getItem(TOUR_KEY); } catch (err) {} try { seen = seen || !!sessionStorage.getItem(TOUR_KEY); } catch (err) {} seen = seen || !!window.__slTourSeen;
-      if (seen) return;
-      i = 0;
-      // v5.93: the very first visit asks "How well do you know snakes?" first - the tutorial comes after the choice
-      if (window.SL_LEVEL_NEEDED && window.SL_LEVEL_NEEDED() && window.SL_LEVEL_OPEN) { window.SL_LEVEL_OPEN({ first: true, onDone: go }); return; }
-      go();
-    }
-
-    // v4.83: the welcome (and the tutorial) waits until you've scrolled past the opening photo
-    // ...and until the page has stopped scrolling for a moment (it used to open in the middle of the scroll down into SnakeList)
-    let t0Quiet = 0; const startQuiet = () => { if (window.SL_promptsReady && !window.SL_promptsReady() && Date.now() - t0Quiet < 20000) { setTimeout(startQuiet, 250); return; } start(); };
-    const whenIn = () => { const h = document.getElementById("sl-hero"); if (window.__heroEntered || !h || h.hidden) start(); else document.addEventListener("sl-hero-entered", () => { t0Quiet = Date.now(); setTimeout(startQuiet, 0); }, { once: true }); };
-    if (window.__introDone) whenIn(); else document.addEventListener("sl-intro-done", whenIn, { once: true });
-    document.getElementById("tour-skip").addEventListener("click", finish);
-    document.getElementById("tour-next").addEventListener("click", advance);
-    // answering the cookie question during its step moves the tutorial on
-    document.addEventListener("sl-consent-answered", () => { if (!layer.hidden && steps[i] && steps[i].cookie) setTimeout(advance, 500); });
-    window.addEventListener("resize", () => { if (!layer.hidden) place(true); });
-    // v4.78: if the page moves after the step was placed (the list settling, a scroll), the ring and box follow it
-    let followRaf = 0;
-    window.addEventListener("scroll", () => { if (layer.hidden || followRaf) return; followRaf = requestAnimationFrame(() => { followRaf = 0; if (!layer.hidden) place(true); }); }, { passive: true });
-    // replaying is always available from the header - seeing it once shouldn't mean never again
-    const replayBtn = document.getElementById("tour-replay");
-    if (replayBtn) replayBtn.addEventListener("click", () => { i = 0; go(); });
-    // v6.11 (Eduardo): Restart at the top right of every tutorial box - back to the first step (out of the 3D window and back to the list first)
-    window.SL_TOUR_RESTART = () => {
-      clearTry(); layer.hidden = true;
-      const x = document.querySelector(".sl3d-ov .sl3d-back"); if (x && x.offsetParent) x.click();
-      const tg = document.getElementById("tab-guide"); const moved = tg && !tg.classList.contains("active"); if (moved) tg.click();
-      i = 0; setTimeout(go, moved || x ? 600 : 0);
-    };
-  })();
+  // (v6.28: the tutorial moved to script#sl-tour near the end of the page - guides, stages, Quick Tour / Full Tutorial)
 
   noteClearBtn.addEventListener("click", () => {
     if (!noteBtn) return;
@@ -30250,6 +30012,709 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
     co.insertBefore(b, co.firstChild);
     b.addEventListener("click", function () { if (window.SL_TOUR_RESTART) window.SL_TOUR_RESTART(); });
   })();
+})();
+</script>
+
+<style id="sl-tour-css">
+/* ---- v6.28 tutorial and guides (the engine is the script#sl-tour below) ----
+   Same box, ring and colours as before; a progress bar, Back, a close x, a photo on the welcome,
+   choice buttons, and a bottom sheet on phones. */
+.tour-callout { padding: 16px 18px 16px; outline: none; }
+.tour-callout .tour-top { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; min-height: 26px; }
+.tour-callout .tour-top .tour-step { margin: 0; padding-right: 0; flex: 1 1 auto; min-width: 0; }
+.tour-callout .tour-restart { position: static !important; flex: 0 0 auto; }
+.tour-callout .tour-x { flex: 0 0 auto; width: 32px; height: 32px; margin: -4px -6px -4px 0; border: 0; border-radius: 9px; background: transparent; color: var(--text-muted); font: 400 22px/1 'Inter', sans-serif; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.tour-callout .tour-x:hover { color: var(--text); background: var(--ver-bg, rgba(88,179,81,.15)); }
+.tour-prog { height: 4px; border-radius: 4px; background: var(--border); margin: 0 0 12px; overflow: hidden; }
+.tour-prog i { display: block; height: 100%; width: 0; background: var(--gold-fill); border-radius: 4px; transition: width .3s; }
+.tour-callout h3 { outline: none; }
+.tour-extra:empty, .tour-media:empty { display: none; }
+.tour-extra { margin: 0 0 12px; }
+.tour-callout p#tour-text { margin-bottom: 12px; }
+.tour-actions { flex-wrap: wrap; }
+.tour-actions button { min-height: 40px; font-size: 14px; padding: 8px 14px; border-radius: 10px; }
+.tour-actions button:focus-visible, .tour-callout button:focus-visible, .tour-callout a:focus-visible { outline: 3px solid var(--gold-fill); outline-offset: 2px; }
+.tour-actions #tour-back[hidden], .tour-actions #tour-skip[hidden] { display: none; }
+.tour-actions .primary { color: var(--on-fill); }
+/* the welcome: photo, logo, three choices */
+.tour-media .tour-photo { position: relative; margin: -16px -18px 14px; height: 150px; border-radius: 14px 14px 0 0; overflow: hidden; background: #1d3b2a; }
+.tour-callout.tour-big .tour-media .tour-photo { margin: -30px -32px 16px; height: 190px; }
+.tour-media .tour-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tour-media .tour-photo small { position: absolute; right: 8px; bottom: 6px; font: 500 10.5px 'Inter', sans-serif; color: #fff; background: rgba(0,0,0,.45); padding: 2px 7px; border-radius: 8px; }
+.tour-media .tour-logo { position: absolute; left: 16px; bottom: 10px; font-size: 34px; color: #9fe08a; text-shadow: 0 2px 10px rgba(0,0,0,.55); }
+.tour-media .tour-logo .sl-title { font-size: 34px !important; }
+.tour-choices { display: grid; gap: 8px; margin: 4px 0 0; }
+.tour-choices button { display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; min-height: 48px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--text); font: 600 15px/1.3 'Inter', sans-serif; cursor: pointer; }
+.tour-choices button small { font-weight: 500; font-size: 12.5px; color: var(--text-muted); white-space: nowrap; }
+.tour-choices button.primary { background: var(--gold-fill); border-color: var(--gold-fill); color: var(--on-fill); }
+.tour-choices button.primary small { color: rgba(255,255,255,.88); }
+.tour-choices button:hover { border-color: #58b351; }
+.tour-guides { margin: 12px 0 0; }
+.tour-guides p { margin: 0 0 6px; font: 600 12px 'Inter', sans-serif; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+.tour-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.tour-chips button { min-height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text); font: 500 13px 'Inter', sans-serif; cursor: pointer; }
+.tour-chips button:hover { border-color: #58b351; }
+.tour-chips button.is-done::after { content: " \2713"; color: var(--gold); }
+/* "What you can do" and other short lists */
+.tour-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.tour-list li { display: flex; gap: 10px; align-items: flex-start; font: 400 14px/1.45 'Inter', sans-serif; color: var(--text-muted); }
+.tour-list li b { color: var(--text); font-weight: 600; }
+.tour-list li > span:first-child { flex: 0 0 26px; height: 26px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: var(--ver-bg, rgba(88,179,81,.15)); font-size: 14px; }
+.tour-more { font: 600 13.5px 'Inter', sans-serif; color: var(--gold); }
+/* a pretend sighting (nothing is saved) */
+.tour-demo { border: 1px dashed var(--gold-soft); border-radius: 12px; padding: 10px 12px; font: 400 13.5px/1.45 'Inter', sans-serif; color: var(--text); background: var(--ver-bg, rgba(88,179,81,.1)); }
+.tour-demo .tour-demo-tag { display: inline-block; font: 600 10.5px 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin: 0 0 6px; }
+.tour-demo dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; }
+.tour-demo dt { color: var(--text-muted); }
+.tour-demo dd { margin: 0; font-weight: 600; }
+.tour-demo .tour-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.tour-demo .tour-pills span { padding: 1px 9px; border-radius: 999px; border: 1px solid var(--border); font-weight: 500; }
+.tour-demo .tour-pills span.on { background: var(--gold-fill); border-color: var(--gold-fill); color: #fff; }
+.tour-try button.tour-trybtn { margin-left: 6px; min-height: 34px; padding: 5px 12px; border-radius: 9px; border: 1px solid var(--gold-fill); background: var(--surface); color: var(--text); font: 600 13.5px 'Inter', sans-serif; cursor: pointer; }
+.tour-safe { margin: 8px 0 0; padding: 8px 10px; border-radius: 10px; border-left: 3px solid #c9822b; background: rgba(201,130,43,.12); font: 500 13px/1.45 'Inter', sans-serif; color: var(--text); }
+.tour-sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* the box glides to each step (not with Reduce motion) */
+.tour-callout.tour-anim { transition: left .22s ease, top .22s ease; }
+@media (prefers-reduced-motion: reduce) { .tour-callout.tour-anim, .tour-spotlight, .tour-dim, .tour-prog i { transition: none !important; } }
+html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm .tour-dim { transition: none !important; }
+/* phones: a bottom (or top) sheet the width of the screen, 16px from the edges */
+.tour-callout.tour-sheet { width: calc(100vw - 32px) !important; max-height: 62vh; overflow-y: auto; padding: 14px 16px; }
+.tour-callout.tour-sheet.tour-big { max-height: 86vh; padding: 18px 18px; }
+.tour-callout.tour-sheet.tour-big h3 { font-size: 23px !important; }
+.tour-callout.tour-sheet.tour-big p#tour-text { font-size: 15.5px !important; }
+.tour-callout.tour-sheet.tour-big .tour-media .tour-photo { margin: -18px -18px 14px; height: 150px; }
+.tour-callout.tour-sheet .tour-arrow { display: none !important; }
+/* a small "guide" offer the first time a tricky tab is opened */
+.sl-tour-tip { position: fixed; left: 50%; bottom: 18px; z-index: 75; transform: translate(-50%, 20px); opacity: 0; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 32px); box-sizing: border-box;
+  padding: 9px 10px 9px 14px; border-radius: 14px; background: var(--surface); color: var(--text); border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,.25); font: 500 14px/1.35 'Inter', sans-serif; transition: transform .25s, opacity .25s; }
+.sl-tour-tip.on { transform: translate(-50%, 0); opacity: 1; }
+.sl-tour-tip button { min-height: 36px; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--text); font: 600 13.5px 'Inter', sans-serif; padding: 6px 12px; cursor: pointer; white-space: nowrap; }
+.sl-tour-tip button.go { background: var(--gold-fill); border-color: var(--gold-fill); color: var(--on-fill); }
+.sl-tour-tip button.x { border: 0; font-size: 20px; padding: 4px 8px; color: var(--text-muted); }
+@media (max-width: 640px) { .sl-tour-tip { bottom: 76px; } }
+/* Settings -> Tutorials & help */
+.sl-tour-help { display: grid; gap: 10px; }
+.sl-tour-help .sl-th-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sl-tour-help .sl-th-row > b { flex: 1 1 100%; font: 600 14px 'Inter', sans-serif; color: var(--text); }
+.sl-tour-help .sl-th-row > small { flex: 1 1 100%; margin-top: -6px; font: 400 12.5px 'Inter', sans-serif; color: var(--text-muted); }
+</style>
+<script id="sl-tour">
+// v6.28 (Eduardo, 2026-11-24 "Tutorial & onboarding redesign"): the tutorial, rebuilt.
+//  * The welcome offers a Quick Tour (about a minute), the Full Tutorial (seven stages, in the order you'd learn SnakeList:
+//    welcome -> basics -> your own lists -> the map -> extras -> settings -> done) or Skip for now.
+//  * Short feature guides (Map, Recording sightings, Checklist, Filters, Camera ID, 3D Explorer, Achievements, and the
+//    seasonal ones while they exist) start from Settings -> Tutorials & help, the header "?" button, any element with
+//    data-sl-guide="<id>", or a one-time offer the first time a tricky tab is opened.
+//  * Every step is data (see STEPS): id, stage, title, text, target (a data-tour name - [data-tour="name"] wins, then the
+//    fallback selectors in TARGETS), placement, route (the tab it needs), devices, interaction, completion, fallback.
+//  * Nothing the tour does changes your lists: no Mark Seen, no Want to see, no follow - the sighting is a pretend one in
+//    the box. The only thing it types for you (the "King Cobra" search) is put back the way it was.
+//  * One overlay at a time: it waits for the opening, the photo and the "How well do you know snakes?" choice, and while it
+//    is pending or showing no other pop-up (What's new, cookies, Welcome back, the idea tip, the Christmas welcome...)
+//    may open (window.SL_canPrompt says no).
+//  * Keys: Escape closes (your place is kept), Tab stays in the box, Left/Right go back/on. Screen readers hear each step.
+//  * localStorage: sl-tour-seen = 1 (the first-visit welcome was answered - other code reads this key),
+//    sl-tour-progress = {cur: {g, id}, done: {guide: 1}} (where you were, and the guides you finished).
+(function () {
+  "use strict";
+  var D = document, de = D.documentElement, W = window;
+  var $ = function (id) { return D.getElementById(id); };
+  var layer = $("tour-layer"), callout = $("tour-callout");
+  if (!layer || !callout || W.SL_TOUR) return;
+  var arrow = $("tour-arrow"), spot = $("tour-spotlight");
+  var dims = ["top", "bottom", "left", "right"].map(function (k) { return $("tour-dim-" + k); });
+  var elNum = $("tour-step-num"), elTitle = $("tour-title"), elText = $("tour-text"), elExtra = $("tour-extra"), elMedia = $("tour-media"),
+    elProg = $("tour-prog-bar"), bNext = $("tour-next"), bBack = $("tour-back"), bSkip = $("tour-skip"), bClose = $("tour-close"), bRestart = $("tour-restart"), live = $("tour-live");
+  var KEY = "sl-tour-seen", PKEY = "sl-tour-progress";
+  function lg(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function ls(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  function seen() { var s = !!lg(KEY) || !!W.__slTourSeen; try { s = s || !!sessionStorage.getItem(KEY); } catch (e) {} return s; }
+  function markSeen() { ls(KEY, "1"); try { sessionStorage.setItem(KEY, "1"); } catch (e) {} W.__slTourSeen = true; }
+  function prog() { try { var p = JSON.parse(lg(PKEY) || "null"); if (p && typeof p === "object") { p.done = p.done || {}; return p; } } catch (e) {} return { done: {} }; }
+  function saveProg(p) { ls(PKEY, JSON.stringify(p)); }
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  var RM = W.matchMedia ? W.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
+  function calm() { return RM.matches || de.classList.contains("sl-calm"); }
+  // touch or mouse: "Tap" or "Click", "pinch" or "scroll"
+  function touch() { if (!W.matchMedia) return false; return matchMedia("(hover: none)").matches || (matchMedia("(pointer: coarse)").matches && !matchMedia("(hover: hover) and (pointer: fine)").matches); }
+  function words(s) {
+    var t = touch();
+    return String(s).replace(/\{(Tap|tap|Tapping|tapping|zoom|Hover|hover)\}/g, function (_, w) {
+      switch (w) {
+        case "Tap": return t ? "Tap" : "Click"; case "tap": return t ? "tap" : "click";
+        case "Tapping": return t ? "Tapping" : "Clicking"; case "tapping": return t ? "tapping" : "clicking";
+        case "zoom": return t ? "pinch" : "scroll"; case "Hover": return t ? "Tap" : "Point at"; case "hover": return t ? "tap" : "point at";
+      } return w;
+    });
+  }
+  function vis(el) {
+    if (!el || !el.isConnected || el.hidden || el.closest("[hidden]")) return false;
+    var cs = getComputedStyle(el); if (cs.display === "none" || cs.visibility === "hidden") return false;
+    var r = el.getBoundingClientRect(); return r.width >= 2 && r.height >= 2;
+  }
+  function total() { var t = D.querySelector("[data-sl-total]"); return (t && t.textContent.trim()) || "4,243"; }
+  var stamps = { quick: "about 1 minute", full: "about 5 minutes" };
+
+  // ---------- where things are: [data-tour="name"] first, then these (other code can add data-tour and it wins) ----------
+  var TARGETS = {
+    tabs: [".tabs"], "tab-guide": ["#tab-guide"], "tab-sightings": ["#tab-sightings"], "tab-wish": ["#tab-wish"], "tab-follow": ["#tab-follow"],
+    "tab-map": ["#tab-map"], "tab-quiz": ["#tab-quiz"], "tab-cam": ["#tab-cam"], "tab-cabin": ["#tab-cabin"],
+    search: [".search-box", "#search"], filters: ["#fsecs"], "filter-family": ['details.fsec[data-sec="family"] > summary', "#fsecs details > summary"],
+    "filter-traits": ['details.fsec[data-sec="traits"] > summary'], sort: [".sl-sort-wrap", "button.sl-sort", "#sl-sort"],
+    achievements: ["#sl-ach-btn"], "share-sightings": ["#sl-share-sightings"], seen: ["#sl-achrow .sl-seen", "#sl-achrow"],
+    settings: ["#set-btn"], report: ["#report-btn"], help: ["#tour-replay"], share: ["#share-btn"], signin: [".auth-btn"],
+    "map-stage": ["#globe-stage"], "map-zoom": [".globe-zoom"], "map-layers": [".layers-btn"], "map-heatmap": ["#hm-toggle"],
+    "map-sightings": ["#sg-toggle"], "map-habitats": ["#hab-toggle"], "map-filters": ["#mf-toggle"], "map-3d": ["#td-toggle"], "map-search": ["#map-search", ".map-search", "#hsearch"],
+    "quiz-levels": ["#quiz-levels", "#quiz-panel"], "cam-panel": [".cam-card", "#cam-panel"], "cam-loc": ["#cam-loc"], "cam-shot": ["#cam-shot"],
+    "cabin-stage": ["#xm-cabin .xc-stage", "#xm-cabin"], "events-banner": ["#sl-ev-banner"]
+  };
+  function firstCard() { var cs = D.querySelectorAll("#grid .card"); for (var k = 0; k < cs.length; k++) if (cs[k].offsetParent && getComputedStyle(cs[k]).display !== "none") return cs[k]; return null; }
+  var CARD = { card: "", "card-name": ".card-name", "card-seen": ".seen-btn", "card-wish": ".wish-btn, .wish-row", "card-follow": ".follow-btn", "card-3d": ".td-card-btn", "card-info": ".map-btn", "card-tags": ".card-tags" };
+  function find(name) {
+    if (!name) return null;
+    if (typeof name === "function") { var f = name(); return vis(f) ? f : null; }
+    var el = D.querySelectorAll('[data-tour="' + name + '"]');
+    for (var k = 0; k < el.length; k++) if (vis(el[k])) return el[k];
+    if (name in CARD) { var c = firstCard(); if (!c) return null; var x = CARD[name] ? c.querySelector(CARD[name]) : c; return vis(x) ? x : null; }
+    var list = TARGETS[name] || [name];
+    for (var j = 0; j < list.length; j++) { var e = D.querySelector(list[j]); if (vis(e)) return e; }
+    // a tab that didn't fit sits in the "More" menu: point at More
+    if (/^tab-/.test(name) && D.getElementById(name)) { var m = D.querySelector(".tab-more"); if (vis(m)) return m; }
+    return null;
+  }
+  function exists(name) { var list = TARGETS[name] || [name]; if (D.querySelector('[data-tour="' + name + '"]')) return true; for (var j = 0; j < list.length; j++) if (D.querySelector(list[j])) return true; return false; }
+  function in3d(re) { return function () { var bs = D.querySelectorAll(".sl3d-ov button"); for (var k = 0; k < bs.length; k++) if (bs[k].offsetParent && re.test((bs[k].textContent || "").trim())) return bs[k]; return null; }; }
+  function open3d() { return !!D.querySelector(".sl3d-ov") && vis(D.querySelector(".sl3d-ov")); }
+  function hasXmas() { return !!D.getElementById("tab-cabin"); }
+  function hasEvents() { return !!D.getElementById("sl-ev-banner") || hasXmas(); }
+  function cursorRow() { return !!D.querySelector(".sl-ev-cur-row, [data-sl-cursor]"); }
+
+  // ---------- the steps ----------
+  var STAGES = ["Welcome", "The basics", "Your own lists", "The map", "Extras", "Settings", "Ready"];
+  var L = function (a) { return '<ul class="tour-list">' + a.map(function (x) { return "<li><span aria-hidden=\"true\">" + x[0] + "</span><span><b>" + x[1] + "</b> " + x[2] + "</span></li>"; }).join("") + "</ul>"; };
+  var STEPS = {
+    // stage 1
+    welcome: { stage: 0, place: "center", big: true, title: "Welcome to SnakeList 🐍", welcome: true,
+      text: function () { return "Explore, identify and discover all " + total() + " snake species of the world - with photos, range maps and your own checklist. Want a quick look around?"; } },
+    what: { stage: 0, place: "center", big: true, title: "What is SnakeList?",
+      text: function () { return "A free checklist of every snake species in the world - all " + total() + " of them, from the tiniest blind snakes to the biggest pythons. Each snake has its family, where it lives, whether it's venomous, its own page with a range map, and a photo for most of them. Your list is saved on your device, and in your account if you sign in."; } },
+    why: { stage: 0, place: "center", big: true, title: "Why SnakeList was made",
+      text: "SnakeList was made by Eduardo, an 11-year-old snake enthusiast from Portugal. He and his dad go herping together - looking for snakes on Turner River Road in Florida. Later, on a trip to Orlando, he had an idea: an app with a checklist of snakes, where he could tick off every snake he had ever seen. He made it to keep a life list of the snakes he finds, and to help everyone learn about every snake species in the world.",
+      extra: function () { return '<a class="tour-more" href="about-snakelist.html" target="_blank" rel="noopener">Read the whole story (opens a new tab)</a>'; } },
+    cando: { stage: 0, place: "center", big: true, title: "What you can do", text: "",
+      extra: function () { return L([["🔍", "Discover", "- search and filter every snake species in the world."], ["📖", "Learn", "- a page for each snake: facts, range map, related snakes and a 3D model."], ["🌍", "Explore", "- the map: where snakes live, a heatmap, sightings and habitats."], ["✔️", "Track", "- tick off the snakes you've seen and keep a Want to see list."], ["🏆", "Enjoy", "- the quiz, the camera and achievements."]]); } },
+    // stage 2
+    nav: { stage: 1, target: "tabs", route: "guide", title: "Getting around", text: "These tabs are the main parts of SnakeList: the Species Checklist, your own lists (My Sightings, Want to see, Following), the Map, the Quiz and the Camera. On a small screen, tabs that don't fit are under More." },
+    checklist: { stage: 1, target: "tab-guide", route: "guide", title: "The Species Checklist", text: function () { return "Every snake in SnakeList, " + total() + " species, as cards you can scroll through. This is where you start."; } },
+    search: { stage: 1, target: "search", route: "guide", title: "Search", interact: "search",
+      text: "Type a snake's name, a family, a type of snake or a country to find it fast. Small typos are fine - SnakeList finds the closest match." },
+    filters: { stage: 1, target: "filters", route: "guide", title: "Filters", text: "Narrow the list: Snake family, Location, Habitats, Characteristics (like venomous, or what it looks like), Other filters and My lists. The filters you pick show as pills above the list, with Reset all filters to clear them." },
+    sort: { stage: 1, target: "sort", route: "guide", title: "Sort", text: "Change the order of the list - Picked for you, name A-Z, venomous first, family and more." },
+    card: { stage: 1, target: "card", route: "guide", title: "A species card", text: "Each card is one species: its photo, name and scientific name, then tags - where it lives, its type and family, and labels like Venomous or Rare. {Tap} a tag to filter the list by it." },
+    page: { stage: 1, target: "card-name", route: "guide", title: "The species page",
+      text: function () { var c = firstCard(), i = c && c.querySelector(".map-btn"), lab = i ? i.textContent.trim() : "See more info";
+        return "{Tap} a snake's name to open its own page: how to recognise it, where it lives (with a map), behaviour, diet, similar snakes, taxonomy and sources. " + lab + " on the card shows where it lives without leaving the list."; } },
+    // stage 3
+    seen: { stage: 2, target: "card-seen", route: "guide", title: "Build your Life List",
+      text: "Seen this snake in real life? {Tap} Mark Seen to tick it off. Your “Snakes seen” count goes up and you earn achievements. (Nothing is ticked during this tour.)" },
+    record: { stage: 2, place: "center", title: "Record a sighting",
+      text: "Once a snake is marked seen, its card gets “+ date & place” and “+ photo”. Record when and where you found it, whether it was alive or dead, and add your own photo. Found it more than once? Add another time. This is an example - nothing is saved:",
+      extra: function () { return '<div class="tour-demo" aria-label="An example sighting, not saved"><span class="tour-demo-tag">Example · not saved</span><dl><dt>Date</dt><dd>August 2026 <small style="font-weight:400;color:var(--text-muted)">(just the month is fine)</small></dd><dt>Place</dt><dd>Near a river - approximate</dd><dt>Found</dt><dd><span class="tour-pills"><span class="on">Alive</span><span>Dead</span></span></dd></dl></div>'; } },
+    sightings: { stage: 2, target: "tab-sightings", route: "guide", title: "My Sightings", text: "Every snake you've marked seen, with your dates, places and photos. Share my sightings (next to Achievements) makes a picture of them to send to friends." },
+    wish: { stage: 2, target: "card-wish", route: "guide", title: "Want to see", text: "The star adds a snake to your Want to see tab - the snakes you'd love to find one day." },
+    follow: { stage: 2, target: "card-follow", route: "guide", title: "Following", text: "The bell follows a snake. Followed snakes are in the Following tab, with news about them - facts and recent sightings - and a note when you open SnakeList." },
+    // stage 4
+    "map-intro": { stage: 3, target: "map-stage", route: "map", resetSearch: true, fallback: "center", title: "The map",
+      text: "The world map of snakes. Each country is coloured by how many species are recorded there - the key shows fewer to more. {Tap} any country to see the snakes that live there." },
+    "map-move": { stage: 3, target: "map-zoom", route: "map", title: "Moving around", text: "Drag to move and {zoom} to zoom in - or use + and −. ↻ goes back to the whole world, and the last button makes the map fill the screen." },
+    "map-country": { stage: 3, target: "map-stage", route: "map", title: "A country and Show colours",
+      text: "A country's panel lists its snakes and links to its own page. Show colours on a snake colours every place where it lives: darker deep inside its range, lighter near the edge. It's an estimate from range maps and records, so treat the edges as a guide." },
+    "map-layers": { stage: 3, target: "map-layers", route: "map", title: "Layers", text: "Change how the map looks - the SnakeList map or Satellite - and switch on the species heatmap or habitats." },
+    "map-heatmap": { stage: 3, target: "map-heatmap", route: "map", title: "Species Heatmap", text: "Colours the map by how many kinds of snakes live in each place - or where one snake you search for lives. You can switch between where they live and where they've been seen." },
+    "map-sightings": { stage: 3, target: "map-sightings", route: "map", title: "Sightings", text: "Real observations people have shared on iNaturalist, as dots. {Tap} one for its photos, date and place - and See the spot to see that place in 3D." },
+    "map-habitats": { stage: 3, target: "map-habitats", route: "map", title: "Habitats", text: "Pick a habitat, like rainforest or desert, and see where its snakes live. Habitats are estimated from where each snake lives - a guide, not a survey." },
+    "map-filters": { stage: 3, target: "map-filters", route: "map", title: "Map filters", text: "The same filters as the checklist, for the map." },
+    "map-3d": { stage: 3, target: "map-3d", route: "map", title: "3D map", text: "Real mountains, forests and deserts you can tilt and turn. With Habitats on, {tap} a place to fly down and see what it looks like." },
+    "map-near": { stage: 3, place: "center", route: "map", title: "Snakes near me",
+      text: "Sign in and turn on Share my location in Settings, and the map gets a See near me button: the snakes recorded around you, how to find them, and which are likely out right now. SnakeList only asks for your location when you turn it on - never during this tour." },
+    // stage 5
+    quiz: { stage: 4, target: "tab-quiz", title: "Quiz", text: "Easy, Medium, Hard and Impossible rounds: where does this snake live, which state, and snake facts. It recommends a level from how well you said you know snakes." },
+    camera: { stage: 4, target: "tab-cam", title: "Camera ID", text: "Take or choose a photo of a snake and SnakeList suggests which species it might be, from the snakes recorded where you are. The suggestions can be wrong - they're a guide, not a definite identification.",
+      extra: function () { return '<p class="tour-safe">Stay safe: never go close to a snake for a photo - zoom in from a distance, and treat any snake you don\'t know as venomous.</p>'; } },
+    "3d": { stage: 4, target: "card-3d", route: "guide", title: "3D models", text: "Every snake has a 3D model. Drag to turn it, {zoom} to zoom, and try Open mouth, Anatomy, See it eat, Slither, Size vs person and Compare photo. The 3D Explorer guide (in Settings) walks you through it." },
+    achievements: { stage: 4, target: "achievements", route: "guide", title: "Achievements", text: "Badges for your life list, your own sightings and the quiz - with your next milestone at the top. Snakes seen, next to it, counts your life list." },
+    cabin: { stage: 4, target: "tab-cabin", when: hasXmas, title: "Christmas Cabin", text: "This season's Christmas Cabin: do Christmas tasks to earn presents for your tree, then decorate it. Optional - just for fun." },
+    events: { stage: 4, target: "events-banner", when: function () { return !!D.getElementById("sl-ev-banner"); }, title: "Seasonal events", text: "Events come and go with the seasons. {Tap} here to see what's on and how long is left. Optional - SnakeList works the same without them." },
+    // stage 6
+    settings: { stage: 5, target: "settings", title: "Settings",
+      text: function () { return "Light or dark, brightness, text size, your language, Reduce motion, What's new pop-ups, sounds" + (cursorRow() && !touch() ? ", your cursor" : "") + " and more. They work straight away and are remembered on this device."; } },
+    report: { stage: 5, target: "report", title: "Report a bug or an idea", text: "Spotted a mistake, or have an idea? Send it to the person who makes SnakeList." },
+    help: { stage: 5, target: "settings", title: "Tutorials & help", text: "Want this again? Settings → Tutorials & help restarts the tutorial or opens a short guide - the Map, recording sightings, filters, the camera and more. The ? button at the top opens it too." },
+    // stage 7
+    done: { stage: 6, place: "center", big: true, done: true, resetSearch: true, route: "guide", title: "You're Ready to Explore! 🐍",
+      text: "That's SnakeList. Find a snake you know, tick off the ones you've seen, or open the map and see what lives near you. Tutorials & help in Settings is there any time." },
+
+    // ----- feature guides only -----
+    "map-tab": { stage: 3, target: "tab-map", title: "The map", text: "The Map shows where every snake lives - {tap} a country to see its snakes, or turn on the heatmap, sightings and habitats. The Map guide in Settings shows you round." },
+    "filters-try": { stage: 1, target: "filter-family", route: "guide", interact: "click", tryIt: "Try it: {tap} Snake family to open it.", title: "Open a filter",
+      text: "Each section opens with a {tap}. Pick a chip - like a family or a continent - and the list shows only those snakes.", cleanup: "closeDetails" },
+    "filters-traits": { stage: 1, target: "filter-traits", route: "guide", title: "Search by what it looks like", text: "Open Characteristics and type in its search box - like black, green, rattle, stripes or horns - to find snakes that look like that." },
+    "filters-map": { stage: 1, target: "filters", route: "guide", title: "Filters everywhere", text: "Your filters stay while you switch tabs, and “View filtered species on map” shows the snakes you filtered on the map." },
+    "cam-intro": { stage: 4, target: "cam-panel", route: "cam", title: "What snake is this?", text: "The camera guesses the species from your photo and the snakes that live where you are. The guessing happens on your device - the photo isn't uploaded." },
+    "cam-loc": { stage: 4, target: "cam-loc", route: "cam", title: "1. Where are you?", text: "Use your location, pick the spot on a map, or choose a photo that has its place saved in it. SnakeList only asks for your location when you {tap} Use my location." },
+    "cam-shot": { stage: 4, target: "cam-shot", route: "cam", title: "2. The photo", text: "Take a photo or choose one. You get a short list of snakes it might be - check them against the species pages before you're sure.",
+      extra: function () { return '<p class="tour-safe">Never go closer to take a photo - zoom in from a safe distance. Treat any snake you don\'t know as venomous.</p>'; } },
+    "3d-open": { stage: 4, target: "card-3d", route: "guide", interact: "click", tryIt: "Try it: {tap} 3D to open this snake in 3D.", title: "3D", text: "Every snake in SnakeList has its own 3D model. {Tap} 3D and we'll look at it together." },
+    "3d-stage": { stage: 4, target: function () { return D.querySelector(".sl3d-ov .sp3d-stage"); }, need3d: true, wait: 10000, title: "Your snake in 3D", text: "Its colours, pattern and size come from photos and measurements of the real species. Drag to go round it, and {zoom} to zoom in where you point." },
+    "3d-mouth": { stage: 4, target: in3d(/^Open mouth$/), need3d: true, wait: 4000, interact: "click", tryIt: "Try it: {tap} Open mouth.", title: "Open mouth", text: "Look inside its mouth: the teeth, the fangs if it has them, and the tongue." },
+    "3d-anatomy": { stage: 4, target: in3d(/^Anatomy$/), need3d: true, wait: 4000, interact: "click", tryIt: "Try it: {tap} Anatomy.", title: "Anatomy", text: "The skin turns see-through, so you can see its skeleton and organs. {Tap} a label to learn about that part." },
+    "3d-eat": { stage: 4, target: in3d(/^See it eat$/), need3d: true, wait: 4000, title: "See it eat", text: "Watch it catch and swallow its food the way this kind of snake really does." },
+    "3d-slither": { stage: 4, target: in3d(/^Slither$/), need3d: true, wait: 4000, title: "Slither", text: "Watch it move along the ground." },
+    "3d-more": { stage: 4, target: in3d(/^Show more/), need3d: true, wait: 4000, title: "More views", text: "The full body, a close-up of the head, its pattern from above, and Size vs person - how long it is next to a person 1.70 m tall." },
+    "3d-compare": { stage: 4, target: in3d(/Compare photo/), need3d: true, wait: 3000, title: "Compare photo", text: "Put a real photo of this snake next to the model." },
+    "3d-countries": { stage: 4, target: in3d(/See countries/), need3d: true, wait: 3000, title: "See countries", text: "The countries and states where this snake lives." },
+    "3d-close": { stage: 4, target: function () { return D.querySelector(".sl3d-ov .sl3d-back"); }, need3d: true, wait: 3000, interact: "click", tryIt: "Try it: {tap} the X to close it.", title: "Close", text: "Close the 3D model to go back to your list." },
+    "ach-share": { stage: 4, target: "share-sightings", route: "guide", title: "Share my sightings", text: "Makes a picture of the snakes you've seen, to send to friends and family." },
+    "cabin-open": { stage: 4, target: "tab-cabin", when: hasXmas, title: "Christmas Cabin", text: "This season's Christmas Cabin. Do Christmas tasks - each one puts a present under your tree - then open them and decorate the tree. Each task has a Show me button that takes you to it." },
+    "events-adv": { stage: 4, place: "center", when: hasEvents, title: "Advent and seasonal rewards", text: "While a seasonal event is on, its panel shows what's open and when. Rewards you earn stay in My rewards; seasonal achievements are listed under Achievements and say when they can no longer be earned." },
+    "guide-done": { stage: 6, place: "center", done: true, guideDone: true, resetSearch: true, title: "That's it!", text: "You can open this guide again from Settings → Tutorials & help." }
+  };
+  Object.keys(STEPS).forEach(function (k) { STEPS[k].id = k; });
+
+  var GUIDES = {
+    quick: { name: "Quick Tour", steps: ["welcome", "what", "nav", "search", "card", "seen", "map-tab", "help", "done"] },
+    full: { name: "Full Tutorial", steps: ["welcome", "what", "why", "cando", "nav", "checklist", "search", "filters", "sort", "card", "page", "seen", "record", "sightings", "wish", "follow",
+      "map-intro", "map-move", "map-country", "map-layers", "map-heatmap", "map-sightings", "map-habitats", "map-filters", "map-3d", "map-near",
+      "quiz", "camera", "3d", "achievements", "cabin", "events", "settings", "report", "help", "done"] },
+    map: { name: "Map", guide: true, steps: ["map-intro", "map-move", "map-country", "map-layers", "map-heatmap", "map-sightings", "map-habitats", "map-filters", "map-3d", "map-near", "guide-done"] },
+    sightings: { name: "Recording sightings", guide: true, steps: ["seen", "record", "sightings", "ach-share", "wish", "follow", "guide-done"] },
+    checklist: { name: "Checklist", guide: true, steps: ["nav", "checklist", "search", "sort", "card", "page", "guide-done"] },
+    filters: { name: "Filters", guide: true, steps: ["filters", "filters-try", "filters-traits", "filters-map", "guide-done"] },
+    camera: { name: "Camera ID", guide: true, steps: ["cam-intro", "cam-loc", "cam-shot", "guide-done"] },
+    "3d": { name: "3D Explorer", guide: true, steps: ["3d-open", "3d-stage", "3d-mouth", "3d-anatomy", "3d-eat", "3d-slither", "3d-more", "3d-compare", "3d-countries", "3d-close", "guide-done"] },
+    achievements: { name: "Achievements", guide: true, steps: ["achievements", "ach-share", "guide-done"] },
+    christmas: { name: "Christmas events", guide: true, when: hasEvents, steps: ["events", "events-adv", "cabin-open", "guide-done"] },
+    cabin: { name: "Cabin", guide: true, when: hasXmas, steps: ["cabin-open", "guide-done"] }
+  };
+  function guideOk(g) { return GUIDES[g] && (!GUIDES[g].when || GUIDES[g].when()); }
+
+  // ---------- state ----------
+  var cur = null; // { g, list: [step], i, auto, orig: {search}, opener }
+  var dir = 1, token = 0, tryOff = null, autoPending = false, succeeded = false;
+  function running() { return !!cur && !layer.hidden; }
+  W.__slTourPending = function () { return autoPending; };
+
+  // ---------- tabs ----------
+  function activeTab() { var a = D.querySelector(".tabs .tab-btn.active:not(.tab-more)"); return a ? a.id.replace(/^tab-/, "") : ""; }
+  function goRoute(r) { if (!r || activeTab() === r) return false; var b = $("tab-" + r); if (!b) return false; if (W.XM && W.XM.cabin && r !== "cabin") try { W.XM.cabin.close(); } catch (e) {} b.click(); return true; }
+  function close3d() { var x = D.querySelector(".sl3d-ov .sl3d-back"); if (x && x.offsetParent) { x.click(); return true; } return false; }
+
+  // ---------- the King Cobra search, put back afterwards ----------
+  function searchEl() { return $("search"); }
+  function setSearch(v) { var s = searchEl(); if (!s || s.value === v) return; s.value = v; s.dispatchEvent(new Event("input")); }
+  function resetSearch() { if (cur && cur.orig && cur.orig.touched) { setSearch(cur.orig.search); cur.orig.touched = false; var s = searchEl(); if (s && D.activeElement === s) s.blur(); } }
+  var opened = []; // filter sections the tour opened
+  function closeDetails() { opened.forEach(function (d) { if (d.open) { var s = d.querySelector("summary"); if (s) s.click(); else d.open = false; } }); opened = []; }
+
+  // ---------- drawing ----------
+  function sheetMode() { return W.innerWidth < 640; }
+  function sizeLayer() { layer.style.height = Math.max(de.scrollHeight, de.clientHeight) + "px"; }
+  function dimAll(on) { var pw = de.clientWidth, ph = parseFloat(layer.style.height) || de.scrollHeight; dims[0].style.left = dims[0].style.top = "0px"; dims[0].style.width = pw + "px"; dims[0].style.height = ph + "px"; dims[0].style.background = on ? "" : "transparent"; for (var k = 1; k < 4; k++) dims[k].style.width = dims[k].style.height = "0px"; }
+  function setText(st) {
+    var t = typeof st.text === "function" ? st.text() : st.text;
+    elTitle.textContent = words(st.title); elText.textContent = words(t || ""); elText.hidden = !t;
+  }
+  function header(st) {
+    var g = GUIDES[cur.g], n = cur.list.length, firstIdx = cur.list[0].welcome ? 1 : 0, idx = cur.i - firstIdx + 1, cnt = n - firstIdx;
+    var lab;
+    if (st.welcome) lab = cur.g === "full" || cur.g === "quick" ? "Welcome" : g.name;
+    else if (cur.g === "full") lab = "Stage " + (st.stage + 1) + " of 7 · " + STAGES[st.stage] + " · " + idx + "/" + cnt;
+    else if (cur.g === "quick") lab = "Quick tour · " + idx + " of " + cnt;
+    else lab = g.name + " guide · " + idx + " of " + cnt;
+    elNum.textContent = lab;
+    elProg.style.width = (st.welcome ? 0 : Math.round(idx / cnt * 100)) + "%";
+    elProg.parentNode.hidden = !!st.welcome;
+  }
+  function welcomeMedia() {
+    var im = D.querySelector("#sl-hero .hero-media img:not(.hero-fill)"), src = im && (im.currentSrc || im.src), h = W.SL_HERO;
+    var logo = D.querySelector("h1.sl-title"), lh = "";
+    if (logo) { lh = logo.outerHTML.replace(/<h1/, "<div").replace(/<\/h1>$/, "</div>").replace(/id="([^"]+)"/g, 'id="$1-tour"').replace(/url\(#([^)]+)\)/g, "url(#$1-tour)").replace(/aria-label="[^"]*"/, 'aria-hidden="true"'); }
+    var cap = h && h[1] ? esc(h[1]) + (h[5] ? " · " + esc(h[5]) : "") : "";
+    return '<div class="tour-photo">' + (src ? '<img alt="" src="' + esc(src) + '">' : "") + (lh ? '<span class="tour-logo">' + lh + "</span>" : "") + (cap ? "<small>" + cap + "</small>" : "") + "</div>";
+  }
+  function welcomeChoices() {
+    var p = prog(), c = p.cur, resume = c && GUIDES[c.g] && (c.g === "full" || c.g === "quick") && c.id && c.id !== "welcome" && c.id !== "done" ? c : null, h = "";
+    if (resume) { var L2 = listFor(resume.g), at = idxOf(L2, resume.id); h += '<button type="button" class="primary" data-go="resume">Continue where you left off <small>' + esc(GUIDES[resume.g].name) + " · step " + at + " of " + (L2.length - 1) + "</small></button>"; }
+    h += '<button type="button"' + (resume ? "" : ' class="primary"') + ' data-go="quick">Start Quick Tour <small>' + stamps.quick + "</small></button>";
+    h += '<button type="button" data-go="full">Explore Full Tutorial <small>' + stamps.full + "</small></button>";
+    var gs = cur.auto ? "" : guideChips(true);
+    return '<div class="tour-choices">' + h + "</div>" + gs;
+  }
+  function guideChips(withHead) {
+    var p = prog();
+    var chips = Object.keys(GUIDES).filter(function (g) { return GUIDES[g].guide && guideOk(g); }).map(function (g) { return '<button type="button" data-guide="' + g + '"' + (p.done[g] ? ' class="is-done"' : "") + ">" + esc(GUIDES[g].name) + "</button>"; }).join("");
+    return '<div class="tour-guides">' + (withHead ? "<p>Or a short guide</p>" : "") + '<div class="tour-chips">' + chips + "</div></div>";
+  }
+  function doneChoices() {
+    if (GUIDES[cur.g].guide) return guideChips(true).replace("Or a short guide", "More guides");
+    return '<div class="tour-chips" role="group" aria-label="Where to next">' +
+      '<button type="button" data-next="guide">Explore Species</button><button type="button" data-next="map">Open the Map</button><button type="button" data-next="sightings">View My Sightings</button></div>';
+  }
+  function placeCenter(big) {
+    callout.classList.toggle("tour-big", !!big); callout.classList.toggle("tour-sheet", sheetMode());
+    spot.style.width = spot.style.height = "0px"; spot.style.left = spot.style.top = "-10px"; spot.style.boxShadow = "none";
+    dimAll(true);
+    var vw = W.innerWidth, vh = W.innerHeight, cw = callout.offsetWidth, ch = callout.offsetHeight;
+    callout.style.left = (W.scrollX + Math.max(16, (vw - cw) / 2)) + "px";
+    callout.style.top = (W.scrollY + Math.max(12, (vh - ch) / 2)) + "px";
+    arrow.className = "tour-arrow"; arrow.style.display = "none";
+  }
+  function placeAt(target, st) {
+    callout.classList.remove("tour-big"); var sheet = sheetMode(); callout.classList.toggle("tour-sheet", sheet);
+    sizeLayer();
+    var vr = target.getBoundingClientRect(), sx = W.scrollX, sy = W.scrollY, pad = 4, pw = de.clientWidth, ph = parseFloat(layer.style.height);
+    var r = { left: vr.left + sx, right: vr.right + sx, top: vr.top + sy, bottom: vr.bottom + sy, width: vr.width, height: vr.height };
+    spot.style.left = (r.left - pad) + "px"; spot.style.top = (r.top - pad) + "px"; spot.style.width = (r.width + pad * 2) + "px"; spot.style.height = (r.height + pad * 2) + "px";
+    var tr = Math.min(parseFloat(getComputedStyle(target).borderTopLeftRadius) || 0, r.height / 2); spot.style.borderRadius = (tr + pad) + "px";
+    spot.style.boxShadow = "0 0 0 3px var(--gold), 0 0 0 " + Math.ceil(Math.max(de.scrollHeight, de.scrollWidth) * 1.2) + "px rgba(0,0,0,0.5)";
+    // see-through click catchers: everything, or (when you're asked to try it) everything but the target
+    if (st.interact) {
+      var d = dims;
+      d[0].style.left = "0px"; d[0].style.top = "0px"; d[0].style.width = pw + "px"; d[0].style.height = Math.max(0, r.top - pad) + "px";
+      d[1].style.left = "0px"; d[1].style.top = (r.bottom + pad) + "px"; d[1].style.width = pw + "px"; d[1].style.height = Math.max(0, ph - r.bottom - pad) + "px";
+      d[2].style.left = "0px"; d[2].style.top = (r.top - pad) + "px"; d[2].style.width = Math.max(0, r.left - pad) + "px"; d[2].style.height = (r.height + pad * 2) + "px";
+      d[3].style.left = (r.right + pad) + "px"; d[3].style.top = (r.top - pad) + "px"; d[3].style.width = Math.max(0, pw - r.right - pad) + "px"; d[3].style.height = (r.height + pad * 2) + "px";
+      d.forEach(function (x) { x.style.background = "transparent"; });
+    } else dimAll(false);
+    var vw = W.innerWidth, vh = W.innerHeight, cw = callout.offsetWidth, ch = callout.offsetHeight, GAP = 16, left, top, side = "none";
+    if (sheet) {
+      // a sheet at the bottom - or at the top when the target is down there
+      var roomBelow = vr.bottom + 12 <= vh - ch - 12, roomAbove = vr.top >= ch + 24;
+      left = sx + 16; top = roomBelow || !roomAbove ? sy + vh - ch - 12 : sy + 12;
+      callout.style.left = left + "px"; callout.style.top = Math.max(sy + 8, top) + "px"; arrow.style.display = "none"; return;
+    }
+    var fits = {
+      bottom: vh - vr.bottom - GAP >= ch + 8, top: vr.top - GAP >= ch + 8,
+      right: vw - vr.right - GAP >= cw + 8 && vr.height < vh - 16, left: vr.left - GAP >= cw + 8 && vr.height < vh - 16
+    };
+    var order = st.place && st.place !== "auto" ? [st.place, "bottom", "top", "right", "left"] : ["bottom", "top", "right", "left"];
+    for (var k = 0; k < order.length; k++) if (fits[order[k]]) { side = order[k]; break; }
+    var cx = vr.left + vr.width / 2, cy = vr.top + vr.height / 2, clampX = function (x) { return Math.max(8, Math.min(vw - cw - 8, x)); }, clampY = function (y) { return Math.max(8, Math.min(vh - ch - 8, y)); };
+    if (side === "bottom") { left = clampX(cx - cw / 2); top = vr.bottom + GAP; }
+    else if (side === "top") { left = clampX(cx - cw / 2); top = vr.top - GAP - ch; }
+    else if (side === "right") { left = vr.right + GAP; top = clampY(cy - ch / 2); }
+    else if (side === "left") { left = vr.left - GAP - cw; top = clampY(cy - ch / 2); }
+    else { left = clampX(vw - cw - 16); top = clampY(vh - ch - 16); } // a big target (the map): the box sits in its corner
+    callout.style.left = (left + sx) + "px"; callout.style.top = (top + sy) + "px";
+    var ac = { bottom: "pos-top", top: "pos-bottom", right: "pos-left", left: "pos-right" }[side];
+    if (!ac) { arrow.style.display = "none"; return; }
+    arrow.style.display = ""; arrow.className = "tour-arrow " + ac; arrow.style.left = arrow.style.top = "";
+    if (side === "bottom" || side === "top") arrow.style.left = Math.max(14, Math.min(cw - 30, cx - left - 8)) + "px";
+    else arrow.style.top = Math.max(14, Math.min(ch - 30, cy - top - 8)) + "px";
+  }
+  function bring(target, then) {
+    // bring the target on screen (inside a scrolling tab row too), leaving room for the box
+    try { target.scrollIntoView({ block: "nearest", inline: "nearest" }); } catch (e) {}
+    var vr = target.getBoundingClientRect(), vh = W.innerHeight, sheet = sheetMode(), ch = callout.offsetHeight || 220;
+    var want = sheet ? Math.max(64, Math.min((vh - ch - 24 - vr.height) / 2, 140)) : Math.max(64, (vh - vr.height) / 2 - (vr.height < vh / 2 ? 80 : 0));
+    if (vr.height > vh * 0.7) want = 64;
+    var dy = vr.top - want;
+    if (Math.abs(dy) > 8 && !(vr.top >= 56 && vr.bottom <= (sheet ? vh - ch - 20 : vh - 20) && vr.height < vh * 0.7)) {
+      W.scrollTo({ top: Math.max(0, W.scrollY + dy), behavior: calm() ? "auto" : "smooth" });
+      setTimeout(then, calm() ? 30 : 420);
+    } else then();
+  }
+
+  // ---------- one step ----------
+  function show(follow) {
+    if (!cur) return;
+    var st = cur.list[cur.i], my = ++token;
+    if (!follow) { clearTry(); succeeded = false; }
+    if (st.resetSearch && !follow) resetSearch();
+    if (!follow) {
+      // a step can need a tab first (the map...), and wait for its part to appear
+      if (st.need3d && !open3d()) { skip(); return; }
+      if (st.route && goRoute(st.route)) { layer.hidden = true; setTimeout(function () { if (my === token) waitFor(st, my); }, st.route === "map" ? 900 : 450); return; }
+      waitFor(st, my); return;
+    }
+    render(st, follow);
+  }
+  function waitFor(st, my) {
+    if (st.place === "center" && !st.target) { render(st); return; }
+    var t0 = Date.now(), max = st.wait || 2500;
+    (function poll() {
+      if (my !== token) return;
+      var el = find(st.target);
+      if (el) { render(st, false, el); return; }
+      // not there (hidden on this device, not loaded): a centred box if the step says so, otherwise on to the next step
+      if (Date.now() - t0 > max) { if (st.place === "center" || st.fallback === "center") render(st, false, null); else skip(); return; }
+      setTimeout(poll, 150);
+    })();
+  }
+  function skip() { var n = cur.i + dir; if (n < 0) { dir = 1; n = cur.i + 1; } if (n >= cur.list.length) { finish(true); return; } cur.i = n; save(); show(); }
+  function render(st, follow, el) {
+    var target = st.place === "center" ? null : (el || find(st.target));
+    layer.hidden = false; de.classList.add("sl-tour-on"); sizeLayer();
+    if (!follow) {
+      setText(st); header(st);
+      callout.setAttribute("data-step", st.id);
+      elMedia.innerHTML = st.welcome ? welcomeMedia() : "";
+      var ex = st.welcome ? welcomeChoices() : st.done ? (typeof st.extra === "function" ? st.extra() : "") + doneChoices() : (typeof st.extra === "function" ? words(st.extra()) : "");
+      elExtra.innerHTML = ex;
+      var firstIdx = cur.list[0].welcome ? 1 : 0;
+      bBack.hidden = st.welcome || cur.i <= firstIdx;
+      bSkip.hidden = !!st.done;
+      bSkip.textContent = st.welcome ? "Skip for now" : GUIDES[cur.g].guide ? "Close guide" : "Skip tutorial";
+      bNext.hidden = !!st.welcome;
+      bNext.textContent = st.done ? (GUIDES[cur.g].guide ? "Finish" : "Start Exploring") : "Next";
+      bRestart.hidden = !!st.welcome;
+      if (st.interact) setTry(st, target);
+      callout.classList.toggle("tour-anim", !calm() && !st.big);
+      announce(st);
+    }
+    if (!target) { placeCenter(st.big || st.place === "center"); if (!follow) focusBox(); return; }
+    if (follow) { placeAt(target, st); return; }
+    placeAt(target, st); // measure the box at its size first
+    bring(target, function () { if (cur && cur.list[cur.i] === st) { var t2 = find(st.target) || target; placeAt(t2, st); focusBox(); } });
+  }
+  function announce(st) {
+    var t = typeof st.text === "function" ? st.text() : st.text;
+    live.textContent = ""; setTimeout(function () { live.textContent = elNum.textContent + ". " + words(st.title) + ". " + words(t || ""); }, 60);
+  }
+  function focusBox() {
+    var b = !bNext.hidden ? bNext : callout.querySelector(".tour-choices button, .tour-chips button") || bSkip;
+    try { b.focus({ preventScroll: true }); } catch (e) {}
+  }
+
+  // ---------- "try it" ----------
+  function clearTry() { if (tryOff) { tryOff(); tryOff = null; } }
+  function nice(msg, then, ms) {
+    var p = $("tour-try"); if (!p) { p = D.createElement("p"); p.id = "tour-try"; elExtra.appendChild(p); }
+    p.className = "tour-try tour-try-ok"; p.textContent = msg; live.textContent = msg; succeeded = true;
+    if (then) { var at = cur.i, g = cur.g; setTimeout(function () { if (cur && cur.i === at && cur.g === g && !layer.hidden) then(); }, ms || 900); }
+  }
+  function setTry(st, target) {
+    var p = D.createElement("p"); p.id = "tour-try"; p.className = "tour-try";
+    if (st.interact === "search") {
+      var s = searchEl(); if (!s) return;
+      p.innerHTML = words("Try it: type a snake's name") + ' <button type="button" class="tour-trybtn" id="tour-trycobra">or try “King Cobra”</button>';
+      elExtra.appendChild(p);
+      if (!cur.orig.touched) { cur.orig.search = s.value; }
+      var idle = 0, fn = function () {
+        cur.orig.touched = true; clearTimeout(idle);
+        idle = setTimeout(function () {
+          var v = s.value.trim(); if (v.length < 2) return;
+          var rc = $("result-count"), n = rc ? (rc.textContent.match(/[\d,]+/) || [""])[0] : "";
+          nice("Nice! " + (n ? n + " snake" + (n === "1" ? "" : "s") + " for “" + v + "”." : "Found “" + v + "”."), next, 1600);
+        }, 900);
+      };
+      s.addEventListener("input", fn);
+      var tb = $("tour-trycobra"); tb.addEventListener("click", function () { cur.orig.touched = true; setSearch("King Cobra"); fn(); });
+      tryOff = function () { clearTimeout(idle); s.removeEventListener("input", fn); };
+      return;
+    }
+    if (!target) return;
+    p.textContent = words(st.tryIt || "Try it."); elExtra.appendChild(p);
+    var at = cur.i, f = function () {
+      if (!cur || cur.i !== at) return;
+      if (st.cleanup === "closeDetails") { var d = target.closest("details"); if (d && opened.indexOf(d) < 0) setTimeout(function () { if (d.open) opened.push(d); }, 0); }
+      clearTry(); nice("Nice! ✔", next, st.id === "3d-open" ? 400 : 900);
+    };
+    target.addEventListener("click", f, true);
+    tryOff = function () { target.removeEventListener("click", f, true); };
+  }
+
+  // ---------- moving ----------
+  function save() {
+    if (!cur) return; var p = prog();
+    var st = cur.list[cur.i];
+    if (cur.g === "full" || cur.g === "quick") p.cur = { g: cur.g, id: st.id, t: Date.now() };
+    p.g = p.g || {}; p.g[cur.g] = st.id;
+    saveProg(p);
+  }
+  function next() { if (!cur) return; clearTry(); var st = cur.list[cur.i]; if (st.cleanup === "closeDetails") closeDetails(); if (cur.i >= cur.list.length - 1) { finish(true); return; } dir = 1; cur.i++; save(); show(); }
+  function back() { if (!cur) return; clearTry(); var st = cur.list[cur.i]; if (st.cleanup === "closeDetails") closeDetails(); var firstIdx = cur.list[0].welcome ? 1 : 0; if (cur.i <= firstIdx) return; dir = -1; cur.i--; if (cur.list[cur.i].id === "3d-open" && open3d()) cur.i--; save(); show(); }
+  function listFor(g) { return GUIDES[g].steps.map(function (id) { return STEPS[id]; }).filter(function (s) { return s && (!s.when || s.when()) && (!s.devices || (s.devices === "touch") === touch()); }); }
+  function idxOf(list, id) { for (var k = 0; k < list.length; k++) if (list[k].id === id) return k; return 0; }
+
+  function begin(g, opt) {
+    opt = opt || {};
+    if (!guideOk(g)) g = "full";
+    var keepOrig = cur && cur.orig, auto = cur ? cur.auto : !!opt.auto, opener = cur ? cur.opener : (opt.opener || D.activeElement);
+    clearTry(); closeDetails();
+    cur = { g: g, list: listFor(g), i: 0, auto: auto, orig: keepOrig || { search: (searchEl() || {}).value || "", touched: false }, opener: opener };
+    if (opt.at) cur.i = Math.max(0, idxOf(cur.list, opt.at));
+    else if (cur.list[0].welcome && opt.skipWelcome) cur.i = 1;
+    dir = 1; autoPending = false;
+    if (GUIDES[g].guide || cur.i > 0) save();
+    if (W.SL_CLOSE_PANEL) try { W.SL_CLOSE_PANEL(true); } catch (e) {}
+    var lv = $("sl-level"); if (lv && lv.classList.contains("open")) { /* the chooser goes first; the tutorial comes after it (see start) */ }
+    show();
+  }
+  function finish(completed) {
+    if (!cur) { layer.hidden = true; return; }
+    var c = cur; clearTry(); closeDetails(); resetSearch(); token++;
+    if (c.list[c.i] && /^3d-/.test(c.list[c.i].id)) close3d();
+    var p = prog();
+    if (completed) { p.done[c.g] = 1; if (p.cur && p.cur.g === c.g) delete p.cur; }
+    saveProg(p);
+    cur = null; layer.hidden = true; de.classList.remove("sl-tour-on"); callout.removeAttribute("data-step");
+    autoPending = false; markSeen();
+    if (c.auto) setTimeout(function () { if (W.SL_showCookies) W.SL_showCookies(); }, 600); // the cookie question, if it wasn't answered with the level choice
+    var o = c.opener; if (o && o.focus && o.isConnected && o !== D.body) try { o.focus({ preventScroll: true }); } catch (e) {}
+    live.textContent = completed ? "Tutorial finished." : "Tutorial closed. Settings, Tutorials and help, opens it again.";
+    D.dispatchEvent(new CustomEvent("sl-tour-closed", { detail: { guide: c.g, completed: !!completed } }));
+  }
+  function hub(opt) { // the welcome with its choices (the ? button, Restart, the first visit)
+    opt = opt || {}; if (cur) { clearTry(); closeDetails(); resetSearch(); if (cur.list[cur.i] && /^3d-/.test(cur.list[cur.i].id)) close3d(); }
+    var c = cur; cur = null;
+    var opener = c ? c.opener : (opt.opener || D.activeElement);
+    cur = { g: "full", list: listFor("full"), i: 0, auto: c ? c.auto : !!opt.auto, orig: (c && c.orig) || { search: (searchEl() || {}).value || "", touched: false }, opener: opener };
+    autoPending = false; dir = 1;
+    if (W.SL_CLOSE_PANEL) try { W.SL_CLOSE_PANEL(true); } catch (e) {}
+    var moved = goRoute("guide") || close3d();
+    setTimeout(show, moved ? 500 : 0);
+  }
+
+  // ---------- buttons and keys ----------
+  bNext.addEventListener("click", next);
+  bBack.addEventListener("click", back);
+  bSkip.addEventListener("click", function () { finish(false); });
+  bClose.addEventListener("click", function () { finish(false); });
+  bRestart.addEventListener("click", function () { if (!cur) return; if (GUIDES[cur.g].guide) { var g = cur.g; cur.i = 0; clearTry(); closeDetails(); if (open3d()) close3d(); dir = 1; save(); setTimeout(show, 300); } else hub(); });
+  callout.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    var go = b.getAttribute("data-go"), gd = b.getAttribute("data-guide"), nx = b.getAttribute("data-next");
+    if (go === "resume") { var p = prog(); if (p.cur) begin(p.cur.g, { at: p.cur.id }); }
+    else if (go) begin(go, { skipWelcome: true });
+    else if (gd) begin(gd, {});
+    else if (nx) { finish(true); var cb = function () { goRoute(nx); if (nx === "guide") { var s = searchEl(); if (s) setTimeout(function () { try { s.focus({ preventScroll: true }); } catch (e) {} }, 300); } }; setTimeout(cb, 50); }
+  });
+  W.SL_TOUR_FOCUSABLE = function () { return [].filter.call(callout.querySelectorAll("button, a[href], input"), function (x) { return !x.disabled && !x.hidden && x.offsetParent !== null; }); };
+  D.addEventListener("keydown", function (e) {
+    if (!running()) return;
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); finish(false); return; }
+    var st = cur.list[cur.i], tgt = st && st.interact ? find(st.target) : null;
+    if (e.key === "Tab") {
+      var f = W.SL_TOUR_FOCUSABLE(); if (tgt) { var inner = [].filter.call(tgt.matches("button, input, summary, a[href]") ? [tgt] : tgt.querySelectorAll("button, input, summary, a[href]"), function (x) { return x.offsetParent !== null; }); f = inner.concat(f); }
+      if (!f.length) return; var a = D.activeElement, k = f.indexOf(a);
+      if (k < 0) { e.preventDefault(); f[0].focus(); return; }
+      if (e.shiftKey && k === 0) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && k === f.length - 1) { e.preventDefault(); f[0].focus(); }
+      return;
+    }
+    var inBox = callout.contains(D.activeElement) && !/^(INPUT|TEXTAREA|SELECT)$/.test(D.activeElement.tagName);
+    if (inBox && e.key === "ArrowRight" && !bNext.hidden) { e.preventDefault(); next(); }
+    else if (inBox && e.key === "ArrowLeft" && !bBack.hidden) { e.preventDefault(); back(); }
+  }, true);
+  W.addEventListener("resize", function () { if (running()) show(true); });
+  var raf = 0;
+  W.addEventListener("scroll", function () { if (!running() || raf) return; raf = requestAnimationFrame(function () { raf = 0; if (running()) show(true); }); }, { passive: true });
+  // the header "?" and Settings -> Restart open the welcome with its choices
+  var replay = $("tour-replay");
+  if (replay) { replay.setAttribute("aria-label", "Tutorials and help"); replay.addEventListener("click", function () { hub({ opener: replay }); }); }
+  W.SL_TOUR_RESTART = function () { hub(); };
+  // any element with data-sl-guide="map" (or "quick", "full"...) starts that guide
+  D.addEventListener("click", function (e) { var b = e.target.closest && e.target.closest("[data-sl-guide]"); if (!b || callout.contains(b)) return; var g = b.getAttribute("data-sl-guide"); if (!GUIDES[g]) return; e.preventDefault(); begin(g, { opener: b, skipWelcome: true }); });
+
+  // ---------- one pop-up at a time ----------
+  // while the first-visit tutorial is still to come, or any tutorial is showing, nothing else pops up
+  var origCan = W.SL_canPrompt;
+  if (origCan && !origCan.__tour) { W.SL_canPrompt = function (ex) { return !autoPending && !cur && origCan(ex); }; W.SL_canPrompt.__tour = 1; }
+  function othersOpen() {
+    return !!D.querySelector("#wn-sheet.open, #sl-level.open, .note-sheet.open, .map-sheet.open, .report-sheet.open, .ins-sheet.open, .photo-lightbox.open, #xm-welcome, .signin-page:not([hidden])")
+      || de.classList.contains("sl-achdlg-on") || de.classList.contains("sl-level-lock");
+  }
+
+  // ---------- the first visit: after the opening, the photo and the "How well do you know snakes?" choice ----------
+  function start() {
+    if (seen()) { autoPending = false; return; }
+    var go = function () {
+      if (othersOpen()) { setTimeout(go, 400); return; }
+      hub({ auto: true });
+    };
+    if (W.SL_LEVEL_NEEDED && W.SL_LEVEL_NEEDED() && W.SL_LEVEL_OPEN) { W.SL_LEVEL_OPEN({ first: true, onDone: function () { setTimeout(go, 50); } }); return; }
+    go();
+  }
+  if (!seen()) autoPending = true;
+  var t0 = 0;
+  function quiet() { if (W.SL_promptsReady && !W.SL_promptsReady() && Date.now() - t0 < 20000) { setTimeout(quiet, 250); return; } start(); }
+  function whenIn() { var h = $("sl-hero"); if (W.__heroEntered || !h || h.hidden) { t0 = Date.now(); quiet(); } else D.addEventListener("sl-hero-entered", function () { t0 = Date.now(); setTimeout(quiet, 0); }, { once: true }); }
+  if (W.__introDone) whenIn(); else D.addEventListener("sl-intro-done", whenIn, { once: true });
+
+  // ---------- a one-time offer of a guide, the first time a tricky tab is opened ----------
+  var TIPS = { map: ["map", "New to the map? A 1-minute guide shows you round."], cam: ["camera", "How the camera works - and staying safe - in a 30-second guide."], cabin: ["cabin", "First time in the Cabin? A quick guide shows you how it works."] };
+  var tipEl = null;
+  function offer(tab) {
+    var t = TIPS[tab]; if (!t || !seen() || running() || tipEl || !guideOk(t[0])) return;
+    var p = prog(); if (p.done[t[0]] || (p.done.full && tab !== "cabin") || lg("sl-tour-tip-" + tab)) return;
+    var shown = function () {
+      if (activeTab() !== tab || running() || tipEl) return;
+      ls("sl-tour-tip-" + tab, "1"); if (W.SL_promptShown) W.SL_promptShown();
+      tipEl = D.createElement("div"); tipEl.className = "sl-tour-tip"; tipEl.setAttribute("role", "status");
+      tipEl.innerHTML = "<span>" + esc(t[1]) + '</span><button type="button" class="go">Show me</button><button type="button" class="x" aria-label="No thanks">&times;</button>';
+      D.body.appendChild(tipEl); requestAnimationFrame(function () { if (tipEl) tipEl.classList.add("on"); });
+      var el = tipEl, bye = function () { if (!el) return; el.classList.remove("on"); setTimeout(function () { el.remove(); }, 300); if (tipEl === el) tipEl = null; };
+      el.querySelector(".go").addEventListener("click", function () { bye(); begin(t[0], { opener: $("tab-" + tab) }); });
+      el.querySelector(".x").addEventListener("click", bye);
+      setTimeout(bye, 15000);
+      D.addEventListener("click", function off(e) { if (e.target.closest && e.target.closest(".tabs .tab-btn") && activeTab() !== tab) { bye(); D.removeEventListener("click", off, true); } }, true);
+    };
+    if (W.SL_whenPrompt) W.SL_whenPrompt(function () { setTimeout(shown, 600); }); else setTimeout(shown, 1200);
+  }
+  D.addEventListener("click", function (e) { var b = e.target.closest && e.target.closest(".tab-btn[id^='tab-']"); if (!b || !e.isTrusted || running()) return; var tab = b.id.replace(/^tab-/, ""); if (TIPS[tab]) setTimeout(function () { offer(tab); }, 50); });
+
+  // ---------- Settings -> Tutorials & help (into [data-sl-settings-help] if the panel has one, or a section of its own) ----------
+  function helpHtml() {
+    var p = prog(), c = p.cur && (p.cur.g === "full" || p.cur.g === "quick") && p.cur.id !== "done" ? p.cur : null, L2, at;
+    if (c) { L2 = listFor(c.g); at = idxOf(L2, c.id); }
+    return '<div class="sl-tour-help">' +
+      '<div class="sl-th-row"><b>Tutorial</b><small>A walk round SnakeList - the Quick Tour or the Full Tutorial.</small>' +
+      (c ? '<button type="button" class="sl-sbtn" data-th="resume">Continue (' + esc(GUIDES[c.g].name) + ", step " + at + " of " + (L2.length - 1) + ")</button>" : "") +
+      '<button type="button" class="sl-sbtn" data-th="quick">Quick Tour</button><button type="button" class="sl-sbtn" data-th="full">Full Tutorial</button></div>' +
+      '<div class="sl-th-row"><b>Feature guides</b><small>Short guides to one part of SnakeList.</small>' + guideChips(false) + "</div>" +
+      '<div class="sl-th-row"><b>What\'s new</b><small>Every update to SnakeList.</small><button type="button" class="sl-sbtn" data-th="news">See what\'s new</button></div></div>';
+  }
+  function mountHelp(panel) {
+    if (!panel) return;
+    var slot = panel.querySelector("[data-sl-settings-help]"), sec;
+    if (slot) sec = slot;
+    else {
+      sec = panel.querySelector(".sl-tour-helpsec");
+      if (!sec) {
+        sec = D.createElement("section"); sec.className = "sl-sgrp sl-tour-helpsec"; sec.setAttribute("data-section", "help");
+        var foot = panel.querySelector(".sl-sfoot"), body = panel.querySelector(".sl-pbody") || panel;
+        if (foot && foot.parentNode) foot.parentNode.insertBefore(sec, foot); else body.appendChild(sec);
+      }
+      var old = $("ss-tour"); if (old) { var row = old.closest(".sl-srow"); if (row) row.hidden = true; }
+    }
+    sec.innerHTML = (slot ? "" : '<h3>Tutorials &amp; help</h3>') + helpHtml();
+    if (!sec.__th) {
+      sec.__th = 1;
+      sec.addEventListener("click", function (e) {
+        var b = e.target.closest("button"); if (!b) return;
+        var th = b.getAttribute("data-th"), gd = b.getAttribute("data-guide");
+        if (!th && !gd) return;
+        if (W.SL_CLOSE_PANEL) try { W.SL_CLOSE_PANEL(true); } catch (er) {}
+        var setb = $("set-btn");
+        setTimeout(function () {
+          if (th === "news") { var v = D.querySelector(".sl-ver"); if (v) v.click(); return; }
+          if (th === "resume") { var p = prog(); if (p.cur) begin(p.cur.g, { at: p.cur.id, opener: setb }); return; }
+          begin(th || gd, { skipWelcome: true, opener: setb });
+        }, 150);
+      });
+    }
+  }
+  D.addEventListener("sl-settings-open", function (e) { mountHelp((e.detail && e.detail.panel) || $("sl-settings")); });
+  W.SL_TOUR_MOUNT_HELP = mountHelp;
+
+  // ---------- for other code ----------
+  W.SL_TOUR = {
+    start: function (g, o) { o = o || {}; if (g === "hub" || !g) hub(o); else begin(g, { skipWelcome: true, opener: o.opener, at: o.at }); },
+    hub: hub, close: function () { finish(false); }, active: running, pending: function () { return autoPending; },
+    guides: function () { return Object.keys(GUIDES).filter(guideOk).map(function (g) { return { id: g, name: GUIDES[g].name, done: !!prog().done[g] }; }); },
+    steps: STEPS, list: listFor, current: function () { return cur ? { guide: cur.g, step: cur.list[cur.i].id, index: cur.i, count: cur.list.length } : null; }
+  };
 })();
 </script>
 
