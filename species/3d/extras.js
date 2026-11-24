@@ -1519,7 +1519,7 @@ export function create(V) {
     // (v6.20: framed close enough that the prey - a mouse is 2-3 cm - is plainly seen beside the head, not a speck in a
     // wide view of the whole floor)
     const near2 = (a, b) => fitD(Math.max(a.distanceTo(b) * 1.35, Lp * 6, Hl * 7));
-    let camKey = camSide(prey.position.clone().lerp(V.info.headPos, 0.45), near2(prey.position, V.info.headPos), 0.5, 0.05);
+    let camKey = camSide(prey.position.clone().lerp(V.info.headPos, 0.45), near2(prey.position, V.info.headPos), 0.72, 0.05);
     const nm = prey.userData.name;
     const T = {
       intro: { egg: 'Egg-eaters find <b>birds\' eggs</b> by smell.', fish: 'It hunts <b>' + nm + '</b>.', frog: 'It hunts <b>' + nm + '</b>, found by smell with its tongue.', snake: 'It hunts <b>' + nm + '</b> - some snakes eat other snakes!', lizard: 'It hunts <b>' + nm + '</b>.', bird: 'It hunts <b>' + nm + '</b>.', centipede: 'It hunts <b>' + nm + '</b> - small snakes like this one eat centipedes, scorpions and spiders.', worm: 'It finds <b>' + nm + '</b> by smell in damp soil.', slug: 'It finds <b>' + nm + '</b> by following its slime trail.', caterpillar: 'It hunts <b>' + nm + '</b> and other insects in the leaves.', mouse: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.', rat: 'It hunts <b>' + nm + '</b>, tracked by smell with its flicking tongue.' }[kind],
@@ -1558,13 +1558,13 @@ export function create(V) {
         const fp = fol(sh), c = strikes ? sstep(0.62, 1, u) : 0; let pose = fp;
         if (c > 0) { const Bt = R.baseOf(fp, B.fl), cp = R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1, base: Bt }); pose = R.blend(fp, cp, ease(c)); }
         R.setPose(pose); R.apply(); alivePrey(s, 1 - sstep(0.5, 1, u)); say(T.stalk); flick(flicks(s, 1.3, 2)); wake(s);
-        const h = R.point(Hl * 0.5); camKey = camSide(h.clone().lerp(preyPt(), 0.5), near2(h, preyPt()), 0.5, 0.05);
+        const h = R.point(Hl * 0.5); camKey = camSide(h.clone().lerp(preyPt(), 0.5), near2(h, preyPt()), 0.72, 0.05);
       }]);
     }
     if (!travel) { N1 = R.blend(rest, strikes ? coil : ext, 0.35); if (strikes) phases.push([0.9, (u, s) => { R.setPose(R.blend(N1, coil, ease(u))); R.apply(); flick(flicks(s, 0.9, 1)); say(T.aim); alivePrey(s, 1 - u); }]); }
     if (strikes) {
       // 3. the S-coil strike pose (a slight tremor of tension)
-      phases.push([0.75, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 + 0.04 * Math.sin(s * 11), base: B })); R.apply(); alivePrey(s, 0); say(T.aim); flick(u < 0.55 ? flicks(u * 0.55, 0.55, 1) : 0); camKey = camSide(headPt().lerp(preyPt(), 0.5), fitD(Math.max(headPt().distanceTo(preyPt()) * 1.6, Lp * 4, Hl * 5)), 0.42, 0.05); }]);
+      phases.push([0.75, (u, s) => { R.setPose(R.fore({ len: st.len, phi, lift: lift * 0.7, coil: 1 + 0.04 * Math.sin(s * 11), base: B })); R.apply(); alivePrey(s, 0); say(T.aim); flick(u < 0.55 ? flicks(u * 0.55, 0.55, 1) : 0); camKey = camSide(headPt().lerp(preyPt(), 0.5), fitD(Math.max(headPt().distanceTo(preyPt()) * 1.6, Lp * 4, Hl * 5)), 0.6, 0.05); }]);
       // 4. strike: ~0.16 s, the mouth opening as it lands
       phases.push([0.16, (u) => { const e = u * u * (3 - 2 * u); R.setPose(R.blend(coil, ext, e)); R.apply(); setMouth(Math.max(0.75, tHold) * sstep(0.25, 0.85, u)); say(T.strike); if (u >= 0.98) held = true; }]);
       phases.push([0.45, (u, s) => {
@@ -1645,10 +1645,10 @@ export function create(V) {
     // to settle the jaws and their stretched ligaments back in place (and clear the windpipe) - then a few tongue flicks
     if (kind !== 'worm' && kind !== 'slug' && kind !== 'centipede' && kind !== 'caterpillar') phases.push([2.4, (u, s) => {
       if (downPose) R.setPose(downPose); bulgeAt(xEnd, 1); R.apply(); say(T.yawn);
-      const y1 = Math.sin(Math.PI * sstep(0.02, 0.5, u)), y2 = Math.sin(Math.PI * sstep(0.52, 0.86, u)) * 0.75, y = Math.max(y1, y2);
+      const y1 = sstep(0.02, 0.16, u) * (1 - sstep(0.44, 0.56, u)), y2 = 0.75 * sstep(0.6, 0.7, u) * (1 - sstep(0.8, 0.92, u)), y = Math.max(y1, y2); // (two gapes, each held a moment)
       setMouth(Math.min(1.05, Math.max(tNeed, 0.85)) * y, { spread: 0.25 * y, walk: Math.sin(u * TAU * 2.5) * y * 0.8 });
       flick(u > 0.88 ? (u - 0.88) / 0.12 : 0); void s;
-      camKey = camSide(headPt(), fitD(Hl * 5), 0.3, 0.6);
+      { const f = R.frameAtX(Hl * 0.5), side = f.S.clone().setY(0), fw = f.T.clone().setY(0).negate(); if (side.lengthSq() < 1e-10) side.copy(st.perp); side.normalize(); if (fw.lengthSq() > 1e-10) fw.normalize(); if (side.dot(st.perp) < 0) side.negate(); const dir = side.addScaledVector(fw, 0.8).normalize(), d = fitD(Hl * 4.5), tg = headPt(); camKey = { tgt: tg, pos: tg.clone().addScaledVector(dir, d * Math.cos(0.28)).add(V3(0, d * Math.sin(0.28), 0)) }; } // (from the side and a little in front: the gape is seen)
     }]);
     if (travel) { // 6. it crawls (or swims) on, round and back into its resting place, the meal a lump in its body
       const dR = shEnd - sh1, dRet = clamp(dR / (0.38 * L), 3, 6.5);
@@ -1680,7 +1680,7 @@ export function create(V) {
     show.cam = () => camKey;
     show.clrR = Math.max(prR * 3, Hl * 1.3, W0 * 3); // (v6.20: the grass between the camera and the action bows down)
     show.diet = kind;
-    show.info = { kind, constrict, coils: constrict ? { layers: cL, turns: +(cL * cTpl).toFixed(2) } : null, style, letGo, envenom, travel, wet, inWater, phases: phases.length, mids: (() => { let t = 0; return phases.map(([d]) => { const m = +(t + d * 0.6).toFixed(2); t += d; return m; }); })(), waterY, gQ, Q: Q && [Q.x, Q.z], head: [head0.x, head0.z], prR };
+    show.info = { kind, constrict, coils: constrict ? { layers: cL, turns: +(cL * cTpl).toFixed(2) } : null, style, letGo, envenom, travel, wet, inWater, phases: phases.length, mids: (() => { let t = 0; return phases.map(([d]) => { const m = +(t + d * 0.35).toFixed(2); t += d; return m; }); })(), waterY, gQ, Q: Q && [Q.x, Q.z], head: [head0.x, head0.z], prR };
   }
 
   // ---------------------------------------------------------------- Slither (loops until pressed again)
@@ -2532,7 +2532,7 @@ export function create(V) {
         if (!st.data) st.data = buildAnatomy();
         skinSeeThrough(true); setOrganVis(true); regions();
         const hint = stage.querySelector('.sp3d-hint'); if (hint) hint.classList.add('sp3d-hint-off');
-        tip.hidden = false; tip.textContent = (window.innerWidth < 560 ? 'Tap' : 'Click') + ' any part to learn what it is. Scroll or pinch to zoom in close.';
+        tip.hidden = false; tip.textContent = 'A simplified model: organs at their usual places along a snake\'s long body, not to exact scale. ' + (window.innerWidth < 560 ? 'Tap' : 'Click') + ' any part to learn what it is.'; // (v6.20: S12 - say that it is simplified)
         // v5.12: the snake stays as it is (Eduardo: "don't stretch the snake"); the whole snake in view, from a little higher
         st.k = 1;
         if (!V.scaleOn()) { st.view = { az: V.controls.st.az, el: 0.72, d: V.info.dFit * 1.1 }; V.view(st.view); }

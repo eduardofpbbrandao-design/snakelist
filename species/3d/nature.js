@@ -774,7 +774,7 @@ vec3 slSc = vec3( slKeep );
 float slC = smoothstep( uSlNear * 0.35, uSlNear, distance( slO, cameraPosition ) );
 // v6.20: during See it eat, grass standing between the camera and the prey and head (uSlClr: the point looked at, and
 // the half-width of a clear corridor to it) bows down smoothly too, so no tuft hides the action from any side
-if ( uSlClr.w > 0.0 ) { vec3 slA = cameraPosition, slAB = uSlClr.xyz - slA; float slT = clamp( dot( slO - slA, slAB ) / max( 1e-6, dot( slAB, slAB ) ), 0.0, 1.0 ); vec3 slQ = slA + slAB * slT; float slDd = length( ( slO - slQ ).xz ); slC = min( slC, mix( 1.0, smoothstep( uSlClr.w * 0.55, uSlClr.w * 1.25, slDd ), 1.0 - smoothstep( 0.86, 1.0, slT ) ) ); }
+if ( uSlClr.w > 0.0 ) { vec3 slA = cameraPosition, slAB = uSlClr.xyz - slA; float slT = clamp( dot( slO - slA, slAB ) / max( 1e-6, dot( slAB, slAB ) ), 0.0, 1.0 ); vec3 slQ = slA + slAB * slT; float slDd = length( ( slO - slQ ).xz ), slRw = uSlClr.w + ( 1.0 - slT ) * length( slAB ) * 0.32; slC = min( slC, mix( 1.0, smoothstep( slRw * 0.55, slRw * 1.25, slDd ), 1.0 - smoothstep( 0.86, 1.0, slT ) ) ); } // (a cone, wider towards the lens: a blade near the camera covers much of the view even off to one side)
 slSc *= vec3( mix( 0.35, 1.0, slC ), slC, mix( 0.35, 1.0, slC ) ); slKeep *= slC;
 #endif
 if ( slKeep < 0.999 ) slW.xyz = slO + ( slW.xyz - slO ) * slSc;

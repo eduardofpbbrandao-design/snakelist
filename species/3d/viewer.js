@@ -3758,7 +3758,7 @@ float slScale(vec2 m) {
     const vf = (cam.fov * Math.PI) / 360, hf = Math.atan(Math.tan(vf) * asp);
     info.portrait = asp < 0.8; info.vf = vf; info.hf = hf;
     // the snake lies flat: fit its footprint across the view, and its foreshortened depth (seen from above at an angle) up and down
-    info.dFit = Math.max((r * (info.portrait ? 0.98 : 1.1)) / Math.tan(hf), (r * (info.portrait ? 0.8 : 0.62)) / Math.tan(vf)) + r * 0.4;
+    info.dFit = Math.max((r * (info.portrait ? 0.98 : 1.2)) / Math.tan(hf), (r * (info.portrait ? 0.8 : 0.66)) / Math.tan(vf)) + r * 0.4; // (v6.20: a little more room round the snake - its head was often right at the edge of the first view)
     info.dMax = info.dFit * 1.55;
     info.dMin = Math.max(info.F.Hl * 0.9, info.F.w0 * 1.6); // v5.05: zoom right in (organs, eyes and scales up close)
     info.scaleK = 1;
@@ -4245,7 +4245,10 @@ float slScale(vec2 m) {
     if (!extras || !extras.mouth) return;
     const v = force != null ? force : !mouthGoal; mouthGoal = v ? 1 : 0;
     bMouth.setAttribute('aria-pressed', String(v)); bMouth.textContent = v ? 'Close mouth' : 'Open mouth';
-    if (v && !sizeSt.on && !fx.anatOn() && controls.st.d > info.dFit * 0.55) { // turn to face the head, close enough to see inside (v4.81: only from the whole-snake view; Open mouth changes nothing else)
+    // (v6.20: also whenever the head is off to the side or too far to see into the mouth - from the first view the head
+    // could be at the very edge, or out of the picture, and Open mouth then showed nothing)
+    const hp = (fx.focusPoint && fx.focusPoint()) || info.headPos, ndc = hp.clone().project(cam), headOk = ndc.z < 1 && Math.abs(ndc.x) < 0.6 && Math.abs(ndc.y) < 0.6 && cam.position.distanceTo(hp) < info.F.Hl * 9;
+    if (v && !sizeSt.on && !fx.anatOn() && (controls.st.d > info.dFit * 0.55 || !headOk)) { // turn to face the head, close enough to see inside (v4.81: only from the whole-snake view; Open mouth changes nothing else)
       controls.setGoal({ az: viewAz('front') + 0.55, el: (16 * Math.PI) / 180, d: Math.max(info.dMin * 1.5, info.F.Hl * 3.4), px: 0, pz: 0 }); // (close enough to see inside; plants in the way step aside)
     }
     kick();
