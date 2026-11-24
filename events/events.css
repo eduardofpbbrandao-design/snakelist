@@ -424,7 +424,7 @@ details.sl-ev-more summary { cursor: pointer; font-weight: 600; }
 .sla-card.sl-ev-rbox .sla-cdesc, .sla-card.sl-ev-rbox .sla-crw, .sla-card.sl-ev-rbox .sla-cprog em, .sla-card.sl-ev-rbox .sla-st { color: var(--xr-d); }
 .sla-card.sl-ev-rbox.sl-ev-legendary .sla-cname { color: var(--xl-t); font-family: 'Fraunces', serif; }
 .sla-card.sl-ev-rbox.sl-ev-legendary .sla-cdesc, .sla-card.sl-ev-rbox.sl-ev-legendary .sla-crw { color: var(--xl-d); }
-.sla-card.sl-ev-rbox .sl-ev-limited { margin: 0 6px 0 0; }
+.sla-card.sl-ev-rbox .sl-ev-limited { margin: 2px 6px 2px 0; align-self: flex-start; justify-self: start; width: max-content; }
 /* collection tiles */
 .sl-ev-item.sl-ev-rbox { padding: 8px 6px 9px; }
 .sl-ev-item.sl-ev-rbox svg { width: 56px; height: 56px; filter: drop-shadow(0 3px 4px rgba(0,0,0,.3)); }
