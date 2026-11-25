@@ -58,7 +58,8 @@
     return days >= 10 ? "Subscribers get early access 10 or more days before · from " + from
       : "Early access for subscribers · " + days + " day" + (days === 1 ? "" : "s") + " before, from " + from;
   }
-  function tzName() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) { return ""; } }
+  // the time zone the times are shown in (Settings > Time zone, else this device's; see EV.tzName in core.js)
+  function tzName() { return EV.tzName(); }
 
   /* ---------------- the clock: four groups, each digit in its own cell ---------------- */
   var UNITS = [["d", "Days"], ["h", "Hours"], ["m", "Minutes"], ["s", "Seconds"]];
@@ -200,7 +201,8 @@
   function crossing(el, st, host) {
     var pt = el._evTarget, pd = el._evDone;
     el._evTarget = st.target; el._evDone = st.done;
-    if (pt != null && pt !== st.target && st.now >= pt && st.now - pt < 5000) burst(host, pd);
+    // (in the big panel, the finale's own words when it has just reached the event's start - see the finale below)
+    if (pt != null && pt !== st.target && st.now >= pt && st.now - pt < 5000) burst(host, (host !== B && F.zeroText) || pd);
   }
   function burst(host, text) {
     if (!host || !host.isConnected) return;
@@ -233,10 +235,11 @@
         '<p class="sl-ev-for">' + esc(st.label) + "</p>" + clockHtml(st.left);
     return '<div class="sl-ev-hero sl-ev-hx sl-ev-t-' + ev.theme + '">' + (ev.theme === "xmas" ? frame() : "") +
       '<div class="sl-ev-hx-in">' +
+      (EV.finalePreview ? '<p class="sl-ev-test sl-ev-fpv">FINALE PREVIEW &middot; pretend time &middot; reload to watch again</p>' : "") +
       '<span class="sl-ev-hero-art">' + EV.art.event(ev.theme) + "</span>" + tag +
       "<h3>" + esc(ev.name) + "</h3>" + (!PUB && st.phase === "early" && sub ? EV.earlyNoteHtml(ev) : "") + body +
       '<p class="sl-ev-when">' + esc(whenLab) + " <b>" + esc(EV.localTime(opens, { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZoneName: "short" })) + "</b>" +
-      (tz ? '<span class="sl-ev-tz">Your time zone: ' + esc(tz) + "</span>" : "") +
+      (tz ? '<span class="sl-ev-tz">Your time zone: ' + esc(EV.finalePreview ? tz.replace(/_/g, " ") + (EV.tzChosen() ? " (chosen in Settings)" : " (automatic)") : tz) + "</span>" : "") +
       '<span class="sl-ev-utc">Same moment everywhere: ' + esc(new Date(EV.ms(opens)).toUTCString().replace(" GMT", " UTC")) + "</span></p>" +
       (el && !(sub && st.open) ? '<p class="sl-ev-early">' + ic("crown", 14) + esc(el) + "</p>" : "") +
       '<p class="sl-ev-desc">' + esc(PUB && ev.publicDescription && !st.go ? ev.publicDescription : ev.description) + "</p></div></div>";
@@ -280,7 +283,7 @@
     if (!P || !P.isConnected) return;
     var st = EV.countdownState(); if (!st) return;
     var key = pkey(st), hero = P.querySelector(".sl-ev-hero");
-    var box = P.querySelector(".sl-ev-box"); box.className = "sl-achbox sl-ev-box" + heat(st.left);
+    var box = P.querySelector(".sl-ev-box"); box.className = "sl-achbox sl-ev-box" + heat(st.left) + (EV.finalePreview && lastMinute(st) ? " sl-ev-lastmin" : "");
     if (key !== pKey && hero) {
       var fresh = D.createElement("div"); fresh.innerHTML = heroHtml(st); fresh = fresh.firstChild;
       fresh._evTarget = hero._evTarget; fresh._evDone = hero._evDone;
@@ -292,9 +295,105 @@
     var tl = P.querySelector("[data-timecheck]"); if (tl) { var t = timeLine(); if (tl._t !== t) { tl.innerHTML = t; tl._t = t; } }
   }
 
+  /* ---------------- the finale: the last minute before the event starts ----------------
+     LAST 60 SECONDS: the big panel opens by itself (once; not while someone is typing in a field - then as soon as
+     they leave it or stop typing for 5 seconds), showing just the seconds, big. LAST 10 SECONDS: the whole display glows Christmas red and
+     green, swapping once a second with a soft 0.45 s fade (1 colour change per second - well under the 3 flashes
+     per second photosensitivity limit), a see-through tint that is strongest at the edges (never more than 0.42
+     opacity) and never over the panel itself. With "reduce motion" (device or Settings) it is a calm, steady
+     red-and-green glow instead. AT ZERO: "SnakeList Christmas is here!" for a few seconds, then it fades away and
+     the countdown carries on as it always does at the start (in public mode, while the Christmas event isn't
+     switched on, it says the event is coming today). Only for the event's own start (kind "public"), never for
+     the later "Time until Christmas / New Year" targets. Nothing here unlocks anything. */
+  var F = { target: null, opened: false, waiting: false, armed: null, zeroAt: 0, zeroText: "" }, FX = null;
+  var ZERO_TEXT = "SnakeList Christmas is here!";
+  function lastMinute(st) { return !!st && st.kind === "public" && !st.open && st.left > 0 && st.left <= MIN; }
+  // "typing" = a text field has the focus AND a key was pressed in the last 5 seconds (a field that merely has the
+  // focus - an idle search box - doesn't hold the panel back)
+  var keyAt = -1e9;
+  ["keydown", "input", "compositionupdate"].forEach(function (n) { D.addEventListener(n, function () { keyAt = performance.now(); }, true); });
+  function typing() {
+    if (performance.now() - keyAt > 5000) return false;
+    var a = D.activeElement; if (!a || a === D.body) return false;
+    if (a.isContentEditable) return true;
+    if (a.tagName === "TEXTAREA" || a.tagName === "SELECT") return true;
+    return a.tagName === "INPUT" && !/^(button|submit|reset|checkbox|radio|range|color|file|image|hidden)$/i.test(a.type || "text");
+  }
+  function autoOpen() { if (!P || !P.isConnected) EV.openCountdown(); }
+  function deferOpen() {
+    if (F.waiting) return; F.waiting = true;
+    D.addEventListener("focusout", function h() {
+      setTimeout(function () {
+        if (!F.waiting) { D.removeEventListener("focusout", h, true); return; }   // already shown
+        if (typing()) return;   // moved on to another field: keep waiting
+        D.removeEventListener("focusout", h, true); F.waiting = false;
+        var st = EV.countdownState();
+        if (lastMinute(st) || F.zeroAt) autoOpen();
+      }, 0);
+    }, true);
+  }
+  function fxEl() {
+    if (!FX) {
+      FX = D.createElement("div"); FX.className = "sl-ev-fin"; FX.id = "sl-ev-fin"; FX.setAttribute("aria-hidden", "true");
+      FX.innerHTML = '<i class="r"></i><i class="g"></i><i class="z"></i><div class="sl-ev-fin-n"></div><div class="sl-ev-fin-msg">' + esc(ZERO_TEXT) + "</div>";
+    }
+    // inside the open panel (over its dimmed background, under the panel itself), else over the page
+    var host = P && P.isConnected ? P : D.body;
+    if (FX.parentNode !== host) {
+      if (host === P) P.insertBefore(FX, P.querySelector(".sl-achbox")); else D.body.appendChild(FX);
+    }
+    FX.classList.toggle("solo", host !== P);
+    FX.classList.toggle("calm", EV.reducedMotion());
+    return FX;
+  }
+  function fxOff() {
+    if (P) { P.classList.remove("sl-ev-finp"); P.removeAttribute("data-fin"); }
+    if (!FX || !FX.parentNode) return;
+    var x = FX; FX = null; x.classList.add("out");
+    setTimeout(function () { x.remove(); }, 1000);
+  }
+  function finaleTick(st) {
+    if (st && st.kind === "public" && !st.open && F.target !== st.target) { F.target = st.target; F.opened = false; }
+    if (lastMinute(st) && !F.opened) { F.opened = true; if (typing()) deferOpen(); else autoOpen(); }
+    // (in case the field went away without a focusout - removed, or the window lost focus first)
+    else if (F.waiting && !typing() && (lastMinute(st) || F.zeroAt)) { F.waiting = false; autoOpen(); }
+    var now = st ? st.now : EV.time.display();
+    // zero: the event's start has just been reached after the final seconds were shown
+    if (F.armed != null && now >= F.armed) {
+      var late = now - F.armed; F.armed = null;
+      if (late < 8000) { F.zeroAt = now; F.zeroText = ZERO_TEXT; }
+    }
+    if (F.zeroAt) {
+      if (now - F.zeroAt < 4500) {
+        var z = fxEl(); z.setAttribute("data-c", "zero");
+        if (P && P.isConnected) { P.classList.add("sl-ev-finp"); P.setAttribute("data-fin", "zero"); }
+        return;
+      }
+      F.zeroAt = 0; F.zeroText = ""; fxOff(); return;
+    }
+    if (lastMinute(st) && st.left <= 10 * SEC) {
+      F.armed = st.target;
+      // the colour follows the number on screen (whole seconds, as the clock shows them): one change per second
+      var secs = Math.floor(st.left / SEC), c = secs % 2 ? "red" : "green", x = fxEl();
+      x.setAttribute("data-c", c);
+      var n = x.querySelector(".sl-ev-fin-n"); if (n.textContent !== String(secs)) n.textContent = secs;
+      if (P && P.isConnected) { P.classList.add("sl-ev-finp"); P.setAttribute("data-fin", c); }
+      return;
+    }
+    if (FX) fxOff();
+  }
+
   /* ---------------- ticking ---------------- */
-  function tick() { if (D.hidden) return; try { banner(); panelTick(); } catch (e) { console.error(e); } }
+  function tick() {
+    if (D.hidden) return;
+    var st = null;
+    // (the finale is a preview for now: only with Settings > Previews > "Countdown finale + time zone", which also pretends
+    // the start is about 70 seconds away - see EV.finalePreview in core.js)
+    if (EV.finalePreview) try { st = EV.countdownState(); finaleTick(st); } catch (e) { console.error(e); }
+    try { banner(); panelTick(); } catch (e) { console.error(e); }
+  }
   setInterval(tick, 250);
+  EV.on("tz", function () { lastKey = ""; pKey = "~"; tick(); });
   EV.on("sub", function () { lastKey = ""; pKey = "~"; tick(); });
   EV.on("time", function () { lastKey = ""; tick(); });
   if (D.readyState === "loading") D.addEventListener("DOMContentLoaded", tick); else tick();

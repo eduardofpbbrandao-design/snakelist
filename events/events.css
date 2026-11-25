@@ -637,3 +637,53 @@ html.sl-calm .sl-ev-rv-sparks, html.sl-calm .sl-ev-rv-door { display: none !impo
 /* reduce motion: SnakeList's own calm setting (html.sl-calm) as well as the device's */
 html.sl-calm .sl-ev-dg i, html.sl-calm .sl-ev-flakes i, html.sl-calm .sl-ev-burst i, html.sl-calm .sl-ev-burst .ring, html.sl-calm .sl-ev-burst .sl-ev-boom, html.sl-calm .sl-ev-b-badge { animation: none !important; }
 html.sl-calm .sl-ev-flakes { display: none; }
+
+/* ------------------------------------------------------------- the countdown finale (countdown.js, "the finale")
+   LAST MINUTE: the panel shows just the seconds, big. LAST 10 SECONDS: a soft red/green glow over the whole display.
+   Photosensitive-safe: one colour change per second (0.45 s fades, never a hard cut), a see-through tint strongest
+   at the screen's edges (at most .42 opacity, the middle stays nearly clear), never over the panel itself; with
+   "reduce motion" a steady red-and-green glow that never changes. */
+.sl-ev-box.sl-ev-lastmin .sl-ev-hero .sl-ev-clock { grid-template-columns: minmax(0, 1fr); max-width: 300px; }
+.sl-ev-box.sl-ev-lastmin .sl-ev-hero .sl-ev-g:not([data-u="s"]) { display: none; }
+.sl-ev-box.sl-ev-lastmin .sl-ev-hero .sl-ev-g[data-u="s"] { padding: 16px 10px 12px; }
+.sl-ev-box.sl-ev-lastmin .sl-ev-hero .sl-ev-g[data-u="s"] .sl-ev-num { font-size: clamp(88px, 24vw, 150px); }
+.sl-ev-box.sl-ev-lastmin .sl-ev-hero .sl-ev-g[data-u="s"] small { font-size: clamp(12px, 3vw, 15px); }
+.sl-ev-box.sl-ev-lastmin .sl-ev-hero .sl-ev-g[data-u="s"] .sl-ev-dg:first-child:not(:last-child)[data-v="0"] { display: none; }   /* "9", not "09" */
+/* zero: the finale's words on a calm green card, so they never sit on top of other text */
+.sl-ev-dlg.sl-ev-finp .sl-ev-burst .sl-ev-boom { font-size: clamp(24px, 5.6vw, 34px); padding: 14px 20px; margin: 0 14px; border-radius: 18px; background: linear-gradient(160deg, #2A7048, #174A31);
+  border: 1px solid rgba(228,197,122,.6); box-shadow: 0 0 0 4px rgba(182,56,72,.35), 0 14px 34px rgba(0,0,0,.35); }
+.sl-ev-fpv { align-self: center; margin: -22px 0 12px !important; }
+.sl-ev-fin { position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 1; transition: opacity .6s ease; animation: sl-ev-fin-in .6s ease both; }
+.sl-ev-fin.solo { z-index: 2290; }
+.sl-ev-fin.out { opacity: 0; }
+@keyframes sl-ev-fin-in { from { opacity: 0; } }
+.sl-ev-fin > i { position: absolute; inset: 0; opacity: 0; transition: opacity .45s ease-in-out; }
+.sl-ev-fin > .r { background: radial-gradient(ellipse at center, rgba(182,56,72,.08) 30%, rgba(182,56,72,.42) 78%); }
+.sl-ev-fin > .g { background: radial-gradient(ellipse at center, rgba(42,112,72,.08) 30%, rgba(42,112,72,.42) 78%); }
+.sl-ev-fin > .z { background: radial-gradient(ellipse at center, rgba(228,197,122,.16) 20%, rgba(228,197,122,.08) 55%, rgba(182,56,72,.22) 85%, rgba(42,112,72,.3) 100%); }
+.sl-ev-fin[data-c="red"] > .r, .sl-ev-fin[data-c="green"] > .g, .sl-ev-fin[data-c="zero"] > .z { opacity: 1; }
+/* reduce motion: the same colours, still - red down the left, green down the right, no changes at all */
+.sl-ev-fin.calm, .sl-ev-fin.calm > i { animation: none; transition: none; }
+.sl-ev-fin.calm > .r { opacity: 1; background: linear-gradient(90deg, rgba(182,56,72,.34), rgba(182,56,72,0) 38%); box-shadow: none; }
+.sl-ev-fin.calm > .g { opacity: 1; background: linear-gradient(270deg, rgba(42,112,72,.34), rgba(42,112,72,0) 38%); box-shadow: none; }
+.sl-ev-fin.calm > .z { opacity: 0; }
+/* with the panel closed: the seconds (and at zero the words) on the glow itself */
+.sl-ev-fin-n, .sl-ev-fin-msg { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none; text-align: center; font-family: "SL Outfit", "Inter", sans-serif; font-weight: 800;
+  color: #FFF8ED; text-shadow: 0 0 22px rgba(23,74,49,.9), 0 4px 0 rgba(0,0,0,.25); }
+.sl-ev-fin-n { font-size: clamp(110px, 30vw, 220px); line-height: 1; font-variant-numeric: tabular-nums; }
+.sl-ev-fin-msg { font-size: clamp(30px, 7vw, 58px); line-height: 1.1; width: min(90vw, 760px); padding: 18px 22px; border-radius: 22px; background: linear-gradient(160deg, rgba(42,112,72,.92), rgba(23,74,49,.92)); border: 1px solid rgba(228,197,122,.5); }
+.sl-ev-fin.solo:not([data-c="zero"]) .sl-ev-fin-n { display: block; }
+.sl-ev-fin.solo[data-c="zero"] .sl-ev-fin-msg { display: block; }
+/* the panel's own soft glow in the same colour */
+.sl-ev-dlg.sl-ev-finp .sl-achbox { transition: box-shadow .45s ease-in-out; }
+.sl-ev-dlg.sl-ev-finp[data-fin="red"] .sl-achbox { box-shadow: 0 0 0 3px rgba(182,56,72,.8), 0 0 60px 10px rgba(182,56,72,.4), 0 18px 44px rgba(0,0,0,.35); }
+.sl-ev-dlg.sl-ev-finp[data-fin="green"] .sl-achbox { box-shadow: 0 0 0 3px rgba(42,112,72,.85), 0 0 60px 10px rgba(42,112,72,.42), 0 18px 44px rgba(0,0,0,.35); }
+.sl-ev-dlg.sl-ev-finp[data-fin="zero"] .sl-achbox { box-shadow: 0 0 0 3px rgba(228,197,122,.85), 0 0 60px 12px rgba(228,197,122,.35), 0 18px 44px rgba(0,0,0,.35); }
+@media (prefers-reduced-motion: reduce) {
+  .sl-ev-fin, .sl-ev-fin > i, .sl-ev-dlg.sl-ev-finp .sl-achbox { animation: none !important; transition: none !important; }
+  .sl-ev-fin > .r { opacity: 1; background: linear-gradient(90deg, rgba(182,56,72,.34), rgba(182,56,72,0) 38%); box-shadow: none; }
+  .sl-ev-fin > .g { opacity: 1; background: linear-gradient(270deg, rgba(42,112,72,.34), rgba(42,112,72,0) 38%); box-shadow: none; }
+  .sl-ev-fin > .z { opacity: 0 !important; }
+  .sl-ev-dlg.sl-ev-finp[data-fin] .sl-achbox { box-shadow: -8px 0 40px rgba(182,56,72,.45), 8px 0 40px rgba(42,112,72,.45), 0 18px 44px rgba(0,0,0,.35) !important; }
+}
+html.sl-calm .sl-ev-dlg.sl-ev-finp[data-fin] .sl-achbox { transition: none !important; box-shadow: -8px 0 40px rgba(182,56,72,.45), 8px 0 40px rgba(42,112,72,.45), 0 18px 44px rgba(0,0,0,.35) !important; }

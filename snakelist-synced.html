@@ -32697,6 +32697,167 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
     guides: function () { return Object.keys(GUIDES).filter(guideOk).map(function (g) { return { id: g, name: GUIDES[g].name, done: !!prog().done[g] }; }); },
     steps: STEPS, list: listFor, current: function () { return cur ? { guide: cur.g, step: cur.list[cur.i].id, index: cur.i, count: cur.list.length } : null; }
   };
+<style id="sl-tz-css">
+/* Settings > Time zone (see the script below). The list reuses the language menu's look (.lang-menu). */
+.sl-tz-menu ul li { align-items: baseline; }
+.sl-tz-menu li small { white-space: nowrap; }
+.sl-tzrow .sl-sbtn { max-width: 48%; }
+.sl-tzrow .sl-sbtn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 520px) { .sl-tzrow .sl-sbtn { max-width: 100%; margin-left: 46px; } }
+</style>
+<script>
+// ---- Settings > Time zone: which time zone SnakeList shows event and Advent Calendar times in ------------------
+// localStorage sl-tz = an IANA time zone ("Europe/Lisbon"); none = Automatic (this device's own time zone).
+// Kept on this device, like the rest of Settings. Only how times are SHOWN changes: an event or a door still
+// opens at the same moment for everybody (events/core.js counts with the server-checked clock, never this).
+//   window.SL_TZ: chosen() ("" = automatic), zone() (the one in use), device(), set(zone or ""), ok(zone),
+//                 label(zone), offset(zone) ("GMT+1"), format(time, Intl options) - the shared helper.
+//   A change fires the document events "sl-tz-changed" and "sl-settings-changed" (detail "time-zone").
+//   window.SL_TZ_SETTING_RENDER(container): draws the Settings row (and wires its searchable list) into any
+//   container - one self-contained block, so the Settings layout can move it wherever it likes.
+(function () {
+  // PREVIEW: only with the countdown finale preview on (Settings > Previews > "Countdown finale + time zone")
+  if (window.SL_TZ || !(window.SL_PV_ON && window.SL_PV_ON("finale"))) return;
+  var KEY = "sl-tz", D = document;
+  function stored() { try { return localStorage.getItem(KEY) || ""; } catch (e) { return ""; } }
+  function ok(z) { if (!z || typeof z !== "string") return false; try { new Intl.DateTimeFormat("en", { timeZone: z }); return true; } catch (e) { return false; } }
+  function device() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch (e) { return "UTC"; } }
+  function chosen() { var z = stored(); return ok(z) ? z : ""; }
+  function zone() { return chosen() || device(); }
+  function label(z) { return String(z || "").replace(/_/g, " "); }
+  function offset(z, at) {
+    try {
+      var p = new Intl.DateTimeFormat("en-US", { timeZone: z, timeZoneName: "shortOffset" }).formatToParts(at || new Date());
+      for (var i = 0; i < p.length; i++) if (p[i].type === "timeZoneName") return p[i].value === "GMT" ? "GMT+0" : p[i].value;
+    } catch (e) {}
+    return "";
+  }
+  function format(t, opts) {
+    var o = {}; for (var k in (opts || {})) o[k] = opts[k];
+    o.timeZone = zone();
+    try { return new Date(t).toLocaleString(undefined, o); } catch (e) { return new Date(t).toString(); }
+  }
+  function set(z) {
+    z = ok(z) ? z : "";
+    try { if (z) localStorage.setItem(KEY, z); else localStorage.removeItem(KEY); } catch (e) {}
+    paint();
+    D.dispatchEvent(new CustomEvent("sl-tz-changed", { detail: { zone: zone(), chosen: z } }));
+    D.dispatchEvent(new CustomEvent("sl-settings-changed", { detail: "time-zone" }));
+  }
+  window.SL_TZ = { chosen: chosen, zone: zone, device: device, set: set, ok: ok, label: label, offset: offset, format: format };
+
+  // ---------- every time zone this browser knows (Intl.supportedValuesOf), made once, when the list first opens ----------
+  var FALLBACK = ["UTC", "Africa/Cairo", "Africa/Johannesburg", "Africa/Lagos", "Africa/Nairobi", "America/Anchorage", "America/Bogota", "America/Chicago", "America/Denver", "America/Los_Angeles",
+    "America/Mexico_City", "America/New_York", "America/Sao_Paulo", "America/Toronto", "Asia/Bangkok", "Asia/Dubai", "Asia/Hong_Kong", "Asia/Jakarta", "Asia/Kolkata", "Asia/Seoul", "Asia/Shanghai",
+    "Asia/Singapore", "Asia/Tokyo", "Atlantic/Azores", "Atlantic/Madeira", "Australia/Perth", "Australia/Sydney", "Europe/Berlin", "Europe/Istanbul", "Europe/Lisbon", "Europe/London", "Europe/Madrid",
+    "Europe/Moscow", "Europe/Paris", "Pacific/Auckland", "Pacific/Honolulu"];
+  var ALL = null;
+  function fold(t) { return String(t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  function zones() {
+    if (ALL) return ALL;
+    var l = []; try { l = Intl.supportedValuesOf("timeZone").slice(); } catch (e) {}
+    if (!l.length) l = FALLBACK.slice();
+    if (l.indexOf("UTC") < 0) l.unshift("UTC");
+    var dz = device(); if (ok(dz) && l.indexOf(dz) < 0) l.push(dz);
+    var now = new Date();
+    ALL = l.filter(ok).map(function (z) {
+      var i = z.lastIndexOf("/"), city = label(i < 0 ? z : z.slice(i + 1)), region = i < 0 ? "" : label(z.slice(0, i)).replace(/\//g, " · "), off = offset(z, now);
+      return { z: z, city: city, region: region, off: off, key: fold(z + " " + city + " " + region + " " + off + " " + off.replace("GMT", "UTC")) };
+    });
+    return ALL;
+  }
+
+  // ---------- the list: the same look as the language menu ----------
+  var menu = null, q = null, ul = null, shown = [], hi = 0, anchor = null;
+  function makeMenu() {
+    if (menu) return;
+    menu = D.createElement("div"); menu.className = "lang-menu sl-tz-menu notranslate"; menu.id = "sl-tz-menu"; menu.setAttribute("translate", "no"); menu.hidden = true;
+    menu.innerHTML = '<input type="text" placeholder="Find a time zone (city, region or GMT+1)…" aria-label="Find a time zone" autocomplete="off"><ul role="listbox" aria-label="Time zones"></ul><p class="lang-note"></p>';
+    D.body.appendChild(menu);
+    q = menu.querySelector("input"); ul = menu.querySelector("ul");
+    q.addEventListener("input", render);
+    q.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(true); }
+      else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); if (!shown.length) return; hi = (hi + (e.key === "ArrowDown" ? 1 : -1) + shown.length) % shown.length; mark(); }
+      else if (e.key === "Enter" && shown[hi] != null) { e.preventDefault(); pick(shown[hi]); }
+      else if (e.key === "Tab") { close(false); }
+    });
+    ul.addEventListener("click", function (e) { var li = e.target.closest("[data-z]"); if (li) pick(li.getAttribute("data-z")); });
+    D.addEventListener("mousedown", function (e) { if (!menu.hidden && !menu.contains(e.target) && !(anchor && anchor.contains(e.target))) close(false); }, true);
+    D.addEventListener("touchstart", function (e) { if (!menu.hidden && !menu.contains(e.target) && !(anchor && anchor.contains(e.target))) close(false); }, { capture: true, passive: true });
+  }
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function render() {
+    var f = fold(q.value.trim()), cur = chosen(), all = zones(), dz = device();
+    var list = all.filter(function (x) { return !f || x.key.indexOf(f) >= 0; });
+    // a typed city comes first ("tok" -> Tokyo before Vostok), then other cities that contain it, then the rest
+    if (f) list = list.map(function (x, i) { var c = fold(x.city), r = c.indexOf(f) === 0 ? 0 : c.indexOf(f) > 0 ? 1 : 2; return { x: x, r: r, i: i }; })
+      .sort(function (a, b) { return a.r - b.r || a.i - b.i; }).map(function (o) { return o.x; });
+    var auto = !f || fold("automatic device " + dz + " " + label(dz)).indexOf(f) >= 0;
+    shown = (auto ? [""] : []).concat(list.map(function (x) { return x.z; }));
+    hi = f ? 0 : Math.max(0, shown.indexOf(cur));
+    var html = auto ? '<li role="option" data-z="" aria-selected="' + (cur === "") + '"' + (hi === 0 ? ' class="hi"' : "") + ">Automatic (device) <small>" + esc(label(dz)) + " · " + esc(offset(dz)) + "</small></li>" : "";
+    html += list.map(function (x, i) {
+      var k = i + (auto ? 1 : 0);
+      return '<li role="option" data-z="' + esc(x.z) + '" aria-selected="' + (x.z === cur) + '"' + (k === hi ? ' class="hi"' : "") + ">" + esc(x.city) + " <small>" + esc((x.region ? x.region + " · " : "") + x.off) + "</small></li>";
+    }).join("");
+    ul.innerHTML = shown.length ? html : '<p class="lang-none">No time zone matches that.</p>';
+    menu.querySelector(".lang-note").textContent = all.length + " time zones - type a city, a region or an offset like GMT+1.";
+  }
+  function mark() { [].forEach.call(ul.querySelectorAll("li"), function (li, i) { li.classList.toggle("hi", i === hi); if (i === hi) li.scrollIntoView({ block: "nearest" }); }); }
+  function open(btn) {
+    makeMenu(); anchor = btn;
+    q.value = ""; render(); menu.hidden = false; menu.style.zIndex = "2320";
+    if (btn) btn.setAttribute("aria-expanded", "true");
+    var r = btn.getBoundingClientRect();
+    var below = window.innerHeight - r.bottom - 8, above = r.top - 8, up = below < 300 && above > below;
+    ul.style.maxHeight = Math.max(160, Math.round((up ? above : below) - (menu.offsetHeight - ul.offsetHeight) - 14)) + "px";
+    menu.style.top = Math.round(up ? Math.max(8, r.top - 8 - menu.offsetHeight) : r.bottom + 8) + "px";
+    menu.style.left = Math.round(Math.max(12, Math.min(r.right - menu.offsetWidth, window.innerWidth - menu.offsetWidth - 12))) + "px";
+    q.focus();
+    var s = ul.querySelector('[aria-selected="true"]'); if (s) s.scrollIntoView({ block: "nearest" });
+  }
+  function close(refocus) {
+    if (!menu || menu.hidden) return;
+    menu.hidden = true;
+    if (anchor) { anchor.setAttribute("aria-expanded", "false"); if (refocus && anchor.isConnected) try { anchor.focus({ preventScroll: true }); } catch (e) {} }
+  }
+  function pick(z) { close(true); set(z); }
+
+  // ---------- the Settings row ----------
+  var CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.2 2"></path></svg>';
+  function paint() {
+    var b = D.getElementById("ss-tz"), s = D.getElementById("ss-tz-s"); if (!b || !s) return;
+    var c = chosen(), dz = device();
+    b.innerHTML = "<span>" + esc(c ? label(c.slice(c.lastIndexOf("/") + 1)) : "Automatic") + "</span> &#9662;";
+    b.setAttribute("aria-label", "Time zone: " + (c ? label(c) : "Automatic, " + label(dz)) + ". Change");
+    s.textContent = c ? label(c) + " (" + offset(c) + ") - event and Advent times are shown in this time zone"
+      : "Automatic - this device's time zone, " + label(dz) + " (" + offset(dz) + ")";
+  }
+  window.SL_TZ_SETTING_RENDER = function (container) {
+    if (!container) return null;
+    var old = D.getElementById("ss-tz-row"); if (old) old.remove();
+    var row = D.createElement("div"); row.className = "sl-srow sl-tzrow"; row.id = "ss-tz-row";
+    row.innerHTML = '<span class="sl-sic">' + CLOCK + '</span><span class="sl-stx"><b>Time zone</b><small id="ss-tz-s"></small></span>' +
+      '<button type="button" class="sl-sbtn" id="ss-tz" aria-haspopup="listbox" aria-expanded="false"></button>';
+    container.appendChild(row);
+    row.querySelector("#ss-tz").addEventListener("click", function (e) { e.stopPropagation(); if (menu && !menu.hidden) close(false); else open(e.currentTarget); });
+    paint();
+    return row;
+  };
+  // where it goes today: Settings > "Language and place" (next to Language and Share my location)
+  function mount() {
+    if (D.getElementById("ss-tz-row")) { paint(); return; }
+    var loc = D.getElementById("ss-loc"), grid = loc && loc.closest(".sl-sgrid");
+    if (!grid) grid = D.querySelector("#sl-settings .sl-pbody");
+    if (grid) window.SL_TZ_SETTING_RENDER(grid);
+  }
+  mount();
+  D.addEventListener("sl-settings-open", mount);
+  // Settings' "Reset to defaults" goes back to Automatic too
+  D.addEventListener("sl-settings-changed", function (e) { if (e.detail === "reset" && stored()) set(""); });
+  // closing Settings closes the list with it
+  D.addEventListener("keydown", function (e) { if (e.key === "Escape" && menu && !menu.hidden && !menu.contains(e.target)) close(false); }, true);
 })();
 </script>
 
