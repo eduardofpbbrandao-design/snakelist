@@ -728,7 +728,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         return (", ".join(L[:-1]) + " and " + L[-1]) if len(L) <= n + 1 else ", ".join(L[:n]) + " and %d more" % (len(L) - n)
     # photos that came with the photographer's name printed on them: SnakeList keeps a cleaned
     # copy (the name cropped off; the credit is shown under the photo), used instead of the original
-    CLEANED = set(['0-9', '1-1', '1-17', '10-19', '100-1', '100-24', '100-3', '102-12', '103-2', '104-7', '107-16', '108-2', '108-7', '109-0', '109-3', '11-19', '110-22', '114-4', '116-17', '117-11', '120-18', '120-23', '121-21', '121-22', '122-10', '122-11', '123-10', '123-11', '123-12', '123-13', '123-2', '123-3', '123-4', '123-5', '123-6', '123-7', '123-8', '123-9', '16-19', '16-2', '18-6', '2-13', '2-22', '21-20', '22-14', '24-10', '24-12', '28-13', '29-19', '3-10', '3-2', '31-10', '31-9', '32-3', '32-6', '33-4', '34-11', '35-23', '4-6', '40-12', '40-7', '43-1', '43-24', '43-8', '49-22', '5-3', '50-10', '50-13', '50-14', '50-6', '51-16', '52-23', '53-19', '54-15', '54-16', '57-13', '59-4', '60-18', '61-10', '61-18', '61-2', '65-5', '69-4', '7-15', '7-21', '7-9', '71-9', '72-1', '75-9', '76-13', '80-16', '81-7', '82-23', '87-15', '87-17', '88-10', '89-20', '89-22', '9-2', '9-5', '93-9', '97-2', '97-7', '98-5', '99-2'])
+    CLEANED = set(['0-9', '1-17', '10-19', '100-1', '100-24', '100-3', '102-12', '103-2', '107-16', '109-0', '11-19', '110-22', '114-4', '121-21', '121-22', '122-10', '122-11', '123-10', '123-11', '123-12', '123-13', '123-2', '123-3', '123-4', '123-5', '123-6', '123-7', '123-8', '123-9', '16-2', '18-6', '2-13', '24-10', '28-13', '3-10', '3-2', '31-10', '31-9', '32-3', '32-6', '33-4', '34-11', '4-6', '40-7', '43-1', '43-24', '5-3', '50-13', '51-16', '52-23', '53-19', '54-15', '54-16', '59-4', '60-18', '61-10', '61-2', '65-5', '69-4', '7-15', '7-21', '7-9', '71-9', '72-1', '75-9', '76-13', '80-16', '81-7', '82-23', '87-15', '87-17', '89-20', '89-22', '9-2', '9-5', '93-9', '97-2', '97-7', '98-5'])
     def img_of(c, size="medium"):
         p = c["photo"]
         if not p or len(p) < 5 or "Illustration" in p[2]: return None
@@ -2169,8 +2169,9 @@ var nf=document.querySelector('.sp-nophoto:not(.sp-fossilfig)'),sm=document.quer
 if(nf&&sm){var sci=sm.dataset.sci,API='https://api.inaturalist.org/v1/';
 function bad(u){var f='';try{f=decodeURIComponent(String(u).split('?')[0].split('/').pop())}catch(e){f=String(u)}return !u||/map|range|distrib|locat|verbreit|carte|mapa|karte|areal|zone|world|globe/i.test(f)||(/wiki(pedia|media)/.test(u)&&/\\.(svg|png|gif)\\b/i.test(f))}
 function J(u){return fetch(u).then(function(r){return r.ok?r.json():null})}
-// only photos their owners licensed for reuse (Creative Commons), never 'all rights reserved'
-var LIC='cc0,cc-by,cc-by-nc,cc-by-sa,cc-by-nc-sa,cc-by-nd,cc-by-nc-nd';
+// only photos their owners licensed for any reuse, including on a site with ads (CC0, CC BY, CC BY-SA):
+// never non-commercial (NC), no-derivatives (ND) or 'all rights reserved'
+var LIC='cc0,cc-by,cc-by-sa';
 // the credit in English whatever language the photographer uses iNaturalist in: their name and the licence
 function cred(ph,who){var l=String(ph.license_code||'').toUpperCase().replace(/^CC-/,'CC ');return (ph.attribution_name||who||'iNaturalist user')+(l?', '+l:'')}
 function show(url,credit,via){if(!url||bad(url))return false;var f=document.createElement('figure');f.className='sp-photo';
@@ -2181,7 +2182,7 @@ var t=d&&(d.results||[]).filter(function(x){return (x.name||'').toLowerCase()===
 return (t?J(API+'observations?photos=true&quality_grade=research&term_id=17&term_value_id=18&order_by=votes&per_page=3&photo_license='+LIC+'&taxon_id='+t.id):Promise.resolve(null)).then(function(o){
 var r=o&&(o.results||[]).filter(function(x){return x.photos&&x.photos[0]&&x.photos[0].license_code})[0];
 if(r&&show(r.photos[0].url.replace('/square.','/medium.'),cred(r.photos[0],r.user&&(r.user.name||r.user.login)),'iNaturalist'))return true;
-if(t&&t.default_photo&&t.default_photo.license_code&&show((t.default_photo.medium_url||t.default_photo.url),cred(t.default_photo),'iNaturalist'))return true;
+if(t&&t.default_photo&&/^(cc0|cc-by|cc-by-sa)$/.test(t.default_photo.license_code||'')&&show((t.default_photo.medium_url||t.default_photo.url),cred(t.default_photo),'iNaturalist'))return true;
 return J('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(sci.replace(/ /g,'_'))).then(function(w){
 var img=w&&(w.originalimage||w.thumbnail);if(img&&!bad(img.source)&&w.thumbnail)show(w.thumbnail.source,'Wikipedia','Wikipedia')})})}).catch(function(){})}
 var main=document.querySelector('.sp-main[data-sci]'),w=document.getElementById('sp-wiki');

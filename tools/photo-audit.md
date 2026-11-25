@@ -368,3 +368,15 @@ No suitable commercial-OK replacement was found (most are rarely photographed sp
 - Re-search the flagged-but-unreplaced list periodically; held/container photos of rare species can only be replaced when new field photos appear.
 - Look for photos for the most famous photo-less species.
 - This pass judged identification from the tile and the iNaturalist research-grade taxon; it did not re-identify every existing photo against keys, so subtle misidentifications among lookalikes can remain.
+
+## 2026-11-24 licence pass (commercial use)
+
+SnakeList shows ads, so every photo must allow commercial use: CC0, public domain, CC BY or CC BY-SA (with credit). NC, ND (SnakeList crops every photo), "all rights reserved" and unknown licences are not OK without the photographer's permission.
+
+- `data/photo-licences.json` lists every photo SnakeList shows (species tiles and opening photos) with its source, link, author, licence and `commercialOK`. Rebuild it with `python3 tools/photo_licences.py`.
+- All 2460 species whose photo was not commercial-OK were searched: research-grade, wild (not captive), not-dead iNaturalist observations of the same taxon (matched by iNaturalist taxon id; subspecies accepted; a name iNaturalist treats as a synonym accepted only when it is the same species under a new genus or spelling, never when iNaturalist lumps it into another species) with photo licence CC0 / CC BY / CC BY-SA, plus the taxon's curated iNaturalist photos with those licences. Up to six candidates per species were viewed (cropped exactly as the tile) next to the old photo; handled, dead, feeding, gaping, in containers, on rulers, watermarked, tiny, blurry or doubtful-looking candidates were rejected.
+- Photos already commercial-OK were not touched.
+- Where the photographer of the old photo has since relicensed it (CC BY / CC0), the photo was kept and only its credit updated.
+- Photos with no acceptable commercial-OK replacement were kept and listed in `docs/PHOTO-PERMISSIONS.md` / `data/photo-permissions.json`, with the photographer's iNaturalist username, a link to the original and a message template for asking permission.
+- The species pages' runtime photo finder (for species with no built-in photo, `build_species.py`) now only takes CC0 / CC BY / CC BY-SA iNaturalist photos.
+- Wikimedia Commons pass (species still without a commercial-OK photo after the iNaturalist pass): each species' Wikidata image (P18) was checked on Commons (licence and author from the file's own metadata; NC/ND/fair-use files and files without a named author skipped). 229 species had an openly licensed Commons image; 87 replaced their old photo. Rejected: illustrations and plates, multi-panel figures, preserved specimens in jars or with tags, handled, captive-in-container, on rulers, watermarked, gaping, tiny/blurry or partly hidden snakes, doubtful identifications, and files under 540 px wide (Commons no longer serves full-size originals to scripts). Credits use the Commons author and licence, linked to the Commons file page.
