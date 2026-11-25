@@ -237,6 +237,20 @@ details>summary:hover::after{border-color:var(--g,#2e7d4f)}
 .sp-rl-hd h2,.sp-rl-hd h2 .sp-rl-nm{color:#1f7a3a}@media (prefers-color-scheme:dark){.sp-rl-hd h2,.sp-rl-hd h2 .sp-rl-nm{color:#a8ef94}}
 
 :where(p,li,dd,td,th,nav,small,figcaption,h2,h3,.sl-flinks,.sp-crumbs,.cy-crumbs) a:not([class]):not(.sp-tags *):not(.sp-pills *):not(.sx-chips *):hover{color:var(--link-hover)}
+html.sl-pv-design .sp-cities h3{font:700 16px Fraunces,Georgia,serif;margin:0 0 4px}
+html.sl-pv-design .sp-states h3{font:700 16px Fraunces,Georgia,serif;margin:0 0 4px}
+html.sl-pv-design{--bg:#f1f6ee;--card:#fbfdf9;--text:#1d6b33;--muted:#3e6b48;--line:#d5e4cf;--g:#58b351;--land:#d7dccb;--on:#58b351;--in:#e07a1f;--sea:#e3ecef;--tag:#e3f0dc;--tagline:#a9cf9c;--link:#2a7a2f;--link-hover:#24321f}
+@media (prefers-color-scheme:dark){html.sl-pv-design{--bg:#123526;--card:#1a4d37;--text:#dff5d6;--muted:#c6dfcf;--line:#2f6d50;--g:#58b351;--land:#3a7c5a;--on:#58b351;--in:#f0a04b;--sea:#1b5034;--tag:#215c42;--tagline:#4a9a6c;--link:#dcf7d0;--link-hover:#9be07c}}
+html.sl-pv-design .sp-logo{font:700 26px Fraunces,Georgia,serif;color:var(--g);text-decoration:none}
+html.sl-pv-design h1{font:700 clamp(30px,5vw,44px)/1.1 Fraunces,Georgia,serif;margin:0}
+html.sl-pv-design h2{font:700 22px Fraunces,Georgia,serif;margin:0 0 8px}
+html.sl-pv-design .sp-relh{font:700 16px Fraunces,Georgia,serif;margin:10px 0 4px}
+html.sl-pv-design .sp-sec h3{font:700 17px Fraunces,Georgia,serif;margin:16px 0 4px}
+html.sl-pv-design .sp-fossilfig b{font:700 18px Fraunces,Georgia,serif}
+html.sl-pv-design .sp-rl-hd h2{margin:0;font:700 21px/1.2 Fraunces,Georgia,serif}
+html.sl-pv-design .sp-rl-sci{font:italic 400 16px Fraunces,Georgia,serif;color:#2e7d4f;white-space:nowrap}
+html.sl-pv-design .sp-rl-rec h3{margin:0 0 2px;font:700 19px Fraunces,Georgia,serif;color:#1f7a3a}
+html.sl-pv-design .sp-rl-mb{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:10px 2px;border:0;background:none;color:var(--text);font:700 17px Fraunces,Georgia,serif;text-align:left;cursor:pointer}
 /* nothing is ever underlined, on hover or not - a link or a word changes colour instead (like About creator) */
 *, *::before, *::after { text-decoration-line: none !important; }
 /* (Eduardo: "dont make it when you hover something turn black instead make it like it was before") - the v5.78/v5.81 rule that
@@ -267,3 +281,44 @@ html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover,details>summary:
 .sl-report{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-left:6px;flex:none;align-self:center;border-radius:10px;border:1px solid var(--line,#d5e4cf);background:var(--card,#fbfdf9);color:var(--text,#1d6b33);cursor:pointer;padding:0}.sl-report svg{width:16px;height:16px}.sl-report:focus-visible{outline:2px solid #58b351;outline-offset:2px}
 @media (max-width:640px){header.sl-top,header.site-top .site-wrap{position:relative}.sl-report{position:absolute;top:12px;right:12px;margin:0}}
 .sl-rep-sheet{position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(8,20,12,.55)}.sl-rep-sheet.open{display:flex}.sl-rep-card{width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;border-radius:16px;padding:20px 20px 18px;background:var(--card,#fbfdf9);color:var(--text,#1d6b33);border:1px solid var(--line,#d5e4cf);box-shadow:0 18px 50px rgba(0,0,0,.35);font:400 14px/1.5 Inter,system-ui,sans-serif;text-align:left}.sl-rep-card h2{margin:0 0 6px;font-size:20px;line-height:1.25}.sl-rep-card p{margin:0 0 12px;color:var(--muted,#4b7a55)}.sl-rep-kinds{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}.sl-rep-kinds button,.sl-rep-acts button{font:600 13px Inter,system-ui,sans-serif;padding:7px 12px;border-radius:999px;border:1px solid var(--line,#d5e4cf);background:transparent;color:var(--text,#1d6b33);cursor:pointer}.sl-rep-kinds button.on{background:#3f8f3a;border-color:#3f8f3a;color:#fff}.sl-rep-card textarea{box-sizing:border-box;width:100%;min-height:110px;padding:10px 12px;border-radius:10px;border:1px solid var(--line,#d5e4cf);background:var(--bg,#f1f6ee);color:var(--text,#1d6b33);font:inherit;resize:vertical}.sl-rep-acts{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.sl-rep-acts button{border-radius:10px}.sl-rep-acts .go{background:#3f8f3a;border-color:#3f8f3a;color:#fff}.sl-rep-note{min-height:1em;margin:8px 0 0!important;font-size:13px}.sl-rep-note a{color:var(--link,#2a7a2f)}
+.ds-n{display:none}html.sl-pv-design .ds-n{display:inline}html.sl-pv-design .ds-o{display:none}
+html.sl-pv-design .sp-fmore,html.sl-pv-design .sp-all,html.sl-pv-design .sl-more-btn,html.sl-pv-design details>summary::after{display:inline-flex;align-items:center;gap:0;min-height:0;margin:8px 0 0;font:600 13.5px/1.35 Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:7px 14px;border-radius:999px;border:1px solid #c8d6bc;background:#f6faf1;color:#55614f;box-shadow:none;cursor:pointer;transition:border-color .15s ease,color .15s ease}
+@media (prefers-color-scheme:dark){html.sl-pv-design .sp-fmore,html.sl-pv-design .sp-all,html.sl-pv-design .sl-more-btn,html.sl-pv-design details>summary::after{border-color:#2f6d50;background:#1a4d37;color:#d2e6d8}}
+/* sl-ds (copied from the app by build_species.py) - only with the design preview */
+html.sl-pv-design{--ds-primary: #2e7d32; --ds-primary-hover: #276d2c; --ds-primary-press: #1f5c23; --ds-on-primary: #ffffff;
+  --ds-focus: #1f6f2a; --ds-danger: #a33a24; --ds-danger-hover: #8a2f1c; --ds-on-danger: #ffffff;
+  --ds-radius: 10px; --ds-radius-sm: 8px; --ds-pill: 999px;
+  --ds-fs-label: 12.5px; --ds-fs-meta: 13.5px; --ds-fs-ui: 14.5px; --ds-fs-body: 16px; --ds-fs-lead: 18px;
+  --ds-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ds-display: 'Fraunces', Georgia, serif;
+  --ds-tap: 44px;}
+html.sl-pv-design[data-sl-theme="dark"]{--ds-primary: #8fd46c; --ds-primary-hover: #a5e486; --ds-primary-press: #7cc35a; --ds-on-primary: #0e2f1e;
+  --ds-focus: #b8f09f; --ds-danger: #f0a58a; --ds-danger-hover: #f6bba5; --ds-on-danger: #2a0e06;}
+html.sl-pv-design :where(a, button, [role="button"], [role="tab"], [role="link"], summary, input, select, textarea, [tabindex]):focus-visible{outline: 3px solid var(--ds-focus); outline-offset: 2px;}
+html.sl-pv-design :where(p, li, dd, td, figcaption, .sp-note, .sl-sub) a:not([class]){font-weight: 600;}
+html.sl-pv-design :where(p, li, dd, td, figcaption, .sp-note, .sl-sub) a:not([class]):focus-visible{text-decoration-line: underline !important; text-underline-offset: 3px;}
+html.sl-pv-design .sl-btn{display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-sizing: border-box; min-height: 40px;
+  padding: 8px 16px; border-radius: var(--ds-radius); border: 1px solid transparent; font: 600 var(--ds-fs-ui)/1.2 var(--ds-font);
+  cursor: pointer; text-decoration: none; white-space: nowrap; transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .08s ease;}
+html.sl-pv-design .sl-btn.is-primary{background: var(--ds-primary); border-color: var(--ds-primary); color: var(--ds-on-primary);}
+html.sl-pv-design .sl-btn.is-primary:hover{background: var(--ds-primary-hover); border-color: var(--ds-primary-hover);}
+html.sl-pv-design .sl-btn.is-primary:active{background: var(--ds-primary-press);}
+html.sl-pv-design .sl-btn.is-secondary{background: transparent; border-color: currentColor; color: var(--ds-primary);}
+html.sl-pv-design .sl-btn.is-ghost{background: transparent; color: inherit;}
+html.sl-pv-design .sl-btn.is-danger{background: var(--ds-danger); border-color: var(--ds-danger); color: var(--ds-on-danger);}
+html.sl-pv-design .sl-btn.is-danger:hover{background: var(--ds-danger-hover);}
+html.sl-pv-design .sl-btn:active{transform: translateY(1px);}
+html.sl-pv-design .sl-btn[aria-pressed="true"],html.sl-pv-design .sl-btn.is-selected{box-shadow: inset 0 0 0 2px currentColor;}
+html.sl-pv-design .sl-btn:disabled,html.sl-pv-design .sl-btn[aria-disabled="true"]{opacity: .5; cursor: not-allowed; transform: none;}
+html.sl-pv-design .sl-btn.is-loading,html.sl-pv-design .sl-btn[aria-busy="true"]{pointer-events: none; opacity: .8;}
+html.sl-pv-design .sl-btn.is-loading::before,html.sl-pv-design .sl-btn[aria-busy="true"]::before{content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor;
+  border-right-color: transparent; animation: sl-ds-spin .7s linear infinite;}
+@keyframes sl-ds-spin{to { transform: rotate(360deg); }}
+html.sl-pv-design .sl-badge-ds{display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: var(--ds-pill); font: 600 var(--ds-fs-label)/1.3 var(--ds-font); border: 1px solid currentColor;}
+html.sl-pv-design .sl-notice{display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--ds-radius); border: 1px solid; font: 400 var(--ds-fs-meta)/1.5 var(--ds-font);}
+@media (pointer: coarse){html.sl-pv-design .sl-btn{min-height: var(--ds-tap);}}
+@media (prefers-reduced-motion: reduce){html.sl-pv-design .sl-btn{transition: none;}html.sl-pv-design .sl-btn.is-loading::before,html.sl-pv-design .sl-btn[aria-busy="true"]::before{animation-duration: 2s;}}
+html.sl-pv-design .sp-actions a.sp-btn:not(.sp-btn2),html.sl-pv-design .cy-cta a.cy-btn,html.sl-pv-design .center a.btn,html.sl-pv-design a.btn.btn-primary,html.sl-pv-design .btn-primary,html.sl-pv-design .sl-ev-btn.pri{background: var(--ds-primary) !important; border-color: var(--ds-primary) !important; color: var(--ds-on-primary) !important;}
+html.sl-pv-design .sp-actions a.sp-btn:not(.sp-btn2):hover,html.sl-pv-design .cy-cta a.cy-btn:hover,html.sl-pv-design .center a.btn:hover,html.sl-pv-design .btn-primary:hover{background: var(--ds-primary-hover) !important; border-color: var(--ds-primary-hover) !important;}
+html.sl-pv-design .sp-actions a.sp-btn:active,html.sl-pv-design .cy-cta a.cy-btn:active,html.sl-pv-design .center a.btn:active{transform: translateY(1px);}
+@media (prefers-color-scheme:dark){html.sl-pv-design{--ds-primary:#8fd46c;--ds-primary-hover:#a5e486;--ds-primary-press:#7cc35a;--ds-on-primary:#0e2f1e;--ds-focus:#b8f09f}}

@@ -224,6 +224,7 @@ b.addEventListener('click',open);var ab=document.querySelector('.sp-anatbtn'),wa
 Object.keys(T).forEach(function(k){var seen=0;try{seen=localStorage.getItem('sl-new-seen-'+k)}catch(e){}if(V&&V<T[k].v+20&&!seen)d.classList.add('sl-new-'+k);
 document.addEventListener('click',function(e){if(!d.classList.contains('sl-new-'+k)||!e.target.closest||!e.target.closest(T[k].sel))return;try{localStorage.setItem('sl-new-seen-'+k,'1')}catch(x){}d.classList.remove('sl-new-'+k)},true)})})();
 
+(function(){if(!document.documentElement.classList.contains('sl-pv-design'))return;[].forEach.call(document.querySelectorAll('#cy-v option[value=hl]'),function(o){o.textContent=o.textContent.replace(/^Harmless/,'Low risk')});var q=document.getElementById('cy-jq');if(q){q.type='search';q.placeholder='Go to another country\u2026'}})();
 // v5.78: the button under the mouse gets the class sl-hov (no look of its own any more - each button keeps its own hover). v5.93: the thin
 // light mint line that travels once round the border over 1.5 s, then fades (on hover, a tap and keyboard focus) is only on .sl-trace-on.
 // One SVG over the whole page, moved with the button - nothing is added inside the buttons, so their own layout, ::before/::after

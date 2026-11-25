@@ -21,6 +21,14 @@ def _fix_totals(path):
     t2 = re.sub(r'(<span data-sl-photos>)[\d,]+(</span>)', r"\g<1>" + P_TXT + r"\2", t2)
     if t2 != t: open(path, "w", encoding="utf-8").write(t2)
 for _p in ("about.html", "about-snakelist.html", "install.html", "privacy.html", "terms.html"): _fix_totals(_p)
+# the design preview's head line (tools/ds_scope.py) on these hand-made pages too, right after sl-fx.css: only with
+# Settings > Previews > New design on in this browser does it do anything (the sl-ds styles in sl-fx.css then apply)
+import sys as _sys_ds; _sys_ds.path.insert(0, "tools"); from ds_scope import DS_HEAD as _DSH
+for _p in ("about.html", "about-snakelist.html", "install.html", "privacy.html", "terms.html"):
+    try: _t = open(_p, encoding="utf-8").read()
+    except OSError: continue
+    _t2 = re.sub(r'(<link rel="stylesheet" href="species/sl-fx\.css">)(?:<script>if\(window\.localStorage&&localStorage\.getItem\("sl-art-preview-design"\).*?</script>)?', lambda m: m.group(1) + _DSH, _t, count=1)
+    if _t2 != _t: open(_p, "w", encoding="utf-8").write(_t2)
 title = "SnakeList - the snake life list, map and quiz"
 desc = ("Track every snake species you've seen. A checklist of 4,000+ snakes with photos, "
         "range maps down to states and provinces, a wishlist and a where-does-it-live quiz.")

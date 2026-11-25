@@ -46,6 +46,22 @@ SEEMORE_CSS = (
     "@media (prefers-color-scheme:dark){:root{--sl-sb:rgba(155,224,124,.72);--sl-sb-hover:#b8f09f}}\n"
     "@media (prefers-color-scheme:dark){html .sp-fmore,html .sp-all,html .sl-more-btn,details>summary::after{border-color:#37855f;background:#24684a;color:#a8c9b4}"
     "html .sp-fmore:hover,html .sp-all:hover,html .sl-more-btn:hover,details>summary:hover::after{border-color:#6fbf8a;color:#dff5d6}}\n")
+# ---- PREVIEW "design" (Settings > Previews > New design; localStorage sl-art-preview-design = "1") ----
+# The pages look exactly as before for everyone else. With the preview on, DS_HEAD (in every page's <head>, right after
+# its stylesheet) puts the class sl-pv-design on <html> before anything is drawn and loads Inter and Fraunces; the CSS
+# below and the app's "sl-ds shared" block (both scoped under html.sl-pv-design by tools/ds_scope.py) then apply.
+# DS_OVR_*: only the rules the overhaul changed in CSS / REAL_CSS / SEEMORE_CSS / COUNTRY_CSS, made by tools/ds_scope.diff.
+# (No braces and no percent signs in DS_HEAD: the page templates are filled with .format() and with %.)
+from ds_scope import DS_HEAD  # (in tools/ds_scope.py: build_regions.py uses it too)
+# the words that change with the preview: both are in the page, one is shown (.ds-o = today's, .ds-n = the new one)
+DS_WORDS_CSS = ".ds-n{display:none}html.sl-pv-design .ds-n{display:inline}html.sl-pv-design .ds-o{display:none}\n"
+# country pages: "Harmless" in the Venom & danger menu, and the Go to another country box (the preview's wording and look)
+DS_PAGE_JS = (r"""(function(){if(!document.documentElement.classList.contains('sl-pv-design'))return;"""
+              r"""[].forEach.call(document.querySelectorAll('#cy-v option[value=hl]'),function(o){o.textContent=o.textContent.replace(/^Harmless/,'Low risk')});"""
+              r"""var q=document.getElementById('cy-jq');if(q){q.type='search';q.placeholder='Go to another country\u2026'}})();""" + "\n")
+DS_OVR_SEEMORE = "html.sl-pv-design .sp-fmore,html.sl-pv-design .sp-all,html.sl-pv-design .sl-more-btn,html.sl-pv-design details>summary::after{display:inline-flex;align-items:center;gap:0;min-height:0;margin:8px 0 0;font:600 13.5px/1.35 Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:7px 14px;border-radius:999px;border:1px solid #c8d6bc;background:#f6faf1;color:#55614f;box-shadow:none;cursor:pointer;transition:border-color .15s ease,color .15s ease}\n@media (prefers-color-scheme:dark){html.sl-pv-design .sp-fmore,html.sl-pv-design .sp-all,html.sl-pv-design .sl-more-btn,html.sl-pv-design details>summary::after{border-color:#2f6d50;background:#1a4d37;color:#d2e6d8}}\n"
+DS_OVR_SP = "html.sl-pv-design .sp-cities h3{font:700 16px Fraunces,Georgia,serif;margin:0 0 4px}\nhtml.sl-pv-design .sp-states h3{font:700 16px Fraunces,Georgia,serif;margin:0 0 4px}\nhtml.sl-pv-design{--bg:#f1f6ee;--card:#fbfdf9;--text:#1d6b33;--muted:#3e6b48;--line:#d5e4cf;--g:#58b351;--land:#d7dccb;--on:#58b351;--in:#e07a1f;--sea:#e3ecef;--tag:#e3f0dc;--tagline:#a9cf9c;--link:#2a7a2f;--link-hover:#24321f}\n@media (prefers-color-scheme:dark){html.sl-pv-design{--bg:#123526;--card:#1a4d37;--text:#dff5d6;--muted:#c6dfcf;--line:#2f6d50;--g:#58b351;--land:#3a7c5a;--on:#58b351;--in:#f0a04b;--sea:#1b5034;--tag:#215c42;--tagline:#4a9a6c;--link:#dcf7d0;--link-hover:#9be07c}}\nhtml.sl-pv-design .sp-logo{font:700 26px Fraunces,Georgia,serif;color:var(--g);text-decoration:none}\nhtml.sl-pv-design h1{font:700 clamp(30px,5vw,44px)/1.1 Fraunces,Georgia,serif;margin:0}\nhtml.sl-pv-design h2{font:700 22px Fraunces,Georgia,serif;margin:0 0 8px}\nhtml.sl-pv-design .sp-relh{font:700 16px Fraunces,Georgia,serif;margin:10px 0 4px}\nhtml.sl-pv-design .sp-sec h3{font:700 17px Fraunces,Georgia,serif;margin:16px 0 4px}\nhtml.sl-pv-design .sp-fossilfig b{font:700 18px Fraunces,Georgia,serif}\nhtml.sl-pv-design .sp-rl-hd h2{margin:0;font:700 21px/1.2 Fraunces,Georgia,serif}\nhtml.sl-pv-design .sp-rl-sci{font:italic 400 16px Fraunces,Georgia,serif;color:#2e7d4f;white-space:nowrap}\nhtml.sl-pv-design .sp-rl-rec h3{margin:0 0 2px;font:700 19px Fraunces,Georgia,serif;color:#1f7a3a}\nhtml.sl-pv-design .sp-rl-mb{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:10px 2px;border:0;background:none;color:var(--text);font:700 17px Fraunces,Georgia,serif;text-align:left;cursor:pointer}\n"
+DS_OVR_COUNTRY = "html.sl-pv-design .cy-crumbs li+li:before{content:\"\u203a\";margin:0 8px;color:var(--tagline)}\nhtml.sl-pv-design .cy-jump input{width:210px;max-width:60vw;font:inherit;font-size:14.5px;padding:8px 10px 8px 34px;min-height:40px;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b7a55' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E\")!important;background-repeat:no-repeat!important;background-position:10px 50%!important;background-size:16px!important;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text)}\nhtml.sl-pv-design .cy-head h1{font:700 clamp(28px,4.4vw,40px)/1.12 Fraunces,Georgia,serif;margin:0;overflow-wrap:anywhere}\nhtml.sl-pv-design .cy-fg h2{font:700 19px Fraunces,Georgia,serif;margin:0 0 4px}\nhtml.sl-pv-design .cy-tools label{display:flex;flex-direction:column;gap:3px;min-width:0;max-width:100%}\nhtml.sl-pv-design .cy-name{font:700 16.5px/1.25 Fraunces,Georgia,serif;overflow-wrap:anywhere}\nhtml.sl-pv-design .cy-sec h2{font:700 21px Fraunces,Georgia,serif;margin:0 0 6px}\nhtml.sl-pv-design .cy-flogo{font:700 17px Fraunces,Georgia,serif;color:var(--g);text-decoration:none}\n"
 # v5.93: the app's Report button (a bug or an idea for the creator) on every page too, at the end of the header, top right
 PAGE_REPORT_CSS = (
     ".sl-report{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-left:6px;flex:none;align-self:center;"
@@ -386,12 +402,20 @@ def build(app):
     # the Christmas preview switch (tools/xmas_loader.js), on every page that loads sp.js, country.js or sl-fx.js
     # (all of them live in species/, so the site root is one folder up from the script)
     FX_JS += XMAS_LOADER_JS
+    # PREVIEW "design": the app's design system (its "sl-ds shared" part: buttons, focus ring, links, filled-green contrast),
+    # scoped under html.sl-pv-design, plus the night version of the filled green (the pages follow the device's night mode)
+    import ds_scope
+    _ds = re.search(r"/\* ---- sl-ds shared start ---- \*/(.*?)/\* ---- sl-ds shared end ---- \*/", app, re.S)
+    DS_CSS = ("/* sl-ds (copied from the app by build_species.py) - only with the design preview */\n" + ds_scope.scope(_ds.group(1)) +
+              ds_scope.scope("@media (prefers-color-scheme:dark){:root{--ds-primary:#8fd46c;--ds-primary-hover:#a5e486;--ds-primary-press:#7cc35a;--ds-on-primary:#0e2f1e;--ds-focus:#b8f09f}}")) if _ds else ""
+    FX_CSS += DS_WORDS_CSS + DS_OVR_SEEMORE + DS_CSS
+    FX_JS = DS_PAGE_JS + FX_JS
     open(OUT + "/sl-fx.css", "w", encoding="utf-8").write(FX_CSS)
     open(OUT + "/sl-fx.js", "w", encoding="utf-8").write(FX_JS)
     # every plain text link (in a sentence, a list, a table, the breadcrumbs, the footer) changes colour when pointed at
     LINK_HOVER = (":where(p,li,dd,td,th,nav,small,figcaption,h2,h3,.sl-flinks,.sp-crumbs,.cy-crumbs) a:not([class]):not(.sp-tags *):not(.sp-pills *):not(.sx-chips *):hover"
                   "{color:var(--link-hover)}\n")
-    open(OUT + "/sp.css", "w").write(CSS + build_regions.REAL_CSS + "\n" + LINK_HOVER + FX_CSS)
+    open(OUT + "/sp.css", "w").write(CSS + build_regions.REAL_CSS + "\n" + LINK_HOVER + DS_OVR_SP + FX_CSS)
     open(OUT + "/sp.js", "w").write(APP_BACK_JS + JS + build_regions.REAL_JS + "\n" + FX_JS)
     # "Explore in 3D": the reviewed model profiles, next to the viewer (species/3d/viewer.js)
     os.makedirs(OUT + "/3d", exist_ok=True)
@@ -874,7 +898,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         nm_t = nm
         mq = re.search(r" \(([a-z-]+)\)$", nm)
         label_t = nm if (c["is_sci"] or (mq and mq.group(1) in sci.split(" "))) else label  # (the full name stays: it is the page's h1)
-        for title in [label_t + " \u2013 Explore in 3D | SnakeList", label_t + " \u2013 Explore in 3D", label_t + " | SnakeList",
+        for title in ([label_t + " \u2013 fossil snake, 3D reconstruction | SnakeList", label_t + " \u2013 fossil snake | SnakeList"] if c["fossil"] else []) + [label_t + " \u2013 Explore in 3D | SnakeList", label_t + " \u2013 Explore in 3D", label_t + " | SnakeList",
                       nm_t + " \u2013 Explore in 3D | SnakeList", label_t, nm_t + " | SnakeList"]:
             if len(title) <= 70: break
         else: title = nm_t
@@ -1094,8 +1118,10 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         # ---- photo, with a readable credit linking to the original record ----
         photo = img_of(c); p = c["photo"]
         if c["fossil"]:  # no photo can exist, and its colours are unknown: no painted life reconstruction
-            ph = ('<figure class="sp-photo sp-nophoto sp-fossilfig"><div><b>Known only from fossils</b><span>No photo can exist, and its colours '
-                  'and pattern are unknown, so SnakeList shows no life reconstruction.</span></div></figure>')
+            # (design preview: the new wording says what its 3D model is, since the page offers Explore in 3D)
+            ph = ('<figure class="sp-photo sp-nophoto sp-fossilfig"><div><b>Known only from fossils</b><span><span class="ds-o">No photo can exist, and its colours '
+                  'and pattern are unknown, so SnakeList shows no life reconstruction.</span><span class="ds-n">No photo can exist, and its real colours '
+                  'and pattern are unknown. Its 3D model (Explore in 3D) is a reconstruction: the size and shape follow the fossils, while the colours and pattern are borrowed from living relatives.</span></span></div></figure>')
         elif photo:
             who, _, lic = p[2].rpartition(", ")
             if not who: who, lic = p[2], ""
@@ -1449,8 +1475,10 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             actions = ('<a class="sp-btn" href="../?sp=%s&amp;do=seen"><span aria-hidden="true">&#10003; </span>Mark seen</a>'
                        '<a class="sp-btn sp-btn2" href="../?sp=%s&amp;do=want"><span aria-hidden="true">&#9734; </span>Want to see</a>') % (c["id"], c["id"])
             if c["countries"]: actions += '<a class="sp-btn sp-btn2" href="../?map=%s">View on map</a>' % esc(quote(sci))
-            actnote = ("&ldquo;Mark seen&rdquo; and &ldquo;Want to see&rdquo; open this snake in the SnakeList app, where your lists are kept on your device &ndash; "
-                       "tap the highlighted button on its card. &ldquo;View on map&rdquo; opens SnakeList&rsquo;s map on it.")
+            # (design preview: the app then saves it straight away, with Undo - both wordings, one shown)
+            actnote = ('<span class="ds-o">&ldquo;Mark seen&rdquo; and &ldquo;Want to see&rdquo; open this snake in the SnakeList app, where your lists are kept on your device &ndash; '
+                       'tap the highlighted button on its card.</span><span class="ds-n">&ldquo;Mark seen&rdquo; and &ldquo;Want to see&rdquo; open SnakeList and save this snake to that list straight away (on this device, '
+                       'or in your account if you are signed in) &ndash; with Undo if it was a slip.</span> &ldquo;View on map&rdquo; opens SnakeList&rsquo;s map on it.')
         page = PAGE.format(
             title=esc(title), desc=esc(mdesc), url=url, img=esc(img), img_alt=esc(img_alt), info_json=info_json, ld=json.dumps(ld, ensure_ascii=False).replace("</", "<\\/"),
             h1=esc(nm), sub=('<i>%s</i>%s' % (esc(sci), (' <span class="sp-auth">%s</span>' % esc(auth_short)) if auth else "")) if not c["is_sci"] else (esc(auth_short) if auth else ""),
@@ -1611,6 +1639,7 @@ def credits_page(cards, esc):
 q.addEventListener('input',function(){clearTimeout(t);t=setTimeout(function(){var v=q.value.trim().toLowerCase();r.forEach(function(e){e.hidden=v&&e._t.indexOf(v)<0})},120)})})();</script>
 </body></html>
 """ % (SITE, site_header("../", "species"), ill, "{:,}".format(len(rows)), "".join(rows), len(frows), "".join(frows), site_footer("../"))
+    html = html.replace('<link rel="stylesheet" href="sp.css">', '<link rel="stylesheet" href="sp.css">' + DS_HEAD, 1)  # (the design preview)
     open(OUT + "/photo-credits.html", "w", encoding="utf-8").write(html)
 
 
@@ -1738,8 +1767,8 @@ def hubs(cards, esc, img_of, invasive=None):
     for kind, G in groups.items():
         os.makedirs(OUT + "/" + kind, exist_ok=True)
         if kind == "country":  # the redesigned country pages (country_page below) and the country picker's list
-            open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS + build_regions.REGION_CSS)
-            open(OUT + "/country.js", "w", encoding="utf-8").write(APP_BACK_JS + COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS + "\n" + SUGG_JS + "\n" + FX_JS)
+            open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS + build_regions.REGION_CSS + DS_OVR_COUNTRY)
+            open(OUT + "/country.js", "w", encoding="utf-8").write(DS_PAGE_JS + APP_BACK_JS + COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS + "\n" + SUGG_JS + "\n" + FX_JS)
             with open(OUT + "/countries.json", "w", encoding="utf-8") as fh:
                 json.dump({n: slugify(n) for n in sorted(G) if slugify(n)}, fh, ensure_ascii=False, separators=(",", ":"))
             for name, L in G.items():
@@ -1758,8 +1787,8 @@ def hubs(cards, esc, img_of, invasive=None):
                 if m: open("%s/country/%s" % (OUT, f), "w", encoding="utf-8").write(
                     country_page(H.unescape(m.group(1).strip()), [], {"_cards": cards}, invasive or {}, esc, f[:-5]))
             continue
-        open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS + build_regions.REGION_CSS)
-        open(OUT + "/country.js", "w", encoding="utf-8").write(APP_BACK_JS + COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS + "\n" + SUGG_JS + "\n" + FX_JS)
+        open(OUT + "/country.css", "w", encoding="utf-8").write(COUNTRY_CSS + build_regions.REGION_CSS + DS_OVR_COUNTRY)
+        open(OUT + "/country.js", "w", encoding="utf-8").write(DS_PAGE_JS + APP_BACK_JS + COUNTRY_JS + build_regions.PLIST_JS + "\n" + build_regions.DD_JS + "\n" + SUGG_JS + "\n" + FX_JS)
         for name, L in G.items():
             slug = slugify(name)
             if not slug: continue
@@ -1799,7 +1828,7 @@ PAGE = """<!doctype html>
 <meta name="twitter:image" content="{img}"><meta name="twitter:image:alt" content="{img_alt}">
 <meta name="theme-color" content="#1F5A3A">
 <link rel="icon" href="../favicon.ico" sizes="any"><link rel="manifest" href="../app/snakelist.webmanifest">
-<link rel="stylesheet" href="sp.css"><script>document.documentElement.className+=" js"</script>
+<link rel="stylesheet" href="sp.css">""" + DS_HEAD + """<script>document.documentElement.className+=" js"</script>
 <script type="application/ld+json">{ld}</script>
 </head><body>
 {site_head}
@@ -1832,7 +1861,7 @@ INDEX = """<!doctype html>
 <meta name="description" content="Every one of the {n} snake species in SnakeList, by family and by country - each with its photo, range map and facts.">
 <link rel="canonical" href="{url}"><meta name="author" content="{author}"><meta name="robots" content="index,follow">
 <meta property="og:title" content="All {n} snake species | SnakeList"><meta property="og:url" content="{url}"><meta property="og:type" content="website">
-<link rel="icon" href="../favicon.ico" sizes="any"><link rel="stylesheet" href="sp.css"><script src="sl-fx.js" defer></script>
+<link rel="icon" href="../favicon.ico" sizes="any"><link rel="stylesheet" href="sp.css">""" + DS_HEAD + """<script src="sl-fx.js" defer></script>
 </head><body>
 {site_head}
 <main class="sp-main"><nav class="sp-crumbs" aria-label="Breadcrumb"><a href="../">SnakeList</a> &rsaquo; <span aria-current="page">All species</span></nav>
@@ -2331,7 +2360,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
                  ("cy-d-dv", "fv", "dv", dk["dv"], "dangerously venomous", "Venomous and dangerous to people: elapids (cobras, kraits, mambas, sea snakes...), vipers, stiletto snakes, the boomslang, twig snakes and keelbacks"),
                  ("cy-d-mv", "fv", "mv", dk["mv"], "mildly venomous", "Rear-fanged snakes with mild venom: no serious bites to people are documented"),
                  ("cy-d-gc", "fv", "gc", dk["gc"], "giant constrictor" if dk["gc"] == 1 else "giant constrictors", "Not venomous, but big enough to be dangerous to people"),
-                 ("cy-d-hl", "fv", "hl", dk["hl"], "harmless", "The app's Low risk filter: not venomous and not a giant constrictor - though any snake can bite")]
+                 ("cy-d-hl", "fv", "hl", dk["hl"], '<span class="ds-o">harmless</span><span class="ds-n">low risk</span>', "The app's Low risk filter: not venomous and not a giant constrictor - though any snake can bite")]
         # the header's own venomous / non-venomous counts become taps too (no second copy of them)
         for r0 in DROWS[:2]:
             stats = stats.replace('<li><b>%s</b><span>%s</span></li>' % ("{:,}".format(r0[3]), r0[4]), dchip(*r0), 1)
@@ -2340,7 +2369,7 @@ def country_page(name, L, all_countries, invasive, esc, slug, kind="country"):
                   '<p class="cy-dnote">%s</p></div>') % (
             ' <span>&middot; tap a number to show only those snakes</span>' if vfilter else "",
             "".join(dchip(*r0) for r0 in DROWS[2:]),
-            "Harmful = dangerously venomous + giant constrictors. Harmless = not venomous and not a giant constrictor. "
+            "Harmful = dangerously venomous + giant constrictors. <span class=\"ds-o\">Harmless</span><span class=\"ds-n\">Low risk</span> = not venomous and not a giant constrictor. "
             "Mildly venomous snakes have no serious bites to people documented. Any snake can bite.")
         # the app's checklist filter panel, group by group, counted over this page's living species
         tcount = {}
@@ -2530,7 +2559,7 @@ COUNTRY = """<!doctype html>
 <meta property="og:type" content="website"><meta property="og:site_name" content="SnakeList"><meta property="og:title" content="{title}"><meta property="og:description" content="{desc}">
 <meta property="og:url" content="{url}"><meta property="og:image" content="{img}"><meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#1F5A3A">
-<link rel="icon" href="../../favicon.ico" sizes="any"><link rel="stylesheet" href="../sp.css"><link rel="stylesheet" href="../country.css">
+<link rel="icon" href="../../favicon.ico" sizes="any"><link rel="stylesheet" href="../sp.css"><link rel="stylesheet" href="../country.css">""" + DS_HEAD + """
 <script type="application/ld+json">{ld}</script>
 </head><body class="cy-page">
 {site_head}

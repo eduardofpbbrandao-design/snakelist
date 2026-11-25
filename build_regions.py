@@ -21,6 +21,7 @@ What the data can and cannot say, and how the pages word it:
 - Who described a snake: the reviewed account's authority where there is one; otherwise the page
   asks Wikidata in the visitor's browser (wd.js) and says where the answer came from.
 """
+import os as _os_ds, sys as _sys_ds; _sys_ds.path.insert(0, _os_ds.path.join(_os_ds.path.dirname(_os_ds.path.abspath(__file__)), "tools")); from ds_scope import DS_HEAD  # the design preview's head line
 import json, re, os, math, unicodedata, html as H
 from urllib.parse import quote
 import build_species as B
@@ -789,7 +790,7 @@ PAGE = """<!doctype html>
 <meta property="og:type" content="website"><meta property="og:site_name" content="SnakeList"><meta property="og:title" content="{title}"><meta property="og:description" content="{desc}">
 <meta property="og:url" content="{url}"><meta property="og:image" content="{img}"><meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#1F5A3A">
-<link rel="icon" href="../../favicon.ico" sizes="any"><link rel="stylesheet" href="../sp.css"><link rel="stylesheet" href="../country.css">
+<link rel="icon" href="../../favicon.ico" sizes="any"><link rel="stylesheet" href="../sp.css"><link rel="stylesheet" href="../country.css">""" + DS_HEAD + """
 <script>document.documentElement.className+=" js"</script>
 <script type="application/ld+json">{ld}</script>
 </head><body class="cy-page">
@@ -965,7 +966,7 @@ function enhance(sel){
   var w=document.createElement('span');w.className='sl-dd';sel.parentNode.insertBefore(w,sel);w.appendChild(sel);
   var cs=getComputedStyle(sel),b=document.createElement('button');b.type='button';b.className='sl-dd-btn '+(sel.className||'');
   ['font','color','background-color','border','border-radius','padding','min-height','height','box-shadow','letter-spacing'].forEach(function(k){b.style.setProperty(k,cs.getPropertyValue(k))});
-  if(cs.width&&cs.display!=='none'&&sel.offsetWidth)b.style.minWidth=sel.offsetWidth+'px';
+  if(cs.width&&cs.display!=='none'&&sel.offsetWidth)b.style.minWidth='min('+sel.offsetWidth+'px,100%)';
   b.setAttribute('aria-haspopup','listbox');b.setAttribute('aria-expanded','false');b.setAttribute('aria-controls',id);
   var lab=sel.getAttribute('aria-label')||(sel.labels&&sel.labels[0]&&sel.labels[0].textContent.trim())||'';if(lab)b.setAttribute('aria-label',lab);
   var txt=document.createElement('span');b.appendChild(txt);

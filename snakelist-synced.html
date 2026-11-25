@@ -1,4 +1,16 @@
 <title>SnakeList</title>
+<script>
+// Previews (Settings > Previews; on the website tools/previews.js runs first and puts the classes): html.sl-pv-<name> for each
+// preview that was on when this page started. SL_PV_ON(name) answers from that, so a page never mixes old and new halfway;
+// a preview switched on later shows after a reload. SL_DSW(old, new): the design preview's wording, else today's.
+(function () {
+  var d = document.documentElement;
+  try { ["design", "cookies", "tutorial", "finale", "opening"].forEach(function (k) {
+    if (!d.classList.contains("sl-pv-" + k) && !(window.SL_PREVIEWS && window.SL_PREVIEWS.on) && localStorage.getItem("sl-art-preview-" + k) === "1") d.classList.add("sl-pv-" + k); }); } catch (e) {}
+  window.SL_PV_ON = function (k) { return d.classList.contains("sl-pv-" + k); };
+  window.SL_DSW = function (a, b) { return d.classList.contains("sl-pv-design") ? b : a; };
+})();
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -8276,7 +8288,7 @@
   }
 
   // ---- the other Mark Seen buttons (outside the card) ----
-  var HTML = '<span class="lbl-mark">Mark Seen</span><span class="lbl-seen"><svg class="ic" width="13" height="13" aria-hidden="true"><use href="#i-check"></use></svg> Seen</span>';
+  var HTML = '<span class="lbl-mark">' + SL_DSW("Mark Seen", "Mark seen") + '</span><span class="lbl-seen"><svg class="ic" width="13" height="13" aria-hidden="true"><use href="#i-check"></use></svg> Seen</span>';
   function sync(b, on) {
     if (!b) return;
     b.classList.toggle(b.classList.contains("cam-btn") ? "seen" : "on", !!on);
@@ -9961,7 +9973,7 @@
       { sel: firstCard, act: "hover", tryIt: "Try it: point at the card with your mouse.", title: "A snake card", text: "Each card is one species: its photo, name, scientific name, where it lives, its family and tags like Venomous or Rare." },
       { sel: inCard(".wish-row, .wish-btn"), title: "Want to see", text: "Add a snake to the list of snakes you'd love to find one day." },
       { sel: inCard(".follow-btn"), title: "Follow", text: "Tap the bell to follow a snake and get news about it." },
-      { sel: inCard(".seen-btn"), title: "Mark Seen", text: "Seen this snake in real life? Tap Mark Seen to tick it off - you can add the date, the place and your own photo." },
+      { sel: inCard(".seen-btn"), title: SL_DSW("Mark Seen", "Mark seen"), text: "Seen this snake in real life? Tap " + SL_DSW("Mark Seen", "Mark seen") + " to tick it off - you can add the date, the place and your own photo." },
       // v5.16: the 3D tour - it opens a snake in 3D and lets you try the buttons, then closes it again
       { sel: () => [].find.call(document.querySelectorAll("#grid .card .td-card-btn"), (b) => b.offsetParent), act: "click", tryIt: "Try it: click 3D to open this snake in 3D.", title: "3D", text: "Every snake in SnakeList has its own 3D model. Click 3D and we'll look at it together." },
       { sel: ".sl3d-ov .sp3d-stage", waitFor: true, title: "Your snake in 3D", text: "This is a 3D model of the real snake - its colours, pattern and size come from photos and measurements of the real species, and it lies in the kind of place where it lives. Drag to go round it, and scroll or pinch to zoom in where you point." },
@@ -9972,11 +9984,11 @@
       { sel: in3d(/^Show more/), waitFor: true, act: "click", tryIt: "Try it: click Show more.", title: "More buttons", text: "The camera buttons: the full body, a close-up of the head and its pattern from above. Size vs person, next to Normal and Anatomy, shows how long it is next to a person 1.70 m tall." },
       { sel: ".sl3d-ov .sp3d-fsc", waitFor: true, title: "Full screen", text: "Make the 3D model fill your whole screen." },
       { sel: in3d(/Compare photo/), waitFor: true, title: "Compare photo", text: "Put a real photo of this snake next to the model. You can zoom into the photo too." },
-      { sel: in3d(/See countries/), waitFor: true, title: "See countries", text: "See the countries and states where this snake lives." },
+      { sel: in3d(/See countries|See more info/), waitFor: true, title: SL_DSW("See countries", "See more info"), text: SL_DSW("See the countries and states where this snake lives.", "See the countries and states where this snake lives, beside the model.") },
       { sel: in3d(/Habitat/), title: "Habitat", text: "See the kind of place where this snake lives, all around it in 3D." },
       { sel: ".sl3d-ov .sl3d-back", waitFor: true, act: "click", tryIt: "Try it: click the X in the top-right corner.", title: "Close", text: "Close the 3D model to go back to your list." },
       { sel: inCard(".map-btn"), title: "See more info", text: "Open the snake's own page with everything SnakeList knows about it." },
-      { sel: "#tab-sightings", title: "My Sightings", text: "Every snake you've marked as seen." },
+      { sel: "#tab-sightings", title: SL_DSW("My Sightings", "My sightings"), text: "Every snake you've marked as seen." },
       { sel: "#tab-wish", title: "Want to see", text: "The snakes you'd love to find one day." },
       { sel: "#tab-follow", title: "Following", text: "The snakes you follow, with their news." },
       { sel: "#sl-share-sightings", title: "Share your sightings", text: "Makes a picture of the snakes you've seen, to send to your friends and family." },
@@ -11356,7 +11368,7 @@
     const seen = cards.filter((c) => c.classList.contains("done")).length;
     const sn = document.getElementById("sl-seen-n"); if (sn) sn.textContent = seen.toLocaleString();
     const t = document.getElementById("tab-sightings");
-    if (t) t.innerHTML = sightIcon() + " My Sightings" + tabN(seen);
+    if (t) t.innerHTML = sightIcon() + SL_DSW(" My Sightings", " My sightings") + tabN(seen);
     const w = document.getElementById("tab-wish");
     if (w) w.innerHTML = TAB_STAR + " Want to see" + tabN(wishCount());
     const fl = document.getElementById("tab-follow");
@@ -11700,7 +11712,7 @@
     const seen = cards.filter((c) => c.classList.contains("done")).length;
 
     document.getElementById("tab-guide").innerHTML = ICON.book + " Species Checklist";
-    document.getElementById("tab-sightings").innerHTML = sightIcon() + " My Sightings" + tabN(seen);
+    document.getElementById("tab-sightings").innerHTML = sightIcon() + SL_DSW(" My Sightings", " My sightings") + tabN(seen);
     document.getElementById("tab-guide").classList.toggle("active", tab === "guide");
     document.getElementById("tab-sightings").classList.toggle("active", tab === "sightings");
     document.getElementById("tab-wish").innerHTML = TAB_STAR + " Want to see" + tabN(wishCount());
@@ -11766,7 +11778,7 @@
       ? "No snakes found."
       : tab === "follow" ? "You're not following any snakes yet - tap the bell next to a snake's name to follow it."
       : tab === "wish" ? "No snakes on your list yet - tap \u2606 Want to see on any snake in the Species Checklist."
-      : "You haven't logged any sightings yet — find one in the Species Checklist and tap Mark Seen.";
+      : "You haven't logged any sightings yet — find one in the Species Checklist and tap " + SL_DSW("Mark Seen", "Mark seen") + ".";
 
     document.getElementById("clear").classList.toggle("show", query.length > 0);
     if (!skipChips) renderChips();
@@ -13046,7 +13058,7 @@
       "Lives in: " + '<span class="quiz-lives-in">' + quizCurrent.answers.map((a) =>
         (((window.SL_INVASIVE || {})[quizCurrent.card.dataset.id] || []).some((pl) => pl.name === a || (pl.states || []).some((c) => window.STATE_NAME[c] === a))
           && !quizCurrent.card.dataset.countries.split("|").includes(a)) ? a + " (invasive)" : a).join(", ") + "</span>" + roundNote +
-      '<div class="quiz-result-actions"><button class="quiz-see-map" id="quiz-see-map" type="button">See countries</button>' +
+      '<div class="quiz-result-actions"><button class="quiz-see-map" id="quiz-see-map" type="button">' + SL_DSW("See countries", "See more info") + '</button>' +
       '<button class="quiz-next" id="quiz-next" type="button">Next question</button></div>';
     document.getElementById("quiz-submit").hidden = true;
     revealQuizMap();
@@ -20385,10 +20397,22 @@ window.SL_GEO_READY = new Promise(function (res) {
     sb.value = c.querySelector(".card-name").textContent.trim(); sb.dispatchEvent(new Event("input"));
     var n = 0;
     setTimeout(function down() {   // after the checklist has redrawn for the search
+      // (design preview) Mark seen / Want to see wait until the opening photo has gone, so the confirmation and its Undo are seen
+      if (act && SL_PV_ON("design") && !window.__heroEntered && document.querySelector("#sl-hero:not([hidden])") && (down.w = (down.w || 0) + 1) < 400) { setTimeout(down, 300); return; }
       if (c.offsetParent === null && n++ < 20) { setTimeout(down, 150); return; }
       window.scrollTo({ top: c.getBoundingClientRect().top + scrollY - 90, behavior: "smooth" });
       // &do=seen / &do=want (a species page's "Mark seen" / "Want to see"): point at that button on the card; the person still taps it
       var b = act === "seen" ? c.querySelector(".seen-btn") : act === "want" ? c.querySelector(".wish-btn") : null;
+      if (b && SL_PV_ON("design")) {
+        // (design preview) it really does it (once: a refresh doesn't flip it back), says so, and offers Undo
+        var cls = act === "seen" ? "done" : "wish", already = c.classList.contains(cls), nm = c.querySelector(".card-name").textContent.trim();
+        var ext = window.SL_FACTS && window.SL_FACTS.EXTINCT && window.SL_FACTS.EXTINCT[id];
+        if (!already && !ext && !(act === "want" && c.classList.contains("done"))) {
+          b.click();
+          if (window.SL_offerUndo) window.SL_offerUndo(nm + (act === "seen" ? " is marked as seen." : " is on your Want to see list."), function () { if (c.classList.contains(cls)) b.click(); });
+        }
+        try { history.replaceState(null, "", location.pathname + "?sp=" + encodeURIComponent(id) + location.hash); } catch (e) {}
+      }
       if (b) { try { b.focus({ preventScroll: true }); } catch (e) {} b.classList.remove("chip-pulse"); void b.offsetWidth; b.classList.add("chip-pulse"); }
     }, 700);
   }
@@ -20802,7 +20826,7 @@ window.SL_GEO_READY = new Promise(function (res) {
         '<ul class="fp-facts"><li class="fp-wait">Loading facts&hellip;</li></ul>' +
         '<div class="fp-sight"><h4>Latest sightings</h4><div class="fp-obs"><span class="fp-wait">Checking iNaturalist&hellip;</span></div></div>' +
         '<div class="fp-actions"><button type="button" class="fp-fav' + (fav ? " on" : "") + '">' + STAR + (fav ? "Favourite" : "Mark as favourite") + '</button>' +
-        '<button type="button" class="fp-countries">See countries</button><button type="button" class="fp-unfollow">Unfollow</button></div></div></article>';
+        '<button type="button" class="fp-countries">' + SL_DSW("See countries", "See more info") + '</button><button type="button" class="fp-unfollow">Unfollow</button></div></div></article>';
     }).join("");
     var cards = feed.querySelectorAll(".fp");
     feed.onclick = function (e) {
@@ -20822,6 +20846,8 @@ window.SL_GEO_READY = new Promise(function (res) {
         if (b) b.click(); // same as tapping its bell - the profile disappears
         return;
       }
+      // (design preview) "See more info" opens the species page, as on the cards
+      if (e.target.closest(".fp-countries") && SL_PV_ON("design") && window.SL_PAGE_URL) { var u0 = window.SL_PAGE_URL(s.card); if (window.claude && window.claude.use) window.open(u0, "_blank", "noopener"); else location.href = u0; return; }
       if (e.target.closest(".fp-countries") || (e.target.closest(".fp-place") && s.countries.length > 1)) {
         if (window.showMapSheet) window.showMapSheet(s.card);
         return;
@@ -26050,9 +26076,9 @@ window.SL_GEO_READY = new Promise(function (res) {
         (i.type ? '<button type="button" data-filter="type" data-value="' + esc(i.type) + '">' + esc(i.type) + "</button>" : "") +
         (x.near ? '<span class="cam-near">Seen ' + x.near + " time" + (x.near === 1 ? "" : "s") + " within " + near.r + " km</span>" : near && Object.keys(near.m).length ? '<span class="cam-near no">No sightings within ' + near.r + " km</span>" : "") + "</div></div>" +
         '<div class="cam-pct">' + (pct < 1 ? "<1" : pct) + '%</div><div class="cam-acts">' +
-        '<button type="button" class="cam-btn" data-keep="' + esc(i.id) + '">Mark Seen &amp; keep this photo</button>' +
+        '<button type="button" class="cam-btn" data-keep="' + esc(i.id) + '">' + SL_DSW("Mark Seen", "Mark seen") + ' &amp; keep this photo</button>' +
         '<button type="button" class="cam-btn ghost sl-sb' + (seen ? " seen" : "") + '" data-seen="' + esc(i.id) + '">' + (window.SL_SEEN_UI ? window.SL_SEEN_UI.html() : seen ? "&#10003; Seen" : "Mark Seen") + "</button>" + // (Mark Seen smooth)
-        '<button type="button" class="cam-btn ghost" data-countries="' + esc(i.id) + '">See countries</button>' +
+        '<button type="button" class="cam-btn ghost" data-countries="' + esc(i.id) + '">' + SL_DSW("See countries", "See more info") + '</button>' +
         '<button type="button" class="cam-btn ghost" data-see="' + esc(i.name) + '">See in checklist</button></div></div>';
     }).join("") + (anyHere || !here ? "" : '<p class="cam-note">No snakes are on record where you are, so these are from anywhere in the world.</p>') +
       '<p class="cam-note">Guesses come from what the snake looks like, where you are' + (near && Object.keys(near.m).length ? " and the snakes recorded within " + near.r + " km of there on iNaturalist" : "") + '. Use them as a starting point, not a final answer.</p>' +
@@ -26069,7 +26095,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       c3.width = Math.round(img.naturalWidth * sc3); c3.height = Math.round(img.naturalHeight * sc3); c3.getContext("2d").drawImage(img, 0, 0, c3.width, c3.height);
       var where = here ? window.SL_placeLabel(here.lat, here.lon) : "";
       var r = window.SL_keepSighting(kp.getAttribute("data-keep"), c3.toDataURL("image/jpeg", 0.82), where);
-      kp.textContent = r === "full" ? "Marked seen - but storage is full, the photo wasn't kept" : r ? "Saved to My Sightings" + (where ? " - " + where : "") : "Couldn't save";
+      kp.textContent = r === "full" ? "Marked seen - but storage is full, the photo wasn't kept" : r ? "Saved to " + SL_DSW("My Sightings", "My sightings") + (where ? " - " + where : "") : "Couldn't save";
       kp.disabled = true;
       var sb = kp.parentNode.querySelector("[data-seen]"); if (sb) { if (window.SL_SEEN_UI) window.SL_SEEN_UI.sync(sb, true); else { sb.classList.add("seen"); sb.innerHTML = "&#10003; Seen"; } } // (Mark Seen smooth)
       return;
@@ -26081,7 +26107,9 @@ window.SL_GEO_READY = new Promise(function (res) {
       return;
     }
     var mc = e.target.closest("[data-countries]");
-    if (mc) { var c2 = cardInfo(mc.getAttribute("data-countries")), mb = c2 && c2.card.querySelector(".map-btn"); if (mb) mb.click(); }
+    if (mc) { var c2 = cardInfo(mc.getAttribute("data-countries"));
+      if (c2 && SL_PV_ON("design") && window.SL_PAGE_URL) { var u1 = window.SL_PAGE_URL(c2.card); if (window.claude && window.claude.use) window.open(u1, "_blank", "noopener"); else location.href = u1; return; } // (design preview: the species page, like the cards)
+      var mb = c2 && c2.card.querySelector(".map-btn"); if (mb) mb.click(); }
   });
 })();
 </script>
@@ -31028,7 +31056,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
   };
   var opts = [].slice.call(box.querySelectorAll(".sl-lv-opt")), go = document.getElementById("sl-lv-go"), no = document.getElementById("sl-lv-no");
   var hint = document.getElementById("sl-lv-hint"), ckTxt = document.getElementById("sl-lv-ck-txt");
-  function consentAsked() { return !web || get("sl-consent") === "yes"; } // (with "Only essentials" before, it asks again here)
+  function consentAsked() { return !web || !!get("sl-consent"); } // asked once only - an earlier "Only essentials" is respected (no second cookie question here)
   function paint() {
     opts.forEach(function (o) { o.setAttribute("aria-pressed", String(o.dataset.level === pick)); });
     go.disabled = no.disabled = !pick;
@@ -31057,7 +31085,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
   });
   go.addEventListener("click", function () {
     if (!pick) return;
-    if (web && get("sl-consent") !== "yes" && window.SL_CONSENT) window.SL_CONSENT(true);
+    if (web && !get("sl-consent") && window.SL_CONSENT) window.SL_CONSENT(true); // ("Continue" after an earlier "Only essentials" does not turn cookies on)
     var keep = !web || get("sl-consent") === "yes";
     apply(pick, keep); if (!keep) { /* cookies refused earlier: this visit only */ }
     close();
@@ -31332,13 +31360,15 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
     if (!box) return null;
     var P = reg(), sec = box.querySelector("#sl-set-previews");
     // shown when a preview is on - and, once shown, kept while Settings is open (so a switch turned off can go back on)
-    if (!P || !(P.any() || sec)) { if (sec) sec.remove(); return null; }
+    // (or, for someone signed in, once ?preview=all - or any preview - has been used here or in the account: P.menu())
+    if (!P || !(P.any() || sec || (signedIn() && P.menu && P.menu()))) { if (sec) sec.remove(); return null; }
     if (!sec) {
       sec = document.createElement("section"); sec.className = "sl-sgrp sl-set-prev"; sec.id = "sl-set-previews"; sec.setAttribute("data-section", "previews");
       var foot = box.querySelector(".sl-sfoot"); if (foot && foot.parentNode === box) box.insertBefore(sec, foot); else box.appendChild(sec);
       sec.addEventListener("click", function (e) {
         var s = e.target.closest("[data-pv]"), R = reg(); if (!R) return;
         if (s) { R.set(s.getAttribute("data-pv"), s.getAttribute("aria-checked") !== "true"); changedHere = true; render(box); return; }
+        if (e.target.closest("[data-pv-allon]")) { R.list().forEach(function (p) { if (!p.on && p.key !== "events") R.set(p.key, true); }); changedHere = true; render(box); return; }
         if (e.target.closest("[data-pv-alloff]")) { R.list().forEach(function (p) { if (p.on) R.set(p.key, false); }); changedHere = true; render(box); return; }
         if (e.target.closest("[data-pv-reload]")) location.reload();
       });
@@ -31351,7 +31381,8 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
           '</small><span class="sl-pv-tag">Preview &mdash; not public yet</span></span><button type="button" class="sl-sw" role="switch" data-pv="' + esc(p.key) +
           '" aria-label="' + esc(p.label) + '" aria-checked="' + (p.on ? "true" : "false") + '"></button></div>';
       }).join("") + "</div>" +
-      '<div class="sl-pv-act"><button type="button" class="sl-sbtn" data-pv-alloff' + (any ? "" : " disabled") + ">Turn all previews off</button>" +
+      '<div class="sl-pv-act"><button type="button" class="sl-sbtn" data-pv-allon' + (L.every(function (p) { return p.on || p.key === "events"; }) ? " disabled" : "") + ">Turn all previews on</button>" +
+      '<button type="button" class="sl-sbtn" data-pv-alloff' + (any ? "" : " disabled") + ">Turn all previews off</button>" +
       '<button type="button" class="sl-sbtn" data-pv-reload' + (changedHere ? "" : " hidden") + ">Reload SnakeList to see it</button>" +
       '<span class="sl-pv-msg" role="status" aria-live="polite">' + (changedHere ? (any ? "Saved." : "All previews are off.") + " The change shows after a reload." : "") + "</span></div>";
     return sec;
@@ -32245,7 +32276,7 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
     "3d-slither": { stage: 4, target: in3d(/^Slither$/), need3d: true, wait: 4000, title: "Slither", text: "Watch it move along the ground." },
     "3d-more": { stage: 4, target: in3d(/^Show more/), need3d: true, wait: 4000, title: "More views", text: "The full body, a close-up of the head, its pattern from above, and Size vs person - how long it is next to a person 1.70 m tall." },
     "3d-compare": { stage: 4, target: in3d(/Compare photo/), need3d: true, wait: 3000, title: "Compare photo", text: "Put a real photo of this snake next to the model." },
-    "3d-countries": { stage: 4, target: in3d(/See countries/), need3d: true, wait: 3000, title: "See countries", text: "The countries and states where this snake lives." },
+    "3d-countries": { stage: 4, target: in3d(/See countries|See more info/), need3d: true, wait: 3000, title: "See countries", text: "The countries and states where this snake lives." },
     "3d-close": { stage: 4, target: function () { return D.querySelector(".sl3d-ov .sl3d-back"); }, need3d: true, wait: 3000, interact: "click", tryIt: "Try it: {tap} the X to close it.", title: "Close", text: "Close the 3D model to go back to your list." },
     "ach-share": { stage: 4, target: "share-sightings", route: "guide", title: "Share my sightings", text: "Makes a picture of the snakes you've seen, to send to friends and family." },
     "cabin-open": { stage: 4, target: "tab-cabin", when: hasXmas, title: "Christmas Cabin", text: "This season's Christmas Cabin. Do Christmas tasks - each one puts a present under your tree - then open them and decorate the tree. Each task has a Show me button that takes you to it." },
@@ -32904,5 +32935,466 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
   sec.addEventListener("toggle", render);
   document.addEventListener("sl-traits-changed", render);
   if (window.SL_GET_TRAITS().length) render();
+})();
+</script>
+<style id="sl-ds-css" media="not all">
+/* ==== sl-ds: the SnakeList design system (v6.24 overhaul) ====================================================
+   One set of tokens and components, loaded LAST so it wins over the older per-feature rules above.
+   The part between "sl-ds shared start/end" is copied by build_species.py into species/sp.css and species/sl-fx.css,
+   so the species, place, About, Install and Privacy pages get the same buttons, focus ring, links and type.
+   Rules of the system:
+   - green stays the brand: #58b351 for accents, marks and progress; FILLED buttons with words on them use a deeper
+     green (#2e7d32, white words 5.1:1) in day mode and a light green with dark words (#8fd46c, 8.2:1) at night
+   - type: Inter for everything you read, Fraunces for names and headings; body text 16px, labels never under 12.5px;
+     scientific names are Inter italic (not monospace); capitals only for very short labels
+   - pills (999px) are for filters, toggles and status; actions are rounded rectangles (10px)
+   - every control has hover, pressed, keyboard focus, selected and disabled looks; 44px tall on touch screens */
+/* ---- sl-ds shared start ---- */
+:root {
+  --ds-primary: #2e7d32; --ds-primary-hover: #276d2c; --ds-primary-press: #1f5c23; --ds-on-primary: #ffffff;
+  --ds-focus: #1f6f2a; --ds-danger: #a33a24; --ds-danger-hover: #8a2f1c; --ds-on-danger: #ffffff;
+  --ds-radius: 10px; --ds-radius-sm: 8px; --ds-pill: 999px;
+  --ds-fs-label: 12.5px; --ds-fs-meta: 13.5px; --ds-fs-ui: 14.5px; --ds-fs-body: 16px; --ds-fs-lead: 18px;
+  --ds-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ds-display: 'Fraunces', Georgia, serif;
+  --ds-tap: 44px;
+}
+[data-sl-theme="dark"] {
+  --ds-primary: #8fd46c; --ds-primary-hover: #a5e486; --ds-primary-press: #7cc35a; --ds-on-primary: #0e2f1e;
+  --ds-focus: #b8f09f; --ds-danger: #f0a58a; --ds-danger-hover: #f6bba5; --ds-on-danger: #2a0e06;
+}
+/* keyboard focus: one visible ring everywhere (mouse clicks don't show it) */
+:where(a, button, [role="button"], [role="tab"], [role="link"], summary, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--ds-focus); outline-offset: 2px; }
+/* links in running text: never colour alone - they are a little bolder than the words around them, and get an
+   underline while they have keyboard focus (Eduardo asked for no underlines on hover; see v5.81) */
+:where(p, li, dd, td, figcaption, .sp-note, .sl-sub) a:not([class]) { font-weight: 600; }
+:where(p, li, dd, td, figcaption, .sp-note, .sl-sub) a:not([class]):focus-visible { text-decoration-line: underline !important; text-underline-offset: 3px; }
+/* the shared button: .sl-btn (+ .is-primary / .is-secondary / .is-ghost / .is-danger) */
+.sl-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-sizing: border-box; min-height: 40px;
+  padding: 8px 16px; border-radius: var(--ds-radius); border: 1px solid transparent; font: 600 var(--ds-fs-ui)/1.2 var(--ds-font);
+  cursor: pointer; text-decoration: none; white-space: nowrap; transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .08s ease; }
+.sl-btn.is-primary { background: var(--ds-primary); border-color: var(--ds-primary); color: var(--ds-on-primary); }
+.sl-btn.is-primary:hover { background: var(--ds-primary-hover); border-color: var(--ds-primary-hover); }
+.sl-btn.is-primary:active { background: var(--ds-primary-press); }
+.sl-btn.is-secondary { background: transparent; border-color: currentColor; color: var(--ds-primary); }
+.sl-btn.is-ghost { background: transparent; color: inherit; }
+.sl-btn.is-danger { background: var(--ds-danger); border-color: var(--ds-danger); color: var(--ds-on-danger); }
+.sl-btn.is-danger:hover { background: var(--ds-danger-hover); }
+.sl-btn:active { transform: translateY(1px); }
+.sl-btn[aria-pressed="true"], .sl-btn.is-selected { box-shadow: inset 0 0 0 2px currentColor; }
+.sl-btn:disabled, .sl-btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; transform: none; }
+.sl-btn.is-loading, .sl-btn[aria-busy="true"] { pointer-events: none; opacity: .8; }
+.sl-btn.is-loading::before, .sl-btn[aria-busy="true"]::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor;
+  border-right-color: transparent; animation: sl-ds-spin .7s linear infinite; }
+@keyframes sl-ds-spin { to { transform: rotate(360deg); } }
+/* badge (status, never colour alone: it always has words), notice */
+.sl-badge-ds { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: var(--ds-pill); font: 600 var(--ds-fs-label)/1.3 var(--ds-font); border: 1px solid currentColor; }
+.sl-notice { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--ds-radius); border: 1px solid; font: 400 var(--ds-fs-meta)/1.5 var(--ds-font); }
+@media (pointer: coarse) { .sl-btn { min-height: var(--ds-tap); } }
+@media (prefers-reduced-motion: reduce) { .sl-btn { transition: none; } .sl-btn.is-loading::before, .sl-btn[aria-busy="true"]::before { animation-duration: 2s; } }
+/* ---- species, place and About pages (classes that only exist there) ---- */
+/* the filled buttons on the pages: deeper green, white words (were white on #58b351, 2.6:1) */
+.sp-actions a.sp-btn:not(.sp-btn2), .cy-cta a.cy-btn, .center a.btn, a.btn.btn-primary, .btn-primary, .sl-ev-btn.pri {
+  background: var(--ds-primary) !important; border-color: var(--ds-primary) !important; color: var(--ds-on-primary) !important; }
+.sp-actions a.sp-btn:not(.sp-btn2):hover, .cy-cta a.cy-btn:hover, .center a.btn:hover, .btn-primary:hover { background: var(--ds-primary-hover) !important; border-color: var(--ds-primary-hover) !important; }
+.sp-actions a.sp-btn:active, .cy-cta a.cy-btn:active, .center a.btn:active { transform: translateY(1px); }
+/* ---- sl-ds shared end ---- */
+
+/* ==== app-only part ==== */
+/* day: filled green fills everywhere use the deeper green; night: a true dark forest green (was mid-green #24684a),
+   muted words 6.4:1 on panels (were 3.7:1) */
+:root { --gold-fill: var(--ds-primary); --on-fill: var(--ds-on-primary); }
+[data-sl-theme="dark"] {
+  --bg: #173f2e; --bg-grad: linear-gradient(180deg, #1b4a35 0%, #163d2c 34%, #11321f 70%, #0b2416 100%); --page-under: #0b2416;
+  --surface: #1a4d37; --surface-hover: #215c42; --border: #2f6d50; --text-muted: #bcd8c5; --moss: #bcd8c5;
+  --gold-fill: var(--ds-primary); --on-fill: var(--ds-on-primary);
+}
+/* every filled button with words on it (the older classes, one list) */
+.map-btn, .sl3d-more, .fp-countries, html.sl-web .install-btn, .ck-yes, .keep-go, .sl-nudge .nd-go, .wn-ok, .ins-ok, .ps-close, .cam-btn,
+.ed-stay, .ed-bar-btns .edb-done, #signin-page .signin-primary, .sl-lv-btns .sl-lv-go, .tour-actions .primary, #note-save, #report-send, #wn-all,
+html:not([data-sl-theme="dark"]) .ck-yes, html:not([data-sl-theme="dark"]) .ed-bar-btns .edb-done, html:not([data-sl-theme="dark"]) .sl-nudge .nd-go {
+  background-color: var(--ds-primary) !important; border-color: var(--ds-primary) !important; color: var(--ds-on-primary) !important; background-image: none !important; }
+.map-btn:hover, .sl3d-more:hover, .fp-countries:hover, html.sl-web .install-btn:hover, .ck-yes:hover, .keep-go:hover, .sl-nudge .nd-go:hover, .wn-ok:hover, .ins-ok:hover,
+.ps-close:hover, .cam-btn:hover, .ed-stay:hover, .ed-bar-btns .edb-done:hover, #signin-page .signin-primary:hover, .sl-lv-btns .sl-lv-go:not(:disabled):hover,
+.tour-actions .primary:hover, #note-save:hover, #report-send:hover, #wn-all:hover {
+  background-color: var(--ds-primary-hover) !important; border-color: var(--ds-primary-hover) !important; opacity: 1 !important; }
+.map-btn:active, .sl3d-more:active, .install-btn:active, .ck-yes:active, .wn-ok:active, .ins-ok:active, #signin-page .signin-primary:active, .sl-lv-go:active,
+.tour-actions .primary:active, #note-save:active, #report-send:active { background-color: var(--ds-primary-press) !important; transform: translateY(1px); }
+/* small filled count pills and selected options with words on them */
+.fsec-n, .fsec-adv .fa-n, .xa-sec-n, .wn-ver, html:not([data-sl-theme="dark"]) .wn-ver, .note-cond-b[aria-checked="true"], .lang-menu li[aria-selected="true"],
+.pin-btn.on, .g-acct .g-init, .sl-asteprow li.on, .sl3d-seen.on, .cam-step.done .cam-num {
+  background-color: var(--ds-primary) !important; border-color: var(--ds-primary) !important; color: var(--ds-on-primary) !important; }
+/* ---- type: one scale; Inter for reading, Fraunces for names; monospace only for clocks ---- */
+body { font-size: 16px; }
+.sl-sub { font-size: 16px; line-height: 1.5; }
+.eyebrow { font: 600 12.5px/1.4 var(--ds-font); letter-spacing: .06em; }
+.sl-ver { font: 600 12.5px/1.3 var(--ds-font); letter-spacing: .02em; }
+.field span, .signin-msg, .filter-label, .quiz-answer-field span, .tour-step, .sl-akick, .ed-h, .wn-card h3, .g-or, .sg-opts legend, .sgv-ttl, .sgv-facts dt,
+.ach-newest small, .xa-kicker, .xa-latest small, .quiz-level-tag, .sl-sgrp > h3, .sl-set .xm-set-audio > h3, .gmenu .gm-h, .cmp-col dt, .qp-facts dt {
+  font-family: var(--ds-font) !important; font-size: var(--ds-fs-label) !important; letter-spacing: .02em !important; text-transform: none !important; font-weight: 700 !important; }
+.sl-sgrp > h3, .sl-set .xm-set-audio > h3 { font-size: 13.5px !important; line-height: 1.3 !important; color: var(--text) !important; }
+.city-lookup-result .city-lookup-note, .city-search-caption, .city-search-row span, .country-opt span, .result-count, .note-btn, .photo-btn, .pic-tag-count,
+.pic-field, .fp-sci, .map-sci, .cp-sub, .ach-ring-txt span, .ach-stats li b, .ach-count, .sl-agrp h3 span, .sl-asteprow li, .ach-toast span span, .xa-ring-txt span,
+.xa-count, .quiz-level-btn span, .quiz-score, .quiz-map-pick, .quiz-left, .quiz-sci, .quiz-level-imp em, .imp-photo figcaption, .map-count, .map-list span, .note-sub,
+.wn-ver, .cam-pct, .sl-badge, .sl-sval, .sgv-mono, .chip-n, .card-sci, .tag, .photo-btn-clear, .sp-info-sci, .nm-months em, .ach-stats li b {
+  font-family: var(--ds-font) !important; letter-spacing: 0 !important; }
+.chip-n, .ach-stats li b, .ach-count, .xa-count, .quiz-score, .cam-pct, .sl-sval, .result-count, .wn-ver { font-variant-numeric: tabular-nums; }
+.result-count { font-size: 14px; }
+.chip { font-size: 14px; }
+.chip-n { font-size: 12.5px; opacity: .85; }
+.place-note, .quiz-level-btn span, .quiz-left, .quiz-score, .quiz-map-pick, .map-count, .note-sub, .ach-count { font-size: 13.5px !important; }
+.quiz-sci, .map-sci, .fp-sci { font-size: 14px !important; font-style: italic; }
+.sl-sfoot { font-size: 13.5px; }
+/* ---- cards ---- */
+#grid .card-name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 18px; line-height: 1.25; color: inherit; text-decoration: none; overflow-wrap: anywhere; }
+#grid a.card-name { cursor: pointer; border-radius: 4px; }
+#grid a.card-name:hover { color: var(--gold); }
+#grid .card.done a.card-name { color: var(--gold); }
+#grid .card-sci { font-size: 14px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#grid .card-sci.no-common { display: none; }
+#grid .tag { font-size: 12.5px; padding: 3px 9px; }
+.seen-btn, .map-btn, .td-card-btn { font: 600 14px/1.2 var(--ds-font) !important; border-radius: var(--ds-radius) !important; }
+/* one even action row on every card: 3D | Mark seen | See more info (the primary, filled) - the same order and sizes on
+   fossil cards (no Mark seen there: See more info just takes the room) */
+#grid .card-bottom { gap: 8px; justify-content: stretch; }
+#grid .card-bottom .note-btn, #grid .card-bottom .photo-btn { order: 0; }
+#grid .card-bottom .td-card-btn { order: 1; margin-left: 0 !important; flex: none; min-height: 40px !important; width: 44px !important; }
+#grid .card-bottom .seen-btn { order: 2; flex: 1 1 0; min-width: 0 !important; padding: 8px 8px !important; margin: 0 !important; }
+#grid .card-bottom .map-btn { order: 3; flex: 1.25 1 0; min-width: 0; padding: 8px 8px !important; margin: 0 !important; white-space: nowrap; }
+#grid .card-bottom .seen-btn, #grid .card-bottom .map-btn { min-height: 40px; }
+/* status in words, not just colour: Want to see shows a tick when it's on your list; the bell says Following */
+.wish-btn { font-size: 13px; }
+.card.wish .wish-btn .wish-on::before { content: "\2713\00a0"; }
+.follow-btn .sl-fol-lbl { display: none; font: 600 12.5px/1 var(--ds-font); margin-left: 4px; }
+.card.follow .follow-btn { width: auto !important; padding: 0 10px 0 8px !important; border-radius: 999px !important; display: inline-flex !important; align-items: center; }
+.card.follow .follow-btn .sl-fol-lbl { display: inline; }
+[data-sl-theme="dark"] .card.follow .follow-btn { color: #ffd27a; }
+.note-btn, .photo-btn { font-size: 13px !important; }
+/* My lists: Picked for you is the switch (filled when on); Edit and Refresh are plain outlined actions, not three filled greens in a row */
+.ml-picks, .ml-edit { font-size: 13px !important; padding: 5px 12px !important; }
+.ml-edit { background: transparent !important; color: var(--gold) !important; border-color: currentColor !important; }
+.ml-edit:hover { background: rgba(46,125,50,0.08) !important; filter: none !important; }
+/* the "Common" status pill: white words on the deeper green (were on #58b351, 2.6:1) */
+.sl-tag.com, .sl-badge.com { background: linear-gradient(135deg, #2e7d32 0%, #2a7330 100%) !important; border-color: #2e7d32 !important; color: #fff !important; }
+/* the sort menu had no keyboard focus ring */
+button.sl-sort:focus-visible { outline: 3px solid var(--ds-focus) !important; outline-offset: 2px; }
+/* ---- dark mode: locked achievements and their step pills were 3.2:1 and 2.8:1 ---- */
+[data-sl-theme="dark"] .is-locked .sl-at, [data-sl-theme="dark"] .is-locked .sl-ast { color: #c6dfcf !important; opacity: 1 !important; }
+[data-sl-theme="dark"] .sl-asteprow li:not(.on) { color: #d2e6d8 !important; background: rgba(255,255,255,0.10) !important; opacity: 1 !important; }
+.sl-asteprow li:not(.on) { color: var(--text); }
+[data-sl-theme="dark"] .sl-abadge.is-locked, [data-sl-theme="dark"] .is-locked { opacity: 1 !important; }
+.tabs .tab-s { display: none; }
+/* ---- phones: the seven tabs in a two-row grid, all visible (only 2.5 fitted on the sideways strip) ---- */
+@media (max-width: 600px) {
+  .tabs { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px !important; overflow: visible !important; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .tabs .tab-btn, .tabs .tab-btn:first-child { flex-direction: column; justify-content: center; gap: 3px !important; min-height: 54px; padding: 6px 2px !important;
+    font: 500 12.5px/1.15 var(--ds-font) !important; white-space: normal; text-align: center; border-radius: 10px !important; border-bottom: 0 !important; }
+  .tabs .tab-btn.active { background: rgba(46,125,50,0.12); font-weight: 700 !important; box-shadow: inset 0 -3px 0 var(--gold); }
+  [data-sl-theme="dark"] .tabs .tab-btn.active { background: rgba(155,224,124,0.14); }
+  .tabs .tab-btn svg, .tabs .tab-btn .ic, .tabs .tab-star { width: 18px !important; height: 18px !important; font-size: 17px !important; }
+  .tabs .tab-n { position: absolute; top: 3px; right: calc(50% - 26px); min-width: 17px; height: 17px; font-size: 11px !important; }
+  .tabs .tab-l { display: none; }
+  .tabs .tab-s { display: inline; }
+  .tabs .tab-more { display: none !important; }
+}
+/* ---- touch screens: 44px targets ---- */
+@media (pointer: coarse) {
+  .hdr-actions .theme-btn, .eyebrow-row .hdr-actions .theme-btn { width: 44px !important; height: 44px !important; }
+  .hdr-actions .install-btn, .hdr-actions .auth-btn, .eyebrow-row .hdr-actions > button:not(.theme-btn) { min-height: 44px; }
+  .eyebrow-row .hdr-actions { gap: 6px !important; }
+  #grid .follow-btn { width: 44px; height: 44px; margin: -8px -10px -4px 0; }
+  #grid .card.follow .follow-btn { height: 44px; width: auto !important; }
+  .wish-btn { min-height: 44px; padding: 6px 14px; font-size: 13.5px; }
+  .chip, .tabs .tab-btn, button.sl-sort, #ml-edit, #ml-reshuffle, .ml-tools button, #family-toggle, .hab-more-btn, .sl-achrow button, #sl-ach-btn, #sl-share-sightings,
+  .card.done .note-btn, .card.done .photo-btn, .sp-fmore, .sp-stbtn, .sp-all, .sl-more-btn { min-height: 44px !important; }
+  #grid .card-bottom .seen-btn, #grid .card-bottom .map-btn, #grid .card-bottom .td-card-btn { min-height: 44px !important; }
+  .globe-zoom button, .globe-zoom > * { min-width: 44px; min-height: 44px; }
+  .sl-ver { position: relative; }
+  .sl-ver::after { content: ""; position: absolute; inset: -13px -8px; }
+  #family-toggle, .hab-more-btn { align-items: center; }
+}
+/* phones: the header's two word buttons share the first row, the icon buttons (44px) the second; the top line wraps
+   instead of cutting the version number off */
+@media (max-width: 430px) {
+  .eyebrow-row .eyebrow { white-space: normal !important; letter-spacing: .04em !important; line-height: 1.6; }
+  .eyebrow-row .hdr-actions .install-btn, .eyebrow-row .hdr-actions .auth-btn { flex: 1 1 calc(50% - 3px); justify-content: center; min-height: 44px; }
+}
+/* My sightings (Eduardo, A31/A32): your own photo takes the place of the card's photo there (only there), with the date
+   you wrote under it - the rules for each card are written by the sl-ds script into #sl-own-photos */
+html.sl-tab-sightings #grid .sl-taken { display: block; margin: 0 0 4px; font: 500 13px/1.35 var(--ds-font); color: var(--text-muted); }
+#grid .sl-taken { display: none; }
+/* the cookie question sits above the map's own bottom controls instead of covering them */
+html.sl-on-map .ck-bar:not(.nm-bar) { bottom: auto; top: 12px; }
+@media (max-width: 600px) { html.sl-on-map .ck-bar:not(.nm-bar) { top: auto; bottom: 10px; max-height: 40vh; overflow: auto; font-size: 13.5px; } html.sl-on-map .ck-bar:not(.nm-bar) p { font-size: 13.5px; } }
+/* the empty search: what to do next */
+.sl-empty-acts[hidden] { display: none !important; }
+.sl-empty-acts { display: flex; width: 100%; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; }
+/* reduced motion: decorative loops stop */
+@media (prefers-reduced-motion: reduce) {
+  .photo-wall, .quiz-level-btn.quiz-level-imp::before, .rotate-gate svg, .nm-spot-ring { animation: none !important; }
+}
+</style>
+<script>if (window.SL_PV_ON && window.SL_PV_ON("design")) document.getElementById("sl-ds-css").media = "all"; // (design preview)</script>
+<script id="sl-ds-js">
+// ==== sl-ds (v6.24 overhaul): cards, dialogs, tabs, small fixes - one block, after everything else ====
+(function () {
+  // PREVIEW (Settings > Previews > "New design"): without it none of this runs (and #sl-ds-css stays switched off)
+  if (window.__slDS || !(window.SL_PV_ON && window.SL_PV_ON("design"))) return; window.__slDS = 1;
+  var grid = document.getElementById("grid");
+  var inClaude = !!(window.claude && window.claude.use);
+  function slug(t) { return String(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+  // the species page's own address (the same as build_species.page_name: common-name-scientific-name), no redirect hop
+  function pageUrl(card) {
+    var id = card.getAttribute("data-id"), nmEl = card.querySelector(".card-name");
+    var nm = nmEl && !nmEl.classList.contains("is-sci") ? slug(nmEl.textContent) : "";
+    if (nm && nm !== id) id = nm + "-" + id;
+    if (inClaude) return "https://snakelist.com/species/" + id;
+    return "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html");
+  }
+  window.SL_PAGE_URL = pageUrl;
+  // a "light" card (SL_LIGHT, off screen) must not be asked for its buttons - that would rebuild it; it gets
+  // decorated by SL_CARD_HOOKS when it is made whole again
+  function isLight(c) { return !!(window.SL_LIGHT && window.SL_LIGHT.isLight && window.SL_LIGHT.isLight(c)); }
+
+  // ---- cards: the name is a real link to the species page (keyboard, middle-click, "open in new tab" all work) ----
+  function linkName(c) {
+    var n = c.querySelector(".card-name"); if (!n || n.tagName === "A") return;
+    var a = document.createElement("a"); a.className = n.className; a.href = pageUrl(c);
+    if (inClaude) { a.target = "_blank"; a.rel = "noopener"; }
+    while (n.firstChild) a.appendChild(n.firstChild);
+    if (n.title) a.title = n.title;
+    n.parentNode.replaceChild(a, n);
+  }
+  // the bell says "Following" in words when it's on; Want to see and Follow say whether they are on
+  function relabel(c) { var l = c.querySelector(".lbl-mark"); if (l && l.textContent === "Mark Seen") l.textContent = "Mark seen"; }
+  function decorate(c) {
+    relabel(c);
+    var f = c.querySelector(".follow-btn");
+    if (f && !f.querySelector(".sl-fol-lbl")) { var s = document.createElement("span"); s.className = "sl-fol-lbl"; s.textContent = "Following"; f.appendChild(s); }
+    if (f) f.setAttribute("aria-pressed", String(c.classList.contains("follow")));
+    var w = c.querySelector(".wish-btn"); if (w) w.setAttribute("aria-pressed", String(c.classList.contains("wish")));
+    var s2 = c.querySelector(".seen-btn"); if (s2) s2.setAttribute("aria-pressed", String(c.classList.contains("done")));
+    var sci = c.querySelector(".card-sci"); if (sci && !sci.title && sci.textContent.length > 28) sci.title = sci.textContent.trim();
+    var nm = c.querySelector(".card-name"); if (nm && !nm.title && nm.textContent.length > 34) nm.title = nm.textContent.trim();
+  }
+  if (grid) {
+    var cards = grid.querySelectorAll(".card");
+    // names first (cheap: one element each), the rest as each card is made whole (SL_CARD_HOOKS) or shown
+    for (var i = 0; i < cards.length; i++) { linkName(cards[i]); if (!isLight(cards[i])) relabel(cards[i]); }
+    (window.SL_CARD_HOOKS = window.SL_CARD_HOOKS || []).push(function (c) { linkName(c); decorate(c); });
+    new MutationObserver(function (ms) {
+      ms.forEach(function (m) {
+        if (m.type === "childList") [].forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && n.classList.contains("card")) { linkName(n); decorate(n); } });
+        else if (m.type === "attributes" && m.target.classList && m.target.classList.contains("card") && !isLight(m.target)) decorate(m.target);
+      });
+    }).observe(grid, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+    var dec = function () { [].forEach.call(grid.querySelectorAll(".card"), function (c) { if (c.offsetParent !== null && !isLight(c)) decorate(c); }); };
+    window.addEventListener("sl-refreshed", function () { setTimeout(dec, 0); }); setTimeout(dec, 800); setTimeout(dec, 3000);
+    // a plain click on the name: the same tab (like the rest of the card); claude.ai: a new tab
+    grid.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest("a.card-name"); if (!a) return;
+      if (document.body.classList.contains("sl-editing")) { e.preventDefault(); return; }
+    });
+  }
+  // "See more info" opens the species page everywhere it appears (3D window too), at its real address
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("#grid .map-btn");
+    if (!b || !e.isTrusted || e.button !== 0) return;
+    var c = b.closest(".card"); if (!c) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    var url = pageUrl(c);
+    if (inClaude) window.open(url, "_blank", "noopener"); else location.href = url;
+  }, true);
+
+  // ---- the shared dialog helper: focus goes in, Tab stays in, Escape closes, focus comes back ----
+  var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), summary';
+  function visible(el) { if (!el || el.hidden || el.closest("[hidden]")) return false; var cs = getComputedStyle(el); if (cs.display === "none" || cs.visibility === "hidden") return false; var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; }
+  function focusables(box) { return [].slice.call(box.querySelectorAll(FOCUSABLE)).filter(function (x) { return visible(x) && !x.closest("[inert]"); }); }
+  var lastFocus = null;
+  document.addEventListener("focusin", function (e) { if (!stack.some(function (d) { return d.box.contains(e.target); })) lastFocus = e.target; }, true);
+  document.addEventListener("pointerdown", function (e) { var t = e.target.closest && e.target.closest(FOCUSABLE); if (t && !stack.some(function (d) { return d.box.contains(t); })) lastFocus = t; }, true);
+  var DIALOGS = [
+    { el: "#map-sheet", open: function (el) { return el.classList.contains("open"); }, box: ".map-card", close: "#map-close", trap: true },
+    { el: "#note-sheet", open: function (el) { return el.classList.contains("open"); }, box: ".note-card", close: "#note-cancel", trap: true },
+    { el: "#report-sheet", open: function (el) { return el.classList.contains("open"); }, box: ".report-card", close: "#report-cancel", trap: true },
+    { el: "#ins-sheet", open: function (el) { return el.classList.contains("open"); }, box: ".ins-card", close: "#ins-ok", trap: true },
+    { el: "#signin-page", open: function (el) { return !el.hidden; }, box: ".signin-card", close: "#signin-back", trap: true },
+    // (the tutorial is a guide over the page, not a modal: Tab can still reach what a step points at)
+    { el: "#tour-layer", open: function (el) { return !el.hidden; }, box: "#tour-callout", close: "#tour-skip", trap: false, esc: true },
+    { el: "#country-panel", open: function (el) { return !el.hidden && !!el.closest(".tab-panel, #map-panel, body") && visible(el); }, box: "#country-panel", close: "#cp-close", trap: false, esc: true, noFocus: true }
+  ];
+  var stack = [];
+  window.SL_DIALOG = {
+    // for new panels: SL_DIALOG.open(panelEl, { close: fn, opener: el }) / SL_DIALOG.close(panelEl)
+    open: function (box, o) { o = o || {}; if (stack.some(function (d) { return d.box === box; })) return; var d = { box: box, opener: o.opener || document.activeElement, closeFn: o.close, trap: o.trap !== false, esc: true, manual: true }; stack.push(d); focusIn(d); },
+    close: function (box) { for (var i = stack.length - 1; i >= 0; i--) if (stack[i].box === box) { var d = stack.splice(i, 1)[0]; restore(d); } },
+    stack: stack
+  };
+  function focusIn(d) {
+    if (d.noFocus) return;
+    setTimeout(function () {
+      if (stack.indexOf(d) < 0 || d.box.contains(document.activeElement)) return;
+      var f = focusables(d.box), h = d.box.querySelector("h1, h2, h3");
+      var t = d.cfg && d.cfg.el === "#tour-layer" ? (document.getElementById("tour-next") || f[0]) : f[0];
+      if (!t) { if (!d.box.hasAttribute("tabindex")) d.box.setAttribute("tabindex", "-1"); t = d.box; }
+      try { t.focus({ preventScroll: true }); } catch (e) {}
+    }, 60);
+  }
+  function restore(d) {
+    var o = d.opener;
+    setTimeout(function () {
+      var a = document.activeElement;
+      if (a && a !== document.body && !d.box.contains(a) && visible(a)) return; // something else already took focus
+      if (o && document.contains(o) && visible(o)) { try { o.focus({ preventScroll: true }); } catch (e) {} }
+    }, 40);
+  }
+  function watch(cfg) {
+    var el = document.querySelector(cfg.el); if (!el) return false;
+    var was = false;
+    function check() {
+      var on = false; try { on = cfg.open(el); } catch (e) {}
+      if (on === was) return; was = on;
+      if (on) {
+        var box = el.querySelector(cfg.box) || (el.matches(cfg.box) ? el : el);
+        var d = { box: box, root: el, cfg: cfg, opener: lastFocus && document.contains(lastFocus) ? lastFocus : document.activeElement, trap: cfg.trap, esc: cfg.esc, noFocus: cfg.noFocus };
+        stack.push(d); focusIn(d);
+      } else {
+        for (var i = stack.length - 1; i >= 0; i--) if (stack[i].root === el) { var d2 = stack.splice(i, 1)[0]; if (!cfg.noFocus) restore(d2); }
+      }
+    }
+    new MutationObserver(check).observe(el, { attributes: true, attributeFilter: ["class", "hidden", "style"] });
+    check();
+    return true;
+  }
+  var pending = DIALOGS.slice(), hookN = 0;
+  function hook() { pending = pending.filter(function (c) { return !watch(c); }); if (pending.length && ++hookN < 40) setTimeout(hook, 1500); }
+  hook();
+  document.addEventListener("keydown", function (e) {
+    var d = stack[stack.length - 1]; if (!d) return;
+    if (d.root && d.cfg && !d.cfg.open(d.root)) return;
+    if (e.key === "Escape" && d.esc) {
+      if (document.querySelector(".photo-lightbox.open")) return;
+      var c = d.cfg && d.root.querySelector(d.cfg.close);
+      if (c) { e.preventDefault(); c.click(); }
+      else if (d.closeFn) { e.preventDefault(); d.closeFn(); }
+      return;
+    }
+    if (e.key !== "Tab" || !d.trap) return;
+    var f = focusables(d.box); if (!f.length) { e.preventDefault(); return; }
+    var first = f[0], last = f[f.length - 1], a = document.activeElement;
+    if (!d.box.contains(a)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); return; }
+    if (e.shiftKey && (a === first || a === d.box)) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+  }, true);
+
+  // ---- phones: shorter tab names in the two-row tab grid ("Checklist", "Sightings"); the tabs redraw their labels, so again after each ----
+  var SHORT = { "tab-guide": ["Species Checklist", "Checklist"], "tab-sightings": ["My sightings", "Sightings"] };
+  function shortTabs() {
+    Object.keys(SHORT).forEach(function (id) {
+      var b = document.getElementById(id); if (!b || b.querySelector(".tab-s")) return;
+      var L = SHORT[id];
+      [].some.call(b.childNodes, function (n) {
+        if (n.nodeType !== 3 || n.nodeValue.indexOf(L[0]) < 0) return false;
+        var at = n.nodeValue.indexOf(L[0]), frag = document.createDocumentFragment();
+        frag.appendChild(document.createTextNode(n.nodeValue.slice(0, at)));
+        var l = document.createElement("span"); l.className = "tab-l"; l.textContent = L[0]; frag.appendChild(l);
+        var sh = document.createElement("span"); sh.className = "tab-s"; sh.textContent = L[1]; frag.appendChild(sh);
+        frag.appendChild(document.createTextNode(n.nodeValue.slice(at + L[0].length)));
+        b.replaceChild(frag, n); return true;
+      });
+    });
+  }
+  shortTabs();
+  var tabsEl = document.querySelector(".tabs"); if (tabsEl) new MutationObserver(shortTabs).observe(tabsEl, { childList: true, subtree: true });
+  // the Map tab: the cookie question moves out of the way of the map's controls
+  function onMap() { var t = document.getElementById("tab-map"); document.documentElement.classList.toggle("sl-on-map", !!(t && t.classList.contains("active"))); }
+  var tabs = document.querySelector(".tabs"); if (tabs) { new MutationObserver(onMap).observe(tabs, { subtree: true, attributes: true, attributeFilter: ["class"] }); onMap(); }
+
+  // ---- My sightings (Eduardo, A31/A32): your own photo replaces the card photo, and "Taken on <your date>" under it ----
+  // Only in that tab (html.sl-tab-sightings), never in the checklist. The photos stay where they are saved
+  // (sl-sighting-photos:<id>); here they are shown through blob: addresses, one CSS rule per card in #sl-own-photos.
+  // (Inside claude.ai the synced cards are left alone.)
+  (function () {
+    if (inClaude || !grid) return;
+    var st = document.createElement("style"); st.id = "sl-own-photos"; document.head.appendChild(st);
+    var urls = {}; // id -> [dataUrl, blobUrl]
+    function own(id) { try { var a = JSON.parse(localStorage.getItem("sl-sighting-photos:" + id) || "null"); if (Array.isArray(a) && a[0]) return a[0]; return localStorage.getItem("sl-sighting-photo:" + id) || ""; } catch (e) { return ""; } }
+    function blobOf(id, d) {
+      if (urls[id] && urls[id][0] === d) return urls[id][1];
+      if (urls[id]) try { URL.revokeObjectURL(urls[id][1]); } catch (e) {}
+      var u = d;
+      try { var m = /^data:([^;,]+);base64,(.*)$/.exec(d); if (m) { var bin = atob(m[2]), n = bin.length, a = new Uint8Array(n); for (var i = 0; i < n; i++) a[i] = bin.charCodeAt(i); u = URL.createObjectURL(new Blob([a], { type: m[1] })); } } catch (e) { u = d; }
+      urls[id] = [d, u]; return u;
+    }
+    function on() { var t = document.getElementById("tab-sightings"); return !!(t && t.classList.contains("active")); }
+    var busy = false;
+    function paint() {
+      if (busy) return; busy = true;
+      try { paint0(); } finally { busy = false; }
+    }
+    function paint0() {
+      var sight = on(); document.documentElement.classList.toggle("sl-tab-sightings", sight);
+      var css = [];
+      [].forEach.call(grid.querySelectorAll(".card.done"), function (c) {
+        var id = c.getAttribute("data-id");
+        if (sight) {
+          var d = own(id);
+          if (d) css.push('html.sl-tab-sightings #grid .card[data-id="' + id.replace(/"/g, "") + '"]::before{content:""!important;background-image:url("' + blobOf(id, d).replace(/"/g, "%22") + '")!important;background-size:cover!important;background-position:50% 45%!important;cursor:zoom-in}');
+          var nb = c.querySelector(".note-btn"), when = nb && nb.getAttribute("data-when"), box = !isLight(c) && c.querySelector(".card-top > div");
+          var t = c.querySelector(".sl-taken");
+          if (when && box) { if (!t) { t = document.createElement("span"); t.className = "sl-taken"; box.insertBefore(t, box.firstChild); } var txt = "Taken on " + when; if (t.textContent !== txt) t.textContent = txt; }
+          else if (t) t.remove();
+        }
+      });
+      if (!sight) [].forEach.call(grid.querySelectorAll(".sl-taken"), function (t) { t.remove(); }); // (nothing extra left in the checklist)
+      var txt = css.join("\n"); if (st.textContent !== txt) st.textContent = txt;
+    }
+    var T = 0; function soon() { clearTimeout(T); T = setTimeout(paint, 60); }
+    window.addEventListener("sl-refreshed", soon);
+    var tb = document.getElementById("tab-sightings"); if (tb) new MutationObserver(soon).observe(tb, { attributes: true, attributeFilter: ["class"] });
+    new MutationObserver(function (ms) { if (!busy && on()) soon(); }).observe(grid, { subtree: true, attributes: true, attributeFilter: ["data-when", "data-iso"] });
+    new MutationObserver(function (ms) { if (!busy && on() && ms.some(function (m) { return m.target.classList && m.target.classList.contains("photo-btn"); })) soon(); }).observe(grid, { subtree: true, attributes: true, attributeFilter: ["class", "data-n"] });
+    // in My sightings, tapping a card's photo that is YOUR photo opens your photos (not the species photo)
+    grid.addEventListener("click", function (e) {
+      if (!on()) return;
+      var c = e.target === e.currentTarget ? null : (e.target.classList && e.target.classList.contains("card") ? e.target : null);
+      if (!c || !c.classList.contains("done") || !own(c.getAttribute("data-id"))) return;
+      var r = c.getBoundingClientRect(); if (e.clientY - r.top > r.width / 2.2) return;
+      var pb = c.querySelector(".photo-btn"); if (!pb) return;
+      e.preventDefault(); e.stopImmediatePropagation(); pb.click();
+    }, true);
+    soon();
+  })();
+
+  // ---- Edit (My lists): Escape means Done ----
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape" || !document.body.classList.contains("sl-editing") || stack.length) return;
+    if (document.querySelector(".ed-sheet.open, .photo-lightbox.open, .sl3d-bd")) return;
+    var d = document.querySelector(".ed-bar-btns .edb-done, #edb-done"); if (d) { e.preventDefault(); d.click(); }
+  });
+  // ---- the version tag opens What's new: reachable from the keyboard too ----
+  var ver = document.querySelector(".sl-ver");
+  if (ver && ver.tagName !== "BUTTON") {
+    ver.setAttribute("role", "button"); ver.setAttribute("tabindex", "0"); ver.setAttribute("aria-label", "What's new in SnakeList " + ver.textContent.trim());
+    ver.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); ver.click(); } });
+  }
+
+  // ---- empty search: say what to do next (a row just under "No snakes found.", shown with it) ----
+  var empty = document.getElementById("empty");
+  if (empty && !document.getElementById("sl-empty-acts")) {
+    var acts = document.createElement("div"); acts.className = "sl-empty-acts"; acts.id = "sl-empty-acts"; acts.hidden = true;
+    acts.innerHTML = '<button type="button" class="sl-btn is-secondary" data-ds="clear-search">Clear search</button>';
+    empty.insertAdjacentElement("afterend", acts);
+    var syncEmpty = function () { var sb = document.getElementById("search"); acts.hidden = empty.hidden || !(sb && sb.value.trim()); };
+    new MutationObserver(syncEmpty).observe(empty, { attributes: true, attributeFilter: ["hidden"] });
+    var sbx = document.getElementById("search"); if (sbx) sbx.addEventListener("input", function () { setTimeout(syncEmpty, 0); });
+    syncEmpty();
+    acts.addEventListener("click", function () {
+      var cl = document.getElementById("clear"), sb = document.getElementById("search");
+      if (cl) cl.click(); else if (sb) { sb.value = ""; sb.dispatchEvent(new Event("input", { bubbles: true })); }
+      if (sb) sb.focus();
+    });
+  }
 })();
 </script>

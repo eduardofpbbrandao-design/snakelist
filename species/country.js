@@ -1,3 +1,4 @@
+(function(){if(!document.documentElement.classList.contains('sl-pv-design'))return;[].forEach.call(document.querySelectorAll('#cy-v option[value=hl]'),function(o){o.textContent=o.textContent.replace(/^Harmless/,'Low risk')});var q=document.getElementById('cy-jq');if(q){q.type='search';q.placeholder='Go to another country\u2026'}})();
 // v5.68 (Eduardo): no text pops up when you rest the mouse on a button or link, on any SnakeList page. A title on a
 // button, link or other control (in the page or added later, e.g. by the 3D viewer) is taken off; when the control has
 // no words of its own, its text becomes its name for screen readers. The map's own place names (inside the map drawing) stay.
@@ -105,7 +106,7 @@ function enhance(sel){
   var w=document.createElement('span');w.className='sl-dd';sel.parentNode.insertBefore(w,sel);w.appendChild(sel);
   var cs=getComputedStyle(sel),b=document.createElement('button');b.type='button';b.className='sl-dd-btn '+(sel.className||'');
   ['font','color','background-color','border','border-radius','padding','min-height','height','box-shadow','letter-spacing'].forEach(function(k){b.style.setProperty(k,cs.getPropertyValue(k))});
-  if(cs.width&&cs.display!=='none'&&sel.offsetWidth)b.style.minWidth=sel.offsetWidth+'px';
+  if(cs.width&&cs.display!=='none'&&sel.offsetWidth)b.style.minWidth='min('+sel.offsetWidth+'px,100%)';
   b.setAttribute('aria-haspopup','listbox');b.setAttribute('aria-expanded','false');b.setAttribute('aria-controls',id);
   var lab=sel.getAttribute('aria-label')||(sel.labels&&sel.labels[0]&&sel.labels[0].textContent.trim())||'';if(lab)b.setAttribute('aria-label',lab);
   var txt=document.createElement('span');b.appendChild(txt);
@@ -201,6 +202,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.length;j++){var a=ms[j].addedNodes;for(var i=0;i<a.length;i++){var nd=a[i];if(nd.nodeType!==1)continue;if(nd.tagName==='INPUT'){if(nd.hasAttribute('list'))enhance(nd)}else if(nd.getElementsByTagName&&nd.firstElementChild)scan(nd)}}}).observe(document.documentElement,{childList:true,subtree:true});
 })();
 
+(function(){if(!document.documentElement.classList.contains('sl-pv-design'))return;[].forEach.call(document.querySelectorAll('#cy-v option[value=hl]'),function(o){o.textContent=o.textContent.replace(/^Harmless/,'Low risk')});var q=document.getElementById('cy-jq');if(q){q.type='search';q.placeholder='Go to another country\u2026'}})();
 // v5.78: the button under the mouse gets the class sl-hov (no look of its own any more - each button keeps its own hover). v5.93: the thin
 // light mint line that travels once round the border over 1.5 s, then fades (on hover, a tap and keyboard focus) is only on .sl-trace-on.
 // One SVG over the whole page, moved with the button - nothing is added inside the buttons, so their own layout, ::before/::after

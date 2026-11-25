@@ -42,30 +42,40 @@ var DEFS=[
  {key:"opening",label:"New opening",about:"The opening as a poster collage",
   apply:function(v){try{var ss=W.sessionStorage;if(v){if(!/[?&]opening=/.test(L.search)&&!ss.getItem("sl-opening-style"))ss.setItem("sl-opening-style","collage")}else if(ss.getItem("sl-opening-style")==="collage")ss.removeItem("sl-opening-style")}catch(e){}},
   live:function(){return true}},
- {key:"finale",label:"Countdown finale",about:"Plays the countdown's last minute for you",
+ {key:"design",label:"New design",about:"The design overhaul: clearer colours and contrast, fonts, cards, dialogs, bigger touch targets, phone tabs, wording - and your own photo with \"Taken on\" in My sightings",
+  live:function(){return false}},
+ {key:"cookies",label:"New cookie bar",about:"Accept / Reject / Manage, Cookie choices in Settings and at the bottom of the page",
+  live:function(){return false}},
+ {key:"tutorial",label:"New tutorial",about:"Quick Tour, Full Tutorial and short guides, with Back and a progress bar (the ? button opens it)",
+  live:function(){return false}},
+ {key:"finale",label:"Countdown finale + time zone",about:"The countdown's last minute plays about 70 seconds after SnakeList opens (pretend time, nothing unlocks), and Settings gets a Time zone choice",
   apply:function(v){if(v)W.__slCdFinPv=1},
   live:function(){return !W.SL_EV}}
 ];
+var ALL=["opening","design","cookies","tutorial","finale"],MENU=PRE+"menu";
 function def(k){for(var i=0;i<DEFS.length;i++)if(DEFS[i].key===k)return DEFS[i];return null}
 function on(k){try{return S.getItem(PRE+k)==="1"}catch(e){return false}}
 function emit(){try{document.dispatchEvent(new CustomEvent("sl-previews-changed"))}catch(e){}}
-function set(k,v){v=!!v;if(!def(k))return;try{S.setItem(PRE+k,v?"1":"0")}catch(e){}var d=def(k);if(d.apply&&!v)d.apply(false);emit()}
+function set(k,v){v=!!v;if(!def(k))return;try{S.setItem(PRE+k,v?"1":"0");if(v)S.setItem(MENU,"1")}catch(e){}var d=def(k);if(d.apply&&!v)d.apply(false);emit()}
 // the switches in the address (each one is then taken out of it, except the opening's, which its own code reads)
 var q=L.search,m=/[?&]preview=([^&#]*)/.exec(q);
 if(m){var v=decodeURIComponent(m[1]),k=v.replace(/-off$/,"");
  if(v==="off"||v==="none")DEFS.forEach(function(x){if(S.getItem(PRE+x.key)!==null)S.setItem(PRE+x.key,"0")});
- else if(def(k))S.setItem(PRE+k,k===v?"1":"0");
+ else if(v==="all"){ALL.forEach(function(x){S.setItem(PRE+x,"1")});S.setItem(MENU,"1")}
+ else if(def(k)){S.setItem(PRE+k,k===v?"1":"0");if(k===v)S.setItem(MENU,"1")}
  var u=new URL(L.href);u.searchParams.delete("preview");history.replaceState(history.state,"",u.pathname+u.search+u.hash)}
 var o=/[?&]opening=([^&#]*)/.exec(q);if(o){if(o[1]==="collage")S.setItem(PRE+"opening","1");else if(/^(off|classic|none|default)$/.test(o[1]))S.setItem(PRE+"opening","0")}
 if(/[?&]countdown-finale-preview=1(&|$)/.test(q))S.setItem(PRE+"finale","1");
 else if(/[?&]countdown-finale-preview=0(&|$)/.test(q))S.setItem(PRE+"finale","0");
 // what this page started with: a preview that arrives later (from the account) is switched on in place, or with one reload
-var loaded={};DEFS.forEach(function(x){loaded[x.key]=on(x.key);if(loaded[x.key]&&x.apply)x.apply(true)});
+var loaded={},H=document.documentElement;DEFS.forEach(function(x){loaded[x.key]=on(x.key);if(loaded[x.key]){H.classList.add("sl-pv-"+x.key);if(x.apply)x.apply(true)}});
 var R={
  on:on,set:set,
  list:function(){return DEFS.map(function(x){return{key:x.key,label:x.label,about:x.about,on:on(x.key)}})},
  any:function(){return DEFS.some(function(x){return on(x.key)})},
- keys:function(){return DEFS.map(function(x){return PRE+x.key})},
+ keys:function(){return DEFS.map(function(x){return PRE+x.key}).concat([MENU])},
+ // Settings shows its Previews section for someone signed in once this is set (see above)
+ menu:function(){try{return S.getItem(MENU)==="1"}catch(e){return false}},
  loaded:function(k){return!!loaded[k]},
  // called by the account sync (snakelist-synced.html) after the account's switches were put in this browser.
  // signedInHere: someone signed in on this page just now - then, if a preview can't start in place, one quiet reload
@@ -82,9 +92,10 @@ W.SL_PREVIEWS=R;
 if(!W.SL_PREVIEW_ON)W.SL_PREVIEW_ON=on;
 }catch(e){}})();</script>
 <script>(function(){try{var K="sl-art-preview-events",L=location,S=window.localStorage,m=/[?&]preview=([^&#]*)/.exec(L.search),on;
+if(/[?&]countdown-finale-preview=1(&|$)|cd-finale-preview/.test(L.search+L.hash))window.__slCdFinPv=1;
 if(m){var v=decodeURIComponent(m[1]);if(v==="events")S.setItem(K,"1");else if(v==="events-off"||v==="off"||v==="none")S.setItem(K,"0");var u=new URL(L.href);u.searchParams.delete("preview");history.replaceState(history.state,"",u.pathname+u.search+u.hash)}
 on=window.SL_PREVIEW_ON?window.SL_PREVIEW_ON("events"):S.getItem(K)==="1";
-if(window.SL_EV)return;var d=document,h=d.documentElement,root=new URL("./",L.href).href+"events/",q="?v="+"62fad8ad75",p=d.head||h;
+if(window.SL_EV)return;var d=document,h=d.documentElement,root=new URL("./",L.href).href+"events/",q="?v="+"aebc3bd22c",p=d.head||h;
 function css(){var l=d.createElement("link");l.rel="stylesheet";l.href=root+"events.css"+q;p.appendChild(l)}
 function js(n,f){var s=d.createElement("script");s.src=root+n+".js"+q;s.async=false;if(f)s.onload=f;p.appendChild(s)}
 function full(){window.SL_EV={on:true,root:root};h.classList.add("sl-ev-on");css();
@@ -96,7 +107,7 @@ setTimeout(function(){idle(function(){if(window.SL_EV)return;js("config",functio
 if(!C||!C.publicCountdown||window.SL_EV)return;
 if(!(C.events||[]).some(function(e){return(C.publicEvents||[]).indexOf(e.id)>=0&&t>=Date.parse(e.countdownFrom||e.start)-M&&t<Date.parse(e.end)+M}))return;
 window.SL_EV={on:false,pub:true,root:root};h.classList.add("sl-ev-pub");css();["core","art","countdown"].forEach(function(n){js(n)})})},{timeout:4000})},1500)}
-function hero(){var x=d.getElementById("sl-hero");if(window.__heroEntered||!x||x.hidden)start();else d.addEventListener("sl-hero-entered",start,{once:true})}
+function hero(){var x=d.getElementById("sl-hero");if(window.__heroEntered||!x||x.hidden||window.__slCdFinPv)start();else d.addEventListener("sl-hero-entered",start,{once:true})}
 if(window.__introDone)hero();else{d.addEventListener("sl-intro-done",hero,{once:true});
 window.addEventListener("load",function(){setTimeout(function(){if(!window.__introDone&&!d.getElementById("intro"))start()},60000)})}}catch(e){}})();</script>
 <script>
@@ -133,19 +144,284 @@ window.addEventListener("load",function(){setTimeout(function(){if(!window.__int
     setInterval(function () { if (document.visibilityState === 'visible') check(); }, 30 * 60000);
   })();
 </script>
+<!-- Cookie and ad consent (sl-consent.js, put here whole): Google Consent Mode v2 defaults ("denied") before any Google tag,
+     the visitor's stored choice, Google's certified consent message in Europe, and the ad placement guard. See docs/ADS-CONSENT-SETUP.md -->
+<script>window.SLC_APP = true;</script>
+<script>/* SnakeList cookie and ad consent - the ONE source for every page (build-site.py puts it inside the app's <head>,
+   tools/add_adsense.py adds <script src="sl-consent.js" defer> to the other pages). See docs/ADS-CONSENT-SETUP.md.
+   - Google Consent Mode v2: everything is "denied" before any Google tag runs; it changes only with the visitor's choice.
+   - Europe (EEA, UK, Switzerland - guessed from the time zone): Google's own certified consent message (AdSense >
+     Privacy & messaging) decides about ads. When it is there, SnakeList's own banner is not shown at all and the
+     visitor's answer to Google's message is used for analytics too. Until it is switched on, ads there stay
+     non-personalised and SnakeList's banner asks only about analytics.
+   - Everywhere else: SnakeList's banner (Accept / Reject / Manage). The ads script loads only after an answer; with
+     Reject, ads are limited / non-personalised and use no ad cookies.
+   - Auto-placed ads are never left inside the header, the map, the cards and photos, the 3D viewer, the events or
+     any panel (a MutationObserver that only runs once the ads script is on the page).
+   PREVIEW (Settings > Previews > "Cookie bar", localStorage sl-art-preview-cookies = "1"): everything a visitor SEES of
+   this file - the new Reject / Manage / Accept bar on the other pages, the Manage panel, the "Cookie choices" links -
+   shows only with that switch on. The protective part (Consent Mode v2 "denied" defaults, Google's consent message in
+   Europe, the ad placement guard, and in the app no ads script before an answer outside Europe) runs for everyone.
+   On the other pages, with the switch off, nobody is asked there yet, so the ads script still loads (as before), but
+   with everything "denied" and non-personalised ads until the visitor answers in SnakeList. */
+(function () {
+  "use strict";
+  var W = window, D = document;
+  if (W.SLC) return;
+  var CLIENT = "ca-pub-0736553562389933";
+  var me = D.currentScript, APP = !!W.SLC_APP;
+  var ROOT = (me && me.getAttribute("data-root")) || "";
+  W.dataLayer = W.dataLayer || [];
+  if (typeof W.gtag !== "function") W.gtag = function () { W.dataLayer.push(arguments); };
+  var gtag = W.gtag;
+
+  // the cookies preview (see above): only its visible part waits for this switch
+  function PV() { try { return localStorage.getItem("sl-art-preview-cookies") === "1"; } catch (e) { return false; } }
+  function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
+  // ---- where the visitor probably is (EEA / UK / Switzerland need Google's certified consent message) ----
+  var tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+  var STRICT = !tz || (/^(Europe\/|Atlantic\/(Canary|Madeira|Azores|Reykjavik|Faroe|Faeroe)|Arctic\/Longyearbyen|Asia\/(Nicosia|Famagusta)|America\/(Guadeloupe|Martinique|Cayenne|Marigot|St_Barthelemy)|Indian\/(Reunion|Mayotte))/.test(tz)
+    && !/^Europe\/(Moscow|Kirov|Volgograd|Saratov|Ulyanovsk|Astrakhan|Samara|Kaliningrad|Istanbul|Minsk|Kiev|Kyiv|Simferopol|Chisinau)$/.test(tz));
+
+  // ---- Consent Mode v2: denied until the visitor says otherwise ----
+  gtag("consent", "default", { ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied", analytics_storage: "denied",
+    functionality_storage: "granted", security_storage: "granted", wait_for_update: 500 });
+  gtag("set", "ads_data_redaction", true);
+
+  // the stored choice: sl-consent = "yes" / "no" (analytics + "Picked for you"), sl-ads = "yes" / "no" (ad personalisation).
+  // An older answer (before ads were asked about) counts as answered, with ads not personalised.
+  function analytics() { return ls("sl-consent") === "yes"; }
+  function adsOk() { return !STRICT && ls("sl-ads") === "yes"; }
+  function answered() { return ls("sl-consent") != null; }
+  var cmp = null;          // null: not known yet, true: Google's consent message handles this visitor, false: it doesn't
+  var known = !STRICT, waiting = [], adsWanted = false, adsIn = false;
+
+  function push() {
+    var u = { analytics_storage: analytics() ? "granted" : "denied" };
+    if (!cmp) { var a = adsOk() ? "granted" : "denied"; u.ad_storage = a; u.ad_user_data = a; u.ad_personalization = a; }
+    gtag("consent", "update", u);
+    // (in Europe Google's consent message decides: forcing non-personalised ads there would overrule a "yes" given to it)
+    if (!STRICT) (W.adsbygoogle = W.adsbygoogle || []).requestNonPersonalizedAds = adsOk() ? 0 : 1;
+  }
+  if (answered()) push();
+
+  // remove cookies Google already set on this site, when the visitor turns that part off
+  function drop(re) {
+    D.cookie.split(";").forEach(function (c) {
+      var n = c.split("=")[0].trim(); if (!re.test(n)) return;
+      var h = location.hostname.split(".");
+      for (var i = 0; i < h.length - 1; i++) D.cookie = n + "=; Max-Age=0; path=/; domain=." + h.slice(i).join(".");
+      D.cookie = n + "=; Max-Age=0; path=/";
+    });
+  }
+  function emit(fromCmp) {
+    try { D.dispatchEvent(new CustomEvent("sl-consent-change", { detail: { analytics: analytics(), ads: adsOk(), cmp: !!fromCmp } })); } catch (e) {}
+    try { D.dispatchEvent(new Event("sl-consent-answered")); } catch (e) {}
+  }
+  // o: { analytics: bool, ads: bool (left out = unchanged) }
+  function choose(o) {
+    ls("sl-consent", o.analytics ? "yes" : "no");
+    if (o.ads !== undefined) ls("sl-ads", o.ads ? "yes" : "no");
+    if (!o.analytics) { drop(/^(_ga|_gid|_gat)/); ls("sl-interests", null); }
+    if (!adsOk()) drop(/^(__gads|__gpi|__eoi|_gcl_)/);
+    ls("sl-consent-at", String(Date.now()));
+    push(); hideBar(); emit(false);
+    if (adsWanted) loadAds();
+  }
+
+  // ---- Google's certified consent message (TCF v2.2), when the AdSense account has it switched on ----
+  function setCmp(v) {
+    if (cmp === true) return; cmp = v; known = true;
+    if (v) hideBar();
+    var q = waiting; waiting = []; q.forEach(function (f) { try { f(); } catch (e) {} });
+  }
+  function fromTcf(tc) {
+    var P = (tc.purpose && tc.purpose.consents) || {}, V = (tc.vendor && tc.vendor.consents) || {}, g = !!V[755];
+    var st = !!(P[1] && g), ok = function (b) { return b ? "granted" : "denied"; };
+    gtag("consent", "update", { ad_storage: ok(st), ad_user_data: ok(P[1] && P[7] && g), ad_personalization: ok(P[3] && P[4] && g), analytics_storage: ok(st) });
+    if (ls("sl-consent") !== (st ? "yes" : "no") || tc.eventStatus === "useractioncomplete") {
+      ls("sl-consent", st ? "yes" : "no"); if (!st) { drop(/^(_ga|_gid|_gat)/); ls("sl-interests", null); }
+      emit(true);
+    }
+  }
+  function watchCmp() {
+    var n = 0;
+    (function look() {
+      if (typeof W.__tcfapi === "function") {
+        try {
+          W.__tcfapi("addEventListener", 2, function (tc, ok) {
+            if (!ok || !tc) return;
+            if (tc.gdprApplies === false) { if (cmp === null) setCmp(false); return; }
+            if (tc.gdprApplies) { setCmp(true); if (tc.eventStatus === "tcloaded" || tc.eventStatus === "useractioncomplete") fromTcf(tc); }
+          });
+        } catch (e) { setCmp(false); }
+        // a message that never answers (switched off, blocked) must not keep SnakeList's own question away for ever
+        setTimeout(function () { if (cmp === null) setCmp(false); }, 6000);
+        return;
+      }
+      if (++n < 25) setTimeout(look, 300); else if (cmp === null) setCmp(false);
+    })();
+  }
+
+  // ---- the ads script: only after the defaults above, and (outside Europe) only after an answer ----
+  function loadAds() {
+    adsWanted = true;
+    // (the other pages without the cookies preview have no question to answer yet: denied + non-personalised until then)
+    if (adsIn || (!STRICT && !answered() && (APP || PV()))) return;
+    adsIn = true; push(); guard();
+    var s = D.createElement("script"); s.async = true; s.crossOrigin = "anonymous";
+    s.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=" + CLIENT;
+    if (STRICT) { s.onload = watchCmp; s.onerror = function () { setCmp(false); }; }
+    (D.head || D.documentElement).appendChild(s);
+  }
+
+  // ---- ad placement safety ----
+  var NOADS = "header, nav, dialog, [role=dialog], [aria-modal=true], [data-sl-noads], #sl-hero, #grid, .card, figure, .map-wrap, .map-sheet, " +
+    ".lmap, .leaflet-container, .quiz-map-box, .sl3d-bd, .sl-achdlg, .sl-achbox, [id^=sl-ev-], [class*=sl-ev-], [class*=xm-], .sp-head, .sp-photo, .sp-gal, .ck-bar, .slc-bar, .slc-panel";
+  var guarded = false;
+  function fix(n) {
+    var el = n.classList && n.classList.contains("google-auto-placed") ? n : (n.tagName === "INS" && n.className.indexOf("adsbygoogle") >= 0 ? n : null);
+    if (!el || el.hasAttribute("data-anchor-status") || el.hasAttribute("data-vignette-loaded")) return; // overlays: see the CSS below
+    // (html and body don't count: the events put their own classes on them)
+    for (var p = el.parentElement; p && p !== D.body && p !== D.documentElement; p = p.parentElement) if (p.matches(NOADS)) { el.remove(); return; }
+  }
+  function guard() {
+    if (guarded) return; guarded = true;
+    var css = D.createElement("style"); css.id = "slc-ads-css";
+    css.textContent = "ins.adsbygoogle,.google-auto-placed{max-width:100%!important;overflow:hidden}" +
+      // an anchor or vignette ad never stays over an open panel, the photo viewer, the 3D viewer or the events
+      "html.sl-modal-on ins.adsbygoogle[data-anchor-status],html.sl-achdlg-on ins.adsbygoogle[data-anchor-status],html.slc-open ins.adsbygoogle[data-anchor-status]{visibility:hidden!important}";
+    (D.head || D.documentElement).appendChild(css);
+    var go = function () {
+      if (!D.body) return setTimeout(go, 200);
+      new MutationObserver(function (rs) {
+        for (var i = 0; i < rs.length; i++) { var a = rs[i].addedNodes; for (var j = 0; j < a.length; j++) { var n = a[j]; if (n.nodeType === 1 && (n.tagName === "INS" || n.tagName === "DIV" && n.className && typeof n.className === "string" && n.className.indexOf("google-auto-placed") >= 0)) fix(n); } }
+      }).observe(D.body, { childList: true, subtree: true });
+    };
+    go();
+  }
+
+  // ---- SnakeList's own banner (the app has its own markup, #ck-bar; the other pages get this one) ----
+  var bar = null, panel = null, lastFocus = null;
+  var STYLE = ".slc-bar{position:fixed;left:16px;right:16px;bottom:16px;z-index:9200;max-width:760px;margin:0 auto;display:flex;gap:14px;align-items:center;padding:12px 14px 12px 16px;border-radius:16px;font:13px/1.45 Inter,system-ui,sans-serif;animation:slcUp .3s ease-out}" +
+    ".slc-bar p{margin:0;flex:1}.slc-bar b{font-weight:600}.slc-bar a{color:inherit}" +
+    ".slc-btns{display:flex;gap:8px;flex:none}" +
+    ".slc-btns button,.slc-acts button{padding:9px 14px;border-radius:10px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer;border:1px solid rgba(88,179,81,.55);background:transparent;color:inherit}" +
+    ".slc-btns .slc-yes,.slc-acts .slc-yes{background:#58b351;color:#fff;border-color:#58b351}" +
+    ".slc-btns button:focus-visible,.slc-acts button:focus-visible,.slc-sw:focus-visible,.slc-x:focus-visible{outline:2px solid #58b351;outline-offset:2px}" +
+    "@keyframes slcUp{from{transform:translateY(16px);opacity:0}}" +
+    "@media (prefers-reduced-motion:reduce){.slc-bar,.slc-panel{animation:none!important}}" +
+    "@media (max-width:600px){.slc-bar{flex-direction:column;align-items:stretch;gap:10px;left:10px;right:10px;bottom:10px;padding:12px;font-size:12.5px}.slc-btns button{flex:1;padding:9px 6px}}" +
+    ".slc-bd{position:fixed;inset:0;z-index:10060;background:rgba(10,30,15,.45);display:flex;align-items:center;justify-content:center;padding:16px}" +
+    ".slc-panel{box-sizing:border-box;width:100%;max-width:440px;max-height:calc(100vh - 32px);overflow:auto;border-radius:18px;padding:18px 18px 16px;font:14px/1.45 Inter,system-ui,sans-serif;box-shadow:0 18px 50px rgba(0,0,0,.35);animation:slcUp .25s ease-out}" +
+    ".slc-panel h2{margin:0;font:700 18px Inter,system-ui,sans-serif}.slc-panel .slc-sub{margin:4px 0 12px;font-size:13px;opacity:.85}" +
+    ".slc-hd{display:flex;align-items:flex-start;gap:10px}.slc-hd>div{flex:1}" +
+    ".slc-x{flex:none;border:0;background:none;color:inherit;font-size:24px;line-height:1;cursor:pointer;padding:0 4px;border-radius:8px}" +
+    ".slc-row{display:flex;gap:12px;align-items:center;padding:11px 12px;border-radius:12px;margin-bottom:8px}" +
+    ".slc-row span{flex:1}.slc-row b{display:block;font-weight:600}.slc-row small{display:block;font-size:12.5px;opacity:.85;margin-top:2px}" +
+    ".slc-on{flex:none;font:600 12px Inter,system-ui,sans-serif;color:#58b351;white-space:nowrap}" +
+    ".slc-sw{flex:none;position:relative;width:46px;height:26px;border-radius:99px;border:0;padding:0;cursor:pointer;background:rgba(120,130,120,.45);transition:background-color .2s}" +
+    ".slc-sw::after{content:'';position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}" +
+    ".slc-sw[aria-checked=true]{background:#58b351}.slc-sw[aria-checked=true]::after{transform:translateX(20px)}" +
+    ".slc-acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}.slc-acts button{flex:1 1 auto}" +
+    ".slc-note{font-size:12.5px;opacity:.85;margin:6px 2px 0}.slc-note a{color:inherit}" +
+    "@media (max-width:600px){.slc-bd{align-items:flex-end;padding:0}.slc-panel{max-width:none;border-radius:18px 18px 0 0;max-height:88vh;padding-bottom:calc(16px + env(safe-area-inset-bottom))}}" +
+    // light (SnakeList's light pop-ups) and dark (its deep green)
+    ".slc-bar,.slc-panel{background:linear-gradient(160deg,#f6fbf1,#e1eed5);color:#1c3a22;border:1px solid rgba(47,107,51,.25);box-shadow:0 14px 40px rgba(20,50,25,.25)}.slc-row{background:rgba(88,179,81,.10)}.slc-on{color:#2f7a35}" +
+    "html[data-sl-theme=dark] .slc-bar,html[data-sl-theme=dark] .slc-panel{background:linear-gradient(160deg,#256846,#22623f);color:#f0f8ec;border-color:rgba(160,222,140,.3);box-shadow:0 14px 40px rgba(0,0,0,.4)}" +
+    "html[data-sl-theme=dark] .slc-row{background:rgba(0,0,0,.14)}html[data-sl-theme=dark] .slc-on{color:#a8ef94}" +
+    "@media (prefers-color-scheme:dark){html:not([data-sl-theme]) .slc-bar,html:not([data-sl-theme]) .slc-panel{background:linear-gradient(160deg,#256846,#22623f);color:#f0f8ec;border-color:rgba(160,222,140,.3);box-shadow:0 14px 40px rgba(0,0,0,.4)}html:not([data-sl-theme]) .slc-row{background:rgba(0,0,0,.14)}html:not([data-sl-theme]) .slc-on{color:#a8ef94}}";
+  function css() { if (D.getElementById("slc-css")) return; var s = D.createElement("style"); s.id = "slc-css"; s.textContent = STYLE; D.head.appendChild(s); }
+  function privacy() { return (APP ? "https://snakelist.com/" : ROOT) + "privacy.html#analytics"; }
+  function hideBar() { if (bar) bar.hidden = true; var a = D.getElementById("ck-bar"); if (a && cmp) a.hidden = true; }
+  function showBar() {
+    if (APP || answered() || cmp || !PV()) return;
+    css();
+    if (!bar) {
+      bar = D.createElement("div"); bar.className = "slc-bar"; bar.id = "slc-bar"; bar.setAttribute("role", "dialog"); bar.setAttribute("aria-label", "Cookies");
+      bar.innerHTML = "<p><b>Cookies?</b> " + (STRICT ? "With your OK, Google Analytics may use cookies to count visits." :
+        "With your OK, Google Analytics may use cookies to count visits and Google may personalise the ads. Without it, those cookies stay off.") +
+        ' <a href="' + privacy() + '">Privacy</a></p><div class="slc-btns"><button type="button" class="slc-no">Reject</button><button type="button" class="slc-more">Manage</button><button type="button" class="slc-yes">Accept cookies</button></div>';
+      bar.querySelector(".slc-no").onclick = function () { choose({ analytics: false, ads: false }); };
+      bar.querySelector(".slc-yes").onclick = function () { choose({ analytics: true, ads: true }); };
+      bar.querySelector(".slc-more").onclick = function () { manage(); };
+      D.body.appendChild(bar);
+    }
+    bar.hidden = false;
+  }
+
+  // ---- Manage: a small panel with the three switches ----
+  function manage() {
+    if (cmp && W.googlefc && typeof W.googlefc.showRevocationMessage === "function") { W.googlefc.showRevocationMessage(); return; }
+    css(); closePanel(true);
+    var a = answered() ? analytics() : false, ad = answered() ? ls("sl-ads") === "yes" : false;
+    lastFocus = D.activeElement;
+    var bd = D.createElement("div"); bd.className = "slc-bd"; bd.id = "slc-manage";
+    var adsRow = STRICT
+      ? '<p class="slc-note">Ads: in Europe, Google\'s own consent message asks about ads. Until you say yes there, any ads on SnakeList are not personalised.</p>'
+      : '<div class="slc-row"><span><b>Advertising personalisation</b><small>Lets Google use cookies to show ads based on your interests. Off: ads may still appear, but they aren\'t personalised and use no ad cookies.</small></span>' +
+        '<button type="button" class="slc-sw" role="switch" id="slc-ads" aria-label="Advertising personalisation" aria-checked="' + ad + '"></button></div>';
+    bd.innerHTML = '<div class="slc-panel" role="dialog" aria-modal="true" aria-labelledby="slc-h"><div class="slc-hd"><div><h2 id="slc-h">Cookie choices</h2>' +
+      '<p class="slc-sub">Choose what SnakeList may use. You can change it any time from Cookie choices.</p></div><button type="button" class="slc-x" aria-label="Close">&times;</button></div>' +
+      '<div class="slc-row"><span><b>Essential</b><small>Keeps your list, your settings and this choice on this device.</small></span><span class="slc-on" style="flex:none">Always on</span></div>' +
+      '<div class="slc-row"><span><b>Analytics</b><small>Google Analytics counts visits with cookies, and SnakeList remembers what you look at (on this device only) for Picked for you.</small></span>' +
+      '<button type="button" class="slc-sw" role="switch" id="slc-an" aria-label="Analytics" aria-checked="' + a + '"></button></div>' + adsRow +
+      '<div class="slc-acts"><button type="button" class="slc-no">Reject all</button><button type="button" class="slc-save">Save choices</button><button type="button" class="slc-yes">Accept all</button></div>' +
+      '<p class="slc-note"><a href="' + privacy() + '" target="_blank" rel="noopener">How SnakeList uses cookies</a></p></div>';
+    D.body.appendChild(bd); panel = bd; D.documentElement.classList.add("slc-open");
+    var sw = function (id) { var b = bd.querySelector("#" + id); return b && b.getAttribute("aria-checked") === "true"; };
+    [].forEach.call(bd.querySelectorAll(".slc-sw"), function (b) { b.onclick = function () { b.setAttribute("aria-checked", String(b.getAttribute("aria-checked") !== "true")); }; });
+    bd.querySelector(".slc-x").onclick = function () { closePanel(); };
+    bd.onclick = function (e) { if (e.target === bd) closePanel(); };
+    bd.querySelector(".slc-no").onclick = function () { closePanel(); choose({ analytics: false, ads: false }); };
+    bd.querySelector(".slc-yes").onclick = function () { closePanel(); choose({ analytics: true, ads: !STRICT }); };
+    bd.querySelector(".slc-save").onclick = function () { var o = { analytics: sw("slc-an") }; if (!STRICT) o.ads = sw("slc-ads"); closePanel(); choose(o); };
+    bd.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closePanel(); }
+      if (e.key === "Tab") { var f = bd.querySelectorAll("button, a"), first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && D.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && D.activeElement === last) { e.preventDefault(); first.focus(); } }
+    });
+    setTimeout(function () { try { bd.querySelector("#slc-an").focus({ preventScroll: true }); } catch (e) {} }, 30);
+  }
+  function closePanel(quiet) {
+    if (!panel) return; panel.remove(); panel = null; D.documentElement.classList.remove("slc-open");
+    if (!quiet && lastFocus && lastFocus.focus) try { lastFocus.focus({ preventScroll: true }); } catch (e) {}
+  }
+
+  function whenKnown(f) { if (known) f(); else waiting.push(f); }
+  W.SLC = {
+    strict: STRICT, choose: choose, manage: manage, loadAds: loadAds, whenKnown: whenKnown, answered: answered,
+    known: function () { return known; }, cmpHandles: function () { return cmp === true; },
+    state: function () { return { analytics: analytics(), ads: adsOk(), answered: answered(), strict: STRICT, cmp: cmp }; }
+  };
+
+  // "Cookie choices" links: any element with data-slc-open (or href="#cookie-choices") opens the choices
+  D.addEventListener("click", function (e) {
+    var t = e.target && e.target.closest && e.target.closest("[data-slc-open], a[href='#cookie-choices']");
+    if (t) { e.preventDefault(); manage(); }
+  });
+
+  // the other pages: a "Cookie choices" link in the footer, the ads once the page has loaded, and the question
+  if (!APP) {
+    var start = function () {
+      var f = D.querySelector(".sl-foot .sl-flinks, .site-foot .links, footer");
+      if (f && PV() && !f.querySelector("[data-slc-open]")) { var l = D.createElement("a"); l.href = "#cookie-choices"; l.setAttribute("data-slc-open", ""); l.textContent = "Cookie choices"; if (f.tagName === "FOOTER" && !f.classList.contains("links")) { f.appendChild(D.createTextNode(" ")); } f.appendChild(l); }
+      if (!answered()) whenKnown(function () { setTimeout(showBar, 600); });
+      var later = function () { loadAds(); };
+      if (D.readyState === "complete") setTimeout(later, 300); else W.addEventListener("load", function () { setTimeout(later, 300); }, { once: true });
+    };
+    if (D.readyState === "loading") D.addEventListener("DOMContentLoaded", start, { once: true }); else start();
+  }
+})();
+</script>
 <!-- Google tag (gtag.js) - visitor statistics for snakelist.com (v6.11: its script is loaded by SL_3P below, after the opening) -->
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  // cookies only once the visitor accepts them in SnakeList's cookie banner
-  var slOk = false; try { slOk = localStorage.getItem('sl-consent') === 'yes'; } catch (e) {}
-  gtag('consent', 'default', { analytics_storage: slOk ? 'granted' : 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
   gtag('js', new Date());
   gtag('config', 'G-PY2LJV389K');
 </script>
-<!-- Google AdSense (site verification + ads) - tools/add_adsense.py adds the tag to every other page. On the app (this page) the
-     AdSense account is declared here for verification (and in ads.txt); its script, the same
-     https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0736553562389933 tag, is added by SL_3P below -->
+<!-- Google AdSense (site verification + ads) - tools/add_adsense.py adds sl-consent.js (which loads the ads script) to every other page.
+     On the app (this page) the AdSense account is declared here for verification (and in ads.txt); its script,
+     https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0736553562389933, is added by SLC.loadAds() via SL_3P below -->
 <meta name="google-adsense-account" content="ca-pub-0736553562389933">
 <script>
   // v6.11 (Eduardo: the opening "stops", then "jumps"): Google's statistics and ads scripts took over a second and a half of the
@@ -157,7 +433,7 @@ window.addEventListener("load",function(){setTimeout(function(){if(!window.__int
     window.SL_3P = function () {
       if (done) return; done = true;
       add('https://www.googletagmanager.com/gtag/js?id=G-PY2LJV389K');
-      setTimeout(function () { add('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0736553562389933', true); }, 2500);
+      setTimeout(function () { if (window.SLC) window.SLC.loadAds(); }, 2500); // only after the consent defaults; outside Europe only after an answer
     };
     ['scroll', 'wheel', 'touchmove', 'pointerdown', 'keydown'].forEach(function (n) { window.addEventListener(n, function () { lastMove = Date.now(); }, { passive: true, capture: true }); });
     function whenStill(ms) { setTimeout(function again() { if (Date.now() - lastMove < 1500) { setTimeout(again, 700); return; } window.SL_3P(); }, ms); }
@@ -171,11 +447,8 @@ window.addEventListener("load",function(){setTimeout(function(){if(!window.__int
   })();
 </script>
 <title>SnakeList - the snake life list, map and quiz</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<style>
+<script>
+// Previews (Settings > Previews; on the website tools/previews.js runs first and puts the classes): html.sl-pv-<style>
   /* v5.73: the opening logo's typeface is built into the page (EB Garamond itself, only the letters of "SnakeList", 3.5 KB),
      so the opening never waits for the font to download and the logo never changes shape halfway through */
   @font-face { font-family: 'SL Mark'; font-style: normal; font-weight: 400 800; font-display: block; unicode-range: U+4C, U+53, U+61, U+65, U+69, U+6B, U+6E, U+74;
@@ -2240,8 +2513,6 @@ window.addEventListener("load",function(){setTimeout(function(){if(!window.__int
   @media (prefers-reduced-motion: reduce) { .rotate-gate svg { animation: none; transform: rotate(-90deg); } }
 
 </style>
-<script>/* v5.73: start reading the opening logo's built-in letters (above) straight away */ try { document.fonts.load('600 1em "SL Mark"', "SnakeList"); document.fonts.load('500 1em "SL Mark"', "List"); } catch (e) {}</script>
-
 <style>
   .sl-browse { margin: 6px 0 0; font: 500 12.5px/1.6 'Inter', sans-serif; color: var(--text-muted); }
   .sl-browse a { color: var(--text-muted); text-decoration: underline; text-decoration-color: rgba(127,199,106,0.4); text-underline-offset: 3px; }
@@ -2909,6 +3180,10 @@ window.addEventListener("load",function(){setTimeout(function(){if(!window.__int
   .ck-yes { background: #58b351; color: #fff; border-color: #58b351 !important; }
   .ck-no { background: transparent; color: #f0f8ec; }
   @media (max-width: 600px) { .ck-bar { flex-direction: column; align-items: stretch; left: 10px; right: 10px; bottom: 10px; } .ck-btns button { flex: 1; } }
+  /* (cookies preview, Settings > Previews) cookie question: Reject / Manage / Accept - kept small on phones.
+     Without the preview the bar keeps its old words and buttons (the .ck-old parts) */
+  html:not(.sl-pv-cookies) .ck-bar .ck-new, html.sl-pv-cookies .ck-bar .ck-old { display: none !important; }
+  @media (max-width: 600px) { html.sl-pv-cookies .ck-bar:not(.nm-bar) { gap: 10px; padding: 12px; font-size: 12.5px; } html.sl-pv-cookies .ck-bar:not(.nm-bar) .ck-btns button { padding: 9px 6px; } }
 </style>
 <style>
   .g-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid #dadce0;
@@ -4392,6 +4667,24 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
 </style>
 </head>
 <body>
+<name> for each
+// preview that was on when this page started. SL_PV_ON(name) answers from that, so a page never mixes old and new halfway;
+// a preview switched on later shows after a reload. SL_DSW(old, new): the design preview's wording, else today's.
+(function () {
+  var d = document.documentElement;
+  try { ["design", "cookies", "tutorial", "finale", "opening"].forEach(function (k) {
+    if (!d.classList.contains("sl-pv-" + k) && !(window.SL_PREVIEWS && window.SL_PREVIEWS.on) && localStorage.getItem("sl-art-preview-" + k) === "1") d.classList.add("sl-pv-" + k); }); } catch (e) {}
+  window.SL_PV_ON = function (k) { return d.classList.contains("sl-pv-" + k); };
+  window.SL_DSW = function (a, b) { return d.classList.contains("sl-pv-design") ? b : a; };
+})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+
+<script>/* v5.73: start reading the opening logo's built-in letters (above) straight away */ try { document.fonts.load('600 1em "SL Mark"', "SnakeList"); document.fonts.load('500 1em "SL Mark"', "List"); } catch (e) {}</script>
+
 <div class="sl-root intro-on">
   <svg class="mark-defs" aria-hidden="true"><defs><linearGradient id="sgrad" x1="0" y1="0" x2="1" y2="0.3"><stop offset="0" stop-color="#96dd78"></stop><stop offset="1" stop-color="#81ce65"></stop></linearGradient><linearGradient id="tickgrad" x1="0" y1="0" x2="1" y2="0.3"><stop offset="0" stop-color="#5fb246"></stop><stop offset="1" stop-color="#3b8429"></stop></linearGradient><clipPath id="tick-clip"><path d="M6.1 26.0L6.7 26.5L7.2 27.1L7.8 27.7L8.3 28.2L8.9 28.8L9.5 29.4L10.0 30.0L10.6 30.5L11.3 31.1L11.9 31.7L12.6 32.3L13.2 32.8L14.0 33.4L14.7 33.9L15.6 34.4L16.4 34.9L17.4 35.3L18.7 35.7L20.2 35.7L21.7 35.4L23.0 34.8L24.0 34.1L24.8 33.3L25.5 32.5L26.0 31.7L26.5 30.9L26.9 30.2L27.4 29.5L27.7 28.7L28.1 28.0L28.5 27.3L28.8 26.6L29.2 25.9L29.6 25.2L29.9 24.5L30.3 23.8L30.7 23.1L31.0 22.4L31.4 21.7L31.8 21.0L32.1 20.3L32.5 19.6L32.9 18.9L33.2 18.1L33.6 17.4L33.9 16.7A2.4 2.4 0 0 0 29.7 14.5L29.3 15.2L28.9 15.8L28.5 16.5L28.1 17.2L27.7 17.9L27.3 18.6L26.9 19.3L26.6 19.9L26.2 20.6L25.8 21.3L25.4 22.0L25.0 22.7L24.6 23.4L24.2 24.0L23.8 24.7L23.4 25.4L23.0 26.1L22.6 26.7L22.2 27.4L21.8 28.0L21.4 28.5L21.0 29.0L20.7 29.4L20.3 29.7L20.1 29.9L19.9 30.0L19.9 29.9L19.8 29.9L19.5 29.8L19.1 29.6L18.6 29.3L18.1 29.0L17.6 28.6L17.0 28.1L16.5 27.7L16.0 27.2L15.5 26.7L14.9 26.2L14.4 25.6L13.9 25.1L13.4 24.5L12.8 23.9L12.3 23.4L11.8 22.8L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z"></path></clipPath><g id="mark-snake"><defs><clipPath id="py-clip"><path d="M94.6 23L92.5 21.6L90.4 20.1L88.3 18.7L86.1 17.2L83.9 15.8L81.7 14.4L79.4 13L77 11.6L74.6 10.3L72.1 9L69.5 7.7L66.9 6.5L64.1 5.3L61.1 4.3L58 3.3L54.7 2.6L51.2 2.1L47.5 2L43.5 2.1L39.4 2.7L35.2 3.8L31 5.5L27.1 7.7L23.5 10.4L20.4 13.4L17.7 16.7L15.6 19.9L13.7 23.5L12.2 27.3L11 31.4L10.3 35.7L10.2 40L10.5 44.3L11.4 48.5L12.7 52.4L14.3 56.1L16.2 59.5L18.4 62.6L20.7 65.5L23.2 68.1L25.8 70.5L28.5 72.6L31.2 74.5L34 76.3L36.8 77.9L39.6 79.2L41.9 80.3L44 81.3L46.1 82.3L48.3 83.3L50.3 84.2L52.4 85.2L54.4 86.2L56.4 87.2L58.3 88.2L60.2 89.2L62.1 90.2L63.9 91.3L65.6 92.4L67.2 93.5L68.8 94.6L70.3 95.8L71.7 97L73.1 98.2L74.3 99.4L75.4 100.6L76.1 101.5L76.8 102.4L77.3 103.5L77.8 104.6L78.2 105.8L78.4 107.1L78.6 108.4L78.6 109.7L78.5 111.1L78.3 112.4L78 113.8L77.5 115.1L76.9 116.4L76.2 117.7L75.3 118.9L74.3 120.1L73.2 121.3L72 122.4L70.7 123.4L69.2 124.3L67.7 125.2L66 125.9L64.1 126.7L62.2 127.4L60.2 127.9L58.2 128.4L56.2 128.8L54.2 129.2L52.1 129.4L50.1 129.6L48 129.6L45.9 129.6L43.9 129.4L41.8 129.2L39.8 128.8L37.8 128.4L35.8 127.9L33.9 127.2L32 126.4L30.2 125.6L28.5 124.6L26.8 123.5L25.2 122.3L23.7 120.9L23.26 120.43L23.02 120.18L22.79 119.94L22.55 119.7L22.32 119.45L22.08 119.21L21.85 118.96L21.61 118.72L21.38 118.48L21.14 118.24L20.9 117.99L20.67 117.75L20.43 117.51L20.19 117.28L19.94 117.04L19.7 116.8L19.45 116.57L19.21 116.33L18.96 116.11L18.7 115.88L18.45 115.66L18.19 115.44L17.93 115.22L17.67 115L17.4 114.78L17.14 114.57L16.88 114.36L16.61 114.14L16.35 113.93L16.08 113.72L15.82 113.5L15.55 113.29L15.29 113.07L15.03 112.86L14.77 112.64L14.51 112.42L14.25 112.2L13.98 111.99L13.71 111.78L13.43 111.58L13.15 111.39L12.87 111.2L12.58 111.01L12.3 110.82L12.01 110.64L11.72 110.46L11.43 110.28L11.14 110.09L10.85 109.91L10.57 109.72L10.29 109.53L10.01 109.34L9.73 109.14L9.46 108.93L9.19 108.73L8.91 108.54L8.62 108.36L8.32 108.19L8.02 108.03L7.71 107.87L7.41 107.71L7.1 107.56L6.79 107.41L6.48 107.26L6.17 107.11L5.87 106.95L5.57 106.78L5.28 106.61L5 106.43L4.72 106.24L4.43 106.06L4.13 105.9L3.82 105.75L3.51 105.61L3.05 105.39L2.53 105.18L2.13 105.06L1.77 104.96L1.42 104.86L1.06 104.76L0.71 104.66L0.37 104.54L0.03 104.41L-0.31 104.27L-0.64 104.14L-0.99 104.03L-1.35 103.95L-1.72 103.88L-2.09 103.83L-2.46 103.79L-2.83 103.76L-3.2 103.72L-3.57 103.68L-3.93 103.62L-4.29 103.55L-4.64 103.45L-4.99 103.37L-5.35 103.33L-5.72 103.32L-6.1 103.34L-6.48 103.37L-6.85 103.4L-7.22 103.43L-7.59 103.43L-7.94 103.41L-8.29 103.36L-8.65 103.35L-9.02 103.41L-9.39 103.49L-9.76 103.58L-10.12 103.66L-10.47 103.7L-10.82 103.7L-11.17 103.75L-11.53 103.9L-11.88 104.05L-12.23 104.17L-12.57 104.2L-12.91 104.39L-13.25 104.52A0.85 0.85 0 0 0 -13.27 106.22L-12.95 106.35L-12.65 106.55L-12.34 106.61L-12.04 106.76L-11.75 106.96L-11.47 107.15L-11.17 107.27L-10.88 107.33L-10.59 107.45L-10.31 107.61L-10.04 107.8L-9.77 107.98L-9.5 108.14L-9.23 108.26L-8.94 108.33L-8.67 108.44L-8.4 108.58L-8.14 108.76L-7.89 108.94L-7.64 109.14L-7.39 109.32L-7.14 109.49L-6.89 109.64L-6.62 109.75L-6.35 109.85L-6.1 109.98L-5.85 110.14L-5.61 110.31L-5.37 110.5L-5.14 110.69L-4.91 110.89L-4.68 111.08L-4.45 111.27L-4.22 111.44L-3.98 111.59L-3.72 111.73L-3.47 111.86L-3.23 112.01L-2.99 112.17L-2.76 112.36L-2.54 112.55L-2.33 112.75L-2.11 112.96L-1.94 113.14L-1.91 113.25L-1.83 113.4L-1.61 113.63L-1.39 113.85L-1.16 114.06L-0.91 114.25L-0.67 114.43L-0.42 114.62L-0.19 114.83L0.04 115.04L0.26 115.26L0.48 115.48L0.69 115.71L0.9 115.95L1.11 116.18L1.32 116.41L1.53 116.64L1.75 116.87L1.96 117.09L2.19 117.3L2.42 117.51L2.66 117.7L2.9 117.89L3.13 118.09L3.36 118.3L3.58 118.51L3.8 118.72L4.02 118.94L4.23 119.17L4.45 119.39L4.66 119.62L4.87 119.84L5.08 120.07L5.29 120.3L5.5 120.52L5.72 120.74L5.94 120.96L6.16 121.17L6.38 121.38L6.61 121.58L6.84 121.78L7.07 121.99L7.29 122.2L7.52 122.41L7.74 122.62L7.96 122.84L8.17 123.06L8.39 123.27L8.6 123.49L8.82 123.71L9.03 123.94L9.24 124.16L9.46 124.38L9.67 124.6L9.89 124.82L10.1 125.04L10.32 125.25L10.54 125.47L10.76 125.68L10.98 125.9L11.2 126.11L11.43 126.32L11.65 126.53L11.87 126.74L12.09 126.95L12.32 127.17L12.54 127.38L12.76 127.59L12.98 127.81L13.2 128.02L13.42 128.24L13.64 128.45L13.86 128.67L14.08 128.89L14.3 129.11L14.3 129.1L16.1 131.3L18.1 133.5L20.3 135.5L22.6 137.3L25 139L27.5 140.5L30.1 141.8L32.7 143L35.4 144.1L38.1 145L40.9 145.7L43.7 146.3L46.5 146.8L49.4 147.2L52.3 147.4L55.1 147.5L58 147.5L60.9 147.3L63.8 147L66.6 146.6L69.5 146L72.3 145.4L75.3 144.5L78.2 143.4L81.1 142.1L84 140.5L86.8 138.7L89.4 136.7L92 134.4L94.3 131.9L96.5 129.2L98.4 126.3L100.1 123.2L101.4 120L102.5 116.6L103.3 113.1L103.8 109.5L104 105.9L103.8 102.3L103.3 98.6L102.4 95L101.1 91.5L99.5 88L97.6 84.8L95.7 82.1L93.7 79.5L91.7 77.2L89.5 74.9L87.4 72.8L85.1 70.8L82.9 69L80.6 67.2L78.3 65.5L76 63.9L73.7 62.3L71.4 60.9L69 59.5L66.7 58.1L64.4 56.8L62.1 55.5L59.8 54.3L57.5 53.2L55.2 52.1L53 51L51.3 50.2L49.9 49.4L48.5 48.6L47.2 47.7L46 46.7L45 45.8L44.1 44.8L43.3 43.8L42.7 42.9L42.2 42.1L41.8 41.2L41.6 40.5L41.4 39.9L41.4 39.2L41.4 38.7L41.5 38.1L41.7 37.4L42 36.7L42.4 35.9L43 35L43.4 34.5L43.8 34.1L44.2 33.8L44.6 33.6L44.9 33.4L45.5 33.3L46.2 33.2L47.2 33.2L48.4 33.2L49.8 33.4L51.3 33.6L53 33.8L54.8 34.2L56.6 34.6L58.5 35.2L60.5 35.8L62.5 36.5L64.5 37.3L66.6 38.1L68.7 38.9L70.8 39.9L72.9 40.8L75 41.8L77.1 42.8L79.3 43.9L81.4 45Z"/></clipPath></defs><path class="snake-body" fill="var(--sl-snake, #5fbf56)" d="M94.6 23L92.5 21.6L90.4 20.1L88.3 18.7L86.1 17.2L83.9 15.8L81.7 14.4L79.4 13L77 11.6L74.6 10.3L72.1 9L69.5 7.7L66.9 6.5L64.1 5.3L61.1 4.3L58 3.3L54.7 2.6L51.2 2.1L47.5 2L43.5 2.1L39.4 2.7L35.2 3.8L31 5.5L27.1 7.7L23.5 10.4L20.4 13.4L17.7 16.7L15.6 19.9L13.7 23.5L12.2 27.3L11 31.4L10.3 35.7L10.2 40L10.5 44.3L11.4 48.5L12.7 52.4L14.3 56.1L16.2 59.5L18.4 62.6L20.7 65.5L23.2 68.1L25.8 70.5L28.5 72.6L31.2 74.5L34 76.3L36.8 77.9L39.6 79.2L41.9 80.3L44 81.3L46.1 82.3L48.3 83.3L50.3 84.2L52.4 85.2L54.4 86.2L56.4 87.2L58.3 88.2L60.2 89.2L62.1 90.2L63.9 91.3L65.6 92.4L67.2 93.5L68.8 94.6L70.3 95.8L71.7 97L73.1 98.2L74.3 99.4L75.4 100.6L76.1 101.5L76.8 102.4L77.3 103.5L77.8 104.6L78.2 105.8L78.4 107.1L78.6 108.4L78.6 109.7L78.5 111.1L78.3 112.4L78 113.8L77.5 115.1L76.9 116.4L76.2 117.7L75.3 118.9L74.3 120.1L73.2 121.3L72 122.4L70.7 123.4L69.2 124.3L67.7 125.2L66 125.9L64.1 126.7L62.2 127.4L60.2 127.9L58.2 128.4L56.2 128.8L54.2 129.2L52.1 129.4L50.1 129.6L48 129.6L45.9 129.6L43.9 129.4L41.8 129.2L39.8 128.8L37.8 128.4L35.8 127.9L33.9 127.2L32 126.4L30.2 125.6L28.5 124.6L26.8 123.5L25.2 122.3L23.7 120.9L23.26 120.43L23.02 120.18L22.79 119.94L22.55 119.7L22.32 119.45L22.08 119.21L21.85 118.96L21.61 118.72L21.38 118.48L21.14 118.24L20.9 117.99L20.67 117.75L20.43 117.51L20.19 117.28L19.94 117.04L19.7 116.8L19.45 116.57L19.21 116.33L18.96 116.11L18.7 115.88L18.45 115.66L18.19 115.44L17.93 115.22L17.67 115L17.4 114.78L17.14 114.57L16.88 114.36L16.61 114.14L16.35 113.93L16.08 113.72L15.82 113.5L15.55 113.29L15.29 113.07L15.03 112.86L14.77 112.64L14.51 112.42L14.25 112.2L13.98 111.99L13.71 111.78L13.43 111.58L13.15 111.39L12.87 111.2L12.58 111.01L12.3 110.82L12.01 110.64L11.72 110.46L11.43 110.28L11.14 110.09L10.85 109.91L10.57 109.72L10.29 109.53L10.01 109.34L9.73 109.14L9.46 108.93L9.19 108.73L8.91 108.54L8.62 108.36L8.32 108.19L8.02 108.03L7.71 107.87L7.41 107.71L7.1 107.56L6.79 107.41L6.48 107.26L6.17 107.11L5.87 106.95L5.57 106.78L5.28 106.61L5 106.43L4.72 106.24L4.43 106.06L4.13 105.9L3.82 105.75L3.51 105.61L3.05 105.39L2.53 105.18L2.13 105.06L1.77 104.96L1.42 104.86L1.06 104.76L0.71 104.66L0.37 104.54L0.03 104.41L-0.31 104.27L-0.64 104.14L-0.99 104.03L-1.35 103.95L-1.72 103.88L-2.09 103.83L-2.46 103.79L-2.83 103.76L-3.2 103.72L-3.57 103.68L-3.93 103.62L-4.29 103.55L-4.64 103.45L-4.99 103.37L-5.35 103.33L-5.72 103.32L-6.1 103.34L-6.48 103.37L-6.85 103.4L-7.22 103.43L-7.59 103.43L-7.94 103.41L-8.29 103.36L-8.65 103.35L-9.02 103.41L-9.39 103.49L-9.76 103.58L-10.12 103.66L-10.47 103.7L-10.82 103.7L-11.17 103.75L-11.53 103.9L-11.88 104.05L-12.23 104.17L-12.57 104.2L-12.91 104.39L-13.25 104.52A0.85 0.85 0 0 0 -13.27 106.22L-12.95 106.35L-12.65 106.55L-12.34 106.61L-12.04 106.76L-11.75 106.96L-11.47 107.15L-11.17 107.27L-10.88 107.33L-10.59 107.45L-10.31 107.61L-10.04 107.8L-9.77 107.98L-9.5 108.14L-9.23 108.26L-8.94 108.33L-8.67 108.44L-8.4 108.58L-8.14 108.76L-7.89 108.94L-7.64 109.14L-7.39 109.32L-7.14 109.49L-6.89 109.64L-6.62 109.75L-6.35 109.85L-6.1 109.98L-5.85 110.14L-5.61 110.31L-5.37 110.5L-5.14 110.69L-4.91 110.89L-4.68 111.08L-4.45 111.27L-4.22 111.44L-3.98 111.59L-3.72 111.73L-3.47 111.86L-3.23 112.01L-2.99 112.17L-2.76 112.36L-2.54 112.55L-2.33 112.75L-2.11 112.96L-1.94 113.14L-1.91 113.25L-1.83 113.4L-1.61 113.63L-1.39 113.85L-1.16 114.06L-0.91 114.25L-0.67 114.43L-0.42 114.62L-0.19 114.83L0.04 115.04L0.26 115.26L0.48 115.48L0.69 115.71L0.9 115.95L1.11 116.18L1.32 116.41L1.53 116.64L1.75 116.87L1.96 117.09L2.19 117.3L2.42 117.51L2.66 117.7L2.9 117.89L3.13 118.09L3.36 118.3L3.58 118.51L3.8 118.72L4.02 118.94L4.23 119.17L4.45 119.39L4.66 119.62L4.87 119.84L5.08 120.07L5.29 120.3L5.5 120.52L5.72 120.74L5.94 120.96L6.16 121.17L6.38 121.38L6.61 121.58L6.84 121.78L7.07 121.99L7.29 122.2L7.52 122.41L7.74 122.62L7.96 122.84L8.17 123.06L8.39 123.27L8.6 123.49L8.82 123.71L9.03 123.94L9.24 124.16L9.46 124.38L9.67 124.6L9.89 124.82L10.1 125.04L10.32 125.25L10.54 125.47L10.76 125.68L10.98 125.9L11.2 126.11L11.43 126.32L11.65 126.53L11.87 126.74L12.09 126.95L12.32 127.17L12.54 127.38L12.76 127.59L12.98 127.81L13.2 128.02L13.42 128.24L13.64 128.45L13.86 128.67L14.08 128.89L14.3 129.11L14.3 129.1L16.1 131.3L18.1 133.5L20.3 135.5L22.6 137.3L25 139L27.5 140.5L30.1 141.8L32.7 143L35.4 144.1L38.1 145L40.9 145.7L43.7 146.3L46.5 146.8L49.4 147.2L52.3 147.4L55.1 147.5L58 147.5L60.9 147.3L63.8 147L66.6 146.6L69.5 146L72.3 145.4L75.3 144.5L78.2 143.4L81.1 142.1L84 140.5L86.8 138.7L89.4 136.7L92 134.4L94.3 131.9L96.5 129.2L98.4 126.3L100.1 123.2L101.4 120L102.5 116.6L103.3 113.1L103.8 109.5L104 105.9L103.8 102.3L103.3 98.6L102.4 95L101.1 91.5L99.5 88L97.6 84.8L95.7 82.1L93.7 79.5L91.7 77.2L89.5 74.9L87.4 72.8L85.1 70.8L82.9 69L80.6 67.2L78.3 65.5L76 63.9L73.7 62.3L71.4 60.9L69 59.5L66.7 58.1L64.4 56.8L62.1 55.5L59.8 54.3L57.5 53.2L55.2 52.1L53 51L51.3 50.2L49.9 49.4L48.5 48.6L47.2 47.7L46 46.7L45 45.8L44.1 44.8L43.3 43.8L42.7 42.9L42.2 42.1L41.8 41.2L41.6 40.5L41.4 39.9L41.4 39.2L41.4 38.7L41.5 38.1L41.7 37.4L42 36.7L42.4 35.9L43 35L43.4 34.5L43.8 34.1L44.2 33.8L44.6 33.6L44.9 33.4L45.5 33.3L46.2 33.2L47.2 33.2L48.4 33.2L49.8 33.4L51.3 33.6L53 33.8L54.8 34.2L56.6 34.6L58.5 35.2L60.5 35.8L62.5 36.5L64.5 37.3L66.6 38.1L68.7 38.9L70.8 39.9L72.9 40.8L75 41.8L77.1 42.8L79.3 43.9L81.4 45Z"/><g clip-path="url(#py-clip)"><g fill="var(--sl-pat-solid, #173d27)" opacity="0.68"><g transform="translate(56.3 18.9) rotate(-165.4) scale(0.93)"><path d="M0 -10.32 C7.02 -10.32, 11.32 -5.68, 11.32 0 C11.32 5.68, 7.02 10.32, 0 10.32 C-7.02 10.32, -11.32 5.68, -11.32 0 C-11.32 -5.68, -7.02 -10.32, 0 -10.32 Z"/></g><g transform="translate(36.1 20.4) rotate(148.4) scale(0.93)"><path d="M0 -8.10 C8.14 -8.10, 13.12 -4.46, 13.12 0 C13.12 4.46, 8.14 8.10, 0 8.10 C-8.14 8.10, -13.12 4.46, -13.12 0 C-13.12 -4.46, -8.14 -8.10, 0 -8.10 Z"/></g><g transform="translate(25.8 37.8) rotate(93.9) scale(0.93)"><path d="M0 -10.80 C6.97 -10.80, 11.25 -5.94, 11.25 0 C11.25 5.94, 6.97 10.80, 0 10.80 C-6.97 10.80, -11.25 5.94, -11.25 0 C-11.25 -5.94, -6.97 -10.80, 0 -10.80 Z"/></g><g transform="translate(33.6 56.4) rotate(45.4) scale(0.93)"><path d="M0 -8.64 C7.91 -8.64, 12.75 -4.75, 12.75 0 C12.75 4.75, 7.91 8.64, 0 8.64 C-7.91 8.64, -12.75 4.75, -12.75 0 C-12.75 -4.75, -7.91 -8.64, 0 -8.64 Z"/></g><g transform="translate(51.2 67.4) rotate(25.7) scale(0.93)"><path d="M0 -9.90 C7.36 -9.90, 11.88 -5.45, 11.88 0 C11.88 5.45, 7.36 9.90, 0 9.90 C-7.36 9.90, -11.88 5.45, -11.88 0 C-11.88 -5.45, -7.36 -9.90, 0 -9.90 Z"/></g><g transform="translate(69.5 77.4) rotate(32.8) scale(0.93)"><path d="M0 -8.60 C7.38 -8.60, 11.90 -4.73, 11.90 0 C11.90 4.73, 7.38 8.60, 0 8.60 C-7.38 8.60, -11.90 4.73, -11.90 0 C-11.90 -4.73, -7.38 -8.60, 0 -8.60 Z"/></g><g transform="translate(85.2 91.0) rotate(51.4) scale(0.93)"><path d="M0 -9.12 C6.34 -9.12, 10.23 -5.02, 10.23 0 C10.23 5.02, 6.34 9.12, 0 9.12 C-6.34 9.12, -10.23 5.02, -10.23 0 C-10.23 -5.02, -6.34 -9.12, 0 -9.12 Z"/></g><g transform="translate(91.1 110.4) rotate(95.7) scale(0.93)"><path d="M0 -6.72 C6.45 -6.72, 10.40 -3.69, 10.40 0 C10.40 3.69, 6.45 6.72, 0 6.72 C-6.45 6.72, -10.40 3.69, -10.40 0 C-10.40 -3.69, -6.45 -6.72, 0 -6.72 Z"/></g><g transform="translate(81.8 128.5) rotate(138.0) scale(0.93)"><path d="M0 -6.89 C5.41 -6.89, 8.73 -3.79, 8.73 0 C8.73 3.79, 5.41 6.89, 0 6.89 C-5.41 6.89, -8.73 3.79, -8.73 0 C-8.73 -3.79, -5.41 -6.89, 0 -6.89 Z"/></g><g transform="translate(63.1 137.2) rotate(168.3) scale(0.93)"><path d="M0 -5.36 C4.98 -5.36, 8.03 -2.95, 8.03 0 C8.03 2.95, 4.98 5.36, 0 5.36 C-4.98 5.36, -8.03 2.95, -8.03 0 C-8.03 -2.95, -4.98 -5.36, 0 -5.36 Z"/></g><g transform="translate(42.4 137.6) rotate(-169.7) scale(0.93)"><path d="M0 -5.38 C3.85 -5.38, 6.20 -2.96, 6.20 0 C6.20 2.96, 3.85 5.38, 0 5.38 C-3.85 5.38, -6.20 2.96, -6.20 0 C-6.20 -2.96, -3.85 -5.38, 0 -5.38 Z"/></g><g transform="translate(88.0 34.0) rotate(6.0) scale(0.93)"><path d="M-30 -8.0 C-24 -14.2, -14 -16.6, -4 -16.5 C4.5 -16.3, 12.6 -12.6, 18.2 -8.6 C21.4 -6.4, 23.6 -4.5, 24.6 -3.0 C25.6 -1.5, 25.6 1.5, 24.6 3.0 C23.6 4.5, 21.4 6.4, 18.2 8.6 C12.6 12.6, 4.5 16.3, -4 16.5 C-14 16.6, -24 14.2, -30 8.0 C-33.5 5.4, -33.5 -5.4, -30 -8.0 Z"/></g></g></g><g clip-path="url(#py-clip)"><g transform="translate(88.0 34.0) rotate(6) translate(-24 0) scale(1.07) translate(24 0)"><path d="M-30 -8.0 C-24 -14.2, -14 -16.6, -4 -16.5 C4.5 -16.3, 12.6 -12.6, 18.2 -8.6 C21.4 -6.4, 23.6 -4.5, 24.6 -3.0 C25.6 -1.5, 25.6 1.5, 24.6 3.0 C23.6 4.5, 21.4 6.4, 18.2 8.6 C12.6 12.6, 4.5 16.3, -4 16.5 C-14 16.6, -24 14.2, -30 8.0 C-33.5 5.4, -33.5 -5.4, -30 -8.0 Z" fill="none" stroke="var(--sl-eye, #123320)" stroke-opacity="0.7" stroke-width="4.11"/></g></g><g transform="translate(88.0 34.0) rotate(6) translate(-24 0) scale(1.07) translate(24 0)"><path d="M-30 -8.0 C-24 -14.2, -14 -16.6, -4 -16.5 C4.5 -16.3, 12.6 -12.6, 18.2 -8.6 C21.4 -6.4, 23.6 -4.5, 24.6 -3.0 C25.6 -1.5, 25.6 1.5, 24.6 3.0 C23.6 4.5, 21.4 6.4, 18.2 8.6 C12.6 12.6, 4.5 16.3, -4 16.5 C-14 16.6, -24 14.2, -30 8.0 C-33.5 5.4, -33.5 -5.4, -30 -8.0 Z" fill="var(--sl-snake, #5fbf56)"/><circle cx="9.8" cy="-6.4" r="5.05" fill="var(--sl-eye, #123320)"/><circle cx="11.72" cy="-8.32" r="1.26" fill="#fff" fill-opacity="0.9"/><path d="M24.6 2.2 L33.2 3.9" fill="none" stroke="var(--sl-snake, #5fbf56)" stroke-width="2.2" stroke-linecap="round"/><path d="M33.2 3.9 L38.4 1.3" fill="none" stroke="var(--sl-snake, #5fbf56)" stroke-width="1.8" stroke-linecap="round"/><path d="M33.2 3.9 L38.4 7.3" fill="none" stroke="var(--sl-snake, #5fbf56)" stroke-width="1.8" stroke-linecap="round"/></g></g></defs></svg>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -10406,7 +10699,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   }
 
   // ---- the other Mark Seen buttons (outside the card) ----
-  var HTML = '<span class="lbl-mark">Mark Seen</span><span class="lbl-seen"><svg class="ic" width="13" height="13" aria-hidden="true"><use href="#i-check"></use></svg> Seen</span>';
+  var HTML = '<span class="lbl-mark">' + SL_DSW("Mark Seen", "Mark seen") + '</span><span class="lbl-seen"><svg class="ic" width="13" height="13" aria-hidden="true"><use href="#i-check"></use></svg> Seen</span>';
   function sync(b, on) {
     if (!b) return;
     b.classList.toggle(b.classList.contains("cam-btn") ? "seen" : "on", !!on);
@@ -10601,22 +10894,17 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     <div class="tour-dim" id="tour-dim-left"></div>
     <div class="tour-dim" id="tour-dim-right"></div>
     <div class="tour-spotlight" id="tour-spotlight"></div>
-    <div class="tour-callout" id="tour-callout" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-describedby="tour-text">
+    <div class="tour-callout" id="tour-callout" role="dialog" aria-label="Tour">
       <div class="tour-arrow" id="tour-arrow"></div>
-      <div class="tour-media" id="tour-media"></div>
-      <div class="tour-top"><p class="tour-step" id="tour-step-num"></p><button type="button" class="tour-restart" id="tour-restart" aria-label="Restart the tutorial from the beginning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 3v6h6"></path></svg>Restart</button><button type="button" class="tour-x" id="tour-close" aria-label="Close the tutorial">&times;</button></div>
-      <div class="tour-prog" aria-hidden="true"><i id="tour-prog-bar"></i></div>
-      <h3 id="tour-title" tabindex="-1"></h3>
+      <p class="tour-step" id="tour-step-num"></p>
+      <h3 id="tour-title"></h3>
       <p id="tour-text"></p>
-      <div class="tour-extra" id="tour-extra"></div>
       <div class="tour-actions">
-        <button type="button" id="tour-back">Back</button>
         <button type="button" id="tour-skip">Skip tutorial</button>
         <button type="button" id="tour-next" class="primary">Next</button>
       </div>
     </div>
   </div>
-  <div class="tour-sr" id="tour-live" aria-live="polite" role="status"></div>
   <div class="note-sheet" id="note-sheet" role="dialog" aria-modal="true" aria-label="Log a sighting">
     <div class="note-card">
       <h2 id="note-title"></h2>
@@ -12058,7 +12346,254 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
   noteSheet.addEventListener("click", (e) => { if (e.target === noteSheet) tryClose(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && noteBtn) tryClose(); });
 
-  // (v6.28: the tutorial moved to script#sl-tour near the end of the page - guides, stages, Quick Tour / Full Tutorial)
+  // (the new tutorial - guides, stages, Quick Tour / Full Tutorial - is script#sl-tour near the end of the page; it runs
+  // instead of this one only with the tutorial preview on)
+  // A one-time spotlight tour of the tabs, shown right after the opening animation on a
+  // device's first-ever visit - gated by localStorage so returning devices never see it again.
+  // Each step highlights the real tab button and points a callout at it, rather than listing
+  // everything in one static box, so "what this does" always has something concrete to point at.
+  (() => {
+    // (tutorial preview, Settings > Previews: the new tutorial in script#sl-tour runs instead of this one)
+    if (window.SL_PV_ON && window.SL_PV_ON("tutorial")) return;
+    const TOUR_KEY = "sl-tour-seen";
+    // v4.73: the long tour - what SnakeList is, every button, then it takes you to the map and shows you that too
+    const firstCard = () => [...document.querySelectorAll("#grid .card")].find((c) => c.offsetParent && getComputedStyle(c).display !== "none");
+    const inCard = (q) => () => { const c = firstCard(); return c && c.querySelector(q); };
+    const in3d = (re) => () => [].find.call(document.querySelectorAll(".sl3d-ov button"), (b) => b.offsetParent && re.test((b.textContent || "").trim()));
+    const goTab = (t) => () => { const b = document.getElementById("tab-" + t); if (b && !b.classList.contains("active")) { b.click(); return true; } return false; };
+    const steps = [
+      { sel: ".brand, h1, .eyebrow-row", center: true, title: "Welcome to SnakeList", text: "SnakeList is your life list of the world's snakes - every one of the 4,000+ known species, with photos, maps of where they live and a 3D model of each. Find snakes, learn about them and tick off the ones you've seen. This tour shows you every button." },
+      { sel: ".sl-ver", title: "Version and what's new", text: "The version of SnakeList you're using. Tap it to see what's new in this update." },
+      // the Install button hides once your account has the app: then this step circles your account (or Sign in)
+      { sel: () => { const b = document.getElementById("install-btn"); return b && b.getClientRects().length && b.offsetWidth ? b : document.querySelector(".auth-btn"); }, title: "Install the app",
+        text: "Put SnakeList on your phone or computer like a real app - it opens straight away and works without internet.",
+        textFn: (t) => t && t.id === "install-btn" ? null : /sign in/i.test(t ? t.textContent : "") ? "Put SnakeList on your phone or computer like a real app. Sign in here, and SnakeList offers to install itself on this device." : "You already have the SnakeList app with this account - it's all here under your name, on every device you sign in on." },
+      { sel: ".auth-btn", title: "Sign in", text: "Sign in to keep your list safe and the same on all your devices." },
+      { sel: "#report-btn", title: "Report a bug or an idea", text: "Found something wrong, or have an idea? Send it to the person who makes SnakeList. After you've used SnakeList for a while, a little tip pops up here once to remind you." },
+      { sel: "#share-btn", title: "Share SnakeList", text: "Send SnakeList to a friend: copy the link, or send it with WhatsApp, email and more." },
+      { sel: "#tour-replay", title: "This tutorial", text: "Watch this tour again any time. The Restart button at the top of each box starts it again from the beginning." },
+      { sel: "#set-btn", title: "Settings", text: "The gear has all your settings: light or dark, how bright the screen is, how big the words are, your language, full screen, sharing your location for See near me, and more. They are remembered on this device." },
+      { sel: ".brand, h1, .eyebrow-row", center: true, title: "Snakes picked for you", text: "The first time you opened SnakeList it asked how well you know snakes (or you said \u201cI don't know\u201d). That decides which snakes come first in your list and which quiz level is best for you. You can change it any time in the Quiz." },
+      { sel: "#tab-guide", go: goTab("guide"), title: "Species Checklist", text: "The whole list of snakes. This is where you start." },
+      { sel: "#search", act: "click", tryIt: "Try it: click the search box.", title: "Search", text: "Type a snake's name, a family, a type of snake or a country to find it fast." },
+      { sel: 'details.fsec[data-sec="family"] > summary', act: "click", tryIt: "Try it: click Snake family to open it.", title: "Filters", text: "Open these to narrow the list: snake family, location, habitat, characteristics (like venomous or constrictor), other filters and your own lists." },
+      { sel: 'details.fsec[data-sec="traits"] > summary', title: "Search by what a snake looks like", text: "Open Characteristics and type in its search box - like black, green, rattle, stripes or horns - to find the snakes that look like that." },
+      { sel: ".sl-sort-wrap", title: "Sort", text: "Change the order of the list - by name, venomous first, family and more." },
+      { sel: "#ck-yes", cookie: true, go: () => { if (window.SL_showCookies) window.SL_showCookies(); return false; }, title: "Picked for you",
+        text: "SnakeList can put the snakes you're most likely to love at the top of your list - that's \u201cPicked for you\u201d. Go ahead and click Accept cookies to unlock this feature!" },
+      { sel: firstCard, act: "hover", tryIt: "Try it: point at the card with your mouse.", title: "A snake card", text: "Each card is one species: its photo, name, scientific name, where it lives, its family and tags like Venomous or Rare." },
+      { sel: inCard(".wish-row, .wish-btn"), title: "Want to see", text: "Add a snake to the list of snakes you'd love to find one day." },
+      { sel: inCard(".follow-btn"), title: "Follow", text: "Tap the bell to follow a snake and get news about it." },
+      { sel: inCard(".seen-btn"), title: SL_DSW("Mark Seen", "Mark seen"), text: "Seen this snake in real life? Tap " + SL_DSW("Mark Seen", "Mark seen") + " to tick it off - you can add the date, the place and your own photo." },
+      // v5.16: the 3D tour - it opens a snake in 3D and lets you try the buttons, then closes it again
+      { sel: () => [].find.call(document.querySelectorAll("#grid .card .td-card-btn"), (b) => b.offsetParent), act: "click", tryIt: "Try it: click 3D to open this snake in 3D.", title: "3D", text: "Every snake in SnakeList has its own 3D model. Click 3D and we'll look at it together." },
+      { sel: ".sl3d-ov .sp3d-stage", waitFor: true, title: "Your snake in 3D", text: "This is a 3D model of the real snake - its colours, pattern and size come from photos and measurements of the real species, and it lies in the kind of place where it lives. Drag to go round it, and scroll or pinch to zoom in where you point." },
+      { sel: in3d(/^Open mouth$/), waitFor: true, act: "click", tryIt: "Try it: click Open mouth.", title: "Open mouth", text: "Look inside its mouth: the teeth, the fangs if it has them, the tongue, and the windpipe it breathes through while it swallows." },
+      { sel: in3d(/^Anatomy$/), waitFor: true, act: "click", tryIt: "Try it: click Anatomy.", title: "Anatomy", text: "The skin turns see-through, so you can see its skeleton and organs. Click a label or its Show more to learn about that part - it gets a green outline so you can see where it is." },
+      { sel: in3d(/^See it eat$/), waitFor: true, title: "See it eat", text: "Watch it catch and swallow its food the way this kind of snake really does." },
+      { sel: in3d(/^Slither$/), waitFor: true, act: "click", tryIt: "Try it: click Slither.", title: "Slither", text: "Watch it move along the ground. Click Stop when you've seen enough." },
+      { sel: in3d(/^Show more/), waitFor: true, act: "click", tryIt: "Try it: click Show more.", title: "More buttons", text: "The camera buttons: the full body, a close-up of the head and its pattern from above. Size vs person, next to Normal and Anatomy, shows how long it is next to a person 1.70 m tall." },
+      { sel: ".sl3d-ov .sp3d-fsc", waitFor: true, title: "Full screen", text: "Make the 3D model fill your whole screen." },
+      { sel: in3d(/Compare photo/), waitFor: true, title: "Compare photo", text: "Put a real photo of this snake next to the model. You can zoom into the photo too." },
+      { sel: in3d(/See countries|See more info/), waitFor: true, title: SL_DSW("See countries", "See more info"), text: SL_DSW("See the countries and states where this snake lives.", "See the countries and states where this snake lives, beside the model.") },
+      { sel: in3d(/Habitat/), title: "Habitat", text: "See the kind of place where this snake lives, all around it in 3D." },
+      { sel: ".sl3d-ov .sl3d-back", waitFor: true, act: "click", tryIt: "Try it: click the X in the top-right corner.", title: "Close", text: "Close the 3D model to go back to your list." },
+      { sel: inCard(".map-btn"), title: "See more info", text: "Open the snake's own page with everything SnakeList knows about it." },
+      { sel: "#tab-sightings", title: SL_DSW("My Sightings", "My sightings"), text: "Every snake you've marked as seen." },
+      { sel: "#tab-wish", title: "Want to see", text: "The snakes you'd love to find one day." },
+      { sel: "#tab-follow", title: "Following", text: "The snakes you follow, with their news." },
+      { sel: "#sl-share-sightings", title: "Share your sightings", text: "Makes a picture of the snakes you've seen, to send to your friends and family." },
+      { sel: "#sl-ach-btn", title: "Achievements", text: "How many snakes you have seen, and the badges you earn for your life list, your own sightings and the quiz. Tap Achievements to see them." },
+      { sel: "#tab-map", center: true, title: "Map", text: "Now let's go to the map - SnakeList will take you there." },
+      { sel: "#globe-stage", center: true, go: goTab("map"), wait: 900, title: "The map", text: "The world map of snakes. Drag to move around, scroll or pinch to zoom, and click any country to see the snakes that live there." },
+      { sel: "#hm-toggle", act: "click", tryIt: "Try it: click Species Heatmap to turn it on.", title: "Species Heatmap", text: "Colours every country by how many kinds of snakes live there - or where one snake you search for lives." },
+      { sel: "#sg-toggle", title: "Sightings", text: "Real photos of snakes people have found, shown as dots on the map." },
+      { sel: "#hab-toggle", title: "Habitats", text: "Pick a habitat - like rainforest or desert - and see where its snakes live." },
+      { sel: "#globe-stage", center: true, title: "See near me and Time", text: "Turn on Share my location in Settings, and the map gets a See near me button: it shows the snakes that live around you. Its Time button shows which of them are likely out right now - by day or night and by season." },
+      { sel: "#globe-stage", center: true, title: "Show colours", text: "Click a country, then Show colours on one of its snakes: the map colours in every place where that snake lives." },
+      { sel: "#mf-toggle", title: "Filters", text: "The same filters as the checklist, but for the map." },
+      { sel: ".layers-btn", title: "Map style", text: "Change how the map looks, like the satellite view." },
+      { sel: ".globe-zoom", act: "hover", tryIt: "Try it: point at these buttons.", title: "Zoom, reset and full screen", text: "Zoom in and out, go back to the whole world, or make the map fill the screen." },
+      { sel: "#td-toggle", title: "3D map", text: "See the map in 3D - real mountains, forests and deserts you can tilt and turn. With Habitats on, tap a place to fly down, see real photos of what it looks like, then see the snakes that live there in 3D." },
+      { sel: "#tab-quiz", title: "Quiz", text: "Guess where snakes live and test what you've learned." },
+      { sel: "#tab-cam", title: "Camera", text: "Take or upload a photo of a snake and SnakeList helps you work out which one it is." },
+      { sel: ".brand, h1, .eyebrow-row", center: true, go: goTab("guide"), wait: 500, title: "You're ready!", text: "That's everything. Start by searching for a snake you know, or open the map and see what lives near you.", last: true },
+    ];
+    const layer = document.getElementById("tour-layer");
+    const callout = document.getElementById("tour-callout");
+    const arrow = document.getElementById("tour-arrow");
+    const spotlight = document.getElementById("tour-spotlight");
+    const dimTop = document.getElementById("tour-dim-top");
+    const dimBottom = document.getElementById("tour-dim-bottom");
+    const dimLeft = document.getElementById("tour-dim-left");
+    const dimRight = document.getElementById("tour-dim-right");
+    if (!layer) return;
+    let i = 0;
+    const GAP = 20; // clear space between the spotlight ring and the callout - the arrow
+                     // lives entirely inside this gap so it never touches either one
+
+    function sizeLayer() {
+      // the layer is positioned in document coordinates (see .tour-layer), not fixed to the
+      // viewport, specifically so a page taller than one screen still gets dimmed all the
+      // way to its real bottom instead of only the first screenful
+      layer.style.height = Math.max(document.documentElement.scrollHeight, document.documentElement.clientHeight) + "px";
+    }
+
+    function place(follow) {
+      const step = steps[i];
+      const target = typeof step.sel === "function" ? step.sel() : document.querySelector(step.sel);
+      // a step whose button isn't there - or is hidden on this device (Install once installed...) - is skipped
+      if (!step.center && (!target || !target.getClientRects().length || target.getBoundingClientRect().width < 2)) { advance(); return; }
+      if (!target) { advance(); return; }
+      // the tab row scrolls horizontally on narrow screens - bring the target fully into view
+      // before measuring it, so the spotlight/callout never land on a half-scrolled button
+      if (!follow && !step.center) target.scrollIntoView({ block: "center", inline: "nearest", behavior: (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) ? "auto" : "smooth" }); // v4.80: glides (no jump); the welcome box opens over the hero photo, not scrolled past it
+      document.getElementById("tour-step-num").textContent = "Step " + (i + 1) + " of " + steps.length;
+      document.getElementById("tour-title").textContent = step.title;
+      document.getElementById("tour-text").textContent = (step.textFn && step.textFn(target)) || step.text;
+      if (!follow) setTry(step, target);
+      document.getElementById("tour-next").textContent = i === 0 ? "Start tutorial" : i === steps.length - 1 ? "Explore SnakeList" : "Next";
+      document.getElementById("tour-skip").textContent = i === 0 ? "Explore SnakeList" : "Skip tutorial";
+      document.body.classList.toggle("tour-ck", !!step.cookie); // the cookie bar sits under the tutorial, its Accept button circled
+      if (step.cookie) setTimeout(() => { const bar = document.getElementById("ck-bar"); if (!bar || bar.hidden || steps[i] !== step) return; const r = bar.getBoundingClientRect();
+        callout.style.top = Math.max(window.scrollY + 8, window.scrollY + r.top - callout.offsetHeight - 14) + "px"; arrow.style.display = "none"; }, 0);
+
+      layer.hidden = false;
+      sizeLayer();
+      callout.classList.toggle("tour-big", !!step.center);
+      if (step.center) { // v4.76: the welcome and the goodbye are a box in the middle - nothing circled
+        const pageW0 = document.documentElement.clientWidth, pageH0 = parseFloat(layer.style.height), vw0 = window.innerWidth, vh0 = window.innerHeight;
+        spotlight.style.width = spotlight.style.height = "0px"; spotlight.style.left = spotlight.style.top = "-10px"; spotlight.style.boxShadow = "none";
+        dimTop.style.left = dimTop.style.top = "0px"; dimTop.style.width = pageW0 + "px"; dimTop.style.height = pageH0 + "px"; dimTop.style.background = "";
+        [dimBottom, dimLeft, dimRight].forEach((d) => { d.style.width = d.style.height = "0px"; });
+        callout.style.left = (window.scrollX + Math.max(8, (vw0 - callout.offsetWidth) / 2)) + "px";
+        callout.style.top = (window.scrollY + Math.max(8, (vh0 - callout.offsetHeight) / 2)) + "px";
+        arrow.className = "tour-arrow pos-none"; arrow.style.display = "none";
+        return;
+      }
+      arrow.style.display = "";
+      const vr = target.getBoundingClientRect();       // viewport coordinates, for fit checks
+      const sx = window.scrollX, sy = window.scrollY;
+      const r = { left: vr.left + sx, right: vr.right + sx, top: vr.top + sy, bottom: vr.bottom + sy, width: vr.width, height: vr.height };
+      const pad = 4;
+      spotlight.style.left = (r.left - pad) + "px";
+      spotlight.style.top = (r.top - pad) + "px";
+      spotlight.style.width = (r.width + pad * 2) + "px";
+      spotlight.style.height = (r.height + pad * 2) + "px";
+      const tr = Math.min(parseFloat(getComputedStyle(target).borderTopLeftRadius) || 0, r.height / 2);
+      spotlight.style.borderRadius = (tr + pad) + "px"; // v4.78: same shape as what it circles - no light corners
+      spotlight.style.boxShadow = "0 0 0 2px var(--gold), 0 0 0 " + Math.ceil(Math.max(document.documentElement.scrollHeight, document.documentElement.scrollWidth) * 1.2) + "px rgba(0,0,0,0.45)";
+      // four rectangles tiling everything around the padded target box: full-width bands
+      // above and below it, and two bands exactly as tall as it is to its left and right -
+      // together they cover the whole page with no gap and no reliance on how long it is
+      const pageW = document.documentElement.clientWidth;
+      const pageH = parseFloat(layer.style.height);
+      dimTop.style.left = "0px"; dimTop.style.top = "0px";
+      dimTop.style.width = pageW + "px"; dimTop.style.height = Math.max(0, r.top - pad) + "px";
+      dimBottom.style.left = "0px"; dimBottom.style.top = (r.bottom + pad) + "px";
+      dimBottom.style.width = pageW + "px"; dimBottom.style.height = Math.max(0, pageH - (r.bottom + pad)) + "px";
+      dimLeft.style.left = "0px"; dimLeft.style.top = (r.top - pad) + "px";
+      dimLeft.style.width = Math.max(0, r.left - pad) + "px"; dimLeft.style.height = (r.height + pad * 2) + "px";
+      dimRight.style.left = (r.right + pad) + "px"; dimRight.style.top = (r.top - pad) + "px";
+      dimRight.style.width = Math.max(0, pageW - (r.right + pad)) + "px"; dimRight.style.height = (r.height + pad * 2) + "px";
+      // v4.78: the ring's own shadow does the darkening (it follows the rounded shape); the four see-through
+      // rectangles only catch clicks - around the thing to try on a try-it step, over everything otherwise
+      [dimTop, dimBottom, dimLeft, dimRight].forEach((d) => { d.style.background = "transparent"; });
+      if (!step.act) { dimTop.style.width = pageW + "px"; dimTop.style.height = pageH + "px"; [dimBottom, dimLeft, dimRight].forEach((d) => { d.style.width = d.style.height = "0px"; }); }
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const cw = callout.offsetWidth, ch = callout.offsetHeight;
+      // prefer placing to the right of the element (in viewport terms); fall back to the
+      // left, then below - fit checks stay in viewport space since that's what's on screen
+      let left, top, dir;
+      if (vr.right + GAP + cw < vw - 8) { left = r.right + GAP; top = r.top; dir = "left"; }
+      else if (vr.left - GAP - cw > 8) { left = r.left - GAP - cw; top = r.top; dir = "right"; }
+      else { left = Math.max(sx + 8, Math.min(sx + vw - cw - 8, r.left)); top = r.bottom + GAP; dir = "top"; }
+      top = Math.max(sy + 8, Math.min(sy + vh - ch - 8, top));
+      callout.style.left = left + "px";
+      callout.style.top = top + "px";
+      arrow.className = "tour-arrow pos-" + dir;
+      if (dir === "left" || dir === "right") {
+        // keeps the arrow pointed at the target's own middle even when the box had to slide
+        // down to stay on screen, instead of always sitting at a fixed spot on the box
+        arrow.style.top = Math.max(14, Math.min(ch - 28, (r.top + r.height / 2) - top - 7)) + "px";
+      }
+    }
+
+    // v4.78: some steps ask you to do it - click or point at the thing - and move on once you have;
+    // everywhere else the page under the tutorial can't be clicked
+    let tryCur = null;
+    function clearTry() { if (tryCur) { tryCur.el.removeEventListener(tryCur.type, tryCur.fn, true); tryCur = null; } const n = document.getElementById("tour-next"); n.disabled = false; const t = document.getElementById("tour-try"); if (t) t.remove(); }
+    function setTry(step, target) {
+      clearTry();
+      if (!step.act || !target) return;
+      const n = document.getElementById("tour-next"); n.disabled = true;
+      const t = document.createElement("p"); t.id = "tour-try"; t.className = "tour-try"; t.textContent = step.tryIt; document.getElementById("tour-text").after(t);
+      const type = step.act === "hover" ? "pointermove" : "click", at = i, el = step.act === "hover" ? document : target;
+      const fn = (e) => { if (i !== at) return;
+        if (step.act === "hover") { const rr = target.getBoundingClientRect(); if (!(e.clientX >= rr.left && e.clientX <= rr.right && e.clientY >= rr.top && e.clientY <= rr.bottom)) return; } // the mouse is over it (whatever lies on top)
+        clearTry(); const t2 = document.createElement("p"); t2.id = "tour-try"; t2.className = "tour-try tour-try-ok"; t2.textContent = "Nice! \u2714"; document.getElementById("tour-text").after(t2); setTimeout(() => { if (i === at && !layer.hidden) advance(); }, step.act === "click" ? 900 : 700); };
+      el.addEventListener(type, fn, true); tryCur = { el, type, fn };
+    }
+    function advance() {
+      clearTry();
+      i++;
+      if (i >= steps.length) { finish(); return; }
+      go();
+    }
+    // a step can first take you somewhere (the map), then wait for it to appear
+    function go() {
+      const st = steps[i];
+      // v5.16: a step inside the 3D window waits until that part has loaded (never more than 10 s)
+      if (st && st.waitFor) {
+        layer.hidden = true; const t0 = Date.now();
+        const poll = () => { const el = typeof st.sel === "function" ? st.sel() : document.querySelector(st.sel); if ((el && el.getClientRects().length) || Date.now() - t0 > 10000) setTimeout(() => { place(); [500, 1300].forEach((ms) => setTimeout(() => { if (steps[i] === st && !layer.hidden) place(true); }, ms)); }, 750); else setTimeout(poll, 200); }; /* ...and checks again just after, as the 3D buttons can shift */
+        poll(); return;
+      }
+      if (st && st.go && st.go()) { layer.hidden = true; setTimeout(place, st.wait || 600); } else place();
+    }
+
+    function finish() {
+      clearTry();
+      layer.hidden = true;
+      document.body.classList.remove("tour-ck");
+      setTimeout(() => { if (window.SL_showCookies) window.SL_showCookies(); }, 400); // not answered in the tutorial: asked now, on its own
+      try { localStorage.setItem(TOUR_KEY, "1"); } catch (err) {} try { sessionStorage.setItem(TOUR_KEY, "1"); } catch (err) {} window.__slTourSeen = true;
+    }
+
+    function start() {
+      let seen = false;
+      try { seen = !!localStorage.getItem(TOUR_KEY); } catch (err) {} try { seen = seen || !!sessionStorage.getItem(TOUR_KEY); } catch (err) {} seen = seen || !!window.__slTourSeen;
+      if (seen) return;
+      i = 0;
+      // v5.93: the very first visit asks "How well do you know snakes?" first - the tutorial comes after the choice
+      if (window.SL_LEVEL_NEEDED && window.SL_LEVEL_NEEDED() && window.SL_LEVEL_OPEN) { window.SL_LEVEL_OPEN({ first: true, onDone: go }); return; }
+      go();
+    }
+
+    // v4.83: the welcome (and the tutorial) waits until you've scrolled past the opening photo
+    // ...and until the page has stopped scrolling for a moment (it used to open in the middle of the scroll down into SnakeList)
+    let t0Quiet = 0; const startQuiet = () => { if (window.SL_promptsReady && !window.SL_promptsReady() && Date.now() - t0Quiet < 20000) { setTimeout(startQuiet, 250); return; } start(); };
+    const whenIn = () => { const h = document.getElementById("sl-hero"); if (window.__heroEntered || !h || h.hidden) start(); else document.addEventListener("sl-hero-entered", () => { t0Quiet = Date.now(); setTimeout(startQuiet, 0); }, { once: true }); };
+    if (window.__introDone) whenIn(); else document.addEventListener("sl-intro-done", whenIn, { once: true });
+    document.getElementById("tour-skip").addEventListener("click", finish);
+    document.getElementById("tour-next").addEventListener("click", advance);
+    // answering the cookie question during its step moves the tutorial on
+    document.addEventListener("sl-consent-answered", () => { if (!layer.hidden && steps[i] && steps[i].cookie) setTimeout(advance, 500); });
+    window.addEventListener("resize", () => { if (!layer.hidden) place(true); });
+    // v4.78: if the page moves after the step was placed (the list settling, a scroll), the ring and box follow it
+    let followRaf = 0;
+    window.addEventListener("scroll", () => { if (layer.hidden || followRaf) return; followRaf = requestAnimationFrame(() => { followRaf = 0; if (!layer.hidden) place(true); }); }, { passive: true });
+    // replaying is always available from the header - seeing it once shouldn't mean never again
+    const replayBtn = document.getElementById("tour-replay");
+    if (replayBtn) replayBtn.addEventListener("click", () => { i = 0; go(); });
+    // v6.11 (Eduardo): Restart at the top right of every tutorial box - back to the first step (out of the 3D window and back to the list first)
+    window.SL_TOUR_RESTART = () => {
+      clearTry(); layer.hidden = true;
+      const x = document.querySelector(".sl3d-ov .sl3d-back"); if (x && x.offsetParent) x.click();
+      const tg = document.getElementById("tab-guide"); const moved = tg && !tg.classList.contains("active"); if (moved) tg.click();
+      i = 0; setTimeout(go, moved || x ? 600 : 0);
+    };
+  })();
 
   noteClearBtn.addEventListener("click", () => {
     if (!noteBtn) return;
@@ -13244,7 +13779,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     const seen = cards.filter((c) => c.classList.contains("done")).length;
     const sn = document.getElementById("sl-seen-n"); if (sn) sn.textContent = seen.toLocaleString();
     const t = document.getElementById("tab-sightings");
-    if (t) t.innerHTML = sightIcon() + " My Sightings" + tabN(seen);
+    if (t) t.innerHTML = sightIcon() + SL_DSW(" My Sightings", " My sightings") + tabN(seen);
     const w = document.getElementById("tab-wish");
     if (w) w.innerHTML = TAB_STAR + " Want to see" + tabN(wishCount());
     const fl = document.getElementById("tab-follow");
@@ -13588,7 +14123,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     const seen = cards.filter((c) => c.classList.contains("done")).length;
 
     document.getElementById("tab-guide").innerHTML = ICON.book + " Species Checklist";
-    document.getElementById("tab-sightings").innerHTML = sightIcon() + " My Sightings" + tabN(seen);
+    document.getElementById("tab-sightings").innerHTML = sightIcon() + SL_DSW(" My Sightings", " My sightings") + tabN(seen);
     document.getElementById("tab-guide").classList.toggle("active", tab === "guide");
     document.getElementById("tab-sightings").classList.toggle("active", tab === "sightings");
     document.getElementById("tab-wish").innerHTML = TAB_STAR + " Want to see" + tabN(wishCount());
@@ -13654,7 +14189,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       ? "No snakes found."
       : tab === "follow" ? "You're not following any snakes yet - tap the bell next to a snake's name to follow it."
       : tab === "wish" ? "No snakes on your list yet - tap \u2606 Want to see on any snake in the Species Checklist."
-      : "You haven't logged any sightings yet — find one in the Species Checklist and tap Mark Seen.";
+      : "You haven't logged any sightings yet — find one in the Species Checklist and tap " + SL_DSW("Mark Seen", "Mark seen") + ".";
 
     document.getElementById("clear").classList.toggle("show", query.length > 0);
     if (!skipChips) renderChips();
@@ -14934,7 +15469,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       "Lives in: " + '<span class="quiz-lives-in">' + quizCurrent.answers.map((a) =>
         (((window.SL_INVASIVE || {})[quizCurrent.card.dataset.id] || []).some((pl) => pl.name === a || (pl.states || []).some((c) => window.STATE_NAME[c] === a))
           && !quizCurrent.card.dataset.countries.split("|").includes(a)) ? a + " (invasive)" : a).join(", ") + "</span>" + roundNote +
-      '<div class="quiz-result-actions"><button class="quiz-see-map" id="quiz-see-map" type="button">See countries</button>' +
+      '<div class="quiz-result-actions"><button class="quiz-see-map" id="quiz-see-map" type="button">' + SL_DSW("See countries", "See more info") + '</button>' +
       '<button class="quiz-next" id="quiz-next" type="button">Next question</button></div>';
     document.getElementById("quiz-submit").hidden = true;
     revealQuizMap();
@@ -22270,10 +22805,22 @@ window.SL_GEO_READY = new Promise(function (res) {
     sb.value = c.querySelector(".card-name").textContent.trim(); sb.dispatchEvent(new Event("input"));
     var n = 0;
     setTimeout(function down() {   // after the checklist has redrawn for the search
+      // (design preview) Mark seen / Want to see wait until the opening photo has gone, so the confirmation and its Undo are seen
+      if (act && SL_PV_ON("design") && !window.__heroEntered && document.querySelector("#sl-hero:not([hidden])") && (down.w = (down.w || 0) + 1) < 400) { setTimeout(down, 300); return; }
       if (c.offsetParent === null && n++ < 20) { setTimeout(down, 150); return; }
       window.scrollTo({ top: c.getBoundingClientRect().top + scrollY - 90, behavior: "smooth" });
       // &do=seen / &do=want (a species page's "Mark seen" / "Want to see"): point at that button on the card; the person still taps it
       var b = act === "seen" ? c.querySelector(".seen-btn") : act === "want" ? c.querySelector(".wish-btn") : null;
+      if (b && SL_PV_ON("design")) {
+        // (design preview) it really does it (once: a refresh doesn't flip it back), says so, and offers Undo
+        var cls = act === "seen" ? "done" : "wish", already = c.classList.contains(cls), nm = c.querySelector(".card-name").textContent.trim();
+        var ext = window.SL_FACTS && window.SL_FACTS.EXTINCT && window.SL_FACTS.EXTINCT[id];
+        if (!already && !ext && !(act === "want" && c.classList.contains("done"))) {
+          b.click();
+          if (window.SL_offerUndo) window.SL_offerUndo(nm + (act === "seen" ? " is marked as seen." : " is on your Want to see list."), function () { if (c.classList.contains(cls)) b.click(); });
+        }
+        try { history.replaceState(null, "", location.pathname + "?sp=" + encodeURIComponent(id) + location.hash); } catch (e) {}
+      }
       if (b) { try { b.focus({ preventScroll: true }); } catch (e) {} b.classList.remove("chip-pulse"); void b.offsetWidth; b.classList.add("chip-pulse"); }
     }, 700);
   }
@@ -22645,7 +23192,7 @@ window.SL_GEO_READY = new Promise(function (res) {
         '<ul class="fp-facts"><li class="fp-wait">Loading facts&hellip;</li></ul>' +
         '<div class="fp-sight"><h4>Latest sightings</h4><div class="fp-obs"><span class="fp-wait">Checking iNaturalist&hellip;</span></div></div>' +
         '<div class="fp-actions"><button type="button" class="fp-fav' + (fav ? " on" : "") + '">' + STAR + (fav ? "Favourite" : "Mark as favourite") + '</button>' +
-        '<button type="button" class="fp-countries">See countries</button><button type="button" class="fp-unfollow">Unfollow</button></div></div></article>';
+        '<button type="button" class="fp-countries">' + SL_DSW("See countries", "See more info") + '</button><button type="button" class="fp-unfollow">Unfollow</button></div></div></article>';
     }).join("");
     var cards = feed.querySelectorAll(".fp");
     feed.onclick = function (e) {
@@ -22665,6 +23212,8 @@ window.SL_GEO_READY = new Promise(function (res) {
         if (b) b.click(); // same as tapping its bell - the profile disappears
         return;
       }
+      // (design preview) "See more info" opens the species page, as on the cards
+      if (e.target.closest(".fp-countries") && SL_PV_ON("design") && window.SL_PAGE_URL) { var u0 = window.SL_PAGE_URL(s.card); if (window.claude && window.claude.use) window.open(u0, "_blank", "noopener"); else location.href = u0; return; }
       if (e.target.closest(".fp-countries") || (e.target.closest(".fp-place") && s.countries.length > 1)) {
         if (window.showMapSheet) window.showMapSheet(s.card);
         return;
@@ -25664,8 +26213,9 @@ window.SL_GEO_READY = new Promise(function (res) {
   </div>
 </div>
 <div class="ck-bar" id="ck-bar" hidden role="dialog" aria-label="Cookies">
-  <p><b>Cookies?</b> SnakeList keeps your list on this device. With your OK, it also remembers on this device what you look at, to put snakes you're likely to love first, and lets Google Analytics use cookies to count visits. Without it, analytics cookies stay off. <a href="privacy.html">Privacy</a></p>
-  <div class="ck-btns"><button type="button" class="ck-no" id="ck-no">Only essentials</button><button type="button" class="ck-yes" id="ck-yes">Accept cookies</button></div>
+  <p class="ck-old"><b>Cookies?</b> SnakeList keeps your list on this device. With your OK, it also remembers on this device what you look at, to put snakes you're likely to love first, and lets Google Analytics use cookies to count visits. Without it, analytics cookies stay off. <a href="privacy.html">Privacy</a></p>
+  <p class="ck-new"><b>Cookies?</b> SnakeList keeps your list on this device. With your OK, Google Analytics counts visits with cookies and SnakeList learns which snakes you like<span class="ck-ads">, and Google may personalise the ads</span>. Without it, those cookies stay off. <a href="privacy.html#analytics">Privacy</a></p>
+  <div class="ck-btns"><button type="button" class="ck-no" id="ck-no"><span class="ck-old">Only essentials</span><span class="ck-new">Reject</span></button><button type="button" class="ck-no ck-more ck-new" id="ck-more">Manage</button><button type="button" class="ck-yes" id="ck-yes">Accept cookies</button></div>
 </div>
 <script>
 // ---- What's new (once per version) + cookie consent + "Picked for you" --------------------
@@ -26169,11 +26719,18 @@ window.SL_GEO_READY = new Promise(function (res) {
   function tourSeen() { try { return !!(localStorage.getItem("sl-tour-seen") || sessionStorage.getItem("sl-tour-seen")); } catch (e) { return true; } }
   // v4.83: the cookie question never shows at the same time as the welcome, the tutorial or What's new -
   // first-timers are asked inside the tutorial (at Picked for you), everyone else on its own
-  function maybeCookies() { if (web && !get("sl-consent") && tourSeen() && !tourOn() && !sheet.classList.contains("open")) {
+  // in Europe Google's own consent message may handle the question (sl-consent.js): wait until that is known, then ask only if it doesn't
+  var SLC = window.SLC; if (SLC && SLC.strict) { var ckAds = bar.querySelector(".ck-ads"); if (ckAds) ckAds.hidden = true; }
+  // the cookies preview (Settings > Previews): the new bar (Reject / Manage / Accept, which also answers about ads) and
+  // waiting for Google's consent message in Europe; without it the old bar, asked as before (analytics only)
+  function ckPv() { return !!(window.SL_PV_ON && window.SL_PV_ON("cookies")); }
+  function maybeCookies() { if (SLC && ckPv() && !SLC.known()) { if (!maybeCookies.k) { maybeCookies.k = 1; SLC.whenKnown(function () { maybeCookies.k = 0; maybeCookies(); }); } return; }
+    if (SLC && SLC.cmpHandles()) return;
+    if (web && !get("sl-consent") && tourSeen() && !tourOn() && !sheet.classList.contains("open")) {
     // v5.68: never over the opening or the photo, and not with another pop-up
     if (window.SL_canPrompt && !window.SL_canPrompt(bar)) { if (!maybeCookies.q) { maybeCookies.q = 1; window.SL_whenPrompt(function () { maybeCookies.q = 0; maybeCookies(); }); } return; }
     bar.hidden = false; if (window.SL_promptShown) window.SL_promptShown(); } }
-  window.SL_showCookies = function () { if (web && !get("sl-consent") && !sheet.classList.contains("open")) bar.hidden = false; };
+  window.SL_showCookies = function () { if (web && !get("sl-consent") && !(SLC && SLC.cmpHandles()) && !sheet.classList.contains("open")) bar.hidden = false; };
   // v4.83: after a while in SnakeList without an account: "Want to keep your progress? Sign in" (once per visit)
   (function () {
     var shown = false, used = 0, last = Date.now();
@@ -26197,14 +26754,24 @@ window.SL_GEO_READY = new Promise(function (res) {
   })();
   // asked straight away on the first visit - it sits above the tutorial and the What's new popup
   setTimeout(maybeCookies, 1200);
-  function consent(yes) {
-    set("sl-consent", yes ? "yes" : "no"); bar.hidden = true; document.dispatchEvent(new Event("sl-consent-answered"));
-    if (window.gtag) window.gtag("consent", "update", { analytics_storage: yes ? "granted" : "denied" });
+  // yes: analytics + "Picked for you"; ads: ad personalisation (left out = unchanged). On snakelist.com sl-consent.js
+  // stores it, tells Google (Consent Mode) and loads the ads; it then sends "sl-consent-change" (also after Manage or
+  // Google's consent message), which is handled below
+  function answeredNow(yes) {
+    bar.hidden = true;
     if (yes) pick(); else { try { localStorage.removeItem("sl-interests"); } catch (e) {} }
   }
-  window.SL_CONSENT = consent; // v5.93: the first-visit "How well do you know snakes?" asks too
-  document.getElementById("ck-yes").addEventListener("click", function () { consent(true); });
-  document.getElementById("ck-no").addEventListener("click", function () { consent(false); });
+  function consent(yes, ads) {
+    if (SLC) { SLC.choose({ analytics: !!yes, ads: ads }); return; }
+    set("sl-consent", yes ? "yes" : "no"); answeredNow(yes); document.dispatchEvent(new Event("sl-consent-answered"));
+    if (window.gtag) window.gtag("consent", "update", { analytics_storage: yes ? "granted" : "denied" });
+  }
+  document.addEventListener("sl-consent-change", function (e) { answeredNow(!!(e.detail && e.detail.analytics)); });
+  window.SL_CONSENT = function (yes) { consent(yes); }; // v5.93: the first-visit "How well do you know snakes?" asks too (about analytics only)
+  document.getElementById("ck-yes").addEventListener("click", function () { if (ckPv()) consent(true, true); else consent(true); });
+  document.getElementById("ck-no").addEventListener("click", function () { if (ckPv()) consent(false, false); else consent(false); });
+  document.getElementById("ck-more").addEventListener("click", function () { if (SLC) SLC.manage(); });
+  if (!SLC) document.getElementById("ck-more").hidden = true;
   function allowed() { return get("sl-consent") === "yes" || !web; } // claude.ai: kept on this device only, no analytics
 
   // ---- what this person looks at (only with consent), and the snakes that match it ----
@@ -27328,9 +27895,9 @@ window.SL_GEO_READY = new Promise(function (res) {
         (i.type ? '<button type="button" data-filter="type" data-value="' + esc(i.type) + '">' + esc(i.type) + "</button>" : "") +
         (x.near ? '<span class="cam-near">Seen ' + x.near + " time" + (x.near === 1 ? "" : "s") + " within " + near.r + " km</span>" : near && Object.keys(near.m).length ? '<span class="cam-near no">No sightings within ' + near.r + " km</span>" : "") + "</div></div>" +
         '<div class="cam-pct">' + (pct < 1 ? "<1" : pct) + '%</div><div class="cam-acts">' +
-        '<button type="button" class="cam-btn" data-keep="' + esc(i.id) + '">Mark Seen &amp; keep this photo</button>' +
+        '<button type="button" class="cam-btn" data-keep="' + esc(i.id) + '">' + SL_DSW("Mark Seen", "Mark seen") + ' &amp; keep this photo</button>' +
         '<button type="button" class="cam-btn ghost sl-sb' + (seen ? " seen" : "") + '" data-seen="' + esc(i.id) + '">' + (window.SL_SEEN_UI ? window.SL_SEEN_UI.html() : seen ? "&#10003; Seen" : "Mark Seen") + "</button>" + // (Mark Seen smooth)
-        '<button type="button" class="cam-btn ghost" data-countries="' + esc(i.id) + '">See countries</button>' +
+        '<button type="button" class="cam-btn ghost" data-countries="' + esc(i.id) + '">' + SL_DSW("See countries", "See more info") + '</button>' +
         '<button type="button" class="cam-btn ghost" data-see="' + esc(i.name) + '">See in checklist</button></div></div>';
     }).join("") + (anyHere || !here ? "" : '<p class="cam-note">No snakes are on record where you are, so these are from anywhere in the world.</p>') +
       '<p class="cam-note">Guesses come from what the snake looks like, where you are' + (near && Object.keys(near.m).length ? " and the snakes recorded within " + near.r + " km of there on iNaturalist" : "") + '. Use them as a starting point, not a final answer.</p>' +
@@ -27347,7 +27914,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       c3.width = Math.round(img.naturalWidth * sc3); c3.height = Math.round(img.naturalHeight * sc3); c3.getContext("2d").drawImage(img, 0, 0, c3.width, c3.height);
       var where = here ? window.SL_placeLabel(here.lat, here.lon) : "";
       var r = window.SL_keepSighting(kp.getAttribute("data-keep"), c3.toDataURL("image/jpeg", 0.82), where);
-      kp.textContent = r === "full" ? "Marked seen - but storage is full, the photo wasn't kept" : r ? "Saved to My Sightings" + (where ? " - " + where : "") : "Couldn't save";
+      kp.textContent = r === "full" ? "Marked seen - but storage is full, the photo wasn't kept" : r ? "Saved to " + SL_DSW("My Sightings", "My sightings") + (where ? " - " + where : "") : "Couldn't save";
       kp.disabled = true;
       var sb = kp.parentNode.querySelector("[data-seen]"); if (sb) { if (window.SL_SEEN_UI) window.SL_SEEN_UI.sync(sb, true); else { sb.classList.add("seen"); sb.innerHTML = "&#10003; Seen"; } } // (Mark Seen smooth)
       return;
@@ -27359,7 +27926,9 @@ window.SL_GEO_READY = new Promise(function (res) {
       return;
     }
     var mc = e.target.closest("[data-countries]");
-    if (mc) { var c2 = cardInfo(mc.getAttribute("data-countries")), mb = c2 && c2.card.querySelector(".map-btn"); if (mb) mb.click(); }
+    if (mc) { var c2 = cardInfo(mc.getAttribute("data-countries"));
+      if (c2 && SL_PV_ON("design") && window.SL_PAGE_URL) { var u1 = window.SL_PAGE_URL(c2.card); if (window.claude && window.claude.use) window.open(u1, "_blank", "noopener"); else location.href = u1; return; } // (design preview: the species page, like the cards)
+      var mb = c2 && c2.card.querySelector(".map-btn"); if (mb) mb.click(); }
   });
 })();
 </script>
@@ -27846,7 +28415,8 @@ window.SL_welcome = function (u, back) {
 
 <div class="wco-drag" aria-hidden="true"></div>
 
-<footer class="sl-foot" id="sl-foot"><a href="https://snakelist.com/about-snakelist.html"><b>SnakeList</b></a> &middot; made by <a href="https://snakelist.com/about.html"><b>Eduardo Brandao</b></a> &middot; &copy; 2026 &middot; <a href="https://snakelist.com/species/">All <span data-sl-total>4,243</span> species</a> &middot; <a href="https://snakelist.com/install.html">Install app</a> &middot; <a href="https://snakelist.com/about.html">About me</a> &middot; <a href="https://snakelist.com/privacy.html" target="_blank" rel="noopener">Privacy</a> &middot; <a href="https://snakelist.com/terms.html" target="_blank" rel="noopener">Terms</a></footer>
+<footer class="sl-foot" id="sl-foot"><a href="https://snakelist.com/about-snakelist.html"><b>SnakeList</b></a> &middot; made by <a href="https://snakelist.com/about.html"><b>Eduardo Brandao</b></a> &middot; &copy; 2026 &middot; <a href="https://snakelist.com/species/">All <span data-sl-total>4,243</span> species</a> &middot; <a href="https://snakelist.com/install.html">Install app</a> &middot; <a href="https://snakelist.com/about.html">About me</a> &middot; <a href="https://snakelist.com/privacy.html" target="_blank" rel="noopener">Privacy</a> &middot; <a href="https://snakelist.com/terms.html" target="_blank" rel="noopener">Terms</a><span id="sl-foot-ck" hidden> &middot; <a href="#cookie-choices" data-slc-open>Cookie choices</a></span></footer>
+<script>if (window.SLC && window.SL_PV_ON && window.SL_PV_ON("cookies")) document.getElementById("sl-foot-ck").hidden = false;</script>
 
 <script>
   // the footer belongs after everything else on the page
@@ -30971,7 +31541,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
   };
   var opts = [].slice.call(box.querySelectorAll(".sl-lv-opt")), go = document.getElementById("sl-lv-go"), no = document.getElementById("sl-lv-no");
   var hint = document.getElementById("sl-lv-hint"), ckTxt = document.getElementById("sl-lv-ck-txt");
-  function consentAsked() { return !web || get("sl-consent") === "yes"; } // (with "Only essentials" before, it asks again here)
+  function consentAsked() { return !web || !!get("sl-consent"); } // asked once only - an earlier "Only essentials" is respected (no second cookie question here)
   function paint() {
     opts.forEach(function (o) { o.setAttribute("aria-pressed", String(o.dataset.level === pick)); });
     go.disabled = no.disabled = !pick;
@@ -31000,7 +31570,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
   });
   go.addEventListener("click", function () {
     if (!pick) return;
-    if (web && get("sl-consent") !== "yes" && window.SL_CONSENT) window.SL_CONSENT(true);
+    if (web && !get("sl-consent") && window.SL_CONSENT) window.SL_CONSENT(true); // ("Continue" after an earlier "Only essentials" does not turn cookies on)
     var keep = !web || get("sl-consent") === "yes";
     apply(pick, keep); if (!keep) { /* cookies refused earlier: this visit only */ }
     close();
@@ -31275,13 +31845,15 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
     if (!box) return null;
     var P = reg(), sec = box.querySelector("#sl-set-previews");
     // shown when a preview is on - and, once shown, kept while Settings is open (so a switch turned off can go back on)
-    if (!P || !(P.any() || sec)) { if (sec) sec.remove(); return null; }
+    // (or, for someone signed in, once ?preview=all - or any preview - has been used here or in the account: P.menu())
+    if (!P || !(P.any() || sec || (signedIn() && P.menu && P.menu()))) { if (sec) sec.remove(); return null; }
     if (!sec) {
       sec = document.createElement("section"); sec.className = "sl-sgrp sl-set-prev"; sec.id = "sl-set-previews"; sec.setAttribute("data-section", "previews");
       var foot = box.querySelector(".sl-sfoot"); if (foot && foot.parentNode === box) box.insertBefore(sec, foot); else box.appendChild(sec);
       sec.addEventListener("click", function (e) {
         var s = e.target.closest("[data-pv]"), R = reg(); if (!R) return;
         if (s) { R.set(s.getAttribute("data-pv"), s.getAttribute("aria-checked") !== "true"); changedHere = true; render(box); return; }
+        if (e.target.closest("[data-pv-allon]")) { R.list().forEach(function (p) { if (!p.on && p.key !== "events") R.set(p.key, true); }); changedHere = true; render(box); return; }
         if (e.target.closest("[data-pv-alloff]")) { R.list().forEach(function (p) { if (p.on) R.set(p.key, false); }); changedHere = true; render(box); return; }
         if (e.target.closest("[data-pv-reload]")) location.reload();
       });
@@ -31294,7 +31866,8 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
           '</small><span class="sl-pv-tag">Preview &mdash; not public yet</span></span><button type="button" class="sl-sw" role="switch" data-pv="' + esc(p.key) +
           '" aria-label="' + esc(p.label) + '" aria-checked="' + (p.on ? "true" : "false") + '"></button></div>';
       }).join("") + "</div>" +
-      '<div class="sl-pv-act"><button type="button" class="sl-sbtn" data-pv-alloff' + (any ? "" : " disabled") + ">Turn all previews off</button>" +
+      '<div class="sl-pv-act"><button type="button" class="sl-sbtn" data-pv-allon' + (L.every(function (p) { return p.on || p.key === "events"; }) ? " disabled" : "") + ">Turn all previews on</button>" +
+      '<button type="button" class="sl-sbtn" data-pv-alloff' + (any ? "" : " disabled") + ">Turn all previews off</button>" +
       '<button type="button" class="sl-sbtn" data-pv-reload' + (changedHere ? "" : " hidden") + ">Reload SnakeList to see it</button>" +
       '<span class="sl-pv-msg" role="status" aria-live="polite">' + (changedHere ? (any ? "Saved." : "All previews are off.") + " The change shows after a reload." : "") + "</span></div>";
     return sec;
@@ -31462,7 +32035,8 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
     bright: '<circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.4v2.2M12 19.4v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.2M19.4 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path>',
     x: '<path d="M6 6l12 12M18 6 6 18"></path>',
     link: '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path>',
-    restart: '<path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 3v6h6"></path>'
+    restart: '<path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 3v6h6"></path>',
+    cookie: '<path d="M12 3a9 9 0 1 0 9 9 3 3 0 0 1-3.5-3A3 3 0 0 1 14 5.5 3 3 0 0 1 12 3Z"></path><path d="M8.5 10.5h.01M12 15h.01M15.5 13.5h.01M8 15.5h.01"></path>'
   };
   window.SL_ICON = function (k) { return SVG(IC[k] || ""); };
   var theme = function () { return window.SL_THEME ? window.SL_THEME() : (de.getAttribute("data-sl-theme") === "dark" ? "dark" : "light"); };
@@ -31583,6 +32157,8 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
     '<section class="sl-sgrp"><h3>About & Help</h3><div class="sl-sgrid">' +
       row("news", "Version", { id: "ss-ver-s", t: "" }, '<button type="button" class="sl-sbtn" id="ss-ver">What\'s new</button>') +
       row("tour", "Tutorial", "Restart the guided tour from the beginning", '<button type="button" class="sl-sbtn" id="ss-tour">' + SVG(IC.restart) + "Restart</button>") +
+      // (cookies preview) Cookie choices: Analytics and ad personalisation - only with the new cookie bar (Settings > Previews)
+      (window.SLC && window.SL_PV_ON && window.SL_PV_ON("cookies") ? row("cookie", "Cookie choices", "Analytics and ads on snakelist.com", '<button type="button" class="sl-sbtn" id="ss-ck">Change</button>') : "") +
       row("calm", "Report a problem or suggest an idea", "Send a message to SnakeList's developer", '<button type="button" class="sl-sbtn" id="ss-report">Report</button>') +
     "</div></section>") +
     '<div class="sl-sfoot"><span>Settings are saved on this device only.</span><button type="button" class="sl-sbtn" id="ss-reset">Reset to defaults</button></div>';
@@ -31701,6 +32277,7 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
       .catch(function () { hmsg.textContent = "That photo could not be used. Please choose a JPEG, PNG or HEIC photo."; });
   });
   $("ss-tour").addEventListener("click", function () { closeDlg(true); try { localStorage.removeItem("sl-tour-seen"); sessionStorage.removeItem("sl-tour-seen"); } catch (e) {} window.__slTourSeen = false; var t = document.getElementById("tour-replay"); if (t) setTimeout(function () { t.click(); }, 120); });
+  if ($("ss-ck")) $("ss-ck").addEventListener("click", function () { window.SLC.manage(); });
   $("ss-reset").addEventListener("click", function () { ["sl-bright-light", "sl-bright-dark", "sl-text-size", "sl-calm", "sl-sounds", "sl-open-theme"].forEach(function (k) { ls(k, null); }); ls("sl-news-off", "0"); applyAll(); paint(); changed("reset"); });
   var tab0 = null; try { tab0 = sessionStorage.getItem("sl-set-tab"); } catch (e) {} selTab(tab0 || "display");
   window.SL_OPEN_SETTINGS = function (tab) { if (typeof tab === "string") selTab(tab); paint(); showDlg(setDlg, setBtn); document.dispatchEvent(new CustomEvent("sl-settings-open", { detail: { panel: setDlg } })); };
@@ -31918,7 +32495,7 @@ html.sl-calm *, html.sl-calm *::before, html.sl-calm *::after { animation-durati
 })();
 </script>
 
-<style id="sl-tour-css">
+<style id="sl-tour-css" media="not all">
 /* ---- v6.28 tutorial and guides (the engine is the script#sl-tour below) ----
    Same box, ring and colours as before; a progress bar, Back, a close x, a photo on the welcome,
    choice buttons, and a bottom sheet on phones. */
@@ -32002,6 +32579,7 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
 .sl-tour-help .sl-th-row > b { flex: 1 1 100%; font: 600 14px 'Inter', sans-serif; color: var(--text); }
 .sl-tour-help .sl-th-row > small { flex: 1 1 100%; margin-top: -6px; font: 400 12.5px 'Inter', sans-serif; color: var(--text-muted); }
 </style>
+<script>if (window.SL_PV_ON && window.SL_PV_ON("tutorial")) document.getElementById("sl-tour-css").media = "all"; // (tutorial preview)</script>
 <script id="sl-tour">
 // v6.28 (Eduardo, 2026-11-24 "Tutorial & onboarding redesign"): the tutorial, rebuilt.
 //  * The welcome offers a Quick Tour (about a minute), the Full Tutorial (seven stages, in the order you'd learn SnakeList:
@@ -32024,7 +32602,13 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
   var D = document, de = D.documentElement, W = window;
   var $ = function (id) { return D.getElementById(id); };
   var layer = $("tour-layer"), callout = $("tour-callout");
+  // PREVIEW (Settings > Previews > "New tutorial"): without it the old tutorial (in the main script) runs and this does nothing
+  if (!(W.SL_PV_ON && W.SL_PV_ON("tutorial"))) return;
   if (!layer || !callout || W.SL_TOUR) return;
+  // the new box: progress bar, Back, a picture, choices, and the line screen readers hear
+  callout.removeAttribute("aria-label"); callout.setAttribute("aria-modal", "true"); callout.setAttribute("aria-labelledby", "tour-title"); callout.setAttribute("aria-describedby", "tour-text");
+  callout.innerHTML = "\n      <div class=\"tour-arrow\" id=\"tour-arrow\"><\/div>\n      <div class=\"tour-media\" id=\"tour-media\"><\/div>\n      <div class=\"tour-top\"><p class=\"tour-step\" id=\"tour-step-num\"><\/p><button type=\"button\" class=\"tour-restart\" id=\"tour-restart\" aria-label=\"Restart the tutorial from the beginning\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 12a9 9 0 1 0 3-6.7\"><\/path><path d=\"M3 3v6h6\"><\/path><\/svg>Restart<\/button><button type=\"button\" class=\"tour-x\" id=\"tour-close\" aria-label=\"Close the tutorial\">&times;<\/button><\/div>\n      <div class=\"tour-prog\" aria-hidden=\"true\"><i id=\"tour-prog-bar\"><\/i><\/div>\n      <h3 id=\"tour-title\" tabindex=\"-1\"><\/h3>\n      <p id=\"tour-text\"><\/p>\n      <div class=\"tour-extra\" id=\"tour-extra\"><\/div>\n      <div class=\"tour-actions\">\n        <button type=\"button\" id=\"tour-back\">Back<\/button>\n        <button type=\"button\" id=\"tour-skip\">Skip tutorial<\/button>\n        <button type=\"button\" id=\"tour-next\" class=\"primary\">Next<\/button>\n      <\/div>\n";
+  if (!$("tour-live")) { var lv0 = D.createElement("div"); lv0.className = "tour-sr"; lv0.id = "tour-live"; lv0.setAttribute("aria-live", "polite"); lv0.setAttribute("role", "status"); layer.parentNode.insertBefore(lv0, layer.nextSibling); }
   var arrow = $("tour-arrow"), spot = $("tour-spotlight");
   var dims = ["top", "bottom", "left", "right"].map(function (k) { return $("tour-dim-" + k); });
   var elNum = $("tour-step-num"), elTitle = $("tour-title"), elText = $("tour-text"), elExtra = $("tour-extra"), elMedia = $("tour-media"),
@@ -32177,7 +32761,7 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
     "3d-slither": { stage: 4, target: in3d(/^Slither$/), need3d: true, wait: 4000, title: "Slither", text: "Watch it move along the ground." },
     "3d-more": { stage: 4, target: in3d(/^Show more/), need3d: true, wait: 4000, title: "More views", text: "The full body, a close-up of the head, its pattern from above, and Size vs person - how long it is next to a person 1.70 m tall." },
     "3d-compare": { stage: 4, target: in3d(/Compare photo/), need3d: true, wait: 3000, title: "Compare photo", text: "Put a real photo of this snake next to the model." },
-    "3d-countries": { stage: 4, target: in3d(/See countries/), need3d: true, wait: 3000, title: "See countries", text: "The countries and states where this snake lives." },
+    "3d-countries": { stage: 4, target: in3d(/See countries|See more info/), need3d: true, wait: 3000, title: "See countries", text: "The countries and states where this snake lives." },
     "3d-close": { stage: 4, target: function () { return D.querySelector(".sl3d-ov .sl3d-back"); }, need3d: true, wait: 3000, interact: "click", tryIt: "Try it: {tap} the X to close it.", title: "Close", text: "Close the 3D model to go back to your list." },
     "ach-share": { stage: 4, target: "share-sightings", route: "guide", title: "Share my sightings", text: "Makes a picture of the snakes you've seen, to send to friends and family." },
     "cabin-open": { stage: 4, target: "tab-cabin", when: hasXmas, title: "Christmas Cabin", text: "This season's Christmas Cabin. Do Christmas tasks - each one puts a present under your tree - then open them and decorate the tree. Each task has a Show me button that takes you to it." },
@@ -32629,6 +33213,167 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
     guides: function () { return Object.keys(GUIDES).filter(guideOk).map(function (g) { return { id: g, name: GUIDES[g].name, done: !!prog().done[g] }; }); },
     steps: STEPS, list: listFor, current: function () { return cur ? { guide: cur.g, step: cur.list[cur.i].id, index: cur.i, count: cur.list.length } : null; }
   };
+<style id="sl-tz-css">
+/* Settings > Time zone (see the script below). The list reuses the language menu's look (.lang-menu). */
+.sl-tz-menu ul li { align-items: baseline; }
+.sl-tz-menu li small { white-space: nowrap; }
+.sl-tzrow .sl-sbtn { max-width: 48%; }
+.sl-tzrow .sl-sbtn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 520px) { .sl-tzrow .sl-sbtn { max-width: 100%; margin-left: 46px; } }
+</style>
+<script>
+// ---- Settings > Time zone: which time zone SnakeList shows event and Advent Calendar times in ------------------
+// localStorage sl-tz = an IANA time zone ("Europe/Lisbon"); none = Automatic (this device's own time zone).
+// Kept on this device, like the rest of Settings. Only how times are SHOWN changes: an event or a door still
+// opens at the same moment for everybody (events/core.js counts with the server-checked clock, never this).
+//   window.SL_TZ: chosen() ("" = automatic), zone() (the one in use), device(), set(zone or ""), ok(zone),
+//                 label(zone), offset(zone) ("GMT+1"), format(time, Intl options) - the shared helper.
+//   A change fires the document events "sl-tz-changed" and "sl-settings-changed" (detail "time-zone").
+//   window.SL_TZ_SETTING_RENDER(container): draws the Settings row (and wires its searchable list) into any
+//   container - one self-contained block, so the Settings layout can move it wherever it likes.
+(function () {
+  // PREVIEW: only with the countdown finale preview on (Settings > Previews > "Countdown finale + time zone")
+  if (window.SL_TZ || !(window.SL_PV_ON && window.SL_PV_ON("finale"))) return;
+  var KEY = "sl-tz", D = document;
+  function stored() { try { return localStorage.getItem(KEY) || ""; } catch (e) { return ""; } }
+  function ok(z) { if (!z || typeof z !== "string") return false; try { new Intl.DateTimeFormat("en", { timeZone: z }); return true; } catch (e) { return false; } }
+  function device() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch (e) { return "UTC"; } }
+  function chosen() { var z = stored(); return ok(z) ? z : ""; }
+  function zone() { return chosen() || device(); }
+  function label(z) { return String(z || "").replace(/_/g, " "); }
+  function offset(z, at) {
+    try {
+      var p = new Intl.DateTimeFormat("en-US", { timeZone: z, timeZoneName: "shortOffset" }).formatToParts(at || new Date());
+      for (var i = 0; i < p.length; i++) if (p[i].type === "timeZoneName") return p[i].value === "GMT" ? "GMT+0" : p[i].value;
+    } catch (e) {}
+    return "";
+  }
+  function format(t, opts) {
+    var o = {}; for (var k in (opts || {})) o[k] = opts[k];
+    o.timeZone = zone();
+    try { return new Date(t).toLocaleString(undefined, o); } catch (e) { return new Date(t).toString(); }
+  }
+  function set(z) {
+    z = ok(z) ? z : "";
+    try { if (z) localStorage.setItem(KEY, z); else localStorage.removeItem(KEY); } catch (e) {}
+    paint();
+    D.dispatchEvent(new CustomEvent("sl-tz-changed", { detail: { zone: zone(), chosen: z } }));
+    D.dispatchEvent(new CustomEvent("sl-settings-changed", { detail: "time-zone" }));
+  }
+  window.SL_TZ = { chosen: chosen, zone: zone, device: device, set: set, ok: ok, label: label, offset: offset, format: format };
+
+  // ---------- every time zone this browser knows (Intl.supportedValuesOf), made once, when the list first opens ----------
+  var FALLBACK = ["UTC", "Africa/Cairo", "Africa/Johannesburg", "Africa/Lagos", "Africa/Nairobi", "America/Anchorage", "America/Bogota", "America/Chicago", "America/Denver", "America/Los_Angeles",
+    "America/Mexico_City", "America/New_York", "America/Sao_Paulo", "America/Toronto", "Asia/Bangkok", "Asia/Dubai", "Asia/Hong_Kong", "Asia/Jakarta", "Asia/Kolkata", "Asia/Seoul", "Asia/Shanghai",
+    "Asia/Singapore", "Asia/Tokyo", "Atlantic/Azores", "Atlantic/Madeira", "Australia/Perth", "Australia/Sydney", "Europe/Berlin", "Europe/Istanbul", "Europe/Lisbon", "Europe/London", "Europe/Madrid",
+    "Europe/Moscow", "Europe/Paris", "Pacific/Auckland", "Pacific/Honolulu"];
+  var ALL = null;
+  function fold(t) { return String(t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  function zones() {
+    if (ALL) return ALL;
+    var l = []; try { l = Intl.supportedValuesOf("timeZone").slice(); } catch (e) {}
+    if (!l.length) l = FALLBACK.slice();
+    if (l.indexOf("UTC") < 0) l.unshift("UTC");
+    var dz = device(); if (ok(dz) && l.indexOf(dz) < 0) l.push(dz);
+    var now = new Date();
+    ALL = l.filter(ok).map(function (z) {
+      var i = z.lastIndexOf("/"), city = label(i < 0 ? z : z.slice(i + 1)), region = i < 0 ? "" : label(z.slice(0, i)).replace(/\//g, " · "), off = offset(z, now);
+      return { z: z, city: city, region: region, off: off, key: fold(z + " " + city + " " + region + " " + off + " " + off.replace("GMT", "UTC")) };
+    });
+    return ALL;
+  }
+
+  // ---------- the list: the same look as the language menu ----------
+  var menu = null, q = null, ul = null, shown = [], hi = 0, anchor = null;
+  function makeMenu() {
+    if (menu) return;
+    menu = D.createElement("div"); menu.className = "lang-menu sl-tz-menu notranslate"; menu.id = "sl-tz-menu"; menu.setAttribute("translate", "no"); menu.hidden = true;
+    menu.innerHTML = '<input type="text" placeholder="Find a time zone (city, region or GMT+1)…" aria-label="Find a time zone" autocomplete="off"><ul role="listbox" aria-label="Time zones"></ul><p class="lang-note"></p>';
+    D.body.appendChild(menu);
+    q = menu.querySelector("input"); ul = menu.querySelector("ul");
+    q.addEventListener("input", render);
+    q.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(true); }
+      else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); if (!shown.length) return; hi = (hi + (e.key === "ArrowDown" ? 1 : -1) + shown.length) % shown.length; mark(); }
+      else if (e.key === "Enter" && shown[hi] != null) { e.preventDefault(); pick(shown[hi]); }
+      else if (e.key === "Tab") { close(false); }
+    });
+    ul.addEventListener("click", function (e) { var li = e.target.closest("[data-z]"); if (li) pick(li.getAttribute("data-z")); });
+    D.addEventListener("mousedown", function (e) { if (!menu.hidden && !menu.contains(e.target) && !(anchor && anchor.contains(e.target))) close(false); }, true);
+    D.addEventListener("touchstart", function (e) { if (!menu.hidden && !menu.contains(e.target) && !(anchor && anchor.contains(e.target))) close(false); }, { capture: true, passive: true });
+  }
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function render() {
+    var f = fold(q.value.trim()), cur = chosen(), all = zones(), dz = device();
+    var list = all.filter(function (x) { return !f || x.key.indexOf(f) >= 0; });
+    // a typed city comes first ("tok" -> Tokyo before Vostok), then other cities that contain it, then the rest
+    if (f) list = list.map(function (x, i) { var c = fold(x.city), r = c.indexOf(f) === 0 ? 0 : c.indexOf(f) > 0 ? 1 : 2; return { x: x, r: r, i: i }; })
+      .sort(function (a, b) { return a.r - b.r || a.i - b.i; }).map(function (o) { return o.x; });
+    var auto = !f || fold("automatic device " + dz + " " + label(dz)).indexOf(f) >= 0;
+    shown = (auto ? [""] : []).concat(list.map(function (x) { return x.z; }));
+    hi = f ? 0 : Math.max(0, shown.indexOf(cur));
+    var html = auto ? '<li role="option" data-z="" aria-selected="' + (cur === "") + '"' + (hi === 0 ? ' class="hi"' : "") + ">Automatic (device) <small>" + esc(label(dz)) + " · " + esc(offset(dz)) + "</small></li>" : "";
+    html += list.map(function (x, i) {
+      var k = i + (auto ? 1 : 0);
+      return '<li role="option" data-z="' + esc(x.z) + '" aria-selected="' + (x.z === cur) + '"' + (k === hi ? ' class="hi"' : "") + ">" + esc(x.city) + " <small>" + esc((x.region ? x.region + " · " : "") + x.off) + "</small></li>";
+    }).join("");
+    ul.innerHTML = shown.length ? html : '<p class="lang-none">No time zone matches that.</p>';
+    menu.querySelector(".lang-note").textContent = all.length + " time zones - type a city, a region or an offset like GMT+1.";
+  }
+  function mark() { [].forEach.call(ul.querySelectorAll("li"), function (li, i) { li.classList.toggle("hi", i === hi); if (i === hi) li.scrollIntoView({ block: "nearest" }); }); }
+  function open(btn) {
+    makeMenu(); anchor = btn;
+    q.value = ""; render(); menu.hidden = false; menu.style.zIndex = "2320";
+    if (btn) btn.setAttribute("aria-expanded", "true");
+    var r = btn.getBoundingClientRect();
+    var below = window.innerHeight - r.bottom - 8, above = r.top - 8, up = below < 300 && above > below;
+    ul.style.maxHeight = Math.max(160, Math.round((up ? above : below) - (menu.offsetHeight - ul.offsetHeight) - 14)) + "px";
+    menu.style.top = Math.round(up ? Math.max(8, r.top - 8 - menu.offsetHeight) : r.bottom + 8) + "px";
+    menu.style.left = Math.round(Math.max(12, Math.min(r.right - menu.offsetWidth, window.innerWidth - menu.offsetWidth - 12))) + "px";
+    q.focus();
+    var s = ul.querySelector('[aria-selected="true"]'); if (s) s.scrollIntoView({ block: "nearest" });
+  }
+  function close(refocus) {
+    if (!menu || menu.hidden) return;
+    menu.hidden = true;
+    if (anchor) { anchor.setAttribute("aria-expanded", "false"); if (refocus && anchor.isConnected) try { anchor.focus({ preventScroll: true }); } catch (e) {} }
+  }
+  function pick(z) { close(true); set(z); }
+
+  // ---------- the Settings row ----------
+  var CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.2 2"></path></svg>';
+  function paint() {
+    var b = D.getElementById("ss-tz"), s = D.getElementById("ss-tz-s"); if (!b || !s) return;
+    var c = chosen(), dz = device();
+    b.innerHTML = "<span>" + esc(c ? label(c.slice(c.lastIndexOf("/") + 1)) : "Automatic") + "</span> &#9662;";
+    b.setAttribute("aria-label", "Time zone: " + (c ? label(c) : "Automatic, " + label(dz)) + ". Change");
+    s.textContent = c ? label(c) + " (" + offset(c) + ") - event and Advent times are shown in this time zone"
+      : "Automatic - this device's time zone, " + label(dz) + " (" + offset(dz) + ")";
+  }
+  window.SL_TZ_SETTING_RENDER = function (container) {
+    if (!container) return null;
+    var old = D.getElementById("ss-tz-row"); if (old) old.remove();
+    var row = D.createElement("div"); row.className = "sl-srow sl-tzrow"; row.id = "ss-tz-row";
+    row.innerHTML = '<span class="sl-sic">' + CLOCK + '</span><span class="sl-stx"><b>Time zone</b><small id="ss-tz-s"></small></span>' +
+      '<button type="button" class="sl-sbtn" id="ss-tz" aria-haspopup="listbox" aria-expanded="false"></button>';
+    container.appendChild(row);
+    row.querySelector("#ss-tz").addEventListener("click", function (e) { e.stopPropagation(); if (menu && !menu.hidden) close(false); else open(e.currentTarget); });
+    paint();
+    return row;
+  };
+  // where it goes today: Settings > "Language and place" (next to Language and Share my location)
+  function mount() {
+    if (D.getElementById("ss-tz-row")) { paint(); return; }
+    var loc = D.getElementById("ss-loc"), grid = loc && loc.closest(".sl-sgrid");
+    if (!grid) grid = D.querySelector("#sl-settings .sl-pbody");
+    if (grid) window.SL_TZ_SETTING_RENDER(grid);
+  }
+  mount();
+  D.addEventListener("sl-settings-open", mount);
+  // Settings' "Reset to defaults" goes back to Automatic too
+  D.addEventListener("sl-settings-changed", function (e) { if (e.detail === "reset" && stored()) set(""); });
+  // closing Settings closes the list with it
+  D.addEventListener("keydown", function (e) { if (e.key === "Escape" && menu && !menu.hidden && !menu.contains(e.target)) close(false); }, true);
 })();
 </script>
 
@@ -32675,6 +33420,467 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
   sec.addEventListener("toggle", render);
   document.addEventListener("sl-traits-changed", render);
   if (window.SL_GET_TRAITS().length) render();
+})();
+</script>
+<style id="sl-ds-css" media="not all">
+/* ==== sl-ds: the SnakeList design system (v6.24 overhaul) ====================================================
+   One set of tokens and components, loaded LAST so it wins over the older per-feature rules above.
+   The part between "sl-ds shared start/end" is copied by build_species.py into species/sp.css and species/sl-fx.css,
+   so the species, place, About, Install and Privacy pages get the same buttons, focus ring, links and type.
+   Rules of the system:
+   - green stays the brand: #58b351 for accents, marks and progress; FILLED buttons with words on them use a deeper
+     green (#2e7d32, white words 5.1:1) in day mode and a light green with dark words (#8fd46c, 8.2:1) at night
+   - type: Inter for everything you read, Fraunces for names and headings; body text 16px, labels never under 12.5px;
+     scientific names are Inter italic (not monospace); capitals only for very short labels
+   - pills (999px) are for filters, toggles and status; actions are rounded rectangles (10px)
+   - every control has hover, pressed, keyboard focus, selected and disabled looks; 44px tall on touch screens */
+/* ---- sl-ds shared start ---- */
+:root {
+  --ds-primary: #2e7d32; --ds-primary-hover: #276d2c; --ds-primary-press: #1f5c23; --ds-on-primary: #ffffff;
+  --ds-focus: #1f6f2a; --ds-danger: #a33a24; --ds-danger-hover: #8a2f1c; --ds-on-danger: #ffffff;
+  --ds-radius: 10px; --ds-radius-sm: 8px; --ds-pill: 999px;
+  --ds-fs-label: 12.5px; --ds-fs-meta: 13.5px; --ds-fs-ui: 14.5px; --ds-fs-body: 16px; --ds-fs-lead: 18px;
+  --ds-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ds-display: 'Fraunces', Georgia, serif;
+  --ds-tap: 44px;
+}
+[data-sl-theme="dark"] {
+  --ds-primary: #8fd46c; --ds-primary-hover: #a5e486; --ds-primary-press: #7cc35a; --ds-on-primary: #0e2f1e;
+  --ds-focus: #b8f09f; --ds-danger: #f0a58a; --ds-danger-hover: #f6bba5; --ds-on-danger: #2a0e06;
+}
+/* keyboard focus: one visible ring everywhere (mouse clicks don't show it) */
+:where(a, button, [role="button"], [role="tab"], [role="link"], summary, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--ds-focus); outline-offset: 2px; }
+/* links in running text: never colour alone - they are a little bolder than the words around them, and get an
+   underline while they have keyboard focus (Eduardo asked for no underlines on hover; see v5.81) */
+:where(p, li, dd, td, figcaption, .sp-note, .sl-sub) a:not([class]) { font-weight: 600; }
+:where(p, li, dd, td, figcaption, .sp-note, .sl-sub) a:not([class]):focus-visible { text-decoration-line: underline !important; text-underline-offset: 3px; }
+/* the shared button: .sl-btn (+ .is-primary / .is-secondary / .is-ghost / .is-danger) */
+.sl-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-sizing: border-box; min-height: 40px;
+  padding: 8px 16px; border-radius: var(--ds-radius); border: 1px solid transparent; font: 600 var(--ds-fs-ui)/1.2 var(--ds-font);
+  cursor: pointer; text-decoration: none; white-space: nowrap; transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .08s ease; }
+.sl-btn.is-primary { background: var(--ds-primary); border-color: var(--ds-primary); color: var(--ds-on-primary); }
+.sl-btn.is-primary:hover { background: var(--ds-primary-hover); border-color: var(--ds-primary-hover); }
+.sl-btn.is-primary:active { background: var(--ds-primary-press); }
+.sl-btn.is-secondary { background: transparent; border-color: currentColor; color: var(--ds-primary); }
+.sl-btn.is-ghost { background: transparent; color: inherit; }
+.sl-btn.is-danger { background: var(--ds-danger); border-color: var(--ds-danger); color: var(--ds-on-danger); }
+.sl-btn.is-danger:hover { background: var(--ds-danger-hover); }
+.sl-btn:active { transform: translateY(1px); }
+.sl-btn[aria-pressed="true"], .sl-btn.is-selected { box-shadow: inset 0 0 0 2px currentColor; }
+.sl-btn:disabled, .sl-btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; transform: none; }
+.sl-btn.is-loading, .sl-btn[aria-busy="true"] { pointer-events: none; opacity: .8; }
+.sl-btn.is-loading::before, .sl-btn[aria-busy="true"]::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor;
+  border-right-color: transparent; animation: sl-ds-spin .7s linear infinite; }
+@keyframes sl-ds-spin { to { transform: rotate(360deg); } }
+/* badge (status, never colour alone: it always has words), notice */
+.sl-badge-ds { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: var(--ds-pill); font: 600 var(--ds-fs-label)/1.3 var(--ds-font); border: 1px solid currentColor; }
+.sl-notice { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--ds-radius); border: 1px solid; font: 400 var(--ds-fs-meta)/1.5 var(--ds-font); }
+@media (pointer: coarse) { .sl-btn { min-height: var(--ds-tap); } }
+@media (prefers-reduced-motion: reduce) { .sl-btn { transition: none; } .sl-btn.is-loading::before, .sl-btn[aria-busy="true"]::before { animation-duration: 2s; } }
+/* ---- species, place and About pages (classes that only exist there) ---- */
+/* the filled buttons on the pages: deeper green, white words (were white on #58b351, 2.6:1) */
+.sp-actions a.sp-btn:not(.sp-btn2), .cy-cta a.cy-btn, .center a.btn, a.btn.btn-primary, .btn-primary, .sl-ev-btn.pri {
+  background: var(--ds-primary) !important; border-color: var(--ds-primary) !important; color: var(--ds-on-primary) !important; }
+.sp-actions a.sp-btn:not(.sp-btn2):hover, .cy-cta a.cy-btn:hover, .center a.btn:hover, .btn-primary:hover { background: var(--ds-primary-hover) !important; border-color: var(--ds-primary-hover) !important; }
+.sp-actions a.sp-btn:active, .cy-cta a.cy-btn:active, .center a.btn:active { transform: translateY(1px); }
+/* ---- sl-ds shared end ---- */
+
+/* ==== app-only part ==== */
+/* day: filled green fills everywhere use the deeper green; night: a true dark forest green (was mid-green #24684a),
+   muted words 6.4:1 on panels (were 3.7:1) */
+:root { --gold-fill: var(--ds-primary); --on-fill: var(--ds-on-primary); }
+[data-sl-theme="dark"] {
+  --bg: #173f2e; --bg-grad: linear-gradient(180deg, #1b4a35 0%, #163d2c 34%, #11321f 70%, #0b2416 100%); --page-under: #0b2416;
+  --surface: #1a4d37; --surface-hover: #215c42; --border: #2f6d50; --text-muted: #bcd8c5; --moss: #bcd8c5;
+  --gold-fill: var(--ds-primary); --on-fill: var(--ds-on-primary);
+}
+/* every filled button with words on it (the older classes, one list) */
+.map-btn, .sl3d-more, .fp-countries, html.sl-web .install-btn, .ck-yes, .keep-go, .sl-nudge .nd-go, .wn-ok, .ins-ok, .ps-close, .cam-btn,
+.ed-stay, .ed-bar-btns .edb-done, #signin-page .signin-primary, .sl-lv-btns .sl-lv-go, .tour-actions .primary, #note-save, #report-send, #wn-all,
+html:not([data-sl-theme="dark"]) .ck-yes, html:not([data-sl-theme="dark"]) .ed-bar-btns .edb-done, html:not([data-sl-theme="dark"]) .sl-nudge .nd-go {
+  background-color: var(--ds-primary) !important; border-color: var(--ds-primary) !important; color: var(--ds-on-primary) !important; background-image: none !important; }
+.map-btn:hover, .sl3d-more:hover, .fp-countries:hover, html.sl-web .install-btn:hover, .ck-yes:hover, .keep-go:hover, .sl-nudge .nd-go:hover, .wn-ok:hover, .ins-ok:hover,
+.ps-close:hover, .cam-btn:hover, .ed-stay:hover, .ed-bar-btns .edb-done:hover, #signin-page .signin-primary:hover, .sl-lv-btns .sl-lv-go:not(:disabled):hover,
+.tour-actions .primary:hover, #note-save:hover, #report-send:hover, #wn-all:hover {
+  background-color: var(--ds-primary-hover) !important; border-color: var(--ds-primary-hover) !important; opacity: 1 !important; }
+.map-btn:active, .sl3d-more:active, .install-btn:active, .ck-yes:active, .wn-ok:active, .ins-ok:active, #signin-page .signin-primary:active, .sl-lv-go:active,
+.tour-actions .primary:active, #note-save:active, #report-send:active { background-color: var(--ds-primary-press) !important; transform: translateY(1px); }
+/* small filled count pills and selected options with words on them */
+.fsec-n, .fsec-adv .fa-n, .xa-sec-n, .wn-ver, html:not([data-sl-theme="dark"]) .wn-ver, .note-cond-b[aria-checked="true"], .lang-menu li[aria-selected="true"],
+.pin-btn.on, .g-acct .g-init, .sl-asteprow li.on, .sl3d-seen.on, .cam-step.done .cam-num {
+  background-color: var(--ds-primary) !important; border-color: var(--ds-primary) !important; color: var(--ds-on-primary) !important; }
+/* ---- type: one scale; Inter for reading, Fraunces for names; monospace only for clocks ---- */
+body { font-size: 16px; }
+.sl-sub { font-size: 16px; line-height: 1.5; }
+.eyebrow { font: 600 12.5px/1.4 var(--ds-font); letter-spacing: .06em; }
+.sl-ver { font: 600 12.5px/1.3 var(--ds-font); letter-spacing: .02em; }
+.field span, .signin-msg, .filter-label, .quiz-answer-field span, .tour-step, .sl-akick, .ed-h, .wn-card h3, .g-or, .sg-opts legend, .sgv-ttl, .sgv-facts dt,
+.ach-newest small, .xa-kicker, .xa-latest small, .quiz-level-tag, .sl-sgrp > h3, .sl-set .xm-set-audio > h3, .gmenu .gm-h, .cmp-col dt, .qp-facts dt {
+  font-family: var(--ds-font) !important; font-size: var(--ds-fs-label) !important; letter-spacing: .02em !important; text-transform: none !important; font-weight: 700 !important; }
+.sl-sgrp > h3, .sl-set .xm-set-audio > h3 { font-size: 13.5px !important; line-height: 1.3 !important; color: var(--text) !important; }
+.city-lookup-result .city-lookup-note, .city-search-caption, .city-search-row span, .country-opt span, .result-count, .note-btn, .photo-btn, .pic-tag-count,
+.pic-field, .fp-sci, .map-sci, .cp-sub, .ach-ring-txt span, .ach-stats li b, .ach-count, .sl-agrp h3 span, .sl-asteprow li, .ach-toast span span, .xa-ring-txt span,
+.xa-count, .quiz-level-btn span, .quiz-score, .quiz-map-pick, .quiz-left, .quiz-sci, .quiz-level-imp em, .imp-photo figcaption, .map-count, .map-list span, .note-sub,
+.wn-ver, .cam-pct, .sl-badge, .sl-sval, .sgv-mono, .chip-n, .card-sci, .tag, .photo-btn-clear, .sp-info-sci, .nm-months em, .ach-stats li b {
+  font-family: var(--ds-font) !important; letter-spacing: 0 !important; }
+.chip-n, .ach-stats li b, .ach-count, .xa-count, .quiz-score, .cam-pct, .sl-sval, .result-count, .wn-ver { font-variant-numeric: tabular-nums; }
+.result-count { font-size: 14px; }
+.chip { font-size: 14px; }
+.chip-n { font-size: 12.5px; opacity: .85; }
+.place-note, .quiz-level-btn span, .quiz-left, .quiz-score, .quiz-map-pick, .map-count, .note-sub, .ach-count { font-size: 13.5px !important; }
+.quiz-sci, .map-sci, .fp-sci { font-size: 14px !important; font-style: italic; }
+.sl-sfoot { font-size: 13.5px; }
+/* ---- cards ---- */
+#grid .card-name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 18px; line-height: 1.25; color: inherit; text-decoration: none; overflow-wrap: anywhere; }
+#grid a.card-name { cursor: pointer; border-radius: 4px; }
+#grid a.card-name:hover { color: var(--gold); }
+#grid .card.done a.card-name { color: var(--gold); }
+#grid .card-sci { font-size: 14px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#grid .card-sci.no-common { display: none; }
+#grid .tag { font-size: 12.5px; padding: 3px 9px; }
+.seen-btn, .map-btn, .td-card-btn { font: 600 14px/1.2 var(--ds-font) !important; border-radius: var(--ds-radius) !important; }
+/* one even action row on every card: 3D | Mark seen | See more info (the primary, filled) - the same order and sizes on
+   fossil cards (no Mark seen there: See more info just takes the room) */
+#grid .card-bottom { gap: 8px; justify-content: stretch; }
+#grid .card-bottom .note-btn, #grid .card-bottom .photo-btn { order: 0; }
+#grid .card-bottom .td-card-btn { order: 1; margin-left: 0 !important; flex: none; min-height: 40px !important; width: 44px !important; }
+#grid .card-bottom .seen-btn { order: 2; flex: 1 1 0; min-width: 0 !important; padding: 8px 8px !important; margin: 0 !important; }
+#grid .card-bottom .map-btn { order: 3; flex: 1.25 1 0; min-width: 0; padding: 8px 8px !important; margin: 0 !important; white-space: nowrap; }
+#grid .card-bottom .seen-btn, #grid .card-bottom .map-btn { min-height: 40px; }
+/* status in words, not just colour: Want to see shows a tick when it's on your list; the bell says Following */
+.wish-btn { font-size: 13px; }
+.card.wish .wish-btn .wish-on::before { content: "\2713\00a0"; }
+.follow-btn .sl-fol-lbl { display: none; font: 600 12.5px/1 var(--ds-font); margin-left: 4px; }
+.card.follow .follow-btn { width: auto !important; padding: 0 10px 0 8px !important; border-radius: 999px !important; display: inline-flex !important; align-items: center; }
+.card.follow .follow-btn .sl-fol-lbl { display: inline; }
+[data-sl-theme="dark"] .card.follow .follow-btn { color: #ffd27a; }
+.note-btn, .photo-btn { font-size: 13px !important; }
+/* My lists: Picked for you is the switch (filled when on); Edit and Refresh are plain outlined actions, not three filled greens in a row */
+.ml-picks, .ml-edit { font-size: 13px !important; padding: 5px 12px !important; }
+.ml-edit { background: transparent !important; color: var(--gold) !important; border-color: currentColor !important; }
+.ml-edit:hover { background: rgba(46,125,50,0.08) !important; filter: none !important; }
+/* the "Common" status pill: white words on the deeper green (were on #58b351, 2.6:1) */
+.sl-tag.com, .sl-badge.com { background: linear-gradient(135deg, #2e7d32 0%, #2a7330 100%) !important; border-color: #2e7d32 !important; color: #fff !important; }
+/* the sort menu had no keyboard focus ring */
+button.sl-sort:focus-visible { outline: 3px solid var(--ds-focus) !important; outline-offset: 2px; }
+/* ---- dark mode: locked achievements and their step pills were 3.2:1 and 2.8:1 ---- */
+[data-sl-theme="dark"] .is-locked .sl-at, [data-sl-theme="dark"] .is-locked .sl-ast { color: #c6dfcf !important; opacity: 1 !important; }
+[data-sl-theme="dark"] .sl-asteprow li:not(.on) { color: #d2e6d8 !important; background: rgba(255,255,255,0.10) !important; opacity: 1 !important; }
+.sl-asteprow li:not(.on) { color: var(--text); }
+[data-sl-theme="dark"] .sl-abadge.is-locked, [data-sl-theme="dark"] .is-locked { opacity: 1 !important; }
+.tabs .tab-s { display: none; }
+/* ---- phones: the seven tabs in a two-row grid, all visible (only 2.5 fitted on the sideways strip) ---- */
+@media (max-width: 600px) {
+  .tabs { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px !important; overflow: visible !important; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .tabs .tab-btn, .tabs .tab-btn:first-child { flex-direction: column; justify-content: center; gap: 3px !important; min-height: 54px; padding: 6px 2px !important;
+    font: 500 12.5px/1.15 var(--ds-font) !important; white-space: normal; text-align: center; border-radius: 10px !important; border-bottom: 0 !important; }
+  .tabs .tab-btn.active { background: rgba(46,125,50,0.12); font-weight: 700 !important; box-shadow: inset 0 -3px 0 var(--gold); }
+  [data-sl-theme="dark"] .tabs .tab-btn.active { background: rgba(155,224,124,0.14); }
+  .tabs .tab-btn svg, .tabs .tab-btn .ic, .tabs .tab-star { width: 18px !important; height: 18px !important; font-size: 17px !important; }
+  .tabs .tab-n { position: absolute; top: 3px; right: calc(50% - 26px); min-width: 17px; height: 17px; font-size: 11px !important; }
+  .tabs .tab-l { display: none; }
+  .tabs .tab-s { display: inline; }
+  .tabs .tab-more { display: none !important; }
+}
+/* ---- touch screens: 44px targets ---- */
+@media (pointer: coarse) {
+  .hdr-actions .theme-btn, .eyebrow-row .hdr-actions .theme-btn { width: 44px !important; height: 44px !important; }
+  .hdr-actions .install-btn, .hdr-actions .auth-btn, .eyebrow-row .hdr-actions > button:not(.theme-btn) { min-height: 44px; }
+  .eyebrow-row .hdr-actions { gap: 6px !important; }
+  #grid .follow-btn { width: 44px; height: 44px; margin: -8px -10px -4px 0; }
+  #grid .card.follow .follow-btn { height: 44px; width: auto !important; }
+  .wish-btn { min-height: 44px; padding: 6px 14px; font-size: 13.5px; }
+  .chip, .tabs .tab-btn, button.sl-sort, #ml-edit, #ml-reshuffle, .ml-tools button, #family-toggle, .hab-more-btn, .sl-achrow button, #sl-ach-btn, #sl-share-sightings,
+  .card.done .note-btn, .card.done .photo-btn, .sp-fmore, .sp-stbtn, .sp-all, .sl-more-btn { min-height: 44px !important; }
+  #grid .card-bottom .seen-btn, #grid .card-bottom .map-btn, #grid .card-bottom .td-card-btn { min-height: 44px !important; }
+  .globe-zoom button, .globe-zoom > * { min-width: 44px; min-height: 44px; }
+  .sl-ver { position: relative; }
+  .sl-ver::after { content: ""; position: absolute; inset: -13px -8px; }
+  #family-toggle, .hab-more-btn { align-items: center; }
+}
+/* phones: the header's two word buttons share the first row, the icon buttons (44px) the second; the top line wraps
+   instead of cutting the version number off */
+@media (max-width: 430px) {
+  .eyebrow-row .eyebrow { white-space: normal !important; letter-spacing: .04em !important; line-height: 1.6; }
+  .eyebrow-row .hdr-actions .install-btn, .eyebrow-row .hdr-actions .auth-btn { flex: 1 1 calc(50% - 3px); justify-content: center; min-height: 44px; }
+}
+/* My sightings (Eduardo, A31/A32): your own photo takes the place of the card's photo there (only there), with the date
+   you wrote under it - the rules for each card are written by the sl-ds script into #sl-own-photos */
+html.sl-tab-sightings #grid .sl-taken { display: block; margin: 0 0 4px; font: 500 13px/1.35 var(--ds-font); color: var(--text-muted); }
+#grid .sl-taken { display: none; }
+/* the cookie question sits above the map's own bottom controls instead of covering them */
+html.sl-on-map .ck-bar:not(.nm-bar) { bottom: auto; top: 12px; }
+@media (max-width: 600px) { html.sl-on-map .ck-bar:not(.nm-bar) { top: auto; bottom: 10px; max-height: 40vh; overflow: auto; font-size: 13.5px; } html.sl-on-map .ck-bar:not(.nm-bar) p { font-size: 13.5px; } }
+/* the empty search: what to do next */
+.sl-empty-acts[hidden] { display: none !important; }
+.sl-empty-acts { display: flex; width: 100%; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; }
+/* reduced motion: decorative loops stop */
+@media (prefers-reduced-motion: reduce) {
+  .photo-wall, .quiz-level-btn.quiz-level-imp::before, .rotate-gate svg, .nm-spot-ring { animation: none !important; }
+}
+</style>
+<script>if (window.SL_PV_ON && window.SL_PV_ON("design")) document.getElementById("sl-ds-css").media = "all"; // (design preview)</script>
+<script id="sl-ds-js">
+// ==== sl-ds (v6.24 overhaul): cards, dialogs, tabs, small fixes - one block, after everything else ====
+(function () {
+  // PREVIEW (Settings > Previews > "New design"): without it none of this runs (and #sl-ds-css stays switched off)
+  if (window.__slDS || !(window.SL_PV_ON && window.SL_PV_ON("design"))) return; window.__slDS = 1;
+  var grid = document.getElementById("grid");
+  var inClaude = !!(window.claude && window.claude.use);
+  function slug(t) { return String(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+  // the species page's own address (the same as build_species.page_name: common-name-scientific-name), no redirect hop
+  function pageUrl(card) {
+    var id = card.getAttribute("data-id"), nmEl = card.querySelector(".card-name");
+    var nm = nmEl && !nmEl.classList.contains("is-sci") ? slug(nmEl.textContent) : "";
+    if (nm && nm !== id) id = nm + "-" + id;
+    if (inClaude) return "https://snakelist.com/species/" + id;
+    return "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html");
+  }
+  window.SL_PAGE_URL = pageUrl;
+  // a "light" card (SL_LIGHT, off screen) must not be asked for its buttons - that would rebuild it; it gets
+  // decorated by SL_CARD_HOOKS when it is made whole again
+  function isLight(c) { return !!(window.SL_LIGHT && window.SL_LIGHT.isLight && window.SL_LIGHT.isLight(c)); }
+
+  // ---- cards: the name is a real link to the species page (keyboard, middle-click, "open in new tab" all work) ----
+  function linkName(c) {
+    var n = c.querySelector(".card-name"); if (!n || n.tagName === "A") return;
+    var a = document.createElement("a"); a.className = n.className; a.href = pageUrl(c);
+    if (inClaude) { a.target = "_blank"; a.rel = "noopener"; }
+    while (n.firstChild) a.appendChild(n.firstChild);
+    if (n.title) a.title = n.title;
+    n.parentNode.replaceChild(a, n);
+  }
+  // the bell says "Following" in words when it's on; Want to see and Follow say whether they are on
+  function relabel(c) { var l = c.querySelector(".lbl-mark"); if (l && l.textContent === "Mark Seen") l.textContent = "Mark seen"; }
+  function decorate(c) {
+    relabel(c);
+    var f = c.querySelector(".follow-btn");
+    if (f && !f.querySelector(".sl-fol-lbl")) { var s = document.createElement("span"); s.className = "sl-fol-lbl"; s.textContent = "Following"; f.appendChild(s); }
+    if (f) f.setAttribute("aria-pressed", String(c.classList.contains("follow")));
+    var w = c.querySelector(".wish-btn"); if (w) w.setAttribute("aria-pressed", String(c.classList.contains("wish")));
+    var s2 = c.querySelector(".seen-btn"); if (s2) s2.setAttribute("aria-pressed", String(c.classList.contains("done")));
+    var sci = c.querySelector(".card-sci"); if (sci && !sci.title && sci.textContent.length > 28) sci.title = sci.textContent.trim();
+    var nm = c.querySelector(".card-name"); if (nm && !nm.title && nm.textContent.length > 34) nm.title = nm.textContent.trim();
+  }
+  if (grid) {
+    var cards = grid.querySelectorAll(".card");
+    // names first (cheap: one element each), the rest as each card is made whole (SL_CARD_HOOKS) or shown
+    for (var i = 0; i < cards.length; i++) { linkName(cards[i]); if (!isLight(cards[i])) relabel(cards[i]); }
+    (window.SL_CARD_HOOKS = window.SL_CARD_HOOKS || []).push(function (c) { linkName(c); decorate(c); });
+    new MutationObserver(function (ms) {
+      ms.forEach(function (m) {
+        if (m.type === "childList") [].forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && n.classList.contains("card")) { linkName(n); decorate(n); } });
+        else if (m.type === "attributes" && m.target.classList && m.target.classList.contains("card") && !isLight(m.target)) decorate(m.target);
+      });
+    }).observe(grid, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+    var dec = function () { [].forEach.call(grid.querySelectorAll(".card"), function (c) { if (c.offsetParent !== null && !isLight(c)) decorate(c); }); };
+    window.addEventListener("sl-refreshed", function () { setTimeout(dec, 0); }); setTimeout(dec, 800); setTimeout(dec, 3000);
+    // a plain click on the name: the same tab (like the rest of the card); claude.ai: a new tab
+    grid.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest("a.card-name"); if (!a) return;
+      if (document.body.classList.contains("sl-editing")) { e.preventDefault(); return; }
+    });
+  }
+  // "See more info" opens the species page everywhere it appears (3D window too), at its real address
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("#grid .map-btn");
+    if (!b || !e.isTrusted || e.button !== 0) return;
+    var c = b.closest(".card"); if (!c) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    var url = pageUrl(c);
+    if (inClaude) window.open(url, "_blank", "noopener"); else location.href = url;
+  }, true);
+
+  // ---- the shared dialog helper: focus goes in, Tab stays in, Escape closes, focus comes back ----
+  var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), summary';
+  function visible(el) { if (!el || el.hidden || el.closest("[hidden]")) return false; var cs = getComputedStyle(el); if (cs.display === "none" || cs.visibility === "hidden") return false; var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; }
+  function focusables(box) { return [].slice.call(box.querySelectorAll(FOCUSABLE)).filter(function (x) { return visible(x) && !x.closest("[inert]"); }); }
+  var lastFocus = null;
+  document.addEventListener("focusin", function (e) { if (!stack.some(function (d) { return d.box.contains(e.target); })) lastFocus = e.target; }, true);
+  document.addEventListener("pointerdown", function (e) { var t = e.target.closest && e.target.closest(FOCUSABLE); if (t && !stack.some(function (d) { return d.box.contains(t); })) lastFocus = t; }, true);
+  var DIALOGS = [
+    { el: "#map-sheet", open: function (el) { return el.classList.contains("open"); }, box: ".map-card", close: "#map-close", trap: true },
+    { el: "#note-sheet", open: function (el) { return el.classList.contains("open"); }, box: ".note-card", close: "#note-cancel", trap: true },
+    { el: "#report-sheet", open: function (el) { return el.classList.contains("open"); }, box: ".report-card", close: "#report-cancel", trap: true },
+    { el: "#ins-sheet", open: function (el) { return el.classList.contains("open"); }, box: ".ins-card", close: "#ins-ok", trap: true },
+    { el: "#signin-page", open: function (el) { return !el.hidden; }, box: ".signin-card", close: "#signin-back", trap: true },
+    // (the tutorial is a guide over the page, not a modal: Tab can still reach what a step points at)
+    { el: "#tour-layer", open: function (el) { return !el.hidden; }, box: "#tour-callout", close: "#tour-skip", trap: false, esc: true },
+    { el: "#country-panel", open: function (el) { return !el.hidden && !!el.closest(".tab-panel, #map-panel, body") && visible(el); }, box: "#country-panel", close: "#cp-close", trap: false, esc: true, noFocus: true }
+  ];
+  var stack = [];
+  window.SL_DIALOG = {
+    // for new panels: SL_DIALOG.open(panelEl, { close: fn, opener: el }) / SL_DIALOG.close(panelEl)
+    open: function (box, o) { o = o || {}; if (stack.some(function (d) { return d.box === box; })) return; var d = { box: box, opener: o.opener || document.activeElement, closeFn: o.close, trap: o.trap !== false, esc: true, manual: true }; stack.push(d); focusIn(d); },
+    close: function (box) { for (var i = stack.length - 1; i >= 0; i--) if (stack[i].box === box) { var d = stack.splice(i, 1)[0]; restore(d); } },
+    stack: stack
+  };
+  function focusIn(d) {
+    if (d.noFocus) return;
+    setTimeout(function () {
+      if (stack.indexOf(d) < 0 || d.box.contains(document.activeElement)) return;
+      var f = focusables(d.box), h = d.box.querySelector("h1, h2, h3");
+      var t = d.cfg && d.cfg.el === "#tour-layer" ? (document.getElementById("tour-next") || f[0]) : f[0];
+      if (!t) { if (!d.box.hasAttribute("tabindex")) d.box.setAttribute("tabindex", "-1"); t = d.box; }
+      try { t.focus({ preventScroll: true }); } catch (e) {}
+    }, 60);
+  }
+  function restore(d) {
+    var o = d.opener;
+    setTimeout(function () {
+      var a = document.activeElement;
+      if (a && a !== document.body && !d.box.contains(a) && visible(a)) return; // something else already took focus
+      if (o && document.contains(o) && visible(o)) { try { o.focus({ preventScroll: true }); } catch (e) {} }
+    }, 40);
+  }
+  function watch(cfg) {
+    var el = document.querySelector(cfg.el); if (!el) return false;
+    var was = false;
+    function check() {
+      var on = false; try { on = cfg.open(el); } catch (e) {}
+      if (on === was) return; was = on;
+      if (on) {
+        var box = el.querySelector(cfg.box) || (el.matches(cfg.box) ? el : el);
+        var d = { box: box, root: el, cfg: cfg, opener: lastFocus && document.contains(lastFocus) ? lastFocus : document.activeElement, trap: cfg.trap, esc: cfg.esc, noFocus: cfg.noFocus };
+        stack.push(d); focusIn(d);
+      } else {
+        for (var i = stack.length - 1; i >= 0; i--) if (stack[i].root === el) { var d2 = stack.splice(i, 1)[0]; if (!cfg.noFocus) restore(d2); }
+      }
+    }
+    new MutationObserver(check).observe(el, { attributes: true, attributeFilter: ["class", "hidden", "style"] });
+    check();
+    return true;
+  }
+  var pending = DIALOGS.slice(), hookN = 0;
+  function hook() { pending = pending.filter(function (c) { return !watch(c); }); if (pending.length && ++hookN < 40) setTimeout(hook, 1500); }
+  hook();
+  document.addEventListener("keydown", function (e) {
+    var d = stack[stack.length - 1]; if (!d) return;
+    if (d.root && d.cfg && !d.cfg.open(d.root)) return;
+    if (e.key === "Escape" && d.esc) {
+      if (document.querySelector(".photo-lightbox.open")) return;
+      var c = d.cfg && d.root.querySelector(d.cfg.close);
+      if (c) { e.preventDefault(); c.click(); }
+      else if (d.closeFn) { e.preventDefault(); d.closeFn(); }
+      return;
+    }
+    if (e.key !== "Tab" || !d.trap) return;
+    var f = focusables(d.box); if (!f.length) { e.preventDefault(); return; }
+    var first = f[0], last = f[f.length - 1], a = document.activeElement;
+    if (!d.box.contains(a)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); return; }
+    if (e.shiftKey && (a === first || a === d.box)) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+  }, true);
+
+  // ---- phones: shorter tab names in the two-row tab grid ("Checklist", "Sightings"); the tabs redraw their labels, so again after each ----
+  var SHORT = { "tab-guide": ["Species Checklist", "Checklist"], "tab-sightings": ["My sightings", "Sightings"] };
+  function shortTabs() {
+    Object.keys(SHORT).forEach(function (id) {
+      var b = document.getElementById(id); if (!b || b.querySelector(".tab-s")) return;
+      var L = SHORT[id];
+      [].some.call(b.childNodes, function (n) {
+        if (n.nodeType !== 3 || n.nodeValue.indexOf(L[0]) < 0) return false;
+        var at = n.nodeValue.indexOf(L[0]), frag = document.createDocumentFragment();
+        frag.appendChild(document.createTextNode(n.nodeValue.slice(0, at)));
+        var l = document.createElement("span"); l.className = "tab-l"; l.textContent = L[0]; frag.appendChild(l);
+        var sh = document.createElement("span"); sh.className = "tab-s"; sh.textContent = L[1]; frag.appendChild(sh);
+        frag.appendChild(document.createTextNode(n.nodeValue.slice(at + L[0].length)));
+        b.replaceChild(frag, n); return true;
+      });
+    });
+  }
+  shortTabs();
+  var tabsEl = document.querySelector(".tabs"); if (tabsEl) new MutationObserver(shortTabs).observe(tabsEl, { childList: true, subtree: true });
+  // the Map tab: the cookie question moves out of the way of the map's controls
+  function onMap() { var t = document.getElementById("tab-map"); document.documentElement.classList.toggle("sl-on-map", !!(t && t.classList.contains("active"))); }
+  var tabs = document.querySelector(".tabs"); if (tabs) { new MutationObserver(onMap).observe(tabs, { subtree: true, attributes: true, attributeFilter: ["class"] }); onMap(); }
+
+  // ---- My sightings (Eduardo, A31/A32): your own photo replaces the card photo, and "Taken on <your date>" under it ----
+  // Only in that tab (html.sl-tab-sightings), never in the checklist. The photos stay where they are saved
+  // (sl-sighting-photos:<id>); here they are shown through blob: addresses, one CSS rule per card in #sl-own-photos.
+  // (Inside claude.ai the synced cards are left alone.)
+  (function () {
+    if (inClaude || !grid) return;
+    var st = document.createElement("style"); st.id = "sl-own-photos"; document.head.appendChild(st);
+    var urls = {}; // id -> [dataUrl, blobUrl]
+    function own(id) { try { var a = JSON.parse(localStorage.getItem("sl-sighting-photos:" + id) || "null"); if (Array.isArray(a) && a[0]) return a[0]; return localStorage.getItem("sl-sighting-photo:" + id) || ""; } catch (e) { return ""; } }
+    function blobOf(id, d) {
+      if (urls[id] && urls[id][0] === d) return urls[id][1];
+      if (urls[id]) try { URL.revokeObjectURL(urls[id][1]); } catch (e) {}
+      var u = d;
+      try { var m = /^data:([^;,]+);base64,(.*)$/.exec(d); if (m) { var bin = atob(m[2]), n = bin.length, a = new Uint8Array(n); for (var i = 0; i < n; i++) a[i] = bin.charCodeAt(i); u = URL.createObjectURL(new Blob([a], { type: m[1] })); } } catch (e) { u = d; }
+      urls[id] = [d, u]; return u;
+    }
+    function on() { var t = document.getElementById("tab-sightings"); return !!(t && t.classList.contains("active")); }
+    var busy = false;
+    function paint() {
+      if (busy) return; busy = true;
+      try { paint0(); } finally { busy = false; }
+    }
+    function paint0() {
+      var sight = on(); document.documentElement.classList.toggle("sl-tab-sightings", sight);
+      var css = [];
+      [].forEach.call(grid.querySelectorAll(".card.done"), function (c) {
+        var id = c.getAttribute("data-id");
+        if (sight) {
+          var d = own(id);
+          if (d) css.push('html.sl-tab-sightings #grid .card[data-id="' + id.replace(/"/g, "") + '"]::before{content:""!important;background-image:url("' + blobOf(id, d).replace(/"/g, "%22") + '")!important;background-size:cover!important;background-position:50% 45%!important;cursor:zoom-in}');
+          var nb = c.querySelector(".note-btn"), when = nb && nb.getAttribute("data-when"), box = !isLight(c) && c.querySelector(".card-top > div");
+          var t = c.querySelector(".sl-taken");
+          if (when && box) { if (!t) { t = document.createElement("span"); t.className = "sl-taken"; box.insertBefore(t, box.firstChild); } var txt = "Taken on " + when; if (t.textContent !== txt) t.textContent = txt; }
+          else if (t) t.remove();
+        }
+      });
+      if (!sight) [].forEach.call(grid.querySelectorAll(".sl-taken"), function (t) { t.remove(); }); // (nothing extra left in the checklist)
+      var txt = css.join("\n"); if (st.textContent !== txt) st.textContent = txt;
+    }
+    var T = 0; function soon() { clearTimeout(T); T = setTimeout(paint, 60); }
+    window.addEventListener("sl-refreshed", soon);
+    var tb = document.getElementById("tab-sightings"); if (tb) new MutationObserver(soon).observe(tb, { attributes: true, attributeFilter: ["class"] });
+    new MutationObserver(function (ms) { if (!busy && on()) soon(); }).observe(grid, { subtree: true, attributes: true, attributeFilter: ["data-when", "data-iso"] });
+    new MutationObserver(function (ms) { if (!busy && on() && ms.some(function (m) { return m.target.classList && m.target.classList.contains("photo-btn"); })) soon(); }).observe(grid, { subtree: true, attributes: true, attributeFilter: ["class", "data-n"] });
+    // in My sightings, tapping a card's photo that is YOUR photo opens your photos (not the species photo)
+    grid.addEventListener("click", function (e) {
+      if (!on()) return;
+      var c = e.target === e.currentTarget ? null : (e.target.classList && e.target.classList.contains("card") ? e.target : null);
+      if (!c || !c.classList.contains("done") || !own(c.getAttribute("data-id"))) return;
+      var r = c.getBoundingClientRect(); if (e.clientY - r.top > r.width / 2.2) return;
+      var pb = c.querySelector(".photo-btn"); if (!pb) return;
+      e.preventDefault(); e.stopImmediatePropagation(); pb.click();
+    }, true);
+    soon();
+  })();
+
+  // ---- Edit (My lists): Escape means Done ----
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape" || !document.body.classList.contains("sl-editing") || stack.length) return;
+    if (document.querySelector(".ed-sheet.open, .photo-lightbox.open, .sl3d-bd")) return;
+    var d = document.querySelector(".ed-bar-btns .edb-done, #edb-done"); if (d) { e.preventDefault(); d.click(); }
+  });
+  // ---- the version tag opens What's new: reachable from the keyboard too ----
+  var ver = document.querySelector(".sl-ver");
+  if (ver && ver.tagName !== "BUTTON") {
+    ver.setAttribute("role", "button"); ver.setAttribute("tabindex", "0"); ver.setAttribute("aria-label", "What's new in SnakeList " + ver.textContent.trim());
+    ver.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); ver.click(); } });
+  }
+
+  // ---- empty search: say what to do next (a row just under "No snakes found.", shown with it) ----
+  var empty = document.getElementById("empty");
+  if (empty && !document.getElementById("sl-empty-acts")) {
+    var acts = document.createElement("div"); acts.className = "sl-empty-acts"; acts.id = "sl-empty-acts"; acts.hidden = true;
+    acts.innerHTML = '<button type="button" class="sl-btn is-secondary" data-ds="clear-search">Clear search</button>';
+    empty.insertAdjacentElement("afterend", acts);
+    var syncEmpty = function () { var sb = document.getElementById("search"); acts.hidden = empty.hidden || !(sb && sb.value.trim()); };
+    new MutationObserver(syncEmpty).observe(empty, { attributes: true, attributeFilter: ["hidden"] });
+    var sbx = document.getElementById("search"); if (sbx) sbx.addEventListener("input", function () { setTimeout(syncEmpty, 0); });
+    syncEmpty();
+    acts.addEventListener("click", function () {
+      var cl = document.getElementById("clear"), sb = document.getElementById("search");
+      if (cl) cl.click(); else if (sb) { sb.value = ""; sb.dispatchEvent(new Event("input", { bubbles: true })); }
+      if (sb) sb.focus();
+    });
+  }
 })();
 </script>
 
