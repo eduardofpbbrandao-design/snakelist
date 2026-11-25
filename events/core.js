@@ -52,10 +52,12 @@
     // (tools/events_loader.js notes the switch as the page starts, in case the address changes later)
     if (window.__slCdFinPv || /[?&]countdown-finale-preview=1(&|$)/.test(location.search) || /cd-finale-preview/.test(location.hash)) {
       var fe = CFG.events.filter(function (e) { return !e.meta && shown(e); })[0];
-      if (fe) FP = { at: Date.parse(fe.start) - 70000, p0: performance.now() };
+      if (fe) FP = { at: Date.parse(fe.start) - 70000, p0: performance.now(), tgt: Date.parse(fe.start) };
     }
   } catch (e) { FP = null; }
   EV.finalePreview = !!FP;
+  // the preview's pretend clock waits at `ms` before the start while something else has the screen (see countdown.js)
+  EV.finaleHold = function (ms) { if (FP) FP.at = FP.tgt - ms - (performance.now() - FP.p0); };
 
   /* ---------------- trusted time ---------------- */
   var T = { base: null, perf: 0, at: 0, source: null, pending: null, failed: false };

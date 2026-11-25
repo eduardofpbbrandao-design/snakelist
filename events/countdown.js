@@ -352,7 +352,15 @@
     var x = FX; FX = null; x.classList.add("out");
     setTimeout(function () { x.remove(); }, 1000);
   }
+  // the preview only: while the opening, "How well do you know snakes?" or a tutorial has the screen, its
+  // pretend clock waits at 1:01 - the last minute then starts once they are done (it never covers them)
+  function firstVisitBusy() {
+    var tl = D.getElementById("tour-layer");
+    return !window.__introDone || !!D.querySelector("#sl-level.open") || (tl && !tl.hidden)
+      || !!(window.SL_TOUR && window.SL_TOUR.pending && window.SL_TOUR.pending());
+  }
   function finaleTick(st) {
+    if (EV.finalePreview && EV.finaleHold && !F.opened && st && st.kind === "public" && !st.open && st.left <= MIN + SEC && firstVisitBusy()) { EV.finaleHold(MIN + SEC); return; }
     if (st && st.kind === "public" && !st.open && F.target !== st.target) { F.target = st.target; F.opened = false; }
     if (lastMinute(st) && !F.opened) { F.opened = true; if (typing()) deferOpen(); else autoOpen(); }
     // (in case the field went away without a focusout - removed, or the window lost focus first)

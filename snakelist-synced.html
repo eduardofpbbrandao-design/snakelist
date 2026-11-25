@@ -24832,6 +24832,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   document.getElementById("ck-no").addEventListener("click", function () { if (ckPv()) consent(false, false); else consent(false); });
   document.getElementById("ck-more").addEventListener("click", function () { if (SLC) SLC.manage(); });
   if (!SLC) document.getElementById("ck-more").hidden = true;
+  // (cookies preview) Settings > Previews > "Show the cookie bar": the new bar, even after an answer, to try it out
+  window.SL_PV_COOKIE_BAR = function () { if (!ckPv()) return false; if (SLC && SLC.strict) { var a0 = bar.querySelector(".ck-ads"); if (a0) a0.hidden = true; } bar.hidden = false; return true; };
   function allowed() { return get("sl-consent") === "yes" || !web; } // claude.ai: kept on this device only, no analytics
 
   // ---- what this person looks at (only with consent), and the snakes that match it ----
@@ -31373,6 +31375,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
 [data-sl-theme="dark"] .sl-set-prev .sl-pv-tag { color: #e9c766; background: rgba(233,199,102,.14); }
 .sl-set-prev .sl-pv-act { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
 .sl-set-prev .sl-pv-act [hidden] { display: none; }
+.sl-set-prev .sl-pv-try { display: inline-flex; margin: 8px 0 0; }
 .sl-set-prev .sl-pv-msg { font: 400 12.5px/1.4 'Inter', sans-serif; color: var(--text-muted); }
 </style>
 <script>
@@ -31399,6 +31402,9 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
         if (s) { R.set(s.getAttribute("data-pv"), s.getAttribute("aria-checked") !== "true"); changedHere = true; render(box); return; }
         if (e.target.closest("[data-pv-allon]")) { R.list().forEach(function (p) { if (!p.on && p.key !== "events") R.set(p.key, true); }); if (R.menu) R.menu(true); changedHere = true; render(box); return; }
         if (e.target.closest("[data-pv-alloff]")) { R.list().forEach(function (p) { if (p.on) R.set(p.key, false); }); changedHere = true; render(box); return; }
+        var tr = e.target.closest("[data-pv-try]");
+        if (tr) { var k = tr.getAttribute("data-pv-try"); if (window.SL_CLOSE_PANEL) try { window.SL_CLOSE_PANEL(true); } catch (er) {}
+          setTimeout(function () { if (k === "cookies" && window.SL_PV_COOKIE_BAR) window.SL_PV_COOKIE_BAR(); if (k === "tutorial" && window.SL_TOUR) window.SL_TOUR.hub(); }, 200); return; }
         if (e.target.closest("[data-pv-reload]")) location.reload();
       });
     }
@@ -31407,7 +31413,12 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
       (signedIn() ? "They follow your account: on every device where you sign in, they&rsquo;re on too." : "They&rsquo;re on in this browser - sign in and they follow your account.") + "</p>" +
       '<div class="sl-sgrid">' + L.map(function (p) {
         return '<div class="sl-srow"><span class="sl-sic">' + ICON + '</span><span class="sl-stx"><b>' + esc(p.label) + "</b><small>" + esc(p.about) +
-          '</small><span class="sl-pv-tag">Preview &mdash; not public yet</span></span><button type="button" class="sl-sw" role="switch" data-pv="' + esc(p.key) +
+          '</small><span class="sl-pv-tag">Preview &mdash; not public yet</span>' +
+          // a way to see it straight away, for the ones that otherwise wait for their moment
+          (p.on && P.loaded && P.loaded(p.key) ? (p.key === "cookies" && window.SL_PV_COOKIE_BAR ? '<button type="button" class="sl-sbtn sl-pv-try" data-pv-try="cookies">Show the cookie bar</button>'
+            : p.key === "tutorial" && window.SL_TOUR ? '<button type="button" class="sl-sbtn sl-pv-try" data-pv-try="tutorial">Open the tutorial</button>'
+            : p.key === "finale" ? '<button type="button" class="sl-sbtn sl-pv-try" data-pv-reload>Reload to watch the finale</button>' : "") : "") +
+          '</span><button type="button" class="sl-sw" role="switch" data-pv="' + esc(p.key) +
           '" aria-label="' + esc(p.label) + '" aria-checked="' + (p.on ? "true" : "false") + '"></button></div>';
       }).join("") + "</div>" +
       '<div class="sl-pv-act"><button type="button" class="sl-sbtn" data-pv-allon' + (L.every(function (p) { return p.on || p.key === "events"; }) ? " disabled" : "") + ">Turn all previews on</button>" +
