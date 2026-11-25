@@ -636,9 +636,21 @@ CLAUDE_CHECKS = [
     ("a", ') { note("Translation works on snakelist.com', True),
     ("b", 'if (cur !== "en" && !(', True),
     ("a", ') { note("The 3D map works on snakelist.com', True),          # the 3D map: outside picture and height servers
-    ("b", "var u0 = window.SL_PAGE_URL(s.card); if (", True),            # design preview: species page opens on snakelist.com
+    ("b", "= window.SL_PAGE_URL(", True),
+    ("b", "var inClaude = !!(", True),                                  # design preview: species links open snakelist.com           # design preview: species page opens on snakelist.com
 ]
 CHECK = "window.claude && window.claude.use"
+
+
+def _strip_fffd(out):
+    # the claude.ai publish refuses text files with U+FFFD (a broken character from iNaturalist data)
+    for root, _, fs in os.walk(out):
+        for f in fs:
+            if f.rsplit(".", 1)[-1] in ("json", "js", "html", "css", "txt", "svg"):
+                p = os.path.join(root, f)
+                b = open(p, "rb").read()
+                if b"\xef\xbf\xbd" in b:
+                    open(p, "wb").write(b.replace(b"\xef\xbf\xbd", b""))
 
 
 def patch_claude_checks(html):
@@ -1006,13 +1018,15 @@ def build(out, christmas_default=True, events_default=True, cache=DEFAULT_CACHE,
     put("index.html", html)
 
     # ---- 5. manifest + publish batches ----
-    assets = sorted((p, files[p]) for p in files if p != "index.html")
+    _strip_fffd(out)
+    # .m4a isn't a type claude.ai artifacts serve (the .webm copies are used there)
+    assets = sorted((p, files[p]) for p in files if p != "index.html" and not p.endswith(".m4a"))
     total = sum(os.path.getsize(f) for _, f in assets)
     page_size = os.path.getsize(files["index.html"])
     batches, cur, cs = [], {}, 0
     for p, f in sorted(assets, key=lambda x: (not x[0].startswith(("ad/", "data/", "species/", "vendor/", "app/", "christmas/")), x[0])):
         s = os.path.getsize(f)
-        if cur and (len(cur) >= 250 or cs + s > 60_000_000):
+        if cur and (len(cur) >= 250 or cs + s > 46_000_000):
             batches.append(cur); cur, cs = {}, 0
         cur[p] = f; cs += s
     if cur:
