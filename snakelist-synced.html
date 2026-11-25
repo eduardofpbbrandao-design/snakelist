@@ -183,6 +183,11 @@
   html.sl-restyle .sl-root > :not(#intro):not(#sl-hero) *::before, html.sl-restyle .sl-root > :not(#intro):not(#sl-hero) *::after { transition: none !important; }
   html.sl-restyle .sl-root .card { content-visibility: visible !important; }
   html.sl-intro-lock, html.sl-intro-lock body { overflow: hidden !important; overscroll-behavior: none; } /* v4.80: the page can't move behind the opening */
+  /* the strip kept for the scrollbar (scrollbar-gutter: stable) is painted with the page's own background - while the opening
+     plays that was a bright pale stripe down the right of the dark opening on computers; it now has the opening's darkest green */
+  /* ...and the page under the opening (body, .sl-root) is that green too while it plays: before the opening itself had arrived the
+     browser could paint SnakeList's light background for a frame - a pale flash at the very start */
+  html.sl-intro-lock, html.sl-intro-lock body, html.sl-intro-lock .sl-root { background: #06140b; }
   /* the tick: a GPU layer of its own and a softer, longer draw */
   .intro-box { transform: translateZ(0); backface-visibility: hidden; }
   /* v4.92: a plain, slower crossfade (no zoom) - the photo underneath is already drawn, so nothing flashes */
@@ -2144,6 +2149,11 @@
     // [file name, common name, scientific name, its SnakeList page, widths made, photo credit] - species-photos/hero/CREDITS.txt
     (function () {
       var P = window.SL_HERO_PHOTOS = [["rough-green-hq", "Smooth Green Snake", "Opheodrys vernalis", "smooth-green-snake-opheodrys-vernalis", [900, 1400, 2000, 2560], "", {"pm": "81% 50%"}], ["corallus-hortulana", "Amazon Tree Boa", "Corallus hortulana", "amazon-tree-boa-corallus-hortulana", [900, 1400, 1920], "Photo: Geoff Gallice, CC BY 2.0 (Wikimedia Commons)", {"pm": "0% 50%"}], ["morelia-viridis", "Green Tree Python", "Morelia viridis", "green-tree-python-morelia-viridis", [900, 1400, 1920], "Photo: JJ Harrison, CC BY-SA 3.0 (Wikimedia Commons)", {"pm": "50% 50%"}], ["dendroaspis-angusticeps", "Green Mamba", "Dendroaspis angusticeps", "green-mamba-dendroaspis-angusticeps", [900, 1400, 1920], "Photo: Holger Krisp, CC BY 3.0 (Wikimedia Commons)", {"pm": "29% 50%"}], ["naja-kaouthia", "Monocled Cobra", "Naja kaouthia", "monocled-cobra-naja-kaouthia", [900, 1400, 1920], "Photo: Charles J. Sharp, CC BY-SA 4.0 (Wikimedia Commons)", {"pm": "24% 50%"}], ["oxybelis-aeneus", "Brown Vinesnake", "Oxybelis aeneus", "brown-vinesnake-oxybelis-aeneus", [900, 1400, 1920], "Photo: Brian Gratwicke, CC BY 2.0 (Wikimedia Commons)", {"pm": "14% 50%"}], ["zamenis-scalaris", "Ladder Snake", "Zamenis scalaris", "ladder-snake-zamenis-scalaris", [900, 1400, 1920], "Photo: Benny Trapp (crop: Papa Lima Whiskey 2), CC BY 3.0 (Wikimedia Commons)", {"pm": "24% 50%"}], ["echis-omanensis", "Oman Saw-scaled Viper", "Echis omanensis", "oman-saw-scaled-viper-echis-omanensis", [900, 1400, 1920], "Photo: Arabella Willing, CC BY 4.0 (iNaturalist)", {"lg": [0.6, 0.9, 0.6], "pm": "11% 50%"}], ["farancia-erytrogramma", "Rainbow Snake", "Farancia erytrogramma", "rainbow-snake-farancia-erytrogramma", [900, 1400, 1920], "Photo: Joshua Liverman, CC BY 4.0 (iNaturalist)", {"pm": "76% 50%"}], ["agkistrodon-contortrix", "Copperhead", "Agkistrodon contortrix", "copperhead-agkistrodon-contortrix", [900, 1400, 1920], "Photo: Alan Rockefeller, CC BY 4.0 (iNaturalist)", {"pm": "76% 50%"}], ["ahaetulla-prasina", "Asian Vine Snake", "Ahaetulla prasina", "asian-vine-snake-ahaetulla-prasina", [900, 1400, 1920], "Photo: Eric Lopes, CC BY-SA 4.0 (iNaturalist)", {"lg": [0.6, 0.9, 0.42], "pm": "100% 50%"}], ["corallus-caninus", "Emerald Tree Boa", "Corallus caninus", "emerald-tree-boa-corallus-caninus", [900, 1400, 1920], "Photo: eloise kerroux, CC BY 4.0 (iNaturalist)", {"pm": "37% 50%"}], ["trimeresurus-insularis", "White-lipped Island Pitviper", "Trimeresurus insularis", "white-lipped-island-pitviper-trimeresurus-insularis", [900, 1400, 1920], "Photo: James Hunt, CC BY 4.0 (iNaturalist)", {"pm": "71% 50%"}], ["lampropeltis-gentilis", "Central Plains Milksnake", "Lampropeltis gentilis", "central-plains-milksnake-lampropeltis-gentilis", [900, 1400, 1920], "Photo: evangrimes, CC BY 4.0 (iNaturalist)", {"lg": [0.6, 0.9, 0.42], "pm": "100% 50%"}], ["micrurus-tener", "Texas Coral Snake", "Micrurus tener", "texas-coral-snake-micrurus-tener", [900, 1400, 1920], "Photo: Brady Reed, CC0 (iNaturalist)", {"lg": [0.6, 0.9, 0.42], "pm": "100% 50%", "lgm": [0.9, 1.12, 0.5]}]];
+      // PREVIEW (cinematic opening - preview key "cinematic" or ?opening=cinematic; waiting for Eduardo's OK): the curated pool of
+      // opening photos (data/hero-pool.json, copied here by tools/hero_pool.py) is used instead of the list above. Off: nothing changes.
+      var CINE = false; try { var oq = /[?&]opening=([a-z]+)/.exec(location.search); CINE = oq ? oq[1] === "cinematic" : localStorage.getItem("sl-art-preview-cinematic") === "1"; } catch (e) {}
+      window.SL_CINE_ON = CINE;
+      if (CINE) P = window.SL_HERO_PHOTOS = /*HERO_POOL*/[["corallus-hortulana","Amazon Tree Boa","Corallus hortulana","amazon-tree-boa-corallus-hortulana",[900,1400,1920],"Photo: Geoff Gallice, CC BY 2.0 (Wikimedia Commons)",{"pm":"0% 50%","fo":[0.33,0.16]}],["morelia-viridis","Green Tree Python","Morelia viridis","green-tree-python-morelia-viridis",[900,1400,1920],"Photo: JJ Harrison, CC BY-SA 3.0 (Wikimedia Commons)",{"pm":"50% 50%","fo":[0.465,0.385]}],["dendroaspis-angusticeps","Green Mamba","Dendroaspis angusticeps","green-mamba-dendroaspis-angusticeps",[900,1400,1920],"Photo: Holger Krisp, CC BY 3.0 (Wikimedia Commons)",{"pm":"29% 50%","fo":[0.355,0.335]}],["naja-kaouthia","Monocled Cobra","Naja kaouthia","monocled-cobra-naja-kaouthia",[900,1400,1920],"Photo: Charles J. Sharp, CC BY-SA 4.0 (Wikimedia Commons)",{"pm":"24% 50%","fo":[0.39,0.38]}],["oxybelis-aeneus","Brown Vinesnake","Oxybelis aeneus","brown-vinesnake-oxybelis-aeneus",[900,1400,1920],"Photo: Brian Gratwicke, CC BY 2.0 (Wikimedia Commons)",{"pm":"14% 50%","fo":[0.42,0.33]}],["zamenis-scalaris","Ladder Snake","Zamenis scalaris","ladder-snake-zamenis-scalaris",[900,1400,1920],"Photo: Benny Trapp (crop: Papa Lima Whiskey 2), CC BY 3.0 (Wikimedia Commons)",{"pm":"24% 50%","fo":[0.345,0.39]}],["echis-omanensis","Oman Saw-scaled Viper","Echis omanensis","oman-saw-scaled-viper-echis-omanensis",[900,1400,1920],"Photo: Arabella Willing, CC BY 4.0 (iNaturalist)",{"pm":"11% 50%","fo":[0.4,0.462],"lg":[0.6,0.9,0.6]}],["farancia-erytrogramma","Rainbow Snake","Farancia erytrogramma","rainbow-snake-farancia-erytrogramma",[900,1400,1920],"Photo: Joshua Liverman, CC BY 4.0 (iNaturalist)",{"pm":"76% 50%","fo":[0.74,0.41]}],["agkistrodon-contortrix","Copperhead","Agkistrodon contortrix","copperhead-agkistrodon-contortrix",[900,1400,1920],"Photo: Alan Rockefeller, CC BY 4.0 (iNaturalist)",{"pm":"76% 50%","fo":[0.66,0.4]}],["ahaetulla-prasina","Asian Vine Snake","Ahaetulla prasina","asian-vine-snake-ahaetulla-prasina",[900,1400,1920],"Photo: Eric Lopes, CC BY-SA 4.0 (iNaturalist)",{"pm":"100% 50%","fo":[0.655,0.537],"lg":[0.6,0.9,0.42]}],["corallus-caninus","Emerald Tree Boa","Corallus caninus","emerald-tree-boa-corallus-caninus",[900,1400,1920],"Photo: eloise kerroux, CC BY 4.0 (iNaturalist)",{"pm":"37% 50%","fo":[0.418,0.428]}],["trimeresurus-insularis","White-lipped Island Pitviper","Trimeresurus insularis","white-lipped-island-pitviper-trimeresurus-insularis",[900,1400,1920],"Photo: James Hunt, CC BY 4.0 (iNaturalist)",{"pm":"71% 50%","fo":[0.505,0.25]}],["bothriechis-schlegelii","Eyelash Viper","Bothriechis schlegelii","eyelash-viper-bothriechis-schlegelii",[900,1400,1920],"Photo: Daniel Mesa, CC BY (iNaturalist)",{"pm":"72% 50%","fo":[0.72,0.18]}],["bungarus-fasciatus","Banded Krait","Bungarus fasciatus","banded-krait-bungarus-fasciatus",[900,1200],"Photo: Ramit Singal, CC BY (iNaturalist)",{"pm":"66% 50%","fo":[0.66,0.36]}],["craspedocephalus-gramineus","Common Bamboo Viper","Craspedocephalus gramineus","common-bamboo-viper-craspedocephalus-gramineus",[900,1400,1920],"Photo: Tejas M, CC BY (iNaturalist)",{"pm":"55% 50%","fo":[0.55,0.27]}],["dispholidus-typus","Boomslang","Dispholidus typus","boomslang-dispholidus-typus",[900,1177],"Photo: Wynand Uys, CC BY (iNaturalist)",{"pm":"39% 50%","fo":[0.39,0.39]}],["elaphe-quatuorlineata","Four-lined Snake","Elaphe quatuorlineata","four-lined-snake-elaphe-quatuorlineata",[900,1400,1920],"Photo: milan kořínek, CC BY (iNaturalist)",{"pm":"76% 50%","fo":[0.76,0.31]}],["gonyosoma-oxycephalum","Red-Tailed Racer","Gonyosoma oxycephalum","red-tailed-racer-gonyosoma-oxycephalum",[900,1400,1920],"Photo: Bernard DUPONT, CC BY (iNaturalist)",{"pm":"71% 50%","fo":[0.71,0.42]}],["natrix-natrix","Grass Snake","Natrix natrix","grass-snake-natrix-natrix",[900,1400,1920],"Photo: Andreas Eichler, CC BY-SA (iNaturalist)",{"pm":"34% 50%","fo":[0.335,0.465]}],["pseudechis-porphyriacus","Australian Black Snake","Pseudechis porphyriacus","australian-black-snake-pseudechis-porphyriacus",[900,1400,1920],"Photo: Richard Fuller, CC0 (iNaturalist)",{"pm":"56% 50%","fo":[0.56,0.43]}],["tropidolaemus-wagleri","Wagler's Pit Viper","Tropidolaemus wagleri","wagler-s-pit-viper-tropidolaemus-wagleri",[900,1400,1920],"Photo: diego_cue, CC BY-SA (iNaturalist)",{"pm":"52% 50%","fo":[0.52,0.47]}],["vipera-berus","European Adder","Vipera berus","european-adder-vipera-berus",[900,1400,1920],"Photo: Johan Kjær Prehn, CC BY (iNaturalist)",{"pm":"33% 50%","fo":[0.33,0.37]}]]/*END_HERO_POOL*/;
       // v6.20: the very first visit always opens on the Smooth Green Snake; after that a different photo each visit (never the one
       // from last time), and the same photo for the whole visit (a reload keeps it)
       // v6.28 (Eduardo): Settings can fix the opening photo - one of these (sl-hero-pick = its file name), or your own photo
@@ -2154,7 +2164,7 @@
       var pick = want && want !== "own" ? find(want) : -1;
       if (pick < 0) pick = find(now);
       if (pick < 0) {
-        if (last == null) pick = Math.max(0, find("rough-green-hq"));
+        if (last == null) pick = Math.max(0, find(CINE ? "ahaetulla-prasina" : "rough-green-hq")); // (the cinematic preview: the Asian Vine Snake)
         else { pick = Math.floor(Math.random() * P.length); if (P[pick][0] === last && P.length > 1) pick = (pick + 1 + Math.floor(Math.random() * (P.length - 1))) % P.length; }
         try { localStorage.setItem("sl-hero-last", P[pick][0]); sessionStorage.setItem("sl-hero-now", P[pick][0]); } catch (e) {}
       }
@@ -2212,6 +2222,10 @@
         return !!(s && s.t && Date.now() - s.t < 12 * 3600 * 1000);
       } catch (e) { return false; }
     })();
+    // the opening will play: its dark green is the page's background from the very first frame (the browser can paint the page's
+    // light background before the opening itself has arrived - a pale flash at the start); the opening's own script keeps it
+    // (sl-intro-lock, same rule) and takes it off when the opening ends
+    try { if (!(/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search) || window.SL_CAME_BACK || window.SL_QUICK_REOPEN)) document.documentElement.classList.add("sl-intro-lock"); } catch (e) {}
     // v4.84: the NEW tags are on from the very first frame (the full check, with the version, runs later and can take them off)
     try { if (!localStorage.getItem("sl-new-seen-3d") && +(localStorage.getItem("sl-ver-n") || 0) < 500) document.documentElement.classList.add("sl-new-3d"); } catch (e) {}
     // a refresh starts at the top of the app, not wherever the page was scrolled to
@@ -2310,7 +2324,7 @@
       try { var q = /[?&]opening=(collage|wall)(?=[&#]|$)/.exec(location.search); if (q) { mode = q[1]; sessionStorage.setItem("sl-opening-style", mode); } else mode = sessionStorage.getItem("sl-opening-style") || OPENING_DEFAULT; } catch (e) {}
       var intro = document.getElementById("intro"), P = window.SL_HERO_PHOTOS, H = window.SL_HERO, zoom = intro && intro.querySelector(".photo-zoom");
       // (no opening at all this time - a link into SnakeList, back from a page, a quick reload: nothing is built or fetched)
-      if (mode !== "collage" || !zoom || !P || !H || /[?&](sp|map|f|hab|type|fam|q)=/.test(location.search) || window.SL_CAME_BACK || window.SL_QUICK_REOPEN) return;
+      if (mode !== "collage" || window.SL_CINE_ON || !zoom || !P || !H || /[?&](sp|map|f|hab|type|fam|q)=/.test(location.search) || window.SL_CAME_BACK || window.SL_QUICK_REOPEN) return;
       intro.classList.add("intro-collage");
       var wall = zoom.querySelector(".photo-wall"); if (wall) wall.parentNode.removeChild(wall);
       var box = document.createElement("div"); box.className = "slc"; zoom.appendChild(box);
@@ -2427,6 +2441,414 @@
       window.addEventListener("resize", onResize);
       // once the opening is over, its photos are let go (they are not needed again)
       document.addEventListener("sl-intro-done", function () { window.removeEventListener("resize", onResize); setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); panels = []; }, 1500); }, { once: true });
+    })();
+  </script>
+
+  <!-- PREVIEW (cinematic opening, waiting for Eduardo's OK): only with the preview "cinematic" switched on (Settings > Previews,
+       ?preview=cinematic) or ?opening=cinematic. Everyone else: nothing below runs or is built - the opening above plays as before.
+       See docs/audit/opening.md. -->
+  <style id="sl-cine-css">
+    /* a dark tropical night the logo is assembled in: foliage at three depths, faint light through the canopy, a few drifting
+       motes - then a warm gold light opens onto the opening photo. Every moving thing is a transform or an opacity on one Web
+       Animations timeline (the graphics chip plays it, so the page still arriving cannot make it stutter); no filters move. */
+    .intro.intro-cine, .intro.intro-cine.intro-glide { background: transparent; } /* (the dark is the scene's own first layer) */
+    .intro.intro-cine::before, .intro.intro-cine .photo-zoom, .intro.intro-cine .photo-scrim, .intro.intro-cine .intro-loading { display: none; }
+    .cine { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .cine > * { position: absolute; will-change: transform, opacity; }
+    .cine-bg { inset: 0; background: radial-gradient(110% 85% at 50% 47%, #15402a 0%, #0c2618 38%, #071a10 66%, #030a06 100%); }
+    .cine-mist { border-radius: 50%; background: radial-gradient(closest-side, rgba(126,196,146,.15), rgba(126,196,146,.05) 55%, rgba(126,196,146,0)); }
+    .cine-shaft { top: -25%; height: 150%; transform-origin: 50% 0; background: linear-gradient(90deg, rgba(226,240,196,0), rgba(226,240,196,.075) 50%, rgba(226,240,196,0)); }
+    .cine-leaves { inset: -7%; }
+    .cine-leaves svg { display: block; width: 100%; height: 100%; }
+    .cine-mote { left: 0; top: 0; width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle, rgba(246,232,170,.95) 0%, rgba(246,232,170,.35) 40%, rgba(246,232,170,0) 70%); }
+    .cine-glow { left: 50%; top: 50%; border-radius: 50%; opacity: 0;
+      background: radial-gradient(closest-side, rgba(242,213,138,.58) 0%, rgba(242,213,138,.44) 12%, rgba(242,213,138,.27) 28%, rgba(242,213,138,.14) 46%, rgba(242,213,138,.06) 64%, rgba(242,213,138,.02) 82%, rgba(242,213,138,0) 100%); }
+    .cine-iris { left: 50%; top: 50%; opacity: 0;
+      background: radial-gradient(closest-side, rgba(4,12,7,0) 0%, rgba(4,12,7,0) 22%, rgba(4,12,7,.55) 42%, rgba(4,12,7,.93) 63%, #040c07 80%); }
+    .intro.intro-cine .intro-content { z-index: 2; }
+    /* the wordmark is the opening's own (same letters, gradient, shadow and tick), already finished: it is built from pieces */
+    .intro.intro-cine .intro-title { opacity: 1; animation: none; }
+    .intro.intro-cine .intro-box { opacity: 1; animation: none; transform: translateY(0.02em); }
+    .intro.intro-cine .intro-box .tick-wipe, .intro.intro-cine .intro-box .tick-unwipe { animation: none; transform: none; -webkit-mask-image: none; mask-image: none; }
+    .intro.intro-cine .intro-box .tick-detail { animation: none; opacity: 1; }
+    .intro.intro-cine .intro-line.cine-src { visibility: hidden; }
+    .intro.intro-cine .intro-line.cine-src.cine-whole { visibility: visible; }
+    .cine-mark { position: absolute; left: 0; top: 0; width: 100%; height: 100%; will-change: transform; }
+    .cine-pc { position: absolute; margin: 0; opacity: 0; will-change: transform, opacity; transform: none; }
+    /* Skip and Sound: there from the first frame, clear of the notch and the home bar */
+    .cine-ui { position: absolute; z-index: 4; display: flex; gap: 8px; pointer-events: auto;
+      top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); }
+    .cine-btn { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 0 15px; margin: 0; border-radius: 99px; cursor: pointer;
+      font: 600 13.5px/1 'Inter', system-ui, sans-serif; letter-spacing: .01em; color: #eef6e6; background: rgba(6,18,11,.46);
+      border: 1px solid rgba(238,246,230,.26); -webkit-tap-highlight-color: transparent; transition: background-color .2s ease, border-color .2s ease; }
+    .cine-btn:hover { background: rgba(6,18,11,.7); border-color: rgba(238,246,230,.45); }
+    .cine-btn:focus-visible { outline: 2px solid #F2D58A; outline-offset: 2px; }
+    .cine-btn svg { width: 17px; height: 17px; flex: none; }
+    .cine-btn.cine-snd { width: 38px; padding: 0; justify-content: center; }
+    .cine-btn.cine-snd .cine-on, .cine-btn.cine-snd[aria-pressed="true"] .cine-off { display: none; }
+    .cine-btn.cine-snd[aria-pressed="true"] .cine-on { display: block; }
+    .intro.intro-cine.cine-out .cine-ui { opacity: 0; transition: opacity .3s ease; pointer-events: none; }
+    .cine-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  </style>
+  <script>
+    (function () {
+      var intro = document.getElementById("intro");
+      if (!window.SL_CINE_ON || !intro || !document.documentElement.animate) return;
+      // (no opening at all this time - a link into SnakeList, back from a page, a quick reload: nothing is built)
+      if (/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search) || window.SL_CAME_BACK || window.SL_QUICK_REOPEN) return;
+      var de = document.documentElement, W = window, NS = "http://www.w3.org/2000/svg";
+      var ls = function (k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } };
+      var ss = function (k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { return null; } };
+      var calm = (W.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) || de.classList.contains("sl-calm");
+      // the first time: the whole opening (about 4.5 s); afterwards a short one (about 2.5 s). Settings > Replay opening: the whole one again
+      var replay = ss("sl-cine-replay") === "1"; ss("sl-cine-replay", null);
+      var full = replay || ls("sl-cine-seen") !== "1";
+      var F = full ? 1 : 0.55;
+      intro.classList.add("intro-cine");
+      intro.removeAttribute("aria-hidden"); // (its pictures are hidden from screen readers one by one; Skip and Sound are real buttons)
+      [].forEach.call(intro.children, function (c) { c.setAttribute("aria-hidden", "true"); });
+      var zoom = intro.querySelector(".photo-zoom"), wall = zoom && zoom.querySelector(".photo-wall"); if (wall) wall.parentNode.removeChild(wall); // (its photos are not decoded)
+      var VW = W.innerWidth || 1, VH = W.innerHeight || 1, VMIN = Math.min(VW, VH), VMAX = Math.max(VW, VH), DIAG = Math.sqrt(VW * VW + VH * VH);
+      // ---- a little seeded randomness: the same forest every time ----
+      var seed = 7, rnd = function () { seed = (seed + 0x6D2B79F5) | 0; var t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+      var el = function (tag, cls, parent) { var e = document.createElement(tag); if (cls) e.className = cls; if (parent) parent.appendChild(e); return e; };
+      var scene = el("div", "cine"); scene.setAttribute("aria-hidden", "true"); intro.insertBefore(scene, intro.firstChild);
+      var bg = el("div", "cine-bg", scene);
+      var mists = [[0.32, 0.36, 0.9], [0.7, 0.62, 0.75]].map(function (m) { var e = el("div", "cine-mist", scene), s = VMAX * m[2]; e.style.width = s + "px"; e.style.height = s * 0.62 + "px"; e.style.left = (m[0] * VW - s / 2) + "px"; e.style.top = (m[1] * VH - s * 0.31) + "px"; return e; });
+      var shafts = [[0.18, 22, 0.16], [0.34, 26, 0.1], [0.58, 31, 0.07]].map(function (s) { var e = el("div", "cine-shaft", scene); e.style.left = (s[0] * VW) + "px"; e.style.width = (s[2] * VMAX) + "px"; e.style.transform = "rotate(" + (-s[1]) + "deg)"; e.__r = -s[1]; return e; });
+      // ---- foliage: original leaf shapes drawn here, three depths framing the middle ----
+      var leaf = function (L, Wd, bend) { // a pointed leaf from its base (0,0) along +x, with its midrib
+        var b = bend * L;
+        return "M0 0C" + (L * 0.28) + " " + (-Wd + b * 0.3) + " " + (L * 0.7) + " " + (-Wd * 0.85 + b) + " " + L + " " + b + "C" + (L * 0.7) + " " + (Wd * 0.85 + b) + " " + (L * 0.28) + " " + (Wd + b * 0.3) + " 0 0Z";
+      };
+      var frond = function (L, n, lw, curl) { // a palm-like frond: a curved stem with leaflets on both sides
+        var d = "", px = 0, py = 0;
+        for (var i = 1; i <= n; i++) {
+          var t = i / (n + 1), x = L * t, y = curl * L * t * t, ang = Math.atan2(2 * curl * L * t, L), ll = lw * (1 - t * 0.55) * L * 0.45, w = ll * 0.16;
+          [-1, 1].forEach(function (sd) {
+            var a = ang + sd * (0.95 - t * 0.35), ca = Math.cos(a), sa = Math.sin(a), ex = x + ca * ll, ey = y + sa * ll, nx = -sa * w, ny = ca * w;
+            d += "M" + x.toFixed(1) + " " + y.toFixed(1) + "Q" + (x + ca * ll * 0.5 + nx).toFixed(1) + " " + (y + sa * ll * 0.5 + ny).toFixed(1) + " " + ex.toFixed(1) + " " + ey.toFixed(1) +
+              "Q" + (x + ca * ll * 0.5 - nx).toFixed(1) + " " + (y + sa * ll * 0.5 - ny).toFixed(1) + " " + x.toFixed(1) + " " + y.toFixed(1) + "Z";
+          });
+          px = x; py = y;
+        }
+        return d;
+      };
+      var layer = function (o) {
+        var box = el("div", "cine-leaves", scene), sv = document.createElementNS(NS, "svg"), LW = VW * 1.14, LH = VH * 1.14;
+        sv.setAttribute("viewBox", "0 0 " + LW.toFixed(0) + " " + LH.toFixed(0)); sv.setAttribute("preserveAspectRatio", "none"); box.appendChild(sv);
+        var g = document.createElementNS(NS, "g"); g.setAttribute("fill", o.fill); if (o.stroke) { g.setAttribute("stroke", o.stroke); g.setAttribute("stroke-width", o.sw); } sv.appendChild(g);
+        for (var i = 0; i < o.n; i++) {
+          // a spot in the band round the edge (never over the middle, where the logo is)
+          var side = i % 4, u = (i + rnd() * 0.8) / o.n, x, y, inset = o.depth * VMIN * (0.35 + rnd() * 0.65);
+          if (side === 0) { x = u * LW; y = inset * 0.6; } else if (side === 1) { x = LW - inset; y = u * LH; } else if (side === 2) { x = (1 - u) * LW; y = LH - inset * 0.6; } else { x = inset; y = (1 - u) * LH; }
+          var toC = Math.atan2(LH / 2 - y, LW / 2 - x) * 180 / Math.PI + (rnd() - 0.5) * 70, L = o.size * VMIN * (0.7 + rnd() * 0.6);
+          var p = document.createElementNS(NS, "path");
+          p.setAttribute("d", rnd() < o.fronds ? frond(L, 7 + Math.floor(rnd() * 4), 1, (rnd() - 0.5) * 0.5) : leaf(L, L * (0.17 + rnd() * 0.12), (rnd() - 0.5) * 0.22));
+          p.setAttribute("transform", "translate(" + x.toFixed(1) + " " + y.toFixed(1) + ") rotate(" + toC.toFixed(1) + ")");
+          if (o.op) p.setAttribute("opacity", (o.op[0] + rnd() * (o.op[1] - o.op[0])).toFixed(2));
+          g.appendChild(p);
+        }
+        return box;
+      };
+      var far = layer({ n: 30, depth: 0.22, size: 0.17, fill: "#2a6644", op: [0.16, 0.36], fronds: 0.35 });
+      var mid = layer({ n: 18, depth: 0.12, size: 0.25, fill: "#123822", op: [0.55, 0.85], fronds: 0.5 });
+      var near = layer({ n: 10, depth: 0.02, size: 0.36, fill: "#030a06", stroke: "rgba(80,140,96,.22)", sw: 1, fronds: 0.8 });
+      var motes = []; for (var mi = 0; mi < 13; mi++) { var mo = el("div", "cine-mote", scene); mo.__x = VW * (0.12 + rnd() * 0.76); mo.__y = VH * (0.18 + rnd() * 0.66); mo.__s = 0.5 + rnd() * 0.9; motes.push(mo); }
+      var glow = el("div", "cine-glow", scene), GS = Math.max(VMAX * 0.9, 520); glow.style.width = glow.style.height = GS + "px"; glow.style.marginLeft = glow.style.marginTop = (-GS / 2) + "px";
+      var iris = el("div", "cine-iris", scene), IS = DIAG * 1.02; iris.style.width = iris.style.height = IS + "px"; iris.style.marginLeft = iris.style.marginTop = (-IS / 2) + "px";
+      // ---- Skip and Sound ----
+      var ui = el("div", "cine-ui", intro);
+      ui.innerHTML = '<button type="button" class="cine-btn cine-snd" aria-pressed="false" aria-label="Opening sound"><svg class="cine-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="m22 9-6 6"></path><path d="m16 9 6 6"></path></svg><svg class="cine-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.5 5.5a9 9 0 0 1 0 13"></path></svg></button>' +
+        '<button type="button" class="cine-btn cine-skip">Skip<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 6 6-6 6"></path><path d="m13 6 6 6-6 6"></path></svg></button>';
+      var sndBtn = ui.querySelector(".cine-snd"), skipBtn = ui.querySelector(".cine-skip");
+      // ---- the timeline: every animation hangs off one clock, started together; Skip plays what is left 4x faster ----
+      var anims = [], rate = 1, T = function (ms) { return ms * F; };
+      var play = function (node, frames, o) { var a = node.animate(frames, o); if (rate !== 1 && !o.iterations) a.playbackRate = rate; anims.push(a); return a; };
+      var ambient = [];
+      // the forest drifts in (a slow push) and keeps breathing; the motes and the light move on their own slow loops
+      [[far, 1.05, 2600], [mid, 1.08, 2400], [near, 1.13, 2200]].forEach(function (l, i) {
+        ambient.push(l[0].animate([{ transform: "scale(" + l[1] + ")", opacity: i === 2 ? 0.6 : 0.3 }, { transform: "scale(1)", opacity: 1 }], { duration: calm ? 1 : T(l[2]), easing: "cubic-bezier(.2,.7,.25,1)", fill: "both" }));
+      });
+      if (!calm) {
+        motes.forEach(function (m, i) {
+          var dx = (rnd() - 0.5) * 70, dy = -20 - rnd() * 50, s = m.__s;
+          ambient.push(m.animate([{ transform: "translate(" + m.__x + "px," + m.__y + "px) scale(" + s + ")", opacity: 0 }, { opacity: 0.9, offset: 0.35 }, { opacity: 0.35, offset: 0.7 },
+            { transform: "translate(" + (m.__x + dx) + "px," + (m.__y + dy) + "px) scale(" + s + ")", opacity: 0.75 }], { duration: 2600 + rnd() * 2600, delay: -rnd() * 2000, iterations: Infinity, direction: "alternate", easing: "ease-in-out" }));
+        });
+        shafts.forEach(function (s, i) { ambient.push(s.animate([{ transform: "rotate(" + s.__r + "deg) translateX(0)", opacity: 0.55 }, { transform: "rotate(" + (s.__r + 2.5) + "deg) translateX(" + (VW * 0.03) + "px)", opacity: 1 }], { duration: 5200 + i * 900, iterations: Infinity, direction: "alternate", easing: "ease-in-out" })); });
+        mists.forEach(function (m, i) { ambient.push(m.animate([{ transform: "translate(0,0)" }, { transform: "translate(" + (i ? -1 : 1) * VW * 0.05 + "px," + (i ? 1 : -1) * VH * 0.03 + "px)" }], { duration: 7000, iterations: Infinity, direction: "alternate", easing: "ease-in-out" })); });
+      } else motes.forEach(function (m) { m.style.transform = "translate(" + m.__x + "px," + m.__y + "px)"; m.style.opacity = "0.6"; });
+      // ---- sound (optional, off by default): made here from scratch with Web Audio - a breeze, insects, now and then a bird, and
+      //      a soft chime as the logo locks. Only after you press Sound (remembered on this device), quiet, faded in and out, paused
+      //      while the tab is hidden, and never over SnakeList's Christmas music or fire. ----
+      var S = (function () {
+        var ctx = null, master = null, on = ls("sl-cine-sound") === "1", alive = true, birdT = 0, xmT = 0, offT = 0;
+        var xmas = function () { try { var x = W.SL_XMAS_AUDIO && W.SL_XMAS_AUDIO.state && W.SL_XMAS_AUDIO.state(); return !!(x && (x.music || x.fire)); } catch (e) { return false; } };
+        var noise = function () { var n = ctx.sampleRate * 2, b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0), last = 0; for (var i = 0; i < n; i++) { last = 0.97 * last + 0.03 * (Math.random() * 2 - 1); d[i] = last * 6 + (Math.random() * 2 - 1) * 0.08; } var s = ctx.createBufferSource(); s.buffer = b; s.loop = true; return s; };
+        var lfo = function (f, depth, target) { var o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = f; g.gain.value = depth; o.connect(g); g.connect(target); o.start(); };
+        var build = function () {
+          var AC = W.AudioContext || W.webkitAudioContext; if (!AC) return false;
+          try { ctx = new AC(); } catch (e) { return false; }
+          master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+          // breeze: soft filtered noise that swells and falls
+          var br = noise(), bf = ctx.createBiquadFilter(), bg2 = ctx.createGain(); bf.type = "lowpass"; bf.frequency.value = 520; bg2.gain.value = 0.11; br.connect(bf); bf.connect(bg2); bg2.connect(master); lfo(0.11, 0.07, bg2.gain); lfo(0.07, 180, bf.frequency); br.start();
+          // insects: a high, narrow band of noise pulsing quickly, in slow waves
+          var ins = noise(), inf = ctx.createBiquadFilter(), ing = ctx.createGain(), inw = ctx.createGain(); inf.type = "bandpass"; inf.frequency.value = 5400; inf.Q.value = 9; ing.gain.value = 0.0; inw.gain.value = 0.05;
+          ins.connect(inf); inf.connect(ing); ing.connect(inw); inw.connect(master); lfo(31, 0.5, ing.gain); lfo(0.23, 0.045, inw.gain); ins.start();
+          return true;
+        };
+        var bird = function () { // two to four quick falling-rising notes, now left, now right
+          if (!ctx || !alive) return; var t = ctx.currentTime + 0.05, n = 2 + Math.floor(Math.random() * 3), base = 2300 + Math.random() * 1400;
+          var pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null, g = ctx.createGain(); g.gain.value = 0; if (pan) { pan.pan.value = Math.random() * 1.6 - 0.8; g.connect(pan); pan.connect(master); } else g.connect(master);
+          var o = ctx.createOscillator(); o.type = "sine"; o.connect(g);
+          for (var i = 0; i < n; i++) { var s = t + i * 0.16; o.frequency.setValueAtTime(base * 1.25, s); o.frequency.exponentialRampToValueAtTime(base * 0.82, s + 0.09); g.gain.setValueAtTime(0, s); g.gain.linearRampToValueAtTime(0.035, s + 0.015); g.gain.exponentialRampToValueAtTime(0.0005, s + 0.12); }
+          o.start(t); o.stop(t + n * 0.16 + 0.1);
+          birdT = setTimeout(bird, 1700 + Math.random() * 2600);
+        };
+        var level = function (v, s) { if (!ctx) return; var t = ctx.currentTime; master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(master.gain.value, t); master.gain.linearRampToValueAtTime(v, t + s); };
+        var start = function () {
+          if (!on || !alive || xmas()) return;
+          if (!ctx && navigator.userActivation && !navigator.userActivation.hasBeenActive) return; // (no sound before a tap or key)
+          if (!ctx && !build()) return;
+          if (ctx.state === "suspended") ctx.resume().catch(function () {});
+          level(0.55, 1.4); clearTimeout(birdT); birdT = setTimeout(bird, 600);
+          clearInterval(xmT); xmT = setInterval(function () { if (xmas()) stop(true); }, 1000); // Christmas music or fire on: this one steps aside
+        };
+        var stop = function (fast) { clearTimeout(birdT); clearInterval(xmT); if (!ctx) return; level(0, fast ? 0.4 : 1.6); clearTimeout(offT); offT = setTimeout(function () { if (ctx && master.gain.value < 0.01) ctx.suspend().catch(function () {}); }, fast ? 600 : 1900); };
+        document.addEventListener("visibilitychange", function () { if (!ctx) return; if (document.hidden) ctx.suspend().catch(function () {}); else if (on && alive && !xmas()) { ctx.resume().catch(function () {}); } });
+        return {
+          on: function () { return on; },
+          state: function () { return { on: on, alive: alive, ctx: ctx ? ctx.state : null, level: master ? +master.gain.value.toFixed(3) : 0 }; },
+          set: function (v) { on = !!v; ls("sl-cine-sound", on ? "1" : "0"); if (on) start(); else stop(true); },
+          start: start,
+          chime: function () { if (!ctx || !on || !alive || xmas() || ctx.state !== "running") return; var t = ctx.currentTime + 0.02;
+            [[659.25, 0.05], [987.77, 0.035], [1318.5, 0.018], [1975.5, 0.008]].forEach(function (p, i) { var o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = p[0]; o.connect(g); g.connect(master); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(p[1] * 2.2, t + 0.012 + i * 0.004); g.gain.exponentialRampToValueAtTime(0.0002, t + 2.2 - i * 0.3); o.start(t); o.stop(t + 2.3); }); },
+          end: function () { alive = false; stop(false); }
+        };
+      })();
+      W.SL_CINE_SOUND = S;
+      var syncSnd = function () { sndBtn.setAttribute("aria-pressed", S.on() ? "true" : "false"); sndBtn.setAttribute("title", S.on() ? "Sound on - press to mute" : "Sound off - press for quiet forest sounds"); };
+      syncSnd();
+      sndBtn.addEventListener("click", function (e) { e.stopPropagation(); S.set(!S.on()); syncSnd(); });
+      // the sound you switched on last time comes back with your first tap or key (browsers allow no sound before that)
+      if (S.on()) { var g1 = function () { ["pointerdown", "keydown", "touchend"].forEach(function (n) { W.removeEventListener(n, g1, true); }); S.start(); }; ["pointerdown", "keydown", "touchend"].forEach(function (n) { W.addEventListener(n, g1, { capture: true, passive: true }); }); }
+      // ---- the run ----
+      var hooks = null, ended = false, skipped = false, phase = "atmos", pieces = [], line = intro.querySelector(".intro-line"), content = intro.querySelector(".intro-content");
+      if (line) line.classList.add("cine-src");
+      var hero = function () { return document.getElementById("sl-hero"); };
+      var heroImg = function () { var h = hero(); return h && h.querySelector(".hero-media img:not(.hero-fill)"); };
+      // the photo is fetched (it is already on its way - the preload at the top) and decoded before the light opens onto it; if it
+      // fails, the next photo of the pool is tried; if that fails too, the light opens onto the opening's own green
+      var photoP = null, photoOk = false;
+      var photo = function () {
+        if (photoP) return photoP;
+        photoP = new Promise(function (res) {
+          var tries = 0, wait = function () {
+            var im = heroImg(); if (!im) { if (tries++ < 120) return setTimeout(wait, 50); return res(false); }
+            var dec = function () { if (im.decode) im.decode().then(function () { photoOk = true; res(true); }, function () { photoOk = !!im.naturalWidth; res(photoOk); }); else { photoOk = true; res(true); } };
+            var fail = function () { var P = W.SL_HERO_PHOTOS, H = W.SL_HERO; if (W.SL_HERO_USE && P && P.length > 1 && !wait.swapped) { wait.swapped = true; var nx = P[(P.indexOf(H) + 1) % P.length]; if (nx && nx[0] !== (H && H[0])) { W.SL_HERO_USE(nx[0]); setTimeout(wait, 30); return; } } res(false); };
+            if (im.complete && im.naturalWidth) dec(); else if (im.complete && im.getAttribute("src")) fail();
+            else { im.addEventListener("load", dec, { once: true }); im.addEventListener("error", fail, { once: true }); }
+          };
+          wait();
+        });
+        return photoP;
+      };
+      var timeout = function (p, ms) { return Promise.race([p, new Promise(function (r) { setTimeout(function () { r(false); }, ms); })]); };
+      // the page has been read in and its own start-up work has died down (or enough time has gone by): the moving part may start
+      var settled = function (cap) { return new Promise(function (res) { var c0 = performance.now(), last = c0, quiet = 0;
+        (function check() { var now = performance.now(); quiet = now - last - 40 < 25 ? quiet + 1 : 0; last = now;
+          if (skipped || (document.readyState !== "loading" && quiet >= 5) || now - c0 > cap) res(); else setTimeout(check, 40); })(); }); };
+      var ease = { out3: function (t) { return 1 - Math.pow(1 - t, 3); }, out4: function (t) { return 1 - Math.pow(1 - t, 4); }, io3: function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; } };
+      // a piece's flight: a curve from far off (bezier through c1, c2) to its place, from a depth (scale) to the logo's plane
+      var flight = function (p, o) {
+        var N = 26, f = [];
+        for (var k = 0; k <= N; k++) {
+          var t = k / N, e = (o.pe || ease.out3)(t), u = 1 - e;
+          var x = u * u * u * o.x0 + 3 * u * u * e * o.c1[0] + 3 * u * e * e * o.c2[0], y = u * u * u * o.y0 + 3 * u * u * e * o.c1[1] + 3 * u * e * e * o.c2[1];
+          var s = o.s ? o.s(t) : o.s0 + (1 - o.s0) * ease.out4(t), r = o.r0 * (1 - ease.out3(t));
+          f.push({ offset: t, transform: "translate(" + x.toFixed(2) + "px," + y.toFixed(2) + "px) rotate(" + r.toFixed(2) + "deg) scale(" + s.toFixed(4) + ")", opacity: Math.min(1, t / (o.fade || 0.28)) });
+        }
+        return play(p, f, { duration: T(o.dur), delay: T(o.delay), fill: "both", easing: "linear" });
+      };
+      var buildPieces = function () {
+        // the logo at its final size (the photo's own logo size), measured letter by letter
+        try { var h = hero(); if (h && h.__placeLogo) h.__placeLogo(); else if (W.__sizeIntroLogo) W.__sizeIntroLogo(); } catch (e) {}
+        var lr = line.getBoundingClientRect(), title = line.querySelector(".intro-title"), parts = [];
+        var add = function (r, kind) { if (r && r.width) parts.push({ l: r.left - lr.left, r: r.right - lr.left, kind: kind }); };
+        add(title.querySelector(".snake-s").getBoundingClientRect(), "S");
+        var walk = function (n) { [].forEach.call(n.childNodes, function (c) { if (c.nodeType === 3) { for (var i = 0; i < c.length; i++) { if (!/\S/.test(c.data[i])) continue; var rg = document.createRange(); rg.setStart(c, i); rg.setEnd(c, i + 1); add(rg.getBoundingClientRect(), "L"); } } else if (c.nodeType === 1 && !c.classList.contains("snake-s")) walk(c); }); };
+        walk(title);
+        add(line.querySelector(".intro-box").getBoundingClientRect(), "T");
+        parts.sort(function (a, b) { return a.l - b.l; });
+        var LW = lr.width, LH = lr.height, pad = LH * 0.9;
+        var mark = el("div", "cine-mark", content); mark.setAttribute("aria-hidden", "true");
+        mark.style.transformOrigin = (line.offsetLeft + LW / 2) + "px " + (line.offsetTop + LH / 2) + "px";
+        parts.forEach(function (p, i) {
+          var x0 = i ? (parts[i - 1].r + p.l) / 2 : -LW, x1 = i < parts.length - 1 ? (p.r + parts[i + 1].l) / 2 : LW * 2;
+          var c = line.cloneNode(true); c.classList.remove("cine-src"); c.classList.add("cine-pc");
+          // (its own copies of the tick's clip, so no id is used twice and each piece draws its tick in full)
+          [].forEach.call(c.querySelectorAll("[id]"), function (n) { var o = n.id, nu = o + "-cine" + i; n.id = nu;
+            [].forEach.call(c.querySelectorAll('[clip-path="url(#' + o + ')"]'), function (r) { r.setAttribute("clip-path", "url(#" + nu + ")"); }); });
+          c.removeAttribute("style"); c.style.fontSize = line.style.fontSize || getComputedStyle(line).fontSize;
+          c.style.left = line.offsetLeft + "px"; c.style.top = line.offsetTop + "px"; c.style.width = LW + "px";
+          c.style.clipPath = c.style.webkitClipPath = "polygon(" + x0.toFixed(2) + "px " + (-pad) + "px," + x1.toFixed(2) + "px " + (-pad) + "px," + x1.toFixed(2) + "px " + (LH + pad) + "px," + x0.toFixed(2) + "px " + (LH + pad) + "px)";
+          c.style.transformOrigin = ((p.l + p.r) / 2).toFixed(1) + "px " + (LH * 0.55).toFixed(1) + "px";
+          mark.appendChild(c); pieces.push({ el: c, kind: p.kind, cx: (p.l + p.r) / 2 - LW / 2 });
+        });
+        line.classList.add("cine-src");
+        return { mark: mark, LW: LW, LH: LH };
+      };
+      // ---- A: the logo is assembled ----
+      var assemble = function (m) {
+        var n = pieces.length, letters = pieces.filter(function (p) { return p.kind === "L"; }), S0 = pieces[0], tick = pieces[n - 1];
+        var R = Math.min(VMAX * 0.55, 900);
+        if (calm) { pieces.forEach(function (p) { play(p.el, [{ opacity: 0 }, { opacity: 1 }], { duration: 450, fill: "both" }); }); return 500; }
+        // the S slithers in from the lower left on a winding path, from close to the camera
+        flight(S0.el, { x0: -R * 0.95, y0: R * 0.42, c1: [-R * 0.2, R * 0.75], c2: [-R * 0.55, -R * 0.18], s0: 1.9, r0: -38, dur: 1150, delay: 0, fade: 0.22 });
+        // the letters come in from both sides, above and below, some from far away and some from close by, one after another
+        letters.forEach(function (p, i) {
+          var side = p.cx < 0 ? -1 : 1, up = i % 2 ? 1 : -1, farAway = i % 3 !== 1;
+          var x0 = side * R * (0.45 + 0.08 * (i % 3)) + p.cx * 0.6, y0 = up * R * (0.5 + 0.05 * (i % 4));
+          flight(p.el, { x0: x0, y0: y0, c1: [x0 * 0.35 - side * R * 0.12, y0 * 0.85], c2: [x0 * 0.04, -up * R * 0.06], s0: farAway ? 0.32 : 2.1, r0: (side * up) * (14 + 5 * (i % 3)), dur: 950, delay: 230 + i * 72, fade: farAway ? 0.35 : 0.22 });
+        });
+        // the tick swings in from the upper right in a wide arc and lands - a little past its size, then settles, like a pen stroke
+        flight(tick.el, { x0: R * 0.8, y0: -R * 0.62, c1: [R * 0.95, R * 0.12], c2: [R * 0.08, R * 0.05], r0: -42, dur: 820, delay: 1130, fade: 0.2,
+          pe: function (t) { return 1 - Math.pow(1 - t, 2.4); }, s: function (t) { return t < 0.8 ? 0.45 + 0.8 * ease.out3(t / 0.8) : 1.25 - 0.25 * ease.out3((t - 0.8) / 0.2); } });
+        // at the lock the whole logo gives a small nod
+        play(m.mark, [{ transform: "scale(1)" }, { transform: "scale(1.022)", offset: 0.35 }, { transform: "scale(1)" }], { duration: T(380), delay: T(1920), fill: "both", easing: "cubic-bezier(.3,.6,.3,1)" });
+        return 1950;
+      };
+      // ---- B: the gold light, the photo, the logo goes to its place on it ----
+      var reveal = function () {
+        phase = "reveal";
+        var h = hero(), A = function (ms) { return T(ms); };
+        if (h) { h.classList.add("hero-reveal"); W.__heroRevealT = performance.now(); }
+        if (calm) {
+          play(intro, [{ opacity: 1 }, { opacity: 0 }], { duration: 650, fill: "both", easing: "ease" });
+          if (h) h.classList.add("hero-landed");
+          return anims[anims.length - 1].finished.then(finish, finish);
+        }
+        play(glow, [{ opacity: 0, transform: "scale(.22)" }, { opacity: 0.85, transform: "scale(.8)", offset: 0.2 }, { opacity: 0.5, transform: "scale(1.2)", offset: 0.5 }, { opacity: 0, transform: "scale(1.6)" }], { duration: A(1500), fill: "both", easing: "cubic-bezier(.25,.6,.3,1)" });
+        play(bg, [{ opacity: 1 }, { opacity: 0 }], { duration: A(520), delay: A(160), fill: "both", easing: "ease-in" });
+        var ik = []; for (var k = 0; k <= 12; k++) { var t = k / 12; ik.push({ offset: t, transform: "scale(" + (0.92 * Math.pow(2.75, ease.out3(t))).toFixed(4) + ")", opacity: t < 0.55 ? 1 : 1 - (t - 0.55) / 0.45 }); }
+        iris.style.opacity = "1"; play(iris, ik, { duration: A(1500), delay: A(160), fill: "both", easing: "linear" });
+        [[far, 1.35, 900], [mid, 1.6, 820], [near, 2.1, 720]].forEach(function (l, i) { play(l[0], [{ transform: "scale(1)", opacity: 1 }, { transform: "scale(" + l[1] + ")", opacity: 0 }], { duration: A(l[2] + 400), delay: A(120 + i * 30), fill: "both", easing: "cubic-bezier(.45,0,.75,.6)" }); });
+        mists.concat(shafts, motes).forEach(function (x) { play(x, [{ opacity: 1 }, { opacity: 0 }], { duration: A(600), fill: "forwards", composite: "replace" }); });
+        // the logo goes from the middle to its place on the photo (exactly over the photo's identical logo)
+        var go = function () {
+          var ht = document.querySelector("#sl-hero:not([hidden]) .hero-line") || document.querySelector("#sl-hero:not([hidden]) .hero-title");
+          try { if (W.__matchHeroLogo) W.__matchHeroLogo(line.offsetWidth); } catch (e) {}
+          var a = line.getBoundingClientRect(), b = ht && ht.getBoundingClientRect();
+          if (!a.width || !b || !b.width || b.bottom > VH + 2) { // no photo logo to go to: the opening fades over the photo
+            play(intro, [{ opacity: 1 }, { opacity: 0 }], { duration: A(700), delay: A(500), fill: "both" });
+            return anims[anims.length - 1].finished.then(function () { if (h) h.classList.add("hero-landed"); finish(); }, finish);
+          }
+          var k = b.width / a.width, dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + k * a.height / 2) - (a.top + a.height / 2);
+          content.style.transformOrigin = (line.offsetLeft + a.width / 2) + "px " + (line.offsetTop + a.height / 2) + "px";
+          intro.classList.add("intro-glide"); // (the watchdog lets a moving logo finish)
+          var gk = []; for (var q = 0; q <= 20; q++) { var u = q / 20, e2 = ease.io3(u); gk.push({ offset: u, transform: "translate(" + (dx * e2).toFixed(2) + "px," + (dy * e2).toFixed(2) + "px) scale(" + (1 + (k - 1) * e2).toFixed(5) + ")" }); }
+          var g = play(content, gk, { duration: A(1050), delay: A(420), fill: "both", easing: "linear" });
+          return g.finished.then(function () {
+            // landed: the photo's logo is shown at full strength under it, then the opening goes (no crossfade between two logos)
+            if (h) h.classList.add("hero-landed");
+            return new Promise(function (r) { requestAnimationFrame(function () { var f = play(intro, [{ opacity: 1 }, { opacity: 0 }], { duration: 220, fill: "both" }); f.finished.then(r, r); }); });
+          }).then(finish, finish);
+        };
+        return go();
+      };
+      var finish = function () {
+        if (ended) return; ended = true; phase = "done";
+        if (!W.__introDone) {
+          intro.classList.add("intro-gone"); W.__introDone = true;
+          try { sessionStorage.setItem("sl-opening-at", String(Date.now())); } catch (e) {}
+          if (hooks && hooks.end) hooks.end();
+          document.dispatchEvent(new Event("sl-intro-done"));
+          if (hooks && hooks.unhideLater) hooks.unhideLater();
+        }
+        ls("sl-cine-seen", "1");
+        cleanup();
+      };
+      var cleanup = function () {
+        removeSkip();
+        setTimeout(function () { ambient.concat(anims).forEach(function (a) { try { a.cancel(); } catch (e) {} }); if (scene.parentNode) scene.parentNode.removeChild(scene); if (ui.parentNode) ui.parentNode.removeChild(ui);
+          var mk = intro.querySelector(".cine-mark"); if (mk) mk.parentNode.removeChild(mk); }, 400);
+        // the forest sounds stay with the photo, and fade once you go on into SnakeList (or after a while)
+        var stopT = setTimeout(function () { S.end(); }, 14000);
+        document.addEventListener("sl-hero-entered", function () { clearTimeout(stopT); S.end(); }, { once: true });
+      };
+      // ---- Skip: whatever is left plays 4x faster (nothing is cut, nothing jumps); a scroll down also carries on into SnakeList ----
+      var skip = function () {
+        if (skipped || ended) return; skipped = true; rate = 4;
+        anims.forEach(function (a) { try { a.updatePlaybackRate ? a.updatePlaybackRate(4) : (a.playbackRate = 4); } catch (e) {} });
+        intro.classList.add("cine-out");
+      };
+      var onEv = function (e) {
+        if (e.target && e.target.closest && e.target.closest(".cine-snd")) return;
+        if (e.type === "keydown") { if (e.target && e.target.closest && e.target.closest(".cine-ui") && /^(Enter| |Spacebar)$/.test(e.key)) return; if (!/^(ArrowDown|PageDown| |Enter|Escape|Spacebar)$/.test(e.key)) return; }
+        if ((e.type === "wheel" && e.deltaY > 0 && !e.ctrlKey) || e.type === "touchmove" || (e.type === "keydown" && /^(ArrowDown|PageDown| |Spacebar)$/.test(e.key))) W.__introWantsIn = true;
+        W.__introSkipped = true; skip();
+      };
+      var EVS = ["wheel", "touchmove", "pointerdown", "keydown"];
+      var removeSkip = function () { EVS.forEach(function (n) { W.removeEventListener(n, onEv, true); }); };
+      EVS.forEach(function (n) { W.addEventListener(n, onEv, { capture: true, passive: true }); });
+      skipBtn.addEventListener("click", function () { W.__introSkipped = true; skip(); });
+      // ended some other way (the watchdog): tidy up
+      document.addEventListener("sl-intro-done", function () { if (!ended) { ended = true; cleanup(); } }, { once: true });
+      W.SL_CINE = {
+        state: function () { return { phase: phase, full: full, calm: calm, skipped: skipped, photoOk: photoOk, anims: anims.length, rate: rate, pieces: pieces.length }; },
+        start: function (h) {
+          hooks = h || {};
+          W.__dismissIntro = function () { W.__introSkipped = true; skip(); };
+          W.__introSizable = function () { return !pieces.length; };
+          intro.classList.remove("intro-hold");
+          photo(); S.start();
+          var t0 = performance.now(), fontsIn = Promise.resolve();
+          try { if (document.fonts && document.fonts.load) fontsIn = Promise.all([document.fonts.load('600 1em "SL Mark"', "SnakeList"), document.fonts.load('500 1em "SL Mark"', "List")]); } catch (e) {}
+          // the forest first (it moves on the graphics chip, so it is smooth even while the page is still arriving), then the logo
+          // once the page has been read in and is calm - or after 4.5 s whatever happens (3 s for the short one); the light waits for a calm page too (2.5 s at most)
+          var beat = calm ? 250 : T(full ? 700 : 300);
+          Promise.all([timeout(fontsIn, 300), new Promise(function (r) { var go = function () { var left = beat - (performance.now() - t0); if (left > 0 && !skipped) setTimeout(r, left); else r(); }; settled(full ? 4500 : 3000).then(go); })]).then(function () {
+            phase = "assemble"; W.SL_CINE.assembleAt = performance.now();
+            var m = null, dur = 0; try { m = buildPieces(); dur = assemble(m); } catch (e) { line.classList.add("cine-whole"); pieces.forEach(function (p) { p.el.style.display = "none"; }); }
+            setTimeout(function () { if (!calm) S.chime(); }, T(1930) / rate);
+            // B waits for the end of A, and for the photo (decoded) - at most 3 s more, then it goes on anyway
+            var aDone = new Promise(function (r) { var lastA = anims.slice(); Promise.all(lastA.map(function (a) { return a.finished.catch(function () {}); })).then(r); setTimeout(r, (dur + 400) * F / rate + 8000); });
+            Promise.all([aDone, timeout(photo(), skipped ? 1200 : 3000)]).then(function () { return skipped ? 0 : settled(2500); }).then(function () { W.SL_CINE.revealAt = performance.now(); reveal(); });
+          });
+        }
+      };
+    })();
+  </script>
+
+  <script>
+    // PREVIEW (cinematic opening): Settings > Display gets "Opening" - Replay opening (the whole one, from the top) and its sound
+    (function () {
+      if (!window.SL_CINE_ON) return;
+      var IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path><path d="m10 9 5 3-5 3z"></path></svg>';
+      var IS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.5 5.5a9 9 0 0 1 0 13"></path></svg>';
+      var on = function () { try { return localStorage.getItem("sl-cine-sound") === "1"; } catch (e) { return false; } };
+      document.addEventListener("sl-settings-open", function (e) {
+        var p = e.detail && e.detail.panel, d = p && p.querySelector("#ssp-display"); if (!d) return;
+        var sec = d.querySelector("#sl-set-cine");
+        if (!sec) {
+          sec = document.createElement("section"); sec.className = "sl-sgrp"; sec.id = "sl-set-cine";
+          sec.innerHTML = '<h3>Opening</h3><div class="sl-sgrid">' +
+            '<div class="sl-srow"><span class="sl-sic">' + IC + '</span><span class="sl-stx"><b>Replay opening</b><small>See the opening animation again, from the start</small></span><button type="button" class="sl-sbtn" id="ss-cine-replay">Replay</button></div>' +
+            '<div class="sl-srow"><span class="sl-sic">' + IS + '</span><span class="sl-stx"><b>Opening sound</b><small>Quiet forest sounds and a soft chime during the opening</small></span><button type="button" class="sl-sw" role="switch" id="ss-cine-snd" aria-label="Opening sound" aria-checked="false"></button></div></div>';
+          var hp = d.querySelector(".sl-hpsec"); if (hp && hp.nextSibling) d.insertBefore(sec, hp.nextSibling); else d.appendChild(sec);
+          sec.querySelector("#ss-cine-replay").addEventListener("click", function () {
+            try { sessionStorage.setItem("sl-cine-replay", "1"); sessionStorage.removeItem("sl-opening-at"); } catch (er) {}
+            location.assign(location.pathname); // (the opening plays from the top of SnakeList, the whole of it)
+          });
+          sec.querySelector("#ss-cine-snd").addEventListener("click", function () {
+            var v = !on(); if (window.SL_CINE_SOUND) window.SL_CINE_SOUND.set(v); else try { localStorage.setItem("sl-cine-sound", v ? "1" : "0"); } catch (er) {}
+            this.setAttribute("aria-checked", v ? "true" : "false");
+          });
+        }
+        sec.querySelector("#ss-cine-snd").setAttribute("aria-checked", on() ? "true" : "false");
+      });
     })();
   </script>
 
@@ -2570,6 +2992,9 @@
         document.documentElement.classList.remove("sl-intro-lock");
         try { document.dispatchEvent(new Event("sl-intro-done")); } catch (e) {}
       }, 15000);
+      // PREVIEW (cinematic opening): it plays on its own single timeline (the script above); this one keeps the scroll lock,
+      // drawing SnakeList under the photo afterwards and the watchdog
+      if (window.SL_CINE && lockOn) { window.SL_CINE.start({ unhideLater: unhideLater, end: function () { done = true; } }); return; }
       // opened from a species page link (?sp= ?map= ?f= ?hab= ?type= ?fam=): no opening, straight there
       if (/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search) || window.SL_CAME_BACK || window.SL_QUICK_REOPEN) {
         intro.classList.add("intro-gone"); done = true; window.__introDone = true; var rt = intro.closest(".sl-root"); if (rt) rt.classList.remove("intro-on");
@@ -12425,6 +12850,14 @@
     closeCountryMenu();
     refresh();
   }
+  // PREVIEW (country card, see "Country card - BEGIN"): the checklist's own country filter and its own count, so the card says
+  // exactly what the list will show. Nothing calls it unless that preview is on.
+  window.SL_CK_COUNTRY = {
+    names: () => COUNTRIES.slice(),
+    count: (n) => { const st = Object.assign({}, filterState(), { tab: "guide", countries: [n] }); let k = 0; for (const c of cards) if (passes(c, st)) k++; return k; },
+    get: () => countryFilters.slice(),
+    set: (list) => { countryFilters = (list || []).filter((n) => COUNTRIES.includes(n)); refresh(); },
+  };
 
   countryInput.addEventListener("focus", openCountryMenu);
   countryInput.addEventListener("input", openCountryMenu);
@@ -30758,6 +31191,7 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
     // not when SnakeList was opened on something particular (a species, a country, a tab...) or you came back to it
     if (/[?&](sp|map|f|hab|type|fam|q|tab)=/.test(location.search) || window.SL_CAME_BACK || window.SL_QUICK_REOPEN) return false;
     var tb = document.getElementById("tab-map"); if (tb && tb.classList.contains("active")) return false; // already on the Map
+    if (window.SL_COUNTRY_CARD) return false; // (PREVIEW: the country card at the top of the checklist says it instead)
     return !document.querySelector(".signin-page.open, .signin-sheet.open, dialog[open]");
   }
   function show(pl) {
@@ -30806,6 +31240,147 @@ if(window.MutationObserver)new MutationObserver(function(ms){for(var j=0;j<ms.le
 })();
 </script>
 <!-- ==== See snakes from - END ============================================================================ -->
+<!-- ==== Country card - BEGIN (PREVIEW "country", waiting for Eduardo's OK) ================================= -->
+<style id="sl-cc-css">
+  /* a compact card at the top of the Species Checklist (under the opening photo, never over it, not a pop-up) */
+  .slcc { margin: 4px 0 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif; }
+  .slcc[hidden], .slcc [hidden] { display: none !important; }
+  .slcc-main { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-height: 44px; }
+  .slcc-pin { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: #58b351; color: #fff; }
+  .slcc-pin svg { width: 20px; height: 20px; }
+  .slcc-txt { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .slcc-h { font-size: 15.5px; font-weight: 650; line-height: 1.3; }
+  .slcc-sub { font-size: 12.5px; color: var(--text-muted); line-height: 1.35; }
+  .slcc-act { display: flex; flex-wrap: wrap; gap: 8px; }
+  .slcc-b { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 14px; border-radius: 99px; cursor: pointer; font: 600 13px/1 'Inter', system-ui, sans-serif;
+    border: 1px solid var(--border); background: transparent; color: var(--text); }
+  .slcc-b:hover { background: var(--surface-hover); }
+  .slcc-b.slcc-pri { background: #58b351; border-color: #58b351; color: #fff; }
+  .slcc-b.slcc-pri:hover { background: #4ea347; }
+  .slcc-b:focus-visible, .slcc-in:focus-visible, .slcc-opt:focus-visible { outline: 2px solid #58b351; outline-offset: 2px; }
+  .slcc-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 6px 0 12px; border-radius: 99px; border: 1px solid #58b351; background: rgba(88,179,81,.14);
+    color: var(--text); font: 600 12.5px/1 'Inter', sans-serif; cursor: pointer; }
+  .slcc-chip span[aria-hidden] { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(88,179,81,.25); font-size: 15px; }
+  .slcc-pick { margin-top: 10px; position: relative; }
+  .slcc-in { width: 100%; min-height: 40px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font: 400 14px 'Inter', sans-serif; box-sizing: border-box; }
+  .slcc-list { list-style: none; margin: 6px 0 0; padding: 4px; max-height: 236px; overflow: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  .slcc-opt { display: flex; justify-content: space-between; gap: 10px; width: 100%; padding: 9px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: 400 14px 'Inter', sans-serif; text-align: left; cursor: pointer; }
+  .slcc-opt:hover, .slcc-opt[aria-selected="true"] { background: var(--surface-hover); }
+  .slcc-opt small { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
+  .slcc-near { margin-top: 8px; }
+  .slcc-none { padding: 9px 10px; margin: 0; color: var(--text-muted); font-size: 13px; }
+  @media (max-width: 520px) { .slcc-act { width: 100%; } .slcc-act .slcc-b { flex: 1 1 auto; justify-content: center; } }
+</style>
+<script>
+// PREVIEW (country card): "Explore snakes in Portugal - 23 species - [See snakes] [Change country]" at the top of the Species
+// Checklist. The country is the one you chose (kept on this device as sl-cc-pick, and never replaced by a guess) or else the
+// approximate country from your internet connection (the "See snakes from" lookup, sl-ipc - only after the opening has finished);
+// nothing known: "Find snakes in your country" and a country search. See snakes = the checklist's own country filter, with a
+// heading, a chip that takes the filter off and View on map. Your exact location is only asked for if you press See snakes near me.
+(function () {
+  var on = false; try { on = !!(window.SL_PREVIEWS ? window.SL_PREVIEWS.on("country") : localStorage.getItem("sl-art-preview-country") === "1"); } catch (e) {}
+  if (!on) return;
+  var PICK = "sl-cc-pick";
+  var ls = function (k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } };
+  var esc = function (t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var GLOBE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3c2.5 2.7 3.8 5.8 3.8 9S14.5 18.3 12 21c-2.5-2.7-3.8-5.8-3.8-9S9.5 5.7 12 3z"></path></svg>';
+  var CK = function () { return window.SL_CK_COUNTRY; };
+  var ISO = function () { return window.SL_COUNTRY_ISO || {}; };
+  // every country SnakeList knows (the map's list), with how many snakes the checklist has for it (0: none recorded)
+  var all = null;
+  var countries = function () {
+    if (all) return all;
+    var ck = CK(), have = {}, names = ck ? ck.names() : [];
+    names.forEach(function (n) { have[n] = 1; });
+    var set = {}; Object.keys(ISO()).concat(names).forEach(function (n) { if (n) set[n] = 1; });
+    all = Object.keys(set).sort(function (a, b) { return a.localeCompare(b); }).map(function (n) { return { name: n, has: !!have[n] }; });
+    return all;
+  };
+  var shown = function (n) { return window.SL_DISPLAY_NAME ? window.SL_DISPLAY_NAME(n) : n; };
+  var nameOfCode = function (cc) { cc = String(cc || "").toLowerCase(); cc = ({ uk: "gb", hk: "cn", mo: "cn", ax: "fi", sj: "no" })[cc] || cc; var I = ISO(); for (var k in I) if (I[k] === cc) return k; return null; };
+  var state = { name: null, src: null, picking: false, q: "" }, card = null;
+  var detect = null;
+  var current = function () {
+    var p = ls(PICK); if (p) return { name: p, src: "you" };
+    return detect;
+  };
+  var filtered = function () { var ck = CK(), f = ck ? ck.get() : []; return f.length === 1 && state.name && f[0] === state.name; };
+  function render() {
+    if (!card) return;
+    var cur = current(); state.name = cur && cur.name; state.src = cur && cur.src;
+    var ck = CK(), n = state.name && ck ? ck.count(state.name) : 0, has = state.name && ck && ck.names().indexOf(state.name) >= 0, h = "";
+    if (state.name && filtered()) {
+      h = '<span class="slcc-pin" aria-hidden="true">' + GLOBE + '</span><div class="slcc-txt"><b class="slcc-h" id="slcc-h">Snakes of ' + esc(shown(state.name)) + "</b>" +
+        '<span class="slcc-sub">' + n.toLocaleString() + (n === 1 ? " species" : " species") + " in the checklist below</span></div>" +
+        '<div class="slcc-act"><button type="button" class="slcc-chip" data-cc="off" aria-label="Remove the filter: ' + esc(shown(state.name)) + '">' + esc(shown(state.name)) + '<span aria-hidden="true">&times;</span></button>' +
+        '<button type="button" class="slcc-b" data-cc="map">View on map</button></div>';
+    } else if (state.name && has && n) {
+      h = '<span class="slcc-pin" aria-hidden="true">' + GLOBE + '</span><div class="slcc-txt"><b class="slcc-h" id="slcc-h">Explore snakes in ' + esc(shown(state.name)) + "</b>" +
+        '<span class="slcc-sub">' + n.toLocaleString() + " species" + (state.src === "you" ? "" : " &middot; your approximate country, from your internet connection") + "</span></div>" +
+        '<div class="slcc-act"><button type="button" class="slcc-b slcc-pri" data-cc="go">See snakes</button><button type="button" class="slcc-b" data-cc="change" aria-expanded="' + state.picking + '">Change country</button></div>';
+    } else if (state.name) { // a country with no snakes recorded (or none left under the other filters): said plainly
+      var none = !has;
+      h = '<span class="slcc-pin" aria-hidden="true">' + GLOBE + '</span><div class="slcc-txt"><b class="slcc-h" id="slcc-h">' + (none ? "No snakes recorded in " : "No snakes in ") + esc(shown(state.name)) + "</b>" +
+        '<span class="slcc-sub">' + (none ? "SnakeList has no records of wild snakes living there." : "None match the other filters you have on.") + "</span></div>" +
+        '<div class="slcc-act"><button type="button" class="slcc-b" data-cc="change" aria-expanded="' + state.picking + '">Change country</button></div>';
+    } else {
+      h = '<span class="slcc-pin" aria-hidden="true">' + GLOBE + '</span><div class="slcc-txt"><b class="slcc-h" id="slcc-h">Find snakes in your country</b>' +
+        '<span class="slcc-sub">Pick a country to see the snakes that live there.</span></div>' +
+        '<div class="slcc-act"><button type="button" class="slcc-b slcc-pri" data-cc="change" aria-expanded="' + state.picking + '">Choose country</button></div>';
+    }
+    card.querySelector(".slcc-main").innerHTML = h;
+    var pk = card.querySelector(".slcc-pick"); pk.hidden = !state.picking;
+  }
+  function list() {
+    var q = state.q.trim().toLowerCase(), ck = CK(), L = countries().filter(function (c) { return !q || shown(c.name).toLowerCase().indexOf(q) >= 0 || c.name.toLowerCase().indexOf(q) >= 0; }).slice(0, 60);
+    var ul = card.querySelector(".slcc-list");
+    ul.innerHTML = L.length ? L.map(function (c, i) { return '<li role="presentation"><button type="button" role="option" class="slcc-opt" id="slcc-o' + i + '" data-name="' + esc(c.name) + '" aria-selected="false">' + esc(shown(c.name)) +
+      "<small>" + (c.has && ck ? ck.count(c.name).toLocaleString() + " species" : "no snakes recorded") + "</small></button></li>"; }).join("") : '<li class="slcc-none">No country matches that.</li>';
+  }
+  function choose(name) { ls(PICK, name); state.picking = false; state.q = ""; render(); var b = card.querySelector('[data-cc="go"]') || card.querySelector('[data-cc="change"]'); if (b) b.focus(); }
+  function build() {
+    var gc = document.getElementById("guide-controls"); if (!gc || card) return;
+    card = document.createElement("section"); card.className = "slcc"; card.id = "sl-cc"; card.setAttribute("aria-labelledby", "slcc-h");
+    card.innerHTML = '<div class="slcc-main"></div><div class="slcc-pick" hidden><label class="sr-only" for="slcc-in">Search for a country</label>' +
+      '<input type="search" class="slcc-in" id="slcc-in" placeholder="Type a country&hellip;" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="slcc-list" aria-autocomplete="list">' +
+      '<ul class="slcc-list" id="slcc-list" role="listbox" aria-label="Countries"></ul>' +
+      '<button type="button" class="slcc-b slcc-near" data-cc="near">See snakes near me</button></div>';
+    gc.insertBefore(card, gc.firstChild);
+    window.SL_COUNTRY_CARD = card;
+    card.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-cc], .slcc-opt"); if (!b) return;
+      if (b.classList.contains("slcc-opt")) { choose(b.getAttribute("data-name")); return; }
+      var k = b.getAttribute("data-cc"), ck = CK();
+      if (k === "go" && ck && state.name) { ck.set([state.name]); render(); var h0 = document.getElementById("slcc-h"); if (h0) { h0.setAttribute("tabindex", "-1"); h0.focus({ preventScroll: true }); } }
+      else if (k === "off" && ck) { ck.set([]); render(); var g2 = card.querySelector('[data-cc="go"]'); if (g2) g2.focus(); }
+      else if (k === "change") { state.picking = !state.picking; render(); if (state.picking) { list(); var inp = card.querySelector(".slcc-in"); inp.value = state.q; inp.focus(); } }
+      else if (k === "map") { var code = ISO()[state.name]; if (code && window.SL_IPC) window.SL_IPC.open(code); }
+      else if (k === "near") { var tb = document.getElementById("tab-map"); if (tb && !tb.classList.contains("active")) tb.click(); setTimeout(function () { if (window.SL_NEARME && window.SL_NEARME.see) window.SL_NEARME.see(); }, 300); }
+    });
+    var inp = card.querySelector(".slcc-in");
+    inp.addEventListener("input", function () { state.q = inp.value; list(); });
+    inp.addEventListener("keydown", function (e) {
+      var opts = [].slice.call(card.querySelectorAll(".slcc-opt")), cur = card.querySelector('.slcc-opt[aria-selected="true"]'), i = opts.indexOf(cur);
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); if (cur) cur.setAttribute("aria-selected", "false"); i = e.key === "ArrowDown" ? Math.min(opts.length - 1, i + 1) : Math.max(0, i - 1); if (opts[i]) { opts[i].setAttribute("aria-selected", "true"); inp.setAttribute("aria-activedescendant", opts[i].id); opts[i].scrollIntoView({ block: "nearest" }); } }
+      else if (e.key === "Enter") { e.preventDefault(); var o = cur || opts[0]; if (o) choose(o.getAttribute("data-name")); }
+      else if (e.key === "Escape") { state.picking = false; render(); var c2 = card.querySelector('[data-cc="change"]'); if (c2) c2.focus(); }
+    });
+    // the list's own filter changed (its chips, Reset...): the card follows
+    var rc = document.getElementById("result-count"); if (rc && window.MutationObserver) new MutationObserver(function () { if (!card.contains(document.activeElement) || !state.picking) render(); }).observe(rc, { childList: true, characterData: true, subtree: true });
+    render();
+  }
+  // the guessed country: only once the opening has finished and the page is idle (the "See snakes from" lookup does the asking)
+  function guess() {
+    if (ls(PICK) || !window.SL_IPC) return;
+    window.SL_IPC.get().then(function (r) { if (!r || ls(PICK)) return; var nm = nameOfCode(r.cc); if (nm) { detect = { name: nm, src: r.src }; render(); } }, function () {});
+  }
+  var start = function () { build(); var go = function () { if (window.requestIdleCallback) requestIdleCallback(guess, { timeout: 4000 }); else setTimeout(guess, 1500); };
+    if (window.__introDone || !document.getElementById("intro")) go(); else document.addEventListener("sl-intro-done", go, { once: true }); };
+  if (window.SL_WHEN_DRAWN) window.SL_WHEN_DRAWN(start); else if (document.readyState === "complete") start(); else window.addEventListener("load", start, { once: true });
+})();
+</script>
+<!-- ==== Country card - END ================================================================================ -->
 
 <script>
 // ---- v5.49: pop-ups never sit on top of each other. Every small message and bar that floats over

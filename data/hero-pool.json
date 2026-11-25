@@ -1,0 +1,739 @@
+{
+ "about": "The curated pool of opening (hero) photos for the cinematic opening preview (?opening=cinematic / preview key 'cinematic'). Every photo: a living snake in the wild or in natural surroundings, sharp eye or clearly visible head, no handling, no dead or feeding animals, species as in SnakeList, and a licence that allows a site with ads (data/photo-licences.json commercialOK, or CC0/CC BY/CC BY-SA with credit). Files: species-photos/hero/<id>-<width>.webp, all in the opening's 2560:1658 shape. focal = the snake's eye/head as fractions of the photo; crop.phone = the object-position used on upright phones (the photo is cropped there), crop.desktop = on wide screens (the whole photo shows); logo = [top, bottom, centre-x] of the band the logo may use (default [0.6, 0.9, 0.5]). The page carries a copy (SL_HERO_POOL) written by tools/hero_pool.py.",
+ "leftOut": [
+  {
+   "id": "rough-green-hq",
+   "why": "licence and photographer unknown (permission needed) - not usable on a page with ads yet"
+  },
+  {
+   "id": "lampropeltis-gentilis",
+   "why": "the head is small in the frame (no clear eye at opening size)"
+  },
+  {
+   "id": "micrurus-tener",
+   "why": "the head is small and at the very edge of the frame"
+  }
+ ],
+ "photos": [
+  {
+   "id": "corallus-hortulana",
+   "species": "corallus-hortulana",
+   "name": "Amazon Tree Boa",
+   "sci": "Corallus hortulana",
+   "page": "amazon-tree-boa-corallus-hortulana",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Geoff Gallice, CC BY 2.0 (Wikimedia Commons)",
+   "licence": "CC BY 2.0",
+   "source": "https://commons.wikimedia.org/wiki/File:Corallus_hortulanus_head,_Peru.jpg",
+   "author": "Geoff Gallice",
+   "commercialOK": true,
+   "focal": [
+    0.33,
+    0.16
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "0% 50%"
+   },
+   "inLiveRotation": true
+  },
+  {
+   "id": "morelia-viridis",
+   "species": "morelia-viridis",
+   "name": "Green Tree Python",
+   "sci": "Morelia viridis",
+   "page": "green-tree-python-morelia-viridis",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: JJ Harrison, CC BY-SA 3.0 (Wikimedia Commons)",
+   "licence": "CC BY-SA 3.0",
+   "source": "https://commons.wikimedia.org/wiki/File:Green_Tree_Python_0A2A0428.jpg",
+   "author": "JJ Harrison",
+   "commercialOK": true,
+   "focal": [
+    0.465,
+    0.385
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "50% 50%"
+   },
+   "inLiveRotation": true
+  },
+  {
+   "id": "dendroaspis-angusticeps",
+   "species": "dendroaspis-angusticeps",
+   "name": "Green Mamba",
+   "sci": "Dendroaspis angusticeps",
+   "page": "green-mamba-dendroaspis-angusticeps",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Holger Krisp, CC BY 3.0 (Wikimedia Commons)",
+   "licence": "CC BY 3.0",
+   "source": "https://commons.wikimedia.org/wiki/File:Mamba_Dendroaspis_angusticeps.jpg",
+   "author": "Holger Krisp",
+   "commercialOK": true,
+   "focal": [
+    0.355,
+    0.335
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "29% 50%"
+   },
+   "inLiveRotation": true
+  },
+  {
+   "id": "naja-kaouthia",
+   "species": "naja-kaouthia",
+   "name": "Monocled Cobra",
+   "sci": "Naja kaouthia",
+   "page": "monocled-cobra-naja-kaouthia",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Charles J. Sharp, CC BY-SA 4.0 (Wikimedia Commons)",
+   "licence": "CC BY-SA 4.0",
+   "source": "https://commons.wikimedia.org/wiki/File:Monocled_cobra_(Naja_kaouthia)_Bach_Ma_2.jpg",
+   "author": "Charles J. Sharp",
+   "commercialOK": true,
+   "focal": [
+    0.39,
+    0.38
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "24% 50%"
+   },
+   "inLiveRotation": true
+  },
+  {
+   "id": "oxybelis-aeneus",
+   "species": "oxybelis-aeneus",
+   "name": "Brown Vinesnake",
+   "sci": "Oxybelis aeneus",
+   "page": "brown-vinesnake-oxybelis-aeneus",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Brian Gratwicke, CC BY 2.0 (Wikimedia Commons)",
+   "licence": "CC BY 2.0",
+   "source": "https://commons.wikimedia.org/wiki/File:Oxybelis_aeneus_01.jpg",
+   "author": "Brian Gratwicke",
+   "commercialOK": true,
+   "focal": [
+    0.42,
+    0.33
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "14% 50%"
+   },
+   "inLiveRotation": true
+  },
+  {
+   "id": "zamenis-scalaris",
+   "species": "zamenis-scalaris",
+   "name": "Ladder Snake",
+   "sci": "Zamenis scalaris",
+   "page": "ladder-snake-zamenis-scalaris",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Benny Trapp (crop: Papa Lima Whiskey 2), CC BY 3.0 (Wikimedia Commons)",
+   "licence": "CC BY 3.0",
+   "source": "https://commons.wikimedia.org/wiki/File:Rhinechis_scalaris_cropped.jpg",
+   "author": "Benny Trapp (crop: Papa Lima Whiskey 2)",
+   "commercialOK": true,
+   "focal": [
+    0.345,
+    0.39
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "24% 50%"
+   },
+   "inLiveRotation": true
+  },
+  {
+   "id": "echis-omanensis",
+   "species": "echis-omanensis",
+   "name": "Oman Saw-scaled Viper",
+   "sci": "Echis omanensis",
+   "page": "oman-saw-scaled-viper-echis-omanensis",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Arabella Willing, CC BY 4.0 (iNaturalist)",
+   "licence": "CC BY 4.0",
+   "source": "https://www.inaturalist.org/observations/285888604",
+   "author": "Arabella Willing",
+   "commercialOK": true,
+   "focal": [
+    0.4,
+    0.462
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "11% 50%"
+   },
+   "logo": [
+    0.6,
+    0.9,
+    0.6
+   ],
+   "inLiveRotation": true
+  },
+  {
+   "id": "farancia-erytrogramma",
+   "species": "farancia-erytrogramma",
+   "name": "Rainbow Snake",
+   "sci": "Farancia erytrogramma",
+   "page": "rainbow-snake-farancia-erytrogramma",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Joshua Liverman, CC BY 4.0 (iNaturalist)",
+   "licence": "CC BY 4.0",
+   "source": "https://www.inaturalist.org/observations/19555285",
+   "author": "Joshua Liverman",
+   "commercialOK": true,
+   "focal": [
+    0.74,
+    0.41
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "76% 50%"
+   },
+   "inLiveRotation": true
+  },
+  {
+   "id": "agkistrodon-contortrix",
+   "species": "agkistrodon-contortrix",
+   "name": "Copperhead",
+   "sci": "Agkistrodon contortrix",
+   "page": "copperhead-agkistrodon-contortrix",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Alan Rockefeller, CC BY 4.0 (iNaturalist)",
+   "licence": "CC BY 4.0",
+   "source": "https://www.inaturalist.org/observations/141425644",
+   "author": "Alan Rockefeller",
+   "commercialOK": true,
+   "focal": [
+    0.66,
+    0.4
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "76% 50%"
+   },
+   "inLiveRotation": true
+  },
+  {
+   "id": "ahaetulla-prasina",
+   "species": "ahaetulla-prasina",
+   "name": "Asian Vine Snake",
+   "sci": "Ahaetulla prasina",
+   "page": "asian-vine-snake-ahaetulla-prasina",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Eric Lopes, CC BY-SA 4.0 (iNaturalist)",
+   "licence": "CC BY-SA 4.0",
+   "source": "https://www.inaturalist.org/observations/155876942",
+   "author": "Eric Lopes",
+   "commercialOK": true,
+   "focal": [
+    0.655,
+    0.537
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "100% 50%"
+   },
+   "logo": [
+    0.6,
+    0.9,
+    0.42
+   ],
+   "inLiveRotation": true
+  },
+  {
+   "id": "corallus-caninus",
+   "species": "corallus-caninus",
+   "name": "Emerald Tree Boa",
+   "sci": "Corallus caninus",
+   "page": "emerald-tree-boa-corallus-caninus",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: eloise kerroux, CC BY 4.0 (iNaturalist)",
+   "licence": "CC BY 4.0",
+   "source": "https://www.inaturalist.org/observations/138380737",
+   "author": "eloise kerroux",
+   "commercialOK": true,
+   "focal": [
+    0.418,
+    0.428
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "37% 50%"
+   },
+   "inLiveRotation": true
+  },
+  {
+   "id": "trimeresurus-insularis",
+   "species": "trimeresurus-insularis",
+   "name": "White-lipped Island Pitviper",
+   "sci": "Trimeresurus insularis",
+   "page": "white-lipped-island-pitviper-trimeresurus-insularis",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: James Hunt, CC BY 4.0 (iNaturalist)",
+   "licence": "CC BY 4.0",
+   "source": "https://www.inaturalist.org/observations/167155675",
+   "author": "James Hunt",
+   "commercialOK": true,
+   "focal": [
+    0.505,
+    0.25
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "71% 50%"
+   },
+   "inLiveRotation": true
+  },
+  {
+   "id": "bothriechis-schlegelii",
+   "species": "bothriechis-schlegelii",
+   "name": "Eyelash Viper",
+   "sci": "Bothriechis schlegelii",
+   "page": "eyelash-viper-bothriechis-schlegelii",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Daniel Mesa, CC BY (iNaturalist)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/photos/84758579",
+   "author": "Daniel Mesa",
+   "commercialOK": true,
+   "focal": [
+    0.72,
+    0.18
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "72% 50%"
+   },
+   "light": "daylight",
+   "original": {
+    "size": [
+     2048,
+     1365
+    ],
+    "cropBox": [
+     0,
+     0,
+     2048,
+     1326
+    ]
+   },
+   "inLiveRotation": false,
+   "new": true
+  },
+  {
+   "id": "bungarus-fasciatus",
+   "species": "bungarus-fasciatus",
+   "name": "Banded Krait",
+   "sci": "Bungarus fasciatus",
+   "page": "banded-krait-bungarus-fasciatus",
+   "widths": [
+    900,
+    1200
+   ],
+   "credit": "Photo: Ramit Singal, CC BY (iNaturalist)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/photos/469687991",
+   "author": "Ramit Singal",
+   "commercialOK": true,
+   "focal": [
+    0.66,
+    0.36
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "66% 50%"
+   },
+   "light": "soft flash",
+   "original": {
+    "size": [
+     1200,
+     800
+    ],
+    "cropBox": [
+     0,
+     0,
+     1200,
+     777
+    ]
+   },
+   "inLiveRotation": false,
+   "new": true
+  },
+  {
+   "id": "craspedocephalus-gramineus",
+   "species": "craspedocephalus-gramineus",
+   "name": "Common Bamboo Viper",
+   "sci": "Craspedocephalus gramineus",
+   "page": "common-bamboo-viper-craspedocephalus-gramineus",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Tejas M, CC BY (iNaturalist)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/photos/403947456",
+   "author": "Tejas M",
+   "commercialOK": true,
+   "focal": [
+    0.55,
+    0.27
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "55% 50%"
+   },
+   "light": "night flash, dark background",
+   "original": {
+    "size": [
+     1967,
+     1360
+    ],
+    "cropBox": [
+     0,
+     0,
+     1967,
+     1274
+    ]
+   },
+   "inLiveRotation": false,
+   "new": true
+  },
+  {
+   "id": "dispholidus-typus",
+   "species": "dispholidus-typus",
+   "name": "Boomslang",
+   "sci": "Dispholidus typus",
+   "page": "boomslang-dispholidus-typus",
+   "widths": [
+    900,
+    1177
+   ],
+   "credit": "Photo: Wynand Uys, CC BY (iNaturalist)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/photos/15165535",
+   "author": "Wynand Uys",
+   "commercialOK": true,
+   "focal": [
+    0.39,
+    0.39
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "39% 50%"
+   },
+   "light": "flash",
+   "original": {
+    "size": [
+     1177,
+     770
+    ],
+    "cropBox": [
+     0,
+     0,
+     1177,
+     762
+    ]
+   },
+   "inLiveRotation": false,
+   "new": true
+  },
+  {
+   "id": "elaphe-quatuorlineata",
+   "species": "elaphe-quatuorlineata",
+   "name": "Four-lined Snake",
+   "sci": "Elaphe quatuorlineata",
+   "page": "four-lined-snake-elaphe-quatuorlineata",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: milan kořínek, CC BY (iNaturalist)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/photos/579416696",
+   "author": "milan kořínek",
+   "commercialOK": true,
+   "focal": [
+    0.76,
+    0.31
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "76% 50%"
+   },
+   "light": "flash, dark background",
+   "original": {
+    "size": [
+     2000,
+     1309
+    ],
+    "cropBox": [
+     0,
+     0,
+     2000,
+     1295
+    ]
+   },
+   "inLiveRotation": false,
+   "new": true
+  },
+  {
+   "id": "gonyosoma-oxycephalum",
+   "species": "gonyosoma-oxycephalum",
+   "name": "Red-Tailed Racer",
+   "sci": "Gonyosoma oxycephalum",
+   "page": "red-tailed-racer-gonyosoma-oxycephalum",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Bernard DUPONT, CC BY (iNaturalist)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/photos/140167081",
+   "author": "Bernard DUPONT",
+   "commercialOK": true,
+   "focal": [
+    0.71,
+    0.42
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "71% 50%"
+   },
+   "light": "flash, dark background",
+   "original": {
+    "size": [
+     2048,
+     1306
+    ],
+    "cropBox": [
+     31,
+     0,
+     2017,
+     1306
+    ]
+   },
+   "inLiveRotation": false,
+   "new": true
+  },
+  {
+   "id": "natrix-natrix",
+   "species": "natrix-natrix",
+   "name": "Grass Snake",
+   "sci": "Natrix natrix",
+   "page": "grass-snake-natrix-natrix",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Andreas Eichler, CC BY-SA (iNaturalist)",
+   "licence": "CC BY-SA",
+   "source": "https://www.inaturalist.org/photos/349334990",
+   "author": "Andreas Eichler",
+   "commercialOK": true,
+   "focal": [
+    0.335,
+    0.465
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "34% 50%"
+   },
+   "light": "daylight",
+   "original": {
+    "size": [
+     2048,
+     1452
+    ],
+    "cropBox": [
+     0,
+     126,
+     2048,
+     1326
+    ]
+   },
+   "inLiveRotation": false,
+   "new": true
+  },
+  {
+   "id": "pseudechis-porphyriacus",
+   "species": "pseudechis-porphyriacus",
+   "name": "Australian Black Snake",
+   "sci": "Pseudechis porphyriacus",
+   "page": "australian-black-snake-pseudechis-porphyriacus",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Richard Fuller, CC0 (iNaturalist)",
+   "licence": "CC0",
+   "source": "https://www.inaturalist.org/photos/78061047",
+   "author": "Richard Fuller",
+   "commercialOK": true,
+   "focal": [
+    0.56,
+    0.43
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "56% 50%"
+   },
+   "light": "daylight",
+   "original": {
+    "size": [
+     2048,
+     1365
+    ],
+    "cropBox": [
+     0,
+     16,
+     2048,
+     1326
+    ]
+   },
+   "inLiveRotation": false,
+   "new": true
+  },
+  {
+   "id": "tropidolaemus-wagleri",
+   "species": "tropidolaemus-wagleri",
+   "name": "Wagler's Pit Viper",
+   "sci": "Tropidolaemus wagleri",
+   "page": "wagler-s-pit-viper-tropidolaemus-wagleri",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: diego_cue, CC BY-SA (iNaturalist)",
+   "licence": "CC BY-SA",
+   "source": "https://www.inaturalist.org/photos/70494942",
+   "author": "diego_cue",
+   "commercialOK": true,
+   "focal": [
+    0.52,
+    0.47
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "52% 50%"
+   },
+   "light": "night flash",
+   "original": {
+    "size": [
+     2048,
+     1371
+    ],
+    "cropBox": [
+     0,
+     45,
+     2048,
+     1326
+    ]
+   },
+   "inLiveRotation": false,
+   "new": true
+  },
+  {
+   "id": "vipera-berus",
+   "species": "vipera-berus",
+   "name": "European Adder",
+   "sci": "Vipera berus",
+   "page": "european-adder-vipera-berus",
+   "widths": [
+    900,
+    1400,
+    1920
+   ],
+   "credit": "Photo: Johan Kjær Prehn, CC BY (iNaturalist)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/photos/261912341",
+   "author": "Johan Kjær Prehn",
+   "commercialOK": true,
+   "focal": [
+    0.33,
+    0.37
+   ],
+   "crop": {
+    "desktop": "50% 50%",
+    "phone": "33% 50%"
+   },
+   "light": "daylight",
+   "original": {
+    "size": [
+     2048,
+     1538
+    ],
+    "cropBox": [
+     0,
+     138,
+     2048,
+     1326
+    ]
+   },
+   "inLiveRotation": false,
+   "new": true
+  }
+ ]
+}

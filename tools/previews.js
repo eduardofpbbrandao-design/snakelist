@@ -14,7 +14,7 @@
    app's SL_PV_ON(key) reads that class): the design preview's styles, the new cookie bar and the new tutorial follow it.
    Settings > Previews shows when a preview is on, or - for someone signed in - once ?preview=all has been used in this
    browser or account ("sl-art-preview-menu", synced like the switches; Settings' "Turn all previews on" sets it too).
-   Their own switches work as well: ?opening=collage (new opening) and ?countdown-finale-preview=1 (countdown finale).
+   Their own switches work as well: ?opening=collage (new opening), ?opening=cinematic (cinematic opening; ?opening=wall or ?opening=off turn both openings off) and ?countdown-finale-preview=1 (countdown finale).
    A new preview = one more entry in DEFS below (its key must be here for it to follow the account), and its own code
    asks SL_PREVIEWS.on(key). For a normal visitor (nothing switched on) this does nothing and loads nothing. */
 (function(){try{var W=window,S=W.localStorage,L=location,PRE="sl-art-preview-",P=W.SL_PREVIEWS;
@@ -31,11 +31,15 @@ var DEFS=[
   live:function(){return false}},
  {key:"tutorial",label:"New tutorial",about:"Quick Tour, Full Tutorial and short guides, with Back and a progress bar (the ? button opens it)",
   live:function(){return false}},
+ {key:"cinematic",label:"Cinematic opening",about:"A new opening: the logo assembles in a tropical night, a warm light opens onto a curated snake photo (Skip, sound, Replay in Settings)",
+  live:function(){return true}},
+ {key:"country",label:"Country card",about:"\"Explore snakes in <your country>\" just under the opening photo, with a country picker",
+  live:function(){return !!W.SL_COUNTRY_CARD}},
  {key:"finale",label:"Countdown finale + time zone",about:"The countdown's last minute plays once per visit, about 70 seconds after SnakeList opens (pretend time, nothing unlocks; it waits for the tutorial), and Settings gets a Time zone choice",
   apply:function(v){if(v)W.__slCdFinPv=1},
   live:function(){return !W.SL_EV}}
 ];
-var ALL=["opening","design","cookies","tutorial","finale"],MENU=PRE+"menu";
+var ALL=["opening","design","cookies","tutorial","finale","country"],MENU=PRE+"menu";
 function def(k){for(var i=0;i<DEFS.length;i++)if(DEFS[i].key===k)return DEFS[i];return null}
 function on(k){try{return S.getItem(PRE+k)==="1"}catch(e){return false}}
 function emit(){try{document.dispatchEvent(new CustomEvent("sl-previews-changed"))}catch(e){}}
@@ -47,7 +51,7 @@ if(m){var v=decodeURIComponent(m[1]),k=v.replace(/-off$/,"");
  else if(v==="all"){ALL.forEach(function(x){S.setItem(PRE+x,"1")});S.setItem(MENU,"1")}
  else if(def(k))S.setItem(PRE+k,k===v?"1":"0");
  var u=new URL(L.href);u.searchParams.delete("preview");history.replaceState(history.state,"",u.pathname+u.search+u.hash)}
-var o=/[?&]opening=([^&#]*)/.exec(q);if(o){if(o[1]==="collage")S.setItem(PRE+"opening","1");else if(/^(off|classic|none|default)$/.test(o[1]))S.setItem(PRE+"opening","0")}
+var o=/[?&]opening=([^&#]*)/.exec(q);if(o){if(o[1]==="collage"){S.setItem(PRE+"opening","1");S.setItem(PRE+"cinematic","0")}else if(o[1]==="cinematic")S.setItem(PRE+"cinematic","1");else if(/^(off|classic|none|default)$/.test(o[1])){S.setItem(PRE+"opening","0");S.setItem(PRE+"cinematic","0")}else if(o[1]==="wall")S.setItem(PRE+"cinematic","0")}
 if(/[?&]countdown-finale-preview=1(&|$)/.test(q))S.setItem(PRE+"finale","1");
 else if(/[?&]countdown-finale-preview=0(&|$)/.test(q))S.setItem(PRE+"finale","0");
 // what this page started with: a preview that arrives later (from the account) is switched on in place, or with one reload
