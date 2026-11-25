@@ -382,9 +382,14 @@ window.addEventListener("load",function(){setTimeout(function(){if(!window.__int
         if (e.shiftKey && D.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && D.activeElement === last) { e.preventDefault(); first.focus(); } }
     });
     setTimeout(function () { try { bd.querySelector("#slc-an").focus({ preventScroll: true }); } catch (e) {} }, 30);
+    // Escape closes this panel first, wherever the focus is (opened from Settings, the focus may still be there)
+    escH = function (e) { if (e.key === "Escape" && panel) { e.preventDefault(); e.stopImmediatePropagation(); closePanel(); } };
+    D.addEventListener("keydown", escH, true);
   }
+  var escH = null;
   function closePanel(quiet) {
     if (!panel) return; panel.remove(); panel = null; D.documentElement.classList.remove("slc-open");
+    if (escH) { D.removeEventListener("keydown", escH, true); escH = null; }
     if (!quiet && lastFocus && lastFocus.focus) try { lastFocus.focus({ preventScroll: true }); } catch (e) {}
   }
 
@@ -28270,11 +28275,6 @@ window.SL_welcome = function (u, back) {
   if (window.ResizeObserver) new ResizeObserver(soon).observe(grid);
   // anything above the cards changing height (a filter section opening) moves them: follow
   if (window.ResizeObserver) ["guide-controls", "fsecs", "fbar"].forEach(function (id) { var el = document.getElementById(id); if (el) new ResizeObserver(later).observe(el); });
-  // (fix) the page growing above the cards without the list itself changing size - the public countdown banner arriving
-  // after the opening - left the extra tags ("Common", "Rare"...) a banner's height away from their cards: follow that too
-  // (in the same frame when nobody is scrolling, so they never show in the wrong place for a frame)
-  if (window.ResizeObserver) { var bodyH = 0; new ResizeObserver(function (en) { var h = en[0] && en[0].contentRect.height; if (h === bodyH) return; bodyH = h;
-    if (performance.now() - lastScroll > 180) { if (raf) { cancelAnimationFrame(raf); raf = 0; } paint(); } else later(); }).observe(document.body); }
   document.addEventListener("toggle", later, true);
   new MutationObserver(soon).observe(grid, { subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
   later();
@@ -33163,7 +33163,7 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
   // ---------- one pop-up at a time ----------
   // while the first-visit tutorial is still to come, or any tutorial is showing, nothing else pops up
   var origCan = W.SL_canPrompt;
-  if (origCan && !origCan.__tour) { W.SL_canPrompt = function (ex) { return !autoPending && !cur && origCan(ex); }; W.SL_canPrompt.__tour = 1; }
+  if (origCan && !origCan.__tour) { W.SL_canPrompt = function (ex, corner) { return !autoPending && !cur && origCan.apply(this, arguments); }; // (every argument passed on: v6.3x added a second one) W.SL_canPrompt.__tour = 1; }
   function othersOpen() {
     return !!D.querySelector("#wn-sheet.open, #sl-level.open, .note-sheet.open, .map-sheet.open, .report-sheet.open, .ins-sheet.open, .photo-lightbox.open, #xm-welcome, .signin-page:not([hidden])")
       || de.classList.contains("sl-achdlg-on") || de.classList.contains("sl-level-lock");
@@ -33815,6 +33815,9 @@ html.sl-on-map .ck-bar:not(.nm-bar) { bottom: auto; top: 12px; }
     if (d.root && d.cfg && !d.cfg.open(d.root)) return;
     if (e.key === "Escape" && d.esc) {
       if (document.querySelector(".photo-lightbox.open")) return;
+      // a panel that isn't modal (the map's country panel) closes only when the focus is in it - Escape in the map's
+      // search box keeps meaning what it meant there
+      if (d.cfg && d.cfg.noFocus && !d.box.contains(document.activeElement)) return;
       var c = d.cfg && d.root.querySelector(d.cfg.close);
       if (c) { e.preventDefault(); c.click(); }
       else if (d.closeFn) { e.preventDefault(); d.closeFn(); }

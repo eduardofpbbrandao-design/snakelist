@@ -235,7 +235,7 @@ const shot = async (p, name) => { if (SHOTS) await p.screenshot({ path: SHOTS + 
     ok(!adsReq(p).length, 'no preview: no AdSense request before an answer');
     await p.evaluate(() => window.SL_showCookies());
     await p.waitForSelector('#ck-bar:not([hidden])', { timeout: 5000 });
-    const btns = await p.$$eval('#ck-bar button', (l) => l.filter((x) => x.offsetParent !== null).map((x) => x.textContent.trim()));
+    const btns = await p.$$eval('#ck-bar button', (l) => l.filter((x) => x.offsetParent !== null).map((x) => x.innerText.trim()));
     ok(btns.join('|') === 'Only essentials|Accept cookies', 'no preview: the bar is today\'s - Only essentials, Accept cookies (' + btns.join('|') + ')');
     ok(await p.$eval('#ck-bar', (x) => /remembers on this device what you look at/.test(x.innerText) && !/personalise the ads/.test(x.innerText)), 'no preview: today\'s words');
     await shot(p, 'app-nopreview-banner');

@@ -233,9 +233,14 @@
         if (e.shiftKey && D.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && D.activeElement === last) { e.preventDefault(); first.focus(); } }
     });
     setTimeout(function () { try { bd.querySelector("#slc-an").focus({ preventScroll: true }); } catch (e) {} }, 30);
+    // Escape closes this panel first, wherever the focus is (opened from Settings, the focus may still be there)
+    escH = function (e) { if (e.key === "Escape" && panel) { e.preventDefault(); e.stopImmediatePropagation(); closePanel(); } };
+    D.addEventListener("keydown", escH, true);
   }
+  var escH = null;
   function closePanel(quiet) {
     if (!panel) return; panel.remove(); panel = null; D.documentElement.classList.remove("slc-open");
+    if (escH) { D.removeEventListener("keydown", escH, true); escH = null; }
     if (!quiet && lastFocus && lastFocus.focus) try { lastFocus.focus({ preventScroll: true }); } catch (e) {}
   }
 
