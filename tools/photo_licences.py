@@ -99,7 +99,10 @@ def main():
                     "docs/PHOTO-PERMISSIONS.md.",
            "counts": {"photos": len(photos), "commercialOK": n_ok, "needPermission": len(photos) - n_ok},
            "photos": photos}
-    json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+    # one photo per line: small, and easy to read and diff
+    head = json.dumps({k: v for k, v in out.items() if k != "photos"}, ensure_ascii=False)[:-1]
+    body = ",\n".join(json.dumps(p, ensure_ascii=False, separators=(",", ":")) for p in photos)
+    open(OUT, "w", encoding="utf-8").write(head + ', "photos": [\n' + body + "\n]}\n")
     print(out["counts"])
 
 
