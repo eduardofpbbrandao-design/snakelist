@@ -30,7 +30,7 @@ for _p in ("about.html", "about-snakelist.html", "install.html", "privacy.html",
     _t2 = re.sub(r'(<link rel="stylesheet" href="species/sl-fx\.css">)(?:<script>if\(window\.localStorage&&localStorage\.getItem\("sl-art-preview-design"\).*?</script>)?', lambda m: m.group(1) + _DSH, _t, count=1)
     if _t2 != _t: open(_p, "w", encoding="utf-8").write(_t2)
 title = "SnakeList - the snake life list, map and quiz"
-desc = ("Track every snake species you've seen. A checklist of 4,000+ snakes with photos, "
+desc = ("Track every snake species you've seen. A checklist of " + N_TXT + " snake species with photos, "
         "range maps down to states and provinces, a wishlist and a where-does-it-live quiz.")
 head = f"""<!doctype html>
 <html lang="en">

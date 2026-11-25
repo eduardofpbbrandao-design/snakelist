@@ -200,6 +200,14 @@ def constriction_of(c):
     return "unknown"
 
 
+def venom_label(c):
+    """the one wording for a snake's venom status, from the card's venom flag (data/venom-status.json, written into
+    the cards by tools/venom_status.py) and the app's #harm-data: 'Venomous' (can be dangerous to people),
+    'Mildly venomous' (venomous, usually rear-fanged, no serious bites in SnakeList's records) or 'Non-venomous'"""
+    if not c["venom"]: return "Non-venomous"
+    return "Venomous" if harm_of(c) == "harmful" else "Mildly venomous"
+
+
 def danger_of(c):
     """venom flag x harm: 'dv' venomous and dangerous to people, 'mv' mildly venomous (no serious bites
     documented), 'gc' not venomous but a dangerous giant constrictor, 'hl' not venomous and low risk"""
@@ -255,7 +263,7 @@ def checklist_facts(c, rel="../", has_hab=False):
         hm0 = harm_of(c)
         # v6.20: the same words as the "Venom and safety" key fact (venom_text): a venomous snake SnakeList has no serious
         # bites for is "Mildly venomous", and the app's Harmful / Low risk chips read "Dangerous to people" / "Low risk to people"
-        tags.append((a("Venomous", "f=chip-venom") if hm0 == "harmful" else a("Mildly venomous", "f=chip-venom")) if c["venom"] else a("Non-venomous", "f=chip-nonvenom"))
+        tags.append(a(venom_label(c), "f=chip-venom" if c["venom"] else "f=chip-nonvenom"))
         if hm0 == "harmful": tags.append(a("Dangerous to people", "f=chip-harmful"))
         elif hm0 == "harmless": tags.append(a("Low risk to people", "f=chip-harmless"))
     elif FLAG["z"][2](c): tags.append(a("Extinct", "f=chip-extinct") + " <small>(fossil)</small>")
@@ -295,6 +303,44 @@ def checklist_facts(c, rel="../", has_hab=False):
              "".join('<div%s><dt>%s</dt><dd>%s</dd></div>' % (' class="sp-fwide"' if k == "Habitats" else "", k, v) for k, v in rows)))
 
 
+# data-seo: the countries a species' sourced "Published distribution" names, so a page can say which of them SnakeList has
+# no records from (its map and "N countries" come from observation records, which can miss parts of the published range)
+COUNTRY_ALIASES = {"Burma": "Myanmar", "USA": "United States", "U.S.": "United States", "the US": "United States", "Ivory Coast": "Ivory Coast",
+                   "Côte d'Ivoire": "Ivory Coast", "Czechia": "Czech Republic", "Türkiye": "Turkey", "DR Congo": "Democratic Republic of the Congo",
+                   "Democratic Republic of Congo": "Democratic Republic of the Congo", "Republic of the Congo": "Republic of the Congo",
+                   "East Timor": "Timor-Leste", "Swaziland": "Eswatini", "Macedonia": "North Macedonia", "Persia": "Iran"}
+_NOT_COUNTRY_BEFORE = re.compile(r"(?:New|Papua New|Equatorial|French|American|Western|South|Northern|Gulf of|Bay of|Sea of)\s+$")
+_PUB_SKIP_LABEL = re.compile(r"broad sense|before|introduced|about the map", re.I)   # not the species' own present native range
+_PUB_SKIP_SENT = re.compile(r"separate species|no longer|now (?:a|considered|treated)|except|not (?:found|in)\b|absent|extinct in|introduced", re.I)
+THE_COUNTRIES = {"Philippines", "Netherlands", "United States", "United Kingdom", "United Arab Emirates", "Bahamas", "Gambia", "Maldives",
+                 "Comoros", "Solomon Islands", "Seychelles", "Marshall Islands", "Democratic Republic of the Congo", "Republic of the Congo",
+                 "Central African Republic", "Dominican Republic", "Czech Republic", "Cayman Islands", "British Virgin Islands",
+                 "United States Virgin Islands", "Turks and Caicos Islands", "Cook Islands", "Falkland Islands", "Northern Mariana Islands"}
+def the_country(n): return ("the " + n) if n in THE_COUNTRIES else n
+def published_native_texts(paras):
+    """the sentences of a species' "Published distribution" that describe its present native range"""
+    out = []
+    for x in paras or []:
+        if _PUB_SKIP_LABEL.search(x.get("label") or ""): continue
+        out += [t for t in re.split(r"(?<=[.;])\s+", plain(x.get("text", ""))) if not _PUB_SKIP_SENT.search(t)]
+    return out
+def published_countries(texts, names):
+    """country names (as SnakeList's cards spell them) that the published distribution texts mention, in the order they
+    are named; ambiguous ones ('Georgia' in an American range, 'Guinea' in 'New Guinea', 'Mexico' in 'New Mexico',
+    'Sudan' in 'South Sudan', 'Congo' alone) are skipped rather than guessed"""
+    t = " ".join(texts)
+    at = {}
+    alias = dict(COUNTRY_ALIASES); alias.update({n: n for n in names})
+    for k, v in alias.items():
+        if v not in names or k in ("Congo", "Jersey"): continue
+        for m in re.finditer(r"(?<![\w-])%s(?![\w-])" % re.escape(k), t):
+            if _NOT_COUNTRY_BEFORE.search(t[max(0, m.start() - 14):m.start()]): continue
+            if k == "Georgia" and re.search(r"United States|USA|Florida|Alabama|Carolina|Tennessee|\bUS\b|America", t): continue
+            if k == "Guinea" and t[m.end():m.end() + 7] == "-Bissau": continue
+            at[v] = min(at.get(v, m.start()), m.start()); break
+    return sorted(at, key=at.get)
+
+
 def places_txt(names, link=None):
     """'5 countries and 1 territory': countries and territories (NON_SOVEREIGN) counted apart"""
     t = sum(1 for n in names if n in NONSOV); c = len(names) - t
@@ -304,6 +350,14 @@ def places_txt(names, link=None):
 
 def build(app):
     APP[0] = app
+    # venom status has one source, data/venom-status.json (written into the cards by tools/venom_status.py): say so loudly
+    # if a card disagrees, rather than build pages that contradict their own accounts
+    try:
+        import venom_status as _VS
+        _bad = _VS.mismatches(app, _VS.load())
+        if _bad: print("WARNING: %d card(s) disagree with data/venom-status.json - run python3 tools/venom_status.py (%s)" % (len(_bad), ", ".join(b[0] for b in _bad[:5])))
+    except (ImportError, OSError, ValueError) as _e:
+        print("venom-status check skipped:", _e)
     # the app's big-city list; only cities that name their state can be placed in a snake's range
     CITIES.clear()
     for ct in json.loads(re.search(r"window\.SL_CITIES = (\[.*?\]);\n", app, re.S).group(1)):
@@ -791,6 +845,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
     def see_all(what, n):
         return ('<button type="button" class="sp-all" aria-expanded="false" data-all="See all %s (%d)">See all %s (%d)</button>' % (what, n, what, n)) if clipped(n) else ""
     code_name = {v: k for k, v in iso.items()}
+    ISO_NAMES = set(iso)
     prov_used = set()
     harm = harm_of  # the app's #harm-data and #constrictor-data, shared with the country pages (module level)
     constriction = constriction_of
@@ -870,7 +925,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         info = INFO.get(c["id"])
         label = nm if c["is_sci"] else "%s (%s)" % (nm, sci)
         where = plist(c["countries"], 5) if c["countries"] else ""
-        venom = "venomous" if c["venom"] else "non-venomous"
+        venom = venom_label(c).lower()  # "venomous", "mildly venomous" or "non-venomous": the same words as its tags
         if c["fossil"]:
             fa = c["died"]
             lead = "%s is a prehistoric snake%s, known only from fossils.%s" % (label, " of the family %s" % c["family"] if c["family"] else "",
@@ -898,8 +953,13 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         nm_t = nm
         mq = re.search(r" \(([a-z-]+)\)$", nm)
         label_t = nm if (c["is_sci"] or (mq and mq.group(1) in sci.split(" "))) else label  # (the full name stays: it is the page's h1)
-        for title in ([label_t + " \u2013 fossil snake, 3D reconstruction | SnakeList", label_t + " \u2013 fossil snake | SnakeList"] if c["fossil"] else []) + [label_t + " \u2013 Explore in 3D | SnakeList", label_t + " \u2013 Explore in 3D", label_t + " | SnakeList",
-                      nm_t + " \u2013 Explore in 3D | SnakeList", label_t, nm_t + " | SnakeList"]:
+        # data-seo: "Common (Scientific) \u2013 Photos, Range & Facts | SnakeList", naming only what the page really has (no
+        # "Photos" without a photo, no "Range" without a recorded country; a fossil is a fossil snake)
+        _ph, _rg = bool(img_of(c)), bool(c["countries"])
+        whats = ["Fossil Snake Facts", "Fossil Snake"] if c["fossil"] else (
+            (["Photos, Range & Facts"] if _ph and _rg else []) + (["Photos & Facts"] if _ph else []) + (["Range & Facts"] if _rg else []) + ["Facts"])
+        for title in [label_t + " \u2013 " + w + " | SnakeList" for w in whats] + [label_t + " | SnakeList"] + [
+                      nm_t + " \u2013 " + w + " | SnakeList" for w in whats] + [label_t, nm_t + " | SnakeList"]:
             if len(title) <= 70: break
         else: title = nm_t
         ov = (info or {}).get("sections", {}).get("overview") or []
@@ -1016,7 +1076,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if rt.startswith("Common"): tags.append(("Often recorded on iNaturalist", "f=chip-common"))
         if rt.startswith("Rare"): tags.append(("Rarely recorded on iNaturalist", "f=chip-rare"))
         hm = harm(c)
-        tags.append((("Venomous" if hm == "harmful" else "Mildly venomous"), "f=chip-venom") if c["venom"] else ("Non-venomous", "f=chip-nonvenom"))
+        tags.append((venom_label(c), "f=chip-venom" if c["venom"] else "f=chip-nonvenom"))
         if hm: tags.append(("Dangerous to people" if hm == "harmful" else "Low risk to people", "f=chip-" + hm))
         cons = constriction(c)  # documented for its family or genus, same list as the app (#constrictor-data)
         if cons == "yes": tags.append(("Constrictor", "f=chip-constrictor"))
@@ -1037,6 +1097,10 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         rel_f = sorted([x for x in by_family.get(c["family"], []) if x is not c and x["genus"] != c["genus"]], key=relkey)[:max(0, 8 - len(rel_g))] if c["family"] else []
         S = (info or {}).get("sections", {})
         F = (info or {}).get("facts", {})
+        # data-seo: countries its sourced published distribution names where SnakeList has no records of it (its map and its
+        # "recorded in N countries" come from observation records) - named, so a missing country never reads as outside its range
+        pub_missing = [] if gone else [x for x in published_countries(published_native_texts(S.get("distribution")), ISO_NAMES) if x not in c["countries"]]
+        if pub_missing: HAB_STATS["published_range_wider"] += 1
         FI = FOSSIL.get(c["id"], {}) if c["fossil"] else {}
         PB = FPB.get(c["id"]) if c["fossil"] else None
         if PB: R.add("pbdb", PB["src"])
@@ -1090,10 +1154,12 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             if c["extinct"]:
                 kf.append(("Status", esc(c["extinct"].split(" - ")[0])))
             if c["countries"]:
-                dist = '<a href="#range">%s</a>' % (("Formerly " if c["extinct"] else "") + places_txt(c["countries"]))
+                dist = '<a href="#range">%s</a>' % (("Formerly recorded in " if gone else "Recorded in ") + places_txt(c["countries"]))
                 if c["continents"]: dist += " <small>&middot; %s</small>" % esc(", ".join(c["continents"]))
             else:
                 dist = UNK
+            if pub_missing:
+                dist += '<small class="sp-kintro">Its published range also includes %s, where SnakeList has no records of it yet</small>' % esc(plist([the_country(x) for x in pub_missing], 4))
             if IST:
                 dist += "<small class=\"sp-kintro\">%s</small>" % "; ".join(
                     esc(("Invasive in %s" if x["status"] == "invasive" else "Introduced to %s") % x["area"]) for x in IST)
@@ -1488,7 +1554,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             actions=actions, actnote=actnote, range_h=dict((k, h) for k, h, _ in secs)["range"],
             pub=pub_html, obs=obs,
             where_h=("Country where the fossils were found" if len(c["countries"]) == 1 else "Countries where the fossils were found") if c["fossil"] else
-                    "%s where it %s recorded <small>(%s)</small>" % ("Countries and territories" if nterr else "Countries", "was" if gone else "is", places_txt(c["countries"])) if c["countries"] else "Countries",
+                    "%s with records of it in SnakeList <small>(%s)</small>" % ("Countries and territories" if nterr else "Countries", places_txt(c["countries"])) if c["countries"] else "Countries",
             where="".join(rows) or "<li>No range recorded yet.</li>", where_all=see_all("places", len(c["countries"])),
             st=esc(json.dumps(st_data, ensure_ascii=False, separators=(",", ":"))) if st_data else "", sview=esc(sview or "0 0 1440 720"),
             ns=esc(json.dumps(ns, separators=(",", ":"))) if ns else "",
@@ -1501,7 +1567,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             codes=esc(" ".join(codes)), intro_codes=esc(" ".join(icodes)),
             ishapes="".join('<path class="in" d="%s"/>' % d for d in ishapes),
             dots=esc(" ".join("%.1f,%.1f,%s,%.2g" % ((lo + 180) * 4, (90 - la) * 4, k, sz) for lo, la, k, sz in dots)),
-            legend=('<p class="sp-legend"><span><i class="on"></i>%s</span>%s</p>' % ("Fossil find (by country)" if c["fossil"] else "Former range (by country)" if gone else "Native (by country)",
+            legend=('<p class="sp-legend"><span><i class="on"></i>%s</span>%s</p>' % ("Fossil find (by country)" if c["fossil"] else "Former range (countries with records)" if gone else "Native (countries with records)",
                 '<span><i class="in"></i>Introduced by people</span>' if icodes or ishapes or any(d[2] == "in" for d in dots) else "")) if codes or icodes or ishapes or dots else "", view=esc(view or "0 0 1440 720"), sci_attr=esc(sci), id=c["id"],
             sci_q=esc(quote(sci)),
             nplaces_txt=places_txt(c["countries"]) if c["countries"] else "the places", lives="lived" if gone else "lives", safe_hidden=" hidden" if gone else "",
@@ -1512,7 +1578,8 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
             lenattr=len_attr(info),
             mapnote=('<p class="sp-note sp-mapnote">%s</p>' % ("The shaded country is where its fossils were found &ndash; not a living range." if c["fossil"] else
                      ("Shaded countries are those where it was recorded &ndash; it did not live everywhere inside them." if gone else
-                      "Shaded countries are those where it is recorded &ndash; it does not live everywhere inside them.")))
+                      "Shaded countries are those where SnakeList has records of it &ndash; it does not live everywhere inside them, and a country "
+                      "with no records is not necessarily outside its range." + (" Its published distribution also names %s." % esc(plist([the_country(x) for x in pub_missing], 6)) if pub_missing else ""))))
                     if codes or icodes or ishapes or dots else '<p class="sp-muted">No range data for this snake yet.</p>')
         pd = dates.get(page_name(c), page)
         PAGE_LASTMOD[url] = pd
@@ -1745,7 +1812,7 @@ def genus_compare(L, info, esc):
         conts = sorted(set(x["continents"]))
         rows.append('<tr><td><a href="../%s">%s</a>%s</td><td>%s</td><td>%s%s</td><td>%s</td></tr>' % (
             page_name(x), esc(x["sci"] if x["is_sci"] else x["name"]), "" if x["is_sci"] else " <small><i>%s</i></small>" % esc(x["sci"]),
-            "Venomous" if x["venom"] else "Non-venomous", esc(build_regions.count_places(set(x["countries"])) or "No country recorded"),
+            venom_label(x), esc(build_regions.count_places(set(x["countries"])) or "No country recorded"),
             (" <small>(%s)</small>" % esc(", ".join(conts))) if conts else "", esc(plain(f["text"])) if f else '<small>No reviewed account yet</small>'))
     tbl = ('<div class="cy-cmp-wrap"><table class="cy-cmp"><thead><tr><th scope="col">Species</th><th scope="col">Venom</th><th scope="col">Recorded in</th>'
            '<th scope="col">Adult length (reviewed accounts)</th></tr></thead><tbody>%s</tbody></table></div>') % "".join(rows)

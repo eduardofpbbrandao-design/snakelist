@@ -12,14 +12,15 @@
  "no_verified_diet": 3934,
  "no_verified_length": 3924,
  "no_verified_reproduction": 3871,
+ "published_range_wider": 49,
  "recognise_dupes_dropped": 183,
  "size_class_estimate_genus": 3840,
  "size_class_estimate_model": 75,
  "species_funfact_dupes": 9,
  "species_recognise_dupes": 111,
- "venom: Mildly venomous": 150,
- "venom: Not venomous": 3073,
- "venom: Venomous": 851,
+ "venom: Mildly venomous": 547,
+ "venom: Not venomous": 2675,
+ "venom: Venomous": 852,
  "with_account": 216,
  "without_account": 3858
 }
