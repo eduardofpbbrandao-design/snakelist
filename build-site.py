@@ -22,7 +22,7 @@ def _fix_totals(path):
     if t2 != t: open(path, "w", encoding="utf-8").write(t2)
 for _p in ("about.html", "about-snakelist.html", "install.html", "privacy.html", "terms.html"): _fix_totals(_p)
 title = "SnakeList - the snake life list, map and quiz"
-desc = ("Track every snake species you've seen. A checklist of 4,000+ snakes with photos, "
+desc = ("Track every snake species you've seen. A checklist of " + N_TXT + " snake species with photos, "
         "range maps down to states and provinces, a wishlist and a where-does-it-live quiz.")
 head = f"""<!doctype html>
 <html lang="en">

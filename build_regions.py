@@ -768,7 +768,10 @@ def length_m(info):
     a popular claim. Returns None when there is nothing safe to draw."""
     f = (info or {}).get("facts", {}).get("length")
     if not f: return None
-    clause = next((p for p in f["text"].split(";") if re.search(r"\d", p)), "")
+    # data-seo: a bracket about something else - the tail, one female, what some sources say - is not the adult length
+    # ("Up to about 1.8 m (tail about 0.6 m)" drew a 0.6-1.8 m snake); a bracket that converts the units is kept
+    txt = re.sub(r"\([^)]*\b(?:tail|head|snout|one|some|a few|female|male|record|sources?)\b[^)]*\)", "", f["text"], flags=re.I)
+    clause = next((p for p in txt.split(";") if re.search(r"\d", p)), "")
     if not clause or re.search(r"popular|rare", clause, re.I): return None
     toks = re.findall(r"(\d+(?:\.\d+)?)\s*(cm|m)?\b", clause)
     vals, pend = [], []

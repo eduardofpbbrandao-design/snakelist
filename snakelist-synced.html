@@ -9937,7 +9937,7 @@
     const in3d = (re) => () => [].find.call(document.querySelectorAll(".sl3d-ov button"), (b) => b.offsetParent && re.test((b.textContent || "").trim()));
     const goTab = (t) => () => { const b = document.getElementById("tab-" + t); if (b && !b.classList.contains("active")) { b.click(); return true; } return false; };
     const steps = [
-      { sel: ".brand, h1, .eyebrow-row", center: true, title: "Welcome to SnakeList", text: "SnakeList is your life list of the world's snakes - every one of the 4,000+ known species, with photos, maps of where they live and a 3D model of each. Find snakes, learn about them and tick off the ones you've seen. This tour shows you every button." },
+      { sel: ".brand, h1, .eyebrow-row", center: true, title: "Welcome to SnakeList", text: "SnakeList is your life list of the world's snakes - every one of the " + (((document.querySelector("[data-sl-total]") || {}).textContent || "").trim() || "4,000+") /* data-seo: the counted total */ + " species, with photos, maps of where they live and a 3D model of each. Find snakes, learn about them and tick off the ones you've seen. This tour shows you every button." },
       { sel: ".sl-ver", title: "Version and what's new", text: "The version of SnakeList you're using. Tap it to see what's new in this update." },
       // the Install button hides once your account has the app: then this step circles your account (or Sign in)
       { sel: () => { const b = document.getElementById("install-btn"); return b && b.getClientRects().length && b.offsetWidth ? b : document.querySelector(".auth-btn"); }, title: "Install the app",
@@ -14298,7 +14298,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     // other parts of SnakeList still open this countries map by clicking the button for you
     if (btn && e.isTrusted && btn.closest("#grid")) {
       var cid = btn.closest(".card").dataset.id;
-      location.href = "species/" + cid + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html");
+      location.href = ((window.SL_SP_PAGE_URL && window.SL_SP_PAGE_URL(cid)) || "species/" + cid + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html"));
       return;
     }
     if (btn) { show(btn.closest(".card")); return; }
@@ -17879,7 +17879,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       "<dt>Constrictor</dt><dd>" + (cons === "yes" ? "Yes" : cons === "no" ? "No" : "Not documented") + "</dd>" +
       (harm ? "<dt>Harm</dt><dd>" + (harm === "harmful" ? "Harmful" : harm === "harmless" ? "Low risk" : "Not documented") + "</dd>" : "") +
       (ext ? "<dt>Status</dt><dd>" + spEsc(ext) + "</dd>" : "") + "</dl>" +
-      '<p class="sp-info-h">' + (ctry.length === 1 ? "Country" : "Countries" + (ctry.length ? " (" + ctry.length + ")" : "")) + "</p>" +
+      '<p class="sp-info-h">' + (ctry.length === 1 ? "Country with records" : "Countries with records" + (ctry.length ? " (" + ctry.length + ")" : "")) + "</p>" +
       '<p class="sp-info-txt">' + (ctry.length ? spEsc(ctry.join(", ")) : "Not recorded") + "</p>" +
       '<div class="sp-info-acts">' +
         '<button type="button" data-sp="seen"' + (ext ? " hidden" : "") + ' class="sl-sb' + (done ? " on" : "") + '" aria-pressed="' + done + '">' + (window.SL_SEEN_UI ? window.SL_SEEN_UI.html() : done ? "&#10003; Seen" : "Mark Seen") + "</button>" + // (Mark Seen smooth)
@@ -20294,7 +20294,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     var b = document.createElement("b"); b.textContent = name || ""; cap.appendChild(b);
     var i = document.createElement("i"); i.textContent = sci && sci !== name ? sci : ""; cap.appendChild(i);
     var rl = document.createElement("a"); rl.className = "pl-compare pl-real"; rl.textContent = "Explore in 3D";
-    rl.href = "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html") + "#real"; cap.appendChild(rl);
+    rl.href = ((window.SL_SP_PAGE_URL && window.SL_SP_PAGE_URL(id)) || "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html")) + "#real"; cap.appendChild(rl);
     // v4.71: the 3D model opens in a panel right here in SnakeList (the page link stays for a new tab)
     rl.addEventListener("click", function (ev) {
       if (ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.button > 0 || !window.SL_3D || !window.SL_3D.panel) return;
@@ -27447,7 +27447,7 @@ window.SL_welcome = function (u, back) {
       "<dt>Constrictor</dt><dd>" + (cons === "yes" ? "Yes" : cons === "no" ? "No" : "Not documented") + "</dd>" +
       "<dt>Harm</dt><dd>" + (harm === "harmful" ? "Harmful" : harm === "harmless" ? "Low risk" : "Not documented") + "</dd>" +
       (ext ? "<dt>Status</dt><dd>" + esc(ext) + "</dd>" : "") + "</dl>" +
-      '<p class="qp-h">' + (ctry.length === 1 ? "Country" : "Countries (" + ctry.length + ")") + '</p><p class="qp-countries">' + (ctry.length ? esc(ctry.join(", ")) : "Not recorded") + "</p>" +
+      '<p class="qp-h">' + (ctry.length === 1 ? "Country with records" : "Countries with records (" + ctry.length + ")") + '</p><p class="qp-countries">' + (ctry.length ? esc(ctry.join(", ")) : "Not recorded") + "</p>" +
       '<div class="qp-acts">' +
         '<button type="button" data-qp="seen"' + (ext ? " hidden" : "") + ' class="sl-sb' + (done ? " on" : "") + '" aria-pressed="' + done + '">' + (window.SL_SEEN_UI ? window.SL_SEEN_UI.html() : done ? "&#10003; Seen" : "Mark Seen") + "</button>" + // (Mark Seen smooth)
         '<button type="button" data-qp="wish"' + (ext || done ? " hidden" : "") + (wish ? ' class="on"' : "") + ' aria-pressed="' + wish + '">' + (wish ? "&#9733; Want to see" : "&#9734; Want to see") + "</button>" +
@@ -27881,7 +27881,7 @@ window.SL_welcome = function (u, back) {
     return "background-image:url(" + D.path.replace("%d", it[0]) + ");background-size:" + C * 100 + "% " + R * 100 + "%;background-position:" +
       ((it[1] % C) / (C - 1) * 100) + "% " + (Math.floor(it[1] / C) / (R - 1) * 100) + "%";
   }
-  function pageUrl(id) { return "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html"); }
+  function pageUrl(id) { return ((window.SL_SP_PAGE_URL && window.SL_SP_PAGE_URL(id)) || "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html")); }
   var sheet = document.createElement("div");
   sheet.className = "cmp-sheet"; sheet.setAttribute("role", "dialog"); sheet.setAttribute("aria-modal", "true"); sheet.setAttribute("aria-label", "Compare snakes");
   document.body.appendChild(sheet);
@@ -28876,7 +28876,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     // v5.78: the name on its checklist card first (the 3D models' own list had "Mangrove Snak")
     var cardEl = document.querySelector('#grid .card[data-id="' + id + '"]'), cardNm = cardEl && cardEl.getAttribute("data-name");
     var nm = typeof modal === "string" && modal ? modal : cardNm ? cardNm : p && p.name && p.name.toLowerCase() !== sci.toLowerCase() ? p.name : sci;
-    var pageUrl = "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html");
+    var pageUrl = ((window.SL_SP_PAGE_URL && window.SL_SP_PAGE_URL(id)) || "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html"));
     ov = document.createElement("div"); ov.className = "sl3d-ov"; ov.setAttribute("role", "region");
     ov.setAttribute("aria-label", nm + " in 3D"); ov.setAttribute("data-sp-id", id); // v5.93: (the Chinese-name Translate button finds it by this)
     // v5.50: in the panel over the app, Close is just an X in the top-right corner
@@ -28941,7 +28941,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
     var paint = function () { var on = card.classList.contains("done"); seen.classList.toggle("on", on); if (window.SL_SEEN_UI) { if (!seen.firstElementChild) { seen.classList.add("sl-sb"); seen.innerHTML = window.SL_SEEN_UI.html(); } } else seen.textContent = on ? "\u2713 Seen" : "Mark Seen"; seen.setAttribute("aria-pressed", String(on)); }; // (Mark Seen smooth: the labels stay, only the class changes)
     paint(); new MutationObserver(paint).observe(card, { attributes: true, attributeFilter: ["class"] });
     seen.addEventListener("click", function () { var b = card.querySelector(".seen-btn"); if (b) b.click(); setTimeout(paint, 50); });
-    more.addEventListener("click", function () { /* the snake's own page, like the card's See more info */ location.href = "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html"); });
+    more.addEventListener("click", function () { /* the snake's own page, like the card's See more info */ location.href = ((window.SL_SP_PAGE_URL && window.SL_SP_PAGE_URL(id)) || "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html")); });
     box.append(seen, more); hd.appendChild(box);
   }
   // a real photograph of the snake (SnakeList's own drawings of fossil snakes don't count)
@@ -28966,7 +28966,7 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
       + '<p>A 3D reconstruction of this extinct snake is not currently available.</p>'
       + '<p>Explore its fossil discoveries and scientific information while we work on expanding our prehistoric snake collection.</p>'
       + '<button type="button">See its fossil discoveries</button></div>';
-    h.querySelector("button").addEventListener("click", function () { location.href = "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html"); });
+    h.querySelector("button").addEventListener("click", function () { location.href = ((window.SL_SP_PAGE_URL && window.SL_SP_PAGE_URL(id)) || "species/" + id + (location.protocol === "https:" && location.hostname.indexOf("snakelist.com") >= 0 ? "" : ".html")); });
     cardActs(id);
   }
   function start(id, spot) {
