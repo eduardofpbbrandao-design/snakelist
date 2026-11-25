@@ -184,6 +184,14 @@ def constriction_of(c):
     return "unknown"
 
 
+def venom_label(c):
+    """the one wording for a snake's venom status, from the card's venom flag (data/venom-status.json, written into
+    the cards by tools/venom_status.py) and the app's #harm-data: 'Venomous' (can be dangerous to people),
+    'Mildly venomous' (venomous, usually rear-fanged, no serious bites in SnakeList's records) or 'Non-venomous'"""
+    if not c["venom"]: return "Non-venomous"
+    return "Venomous" if harm_of(c) == "harmful" else "Mildly venomous"
+
+
 def danger_of(c):
     """venom flag x harm: 'dv' venomous and dangerous to people, 'mv' mildly venomous (no serious bites
     documented), 'gc' not venomous but a dangerous giant constrictor, 'hl' not venomous and low risk"""
@@ -239,7 +247,7 @@ def checklist_facts(c, rel="../", has_hab=False):
         hm0 = harm_of(c)
         # v6.20: the same words as the "Venom and safety" key fact (venom_text): a venomous snake SnakeList has no serious
         # bites for is "Mildly venomous", and the app's Harmful / Low risk chips read "Dangerous to people" / "Low risk to people"
-        tags.append((a("Venomous", "f=chip-venom") if hm0 == "harmful" else a("Mildly venomous", "f=chip-venom")) if c["venom"] else a("Non-venomous", "f=chip-nonvenom"))
+        tags.append(a(venom_label(c), "f=chip-venom" if c["venom"] else "f=chip-nonvenom"))
         if hm0 == "harmful": tags.append(a("Dangerous to people", "f=chip-harmful"))
         elif hm0 == "harmless": tags.append(a("Low risk to people", "f=chip-harmless"))
     elif FLAG["z"][2](c): tags.append(a("Extinct", "f=chip-extinct") + " <small>(fossil)</small>")
@@ -288,6 +296,14 @@ def places_txt(names, link=None):
 
 def build(app):
     APP[0] = app
+    # venom status has one source, data/venom-status.json (written into the cards by tools/venom_status.py): say so loudly
+    # if a card disagrees, rather than build pages that contradict their own accounts
+    try:
+        import venom_status as _VS
+        _bad = _VS.mismatches(app, _VS.load())
+        if _bad: print("WARNING: %d card(s) disagree with data/venom-status.json - run python3 tools/venom_status.py (%s)" % (len(_bad), ", ".join(b[0] for b in _bad[:5])))
+    except (ImportError, OSError, ValueError) as _e:
+        print("venom-status check skipped:", _e)
     # the app's big-city list; only cities that name their state can be placed in a snake's range
     CITIES.clear()
     for ct in json.loads(re.search(r"window\.SL_CITIES = (\[.*?\]);\n", app, re.S).group(1)):
@@ -846,7 +862,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         info = INFO.get(c["id"])
         label = nm if c["is_sci"] else "%s (%s)" % (nm, sci)
         where = plist(c["countries"], 5) if c["countries"] else ""
-        venom = "venomous" if c["venom"] else "non-venomous"
+        venom = venom_label(c).lower()  # "venomous", "mildly venomous" or "non-venomous": the same words as its tags
         if c["fossil"]:
             fa = c["died"]
             lead = "%s is a prehistoric snake%s, known only from fossils.%s" % (label, " of the family %s" % c["family"] if c["family"] else "",
@@ -992,7 +1008,7 @@ def pages(cards, by_genus, by_family, photos, iso, hab_names, invasive, intro_ll
         if rt.startswith("Common"): tags.append(("Often recorded on iNaturalist", "f=chip-common"))
         if rt.startswith("Rare"): tags.append(("Rarely recorded on iNaturalist", "f=chip-rare"))
         hm = harm(c)
-        tags.append((("Venomous" if hm == "harmful" else "Mildly venomous"), "f=chip-venom") if c["venom"] else ("Non-venomous", "f=chip-nonvenom"))
+        tags.append((venom_label(c), "f=chip-venom" if c["venom"] else "f=chip-nonvenom"))
         if hm: tags.append(("Dangerous to people" if hm == "harmful" else "Low risk to people", "f=chip-" + hm))
         cons = constriction(c)  # documented for its family or genus, same list as the app (#constrictor-data)
         if cons == "yes": tags.append(("Constrictor", "f=chip-constrictor"))
@@ -1716,7 +1732,7 @@ def genus_compare(L, info, esc):
         conts = sorted(set(x["continents"]))
         rows.append('<tr><td><a href="../%s">%s</a>%s</td><td>%s</td><td>%s%s</td><td>%s</td></tr>' % (
             page_name(x), esc(x["sci"] if x["is_sci"] else x["name"]), "" if x["is_sci"] else " <small><i>%s</i></small>" % esc(x["sci"]),
-            "Venomous" if x["venom"] else "Non-venomous", esc(build_regions.count_places(set(x["countries"])) or "No country recorded"),
+            venom_label(x), esc(build_regions.count_places(set(x["countries"])) or "No country recorded"),
             (" <small>(%s)</small>" % esc(", ".join(conts))) if conts else "", esc(plain(f["text"])) if f else '<small>No reviewed account yet</small>'))
     tbl = ('<div class="cy-cmp-wrap"><table class="cy-cmp"><thead><tr><th scope="col">Species</th><th scope="col">Venom</th><th scope="col">Recorded in</th>'
            '<th scope="col">Adult length (reviewed accounts)</th></tr></thead><tbody>%s</tbody></table></div>') % "".join(rows)

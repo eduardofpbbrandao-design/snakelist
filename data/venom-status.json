@@ -1,0 +1,56 @@
+{
+ "_about": "The one source for which snakes SnakeList calls venomous. tools/venom_status.py writes it into the app's cards (data-venomous and the red Venomous tag); everything else - the app's filters, tags, quick look, quiz and map, the species pages' key facts and tags, the genus, family, country and region pages - reads the cards. Elapidae, Viperidae and Atractaspididae were already venomous in the cards. Harm to people (Venomous vs Mildly venomous) is the app's #harm-data: a venomous snake that is not on it is shown as Mildly venomous. Rear-fanged (opisthoglyphous) snakes listed here produce venom from a Duvernoy's (oral) gland and deliver it through enlarged, often grooved, teeth at the back of the upper jaw; most are harmless to people.",
+ "_sources": {
+  "weinstein2011": "Weinstein, S.A., Warrell, D.A., White, J. & Keyler, D.E. (2011) 'Venomous' Bites from 'Non-Venomous' Snakes: A Critical Analysis of Risk and Management of 'Colubrid' Snake Bites. Elsevier.",
+  "rdb": "The Reptile Database (reptile-database.reptarium.cz), genus and species accounts",
+  "wp": "Wikipedia genus and species articles (each cited on the species pages that use them)",
+  "mackessy2002": "Mackessy, S.P. (2002) Biochemistry and pharmacology of colubrid snake venoms. Journal of Toxicology: Toxin Reviews 21: 43-83."
+ },
+ "families": {
+  "Homalopsidae": {"status": "mild", "why": "Indo-Australian mud and water snakes: the whole family is rear-fanged and venomous (mildly, to people)", "src": ["weinstein2011", "rdb"]},
+  "Psammophiidae": {"status": "mild", "why": "Sand snakes, skaapstekers and relatives: the whole family is rear-fanged and venomous", "src": ["weinstein2011", "rdb"]}
+ },
+ "genera": {
+  "Ahaetulla": {"status": "mild", "why": "Asian vine snakes: rear-fanged, mildly venomous", "src": ["weinstein2011", "wp"]},
+  "Chrysopelea": {"status": "mild", "why": "Flying snakes: rear-fanged, mildly venomous", "src": ["weinstein2011", "wp"]},
+  "Dryophiops": {"status": "mild", "why": "Whip snakes related to Ahaetulla: rear-fanged", "src": ["rdb"]},
+  "Crotaphopeltis": {"status": "mild", "why": "Herald snakes: rear-fanged, mildly venomous", "src": ["weinstein2011", "wp"]},
+  "Dipsadoboa": {"status": "mild", "why": "African tree snakes: rear-fanged", "src": ["weinstein2011", "rdb"]},
+  "Telescopus": {"status": "mild", "why": "Cat snakes (tiger snakes of Africa): rear-fanged, mildly venomous", "src": ["weinstein2011", "wp"]},
+  "Trimorphodon": {"status": "mild", "why": "Lyre snakes: rear-fanged, mildly venomous", "src": ["weinstein2011", "wp"]},
+  "Oxybelis": {"status": "mild", "why": "American vine snakes: rear-fanged, mildly venomous", "src": ["weinstein2011", "wp"]},
+  "Leptophis": {"status": "mild", "why": "Parrot snakes: rear-fanged, mildly venomous", "src": ["weinstein2011", "wp"]},
+  "Tantilla": {"status": "mild", "why": "Centipede and black-headed snakes: small grooved rear fangs and a mild venom used on centipedes", "src": ["wp", "rdb"]},
+  "Macroprotodon": {"status": "mild", "why": "False smooth snakes: rear-fanged, mildly venomous", "src": ["wp"]},
+  "Hypsiglena": {"status": "mild", "why": "Night snakes: mild venom from enlarged rear teeth", "src": ["weinstein2011", "wp"]},
+  "Imantodes": {"status": "mild", "why": "Blunt-headed tree snakes: rear-fanged, very mild venom", "src": ["weinstein2011", "wp"]},
+  "Leptodeira": {"status": "mild", "why": "Cat-eyed snakes: rear-fanged, mildly venomous", "src": ["weinstein2011", "wp"]},
+  "Oxyrhopus": {"status": "mild", "why": "False coral and flame snakes: rear-fanged, mildly venomous", "src": ["weinstein2011", "wp"]},
+  "Xenodon": {"status": "mild", "why": "Toad-eating false vipers: enlarged rear fangs, mild envenoming recorded", "src": ["weinstein2011", "wp"]},
+  "Clelia": {"status": "mild", "why": "Mussuranas: rear-fanged, mild envenoming recorded", "src": ["weinstein2011", "wp"]},
+  "Boiruna": {"status": "mild", "why": "Mussuranas: rear-fanged", "src": ["rdb"]},
+  "Mussurana": {"status": "mild", "why": "Mussuranas: rear-fanged", "src": ["rdb"]},
+  "Helicops": {"status": "mild", "why": "Keelback water snakes of South America: rear-fanged, envenoming recorded", "src": ["weinstein2011", "wp"]},
+  "Thamnodynastes": {"status": "mild", "why": "Neotropical swamp snakes: rear-fanged, mildly venomous", "src": ["weinstein2011", "wp"]},
+  "Conophis": {"status": "mild", "why": "Road guarders: rear-fanged, envenoming recorded", "src": ["weinstein2011", "wp"]},
+  "Coniophanes": {"status": "mild", "why": "Black-striped snakes: rear-fanged, mild envenoming recorded", "src": ["weinstein2011", "wp"]},
+  "Phalotris": {"status": "mild", "why": "Reticulated collared snakes: rear-fanged, envenoming recorded", "src": ["weinstein2011", "wp"]},
+  "Psammodynastes": {"status": "mild", "why": "Mock vipers: rear-fanged, mildly venomous", "src": ["weinstein2011", "wp"]},
+  "Leioheterodon": {"status": "mild", "why": "Malagasy hognose snakes: rear-fanged, mild envenoming recorded", "src": ["weinstein2011", "wp"]},
+  "Langaha": {"status": "mild", "why": "Malagasy leaf-nosed snakes: rear-fanged, mildly venomous", "src": ["weinstein2011", "wp"]},
+  "Ithycyphus": {"status": "mild", "why": "Malagasy tree snakes: rear-fanged, envenoming recorded", "src": ["weinstein2011", "rdb"]},
+  "Madagascarophis": {"status": "mild", "why": "Malagasy cat-eyed snakes: rear-fanged", "src": ["weinstein2011", "rdb"]},
+  "Amplorhinus": {"status": "mild", "why": "Many-spotted reed snake: rear-fanged, mild envenoming recorded", "src": ["weinstein2011", "wp"]}
+ },
+ "reviewed_not_changed": {
+  "Heterodon": "Hognose snakes have enlarged rear teeth and a Duvernoy's secretion, but SnakeList's sourced account calls the Eastern Hognose non-venomous; left as non-venomous until an expert source is added to its account",
+  "Thamnophis": "Garter snakes: an oral secretion that is mildly toxic to prey; standard field guides call them non-venomous. Left as non-venomous",
+  "Erythrolamprus": "Some species have enlarged rear teeth and a few envenomings are reported, but not for the genus as a whole. Left as non-venomous",
+  "Apostolepis": "Rear-fanged burrowers with little bite information. Left as non-venomous pending a source",
+  "Coronella": "Smooth snakes: weak oral secretion, generally described as non-venomous. Left as non-venomous"
+ },
+ "family_fixes": {
+  "naja-suevica": "Elapidae",
+  "psammophis-odysseus": "Psammophiidae"
+ }
+}
