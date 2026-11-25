@@ -66,19 +66,18 @@ head = f"""<!doctype html>
   }}
 </script>
 <script>__SL_UPDATE_CHECK__</script>
+<!-- Cookie and ad consent (sl-consent.js, put here whole): Google Consent Mode v2 defaults ("denied") before any Google tag,
+     the visitor's stored choice, Google's certified consent message in Europe, and the ad placement guard. See docs/ADS-CONSENT-SETUP.md -->
+<script>window.SLC_APP = true;</script>
+<script>/*SLC*/</script>
 <!-- Google tag (gtag.js) - visitor statistics for snakelist.com (v6.11: its script is loaded by SL_3P below, after the opening) -->
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){{dataLayer.push(arguments);}}
-  // cookies only once the visitor accepts them in SnakeList's cookie banner
-  var slOk = false; try {{ slOk = localStorage.getItem('sl-consent') === 'yes'; }} catch (e) {{}}
-  gtag('consent', 'default', {{ analytics_storage: slOk ? 'granted' : 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' }});
   gtag('js', new Date());
   gtag('config', 'G-PY2LJV389K');
 </script>
-<!-- Google AdSense (site verification + ads) - tools/add_adsense.py adds the tag to every other page. On the app (this page) the
-     AdSense account is declared here for verification (and in ads.txt); its script, the same
-     https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0736553562389933 tag, is added by SL_3P below -->
+<!-- Google AdSense (site verification + ads) - tools/add_adsense.py adds sl-consent.js (which loads the ads script) to every other page.
+     On the app (this page) the AdSense account is declared here for verification (and in ads.txt); its script,
+     https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0736553562389933, is added by SLC.loadAds() via SL_3P below -->
 <meta name="google-adsense-account" content="ca-pub-0736553562389933">
 <script>
   // v6.11 (Eduardo: the opening "stops", then "jumps"): Google's statistics and ads scripts took over a second and a half of the
@@ -90,7 +89,7 @@ head = f"""<!doctype html>
     window.SL_3P = function () {{
       if (done) return; done = true;
       add('https://www.googletagmanager.com/gtag/js?id=G-PY2LJV389K');
-      setTimeout(function () {{ add('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0736553562389933', true); }}, 2500);
+      setTimeout(function () {{ if (window.SLC) window.SLC.loadAds(); }}, 2500); // only after the consent defaults; outside Europe only after an answer
     }};
     ['scroll', 'wheel', 'touchmove', 'pointerdown', 'keydown'].forEach(function (n) {{ window.addEventListener(n, function () {{ lastMove = Date.now(); }}, {{ passive: true, capture: true }}); }});
     function whenStill(ms) {{ setTimeout(function again() {{ if (Date.now() - lastMove < 1500) {{ setTimeout(again, 700); return; }} window.SL_3P(); }}, ms); }}
@@ -135,6 +134,7 @@ UPDATE_CHECK = r"""
   })();
 """.replace("__VER__", SL_VER)
 head = head.replace("__SL_UPDATE_CHECK__", UPDATE_CHECK, 1)
+head = head.replace("<script>/*SLC*/</script>", "<script>" + open("sl-consent.js", encoding="utf-8").read().replace("</script", "<\\/script") + "</script>", 1)
 # the Christmas preview switch (tools/xmas_loader.js): does nothing unless the visitor opens ?christmas
 _xm = open("tools/xmas_loader.js", encoding="utf-8").read().split("*/", 1)[1].strip()
 # the events preview switch (tools/events_loader.js): does nothing unless the visitor opens ?preview=events
