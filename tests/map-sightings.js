@@ -180,7 +180,9 @@ async function route(r) {
   const card = await p.evaluate(() => { const s = document.getElementById('sg-pop'), det = s.querySelector('details.sg-det');
     return { links: [].map.call(s.querySelectorAll('a'), a => a.textContent.trim()), name: (s.querySelector('.sg-name') || {}).textContent, det: det ? det.textContent : '', open: det ? det.open : null,
       shown: s.innerText, done: [].every.call(s.querySelectorAll('img'), i => i.complete && i.naturalWidth > 0) }; });
-  ok(card.name === 'Viperine Water Snake' || card.name === "Lataste's Viper", 'card: the snake\'s name (' + card.name + ')');
+  // batch109: the card's main name is SnakeList's own (its checklist card's - the same in the photo viewer and 3D);
+  // iNaturalist's name, when it differs, is kept as "Also called"
+  ok(card.name === 'Viperine Snake' || card.name === "Lataste's Viper", 'card: the snake\'s name - SnakeList\'s own (' + card.name + ')');
   ok(/2024/.test(t1) && /May/.test(t1) && /by Observer \d+/.test(t1), 'card: the date observed and who found it, under the name');
   ok(card.links.some(l => /^See in iNaturalist/.test(l)) && await p.evaluate(() => { const a = document.querySelector('#sg-pop a.sgc-inat'); return a.target === '_blank' && /noopener/.test(a.rel) && /^https:\/\/www\.inaturalist\.org\/observations\/\d+$/.test(a.href); }),
     'card: "See in iNaturalist" opens the observation on iNaturalist in a new tab (' + card.links.join(', ') + ')');
@@ -272,7 +274,7 @@ async function route(r) {
   d = await dbg(p);
   ok(d.mode === 'tiles' && d.n > 20 && M.tileUrls.length > nT0, 'All dots: the dots come from iNaturalist\'s map tiles (' + d.n + ' dots from ' + d.tiles + ' tiles)');
   ok(M.tileUrls.every(u => /taxon_id=85553/.test(u) && /verifiable=true/.test(u)), 'tiles ask for snakes only, verifiable');
-  ok(await p.evaluate(() => !document.getElementById('sg-acts').hidden && /Show all dots/.test(document.getElementById('sg-all').textContent) && /Most popular sighting/.test(document.getElementById('sg-popular').textContent)), 'Show all dots and Most popular sighting buttons while Sightings is on');
+  ok(await p.evaluate(() => !document.getElementById('sg-acts').hidden && /Zoom out to all sightings/.test(document.getElementById('sg-all').textContent) && /Most favourited sighting/.test(document.getElementById('sg-popular').textContent)), 'Zoom out to all sightings and Most favourited sighting buttons while Sightings is on');
   await shot(p, 'tiles-desktop', '#globe-stage');
   // a tile dot opens: its record is fetched by id, and the card is beside it, inside the map
   d = await dbg(p);
@@ -312,7 +314,8 @@ async function route(r) {
   await p.fill('#heat-search', ''); await p.waitForTimeout(500);
   await p.fill('#heat-search', 'Iceland'); await p.waitForTimeout(500); await p.keyboard.press('Escape'); await p.waitForTimeout(2500);
   d = await dbg(p);
-  ok(d.n === 0 && /No iNaturalist sightings in Iceland/.test(await p.evaluate(() => document.getElementById('sg-note').innerText)), 'a place with no sightings shows none, and says so');
+  const noteIce = await p.evaluate(() => document.getElementById('sg-note').innerText);
+  ok(d.n === 0 && /No iNaturalist sightings in Iceland/.test(noteIce), 'a place with no sightings shows none, and says so (' + d.n + ' dots; "' + noteIce + '")');
   M.emptyTiles = false;
   // names on the map sit over the dots and are buttons: the map centres on the name, closer (A18, A22)
   await p.fill('#heat-search', ''); await p.waitForTimeout(400);

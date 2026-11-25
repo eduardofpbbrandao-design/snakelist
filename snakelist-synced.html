@@ -12670,7 +12670,7 @@
       const valid = results.filter((r) => r.count !== null).sort((a, b) => b.count - a.count);
       document.getElementById("city-search-caption").textContent =
         valid.filter((r) => r.count > 0).length + " of " + candidates.length +
-        " species (with a known range in " + city.state + ") have documented iNaturalist sightings within 25 miles of " + city.name +
+        " species (with a known range in " + city.state + ") have documented iNaturalist sightings within 25 km of " + city.name +
         " - a live citizen-science count, not a verified population survey.";
       document.getElementById("city-search-list").innerHTML = valid.map((r) =>
         '<div class="city-search-row"><span class="city-search-name"><b>' + r.name + "</b><i>" + r.sci + "</i></span>" +
@@ -12719,7 +12719,7 @@
       valid.sort((a, b) => wantMost ? b.count - a.count : a.count - b.count);
       const top = valid[0];
       result.innerHTML = "<b>" + top.city + "</b>" + top.count.toLocaleString() + " documented " + name +
-        " sighting" + (top.count === 1 ? "" : "s") + " within 25 miles" +
+        " sighting" + (top.count === 1 ? "" : "s") + " within 25 km" +
         '<span class="city-lookup-note">Live count from iNaturalist citizen-science observations - reflects how much an area has been ' +
         "documented, not a verified population count.</span>";
     });
@@ -15163,7 +15163,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (cityMatch) {
       var cphi = cityMatch.lat * RAD, clam = cityMatch.lng * RAD, ccp = Math.cos(cphi);
       // reuses the exact same rich "cityDot" pin the single-species search already builds
-      // (live per-species sighting counts within 25 miles), just placed directly from a
+      // (live per-species sighting counts within 25 km), just placed directly from a
       // typed city name instead of requiring the search to narrow to one species first
       PINS.push({
         area: cityMatch.name, lon: cityMatch.lng, lat: cityMatch.lat, species: [],
@@ -15381,6 +15381,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     // a phone held upright: half its width would be a thin strip - the map gets most of the
     // screen's height instead (v4.28), so it's big enough to use with a finger
     if (!full && w < 700 && window.innerHeight > window.innerWidth) h = Math.max(h, Math.round(Math.min(window.innerHeight * 0.56, w * 1.25)));
+    // PREVIEW "sightings" (batch109): on a phone the map gets most of the screen - about three quarters of its height
+    if (!full && w < 700 && window.innerHeight > window.innerWidth && window.SL_PREVIEWS && window.SL_PREVIEWS.on && window.SL_PREVIEWS.on("sightings")) h = Math.max(h, Math.round(Math.min(window.innerHeight * 0.74, w * 1.75)));
     var dpr = Math.min(2, window.devicePixelRatio || 1);
     sizeW = w; sizeH = h;
     if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
@@ -18398,8 +18400,8 @@ window.SL_GEO_READY = new Promise(function (res) {
         var found = results.filter(function (r) { return r.count > 0; })
           .sort(function (a, b) { return b.count - a.count; });
         document.getElementById("cp-sub").textContent = found.length
-          ? found.length + " species with documented sightings within 25 miles"
-          : "No documented sightings within 25 miles yet.";
+          ? found.length + " species with documented sightings within 25 km"
+          : "No documented sightings within 25 km yet.";
         document.getElementById("cp-list").innerHTML = found.length
           ? found.map(function (r) {
               return '<div class="cp-row cp-sp" data-sp="' + attrEsc(r.sp.id) + '">' + photoBtn(r.sp) + "<b>" + r.sp.name + "</b><i>" + r.sp.sci + "</i>" +
@@ -18407,6 +18409,12 @@ window.SL_GEO_READY = new Promise(function (res) {
             }).join("")
           : '<div class="cp-row"><b>Count from iNaturalist</b><i>Citizen-science observations, not a verified population count.</i></div>';
       });
+      return;
+    }
+    if (!pin.species || !pin.species.length) { // batch109: never "0 snakes were brought here ... none of them is native"
+      document.getElementById("cp-sub").textContent = "No introduced snakes are recorded here in SnakeList's range records.";
+      document.getElementById("cp-list").innerHTML = '<p class="cp-note">Not listed is not the same as absent.</p>';
+      popPanel();
       return;
     }
     document.getElementById("cp-sub").textContent = pin.species.length === 1
@@ -21056,6 +21064,8 @@ window.SL_GEO_READY = new Promise(function (res) {
   .globe-stage:where(:has(#sg-toggle[aria-pressed="true"])) .globe-hint.sg-hint { display: flex; }
   .globe-stage.real-map .globe-hint.sg-hint, .globe-stage.full:has(.country-panel:not([hidden])) .globe-hint.sg-hint { display: none; }
   .sg-hint-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #58b351; border: 1.5px solid rgba(12,46,18,0.92); box-shadow: 0 0 0 1.2px rgba(255,255,255,0.85); }
+  .sg-hint-g[hidden] { display: none; }
+  .sg-hint-grp { display: inline-block; vertical-align: -3px; width: 13px; height: 13px; border-radius: 50%; background: #58b351; border: 1.5px solid rgba(12,46,18,0.92); box-shadow: 0 0 0 1.2px rgba(255,255,255,0.85), inset 0 0 0 1.5px #58b351, inset 0 0 0 2.6px rgba(255,255,255,0.8); box-sizing: border-box; }
   .sg-key span { width: 10px; height: 10px; border-radius: 50%; background: #e3261f; border: 1.5px solid #fff; }
   .globe-stage:has(.sg-key:not([hidden])) .globe-hint { display: none; }
   .sg-pop { position: absolute; z-index: 6; width: 250px; border-radius: 14px; overflow: hidden; background: var(--surface, #fff); color: var(--text, #222);
@@ -22730,15 +22740,20 @@ window.SL_GEO_READY = new Promise(function (res) {
     while (SGT.live < SGT_PAR && SGT.queue.length) {
       var job = SGT.queue.shift(), k = job.k;
       if (SGT.cache[k] && SGT.cache[k].st !== 2) continue;
-      var my = SGT.tok, ent = { st: 0, pts: [], t: job.t, at: Date.now() };
+      var my = SGT.tok, ent = { st: 0, pts: [], t: job.t, at: Date.now(), bg: !!job.bg };
+      // batch109: each tile asked for the view can be called off - when the view moves on, tiles no longer wanted stop
+      // taking up the six places in line, so the new view's tiles aren't stuck behind old ones
+      ent.ctl = window.AbortController ? new AbortController() : null;
       sgtKeep(k, ent); SGT.live++;
       (function (ent, k, my, job) {
-        sgGet(sgtUrl(job.t), null, 20000).then(function (d) {
+        sgGet(sgtUrl(job.t), ent.ctl, 20000).then(function (d) {
           ent.st = 1; ent.pts = sgtPoints(d); SGT.fail = 0;
         }, function (e) {
+          if (e && e.aborted) { if (SGT.cache[k] === ent) delete SGT.cache[k]; ent.st = 3; return; } // (called off: asked again if wanted again)
           ent.st = 2; ent.err = e && e.status === 429 ? 429 : 1; SGT.fail++;
           if (e && e.status === 429) SGT.busy429 = Date.now();
         }).then(function () {
+          ent.ctl = null;
           SGT.live--;
           if (job.bg) { sgtPump(); return; }
           if (my === SGT.tok) sgtSoon();
@@ -22795,6 +22810,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     var wantKey = q + "|" + T.tiles.map(function (t) { return t.z + "/" + t.x + "/" + t.y; }).join(",") + "|" + (A ? A.key : "");
     if (!force && wantKey === SGT.wantKey) return;
     SGT.wantKey = wantKey; SGT.tok++; SGT.want = T.tiles; SGT.z = T.z;
+    var wantNow = {}; T.tiles.forEach(function (t) { wantNow[sgtKey(t)] = 1; });
+    Object.keys(SGT.cache).forEach(function (k) { var e = SGT.cache[k]; if (e && e.st === 0 && e.ctl && !e.bg && !wantNow[k]) try { e.ctl.abort(); } catch (er) {} });
     if (force) Object.keys(SGT.cache).forEach(function (k) { if (SGT.cache[k].st === 2) delete SGT.cache[k]; });
     SGT.busy429 = 0;
     // what's wanted now goes before anything queued for later (the "Show all dots" view, asked for in the background)
@@ -22813,12 +22830,16 @@ window.SL_GEO_READY = new Promise(function (res) {
   // how many sightings iNaturalist has for this view (one small count request once the map stops): the strip says it
   var sgtCountT = null;
   function sgtCount(F, box) {
-    clearTimeout(sgtCountT); SG.total = null;
+    clearTimeout(sgtCountT); SG.total = null; SG.totalErr = false;
+    if (SG.countCtl) try { SG.countCtl.abort(); } catch (e) {} // (batch109: an older view's count can't land on this one)
+    SG.countCtl = null;
     if (!box) { SG.total = 0; return; }
     var my = SGT.tok, A = SG.area;
     sgtCountT = setTimeout(function () {
       var u = INAT + "observations?per_page=0&" + SGT.q + "&swlat=" + box.s.toFixed(4) + "&swlng=" + box.w.toFixed(4) + "&nelat=" + box.n.toFixed(4) + "&nelng=" + box.e.toFixed(4);
-      sgGet(u, null, 15000).then(function (d) { if (my !== SGT.tok) return; SG.total = +d.total_results || 0; SG.totalBox = !!(A && !A.all); sgStatus(); }, function () {});
+      var ctl = SG.countCtl = window.AbortController ? new AbortController() : null;
+      sgGet(u, ctl, 15000).then(function (d) { if (my !== SGT.tok) return; SG.total = +d.total_results || 0; SG.totalBox = !!(A && !A.all); sgStatus(); },
+        function (e) { if (my !== SGT.tok || (e && e.aborted)) return; SG.totalErr = true; sgStatus(); });
     }, 700);
   }
   // is a dot inside the searched place? (worked out once per dot and place)
@@ -22845,7 +22866,11 @@ window.SL_GEO_READY = new Promise(function (res) {
       SG.area = A; SG.areaKey = A ? A.key : "";
       // different snakes, dates, quality or place: start again (a new snake's dots only, never the old ones)
       var rkey = F.key + "|" + SG.range + "|" + SG.grade + "|" + SG.areaKey;
-      if (rkey !== SG.rkey) { SG.rkey = rkey; SG.fkey = F.key; SG.list = []; SG.ids = {}; SG.done = []; SGT.list = []; SG.pinned = null; sgCloseView(true); SG.hist = []; sgRender(); force = true; }
+      if (rkey !== SG.rkey) {
+        // batch109: a "Most popular" still on its way was asked for the old snakes or place - it is dropped, not opened
+        if (SG.rkey) { SG.poptok++; sgPopBtn.removeAttribute("aria-busy"); }
+        SG.rkey = rkey; SG.fkey = F.key; SG.list = []; SG.ids = {}; SG.done = []; SGT.list = []; SG.pinned = null; SG.selM = null; sgUnspider(); SG.cl = null; sgCloseView(true); SG.hist = []; sgRender(); force = true;
+      }
       SG.only = F.only || null;
       sgWhat.textContent = " · " + (F.label || "all snakes"); // always says which snakes the dots are
       if (!F.param) { // nothing to ask for: no dots at all (never the old ones, never every snake)
@@ -22889,7 +22914,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       annotations: (o.annotations || []).map(function (a) { return { controlled_attribute_id: a.controlled_attribute_id, controlled_value_id: a.controlled_value_id }; }),
       photos: (o.photos || []).filter(function (p) { return p && p.url; }).slice(0, 20).map(function (p) { return { url: p.url, attribution: p.attribution, license_code: p.license_code }; }),
       identifications_count: o.identifications_count, num_identification_agreements: o.num_identification_agreements, num_identification_disagreements: o.num_identification_disagreements,
-      comments_count: o.comments_count, faves_count: o.faves_count };
+      comments_count: o.comments_count, faves_count: o.faves_count, license_code: o.license_code || null };
   }
   // one page of observations for the view. Each observation id is kept once; what was already on
   // the map stays (a dot never jumps or blinks when the map moves), up to SG_KEEP in all.
@@ -22958,30 +22983,58 @@ window.SL_GEO_READY = new Promise(function (res) {
   // bottom of the map says how many sightings iNaturalist has for the view and what a dot is
   var sgActs = document.createElement("div"); sgActs.className = "sg-acts"; sgActs.id = "sg-acts"; sgActs.hidden = true;
   sgActs.setAttribute("role", "group"); sgActs.setAttribute("aria-label", "Sightings");
-  sgActs.innerHTML = '<button type="button" class="sg-act" id="sg-all" title="Zoom out to every sighting of these snakes (or of the place you searched) - the dots are already loaded, so they appear at once">' +
-    '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path><circle cx="9" cy="10" r="1.3" fill="currentColor" stroke="none"></circle><circle cx="14.5" cy="9" r="1.3" fill="currentColor" stroke="none"></circle><circle cx="12" cy="14.5" r="1.3" fill="currentColor" stroke="none"></circle></svg> <span class="sg-lw">Show all dots</span><span class="sg-ls">All dots</span></button>' +
-    '<button type="button" class="sg-act" id="sg-popular" title="The sighting the most people made a favourite on iNaturalist (iNaturalist doesn\'t share view counts)">' +
-    '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3.5 2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"></path></svg> <span class="sg-lw">Most popular sighting</span><span class="sg-ls">Most popular</span></button>';
+  sgActs.innerHTML = '<button type="button" class="sg-act" id="sg-all" title="Zoom out to the whole area of these sightings (the place you searched, or the world) - zoomed out, nearby dots are grouped">' +
+    '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path><circle cx="9" cy="10" r="1.3" fill="currentColor" stroke="none"></circle><circle cx="14.5" cy="9" r="1.3" fill="currentColor" stroke="none"></circle><circle cx="12" cy="14.5" r="1.3" fill="currentColor" stroke="none"></circle></svg> <span class="sg-lw">Zoom out to all sightings</span><span class="sg-ls">Zoom out</span></button>' +
+    '<button type="button" class="sg-act" id="sg-popular" title="The most popular sighting by iNaturalist favourites: the one the most people made a favourite (iNaturalist doesn\'t share view counts)">' +
+    '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3.5 2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"></path></svg> <span class="sg-lw">Most favourited sighting</span><span class="sg-ls">Most favourited</span></button>';
   (function () { var tools = stage.querySelector(".map-tools"); if (tools) tools.appendChild(sgActs); else stage.appendChild(sgActs); })();
   ["pointerup", "pointerdown", "dblclick"].forEach(function (t) { sgActs.addEventListener(t, function (e) { e.stopPropagation(); }); });
   var sgHint = document.getElementById("sg-hint"), sgHintN = document.createElement("span");
-  sgHintN.className = "sg-hint-n"; if (sgHint) sgHint.appendChild(sgHintN);
+  sgHintN.className = "sg-hint-n";
+  // batch109: when groups are on the map, the key says what a bigger dot is
+  var sgHintG = document.createElement("span"); sgHintG.className = "sg-hint-g"; sgHintG.hidden = true;
+  sgHintG.innerHTML = ' &middot; <span class="sg-hint-grp" aria-hidden="true"></span> a group of nearby dots (' + (window.matchMedia && matchMedia("(pointer: coarse)").matches ? "tap" : "click") + " to zoom in)";
+  if (sgHint) { // (one line of text beside the dot: the key, then the counts)
+    var sgHintT = document.createElement("span"); sgHintT.className = "sg-hint-t";
+    [].slice.call(sgHint.childNodes).forEach(function (nd) { if (!(nd.classList && nd.classList.contains("sg-hint-dot"))) sgHintT.appendChild(nd); });
+    sgHintT.appendChild(sgHintG); sgHintT.appendChild(sgHintN); sgHint.appendChild(sgHintT);
+  }
   function sgStatus() {
     sgActs.hidden = !SG.on;
-    if (!SG.on) { sgHintN.textContent = ""; return; }
-    var txt = "", n = sgDots().length;
+    if (!SG.on) { sgHintN.textContent = ""; if (window.SL_SG_STATUS_HOOK) try { window.SL_SG_STATUS_HOOK("", 0, false); } catch (e) {} return; }
+    // batch109: every number says what it counts - iNaturalist's records in view, the dots actually on the map (a
+    // sample or a loaded part of them, said so), and the groups those dots are drawn in
+    var txt = "", D0 = sgDots(), v0 = sgView(), n = 0, where = SG.area ? " in " + SG.area.name + (SG.totalBox ? " (its area)" : "") : " in view";
+    for (var i0 = 0; i0 < D0.length; i0++) { var m0 = D0[i0]; if (m0.lon >= v0.w && m0.lon <= v0.e && m0.lat >= v0.s && m0.lat <= v0.n) n++; } // (the dots in view, not the ones kept off screen)
+    var nG = 0, LB = SG.lastB, loadingNow = SG.mode === "tiles" ? !!SGT.loading : !!SG.busy, sh = "";
+    if (SG.cl && LB) SG.cl.groups.forEach(function (G) { var gx = LB[0] + G.x, gy = LB[1] + G.y; if (gx >= 0 && gy >= 0 && gx <= LB[4] && gy <= LB[5]) nG++; }); // (the groups in view)
     if (SG.mode === "tiles") {
-      if (SGT.loading && !n) txt = "loading…";
-      else if (SG.total != null && SG.total >= 0) txt = SG.total.toLocaleString() + (SG.total === 1 ? " sighting" : " sightings") + (SG.area ? " in " + SG.area.name + (SG.totalBox ? " (its area)" : "") : " in view");
-      if (n && SGT.z && SGT.z < 9) txt += (txt ? " · " : "") + "zoom in to split dots that share a spot";
-      if (sgHint) sgHint.title = "The dots come from iNaturalist's own map. Close up there is one dot for each sighting with a public location; further out, sightings a few pixels apart share a dot and iNaturalist thins out the busiest places, so zoom in to see every one. Sightings whose real spot is hidden for privacy are shown at their approximate place.";
+      if (loadingNow && !n) { txt = "loading…"; sh = "loading…"; }
+      else {
+        var T = SG.total;
+        if (T != null && T >= 0) txt = n >= T ? (T === 1 ? "1 sighting" : "all " + T.toLocaleString() + " sightings") + where + " on the map" :
+          T.toLocaleString() + " iNaturalist sightings" + where + " · " + n.toLocaleString() + " shown (a sample - zoom in for more)";
+        else if (n) txt = n.toLocaleString() + (n === 1 ? " sighting" : " sightings") + " on the map" + (SG.totalErr ? " (iNaturalist's total for the view couldn't load)" : "");
+        sh = T != null && T >= 0 ? (n >= T ? "all " + T.toLocaleString() + " in view shown" : T.toLocaleString() + " in view · " + n.toLocaleString() + " shown (a sample)") : n ? n.toLocaleString() + " shown" : "";
+        if (loadingNow) { txt += " · loading more…"; sh += (sh ? " · " : "") + "loading…"; }
+      }
+      if (sgHint) sgHint.title = "The dots come from iNaturalist's own map. Close up there is one dot for each sighting with a public location; further out, iNaturalist sends a sample (it thins out the busiest places), so zoom in to see every one. A bigger dot is a group of dots close together - click it to zoom in. Sightings whose real spot is hidden for privacy are shown at their approximate place. Dots show where people recorded snakes, not how many snakes live there.";
     } else {
       var tot = SG.total || 0;
       if (SG.busy && !n) txt = "loading…";
-      else if (tot || n) txt = n.toLocaleString() + " on the map" + (tot > SG.fetched ? " · the newest " + SG.fetched.toLocaleString() + " of " + tot.toLocaleString() + " (with Filters on, SnakeList checks each sighting itself)" : "");
-      if (sgHint) sgHint.title = "With Filters or a habitat on, SnakeList checks each sighting's species itself, so it loads the newest sightings for the view (up to " + (SG_PER * SG_MAXPAGES).toLocaleString() + ").";
+      else if (tot || n) {
+        txt = tot > SG.fetched ? tot.toLocaleString() + " iNaturalist sightings" + where + " · the newest " + SG.fetched.toLocaleString() + " loaded (only a part) · " + n.toLocaleString() + " on the map"
+          : n.toLocaleString() + (n === 1 ? " sighting" : " sightings") + " on the map (every one" + where + (SG.only || (window.SL_MAPF_SCI && window.SL_MAPF_SCI()) || (SG.fkey || "").indexOf("hab:") === 0 ? " that matches" : "") + ")";
+        sh = tot > SG.fetched ? tot.toLocaleString() + " in view · newest " + SG.fetched.toLocaleString() + " loaded · " + n.toLocaleString() + " shown" : n.toLocaleString() + " shown (all in view)";
+        if (SG.busy) { txt += " · loading more…"; sh += " · loading…"; }
+      } else if (SG.busy) sh = "loading…";
+      if (sgHint) sgHint.title = "With Filters or a habitat on, SnakeList checks each sighting's species itself, so it loads the newest sightings for the view (up to " + (SG_PER * SG_MAXPAGES).toLocaleString() + "). Dots show where people recorded snakes, not how many snakes live there.";
     }
+    if (nG) { txt += " · " + nG.toLocaleString() + (nG === 1 ? " group" : " groups"); sh += " · " + nG.toLocaleString() + (nG === 1 ? " group" : " groups"); }
+    if (sgHintG) sgHintG.hidden = !nG;
     sgHintN.textContent = txt ? " · " + txt : "";
+    SG.statusTxt = txt;
+    if (window.SL_SG_STATUS_HOOK) try { window.SL_SG_STATUS_HOOK(sh, nG, loadingNow); } catch (e) {}
   }
   // "Show all dots": the whole place searched, or the whole world, at once - its tiles were fetched ahead (sgtAhead)
   document.getElementById("sg-all").addEventListener("click", function () {
@@ -23003,9 +23056,11 @@ window.SL_GEO_READY = new Promise(function (res) {
       var picky = !!(A || F.only || FS);
       var u = INAT + "observations?order_by=votes&order=desc&per_page=" + (picky ? 100 : 1) + SG_GRADES[SG.grade].p + F.param + sgDates() +
         (A && A.box && A.box[1] - A.box[0] < 300 ? "&swlat=" + A.box[2].toFixed(4) + "&swlng=" + A.box[0].toFixed(4) + "&nelat=" + A.box[3].toFixed(4) + "&nelng=" + A.box[1].toFixed(4) : "");
+      sgNoteSet("Finding the most popular sighting…");
       return sgGet(u, null, 20000).then(function (d) {
         if (my !== SG.poptok) return;
-        sgPopBtn.removeAttribute("aria-busy");
+        sgPopBtn.removeAttribute("aria-busy"); sgNoteSet("");
+        if (!SG.on || (SG.fkey && F.key !== SG.fkey)) return; // (the snakes shown changed meanwhile: this answer is for the old ones)
         var best = (d.results || []).filter(function (o) {
           var c = o && o.geojson && o.geojson.coordinates; if (!c) return false;
           var sp2 = String((o.taxon || {}).name || "").toLowerCase().split(" ").slice(0, 2).join(" ");
@@ -23058,9 +23113,56 @@ window.SL_GEO_READY = new Promise(function (res) {
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !sgOpts.hidden) sgOptsOpen(false); });
     document.addEventListener("click", function (e) { if (!sgOpts.hidden && !e.target.closest("#sg-opts, #sg-opt-btn")) sgOptsOpen(false); });
   }
+  // ---- PREVIEW "sightings" (batch109): a compact key that opens and closes (instead of the long line at the bottom of
+  // the map), and one row of chips under the map's buttons saying what the dots are filtered by ----
+  var sg2Key = document.createElement("div"); sg2Key.className = "sg2-key"; sg2Key.id = "sg2-key"; sg2Key.hidden = true;
+  sg2Key.innerHTML = '<button type="button" class="sg2-key-btn" aria-expanded="false" aria-controls="sg2-key-body"><span class="sg-hint-dot" aria-hidden="true"></span>Key</button><span class="sg2-key-n" aria-live="polite"></span>' +
+    '<div class="sg2-key-body" id="sg2-key-body" hidden>' +
+    '<p><span class="sg-hint-dot" aria-hidden="true"></span>One iNaturalist sighting - ' + (window.matchMedia && matchMedia("(pointer: coarse)").matches ? "tap" : "click") + ' it for its photo and details</p>' +
+    '<p><span class="sg2-k-grp" aria-hidden="true">12</span>A group of nearby dots - the number is how many dots; ' + (window.matchMedia && matchMedia("(pointer: coarse)").matches ? "tap" : "click") + ' to zoom in</p>' +
+    '<p><span class="sg2-k-sel" aria-hidden="true"></span>The sighting you picked</p>' +
+    '<p class="sg2-k-note">Zoomed out, iNaturalist sends a sample of its sightings - zoom in to see every one. A sighting whose real spot is hidden for privacy is shown at its approximate place.</p>' +
+    '<p class="sg2-k-note">Dots show where people recorded snakes, not how many snakes live there - and they are not a range map.</p></div>';
+  stage.appendChild(sg2Key);
+  ["pointerup", "pointerdown", "dblclick", "wheel"].forEach(function (t) { sg2Key.addEventListener(t, function (e) { e.stopPropagation(); }, { passive: true }); });
+  var sg2KeyBtn = sg2Key.querySelector(".sg2-key-btn"), sg2KeyBody = sg2Key.querySelector(".sg2-key-body"), sg2KeyN = sg2Key.querySelector(".sg2-key-n");
+  function sg2KeyOpen(on) { sg2KeyBody.hidden = !on; sg2KeyBtn.setAttribute("aria-expanded", String(!!on)); sg2Key.classList.toggle("open", !!on); }
+  sg2KeyBtn.addEventListener("click", function (e) { e.stopPropagation(); sg2KeyOpen(sg2KeyBody.hidden); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !sg2KeyBody.hidden && (sgPop.hidden || sg2Key.contains(document.activeElement))) { e.stopPropagation(); sg2KeyOpen(false); sg2KeyBtn.focus(); } }, true);
+  var sg2Chips = document.createElement("div"); sg2Chips.className = "sg2-chips"; sg2Chips.id = "sg2-chips"; sg2Chips.hidden = true;
+  sg2Chips.setAttribute("role", "group"); sg2Chips.setAttribute("aria-label", "What the sightings show");
+  (function () { var tools = stage.querySelector(".map-tools"); if (tools) tools.appendChild(sg2Chips); else stage.appendChild(sg2Chips); })();
+  ["pointerup", "pointerdown", "dblclick"].forEach(function (t) { sg2Chips.addEventListener(t, function (e) { e.stopPropagation(); }); });
+  sg2Chips.addEventListener("click", function (e) {
+    var x = e.target.closest(".sg2-chip-x"); if (!x) return;
+    e.stopPropagation();
+    var inp = document.getElementById("heat-search"); if (!inp) return;
+    inp.value = ""; inp.dispatchEvent(new Event("input", { bubbles: true }));
+    var clr = stage.parentNode && stage.parentNode.querySelector("#heat-search-clear, .heat-search-clear"); if (clr && !clr.hidden) clr.click();
+  });
+  function sg2Paint(txt, loading) {
+    var on = SG.on && sgPV();
+    stage.classList.toggle("sg2-on", on);
+    sg2Key.hidden = !on; sg2Chips.hidden = !on;
+    if (!on) return;
+    sg2KeyN.textContent = txt || "";
+    sg2Key.classList.toggle("busy", !!loading);
+    var ms = window.SL_MAP_SEARCH && window.SL_MAP_SEARCH(), fs = window.SL_MAPF_SCI && window.SL_MAPF_SCI(), lab = (sgWhat.textContent || "").replace(/^ · /, "") || "all snakes";
+    var chip = function (k, v, x) { return '<span class="sg2-chip"><b>' + esc(k) + "</b> " + esc(v) + (x ? '<button type="button" class="sg2-chip-x" aria-label="' + esc(x) + '">&times;</button>' : "") + "</span>"; };
+    var searched = !!(ms && ms.q);
+    var html = chip("Snakes", lab, searched && ms.kind === "text" ? "Clear the search" : "") +
+      (SG.area ? chip("Place", SG.area.name, searched && ms.kind !== "text" ? "Clear the place" : "") : "") +
+      (fs ? chip("Filters", "on", "") : "") +
+      (SG.range !== "any" ? chip("Dates", SG_RANGES[SG.range].label, "") : "") + (SG.grade === "research" ? chip("Quality", "Research grade only", "") : "");
+    if (sg2Chips.innerHTML !== html) sg2Chips.innerHTML = html;
+  }
+  window.SL_SG_STATUS_HOOK = function (txt, nG, loading) { sg2Paint(txt, loading); };
+  document.addEventListener("sl-previews-changed", function () { sgStatus(); SG.ver = (SG.ver || 0) + 1; SG.cl = null; if (!sgPop.hidden && SG.openM && SG.vo) sgFill(SG.openM, SG.vo); window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); });
   window.SL_SG_COUNT = function () { return sgDots().length; };
   window.SL_SG_ON = function () { return !!SG.on && onCanvas(); };
-  window.SL_SG_DEBUG = function () { return { what: sgWhat.textContent, n: sgDots().length, ids: sgDots().map(function (m) { return m.id; }), total: SG.total, page: SG.page, fetched: SG.fetched, open: SG.openM ? SG.openM.id : null, view: !sgPop.hidden, hist: SG.hist.length, clusters: [], mode: SG.mode || "", tiles: SGT.want.length, area: SG.areaKey || "", dots: SG.lastB ? sgDots().filter(function (m) { return sgPos(m, SG.lastB, SG.lastB[4], SG.lastB[5]) != null; }).map(function (m) { return { id: m.id, x: m.sx, y: m.sy, lon: m.lon, lat: m.lat, n: m.n || 1 }; }) : [] }; };
+  window.SL_SG_DEBUG = function () { return { what: sgWhat.textContent, n: sgDots().length, ids: sgDots().map(function (m) { return m.id; }), total: SG.total, page: SG.page, fetched: SG.fetched, open: SG.openM ? SG.openM.id : null, view: !sgPop.hidden, hist: SG.hist.length, mode: SG.mode || "", tiles: SGT.want.length, area: SG.areaKey || "", hint: sgHint ? sgHint.textContent : "", loading: SG.mode === "tiles" ? SGT.loading || 0 : SG.busy ? 1 : 0, sel: SG.selM ? SG.selM.id : null, spider: SG.spider ? SG.spider.members.length : 0,
+    clusters: SG.lastB && SG.cl ? SG.cl.groups.map(function (G) { return { x: SG.lastB[0] + G.x, y: SG.lastB[1] + G.y, n: G.n, ids: G.members.slice(0, 50).map(function (m) { return m.id; }) }; }).filter(function (G) { return G.x > -20 && G.y > -20 && G.x < SG.lastB[4] + 20 && G.y < SG.lastB[5] + 20; }) : [],
+    dots: SG.lastB ? (SG.cl ? SG.cl.singles : sgDots()).filter(function (m) { return sgPos(m, SG.lastB, SG.lastB[4], SG.lastB[5]) != null; }).map(function (m) { return { id: m.id, x: m.sx, y: m.sy, lon: m.lon, lat: m.lat, n: m.n || 1 }; }) : [] }; };
   function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   // ---- the dots ----
   // SnakeList green (the same as the Sightings button when it's on), with a thin dark edge so a
@@ -23096,7 +23198,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   }
   // where each dot is on screen for the map's box b (its fan-out offset included), or null off screen
   function sgPos(m, b, w, h) {
-    var x = b[0] + (m.lon + 180) / 360 * b[2] + (m.ox || 0), y = b[1] + (90 - m.lat) / 180 * b[3] + (m.oy || 0);
+    var x = b[0] + (m.lon + 180) / 360 * b[2] + (m.ox || 0) + (m.qx || 0), y = b[1] + (90 - m.lat) / 180 * b[3] + (m.oy || 0) + (m.qy || 0);
     m.sx = x; m.sy = y;
     if (w != null && (x < -24 || y < -24 || x > w + 24 || y > h + 24)) m.sx = null;
     return m.sx;
@@ -23115,6 +23217,64 @@ window.SL_GEO_READY = new Promise(function (res) {
     g.beginPath(); g.arc(S / 2, S / 2, R * dpr, 0, Math.PI * 2); g.fillStyle = SG_GREEN; g.fill(); g.lineWidth = 1.3 * dpr; g.strokeStyle = SG_EDGE; g.stroke();
     return (sgSprites[k] = c);
   }
+  // ---- batch109: crowded dots are grouped (the whole world was one carpet of overlapping dots) ----
+  // Dots closer than SG_CL_R pixels on screen, three or more of them, become one bigger dot in the same green - a group.
+  // It is worked out again at each zoom step, so zooming in splits the groups into their dots (with a short fade).
+  // Close up (past SG_CL_DEEP) nothing is grouped any more, except dots right on top of each other (the same spot):
+  // clicking one of those fans them out round it ("spiderfy"), so every sighting can still be clicked on its own.
+  // A group's number is how many DOTS it holds (the sightings on the map there), not iNaturalist's total for the place.
+  // (Eduardo, v4.54: "no numbers on the sightings dots" - so a group shows its number only in the "sightings" preview.)
+  var SG_CL_R = 22, SG_CL_MIN = 3, SG_CL_DEEP = 256 * Math.pow(2, 16);
+  function sgPV() { try { return !!(window.SL_PREVIEWS && window.SL_PREVIEWS.on && window.SL_PREVIEWS.on("sightings")); } catch (e) { return false; } }
+  function sgGroupR(n) { return Math.min(15, 6 + 2.6 * Math.log(n) / Math.LN10); }
+  function sgClusters(b) {
+    if (SG.spider && Math.abs(SG.spider.b2 / b[2] - 1) > 1e-6) sgUnspider(); // (zoomed since: folded back)
+    var D = sgDots(), key = b[2].toFixed(3) + "|" + b[3].toFixed(3) + "|" + (SG.ver || 0) + "|" + D.length + "|" + (SG.spider ? SG.spider.key : "");
+    if (SG.cl && SG.cl.key === key) return SG.cl;
+    var deep = b[2] >= SG_CL_DEEP, R = deep ? 3.5 : SG_CL_R, MIN = deep ? 2 : SG_CL_MIN, n = D.length;
+    var out = { key: key, groups: [], singles: [], deep: deep };
+    var px = new Float64Array(n), py = new Float64Array(n), used = new Uint8Array(n), grid = {}, i, j, m, gx, gy, k;
+    for (i = 0; i < n; i++) {
+      m = D[i];
+      px[i] = (m.lon + 180) / 360 * b[2] + (m.ox || 0); py[i] = (90 - m.lat) / 180 * b[3] + (m.oy || 0);
+      // (fanned out by a click, or - closer than the whole world - a pile at one exact spot already fanned out round it
+      // (v5.68): each one on its own, so every one stays clickable)
+      if (m.qx || m.qy || ((m.ox || m.oy) && b[2] >= 256 * 128)) { used[i] = 1; out.singles.push(m); continue; }
+      k = Math.floor(px[i] / R) + "," + Math.floor(py[i] / R); (grid[k] || (grid[k] = [])).push(i);
+    }
+    var R2 = R * R;
+    for (i = 0; i < n; i++) {
+      if (used[i]) continue;
+      gx = Math.floor(px[i] / R); gy = Math.floor(py[i] / R);
+      var nb = [i];
+      for (var ax = gx - 1; ax <= gx + 1; ax++) for (var ay = gy - 1; ay <= gy + 1; ay++) {
+        var cellL = grid[ax + "," + ay]; if (!cellL) continue;
+        for (var q = 0; q < cellL.length; q++) { j = cellL[q]; if (j === i || used[j]) continue; var dx = px[j] - px[i], dy = py[j] - py[i]; if (dx * dx + dy * dy <= R2) nb.push(j); }
+      }
+      if (nb.length >= MIN) {
+        var sx = 0, sy = 0, mem = [];
+        for (q = 0; q < nb.length; q++) { used[nb[q]] = 1; sx += px[nb[q]]; sy += py[nb[q]]; mem.push(D[nb[q]]); }
+        out.groups.push({ x: sx / nb.length, y: sy / nb.length, n: nb.length, members: mem, id: "g" + D[i].id });
+      } else { used[i] = 1; out.singles.push(D[i]); }
+    }
+    return (SG.cl = out);
+  }
+  // a group's own picture: the dots' green, white halo and dark edge, with a thin inner ring (and in the preview its number)
+  var sgGSprites = {};
+  function sgGroupSprite(n, dpr, num) {
+    var R = Math.round(sgGroupR(n) * 2) / 2, lab = num ? (n >= 10000 ? Math.round(n / 1000) + "k" : n >= 1000 ? (Math.round(n / 100) / 10).toString().replace(/\.0$/, "") + "k" : String(n)) : "";
+    var k = R + "|" + dpr + "|" + lab; if (sgGSprites[k]) return sgGSprites[k];
+    var S = Math.ceil((R + 2.8) * dpr) * 2 + 2, c = document.createElement("canvas"); c.width = c.height = S;
+    var g = c.getContext("2d"), C = S / 2;
+    g.beginPath(); g.arc(C, C, (R + 1.4) * dpr, 0, Math.PI * 2); g.lineWidth = 1.4 * dpr; g.strokeStyle = "rgba(255,255,255,0.9)"; g.stroke();
+    g.beginPath(); g.arc(C, C, R * dpr, 0, Math.PI * 2); g.fillStyle = SG_GREEN; g.fill(); g.lineWidth = 1.4 * dpr; g.strokeStyle = SG_EDGE; g.stroke();
+    if (lab) {
+      g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle";
+      g.font = "700 " + Math.round((lab.length > 3 ? 9.5 : 10.5) * dpr) + "px Inter, system-ui, sans-serif";
+      g.lineWidth = 2.2 * dpr; g.strokeStyle = "rgba(12,46,18,0.85)"; g.strokeText(lab, C, C + 0.5 * dpr); g.fillText(lab, C, C + 0.5 * dpr);
+    } else { g.beginPath(); g.arc(C, C, Math.max(2.5, R - 3.2) * dpr, 0, Math.PI * 2); g.lineWidth = 1.3 * dpr; g.strokeStyle = "rgba(255,255,255,0.8)"; g.stroke(); }
+    return (sgGSprites[k] = c);
+  }
   function sgLayerDraw(b, w, h, dpr, R) {
     var pad = sgLay.pad = Math.round(Math.min(220, Math.max(w, h) * 0.3));
     var W = Math.round((w + 2 * pad) * dpr), H = Math.round((h + 2 * pad) * dpr);
@@ -23122,30 +23282,80 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
     var g = c.getContext("2d"); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, H);
     sgLay.b0 = b[0]; sgLay.b1 = b[1];
-    var list = sgDots(), n = list.length, i, m, x, y, legs = false, sp = sgSprite(R, dpr), half = sp.width / 2;
+    var CL = sgClusters(b), list = CL.singles, n = list.length, i, m, x, y, legs = false, sp = sgSprite(R, dpr), half = sp.width / 2, num = sgPV();
     var bx = [b[0] + pad, b[1] + pad, b[2], b[3]], lw = w + 2 * pad, lh = h + 2 * pad;
     g.beginPath();
     for (i = 0; i < n; i++) {
       m = list[i];
-      if (m.ox || m.oy) {
+      var ofx = (m.ox || 0) + (m.qx || 0), ofy = (m.oy || 0) + (m.qy || 0);
+      if (ofx || ofy) {
         x = bx[0] + (m.lon + 180) / 360 * b[2]; y = bx[1] + (90 - m.lat) / 180 * b[3];
-        if (x > -20 && y > -20 && x < lw + 20 && y < lh + 20) { g.moveTo(x * dpr, y * dpr); g.lineTo((x + m.ox) * dpr, (y + m.oy) * dpr); legs = true; }
+        if (x > -40 && y > -40 && x < lw + 40 && y < lh + 40) { g.moveTo(x * dpr, y * dpr); g.lineTo((x + ofx) * dpr, (y + ofy) * dpr); legs = true; }
       }
     }
     if (legs) { g.lineWidth = 1.2 * dpr; g.strokeStyle = "rgba(12,46,18,0.55)"; g.stroke(); }
+    // the groups under the single dots (a single dot is always on top, so it can always be clicked)
+    for (i = 0; i < CL.groups.length; i++) {
+      var G = CL.groups[i]; x = pad + b[0] + G.x; y = pad + b[1] + G.y;
+      if (x < -24 || y < -24 || x > lw + 24 || y > lh + 24) continue;
+      var gs = sgGroupSprite(G.n, dpr, num);
+      g.drawImage(gs, Math.round(x * dpr - gs.width / 2), Math.round(y * dpr - gs.height / 2));
+    }
     for (i = 0; i < n; i++) {
       m = list[i];
-      x = bx[0] + (m.lon + 180) / 360 * b[2] + (m.ox || 0); y = bx[1] + (90 - m.lat) / 180 * b[3] + (m.oy || 0);
+      x = bx[0] + (m.lon + 180) / 360 * b[2] + (m.ox || 0) + (m.qx || 0); y = bx[1] + (90 - m.lat) / 180 * b[3] + (m.oy || 0) + (m.qy || 0);
       if (x < -12 || y < -12 || x > lw + 12 || y > lh + 12) continue;
       g.drawImage(sp, Math.round(x * dpr - half), Math.round(y * dpr - half));
     }
+  }
+  // a group clicked: the map zooms in to its dots (an Undo step), and once they can't be split by zooming any more
+  // (the same spot, or the map as close as it goes) they fan out round it instead, each one clickable
+  function sgUnspider() {
+    if (!SG.spider) return;
+    SG.spider.members.forEach(function (m) { m.qx = 0; m.qy = 0; });
+    SG.spider = null; SG.cl = null; SG.ver = (SG.ver || 0) + 1;
+  }
+  function sgGroupOpen(G) {
+    var B = SG.lastB; if (!B || !G) return;
+    var w = 180, e = -180, s = 90, n = -90;
+    G.members.forEach(function (m) { w = Math.min(w, m.lon); e = Math.max(e, m.lon); s = Math.min(s, m.lat); n = Math.max(n, m.lat); });
+    // how far the map can still zoom in, and whether that would pull these dots apart
+    var capPx = 256 * Math.pow(2, 19), spanPx = Math.max((e - w) / 360 * capPx, (n - s) / 180 * capPx / 2);
+    if (B[2] >= SG_CL_DEEP || spanPx < 14) { sgSpider(G); return; }
+    var padLon = Math.max((e - w) * 0.15, 0.002), padLat = Math.max((n - s) * 0.15, 0.002);
+    if (window.SL_MAP_UNDO_PUSH) window.SL_MAP_UNDO_PUSH();
+    if (window.SL_MAP_FIT) window.SL_MAP_FIT(w - padLon, e + padLon, Math.max(-85, s - padLat), Math.min(85, n + padLat), true);
+  }
+  function sgSpider(G) {
+    sgUnspider();
+    var mem = G.members.slice().sort(function (a, b) { return a.id - b.id; }), k = mem.length, B = SG.lastB;
+    mem.forEach(function (m, i) {
+      var r, a;
+      if (k <= 8) { r = Math.max(16, 12 / Math.sin(Math.PI / k)); a = -Math.PI / 2 + i * 2 * Math.PI / k; }
+      else { r = 12 * Math.sqrt(i + 1.2); a = i * 2.39996; }
+      var ox = (m.lon + 180) / 360 * B[2] + (m.ox || 0), oy = (90 - m.lat) / 180 * B[3] + (m.oy || 0);
+      m.qx = G.x + r * Math.cos(a) - ox; m.qy = G.y + r * Math.sin(a) - oy;
+    });
+    SG.spider = { key: G.id + ":" + k, b2: B[2], members: mem };
+    SG.cl = null; SG.ver = (SG.ver || 0) + 1;
+    window.SL_MAP_REDRAW && window.SL_MAP_REDRAW();
+  }
+  // the group under a point on the map (its own round shape, a little more for a finger)
+  function sgHitGroup(x, y, reach) {
+    var B = SG.lastB; if (!B || !SG.cl) return null;
+    var best = null, bd = Infinity;
+    SG.cl.groups.forEach(function (G) {
+      var gx = B[0] + G.x, gy = B[1] + G.y, d = Math.hypot(gx - x, gy - y), lim = sgGroupR(G.n) + reach * 0.5;
+      if (d <= lim && d < bd) { bd = d; best = G; }
+    });
+    return best;
   }
   window.SL_OVERLAY_DRAW = function (ctx, b, w, h) {
     if (!SG.on || !onCanvas()) return;
     SG.lastB = [b[0], b[1], b[2], b[3], w, h];
     // load for the new view once the map has stopped moving (not on every frame of a drag)
     var want = b[0].toFixed(1) + "," + b[1].toFixed(1) + "," + b[2].toFixed(1);
-    if (want !== SG.lastBox) { SG.lastBox = want; clearTimeout(SG.t); SG.t = setTimeout(function () { sgLoad(false); }, SG.mode === "tiles" ? 220 : 450); }
+    if (want !== SG.lastBox) { SG.lastBox = want; clearTimeout(SG.t); SG.t = setTimeout(function () { sgLoad(false); sgStatus(); }, SG.mode === "tiles" ? 220 : 450); }
     // a different place picked or searched (a state tapped, a search cleared): the dots follow it
     var A = window.SL_MAP_PLACE_AREA ? window.SL_MAP_PLACE_AREA() : null;
     if ((A ? A.key : "") !== (SG.areaKey || "")) { SG.areaKey = A ? A.key : ""; clearTimeout(SG.t); SG.t = setTimeout(function () { sgLoad(true); }, 60); }
@@ -23167,18 +23377,37 @@ window.SL_GEO_READY = new Promise(function (res) {
       return;
     }
     if (key !== sgLay.key || Math.abs(dx) > sgLay.pad - 2 || Math.abs(dy) > sgLay.pad - 2) {
-      if (sgLay.key && key.split("|")[0] !== sgLay.key.split("|")[0]) sgLay.at = now; // (a zoom step: the next few frames stretch this one)
+      var zstep = sgLay.key && key.split("|")[0] !== sgLay.key.split("|")[0];
+      if (zstep) sgLay.at = now; // (a zoom step: the next few frames stretch this one)
+      // batch109: a zoom step that changes the groups fades from the old picture to the new one (groups split smoothly)
+      var hadG = !!sgLay.groups;
+      if (zstep && sgLay.cv && sgLay.dpr === dpr && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+        var keepOld = { cv: sgLay.cv, b0: sgLay.b0, b1: sgLay.b1, b2: sgLay.b2, pad: sgLay.pad, at: now, groups: hadG };
+        sgLay.cv = sgLay.old ? sgLay.old.cv : sgLay.spare || null; sgLay.spare = null; sgLay.old = keepOld;
+      }
       sgLayerDraw(b, w, h, dpr, R); sgLay.key = key; sgLay.b2 = b[2]; sgLay.ver = SG.ver; sgLay.w = w; sgLay.h = h; sgLay.dpr = dpr; dx = 0; dy = 0;
+      sgLay.groups = !!(SG.cl && SG.cl.groups.length);
+      var nGr = SG.cl ? SG.cl.groups.length : 0; if (nGr !== SG.lastNG) { SG.lastNG = nGr; setTimeout(sgStatus, 0); } // (the key counts the groups)
+      if (sgLay.old && sgLay.old.at === now && !sgLay.old.groups && !sgLay.groups) { sgLay.spare = sgLay.old.cv; sgLay.old = null; } // (no groups either side: nothing to fade)
     }
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0); // whole device pixels: crisp dots
+    var O = sgLay.old, ft = O ? (now - O.at) / 200 : 1;
+    if (O && ft < 1) {
+      var k2 = b[2] / O.b2;
+      ctx.globalAlpha = 1 - ft;
+      ctx.drawImage(O.cv, (b[0] - (O.pad + O.b0) * k2) * dpr, (b[1] - (O.pad + O.b1) * k2) * dpr, O.cv.width * k2, O.cv.height * k2);
+      ctx.globalAlpha = ft;
+      requestAnimationFrame(function () { window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); });
+    } else if (O) { sgLay.spare = O.cv; sgLay.old = null; }
     ctx.drawImage(sgLay.cv, Math.round((dx - sgLay.pad) * dpr), Math.round((dy - sgLay.pad) * dpr));
+    ctx.globalAlpha = 1;
     ctx.restore();
   };
   // the dot you opened: bigger, in a white ring with a green halo, drawn over the names (the one thing that may cover one)
   window.SL_OVERLAY_TOP = function (ctx, b, w, h) {
     if (!SG.on || !onCanvas()) return;
-    var open = SG.openM, R = b[2] > 60 * w ? 5 : 4.2, TAU = Math.PI * 2;
+    var open = SG.openM || (sgPV() ? SG.selM : null), R = b[2] > 60 * w ? 5 : 4.2, TAU = Math.PI * 2;
     if (open && sgPos(open, b, w, h) != null) {
       ctx.save();
       ctx.beginPath(); ctx.arc(open.sx, open.sy, R + 7.5, 0, TAU); ctx.lineWidth = 2; ctx.strokeStyle = "rgba(88,179,81,0.85)"; ctx.stroke();
@@ -23190,7 +23419,7 @@ window.SL_GEO_READY = new Promise(function (res) {
   // the dot under a point on the map (the nearest within reach of a finger or the mouse)
   function sgHit(x, y, reach) {
     var B = SG.lastB; if (!B) return null;
-    var best = null, bd = reach * reach, D = sgDots();
+    var best = null, bd = reach * reach, D = SG.cl ? SG.cl.singles : sgDots(); // (a dot inside a group isn't on the map by itself)
     for (var i = D.length - 1; i >= 0; i--) {
       var m = D[i]; if (sgPos(m, B, B[4], B[5]) == null) continue;
       var d = (m.sx - x) * (m.sx - x) + (m.sy - y) * (m.sy - y);
@@ -23201,8 +23430,15 @@ window.SL_GEO_READY = new Promise(function (res) {
   // a tap on the map: a dot opens its own observation, every dot on its own
   window.SL_MAP_TAP = function (x, y) {
     if (!SG.on || !onCanvas()) return false;
-    var m = sgHit(x, y, window.matchMedia && matchMedia("(pointer: coarse)").matches ? 18 : 13);
-    if (!m) { if (SG.openM || !sgPop.hidden) { sgCloseView(false); return true; } return false; }
+    var reach = window.matchMedia && matchMedia("(pointer: coarse)").matches ? 18 : 13, m = sgHit(x, y, reach);
+    if (!m) {
+      var G = sgHitGroup(x, y, reach);
+      if (G) { sgGroupOpen(G); return true; }
+      if (SG.spider) { sgUnspider(); window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); return true; } // (empty map: a fanned-out group folds back)
+      if (SG.openM || !sgPop.hidden) { sgCloseView(false); return true; }
+      if (SG.selM) { SG.selM = null; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); }
+      return false;
+    }
     sgOpen(m);
     return true;
   };
@@ -23235,7 +23471,8 @@ window.SL_GEO_READY = new Promise(function (res) {
         sgHoverRaf = 0; var ev = sgHoverEv; if (!ev || ev.buttons) return;
         var r = sgCv.getBoundingClientRect(), m = sgHit(ev.clientX - r.left, ev.clientY - r.top, 12);
         var lab = window.SL_MAP_LABEL_AT && window.SL_MAP_LABEL_AT(ev.clientX - r.left, ev.clientY - r.top);
-        sgCv.style.cursor = m || lab ? "pointer" : "";
+        var hg = m ? null : sgHitGroup(ev.clientX - r.left, ev.clientY - r.top, 8);
+        sgCv.style.cursor = m || hg || lab ? "pointer" : "";
         // (the pointer resting on a dot a moment, not just passing over: its record and photo start loading)
         clearTimeout(sgHoverT); if (m) sgHoverT = setTimeout(function () { sgPrefetch(m, "medium"); }, m.t && !m.o ? 90 : 0);
       });
@@ -23269,9 +23506,22 @@ window.SL_GEO_READY = new Promise(function (res) {
   function sgPlaceSoon() { if (!sgPlaceRaf) sgPlaceRaf = requestAnimationFrame(function () { sgPlaceRaf = 0; sgPlace(); }); }
   function sgPlace() {
     if (sgPop.hidden || !sgPop.parentNode) return;
-    var sr = stage.getBoundingClientRect(), W = sr.width, H = sr.height, sheet = W < 600;
+    var sr = stage.getBoundingClientRect(), W = sr.width, H = sr.height, sheet = W < 600, pv = sgPV();
     sgPop.classList.toggle("sgc-sheet", sheet);
-    if (sheet) { sgPop.style.left = sgPop.style.top = ""; return; }
+    sgPop.classList.toggle("sg2-pop", pv);
+    if (sheet) { sgPop.style.left = sgPop.style.top = sgPop.style.maxHeight = ""; return; }
+    if (pv) { // docked on the right of the map, under its own buttons' column; on the left (below the map's buttons) when the dot is there
+      var pw2 = sgPop.offsetWidth, m2 = SG.openM, dx2 = null;
+      if (m2 && m2.sx != null && sgCv && !(window.SL_MAP3D && window.SL_MAP3D.on && window.SL_MAP3D.on())) { var cr2 = sgCv.getBoundingClientRect(); dx2 = cr2.left - sr.left + m2.sx; }
+      var right = W > 700 ? 58 : 12, L2 = W - pw2 - right, T2 = 12;
+      if (dx2 != null && dx2 > L2 - 18) {
+        var tl = stage.querySelector(".map-tools"), tb = tl ? tl.getBoundingClientRect().bottom - sr.top : 0;
+        L2 = 12; T2 = Math.max(12, Math.min(H * 0.4, tb + 10));
+      }
+      sgPop.style.left = Math.round(L2) + "px"; sgPop.style.top = Math.round(T2) + "px"; sgPop.style.maxHeight = Math.round(H - T2 - 12) + "px";
+      return;
+    }
+    sgPop.style.maxHeight = "";
     var pw = sgPop.offsetWidth, ph = sgPop.offsetHeight, m = SG.openM, x = null, y = null;
     var in3d = window.SL_MAP3D && window.SL_MAP3D.on && window.SL_MAP3D.on();
     if (m && m.sx != null && sgCv && !in3d) { var cr = sgCv.getBoundingClientRect(); x = cr.left - sr.left + m.sx; y = cr.top - sr.top + m.sy; }
@@ -23488,9 +23738,19 @@ window.SL_GEO_READY = new Promise(function (res) {
   // the real spot was hidden in (iNaturalist's obscuring cell is about 0.2 degrees, ~22 km, when none is given)
   function sgObsc(o) { return !!(o.obscured || (o.geoprivacy && o.geoprivacy !== "open") || (o.taxon_geoprivacy && o.taxon_geoprivacy !== "open")); }
   function sgAcc(o) { return sgObsc(o) ? +(o.public_positional_accuracy || 0) || 22000 : +(o.positional_accuracy || o.public_positional_accuracy || 0); }
+  // batch109: one main name for the snake in the card, its photo and See the spot - SnakeList's own (its checklist card's,
+  // the same as the 3D panel and the photo viewer use); iNaturalist's common name, when it differs, is kept as "also called"
+  function sgNames(o) {
+    var t = o && o.taxon || null, sp = t && sgCard(t.name), cn = "";
+    if (sp) cn = sp.card.getAttribute("data-name") || ((sp.card.querySelector(".card-name") || {}).textContent || "").trim();
+    var inat = t && t.preferred_common_name ? String(t.preferred_common_name).trim() : "";
+    var main = cn || inat || (t && t.name) || (o && o.species_guess) || "Not identified yet";
+    return { main: main, sci: t ? t.name : "", also: inat && inat.toLowerCase() !== main.toLowerCase() ? [inat] : [], sp: sp, common: !!(cn || inat) };
+  }
   function obsHTML(o, m) {
-    var t = o.taxon || null, ps = sgPhotos(o);
-    var name = t ? (t.preferred_common_name || t.name) : (o.species_guess || "Not identified yet");
+    if (sgPV()) return obsHTML2(o, m);
+    var t = o.taxon || null, ps = sgPhotos(o), NM = sgNames(o);
+    var name = NM.main;
     var rank = t && t.rank ? t.rank : "";
     var sci = t ? '<p class="sg-sci' + (/^(species|subspecies|variety|form|hybrid|genus)$/.test(rank) ? "" : " sg-up") + '">' + esc(t.preferred_common_name ? t.name : (rank && rank !== "species" ? rank.charAt(0).toUpperCase() + rank.slice(1) : "")) + "</p>" : "";
     var u = o.user || null, who = u ? (u.name || (u.login ? "@" + u.login : "")) : "";
@@ -23510,15 +23770,15 @@ window.SL_GEO_READY = new Promise(function (res) {
         '<figcaption><span class="sgc-by">' + (who ? "Photo by " + esc(who) : "Photo by the observer") + (when ? " · taken " + esc(when) : "") + '</span><span class="sgc-lic"></span></figcaption>' +
         (ps.length > 1 ? '<button type="button" class="sgv-nav sgv-prev" aria-label="Previous photo">&#8249;</button><button type="button" class="sgv-nav sgv-next" aria-label="Next photo">&#8250;</button><span class="sgc-n" aria-hidden="true"></span>' : "") + "</figure>"
       : "";
-    var pop = SG.popular && SG.popular.id === o.id ? '<p class="sgc-pop"><b>Most popular sighting' + (SG.popular.where ? " " + esc(SG.popular.where) : "") + "</b> &middot; " + faves.toLocaleString() + (faves === 1 ? " person" : " people") +
+    var pop = SG.popular && SG.popular.id === o.id ? '<p class="sgc-pop"><b>Most popular sighting' + (SG.popular.where ? " " + esc(SG.popular.where) : "") + "</b>, by iNaturalist favourites &middot; " + faves.toLocaleString() + (faves === 1 ? " person" : " people") +
       " made it a favourite on iNaturalist, more than any other here. (iNaturalist doesn't share how many times a sighting is viewed, so favourites are the measure.)</p>" : "";
     var many = m && m.n > 1 ? '<p class="sgc-many">This dot stands for <b>' + m.n.toLocaleString() + " sightings</b> very close together at this zoom - this is one of them. " +
       '<button type="button" class="sgc-zoom">Zoom in to see each one</button></p>' : "";
     return '<div class="sgv-card sgc-card"><button type="button" class="sg-x" aria-label="Close">&times;</button>' + gal +
       '<div class="sgv-scroll"><div class="sgv-info">' + pop +
       '<h2 class="sg-name" tabindex="-1">' + esc(name) + "</h2>" +
-      '<p class="sgc-line">' + (t && t.preferred_common_name ? "<i>" + esc(t.name) + "</i>" : t && rank && rank !== "species" ? esc(rank.charAt(0).toUpperCase() + rank.slice(1)) : "") +
-        (when || o.observed_on ? '<span class="sgc-d">' + ((t && (t.preferred_common_name || (rank && rank !== "species"))) ? " · " : "") + "found " + esc(when || fmtDate(o.observed_on)) + "</span>" : "") +
+      '<p class="sgc-line">' + (t && NM.common ? "<i>" + esc(t.name) + "</i>" : t && rank && rank !== "species" ? esc(rank.charAt(0).toUpperCase() + rank.slice(1)) : "") +
+        (when || o.observed_on ? '<span class="sgc-d">' + ((t && (NM.common || (rank && rank !== "species"))) ? " · " : "") + "found " + esc(when || fmtDate(o.observed_on)) + "</span>" : "") +
         (who ? '<span class="sgc-d"> · by ' + esc(who) + "</span>" : "") + "</p>" +
       '<div class="sgv-chips">' + (gr ? '<span class="sgv-chip sgv-q-' + esc(o.quality_grade) + '" title="' + esc(gr[1]) + '">' + esc(gr[0]) + "</span>" : "") +
       (faves ? '<span class="sgv-chip" title="People who made it a favourite on iNaturalist">&#9733; ' + faves.toLocaleString() + "</span>" : "") + "</div>" +
@@ -23530,6 +23790,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       '<details class="sgc-more"><summary>More details</summary>' +
       '<dl class="sgv-facts">' +
       "<dt>Seen</dt><dd>" + esc(observedTxt(o)) + "</dd>" +
+      (NM.also.length ? "<dt>Also called</dt><dd>" + esc(NM.also.join(", ")) + ' <span class="sgv-muted">(on iNaturalist)</span></dd>' : "") +
       "<dt>Found by</dt><dd>" + (who ? esc(who) + (u.login && u.name ? ' <span class="sgv-muted">@' + esc(u.login) + "</span>" : "") : "Observer not shown") + "</dd>" +
       "<dt>Accuracy</dt><dd>" + (obsc ? "Location made approximate for privacy (the real spot is hidden)" + (acc ? " - within about " + esc(fmtMetres(acc)) : "") : acc ? "Within about " + esc(fmtMetres(acc)) : "Not recorded") + "</dd>" +
       "<dt>Quality</dt><dd>" + (gr ? esc(gr[0]) + ' <span class="sgv-muted">- ' + esc(gr[1]) + "</span>" : "Not graded") + "</dd>" +
@@ -23545,12 +23806,75 @@ window.SL_GEO_READY = new Promise(function (res) {
       '<p class="sgv-credit">Observation by ' + esc(who || "an iNaturalist user") + ", shared on iNaturalist" + (ps.length ? " · photos " + esc(licTxt(ps[0].license_code)) : "") + ". Shown as it is on iNaturalist now.</p>" +
       "</details></div></div></div>";
   }
+  // ---- PREVIEW "sightings" (batch109): the sighting panel in SnakeList's panel style - docked at the side of the map on a
+  // computer (the dot stays in sight), a sheet from the bottom on a phone. The photo first and whole (never cropped - no cut
+  // off heads), with swipe, < > and "2 / 5"; one main name (alternates small, "also called"); then Seen, Where, Found by,
+  // Quality and Source in that order; View species and See the spot; the photo's licence apart from the record's; the
+  // long parts folded away in More details. Off: the card above, exactly as before.
+  function obsHTML2(o, m) {
+    var t = o.taxon || null, ps = sgPhotos(o), NM = sgNames(o), name = NM.main, rank = t && t.rank ? t.rank : "";
+    var u = o.user || null, who = u ? (u.name || (u.login ? "@" + u.login : "")) : "";
+    var obsc = sgObsc(o), acc = sgAcc(o), gr = GRADE[o.quality_grade], when = shortWhen(o), faves = +o.faves_count || 0;
+    var link = o.uri && /^https:\/\/(www\.)?inaturalist\.org\//.test(o.uri) ? o.uri : "https://www.inaturalist.org/observations/" + encodeURIComponent(o.id);
+    var c = o.geojson && o.geojson.coordinates, lat = c ? +c[1] : m.lat, lon = c ? +c[0] : m.lon;
+    var notes = plainText(o.description);
+    var idn = +o.identifications_count || 0, agree = o.num_identification_agreements, dis = o.num_identification_disagreements;
+    var ann = (o.annotations || []).map(function (a) { var A = ANNOT[a.controlled_attribute_id]; return A && A[1][a.controlled_value_id] ? [A[0], A[1][a.controlled_value_id]] : null; }).filter(Boolean);
+    SG.vname = name;
+    var ext = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"></path><path d="M20 4 10 14"></path><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg>';
+    var gal = ps.length
+      ? '<figure class="sg-ph sg2-ph" aria-roledescription="carousel"><div class="sg2-frame"><img alt="" decoding="async" draggable="false"></div>' +
+        (ps.length > 1 ? '<button type="button" class="sgv-nav sgv-prev" aria-label="Previous photo">&#8249;</button><button type="button" class="sgv-nav sgv-next" aria-label="Next photo">&#8250;</button><span class="sgc-n" aria-live="polite"></span>' : "") +
+        '<figcaption><span class="sgc-by"></span><span class="sgc-lic"></span></figcaption></figure>'
+      : "";
+    var pop = SG.popular && SG.popular.id === o.id ? '<p class="sgc-pop"><b>Most popular sighting' + (SG.popular.where ? " " + esc(SG.popular.where) : "") + "</b>, by iNaturalist favourites &middot; " + faves.toLocaleString() + (faves === 1 ? " person" : " people") +
+      " made it a favourite, more than any other here. (Favourites, not views: iNaturalist doesn't share how many times a sighting is viewed.)</p>" : "";
+    var many = m && m.n > 1 ? '<p class="sgc-many">This dot stands for <b>' + m.n.toLocaleString() + " sightings</b> very close together at this zoom - this is one of them. " +
+      '<button type="button" class="sgc-zoom">Zoom in to see each one</button></p>' : "";
+    var where = esc(o.place_guess || "No place name given") + (obsc ? ' <span class="sgv-muted">(approximate - the real spot is hidden for privacy' + (acc ? ", within about " + esc(fmtMetres(acc)) : "") + ")</span>" :
+      acc > 5000 ? ' <span class="sgv-muted">(only accurate to about ' + esc(fmtMetres(acc)) + ")</span>" : "");
+    var sp = NM.sp, spUrl = sp && window.SL_SP_PAGE_URL ? window.SL_SP_PAGE_URL(sp.id) : "";
+    var photoLic = ps.length ? (ps.length === 1 ? licTxt(ps[0].license_code) : (function () { var L = {}; ps.forEach(function (p) { L[licTxt(p.license_code)] = 1; }); return Object.keys(L).join(", "); })()) : "";
+    return '<div class="sgv-card sgc-card sg2"><span class="sg2-grab" aria-hidden="true"></span><button type="button" class="sg-x" aria-label="Close">&times;</button>' + gal +
+      '<div class="sgv-scroll"><div class="sgv-info">' + pop +
+      '<h2 class="sg-name" tabindex="-1">' + esc(name) + "</h2>" +
+      (t && (NM.common || NM.also.length) ? '<p class="sg2-sci">' + (NM.common ? "<i>" + esc(t.name) + "</i>" : "") + (NM.also.length ? (NM.common ? " &middot; " : "") + '<span class="sg2-also">also called ' + esc(NM.also.join(", ")) + "</span>" : "") + "</p>" :
+        t && rank && rank !== "species" ? '<p class="sg2-sci">' + esc(rank.charAt(0).toUpperCase() + rank.slice(1)) + "</p>" : "") +
+      '<dl class="sg2-facts">' +
+      "<dt>Seen</dt><dd>" + esc(when || (o.observed_on ? fmtDate(o.observed_on) : "Date not recorded")) + "</dd>" +
+      "<dt>Where</dt><dd>" + where + "</dd>" +
+      "<dt>Found by</dt><dd>" + (who ? esc(who) : "Observer not shown") + "</dd>" +
+      "<dt>Quality</dt><dd>" + (gr ? '<span class="sgv-chip sgv-q-' + esc(o.quality_grade) + '">' + esc(gr[0]) + '</span> <span class="sgv-muted">' + esc(gr[1]) + "</span>" : "Not graded") + "</dd>" +
+      '<dt>Source</dt><dd><a class="sg-orig sgc-inat sg2-src" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">See in iNaturalist ' + ext + '<span class="sl-sr"> (opens iNaturalist in a new tab)</span></a> <span class="sgv-muted">observation ' + esc(o.id) + "</span></dd>" +
+      "</dl>" + (ps.length ? "" : '<p class="sgc-nophoto">No photo was shared with this sighting.</p>') + many +
+      '<div class="sgc-acts sg2-acts">' + (spUrl ? '<a class="sg2-view" href="' + esc(spUrl) + '">View species</a>' : "") + sgActsHTML(o) + "</div>" +
+      '<details class="sgc-more"><summary>More details</summary>' +
+      '<dl class="sgv-facts">' +
+      "<dt>Seen</dt><dd>" + esc(observedTxt(o)) + "</dd>" +
+      "<dt>Accuracy</dt><dd>" + (obsc ? "Location made approximate for privacy (the real spot is hidden)" + (acc ? " - within about " + esc(fmtMetres(acc)) : "") : acc ? "Within about " + esc(fmtMetres(acc)) : "Not recorded") + "</dd>" +
+      "<dt>Identification</dt><dd>" + (t ? (rank && rank !== "species" ? "To " + esc(rank) + " level" : "To species") : "Not identified yet") + (idn ? " · " + idn + (idn === 1 ? " identification" : " identifications") + (agree != null ? ", " + agree + " agreeing" : "") + (dis ? ", " + dis + " disagreeing" : "") : "") + "</dd>" +
+      ann.map(function (a) { return "<dt>" + esc(a[0]) + "</dt><dd>" + esc(a[1]) + "</dd>"; }).join("") +
+      (faves ? "<dt>Favourites</dt><dd>" + faves.toLocaleString() + ' <span class="sgv-muted">(people who made it a favourite on iNaturalist)</span></dd>' : "") +
+      (o.created_at ? "<dt>Uploaded</dt><dd>" + esc(fmtDate(o.created_at)) + "</dd>" : "") +
+      (u && u.login ? '<dt>Observer</dt><dd><a href="https://www.inaturalist.org/people/' + encodeURIComponent(u.login) + '" target="_blank" rel="noopener noreferrer">' + esc(who) + " on iNaturalist</a></dd>" : "") +
+      (ps.length ? "<dt>" + (ps.length > 1 ? "Photo licences" : "Photo licence") + "</dt><dd>" + esc(photoLic) + ' <span class="sgv-muted">(set by the photographer' + (ps.length > 1 ? " - each photo\'s is shown under it" : "") + ")</span></dd>" : "") +
+      "<dt>Record licence</dt><dd>" + esc(o.license_code ? licTxt(o.license_code) : "Not given") + ' <span class="sgv-muted">(the sighting\'s data - date, place, notes - set by the observer)</span></dd>' +
+      "</dl>" +
+      (notes ? '<details class="sg2-notes"><summary>Observer\'s notes</summary><p>' + esc(notes).replace(/\n/g, "<br>") + "</p></details>" : "") +
+      '<section class="sgv-sec"><h3>' + (obsc ? "Approximate area" : "Exact spot") + "</h3>" + (obsc ? '<p class="sgv-muted sgc-obsc">iNaturalist hides the real spot of this sighting: it is somewhere in the dashed circle, not at a point.</p>' : "") + '<div class="sgv-map" data-lat="' + lat + '" data-lon="' + lon + '"><button type="button" class="sgv-onmap">Zoom the map here</button><span class="sgv-nomap-t">' + esc(fmtCoord(lat, lon)) + "</span></div>" +
+      '<p class="sgv-mono sgc-coord">' + esc(fmtCoord(lat, lon)) + "</p></section>" +
+      sgSpeciesHTML(o) +
+      '<p class="sgv-credit">Observation by ' + esc(who || "an iNaturalist user") + ", shared on iNaturalist. Shown as it is on iNaturalist now.</p>" +
+      "</details></div></div></div>";
+  }
   // fill the view (straight away from what's known; again when the full record arrives)
   function sgFill(m, o) {
     var keepPi = SG.vo && SG.vo.id === o.id ? SG.pi || 0 : 0;
     if (!(SG.vo && SG.vo.id === o.id)) SG.moreOpen = false;
     SG.vo = o;
+    var hadFocus = sgPop.contains(document.activeElement); // (batch109: the keyboard stays in the card when it is filled again)
     sgPop.innerHTML = obsHTML(o, m);
+    if (hadFocus && !sgPop.contains(document.activeElement)) sgFocusView();
     sgPop.setAttribute("aria-label", "Sighting: " + (SG.vname || "snake"));
     if (sgPhotos(o).length) sgShowPhoto(Math.min(keepPi, sgPhotos(o).length - 1));
     var det = sgPop.querySelector(".sgc-more");
@@ -23575,7 +23899,10 @@ window.SL_GEO_READY = new Promise(function (res) {
   // the card shows (beside its dot); focus goes to its name once it's filled, so a screen reader reads it
   function sgShowView() {
     if (!sgPop.hidden) return false;
-    SG.focusBack = document.activeElement;
+    var fb = document.activeElement;
+    // batch109: a dot clicked on the map: the map itself is what opened it, so the keyboard goes back there on Close
+    if ((!fb || fb === document.body || fb === sgCv) && sgCv) { if (!sgCv.hasAttribute("tabindex")) sgCv.setAttribute("tabindex", "-1"); fb = sgCv; }
+    SG.focusBack = fb;
     sgPop.hidden = false;
     return true;
   }
@@ -23594,6 +23921,8 @@ window.SL_GEO_READY = new Promise(function (res) {
     var c = SG.cache[m.id];
     if (c && c.gone) { sgPaint(m, c); return; }
     var known = (c && c.o) || m.o, first = sgPop.hidden;
+    if (first) { SG.cam0 = window.SL_MAP_CAM && window.SL_MAP_CAM.get ? window.SL_MAP_CAM.get() : null; SG.camMoved = false; } // (where the map was)
+    SG.selM = m;
     if (known) { sgShowView(); sgFill(m, known); if (first) sgFocusView(); }
     else { // nothing known yet (shouldn't happen - the list carries it): a light loading view
       SG.vo = null;
@@ -23641,6 +23970,12 @@ window.SL_GEO_READY = new Promise(function (res) {
     SG.otok++; if (SG.ctl) try { SG.ctl.abort(); } catch (e) {} SG.ctl = null;
     var was = !sgPop.hidden;
     sgPop.hidden = true; sgPop.innerHTML = ""; SG.vo = null;
+    // PREVIEW "sightings": Close leaves the dot picked (a ring round it) and the map where it was when the panel opened
+    if (sgPV() && !quiet && was) {
+      SG.selM = SG.openM;
+      if (SG.camMoved && SG.cam0 && window.SL_MAP_CAM && window.SL_MAP_CAM.set) window.SL_MAP_CAM.set(SG.cam0, 420);
+    } else if (quiet) SG.selM = null;
+    SG.cam0 = null; SG.camMoved = false;
     SG.openM = null; // (v6.28: the card closed, the dot is just a dot again)
     sgUndoBtn();
     if (was && !quiet && SG.focusBack && SG.focusBack.focus) try { SG.focusBack.focus({ preventScroll: true }); } catch (e) {}
@@ -23653,14 +23988,16 @@ window.SL_GEO_READY = new Promise(function (res) {
     var rt = e.target.closest(".sg-retry2");
     if (rt) { var id = rt.getAttribute("data-oid"), m = SG.ids[id] || (SG.lastM && String(SG.lastM.id) === id ? SG.lastM : null); if (m) { sgCloseView(false); sgOpen(m); } return; }
     var ph = e.target.closest(".sg-ph img"); // the photo: the whole of it (not cropped), and back
+    if (ph && (SG.swiped && Date.now() - SG.swiped < 400 || sgPV())) return; // (a swipe isn't a tap; the preview shows it whole already)
     if (ph) { ph.closest(".sg-ph").classList.toggle("sgc-whole"); sgPlaceSoon(); return; }
-    if (e.target.closest(".sgc-zoom")) { var mz = SG.openM; if (mz) { sgJump(mz.lon, mz.lat, 256 * Math.pow(2, Math.min(17, Math.max(4, Math.round(Math.log((SG.lastB ? SG.lastB[2] : 1024) / 256) / Math.LN2) + 3)))); } return; }
+    if (e.target.closest(".sgc-zoom")) { var mz = SG.openM; if (mz) { SG.camMoved = true; sgJump(mz.lon, mz.lat, 256 * Math.pow(2, Math.min(17, Math.max(4, Math.round(Math.log((SG.lastB ? SG.lastB[2] : 1024) / 256) / Math.LN2) + 3)))); } return; }
     var th = e.target.closest(".sg-th");
     if (th) { sgShowPhoto(+th.getAttribute("data-i")); return; }
     var nv = e.target.closest(".sgv-nav");
     if (nv) { var k = sgPhotos(SG.vo).length; if (k) sgShowPhoto(((SG.pi || 0) + (nv.classList.contains("sgv-next") ? 1 : -1) + k) % k); return; }
     if (e.target.closest(".sgv-onmap")) { // the map, right at this spot, close up (Undo goes back)
       var mo = SG.openM; if (!mo) return;
+      SG.camMoved = true;
       sgJump(mo.lon, mo.lat, mo.fuzzy ? 256 * Math.pow(2, 12) : 256 * Math.pow(2, 16));
       window.SL_MAP_REDRAW && window.SL_MAP_REDRAW();
       return;
@@ -23671,7 +24008,7 @@ window.SL_GEO_READY = new Promise(function (res) {
       if (!skey) return;
       bs.setAttribute("aria-busy", "true"); bs.querySelector("span").textContent = "Opening…";
       setTimeout(function () { if (bs.isConnected) { bs.removeAttribute("aria-busy"); bs.querySelector("span").textContent = "See the spot"; } }, 900);
-      window.SL_3D.spot(skey, bs, stx.preferred_common_name && stx.preferred_common_name !== stx.name ? stx.preferred_common_name : "", {
+      window.SL_3D.spot(skey, bs, sgNames(so).main !== stx.name ? sgNames(so).main : "", {
         lat: sc ? +sc[1] : SG.openM && SG.openM.lat, lon: sc ? +sc[0] : SG.openM && SG.openM.lon,
         acc: +(so.positional_accuracy || so.public_positional_accuracy || 0),
         obscured: !!(so.obscured || (so.geoprivacy && so.geoprivacy !== "open") || (so.taxon_geoprivacy && so.taxon_geoprivacy !== "open")),
@@ -23684,7 +24021,7 @@ window.SL_GEO_READY = new Promise(function (res) {
     var b3 = e.target.closest(".sgv-3d");
     if (b3 && window.SL_3D && window.SL_3D.panel && SG.vo && SG.vo.taxon) {
       var tx = SG.vo.taxon, key = String(tx.name || "").trim().toLowerCase().split(/\s+/).slice(0, 2).join("-").replace(/[^a-z-]+/g, "");
-      if (key) window.SL_3D.panel(key, b3, tx.preferred_common_name && tx.preferred_common_name !== tx.name ? tx.preferred_common_name : "");
+      if (key) window.SL_3D.panel(key, b3, sgNames(SG.vo).main !== tx.name ? sgNames(SG.vo).main : "");
       return;
     }
     var rp = e.target.closest(".sg-ph-retry");
@@ -23700,10 +24037,27 @@ window.SL_GEO_READY = new Promise(function (res) {
   }, true);
   sgPop.addEventListener("load", function (e) { var im = e.target; if (im && im.tagName === "IMG") { var fg = im.closest(".sg-ph"); if (fg) { fg.classList.remove("sg-ph-err"); var mm = fg.querySelector(".sg-ph-msg"); if (mm) mm.remove(); } } }, true);
   sgPop.addEventListener("pointerup", function (e) { e.stopPropagation(); });
+  // batch109: swipe the photo left or right for the next or previous one (a finger or the mouse)
+  var sgSw = null;
+  sgPop.addEventListener("pointerdown", function (e) { var f = e.target.closest && e.target.closest(".sg-ph"); sgSw = f && !e.target.closest("button") ? { x: e.clientX, y: e.clientY, id: e.pointerId } : null; });
+  sgPop.addEventListener("pointerup", function (e) {
+    var w0 = sgSw; sgSw = null; if (!w0 || w0.id !== e.pointerId || !SG.vo) return;
+    var dx = e.clientX - w0.x, dy = e.clientY - w0.y, k = sgPhotos(SG.vo).length;
+    if (k > 1 && Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.4) { SG.swiped = Date.now(); sgShowPhoto(((SG.pi || 0) + (dx < 0 ? 1 : -1) + k) % k); }
+  });
+  sgPop.addEventListener("pointercancel", function () { sgSw = null; });
+  // batch109: Escape closes only the top layer - the card, and not full screen (or anything else) with it. Whatever is
+  // open over the card (the 3D panel, the bigger photo, the Map style menu, a panel the keyboard is in) closes first.
+  window.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape" || sgPop.hidden) return;
+    if (document.querySelector(".sl3d-bd, .photo-lightbox.open")) return;
+    var lp = document.getElementById("layers-pop"); if (lp && !lp.hidden) return;
+    var ae = document.activeElement; if (ae && ae !== document.body && !sgPop.contains(ae) && ae.closest && ae.closest('[role="dialog"], .hm-panel, .mf-panel, .country-panel')) return;
+    e.preventDefault(); e.stopImmediatePropagation(); sgCloseView(false);
+  }, true);
   document.addEventListener("keydown", function (e) {
     if (sgPop.hidden || document.querySelector(".sl3d-bd")) return; // (the 3D panel on top closes first)
-    if (e.key === "Escape") { e.preventDefault(); sgCloseView(false); }
-    else if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && SG.vo && !/^(INPUT|TEXTAREA)$/.test((e.target || {}).tagName || "")) {
+    if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && SG.vo && !/^(INPUT|TEXTAREA)$/.test((e.target || {}).tagName || "")) {
       var k = sgPhotos(SG.vo).length; if (k > 1) sgShowPhoto(((SG.pi || 0) + (e.key === "ArrowRight" ? 1 : -1) + k) % k);
     }
   });
@@ -23714,7 +24068,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (sgKey) sgKey.hidden = !on;
     // a species search shows its range countries with Sightings off, only its dots with it on
     var msq = window.SL_MAP_SEARCH && window.SL_MAP_SEARCH(); if (msq && msq.kind === "text" && msq.q && window.SL_MAP_REPAINT) try { window.SL_MAP_REPAINT(); } catch (e) {} // (a place search stays as it is)
-    if (!on) { SGT.tok++; SGT.want = []; SGT.list = []; SGT.queue = SGT.queue.filter(function () { return false; }); SGT.wantKey = ""; SG.mode = ""; SG.pinned = null; SG.popular = null; SG.areaKey = ""; SG.token++; SG.ptok++; SG.busy = false; SG.list = []; SG.ids = {}; SG.done = []; SG.fkey = ""; SG.rkey = ""; SG.want = ""; SG.hist = []; clearTimeout(SG.t); sgClose(); sgNoteSet(""); sgOptsOpen(false); sgStatus(); sgUndoBtn(); if (SG.layer) SG.layer.clearLayers(); if (sgCv) sgCv.style.cursor = ""; sgLay.key = ""; if (sgLay.cv) sgLay.cv.width = sgLay.cv.height = 0; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); return; }
+    if (!on) { Object.keys(SGT.cache).forEach(function (k) { var e = SGT.cache[k]; if (e && e.st === 0 && e.ctl) try { e.ctl.abort(); } catch (er) {} });
+      SG.poptok++; if (sgPopBtn) sgPopBtn.removeAttribute("aria-busy"); sgUnspider(); SG.cl = null; SG.selM = null; SG.lastNG = 0;
+      SGT.tok++; SGT.want = []; SGT.list = []; SGT.queue = SGT.queue.filter(function () { return false; }); SGT.wantKey = ""; SG.mode = ""; SG.pinned = null; SG.popular = null; SG.areaKey = ""; SG.token++; SG.ptok++; SG.busy = false; SG.list = []; SG.ids = {}; SG.done = []; SG.fkey = ""; SG.rkey = ""; SG.want = ""; SG.hist = []; clearTimeout(SG.t); sgClose(); sgNoteSet(""); sgOptsOpen(false); sgStatus(); sgUndoBtn(); if (SG.layer) SG.layer.clearLayers(); if (sgCv) sgCv.style.cursor = ""; sgLay.key = ""; if (sgLay.cv) sgLay.cv.width = sgLay.cv.height = 0; window.SL_MAP_REDRAW && window.SL_MAP_REDRAW(); return; }
     // v4.62: turning Sightings on keeps the picked country, state or search (it no longer clears the map)
     SG.want = ""; sgStatus(); sgLoad(true); sgRender();
   }
@@ -28309,6 +28665,66 @@ html.sgv-lock, html.sgv-lock body { overflow: hidden; }
 /* a phone (or a narrow map): a sheet along the bottom of the map, the map still showing above it */
 #sg-pop.sg-card.sgc-sheet { left: 8px !important; right: 8px; top: auto !important; bottom: 8px; width: auto; max-height: min(64%, 520px); }
 #sg-pop.sg-card.sgc-sheet .sg-ph img { height: 150px; }
+/* ---- PREVIEW "sightings" (batch109): the sighting panel docked at the side of the map (a sheet on a phone), the whole
+   photo first, facts in a readable order; a compact key and a row of filter chips. Only with the preview on. ---- */
+#sg-pop.sg-card.sg2-pop { width: 344px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.28); }
+#sg-pop.sg2-pop .sg2-grab { display: none; }
+#sg-pop.sg2-pop .sg-ph.sg2-ph { background: #0b1710; }
+#sg-pop.sg2-pop .sg2-frame { height: 216px; display: flex; align-items: center; justify-content: center; touch-action: pan-y; overflow: hidden; }
+#sg-pop.sg-card.sg2-pop .sg-ph img { width: 100%; height: 100%; max-height: none; object-fit: contain; cursor: default; user-select: none; -webkit-user-drag: none; background: #0b1710; }
+#sg-pop.sg-card.sg2-pop .sg-ph-msg { height: 216px; }
+#sg-pop.sg-card.sg2-pop .sg-ph figcaption { position: static; padding: 6px 12px 7px; background: var(--surface-hover, rgba(0,0,0,.05)); color: var(--text-muted, #667261); text-shadow: none; font: 500 11.5px/1.35 'Inter', sans-serif; pointer-events: auto; }
+#sg-pop.sg-card.sg2-pop .sgv-nav { top: 108px; }
+#sg-pop.sg-card.sg2-pop .sgc-n { top: auto; bottom: auto; top: 182px; left: 50%; transform: translateX(-50%); }
+#sg-pop.sg2-pop .sgv-info { padding: 12px 14px 14px; }
+#sg-pop.sg-card.sg2-pop h2.sg-name { font-size: 19px; padding-right: 0; }
+#sg-pop.sg2-pop .sg2-sci { margin: 3px 0 0; font-size: 13px; line-height: 1.4; color: var(--text-muted, #667261); }
+#sg-pop.sg2-pop .sg2-sci i { color: var(--text, #222); opacity: .85; }
+#sg-pop.sg2-pop .sg2-also { font-size: 12px; }
+#sg-pop.sg2-pop .sg2-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 12px; margin: 12px 0 0; font-size: 13px; line-height: 1.4; }
+#sg-pop.sg2-pop .sg2-facts dt { margin: 0; padding-top: 2px; font: 600 10.5px 'Inter', sans-serif; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted, #667261); }
+#sg-pop.sg2-pop .sg2-facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+#sg-pop.sg2-pop .sg2-facts .sgv-chip { font-size: 11.5px; padding: 2px 8px; margin-right: 4px; }
+#sg-pop.sg2-pop .sg2-facts .sgv-muted { font-size: 12px; }
+#sg-pop.sg-card.sg2-pop a.sg2-src { padding: 3px 10px; font-size: 12px; }
+#sg-pop.sg2-pop .sg2-acts { margin-top: 14px; gap: 8px; }
+#sg-pop.sg2-pop .sg2-acts > * { flex: 1 1 0; justify-content: center; }
+#sg-pop.sg2-pop a.sg2-view { display: inline-flex; align-items: center; gap: 6px; font: 600 12.5px 'Inter', sans-serif; padding: 7px 12px; border-radius: 999px; text-decoration: none;
+  border: 1px solid var(--map-on, #3f7d43); color: var(--text, #222); background: var(--surface, #fff); }
+#sg-pop.sg2-pop a.sg2-view:hover { background: var(--surface-hover, rgba(0,0,0,.05)); }
+#sg-pop.sg-card.sg2-pop .sgc-acts .sgv-spot { padding: 7px 12px; }
+#sg-pop.sg2-pop .sg2-notes { margin-top: 10px; }
+#sg-pop.sg2-pop .sg2-notes > summary { cursor: pointer; font: 600 12.5px 'Inter', sans-serif; }
+#sg-pop.sg2-pop .sg2-notes p { margin: 6px 0 0; font-size: 13px; line-height: 1.5; }
+#sg-pop.sg-card.sgc-sheet.sg2-pop { left: 0 !important; right: 0; bottom: 0; width: auto; max-width: none; max-height: min(74%, 620px); border-radius: 18px 18px 0 0; border-bottom: 0; }
+#sg-pop.sg-card.sgc-sheet.sg2-pop .sg2-grab { display: block; position: absolute; top: 6px; left: 50%; width: 38px; height: 4px; margin-left: -19px; border-radius: 2px; background: rgba(255,255,255,.75); z-index: 4; }
+#sg-pop.sg-card.sgc-sheet.sg2-pop .sg2-frame { height: 200px; }
+#sg-pop.sg-card.sgc-sheet.sg2-pop .sgv-nav { top: 100px; }
+#sg-pop.sg-card.sgc-sheet.sg2-pop .sgc-n { top: 168px; }
+.globe-stage.sg2-on .globe-hint.sg-hint { display: none !important; }
+.sg2-key { position: absolute; left: 12px; bottom: 10px; z-index: 5; max-width: calc(100% - 90px); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px;
+  padding: 4px 10px 4px 4px; border-radius: 12px; background: rgba(0,0,0,0.58); color: #fff; font: 500 11px 'JetBrains Mono', monospace; }
+.sg2-key[hidden] { display: none; }
+.sg2-key-btn { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px 3px 7px; border-radius: 999px; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.1); color: #fff; font: 600 11.5px 'Inter', sans-serif; cursor: pointer; }
+.sg2-key-btn::after { content: ""; width: 6px; height: 6px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(-135deg) translate(-1px, -1px); margin-left: 2px; }
+.sg2-key.open .sg2-key-btn::after { transform: rotate(45deg) translate(-1px, -1px); }
+.sg2-key-btn:focus-visible, .sg2-chip-x:focus-visible { outline: 3px solid #9be07c; outline-offset: 2px; }
+.sg2-key.busy .sg2-key-n::after { content: ""; display: inline-block; width: 9px; height: 9px; margin-left: 6px; vertical-align: -1px; border-radius: 50%; border: 1.6px solid rgba(255,255,255,.35); border-top-color: #fff; animation: sl-spin .8s linear infinite; }
+.sg2-key-body { flex-basis: 100%; padding: 4px 4px 2px; font: 500 11.5px/1.45 'Inter', sans-serif; }
+.sg2-key-body[hidden] { display: none; }
+.sg2-key-body p { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+.sg2-key-body .sg2-k-note { display: block; opacity: .82; font-size: 11px; max-width: 46ch; }
+.sg2-k-grp { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #58b351; border: 1.5px solid rgba(12,46,18,0.92); box-shadow: 0 0 0 1.3px rgba(255,255,255,.9); font: 700 9.5px 'Inter', sans-serif; color: #fff; box-sizing: border-box; }
+.sg2-k-sel { flex: none; width: 16px; height: 16px; border-radius: 50%; background: #58b351; border: 2.5px solid #fff; box-shadow: 0 0 0 1px rgba(12,46,18,0.92), 0 0 0 4px rgba(88,179,81,.75); box-sizing: border-box; margin: 0 2px; }
+.sg2-chips { order: 21; flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 5px; pointer-events: none; }
+.sg2-chips[hidden] { display: none; }
+.sg2-chip { pointer-events: auto; display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; font: 500 11px 'Inter', sans-serif; color: #f2f6fa;
+  background: rgba(10,20,32,0.66); border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(6px); max-width: 100%; }
+.sg2-chip b { font-weight: 600; color: #9be07c; }
+.sg2-chip-x { margin: -2px -5px -2px 1px; width: 18px; height: 18px; border-radius: 50%; border: 0; background: rgba(255,255,255,.14); color: #fff; font-size: 13px; line-height: 1; cursor: pointer; padding: 0; }
+.globe-stage.full .map-tools .sg2-chips { position: absolute; top: calc(100% + 40px); left: 50%; transform: translateX(-50%); width: max-content; max-width: 92vw; justify-content: center; }
+@media (max-width: 640px) { .sg2-chip { font-size: 10.5px; padding: 2px 8px; } .sg2-key { max-width: calc(100% - 70px); } }
+@media (prefers-reduced-motion: reduce) { .sg2-key.busy .sg2-key-n::after { animation: none; } }
 .sl-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* v6.28: a place's name over the map and in the panel's title is a button - it centres the map on it, closer */
 .sl-zoomname.sl-zoomable { cursor: pointer; }

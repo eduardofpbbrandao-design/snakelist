@@ -71,6 +71,8 @@ async function route(r) {
     ok(await p.evaluate(() => ![].some.call(document.scripts, (s) => /spot\.js|daynight\.js/.test(s.src)) && !performance.getEntriesByType('resource').some((e) => /spot\.js|daynight\.js|arcgisonline|terrarium|overpass/.test(e.name))), `${label}: nothing of See the spot is loaded with the page`);
     await p.evaluate(([la, lo]) => window.SL_FLY_BOX(lo - 0.05, lo + 0.05, la - 0.04, la + 0.04), [LAT, LON]); await p.waitForTimeout(600);
     await p.click('#sg-toggle'); await p.waitForTimeout(2500);
+    // (batch109: zoomed out, nearby dots are drawn as a group - the map is flown close again now Sightings lets it zoom in)
+    await p.evaluate(([la, lo]) => window.SL_FLY_BOX(lo - 0.05, lo + 0.05, la - 0.04, la + 0.04), [LAT, LON]); await p.waitForTimeout(1500);
     const openDot = async (id) => {
       const d = await p.evaluate(() => window.SL_SG_DEBUG()), dot = d.dots.find((o) => o.id === id);
       if (!dot) return false;

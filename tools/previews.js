@@ -22,7 +22,9 @@ var DEFS=[
   live:function(){return true}},
  {key:"finale",label:"Countdown finale",about:"Plays the countdown's last minute for you",
   apply:function(v){if(v)W.__slCdFinPv=1},
-  live:function(){return !W.SL_EV}}
+  live:function(){return !W.SL_EV}},
+ {key:"sightings",label:"New sightings panel",about:"Map sightings: a docked panel (a sheet on phones) with the whole photo, a small key, filter chips, numbers on groups of dots and a taller map on phones",
+  live:function(){return true}}
 ];
 function def(k){for(var i=0;i<DEFS.length;i++)if(DEFS[i].key===k)return DEFS[i];return null}
 function on(k){try{return S.getItem(PRE+k)==="1"}catch(e){return false}}
