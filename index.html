@@ -28270,6 +28270,9 @@ window.SL_welcome = function (u, back) {
   if (window.ResizeObserver) new ResizeObserver(soon).observe(grid);
   // anything above the cards changing height (a filter section opening) moves them: follow
   if (window.ResizeObserver) ["guide-controls", "fsecs", "fbar"].forEach(function (id) { var el = document.getElementById(id); if (el) new ResizeObserver(later).observe(el); });
+  // (fix) the page growing above the cards without the list itself changing size - the public countdown banner arriving
+  // after the opening - left the extra tags ("Common", "Rare"...) a banner's height away from their cards: follow that too
+  if (window.ResizeObserver) new ResizeObserver(later).observe(document.body);
   document.addEventListener("toggle", later, true);
   new MutationObserver(soon).observe(grid, { subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
   later();

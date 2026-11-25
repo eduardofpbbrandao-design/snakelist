@@ -221,6 +221,45 @@ const shot = async (p, name) => { if (SHOTS) await p.screenshot({ path: SHOTS + 
     ok(!p.errs.length, 'no page errors ' + p.errs.join(' | '));
     await p.context().close();
   }
+  // ---------- without the cookies preview (everyone else today): the old bar and words, the protective part all the same ----------
+  {
+    console.log('--- no preview: app, New York, desktop');
+    const p = await page(b, { ...desk, timezoneId: 'America/New_York' }, { 'sl-art-preview-cookies': '0' });
+    await p.goto(BASE + 'index.html', { waitUntil: 'load', timeout: 180000 });
+    await appReady(p);
+    const c0 = await consentCalls(p);
+    ok(c0.length && c0[0][0] === 'default' && ['ad_storage', 'ad_user_data', 'ad_personalization', 'analytics_storage'].every((k) => c0[0][1][k] === 'denied'), 'no preview: Consent Mode v2 default is denied for all four');
+    await p.evaluate(() => window.SL_3P && window.SL_3P());
+    await p.waitForTimeout(3500);
+    ok(!adsReq(p).length, 'no preview: no AdSense request before an answer');
+    await p.evaluate(() => window.SL_showCookies());
+    await p.waitForSelector('#ck-bar:not([hidden])', { timeout: 5000 });
+    const btns = await p.$$eval('#ck-bar button', (l) => l.filter((x) => x.offsetParent !== null).map((x) => x.textContent.trim()));
+    ok(btns.join('|') === 'Only essentials|Accept cookies', 'no preview: the bar is today\'s - Only essentials, Accept cookies (' + btns.join('|') + ')');
+    ok(await p.$eval('#ck-bar', (x) => /remembers on this device what you look at/.test(x.innerText) && !/personalise the ads/.test(x.innerText)), 'no preview: today\'s words');
+    await shot(p, 'app-nopreview-banner');
+    ok(await p.evaluate(() => document.getElementById('sl-foot-ck').hidden), 'no preview: no Cookie choices in the footer');
+    await p.click('#ck-yes');
+    await p.waitForTimeout(800);
+    ok(await p.evaluate(() => localStorage.getItem('sl-consent') === 'yes' && localStorage.getItem('sl-ads') === null), 'no preview: Accept cookies = analytics yes; ads not asked, so not personalised');
+    ok(adsReq(p).length === 1 && await p.evaluate(() => window.__adsAt && window.__adsAt.npa === 1), 'no preview: the AdSense script loads after the answer, non-personalised');
+    await p.evaluate(() => window.SL_OPEN_SETTINGS()); await p.waitForTimeout(500);
+    ok(await p.evaluate(() => !document.getElementById('ss-ck')), 'no preview: no Cookie choices row in Settings');
+    ok(!p.errs.length, 'no preview: no page errors ' + p.errs.join(' | '));
+    await p.context().close();
+  }
+  {
+    console.log('--- no preview: species page, New York, phone');
+    const p = await page(b, { ...phone, timezoneId: 'America/New_York' }, { 'sl-art-preview-cookies': '0' });
+    await p.goto(BASE + 'species/viperine-snake-natrix-maura.html', { waitUntil: 'load' });
+    await p.waitForTimeout(3000);
+    ok(await p.evaluate(() => !document.getElementById('slc-bar') && !document.querySelector('[data-slc-open]')), 'no preview: species page has no new bar and no Cookie choices link');
+    const c0 = await consentCalls(p);
+    ok(c0.length && c0[0][0] === 'default' && c0[0][1].ad_storage === 'denied' && c0[0][1].analytics_storage === 'denied', 'no preview: species page tells Google "denied" first');
+    ok(adsReq(p).length === 1 && await p.evaluate(() => window.__adsAt && window.__adsAt.npa === 1), 'no preview: species page still loads the ads, non-personalised');
+    ok(!p.errs.length, 'no page errors ' + p.errs.join(' | '));
+    await p.context().close();
+  }
   // dark look, for the record
   if (SHOTS) {
     const p = await page(b, { ...desk, timezoneId: 'America/New_York', colorScheme: 'dark' });
