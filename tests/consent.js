@@ -80,7 +80,7 @@ const shot = async (p, name) => { if (SHOTS) await p.screenshot({ path: SHOTS + 
     ok(!/(^|; )(_ga|_gid|__gads|__gpi|__eoi|_gcl)/.test(await cookies(p)), label + ': no analytics or ad cookies before an answer');
     await p.evaluate(() => window.SL_showCookies());
     await p.waitForSelector('#ck-bar:not([hidden])', { timeout: 5000 });
-    const btns = await p.$$eval('#ck-bar button', (l) => l.filter((x) => !x.hidden).map((x) => x.textContent.trim()));
+    const btns = await p.$$eval('#ck-bar button', (l) => l.filter((x) => !x.hidden && x.offsetParent !== null).map((x) => x.innerText.trim()));
     ok(btns.join('|') === 'Reject|Manage|Accept cookies', label + ': the bar offers Reject, Manage, Accept (' + btns.join('|') + ')');
     ok(await p.$eval('#ck-bar .ck-ads', (x) => !x.hidden), label + ': outside Europe the bar mentions ads');
     const r = await p.$eval('#ck-bar', (x) => { const r = x.getBoundingClientRect(); return { h: r.height, b: innerHeight - r.bottom }; });
@@ -110,6 +110,7 @@ const shot = async (p, name) => { if (SHOTS) await p.screenshot({ path: SHOTS + 
     // Cookie choices in Settings and the footer open the panel again with the saved switches
     ok(await p.evaluate(() => !document.getElementById('sl-foot-ck').hidden), label + ': the footer has Cookie choices');
     await p.evaluate(() => window.SL_OPEN_SETTINGS());
+    await p.evaluate(() => { const t = document.getElementById('sst-about'); if (t) t.click(); }); // (v6.28 Settings tabs: Cookie choices is under About & Help)
     await p.waitForSelector('#ss-ck', { timeout: 3000 });
     await p.click('#ss-ck');
     await p.waitForSelector('#slc-manage', { timeout: 3000 });

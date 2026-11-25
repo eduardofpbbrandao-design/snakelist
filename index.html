@@ -48,7 +48,7 @@ var DEFS=[
   live:function(){return false}},
  {key:"tutorial",label:"New tutorial",about:"Quick Tour, Full Tutorial and short guides, with Back and a progress bar (the ? button opens it)",
   live:function(){return false}},
- {key:"finale",label:"Countdown finale + time zone",about:"The countdown's last minute plays about 70 seconds after SnakeList opens (pretend time, nothing unlocks), and Settings gets a Time zone choice",
+ {key:"finale",label:"Countdown finale + time zone",about:"The countdown's last minute plays once per visit, about 70 seconds after SnakeList opens (pretend time, nothing unlocks; it waits for the tutorial), and Settings gets a Time zone choice",
   apply:function(v){if(v)W.__slCdFinPv=1},
   live:function(){return !W.SL_EV}}
 ];
@@ -95,7 +95,7 @@ if(!W.SL_PREVIEW_ON)W.SL_PREVIEW_ON=on;
 if(/[?&]countdown-finale-preview=1(&|$)|cd-finale-preview/.test(L.search+L.hash))window.__slCdFinPv=1;
 if(m){var v=decodeURIComponent(m[1]);if(v==="events")S.setItem(K,"1");else if(v==="events-off"||v==="off"||v==="none")S.setItem(K,"0");var u=new URL(L.href);u.searchParams.delete("preview");history.replaceState(history.state,"",u.pathname+u.search+u.hash)}
 on=window.SL_PREVIEW_ON?window.SL_PREVIEW_ON("events"):S.getItem(K)==="1";
-if(window.SL_EV)return;var d=document,h=d.documentElement,root=new URL("./",L.href).href+"events/",q="?v="+"9b98d55c7e",p=d.head||h;
+if(window.SL_EV)return;var d=document,h=d.documentElement,root=new URL("./",L.href).href+"events/",q="?v="+"ee5149ec11",p=d.head||h;
 function css(){var l=d.createElement("link");l.rel="stylesheet";l.href=root+"events.css"+q;p.appendChild(l)}
 function js(n,f){var s=d.createElement("script");s.src=root+n+".js"+q;s.async=false;if(f)s.onload=f;p.appendChild(s)}
 function full(){window.SL_EV={on:true,root:root};h.classList.add("sl-ev-on");css();
@@ -28272,7 +28272,9 @@ window.SL_welcome = function (u, back) {
   if (window.ResizeObserver) ["guide-controls", "fsecs", "fbar"].forEach(function (id) { var el = document.getElementById(id); if (el) new ResizeObserver(later).observe(el); });
   // (fix) the page growing above the cards without the list itself changing size - the public countdown banner arriving
   // after the opening - left the extra tags ("Common", "Rare"...) a banner's height away from their cards: follow that too
-  if (window.ResizeObserver) new ResizeObserver(later).observe(document.body);
+  // (in the same frame when nobody is scrolling, so they never show in the wrong place for a frame)
+  if (window.ResizeObserver) { var bodyH = 0; new ResizeObserver(function (en) { var h = en[0] && en[0].contentRect.height; if (h === bodyH) return; bodyH = h;
+    if (performance.now() - lastScroll > 180) { if (raf) { cancelAnimationFrame(raf); raf = 0; } paint(); } else later(); }).observe(document.body); }
   document.addEventListener("toggle", later, true);
   new MutationObserver(soon).observe(grid, { subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
   later();
@@ -31890,6 +31892,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
         if (e.target.closest("[data-pv-allon]")) { R.list().forEach(function (p) { if (!p.on && p.key !== "events") R.set(p.key, true); }); if (R.menu) R.menu(true); changedHere = true; render(box); return; }
         if (e.target.closest("[data-pv-alloff]")) { R.list().forEach(function (p) { if (p.on) R.set(p.key, false); }); changedHere = true; render(box); return; }
         var tr = e.target.closest("[data-pv-try]");
+        if (tr && tr.getAttribute("data-pv-try") === "finale") { try { sessionStorage.removeItem("sl-cd-fin-played"); } catch (er) {} location.reload(); return; }
         if (tr) { var k = tr.getAttribute("data-pv-try"); if (window.SL_CLOSE_PANEL) try { window.SL_CLOSE_PANEL(true); } catch (er) {}
           setTimeout(function () { if (k === "cookies" && window.SL_PV_COOKIE_BAR) window.SL_PV_COOKIE_BAR(); if (k === "tutorial" && window.SL_TOUR) window.SL_TOUR.hub(); }, 200); return; }
         if (e.target.closest("[data-pv-reload]")) location.reload();
@@ -31904,7 +31907,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
           // a way to see it straight away, for the ones that otherwise wait for their moment
           (p.on && P.loaded && P.loaded(p.key) ? (p.key === "cookies" && window.SL_PV_COOKIE_BAR ? '<button type="button" class="sl-sbtn sl-pv-try" data-pv-try="cookies">Show the cookie bar</button>'
             : p.key === "tutorial" && window.SL_TOUR ? '<button type="button" class="sl-sbtn sl-pv-try" data-pv-try="tutorial">Open the tutorial</button>'
-            : p.key === "finale" ? '<button type="button" class="sl-sbtn sl-pv-try" data-pv-reload>Reload to watch the finale</button>' : "") : "") +
+            : p.key === "finale" ? '<button type="button" class="sl-sbtn sl-pv-try" data-pv-try="finale">Reload to watch the finale</button>' : "") : "") +
           '</span><button type="button" class="sl-sw" role="switch" data-pv="' + esc(p.key) +
           '" aria-label="' + esc(p.label) + '" aria-checked="' + (p.on ? "true" : "false") + '"></button></div>';
       }).join("") + "</div>" +

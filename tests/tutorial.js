@@ -139,6 +139,8 @@ async function runTo(p, label, max, onStep) {
   ok(await p.evaluate(() => !!document.querySelector('#fake-set [data-sl-settings-help] .sl-tour-help [data-th="quick"]')), 'Tutorials & help goes into [data-sl-settings-help] when Settings has one');
   // 6. the one-time Map guide offer (not after the Full Tutorial; clear that first)
   await p.evaluate(() => { const g = JSON.parse(localStorage.getItem('sl-tour-progress')); delete g.done.full; delete g.done.map; localStorage.setItem('sl-tour-progress', JSON.stringify(g)); });
+  // (v6.3x: the "See snakes from <your country>" panel is a pop-up too - closed first, as anyone would, so the offer can come)
+  await p.evaluate(() => { const x = document.querySelector('#sl-ipc .nd-x'); if (x) x.click(); }); await p.waitForTimeout(500);
   await p.click('#tab-guide'); await p.waitForTimeout(400); await p.click('#tab-map');
   // (it waits its turn: another pop-up - like the sign-in nudge after a few minutes of use - goes first)
   await p.waitForSelector('.sl-tour-tip.on', { timeout: 30000 }).catch(() => {});

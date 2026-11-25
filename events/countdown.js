@@ -369,7 +369,7 @@
     // zero: the event's start has just been reached after the final seconds were shown
     if (F.armed != null && now >= F.armed) {
       var late = now - F.armed; F.armed = null;
-      if (late < 8000) { F.zeroAt = now; F.zeroText = ZERO_TEXT; }
+      if (late < 8000) { F.zeroAt = now; F.zeroText = ZERO_TEXT; try { sessionStorage.setItem("sl-cd-fin-played", "1"); } catch (e) {} }
     }
     if (F.zeroAt) {
       if (now - F.zeroAt < 4500) {

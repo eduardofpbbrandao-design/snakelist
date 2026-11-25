@@ -50,7 +50,12 @@
   var FP = null;
   try {
     // (tools/events_loader.js notes the switch as the page starts, in case the address changes later)
-    if (window.__slCdFinPv || /[?&]countdown-finale-preview=1(&|$)/.test(location.search) || /cd-finale-preview/.test(location.hash)) {
+    // From Settings > Previews it plays once per visit (sessionStorage sl-cd-fin-played, set at zero), so it doesn't cover
+    // SnakeList on every reload while the other previews are being tried; the address switch and Settings' "Reload to
+    // watch the finale" play it again.
+    var asked = /[?&]countdown-finale-preview=1(&|$)/.test(location.search) || /cd-finale-preview/.test(location.hash), played = false;
+    try { played = sessionStorage.getItem("sl-cd-fin-played") === "1"; } catch (e) {}
+    if (asked || (window.__slCdFinPv && !played)) {
       var fe = CFG.events.filter(function (e) { return !e.meta && shown(e); })[0];
       if (fe) FP = { at: Date.parse(fe.start) - 70000, p0: performance.now(), tgt: Date.parse(fe.start) };
     }

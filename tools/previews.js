@@ -31,7 +31,7 @@ var DEFS=[
   live:function(){return false}},
  {key:"tutorial",label:"New tutorial",about:"Quick Tour, Full Tutorial and short guides, with Back and a progress bar (the ? button opens it)",
   live:function(){return false}},
- {key:"finale",label:"Countdown finale + time zone",about:"The countdown's last minute plays about 70 seconds after SnakeList opens (pretend time, nothing unlocks), and Settings gets a Time zone choice",
+ {key:"finale",label:"Countdown finale + time zone",about:"The countdown's last minute plays once per visit, about 70 seconds after SnakeList opens (pretend time, nothing unlocks; it waits for the tutorial), and Settings gets a Time zone choice",
   apply:function(v){if(v)W.__slCdFinPv=1},
   live:function(){return !W.SL_EV}}
 ];
