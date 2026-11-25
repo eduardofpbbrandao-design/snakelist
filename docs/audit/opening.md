@@ -161,5 +161,16 @@ A compact card at the top of the Species Checklist (under the photo screen, not 
   replay), reduced motion, species link, preview off (old opening untouched); 4 screen sizes; optional webm videos.
 * `tests/country-card.js` - preview off, PT detected, See snakes filter + heading + chip + View on map, unknown + search,
   manual choice kept over detection, Iceland, no geolocation, desktop + phone.
-* Re-run: `data-safety.js`, `opening-continuous.js`, `hero-scroll.js`, `ip-country.js`, `previews.js` (results in the hand-over
-  report; the machine was shared and heavily loaded, so timing checks were compared with the unchanged page run the same way).
+* Re-run: `data-safety.js`, `opening-continuous.js`, `hero-scroll.js`, `ip-country.js`, `previews.js`. The machine was shared
+  and heavily loaded, so the timing-sensitive ones were also run on the unchanged page (`git show HEAD:...` built to `base.html`,
+  `PAGE=base.html`) under the same load:
+
+  | test | this branch | unchanged page, same machine |
+  |---|---|---|
+  | data-safety | all passed | - |
+  | ip-country | all passed | all passed |
+  | previews | all passed | all passed |
+  | opening-continuous | 9 failed (long tasks in the glide, watchdog hand-over, reload check, change after hand-over) | 7 failed, the same kinds |
+  | hero-scroll | 19 failed (mostly the public Christmas countdown `sl-ev-pub` ticking while scrolling, `map-btn` jumps) | 22 failed, the same kinds |
+  | country-card | all passed (38) | - |
+  | opening-cinematic | every functional check passed; the timing checks failed (see section 2, "Measured here") | - |
