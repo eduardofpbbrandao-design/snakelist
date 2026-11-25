@@ -101,8 +101,9 @@ var nf=document.querySelector('.sp-nophoto:not(.sp-fossilfig)'),sm=document.quer
 if(nf&&sm){var sci=sm.dataset.sci,API='https://api.inaturalist.org/v1/';
 function bad(u){var f='';try{f=decodeURIComponent(String(u).split('?')[0].split('/').pop())}catch(e){f=String(u)}return !u||/map|range|distrib|locat|verbreit|carte|mapa|karte|areal|zone|world|globe/i.test(f)||(/wiki(pedia|media)/.test(u)&&/\.(svg|png|gif)\b/i.test(f))}
 function J(u){return fetch(u).then(function(r){return r.ok?r.json():null})}
-// only photos their owners licensed for reuse (Creative Commons), never 'all rights reserved'
-var LIC='cc0,cc-by,cc-by-nc,cc-by-sa,cc-by-nc-sa,cc-by-nd,cc-by-nc-nd';
+// only photos their owners licensed for any reuse, including on a site with ads (CC0, CC BY, CC BY-SA):
+// never non-commercial (NC), no-derivatives (ND) or 'all rights reserved'
+var LIC='cc0,cc-by,cc-by-sa';
 // the credit in English whatever language the photographer uses iNaturalist in: their name and the licence
 function cred(ph,who){var l=String(ph.license_code||'').toUpperCase().replace(/^CC-/,'CC ');return (ph.attribution_name||who||'iNaturalist user')+(l?', '+l:'')}
 function show(url,credit,via){if(!url||bad(url))return false;var f=document.createElement('figure');f.className='sp-photo';
@@ -113,7 +114,7 @@ var t=d&&(d.results||[]).filter(function(x){return (x.name||'').toLowerCase()===
 return (t?J(API+'observations?photos=true&quality_grade=research&term_id=17&term_value_id=18&order_by=votes&per_page=3&photo_license='+LIC+'&taxon_id='+t.id):Promise.resolve(null)).then(function(o){
 var r=o&&(o.results||[]).filter(function(x){return x.photos&&x.photos[0]&&x.photos[0].license_code})[0];
 if(r&&show(r.photos[0].url.replace('/square.','/medium.'),cred(r.photos[0],r.user&&(r.user.name||r.user.login)),'iNaturalist'))return true;
-if(t&&t.default_photo&&t.default_photo.license_code&&show((t.default_photo.medium_url||t.default_photo.url),cred(t.default_photo),'iNaturalist'))return true;
+if(t&&t.default_photo&&/^(cc0|cc-by|cc-by-sa)$/.test(t.default_photo.license_code||'')&&show((t.default_photo.medium_url||t.default_photo.url),cred(t.default_photo),'iNaturalist'))return true;
 return J('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(sci.replace(/ /g,'_'))).then(function(w){
 var img=w&&(w.originalimage||w.thumbnail);if(img&&!bad(img.source)&&w.thumbnail)show(w.thumbnail.source,'Wikipedia','Wikipedia')})})}).catch(function(){})}
 var main=document.querySelector('.sp-main[data-sci]'),w=document.getElementById('sp-wiki');
@@ -219,7 +220,7 @@ body.id='sp-rl-m'+i;body.hidden=true;body.setAttribute('role','region');body.set
 bt.addEventListener('click',function(){var o=bt.getAttribute('aria-expanded')!=='true';bt.setAttribute('aria-expanded',String(o));body.hidden=!o});mw.appendChild(sec)});box.appendChild(mw)}}
 b.addEventListener('click',open);var ab=document.querySelector('.sp-anatbtn'),wantA=0;function anat(){if(!wantA)return;var x=document.querySelector('.sp3d-wrap .sp3d-b[title^="Show the parts"]');if(x){wantA=0;if(x.getAttribute('aria-pressed')!=='true')setTimeout(function(){x.click()},300)}}if(ab)ab.addEventListener('click',function(){wantA=1;open();anat()});if(location.hash==='#real')open();window.addEventListener('hashchange',function(){if(location.hash==='#real')open()})})();
 
-(function(){var T={'3d':{v:480,sel:'.sp-realbtn,.sp-anatbtn,.sp-rl'}},V=632,d=document.documentElement;try{var a=+localStorage.getItem('sl-ver-n');if(a>V)V=a}catch(e){}
+(function(){var T={'3d':{v:480,sel:'.sp-realbtn,.sp-anatbtn,.sp-rl'}},V=633,d=document.documentElement;try{var a=+localStorage.getItem('sl-ver-n');if(a>V)V=a}catch(e){}
 Object.keys(T).forEach(function(k){var seen=0;try{seen=localStorage.getItem('sl-new-seen-'+k)}catch(e){}if(V&&V<T[k].v+20&&!seen)d.classList.add('sl-new-'+k);
 document.addEventListener('click',function(e){if(!d.classList.contains('sl-new-'+k)||!e.target.closest||!e.target.closest(T[k].sel))return;try{localStorage.setItem('sl-new-seen-'+k,'1')}catch(x){}d.classList.remove('sl-new-'+k)},true)})})();
 
