@@ -636,6 +636,7 @@ CLAUDE_CHECKS = [
     ("a", ') { note("Translation works on snakelist.com', True),
     ("b", 'if (cur !== "en" && !(', True),
     ("a", ') { note("The 3D map works on snakelist.com', True),          # the 3D map: outside picture and height servers
+    ("b", "var u0 = window.SL_PAGE_URL(s.card); if (", True),            # design preview: species page opens on snakelist.com
 ]
 CHECK = "window.claude && window.claude.use"
 
