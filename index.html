@@ -33163,7 +33163,7 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
   // ---------- one pop-up at a time ----------
   // while the first-visit tutorial is still to come, or any tutorial is showing, nothing else pops up
   var origCan = W.SL_canPrompt;
-  if (origCan && !origCan.__tour) { W.SL_canPrompt = function (ex, corner) { return !autoPending && !cur && origCan.apply(this, arguments); }; // (every argument passed on: v6.3x added a second one) W.SL_canPrompt.__tour = 1; }
+  if (origCan && !origCan.__tour) { W.SL_canPrompt = function (ex, corner) { return !autoPending && !cur && origCan.apply(this, arguments); }; /* (every argument passed on: v6.3x added a second one) */ W.SL_canPrompt.__tour = 1; }
   function othersOpen() {
     return !!D.querySelector("#wn-sheet.open, #sl-level.open, .note-sheet.open, .map-sheet.open, .report-sheet.open, .ins-sheet.open, .photo-lightbox.open, #xm-welcome, .signin-page:not([hidden])")
       || de.classList.contains("sl-achdlg-on") || de.classList.contains("sl-level-lock");
