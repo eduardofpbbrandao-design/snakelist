@@ -1,7 +1,7 @@
 <title>SnakeList</title>
 <script>
-// Previews (Settings > Previews; on the website tools/previews.js runs first and puts the classes): html.sl-pv-<name> for each
-// preview that was on when this page started. SL_PV_ON(name) answers from that, so a page never mixes old and new halfway;
+// Previews (Settings > Previews; on the website tools/previews.js runs first and puts the classes): an html class sl-pv-NAME for each
+// preview that was on when this page started. SL_PV_ON(NAME) answers from that, so a page never mixes old and new halfway;
 // a preview switched on later shows after a reload. SL_DSW(old, new): the design preview's wording, else today's.
 (function () {
   var d = document.documentElement;
@@ -32728,6 +32728,9 @@ html.sl-calm .tour-callout.tour-anim, html.sl-calm .tour-spotlight, html.sl-calm
     guides: function () { return Object.keys(GUIDES).filter(guideOk).map(function (g) { return { id: g, name: GUIDES[g].name, done: !!prog().done[g] }; }); },
     steps: STEPS, list: listFor, current: function () { return cur ? { guide: cur.g, step: cur.list[cur.i].id, index: cur.i, count: cur.list.length } : null; }
   };
+})();
+</script>
+
 <style id="sl-tz-css">
 /* Settings > Time zone (see the script below). The list reuses the language menu's look (.lang-menu). */
 .sl-tz-menu ul li { align-items: baseline; }
