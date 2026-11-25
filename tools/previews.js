@@ -9,7 +9,8 @@
      window.SL_PREVIEWS.any()              is at least one on? (only then does Settings show its Previews section)
      window.SL_PREVIEW_ON(key)             the same as .on() (the claude.ai testing copy defines its own - kept as it is)
    URL switches: ?preview=<key> turns one on, ?preview=<key>-off turns it off, ?preview=off (or none) turns all off.
-   Their own switches work as well: ?opening=collage (new opening) and ?countdown-finale-preview=1 (countdown finale).
+   Their own switches work as well: ?opening=collage (new opening), ?opening=cinematic (cinematic opening; ?opening=wall or
+   ?opening=off turn both openings off) and ?countdown-finale-preview=1 (countdown finale).
    A new preview = one more entry in DEFS below (its key must be here for it to follow the account), and its own code
    asks SL_PREVIEWS.on(key). For a normal visitor (nothing switched on) this does nothing and loads nothing. */
 (function(){try{var W=window,S=W.localStorage,L=location,PRE="sl-art-preview-",P=W.SL_PREVIEWS;
@@ -20,6 +21,10 @@ var DEFS=[
  {key:"opening",label:"New opening",about:"The opening as a poster collage",
   apply:function(v){try{var ss=W.sessionStorage;if(v){if(!/[?&]opening=/.test(L.search)&&!ss.getItem("sl-opening-style"))ss.setItem("sl-opening-style","collage")}else if(ss.getItem("sl-opening-style")==="collage")ss.removeItem("sl-opening-style")}catch(e){}},
   live:function(){return true}},
+ {key:"cinematic",label:"Cinematic opening",about:"A new opening: the logo assembles in a tropical night, a warm light opens onto a curated snake photo (Skip, sound, Replay in Settings)",
+  live:function(){return true}},
+ {key:"country",label:"Country card",about:"\"Explore snakes in <your country>\" just under the opening photo, with a country picker",
+  live:function(){return !!W.SL_COUNTRY_CARD}},
  {key:"finale",label:"Countdown finale",about:"Plays the countdown's last minute for you",
   apply:function(v){if(v)W.__slCdFinPv=1},
   live:function(){return !W.SL_EV}}
@@ -34,7 +39,7 @@ if(m){var v=decodeURIComponent(m[1]),k=v.replace(/-off$/,"");
  if(v==="off"||v==="none")DEFS.forEach(function(x){if(S.getItem(PRE+x.key)!==null)S.setItem(PRE+x.key,"0")});
  else if(def(k))S.setItem(PRE+k,k===v?"1":"0");
  var u=new URL(L.href);u.searchParams.delete("preview");history.replaceState(history.state,"",u.pathname+u.search+u.hash)}
-var o=/[?&]opening=([^&#]*)/.exec(q);if(o){if(o[1]==="collage")S.setItem(PRE+"opening","1");else if(/^(off|classic|none|default)$/.test(o[1]))S.setItem(PRE+"opening","0")}
+var o=/[?&]opening=([^&#]*)/.exec(q);if(o){if(o[1]==="collage"){S.setItem(PRE+"opening","1");S.setItem(PRE+"cinematic","0")}else if(o[1]==="cinematic")S.setItem(PRE+"cinematic","1");else if(/^(off|classic|none|default)$/.test(o[1])){S.setItem(PRE+"opening","0");S.setItem(PRE+"cinematic","0")}else if(o[1]==="wall")S.setItem(PRE+"cinematic","0")}
 if(/[?&]countdown-finale-preview=1(&|$)/.test(q))S.setItem(PRE+"finale","1");
 else if(/[?&]countdown-finale-preview=0(&|$)/.test(q))S.setItem(PRE+"finale","0");
 // what this page started with: a preview that arrives later (from the account) is switched on in place, or with one reload
