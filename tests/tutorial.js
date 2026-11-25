@@ -1,6 +1,6 @@
 // Run: serve the repo (python3 -m http.server $PORT --bind 127.0.0.1), then  PORT=<port> node tests/tutorial.js [screenshot-dir]
 // (PAGE=snakelist-synced.html tests the canonical file directly - the charset and viewport tags the website adds are put in front.)
-// v6.28: the tutorial and guides (script#sl-tour).
+// v6.28: the tutorial and guides (script#sl-tour) - the "tutorial" preview, switched on here.
 //  * first visit: the opening, then "How well do you know snakes?", then the welcome - Start Quick Tour / Explore Full Tutorial /
 //    Skip for now - and nothing else pops up meanwhile (SL_canPrompt says no)
 //  * the Quick Tour and the Full Tutorial run to the end in the learning order (7 stages), on a computer and on a phone
@@ -24,6 +24,8 @@ async function fresh(b, o) {
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', (e) => errs.push(e.message)); p.errs = errs;
   await p.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, (r) => r.abort());
   if (/synced/.test(PAGE)) await p.route(/snakelist-synced\.html/, async (r) => { const res = await r.fetch(); r.fulfill({ response: res, body: '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">' + (await res.text()), headers: { ...res.headers(), 'content-type': 'text/html; charset=utf-8' } }); });
+  // the new tutorial is the "tutorial" preview (Settings > Previews); without it the old tutorial runs
+  await p.addInitScript(() => { if (localStorage.getItem('sl-art-preview-tutorial') == null) localStorage.setItem('sl-art-preview-tutorial', '1'); });
   if (o.init) await p.addInitScript(o.init);
   await p.goto(BASE + PAGE, { waitUntil: 'load', timeout: 120000 });
   await p.waitForFunction(() => window.__introDone, null, { timeout: 90000 });

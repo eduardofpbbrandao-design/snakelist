@@ -31368,7 +31368,7 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
       sec.addEventListener("click", function (e) {
         var s = e.target.closest("[data-pv]"), R = reg(); if (!R) return;
         if (s) { R.set(s.getAttribute("data-pv"), s.getAttribute("aria-checked") !== "true"); changedHere = true; render(box); return; }
-        if (e.target.closest("[data-pv-allon]")) { R.list().forEach(function (p) { if (!p.on && p.key !== "events") R.set(p.key, true); }); changedHere = true; render(box); return; }
+        if (e.target.closest("[data-pv-allon]")) { R.list().forEach(function (p) { if (!p.on && p.key !== "events") R.set(p.key, true); }); if (R.menu) R.menu(true); changedHere = true; render(box); return; }
         if (e.target.closest("[data-pv-alloff]")) { R.list().forEach(function (p) { if (p.on) R.set(p.key, false); }); changedHere = true; render(box); return; }
         if (e.target.closest("[data-pv-reload]")) location.reload();
       });

@@ -2,7 +2,8 @@
 // its preview switch (?countdown-finale-preview=1): the last minute opens the big panel (not while typing - then on
 // blur), the last 10 seconds glow red/green (at most 2 colour changes a second, see-through tint), "reduce motion"
 // keeps the glow still, and zero says "SnakeList Christmas is here!" and then ends without switching Christmas on.
-// Without the switch nothing pretends anything.
+// Without the switch nothing pretends anything. Both are the "finale" preview (Settings > Previews, ?preview=finale):
+// the time zone row and the finale exist only with it on.
 // Run: python3 build-site.py, serve the repo (python3 -m http.server $PORT), then  PORT=<port> node tests/countdown-finale-tz.js
 // (takes about 2 minutes: the preview really counts down 70 seconds)
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
@@ -11,9 +12,10 @@ let fails = 0;
 const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) { fails++; process.exitCode = 1; } };
 const seed = () => { ['sl-intro-seen', 'sl-tour-done', 'sl-tour-seen', 'sl-news-off', 'sl-level-seen'].forEach((k) => localStorage.setItem(k, '1')); localStorage.setItem('sl-consent', 'essential'); };
 
-async function page(b, query, o) {
+async function page(b, query, o, pv) {
   const ctx = await b.newContext(Object.assign({ viewport: { width: 1280, height: 800 }, timezoneId: 'Europe/Lisbon' }, o || {}));
   await ctx.addInitScript(seed);
+  if (pv) await ctx.addInitScript((pv) => Object.keys(pv).forEach((k) => localStorage.setItem('sl-art-preview-' + k, pv[k])), pv);
   const p = await ctx.newPage(); p.setDefaultTimeout(150000);
   p.errs = []; p.on('pageerror', (e) => p.errs.push(e.message));
   await p.goto(BASE + 'index.html' + query, { waitUntil: 'load', timeout: 180000 });
@@ -26,7 +28,10 @@ const ready = (p) => p.waitForFunction(() => window.SL_EVENTS && SL_EVENTS.count
 
   // ------------------------------------------------ the time zone setting
   {
-    const { ctx, p } = await page(b, '');
+    // without the finale preview there is no time zone row
+    { const { ctx, p } = await page(b, '', null, { finale: '0' }); await p.waitForFunction(() => window.__introDone, null, { timeout: 150000 }); await p.waitForTimeout(1500);
+      ok(await p.evaluate(() => !window.SL_TZ && !document.getElementById('ss-tz-row')), 'time zone: not there without the finale preview'); await ctx.close(); }
+    const { ctx, p } = await page(b, '?preview=finale');
     await p.waitForFunction(() => window.SL_TZ && document.getElementById('ss-tz-row'), null, { timeout: 150000 });
     const r = await p.evaluate(() => {
       const o = {};
@@ -66,7 +71,7 @@ const ready = (p) => p.waitForFunction(() => window.SL_EVENTS && SL_EVENTS.count
 
   // ------------------------------------------------ no switch: nothing pretends (events preview loads at once)
   {
-    const { ctx, p } = await page(b, '?preview=events');
+    const { ctx, p } = await page(b, '?preview=events', null, { finale: '0' });
     await ready(p);
     const r = await p.evaluate(() => ({ fp: SL_EVENTS.finalePreview, d: Math.abs(SL_EVENTS.time.display() - Date.now()) < 120000 }));
     ok(!r.fp && r.d, 'without the switch the countdown is not pretending');

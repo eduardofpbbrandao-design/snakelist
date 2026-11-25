@@ -36,6 +36,8 @@ async function page(b, opts, seed) {
   });
   await p.addInitScript((seed) => {
     for (const k of ['sl-intro-seen', 'sl-tour-done', 'sl-tour-seen', 'sl-news-off', 'sl-level-seen']) localStorage.setItem(k, '1');
+    // the new bar, Manage and Cookie choices are the "cookies" preview (Settings > Previews); the protective part runs for everyone
+    if (localStorage.getItem('sl-art-preview-cookies') == null) localStorage.setItem('sl-art-preview-cookies', '1');
     Object.keys(seed || {}).forEach((k) => localStorage.setItem(k, seed[k]));
   }, seed || {});
   return p;

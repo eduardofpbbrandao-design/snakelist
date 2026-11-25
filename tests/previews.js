@@ -7,6 +7,8 @@
 //   b) ?preview=events while signed in: the switch is saved to the account
 //   c) a fresh browser signing in to that account gets the events preview
 //   d) Settings > Previews: the switch turns it off and on again (the account follows), "Turn all previews off"
+//   e) ?preview=all: the five previews waiting for approval are on (classes on <html>, the new parts running), Settings
+//      lists all six switches; ?preview=off puts everything back as today
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const path = require('path');
 const PORT = process.env.PORT || 8766, BASE = 'http://127.0.0.1:' + PORT + '/';
@@ -161,6 +163,33 @@ const closeSettings = (p) => p.keyboard.press('Escape');
       await closeSettings(p);
       t0 = Date.now(); while (accountKV()['sl-art-preview-events'] !== '0' && Date.now() - t0 < 60000) await p.waitForTimeout(500);
       ok(accountKV()['sl-art-preview-events'] === '0', 'and the account follows');
+      ok(errs.length === 0, 'no page errors ' + JSON.stringify(errs.slice(0, 3)));
+      await ctx.close();
+    }
+    // ---------------------------------------------------------------- e) ?preview=all: the five previews waiting for approval
+    console.log('--- e) ?preview=all');
+    {
+      const { ctx, p, errs } = await browser(b);
+      await p.goto(BASE + 'index.html?preview=all', { waitUntil: 'load', timeout: 240000 });
+      await enter(p);
+      const st = await p.evaluate(() => ({ cls: ['opening', 'design', 'cookies', 'tutorial', 'finale'].filter((k) => document.documentElement.classList.contains('sl-pv-' + k)),
+        ev: localStorage.getItem('sl-art-preview-events'), menu: localStorage.getItem('sl-art-preview-menu'), ds: document.getElementById('sl-ds-css').media, tour: document.getElementById('sl-tour-css').media,
+        api: { ds: !!window.__slDS, tour: !!window.SL_TOUR, tz: !!window.SL_TZ }, q: location.search }));
+      ok(st.cls.length === 5, 'the five previews are on, each a class on <html> (' + st.cls.join(', ') + ')');
+      ok(st.ev === null && st.menu === '1', 'the events preview is left alone; the Previews section is remembered');
+      ok(st.ds === 'all' && st.tour === 'all' && st.api.ds && st.api.tour && st.api.tz, 'the new design, tutorial and time zone are running');
+      ok(!/preview=/.test(st.q), 'the switch is taken out of the address');
+      ok(await openSettings(p), 'Settings shows the Previews section');
+      const keys = await p.evaluate(() => [].map.call(document.querySelectorAll('#sl-set-previews [data-pv]'), (x) => x.getAttribute('data-pv') + '=' + x.getAttribute('aria-checked')));
+      ok(['opening', 'design', 'cookies', 'tutorial', 'finale'].every((k) => keys.indexOf(k + '=true') >= 0) && keys.length === 6, 'all six switches are listed, the five on (' + keys.join(' ') + ')');
+      if (SHOTS) { await p.locator('#sl-set-previews').scrollIntoViewIfNeeded(); await p.waitForTimeout(300); await p.locator('#sl-set-previews').screenshot({ path: path.join(SHOTS, 'settings-previews-all.png') }); }
+      await closeSettings(p);
+      await p.goto(BASE + 'index.html?preview=off', { waitUntil: 'load', timeout: 240000 });
+      await ready(p);
+      const off = await p.evaluate(() => ({ cls: /sl-pv-/.test(document.documentElement.className), ds: document.getElementById('sl-ds-css').media, any: window.SL_PREVIEWS.any(), lbl: (document.querySelector('#grid .card .lbl-mark') || {}).textContent }));
+      ok(!off.cls && off.ds === 'not all' && !off.any && off.lbl === 'Mark Seen', '?preview=off: everything as today (' + JSON.stringify(off) + ')');
+      ok(!(await openSettings(p)), 'not signed in, with none on: no Previews section');
+      await closeSettings(p);
       ok(errs.length === 0, 'no page errors ' + JSON.stringify(errs.slice(0, 3)));
       await ctx.close();
     }
