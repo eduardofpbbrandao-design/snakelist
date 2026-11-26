@@ -34,7 +34,8 @@ async function newPage(br, opts = {}) {
   if (opts.init) await pg.addInitScript(opts.init);
   return { ctx, pg, reqs, errs };
 }
-const settle = (pg) => pg.waitForFunction(() => { const st = window.__sp3d.controls.st; return !st.goal && !st.vaz && !st.vel && !st.dragging; }, null, { timeout: 60000 }).catch(() => {});
+// (v5.74: Reset and the camera buttons glide - a tween - so a view has settled only when that has finished too)
+const settle = (pg) => pg.waitForFunction(() => { const c = window.__sp3d.controls, st = c.st; return !st.goal && !st.vaz && !st.vel && !st.dragging && !c.tweening; }, null, { timeout: 60000 }).catch(() => {});
 const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.querySelector('.sp-rl .sp3d-canvas'), null, { timeout: 90000 });
 
 (async () => {
@@ -54,6 +55,9 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
       await pg.waitForTimeout(200);
       counts.push({ open: await pg.evaluate(() => window.__lcount()), canvases: await pg.evaluate(() => document.querySelectorAll('canvas.sp3d-canvas').length), dialogs: await pg.evaluate(() => document.querySelectorAll('dialog.sp-rl').length) });
       await pg.click('.sp-rl-x');
+      // the viewer is taken down on the dialog's "close" event, a task that waits behind the frame being drawn - on
+      // software WebGL one frame can take seconds, so wait for the teardown (bounded) rather than a fixed 200 ms
+      await pg.waitForFunction(() => !window.__sp3d && !document.querySelector('canvas.sp3d-canvas'), null, { timeout: 30000 }).catch(() => {});
       await pg.waitForTimeout(200);
       counts[i].closed = await pg.evaluate(() => window.__lcount());
       counts[i].canvasAfterClose = await pg.evaluate(() => document.querySelectorAll('canvas.sp3d-canvas').length);
@@ -99,7 +103,7 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     st = await pg.evaluate(() => { const s = window.__sp3d, i = s.info(); return { d: s.controls.st.d, dFit: i.dFit, el: s.controls.st.el }; });
     ok('R resets the view', Math.abs(st.d - st.dFit) / st.dFit < 0.01 && Math.abs(st.el - Math.PI / 6) < 0.01, JSON.stringify(st));
     // no spin: after release with no movement, nothing keeps moving
-    await pg.waitForFunction(() => !window.__sp3d.controls.st.goal, null, { timeout: 120000 }).catch(() => {}); // software rendering is slow; wait for the reset to finish
+    await pg.waitForFunction(() => !window.__sp3d.controls.st.goal && !window.__sp3d.controls.tweening, null, { timeout: 120000 }).catch(() => {}); // software rendering is slow; wait for the reset to finish
     const az2 = await pg.evaluate(() => window.__sp3d.controls.st.az); await pg.waitForTimeout(1500);
     ok('no unexpected spin at rest', Math.abs((await pg.evaluate(() => window.__sp3d.controls.st.az)) - az2) < 1e-6);
     // touch: two synthetic touch pointers pinching apart zoom in; one finger orbits
@@ -135,12 +139,20 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     await pg.screenshot({ path: OUT + 'test-after-context-restore.png' });
 
     // v4.63: only Reset stays under the model
-    const bar = await pg.evaluate(() => [].map.call(document.querySelectorAll('.sp3d-bar button'), (b) => b.textContent));
-    ok('the buttons under the model (v4.81: Anatomy, See it eat, Slither, See eye shield, Fullscreen)', JSON.stringify(bar) === JSON.stringify(['Reset', 'Open mouth', 'Anatomy', 'See it eat', 'Slither', 'See eye shield', 'Full body', 'Head close-up', 'Pattern from above', 'Size vs person', 'Fullscreen']), JSON.stringify(bar));
-    const hdb = await pg.evaluate(() => [].map.call(document.querySelectorAll('.sp-rl-hd .sp3d-hdb button'), (b) => b.textContent));
-    ok('Compare photo and See countries beside the name (v4.81)', JSON.stringify(hdb) === JSON.stringify(['Compare photo', 'See countries']), JSON.stringify(hdb));
+    // v5.79: See eye shield removed, Fullscreen is an icon in the view's corner, the rest behind "Show more";
+    // v6.13: Normal / Anatomy / Size vs person are a View group (with a "See more" menu of the same three when narrow)
+    const bar = await pg.evaluate(() => ({ txt: [].map.call(document.querySelectorAll('.sp3d-bar button'), (b) => b.textContent),
+      fsc: (document.querySelector('.sp3d-stage .sp3d-fsc') || {}).getAttribute && document.querySelector('.sp3d-stage .sp3d-fsc').getAttribute('aria-label') }));
+    const wantBar = ['Reset', 'Open mouth', 'Normal', 'Anatomy', 'Size vs person', 'See it eat', 'Slither', 'Full body', 'Head close-up', 'Pattern from above', 'Show more'];
+    ok('the buttons under the model (Reset, Open mouth, the View group, See it eat, Slither, camera views, Show more; Fullscreen as a corner icon)',
+      wantBar.every((t) => bar.txt.includes(t)) && !bar.txt.includes('See eye shield') && bar.fsc === 'Fullscreen', JSON.stringify(bar));
+    // v5.50: Compare photo and See countries sit inside the 3D view (top-right; v6.13: the buttons' first line when the view is narrow)
+    const hdb = await pg.evaluate(() => [].map.call(document.querySelectorAll('.sp3d-stage .sp3d-hdb button'), (b) => b.textContent));
+    ok('Compare photo and See countries in the 3D view (v5.50)', JSON.stringify(hdb) === JSON.stringify(['Compare photo', 'See countries']), JSON.stringify(hdb));
     // resize to phone width
     await pg.setViewportSize({ width: 390, height: 844 }); await pg.waitForTimeout(800);
+    // (the canvas follows its box through a ResizeObserver, which runs with the next frame - seconds away on software WebGL)
+    await pg.waitForFunction(() => { const c = document.querySelector('.sp3d-canvas'); return c && Math.abs(c.clientWidth - c.width / (window.devicePixelRatio || 1)) < 2; }, null, { timeout: 30000 }).catch(() => {});
     const rs = await pg.evaluate(() => { const c = document.querySelector('.sp3d-canvas'); return { cw: c.clientWidth, ch: c.clientHeight, bw: c.width / (window.devicePixelRatio || 1), aspect: window.__sp3d.cam.aspect, docW: document.documentElement.scrollWidth }; });
     ok('resize to phone updates canvas and aspect; no horizontal scroll', Math.abs(rs.cw - rs.bw) < 2 && Math.abs(rs.aspect - rs.cw / rs.ch) < 0.01 && rs.docW <= 390, JSON.stringify(rs));
     await pg.screenshot({ path: OUT + 'test-resized-phone.png' });
@@ -148,19 +160,29 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     await pg.setViewportSize({ width: 1280, height: 900 }); await pg.waitForTimeout(500);
     const sh = await pg.evaluate(async () => {
       const s = window.__sp3d, fx = s.fx, click = (t) => [...document.querySelectorAll('.sp3d-bar button')].find((b) => b.textContent === t).click(), out = {};
-      click('See it eat'); fx.test.freeze(3); s.frame(); out.eating = { show: fx.test.show && fx.test.show.name, locked: fx.locked, mouth: s.mouthGoal, rig: fx.test.rig.active };
-      click('Stop'); s.frame(); out.after = { show: fx.test.show, locked: fx.locked, mouth: s.mouthGoal, rig: fx.test.rig.active };
+      // (some steps finish a moment later on purpose - see below - so each one is waited for, drawing frames meanwhile)
+      const until = async (f, n) => { for (let k = 0; k < (n || 100) && !f(); k++) { s.frame(); await new Promise((r) => setTimeout(r, 100)); } return f(); };
+      // the hunt's timing follows the snake's diet (v5.78; ~24 s for this rattlesnake, the strike a few seconds in), so the
+      // show is frozen step by step until the mouth opens; since v5.78 you can still turn and zoom during it (never locked)
+      click('See it eat'); let mouthMax = 0;
+      for (let t = 0.5; t <= 12 && mouthMax <= 0.3; t += 0.5) { fx.test.freeze(t); s.frame(); mouthMax = Math.max(mouthMax, s.mouthGoal); }
+      out.eating = { show: fx.test.show && fx.test.show.name, locked: fx.locked, mouth: mouthMax, rig: fx.test.rig.active };
+      click('Stop eating'); s.frame(); out.after = { show: fx.test.show, locked: fx.locked, mouth: s.mouthGoal, rig: fx.test.rig.active };
       click('Slither'); await new Promise((r) => setTimeout(r, 400)); s.frame(); out.slither = fx.test.slither && fx.test.rig.active;
-      [...document.querySelectorAll('.sp3d-bar button')].find((b) => /slither/i.test(b.textContent)).click(); await new Promise((r) => setTimeout(r, 2500)); s.frame();
+      [...document.querySelectorAll('.sp3d-bar button')].find((b) => /slither/i.test(b.textContent)).click(); await until(() => !fx.test.slither, 300); // (v6.02: it slithers home first)
       out.slitherStopped = !fx.test.slither;
-      click('Size vs person'); const d0 = s.controls.st.goal ? s.controls.st.goal.d : s.controls.st.d; click('Open mouth');
-      out.mouthOnly = { scale: !!document.querySelector('.sp3d-bar button[aria-pressed=true][title^="Show its adult"]'), sameView: Math.abs((s.controls.st.goal ? s.controls.st.goal.d : s.controls.st.d) - d0) < 1e-6, mouth: s.mouthGoal };
-      click('Size vs person'); click('Close mouth');
+      // (v5.09/v5.74: one thing at a time - Open mouth ends Size vs person, as Size vs person closes the mouth)
+      const scaleOn = () => [...document.querySelectorAll('.sp3d-bar button[aria-pressed=true]')].some((b) => b.textContent === 'Back to model');
+      click('Size vs person'); const wasOn = await until(scaleOn); click('Open mouth'); await until(() => s.mouthGoal === 1);
+      out.mouthOnly = { wasOn, scale: scaleOn(), mouth: s.mouthGoal };
+      click('Size vs person'); out.mouthOnly.closedBySize = (await until(scaleOn)) && s.mouthGoal === 0;
+      const back = [...document.querySelectorAll('.sp3d-bar button')].find((b) => b.textContent === 'Back to model'); if (back) back.click();
       return out;
     });
-    ok('See it eat: a show takes the camera and opens the mouth, Stop gives them back', sh.eating.show === 'eat' && sh.eating.locked && sh.eating.mouth > 0.3 && sh.eating.rig && !sh.after.show && !sh.after.locked && sh.after.mouth === 0 && !sh.after.rig, JSON.stringify(sh));
+    ok('See it eat: the show opens the mouth (the camera stays yours), Stop eating gives everything back', sh.eating.show === 'eat' && !sh.eating.locked && sh.eating.mouth > 0.3 && sh.eating.rig && !sh.after.show && !sh.after.locked && sh.after.mouth === 0 && !sh.after.rig, JSON.stringify(sh));
     ok('Slither starts and stops', sh.slither && sh.slitherStopped, JSON.stringify(sh));
-    ok('Open mouth after Size vs person only opens the mouth', sh.mouthOnly.scale && sh.mouthOnly.sameView && sh.mouthOnly.mouth === 1, JSON.stringify(sh.mouthOnly));
+    ok('one thing at a time: Open mouth ends Size vs person, Size vs person closes the mouth', sh.mouthOnly.wasOn && !sh.mouthOnly.scale && sh.mouthOnly.mouth === 1 && sh.mouthOnly.closedBySize, JSON.stringify(sh.mouthOnly));
+    await settle(pg); // (Back to model glides the camera home first; W during that glide is overridden by it)
     await pg.focus('.sp3d-canvas'); const w0 = await pg.evaluate(() => [window.__sp3d.controls.st.px, window.__sp3d.controls.st.pz]);
     await pg.keyboard.down('w'); await pg.waitForTimeout(1500); await pg.keyboard.up('w');
     const w1 = await pg.evaluate(() => { const st = window.__sp3d.controls.st; return { px: st.px, pz: st.pz, fx: -Math.sin(st.az), fz: -Math.cos(st.az) }; });
@@ -280,16 +302,19 @@ const waitViewer = (pg) => pg.waitForFunction(() => window.__sp3d && document.qu
     ok('no WebGL: fallback message with an information button', /WebGL/.test(t) && !!(await pg.$('.sp3d-msg button:text-is("See information instead")')), t);
   }
 
-  // 7. hidden tab pauses rendering
+  // 7. hidden tab pauses rendering. v5.73: the scenery (wind in the grass, water, the snake's idle life) keeps moving gently
+  // while it is left alone, so "no frames while idle" holds where that is off - with reduced motion
   {
-    const { pg } = await newPage(br);
+    const { pg } = await newPage(br, { ctx: { reducedMotion: 'reduce' } });
     await pg.goto(BASE + 'smooth-snake-coronella-austriaca.html#real'); await waitViewer(pg);
     await pg.evaluate(() => window.__sp3d.envReady); await pg.waitForTimeout(1500); // the photo surroundings arrive once, then nothing moves
     const r = await pg.evaluate(async () => {
-      const ren = window.__sp3d.renderer; let n = 0; const o = ren.render.bind(ren); ren.render = (a, b) => { n++; o(a, b); };
-      await new Promise((r) => setTimeout(r, 1000)); const idle = n;
+      // (frames the viewer draws - window.__slFrames, one entry per frame in test mode - not every renderer.render call:
+      // the photo surroundings arriving late are turned into lighting with render calls of their own, which are not frames)
+      const F = () => (window.__slFrames || []).length; let n = 0; const n0 = F(); const cnt = () => (n = F() - n0);
+      await new Promise((r) => setTimeout(r, 1000)); const idle = cnt();
       Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
-      window.__sp3d.controls.setGoal({ az: 2 }); await new Promise((r) => setTimeout(r, 800)); const hiddenRenders = n - idle;
+      window.__sp3d.controls.setGoal({ az: 2 }); await new Promise((r) => setTimeout(r, 800)); const hiddenRenders = cnt() - idle;
       return { idle, hiddenRenders };
     });
     ok('renders on demand only (no frames while idle) and pauses while the tab is hidden', r.idle <= 1 && r.hiddenRenders === 0, JSON.stringify(r));
