@@ -20,6 +20,8 @@ var DEFS=[
  {key:"opening",label:"New opening",about:"The opening as a poster collage",
   apply:function(v){try{var ss=W.sessionStorage;if(v){if(!/[?&]opening=/.test(L.search)&&!ss.getItem("sl-opening-style"))ss.setItem("sl-opening-style","collage")}else if(ss.getItem("sl-opening-style")==="collage")ss.removeItem("sl-opening-style")}catch(e){}},
   live:function(){return true}},
+ {key:"spot",label:"See the spot: new look",about:"Inspection light at night, a livelier forest and ground, the photo comparison (Fit photo, Photo | Scene on phones)",
+  live:function(){return true}},
  {key:"finale",label:"Countdown finale",about:"Plays the countdown's last minute for you",
   apply:function(v){if(v)W.__slCdFinPv=1},
   live:function(){return !W.SL_EV}}

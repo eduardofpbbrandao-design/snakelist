@@ -31,7 +31,7 @@ export function sunPos(date, lat, lon) {
 export function plugin(V, ui = {}) {
   const THREE = V.THREE, reduce = V.reduce || (() => false);
   let t = 0, goal = 0, from = 0, t0 = 0, scene = null, torch = null, stars = null, moon = null, nightEnv = null, moonDir = null;
-  let torchD = 1;
+  let torchD = 1, lampK = 1, lampW = 0.34; // v6.35: See the spot's Inspection light sets how strong (0 = off: moonlight only) and wide the torch is
   const tmpC = new THREE.Color(), saved = {}, cols = {};
   for (const k in NIGHT) cols[k] = new THREE.Color(NIGHT[k]);
 
@@ -145,7 +145,7 @@ export function plugin(V, ui = {}) {
 
   // ---- the swap ----
   function before(renderer) {
-    if (torch) torch.intensity = t > 0.0005 ? 2.4 * torchD * torchD * ease(t) : 0; // (decay 2: about the same light on the snake from any distance; never hidden, so no shader is rebuilt)
+    if (torch) { torch.angle = lampW; torch.intensity = t > 0.0005 ? 2.4 * lampK * torchD * torchD * ease(t) : 0; } // (decay 2: about the same light on the snake from any distance; never hidden, so no shader is rebuilt)
     const ctx = V.ctx; if (!ctx || t <= 0.0005) return;
     const k = t, sun = ctx.sun, hemi = ctx.hemi;
     saved.on = true;
@@ -196,5 +196,7 @@ export function plugin(V, ui = {}) {
     b.remove();
   }
 
-  return { onBuild, camera, frame, set, dispose, button: b, get night() { return goal > 0.5; }, get t() { return t; } };
+  // v6.35: the torch as See the spot's labelled Inspection light (k: strength, 0 = off; w: the cone's half-angle)
+  function lamp(k, w) { lampK = Math.max(0, +k || 0); if (w) lampW = w; V.kick(); }
+  return { onBuild, camera, frame, set, dispose, lamp, button: b, get night() { return goal > 0.5; }, get t() { return t; } };
 }

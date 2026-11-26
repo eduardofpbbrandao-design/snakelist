@@ -35,6 +35,16 @@ const CSS = `
 .sp3d-side figcaption{flex:none;font:12px/1.4 Inter,system-ui,sans-serif;color:var(--muted);padding:6px 10px}
 .sp3d-side iframe{flex:1 1 auto;display:block;width:100%;height:100%;min-height:260px;border:0;background:var(--card)}
 .sp3d-side .sp3d-none2{padding:16px;font-size:14px;color:var(--muted)}
+.sp3d-pzh-top{top:8px;bottom:auto;transition:opacity .4s}.sp3d-pzh-out{opacity:0}
+.sp3d-cmp{flex:none;display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px 2px;border-top:1px solid var(--line)}
+.sp3d-cb{min-height:34px;padding:4px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text);font:600 12.5px/1.2 Inter,system-ui,sans-serif;cursor:pointer}
+.sp3d-cb:hover{border-color:#4fa64a}.sp3d-cb[aria-pressed=true]{background:#4fa64a;border-color:#4fa64a;color:#fff}.sp3d-cb:focus-visible,.sp3d-sg:focus-visible{outline:3px solid #9be07c;outline-offset:2px}
+.sp3d-side figcaption.sp3d-credit2{font:500 12.5px/1.45 Inter,system-ui,sans-serif;color:var(--text);opacity:.85;padding:6px 10px 9px}
+.sp3d-row.sp3d-wphoto>.sp3d-side{flex-basis:min(66%,900px)}.sp3d-row.sp3d-wscene>.sp3d-side{flex-basis:min(30%,380px)}
+.sp3d-seg2{display:none}
+@media (max-width:900px){.sp3d-row.sp3d-one{flex-direction:column}.sp3d-row.sp3d-one>.sp3d-seg2{display:flex;flex:none;align-self:center;gap:0;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card)}
+.sp3d-sg{min-height:38px;min-width:96px;padding:4px 16px;border:0;background:transparent;color:var(--text);font:600 14px Inter,system-ui,sans-serif;cursor:pointer}.sp3d-sg[aria-selected=true]{background:#4fa64a;color:#fff}
+.sp3d-row.sp3d-one>.sp3d-side{flex:1 1 auto;height:auto;min-height:60vh}.sp3d-row.sp3d-one[data-one=photo]>.sp3d-stage{display:none}.sp3d-row.sp3d-one[data-one=scene]>.sp3d-side{display:none}.sp3d-row.sp3d-one .sp3d-cw{display:none}}
 @media (max-width:640px){.sp3d-row{flex-direction:column}.sp3d-side{flex:0 0 auto;height:min(52vh,430px)}.sp3d-wrap:fullscreen .sp3d-side,.sp3d-max .sp3d-side{height:45%}}
 .sp3d-hdb{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;margin-right:auto}
 .sp3d-b.sp3d-hb{min-height:32px;padding:4px 10px;font-size:12.5px;display:inline-flex;align-items:center;gap:5px}
@@ -90,6 +100,9 @@ const CSS = `
 .sp3d-tip[hidden]{display:none}
 @media (max-width:560px){.sp3d-list{width:min(175px,46%);max-height:calc(52% - 12px);font-size:12px}.sp3d-list button.sp3d-li{font-size:11.5px;padding:4px 6px}.sp3d-capt{font-size:12.5px;padding:6px 10px;bottom:8px}.sp3d-info{font-size:12px;width:min(230px,78%)}}
 `;
+// v6.35: the preview switch of "See the spot" (tools/previews.js; its own key where that isn't loaded) and touch screens
+const spotPv = () => { try { const P = window.SL_PREVIEWS; if (P && typeof P.on === 'function') return !!P.on('spot'); return localStorage.getItem('sl-art-preview-spot') === '1'; } catch (e) { return false; } };
+const touchUI = () => window.innerWidth < 560 || !!(window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches);
 function injectCSS() {
   if (typeof document === 'undefined' || document.getElementById('sp3d-x-css')) return;
   const s = document.createElement('style'); s.id = 'sp3d-x-css'; s.textContent = CSS; document.head.appendChild(s);
@@ -803,29 +816,34 @@ export function create(V) {
     mkH('map', 'See countries', ICON.map, 'Show the countries where it lives beside the 3D model');
     stage.appendChild(hdb); // v5.50: inside the 3D view, in its top-right corner
   }
-  let sideKind = null;
+  let sideKind = null, sideRO = null;
   function toggleSide(k) {
     if (sideKind === k) { closeSide(); return; }
     sideKind = k; side.innerHTML = ''; side.hidden = false;
     for (const q in hdbs) hdbs[q].setAttribute('aria-pressed', String(q === k));
-    const hd = el('div', 'sp3d-side-hd'), t = el('span', '', k === 'photo' ? ((V.opts.name || '').trim() ? V.opts.name.trim() + ' photo' : 'Photo') : 'Where it lives'), x = el('button', 'sp3d-side-x', '×');
+    const ph0 = k === 'photo' ? (typeof V.opts.photo === 'function' ? V.opts.photo() : V.opts.photo) : null;
+    const hd = el('div', 'sp3d-side-hd'), t = el('span', '', k === 'photo' ? (ph0 && ph0.title ? ph0.title : (V.opts.name || '').trim() ? V.opts.name.trim() + ' photo' : 'Photo') : 'Where it lives'), x = el('button', 'sp3d-side-x', '×');
     x.type = 'button'; x.setAttribute('aria-label', 'Close'); on(x, 'click', closeSide); hd.append(t, x); side.appendChild(hd);
     const b = el('div', 'sp3d-side-b'); side.appendChild(b);
     if (k === 'photo') {
-      const ph = typeof V.opts.photo === 'function' ? V.opts.photo() : V.opts.photo;
+      const ph = ph0;
       if (ph && ph.src) {
         const f = el('figure'), im = new Image(); im.alt = ph.alt || ('Photo of ' + V.opts.name); im.decoding = 'async';
         // v5.12: the sharpest copy there is - iNaturalist's large photo (not the small medium one or the 540 px tile);
         // if it does not load, the photo SnakeList was given, then its saved tile
         const tries = [], it = window.SL_PHOTOS && window.SL_PHOTOS.items && window.SL_PHOTOS.items[V.opts.id], fn = it && /^\d+\.(jpe?g|png|webp)$/i.test(String(it[4] || '')) ? String(it[4]) : '';
         if (/inaturalist-open-data[^/]*\/photos\/\d+\/(medium|small|square)\./.test(ph.src)) tries.push(ph.src.replace(/\/(medium|small|square)\./, '/large.'));
-        else if (fn) tries.push('https://inaturalist-open-data.s3.amazonaws.com/photos/' + fn.replace('.', '/large.'));
+        else if (fn && !ph.own) tries.push('https://inaturalist-open-data.s3.amazonaws.com/photos/' + fn.replace('.', '/large.')); // (v6.35: never in place of a sighting's OWN photo - See the spot showed the species' photo for every sighting)
         tries.push(ph.src); if (ph.fb) tries.push(ph.fb);
         let ti = 0; im.src = tries[0]; on(im, 'error', () => { if (++ti < tries.length) im.src = tries[ti]; });
         // v5.12: the photo zooms (wheel, pinch, double-click) and pans (drag) so you can compare the scales up close
-        const vp = el('div', 'sp3d-pz'); vp.appendChild(im); f.appendChild(vp); panZoom(vp, im);
-        const zh = el('div', 'sp3d-pzh', (window.innerWidth < 560 ? 'Pinch' : 'Scroll') + ' to zoom the photo, drag to move it, double-' + (window.innerWidth < 560 ? 'tap' : 'click') + ' to zoom in'); vp.appendChild(zh);
-        if (ph.credit) { const c = el('figcaption'); c.innerHTML = ph.credit; f.appendChild(c); } b.appendChild(f);
+        // v6.35 (preview "spot"): in See the spot the photo opens whole (fit, not a tall crop), with Fit photo / Reset camera /
+        // Focus snake and a bigger photo or a bigger scene; its credit is a line of its own, apart from the instructions
+        const pvC = spotPv() && !!stage.closest('.sl3d-spot');
+        const vp = el('div', 'sp3d-pz'); vp.appendChild(im); f.appendChild(vp); const pz = panZoom(vp, im, pvC);
+        const zh = el('div', 'sp3d-pzh', (touchUI() ? 'Pinch' : 'Scroll') + ' to zoom the photo, drag to move it, double-' + (touchUI() ? 'tap' : 'click') + ' to zoom in'); vp.appendChild(zh);
+        if (pvC) { zh.classList.add('sp3d-pzh-top'); setTimeout(() => zh.classList.add('sp3d-pzh-out'), 6000); f.appendChild(compareBar(pz)); }
+        if (ph.credit) { const c = el('figcaption'); if (pvC) c.className = 'sp3d-credit2'; c.innerHTML = ph.credit; f.appendChild(c); } b.appendChild(f);
       } else b.appendChild(el('p', 'sp3d-none2', 'SnakeList has no photo of this snake yet.'));
     } else {
       const u = typeof V.opts.mapUrl === 'function' ? V.opts.mapUrl() : V.opts.mapUrl;
@@ -834,12 +852,15 @@ export function create(V) {
     }
     V.kick();
   }
-  function panZoom(vp, im) {
+  function panZoom(vp, im, contain) {
     let z = 1, tx = 0, ty = 0; const ptr = new Map(); let pinch = 0, z0 = 1, last = null;
-    // the photo first fills the whole panel (cover); zooming out to 1 shows all of it (contain)
+    // the photo first fills the whole panel (cover); zooming out to 1 shows all of it (contain). v6.35 (preview "spot"):
+    // contain first - the whole photo, never a tall crop of it
     const coverK = () => { const w = vp.clientWidth, h = vp.clientHeight, iw = im.naturalWidth, ih = im.naturalHeight; if (!w || !h || !iw || !ih) return 1; const a = Math.min(w / iw, h / ih), b = Math.max(w / iw, h / ih); return b / a; };
-    const fit = () => { z = coverK(); tx = ty = 0; apply(); };
-    on(im, 'load', fit); if (window.ResizeObserver) { const ro = new ResizeObserver(() => { if (z <= coverK() + 0.01) fit(); else apply(); }); ro.observe(vp); }
+    const startK = () => (contain ? 1 : coverK());
+    const fit = () => { z = startK(); tx = ty = 0; apply(); };
+    on(im, 'load', fit);
+    if (window.ResizeObserver) { if (sideRO) sideRO.disconnect(); const ro = sideRO = new ResizeObserver(() => { if (z <= startK() + 0.01) fit(); else apply(); }); ro.observe(vp); } // (v6.35: one watcher, let go with the panel)
     const clampT = () => { const w = vp.clientWidth, h = vp.clientHeight, iw = im.naturalWidth || w, ih = im.naturalHeight || h, a = Math.min(w / iw, h / ih), mx = Math.max(0, (z * a * iw - w) / 2), my = Math.max(0, (z * a * ih - h) / 2); tx = clamp(tx, -mx, mx); ty = clamp(ty, -my, my); };
     const apply = () => { clampT(); im.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + z + ')'; vp.classList.toggle('sp3d-pz-on', z > coverK() + 0.01); };
     const zoomAt = (nz, cx, cy) => { nz = clamp(nz, 1, coverK() * 6); const r = vp.getBoundingClientRect(), px = cx - r.left - r.width / 2, py = cy - r.top - r.height / 2; tx = px - ((px - tx) * nz) / z; ty = py - ((py - ty) * nz) / z; z = nz; apply(); };
@@ -853,8 +874,34 @@ export function create(V) {
     });
     const up = (e) => { ptr.delete(e.pointerId); if (ptr.size < 2) pinch = 0; last = ptr.size ? [...ptr.values()][0] : null; };
     on(vp, 'pointerup', up); on(vp, 'pointercancel', up);
+    return { fit, get fitted() { return Math.abs(z - startK()) < 0.01 && !tx && !ty; } };
   }
-  function closeSide() { sideKind = null; side.hidden = true; side.innerHTML = ''; for (const q in hdbs) hdbs[q].setAttribute('aria-pressed', 'false'); V.kick(); }
+  // v6.35 (preview "spot"): the buttons under the photo in See the spot - Fit photo, Reset camera, Focus snake, and which
+  // side is bigger (photo or scene). On a phone the two are not squeezed into narrow columns: a Photo | Scene switch
+  // shows one at a time (row.sp3d-one)
+  function compareBar(pz) {
+    const bar2 = el('div', 'sp3d-cmp'); bar2.setAttribute('role', 'toolbar'); bar2.setAttribute('aria-label', 'Compare the photo with the scene');
+    const mkB = (txt, fn, cls) => { const q = el('button', 'sp3d-cb' + (cls ? ' ' + cls : ''), txt); q.type = 'button'; on(q, 'click', fn); bar2.appendChild(q); return q; };
+    mkB('Fit photo', () => pz.fit());
+    mkB('Reset camera', () => { if (V.resetView) V.resetView(); V.kick(); });
+    mkB('Focus snake', () => { const inf = V.info; if (inf && V.view) V.view({ el: (16 * Math.PI) / 180, d: inf.dFit * 0.9, px: 0, pz: 0 }); V.kick(); });
+    const wide = (k) => { row.classList.toggle('sp3d-wphoto', k === 'photo'); row.classList.toggle('sp3d-wscene', k === 'scene'); bP.setAttribute('aria-pressed', String(k === 'photo')); bS.setAttribute('aria-pressed', String(k === 'scene')); setTimeout(() => V.kick(), 60); };
+    const bP = mkB('Bigger photo', () => wide(bP.getAttribute('aria-pressed') === 'true' ? '' : 'photo'), 'sp3d-cw'), bS = mkB('Bigger scene', () => wide(bS.getAttribute('aria-pressed') === 'true' ? '' : 'scene'), 'sp3d-cw');
+    bP.setAttribute('aria-pressed', 'false'); bS.setAttribute('aria-pressed', 'false');
+    oneUI();
+    return bar2;
+  }
+  // phones: Photo | Scene, one at a time (the switch sits at the top of the row)
+  let seg = null;
+  function oneUI() {
+    if (seg) return;
+    seg = el('div', 'sp3d-seg2'); seg.setAttribute('role', 'tablist'); seg.setAttribute('aria-label', 'Show');
+    const tab = (txt, k) => { const q = el('button', 'sp3d-sg', txt); q.type = 'button'; q.setAttribute('role', 'tab'); on(q, 'click', () => showOne(k)); seg.appendChild(q); return q; };
+    const tP = tab('Photo', 'photo'), tS = tab('Scene', 'scene');
+    const showOne = (k) => { row.dataset.one = k; tP.setAttribute('aria-selected', String(k === 'photo')); tS.setAttribute('aria-selected', String(k === 'scene')); setTimeout(() => V.kick(), 60); };
+    showOne('scene'); row.classList.add('sp3d-one'); row.insertBefore(seg, row.firstChild);
+  }
+  function closeSide() { sideKind = null; side.hidden = true; side.innerHTML = ''; if (sideRO) { sideRO.disconnect(); sideRO = null; } if (seg) { seg.remove(); seg = null; row.classList.remove('sp3d-one', 'sp3d-wphoto', 'sp3d-wscene'); delete row.dataset.one; } for (const q in hdbs) hdbs[q].setAttribute('aria-pressed', 'false'); V.kick(); }
 
   // ================================================================= the rig: bends the body along any path
   // N samples along the body (rest centre line and frames). A pose is a new centre line; every vertex keeps its
