@@ -306,6 +306,8 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     return flakesImg;
   }
   var snows = [], raf = 0, last = 0;
+  // falling snow stays still (drawn once) with reduce motion - the device's setting or SnakeList's own calm mode
+  function still() { return RM.matches || D.documentElement.classList.contains("sl-calm"); }
   function makeSnow(host, opt) {
     var c = D.createElement("canvas"); c.className = "xm-snow"; c.setAttribute("aria-hidden", "true");
     host.appendChild(c);
@@ -348,9 +350,9 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     var any = false;
     if (D.documentElement.classList.contains("sl3d-lock")) { last = 0; setTimeout(kick, 800); return; }
     for (var i = 0; i < snows.length; i++) { var S = snows[i]; if (!S.on || S.off || !S.host.isConnected || S.host.offsetParent === null && getComputedStyle(S.host).position !== "fixed") continue; any = true; draw(S, dt); }
-    if (any && !D.hidden && !RM.matches) raf = requestAnimationFrame(frame); else last = 0;
+    if (any && !D.hidden && !still()) raf = requestAnimationFrame(frame); else last = 0;
   }
-  function kick() { if (!raf && !RM.matches && !D.hidden) { last = 0; raf = requestAnimationFrame(frame); } else if (RM.matches) snows.forEach(function (S) { draw(S, 0); }); }
+  function kick() { if (!raf && !still() && !D.hidden) { last = 0; raf = requestAnimationFrame(frame); } else if (still()) snows.forEach(function (S) { draw(S, 0); }); }
   XM.kickSnow = kick;
   D.addEventListener("visibilitychange", kick);
   if (RM.addEventListener) RM.addEventListener("change", kick);
@@ -891,7 +893,7 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
   "use strict";
   var XM = window.XM || {}, D = document, ART = (window.XM_ART || {}).cabin || {};
   var RM = window.matchMedia ? matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
-  var KEY = "sl-xmas-cabin-state";
+  var KEY = "sl-xmas-cabin-state", LOG_MAX = 8;   // LOG_MAX: how many logs the basket holds
   function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
   var S = load();
   S.species = S.species || []; S.done = S.done || {}; S.opened = S.opened || {}; S.unlocked = S.unlocked || {}; S.deco = S.deco || {}; S.opt = S.opt || {};
@@ -975,7 +977,7 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     if (fresh.length) { addLogs(fresh.length); save(); if (!quiet) congrats(fresh[fresh.length - 1]); paint(); }
     else if (changed) { save(); paint(); }
   }
-  function addLogs(n) { S.logs = Math.min(8, (S.logs || 0) + n); }
+  function addLogs(n) { S.logs = Math.min(LOG_MAX, (S.logs || 0) + n); }
   XM.cabinTrack = function (kind, v) {
     if (kind === "species" && v && S.species.indexOf(v) < 0) { S.species.push(v); addLogs(1); }
     else if (kind === "compare" && !S.cmp) { S.cmp = 1; addLogs(1); }
@@ -1036,6 +1038,19 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     "orn-hat": function () { return hook(4) + '<path d="M-8 22C-7 14-4 8 1 6c4-1 7 2 7 7v9z" fill="#C8303F"/><path d="M1 6c-4-.6-7 1-9 4" stroke="#9c1d2e" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="-8.4" cy="10.6" r="2.4" fill="#fff"/><rect x="-10" y="20.6" width="20" height="5" rx="2.5" fill="#fff"/>'; },
     "orn-glow": function () { return '<g class="xc-glow">' + hook(4) + '<circle cx="0" cy="16" r="15" fill="#c9ffb0" opacity=".3" class="xc-halo"/><path d="M-6 26c-5-6 12-6 10-13s-12-4-9-9 9-1 9 2" fill="none" stroke="#c7f7b0" stroke-width="5" stroke-linecap="round"/><path d="M-6 26c-5-6 12-6 10-13s-12-4-9-9 9-1 9 2" fill="none" stroke="#4fd36a" stroke-width="1.6" stroke-dasharray="1.6 3" stroke-linecap="round"/><ellipse cx="5.5" cy="6.5" rx="4" ry="3" fill="#c7f7b0"/><circle cx="6.8" cy="5.8" r=".9" fill="#123D2A"/></g>'; }
   };
+  // the tip of a pine branch drawn over an ornament's hook, so every ornament hangs from a branch (not in the air)
+  var TWIGS = {};
+  function twig(y) {
+    if (TWIGS[y]) return TWIGS[y];
+    var n = { "#163d26": "", "#22573a": "", "#2f7048": "" }, cs = Object.keys(n), r = 3;
+    for (var x = -11; x <= 11; x += 1.6) {
+      var yy = y + 1 - x * .09 + (x * x) * .006;
+      for (var k = -1; k <= 1; k += 2) { r = (r * 9301 + 49297) % 233280; var q = r / 233280;
+        n[cs[Math.floor(q * 3)]] += "M" + x.toFixed(1) + " " + yy.toFixed(1) + "l" + (2.6 + q * 1.6).toFixed(1) + " " + (k * (2.4 + q * 2)).toFixed(1); }
+    }
+    return (TWIGS[y] = '<g class="xc-twig" aria-hidden="true"><path d="M-12 ' + (y + 2) + "Q0 " + (y - 1) + " 12 " + (y - 1) + '" stroke="#3a2a18" stroke-width="1.4" fill="none"/>' +
+      cs.map(function (c) { return '<path d="' + n[c] + '" stroke="' + c + '" stroke-width="1.5" stroke-linecap="round" fill="none"/>'; }).join("") + "</g>");
+  }
   function bauble(c, frost) { return '<path d="M0-10V-6" stroke="#D8B76A" stroke-width="1.2"/><rect x="-3.2" y="-7.6" width="6.4" height="4" rx="1.2" fill="#D8B76A"/><circle cx="0" cy="5" r="9" fill="' + c + '"/><circle cx="-3" cy="2" r="2.6" fill="#fff" opacity=".55"/>' + (frost ? '<path d="M-5 5h10M0 0v10" stroke="#c9d8e2" stroke-width="1.3"/>' : ""); }
   function bow(c, dk) { return '<path d="M0 0c-12-9-16 5-3.6 5.2zM0 0c12-9 16 5 3.6 5.2z" fill="' + c + '" stroke="' + dk + '" stroke-width="1"/><path d="M-2 3l-5 10M2 3l5 10" stroke="' + c + '" stroke-width="2.8" stroke-linecap="round"/><circle cx="0" cy="1.6" r="2.6" fill="' + dk + '"/>'; }
   // a classic Christmas stocking (like the logo's): a velvet boot - straight leg, rounded heel bulging out at the back,
@@ -1091,6 +1106,14 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
 
   /* ---------------- the scene ---------------- */
   var C = { root: null, svg: null };
+  // a part of the room you can touch: an invisible hit area, the outline that lights up on hover / focus / press,
+  // and a small label saying what it does
+  function hot(k, label, d, lx, ly) {
+    var vis = label.replace(/^The fire: /, ""), w; vis = vis.charAt(0).toUpperCase() + vis.slice(1); w = vis.length * 7.4 + 22;
+    return '<g class="xc-hot xc-hot-' + k + '" data-hot="' + k + '" role="button" tabindex="0" aria-label="' + esc(label) + '">' +
+      '<path class="xc-hotarea" d="' + d + '"/><path class="xc-hotline" d="' + d + '"/>' +
+      '<g class="xc-hotlab" transform="translate(' + lx + " " + ly + ')"><rect x="' + (-w / 2) + '" y="-13" width="' + w + '" height="26" rx="13"/><text y="5" text-anchor="middle">' + esc(vis) + "</text></g></g>";
+  }
   function scene() {
     var A = ART, W = A.win || [112, 96, 322, 306], f = A.fire || [780, 446], fx = f[0], fy = f[1], i, snow = "";
     for (i = 0; i < 46; i++) snow += '<circle class="xc-sn" style="--d:' + (5 + (i * 7) % 6) + "s;--o:-" + ((i * 1.37) % 7).toFixed(2) + "s;--dx:" + (((i * 13) % 9) - 4) + 'px" cx="' + (W[0] + (i * 37.3) % (W[2] - W[0])).toFixed(1) + '" cy="' + (W[1] - 10) + '" r="' + (0.9 + (i % 3) * .55) + '"/>';
@@ -1122,6 +1145,15 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
       '<g class="xc-glights">' + gb + '</g>' +
       '<g class="xc-stockings"></g><g class="xc-basket-logs" transform="translate(' + (A.basket || [902, 470]).join(" ") + ')"></g>' +
       '<g class="xc-tree"><ellipse class="xc-tglow" cx="452" cy="300" rx="230" ry="260" fill="url(#xc-treeglow)"/><g class="xc-ribbon"></g><g class="xc-tlights"></g><g class="xc-baubles"></g><g class="xc-orn"></g><g class="xc-topper"></g></g>' +
+      // the firelight falling on what is near it: the hearth floor, the stone breast, the mantel's underside and the rug's edge
+      '<g class="xc-warm" aria-hidden="true"><ellipse cx="' + fx + '" cy="' + (fy + 38) + '" rx="200" ry="44" fill="#ffad4a" opacity=".3" filter="url(#xc-blur)"/>' +
+      '<ellipse cx="' + fx + '" cy="' + (fy - 70) + '" rx="150" ry="118" fill="#ff9a3c" opacity=".13" filter="url(#xc-blur)"/>' +
+      '<rect x="' + (fx - 150) + '" y="' + ((A.mantel || 300) + 30) + '" width="300" height="16" rx="8" fill="#ffb04a" opacity=".2" filter="url(#xc-blur)"/>' +
+      '<ellipse cx="' + (fx - 120) + '" cy="' + (fy + 96) + '" rx="150" ry="22" fill="#ffb04a" opacity=".16" filter="url(#xc-blur)"/></g>' +
+      // things you can touch: the tree (decorations), the fire (a log) and the log basket - each lights up on hover, focus and touch
+      hot("tree", "Decorate the tree", "M" + 452 + " 54L" + 640 + " 470H" + 262 + "Z", 452, 34) +
+      hot("fire", "The fire: add a log", "M" + (fx - 86) + " " + (fy + 6) + "V" + (fy - 74) + "Q" + fx + " " + (fy - 130) + " " + (fx + 86) + " " + (fy - 74) + "V" + (fy + 6) + "Z", fx, fy - 140) +
+      hot("basket", "The log basket", "M" + ((A.basket || [902, 470])[0] - 12) + " " + ((A.basket || [902, 470])[1] + 14) + "h112v76h-112Z", (A.basket || [902, 470])[0] + 44, (A.basket || [902, 470])[1] + 4) +
       '<g class="xc-presents"></g>' +
       '</svg>';
   }
@@ -1133,14 +1165,14 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     var lc = LIGHTC[d.lights] || LIGHTC["lights-warm"];
     q(".xc-tlights").innerHTML = (A.lights || []).map(function (p, i) { var c = lc[i % lc.length]; return '<g class="xc-tl xc-tl' + (i % 3) + (d.lights === "lights-gold" ? " xc-tw" : "") + '"><circle cx="' + p[0] + '" cy="' + p[1] + '" r="8.5" fill="' + c + '" class="xc-lglow"/><ellipse cx="' + p[0] + '" cy="' + (p[1] + .5) + '" rx="3" ry="4" fill="' + c + '" class="xc-lb"/></g>'; }).join("");
     var bc = BAUBC[d.baubles];
-    q(".xc-baubles").innerHTML = bc ? (A.baubles || []).map(function (p, i) { return '<g transform="translate(' + p[0] + " " + (p[1] + 12) + ')">' + bauble(bc[i % 2], d.baubles === "baubles-frost") + "</g>"; }).join("") : "";
+    q(".xc-baubles").innerHTML = bc ? (A.baubles || []).map(function (p, i) { return '<g transform="translate(' + p[0] + " " + (p[1] + 12) + ')">' + bauble(bc[i % 2], d.baubles === "baubles-frost") + twig(-12) + "</g>"; }).join("") : "";
     var rb = "";
     if (d.ribbon === "ribbon-red") rb = (A.baubles || []).filter(function (p, i) { return i % 2; }).map(function (p) { return '<g transform="translate(' + (p[0] + 16) + " " + (p[1] - 4) + ')">' + bow("#A92E3E", "#7c1d2b") + "</g>"; }).join("");
     else if (d.ribbon === "ribbon-gold") rb = (A.garland || []).map(function (g) { return '<path d="' + g + '" fill="none" stroke="#B8913F" stroke-width="7" stroke-linecap="round"/><path d="' + g + '" fill="none" stroke="#F1D58A" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="1 5"/>'; }).join("");
     q(".xc-ribbon").innerHTML = rb;
     // the ornaments: every kind chosen hangs in several places round the tree
     var sel = (S.orns || []).filter(function (k) { return S.unlocked[k] && ORN[k]; }), slots = A.orns || [], out = "";
-    if (sel.length) { var n = Math.min(slots.length, Math.max(sel.length * 2, 6)); for (var i = 0; i < n; i++) { var p = slots[Math.floor(i * slots.length / n)]; out += '<g transform="translate(' + p[0] + " " + p[1] + ')">' + ORN[sel[i % sel.length]]() + "</g>"; } }
+    if (sel.length) { var n = Math.min(slots.length, Math.max(sel.length * 2, 6)); for (var i = 0; i < n; i++) { var p = slots[Math.floor(i * slots.length / n)]; out += '<g transform="translate(' + p[0] + " " + p[1] + ')">' + ORN[sel[i % sel.length]]() + twig(-1) + "</g>"; } }
     q(".xc-orn").innerHTML = out;
     var tp = A.top || [452, 62];
     q(".xc-topper").innerHTML = d.topper && d.topper !== "top-none" ? '<g transform="translate(' + tp[0] + " " + (tp[1] + 6) + ')">' + topperG(d.topper) + "</g>" : "";
@@ -1163,7 +1195,14 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     var n = S.logs || 0, out = "";
     for (var i = 0; i < n; i++) { var row = Math.floor(i / 3), col = i % 3; out += '<g transform="translate(' + (8 + col * 27 + (row % 2) * 12) + " " + (24 - row * 14) + ')"><rect width="30" height="14" rx="7" fill="#6e4628" stroke="#4b2e18"/><ellipse cx="28" cy="7" rx="5" ry="6" fill="#c9a06b" stroke="#4b2e18"/><path d="M27 4.5a3 3 0 1 1 0 5" stroke="#8a6238" fill="none"/></g>'; }
     C.svg.querySelector(".xc-basket-logs").innerHTML = out;
-    var b = C.root && C.root.querySelector(".xc-log"); if (b) { b.disabled = !n; b.querySelector("b").textContent = n; }
+    if (!C.root) return;
+    // the count in words, how logs are earned, and a friendly line (not a dead button) when the basket is empty
+    var b = C.root.querySelector(".xc-log"), lg = C.root.querySelector(".xc-logs"), h = C.root.querySelector(".xc-loghint");
+    if (b) { b.setAttribute("aria-disabled", String(!n)); b.classList.toggle("xc-empty", !n); b.setAttribute("aria-label", n ? "Add a log to the fire (" + n + " left)" : "Add a log - the basket is empty"); }
+    if (lg) { lg.querySelector("b").textContent = n; lg.querySelector(".xc-logw").textContent = (n === 1 ? "log" : "logs") + " in the basket" + (n >= LOG_MAX ? " (full)" : ""); }
+    if (h) h.innerHTML = n ? "Earn more by answering quiz questions, exploring snakes and finishing Christmas tasks. The basket holds " + LOG_MAX + "."
+      : "<b>The basket is empty</b> - the fire keeps burning. Answer a quiz question, explore a snake or finish a Christmas task to collect more logs.";
+    var hf = C.svg.querySelector(".xc-hot-fire"); if (hf) hf.setAttribute("aria-label", n ? "The fire: add a log (" + n + " left)" : "The fire: the log basket is empty");
   }
   function lightsOpt() {
     if (!C.root) return;
@@ -1175,9 +1214,9 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
   /* ---------------- the cabin panel ---------------- */
   function progressText() {
     var o = opened(), all = TASKS.length;
-    if (o >= all) return "All " + all + " presents opened - the Christmas collection is complete!";
-    if (o < GLOW_AT) return o + " of " + GLOW_AT + " presents opened - open " + GLOW_AT + " for a glowing snake ornament";
-    return o + " of " + all + " presents opened - open all " + all + " for the gold snake tree topper";
+    if (o >= all) return "Tree presents: all " + all + " opened - the Christmas collection is complete!";
+    if (o < GLOW_AT) return "Tree presents: " + o + " of " + all + " opened \u00b7 open " + GLOW_AT + " for a glowing snake ornament";
+    return "Tree presents: " + o + " of " + all + " opened \u00b7 open all " + all + " for the gold snake tree topper";
   }
   var FS_ON = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
   var FS_OFF = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
@@ -1189,23 +1228,32 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
   function build() {
     if (C.root) return C.root;
     var r = D.createElement("section"); r.id = "xm-cabin"; r.className = "xc"; r.hidden = true; r.setAttribute("aria-label", "Christmas Cabin");
+    // the room: one dark evergreen card holding the scene and, beside it on wide screens (under it on narrow ones),
+    // a compact control area in labelled groups - the Cabin's own things, the fire, the room, the sound
     r.innerHTML = '<div class="xc-head"><h2>' + treeIcon() + ' Christmas Cabin</h2></div>' +
+      '<div class="xc-room">' +
       '<div class="xc-stage">' + scene() + '<button type="button" class="xc-fs" aria-label="Full screen" aria-pressed="false">' + FS_ON + '</button><div class="xc-celebrate" hidden></div></div>' +
       '<div class="xc-ctrl">' +
-      '<p class="xc-prog" aria-live="polite"></p>' +
+      '<div class="xc-grp xc-grp-main"><p class="xc-gh">In your Cabin</p>' +
       '<div class="xc-bar">' +
-      '<button type="button" class="xc-btn xc-tasks">' + giftIcon() + '<span>Christmas tasks</span><i class="xc-badge" hidden></i></button>' +
-      '<button type="button" class="xc-btn xc-decos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14" r="7" fill="#A92E3E"/><rect x="9.5" y="4.5" width="5" height="3" rx="1" fill="#D8B76A"/><circle cx="9.5" cy="11.5" r="2" fill="#fff" opacity=".6"/></svg><span>My decorations</span></button>' +
-      '<button type="button" class="xc-btn xc-log"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c2 3 5 5 5 9a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3-1-3 0-6 1-8z" fill="#ff9a3c"/><rect x="4" y="18" width="16" height="4" rx="2" fill="#6e4628"/></svg><span>Add a log</span><b>0</b></button>' +
-      '<button type="button" class="xc-btn xc-chip" data-opt="lights" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6q9 9 18 0" stroke="currentColor" stroke-width="1.5" fill="none"/><ellipse cx="7" cy="11" rx="2.2" ry="3" fill="#ffd34d"/><ellipse cx="12" cy="12.4" rx="2.2" ry="3" fill="#ff5d5d"/><ellipse cx="17" cy="11" rx="2.2" ry="3" fill="#5dd0ff"/></svg><span>Festive lights</span></button>' +
-      '<button type="button" class="xc-btn xc-chip" data-opt="snow" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><g stroke="#9cc4e6" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/></g></svg><span>Snow outside</span></button>' +
-      '<div class="xc-audio"></div>' +
+      '<button type="button" class="xc-btn xc-tasks">' + giftIcon() + '<span>Christmas tasks<small class="xc-bsub">' + TASKS.length + ' presents to earn</small></span><i class="xc-badge" hidden></i></button>' +
+      '<button type="button" class="xc-btn xc-decos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14" r="7" fill="#A92E3E"/><rect x="9.5" y="4.5" width="5" height="3" rx="1" fill="#D8B76A"/><circle cx="9.5" cy="11.5" r="2" fill="#fff" opacity=".6"/></svg><span>My decorations<small class="xc-bsub">Decorate the tree</small></span></button>' +
+      '</div><p class="xc-prog" aria-live="polite"></p></div>' +
+      '<div class="xc-grp xc-grp-fire"><p class="xc-gh">Fireplace</p>' +
+      '<div class="xc-fireline"><span class="xc-logs" aria-live="polite"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="9" width="17" height="7" rx="3.5" fill="#7a4d2b" stroke="#4b2e18"/><ellipse cx="18.5" cy="12.5" rx="3" ry="3.5" fill="#d4ab74" stroke="#4b2e18"/></svg><b>0</b> <span class="xc-logw">logs in the basket</span></span>' +
+      '<button type="button" class="xc-btn xc-btn-sm xc-log"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c2 3 5 5 5 9a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3-1-3 0-6 1-8z" fill="#ff9a3c"/></svg><span>Add a log</span></button></div>' +
+      '<p class="xc-note xc-loghint"></p></div>' +
+      '<div class="xc-grp xc-grp-room"><p class="xc-gh">The room</p><div class="xc-chips">' +
+      '<button type="button" class="xc-btn xc-btn-sm xc-chip" data-opt="lights" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6q9 9 18 0" stroke="currentColor" stroke-width="1.5" fill="none"/><ellipse cx="7" cy="11" rx="2.2" ry="3" fill="#ffd34d"/><ellipse cx="12" cy="12.4" rx="2.2" ry="3" fill="#ff5d5d"/><ellipse cx="17" cy="11" rx="2.2" ry="3" fill="#5dd0ff"/></svg><span>Festive lights</span></button>' +
+      '<button type="button" class="xc-btn xc-btn-sm xc-chip" data-opt="snow" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><g stroke="#9cc4e6" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/></g></svg><span>Snow outside</span></button>' +
+      '</div></div>' +
+      '<div class="xc-grp xc-grp-sound"><p class="xc-gh">Sound <small>remembered on this device</small></p><div class="xc-audio"></div></div>' +
       '</div></div>' +
       panel("xc-dlg-tasks", "Christmas tasks", "Each task puts a wrapped present under the tree - every present can be opened once.") +
       panel("xc-dlg-decos", "My decorations", "Choose what goes on your tree. Locked ones come in presents - tap one to see how to get it.") +
       '<div class="xm-panel-wrap xc-open" role="dialog" aria-modal="true" aria-label="Opening a present" hidden><div class="xm-panel-bg"></div><div class="xm-panel xc-ob"></div></div>';
     C.root = r; C.svg = r.querySelector(".xc-svg");
-    if (XM.audio) XM.audio.panel(r.querySelector(".xc-audio"), { compact: true });
+    if (XM.audio) XM.audio.panel(r.querySelector(".xc-audio"), { dark: true });
     r.querySelector(".xc-tasks").onclick = function () { showDlg("tasks"); };
     r.querySelector(".xc-decos").onclick = function () { showDlg("decos"); };
     r.querySelector(".xc-log").onclick = addLog;
@@ -1215,12 +1263,15 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
       if (t.closest(".xc-close")) { hideDlgs(); return; }
       var op = t.closest("[data-opt]"); if (op) { var k = op.getAttribute("data-opt"); S.opt[k] = !S.opt[k]; save(); lightsOpt(); return; }
       var p = t.closest(".xc-present"); if (p) { openPresent(p.getAttribute("data-task")); return; }
+      var ht = t.closest(".xc-hot"); if (ht) { hotAct(ht.getAttribute("data-hot")); return; }
       var sp = t.closest("[data-see-present]"); if (sp) { hideDlgs(); seePresent(sp.getAttribute("data-see-present")); return; }
       var hw = t.closest("[data-how]"); if (hw) { hideDlgs(); how(hw.getAttribute("data-how"), hw.getAttribute("data-task")); return; }
       var dc = t.closest("[data-deco]"); if (dc) { pickDeco(dc.getAttribute("data-deco")); return; }
     });
     r.addEventListener("keydown", function (e) {
       var p = e.target.closest && e.target.closest(".xc-present");
+      var ht2 = e.target.closest && e.target.closest(".xc-hot");
+      if (ht2 && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); hotAct(ht2.getAttribute("data-hot")); }
       if (p && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openPresent(p.getAttribute("data-task")); }
       if (e.key === "Escape") { if (!r.querySelector(".xc-open").hidden) { closeOpen(); e.stopPropagation(); } else if (r.querySelector(".xc-dlg:not([hidden])")) { hideDlgs(); e.stopPropagation(); } else if (r.classList.contains("xc-full")) setFull(false); }
     });
@@ -1232,7 +1283,7 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     var r = C.root; if (!r) return;
     r.classList.toggle("xc-full", on); D.body.classList.toggle("xm-cabin-full", on); D.documentElement.classList.toggle("xm-cabin-full", on);
     var b = r.querySelector(".xc-fs"); b.innerHTML = on ? FS_OFF : FS_ON; b.setAttribute("aria-label", on ? "Leave full screen" : "Full screen"); b.setAttribute("aria-pressed", String(on));
-    var au = r.querySelector(".xm-audio"); if (au) au.classList.toggle("xm-audio-dark", on);
+    // (the sound controls are always the dark version now: the controls sit on the dark Cabin card)
   }
   D.addEventListener("keydown", function (e) { if (e.key === "Escape" && C.root && C.root.classList.contains("xc-full") && !C.root.querySelector(".xm-panel-wrap:not([hidden])") && !D.querySelector(".xm-pt")) setFull(false); });
   function paint() {
@@ -1367,9 +1418,17 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     c.querySelector("button").onclick = function () { c.hidden = true; c.innerHTML = ""; };
   }
 
+  /* ---------------- the room's touchable parts ---------------- */
+  function hotAct(k) {
+    if (k === "tree") showDlg("decos");
+    else if (k === "fire") addLog();
+    else if (k === "basket") addLog();       // a log from the basket onto the fire (or, empty, how to get more)
+  }
+
   /* ---------------- the fire ---------------- */
   function addLog() {
-    if (!(S.logs > 0)) return;
+    // an empty basket: no dead button - the line saying how to get more logs lights up instead
+    if (!(S.logs > 0)) { var h = C.root.querySelector(".xc-loghint"); if (h) { h.classList.remove("xc-flash"); void h.offsetWidth; h.classList.add("xc-flash"); } return; }
     S.logs--; save(); renderLogs();
     var st = C.root.querySelector(".xc-stage"); st.classList.remove("xc-roar"); void st.offsetWidth; st.classList.add("xc-roar");
     setTimeout(function () { st.classList.remove("xc-roar"); }, 2600);

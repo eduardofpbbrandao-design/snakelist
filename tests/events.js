@@ -332,7 +332,7 @@ const noOverflow = (p) => p.evaluate(() => document.documentElement.scrollWidth 
     ok(await p.evaluate(() => SL_EVENTS.advent.state().earned) === 1, '... but 5 in a row still earn only 1 free skip (no double earning)');
     ok(await p.evaluate(() => SL_EVENTS.advent.stats().doors) === 5, 'it counts towards the 24 doors (5 of 24)');
     ok((await claim(p, 6, 'skip')).reason === 'no-earned-skips', 'the free skip is spent: it cannot be used twice');
-    ok(/claimed on their day or covered with a skip/.test(await p.textContent('#sl-ev-adv .sl-ev-rule')), 'the streak rule is shown in the calendar');
+    ok(/for every 3 doors in a row/.test(await p.textContent('#sl-ev-adv .sl-ev-howskip')) && /up to 10 per event/.test(await p.textContent('#sl-ev-adv .sl-ev-howskip')), 'skips are explained once, in one place (free streak skips apart from the 10 subscriber skips)');
     ok(await p.evaluate(() => { const n = document.querySelector('#sl-ev-adv .sl-ev-signin-note'), b = document.querySelector('#sl-ev-adv .sl-ev-signin-btn'); return !!n && !!b && !n.contains(b) && b.getBoundingClientRect().left >= n.getBoundingClientRect().right - 1 && parseFloat(getComputedStyle(n).fontSize) >= 14; }), 'the sign-in notice has big letters, with its Sign in button next to it (not inside)');
     ok(/Limited/i.test(await p.textContent('#sl-ev-adv .sl-ev-grand')), 'the grand prize box carries the LIMITED label');
     await shot(p, 'advent-dec5');

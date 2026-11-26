@@ -142,12 +142,37 @@
   }
   function cd(ms) { ms = Math.max(0, ms); var h = Math.floor(ms / 36e5), m = Math.floor(ms % 36e5 / 6e4), s = Math.floor(ms % 6e4 / 1e3); return h + "h " + (m < 10 ? "0" : "") + m + "m " + (s < 10 ? "0" : "") + s + "s"; }
   function dayName(d, o) { return EV.localTime(L.unlockAt(E, d), o || { weekday: "long", day: "numeric", month: "long" }); }
-  // the three kinds of action, in words and with their own colour + icon (never colour alone)
+  // what each kind of door looks like: every state has its own icon and word as well as its colour (never colour alone)
   function keyHtml() {
-    return '<ul class="sl-ev-key" aria-label="What you can do with a door">' +
-      '<li class="k-claim">' + ic("gift", 13) + "<span><b>Claim</b> today's door</span></li>" +
-      '<li class="k-recover">' + ic("skip", 13) + "<span><b>Recover</b> a missed day with a skip</span></li>" +
-      '<li class="k-reserve">' + ic("lock", 13) + "<span><b>Reserve</b> a future day with a skip - its reward stays wrapped until its day</span></li></ul>";
+    return '<ul class="sl-ev-key" aria-label="What the doors show">' +
+      '<li class="k-claim">' + ic("gift", 13) + "<span><b>Today</b> - claim it</span></li>" +
+      '<li class="k-done">' + ic("check", 13) + "<span><b>Opened</b></span></li>" +
+      '<li class="k-recover">' + ic("skip", 13) + "<span><b>Missed</b> - recover with a skip</span></li>" +
+      '<li class="k-reserve">' + ic("gift", 13) + "<span><b>Reserved</b> - unwraps on its day</span></li>" +
+      '<li class="k-locked">' + ic("lock", 13) + "<span><b>Coming</b>" + (E.advent.skipCanClaimFuture ? " - a skip can reserve it" : "") + "</span></li></ul>";
+  }
+  // skips, explained once: unfolded the first time the calendar is seen, then folded away (remembered in this browser)
+  var EXPLAINED = "sl-ev-adv-skips-explained", helpOpen = null;
+  function skipsHelp() {
+    var first = helpOpen != null ? helpOpen : !EV.ls.get(EXPLAINED, 0);
+    return '<details class="sl-ev-howskip"' + (first ? " open" : "") + "><summary>" + ic("skip", 13) + "<span>How skips work</span></summary><ul>" +
+      "<li>A skip covers <b>one door you choose</b>: <b>recover</b> a day you missed (its reward is yours at once)" + (E.advent.skipCanClaimFuture ? " or <b>reserve</b> a future day (its reward unwraps on that day)" : "") + ". You confirm first.</li>" +
+      "<li><b>Free skips</b>: everyone earns 1 for every " + E.advent.streakForSkip + " doors in a row. Each door counts once.</li>" +
+      "<li><b>Subscriber skips</b>: up to " + E.advent.subscriberSkips + " per event, kept separate from the free ones.</li>" +
+      "<li>Each door can be covered once. Covered doors count towards the 24 and the grand prize.</li></ul></details>";
+  }
+  // "Jump to today": scrolls today's door into view, focuses it and lights it up for a moment
+  function jumpHtml() {
+    var now = EV.time.now(), t = now == null ? 0 : L.today(E, now);
+    if (t < 1 || t > N || now >= L.closesAt(E)) return "";
+    return '<button type="button" class="sl-ev-btn sl-ev-btn-sm sl-ev-jump" data-act="today">' + ic("gift", 14) + "Jump to today &middot; door " + t + "</button>";
+  }
+  function jumpToday() {
+    var now = EV.time.now(), t = now == null ? 0 : L.today(E, now), el = P && P.querySelector('.sl-ev-door[data-day="' + t + '"]');
+    if (!el) return;
+    try { el.scrollIntoView({ block: "center", behavior: EV.reducedMotion() ? "auto" : "smooth" }); el.focus({ preventScroll: true }); } catch (e) {}
+    el.classList.remove("sl-ev-pulse"); void el.offsetWidth; el.classList.add("sl-ev-pulse");
+    setTimeout(function () { el.classList.remove("sl-ev-pulse"); }, 1800);
   }
   function doorsHtml() {
     var now = EV.time.now();
@@ -160,9 +185,10 @@
         st === "claimed" ? r.name + (c.via === "skip" ? " (covered with a free skip)" : c.via === "sub" ? " (covered with a subscriber skip)" : " (opened on its day)") :
         st === "open" ? "today's door - claim it!" : st === "missed" ? "missed - recover it with a skip" : st === "closed" ? "closed" :
         "opens " + EV.localTime(L.unlockAt(E, d), { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZoneName: "short" }) + (tg === "reserve" ? " (or reserve it now with a skip)" : ""));
-      var word = rsv ? "Reserved" : rdy ? "Unwrap!" : st === "open" ? "Claim" : st === "missed" ? "Recover" : "";
-      var showInside = st === "claimed" && !rsv && !rdy;
-      return '<button type="button" role="listitem" class="sl-ev-door ' + cls + (c ? " via-" + c.via : "") + (tg === "reserve" ? " can-reserve" : "") + '" data-day="' + d + '" aria-label="' + esc(lab) + '" title="' + esc(lab) + '">' +
+      var word = rsv ? ic("gift", 10) + "Reserved" : rdy ? ic("gift", 10) + "Unwrap!" : st === "open" ? ic("gift", 10) + "Claim" : st === "missed" ? ic("skip", 10) + "Missed" : "";
+      var showInside = st === "claimed" && !rsv && !rdy, isToday = now != null && d === L.today(E, now);
+      return '<button type="button" role="listitem" class="sl-ev-door ' + cls + (c ? " via-" + c.via : "") + (tg === "reserve" ? " can-reserve" : "") + (isToday ? " is-today" : "") + '" data-day="' + d + '" aria-label="' + esc((isToday ? "Today. " : "") + lab) + '" title="' + esc(lab) + '">' +
+        (isToday ? '<span class="today" aria-hidden="true">Today</span>' : "") +
         (word ? '<span class="st" aria-hidden="true">' + word + "</span>" : "") +
         (showInside ? '<span class="inside">' + EV.art.item(r) + "</span>" : "") +
         '<span class="leaf"><b>' + d + "</b>" + (st === "locked" ? '<span class="ic">' + ic("lock", 12) + "</span>" : "") + "</span>" +
@@ -184,18 +210,19 @@
   }
   function html() {
     if (!ST.loaded) return '<p class="sl-ev-muted">Loading your Advent Calendar…</p>';
-    return EV.earlyNoteHtml(E) + modeNote() + (ST.err ? '<div class="sl-ev-note warn">' + esc(ST.err) + "</div>" : "") + statsHtml() +
-      '<p class="sl-ev-rule">' + ic("flame", 13) + " <span><b>Streak:</b> doors in a row that you claimed on their day or covered with a skip. Every " + E.advent.streakForSkip +
-      " in a row earn a free skip - each door counts once, so a streak can't earn the same skip twice.</span></p>" +
-      keyHtml() + clockLine() + doorsHtml() +
-      '<div class="sl-ev-skip" data-skip hidden></div>' + grandHtml() +
-      '<div class="sl-ev-row"><button type="button" class="sl-ev-btn" data-act="inv">' + ic("gift") + 'My collection</button><button type="button" class="sl-ev-btn" data-act="sub">' + ic("crown") + "Subscriber benefits</button></div>" +
-      '<p class="sl-ev-muted">Each door can be covered once. On its own day you simply claim it. A skip covers one door you choose - a day you missed (recover)' + (E.advent.skipCanClaimFuture ? ", or a future day (reserve)" : "") +
-      " - and you'll always see what it does and confirm it before it is used. Doors covered with a skip count towards the 24 doors and the grand prize. Subscribers also get up to " + E.advent.subscriberSkips + " subscriber skips per event, counted separately from the free ones, and bonus rewards behind every door.</p>";
+    var h = EV.earlyNoteHtml(E) + modeNote() + (ST.err ? '<div class="sl-ev-note warn">' + esc(ST.err) + "</div>" : "") + statsHtml() + skipsHelp() +
+      '<div class="sl-ev-calhead">' + clockLine() + jumpHtml() + "</div>" + keyHtml() + doorsHtml() +
+      '<div class="sl-ev-skip" data-skip hidden></div>' +
+      '<p class="sl-ev-h4">' + ic("star", 13) + "Final reward &middot; for all 24 doors</p>" + grandHtml() +
+      '<p class="sl-ev-muted sl-ev-notcabin">' + ic("gift", 12) + " Behind every door: a reward for everyone" + (BONUS[1] ? ", plus subscriber bonus rewards" : "") + ". (The Cabin's presents under the tree are separate - they come from Christmas tasks.)</p>" +
+      '<div class="sl-ev-row"><button type="button" class="sl-ev-btn" data-act="inv">' + ic("gift") + 'My collection</button><button type="button" class="sl-ev-btn" data-act="sub">' + ic("crown") + "Subscriber benefits</button></div>";
+    if (helpOpen == null) helpOpen = !EV.ls.get(EXPLAINED, 0); EV.ls.set(EXPLAINED, 1);
+    return h;
   }
   function render() {
     if (!P || !P.isConnected) return;
     var body = P.querySelector(".sl-ev-body"), sk = body.querySelector("[data-skip]"), openSkip = sk && !sk.hidden ? +sk.getAttribute("data-day") : null, y = body.scrollTop;
+    var hs = body.querySelector(".sl-ev-howskip"); if (hs) helpOpen = hs.open;
     body.innerHTML = html(); body.scrollTop = y;
     // keep the skip box only while that door can still take a skip
     if (openSkip && L.skipTarget(E, ST.state, openSkip, EV.time.now())) showSkip(openSkip);
@@ -212,6 +239,7 @@
       var w = a.getAttribute("data-act");
       if (w === "signin") { var b = D.querySelector(".auth-btn, #auth-btn"); P.close(); if (b) b.click(); }
       if (w === "inv") openInventory();
+      if (w === "today") jumpToday();
       if (w === "sub" && EV.subscribe) EV.subscribe.open();
       if (w === "skip" || w === "subskip") confirmSkip(+a.getAttribute("data-day"), w === "skip" ? "skip" : "sub");
       if (w === "confirm") doClaim(+a.getAttribute("data-day"), a.getAttribute("data-via"));
@@ -303,12 +331,25 @@
     var how = c ? (c.via === "day" ? "Claimed on its day" : L.wasReserved(E, ST.state, d) ? (c.via === "skip" ? "Reserved with a free skip" : "Reserved with a subscriber skip") : (c.via === "skip" ? "Recovered with a free skip" : "Recovered with a subscriber skip")) +
       (c.at ? " · " + new Date(c.at).toLocaleDateString(undefined, { day: "numeric", month: "long" }) : "") : "";
     ov.innerHTML = '<div class="sl-ev-rv-card' + (anim ? " is-opening" : "") + '">' + (anim ? '<div class="sl-ev-rv-door" aria-hidden="true"><span class="l"><b>' + d + '</b></span><span class="r"></span></div>' : "") + '<div class="sl-ev-rv-rays"></div>' + (anim ? sparkles() : "") +
-      '<p class="k">Door ' + d + " · " + esc(r.kind) + (o.unwrap ? " · unwrapped" : "") + '</p><div class="sl-ev-rv-art' + (r.glow ? " glow" : "") + '">' + EV.art.item(r, true) + "</div><h3>" + esc(r.name) + "</h3><p>" + esc(r.desc) + "</p>" +
-      '<p class="sl-ev-rv-how">' + (o.again ? esc(how) : "Your reward - added to your collection for good") + "</p>" + bonusHtml(d, c) + extra +
+      (anim ? '<button type="button" class="sl-ev-rv-skipanim" data-skipanim>Skip animation</button>' : "") +
+      '<p class="k">Door ' + d + " · " + esc(r.kind) + (o.unwrap ? " · unwrapped" : "") + '</p><div class="sl-ev-rv-art' + (r.glow ? " glow" : "") + '">' + EV.art.item(r, true) + "</div>" +
+      '<p class="sl-ev-rv-who">' + ic("gift", 12) + "Your reward &middot; everyone gets this one</p><h3>" + esc(r.name) + "</h3><p>" + esc(r.desc) + "</p>" +
+      '<p class="sl-ev-rv-how">' + (o.again ? esc(how) : "Added to your collection for good") + "</p>" + bonusHtml(d, c) + extra +
       '<button type="button" class="sl-ev-btn pri" data-close>' + (o.again ? "Close" : "Wonderful!") + "</button></div>";
     D.body.appendChild(ov);
-    var btn = ov.querySelector("[data-close]"); try { btn.focus({ preventScroll: true }); } catch (e) {}
+    var btn = ov.querySelector("[data-close]"), card = ov.querySelector(".sl-ev-rv-card"), sk = ov.querySelector("[data-skipanim]"), endT = 0;
+    // the opening plays once; "Skip animation" (or Enter / Space while it plays) jumps straight to the reward
+    function settle() {
+      clearTimeout(endT); if (!card.classList.contains("is-opening")) return;
+      card.classList.remove("is-opening"); card.classList.add("is-settled");
+      [].forEach.call(card.querySelectorAll(".sl-ev-rv-door, .sl-ev-rv-sparks"), function (x) { x.remove(); });
+      if (sk) sk.remove();
+      try { btn.focus({ preventScroll: true }); } catch (e) {}
+    }
+    if (sk) { sk.addEventListener("click", settle); endT = setTimeout(settle, 1900); try { sk.focus({ preventScroll: true }); } catch (e) {} }
+    else try { btn.focus({ preventScroll: true }); } catch (e) {}
     function close() {
+      clearTimeout(endT);
       ov.remove();
       if (!o.again && stats().complete && !EV.ls.get("sl-ev-legend-seen:" + ST.kind, 0)) { EV.ls.set("sl-ev-legend-seen:" + ST.kind, 1); legend(); }
     }
@@ -404,7 +445,7 @@
   function cabinButton(bar) {
     if (!bar || bar.querySelector(".sl-ev-cabin-btn")) return;
     var b = D.createElement("button"); b.type = "button"; b.className = "xc-btn sl-ev-cabin-btn";
-    b.innerHTML = ic("door", 20) + "<span>Advent Calendar</span>";
+    b.innerHTML = ic("door", 20) + "<span>Advent Calendar<small class=\"xc-bsub\">" + N + " doors, one a day</small></span>";
     b.addEventListener("click", open);
     bar.insertBefore(b, bar.firstChild);
   }

@@ -557,6 +557,7 @@ CABIN_DEFS = '''<defs>
 <radialGradient id="vig" cx=".5" cy=".46" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#080402" stop-opacity=".62"/></radialGradient>
 <linearGradient id="curt" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5a0e18"/><stop offset=".25" stop-color="#9a1f2e"/><stop offset=".5" stop-color="#6e1220"/><stop offset=".75" stop-color="#a8283a"/><stop offset="1" stop-color="#5a0e18"/></linearGradient>
 <linearGradient id="mantel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a36b3a"/><stop offset=".3" stop-color="#7d4d26"/><stop offset="1" stop-color="#3c220f"/></linearGradient>
+<linearGradient id="stoneshade" x1="0" y1="0" x2=".25" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".2"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".34"/></linearGradient>
 <clipPath id="wclip"><rect x="112" y="96" width="210" height="210"/></clipPath>
 <clipPath id="backc"><rect x="0" y="0" width="1000" height="446"/></clipPath>
 </defs>'''
@@ -567,6 +568,8 @@ def _logs_wall(x0, x1, y0, y1, seed):
     while y < y1:
         h = r.uniform(42, 48)
         out.append('<rect x="%s" y="%s" width="%s" height="%s" fill="url(#log)"/>' % (_f(x0), _f1(y), _f(x1 - x0), _f1(h)))
+        # the log's round top catching the light (a soft highlight along it, brighter in places)
+        out.append('<rect x="%s" y="%s" width="%s" height="3" fill="#e0a86a" opacity=".28"/>' % (_f(x0), _f1(y + h * .22), _f(x1 - x0)))
         for _ in range(r.randint(2, 4)):
             kx = r.uniform(x0 + 20, x1 - 20); ky = y + h * r.uniform(.35, .65)
             out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="#3d220e" opacity=".55"/><ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="none" stroke="#2a1507" stroke-width="1" opacity=".5"/>'
@@ -589,6 +592,9 @@ def _stones(x0, x1, y0, y1, seed):
             rx = r.uniform(6, 12)
             out.append('<rect x="%s" y="%s" width="%s" height="%s" rx="%s" fill="%s"/>' % (_f1(x + 2), _f1(y + 2), _f1(w - 4), _f1(h - 4), _f1(rx), c))
             out.append('<rect x="%s" y="%s" width="%s" height="%s" rx="%s" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="1.5"/>' % (_f1(x + 3), _f1(y + 3), _f1(w - 6), _f1(h - 7), _f1(rx)))
+            # each stone rounded: lit from above, in shadow underneath, and set back into darker mortar
+            out.append('<rect x="%s" y="%s" width="%s" height="%s" rx="%s" fill="url(#stoneshade)"/>' % (_f1(x + 2), _f1(y + 2), _f1(w - 4), _f1(h - 4), _f1(rx)))
+            out.append('<path d="M%s %sh%s" stroke="#15110c" stroke-width="2" stroke-opacity=".55" stroke-linecap="round"/>' % (_f1(x + 2 + rx * .6), _f1(y + h - 1.2), _f1(max(2, w - 4 - rx * 1.2))))
             x += w
         y += h; row += 1
     return ('<g><rect x="%s" y="%s" width="%s" height="%s" fill="#262119"/><g filter="url(#bump)">%s</g></g>' % (_f(x0), _f(y0), _f(x1 - x0), _f(y1 - y0), "".join(out)))
