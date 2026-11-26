@@ -13,13 +13,15 @@ html.xm svg.snake-s, html.xm .hero-mark svg, html.xm svg.xm-has-stk { overflow: 
 html.xm .xm-hat, html.xm .xm-ssnow { pointer-events: none; }
 /* the small S used as an icon inside buttons and tabs stays plain */
 html.xm :is(.tab-btn, .tab-n, .chip, button, .sl-mtoast, .xm-nohat) svg.snake-s { --xm-hat-o: 0; }
-/* the tick keeps its own drawing: the stocking hangs from it (round 3 - it used to replace the tick) */
+/* the stocking IS the tick (round 4, Eduardo: "the stocking should be the check"): the tick's own drawing is hidden
+   while the stocking is there (the drawing itself is untouched); the opening's second tick layer (its pattern) waits */
+html.xm svg.xm-has-stk > :not(.xm-stk) { display: none; }
+html.xm .intro-box svg.tick-detail > * { display: none; }
 html.xm svg.xm-has-stk { overflow: visible; }
 /* the opening (the photo wall) draws the tick through a sliding window that hides everything outside the tick's own
    box - which cut off the stocking's cuff and the presents sticking out of it. With the stocking there is no line to
    draw, so the window is switched off and the stocking is hung in place instead (a small swing in) */
 html.xm .intro-box .tick-wipe, html.xm .intro-box .tick-unwipe { transform: none; animation: none; overflow: visible; -webkit-mask-image: none; mask-image: none; }
-html.xm .intro-box svg.xm-has-stk > :not(.xm-stk) { animation: xm-fade .45s .4s ease both; }
 html.xm .intro-box svg.xm-has-stk .xm-stk { transform-box: view-box; transform-origin: 70% 8%; animation: xm-hang .7s .45s cubic-bezier(.34,1.42,.5,1) both; }
 @keyframes xm-hang { from { transform: rotate(-14deg) translateY(-6%); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { html.xm .intro-box svg.xm-has-stk .xm-stk { animation: none; } }

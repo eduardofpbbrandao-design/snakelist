@@ -285,6 +285,8 @@ LOGO_HAT = dict(cx=-6.5, cy=-16.0, width=37, angle=-15)
 # the leg (about a quarter of the height), hung from a little loop at the back corner of the cuff, with a candy cane
 # and a small present peeking out of the top and a sprig of holly on the cuff. No knit stripes, no heel or toe
 # patches (those say "sock").
+# Round 4 (Eduardo, 2026-11-26): "The stocking should be the check" - back to the stocking that IS the tick
+# (the round-3 stocking hanging beside the green tick is gone); the tick's own drawing is hidden while it is there.
 # It still sits where the tick goes and keeps the tick's silhouette: the long arm is the leg (cuff at its top end), the
 # tick's corner is the heel and the short arm is the foot (toe at its end). It is drawn in its own upright frame (leg
 # up, foot to the left, heel at the origin) and turned onto the tick's arms in the tick's viewBox (5.6 0.3 36.9 36.0):
@@ -295,68 +297,70 @@ TICK_OUTLINE = ("M6.1 26.0L10.6 30.5L13.2 32.8L15.6 34.4L17.4 35.3L18.7 35.7L20.
                 "L22.6 26.7L21.8 28.0L21.0 29.0L20.3 29.7L19.9 30.0L19.5 29.8L18.6 29.3L17.6 28.6L16.5 27.7L15.5 26.7L14.4 25.6"
                 "L13.4 24.5L12.3 23.4L11.2 22.2L10.7 21.6A3.1 3.1 0 0 0 6.1 26.0Z")
 
-# Round 3 (Eduardo, 2026-11-24): the tick is no longer turned INTO a boot (it read as a sock and its top was cut
-# off in the opening). The logo keeps its own green tick, and a classic red Christmas stocking HANGS from the tip of
-# the tick's long arm on a little loop: a wide red velvet leg, a rounded heel at the back, the foot turning out to
-# a round toe, a deep fluffy white fur cuff on top - stuffed with presents and a candy cane peeking out.
-# Drawn in its own frame (cuff top at y -20, leg x -5..5, heel on the left, toe to the right) and placed in the
-# tick's viewBox (5.6 0.3 36.9 36.0) just right of the long arm, its loop hooked over the arm's tip near (32, 15.4).
-STK_BOOT = ("M-5-14L-5-2.5C-5.4 1.2-6.6 3.6-6.4 5.6C-6.1 8.2-3.6 9.2-.6 9L8.6 8.8C12.4 8.7 14.4 6.8 14.1 4.2"
-            "C13.8 1.8 11.8.9 9.2.6C7.1.3 5.6-.6 5-2.8L5-14Z")
-STK_AT = (39.6, 30.2, .72)          # translate x, y and scale of the stocking's frame in the tick's viewBox
+# the boot, in its own frame: leg x -2.8..2.8 from the cuff (y -22) down; heel bulging out at the back (right) below
+# the ankle; the foot running left to a round toe that turns up a little
+STK_BOOT = ("M-2.8-22.5L-2.8-5.2C-3.1-3.7-4.6-3.3-6.8-3.5C-9.6-3.8-12.2-4.6-14.4-4.3C-17.3-3.9-18.4-.4-16.9 1.6"
+            "C-15.6 3.3-12.3 3.5-8.4 3.3L-1.6 3.5C2.4 3.9 5.4 2.4 5.3-1.2C5.2-3.9 3.1-5.1 2.8-8L2.8-22.5Z")
 
 def stocking_tick(outline=None, p="xms", tick=None):
-    """the stocking hanging from the tick. tick: a fill (colour or url(#id)) to draw the tick itself as well - for the
-    saved logo files, whose tick drawing is replaced; in the pages the tick's own drawing stays and shows."""
+    # (outline, tick: kept for callers that pass them; the stocking IS the tick now, so the tick itself is not drawn)
     fur = "".join('<circle cx="%s" cy="%s" r="%s"/>' % (_f1(x), _f1(y), _f1(r)) for x, y, r in (
-        (-5.6, -19.7, 1.5), (-3.8, -20.4, 1.6), (-1.8, -20.7, 1.6), (.2, -20.7, 1.6), (2.2, -20.6, 1.6), (4.1, -20.3, 1.55), (5.8, -19.6, 1.45),
-        (-5.7, -13.9, 1.4), (-3.8, -13.4, 1.5), (-1.8, -13.2, 1.5), (.2, -13.2, 1.5), (2.2, -13.3, 1.5), (4.1, -13.5, 1.45), (5.8, -14, 1.35),
-        (-6.6, -16.8, 1.5), (6.7, -16.8, 1.5)))
-    tufts = "".join('<circle cx="%s" cy="%s" r=".5"/>' % (_f1(x), _f1(y)) for x, y in (
-        (-4, -18.3), (-1.5, -19), (1.4, -18.6), (4, -17.4), (-4.4, -15.6), (-1.8, -16.4), (.9, -15.7), (3.4, -14.9), (-2.8, -14.4), (.2, -14.3)))
-    k = STK_AT
+        # the top edge of the cuff, fluffy
+        (-3.7, -29.4, 1.25), (-2.3, -29.9, 1.35), (-.8, -30.1, 1.3), (.7, -30.0, 1.35), (2.2, -29.8, 1.3), (3.6, -29.3, 1.2),
+        # its bottom edge
+        (-3.8, -22.3, 1.15), (-2.4, -21.9, 1.25), (-.8, -21.7, 1.2), (.8, -21.7, 1.25), (2.4, -21.9, 1.2), (3.8, -22.3, 1.1),
+        # its sides
+        (-4.4, -25.9, 1.3), (4.4, -25.9, 1.3)))
+    tufts = "".join('<circle cx="%s" cy="%s" r=".4"/>' % (_f1(x), _f1(y)) for x, y in (
+        (-2.6, -27.6), (-.6, -28.3), (1.6, -27.9), (3.1, -26.2), (-3.2, -24.6), (-1.2, -25.5), (.9, -24.9), (2.6, -23.6), (-1.9, -23.1), (.2, -22.9)))
     return ('<g class="xm-stk"><defs>'
-            '<radialGradient id="%(p)s-r" cx=".38" cy=".3" r=".9"><stop offset="0" stop-color="#e8505f"/><stop offset=".45" stop-color="#c42537"/><stop offset=".8" stop-color="#981627"/><stop offset="1" stop-color="#6e0d1b"/></radialGradient>'
+            # red velvet: a soft light down the middle of the leg, deep red at the edges
+            '<radialGradient id="%(p)s-r" cx=".42" cy=".3" r=".85"><stop offset="0" stop-color="#e4485a"/><stop offset=".45" stop-color="#c42537"/><stop offset=".8" stop-color="#981627"/><stop offset="1" stop-color="#6e0d1b"/></radialGradient>'
             '<linearGradient id="%(p)s-w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#f6f1e8"/><stop offset="1" stop-color="#d9cfbf"/></linearGradient>'
             '<clipPath id="%(p)s-c"><path d="' + STK_BOOT + '"/></clipPath></defs>'
-            + ('<path class="xm-stk-tick" d="' + TICK_OUTLINE + '" fill="' + tick + '"/>' if tick else "") +
-            # the loop, hooked over the tip of the tick's long arm
-            '<path d="M32 15.2C32.4 11.2 37.2 10.8 36.6 15.2" fill="none" stroke="#8f1424" stroke-width=".85" stroke-linecap="round"/>'
-            '<g transform="translate(%(tx)s %(ty)s) scale(%(sc)s)">'
-            # the presents and the candy cane, peeking out of the top (behind the cuff)
-            '<g transform="rotate(-14 -2.6 -22)">'
-            '<rect x="-6" y="-26.6" width="5.8" height="6.4" rx=".5" fill="#1f6b45"/><rect x="-6" y="-26.6" width="5.8" height="1.3" rx=".5" fill="#2f8a5a"/>'
-            '<rect x="-1.6" y="-26.6" width="1.4" height="6.4" fill="#154d31" opacity=".8"/>'
-            '<path d="M-3.1-26.6V-20.2M-6-23.4H-.2" stroke="#e3c46f" stroke-width="1"/>'
-            '<path d="M-3.1-26.7C-4.3-28.6-5.7-28-4.9-26.8M-3.1-26.7C-1.9-28.6-.5-28-1.3-26.8" stroke="#f0d17a" stroke-width=".8" fill="none" stroke-linecap="round"/></g>'
-            '<g transform="rotate(12 3 -22)">'
-            '<rect x=".2" y="-25.6" width="5.8" height="5.6" rx=".5" fill="#e0b13b"/><rect x=".2" y="-25.6" width="5.8" height="1.2" rx=".5" fill="#f3d47a"/>'
-            '<rect x=".2" y="-25.6" width="1.4" height="5.6" fill="#b88a22" opacity=".7"/>'
-            '<path d="M3.1-25.6V-20M.2-22.8H6" stroke="#c42537" stroke-width="1"/>'
-            '<path d="M3.1-25.7C1.9-27.5.6-26.9 1.4-25.8M3.1-25.7C4.3-27.5 5.6-26.9 4.8-25.8" stroke="#d8364a" stroke-width=".8" fill="none" stroke-linecap="round"/></g>'
-            '<path d="M5.4-19V-27.2C5.4-29.8 8.6-29.8 8.6-27.6" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>'
-            '<path d="M5.4-19V-27.2C5.4-29.8 8.6-29.8 8.6-27.6" fill="none" stroke="#cf2f42" stroke-width="1.4" stroke-linecap="butt" stroke-dasharray=".9 .9"/>'
-            # the stocking: a dark velvet rim, then the velvet
-            '<path d="' + STK_BOOT + '" fill="#5c0a16" stroke="#5c0a16" stroke-width="1.1" stroke-linejoin="round"/>'
+            '<g transform="translate(20.6 33) rotate(32)">'
+            # what peeks out of the top (behind the cuff): it is stuffed with presents - a green one with a gold
+            # ribbon tipped to the back, a gold one with a red ribbon tipped forward, a small red one in the middle -
+            # and a candy cane. Each present is a little box with a lit top and a shaded side, so they read as presents.
+            '<g transform="rotate(14 2.6 -31)">'
+            '<rect x=".4" y="-35.4" width="4.6" height="5.6" rx=".45" fill="#1f6b45"/><rect x=".4" y="-35.4" width="4.6" height="1.1" rx=".45" fill="#2f8a5a"/>'
+            '<rect x="3.6" y="-35.4" width="1.4" height="5.6" fill="#154d31" opacity=".8"/>'
+            '<path d="M2.7-35.4V-29.8M.4-32.6H5" stroke="#e3c46f" stroke-width=".8"/>'
+            '<path d="M2.7-35.5C1.7-37 .6-36.6 1.2-35.6M2.7-35.5C3.7-37 4.8-36.6 4.2-35.6" stroke="#f0d17a" stroke-width=".65" fill="none" stroke-linecap="round"/></g>'
+            '<g transform="rotate(-12 -2.4 -31)">'
+            '<rect x="-4.9" y="-34.6" width="4.8" height="4.9" rx=".45" fill="#e0b13b"/><rect x="-4.9" y="-34.6" width="4.8" height="1" rx=".45" fill="#f3d47a"/>'
+            '<rect x="-4.9" y="-34.6" width="1.2" height="4.9" fill="#b88a22" opacity=".7"/>'
+            '<path d="M-2.5-34.6V-29.7M-4.9-32.2H-.1" stroke="#c42537" stroke-width=".8"/>'
+            '<path d="M-2.5-34.7C-3.5-36.1-4.5-35.7-3.9-34.8M-2.5-34.7C-1.5-36.1-.5-35.7-1.1-34.8" stroke="#d8364a" stroke-width=".65" fill="none" stroke-linecap="round"/></g>'
+            '<rect x="-1.2" y="-33.2" width="3.2" height="3.4" rx=".35" fill="#c42537" transform="rotate(4 .4 -31.5)"/>'
+            '<path d="M.4-33.2V-29.8M-1.2-31.5H2" stroke="#fff3d0" stroke-width=".55" transform="rotate(4 .4 -31.5)"/>'
+            '<path d="M-3.6-28V-35.4C-3.6-37.6-1-37.6-1-35.7" fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>'
+            '<path d="M-3.6-28V-35.4C-3.6-37.6-1-37.6-1-35.7" fill="none" stroke="#cf2f42" stroke-width="1.2" stroke-linecap="butt" stroke-dasharray=".8 .8"/>'
+            # the hanging loop, at the back corner of the cuff
+            '<path d="M3.2-29.2C3.9-32.6 7.2-32.4 6.5-29.4C6.2-28.2 5.2-27.7 4.4-27.9" fill="none" stroke="#8f1424" stroke-width="1" stroke-linecap="round"/>'
+            # the stocking: a dark velvet rim, then the velvet itself
+            '<path d="' + STK_BOOT + '" fill="#5c0a16" stroke="#5c0a16" stroke-width="1" stroke-linejoin="round"/>'
             '<path d="' + STK_BOOT + '" fill="url(#%(p)s-r)"/>'
             '<g clip-path="url(#%(p)s-c)" fill="none" stroke-linecap="round">'
-            '<path d="M-2.6-12L-2.6 1.5" stroke="#ff9aa6" stroke-width="1.5" opacity=".35"/>'
-            '<path d="M1.5 6.8C4.5 6.9 8.5 6.8 11.4 6.2" stroke="#ff9aa6" stroke-width=".9" opacity=".3"/>'
-            # the rounded heel and toe in their own shade, the soft fold at the ankle
-            '<path d="M-5.4 2C-6.4 5.4-5.2 8-1.8 8.4" stroke="#5c0a16" stroke-width="1.5" opacity=".45"/>'
-            '<path d="M10.4 8.2C13 7.8 14.2 6 13.8 3.8" stroke="#5c0a16" stroke-width="1.4" opacity=".45"/>'
-            '<path d="M-4.6-1.6C-1.8.2 2.2.2 4.6-1.8" stroke="#5c0a16" stroke-width=".7" opacity=".45"/>'
-            '<path d="M-5-12.6H5" stroke="#3e0610" stroke-width="1.6" opacity=".4"/>'
+            # velvet sheen down the leg and along the top of the foot
+            '<path d="M-1.2-20.5L-1.1-7.5" stroke="#ff9aa6" stroke-width="1.1" opacity=".35"/>'
+            '<path d="M-6.5-2.1C-9.5-2.3-12.2-3-14.4-2.6" stroke="#ff9aa6" stroke-width=".8" opacity=".3"/>'
+            # soft folds where the velvet bends at the ankle, and the rounded heel and toe in shade
+            '<path d="M-2.4-4.4C-.8-3.2 1.2-3.3 2.6-4.6M-2.2-6.6C-.9-5.6.8-5.6 2.4-6.6" stroke="#5c0a16" stroke-width=".55" opacity=".45"/>'
+            '<path d="M1.6 3.1C4.4 2.6 5.3.4 4.8-2" stroke="#5c0a16" stroke-width="1.2" opacity=".45"/>'
+            '<path d="M-16.6 1.2C-15.4 2.8-12.6 3.1-9.6 2.9" stroke="#5c0a16" stroke-width="1.1" opacity=".4"/>'
+            # the shade under the cuff
+            '<path d="M-3-20.9H3" stroke="#3e0610" stroke-width="1.4" opacity=".4"/>'
             '</g>'
-            # the deep, fluffy white fur cuff
-            '<g fill="url(#%(p)s-w)"><rect x="-6.3" y="-20.4" width="12.6" height="7.2" rx="2.4"/>' + fur + '</g>'
+            # the thick white fur cuff, wider than the leg, fluffy all round
+            '<g fill="url(#%(p)s-w)"><rect x="-4.2" y="-29.6" width="8.4" height="7.6" rx="2.2"/>' + fur + '</g>'
             '<g fill="#d8cdbb" opacity=".35">' + tufts + '</g>'
-            '<path d="M-6-14.6Q0-12.8 6-14.6" stroke="#cbbfa9" stroke-width=".7" fill="none" stroke-linecap="round" opacity=".8"/>'
+            '<path d="M-3.9-23.4Q0-22 3.9-23.4" stroke="#cbbfa9" stroke-width=".6" fill="none" stroke-linecap="round" opacity=".8"/>'
             # a sprig of holly on the cuff
-            '<path d="M-.5-17C-1.8-19.4-4.2-19-4.7-17.4C-3.7-17.8-3.1-16.8-2.1-17C-2.5-16.1-1.6-15.7-.5-17Z" fill="#1f6b45"/>'
-            '<path d="M.5-17C1.8-19.4 4.2-19 4.7-17.4C3.7-17.8 3.1-16.8 2.1-17C2.5-16.1 1.6-15.7.5-17Z" fill="#257a50"/>'
-            '<circle cx="-.6" cy="-16.3" r=".95" fill="#c0283b"/><circle cx=".8" cy="-16" r=".9" fill="#a91f31"/><circle cx="-.9" cy="-16.6" r=".28" fill="#fff" opacity=".8"/>'
-            '</g></g>') % {"p": p, "tx": _f1(k[0]), "ty": _f1(k[1]), "sc": k[2]}
+            '<path d="M-.4-25.6C-1.4-27.4-3.2-27.1-3.6-25.9C-2.8-26.2-2.4-25.4-1.6-25.6C-1.9-24.9-1.2-24.6-.4-25.6Z" fill="#1f6b45"/>'
+            '<path d="M.4-25.6C1.4-27.4 3.2-27.1 3.6-25.9C2.8-26.2 2.4-25.4 1.6-25.6C1.9-24.9 1.2-24.6.4-25.6Z" fill="#257a50"/>'
+            '<circle cx="-.5" cy="-25" r=".75" fill="#c0283b"/><circle cx=".6" cy="-24.8" r=".7" fill="#a91f31"/><circle cx="-.7" cy="-25.25" r=".22" fill="#fff" opacity=".8"/>'
+            '</g></g>') % {"p": p}
 
 STOCKING = stocking_tick()
 
