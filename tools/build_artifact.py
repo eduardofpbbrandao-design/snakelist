@@ -638,6 +638,7 @@ CLAUDE_CHECKS = [
     ("a", ') { note("The 3D map works on snakelist.com', True),          # the 3D map: outside picture and height servers
     ("b", "= window.SL_PAGE_URL(", True),
     ("b", "var inClaude = !!(", True),
+    ("b", "if (a.failed) { factsFail(", False),                         # Following tab facts: the snapshot answers here, so the normal messages
     ("b", "'<li class=\"fp-wait\">' + why + (", False),                # Following tab: Retry button (as on the website)                                  # design preview: species links open snakelist.com           # design preview: species page opens on snakelist.com
 ]
 CHECK = "window.claude && window.claude.use"
