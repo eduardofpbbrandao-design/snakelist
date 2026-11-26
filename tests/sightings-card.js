@@ -18,6 +18,7 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
 let fails = 0;
 const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) { fails++; process.exitCode = 1; } };
 const SLOW = {};
+const SL_NAME = { 'Natrix maura': 'Viperine Snake', 'Vipera latastei': "Lataste's Viper" }; // (SnakeList's checklist names)
 
 async function route(r) {
   const u = r.request().url();
@@ -67,12 +68,16 @@ async function route(r) {
       const o = BY_ID[id], d = new Date(o.observed_on + 'T12:00:00Z');
       const dateOk = pn.t.includes(String(d.getUTCDate())) && pn.t.includes(String(d.getUTCFullYear()));
       const photoOk = o.photos.length ? pn.im.length === 1 && pn.im[0].includes('/photos/' + id + '-') : /No photo was shared with this sighting\./.test(pn.t) && pn.im.length === 0;
-      return pn.id === id && pn.t.includes(o.user.name) && dateOk && photoOk && pn.t.includes(o.taxon.preferred_common_name);
+      // (batch109: the main name is SnakeList's own - its checklist card's - the same name the photo viewer and 3D use)
+      return pn.id === id && pn.t.includes(o.user.name) && dateOk && photoOk && pn.t.includes(SL_NAME[o.taxon.name] || o.taxon.preferred_common_name);
     };
     for (const [zoom, box] of [['whole view', null], ['zoomed in', [-9.4, -8.6, 39.9, 40.4]]]) {
       if (box) { await closePanel(); await p.evaluate(bx => window.SL_FLY_BOX.apply(null, bx), box); await p.waitForTimeout(2200); }
       const d = await dbg();
-      ok(d.dots.length >= 2,`${label}, ${zoom}: single dots on the map (${d.dots.length})`);
+      // batch109: zoomed out, dots crowded together are drawn as groups - every sighting is a single dot or in a group
+      const inGroups = d.clusters.reduce((a, c) => a + c.n, 0);
+      if (!box) ok(d.dots.length + inGroups === FIX.length, `${label}, ${zoom}: every sighting is on the map, as its own dot or in a group (${d.dots.length} dots + ${inGroups} in ${d.clusters.length} groups)`);
+      if (box) ok(d.dots.length >= 2, `${label}, ${zoom}: single dots on the map (${d.dots.length})`);
       const covered = [];
       for (const dot of d.dots) { const a = await at(dot); if (a.top !== 'canvas') covered.push(dot.id + ' under ' + a.top); }
       ok(covered.length === 0, `${label}, ${zoom}: no dot is covered by a control` + (covered.length ? ' - ' + covered.join(', ') : ''));

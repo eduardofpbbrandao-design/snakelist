@@ -41,7 +41,9 @@ var DEFS=[
   live:function(){return true}},
  {key:"finale",label:"Countdown finale + time zone",about:"The countdown's last minute plays once per visit, about 70 seconds after SnakeList opens (pretend time, nothing unlocks; it waits for the tutorial), and Settings gets a Time zone choice",
   apply:function(v){if(v)W.__slCdFinPv=1},
-  live:function(){return !W.SL_EV}}
+  live:function(){return !W.SL_EV}},
+ {key:"sightings",label:"New sightings panel",about:"Map sightings: a docked panel (a sheet on phones) with the whole photo, a small key, filter chips, numbers on groups of dots and a taller map on phones",
+  live:function(){return true}}
 ];
 var ALL=["opening","design","cookies","tutorial","finale","country","spot"],MENU=PRE+"menu";
 function def(k){for(var i=0;i<DEFS.length;i++)if(DEFS[i].key===k)return DEFS[i];return null}
