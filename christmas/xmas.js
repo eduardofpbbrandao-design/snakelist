@@ -292,17 +292,24 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     placePhotoHat(); setTimeout(placePhotoHat, 1200);
   }
 
-  /* ================= snow: small flakes at three depths, drawn on one canvas per cover ================= */
-  var flakesImg = null;
+  /* ================= snow: real falling snow, drawn on one canvas per cover =================
+     (round 5, Eduardo: "the snow isn't realistic") - like snow seen through a camera: mostly tiny, crisp specks of many
+     different sizes far away, some bigger flakes nearer, and only now and then a large soft out-of-focus one right in
+     front - each drifting on a shared, gusting breeze with its own small flutter, the near ones falling faster. Sprites
+     are made once per size step: a solid core with a short soft edge (not a big glow) for sharp flakes, a soft disc
+     for the out-of-focus near ones. */
+  var flakesImg = null, FSTEP = [0.8, 1.0, 1.25, 1.5, 1.8, 2.1, 2.5, 2.9];
+  function flakeSprite(r, soft) {
+    var e = soft ? r * 1.15 : r + 0.8, s = Math.ceil(e) + 1, c = D.createElement("canvas"); c.width = c.height = s * 2;
+    var g = c.getContext("2d"), gr = g.createRadialGradient(s, s, 0, s, s, e);
+    if (soft) { gr.addColorStop(0, "rgba(255,255,255,.55)"); gr.addColorStop(0.55, "rgba(250,252,255,.4)"); gr.addColorStop(0.85, "rgba(240,246,255,.16)"); gr.addColorStop(1, "rgba(240,246,255,0)"); }
+    else { var k = r / e; gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(k * 0.7, "rgba(255,255,255,.96)"); gr.addColorStop(k, "rgba(244,249,255,.6)"); gr.addColorStop(1, "rgba(236,244,255,0)"); }
+    g.fillStyle = gr; g.beginPath(); g.arc(s, s, e, 0, Math.PI * 2); g.fill();
+    return { c: c, s: s };
+  }
   function flakeSprites() {
     if (flakesImg) return flakesImg;
-    flakesImg = [1.2, 2, 3.1].map(function (r) {
-      var c = D.createElement("canvas"), s = Math.ceil(r * 4 + 2); c.width = c.height = s * 2;
-      var g = c.getContext("2d"), gr = g.createRadialGradient(s, s, 0, s, s, r * 2);
-      gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.45, "rgba(255,252,244,.85)"); gr.addColorStop(1, "rgba(255,248,237,0)");
-      g.fillStyle = gr; g.beginPath(); g.arc(s, s, r * 2, 0, Math.PI * 2); g.fill();
-      return { c: c, s: s };
-    });
+    flakesImg = { sharp: FSTEP.map(function (r) { return flakeSprite(r, false); }), soft: [4.5, 6, 7.5].map(function (r) { return flakeSprite(r, true); }) };
     return flakesImg;
   }
   var snows = [], raf = 0, last = 0;
@@ -323,23 +330,31 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     var w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
     if (w === S.w && h === S.h && dpr === S.dpr) return;
     S.w = w; S.h = h; S.dpr = dpr; S.cv.width = Math.round(w * dpr); S.cv.height = Math.round(h * dpr);
-    var n = Math.round(Math.min(130, Math.max(28, w * h / 9500)) * S.dens);
+    var n = Math.round(Math.min(240, Math.max(50, w * h / 4200)) * S.dens);
     S.fl = [];
     for (var i = 0; i < n; i++) {
-      var z = Math.random(), layer = z < 0.5 ? 0 : z < 0.85 ? 1 : 2;
-      S.fl.push({ x: Math.random() * w, y: Math.random() * h, l: layer, v: [14, 28, 46][layer] * (0.75 + Math.random() * 0.5),
-        a: [0.42, 0.62, 0.82][layer] * (0.8 + Math.random() * 0.25), ph: Math.random() * 6.28, sw: 0.35 + Math.random() * 0.6, amp: [6, 11, 16][layer] });
+      // depth 0 (far) .. 1 (near): most flakes far away, few near, a rare soft one right in front of the lens
+      var z = Math.pow(Math.random(), 1.4), soft = Math.random() < 0.05, si = Math.min(FSTEP.length - 1, Math.floor(z * FSTEP.length + Math.random() * 1.2));
+      S.fl.push({ x: Math.random() * w, y: Math.random() * h, z: z, soft: soft, si: soft ? Math.floor(Math.random() * 3) : si,
+        v: soft ? 70 + Math.random() * 30 : 12 + z * 42 + Math.random() * 8, // near flakes fall faster
+        a: soft ? 0.32 + Math.random() * 0.18 : 0.38 + z * 0.5 + Math.random() * 0.12,
+        ph: Math.random() * 6.28, sw: 0.6 + Math.random() * 1.4, amp: 1.5 + z * 7 + Math.random() * 3, wd: 0.5 + z * 0.9 });
     }
     draw(S, 0);
   }
   XM.sizeSnow = size;
+  function breeze(t) { return 9 * Math.sin(t * 0.13) + 6 * Math.sin(t * 0.31 + 1.7) + 4 * Math.sin(t * 0.71 + 0.4); } // a slow, gusting wind (px/s)
   function draw(S, dt) {
-    var g = S.g, sp = flakeSprites(), w = S.w, h = S.h, t = performance.now() / 1000;
+    var g = S.g, sp = flakeSprites(), w = S.w, h = S.h, t = performance.now() / 1000, wind = breeze(t);
     g.setTransform(S.dpr, 0, 0, S.dpr, 0, 0); g.clearRect(0, 0, w, h);
     for (var i = 0; i < S.fl.length; i++) {
       var f = S.fl[i];
-      if (dt) { f.y += f.v * dt; if (f.y > h + 8) { f.y = -8; f.x = Math.random() * w; } }
-      var x = f.x + Math.sin(t * f.sw + f.ph) * f.amp, im = sp[f.l];
+      if (dt) {
+        f.y += f.v * dt; f.x += wind * f.wd * dt;
+        if (f.y > h + 12) { f.y = -12; f.x = Math.random() * w; }
+        if (f.x > w + 12) f.x -= w + 24; else if (f.x < -12) f.x += w + 24;
+      }
+      var x = f.x + Math.sin(t * f.sw + f.ph) * f.amp, im = f.soft ? sp.soft[f.si] : sp.sharp[f.si];
       g.globalAlpha = f.a; g.drawImage(im.c, x - im.s, f.y - im.s);
     }
     g.globalAlpha = 1;
