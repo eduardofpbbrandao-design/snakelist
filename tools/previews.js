@@ -43,9 +43,12 @@ var DEFS=[
   apply:function(v){if(v)W.__slCdFinPv=1},
   live:function(){return !W.SL_EV}},
  {key:"sightings",label:"New sightings panel",about:"Map sightings: a docked panel (a sheet on phones) with the whole photo, a small key, filter chips, numbers on groups of dots and a taller map on phones",
+  live:function(){return true}},
+ // the 3D viewer (species/3d/viewer.js realismOn) reads it each time a model opens, so it starts in place
+ {key:"3d",label:"3D snake realism",about:"Reshaped 3D snakes: heads, necks, bodies and tails by body plan, eyes in sockets, less plastic skin",
   live:function(){return true}}
 ];
-var ALL=["opening","design","cookies","tutorial","finale","country","spot"],MENU=PRE+"menu";
+var ALL=["opening","design","cookies","tutorial","finale","country","spot","sightings","3d"],MENU=PRE+"menu";
 function def(k){for(var i=0;i<DEFS.length;i++)if(DEFS[i].key===k)return DEFS[i];return null}
 function on(k){try{return S.getItem(PRE+k)==="1"}catch(e){return false}}
 function emit(){try{document.dispatchEvent(new CustomEvent("sl-previews-changed"))}catch(e){}}
