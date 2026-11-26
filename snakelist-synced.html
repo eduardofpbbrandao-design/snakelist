@@ -21168,11 +21168,20 @@ window.SL_GEO_READY = new Promise(function (res) {
   function isFav(id) { return window.SL_isFav(id); }
   var STAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 2.8 2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3-4.6-4.4 6.3-.9Z"></path></svg>';
   // one quiet retry: a free public API sometimes drops a request when it's busy (HTTP 429)
+  // each request gives up after 25 s (a stalled connection used to leave "Loading sightings..." up for minutes) and is not
+  // tried again then - the usual "didn't answer - tap Retry" line shows instead
+  var GET_TIMEOUT = 25000;
   function getJSON(url, tries) {
-    return fetch(url).then(function (r) {
+    var ac = typeof AbortController === "function" ? new AbortController() : null, timedOut = false;
+    var tm = setTimeout(function () { timedOut = true; if (ac) ac.abort(); }, GET_TIMEOUT);
+    var req = fetch(url, ac ? { signal: ac.signal } : undefined).then(function (r) {
       if (!r.ok) { var e = new Error("HTTP " + r.status); e.status = r.status; throw e; }
       return r.json();
-    }).catch(function (e) {
+    });
+    if (!ac) req = Promise.race([req, new Promise(function (res, rej) { setTimeout(function () { rej(new Error("x")); }, GET_TIMEOUT + 10); })]);
+    return req.then(function (d) { clearTimeout(tm); return d; }, function (e) {
+      clearTimeout(tm);
+      if (timedOut) { var te = new Error("no answer after " + GET_TIMEOUT / 1000 + " s"); te.timeout = true; throw te; }
       if ((tries || 0) >= 2) throw e;
       return new Promise(function (res) { setTimeout(res, 1200 * ((tries || 0) + 1)); }).then(function () { return getJSON(url, (tries || 0) + 1); });
     });
