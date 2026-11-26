@@ -1452,7 +1452,11 @@ window.XM_ART={"bulbs":{"l":[[0.0963,0.3342],[0.1879,0.395],[0.2935,0.4074],[0.4
     return true;
   }
   function openCabin(push) {
+    // SnakeList under the opening photo is drawn only a few seconds after the photo comes to rest (content-visibility:
+    // hidden until then); a Cabin opened before that (?tab=cabin, the tutorial) could not be seen, focused or pressed
+    var draw = function () { if (window.__introUnhide && D.querySelector(".sl-root.intro-on") && C.root && !C.root.hidden) try { window.__introUnhide(); } catch (e) {} };
     var r = build();
+    if (window.__introDone) setTimeout(draw, 0); else D.addEventListener("sl-intro-done", draw, { once: true });
     if (!r.isConnected) { var tabs = D.querySelector(".tabs"); tabs.parentNode.insertBefore(r, tabs.nextSibling); }
     r.hidden = false; D.body.classList.add("xm-cabin-on");
     var b = D.getElementById("tab-cabin"); if (b) { b.classList.add("xm-active"); b.setAttribute("aria-current", "page"); }
