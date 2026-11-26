@@ -23801,6 +23801,23 @@ window.SL_GEO_READY = new Promise(function (res) {
     return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   }
   // the observed date and time, in the place's own time zone when iNaturalist gives one
+  // what "See the spot" (species/3d/spot.js) is given about a sighting. An obscured sighting's accuracy is the size of the
+  // area iNaturalist hides it in (public_positional_accuracy), never the hidden point's own. The raw time and iNaturalist's
+  // time zone go too: spot.js shows (and lights) the time in the place's own zone - iNaturalist's zone is often the
+  // observer's account setting (a Guatemala sighting listed in New York time)
+  function spotOf(so, pi) {
+    var sc = so.geojson && so.geojson.coordinates, su = so.user || null;
+    var obsc = !!(so.obscured || (so.geoprivacy && so.geoprivacy !== "open") || (so.taxon_geoprivacy && so.taxon_geoprivacy !== "open"));
+    return {
+      lat: sc ? +sc[1] : SG.openM && SG.openM.lat, lon: sc ? +sc[0] : SG.openM && SG.openM.lon,
+      acc: obsc ? +(so.public_positional_accuracy || so.positional_accuracy || 0) : +(so.positional_accuracy || so.public_positional_accuracy || 0),
+      obscured: obsc,
+      when: so.time_observed_at || "", tz: so.observed_time_zone || "", whenTxt: observedTxt(so), dayTxt: fmtDate((so.observed_on_details && so.observed_on_details.date) || so.observed_on || ""),
+      observer: su ? (su.name || (su.login ? "@" + su.login : "")) : "", place: so.place_guess || "",
+      photo: (function () { var ps = sgPhotos(so), ph = ps[pi || 0] || ps[0]; if (!ph) return null;
+        return { src: sgPhotoUrl(ph, "large"), fb: sgPhotoUrl(ph, "medium"), own: true, title: "Photo of this sighting", alt: (SG.vname || "Snake") + " - the photo of this sighting", credit: "The real photo of this sighting &middot; " + esc(ph.attribution || "the observer") + " &middot; via iNaturalist" }; })() };
+  }
+  window.SL_SPOT_OF = spotOf;
   function observedTxt(o) {
     var day = (o.observed_on_details && o.observed_on_details.date) || o.observed_on || "";
     if (o.time_observed_at) {
@@ -24173,18 +24190,11 @@ window.SL_GEO_READY = new Promise(function (res) {
     }
     var bs = e.target.closest(".sgv-spot"); // v6.14: See the spot - the sighting's own place in 3D (species/3d/spot.js)
     if (bs && window.SL_3D && window.SL_3D.spot && SG.vo && SG.vo.taxon) {
-      var so = SG.vo, stx = so.taxon, skey = String(stx.name || "").trim().toLowerCase().split(/\s+/).slice(0, 2).join("-").replace(/[^a-z-]+/g, ""), sc = so.geojson && so.geojson.coordinates, su = so.user || null;
+      var so = SG.vo, stx = so.taxon, skey = String(stx.name || "").trim().toLowerCase().split(/\s+/).slice(0, 2).join("-").replace(/[^a-z-]+/g, "");
       if (!skey) return;
       bs.setAttribute("aria-busy", "true"); bs.querySelector("span").textContent = "Opening…";
       setTimeout(function () { if (bs.isConnected) { bs.removeAttribute("aria-busy"); bs.querySelector("span").textContent = "See the spot"; } }, 900);
-      window.SL_3D.spot(skey, bs, stx.preferred_common_name && stx.preferred_common_name !== stx.name ? stx.preferred_common_name : "", {
-        lat: sc ? +sc[1] : SG.openM && SG.openM.lat, lon: sc ? +sc[0] : SG.openM && SG.openM.lon,
-        acc: +(so.positional_accuracy || so.public_positional_accuracy || 0),
-        obscured: !!(so.obscured || (so.geoprivacy && so.geoprivacy !== "open") || (so.taxon_geoprivacy && so.taxon_geoprivacy !== "open")),
-        when: so.time_observed_at || "", whenTxt: observedTxt(so), dayTxt: fmtDate((so.observed_on_details && so.observed_on_details.date) || so.observed_on || ""),
-        observer: su ? (su.name || (su.login ? "@" + su.login : "")) : "", place: so.place_guess || "",
-        photo: (function () { var ps = sgPhotos(so), ph = ps[SG.pi || 0] || ps[0]; if (!ph) return null;
-          return { src: sgPhotoUrl(ph, "large"), fb: sgPhotoUrl(ph, "medium"), alt: (SG.vname || "Snake") + " - the photo of this sighting", credit: "The real photo of this sighting &middot; " + esc(ph.attribution || "the observer") + " &middot; via iNaturalist" }; })() });
+      window.SL_3D.spot(skey, bs, stx.preferred_common_name && stx.preferred_common_name !== stx.name ? stx.preferred_common_name : "", spotOf(so, SG.pi || 0));
       return;
     }
     var b3 = e.target.closest(".sgv-3d");

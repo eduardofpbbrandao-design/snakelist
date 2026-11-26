@@ -11,7 +11,31 @@
 //  - a light beam, an accuracy ring and a label on the exact spot, and the date, observer and place in a card.
 // Obscured sightings (iNaturalist hides the real spot of many snakes) say so: the general area is shown, not the spot.
 // It is downloaded only when "See the spot" is pressed, and everything it made is let go when the view closes.
-import { sunPos } from './daynight.js?r=614';
+// v6.35 (audit, docs/audit/spot.md): honest about what is real - the point is the centre of an approximate observation
+// area (its accuracy), the scene is "recreated from location data" and the card lists which data layers loaded (with
+// Retry for the ones that didn't); the time is shown and lit in the place's own time zone (tz.js), not iNaturalist's
+// zone when that is the observer's home setting. The preview "spot" (tools/previews.js) adds the inspection light at
+// night, a livelier forest and the reworked photo comparison.
+import { sunPos } from './daynight.js?r=635';
+import { zoneOf, reread, offsetAt, utcTxt } from './tz.js?r=635';
+// the preview switch (this module may run where tools/previews.js isn't loaded: then the switch's own key is read)
+export const preview = () => { try { const P = window.SL_PREVIEWS; if (P && typeof P.on === 'function') return !!P.on('spot'); return localStorage.getItem('sl-art-preview-spot') === '1'; } catch (e) { return false; } };
+const fmtM = (m) => (m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(m < 10000 ? 1 : 0) + ' km');
+// the sighting's time in the place's own time zone: { date (the moment, for the sun), txt, note, zone, est }
+export function timeOf(sp) {
+  if (!sp || !sp.when) return null;
+  const d0 = new Date(sp.when); if (isNaN(d0)) return null;
+  const z = zoneOf(+sp.lat, +sp.lon, sp.tz || '', d0);
+  // iNaturalist's zone doesn't fit the place: the clock time the observer recorded is read as the place's own clock
+  const date = z.moved && sp.tz ? reread(d0, sp.tz, z.zone) : d0;
+  if (!z.zone) return { date, txt: sp.whenTxt || '', note: '', zone: '', est: false };
+  let txt = '';
+  try { txt = date.toLocaleString(undefined, { timeZone: z.zone, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-' + 'digit', minute: '2-' + 'digit' }); } catch (e) { txt = sp.whenTxt || ''; }
+  const off = utcTxt(offsetAt(z.zone, date)), city = z.zone.split('/').pop().replace(/_/g, ' ');
+  txt += ' – local time at the spot (' + (z.est ? off + ', time zone estimated from the location' : city + ' time, ' + off) + ')';
+  const note = z.moved ? 'iNaturalist lists it in ' + String(sp.tz).replace(/_/g, ' ') + ' time (not the place\'s zone), so the clock time recorded is read as local time.' : '';
+  return { date, txt, note, zone: z.zone, est: z.est };
+}
 
 const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/';
 const DEM = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/';
@@ -163,18 +187,26 @@ export function prepare(sp) {
   // v6.28 (Eduardo: "See the spot takes too long to load"): lighter and in parallel - the four candidate zooms at the
   // spot are asked for at once (not one after another), and the close picture is 4 x 4 tiles (was 6 x 6 on a computer)
   const zNear = phone ? 18 : 19, nNear = 4;
-  const near = (async () => {
+  const getNear = () => (async () => {
     // the sharpest zoom that has real pictures at the spot (19 in most places, less in remote ones)
     const zs = []; for (let z = zNear; z > 15; z--) zs.push(z);
     const probes = zs.map((z) => { const n = 2 ** z; return loadImg(esriUrl(z, Math.floor(X0 * n), Math.floor(Y0 * n)), live).then((im) => !!(im && !blank(im))); });
     let z = 15; for (let i = 0; i < zs.length; i++) { if (await probes[i]) { z = zs[i]; break; } if (dead) return null; }
     const m = await mosaic(esriUrl, z, nNear, lat, lon, live, phone ? 1024 : 1280, false, true);
     return m.ok ? m : null;
-  })();
-  const far = near.then((m) => mosaic(esriUrl, Math.min(zNear, m ? m.z : 18) - 3, 4, lat, lon, live, 1024, true, true)).then((m) => (m.ok ? m : null));
-  const dem = mosaic(demUrl, 15, 4, lat, lon, live, 1024).then((m) => (m.ok ? m : null));
-  const osmP = osmFetch(lat, lon, phone ? 320 : 450, ctlr && ctlr.signal).catch(() => null);
+  })().catch(() => null);
+  const getFar = (np) => np.then((m) => mosaic(esriUrl, Math.min(zNear, m ? m.z : 18) - 3, 4, lat, lon, live, 1024, true, true)).then((m) => (m.ok ? m : null)).catch(() => null);
+  const getDem = () => mosaic(demUrl, 15, 4, lat, lon, live, 1024).then((m) => (m.ok ? m : null)).catch(() => null);
+  const getOsm = () => osmFetch(lat, lon, phone ? 320 : 450, ctlr && ctlr.signal).catch(() => null);
+  let near = getNear(), far = getFar(near), dem = getDem(), osmP = getOsm();
   const rawP = Promise.all([timeout(osmP, 9000, null), timeout(near, 9000, null)]);
+  // v6.35: Retry asks again for the layers that didn't come (the ones that did are kept)
+  async function refetch() {
+    const [n, f, d, o] = await Promise.all([near, far, dem, osmP].map((p) => timeout(p, 1, null)));
+    if (!n) { near = getNear(); far = getFar(near); } else if (!f) far = getFar(near);
+    if (!d) dem = getDem();
+    if (!o) osmP = getOsm();
+  }
 
   // the satellite picture round the spot, r metres: mean brightness and excess green, the share of green and of dark
   // (tree-shadowed) pixels. Measured on real places: forest E ~0.3 with ~40% dark; meadow and oak pasture E ~0.07;
@@ -222,6 +254,7 @@ export function prepare(sp) {
   const S = {
     ready: (ms) => timeout(rawP.then(([o, m]) => chooseKind(o, m)), ms || 4000, null).then((h) => (S.pick = h || { k: (sp.habs && sp.habs[0] && sp.habs[0].k) || 'grass', l: '', why: 'species' })),
     plugin: (V, ui) => makePlugin(V, ui),
+    refetch,
     dispose() { dead = true; if (ctlr) try { ctlr.abort(); } catch (e) { /* */ } for (const im of live) { im.onload = im.onerror = null; try { im.src = ''; } catch (e) { /* */ } } live.length = 0;
       for (const p of [near, far, dem]) p.then((m) => { if (m && m.cv) m.cv.width = m.cv.height = 0; }, () => {}); }, // (the big pictures' memory goes at once: iPads have little)
   };
@@ -231,37 +264,70 @@ export function prepare(sp) {
     const THREE = V.THREE; TH = THREE; NAT = V.NATURE || null;
     const R = rng(Math.round((lat + 90) * 1e5) ^ Math.round((lon + 180) * 1e5));
     let wantView = false, firstAz = null, built = null, first = true, label = null, card = null, credit = null, bArea = null, extent = 900, terrH = null, areaOn = false, beam = null, ring = null;
-    const obsc = !!sp.obscured;
-    const when = sp.when ? new Date(sp.when) : null, sun = when && !isNaN(when) ? sunPos(when, lat, lon) : null;
+    const obsc = !!sp.obscured, PV = preview(), acc = +sp.acc || 0;
+    // v6.35: the time in the place's own zone (iNaturalist's zone is often the observer's home setting), for the card and the sun
+    const TM = timeOf(sp), sun = TM ? sunPos(TM.date, lat, lon) : null;
     css();
 
     // ---- the card, the label on the spot, the credits ----
     const st = V.stage;
+    if (PV) st.classList.add('spot-pv');
     card = document.createElement('div'); card.className = 'spot-card'; card.setAttribute('role', 'note');
-    const accTxt = obsc ? 'The exact spot is hidden to protect the snake (the observer or iNaturalist made it approximate), so this shows the general area, not the real spot.'
-      : sp.acc > 0 ? 'Exact spot within about ' + (sp.acc < 1000 ? Math.round(sp.acc) + ' m' : (sp.acc / 1000).toFixed(1) + ' km') + ' (the yellow ring).' + (sp.acc > 300 ? ' That is not very exact, so the snake may have been anywhere in the ring.' : '')
-      : 'The observer didn\'t record how exact the spot is.';
+    // v6.35 (audit): never "exact spot" - the point is the centre of the area the observer gave (its accuracy), and an
+    // obscured sighting's point is not the real spot at all (nothing is worked out from it)
+    const accTxt = obsc ? 'Location hidden to protect the snake: iNaturalist shows this sighting only somewhere ' + (acc > 0 ? 'within about ' + fmtM(acc) + ' of this point' : 'near this point') + ', so this is the general area, not the real spot.'
+      : acc > 0 ? 'Approximate observation area (±' + fmtM(acc) + '): the snake was somewhere in the yellow circle; it is drawn at its centre.' + (acc > 1500 ? ' The circle is wider than the land shown here.' : '')
+      : 'Location accuracy not recorded, so the snake may have been some way from the point shown.';
     const sunTxt = sun ? (sun.el < -0.1 ? 'Seen after dark' : sun.el < 0.1 ? 'Seen at dusk or dawn' : 'Seen in daylight') : '';
-    card.innerHTML = '<button type="button" class="spot-card-t" aria-expanded="true"><b>Where it was seen</b><span class="spot-card-ch" aria-hidden="true"></span></button>' +
+    card.innerHTML = '<button type="button" class="spot-card-t" aria-expanded="true"><b>Where it was seen</b><span class="spot-miss" hidden></span><span class="spot-card-ch" aria-hidden="true"></span></button>' +
       '<div class="spot-card-b">' + (sp.photo && sp.photo.src ? '<button type="button" class="spot-ph" title="Show the real photo beside the 3D place"><img alt="' + esc(sp.photo.alt || 'The photo of this sighting') + '" src="' + esc(sp.photo.fb || sp.photo.src) + '" decoding="async"><span>The real photo of this sighting</span></button>' : '') +
-      '<p class="spot-honest">The place is real map data at the exact spot, lit for the time it was seen. The snake is SnakeList\'s 3D model of its species - the real snake and who found it are in the photo.</p>' +
+      '<p class="spot-honest"><b class="spot-recon">Recreated scene based on location data.</b> The map layers below are real data; the plants, ground detail and the snake (a 3D model of its species) are recreated by SnakeList.</p>' +
       '<p class="spot-pl">' + esc(sp.place || 'No place name given') + '</p>' +
-      '<p>' + esc(sp.whenTxt || 'Date not recorded') + (sunTxt ? ' <span class="spot-mut">· ' + esc(sunTxt) + '</span>' : '') + '</p>' +
+      '<p class="spot-when">' + esc((TM && TM.txt) || sp.whenTxt || 'Date not recorded') + (sunTxt ? ' <span class="spot-mut">· ' + esc(sunTxt) + '</span>' : '') + '</p>' +
+      (TM && TM.note ? '<p class="spot-tzn">' + esc(TM.note) + '</p>' : '') +
       (sp.observer ? '<p>Found by ' + esc(sp.observer) + '</p>' : '') +
       '<p class="spot-acc' + (obsc ? ' spot-obsc' : '') + '">' + esc(accTxt) + '</p>' +
+      '<div class="spot-layers" aria-live="polite"><p class="spot-lh">Map data layers</p><ul></ul><button type="button" class="spot-retry" hidden>Retry missing layers</button></div>' +
       '<p class="spot-st" aria-live="polite"></p></div>';
-    const cT = card.querySelector('.spot-card-t'), cS = card.querySelector('.spot-st');
+    const cT = card.querySelector('.spot-card-t'), cM = card.querySelector('.spot-miss'), cS = card.querySelector('.spot-st'), cL = card.querySelector('.spot-layers ul'), cR = card.querySelector('.spot-retry');
     V.on(cT, 'click', () => { const o = card.classList.toggle('spot-shut'); cT.setAttribute('aria-expanded', String(!o)); });
     { const pb = card.querySelector('.spot-ph'); if (pb) V.on(pb, 'click', () => { const hb = st.querySelector('.sp3d-hb'); if (hb && hb.getAttribute('aria-pressed') !== 'true') hb.click(); }); }
     if (phone || (st.clientWidth || 999) < 560) { card.classList.add('spot-shut'); cT.setAttribute('aria-expanded', 'false'); }
     label = document.createElement('div'); label.className = 'spot-pin'; label.setAttribute('aria-hidden', 'true');
-    label.innerHTML = '<b>' + (obsc ? 'Somewhere here' : 'Seen here') + '</b>' + (sp.dayTxt ? '<span>' + esc(sp.dayTxt) + '</span>' : '');
+    label.innerHTML = '<b>' + (obsc ? 'Somewhere in this area' : acc >= 15 ? 'Centre of the observation area' : 'Seen here') + '</b>' + (sp.dayTxt || (!obsc && acc >= 15) ? '<span>' + esc([!obsc && acc >= 15 ? '±' + fmtM(acc) : '', sp.dayTxt || ''].filter(Boolean).join(' · ')) + '</span>' : '');
     label.hidden = true;
     credit = document.createElement('p'); credit.className = 'spot-credit';
     credit.innerHTML = 'Satellite pictures <a href="https://www.esri.com/" target="_blank" rel="noopener">Esri</a>, Maxar, Earthstar Geographics · Land height <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">AWS Terrain Tiles</a> · Roads and water &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
     st.append(card, label, credit);
     const status = (t) => { cS.textContent = t || ''; cS.hidden = !t; };
     status('');
+    // v6.35 (preview "spot"): a night scene stays night, but a labelled Inspection light (on at first) lights the snake
+    // and the ground round it - turned off, only the moon lights the place, as it was
+    let lampB = null;
+    const lampSet = (on) => { if (!lampB) return; lampB.setAttribute('aria-pressed', String(on)); lampB.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"></path></svg><span>Inspection light: ' + (on ? 'on' : 'off') + '</span>';
+      if (V.dayNight && V.dayNight.lamp) V.dayNight.lamp(on ? 1.9 : 0, on ? 0.52 : 0.34); };
+    if (PV && sun && sun.el < -0.05) {
+      lampB = document.createElement('button'); lampB.type = 'button'; lampB.className = 'spot-lamp';
+      lampB.setAttribute('aria-label', 'Inspection light (a torch on the snake - the scene itself stays at night)');
+      V.on(lampB, 'click', () => lampSet(lampB.getAttribute('aria-pressed') !== 'true'));
+      st.appendChild(lampB); lampSet(true);
+    }
+    // v6.35: which data layers the scene has - loading, loaded or missing (never a spinner without end: each has a time limit)
+    const LAYERS = [['sat', 'Satellite pictures'], ['dem', 'Land height'], ['osm', 'Roads and water (OpenStreetMap)']];
+    const layers = (o) => {
+      cL.innerHTML = LAYERS.map(([k, t]) => { const v = o ? o[k] : 'wait'; return '<li class="spot-ly spot-ly-' + (v === true ? 'ok' : v === 'wait' ? 'wait' : 'no') + '" data-k="' + k + '"><span aria-hidden="true"></span>' + esc(t) + ': ' + (v === true ? 'loaded' : v === 'wait' ? 'loading…' : 'couldn\'t load') + '</li>'; }).join('');
+      const miss = !!o && LAYERS.some(([k]) => o[k] !== true); cR.hidden = !miss; cR.disabled = false; cR.textContent = 'Retry missing layers';
+      card.classList.toggle('spot-partial', miss);
+      // (what is missing is never hidden: the card's title says it even while the card is shut - on a phone the open card
+      // would cover the whole scene, so it stays shut there)
+      const nMiss = o ? LAYERS.filter(([k]) => o[k] !== true).length : 0; cM.textContent = nMiss ? nMiss + (nMiss > 1 ? ' layers' : ' layer') + ' missing' : ''; cM.hidden = !nMiss;
+      if (miss && card.classList.contains('spot-shut') && !phone && (st.clientWidth || 999) >= 560) { card.classList.remove('spot-shut'); cT.setAttribute('aria-expanded', 'true'); }
+    };
+    layers(null);
+    V.on(cR, 'click', () => {
+      cR.disabled = true; cR.textContent = 'Trying again…'; layers(null); cR.hidden = false; cR.disabled = true; cR.textContent = 'Trying again…';
+      S.refetch().then(() => { if (!dead && V.rebuild) V.rebuild(); });
+    });
     const busyTxt = (t) => { const s = st.querySelector('.sp3d-busy span'); if (s) s.textContent = t; };
 
     // ---- "The area": the camera rises to see the whole place round the spot, and back ----
@@ -283,7 +349,7 @@ export function prepare(sp) {
         const [mN, mF, mD, osm] = await Promise.all([timeout(near, 25000, null), timeout(far, 25000, null), timeout(dem, 20000, null), timeout(osmP, 22000, null)]);
         if (dead || ctx.scene !== sceneNow) return;
         build({ scene, ctx, Rb, F, poseInfo, dist2snake, mN, mF, mD, osm, low, S: A.S });
-      })().catch((e) => { console.warn('spot', e); status('The real place couldn\'t be built just now.'); });
+      })().catch((e) => { console.warn('spot', e); status('The real place couldn\'t be built just now.'); layers({ sat: false, dem: false, osm: false }); });
       ctx.natureReady = job;
       return true;
     }
@@ -371,12 +437,12 @@ export function prepare(sp) {
       const tex = (m) => { if (!m) return null; const t = new THREE.CanvasTexture(m.cv); t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = Math.min(8, maxAniso); t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; track(t); return t; };
       const box = (m) => { if (!m) return new THREE.Vector4(-1e6, -1e6, 1, 1); const n = 2 ** m.z, x0 = (m.tx0 / n - X0) * Wm, z0 = (m.ty0 / n - Y0) * Wm, s = (m.N / n) * Wm; return new THREE.Vector4(x0, z0, s, s); };
       const tN = tex(mN), tF = tex(mF) || tN, base = new THREE.Color(B.S && B.S.fog ? B.S.fog : '#9a9a88');
-      const U = { uSatN: { value: tN || tF }, uSatF: { value: tF }, uBoxN: { value: box(mN || mF) }, uBoxF: { value: box(mF || mN) }, uHasSat: { value: tN || tF ? 1 : 0 }, uBase: { value: base }, uFloor: { value: new THREE.Color(kindNow() === 'swamp' ? '#3f3a2a' : '#4a3b2a') }, uFloorR: { value: /^(forest|rainforest|swamp)$/.test(kindNow()) ? 34 : 0 } };
+      const U = { uSatN: { value: tN || tF }, uSatF: { value: tF }, uBoxN: { value: box(mN || mF) }, uBoxF: { value: box(mF || mN) }, uHasSat: { value: tN || tF ? 1 : 0 }, uBase: { value: base }, uFloor: { value: new THREE.Color(kindNow() === 'swamp' ? '#3f3a2a' : PV ? '#5e4a33' : '#4a3b2a') }, uFloorR: { value: /^(forest|rainforest|swamp)$/.test(kindNow()) ? 34 : 0 } };
       const gm = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.97, metalness: 0, envMapIntensity: 0.45 });
       gm.onBeforeCompile = (sh) => {
         Object.assign(sh.uniforms, U);
         sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vSpW;').replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvSpW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-        sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vSpW; uniform sampler2D uSatN, uSatF; uniform vec4 uBoxN, uBoxF; uniform float uHasSat; uniform vec3 uBase; uniform vec3 uFloor; uniform float uFloorR;')
+        sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vSpW; uniform sampler2D uSatN, uSatF; uniform vec4 uBoxN, uBoxF; uniform float uHasSat; uniform vec3 uBase; uniform vec3 uFloor; uniform float uFloorR;' + (PV ? '\nfloat spH(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }\nfloat spN(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(spH(i), spH(i + vec2(1.0, 0.0)), f.x), mix(spH(i + vec2(0.0, 1.0)), spH(i + vec2(1.0, 1.0)), f.x), f.y); }' : ''))
           .replace('#include <map_fragment>', `#include <map_fragment>
 { vec2 qn = (vSpW.xz - uBoxN.xy) / uBoxN.zw, qf = (vSpW.xz - uBoxF.xy) / uBoxF.zw;
   vec3 cf = texture2D(uSatF, qf).rgb;
@@ -385,13 +451,18 @@ export function prepare(sp) {
   vec3 sat = mix(uBase, mix(cf, cn4.rgb, wn), wf);
   /* under the trees near the spot: the forest floor (leaf litter), not the crowns the satellite saw from above */
   if (uFloorR > 0.0) { float gr = clamp((2.0 * sat.g - sat.r - sat.b) / (sat.r + sat.g + sat.b + 0.01) * 6.0, 0.0, 1.0); sat = mix(sat, uFloor, gr * (1.0 - smoothstep(uFloorR * 0.45, uFloorR, length(vSpW.xz)))); }
-  diffuseColor.rgb *= mix(uBase, sat * 1.12, uHasSat); }`);
+  diffuseColor.rgb *= mix(uBase, sat * 1.12, uHasSat);${PV ? `
+  /* v6.35 (preview): close up the satellite picture is a blur of 30-60 cm pixels - patches of damper and drier,
+     barer and leafier ground at 0.3-6 m break it up (fading out by 70 m), so it doesn't look stretched */
+  { vec2 gp = vSpW.xz; float gn = spN(gp * 0.17) * 0.5 + spN(gp * 0.55 + 7.3) * 0.3 + spN(gp * 2.1 + 3.1) * 0.2;
+    float gk = 1.0 - smoothstep(25.0, 70.0, distance(cameraPosition.xz, vSpW.xz));
+    diffuseColor.rgb *= mix(1.0, 0.78 + gn * 0.44, gk); }` : ''} }`);
       };
       if (V.NATURE && V.NATURE.groundDetail) {
         const det = { forest: 'litter', rainforest: 'litter', grass: 'dry', heath: 'heath', arid: 'gravel', sand: 'sand', riverbank: 'pebbles', swamp: 'soil', gibber: 'gibber', clay: 'soil', shore: 'pebbles' }[kindNow()] || 'soil';
         V.NATURE.groundDetail(THREE, gm, onRoad ? 'gravel' : det, ctx, { near: 2.5, far: 22, onLoad: () => V.kick() });
       }
-      gm.customProgramCacheKey = () => 'sl-spot-ground';
+      gm.customProgramCacheKey = () => 'sl-spot-ground' + (PV ? '-pv' : '');
       const gMesh = new THREE.Mesh(g, gm); gMesh.receiveShadow = true; gMesh.name = 'spot-ground'; scene.add(gMesh);
 
       // -- the sky reaches past the land; the haze starts well out --
@@ -501,15 +572,15 @@ export function prepare(sp) {
       // -- low plants and stones right round the snake (where the ground is not road or water) --
       groundCover(scene, kind, Tg, dist2snake, roadDist, inWater, F, Rb, low, track, px);
 
-      // -- the spot itself: a ring at the accuracy, a soft light beam seen from far off --
-      const acc = +sp.acc || 0;
+      // -- the spot itself: a ring at the accuracy, a soft light beam seen from far off (not for a hidden location:
+      // its point is not the real spot, so nothing marks it as one) --
       if (!obsc && acc > 1.5 && acc < extent * 0.8) {
         const n = 96, pts = []; for (let i = 0; i <= n; i++) { const a = (i / n) * TAU; pts.push([Math.cos(a) * acc, Math.sin(a) * acc]); }
         const geo = ribbon(pts, clamp(acc * 0.025, 0.1, 4), 1e9, (x, z) => Tg(x, z) + 0.08 + 0.1 * sstep(25, 400, acc), 1);
         const rm = new THREE.MeshBasicMaterial({ color: '#ffd84a', transparent: true, opacity: 0.85, depthWrite: false, polygonOffset: true, polygonOffsetFactor: 0, polygonOffsetUnits: -8, fog: false });
         ring = new THREE.Mesh(geo, rm); ring.renderOrder = 5; ring.name = 'spot-ring'; scene.add(ring);
       }
-      { const hgt = 60, geo = new THREE.CylinderGeometry(0.35, 0.35, hgt, 20, 8, true), col = [], gp = geo.attributes.position;
+      if (!obsc) { const hgt = 60, geo = new THREE.CylinderGeometry(0.35, 0.35, hgt, 20, 8, true), col = [], gp = geo.attributes.position;
         for (let i = 0; i < gp.count; i++) { const k = 1 - (gp.getY(i) + hgt / 2) / hgt; col.push(1, 1, 1, k * k * 0.8); }
         geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 4)); geo.translate(0, hgt / 2, 0);
         const bm = new THREE.MeshBasicMaterial({ color: '#ffd23f', vertexColors: true, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, fog: false });
@@ -517,10 +588,12 @@ export function prepare(sp) {
 
       pix = null; // (the picture's pixels are let go)
       const notes = [];
-      if (!mN && !mF) notes.push('The satellite pictures couldn\'t load, so the ground is plain.');
-      if (!mD) notes.push('The land height couldn\'t load, so the land is drawn flat.');
-      if (!osm) notes.push('Roads and water from OpenStreetMap couldn\'t load just now.');
+      if (!mN && !mF) notes.push('Without the satellite pictures the ground is plain.');
+      if (!mD) notes.push('Without the land height the land is drawn flat.');
+      if (!osm) notes.push('Roads and water couldn\'t load just now, so any there are not shown.');
+      if (notes.length) notes.unshift('This is not the full scene.');
       status(notes.join(' '));
+      layers({ sat: !!(mN || mF), dem: !!mD, osm: !!osm });
       built = { roads: roads.length, waters: waters.length, streams: streams.length, trees: trees.length, trees40: trees.filter((t) => Math.hypot(t.x, t.z) < 40).length, shrubs: shrubs.length, extent, onRoad, kind, why: S.pick && S.pick.why, zNear: mN ? mN.z : null, zFar: mF ? mF.z : null, dem: !!mD, osm: !!osm };
       if (window.SL_3D_TEST) window.__slSpot = built;
     }
@@ -535,7 +608,7 @@ export function prepare(sp) {
         let hide = ov.length() < o.r * 1.3 + 0.5;
         if (!hide && tt > 0.01 && tt < 1.08) { const perp = ov.addScaledVector(od, -tt).length(); hide = perp < o.r + wide * Math.min(1, tt * 1.4) + o.h * 0.25; }
         if (hide === o.hid) continue; o.hid = hide;
-        o.ims.forEach((im, k) => { im.setMatrixAt(o.i, hide ? zeroM : o.ms[k]); dirty.add(im); });
+        o.ims.forEach((im, k) => { im.setMatrixAt(o.is ? o.is[k] : o.i, hide ? zeroM : o.ms[k]); dirty.add(im); });
       }
       dirty.forEach((im) => { im.instanceMatrix.needsUpdate = true; });
     }
@@ -554,7 +627,7 @@ export function prepare(sp) {
         };
         aim(); if (ctx.envReady) ctx.envReady.then(aim);
         if (first) {
-          first = false; if (sun && sun.el < -0.05 && V.dayNight && V.dayNight.set) V.dayNight.set(true, true);
+          first = false; if (sun && sun.el < -0.05 && V.dayNight && V.dayNight.set) { V.dayNight.set(true, true); if (lampB) lampSet(true); }
           wantView = true; // (a lower first view than the plain viewer's, so the real place shows behind the snake: camera(), below)
         }
       },
@@ -578,7 +651,7 @@ export function prepare(sp) {
             label.style.transform = `translate(${((p.x + 1) / 2) * w}px, ${((1 - p.y) / 2) * h}px) translate(-50%, -100%)`; }
         }
       },
-      dispose() { S.dispose(); card && card.remove(); label && label.remove(); credit && credit.remove(); bArea && bArea.remove(); const c = V.ctx; if (c && c.ground === ground) delete c.ground; terrH = null; },
+      dispose() { S.dispose(); lampB && lampB.remove(); card && card.remove(); label && label.remove(); credit && credit.remove(); bArea && bArea.remove(); const c = V.ctx; if (c && c.ground === ground) delete c.ground; terrH = null; },
       get info() { return built; },
     };
   }
@@ -634,6 +707,7 @@ export function prepare(sp) {
   }
   function plantTrees(scene, trees, kind, Tg, occ, track) {
     const THREE = TH; if (!THREE || !trees.length) return;
+    if (preview()) { plantTreesPv(scene, trees, kind, Tg, track); return; } // v6.35 (preview "spot"): trees of many shapes
     const leafT = sprayTex(THREE, track, 11, false), needT = sprayTex(THREE, track, 12, true);
     const coreM = new THREE.MeshStandardMaterial({ color: '#b4b8ac', roughness: 0.95, metalness: 0, envMapIntensity: 0.3 }); track(coreM);
     const leafM = new THREE.MeshStandardMaterial({ map: leafT, alphaTest: 0.45, side: THREE.DoubleSide, roughness: 0.9, metalness: 0, envMapIntensity: 0.35 }); track(leafM); bothSides(leafM);
@@ -670,6 +744,65 @@ export function prepare(sp) {
       }
     }
   }
+  // v6.35 (preview "spot", Eduardo to approve): a forest that isn't one tree copied - three crown shapes of different
+  // fullness, trunks of their own thickness, lean, colour and flared base, a few limbs reaching into each near crown,
+  // foliage of its own size, and a soft dark patch on the ground under each near tree (its contact shadow)
+  function plantTreesPv(scene, trees, kind, Tg, track) {
+    const THREE = TH;
+    const leafTs = [sprayTex(THREE, track, 11, false), sprayTex(THREE, track, 19, false)], needT = sprayTex(THREE, track, 12, true);
+    const coreM = new THREE.MeshStandardMaterial({ color: '#b4b8ac', roughness: 0.95, metalness: 0, envMapIntensity: 0.3 }); track(coreM);
+    const leafMs = leafTs.map((lt) => { const m = new THREE.MeshStandardMaterial({ map: lt, alphaTest: 0.45, side: THREE.DoubleSide, roughness: 0.9, metalness: 0, envMapIntensity: 0.35 }); track(m); bothSides(m); return m; });
+    const needM = new THREE.MeshStandardMaterial({ map: needT, alphaTest: 0.4, side: THREE.DoubleSide, roughness: 0.9, metalness: 0, envMapIntensity: 0.35 }); track(needM); bothSides(needM);
+    const barkM = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1, metalness: 0 }); track(barkM);
+    // a trunk that widens into its roots at the foot and narrows to the top (lathe: radius by height)
+    const trunk = new THREE.LatheGeometry([[1.45, 0], [1.15, 0.025], [1.0, 0.08], [0.86, 0.4], [0.7, 0.8], [0.55, 1]].map(([r, y]) => new THREE.Vector2(r * 0.5, y)), 8); track(trunk);
+    // four limbs from the top of the trunk, up and out into the crown (unit size: scaled with the crown)
+    const limbs = (() => { const parts = []; for (let k = 0; k < 4; k++) { const c = new THREE.CylinderGeometry(0.018, 0.035, 1, 5, 1, true); c.translate(0, 0.5, 0); c.rotateZ(0.75 + (k % 2) * 0.25); c.rotateY((k / 4) * TAU + 0.4); parts.push(c); }
+      const P = [], N = [], I = []; let n = 0; for (const c of parts) { const pa = c.attributes.position, na = c.attributes.normal; for (let q = 0; q < pa.count; q++) { P.push(pa.getX(q), pa.getY(q), pa.getZ(q)); N.push(na.getX(q), na.getY(q), na.getZ(q)); } for (const v3 of c.index.array) I.push(v3 + n); n += pa.count; c.dispose(); }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3)); g.setIndex(I); track(g); return g; })();
+    // three broadleaf crowns (round and full, tall and loose, wide and flat) and two conifers
+    const crowns = { b: [crownGeo(THREE, false, 5), crownGeo(THREE, false, 17), crownGeo(THREE, false, 29)], c: [crownGeo(THREE, true, 7), crownGeo(THREE, true, 23)] };
+    crowns.b[1].scale(0.85, 1.15, 0.85); crowns.b[2].scale(1.2, 0.75, 1.2); crowns.c[1].scale(0.8, 1.1, 0.8);
+    for (const k in crowns) crowns[k].forEach(track);
+    // contact shadows: a soft round dark patch (no light reaches the ground right under a tree)
+    const shT = (() => { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const x = cv.getContext('2d'), gr = x.createRadialGradient(32, 32, 2, 32, 32, 32); gr.addColorStop(0, 'rgba(0,0,0,0.55)'); gr.addColorStop(0.5, 'rgba(0,0,0,0.28)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = gr; x.fillRect(0, 0, 64, 64); const t = new THREE.CanvasTexture(cv); track(t); return t; })();
+    const shG = new THREE.PlaneGeometry(1, 1); shG.rotateX(-Math.PI / 2); track(shG);
+    const shM = new THREE.MeshBasicMaterial({ map: shT, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: 0, polygonOffsetUnits: -4, color: '#000000', opacity: 1 }); track(shM);
+    const tall = { forest: [9, 22], rainforest: [12, 32], grass: [4, 10], heath: [4, 9], riverbank: [7, 17], swamp: [8, 18] }[kind] || [6, 15];
+    const r = rng(77), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), s = new THREE.Vector3(), col = new THREE.Color(), hsl = {};
+    const bins = new Map(), bin = (key) => bins.get(key) || (bins.set(key, []), bins.get(key));
+    for (const t of trees) { const con = !!t.con, sh = con ? (r() < 0.5 ? 0 : 1) : (r() * 3) | 0, lf = r() < 0.5 ? 0 : 1, nearT = Math.hypot(t.x, t.z) < 30; bin((con ? 'c' : 'b') + sh + (con ? '' : lf) + (nearT ? 'n' : 'f')).push(t); }
+    const nearAll = [];
+    bins.forEach((L, key) => {
+      const con = key[0] === 'c', cg = crowns[con ? 'c' : 'b'][+key[1]], lm = con ? needM : leafMs[+(key[2] || 0)], cast = key.endsWith('n');
+      const ci = new THREE.InstancedMesh(cg, [coreM, lm], L.length), ti = new THREE.InstancedMesh(trunk, barkM, L.length);
+      L.forEach((t, i) => {
+        // height: most trees middling, a few tall emergents (rainforest) or young ones
+        const u = r(), h = tall[0] + (u < 0.12 ? 1 : u < 0.3 ? 0.15 * r() : 0.25 + 0.55 * r()) * (tall[1] - tall[0]), y = Tg(t.x, t.z) - 0.15;
+        const wdt = con ? h * (0.17 + r() * 0.1) : h * (0.22 + r() * 0.28) * (u < 0.12 ? 1.25 : 1);
+        e.set((r() - 0.5) * 0.14, r() * TAU, (r() - 0.5) * 0.14); q.setFromEuler(e);
+        const cy = con ? h * (0.1 + r() * 0.12) : h * (0.3 + r() * 0.25);
+        m4.compose(v.set(t.x, y + cy, t.z), q, s.set(wdt * (0.75 + r() * 0.5), (h - cy) * (0.85 + r() * 0.3), wdt * (0.75 + r() * 0.5))); ci.setMatrixAt(i, m4);
+        const c = t.c; col.setRGB(c[0] / 255, c[1] / 255, c[2] / 255, THREE.SRGBColorSpace); col.getHSL(hsl);
+        col.setHSL(clamp(lerpN(hsl.h, con ? 0.3 : 0.25, 0.5) + (r() - 0.5) * 0.05, 0.18, 0.36), clamp(hsl.s * 0.8 + 0.14 + (r() - 0.5) * 0.12, 0.22, 0.58), clamp(hsl.l * 0.9 + 0.13, 0.2, 0.4) * (0.82 + r() * 0.36)); ci.setColorAt(i, col);
+        const tr = h * (0.012 + r() * 0.016) * (u < 0.12 ? 1.5 : 1), tm = new THREE.Matrix4().compose(v.set(t.x, y, t.z), q, s.set(Math.max(0.08, tr), cy + h * 0.22, Math.max(0.08, tr))); ti.setMatrixAt(i, tm);
+        // bark: grey-brown, some pale (lichen-covered rainforest trunks), some dark and wet
+        col.setHSL(0.07 + r() * 0.05, 0.1 + r() * 0.14, kind === 'rainforest' && r() < 0.35 ? 0.4 + r() * 0.12 : 0.2 + r() * 0.16, THREE.SRGBColorSpace); ti.setColorAt(i, col);
+        const cm = new THREE.Matrix4(); ci.getMatrixAt(i, cm); const pe = { ims: [ci, ti], i, is: [i, i], ms: [cm, tm.clone()], c: new THREE.Vector3(t.x, y + h * 0.55, t.z), r: wdt * 0.55, h, hid: false }; plants.push(pe);
+        if (cast) nearAll.push({ x: t.x, z: t.z, y: y + cy * 0.92, w: wdt, tr, q: q.clone(), con, g: Tg(t.x, t.z), pe });
+      });
+      ci.instanceMatrix.needsUpdate = true; if (ci.instanceColor) ci.instanceColor.needsUpdate = true; ti.instanceMatrix.needsUpdate = true; if (ti.instanceColor) ti.instanceColor.needsUpdate = true;
+      ci.castShadow = ti.castShadow = cast; ci.receiveShadow = ti.receiveShadow = cast; ci.name = 'spot-trees'; ti.name = 'spot-trunks';
+      ci.computeBoundingSphere(); ti.computeBoundingSphere(); scene.add(ci, ti);
+    });
+    if (!nearAll.length) return;
+    const bl = nearAll.filter((t) => !t.con), li = bl.length ? new THREE.InstancedMesh(limbs, barkM, bl.length) : null;
+    bl.forEach((t, i) => { m4.compose(v.set(t.x, t.y, t.z), t.q, s.set(t.w * 0.5, t.w * 0.45, t.w * 0.5)); li.setMatrixAt(i, m4); t.pe.ims.push(li); t.pe.is.push(i); t.pe.ms.push(m4.clone()); col.setHSL(0.07, 0.14, 0.24 + r() * 0.1, THREE.SRGBColorSpace); li.setColorAt(i, col); });
+    if (li) { li.instanceMatrix.needsUpdate = true; if (li.instanceColor) li.instanceColor.needsUpdate = true; li.castShadow = true; li.name = 'spot-limbs'; li.computeBoundingSphere(); scene.add(li); }
+    const si = new THREE.InstancedMesh(shG, shM, nearAll.length);
+    nearAll.forEach((t, i) => { const d = Math.max(t.tr * 9, t.w * 0.45); m4.compose(v.set(t.x, t.g + 0.03, t.z), q.identity(), s.set(d, 1, d)); si.setMatrixAt(i, m4); });
+    si.instanceMatrix.needsUpdate = true; si.renderOrder = 1; si.name = 'spot-contact'; si.computeBoundingSphere(); scene.add(si);
+  }
   function lerpN(a, b, t) { return a + (b - a) * t; }
   // a spray's back is lit like its front (its normals point out of the crown, not out of the card)
   function bothSides(m) { m.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <normal_fragment_begin>', TH.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', '')); }; m.customProgramCacheKey = () => 'sl-spot-leaf'; }
@@ -691,7 +824,7 @@ export function prepare(sp) {
   // fallen leaves: a drawn leaf (cut out) on flat cards, brown and ochre with a few green ones, densest near the snake
   function leafLitter(scene, kind, Tg, dist2snake, roadDist, inWater, F, Rb, low, track) {
     const THREE = TH; if (!THREE) return;
-    const big = kind === 'rainforest', rad = Math.max(7, Rb * 6), want = low ? 1400 : phone ? 2800 : 5600, r = rng(61), pts = [];
+    const PV0 = preview(), big = kind === 'rainforest', rad = Math.max(7, Rb * 6), want = low ? 1400 : phone ? 2800 : 5600, r = rng(61), pts = [];
     for (let i = 0; i < want * 2 && pts.length < want; i++) { const a = r() * TAU, d = Math.max(Rb * 0.3, 0.05) + Math.pow(r(), 1.6) * rad, x = Math.cos(a) * d, z = Math.sin(a) * d; if (dist2snake(x, z) < F.w0 * 0.9 + 0.01 || roadDist(x, z) < 0.2 || inWater(x, z)) continue; pts.push([x, z]); }
     if (!pts.length) return;
     const cv = document.createElement('canvas'); cv.width = cv.height = 64; const x = cv.getContext('2d');
@@ -704,9 +837,9 @@ export function prepare(sp) {
     const im = new THREE.InstancedMesh(g, m, pts.length), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), sc = new THREE.Vector3(), col = new THREE.Color();
     const pal = kind === 'swamp' ? ['#5a4a32', '#6b5a3a', '#4a4030', '#7a6a48'] : ['#7a5532', '#94683a', '#a8804a', '#5e4128', '#6f4f2c', '#b08850', '#4f3a22', '#8a7a3a'];
     pts.forEach(([px2, pz], i) => {
-      const L = (big ? 0.08 : 0.05) + r() * r() * (big ? 0.18 : 0.09); e.set((r() - 0.5) * 0.35, r() * TAU, (r() - 0.5) * 0.35); q.setFromEuler(e);
-      m4.compose(v.set(px2, Tg(px2, pz) + 0.004 + r() * 0.012, pz), q, sc.set(L, 1, L)); im.setMatrixAt(i, m4);
-      col.set(r() < 0.06 ? '#5f7a34' : pal[(r() * pal.length) | 0]).multiplyScalar(0.8 + r() * 0.35); im.setColorAt(i, col);
+      const L = PV0 ? (big ? 0.045 : 0.03) + r() ** 1.7 * (big ? 0.17 : 0.09) : (big ? 0.08 : 0.05) + r() * r() * (big ? 0.18 : 0.09); e.set((r() - 0.5) * 0.35, r() * TAU, (r() - 0.5) * 0.35); q.setFromEuler(e); // (v6.35 preview: more small leaves and bits, the odd big one)
+      m4.compose(v.set(px2, Tg(px2, pz) + 0.004 + r() * 0.012, pz), q, sc.set(PV0 ? L * (0.6 + r() * 0.6) : L, 1, L)); im.setMatrixAt(i, m4);
+      col.set(r() < 0.06 ? '#5f7a34' : pal[(r() * pal.length) | 0]).multiplyScalar(PV0 ? 0.68 + r() * 0.6 : 0.8 + r() * 0.35); im.setColorAt(i, col);
     });
     im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; im.receiveShadow = true; im.castShadow = false; im.name = 'spot-litter'; scene.add(im);
   }
@@ -714,15 +847,19 @@ export function prepare(sp) {
   function groundCover(scene, kind, Tg, dist2snake, roadDist, inWater, F, Rb, low, track, colAt) {
     const THREE = TH; if (!THREE) return;
     const r = rng(53), dry = /^(arid|sand|gibber|clay)$/.test(kind), rad = Math.max(14, Rb * 8), pts = [];
-    const want = dry ? (low ? 160 : 420) : kind === 'forest' || kind === 'rainforest' ? (low ? 120 : 360) : (low ? 700 : 2200);
-    for (let i = 0; i < want * 3 && pts.length < want; i++) { const a = r() * TAU, d = Math.max(Rb * 1.1, 0.4) + Math.sqrt(r()) * rad, x = Math.cos(a) * d, z = Math.sin(a) * d; if (dist2snake(x, z) < F.w0 * 2.5 + 0.06) continue; if (roadDist(x, z) < 0.25 || inWater(x, z)) continue; pts.push([x, z]); }
+    const want = dry ? (low ? 900 : 2600) : kind === 'forest' || kind === 'rainforest' ? (low ? 120 : 360) : (low ? 700 : 2200);
+    for (let i = 0; i < want * 3 && pts.length < want; i++) { const a = r() * TAU, d = (dry ? 0.05 : Math.max(Rb * 1.1, 0.4)) + (dry ? r() ** 1.7 : Math.sqrt(r())) * rad, x = Math.cos(a) * d, z = Math.sin(a) * d; if (dist2snake(x, z) < F.w0 * 2.5 + 0.06) continue; if (roadDist(x, z) < 0.25 || inWater(x, z)) continue; pts.push([x, z]); }
     if (!pts.length) return;
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), s = new THREE.Vector3(), col = new THREE.Color();
     if (dry) {
-      const g = new THREE.IcosahedronGeometry(1, 1), p = g.attributes.position, rr = rng(5); for (let i = 0; i < p.count; i++) { const k = 0.75 + rr() * 0.5; p.setXYZ(i, p.getX(i) * k, p.getY(i) * k * 0.6, p.getZ(i) * k); } g.computeVertexNormals();
+      // (v6.35: one displacement per corner, from its position - each triangle used to move its own copy of a corner, so the stones came out cracked and spiky)
+      const g = new THREE.IcosahedronGeometry(1, 1), p = g.attributes.position; for (let i = 0; i < p.count; i++) { const x0 = p.getX(i), y0 = p.getY(i), z0 = p.getZ(i), k = 0.86 + (Math.abs(Math.sin(Math.round(x0 * 1e3) * 0.0129898 + Math.round(y0 * 1e3) * 0.078233 + Math.round(z0 * 1e3) * 0.037719) * 43758.5453) % 1) * 0.28; p.setXYZ(i, x0 * k, y0 * k * 0.6, z0 * k); } g.computeVertexNormals();
       const m = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.95, metalness: 0 }); track(g); track(m);
       const im = new THREE.InstancedMesh(g, m, pts.length);
-      pts.forEach(([x, z], i) => { const sz = 0.02 + r() ** 3 * 0.25; e.set(r(), r() * TAU, r()); q.setFromEuler(e); m4.compose(v.set(x, Tg(x, z) + sz * 0.15, z), q, s.set(sz, sz, sz)); im.setMatrixAt(i, m4); col.setHSL(0.07 + r() * 0.04, 0.18 + r() * 0.15, 0.38 + r() * 0.2); im.setColorAt(i, col); });
+      // v6.35 (audit: "the ground's stones are oversized next to the snake"): real desert pavement is pebbles a few
+      // centimetres across with the odd stone of 10-20 cm - these were up to half a metre (boulders bigger than a taipan's
+      // head, all pale); now many small ones in the gibber colours (dark grey and red-brown), a few bigger
+      pts.forEach(([x, z], i) => { const sz = 0.005 + r() ** 2 * 0.025 + (r() < 0.03 ? 0.02 + r() * 0.04 : 0); e.set(r(), r() * TAU, r()); q.setFromEuler(e); m4.compose(v.set(x, Tg(x, z) + sz * 0.1, z), q, s.set(sz, sz * (0.6 + r() * 0.4), sz * (0.8 + r() * 0.4))); im.setMatrixAt(i, m4); if (r() < 0.5) col.setHSL(0.03 + r() * 0.05, 0.3 + r() * 0.2, 0.26 + r() * 0.16, THREE.SRGBColorSpace); else col.setHSL(0.58 + r() * 0.06, 0.05 + r() * 0.08, 0.24 + r() * 0.16, THREE.SRGBColorSpace); im.setColorAt(i, col); });
       im.castShadow = im.receiveShadow = true; im.name = 'spot-stones'; im.instanceMatrix.needsUpdate = true; scene.add(im); return;
     }
     // under trees: fallen leaves lying flat all round the snake (the forest floor, not bare earth)
@@ -757,12 +894,27 @@ function css() {
 .spot-card-t b{font-weight:700;font-size:13.5px;color:#1f7a3a}[data-sl-theme="dark"] .spot-card-t b{color:#a8ef94}
 .spot-card-ch{width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-135deg);margin-top:4px;flex:none}
 .spot-card.spot-shut .spot-card-ch{transform:rotate(45deg);margin-top:-4px}
-.spot-card-b{padding:0 12px 10px}.spot-card.spot-shut .spot-card-b{display:none}
+.spot-card{display:flex;flex-direction:column;max-height:calc(100% - 64px)}.spot-card-t{flex:none}.spot-card-b{padding:0 12px 10px;overflow:auto;min-height:0}
+.spot-pv .spot-card{bottom:58px;max-height:calc(100% - 110px)}.spot-card.spot-shut .spot-card-b{display:none}
 .spot-card p{margin:0 0 4px}.spot-ph{display:block;width:100%;margin:0 0 8px;padding:0;border:0;border-radius:10px;overflow:hidden;background:#0b1710;cursor:zoom-in;position:relative;color:#fff}.spot-ph img{display:block;width:100%;height:150px;object-fit:cover}.spot-ph span{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 5px;font:600 11.5px/1.3 Inter,system-ui,sans-serif;text-align:left;background:linear-gradient(transparent,rgba(0,0,0,.7))}.spot-ph:focus-visible{outline:3px solid #9be07c;outline-offset:2px}.spot-honest{font-size:11.5px;opacity:.8;line-height:1.4}.sl3d-ov:has(.sp3d-side:not([hidden]) img) .spot-ph{display:none}.spot-pl{font-weight:650}.spot-mut{opacity:.75}
 .spot-acc{font-size:12.5px;opacity:.9}.spot-obsc{background:#fff2c4;color:#4a3a06;border-radius:8px;padding:6px 8px;opacity:1}
 [data-sl-theme="dark"] .spot-obsc{background:#4a4010;color:#ffeeb0}
 .spot-st{font-size:12px;color:#8a4b12}.spot-st[hidden]{display:none}[data-sl-theme="dark"] .spot-st{color:#ffc98a}
 .spot-card-t:focus-visible{outline:3px solid #9be07c;outline-offset:-3px}
+.spot-tzn{font-size:11.5px;opacity:.85}.spot-recon{font-weight:700}
+.spot-miss{margin-left:auto;padding:1px 8px;border-radius:999px;background:#fbe3cc;color:#7a3c08;font-size:11.5px;font-weight:700;white-space:nowrap}.spot-miss[hidden]{display:none}[data-sl-theme="dark"] .spot-miss{background:#5a3410;color:#ffd9b0}
+.spot-layers{margin:6px 0 4px;padding:6px 8px;border-radius:8px;background:rgba(31,122,58,.07)}[data-sl-theme="dark"] .spot-layers{background:rgba(255,255,255,.06)}
+.spot-layers .spot-lh{font-size:11.5px;font-weight:700;margin:0 0 2px;opacity:.85}.spot-layers ul{list-style:none;margin:0;padding:0;font-size:12px;line-height:1.45}
+.spot-ly span{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px;background:#9aa69a}
+.spot-ly-ok span{background:#3d9a46}.spot-ly-no span{background:#d0661c}.spot-ly-no{font-weight:600;color:#8a4b12}[data-sl-theme="dark"] .spot-ly-no{color:#ffc98a}
+.spot-ly-wait span{animation:spot-bl 1.2s ease-in-out infinite}@keyframes spot-bl{50%{opacity:.25}}@media (prefers-reduced-motion:reduce){.spot-ly-wait span{animation:none}}
+.spot-retry{margin-top:6px;min-height:34px;padding:4px 12px;border-radius:999px;border:0;background:#2e7d32;color:#fff;font:600 12.5px/1.2 Inter,system-ui,sans-serif;cursor:pointer}.spot-retry[hidden]{display:none}.spot-retry:disabled{opacity:.7;cursor:progress}.spot-retry:focus-visible{outline:3px solid #9be07c;outline-offset:2px}
+.spot-lamp{position:absolute;z-index:5;right:58px;bottom:10px;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:4px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(12,26,18,.74);color:#fff;font:600 13px/1.2 Inter,system-ui,sans-serif;cursor:pointer}
+.spot-lamp[aria-pressed=true]{background:#b5842a;border-color:#e0b45a}.spot-lamp:focus-visible{outline:3px solid #9be07c;outline-offset:2px}
+/* v6.35 preview: the credits in the top corner, readable, away from the instructions at the bottom */
+.spot-pv .spot-credit{top:8px;bottom:auto;right:8px;font-size:11px;max-width:min(470px,60%);background:rgba(255,255,255,.86)}
+.spot-pv .sp3d-hint{max-width:calc(100% - 140px)}
+@media (max-width:560px){.spot-pv .spot-credit{top:6px;bottom:auto;left:6px;right:6px;font-size:10.5px}.spot-pv .spot-lamp{bottom:58px;right:10px}.spot-pv .spot-card{bottom:106px;max-height:calc(100% - 150px)}}
 .spot-pin{position:absolute;z-index:4;left:0;top:0;pointer-events:none;display:flex;flex-direction:column;align-items:center;padding:4px 10px 5px;border-radius:10px;background:rgba(20,32,24,.82);color:#fff;font:700 12.5px/1.25 Inter,system-ui,sans-serif;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.3);margin-top:-8px}
 .spot-pin::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:rgba(20,32,24,.82)}
 .spot-pin span{font-weight:500;font-size:11.5px;opacity:.85}.spot-pin[hidden]{display:none}

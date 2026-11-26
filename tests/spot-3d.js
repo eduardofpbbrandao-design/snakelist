@@ -12,6 +12,15 @@
 //  - closing lets the 3D view go (no canvas left) and returns to the sighting;
 //  - with Overpass failing, the spot still opens (no roads) and says so;
 //  - the ordinary 3D viewer (Explore in 3D) has the Night button too.
+// v6.35 (docs/audit/spot.md):
+//  - truth: never "exact spot" - "Approximate observation area (±8 m)", "Recreated scene based on location data", the
+//    pin of a hidden location doesn't mark a spot (no beam);
+//  - time: a sighting iNaturalist lists in New York time but seen in Portugal is shown (and lit) in the place's time;
+//  - partial data: the card lists the layers (loaded / couldn't load) and Retry brings the missing ones back;
+//  - closing: no frame is drawn after it, the GPU textures and geometries are let go, no spinner left animating;
+//  - touch screens get touch instructions, not W A S D;
+//  - the preview "spot" (off by default): Inspection light at night, the photo whole (fit) with Fit photo / Reset camera /
+//    Focus snake, and Photo | Scene on a phone - none of it without the preview.
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const zlib = require('zlib');
 const PORT = process.env.PORT || 8766, BASE = 'http://localhost:' + PORT + '/';
@@ -43,7 +52,8 @@ function obs(id, sci, opt = {}) {
     taxon: { id: sci === 'Natrix maura' ? 26093 : 30715, name: sci, rank: 'species', preferred_common_name: sci === 'Natrix maura' ? 'Viperine Water Snake' : "Lataste's Viper" },
     geojson: { type: 'Point', coordinates: [opt.lon != null ? opt.lon : LON, opt.lat != null ? opt.lat : LAT] }, photos: [{ id: id * 10, url: 'https://static.inaturalist.org/photos/' + id + '-0/square.jpg', attribution: '(c) Observer', license_code: 'cc-by' }] };
 }
-const OBS = [obs(101, 'Natrix maura'), obs(102, 'Vipera latastei', { when: '2024-05-12T23:10:00+01:00', lat: LAT + 0.01, lon: LON + 0.012 }), obs(103, 'Natrix maura', { obscured: true, lat: LAT - 0.012, lon: LON - 0.01 })];
+const OBS = [obs(101, 'Natrix maura'), obs(102, 'Vipera latastei', { when: '2024-05-12T23:10:00+01:00', lat: LAT + 0.01, lon: LON + 0.012 }), obs(103, 'Natrix maura', { obscured: true, lat: LAT - 0.012, lon: LON - 0.01 }),
+  Object.assign(obs(104, 'Natrix maura', { when: '2024-05-12T23:10:00-04:00', lat: LAT + 0.016, lon: LON - 0.018 }), { observed_time_zone: 'America/New_York' })]; // (v6.35: the observer's home zone, not the place's)
 const PHOTO = png(() => [120, 150, 90]);
 async function route(r) {
   const u = r.request().url(), J = (o, st) => r.fulfill({ status: st || 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(o) });
@@ -96,7 +106,13 @@ async function route(r) {
       shown: [].filter.call(document.querySelectorAll('.sl3d-ov button'), (x) => x.offsetParent !== null && !x.closest('.spot-card') && !x.closest('.sp3d-side') && !x.classList.contains('sl3d-x') && !x.classList.contains('sl3d-back')).map((x) => x.getAttribute('aria-label') || x.textContent.trim()),
       side: (document.querySelector('.sp3d-side:not([hidden]) img') || {}).src || '', cardPh: !!document.querySelector('.spot-card .spot-ph img'),
       ground: !!(window.__sp3d && window.__sp3d.scene.getObjectByName('spot-ground')), road: !!(window.__sp3d && window.__sp3d.scene.getObjectByName('spot-road')), water: !!(window.__sp3d && window.__sp3d.scene.getObjectByName('spot-water')) }));
-    ok(/Place of 101/.test(ui.card) && /Observer 101/.test(ui.card) && /2024/.test(ui.card) && /within about 8 m/.test(ui.card), `${label}: the card: place, date, observer and accuracy`);
+    ok(/Place of 101/.test(ui.card) && /Observer 101/.test(ui.card) && /2024/.test(ui.card) && /Approximate observation area \(\u00b18 m\)/.test(ui.card) && !/exact spot/i.test(ui.card), `${label}: the card: place, date, observer and the approximate observation area (never "exact spot")`);
+    const tr = await p.evaluate(() => ({ card: document.querySelector('.spot-card').textContent, ly: [].map.call(document.querySelectorAll('.spot-ly'), (l) => l.className + ':' + l.textContent), retry: !document.querySelector('.spot-retry').hidden,
+      when: (document.querySelector('.spot-when') || {}).textContent || '', hint: (document.querySelector('.sp3d-hint') || {}).textContent || '', pv: !!document.querySelector('.spot-lamp, .sp3d-cmp, .sp3d-seg2, .spot-pv') }));
+    ok(/Recreated scene based on location data/.test(tr.card) && tr.ly.length === 3 && tr.ly.every((x) => /spot-ly-ok/.test(x) && /loaded/.test(x)) && !tr.retry, `${label}: "Recreated scene based on location data", and the three data layers listed as loaded (${tr.ly.join(' | ')})`);
+    ok(/local time at the spot/.test(tr.when) && /Lisbon time/.test(tr.when), `${label}: the time is the place's local time (${tr.when})`);
+    ok(phone ? !/W A S D/.test(tr.hint) && /fingers|pinch/i.test(tr.hint) : /W A S D/.test(tr.hint), `${label}: ${phone ? 'touch' : 'keyboard and mouse'} instructions (${tr.hint})`);
+    ok(!tr.pv, `${label}: without the preview none of the preview's pieces (Inspection light, compare buttons, Photo | Scene)`);
     ok(/Esri/.test(ui.credit) && /AWS Terrain Tiles/.test(ui.credit) && /OpenStreetMap/.test(ui.credit), `${label}: imagery, land height and OpenStreetMap are credited`);
     ok(ui.ground && ui.road && ui.water, `${label}: ground, road surface and water are in the scene`);
     ok(ui.dnP === 'false', `${label}: a morning sighting opens by day (lit for its own time)`);
@@ -104,8 +120,11 @@ async function route(r) {
     ok(/photos\/101-0\/large\./.test(ui.side) && ui.cardPh, `${label}: the sighting's OWN photo is shown beside the place (Compare photo) and in the card (${ui.side.slice(-40)})`);
     if (SHOTS) await p.screenshot({ path: SHOTS + `/spot-${label}-day.png`, timeout: 120000 });
     // close: everything goes, the sighting is still there
-    await p.evaluate(() => document.querySelector('.sl3d-ov .sl3d-x').click()); await p.waitForTimeout(500);
+    await p.evaluate(() => { window.__slR = window.__sp3d.renderer; window.__slMem0 = Object.assign({}, window.__slR.info.memory); document.querySelector('.sl3d-ov .sl3d-x').click(); window.__slF0 = (window.__slFrames || []).length; }); await p.waitForTimeout(1500);
     ok(await p.evaluate(() => !document.querySelector('.sl3d-bd') && !document.querySelector('canvas.sp3d-canvas') && !window.__sp3d && !document.getElementById('sg-pop').hidden), `${label}: closing lets the 3D view go and returns to the sighting`);
+    const gone = await p.evaluate(() => ({ frames: (window.__slFrames || []).length - window.__slF0, mem0: window.__slMem0, mem: Object.assign({}, window.__slR.info.memory), busy: document.querySelectorAll('.sp3d-busy').length, css: !!document.querySelector('.spot-card, .spot-pin, .spot-credit, .spot-lamp') }));
+    ok(gone.frames === 0 && gone.busy === 0 && !gone.css, `${label}: closed: no frame drawn after it, no loading spinner or See the spot piece left (${gone.frames} frames)`);
+    ok(gone.mem.geometries === 0 && gone.mem.textures === 0 && gone.mem0.geometries > 10, `${label}: closed: the GPU geometries and textures are let go (${JSON.stringify(gone.mem0)} -> ${JSON.stringify(gone.mem)})`);
     // an evening sighting opens at night by itself
     await p.evaluate(() => { const x = document.querySelector('#sg-pop .sg-x'); if (x) x.click(); });
     if (await openDot(102)) {
@@ -121,13 +140,49 @@ async function route(r) {
     if (await openDot(103)) {
       await p.evaluate(() => document.querySelector('.sgv-spot').click());
       await p.waitForFunction(() => window.__slSpot && document.querySelector('.sp3d-busy') && document.querySelector('.sp3d-busy').hidden, null, { timeout: 180000 });
-      const o = await p.evaluate(() => ({ card: document.querySelector('.spot-card').textContent, s: window.__slSpot, pin: document.querySelector('.spot-pin').textContent }));
-      ok(/hidden to protect the snake/.test(o.card) && /general area/.test(o.card) && /Somewhere here/.test(o.pin), `${label}: obscured: says the exact spot is hidden and shows the general area`);
-      ok(!o.s.osm && o.s.roads === 0 && /couldn't load just now/.test(o.card), `${label}: Overpass failing: the spot still opens, without roads, and says so`);
+      const o = await p.evaluate(() => ({ card: document.querySelector('.spot-card').textContent, s: window.__slSpot, pin: document.querySelector('.spot-pin').textContent, beam: !!window.__sp3d.scene.getObjectByName('spot-beam'),
+        osmLy: (document.querySelector('.spot-ly[data-k=osm]') || {}).className || '', retry: !document.querySelector('.spot-retry').hidden, open: !document.querySelector('.spot-card').classList.contains('spot-shut') }));
+      ok(/hidden to protect the snake/.test(o.card) && /general area/.test(o.card) && /Somewhere in this area/.test(o.pin) && !o.beam, `${label}: obscured: says the location is hidden, shows the general area, no beam marks a spot`);
+      ok(!o.s.osm && o.s.roads === 0 && /not the full scene/.test(o.card) && /1 layer missing/.test(o.card) && /spot-ly-no/.test(o.osmLy) && o.retry && (phone ? !o.open : o.open), `${label}: Overpass failing: the spot still opens without roads, lists "Roads and water: couldn't load" with Retry, "1 layer missing" on the card title (${phone ? "kept shut on a phone" : "card open"}) (${o.osmLy})`);
       if (SHOTS) await p.screenshot({ path: SHOTS + `/spot-${label}-obscured.png`, timeout: 120000 });
+      // Retry: Overpass answers now - the missing layer comes and the place is built again with it
+      M.overpassFail = false;
+      await p.evaluate(() => { window.__slSpot = null; document.querySelector('.spot-retry').click(); });
+      await p.waitForFunction(() => window.__slSpot && document.querySelector('.sp3d-busy') && document.querySelector('.sp3d-busy').hidden, null, { timeout: 180000 });
+      const rt = await p.evaluate(() => ({ s: window.__slSpot, ly: [].map.call(document.querySelectorAll('.spot-ly'), (l) => l.className), retry: !document.querySelector('.spot-retry').hidden, road: !!window.__sp3d.scene.getObjectByName('spot-road') }));
+      ok(rt.s.osm && rt.s.roads >= 1 && rt.ly.every((c) => /spot-ly-ok/.test(c)) && !rt.retry, `${label}: Retry: roads and water load and are built in, every layer loaded, Retry gone (${JSON.stringify(rt)})`);
       await p.evaluate(() => document.querySelector('.sl3d-ov .sl3d-x').click()); await p.waitForTimeout(400);
     } else ok(false, `${label}: the obscured sighting's dot`);
     M.overpassFail = false;
+    // v6.35: a sighting iNaturalist lists in New York time (the observer's home zone), seen in Portugal at 23:10 by the clock
+    await p.evaluate(() => { const x = document.querySelector('#sg-pop .sg-x'); if (x) x.click(); });
+    if (await openDot(104)) {
+      await p.evaluate(() => document.querySelector('.sgv-spot').click());
+      await p.waitForFunction(() => window.__slSpot && document.querySelector('.sp3d-busy') && document.querySelector('.sp3d-busy').hidden, null, { timeout: 180000 });
+      const z = await p.evaluate(() => ({ when: document.querySelector('.spot-when').textContent, note: (document.querySelector('.spot-tzn') || {}).textContent || '', night: document.querySelector('.sp3d-dn').getAttribute('aria-pressed') }));
+      ok(/23:10|11:10/.test(z.when) && /local time at the spot/.test(z.when) && !/New York/.test(z.when) && /New York/.test(z.note) && z.night === 'true', `${label}: New York listed, seen in Portugal: shown as 23:10 local time there, lit as night, with a note (${z.when} / ${z.note})`);
+      await p.evaluate(() => document.querySelector('.sl3d-ov .sl3d-x').click()); await p.waitForTimeout(400);
+    } else ok(false, `${label}: the New York listed sighting's dot`);
+    // v6.35: the preview "spot": Inspection light at night, the photo whole with its buttons, Photo | Scene on a phone
+    await p.evaluate(() => { const x = document.querySelector('#sg-pop .sg-x'); if (x) x.click(); localStorage.setItem('sl-art-preview-spot', '1'); });
+    if (await openDot(102)) {
+      await p.evaluate(() => document.querySelector('.sgv-spot').click());
+      await p.waitForFunction(() => window.__slSpot && document.querySelector('.sp3d-busy') && document.querySelector('.sp3d-busy').hidden, null, { timeout: 180000 });
+      await p.waitForTimeout(800);
+      const pv = await p.evaluate(() => { const L = document.querySelector('.spot-lamp'), im = document.querySelector('.sp3d-side .sp3d-pz img'), row = document.querySelector('.sp3d-row');
+        return { lamp: L && L.offsetParent !== null ? L.getAttribute('aria-pressed') + ' ' + L.textContent : '', tf: im ? im.style.transform : '', btns: [].map.call(document.querySelectorAll('.sp3d-cmp button'), (b) => b.textContent),
+          seg: !!document.querySelector('.sp3d-seg2') && getComputedStyle(document.querySelector('.sp3d-seg2')).display !== 'none', one: row && row.dataset.one, stageShown: !!(document.querySelector('.sp3d-stage') && document.querySelector('.sp3d-stage').offsetParent) }; });
+      ok(/^true Inspection light: on/.test(pv.lamp), `${label}: preview: a night scene has the Inspection light, on (${pv.lamp})`);
+      ok(/scale\(1\)/.test(pv.tf) && ['Fit photo', 'Reset camera', 'Focus snake'].every((t) => pv.btns.includes(t)), `${label}: preview: the photo is shown whole (fit), with Fit photo / Reset camera / Focus snake (${pv.tf}; ${pv.btns.join(', ')})`);
+      ok(phone ? pv.seg && pv.one === 'scene' && pv.stageShown : !pv.seg && pv.btns.includes('Bigger photo'), `${label}: preview: ${phone ? 'Photo | Scene switch on a phone (the scene first)' : 'side by side, Bigger photo / Bigger scene'}`);
+      await p.evaluate(() => document.querySelector('.spot-lamp').click()); await p.waitForTimeout(300);
+      ok(await p.evaluate(() => /off/.test(document.querySelector('.spot-lamp').textContent) && document.querySelector('.spot-lamp').getAttribute('aria-pressed') === 'false'), `${label}: preview: the Inspection light turns off (moonlight only)`);
+      if (phone) { await p.evaluate(() => document.querySelector('.sp3d-seg2 .sp3d-sg').click()); await p.waitForTimeout(300);
+        ok(await p.evaluate(() => document.querySelector('.sp3d-row').dataset.one === 'photo' && !document.querySelector('.sp3d-stage').offsetParent && !!document.querySelector('.sp3d-side').offsetParent), `${label}: preview: Photo shows the photo alone`); }
+      if (SHOTS) await p.screenshot({ path: SHOTS + `/spot-${label}-preview.png`, timeout: 120000 });
+      await p.evaluate(() => document.querySelector('.sl3d-ov .sl3d-x').click()); await p.waitForTimeout(400);
+    } else ok(false, `${label}: the evening sighting's dot (preview)`);
+    await p.evaluate(() => localStorage.setItem('sl-art-preview-spot', '0'));
     // the plain viewer has Night too
     await p.evaluate(() => { const x = document.querySelector('#sg-pop .sg-x'); if (x) x.click(); });
     await p.evaluate(() => window.SL_3D.panel('natrix-maura', null, 'Viperine Water Snake'));

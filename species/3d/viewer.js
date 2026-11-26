@@ -8,8 +8,8 @@
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
 import * as NATURE from './nature.js?r=630'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=630'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
-import * as DAYNIGHT from './daynight.js?r=614'; // v6.14: Day / Night (and the plugin hooks "See the spot", spot.js, uses)
+import * as EXTRA from './extras.js?r=635'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as DAYNIGHT from './daynight.js?r=635'; // v6.14: Day / Night (and the plugin hooks "See the spot", spot.js, uses)
 export function useThree(t) { THREE = t; }
 // v6.13: Array .at() for iPads on iPadOS 15.0-15.3 (it came in 15.4); the species pages load this without SnakeList's own copy
 if (!Array.prototype.at) Object.defineProperty(Array.prototype, 'at', { value(i) { const n = this.length >>> 0; i = Math.trunc(i) || 0; if (i < 0) i += n; return i < 0 || i >= n ? undefined : this[i]; }, writable: true, configurable: true });
@@ -3659,7 +3659,8 @@ export function mount(host, opts) {
   host.innerHTML = '';
   const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
   const wrap = el('div', 'sp3d-wrap'), stage = el('div', 'sp3d-stage'), labels = el('div', 'sp3d-labels'), status = el('div', 'sp3d-status');
-  const hint = el('p', 'sp3d-hint', (window.innerWidth < 520 ? 'Drag to go round it · two fingers to move · pinch or double-tap to zoom' : 'Drag to go round the snake · W A S D or right-drag to move around it · scroll or double-click to zoom'));
+  const touchUI = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches); // v6.35: a touch screen gets touch instructions (not W A S D), at any width
+  const hint = el('p', 'sp3d-hint', (window.innerWidth < 520 || touchUI ? 'Drag to go round it · two fingers to move · pinch or double-tap to zoom' : 'Drag to go round the snake · W A S D or right-drag to move around it · scroll or double-click to zoom'));
   status.setAttribute('role', 'status'); status.hidden = true;
   const canvas = document.createElement('canvas'); canvas.className = 'sp3d-canvas'; canvas.tabIndex = 0;
   canvas.setAttribute('role', 'img'); canvas.setAttribute('aria-label', '3D model of ' + opts.name + '. Arrow keys rotate, plus and minus zoom, R resets the view.');
@@ -3668,7 +3669,7 @@ export function mount(host, opts) {
   // stays until everything is ready and the first full picture is drawn, then goes with it
   if (!document.getElementById('sp3d-busy-css')) { const st = document.createElement('style'); st.id = 'sp3d-busy-css';
     st.textContent = '.sp3d-busy{position:absolute;inset:0;z-index:6;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:12px;background:var(--bg,#f1f6ec);color:var(--ink,#24321f);font:500 15px/1.3 Inter,system-ui,sans-serif;border-radius:inherit;transition:opacity .3s ease}'
-      + '.sp3d-busy.out{opacity:0;pointer-events:none}.sp3d-busy i{flex:none;width:34px;height:34px;border-radius:50%;border:4px solid rgba(87,171,69,.22);border-top-color:#57ab45;animation:sp3dbusy .8s linear infinite;box-sizing:border-box}'
+      + '.sp3d-busy[hidden]{display:none}.sp3d-busy.out{opacity:0;pointer-events:none}.sp3d-busy i{flex:none;width:34px;height:34px;border-radius:50%;border:4px solid rgba(87,171,69,.22);border-top-color:#57ab45;animation:sp3dbusy .8s linear infinite;box-sizing:border-box}'
       + '@keyframes sp3dbusy{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){.sp3d-busy i{animation-duration:2.4s}.sp3d-busy{transition:none}}';
     document.head.appendChild(st); }
   const busy = el('div', 'sp3d-busy'); busy.setAttribute('role', 'status'); busy.append(el('i'), el('span', '', 'Loading the 3D model\u2026'));
@@ -3705,7 +3706,7 @@ export function mount(host, opts) {
     kick: () => kick(), toggleFull: () => toggleFull(), scaleOn: () => sizeSt.on,
     get occ() { return ctx.occ; }, get ctx() { return ctx; }, get quality() { return quality; }, get skinGPU() { return skinGPU; }, get sceneOn() { return cScene.checked; }, NATURE, scaleOff: () => { if (bScale.getAttribute('aria-pressed') === 'true') toggleScale(false, { instant: true }); }, // (at once: something else takes over the snake and the camera)
     scaleBack: (keepCam) => { if (bScale.getAttribute('aria-pressed') === 'true') { toggleScale(false, { keepCam }); return true; } return false; }, /* (gliding back to the view you had) */ closeMouth: () => { if (mouthGoal) toggleMouth(false); }, get mouthGoal() { return mouthGoal; }, set mouthGoal(v) { mouthGoal = v; bMouth.setAttribute('aria-pressed', String(v > 0.01)); bMouth.textContent = v > 0.01 ? 'Close mouth' : 'Open mouth'; },
-    resetView: () => resetView(),     focus: (p, d, elv) => focusOn(p, d, elv), view: (g) => controls.setGoal(Object.assign({ az: controls.st.az, d: info.dFit, px: 0, pz: 0 }, g)) };
+    resetView: () => resetView(), rebuild: () => rebuild(), /* v6.35: See the spot's Retry */ focus: (p, d, elv) => focusOn(p, d, elv), view: (g) => controls.setGoal(Object.assign({ az: controls.st.az, d: info.dFit, px: 0, pz: 0 }, g)) };
   const fx = EXTRA.create(V);
   uiCSSInject();
   // v5.74: the buttons in groups - View (Normal / Anatomy / Size vs person, one at a time), Actions (Open mouth / See it
@@ -4185,7 +4186,7 @@ float slScale(vec2 m) {
   }
   function frame() {
     raf = 0; kicked = false; if (!alive || lost || !cam) return;
-    if (document.hidden || !host.isConnected || host.offsetParent === null && !document.fullscreenElement) { dirty = true; return; } // paused while hidden
+    if (document.hidden || !host.isConnected || (host.offsetParent === null || stage.offsetParent === null) && !document.fullscreenElement) { dirty = true; return; } // paused while hidden (v6.35: also while the 3D view itself is - the phone's Photo | Scene switch on Photo)
     if (holdRender) return; // (still loading: see build)
     const tF0 = performance.now(); colList = null;
     const camMoving = controls.update(); let moving = false;

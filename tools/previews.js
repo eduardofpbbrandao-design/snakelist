@@ -35,11 +35,13 @@ var DEFS=[
   live:function(){return true}},
  {key:"country",label:"Country card",about:"\"Explore snakes in <your country>\" just under the opening photo, with a country picker",
   live:function(){return !!W.SL_COUNTRY_CARD}},
+ {key:"spot",label:"See the spot: new look",about:"Inspection light at night, a livelier forest and ground, the photo comparison (Fit photo, Photo | Scene on phones)",
+  live:function(){return true}},
  {key:"finale",label:"Countdown finale + time zone",about:"The countdown's last minute plays once per visit, about 70 seconds after SnakeList opens (pretend time, nothing unlocks; it waits for the tutorial), and Settings gets a Time zone choice",
   apply:function(v){if(v)W.__slCdFinPv=1},
   live:function(){return !W.SL_EV}}
 ];
-var ALL=["opening","design","cookies","tutorial","finale","country"],MENU=PRE+"menu";
+var ALL=["opening","design","cookies","tutorial","finale","country","spot"],MENU=PRE+"menu";
 function def(k){for(var i=0;i<DEFS.length;i++)if(DEFS[i].key===k)return DEFS[i];return null}
 function on(k){try{return S.getItem(PRE+k)==="1"}catch(e){return false}}
 function emit(){try{document.dispatchEvent(new CustomEvent("sl-previews-changed"))}catch(e){}}
