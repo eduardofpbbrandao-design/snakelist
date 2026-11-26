@@ -305,6 +305,8 @@
     return flakesImg;
   }
   var snows = [], raf = 0, last = 0;
+  // falling snow stays still (drawn once) with reduce motion - the device's setting or SnakeList's own calm mode
+  function still() { return RM.matches || D.documentElement.classList.contains("sl-calm"); }
   function makeSnow(host, opt) {
     var c = D.createElement("canvas"); c.className = "xm-snow"; c.setAttribute("aria-hidden", "true");
     host.appendChild(c);
@@ -347,9 +349,9 @@
     var any = false;
     if (D.documentElement.classList.contains("sl3d-lock")) { last = 0; setTimeout(kick, 800); return; }
     for (var i = 0; i < snows.length; i++) { var S = snows[i]; if (!S.on || S.off || !S.host.isConnected || S.host.offsetParent === null && getComputedStyle(S.host).position !== "fixed") continue; any = true; draw(S, dt); }
-    if (any && !D.hidden && !RM.matches) raf = requestAnimationFrame(frame); else last = 0;
+    if (any && !D.hidden && !still()) raf = requestAnimationFrame(frame); else last = 0;
   }
-  function kick() { if (!raf && !RM.matches && !D.hidden) { last = 0; raf = requestAnimationFrame(frame); } else if (RM.matches) snows.forEach(function (S) { draw(S, 0); }); }
+  function kick() { if (!raf && !still() && !D.hidden) { last = 0; raf = requestAnimationFrame(frame); } else if (still()) snows.forEach(function (S) { draw(S, 0); }); }
   XM.kickSnow = kick;
   D.addEventListener("visibilitychange", kick);
   if (RM.addEventListener) RM.addEventListener("change", kick);

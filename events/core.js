@@ -32,6 +32,10 @@
   EV.on = function (n, f) { (subs[n] = subs[n] || []).push(f); return function () { subs[n] = subs[n].filter(function (x) { return x !== f; }); }; };
   EV.emit = function (n, a) { (subs[n] || []).slice().forEach(function (f) { try { f(a); } catch (e) { console.error(e); } }); };
   EV.ms = function (x) { return typeof x === "number" ? x : Date.parse(x); };
+  // a moment that is the same WALL-CLOCK time everywhere ({ at, local: true }, e.g. New Year's midnight): the date and
+  // time written in `at` (read as UTC) become that date and time in the viewer's own time zone. Otherwise the instant.
+  EV.localWall = function (x) { var d = new Date(EV.ms(x)); return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()).getTime(); };
+  EV.atMs = function (a) { return a && a.local ? EV.localWall(a.at) : EV.ms(a && a.at); };
   EV.event = function (id) { return CFG.events.filter(function (e) { return e.id === id; })[0] || null; };
   // the events this page may show: all of them in the preview, only config.js publicEvents in public mode
   function shown(e) { return !PUB || (CFG.publicEvents || []).indexOf(e.id) >= 0; }

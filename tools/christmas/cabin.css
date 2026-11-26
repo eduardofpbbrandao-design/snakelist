@@ -184,3 +184,98 @@ span.xc-st { cursor: default; }
 @media (max-aspect-ratio: 1/1) {
   .xc.xc-full .xc-ctrl { position: static; background: #120a05; padding-top: 12px; }
 }
+
+/* ============ round 4: the Cabin as one dark evergreen card ============
+   The app's pale page frames ONE dark card: the scene and its controls together. On a wide screen the controls sit in
+   a compact column beside the scene (tree, fireplace, presents and every control visible at once); on an iPad or a
+   phone they sit under it in labelled groups: In your Cabin, Fireplace, The room, Sound. */
+.xc-room { display: grid; grid-template-columns: minmax(0, 1fr); border-radius: 18px; overflow: hidden; color: #FFF8ED;
+  background: linear-gradient(165deg, #1A5136 0%, #123D2A 48%, #0C2D1E 100%); border: 1px solid rgba(255,248,237,.14);
+  box-shadow: 0 18px 40px rgba(10,32,21,.3), inset 0 1px 0 rgba(255,248,237,.08); }
+.xc-room .xc-stage { border: 0; border-radius: 0; box-shadow: none; margin: 0; }
+@media (min-width: 980px) {
+  .xc-room { grid-template-columns: minmax(0, 1fr) 296px; }
+  .xc-room .xc-stage { align-self: center; }
+}
+.xc-room .xc-ctrl { padding: 14px 14px 16px; display: grid; gap: 14px; align-content: start; }
+@media (min-width: 641px) and (max-width: 979px) { .xc-room .xc-ctrl { grid-template-columns: 1fr 1fr; gap: 14px 18px; } .xc-grp-main { grid-column: 1 / -1; } }
+.xc-grp { min-width: 0; }
+.xc-gh { margin: 0 0 7px; font: 800 10.5px/1.2 Inter, sans-serif; letter-spacing: .11em; text-transform: uppercase; color: rgba(255,248,237,.64); }
+.xc-gh small { margin-left: 4px; font: 500 11px Inter, sans-serif; letter-spacing: 0; text-transform: none; color: rgba(255,248,237,.5); }
+.xc-room .xc-bar { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 0; }
+@media (min-width: 641px) and (max-width: 979px) { .xc-room .xc-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .xc-room .xc-bar { grid-template-columns: 1fr 1fr; } .xc-room .xc-bar .sl-ev-cabin-btn { grid-column: 1 / -1; } }
+.xc-room .xc-btn { justify-content: flex-start; text-align: left; min-height: 50px; padding: 6px 12px; color: #FFF8ED; background: rgba(255,248,237,.07); border-color: rgba(255,248,237,.18); }
+.xc-room .xc-btn:hover { background: rgba(255,248,237,.14); }
+.xc-room .xc-btn:active { transform: scale(.98); }
+.xc-room .xc-btn:focus-visible { outline: 3px solid #D8B76A; outline-offset: 2px; }
+.xc-room .xc-btn > span { display: flex; flex-direction: column; gap: 1px; line-height: 1.2; min-width: 0; }
+.xc-bsub { font: 500 11.5px/1.25 Inter, sans-serif; color: rgba(255,248,237,.66); }
+.xc-room .xc-btn-sm { min-height: 40px; padding: 0 12px; font-size: 13.5px; justify-content: center; }
+.xc-room .xc-btn-sm svg { width: 19px; height: 19px; }
+.xc-room .xc-chip[aria-pressed="false"] { opacity: .6; }
+.xc-room .xc-prog { margin: 9px 2px 0; font: 600 13px/1.4 Inter, sans-serif; color: #E4C885; }
+.xc-room .sl-ev-dot { box-shadow: 0 0 0 2px #123D2A; }
+/* the fireplace: the log count in words, the button, how logs are earned */
+.xc-fireline { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.xc-logs { display: inline-flex; align-items: center; gap: 6px; font: 500 13.5px Inter, sans-serif; color: rgba(255,248,237,.86); }
+.xc-logs svg { width: 24px; height: 24px; flex: none; }
+.xc-logs b { font: 700 19px Inter, sans-serif; font-variant-numeric: tabular-nums; color: #FFF8ED; }
+.xc-room .xc-log.xc-empty { opacity: .72; }
+.xc-note { margin: 7px 0 0; padding: 6px 8px; border-radius: 10px; font: 400 12px/1.45 Inter, sans-serif; color: rgba(255,248,237,.74); }
+.xc-note b { color: #FFF8ED; }
+.xc-flash { animation: xc-flash 1.4s ease; }
+@keyframes xc-flash { 0%, 100% { background: transparent; } 20%, 65% { background: rgba(216,183,106,.24); color: #FFF8ED; } }
+.xc-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.xc-chips .xc-btn { flex: 1 1 120px; }
+/* the sound: two labelled, compact sliders (their volumes are remembered: sl-xmas-audio) */
+.xc-room .xc-audio { flex: none; min-width: 0; }
+.xc-room .xc-audio .xm-audio { display: grid; gap: 8px; }
+.xc-room .xm-au-row { gap: 9px; }
+.xc-room .xm-au-row label { gap: 2px; }
+.xc-room .xm-au-row label span { font-size: 12px; font-weight: 600; color: rgba(255,248,237,.86); }
+.xc-room .xm-au-on { width: 32px; height: 32px; }
+@media (max-width: 640px) { .xc-room { border-radius: 16px; margin: 0 -4px; } .xc-room .xc-ctrl { padding: 12px 12px 14px; gap: 12px; } .xc-room .xc-btn { min-height: 48px; } }
+
+/* the touchable parts of the room: the tree, the fire and the log basket light up on hover, focus and touch */
+.xc-hot { cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; }
+.xc-hotarea { fill: #fff; fill-opacity: 0; }
+.xc-hotline { fill: none; stroke: #FFE7A8; stroke-width: 3; stroke-linejoin: round; stroke-dasharray: 8 7; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.xc-hot-tree .xc-hotline { fill: rgba(255,231,168,.05); }
+.xc-hotlab { opacity: 0; transition: opacity .2s; pointer-events: none; }
+.xc-hotlab rect { fill: rgba(18,61,42,.9); stroke: rgba(255,248,237,.45); stroke-width: 1; }
+.xc-hotlab text { fill: #FFF8ED; font: 600 13px Inter, sans-serif; }
+@media (hover: hover) { .xc-hot:hover .xc-hotline, .xc-hot:hover .xc-hotlab { opacity: 1; } }
+.xc-hot:focus-visible .xc-hotline { opacity: 1; stroke: #D8B76A; stroke-dasharray: none; }
+.xc-hot:focus-visible .xc-hotlab, .xc-hot:active .xc-hotlab { opacity: 1; }
+.xc-hot:active .xc-hotline { opacity: 1; stroke-dasharray: none; }
+.xc-present { transition: filter .2s; }
+@media (hover: hover) { .xc-present:hover { filter: brightness(1.15) drop-shadow(0 0 6px rgba(255,231,168,.85)); } }
+.xc-present:focus-visible { filter: brightness(1.15) drop-shadow(0 0 2px #D8B76A) drop-shadow(0 0 7px rgba(255,231,168,.9)); }
+.xc-present:active { filter: brightness(.95); }
+/* the firelight on the hearth, the stones, the mantel and the rug flickers with the flames and swells with a new log */
+.xc-warm { mix-blend-mode: screen; animation: xc-warm 2.1s ease-in-out -.6s infinite; pointer-events: none; }
+.xc-roar .xc-warm { animation: xc-roarl 2.4s ease-out; }
+.xc-twig { pointer-events: none; }
+/* the premium snowfall falls over the window and the upper room only - never over the presents, the controls or labels */
+.xc-stage .sl-ev-snow { bottom: 32%; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+html.sl-calm .xc-stage .sl-ev-snow, html.sl-calm .xc-sn { display: none; }
+html.sl-calm .xc-warm, html.sl-calm .xc-present, html.sl-calm .xc-firelight { animation: none !important; }
+
+/* full screen: the card fills the screen, the controls in one row over the bottom of the scene */
+.xc.xc-full .xc-room { display: flex; flex-direction: column; flex: 1; border: 0; border-radius: 0; box-shadow: none; background: #120a05; margin: 0; }
+.xc.xc-full .xc-room .xc-ctrl { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; }
+.xc.xc-full .xc-room .xc-bar { display: flex; flex-wrap: wrap; }
+.xc.xc-full .xc-gh, .xc.xc-full .xc-note, .xc.xc-full .xc-bsub { display: none; }
+.xc.xc-full .xc-grp-sound { min-width: 240px; }
+@media (prefers-reduced-motion: reduce) { .xc-warm, .xc-flash { animation: none !important; } }
+/* wide screens: the scene sits in the card like a framed picture, the control column beside it a little wider */
+@media (min-width: 980px) {
+  .xc-room { grid-template-columns: minmax(0, 1fr) 316px; }
+  .xc-room .xc-stage { margin: 12px 0 12px 12px; border-radius: 12px; box-shadow: 0 0 0 1px rgba(255,248,237,.1), 0 6px 18px rgba(0,0,0,.35); }
+  .xc-room .xc-ctrl { padding: 14px 14px 14px 16px; gap: 12px; }
+}
+.xc-room .xc-btn-sm { white-space: nowrap; }
+.xc-room .xc-chips .xc-btn { padding: 0 10px; gap: 6px; }
+.xc-note { margin-left: -8px; margin-right: -8px; }
+.xc-logs { flex-wrap: wrap; }

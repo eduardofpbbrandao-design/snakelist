@@ -94,7 +94,8 @@
           publicZero: "December is here!",                 // the words in the burst at zero
           after: [
             { at: "2026-12-25T00:00:00Z", label: "Time until Christmas" },
-            { at: "2027-01-01T00:00:00Z", label: "Time until New Year" }
+            // local: true - midnight in each viewer's own time zone (not one instant for everybody)
+            { at: "2027-01-01T00:00:00Z", local: true, label: "Time until New Year" }
           ]
         },
         advent: {

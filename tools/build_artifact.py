@@ -987,6 +987,9 @@ def build(out, christmas_default=True, events_default=True, cache=DEFAULT_CACHE,
             for f in sorted(os.listdir(fd)):
                 put("events/fonts/" + f, src=os.path.join(fd, f))
         previews.append({"key": "events", "label": "Events preview", "about": "Event countdown, Advent Calendar, seasonal achievements, subscription page, cursor", "on": events_default})
+        # the New Year 2026-27 preview (events/newyear.js, the same files): off at first - switch it on in Previews
+        if os.path.isfile(os.path.join(ROOT, "events", "newyear.js")):
+            previews.append({"key": "newyear", "label": "New Year preview", "about": "New Year theme, countdown to midnight in your time zone, fireworks, the midnight moment", "on": False})
     inject += "<script>" + PREVIEWS_HEAD_JS.replace("__PREVIEWS__", compact(previews)) + "</script>\n"
     if any(p["key"] == "xmas" for p in previews):
         loader = open(os.path.join(ROOT, "tools", "xmas_loader.js"), encoding="utf-8").read().split("*/", 1)[1].strip()

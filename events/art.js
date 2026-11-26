@@ -16,10 +16,15 @@
     // same drawing as the Christmas preview's (tools/christmas_art.py, put in below by tools/build-christmas.py)
     if (theme === "xmas") return '<svg class="sl-ev-xmark" viewBox="-26 -24 162 172" aria-hidden="true"><use href="#mark-snake"></use>' +
       '<g class="sl-ev-xhat" transform="translate(88 34) rotate(6) translate(-24 0) scale(1.07) translate(24 0)">' + XHAT + "</g></svg>";
-    if (theme === "newyear") return '<svg viewBox="0 0 100 100" aria-hidden="true">' + [[30, 30, "#f1d27a"], [70, 24, "#8fd3ff"], [55, 55, "#ff8fd1"]].map(function (f) {
-        var s = ""; for (var a = 0; a < 12; a++) { var r = a * Math.PI / 6; s += '<line x1="' + f[0] + '" y1="' + f[1] + '" x2="' + (f[0] + Math.cos(r) * 16).toFixed(1) + '" y2="' + (f[1] + Math.sin(r) * 16).toFixed(1) + '" stroke="' + f[2] + '" stroke-width="2" stroke-linecap="round"/>'; }
-        return s + '<circle cx="' + f[0] + '" cy="' + f[1] + '" r="3" fill="#fff"/>';
-      }).join("") + M(24, 60, 36) + '<text x="64" y="92" font-family="Inter,sans-serif" font-weight="900" font-size="16" fill="#f1d27a" text-anchor="middle">2027</text></svg>';
+    // New Year: SnakeList's own S in a gold-and-silver party hat, two small gold / silver bursts and 2027
+    if (theme === "newyear") return '<svg class="sl-ev-nymark" viewBox="-30 -46 170 196" aria-hidden="true"><defs><linearGradient id="' + g + '" x1="0" x2="1"><stop offset="0" stop-color="#E9CD87"/><stop offset="1" stop-color="#B08A3A"/></linearGradient></defs>' +
+      [[-6, -14, "#D8B76A"], [124, -22, "#C9D3DE"]].map(function (f) {
+        var s = ""; for (var a = 0; a < 10; a++) { var r = a * Math.PI / 5; s += '<line x1="' + (f[0] + Math.cos(r) * 6).toFixed(1) + '" y1="' + (f[1] + Math.sin(r) * 6).toFixed(1) + '" x2="' + (f[0] + Math.cos(r) * 17).toFixed(1) + '" y2="' + (f[1] + Math.sin(r) * 17).toFixed(1) + '" stroke="' + f[2] + '" stroke-width="4" stroke-linecap="round"/>'; }
+        return s;
+      }).join("") + '<use href="#mark-snake"></use>' +
+      '<g transform="translate(84 26) rotate(14)"><path d="M-17 0L0-44 17 0Z" fill="url(#' + g + ')"/><path d="M-11.5-14.5L8-30M-6-29.5L4.5-38M-15.5-4.5L14.5-21" stroke="#FFF8ED" stroke-width="3.2" stroke-linecap="round" opacity=".85"/>' +
+      '<ellipse cx="0" cy="0" rx="18.5" ry="4.6" fill="#C9D3DE"/><circle cx="0" cy="-45" r="6" fill="#FFF8ED"/></g>' +
+      '<text x="56" y="146" font-family="Inter,sans-serif" font-weight="900" font-size="30" fill="#F3DC9C" text-anchor="middle">2027</text></svg>';
     if (theme === "halloween") return '<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="70" cy="28" r="18" fill="#f6e7b0"/><circle cx="62" cy="24" r="16" fill="#22123a"/>' +
       '<ellipse cx="44" cy="70" rx="30" ry="24" fill="#ff8a3c"/><path d="M44 46v-8q4-4 8-2" stroke="#3b7a2a" stroke-width="4" fill="none"/>' +
       '<path d="M30 64l7-6 7 6zM50 64l7-6 7 6z" fill="#3a1500"/><path d="M28 78q16 10 32 0l-4 4-4-3-4 4-4-4-4 4-4-3z" fill="#3a1500"/>' + M(66, 62, 28, ' opacity=".9"') + '</svg>';
@@ -134,13 +139,14 @@
       pts.push(v(Math.cos(th) * r, y, Math.sin(th) * r));
     }
     var e0 = pts[pts.length - 1], e1 = pts[pts.length - 2], t0 = nrm(sub(e0, e1));
-    var hd = nrm(v(-.45, -.06, .89)), hStart = v(-.04, 1.12, .3);
+    // the head held level and turned three-quarters to the viewer (its length shows, so it reads as a head, not a tube end)
+    var hd = nrm(v(-.86, -.1, .5)), hStart = v(.1, 1.16, .2);
     var c1 = add(e0, mul(add(t0, v(0, .9, 0)), .42)), c2 = sub(hStart, mul(nrm(add(hd, v(0, -.9, -.3))), .5));
     for (i = 1; i <= 120; i++) {
       var s = i / 120, a = 1 - s;
       pts.push(add(add(mul(e0, a * a * a), mul(c1, 3 * a * a * s)), add(mul(c2, 3 * a * s * s), mul(hStart, s * s * s))));
     }
-    var HL = .64;
+    var HL = .72;
     for (i = 1; i <= 40; i++) pts.push(add(hStart, mul(hd, HL * i / 40)));
     // resample by arc length
     var acc = [0]; for (i = 1; i < pts.length; i++) acc.push(acc[i - 1] + Math.sqrt(dot(sub(pts[i], pts[i - 1]), sub(pts[i], pts[i - 1]))));
@@ -163,13 +169,15 @@
     // 3. the profile: half-width (sideways) and half-height of each ring
     function prof(t) {
       var hw, hh;
-      if (t < .3) hw = BR * Math.pow(t / .3, .62); else if (t < headFrom - .1) hw = BR; else hw = BR * (1 - .3 * Math.min(1, (t - (headFrom - .1)) / .08));
+      // a slim neck just behind the head, so the head stands out from the body (a python's head is clearly wider)
+      if (t < .3) hw = BR * Math.pow(t / .3, .62); else if (t < headFrom - .12) hw = BR; else hw = BR * (1 - .4 * Math.min(1, (t - (headFrom - .12)) / .1));
       hw = Math.max(hw, .006); hh = hw * .92;
       if (t >= headFrom - .012) {
         var q = (t - headFrom) / (1 - headFrom);    // 0 at the back of the head .. 1 at the snout
-        var jaw = q < .3 ? .11 + .075 * Math.sin(Math.max(0, q + .04) / .34 * Math.PI / 2) : .185 - .11 * Math.pow((q - .3) / .7, 1.5);
-        var cap = q > .9 ? Math.sqrt(Math.max(0, 1 - Math.pow((q - .9) / .1, 2))) : 1;
-        hw = jaw * (q > .9 ? .35 + .65 * cap : 1); hh = hw * (.62 - .1 * q);
+        // broad temples over the jaw muscles, then a long taper to a rounded snout: the python's spade-shaped head
+        var jaw = q < .32 ? .085 + .12 * Math.sin(Math.max(0, q + .02) / .34 * Math.PI / 2) : .205 - .135 * Math.pow((q - .32) / .68, 1.35);
+        var cap = q > .88 ? Math.sqrt(Math.max(0, 1 - Math.pow((q - .88) / .12, 2))) : 1;
+        hw = jaw * (q > .88 ? .4 + .6 * cap : 1); hh = hw * (.58 - .12 * q);
       }
       return [hw, hh];
     }
@@ -204,16 +212,19 @@
     function base(k, mi, ph) {
       var t = sp[k].t, d = Math.abs(((ph + Math.PI) % (Math.PI * 2)) - Math.PI), q = (t - headFrom) / (1 - headFrom);
       if (t >= headFrom) {
-        if (d > 1.95) return { c: LIP, metal: .2, belly: 1 };
-        if (d < .55 && q > .15 && q < .8) return { c: mix(EM, GOLD, .55), metal: .7 };         // gold crown plates
-        return { c: mix(EM, [24, 150, 92], q), metal: .15 };
+        if (d > 1.85) return { c: LIP, metal: .2, belly: 1 };                                    // pale lips and chin
+        // a dark stripe from the eye back to the angle of the jaw: gives the face its shape
+        if (d > 1.2 && d < 1.6 && q < .62) return { c: EMD, metal: .1 };
+        if (d < .34 && q > .3 && q < .58) return { c: mix(EM, GOLD, .62), metal: .8 };                    // one pair of gold crown plates
+        return { c: mix(EMD, EM, .35 + q * .6), metal: .18 };                                    // a darker crown than the body
       }
       if (d > 2.25) return { c: mix(BELLY, [214, 186, 110], (k % 4 < 2) ? 0 : .35), metal: .25, belly: 1 };  // ventral scutes
-      // a dorsal line of gold scales broken into dashes, and gold flecks on the flanks (like a green tree python's)
-      if (d < .34 && (k % 18) < 4) return { c: GOLD, metal: 1 };
-      if (d > 1.1 && d < 1.9 && hash(k, mi) > .9) return { c: GOLD, metal: 1 };
+      // a gold chain along the back - a diamond every 22 rows - with small gold flank spots between them (a tree python's)
+      var ph16 = k % 22, wdia = ph16 < 11 ? ph16 / 11 : (22 - ph16) / 11;
+      if (k > 24 && d < .08 + .42 * wdia && ph16 > 3 && ph16 < 19) return { c: mix(GOLD, [255, 226, 140], wdia * .3), metal: 1 };
+      if (k > 24 && d > 1.2 && d < 1.5 && ph16 === 0) return { c: GOLD, metal: 1 };
       var dark = d > 1.75 ? .35 : 0;
-      return { c: mix(mix(EM, [32, 158, 96], hash(mi, k) * .3), EMD, dark), metal: .1 };
+      return { c: mix(mix(EM, [32, 158, 96], hash(mi, k) * .22), EMD, dark), metal: .1 };
     }
     function shade(b, n) {
       var nd = Math.max(0, dot(n, Lk)), fd = Math.max(0, dot(n, Lf)) * .35, rim = Math.pow(1 - Math.max(0, n[2]), 2.6) * Math.max(0, dot(n, Lr) + .35);

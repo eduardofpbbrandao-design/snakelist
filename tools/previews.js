@@ -17,6 +17,8 @@ if(P&&typeof P.on==="function")return;
 var DEFS=[
  {key:"events",label:"Christmas events",about:"Countdown, Advent Calendar, seasonal achievements, subscription page, cursor",
   live:function(){return W.SL_EV_PREVIEW_LOAD?W.SL_EV_PREVIEW_LOAD():false}},
+ {key:"newyear",label:"New Year 2026–27",about:"New Year theme, countdown to midnight in your time zone, fireworks, the midnight moment",
+  live:function(){return W.SL_EV_PREVIEW_LOAD?W.SL_EV_PREVIEW_LOAD():false}},
  {key:"opening",label:"New opening",about:"The opening as a poster collage",
   apply:function(v){try{var ss=W.sessionStorage;if(v){if(!/[?&]opening=/.test(L.search)&&!ss.getItem("sl-opening-style"))ss.setItem("sl-opening-style","collage")}else if(ss.getItem("sl-opening-style")==="collage")ss.removeItem("sl-opening-style")}catch(e){}},
   live:function(){return true}},

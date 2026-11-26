@@ -6,7 +6,8 @@
    switch is one of tools/previews.js's previews (it follows the signed-in account; Settings > Previews switches it).
    window.SL_EV_PREVIEW_LOAD() loads the preview later in the page (it arrived with the account) - false if the public
    countdown is already running (then the page needs one reload).
-   PREVIEW ON: the page loads events/events.css and every events/*.js module (countdown, Advent Calendar, seasonal
+   PREVIEW ON ("events", or "newyear" - the New Year 2026-27 preview, events/newyear.js, which needs the same modules):
+   the page loads events/events.css and every events/*.js module (countdown, Advent Calendar, seasonal
    achievements, subscription page, cursor customization) straight away, as before.
    PREVIEW OFF (every normal visitor): only the PUBLIC countdown, and only once the opening has completely finished
    (sl-intro-done, then the opening photo left behind, then a quiet moment) - nothing is fetched or run during the
@@ -15,12 +16,12 @@
    events/ (and nothing from christmas/) is ever fetched for a normal visitor. */
 (function(){try{var K="sl-art-preview-events",L=location,S=window.localStorage,m=/[?&]preview=([^&#]*)/.exec(L.search),on;
 if(m){var v=decodeURIComponent(m[1]);if(v==="events")S.setItem(K,"1");else if(v==="events-off"||v==="off"||v==="none")S.setItem(K,"0");var u=new URL(L.href);u.searchParams.delete("preview");history.replaceState(history.state,"",u.pathname+u.search+u.hash)}
-on=window.SL_PREVIEW_ON?window.SL_PREVIEW_ON("events"):S.getItem(K)==="1";
+on=window.SL_PREVIEW_ON?(window.SL_PREVIEW_ON("events")||window.SL_PREVIEW_ON("newyear")):(S.getItem(K)==="1"||S.getItem("sl-art-preview-newyear")==="1");
 if(window.SL_EV)return;var d=document,h=d.documentElement,root=__ROOT__+"events/",q="?v="+__EVV__,p=d.head||h;
 function css(){var l=d.createElement("link");l.rel="stylesheet";l.href=root+"events.css"+q;p.appendChild(l)}
 function js(n,f){var s=d.createElement("script");s.src=root+n+".js"+q;s.async=false;if(f)s.onload=f;p.appendChild(s)}
 function full(){window.SL_EV={on:true,root:root};h.classList.add("sl-ev-on");css();
-["config","advent-logic","core","art","countdown","advent","achievements","subscribe","cursor"].forEach(function(n){js(n)})}
+["config","advent-logic","core","art","countdown","advent","achievements","subscribe","cursor","newyear"].forEach(function(n){js(n)})}
 window.SL_EV_PREVIEW_LOAD=function(){if(window.SL_EV)return!!window.SL_EV.on;full();return true};
 if(on){full();return}
 var ran=0;function start(){if(ran)return;ran=1;var idle=window.requestIdleCallback||function(f){setTimeout(f,60)};

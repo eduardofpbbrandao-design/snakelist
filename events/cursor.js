@@ -708,9 +708,15 @@
   var autoSettings = true;
   function lookForSettings() {
     if (!autoSettings) return;
-    // only the Settings panel's own content - never the header's gear button (which carries data-sl-settings too)
-    var inner = D.querySelector("#sl-settings .sl-pbody, #sl-settings [data-sl-settings-body]");
-    if (inner && inner.tagName !== "BUTTON" && !inner.closest("button")) mountSettings(inner);
+    // only the Settings panel's own content - never the header's gear button (which carries data-sl-settings too), and
+    // inside the Display tab (data-sl-settings-body) rather than the whole dialog body, so it isn't on every tab; no
+    // button or link may contain it (a button inside a button is invalid and breaks keyboard use)
+    var inner = D.querySelector("#sl-settings [data-sl-settings-body]") || D.querySelector("#sl-settings .sl-pbody");
+    if (inner && inner.tagName !== "BUTTON" && !inner.closest("button, a, [role=button]")) {
+      var old = D.querySelector("#sl-settings .sl-ev-cur-sec");
+      if (old && !inner.contains(old)) old.remove();     // moved here from where an older build put it
+      mountSettings(inner);
+    }
   }
   D.addEventListener("sl-settings-open", function () { setTimeout(lookForSettings, 0); setTimeout(repaintAll, 30); });
   setInterval(function () { if (!D.hidden) lookForSettings(); }, 1500);

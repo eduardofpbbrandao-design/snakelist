@@ -40,7 +40,7 @@
 @keyframes sl-ev-up { from { transform: translate(-50%, 14px); opacity: 0; } }
 
 /* ------------------------------------------------------------- the event themes */
-.sl-ev-t-newyear { --ev-a: #12183a; --ev-b: #3b2b7a; --ev-c: #f1d27a; --ev-d: #8fd3ff; }
+/* (New Year: see the New Year block at the end) */
 .sl-ev-t-snakeday { --ev-a: #0d3a2c; --ev-b: #1d7a5a; --ev-c: #b9f27a; --ev-d: #ffd166; }
 .sl-ev-t-anniversary { --ev-a: #133a26; --ev-b: #2f8f55; --ev-c: #ffd56b; --ev-d: #ff8fa3; }
 .sl-ev-t-halloween { --ev-a: #22123a; --ev-b: #4a1f5e; --ev-c: #ff9a3c; --ev-d: #b6ff6b; }
@@ -564,7 +564,7 @@ details.sl-ev-more summary { cursor: pointer; font-weight: 600; }
 @keyframes xr-leafR { 0% { transform: rotateY(0); } 18% { transform: rotateY(-10deg); } 100% { transform: rotateY(112deg); opacity: 0; visibility: hidden; } }
 @keyframes xr-ribbon { to { transform: scaleY(0); opacity: 0; } }
 .sl-ev-rv-card.is-opening .sl-ev-rv-art { animation: xr-reward .7s 1s var(--xr-spring) both, sl-ev-float 3s 1.7s ease-in-out infinite; }
-.sl-ev-rv-card.is-opening h3, .sl-ev-rv-card.is-opening .k, .sl-ev-rv-card.is-opening p, .sl-ev-rv-card.is-opening .sl-ev-rv-bonus, .sl-ev-rv-card.is-opening .sl-ev-rv-extra { animation: xr-in .45s 1.15s var(--xr-ease) both; }
+.sl-ev-rv-card.is-opening h3, .sl-ev-rv-card.is-opening .k, .sl-ev-rv-card.is-opening .sl-ev-rv-who, .sl-ev-rv-card.is-opening p, .sl-ev-rv-card.is-opening .sl-ev-rv-bonus, .sl-ev-rv-card.is-opening .sl-ev-rv-extra { animation: xr-in .45s 1.15s var(--xr-ease) both; }
 @keyframes xr-reward { from { transform: translateY(26px) scale(.4); opacity: 0; } }
 @keyframes xr-in { from { transform: translateY(8px); opacity: 0; } }
 .sl-ev-rv-sparks { position: absolute; left: 50%; top: 32%; width: 0; height: 0; z-index: 3; pointer-events: none; }
@@ -637,3 +637,153 @@ html.sl-calm .sl-ev-rv-sparks, html.sl-calm .sl-ev-rv-door { display: none !impo
 /* reduce motion: SnakeList's own calm setting (html.sl-calm) as well as the device's */
 html.sl-calm .sl-ev-dg i, html.sl-calm .sl-ev-flakes i, html.sl-calm .sl-ev-burst i, html.sl-calm .sl-ev-burst .ring, html.sl-calm .sl-ev-burst .sl-ev-boom, html.sl-calm .sl-ev-b-badge { animation: none !important; }
 html.sl-calm .sl-ev-flakes { display: none; }
+
+/* =============================================================================================================
+   Christmas round 4 (preview): one palette (deep evergreen, cranberry, ivory; gold only for today, the Legendary
+   box and small accents), Advent doors whose every state has its own word + icon, "Jump to today", skips explained
+   once, the reveal's "Skip animation", and the reward for everyone kept apart from the subscriber bonus.
+   ============================================================================================================= */
+:root { --xp-ever: #123D2A; --xp-ever2: #216B45; --xp-cran: #A92E3E; --xp-ivory: #FFF8ED; --xp-gold: #D8B76A; --xp-gold-ink: #6E5414; }
+[data-sl-theme="dark"] { --xp-gold-ink: #E4C885; }
+/* doors: evergreen, cranberry and ivory (no all-gold doors - gold is kept for today's door) */
+.sl-ev-door .leaf { background: linear-gradient(145deg, #B23847, #84202F); }
+.sl-ev-door:nth-child(3n+1) .leaf { background: linear-gradient(145deg, #2A7A4E, #174F33); }
+.sl-ev-door:nth-child(4n+2) .leaf { background: linear-gradient(145deg, #216B45, #123D2A); }
+.sl-ev-door:nth-child(5n) .leaf { background: linear-gradient(145deg, #FFF8ED, #E6D8BE); color: #84202F; }
+.sl-ev-door .leaf::after { background: var(--xp-gold); }
+/* locked doors stay legible: only a little dimmer, the number at full strength, the lock in its own small badge */
+.sl-ev-door.is-locked .leaf, .sl-ev-door.can-reserve .leaf { filter: saturate(.7) brightness(.9); }
+.sl-ev-door.is-locked .leaf b, .sl-ev-door.can-reserve .leaf b { opacity: 1; text-shadow: 0 1px 0 rgba(0,0,0,.35), 0 0 6px rgba(0,0,0,.25); }
+.sl-ev-door:nth-child(5n).is-locked .leaf b { text-shadow: none; }
+.sl-ev-door .ic { top: 4px; right: 4px; width: 17px; height: 17px; border-radius: 50%; display: grid; place-items: center; background: rgba(10,30,20,.55); opacity: 1; }
+.sl-ev-door .ic svg { width: 10px; height: 10px; }
+/* the word on each state, with its icon */
+.sl-ev-door .st { display: inline-flex; align-items: center; gap: 2px; font-size: 9px; }
+.sl-ev-door .st svg { width: 9px; height: 9px; flex: none; }
+.sl-ev-door.is-missed .st { background: #2F5DA8; color: #fff; }
+.sl-ev-door.is-missed .leaf { filter: saturate(.55) brightness(.82); }
+/* today: the gold ring and a "Today" ribbon on top (the calendar's one gold door) */
+.sl-ev-door .today { position: absolute; left: 50%; top: -7px; transform: translateX(-50%); z-index: 3; padding: 1px 7px; border-radius: 999px; pointer-events: none;
+  font: 800 9px/1.45 'Inter', sans-serif; letter-spacing: .08em; text-transform: uppercase; background: var(--xp-gold); color: #2a1e04; box-shadow: 0 1px 3px rgba(0,0,0,.35); white-space: nowrap; }
+.sl-ev-door.is-today .leaf, .sl-ev-door.is-today .inside { box-shadow: inset 0 0 0 2px #F3DC9C, 0 0 0 3px rgba(216,183,106,.55), 0 0 18px rgba(216,183,106,.55); }
+.sl-ev-door.sl-ev-pulse { animation: xp-pulse 1.6s ease 1; z-index: 4; }
+@keyframes xp-pulse { 0%, 100% { transform: none; } 20%, 60% { transform: scale(1.12); } 40% { transform: scale(1.04); } }
+/* the line above the doors: the next door's time and "Jump to today" */
+.sl-ev-calhead { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 10px; margin: 0 0 8px; }
+.sl-ev-calhead .sl-ev-clockline { margin: 0; flex: 1 1 260px; }
+.sl-ev-jump { flex: none; display: inline-flex; align-items: center; gap: 6px; }
+/* the key: the five door states */
+.sl-ev-key .k-claim { background: rgba(216,183,106,.16); border-color: rgba(184,144,47,.55); } .sl-ev-key .k-claim svg { color: var(--xp-gold-ink); }
+.sl-ev-key .k-done { background: rgba(33,107,69,.1); border-color: rgba(33,107,69,.45); } .sl-ev-key .k-done svg { color: #2F8A55; }
+.sl-ev-key .k-recover { background: rgba(47,93,168,.1); border-color: rgba(47,93,168,.45); } .sl-ev-key .k-recover svg { color: #2F5DA8; }
+.sl-ev-key .k-reserve svg { color: #2F8A55; }
+.sl-ev-key .k-locked { background: transparent; } .sl-ev-key .k-locked svg { color: var(--text-muted); }
+[data-sl-theme="dark"] .sl-ev-key .k-recover svg { color: #8FB0EA; }
+/* skips, explained once */
+.sl-ev-howskip { margin: 8px 0 10px; border: 1px solid var(--border); border-radius: 12px; padding: 0 12px; font-size: 12.5px; line-height: 1.45; }
+.sl-ev-howskip summary { display: flex; align-items: center; gap: 7px; min-height: 36px; cursor: pointer; font-weight: 700; list-style: none; }
+.sl-ev-howskip summary::-webkit-details-marker { display: none; }
+.sl-ev-howskip summary::after { content: ""; margin-left: auto; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); opacity: .6; }
+.sl-ev-howskip[open] summary::after { transform: rotate(-135deg); }
+.sl-ev-howskip summary svg { color: #2F5DA8; }
+.sl-ev-howskip summary:focus-visible { outline: 3px solid var(--focus-ring, #58b351); outline-offset: 2px; border-radius: 8px; }
+.sl-ev-howskip ul { margin: 0 0 10px; padding-left: 18px; color: var(--text-muted); }
+.sl-ev-howskip li { margin: 3px 0; } .sl-ev-howskip b { color: var(--text); }
+.sl-ev-h4 { display: flex; align-items: center; gap: 6px; margin: 14px 0 -4px; font: 800 10.5px 'Inter', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--xp-gold-ink); }
+.sl-ev-notcabin { display: flex; align-items: flex-start; gap: 6px; margin: 8px 2px 0; }
+.sl-ev-notcabin svg { flex: none; margin-top: 2px; }
+/* the reveal: the reward everyone gets, then (apart) the subscriber bonus; "Skip animation" while the door opens */
+.sl-ev-rv-who { display: inline-flex; align-items: center; gap: 5px; margin: 2px 0 0 !important; padding: 2px 9px; border-radius: 999px; background: rgba(255,248,237,.12); font: 700 10.5px 'Inter', sans-serif !important; letter-spacing: .04em; color: #F3E6C4; opacity: 1 !important; }
+.sl-ev-rv-skipanim { all: unset; box-sizing: border-box; position: absolute; top: 10px; right: 10px; z-index: 6; padding: 6px 11px; min-height: 32px; border-radius: 999px; cursor: pointer;
+  font: 600 12px 'Inter', sans-serif; color: #FFF8ED; background: rgba(18,61,42,.72); border: 1px solid rgba(255,248,237,.4); }
+.sl-ev-rv-skipanim:hover { background: rgba(18,61,42,.92); }
+.sl-ev-rv-skipanim:focus-visible { outline: 3px solid var(--xp-gold); outline-offset: 2px; }
+.sl-ev-rv-card.is-settled .sl-ev-rv-art { animation: sl-ev-float 3s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .sl-ev-door.sl-ev-pulse { animation: none; outline: 3px solid var(--xp-gold); outline-offset: 2px; } }
+html.sl-calm .sl-ev-door.sl-ev-pulse { animation: none; outline: 3px solid var(--xp-gold); outline-offset: 2px; }
+/* the reveal's button: cranberry (the Legendary pop-up keeps its gold one) */
+.sl-ev-reveal .sl-ev-btn.pri { background: linear-gradient(180deg, #B23847, #8E2434); border-color: rgba(216,183,106,.55); color: #FFF8ED; }
+.sl-ev-legend .sl-ev-btn.pri { background: linear-gradient(180deg, #E9CD87, #C9A04A); border-color: #F3DC9C; color: #2a1e04; }
+/* gold-and-emerald is the Legendary Christmas Serpent's alone: the ordinary reveal card, the subscriber-bonus box and
+   the early-access note use the evergreen box with an ivory edge (gold stays only as a small label colour) */
+.sl-ev-reveal:not(.sl-ev-legend) .sl-ev-rv-card { background: radial-gradient(120% 90% at 50% 0%, #216B45, #123D2A 75%); box-shadow: 0 0 0 1.5px rgba(255,248,237,.32), 0 24px 60px rgba(0,0,0,.5); }
+.sl-ev-rv-bonus { border-color: rgba(255,248,237,.3); background: rgba(9,32,22,.55); }
+.sl-ev-rv-bonus.locked { border-color: rgba(255,248,237,.3); }
+.sl-ev-rv-bk { color: #F3E6C4; }
+.sl-ev-earlynote { border-color: var(--xr-bd); background: linear-gradient(165deg, var(--xr-bg2), var(--xr-bg) 70%); color: var(--xr-d); }
+.sl-ev-earlynote b { color: var(--xr-t); }
+.sl-ev-earlynote p { color: var(--xr-d); }
+/* ---------- the countdown: read out once a minute, the date + time zone shown, a slim line on the map ---------- */
+.sl-ev-sr { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+.sl-ev-b-when { font: 500 10.5px/1.2 "SL Outfit", "Inter", sans-serif; letter-spacing: .02em; color: rgba(255,248,237,.78); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.sl-ev-b-dense { display: none; font: 800 15px/1 "SL Outfit", "Inter", sans-serif; font-variant-numeric: tabular-nums; letter-spacing: .01em; white-space: nowrap; color: var(--ev-ink, #fff); }
+@media (max-width: 760px) { .sl-ev-b-when { order: 4; flex: 1 1 100%; text-align: right; } .sl-ev-b-right { flex-wrap: wrap; } }
+/* dense screens (the map tab): one slim line - art, name, time left and the date; nothing else */
+.sl-ev-banner.sl-ev-dense { flex-wrap: nowrap; gap: 10px; padding: 5px 10px 5px 6px; margin-top: 6px; margin-bottom: 6px; border-radius: 12px; }
+.sl-ev-dense .sl-ev-b-art { width: 30px; height: 30px; } .sl-ev-dense .sl-ev-b-art svg { width: 28px; height: 28px; }
+.sl-ev-dense .sl-ev-b-txt small, .sl-ev-dense .sl-ev-b-txt em, .sl-ev-dense .sl-ev-b-lab, .sl-ev-dense .sl-ev-clock, .sl-ev-dense .sl-ev-b-fx, .sl-ev-dense .sl-ev-fx { display: none !important; }
+.sl-ev-dense .sl-ev-b-txt b { font-size: 14.5px; white-space: nowrap; }
+.sl-ev-dense .sl-ev-b-right { order: 0; flex: none; flex-direction: row; align-items: baseline; gap: 8px; }
+.sl-ev-dense .sl-ev-b-dense { display: inline; }
+.sl-ev-dense .sl-ev-b-when { order: 0; flex: none; text-align: left; }
+.sl-ev-dense .sl-ev-b-go { width: 26px; height: 26px; } .sl-ev-dense .sl-ev-b-go svg { width: 14px; height: 14px; }
+@media (max-width: 520px) { .sl-ev-dense .sl-ev-b-when { display: none; } }
+.sl-ev-pubwrap.sl-ev-dense .sl-ev-min { top: -6px; }
+
+/* =============================================================================================================
+   New Year 2026-2027 (preview key "newyear", events/newyear.js): midnight blue, deep green, gold and silver.
+   The same tokens as every event theme (--ev-a/b background, --ev-c accent, --ev-d detail, --ev-ink text), so the
+   countdown, panels and pills all follow; html.sl-ny is set while the New Year theme is showing.
+   ============================================================================================================= */
+.sl-ev-t-newyear { --ev-a: #142453; --ev-b: #0B1530; --ev-c: #D8B76A; --ev-d: #0F4A35; --ev-ink: #F4F6FA; --ny-silver: #C9D3DE; --ny-green: #0F4A35; }
+/* the Christmas cover decorations step aside for the New Year (the Cabin, Advent and every reward stay) */
+html.sl-ny .xm-corner, html.sl-ny .xm-phat, html.sl-ny #sl-hero .xm-snow { display: none !important; }
+/* "HAPPY NEW YEAR 2026-2027!" above the logo, between two snakes in party hats */
+.sl-ny-top { display: flex; align-items: flex-end; justify-content: flex-start; gap: 6px; margin: 6px 0 -2px; }
+.sl-ny-top p { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 14px 6px; border-radius: 12px;
+  background: linear-gradient(160deg, #142453, #0B1530); border: 1px solid rgba(216,183,106,.45); box-shadow: inset 0 1px 0 rgba(216,183,106,.35), 0 4px 12px rgba(11,21,48,.25); }
+.sl-ny-top b { font: 800 clamp(13px, 2.6vw, 17px)/1.15 "SL Outfit", Inter, sans-serif; letter-spacing: .06em; color: #F3DC9C; text-align: center; }
+.sl-ny-say { font: 700 9.5px/1 Inter, sans-serif; letter-spacing: .14em; color: #C9D3DE; }
+.sl-ny-snake { width: 40px; height: 46px; flex: none; overflow: visible; }
+/* the New Year card: the countdown to local midnight, fireworks inside it, the Christmas rewards kept */
+.sl-ny-card { position: relative; overflow: hidden; isolation: isolate; width: calc(100% - 32px); max-width: 1248px; margin: 10px auto 10px; border-radius: 16px; color: var(--ev-ink);
+  background: radial-gradient(120% 140% at 85% 0%, #1F3570 0%, #142453 38%, #0B1530 75%), #0B1530; border: 1px solid rgba(216,183,106,.32);
+  box-shadow: inset 0 1px 0 rgba(216,183,106,.4), 0 8px 22px rgba(11,21,48,.3); font-family: "SL Outfit", Inter, sans-serif; }
+.sl-ny-card::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: linear-gradient(90deg, #0F4A35, #1E7A55 30%, #C9D3DE 60%, #D8B76A); opacity: .85; }
+.sl-ny-fw { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+.sl-ny-in { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px; padding: 12px 16px 14px 12px; }
+.sl-ny-art { flex: none; width: 58px; height: 58px; display: grid; place-items: center; }
+.sl-ny-art svg { width: 58px; height: 58px; overflow: visible; }
+.sl-ny-txt { flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sl-ny-txt small { align-self: flex-start; font: 600 11px/1.2 "SL Outfit", Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #0B1530; background: #C9D3DE; padding: 3px 8px; border-radius: 999px; }
+.sl-ny-txt b { font-weight: 800; font-size: 19px; line-height: 1.15; }
+.sl-ny-txt em { font: 500 13px/1.3 "SL Outfit", Inter, sans-serif; font-style: normal; color: #F3DC9C; }
+.sl-ny-clock { flex: none; }
+.sl-ny-card .sl-ev-g { border-color: rgba(201,211,222,.3); box-shadow: inset 0 1px 0 rgba(201,211,222,.5), 0 3px 8px rgba(0,0,0,.3); }
+.sl-ny-card .sl-ev-g small { color: rgba(244,246,250,.75); }
+.sl-ny-acts { flex: none; display: flex; gap: 8px; flex-wrap: wrap; }
+.sl-ny-btn { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 14px; border-radius: 999px; cursor: pointer;
+  font: 600 13.5px Inter, sans-serif; color: #0B1530; background: linear-gradient(180deg, #E9CD87, #D8B76A); box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.sl-ny-btn:hover { filter: brightness(1.06); }
+.sl-ny-btn:focus-visible { outline: 3px solid #F4F6FA; outline-offset: 2px; }
+.sl-ny-btn.sl-ny-ghost { color: #F4F6FA; background: rgba(201,211,222,.12); border: 1px solid rgba(201,211,222,.4); box-shadow: none; }
+@media (max-width: 760px) { .sl-ny-clock { order: 3; flex: 1 1 100%; } .sl-ny-clock .sl-ev-clock.sl-ev-mini { width: auto; max-width: 320px; margin: 0; } .sl-ny-acts { order: 4; } .sl-ny-art { width: 46px; height: 46px; } .sl-ny-art svg { width: 46px; height: 46px; } }
+/* midnight: the celebration (Skip / Escape; it also ends by itself) */
+.sl-ny-cel { position: fixed; inset: 0; z-index: 2600; display: grid; place-items: center; padding: 16px; isolation: isolate; color: #F4F6FA; text-align: center;
+  background: radial-gradient(120% 90% at 50% 20%, #1F3570, #0B1530 60%, #050A1A); animation: sl-afade .3s ease-out; }
+.sl-ny-cel.out { opacity: 0; transition: opacity .25s; }
+.sl-ny-cel .sl-ny-fw { z-index: -1; }
+.sl-ny-cel-in { display: grid; justify-items: center; gap: 8px; max-width: 440px; }
+.sl-ny-cel-k { margin: 0; font: 700 11px/1.2 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #C9D3DE; }
+.sl-ny-cel h2 { margin: 0; font: 800 clamp(30px, 8vw, 52px)/1.05 "SL Outfit", Inter, sans-serif; color: #F3DC9C; text-shadow: 0 2px 24px rgba(216,183,106,.45); }
+.sl-ny-cel p { margin: 0; font: 500 15px/1.4 Inter, sans-serif; color: rgba(244,246,250,.86); }
+.sl-ny-cel-snakes { display: flex; gap: 18px; }
+.sl-ny-cel-snakes .sl-ny-snake { width: 72px; height: 84px; }
+.sl-ny-cel .sl-ny-btn { margin-top: 10px; min-width: 120px; justify-content: center; }
+@media (prefers-reduced-motion: reduce) { .sl-ny-cel { animation: none; } }
+/* the party hat replaces the Santa hat: on the party snakes, the New Year art, and the logo once it is the New Year */
+.sl-ny-snake, .sl-ev-nymark, html.sl-ny .sl-header, html.sl-ny #sl-hero, html.sl-ny .sl-ny-card { --xm-hat-o: 0; }
+.sl-ny-acts { flex: 0 1 auto; min-width: 0; } .sl-ny-btn { white-space: nowrap; }
+@media (max-width: 760px) { .sl-ny-acts { flex: 1 1 100%; } .sl-ny-btn { flex: 1 1 auto; justify-content: center; padding: 0 12px; } }
+/* the Christmas palette, one set for everything: deep evergreen #123D2A / #216B45, cranberry #A92E3E, ivory #FFF8ED, gold #D8B76A (sparingly) */
+.sl-ev-t-xmas { --ev-a: #216B45; --ev-b: #123D2A; --ev-c: #D8B76A; --ev-d: #A92E3E; --ev-ink: #FFF8ED; }

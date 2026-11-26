@@ -38,8 +38,8 @@
       st.kind = "open"; st.target = EV.ms(ev.start); st.label = "Opens for everyone in"; st.done = ev.short + " is open for everyone!";
     } else {
       st.kind = "open";
-      var next = (cdc(ev).after || []).filter(function (a) { return EV.ms(a.at) > now; })[0];
-      if (next) { st.target = EV.ms(next.at); st.label = next.label; st.done = next.label.replace(/^Time until /, "") + "!"; }
+      var next = (cdc(ev).after || []).filter(function (a) { return EV.atMs(a) > now; })[0];
+      if (next) { st.target = EV.atMs(next); st.label = next.label; st.done = next.label.replace(/^Time until /, "") + "!"; }
       else { st.target = EV.ms(ev.end); st.label = "Ends in"; st.done = ev.short + " has ended"; }
       var a = ev.advent && EV.logic && (!PUB || EV.xmasOpener()) ? ev.advent : null, nd = a ? EV.logic.today(ev, now) + 1 : 0;
       if (a && nd >= 2 && nd <= a.days + 1) st.door = nd - 1;     // doors open so far
@@ -65,7 +65,9 @@
   function vals(ms) { var p = parts(ms); return { d: String(p.d), h: two(p.h), m: two(p.m), s: two(p.s) }; }
   function clockHtml(ms, cls) {
     var v = vals(ms);
-    return '<div class="sl-ev-clock ' + (cls || "") + '" role="timer" aria-live="off">' + UNITS.map(function (u) {
+    // the animated digits are hidden from screen readers (they would be read out every second); what they say is in a
+    // visually hidden line next to them that changes only once a minute (srLine / setSr below)
+    return '<div class="sl-ev-clock ' + (cls || "") + '" aria-hidden="true">' + UNITS.map(function (u) {
       return '<div class="sl-ev-g" data-u="' + u[0] + '"><div class="sl-ev-num">' + v[u[0]].split("").map(function (c) {
         return '<span class="sl-ev-dg" data-v="' + c + '"><i>' + c + "</i></span>"; }).join("") + "</div><small>" + u[1] + "</small></div>";
     }).join("") + "</div>";
@@ -90,7 +92,19 @@
       }
     });
   }
-  function spoken(ms) { var p = parts(ms); return (p.d ? p.d + " days " : "") + p.h + " hours " + p.m + " minutes " + p.s + " seconds"; }
+  // what a screen reader hears: to the minute only (rounded up, so it never says "0 minutes" while time is left)
+  function spokenMin(ms) {
+    var m = Math.max(0, Math.ceil(ms / MIN)), d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mm = m % 60;
+    if (!m) return "less than a minute";
+    return [d ? d + (d === 1 ? " day" : " days") : "", h ? h + (h === 1 ? " hour" : " hours") : "", mm ? mm + (mm === 1 ? " minute" : " minutes") : ""].filter(Boolean).join(" ");
+  }
+  function srHtml(st) { return '<span class="sl-ev-sr" data-sr aria-live="polite" aria-atomic="true">' + esc(st.label + ": " + spokenMin(st.left)) + "</span>"; }
+  function setSr(root, st) { var el = root && root.querySelector("[data-sr]"), t = st.label + ": " + spokenMin(st.left); if (el && el.textContent !== t) el.textContent = t; }
+  // the moment the clock counts to, in this viewer's own time, with the time zone named
+  function whenShort(t) { var z = tzName(); return EV.localTime(t, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " · " + (z ? z.split("/").pop().replace(/_/g, " ") + " time" : "your time"); }
+  // dense screens (the map): the banner shrinks to one slim line
+  // (also while the New Year card shows: one countdown card is enough, the Christmas banner stays as a slim line)
+  function dense() { var m = D.getElementById("tab-map"); return !!(m && m.classList.contains("active")) || D.body.classList.contains("map-full") || D.documentElement.classList.contains("sl-ny"); }
   function heat(left) { return left <= 10 * SEC && left > 0 ? " sl-ev-hot sl-ev-final" : left <= MIN && left > 0 ? " sl-ev-hot" : ""; }
 
   /* ---------------- the Christmas frame: pine branches with warm fairy lights round the outside, sparse snow ---------------- */
@@ -140,7 +154,9 @@
     var sub = st.open ? (PUB && !st.go ? comingText(st) : (c.openButton || "Explore the event")) : (c.comes || EV.localTime(ev.start, { day: "numeric", month: "long" }));
     return '<span class="sl-ev-b-art">' + EV.art.event(ev.theme) + "</span>" +
       '<span class="sl-ev-b-txt"><small>' + esc(tagText(st)) + "</small><b>" + esc(ev.name) + "</b><em>" + esc(sub) + "</em></span>" +
-      '<span class="sl-ev-b-right"><span class="sl-ev-b-lab">' + esc(st.label) + "</span>" + clockHtml(st.left, "sl-ev-mini") + "</span>" +
+      '<span class="sl-ev-b-right"><span class="sl-ev-b-lab">' + esc(st.label) + "</span>" + clockHtml(st.left, "sl-ev-mini") +
+      '<span class="sl-ev-b-when">' + esc(whenShort(st.target)) + "</span>" +
+      '<span class="sl-ev-b-dense" aria-hidden="true">' + esc(compact(st.left)) + "</span></span>" +
       '<span class="sl-ev-b-go">' + ic("arrow") + "</span>" + (st.phase === "live" && st.door ? '<span class="sl-ev-b-badge"></span>' : "");
   }
   function banner() {
@@ -153,11 +169,18 @@
     }
     if (PUB) { if (pubWrap(tabs, st)) return; }
     else if (!B.isConnected) tabs.parentNode.insertBefore(B, tabs);
-    B.className = "sl-ev-banner sl-ev-t-" + st.ev.theme + (st.open ? " sl-ev-is-open" : "") + heat(st.left);
+    var dn = dense();
+    B.className = "sl-ev-banner sl-ev-t-" + st.ev.theme + (st.open ? " sl-ev-is-open" : "") + heat(st.left) + (dn ? " sl-ev-dense" : "");
+    if (W) W.classList.toggle("sl-ev-dense", dn);
     var key = st.ev.id + "|" + st.phase + "|" + st.kind + "|" + st.label + "|" + st.door + "|" + !!st.go + "|" + (st.open && PUB && !st.go ? comingText(st) : "");
     if (key !== lastKey) { var keep = B.querySelector(".sl-ev-burst"); B.innerHTML = bannerHtml(st); if (keep) B.appendChild(keep); lastKey = key; }
-    else setDigits(B, st.left);
-    B.setAttribute("aria-label", st.ev.name + ": " + st.label + " " + spoken(st.left) + ". Open the event countdown.");
+    else {
+      setDigits(B, st.left);
+      var dc = B.querySelector(".sl-ev-b-dense"), ct = compact(st.left); if (dc && dc.textContent !== ct) dc.textContent = ct;
+    }
+    // the button's name changes once a minute at most (never every second)
+    var al = st.ev.name + ": " + st.label + " " + spokenMin(st.left) + " (" + whenShort(st.target) + "). Open the event countdown.";
+    if (B.getAttribute("aria-label") !== al) B.setAttribute("aria-label", al);
     crossing(B, st, B);
   }
   /* public mode: the banner sits in a wrapper with a small minimise button; minimised, it is a slim pill instead
@@ -192,7 +215,7 @@
     if (t !== pillTxt) {
       pillTxt = t;
       PILL.innerHTML = '<span class="sl-ev-pill-art">' + EV.art.event(st.ev.theme) + "</span><span>" + esc(t) + "</span>" + ic("arrow", 14);
-      PILL.setAttribute("aria-label", st.ev.name + ": " + (st.open && !st.go ? comingText(st) : st.label + " " + spoken(st.left)) + ". Show the countdown again.");
+      PILL.setAttribute("aria-label", st.ev.name + ": " + (st.open && !st.go ? comingText(st) : st.label + " " + spokenMin(st.left)) + ". Show the countdown again.");
     }
     return true;
   }
@@ -225,12 +248,12 @@
     var tag = '<p class="sl-ev-tag' + (st.open ? " is-live" : "") + '">' + esc(tagText(st)) + "</p>";
     var body = st.open && PUB && !st.go
       ? '<p class="sl-ev-comes sl-ev-soon">' + esc(comingText(st)) + "</p>" +
-        '<p class="sl-ev-for">' + esc(st.label) + "</p>" + clockHtml(st.left, "sl-ev-after")
+        '<p class="sl-ev-for">' + esc(st.label) + "</p>" + clockHtml(st.left, "sl-ev-after") + srHtml(st)
       : st.open
       ? '<button type="button" class="sl-ev-cta" data-go="advent">' + esc(c.openButton || "Explore the event") + ic("arrow", 18) + "</button>" +
-        '<p class="sl-ev-for">' + esc(st.label) + "</p>" + clockHtml(st.left, "sl-ev-after")
+        '<p class="sl-ev-for">' + esc(st.label) + "</p>" + clockHtml(st.left, "sl-ev-after") + srHtml(st)
       : (c.comes ? '<p class="sl-ev-comes">' + esc(c.comes) + "</p>" : "") +
-        '<p class="sl-ev-for">' + esc(st.label) + "</p>" + clockHtml(st.left);
+        '<p class="sl-ev-for">' + esc(st.label) + "</p>" + clockHtml(st.left) + srHtml(st);
     return '<div class="sl-ev-hero sl-ev-hx sl-ev-t-' + ev.theme + '">' + (ev.theme === "xmas" ? frame() : "") +
       '<div class="sl-ev-hx-in">' +
       '<span class="sl-ev-hero-art">' + EV.art.event(ev.theme) + "</span>" + tag +
@@ -287,7 +310,7 @@
       hero.replaceWith(fresh); hero = fresh; pKey = key;
       [].slice.call(P.classList).forEach(function (c) { if (/^sl-ev-t-/.test(c)) P.classList.remove(c); });
       P.classList.add("sl-ev-t-" + st.ev.theme);
-    } else if (hero) setDigits(hero, st.left);
+    } else if (hero) { setDigits(hero, st.left); setSr(hero, st); }
     if (hero) crossing(hero, st, hero);
     var tl = P.querySelector("[data-timecheck]"); if (tl) { var t = timeLine(); if (tl._t !== t) { tl.innerHTML = t; tl._t = t; } }
   }
@@ -295,6 +318,8 @@
   /* ---------------- ticking ---------------- */
   function tick() { if (D.hidden) return; try { banner(); panelTick(); } catch (e) { console.error(e); } }
   setInterval(tick, 250);
+  // the clock for other event modules (the New Year preview counts down with the very same digits)
+  EV.clock = { html: clockHtml, set: setDigits, spokenMin: spokenMin, compact: compact, when: whenShort };
   EV.on("sub", function () { lastKey = ""; pKey = "~"; tick(); });
   EV.on("time", function () { lastKey = ""; tick(); });
   if (D.readyState === "loading") D.addEventListener("DOMContentLoaded", tick); else tick();
