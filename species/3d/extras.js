@@ -14,6 +14,8 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const sstep = (a, b, v) => { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
 const ease = (x) => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
 const angDiff = (a, b) => Math.atan2(Math.sin(b - a), Math.cos(b - a));
+// v6.35: a touch-first device (phones and tablets, a big iPad too): 'tap' and 'pinch', not 'click' and 'scroll' (as viewer.js touchFirst)
+const touchUI = () => { try { const mm = (q) => !!(window.matchMedia && window.matchMedia(q).matches); return window.innerWidth < 560 || (mm('(pointer: coarse)') && !mm('(any-pointer: fine)')) || ((navigator.maxTouchPoints || 0) > 0 && !mm('(hover: hover)')); } catch (e) { return false; } };
 function rnd(seed) { let s = seed >>> 0 || 1; return () => { s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
 // ---------------------------------------------------------------- styles (shared by species pages and the app)
@@ -824,7 +826,7 @@ export function create(V) {
         let ti = 0; im.src = tries[0]; on(im, 'error', () => { if (++ti < tries.length) im.src = tries[ti]; });
         // v5.12: the photo zooms (wheel, pinch, double-click) and pans (drag) so you can compare the scales up close
         const vp = el('div', 'sp3d-pz'); vp.appendChild(im); f.appendChild(vp); panZoom(vp, im);
-        const zh = el('div', 'sp3d-pzh', (window.innerWidth < 560 ? 'Pinch' : 'Scroll') + ' to zoom the photo, drag to move it, double-' + (window.innerWidth < 560 ? 'tap' : 'click') + ' to zoom in'); vp.appendChild(zh);
+        const zh = el('div', 'sp3d-pzh', (touchUI() ? 'Pinch' : 'Scroll') + ' to zoom the photo, drag to move it, double-' + (touchUI() ? 'tap' : 'click') + ' to zoom in'); vp.appendChild(zh);
         if (ph.credit) { const c = el('figcaption'); c.innerHTML = ph.credit; f.appendChild(c); } b.appendChild(f);
       } else b.appendChild(el('p', 'sp3d-none2', 'SnakeList has no photo of this snake yet.'));
     } else {
@@ -2535,7 +2537,7 @@ export function create(V) {
         if (!st.data) st.data = buildAnatomy();
         skinSeeThrough(true); setOrganVis(true); regions();
         const hint = stage.querySelector('.sp3d-hint'); if (hint) hint.classList.add('sp3d-hint-off');
-        tip.hidden = false; tip.textContent = 'A simplified model: organs at their usual places along a snake\'s long body, not to exact scale. ' + (window.innerWidth < 560 ? 'Tap' : 'Click') + ' any part to learn what it is.'; // (v6.20: S12 - say that it is simplified)
+        tip.hidden = false; tip.textContent = 'A simplified model: organs at their usual places along a snake\'s long body, not to exact scale. ' + (touchUI() ? 'Tap' : 'Click') + ' any part to learn what it is.'; // (v6.20: S12 - say that it is simplified)
         // v5.12: the snake stays as it is (Eduardo: "don't stretch the snake"); the whole snake in view, from a little higher
         st.k = 1;
         if (!V.scaleOn()) { st.view = { az: V.controls.st.az, el: 0.72, d: V.info.dFit * 1.1 }; V.view(st.view); }

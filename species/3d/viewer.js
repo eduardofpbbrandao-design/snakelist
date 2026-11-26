@@ -8,7 +8,7 @@
 let THREE = null;
 // v4.80: the realistic scenery (trees, 3D leaf litter, rocks, sky) lives in nature.js
 import * as NATURE from './nature.js?r=630'; // (a new name whenever these change, so no browser keeps an old copy)
-import * as EXTRA from './extras.js?r=630'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
+import * as EXTRA from './extras.js?r=635'; // v4.81: Slither, See it eat, See eye shield, Anatomy, photo/map beside the model
 import * as DAYNIGHT from './daynight.js?r=614'; // v6.14: Day / Night (and the plugin hooks "See the spot", spot.js, uses)
 export function useThree(t) { THREE = t; }
 // v6.13: Array .at() for iPads on iPadOS 15.0-15.3 (it came in 15.4); the species pages load this without SnakeList's own copy
@@ -23,6 +23,14 @@ const habPick = (d, id) => { const l = d && d.sp && d.sp[id]; return Array.isArr
 export function habitatsOf(id) { return habPick(HAB_LOOKS, id); }
 
 const TAU = Math.PI * 2;
+// v6.35: a touch-first device (phone, tablet - also a big iPad, which got the keyboard-and-mouse instructions): the
+// instructions speak of fingers, not W A S D and right-drag
+export function touchFirst() {
+  try {
+    const mm = (q) => !!(window.matchMedia && window.matchMedia(q).matches);
+    return window.innerWidth < 520 || (mm('(pointer: coarse)') && !mm('(any-pointer: fine)')) || ((navigator.maxTouchPoints || 0) > 0 && !mm('(hover: hover)'));
+  } catch (e) { return false; }
+}
 // load-time profiling (tests only): window.__slPerf = { step: ms }
 const perfT = (name, t0) => { if (typeof window !== 'undefined' && window.SL_3D_TEST) { const p = window.__slPerf || (window.__slPerf = {}); p[name] = Math.round((p[name] || 0) + performance.now() - t0); } };
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
@@ -301,6 +309,108 @@ for (const [k, l] of Object.entries({
   hslit: 'ahaetulla oxybelis thelotornis dryophiops xenoxybelis',
   round: 'causus',
 })) for (const g of l.split(' ')) PUPIL_GENUS[g] = k;
+// ---------- v6.35 (the "3d" preview): the shared realism pass ----------
+// Eduardo: the snakes "still look like worms with eyes". Rendered side by side with photos, group by group: the body was a
+// long cone from a thin neck to the middle of the body (a real snake is near its full girth a fifth to a quarter of the way
+// along and keeps it to the vent - the forebody read as a worm's), tails ran out to a needle point, the jawline and the
+// brow were too faint to read at a normal distance, the gloss coat and the eyes' reflections read as plastic, and some groups
+// lacked their own silhouette (vine snakes' long pointed snouts, sea snakes' flattened bodies, burrowers' and blind snakes'
+// tiny eyes, the stout hognoses' shovel snouts). It only changes the profile (P) - the pattern worker gets P, so it builds the
+// same body - and only while the preview is on (tools/previews.js "3d"; window.SL_3D_REALISM true/false overrides it).
+export function realismOn() {
+  try {
+    if (typeof window === 'undefined') return false;
+    if (window.SL_3D_REALISM != null) return !!window.SL_3D_REALISM;
+    const S = window.SL_PREVIEWS; if (S && typeof S.on === 'function') return !!S.on('3d');
+    return window.localStorage.getItem('sl-art-preview-3d') === '1';
+  } catch (e) { return false; }
+}
+// (tools/3d_inventory.py reads these three lists: keep their form)
+const RACER_GENERA = 'coluber masticophis drymarchon drymobius drymoluber ptyas dendrelaphis philothamnus hapsidophrys opheodrys leptophis chironius dendrophidion mastigodryas hierophis dolichophis platyceps psammophis malpolon salvadora spalerosophis orientocoluber thrasops rhamnophis gonyosoma rhadinophis cyclophiops eirenis bamanophis masticophis dispholidus chrysopelea';
+const HOG_GENERA = 'heterodon paleoheterodon xenodon lystrophis waglerophis';
+const LONGSNOUT_GENERA = 'ahaetulla oxybelis thelotornis langaha dryophiops xenoxybelis';
+const RACER_SET = new Set(RACER_GENERA.split(' ')), HOG_SET = new Set(HOG_GENERA.split(' ')), LONGSNOUT_SET = new Set(LONGSNOUT_GENERA.split(' '));
+// the group (tools/3d_inventory.py group_of mirrors this)
+function realGroup(q, id) {
+  const g = String(id || '').split('-')[0], hf = Object.keys(HEAD_FORM).find((k) => HEAD_FORM[k] === headForm(q.plan, id)) || '', HG = HF_GENUS[g];
+  if (q.plan === 'blind') return 'blind';
+  if (q.plan === 'sea') return 'sea';
+  if (q.plan === 'viper' || q.plan === 'pitviper') return g === 'crotalus' || g === 'sistrurus' ? 'rattlesnake' : HG === 'colubrine' ? 'colubrine' : q.plan;
+  if (q.plan === 'python') return HG === 'boa' || HG === 'sandboa' ? HG : 'python';
+  if (q.plan === 'elapid') return HG === 'cobra' || HG === 'mamba' || HG === 'deathadder' || HG === 'burrow' ? HG : 'elapid';
+  if (HOG_SET.has(g)) return 'hognose';
+  if (LONGSNOUT_SET.has(g) || HG === 'vine') return 'vine';
+  if (HG === 'broad' || HG === 'burrow' || HG === 'natricine') return HG;
+  if (RACER_SET.has(g)) return 'racer';
+  return hf === 'natricine' ? 'natricine' : 'colubrine';
+}
+// per group: fore [where along the body (of its length), the width there (of the thickest)] - the forebody filled out
+// early; tail - the tail's taper when the profile names none; ld - stouter (<1) or more slender (>1), the head and neck
+// keeping their real size; lip, sock, brow - the jawline crease, the eye socket's depth and the brow ridge, as factors;
+// eye - eye size factor; xs - flatter from side to side (<1)
+const REAL = {
+  viper: { fore: [0.2, 0.93], tail: 'abrupt', ld: 0.95, lip: 1.6, sock: 1.25, brow: 1.3 },
+  pitviper: { fore: [0.2, 0.92], tail: 'abrupt', ld: 0.96, lip: 1.6, sock: 1.25, brow: 1.3 },
+  rattlesnake: { fore: [0.2, 0.93], ld: 0.96, lip: 1.6, sock: 1.25, brow: 1.3 },
+  deathadder: { fore: [0.18, 0.94], ld: 0.96, lip: 1.5, sock: 1.2, brow: 1.2 },
+  python: { fore: [0.22, 0.9], tail: 'prehensile', ld: 0.96, lip: 1.5, sock: 1.2, brow: 1.4 },
+  boa: { fore: [0.22, 0.9], tail: 'prehensile', ld: 0.96, lip: 1.5, sock: 1.2, brow: 1.4 },
+  sandboa: { fore: [0.12, 0.97], tail: 'blunt', lip: 1.2, sock: 1.1 },
+  cobra: { fore: [0.24, 0.9], lip: 1.5, sock: 1.15, brow: 1.25 },
+  mamba: { fore: [0.28, 0.86], tail: 'whip', ld: 1.03, lip: 1.5, sock: 1.15, brow: 1.25 },
+  elapid: { fore: [0.22, 0.9], lip: 1.5, sock: 1.15, brow: 1.25 },
+  colubrine: { fore: [0.22, 0.9], lip: 1.5, sock: 1.15, brow: 1.25 },
+  natricine: { fore: [0.2, 0.92], lip: 1.5, sock: 1.15, brow: 1.25 },
+  racer: { fore: [0.26, 0.88], tail: 'whip', ld: 1.03, lip: 1.5, sock: 1.15, brow: 1.3 },
+  vine: { fore: [0.3, 0.85], tail: 'whip', ld: 1.04, lip: 1.4, sock: 1.1, brow: 1.3, snout: 1 },
+  broad: { fore: [0.22, 0.9], lip: 1.5, sock: 1.15, brow: 1.25 },
+  hognose: { fore: [0.16, 0.95], ld: 0.96, lip: 1.4, sock: 1.1, brow: 1.2, hog: 1 },
+  burrow: { fore: [0.1, 0.98], tail: 'blunt', eye: 0.75, lip: 1.1 },
+  blind: { fore: [0.08, 1.0], eye: 0.6 },
+  sea: { fore: [0.3, 0.86], xs: 0.9, lip: 1.3, sock: 1.1 },
+};
+// species remodelled in the preview, against photos and field-guide accounts (applied to the raw profile, as SPECIES_LOOK is)
+const REAL_LOOK = {
+  // inland taipan (Australian Museum account; research-grade iNaturalist photos): a long, fairly narrow head with a rounded
+  // snout - not deep and bulbous - set off from a slimmer neck; medium-slender body; brown to olive with dark-edged scales
+  // (darker in winter, the head glossy black-brown); a dark iris with the round pupil still showing
+  'oxyuranus-microlepidotus': { h: { w: 0.8, wFixed: 1, len: 0.04, h: 0.64, hFixed: 1, snoutH: 0.7, snout: 0.5, capK: 0.85, jaw: 0.8, eyeL: 0.17, iris: '#3a2617', irisInner: '#5c3f26', brow: 0.06, cheek: 0.03, lor: 0.02, headRelief: 0.22 },
+    body: { neck: 0.66, ld: 37 }, scales: { gloss: 0.52 } },
+  // smooth green snake (field guides; SnakeList photo): small and very slender, plain bright green above, pale yellow to
+  // white below, smooth satin scales (not wet plastic), a round black pupil in a dark iris
+  'opheodrys-vernalis': { h: { iris: '#262414', irisInner: '#3a3a1e', lw: 1.8 }, scales: { gloss: 0.62 }, colors: { belly: '#eceebf' } },
+};
+function realLook(p, id) {
+  const L = REAL_LOOK[id]; if (!L || !p) return p;
+  const q = JSON.parse(JSON.stringify(p)), tgt = q.auto ? (q.auto.h = q.auto.h || {}) : (q.head = q.head || {});
+  Object.assign(tgt, L.h || {});
+  if (L.body) Object.assign(q.auto ? (q.auto.bx = q.auto.bx || {}) : (q.body = q.body || {}), L.body);
+  if (L.scales) Object.assign(q.auto ? (q.auto.sx = q.auto.sx || {}) : (q.scales = q.scales || {}), L.scales);
+  if (L.colors) Object.assign(q.auto ? (q.auto.cx = q.auto.cx || {}) : (q.colors = q.colors || {}), L.colors);
+  return q;
+}
+function realism(q, id) {
+  const g = String(id || '').split('-')[0], grp = realGroup(q, id), R = REAL[grp] || REAL.colubrine;
+  const B = Object.assign({}, q.body), H = Object.assign({}, q.head), S = Object.assign({}, q.scales), tri = (H.shape || 'oval') === 'tri';
+  // (head and neck widths are fractions of the body's width: they are scaled back so they keep their real size)
+  if (R.ld) { B.ld *= R.ld; H.w *= R.ld; B.neck = Math.min(1.05, B.neck * R.ld); }
+  if (R.xs) { B.xs *= R.xs; const k = 1 / Math.sqrt(R.xs); H.w *= k; B.neck = Math.min(1.05, B.neck * k); }
+  if (R.fore && !B.fore) B.fore = R.fore;
+  if (R.tail && !B.tailShape && !(q.tail && q.tail.rattle) && !B.paddle && !B.blunt) B.tailShape = R.tail;
+  if (B.tipRound == null) B.tipRound = B.tailShape === 'whip' ? 0.16 : 0.24; // (the tail's tip rounded off, not a needle)
+  if (R.lip) H.lipK = R.lip;
+  if (R.sock) H.sockK = R.sock;
+  if (R.brow) { if (H.brow) H.brow *= R.brow; H.browGeo = (H.browGeo != null ? H.browGeo : tri ? 0.16 : 0.09) * R.brow; }
+  if (R.eye) H.eyeK = (H.eyeK || 0.9) * R.eye;
+  H.specK = 0.72; // (the spectacle's reflections restrained)
+  if (R.snout && LONGSNOUT_SET.has(g)) Object.assign(H, { len: Math.min(0.058, H.len * 1.12), snout: Math.min(H.snout, 0.36), tip: 0.24, tipR: 0.06, capK: 0.6 }); // (a little longer, the snout drawn out to a point; the head was already narrow)
+  if (R.hog && !H.snoutUp) Object.assign(H, { snoutUp: 0.45, upturn: 0.5, upLen: 0.34, tip: 0.3 });
+  // the head and neck held a little off the ground in a resting, alert snake on the ground (a head laid flat in line with the
+  // body was much of the worm look) - not in burrowers, sea snakes, or snakes in trees, on a coil or rearing
+  const Po = Object.assign({}, q.pose || {}); if ((Po.kind || 'wave') === 'wave' && !['blind', 'burrow', 'sea', 'sandboa'].includes(grp)) { Po.lift = Math.max(Po.lift != null ? Po.lift : 0.35, 0.9); Po.liftLen = Math.max(Po.liftLen || 2.6, 4.2); }
+  if (grp !== 'blind') { S.gloss = (S.gloss != null ? S.gloss : 0.5) * 0.84; S.coatK = 0.8; } // (less of a plastic coat; blind snakes really are glassy)
+  return Object.assign({}, q, { body: B, head: H, scales: S, pose: Po, realism: grp });
+}
 function normProfile(p, id) {
   { const hs = HEAD_SET[id || p.id]; if (hs) p = Object.assign({}, p, { head: Object.assign({}, p.head, hs) }); } // v6.26: the hand-set heads
   const base = PLANS[p.plan] || PLANS.colubrid;
@@ -575,6 +685,8 @@ function makeBodyFns(P, quality) {
     [Hl * 0.45, hw * mid], [Hl * jaw, hw], [Hl * 1.0, hw * back],
     [Hl * (1.0 + neckLen), Math.min(hw * back, B.neck)],
     [L * Math.max(B.peak, (Hl * 2.6) / L), 1], [L * (1 - B.tail), B.vent]];
+  // v6.35 (preview): the forebody near its full girth early on (B.fore), so the neck reads as a neck and the body is not a cone
+  if (B.fore) { const xn = Hl * (1.0 + neckLen), xf = Math.max(B.fore[0] * L, xn * 1.6), xp = pts[8][0]; if (xf < xp * 0.92) pts.splice(8, 0, [xf, clamp(B.fore[1], pts[7][1], 1)]); }
   if (B.blunt) pts.push([L * (1 - B.tail * 0.35), B.vent * 0.92], [L * (1 - B.tail * 0.06), B.vent * 0.7], [L, 0]);
   else if (P.tail.rattle) pts.push([L * (1 - B.tail * 0.5), B.vent * 0.62], [L, B.vent * 0.36]);
   else if (B.paddle) pts.push([L * (1 - B.tail * 0.5), B.vent * 0.42], [L * (1 - B.tail * 0.08), 0.18], [L, 0]);
@@ -602,7 +714,7 @@ function makeBodyFns(P, quality) {
     // v5.12: the snout ends in a rounded dome (the rostral scale), not a point: within xr of the tip the outline is a
     // quarter ellipse, so seen from the front the head is round, with no flat plate or wedge under the snout
     if (x < xr) { const t = clamp(x / xr, 0, 1); v = wr(xr) * w0 * Math.sqrt(1 - (1 - t) * (1 - t)); }
-    if (!rattleEnd) { const e = L - x, r = B.blunt || B.tailShape === 'blunt' ? w0 * (B.blunt ? 0.5 : 0.3) : w0 * 0.12; if (e < r) v *= Math.sqrt(clamp(e / r, 0, 1)); }
+    if (!rattleEnd) { const e = L - x, r = B.blunt || B.tailShape === 'blunt' ? w0 * (B.blunt ? 0.5 : 0.3) : w0 * (B.tipRound || 0.12); if (e < r) v *= Math.sqrt(clamp(e / r, 0, 1)); }
     if (hoodK) v *= hoodW(x);
     return Math.max(v, 0);
   };
@@ -1098,7 +1210,7 @@ function buildBody(P, F, pose, quality) {
   // v4.81: an eye socket - the skin dips gently where the eye sits, so the domed eye under its clear
   // spectacle scale lies flush with the head (never standing out of its outline)
   const eyeX0 = Hd.eyeX * F.Hl, eyeRad = eyeRadOf(P, F), eyeRl = (F.W(eyeX0) + F.Hh(eyeX0)) / 2;
-  if (Hd.pupil !== 'none') bumps.push({ x: eyeX0, xs: eyeRad * 1.1, th: eyeA, ts: (eyeRad * 1.1) / eyeRl, amp: -(eyeRad * 0.27) / eyeRl, mirror: true, sock: true }); // (v5.58: a little wider and deeper, so the whole round eye shows; v5.62: eye size from eyeRadOf)
+  if (Hd.pupil !== 'none') bumps.push({ x: eyeX0, xs: eyeRad * 1.1, th: eyeA, ts: (eyeRad * 1.1) / eyeRl, amp: -(eyeRad * 0.27 * (Hd.sockK || 1)) / eyeRl, mirror: true, sock: true }); // (v5.58: a little wider and deeper, so the whole round eye shows; v5.62: eye size from eyeRadOf)
 
   // spine point & frame at x
   // v5.09: towards the snout tip the centre line keeps the height it has a little further back (it used to dip to the
@@ -1123,7 +1235,7 @@ function buildBody(P, F, pose, quality) {
     const pUp = 2 / lerp(n0, nUp, nk), pDn = 2 / lerp(n0, nDn, nk);
     const jawK = lerp(0.9, 1, sstep(F.Hl * 0.75, F.Hl * 1.1, x)), tapK = taper * (1 - sstep(F.Hl * 0.85, F.Hl * 1.25, x)), triK = btri * 0.45 * bodyF, ridK = ridge * bodyF;
     const bl = []; for (const b of bumps) { const dx = (x - b.x) / b.xs; if (Math.abs(dx) > 3 || (noSock && b.sock)) continue; bl.push(b, b.amp * Math.exp(-dx * dx)); }
-    const mouthK = x < F.Hl * Hd.jaw * 1.1 && x > F.Hl * 0.02 ? 0.03 /* v5.53: a fine crease (a deep one read as a separate shell) */ * sstep(F.Hl * 0.1, F.Hl * 0.26, x) /* v5.12: the lip line fades out over the rounded snout tip */ * (1 - sstep(F.Hl * Hd.jaw * 0.85, F.Hl * Hd.jaw * 1.1, x)) : 0;
+    const mouthK = x < F.Hl * Hd.jaw * 1.1 && x > F.Hl * 0.02 ? 0.03 * (Hd.lipK || 1) /* v5.53: a fine crease (a deep one read as a separate shell) */ * sstep(F.Hl * 0.1, F.Hl * 0.26, x) /* v5.12: the lip line fades out over the rounded snout tip */ * (1 - sstep(F.Hl * Hd.jaw * 0.85, F.Hl * Hd.jaw * 1.1, x)) : 0;
     const upF = upK && x < upL ? upK * upH * (1 - sstep(0, upL, x)) : 0;
     return (th) => {
       const st = Math.sin(th), ct = Math.cos(th), pw = ct >= 0 ? pUp : pDn;
@@ -1319,8 +1431,8 @@ function headSkinHeights(P, F, G) {
         if (rho > 1.0 && rho < 2.4 && aa < eA) h += eR * browK * Math.exp(-(((rho - 1.32) / 0.32) ** 2)) * sstep(0.1, 0.9, (eA - aa) * hx / eR + 0.4); }
       for (const q of holes) { const d = Math.hypot(x - q.x, (aa - q.a) * hx) / q.r; if (d < 2) h += -q.dep * (1 - sstep(0.45, 1.0, d)) + q.rim * Math.exp(-(((d - 1.15) / 0.3) ** 2)); }
       // the lip line: the upper lip scales swell a little, then roll in to the edge; the lower jaw's edge slopes in under them
-      if (lipF > 0) { if (cols[ci].s > 0) { const dm = Math.max(0, mAa - aa); h += rl * lipF * (0.012 * Math.exp(-(((dm - 0.045) / 0.03) ** 2)) - 0.045 * (1 - sstep(0, 0.022, dm))); }
-        else { const dm = Math.max(0, aa - mAa); h += rl * lipF * (-0.045 * (1 - sstep(0, 0.03, dm))); } }
+      if (lipF > 0) { const lk = H.lipK || 1; if (cols[ci].s > 0) { const dm = Math.max(0, mAa - aa); h += rl * lipF * lk * (0.012 * Math.exp(-(((dm - 0.045) / 0.03) ** 2)) - 0.045 * (1 - sstep(0, 0.022, dm))); }
+        else { const dm = Math.max(0, aa - mAa); h += rl * lipF * lk * (-0.045 * (1 - sstep(0, 0.03, dm))); } }
       { const tk = 1 - aa; hgt[o] = h * fade0 * (1 - sstep(xCut * (0.7 + 0.1 * tk), xCut * (0.86 + 0.1 * tk), x)); } // (v6.20: fades out further back on the crown than on the throat - a V at the nape, not a ring)
     }
   }
@@ -2129,7 +2241,7 @@ function buildEyes(P, F, body, pat) {
   // (the iris lies in the socket's shade: a faint glow of its own colours stands in for the light that reaches it through the
   // clear spectacle from every side, so its fibres and the pupil's edge still read - it was a black hole)
   const em = new THREE.MeshPhysicalMaterial({ map: et, emissiveMap: et, emissive: new THREE.Color(0.2, 0.2, 0.2), roughness: 0.5, /* v6.20: about half - a self-lit iris glowed as a pale painted disc in the shaded socket */ metalness: 0, envMapIntensity: 0.3, specularIntensity: 0.35 });
-  const sm = new THREE.MeshPhysicalMaterial({ color: '#000000', vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, roughness: 0.05, metalness: 0, ior: 1.4, specularIntensity: 0.85, envMapIntensity: 1.5, /* v6.20: restrained - the whole eye flashed white from most angles */ depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  const sm = new THREE.MeshPhysicalMaterial({ color: '#000000', vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, roughness: 0.05, metalness: 0, ior: 1.4, specularIntensity: 0.85 * (H.specK || 1), envMapIntensity: 1.5 * (H.specK || 1), /* v6.20: restrained - the whole eye flashed white from most angles */ depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
   const lm = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, roughness: 0.6, metalness: 0, depthWrite: false, envMapIntensity: 0.8 });
   // the skin colour right round the eye, read from the body's own pattern texture
   const img = pat && pat.image, skinAt = (x, th) => {
@@ -3624,7 +3736,8 @@ function withLook(p, id) {
   return q;
 }
 export function mount(host, opts) {
-  const P = normProfile(autoProfile(withLook(opts.profile, opts.id)), opts.id), seed = strSeed(opts.id || P.name || 'snake');
+  const RZ = opts.realism != null ? !!opts.realism : realismOn(); // v6.35: the "3d" preview's realism pass
+  const P0 = normProfile(autoProfile(RZ ? realLook(withLook(opts.profile, opts.id), opts.id) : withLook(opts.profile, opts.id)), opts.id), P = RZ ? realism(P0, opts.id) : P0, seed = strSeed(opts.id || P.name || 'snake');
   { const gH = HEAD_GENUS[String(opts.id || '').split('-')[0]]; if (gH) P.head = Object.assign({}, gH, P.head); } // v5.53
   const reduceMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const reduce = () => reduceMQ.matches;
@@ -3659,7 +3772,7 @@ export function mount(host, opts) {
   host.innerHTML = '';
   const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
   const wrap = el('div', 'sp3d-wrap'), stage = el('div', 'sp3d-stage'), labels = el('div', 'sp3d-labels'), status = el('div', 'sp3d-status');
-  const hint = el('p', 'sp3d-hint', (window.innerWidth < 520 ? 'Drag to go round it · two fingers to move · pinch or double-tap to zoom' : 'Drag to go round the snake · W A S D or right-drag to move around it · scroll or double-click to zoom'));
+  const hint = el('p', 'sp3d-hint', (touchFirst() ? 'Drag to go round it · two fingers to move · pinch or double-tap to zoom' : 'Drag to go round the snake · W A S D or right-drag to move around it · scroll or double-click to zoom'));
   status.setAttribute('role', 'status'); status.hidden = true;
   const canvas = document.createElement('canvas'); canvas.className = 'sp3d-canvas'; canvas.tabIndex = 0;
   canvas.setAttribute('role', 'img'); canvas.setAttribute('aria-label', '3D model of ' + opts.name + '. Arrow keys rotate, plus and minus zoom, R resets the view.');
@@ -3846,7 +3959,7 @@ export function mount(host, opts) {
       map: pat, normalMap: tiles.normal, normalScale: new THREE.Vector2(2.1, 2.1).multiplyScalar(S.relief != null ? S.relief : (S.keel || 0) > 0.3 ? 1.25 : 0.9), // (v5.58: smooth scales lie flatter than keeled ones; v5.90: both a little deeper - at normal viewing distance the scales and keels were lost)
       aoMap: tiles.cavity, aoMapIntensity: 0.3 + 1.2 * (S.cavity != null ? S.cavity : 0.45), roughnessMap: tiles.cavity, // (v5.78: smooth, tightly overlapping scales hide less skin between them)
       ...(quality !== 'high' || P.scales.rows > 40 ? {} : { displacementMap: tiles.cavity, displacementScale: F.w0 * 0.035, displacementBias: -F.w0 * 0.03 }),
-      roughness: lerp(0.66, 0.32, gl), metalness: 0, clearcoat: 0.18 + gl * 0.7, clearcoatRoughness: lerp(0.32, 0.08, gl), /* (v5.78: glossy snakes get the crisp, mirror-like highlights of real smooth scales; v6.26: a little glossier all round - the coat now breaks up scale by scale (SKIN_SHINE_GLSL), so it never reads as a wet film) */ sheen: S.sheen != null ? S.sheen : 0.04, /* (v5.78: the default sheen laid a grey haze over every skin at grazing angles) */ sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
+      roughness: lerp(0.66, 0.32, gl), metalness: 0, clearcoat: (0.18 + gl * 0.7) * (S.coatK || 1), clearcoatRoughness: lerp(0.32, 0.08, gl), /* (v5.78: glossy snakes get the crisp, mirror-like highlights of real smooth scales; v6.26: a little glossier all round - the coat now breaks up scale by scale (SKIN_SHINE_GLSL), so it never reads as a wet film) */ sheen: S.sheen != null ? S.sheen : 0.04, /* (v5.78: the default sheen laid a grey haze over every skin at grazing angles) */ sheenRoughness: S.sheenRough || 0.7, sheenColor: new THREE.Color(S.sheenColor || '#ffffff').multiplyScalar(S.sheen != null ? 0.6 : 0.12), // velvety skins (Gaboon viper) get a strong sheen
       iridescence: S.iridescence || 0, iridescenceIOR: 1.6, envMapIntensity: 1.0, ior: 1.55, /* (v6.26: keratin) */
     });
     // the cavity map also darkens the skin between scales in direct light (as in real snakes)
@@ -4650,7 +4763,7 @@ float slScale(vec2 m) {
   function rebuild() { const st = controls ? { az: controls.st.az, el: controls.st.el, d: controls.st.d, px: controls.st.px, pz: controls.st.pz } : null; if (sizeBusy()) toggleScale(false, { instant: true }); fx.reset(); disposeScene(); build(); fx.onBuild(); resize(); if (st) controls.setGoal({ az: st.az, el: st.el, d: clamp(st.d, info.dMin, info.dMax), px: st.px, pz: st.pz }, true); kick(); }
 
   build(); fx.onBuild(); resize();
-  if (opts.testing) window.__sp3d = { THREE, renderer, get ctx() { return ctx; }, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), fx, size: () => ({ on: sizeSt.on, leaving: sizeSt.leaving, k: sizeSt.k, arc: sizeSt.arc, len: sizeSt.len, small: sizeSt.small, N: sizeSt.N, person: !!scaleObj, saved: sizeSt.saved }), get group() { return snakeGroup; }, get show() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); if (window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } updateOccluders(); renderer.shadowMap.needsUpdate = true; renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
+  if (opts.testing) window.__sp3d = { THREE, renderer, get P() { return P; }, get ctx() { return ctx; }, bodyClearance: () => bodyClearance(cam.position), get envReady() { return ctx.envReady; }, extras: () => extras, setScene: (v) => { cScene.checked = v; setSceneVisible(v); }, get scene() { return ctx.scene; }, get cam() { return cam; }, controls, info: () => info, setView, resetView, toggleScale, toggleDetails, toggleAnatomy: () => bAnat.click(), fx, size: () => ({ on: sizeSt.on, leaving: sizeSt.leaving, k: sizeSt.k, arc: sizeSt.arc, len: sizeSt.len, small: sizeSt.small, N: sizeSt.N, person: !!scaleObj, saved: sizeSt.saved }), get group() { return snakeGroup; }, get show() { return fx.test.show; }, get mouthGoal() { return mouthGoal; }, frame: () => { controls.update(); fx.step(); placeCamera(); fx.camera(); if (window.__sp3dCam) { const o = window.__sp3dCam; cam.position.copy(o.pos); cam.near = o.near || cam.near; cam.updateProjectionMatrix(); cam.lookAt(o.tgt); } updateOccluders(); renderer.shadowMap.needsUpdate = true; renderer.render(ctx.scene, cam); updateMarkers(); fx.after(); } };
 
   return {
     canvas,
@@ -4699,4 +4812,4 @@ export function adultLength(p, page, id) {
   return out(+p.length || 1, 'genus', '', null);
 }
 export function webglAvailable() { try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { return false; } }
-export const _internals = { buildHeadSkin, headSkinHeights, normProfile, makeBodyFns, makePose, loadEnv, autoProfile, withLook, buildBody, buildEyes, buildMouth, headData, scaleLattice, patternData }; // for offline checks
+export const _internals = { realism, realLook, realGroup, buildHeadSkin, headSkinHeights, normProfile, makeBodyFns, makePose, loadEnv, autoProfile, withLook, buildBody, buildEyes, buildMouth, headData, scaleLattice, patternData }; // for offline checks

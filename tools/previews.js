@@ -22,7 +22,10 @@ var DEFS=[
   live:function(){return true}},
  {key:"finale",label:"Countdown finale",about:"Plays the countdown's last minute for you",
   apply:function(v){if(v)W.__slCdFinPv=1},
-  live:function(){return !W.SL_EV}}
+  live:function(){return !W.SL_EV}},
+ // the 3D viewer (species/3d/viewer.js realismOn) reads it each time a model opens, so it starts in place
+ {key:"3d",label:"3D snake realism",about:"Reshaped 3D snakes: heads, necks, bodies and tails by body plan, eyes in sockets, less plastic skin",
+  live:function(){return true}}
 ];
 function def(k){for(var i=0;i<DEFS.length;i++)if(DEFS[i].key===k)return DEFS[i];return null}
 function on(k){try{return S.getItem(PRE+k)==="1"}catch(e){return false}}
