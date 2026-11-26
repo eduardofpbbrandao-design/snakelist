@@ -181,7 +181,7 @@ const closeSettings = (p) => p.keyboard.press('Escape');
       ok(!/preview=/.test(st.q), 'the switch is taken out of the address');
       ok(await openSettings(p), 'Settings shows the Previews section');
       const keys = await p.evaluate(() => [].map.call(document.querySelectorAll('#sl-set-previews [data-pv]'), (x) => x.getAttribute('data-pv') + '=' + x.getAttribute('aria-checked')));
-      ok(['opening', 'design', 'cookies', 'tutorial', 'finale', 'country', 'spot', 'sightings', '3d'].every((k) => keys.indexOf(k + '=true') >= 0) && keys.length === 12, 'all twelve switches are listed, the nine for approval on (' + keys.join(' ') + ')');
+      ok(['opening', 'design', 'cookies', 'tutorial', 'finale', 'country', 'spot', 'sightings', '3d', 'mobile'].every((k) => keys.indexOf(k + '=true') >= 0) && keys.length === 13, 'all thirteen switches are listed, the ten for approval on (' + keys.join(' ') + ')');
       if (SHOTS) { await p.locator('#sl-set-previews').scrollIntoViewIfNeeded(); await p.waitForTimeout(300); await p.locator('#sl-set-previews').screenshot({ path: path.join(SHOTS, 'settings-previews-all.png') }); }
       await closeSettings(p);
       await p.goto(BASE + 'index.html?preview=off', { waitUntil: 'load', timeout: 240000 });

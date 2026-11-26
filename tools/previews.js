@@ -9,7 +9,7 @@
      window.SL_PREVIEWS.any()              is at least one on? (only then does Settings show its Previews section)
      window.SL_PREVIEW_ON(key)             the same as .on() (the claude.ai testing copy defines its own - kept as it is)
    URL switches: ?preview=<key> turns one on, ?preview=<key>-off turns it off, ?preview=off (or none) turns all off,
-   ?preview=all turns on the five waiting for approval (opening, design, cookies, tutorial, finale).
+   ?preview=all turns on the ones waiting for approval (the ALL list below).
    Each preview that is on when the page starts puts the class sl-pv-<key> on <html> here, before anything is drawn (the
    app's SL_PV_ON(key) reads that class): the design preview's styles, the new cookie bar and the new tutorial follow it.
    Settings > Previews shows when a preview is on, or - for someone signed in - once ?preview=all has been used in this
@@ -46,9 +46,12 @@ var DEFS=[
   live:function(){return true}},
  // the 3D viewer (species/3d/viewer.js realismOn) reads it each time a model opens, so it starts in place
  {key:"3d",label:"3D snake realism",about:"Reshaped 3D snakes: heads, necks, bodies and tails by body plan, eyes in sockets, less plastic skin",
-  live:function(){return true}}
+  live:function(){return true}},
+ // snakelist-synced.html (sl-mobile-css + the map's size): read from the class on <html>, so it starts with the next page load
+ {key:"mobile",label:"Phones and tablets",about:"A shorter header on phones and on a phone held sideways (the tabs and the search on the first screen), the Map tab bringing the whole map onto the screen, and a taller map on an upright iPad",
+  live:function(){return false}}
 ];
-var ALL=["opening","design","cookies","tutorial","finale","country","spot","sightings","3d"],MENU=PRE+"menu";
+var ALL=["opening","design","cookies","tutorial","finale","country","spot","sightings","3d","mobile"],MENU=PRE+"menu";
 function def(k){for(var i=0;i<DEFS.length;i++)if(DEFS[i].key===k)return DEFS[i];return null}
 function on(k){try{return S.getItem(PRE+k)==="1"}catch(e){return false}}
 function emit(){try{document.dispatchEvent(new CustomEvent("sl-previews-changed"))}catch(e){}}

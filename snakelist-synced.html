@@ -5,7 +5,7 @@
 // a preview switched on later shows after a reload. SL_DSW(old, new): the design preview's wording, else today's.
 (function () {
   var d = document.documentElement;
-  try { ["design", "cookies", "tutorial", "finale", "opening"].forEach(function (k) {
+  try { ["design", "cookies", "tutorial", "finale", "opening", "mobile"].forEach(function (k) {
     if (!d.classList.contains("sl-pv-" + k) && !(window.SL_PREVIEWS && window.SL_PREVIEWS.on) && localStorage.getItem("sl-art-preview-" + k) === "1") d.classList.add("sl-pv-" + k); }); } catch (e) {}
   window.SL_PV_ON = function (k) { return d.classList.contains("sl-pv-" + k); };
   window.SL_DSW = function (a, b) { return d.classList.contains("sl-pv-design") ? b : a; };
@@ -2214,6 +2214,15 @@
       try {
         var n = performance.getEntriesByType("navigation")[0], t = n && n.type;
         if (t === "back_forward") return true;
+        // batch110 (mobile): a phone put SnakeList away in the background and has now loaded it again - the browser threw the
+        // page away to save memory (document.wasDiscarded), or the installed app was reopened within 5 minutes of being left:
+        // you carry on where you were, the opening does not play again
+        if (!/[?&](sp|map|f|hab|type|fam|q)=/.test(location.search)) {
+          if (document.wasDiscarded) return true;
+          var app = navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+          var away = +localStorage.getItem("sl-hidden-at") || 0;
+          if (app && away && Date.now() - away < 5 * 60000 && (t === "navigate" || t === "reload")) return true;
+        }
         if (t !== "navigate" || location.search) return false;
         var r = document.referrer ? new URL(document.referrer) : null;
         if (!r || r.origin !== location.origin) return false;
@@ -15868,6 +15877,12 @@ window.SL_GEO_READY = new Promise(function (res) {
     if (!full && w < 700 && window.innerHeight > window.innerWidth) h = Math.max(h, Math.round(Math.min(window.innerHeight * 0.56, w * 1.25)));
     // PREVIEW "sightings" (batch109): on a phone the map gets most of the screen - about three quarters of its height
     if (!full && w < 700 && window.innerHeight > window.innerWidth && window.SL_PREVIEWS && window.SL_PREVIEWS.on && window.SL_PREVIEWS.on("sightings")) h = Math.max(h, Math.round(Math.min(window.innerHeight * 0.74, w * 1.75)));
+    // PREVIEW "mobile" (batch110): an upright tablet (iPad) - the map was a strip half the width with empty page under it;
+    // it gets more of the screen's height, like an upright phone
+    if (!full && w >= 700 && w < 1100 && window.innerHeight > window.innerWidth && document.documentElement.classList.contains("sl-pv-mobile")) h = Math.max(h, Math.round(Math.min(window.innerHeight * 0.56, w * 0.95)));
+    // batch110 (mobile): on a touch screen the map is never taller than the screen. A finger on the map moves the map, so a
+    // map taller than the screen (a phone on its side: half of 804 px is more than 390) left no page to scroll with
+    if (!full && window.matchMedia && matchMedia("(pointer: coarse)").matches) h = Math.min(h, Math.max(200, window.innerHeight - 56));
     var dpr = Math.min(2, window.devicePixelRatio || 1);
     sizeW = w; sizeH = h;
     if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
@@ -32572,6 +32587,159 @@ html.sl-level-lock { scrollbar-gutter: auto !important; }
       .observe(grid, { subtree: true, attributes: true, attributeFilter: ["data-when", "data-where", "data-n"] });
     var all = function () { [].forEach.call(grid.querySelectorAll(".note-btn[data-when], .note-btn[data-where]"), noteName); };
     if (D.readyState === "loading") D.addEventListener("DOMContentLoaded", all); else all();
+  }
+})();
+</script>
+
+<style id="sl-mobile-css">
+/* ---- batch110 (mobile): phones, tablets and the installed app. These rules change nothing on a screen without a notch or
+   rounded corners and with no on-screen keyboard (env(safe-area-inset-*) is 0 there): the installed app on an iPhone draws
+   under the status bar (black-translucent), and on its side under the notch, so the page keeps clear of them ---- */
+.sl-body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 10px)); padding-left: max(20px, calc(env(safe-area-inset-left, 0px) + 8px));
+  padding-right: max(20px, calc(env(safe-area-inset-right, 0px) + 8px)); padding-bottom: max(60px, calc(env(safe-area-inset-bottom, 0px) + 44px)); }
+/* the 3D viewer over the app: its name and close button clear of the status bar / notch / home bar */
+.sl3d-bd { padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+@media (max-width: 640px) { .sl3d-bd { padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); } }
+/* the full-screen map: its search, buttons and key clear of the notch (a frame in the map's own dark green, 0 elsewhere) */
+html .globe-stage.full { border-style: solid; border-color: var(--earth-void); border-width: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+/* small bars at the bottom of the screen: above the home bar */
+.ck-bar, .keep-nudge, .sl-offline, .sl-nudge:not(.sl-ipc) { margin-bottom: env(safe-area-inset-bottom, 0px); }
+@media (min-width: 521px) { .sl-nudge.sl-ipc { margin-bottom: env(safe-area-inset-bottom, 0px); } }
+/* full-height panels: the height you can see (a phone's address bar takes some of 100vh) */
+.map-sheet.big .map-card { max-height: 100dvh; height: 100dvh; }
+.note-card { max-height: calc(100dvh - 24px); }
+.cmp-card { max-height: calc(100dvh - 32px); }
+.cam-card { max-height: calc(100dvh - 28px); }
+
+/* ---- PREVIEW "mobile" (batch110; tools/previews.js, html class sl-pv-mobile): a shorter header on phones and on a phone
+   held sideways, so the tabs and the search are on the first screen ---- */
+@media (max-width: 600px), (max-height: 500px) and (pointer: coarse) {
+  html.sl-pv-mobile .sl-sub, html.sl-pv-mobile .sl-me { display: none; }
+  html.sl-pv-mobile .sl-browse { white-space: nowrap; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; margin-top: 8px;
+    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+  html.sl-pv-mobile .sl-browse::-webkit-scrollbar { display: none; }
+  html.sl-pv-mobile .sl-header { margin-bottom: 14px; }
+}
+@media (max-height: 500px) and (pointer: coarse) {
+  html.sl-pv-mobile .sl-body { padding-top: max(12px, calc(env(safe-area-inset-top, 0px) + 6px)); }
+  html.sl-pv-mobile .sl-title { font-size: 38px; }
+  html.sl-pv-mobile .eyebrow-row .eyebrow { display: none; }
+}
+</style>
+<script>
+// ---- batch110 (mobile): phones, tablets and the installed app ----
+//  - Back (the phone's Back button / gesture, the browser's Back) closes the top panel - the 3D viewer, a photo, Settings, a
+//    sighting, the full-screen map... - before it leaves SnakeList: each panel that opens adds one step to the history, and a
+//    panel closed by its own X takes its step away again (so Back is never "dead")
+//  - the on-screen keyboard: <html> gets the class sl-kb and --sl-kb (the keyboard's height) while it is up, and a search box
+//    whose suggestions open under it is moved up so the suggestions are not hidden behind the keyboard
+//  - "new version" Refresh asks first when it would lose something (SL_BUSY)
+//  - the time SnakeList was put away (localStorage sl-hidden-at), for the installed app's "carry on, no opening" (SL_CAME_BACK)
+(function () {
+  var D = document, W = window, R = D.documentElement;
+  function vis(e) { return !!(e && e.isConnected && e.getClientRects().length && getComputedStyle(e).visibility !== "hidden"); }
+  // ----- put away / back
+  function away() { try { localStorage.setItem("sl-hidden-at", String(Date.now())); } catch (e) {} }
+  D.addEventListener("visibilitychange", function () { if (D.visibilityState === "hidden") away(); });
+  W.addEventListener("pagehide", away);
+
+  // ----- what Refresh would lose (the "new version" bar asks with this text first; "" = nothing)
+  W.SL_BUSY = function () {
+    if (D.querySelector(".note-sheet.open")) return "You have a sighting open that is not saved yet. Refresh anyway?";
+    var q = D.getElementById("quiz-play"), qp = D.getElementById("quiz-panel");
+    if (q && qp && !q.hidden && !qp.hidden && vis(q)) return "You are in the middle of a quiz. Refresh anyway? Your list is saved, but this quiz would start again.";
+    var f = [].filter.call(D.querySelectorAll(".note-sheet input, .note-sheet textarea, .signin-page input[type=email], dialog[open] textarea, [role=dialog] textarea"), function (x) { return vis(x) && x.value && x.defaultValue !== x.value; })[0];
+    if (f) return "Something you typed is not saved yet. Refresh anyway?";
+    return "";
+  };
+
+  // ----- Back closes the top panel
+  var CLOSE = '.sl3d-x, [data-close], [aria-label="Close"], [aria-label^="Close "], [aria-label="close"], .close, [id$="-close"], [class*="-close"], [class$="-x"], [class*="-x "]';
+  function stage() { var s = D.querySelector(".globe-stage.full"); return vis(s) ? s : null; }
+  function tops() {
+    var L = [];
+    var s = stage(); if (s) L.push(s);
+    try { (W.SL_LAYERS ? W.SL_LAYERS() : []).forEach(function (sel) { var e = D.querySelector(sel); if (e && L.indexOf(e) < 0) L.push(e); }); } catch (e) {}
+    return L;
+  }
+  function closeTop(L) {
+    var top = L[L.length - 1]; if (!top) return;
+    if (top.classList.contains("globe-stage")) { var g = D.getElementById("globe-full"); if (g) g.click(); return; }
+    var b = [].filter.call(top.querySelectorAll(CLOSE + ', [id$="-cancel"]'), function (x) { return (/^(BUTTON|A)$/.test(x.tagName) || x.getAttribute("role") === "button") && vis(x) && !x.closest("[inert]"); })[0];
+    if (b) { b.click(); return; }
+    var t = top.contains(D.activeElement) ? D.activeElement : top;
+    try { t.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", code: "Escape", keyCode: 27, bubbles: true, cancelable: true })); } catch (e) {}
+  }
+  if (W.history && history.pushState) {
+    var depth = 0, eat = 0, last = 0, busy = false;
+    function mine() { return !!(history.state && history.state.slLayer); }
+    function sync() {
+      if (busy || eat) return;
+      var n = tops().length;
+      if (n > depth) { for (; depth < n; depth++) { try { history.pushState({ slLayer: depth + 1, slTab: history.state && history.state.slTab }, "", location.href); } catch (e) { break; } } }
+      else if (n < depth && mine()) { var k = Math.min(depth - n, history.state.slLayer || 0); depth = n; if (k > 0) { eat++; try { history.go(-k); } catch (e) { eat = 0; } } }
+      else if (n < depth) depth = n;
+      last = n;
+    }
+    W.addEventListener("popstate", function (e) {
+      if (eat) { eat--; e.stopImmediatePropagation(); return; }
+      var was = depth; depth = Math.max(0, depth - 1);
+      if (!was) return; // (not a step a panel added: the tabs' Back as before)
+      var L = tops();
+      if (!L.length) return;
+      // a panel is open: Back closes it and SnakeList stays (the tabs' own Back handling is not asked)
+      e.stopImmediatePropagation();
+      busy = true; closeTop(L);
+      setTimeout(function () { busy = false; var n = tops().length; if (n >= L.length) { depth = Math.min(depth, n - 1); } sync(); }, 450);
+    }, true);
+    var t = 0; function soon() { clearTimeout(t); t = setTimeout(sync, 350); }
+    ["click", "keyup", "pointerup", "touchend"].forEach(function (n) { W.addEventListener(n, soon, { capture: true, passive: true }); });
+    setInterval(function () { if (D.visibilityState !== "hidden") sync(); }, 1500); // (a panel that opens by itself)
+    W.SL_BACK_DEPTH = function () { return depth; };
+  }
+
+  // ----- the on-screen keyboard
+  var vv = W.visualViewport;
+  if (vv) {
+    var SUG = "#search, #country-search, #place-search, #city-search, #heat-search, #quiz-map-q, #note-where, #sla-q, #hm-q, #hab-q, #ed-search, #trait-q, #slcc-in, [role=combobox], [aria-autocomplete], input[list]";
+    var kbWas = 0;
+    function kb() { var h = Math.round((W.innerHeight || 0) - vv.height - vv.offsetTop); return h > 120 ? h : 0; }
+    function scroller(el) {
+      for (var p = el.parentElement; p && p !== D.body && p !== R; p = p.parentElement) { var cs = getComputedStyle(p); if (/(auto|scroll)/.test(cs.overflowY) && p.scrollHeight > p.clientHeight + 4) return p; }
+      return null;
+    }
+    function roomFor(el) {
+      if (!el || !el.matches || !el.matches(SUG) || !vis(el)) return;
+      var r = el.getBoundingClientRect(), top = vv.offsetTop, bot = vv.offsetTop + vv.height;
+      var want = Math.min(260, vv.height * 0.55), room = bot - r.bottom;
+      if (room >= want) return;
+      var dy = Math.min(want - room, r.top - top - 8); if (dy < 8) return;
+      var sc = scroller(el);
+      if (sc) sc.scrollTop += dy; else W.scrollBy(0, dy);
+    }
+    function upd() {
+      var k = kb();
+      if (k !== kbWas) { kbWas = k; R.style.setProperty("--sl-kb", k + "px"); R.classList.toggle("sl-kb", k > 0); }
+      if (k) roomFor(D.activeElement);
+    }
+    vv.addEventListener("resize", upd);
+    D.addEventListener("focusin", function (e) { if (e.target && e.target.matches && e.target.matches("input, textarea")) setTimeout(upd, 320); });
+    D.addEventListener("focusout", function () { setTimeout(upd, 320); });
+  }
+
+  // ----- PREVIEW "mobile": opening the Map tab on a phone or a phone on its side brings the whole map onto the screen
+  if (R.classList.contains("sl-pv-mobile")) {
+    D.addEventListener("click", function (e) {
+      if (!e.target.closest || !e.target.closest("#tab-map")) return;
+      if (!(W.matchMedia && matchMedia("(pointer: coarse)").matches)) return;
+      setTimeout(function () {
+        var s = D.getElementById("globe-stage"), q = D.querySelector(".heat-search"); if (!vis(s)) return;
+        var sr = s.getBoundingClientRect(); if (sr.bottom <= W.innerHeight) return;
+        var y = W.scrollY + sr.bottom - W.innerHeight + 8;
+        if (vis(q)) y = Math.min(y, W.scrollY + q.getBoundingClientRect().top - 8);
+        if (y > W.scrollY + 4) W.scrollTo({ top: y, behavior: "smooth" });
+      }, 450);
+    });
   }
 })();
 </script>

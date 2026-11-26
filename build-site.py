@@ -68,7 +68,7 @@ head = f"""<!doctype html>
   // one in the background; when it is different, this bar offers Refresh. The page never reloads by
   // itself (on poor wifi a reload meant downloading everything again, and offline nothing came).
   if ('serviceWorker' in navigator) {{
-    window.SL_SHOW_NEW = function (now) {{ /* v6.11: never over the opening or the photo - it waits its turn with the other pop-ups */ if (now !== true) {{ if (document.readyState === 'loading') {{ document.addEventListener('DOMContentLoaded', function () {{ window.SL_SHOW_NEW(); }}); return; }} if (window.SL_whenPrompt) {{ if (!window.__slNewQ) {{ window.__slNewQ = 1; window.SL_whenPrompt(function () {{ window.SL_SHOW_NEW(true); }}, {{ urgent: true }}); }} return; }} }} if (document.getElementById('sl-newver') || !document.body) return; var b = document.createElement('div'); b.id = 'sl-newver'; b.setAttribute('role', 'status'); b.style.cssText = 'position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:9300;display:flex;gap:12px;align-items:center;max-width:calc(100vw - 32px);padding:10px 12px 10px 16px;border-radius:14px;background:#256846;color:#fff;font:500 14px/1.35 Inter,system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28)'; b.innerHTML = '<span>A new version of SnakeList is ready. Your list is already saved.</span><button type="button" style="font:600 14px Inter,sans-serif;color:#256846;background:#fff;border:0;border-radius:9px;padding:7px 14px;cursor:pointer">Refresh</button><button type="button" aria-label="Later" style="background:none;border:0;color:#fff;font-size:20px;cursor:pointer">&times;</button>'; var bs = b.querySelectorAll('button'); bs[0].onclick = function () {{ if (document.querySelector('.note-sheet.open') && !confirm('You have a sighting open that is not saved yet. Refresh anyway?')) return; var c = navigator.serviceWorker.controller; if (c) c.postMessage({{ type: 'sl-fresh' }}); setTimeout(function () {{ location.reload(); }}, c ? 60 : 0); }}; bs[1].onclick = function () {{ b.remove(); }}; document.body.appendChild(b); }};
+    window.SL_SHOW_NEW = function (now) {{ /* v6.11: never over the opening or the photo - it waits its turn with the other pop-ups */ if (now !== true) {{ if (document.readyState === 'loading') {{ document.addEventListener('DOMContentLoaded', function () {{ window.SL_SHOW_NEW(); }}); return; }} if (window.SL_whenPrompt) {{ if (!window.__slNewQ) {{ window.__slNewQ = 1; window.SL_whenPrompt(function () {{ window.SL_SHOW_NEW(true); }}, {{ urgent: true }}); }} return; }} }} if (document.getElementById('sl-newver') || !document.body) return; var b = document.createElement('div'); b.id = 'sl-newver'; b.setAttribute('role', 'status'); b.style.cssText = 'position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top, 0px));transform:translateX(-50%);z-index:9300;display:flex;gap:12px;align-items:center;max-width:calc(100vw - 32px);padding:10px 12px 10px 16px;border-radius:14px;background:#256846;color:#fff;font:500 14px/1.35 Inter,system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28)'; b.innerHTML = '<span>A new version of SnakeList is ready. Your list is already saved.</span><button type="button" style="font:600 14px Inter,sans-serif;color:#256846;background:#fff;border:0;border-radius:9px;padding:7px 14px;cursor:pointer">Refresh</button><button type="button" aria-label="Later" style="background:none;border:0;color:#fff;font-size:20px;cursor:pointer">&times;</button>'; var bs = b.querySelectorAll('button'); bs[0].onclick = function () {{ var busy = window.SL_BUSY ? window.SL_BUSY() : (document.querySelector('.note-sheet.open') ? 'You have a sighting open that is not saved yet. Refresh anyway?' : ''); if (busy && !confirm(busy)) return; var c = navigator.serviceWorker.controller; if (c) c.postMessage({{ type: 'sl-fresh' }}); setTimeout(function () {{ location.reload(); }}, c ? 60 : 0); }}; bs[1].onclick = function () {{ b.remove(); }}; document.body.appendChild(b); }};
     navigator.serviceWorker.addEventListener('message', function (e) {{ if (e.data && e.data.type === 'sl-update') {{ window.SL_SHOW_NEW(); }} }});
     if (location.protocol === 'https:') window.addEventListener('load', function () {{ navigator.serviceWorker.register('sw.js', {{ updateViaCache: 'none' }}).then(function (r) {{ if (navigator.onLine !== false) r.update().catch(function () {{}}); }}).catch(function () {{}}); }});
   }}
@@ -289,7 +289,7 @@ MANIFEST = json.dumps({
     "start_url": "./../", "scope": "./../", "display": "standalone", "display_override": ["window-controls-overlay", "standalone"], "orientation": "any",
     # lets the website ask the browser "is the SnakeList app installed on this device?"
     "related_applications": [{"platform": "webapp", "url": "https://snakelist.com/app/snakelist.webmanifest"}],
-    "background_color": "#1F5A3A", "theme_color": "#1F5A3A",
+    "background_color": "#1F5A3A", "theme_color": "#1F5A3A", "lang": "en", "dir": "ltr", "categories": ["education", "reference"],
     "icons": [{"src": "icon-192-b.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
               {"src": "icon-512-b.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
               {"src": "icon-maskable-512-b.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}],
@@ -318,6 +318,12 @@ self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) =
 // the network, but never longer than ms: then null (the saved copy is used and the download still finishes into the cache)
 const within = (p, ms) => new Promise((res) => { const t = setTimeout(() => res(null), ms); p.then((r) => { clearTimeout(t); res(r); }, () => { clearTimeout(t); res(null); }); });
 const keep = (key) => (r) => { if (r && r.ok) { const copy = r.clone(); caches.open(CACHE).then((c) => c.put(key, copy)); } return r; };
+// batch110 (mobile): no connection and nothing saved for this page (not even SnakeList itself): a plain page that says so,
+// instead of the browser's error (what is kept for offline: SnakeList and your list once it has opened, photos you have seen)
+const offline = () => new Response('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1F5A3A"><title>SnakeList - offline</title>' +
+  '<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#1F5A3A;color:#f4f8ee;font:16px/1.5 system-ui,sans-serif;padding:24px calc(24px + env(safe-area-inset-right)) 24px calc(24px + env(safe-area-inset-left));box-sizing:border-box}main{max-width:30em}h1{font-size:22px;margin:0 0 10px}button{margin-top:16px;font:600 15px system-ui,sans-serif;color:#1F5A3A;background:#fff;border:0;border-radius:10px;padding:10px 18px}</style></head>' +
+  '<body><main><h1>You are offline</h1><p>This page has not been saved on this device yet, so it needs a connection.</p><p>Once SnakeList has opened with a connection it works offline: your list and the checklist, and the photos you have already looked at. Photos and maps you have not opened yet need a connection.</p><button type="button" onclick="location.reload()">Try again</button></main></body></html>',
+  { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
 // the same page? (validators when the server sends them, otherwise the text itself)
 const samePage = (a, b) => {
   const ea = a.headers.get('etag'), eb = b.headers.get('etag');
@@ -364,7 +370,7 @@ self.addEventListener('fetch', (e) => {
     const net = fetch(req, { cache: 'no-cache' });
     if (home) {
       e.respondWith(caches.match(key).then((hit) => {
-        if (!hit) return net.then(keep(key)).catch(() => caches.match('./'));
+        if (!hit) return net.then(keep(key)).catch(() => caches.match('./').then((h) => h || offline()));
         // v5.05: online, the newest SnakeList always opens (an unchanged page costs only a quick check);
         // only when the network is slow or missing does the saved copy open, and the newer one is saved for next time
         // v6.28: right after Refresh on the "new version" bar the newest page is waited for (the saved copy only if it fails)
@@ -384,7 +390,7 @@ self.addEventListener('fetch', (e) => {
     }
     e.respondWith(caches.match(key).then((hit) => {
       const fresh = net.then(keep(key));
-      if (!hit) return fresh.catch(() => caches.match('./'));
+      if (!hit) return fresh.catch(() => caches.match('./').then((h) => h || offline()));
       e.waitUntil(fresh.catch(() => {}));
       return within(fresh, 3500).then((r) => (r && r.ok ? r : hit));
     }));

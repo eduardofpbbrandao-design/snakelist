@@ -8,6 +8,12 @@ self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) =
 // the network, but never longer than ms: then null (the saved copy is used and the download still finishes into the cache)
 const within = (p, ms) => new Promise((res) => { const t = setTimeout(() => res(null), ms); p.then((r) => { clearTimeout(t); res(r); }, () => { clearTimeout(t); res(null); }); });
 const keep = (key) => (r) => { if (r && r.ok) { const copy = r.clone(); caches.open(CACHE).then((c) => c.put(key, copy)); } return r; };
+// batch110 (mobile): no connection and nothing saved for this page (not even SnakeList itself): a plain page that says so,
+// instead of the browser's error (what is kept for offline: SnakeList and your list once it has opened, photos you have seen)
+const offline = () => new Response('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1F5A3A"><title>SnakeList - offline</title>' +
+  '<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#1F5A3A;color:#f4f8ee;font:16px/1.5 system-ui,sans-serif;padding:24px calc(24px + env(safe-area-inset-right)) 24px calc(24px + env(safe-area-inset-left));box-sizing:border-box}main{max-width:30em}h1{font-size:22px;margin:0 0 10px}button{margin-top:16px;font:600 15px system-ui,sans-serif;color:#1F5A3A;background:#fff;border:0;border-radius:10px;padding:10px 18px}</style></head>' +
+  '<body><main><h1>You are offline</h1><p>This page has not been saved on this device yet, so it needs a connection.</p><p>Once SnakeList has opened with a connection it works offline: your list and the checklist, and the photos you have already looked at. Photos and maps you have not opened yet need a connection.</p><button type="button" onclick="location.reload()">Try again</button></main></body></html>',
+  { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
 // the same page? (validators when the server sends them, otherwise the text itself)
 const samePage = (a, b) => {
   const ea = a.headers.get('etag'), eb = b.headers.get('etag');
@@ -54,7 +60,7 @@ self.addEventListener('fetch', (e) => {
     const net = fetch(req, { cache: 'no-cache' });
     if (home) {
       e.respondWith(caches.match(key).then((hit) => {
-        if (!hit) return net.then(keep(key)).catch(() => caches.match('./'));
+        if (!hit) return net.then(keep(key)).catch(() => caches.match('./').then((h) => h || offline()));
         // v5.05: online, the newest SnakeList always opens (an unchanged page costs only a quick check);
         // only when the network is slow or missing does the saved copy open, and the newer one is saved for next time
         // v6.28: right after Refresh on the "new version" bar the newest page is waited for (the saved copy only if it fails)
@@ -74,7 +80,7 @@ self.addEventListener('fetch', (e) => {
     }
     e.respondWith(caches.match(key).then((hit) => {
       const fresh = net.then(keep(key));
-      if (!hit) return fresh.catch(() => caches.match('./'));
+      if (!hit) return fresh.catch(() => caches.match('./').then((h) => h || offline()));
       e.waitUntil(fresh.catch(() => {}));
       return within(fresh, 3500).then((r) => (r && r.ok ? r : hit));
     }));
