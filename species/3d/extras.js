@@ -104,7 +104,6 @@ const CSS = `
 `;
 // v6.35: the preview switch of "See the spot" (tools/previews.js; its own key where that isn't loaded) and touch screens
 const spotPv = () => { try { const P = window.SL_PREVIEWS; if (P && typeof P.on === 'function') return !!P.on('spot'); return localStorage.getItem('sl-art-preview-spot') === '1'; } catch (e) { return false; } };
-const touchUI = () => window.innerWidth < 560 || !!(window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches);
 function injectCSS() {
   if (typeof document === 'undefined' || document.getElementById('sp3d-x-css')) return;
   const s = document.createElement('style'); s.id = 'sp3d-x-css'; s.textContent = CSS; document.head.appendChild(s);
