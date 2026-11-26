@@ -21074,6 +21074,9 @@ window.SL_GEO_READY = new Promise(function (res) {
     try { history.pushState({ slTab: name }, "", u.pathname + u.search + u.hash); } catch (er) {}
   }, true);
   window.addEventListener("popstate", function () {
+    // a Back step that only closes an open panel (or undoes a panel's own step) is not a tab change
+    // (window listeners run in the order they were added, so this one asks the panel Back code first)
+    if (window.SL_BACK_OWNS && window.SL_BACK_OWNS()) return;
     var t = document.getElementById("tab-" + cur()) || document.getElementById("tab-guide");
     if (t && !t.classList.contains("active")) { fromPop = true; try { t.click(); } finally { fromPop = false; } }
   });
@@ -32706,6 +32709,7 @@ html .globe-stage.full { border-style: solid; border-color: var(--earth-void); b
     ["click", "keyup", "pointerup", "touchend"].forEach(function (n) { W.addEventListener(n, soon, { capture: true, passive: true }); });
     setInterval(function () { if (D.visibilityState !== "hidden") sync(); }, 1500); // (a panel that opens by itself)
     W.SL_BACK_DEPTH = function () { return depth; };
+    W.SL_BACK_OWNS = function () { return eat > 0 || (depth > 0 && tops().length > 0); };
   }
 
   // ----- the on-screen keyboard
